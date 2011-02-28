@@ -51,6 +51,10 @@
 #include "tune_timer_dialog.h"
 #include "camera_control.h"
 
+#include "../core/icore.h"
+#include "../core/imenu_manager.h"
+#include "../core/core_constants.h"
+
 using namespace std;
 using namespace NLMISC;
 
@@ -97,7 +101,6 @@ CMainWindow::CMainWindow(QWidget *parent)
 	createActions();
 	createMenus();
 	createToolBars();
-	createStatusBar();
 
 	setWindowIcon(QIcon(":/images/nel.png"));
 
@@ -117,8 +120,8 @@ CMainWindow::CMainWindow(QWidget *parent)
 	_statusBarTimer = new QTimer(this);
 	connect(_statusBarTimer, SIGNAL(timeout()), this, SLOT(updateStatusBar()));
 
-	_statusInfo = new QLabel(this);
-	this->statusBar()->addPermanentWidget(_statusInfo);
+	//_statusInfo = new QLabel(this);
+	// statusBar()->addPermanentWidget(_statusInfo);
 }
 
 CMainWindow::~CMainWindow()
@@ -154,28 +157,25 @@ CMainWindow::~CMainWindow()
 	delete _GraphicsViewport;
 }
 
-void CMainWindow::setVisible(bool visible)
+void CMainWindow::showEvent(QShowEvent *showEvent)
 {
-	// called by show()
-	// code assuming visible window needed to init the 3d driver
-	if (visible != isVisible())
+	QWidget::showEvent(showEvent);
+	if (isVisible())
 	{
-		if (visible)
-		{
-			QMainWindow::setVisible(true);
-			if (_isSoundInitialized)
-				Modules::sound().initGraphics();
-			_mainTimer->start();
-			_statusBarTimer->start(1000);
-		}
-		else
-		{
-			_mainTimer->stop();
-			_statusBarTimer->stop();
-			if (_isSoundInitialized)
-				Modules::sound().releaseGraphics();
-			QMainWindow::setVisible(false);
-		}
+		QMainWindow::setVisible(true);
+		Modules::objView().getDriver()->activate();
+		if (_isSoundInitialized)
+			Modules::sound().initGraphics();
+		_mainTimer->start();
+		//_statusBarTimer->start(1000);
+	}
+	else
+	{
+		_mainTimer->stop();
+		//_statusBarTimer->stop();
+		if (_isSoundInitialized)
+			Modules::sound().releaseGraphics();
+		QMainWindow::setVisible(false);
 	}
 }
 
@@ -239,23 +239,16 @@ void CMainWindow::settings()
 	_settingsDialog.exec();
 }
 
-void CMainWindow::about()
-{
-	QMessageBox::about(this, tr("About Object Viewer Qt"),
-					   tr("<h2>Object Viewer Qt  8-)</h2>"
-						  "<p> Authors: dnk-88, sfb, Kaetemi, kervala <p>Compiled on %1 %2").arg(__DATE__).arg(__TIME__));
-}
-
 void CMainWindow::updateStatusBar()
 {
-	if (_isGraphicsInitialized)
+/*	if (_isGraphicsInitialized)
 	{
 		_statusInfo->setText(QString("%1, Nb tri: %2 , Texture used (Mb): %3 , fps: %4  ").arg(
 								 Modules::objView().getDriver()->getVideocardInformation()).arg(
 								 _numTri).arg(
 								 _texMem, 0,'f',4).arg(
 								 _fps, 0,'f',2));
-	}
+	}*/
 }
 
 void CMainWindow::createActions()
@@ -266,24 +259,10 @@ void CMainWindow::createActions()
 	_openAction->setStatusTip(tr("Open an existing file"));
 	connect(_openAction, SIGNAL(triggered()), this, SLOT(open()));
 
-	_exitAction = new QAction(tr("E&xit"), this);
-	_exitAction->setShortcut(tr("Ctrl+Q"));
-	_exitAction->setStatusTip(tr("Exit the application"));
-	connect(_exitAction, SIGNAL(triggered()), this, SLOT(close()));
-
 	_setBackColorAction = _GraphicsViewport->createSetBackgroundColor(this);
 	_setBackColorAction->setText(tr("Set &background color"));
 	_setBackColorAction->setIcon(QIcon(":/images/ico_bgcolor.png"));
 	_setBackColorAction->setStatusTip(tr("Set background color"));
-
-	_resetCameraAction = new QAction(tr("Reset camera"), this);
-	_resetCameraAction->setShortcut(tr("Ctrl+R"));
-	_resetCameraAction->setStatusTip(tr("Reset current camera"));
-
-	_renderModeAction = new QAction("Change render mode", this);
-	_renderModeAction->setIcon(QIcon(":/images/polymode.png"));
-	_renderModeAction->setShortcut(tr("Ctrl+M"));
-	_renderModeAction->setStatusTip(tr("Change render mode (Line, Point, Filled)"));
 
 	_resetSceneAction = new QAction(tr("&Reset scene"), this);
 	_resetSceneAction->setStatusTip(tr("Reset current scene"));
@@ -297,78 +276,77 @@ void CMainWindow::createActions()
 	_saveScreenshotAction->setText(tr("Save &Screenshot"));
 	_saveScreenshotAction->setStatusTip(tr("Make a screenshot of the current viewport and save"));
 
-	_settingsAction = new QAction(tr("&Settings"), this);
+	_settingsAction = new QAction(tr("&Settings OV"), this);
 	_settingsAction->setIcon(QIcon(":/images/preferences.png"));
 	_settingsAction->setStatusTip(tr("Settings"));
 	connect(_settingsAction, SIGNAL(triggered()), this, SLOT(settings()));
-
-	_aboutAction = new QAction(tr("&About"), this);
-	_aboutAction->setStatusTip(tr("Show the application's About box"));
-	connect(_aboutAction, SIGNAL(triggered()), this, SLOT(about()));
-
-	_aboutQtAction = new QAction(tr("About &Qt"), this);
-	_aboutQtAction->setStatusTip(tr("Show the Qt library's About box"));
-	connect(_aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 }
 
 void CMainWindow::createMenus()
 {
-	_fileMenu = menuBar()->addMenu(tr("&File"));
-	_fileMenu->setObjectName("ovqt.Menu.File");
-	_fileMenu->addAction(_openAction);
-	_fileMenu->addSeparator();
-	_fileMenu->addAction(_exitAction);
+	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
+	
+	// register actions for file menu
+	menuManager->registerAction(_openAction, "ObjectViewer.File.Open");
+	
+	// add actions in file menu
+	QMenu *fileMenu = menuManager->menu(Core::Constants::M_FILE);
+	QAction *exitAction = menuManager->action(Core::Constants::EXIT);
+	fileMenu->insertAction(exitAction, _openAction);
+	fileMenu->insertSeparator(exitAction);
 
-	_viewMenu = menuBar()->addMenu(tr("&View"));
-	_viewMenu->setObjectName("ovqt.Menu.View");
-	_viewMenu->addAction(_setBackColorAction);
-	_viewMenu->addAction(_resetCameraAction);
-	_viewMenu->addAction(_renderModeAction);
-	_viewMenu->addAction(_SetupFog->toggleViewAction());
+	// register actions for view menu
+	menuManager->registerAction(_setBackColorAction, "ObjectViewer.View.SetBackgroundColor");
+	menuManager->registerAction(_SetupFog->toggleViewAction(), "ObjectViewer.View.SetupFog");
+	menuManager->registerAction(_resetSceneAction, "ObjectViewer.View.ResetScene");
+	menuManager->registerAction(_reloadTexturesAction, "ObjectViewer.View.ReloadTextures");
+	menuManager->registerAction(_saveScreenshotAction, "ObjectViewer.View.SaveScreenshot");
+	
+	// add actions in view menu
+	QMenu *viewMenu = menuManager->menu(Core::Constants::M_VIEW);
+	viewMenu->addAction(_setBackColorAction);
+	viewMenu->addAction(_SetupFog->toggleViewAction());
+	viewMenu->addAction(_resetSceneAction);
+	viewMenu->addAction(_reloadTexturesAction);
+	viewMenu->addAction(_saveScreenshotAction);
 
-	_sceneMenu = menuBar()->addMenu(tr("&Scene"));
-	_sceneMenu->setObjectName("ovqt.Menu.Scene");
-	_sceneMenu->addAction(_resetSceneAction);
-	_sceneMenu->addAction(_reloadTexturesAction);
-	_sceneMenu->addAction(_saveScreenshotAction);
-
-	_toolsMenu = menuBar()->addMenu(tr("&Tools"));
-	_toolsMenu->setObjectName("ovqt.Menu.Tools");
-
-	_toolsMenu->addAction(_AnimationDialog->toggleViewAction());
+	// add actions in tools menu
+	QMenu *toolsMenu = menuManager->menu(Core::Constants::M_TOOLS);
+	QAction *settingsAction = menuManager->action(Core::Constants::SETTINGS);
+	toolsMenu->insertAction(settingsAction ,_AnimationDialog->toggleViewAction());
 	_AnimationDialog->toggleViewAction()->setIcon(QIcon(":/images/anim.png"));
 
-	_toolsMenu->addAction(_AnimationSetDialog->toggleViewAction());
+	toolsMenu->insertAction(settingsAction ,_AnimationSetDialog->toggleViewAction());
 	_AnimationSetDialog->toggleViewAction()->setIcon(QIcon(":/images/animset.png"));
 
-	_toolsMenu->addAction(_SlotManagerDialog->toggleViewAction());
+	toolsMenu->insertAction(settingsAction ,_SlotManagerDialog->toggleViewAction());
 	_SlotManagerDialog->toggleViewAction()->setIcon(QIcon(":/images/mixer.png"));
 
-	_toolsMenu->addAction(_ParticleControlDialog->toggleViewAction());
+	toolsMenu->insertAction(settingsAction ,_ParticleControlDialog->toggleViewAction());
 	_ParticleControlDialog->toggleViewAction()->setIcon(QIcon(":/images/pqrticles.png"));
 
-	_toolsMenu->addAction(_DayNightDialog->toggleViewAction());
+	toolsMenu->insertAction(settingsAction ,_DayNightDialog->toggleViewAction());
 	_DayNightDialog->toggleViewAction()->setIcon(QIcon(":/images/dqynight.png"));
 
-	_toolsMenu->addAction(_WaterPoolDialog->toggleViewAction());
+	toolsMenu->insertAction(settingsAction ,_WaterPoolDialog->toggleViewAction());
 	_WaterPoolDialog->toggleViewAction()->setIcon(QIcon(":/images/water.png"));
 	_WaterPoolDialog->toggleViewAction()->setEnabled(false);
 
-	_toolsMenu->addAction(_VegetableDialog->toggleViewAction());
+	toolsMenu->insertAction(settingsAction ,_VegetableDialog->toggleViewAction());
 	_VegetableDialog->toggleViewAction()->setIcon(QIcon(":/images/veget.png"));
 
-	_toolsMenu->addAction(_GlobalWindDialog->toggleViewAction());
+	toolsMenu->insertAction(settingsAction ,_GlobalWindDialog->toggleViewAction());
 	_GlobalWindDialog->toggleViewAction()->setIcon(QIcon(":/images/wind.png"));
 
-	_toolsMenu->addAction(_SkeletonScaleDialog->toggleViewAction());
+	toolsMenu->insertAction(settingsAction ,_SkeletonScaleDialog->toggleViewAction());
 	_SkeletonScaleDialog->toggleViewAction()->setIcon(QIcon(":/images/ico_skelscale.png"));
 
-	_toolsMenu->addAction(_TuneTimerDialog->toggleViewAction());
+	toolsMenu->insertAction(settingsAction ,_TuneTimerDialog->toggleViewAction());
 	_TuneTimerDialog->toggleViewAction()->setIcon(QIcon(":/images/ico_framedelay.png"));
 
-	_toolsMenu->addAction(_SunColorDialog->toggleViewAction());
+	toolsMenu->insertAction(settingsAction ,_SunColorDialog->toggleViewAction());
 
-	_toolsMenu->addAction(_TuneMRMDialog->toggleViewAction());
+	toolsMenu->insertAction(settingsAction ,_TuneMRMDialog->toggleViewAction());
 	_TuneMRMDialog->toggleViewAction()->setIcon(QIcon(":/images/ico_mrm_mesh.png"));
 
 	connect(_ParticleControlDialog->toggleViewAction(), SIGNAL(triggered(bool)),
@@ -377,22 +355,8 @@ void CMainWindow::createMenus()
 	connect(_ParticleControlDialog->toggleViewAction(), SIGNAL(triggered(bool)),
 			_ParticleWorkspaceDialog->_PropertyDialog, SLOT(setVisible(bool)));
 
-	_toolsMenu->addSeparator();
-
-	_toolsMenu->addAction(_settingsAction);
-
-	menuBar()->addSeparator();
-
-	_helpMenu = menuBar()->addMenu(tr("&Help"));
-	_helpMenu->setObjectName("ovqt.Menu.Help");
-	_helpMenu->addAction(_aboutAction);
-	_helpMenu->addAction(_aboutQtAction);
-
-	Modules::plugMan().addObject(_fileMenu);
-	Modules::plugMan().addObject(_viewMenu);
-	Modules::plugMan().addObject(_sceneMenu);
-	Modules::plugMan().addObject(_toolsMenu);
-	Modules::plugMan().addObject(_helpMenu);
+	toolsMenu->insertAction(settingsAction ,_settingsAction);
+	toolsMenu->insertSeparator(settingsAction);
 }
 
 void CMainWindow::createToolBars()
@@ -400,9 +364,13 @@ void CMainWindow::createToolBars()
 	_fileToolBar = addToolBar(tr("&File"));
 	_fileToolBar->addAction(_openAction);
 
-	//_editToolBar = addToolBar(tr("&Edit"));
-	//_editToolBar->addSeparator();
+	//_viewToolBar = addToolBar(tr("&Edit"));
+
 	_toolsBar = addToolBar(tr("&Tools"));
+	
+	_toolsBar->addAction(_setBackColorAction);
+	_toolsBar->addSeparator();
+
 	_toolsBar->addAction(_AnimationDialog->toggleViewAction());
 	_toolsBar->addAction(_AnimationSetDialog->toggleViewAction());
 	_toolsBar->addAction(_SlotManagerDialog->toggleViewAction());
@@ -417,14 +385,6 @@ void CMainWindow::createToolBars()
 
 	_cameraControl = new CCameraControl(this);
 	this->addToolBar(_cameraControl->getToolBar());
-
-	connect(_resetCameraAction, SIGNAL(triggered()), _cameraControl, SLOT(resetCamera()));
-	connect(_renderModeAction, SIGNAL(triggered()), _cameraControl, SLOT(setRenderMode()));
-}
-
-void CMainWindow::createStatusBar()
-{
-	statusBar()->showMessage(tr("StatusReady"));
 }
 
 void CMainWindow::createDialogs()
@@ -523,10 +483,10 @@ bool CMainWindow::loadFile(const QString &fileName, const QString &skelName)
 
 	if (!loaded)
 	{
-		statusBar()->showMessage(tr("Loading canceled"),2000);
+		//statusBar()->showMessage(tr("Loading canceled"),2000);
 		return false;
 	}
-	statusBar()->showMessage(tr("File loaded"),2000);
+	//statusBar()->showMessage(tr("File loaded"),2000);
 	return true;
 }
 

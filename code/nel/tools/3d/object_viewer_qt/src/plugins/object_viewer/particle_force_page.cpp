@@ -45,8 +45,8 @@ CForcePage::CForcePage(QWidget *parent)
 	_ui.radialViscosityWidget->setRange(0.0, 1.0);
 	_ui.tangentialViscosityWidget->setRange(0, 1);
 
-	connect(_ui.toTargetsPushButton, SIGNAL(clicked()), this, SLOT(addTarget()));
-	connect(_ui.toAvaibleTargetsPushButton, SIGNAL(clicked()), this, SLOT(removeTarget()));
+	connect(_ui.toTargetsButton, SIGNAL(clicked()), this, SLOT(addTarget()));
+	connect(_ui.toAvaibleTargetsButton, SIGNAL(clicked()), this, SLOT(removeTarget()));
 
 	connect(_ui.parametricFactorWidget, SIGNAL(valueChanged(float)), this, SLOT(setFactorBrownianForce(float)));
 	connect(_ui.radialViscosityWidget, SIGNAL(valueChanged(float)), this, SLOT(setRadialViscosity(float)));

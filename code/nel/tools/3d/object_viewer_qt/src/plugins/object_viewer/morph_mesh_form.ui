@@ -53,7 +53,7 @@
           <string>Add</string>
          </property>
          <property name="icon">
-          <iconset resource="object_viewer_qt.qrc">
+          <iconset resource="object_viewer.qrc">
            <normaloff>:/images/list-add.png</normaloff>:/images/list-add.png</iconset>
          </property>
         </widget>
@@ -64,7 +64,7 @@
           <string>Change</string>
          </property>
          <property name="icon">
-          <iconset resource="object_viewer_qt.qrc">
+          <iconset resource="object_viewer.qrc">
            <normaloff>:/images/refresh.png</normaloff>:/images/refresh.png</iconset>
          </property>
         </widget>
@@ -82,7 +82,7 @@
           <string>Remove</string>
          </property>
          <property name="icon">
-          <iconset resource="object_viewer_qt.qrc">
+          <iconset resource="object_viewer.qrc">
            <normaloff>:/images/list-remove.png</normaloff>:/images/list-remove.png</iconset>
          </property>
         </widget>
@@ -93,7 +93,7 @@
           <string>Up</string>
          </property>
          <property name="icon">
-          <iconset resource="object_viewer_qt.qrc">
+          <iconset resource="object_viewer.qrc">
            <normaloff>:/images/go-up.png</normaloff>:/images/go-up.png</iconset>
          </property>
         </widget>
@@ -104,7 +104,7 @@
           <string>Down</string>
          </property>
          <property name="icon">
-          <iconset resource="object_viewer_qt.qrc">
+          <iconset resource="object_viewer.qrc">
            <normaloff>:/images/go-down.png</normaloff>:/images/go-down.png</iconset>
          </property>
         </widget>
@@ -217,7 +217,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="object_viewer_qt.qrc"/>
+  <include location="object_viewer.qrc"/>
  </resources>
  <connections>
   <connection>

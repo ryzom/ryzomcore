@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>object_viewer_qt_en.qm</file>
+        <file>object_viewer_qt_fr.qm</file>
+        <file>object_viewer_qt_de.qm</file>
+        <file>object_viewer_qt_ru.qm</file>
+    </qresource>
+</RCC>

@@ -26,7 +26,6 @@
 #include "main_window.h"
 #include "sound_system.h"
 #include "vegetable_editor.h"
-#include "extension_system/plugin_manager.h"
 
 /**
 @class Modules
@@ -62,10 +61,6 @@ public:
 	{
 		return *_vegetableEditor;
 	}
-	static ExtensionSystem::CPluginManager &plugMan()
-	{
-		return *_pluginManager;
-	}
 
 private:
 	static NLQT::CConfiguration *_configuration;
@@ -74,7 +69,6 @@ private:
 	static NLQT::CParticleEditor *_particleEditor;
 	static NLQT::CSoundSystem *_soundSystem;
 	static NLQT::CVegetableEditor *_vegetableEditor;
-	static ExtensionSystem::CPluginManager *_pluginManager;
 };
 
 #endif // MODULES_H

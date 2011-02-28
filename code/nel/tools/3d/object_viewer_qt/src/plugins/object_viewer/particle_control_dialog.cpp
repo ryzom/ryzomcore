@@ -160,16 +160,16 @@ void CParticleControlDialog::updateCount()
 	sint currNumParticles = (sint) ps->getCurrNumParticles();
 
 	// display number of particles for the currently active node
-	_ui.numParticlesLabel->setText(tr("Num particles: %1").arg(currNumParticles));
-
+	_ui.numParticlesSpinBox->setValue(currNumParticles);
+	
 	// display max number of wanted faces
 	NLMISC::CMatrix camMat = ps->getScene()->getCam()->getMatrix();
 	sint numWantedFaces = (uint) ps->getWantedNumTris((ps->getSysMat().getPos() - camMat.getPos()).norm());
-	_ui.numWantedFacesLabel->setText(tr("Num wanted faces: %1").arg(numWantedFaces));
-
+	_ui.numWantedFacesSpinBox->setValue(numWantedFaces);
+	
 	// display system date
-	_ui.systemTimesLabel->setText(tr("System time: %1").arg(ps->getSystemDate(),0,'f',2));
-
+	_ui.timeDoubleSpinBox->setValue(ps->getSystemDate());
+	
 	Q_EMIT changeCount();
 }
 

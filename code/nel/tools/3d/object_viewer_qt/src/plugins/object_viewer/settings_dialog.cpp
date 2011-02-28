@@ -46,19 +46,13 @@ CSettingsDialog::CSettingsDialog(QWidget *parent)
 
 	loadGraphicsSettings();
 	loadSoundSettings();
-	loadPathsSettings();
-	loadVegetableSettings();
+loadVegetableSettings();
 
 	connect(ui.buttonBox, SIGNAL(accepted()), this, SLOT(applyPressed()));
 
 	connect(ui.enableBloomCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnableBloom(bool)));
 	connect(ui.squareBloomCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnableSquareBloon(bool)));
 	connect(ui.bloomDensityHorizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(setDensityBloom(int)));
-
-	connect(ui.addToolButton, SIGNAL(clicked()), this, SLOT(addPath()));
-	connect(ui.removeToolButton, SIGNAL(clicked()), this, SLOT(removePath()));
-	connect(ui.upToolButton, SIGNAL(clicked()), this, SLOT(upPath()));
-	connect(ui.downToolButton, SIGNAL(clicked()), this, SLOT(downPath()));
 
 	connect(ui.tileBankToolButton, SIGNAL(clicked()), this, SLOT(setTileBank()));
 	connect(ui.tileFarBankToolButton, SIGNAL(clicked()), this, SLOT(setTileFarBank()));
@@ -76,47 +70,6 @@ CSettingsDialog::~CSettingsDialog()
 {
 	Modules::config().dropCallback("GraphicsDrivers");
 	Modules::config().dropCallback("SoundDrivers");
-	Modules::config().dropCallback("SearchPaths");
-}
-
-void CSettingsDialog::addPath()
-{
-	QString newPath = QFileDialog::getExistingDirectory(this);
-	if (!newPath.isEmpty())
-	{
-		QListWidgetItem *newItem = new QListWidgetItem;
-		newItem->setText(newPath);
-		newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-		ui.pathsListWidget->addItem(newItem);
-	}
-}
-
-void CSettingsDialog::removePath()
-{
-	QListWidgetItem *removeItem = ui.pathsListWidget->takeItem(ui.pathsListWidget->currentRow());
-	if (!removeItem) delete removeItem;
-}
-
-void CSettingsDialog::upPath()
-{
-	sint currentRow = ui.pathsListWidget->currentRow();
-	if (!(currentRow == 0))
-	{
-		QListWidgetItem *item = ui.pathsListWidget->takeItem(currentRow);
-		ui.pathsListWidget->insertItem(--currentRow, item);
-		ui.pathsListWidget->setCurrentRow(currentRow);
-	}
-}
-
-void CSettingsDialog::downPath()
-{
-	sint currentRow = ui.pathsListWidget->currentRow();
-	if (!(currentRow == ui.pathsListWidget->count()-1))
-	{
-		QListWidgetItem *item = ui.pathsListWidget->takeItem(currentRow);
-		ui.pathsListWidget->insertItem(++currentRow, item);
-		ui.pathsListWidget->setCurrentRow(currentRow);
-	}
 }
 
 void CSettingsDialog::applyPressed()
@@ -130,14 +83,10 @@ void CSettingsDialog::applyPressed()
 
 	saveGraphicsSettings();
 	saveSoundSettings();
-	savePathsSettings();
 	saveVegetableSettings();
 
 	// save config file
 	Modules::config().getConfigFile().save();
-
-	// reload search paths
-	Modules::config().configSearchPaths();
 }
 
 void CSettingsDialog::setTileBank()
@@ -259,20 +208,6 @@ void CSettingsDialog::cfcbSoundDrivers(NLMISC::CConfigFile::CVar& var)
 	}
 }
 
-void CSettingsDialog::cfcbSearchPaths(NLMISC::CConfigFile::CVar &var)
-{
-	/// TODO: create custom widget add/insert/del/up/down paths (also this is use landscape zones)
-
-	ui.pathsListWidget->clear();
-
-	// load search paths from the config file
-	for (uint i = 0; i < var.size(); ++i)
-	{
-		ui.pathsListWidget->addItem(var.asString(i).c_str());
-		ui.pathsListWidget->item(i)->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-	}
-}
-
 void CSettingsDialog::loadGraphicsSettings()
 {
 	// setup config file callbacks and initialize values
@@ -302,12 +237,6 @@ void CSettingsDialog::loadSoundSettings()
 	ui.forceSoftwareCheckBox->setChecked(Modules::config().getValue("SoundForceSoftware", false));
 	ui.useADPCMCheckBox->setChecked(Modules::config().getValue("SoundUseADPCM", false));
 	ui.maxTrackSpinBox->setValue(Modules::config().getValue("SoundMaxTrack", 48));
-}
-
-void CSettingsDialog::loadPathsSettings()
-{
-	// setup config file callbacks and initialize values
-	Modules::config().setAndCallback("SearchPaths", CConfigCallback(this, &CSettingsDialog::cfcbSearchPaths));
 }
 
 void CSettingsDialog::loadVegetableSettings()
@@ -358,18 +287,6 @@ void CSettingsDialog::saveSoundSettings()
 	Modules::config().getConfigFile().getVar("SoundForceSoftware").setAsInt(ui.forceSoftwareCheckBox->isChecked());
 	Modules::config().getConfigFile().getVar("SoundUseADPCM").setAsInt(ui.useADPCMCheckBox->isChecked());
 	Modules::config().getConfigFile().getVar("SoundMaxTrack").setAsInt(ui.maxTrackSpinBox->value());
-}
-
-void CSettingsDialog::savePathsSettings()
-{
-	std::vector<std::string> list;
-	for (sint i = 0; i < ui.pathsListWidget->count(); ++i)
-	{
-		std::string str = ui.pathsListWidget->item(i)->text().toStdString();
-		list.push_back(str);
-	}
-	Modules::config().getConfigFile().getVar("SearchPaths").Type = NLMISC::CConfigFile::CVar::T_STRING;
-	Modules::config().getConfigFile().getVar("SearchPaths").setAsString(list);
 }
 
 void CSettingsDialog::saveVegetableSettings()

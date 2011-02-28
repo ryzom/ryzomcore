@@ -49,8 +49,7 @@ CorePlugin::~CorePlugin()
 	qDeleteAll(_autoReleaseObjects);
 	_autoReleaseObjects.clear();
 
-	if (_oldOVQT)
-		delete _mainWindow;
+	delete _mainWindow;
 }
 
 bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
@@ -58,71 +57,26 @@ bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
 
-	// for old ovqt
-	QMainWindow *wnd = qobject_cast<QMainWindow *>(_plugMan->objectByName("CMainWindow"));
-	if (wnd)
+	_mainWindow = new MainWindow(pluginManager);
+/*	if (QtWin::isCompositionEnabled())
 	{
-		_pluginView = new ExtensionSystem::CPluginView(_plugMan);
-		QMenu *toolsMenu = qobject_cast<QMenu *>(_plugMan->objectByName("ovqt.Menu.Tools"));
-		QMenu *helpMenu = qobject_cast<QMenu *>(_plugMan->objectByName("ovqt.Menu.Help"));
-		nlassert(toolsMenu);
-		nlassert(helpMenu);
-
-		QAction *newAction = toolsMenu->addAction(tr("New settings"));
-		QAction *newAction2 = helpMenu->addAction(tr("About plugins"));
-		newAction->setIcon(QIcon(Constants::ICON_SETTINGS));
-
-		connect(newAction, SIGNAL(triggered()), this, SLOT(execSettings()));
-		connect(newAction2, SIGNAL(triggered()), _pluginView, SLOT(show()));
-		_oldOVQT = false;
-		return true;
+		QtWin::extendFrameIntoClientArea(_mainWindow);
+		_mainWindow->setContentsMargins(0, 0, 0, 0);
 	}
-	else
-	{
-		_mainWindow = new MainWindow(pluginManager);
-#ifdef Q_WS_X11
-		_mainWindow->setAttribute(Qt::WA_TranslucentBackground);
-		_mainWindow->setAttribute(Qt::WA_NoSystemBackground, false);
-		QPalette pal = _mainWindow->palette();
-		QColor bg = pal.window().color();
-		bg.setAlpha(180);
-		pal.setColor(QPalette::Window, bg);
-		_mainWindow->setPalette(pal);
-		_mainWindow->ensurePolished(); // workaround Oxygen filling the background
-		_mainWindow->setAttribute(Qt::WA_StyledBackground, false);
-#endif
-		if (QtWin::isCompositionEnabled())
-		{
-			QtWin::extendFrameIntoClientArea(_mainWindow);
-			_mainWindow->setContentsMargins(0, 0, 0, 0);
-		}
-		_oldOVQT = true;
-		bool success = _mainWindow->initialize(errorString);
-		CSearchPathsSettingsPage *serchPathPage = new CSearchPathsSettingsPage(this);
-		serchPathPage->applySearchPaths();
-		addAutoReleasedObject(serchPathPage);
-
-		return success;
-	}
+*/	bool success = _mainWindow->initialize(errorString);
+	CSearchPathsSettingsPage *serchPathPage = new CSearchPathsSettingsPage(this);
+	serchPathPage->applySearchPaths();
+	addAutoReleasedObject(serchPathPage);
+	return success;
 }
 
 void CorePlugin::extensionsInitialized()
 {
-	_pluginView = new ExtensionSystem::CPluginView(_plugMan);
-	if (_oldOVQT)
-		_mainWindow->extensionsInitialized();
+	_mainWindow->extensionsInitialized();
 }
 
 void CorePlugin::shutdown()
 {
-	delete _pluginView;
-}
-
-void CorePlugin::execSettings()
-{
-	CSettingsDialog settingsDialog(_plugMan);
-	settingsDialog.show();
-	settingsDialog.execDialog();
 }
 
 void CorePlugin::setNelContext(NLMISC::INelContext *nelContext)

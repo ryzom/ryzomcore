@@ -72,7 +72,7 @@
          <string>New</string>
         </property>
         <property name="icon">
-         <iconset resource="object_viewer_qt.qrc">
+         <iconset resource="object_viewer.qrc">
           <normaloff>:/images/new.png</normaloff>:/images/new.png</iconset>
         </property>
         <property name="iconSize">
@@ -113,7 +113,7 @@
          <string>Load</string>
         </property>
         <property name="icon">
-         <iconset resource="object_viewer_qt.qrc">
+         <iconset resource="object_viewer.qrc">
           <normaloff>:/images/open-file.png</normaloff>:/images/open-file.png</iconset>
         </property>
         <property name="iconSize">
@@ -157,7 +157,7 @@
          <string>Save</string>
         </property>
         <property name="icon">
-         <iconset resource="object_viewer_qt.qrc">
+         <iconset resource="object_viewer.qrc">
           <normaloff>:/images/save.png</normaloff>:/images/save.png</iconset>
         </property>
         <property name="iconSize">
@@ -204,7 +204,7 @@
          <string>Save As</string>
         </property>
         <property name="icon">
-         <iconset resource="object_viewer_qt.qrc">
+         <iconset resource="object_viewer.qrc">
           <normaloff>:/images/save-as.png</normaloff>:/images/save-as.png</iconset>
         </property>
         <property name="iconSize">
@@ -270,7 +270,7 @@
          <string>Insert New</string>
         </property>
         <property name="icon">
-         <iconset resource="object_viewer_qt.qrc">
+         <iconset resource="object_viewer.qrc">
           <normaloff>:/images/pqrticles.png</normaloff>:/images/pqrticles.png</iconset>
         </property>
         <property name="iconSize">
@@ -314,7 +314,7 @@
          <string>Create New</string>
         </property>
         <property name="icon">
-         <iconset resource="object_viewer_qt.qrc">
+         <iconset resource="object_viewer.qrc">
           <normaloff>:/images/insert.png</normaloff>:/images/insert.png</iconset>
         </property>
         <property name="iconSize">
@@ -358,7 +358,7 @@
          <string>Reset all</string>
         </property>
         <property name="icon">
-         <iconset resource="object_viewer_qt.qrc">
+         <iconset resource="object_viewer.qrc">
           <normaloff>:/images/clear.png</normaloff>:/images/clear.png</iconset>
         </property>
         <property name="iconSize">
@@ -420,7 +420,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="object_viewer_qt.qrc"/>
+  <include location="object_viewer.qrc"/>
  </resources>
  <connections/>
 </ui>

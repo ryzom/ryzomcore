@@ -26,14 +26,12 @@ NLQT::CMainWindow *Modules::_mainWindow = NULL;
 NLQT::CParticleEditor *Modules::_particleEditor = NULL;
 NLQT::CSoundSystem *Modules::_soundSystem = NULL;
 NLQT::CVegetableEditor *Modules::_vegetableEditor = NULL;
-ExtensionSystem::CPluginManager *Modules::_pluginManager = NULL;
 
 void Modules::init()
 {
 	if (_configuration == NULL) _configuration = new NLQT::CConfiguration;
 	config().init();
 
-	if (_pluginManager == NULL) _pluginManager = new ExtensionSystem::CPluginManager;
 	if (_objectViewer == NULL) _objectViewer = new NLQT::CObjectViewer;
 	if (_soundSystem == NULL) _soundSystem = new NLQT::CSoundSystem;
 	if (_particleEditor == NULL) _particleEditor = new NLQT::CParticleEditor;
@@ -43,8 +41,6 @@ void Modules::init()
 
 void Modules::release()
 {
-	delete _pluginManager;
-	_pluginManager = NULL;
 	delete _mainWindow;
 	_mainWindow = NULL;
 	delete _particleEditor;

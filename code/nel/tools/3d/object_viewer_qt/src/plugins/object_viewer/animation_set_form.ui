@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowIcon">
-   <iconset resource="object_viewer_qt.qrc">
+   <iconset resource="object_viewer.qrc">
     <normaloff>:/images/animset.png</normaloff>:/images/animset.png</iconset>
   </property>
   <property name="windowTitle">
@@ -308,7 +308,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="object_viewer_qt.qrc">
+         <iconset resource="object_viewer.qrc">
           <normaloff>:/images/clear.png</normaloff>:/images/clear.png</iconset>
         </property>
         <property name="iconSize">
@@ -354,7 +354,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="object_viewer_qt.qrc">
+         <iconset resource="object_viewer.qrc">
           <normaloff>:/images/list-add.png</normaloff>:/images/list-add.png</iconset>
         </property>
         <property name="iconSize">
@@ -380,7 +380,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="object_viewer_qt.qrc">
+         <iconset resource="object_viewer.qrc">
           <normaloff>:/images/list-remove.png</normaloff>:/images/list-remove.png</iconset>
         </property>
         <property name="iconSize">
@@ -403,7 +403,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="object_viewer_qt.qrc">
+         <iconset resource="object_viewer.qrc">
           <normaloff>:/images/go-up.png</normaloff>:/images/go-up.png</iconset>
         </property>
         <property name="iconSize">
@@ -426,7 +426,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="object_viewer_qt.qrc">
+         <iconset resource="object_viewer.qrc">
           <normaloff>:/images/go-down.png</normaloff>:/images/go-down.png</iconset>
         </property>
         <property name="iconSize">
@@ -470,7 +470,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="object_viewer_qt.qrc">
+         <iconset resource="object_viewer.qrc">
           <normaloff>:/images/time.png</normaloff>:/images/time.png</iconset>
         </property>
         <property name="iconSize">
@@ -490,7 +490,7 @@
   </widget>
  </widget>
  <resources>
-  <include location="object_viewer_qt.qrc"/>
+  <include location="object_viewer.qrc"/>
  </resources>
  <connections/>
 </ui>

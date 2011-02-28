@@ -4,18 +4,17 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../main.cpp" line="106"/>
+        <location filename="../main.cpp" line="98"/>
         <source>Failed to load Core plugin: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="186"/>
-        <location filename="../main.cpp" line="238"/>
+        <location filename="../main.cpp" line="193"/>
         <source>Object Viewer Qt - Plugin loader messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="222"/>
+        <location filename="../main.cpp" line="177"/>
         <source>Could not find ovqt_plugin_core in %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -23,42 +22,42 @@
 <context>
     <name>CAnimationDialog</name>
     <message>
-        <location filename="../animation_form.ui" line="41"/>
+        <location filename="../plugins/object_viewer/animation_form.ui" line="41"/>
         <source>Animation control</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_form.ui" line="135"/>
+        <location filename="../plugins/object_viewer/animation_form.ui" line="135"/>
         <source>Loop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_form.ui" line="145"/>
+        <location filename="../plugins/object_viewer/animation_form.ui" line="145"/>
         <source>In place</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_form.ui" line="155"/>
+        <location filename="../plugins/object_viewer/animation_form.ui" line="155"/>
         <source>Increment pos</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_form.ui" line="189"/>
+        <location filename="../plugins/object_viewer/animation_form.ui" line="189"/>
         <source>Use the PlayList</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_form.ui" line="233"/>
+        <location filename="../plugins/object_viewer/animation_form.ui" line="233"/>
         <source>Use the Mixer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_form.ui" line="341"/>
+        <location filename="../plugins/object_viewer/animation_form.ui" line="341"/>
         <source>Play/Pause</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_form.ui" line="380"/>
+        <location filename="../plugins/object_viewer/animation_form.ui" line="380"/>
         <source>Stop</source>
         <translation type="unfinished"></translation>
     </message>
@@ -66,57 +65,57 @@
 <context>
     <name>CAnimationSetDialog</name>
     <message>
-        <location filename="../animation_set_form.ui" line="30"/>
+        <location filename="../plugins/object_viewer/animation_set_form.ui" line="30"/>
         <source>Animation set manager</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_set_form.ui" line="67"/>
+        <location filename="../plugins/object_viewer/animation_set_form.ui" line="67"/>
         <source>Edited object:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_set_form.ui" line="99"/>
+        <location filename="../plugins/object_viewer/animation_set_form.ui" line="99"/>
         <source>Animations:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_set_form.ui" line="163"/>
+        <location filename="../plugins/object_viewer/animation_set_form.ui" line="163"/>
         <source>Add anim</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_set_form.ui" line="174"/>
+        <location filename="../plugins/object_viewer/animation_set_form.ui" line="174"/>
         <source>Skeleton weight template:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_set_form.ui" line="232"/>
+        <location filename="../plugins/object_viewer/animation_set_form.ui" line="232"/>
         <source>Add swt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_set_form.ui" line="245"/>
+        <location filename="../plugins/object_viewer/animation_set_form.ui" line="245"/>
         <source>Animations playlist:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_set_form.ui" line="305"/>
+        <location filename="../plugins/object_viewer/animation_set_form.ui" line="305"/>
         <source>Unload all anim and swt files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_set_form.ui" line="351"/>
+        <location filename="../plugins/object_viewer/animation_set_form.ui" line="351"/>
         <source>Add anim in PlayList</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_set_form.ui" line="377"/>
+        <location filename="../plugins/object_viewer/animation_set_form.ui" line="377"/>
         <source>Delete anim from PlayList</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_set_form.ui" line="467"/>
+        <location filename="../plugins/object_viewer/animation_set_form.ui" line="467"/>
         <source>Set duration of time in Animation control</source>
         <translation type="unfinished"></translation>
     </message>
@@ -124,102 +123,102 @@
 <context>
     <name>CAttribWidget</name>
     <message>
-        <location filename="../attrib_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="14"/>
         <source>GroupBox</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="30"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="30"/>
         <source>Constant</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="35"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="35"/>
         <source>Scheme</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="65"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="65"/>
         <source>Input mutliplier:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="88"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="88"/>
         <source>Clamp</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="139"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="139"/>
         <source>E</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="148"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="148"/>
         <source>Src:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="162"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="162"/>
         <source>Date</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="167"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="167"/>
         <source>Position</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="172"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="172"/>
         <source>Inverse Mass</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="177"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="177"/>
         <source>Speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="182"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="182"/>
         <source>Random</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="187"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="187"/>
         <source>User param</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="192"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="192"/>
         <source>LOD</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="197"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="197"/>
         <source>Square LOD</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="202"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="202"/>
         <source>Clamped LOD</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="207"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="207"/>
         <source>Camped square LOD</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="226"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="226"/>
         <source>U</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="242"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="242"/>
         <source>P</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_form.ui" line="258"/>
+        <location filename="../plugins/object_viewer/attrib_form.ui" line="258"/>
         <source>G</source>
         <translation type="unfinished"></translation>
     </message>
@@ -227,27 +226,27 @@
 <context>
     <name>CAutoLODDialog</name>
     <message>
-        <location filename="../auto_lod_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/auto_lod_form.ui" line="14"/>
         <source>Auto LOD</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../auto_lod_form.ui" line="23"/>
+        <location filename="../plugins/object_viewer/auto_lod_form.ui" line="23"/>
         <source>Start percent DIST:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../auto_lod_form.ui" line="33"/>
+        <location filename="../plugins/object_viewer/auto_lod_form.ui" line="33"/>
         <source>Max dist BIAS:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../auto_lod_form.ui" line="43"/>
+        <location filename="../plugins/object_viewer/auto_lod_form.ui" line="43"/>
         <source>Degradation exponent:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../auto_lod_form.ui" line="73"/>
+        <location filename="../plugins/object_viewer/auto_lod_form.ui" line="73"/>
         <source>Skip particles</source>
         <translation type="unfinished"></translation>
     </message>
@@ -255,22 +254,22 @@
 <context>
     <name>CBasicEditWidget</name>
     <message>
-        <location filename="../basic_edit_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/basic_edit_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../basic_edit_form.ui" line="26"/>
+        <location filename="../plugins/object_viewer/basic_edit_form.ui" line="26"/>
         <source>Psi</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../basic_edit_form.ui" line="66"/>
+        <location filename="../plugins/object_viewer/basic_edit_form.ui" line="66"/>
         <source>Theta</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../basic_edit_form.ui" line="90"/>
+        <location filename="../plugins/object_viewer/basic_edit_form.ui" line="90"/>
         <source>Phi</source>
         <translation type="unfinished"></translation>
     </message>
@@ -278,12 +277,12 @@
 <context>
     <name>CColorEditWidget</name>
     <message>
-        <location filename="../color_edit_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/color_edit_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../color_edit_form.ui" line="52"/>
+        <location filename="../plugins/object_viewer/color_edit_form.ui" line="52"/>
         <source>Browse</source>
         <translation type="unfinished">Durchsuchen</translation>
     </message>
@@ -291,123 +290,123 @@
 <context>
     <name>CConstraintMeshWidget</name>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="26"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="26"/>
         <source>Force stage modulation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="32"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="32"/>
         <source>Stage 0</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="39"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="39"/>
         <source>Stage 1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="46"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="46"/>
         <source>Stage 2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="53"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="53"/>
         <source>Stage 3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="63"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="63"/>
         <source>Force vertex color lighting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="77"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="77"/>
         <source>Texture anim type:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="88"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="88"/>
         <source>None</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="93"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="93"/>
         <source>Global</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="101"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="101"/>
         <source>Reinit when new element is created</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="108"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="108"/>
         <source>Stage:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="132"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="132"/>
         <source>Translation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="162"/>
-        <location filename="../constraint_mesh_form.ui" line="306"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="162"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="306"/>
         <source>V Start:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="182"/>
-        <location filename="../constraint_mesh_form.ui" line="326"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="182"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="326"/>
         <source>U Speed:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="202"/>
-        <location filename="../constraint_mesh_form.ui" line="346"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="202"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="346"/>
         <source>V Speed:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="222"/>
-        <location filename="../constraint_mesh_form.ui" line="366"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="222"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="366"/>
         <source>U Accel:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="242"/>
-        <location filename="../constraint_mesh_form.ui" line="386"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="242"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="386"/>
         <source>V Accel:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="262"/>
-        <location filename="../constraint_mesh_form.ui" line="286"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="262"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="286"/>
         <source>U Start:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="272"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="272"/>
         <source>Scale</source>
         <translation type="unfinished">Größe</translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="409"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="409"/>
         <source>Rotation</source>
         <translation type="unfinished">Drehung</translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="421"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="421"/>
         <source>Speed:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../constraint_mesh_form.ui" line="444"/>
+        <location filename="../plugins/object_viewer/constraint_mesh_form.ui" line="444"/>
         <source>Accel:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -415,17 +414,17 @@
 <context>
     <name>CDayNightDialog</name>
     <message>
-        <location filename="../day_night_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/day_night_form.ui" line="14"/>
         <source>Day/Night</source>
         <translation>Tag/Nacht</translation>
     </message>
     <message>
-        <location filename="../day_night_form.ui" line="21"/>
+        <location filename="../plugins/object_viewer/day_night_form.ui" line="21"/>
         <source>Day</source>
         <translation>Tag</translation>
     </message>
     <message>
-        <location filename="../day_night_form.ui" line="38"/>
+        <location filename="../plugins/object_viewer/day_night_form.ui" line="38"/>
         <source>Night</source>
         <translation>Nacht</translation>
     </message>
@@ -433,47 +432,47 @@
 <context>
     <name>CDirectionWidget</name>
     <message>
-        <location filename="../direction_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/direction_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../direction_form.ui" line="26"/>
+        <location filename="../plugins/object_viewer/direction_form.ui" line="26"/>
         <source>Direction:</source>
         <translation>Richtung:</translation>
     </message>
     <message>
-        <location filename="../direction_form.ui" line="44"/>
+        <location filename="../plugins/object_viewer/direction_form.ui" line="44"/>
         <source>+I</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../direction_form.ui" line="57"/>
+        <location filename="../plugins/object_viewer/direction_form.ui" line="57"/>
         <source>+J</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../direction_form.ui" line="70"/>
+        <location filename="../plugins/object_viewer/direction_form.ui" line="70"/>
         <source>+K</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../direction_form.ui" line="83"/>
+        <location filename="../plugins/object_viewer/direction_form.ui" line="83"/>
         <source>-I</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../direction_form.ui" line="96"/>
+        <location filename="../plugins/object_viewer/direction_form.ui" line="96"/>
         <source>-J</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../direction_form.ui" line="109"/>
+        <location filename="../plugins/object_viewer/direction_form.ui" line="109"/>
         <source>-K</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../direction_form.ui" line="116"/>
+        <location filename="../plugins/object_viewer/direction_form.ui" line="116"/>
         <source>Global</source>
         <translation type="unfinished"></translation>
     </message>
@@ -481,7 +480,7 @@
 <context>
     <name>CEditRangeFloatWidget</name>
     <message>
-        <location filename="../edit_range_float_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/edit_range_float_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
@@ -489,7 +488,7 @@
 <context>
     <name>CEditRangeUIntWidget</name>
     <message>
-        <location filename="../edit_range_uint_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/edit_range_uint_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
@@ -497,128 +496,128 @@
 <context>
     <name>CEmitterPage</name>
     <message>
-        <location filename="../emitter_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="36"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="36"/>
         <source>General</source>
         <translation type="unfinished">Allgemein</translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="47"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="47"/>
         <source>Emitted type:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="57"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="57"/>
         <source>Type of emission:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="65"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="65"/>
         <source>Regular</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="70"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="70"/>
         <source>On death</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="75"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="75"/>
         <source>Once</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="80"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="80"/>
         <source>On bounce</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="85"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="85"/>
         <source>External only</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="95"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="95"/>
         <source>Direction:</source>
         <translation type="unfinished">Richtung:</translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="103"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="103"/>
         <source>Default</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="108"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="108"/>
         <source>Direction is aligned on the emitter direction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="113"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="113"/>
         <source>Direction is in world</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="118"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="118"/>
         <source>Direction is local to the system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="123"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="123"/>
         <source>User</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="131"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="131"/>
         <source>Force consistent emission</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="138"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="138"/>
         <source>Bypass Auto-LOD</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="145"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="145"/>
         <source>Speed inheritance factor:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="155"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="155"/>
         <source>Delayed emission:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="165"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="165"/>
         <source>Max Emission Count:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="178"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="178"/>
         <source>Radius:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="202"/>
-        <location filename="../emitter_form.ui" line="221"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="202"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="221"/>
         <source>Emission period</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="229"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="229"/>
         <source>Emission quantity/Speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="235"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="235"/>
         <source>Emission quantity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_form.ui" line="242"/>
+        <location filename="../plugins/object_viewer/emitter_form.ui" line="242"/>
         <source>Strenght modulation</source>
         <translation type="unfinished"></translation>
     </message>
@@ -656,47 +655,37 @@
 <context>
     <name>CForcePage</name>
     <message>
-        <location filename="../particle_force_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/particle_force_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_force_form.ui" line="32"/>
+        <location filename="../plugins/object_viewer/particle_force_form.ui" line="32"/>
         <source>Targets:</source>
         <translation type="unfinished">Ziele:</translation>
     </message>
     <message>
-        <location filename="../particle_force_form.ui" line="39"/>
+        <location filename="../plugins/object_viewer/particle_force_form.ui" line="39"/>
         <source>Avaible targets:</source>
         <translation type="unfinished">Verfügbare Ziele:</translation>
     </message>
     <message>
-        <location filename="../particle_force_form.ui" line="85"/>
-        <source>&lt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../particle_force_form.ui" line="98"/>
-        <source>&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../particle_force_form.ui" line="125"/>
+        <location filename="../plugins/object_viewer/particle_force_form.ui" line="99"/>
         <source>Parametric factor:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_force_form.ui" line="135"/>
+        <location filename="../plugins/object_viewer/particle_force_form.ui" line="109"/>
         <source>Radial viscosity:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_force_form.ui" line="145"/>
+        <location filename="../plugins/object_viewer/particle_force_form.ui" line="119"/>
         <source>Tangential viscosity:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_force_form.ui" line="118"/>
+        <location filename="../plugins/object_viewer/particle_force_form.ui" line="92"/>
         <source>Force intensity</source>
         <translation type="unfinished"></translation>
     </message>
@@ -704,12 +693,12 @@
 <context>
     <name>CGlobalWindDialog</name>
     <message>
-        <location filename="../global_wind_form.ui" line="20"/>
+        <location filename="../plugins/object_viewer/global_wind_form.ui" line="20"/>
         <source>Weather</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../global_wind_form.ui" line="62"/>
+        <location filename="../plugins/object_viewer/global_wind_form.ui" line="62"/>
         <source>Power:</source>
         <translation type="unfinished">Kraft:</translation>
     </message>
@@ -717,27 +706,27 @@
 <context>
     <name>CLightPage</name>
     <message>
-        <location filename="../particle_light_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/particle_light_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_light_form.ui" line="30"/>
+        <location filename="../plugins/object_viewer/particle_light_form.ui" line="30"/>
         <source>Light color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_light_form.ui" line="59"/>
+        <location filename="../plugins/object_viewer/particle_light_form.ui" line="59"/>
         <source>Attenuation start/end</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_light_form.ui" line="71"/>
+        <location filename="../plugins/object_viewer/particle_light_form.ui" line="71"/>
         <source>Attenuation start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_light_form.ui" line="78"/>
+        <location filename="../plugins/object_viewer/particle_light_form.ui" line="78"/>
         <source>Attenuation end</source>
         <translation type="unfinished"></translation>
     </message>
@@ -745,219 +734,219 @@
 <context>
     <name>CLocatedBindablePage</name>
     <message>
-        <location filename="../located_bindable_form.ui" line="20"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="20"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="68"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="68"/>
         <source>Blending mode:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="76"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="76"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="81"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="81"/>
         <source>Modulate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="86"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="86"/>
         <source>Alpha blend</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="91"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="91"/>
         <source>Alpha test</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="103"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="103"/>
         <source>No AutoLOD</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="110"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="110"/>
         <source>Global color lighting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="119"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="119"/>
         <source>Z-Test</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="128"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="128"/>
         <source>ZBias:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="147"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="147"/>
         <source>Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="180"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="180"/>
         <source>Independent size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="202"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="202"/>
         <source>Height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="209"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="209"/>
         <source>Width</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="222"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="222"/>
         <source>Size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="229"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="229"/>
         <source>Angle 2D</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="262"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="262"/>
         <source>Rotation</source>
         <translation type="unfinished">Drehung</translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="269"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="269"/>
         <source>hint / precomputed rotations</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="291"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="291"/>
         <source>Rot speed min:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="301"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="301"/>
         <source>Rot speed max:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="311"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="311"/>
         <source>Nb models:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="357"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="357"/>
         <source>Align on motion</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="397"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="397"/>
         <source>Z-Align</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="364"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="364"/>
         <source>Fake motion blur coeff.:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="374"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="374"/>
         <source>Fake motion blur treshold:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="417"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="417"/>
         <source>Radius cut:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="427"/>
-        <location filename="../located_bindable_form.ui" line="539"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="427"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="539"/>
         <source>Number of segments:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="483"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="483"/>
         <source>Phase smoothness:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="549"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="549"/>
         <source>Duration segment:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="437"/>
-        <location filename="../located_bindable_form.ui" line="559"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="437"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="559"/>
         <source>Texture U factor:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="473"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="473"/>
         <source>Number fan light:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="493"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="493"/>
         <source>Fan light speed:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="503"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="503"/>
         <source>Fan light intensity:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="569"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="569"/>
         <source>Texture V factor:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="585"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="585"/>
         <source>Non parametric anim only</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="588"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="588"/>
         <source>Force constant length(m):</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="602"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="602"/>
         <source>LOD degradation:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="612"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="612"/>
         <source>Trail coord. system:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="620"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="620"/>
         <source>Local</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="625"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="625"/>
         <source>World</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="630"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="630"/>
         <source>User</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="635"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="635"/>
         <source>Father coord. system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_form.ui" line="643"/>
+        <location filename="../plugins/object_viewer/located_bindable_form.ui" line="643"/>
         <source>Use hermitte interpolation</source>
         <translation type="unfinished"></translation>
     </message>
@@ -965,77 +954,77 @@
 <context>
     <name>CLocatedPage</name>
     <message>
-        <location filename="../located_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/located_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_form.ui" line="30"/>
+        <location filename="../plugins/object_viewer/located_form.ui" line="30"/>
         <source>General</source>
         <translation type="unfinished">Allgemein</translation>
     </message>
     <message>
-        <location filename="../located_form.ui" line="36"/>
+        <location filename="../plugins/object_viewer/located_form.ui" line="36"/>
         <source>Coord system:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_form.ui" line="44"/>
+        <location filename="../plugins/object_viewer/located_form.ui" line="44"/>
         <source>Particles are local to the system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_form.ui" line="49"/>
+        <location filename="../plugins/object_viewer/located_form.ui" line="49"/>
         <source>Particles are in world</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_form.ui" line="54"/>
+        <location filename="../plugins/object_viewer/located_form.ui" line="54"/>
         <source>User</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_form.ui" line="62"/>
+        <location filename="../plugins/object_viewer/located_form.ui" line="62"/>
         <source>Disgrade with lod</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_form.ui" line="69"/>
+        <location filename="../plugins/object_viewer/located_form.ui" line="69"/>
         <source>Parametric motion</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_form.ui" line="76"/>
+        <location filename="../plugins/object_viewer/located_form.ui" line="76"/>
         <source>Max number of particles:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_form.ui" line="105"/>
+        <location filename="../plugins/object_viewer/located_form.ui" line="105"/>
         <source>Set current count particles</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_form.ui" line="142"/>
+        <location filename="../plugins/object_viewer/located_form.ui" line="142"/>
         <source>Life time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_form.ui" line="148"/>
+        <location filename="../plugins/object_viewer/located_form.ui" line="148"/>
         <source>Limited life time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_form.ui" line="164"/>
+        <location filename="../plugins/object_viewer/located_form.ui" line="164"/>
         <source>Triger on death</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_form.ui" line="171"/>
+        <location filename="../plugins/object_viewer/located_form.ui" line="171"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_form.ui" line="198"/>
+        <location filename="../plugins/object_viewer/located_form.ui" line="198"/>
         <source>Particle mass</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1089,32 +1078,32 @@
 <context>
     <name>CMeshWidget</name>
     <message>
-        <location filename="../mesh_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/mesh_form.ui" line="14"/>
         <source>GroupBox</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mesh_form.ui" line="29"/>
+        <location filename="../plugins/object_viewer/mesh_form.ui" line="29"/>
         <source>Shape:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mesh_form.ui" line="43"/>
+        <location filename="../plugins/object_viewer/mesh_form.ui" line="43"/>
         <source>Browse</source>
         <translation type="unfinished">Durchsuchen</translation>
     </message>
     <message>
-        <location filename="../mesh_form.ui" line="50"/>
+        <location filename="../plugins/object_viewer/mesh_form.ui" line="50"/>
         <source>Shape not loaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mesh_form.ui" line="72"/>
+        <location filename="../plugins/object_viewer/mesh_form.ui" line="72"/>
         <source>Morph</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mesh_form.ui" line="82"/>
+        <location filename="../plugins/object_viewer/mesh_form.ui" line="82"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1122,42 +1111,42 @@
 <context>
     <name>CMorphMeshDialog</name>
     <message>
-        <location filename="../morph_mesh_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/morph_mesh_form.ui" line="14"/>
         <source>Morph mesh edit </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../morph_mesh_form.ui" line="53"/>
+        <location filename="../plugins/object_viewer/morph_mesh_form.ui" line="53"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../morph_mesh_form.ui" line="64"/>
+        <location filename="../plugins/object_viewer/morph_mesh_form.ui" line="64"/>
         <source>Change</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../morph_mesh_form.ui" line="75"/>
+        <location filename="../plugins/object_viewer/morph_mesh_form.ui" line="75"/>
         <source>Insert</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../morph_mesh_form.ui" line="82"/>
+        <location filename="../plugins/object_viewer/morph_mesh_form.ui" line="82"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../morph_mesh_form.ui" line="93"/>
+        <location filename="../plugins/object_viewer/morph_mesh_form.ui" line="93"/>
         <source>Up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../morph_mesh_form.ui" line="104"/>
+        <location filename="../plugins/object_viewer/morph_mesh_form.ui" line="104"/>
         <source>Down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../morph_mesh_form.ui" line="174"/>
+        <location filename="../plugins/object_viewer/morph_mesh_form.ui" line="174"/>
         <source>Warning: Shapes not found and incompatibles !!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1165,95 +1154,95 @@
 <context>
     <name>CMultiTexDialog</name>
     <message>
-        <location filename="../multi_tex_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="14"/>
         <source>Multitexturing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../multi_tex_form.ui" line="30"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="30"/>
         <source>Main tex</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../multi_tex_form.ui" line="36"/>
-        <location filename="../multi_tex_form.ui" line="144"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="36"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="144"/>
         <source>U speed 1:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../multi_tex_form.ui" line="49"/>
-        <location filename="../multi_tex_form.ui" line="157"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="49"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="157"/>
         <source>V speed 1:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../multi_tex_form.ui" line="59"/>
-        <location filename="../multi_tex_form.ui" line="167"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="59"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="167"/>
         <source>U speed 2:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../multi_tex_form.ui" line="69"/>
-        <location filename="../multi_tex_form.ui" line="177"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="69"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="177"/>
         <source>V speed 2:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../multi_tex_form.ui" line="82"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="82"/>
         <source>Bump factor:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../multi_tex_form.ui" line="96"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="96"/>
         <source>Use particle data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../multi_tex_form.ui" line="103"/>
-        <location filename="../multi_tex_form.ui" line="187"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="103"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="187"/>
         <source>Tex op:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../multi_tex_form.ui" line="111"/>
-        <location filename="../multi_tex_form.ui" line="195"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="111"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="195"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../multi_tex_form.ui" line="116"/>
-        <location filename="../multi_tex_form.ui" line="200"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="116"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="200"/>
         <source>Modulate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../multi_tex_form.ui" line="121"/>
-        <location filename="../multi_tex_form.ui" line="205"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="121"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="205"/>
         <source>Decal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../multi_tex_form.ui" line="126"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="126"/>
         <source>EnvBumpMap</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../multi_tex_form.ui" line="138"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="138"/>
         <source>Alternate tex</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../multi_tex_form.ui" line="213"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="213"/>
         <source>Use particle data all</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../multi_tex_form.ui" line="224"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="224"/>
         <source>Force basic caps</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../multi_tex_form.ui" line="231"/>
+        <location filename="../plugins/object_viewer/multi_tex_form.ui" line="231"/>
         <source>Enable alternate</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1261,52 +1250,52 @@
 <context>
     <name>CPSMoverPage</name>
     <message>
-        <location filename="../ps_mover_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/ps_mover_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ps_mover_form.ui" line="20"/>
+        <location filename="../plugins/object_viewer/ps_mover_form.ui" line="20"/>
         <source>Position:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ps_mover_form.ui" line="28"/>
+        <location filename="../plugins/object_viewer/ps_mover_form.ui" line="28"/>
         <source>X:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ps_mover_form.ui" line="55"/>
+        <location filename="../plugins/object_viewer/ps_mover_form.ui" line="55"/>
         <source>Y:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ps_mover_form.ui" line="82"/>
+        <location filename="../plugins/object_viewer/ps_mover_form.ui" line="82"/>
         <source>Z:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ps_mover_form.ui" line="110"/>
+        <location filename="../plugins/object_viewer/ps_mover_form.ui" line="110"/>
         <source>Sub component:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ps_mover_form.ui" line="122"/>
+        <location filename="../plugins/object_viewer/ps_mover_form.ui" line="122"/>
         <source>Scale X:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ps_mover_form.ui" line="132"/>
+        <location filename="../plugins/object_viewer/ps_mover_form.ui" line="132"/>
         <source>Scale Y:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ps_mover_form.ui" line="142"/>
+        <location filename="../plugins/object_viewer/ps_mover_form.ui" line="142"/>
         <source>Scale Z:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ps_mover_form.ui" line="152"/>
+        <location filename="../plugins/object_viewer/ps_mover_form.ui" line="152"/>
         <source>Scale:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1314,115 +1303,115 @@
 <context>
     <name>CParticleControlDialog</name>
     <message>
-        <location filename="../particle_control_form.ui" line="32"/>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="32"/>
         <source>Particles system control</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="145"/>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="151"/>
         <source>Loop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="158"/>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="164"/>
         <source>Display helpers</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="171"/>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="177"/>
         <source>Enable auto count</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="184"/>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="190"/>
         <source>Display box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="197"/>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="203"/>
         <source>All particle system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="213"/>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="219"/>
         <source>Reset auto count</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="233"/>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="239"/>
         <source>Link play to scene play</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="243"/>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="249"/>
         <source>Link to skeleton</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="256"/>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="262"/>
         <source>Unlink</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="276"/>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="282"/>
         <source>Restick all objects</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="286"/>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="292"/>
         <source>Set anim</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="296"/>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="302"/>
         <source>Clear anim</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="320"/>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="326"/>
         <source>General</source>
         <translation type="unfinished">Allgemein</translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="333"/>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="339"/>
         <source>Additional</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="372"/>
-        <source>Num particles:9999999</source>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="362"/>
+        <source>Num particles:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="385"/>
-        <source>Num wanted faces:9999999</source>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="394"/>
+        <source>Num wanted faces:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_form.ui" line="356"/>
-        <source>System time:99999999999</source>
+        <location filename="../plugins/object_viewer/particle_control_form.ui" line="429"/>
+        <source>System time:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>CParticleLinkDialog</name>
     <message>
-        <location filename="../particle_link_skeleton_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/particle_link_skeleton_form.ui" line="14"/>
         <source>Link to skeleton</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_link_skeleton_form.ui" line="21"/>
+        <location filename="../plugins/object_viewer/particle_link_skeleton_form.ui" line="21"/>
         <source>Choose bone to stick particle system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_link_skeleton_form.ui" line="31"/>
+        <location filename="../plugins/object_viewer/particle_link_skeleton_form.ui" line="31"/>
         <source>Link</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_link_skeleton_form.ui" line="41"/>
+        <location filename="../plugins/object_viewer/particle_link_skeleton_form.ui" line="41"/>
         <source>Unlink</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1430,300 +1419,300 @@
 <context>
     <name>CParticleSystemPage</name>
     <message>
-        <location filename="../particle_system_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="33"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="33"/>
         <source>Integration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="45"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="45"/>
         <source>Enable load balancing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="58"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="58"/>
         <source>Accurate integration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="65"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="65"/>
         <source>Enable motion slowDown</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="72"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="72"/>
         <source>Time threshold:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="82"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="82"/>
         <source>Max steps:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="98"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="98"/>
         <source>Lock</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="122"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="122"/>
         <source>User param</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="130"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="130"/>
         <source>User param1:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="156"/>
-        <location filename="../particle_system_form.ui" line="196"/>
-        <location filename="../particle_system_form.ui" line="230"/>
-        <location filename="../particle_system_form.ui" line="264"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="156"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="196"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="230"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="264"/>
         <source>Global</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="170"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="170"/>
         <source>User param2:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="210"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="210"/>
         <source>User param3:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="244"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="244"/>
         <source>User param4:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="290"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="290"/>
         <source>PBBox / LOD param</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="302"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="302"/>
         <source>Enable Precomputed Bounding Box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="318"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="318"/>
         <source>Auto</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="338"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="338"/>
         <source>Reset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="347"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="347"/>
         <source>X:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="373"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="373"/>
         <source>Y:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="405"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="405"/>
         <source>Z:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="448"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="448"/>
         <source>+10 %</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="473"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="473"/>
         <source>-10 %</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="505"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="505"/>
         <source>Sharable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="512"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="512"/>
         <source>Auto-LOD</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="534"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="534"/>
         <source>Settings</source>
         <translation type="unfinished">Einstellungen</translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="543"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="543"/>
         <source>Max view dist:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="553"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="553"/>
         <source>LOD Ratio:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="577"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="577"/>
         <source>Global color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="589"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="589"/>
         <source>Force global lighting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="605"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="605"/>
         <source>Edit global color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="622"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="622"/>
         <source>Wrn: Bypass multitex, not supported by all types</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="643"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="643"/>
         <source>Life mgt param</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="649"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="649"/>
         <source>Life mgt presets:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="669"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="669"/>
         <source>Environment FX</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="674"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="674"/>
         <source>Running Environment FX</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="679"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="679"/>
         <source>Spell FX</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="684"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="684"/>
         <source>Looping Spell FX</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="689"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="689"/>
         <source>Minor transitory FX</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="694"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="694"/>
         <source>User defined</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="699"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="699"/>
         <source>Moving Looping FX</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="704"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="704"/>
         <source>Spawned Environment FX</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="709"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="709"/>
         <source>Ground FX</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="714"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="714"/>
         <source>Projectile FX</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="728"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="728"/>
         <source>Model removed when out of range</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="735"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="735"/>
         <source>PS resource removed when not visible</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="742"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="742"/>
         <source>Force life time update</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="749"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="749"/>
         <source>No max nb steps</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="758"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="758"/>
         <source>Anim type:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="771"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="771"/>
         <source>Die on event:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="789"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="789"/>
         <source>When visible</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="794"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="794"/>
         <source>When in visible clusters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="799"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="799"/>
         <source>Always</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="814"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="814"/>
         <source>Disabled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="819"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="819"/>
         <source>No more particles</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="824"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="824"/>
         <source>No more particles/emitters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="842"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="842"/>
         <source>Apply after delay:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="855"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="855"/>
         <source> s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_form.ui" line="864"/>
+        <location filename="../plugins/object_viewer/particle_system_form.ui" line="864"/>
         <source>Auto delay</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1731,27 +1720,27 @@
 <context>
     <name>CParticleTextureAnimWidget</name>
     <message>
-        <location filename="../particle_texture_anim_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/particle_texture_anim_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_anim_form.ui" line="35"/>
+        <location filename="../plugins/object_viewer/particle_texture_anim_form.ui" line="35"/>
         <source>Enable texture anim</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_anim_form.ui" line="45"/>
+        <location filename="../plugins/object_viewer/particle_texture_anim_form.ui" line="45"/>
         <source>Texture grouped</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_anim_form.ui" line="76"/>
+        <location filename="../plugins/object_viewer/particle_texture_anim_form.ui" line="76"/>
         <source>Multitexturing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_anim_form.ui" line="86"/>
+        <location filename="../plugins/object_viewer/particle_texture_anim_form.ui" line="86"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1759,32 +1748,32 @@
 <context>
     <name>CParticleTextureWidget</name>
     <message>
-        <location filename="../particle_texture_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/particle_texture_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_form.ui" line="74"/>
+        <location filename="../plugins/object_viewer/particle_texture_form.ui" line="74"/>
         <source>Choose texture</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_form.ui" line="87"/>
+        <location filename="../plugins/object_viewer/particle_texture_form.ui" line="87"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_form.ui" line="108"/>
+        <location filename="../plugins/object_viewer/particle_texture_form.ui" line="108"/>
         <source>Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_form.ui" line="118"/>
+        <location filename="../plugins/object_viewer/particle_texture_form.ui" line="118"/>
         <source>Size:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_form.ui" line="128"/>
+        <location filename="../plugins/object_viewer/particle_texture_form.ui" line="128"/>
         <source>Depth:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1792,7 +1781,7 @@
 <context>
     <name>CParticleWorkspaceDialog</name>
     <message>
-        <location filename="../particle_workspace_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/particle_workspace_form.ui" line="14"/>
         <source>Tree workspace</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1915,7 +1904,7 @@
     <name>CSettingsDialog</name>
     <message>
         <location filename="../plugins/core/settings_dialog.ui" line="14"/>
-        <location filename="../settings_form.ui" line="17"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="17"/>
         <source>Settings</source>
         <translation type="unfinished">Einstellungen</translation>
     </message>
@@ -1925,151 +1914,151 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="43"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="43"/>
         <source>Graphics</source>
         <translation>Video</translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="48"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="48"/>
         <source>Sound</source>
         <translation>Audio</translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="53"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="53"/>
         <source>Paths</source>
         <translation>Verzeichnisse</translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="58"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="58"/>
         <source>Vegetable</source>
         <translation>Vegetation</translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="85"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="85"/>
         <source>Graphics settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="93"/>
-        <location filename="../settings_form.ui" line="242"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="93"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="242"/>
         <source>Driver</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="128"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="128"/>
         <source>Bloom effect</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="136"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="136"/>
         <source>Bloom density</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="155"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="155"/>
         <source>Square bloom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="162"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="162"/>
         <source>Enable bloom effect</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="172"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="172"/>
         <source>Qt Style</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="180"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="180"/>
         <source>Style</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="205"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="205"/>
         <source>Use style&apos;s standard palette</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="232"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="232"/>
         <source>Sound settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="274"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="274"/>
         <source>SoundAutoLoadSample</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="281"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="281"/>
         <source>SoundEnableOccludeObstruct</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="288"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="288"/>
         <source>SoundEnableReverb</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="295"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="295"/>
         <source>SoundManualRolloff</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="302"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="302"/>
         <source>SoundForceSoftware</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="309"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="309"/>
         <source>SoundUseADPCM</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="318"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="318"/>
         <source>SoundMaxTrack</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="381"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="381"/>
         <source>Search paths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="398"/>
-        <location filename="../settings_form.ui" line="415"/>
-        <location filename="../settings_form.ui" line="426"/>
-        <location filename="../settings_form.ui" line="437"/>
-        <location filename="../settings_form.ui" line="493"/>
-        <location filename="../settings_form.ui" line="517"/>
-        <location filename="../settings_form.ui" line="541"/>
-        <location filename="../settings_form.ui" line="582"/>
-        <location filename="../settings_form.ui" line="599"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="398"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="415"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="426"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="437"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="493"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="517"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="541"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="582"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="599"/>
         <source>...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="470"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="470"/>
         <source>Setup Landscape</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="476"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="476"/>
         <source>Tile bank:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="500"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="500"/>
         <source>Tile far bank:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="524"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="524"/>
         <source>Vegetable texture:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_form.ui" line="548"/>
+        <location filename="../plugins/object_viewer/settings_form.ui" line="548"/>
         <source>Landscape zones:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2077,32 +2066,32 @@
 <context>
     <name>CSetupFog</name>
     <message>
-        <location filename="../setup_fog_form.ui" line="23"/>
+        <location filename="../plugins/object_viewer/setup_fog_form.ui" line="23"/>
         <source>Setup fog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../setup_fog_form.ui" line="47"/>
+        <location filename="../plugins/object_viewer/setup_fog_form.ui" line="47"/>
         <source>Start:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../setup_fog_form.ui" line="84"/>
+        <location filename="../plugins/object_viewer/setup_fog_form.ui" line="84"/>
         <source>End:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../setup_fog_form.ui" line="125"/>
+        <location filename="../plugins/object_viewer/setup_fog_form.ui" line="125"/>
         <source>Enable fog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../setup_fog_form.ui" line="147"/>
+        <location filename="../plugins/object_viewer/setup_fog_form.ui" line="147"/>
         <source>Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../setup_fog_form.ui" line="184"/>
+        <location filename="../plugins/object_viewer/setup_fog_form.ui" line="184"/>
         <source>Apply</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2110,86 +2099,86 @@
 <context>
     <name>CSkeletonScaleDialog</name>
     <message>
-        <location filename="../skeleton_scale_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="14"/>
         <source>Skeleton scale edition</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_form.ui" line="37"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="37"/>
         <source>Bone scale</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_form.ui" line="49"/>
-        <location filename="../skeleton_scale_form.ui" line="274"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="49"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="274"/>
         <source>X:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_form.ui" line="62"/>
-        <location filename="../skeleton_scale_form.ui" line="103"/>
-        <location filename="../skeleton_scale_form.ui" line="132"/>
-        <location filename="../skeleton_scale_form.ui" line="170"/>
-        <location filename="../skeleton_scale_form.ui" line="202"/>
-        <location filename="../skeleton_scale_form.ui" line="240"/>
-        <location filename="../skeleton_scale_form.ui" line="287"/>
-        <location filename="../skeleton_scale_form.ui" line="328"/>
-        <location filename="../skeleton_scale_form.ui" line="356"/>
-        <location filename="../skeleton_scale_form.ui" line="385"/>
-        <location filename="../skeleton_scale_form.ui" line="427"/>
-        <location filename="../skeleton_scale_form.ui" line="465"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="62"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="103"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="132"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="170"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="202"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="240"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="287"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="328"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="356"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="385"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="427"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="465"/>
         <source>%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_form.ui" line="119"/>
-        <location filename="../skeleton_scale_form.ui" line="372"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="119"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="372"/>
         <source>Y:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_form.ui" line="186"/>
-        <location filename="../skeleton_scale_form.ui" line="411"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="186"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="411"/>
         <source>Z:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_form.ui" line="262"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="262"/>
         <source>Skin scale (slower)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_form.ui" line="501"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="501"/>
         <source>Mirror selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_form.ui" line="508"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="508"/>
         <source>Undo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_form.ui" line="515"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="515"/>
         <source>Redo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_form.ui" line="522"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="522"/>
         <source>Save .skel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_form.ui" line="529"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="529"/>
         <source>Save as</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_form.ui" line="536"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="536"/>
         <source>Load .scale</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_form.ui" line="543"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_form.ui" line="543"/>
         <source>Save .scale</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2197,92 +2186,92 @@
 <context>
     <name>CSlotGroupBox</name>
     <message>
-        <location filename="../slot_form.ui" line="20"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="20"/>
         <source>GroupBox</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="23"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="23"/>
         <source>Slot _:empty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="43"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="43"/>
         <source>Start blend</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="57"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="57"/>
         <source>End blend</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="71"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="71"/>
         <source>Offset frame</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="85"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="85"/>
         <source>Speed x</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="108"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="108"/>
         <source>Start frame</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="122"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="122"/>
         <source>End frame</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="136"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="136"/>
         <source>Smooth</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="154"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="154"/>
         <source>Wrap mode:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="161"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="161"/>
         <source>Clamp</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="171"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="171"/>
         <source>Repeat</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="178"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="178"/>
         <source>Disable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="195"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="195"/>
         <source>Set anim</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="208"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="208"/>
         <source>Set skel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="224"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="224"/>
         <source>Align blend</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="235"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="235"/>
         <source>Enable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_form.ui" line="245"/>
+        <location filename="../plugins/object_viewer/slot_form.ui" line="245"/>
         <source>Invert skeleton weight</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2290,57 +2279,57 @@
 <context>
     <name>CSoundPage</name>
     <message>
-        <location filename="../particle_sound_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/particle_sound_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_sound_form.ui" line="30"/>
+        <location filename="../plugins/object_viewer/particle_sound_form.ui" line="30"/>
         <source>General</source>
         <translation type="unfinished">Allgemein</translation>
     </message>
     <message>
-        <location filename="../particle_sound_form.ui" line="36"/>
+        <location filename="../plugins/object_viewer/particle_sound_form.ui" line="36"/>
         <source>Sound name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_sound_form.ui" line="49"/>
+        <location filename="../plugins/object_viewer/particle_sound_form.ui" line="49"/>
         <source>Browse</source>
         <translation type="unfinished">Durchsuchen</translation>
     </message>
     <message>
-        <location filename="../particle_sound_form.ui" line="69"/>
+        <location filename="../plugins/object_viewer/particle_sound_form.ui" line="69"/>
         <source>Play</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_sound_form.ui" line="81"/>
+        <location filename="../plugins/object_viewer/particle_sound_form.ui" line="81"/>
         <source>Spawn</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_sound_form.ui" line="88"/>
+        <location filename="../plugins/object_viewer/particle_sound_form.ui" line="88"/>
         <source>Mute</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_sound_form.ui" line="97"/>
+        <location filename="../plugins/object_viewer/particle_sound_form.ui" line="97"/>
         <source>Keep original pitch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_sound_form.ui" line="104"/>
+        <location filename="../plugins/object_viewer/particle_sound_form.ui" line="104"/>
         <source>Emission percent:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_sound_form.ui" line="128"/>
+        <location filename="../plugins/object_viewer/particle_sound_form.ui" line="128"/>
         <source>Sound volume</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_sound_form.ui" line="151"/>
+        <location filename="../plugins/object_viewer/particle_sound_form.ui" line="151"/>
         <source>Sound pitch</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2348,22 +2337,22 @@
 <context>
     <name>CSunColorDialog</name>
     <message>
-        <location filename="../sun_color_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/sun_color_form.ui" line="14"/>
         <source>Sun color</source>
         <translation>Sonnenfarbe</translation>
     </message>
     <message>
-        <location filename="../sun_color_form.ui" line="21"/>
+        <location filename="../plugins/object_viewer/sun_color_form.ui" line="21"/>
         <source>Diffuse:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../sun_color_form.ui" line="31"/>
+        <location filename="../plugins/object_viewer/sun_color_form.ui" line="31"/>
         <source>Ambient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../sun_color_form.ui" line="41"/>
+        <location filename="../plugins/object_viewer/sun_color_form.ui" line="41"/>
         <source>Specular:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2371,77 +2360,77 @@
 <context>
     <name>CTailParticleWidget</name>
     <message>
-        <location filename="../tail_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/tail_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tail_form.ui" line="26"/>
+        <location filename="../plugins/object_viewer/tail_form.ui" line="26"/>
         <source>Ribbon orientation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tail_form.ui" line="30"/>
+        <location filename="../plugins/object_viewer/tail_form.ui" line="30"/>
         <source>Follow Path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tail_form.ui" line="35"/>
+        <location filename="../plugins/object_viewer/tail_form.ui" line="35"/>
         <source>Follow Path XY</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tail_form.ui" line="40"/>
+        <location filename="../plugins/object_viewer/tail_form.ui" line="40"/>
         <source>Identity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tail_form.ui" line="64"/>
+        <location filename="../plugins/object_viewer/tail_form.ui" line="64"/>
         <source>Tail shape</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tail_form.ui" line="68"/>
+        <location filename="../plugins/object_viewer/tail_form.ui" line="68"/>
         <source>Triangle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tail_form.ui" line="73"/>
+        <location filename="../plugins/object_viewer/tail_form.ui" line="73"/>
         <source>Quad</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tail_form.ui" line="78"/>
+        <location filename="../plugins/object_viewer/tail_form.ui" line="78"/>
         <source>Octogon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tail_form.ui" line="83"/>
+        <location filename="../plugins/object_viewer/tail_form.ui" line="83"/>
         <source>Pentagram</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tail_form.ui" line="88"/>
+        <location filename="../plugins/object_viewer/tail_form.ui" line="88"/>
         <source>Simple segment X</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tail_form.ui" line="93"/>
+        <location filename="../plugins/object_viewer/tail_form.ui" line="93"/>
         <source>Simple segment Y</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tail_form.ui" line="98"/>
+        <location filename="../plugins/object_viewer/tail_form.ui" line="98"/>
         <source>Simple segment Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tail_form.ui" line="103"/>
+        <location filename="../plugins/object_viewer/tail_form.ui" line="103"/>
         <source>Simple brace</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tail_form.ui" line="111"/>
+        <location filename="../plugins/object_viewer/tail_form.ui" line="111"/>
         <source>Tail fading</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2449,17 +2438,17 @@
 <context>
     <name>CTuneMRMDialog</name>
     <message>
-        <location filename="../tune_mrm_form.ui" line="23"/>
+        <location filename="../plugins/object_viewer/tune_mrm_form.ui" line="23"/>
         <source>Tune MRM (The maximum faces in scene)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tune_mrm_form.ui" line="32"/>
+        <location filename="../plugins/object_viewer/tune_mrm_form.ui" line="32"/>
         <source>Max (specify the max value)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tune_mrm_form.ui" line="72"/>
+        <location filename="../plugins/object_viewer/tune_mrm_form.ui" line="72"/>
         <source>Current (real final max polygon value)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2467,12 +2456,12 @@
 <context>
     <name>CTuneTimerDialog</name>
     <message>
-        <location filename="../tune_timer_form.ui" line="23"/>
+        <location filename="../plugins/object_viewer/tune_timer_form.ui" line="23"/>
         <source>Time interval update render</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tune_timer_form.ui" line="55"/>
+        <location filename="../plugins/object_viewer/tune_timer_form.ui" line="55"/>
         <source> ms</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2480,37 +2469,37 @@
 <context>
     <name>CVegetNoiseValueWidget</name>
     <message>
-        <location filename="../vegetable_noise_value_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/vegetable_noise_value_form.ui" line="14"/>
         <source>GroupBox</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_noise_value_form.ui" line="29"/>
+        <location filename="../plugins/object_viewer/vegetable_noise_value_form.ui" line="29"/>
         <source>AbsValue:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_noise_value_form.ui" line="60"/>
+        <location filename="../plugins/object_viewer/vegetable_noise_value_form.ui" line="60"/>
         <source> *3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_noise_value_form.ui" line="86"/>
+        <location filename="../plugins/object_viewer/vegetable_noise_value_form.ui" line="86"/>
         <source>100%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_noise_value_form.ui" line="112"/>
+        <location filename="../plugins/object_viewer/vegetable_noise_value_form.ui" line="112"/>
         <source> /3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_noise_value_form.ui" line="131"/>
+        <location filename="../plugins/object_viewer/vegetable_noise_value_form.ui" line="131"/>
         <source>RandValue:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_noise_value_form.ui" line="148"/>
+        <location filename="../plugins/object_viewer/vegetable_noise_value_form.ui" line="148"/>
         <source>Frequency:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2518,37 +2507,37 @@
 <context>
     <name>CVegetableApperancePage</name>
     <message>
-        <location filename="../vegetable_apperance_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/vegetable_apperance_form.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_apperance_form.ui" line="42"/>
+        <location filename="../plugins/object_viewer/vegetable_apperance_form.ui" line="42"/>
         <source>Bend Phase</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_apperance_form.ui" line="68"/>
+        <location filename="../plugins/object_viewer/vegetable_apperance_form.ui" line="68"/>
         <source>Bend Factor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_apperance_form.ui" line="97"/>
+        <location filename="../plugins/object_viewer/vegetable_apperance_form.ui" line="97"/>
         <source>Color Noise</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_apperance_form.ui" line="104"/>
+        <location filename="../plugins/object_viewer/vegetable_apperance_form.ui" line="104"/>
         <source>Color setup</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_apperance_form.ui" line="116"/>
+        <location filename="../plugins/object_viewer/vegetable_apperance_form.ui" line="116"/>
         <source>Double cliclk to change color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_apperance_form.ui" line="140"/>
+        <location filename="../plugins/object_viewer/vegetable_apperance_form.ui" line="140"/>
         <source>Get List from other</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2556,77 +2545,77 @@
 <context>
     <name>CVegetableDensityPage</name>
     <message>
-        <location filename="../vegetable_density_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/vegetable_density_form.ui" line="14"/>
         <source>Form</source>
         <translation>Pflanzen Dichte Seite</translation>
     </message>
     <message>
-        <location filename="../vegetable_density_form.ui" line="20"/>
+        <location filename="../plugins/object_viewer/vegetable_density_form.ui" line="20"/>
         <source>Vegetable mesh selection</source>
         <translation>Pflanzen Mesh Auswahl</translation>
     </message>
     <message>
-        <location filename="../vegetable_density_form.ui" line="33"/>
+        <location filename="../plugins/object_viewer/vegetable_density_form.ui" line="33"/>
         <source>Browse</source>
         <translation>Durchsuchen</translation>
     </message>
     <message>
-        <location filename="../vegetable_density_form.ui" line="45"/>
+        <location filename="../plugins/object_viewer/vegetable_density_form.ui" line="45"/>
         <source>Distance of creation</source>
         <translation>Erstellungsdistanz</translation>
     </message>
     <message>
-        <location filename="../vegetable_density_form.ui" line="55"/>
+        <location filename="../plugins/object_viewer/vegetable_density_form.ui" line="55"/>
         <source>0 m</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_density_form.ui" line="70"/>
+        <location filename="../plugins/object_viewer/vegetable_density_form.ui" line="70"/>
         <source>Density</source>
         <translation>Dichte</translation>
     </message>
     <message>
-        <location filename="../vegetable_density_form.ui" line="77"/>
+        <location filename="../plugins/object_viewer/vegetable_density_form.ui" line="77"/>
         <source>MaxDensity</source>
         <translation>Maximale Dichte</translation>
     </message>
     <message>
-        <location filename="../vegetable_density_form.ui" line="83"/>
+        <location filename="../plugins/object_viewer/vegetable_density_form.ui" line="83"/>
         <source>MaxDensity enabled</source>
         <translation>maximale Dichte aktiviert</translation>
     </message>
     <message>
-        <location filename="../vegetable_density_form.ui" line="100"/>
+        <location filename="../plugins/object_viewer/vegetable_density_form.ui" line="100"/>
         <source>Angle setup</source>
         <translation>Winkel Konfiguration</translation>
     </message>
     <message>
-        <location filename="../vegetable_density_form.ui" line="106"/>
+        <location filename="../plugins/object_viewer/vegetable_density_form.ui" line="106"/>
         <source>Angle Mode:</source>
         <translation>Winkel Modus:</translation>
     </message>
     <message>
-        <location filename="../vegetable_density_form.ui" line="113"/>
+        <location filename="../plugins/object_viewer/vegetable_density_form.ui" line="113"/>
         <source>Floor</source>
         <translation>Boden</translation>
     </message>
     <message>
-        <location filename="../vegetable_density_form.ui" line="120"/>
+        <location filename="../plugins/object_viewer/vegetable_density_form.ui" line="120"/>
         <source>Wall</source>
         <translation>Wand</translation>
     </message>
     <message>
-        <location filename="../vegetable_density_form.ui" line="127"/>
+        <location filename="../plugins/object_viewer/vegetable_density_form.ui" line="127"/>
         <source>Ceiling</source>
         <translation>Decke</translation>
     </message>
     <message>
-        <location filename="../vegetable_density_form.ui" line="134"/>
+        <location filename="../plugins/object_viewer/vegetable_density_form.ui" line="134"/>
         <source>AngleMin</source>
         <translation>Min Winkel</translation>
     </message>
     <message>
-        <location filename="../vegetable_density_form.ui" line="170"/>
+        <location filename="../plugins/object_viewer/vegetable_density_form.ui" line="170"/>
         <source>AngleMax</source>
         <translation>Max Winkel</translation>
     </message>
@@ -2634,102 +2623,102 @@
 <context>
     <name>CVegetableDialog</name>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="18"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="18"/>
         <source>Vegetable editor</source>
         <translation>Pflanzen Editor</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="63"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="63"/>
         <source>Vegetables:</source>
         <translation>Pflanzen:</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="86"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="86"/>
         <source>List edition</source>
         <translation>Liste bearbeiten</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="98"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="98"/>
         <source>Add vegetable</source>
         <translation>Pflanze hinzufügen</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="112"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="112"/>
         <source>Insert vegetable</source>
         <translation>Pflanze einfügen</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="126"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="126"/>
         <source>Remove vegetable</source>
         <translation>Pflanze entfernen</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="140"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="140"/>
         <source>Clear all vegetables</source>
         <translation>Alle entfernen</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="157"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="157"/>
         <source>Copy Vegetable</source>
         <translation>Pflanze kopieren</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="164"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="164"/>
         <source>Load .vegetdesc</source>
         <translation>Lade .vegetdesc</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="171"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="171"/>
         <source>Save .vegetdesc</source>
         <translation>Speichere .vegetdesc</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="181"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="181"/>
         <source>List Save/Load</source>
         <translation>Liste speichern/laden</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="193"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="193"/>
         <source>Load .vegetset</source>
         <translation>Lade .vegetset</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="200"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="200"/>
         <source>Append .vegetset</source>
         <translation>Anfügen eines.vegetset</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="207"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="207"/>
         <source>Save .vegetset</source>
         <translation>Speichere.vegetset</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="220"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="220"/>
         <source>Display Vegetables</source>
         <translation>Pflanzen anzeigen</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="239"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="239"/>
         <source>Landscape</source>
         <translation>Landschaft</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="244"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="244"/>
         <source>General/Density</source>
         <translation>Allgemein/Dichte</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="249"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="249"/>
         <source>Appearance</source>
         <translation>Aussehen</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="254"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="254"/>
         <source>Scale</source>
         <translation>Größe</translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog_form.ui" line="259"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog_form.ui" line="259"/>
         <source>Rotation</source>
         <translation>Drehung</translation>
     </message>
@@ -2737,47 +2726,47 @@
 <context>
     <name>CVegetableLandscapePage</name>
     <message>
-        <location filename="../vegetable_landscape_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/vegetable_landscape_form.ui" line="14"/>
         <source>Form</source>
         <translation>Pflanzen Landschaft Seite</translation>
     </message>
     <message>
-        <location filename="../vegetable_landscape_form.ui" line="23"/>
+        <location filename="../plugins/object_viewer/vegetable_landscape_form.ui" line="23"/>
         <source>Setup Wind</source>
         <translation>Wind konfigurieren</translation>
     </message>
     <message>
-        <location filename="../vegetable_landscape_form.ui" line="34"/>
+        <location filename="../plugins/object_viewer/vegetable_landscape_form.ui" line="34"/>
         <source>Power:</source>
         <translation>Kraft:</translation>
     </message>
     <message>
-        <location filename="../vegetable_landscape_form.ui" line="84"/>
+        <location filename="../plugins/object_viewer/vegetable_landscape_form.ui" line="84"/>
         <source>Bend Start:</source>
         <translation>Start der Beugung:</translation>
     </message>
     <message>
-        <location filename="../vegetable_landscape_form.ui" line="137"/>
+        <location filename="../plugins/object_viewer/vegetable_landscape_form.ui" line="137"/>
         <source>Frequency</source>
         <translation>Frequenz</translation>
     </message>
     <message>
-        <location filename="../vegetable_landscape_form.ui" line="204"/>
+        <location filename="../plugins/object_viewer/vegetable_landscape_form.ui" line="204"/>
         <source>Ambient color</source>
         <translation>Ambient Farbe</translation>
     </message>
     <message>
-        <location filename="../vegetable_landscape_form.ui" line="214"/>
+        <location filename="../plugins/object_viewer/vegetable_landscape_form.ui" line="214"/>
         <source>Diffuse color</source>
         <translation>Diffuse Farbe</translation>
     </message>
     <message>
-        <location filename="../vegetable_landscape_form.ui" line="227"/>
+        <location filename="../plugins/object_viewer/vegetable_landscape_form.ui" line="227"/>
         <source>Show Vegetable Lands</source>
         <translation>Zeige Pflanzen</translation>
     </message>
     <message>
-        <location filename="../vegetable_landscape_form.ui" line="237"/>
+        <location filename="../plugins/object_viewer/vegetable_landscape_form.ui" line="237"/>
         <source>Snap Camera To Ground</source>
         <translation>Kamera bleibt am Boden</translation>
     </message>
@@ -2785,22 +2774,22 @@
 <context>
     <name>CVegetableRotatePage</name>
     <message>
-        <location filename="../vegetable_rotate_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/vegetable_rotate_form.ui" line="14"/>
         <source>Form</source>
         <translation>Pflanzen Drehungs Seite</translation>
     </message>
     <message>
-        <location filename="../vegetable_rotate_form.ui" line="20"/>
+        <location filename="../plugins/object_viewer/vegetable_rotate_form.ui" line="20"/>
         <source>Rotate X</source>
         <translation>Drehung X</translation>
     </message>
     <message>
-        <location filename="../vegetable_rotate_form.ui" line="27"/>
+        <location filename="../plugins/object_viewer/vegetable_rotate_form.ui" line="27"/>
         <source>Rotate Y</source>
         <translation>Drehung Y</translation>
     </message>
     <message>
-        <location filename="../vegetable_rotate_form.ui" line="34"/>
+        <location filename="../plugins/object_viewer/vegetable_rotate_form.ui" line="34"/>
         <source>Rotate Z</source>
         <translation>Drehung Z</translation>
     </message>
@@ -2808,22 +2797,22 @@
 <context>
     <name>CVegetableScalePage</name>
     <message>
-        <location filename="../vegetable_scale_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/vegetable_scale_form.ui" line="14"/>
         <source>Form</source>
         <translation>Pflanzen Größen seite</translation>
     </message>
     <message>
-        <location filename="../vegetable_scale_form.ui" line="20"/>
+        <location filename="../plugins/object_viewer/vegetable_scale_form.ui" line="20"/>
         <source>Scale X/Y</source>
         <translation>Größe X/Y</translation>
     </message>
     <message>
-        <location filename="../vegetable_scale_form.ui" line="27"/>
+        <location filename="../plugins/object_viewer/vegetable_scale_form.ui" line="27"/>
         <source>Scale Z</source>
         <translation>Größe Z</translation>
     </message>
     <message>
-        <location filename="../vegetable_scale_form.ui" line="34"/>
+        <location filename="../plugins/object_viewer/vegetable_scale_form.ui" line="34"/>
         <source>Bend Frequency Factor</source>
         <translation>Faktor Beugungsfrequenz</translation>
     </message>
@@ -2831,122 +2820,122 @@
 <context>
     <name>CWaterPoolDialog</name>
     <message>
-        <location filename="../water_pool_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="14"/>
         <source>Water pool editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="37"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="37"/>
         <source>Pool ID List:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="47"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="47"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="54"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="54"/>
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="61"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="61"/>
         <source>Name...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="74"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="74"/>
         <source>Size:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="95"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="95"/>
         <source>16</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="100"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="100"/>
         <source>32</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="105"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="105"/>
         <source>64</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="110"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="110"/>
         <source>128</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="115"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="115"/>
         <source>256</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="120"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="120"/>
         <source>512</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="130"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="130"/>
         <source>Water Unit Size:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="140"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="140"/>
         <source>Damping:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="150"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="150"/>
         <source>Filter weight:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="160"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="160"/>
         <source>Propagation time:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="170"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="170"/>
         <source>Enable automatic waves generation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="177"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="177"/>
         <source>Waves</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="183"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="183"/>
         <source>Impulsion strenght:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="193"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="193"/>
         <source>Period:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="203"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="203"/>
         <source>Impulsion radius:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="213"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="213"/>
         <source>Generate on border only</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="225"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="225"/>
         <source>Load</source>
         <translation type="unfinished">Laden</translation>
     </message>
     <message>
-        <location filename="../water_pool_form.ui" line="232"/>
+        <location filename="../plugins/object_viewer/water_pool_form.ui" line="232"/>
         <source>Save</source>
         <translation type="unfinished">Speichern</translation>
     </message>
@@ -2954,53 +2943,53 @@
 <context>
     <name>CWorkspacePage</name>
     <message>
-        <location filename="../workspace_form.ui" line="20"/>
-        <location filename="../workspace_form.ui" line="38"/>
+        <location filename="../plugins/object_viewer/workspace_form.ui" line="20"/>
+        <location filename="../plugins/object_viewer/workspace_form.ui" line="38"/>
         <source>Particle system editor</source>
         <translation>Partikelsystem Editor</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="48"/>
+        <location filename="../plugins/object_viewer/workspace_form.ui" line="48"/>
         <source>Workspace</source>
         <translation>Arbeitsbereich</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="72"/>
+        <location filename="../plugins/object_viewer/workspace_form.ui" line="72"/>
         <source>New</source>
         <translation>Neu</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="113"/>
+        <location filename="../plugins/object_viewer/workspace_form.ui" line="113"/>
         <source>Load</source>
         <translation>Laden</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="157"/>
+        <location filename="../plugins/object_viewer/workspace_form.ui" line="157"/>
         <source>Save</source>
         <translation>Speichern</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="204"/>
+        <location filename="../plugins/object_viewer/workspace_form.ui" line="204"/>
         <source>Save As</source>
         <translation>Speichern als ...</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="243"/>
+        <location filename="../plugins/object_viewer/workspace_form.ui" line="243"/>
         <source>Particle system</source>
         <translation>Partikelsystem</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="270"/>
+        <location filename="../plugins/object_viewer/workspace_form.ui" line="270"/>
         <source>Insert New</source>
         <translation>Neu einfügen</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="314"/>
+        <location filename="../plugins/object_viewer/workspace_form.ui" line="314"/>
         <source>Create New</source>
         <translation>Neu erstellen</translation>
     </message>
     <message>
-        <location filename="../workspace_form.ui" line="358"/>
+        <location filename="../plugins/object_viewer/workspace_form.ui" line="358"/>
         <source>Reset all</source>
         <translation>Alles zurücksetzen</translation>
     </message>
@@ -3008,32 +2997,32 @@
 <context>
     <name>CZonePage</name>
     <message>
-        <location filename="../particle_zone_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/particle_zone_form.ui" line="14"/>
         <source>Form</source>
         <translation>Partikel Zonen Editor</translation>
     </message>
     <message>
-        <location filename="../particle_zone_form.ui" line="26"/>
+        <location filename="../plugins/object_viewer/particle_zone_form.ui" line="26"/>
         <source>Targets:</source>
         <translation>Ziele:</translation>
     </message>
     <message>
-        <location filename="../particle_zone_form.ui" line="33"/>
+        <location filename="../plugins/object_viewer/particle_zone_form.ui" line="33"/>
         <source>Avaible targets:</source>
         <translation>Verfügbare Ziele:</translation>
     </message>
     <message>
-        <location filename="../particle_zone_form.ui" line="73"/>
+        <location filename="../plugins/object_viewer/particle_zone_form.ui" line="73"/>
         <source>Bounce</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_zone_form.ui" line="78"/>
+        <location filename="../plugins/object_viewer/particle_zone_form.ui" line="78"/>
         <source>Destroy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_zone_form.ui" line="99"/>
+        <location filename="../plugins/object_viewer/particle_zone_form.ui" line="99"/>
         <source>Bounce factor:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3180,63 +3169,63 @@
 <context>
     <name>CurveEditDialog</name>
     <message>
-        <location filename="../curve_form.ui" line="14"/>
+        <location filename="../plugins/object_viewer/curve_form.ui" line="14"/>
         <source>Curve edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../curve_form.ui" line="29"/>
+        <location filename="../plugins/object_viewer/curve_form.ui" line="29"/>
         <source>Left click to add points.
 Right click to remove points.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../curve_form.ui" line="42"/>
+        <location filename="../plugins/object_viewer/curve_form.ui" line="42"/>
         <source>Zoom:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../curve_form.ui" line="49"/>
+        <location filename="../plugins/object_viewer/curve_form.ui" line="49"/>
         <source>Scale curve</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../curve_form.ui" line="80"/>
+        <location filename="../plugins/object_viewer/curve_form.ui" line="80"/>
         <source>Translate:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../curve_form.ui" line="87"/>
+        <location filename="../plugins/object_viewer/curve_form.ui" line="87"/>
         <source>Position curve</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../curve_form.ui" line="114"/>
+        <location filename="../plugins/object_viewer/curve_form.ui" line="114"/>
         <source>Num samples:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../curve_form.ui" line="161"/>
+        <location filename="../plugins/object_viewer/curve_form.ui" line="161"/>
         <source>Last=First</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../curve_form.ui" line="174"/>
+        <location filename="../plugins/object_viewer/curve_form.ui" line="174"/>
         <source>First=Last</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../curve_form.ui" line="184"/>
+        <location filename="../plugins/object_viewer/curve_form.ui" line="184"/>
         <source>Display interpolation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../curve_form.ui" line="191"/>
+        <location filename="../plugins/object_viewer/curve_form.ui" line="191"/>
         <source>Smoothing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../curve_form.ui" line="216"/>
+        <location filename="../plugins/object_viewer/curve_form.ui" line="216"/>
         <source>Ok</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3265,48 +3254,20 @@ Right click to remove points.</source>
     </message>
 </context>
 <context>
-    <name>Form</name>
-    <message>
-        <location filename="../plugins/example/simple_viewer.cpp" line="235"/>
-        <source>AddInstance</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/example/simple_viewer.cpp" line="236"/>
-        <source>AddCharacter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/example/simple_viewer.cpp" line="237"/>
-        <source>Reset</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/example/simple_viewer.cpp" line="238"/>
-        <source>Play</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/example/simple_viewer.cpp" line="239"/>
-        <source>Stop</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>NLQT::CAnimationSetDialog</name>
     <message>
-        <location filename="../animation_set_dialog.cpp" line="153"/>
-        <location filename="../animation_set_dialog.cpp" line="179"/>
+        <location filename="../plugins/object_viewer/animation_set_dialog.cpp" line="153"/>
+        <location filename="../plugins/object_viewer/animation_set_dialog.cpp" line="179"/>
         <source>Open NeL anim file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_set_dialog.cpp" line="154"/>
+        <location filename="../plugins/object_viewer/animation_set_dialog.cpp" line="154"/>
         <source>NeL anim files (*.anim);;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../animation_set_dialog.cpp" line="180"/>
+        <location filename="../plugins/object_viewer/animation_set_dialog.cpp" line="180"/>
         <source>NeL Skeleton Weight Template files (*.swt);;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3314,27 +3275,27 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CAttribFloatWidget</name>
     <message>
-        <location filename="../attrib_widget.cpp" line="274"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="274"/>
         <source>value blender</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="275"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="275"/>
         <source>values gradient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="276"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="276"/>
         <source>curve</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="277"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="277"/>
         <source>value computed from emitter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="278"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="278"/>
         <source>binary operator</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3342,22 +3303,22 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CAttribIntWidget</name>
     <message>
-        <location filename="../attrib_widget.cpp" line="573"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="573"/>
         <source>value exact blender</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="574"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="574"/>
         <source>values gradient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="575"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="575"/>
         <source>value computed from emitter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="576"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="576"/>
         <source>binary operator</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3365,27 +3326,27 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CAttribPlaneBasisWidget</name>
     <message>
-        <location filename="../attrib_widget.cpp" line="840"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="840"/>
         <source>basis gradient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="841"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="841"/>
         <source>follow path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="842"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="842"/>
         <source>spinner</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="843"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="843"/>
         <source>values computed from emitter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="844"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="844"/>
         <source>binary operator</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3393,27 +3354,27 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CAttribRGBAWidget</name>
     <message>
-        <location filename="../attrib_widget.cpp" line="708"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="708"/>
         <source>color sampled blender</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="709"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="709"/>
         <source>color gradient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="710"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="710"/>
         <source>color exact blender</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="711"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="711"/>
         <source>values computed from emitter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="712"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="712"/>
         <source>binary operator</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3421,22 +3382,22 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CAttribUIntWidget</name>
     <message>
-        <location filename="../attrib_widget.cpp" line="436"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="436"/>
         <source>value blender</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="437"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="437"/>
         <source>values gradient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="438"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="438"/>
         <source>value computed from emitter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../attrib_widget.cpp" line="439"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="439"/>
         <source>binary operator</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3444,7 +3405,7 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CAttribWidget</name>
     <message>
-        <location filename="../attrib_widget.cpp" line="157"/>
+        <location filename="../plugins/object_viewer/attrib_widget.cpp" line="157"/>
         <source>Set user param</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3452,17 +3413,17 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CBinOpDialog</name>
     <message>
-        <location filename="../bin_op_dialog.cpp" line="41"/>
+        <location filename="../plugins/object_viewer/bin_op_dialog.cpp" line="41"/>
         <source>Bin operator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../bin_op_dialog.cpp" line="44"/>
+        <location filename="../plugins/object_viewer/bin_op_dialog.cpp" line="44"/>
         <source>Arg1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../bin_op_dialog.cpp" line="45"/>
+        <location filename="../plugins/object_viewer/bin_op_dialog.cpp" line="45"/>
         <source>Arg2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3470,107 +3431,107 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CCameraControl</name>
     <message>
-        <location filename="../camera_control.cpp" line="107"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="107"/>
         <source>CameraControl</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="109"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="109"/>
         <source>Fly</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="110"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="110"/>
         <source>Set firstPerson camera mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="113"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="113"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="114"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="114"/>
         <source>Set edit3d camera mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="125"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="125"/>
         <source>Render Mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="132"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="132"/>
         <source>Point mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="134"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="134"/>
         <source>Set point render mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="138"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="138"/>
         <source>Line mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="139"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="139"/>
         <source>Set line render mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="144"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="144"/>
         <source>Fill mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="146"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="146"/>
         <source>Set fill render mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="153"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="153"/>
         <source>Speed:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="162"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="162"/>
         <source>Create camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="164"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="164"/>
         <source>Create new camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="167"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="167"/>
         <source>Delete camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="169"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="169"/>
         <source>Delete current camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="174"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="174"/>
         <source>defaultCamera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="178"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="178"/>
         <source>Reset camera</source>
         <translation type="unfinished">Kamera zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="179"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="179"/>
         <source>Reset current camera</source>
         <translation type="unfinished">Aktuelle Kamera zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../camera_control.cpp" line="203"/>
+        <location filename="../plugins/object_viewer/camera_control.cpp" line="203"/>
         <source>%1_Camera</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3578,7 +3539,7 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CDirectionWidget</name>
     <message>
-        <location filename="../direction_widget.cpp" line="101"/>
+        <location filename="../plugins/object_viewer/direction_widget.cpp" line="101"/>
         <source>Enter Name</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3586,31 +3547,31 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CEmitterPage</name>
     <message>
-        <location filename="../emitter_page.cpp" line="196"/>
-        <location filename="../emitter_page.cpp" line="203"/>
-        <location filename="../emitter_page.cpp" line="219"/>
-        <location filename="../emitter_page.cpp" line="304"/>
+        <location filename="../plugins/object_viewer/emitter_page.cpp" line="196"/>
+        <location filename="../plugins/object_viewer/emitter_page.cpp" line="203"/>
+        <location filename="../plugins/object_viewer/emitter_page.cpp" line="219"/>
+        <location filename="../plugins/object_viewer/emitter_page.cpp" line="304"/>
         <source>NeL Particle Editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_page.cpp" line="197"/>
+        <location filename="../plugins/object_viewer/emitter_page.cpp" line="197"/>
         <source>Can&apos;t perform operation : the system is flagged with &apos;No max nb steps&apos; or uses the preset &apos;Spell FX&apos;,and thus, should have a finite duration. This operation create a loop in the system, and so is forbidden.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_page.cpp" line="204"/>
+        <location filename="../plugins/object_viewer/emitter_page.cpp" line="204"/>
         <source>Loops with emitters are forbidden.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_page.cpp" line="220"/>
-        <location filename="../emitter_page.cpp" line="305"/>
+        <location filename="../plugins/object_viewer/emitter_page.cpp" line="220"/>
+        <location filename="../plugins/object_viewer/emitter_page.cpp" line="305"/>
         <source>Can&apos;t perform operation : the system is flagged with &apos;No max nb steps&apos; or uses the preset &apos;Spell FX&apos;, and thus, should have a finite duration. Please remove that flag first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../emitter_page.cpp" line="337"/>
+        <location filename="../plugins/object_viewer/emitter_page.cpp" line="337"/>
         <source>no emission</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3618,32 +3579,32 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CFollowPathDialog</name>
     <message>
-        <location filename="../follow_path_dialog.cpp" line="55"/>
+        <location filename="../plugins/object_viewer/follow_path_dialog.cpp" line="55"/>
         <source>Follow path param</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../follow_path_dialog.cpp" line="56"/>
+        <location filename="../plugins/object_viewer/follow_path_dialog.cpp" line="56"/>
         <source>Projection plane:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../follow_path_dialog.cpp" line="59"/>
+        <location filename="../plugins/object_viewer/follow_path_dialog.cpp" line="59"/>
         <source>No projection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../follow_path_dialog.cpp" line="60"/>
+        <location filename="../plugins/object_viewer/follow_path_dialog.cpp" line="60"/>
         <source>XY plane</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../follow_path_dialog.cpp" line="61"/>
+        <location filename="../plugins/object_viewer/follow_path_dialog.cpp" line="61"/>
         <source>XZ plane</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../follow_path_dialog.cpp" line="62"/>
+        <location filename="../plugins/object_viewer/follow_path_dialog.cpp" line="62"/>
         <source>YZ plane</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3651,12 +3612,12 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CForcePage</name>
     <message>
-        <location filename="../particle_force_page.cpp" line="129"/>
+        <location filename="../plugins/object_viewer/particle_force_page.cpp" line="129"/>
         <source>NeL particle system editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_force_page.cpp" line="130"/>
+        <location filename="../plugins/object_viewer/particle_force_page.cpp" line="130"/>
         <source>The target object last forever. Applying a force on such an object may result in instability in the system after a while. Continue ? (clue : you&apos;ve been warned..)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3664,7 +3625,7 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CGradientDialog</name>
     <message>
-        <location filename="../value_gradient_dialog.cpp" line="126"/>
+        <location filename="../plugins/object_viewer/value_gradient_dialog.cpp" line="126"/>
         <source>Num samples:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3672,63 +3633,63 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CLocatedBindablePage</name>
     <message>
-        <location filename="../located_bindable_page.cpp" line="222"/>
+        <location filename="../plugins/object_viewer/located_bindable_page.cpp" line="222"/>
         <source>Material</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_page.cpp" line="230"/>
+        <location filename="../plugins/object_viewer/located_bindable_page.cpp" line="230"/>
         <source>Size/Angle 2D</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_page.cpp" line="253"/>
+        <location filename="../plugins/object_viewer/located_bindable_page.cpp" line="253"/>
         <source>Rotations</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_page.cpp" line="292"/>
+        <location filename="../plugins/object_viewer/located_bindable_page.cpp" line="292"/>
         <source>Look At param</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_page.cpp" line="318"/>
+        <location filename="../plugins/object_viewer/located_bindable_page.cpp" line="318"/>
         <source>Shock wave param</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_page.cpp" line="341"/>
+        <location filename="../plugins/object_viewer/located_bindable_page.cpp" line="341"/>
         <source>Fan Light param</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_page.cpp" line="362"/>
+        <location filename="../plugins/object_viewer/located_bindable_page.cpp" line="362"/>
         <source>Tail param</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_page.cpp" line="371"/>
+        <location filename="../plugins/object_viewer/located_bindable_page.cpp" line="371"/>
         <source>Mesh param</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_page.cpp" line="392"/>
-        <location filename="../located_bindable_page.cpp" line="406"/>
+        <location filename="../plugins/object_viewer/located_bindable_page.cpp" line="392"/>
+        <location filename="../plugins/object_viewer/located_bindable_page.cpp" line="406"/>
         <source>Texture param</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_page.cpp" line="649"/>
+        <location filename="../plugins/object_viewer/located_bindable_page.cpp" line="649"/>
         <source>Width</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_page.cpp" line="651"/>
+        <location filename="../plugins/object_viewer/located_bindable_page.cpp" line="651"/>
         <source>Height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_bindable_page.cpp" line="661"/>
+        <location filename="../plugins/object_viewer/located_bindable_page.cpp" line="661"/>
         <source>Size</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3736,28 +3697,28 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CLocatedPage</name>
     <message>
-        <location filename="../located_page.cpp" line="134"/>
-        <location filename="../located_page.cpp" line="151"/>
+        <location filename="../plugins/object_viewer/located_page.cpp" line="134"/>
+        <location filename="../plugins/object_viewer/located_page.cpp" line="151"/>
         <source>NeL particle system editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_page.cpp" line="135"/>
+        <location filename="../plugins/object_viewer/located_page.cpp" line="135"/>
         <source>The object has force(s) applied on it. If it last forever, its motion can become instable after a while. Continue anyway ? (clue : you&apos;ve been warned ..)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_page.cpp" line="152"/>
+        <location filename="../plugins/object_viewer/located_page.cpp" line="152"/>
         <source>Can&apos;t perform operation : the system is flagged with &apos;No max nb steps&apos; or uses the preset &apos;Spell FX&apos;, and thus, should have a finite duration. Please remove that flag first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_page.cpp" line="189"/>
+        <location filename="../plugins/object_viewer/located_page.cpp" line="189"/>
         <source>Set the extern ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../located_page.cpp" line="190"/>
+        <location filename="../plugins/object_viewer/located_page.cpp" line="190"/>
         <source>0 means no extern access.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3765,228 +3726,148 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CMainWindow</name>
     <message>
-        <location filename="../main_window.cpp" line="190"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="186"/>
         <source>Open NeL data file</source>
         <translation>Öffne NeL Daten Dateien</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="191"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="187"/>
         <source>All NeL files (*.shape *.ps *.ig);;NeL shape files (*.shape);;NeL particle system files (*.ps)NeL Instance Group files (*.ig)</source>
         <translation>Alle NeL Dateien (*.shape *.ps *.ig);;NeL shape (*.shape);;NeL Partikelsystem(*.ps)NeL Instanz Gruppen (*.ig)</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="203"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="199"/>
         <source>Open skeleton file</source>
         <translation>Öffne Skelett Datei</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="204"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="200"/>
         <source>NeL skeleton file (*.skel)</source>
         <translation>NeL Skelet (*.skel)</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="244"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="240"/>
         <source>About Object Viewer Qt</source>
         <translation>Über Object Viewer Qt</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="245"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="241"/>
         <source>&lt;h2&gt;Object Viewer Qt  8-)&lt;/h2&gt;&lt;p&gt; Authors: dnk-88, sfb, Kaetemi, kervala &lt;p&gt;Compiled on %1 %2</source>
         <translation>&lt;h2&gt;Object Viewer Qt  8-)&lt;/h2&gt;&lt;p&gt; Autoren: dnk-88, sfb, Kaetemi, kervala &lt;p&gt;Kompiliert am %1 %2</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="263"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="259"/>
         <source>&amp;Open...</source>
         <translation>&amp;Öffnen...</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="266"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="262"/>
         <source>Open an existing file</source>
         <translation>Datei öffnen</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="269"/>
-        <source>E&amp;xit</source>
-        <translation>B&amp;eenden</translation>
-    </message>
-    <message>
-        <location filename="../main_window.cpp" line="270"/>
-        <source>Ctrl+Q</source>
-        <translation>Ctrl+Q</translation>
-    </message>
-    <message>
-        <location filename="../main_window.cpp" line="271"/>
-        <source>Exit the application</source>
-        <translation>Object Viewer verlassen</translation>
-    </message>
-    <message>
-        <location filename="../main_window.cpp" line="275"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="266"/>
         <source>Set &amp;background color</source>
         <translation>Hintergrundfar&amp;be setzen</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="277"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="268"/>
         <source>Set background color</source>
         <translation>Hintergrundfarbe setzen</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="279"/>
-        <source>Reset camera</source>
-        <translation>Kamera zurücksetzen</translation>
-    </message>
-    <message>
-        <location filename="../main_window.cpp" line="280"/>
-        <source>Ctrl+R</source>
-        <translation>Ctrl+R</translation>
-    </message>
-    <message>
-        <location filename="../main_window.cpp" line="281"/>
-        <source>Reset current camera</source>
-        <translation>Aktuelle Kamera zurücksetzen</translation>
-    </message>
-    <message>
-        <location filename="../main_window.cpp" line="285"/>
-        <source>Ctrl+M</source>
-        <translation>Ctrl+M</translation>
-    </message>
-    <message>
-        <location filename="../main_window.cpp" line="286"/>
-        <source>Change render mode (Line, Point, Filled)</source>
-        <translation>Render Modus ändern (Linie, Punkt, Gefüllt)</translation>
-    </message>
-    <message>
-        <location filename="../main_window.cpp" line="288"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="270"/>
         <source>&amp;Reset scene</source>
         <translation>Szene zu&amp;rücksetzen</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="289"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="271"/>
         <source>Reset current scene</source>
         <translation>Aktuelle Szene zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="292"/>
-        <location filename="../main_window.cpp" line="293"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="274"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="275"/>
         <source>Reload textures</source>
         <translation>Texturen neu laden</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="297"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="279"/>
         <source>Save &amp;Screenshot</source>
         <translation>Screenshot &amp;Speichern</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="298"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="280"/>
         <source>Make a screenshot of the current viewport and save</source>
         <translation>Speichert ein Screenshot der aktuellen Szene</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="300"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="282"/>
         <source>&amp;Settings</source>
         <translation>Ein&amp;stellungen</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="302"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="284"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="305"/>
-        <source>&amp;About</source>
-        <translation>&amp;Über</translation>
-    </message>
-    <message>
-        <location filename="../main_window.cpp" line="306"/>
-        <source>Show the application&apos;s About box</source>
-        <translation>Zeigt Informationen über den Object Viewer</translation>
-    </message>
-    <message>
-        <location filename="../main_window.cpp" line="309"/>
-        <source>About &amp;Qt</source>
-        <translation>Über &amp;Qt</translation>
-    </message>
-    <message>
-        <location filename="../main_window.cpp" line="310"/>
-        <source>Show the Qt library&apos;s About box</source>
-        <translation>Zeigt Informationen über Qt</translation>
-    </message>
-    <message>
-        <location filename="../main_window.cpp" line="316"/>
-        <location filename="../main_window.cpp" line="400"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="290"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="357"/>
         <source>&amp;File</source>
         <translation>&amp;Datei</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="322"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="294"/>
         <source>&amp;View</source>
         <translation>&amp;Ansicht</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="329"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="299"/>
         <source>&amp;Scene</source>
         <translation>&amp;Szene</translation>
     </message>
     <message>
-        <location filename="../main_window.cpp" line="335"/>
-        <location filename="../main_window.cpp" line="405"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="305"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="362"/>
         <source>&amp;Tools</source>
         <translation>&amp;Werkzeuge</translation>
-    </message>
-    <message>
-        <location filename="../main_window.cpp" line="386"/>
-        <source>&amp;Help</source>
-        <translation>&amp;Hilfe</translation>
-    </message>
-    <message>
-        <location filename="../main_window.cpp" line="427"/>
-        <source>StatusReady</source>
-        <translation>Status Fertig</translation>
-    </message>
-    <message>
-        <location filename="../main_window.cpp" line="526"/>
-        <source>Loading canceled</source>
-        <translation>Laden abgebrochen</translation>
-    </message>
-    <message>
-        <location filename="../main_window.cpp" line="529"/>
-        <source>File loaded</source>
-        <translation>Datei geladen</translation>
     </message>
 </context>
 <context>
     <name>NLQT::CMeshWidget</name>
     <message>
-        <location filename="../mesh_widget.cpp" line="83"/>
+        <location filename="../plugins/object_viewer/mesh_widget.cpp" line="83"/>
         <source>Open NeL data file</source>
         <translation type="unfinished">Öffne NeL Daten Dateien</translation>
     </message>
     <message>
-        <location filename="../mesh_widget.cpp" line="84"/>
+        <location filename="../plugins/object_viewer/mesh_widget.cpp" line="84"/>
         <source>NeL shape file (*.shape)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mesh_widget.cpp" line="99"/>
+        <location filename="../plugins/object_viewer/mesh_widget.cpp" line="99"/>
         <source>Shape loading error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mesh_widget.cpp" line="181"/>
+        <location filename="../plugins/object_viewer/mesh_widget.cpp" line="181"/>
         <source>Error in morph meshes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mesh_widget.cpp" line="190"/>
+        <location filename="../plugins/object_viewer/mesh_widget.cpp" line="190"/>
         <source>Not a mesh</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mesh_widget.cpp" line="192"/>
+        <location filename="../plugins/object_viewer/mesh_widget.cpp" line="192"/>
         <source>Shape not loaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mesh_widget.cpp" line="194"/>
+        <location filename="../plugins/object_viewer/mesh_widget.cpp" line="194"/>
         <source>Too much vertices</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3994,26 +3875,26 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CMorphMeshDialog</name>
     <message>
-        <location filename="../morph_mesh_dialog.cpp" line="88"/>
+        <location filename="../plugins/object_viewer/morph_mesh_dialog.cpp" line="88"/>
         <source>vertices</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../morph_mesh_dialog.cpp" line="89"/>
+        <location filename="../plugins/object_viewer/morph_mesh_dialog.cpp" line="89"/>
         <source> (%1 vertices)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../morph_mesh_dialog.cpp" line="103"/>
-        <location filename="../morph_mesh_dialog.cpp" line="145"/>
-        <location filename="../morph_mesh_dialog.cpp" line="168"/>
+        <location filename="../plugins/object_viewer/morph_mesh_dialog.cpp" line="103"/>
+        <location filename="../plugins/object_viewer/morph_mesh_dialog.cpp" line="145"/>
+        <location filename="../plugins/object_viewer/morph_mesh_dialog.cpp" line="168"/>
         <source>Open NeL data file</source>
         <translation type="unfinished">Öffne NeL Daten Dateien</translation>
     </message>
     <message>
-        <location filename="../morph_mesh_dialog.cpp" line="104"/>
-        <location filename="../morph_mesh_dialog.cpp" line="146"/>
-        <location filename="../morph_mesh_dialog.cpp" line="169"/>
+        <location filename="../plugins/object_viewer/morph_mesh_dialog.cpp" line="104"/>
+        <location filename="../plugins/object_viewer/morph_mesh_dialog.cpp" line="146"/>
+        <location filename="../plugins/object_viewer/morph_mesh_dialog.cpp" line="169"/>
         <source>NeL shape files (*.shape)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4021,60 +3902,45 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CParticleControlDialog</name>
     <message>
-        <location filename="../particle_control_dialog.cpp" line="112"/>
+        <location filename="../plugins/object_viewer/particle_control_dialog.cpp" line="112"/>
         <source>Num particles:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_dialog.cpp" line="113"/>
+        <location filename="../plugins/object_viewer/particle_control_dialog.cpp" line="113"/>
         <source>Num wanted faces:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_control_dialog.cpp" line="114"/>
+        <location filename="../plugins/object_viewer/particle_control_dialog.cpp" line="114"/>
         <source>System time:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../particle_control_dialog.cpp" line="163"/>
-        <source>Num particles: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../particle_control_dialog.cpp" line="168"/>
-        <source>Num wanted faces: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../particle_control_dialog.cpp" line="171"/>
-        <source>System time: %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>NLQT::CParticleSystemPage</name>
     <message>
-        <location filename="../particle_system_page.cpp" line="272"/>
+        <location filename="../plugins/object_viewer/particle_system_page.cpp" line="272"/>
         <source>Are you sure?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_page.cpp" line="273"/>
+        <location filename="../plugins/object_viewer/particle_system_page.cpp" line="273"/>
         <source>Load balancing on/off</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_page.cpp" line="458"/>
+        <location filename="../plugins/object_viewer/particle_system_page.cpp" line="458"/>
         <source>Can&apos;t perform operation : the system is flagged with &apos;No max nb steps&apos; or uses the preset &apos;Spell FX&apos;, and thus, should have a finite duration. Please remove that flag first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_page.cpp" line="464"/>
+        <location filename="../plugins/object_viewer/particle_system_page.cpp" line="464"/>
         <source>The system must have a finite duration for this setting! Please check that the following object doesn&apos;t live forever or doesn&apos;t create a loop in the system :</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_system_page.cpp" line="537"/>
+        <location filename="../plugins/object_viewer/particle_system_page.cpp" line="537"/>
         <source>The system must have a finite duration for this setting! Please check that.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4082,47 +3948,47 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CParticleTextureWidget</name>
     <message>
-        <location filename="../particle_texture_widget.cpp" line="72"/>
+        <location filename="../plugins/object_viewer/particle_texture_widget.cpp" line="72"/>
         <source>Open texture file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_widget.cpp" line="73"/>
+        <location filename="../plugins/object_viewer/particle_texture_widget.cpp" line="73"/>
         <source>Image file (*.tga *.png)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_widget.cpp" line="91"/>
+        <location filename="../plugins/object_viewer/particle_texture_widget.cpp" line="91"/>
         <source>Texture loading error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_widget.cpp" line="112"/>
+        <location filename="../plugins/object_viewer/particle_texture_widget.cpp" line="112"/>
         <source>Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_widget.cpp" line="113"/>
+        <location filename="../plugins/object_viewer/particle_texture_widget.cpp" line="113"/>
         <source>Size:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_widget.cpp" line="114"/>
+        <location filename="../plugins/object_viewer/particle_texture_widget.cpp" line="114"/>
         <source>Depth:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_widget.cpp" line="123"/>
+        <location filename="../plugins/object_viewer/particle_texture_widget.cpp" line="123"/>
         <source>Name: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_widget.cpp" line="127"/>
+        <location filename="../plugins/object_viewer/particle_texture_widget.cpp" line="127"/>
         <source>Size: %1x%2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_texture_widget.cpp" line="128"/>
+        <location filename="../plugins/object_viewer/particle_texture_widget.cpp" line="128"/>
         <source>Depth: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4130,167 +3996,167 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CParticleWorkspaceDialog</name>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="143"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="143"/>
         <source>Set as active particle system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="144"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="144"/>
         <source>Save</source>
         <translation type="unfinished">Speichern</translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="145"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="145"/>
         <source>Save as</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="146"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="146"/>
         <source>Clear content</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="147"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="147"/>
         <source>Remove from workspace</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="148"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="148"/>
         <source>Merge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="150"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="150"/>
         <source>New located</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="152"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="152"/>
         <source>Paste located</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="160"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="160"/>
         <source>Force ZBias</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="162"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="162"/>
         <source>Instanciate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="164"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="164"/>
         <source>Copy located</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="165"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="165"/>
         <source>Copy bindable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="166"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="166"/>
         <source>Paste bindable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="167"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="167"/>
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="169"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="169"/>
         <source>All LOD</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="171"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="171"/>
         <source>LOD 1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="173"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="173"/>
         <source>LOD 2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="175"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="175"/>
         <source>extern ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="330"/>
-        <location filename="../particle_workspace_dialog.cpp" line="351"/>
-        <location filename="../particle_workspace_dialog.cpp" line="402"/>
-        <location filename="../particle_workspace_dialog.cpp" line="530"/>
-        <location filename="../particle_workspace_dialog.cpp" line="603"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="330"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="351"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="402"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="530"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="603"/>
         <source>NeL particle system editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="331"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="331"/>
         <source> uses auto count feature, and it has been modified. You should run the system entirely at least once at full detail before saving so that the editor can compute the number of particles in the system. If user params are used to modify system aspect, you should run the system for extreme cases before saving. </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="340"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="340"/>
         <source>Save as ps file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="342"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="342"/>
         <source>ps files (*.ps)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="352"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="352"/>
         <source>Clear content ?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="403"/>
-        <location filename="../particle_workspace_dialog.cpp" line="604"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="403"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="604"/>
         <source>Can&apos;t perform operation : the system is flagged with &apos;No max nb steps&apos; or uses the preset &apos;Spell FX&apos;, and thus, should have a finite duration. Please remove that flag first.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="531"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="531"/>
         <source>The system is flagged with &apos;No max Nb steps&apos;,  or uses the preset &apos;Spell FX&apos;.System must have finite duration. Can&apos;t add object. To solve this,  set a limited life time for the father.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="568"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="568"/>
         <source>All object force ZBias</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="704"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="704"/>
         <source>Set the extern ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="705"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="705"/>
         <source>0 means no extern access.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="734"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="734"/>
         <source>Bind particle...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="740"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="740"/>
         <source>Bind force...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="745"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="745"/>
         <source>Bind zone...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_dialog.cpp" line="751"/>
+        <location filename="../plugins/object_viewer/particle_workspace_dialog.cpp" line="751"/>
         <source>Bind emitter...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4298,7 +4164,7 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CPropertyDialog</name>
     <message>
-        <location filename="../particle_property_dialog.cpp" line="88"/>
+        <location filename="../plugins/object_viewer/particle_property_dialog.cpp" line="88"/>
         <source>Property editor</source>
         <translation>Eigenschaften</translation>
     </message>
@@ -4306,52 +4172,52 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CSettingsDialog</name>
     <message>
-        <location filename="../settings_dialog.cpp" line="126"/>
+        <location filename="../plugins/object_viewer/settings_dialog.cpp" line="126"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../settings_dialog.cpp" line="127"/>
+        <location filename="../plugins/object_viewer/settings_dialog.cpp" line="127"/>
         <source>Graphics and sound settings take after restart the program</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_dialog.cpp" line="145"/>
+        <location filename="../plugins/object_viewer/settings_dialog.cpp" line="145"/>
         <source>Set new tile bank</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_dialog.cpp" line="147"/>
+        <location filename="../plugins/object_viewer/settings_dialog.cpp" line="147"/>
         <source>Tile Bank file (*.smallbank *.bank);;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_dialog.cpp" line="156"/>
+        <location filename="../plugins/object_viewer/settings_dialog.cpp" line="156"/>
         <source>Set new tile far bank</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_dialog.cpp" line="158"/>
+        <location filename="../plugins/object_viewer/settings_dialog.cpp" line="158"/>
         <source>Tile Far Bank file (*.farbank);;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_dialog.cpp" line="167"/>
+        <location filename="../plugins/object_viewer/settings_dialog.cpp" line="167"/>
         <source>Set MicroVegetable texture</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_dialog.cpp" line="169"/>
+        <location filename="../plugins/object_viewer/settings_dialog.cpp" line="169"/>
         <source>Texture file (*.tga *.png *.jpg *.dds);;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_dialog.cpp" line="179"/>
+        <location filename="../plugins/object_viewer/settings_dialog.cpp" line="179"/>
         <source>Add zone files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings_dialog.cpp" line="180"/>
+        <location filename="../plugins/object_viewer/settings_dialog.cpp" line="180"/>
         <source>Zonel files (*.zonel *.zone);;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4359,62 +4225,62 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CSkeletonScaleDialog</name>
     <message>
-        <location filename="../skeleton_scale_dialog.cpp" line="276"/>
-        <location filename="../skeleton_scale_dialog.cpp" line="307"/>
-        <location filename="../skeleton_scale_dialog.cpp" line="330"/>
-        <location filename="../skeleton_scale_dialog.cpp" line="351"/>
-        <location filename="../skeleton_scale_dialog.cpp" line="589"/>
-        <location filename="../skeleton_scale_dialog.cpp" line="635"/>
-        <location filename="../skeleton_scale_dialog.cpp" line="680"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="276"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="307"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="330"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="351"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="589"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="635"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="680"/>
         <source>Skeleton scale editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_dialog.cpp" line="276"/>
-        <location filename="../skeleton_scale_dialog.cpp" line="307"/>
-        <location filename="../skeleton_scale_dialog.cpp" line="351"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="276"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="307"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="351"/>
         <source>Failed to open file for write!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_dialog.cpp" line="286"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="286"/>
         <source>Save As Skeleton File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_dialog.cpp" line="288"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="288"/>
         <source>Skeleton files (*.skel);;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_dialog.cpp" line="320"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="320"/>
         <source>Open Skeleton Scale File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_dialog.cpp" line="321"/>
-        <location filename="../skeleton_scale_dialog.cpp" line="344"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="321"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="344"/>
         <source>SkelScale files (*.scale);;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_dialog.cpp" line="330"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="330"/>
         <source>Failed to open file for read!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_dialog.cpp" line="342"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="342"/>
         <source>Save As Skeleton Scale File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_dialog.cpp" line="589"/>
-        <location filename="../skeleton_scale_dialog.cpp" line="635"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="589"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="635"/>
         <source>Failed to save file!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../skeleton_scale_dialog.cpp" line="680"/>
+        <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="680"/>
         <source>Failed to load file!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4422,35 +4288,35 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CSlotGroupBox</name>
     <message>
-        <location filename="../slot_manager_dialog.cpp" line="107"/>
-        <location filename="../slot_manager_dialog.cpp" line="183"/>
-        <location filename="../slot_manager_dialog.cpp" line="211"/>
+        <location filename="../plugins/object_viewer/slot_manager_dialog.cpp" line="107"/>
+        <location filename="../plugins/object_viewer/slot_manager_dialog.cpp" line="183"/>
+        <location filename="../plugins/object_viewer/slot_manager_dialog.cpp" line="211"/>
         <source>Slot %1 : </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_manager_dialog.cpp" line="173"/>
-        <location filename="../slot_manager_dialog.cpp" line="201"/>
+        <location filename="../plugins/object_viewer/slot_manager_dialog.cpp" line="173"/>
+        <location filename="../plugins/object_viewer/slot_manager_dialog.cpp" line="201"/>
         <source>empty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_manager_dialog.cpp" line="178"/>
+        <location filename="../plugins/object_viewer/slot_manager_dialog.cpp" line="178"/>
         <source>Select your anim</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_manager_dialog.cpp" line="179"/>
+        <location filename="../plugins/object_viewer/slot_manager_dialog.cpp" line="179"/>
         <source>Animation:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_manager_dialog.cpp" line="206"/>
+        <location filename="../plugins/object_viewer/slot_manager_dialog.cpp" line="206"/>
         <source>Select your skel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_manager_dialog.cpp" line="207"/>
+        <location filename="../plugins/object_viewer/slot_manager_dialog.cpp" line="207"/>
         <source>Skeleton weight template:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4458,17 +4324,17 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CSlotManagerDialog</name>
     <message>
-        <location filename="../slot_manager_dialog.cpp" line="252"/>
+        <location filename="../plugins/object_viewer/slot_manager_dialog.cpp" line="252"/>
         <source>Slot %1 : empty : empty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_manager_dialog.cpp" line="260"/>
+        <location filename="../plugins/object_viewer/slot_manager_dialog.cpp" line="260"/>
         <source>Slot %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../slot_manager_dialog.cpp" line="272"/>
+        <location filename="../plugins/object_viewer/slot_manager_dialog.cpp" line="272"/>
         <source>Slot manager</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4476,12 +4342,12 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CSoundPage</name>
     <message>
-        <location filename="../particle_sound_page.cpp" line="114"/>
+        <location filename="../plugins/object_viewer/particle_sound_page.cpp" line="114"/>
         <source>Select your sound</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_sound_page.cpp" line="115"/>
+        <location filename="../plugins/object_viewer/particle_sound_page.cpp" line="115"/>
         <source>Sound:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4489,12 +4355,12 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CSpinnerDialog</name>
     <message>
-        <location filename="../spinner_dialog.cpp" line="50"/>
+        <location filename="../plugins/object_viewer/spinner_dialog.cpp" line="50"/>
         <source>Edit spinner</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../spinner_dialog.cpp" line="52"/>
+        <location filename="../plugins/object_viewer/spinner_dialog.cpp" line="52"/>
         <source>Nb samples:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4502,17 +4368,17 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CValueBlenderDialog</name>
     <message>
-        <location filename="../value_blender_dialog.cpp" line="59"/>
+        <location filename="../plugins/object_viewer/value_blender_dialog.cpp" line="59"/>
         <source>Value blender</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../value_blender_dialog.cpp" line="60"/>
+        <location filename="../plugins/object_viewer/value_blender_dialog.cpp" line="60"/>
         <source>Start value:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../value_blender_dialog.cpp" line="61"/>
+        <location filename="../plugins/object_viewer/value_blender_dialog.cpp" line="61"/>
         <source>End value:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4520,7 +4386,7 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CValueFromEmitterDialog</name>
     <message>
-        <location filename="../value_from_emitter_dialog.cpp" line="33"/>
+        <location filename="../plugins/object_viewer/value_from_emitter_dialog.cpp" line="33"/>
         <source>Value from emitter</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4528,12 +4394,12 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CVegetableApperancePage</name>
     <message>
-        <location filename="../vegetable_appearance_page.cpp" line="205"/>
+        <location filename="../plugins/object_viewer/vegetable_appearance_page.cpp" line="205"/>
         <source>Select on other vegetables</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_appearance_page.cpp" line="206"/>
+        <location filename="../plugins/object_viewer/vegetable_appearance_page.cpp" line="206"/>
         <source>Select the other vegetable to copy color.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4541,12 +4407,12 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CVegetableDensityPage</name>
     <message>
-        <location filename="../vegetable_density_page.cpp" line="142"/>
+        <location filename="../plugins/object_viewer/vegetable_density_page.cpp" line="142"/>
         <source>Open Vegetable Shape</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_density_page.cpp" line="144"/>
+        <location filename="../plugins/object_viewer/vegetable_density_page.cpp" line="144"/>
         <source>veget files (*.veget);;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4554,48 +4420,48 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CVegetableDialog</name>
     <message>
-        <location filename="../vegetable_dialog.cpp" line="64"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog.cpp" line="64"/>
         <source>Load a new vegetset file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog.cpp" line="66"/>
-        <location filename="../vegetable_dialog.cpp" line="92"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog.cpp" line="66"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog.cpp" line="92"/>
         <source>vegetset files (*.vegetset);;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog.cpp" line="90"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog.cpp" line="90"/>
         <source>Append vegetset file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog.cpp" line="119"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog.cpp" line="119"/>
         <source>Save Vegetable Set</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog.cpp" line="121"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog.cpp" line="121"/>
         <source>VegetSetFiles (*.vegetset);;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog.cpp" line="222"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog.cpp" line="222"/>
         <source>Open Vegetable Descriptor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog.cpp" line="224"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog.cpp" line="224"/>
         <source>vegetdesc files (*.vegetdesc);;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog.cpp" line="267"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog.cpp" line="267"/>
         <source>Save Vegetable Descriptor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../vegetable_dialog.cpp" line="269"/>
+        <location filename="../plugins/object_viewer/vegetable_dialog.cpp" line="269"/>
         <source>VegetDescFiles (*.vegetdesc);;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4603,56 +4469,56 @@ Right click to remove points.</source>
 <context>
     <name>NLQT::CWorkspacePage</name>
     <message>
-        <location filename="../particle_workspace_page.cpp" line="60"/>
+        <location filename="../plugins/object_viewer/particle_workspace_page.cpp" line="60"/>
         <source>Create new pws file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_page.cpp" line="62"/>
-        <location filename="../particle_workspace_page.cpp" line="107"/>
+        <location filename="../plugins/object_viewer/particle_workspace_page.cpp" line="62"/>
+        <location filename="../plugins/object_viewer/particle_workspace_page.cpp" line="107"/>
         <source>pws files (*.pws)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_page.cpp" line="79"/>
-        <location filename="../particle_workspace_page.cpp" line="120"/>
+        <location filename="../plugins/object_viewer/particle_workspace_page.cpp" line="79"/>
+        <location filename="../plugins/object_viewer/particle_workspace_page.cpp" line="120"/>
         <source>Open NeL data file</source>
         <translation type="unfinished">Öffne NeL Daten Dateien</translation>
     </message>
     <message>
-        <location filename="../particle_workspace_page.cpp" line="80"/>
+        <location filename="../plugins/object_viewer/particle_workspace_page.cpp" line="80"/>
         <source>Particle Workspace file (*.pws);;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_page.cpp" line="105"/>
+        <location filename="../plugins/object_viewer/particle_workspace_page.cpp" line="105"/>
         <source>Save as pws file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_page.cpp" line="121"/>
+        <location filename="../plugins/object_viewer/particle_workspace_page.cpp" line="121"/>
         <source>Particle System file (*.ps);;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_page.cpp" line="135"/>
-        <location filename="../particle_workspace_page.cpp" line="161"/>
-        <location filename="../particle_workspace_page.cpp" line="177"/>
+        <location filename="../plugins/object_viewer/particle_workspace_page.cpp" line="135"/>
+        <location filename="../plugins/object_viewer/particle_workspace_page.cpp" line="161"/>
+        <location filename="../plugins/object_viewer/particle_workspace_page.cpp" line="177"/>
         <source>NeL particle system editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_page.cpp" line="152"/>
+        <location filename="../plugins/object_viewer/particle_workspace_page.cpp" line="152"/>
         <source>Create new particle system file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_page.cpp" line="154"/>
+        <location filename="../plugins/object_viewer/particle_workspace_page.cpp" line="154"/>
         <source>ps files (*.ps)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../particle_workspace_page.cpp" line="162"/>
+        <location filename="../plugins/object_viewer/particle_workspace_page.cpp" line="162"/>
         <source>Failed to create new particle system</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4660,12 +4526,12 @@ Right click to remove points.</source>
 <context>
     <name>Plugin::CCoreListener</name>
     <message>
-        <location filename="../plugins/example/simple_viewer.cpp" line="244"/>
+        <location filename="../plugins/example/simple_viewer.cpp" line="44"/>
         <source>Example close event hook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/example/simple_viewer.cpp" line="245"/>
+        <location filename="../plugins/example/simple_viewer.cpp" line="45"/>
         <source>Do you want to close window?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4702,35 +4568,6 @@ Right click to remove points.</source>
         <location filename="../plugins/log/log_settings_page.cpp" line="57"/>
         <source>General</source>
         <translation type="unfinished">Allgemein</translation>
-    </message>
-</context>
-<context>
-    <name>Plugin::CSimpleViewer</name>
-    <message>
-        <location filename="../plugins/example/simple_viewer.cpp" line="57"/>
-        <location filename="../plugins/example/simple_viewer.cpp" line="76"/>
-        <source>Open NeL data file</source>
-        <translation type="unfinished">Öffne NeL Daten Dateien</translation>
-    </message>
-    <message>
-        <location filename="../plugins/example/simple_viewer.cpp" line="58"/>
-        <source>All NeL files (*.shape *.ps);;NeL shape files (*.shape);;NeL particle system files (*.ps)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/example/simple_viewer.cpp" line="77"/>
-        <source>All NeL files (*.shape *.ps);;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/example/simple_viewer.cpp" line="86"/>
-        <source>Open skeleton file</source>
-        <translation type="unfinished">Öffne Skelett Datei</translation>
-    </message>
-    <message>
-        <location filename="../plugins/example/simple_viewer.cpp" line="87"/>
-        <source>NeL skeleton file (*.skel)</source>
-        <translation type="unfinished">NeL Skelet (*.skel)</translation>
     </message>
 </context>
 <context>
@@ -4804,7 +4641,7 @@ Right click to remove points.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="157"/>
+        <location filename="../plugins/ovqt_sheet_builder/sheetbuilderconfgdialog.cpp" line="156"/>
         <source>Choose output file</source>
         <translation type="unfinished"></translation>
     </message>

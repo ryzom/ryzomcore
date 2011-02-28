@@ -69,15 +69,10 @@ public:
 protected:
 	NLMISC::CLibraryContext *_LibContext;
 
-private Q_SLOTS:
-	void execSettings();
-
 private:
 	ExtensionSystem::IPluginManager *_plugMan;
-	ExtensionSystem::CPluginView *_pluginView;
 	MainWindow *_mainWindow;
 	QList<QObject *> _autoReleaseObjects;
-	bool _oldOVQT;
 };
 
 } // namespace Core

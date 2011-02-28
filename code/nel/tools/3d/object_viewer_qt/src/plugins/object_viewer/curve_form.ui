@@ -136,7 +136,7 @@ Right click to remove points.</string>
       <string/>
      </property>
      <property name="icon">
-      <iconset resource="object_viewer_qt.qrc">
+      <iconset resource="object_viewer.qrc">
        <normaloff>:/images/refresh.png</normaloff>:/images/refresh.png</iconset>
      </property>
      <property name="autoRaise">
@@ -230,7 +230,7 @@ Right click to remove points.</string>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="object_viewer_qt.qrc"/>
+  <include location="object_viewer.qrc"/>
  </resources>
  <connections>
   <connection>

@@ -17,7 +17,7 @@
    <string>Settings</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="object_viewer_qt.qrc">
+   <iconset resource="object_viewer.qrc">
     <normaloff>:/images/preferences.png</normaloff>:/images/preferences.png</iconset>
   </property>
   <property name="modal">
@@ -50,11 +50,6 @@
      </item>
      <item>
       <property name="text">
-       <string>Paths</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
        <string>Vegetable</string>
       </property>
      </item>
@@ -75,7 +70,7 @@
       <enum>QFrame::Plain</enum>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="graphicsPage">
       <layout class="QGridLayout" name="gridLayout_10">
@@ -373,95 +368,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="pathsPage">
-      <layout class="QGridLayout" name="gridLayout_7">
-       <item row="0" column="0">
-        <widget class="QGroupBox" name="searchPathsGroupBox">
-         <property name="title">
-          <string>Search paths</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_6">
-          <item row="0" column="0" rowspan="2">
-           <widget class="QListWidget" name="pathsListWidget"/>
-          </item>
-          <item row="0" column="1">
-           <layout class="QVBoxLayout" name="verticalLayout_2">
-            <item>
-             <widget class="QToolButton" name="addToolButton">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-              <property name="icon">
-               <iconset resource="object_viewer_qt.qrc">
-                <normaloff>:/images/list-add.png</normaloff>:/images/list-add.png</iconset>
-              </property>
-              <property name="iconSize">
-               <size>
-                <width>16</width>
-                <height>16</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="removeToolButton">
-              <property name="text">
-               <string>...</string>
-              </property>
-              <property name="icon">
-               <iconset resource="object_viewer_qt.qrc">
-                <normaloff>:/images/list-remove.png</normaloff>:/images/list-remove.png</iconset>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="upToolButton">
-              <property name="text">
-               <string>...</string>
-              </property>
-              <property name="icon">
-               <iconset resource="object_viewer_qt.qrc">
-                <normaloff>:/images/go-up.png</normaloff>:/images/go-up.png</iconset>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="downToolButton">
-              <property name="text">
-               <string>...</string>
-              </property>
-              <property name="icon">
-               <iconset resource="object_viewer_qt.qrc">
-                <normaloff>:/images/go-down.png</normaloff>:/images/go-down.png</iconset>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="1" column="1">
-           <spacer name="verticalSpacer_4">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>195</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
-     </widget>
      <widget class="QWidget" name="page">
       <layout class="QGridLayout" name="gridLayout_8">
        <item row="0" column="1">
@@ -582,7 +488,7 @@
                <string>...</string>
               </property>
               <property name="icon">
-               <iconset resource="object_viewer_qt.qrc">
+               <iconset resource="object_viewer.qrc">
                 <normaloff>:/images/list-add.png</normaloff>:/images/list-add.png</iconset>
               </property>
               <property name="iconSize">
@@ -599,7 +505,7 @@
                <string>...</string>
               </property>
               <property name="icon">
-               <iconset resource="object_viewer_qt.qrc">
+               <iconset resource="object_viewer.qrc">
                 <normaloff>:/images/list-remove.png</normaloff>:/images/list-remove.png</iconset>
               </property>
              </widget>
@@ -653,15 +559,10 @@
   <tabstop>forceSoftwareCheckBox</tabstop>
   <tabstop>useADPCMCheckBox</tabstop>
   <tabstop>maxTrackSpinBox</tabstop>
-  <tabstop>pathsListWidget</tabstop>
-  <tabstop>addToolButton</tabstop>
-  <tabstop>removeToolButton</tabstop>
-  <tabstop>upToolButton</tabstop>
-  <tabstop>downToolButton</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources>
-  <include location="object_viewer_qt.qrc"/>
+  <include location="object_viewer.qrc"/>
  </resources>
  <connections>
   <connection>

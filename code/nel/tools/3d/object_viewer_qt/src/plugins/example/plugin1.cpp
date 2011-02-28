@@ -44,21 +44,16 @@ bool MyPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStrin
 void MyPlugin::extensionsInitialized()
 {
 	Core::ICore *core = Core::ICore::instance();
-	if (core == 0)
-		nlinfo("This not ovqt ng");
-	else
-	{
-		Core::IMenuManager *menuManager = core->menuManager();
-		//menuManager = _plugMan->getObject<Core::IMenuManager>();
-		QAction *exampleAction1 = new QAction("Example1", this);
-		QAction *exampleAction2 = new QAction("Example2", this);
-		QAction *aboutQtAction = menuManager->action(Core::Constants::ABOUT_QT);
-		QMenu *helpMenu = menuManager->menu(Core::Constants::M_HELP);
-		helpMenu->insertAction(aboutQtAction, exampleAction1);
-		helpMenu->addSeparator();
-		helpMenu->addAction(exampleAction2);
-		menuManager->menuBar()->addMenu("ExampleMenu");
-	}
+	Core::IMenuManager *menuManager = core->menuManager();
+	//menuManager = _plugMan->getObject<Core::IMenuManager>();
+	QAction *exampleAction1 = new QAction("Example1", this);
+	QAction *exampleAction2 = new QAction("Example2", this);
+	QAction *aboutQtAction = menuManager->action(Core::Constants::ABOUT_QT);
+	QMenu *helpMenu = menuManager->menu(Core::Constants::M_HELP);
+	helpMenu->insertAction(aboutQtAction, exampleAction1);
+	helpMenu->addSeparator();
+	helpMenu->addAction(exampleAction2);
+	menuManager->menuBar()->addMenu("ExampleMenu");
 }
 
 void MyPlugin::setNelContext(NLMISC::INelContext *nelContext)

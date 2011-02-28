@@ -59,6 +59,7 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 
 	m_tabWidget = new QTabWidget(this);
 	m_tabWidget->setTabPosition(QTabWidget::South);
+	m_tabWidget->setMovable(true);
 	setCentralWidget(m_tabWidget);
 
 	setDockNestingEnabled(true);

@@ -46,10 +46,6 @@ public:
 	~CSettingsDialog();
 
 private Q_SLOTS:
-	void addPath();
-	void removePath();
-	void upPath();
-	void downPath();
 	void applyPressed();
 
 	void setTileBank();
@@ -65,15 +61,12 @@ private Q_SLOTS:
 private:
 	void cfcbGraphicsDrivers(NLMISC::CConfigFile::CVar &var);
 	void cfcbSoundDrivers(NLMISC::CConfigFile::CVar &var);
-	void cfcbSearchPaths(NLMISC::CConfigFile::CVar &var);
 
 	void loadGraphicsSettings();
 	void loadSoundSettings();
-	void loadPathsSettings();
 	void loadVegetableSettings();
 	void saveGraphicsSettings();
 	void saveSoundSettings();
-	void savePathsSettings();
 	void saveVegetableSettings();
 
 	Ui::CSettingsDialog ui;

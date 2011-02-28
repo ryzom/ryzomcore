@@ -66,8 +66,6 @@ public:
 	CMainWindow(QWidget *parent = 0);
 	~CMainWindow();
 
-	virtual void setVisible(bool visible);
-
 	int getFrameRate();
 	CSkeletonTreeModel *getSkeletonModel() const
 	{
@@ -83,16 +81,17 @@ private Q_SLOTS:
 	void resetScene();
 	void reloadTextures();
 	void settings();
-	void about();
 	void updateStatusBar();
 	void updateRender();
 	void setInterval(int value);
+
+protected:
+	virtual void showEvent(QShowEvent *showEvent);
 
 private:
 	void createActions();
 	void createMenus();
 	void createToolBars();
-	void createStatusBar();
 	void createDialogs();
 
 	bool loadFile(const QString &fileName, const QString &skelName);
@@ -129,28 +128,17 @@ private:
 	QTimer *_mainTimer;
 	QTimer *_statusBarTimer;
 
-	QMenu *_fileMenu;
-	QMenu *_viewMenu;
-	QMenu *_sceneMenu;
-	QMenu *_toolsMenu;
-	QMenu *_helpMenu;
 	QToolBar *_fileToolBar;
-	QToolBar *_editToolBar;
+	QToolBar *_viewToolBar;
 	QToolBar *_toolsBar;
 	QAction *_openAction;
-	QAction *_exitAction;
 	QAction *_setBackColorAction;
-	QAction *_renderModeAction;
 	QAction *_frameDelayAction;
 	QAction *_lightGroupAction;
 	QAction *_reloadTexturesAction;
-	QAction *_resetCameraAction;
 	QAction *_resetSceneAction;
 	QAction *_saveScreenshotAction;
 	QAction *_settingsAction;
-	QAction *_aboutAction;
-	QAction *_aboutQtAction;
-
 	QLabel *_statusInfo;
 
 	float _fps;

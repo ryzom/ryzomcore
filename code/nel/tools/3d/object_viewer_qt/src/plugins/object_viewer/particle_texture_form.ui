@@ -26,7 +26,7 @@
       <number>3</number>
      </property>
      <item>
-      <widget class="QGroupBox" name="groupBox_2">
+      <widget class="QFrame" name="frame_2">
        <property name="minimumSize">
         <size>
          <width>100</width>
@@ -39,8 +39,11 @@
          <height>100</height>
         </size>
        </property>
-       <property name="title">
-        <string/>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Sunken</enum>
        </property>
        <layout class="QGridLayout" name="gridLayout">
         <property name="margin">

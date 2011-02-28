@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1053</width>
-    <height>85</height>
+    <width>914</width>
+    <height>92</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,14 +18,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>896</width>
-    <height>85</height>
+    <width>0</width>
+    <height>0</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>524287</width>
-    <height>85</height>
+    <width>16777215</width>
+    <height>120</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -72,7 +72,7 @@
        <string/>
       </property>
       <property name="icon">
-       <iconset resource="object_viewer_qt.qrc">
+       <iconset resource="object_viewer.qrc">
         <normaloff>:/images/play.png</normaloff>
         <normalon>:/images/pause.png</normalon>:/images/play.png</iconset>
       </property>
@@ -92,11 +92,17 @@
     </item>
     <item row="0" column="3" rowspan="2">
      <widget class="QFrame" name="frame">
-      <layout class="QGridLayout" name="gridLayout_6">
-       <property name="margin">
+      <layout class="QGridLayout" name="gridLayout_3">
+       <property name="topMargin">
         <number>0</number>
        </property>
-       <property name="spacing">
+       <property name="rightMargin">
+        <number>6</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <property name="verticalSpacing">
         <number>3</number>
        </property>
        <item row="0" column="0" rowspan="3">
@@ -344,22 +350,6 @@
          </layout>
         </widget>
        </item>
-       <item row="0" column="3">
-        <widget class="QLabel" name="systemTimesLabel">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>System time:99999999999</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="1">
         <widget class="QLabel" name="numParticlesLabel">
          <property name="sizePolicy">
@@ -369,11 +359,30 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Num particles:9999999</string>
+          <string>Num particles:</string>
          </property>
         </widget>
        </item>
        <item row="0" column="2">
+        <widget class="QSpinBox" name="numParticlesSpinBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
+         </property>
+         <property name="maximum">
+          <number>999999999</number>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
         <widget class="QLabel" name="numWantedFacesLabel">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
@@ -382,14 +391,68 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Num wanted faces:9999999</string>
+          <string>Num wanted faces:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
-       <item row="1" column="1" colspan="3">
+       <item row="0" column="4">
+        <widget class="QSpinBox" name="numWantedFacesSpinBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
+         </property>
+         <property name="maximum">
+          <number>999999999</number>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="5">
+        <widget class="QLabel" name="systemTimesLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>System time:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="6">
+        <widget class="QDoubleSpinBox" name="timeDoubleSpinBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
+         </property>
+         <property name="maximum">
+          <double>9999999.990000000223517</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" colspan="6">
         <widget class="QSlider" name="horizontalSlider">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
@@ -433,7 +496,7 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="2">
+       <item row="2" column="3" colspan="2">
         <spacer name="horizontalSpacer">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -446,7 +509,7 @@
          </property>
         </spacer>
        </item>
-       <item row="2" column="3">
+       <item row="2" column="5">
         <widget class="QLabel" name="label_2">
          <property name="text">
           <string notr="true">100</string>
@@ -477,7 +540,7 @@
        <string/>
       </property>
       <property name="icon">
-       <iconset resource="object_viewer_qt.qrc">
+       <iconset resource="object_viewer.qrc">
         <normaloff>:/images/stop.png</normaloff>:/images/stop.png</iconset>
       </property>
       <property name="iconSize">
@@ -495,7 +558,7 @@
   </widget>
  </widget>
  <resources>
-  <include location="object_viewer_qt.qrc"/>
+  <include location="object_viewer.qrc"/>
  </resources>
  <connections/>
 </ui>

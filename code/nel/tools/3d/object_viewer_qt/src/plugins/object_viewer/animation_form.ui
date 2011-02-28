@@ -192,7 +192,7 @@
        <string/>
       </property>
       <property name="icon">
-       <iconset resource="object_viewer_qt.qrc">
+       <iconset resource="object_viewer.qrc">
         <normaloff>:/images/animset.png</normaloff>:/images/animset.png</iconset>
       </property>
       <property name="iconSize">
@@ -236,7 +236,7 @@
        <string/>
       </property>
       <property name="icon">
-       <iconset resource="object_viewer_qt.qrc">
+       <iconset resource="object_viewer.qrc">
         <normaloff>:/images/mixer.png</normaloff>:/images/mixer.png</iconset>
       </property>
       <property name="iconSize">
@@ -274,7 +274,7 @@
        <string/>
       </property>
       <property name="icon">
-       <iconset resource="object_viewer_qt.qrc">
+       <iconset resource="object_viewer.qrc">
         <normaloff>:/images/skip-backward.png</normaloff>:/images/skip-backward.png</iconset>
       </property>
       <property name="iconSize">
@@ -306,7 +306,7 @@
        <string/>
       </property>
       <property name="icon">
-       <iconset resource="object_viewer_qt.qrc">
+       <iconset resource="object_viewer.qrc">
         <normaloff>:/images/seek-backward.png</normaloff>:/images/seek-backward.png</iconset>
       </property>
       <property name="iconSize">
@@ -344,7 +344,7 @@
        <string/>
       </property>
       <property name="icon">
-       <iconset resource="object_viewer_qt.qrc">
+       <iconset resource="object_viewer.qrc">
         <normaloff>:/images/play.png</normaloff>
         <normalon>:/images/pause.png</normalon>:/images/play.png</iconset>
       </property>
@@ -383,7 +383,7 @@
        <string/>
       </property>
       <property name="icon">
-       <iconset resource="object_viewer_qt.qrc">
+       <iconset resource="object_viewer.qrc">
         <normaloff>:/images/stop.png</normaloff>:/images/stop.png</iconset>
       </property>
       <property name="iconSize">
@@ -418,7 +418,7 @@
        <string/>
       </property>
       <property name="icon">
-       <iconset resource="object_viewer_qt.qrc">
+       <iconset resource="object_viewer.qrc">
         <normaloff>:/images/seek-forward.png</normaloff>:/images/seek-forward.png</iconset>
       </property>
       <property name="iconSize">
@@ -450,7 +450,7 @@
        <string/>
       </property>
       <property name="icon">
-       <iconset resource="object_viewer_qt.qrc">
+       <iconset resource="object_viewer.qrc">
         <normaloff>:/images/skip-forward.png</normaloff>:/images/skip-forward.png</iconset>
       </property>
       <property name="iconSize">
@@ -482,7 +482,7 @@
   </widget>
  </widget>
  <resources>
-  <include location="object_viewer_qt.qrc"/>
+  <include location="object_viewer.qrc"/>
  </resources>
  <connections>
   <connection>

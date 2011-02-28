@@ -15,9 +15,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdpch.h"
+// Project includes
+#include "extension_system/iplugin_spec.h"
+#include "extension_system/plugin_manager.h"
+
+// NeL includes
 #include <nel/misc/types_nl.h>
 #include <nel/misc/app_context.h>
+#include <nel/misc/debug.h>
+#include <nel/misc/common.h>
+#include <nel/misc/file.h>
+#include <nel/misc/dynloadlib.h>
+#include <nel/misc/path.h>
+#include <nel/misc/command.h>
 
 // Qt includes
 #include <QtCore/QDir>
@@ -28,19 +38,6 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QApplication>
 #include <QtGui/QSplashScreen>
-
-// NeL includes
-#include <nel/misc/debug.h>
-#include <nel/misc/common.h>
-#include <nel/misc/file.h>
-#include <nel/misc/dynloadlib.h>
-#include <nel/misc/path.h>
-#include <nel/misc/command.h>
-
-// Project includes
-#include "modules.h"
-#include "extension_system/iplugin_spec.h"
-#include "extension_system/plugin_manager.h"
 
 static const char *appNameC = "ObjectViewerQt";
 
@@ -57,17 +54,12 @@ static const char *appNameC = "ObjectViewerQt";
 #	define NLQT_USE_LOG 1
 #endif
 
-using namespace std;
-using namespace NLMISC;
-
 namespace NLQT
 {
 
 namespace
 {
-
-CFileDisplayer *s_FileDisplayer = NULL;
-
+NLMISC::CFileDisplayer *s_FileDisplayer = NULL;
 } /* anonymous namespace */
 
 } /* namespace NLQT */
@@ -106,28 +98,26 @@ static inline QString msgCoreLoadFailure(const QString &why)
 	return QCoreApplication::translate("Application", "Failed to load Core plugin: %1").arg(why);
 }
 
-#define OVQT_OLD true
-
 sint main(int argc, char **argv)
 {
 	// go nel!
 	new NLMISC::CApplicationContext;
 	{
 		// use log.log if NEL_LOG_IN_FILE and NLQT_USE_LOG_LOG defined as 1
-		createDebug(NULL, NLQT_USE_LOG_LOG, false);
+		NLMISC::createDebug(NULL, NLQT_USE_LOG_LOG, false);
 #if NLQT_USE_LOG
 		// create NLQT_LOG_FILE
 		// filedisplayer only deletes the 001 etc
-		if (NLQT_ERASE_LOG && CFile::isExists(NLQT_LOG_FILE))
-			CFile::deleteFile(NLQT_LOG_FILE);
+		if (NLQT_ERASE_LOG && NLMISC::CFile::isExists(NLQT_LOG_FILE))
+			NLMISC::CFile::deleteFile(NLQT_LOG_FILE);
 		// initialize the log file
-		NLQT::s_FileDisplayer = new CFileDisplayer();
+		NLQT::s_FileDisplayer = new NLMISC::CFileDisplayer();
 		NLQT::s_FileDisplayer->setParam(NLQT_LOG_FILE, NLQT_ERASE_LOG);
-		DebugLog->addDisplayer(NLQT::s_FileDisplayer);
-		InfoLog->addDisplayer(NLQT::s_FileDisplayer);
-		WarningLog->addDisplayer(NLQT::s_FileDisplayer);
-		AssertLog->addDisplayer(NLQT::s_FileDisplayer);
-		ErrorLog->addDisplayer(NLQT::s_FileDisplayer);
+		NLMISC::DebugLog->addDisplayer(NLQT::s_FileDisplayer);
+		NLMISC::InfoLog->addDisplayer(NLQT::s_FileDisplayer);
+		NLMISC::WarningLog->addDisplayer(NLQT::s_FileDisplayer);
+		NLMISC::AssertLog->addDisplayer(NLQT::s_FileDisplayer);
+		NLMISC::ErrorLog->addDisplayer(NLQT::s_FileDisplayer);
 #endif
 
 		nlinfo("Welcome to NeL Object Viewer Qt!");
@@ -145,7 +135,7 @@ sint main(int argc, char **argv)
 	QTranslator qtTranslator;
 	QString locale = settings->value("Language", QLocale::system().name()).toString();
 	QString qtTrPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
-	translator.load("object_viewer_qt_" + locale, ":/translations");
+	translator.load("object_viewer_qt_" + locale, ":/");
 	qtTranslator.load("qt_" + locale, qtTrPath);
 	app.installTranslator(&translator);
 	app.installTranslator(&qtTranslator);
@@ -155,41 +145,6 @@ sint main(int argc, char **argv)
 	CLibrary::addLibPath((qApp->applicationDirPath() + QString("/../PlugIns/nel")).toStdString());
 #endif
 
-#if defined(OVQT_OLD)
-	Modules::init();
-
-	Modules::plugMan().setSettings(settings);
-
-	// load and set remap extensions from config
-	Modules::config().configRemapExtensions();
-	// load and set search paths from config
-	Modules::config().configSearchPaths();
-
-	Modules::mainWin().showMaximized();
-	Modules::plugMan().addObject(&Modules::mainWin());
-
-#if !defined(NL_OS_MAC)
-	Modules::plugMan().setPluginPaths(QStringList() << QString("./plugins"));
-#else
-	Modules::plugMan().setPluginPaths(QStringList() <<
-									  qApp->applicationDirPath() + QString("/../PlugIns/ovqt"));
-#endif
-
-	Modules::plugMan().loadPlugins();
-
-	QStringList errors;
-	Q_FOREACH (ExtensionSystem::IPluginSpec *spec, Modules::plugMan().plugins())
-	if (spec->hasError())
-		errors.append(spec->fileName() + " : " + spec->errorString());
-
-	if (!errors.isEmpty())
-		QMessageBox::warning(0, QCoreApplication::translate("Application", "Object Viewer Qt - Plugin loader messages"),
-							 errors.join(QString::fromLatin1("\n\n")));
-
-	splash->finish(&Modules::mainWin());
-	int result = app.exec();
-	Modules::release();
-#else
 	ExtensionSystem::CPluginManager pluginManager;
 	pluginManager.setSettings(settings);
 	QStringList pluginPaths;
@@ -239,7 +194,5 @@ sint main(int argc, char **argv)
 							 errors.join(QString::fromLatin1("\n\n")));
 
 	int result = app.exec();
-#endif
-
 	return result;
 }
