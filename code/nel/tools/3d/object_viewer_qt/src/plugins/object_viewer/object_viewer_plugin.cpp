@@ -65,9 +65,11 @@ QString ObjectViewerPlugin::description() const
 	return "Object Viewer plugin.";
 }
 
-QList<QString> ObjectViewerPlugin::dependencies() const
+QStringList ObjectViewerPlugin::dependencies() const
 {
-	return QList<QString>();
+	QStringList list;
+	list.append(Core::Constants::OVQT_CORE_PLUGIN);
+	return list;
 }
 
 void ObjectViewerPlugin::addAutoReleasedObject(QObject *obj)

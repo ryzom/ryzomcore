@@ -26,6 +26,7 @@ namespace Constants
 const char * const OVQT_VERSION_LONG	= "0.0.1";
 const char * const OVQT_VENDOR		= "Dzmitry Kamiahin";
 const char * const OVQT_YEAR		= "2010, 2011";
+const char * const OVQT_CORE_PLUGIN	= "Core";
 
 //mainwindow
 const char * const MAIN_WINDOW		= "ObjectViewerQt.MainWindow";

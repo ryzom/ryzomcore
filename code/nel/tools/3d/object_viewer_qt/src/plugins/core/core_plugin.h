@@ -57,7 +57,7 @@ public:
 	QString version() const;
 	QString vendor() const;
 	QString description() const;
-	QList<QString> dependencies() const;
+	QStringList dependencies() const;
 
 	void addAutoReleasedObject(QObject *obj);
 

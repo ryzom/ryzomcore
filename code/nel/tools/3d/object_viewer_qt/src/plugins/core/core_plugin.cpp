@@ -58,12 +58,13 @@ bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 	_plugMan = pluginManager;
 
 	_mainWindow = new MainWindow(pluginManager);
-/*	if (QtWin::isCompositionEnabled())
-	{
-		QtWin::extendFrameIntoClientArea(_mainWindow);
-		_mainWindow->setContentsMargins(0, 0, 0, 0);
-	}
-*/	bool success = _mainWindow->initialize(errorString);
+	/*	if (QtWin::isCompositionEnabled())
+		{
+			QtWin::extendFrameIntoClientArea(_mainWindow);
+			_mainWindow->setContentsMargins(0, 0, 0, 0);
+		}
+	*/
+	bool success = _mainWindow->initialize(errorString);
 	CSearchPathsSettingsPage *serchPathPage = new CSearchPathsSettingsPage(this);
 	serchPathPage->applySearchPaths();
 	addAutoReleasedObject(serchPathPage);
@@ -91,7 +92,7 @@ void CorePlugin::setNelContext(NLMISC::INelContext *nelContext)
 
 QString CorePlugin::name() const
 {
-	return QLatin1String("Core");
+	return QLatin1String(Constants::OVQT_CORE_PLUGIN);
 }
 
 QString CorePlugin::version() const
@@ -109,9 +110,9 @@ QString CorePlugin::description() const
 	return "Core plugin.";
 }
 
-QList<QString> CorePlugin::dependencies() const
+QStringList CorePlugin::dependencies() const
 {
-	return QList<QString>();
+	return QStringList();
 }
 
 void CorePlugin::addAutoReleasedObject(QObject *obj)

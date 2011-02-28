@@ -86,9 +86,12 @@ QString MyPlugin::description() const
 	return "Example ovqt plugin.";
 }
 
-QList<QString> MyPlugin::dependencies() const
+QStringList MyPlugin::dependencies() const
 {
-	return QList<QString>();
+	QStringList list;
+	list.append(Core::Constants::OVQT_CORE_PLUGIN);
+	list.append("ObjectViewer");
+	return list;
 }
 
 void MyPlugin::addAutoReleasedObject(QObject *obj)

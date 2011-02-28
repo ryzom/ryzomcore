@@ -46,7 +46,7 @@ CSettingsDialog::CSettingsDialog(QWidget *parent)
 
 	loadGraphicsSettings();
 	loadSoundSettings();
-loadVegetableSettings();
+	loadVegetableSettings();
 
 	connect(ui.buttonBox, SIGNAL(accepted()), this, SLOT(applyPressed()));
 
