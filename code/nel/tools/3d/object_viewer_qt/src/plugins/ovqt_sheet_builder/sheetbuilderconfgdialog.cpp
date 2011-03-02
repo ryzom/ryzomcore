@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "sheetbuilderconfgdialog.h"
+#include "../core/icore.h"
 
 #include <QListWidget>
 #include <QPushButton>
@@ -25,187 +26,196 @@
 #include <QCloseEvent>
 #include <QFileDialog>
 
-SheetBuilderConfigDialog::SheetBuilderConfigDialog(QWidget *parent) :
-        QDialog(parent)
+SheetBuilderConfigDialog::SheetBuilderConfigDialog(QWidget *parent)
+	: QDialog(parent)
 {
-    /*
-     * Paths
-     */
-    QLabel *lblPaths = new QLabel(tr("Paths:"));
-    lstPaths = new QListWidget;
-    lstPaths->addItem("");
+	/*
+	 * Paths
+	 */
+	QLabel *lblPaths = new QLabel(tr("Paths:"));
+	lstPaths = new QListWidget;
+	lstPaths->addItem("");
 
-    QPushButton *btnAddPath = new QPushButton(tr("Add"));
-    connect(btnAddPath, SIGNAL(clicked()), SLOT(addPath()));
-    QPushButton *btnDeletePath = new QPushButton(tr("Delete"));
-    connect(btnDeletePath, SIGNAL(clicked()), SLOT(deletePath()));
+	QPushButton *btnAddPath = new QPushButton(tr("Add"));
+	connect(btnAddPath, SIGNAL(clicked()), SLOT(addPath()));
+	QPushButton *btnDeletePath = new QPushButton(tr("Delete"));
+	connect(btnDeletePath, SIGNAL(clicked()), SLOT(deletePath()));
 
-    QVBoxLayout *ltButtonsPaths = new QVBoxLayout();
-    ltButtonsPaths->addWidget(btnAddPath);
-    ltButtonsPaths->addWidget(btnDeletePath);
-    ltButtonsPaths->addStretch(1);
+	QVBoxLayout *ltButtonsPaths = new QVBoxLayout();
+	ltButtonsPaths->addWidget(btnAddPath);
+	ltButtonsPaths->addWidget(btnDeletePath);
+	ltButtonsPaths->addStretch(1);
 
-    QHBoxLayout *ltPaths = new QHBoxLayout;
-    ltPaths->addWidget(lstPaths);
-    ltPaths->addLayout(ltButtonsPaths);
+	QHBoxLayout *ltPaths = new QHBoxLayout;
+	ltPaths->addWidget(lstPaths);
+	ltPaths->addLayout(ltButtonsPaths);
 
-    /*
-     * Output file
-     */
-    QLabel *lblOutputFile = new QLabel(tr("Output file:"));
-    txtOutputFile = new QLineEdit();
-    QPushButton *btnBrowse = new QPushButton(tr("Browse..."));
-    connect(btnBrowse, SIGNAL(clicked()), SLOT(browseOutput()));
+	/*
+	 * Output file
+	 */
+	QLabel *lblOutputFile = new QLabel(tr("Output file:"));
+	txtOutputFile = new QLineEdit();
+	QPushButton *btnBrowse = new QPushButton(tr("Browse..."));
+	connect(btnBrowse, SIGNAL(clicked()), SLOT(browseOutput()));
 
-    QHBoxLayout *ltOutput = new QHBoxLayout();
-    ltOutput->addWidget(txtOutputFile);
-    ltOutput->addWidget(btnBrowse);
+	QHBoxLayout *ltOutput = new QHBoxLayout();
+	ltOutput->addWidget(txtOutputFile);
+	ltOutput->addWidget(btnBrowse);
 
-    /*
-     * Extensions
-     */
-    QLabel *lblExtensions = new QLabel(tr("Allowed extensions:"));
-    lstExtensionsAllowed = new QListWidget();
+	/*
+	 * Extensions
+	 */
+	QLabel *lblExtensions = new QLabel(tr("Allowed extensions:"));
+	lstExtensionsAllowed = new QListWidget();
 
-    QPushButton *btnAddExtension = new QPushButton(tr("Add"));
-    connect(btnAddExtension, SIGNAL(clicked()), SLOT(addExtension()));
-    QPushButton *btnDeleteExtension = new QPushButton(tr("Delete"));
-    connect(btnDeleteExtension, SIGNAL(clicked()), SLOT(deleteExtension()));
+	QPushButton *btnAddExtension = new QPushButton(tr("Add"));
+	connect(btnAddExtension, SIGNAL(clicked()), SLOT(addExtension()));
+	QPushButton *btnDeleteExtension = new QPushButton(tr("Delete"));
+	connect(btnDeleteExtension, SIGNAL(clicked()), SLOT(deleteExtension()));
 
-    QVBoxLayout *ltButtonsExtensions = new QVBoxLayout();
-    ltButtonsExtensions->addWidget(btnAddExtension);
-    ltButtonsExtensions->addWidget(btnDeleteExtension);
-    ltButtonsExtensions->addStretch(1);
+	QVBoxLayout *ltButtonsExtensions = new QVBoxLayout();
+	ltButtonsExtensions->addWidget(btnAddExtension);
+	ltButtonsExtensions->addWidget(btnDeleteExtension);
+	ltButtonsExtensions->addStretch(1);
 
-    QHBoxLayout *ltExtensions = new QHBoxLayout();
-    ltExtensions->addWidget(lstExtensionsAllowed);
-    ltExtensions->addLayout(ltButtonsExtensions);
+	QHBoxLayout *ltExtensions = new QHBoxLayout();
+	ltExtensions->addWidget(lstExtensionsAllowed);
+	ltExtensions->addLayout(ltButtonsExtensions);
 
-    /*
-     * Buttons
-     */
-    QPushButton *btnOk = new QPushButton(tr("OK"));
-    connect(btnOk, SIGNAL(clicked()), SLOT(accept()));
-    connect(btnOk, SIGNAL(clicked()), SLOT(writeSettings()));
+	/*
+	 * Buttons
+	 */
+	QPushButton *btnOk = new QPushButton(tr("OK"));
+	connect(btnOk, SIGNAL(clicked()), SLOT(accept()));
+	connect(btnOk, SIGNAL(clicked()), SLOT(writeSettings()));
 
-    QPushButton *btnCancel = new QPushButton(tr("Cancel"));
-    connect(btnCancel, SIGNAL(clicked()), SLOT(reject()));
+	QPushButton *btnCancel = new QPushButton(tr("Cancel"));
+	connect(btnCancel, SIGNAL(clicked()), SLOT(reject()));
 
-    QHBoxLayout *ltButtons = new QHBoxLayout;
-    ltButtons->addStretch(1);
-    ltButtons->addWidget(btnOk);
-    ltButtons->addWidget(btnCancel);
+	QHBoxLayout *ltButtons = new QHBoxLayout;
+	ltButtons->addStretch(1);
+	ltButtons->addWidget(btnOk);
+	ltButtons->addWidget(btnCancel);
 
-    /*
-     * Main layout
-     */
-    QVBoxLayout *ltMain = new QVBoxLayout;
-    ltMain->addWidget(lblPaths);
-    ltMain->addLayout(ltPaths);
-    ltMain->addWidget(lblOutputFile);
-    ltMain->addLayout(ltOutput);
-    ltMain->addWidget(lblExtensions);
-    ltMain->addLayout(ltExtensions);
-    ltMain->addLayout(ltButtons);
+	/*
+	 * Main layout
+	 */
+	QVBoxLayout *ltMain = new QVBoxLayout;
+	ltMain->addWidget(lblPaths);
+	ltMain->addLayout(ltPaths);
+	ltMain->addWidget(lblOutputFile);
+	ltMain->addLayout(ltOutput);
+	ltMain->addWidget(lblExtensions);
+	ltMain->addLayout(ltExtensions);
+	ltMain->addLayout(ltButtons);
 
-    setLayout(ltMain);
-    setWindowTitle(tr("Sheet builder configuration"));
-    resize(500, 450);
-    readSettings();
+	setLayout(ltMain);
+	setWindowTitle(tr("Sheet builder configuration"));
+	resize(500, 450);
+	readSettings();
 }
 
 void SheetBuilderConfigDialog::addPath()
 {
-    QString path =
-            QFileDialog::getExistingDirectory(this, "Choose path");
-    if (!path.isEmpty()) {
-        QListWidgetItem *newItem = new QListWidgetItem;
-        newItem->setText(path);
-        newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-        lstPaths->addItem(newItem);
-        lstPaths->setCurrentItem(newItem);
-    }
+	QString path =
+		QFileDialog::getExistingDirectory(this, tr("Choose path"));
+	if (!path.isEmpty())
+	{
+		QListWidgetItem *newItem = new QListWidgetItem;
+		newItem->setText(path);
+		newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+		lstPaths->addItem(newItem);
+		lstPaths->setCurrentItem(newItem);
+	}
 }
 
 void SheetBuilderConfigDialog::addExtension()
 {
-    QListWidgetItem *newItem = new QListWidgetItem;
-    newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-    lstExtensionsAllowed->addItem(newItem);
-    lstExtensionsAllowed->setCurrentItem(newItem);
+	QListWidgetItem *newItem = new QListWidgetItem;
+	newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+	lstExtensionsAllowed->addItem(newItem);
+	lstExtensionsAllowed->setCurrentItem(newItem);
 }
 
 void SheetBuilderConfigDialog::deletePath()
 {
-    QListWidgetItem *removeItem = lstPaths->takeItem(lstPaths->currentRow());
-    if (!removeItem)
-        delete removeItem;
+	QListWidgetItem *removeItem = lstPaths->takeItem(lstPaths->currentRow());
+	if (!removeItem)
+		delete removeItem;
 }
 
 void SheetBuilderConfigDialog::deleteExtension()
 {
-    QListWidgetItem *removeItem
-            = lstExtensionsAllowed->takeItem(lstExtensionsAllowed->currentRow());
-    if (!removeItem)
-        delete removeItem;
+	QListWidgetItem *removeItem
+	= lstExtensionsAllowed->takeItem(lstExtensionsAllowed->currentRow());
+	if (!removeItem)
+		delete removeItem;
 }
 
 void SheetBuilderConfigDialog::browseOutput()
 {
-    QString fileName =
-            QFileDialog::getSaveFileName(this,tr("Choose output file"), "");
-    if (!fileName.isEmpty())
-        txtOutputFile->setText(fileName);
+	QString fileName =
+		QFileDialog::getSaveFileName(this, tr("Choose output file"), "");
+	if (!fileName.isEmpty())
+		txtOutputFile->setText(fileName);
 }
 
 void SheetBuilderConfigDialog::readSettings()
 {
-    QStringList paths;
-    QString outputFile;
-    QStringList extensions;
+	QStringList paths;
+	QString outputFile;
+	QStringList extensions;
 
-    QSettings settings("ovqt_sheet_builder.ini", QSettings::IniFormat);
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup("SheetBuilder");
+	paths = settings->value("SheetPaths").toStringList();
+	outputFile = settings->value("SheetOutputFile").toString();
+	extensions = settings->value("ExtensionsAllowed").toStringList();
+	settings->endGroup();
 
-    paths = settings.value("SheetPaths").toStringList();
-    outputFile = settings.value("SheetOutputFile").toString();
-    extensions = settings.value("ExtensionsAllowed").toStringList();
+	lstPaths->clear();
+	lstExtensionsAllowed->clear();
 
-    lstPaths->clear();
-    lstExtensionsAllowed->clear();
+	QListWidgetItem *newItem;
 
-    QListWidgetItem *newItem;
+	Q_FOREACH (QString path, paths)
+	{
+		newItem = new QListWidgetItem;
+		newItem->setText(path);
+		newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+		lstPaths->addItem(newItem);
+	}
 
-    Q_FOREACH (QString path, paths) {
-        newItem = new QListWidgetItem;
-        newItem->setText(path);
-        newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-        lstPaths->addItem(newItem);
-    }
+	txtOutputFile->setText(outputFile);
 
-    txtOutputFile->setText(outputFile);
-
-    Q_FOREACH (QString extension, extensions) {
-        newItem = new QListWidgetItem;
-        newItem->setText(extension);
-        newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-        lstExtensionsAllowed->addItem(newItem);
-    }
+	Q_FOREACH (QString extension, extensions)
+	{
+		newItem = new QListWidgetItem;
+		newItem->setText(extension);
+		newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+		lstExtensionsAllowed->addItem(newItem);
+	}
 }
 
 void SheetBuilderConfigDialog::writeSettings()
 {
-    QStringList paths;
-    for (int i = 0; i < lstPaths->count(); i++)
-        paths.push_back(lstPaths->item(i)->text());
+	QStringList paths;
+	for (int i = 0; i < lstPaths->count(); i++)
+		paths.push_back(lstPaths->item(i)->text());
 
-    QString outputFile = txtOutputFile->text();
+	QString outputFile = txtOutputFile->text();
 
-    QStringList extensions;
-    for (int i = 0; i < lstExtensionsAllowed->count(); i++)
-        extensions.push_back(lstExtensionsAllowed->item(i)->text());
+	QStringList extensions;
+	for (int i = 0; i < lstExtensionsAllowed->count(); i++)
+		extensions.push_back(lstExtensionsAllowed->item(i)->text());
 
-    QSettings settings("./ovqt_sheet_builder.ini", QSettings::IniFormat);
-    settings.setValue("SheetPaths", paths);
-    settings.setValue("SheetOutputFile", outputFile);
-    settings.setValue("ExtensionsAllowed", extensions);
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup("SheetBuilder");
+	settings->setValue("SheetPaths", paths);
+	settings->setValue("SheetOutputFile", outputFile);
+	settings->setValue("ExtensionsAllowed", extensions);
+	settings->endGroup();
+
+	// Forced save settings
+	settings->sync();
 }

@@ -231,8 +231,10 @@ void MainWindow::createMenus()
 	m_toolsMenu = menuBar()->addMenu(tr("&Tools"));
 	menuManager()->registerMenu(m_toolsMenu, Constants::M_TOOLS);
 
+	m_sheetMenu = m_toolsMenu->addMenu(tr("&Sheet"));
+	menuManager()->registerMenu(m_sheetMenu, Constants::M_SHEET);
 
-	m_toolsMenu->addSeparator();
+//	m_toolsMenu->addSeparator();
 
 	m_toolsMenu->addAction(m_settingsAction);
 

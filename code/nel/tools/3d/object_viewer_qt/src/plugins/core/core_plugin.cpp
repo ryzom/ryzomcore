@@ -58,12 +58,11 @@ bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 	_plugMan = pluginManager;
 
 	_mainWindow = new MainWindow(pluginManager);
-	/*	if (QtWin::isCompositionEnabled())
-		{
-			QtWin::extendFrameIntoClientArea(_mainWindow);
-			_mainWindow->setContentsMargins(0, 0, 0, 0);
-		}
-	*/
+	/*if (QtWin::isCompositionEnabled())
+	{
+		QtWin::extendFrameIntoClientArea(_mainWindow);
+		_mainWindow->setContentsMargins(0, 0, 0, 0);
+	}*/
 	bool success = _mainWindow->initialize(errorString);
 	CSearchPathsSettingsPage *serchPathPage = new CSearchPathsSettingsPage(this);
 	serchPathPage->applySearchPaths();

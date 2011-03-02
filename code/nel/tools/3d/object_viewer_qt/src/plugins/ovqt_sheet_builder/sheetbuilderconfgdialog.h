@@ -24,23 +24,23 @@ class QLineEdit;
 
 class SheetBuilderConfigDialog : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    explicit SheetBuilderConfigDialog(QWidget *parent = 0);
+	explicit SheetBuilderConfigDialog(QWidget *parent = 0);
 
 private Q_SLOTS:
-    void addPath();
-    void addExtension();
-    void deletePath();
-    void deleteExtension();
-    void browseOutput();
-    void readSettings();
-    void writeSettings();
+	void addPath();
+	void addExtension();
+	void deletePath();
+	void deleteExtension();
+	void browseOutput();
+	void readSettings();
+	void writeSettings();
 
 private:
-    QListWidget *lstPaths;
-    QListWidget *lstExtensionsAllowed;
-    QLineEdit *txtOutputFile;
+	QListWidget *lstPaths;
+	QListWidget *lstExtensionsAllowed;
+	QLineEdit *txtOutputFile;
 };
 
 #endif // SHEETBUILDERCONFGDIALOG_H

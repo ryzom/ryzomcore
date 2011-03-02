@@ -43,6 +43,8 @@ const char * const M_TOOLS		= "ObjectViewerQt.Menu.Tools";
 const char * const M_WINDOW		= "ObjectViewerQt.Menu.Window";
 const char * const M_HELP		= "ObjectViewerQt.Menu.Help";
 
+const char * const M_SHEET		= "ObjectViewerQt.Menu.Sheet";
+
 //actions
 const char * const NEW			= "ObjectViewerQt.New";
 const char * const OPEN			= "ObjectViewerQt.Open";

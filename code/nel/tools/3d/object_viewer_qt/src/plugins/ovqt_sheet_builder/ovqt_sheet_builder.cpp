@@ -14,8 +14,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// Project includes
 #include "ovqt_sheet_builder.h"
+#include "sheetbuilderdialog.h"
+#include "sheetbuilderconfgdialog.h"
+#include "../core/icore.h"
+#include "../core/imenu_manager.h"
+#include "../core/core_constants.h"
 
+// NeL includes
+#include <nel/misc/debug.h>
+
+// Qt includes
 #include <QtCore/QObject>
 #include <QtGui/QMessageBox>
 #include <QtGui/QMainWindow>
@@ -23,47 +33,29 @@
 #include <QtGui/QAction>
 #include <QtGui/QMenuBar>
 
-#include "../../extension_system/iplugin_spec.h"
-
-#include "nel/misc/debug.h"
-#include "sheetbuilderdialog.h"
-#include "sheetbuilderconfgdialog.h"
-
 using namespace Plugin;
 
 bool SheetBuilderPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
-	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
-	if (!wnd)
-	{
-		*errorString = tr("Not found MainWindow Object Viewer Qt.");
-		return false;
-	}
-	QMenu *toolsMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Tools"));
-	if (!toolsMenu)
-	{
-		*errorString = tr("Not found QMenu Tools.");
-		return false;
-	}
+
 	return true;
 }
 
 void SheetBuilderPlugin::extensionsInitialized()
 {
-	QMenu *toolsMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Tools"));
-	nlassert(toolsMenu);
+	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
 
-	toolsMenu->addSeparator();
-
-	QAction *actBuilder = toolsMenu->addAction("Sheet builder");
-	connect(actBuilder, SIGNAL(triggered()), this, SLOT(execBuilderDialog()));
+	QMenu *sheetMenu = menuManager->menu(Core::Constants::M_SHEET);
+	QAction *sheetBuilderAction = sheetMenu->addAction(tr("Sheet builder"));
+	menuManager->registerAction(sheetBuilderAction, "SheetBuilder");
+	connect(sheetBuilderAction, SIGNAL(triggered()), this, SLOT(execBuilderDialog()));
 }
 
 void SheetBuilderPlugin::execBuilderDialog()
 {
-	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
+	QMainWindow *wnd = Core::ICore::instance()->mainWindow();
 	nlassert(wnd);
 
 	SheetBuilderDialog dlg(wnd);
@@ -100,25 +92,11 @@ QString SheetBuilderPlugin::description() const
 	return "make_sheet_id equivalent";
 }
 
-QList<QString> SheetBuilderPlugin::dependencies() const
+QStringList SheetBuilderPlugin::dependencies() const
 {
-	return QList<QString>();
-}
-
-QObject* SheetBuilderPlugin::objectByName(const QString &name) const
-{
-	Q_FOREACH (QObject *qobj, _plugMan->allObjects())
-	if (qobj->objectName() == name)
-		return qobj;
-	return 0;
-}
-
-ExtensionSystem::IPluginSpec *SheetBuilderPlugin::pluginByName(const QString &name) const
-{
-	Q_FOREACH (ExtensionSystem::IPluginSpec *spec, _plugMan->plugins())
-	if (spec->name() == name)
-		return spec;
-	return 0;
+	QStringList list;
+	list.append(Core::Constants::OVQT_CORE_PLUGIN);
+	return list;
 }
 
 Q_EXPORT_PLUGIN(SheetBuilderPlugin)

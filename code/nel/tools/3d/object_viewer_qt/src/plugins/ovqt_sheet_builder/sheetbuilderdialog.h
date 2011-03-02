@@ -24,24 +24,24 @@ class QTextEdit;
 
 class SheetBuilderDialog : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    explicit SheetBuilderDialog(QWidget *parent = 0);
-    ~SheetBuilderDialog() {}
+	explicit SheetBuilderDialog(QWidget *parent = 0);
+	~SheetBuilderDialog() {}
 
 private Q_SLOTS:
-    void buildSheet();
-    void detailsShowHide();
-    void showConfig();
+	void buildSheet();
+	void detailsShowHide();
+	void showConfig();
 
 private:
-    void displayInfo(QString str);
+	void displayInfo(QString str);
 
-    int defHeight;
-    int defWidth;
-    bool detailsVisible;
-    QCheckBox *chckClean;
-    QTextEdit *txtOutput;
+	int defHeight;
+	int defWidth;
+	bool detailsVisible;
+	QCheckBox *chckClean;
+	QTextEdit *txtOutput;
 };
 
 #endif // SHEETBUILDERDIALOG_H

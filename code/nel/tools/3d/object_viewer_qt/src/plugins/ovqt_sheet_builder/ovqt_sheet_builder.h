@@ -25,48 +25,45 @@
 
 namespace NLMISC
 {
-    class CLibraryContext;
+class CLibraryContext;
 }
 
 namespace ExtensionSystem
 {
-    class IPluginSpec;
+class IPluginSpec;
 }
 
 namespace Plugin
 {
 
-    class SheetBuilderPlugin : public QObject, public ExtensionSystem::IPlugin
-    {
-        Q_OBJECT
-        Q_INTERFACES(ExtensionSystem::IPlugin)
-    public:
-        bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
-        void extensionsInitialized();
+class SheetBuilderPlugin : public QObject, public ExtensionSystem::IPlugin
+{
+	Q_OBJECT
+	Q_INTERFACES(ExtensionSystem::IPlugin)
+public:
+	bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
+	void extensionsInitialized();
 
-        void setNelContext(NLMISC::INelContext *nelContext);
+	void setNelContext(NLMISC::INelContext *nelContext);
 
-		QString name() const;
-		QString version() const;
-		QString vendor() const;
-		QString description() const;
-		QList<QString> dependencies() const;
+	QString name() const;
+	QString version() const;
+	QString vendor() const;
+	QString description() const;
+	QStringList dependencies() const;
 
-		QObject *objectByName(const QString &name) const;
-		ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
+	void buildSheet(bool clean);
 
-		void buildSheet(bool clean);
+private Q_SLOTS:
+	void execBuilderDialog();
 
-    private Q_SLOTS:
-        void execBuilderDialog();
+protected:
+	NLMISC::CLibraryContext *_LibContext;
 
-    protected:
-        NLMISC::CLibraryContext *_LibContext;
+private:
+	ExtensionSystem::IPluginManager *_plugMan;
 
-    private:
-		ExtensionSystem::IPluginManager *_plugMan;
-
-    };
+};
 
 } // namespace Plugin
 

@@ -97,6 +97,8 @@ private:
 	QMenu *m_toolsMenu;
 	QMenu *m_helpMenu;
 
+	QMenu *m_sheetMenu;
+
 	QAction *m_openAction;
 	QAction *m_exitAction;
 	QAction *m_settingsAction;
