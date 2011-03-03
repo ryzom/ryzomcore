@@ -807,6 +807,16 @@ void CGuild::takeItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 s
 		return;
 	}
 
+	// check if user is trial
+	CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( user->getId() ));
+	BOMB_IF(p == NULL, "Failed to find player record for character: " << user->getId().toString(), return);
+	if ( p->isTrialPlayer() )
+	{
+		user->sendDynamicSystemMessage( user->getId(), "EGS_CANT_USE_GUILD_INV_IS_TRIAL_PLAYER" );
+		return;
+	}
+
+
 	CGuildMemberModule * module;
 	if ( !user->getModuleParent().getModule(module) || !module->canTakeGuildItem() )
 	{

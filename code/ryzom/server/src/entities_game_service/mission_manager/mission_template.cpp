@@ -28,6 +28,7 @@
 #include "mission_log.h"
 #include "mission_manager/mission_manager.h"
 #include "mission_manager/mission_parser.h"
+#include "player_manager/player_manager.h"
 #include "player_manager/character.h"
 #include "player_manager/character_encyclopedia.h"
 #include "mission_item.h"
@@ -44,8 +45,9 @@
 using namespace std;
 using namespace NLMISC;
 
-extern CVariable<sint32> MissionForcedSeason;
-extern CVariable<bool>	MissionPrerequisitsEnabled;
+extern CVariable<sint32> 	MissionForcedSeason;
+extern CVariable<bool>		MissionPrerequisitsEnabled;
+extern CPlayerManager		PlayerManager;
 
 
 NL_INSTANCE_COUNTER_IMPL(CMissionTemplate);
@@ -179,7 +181,9 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 	Prerequisits.GuildGrade	 = EGSPD::CGuildGrade::Unknown;
 	Prerequisits.TeamSize = 0;
 	Prerequisits.Season = EGSPD::CSeason::Invalid;
-
+	Prerequisits.CharacterMinAge = 0;
+	Prerequisits.MaxPlayerID = 0;  
+	
 	// init parsing vars
 	bool ret = true;
 	string value;
@@ -528,7 +532,30 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 				if (ret)
 					Prerequisits.EventFaction = CMissionParser::getNoBlankString( script[1] );
 			}
-
+			// character oldness check loading
+			else if ( script[0] == "req_character_age" )
+			{
+				sint age;
+				ret = parseInt( i+1, script,age ) && ret;
+				Prerequisits.CharacterMinAge = (uint32)age;
+				if ( Prerequisits.CharacterMinAge < 0 )
+				{
+					MISLOGERROR1("character minimum age is %d. Must be >= 0", Prerequisits.CharacterMinAge );
+					ret = false;
+				}
+			}
+			// maximum player ID check loading
+			else if ( script[0] == "req_max_player_id" )
+			{
+				sint max_id;
+				ret = parseInt( i+1, script,max_id ) && ret;
+				Prerequisits.MaxPlayerID = (uint32)max_id;
+				if ( Prerequisits.MaxPlayerID < 0 )
+				{
+					MISLOGERROR1("Maximum player ID is %u. Must be >= 0", Prerequisits.MaxPlayerID );
+					ret = false;
+				}
+			}
 			// update next step step text
 			else if ( script[0] == "set_obj" )
 			{
@@ -2279,6 +2306,82 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				prereqDesc.IsMandatory = true;
 				prereqDesc.Validated = true;
 				prereqInfos.Prerequisits.push_back(prereqDesc);
+			}
+		}
+
+		// check character minimum oldness
+		if( Prerequisits.CharacterMinAge > 0 )
+		{
+			prereqDesc.Validated = true;
+
+			uint32 minimumAge   = Prerequisits.CharacterMinAge * 24 * 3600; // oldness required is given in days
+			uint32 characterAge = NLMISC::CTime::getSecondsSince1970() - user->getFirstConnectedTime();
+			nlwarning("%s Require character age of %d days (%ds) and current character age is %d", sDebugPrefix.c_str(), 
+						Prerequisits.CharacterMinAge, minimumAge, characterAge);
+
+			if (characterAge < minimumAge)
+			{
+				if (logOnFail)
+					MISDBG("%s Require character age of %d days (%ds) and current character age is %d", sDebugPrefix.c_str(), 
+						Prerequisits.CharacterMinAge, minimumAge, characterAge);
+					
+				if (returnValue == MISSION_DESC::PreReqSuccess)
+				{
+					if (!fillPrereqInfos)
+						{return MISSION_DESC::PreReqFail;}
+
+					returnValue = MISSION_DESC::PreReqFail;
+					logOnFail = false;
+				}
+				prereqDesc.Validated = false;
+			}
+			if (fillPrereqInfos)
+			{
+				if (addedPrereqTexts.find("MISSION_PREREQ_CHARACTER_MIN_AGE") == addedPrereqTexts.end())
+				{
+					SM_STATIC_PARAMS_2(params, STRING_MANAGER::integer, STRING_MANAGER::integer);
+					params[0].Int = (uint32) (characterAge / (24 * 3600) );
+					params[1].Int = (uint32) Prerequisits.CharacterMinAge;
+					prereqDesc.Description = STRING_MANAGER::sendStringToClient(user->getEntityRowId(), "MISSION_PREREQ_CHARACTER_MIN_AGE", params);
+					prereqDesc.IsMandatory = true;
+					prereqInfos.Prerequisits.push_back(prereqDesc);
+				}
+			}
+		}
+
+		// check maximum player ID
+		if (Prerequisits.MaxPlayerID > 0)
+		{
+			prereqDesc.Validated = true;
+
+			uint32 playerId = PlayerManager.getPlayerId(user->getId());
+			nlwarning("%s Require player ID of %d and player's ID is %d", sDebugPrefix.c_str(), 
+						Prerequisits.MaxPlayerID, playerId);
+
+			if (playerId > Prerequisits.MaxPlayerID )
+			{
+				if (logOnFail)
+					MISDBG("%s Require player ID of %d and player's ID is %d", sDebugPrefix.c_str(), 
+						Prerequisits.MaxPlayerID, playerId);
+				
+				if (returnValue == MISSION_DESC::PreReqSuccess)
+				{
+					if (!fillPrereqInfos)
+						{return MISSION_DESC::PreReqFail;}
+
+					returnValue = MISSION_DESC::PreReqFail;
+					logOnFail = false;
+				}
+				prereqDesc.Validated = false;
+			}
+			if (fillPrereqInfos)
+			{
+				if (addedPrereqTexts.find("MISSION_PREREQ_MAX_PLAYER_ID") == addedPrereqTexts.end())
+				{
+					prereqDesc.Description = STRING_MANAGER::sendStringToClient(user->getEntityRowId(), "MISSION_PREREQ_MAX_PLAYER_ID", TVectorParamCheck());
+					prereqDesc.IsMandatory = true;
+					prereqInfos.Prerequisits.push_back(prereqDesc);
+				}
 			}
 		}
 	}

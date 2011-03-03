@@ -207,7 +207,7 @@ extern vector<CMainlandSummary>		Mainlands;
 CVariable<uint32>			SpawnedDeadMektoubDelay("egs","SpawnedDeadMektoubDelay", "nb tick before a dead mektoub despawn)", 2592000, 0, true );
 CVariable<bool>				ForceQuarteringRight("egs","ForceQuarteringRight", "Allow anyone to quarter a dead creature", false, 0, true );
 CVariable<bool>				AllowAnimalInventoryAccessFromAnyStable("egs", "AllowAnimalInventoryAccessFromAnyStable", "If true a player can access to his animal inventory (if the animal is inside a stable) from any stable over the world", true, 0, true );
-CVariable<uint32>			FreeTrialSkillLimit("egs", "FreeTrialSkillLimit", "Level limit for characters belonging to free trial accounts", 19,0,true);
+CVariable<uint32>			FreeTrialSkillLimit("egs", "FreeTrialSkillLimit", "Level limit for characters belonging to free trial accounts", 125,0,true);
 CVariable<uint32>			CraftFailureProbaMpLost("egs", "CraftFailureProbaMpLost", "Probabilité de destruction de chaque MP en cas d'echec du craft", 50,0,true);
 
 
@@ -4050,6 +4050,7 @@ void CCharacter::initDatabase()
 	// combat flags
 	//_ForbidPowerDates.writeUsablePowerFlags(_UsablePowerFlags);
 	setPowerFlagDates();
+	setAuraFlagDates();
 	updateBrickFlagsDBEntry();
 
 	// defense interface
@@ -5259,6 +5260,17 @@ bool CCharacter::checkAnimalCount( const CSheetId& PetTicket, bool sendMessage, 
 			if( sendMessage )
 			{
 				sendDynamicSystemMessage( _Id, "EGS_CANT_BUY_ANOTHER_PACKER" );
+			}
+			return false;
+		}
+
+		CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( getId() ));
+		BOMB_IF(p == NULL,"Failed to find player record for character: "<<getId().toString(),return 0.0);
+		if ( p->isTrialPlayer() )
+		{
+			if( sendMessage )
+			{
+				sendDynamicSystemMessage( _Id, "EGS_CANT_BUY_PACKER_IS_TRIAL_PLAYER" );
 			}
 			return false;
 		}
@@ -13885,7 +13897,7 @@ void CCharacter::setAuraFlagDates()
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
 
 	uint32 flag = BRICK_FLAGS::Aura - BRICK_FLAGS::BeginPowerFlags;
-	if ( _ForbidAuraUseEndDate > time )
+	if ( (_ForbidAuraUseEndDate > time) && (_ForbidAuraUseEndDate - time < 72000) )
 	{
 		_PowerFlagTicks[flag].StartTick = _ForbidAuraUseStartDate;
 		_PowerFlagTicks[flag].EndTick = _ForbidAuraUseEndDate;
@@ -13895,7 +13907,6 @@ void CCharacter::setAuraFlagDates()
 		_PowerFlagTicks[flag].StartTick = 0;
 		_PowerFlagTicks[flag].EndTick = 0;
 	}
-
 } // setAuraFlagDates //
 
 
@@ -15687,10 +15698,15 @@ void CCharacter::sendCustomEmote( const NLMISC::CEntityId& id, MBEHAV::EBehaviou
 	if( behaviour != MBEHAV::IDLE )
 	{
 		setEmote( behaviour );
-		setAfkState(false);
 	}
 
 	string sEmoteCustomText = emoteCustomText.toUtf8();
+
+	if ((behaviour != MBEHAV::IDLE) || (sEmoteCustomText == "none"))
+	{
+		setAfkState(false);
+	}
+
 	if( sEmoteCustomText == "none" )
 	{
 		return;

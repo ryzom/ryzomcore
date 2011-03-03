@@ -366,10 +366,12 @@ namespace LS
 				{
 					nlwarning("on_login : Can't find ring user %u from account %u with GMId", otherUserId, userId);
 				}
-				else if (otherRu->getCurrentStatus() != TCurrentStatus::cs_offline) // cs_logged and cs_online
+				//else if (otherRu->getCurrentStatus() != TCurrentStatus::cs_offline) // cs_logged and cs_online
+				else if (otherRu->getCurrentStatus() == TCurrentStatus::cs_online)	// less strict check, only avoid csr/player account logged on the same time
 				{
 					// DON'T check in the entity locator that the player is really online
 					//if (IEntityLocator::getInstance() && IEntityLocator::getInstance()->isUserOnline(otherUserId))
+					if (IEntityLocator::getInstance() && IEntityLocator::getInstance()->isUserOnline(otherUserId))
 					{
 						nldebug("LS : on_login : user %u already connected, rejecting login of %u with GMId", otherUserId, userId);
 						loginResult(from, userId, "", 3, toString("User %u (%u's GMId) already online", otherUserId, userId));
@@ -392,10 +394,12 @@ namespace LS
 				{
 					nlwarning("on_login : Can't find ring user %u which GMID is account %u", otherUserId, userId);
 				}
-				else if (otherRu->getCurrentStatus() != TCurrentStatus::cs_offline) // cs_logged and cs_online
+				//else if (otherRu->getCurrentStatus() != TCurrentStatus::cs_offline) // cs_logged and cs_online
+				else if (otherRu->getCurrentStatus() == TCurrentStatus::cs_online)	// less strict check, only avoid csr/player account logged on the same time
 				{
 					// DON'T check in the entity locator that the player is really online
 					//if (IEntityLocator::getInstance() && IEntityLocator::getInstance()->isUserOnline(otherUserId))
+					if (IEntityLocator::getInstance() && IEntityLocator::getInstance()->isUserOnline(otherUserId))
 					{
 						nldebug("LS : on_login : user %u already connected, rejecting login of %u which is the GMId of it", otherUserId, userId);
 						loginResult(from, userId, "", 4, toString("GM user %u (having GMId=%u) already online", otherUserId, userId));

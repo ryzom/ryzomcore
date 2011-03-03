@@ -20,6 +20,8 @@
 #include "powers_and_auras.h"
 #include "egs_sheets/egs_static_game_item.h"
 
+#define MAX_ACTIVATION_DATE 72000 // 2h
+#define MAX_DEACTIVATION_DATE 72000 // 2h
 
 //-----------------------------------------------------------------------------
 // CPowerActivationDate
@@ -156,8 +158,24 @@ void CPowerActivationDateVector::activate()
 	
 	while (it != PowerActivationDates.end())
 	{
-		(*it).DeactivationDate = time - (*it).DeactivationDate; // the value saved is time length since deactivation, here we transform length into a date
-		(*it).ActivationDate += time;
+		if ( ((*it).DeactivationDate >= 0) && ((*it).DeactivationDate < MAX_DEACTIVATION_DATE) )
+		{
+			(*it).DeactivationDate = time - (*it).DeactivationDate; // the value saved is time length since deactivation, here we transform length into a date
+		}
+		else
+		{
+			nlinfo("POWER_AURA_CONTROL : Bad Deactivation date : %d", (*it).DeactivationDate);
+			(*it).DeactivationDate = time - MAX_DEACTIVATION_DATE;
+		}
+		if ((*it).ActivationDate < MAX_ACTIVATION_DATE)
+		{
+			(*it).ActivationDate += time;
+		}
+		else
+		{
+			nlinfo("POWER_AURA_CONTROL : Bad Activation date : %d", (*it).ActivationDate);
+			(*it).ActivationDate = time;
+		}
 		++it;
 	}
 	doNotClear = false;
@@ -214,7 +232,8 @@ void CAuraActivationDateVector::cleanVector()
 		}
 		else
 		{
-			++it;++itUser;
+			++it;
+			++itUser;
 		}
 	}
 }
@@ -226,7 +245,7 @@ bool CAuraActivationDateVector::isAuraEffective(POWERS::TPowerType type, const N
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
 	std::vector <CPowerActivationDate>::iterator it = _AuraActivationDates.begin();
 	std::vector <NLMISC::CEntityId>::iterator itUser = _AuraUsers.begin();
-	
+
 	while (it != _AuraActivationDates.end())
 	{
 		if ( (*it).ActivationDate <= time )
@@ -249,7 +268,6 @@ bool CAuraActivationDateVector::isAuraEffective(POWERS::TPowerType type, const N
 	return result;
 }
 
-
 //-----------------------------------------------------------------------------
 void CAuraActivationDateVector::activate()
 {
@@ -258,7 +276,17 @@ void CAuraActivationDateVector::activate()
 	
 	while (it != _AuraActivationDates.end())
 	{
-		(*it).ActivationDate += time;
+		(*it).DeactivationDate = time - (*it).DeactivationDate; // the value saved is time length since deactivation, here we transform length into a date
+
+		if ((*it).ActivationDate < MAX_ACTIVATION_DATE)
+		{
+			(*it).ActivationDate += time;
+		}
+		else
+		{
+			nlinfo("POWER_AURA_CONTROL : Bad Activation date : %d", (*it).ActivationDate);
+			(*it).ActivationDate = time;
+		}
 		++it;
 	}
 }
@@ -321,7 +349,15 @@ void CConsumableOverdoseTimerVector::activate()
 	
 	while (it != Dates.end())
 	{
-		(*it).ActivationDate += time;
+		if ((*it).ActivationDate < MAX_ACTIVATION_DATE)
+		{
+			(*it).ActivationDate += time;
+		}
+		else
+		{
+			nlinfo("POWER_AURA_CONTROL : Bad Activation date : %d", (*it).ActivationDate);
+			(*it).ActivationDate = time;
+		}
 		++it;
 	}
 }

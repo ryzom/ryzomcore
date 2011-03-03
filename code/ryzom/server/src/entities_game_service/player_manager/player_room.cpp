@@ -221,6 +221,14 @@ bool CPlayerRoomInterface::canUseInventory(const CCharacter * owner, const CChar
 	if (owner != user)
 		return false;
 
+	CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( user->getId() ));
+	BOMB_IF(p == NULL, "Failed to find player record for character: " << user->getId().toString(), return true);
+	if ( p->isTrialPlayer() )
+	{
+		user->sendDynamicSystemMessage( user->getId(), "EGS_CANT_USE_ROOM_INV_IS_TRIAL_PLAYER" );
+		return false;
+	}
+
 	CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, user->getEntityRowId(), DSPropertyCELL );
 	const sint32 cell = mirrorCell;
 	if ( !CBuildingManager::getInstance()->isRoomCell(cell) )

@@ -201,7 +201,9 @@ private:
 	/// infos on a character from his name
 	TCharInfoCont	_NameToInfos;
 
-	
+	/// Original information about renamed characters
+	TCharInfoCont	_RenamedCharInfos;
+
 	typedef std::map<NLMISC::CEntityId, std::pair<NLMISC::TGameCycle, CCharacterInfos*> >	TTempCharInfoCont;
 	/// Temporary storage for removed entities, will survive here for 3000 ticks.
 	TTempCharInfoCont		_RemovedCharInfos;

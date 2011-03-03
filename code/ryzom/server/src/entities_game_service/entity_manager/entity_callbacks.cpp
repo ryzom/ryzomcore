@@ -231,7 +231,7 @@ void cbClientConnection(CMessage& msgin, const std::string &serviceName, NLNET::
 	const bool betaTester = (userExtended.find(":FBT:") != string::npos);
 	const bool preOrder = (userExtended.find(":PO:") != string::npos);
 	const bool windermeerCommunity = (userExtended.find(":WIND:") != string::npos);
-	const bool trialPlayer = (userExtended.find(":TRIAL:") != string::npos);
+	const bool trialPlayer = (userExtended.find(":TRB:") != string::npos);
 
 	// load player infos
 	player = new CPlayer;

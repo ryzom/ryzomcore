@@ -62,6 +62,7 @@ public:
 		german,
 		french,
 		russian,
+		spanish,
 		NB_LANGUAGES
 	};
 

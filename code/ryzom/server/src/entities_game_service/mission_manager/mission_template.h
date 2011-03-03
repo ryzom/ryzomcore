@@ -242,13 +242,17 @@ public:
 		/// true if the player must be in a guild
 		bool								Guild;
 		/// minimum guild grade displayed by the player
-		EGSPD::CGuildGrade::TGuildGrade				GuildGrade;
+		EGSPD::CGuildGrade::TGuildGrade		GuildGrade;
 		/// minimum team size
 		uint8								TeamSize;
 		/// actions that the player must know
 		std::vector<NLMISC::CSheetId>		KnownActions;
 		/// The season that must be current
-		EGSPD::CSeason::TSeason					Season;
+		EGSPD::CSeason::TSeason				Season;
+		/// Character minimum oldness
+		uint32								CharacterMinAge;
+		/// minimum account id
+		uint32								MaxPlayerID;
 
 		// Requesite a specific thema of a specific album that all of its tasks are done
 		// or if TaskDone is false check if at least one is not done

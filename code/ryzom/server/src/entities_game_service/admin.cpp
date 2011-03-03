@@ -4284,11 +4284,11 @@ NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <chan
 	CPVPManager2 *inst = CPVPManager2::getInstance();
 
 	string pass;
-	string name = NLMISC::toLower(args[1]);
+	string name = args[1];
 	TChanID channel = CPVPManager2::getInstance()->getUserDynChannel(name);
 
 	if (args.size() < 3)
-		pass = name;
+		pass = toLower(name);
 	else
 		pass = args[2];
 

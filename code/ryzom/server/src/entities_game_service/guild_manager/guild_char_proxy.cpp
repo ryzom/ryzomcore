@@ -91,6 +91,14 @@ void CGuildCharProxy::spendMoney(uint64 money)
 }
 
 //----------------------------------------------------------------------------
+bool CGuildCharProxy::isTrialPlayer()
+{
+	CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( getId() ));
+	BOMB_IF(p == NULL, "Failed to find player record for character: " << getId().toString(), return true);
+	return p->isTrialPlayer();
+}
+
+//----------------------------------------------------------------------------
 void CGuildCharProxy::endBotChat()
 {
 	_ModuleCore->endBotChat(false);

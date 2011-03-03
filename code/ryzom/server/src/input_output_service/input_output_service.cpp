@@ -541,6 +541,7 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 
 	CEntityId eid = TheDataset.getEntityId(chId);
 
+	ucstring oldname;
 	CCharacterInfos * charInfos = IOS->getCharInfos( eid, false );
 	if( charInfos == NULL )
 	{
@@ -553,6 +554,7 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 		// remove previous name association
 //		_NameToInfos.erase(ucname);
 		_NameToInfos.erase(charInfos->ShortName.toUtf8());
+		oldname = charInfos->ShortName;
 
 		if (charInfos->EntityId != eid)
 		{
@@ -597,6 +599,42 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 				charInfos->HomeSessionNameId = CShardNames::getInstance().getSessionNames()[i].DisplayNameId;
 
 				break;
+			}
+		}
+
+		// See if an existing player was renamed
+		if (!oldname.empty())
+		{
+			TSessionId sessionid;
+			string name = charInfos->ShortName.toUtf8();
+			// Make sure that the short name contains the home session name, but only if the new name does not exist yet
+			// otherwise we will have problems. If the new name contains opening parentheses then don't add it because
+			// it will try to match it as a homeland name
+			string::size_type pos = name.find('(');
+			if (pos == string::npos)
+			{
+				name = CShardNames::getInstance().makeFullName(name, charInfos->HomeSessionId);
+			}
+
+			TCharInfoCont::iterator itInfos = _NameToInfos.find( name );
+			if( itInfos == _NameToInfos.end() )
+			{
+				// New name does not exist
+				charInfos->ShortName = ucstring(name);
+			}
+
+			// Save the old name only if new name is not found (and the player is getting original name back)
+			itInfos = _RenamedCharInfos.find( charInfos->ShortName.toUtf8() );
+			if( itInfos != _RenamedCharInfos.end() )
+			{
+				// New name was in the saved list; player is getting original name back. 
+				// Remove the new name
+				_RenamedCharInfos.erase(charInfos->ShortName.toUtf8());
+			}
+			else
+			{
+				// New name was not in the list, save old name
+				_RenamedCharInfos.insert( make_pair(oldname.toUtf8(), charInfos) );
 			}
 		}
 	}
@@ -741,6 +779,13 @@ CCharacterInfos * CInputOutputService::getCharInfos( const CEntityId& chId, bool
 CCharacterInfos * CInputOutputService::getCharInfos( const ucstring& chName )
 {
 	TCharInfoCont::iterator itInfos = _NameToInfos.find( chName.toUtf8() );
+	if( itInfos != _NameToInfos.end() )
+	{
+		return 	itInfos->second;
+	}
+	
+	// Not found so check any renamed players
+	itInfos = _RenamedCharInfos.find( chName.toUtf8() );
 	if( itInfos != _NameToInfos.end() )
 	{
 		return 	itInfos->second;

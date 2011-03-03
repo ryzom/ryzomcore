@@ -55,6 +55,7 @@ public:
 	void sendDynamicMessageToChatGroup( const std::string &  msg, CChatGroup::TGroupType type, const TVectorParamCheck & params  =  TVectorParamCheck() );
 	uint64 getMoney();
 	void spendMoney(uint64 money);
+	bool isTrialPlayer();
 	void endBotChat();
 	bool getTarget(CGuildCharProxy & proxy);
 	void setGuildId(uint32 guildId );
