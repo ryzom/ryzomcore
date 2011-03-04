@@ -33,6 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace NLGEORGES
 {
 	class UForm;
+	class CForm;
 }
 
 using namespace NLGEORGES;
@@ -53,6 +54,9 @@ namespace NLQT
 		bool modified() {return _modified;}
 		void setModified(bool m) {_modified = m;}
 
+		CForm* getFormByName(const QString);
+		void addParentForm(CForm *form);
+
 		void write (  );
 
 		QString loadedForm;
@@ -64,10 +68,11 @@ namespace NLQT
 		void changeFile(QString);
 		void modified(bool);
 	public Q_SLOTS:
-		void selectedForm(QString);
+		void setForm(const CForm*);
+		void loadFormIntoDialog(CForm *form = 0);
+		void modifiedFile( );
 	private Q_SLOTS:
 		void doubleClicked ( const QModelIndex & index );
-		void modifiedFile( );
 		void filterRows();
 
 	private:

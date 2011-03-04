@@ -29,14 +29,17 @@ NLQT::CConfiguration      *Modules::_configuration = NULL;
 NLQT::IObjectViewer       *Modules::_objViewerInterface = NULL;
 NLQT::CMainWindow         *Modules::_mainWindow = NULL;
 
-void Modules::init()
+void Modules::init(NLMISC::IProgressCallback *cb)
 {
-	loadPlugin();
-
+	if (loadPlugin())
+	{
 	_objViewerInterface->setNelContext(NLMISC::INelContext::getInstance());
+	}
 
 	if (_configuration == NULL) _configuration = new NLQT::CConfiguration;
+	_configuration->setProgressCallback(cb);
 	config().init();
+	_configuration->setProgressCallback(0);
 
 	if (_mainWindow == NULL) _mainWindow = new NLQT::CMainWindow;
 }

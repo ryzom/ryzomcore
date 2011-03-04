@@ -16,30 +16,41 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef FORMDELEGATE_H
-#define FORMDELEGATE_H
+#ifndef GEORGES_SPLASH_H
+#define GEORGES_SPLASH_H
 
-#include <QStyledItemDelegate>
+// Qt includes
+#include <QtGui/QWidget>
+
+// STL includes
+
+// NeL includes
+
+// NeL includes
+#include <nel/misc/progress_callback.h>
+
+// Project includes
+#include "ui_splash.h"
+
+namespace NLMISC {
+	class IProgressCallback;
+}
 
 namespace NLQT 
 {
-
-	class FormDelegate : public QStyledItemDelegate
+	class CGeorgesSplash: public QWidget, public NLMISC::IProgressCallback
 	{
+		Q_OBJECT
+
+		Ui::CGeorgesSplash _ui;
+
+		void progress (float progressValue);
 
 	public:
-		FormDelegate(QObject *parent = 0);
+		CGeorgesSplash(QWidget *parent = 0);
+		~CGeorgesSplash();
+	}; /* CGeorgesSplash */
 
-		QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-			const QModelIndex &index) const;
-		void setEditorData(QWidget *editor, const QModelIndex &index) const;
-		void setModelData(QWidget *editor, QAbstractItemModel *model,
-			const QModelIndex &index) const;
-		void updateEditorGeometry(QWidget *editor,
-			const QStyleOptionViewItem &option, const QModelIndex &index) const;
-		//void paint ( QPainter * painter, const QStyleOptionViewItem & option, 
-		//	const QModelIndex & index ) const;  
-	};
+} /* namespace NLQT */
 
-}
-#endif // FORMDELEGATE_H
+#endif // GEORGES_SPLASH_H

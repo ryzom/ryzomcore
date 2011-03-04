@@ -60,6 +60,8 @@ namespace NLQT
 		void createEmptyView(QDockWidget* w = 0);
 		void closeEvent(QCloseEvent *event);
 
+		QString leveldesignPath() { return _leveldesignPath; }
+
 	private Q_SLOTS:
 		void open();
 		void create();
@@ -67,9 +69,10 @@ namespace NLQT
 		void settings();
 		void about();
 		void updateStatusBar();
-		void openTreeView(QString);
+		CGeorgesTreeViewDialog * createTreeView(QString);
 		void tabChanged(int);
 		void openRecentFile();
+		void loadFile(QString fileName);
 
 	private:
 		void createActions();
@@ -77,8 +80,7 @@ namespace NLQT
 		void createToolBars();
 		void createStatusBar();
 		void createDialogs();
-
-		void loadFile(const QString &fileName);
+		
 		void updateRecentFileActions();
 		void setCurrentFile(const QString &fileName);
 
@@ -113,6 +115,7 @@ namespace NLQT
 		QAction *_aboutQtAction;
 		QAction *_separatorAction;
 
+		QString _leveldesignPath;
 
 		enum { MaxRecentFiles = 5 };
 		QAction *recentFileActs[MaxRecentFiles];

@@ -48,7 +48,7 @@ namespace NLQT
 		QString _ldPath;
 
 	Q_SIGNALS:
-		void selectedForm(QString);
+		void selectedForm(const QString);
 
 	public Q_SLOTS:
 		void ldPathChanged(QString path);

@@ -9,5 +9,7 @@
     <file>images/preferences.png</file>
     <file>images/pqrticles.png</file>
     <file>images/khead.png</file>
+	<file>images/georges_logo.png</file>
+	<file>images/mp_generic.png</file>
 </qresource>
 </RCC>

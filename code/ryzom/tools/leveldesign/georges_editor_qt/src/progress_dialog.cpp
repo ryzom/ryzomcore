@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QLabel>
 #include <QApplication>
 #include <QProgressBar>
+#include <QIcon>
 // STL includes
 
 // NeL includes
@@ -47,6 +48,7 @@ namespace NLQT
 		resize(250, 100);
 		_progressBar->setMinimum(0);
 		_progressBar->setMaximum(100);
+		setWindowIcon(QIcon(":/images/georges_logo.png"));
 	}
 
 	CProgressDialog::~CProgressDialog() 

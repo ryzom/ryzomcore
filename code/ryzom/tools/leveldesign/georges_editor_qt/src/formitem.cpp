@@ -22,7 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 // NeL includes
+#include <nel/misc/o_xml.h>
 #include <nel/georges/u_type.h>
+#include <nel/georges/form.h>
 
 namespace NLQT 
 {
@@ -101,18 +103,60 @@ namespace NLQT
 				case NLGEORGES::UType::SignedInt:
 				case NLGEORGES::UType::Double:
 				case NLGEORGES::UType::String:
-					nldebug(QString("string %1 %2")
-						.arg(itemData[0].toString()).arg(value.toString())
-						.toStdString().c_str());
-					parentItem->formElm->setValueByName(
-						value.toString().toStdString().c_str(),itemData[0].toString().toStdString().c_str());
+					if (parentItem->formElm->isArray())
+					{
+						//((NLGEORGES::CFormElm*)parentItem->formElm);//->arrayInsertNodeByName(
+						//if(parentItem->formElm->getArrayNode(elmName, num))
+						//{
+						//}
+
+						bool ok;
+						// TODO: the node can be renamed from eg "#0" to "foobar"
+						int arrayIndex = itemData[0].toString().remove("#").toInt(&ok);
+						if(ok)
+						{
+							NLGEORGES::UFormElm *elmt = 0;
+							if(parentItem->formElm->getArrayNode(&elmt, arrayIndex) && elmt)
+							{
+								if (elmt->isAtom()) 
+								{
+									((NLGEORGES::CFormElmAtom*)elmt)->setValue(value.toString().toStdString().c_str());
+									nldebug(QString("array element string %1 %2")
+									.arg(itemData[0].toString()).arg(value.toString())
+									.toStdString().c_str());
+								}
+							}
+						}
+					}
+					else
+					{
+						if(parentItem->formElm->setValueByName(
+							value.toString().toStdString().c_str(),
+							itemData[0].toString().toStdString().c_str()))
+						{
+							nldebug(QString("string %1 %2")
+							.arg(itemData[0].toString()).arg(value.toString())
+							.toStdString().c_str());
+						}
+						else
+						{
+							nldebug(QString("FAILED string %1 %2")
+							.arg(itemData[0].toString()).arg(value.toString())
+							.toStdString().c_str());
+						}
+					}
 					break;
 				case NLGEORGES::UType::Color:
+					nldebug("Color is TODO");
 					break;
 				default:
 					break;
 				}
 			}
+		}
+		else
+		{
+			nldebug("setting sth other than Atom");
 		}
 		//formElm->setValueByName();
 		return true;

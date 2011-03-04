@@ -41,14 +41,17 @@ using namespace NL3D;
 namespace NLQT
 {
 
-	CObjectViewerDialog::CObjectViewerDialog(QWidget *parent)
-		: QDockWidget(parent)
+	CObjectViewerDialog::CObjectViewerDialog(QWidget *parent) :QDockWidget(parent),
+		_nlw(0)
 	{
 		_ui.setupUi(this);
 
-		_nlw = dynamic_cast<QNLWidget*>(Modules::objViewInt().getWidget());
-		//_nlw->setObjectName(QString::fromUtf8("nlwidget"));
-		_ui.gridLayout->addWidget(_nlw, 0, 0);
+		if (Modules::objViewInt()) 
+		{
+			_nlw = dynamic_cast<QNLWidget*>(Modules::objViewInt()->getWidget());
+			//_nlw->setObjectName(QString::fromUtf8("nlwidget"));
+			_ui.gridLayout->addWidget(_nlw, 0, 0);
+		}
 	}
 
 	CObjectViewerDialog::~CObjectViewerDialog()
@@ -97,8 +100,10 @@ namespace NLQT
 	{
 		//nldebug("%d %d",_nlw->width(), _nlw->height());
 		QDockWidget::resizeEvent(resizeEvent);
-		if (Modules::objViewInt().getDriver())
-			Modules::objViewInt().setSizeViewport(resizeEvent->size().width(), resizeEvent->size().height());
+		if (Modules::objViewInt()) {
+			if (Modules::objViewInt()->getDriver())
+				Modules::objViewInt()->setSizeViewport(resizeEvent->size().width(), resizeEvent->size().height());
+		}
 		// The OpenGL driver does not resize automatically.
 		// The Direct3D driver breaks the window mode to include window borders when calling setMode windowed.
 

@@ -35,6 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // project includes
 #include "formitem.h"
+#include "modules.h"
 
 using namespace NLGEORGES;
 
@@ -141,7 +142,21 @@ namespace NLQT
 
 					if (value.contains(".shape")) 
 					{
-						return QIcon(":/images/pqrticles.png");
+						if (Modules::objViewInt())
+						{
+							QIcon *icon = Modules::objViewInt()->saveOneImage(value.toStdString());
+							if (icon)
+							{
+								if(icon->isNull())
+									return QIcon(":/images/pqrticles.png");
+								else
+									return QIcon(*icon);
+							}
+							else
+							{
+								return QIcon();
+							}
+						}
 					}
 					else if(value.contains(".tga") || value.contains(".png")) 
 					{
@@ -166,7 +181,14 @@ namespace NLQT
 					
 					if (value.contains(".shape")) 
 					{
-						return QIcon(":/images/pqrticles.png");
+						if (Modules::objViewInt()) 
+						{
+							QIcon *icon = Modules::objViewInt()->saveOneImage(value.toStdString());
+							if (icon->isNull())
+								return QIcon(":/images/pqrticles.png");
+							else
+								return QIcon(*icon);
+						}
 					}
 					else if(value.contains(".tga") || value.contains(".png")) 
 					{
@@ -218,6 +240,7 @@ namespace NLQT
 		if (result)
 			Q_EMIT dataChanged(index, this->index(index.row(),index.column()+1,index.parent()));
 
+		setupModelData();
 		return result;
 	}
 
@@ -385,6 +408,10 @@ namespace NLQT
 										elmtType.append("_unknownType");
 									}
 								}
+								else
+								{
+									elmtType.append("_noType");
+								}
 
 								if (numDefinitions) 
 								{
@@ -485,9 +512,6 @@ namespace NLQT
 
 							columnData << QString(elmName.c_str()) << QString(value.c_str()) << "" << elmtType;
 							parent->appendChild(new CFormItem(elmt, columnData, parent, *whereV, *whereN));
-
-							//columnData << QString(elmName.c_str()) << QString("default") << QString("default");
-							//parent->appendChild(new CFormItem(elmt, columnData, parent, UFormElm::ValueDefaultDfn, UFormElm::NodeDfn));
 						}
 					}
 					else 
@@ -510,7 +534,6 @@ namespace NLQT
 					QList<QVariant> columnData;
 					std::string value;
 					QString elmtType = "";
-					//root->getValueByName(value, elmName.c_str());
 
 					UFormElm *elmt = 0;
 					if(root->getArrayNode(&elmt,0) && elmt) 
@@ -527,6 +550,8 @@ namespace NLQT
 						}
 						if (elmt->isVirtualStruct())
 							elmtType = "VirtualStruct";
+
+						elmtType.append("_arrayValue");
 						columnData << QString(elmName.c_str()) << QString(value.c_str()) << "" << elmtType;
 						parent->appendChild(new CFormItem(elmt, columnData, parent));
 						loadFormData(elmt, parent->child(parent->childCount()-1));

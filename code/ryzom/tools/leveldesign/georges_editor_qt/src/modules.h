@@ -23,14 +23,18 @@
 #include "main_window.h"
 #include "interfaces.h"
 
+namespace NLMISC {
+	class IProgressCallback;
+}
+
 class Modules
 {
 public:
-	static void init();
+	static void init(NLMISC::IProgressCallback *cb);
 	static void release();
 	
 	static NLQT::CConfiguration &config()  { return *_configuration; }
-	static NLQT::IObjectViewer  &objViewInt() { return *_objViewerInterface; }
+	static NLQT::IObjectViewer*  objViewInt() { return _objViewerInterface; }
 	static NLQT::CMainWindow    &mainWin() { return *_mainWindow; }
 private:
 	static bool loadPlugin();

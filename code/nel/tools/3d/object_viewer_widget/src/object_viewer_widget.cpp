@@ -41,6 +41,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <nel/3d/u_3d_mouse_listener.h>
 #include <nel/3d/bloom_effect.h>
 
+// Qt includes
+#include <QIcon>
+
 // Project includes
 
 Q_EXPORT_PLUGIN2(object_viewer_widget_qt, NLQT::CObjectViewerWidget)
@@ -432,7 +435,7 @@ namespace NLQT
 		
 		CAABBox bbox;
 		Entity.getShapeAABBox(bbox);
-		setCamera(bbox , Entity, true);
+		setCamera(_Scene, bbox , Entity, true);
 
 		_MouseListener->setMatrix(_Scene->getCam().getMatrix());
 
@@ -576,7 +579,7 @@ namespace NLQT
 		_Entities.clear();
 	}
 
-	void CObjectViewerWidget::setCamera(CAABBox &bbox, UTransform &entity, bool high_z)
+	void CObjectViewerWidget::setCamera(NL3D::UScene *scene, CAABBox &bbox, UTransform &entity, bool high_z)
 	{
 		CVector pos(0.f, 0.f, 0.f);
 		CQuat quat(0.f, 0.f, 0.f, 0.f);
@@ -586,87 +589,29 @@ namespace NLQT
 		{
 			inst.getDefaultPos(pos);
 			inst.getDefaultRotQuat(quat);
-			/*
-			if (quat.getAxis().isNull())
-			{
-			quat.set(0, 0, 0, 0);
-			inst.setRotQuat(quat);
-			}
-			*/
-			//		quat.set(1.f, 1.f, 0.f, 0.f);
-
-			//		inst.setRotQuat(quat);
-			//		inst.getRotQuat(quat);
-
-			// check for presence of all textures from each sets
-			//bool allGood = true;
-
-			//for(uint s = 0; s < 5; ++s)
-			//{
-			//	inst.selectTextureSet(s);
-
-			//	uint numMat = inst.getNumMaterials();
-
-			//	// by default, all textures are present
-			//	allGood = true;
-
-			//	for(uint i = 0; i < numMat; ++i)
-			//	{
-			//		UInstanceMaterial mat = inst.getMaterial(i);
-
-			//		for(sint j = 0; j <= mat.getLastTextureStage(); ++j)
-			//		{
-			//			// if a texture is missing
-			//			if (mat.isTextureFile(j) && mat.getTextureFileName(j) == "CTextureMultiFile:Dummy")
-			//				allGood = false;
-			//		}
-			//	}
-
-			//	// if all textures have been found for this set, skip other sets
-			//	if (allGood)
-			//		break;
-			//}
 		}
 
 		// fix scale (some shapes have a different value)
 		entity.setScale(1.f, 1.f, 1.f);
 
-		UCamera Camera = _Scene->getCam();
+		UCamera Camera = scene->getCam();
 		CVector max_radius = bbox.getHalfSize();
 
 		CVector center = bbox.getCenter();
 		entity.setPivot(center);
 		center += pos;
 
-		//_Scene->getCam().setPerspective(_CameraFocal * (float)Pi/180.f, (float)w/h, 0.1f, 1000);
+		//scene->getCam().setPerspective(_CameraFocal * (float)Pi/180.f, (float)w/h, 0.1f, 1000);
 		float fov = float(_CameraFocal * (float)Pi/180.0);
 		//Camera.setPerspective (fov, 1.0f, 0.1f, 1000.0f);
 		float radius = max(max(max_radius.x, max_radius.y), max_radius.z);
 		if (radius == 0.f) radius = 1.f;
 		float left, right, bottom, top, znear, zfar;
 		Camera.getFrustum(left, right, bottom, top, znear, zfar);
-		float dist = radius / (tan(fov/2));
+		float dist = (radius / (tan(fov/2))) * 0.2;
 		CVector eye(center);
-		/*	if (axis == CVector::I)
-		eye.y -= dist+radius;
-		else if (axis == CVector::J)
-		eye.x += dist+radius;
-		*/
-		//	quat.normalize();
-
 		CVector ax(quat.getAxis());
 
-		//	float angle = quat.getAngle();
-		/*
-		if (ax.isNull())
-		{
-		if (int(angle*100.f) == int(NLMISC::Pi * 200.f))
-		{
-		ax = CVector::J;
-		}
-		}
-		else 
-		*/
 		if (ax.isNull() || ax == CVector::I)
 		{
 			ax = CVector::J;
@@ -675,12 +620,6 @@ namespace NLQT
 		{
 			ax = -CVector::J;
 		}
-		/*	else if (ax.x < -0.9f && ax.y == 0.f && ax.z == 0.f)
-		{
-		ax = -CVector::J ;
-		}
-		*/
-		//	ax.normalize();
 
 		eye -= ax * (dist+radius);
 		if (high_z)
@@ -711,6 +650,73 @@ namespace NLQT
 		_Driver->enableLight(0);
 
 		return true;
+	}
+
+	QIcon* CObjectViewerWidget::saveOneImage(string shapename)
+	{
+		int output_width = 128;
+		int output_height = 128;
+
+		// Create a scene
+		NL3D::UScene* Scene = _Driver->createScene(true);
+		if (!Scene) return 0;
+
+		// get scene camera
+		if (Scene->getCam().empty())
+		{
+			nlwarning("can't get camera from scene");
+			return 0;
+		}
+
+		// add an entity to the scene
+		UInstance Entity = Scene->createInstance(shapename.c_str());
+
+		// if we can't create entity, skip it
+		if (Entity.empty())
+		{
+			nlwarning("can't create instance from %s", shapename.c_str());
+			return 0;
+		}
+
+		// get AABox of Entity
+		CAABBox bbox;
+		Entity.getShapeAABBox(bbox);
+		setCamera(Scene, bbox , Entity, true);
+		Scene->getCam().setPerspective(_CameraFocal * (float)Pi/180.f, (float)output_width/output_height, 0.1f, 1000);
+
+		string filename = CPath::standardizePath("") + toString("%s.%s", shapename.c_str(), "png");
+
+		// the background is white
+		_Driver->clearBuffers();
+
+		// render the scene
+		Scene->render();
+
+		CBitmap btm;
+		_Driver->getBuffer(btm);
+
+		btm.resample(output_width, output_height);
+
+		COFile fs;
+
+		if (fs.open(filename))
+		{
+			if (!btm.writePNG(fs, 24))
+			{
+				nlwarning("can't save image to PNG");
+				return 0;
+			}
+		}
+		else
+		{
+			nlwarning("can't create %s", "test.png");
+			return 0;
+		}
+		fs.close();
+
+		QIcon *icon	= new QIcon(QString(filename.c_str()));
+		//CFile::deleteFile(filename);
+		return icon;
 	}
 
 #if defined(NL_OS_WINDOWS)
