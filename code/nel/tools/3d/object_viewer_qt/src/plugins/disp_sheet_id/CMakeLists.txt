@@ -9,12 +9,11 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
 SET(OVQT_DISP_SHEET_ID_PLUGIN_HDR
-			bin_reader.h
-			dialog.h
+			sheet_id_view.h
 			disp_sheet_id_plugin.h)
 
 SET(OVQT_DISP_SHEET_ID_PLUGIN_UIS
-				dialog.ui)
+				sheet_id_view.ui)
 
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
@@ -29,7 +28,7 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(ovqt_plugin_disp_sheet_id MODULE ${SRC} ${OVQT_DISP_SHEET_ID_PLUGIN_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_DISP_SHEET_ID_PLUGIN_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(ovqt_plugin_disp_sheet_id nelmisc nel3d ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(ovqt_plugin_disp_sheet_id ovqt_plugin_core nelmisc nel3d ${QT_LIBRARIES})
 
 IF(WITH_STLPORT)
   TARGET_LINK_LIBRARIES(ovqt_plugin_disp_sheet_id ${CMAKE_THREAD_LIBS_INIT})

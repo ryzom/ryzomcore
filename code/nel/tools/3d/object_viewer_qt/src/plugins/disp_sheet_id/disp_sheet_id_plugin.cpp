@@ -1,5 +1,27 @@
+// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+// Project includes
 #include "disp_sheet_id_plugin.h"
-#include "dialog.h"
+#include "sheet_id_view.h"
+#include "../core/icore.h"
+#include "../core/imenu_manager.h"
+#include "../core/core_constants.h"
+
+// Qt includes
 #include <QtCore/QObject>
 #include <QtGui/QMessageBox>
 #include <QtGui/QMainWindow>
@@ -7,43 +29,38 @@
 #include <QtGui/QAction>
 #include <QtGui/QMenuBar>
 
-#include "../../extension_system/iplugin_spec.h"
-
+// NeL includes
 #include "nel/misc/debug.h"
 
-using namespace Plugin;
+using namespace SheetIdViewPlugin;
 
-bool MyPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
+bool DispSheetIdPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
-	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
-	if (!wnd)
-	{
-		*errorString = tr("Not found QMainWindow Object Viewer Qt.");
-		return false;
-	}
 	return true;
 }
 
-void MyPlugin::extensionsInitialized()
+void DispSheetIdPlugin::extensionsInitialized()
 {
-	QMenu *toolsMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.Tools"));
-	nlassert(toolsMenu);
+	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
 
-	QAction *newAction = toolsMenu->addAction("Display sheet id");
+	QMenu *sheetMenu = menuManager->menu(Core::Constants::M_SHEET);
+	QAction *sheetIdViewAction = sheetMenu->addAction(tr("Sheet id view"));
+	menuManager->registerAction(sheetIdViewAction, "SheetIdView");
+	connect(sheetIdViewAction, SIGNAL(triggered()), this, SLOT(execBuilderDialog()));
 
-	connect(newAction, SIGNAL(triggered()), this, SLOT(execMessageBox()));
+	connect(sheetIdViewAction, SIGNAL(triggered()), this, SLOT(execMessageBox()));
 }
 
-void MyPlugin::execMessageBox()
+void DispSheetIdPlugin::execMessageBox()
 {
-	Dialog dialog;
+	SheetIdView dialog;
 	dialog.show();
 	dialog.exec();
 }
 
-void MyPlugin::setNelContext(NLMISC::INelContext *nelContext)
+void DispSheetIdPlugin::setNelContext(NLMISC::INelContext *nelContext)
 {
 #ifdef NL_OS_WINDOWS
 	// Ensure that a context doesn't exist yet.
@@ -53,45 +70,31 @@ void MyPlugin::setNelContext(NLMISC::INelContext *nelContext)
 	_LibContext = new NLMISC::CLibraryContext(*nelContext);
 }
 
-QString MyPlugin::name() const
+QString DispSheetIdPlugin::name() const
 {
 	return "Display sheet id";
 }
 
-QString MyPlugin::version() const
+QString DispSheetIdPlugin::version() const
 {
-	return "0.1";
+	return "1.0";
 }
 
-QString MyPlugin::vendor() const
+QString DispSheetIdPlugin::vendor() const
 {
 	return "pemeon";
 }
 
-QString MyPlugin::description() const
+QString DispSheetIdPlugin::description() const
 {
 	return "Display sheet id";
 }
 
-QList<QString> MyPlugin::dependencies() const
+QStringList DispSheetIdPlugin::dependencies() const
 {
-	return QList<QString>();
+	QStringList list;
+	list.append(Core::Constants::OVQT_CORE_PLUGIN);
+	return list;
 }
 
-QObject* MyPlugin::objectByName(const QString &name) const
-{
-	Q_FOREACH (QObject *qobj, _plugMan->allObjects())
-	if (qobj->objectName() == name)
-		return qobj;
-	return 0;
-}
-
-ExtensionSystem::IPluginSpec *MyPlugin::pluginByName(const QString &name) const
-{
-	Q_FOREACH (ExtensionSystem::IPluginSpec *spec, _plugMan->plugins())
-	if (spec->name() == name)
-		return spec;
-	return 0;
-}
-
-Q_EXPORT_PLUGIN(MyPlugin)
+Q_EXPORT_PLUGIN(DispSheetIdPlugin)

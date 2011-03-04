@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>SheetIdView</class>
+ <widget class="QDialog" name="SheetIdView">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>508</width>
-    <height>531</height>
+    <width>426</width>
+    <height>393</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Sheet Id View</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTableWidget" name="table"/>
+    <widget class="QTableWidget" name="table">
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -33,16 +37,9 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="browseButton">
-       <property name="text">
-        <string>Browse</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="reloadButton">
        <property name="text">
-        <string>Display</string>
+        <string>Fill table</string>
        </property>
       </widget>
      </item>
@@ -63,7 +60,7 @@
   <connection>
    <sender>endButton</sender>
    <signal>clicked()</signal>
-   <receiver>Dialog</receiver>
+   <receiver>SheetIdView</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
