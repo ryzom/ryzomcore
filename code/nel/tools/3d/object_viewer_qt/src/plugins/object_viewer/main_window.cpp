@@ -241,14 +241,14 @@ void CMainWindow::settings()
 
 void CMainWindow::updateStatusBar()
 {
-/*	if (_isGraphicsInitialized)
-	{
-		_statusInfo->setText(QString("%1, Nb tri: %2 , Texture used (Mb): %3 , fps: %4  ").arg(
-								 Modules::objView().getDriver()->getVideocardInformation()).arg(
-								 _numTri).arg(
-								 _texMem, 0,'f',4).arg(
-								 _fps, 0,'f',2));
-	}*/
+	/*	if (_isGraphicsInitialized)
+		{
+			_statusInfo->setText(QString("%1, Nb tri: %2 , Texture used (Mb): %3 , fps: %4  ").arg(
+									 Modules::objView().getDriver()->getVideocardInformation()).arg(
+									 _numTri).arg(
+									 _texMem, 0,'f',4).arg(
+									 _fps, 0,'f',2));
+		}*/
 }
 
 void CMainWindow::createActions()
@@ -285,10 +285,10 @@ void CMainWindow::createActions()
 void CMainWindow::createMenus()
 {
 	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
-	
+
 	// register actions for file menu
 	menuManager->registerAction(_openAction, "ObjectViewer.File.Open");
-	
+
 	// add actions in file menu
 	QMenu *fileMenu = menuManager->menu(Core::Constants::M_FILE);
 	QAction *exitAction = menuManager->action(Core::Constants::EXIT);
@@ -301,7 +301,7 @@ void CMainWindow::createMenus()
 	menuManager->registerAction(_resetSceneAction, "ObjectViewer.View.ResetScene");
 	menuManager->registerAction(_reloadTexturesAction, "ObjectViewer.View.ReloadTextures");
 	menuManager->registerAction(_saveScreenshotAction, "ObjectViewer.View.SaveScreenshot");
-	
+
 	// add actions in view menu
 	QMenu *viewMenu = menuManager->menu(Core::Constants::M_VIEW);
 	viewMenu->addAction(_setBackColorAction);
@@ -313,40 +313,44 @@ void CMainWindow::createMenus()
 	// add actions in tools menu
 	QMenu *toolsMenu = menuManager->menu(Core::Constants::M_TOOLS);
 	QAction *settingsAction = menuManager->action(Core::Constants::SETTINGS);
-	toolsMenu->insertAction(settingsAction ,_AnimationDialog->toggleViewAction());
+	QMenu *ovMenu = new QMenu("Object Viewer", this);
+	menuManager->registerMenu(ovMenu, "ObjectViewerQt.ObjectViewer");
+	toolsMenu->insertMenu(settingsAction, ovMenu);
+
+	ovMenu->insertAction(settingsAction ,_AnimationDialog->toggleViewAction());
 	_AnimationDialog->toggleViewAction()->setIcon(QIcon(":/images/anim.png"));
 
-	toolsMenu->insertAction(settingsAction ,_AnimationSetDialog->toggleViewAction());
+	ovMenu->insertAction(settingsAction ,_AnimationSetDialog->toggleViewAction());
 	_AnimationSetDialog->toggleViewAction()->setIcon(QIcon(":/images/animset.png"));
 
-	toolsMenu->insertAction(settingsAction ,_SlotManagerDialog->toggleViewAction());
+	ovMenu->insertAction(settingsAction ,_SlotManagerDialog->toggleViewAction());
 	_SlotManagerDialog->toggleViewAction()->setIcon(QIcon(":/images/mixer.png"));
 
-	toolsMenu->insertAction(settingsAction ,_ParticleControlDialog->toggleViewAction());
+	ovMenu->insertAction(settingsAction ,_ParticleControlDialog->toggleViewAction());
 	_ParticleControlDialog->toggleViewAction()->setIcon(QIcon(":/images/pqrticles.png"));
 
-	toolsMenu->insertAction(settingsAction ,_DayNightDialog->toggleViewAction());
+	ovMenu->insertAction(settingsAction ,_DayNightDialog->toggleViewAction());
 	_DayNightDialog->toggleViewAction()->setIcon(QIcon(":/images/dqynight.png"));
 
-	toolsMenu->insertAction(settingsAction ,_WaterPoolDialog->toggleViewAction());
+	ovMenu->insertAction(settingsAction ,_WaterPoolDialog->toggleViewAction());
 	_WaterPoolDialog->toggleViewAction()->setIcon(QIcon(":/images/water.png"));
 	_WaterPoolDialog->toggleViewAction()->setEnabled(false);
 
-	toolsMenu->insertAction(settingsAction ,_VegetableDialog->toggleViewAction());
+	ovMenu->insertAction(settingsAction ,_VegetableDialog->toggleViewAction());
 	_VegetableDialog->toggleViewAction()->setIcon(QIcon(":/images/veget.png"));
 
-	toolsMenu->insertAction(settingsAction ,_GlobalWindDialog->toggleViewAction());
+	ovMenu->insertAction(settingsAction ,_GlobalWindDialog->toggleViewAction());
 	_GlobalWindDialog->toggleViewAction()->setIcon(QIcon(":/images/wind.png"));
 
-	toolsMenu->insertAction(settingsAction ,_SkeletonScaleDialog->toggleViewAction());
+	ovMenu->insertAction(settingsAction ,_SkeletonScaleDialog->toggleViewAction());
 	_SkeletonScaleDialog->toggleViewAction()->setIcon(QIcon(":/images/ico_skelscale.png"));
 
-	toolsMenu->insertAction(settingsAction ,_TuneTimerDialog->toggleViewAction());
+	ovMenu->insertAction(settingsAction ,_TuneTimerDialog->toggleViewAction());
 	_TuneTimerDialog->toggleViewAction()->setIcon(QIcon(":/images/ico_framedelay.png"));
 
-	toolsMenu->insertAction(settingsAction ,_SunColorDialog->toggleViewAction());
+	ovMenu->insertAction(settingsAction ,_SunColorDialog->toggleViewAction());
 
-	toolsMenu->insertAction(settingsAction ,_TuneMRMDialog->toggleViewAction());
+	ovMenu->insertAction(settingsAction ,_TuneMRMDialog->toggleViewAction());
 	_TuneMRMDialog->toggleViewAction()->setIcon(QIcon(":/images/ico_mrm_mesh.png"));
 
 	connect(_ParticleControlDialog->toggleViewAction(), SIGNAL(triggered(bool)),
@@ -355,7 +359,7 @@ void CMainWindow::createMenus()
 	connect(_ParticleControlDialog->toggleViewAction(), SIGNAL(triggered(bool)),
 			_ParticleWorkspaceDialog->_PropertyDialog, SLOT(setVisible(bool)));
 
-	toolsMenu->insertAction(settingsAction ,_settingsAction);
+	ovMenu->insertAction(settingsAction ,_settingsAction);
 	toolsMenu->insertSeparator(settingsAction);
 }
 
@@ -367,7 +371,7 @@ void CMainWindow::createToolBars()
 	//_viewToolBar = addToolBar(tr("&Edit"));
 
 	_toolsBar = addToolBar(tr("&Tools"));
-	
+
 	_toolsBar->addAction(_setBackColorAction);
 	_toolsBar->addSeparator();
 

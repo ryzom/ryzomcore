@@ -48,34 +48,34 @@ public:
 
 	/**
 	@brief Called after the plugin has been loaded and the IPlugin instance has been created.
-	
+
 	@details The initialize methods of plugins that depend
-    on this plugin are called after the initialize method of this plugin
-    has been called. Plugins should initialize their internal state in this
-    method. Returns if initialization of successful. If it wasn't successful,
-    the \a errorString should be set to a user-readable message
-    describing the reason.
+	on this plugin are called after the initialize method of this plugin
+	has been called. Plugins should initialize their internal state in this
+	method. Returns if initialization of successful. If it wasn't successful,
+	the \a errorString should be set to a user-readable message
+	describing the reason.
 	*/
 	virtual bool initialize(IPluginManager *pluginManager, QString *errorString) = 0;
 
 	/**
 	@brief Called after the IPlugin::initialize() method has been called,
-    and after both the IPlugin::initialize() and IPlugin::extensionsInitialized()
-    methods of plugins that depend on this plugin have been called.
+	and after both the IPlugin::initialize() and IPlugin::extensionsInitialized()
+	methods of plugins that depend on this plugin have been called.
 
-    @details In this method, the plugin can assume that plugins that depend on
-    this plugin are fully 'up and running'. It is a good place to
-    look in the plugin manager's object pool for objects that have
-    been provided by dependent plugins.
+	@details In this method, the plugin can assume that plugins that depend on
+	this plugin are fully 'up and running'. It is a good place to
+	look in the plugin manager's object pool for objects that have
+	been provided by dependent plugins.
 	*/
 	virtual void extensionsInitialized() = 0;
 
 	/**
 	@\brief Called during a shutdown sequence in the same order as initialization
-    before the plugins get deleted in reverse order.
-    
+	before the plugins get deleted in reverse order.
+
 	@details This method should be used to disconnect from other plugins,
-    hide all UI, and optimize shutdown in general.
+	hide all UI, and optimize shutdown in general.
 	*/
 	virtual void shutdown() { }
 
