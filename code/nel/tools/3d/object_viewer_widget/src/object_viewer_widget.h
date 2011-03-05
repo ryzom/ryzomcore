@@ -45,6 +45,7 @@ namespace NL3D
 	class U3dMouseListener;
 }
 
+class QIcon;
 /**
 namespace NLQT
 @brief namespace NLQT
@@ -153,8 +154,10 @@ namespace NLQT
 		/// @return pointer to the UPlayListManager
 		inline NL3D::UPlayListManager *getPlayListManager() { return _PlayListManager; }
 
-		void setCamera(NLMISC::CAABBox &bbox, NL3D::UTransform &entity, bool high_z);
+		void setCamera(NL3D::UScene *scene, NLMISC::CAABBox &bbox, NL3D::UTransform &entity, bool high_z=false);
 		bool setupLight(const NLMISC::CVector &position, const NLMISC::CVector &direction);
+
+		QIcon* saveOneImage(std::string shapename);
 
 		virtual void setVisible(bool visible);
 

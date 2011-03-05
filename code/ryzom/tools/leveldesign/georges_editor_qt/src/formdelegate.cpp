@@ -58,7 +58,13 @@ namespace NLQT
 		if (value.isEmpty() || !mp || !m)
 			return 0;
 
-		const NLGEORGES::UType *type = m->getItem(mp->mapToSource(index))->getFormElm()->getType();
+		CFormItem* curItem = m->getItem(mp->mapToSource(index));
+		NLGEORGES::UFormElm *curElm = curItem->getFormElm();
+		if (!curElm) {
+			// TODO: create new Element
+			return 0;
+		}
+		const NLGEORGES::UType *type = curElm->getType();
 		if(type) 
 		{
 			int numDefinitions = type->getNumDefinition();
@@ -273,36 +279,36 @@ namespace NLQT
 		//option.decorationAlignment = QStyleOptionViewItem::Right;
 	}
 
-	void FormDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
-	{
-		QStyleOptionViewItemV4 optionV4 = option;
-		optionV4.decorationPosition = QStyleOptionViewItem::Right;
-		//optionV4.decorationSize = QSize(32,32);
-		initStyleOption(&optionV4, index);
+	//void FormDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+	//{
+	//	QStyleOptionViewItemV4 optionV4 = option;
+	//	optionV4.decorationPosition = QStyleOptionViewItem::Right;
+	//	//optionV4.decorationSize = QSize(32,32);
+	//	initStyleOption(&optionV4, index);
 
-		QStyledItemDelegate::paint(painter,optionV4,index);
+	//	QStyledItemDelegate::paint(painter,optionV4,index);
 
-		//QStyle *style = optionV4.widget? optionV4.widget->style() : QApplication::style();
+	//	//QStyle *style = optionV4.widget? optionV4.widget->style() : QApplication::style();
 
-		//QTextDocument doc;
-		//doc.setHtml(optionV4.text);
+	//	//QTextDocument doc;
+	//	//doc.setHtml(optionV4.text);
 
-		///// Painting item without text
-		//optionV4.text = QString();
-		//style->drawControl(QStyle::CE_ItemViewItem, &optionV4, painter);
+	//	///// Painting item without text
+	//	//optionV4.text = QString();
+	//	//style->drawControl(QStyle::CE_ItemViewItem, &optionV4, painter);
 
-		//QAbstractTextDocumentLayout::PaintContext ctx;
+	//	//QAbstractTextDocumentLayout::PaintContext ctx;
 
-		//// Highlighting text if item is selected
-		//if (optionV4.state & QStyle::State_Selected)
-		//    ctx.palette.setColor(QPalette::Text, optionV4.palette.color(QPalette::Active, QPalette::HighlightedText));
+	//	//// Highlighting text if item is selected
+	//	//if (optionV4.state & QStyle::State_Selected)
+	//	//    ctx.palette.setColor(QPalette::Text, optionV4.palette.color(QPalette::Active, QPalette::HighlightedText));
 
-		//QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &optionV4);
-		//painter->save();
-		//painter->translate(textRect.topLeft());
-		//painter->setClipRect(textRect.translated(-textRect.topLeft()));
-		//doc.documentLayout()->draw(painter, ctx);
-		//painter->restore();
-	}
+	//	//QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &optionV4);
+	//	//painter->save();
+	//	//painter->translate(textRect.topLeft());
+	//	//painter->setClipRect(textRect.translated(-textRect.topLeft()));
+	//	//doc.documentLayout()->draw(painter, ctx);
+	//	//painter->restore();
+	//}
 
 } /* namespace NLQT */

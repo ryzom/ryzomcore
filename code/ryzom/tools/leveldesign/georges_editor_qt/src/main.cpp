@@ -7,6 +7,7 @@
 #include <QFile>
 #include <QDateTime>
 #include <QTextStream>
+#include <QSplashScreen>
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -18,6 +19,7 @@
 
 // Project includes
 #include "modules.h"
+#include "georges_splash.h"
 
 // nel_qt log file name
 #define NLQT_LOG_FILE "nel_qt.log"
@@ -84,6 +86,11 @@ void messageHandler(QtMsgType p_type, const char* p_msg)
 sint main(int argc, char **argv)
 {
 	QApplication app(argc, argv);
+	QPixmap pixmap(":/images/georges_logo.png");
+	NLQT::CGeorgesSplash splash;
+    splash.show();
+    app.processEvents();
+
 	NLMISC::CApplicationContext myApplicationContext;
 
 #if defined(NL_OS_MAC)
@@ -120,9 +127,10 @@ sint main(int argc, char **argv)
 		NLMISC::CPath::remapExtension("tga", "png", true);
 	}
 
-	Modules::init();
+	Modules::init(&splash);
 	//Modules::mainWin().resize(800,600);
 	Modules::mainWin().show();
+	splash.close();
 	int result = app.exec();
 	Modules::release();
 	return result;

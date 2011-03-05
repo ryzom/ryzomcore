@@ -32,7 +32,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace NLGEORGES
 {
+	class UType;
 	class UForm;
+	class UFormDfn;
 	class UFormLoader;
 }
 
@@ -54,6 +56,10 @@ namespace NLQT
 
 		// Load the given form root
 		UForm* loadForm(std::string formName);
+		// Load a dfn
+		UFormDfn* loadFormDfn(std::string formName);
+		// Load a type
+		UType *loadFormType (std::string formName);
 
 		// A form loader
 		UFormLoader	*FormLoader;

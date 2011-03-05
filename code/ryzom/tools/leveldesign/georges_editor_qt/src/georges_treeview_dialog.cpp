@@ -25,10 +25,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QFileDialog>
 
 // NeL includes
-#include <nel/georges/u_form.h>
 #include <nel/misc/path.h>
 #include <nel/misc/file.h>
 #include <nel/misc/o_xml.h>
+#include <nel/georges/form.h>
 
 // Project includes
 #include "modules.h"
@@ -47,7 +47,7 @@ namespace NLQT
 	CGeorgesTreeViewDialog::CGeorgesTreeViewDialog(QWidget *parent /*= 0*/, bool emptyView /*= false*/)
 		: QDockWidget(parent)
 	{
-		 _georges = new NLQT::CGeorges;
+		_georges = new NLQT::CGeorges;
 
 		loadedForm = "";
 		_modified = false;
@@ -80,14 +80,65 @@ namespace NLQT
 	CGeorgesTreeViewDialog::~CGeorgesTreeViewDialog()
 	{
 		delete _ui.treeView->itemDelegateForColumn(1);
+		delete _form;
 		deleteLater();
 		//QSettings settings("RyzomCore", "GeorgesQt");
 		//settings.setValue("dirViewGeometry", saveGeometry());
 	}
 
-	void CGeorgesTreeViewDialog::selectedForm(QString formName) 
+	void CGeorgesTreeViewDialog::setForm(const CForm *form) 
 	{
-		_form = _georges->loadForm(formName.toStdString());
+		_form = (UForm*)form;
+	}
+
+	CForm* CGeorgesTreeViewDialog::getFormByName(const QString formName) 
+	{
+		if(NLMISC::CPath::exists(formName.toStdString()))
+		{
+			return (CForm*)_georges->loadForm(formName.toStdString());
+		}
+		else
+		{
+			CForm *form = 0;
+			// Load the DFN
+			std::string extStr = NLMISC::CFile::getExtension( formName.toStdString() );
+			QString dfnName = QString("%1.dfn").arg(extStr.c_str());
+			UFormDfn *formdfn;
+			if (NLMISC::CPath::exists(dfnName.toStdString()))
+			{
+				formdfn = _georges->loadFormDfn (dfnName.toStdString());
+				if (!formdfn)
+				{
+					nlwarning("Failed to load dfn: %s", dfnName.toStdString().c_str());
+					return 0;
+				}
+			}
+			else
+			{
+				nlwarning("Cannot find dfn: %s", dfnName.toStdString().c_str());
+				return 0;
+			}
+
+			form = new CForm;
+
+			// Build the root element
+			((CFormElmStruct*)&form->getRootNode())->build((CFormDfn*)formdfn);
+
+			uint i;
+			for (i=0; i<CForm::HeldElementCount; i++)
+			{
+				((CFormElmStruct*)(((CForm*)form)->HeldElements[i]))->build ((CFormDfn*)formdfn);
+			}
+			return form;
+		}
+		return 0;
+	}
+
+	void CGeorgesTreeViewDialog::loadFormIntoDialog(CForm *form) 
+	{
+
+		if(form)
+			_form = form;
 
 		if (_form) 
 		{
@@ -118,7 +169,7 @@ namespace NLQT
 			Q_FOREACH(std::string str, dependencies) 
 			{
 				QString file = str.c_str();
-				if (file == formName) continue;
+				if (str == _form->getFilename()) continue;
 				deps[file.remove(0,file.indexOf(".")+1)] << str.c_str();
 			}
 			nlinfo("typ's %d",deps["typ"].count());
@@ -127,7 +178,7 @@ namespace NLQT
 			//nlwarning(strList.join(";").toStdString().c_str());
 			if (root) 
 			{
-				loadedForm = formName;
+				loadedForm = _form->getFilename().c_str();
 
 				CGeorgesFormModel *model = new CGeorgesFormModel(root,deps,comments,parents);
 				CGeorgesFormProxyModel *proxyModel = new CGeorgesFormProxyModel();
@@ -145,10 +196,15 @@ namespace NLQT
 				connect(model, SIGNAL(dataChanged(const QModelIndex, const QModelIndex)),
 					this, SLOT(modifiedFile()));
 
-				Modules::mainWin().setWindowTitle("Qt Georges Editor - " + formName);
+				Modules::mainWin().setWindowTitle("Qt Georges Editor - " + loadedForm);
 				//Modules::mainWin().getTabBar();			
 			}		
 		}
+	}
+
+	void CGeorgesTreeViewDialog::addParentForm(CForm *form) 
+	{
+		((CForm*)_form)->insertParent(((CForm*)_form)->getParentCount(), form->getFilename().c_str(), form);
 	}
 
 	void CGeorgesTreeViewDialog::modifiedFile( ) 
@@ -249,7 +305,7 @@ namespace NLQT
 		CGeorgesFormModel *m = 
 			dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());
 		QModelIndex in = mp->mapToSource(index);
-	
+
 		// col containing additional stuff like icons
 		if (index.column() == 2) 
 		{
@@ -279,9 +335,12 @@ namespace NLQT
 			{
 				if (path.contains(".shape"))
 				{
-					Modules::objViewInt().resetScene();
-					//Modules::config().configRemapExtensions();
-					Modules::objViewInt().loadMesh(path.toStdString(),"");
+					if (Modules::objViewInt()) 
+					{
+						Modules::objViewInt()->resetScene();
+						//Modules::config().configRemapExtensions();
+						Modules::objViewInt()->loadMesh(path.toStdString(),"");
+					}
 					return;
 				}
 			} 
@@ -289,7 +348,7 @@ namespace NLQT
 			// open eg parent files
 			if (!path.isEmpty())
 				Q_EMIT changeFile(path);
-			
+
 		}
 	}
 

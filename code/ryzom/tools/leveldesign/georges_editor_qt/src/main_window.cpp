@@ -24,11 +24,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtGui/QtGui>
 
 // NeL includes
+#include <nel/misc/path.h>
 
 // Project includes
 #include "modules.h"
 #include "settings_dialog.h"
 #include "log_dialog.h"
+#include "new_dialog.h"
 #include "objectviewer_dialog.h"
 #include "georges_dirtree_dialog.h"
 #include "georges_treeview_dialog.h"
@@ -60,16 +62,16 @@ namespace NLQT
 		_currentView = 0;
 
 		// load and set leveldesign path from config
-		QString ldPath = Modules::config().
+		_leveldesignPath = Modules::config().
 			getValue("LeveldesignPath", QString("").toStdString()).c_str();
-		QFileInfo info(ldPath);
+		QFileInfo info(_leveldesignPath);
 		if (!info.isDir()) 
-			ldPath = "";
+			_leveldesignPath = "";
 
 		// create georges dir dock widget
-		_GeorgesDirTreeDialog = new CGeorgesDirTreeDialog(ldPath, this);
+		_GeorgesDirTreeDialog = new CGeorgesDirTreeDialog(_leveldesignPath, this);
 		addDockWidget(Qt::LeftDockWidgetArea, _GeorgesDirTreeDialog);
-		if (ldPath == "") 
+		if (_leveldesignPath == "") 
 		{
 			if (QMessageBox::information(this, tr("Missing leveldesign path"), 
 				tr("Your leveldesign path seems to be empty or incorrect.\nDo you want to set it now?"),
@@ -101,8 +103,8 @@ namespace NLQT
 		connect(_statusBarTimer, SIGNAL(timeout()), this, SLOT(updateStatusBar()));
 		_statusBarTimer->start(5000);
 
-		connect(_GeorgesDirTreeDialog, SIGNAL(selectedForm(QString)), 
-			this, SLOT(openTreeView(QString)));
+		connect(_GeorgesDirTreeDialog, SIGNAL(selectedForm(const QString)), 
+			this, SLOT(loadFile(const QString)));
 	}
 
 	CMainWindow::~CMainWindow()
@@ -135,11 +137,11 @@ namespace NLQT
 	 event->accept();
 	}
 
-	void CMainWindow::openTreeView(QString file) 
+	CGeorgesTreeViewDialog * CMainWindow::createTreeView(QString file) 
 	{
 		// create or/and raise tree view dock widget for current file
 
-		setCurrentFile(file);
+		//setCurrentFile(file);
 
 		CGeorgesTreeViewDialog *newView = 0;
 
@@ -172,7 +174,9 @@ namespace NLQT
 			}
 
 			_treeViewList.append(newView);
-			newView->selectedForm(file);
+			
+			//newView->selectedForm(file);
+			
 			_currentView = newView;
 
 			connect(newView, SIGNAL(changeFile(QString)), 
@@ -182,6 +186,8 @@ namespace NLQT
 		}
 		QApplication::processEvents();
 		newView->raise();
+
+		return newView;
 	}
 
 	void CMainWindow::settings()
@@ -210,33 +216,9 @@ namespace NLQT
 
 	void CMainWindow::open()
 	{
-		/*QStringList fileNames = QFileDialog::getOpenFileNames(this,
-		tr("Open NeL data file"), _lastDir,
-		tr("All NeL files (*.shape *.ps);;"
-		"NeL shape files (*.shape);;"
-		"NeL particle system files (*.ps)"));
-
-		setCursor(Qt::WaitCursor);
-		if (!fileNames.isEmpty()) 
-		{
-		QStringList list = fileNames;
-		QStringList::Iterator it = list.begin();
-		_lastDir = QFileInfo(*it).absolutePath();
-
-		QString skelFileName = QFileDialog::getOpenFileName(this,
-		tr("Open skeleton file"), _lastDir,
-		tr("NeL skeleton file (*.skel)"));
-
-		while(it != list.end()) 
-		{
-		loadFile(*it, skelFileName);
-		++it;
-		}
-		_AnimationSetDialog->updateListObject();
-		_AnimationSetDialog->updateListAnim();
-		_SlotManagerDialog->updateUiSlots();
-		}
-		setCursor(Qt::ArrowCursor);*/
+		// TODO: FileDialog & loadFile();
+		QString fileName = QFileDialog::getOpenFileName();
+		loadFile(fileName);
 	}
 
 	void CMainWindow::save()
@@ -246,6 +228,21 @@ namespace NLQT
 
 		setCursor(Qt::WaitCursor);
 
+		//TODO: if not exists open FileDialog SaveAs...
+		if(!CPath::exists(_currentView->loadedForm.toStdString()))
+		{
+			QString fileName = QFileDialog::getSaveFileName(
+				this,
+				QString(),
+				_currentView->loadedForm
+				);
+			QFile file(fileName);
+	        file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+			file.close();
+			CPath::addSearchFile(fileName.toStdString());
+				//QFileInfo info = QFileInfo(file);
+				//m->setData(in2, info.fileName());
+		}
 		_currentView->write();
 		setWindowTitle(windowTitle().remove("*"));
 		_saveAction->setEnabled(false);
@@ -255,6 +252,31 @@ namespace NLQT
 
 	void CMainWindow::create()
 	{
+		QStringList lst;
+		CGeorgesNewDialog dlg(lst);
+		dlg.exec();
+		qDebug() << lst;
+		if (!lst.isEmpty() && !lst.at(0).isEmpty()) 
+		{
+			QString formName = lst.takeFirst();
+			CGeorgesTreeViewDialog * newView = 0;
+			newView = createTreeView(formName);
+			CForm* form = newView->getFormByName(formName);
+			newView->setForm(form);
+			
+			Q_FOREACH(QString dep, lst)
+			{
+				newView->addParentForm(newView->getFormByName(dep));
+			}
+			newView->loadFormIntoDialog();
+			//TODO: look into setFilename for new Form object
+			if(newView->loadedForm.isEmpty())
+			{
+				newView->loadedForm = formName;
+				setWindowTitle("Qt Georges Editor - " + formName);
+			}
+			newView->modifiedFile();
+		}
 	}
 
 	void CMainWindow::createEmptyView(QDockWidget* w)
@@ -442,6 +464,24 @@ namespace NLQT
 		}
 	}
 
+	void CMainWindow::loadFile(QString fileName){
+		QFileInfo info(fileName);
+		fileName = info.fileName();
+		// TODO: make georges static and stuff
+		CGeorgesTreeViewDialog *newView = new CGeorgesTreeViewDialog;
+		CForm *form = newView->getFormByName(fileName);
+		if (form)
+		{
+			delete newView;
+			newView = createTreeView(fileName);
+			newView->setForm(form);
+			newView->loadFormIntoDialog(form);
+			setCurrentFile(fileName);
+			return;
+		}
+		delete newView;
+	}
+
 	void CMainWindow::openRecentFile()
 	{
 		QAction *action = qobject_cast<QAction *>(sender());
@@ -496,28 +536,6 @@ namespace NLQT
 
 		_separatorAction->setVisible(numRecentFiles > 0);
 	}
-
-	void CMainWindow::loadFile(const QString &fileName)
-	{
-		/*QFile file(fileName);
-		if (!file.open(QFile::ReadOnly | QFile::Text)) {
-		QMessageBox::warning(this, tr("Recent Files"),
-		tr("Cannot read file %1:\n%2.")
-		.arg(fileName)
-		.arg(file.errorString()));
-		return;
-		}
-
-		QTextStream in(&file);
-		QApplication::setOverrideCursor(Qt::WaitCursor);
-		textEdit->setPlainText(in.readAll());
-		QApplication::restoreOverrideCursor();*/
-
-		openTreeView(fileName);
-		setCurrentFile(fileName);
-		//statusBar()->showMessage(tr("File loaded"), 2000);
-	}
-
 } /* namespace NLQT */
 
 /* end of file */

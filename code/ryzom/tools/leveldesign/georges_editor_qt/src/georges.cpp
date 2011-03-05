@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // NeL includes
 #include <nel/georges/u_form_loader.h>
 #include <nel/georges/u_form.h>
+#include <nel/georges/u_type.h>
 
 // Project includes
 
@@ -46,6 +47,20 @@ namespace NLQT
 		UForm *form = FormLoader->loadForm(formName.c_str());
 
 		return form;
+	}
+
+	UFormDfn *CGeorges::loadFormDfn(std::string formName) 
+	{
+		UFormDfn *formdfn = FormLoader->loadFormDfn(formName.c_str());
+
+		return formdfn;
+	}
+
+	UType *CGeorges::loadFormType(std::string formName) 
+	{
+		UType *type = FormLoader->loadFormType(formName.c_str());
+
+		return type;
 	}
 
 } /* namespace NLQT */

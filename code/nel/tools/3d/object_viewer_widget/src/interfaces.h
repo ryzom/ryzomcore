@@ -67,11 +67,12 @@ namespace NLQT
 		virtual NL3D::UDriver *getDriver() = 0;
 		virtual NL3D::UScene *getScene() = 0;
 		virtual NL3D::UPlayListManager *getPlayListManager() = 0;
-		virtual void setCamera(NLMISC::CAABBox &bbox, NL3D::UTransform &entity, bool high_z) = 0;
+		virtual void setCamera(NL3D::UScene *scene, NLMISC::CAABBox &bbox, NL3D::UTransform &entity, bool high_z) = 0;
 		virtual bool setupLight(const NLMISC::CVector &position, const NLMISC::CVector &direction) = 0;
 		virtual void setVisible(bool visible) = 0;
 		virtual QWidget* getWidget() = 0;
 		virtual void setNelContext(NLMISC::INelContext &nelContext) = 0;
+		virtual QIcon* saveOneImage(std::string shapename) = 0;
 
 	};
 
