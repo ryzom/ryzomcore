@@ -321,7 +321,7 @@ void CTextureGradientInterface::displayValue(uint index, QListWidgetItem *item)
 		std::string texName = (static_cast<NL3D::CTextureFile *>(tex.getPtr()))->getFileName().c_str();
 		if (!texName.empty())
 		{
-			pixmap.load(NLMISC::CPath::lookup(texName).c_str());
+			pixmap.load(NLMISC::CPath::lookup(texName, false).c_str());
 			item->setText(texName.c_str());
 		}
 		else

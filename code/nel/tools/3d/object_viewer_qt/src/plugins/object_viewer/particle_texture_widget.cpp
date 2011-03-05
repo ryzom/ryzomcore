@@ -112,24 +112,31 @@ void CParticleTextureWidget::updateTexture()
 	_ui.nameLabel->setText(tr("Name:"));
 	_ui.sizeLabel->setText(tr("Size:"));
 	_ui.depthLabel->setText(tr("Depth:"));
+	_ui.imageLabel->setText("");
+	_ui.imageLabel->setPixmap(QPixmap());
 	if (!_Texture)
-	{
-		_ui.imageLabel->setPixmap(QPixmap());
 		return;
-	}
 	if (dynamic_cast<NL3D::CTextureFile *>(_Wrapper->get()))
 	{
 		std::string texName = (static_cast<NL3D::CTextureFile *>(_Wrapper->get()))->getFileName().c_str();
 		_ui.nameLabel->setText(tr("Name: %1").arg(texName.c_str()));
 		if (!NLMISC::CFile::getFilename(texName).empty())
 		{
-			QPixmap pixmap(NLMISC::CPath::lookup(texName).c_str());
+			std::string path;
+			try
+			{
+				path = NLMISC::CPath::lookup(texName);
+			}
+			catch (NLMISC::Exception &e)
+			{
+				_ui.imageLabel->setText(e.what());
+				return;
+			}
+			QPixmap pixmap(path.c_str());
 			_ui.sizeLabel->setText(tr("Size: %1x%2").arg(pixmap.width()).arg(pixmap.height()));
 			_ui.depthLabel->setText(tr("Depth: %1").arg(pixmap.depth()));
 			_ui.imageLabel->setPixmap(pixmap);
 		}
-		else
-			_ui.imageLabel->setPixmap(QPixmap());
 	}
 }
 
