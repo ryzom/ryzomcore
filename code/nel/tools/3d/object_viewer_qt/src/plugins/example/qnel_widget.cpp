@@ -33,7 +33,7 @@ namespace NLQT
 {
 
 QNLWidget::QNLWidget(QWidget *parent)
-	: QWidget(parent),
+	: QNeLWidget(parent),
 	  m_driver(NULL),
 	  m_initialized(false),
 	  m_interval(25)
@@ -42,6 +42,9 @@ QNLWidget::QNLWidget(QWidget *parent)
 	setFocusPolicy(Qt::StrongFocus);
 
 	init();
+#ifdef Q_OS_LINUX
+	makeCurrent();
+#endif
 	m_mainTimer = new QTimer(this);
 	connect(m_mainTimer, SIGNAL(timeout()), this, SLOT(updateRender()));
 }

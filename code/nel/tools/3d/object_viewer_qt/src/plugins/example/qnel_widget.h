@@ -29,6 +29,15 @@
 
 class QAction;
 
+/* TODO every platform should use QWidget */
+#if defined(NL_OS_WINDOWS)
+typedef QWidget QNeLWidget;
+#elif defined(NL_OS_MAC)
+typedef QWidget QNeLWidget;
+#elif defined(NL_OS_UNIX)
+typedef QGLWidget QNeLWidget;
+#endif // NL_OS_UNIX
+
 namespace NL3D
 {
 class UDriver;
@@ -44,7 +53,7 @@ namespace NLQT
 @details Automatically begins to update the render if the widget is visible
 or suspends the updating of render if the widget is hidden.
 */
-class QNLWidget : public QWidget
+class QNLWidget : public QNeLWidget
 {
 	Q_OBJECT
 

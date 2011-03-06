@@ -15,7 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "sheet_id_view.h"
-#include "ui_dialog.h"
 
 #include "nel/misc/path.h"
 
@@ -58,7 +57,7 @@ void SheetIdView::pushToTable()
 	NLMISC::CSheetId::init(false);
 	NLMISC::CSheetId::buildIdVector(m_sheetList);
 	CPred	Pred;
-	sort(m_sheetList.begin(), m_sheetList.end(), Pred);
+	std::sort(m_sheetList.begin(), m_sheetList.end(), Pred);
 
 	// Fill table
 	m_ui.table->clear();
@@ -66,7 +65,6 @@ void SheetIdView::pushToTable()
 	m_ui.table->setColumnCount(2);
 	for (size_t i = 0; i < m_sheetList.size(); i++)
 	{
-		QApplication::processEvents();
 		QTableWidgetItem* item1 = new QTableWidgetItem(QString(m_sheetList[i].toString().c_str()));
 		QTableWidgetItem* item2 = new QTableWidgetItem(QString("%1").arg(m_sheetList[i].asInt()));
 		m_ui.table->setItem(i,1,item1);

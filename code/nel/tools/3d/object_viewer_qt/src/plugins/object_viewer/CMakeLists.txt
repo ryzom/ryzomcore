@@ -146,6 +146,11 @@ TARGET_LINK_LIBRARIES(ovqt_plugin_object_viewer
 			${QT_QTOPENGL_LIBRARY})
 
 NL_DEFAULT_PROPS(ovqt_plugin_object_viewer "NeL, Tools, 3D: Object Viewer Qt Plugin: Object Viewer")
+
+IF(WITH_PCH)
+  ADD_NATIVE_PRECOMPILED_HEADER(ovqt_plugin_object_viewer ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+ENDIF(WITH_PCH)
+
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_object_viewer)
 NL_ADD_LIB_SUFFIX(ovqt_plugin_object_viewer)
 

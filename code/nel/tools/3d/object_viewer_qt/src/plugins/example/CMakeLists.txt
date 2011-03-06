@@ -30,7 +30,7 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(ovqt_plugin_example MODULE ${SRC} ${OVQT_PLUG_EXAMPLE_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_EXAMPLE_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(ovqt_plugin_example ovqt_plugin_core nelmisc nel3d ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(ovqt_plugin_example ovqt_plugin_core nelmisc nel3d ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
 
 NL_DEFAULT_PROPS(ovqt_plugin_example "NeL, Tools, 3D: Object Viewer Qt Plugin: Example")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_example)
