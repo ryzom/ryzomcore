@@ -36,7 +36,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <nel/misc/debug.h>
 
 // Project includes
-#include "../../extension_system/iplugin_spec.h"
+#include "../core/icore.h"
+#include "../core/core_constants.h"
+#include "../core/imenu_manager.h"
 #include "qt_displayer.h"
 
 using namespace Plugin;
@@ -53,6 +55,9 @@ CLogPlugin::CLogPlugin(QWidget *parent): QDockWidget(parent)
 
 CLogPlugin::~CLogPlugin() 
 {
+	_plugMan->removeObject(_logSettingsPage);
+	delete _logSettingsPage;
+
 	NLMISC::ErrorLog->removeDisplayer(_displayer);
 	NLMISC::WarningLog->removeDisplayer(_displayer);
 	NLMISC::DebugLog->removeDisplayer(_displayer);
@@ -65,31 +70,28 @@ bool CLogPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 {
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
-	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
-	if (!wnd)
-	{
-		*errorString = tr("Not found QMainWindow Object Viewer Qt.");
-		return false;
-	}
-	_plugMan->addObject(new CLogSettingsPage(this));
+	_logSettingsPage = new CLogSettingsPage(this);
+	_plugMan->addObject(_logSettingsPage);
 	return true;
 }
 
 void CLogPlugin::extensionsInitialized()
 {
-	QMenu *helpMenu = qobject_cast<QMenu *>(objectByName("ovqt.Menu.View"));
-	helpMenu->addSeparator();
-
 	NLMISC::ErrorLog->addDisplayer(_displayer);
 	NLMISC::WarningLog->addDisplayer(_displayer);
 	NLMISC::DebugLog->addDisplayer(_displayer);
 	NLMISC::AssertLog->addDisplayer(_displayer);
 	NLMISC::InfoLog->addDisplayer(_displayer);
 
-	QMainWindow *wnd = qobject_cast<QMainWindow *>(objectByName("CMainWindow"));
+	Core::ICore *core = Core::ICore::instance();
+	Core::IMenuManager *menuManager = core->menuManager();
+	QMenu *viewMenu = menuManager->menu(Core::Constants::M_VIEW);
+
+	QMainWindow *wnd = Core::ICore::instance()->mainWindow();
 	wnd->addDockWidget(Qt::RightDockWidgetArea, this);
 	hide();
-	helpMenu->addAction(this->toggleViewAction());
+
+	viewMenu->addAction(this->toggleViewAction());
 }
 
 void CLogPlugin::setNelContext(NLMISC::INelContext *nelContext)
@@ -125,25 +127,11 @@ QString CLogPlugin::description() const
 	return "DockWidget to display all log messages from NeL.";
 }
 
-QList<QString> CLogPlugin::dependencies() const
+QStringList CLogPlugin::dependencies() const
 {
-	return QList<QString>();
-}
-
-QObject* CLogPlugin::objectByName(const QString &name) const
-{
-	Q_FOREACH (QObject *qobj, _plugMan->allObjects())
-		if (qobj->objectName() == name)
-			return qobj;
-	return 0;
-}
-
-ExtensionSystem::IPluginSpec *CLogPlugin::pluginByName(const QString &name) const
-{
-	Q_FOREACH (ExtensionSystem::IPluginSpec *spec, _plugMan->plugins())
-		if (spec->name() == name)
-			return spec;
-	return 0;
+	QStringList list;
+	list.append(Core::Constants::OVQT_CORE_PLUGIN);
+	return list;
 }
 
 Q_EXPORT_PLUGIN(CLogPlugin)

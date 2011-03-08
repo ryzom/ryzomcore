@@ -47,6 +47,7 @@ namespace NLQT
 
 namespace Plugin 
 {
+	class CLogSettingsPage;
 
 	class CLogPlugin : public QDockWidget, public ExtensionSystem::IPlugin
 	{
@@ -66,16 +67,14 @@ namespace Plugin
 		QString version() const;
 		QString vendor() const;
 		QString description() const;
-		QList<QString> dependencies() const;
-
-		QObject *objectByName(const QString &name) const;
-		ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
+		QStringList dependencies() const;
 
 	protected:
 		NLMISC::CLibraryContext *_LibContext;
 
 	private:
 		ExtensionSystem::IPluginManager *_plugMan;
+		CLogSettingsPage *_logSettingsPage;
 
 		Ui::CLogPlugin _ui;
 
