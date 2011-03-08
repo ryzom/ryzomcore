@@ -14,7 +14,6 @@ SET(OBJECT_VIEWER_PLUGIN_HDR 	object_viewer_plugin.h
 				graphics_viewport.h 
 				animation_dialog.h 
 				animation_set_dialog.h 
-				settings_dialog.h 
 				setup_fog_dialog.h 
 				slot_manager_dialog.h 
 				particle_control_dialog.h 
@@ -68,11 +67,13 @@ SET(OBJECT_VIEWER_PLUGIN_HDR 	object_viewer_plugin.h
 				vegetable_rotate_page.h
 				tune_mrm_dialog.h
 				tune_timer_dialog.h
-				camera_control.h)
+				camera_control.h
+				graphics_settings_page.h
+				sound_settings_page.h
+				vegetable_settings_page.h)
 
 SET(OBJECT_VIEWER_PLUGIN_UIS    animation_form.ui
 				animation_set_form.ui
-				settings_form.ui
 				setup_fog_form.ui
 				slot_form.ui
 				particle_control_form.ui
@@ -116,7 +117,10 @@ SET(OBJECT_VIEWER_PLUGIN_UIS    animation_form.ui
 				vegetable_rotate_form.ui
 				vegetable_scale_form.ui
 				tune_mrm_form.ui
-				tune_timer_form.ui)
+				tune_timer_form.ui
+				graphics_settings_page.ui
+				sound_settings_page.ui
+				vegetable_settings_page.ui)
 
 SET(OBJECT_VIEWER_PLUGIN_RCS object_viewer.qrc)
 

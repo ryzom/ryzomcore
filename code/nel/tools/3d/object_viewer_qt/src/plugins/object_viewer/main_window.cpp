@@ -32,7 +32,6 @@
 
 // Project includes
 #include "modules.h"
-#include "settings_dialog.h"
 #include "graphics_viewport.h"
 #include "animation_dialog.h"
 #include "animation_set_dialog.h"
@@ -120,8 +119,9 @@ CMainWindow::CMainWindow(QWidget *parent)
 	_statusBarTimer = new QTimer(this);
 	connect(_statusBarTimer, SIGNAL(timeout()), this, SLOT(updateStatusBar()));
 
-	//_statusInfo = new QLabel(this);
-	// statusBar()->addPermanentWidget(_statusInfo);
+	_statusInfo = new QLabel(this);
+	_statusInfo->hide();
+	Core::ICore::instance()->mainWindow()->statusBar()->addPermanentWidget(_statusInfo);
 }
 
 CMainWindow::~CMainWindow()
@@ -159,24 +159,23 @@ CMainWindow::~CMainWindow()
 
 void CMainWindow::showEvent(QShowEvent *showEvent)
 {
-	QWidget::showEvent(showEvent);
-	if (isVisible())
-	{
-		QMainWindow::setVisible(true);
-		Modules::objView().getDriver()->activate();
-		if (_isSoundInitialized)
-			Modules::sound().initGraphics();
-		_mainTimer->start();
-		//_statusBarTimer->start(1000);
-	}
-	else
-	{
-		_mainTimer->stop();
-		//_statusBarTimer->stop();
-		if (_isSoundInitialized)
-			Modules::sound().releaseGraphics();
-		QMainWindow::setVisible(false);
-	}
+	QMainWindow::showEvent(showEvent);
+	Modules::objView().getDriver()->activate();
+	if (_isSoundInitialized)
+		Modules::sound().initGraphics();
+	_mainTimer->start();
+	_statusBarTimer->start(1000);
+	_statusInfo->show();
+}
+
+void CMainWindow::hideEvent(QHideEvent *hideEvent)
+{
+	_mainTimer->stop();
+	_statusBarTimer->stop();
+	_statusInfo->hide();
+	if (_isSoundInitialized)
+		Modules::sound().releaseGraphics();
+	QMainWindow::hideEvent(hideEvent);
 }
 
 int CMainWindow::getFrameRate()
@@ -232,23 +231,16 @@ void CMainWindow::setInterval(int value)
 	_mainTimer->setInterval(value);
 }
 
-void CMainWindow::settings()
-{
-	CSettingsDialog _settingsDialog(this);
-	_settingsDialog.show();
-	_settingsDialog.exec();
-}
-
 void CMainWindow::updateStatusBar()
 {
-	/*	if (_isGraphicsInitialized)
-		{
-			_statusInfo->setText(QString("%1, Nb tri: %2 , Texture used (Mb): %3 , fps: %4  ").arg(
-									 Modules::objView().getDriver()->getVideocardInformation()).arg(
-									 _numTri).arg(
-									 _texMem, 0,'f',4).arg(
-									 _fps, 0,'f',2));
-		}*/
+	if (_isGraphicsInitialized)
+	{
+		_statusInfo->setText(QString("%1, Nb tri: %2 , Texture used (Mb): %3 , fps: %4  ").arg(
+								 Modules::objView().getDriver()->getVideocardInformation()).arg(
+								 _numTri).arg(
+								 _texMem, 0,'f',4).arg(
+								 _fps, 0,'f',2));
+	}
 }
 
 void CMainWindow::createActions()
@@ -275,11 +267,6 @@ void CMainWindow::createActions()
 	_saveScreenshotAction = _GraphicsViewport->createSaveScreenshotAction(this);
 	_saveScreenshotAction->setText(tr("Save &Screenshot"));
 	_saveScreenshotAction->setStatusTip(tr("Make a screenshot of the current viewport and save"));
-
-	_settingsAction = new QAction(tr("&Settings OV"), this);
-	_settingsAction->setIcon(QIcon(":/images/preferences.png"));
-	_settingsAction->setStatusTip(tr("Settings"));
-	connect(_settingsAction, SIGNAL(triggered()), this, SLOT(settings()));
 }
 
 void CMainWindow::createMenus()
@@ -359,7 +346,6 @@ void CMainWindow::createMenus()
 	connect(_ParticleControlDialog->toggleViewAction(), SIGNAL(triggered(bool)),
 			_ParticleWorkspaceDialog->_PropertyDialog, SLOT(setVisible(bool)));
 
-	ovMenu->insertAction(settingsAction ,_settingsAction);
 	toolsMenu->insertSeparator(settingsAction);
 }
 

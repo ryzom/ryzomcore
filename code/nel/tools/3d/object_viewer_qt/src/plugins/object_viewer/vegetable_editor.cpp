@@ -185,7 +185,7 @@ bool CVegetableEditor::createVegetableLandscape()
 			_VegetableLandscape->Landscape.setupVegetableLighting(_VegetableAmbient, _VegetableDiffuse, _VegetableLightDir);
 			_VegetableLandscape->Landscape.setVegetableWind(_VegetableWindDir, _VegetableWindFreq, _VegetableWindPower, _VegetableWindBendMin);
 			_VegetableLandscape->Landscape.setUpdateLightingFrequency(1);
-
+			_VegetableLandscape->enableAdditive(true);
 			// Load the zones.
 			// ================
 			// landscape recentering.

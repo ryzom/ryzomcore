@@ -15,18 +15,18 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #include "plugin_spec.h"
+#include "iplugin.h"
+#include "iplugin_manager.h"
+
+#include "nel/misc/app_context.h"
 
 #include <QtCore/QList>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
 #include <QtCore/QPluginLoader>
 #include <QtCore/QCoreApplication>
-
-#include "nel/misc/app_context.h"
-
-#include "iplugin.h"
-#include "iplugin_manager.h"
 
 namespace ExtensionSystem
 {

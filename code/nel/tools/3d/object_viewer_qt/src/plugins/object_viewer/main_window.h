@@ -80,13 +80,13 @@ private Q_SLOTS:
 	void open();
 	void resetScene();
 	void reloadTextures();
-	void settings();
 	void updateStatusBar();
 	void updateRender();
 	void setInterval(int value);
 
 protected:
 	virtual void showEvent(QShowEvent *showEvent);
+	virtual void hideEvent(QHideEvent *hideEvent);
 
 private:
 	void createActions();
@@ -138,7 +138,6 @@ private:
 	QAction *_reloadTexturesAction;
 	QAction *_resetSceneAction;
 	QAction *_saveScreenshotAction;
-	QAction *_settingsAction;
 	QLabel *_statusInfo;
 
 	float _fps;

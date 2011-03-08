@@ -1,5 +1,8 @@
 // Project includes
 #include "object_viewer_plugin.h"
+#include "graphics_settings_page.h"
+#include "sound_settings_page.h"
+#include "vegetable_settings_page.h"
 #include "modules.h"
 #include "../core/core_constants.h"
 
@@ -28,6 +31,9 @@ bool ObjectViewerPlugin::initialize(ExtensionSystem::IPluginManager *pluginManag
 	_plugMan = pluginManager;
 	Modules::init();
 	addAutoReleasedObject(new CObjectViewerContext());
+	addAutoReleasedObject(new GraphicsSettingsPage());
+	addAutoReleasedObject(new SoundSettingsPage());
+	addAutoReleasedObject(new VegetableSettingsPage());
 	return true;
 }
 

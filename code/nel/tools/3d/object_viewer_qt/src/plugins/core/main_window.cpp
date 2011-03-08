@@ -138,8 +138,8 @@ bool MainWindow::showOptionsDialog(const QString &group,
 void MainWindow::about()
 {
 	QMessageBox::about(this, tr("About Object Viewer Qt"),
-					   tr("<h2>Object Viewer Qt NG</h2>"
-						  "<p> Author: dnk-88 <p>Compiled on %1 %2").arg(__DATE__).arg(__TIME__));
+					   tr("<h2>Object Viewer Qt</h2>"
+						  "<p> Ryzom Core team <p>Compiled on %1 %2").arg(__DATE__).arg(__TIME__));
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
