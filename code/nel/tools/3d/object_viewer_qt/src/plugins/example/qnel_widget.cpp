@@ -122,13 +122,14 @@ void QNLWidget::updateRender()
 void QNLWidget::showEvent(QShowEvent *showEvent)
 {
 	QWidget::showEvent(showEvent);
-	if (isVisible())
-	{
-		m_driver->activate();
-		m_mainTimer->start(m_interval);
-	}
-	else
-		m_mainTimer->stop();
+	m_driver->activate();
+	m_mainTimer->start(m_interval);
+}
+
+void QNLWidget::hideEvent(QHideEvent *hideEvent)
+{
+	m_mainTimer->stop();
+	QWidget::hideEvent(hideEvent);
 }
 
 #if defined(NL_OS_WINDOWS)

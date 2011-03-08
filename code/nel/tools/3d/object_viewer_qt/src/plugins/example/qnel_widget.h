@@ -96,6 +96,7 @@ private Q_SLOTS:
 
 protected:
 	virtual void showEvent(QShowEvent *showEvent);
+	virtual void hideEvent(QHideEvent *hideEvent);
 
 #if defined(NL_OS_WINDOWS)
 	virtual bool winEvent(MSG *message, long *result);
