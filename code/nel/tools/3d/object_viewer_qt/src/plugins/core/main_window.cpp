@@ -69,6 +69,7 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 	createActions();
 	createMenus();
 	createStatusBar();
+	resize(1024, 768);
 }
 
 MainWindow::~MainWindow()

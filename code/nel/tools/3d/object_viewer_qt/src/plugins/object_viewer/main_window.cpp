@@ -391,22 +391,22 @@ void CMainWindow::createDialogs()
 
 	// create animation slot manager dialog
 	_SlotManagerDialog = new CSlotManagerDialog(this);
-	addDockWidget(Qt::RightDockWidgetArea, _SlotManagerDialog);
+	tabifyDockWidget(_AnimationSetDialog, _SlotManagerDialog);
 	_SlotManagerDialog->setVisible(false);
 
 	// create particle control dialog
 	_ParticleControlDialog = new CParticleControlDialog(_SkeletonTreeModel ,this);
-	addDockWidget(Qt::BottomDockWidgetArea, _ParticleControlDialog);
+	tabifyDockWidget(_AnimationDialog, _ParticleControlDialog);
 	_ParticleControlDialog->setVisible(false);
 
 	// create particle workspace dialog
 	_ParticleWorkspaceDialog = new  CParticleWorkspaceDialog(this);
-	addDockWidget(Qt::LeftDockWidgetArea, _ParticleWorkspaceDialog);
+	tabifyDockWidget(_SlotManagerDialog, _ParticleWorkspaceDialog);
 	_ParticleWorkspaceDialog->setVisible(false);
 
 	// create day night (water) dialog
 	_DayNightDialog = new CDayNightDialog(this);
-	addDockWidget(Qt::BottomDockWidgetArea, _DayNightDialog);
+	addDockWidget(Qt::TopDockWidgetArea, _DayNightDialog);
 	_DayNightDialog->setVisible(false);
 
 	// create water pool editor dialog
@@ -421,35 +421,36 @@ void CMainWindow::createDialogs()
 
 	// create global wind power/direction dialog
 	_GlobalWindDialog = new CGlobalWindDialog(this);
-	addDockWidget(Qt::TopDockWidgetArea, _GlobalWindDialog);
+	tabifyDockWidget(_DayNightDialog, _GlobalWindDialog);
 	_GlobalWindDialog->setVisible(false);
 
 	// create sun color dialog
 	_SunColorDialog = new CSunColorDialog(this);
-	addDockWidget(Qt::LeftDockWidgetArea, _SunColorDialog);
+	tabifyDockWidget(_SlotManagerDialog, _SunColorDialog);
 	_SunColorDialog->setVisible(false);
 
 	// add property editor in widget area
 	addDockWidget(Qt::RightDockWidgetArea, _ParticleWorkspaceDialog->_PropertyDialog);
+	tabifyDockWidget(_VegetableDialog, _ParticleWorkspaceDialog->_PropertyDialog);
 	_ParticleWorkspaceDialog->_PropertyDialog->setVisible(false);
 
 	// create skeleton scale dialog
 	_SkeletonScaleDialog = new CSkeletonScaleDialog(_SkeletonTreeModel, this);
-	addDockWidget(Qt::RightDockWidgetArea, _SkeletonScaleDialog);
+	tabifyDockWidget(_VegetableDialog, _SkeletonScaleDialog);
 	_SkeletonScaleDialog->setVisible(false);
 
 	// create setup fog dialog
 	_SetupFog = new CSetupFog(this);
-	addDockWidget(Qt::RightDockWidgetArea, _SetupFog);
+	tabifyDockWidget(_VegetableDialog,  _SetupFog);
 	_SetupFog->setVisible(false);
 
 	// create tune mrm dialog
 	_TuneMRMDialog = new CTuneMRMDialog(this);
-	addDockWidget(Qt::BottomDockWidgetArea, _TuneMRMDialog);
+	tabifyDockWidget(_ParticleControlDialog, _TuneMRMDialog);
 	_TuneMRMDialog->setVisible(false);
 
 	_TuneTimerDialog = new CTuneTimerDialog(this);
-	addDockWidget(Qt::TopDockWidgetArea, _TuneTimerDialog);
+	tabifyDockWidget(_GlobalWindDialog, _TuneTimerDialog);
 	_TuneTimerDialog->setVisible(false);
 
 	connect(_ParticleControlDialog, SIGNAL(changeState()), _ParticleWorkspaceDialog, SLOT(setNewState()));
