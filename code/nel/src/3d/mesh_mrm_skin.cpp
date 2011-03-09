@@ -316,7 +316,7 @@ uint	CMeshMRMGeom::NumCacheVertexNormal4= NL_BlockByteL1 / sizeof(CRawVertexNorm
 
 /* Old School template: include the same file with define switching,
 	Was used before to reuse same code for and without SSE.
-	useless now because SSE removed, but keep it for possible future work on it.
+	Useless now because SSE removed, but keep it for possible future work on it.
 */
 #define ADD_MESH_MRM_SKIN_TEMPLATE
 #include "mesh_mrm_skin_template.cpp"

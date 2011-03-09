@@ -15,8 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*
-	$Id: thread_win32.h,v 1.1 2000/10/19 07:53:33 corvazier Exp $
-
 	------------------------------------------------------------------------
 	ClanLib, the platform independent game SDK.
 

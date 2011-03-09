@@ -180,11 +180,11 @@ void CMeshBaseInstance::traverseHrc()
 			if (anim)
 			{
 				// Animation offset are setuped before clipping, they will be used for detail too.
-				float animLenght = anim->getEndTime() - anim->getBeginTime();
-				if (animLenght > 0)
+				float animLength = anim->getEndTime() - anim->getBeginTime();
+				if (animLength > 0)
 				{
 					float currTime = (TAnimationTime) getOwnerScene()->getCurrentTime();
-					float startTime = (uint) (currTime / animLenght) * animLenght;
+					float startTime = (uint) (currTime / animLength) * animLength;
 					// Set the channel mixer date using the global date of the scene
 					chanMix->setSlotTime(0, anim->getBeginTime() + currTime - startTime);
 				}

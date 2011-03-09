@@ -298,7 +298,7 @@ private:
 	/// The base name, that is the constante part of the name (before the first joker).
 	std::string					_BaseName;
 
-	/// The random lenght (0 mean no random)
+	/// The random length (0 mean no random)
 	uint32						_Random;
 
 

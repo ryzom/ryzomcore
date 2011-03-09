@@ -49,7 +49,7 @@ public:
 
 	/**
 	 * Set the blend shape factor for this instance
-	 * blenShapeName is the name of the blendshape we want to set
+	 * blendShapeName is the name of the blendshape we want to set
 	 * factor the blendshape percentage from -100.0 to 100.0
 	 * dynamic tells the optimizer if the blendshape have to change in real time
 	 */

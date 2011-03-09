@@ -183,7 +183,7 @@ private:
 										       );
 
 	/** Compute the ribbon points using hermitte splines between each sampling point,
-	  * and make a rough approximation to get a constant lenght
+	  * and make a rough approximation to get a constant length
 	  */
 	void					computeHermitteCstSizeRibbon( uint index,
 											     NLMISC::CVector *dest,

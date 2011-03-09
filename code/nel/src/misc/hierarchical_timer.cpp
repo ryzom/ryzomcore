@@ -337,15 +337,15 @@ void	CHTimer::display(CLog *log, TSortCriterion criterion, bool displayInline /*
 	rootStats.buildFromNode( &_RootNode, _MsPerTick);
 
 	// 5 ) display statistics
-	uint maxNodeLenght = 0;
+	uint maxNodeLength = 0;
 	std::string format;
 	if (displayInline)
 	{
 		for(TTimerStatPtrVect::iterator statIt = statsPtr.begin(); statIt != statsPtr.end(); ++statIt)
 		{
-			maxNodeLenght = std::max(maxNodeLenght, (uint)strlen((*statIt)->Timer->_Name));
+			maxNodeLength = std::max(maxNodeLength, (uint)strlen((*statIt)->Timer->_Name));
 		}
-		format = "HTIMER: %-" + NLMISC::toString(maxNodeLenght + 1) + "s %s";
+		format = "HTIMER: %-" + NLMISC::toString(maxNodeLength + 1) + "s %s";
 	}
 	std::string statsInline;
 

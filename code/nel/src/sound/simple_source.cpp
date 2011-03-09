@@ -132,7 +132,7 @@ void CSimpleSource::play()
 		//|| (mixer->getListenPosVector() - _Position).sqrnorm() > _SimpleSound->getMaxDistance() * _SimpleSound->getMaxDistance())
 		|| (_RelativeMode ? getPos().sqrnorm() : (mixer->getListenPosVector() - getPos()).sqrnorm()) > _SimpleSound->getMaxDistance() * _SimpleSound->getMaxDistance())
 	{
-		// The sample buffer is not available, don't play (we don't know the lenght)
+		// The sample buffer is not available, don't play (we don't know the length)
 		if (_Spawn)
 		{
 			if (_SpawnEndCb != 0)

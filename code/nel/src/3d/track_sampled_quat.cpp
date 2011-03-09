@@ -51,7 +51,7 @@ void		CQuatPack::pack(const CQuat &quat)
 		- The same than above, but encode the axis as X/Y only, and deduce Z from
 			them, is possible but precision problems arise.
 
-		You can see that the operation "deduce a 3/4 member from unit lenght rule" is definetly not precise.
+		You can see that the operation "deduce a 3/4 member from unit length rule" is definetly not precise.
 
 		Hence this simpler but workable way.
 	*/

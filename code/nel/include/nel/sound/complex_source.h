@@ -129,8 +129,8 @@ private:
 	 */
 	bool				_Muted;
 
-//	NLMISC::TTime	_Lenght1;
-//	NLMISC::TTime	_Lenght2;
+//	NLMISC::TTime	_Length1;
+//	NLMISC::TTime	_Length2;
 
 	NLMISC::TTime	_StartTime1;
 	NLMISC::TTime	_StartTime2;

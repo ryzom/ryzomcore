@@ -16,6 +16,8 @@
 
 #include "stdpch.h"
 #include "player_manager/character.h"
+#include "player_manager/player_manager.h"
+#include "player_manager/player.h"
 #include "guild_leader_module.h"
 #include "guild_member.h"
 #include "guild.h"
@@ -48,6 +50,7 @@ void CGuildLeaderModule::setLeader( uint16 index,uint8 session)
 		nlwarning("<GUILD>%s set invalid member idx %u as leader",proxy.getId().toString().c_str(),index );
 		return;
 	}
+
 	_GuildMemberCore->setMemberGrade(memberPD->getGrade());
 	memberPD->setMemberGrade(EGSPD::CGuildGrade::Leader);
 
@@ -99,6 +102,7 @@ void CGuildLeaderModule::quitGuild()
 		// ignore current leader
 		if ( member->getGrade() == EGSPD::CGuildGrade::Leader )
 			continue;
+
 		// check if the current member is the successor
 		if ( successor == NULL ||
 			 member->getGrade() < successor->getGrade() ||

@@ -55,7 +55,7 @@ public:
 	NLMISC::TStringId				getSound(uint index) const					{ return !_Sounds.empty() ? _Sounds[index%_Sounds.size()]:0;}
 	const std::vector<NLMISC::TStringId>	&getSounds() const					{ return _Sounds;}
 
-	uint32							getFadeLenght() const						{ return _XFadeLenght;}
+	uint32							getFadeLength() const						{ return _XFadeLength;}
 
 	/** Constructor */
 	CComplexSound();
@@ -94,7 +94,7 @@ private:
 	std::vector<uint32>			_DelaySeq;
 
 	/// Duration of xfade in millisec.
-	uint32						_XFadeLenght;
+	uint32						_XFadeLength;
 	/// Flag for fade in
 	bool						_DoFadeIn;
 	/// Flag for fade out (only on normal termination, not explicit stop).

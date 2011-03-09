@@ -113,7 +113,7 @@ void CComplexSource::playStuf()
 					return;
 
 				if (_PatternSound->doFadeIn())
-					_FadeLength = min(uint32(_PatternSound->getFadeLenght()/_TickPerSecond), sound->getDuration() /2);
+					_FadeLength = min(uint32(_PatternSound->getFadeLength()/_TickPerSecond), sound->getDuration() /2);
 				else
 					_FadeLength = 0;
 
@@ -510,8 +510,8 @@ void CComplexSource::onUpdate()
 				//nldebug("CS : Chaining to sound %s", CStringMapper::unmap(sound2->getName()).c_str());
 				CAudioMixerUser	*mixer = CAudioMixerUser::instance();
 
-				// determine the XFade lenght (if next sound is too short.
-				_FadeLength = minof<uint32>(uint32(_PatternSound->getFadeLenght()/_TickPerSecond), (sound2->getDuration()) / 2, (_Source1->getSound()->getDuration())/2);
+				// determine the XFade length (if next sound is too short.
+				_FadeLength = minof<uint32>(uint32(_PatternSound->getFadeLength()/_TickPerSecond), (sound2->getDuration()) / 2, (_Source1->getSound()->getDuration())/2);
 				_Source2 = mixer->createSource(sound2, false, 0, 0, _Cluster);
 				if (_Source2)
 				{
@@ -528,7 +528,7 @@ void CComplexSource::onUpdate()
 				if (_PatternSound->doFadeOut())
 				{
 					// set the event to begin fade out.
-					mixer->addEvent(this, _StartTime1 + _Source1->getSound()->getDuration() - _PatternSound->getFadeLenght());
+					mixer->addEvent(this, _StartTime1 + _Source1->getSound()->getDuration() - _PatternSound->getFadeLength());
 				}
 				else
 				{

@@ -108,13 +108,13 @@ uint32 CComplexSound::getDuration()
 				if (first != _SoundSeq.begin() && !durations.empty())
 				{
 					// remove a xfade value
-					_Duration -= minof<uint32>(uint32(_XFadeLenght / _TicksPerSeconds), durations[*first % durations.size()] / 2, durations[*prev % durations.size()] /2);
+					_Duration -= minof<uint32>(uint32(_XFadeLength / _TicksPerSeconds), durations[*first % durations.size()] / 2, durations[*prev % durations.size()] /2);
 				}
 				if (!durations.empty())
 					_Duration += durations[*first % durations.size()];
 				prev = first;
 			}
-//			_Duration -= max(sint(0), sint(_XFadeLenght * (_SoundSeq.size()-2)  ));
+//			_Duration -= max(sint(0), sint(_XFadeLength * (_SoundSeq.size()-2)  ));
 		}
 		break;
 	case MODE_SPARSE:
@@ -140,7 +140,7 @@ uint32 CComplexSound::getDuration()
 				++first;
 				for (; first != last; ++first)
 				{
-					// add the sound lenght
+					// add the sound length
 					_Duration += durations[soundIndex++ % durations.size()];
 					// add the delay
 					_Duration += uint32(*first / _TicksPerSeconds);
@@ -170,7 +170,7 @@ uint32 CComplexSound::getDuration()
 CComplexSound::CComplexSound() :
 	_PatternMode(CComplexSound::MODE_UNDEFINED),
 	_TicksPerSeconds(1.0f),
-	_XFadeLenght(3000),		// default to 3000 sec.
+	_XFadeLength(3000),		// default to 3000 sec.
 	_MaxDistValid(false),
 	_Duration(0),
 	_DurationValid(false)
@@ -252,7 +252,7 @@ void	CComplexSound::serial(NLMISC::IStream &s)
 	s.serial(_TicksPerSeconds);
 	s.serialCont(_SoundSeq);
 	s.serialCont(_DelaySeq);
-	s.serial(_XFadeLenght);
+	s.serial(_XFadeLength);
 	s.serial(_DoFadeIn);
 	s.serial(_DoFadeOut);
 
@@ -313,14 +313,14 @@ void	CComplexSound::importForm(const std::string& filename, NLGEORGES::UFormElm&
 
 	if (mode == "Chained" || mode == "Sparse")
 	{
-		// XFade lenght
-		formRoot.getValueByName(_XFadeLenght, ".SoundType.XFadeLenght");
+		// XFade length
+		formRoot.getValueByName(_XFadeLength, ".SoundType.XFadeLength");
 		// Fade in/out flag.
 		formRoot.getValueByName(_DoFadeIn, ".SoundType.DoFadeIn");
 		formRoot.getValueByName(_DoFadeOut, ".SoundType.DoFadeOut");
 
 		// convert xfade to millisec.
-		_XFadeLenght *= 1000;
+		_XFadeLength *= 1000;
 		_PatternMode = MODE_CHAINED;
 		// just read the sequence
 		_SoundSeq.clear();
