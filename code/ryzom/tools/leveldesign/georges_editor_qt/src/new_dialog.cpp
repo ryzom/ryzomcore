@@ -89,7 +89,7 @@ namespace NLQT
 		//nlinfo ("Searching files in directory '%s'...", dir.c_str());
 		NLMISC::CPath::getPathContent(path.toStdString(),true,false,true,_files);
 
-		getTypes(path.toStdString());
+		getTypes( /* path.toStdString() // incompatible parameter type */ );
 		//nlinfo ("%d supported file types :",FileTypeToId.size());
 		for ( std::map<std::string,uint8>::iterator it = FileTypeToId.begin(); it != FileTypeToId.end(); ++it )
 		{
@@ -232,7 +232,7 @@ namespace NLQT
 		_ui.wizDescLabel->setText(myDescription);
 	}
 
-	void CGeorgesNewDialog::getTypes( std::string& dir )
+	void CGeorgesNewDialog::getTypes( /* std::string& dir // not needed anymore? */ )
 	{
 		//nlinfo ("Found %d files in directory '%s'", files.size(), dir.c_str());
 		for(uint i = 0; i < _files.size(); i++)

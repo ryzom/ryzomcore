@@ -59,7 +59,7 @@ namespace NLQT
 
 		std::vector<std::string> _files;
 
-		void   getTypes( std::string& dir );
+		void   getTypes( /* std::string& dir // not needed anymore? */ );
 		void   addType( std::string fileName );
 		bool   getFileType( std::string& fileName, std::string& fileType );
 		sint16 getFirstFreeFileTypeId();
