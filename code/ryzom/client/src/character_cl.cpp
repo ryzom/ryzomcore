@@ -1031,6 +1031,7 @@ bool CCharacterCL::isUnknownRace() const
 //-----------------------------------------------
 // getAttackHeight :
 // Return the atk height.
+// \todo GUIGUI : height relative to attacker instead of global height
 //-----------------------------------------------
 CCharacterCL::TAtkHeight CCharacterCL::getAttackHeight(CEntityCL *target, BODY::TBodyPart localisation, BODY::TSide side) const
 {
@@ -6420,23 +6421,23 @@ void CCharacterCL::updatePosCombatFloat(double /* frameTimeRemaining */, CEntity
 		{
 			dist2Dest(vectToDest.norm());
 			// Compute the time to reach the destination at the max speed.
-			double lenghtOfTimeToDest = 0.0; // 0 = No Speed Limit
+			double lengthOfTimeToDest = 0.0; // 0 = No Speed Limit
 			_FirstPos	= _DestPos;
-			_DestTime	= _LastFrameTime + lenghtOfTimeToDest + ClientCfg.ChaseReactionTime;
+			_DestTime	= _LastFrameTime + lengthOfTimeToDest + ClientCfg.ChaseReactionTime;
 			_FirstTime	= _DestTime;
 /*
 			// The time remaining will be enough to reach the destination
-			if(frameTimeRemaining >= lenghtOfTimeToDest)
+			if(frameTimeRemaining >= lengthOfTimeToDest)
 			{
 				_FirstPos	= _DestPos;
-				_DestTime	= _LastFrameTime + lenghtOfTimeToDest + ClientCfg.ChaseReactionTime;
+				_DestTime	= _LastFrameTime + lengthOfTimeToDest + ClientCfg.ChaseReactionTime;
 				_FirstTime	= _DestTime;
 			}
 			// The time remaining is not enough to reach the destination at max speed -> compute a first pos possible to reach.
 			else
 			{
-				_FirstPos	= pos() + vectToDest*frameTimeRemaining/lenghtOfTimeToDest;
-				_DestTime	= _LastFrameTime + lenghtOfTimeToDest + ClientCfg.ChaseReactionTime;
+				_FirstPos	= pos() + vectToDest*frameTimeRemaining/lengthOfTimeToDest;
+				_DestTime	= _LastFrameTime + lengthOfTimeToDest + ClientCfg.ChaseReactionTime;
 				_FirstTime	= _LastFrameTime + frameTimeRemaining + ClientCfg.ChaseReactionTime;
 			}
 */

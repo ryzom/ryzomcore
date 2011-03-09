@@ -45,7 +45,7 @@ namespace NL3D
 /// Description of the hours for days / night
 struct CLightCycleDesc
 {
-	float RealDayLength; // real lenght of the day, in seconds
+	float RealDayLength; // real length of the day, in seconds
 	float NumHours;  // number of ryzom hours in a day
 	float NightTransitionStartHour; // start of night transition
 	float NightTransitionEndHour;   // end   of night transition

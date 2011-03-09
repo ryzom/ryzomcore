@@ -150,7 +150,7 @@ double CAnimationMisc::getAnimationLength(UAnimationSet *animationSet, const std
 			length = getAnimationLength(animationSet, idAnim);
 	}
 
-	// Return the lenght of the animation or 0 is any pb.
+	// Return the length of the animation or 0 is any pb.
 	return length;
 }// getAnimationLength //
 
@@ -179,7 +179,7 @@ double CAnimationMisc::getAnimationLength(UAnimationSet *animationSet, uint idAn
 		}
 	}
 
-	// Return the lenght of the animation or 0 is any pb.
+	// Return the length of the animation or 0 is any pb.
 	return length;
 }// getAnimationLength //
 

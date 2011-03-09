@@ -247,7 +247,7 @@ private:
 
 		                                                                 // NB : this vector nevers grows
 		bool							   _CandidateFXListTouched;      // the list of candidate has been modified, so the manager should see which fxs should be instanciated, and which fxs should be removed
-		float							   _SortDistance;                // lenght of each distance interval, in meters
+		float							   _SortDistance;                // length of each distance interval, in meters
 		uint							   _MaxNumberOfFXInstances;       // max number of instances that can be 'alive' at a time
 	//@}
 

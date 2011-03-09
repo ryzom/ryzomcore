@@ -653,14 +653,14 @@ void CWeatherManagerClient::updateThunder(uint64 day, float hour, const CWeather
 	{
 		// if too much time has ellapsed since the last thunder strike, disable it
 		float timeEllapsedSinceStrike = diff(_ThunderStrikeDate, t1) * wc.WFP->MinThunderPeriod ;
-		if (timeEllapsedSinceStrike >= wc.WFP->ThunderLenght)
+		if (timeEllapsedSinceStrike >= wc.WFP->ThunderLength)
 		{
 			_ThunderStrike = false;
 			_ThunderLevel = 0.f;
 		}
 		else
 		{
-			_ThunderLevel = wc.WFP->ThunderLenght != 0.f ? 1.f - (timeEllapsedSinceStrike / wc.WFP->ThunderLenght)
+			_ThunderLevel = wc.WFP->ThunderLength != 0.f ? 1.f - (timeEllapsedSinceStrike / wc.WFP->ThunderLength)
 				                                         : 0.f;
 		}
 	}
