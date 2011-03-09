@@ -557,9 +557,12 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CRGBA	newMsgColor= stringToRGBA(pIM->getDefine("chat_group_tab_color_newmsg").c_str());
 
+	ucstring newmsg = msg;
+	ucstring prefix;
+
 	if (gl != NULL)
 	{
-		gl->addChild(ctm.createMsgText(msg, col));
+		gl->addChild(ctm.createMsgText(newmsg, col));
 		if (!gl->getParent()->getActive())
 			if (tab != NULL)
 				tab->setTextColorNormal(newMsgColor);
@@ -584,14 +587,37 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 			case CChatGroup::guild:		if (ci.Guild.isListeningWindow(cw))			gl = gl2;	break;
 			case CChatGroup::system:	if (ci.SystemInfo.isListeningWindow(cw))	gl = gl2;	break;
 			case CChatGroup::universe:	if (ci.Universe.isListeningWindow(cw))		gl = gl2;	break;
-				// NB: the yubo chat and dyn_chat cannot be in a user chat
+			case CChatGroup::dyn_chat:	
+				if (ci.DynamicChat[dynamicChatDbIndex].isListeningWindow(cw))
+				{
+					gl = gl2;
+
+					// Add dynchannel number and optionally name before text if user channel
+					CCDBNodeLeaf* node = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB", false);
+					if (node && node->getValueBool())
+					{
+						uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(dynamicChatDbIndex);
+						ucstring title;
+						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
+						if ( ! title.empty())
+						{
+							prefix = " " + title;
+						}
+					}
+					
+					// Put the new prefix in the correct position
+					size_t pos = newmsg.find(ucstring("] "));
+					newmsg = newmsg.substr(0, pos) + prefix + newmsg.substr(pos);
+				}
+				break;
+
+				// NB: the yubo chat cannot be in a user chat
 			case CChatGroup::yubo_chat:	gl = NULL;	break;
-			case CChatGroup::dyn_chat:	gl = NULL;	break;
 		}
 
 		if (gl != NULL)
 		{
-			gl->addChild(ctm.createMsgText(msg, col));
+			gl->addChild(ctm.createMsgText(newmsg, col));
 			if (!gl->getParent()->getActive())
 				if (tab != NULL)
 					tab->setTextColorNormal(newMsgColor);

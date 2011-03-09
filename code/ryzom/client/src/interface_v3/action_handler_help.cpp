@@ -65,6 +65,8 @@
 #include "../r2/editor.h"
 #include "../init.h"
 #include "../browse_faq.h"
+#include "people_list.h"
+#include "people_interraction.h"
 
 extern CSheetManager	SheetMngr;
 
@@ -618,7 +620,34 @@ class CHandlerOpenTitleHelp : public IActionHandler
 	void execute (CCtrlBase *pCaller, const std::string &sParams)
 	{
 		// display web profile if necessary
-		if (getParam(sParams, "from") == "target")
+		if (getParam(sParams, "from") == "contact")
+		{
+			if (pCaller == NULL)
+				return;
+
+			CInterfaceGroup *fatherGC = pCaller->getParent();
+			if (fatherGC == NULL)
+				return;
+			fatherGC = fatherGC->getParent();
+			if (fatherGC == NULL)
+				return;
+			string str = fatherGC->getId().substr(0,fatherGC->getId().rfind('_'));
+			str = str.substr(str.rfind(':')+1, str.size());
+			CPeopleList *peopleList = PeopleInterraction.getPeopleListFromContainerID(str);
+			if (peopleList == NULL)
+				return;
+
+			sint index = peopleList->getIndexFromContainerID(fatherGC->getId());
+			if (index == -1)
+				return;
+			ucstring name = peopleList->getName(index);
+			if ( ! name.empty())
+			{
+				CInterfaceManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name.toUtf8()+"|ptype="+toString((int)CEntityCL::Player));
+			}
+			return;
+		}
+		else if (getParam(sParams, "from") == "target")
 		{
 			// Require info on the target
 			CEntityCL *selection = EntitiesMngr.entity(UserEntity->selection());

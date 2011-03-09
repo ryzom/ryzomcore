@@ -2328,6 +2328,42 @@ bool CDBGroupListSheetFilterExchangeable::CSheetChildFilter::isSheetValid(CDBGro
 	return false;
 }
 
+// ***************************************************************************
+void CDBGroupListSheetFilterExchangeable::sort()
+{
+	vector<SSortStruct> vTemp;
+
+	vTemp.resize (_MaxItems);
+
+	uint i;
+	for (i = 0; i < _MaxItems; ++i)
+	{
+		vTemp[i].SheetIcon = _SheetChildren[i];
+
+		CDBCtrlSheet	*ctrl= _SheetChildren[i]->Ctrl;
+		initStructForItemSort (vTemp, ctrl->getSheetId(), ctrl->getQuality(), i, ctrl->getIndexInDB());
+	}
+
+	std::sort(vTemp.begin(), vTemp.end());
+
+	for (i = 0; i < _MaxItems; ++i)
+	{
+		_SheetChildren[i] = vTemp[i].SheetIcon;
+	}
+}
+
+// ***************************************************************************
+bool CDBGroupListSheetFilterExchangeable::parse(xmlNodePtr cur, CInterfaceGroup *parentGroup)
+{
+	if(!CDBGroupListSheet::parse(cur, parentGroup))
+		return false;
+
+	// Parse options (type, filters ...)
+	if (!_BO.parse(cur,parentGroup))
+		return false;
+
+	return true;
+}
 
 // ***************************************************************************
 // ***************************************************************************

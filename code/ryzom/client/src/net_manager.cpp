@@ -368,6 +368,7 @@ void impulseUserChars(NLMISC::CBitMemStream &impulse)
 	// read privileges
 	readPrivileges(impulse);
 	impulse.serial(FreeTrial);
+	FreeTrial = false;
 	impulse.serialCont(Mainlands);
 	userChar = true;
 
@@ -666,7 +667,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		string entry="UI:SAVE:CHAT:COLORS:";
 		switch(mode)
 		{
-		case CChatGroup::dyn_chat:	// dyn_chat takes the color of say
+		case CChatGroup::dyn_chat:	entry+="DYN";	break;
 		case CChatGroup::say:	entry+="SAY";	break;
 		case CChatGroup::shout:	entry+="SHOUT";	break;
 		case CChatGroup::team:	entry+="GROUP";	break;
@@ -764,7 +765,35 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 			// if found, display, else discarded
 			if(dbIndex >= 0 && dbIndex < CChatGroup::MaxDynChanPerPlayer)
 			{
+				// Add dyn chan number before string
+				ucstring prefix = "[" + NLMISC::toString(dbIndex) + "]";
+				// Find position to put the new string
+				// After timestamp?
+				size_t pos = finalString.find(ucstring("]"));
+				if (pos == ucstring::npos)
+				{
+					// No timestamp, so put it right after the color and add a space
+					pos = finalString.find(ucstring("}"));
+					prefix += " ";
+				}
+				finalString = finalString.substr(0, pos + 1) + prefix + finalString.substr(pos + 1);
 				PeopleInterraction.ChatInput.DynamicChat[dbIndex].displayMessage(finalString, col, 2, &windowVisible);
+				// Add optionally dynchannel name before text so that the chat log 
+				// will show the correct string if enabled.
+				CCDBNodeLeaf* node = pIM->getDbProp("UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB", false);
+				if (node && pIM->getLogState() && node->getValueBool())
+				{
+					uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(dbIndex);
+					ucstring title;
+					STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
+					if ( ! title.empty())
+					{
+						prefix = " " + title;
+					}
+					// Put the new prefix in the correct position
+					size_t pos = finalString.find(ucstring("] "));
+					finalString = finalString.substr(0, pos) + prefix + finalString.substr(pos);
+				}
 			}
 			else
 			{
@@ -3775,12 +3804,12 @@ bool CNetManager::update()
 		{
 			nldebug("CNetManager::update : Lag detected.");
 		}
-		// Lag detected.
+		// Probe received.
 		else if(change.Property == ProbeReceived)
 		{
 			nldebug("CNetManager::update : Probe Received.");
 		}
-		// Lag detected.
+		// Connection ready.
 		else if(change.Property == ConnectionReady)
 		{
 			nldebug("CNetManager::update : Connection Ready.");

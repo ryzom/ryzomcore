@@ -135,6 +135,7 @@ namespace R2
 
 // ***************************************************************************
 /*
+	Version 11: - Dyn chat in user tab
 	Version 10: - Last screen resolution serialisation
 	Version  9: UI_DB_SAVE_VERSION system
 	Version  8:	- serialInSceneBubbleInfo (for ignore context help)
@@ -147,7 +148,7 @@ namespace R2
 	Version  1:	- people interraction
 	Version  0:	- base version
 */
-#define	ICFG_STREAM_VERSION	10
+#define	ICFG_STREAM_VERSION	11
 
 #ifdef AJM_DEBUG_TRACK_INTERFACE_GROUPS
 	#define	FOREACH(__itvar,__conttype,__contvar)	\
@@ -191,7 +192,7 @@ NLMISC::CLog	g_log;
 // GLOBAL //
 ////////////
 
-// Hierachical timer
+// Hierarchical timer
 H_AUTO_DECL ( RZ_Client_Update_Frame_Events )
 
 // ------------------------------------------------------------------------------------------------
@@ -1649,6 +1650,14 @@ bool CInterfaceManager::loadConfig (const string &filename)
 
 		if(ver>=8)
 			CGroupInSceneBubbleManager::serialInSceneBubbleInfo(f);
+
+		if (ver >= 11)
+		{
+			if ( ! PeopleInterraction.loadUserDynChatsInfos(f))
+			{
+				nlwarning("Bad user dyn chat saving");
+			}
+		}
 	}
 	catch(NLMISC::EStream &)
 	{
@@ -1831,6 +1840,11 @@ bool CInterfaceManager::saveConfig (const string &filename)
 
 		CGroupInSceneBubbleManager::serialInSceneBubbleInfo(f);
 
+		if ( ! PeopleInterraction.saveUserDynChatsInfos(f))
+		{
+			nlwarning("Bad user dyn chat saving");
+			return false;
+		}
 	}
 	catch(NLMISC::EStream &)
 	{

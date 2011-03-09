@@ -128,16 +128,16 @@ public:
 	void tryToUnblockTitleFromSkill(SKILLS::ESkills eSkill, sint32 value);
 
 	/// The same but with parsing all bricks wanted
-	void tryToUnblockTitleFromBricks();
+	void tryToUnblockTitleFromBricks(bool show_message = true);
 
 	/// The same but with civ allegiance
-	void tryToUnblockTitleFromCiv();
+	void tryToUnblockTitleFromCiv(bool show_message = true);
 
 	/// The same but with cult allegiance
-	void tryToUnblockTitleFromCult();
+	void tryToUnblockTitleFromCult(bool show_message = true);
 
 	/// The same but with parsing all items wanted
-	void tryToUnblockTitleFromItems();
+	void tryToUnblockTitleFromItems(bool show_message = true);
 
 	/// Called when a fame changes to look if we can unblock a title
 	void tryToUnblockTitleFromMinFames(uint32 factionIndex, sint32 fameValue);
@@ -242,7 +242,7 @@ private:
 	};
 
 	std::vector<SUnblockingTitle> _TitlesUnblocked;
-	void checkTitleUnblocked(CHARACTER_TITLE::ECharacterTitle i);
+	void checkTitleUnblocked(CHARACTER_TITLE::ECharacterTitle i, bool show_message = true);
 
 	uint8	_CurrentTitle;
 	std::vector<sint32>	_UIUnblockedTitles;

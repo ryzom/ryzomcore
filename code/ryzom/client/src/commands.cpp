@@ -5743,3 +5743,24 @@ NLMISC_COMMAND(guildmotd, "Set the guild message of the day","<msg of the day>")
 
 	return true;
 }
+
+
+NLMISC_COMMAND(time, "Shows information about the current time", "")
+{
+	const uint8 size = 50;
+	char cs_local[size];
+	char cs_utc[size];
+	time_t date;
+	time(&date);
+	struct tm *tm;
+	tm = localtime(&date);
+	strftime(cs_local, size, "%X", tm);
+	tm = gmtime(&date);
+	strftime(cs_utc, size, "%X", tm);
+
+	ucstring msg = CI18N::get("uiCurrentLocalAndUtcTime");
+	strFindReplace(msg, "%local", cs_local);
+	strFindReplace(msg, "%utc", cs_utc);
+	CInterfaceManager::getInstance()->displaySystemInfo(msg, "AROUND");
+	return true;
+}

@@ -2999,8 +2999,17 @@ void	CEntityCL::updateClipped(const NLMISC::TTime &/* currentTimeInMs */, CEntit
 void	CEntityCL::updateVisiblePostPos(const NLMISC::TTime &/* currentTimeInMs */, CEntityCL * /* target */)
 {
 	if (R2::isEditionCurrent())	return; // selection managed by r2 editor in edition mode
+
+	bool bShowReticle = true;
+
+	CCDBNodeLeaf* node = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:SHOW_RETICLE");
+	if (node)
+	{
+		bShowReticle = node->getValueBool();
+	}
+
 	// No-op if I am not the current UserEntity Target
-	if(isTarget())
+	if(bShowReticle && isTarget())
 	{
 		// activate selection fx
 		if (_SelectionFX.empty())
@@ -3028,7 +3037,7 @@ void	CEntityCL::updateVisiblePostPos(const NLMISC::TTime &/* currentTimeInMs */,
 	}
 
 	// Mouse over SFX, only if the entity is selectable
-	if (ShowInterface && !isTarget() && isUnderCursor() && properties().selectable())
+	if (bShowReticle && ShowInterface && !isTarget() && isUnderCursor() && properties().selectable())
 	{
 		// activate selection fx
 		if (_MouseOverFX.empty())

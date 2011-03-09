@@ -508,7 +508,7 @@ void	CSkillManager::onSkillChange()
 }
 
 // ***************************************************************************
-void CSkillManager::checkTitleUnblocked(CHARACTER_TITLE::ECharacterTitle i)
+void CSkillManager::checkTitleUnblocked(CHARACTER_TITLE::ECharacterTitle i, bool show_message)
 {
 	if (isTitleReserved(i)) return;
 
@@ -581,7 +581,7 @@ void CSkillManager::checkTitleUnblocked(CHARACTER_TITLE::ECharacterTitle i)
 		if (!IngameDbMngr.initInProgress())
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			if (bAllUnblocked)
+			if (bAllUnblocked && show_message)
 			{
 				// This is a new title, send a message
 				string titleStr = CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)i);
@@ -682,7 +682,7 @@ void CSkillManager::tryToUnblockTitleFromSkill(SKILLS::ESkills eSkill, sint32 va
 }
 
 // ***************************************************************************
-void CSkillManager::tryToUnblockTitleFromBricks()
+void CSkillManager::tryToUnblockTitleFromBricks(bool show_message)
 {
 	CSBrickManager *pSBM =  CSBrickManager::getInstance();
 
@@ -703,7 +703,7 @@ void CSkillManager::tryToUnblockTitleFromBricks()
 			}
 		}
 
-		checkTitleUnblocked((CHARACTER_TITLE::ECharacterTitle)i);
+		checkTitleUnblocked((CHARACTER_TITLE::ECharacterTitle)i, show_message);
 	}
 }
 
@@ -763,7 +763,7 @@ void CSkillManager::tryToUnblockTitleFromMaxFames( uint32 factionIndex, sint32 f
 
 
 // ***************************************************************************
-void CSkillManager::tryToUnblockTitleFromCiv()
+void CSkillManager::tryToUnblockTitleFromCiv(bool show_message)
 {
 	for (uint i = 0; i < CHARACTER_TITLE::NB_CHARACTER_TITLE; ++i)
 	{
@@ -796,12 +796,12 @@ void CSkillManager::tryToUnblockTitleFromCiv()
 				}
 			}
 		}
-		checkTitleUnblocked((CHARACTER_TITLE::ECharacterTitle)i);
+		checkTitleUnblocked((CHARACTER_TITLE::ECharacterTitle)i, show_message);
 	}
 }
 
 // ***************************************************************************
-void CSkillManager::tryToUnblockTitleFromCult()
+void CSkillManager::tryToUnblockTitleFromCult(bool show_message)
 {
 
 	for (uint i = 0; i < CHARACTER_TITLE::NB_CHARACTER_TITLE; ++i)
@@ -835,7 +835,7 @@ void CSkillManager::tryToUnblockTitleFromCult()
 				}
 			}
 		}
-		checkTitleUnblocked((CHARACTER_TITLE::ECharacterTitle)i);
+		checkTitleUnblocked((CHARACTER_TITLE::ECharacterTitle)i, show_message);
 	}
 }
 
@@ -933,7 +933,7 @@ void CSkillManager::tryToUnblockTitleFromRingRatings( uint32 authorRating, uint3
 }
 
 // ***************************************************************************
-void CSkillManager::tryToUnblockTitleFromItems()
+void CSkillManager::tryToUnblockTitleFromItems(bool show_message)
 {
 	if (IngameDbMngr.initInProgress())
 		return;
@@ -1007,7 +1007,7 @@ void CSkillManager::tryToUnblockTitleFromItems()
 			if (allItemsFromListValidated != _TitlesUnblocked[i].UnblockedItemLists[j])
 			{
 				_TitlesUnblocked[i].UnblockedItemLists[j] = allItemsFromListValidated;
-				checkTitleUnblocked((CHARACTER_TITLE::ECharacterTitle)i);
+				checkTitleUnblocked((CHARACTER_TITLE::ECharacterTitle)i, show_message);
 			}
 		}
 	}
@@ -1077,10 +1077,11 @@ public:
 	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CSkillManager *pSM = CSkillManager::getInstance();
-		pSM->tryToUnblockTitleFromBricks();
-		pSM->tryToUnblockTitleFromCiv();
-		pSM->tryToUnblockTitleFromCult();
-		pSM->tryToUnblockTitleFromItems();
+		// Try to unblock titles without showing the new title message
+		pSM->tryToUnblockTitleFromBricks(false);
+		pSM->tryToUnblockTitleFromCiv(false);
+		pSM->tryToUnblockTitleFromCult(false);
+		pSM->tryToUnblockTitleFromItems(false);
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId(GROUP_TITLE_COMBO));

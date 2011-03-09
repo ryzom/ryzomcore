@@ -25,7 +25,7 @@
 
 class CChatWindow;
 class CFilteredChatSummary;
-
+class CFilteredDynChatSummary;
 
 // ***************************************************************************
 #define TEAM_DB_PATH	"SERVER:GROUP"
@@ -238,6 +238,11 @@ public:
 	// restore infos about user chats
 	bool				loadUserChatsInfos(NLMISC::IStream &f);
 
+	// save info about user dyn chats
+	bool				saveUserDynChatsInfos(NLMISC::IStream &f);
+	// restore info about user dyn chats
+	bool				loadUserDynChatsInfos(NLMISC::IStream &f);
+
 	// remove all the user chats
 	void				removeAllUserChats();
 
@@ -281,9 +286,12 @@ private:
 	//
 	// build summary about a filtered chat
 	void buildFilteredChatSummary(const CFilteredChat &src, CFilteredChatSummary &dest);
+	void buildFilteredDynChatSummary(const CFilteredChat &src, CFilteredDynChatSummary &dest);
 	void saveFilteredChat(NLMISC::IStream &f, const CFilteredChat &src);
+	void saveFilteredDynChat(NLMISC::IStream &f, const CFilteredChat &src);
 	// setup a user chat from its summary
 	void setupUserChatFromSummary(const CFilteredChatSummary &summary, CFilteredChat &dest);
+	void setupUserDynChatFromSummary(const CFilteredDynChatSummary &summary, CFilteredChat &dest);
 private:
 	// Contact waiting their name (received by string_manager) to be added
 	struct SWaitingContact

@@ -39,6 +39,18 @@ public:
 	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
 };
 
+// class for serialisation of user dyn chat (filtered chat) info
+class CFilteredDynChatSummary
+{
+public:
+	// Inputs
+	bool SrcDynChat[CChatGroup::MaxDynChanPerPlayer];
+	// output
+	CChatGroup::TGroupType Target;
+public:
+	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+};
+
 
 
 

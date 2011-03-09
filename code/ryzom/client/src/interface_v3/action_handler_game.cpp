@@ -111,6 +111,7 @@ string convertLanguageIntToLanguageCode(sint val)
 	case 1: return "fr"; break;
 	case 2: return "de"; break;
 	case 3: return "ru"; break;
+	case 4: return "es"; break;
 	}
 }
 
@@ -2467,7 +2468,7 @@ class CAHAddShape : public IActionHandler
 		string c = getParam(Params, "text");
 		string u = getParam(Params, "url");
 		string texture_name = getParam(Params, "texture");
-		string highlight = getParam(Params, "texture");
+		string highlight = getParam(Params, "highlight");
 		string transparency = getParam(Params, "transparency");
 
 		if (!getParam(Params, "x").empty())

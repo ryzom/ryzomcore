@@ -487,9 +487,6 @@ void CPeopleInterraction::initStdInputs()
 	if (YuboChat)
 		ChatInput.YuboChat.addListeningWindow(YuboChat);
 
-	// NB: The universe channel can only be seen from the user chat (and hence chat group)
-	// There is no Special universe window
-
 	if (TheUserChat.Window)
 	{
 		ChatInput.AroundMe.addListeningWindow(TheUserChat.Window);
@@ -498,6 +495,11 @@ void CPeopleInterraction::initStdInputs()
 		ChatInput.Guild.addListeningWindow(TheUserChat.Window);
 		ChatInput.Universe.addListeningWindow	(TheUserChat.Window);
 		// Don't add the system info by default
+		// Dynamic chats
+		for(i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
+		{
+			ChatInput.DynamicChat[i].addListeningWindow(TheUserChat.Window);
+		}
 	}
 
 	ChatInput.Tell.addListeningPeopleList(&FriendList);
@@ -804,8 +806,8 @@ void CPeopleInterraction::createDynamicChats()
 		chatDesc.ChatTemplateParams.push_back(make_pair(string("dyn_chat_nb"),toString(i)));
 		chatDesc.Id = string("dynamic_chat") + toString(i);
 		// no active proc because active state is driven by database
-		chatDesc.AHOnDeactive = "proc";
-		chatDesc.AHOnDeactiveParams = string("dynamic_chat_proc_deactive|") + toString(i);
+		chatDesc.AHOnCloseButton = "proc";
+		chatDesc.AHOnCloseButtonParams = string("dynamic_chat_proc_close|") + toString(i);
 		chatDesc.HeaderColor = "UI:SAVE:WIN:COLORS:MEM";
 
 		DynamicChat[i] = getChatWndMgr().createChatWindow(chatDesc);
@@ -1560,7 +1562,6 @@ bool CPeopleInterraction::createNewPartyChat(const ucstring &title)
 	return false;
 }
 
-
 //=================================================================================================================
 void CPeopleInterraction::buildFilteredChatSummary(const CFilteredChat &src, CFilteredChatSummary &fcs)
 {
@@ -1585,6 +1586,15 @@ void CPeopleInterraction::buildFilteredChatSummary(const CFilteredChat &src, CFi
 }
 
 //=================================================================================================================
+void CPeopleInterraction::buildFilteredDynChatSummary(const CFilteredChat &src, CFilteredDynChatSummary &fcs)
+{
+	for (uint8 i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
+	{
+		fcs.SrcDynChat[i] = ChatInput.DynamicChat[i].isListeningWindow(src.Window);
+	}
+}
+
+//=================================================================================================================
 void CPeopleInterraction::saveFilteredChat(NLMISC::IStream &f, const CFilteredChat &src)
 {
 	bool present;
@@ -1604,12 +1614,32 @@ void CPeopleInterraction::saveFilteredChat(NLMISC::IStream &f, const CFilteredCh
 }
 
 //=================================================================================================================
+void CPeopleInterraction::saveFilteredDynChat(NLMISC::IStream &f, const CFilteredChat &src)
+{
+	bool present;
+	if (src.Window == NULL)
+	{
+		present = false;
+		f.serial(present);
+	}
+	else
+	{
+		present = true;
+		f.serial(present);
+		CFilteredDynChatSummary fcs;
+		buildFilteredDynChatSummary(src, fcs);
+		f.serial(fcs);
+	}
+}
+
+//=================================================================================================================
 CChatGroupWindow *CPeopleInterraction::getChatGroupWindow() const
 {
 	return dynamic_cast<CChatGroupWindow*>(ChatGroup.Window);
 }
 
 #define USER_CHATS_INFO_VERSION 2
+#define USER_DYN_CHATS_INFO_VERSION 1
 
 //=================================================================================================================
 bool CPeopleInterraction::saveUserChatsInfos(NLMISC::IStream &f)
@@ -1643,6 +1673,27 @@ bool CPeopleInterraction::saveUserChatsInfos(NLMISC::IStream &f)
 	catch(NLMISC::EStream &e)
 	{
 		nlwarning("Error while saving user chat infos : %s", e.what());
+		return false;
+	}
+	return true;
+}
+
+//=================================================================================================================
+bool CPeopleInterraction::saveUserDynChatsInfos(NLMISC::IStream &f)
+{
+	nlassert(!f.isReading());
+	try
+	{
+		sint ver = f.serialVersion(USER_DYN_CHATS_INFO_VERSION);
+		f.serialCheck((uint32) 'OMGY');
+		if (ver >= 1)
+		{
+			saveFilteredDynChat(f, TheUserChat);
+		}
+	}
+	catch(NLMISC::EStream &e)
+	{
+		nlwarning("Error while saving user dyn chat infos : %s", e.what());
 		return false;
 	}
 	return true;
@@ -1714,6 +1765,37 @@ bool CPeopleInterraction::loadUserChatsInfos(NLMISC::IStream &f)
 }
 
 //=================================================================================================================
+bool CPeopleInterraction::loadUserDynChatsInfos(NLMISC::IStream &f)
+{
+	nlassert(f.isReading());
+	try
+	{
+		bool present;
+		sint ver = f.serialVersion(USER_DYN_CHATS_INFO_VERSION);
+		f.serialCheck((uint32) 'OMGY');
+		f.serial(present);
+		if (!present)
+		{
+			nlwarning("Bad data in user dyn chats infos");
+			return false;
+		}
+		CFilteredDynChatSummary fcs;
+		if (ver >= 1)
+		{
+			f.serial(fcs);
+			setupUserDynChatFromSummary(fcs, TheUserChat);
+		}
+	}
+	catch(NLMISC::EStream &e)
+	{
+		nlwarning("Error while loading user dyn chat infos : %s", e.what());
+		return false;
+	}
+	return true;
+}
+
+
+//=================================================================================================================
 void CPeopleInterraction::setupUserChatFromSummary(const CFilteredChatSummary &summary, CFilteredChat &dest)
 {
 	// User Dest. Do not allow Universe Warning, because do not want a warning open at load (moreover, the UNIVERSE tab should not be activated)
@@ -1726,6 +1808,18 @@ void CPeopleInterraction::setupUserChatFromSummary(const CFilteredChatSummary &s
 	ChatInput.Tell.setWindowState(dest.Window, summary.SrcTell);
 	ChatInput.Region.setWindowState(dest.Window, summary.SrcRegion);
 	ChatInput.Universe.setWindowState(dest.Window, summary.SrcUniverse);
+}
+
+//=================================================================================================================
+void CPeopleInterraction::setupUserDynChatFromSummary(const CFilteredDynChatSummary &summary, CFilteredChat &dest)
+{
+	// User Dest
+	dest.Filter.setTargetGroup(summary.Target, 0, false);
+	// src
+	for (uint8 i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
+	{
+		ChatInput.DynamicChat[i].setWindowState(dest.Window, summary.SrcDynChat[i]);
+	}
 }
 
 //=================================================================================================================
@@ -2494,7 +2588,7 @@ public:
 			for (uint i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
 			{
 				string s = toString(i);
-				uint32 textId = im->getDbProp("SERVER:DYN_CHAT:CHANNEL"+s+":NAME")->getValue32();
+				uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(i);
 				bool active = (textId != 0);
 				if (active)
 				{
@@ -2681,7 +2775,7 @@ class CHandlerSelectChatSource : public IActionHandler
 				CViewTextMenu *pVTM = dynamic_cast<CViewTextMenu *>(im->getElementFromId(MAIN_CHAT_SOURCE_MENU+":tab:dyn"+s));
 				if (pVTM)
 				{
-					uint32 textId = im->getDbProp("SERVER:DYN_CHAT:CHANNEL"+s+":NAME")->getValue32();
+					uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(i);
 					bool active = (textId != 0);
 					pVTM->setActive(active);
 					if (active)
@@ -2802,6 +2896,23 @@ class CHandlerSelectChatSource : public IActionHandler
 					++ insertionIndex;
 				}
 			}
+
+			// Add all existing dynamic channels and set the names
+			for (uint8 i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
+			{
+				string s = toString(i);
+				uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(i);
+				bool active = (textId != 0);
+				if (active)
+				{
+					ucstring title;
+					STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
+					menu->addLineAtIndex(insertionIndex, "["+s+"] " + title, FILTER_TOGGLE, "dyn"+s);
+					menu->setUserGroupLeft(insertionIndex, createMenuCheckBox(FILTER_TOGGLE, "dyn"+s, pi.ChatInput.DynamicChat[i].isListeningWindow(cw)));
+					++insertionIndex;
+				}
+			}
+
 		}
 
 
@@ -2909,6 +3020,13 @@ class CHandlerChatSourceSelected : public IActionHandler
 					}
 				}
 			}
+		}
+		else if (nlstricmp(sParams.substr(0, 3), "dyn") == 0)
+		{
+			uint8 i = 0;
+			fromString(sParams.substr(3), i);
+			if (ci.DynamicChat[i].isListeningWindow(cw)) ci.DynamicChat[i].removeListeningWindow(cw);
+			else ci.DynamicChat[i].addListeningWindow(cw);
 		}
 	}
 };

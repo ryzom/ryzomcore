@@ -356,7 +356,7 @@ class CAHEditPreviousLine : public CAHEdit
 {
 	void actionPart ()
 	{
-		if(_GroupEdit->getMaxHistoric())
+		if (_GroupEdit->getMaxHistoric() && (! _GroupEdit->getViewText()->getMultiLine()))
 		{
 			// Get the start of the string.
 			ucstring	startStr= _GroupEdit->getInputStringRef().substr(0, _GroupEdit->getCursorPos());
@@ -372,7 +372,7 @@ class CAHEditPreviousLine : public CAHEdit
 				}
 			}
 		}
-		else if (!_GroupEdit->getMaxHistoric() && _GroupEdit->getViewText()->getMultiLine())
+		else if (_GroupEdit->getViewText()->getMultiLine())
 		{
 			uint cursorPosInText = _GroupEdit->getCursorPos() + (uint)_GroupEdit->getPrompt().length();
 			if (
@@ -428,7 +428,7 @@ class CAHEditNextLine : public CAHEdit
 {
 	void actionPart ()
 	{
-		if(_GroupEdit->getMaxHistoric() && _GroupEdit->getCurrentHistoricIndex()>0)
+		if( (! _GroupEdit->getViewText()->getMultiLine()) && _GroupEdit->getMaxHistoric() && _GroupEdit->getCurrentHistoricIndex()>0)
 		{
 			// Get the start of the string.
 			ucstring	startStr= _GroupEdit->getInputStringRef().substr(0, _GroupEdit->getCursorPos());
@@ -444,7 +444,7 @@ class CAHEditNextLine : public CAHEdit
 				}
 			}
 		}
-		else if (!_GroupEdit->getMaxHistoric() && _GroupEdit->getViewText()->getMultiLine())
+		else if (_GroupEdit->getViewText()->getMultiLine())
 		{
 			sint cx, cy;
 			sint height;

@@ -4710,7 +4710,9 @@ bool	CInterfaceParser::loadLUA(const std::string &fileName, std::string &error)
 
 	if (needCheck && !isInData)
 	{
-		return false;
+		nlwarning("You are not allowed to modify the lua files");
+		// return true so it'll not generate a message box, we just ignore the file
+		return true;
 	}
 
 	// Parse script

@@ -692,6 +692,12 @@ public:
 	{
 		virtual bool isSheetValid(CDBGroupListSheet *pFather);
 	};
+
+	void sort();
+	bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+
+private:
+	SBagOptions	_BO;
 };
 
 
