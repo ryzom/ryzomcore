@@ -2748,8 +2748,11 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <!-- *             MISC           * -->
   <!-- ****************************** -->
   <variable entry="UI:SAVE:SHOW_CLOCK"
-             type="bool"
-             value="false" />
+            type="bool"
+            value="false" />
+  <variable entry="UI:SAVE:SHOW_RETICLE"
+            type="bool"
+            value="true" />
   <variable entry="UI:VARIABLES:MISSION_SELECTED_PREV_SESSION"
             type="sint32"
             value="-1" />
@@ -2960,10 +2963,16 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:CHAT:COLORS:TELL"
             type="rgba"
             value="170 170 170 255" />
+  <variable entry="UI:SAVE:CHAT:COLORS:DYN"
+            type="rgba"
+            value="162 255 173 255" />
   <variable entry="UI:SAVE:CHAT:ENTER_DONT_QUIT_CB"
             type="bool"
             value="false" />
   <variable entry="UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB"
+             type="bool"
+             value="false" />
+  <variable entry="UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB"
              type="bool"
              value="false" />
   <!-- ***************************** -->

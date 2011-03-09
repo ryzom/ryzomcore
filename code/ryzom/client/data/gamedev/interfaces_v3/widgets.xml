@@ -6203,8 +6203,7 @@
               fontsize="10" />
         <instance template="text_tt"
                   tooltip="uittInventoryWeight"
-                  posparent="weight_txt"
-                  tooltip_parent="win" />
+                  posparent="weight_txt" />
         <link expr="identity(getItemsWeight('#inv_branch',0,#inv_branch_nb),@#inv_branch)"
               target="weight_txt:hardtext" />
         <view type="bar"
@@ -6221,8 +6220,7 @@
               w="0"
               h="0"
               on_tooltip="get_tt_bulk"
-              on_tooltip_params="dbbranch=#inv_branch|dbmax=#inv_bulk_max"
-              tooltip_parent="win" />
+              on_tooltip_params="dbbranch=#inv_branch|dbmax=#inv_bulk_max" />
         <link expr="identity(getItemsBulk('#inv_branch',0,#inv_branch_nb),@#inv_branch)"
               target="encombrement:value" />
       </group>
@@ -6238,8 +6236,7 @@
             id="slots_tt"
             posparent="slots_nb"
             sizeref="wh"
-            tooltip="uittInvSlots"
-            tooltip_parent="win" />
+            tooltip="uittInvSlots" />
       <link expr="identity(getInvSlotCounts('#inv_branch'),@#inv_branch)"
             target="slots_nb:hardtext" />
       <!-- uses identity(x,@branch) to add an observer on branch -->

@@ -70,6 +70,7 @@
   <DEFINITION Label="Stable Service" Value="SERVICE_STABLE"/>
   <DEFINITION Label="Light helmet" Value="LIGHT_HELMET"/>
   <DEFINITION Label="ToolMaker" Value="ToolMaker"/>
+  <DEFINITION Label="Job element" Value="JOB_ELEMENT"/> 
   <DEFINITION Label="Generic" Value="GENERIC"/>
   <LOG>Tue Sep 02 10:51:46 2003 (saffray) Type Predef = 
 Fri Jun 18 11:04:28 2004 (fleury) Type Predef = 

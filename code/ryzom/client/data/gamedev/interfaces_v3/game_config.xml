@@ -1349,6 +1349,14 @@
                   posparent="cao"
                   x="0"
                   y="-12" />
+        <instance template="tgcw_checkbox"
+                  id="show_reticle"
+                  text="uiShowReticle"
+                  tooltip="uittShowReticle"
+                  posref="BL TL"
+                  posparent="show_clock"
+                  x="0"
+                  y="-12" />
       </group>
       <ctrl style="skin_scroll"
             id="sb_hud"
@@ -1393,6 +1401,7 @@
           <combo_text name="uigcFrancais" />
           <combo_text name="uigcDeutch" />
           <combo_text name="uigcRussian" />
+          <combo_text name="uigcSpanish" />
         </group>
         <link expr="@UI:TEMP:LANGUAGE"
               action="game_config_change_language" />
@@ -1605,14 +1614,23 @@
                   posparent="cc_univ"
                   x="0"
                   y="-4" />
+        <instance template="tgcw_color"
+                  id="cc_dyn"
+                  text="uiDynColor"
+                  title="uiCCDDyn"
+                  tooltip="uittChooseDynColor"
+                  posref="BL TL"
+                  posparent="cc_shout"
+                  x="0"
+                  y="-4" />
         <instance template="tgcw_checkbox"
                   id="enter_dontquit_cb"
                   text="uiEnterDontQuitCB"
                   tooltip="uittChatEnter"
-                  posparent="cc_univ"
+                  posparent="cc_dyn"
                   posref="BL TL"
                   x="0"
-                  y="-25" />
+                  y="-8" />
         <instance template="tgcw_checkbox"
                   id="show_times_in_chat_cb"
                   text="uiShowTimesInChatCB"
@@ -1621,17 +1639,27 @@
                   posref="BL TL"
                   x="0"
                   y="-8" />
+        <instance template="tgcw_checkbox"
+                  id="show_dyn_channel_name_in_chat_cb"
+                  text="uiShowDynChannelNameInChatCB"
+                  tooltip="uittShowDynChannelNameInChat"
+                  posparent="show_times_in_chat_cb"
+                  posref="BL TL"
+                  x="0"
+                  y="-8" />
         <instance template="tgcw_scrollbarint"
                   id="font_size"
                   text="uiFontSize"
                   posref="BL TL"
-                  posparent="show_times_in_chat_cb"
+                  posparent="show_dyn_channel_name_in_chat_cb"
                   x="0"
                   y="-8" />
         <link expr="@UI:SAVE:CHAT:ENTER_DONT_QUIT_CB"
               target="enter_dontquit_cb:c:pushed" />
         <link expr="@UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB"
               target="show_times_in_chat_cb:c:pushed" />
+        <link expr="@UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB"
+              target="show_dyn_channel_name_in_chat_cb:c:pushed" />
       </group>
       <ctrl style="skin_scroll"
             id="sb_chat_colors"
@@ -2707,35 +2735,35 @@
                   posref="TL TL"
                   x="0"
                   y="-20" />
-        <instance template="tgcw_color" id="cc_tribe" text="uiLMTribeColor" title="uiCCDLMTribeColor" tooltip="uittChooseLMTribeColor" posref="BL TL" posparent="cc_misc" x="0" y="-16" />
-		<instance template="tgcw_color" id="cc_bandit" text="uiLMBanditColor" title="uiCCDLMBanditColor" tooltip="uittChooseLMBanditColor" posref="BL TL" posparent="cc_tribe" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_citizen" text="uiLMCitizenColor" title="uiCCDLMCitizenColor" tooltip="uittChooseLMCitizenColor" posref="BL TL" posparent="cc_bandit" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_fauna" text="uiLMFaunaColor" title="uiCCDLMFaunaColor" tooltip="uittChooseLMFaunaColor" posref="BL TL" posparent="cc_citizen" x="0" y="-16" />
-		<instance template="tgcw_color" id="cc_faunaexcel" text="uiLMFaunaExcelColor" title="uiCCDLMFaunaExcelColor" tooltip="uittChooseLMFaunaExcelColor" posref="BL TL" posparent="cc_fauna" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_faunasup" text="uiLMFaunaSupColor" title="uiCCDLMFaunaSupColor" tooltip="uittChooseLMFaunaSupColor" posref="BL TL" posparent="cc_faunaexcel" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_forage" text="uiLMForageColor" title="uiCCDLMForageColor" tooltip="uittChooseLMForageColor" posref="BL TL" posparent="cc_faunasup" x="0" y="-16" />
-		<instance template="tgcw_color" id="cc_forageexcel" text="uiLMForageExcelColor" title="uiCCDLMForageExcelColor" tooltip="uittChooseLMForageExcelColor" posref="BL TL" posparent="cc_forage" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_foragesup" text="uiLMForageSupColor" title="uiCCDLMForageSupColor" tooltip="uittChooseLMForageSupColor" posref="BL TL" posparent="cc_forageexcel" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_sap" text="uiLMSapColor" title="uiCCDLMSapColor" tooltip="uittChooseLMSapColor" posref="BL TL" posparent="cc_foragesup" x="16" y="-4" />
-		<instance template="tgcw_color" id="cc_amber" text="uiLMAmberColor" title="uiCCDLMAmberColor" tooltip="uittChooseLMAmberColor" posref="BL TL" posparent="cc_sap" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_node" text="uiLMNodeColor" title="uiCCDLMNodeColor" tooltip="uittChooseLMNodeColor" posref="BL TL" posparent="cc_amber" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_fiber" text="uiLMFiberColor" title="uiCCDLMFiberColor" tooltip="uittChooseLMFiberColor" posref="BL TL" posparent="cc_node" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_bark" text="uiLMBarkColor" title="uiCCDLMBarkColor" tooltip="uittChooseLMBarkColor" posref="BL TL" posparent="cc_fiber" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_seed" text="uiLMSeedColor" title="uiCCDLMSeedColor" tooltip="uittChooseLMSeedColor" posref="BL TL" posparent="cc_bark" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_shell" text="uiLMShellColor" title="uiCCDLMShellColor" tooltip="uittChooseLMShellColor" posref="BL TL" posparent="cc_seed" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_resin" text="uiLMResinColor" title="uiCCDLMResinColor" tooltip="uittChooseLMResinColor" posref="BL TL" posparent="cc_shell" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_wood" text="uiLMWoodColor" title="uiCCDLMWoodColor" tooltip="uittChooseLMWoodColor" posref="BL TL" posparent="cc_resin" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_oil" text="uiLMOilColor" title="uiCCDLMOilColor" tooltip="uittChooseLMOilColor" posref="BL TL" posparent="cc_wood" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_mission" text="uiLMMissionColor" title="uiCCDLMMissionColor" tooltip="uittChooseLMMissionColor" posref="BL TL" posparent="cc_oil" x="-16" y="-16" />
-		<instance template="tgcw_color" id="cc_food" text="uiLMFoodColor" title="uiCCDLMFoodColor" tooltip="uittChooseLMFoodColor" posref="BL TL" posparent="cc_mission" x="16" y="-4" />
-		<instance template="tgcw_color" id="cc_construction" text="uiLMConstructionColor" title="uiCCDLMConstructionColor" tooltip="uittChooseLMConstructionColor" posref="BL TL" posparent="cc_food" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_goo" text="uiLMGooColor" title="uiCCDLMGooColor" tooltip="uittChooseLMGooColor" posref="BL TL" posparent="cc_construction" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_insect" text="uiLMInsectColor" title="uiCCDLMInsectColor" tooltip="uittChooseLMInsectColor" posref="BL TL" posparent="cc_goo" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_kitin" text="uiLMKitinColor" title="uiCCDLMKitinColor" tooltip="uittChooseLMKitinColor" posref="BL TL" posparent="cc_insect" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_nocive" text="uiLMNociveColor" title="uiCCDLMNociveColor" tooltip="uittChooseLMNociveColor" posref="BL TL" posparent="cc_kitin" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_preservative" text="uiLMPreservativeColor" title="uiCCDLMPreservativeColor" tooltip="uittChooseLMPreservativeColor" posref="BL TL" posparent="cc_nocive" x="0" y="-4" />
-		<instance template="tgcw_color" id="cc_passage" text="uiLMPassageColor" title="uiCCDLMPassageColor" tooltip="uittChooseLMPassageColor" posref="BL TL" posparent="cc_preservative" x="-16" y="-16" />
-		<instance template="tgcw_color" id="cc_teleporter" text="uiLMTeleporterColor" title="uiCCDLMTeleporterColor" tooltip="uittChooseLMTeleporterColor" posref="BL TL" posparent="cc_passage" x="0" y="-4" />
+        <instance template="tgcw_color" id="cc_tribe" text="uiLMTribeColor" title="uiCCDLMTribe" tooltip="uittChooseLMTribeColor" posref="BL TL" posparent="cc_misc" x="0" y="-16" />
+		<instance template="tgcw_color" id="cc_bandit" text="uiLMBanditColor" title="uiCCDLMBandit" tooltip="uittChooseLMBanditColor" posref="BL TL" posparent="cc_tribe" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_citizen" text="uiLMCitizenColor" title="uiCCDLMCitizen" tooltip="uittChooseLMCitizenColor" posref="BL TL" posparent="cc_bandit" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_fauna" text="uiLMFaunaColor" title="uiCCDLMFauna" tooltip="uittChooseLMFaunaColor" posref="BL TL" posparent="cc_citizen" x="0" y="-16" />
+		<instance template="tgcw_color" id="cc_faunaexcel" text="uiLMFaunaExcelColor" title="uiCCDLMFaunaExcel" tooltip="uittChooseLMFaunaExcelColor" posref="BL TL" posparent="cc_fauna" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_faunasup" text="uiLMFaunaSupColor" title="uiCCDLMFaunaSup" tooltip="uittChooseLMFaunaSupColor" posref="BL TL" posparent="cc_faunaexcel" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_forage" text="uiLMForageColor" title="uiCCDLMForage" tooltip="uittChooseLMForageColor" posref="BL TL" posparent="cc_faunasup" x="0" y="-16" />
+		<instance template="tgcw_color" id="cc_forageexcel" text="uiLMForageExcelColor" title="uiCCDLMForageExcel" tooltip="uittChooseLMForageExcelColor" posref="BL TL" posparent="cc_forage" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_foragesup" text="uiLMForageSupColor" title="uiCCDLMForageSup" tooltip="uittChooseLMForageSupColor" posref="BL TL" posparent="cc_forageexcel" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_sap" text="uiLMSapColor" title="uiCCDLMSap" tooltip="uittChooseLMSapColor" posref="BL TL" posparent="cc_foragesup" x="16" y="-4" />
+		<instance template="tgcw_color" id="cc_amber" text="uiLMAmberColor" title="uiCCDLMAmber" tooltip="uittChooseLMAmberColor" posref="BL TL" posparent="cc_sap" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_node" text="uiLMNodeColor" title="uiCCDLMNode" tooltip="uittChooseLMNodeColor" posref="BL TL" posparent="cc_amber" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_fiber" text="uiLMFiberColor" title="uiCCDLMFiber" tooltip="uittChooseLMFiberColor" posref="BL TL" posparent="cc_node" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_bark" text="uiLMBarkColor" title="uiCCDLMBark" tooltip="uittChooseLMBarkColor" posref="BL TL" posparent="cc_fiber" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_seed" text="uiLMSeedColor" title="uiCCDLMSeed" tooltip="uittChooseLMSeedColor" posref="BL TL" posparent="cc_bark" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_shell" text="uiLMShellColor" title="uiCCDLMShell" tooltip="uittChooseLMShellColor" posref="BL TL" posparent="cc_seed" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_resin" text="uiLMResinColor" title="uiCCDLMResin" tooltip="uittChooseLMResinColor" posref="BL TL" posparent="cc_shell" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_wood" text="uiLMWoodColor" title="uiCCDLMWood" tooltip="uittChooseLMWoodColor" posref="BL TL" posparent="cc_resin" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_oil" text="uiLMOilColor" title="uiCCDLMOil" tooltip="uittChooseLMOilColor" posref="BL TL" posparent="cc_wood" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_mission" text="uiLMMissionColor" title="uiCCDLMMission" tooltip="uittChooseLMMissionColor" posref="BL TL" posparent="cc_oil" x="-16" y="-16" />
+		<instance template="tgcw_color" id="cc_food" text="uiLMFoodColor" title="uiCCDLMFood" tooltip="uittChooseLMFoodColor" posref="BL TL" posparent="cc_mission" x="16" y="-4" />
+		<instance template="tgcw_color" id="cc_construction" text="uiLMConstructionColor" title="uiCCDLMConstruction" tooltip="uittChooseLMConstructionColor" posref="BL TL" posparent="cc_food" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_goo" text="uiLMGooColor" title="uiCCDLMGoo" tooltip="uittChooseLMGooColor" posref="BL TL" posparent="cc_construction" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_insect" text="uiLMInsectColor" title="uiCCDLMInsect" tooltip="uittChooseLMInsectColor" posref="BL TL" posparent="cc_goo" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_kitin" text="uiLMKitinColor" title="uiCCDLMKitin" tooltip="uittChooseLMKitinColor" posref="BL TL" posparent="cc_insect" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_nocive" text="uiLMNociveColor" title="uiCCDLMNocive" tooltip="uittChooseLMNociveColor" posref="BL TL" posparent="cc_kitin" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_preservative" text="uiLMPreservativeColor" title="uiCCDLMPreservative" tooltip="uittChooseLMPreservativeColor" posref="BL TL" posparent="cc_nocive" x="0" y="-4" />
+		<instance template="tgcw_color" id="cc_passage" text="uiLMPassageColor" title="uiCCDLMPassage" tooltip="uittChooseLMPassageColor" posref="BL TL" posparent="cc_preservative" x="-16" y="-16" />
+		<instance template="tgcw_color" id="cc_teleporter" text="uiLMTeleporterColor" title="uiCCDLMTeleporter" tooltip="uittChooseLMTeleporterColor" posref="BL TL" posparent="cc_passage" x="0" y="-4" />
 
       </group>
       <ctrl style="skin_scroll"
@@ -2977,6 +3005,11 @@
                widget="boolbut"
                link="UI:SAVE:SHOW_CLOCK"
                realtime="true" />
+        <param ui="hud:show_reticle:c"
+               type="db"
+               widget="boolbut"
+               link="UI:SAVE:SHOW_RETICLE"
+               realtime="true" />
         <param ui="alpha_colors:col_day:c"
                type="db"
                widget="colbut"
@@ -3062,6 +3095,11 @@
                widget="colbut"
                link="UI:SAVE:CHAT:COLORS:SHOUT"
                realtime="true" />
+        <param ui="chat_colors:cc_dyn:c"
+               type="db"
+               widget="colbut"
+               link="UI:SAVE:CHAT:COLORS:DYN"
+               realtime="true" />
         <!--
                         <param ui="chat_colors:cc_shout:c"              type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:SHOUT" realtime="true" />
                         <param ui="chat_colors:cc_civi:c"               type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:CIVILIZATION" realtime="true" />
@@ -3076,6 +3114,11 @@
                type="db"
                widget="boolbut"
                link="UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB"
+               realtime="true" />
+        <param ui="chat_colors:show_dyn_channel_name_in_chat_cb:c"
+               type="db"
+               widget="boolbut"
+               link="UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB"
                realtime="true" />
         <param ui="chat_colors:font_size:c"
                type="db"

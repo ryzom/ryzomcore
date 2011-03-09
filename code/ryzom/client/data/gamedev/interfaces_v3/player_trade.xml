@@ -50,7 +50,8 @@
 		squarify="true"
 		onclick_l="put_bag_item_to_exchange"
 		onclick_r="open_help_auto" lmargin="4" rmargin="4" tmargin="4" bmargin="4" column_max="16" 
-		auto_grayed="true" >
+		auto_grayed="true"
+		maxitem="%max_bag_invslot" >
 	</group>
 </group>
 

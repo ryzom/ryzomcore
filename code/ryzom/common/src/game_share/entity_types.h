@@ -147,7 +147,7 @@ const TCoord		THRESHOLD_VPA				= MAX_THRESHOLD;
 
 // Visual property B
 const TPropIndex	PROPERTY_VPB				= 10;
-const TCoord		THRESHOLD_VPB				= 20000;
+const TCoord		THRESHOLD_VPB				= MAX_THRESHOLD;
 
 // Visual property C
 const TPropIndex	PROPERTY_VPC				= 11;

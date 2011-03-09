@@ -715,7 +715,7 @@
         <group id="guild"
                posref="TL TL"
                sizeref="w"
-               h="12"
+               h="14"
                y="-52">
           <view type="text"
                 id="guild_title"

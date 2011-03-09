@@ -1742,10 +1742,25 @@
               h="0"
               tooltip="uittFriendsOnline"
               tooltip_parent="win" />
+        <ctrl type="button"
+              id="profile_button"
+              button_type="push_button"
+              posref="MR MR"
+              x="-36"
+              tx_normal="profile.tga"
+              tx_pushed="profile.tga"
+              tx_over="profile.tga"
+              global_color_normal="false"
+              global_color_over="false"
+              global_color_pushed="false"
+              onclick_l="open_title_help"
+              params_l="from=contact"
+              tooltip="uittContactInfo"
+              tooltip_parent="win" />
         <view type="bitmap"
               id="blocked"
               posref="MR MR"
-              x="-34"
+              x="-50"
               y="-2"
               texture="w_answer_16_cancel.tga"
               global_color="false"
@@ -3082,8 +3097,7 @@
            pop_min_w="216"
            pop_min_h="96"
            pop_max_w="2000"
-           pop_max_h="1600"
-           active_savable="false">
+           pop_max_h="1600" >
       <group id="header_closed"
              x="0"
              y="0"
@@ -3117,7 +3131,6 @@
                   sizeref="w"
                   w="-10"
                   onenter="chat_box_entry"
-                  reset_focus_on_hide="true"
                   backup_father_container_pos="true" />
         <view type="text"
               id="cant_write_ebw"
@@ -3143,7 +3156,7 @@
     </group>
   </template>
   <!-- those proc have the index in db of the dyn_chat, in parameter @0 -->
-  <proc id="dynamic_chat_proc_deactive">
+  <proc id="dynamic_chat_proc_close">
     <!-- The window is closed by the user, change the associated DB flag -->
     <action handler="set"
             params="dblink=UI:SAVE:ISDETACHED:DYNAMIC_CHAT@0|value=0" />

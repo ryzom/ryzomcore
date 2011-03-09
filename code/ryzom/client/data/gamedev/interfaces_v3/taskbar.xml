@@ -912,7 +912,7 @@
 										click_when_pushed="true" onclick_l="show_hide" params_l="#win_name" />
 
 		<view type="text" id="text" posparent="but" posref="MR ML" x="4" y="-3" fontsize="11" global_color="false" color="#color" shadow="true" hardtext="#text" />
-		<view type="text" id="key" posref="MR MR" x="-8" y="-4" fontsize="8" global_color="false" color="#color" shadow="true" hardtext="uiNotAssigned" />
+		<view type="text" id="key" posref="MR MR" x="-8" y="-2" fontsize="8" global_color="false" color="#color" shadow="true" hardtext="uiNotAssigned" />
 
 
 		<link expr="@#pushflag" target="but:pushed" />
@@ -1208,6 +1208,7 @@
 	<param value="communication:contact_list|contact_list" />
 	<param value="communication:mailbox|mailbox" />
 	<param value="communication:fame|fame" />
+	<param value="communication:webig|webig" />
 	
 	<param value="options:game_config|game_config" />
 	<param value="options:keys|keys" />
