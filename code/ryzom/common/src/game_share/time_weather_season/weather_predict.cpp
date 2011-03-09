@@ -64,18 +64,18 @@ float CPredictWeather::predictWeather(uint64 day, float hour, const CWeatherFunc
 	{
 		return 1.f;
 	}
-	if (wfp.DayLenght <= 0.f || wfp.CycleLenght == 0) return 0.f;
+	if (wfp.DayLength <= 0.f || wfp.CycleLength == 0) return 0.f;
 	nlassert(hour >= 0);
-	day += (uint64) (hour / (float) wfp.DayLenght);
-	hour = fmodf(hour, (float) wfp.DayLenght);
+	day += (uint64) (hour / (float) wfp.DayLength);
+	hour = fmodf(hour, (float) wfp.DayLength);
 	// test in which cycle we are, we use this as a seed to a random fct to get reproductible behaviour
-	nlassert(wfp.CycleLenght != 0.f);
+	nlassert(wfp.CycleLength != 0.f);
 	float weatherValue;
-	uint64 currHour = (day * wfp.DayLenght) + (uint) hour;
-	uint64 cycle = currHour / wfp.CycleLenght;
-	uint64 cycleStartHour = cycle * wfp.CycleLenght; // global start hour of the cycle
+	uint64 currHour = (day * wfp.DayLength) + (uint) hour;
+	uint64 cycle = currHour / wfp.CycleLength;
+	uint64 cycleStartHour = cycle * wfp.CycleLength; // global start hour of the cycle
 	// the last hour of each cycle does a transition
-	if (currHour - cycleStartHour < wfp.CycleLenght - 1)
+	if (currHour - cycleStartHour < wfp.CycleLength - 1)
 	{
 		// not a transition
 		EGSPD::CSeason::TSeason season = CRyzomTime::getSeasonByDay((uint32) day);
@@ -85,7 +85,7 @@ float CPredictWeather::predictWeather(uint64 day, float hour, const CWeatherFunc
 	{
 		// this is a transition
 		EGSPD::CSeason::TSeason season = CRyzomTime::getSeasonByDay((uint32) day);
-		EGSPD::CSeason::TSeason nextSeason = CRyzomTime::getSeasonByDay((uint32) ((cycleStartHour + wfp.CycleLenght) & 0xFFFFFFFF) / wfp.DayLenght);
+		EGSPD::CSeason::TSeason nextSeason = CRyzomTime::getSeasonByDay((uint32) ((cycleStartHour + wfp.CycleLength) & 0xFFFFFFFF) / wfp.DayLength);
 		float blendFactor = (float) fmod(hour, 1);
 		weatherValue = blendFactor * getCycleWeatherValue(cycle + 1, wf[nextSeason]) + (1.f - blendFactor) * getCycleWeatherValue(cycle, wf[season]);
 	}
@@ -104,9 +104,9 @@ using namespace std;
 
 inline bool operator == (const CWeatherFunctionParamsSheetBase &lhs, const CWeatherFunctionParamsSheetBase &rhs)
 {
-	return    lhs.CycleLenght == rhs.CycleLenght &&
+	return    lhs.CycleLength == rhs.CycleLength &&
 		      lhs.MaximaRatio == rhs.MaximaRatio &&
-			  lhs.DayLenght == rhs.DayLenght     &&
+			  lhs.DayLength == rhs.DayLength     &&
 			  lhs.MaxARatio == rhs.MaxARatio     &&
 			  lhs.MaxDRatio == rhs.MaxDRatio     &&
 			  lhs.MinDRatio == rhs.MinDRatio;
@@ -190,15 +190,15 @@ static float getFairWeatherValue(EGSPD::CSeason::TSeason season, const CWeatherF
 /*
 static float getCycleStartValue(uint64 day, uint64 totalHour, const CWeatherFunctionParamsSheetBase &wfp, const CWeatherFunction wf[EGSPD::CSeason::Invalid])
 {
-	uint64 cycle = totalHour / wfp.CycleLenght;
-	uint64 cycleStartHour = cycle * wfp.CycleLenght;
-	uint64 dayStartHour = day * wfp.DayLenght; // the global hour at which the day starts
+	uint64 cycle = totalHour / wfp.CycleLength;
+	uint64 cycleStartHour = cycle * wfp.CycleLength;
+	uint64 dayStartHour = day * wfp.DayLength; // the global hour at which the day starts
 
 	EGSPD::CSeason::TSeason season = CRyzomTime::getSeasonByDay((uint32)day);
 
 
 	// When a weather cycle starts at a season, and end at another one, this is a special case where Weather value must be set to "fair weather"
-	uint64 dayForEndCycle = (cycleStartHour + wfp.CycleLenght) / wfp.DayLenght;
+	uint64 dayForEndCycle = (cycleStartHour + wfp.CycleLength) / wfp.DayLength;
 	if (CRyzomTime::getSeasonByDay((uint32)day) != season)
 	{
 		// yes this is a transition cycle, so return the fair weather value for the previous season
@@ -255,15 +255,15 @@ float CPredictWeather::predictWeather(uint64 day, float hour, const CWeatherFunc
 	{
 		return 1.f;
 	}
-	if (wfp.DayLenght <= 0.f || wfp.CycleLenght == 0) return 0.f;
+	if (wfp.DayLength <= 0.f || wfp.CycleLength == 0) return 0.f;
 	nlassert(hour >= 0);
-	day += (uint64) (hour / (float) wfp.DayLenght);
-	hour = fmodf(hour, (float) wfp.DayLenght);
+	day += (uint64) (hour / (float) wfp.DayLength);
+	hour = fmodf(hour, (float) wfp.DayLength);
 	// test in which cycle we are, we use this as a seed to a random fct to get reproductible behaviour
-	nlassert(wfp.CycleLenght != 0.f);
-	uint64 currHour = (day * wfp.DayLenght) + (uint) hour;
-	uint64 cycle = currHour / wfp.CycleLenght;
-	uint64 cycleStartHour = cycle * wfp.CycleLenght; // global start hour of the cycle
+	nlassert(wfp.CycleLength != 0.f);
+	uint64 currHour = (day * wfp.DayLength) + (uint) hour;
+	uint64 cycle = currHour / wfp.CycleLength;
+	uint64 cycleStartHour = cycle * wfp.CycleLength; // global start hour of the cycle
 	// cache previous results, this avoid to recompute the weather function
 	static const CFctCtrlPoint	 *lastFct;
 	static uint				     lastNumPoints;
@@ -282,7 +282,7 @@ float CPredictWeather::predictWeather(uint64 day, float hour, const CWeatherFunc
 		lastWf = wf;
 
 		// special case : see if the weather is at a transition of season
-		uint64 endCycleDay = (cycleStartHour + wfp.CycleLenght) / wfp.DayLenght; // which day is it at the end of the cycle
+		uint64 endCycleDay = (cycleStartHour + wfp.CycleLength) / wfp.DayLength; // which day is it at the end of the cycle
 		EGSPD::CSeason::TSeason nextSeason = CRyzomTime::getSeasonByDay((uint32)endCycleDay);
 		if (nextSeason != season)
 		{
@@ -291,19 +291,19 @@ float CPredictWeather::predictWeather(uint64 day, float hour, const CWeatherFunc
 			static CFctCtrlPoint transitionFct[4];
 			transitionFct[0].X = 0.f;
 			transitionFct[0].Y = getFairWeatherValue(season, wf);
-			transitionFct[1].X = (float) (endCycleDay * wfp.DayLenght - cycleStartHour);
+			transitionFct[1].X = (float) (endCycleDay * wfp.DayLength - cycleStartHour);
 			transitionFct[1].Y = getFairWeatherValue(season, wf);;
 			transitionFct[2].X = transitionFct[1].X;
 			transitionFct[2].Y = getFairWeatherValue(nextSeason, wf);;
-			transitionFct[3].X = (float) wfp.CycleLenght;
-			transitionFct[3].Y = getCycleStartValue(day, cycleStartHour + wfp.CycleLenght, wfp, wf); // start value for the next cycle
+			transitionFct[3].X = (float) wfp.CycleLength;
+			transitionFct[3].Y = getCycleStartValue(day, cycleStartHour + wfp.CycleLength, wfp, wf); // start value for the next cycle
 			lastFct = transitionFct;
 			lastNumPoints = sizeof(transitionFct) / sizeof(transitionFct[0]);
 			weatherCycle = SeasonTransition;
 		}
 		else
 		{
-			uint64 dayStartHour = day * wfp.DayLenght; // the global hour at which the day starts
+			uint64 dayStartHour = day * wfp.DayLength; // the global hour at which the day starts
 
 			NLMISC::CRandom randomGenerator;
 			// set seed
@@ -328,7 +328,7 @@ float CPredictWeather::predictWeather(uint64 day, float hour, const CWeatherFunc
 				// For each hour, we see if there is mist, and set the function accordingly
 
 				static std::vector<CFctCtrlPoint> lpFct;
-				lpFct.resize(wfp.CycleLenght);
+				lpFct.resize(wfp.CycleLength);
 
 				float fairWeatherValue = getFairWeatherValue(season, wf);
 				float A;
@@ -352,14 +352,14 @@ float CPredictWeather::predictWeather(uint64 day, float hour, const CWeatherFunc
 				// starts with fair weather
 				lpFct[0] = CFctCtrlPoint(0.f, fairWeatherValue);
 				//
-				uint currHour = (uint) (cycleStartHour - day * wfp.DayLenght);
+				uint currHour = (uint) (cycleStartHour - day * wfp.DayLength);
 				// for each hour, see if mist is needed
-				for(uint k = 1; k < wfp.CycleLenght - 1; ++k)
+				for(uint k = 1; k < wfp.CycleLength - 1; ++k)
 				{
 					++currHour;
-					if (currHour == wfp.DayLenght) currHour = 0;
+					if (currHour == wfp.DayLength) currHour = 0;
 
-					if (k == 0 || k == (wfp.CycleLenght - 1))
+					if (k == 0 || k == (wfp.CycleLength - 1))
 					{
 						lpFct[k] = CFctCtrlPoint((float) k, fairWeatherValue);
 					}
@@ -382,8 +382,8 @@ float CPredictWeather::predictWeather(uint64 day, float hour, const CWeatherFunc
 				}
 
 				// ends with start value of next cycle
-				float endValue   = getCycleStartValue(day, cycleStartHour + wfp.CycleLenght, wfp, wf);
-				lpFct[wfp.CycleLenght - 1] = CFctCtrlPoint((float) wfp.CycleLenght - 1, endValue);
+				float endValue   = getCycleStartValue(day, cycleStartHour + wfp.CycleLength, wfp, wf);
+				lpFct[wfp.CycleLength - 1] = CFctCtrlPoint((float) wfp.CycleLength - 1, endValue);
 
 				lastFct = &lpFct[0];
 				lastNumPoints = lpFct.size();
@@ -417,18 +417,18 @@ float CPredictWeather::predictWeather(uint64 day, float hour, const CWeatherFunc
 				//
 				//
 
-				float A = randomGenerator.frand(wfp.MaxARatio) * wfp.CycleLenght;
+				float A = randomGenerator.frand(wfp.MaxARatio) * wfp.CycleLength;
 				float C = randomGenerator.frand(1.f);
 				if (wf)
 				{
 					C *= wf[season].LowPressureValueFactor;
 				}
-				float D = 2.f * (wfp.CycleLenght - A) / 3.f;
+				float D = 2.f * (wfp.CycleLength - A) / 3.f;
 				float E = C * wfp.MaximaRatio;
 				float F = wfp.MinDRatio + randomGenerator.frand(wfp.MaxDRatio - wfp.MinDRatio);
 
 				float startValue = getCycleStartValue(day, cycleStartHour, wfp, wf);
-				float endValue   = getCycleStartValue(day, cycleStartHour + wfp.CycleLenght, wfp, wf);
+				float endValue   = getCycleStartValue(day, cycleStartHour + wfp.CycleLength, wfp, wf);
 
 				static CFctCtrlPoint hpFct[6];
 				hpFct[0].X = 0.f;
@@ -441,7 +441,7 @@ float CPredictWeather::predictWeather(uint64 day, float hour, const CWeatherFunc
 				hpFct[3].Y = startValue;
 				hpFct[4].X = 1.25f * D + A;
 				hpFct[4].Y = startValue + C;
-				hpFct[5].X = (float) wfp.CycleLenght;
+				hpFct[5].X = (float) wfp.CycleLength;
 				hpFct[5].Y = endValue;
 
 				lastFct = hpFct;
@@ -504,7 +504,7 @@ void CPredictWeather::generateWeatherStats(const std::string &fileName, const CW
 		// Take 2000 sample of weather state along the day
 		for(k = 0; k < numSamples; ++k)
 		{
-			float hour = wfp.DayLenght / (float) numSamples;
+			float hour = wfp.DayLength / (float) numSamples;
 			float weatherValue = predictWeather(day, hour, wfp, wf);
 			if (wf[season].getNumWeatherSetups() == 0.f) continue;
 			if (wf[season].getNumWeatherSetups() == 1.f)

@@ -14,6 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+  *  This file contains an extension of the 'persistent data record' system
+  *  It represents the contents of arbitrary CPersistentDataRecord records in a tree structure
+  *  that can be interrogated or written to / read from easy to read text files
+  *
+  **/
+
 #ifndef PERSISTENT_DATA_TREE_H
 #define	PERSISTENT_DATA_TREE_H
 

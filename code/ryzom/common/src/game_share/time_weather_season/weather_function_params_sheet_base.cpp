@@ -26,11 +26,11 @@
 
 
 //=======================================================================
-CWeatherFunctionParamsSheetBase::CWeatherFunctionParamsSheetBase()
-:							DayLenght(24),
-							CycleLenght(25),
+CWeatherFunctionParamsSheetBase::CWeatherFunctionParamsSheetBase():
+							DayLength(24),
+							CycleLength(25),
 							MinThunderPeriod(1.f),
-							ThunderLenght(0.5f),
+							ThunderLength(0.5f),
 							CloudWindSpeedFactor(1.f),
 							CloudMinSpeed(0.f)
 {
@@ -46,10 +46,10 @@ void CWeatherFunctionParamsSheetBase::readGeorges(const NLGEORGES::UForm *form, 
 //=======================================================================
 void CWeatherFunctionParamsSheetBase::build(const NLGEORGES::UFormElm &item)
 {
-	item.getValueByName(DayLenght, "DayNumHours");
-	item.getValueByName(CycleLenght, "CycleLenght");
+	item.getValueByName(DayLength, "DayNumHours");
+	item.getValueByName(CycleLength, "CycleLenght");
 	item.getValueByName(MinThunderPeriod, "MinThunderPeriod");
-	item.getValueByName(ThunderLenght, "ThunderLenght");
+	item.getValueByName(ThunderLength, "ThunderLenght");
 	item.getValueByName(CloudWindSpeedFactor, "CloudWindSpeedFactor");
 	item.getValueByName(CloudMinSpeed, "CloudMinSpeed");
 }
@@ -57,10 +57,10 @@ void CWeatherFunctionParamsSheetBase::build(const NLGEORGES::UFormElm &item)
 //=======================================================================
 void CWeatherFunctionParamsSheetBase::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 {
-	f.serial(DayLenght);
-	f.serial(CycleLenght);
+	f.serial(DayLength);
+	f.serial(CycleLength);
 	f.serial(MinThunderPeriod);
-	f.serial(ThunderLenght);
+	f.serial(ThunderLength);
 	f.serial(CloudWindSpeedFactor);
 	f.serial(CloudMinSpeed);
 }

@@ -208,7 +208,7 @@ namespace R2
 
 		void fromSkillName(const std::string &skillName)
 		{
-			// we considere the lenght of the skill name to be proportional to the level
+			// we considere the length of the skill name to be proportional to the level
 			if (skillName.size() < 2)
 			{
 				// skill name too short

@@ -37,11 +37,11 @@ namespace NLMISC
 class CWeatherFunctionParamsSheetBase
 {
 public:
-	uint32  DayLenght;   // lenght of day, in hours
-	uint32  CycleLenght; // lenght of a cycle, in hours
+	uint32  DayLength;   // length of day, in hours
+	uint32  CycleLength; // length of a cycle, in hours
 	//
 	float   MinThunderPeriod; // Min thunder period, in s.
-	float   ThunderLenght; // Lenght of a thunder strike, in s.
+	float   ThunderLength; // Length of a thunder strike, in s.
 	//
 	float   CloudWindSpeedFactor;
 	float   CloudMinSpeed;

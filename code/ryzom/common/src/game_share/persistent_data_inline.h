@@ -604,8 +604,8 @@ inline CPersistentDataRecord::CArg::CArg(const std::string& type,const std::stri
 	case UINT32:		_Value.i32=NLMISC::CSString(value).atoi();		break;
 	case SINT64:		_Value.i64=NLMISC::atoiInt64(value.c_str());	break;
 	case UINT64:		_Value.i64=NLMISC::atoiInt64(value.c_str());	break;
-	case FLOAT32:		NLMISC::fromString(value, _Value.f32);				break;
-	case FLOAT64:		NLMISC::fromString(value, _Value.f64);				break;
+	case FLOAT32:		NLMISC::fromString(value, _Value.f32);			break;
+	case FLOAT64:		NLMISC::fromString(value, _Value.f64);			break;
 	case STRING:		_Value.i32=pdr.addString(value); _String=value;	break;
 	case EXTEND_TYPE:
 		switch(_Value.ExType)
