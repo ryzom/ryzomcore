@@ -142,7 +142,7 @@ sint main(int argc, char **argv)
 
 #if defined(NL_OS_MAC)
 	QDir::setCurrent(qApp->applicationDirPath() + QString("/../Resources"));
-	CLibrary::addLibPath((qApp->applicationDirPath() + QString("/../PlugIns/nel")).toStdString());
+	NLMISC::CLibrary::addLibPath((qApp->applicationDirPath() + QString("/../PlugIns/nel")).toStdString());
 #endif
 
 	ExtensionSystem::CPluginManager pluginManager;
