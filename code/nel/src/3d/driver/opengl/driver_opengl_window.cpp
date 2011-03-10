@@ -2537,7 +2537,7 @@ bool CDriverGL::isActive()
 	XWindowAttributes attr;
 	Status status = XGetWindowAttributes(_dpy, _win, &attr);
 
-	nlwarning("XGetWindowAttributes returned %d", status);
+	res = (status == 1);
 
 #endif // NL_OS_UNIX
 

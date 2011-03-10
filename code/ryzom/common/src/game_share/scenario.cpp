@@ -836,9 +836,9 @@ bool CScenarioValidator::setScenarioToLoad( const std::string& filename, CScenar
 		static const char * slashheader = "---- /Header\n\n";
 		static const char * comment = "-- ";
 
-		static const unsigned int headerLen = (unsigned int)strlen(header);
-		static const unsigned int slasheaderLen = (unsigned int)strlen(slashheader);
-		static const unsigned int commentLen = (unsigned int)strlen(comment);
+		static const uint headerLen = (uint)strlen(header);
+		static const uint slasheaderLen = (uint)strlen(slashheader);
+		static const uint commentLen = (uint)strlen(comment);
 
 
 		NLMISC::CSString tmp;
@@ -1095,9 +1095,9 @@ bool CUserComponentValidator::setUserComponentToLoad( const std::string& filenam
 		static const char * slashheader = "---- /Header\n\n";
 		static const char * comment = "-- ";
 
-		static const unsigned int headerLen = (unsigned int)strlen(header);
-		static const unsigned int slasheaderLen = (unsigned int)strlen(slashheader);
-		static const unsigned int commentLen = (unsigned int)strlen(comment);
+		static const uint headerLen = (uint)strlen(header);
+		static const uint slasheaderLen = (uint)strlen(slashheader);
+		static const uint commentLen = (uint)strlen(comment);
 
 
 		NLMISC::CSString tmp;
