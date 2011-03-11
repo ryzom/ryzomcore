@@ -592,6 +592,21 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 				{
 					gl = gl2;
 
+					// Add dyn chan number before string
+					ucstring prefix("[" + NLMISC::toString(dynamicChatDbIndex) + "]");
+					// Find position to put the new string
+					// After timestamp?
+					size_t pos = newmsg.find(ucstring("]"));
+					size_t colonpos = newmsg.find(ucstring(": @{"));
+					// If no ] found or if found but after the colon (so part of the user chat)
+					if (pos == ucstring::npos || (colonpos < pos))
+					{
+						// No timestamp, so put it right after the color and add a space
+						pos = newmsg.find(ucstring("}"));;
+						prefix += " ";
+					}
+					newmsg = newmsg.substr(0, pos + 1) + prefix + newmsg.substr(pos + 1);
+
 					// Add dynchannel number and optionally name before text if user channel
 					CCDBNodeLeaf* node = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB", false);
 					if (node && node->getValueBool())
@@ -599,15 +614,10 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 						uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(dynamicChatDbIndex);
 						ucstring title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-						if ( ! title.empty())
-						{
-							prefix = " " + title;
-						}
+						prefix = title.empty() ? ucstring("") : ucstring(" ") + title;
+						pos = newmsg.find(ucstring("] "));
+						newmsg = newmsg.substr(0, pos) + prefix + newmsg.substr(pos);
 					}
-					
-					// Put the new prefix in the correct position
-					size_t pos = newmsg.find(ucstring("] "));
-					newmsg = newmsg.substr(0, pos) + prefix + newmsg.substr(pos);
 				}
 				break;
 

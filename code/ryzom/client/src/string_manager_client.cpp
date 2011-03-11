@@ -1387,6 +1387,13 @@ const ucchar * CStringManagerClient::getSpecialWord(const std::string &label, bo
 		return emptyString.c_str();
 	}
 
+	if (label[0] == '#')
+	{
+		static ucstring	rawString;
+		rawString = label.substr(1, label.size()-1);
+		return rawString.c_str();
+	}
+
 	// avoid case problems
 	static std::string lwrLabel;
 	lwrLabel = label;

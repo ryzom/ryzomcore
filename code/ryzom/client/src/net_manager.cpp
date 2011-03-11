@@ -765,34 +765,36 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 			// if found, display, else discarded
 			if(dbIndex >= 0 && dbIndex < CChatGroup::MaxDynChanPerPlayer)
 			{
-				// Add dyn chan number before string
-				ucstring prefix = "[" + NLMISC::toString(dbIndex) + "]";
-				// Find position to put the new string
-				// After timestamp?
-				size_t pos = finalString.find(ucstring("]"));
-				if (pos == ucstring::npos)
-				{
-					// No timestamp, so put it right after the color and add a space
-					pos = finalString.find(ucstring("}"));
-					prefix += " ";
-				}
-				finalString = finalString.substr(0, pos + 1) + prefix + finalString.substr(pos + 1);
 				PeopleInterraction.ChatInput.DynamicChat[dbIndex].displayMessage(finalString, col, 2, &windowVisible);
-				// Add optionally dynchannel name before text so that the chat log 
-				// will show the correct string if enabled.
+
+				// Add dynchannel info before text so that the chat log will show the correct string.
 				CCDBNodeLeaf* node = pIM->getDbProp("UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB", false);
-				if (node && pIM->getLogState() && node->getValueBool())
+				if (pIM->getLogState())
 				{
-					uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(dbIndex);
-					ucstring title;
-					STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-					if ( ! title.empty())
+					// Add dyn chan number before string
+					ucstring prefix("[" + NLMISC::toString(dbIndex) + "]");
+					// Find position to put the new string
+					// After timestamp?
+					size_t pos = finalString.find(ucstring("]"));
+					size_t colonpos = finalString.find(ucstring(": @{"));
+					// If no ] found or if found but after the colon (so part of the user chat)
+					if (pos == ucstring::npos || (colonpos < pos))
 					{
-						prefix = " " + title;
+						// No timestamp, so put it right after the color and add a space
+						pos = finalString.find(ucstring("}"));;
+						prefix += " ";
 					}
-					// Put the new prefix in the correct position
-					size_t pos = finalString.find(ucstring("] "));
-					finalString = finalString.substr(0, pos) + prefix + finalString.substr(pos);
+					finalString = finalString.substr(0, pos + 1) + prefix + finalString.substr(pos + 1);
+
+					if (node && node->getValueBool())
+					{
+						uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(dbIndex);
+						ucstring title;
+						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
+						prefix = title.empty() ? ucstring("") : ucstring(" ") + title;
+						pos = finalString.find(ucstring("] "));
+						finalString = finalString.substr(0, pos) + prefix + finalString.substr(pos);
+					}
 				}
 			}
 			else
