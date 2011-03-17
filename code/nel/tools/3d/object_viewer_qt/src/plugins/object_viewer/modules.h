@@ -20,7 +20,6 @@
 #ifndef MODULES_H
 #define MODULES_H
 
-#include "configuration.h"
 #include "object_viewer.h"
 #include "particle_editor.h"
 #include "main_window.h"
@@ -37,10 +36,6 @@ public:
 	static void init();
 	static void release();
 
-	static NLQT::CConfiguration &config()
-	{
-		return *_configuration;
-	}
 	static NLQT::CObjectViewer &objView()
 	{
 		return *_objectViewer;
@@ -63,7 +58,6 @@ public:
 	}
 
 private:
-	static NLQT::CConfiguration *_configuration;
 	static NLQT::CObjectViewer *_objectViewer;
 	static NLQT::CMainWindow *_mainWindow;
 	static NLQT::CParticleEditor *_particleEditor;

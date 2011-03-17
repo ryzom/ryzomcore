@@ -48,10 +48,11 @@ public:
 	virtual void apply();
 	virtual void finish();
 
-public Q_SLOTS:
+private Q_SLOTS:
 	void setTileBank();
 	void setTileFarBank();
 	void setTextureVegetable();
+	void setCoarseMeshTexture();
 	void addZone();
 	void removeZone();
 

@@ -16,11 +16,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-
+// Project includes
+#include "modules.h"
 #include "stdpch.h"
 #include "object_viewer.h"
+#include "object_viewer_constants.h"
+#include "../core/icore.h"
 
-// STL includes
+// Qt includes
+#include <QtCore/QSettings>
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -45,14 +49,6 @@
 #include <nel/3d/scene_user.h>
 #include <nel/3d/bloom_effect.h>
 
-// Project includes
-#include "modules.h"
-#include "configuration.h"
-
-using namespace std;
-using namespace NLMISC;
-using namespace NL3D;
-
 namespace NLQT
 {
 
@@ -66,11 +62,12 @@ CObjectViewer::CObjectViewer()
 	  _CurrentInstance(""),
 	  _BloomEffect(false)
 {
-
+	loadConfig();
 }
 
 CObjectViewer::~CObjectViewer()
 {
+	saveConfig();
 }
 
 void CObjectViewer::init(nlWindow wnd, uint16 w, uint16 h)
@@ -78,12 +75,10 @@ void CObjectViewer::init(nlWindow wnd, uint16 w, uint16 h)
 	//H_AUTO2
 	nldebug("CObjectViewert::init");
 
-	loadConfig();
-
 	// create the driver
 	nlassert(!_Driver);
 
-	_Driver = UDriver::createDriver(0, _Direct3D, 0);
+	_Driver = NL3D::UDriver::createDriver(0, _Direct3D, 0);
 	nlassert(_Driver);
 
 	// initialize the window with config file values
@@ -95,16 +90,16 @@ void CObjectViewer::init(nlWindow wnd, uint16 w, uint16 h)
 
 	_Driver->enableUsedTextureMemorySum();
 
-	_Light = ULight::createLight();
+	_Light = NL3D::ULight::createLight();
 
 	// set mode of the light
-	_Light->setMode(ULight::DirectionalLight);
+	_Light->setMode(NL3D::ULight::DirectionalLight);
 
 	// set position of the light
-	_Light->setPosition(CVector(-20.f, 30.f, 10.f));
+	_Light->setPosition(NLMISC::CVector(-20.f, 30.f, 10.f));
 
 	// white light
-	_Light->setAmbiant(CRGBA(255, 255, 255));
+	_Light->setAmbiant(NLMISC::CRGBA(255, 255, 255));
 
 	// set and enable the light
 	_Driver->setLight(0, *_Light);
@@ -117,7 +112,7 @@ void CObjectViewer::init(nlWindow wnd, uint16 w, uint16 h)
 	NLMISC::CVector hotSpot=NLMISC::CVector(0,0,0);
 
 	_MouseListener = _Driver->create3dMouseListener();
-	_MouseListener->setMouseMode(U3dMouseListener::edit3d);
+	_MouseListener->setMouseMode(NL3D::U3dMouseListener::edit3d);
 
 	// set the cache size for the font manager(in bytes)
 	_Driver->setFontManagerMaxMemory(2097152);
@@ -130,8 +125,8 @@ void CObjectViewer::init(nlWindow wnd, uint16 w, uint16 h)
 	NL3D::CBloomEffect::instance().setDriver(_Driver);
 	NL3D::CBloomEffect::instance().setScene(_Scene);
 	NL3D::CBloomEffect::instance().init(!_Direct3D);
-	NL3D::CBloomEffect::instance().setDensityBloom(Modules::config().getConfigFile().getVar("BloomDensity").asInt());
-	NL3D::CBloomEffect::instance().setSquareBloom(Modules::config().getConfigFile().getVar("BloomSquare").asBool());
+	NL3D::CBloomEffect::instance().setDensityBloom(uint8(_BloomDensity));
+	NL3D::CBloomEffect::instance().setSquareBloom(_BloomSquare);
 
 	NL3D::CDriverUser *driver = dynamic_cast<NL3D::CDriverUser *>(Modules::objView().getDriver());
 	_IDriver = driver->getDriver();
@@ -144,8 +139,6 @@ void CObjectViewer::release()
 {
 	//H_AUTO2
 	nldebug("CObjectViewer::release");
-
-	saveConfig();
 
 	// release text context
 	nlassert(_TextContext);
@@ -232,7 +225,7 @@ void CObjectViewer::reloadTextures()
 				int tex;
 				for (tex = 0; tex < NL3D::IDRV_MAT_MAXTEXTURES; tex++)
 				{
-					ITexture *texture = material->getTexture(tex);
+					NL3D::ITexture *texture = material->getTexture(tex);
 
 					// Touch it!
 					if (texture)
@@ -250,30 +243,30 @@ void CObjectViewer::saveScreenshot(const std::string &nameFile, bool jpg, bool p
 	// FIXME: create screenshot path if it doesn't exist!
 
 	// empty bitmap
-	CBitmap bitmap;
+	NLMISC::CBitmap bitmap;
 	// copy the driver buffer to the bitmap
 	_Driver->getBuffer(bitmap);
 	// create the file name
-	string filename = std::string("./") + nameFile;
+	std::string filename = std::string("./") + nameFile;
 	// write the bitmap as a jpg, png or tga to the file
 	if (jpg)
 	{
-		string newfilename = CFile::findNewFile(filename + ".jpg");
-		COFile outputFile(newfilename);
+		std::string newfilename = NLMISC::CFile::findNewFile(filename + ".jpg");
+		NLMISC::COFile outputFile(newfilename);
 		bitmap.writeJPG(outputFile, 100);
 		nlinfo("Screenshot '%s' saved", newfilename.c_str());
 	}
 	if (png)
 	{
-		string newfilename = CFile::findNewFile(filename + ".png");
-		COFile outputFile(newfilename);
+		std::string newfilename = NLMISC::CFile::findNewFile(filename + ".png");
+		NLMISC::COFile outputFile(newfilename);
 		bitmap.writePNG(outputFile, 24);
 		nlinfo("Screenshot '%s' saved", newfilename.c_str());
 	}
 	if (tga)
 	{
-		string newfilename = CFile::findNewFile(filename + ".tga");
-		COFile outputFile(newfilename);
+		std::string newfilename = NLMISC::CFile::findNewFile(filename + ".tga");
+		NLMISC::COFile outputFile(newfilename);
 		bitmap.writeTGA(outputFile, 24, false);
 		nlinfo("Screenshot '%s' saved", newfilename.c_str());
 	}
@@ -281,25 +274,25 @@ void CObjectViewer::saveScreenshot(const std::string &nameFile, bool jpg, bool p
 
 bool CObjectViewer::loadMesh(const std::string &meshFileName, const std::string &skelFileName)
 {
-	std::string fileName = CFile::getFilenameWithoutExtension(meshFileName);
+	std::string fileName = NLMISC::CFile::getFilenameWithoutExtension(meshFileName);
 	if (_Entities.count(fileName) != 0)
 		return false;
 
-	CPath::addSearchPath(CFile::getPath(meshFileName), false, false);
+	NLMISC::CPath::addSearchPath(NLMISC::CFile::getPath(meshFileName), false, false);
 
 	// create instance of the mesh character
-	UInstance Entity = _Scene->createInstance(meshFileName);
+	NL3D::UInstance Entity = _Scene->createInstance(meshFileName);
 
 	// if we can't create entity, skip it
 	if (Entity.empty()) return false;
 
-	CAABBox bbox;
+	NLMISC::CAABBox bbox;
 	Entity.getShapeAABBox(bbox);
 	setCamera(bbox , Entity, true);
 
 	_MouseListener->setMatrix(_Scene->getCam().getMatrix());
 
-	USkeleton Skeleton = _Scene->createSkeleton(skelFileName);
+	NL3D::USkeleton Skeleton = _Scene->createSkeleton(skelFileName);
 
 	// TODO: remade at typedef std::map<std::string, *CEntity>	CEntities;
 	EIT eit = (_Entities.insert (make_pair (fileName, CEntity()))).first;
@@ -322,8 +315,8 @@ bool CObjectViewer::loadMesh(const std::string &meshFileName, const std::string 
 
 bool CObjectViewer::loadInstanceGroup(const std::string &igName)
 {
-	CPath::addSearchPath (CFile::getPath(igName));
-	UInstanceGroup *ig = UInstanceGroup::createInstanceGroup(igName);
+	NLMISC::CPath::addSearchPath (NLMISC::CFile::getPath(igName));
+	NL3D::UInstanceGroup *ig = NL3D::UInstanceGroup::createInstanceGroup(igName);
 	if (ig == 0)
 		return false;
 	ig->addToScene(*_Scene, _Driver);
@@ -334,8 +327,8 @@ bool CObjectViewer::loadInstanceGroup(const std::string &igName)
 
 void CObjectViewer::setCamera(NLMISC::CAABBox &bbox, NL3D::UTransform &entity, bool high_z)
 {
-	CVector pos(0.f, 0.f, 0.f);
-	CQuat quat(0.f, 0.f, 0.f, 0.f);
+	NLMISC::CVector pos(0.f, 0.f, 0.f);
+	NLMISC::CQuat quat(0.f, 0.f, 0.f, 0.f);
 	NL3D::UInstance inst;
 	inst.cast(entity);
 	if (!inst.empty())
@@ -346,28 +339,28 @@ void CObjectViewer::setCamera(NLMISC::CAABBox &bbox, NL3D::UTransform &entity, b
 
 	// fix scale (some shapes have a different value)
 	entity.setScale(1.f, 1.f, 1.f);
-	UCamera Camera = _Scene->getCam();
-	CVector max_radius = bbox.getHalfSize();
-	CVector center = bbox.getCenter();
+	NL3D::UCamera Camera = _Scene->getCam();
+	NLMISC::CVector max_radius = bbox.getHalfSize();
+	NLMISC::CVector center = bbox.getCenter();
 	entity.setPivot(center);
 	center += pos;
-	float fov = float(_CameraFocal * (float)Pi/180.0);
-	float radius = max(max(max_radius.x, max_radius.y), max_radius.z);
+	float fov = float(_CameraFocal * (float)NLMISC::Pi/180.0);
+	float radius = std::max(std::max(max_radius.x, max_radius.y), max_radius.z);
 	if (radius == 0.f) radius = 1.f;
 	float left, right, bottom, top, znear, zfar;
 	Camera.getFrustum(left, right, bottom, top, znear, zfar);
 	float dist = radius / (tan(fov/2));
-	CVector eye(center);
+	NLMISC::CVector eye(center);
 
-	CVector ax(quat.getAxis());
+	NLMISC::CVector ax(quat.getAxis());
 
-	if (ax.isNull() || ax == CVector::I)
+	if (ax.isNull() || ax == NLMISC::CVector::I)
 	{
-		ax = CVector::J;
+		ax = NLMISC::CVector::J;
 	}
-	else if (ax == -CVector::K)
+	else if (ax == -NLMISC::CVector::K)
 	{
-		ax = -CVector::J;
+		ax = -NLMISC::CVector::J;
 	}
 
 	eye -= ax * (dist+radius);
@@ -423,24 +416,16 @@ void CObjectViewer::updateAnimation(NL3D::TAnimationTime time)
 void CObjectViewer::setBackgroundColor(NLMISC::CRGBA backgroundColor)
 {
 	_BackgroundColor = backgroundColor;
-
-	// config file variable changes
-	Modules::config().getConfigFile().getVar("BackgroundColor").setAsInt(_BackgroundColor.R, 0);
-	Modules::config().getConfigFile().getVar("BackgroundColor").setAsInt(_BackgroundColor.G, 1);
-	Modules::config().getConfigFile().getVar("BackgroundColor").setAsInt(_BackgroundColor.B, 2);
 }
 
 void CObjectViewer::setGraphicsDriver(bool Direct3D)
 {
 	_Direct3D = Direct3D;
-
-	if (_Direct3D) Modules::config().getConfigFile().getVar("GraphicsDriver").setAsString("Direct3D");
-	else Modules::config().getConfigFile().getVar("GraphicsDriver").setAsString("OpenGL");
 }
 
 void CObjectViewer::setSizeViewport(uint16 w, uint16 h)
 {
-	_Scene->getCam().setPerspective(_CameraFocal * (float)Pi/180.f, (float)w/h, 0.1f, 1000);
+	_Scene->getCam().setPerspective(_CameraFocal * (float)NLMISC::Pi/180.f, (float)w/h, 0.1f, 1000);
 }
 
 void CObjectViewer::setCurrentObject(const std::string &name)
@@ -466,26 +451,41 @@ void CObjectViewer::getListObjects(std::vector<std::string> &listObj)
 
 void CObjectViewer::loadConfig()
 {
-	// set background color from config
-	Modules::config().setAndCallback("BackgroundColor", CConfigCallback(this, &CObjectViewer::cfcbBackgroundColor));
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
 
-	// set graphics driver from config
-	Modules::config().setAndCallback("GraphicsDriver",CConfigCallback(this,&CObjectViewer::cfcbGraphicsDriver));
+	QColor color;
+	color = settings->value("BackgroundColor", QColor(80, 80, 80)).value<QColor>();
+	_BackgroundColor = NLMISC::CRGBA(color.red(), color.green(), color.blue(), color.alpha());
 
-	Modules::config().setAndCallback("CameraFocal",CConfigCallback(this,&CObjectViewer::cfcbCameraFocal));
+	_Direct3D = false; //_Driver = OpenGL;
 
-	Modules::config().setAndCallback("FontName",CConfigCallback(this,&CObjectViewer::cfcbFontName));
+#ifdef NL_OS_WINDOWS
+	QString driver = settings->value(Constants::GRAPHICS_DRIVER, "OpenGL").toString();
+	if (driver == "Direct3D") _Direct3D = true; //m_Driver = Direct3D;
+	else if (driver == "OpenGL") _Direct3D = false; //m_Driver = OpenGL;
+	else nlwarning("Invalid driver specified, defaulting to OpenGL");
+#endif
 
-	Modules::config().setAndCallback("BloomEffect",CConfigCallback(this,&CObjectViewer::cfcbBloomEffect));
+	_CameraFocal = settings->value("CameraFocal", 75).toInt();
+	_FontName = settings->value(Constants::FONT, "andbasr.ttf").toString().toStdString();
+	_BloomEffect = settings->value(Constants::ENABLE_BLOOM, false).toBool();
+	_BloomDensity = settings->value(Constants::BLOOM_DENSITY, 0).toInt();
+	_BloomSquare = settings->value(Constants::ENABLE_SQUARE_BLOOM, false).toBool();
+
+	settings->endGroup();
 }
 
 void CObjectViewer::saveConfig()
 {
-	Modules::config().dropCallback("BackgroundColor");
-	Modules::config().dropCallback("GraphicsDriver");
-	Modules::config().dropCallback("CameraFocal");
-	Modules::config().dropCallback("FontName");
-	Modules::config().dropCallback("BloomEffect");
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
+
+	QColor color(_BackgroundColor.R, _BackgroundColor.G, _BackgroundColor.B, _BackgroundColor.A);
+	settings->setValue("BackgroundColor", color);
+
+	settings->endGroup();
+	settings->sync();
 }
 
 void CObjectViewer::deleteEntities()
@@ -498,40 +498,6 @@ void CObjectViewer::deleteEntities()
 		delete _ListIG[i];
 	}
 	_ListIG.clear();
-}
-
-void CObjectViewer::cfcbBackgroundColor(NLMISC::CConfigFile::CVar &var)
-{
-	// read variable from config file
-	_BackgroundColor = CRGBA(var.asInt(0), var.asInt(1), var.asInt(2));
-}
-
-void CObjectViewer::cfcbGraphicsDriver(NLMISC::CConfigFile::CVar &var)
-{
-	// Choose driver opengl to work correctly under Linux example
-	_Direct3D = false; //_Driver = OpenGL;
-
-#ifdef NL_OS_WINDOWS
-	std::string driver = var.asString();
-	if (driver == "Direct3D") _Direct3D = true; //m_Driver = Direct3D;
-	else if (driver == "OpenGL") _Direct3D = false; //m_Driver = OpenGL;
-	else nlwarning("Invalid driver specified, defaulting to OpenGL");
-#endif
-}
-
-void CObjectViewer::cfcbCameraFocal(NLMISC::CConfigFile::CVar &var)
-{
-	_CameraFocal = var.asFloat();
-}
-
-void CObjectViewer::cfcbFontName(NLMISC::CConfigFile::CVar &var)
-{
-	_FontName = var.asString();
-}
-
-void CObjectViewer::cfcbBloomEffect(NLMISC::CConfigFile::CVar &var)
-{
-	_BloomEffect = var.asBool();
 }
 
 } /* namespace NLQT */

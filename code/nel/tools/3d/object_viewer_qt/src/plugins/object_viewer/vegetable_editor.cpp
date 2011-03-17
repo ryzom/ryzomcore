@@ -17,12 +17,19 @@
 
 */
 
+// Project includes
 #include "stdpch.h"
 #include "vegetable_editor.h"
+#include "modules.h"
+#include "object_viewer_constants.h"
+#include "../core/icore.h"
 
 // Qt includes
 #include <QtGui/QProgressDialog>
 #include <QtGui/QMessageBox>
+#include <QtGui/QColor>
+#include <QtGui/QVector3D>
+#include <QtCore/QSettings>
 
 // NeL includes
 #include <nel/3d/landscape_model.h>
@@ -31,12 +38,8 @@
 #include <nel/3d/driver.h>
 #include <nel/3d/scene_user.h>
 #include <nel/3d/scene.h>
-
-//#include <nel/3d/u_landscape.h>
-
-// Project includes
-#include "modules.h"
 #include <nel/3d/u_camera.h>
+//#include <nel/3d/u_landscape.h>
 
 namespace NLQT
 {
@@ -258,7 +261,7 @@ bool CVegetableEditor::createVegetableLandscape()
 			return false;
 		}
 	}
-
+	Modules::objView().getScene()->setCoarseMeshManagerTexture(_CoarseMeshTexture.c_str());
 	return true;
 }
 
@@ -311,7 +314,7 @@ void CVegetableEditor::refreshVegetableLandscape(const NL3D::CTileVegetableDesc 
 	}
 }
 
-void CVegetableEditor::setVegetableWindPower(float w)
+void CVegetableEditor::setVegetableWindPower(double w)
 {
 	_VegetableWindPower= w;
 	if(_VegetableLandscape)
@@ -321,7 +324,7 @@ void CVegetableEditor::setVegetableWindPower(float w)
 				_VegetableWindBendMin);
 }
 
-void CVegetableEditor::setVegetableWindBendStart(float w)
+void CVegetableEditor::setVegetableWindBendStart(double w)
 {
 	_VegetableWindBendMin= w;
 	if(_VegetableLandscape)
@@ -331,7 +334,7 @@ void CVegetableEditor::setVegetableWindBendStart(float w)
 				_VegetableWindBendMin);
 }
 
-void CVegetableEditor::setVegetableWindFrequency(float w)
+void CVegetableEditor::setVegetableWindFrequency(double w)
 {
 	_VegetableWindFreq= w;
 	if(_VegetableLandscape)
@@ -540,222 +543,94 @@ void CVegetableEditor::loadConfig()
 	_VegetableSnapToGround = false;
 
 	// Load Landscape params.
-	// --------------
-	// threshold
-	try
-	{
-		_VegetableLandscapeThreshold = Modules::config().getConfigFile().getVar("VegetLandscapeThreshold").asFloat();
-		// clamp to avoid divide/0.
-		_VegetableLandscapeThreshold = std::max(_VegetableLandscapeThreshold, 0.001f);
-	}
-	catch (NLMISC::EUnknownVar &)
-	{
-		_VegetableLandscapeThreshold = 0.003f;
-	}
-	// tilenear
-	try
-	{
-		_VegetableLandscapeTileNear = Modules::config().getConfigFile().getVar("VegetLandscapeTileNear").asFloat();
-	}
-	catch (NLMISC::EUnknownVar &)
-	{
-		_VegetableLandscapeTileNear= 50;
-	}
-	// ambient
-	try
-	{
-		NLMISC::CConfigFile::CVar &color = Modules::config().getConfigFile().getVar("VegetLandscapeAmbient");
-		_VegetableLandscapeAmbient.R = color.asInt(0);
-		_VegetableLandscapeAmbient.G = color.asInt(1);
-		_VegetableLandscapeAmbient.B = color.asInt(2);
-		_VegetableLandscapeAmbient.A = color.asInt(3);
-	}
-	catch (NLMISC::EUnknownVar &)
-	{
-		_VegetableLandscapeAmbient.set(80, 80, 80, 255);
-	}
-	// diffuse
-	try
-	{
-		NLMISC::CConfigFile::CVar &color= Modules::config().getConfigFile().getVar("VegetLandscapeDiffuse");
-		_VegetableLandscapeDiffuse.R = color.asInt(0);
-		_VegetableLandscapeDiffuse.G = color.asInt(1);
-		_VegetableLandscapeDiffuse.B = color.asInt(2);
-		_VegetableLandscapeDiffuse.A = color.asInt(3);
-	}
-	catch (NLMISC::EUnknownVar &)
-	{
-		_VegetableLandscapeDiffuse.set(255, 255, 255, 255);
-	}
-	// Snapping
-	try
-	{
-		_VegetableSnapHeight = Modules::config().getConfigFile().getVar("VegetLandscapeSnapHeight").asFloat();
-	}
-	catch (NLMISC::EUnknownVar &)
-	{
-		_VegetableSnapHeight = 1.70f;
-	}
 
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
+
+	_VegetableLandscapeThreshold = std::max(settings->value("VegetLandscapeThreshold", 0.003).toDouble(), 0.001);
+	_VegetableLandscapeTileNear = settings->value("VegetLandscapeTileNear", 50).toDouble();
+
+	QColor color;
+	color = settings->value("VegetLandscapeAmbient", QColor(80, 80, 80)).value<QColor>();
+	_VegetableLandscapeAmbient = NLMISC::CRGBA(color.red(), color.green(), color.blue(), color.alpha());
+
+	color = settings->value("VegetLandscapeDiffuse", QColor(255, 255, 255)).value<QColor>();
+	_VegetableLandscapeDiffuse = NLMISC::CRGBA(color.red(), color.green(), color.blue(), color.alpha());
+
+	_VegetableSnapHeight = settings->value("VegetLandscapeSnapHeight", 1.70f).toFloat();
 
 	// Load Vegetable params.
-	// --------------
 
-	// vegetable ambient
-	try
-	{
-		NLMISC::CConfigFile::CVar &color = Modules::config().getConfigFile().getVar("VegetAmbient");
-		_VegetableAmbient.R = color.asInt(0);
-		_VegetableAmbient.G = color.asInt(1);
-		_VegetableAmbient.B = color.asInt(2);
-	}
-	catch (NLMISC::EUnknownVar &)
-	{
-		_VegetableAmbient.set(80, 80, 80, 255);
-	}
-	// vegetable diffuse
-	try
-	{
-		NLMISC::CConfigFile::CVar &color = Modules::config().getConfigFile().getVar("VegetDiffuse");
-		// setup to behave correclty ie as maxLightFactor:
-		sint R = color.asInt(0) - _VegetableAmbient.R;
-		NLMISC::clamp(R, 0, 255);
-		_VegetableDiffuse.R = R;
-		sint G = color.asInt(1) - _VegetableAmbient.G;
-		NLMISC::clamp(G, 0, 255);
-		_VegetableDiffuse.G = G;
-		sint B = color.asInt(2) - _VegetableAmbient.B;
-		NLMISC::clamp(B, 0, 255);
-		_VegetableDiffuse.B = B;
-	}
-	catch (NLMISC::EUnknownVar &)
-	{
-		sint R = 255 - _VegetableAmbient.R;
-		NLMISC::clamp(R, 0, 255);
-		_VegetableDiffuse.R = R;
-		sint G = 255 - _VegetableAmbient.G;
-		NLMISC::clamp(G, 0, 255);
-		_VegetableDiffuse.G = G;
-		sint B = 255 - _VegetableAmbient.B;
-		NLMISC::clamp(B, 0, 255);
-		_VegetableDiffuse.B = B;
-	}
-	// vegetable lightDir
-	try
-	{
-		NLMISC::CConfigFile::CVar &var = Modules::config().getConfigFile().getVar("VegetLightDir");
-		_VegetableLightDir.x = var.asFloat(0);
-		_VegetableLightDir.y = var.asFloat(1);
-		_VegetableLightDir.z = var.asFloat(2);
-		_VegetableLightDir.normalize();
-	}
-	catch (NLMISC::EUnknownVar &)
-	{
-		_VegetableLightDir.set(0, 1, -1);
-		_VegetableLightDir.normalize();
-	}
+	color = settings->value("VegetAmbient", QColor(80, 80, 80)).value<QColor>();
+	_VegetableAmbient = NLMISC::CRGBA(color.red(), color.green(), color.blue(), color.alpha());
 
-	// windDir
-	try
-	{
-		NLMISC::CConfigFile::CVar &var = Modules::config().getConfigFile().getVar("VegetWindDir");
-		_VegetableWindDir.x = var.asFloat(0);
-		_VegetableWindDir.y = var.asFloat(1);
-		_VegetableWindDir.z = var.asFloat(2);
-	}
-	catch (NLMISC::EUnknownVar &)
-	{
-		_VegetableWindDir.x = 0.5f;
-		_VegetableWindDir.y = 0.5f;
-		_VegetableWindDir.z = 0;
-	}
-	// windFreq
-	try
-	{
-		_VegetableWindFreq = Modules::config().getConfigFile().getVar("VegetWindFreq").asFloat();
-	}
-	catch (NLMISC::EUnknownVar &)
-	{
-		_VegetableWindFreq= 0.5;
-	}
-	// windPower
-	try
-	{
-		_VegetableWindPower = Modules::config().getConfigFile().getVar("VegetWindPower").asFloat();
-	}
-	catch (NLMISC::EUnknownVar &)
-	{
-		_VegetableWindPower= 1;
-	}
-	// windBendMin
-	try
-	{
-		_VegetableWindBendMin = Modules::config().getConfigFile().getVar("VegetWindBendMin").asFloat();
-	}
-	catch (NLMISC::EUnknownVar &)
-	{
-		_VegetableWindBendMin= 0;
-	}
+	color = settings->value("VegetDiffuse", QColor(80, 80, 80)).value<QColor>();
+
+	// setup to behave correclty ie as maxLightFactor:
+	sint R = color.red() - _VegetableAmbient.R;
+	NLMISC::clamp(R, 0, 255);
+	_VegetableDiffuse.R = R;
+	sint G = color.green() - _VegetableAmbient.G;
+	NLMISC::clamp(G, 0, 255);
+	_VegetableDiffuse.G = G;
+	sint B = color.blue() - _VegetableAmbient.B;
+	NLMISC::clamp(B, 0, 255);
+	_VegetableDiffuse.B = B;
+
+	QVector3D vec;
+	vec = settings->value("VegetLightDir", QVector3D(0, 1, -1)).value<QVector3D>();
+	_VegetableLightDir = NLMISC::CVector(vec.x(), vec.y(), vec.z());
+	_VegetableLightDir.normalize();
+
+	vec = settings->value("VegetWindDir", QVector3D(0.5f, 0.5f, 0)).value<QVector3D>();
+	_VegetableWindDir = NLMISC::CVector(vec.x(), vec.y(), vec.z());
+
+	_VegetableWindFreq = settings->value("VegetWindFreq", 0.5).toDouble();
+	_VegetableWindPower = settings->value("VegetWindPower", 1).toDouble();
+	_VegetableWindBendMin = settings->value("VegetWindBendMin", 0).toDouble();
+	settings->endGroup();
 }
 
 void CVegetableEditor::loadLandscapeSetup()
 {
-	// Load landscape setup
-	// --------------
-	try
-	{
-		// tileBank setup.
-		_VegetableLandscapeTileBank = Modules::config().getConfigFile().getVar("VegetTileBank").asString();
-		_VegetableLandscapeTileFarBank = Modules::config().getConfigFile().getVar("VegetTileFarBank").asString();
-		// zone list.
-		_VegetableLandscapeZoneNames.clear();
-		NLMISC::CConfigFile::CVar &zones = Modules::config().getConfigFile().getVar("VegetLandscapeZones");
-		for (uint i=0; i<(uint)zones.size(); i++)
-			_VegetableLandscapeZoneNames.push_back(zones.asString(i).c_str());
-	}
-	catch (NLMISC::EUnknownVar &)
-	{
-		_VegetableLandscapeTileBank.clear();
-		_VegetableLandscapeTileFarBank.clear();
-		_VegetableLandscapeZoneNames.clear();
-	}
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
 
-	// Load Vegetable params.
-	// --------------
+	_VegetableLandscapeTileBank = settings->value(Constants::VEGET_TILE_BANK, "").toString().toStdString();
+	_VegetableLandscapeTileFarBank = settings->value(Constants::VEGET_TILE_FAR_BANK, "").toString().toStdString();
+	_CoarseMeshTexture = settings->value(Constants::COARSE_MESH_TEXTURE, "").toString().toStdString();
+	_VegetableTexture = settings->value(Constants::VEGET_TEXTURE, "").toString().toStdString();
 
-	// vegetable texture
-	try
-	{
-		_VegetableTexture = Modules::config().getConfigFile().getVar("VegetTexture").asString();
-	}
-	catch (NLMISC::EUnknownVar &)
-	{
-		_VegetableTexture= "";
-	}
+	QStringList list = settings->value(Constants::VEGET_LANDSCAPE_ZONES).toStringList();
+	_VegetableLandscapeZoneNames.clear();
+	for (int i = 0; i < list.size(); ++i)
+		_VegetableLandscapeZoneNames.push_back(list[i].toStdString());
+	settings->endGroup();
 }
 
 void CVegetableEditor::saveConfig()
 {
-	Modules::config().getConfigFile().getVar("VegetLandscapeThreshold").setAsFloat(_VegetableLandscapeThreshold);
-	Modules::config().getConfigFile().getVar("VegetLandscapeTileNear").setAsFloat(_VegetableLandscapeTileNear);
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
 
-	Modules::config().getConfigFile().getVar("VegetLandscapeAmbient").setAsInt(_VegetableLandscapeAmbient.R, 0);
-	Modules::config().getConfigFile().getVar("VegetLandscapeAmbient").setAsInt(_VegetableLandscapeAmbient.G, 1);
-	Modules::config().getConfigFile().getVar("VegetLandscapeAmbient").setAsInt(_VegetableLandscapeAmbient.B, 2);
-	Modules::config().getConfigFile().getVar("VegetLandscapeAmbient").setAsInt(_VegetableLandscapeAmbient.A, 3);
+	settings->setValue("VegetLandscapeThreshold", _VegetableLandscapeThreshold);
+	settings->setValue("VegetLandscapeTileNear", _VegetableLandscapeTileNear);
 
-	Modules::config().getConfigFile().getVar("VegetLandscapeDiffuse").setAsInt(_VegetableLandscapeDiffuse.R, 0);
-	Modules::config().getConfigFile().getVar("VegetLandscapeDiffuse").setAsInt(_VegetableLandscapeDiffuse.G, 1);
-	Modules::config().getConfigFile().getVar("VegetLandscapeDiffuse").setAsInt(_VegetableLandscapeDiffuse.B, 2);
-	Modules::config().getConfigFile().getVar("VegetLandscapeAmbient").setAsInt(_VegetableLandscapeAmbient.A, 3);
+	QColor vAmbColor(_VegetableLandscapeAmbient.R, _VegetableLandscapeAmbient.G, _VegetableLandscapeAmbient.B, _VegetableLandscapeAmbient.A);
+	settings->setValue("VegetLandscapeAmbient", vAmbColor);
 
-	Modules::config().getConfigFile().getVar("VegetWindDir").setAsFloat(_VegetableWindDir.x, 0);
-	Modules::config().getConfigFile().getVar("VegetWindDir").setAsFloat(_VegetableWindDir.y, 1);
-	Modules::config().getConfigFile().getVar("VegetWindDir").setAsFloat(_VegetableWindDir.z, 2);
+	QColor vDifColor(_VegetableLandscapeDiffuse.R, _VegetableLandscapeDiffuse.G, _VegetableLandscapeDiffuse.B, _VegetableLandscapeDiffuse.A);
+	settings->setValue("VegetLandscapeDiffuse", vDifColor);
 
-	Modules::config().getConfigFile().getVar("VegetWindPower").setAsFloat(_VegetableWindPower);
-	Modules::config().getConfigFile().getVar("VegetWindFreq").setAsFloat(_VegetableWindFreq);
-	Modules::config().getConfigFile().getVar("VegetWindBendMin").setAsFloat(_VegetableWindBendMin);
+	QVector3D vec(_VegetableWindDir.x, _VegetableWindDir.y, _VegetableWindDir.z);
+	settings->setValue("VegetWindDir", vec);
+
+	settings->setValue("VegetWindPower", _VegetableWindPower);
+	settings->setValue("VegetWindFreq", _VegetableWindFreq);
+	settings->setValue("VegetWindBendMin", _VegetableWindBendMin);
+
+	settings->endGroup();
+	settings->sync();
 }
 
 } /* namespace NLQT */

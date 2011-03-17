@@ -18,9 +18,12 @@
 // Project includes
 #include "stdpch.h"
 #include "graphics_settings_page.h"
+#include "object_viewer_constants.h"
+#include "../core/icore.h"
 #include "modules.h"
 
 // Qt includes
+#include <QtCore/QSettings>
 #include <QtGui/QWidget>
 #include <QtGui/QStyleFactory>
 #include <QtGui/QStyle>
@@ -49,7 +52,7 @@ QString GraphicsSettingsPage::trName() const
 
 QString GraphicsSettingsPage::category() const
 {
-	return QLatin1String("ObjectViewer");
+	return QLatin1String(Constants::OBJECT_VIEWER_SECTION);
 }
 
 QString GraphicsSettingsPage::trCategory() const
@@ -62,13 +65,22 @@ QWidget *GraphicsSettingsPage::createPage(QWidget *parent)
 	m_page = new QWidget(parent);
 	m_ui.setupUi(m_page);
 
-	Modules::config().setAndCallback("GraphicsDrivers", CConfigCallback(this, &GraphicsSettingsPage::cfcbGraphicsDrivers));
-	m_ui.enableBloomCheckBox->setChecked(Modules::objView().getBloomEffect());
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
+
+	QString graphicsDriver = settings->value(Constants::GRAPHICS_DRIVER, "OpenGL").toString();
+	m_ui.driverGraphComboBox->setCurrentIndex(m_ui.driverGraphComboBox->findText(graphicsDriver));
+
+	m_ui.enableBloomCheckBox->setChecked(settings->value(Constants::ENABLE_BLOOM, false).toBool());
 	m_ui.squareBloomCheckBox->setChecked(NL3D::CBloomEffect::instance().getSquareBloom());
 	m_ui.bloomDensityHorizontalSlider->setValue(NL3D::CBloomEffect::instance().getDensityBloom());
+
 	m_ui.styleComboBox->addItems(QStyleFactory::keys());
-	m_ui.styleComboBox->setCurrentIndex(m_ui.styleComboBox->findText(Modules::config().getValue("QtStyle", std::string("")).c_str()));
-	m_ui.paletteCheckBox->setChecked(Modules::config().getValue("QtPalette", false));
+	QString style = settings->value(Constants::QT_STYLE, "").toString();
+	m_ui.styleComboBox->setCurrentIndex(m_ui.styleComboBox->findText(style));
+	m_ui.paletteCheckBox->setChecked(settings->value(Constants::QT_PALETTE, true).toBool());
+
+	settings->endGroup();
 
 	connect(m_ui.enableBloomCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnableBloom(bool)));
 	connect(m_ui.squareBloomCheckBox, SIGNAL(toggled(bool)), this, SLOT(setEnableSquareBloon(bool)));
@@ -82,16 +94,19 @@ QWidget *GraphicsSettingsPage::createPage(QWidget *parent)
 
 void GraphicsSettingsPage::apply()
 {
-	// save graphics settings to config file
-	Modules::config().getConfigFile().getVar("GraphicsDriver").setAsString(m_ui.driverGraphComboBox->currentText().toStdString());
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
 
-	Modules::config().getConfigFile().getVar("BloomEffect").setAsInt(m_ui.enableBloomCheckBox->isChecked());
-	Modules::config().getConfigFile().getVar("BloomSquare").setAsInt(m_ui.squareBloomCheckBox->isChecked());
-	Modules::config().getConfigFile().getVar("BloomDensity").setAsInt(m_ui.bloomDensityHorizontalSlider->value());
+	settings->setValue(Constants::GRAPHICS_DRIVER, m_ui.driverGraphComboBox->currentText());
 
-	Modules::config().getConfigFile().getVar("QtStyle").setAsString(m_ui.styleComboBox->currentText().toStdString());
-	Modules::config().getConfigFile().getVar("QtPalette").setAsInt(m_ui.paletteCheckBox->isChecked());
+	// save settings
+	settings->setValue(Constants::ENABLE_BLOOM, m_ui.enableBloomCheckBox->isChecked());
+	settings->setValue(Constants::ENABLE_SQUARE_BLOOM, m_ui.squareBloomCheckBox->isChecked());
+	settings->setValue(Constants::BLOOM_DENSITY, m_ui.bloomDensityHorizontalSlider->value());
+	settings->setValue(Constants::QT_STYLE, m_ui.styleComboBox->currentText());
+	settings->setValue(Constants::QT_PALETTE, m_ui.paletteCheckBox->isChecked());
 
+	// apply qt style and palette
 	QApplication::setStyle(QStyleFactory::create(m_ui.styleComboBox->currentText()));
 
 	if (m_ui.paletteCheckBox->isChecked())
@@ -99,12 +114,12 @@ void GraphicsSettingsPage::apply()
 	else
 		QApplication::setPalette(Modules::mainWin().getOriginalPalette());
 
-	// save config file
-	Modules::config().getConfigFile().save();
+	settings->endGroup();
+	settings->sync();
 }
+
 void GraphicsSettingsPage::finish()
 {
-	Modules::config().dropCallback("GraphicsDrivers");
 }
 
 void GraphicsSettingsPage::setEnableBloom(bool state)
@@ -120,28 +135,6 @@ void GraphicsSettingsPage::setEnableSquareBloon(bool state)
 void GraphicsSettingsPage::setDensityBloom(int density)
 {
 	NL3D::CBloomEffect::instance().setDensityBloom(density);
-}
-
-void GraphicsSettingsPage::cfcbGraphicsDrivers(NLMISC::CConfigFile::CVar &var)
-{
-	while (m_ui.driverGraphComboBox->count())
-		m_ui.driverGraphComboBox->removeItem(0);
-
-	// load types graphics driver from the config file
-	for (uint i = 0; i < var.size(); ++i)
-		m_ui.driverGraphComboBox->addItem(var.asString(i).c_str());
-
-	// set graphics driver from the config file
-	QString value = Modules::config().getValue("GraphicsDriver", std::string("OpenGL")).c_str();
-	QString dn = value.toLower();
-	for (sint i = 0; i < m_ui.driverGraphComboBox->count(); ++i)
-	{
-		if (dn == m_ui.driverGraphComboBox->itemText(i).toLower())
-		{
-			m_ui.driverGraphComboBox->setCurrentIndex(i);
-			return;
-		}
-	}
 }
 
 } /* namespace NLQT */

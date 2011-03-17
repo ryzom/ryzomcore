@@ -71,7 +71,7 @@ public:
 	virtual void extensionsInitialized() = 0;
 
 	/**
-	@\brief Called during a shutdown sequence in the same order as initialization
+	@brief Called during a shutdown sequence in the same order as initialization
 	before the plugins get deleted in reverse order.
 
 	@details This method should be used to disconnect from other plugins,
@@ -80,7 +80,7 @@ public:
 	virtual void shutdown() { }
 
 	/**
-	@\brief This method should be implemented to work properly NeL singletons.
+	@brief This method should be implemented to work properly NeL singletons.
 	Called immediately after loading the plugin.
 	@code
 	void Plugin::setNelContext(NLMISC::INelContext *nelContext)

@@ -23,9 +23,9 @@
 // Project includes
 #include "modules.h"
 
-#define NL_VEGETABLE_EDIT_WIND_MAX_POWER 10.f
-#define NL_VEGETABLE_EDIT_WIND_MAX_FREQUENCY 10.f
-#define NL_VEGETABLE_EDIT_WIND_MAX_BENDSTART 1.f
+#define NL_VEGETABLE_EDIT_WIND_MAX_POWER 10.0
+#define NL_VEGETABLE_EDIT_WIND_MAX_FREQUENCY 10.0
+#define NL_VEGETABLE_EDIT_WIND_MAX_BENDSTART 1.0
 
 namespace NLQT
 {
@@ -43,15 +43,15 @@ CVegetableLandscapePage::CVegetableLandscapePage(QWidget *parent)
 	connect(_ui.diffuseColorWidget, SIGNAL(colorChanged(NLMISC::CRGBA)), this, SLOT(setColorDiffuse(NLMISC::CRGBA)));
 	connect(_ui.ambientColorwidget, SIGNAL(colorChanged(NLMISC::CRGBA)), this, SLOT(setColorAmbient(NLMISC::CRGBA)));
 
-	float windPower = Modules::veget().getVegetableWindPower();
+	double windPower = Modules::veget().getVegetableWindPower();
 	NLMISC::clamp(windPower, 0, NL_VEGETABLE_EDIT_WIND_MAX_POWER);
 	_ui.powerHorizontalSlider->setValue(int(windPower * _ui.powerHorizontalSlider->maximum() / NL_VEGETABLE_EDIT_WIND_MAX_POWER));
 
-	float bendStar = Modules::veget().getVegetableWindBendStart();
+	double bendStar = Modules::veget().getVegetableWindBendStart();
 	NLMISC::clamp(bendStar, 0, NL_VEGETABLE_EDIT_WIND_MAX_BENDSTART);
 	_ui.bendStartHorizontalSlider->setValue(int(bendStar * _ui.bendStartHorizontalSlider->maximum() / NL_VEGETABLE_EDIT_WIND_MAX_BENDSTART));
 
-	float frequency = Modules::veget().getVegetableWindFrequency();
+	double frequency = Modules::veget().getVegetableWindFrequency();
 	NLMISC::clamp(frequency, 0, NL_VEGETABLE_EDIT_WIND_MAX_FREQUENCY);
 	_ui.frequencyHorizontalSlider->setValue(int(frequency * _ui.frequencyHorizontalSlider->maximum() / NL_VEGETABLE_EDIT_WIND_MAX_FREQUENCY));
 

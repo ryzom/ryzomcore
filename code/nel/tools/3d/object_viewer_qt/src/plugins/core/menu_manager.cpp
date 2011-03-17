@@ -54,7 +54,7 @@ void MenuManager::registerAction(QAction *action, const QString &id)
 QMenu *MenuManager::menu(const QString &id) const
 {
 	QMenu *result = 0;
-	if (_menuMap.count(id) == 0)
+	if (!_menuMap.contains(id))
 		nlwarning("QMenu %s not found", id.toStdString().c_str());
 	else
 		result = _menuMap.value(id);
@@ -64,7 +64,7 @@ QMenu *MenuManager::menu(const QString &id) const
 QAction *MenuManager::action(const QString &id) const
 {
 	QAction *result = 0;
-	if (_actionMap.count(id) == 0)
+	if (!_actionMap.contains(id))
 		nlwarning("QAction %s not found", id.toStdString().c_str());
 	else
 		result = _actionMap.value(id);

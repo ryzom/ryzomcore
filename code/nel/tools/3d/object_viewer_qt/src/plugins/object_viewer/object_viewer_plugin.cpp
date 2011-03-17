@@ -22,7 +22,7 @@ ObjectViewerPlugin::~ObjectViewerPlugin()
 	}
 	qDeleteAll(_autoReleaseObjects);
 	_autoReleaseObjects.clear();
-	Modules::release();
+	//Modules::release();
 }
 
 bool ObjectViewerPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
@@ -39,6 +39,11 @@ bool ObjectViewerPlugin::initialize(ExtensionSystem::IPluginManager *pluginManag
 
 void ObjectViewerPlugin::extensionsInitialized()
 {
+}
+
+void ObjectViewerPlugin::shutdown()
+{
+	Modules::release();
 }
 
 void ObjectViewerPlugin::setNelContext(NLMISC::INelContext *nelContext)

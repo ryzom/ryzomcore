@@ -18,11 +18,14 @@
 // Project includes
 #include "stdpch.h"
 #include "sound_settings_page.h"
+#include "object_viewer_constants.h"
+#include "../core/icore.h"
 #include "modules.h"
 
 // Qt includes
+#include <QtCore/QSettings>
 #include <QtGui/QWidget>
-
+#include <QtGui/QFileDialog>
 
 namespace NLQT
 {
@@ -45,7 +48,7 @@ QString SoundSettingsPage::trName() const
 
 QString SoundSettingsPage::category() const
 {
-	return QLatin1String("ObjectViewer");
+	return QLatin1String(Constants::OBJECT_VIEWER_SECTION);
 }
 
 QString SoundSettingsPage::trCategory() const
@@ -58,61 +61,69 @@ QWidget *SoundSettingsPage::createPage(QWidget *parent)
 	m_page = new QWidget(parent);
 	m_ui.setupUi(m_page);
 
-	// setup config file callbacks and initialize values
-	Modules::config().setAndCallback("SoundDrivers", CConfigCallback(this, &SoundSettingsPage::cfcbSoundDrivers));
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
+
+	QString soundDriver = settings->value(Constants::SOUND_DRIVER, "Auto").toString();
+	m_ui.driverSndComboBox->setCurrentIndex(m_ui.driverSndComboBox->findText(soundDriver));
 
 	// load settings from the config file
-	m_ui.autoLoadSampleCheckBox->setChecked(Modules::config().getValue("SoundAutoLoadSample", true));
-	m_ui.enableOccludeObstructCheckBox->setChecked(Modules::config().getValue("SoundEnableOccludeObstruct", true));
-	m_ui.enableReverbCheckBox->setChecked(Modules::config().getValue("SoundEnableReverb", true));
-	m_ui.manualRolloffCheckBox->setChecked(Modules::config().getValue("SoundManualRolloff", true));
-	m_ui.forceSoftwareCheckBox->setChecked(Modules::config().getValue("SoundForceSoftware", false));
-	m_ui.useADPCMCheckBox->setChecked(Modules::config().getValue("SoundUseADPCM", false));
-	m_ui.maxTrackSpinBox->setValue(Modules::config().getValue("SoundMaxTrack", 48));
+	m_ui.autoLoadSampleCheckBox->setChecked(settings->value(Constants::SOUND_AUTO_LOAD_SAMPLE, true).toBool());
+	m_ui.enableOccludeObstructCheckBox->setChecked(settings->value(Constants::SOUND_ENABLE_OCCLUDE_OBSTRUCT, true).toBool());
+	m_ui.enableReverbCheckBox->setChecked(settings->value(Constants::SOUND_ENABLE_REVERB, true).toBool());
+	m_ui.manualRolloffCheckBox->setChecked(settings->value(Constants::SOUND_MANUAL_ROLL_OFF, true).toBool());
+	m_ui.forceSoftwareCheckBox->setChecked(settings->value(Constants::SOUND_FORCE_SOFTWARE, false).toBool());
+	m_ui.useADPCMCheckBox->setChecked(settings->value(Constants::SOUND_USE_ADCPM, false).toBool());
+	m_ui.maxTrackSpinBox->setValue(settings->value(Constants::SOUND_MAX_TRACK, 48).toInt());
+	m_ui.soundSamplePathLineEdit->setText(settings->value(Constants::SOUND_SAMPLE_PATH, "").toString());
+	m_ui.soundSheetPathLineEdit->setText(settings->value(Constants::SOUND_PACKED_SHEET_PATH, "").toString());
 
+	connect(m_ui.soundSamplePathButton, SIGNAL(clicked()), this, SLOT(setSamplePath()));
+	connect(m_ui.soundSheetPathButton, SIGNAL(clicked()), this, SLOT(setSheetPath()));
+
+	settings->endGroup();
 	return m_page;
 }
 
 void SoundSettingsPage::apply()
 {
-	// save sound settings to config file
-	Modules::config().getConfigFile().getVar("SoundDriver").setAsString(m_ui.driverSndComboBox->currentText().toStdString());
-	Modules::config().getConfigFile().getVar("SoundAutoLoadSample").setAsInt(m_ui.autoLoadSampleCheckBox->isChecked());
-	Modules::config().getConfigFile().getVar("SoundEnableOccludeObstruct").setAsInt(m_ui.enableOccludeObstructCheckBox->isChecked());
-	Modules::config().getConfigFile().getVar("SoundEnableReverb").setAsInt(m_ui.enableReverbCheckBox->isChecked());
-	Modules::config().getConfigFile().getVar("SoundManualRolloff").setAsInt(m_ui.manualRolloffCheckBox->isChecked());
-	Modules::config().getConfigFile().getVar("SoundForceSoftware").setAsInt(m_ui.forceSoftwareCheckBox->isChecked());
-	Modules::config().getConfigFile().getVar("SoundUseADPCM").setAsInt(m_ui.useADPCMCheckBox->isChecked());
-	Modules::config().getConfigFile().getVar("SoundMaxTrack").setAsInt(m_ui.maxTrackSpinBox->value());
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
 
-	// save config file
-	Modules::config().getConfigFile().save();
+	settings->setValue(Constants::SOUND_DRIVER, m_ui.driverSndComboBox->currentText());
+	settings->setValue(Constants::SOUND_AUTO_LOAD_SAMPLE, m_ui.autoLoadSampleCheckBox->isChecked());
+	settings->setValue(Constants::SOUND_ENABLE_OCCLUDE_OBSTRUCT, m_ui.enableOccludeObstructCheckBox->isChecked());
+	settings->setValue(Constants::SOUND_ENABLE_REVERB, m_ui.enableReverbCheckBox->isChecked());
+	settings->setValue(Constants::SOUND_MANUAL_ROLL_OFF, m_ui.manualRolloffCheckBox->isChecked());
+	settings->setValue(Constants::SOUND_FORCE_SOFTWARE, m_ui.forceSoftwareCheckBox->isChecked());
+	settings->setValue(Constants::SOUND_USE_ADCPM, m_ui.useADPCMCheckBox->isChecked());
+	settings->setValue(Constants::SOUND_MAX_TRACK, m_ui.maxTrackSpinBox->value());
+	settings->setValue(Constants::SOUND_SAMPLE_PATH, m_ui.soundSamplePathLineEdit->text());
+	settings->setValue(Constants::SOUND_PACKED_SHEET_PATH, m_ui.soundSheetPathLineEdit->text());
+
+	settings->endGroup();
+	settings->sync();
 }
 
 void SoundSettingsPage::finish()
 {
-	Modules::config().dropCallback("SoundDrivers");
 }
 
-void SoundSettingsPage::cfcbSoundDrivers(NLMISC::CConfigFile::CVar& var)
+void SoundSettingsPage::setSheetPath()
 {
-	while (m_ui.driverSndComboBox->count())
-		m_ui.driverSndComboBox->removeItem(0);
-
-	// load types sound driver from the config file
-	for (uint i = 0; i < var.size(); ++i)
-		m_ui.driverSndComboBox->addItem(var.asString(i).c_str());
-
-	// set sound driver from the config file
-	QString value = Modules::config().getValue("SoundDriver",std::string("Auto")).c_str();
-	QString dn = value.toLower();
-	for (sint i = 0; i < m_ui.driverSndComboBox->count(); ++i)
+	QString path = QFileDialog::getExistingDirectory();
+	if (!path.isEmpty())
 	{
-		if (dn == m_ui.driverSndComboBox->itemText(i).toLower())
-		{
-			m_ui.driverSndComboBox->setCurrentIndex(i);
-			return;
-		}
+		m_ui.soundSheetPathLineEdit->setText(path);
+	}
+}
+
+void SoundSettingsPage::setSamplePath()
+{
+	QString path = QFileDialog::getExistingDirectory();
+	if (!path.isEmpty())
+	{
+		m_ui.soundSamplePathLineEdit->setText(path);
 	}
 }
 

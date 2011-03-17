@@ -24,8 +24,6 @@
 
 #include <QtCore/QObject>
 
-#include <nel/misc/config_file.h>
-
 class QWidget;
 
 namespace NLQT
@@ -55,8 +53,6 @@ private Q_SLOTS:
 	void setDensityBloom(int density);
 
 private:
-	void cfcbGraphicsDrivers(NLMISC::CConfigFile::CVar &var);
-
 	QWidget *m_page;
 	Ui::GraphicsSettingsPage m_ui;
 };

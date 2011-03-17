@@ -95,7 +95,7 @@
    <item row="3" column="0">
     <widget class="QLabel" name="label_7">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="text">
       <string>Coarse mesh texture</string>
@@ -105,14 +105,14 @@
    <item row="3" column="1" colspan="2">
     <widget class="QLineEdit" name="coarseLineEdit">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
     </widget>
    </item>
    <item row="3" column="3">
     <widget class="QToolButton" name="coarseToolButton">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="text">
       <string>...</string>
