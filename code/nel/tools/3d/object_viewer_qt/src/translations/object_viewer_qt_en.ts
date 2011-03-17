@@ -2,79 +2,6 @@
 <!DOCTYPE TS>
 <TS version="2.0" language="en_US">
 <context>
-    <name>AnimEditWidget</name>
-    <message>
-        <location filename="../plugins/scene_viewer/anim_edit_widget.ui" line="20"/>
-        <location filename="../plugins/scene_viewer/template/anim_edit_widget.ui" line="20"/>
-        <source>Form</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/anim_edit_widget.ui" line="134"/>
-        <location filename="../plugins/scene_viewer/template/anim_edit_widget.ui" line="129"/>
-        <source>Animation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/anim_edit_widget.ui" line="185"/>
-        <source>Add anim</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/anim_edit_widget.ui" line="231"/>
-        <source>Unload all anim and swt files</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/anim_edit_widget.ui" line="272"/>
-        <source>Add anim in PlayList</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/anim_edit_widget.ui" line="304"/>
-        <source>Delete anim from PlayList</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/anim_edit_widget.ui" line="419"/>
-        <source>Set duration of time in Animation control</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/anim_edit_widget.ui" line="459"/>
-        <source>In place</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/anim_edit_widget.ui" line="469"/>
-        <source>Increment pos</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>AnimationControl</name>
-    <message>
-        <location filename="../plugins/scene_viewer/animation_control.ui" line="14"/>
-        <source>Form</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/animation_control.ui" line="102"/>
-        <source>Loop</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/animation_control.ui" line="158"/>
-        <source>Play/Pause</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/animation_control.ui" line="197"/>
-        <source>Stop</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>Application</name>
     <message>
         <location filename="../main.cpp" line="98"/>
@@ -699,35 +626,28 @@
     <name>CExampleSettingsPage</name>
     <message>
         <location filename="../plugins/example/example_settings_page.ui" line="14"/>
-        <location filename="../plugins/scene_viewer/example_settings_page.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../plugins/example/example_settings_page.ui" line="23"/>
-        <location filename="../plugins/scene_viewer/example_settings_page.ui" line="23"/>
         <source>GroupBox</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../plugins/example/example_settings_page.ui" line="29"/>
         <location filename="../plugins/example/example_settings_page.ui" line="39"/>
-        <location filename="../plugins/scene_viewer/example_settings_page.ui" line="29"/>
-        <location filename="../plugins/scene_viewer/example_settings_page.ui" line="39"/>
         <source>PushButton</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../plugins/example/example_settings_page.ui" line="46"/>
         <location filename="../plugins/example/example_settings_page.ui" line="53"/>
-        <location filename="../plugins/scene_viewer/example_settings_page.ui" line="46"/>
-        <location filename="../plugins/scene_viewer/example_settings_page.ui" line="53"/>
         <source>RadioButton</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../plugins/example/example_settings_page.ui" line="60"/>
-        <location filename="../plugins/scene_viewer/example_settings_page.ui" line="60"/>
         <source>CheckBox</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2965,12 +2885,12 @@
 <context>
     <name>Core::CSearchPathsSettingsPage</name>
     <message>
-        <location filename="../plugins/core/search_paths_settings_page.cpp" line="51"/>
+        <location filename="../plugins/core/search_paths_settings_page.cpp" line="53"/>
         <source>Search Paths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/search_paths_settings_page.cpp" line="61"/>
+        <location filename="../plugins/core/search_paths_settings_page.cpp" line="63"/>
         <source>General</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2983,112 +2903,112 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="140"/>
+        <location filename="../plugins/core/main_window.cpp" line="141"/>
         <source>About Object Viewer Qt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="141"/>
+        <location filename="../plugins/core/main_window.cpp" line="142"/>
         <source>&lt;h2&gt;Object Viewer Qt&lt;/h2&gt;&lt;p&gt; Ryzom Core team &lt;p&gt;Compiled on %1 %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="174"/>
+        <location filename="../plugins/core/main_window.cpp" line="175"/>
         <source>&amp;Open...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="177"/>
+        <location filename="../plugins/core/main_window.cpp" line="178"/>
         <source>Open an existing file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="181"/>
+        <location filename="../plugins/core/main_window.cpp" line="182"/>
         <source>E&amp;xit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="182"/>
+        <location filename="../plugins/core/main_window.cpp" line="183"/>
         <source>Ctrl+Q</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="183"/>
+        <location filename="../plugins/core/main_window.cpp" line="184"/>
         <source>Exit the application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="187"/>
+        <location filename="../plugins/core/main_window.cpp" line="188"/>
         <source>&amp;Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="190"/>
+        <location filename="../plugins/core/main_window.cpp" line="191"/>
         <source>Open the settings dialog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="194"/>
+        <location filename="../plugins/core/main_window.cpp" line="195"/>
         <source>&amp;About</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="195"/>
+        <location filename="../plugins/core/main_window.cpp" line="196"/>
         <source>Show the application&apos;s About box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="199"/>
+        <location filename="../plugins/core/main_window.cpp" line="200"/>
         <source>About &amp;Qt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="200"/>
+        <location filename="../plugins/core/main_window.cpp" line="201"/>
         <source>Show the Qt library&apos;s About box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="204"/>
+        <location filename="../plugins/core/main_window.cpp" line="205"/>
         <source>About &amp;Plugins</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="205"/>
+        <location filename="../plugins/core/main_window.cpp" line="206"/>
         <source>Show the plugin view dialog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="220"/>
+        <location filename="../plugins/core/main_window.cpp" line="221"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="225"/>
+        <location filename="../plugins/core/main_window.cpp" line="226"/>
         <source>&amp;Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="228"/>
+        <location filename="../plugins/core/main_window.cpp" line="229"/>
         <source>&amp;View</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="231"/>
+        <location filename="../plugins/core/main_window.cpp" line="232"/>
         <source>&amp;Tools</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="234"/>
+        <location filename="../plugins/core/main_window.cpp" line="235"/>
         <source>&amp;Sheet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="243"/>
+        <location filename="../plugins/core/main_window.cpp" line="244"/>
         <source>&amp;Help</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/core/main_window.cpp" line="252"/>
+        <location filename="../plugins/core/main_window.cpp" line="253"/>
         <source>StatusReady</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3197,141 +3117,68 @@ Reason: %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="48"/>
+        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="105"/>
+        <source>OpenGL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="110"/>
+        <source>Direct3D</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="123"/>
         <source>Qt Style</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="56"/>
+        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="131"/>
         <source>Style</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="81"/>
+        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="156"/>
         <source>Use style&apos;s standard palette</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="91"/>
+        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="169"/>
+        <source>Font</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="186"/>
+        <source>...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="70"/>
         <source>Graphics settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="99"/>
+        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="78"/>
         <source>Driver</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="134"/>
+        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="26"/>
         <source>Bloom effect</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="142"/>
+        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="34"/>
         <source>Bloom density</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="161"/>
+        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="53"/>
         <source>Square bloom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="168"/>
+        <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="60"/>
         <source>Enable bloom effect</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>MixerEditWidget</name>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="20"/>
-        <source>Form</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="131"/>
-        <source>Mixer</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="164"/>
-        <source>Enable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="174"/>
-        <source> Slot</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="189"/>
-        <source>Start blend</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="203"/>
-        <source>End blend</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="217"/>
-        <source>Offset frame</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="231"/>
-        <source>Speed x</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="254"/>
-        <source>Start frame</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="268"/>
-        <source>End frame</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="282"/>
-        <source>Smooth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="310"/>
-        <source>Align blend</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="317"/>
-        <source>Wrap mode:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="325"/>
-        <source>Clamp</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="330"/>
-        <source>Repeat</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="335"/>
-        <source>Disable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="343"/>
-        <source>Invert skeleton weight</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/mixer_edit_widget.ui" line="350"/>
-        <source>Skeleton weight template</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3808,78 +3655,78 @@ Reason: %3</source>
 <context>
     <name>NLQT::CMainWindow</name>
     <message>
-        <location filename="../plugins/object_viewer/main_window.cpp" line="189"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="192"/>
         <source>Open NeL data file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/main_window.cpp" line="190"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="193"/>
         <source>All NeL files (*.shape *.ps *.ig);;NeL shape files (*.shape);;NeL particle system files (*.ps)NeL Instance Group files (*.ig)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/main_window.cpp" line="202"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="205"/>
         <source>Open skeleton file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/main_window.cpp" line="203"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="206"/>
         <source>NeL skeleton file (*.skel)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/main_window.cpp" line="248"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="251"/>
         <source>&amp;Open...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/main_window.cpp" line="251"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="254"/>
         <source>Open an existing file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/main_window.cpp" line="255"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="258"/>
         <source>Set &amp;background color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/main_window.cpp" line="257"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="260"/>
         <source>Set background color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/main_window.cpp" line="259"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="262"/>
         <source>&amp;Reset scene</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/main_window.cpp" line="260"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="263"/>
         <source>Reset current scene</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/main_window.cpp" line="263"/>
-        <location filename="../plugins/object_viewer/main_window.cpp" line="264"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="266"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="267"/>
         <source>Reload textures</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/main_window.cpp" line="268"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="271"/>
         <source>Save &amp;Screenshot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/main_window.cpp" line="269"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="272"/>
         <source>Make a screenshot of the current viewport and save</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/main_window.cpp" line="354"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="357"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/main_window.cpp" line="359"/>
+        <location filename="../plugins/object_viewer/main_window.cpp" line="362"/>
         <source>&amp;Tools</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4523,12 +4370,12 @@ Reason: %3</source>
 <context>
     <name>NLQT::GraphicsSettingsPage</name>
     <message>
-        <location filename="../plugins/object_viewer/graphics_settings_page.cpp" line="47"/>
+        <location filename="../plugins/object_viewer/graphics_settings_page.cpp" line="50"/>
         <source>Graphics</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/graphics_settings_page.cpp" line="57"/>
+        <location filename="../plugins/object_viewer/graphics_settings_page.cpp" line="60"/>
         <source>Object Viewer</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4536,12 +4383,12 @@ Reason: %3</source>
 <context>
     <name>NLQT::SoundSettingsPage</name>
     <message>
-        <location filename="../plugins/object_viewer/sound_settings_page.cpp" line="43"/>
+        <location filename="../plugins/object_viewer/sound_settings_page.cpp" line="46"/>
         <source>Sound</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/sound_settings_page.cpp" line="53"/>
+        <location filename="../plugins/object_viewer/sound_settings_page.cpp" line="56"/>
         <source>Object Viewer</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4549,52 +4396,58 @@ Reason: %3</source>
 <context>
     <name>NLQT::VegetableSettingsPage</name>
     <message>
-        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="47"/>
+        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="49"/>
         <source>Vegetable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="57"/>
+        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="59"/>
         <source>Object Viewer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="113"/>
+        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="114"/>
         <source>Set new tile bank</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="115"/>
+        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="116"/>
         <source>Tile Bank file (*.smallbank *.bank);;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="124"/>
+        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="125"/>
         <source>Set new tile far bank</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="126"/>
+        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="127"/>
         <source>Tile Far Bank file (*.farbank);;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="135"/>
+        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="136"/>
         <source>Set MicroVegetable texture</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="137"/>
+        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="138"/>
+        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="149"/>
         <source>Texture file (*.tga *.png *.jpg *.dds);;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="147"/>
+        <source>Set Coarse Mesh texture</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="159"/>
         <source>Add zone files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="148"/>
+        <location filename="../plugins/object_viewer/vegetable_settings_page.cpp" line="160"/>
         <source>Zonel files (*.zonel *.zone);;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4616,22 +4469,12 @@ Reason: %3</source>
     <name>Plugin::CExampleSettingsPage</name>
     <message>
         <location filename="../plugins/example/example_settings_page.cpp" line="43"/>
-        <location filename="../plugins/scene_viewer/example_settings_page.cpp" line="43"/>
         <source>Example page</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../plugins/example/example_settings_page.cpp" line="53"/>
-        <location filename="../plugins/scene_viewer/example_settings_page.cpp" line="53"/>
         <source>General</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>Plugin::CLogPlugin</name>
-    <message>
-        <location filename="../plugins/log/log_plugin.cpp" line="72"/>
-        <source>Not found QMainWindow Object Viewer Qt.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4653,101 +4496,6 @@ Reason: %3</source>
     <message>
         <location filename="../plugins/ovqt_sheet_builder/ovqt_sheet_builder.cpp" line="51"/>
         <source>Sheet builder</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>PointLightEditWidget</name>
-    <message>
-        <location filename="../plugins/scene_viewer/point_light_edit_widget.ui" line="20"/>
-        <source>Form</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/point_light_edit_widget.ui" line="132"/>
-        <source>PointLight</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/point_light_edit_widget.ui" line="150"/>
-        <source>Ambient color</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/point_light_edit_widget.ui" line="157"/>
-        <source>Diffuse color</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/point_light_edit_widget.ui" line="164"/>
-        <source>Specular color</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/point_light_edit_widget.ui" line="171"/>
-        <source>Attenuation start</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/point_light_edit_widget.ui" line="178"/>
-        <source>Attenuation end</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/point_light_edit_widget.ui" line="185"/>
-        <source>Spot angle begin</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/point_light_edit_widget.ui" line="192"/>
-        <source>Spot angle end</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/point_light_edit_widget.ui" line="199"/>
-        <source>Influence light map</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>SceneViewer::AnimEditWidget</name>
-    <message>
-        <location filename="../plugins/scene_viewer/anim_edit_widget.cpp" line="59"/>
-        <source>Open NeL anim file</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/anim_edit_widget.cpp" line="60"/>
-        <source>NeL anim files (*.anim);;</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>SceneViewer::ViewerWindow</name>
-    <message>
-        <location filename="../plugins/scene_viewer/viewer_window.cpp" line="41"/>
-        <location filename="../plugins/scene_viewer/viewer_window.cpp" line="60"/>
-        <source>Open NeL data file</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/viewer_window.cpp" line="42"/>
-        <source>All NeL files (*.shape *.ps);;NeL shape files (*.shape);;NeL particle system files (*.ps)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/viewer_window.cpp" line="61"/>
-        <source>All NeL files (*.shape *.ps);;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/viewer_window.cpp" line="70"/>
-        <source>Open skeleton file</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/viewer_window.cpp" line="71"/>
-        <source>NeL skeleton file (*.skel)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4923,92 +4671,84 @@ Reason: %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="28"/>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="22"/>
         <source>Driver</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="60"/>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="49"/>
+        <source>Auto</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="54"/>
+        <source>OpenAL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="59"/>
+        <source>XAudio2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="64"/>
+        <source>FMod</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="69"/>
+        <source>DSound</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="79"/>
         <source>SoundAutoLoadSample</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="67"/>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="86"/>
         <source>SoundEnableOccludeObstruct</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="74"/>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="93"/>
         <source>SoundEnableReverb</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="81"/>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="100"/>
         <source>SoundManualRolloff</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="88"/>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="107"/>
         <source>SoundForceSoftware</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="95"/>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="114"/>
         <source>SoundUseADPCM</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="104"/>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="123"/>
         <source>SoundMaxTrack</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>TransformEditWidget</name>
     <message>
-        <location filename="../plugins/scene_viewer/transform_edit_widget.ui" line="20"/>
-        <source>Form</source>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="164"/>
+        <source>SoundPackedSheetPath</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/scene_viewer/transform_edit_widget.ui" line="135"/>
-        <source>Transform</source>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="174"/>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="191"/>
+        <source>...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugins/scene_viewer/transform_edit_widget.ui" line="168"/>
-        <source>Position</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/transform_edit_widget.ui" line="184"/>
-        <location filename="../plugins/scene_viewer/transform_edit_widget.ui" line="326"/>
-        <location filename="../plugins/scene_viewer/transform_edit_widget.ui" line="468"/>
-        <source>X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/transform_edit_widget.ui" line="228"/>
-        <location filename="../plugins/scene_viewer/transform_edit_widget.ui" line="370"/>
-        <location filename="../plugins/scene_viewer/transform_edit_widget.ui" line="512"/>
-        <source>Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/transform_edit_widget.ui" line="272"/>
-        <location filename="../plugins/scene_viewer/transform_edit_widget.ui" line="414"/>
-        <location filename="../plugins/scene_viewer/transform_edit_widget.ui" line="556"/>
-        <source>Z</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/transform_edit_widget.ui" line="310"/>
-        <source>Rotation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/transform_edit_widget.ui" line="452"/>
-        <source>Scale</source>
+        <location filename="../plugins/object_viewer/sound_settings_page.ui" line="181"/>
+        <source>SoundSamplePath</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5052,59 +4792,6 @@ Reason: %3</source>
     <message>
         <location filename="../plugins/object_viewer/vegetable_settings_page.ui" line="125"/>
         <source>Landscape zones:</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>ViewerWindow</name>
-    <message>
-        <location filename="../plugins/scene_viewer/viewer_window.ui" line="14"/>
-        <source>MainWindow</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/viewer_window.ui" line="23"/>
-        <source>toolBar</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/viewer_window.ui" line="40"/>
-        <source>Object Inspector</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/viewer_window.ui" line="64"/>
-        <source>Property Editor</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/viewer_window.ui" line="107"/>
-        <source>Control panel animation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/viewer_window.ui" line="116"/>
-        <source>Add_Instance</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/viewer_window.ui" line="121"/>
-        <source>Add_Character</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/viewer_window.ui" line="126"/>
-        <source>Reset_Scene</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/viewer_window.ui" line="131"/>
-        <source>Add_PointLight</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugins/scene_viewer/viewer_window.ui" line="136"/>
-        <source>Add_Landscape</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
