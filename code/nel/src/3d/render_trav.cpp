@@ -1300,12 +1300,12 @@ void CRenderTrav::debugWaterModelMemory(const char *tag, bool dumpList)
 		{
 			// Before crash, do some log
 			nlwarning("******* WaterModelList crash after %s", tag);
-			nlwarning("Current: Ptr:%x. List:%x/%x", (ptrdiff_t)dmp.Address, (ptrdiff_t)dmp.ClippedPolyBegin, (ptrdiff_t)dmp.ClippedPolyEnd);
+			nlwarning("Current: Ptr:%p. List:%p/%p", dmp.Address, dmp.ClippedPolyBegin, dmp.ClippedPolyEnd);
 			// Log also the list bkuped (to do comparisons)
 			for(uint i=0;i<_DebugWaterModelList.size();i++)
 			{
 				CWaterModelDump		&bkup= _DebugWaterModelList[i];
-				nlwarning("List%02d: Ptr:%x. Array:%x/%x", i, (ptrdiff_t)bkup.Address, (ptrdiff_t)bkup.ClippedPolyBegin, (ptrdiff_t)bkup.ClippedPolyEnd);
+				nlwarning("List%02d: Ptr:%p. Array:%p/%p", i, bkup.Address, bkup.ClippedPolyBegin, bkup.ClippedPolyEnd);
 			}
 
 			// crash (assert not stop for clearness)

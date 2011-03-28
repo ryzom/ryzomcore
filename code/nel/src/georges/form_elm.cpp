@@ -1904,8 +1904,8 @@ void CFormElmStruct::read (xmlNodePtr node, CFormLoader &loader, const CFormDfn 
 						else
 						{
 							// Make a warning message
-							warning (false, "read", "In block line %d, node (%s) type in DFN have changed.",
-								(ptrdiff_t)child->content, child->name);
+							warning (false, "read", "In block line %p, node (%s) type in DFN have changed.",
+								child->content, child->name);
 						}
 					}
 					else
@@ -1917,8 +1917,8 @@ void CFormElmStruct::read (xmlNodePtr node, CFormLoader &loader, const CFormDfn 
 						}
 
 						// Throw exception
-						warning (true, "read", "XML Syntax error in block line %d, node (%s) name should be STRUCT, ATOM or ARRAY.",
-							(ptrdiff_t)child->content, child->name);
+						warning (true, "read", "XML Syntax error in block line %p, node (%s) name should be STRUCT, ATOM or ARRAY.",
+							child->content, child->name);
 					}
 				}
 
@@ -2199,8 +2199,8 @@ void CFormElmVirtualStruct::read (xmlNodePtr node, CFormLoader &loader, CForm *f
 	else
 	{
 		// Throw exception
-		warning (true, "read", "XML Syntax error in virtual struct in block line %d, should have a DfnName property.",
-			(ptrdiff_t)node->content, node->name);
+		warning (true, "read", "XML Syntax error in virtual struct in block line %p, should have a DfnName property.",
+			node->content);
 	}
 
 	// Read the parent

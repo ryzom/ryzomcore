@@ -117,7 +117,7 @@ bool CCoarseMeshBuild::buildBitmap (const std::vector<CCoarseMeshDesc>& coarseMe
 						else
 						{
 							// Build a name
-							name+=toString ("%d",(ptrdiff_t)texture);
+							name+=toString ("%p", texture);
 						}
 					}
 
@@ -477,7 +477,7 @@ void CCoarseMeshBuild::remapCoordinates (const std::vector<CCoarseMeshDesc>& coa
 						else
 						{
 							// Build a name
-							name+=toString ("%d",(ptrdiff_t)texture);
+							name+=toString ("%p", texture);
 						}
 					}
 

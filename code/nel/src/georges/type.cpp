@@ -110,8 +110,8 @@ void CType::read (xmlNodePtr root)
 	if ( ((const char*)root->name == NULL) || (strcmp ((const char*)root->name, "TYPE") != 0) )
 	{
 		// Throw exception
-		warning2 (true, "read", "XML Syntax error in block line %d, node (%s) should be TYPE.",
-			(ptrdiff_t)root->content, root->name);
+		warning2 (true, "read", "XML Syntax error in block line %p, node (%s) should be TYPE.",
+			root->content, root->name);
 	}
 
 	// Read the type
@@ -138,8 +138,8 @@ void CType::read (xmlNodePtr root)
 			xmlFree ((void*)value);
 
 			// Throw exception
-			warning2 (true, "read", "XML Syntax error in TYPE block line %d, the Type value is unknown (%s).",
-				(ptrdiff_t)root->content, valueStr.c_str ());
+			warning2 (true, "read", "XML Syntax error in TYPE block line %p, the Type value is unknown (%s).",
+				root->content, valueStr.c_str ());
 		}
 
 		// Delete the value
@@ -148,8 +148,8 @@ void CType::read (xmlNodePtr root)
 	else
 	{
 		// Throw exception
-		warning2 (true, "read", "XML Syntax error in TYPE block line %d, the Type argument was not found.",
-			(ptrdiff_t)root->content);
+		warning2 (true, "read", "XML Syntax error in TYPE block line %p, the Type argument was not found.",
+			root->content);
 	}
 
 	// Read the UI
@@ -256,8 +256,8 @@ void CType::read (xmlNodePtr root)
 				xmlFree ((void*)label);
 
 				// Throw exception
-				warning2 (true, "read", "XML Syntax error in DEFINITION block line %d, the Value argument was not found.",
-					(ptrdiff_t)childPtr->content);
+				warning2 (true, "read", "XML Syntax error in DEFINITION block line %p, the Value argument was not found.",
+					childPtr->content);
 			}
 
 			// Delete the value
@@ -266,8 +266,8 @@ void CType::read (xmlNodePtr root)
 		else
 		{
 			// Throw exception
-			warning2 (true, "read", "XML Syntax error in DEFINITION block line %d, the Label argument was not found.",
-				(ptrdiff_t)childPtr->content);
+			warning2 (true, "read", "XML Syntax error in DEFINITION block line %p, the Label argument was not found.",
+				childPtr->content);
 		}
 
 		// One more
