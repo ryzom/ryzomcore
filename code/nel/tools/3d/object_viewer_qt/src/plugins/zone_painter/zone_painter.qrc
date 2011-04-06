@@ -1,0 +1,12 @@
+<RCC>
+  <qresource prefix="painterTools">
+    <file>images/color-picker-black.png</file>
+    <file>images/colorize.png</file>
+    <file>images/draw-brush.png</file>
+    <file>images/go-down-7.png</file>
+    <file>images/go-jump-4.png</file>
+    <file>images/lock-6.png</file>
+    <file>images/lock-silver.png</file>
+    <file>images/color-fill.png</file>
+  </qresource>
+</RCC>
