@@ -140,23 +140,23 @@ public:
 	void refreshVegetableLandscape(const NL3D::CTileVegetableDesc &tvdesc);
 
 	/// Get vegetable Wind wetup.
-	float getVegetableWindPower() const
+	double getVegetableWindPower() const
 	{
 		return _VegetableWindPower;
 	}
-	float getVegetableWindBendStart() const
+	double getVegetableWindBendStart() const
 	{
 		return _VegetableWindBendMin;
 	}
-	float getVegetableWindFrequency() const
+	double getVegetableWindFrequency() const
 	{
 		return _VegetableWindFreq;
 	}
 
 	/// Set vegetable Wind wetup (updat view if possible)
-	void setVegetableWindPower(float w);
-	void setVegetableWindBendStart(float w);
-	void setVegetableWindFrequency(float w);
+	void setVegetableWindPower(double w);
+	void setVegetableWindBendStart(double w);
+	void setVegetableWindFrequency(double w);
 
 	void setVegetableAmbientLight(const NLMISC::CRGBA &ambient);
 	void setVegetableDiffuseLight(const NLMISC::CRGBA &diffuse);
@@ -236,11 +236,12 @@ private:
 	std::string	_VegetableLandscapeTileBank;
 	std::string	_VegetableLandscapeTileFarBank;
 	std::vector<std::string> _VegetableLandscapeZoneNames;
+	std::string	_CoarseMeshTexture;
 
 	// Misc.
-	float _VegetableLandscapeThreshold;
-	float _VegetableLandscapeTileNear;
-	float _VegetableLandscapeMultiply;
+	double _VegetableLandscapeThreshold;
+	double _VegetableLandscapeTileNear;
+	double _VegetableLandscapeMultiply;
 	NLMISC::CRGBA _VegetableLandscapeAmbient;
 	NLMISC::CRGBA _VegetableLandscapeDiffuse;
 	std::string	_VegetableTexture;
@@ -249,9 +250,9 @@ private:
 	NLMISC::CVector	_VegetableLightDir;
 	// Vegetable wind.
 	NLMISC::CVector	_VegetableWindDir;
-	float _VegetableWindFreq;
-	float _VegetableWindPower;
-	float _VegetableWindBendMin;
+	double _VegetableWindFreq;
+	double _VegetableWindPower;
+	double _VegetableWindBendMin;
 
 	bool _VegetableEnabled;
 

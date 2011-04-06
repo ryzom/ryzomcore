@@ -31,6 +31,8 @@
 namespace Core
 {
 
+QString lastDir = ".";
+
 CSearchPathsSettingsPage::CSearchPathsSettingsPage(QObject *parent)
 	: IOptionsPage(parent),
 	  m_page(0)
@@ -104,13 +106,14 @@ void CSearchPathsSettingsPage::applySearchPaths()
 
 void CSearchPathsSettingsPage::addPath()
 {
-	QString newPath = QFileDialog::getExistingDirectory(m_page);
+	QString newPath = QFileDialog::getExistingDirectory(m_page, "", lastDir);
 	if (!newPath.isEmpty())
 	{
 		QListWidgetItem *newItem = new QListWidgetItem;
 		newItem->setText(newPath);
 		newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 		m_ui.pathsListWidget->addItem(newItem);
+		lastDir = newPath;
 	}
 
 	checkEnabledButton();

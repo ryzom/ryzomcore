@@ -20,7 +20,6 @@
 #include "stdpch.h"
 #include "modules.h"
 
-NLQT::CConfiguration *Modules::_configuration = NULL;
 NLQT::CObjectViewer *Modules::_objectViewer = NULL;
 NLQT::CMainWindow *Modules::_mainWindow = NULL;
 NLQT::CParticleEditor *Modules::_particleEditor = NULL;
@@ -29,9 +28,6 @@ NLQT::CVegetableEditor *Modules::_vegetableEditor = NULL;
 
 void Modules::init()
 {
-	if (_configuration == NULL) _configuration = new NLQT::CConfiguration;
-	config().init();
-
 	if (_objectViewer == NULL) _objectViewer = new NLQT::CObjectViewer;
 	if (_soundSystem == NULL) _soundSystem = new NLQT::CSoundSystem;
 	if (_particleEditor == NULL) _particleEditor = new NLQT::CParticleEditor;
@@ -51,8 +47,4 @@ void Modules::release()
 	_soundSystem = NULL;
 	delete _objectViewer;
 	_objectViewer = NULL;
-
-	config().release();
-	delete _configuration;
-	_configuration = NULL;
 }

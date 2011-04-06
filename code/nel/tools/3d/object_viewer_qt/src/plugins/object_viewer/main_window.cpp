@@ -49,6 +49,7 @@
 #include "tune_mrm_dialog.h"
 #include "tune_timer_dialog.h"
 #include "camera_control.h"
+#include "object_viewer_constants.h"
 
 #include "../core/icore.h"
 #include "../core/imenu_manager.h"
@@ -79,11 +80,18 @@ CMainWindow::CMainWindow(QWidget *parent)
 
 	setDockNestingEnabled(true);
 
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
+
 	// setup Qt style and palette from config file
 	_originalPalette = QApplication::palette();
-	Modules::config().setAndCallback("QtStyle", CConfigCallback(this, &CMainWindow::cfcbQtStyle));
-	Modules::config().setAndCallback("QtPalette", CConfigCallback(this, &CMainWindow::cfcbQtPalette));
-	Modules::config().setAndCallback("SoundEnabled", CConfigCallback(this, &CMainWindow::cfcbSoundEnabled));
+
+	QApplication::setStyle(QStyleFactory::create(settings->value(Constants::QT_STYLE, "").toString()));
+
+	if (settings->value(Constants::QT_PALETTE, true).toBool())
+		QApplication::setPalette(QApplication::style()->standardPalette());
+	else
+		QApplication::setPalette(_originalPalette);
 
 	_GraphicsViewport->init();
 	_isGraphicsInitialized = true;
@@ -103,18 +111,16 @@ CMainWindow::CMainWindow(QWidget *parent)
 
 	setWindowIcon(QIcon(":/images/nel.png"));
 
-	QSettings settings("object_viewer_qt.ini", QSettings::IniFormat);
-	settings.beginGroup("WindowSettings");
-	restoreState(settings.value("QtWindowState").toByteArray());
-	restoreGeometry(settings.value("QtWindowGeometry").toByteArray());
-	settings.endGroup();
+	restoreState(settings->value("QtWindowState").toByteArray());
+	restoreGeometry(settings->value("QtWindowGeometry").toByteArray());
 
 	// As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in the window system's event queue have been processed.
 	// This can be used to do heavy work while providing a snappy user interface.
 	_mainTimer = new QTimer(this);
 	connect(_mainTimer, SIGNAL(timeout()), this, SLOT(updateRender()));
 	connect(_TuneTimerDialog, SIGNAL(changeInterval(int)), this, SLOT(setInterval(int)));
-	_TuneTimerDialog->setInterval(settings.value("TimerInterval", 25).toInt());
+	_TuneTimerDialog->setInterval(settings->value("TimerInterval", 25).toInt());
+	settings->endGroup();
 
 	_statusBarTimer = new QTimer(this);
 	connect(_statusBarTimer, SIGNAL(timeout()), this, SLOT(updateStatusBar()));
@@ -129,16 +135,13 @@ CMainWindow::~CMainWindow()
 	nldebug("CMainWindow::~CMainWindow:");
 
 	// save state & geometry of window and widgets
-	QSettings settings("object_viewer_qt.ini", QSettings::IniFormat);
-	settings.beginGroup("WindowSettings");
-	settings.setValue("QtWindowState", saveState());
-	settings.setValue("QtWindowGeometry", saveGeometry());
-	settings.endGroup();
-	settings.setValue("TimerInterval", _mainTimer->interval());
-
-	Modules::config().dropCallback("SoundEnabled");
-	Modules::config().dropCallback("QtPalette");
-	Modules::config().dropCallback("QtStyle");
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
+	settings->setValue("QtWindowState", saveState());
+	settings->setValue("QtWindowGeometry", saveGeometry());
+	settings->setValue("TimerInterval", _mainTimer->interval());
+	settings->endGroup();
+	settings->sync();
 
 	delete _AnimationDialog;
 	delete _AnimationSetDialog;

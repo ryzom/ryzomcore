@@ -734,10 +734,10 @@ public:
 				str = "<NoModule>";
 			}
 			char tmp[32];
-			sprintf (tmp, "!0x%X", addr);
+			sprintf (tmp, "!0x%p", addr);
 			str += tmp;
 		//}
-		str +=" DEBUG:"+toString("0x%08X", addr);
+		str +=" DEBUG:"+toString("0x%p", addr);
 
 //
 
@@ -925,7 +925,7 @@ public:
 							if(*addr == NULL)
 								sprintf (tmp, "<NULL>");
 							else
-								sprintf (tmp, "0x%X", *addr);
+								sprintf (tmp, "0x%p", *addr);
 						}
 					}
 

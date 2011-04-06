@@ -2,7 +2,7 @@
 #
 # NeL
 #  Authors: Nevrax and the NeL Community
-#  Version: 0.7.0
+#  Version: 0.8.0
 #
 # Notes:
 #   * Changing install location: add -DCMAKE_INSTALL_PREFIX:PATH=/my/new/path
@@ -48,7 +48,7 @@ NL_SETUP_BUILD_FLAGS()
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)
 SET(NL_VERSION_MAJOR 0)
-SET(NL_VERSION_MINOR 7)
+SET(NL_VERSION_MINOR 8)
 SET(NL_VERSION_PATCH 0)
 SET(NL_VERSION "${NL_VERSION_MAJOR}.${NL_VERSION_MINOR}.${NL_VERSION_PATCH}")
 

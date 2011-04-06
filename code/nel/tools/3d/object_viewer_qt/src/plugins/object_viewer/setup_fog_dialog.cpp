@@ -17,22 +17,21 @@
 
 */
 
+// Project includes
 #include "stdpch.h"
 #include "setup_fog_dialog.h"
+#include "object_viewer_constants.h"
+#include "../core/icore.h"
+#include "modules.h"
 
 // Qt includes
 #include <QtGui/QWidget>
 #include <QtGui/QColorDialog>
+#include <QtCore/QSettings>
 
 // NeL includes
 #include <nel/misc/path.h>
 #include <nel/3d/u_driver.h>
-
-// Project includes
-#include "modules.h"
-
-using namespace NL3D;
-using namespace NLMISC;
 
 namespace NLQT
 {
@@ -42,10 +41,17 @@ CSetupFog::CSetupFog(QWidget *parent)
 {
 	ui.setupUi(this);
 
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
+
 	// load fog value from config file
-	ui.startDoubleSpinBox->setValue(Modules::config().getValue("FogStart", 0.0));
-	ui.endDoubleSpinBox->setValue(Modules::config().getValue("FogEnd", 0.0));
-	colorFog = Modules::config().getValue("FogColor",CRGBA(0.0, 0.0, 0.0));
+	ui.startDoubleSpinBox->setValue(settings->value("FogStart", 0.0).toDouble());
+	ui.endDoubleSpinBox->setValue(settings->value("FogEnd", 0.0).toDouble());
+
+	QColor color = settings->value("FogColor", QColor(80, 80, 80)).value<QColor>();
+	colorFog = NLMISC::CRGBA(color.red(), color.green(), color.blue(), color.alpha());
+
+	settings->endGroup();
 
 	connect(ui.applyPushButton, SIGNAL(clicked()), this, SLOT(apply()));
 	connect(ui.colorPushButton, SIGNAL(clicked()), this, SLOT(setColor()));
@@ -53,13 +59,17 @@ CSetupFog::CSetupFog(QWidget *parent)
 
 CSetupFog::~CSetupFog()
 {
-	// save fog value from config file
-	Modules::config().getConfigFile().getVar("FogStart").setAsFloat(ui.startDoubleSpinBox->value());
-	Modules::config().getConfigFile().getVar("FogEnd").setAsFloat(ui.endDoubleSpinBox->value());
-	Modules::config().getConfigFile().getVar("FogColor").setAsInt(colorFog.R, 0);
-	Modules::config().getConfigFile().getVar("FogColor").setAsInt(colorFog.G, 1);
-	Modules::config().getConfigFile().getVar("FogColor").setAsInt(colorFog.B, 2);
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
 
+	settings->setValue("FogStart", ui.startDoubleSpinBox->value());
+	settings->setValue("FogEnd", ui.endDoubleSpinBox->value());
+
+	QColor color(colorFog.R, colorFog.G, colorFog.B, colorFog.A);
+	settings->setValue("FogColor", color);
+
+	settings->endGroup();
+	settings->sync();
 }
 
 void CSetupFog::apply()

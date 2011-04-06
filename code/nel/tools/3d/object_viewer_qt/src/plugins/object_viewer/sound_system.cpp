@@ -18,6 +18,11 @@
 #include "stdpch.h"
 #include "sound_system.h"
 
+// Project includes
+#include "modules.h"
+#include "object_viewer_constants.h"
+#include "../core/icore.h"
+
 // NeL includes
 #include <nel/sound/u_audio_mixer.h>
 #include <nel/sound/u_listener.h>
@@ -26,8 +31,8 @@
 #include <nel/3d/u_particle_system_sound.h>
 #include <nel/misc/path.h>
 
-// Project includes
-#include "modules.h"
+// Qt includes
+#include <QtCore/QSettings>
 
 namespace NLQT
 {
@@ -58,7 +63,7 @@ void CSoundSystem::setListenerMatrix(const NLMISC::CMatrix &m)
 	}
 }
 
-void CSoundSystem::init ()
+void CSoundSystem::init()
 {
 	//H_AUTO2
 	nldebug("CSoundSystem::init");
@@ -73,23 +78,28 @@ void CSoundSystem::init ()
 	try
 	{
 		// init audiomixer
-		_PackedSheetPath = Modules::config().getValue("SoundPackedSheetPath", std::string(""));
-		_SamplePath = Modules::config().getValue("SoundSamplePath", std::string(""));
+		QSettings *settings = Core::ICore::instance()->settings();
+		settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
+
+		_PackedSheetPath = settings->value(Constants::SOUND_PACKED_SHEET_PATH, "").toString().toStdString();
+		_SamplePath = settings->value(Constants::SOUND_SAMPLE_PATH, "").toString().toStdString();
 		_AudioMixer->setSamplePath(_SamplePath);
 		_AudioMixer->setPackedSheetOption(_PackedSheetPath, true);
 		std::vector<std::string> devices;
-		_AudioMixer->initDriver(Modules::config().getValue("SoundDriver", std::string("Auto")));
+		_AudioMixer->initDriver(settings->value(Constants::SOUND_DRIVER, "Auto").toString().toStdString());
 		_AudioMixer->getDevices(devices);
 		NLSOUND::UAudioMixer::CInitInfo audioInfo;
-		audioInfo.AutoLoadSample = Modules::config().getValue("SoundAutoLoadSample", true);
-		audioInfo.EnableOccludeObstruct = Modules::config().getValue("SoundEnableOccludeObstruct", true);
-		audioInfo.EnableReverb = Modules::config().getValue("SoundEnableReverb", true);
-		audioInfo.ManualRolloff = Modules::config().getValue("SoundManualRolloff", true);
-		audioInfo.ForceSoftware = Modules::config().getValue("SoundForceSoftware", false);
-		audioInfo.MaxTrack = Modules::config().getValue("SoundMaxTrack", 48);
-		audioInfo.UseADPCM = Modules::config().getValue("SoundUseADPCM", false);
-		_AudioMixer->initDevice(Modules::config().getValue("SoundDevice", std::string("")), audioInfo, NULL);
+		audioInfo.AutoLoadSample = settings->value(Constants::SOUND_AUTO_LOAD_SAMPLE, true).toBool();
+		audioInfo.EnableOccludeObstruct = settings->value(Constants::SOUND_ENABLE_OCCLUDE_OBSTRUCT, true).toBool();
+		audioInfo.EnableReverb = settings->value(Constants::SOUND_ENABLE_REVERB, true).toBool();
+		audioInfo.ManualRolloff = settings->value(Constants::SOUND_MANUAL_ROLL_OFF, true).toBool();
+		audioInfo.ForceSoftware = settings->value(Constants::SOUND_FORCE_SOFTWARE, false).toBool();
+		audioInfo.MaxTrack = settings->value(Constants::SOUND_MAX_TRACK, 48).toInt();
+		audioInfo.UseADPCM = settings->value(Constants::SOUND_USE_ADCPM, false).toBool();
+		_AudioMixer->initDevice(settings->value(Constants::SOUND_DEVICE, "").toString().toStdString(), audioInfo, NULL);
 		_AudioMixer->setLowWaterMark(1);
+
+		settings->endGroup();
 	}
 	catch(NLMISC::Exception &e)
 	{

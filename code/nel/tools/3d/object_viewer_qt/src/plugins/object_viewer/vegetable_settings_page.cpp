@@ -18,18 +18,20 @@
 // Project includes
 #include "stdpch.h"
 #include "vegetable_settings_page.h"
+#include "object_viewer_constants.h"
+#include "../core/icore.h"
 #include "modules.h"
 
 // Qt includes
 #include <QtGui/QWidget>
+#include <QtCore/QSettings>
 #include <QtGui/QMessageBox>
 #include <QtGui/QFileDialog>
 
-// NeL includes
-#include <nel/misc/config_file.h>
-
 namespace NLQT
 {
+
+QString LastDir = ".";
 
 VegetableSettingsPage::VegetableSettingsPage(QObject *parent)
 	: IOptionsPage(parent),
@@ -49,7 +51,7 @@ QString VegetableSettingsPage::trName() const
 
 QString VegetableSettingsPage::category() const
 {
-	return QLatin1String("ObjectViewer");
+	return QLatin1String(Constants::OBJECT_VIEWER_SECTION);
 }
 
 QString VegetableSettingsPage::trCategory() const
@@ -62,23 +64,21 @@ QWidget *VegetableSettingsPage::createPage(QWidget *parent)
 	m_page = new QWidget(parent);
 	m_ui.setupUi(m_page);
 
-	m_ui.tileBankLineEdit->setText(Modules::config().getConfigFile().getVar("VegetTileBank").asString().c_str());
-	m_ui.tileFarBankLineEdit->setText(Modules::config().getConfigFile().getVar("VegetTileFarBank").asString().c_str());
-	m_ui.vegetTextureLineEdit->setText(Modules::config().getConfigFile().getVar("VegetTexture").asString().c_str());
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
 
-	m_ui.zonesListWidget->clear();
+	m_ui.tileBankLineEdit->setText(settings->value(Constants::VEGET_TILE_BANK, "").toString());
+	m_ui.tileFarBankLineEdit->setText(settings->value(Constants::VEGET_TILE_FAR_BANK, "").toString());
+	m_ui.vegetTextureLineEdit->setText(settings->value(Constants::VEGET_TEXTURE, "").toString());
+	m_ui.coarseLineEdit->setText(settings->value(Constants::COARSE_MESH_TEXTURE, "").toString());
+	m_ui.zonesListWidget->addItems(settings->value(Constants::VEGET_LANDSCAPE_ZONES).toStringList());
 
-	// load vegetable landscape zone paths from config file
-	NLMISC::CConfigFile::CVar &var = Modules::config().getConfigFile().getVar("VegetLandscapeZones");
-	for (uint i = 0; i < var.size(); ++i)
-	{
-		m_ui.zonesListWidget->addItem(var.asString(i).c_str());
-		m_ui.zonesListWidget->item(i)->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-	}
+	settings->endGroup();
 
 	connect(m_ui.tileBankToolButton, SIGNAL(clicked()), this, SLOT(setTileBank()));
 	connect(m_ui.tileFarBankToolButton, SIGNAL(clicked()), this, SLOT(setTileFarBank()));
 	connect(m_ui.vegetTexToolButton, SIGNAL(clicked()), this, SLOT(setTextureVegetable()));
+	connect(m_ui.coarseToolButton, SIGNAL(clicked()), this, SLOT(setCoarseMeshTexture()));
 	connect(m_ui.addZoneToolButton, SIGNAL(clicked()), this, SLOT(addZone()));
 	connect(m_ui.removeZoneToolButton, SIGNAL(clicked()), this, SLOT(removeZone()));
 
@@ -87,21 +87,22 @@ QWidget *VegetableSettingsPage::createPage(QWidget *parent)
 
 void VegetableSettingsPage::apply()
 {
-	Modules::config().getConfigFile().getVar("VegetTileBank").setAsString(m_ui.tileBankLineEdit->text().toStdString());
-	Modules::config().getConfigFile().getVar("VegetTileFarBank").setAsString(m_ui.tileFarBankLineEdit->text().toStdString());
-	Modules::config().getConfigFile().getVar("VegetTexture").setAsString(m_ui.vegetTextureLineEdit->text().toStdString());
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
 
-	std::vector<std::string> list;
+	settings->setValue(Constants::VEGET_TILE_BANK, m_ui.tileBankLineEdit->text());
+	settings->setValue(Constants::VEGET_TILE_FAR_BANK, m_ui.tileFarBankLineEdit->text());
+	settings->setValue(Constants::COARSE_MESH_TEXTURE, m_ui.coarseLineEdit->text());
+	settings->setValue(Constants::VEGET_TEXTURE, m_ui.vegetTextureLineEdit->text());
+
+	QStringList list;
 	for (sint i = 0; i < m_ui.zonesListWidget->count(); ++i)
-	{
-		std::string str = m_ui.zonesListWidget->item(i)->text().toStdString();
-		list.push_back(str);
-	}
+		list.push_back(m_ui.zonesListWidget->item(i)->text());
 
-	Modules::config().getConfigFile().getVar("VegetLandscapeZones").Type = NLMISC::CConfigFile::CVar::T_STRING;
-	Modules::config().getConfigFile().getVar("VegetLandscapeZones").setAsString(list);
+	settings->setValue(Constants::VEGET_LANDSCAPE_ZONES, list);
 
-	Modules::config().getConfigFile().save();
+	settings->endGroup();
+	settings->sync();
 }
 
 void VegetableSettingsPage::finish()
@@ -141,10 +142,21 @@ void VegetableSettingsPage::setTextureVegetable()
 	}
 }
 
+void VegetableSettingsPage::setCoarseMeshTexture()
+{
+	QString fileName = QFileDialog::getOpenFileName(0, tr("Set Coarse Mesh texture"),
+					   m_ui.vegetTextureLineEdit->text(),
+					   tr("Texture file (*.tga *.png *.jpg *.dds);;"));
+	if (!fileName.isEmpty())
+	{
+		m_ui.coarseLineEdit->setText(fileName);
+	}
+}
+
 void VegetableSettingsPage::addZone()
 {
 	QStringList fileNames = QFileDialog::getOpenFileNames(0,
-							tr("Add zone files"), ".",
+							tr("Add zone files"), LastDir,
 							tr("Zonel files (*.zonel *.zone);;"));
 
 	if (!fileNames.isEmpty())

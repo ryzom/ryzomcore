@@ -27,7 +27,6 @@
 #include <map>
 
 // NeL includes
-#include <nel/misc/config_file.h>
 #include <nel/misc/rgba.h>
 #include <nel/3d/event_mouse_listener.h>
 
@@ -231,13 +230,6 @@ private:
 	// Delete all entities
 	void deleteEntities();
 
-	// Load background color from config file, intended for CConfiguration.
-	void cfcbBackgroundColor(NLMISC::CConfigFile::CVar &var);
-	void cfcbGraphicsDriver(NLMISC::CConfigFile::CVar &var);
-	void cfcbCameraFocal(NLMISC::CConfigFile::CVar &var);
-	void cfcbFontName(NLMISC::CConfigFile::CVar &var);
-	void cfcbBloomEffect(NLMISC::CConfigFile::CVar &var);
-
 	NLMISC::CRGBA 			_BackgroundColor;
 	NL3D::IDriver			*_IDriver;
 	NL3D::CScene			*_CScene;
@@ -260,6 +252,8 @@ private:
 
 	bool _Direct3D;
 	bool _BloomEffect;
+	int _BloomDensity;
+	bool _BloomSquare;
 
 	std::string _CurrentInstance;
 

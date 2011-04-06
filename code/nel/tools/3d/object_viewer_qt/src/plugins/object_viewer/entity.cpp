@@ -391,6 +391,7 @@ void CEntity::animatePlayList(NL3D::TAnimationTime time)
 			// If a  skeleton model
 			if(!_Skeleton.empty())
 			{
+				_Skeleton.setTransformMode(NL3D::UTransformable::RotQuat);
 				// scale animated pos value with the CFG scale
 				pos *= _CharacterScalePos;
 				_Skeleton.setPos(pos);
@@ -398,6 +399,7 @@ void CEntity::animatePlayList(NL3D::TAnimationTime time)
 			}
 			else
 			{
+				_Instance.setTransformMode(NL3D::UTransformable::RotQuat);
 				_Instance.setPos(pos);
 				_Instance.setRotQuat(current.getRot());
 			}

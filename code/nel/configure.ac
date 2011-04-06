@@ -13,7 +13,7 @@
 # *and* AC_SUBST(LIBTOOL_VERSION)
 
 AC_PREREQ(2.57)
-AC_INIT([nel],[0.7.0],[nel-all@nevrax.org])
+AC_INIT([nel],[0.8.0],[nel-all@nevrax.org])
 AM_INIT_AUTOMAKE([tar-ustar])
 
 AC_CONFIG_SRCDIR(include/nel/misc/types_nl.h)

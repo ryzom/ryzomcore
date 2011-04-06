@@ -59,7 +59,7 @@ void XMLError (xmlNodePtr xmlNode, const char *filename, const char *format, ...
 	vsnprintf( buffer, 1024, format, args );
 	va_end( args );
 
-	Error (filename, "node (%s), line (%d) : %s", xmlNode->name, (ptrdiff_t)xmlNode->content, buffer);
+	Error (filename, "node (%s), line (%p) : %s", xmlNode->name, xmlNode->content, buffer);
 }
 
 

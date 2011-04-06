@@ -35,6 +35,7 @@ public:
 
 	bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
 	void extensionsInitialized();
+	void shutdown();
 
 	void setNelContext(NLMISC::INelContext *nelContext);
 

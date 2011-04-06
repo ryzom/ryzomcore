@@ -26,9 +26,6 @@
 // Qt includes
 #include <QtCore/QObject>
 
-// NeL includes
-#include <nel/misc/config_file.h>
-
 class QWidget;
 
 namespace NLQT
@@ -52,9 +49,11 @@ public:
 	virtual void apply();
 	virtual void finish();
 
-private:
-	void cfcbSoundDrivers(NLMISC::CConfigFile::CVar &var);
+private Q_SLOTS:
+	void setSheetPath();
+	void setSamplePath();
 
+private:
 	QWidget *m_page;
 	Ui::SoundSettingsPage m_ui;
 };
