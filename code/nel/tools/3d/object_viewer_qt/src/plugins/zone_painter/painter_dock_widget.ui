@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>304</width>
-    <height>510</height>
+    <width>361</width>
+    <height>555</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>300</width>
-    <height>80</height>
+    <height>83</height>
    </size>
   </property>
   <property name="features">
@@ -23,34 +23,36 @@
    <string>Painter Modes</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
-   <widget class="QTabWidget" name="tabWidget">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>300</width>
-      <height>480</height>
-     </rect>
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="margin">
+     <number>3</number>
     </property>
-    <property name="currentIndex">
-     <number>0</number>
+    <property name="spacing">
+     <number>1</number>
     </property>
-    <widget class="QWidget" name="tileTab">
-     <attribute name="title">
-      <string>Paint Tiles</string>
-     </attribute>
-    </widget>
-    <widget class="QWidget" name="colorTab">
-     <attribute name="title">
-      <string>Paint Colors</string>
-     </attribute>
-    </widget>
-    <widget class="QWidget" name="displaceTab">
-     <attribute name="title">
-      <string>Paint Displacement</string>
-     </attribute>
-    </widget>
-   </widget>
+    <item row="0" column="0">
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tileTab">
+       <attribute name="title">
+        <string>Paint Tiles</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="colorTab">
+       <attribute name="title">
+        <string>Paint Colors</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="displaceTab">
+       <attribute name="title">
+        <string>Paint Displacement</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>
