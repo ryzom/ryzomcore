@@ -1,5 +1,6 @@
 #include <nel/misc/types_nl.h>
 
+#include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
