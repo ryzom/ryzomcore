@@ -41,6 +41,7 @@
 // Project includes
 #include "dup_ps.h"
 #include "modules.h"
+#include "object_viewer_constants.h"
 
 namespace NLQT
 {
@@ -148,19 +149,19 @@ CParticleWorkspaceDialog::CParticleWorkspaceDialog(QWidget *parent)
 	_mergeAction = new QAction(tr("Merge"), this);
 
 	_newLocatedAction = new QAction(tr("New located"), this);
-	_newLocatedAction->setIcon(QIcon(":/images/located_item.png"));
+	_newLocatedAction->setIcon(QIcon(Constants::ICON_LOCATED_ITEM_SMALL));
 	_pasteLocatedAction = new QAction(tr("Paste located"), this);
 
 	for(int i = 0; LocatedBindable[i]; ++i)
 		_bindNewLocatedBindable[i] = new QAction(tr(LocatedBindable[i]), this);
 
-	_bindNewLocatedBindable[Action::Sound]->setIcon(QIcon(":/images/sound_item.png"));
-	_bindNewLocatedBindable[Action::Light]->setIcon(QIcon(":/images/light_item.png"));
+	_bindNewLocatedBindable[Action::Sound]->setIcon(QIcon(Constants::ICON_SOUND_ITEM_SMALL));
+	_bindNewLocatedBindable[Action::Light]->setIcon(QIcon(Constants::ICON_LIGHT_ITEM_SMALL));
 
 	_forceZBiasAction = new QAction(tr("Force ZBias"), this);
 
 	_instanciateAction = new QAction(tr("Instanciate"), this);
-	_instanciateAction->setIcon(QIcon(":/images/instance_item.png"));
+	_instanciateAction->setIcon(QIcon(Constants::ICON_INSTANCE_ITEM_SMALL));
 	_copyLocatedAction = new QAction(tr("Copy located"), this);
 	_copyBindableAction = new QAction(tr("Copy bindable"), this);
 	_pasteBindableAction = new QAction(tr("Paste bindable"), this);
@@ -732,23 +733,25 @@ void CParticleWorkspaceDialog::updateTreeView()
 void CParticleWorkspaceDialog::buildMenu(QMenu *menu)
 {
 	QMenu *bindParticleMenu = new QMenu(tr("Bind particle..."), menu);
-	bindParticleMenu->setIcon(QIcon(":/images/particle_system_item.png"));
+	bindParticleMenu->setIcon(QIcon(Constants::ICON_PARTICLE_SYSTEM_SMALL));
 	menu->addAction(bindParticleMenu->menuAction());
 	for(int i = Action::ParticlePoint; i <= Action::ParticleRibbonLookAt; ++i)
 		bindParticleMenu->addAction(_bindNewLocatedBindable[i]);
 
 	QMenu *bindForceMenu = new QMenu(tr("Bind force..."), menu);
+	bindForceMenu->setIcon(QIcon(Constants::ICON_FORCE_ITEM_SMALL));
 	menu->addAction(bindForceMenu->menuAction());
 	for(int i = Action::ForceGravity; i <= Action::ForceMagnetic; ++i)
 		bindForceMenu->addAction(_bindNewLocatedBindable[i]);
 
 	QMenu *bindZoneMenu = new QMenu(tr("Bind zone..."), menu);
-	bindZoneMenu->setIcon(QIcon(":/images/collision_zone_item.png"));
+	bindZoneMenu->setIcon(QIcon(Constants::ICON_COLLISION_ZONE_ITEM_SMALL));
 	menu->addAction(bindZoneMenu->menuAction());
 	for(int i = Action::ZonePlane; i <= Action::ZoneCylinder; ++i)
 		bindZoneMenu->addAction(_bindNewLocatedBindable[i]);
 
 	QMenu *bindEmitterMenu = new QMenu(tr("Bind emitter..."), menu);
+	bindEmitterMenu->setIcon(QIcon(Constants::ICON_EMITTER_ITEM_SMALL));
 	menu->addAction(bindEmitterMenu->menuAction());
 	for(int i = Action::EmitterDirectional; i <= Action::EmitterRadial; ++i)
 		bindEmitterMenu->addAction(_bindNewLocatedBindable[i]);

@@ -130,7 +130,7 @@
         </property>
         <property name="icon">
          <iconset resource="object_viewer.qrc">
-          <normaloff>:/images/list-remove.png</normaloff>:/images/list-remove.png</iconset>
+          <normaloff>:/icons/ic_nel_delete_item.png</normaloff>:/icons/ic_nel_delete_item.png</iconset>
         </property>
        </widget>
       </item>
@@ -148,7 +148,7 @@
         </property>
         <property name="icon">
          <iconset resource="object_viewer.qrc">
-          <normaloff>:/images/insert-horizontal.png</normaloff>:/images/insert-horizontal.png</iconset>
+          <normaloff>:/icons/ic_nel_insert_item.png</normaloff>:/icons/ic_nel_insert_item.png</iconset>
         </property>
        </widget>
       </item>
@@ -159,7 +159,7 @@
         </property>
         <property name="icon">
          <iconset resource="object_viewer.qrc">
-          <normaloff>:/images/list-add.png</normaloff>:/images/list-add.png</iconset>
+          <normaloff>:/icons/ic_nel_add_item.png</normaloff>:/icons/ic_nel_add_item.png</iconset>
         </property>
        </widget>
       </item>

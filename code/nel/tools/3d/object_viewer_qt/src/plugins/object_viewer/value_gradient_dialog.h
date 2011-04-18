@@ -1,26 +1,30 @@
-/*
-    Object Viewer Qt
-    Copyright (C) 2010 Dzmitry Kamiahin <dnk-88@tut.by>
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
+// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef VALUE_GRADIENT_DIALOG_H
 #define VALUE_GRADIENT_DIALOG_H
 
-#include <nel/misc/types_nl.h>
+// Project includes
+#include "ui_value_gradient_form.h"
+#include "basic_edit_widget.h"
+#include "color_edit_widget.h"
+#include "edit_range_widget.h"
+#include "ps_wrapper.h"
+#include "particle_node.h"
 
 // Qt includes
 #include <QtGui/QIcon>
@@ -36,13 +40,6 @@
 
 // NeL includes
 #include <nel/3d/ps_attrib_maker_template.h>
-
-// Project includes
-#include "basic_edit_widget.h"
-#include "color_edit_widget.h"
-#include "edit_range_widget.h"
-#include "ps_wrapper.h"
-#include "particle_node.h"
 
 namespace NL3D
 {
@@ -111,58 +108,31 @@ private Q_SLOTS:
 	void valueUp();
 	void changeCurrentRow(int currentRow);
 	void updateItem();
+	void setNbSteps(uint32 nbSteps);
 
 protected:
 
 	// the minimum number of element in the gradient
-	uint _MinSize;
+	uint m_minSize;
 
 	// false to disable the dialog that control the number of stages between each value
-	bool _CanTuneNbStages;
+	bool m_canTuneNbStages;
 
-	IValueGradientClient *_ClientInterface;
+	IValueGradientClient *m_clientInterface;
 
-	bool _DestroyClientInterface;
+	bool m_destroyClientInterface;
 
 	// the current size of the gradient
-	uint _Size;
+	uint m_size;
 
-	CWorkspaceNode *_Node;
-
-	// a wrapper to tune the number of step
-	struct CNbStepWrapper :public IPSWrapperUInt
-	{
-		// the interface that was passed to the dialog this struct is part of
-		IValueGradientClient *I;
-		uint32 get(void) const
-		{
-			return I->getNbSteps();
-		}
-		void set(const uint32 &nbSteps)
-		{
-			I->setNbSteps(nbSteps);
-		}
-
-	} _NbStepWrapper;
-
-	QGridLayout *_gridLayout;
-	QListWidget *_listWidget;
-	QHBoxLayout *_horizontalLayout;
-	QPushButton *_addPushButton;
-	QPushButton *_removePushButton;
-	QPushButton *_upPushButton;
-	QPushButton *_downPushButton;
-	QSpacerItem *_horizontalSpacer;
-	QLabel *_label;
-	NLQT::CEditRangeUIntWidget *_nbStepWidget;
-	QSpacerItem *_verticalSpacer;
-	QWidget *editWidget;
+	CWorkspaceNode *m_node;
+	Ui::CGradientDialog m_ui;
 }; /* class CGradientDialog */
 
 /**
 @class CValueGradientClientT
 @brief This template generate an interface that is used with the gradient edition dialog
-This the type to be edited (color, floet, etc..)
+This the type to be edited (color, float, etc..)
  */
 template <typename T>
 class CValueGradientClientT : public IValueGradientClient, public IPSWrapper<T>
@@ -172,22 +142,22 @@ public:
 	virtual ~CValueGradientClientT() {}
 
 	/// the gradient being edited, must be filled by the instancier
-	NL3D::CPSValueGradientFunc<T> *Scheme;
+	NL3D::CPSValueGradientFunc<T> *m_scheme;
 
 	/// the gradient dialog, must be filled by the instancier
-	T DefaultValue;
+	T m_defaultValue;
 
 	/// inherited from IPSWrapper
 	virtual T get(void) const
 	{
-		return Scheme->getValue(_CurrentEditedIndex);
+		return m_scheme->getValue(m_currentEditedIndex);
 	}
 	virtual void set(const T &v)
 	{
-		T *tab = new T[Scheme->getNumValues()];
-		Scheme->getValues(tab);
-		tab[_CurrentEditedIndex] = v;
-		Scheme->setValues(tab, Scheme->getNumValues(), Scheme->getNumStages());
+		T *tab = new T[m_scheme->getNumValues()];
+		m_scheme->getValues(tab);
+		tab[m_currentEditedIndex] = v;
+		m_scheme->setValues(tab, m_scheme->getNumValues(), m_scheme->getNumStages());
 		delete[] tab;
 	}
 
@@ -209,33 +179,33 @@ public:
 	virtual bool modifyGradient(TAction action, uint index)
 	{
 
-		T *tab = new T[Scheme->getNumValues() + 1]; // +1 is for the add / insert case
-		Scheme->getValues(tab);
+		T *tab = new T[m_scheme->getNumValues() + 1]; // +1 is for the add / insert case
+		m_scheme->getValues(tab);
 
 		switch(action)
 		{
 		case IValueGradientClient::Add:
-			tab[Scheme->getNumValues()] = DefaultValue;
-			Scheme->setValues(tab, Scheme->getNumValues() + 1, Scheme->getNumStages());
+			tab[m_scheme->getNumValues()] = m_defaultValue;
+			m_scheme->setValues(tab, m_scheme->getNumValues() + 1, m_scheme->getNumStages());
 			break;
 		case IValueGradientClient::Insert:
-			::memmove(tab + (index + 1), tab + index, sizeof(T) * (Scheme->getNumValues() - index));
-			tab[index] = DefaultValue;
-			Scheme->setValues(tab, Scheme->getNumValues() + 1, Scheme->getNumStages());
+			::memmove(tab + (index + 1), tab + index, sizeof(T) * (m_scheme->getNumValues() - index));
+			tab[index] = m_defaultValue;
+			m_scheme->setValues(tab, m_scheme->getNumValues() + 1, m_scheme->getNumStages());
 			break;
 		case IValueGradientClient::Delete:
-			::memmove(tab + index, tab + index + 1, sizeof(T) * (Scheme->getNumValues() - index - 1));
-			Scheme->setValues(tab, Scheme->getNumValues() - 1, Scheme->getNumStages());
+			::memmove(tab + index, tab + index + 1, sizeof(T) * (m_scheme->getNumValues() - index - 1));
+			m_scheme->setValues(tab, m_scheme->getNumValues() - 1, m_scheme->getNumStages());
 			break;
 		case IValueGradientClient::Up:
 			nlassert(index > 0);
 			std::swap(tab[index], tab[index - 1]);
-			Scheme->setValues(tab, Scheme->getNumValues(), Scheme->getNumStages());
+			m_scheme->setValues(tab, m_scheme->getNumValues(), m_scheme->getNumStages());
 			break;
 		case IValueGradientClient::Down:
-			nlassert(index <  Scheme->getNumValues() - 1);
+			nlassert(index <  m_scheme->getNumValues() - 1);
 			std::swap(tab[index], tab[index + 1]);
-			Scheme->setValues(tab, Scheme->getNumValues(), Scheme->getNumStages());
+			m_scheme->setValues(tab, m_scheme->getNumValues(), m_scheme->getNumStages());
 			break;
 		}
 
@@ -244,24 +214,24 @@ public:
 	}
 	virtual uint32 getSchemeSize(void) const
 	{
-		return Scheme->getNumValues();
+		return m_scheme->getNumValues();
 	}
 
 	/// Get the number of interpolation step
 	uint32 getNbSteps(void) const
 	{
-		return Scheme->getNumStages();
+		return m_scheme->getNumStages();
 	}
 
 	/// Set the number of interpolation steps
 	void setNbSteps(uint32 value)
 	{
-		Scheme->setNumStages(value);
+		m_scheme->setNumStages(value);
 	}
 
 protected:
 	// index of the value OF the current dialog that exist
-	uint32 _CurrentEditedIndex;
+	uint32 m_currentEditedIndex;
 }; /* class CValueGradientClientT */
 
 /// FLOAT GRADIENT EDITION INTERFACE
@@ -274,11 +244,11 @@ public:
 
 	virtual QWidget *newDialog(IPSWrapperFloat *wrapper, QWidget *parent)
 	{
-		editWidget = new CEditRangeFloatWidget(parent);
-		editWidget->setRange(MinRange, MaxRange);
-		editWidget->setWrapper(wrapper);
-		connect(editWidget, SIGNAL(valueChanged(float)), this, SIGNAL(itemChanged()));
-		return editWidget;
+		m_editWidget = new CEditRangeFloatWidget(parent);
+		m_editWidget->setRange(m_minRange, m_maxRange);
+		m_editWidget->setWrapper(wrapper);
+		connect(m_editWidget ,SIGNAL(valueChanged(float)), this, SIGNAL(itemChanged()));
+		return m_editWidget;
 	}
 
 	virtual QString getTitleDialog() const
@@ -288,17 +258,17 @@ public:
 
 	virtual void setCurrentIndex(uint index)
 	{
-		_CurrentEditedIndex = index;
-		editWidget->updateUi();
+		m_currentEditedIndex = index;
+		m_editWidget->updateUi();
 	}
 
 	virtual void displayValue(uint index, QListWidgetItem *item)
 	{
-		item->setText(QString("%1").arg(Scheme->getValue(index),0,'f',2));
+		item->setText(QString("%1").arg(m_scheme->getValue(index), 0, 'f', 2));
 	}
 
-	CEditRangeFloatWidget *editWidget;
-	float MinRange, MaxRange;
+	CEditRangeFloatWidget *m_editWidget;
+	float m_minRange, m_maxRange;
 }; /* CFloatGradientWrapper */
 
 /// UINT GRADIENT EDITION INTERFACE
@@ -311,11 +281,11 @@ public:
 
 	virtual QWidget *newDialog(IPSWrapperUInt *wrapper, QWidget *parent)
 	{
-		editWidget = new CEditRangeUIntWidget(parent);
-		editWidget->setRange(MinRange, MaxRange);
-		editWidget->setWrapper(wrapper);
-		connect(editWidget, SIGNAL(valueChanged(uint32)), this, SIGNAL(itemChanged()));
-		return editWidget;
+		m_editWidget = new CEditRangeUIntWidget(parent);
+		m_editWidget->setRange(m_minRange, m_maxRange);
+		m_editWidget->setWrapper(wrapper);
+		connect(m_editWidget, SIGNAL(valueChanged(uint32)), this, SIGNAL(itemChanged()));
+		return m_editWidget;
 	}
 
 	virtual QString getTitleDialog() const
@@ -325,17 +295,17 @@ public:
 
 	virtual void setCurrentIndex(uint index)
 	{
-		_CurrentEditedIndex = index;
-		editWidget->updateUi();
+		m_currentEditedIndex = index;
+		m_editWidget->updateUi();
 	}
 
 	virtual void displayValue(uint index, QListWidgetItem *item)
 	{
-		item->setText(QString("%1").arg(Scheme->getValue(index)));
+		item->setText(QString("%1").arg(m_scheme->getValue(index)));
 	}
 
-	CEditRangeUIntWidget *editWidget;
-	uint32 MinRange, MaxRange;
+	CEditRangeUIntWidget *m_editWidget;
+	uint32 m_minRange, m_maxRange;
 }; /* CUIntGradientWrapper */
 
 /// INT GRADIENT EDITION INTERFACE
@@ -348,11 +318,11 @@ public:
 
 	virtual QWidget *newDialog(IPSWrapper<sint32> *wrapper, QWidget *parent)
 	{
-		editWidget = new CEditRangeIntWidget(parent);
-		editWidget->setRange(MinRange, MaxRange);
-		editWidget->setWrapper(wrapper);
-		connect(editWidget, SIGNAL(valueChanged(sint32)), this, SIGNAL(itemChanged()));
-		return editWidget;
+		m_editWidget = new CEditRangeIntWidget(parent);
+		m_editWidget->setRange(m_minRange, m_maxRange);
+		m_editWidget->setWrapper(wrapper);
+		connect(m_editWidget, SIGNAL(valueChanged(sint32)), this, SIGNAL(itemChanged()));
+		return m_editWidget;
 	}
 
 	virtual QString getTitleDialog() const
@@ -362,17 +332,17 @@ public:
 
 	virtual void setCurrentIndex(uint index)
 	{
-		_CurrentEditedIndex = index;
-		editWidget->updateUi();
+		m_currentEditedIndex = index;
+		m_editWidget->updateUi();
 	}
 
 	virtual void displayValue(uint index, QListWidgetItem *item)
 	{
-		item->setText(QString("%1").arg(Scheme->getValue(index)));
+		item->setText(QString("%1").arg(m_scheme->getValue(index)));
 	}
 
-	CEditRangeIntWidget *editWidget;
-	sint32 MinRange, MaxRange;
+	CEditRangeIntWidget *m_editWidget;
+	sint32 m_minRange, m_maxRange;
 }; /* CIntGradientWrapper */
 
 /// COLOR GRADIENT EDITION INTERFACE
@@ -385,10 +355,10 @@ public:
 
 	virtual QWidget *newDialog(IPSWrapper<NLMISC::CRGBA> *wrapper, QWidget *parent)
 	{
-		editWidget = new CColorEditWidget(parent);
-		editWidget->setWrapper(wrapper);
-		connect(editWidget, SIGNAL(colorChanged(NLMISC::CRGBA)), this, SIGNAL(itemChanged()));
-		return editWidget;
+		m_editWidget = new CColorEditWidget(parent);
+		m_editWidget->setWrapper(wrapper);
+		connect(m_editWidget, SIGNAL(colorChanged(NLMISC::CRGBA)), this, SIGNAL(itemChanged()));
+		return m_editWidget;
 	}
 
 	virtual QString getTitleDialog() const
@@ -398,24 +368,24 @@ public:
 
 	virtual void setCurrentIndex(uint index)
 	{
-		_CurrentEditedIndex = index;
-		editWidget->updateUi();
+		m_currentEditedIndex = index;
+		m_editWidget->updateUi();
 	}
 
 	virtual void displayValue(uint index, QListWidgetItem *item)
 	{
-		NLMISC::CRGBA color = Scheme->getValue(index);
+		NLMISC::CRGBA color = m_scheme->getValue(index);
 		item->setText(QString("RGBA(%1,%2,%3,%4)").arg(color.R).arg(color.G).arg(color.B).arg(color.A));
 		QPixmap pixmap(QSize(16, 16));
 		QPainter painter(&pixmap);
 		painter.setRenderHint(QPainter::Antialiasing, true);
 		painter.setBrush(QBrush(QColor(color.R, color.G, color.B)));
 		painter.setPen(QPen(Qt::black, 1, Qt::SolidLine));
-		painter.drawRect(0, 0, pixmap.width() , pixmap.height());
+		painter.drawRect(0, 0, pixmap.width(), pixmap.height());
 		item->setIcon(QIcon(pixmap));
 	}
 
-	CColorEditWidget *editWidget;
+	CColorEditWidget *m_editWidget;
 }; /* CColorGradientWrapper  */
 
 /// PLANE BASIS GRADIENT EDITION INTERFACE
@@ -428,9 +398,9 @@ public:
 
 	virtual QWidget *newDialog(IPSWrapper<NL3D::CPlaneBasis> *wrapper, QWidget *parent)
 	{
-		editWidget = new CBasicEditWidget(parent);
-		editWidget->setWrapper(wrapper);
-		return editWidget;
+		m_editWidget = new CBasicEditWidget(parent);
+		m_editWidget->setWrapper(wrapper);
+		return m_editWidget;
 	}
 	virtual QString getTitleDialog() const
 	{
@@ -438,8 +408,8 @@ public:
 	}
 	virtual void setCurrentIndex(uint index)
 	{
-		_CurrentEditedIndex = index;
-		editWidget->updateUi();
+		m_currentEditedIndex = index;
+		m_editWidget->updateUi();
 	}
 
 	virtual void displayValue(uint index, QListWidgetItem *item)
@@ -447,7 +417,7 @@ public:
 		item->setText(QString("Plane %1").arg(index));
 	}
 
-	CBasicEditWidget *editWidget;
+	CBasicEditWidget *m_editWidget;
 }; /* class CPlaneBasisGradientWrapper */
 
 /**
@@ -460,12 +430,12 @@ class CTextureGradientInterface : public IValueGradientClient
 public:
 	CTextureGradientInterface(QObject *parent = 0): IValueGradientClient(parent) {}
 
-	CTextureGradientInterface(NL3D::CPSTexturedParticle *tp, CWorkspaceNode *ownerNode): Node(ownerNode), TP(tp) {}
+	CTextureGradientInterface(NL3D::CPSTexturedParticle *tp, CWorkspaceNode *ownerNode): m_node(ownerNode), m_tp(tp) {}
 
 	~CTextureGradientInterface() {}
 
-	CWorkspaceNode *Node;
-	NL3D::CPSTexturedParticle *TP;
+	CWorkspaceNode *m_node;
+	NL3D::CPSTexturedParticle *m_tp;
 
 	// all method inherited from IValueGradientClient
 	virtual QWidget *createDialog(QWidget *parent);
@@ -489,9 +459,9 @@ public:
 		uint32 Index;
 		NL3D::ITexture *get(void);
 		void set(NL3D::ITexture *t);
-	} _TextureWrapper;
+	} m_textureWrapper;
 
-	CParticleTextureWidget *editWidget;
+	CParticleTextureWidget *m_editWidget;
 };
 
 } /* namespace NLQT */

@@ -53,12 +53,15 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Add</string>
+       </property>
        <property name="text">
         <string/>
        </property>
        <property name="icon">
         <iconset resource="core.qrc">
-         <normaloff>:/core/images/list-add.png</normaloff>:/core/images/list-add.png</iconset>
+         <normaloff>:/core/icons/ic_nel_add_item.png</normaloff>:/core/icons/ic_nel_add_item.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -79,12 +82,15 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Delete</string>
+       </property>
        <property name="text">
         <string/>
        </property>
        <property name="icon">
         <iconset resource="core.qrc">
-         <normaloff>:/core/images/list-remove.png</normaloff>:/core/images/list-remove.png</iconset>
+         <normaloff>:/core/icons/ic_nel_delete_item.png</normaloff>:/core/icons/ic_nel_delete_item.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -105,12 +111,15 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Up</string>
+       </property>
        <property name="text">
         <string/>
        </property>
        <property name="icon">
         <iconset resource="core.qrc">
-         <normaloff>:/core/images/go-up.png</normaloff>:/core/images/go-up.png</iconset>
+         <normaloff>:/core/icons/ic_nel_up_item.png</normaloff>:/core/icons/ic_nel_up_item.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -131,12 +140,38 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Down</string>
+       </property>
        <property name="text">
         <string/>
        </property>
        <property name="icon">
         <iconset resource="core.qrc">
-         <normaloff>:/core/images/go-down.png</normaloff>:/core/images/go-down.png</iconset>
+         <normaloff>:/core/icons/ic_nel_down_item.png</normaloff>:/core/icons/ic_nel_down_item.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="resetToolButton">
+       <property name="toolTip">
+        <string>Reset</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="core.qrc">
+         <normaloff>:/core/icons/ic_nel_reset_all.png</normaloff>:/core/icons/ic_nel_reset_all.png</iconset>
        </property>
        <property name="iconSize">
         <size>

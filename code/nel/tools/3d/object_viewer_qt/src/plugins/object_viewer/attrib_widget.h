@@ -109,6 +109,7 @@ private Q_SLOTS:
 	virtual void setCurrentSrc(int index);
 	virtual void setUserIndex();
 	virtual void changeUseScheme(int index);
+	virtual void openSchemeBankDialog();
 
 protected:
 

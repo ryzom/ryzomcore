@@ -1,23 +1,23 @@
-/*
-    Object Viewer Qt
-    Copyright (C) 2010 Dzmitry Kamiahin <dnk-88@tut.by>
+// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
-
+// Projects include
 #include "stdpch.h"
+#include "particle_texture_widget.h"
 #include "value_gradient_dialog.h"
 
 // Qt include
@@ -25,11 +25,8 @@
 
 // NeL includes
 #include <nel/3d/texture_grouped.h>
-#include "nel/3d/texture_file.h"
-#include "nel/misc/path.h"
-
-// Projects include
-#include "particle_texture_widget.h"
+#include <nel/3d/texture_file.h>
+#include <nel/misc/path.h>
 
 namespace NLQT
 {
@@ -41,246 +38,178 @@ CGradientDialog::CGradientDialog(CWorkspaceNode *ownerNode,
 								 uint minSize,
 								 QWidget *parent)
 	: QDialog(parent),
-	  _MinSize(minSize),
-	  _CanTuneNbStages(canTuneNbStages),
-	  _ClientInterface(clientInterface),
-	  _DestroyClientInterface(destroyClientInterface),
-	  _Node(ownerNode)
+	  m_minSize(minSize),
+	  m_canTuneNbStages(canTuneNbStages),
+	  m_clientInterface(clientInterface),
+	  m_destroyClientInterface(destroyClientInterface),
+	  m_node(ownerNode)
 {
-	nlassert(_ClientInterface);
+	nlassert(m_clientInterface);
 
-	resize(490, 210);
-	_gridLayout = new QGridLayout(this);
-	_listWidget = new QListWidget(this);
-	QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-	sizePolicy.setHorizontalStretch(0);
-	sizePolicy.setVerticalStretch(0);
-	sizePolicy.setHeightForWidth(_listWidget->sizePolicy().hasHeightForWidth());
-	_listWidget->setSizePolicy(sizePolicy);
-	//_listWidget->setIconSize(QSize(16, 16));
-	_listWidget->setMaximumSize(QSize(185, 16777215));
-	_gridLayout->addWidget(_listWidget, 0, 0, 9, 1);
+	m_ui.setupUi(this);
+	setWindowTitle(m_clientInterface->getTitleDialog());
+	QWidget *widget = m_clientInterface->createDialog(this);
+	m_ui.gridLayout->addWidget(widget, 4, 0, 1, 2);
 
-	_horizontalLayout = new QHBoxLayout();
-	_addPushButton = new QPushButton(this);
-	QSizePolicy sizePolicy1(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	sizePolicy1.setHorizontalStretch(0);
-	sizePolicy1.setVerticalStretch(0);
-	sizePolicy1.setHeightForWidth(_addPushButton->sizePolicy().hasHeightForWidth());
-	_addPushButton->setSizePolicy(sizePolicy1);
-	_addPushButton->setMaximumSize(QSize(36, 36));
-	QIcon icon;
-	icon.addFile(QString::fromUtf8(":/images/list-add.png"), QSize(), QIcon::Normal, QIcon::Off);
-	_addPushButton->setIcon(icon);
-	_addPushButton->setIconSize(QSize(24, 24));
-	_horizontalLayout->addWidget(_addPushButton);
-
-	_removePushButton = new QPushButton(this);
-	sizePolicy1.setHeightForWidth(_removePushButton->sizePolicy().hasHeightForWidth());
-	_removePushButton->setSizePolicy(sizePolicy1);
-	_removePushButton->setMinimumSize(QSize(0, 0));
-	_removePushButton->setMaximumSize(QSize(36, 36));
-	QIcon icon1;
-	icon1.addFile(QString::fromUtf8(":/images/list-remove.png"), QSize(), QIcon::Normal, QIcon::Off);
-	_removePushButton->setIcon(icon1);
-	_removePushButton->setIconSize(QSize(24, 24));
-	_horizontalLayout->addWidget(_removePushButton);
-
-	_upPushButton = new QPushButton(this);
-	sizePolicy1.setHeightForWidth(_upPushButton->sizePolicy().hasHeightForWidth());
-	_upPushButton->setSizePolicy(sizePolicy1);
-	_upPushButton->setMaximumSize(QSize(36, 36));
-	QIcon icon2;
-	icon2.addFile(QString::fromUtf8(":/images/go-up.png"), QSize(), QIcon::Normal, QIcon::Off);
-	_upPushButton->setIcon(icon2);
-	_upPushButton->setIconSize(QSize(24, 24));
-	_horizontalLayout->addWidget(_upPushButton);
-
-	_downPushButton = new QPushButton(this);
-	sizePolicy1.setHeightForWidth(_downPushButton->sizePolicy().hasHeightForWidth());
-	_downPushButton->setSizePolicy(sizePolicy1);
-	_downPushButton->setMaximumSize(QSize(36, 36));
-	QIcon icon3;
-	icon3.addFile(QString::fromUtf8(":/images/go-down.png"), QSize(), QIcon::Normal, QIcon::Off);
-	_downPushButton->setIcon(icon3);
-	_downPushButton->setIconSize(QSize(24, 24));
-	_horizontalLayout->addWidget(_downPushButton);
-
-	_horizontalSpacer = new QSpacerItem(208, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-	_horizontalLayout->addItem(_horizontalSpacer);
-	_gridLayout->addLayout(_horizontalLayout, 0, 1, 1, 2);
-
-	_label = new QLabel(this);
-	_gridLayout->addWidget(_label, 1, 1, 1, 1);
-
-	_nbStepWidget = new NLQT::CEditRangeUIntWidget(this);
-	_gridLayout->addWidget(_nbStepWidget, 2, 1, 1, 2);
-
-	_verticalSpacer = new QSpacerItem(20, 85, QSizePolicy::Minimum, QSizePolicy::Expanding);
-	_gridLayout->addItem(_verticalSpacer, 3, 2, 1, 1);
-
-	editWidget = _ClientInterface->createDialog(this);
-	_gridLayout->addWidget(editWidget, 4, 1, 1, 2);
-
-	setWindowTitle(_ClientInterface->getTitleDialog());
-	_label->setText(tr("Num samples:"));
-
-	if (canTuneNbStages)
+	if (m_canTuneNbStages)
 	{
-		_NbStepWrapper.OwnerNode = _Node;
-		_NbStepWrapper.I = _ClientInterface;
-		_nbStepWidget->setRange(1, 255);
-		_nbStepWidget->enableLowerBound(0, true);
-		_nbStepWidget->setWrapper(&_NbStepWrapper);
-		_nbStepWidget->updateUi();
+		m_ui.nbStepWidget->setRange(1, 255);
+		m_ui.nbStepWidget->enableLowerBound(0, true);
+		m_ui.nbStepWidget->setValue(m_clientInterface->getNbSteps());
+		connect(m_ui.nbStepWidget, SIGNAL(valueChanged(uint32)), this, SLOT(setNbSteps(uint32)));
 	}
 	else
 	{
-		_nbStepWidget->hide();
-		_label->hide();
+		m_ui.nbStepWidget->hide();
+		m_ui.label->hide();
 	}
 
-	connect(_addPushButton, SIGNAL(clicked()), this, SLOT(addValue()));
-	connect(_removePushButton, SIGNAL(clicked()), this, SLOT(removeValue()));
-	connect(_upPushButton, SIGNAL(clicked()), this, SLOT(valueUp()));
-	connect(_downPushButton, SIGNAL(clicked()), this, SLOT(valueDown()));
-	connect(_listWidget, SIGNAL(currentRowChanged(int)), this, SLOT(changeCurrentRow(int)));
+	connect(m_ui.addButton, SIGNAL(clicked()), this, SLOT(addValue()));
+	connect(m_ui.insButton, SIGNAL(clicked()), this, SLOT(insertValue()));
+	connect(m_ui.delButton, SIGNAL(clicked()), this, SLOT(removeValue()));
+	connect(m_ui.upButton, SIGNAL(clicked()), this, SLOT(valueUp()));
+	connect(m_ui.downButton, SIGNAL(clicked()), this, SLOT(valueDown()));
+	connect(m_ui.listWidget, SIGNAL(currentRowChanged(int)), this, SLOT(changeCurrentRow(int)));
 	connect(clientInterface, SIGNAL(itemChanged()), this, SLOT(updateItem()));
 
-	_Size = _ClientInterface->getSchemeSize();
-	for (uint k = 0; k < _Size; ++k)
+	m_size = m_clientInterface->getSchemeSize();
+	for (uint k = 0; k < m_size; ++k)
 	{
 		QListWidgetItem *item = new QListWidgetItem();
-		_ClientInterface->displayValue(k, item);
-		_listWidget->addItem(item);
+		m_clientInterface->displayValue(k, item);
+		m_ui.listWidget->addItem(item);
 	}
-	_removePushButton->setEnabled(_Size > _MinSize ? true : false);
-	_listWidget->setCurrentRow(0);
+	m_ui.delButton->setEnabled(m_size > m_minSize ? true : false);
+	m_ui.listWidget->setCurrentRow(0);
 }
 
 CGradientDialog::~CGradientDialog()
 {
-	if (_DestroyClientInterface) delete _ClientInterface;
+	if (m_destroyClientInterface) delete m_clientInterface;
 }
 
 void CGradientDialog::addValue()
 {
-	nlassert(_ClientInterface);
-	if (!_ClientInterface->modifyGradient(IValueGradientClient::Add, 0)) return;
-	++_Size;
+	nlassert(m_clientInterface);
+	if (!m_clientInterface->modifyGradient(IValueGradientClient::Add, 0)) return;
+	++m_size;
 	QListWidgetItem *item = new QListWidgetItem();
-	_ClientInterface->displayValue(_Size - 1, item);
-	_listWidget->addItem(item);
+	m_clientInterface->displayValue(m_size - 1, item);
+	m_ui.listWidget->addItem(item);
 
-	_removePushButton->setEnabled(true);
+	m_ui.delButton->setEnabled(true);
 
-	_listWidget->setCurrentRow(_Size - 1);
+	m_ui.listWidget->setCurrentRow(m_size - 1);
 }
 
 void CGradientDialog::insertValue()
 {
-	nlassert(_ClientInterface);
-	int oldIndex = _listWidget->currentRow();
-	if (!_ClientInterface->modifyGradient(IValueGradientClient::Insert, oldIndex)) return;
-	++_Size;
+	nlassert(m_clientInterface);
+	int oldIndex = m_ui.listWidget->currentRow();
+	if (!m_clientInterface->modifyGradient(IValueGradientClient::Insert, oldIndex)) return;
+	++m_size;
 	QListWidgetItem *item = new QListWidgetItem();
-	_ClientInterface->displayValue(_Size - 1, item);
-	_listWidget->insertItem(oldIndex, item);
-	_listWidget->setCurrentRow(oldIndex);
+	m_clientInterface->displayValue(m_size - 1, item);
+	m_ui.listWidget->insertItem(oldIndex, item);
+	m_ui.listWidget->setCurrentRow(oldIndex);
+	m_ui.delButton->setEnabled(true);
 }
 
 void CGradientDialog::removeValue()
 {
-	nlassert(_ClientInterface);
-
-	int oldIndex = _listWidget->currentRow();
+	nlassert(m_clientInterface);
+	int oldIndex = m_ui.listWidget->currentRow();
 	if (oldIndex == -1)
 		return;
 
 	if (uint(oldIndex) == 0)
-		_listWidget->setCurrentRow(oldIndex + 1);
+		m_ui.listWidget->setCurrentRow(oldIndex + 1);
 	else
-		_listWidget->setCurrentRow(oldIndex - 1);
+		m_ui.listWidget->setCurrentRow(oldIndex - 1);
 
-	if (!_ClientInterface->modifyGradient(IValueGradientClient::Delete, oldIndex))
+	if (!m_clientInterface->modifyGradient(IValueGradientClient::Delete, oldIndex))
 	{
-		_listWidget->setCurrentRow(oldIndex);
+		m_ui.listWidget->setCurrentRow(oldIndex);
 		return;
 	}
 
-	--_Size;
+	--m_size;
+	if (m_size <= m_minSize)
+		m_ui.delButton->setEnabled(false);
 
-	if (_Size <= _MinSize)
-		_removePushButton->setEnabled(false);
-
-	QListWidgetItem *removeItem = _listWidget->takeItem(oldIndex);
+	QListWidgetItem *removeItem = m_ui.listWidget->takeItem(oldIndex);
 	if (!removeItem)
 		delete removeItem;
 }
 
 void CGradientDialog::valueDown()
 {
-	nlassert(_ClientInterface);
-	int currentRow = _listWidget->currentRow();
-	if (!((currentRow == _listWidget->count()-1) || (currentRow == -1)))
+	nlassert(m_clientInterface);
+	int currentRow = m_ui.listWidget->currentRow();
+	if (!((currentRow == m_ui.listWidget->count()-1) || (currentRow == -1)))
 	{
-		if (!_ClientInterface->modifyGradient(IValueGradientClient::Down, currentRow)) return;
-		QListWidgetItem *item = _listWidget->takeItem(currentRow);
-		_listWidget->insertItem(++currentRow, item);
-		_listWidget->setCurrentRow(currentRow);
+		if (!m_clientInterface->modifyGradient(IValueGradientClient::Down, currentRow)) return;
+		QListWidgetItem *item = m_ui.listWidget->takeItem(currentRow);
+		m_ui.listWidget->insertItem(++currentRow, item);
+		m_ui.listWidget->setCurrentRow(currentRow);
 	}
-	_listWidget->setCurrentRow(currentRow);
+	m_ui.listWidget->setCurrentRow(currentRow);
 }
 
 void CGradientDialog::valueUp()
 {
-	nlassert(_ClientInterface);
-	int currentRow = _listWidget->currentRow();
+	nlassert(m_clientInterface);
+	int currentRow = m_ui.listWidget->currentRow();
 	if (!((currentRow == 0) || (currentRow == -1)))
 	{
-		if (!_ClientInterface->modifyGradient(IValueGradientClient::Up, currentRow)) return;
-		QListWidgetItem *item = _listWidget->takeItem(currentRow);
-		_listWidget->insertItem(--currentRow, item);
-		_listWidget->setCurrentRow(currentRow);
+		if (!m_clientInterface->modifyGradient(IValueGradientClient::Up, currentRow)) return;
+		QListWidgetItem *item = m_ui.listWidget->takeItem(currentRow);
+		m_ui.listWidget->insertItem(--currentRow, item);
+		m_ui.listWidget->setCurrentRow(currentRow);
 	}
-	_listWidget->setCurrentRow(currentRow);
+	m_ui.listWidget->setCurrentRow(currentRow);
 }
 
 void CGradientDialog::changeCurrentRow(int currentRow)
 {
-	_ClientInterface->setCurrentIndex(currentRow);
+	m_clientInterface->setCurrentIndex(currentRow);
 }
 
 void CGradientDialog::updateItem()
 {
-	_ClientInterface->displayValue(_listWidget->currentRow(), _listWidget->currentItem());
+	m_clientInterface->displayValue(m_ui.listWidget->currentRow(), m_ui.listWidget->currentItem());
+}
+
+void CGradientDialog::setNbSteps(uint32 nbSteps)
+{
+	m_clientInterface->setNbSteps(nbSteps);
 }
 
 QWidget *CTextureGradientInterface::createDialog(QWidget *parent)
 {
-	editWidget = new CParticleTextureWidget();
+	m_editWidget = new CParticleTextureWidget();
 
-	_TextureWrapper.P = TP;
-	_TextureWrapper.Index = 0;
-	_TextureWrapper.OwnerNode = Node;
-	editWidget->setWrapper(&_TextureWrapper);
-	connect(editWidget, SIGNAL(textureChanged(QString)), this, SIGNAL(itemChanged()));
-	return editWidget;
+	m_textureWrapper.P = m_tp;
+	m_textureWrapper.Index = 0;
+	m_textureWrapper.OwnerNode = m_node;
+	m_editWidget->setWrapper(&m_textureWrapper);
+	connect(m_editWidget, SIGNAL(textureChanged(QString)), this, SIGNAL(itemChanged()));
+	return m_editWidget;
 }
 
 bool CTextureGradientInterface::modifyGradient(TAction action, uint index)
 {
-	nlassert(TP);
-	nlassert(TP->getTextureGroup());
+	nlassert(m_tp);
+	nlassert(m_tp->getTextureGroup());
 
-	NLMISC::CSmartPtr<NL3D::ITexture> tex = TP->getTextureGroup()->getTexture(index);
+	NLMISC::CSmartPtr<NL3D::ITexture> tex = m_tp->getTextureGroup()->getTexture(index);
 	std::string texName = (static_cast<NL3D::CTextureFile *>(tex.getPtr()))->getFileName().c_str();
 	if (texName.empty())
 		return false;
 
 	std::vector< NLMISC::CSmartPtr<NL3D::ITexture> > textureList;
-	textureList.resize(TP->getTextureGroup()->getNbTextures());
-	TP->getTextureGroup()->getTextures(&textureList[0]);
+	textureList.resize(m_tp->getTextureGroup()->getNbTextures());
+	m_tp->getTextureGroup()->getTextures(&textureList[0]);
 
 	switch(action)
 	{
@@ -307,14 +236,14 @@ bool CTextureGradientInterface::modifyGradient(TAction action, uint index)
 		return false;
 	}
 
-	TP->getTextureGroup()->setTextures(&textureList[0], (uint)textureList.size());
+	m_tp->getTextureGroup()->setTextures(&textureList[0], (uint)textureList.size());
 	return true;
 }
 
 void CTextureGradientInterface::displayValue(uint index, QListWidgetItem *item)
 {
 	QPixmap pixmap;
-	NLMISC::CSmartPtr<NL3D::ITexture> tex = TP->getTextureGroup()->getTexture(index);
+	NLMISC::CSmartPtr<NL3D::ITexture> tex = m_tp->getTextureGroup()->getTexture(index);
 
 	if (dynamic_cast<NL3D::CTextureFile *>(tex.getPtr()))
 	{
@@ -332,14 +261,14 @@ void CTextureGradientInterface::displayValue(uint index, QListWidgetItem *item)
 
 void CTextureGradientInterface::setCurrentIndex(uint index)
 {
-	_TextureWrapper.Index = index;
-	editWidget->updateUi();
+	m_textureWrapper.Index = index;
+	m_editWidget->updateUi();
 }
 
 uint32 CTextureGradientInterface::getSchemeSize(void) const
 {
-	nlassert(TP->getTextureGroup());
-	return TP->getTextureGroup()->getNbTextures();
+	nlassert(m_tp->getTextureGroup());
+	return m_tp->getTextureGroup()->getNbTextures();
 }
 uint32 CTextureGradientInterface::getNbSteps(void) const
 {
@@ -388,7 +317,6 @@ void CTextureGradientInterface::CTextureWrapper::set(NL3D::ITexture *t)
 	P->getTextureGroup()->getTextures(&textureList[0]);
 
 	textureList[Index] = t;
-
 
 	P->getTextureGroup()->setTextures(&textureList[0], (uint)textureList.size());
 }

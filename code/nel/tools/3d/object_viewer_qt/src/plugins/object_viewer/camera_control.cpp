@@ -33,6 +33,7 @@
 
 // Project includes
 #include "modules.h"
+#include "object_viewer_constants.h"
 
 static int camId = 0;
 
@@ -106,11 +107,13 @@ CCameraControl::CCameraControl(QWidget *parent)
 {
 	_camToolBar = new QToolBar(tr("CameraControl"), parent);
 
-	_fpsAction = _camToolBar->addAction(tr("Fly"));
+	_fpsAction = _camToolBar->addAction(tr("Camera frs"));
+	_fpsAction->setIcon(QIcon(Constants::ICON_CAMERA_FPS));
 	_fpsAction->setStatusTip(tr("Set firstPerson camera mode"));
 	_fpsAction->setCheckable(true);
 
-	_edit3dAction = _camToolBar->addAction(tr("Edit"));
+	_edit3dAction = _camToolBar->addAction(tr("Camera 3dEdit"));
+	_edit3dAction->setIcon(QIcon(Constants::ICON_CAMERA_3DEDIT));
 	_edit3dAction->setStatusTip(tr("Set edit3d camera mode"));
 	_edit3dAction->setCheckable(true);
 
@@ -160,12 +163,12 @@ CCameraControl::CCameraControl(QWidget *parent)
 
 	_camToolBar->addSeparator();
 	_addCamAction = _camToolBar->addAction(tr("Create camera"));
-	_addCamAction->setIcon(QIcon(":/images/cam_add.png"));
+	_addCamAction->setIcon(QIcon(Constants::ICON_CAMERA_ADD));
 	_addCamAction->setStatusTip(tr("Create new camera"));
 	connect(_addCamAction, SIGNAL(triggered()), this, SLOT(addCamera()));
 
 	_delCamAction = _camToolBar->addAction(tr("Delete camera"));
-	_delCamAction->setIcon(QIcon(":/images/cam_del.png"));
+	_delCamAction->setIcon(QIcon(Constants::ICON_CAMERA_DEL));
 	_delCamAction->setStatusTip(tr("Delete current camera"));
 	connect(_delCamAction, SIGNAL(triggered()), this, SLOT(delCamera()));
 
@@ -176,6 +179,7 @@ CCameraControl::CCameraControl(QWidget *parent)
 
 	_camToolBar->addSeparator();
 	_resetCamAction = _camToolBar->addAction(tr("Reset camera"));
+	_resetCamAction->setIcon(QIcon(Constants::ICON_RESET_CAMERA));
 	_resetCamAction->setStatusTip(tr("Reset current camera"));
 	//_resetCamAction->setShortcut(tr("Ctrl+R"));
 	connect(_resetCamAction, SIGNAL(triggered()), this, SLOT(resetCamera()));

@@ -47,6 +47,8 @@ class CFontGenerator;
 
 namespace NLQT
 {
+class CSchemeManager;
+
 /**
 @class CParticleEditor
 @brief The main class of the particles editor.
@@ -212,6 +214,11 @@ public:
 	{
 		return _FontGen;
 	}
+	
+	CSchemeManager *getSchemeManager () const
+	{
+		return _SchemeManager;
+	}
 
 private:
 	// Check if a node is inserted in the running list (it may be paused)
@@ -256,6 +263,8 @@ private:
 
 	// Font generator
 	NL3D::CFontGenerator *_FontGen;
+
+	CSchemeManager *_SchemeManager;
 
 }; /* class CParticleEditor */
 

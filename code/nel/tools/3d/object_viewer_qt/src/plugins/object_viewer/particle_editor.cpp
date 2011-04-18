@@ -28,13 +28,14 @@
 #include <nel/3d/particle_system_shape.h>
 
 // Project includes
+#include "scheme_manager.h"
 #include "modules.h"
 
 namespace NLQT
 {
 
 CParticleEditor::CParticleEditor(void)
-	: _ActiveNode(NULL),
+	: _ActiveNode(0),
 	  _State(State::Stopped),
 	  _Speed(1.0f),
 	  _AutoRepeat(false),
@@ -42,11 +43,12 @@ CParticleEditor::CParticleEditor(void)
 	  _DisplayHelpers(false),
 	  _AutoUpdateBBox(false),
 	  _EmptyBBox(true),
-	  _PW(NULL),
-	  _Driver(NULL),
-	  _Scene(NULL),
-	  _FontManager(NULL),
-	  _FontGen(NULL)
+	  _PW(0),
+	  _Driver(0),
+	  _Scene(0),
+	  _FontManager(0),
+	  _FontGen(0),
+	  _SchemeManager(0)
 {
 }
 
@@ -63,6 +65,8 @@ void CParticleEditor::init()
 	_FontManager = textContext->getTextContext().getFontManager();
 	_FontGen = textContext->getTextContext().getFontGenerator();
 	NL3D::CParticleSystem::setSerializeIdentifierFlag(true);
+
+	_SchemeManager = new CSchemeManager();
 }
 
 void CParticleEditor::release()
@@ -89,9 +93,9 @@ void CParticleEditor::setActiveNode(CWorkspaceNode *node)
 
 NL3D::CParticleSystemModel *CParticleEditor::getModelFromPS(NL3D::CParticleSystem *ps) const
 {
-	if (!ps) return	NULL;
+	if (!ps) return	0;
 	CWorkspaceNode *node = _PW->getNodeFromPS(ps);
-	if (!node) return NULL;
+	if (!node) return 0;
 	return node->getPSModel();
 }
 
@@ -113,7 +117,7 @@ void CParticleEditor::loadWorkspace(const std::string &fullPath)
 	}
 
 	// try to load each ps
-	CWorkspaceNode *firstLoadedNode = NULL;
+	CWorkspaceNode *firstLoadedNode = 0;
 	TPWNodeItr itr = newPW->getNodeList().begin();
 	while(itr != newPW->getNodeList().end())
 	{
@@ -181,9 +185,9 @@ void CParticleEditor::saveWorkspaceContent()
 
 void CParticleEditor::closeWorkspace()
 {
-	setActiveNode(NULL);
+	setActiveNode(0);
 	delete _PW;
-	_PW = NULL;
+	_PW = 0;
 }
 
 void CParticleEditor::start()
@@ -353,7 +357,7 @@ void CParticleEditor::stop()
 void CParticleEditor::update()
 {
 	if (!_ActiveNode) return;
-	if (_PW == NULL) return;
+	if (_PW == 0) return;
 
 	NL3D::CParticleSystem *currPS = _ActiveNode->getPSPointer();
 

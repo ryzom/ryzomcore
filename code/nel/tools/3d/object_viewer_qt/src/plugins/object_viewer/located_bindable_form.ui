@@ -60,6 +60,12 @@
        <string/>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
+       <property name="margin">
+        <number>6</number>
+       </property>
+       <property name="spacing">
+        <number>3</number>
+       </property>
        <item row="0" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
@@ -174,6 +180,12 @@
        <string/>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
+       <property name="margin">
+        <number>6</number>
+       </property>
+       <property name="spacing">
+        <number>3</number>
+       </property>
        <item row="0" column="0">
         <widget class="QCheckBox" name="independentSizeCheckBox">
          <property name="text">
@@ -256,6 +268,12 @@
        <string/>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_7">
+       <property name="margin">
+        <number>6</number>
+       </property>
+       <property name="spacing">
+        <number>3</number>
+       </property>
        <item row="0" column="0">
         <widget class="NLQT::CAttribPlaneBasisWidget" name="particlePlaneBasicWidget">
          <property name="title">
@@ -351,6 +369,12 @@
        <string/>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_6">
+       <property name="margin">
+        <number>6</number>
+       </property>
+       <property name="spacing">
+        <number>3</number>
+       </property>
        <item row="0" column="0">
         <widget class="QCheckBox" name="alignCheckBox">
          <property name="text">
@@ -411,6 +435,12 @@
        <string/>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_8">
+       <property name="margin">
+        <number>6</number>
+       </property>
+       <property name="spacing">
+        <number>3</number>
+       </property>
        <item row="0" column="0">
         <widget class="QLabel" name="label_6">
          <property name="text">
@@ -467,6 +497,12 @@
        <string/>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_9">
+       <property name="margin">
+        <number>6</number>
+       </property>
+       <property name="spacing">
+        <number>3</number>
+       </property>
        <item row="0" column="0">
         <widget class="QLabel" name="label_9">
          <property name="text">
@@ -533,6 +569,12 @@
        <string/>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_11">
+       <property name="margin">
+        <number>6</number>
+       </property>
+       <property name="spacing">
+        <number>3</number>
+       </property>
        <item row="0" column="0">
         <widget class="QLabel" name="label">
          <property name="text">
@@ -579,6 +621,12 @@
           <string/>
          </property>
          <layout class="QGridLayout" name="gridLayout">
+          <property name="margin">
+           <number>6</number>
+          </property>
+          <property name="spacing">
+           <number>3</number>
+          </property>
           <item row="0" column="0">
            <widget class="QCheckBox" name="constantLengthCheckBox">
             <property name="toolTip">
@@ -670,6 +718,12 @@
        <string/>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_12">
+       <property name="margin">
+        <number>6</number>
+       </property>
+       <property name="spacing">
+        <number>3</number>
+       </property>
        <item row="0" column="0">
         <widget class="NLQT::CMeshWidget" name="meshWidget" native="true"/>
        </item>

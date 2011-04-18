@@ -47,6 +47,7 @@ CWorkspacePage::CWorkspacePage(CParticleTreeModel *treeModel, QWidget *parent)
 	connect(_ui.insertToolButton, SIGNAL(clicked()), this, SLOT(insertPS()));
 	connect(_ui.createToolButton, SIGNAL(clicked()), this, SLOT(createPS()));
 	connect(_ui.resetToolButton, SIGNAL(clicked()), this, SLOT(removeAllPS()));
+	connect(_ui.unloadToolButton, SIGNAL(clicked()), this, SLOT(unloadWP()));
 }
 
 CWorkspacePage::~CWorkspacePage()
@@ -84,6 +85,7 @@ void CWorkspacePage::loadWP()
 	{
 		Modules::psEdit().loadWorkspace(fileName.toStdString());
 		_treeModel->setupModelFromWorkSpace();
+		_ui.unloadToolButton->setEnabled(true);
 		_ui.saveToolButton->setEnabled(true);
 		_ui.saveAsToolButton->setEnabled(true);
 		_ui.insertToolButton->setEnabled(true);
@@ -124,7 +126,7 @@ void CWorkspacePage::insertPS()
 	{
 		// TODO: create method particle editor insertNewPS and multiple add
 		CWorkspaceNode *node = Modules::psEdit().getParticleWorkspace()->addNode(NLMISC::CFile::getFilename(fileName.toStdString()));
-		if (node != NULL)
+		if (node != 0)
 		{
 			try
 			{
@@ -193,6 +195,19 @@ void CWorkspacePage::removeAllPS()
 		Modules::psEdit().getParticleWorkspace()->removeNode((uint) 0);
 
 	_treeModel->setupModelFromWorkSpace();
+}
+
+void CWorkspacePage::unloadWP()
+{
+	//checkModifiedWorkSpace();
+	Modules::psEdit().closeWorkspace();
+	_treeModel->setupModelFromWorkSpace();
+	_ui.unloadToolButton->setEnabled(false);
+	_ui.saveToolButton->setEnabled(false);
+	_ui.saveAsToolButton->setEnabled(false);
+	_ui.insertToolButton->setEnabled(false);
+	_ui.resetToolButton->setEnabled(false);
+	_ui.createToolButton->setEnabled(false);
 }
 
 } /* namespace NLQT */

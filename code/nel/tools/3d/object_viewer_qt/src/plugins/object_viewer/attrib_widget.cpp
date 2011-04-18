@@ -39,6 +39,7 @@
 #include "value_from_emitter_dialog.h"
 #include "spinner_dialog.h"
 #include "follow_path_dialog.h"
+#include "scheme_bank_dialog.h"
 
 namespace NLQT
 {
@@ -59,6 +60,7 @@ CAttribWidget::CAttribWidget(QWidget *parent)
 	_ui.constRangeIntWidget->hide();
 	_ui.constRGBAWidget->hide();
 	_ui.schemeWidget->hide();
+	_ui.schemeEditWidget->hide();
 
 	_ui.inMultiplierWidget->setRange(0.1f, 10.1f);
 	_ui.inMultiplierWidget->enableLowerBound(0, true);;
@@ -82,6 +84,7 @@ void CAttribWidget::init()
 	connect(_ui.schemeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeCurrentScheme(int)));
 	connect(_ui.srcComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setCurrentSrc(int)));
 	connect(_ui.userParamPushButton, SIGNAL(clicked()), this, SLOT(setUserIndex()));
+	connect(_ui.bankButton, SIGNAL(clicked()), this, SLOT(openSchemeBankDialog()));
 	connect(_ui.comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeUseScheme(int)));
 }
 
@@ -181,6 +184,16 @@ void CAttribWidget::changeUseScheme(int index)
 	}
 }
 
+void CAttribWidget::openSchemeBankDialog()
+{
+	CSchemeBankDialog *dialog = new CSchemeBankDialog(this);
+	dialog->setModal(true);
+	dialog->show();
+	dialog->exec();
+	delete dialog;
+	//updateUi();
+}
+
 void CAttribWidget::inputValueUpdate(void)
 {
 	if (useScheme() && getSchemeInput().InputType == NL3D::CPSInputType::attrUserParam)
@@ -206,7 +219,7 @@ void CAttribWidget::schemeValueUpdate()
 	_ui.constRGBAWidget->hide();
 
 	_ui.schemeWidget->show();
-
+	_ui.schemeEditWidget->show();
 	sint k = getCurrentScheme();
 
 	if (k == -1) // unknow scheme ...
@@ -312,11 +325,11 @@ QDialog *CAttribFloatWidget::editScheme(void)
 	if (dynamic_cast<NL3D::CPSFloatGradient *>(scheme))
 	{
 		CFloatGradientWrapper *wrapper = new CFloatGradientWrapper;
-		wrapper->MinRange = _MinRange;
-		wrapper->MaxRange = _MaxRange;
-		wrapper->Scheme = &(((NL3D::CPSFloatGradient *) (_SchemeWrapper->getScheme()) )->_F);
+		wrapper->m_minRange = _MinRange;
+		wrapper->m_maxRange = _MaxRange;
+		wrapper->m_scheme = &(((NL3D::CPSFloatGradient *) (_SchemeWrapper->getScheme()) )->_F);
 		CGradientDialog *gd = new CGradientDialog(_Node, wrapper, true, true, 2, this);
-		wrapper->DefaultValue = 0.f;
+		wrapper->m_defaultValue = 0.f;
 		return gd;
 	}
 	if (dynamic_cast<NL3D::CPSFloatMemory *>(scheme))
@@ -423,6 +436,7 @@ sint CAttribFloatWidget::getCurrentScheme(void) const
 void CAttribFloatWidget::cstValueUpdate()
 {
 	_ui.schemeWidget->hide();
+	_ui.schemeEditWidget->hide();
 	_ui.inMultiplierWidget->setEnabled(false);
 	_ui.clampCheckBox->setEnabled(false);
 	_ui.inputLabel->setEnabled(false);
@@ -473,11 +487,11 @@ QDialog *CAttribUIntWidget::editScheme(void)
 	if (dynamic_cast<const NL3D::CPSUIntGradient *>(scheme))
 	{
 		CUIntGradientWrapper *wrapper = new CUIntGradientWrapper;
-		wrapper->MinRange = _MinRange;
-		wrapper->MaxRange = _MaxRange;
-		wrapper->Scheme = &(((NL3D::CPSUIntGradient *) (_SchemeWrapper->getScheme()) )->_F);
+		wrapper->m_minRange = _MinRange;
+		wrapper->m_maxRange = _MaxRange;
+		wrapper->m_scheme = &(((NL3D::CPSUIntGradient *) (_SchemeWrapper->getScheme()) )->_F);
 		CGradientDialog *gd = new CGradientDialog(_Node, wrapper, true, true, 2, this);
-		wrapper->DefaultValue = 0;
+		wrapper->m_defaultValue = 0;
 		return gd;
 
 	}
@@ -560,6 +574,7 @@ sint CAttribUIntWidget::getCurrentScheme(void) const
 void CAttribUIntWidget::cstValueUpdate()
 {
 	_ui.schemeWidget->hide();
+	_ui.schemeEditWidget->hide();
 	_ui.inMultiplierWidget->setEnabled(false);
 	_ui.clampCheckBox->setEnabled(false);
 	_ui.inputLabel->setEnabled(false);
@@ -610,11 +625,11 @@ QDialog *CAttribIntWidget::editScheme(void)
 	if (dynamic_cast<const NL3D::CPSIntGradient *>(scheme))
 	{
 		CIntGradientWrapper *wrapper = new CIntGradientWrapper;
-		wrapper->MinRange = _MinRange;
-		wrapper->MaxRange = _MaxRange;
-		wrapper->Scheme = &(((NL3D::CPSIntGradient *) (_SchemeWrapper->getScheme()) )->_F);
+		wrapper->m_minRange = _MinRange;
+		wrapper->m_maxRange = _MaxRange;
+		wrapper->m_scheme = &(((NL3D::CPSIntGradient *) (_SchemeWrapper->getScheme()) )->_F);
 		CGradientDialog *gd = new CGradientDialog(_Node, wrapper, true, true, 2, this);
-		wrapper->DefaultValue = 0;
+		wrapper->m_defaultValue = 0;
 		return gd;
 	}
 	if (dynamic_cast<const NL3D::CPSIntMemory *>(scheme))
@@ -695,6 +710,7 @@ sint CAttribIntWidget::getCurrentScheme(void) const
 void CAttribIntWidget::cstValueUpdate()
 {
 	_ui.schemeWidget->hide();
+	_ui.schemeEditWidget->hide();
 	_ui.inMultiplierWidget->setEnabled(false);
 	_ui.clampCheckBox->setEnabled(false);
 	_ui.inputLabel->setEnabled(false);
@@ -737,9 +753,9 @@ QDialog *CAttribRGBAWidget::editScheme(void)
 	if (dynamic_cast<const NL3D::CPSColorGradient *>(scheme))
 	{
 		CColorGradientWrapper *wrapper = new CColorGradientWrapper;
-		wrapper->Scheme = &(((NL3D::CPSColorGradient *) (_SchemeWrapper->getScheme()) )->_F);
+		wrapper->m_scheme = &(((NL3D::CPSColorGradient *) (_SchemeWrapper->getScheme()) )->_F);
 		CGradientDialog *gd = new CGradientDialog(_Node, wrapper, true, true, 2, this);
-		wrapper->DefaultValue = NLMISC::CRGBA::White;
+		wrapper->m_defaultValue = NLMISC::CRGBA::White;
 		return gd;
 	}
 	if (dynamic_cast<const NL3D::CPSColorBlenderExact *>(scheme))
@@ -827,6 +843,7 @@ sint CAttribRGBAWidget::getCurrentScheme(void) const
 void CAttribRGBAWidget::cstValueUpdate()
 {
 	_ui.schemeWidget->hide();
+	_ui.schemeEditWidget->hide();
 	_ui.inMultiplierWidget->setEnabled(false);
 	_ui.clampCheckBox->setEnabled(false);
 	_ui.inputLabel->setEnabled(false);
@@ -861,9 +878,9 @@ QDialog *CAttribPlaneBasisWidget::editScheme(void)
 	if (dynamic_cast<NL3D::CPSPlaneBasisGradient *>(scheme))
 	{
 		CPlaneBasisGradientWrapper *wrapper = new CPlaneBasisGradientWrapper;
-		wrapper->Scheme = &(((NL3D::CPSPlaneBasisGradient *) (_SchemeWrapper->getScheme()) )->_F);
+		wrapper->m_scheme = &(((NL3D::CPSPlaneBasisGradient *) (_SchemeWrapper->getScheme()) )->_F);
 		CGradientDialog *gd = new CGradientDialog(_Node, wrapper, true, true, 2, this);
-		wrapper->DefaultValue = NL3D::CPlaneBasis(NLMISC::CVector::K);
+		wrapper->m_defaultValue = NL3D::CPlaneBasis(NLMISC::CVector::K);
 		return gd;
 	}
 	if (dynamic_cast<NL3D::CPSPlaneBasisFollowSpeed *>(scheme))
@@ -964,6 +981,7 @@ sint CAttribPlaneBasisWidget::getCurrentScheme(void) const
 void CAttribPlaneBasisWidget::cstValueUpdate()
 {
 	_ui.schemeWidget->hide();
+	_ui.schemeEditWidget->hide();
 	_ui.inMultiplierWidget->setEnabled(false);
 	_ui.clampCheckBox->setEnabled(false);
 	_ui.inputLabel->setEnabled(false);

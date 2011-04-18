@@ -1,9 +1,15 @@
 <RCC>
   <qresource prefix="/core">
-    <file>images/list-add.png</file>
-    <file>images/list-remove.png</file>
-    <file>images/go-up.png</file>
-    <file>images/go-down.png</file>
+    <file>icons/ic_nel_add_item.png</file>
+    <file>icons/ic_nel_crash.png</file>
+    <file>icons/ic_nel_delete_item.png</file>
+    <file>icons/ic_nel_down_item.png</file>
+    <file>icons/ic_nel_generic_settings.png</file>
+    <file>icons/ic_nel_open.png</file>
+    <file>icons/ic_nel_path_settings.png</file>
+    <file>icons/ic_nel_pill.png</file>
+    <file>icons/ic_nel_reset_all.png</file>
+    <file>icons/ic_nel_up_item.png</file>
     <file>images/nel.png</file>
     <file>images/preferences.png</file>
   </qresource>

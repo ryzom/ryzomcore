@@ -70,7 +70,8 @@ SET(OBJECT_VIEWER_PLUGIN_HDR 	object_viewer_plugin.h
 				camera_control.h
 				graphics_settings_page.h
 				sound_settings_page.h
-				vegetable_settings_page.h)
+				vegetable_settings_page.h
+				scheme_bank_dialog.h)
 
 SET(OBJECT_VIEWER_PLUGIN_UIS    animation_form.ui
 				animation_set_form.ui
@@ -120,7 +121,9 @@ SET(OBJECT_VIEWER_PLUGIN_UIS    animation_form.ui
 				tune_timer_form.ui
 				graphics_settings_page.ui
 				sound_settings_page.ui
-				vegetable_settings_page.ui)
+				vegetable_settings_page.ui
+				scheme_bank_form.ui
+				value_gradient_form.ui)
 
 SET(OBJECT_VIEWER_PLUGIN_RCS object_viewer.qrc)
 

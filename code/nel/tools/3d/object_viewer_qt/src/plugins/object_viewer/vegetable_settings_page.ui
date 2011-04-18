@@ -156,11 +156,11 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>...</string>
+        <string/>
        </property>
        <property name="icon">
         <iconset resource="object_viewer.qrc">
-         <normaloff>:/images/list-add.png</normaloff>:/images/list-add.png</iconset>
+         <normaloff>:/icons/ic_nel_add_item.png</normaloff>:/icons/ic_nel_add_item.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -173,11 +173,11 @@
      <item>
       <widget class="QToolButton" name="removeZoneToolButton">
        <property name="text">
-        <string>...</string>
+        <string/>
        </property>
        <property name="icon">
         <iconset resource="object_viewer.qrc">
-         <normaloff>:/images/list-remove.png</normaloff>:/images/list-remove.png</iconset>
+         <normaloff>:/icons/ic_nel_delete_item.png</normaloff>:/icons/ic_nel_delete_item.png</iconset>
        </property>
       </widget>
      </item>

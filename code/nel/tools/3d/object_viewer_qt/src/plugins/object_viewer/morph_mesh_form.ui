@@ -54,7 +54,7 @@
          </property>
          <property name="icon">
           <iconset resource="object_viewer.qrc">
-           <normaloff>:/images/list-add.png</normaloff>:/images/list-add.png</iconset>
+           <normaloff>:/icons/ic_nel_add_item.png</normaloff>:/icons/ic_nel_add_item.png</iconset>
          </property>
         </widget>
        </item>
@@ -74,6 +74,10 @@
          <property name="text">
           <string>Insert</string>
          </property>
+         <property name="icon">
+          <iconset resource="object_viewer.qrc">
+           <normaloff>:/icons/ic_nel_insert_item.png</normaloff>:/icons/ic_nel_insert_item.png</iconset>
+         </property>
         </widget>
        </item>
        <item row="1" column="1">
@@ -83,7 +87,7 @@
          </property>
          <property name="icon">
           <iconset resource="object_viewer.qrc">
-           <normaloff>:/images/list-remove.png</normaloff>:/images/list-remove.png</iconset>
+           <normaloff>:/icons/ic_nel_delete_item.png</normaloff>:/icons/ic_nel_delete_item.png</iconset>
          </property>
         </widget>
        </item>
@@ -94,7 +98,7 @@
          </property>
          <property name="icon">
           <iconset resource="object_viewer.qrc">
-           <normaloff>:/images/go-up.png</normaloff>:/images/go-up.png</iconset>
+           <normaloff>:/icons/ic_nel_up_item.png</normaloff>:/icons/ic_nel_up_item.png</iconset>
          </property>
         </widget>
        </item>
@@ -105,7 +109,7 @@
          </property>
          <property name="icon">
           <iconset resource="object_viewer.qrc">
-           <normaloff>:/images/go-down.png</normaloff>:/images/go-down.png</iconset>
+           <normaloff>:/icons/ic_nel_down_item.png</normaloff>:/icons/ic_nel_down_item.png</iconset>
          </property>
         </widget>
        </item>

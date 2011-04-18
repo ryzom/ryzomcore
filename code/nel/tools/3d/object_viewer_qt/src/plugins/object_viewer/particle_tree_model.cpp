@@ -26,6 +26,7 @@
 #include "nel/3d/particle_system.h"
 
 // Project includes
+#include "object_viewer_constants.h"
 #include "modules.h"
 
 namespace NLQT
@@ -337,27 +338,27 @@ QIcon CParticleTreeModel::getIcon(const QModelIndex &index) const
 	case ItemType::Root:
 		break;
 	case ItemType::Workspace:
-		return QIcon(":/images/workspace_item.png");
+		return QIcon(Constants::ICON_WORKSPACE_ITEM_SMALL);
 	case ItemType::ParticleSystem:
-		return QIcon(":/images/particle_system_item.png");
+		return QIcon(Constants::ICON_PARTICLE_SYSTEM_SMALL);
 	case ItemType::Particle:
-		return QIcon(":/images/particle_item.png");
+		return QIcon(Constants::ICON_PARTICLE_ITEM_SMALL);
 	case ItemType::Emitter:
-		return QIcon(":/images/Emitter.bmp");
+		return QIcon(Constants::ICON_EMITTER_ITEM_SMALL);
 	case ItemType::Force:
-		return QIcon(":/images/Force.bmp");
+		return QIcon(Constants::ICON_FORCE_ITEM_SMALL);
 	case ItemType::Light:
-		return QIcon(":/images/light_item.png");
+		return QIcon(Constants::ICON_LIGHT_ITEM_SMALL);
 	case ItemType::Sound:
-		return QIcon(":/images/sound_item.png");
+		return QIcon(Constants::ICON_SOUND_ITEM_SMALL);
 	case ItemType::Located:
-		return QIcon(":/images/located_item.png");
+		return QIcon(Constants::ICON_LOCATED_ITEM_SMALL);
 	case ItemType::CollisionZone:
-		return QIcon(":/images/collision_zone_item.png");
+		return QIcon(Constants::ICON_COLLISION_ZONE_ITEM_SMALL);
 	case ItemType::LocatedInstance:
-		return QIcon(":/images/instance_item.png");
+		return QIcon(Constants::ICON_INSTANCE_ITEM_SMALL);
 	case ItemType::ParticleSystemNotLoaded:
-		return QIcon(":/images/bad_particle_system_item.png");
+		return QIcon(Constants::ICON_PARTICLE_SYSTEM_CLOSE_SMALL);
 	}
 	return QIcon();
 }

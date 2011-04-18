@@ -55,6 +55,7 @@ private Q_SLOTS:
 	void insertPS();
 	void createPS();
 	void removeAllPS();
+	void unloadWP();
 
 private:
 

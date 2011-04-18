@@ -249,14 +249,14 @@ void CMainWindow::updateStatusBar()
 void CMainWindow::createActions()
 {
 	_openAction = new QAction(tr("&Open..."), this);
-	_openAction->setIcon(QIcon(":/images/open-file.png"));
+	_openAction->setIcon(QIcon(Core::Constants::ICON_OPEN));
 	_openAction->setShortcut(QKeySequence::Open);
 	_openAction->setStatusTip(tr("Open an existing file"));
 	connect(_openAction, SIGNAL(triggered()), this, SLOT(open()));
 
 	_setBackColorAction = _GraphicsViewport->createSetBackgroundColor(this);
 	_setBackColorAction->setText(tr("Set &background color"));
-	_setBackColorAction->setIcon(QIcon(":/images/ico_bgcolor.png"));
+	_setBackColorAction->setIcon(QIcon(Constants::ICON_BGCOLOR));
 	_setBackColorAction->setStatusTip(tr("Set background color"));
 
 	_resetSceneAction = new QAction(tr("&Reset scene"), this);
@@ -308,40 +308,40 @@ void CMainWindow::createMenus()
 	toolsMenu->insertMenu(settingsAction, ovMenu);
 
 	ovMenu->insertAction(settingsAction ,_AnimationDialog->toggleViewAction());
-	_AnimationDialog->toggleViewAction()->setIcon(QIcon(":/images/anim.png"));
+	_AnimationDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_ANIM));
 
 	ovMenu->insertAction(settingsAction ,_AnimationSetDialog->toggleViewAction());
-	_AnimationSetDialog->toggleViewAction()->setIcon(QIcon(":/images/animset.png"));
+	_AnimationSetDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_ANIMSET));
 
 	ovMenu->insertAction(settingsAction ,_SlotManagerDialog->toggleViewAction());
-	_SlotManagerDialog->toggleViewAction()->setIcon(QIcon(":/images/mixer.png"));
+	_SlotManagerDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_MIXER));
 
 	ovMenu->insertAction(settingsAction ,_ParticleControlDialog->toggleViewAction());
 	_ParticleControlDialog->toggleViewAction()->setIcon(QIcon(":/images/pqrticles.png"));
 
 	ovMenu->insertAction(settingsAction ,_DayNightDialog->toggleViewAction());
-	_DayNightDialog->toggleViewAction()->setIcon(QIcon(":/images/dqynight.png"));
+	_DayNightDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_DAYNIGHT));
 
 	ovMenu->insertAction(settingsAction ,_WaterPoolDialog->toggleViewAction());
-	_WaterPoolDialog->toggleViewAction()->setIcon(QIcon(":/images/water.png"));
+	_WaterPoolDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_WATER));
 	_WaterPoolDialog->toggleViewAction()->setEnabled(false);
 
 	ovMenu->insertAction(settingsAction ,_VegetableDialog->toggleViewAction());
-	_VegetableDialog->toggleViewAction()->setIcon(QIcon(":/images/veget.png"));
+	_VegetableDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_VEGET));
 
 	ovMenu->insertAction(settingsAction ,_GlobalWindDialog->toggleViewAction());
-	_GlobalWindDialog->toggleViewAction()->setIcon(QIcon(":/images/wind.png"));
+	_GlobalWindDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_WIND));
 
 	ovMenu->insertAction(settingsAction ,_SkeletonScaleDialog->toggleViewAction());
-	_SkeletonScaleDialog->toggleViewAction()->setIcon(QIcon(":/images/ico_skelscale.png"));
+	_SkeletonScaleDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_SKELSCALE));
 
 	ovMenu->insertAction(settingsAction ,_TuneTimerDialog->toggleViewAction());
-	_TuneTimerDialog->toggleViewAction()->setIcon(QIcon(":/images/ico_framedelay.png"));
+	_TuneTimerDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_FRAMEDELAY));
 
 	ovMenu->insertAction(settingsAction ,_SunColorDialog->toggleViewAction());
 
 	ovMenu->insertAction(settingsAction ,_TuneMRMDialog->toggleViewAction());
-	_TuneMRMDialog->toggleViewAction()->setIcon(QIcon(":/images/ico_mrm_mesh.png"));
+	_TuneMRMDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_MRM_MESH));
 
 	connect(_ParticleControlDialog->toggleViewAction(), SIGNAL(triggered(bool)),
 			_ParticleWorkspaceDialog, SLOT(setVisible(bool)));

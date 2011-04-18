@@ -47,7 +47,7 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 	QCoreApplication::setOrganizationName(QLatin1String("RyzomCore"));
 
 	setObjectName(Constants::MAIN_WINDOW);
-	setWindowIcon(QIcon(Constants::ICON_NEL));
+	setWindowIcon(QIcon(Constants::ICON_PILL));
 	setWindowTitle(tr("Object Viewer Qt"));
 
 	m_pluginManager = pluginManager;
@@ -173,7 +173,7 @@ void MainWindow::addContextObject(IContext *context)
 void MainWindow::createActions()
 {
 	m_openAction = new QAction(tr("&Open..."), this);
-	m_openAction->setIcon(QIcon(":/images/open-file.png"));
+	m_openAction->setIcon(QIcon(Constants::ICON_OPEN));
 	m_openAction->setShortcut(QKeySequence::Open);
 	m_openAction->setStatusTip(tr("Open an existing file"));
 	menuManager()->registerAction(m_openAction, Constants::OPEN);

@@ -74,6 +74,7 @@ QWidget *CSearchPathsSettingsPage::createPage(QWidget *parent)
 	connect(m_ui.removeToolButton, SIGNAL(clicked()), this, SLOT(delPath()));
 	connect(m_ui.upToolButton, SIGNAL(clicked()), this, SLOT(upPath()));
 	connect(m_ui.downToolButton, SIGNAL(clicked()), this, SLOT(downPath()));
+	connect(m_ui.resetToolButton, SIGNAL(clicked()), m_ui.pathsListWidget, SLOT(clear()));
 	return m_page;
 }
 
