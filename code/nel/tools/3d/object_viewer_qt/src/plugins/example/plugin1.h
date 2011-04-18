@@ -62,7 +62,11 @@ class CExampleContext: public Core::IContext
 {
 	Q_OBJECT
 public:
-	CExampleContext(QObject *parent = 0): IContext(parent) {}
+	CExampleContext(QObject *parent = 0): IContext(parent)
+	{
+		m_simpleViewer = new CSimpleViewer();
+	}
+
 	virtual ~CExampleContext() {}
 
 	virtual QString id() const
@@ -79,8 +83,10 @@ public:
 	}
 	virtual QWidget *widget()
 	{
-		return new CSimpleViewer();
+		return m_simpleViewer;
 	}
+
+	CSimpleViewer *m_simpleViewer;
 };
 
 } // namespace Plugin
