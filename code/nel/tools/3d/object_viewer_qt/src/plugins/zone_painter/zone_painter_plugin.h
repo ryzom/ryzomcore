@@ -79,7 +79,10 @@ class CZonePainterContext: public Core::IContext
 {
 	Q_OBJECT
 public:
-	CZonePainterContext(QObject *parent = 0): IContext(parent) {}
+	CZonePainterContext(QObject *parent = 0): IContext(parent)
+	{
+		m_zonePainterMainWindow = new ZonePainterMainWindow();
+	}
 	virtual ~CZonePainterContext() {}
 
 	virtual QString id() const
@@ -96,8 +99,9 @@ public:
 	}
 	virtual QWidget *widget()
 	{
-		return new ZonePainterMainWindow();
+		return m_zonePainterMainWindow;
 	}
+	ZonePainterMainWindow *m_zonePainterMainWindow;
 };
 
 } // namespace Plugin

@@ -3,6 +3,7 @@
 
 #include "qnel_widget.h"
 #include "painter_dock_widget.h"
+#include <QtGui/QMenu>
 
 ZonePainterMainWindow::ZonePainterMainWindow(QWidget *parent) :
     QMainWindow(parent),
