@@ -5,6 +5,7 @@
 #include <QSignalMapper>
 #include <QColor>
 #include <QColorDialog>
+#include <QSettings>
 
 #include "qnel_widget.h"
 #include "painter_dock_widget.h"
@@ -20,6 +21,9 @@ ZonePainterMainWindow::ZonePainterMainWindow(QWidget *parent) :
     ui->setupUi(this);
 	m_nelWidget = new NLQT::QNLWidget(this);
 	setCentralWidget(m_nelWidget);
+
+	// Load the settings.
+	loadConfig();
 
 	// Set up dock widget(s) and toolbar.
 	m_painterDockWidget = new PainterDockWidget(this);
@@ -133,6 +137,26 @@ void ZonePainterMainWindow::setBackgroundColor() {
 										  m_nelWidget->backgroundColor().B));
 	if (color.isValid())
 		m_nelWidget->setBackgroundColor(NLMISC::CRGBA(color.red(), color.green(), color.blue()));
+}
+
+void ZonePainterMainWindow::loadConfig() {
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup("ZonePainter");
+
+	QColor color;
+	color = settings->value("BackgroundColor", QColor(80, 80, 80)).value<QColor>();
+	m_nelWidget->setBackgroundColor(NLMISC::CRGBA(color.red(), color.green(), color.blue(), color.alpha()));
+}
+
+void ZonePainterMainWindow::saveConfig() {
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup("ZonePainter" );
+
+	QColor color(m_nelWidget->backgroundColor().R, m_nelWidget->backgroundColor().G, m_nelWidget->backgroundColor().B, m_nelWidget->backgroundColor().A);
+	settings->setValue("BackgroundColor", color);
+
+	settings->endGroup();
+	settings->sync();
 }
 
 ZonePainterMainWindow::~ZonePainterMainWindow()

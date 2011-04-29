@@ -24,6 +24,9 @@ public:
     explicit ZonePainterMainWindow(QWidget *parent = 0);
     ~ZonePainterMainWindow();
 
+	void loadConfig();
+	void saveConfig();
+
 public Q_SLOTS:
 	void setToolMode(int value);
 	void setToolMode();
