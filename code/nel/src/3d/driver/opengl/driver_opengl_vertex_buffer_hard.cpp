@@ -1420,7 +1420,8 @@ void *CVertexBufferHardARB::lock()
 // ***************************************************************************
 void CVertexBufferHardARB::unlock()
 {
-	H_AUTO_OGL(CVertexBufferHardARB_unlock)
+	H_AUTO_OGL(CVertexBufferHardARB_unlock);
+
 	_VertexPtr = NULL;
 	if (_Invalid) return;
 	if (!_VertexObjectId) return;
@@ -1434,7 +1435,17 @@ void CVertexBufferHardARB::unlock()
 	#ifdef NL_DEBUG
 		_Unmapping = true;
 	#endif
-	GLboolean unmapOk = nglUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
+	GLboolean unmapOk = false;
+
+#ifdef USE_OPENGLES
+	if (_Driver->_Extensions.OESMapBuffer)
+	{
+		unmapOk = nglUnmapBufferOES(GL_ARRAY_BUFFER);
+	}
+#else
+	unmapOk = nglUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
+#endif
+
 	#ifdef NL_DEBUG
 		_Unmapping = false;
 	#endif

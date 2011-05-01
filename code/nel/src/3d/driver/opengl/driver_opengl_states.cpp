@@ -144,33 +144,62 @@ void			CDriverGLStates::forceDefaults(uint nbStages)
 	for(stage=0;stage<nbStages; stage++)
 	{
 		// disable texturing.
+#ifdef USE_OPENGLES
+		glActiveTexture(GL_TEXTURE0+stage);
+#else
 		nglActiveTextureARB(GL_TEXTURE0_ARB+stage);
+#endif
+
 		glDisable(GL_TEXTURE_2D);
+
 		if(_TextureCubeMapSupported)
+		{
+#ifdef USE_OPENGLES
+			glDisable(GL_TEXTURE_CUBE_MAP_OES);
+			glDisable(GL_TEXTURE_GEN_STR_OES);
+#else
 			glDisable(GL_TEXTURE_CUBE_MAP_ARB);
-		if(_TextureRectangleSupported)
-			glDisable(GL_TEXTURE_RECTANGLE_NV);
+#endif
+		}
+
 		_TextureMode[stage]= TextureDisabled;
 
 		// Tex gen init
 		_TexGenMode[stage] = 0;
-		glDisable( GL_TEXTURE_GEN_S );
-		glDisable( GL_TEXTURE_GEN_T );
-		glDisable( GL_TEXTURE_GEN_R );
-		glDisable( GL_TEXTURE_GEN_Q );
+
+#ifndef USE_OPENGLES
+		if(_TextureRectangleSupported)
+			glDisable(GL_TEXTURE_RECTANGLE_NV);
+
+		glDisable(GL_TEXTURE_GEN_S);
+		glDisable(GL_TEXTURE_GEN_T);
+		glDisable(GL_TEXTURE_GEN_R);
+		glDisable(GL_TEXTURE_GEN_Q);
+#endif
 	}
 
 	// ActiveTexture current texture to 0.
+#ifdef USE_OPENGLES
+	glActiveTexture(GL_TEXTURE0);
+	glClientActiveTexture(GL_TEXTURE0);
+#else
 	nglActiveTextureARB(GL_TEXTURE0_ARB);
-	_CurrentActiveTextureARB= 0;
 	nglClientActiveTextureARB(GL_TEXTURE0_ARB);
+#endif
+
+	_CurrentActiveTextureARB= 0;
 	_CurrentClientActiveTextureARB= 0;
 
 	// Depth range
 	_DepthRangeNear = 0.f;
 	_DepthRangeFar = 1.f;
 	_ZBias = 0.f;
+
+#ifdef USE_OPENGLES
+	glDepthRangef (0.f, 1.f);
+#else
 	glDepthRange (0, 1);
+#endif
 
 	// Cull order
 	_CullMode = CCW;
@@ -536,7 +565,9 @@ void			CDriverGLStates::setVertexColorLighted(bool enable)
 		if (_VertexColorLighted)
 		{
 			glEnable (GL_COLOR_MATERIAL);
+#ifndef USE_OPENGLES
 			glColorMaterial (GL_FRONT_AND_BACK, GL_DIFFUSE);
+#endif
 		}
 		else
 		{
@@ -558,9 +589,15 @@ void			CDriverGLStates::setVertexColorLighted(bool enable)
 // ***************************************************************************
 void CDriverGLStates::updateDepthRange()
 {
-	H_AUTO_OGL(CDriverGLStates_updateDepthRange)
+	H_AUTO_OGL(CDriverGLStates_updateDepthRange);
+
 	float delta = _ZBias * (_DepthRangeFar - _DepthRangeNear);
+
+#ifdef USE_OPENGLES
+	glDepthRangef(delta + _DepthRangeNear, delta + _DepthRangeFar);
+#else
 	glDepthRange(delta + _DepthRangeNear, delta + _DepthRangeFar);
+#endif
 }
 
 // ***************************************************************************
@@ -631,9 +668,13 @@ void		CDriverGLStates::setTexGenMode (uint stage, GLint mode)
 				glDisable( GL_TEXTURE_GEN_Q );
 			}
 			// Enable All.
+#ifdef USE_OPENGLES
+			glEnable(GL_TEXTURE_GEN_STR_OES);
+#else
 			glEnable( GL_TEXTURE_GEN_S );
 			glEnable( GL_TEXTURE_GEN_T );
 			glEnable( GL_TEXTURE_GEN_R );
+#endif
 		}
 	}
 }
@@ -649,12 +690,19 @@ void			CDriverGLStates::resetTextureMode()
 
 	if (_TextureCubeMapSupported)
 	{
+#ifdef USE_OPENGLES
+		glDisable(GL_TEXTURE_CUBE_MAP_OES);
+#else
 		glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+#endif
 	}
+
+#ifndef USE_OPENGLES
 	if (_TextureRectangleSupported)
 	{
 		glDisable(GL_TEXTURE_RECTANGLE_NV);
 	}
+#endif
 
 	_TextureMode[_CurrentActiveTextureARB]= TextureDisabled;
 }
@@ -674,11 +722,13 @@ void			CDriverGLStates::setTextureMode(TTextureMode texMode)
 		}
 		else if(oldTexMode == TextureRect)
 		{
+#ifndef USE_OPENGLES
 			if(_TextureRectangleSupported)
 			{
 				glDisable(GL_TEXTURE_RECTANGLE_NV);
 			}
 			else
+#endif
 			{
 				glDisable(GL_TEXTURE_2D);
 			}
@@ -687,7 +737,11 @@ void			CDriverGLStates::setTextureMode(TTextureMode texMode)
 		{
 			if(_TextureCubeMapSupported)
 			{
+#ifdef USE_OPENGLES
+				glDisable(GL_TEXTURE_CUBE_MAP_OES);
+#else
 				glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+#endif
 			}
 			else
 			{
@@ -702,24 +756,30 @@ void			CDriverGLStates::setTextureMode(TTextureMode texMode)
 		}
 		else if(texMode == TextureRect)
 		{
+#ifndef USE_OPENGLES
 			if(_TextureRectangleSupported)
 			{
 				glEnable(GL_TEXTURE_RECTANGLE_NV);
 			}
 			else
+#endif
 			{
-				glDisable(GL_TEXTURE_2D);
+				glEnable(GL_TEXTURE_2D);
 			}
 		}
 		else if(texMode == TextureCubeMap)
 		{
 			if(_TextureCubeMapSupported)
 			{
+#ifdef USE_OPENGLES
+				glEnable(GL_TEXTURE_CUBE_MAP_OES);
+#else
 				glEnable(GL_TEXTURE_CUBE_MAP_ARB);
+#endif
 			}
 			else
 			{
-				glDisable(GL_TEXTURE_2D);
+				glEnable(GL_TEXTURE_2D);
 			}
 		}
 
@@ -736,8 +796,11 @@ void			CDriverGLStates::activeTextureARB(uint stage)
 
 	if( _CurrentActiveTextureARB != stage )
 	{
+#ifdef USE_OPENGLES
+		glActiveTexture(GL_TEXTURE0+stage);
+#else
 		nglActiveTextureARB(GL_TEXTURE0_ARB+stage);
-
+#endif
 
 		_CurrentActiveTextureARB= stage;
 	}
@@ -748,7 +811,11 @@ void			CDriverGLStates::forceActiveTextureARB(uint stage)
 {
 	H_AUTO_OGL(CDriverGLStates_forceActiveTextureARB);
 
+#ifdef USE_OPENGLES
+	glActiveTexture(GL_TEXTURE0+stage);
+#else
 	nglActiveTextureARB(GL_TEXTURE0_ARB+stage);
+#endif
 
 	_CurrentActiveTextureARB= stage;
 }
@@ -828,12 +895,15 @@ void			CDriverGLStates::enableSecondaryColorArray(bool enable)
 
 
 		_SecondaryColorArrayEnabled= enable;
+
+#ifndef USE_OPENGLES
 		// If disable
 		if(!enable)
 		{
 			// GeForceFx Bug: Must reset Secondary color to 0 (if comes from a VP), else bugs
 			nglSecondaryColor3ubEXT(0,0,0);
 		}
+#endif
 	}
 }
 
@@ -988,7 +1058,13 @@ void			CDriverGLStates::enableFog(uint enable)
 void CDriverGLStates::forceBindARBVertexBuffer(uint objectID)
 {
 	H_AUTO_OGL(CDriverGLStates_forceBindARBVertexBuffer)
+
+#ifdef USE_OPENGLES
+	glBindBuffer(GL_ARRAY_BUFFER, objectID);
+#else
 	nglBindBufferARB(GL_ARRAY_BUFFER_ARB, objectID);
+#endif
+
 	_CurrARBVertexBuffer = objectID;
 }
 

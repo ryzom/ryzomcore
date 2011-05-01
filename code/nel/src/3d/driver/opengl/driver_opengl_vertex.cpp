@@ -280,8 +280,12 @@ bool CDriverGL::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 			}
 			else
 			{
+#ifdef USE_OPENGLES
+				nlerror("not available in OpenGL ES 1.0, only use 16 bits indices");
+#else
 				nlassert(_LastIB._Format == CIndexBuffer::Indices32);
 				glDrawElements(GL_LINES,2*nlines,GL_UNSIGNED_INT,((uint32 *) _LastIB._Values)+firstIndex);
+#endif
 			}
 		}
 	}
@@ -336,8 +340,12 @@ bool CDriverGL::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris)
 			}
 			else
 			{
+#ifdef USE_OPENGLES
+				nlerror("not available in OpenGL ES 1.0, only use 16 bits indices");
+#else
 				nlassert(_LastIB._Format == CIndexBuffer::Indices32);
 				glDrawElements(GL_TRIANGLES,3*ntris,GL_UNSIGNED_INT, ((uint32 *) _LastIB._Values)+firstIndex);
+#endif
 			}
 		}
 	}
@@ -380,8 +388,12 @@ bool CDriverGL::renderSimpleTriangles(uint32 firstTri, uint32 ntris)
 	}
 	else
 	{
+#ifdef USE_OPENGLES
+		nlerror("not available in OpenGL ES 1.0, only use 16 bits indices");
+#else
 		nlassert(_LastIB._Format == CIndexBuffer::Indices32);
 		glDrawElements(GL_TRIANGLES,3*ntris,GL_UNSIGNED_INT, ((uint32 *) _LastIB._Values)+firstTri);
+#endif
 	}
 
 	// Profiling.
@@ -608,6 +620,9 @@ bool CDriverGL::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQuad
 			}
 			else
 			{
+#ifdef USE_OPENGLES
+				nlerror("not available in OpenGL ES 1.0, only use 16 bits indices");
+#else
 				// indices fits on 32 bits
 				GLint indices[QUAD_BATCH_SIZE];
 				GLint *curr = indices;
@@ -625,6 +640,7 @@ bool CDriverGL::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQuad
 				}
 				while(curr != end);
 				glDrawElements(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_INT, indices);
+#endif
 			}
 			numLeftQuads -= numQuadsToDraw;
 			currIndex += 4 * numQuadsToDraw;
@@ -665,10 +681,12 @@ void		CDriverGL::setupUVPtr(uint stage, CVertexBufferInfo &VB, uint uvId)
 			// Setup ATI VBHard or std ptr.
 			switch(VB.VBMode)
 			{
+#ifndef USE_OPENGLES
 				case CVertexBufferInfo::HwATI:
 					nglArrayObjectATI(GL_TEXTURE_COORD_ARRAY, numTexCoord, GL_FLOAT, VB.VertexSize, VB.VertexObjectId,
 						              (ptrdiff_t) VB.ValuePtr[CVertexBuffer::TexCoord0+uvId]);
 				break;
+#endif
 				case CVertexBufferInfo::HwARB:
 					_DriverGLStates.bindARBVertexBuffer(VB.VertexObjectId);
 					// with arb buffers, position is relative to the start of the stream
@@ -811,6 +829,21 @@ const uint		CDriverGL::NumCoordinatesType[CVertexBuffer::NumType]=
 // ***************************************************************************
 const uint		CDriverGL::GLType[CVertexBuffer::NumType]=
 {
+#ifdef USE_OPENGLES
+	GL_FLOAT,	// Double1
+	GL_FLOAT,	// Float1
+	GL_SHORT,	// Short1
+	GL_FLOAT,	// Double2
+	GL_FLOAT,	// Float2
+	GL_SHORT,	// Short2
+	GL_FLOAT,	// Double3
+	GL_FLOAT,	// Float3
+	GL_SHORT,	// Short3
+	GL_FLOAT,	// Double4
+	GL_FLOAT,	// Float4
+	GL_SHORT,	// Short4
+	GL_UNSIGNED_BYTE	// UChar4
+#else
 	GL_DOUBLE,	// Double1
 	GL_FLOAT,	// Float1
 	GL_SHORT,	// Short1
@@ -824,6 +857,7 @@ const uint		CDriverGL::GLType[CVertexBuffer::NumType]=
 	GL_FLOAT,	// Float4
 	GL_SHORT,	// Short4
 	GL_UNSIGNED_BYTE	// UChar4
+#endif
 };
 
 // ***************************************************************************
@@ -926,6 +960,7 @@ void		CDriverGL::setupGlArraysStd(CVertexBufferInfo &vb)
 			}
 		}
 		break;
+#ifndef USE_OPENGLES
 		case CVertexBufferInfo::HwATI:
 		{
 			// setup vertex ptr.
@@ -963,9 +998,12 @@ void		CDriverGL::setupGlArraysStd(CVertexBufferInfo &vb)
 				nglArrayObjectATI(GL_COLOR_ARRAY, 4, GL_UNSIGNED_BYTE, vb.VertexSize, vb.VertexObjectId, (ptrdiff_t)  vb.ValuePtr[CVertexBuffer::PrimaryColor]);
 			}
 			else
+			{
 				_DriverGLStates.enableColorArray(false);
+			}
 		}
 		break;
+#endif
 		default:
 			nlassert(0);
 		break;
@@ -1035,7 +1073,9 @@ void		CDriverGL::toggleGlArraysForARBVertexProgram()
 	// If last was a VertexProgram setup, and now it is a standard GL array setup.
 	if( _LastSetupGLArrayVertexProgram && !isVertexProgramEnabled () )
 	{
+#ifndef USE_OPENGLES
 		if (_Extensions.ATITextureEnvCombine3)
+#endif
 		{
 			// fix for ATI : when switching from Vertex Program to fixed Pipe, must clean texture, otherwise texture may be disabled in next render
 			// (seems to be a driver bug)
@@ -1046,12 +1086,16 @@ void		CDriverGL::toggleGlArraysForARBVertexProgram()
 				// activate the texture, or disable texturing if NULL.
 				activateTexture(stage, NULL);
 			}
+
+#ifndef USE_OPENGLES
 			glBegin(GL_QUADS);
 			glVertex4f(0.f, 0.f, 0.f, 1.f);
 			glVertex4f(0.f, 0.f, 0.f, 1.f);
 			glVertex4f(0.f, 0.f, 0.f, 1.f);
 			glVertex4f(0.f, 0.f, 0.f, 1.f);
 			glEnd();
+#endif
+
 			for(uint stage=0 ; stage<inlGetNumTextStages() ; stage++)
 			{
 				// activate the texture, or disable texturing if NULL.
@@ -1185,7 +1229,9 @@ void		CDriverGL::setupGlArraysForNVVertexProgram(CVertexBufferInfo &vb)
 					{
 						// Secondary color
 						_DriverGLStates.enableSecondaryColorArray(true);
-						nglSecondaryColorPointerEXT(4,GL_UNSIGNED_BYTE, vb.VertexSize, vb.ValuePtr[value]);
+#ifndef USE_OPENGLES
+						nglSecondaryColorPointerEXT(4, GL_UNSIGNED_BYTE, vb.VertexSize, vb.ValuePtr[value]);
+#endif
 					}
 				}
 				else
@@ -1199,7 +1245,9 @@ void		CDriverGL::setupGlArraysForNVVertexProgram(CVertexBufferInfo &vb)
 
 					// Active this value
 					_DriverGLStates.enableVertexAttribArray(glIndex, true);
+#ifndef USE_OPENGLES
 					nglVertexAttribPointerNV (glIndex, NumCoordinatesType[type], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
+#endif
 				}
 			}
 			// Else normal case, can't do anything for other values with UChar4....
@@ -1207,7 +1255,9 @@ void		CDriverGL::setupGlArraysForNVVertexProgram(CVertexBufferInfo &vb)
 			{
 				// Active this value
 				_DriverGLStates.enableVertexAttribArray(glIndex, true);
+#ifndef USE_OPENGLES
 				nglVertexAttribPointerNV (glIndex, NumCoordinatesType[type], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
+#endif
 			}
 		}
 		else
