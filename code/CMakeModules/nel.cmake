@@ -93,6 +93,14 @@ MACRO(NL_ADD_STATIC_VID_DRIVERS name)
         TARGET_LINK_LIBRARIES(${name} nel_drv_opengl)
       ENDIF(WIN32)
     ENDIF(WITH_DRIVER_OPENGL)
+
+    IF(WITH_DRIVER_OPENGLES)
+      IF(WIN32)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_opengles_win)
+      ELSE(WIN32)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_opengles)
+      ENDIF(WIN32)
+    ENDIF(WITH_DRIVER_OPENGLES)
   ENDIF(WITH_STATIC_DRIVERS)
 ENDMACRO(NL_ADD_STATIC_VID_DRIVERS)
 
@@ -208,6 +216,7 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   # Drivers Support
   ###
   OPTION(WITH_DRIVER_OPENGL       "Build OpenGL Driver (3D)"                      ON )
+  OPTION(WITH_DRIVER_OPENGLES     "Build OpenGL ES Driver (3D)"                   OFF)
   OPTION(WITH_DRIVER_DIRECT3D     "Build Direct3D Driver (3D)"                    OFF)
   OPTION(WITH_DRIVER_OPENAL       "Build OpenAL Driver (Sound)"                   ON )
   OPTION(WITH_DRIVER_FMOD         "Build FMOD Driver (Sound)"                     OFF)
