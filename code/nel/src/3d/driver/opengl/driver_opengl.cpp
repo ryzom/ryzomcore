@@ -2508,8 +2508,13 @@ void CDriverGL::checkTextureOn() const
 		GLboolean flagCM;
 		GLboolean flagTR;
 		glGetBooleanv(GL_TEXTURE_2D, &flag2D);
+#ifdef USE_OPENGLES
+		glGetBooleanv(GL_TEXTURE_CUBE_MAP_OES, &flagCM);
+		flagTR = true; // always true in OpenGL ES
+#else
 		glGetBooleanv(GL_TEXTURE_CUBE_MAP_ARB, &flagCM);
 		glGetBooleanv(GL_TEXTURE_RECTANGLE_NV, &flagTR);
+#endif
 		switch(dgs.getTextureMode())
 		{
 			case CDriverGLStates::TextureDisabled:
@@ -2545,7 +2550,8 @@ bool CDriverGL::supportOcclusionQuery() const
 // ***************************************************************************
 bool CDriverGL::supportTextureRectangle() const
 {
-	H_AUTO_OGL(CDriverGL_supportTextureRectangle)
+	H_AUTO_OGL(CDriverGL_supportTextureRectangle);
+
 	return (_Extensions.NVTextureRectangle || _Extensions.EXTTextureRectangle || _Extensions.ARBTextureRectangle);
 }
 

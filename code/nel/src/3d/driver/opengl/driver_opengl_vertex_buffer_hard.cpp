@@ -1210,19 +1210,37 @@ IVertexBufferHardGL *CVertexArrayRangeARB::createVBHardGL(uint size, CVertexBuff
 	// create a ARB VBHard
 	GLuint vertexBufferID;
 	glGetError();
+
+#ifdef USE_OPENGLES
+	glGenBuffers(1, &vertexBufferID);
+#else
 	nglGenBuffersARB(1, &vertexBufferID);
+#endif
+
 	if (glGetError() != GL_NO_ERROR) return false;
 	_Driver->_DriverGLStates.forceBindARBVertexBuffer(vertexBufferID);
 	switch(_VBType)
 	{
 		case CVertexBuffer::AGPPreferred:
+#ifdef USE_OPENGLES
+			glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
+#else
 			nglBufferDataARB(GL_ARRAY_BUFFER_ARB, size, NULL, GL_DYNAMIC_DRAW_ARB);
+#endif
 			break;
 		case CVertexBuffer::StaticPreferred:
 			if (_Driver->getStaticMemoryToVRAM())
+#ifdef USE_OPENGLES
+				glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_STATIC_DRAW);
+#else
 				nglBufferDataARB(GL_ARRAY_BUFFER_ARB, size, NULL, GL_STATIC_DRAW_ARB);
+#endif
 			else
+#ifdef USE_OPENGLES
+				glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
+#else
 				nglBufferDataARB(GL_ARRAY_BUFFER_ARB, size, NULL, GL_DYNAMIC_DRAW_ARB);
+#endif
 			break;
 		default:
 			nlassert(0);
@@ -1230,7 +1248,12 @@ IVertexBufferHardGL *CVertexArrayRangeARB::createVBHardGL(uint size, CVertexBuff
 	}
 	if (glGetError() != GL_NO_ERROR)
 	{
+#ifdef USE_OPENGLES
+		glDeleteBuffers(1, &vertexBufferID);
+#else
 		nglDeleteBuffersARB(1, &vertexBufferID);
+#endif
+
 		return false;
 	}
 	CVertexBufferHardARB *newVbHard= new CVertexBufferHardARB(_Driver, vb);
@@ -1272,8 +1295,13 @@ void CVertexArrayRangeARB::updateLostBuffers()
 		{
 			nlassert((*it)->_VertexObjectId);
 			GLuint id = (GLuint) (*it)->_VertexObjectId;
+#ifdef USE_OPENGLES
+			nlassert(glIsBuffer(id));
+			glDeleteBuffers(1, &id);
+#else
 			nlassert(nglIsBufferARB(id));
 			nglDeleteBuffersARB(1, &id);
+#endif
 			(*it)->_VertexObjectId = 0;
 			(*it)->VB->setLocation(CVertexBuffer::NotResident);
 		}
@@ -1316,8 +1344,13 @@ CVertexBufferHardARB::~CVertexBufferHardARB()
 	if (_VertexObjectId)
 	{
 		GLuint id = (GLuint) _VertexObjectId;
+#ifdef USE_OPENGLES
+		nlassert(glIsBuffer(id));
+		glDeleteBuffers(1, &id);
+#else
 		nlassert(nglIsBufferARB(id));
 		nglDeleteBuffersARB(1, &id);
+#endif
 	}
 	if (_VertexArrayRange)
 	{
@@ -1341,7 +1374,8 @@ CVertexBufferHardARB::~CVertexBufferHardARB()
 // ***************************************************************************
 void *CVertexBufferHardARB::lock()
 {
-	H_AUTO_OGL(CVertexBufferHardARB_lock)
+	H_AUTO_OGL(CVertexBufferHardARB_lock);
+
 	if (_VertexPtr) return _VertexPtr; // already locked
 	if (_Invalid)
 	{
@@ -1352,7 +1386,13 @@ void *CVertexBufferHardARB::lock()
 		}
 		// recreate a vb
 		GLuint vertexBufferID;
+
+#ifdef USE_OPENGLES
+		glGenBuffers(1, &vertexBufferID);
+#else
 		nglGenBuffersARB(1, &vertexBufferID);
+#endif
+
 		if (glGetError() != GL_NO_ERROR)
 		{
 			_Driver->incrementResetCounter();
@@ -1363,13 +1403,25 @@ void *CVertexBufferHardARB::lock()
 		switch(_MemType)
 		{
 			case CVertexBuffer::AGPPreferred:
+#ifdef USE_OPENGLES
+				glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
+#else
 				nglBufferDataARB(GL_ARRAY_BUFFER_ARB, size, NULL, GL_DYNAMIC_DRAW_ARB);
+#endif
 			break;
 			case CVertexBuffer::StaticPreferred:
 				if (_Driver->getStaticMemoryToVRAM())
+#ifdef USE_OPENGLES
+					glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_STATIC_DRAW);
+#else
 					nglBufferDataARB(GL_ARRAY_BUFFER_ARB, size, NULL, GL_STATIC_DRAW_ARB);
+#endif
 				else
+#ifdef USE_OPENGLES
+					glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
+#else
 					nglBufferDataARB(GL_ARRAY_BUFFER_ARB, size, NULL, GL_DYNAMIC_DRAW_ARB);
+#endif
 			break;
 			default:
 				nlassert(0);
@@ -1378,7 +1430,11 @@ void *CVertexBufferHardARB::lock()
 		if (glGetError() != GL_NO_ERROR)
 		{
 			_Driver->incrementResetCounter();
+#ifdef USE_OPENGLES
+			glDeleteBuffers(1, &vertexBufferID);
+#else
 			nglDeleteBuffersARB(1, &vertexBufferID);
+#endif
 			return &_DummyVB[0];;
 		}
 		_VertexObjectId = vertexBufferID;

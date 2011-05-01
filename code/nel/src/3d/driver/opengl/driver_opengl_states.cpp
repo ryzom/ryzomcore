@@ -77,7 +77,8 @@ void			CDriverGLStates::init(bool supportTextureCubeMap, bool supportTextureRect
 // ***************************************************************************
 void			CDriverGLStates::forceDefaults(uint nbStages)
 {
-	H_AUTO_OGL(CDriverGLStates_forceDefaults)
+	H_AUTO_OGL(CDriverGLStates_forceDefaults);
+
 	// Enable / disable.
 	_CurFog= false;
 	_CurBlend= false;
@@ -86,6 +87,7 @@ void			CDriverGLStates::forceDefaults(uint nbStages)
 	_CurLighting= false;
 	_CurZWrite= true;
 	_CurStencilTest=false;
+
 	// setup GLStates.
 	glDisable(GL_FOG);
 	glDisable(GL_BLEND);
@@ -642,10 +644,14 @@ void		CDriverGLStates::setTexGenMode (uint stage, GLint mode)
 
 		if(mode==0)
 		{
+#ifdef USE_OPENGLES
+			glDisable(GL_TEXTURE_GEN_STR_OES);
+#else
 			glDisable( GL_TEXTURE_GEN_S );
 			glDisable( GL_TEXTURE_GEN_T );
 			glDisable( GL_TEXTURE_GEN_R );
 			glDisable( GL_TEXTURE_GEN_Q );
+#endif
 		}
 		else
 		{
@@ -667,6 +673,7 @@ void		CDriverGLStates::setTexGenMode (uint stage, GLint mode)
 			{
 				glDisable( GL_TEXTURE_GEN_Q );
 			}
+
 			// Enable All.
 #ifdef USE_OPENGLES
 			glEnable(GL_TEXTURE_GEN_STR_OES);
@@ -853,22 +860,25 @@ void			CDriverGLStates::enableNormalArray(bool enable)
 // ***************************************************************************
 void			CDriverGLStates::enableWeightArray(bool enable)
 {
-	H_AUTO_OGL(CDriverGLStates_enableWeightArray)
+	H_AUTO_OGL(CDriverGLStates_enableWeightArray);
+
 	if(_WeightArrayEnabled != enable)
 	{
+#ifndef USE_OPENGLES
 		if(enable)
 			glEnableClientState(GL_VERTEX_WEIGHTING_EXT);
 		else
 			glDisableClientState(GL_VERTEX_WEIGHTING_EXT);
+#endif
+
 		_WeightArrayEnabled= enable;
-
-
 	}
 }
 // ***************************************************************************
 void			CDriverGLStates::enableColorArray(bool enable)
 {
-	H_AUTO_OGL(CDriverGLStates_enableColorArray)
+	H_AUTO_OGL(CDriverGLStates_enableColorArray);
+
 	if(_ColorArrayEnabled != enable)
 	{
 		if(enable)
@@ -885,14 +895,16 @@ void			CDriverGLStates::enableColorArray(bool enable)
 // ***************************************************************************
 void			CDriverGLStates::enableSecondaryColorArray(bool enable)
 {
-	H_AUTO_OGL(CDriverGLStates_enableSecondaryColorArray)
+	H_AUTO_OGL(CDriverGLStates_enableSecondaryColorArray);
+
 	if(_SecondaryColorArrayEnabled != enable)
 	{
+#ifndef USE_OPENGLES
 		if(enable)
 			glEnableClientState(GL_SECONDARY_COLOR_ARRAY_EXT);
 		else
 			glDisableClientState(GL_SECONDARY_COLOR_ARRAY_EXT);
-
+#endif
 
 		_SecondaryColorArrayEnabled= enable;
 
@@ -910,10 +922,15 @@ void			CDriverGLStates::enableSecondaryColorArray(bool enable)
 // ***************************************************************************
 void			CDriverGLStates::clientActiveTextureARB(uint stage)
 {
-	H_AUTO_OGL(CDriverGLStates_clientActiveTextureARB)
+	H_AUTO_OGL(CDriverGLStates_clientActiveTextureARB);
+
 	if( _CurrentClientActiveTextureARB != stage )
 	{
+#ifdef USE_OPENGLES
+		glClientActiveTexture(GL_TEXTURE0+stage);
+#else
 		nglClientActiveTextureARB(GL_TEXTURE0_ARB+stage);
+#endif
 		_CurrentClientActiveTextureARB= stage;
 	}
 }
@@ -921,7 +938,8 @@ void			CDriverGLStates::clientActiveTextureARB(uint stage)
 // ***************************************************************************
 void			CDriverGLStates::enableTexCoordArray(bool enable)
 {
-	H_AUTO_OGL(CDriverGLStates_enableTexCoordArray)
+	H_AUTO_OGL(CDriverGLStates_enableTexCoordArray);
+
 	if(_TexCoordArrayEnabled[_CurrentClientActiveTextureARB] != enable)
 	{
 		if(enable)
@@ -937,14 +955,16 @@ void			CDriverGLStates::enableTexCoordArray(bool enable)
 // ***************************************************************************
 void			CDriverGLStates::enableVertexAttribArray(uint glIndex, bool enable)
 {
-	H_AUTO_OGL(CDriverGLStates_enableVertexAttribArray)
+	H_AUTO_OGL(CDriverGLStates_enableVertexAttribArray);
+
 	if(_VertexAttribArrayEnabled[glIndex] != enable)
 	{
+#ifndef USE_OPENGLES
 		if(enable)
 			glEnableClientState(glIndex+GL_VERTEX_ATTRIB_ARRAY0_NV);
 		else
 			glDisableClientState(glIndex+GL_VERTEX_ATTRIB_ARRAY0_NV);
-
+#endif
 
 		_VertexAttribArrayEnabled[glIndex]= enable;
 	}
@@ -953,15 +973,18 @@ void			CDriverGLStates::enableVertexAttribArray(uint glIndex, bool enable)
 // ***************************************************************************
 void CDriverGLStates::enableVertexAttribArrayARB(uint glIndex,bool enable)
 {
-	H_AUTO_OGL(CDriverGLStates_enableVertexAttribArrayARB)
+	H_AUTO_OGL(CDriverGLStates_enableVertexAttribArrayARB);
+
 	#ifndef NL3D_GLSTATE_DISABLE_CACHE
 		if(_VertexAttribArrayEnabled[glIndex] != enable)
 	#endif
 	{
+#ifndef USE_OPENGLES
 		if(enable)
 			nglEnableVertexAttribArrayARB(glIndex);
 		else
 			nglDisableVertexAttribArrayARB(glIndex);
+#endif
 
 		_VertexAttribArrayEnabled[glIndex]= enable;
 	}

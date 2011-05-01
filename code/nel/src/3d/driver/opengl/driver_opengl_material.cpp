@@ -137,7 +137,9 @@ void CDriverGL::setTextureEnvFunction(uint stage, CMaterial& mat)
 				_DriverGLStates.setTexGenMode (stage, GL_OBJECT_LINEAR);
 			}
 			else if(mode==CMaterial::TexCoordGenEyeSpace)
+			{
 				_DriverGLStates.setTexGenMode (stage, GL_EYE_LINEAR);
+			}
 		}
 		else
 		{
@@ -918,7 +920,11 @@ void			CDriverGL::setupLightMapPass(uint pass)
 				if (mat._LightMapsMulx2)
 				{
 					// Multiply x 2
+#ifdef USE_OPENGLES
+					glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE, 2);
+#else
 					glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, 2);
+#endif
 				}
 			}
 		}
@@ -1027,7 +1033,11 @@ void			CDriverGL::endLightMapMultiPass()
 		for (uint32 i = 0; i < (_NLightMapPerPass+1); ++i)
 		{
 			_DriverGLStates.activeTextureARB(i);
+#ifdef USE_OPENGLES
+			glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE, 1);
+#else
 			glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, 1);
+#endif
 		}
 	}
 }
@@ -1102,13 +1112,16 @@ void			CDriverGL::setupSpecularBegin()
 	// todo hulud remove
 	// _DriverGLStates.setTextureMode(CDriverGLStates::TextureCubeMap);
 
+#ifdef USE_OPENGLES
+	_DriverGLStates.setTexGenMode (1, GL_REFLECTION_MAP_OES);
+#else
 	_DriverGLStates.setTexGenMode (1, GL_REFLECTION_MAP_ARB);
+#endif
+
 	// setup the good matrix for stage 1.
 	glMatrixMode(GL_TEXTURE);
 	glLoadMatrixf( _SpecularTexMtx.get() );
 	glMatrixMode(GL_MODELVIEW);
-
-
 }
 
 // ***************************************************************************
@@ -1292,7 +1305,8 @@ void			CDriverGL::setupSpecularPass(uint pass)
 			_DriverGLStates.setTextureMode(CDriverGLStates::TextureDisabled);
 		}
 		else
-		{ // Multiply texture1 by alpha_texture0 and display with add
+		{
+			// Multiply texture1 by alpha_texture0 and display with add
 			_DriverGLStates.enableBlend(true);
 			_DriverGLStates.blendFunc(GL_ONE, GL_ONE);
 
