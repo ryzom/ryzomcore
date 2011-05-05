@@ -101,8 +101,15 @@ IF(WIN32)
     # convert IDE fullpath to VC++ path
     STRING(REGEX REPLACE "Common7/IDE/.+" "VC" VC_DIR ${CMAKE_MAKE_PROGRAM})
   ELSE(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
-    # convert compiler fullpath to VC++ path
-    STRING(REGEX REPLACE "VC/bin/.+" "VC" VC_DIR ${CMAKE_CXX_COMPILER})
+    IF(${CMAKE_CXX_COMPILER} MATCHES "VC")
+      # convert compiler fullpath to VC++ path
+      STRING(REGEX REPLACE "VC/bin/.+" "VC" VC_DIR ${CMAKE_CXX_COMPILER})
+    ELSE(${CMAKE_CXX_COMPILER} MATCHES "VC")
+      # Hack for Visual C++ 2010 
+      GET_FILENAME_COMPONENT(VC_ROOT_PATH "[HKEY_CURRENT_USER\\Software\\Microsoft\\VCExpress\\10.0_Config;InstallDir]" ABSOLUTE)
+      # convert IDE fullpath to VC++ path
+      STRING(REGEX REPLACE "Common7/.*" "VC" VC_DIR ${VC_ROOT_PATH})
+	ENDIF(${CMAKE_CXX_COMPILER} MATCHES "VC")
   ENDIF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
 
   IF(WITH_MFC)
