@@ -57,6 +57,9 @@
             <height>0</height>
            </size>
           </property>
+          <attribute name="headerCascadingSectionResizes">
+           <bool>true</bool>
+          </attribute>
          </widget>
         </item>
         <item row="1" column="0">
