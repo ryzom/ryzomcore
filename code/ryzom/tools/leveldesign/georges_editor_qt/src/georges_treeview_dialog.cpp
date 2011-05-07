@@ -335,7 +335,7 @@ namespace NLQT
 			}
 			else 
 			{
-				if (path.contains(".shape"))
+				if (path.contains(".shape") || path.contains(".ps"))
 				{
 					if (Modules::objViewInt()) 
 					{
