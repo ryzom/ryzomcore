@@ -62,7 +62,8 @@ namespace NLQT
 		_CameraFocal(75), _CurrentInstance(""), _BloomEffect(false),
 		_Scene(0), QWidget(parent)
 	{
-
+		setMouseTracking(true);
+		setFocusPolicy(Qt::StrongFocus);
 		_objectViewerWidget = this;
 
 		_isGraphicsEnabled = true;
