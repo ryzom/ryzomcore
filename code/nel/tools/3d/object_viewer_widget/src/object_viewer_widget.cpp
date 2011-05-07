@@ -79,7 +79,7 @@ namespace NLQT
 
 	CObjectViewerWidget::~CObjectViewerWidget()
 	{
-
+		release();
 	}
 
 	void CObjectViewerWidget::showEvent ( QShowEvent * event )
