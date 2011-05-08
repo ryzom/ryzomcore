@@ -65,7 +65,10 @@ public:
 	QObject *objectByName(const QString &name) const;
 	ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
 
+public Q_SLOTS:
 
+	void clickLoadZoneAction();
+	void clickSaveZoneAction();
 
 protected:
 	NLMISC::CLibraryContext *_LibContext;
@@ -73,6 +76,8 @@ protected:
 private:
 	ExtensionSystem::IPluginManager *_plugMan;
 	QList<QObject *> _autoReleaseObjects;
+
+	NL3D::CLandscapeModel *m_Landscape;
 };
 
 class CZonePainterContext: public Core::IContext

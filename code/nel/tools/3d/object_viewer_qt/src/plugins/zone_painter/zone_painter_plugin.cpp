@@ -16,6 +16,7 @@
 #include <QtGui/QMenu>
 #include <QtGui/QAction>
 #include <QtGui/QMenuBar>
+#include <QtGui/QFileDialog>
 
 namespace Plugin
 {
@@ -37,6 +38,7 @@ bool ZonePainterPlugin::initialize(ExtensionSystem::IPluginManager *pluginManage
 	addAutoReleasedObject(new CZonePainterSettingsPage(this));
 	addAutoReleasedObject(new CZonePainterContext(this));
 	//addAutoReleasedObject(new CCoreListener(this));
+
 	return true;
 }
 
@@ -44,19 +46,25 @@ void ZonePainterPlugin::extensionsInitialized()
 {
 	Core::ICore *core = Core::ICore::instance();
 	Core::IMenuManager *menuManager = core->menuManager();
-	//menuManager = _plugMan->getObject<Core::IMenuManager>();
-	QAction *exampleAction1 = new QAction("Zone1", this);
-	QAction *exampleAction2 = new QAction("Zone2", this);
-	QAction *aboutQtAction = menuManager->action(Core::Constants::ABOUT_QT);
-	QMenu *helpMenu = menuManager->menu(Core::Constants::M_HELP);
-	helpMenu->insertAction(aboutQtAction, exampleAction1);
-	helpMenu->addSeparator();
-	helpMenu->addAction(exampleAction2);
-	QMenu *zoneMenu = menuManager->menuBar()->addMenu("ZoneMenu");
-	zoneMenu->insertAction(aboutQtAction, exampleAction1);
-	zoneMenu->addSeparator();
-	zoneMenu->addAction(exampleAction2);
+	QAction *loadZoneAction = new QAction("Load Zone", this);
+	QAction *saveZoneAction = new QAction("Save Zone", this);
+
+	QMenu *toolsMenu = menuManager->menu(Core::Constants::M_TOOLS);
+	QMenu *zoneMenu = toolsMenu->addMenu("Zone Painter");
+	zoneMenu->addAction(loadZoneAction);
+	connect(loadZoneAction, SIGNAL(triggered()), this, SLOT(clickLoadZoneAction()));
+	zoneMenu->addAction(saveZoneAction);
 }
+
+/****** SLOTS ******/
+void ZonePainterPlugin::clickLoadZoneAction() {
+	QString zoneFile = QFileDialog::getOpenFileName(NULL, tr("Open Zone File"), ".", tr("Zone Files (*.zone);;"));
+}
+
+void ZonePainterPlugin::clickSaveZoneAction() {
+
+}
+/****** END SLOTS ******/
 
 void ZonePainterPlugin::setNelContext(NLMISC::INelContext *nelContext)
 {
