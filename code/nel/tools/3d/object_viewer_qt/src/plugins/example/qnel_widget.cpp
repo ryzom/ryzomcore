@@ -38,6 +38,9 @@ QNLWidget::QNLWidget(QWidget *parent)
 	  m_initialized(false),
 	  m_interval(25)
 {
+	setAttribute(Qt::WA_OpaquePaintEvent);
+	setAttribute(Qt::WA_NoSystemBackground);
+	setAttribute(Qt::WA_PaintOnScreen);
 	setMouseTracking(true);
 	setFocusPolicy(Qt::StrongFocus);
 
