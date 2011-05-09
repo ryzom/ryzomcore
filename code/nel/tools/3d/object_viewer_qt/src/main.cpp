@@ -38,6 +38,8 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QApplication>
 #include <QtGui/QSplashScreen>
+#include <QtGui/QFileDialog>
+#include <QtGui/QInputDialog>
 
 static const char *appNameC = "ObjectViewerQt";
 
@@ -135,7 +137,7 @@ sint main(int argc, char **argv)
 	QTranslator qtTranslator;
 	QString locale = settings->value("Language", QLocale::system().name()).toString();
 	QString qtTrPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
-	translator.load("object_viewer_qt_" + locale, ":/");
+//	translator.load("object_viewer_qt_" + locale, ":/");
 	qtTranslator.load("qt_" + locale, qtTrPath);
 	app.installTranslator(&translator);
 	app.installTranslator(&qtTranslator);
@@ -149,7 +151,7 @@ sint main(int argc, char **argv)
 	pluginManager.setSettings(settings);
 	QStringList pluginPaths;
 #if !defined(NL_OS_MAC)
-	pluginPaths << QString("./plugins");
+	pluginPaths << settings->value("PluginPath", "./plugins").toString();
 #else
 	pluginPaths << qApp->applicationDirPath() + QString("/../PlugIns/ovqt");
 #endif
@@ -176,6 +178,15 @@ sint main(int argc, char **argv)
 		QString absolutePaths = absolutePluginPaths.absolutePath();
 		const QString reason = QCoreApplication::translate("Application", "Could not find ovqt_plugin_core in %1").arg(absolutePaths);
 		displayError(msgCoreLoadFailure(reason));
+
+		QString newPath = QFileDialog::getExistingDirectory(0, QCoreApplication::translate("Application", "Change the plugins path"), QDir::homePath());
+		bool ok;
+		QString text = QInputDialog::getText(0, QCoreApplication::translate("Application", "Enter the plugins path"),
+											 QCoreApplication::translate("Application", "Plugin path:"), QLineEdit::Normal,
+											 newPath, &ok);
+		if (ok && !text.isEmpty())
+			settings->setValue("PluginPath", text);
+		settings->sync();
 		return 1;
 	}
 	if (corePlugin->hasError())
