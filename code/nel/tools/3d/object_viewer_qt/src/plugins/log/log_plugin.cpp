@@ -45,7 +45,7 @@ using namespace Plugin;
 
 namespace ExtensionSystem
 {
-	class IPluginSpec;
+class IPluginSpec;
 }
 
 CLogPlugin::CLogPlugin(QWidget *parent): QDockWidget(parent)
@@ -53,9 +53,9 @@ CLogPlugin::CLogPlugin(QWidget *parent): QDockWidget(parent)
 	_ui.setupUi(this);
 }
 
-CLogPlugin::~CLogPlugin() 
+CLogPlugin::~CLogPlugin()
 {
-	_plugMan->removeObject(_logSettingsPage);
+	//_plugMan->removeObject(_logSettingsPage);
 	delete _logSettingsPage;
 
 	NLMISC::ErrorLog->removeDisplayer(_displayer);
@@ -71,7 +71,7 @@ bool CLogPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
 	_logSettingsPage = new CLogSettingsPage(this);
-	_plugMan->addObject(_logSettingsPage);
+	//_plugMan->addObject(_logSettingsPage);
 	return true;
 }
 
@@ -96,12 +96,12 @@ void CLogPlugin::extensionsInitialized()
 
 void CLogPlugin::setNelContext(NLMISC::INelContext *nelContext)
 {
-#ifdef NL_OS_WINDOWS 
-        // Ensure that a context doesn't exist yet.  
-        // This only applies to platforms without PIC, e.g. Windows.  
-        nlassert(!NLMISC::INelContext::isContextInitialised()); 
+#ifdef NL_OS_WINDOWS
+	// Ensure that a context doesn't exist yet.
+	// This only applies to platforms without PIC, e.g. Windows.
+	nlassert(!NLMISC::INelContext::isContextInitialised());
 #endif // fdef NL_OS_WINDOWS^M
-        _LibContext = new NLMISC::CLibraryContext(*nelContext); 
+	_LibContext = new NLMISC::CLibraryContext(*nelContext);
 
 	_displayer = new NLQT::CQtDisplayer(_ui.plainTextEdit);
 

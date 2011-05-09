@@ -1,7 +1,6 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
-// Parts by Nokia Corporation (qt-info@nokia.com) Copyright (C) 2009.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -16,53 +15,57 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef ICORE_H
-#define ICORE_H
 
-#include "core_global.h"
+#ifndef GENERAL_SETTINGS_PAGE_H
+#define GENERAL_SETTINGS_PAGE_H
 
 #include <QtCore/QObject>
 
-QT_BEGIN_NAMESPACE
-class QMainWindow;
-class QSettings;
-QT_END_NAMESPACE
+#include "ioptions_page.h"
 
-namespace ExtensionSystem
-{
-class IPluginManager;
-}
+#include "ui_general_settings_page.h"
+
+class QWidget;
 
 namespace Core
 {
-class IMenuManager;
-
-class CORE_EXPORT ICore : public QObject
+/**
+@class GeneralSettingsPage
+*/
+class GeneralSettingsPage : public Core::IOptionsPage
 {
 	Q_OBJECT
 
 public:
-	ICore() {}
-	virtual ~ICore() {}
+	GeneralSettingsPage(QObject *parent = 0);
+	~GeneralSettingsPage();
 
-	static ICore *instance();
+	QString id() const;
+	QString trName() const;
+	QString category() const;
+	QString trCategory() const;
+	QWidget *createPage(QWidget *parent);
 
-	virtual bool showOptionsDialog(const QString &group = QString(),
-								   const QString &page = QString(),
-								   QWidget *parent = 0) = 0;
+	void apply();
+	void finish();
 
-	virtual IMenuManager *menuManager() const = 0;
+	void applyGeneralSettings();
 
-	virtual QSettings *settings() const = 0;
-	virtual QMainWindow *mainWindow() const = 0;
+private Q_SLOTS:
+	void changeLanguage(const QString &lang);
+	void setPluginsPath();
+	void setLevelDesignPath();
+	void setAssetsPath();
 
-	virtual ExtensionSystem::IPluginManager *pluginManager() const = 0;
+private:
+	void readSettings();
+	void writeSettings();
 
-Q_SIGNALS:
-	void changeSettings();
-	void closeMainWindow();
+	QPalette m_originalPalette;
+	QWidget *m_page;
+	Ui::GeneralSettingsPage m_ui;
 };
 
 } // namespace Core
 
-#endif // ICORE_H
+#endif // GENERAL_SETTINGS_H

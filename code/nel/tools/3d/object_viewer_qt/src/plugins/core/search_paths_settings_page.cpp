@@ -45,7 +45,7 @@ CSearchPathsSettingsPage::~CSearchPathsSettingsPage()
 
 QString CSearchPathsSettingsPage::id() const
 {
-	return QLatin1String("SearchPaths");
+	return QLatin1String("search_paths");
 }
 
 QString CSearchPathsSettingsPage::trName() const
@@ -55,12 +55,12 @@ QString CSearchPathsSettingsPage::trName() const
 
 QString CSearchPathsSettingsPage::category() const
 {
-	return QLatin1String("General");
+	return QLatin1String(Constants::SETTINGS_CATEGORY_GENERAL);
 }
 
 QString CSearchPathsSettingsPage::trCategory() const
 {
-	return tr("General");
+	return tr(Constants::SETTINGS_TR_CATEGORY_GENERAL);
 }
 
 QWidget *CSearchPathsSettingsPage::createPage(QWidget *parent)

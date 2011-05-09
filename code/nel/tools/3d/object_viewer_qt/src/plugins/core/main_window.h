@@ -59,6 +59,7 @@ public Q_SLOTS:
 						   QWidget *parent = 0);
 
 private Q_SLOTS:
+	void open();
 	void checkObject(QObject *obj);
 	void about();
 

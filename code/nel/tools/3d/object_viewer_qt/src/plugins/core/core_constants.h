@@ -24,7 +24,7 @@ namespace Constants
 {
 
 const char * const OVQT_VERSION_LONG = "0.0.1";
-const char * const OVQT_VENDOR = "Dzmitry Kamiahin";
+const char * const OVQT_VENDOR = "Ryzom Core";
 const char * const OVQT_YEAR = "2010, 2011";
 const char * const OVQT_CORE_PLUGIN	= "Core";
 
@@ -61,6 +61,18 @@ const char * const ABOUT_PLUGINS = "ObjectViewerQt.AboutPlugins";
 const char * const ABOUT_QT = "ObjectViewerQt.AboutQt";
 
 //settings
+const char * const SETTINGS_CATEGORY_GENERAL = "general";
+const char * const SETTINGS_CATEGORY_GENERAL_ICON = ":/icons/ic_nel_generic_settings.png";
+const char * const SETTINGS_TR_CATEGORY_GENERAL = QT_TR_NOOP("General");
+
+const char * const MAIN_WINDOW_SECTION = "MainWindow";
+const char * const MAIN_WINDOW_STATE = "WindowState";
+const char * const MAIN_WINDOW_GEOMETRY = "WindowGeometry";
+const char * const QT_STYLE = "QtStyle";
+const char * const QT_PALETTE = "QtPalette";
+
+const char * const LANGUAGE = "Language";
+const char * const PLUGINS_PATH = "PluginPath";
 const char * const DATA_PATH_SECTION = "DataPath";
 const char * const SEARCH_PATHS = "SearchPaths";
 const char * const RECURSIVE_SEARCH_PATHS = "RecursiveSearchPathes";
