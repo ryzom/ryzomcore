@@ -153,7 +153,7 @@ sint main(int argc, char **argv)
 #if !defined(NL_OS_MAC)
 	pluginPaths << settings->value("PluginPath", "./plugins").toString();
 #else
-	pluginPaths << qApp->applicationDirPath() + QString("/../PlugIns/ovqt");
+	pluginPaths << settings->value("PluginPath", qApp->applicationDirPath() + QString("/../PlugIns/ovqt")).toString();
 #endif
 
 	pluginManager.setPluginPaths(pluginPaths);

@@ -222,24 +222,27 @@ void CParticleWorkspaceDialog::touchPSState(CParticleTreeItem *item)
 
 void CParticleWorkspaceDialog::clickedItem(const QModelIndex & index)
 {
-	if (_currentItem != NULL)
+	if (_currentItem != 0)
 		_treeModel->getOwnerNode(_currentItem)->getPSPointer()->setCurrentEditedElement(NULL);
 
 	_currentItem = static_cast<CParticleTreeItem *>(index.internalPointer());
+	
+	if (_currentItem == 0)
+		return;
 
 	if (index.flags() != Qt::NoItemFlags)
 		_PropertyDialog->setCurrentEditedElement(_currentItem);
 
 	if ((_currentItem->itemType() == ItemType::Workspace) ||
 			(_currentItem->itemType() == ItemType::ParticleSystemNotLoaded))
-		_currentItem = NULL;
+		_currentItem = 0;
 }
 
 void CParticleWorkspaceDialog::customContextMenu()
 {
 	if (!Modules::psEdit().getParticleWorkspace()) return;
 	clickedItem(_ui.treeView->currentIndex());
-	if (_currentItem == NULL) return;
+	if (_currentItem == 0) return;
 	QMenu *popurMenu = new QMenu(this);
 	switch (_currentItem->itemType())
 	{
