@@ -292,4 +292,4 @@ void CPluginManager::deleteAll()
 	}
 }
 
-}; // namespace NLQT
+}; // namespace ExtensionSystem

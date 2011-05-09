@@ -605,25 +605,21 @@ void CParticleSystemPage::setMaxSteps(uint32 value)
 void CParticleSystemPage::setUserParam1(float value)
 {
 	_Node->getPSPointer()->setUserParam(0, value);
-	updateModifiedFlag();
 }
 
 void CParticleSystemPage::setUserParam2(float value)
 {
 	_Node->getPSPointer()->setUserParam(1, value);
-	updateModifiedFlag();
 }
 
 void CParticleSystemPage::setUserParam3(float value)
 {
 	_Node->getPSPointer()->setUserParam(2, value);
-	updateModifiedFlag();
 }
 
 void CParticleSystemPage::setUserParam4(float value)
 {
 	_Node->getPSPointer()->setUserParam(3, value);
-	updateModifiedFlag();
 }
 
 void CParticleSystemPage::setMaxViewDist(float value)

@@ -32,7 +32,7 @@ const char * const OVQT_CORE_PLUGIN	= "Core";
 const char * const MAIN_WINDOW = "ObjectViewerQt.MainWindow";
 
 //menubar
-const char * const MENU_BAR	= "ObjectViewerQt.MenuBar";
+const char * const MENU_BAR = "ObjectViewerQt.MenuBar";
 
 //menus
 const char * const M_FILE = "ObjectViewerQt.Menu.File";
@@ -54,11 +54,11 @@ const char * const SETTINGS = "ObjectViewerQt.Settings";
 const char * const TOGGLE_FULLSCREEN = "ObjectViewerQt.ToggleFullScreen";
 
 const char * const CLOSE = "ObjectViewerQt.Close";
-const char * const CLOSEALL	= "ObjectViewerQt.CloseAll";
+const char * const CLOSEALL = "ObjectViewerQt.CloseAll";
 const char * const CLOSEOTHERS = "ObjectViewerQt.CloseOthers";
 const char * const ABOUT = "ObjectViewerQt.About";
 const char * const ABOUT_PLUGINS = "ObjectViewerQt.AboutPlugins";
-const char * const ABOUT_QT	= "ObjectViewerQt.AboutQt";
+const char * const ABOUT_QT = "ObjectViewerQt.AboutQt";
 
 //settings
 const char * const DATA_PATH_SECTION = "DataPath";
@@ -68,7 +68,7 @@ const char * const LEVELDESIGN_PATH = "LevelDesignPath";
 const char * const ASSETS_PATH = "LevelDesignPath";
 
 //resources
-const char * const ICON_NEL	= ":/core/images/nel.png";
+const char * const ICON_NEL = ":/core/images/nel.png";
 const char * const ICON_SETTINGS = ":/core/images/preferences.png";
 const char * const ICON_PILL = ":/core/icons/ic_nel_pill.png";
 const char * const ICON_OPEN = ":/core/icons/ic_nel_open.png";
