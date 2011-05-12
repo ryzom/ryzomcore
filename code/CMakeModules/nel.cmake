@@ -37,16 +37,15 @@ ENDMACRO(NL_TARGET_DRIVER)
 # Argument:
 ###
 MACRO(NL_DEFAULT_PROPS name label)
+  IF(NOT MSVC10)
+    SET_TARGET_PROPERTIES(${name} PROPERTIES PROJECT_LABEL ${label})
+  ENDIF(NOT MSVC10)
   GET_TARGET_PROPERTY(type ${name} TYPE)
   IF(${type} STREQUAL SHARED_LIBRARY)
     # Set versions only if target is a shared library
     SET_TARGET_PROPERTIES(${name} PROPERTIES
       VERSION ${NL_VERSION} SOVERSION ${NL_VERSION_MAJOR}
-      INSTALL_NAME_DIR ${NL_LIB_PREFIX}
-      PROJECT_LABEL ${label})
-  ELSE(${type} STREQUAL SHARED_LIBRARY)
-    SET_TARGET_PROPERTIES(${name} PROPERTIES
-      PROJECT_LABEL ${label})
+      INSTALL_NAME_DIR ${NL_LIB_PREFIX})
   ENDIF(${type} STREQUAL SHARED_LIBRARY)
   IF(WITH_STLPORT AND WIN32)
     SET_TARGET_PROPERTIES(${name} PROPERTIES COMPILE_FLAGS "/X")
@@ -288,10 +287,17 @@ MACRO(NL_SETUP_BUILD)
   ENDIF(CMAKE_BUILD_TYPE MATCHES "Debug")
 
   IF(WIN32)
-    # don't use a /O[012x] flag if you want custom optimizations
-    SET(SPEED_OPTIMIZATIONS "/Ob2 /Oi /Ot /Oy /GT /GF /GS-")
-    # without inlining it's unusable, use custom optimizations again
-    SET(MIN_OPTIMIZATIONS "/Ob1")
+    IF(MSVC10)
+      # /Ox is working with VC++ 2010, but custom optimizations don't exist
+      SET(SPEED_OPTIMIZATIONS "/Ox /GF /GS-")
+      # without inlining it's unusable, use custom optimizations again
+      SET(MIN_OPTIMIZATIONS "/Od /Ob1")
+	ELSE(MSVC10)
+      # don't use a /O[012x] flag if you want custom optimizations
+      SET(SPEED_OPTIMIZATIONS "/Ob2 /Oi /Ot /Oy /GT /GF /GS-")
+      # without inlining it's unusable, use custom optimizations again
+      SET(MIN_OPTIMIZATIONS "/Ob1")
+    ENDIF(MSVC10)
 
     SET(PLATFORM_CFLAGS "/D_CRT_SECURE_NO_WARNINGS /DWIN32 /D_WINDOWS /W3 /Zi /Zm1000")
 
@@ -347,9 +353,6 @@ MACRO(NL_SETUP_BUILD)
 ENDMACRO(NL_SETUP_BUILD)
 
 MACRO(NL_SETUP_BUILD_FLAGS)
-  #SET(CMAKE_DEBUG_POSTFIX "_d")
-  #SET(CMAKE_RELEASE_POSTFIX "_r")
-
   SET(CMAKE_C_FLAGS ${PLATFORM_CFLAGS} CACHE STRING "" FORCE)
   SET(CMAKE_CXX_FLAGS ${PLATFORM_CXXFLAGS} CACHE STRING "" FORCE)
 

@@ -41,16 +41,15 @@ INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 # Force out of source builds.
 CHECK_OUT_OF_SOURCE()
 
-# Variables which must be set before PROJECT
-NL_SETUP_BUILD()
-NL_SETUP_BUILD_FLAGS()
-
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)
 SET(NL_VERSION_MAJOR 0)
 SET(NL_VERSION_MINOR 8)
 SET(NL_VERSION_PATCH 0)
 SET(NL_VERSION "${NL_VERSION_MAJOR}.${NL_VERSION_MINOR}.${NL_VERSION_PATCH}")
+
+NL_SETUP_BUILD()
+NL_SETUP_BUILD_FLAGS()
 
 #-----------------------------------------------------------------------------
 # Redirect output files
@@ -109,7 +108,7 @@ IF(WIN32)
       GET_FILENAME_COMPONENT(VC_ROOT_PATH "[HKEY_CURRENT_USER\\Software\\Microsoft\\VCExpress\\10.0_Config;InstallDir]" ABSOLUTE)
       # convert IDE fullpath to VC++ path
       STRING(REGEX REPLACE "Common7/.*" "VC" VC_DIR ${VC_ROOT_PATH})
-	ENDIF(${CMAKE_CXX_COMPILER} MATCHES "VC")
+    ENDIF(${CMAKE_CXX_COMPILER} MATCHES "VC")
   ENDIF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
 
   IF(WITH_MFC)
