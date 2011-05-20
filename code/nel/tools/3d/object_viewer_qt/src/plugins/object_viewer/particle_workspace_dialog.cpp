@@ -226,7 +226,7 @@ void CParticleWorkspaceDialog::clickedItem(const QModelIndex & index)
 		_treeModel->getOwnerNode(_currentItem)->getPSPointer()->setCurrentEditedElement(NULL);
 
 	_currentItem = static_cast<CParticleTreeItem *>(index.internalPointer());
-	
+
 	if (_currentItem == 0)
 		return;
 

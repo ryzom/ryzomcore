@@ -78,6 +78,7 @@ const char * const SEARCH_PATHS = "SearchPaths";
 const char * const RECURSIVE_SEARCH_PATHS = "RecursiveSearchPathes";
 const char * const LEVELDESIGN_PATH = "LevelDesignPath";
 const char * const ASSETS_PATH = "AssetsPath";
+const char * const REMAP_EXTENSIONS = "RemapExtensions";
 
 //resources
 const char * const ICON_NEL = ":/core/images/nel.png";

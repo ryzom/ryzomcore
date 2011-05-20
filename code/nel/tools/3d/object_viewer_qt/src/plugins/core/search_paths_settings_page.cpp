@@ -92,17 +92,20 @@ void CSearchPathsSettingsPage::finish()
 
 void CSearchPathsSettingsPage::applySearchPaths()
 {
-	QStringList paths;
+	QStringList paths, remapExt;
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
 	paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
+	remapExt = settings->value(Core::Constants::REMAP_EXTENSIONS).toStringList();
 	settings->endGroup();
+
+	for (int i = 1; i < remapExt.size(); i += 2)
+		NLMISC::CPath::remapExtension(remapExt.at(i - 1).toStdString(), remapExt.at(i).toStdString(), true);
+
 	Q_FOREACH(QString path, paths)
 	{
 		NLMISC::CPath::addSearchPath(path.toStdString(), false, false);
 	}
-	NLMISC::CPath::remapExtension("png", "tga", true);
-	NLMISC::CPath::remapExtension("png", "dds", true);
 }
 
 void CSearchPathsSettingsPage::addPath()

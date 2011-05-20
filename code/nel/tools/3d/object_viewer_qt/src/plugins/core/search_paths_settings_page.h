@@ -49,6 +49,7 @@ public:
 	void apply();
 	void finish();
 
+	// Set of the search paths(not recursive) and the remap extensions (loading from settings file)
 	void applySearchPaths();
 
 private Q_SLOTS:
