@@ -40,7 +40,6 @@ class IPluginSpec;
 class IPluginManager: public QObject
 {
 	Q_OBJECT
-
 public:
 	IPluginManager(QObject *parent = 0): QObject(parent) {}
 	virtual ~IPluginManager() {}

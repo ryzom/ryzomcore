@@ -60,6 +60,7 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 	m_tabWidget = new QTabWidget(this);
 	m_tabWidget->setTabPosition(QTabWidget::South);
 	m_tabWidget->setMovable(true);
+	m_tabWidget->setDocumentMode(true);
 	setCentralWidget(m_tabWidget);
 
 	setDockNestingEnabled(true);
@@ -118,6 +119,10 @@ ExtensionSystem::IPluginManager *MainWindow::pluginManager() const
 	return m_pluginManager;
 }
 
+void MainWindow::open()
+{
+}
+
 void MainWindow::checkObject(QObject *obj)
 {
 	IContext *context = qobject_cast<IContext *>(obj);
@@ -133,7 +138,10 @@ bool MainWindow::showOptionsDialog(const QString &group,
 		parent = this;
 	CSettingsDialog settingsDialog(m_pluginManager, group, page, parent);
 	settingsDialog.show();
-	return settingsDialog.execDialog();
+	bool ok = settingsDialog.execDialog();
+	if (ok)
+		Q_EMIT m_coreImpl->changeSettings();
+	return ok;
 }
 
 void MainWindow::about()
@@ -177,7 +185,7 @@ void MainWindow::createActions()
 	m_openAction->setShortcut(QKeySequence::Open);
 	m_openAction->setStatusTip(tr("Open an existing file"));
 	menuManager()->registerAction(m_openAction, Constants::OPEN);
-//	connect(m_openAction, SIGNAL(triggered()), this, SLOT(open()));
+	connect(m_openAction, SIGNAL(triggered()), this, SLOT(open()));
 
 	m_exitAction = new QAction(tr("E&xit"), this);
 	m_exitAction->setShortcut(QKeySequence(tr("Ctrl+Q")));
@@ -220,6 +228,7 @@ void MainWindow::createMenus()
 {
 	m_fileMenu = menuBar()->addMenu(tr("&File"));
 	menuManager()->registerMenu(m_fileMenu, Constants::M_FILE);
+//	m_fileMenu->addAction(m_openAction);
 	m_fileMenu->addSeparator();
 	m_fileMenu->addAction(m_exitAction);
 
@@ -260,17 +269,17 @@ void MainWindow::createDialogs()
 
 void MainWindow::readSettings()
 {
-	m_settings->beginGroup("MainWindow");
-	restoreState(m_settings->value("WindowState").toByteArray());
-	restoreGeometry(m_settings->value("WindowGeometry").toByteArray());
+	m_settings->beginGroup(Constants::MAIN_WINDOW_SECTION);
+	restoreState(m_settings->value(Constants::MAIN_WINDOW_STATE).toByteArray());
+	restoreGeometry(m_settings->value(Constants::MAIN_WINDOW_GEOMETRY).toByteArray());
 	m_settings->endGroup();
 }
 
 void MainWindow::writeSettings()
 {
-	m_settings->beginGroup("MainWindow");
-	m_settings->setValue("WindowState", saveState());
-	m_settings->setValue("WindowGeometry", saveGeometry());
+	m_settings->beginGroup(Constants::MAIN_WINDOW_SECTION);
+	m_settings->setValue(Constants::MAIN_WINDOW_STATE, saveState());
+	m_settings->setValue(Constants::MAIN_WINDOW_GEOMETRY, saveGeometry());
 	m_settings->endGroup();
 }
 

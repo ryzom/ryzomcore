@@ -184,10 +184,17 @@ namespace NLQT
 						if (Modules::objViewInt()) 
 						{
 							QIcon *icon = Modules::objViewInt()->saveOneImage(value.toStdString());
-							if (icon->isNull())
-								return QIcon(":/images/pqrticles.png");
+							if (icon)
+							{
+								if(icon->isNull())
+									return QIcon(":/images/pqrticles.png");
+								else
+									return QIcon(*icon);
+							}
 							else
-								return QIcon(*icon);
+							{
+								return QIcon();
+							}
 						}
 					}
 					else if(value.contains(".tga") || value.contains(".png")) 

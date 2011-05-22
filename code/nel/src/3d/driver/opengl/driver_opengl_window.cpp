@@ -2376,11 +2376,15 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 	if (_CurrentMode.OffScreen)
 	{
 #ifdef NL_OS_WINDOWS
+
+#ifndef USE_OPENGLES
 		if (_PBuffer)
 		{
 			nwglQueryPbufferARB( _PBuffer, WGL_PBUFFER_WIDTH_ARB, (int*)&width );
 			nwglQueryPbufferARB( _PBuffer, WGL_PBUFFER_HEIGHT_ARB, (int*)&height );
 		}
+#endif
+
 #endif
 	}
 	else

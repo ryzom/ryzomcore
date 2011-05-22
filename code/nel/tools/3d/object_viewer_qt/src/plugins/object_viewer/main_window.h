@@ -71,10 +71,6 @@ public:
 	{
 		return _SkeletonTreeModel;
 	}
-	QPalette getOriginalPalette() const
-	{
-		return _originalPalette;
-	}
 
 private Q_SLOTS:
 	void open();
@@ -95,10 +91,6 @@ private:
 	void createDialogs();
 
 	bool loadFile(const QString &fileName, const QString &skelName);
-
-	void cfcbQtStyle(NLMISC::CConfigFile::CVar &var);
-	void cfcbQtPalette(NLMISC::CConfigFile::CVar &var);
-	void cfcbSoundEnabled(NLMISC::CConfigFile::CVar &var);
 
 	bool _isGraphicsInitialized, _isGraphicsEnabled;
 	bool _isSoundInitialized, _isSoundEnabled;
@@ -122,7 +114,6 @@ private:
 
 	CCameraControl *_cameraControl;
 
-	QPalette _originalPalette;
 	QString _lastDir;
 
 	QTimer *_mainTimer;

@@ -45,7 +45,7 @@ CSearchPathsSettingsPage::~CSearchPathsSettingsPage()
 
 QString CSearchPathsSettingsPage::id() const
 {
-	return QLatin1String("SearchPaths");
+	return QLatin1String("search_paths");
 }
 
 QString CSearchPathsSettingsPage::trName() const
@@ -55,12 +55,12 @@ QString CSearchPathsSettingsPage::trName() const
 
 QString CSearchPathsSettingsPage::category() const
 {
-	return QLatin1String("General");
+	return QLatin1String(Constants::SETTINGS_CATEGORY_GENERAL);
 }
 
 QString CSearchPathsSettingsPage::trCategory() const
 {
-	return tr("General");
+	return tr(Constants::SETTINGS_TR_CATEGORY_GENERAL);
 }
 
 QWidget *CSearchPathsSettingsPage::createPage(QWidget *parent)
@@ -92,17 +92,20 @@ void CSearchPathsSettingsPage::finish()
 
 void CSearchPathsSettingsPage::applySearchPaths()
 {
-	QStringList paths;
+	QStringList paths, remapExt;
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
 	paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
+	remapExt = settings->value(Core::Constants::REMAP_EXTENSIONS).toStringList();
 	settings->endGroup();
+
+	for (int i = 1; i < remapExt.size(); i += 2)
+		NLMISC::CPath::remapExtension(remapExt.at(i - 1).toStdString(), remapExt.at(i).toStdString(), true);
+
 	Q_FOREACH(QString path, paths)
 	{
 		NLMISC::CPath::addSearchPath(path.toStdString(), false, false);
 	}
-	NLMISC::CPath::remapExtension("png", "tga", true);
-	NLMISC::CPath::remapExtension("png", "dds", true);
 }
 
 void CSearchPathsSettingsPage::addPath()

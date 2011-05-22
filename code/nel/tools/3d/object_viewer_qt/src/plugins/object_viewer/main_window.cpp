@@ -66,7 +66,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 	  _isGraphicsInitialized(false),
 	  _isGraphicsEnabled(false),
 	  _isSoundInitialized(false),
-	  _isSoundEnabled(false),
+	  _isSoundEnabled(true),
 	  _GraphicsViewport(NULL),
 	  _lastDir("."),
 	  _mouseMode(NL3D::U3dMouseListener::edit3d)
@@ -79,19 +79,6 @@ CMainWindow::CMainWindow(QWidget *parent)
 	setCentralWidget(_GraphicsViewport);
 
 	setDockNestingEnabled(true);
-
-	QSettings *settings = Core::ICore::instance()->settings();
-	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
-
-	// setup Qt style and palette from config file
-	_originalPalette = QApplication::palette();
-
-	QApplication::setStyle(QStyleFactory::create(settings->value(Constants::QT_STYLE, "").toString()));
-
-	if (settings->value(Constants::QT_PALETTE, true).toBool())
-		QApplication::setPalette(QApplication::style()->standardPalette());
-	else
-		QApplication::setPalette(_originalPalette);
 
 	_GraphicsViewport->init();
 	_isGraphicsInitialized = true;
@@ -110,6 +97,9 @@ CMainWindow::CMainWindow(QWidget *parent)
 	createToolBars();
 
 	setWindowIcon(QIcon(":/images/nel.png"));
+
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
 
 	restoreState(settings->value("QtWindowState").toByteArray());
 	restoreGeometry(settings->value("QtWindowGeometry").toByteArray());
@@ -482,22 +472,6 @@ bool CMainWindow::loadFile(const QString &fileName, const QString &skelName)
 	}
 	//statusBar()->showMessage(tr("File loaded"),2000);
 	return true;
-}
-
-void CMainWindow::cfcbQtStyle(NLMISC::CConfigFile::CVar &var)
-{
-	QApplication::setStyle(QStyleFactory::create(var.asString().c_str()));
-}
-
-void CMainWindow::cfcbQtPalette(NLMISC::CConfigFile::CVar &var)
-{
-	if (var.asBool()) QApplication::setPalette(QApplication::style()->standardPalette());
-	else QApplication::setPalette(_originalPalette);
-}
-
-void CMainWindow::cfcbSoundEnabled(NLMISC::CConfigFile::CVar &var)
-{
-	_isSoundEnabled = var.asBool(); // update loop inits
 }
 
 void CMainWindow::updateRender()

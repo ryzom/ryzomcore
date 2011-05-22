@@ -62,7 +62,8 @@ namespace NLQT
 		_CameraFocal(75), _CurrentInstance(""), _BloomEffect(false),
 		_Scene(0), QWidget(parent)
 	{
-
+		setMouseTracking(true);
+		setFocusPolicy(Qt::StrongFocus);
 		_objectViewerWidget = this;
 
 		_isGraphicsEnabled = true;
@@ -78,7 +79,7 @@ namespace NLQT
 
 	CObjectViewerWidget::~CObjectViewerWidget()
 	{
-
+		release();
 	}
 
 	void CObjectViewerWidget::showEvent ( QShowEvent * event )
@@ -261,7 +262,7 @@ namespace NLQT
 
 
 			//updateAnimation(_AnimationDialog->getTime());
-
+			updateAnimatePS();
 			// 10. Update Camera (depends on entities)
 			// ...
 
@@ -717,6 +718,19 @@ namespace NLQT
 		QIcon *icon	= new QIcon(QString(filename.c_str()));
 		//CFile::deleteFile(filename);
 		return icon;
+	}
+
+	void CObjectViewerWidget::updateAnimatePS(uint64 deltaTime)
+	{
+		static sint64 firstTime = NLMISC::CTime::getLocalTime();
+		static sint64 lastTime = NLMISC::CTime::getLocalTime();
+		if (deltaTime == 0)
+		{
+			deltaTime = NLMISC::CTime::getLocalTime() - lastTime;
+		}
+		lastTime += deltaTime;
+		float fdelta = 0.001f * (float) (lastTime - firstTime);
+		_Scene->animate ( fdelta);
 	}
 
 #if defined(NL_OS_WINDOWS)
