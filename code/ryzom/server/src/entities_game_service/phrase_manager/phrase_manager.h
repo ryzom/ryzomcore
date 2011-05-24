@@ -52,10 +52,11 @@ struct CCyclicActionInfos
 	TDataSetRow						TargetRowId;
 	std::vector<NLMISC::CSheetId>	CyclicActionBricks;
 
+	CCyclicActionInfos() { }
 	inline void reset() { CyclicActionBricks.clear(); }
 };
 
-static const CCyclicActionInfos NoCyclicInfo;
+static const CCyclicActionInfos NoCyclicInfo = CCyclicActionInfos();
 
 class CPhraseManager;
 
