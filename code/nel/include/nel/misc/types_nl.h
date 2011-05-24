@@ -287,19 +287,17 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
-#ifdef NL_OS_MAC
-#define NL_I64 __PRI_64_LENGTH_MODIFIER__
+#if defined(__PRI_64_LENGTH_MODIFIER__)
+#	define NL_I64 __PRI_64_LENGTH_MODIFIER__
+#elif defined(__PRI64_PREFIX)
+#	define NL_I64 __PRI64_PREFIX
 #else
-#define NL_I64 __PRI64_PREFIX
+#	ifdef _LP64
+#		define	NL_I64 "l"
+#	else
+#		define	NL_I64 "ll"
+#	endif // _LP64
 #endif
-
-/*
-#ifdef _LP64
-#	define	NL_I64 "l"
-#else
-#	define	NL_I64 "ll"
-#endif // _LP64
-*/
 
 #endif // NL_OS_UNIX
 
