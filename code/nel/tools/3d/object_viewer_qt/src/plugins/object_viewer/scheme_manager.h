@@ -51,7 +51,7 @@ public:
 	// rename a scheme, given a pointer on it
 	void    rename(NL3D::CPSAttribMakerBase *am, const std::string &newName);
 protected:	
-	typedef std::pair<std::string, NL3D::CPSAttribMakerBase *> TSchemeInfo;
+	// typedef std::pair<std::string, NL3D::CPSAttribMakerBase *> TSchemeInfo;
 	typedef std::multimap<std::string, TSchemeInfo> TSchemeMap;
 	TSchemeMap		_SchemeMap;	
 };
