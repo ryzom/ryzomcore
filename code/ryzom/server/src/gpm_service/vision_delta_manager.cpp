@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
+
 #include "nel/net/unified_network.h"
 #include "vision_delta_manager.h"
 #include "gpm_service.h"
