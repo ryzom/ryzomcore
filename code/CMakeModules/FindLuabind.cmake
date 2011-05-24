@@ -22,7 +22,7 @@ FIND_PATH(LUABIND_INCLUDE_DIR
 )
 
 SET(LIBRARY_NAME_RELEASE luabind libluabind)
-SET(LIBRARY_NAME_DEBUG luabind_d libluabind_d libluabindd)
+SET(LIBRARY_NAME_DEBUG luabind_d luabindd libluabind_d libluabindd)
 
 IF(WITH_STLPORT)
   SET(LIBRARY_NAME_RELEASE luabind_stlport ${LIBRARY_NAME_RELEASE})
