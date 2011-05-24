@@ -1,0 +1,41 @@
+INCLUDE_DIRECTORIES(	${CMAKE_CURRENT_BINARY_DIR}
+						${CMAKE_CURRENT_SOURCE_DIR}
+						${LIBXML2_INCLUDE_DIR}
+						${QT_INCLUDES})
+
+FILE(GLOB SRC *.cpp *.h)
+
+SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.h
+						${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
+						${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
+
+SET(OVQT_PLUG_TRANSLATION_MANAGER_HDR 	translation_manager_plugin.h
+							qnel_widget.h
+							simple_viewer.h
+							translation_manager_settings_page.h)
+
+SET(OVQT_PLUG_TRANSLATION_MANAGER_UIS	translation_manager_settings_page.ui)
+
+SET(QT_USE_QTGUI TRUE)
+SET(QT_USE_QTOPENGL TRUE)
+
+QT4_WRAP_CPP(OVQT_PLUG_TRANSLATION_MANAGER_MOC_SRC ${OVQT_PLUG_TRANSLATION_MANAGER_HDR})
+QT4_WRAP_UI(OVQT_PLUG_TRANSLATION_MANAGER_UI_HDRS ${OVQT_PLUG_TRANSLATION_MANAGER_UIS})
+
+SOURCE_GROUP(QtResources FILES ${OVQT_PLUG_TRANSLATION_MANAGER_UIS})
+SOURCE_GROUP(QtGeneratedUiHdr FILES ${OVQT_PLUG_TRANSLATION_MANAGER_UI_HDRS})
+SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_PLUG_TRANSLATION_MANAGER_MOC_SRC})
+SOURCE_GROUP("Translation Manager Plugin" FILES ${SRC})
+SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
+
+ADD_LIBRARY(ovqt_plugin_translation_manager MODULE ${SRC} ${OVQT_PLUG_TRANSLATION_MANAGER_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_TRANSLATION_MANAGER_UI_HDRS})
+
+TARGET_LINK_LIBRARIES(ovqt_plugin_translation_manager ovqt_plugin_core nelmisc nel3d ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
+
+NL_DEFAULT_PROPS(ovqt_plugin_translation_manager "NeL, Tools, 3D: Object Viewer Qt Plugin: Translation Manager")
+NL_ADD_RUNTIME_FLAGS(ovqt_plugin_translation_manager)
+NL_ADD_LIB_SUFFIX(ovqt_plugin_translation_manager)
+
+ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} -DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+
+INSTALL(TARGETS ovqt_plugin_translation_manager LIBRARY DESTINATION lib RUNTIME DESTINATION bin ARCHIVE DESTINATION lib COMPONENT tools3d)
