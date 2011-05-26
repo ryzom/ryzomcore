@@ -524,11 +524,11 @@ void CInterfaceManager::initOutGame()
 	ActionsContext.addActionsManager(&Actions, "");
 	ActionsContext.addActionsManager(&EditActions, RZ_CATEGORY_EDIT);
 
-
-	if (ClientCfg.SelectCharacter != -1) return;
-
 	// Init LUA Scripting
 	initLUA();
+
+	if (ClientCfg.SelectCharacter != -1) 
+		return;
 
 	{
 		if (SoundMngr != NULL)

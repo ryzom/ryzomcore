@@ -454,8 +454,8 @@ void CFaberPhrase::apply()
 		return;
 	}
 	
-	neededMp = _RootFaberPlan->Faber->NeededMps.size();
-    EGSPD::CPeople::TPeople civRestriction = _RootFaberPlan->CivRestriction;
+	neededMp = (uint32)_RootFaberPlan->Faber->NeededMps.size();
+	EGSPD::CPeople::TPeople civRestriction = _RootFaberPlan->CivRestriction;
 	uint32 usedMp=0;
 	vector< const CStaticItem * > usedMps = _Mps;
 
