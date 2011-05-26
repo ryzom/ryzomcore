@@ -62,15 +62,12 @@ public Q_SLOTS:
 
 private Q_SLOTS:
 	void open();
-	void checkObject(QObject *obj);
 	void about();
 
 protected:
 	virtual void closeEvent(QCloseEvent *event);
 
 private:
-	void addContextObject(IContext *appPage);
-
 	void createActions();
 	void createMenus();
 	void createStatusBar();

@@ -24,27 +24,36 @@
 
 // Qt includes
 #include <QtGui/QTabWidget>
+#include <QtGui/QGridLayout>
 
 namespace Core
 {
 
 struct ContextManagerPrivate
 {
-	explicit ContextManagerPrivate(QTabWidget *tabWidget);
+	explicit ContextManagerPrivate(ExtensionSystem::IPluginManager *pluginManager, QTabWidget *tabWidget);
+	ExtensionSystem::IPluginManager *m_pluginManager;
 	QTabWidget *m_tabWidget;
 	QVector<IContext *> m_contexts;
 	int m_oldCurrent;
 };
 
-ContextManagerPrivate::ContextManagerPrivate(QTabWidget *tabWidget)
-	: m_tabWidget(tabWidget),
+ContextManagerPrivate::ContextManagerPrivate(ExtensionSystem::IPluginManager *pluginManager, QTabWidget *tabWidget)
+	: m_pluginManager(pluginManager),
+	  m_tabWidget(tabWidget),
 	  m_oldCurrent(-1)
 {
 }
 
-ContextManager::ContextManager(QTabWidget *tabWidget)
-	: d(new ContextManagerPrivate(tabWidget))
+ContextManager::ContextManager(ExtensionSystem::IPluginManager *pluginManager, QTabWidget *tabWidget)
+	: d(new ContextManagerPrivate(pluginManager, tabWidget))
 {
+	QObject::connect(d->m_pluginManager, SIGNAL(objectAdded(QObject *)),
+                     this, SLOT(objectAdded(QObject *)));
+	QObject::connect(d->m_pluginManager, SIGNAL(aboutToRemoveObject(QObject *)),
+                     this, SLOT(aboutToRemoveObject(QObject *)));
+
+	QObject::connect(d->m_tabWidget, SIGNAL(currentChanged(int)), this, SLOT(currentTabChanged(int)));
 }
 
 ContextManager::~ContextManager()
@@ -75,16 +84,52 @@ void ContextManager::activateContext(const QString &id)
 		d->m_tabWidget->setCurrentIndex(index);
 }
 
+void ContextManager::objectAdded(QObject *obj)
+{
+	IContext *context = qobject_cast<IContext *>(obj);
+	if (context)
+		addContextObject(context);
+}
+
+void ContextManager::aboutToRemoveObject(QObject *obj)
+{
+	IContext *context = qobject_cast<IContext *>(obj);
+	if (context)
+		removeContextObject(context);
+}
+
 void ContextManager::addContextObject(IContext *context)
 {
+	d->m_contexts.push_back(context);
+
+	QWidget *tabWidget = new QWidget(d->m_tabWidget);
+	d->m_tabWidget->addTab(tabWidget, context->icon(), context->trName());
+	QGridLayout *gridLayout = new QGridLayout(tabWidget);
+	gridLayout->setObjectName(QString::fromUtf8("gridLayout_") + context->id());
+	gridLayout->setContentsMargins(0, 0, 0, 0);
+	gridLayout->addWidget(context->widget(), 0, 0, 1, 1);
 }
 
 void ContextManager::removeContextObject(IContext *context)
 {
+	const int index = indexOf(context->id());
+	QWidget *widget = d->m_tabWidget->widget(index);
+	d->m_tabWidget->removeTab(index);
+	d->m_contexts.remove(index);
+	delete widget;
 }
 
 void ContextManager::currentTabChanged(int index)
 {
+	if (index >= 0) 
+	{
+		IContext *context = d->m_contexts.at(index);
+   	    IContext *oldContext = 0;
+        if (d->m_oldCurrent >= 0)
+            oldContext = d->m_contexts.at(d->m_oldCurrent);
+        d->m_oldCurrent = index;
+        Q_EMIT currentContextChanged(context, oldContext);
+    }
 }
 
 int ContextManager::indexOf(const QString &id) const

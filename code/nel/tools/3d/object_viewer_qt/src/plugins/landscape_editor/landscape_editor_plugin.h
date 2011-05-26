@@ -87,7 +87,7 @@ public:
 	}
 	virtual QString trName() const
 	{
-		return tr("LandscapeEditor");
+		return tr("Landscape Editor");
 	}
 	virtual QIcon icon() const
 	{

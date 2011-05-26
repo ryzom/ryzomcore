@@ -21,6 +21,8 @@
 // Project includes
 #include "core_global.h"
 
+#include "../../extension_system/iplugin_manager.h"
+
 // Qt includes
 #include <QtCore/QObject>
 
@@ -38,7 +40,7 @@ class CORE_EXPORT ContextManager : public QObject
 	Q_OBJECT
 
 public:
-	explicit ContextManager(QTabWidget *tabWidget);
+	explicit ContextManager(ExtensionSystem::IPluginManager *pluginManager, QTabWidget *tabWidget);
 	virtual ~ContextManager();
 
 	Core::IContext* currentContext() const;
@@ -52,6 +54,8 @@ public Q_SLOTS:
 	void activateContext(const QString &id);
 
 private Q_SLOTS:
+	void objectAdded(QObject *obj);
+	void aboutToRemoveObject(QObject *obj);
 	void addContextObject(IContext *context);
 	void removeContextObject(IContext *context);
 	void currentTabChanged(int index);

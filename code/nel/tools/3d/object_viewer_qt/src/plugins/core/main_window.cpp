@@ -65,7 +65,7 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 	m_tabWidget->setDocumentMode(true);
 	setCentralWidget(m_tabWidget);
 
-	m_contextManager = new ContextManager(m_tabWidget);
+	m_contextManager = new ContextManager(m_pluginManager, m_tabWidget);
 
 	setDockNestingEnabled(true);
 	m_originalPalette = QApplication::palette();
@@ -96,14 +96,6 @@ bool MainWindow::initialize(QString *errorString)
 
 void MainWindow::extensionsInitialized()
 {
-	QList<IContext *> listContexts = m_pluginManager->getObjects<IContext>();
-
-	Q_FOREACH(IContext *context, listContexts)
-	{
-		addContextObject(context);
-	}
-
-	connect(m_pluginManager, SIGNAL(objectAdded(QObject *)), this, SLOT(checkObject(QObject *)));
 	readSettings();
 	show();
 }
@@ -130,13 +122,6 @@ ExtensionSystem::IPluginManager *MainWindow::pluginManager() const
 
 void MainWindow::open()
 {
-}
-
-void MainWindow::checkObject(QObject *obj)
-{
-	IContext *context = qobject_cast<IContext *>(obj);
-	if (context)
-		addContextObject(context);
 }
 
 bool MainWindow::showOptionsDialog(const QString &group,
@@ -175,16 +160,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 	writeSettings();
 	event->accept();
-}
-
-void MainWindow::addContextObject(IContext *context)
-{
-	QWidget *tabWidget = new QWidget(m_tabWidget);
-	m_tabWidget->addTab(tabWidget, context->icon(), context->trName());
-	QGridLayout *gridLayout = new QGridLayout(tabWidget);
-	gridLayout->setObjectName(QString::fromUtf8("gridLayout_") + context->id());
-	gridLayout->setContentsMargins(0, 0, 0, 0);
-	gridLayout->addWidget(context->widget(), 0, 0, 1, 1);
 }
 
 void MainWindow::createActions()

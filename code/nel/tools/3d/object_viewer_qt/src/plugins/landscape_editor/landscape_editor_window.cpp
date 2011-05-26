@@ -23,6 +23,9 @@
 #include "../core/imenu_manager.h"
 #include "../core/core_constants.h"
 
+// NeL includes
+#include <nel/misc/debug.h>
+
 // Qt includes
 #include <QtCore/QSettings>
 
@@ -34,12 +37,12 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 {
 	m_ui.setupUi(this);
 	createMenus();
-//	readSettings();
+	readSettings();
 }
 
 LandscapeEditorWindow::~LandscapeEditorWindow()
 {
-//	writeSettings();
+	writeSettings();
 }
 
 void LandscapeEditorWindow::createMenus()
