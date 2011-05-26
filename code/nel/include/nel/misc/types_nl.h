@@ -117,6 +117,10 @@
 #	define NL_COMP_GCC
 #endif
 
+#if defined(_HAS_CPP0X) || defined(__GXX_EXPERIMENTAL_CXX0X__)
+#	define NL_ISO_CPP0X_AVAILABLE
+#endif
+
 // gcc 3.4 introduced ISO C++ with tough template rules
 //
 // NL_ISO_SYNTAX can be used using #if NL_ISO_SYNTAX or #if !NL_ISO_SYNTAX

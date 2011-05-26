@@ -583,7 +583,11 @@ template<class T, class U>	inline T	type_cast(U o)
 
 /** Compile time assertion
   */
-#define nlctassert(cond) sizeof(uint[(cond) ? 1 : 0])
+#ifdef NL_ISO_CPP0X_AVAILABLE
+#	define nlctassert(cond) static_assert(cond, "Compile time assert in "#cond)
+#else
+#	define nlctassert(cond) sizeof(uint[(cond) ? 1 : 0])
+#endif
 
 /**
 *	Allow to verify an object was accessed before its destructor call.
