@@ -49,9 +49,9 @@ ContextManager::ContextManager(ExtensionSystem::IPluginManager *pluginManager, Q
 	: d(new ContextManagerPrivate(pluginManager, tabWidget))
 {
 	QObject::connect(d->m_pluginManager, SIGNAL(objectAdded(QObject *)),
-                     this, SLOT(objectAdded(QObject *)));
+					 this, SLOT(objectAdded(QObject *)));
 	QObject::connect(d->m_pluginManager, SIGNAL(aboutToRemoveObject(QObject *)),
-                     this, SLOT(aboutToRemoveObject(QObject *)));
+					 this, SLOT(aboutToRemoveObject(QObject *)));
 
 	QObject::connect(d->m_tabWidget, SIGNAL(currentChanged(int)), this, SLOT(currentTabChanged(int)));
 }
@@ -121,15 +121,15 @@ void ContextManager::removeContextObject(IContext *context)
 
 void ContextManager::currentTabChanged(int index)
 {
-	if (index >= 0) 
+	if (index >= 0)
 	{
 		IContext *context = d->m_contexts.at(index);
-   	    IContext *oldContext = 0;
-        if (d->m_oldCurrent >= 0)
-            oldContext = d->m_contexts.at(d->m_oldCurrent);
-        d->m_oldCurrent = index;
-        Q_EMIT currentContextChanged(context, oldContext);
-    }
+		IContext *oldContext = 0;
+		if (d->m_oldCurrent >= 0)
+			oldContext = d->m_contexts.at(d->m_oldCurrent);
+		d->m_oldCurrent = index;
+		Q_EMIT currentContextChanged(context, oldContext);
+	}
 }
 
 int ContextManager::indexOf(const QString &id) const
