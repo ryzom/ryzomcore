@@ -713,7 +713,7 @@ void CGroupEditBox::handleEventChar(const CEventDescriptorKey &rEDK)
 // ----------------------------------------------------------------------------
 void CGroupEditBox::handleEventString(const CEventDescriptorKey &rEDK)
 {
-	appendString(rEDK.getString());
+	appendStringFromClipboard(rEDK.getString());
 }
 
 // ----------------------------------------------------------------------------
