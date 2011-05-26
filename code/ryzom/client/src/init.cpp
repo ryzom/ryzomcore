@@ -1326,7 +1326,7 @@ void postlogInit()
 			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 
 			CSBrickManager::getInstance()->init(); // Must be done after sheet loading
-			STRING_MANAGER::CStringManagerClient::specialWordsMemoryCompress(); // Must be done after brick manager init
+			//STRING_MANAGER::CStringManagerClient::specialWordsMemoryCompress(); // Must be done after brick manager init
 
 			initLast = initCurrent;
 			initCurrent = ryzomGetLocalTime();

@@ -895,6 +895,7 @@ void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const u
  	colorizeSender(finalString, senderPart, prop.getRGBA());
 
 	PeopleInterraction.ChatInput.Tell.displayTellMessage(/*senderIndex, */finalString, goodSenderName, prop.getRGBA(), 2, &windowVisible);
+	CInterfaceManager::getInstance()->log(finalString);
 
 	// Open the free teller window
 	CChatGroupWindow *pCGW = PeopleInterraction.getChatGroupWindow();
@@ -3216,7 +3217,11 @@ private:
 
 		// get the content string (should have been received!)
 		ucstring	contentStr;
+		ucstring	titleStr;
 		if(!pSMC->getDynString(_TextId[ContentType], contentStr))
+			return;
+
+		if(!pSMC->getDynString(_TextId[TitleType], titleStr))
 			return;
 
 		// if the string start with a @{Wxxxx} code, remove it and get the wanted window size
@@ -3273,23 +3278,36 @@ private:
 
 		if (is_webig)
 		{
-			CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId("ui:interface:webig:content:html"));
+			CGroupHTML *groupHtml;
+			string group = titleStr.toString();
+			// <missing:XXX>
+			group = group.substr(9, group.size()-10);
+			nlinfo("group = %s", group.c_str());
+			groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId("ui:interface:"+group+":content:html"));
+			if (!groupHtml)
+			{
+				groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId("ui:interface:webig:content:html"));
+				group = "webig";
+			}
+
 			if (groupHtml)
 			{
-
-				CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:webig"));
-
-				if (contentStr.empty())
+				CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:"+group));
+				if (pGC)
 				{
-					pGC->setActive(false);
-				}
-				else
-				{
-					pGC->setActive(true);
-					string url = contentStr.toString();
-					addWebIGParams(url);
-					groupHtml->browse(url.c_str());
-					pIM->setTopWindow(pGC);
+					if (contentStr.empty())
+					{
+						pGC->setActive(false);
+					}
+					else
+					{
+						if (group == "webig")
+							pGC->setActive(true);
+						string url = contentStr.toString();
+						addWebIGParams(url);
+						groupHtml->browse(url.c_str());
+						pIM->setTopWindow(pGC);
+					}
 				}
 			}
 		}

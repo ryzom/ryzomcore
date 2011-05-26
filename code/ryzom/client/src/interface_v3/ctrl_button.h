@@ -50,6 +50,8 @@ public:
 
 	virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 
+	virtual bool getMouseOverShape(std::string &/* texName */, uint8 &/* rot */, NLMISC::CRGBA &/* col */);
+
 	// Display part
 	virtual void draw();
 

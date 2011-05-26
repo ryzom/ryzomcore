@@ -143,7 +143,7 @@ public:
 	void setAHOnCloseButtonParams(const std::string &n);
 	void setHeaderColor(const std::string &n);
 	//
-	void displayLocalPlayerTell(const ucstring &msg, uint numBlinks = 0);
+	void displayLocalPlayerTell(const ucstring &receiver, const ucstring &msg, uint numBlinks = 0);
 
 	/// Encode a color tag '@{RGBA}' in the text. If append is true, append at end of text, otherwise, replace the text
 	static void encodeColorTag(const NLMISC::CRGBA &color, ucstring &text, bool append=true);

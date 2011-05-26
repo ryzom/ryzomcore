@@ -165,10 +165,24 @@ public:
 
 	int luaBrowse(CLuaState &ls);
 	int luaRefresh(CLuaState &ls);
+	int luaRemoveContent(CLuaState &ls);
+	int luaInsertText(CLuaState &ls);
+	int luaAddString(CLuaState &ls);
+	int luaAddImage(CLuaState &ls);
+	int luaBeginElement(CLuaState &ls);
+	int luaEndElement(CLuaState &ls);
+	int luaShowDiv(CLuaState &ls);
 
 	REFLECT_EXPORT_START(CGroupHTML, CGroupScrollText)
 		REFLECT_LUA_METHOD("browse", luaBrowse)
 		REFLECT_LUA_METHOD("refresh", luaRefresh)
+		REFLECT_LUA_METHOD("removeContent", luaRemoveContent)
+		REFLECT_LUA_METHOD("insertText", luaInsertText)
+		REFLECT_LUA_METHOD("addString", luaAddString)
+		REFLECT_LUA_METHOD("addImage", luaAddImage)
+		REFLECT_LUA_METHOD("beginElement", luaBeginElement)
+		REFLECT_LUA_METHOD("endElement", luaEndElement)
+		REFLECT_LUA_METHOD("showDiv", luaShowDiv)
 		REFLECT_STRING("url", getURL, setURL)
 		REFLECT_FLOAT("timeout", getTimeout, setTimeout)
 	REFLECT_EXPORT_END
@@ -290,6 +304,7 @@ protected :
 	// element has been found
 	// True when the <lua> element has been encountered
 	bool			_ParsingLua;
+	bool			_IgnoreText;
 	// the script to execute
 	std::string		_LuaScript;
 
@@ -303,6 +318,7 @@ protected :
 	class CLibWWWData	*_LibWWW;
 
 	// Current paragraph
+	std::string		_DivName;
 	CGroupParagraph*	_Paragraph;
 	inline CGroupParagraph *getParagraph()
 	{
@@ -442,6 +458,7 @@ protected :
 		std::vector<CEntry>	Entries;
 	};
 	std::vector<CForm>	_Forms;
+	std::vector<CInterfaceGroup *>	_Groups;
 
 	// Cells parameters
 	class CCellParams

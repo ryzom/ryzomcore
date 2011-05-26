@@ -278,8 +278,11 @@ void CGroupQuickHelp::browse (const char *url)
 	_IsQuickHelp = false;
 
 	string completeURL = url;
-	completeURL = completeURL.substr(0, completeURL.size()-5); // Substract the ".html"
-	completeURL += "_" + ClientCfg.getHtmlLanguageCode() + ".html";
+	if (completeURL.substr(completeURL.size()-5, 5) == ".html")
+	{
+		completeURL = completeURL.substr(0, completeURL.size()-5); // Substract the ".html"
+		completeURL += "_" + ClientCfg.getHtmlLanguageCode() + ".html";
+	}
 
 	CGroupHTML::browse (completeURL.c_str());
 }
