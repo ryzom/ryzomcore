@@ -56,6 +56,16 @@ public:
 
 	/// The widget will be destroyed by the widget hierarchy when the main window closes
 	virtual QWidget *widget() = 0;
+
+	virtual bool open()
+	{
+		return false;
+	}
+
+	virtual bool help()
+	{
+		return false;
+	}
 };
 
 } // namespace Core

@@ -18,15 +18,18 @@ SET(OVQT_CORE_PLUGIN_HDR
 				core.h
 				main_window.h
 				menu_manager.h
+				context_manager.h
 				settings_dialog.h
 				search_paths_settings_page.h
 				general_settings_page.h
-				plugin_view_dialog.h)
+				plugin_view_dialog.h
+)
 
 SET(OVQT_CORE_PLUGIN_UIS	settings_dialog.ui
 				plugin_view_dialog.ui
 				general_settings_page.ui
-				search_paths_settings_page.ui)
+				search_paths_settings_page.ui
+)
 
 SET(OVQT_CORE_PLUGIN_RCS core.qrc)
 

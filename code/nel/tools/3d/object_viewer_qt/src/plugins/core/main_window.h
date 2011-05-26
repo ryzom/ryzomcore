@@ -35,6 +35,7 @@ class CorePlugin;
 class IContext;
 class IMenuManager;
 class MenuManager;
+class ContextManager;
 class CoreImpl;
 
 class MainWindow : public QMainWindow
@@ -49,6 +50,7 @@ public:
 	void extensionsInitialized();
 
 	IMenuManager *menuManager() const;
+	ContextManager *contextManager() const;
 	QSettings *settings() const;
 
 	ExtensionSystem::IPluginManager *pluginManager() const;
@@ -80,6 +82,7 @@ private:
 	ExtensionSystem::IPluginManager *m_pluginManager;
 	ExtensionSystem::CPluginView *m_pluginView;
 	MenuManager *m_menuManager;
+	ContextManager *m_contextManager;
 	CoreImpl *m_coreImpl;
 
 	QPalette m_originalPalette;

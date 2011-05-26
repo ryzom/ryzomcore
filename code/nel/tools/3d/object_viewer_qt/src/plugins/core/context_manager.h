@@ -1,7 +1,6 @@
-// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
-// Parts by Nokia Corporation (qt-info@nokia.com) Copyright (C) 2009.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -16,55 +15,53 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef ICORE_H
-#define ICORE_H
+#ifndef CONTEXT_MANAGER_H
+#define CONTEXT_MANAGER_H
 
+// Project includes
 #include "core_global.h"
 
+// Qt includes
 #include <QtCore/QObject>
 
 QT_BEGIN_NAMESPACE
-class QMainWindow;
-class QSettings;
+class QTabWidget;
 QT_END_NAMESPACE
-
-namespace ExtensionSystem
-{
-class IPluginManager;
-}
 
 namespace Core
 {
-class IMenuManager;
-class ContextManager;
+class IContext;
+struct ContextManagerPrivate;
 
-class CORE_EXPORT ICore : public QObject
+class CORE_EXPORT ContextManager : public QObject
 {
 	Q_OBJECT
 
 public:
-	ICore() {}
-	virtual ~ICore() {}
+	explicit ContextManager(QTabWidget *tabWidget);
+	virtual ~ContextManager();
 
-	static ICore *instance();
-
-	virtual bool showOptionsDialog(const QString &group = QString(),
-								   const QString &page = QString(),
-								   QWidget *parent = 0) = 0;
-
-	virtual IMenuManager *menuManager() const = 0;
-	virtual ContextManager *contextManager() const = 0;
-
-	virtual QSettings *settings() const = 0;
-	virtual QMainWindow *mainWindow() const = 0;
-
-	virtual ExtensionSystem::IPluginManager *pluginManager() const = 0;
+	Core::IContext* currentContext() const;
+	Core::IContext* context(const QString &id) const;
 
 Q_SIGNALS:
-	void changeSettings();
-	void closeMainWindow();
+	// the default argument '=0' is important for connects without the oldContext argument.
+	void currentContextChanged(Core::IContext *context, Core::IContext *oldContext = 0);
+
+public Q_SLOTS:
+	void activateContext(const QString &id);
+
+private Q_SLOTS:
+	void addContextObject(IContext *context);
+	void removeContextObject(IContext *context);
+	void currentTabChanged(int index);
+
+private:
+	int indexOf(const QString &id) const;
+
+	ContextManagerPrivate *d;
 };
 
 } // namespace Core
 
-#endif // ICORE_H
+#endif // CONTEXT_MANAGER_H

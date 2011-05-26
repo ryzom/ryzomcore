@@ -20,6 +20,7 @@
 #include "icontext.h"
 #include "icore_listener.h"
 #include "menu_manager.h"
+#include "context_manager.h"
 #include "core.h"
 #include "core_constants.h"
 #include "settings_dialog.h"
@@ -38,6 +39,7 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 	: QMainWindow(parent),
 	  m_pluginManager(0),
 	  m_menuManager(0),
+	  m_contextManager(0),
 	  m_coreImpl(0),
 	  m_lastDir("."),
 	  m_settings(0)
@@ -59,9 +61,11 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 
 	m_tabWidget = new QTabWidget(this);
 	m_tabWidget->setTabPosition(QTabWidget::South);
-	m_tabWidget->setMovable(true);
+	m_tabWidget->setMovable(false);
 	m_tabWidget->setDocumentMode(true);
 	setCentralWidget(m_tabWidget);
+
+	m_contextManager = new ContextManager(m_tabWidget);
 
 	setDockNestingEnabled(true);
 	m_originalPalette = QApplication::palette();
@@ -107,6 +111,11 @@ void MainWindow::extensionsInitialized()
 IMenuManager *MainWindow::menuManager() const
 {
 	return m_menuManager;
+}
+
+ContextManager *MainWindow::contextManager() const
+{
+	return m_contextManager;
 }
 
 QSettings *MainWindow::settings() const
