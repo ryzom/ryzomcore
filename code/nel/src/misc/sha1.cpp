@@ -188,6 +188,77 @@ CHashKey getSHA1(const string &filename, bool forcePath)
 }
 
 /*
+*
+* HMAC = hash( (Key ^ 0x5c) .. hash( (Key ^0x36) .. Message ) )
+*
+*/
+
+CHashKey getHMacSHA1(const uint8 *text, uint32 text_len, const uint8 *key, uint32 key_len)
+{
+	SHA1Context sha;
+
+	uint8_t SHA1_Key[64];
+	uint8_t SHA1_Key1[20];
+	uint8_t SHA1_Key2[20];
+
+	string buffer1;
+	string buffer2;
+
+	// Init some vars
+	for (uint i = 0; i <  64; i++)
+		SHA1_Key[i] = 0;
+
+	// If lenght of key > 64 use sha1 hash
+	if (key_len > 64) {
+		uint8_t SHA1_Key0[20];
+		SHA1Reset(&sha);
+		SHA1Input(&sha, (const uint8_t*)key, key_len);
+		SHA1Result(&sha, SHA1_Key0);
+		CHashKey hk0 (SHA1_Key0);
+		for (uint i = 0; i <  20; i++)
+			SHA1_Key[i] = hk0.HashKeyString[i];
+	} else {
+		for (uint i = 0; i < key_len; i++)
+			SHA1_Key[i] = key[i];
+	}
+
+	// Do 0x36 XOR Key
+	for (uint i = 0; i < 64; i++)
+		buffer1 += 0x36 ^ SHA1_Key[i];
+
+	// Append text
+	for (uint i = 0; i < text_len; i++)
+		buffer1 += text[i];
+
+	// Get hash
+	SHA1Reset(&sha);
+	SHA1Input(&sha, (const uint8_t*)buffer1.c_str(), buffer1.size());
+	SHA1Result(&sha, SHA1_Key1);
+	CHashKey hk1 (SHA1_Key1);
+
+	// Do 0x5c XOR Key
+	for (uint i = 0; i < 64; i++)
+		buffer2 += 0x5c ^ SHA1_Key[i];
+
+	// Append previous hash
+	for (uint i = 0; i < 20; i++)
+		buffer2 += hk1.HashKeyString[i];
+
+	// Get new hash
+	SHA1Reset(&sha);
+	SHA1Input(&sha, (const uint8_t*)buffer2.c_str(), buffer2.size());
+	SHA1Result(&sha, SHA1_Key2);
+	CHashKey hk (SHA1_Key2);
+
+	return hk;
+}
+
+
+#ifdef _MFC_VER
+	#pragma runtime_checks( "", off )
+#endif
+
+/*
  *  Define the SHA1 circular left shift macro
  */
 #define SHA1CircularShift(bits,word) \
