@@ -125,6 +125,8 @@ public:
 	void		copy();
 	// Paste the selection into buffer
 	void		paste();
+	// Write the string into buffer
+	void		writeString(const ucstring &str, bool replace = true, bool atEnd = true);
 
 	// Expand the expression (true if there was a '/' at the start of the line)
 	bool		expand();
@@ -217,6 +219,7 @@ protected:
 	// Text selection
 	static sint32	      _SelectCursorPos;
 	static CGroupEditBox *_CurrSelection; // the edit box for which the selection is currently active, or NULL if there's none
+	bool	_SelectingText;
 	NLMISC::CRGBA	_TextSelectColor;
 	NLMISC::CRGBA	_BackSelectColor;
 
@@ -291,7 +294,7 @@ private:
 	void handleEventString(const CEventDescriptorKey &event);
 	void setup();
 	void triggerOnChangeAH();
-	void appendString(const ucstring &str);
+	void appendStringFromClipboard(const ucstring &str);
 
 	ucstring	getSelection();
 

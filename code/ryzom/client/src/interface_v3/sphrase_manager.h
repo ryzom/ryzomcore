@@ -34,6 +34,7 @@
 const	std::string		PHRASE_DB_BOOK="UI:PHRASE:BOOK";
 const	std::string		PHRASE_DB_PROGRESSION[2]= {"UI:PHRASE:PROGRESS_ACTIONS", "UI:PHRASE:PROGRESS_UPGRADES"};
 const	std::string		PHRASE_DB_MEMORY="UI:PHRASE:MEMORY";
+const	std::string		PHRASE_DB_MEMORY_ALT="UI:PHRASE:MEMORY_ALT";
 const	std::string		PHRASE_DB_EXECUTE_NEXT="UI:PHRASE:EXECUTE_NEXT:PHRASE";
 const	std::string		PHRASE_DB_EXECUTE_NEXT_IS_CYCLIC="UI:PHRASE:EXECUTE_NEXT:ISCYCLIC";
 const	std::string		PHRASE_DB_BOTCHAT="LOCAL:TRADING";
@@ -458,6 +459,7 @@ private:
 	// Shortcut To Phrases Leaves
 	std::vector<CCDBNodeLeaf*>				_BookDbLeaves;
 	std::vector<CCDBNodeLeaf*>				_MemoryDbLeaves;
+	std::vector<CCDBNodeLeaf*>				_MemoryAltDbLeaves;
 	CCDBNodeLeaf							*_NextExecuteLeaf;
 	CCDBNodeLeaf							*_NextExecuteIsCyclicLeaf;
 
@@ -698,6 +700,7 @@ private:
 	void	updateMemoryCtrlRegenTickRange(uint memorySlot);
 
 	CDBCtrlSheet	*getMemorySlotCtrl(uint memorySlot);
+	CDBCtrlSheet	*getMemoryAltSlotCtrl(uint memorySlot);
 
 	CTickRange getRegenTickRange(const CSPhraseCom &phrase) const;
 

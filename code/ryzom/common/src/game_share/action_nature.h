@@ -35,6 +35,7 @@ namespace ACTNATURE
 		DODGE,
 		PARRY,
 		SHIELD_USE,
+		RECHARGE,
 
 		NEUTRAL,	//only for multi effect on spell,progression consider it as OFFENSIVE_MAGIC
 

@@ -344,7 +344,6 @@ CCharacter::CCharacter():	CEntityBase(false),
 							_AggroableSave(true),
 							_GodModeSave(false)
 {
-
 	// todo : uncomment that when sadge item api is plugged
 	_AggroCount = 0;
 //	_Bulk = 0;

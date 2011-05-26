@@ -3,6 +3,7 @@ ADD_SUBDIRECTORY(prim_export)
 ADD_SUBDIRECTORY(uni_conv)
 ADD_SUBDIRECTORY(csv_transform)
 ADD_SUBDIRECTORY(icon_search)
+ADD_SUBDIRECTORY(mission_compiler_lib)
 ADD_SUBDIRECTORY(mp_generator)
 ADD_SUBDIRECTORY(named_items_2_csv)
 
@@ -10,6 +11,10 @@ IF(WIN32)
   ADD_SUBDIRECTORY(export)
   ADD_SUBDIRECTORY(world_editor)
 ENDIF(WIN32)
+
+IF(WITH_MFC)
+  ADD_SUBDIRECTORY(mission_compiler_fe)
+ENDIF(WITH_MFC)
 
 IF(WITH_QT)
   ADD_SUBDIRECTORY(georges_editor_qt)
@@ -24,8 +29,6 @@ ENDIF(WITH_QT)
 #icon_search
 #install
 #master
-#mission_compiler_fe
-#mission_compiler_lib
 #mission_simulator
 #
 #primitive_id_assignator

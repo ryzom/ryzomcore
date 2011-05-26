@@ -550,7 +550,9 @@ void checkUnderCursor()
 				if (!instref.ContextText.empty())
 				{
 					selectedInstanceURL = instref.ContextURL;
-					if(ContextCur.context("WEBIG", 0.f, ucstring(instref.ContextText)))
+					ucstring contextText;
+					contextText.fromUtf8(instref.ContextText);
+					if(ContextCur.context("WEBIG", 0.f, contextText))
 						return;
 				}
 			}

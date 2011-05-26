@@ -57,6 +57,7 @@ const	std::string		PhraseMemoryViewNextAction= "ui:interface:gestionsets:shortcu
 const	std::string		PhraseMemoryViewCycleAction= "ui:interface:gestionsets:shortcuts:view_cycle_action";
 const	std::string		PhraseMemoryViewSlotBase= "ui:interface:gestionsets:shortcuts:s";
 const	std::string		PhraseMemoryCtrlBase= "ui:interface:gestionsets:shortcuts:s";
+const	std::string		PhraseMemoryAltCtrlBase= "ui:interface:gestionsets2:header_closed:shortcuts:s";
 
 const	std::string		PhraseMemoryPhraseMenu= "ui:interface:cm_memory_phrase";
 const	std::string		PhraseMemoryPhraseAction= "cast_phrase_or_create_new";
@@ -118,11 +119,16 @@ void			CSPhraseManager::initInGame()
 		_BookDbLeaves[i]= node;
 	}
 	_MemoryDbLeaves.resize(PHRASE_MAX_MEMORY_SLOT, NULL);
+	_MemoryAltDbLeaves.resize(PHRASE_MAX_MEMORY_SLOT, NULL);
+
 	for(i=0;i<PHRASE_MAX_MEMORY_SLOT;i++)
 	{
 		CCDBNodeLeaf	*node= pIM->getDbProp(PHRASE_DB_MEMORY + ":" + toString(i) + ":PHRASE");
 		node->setValue32(0);
 		_MemoryDbLeaves[i]= node;
+		CCDBNodeLeaf	*node_alt= pIM->getDbProp(PHRASE_DB_MEMORY_ALT + ":" + toString(i) + ":PHRASE");
+		node_alt->setValue32(0);
+		_MemoryAltDbLeaves[i]= node_alt;
 	}
 
 	// Progression Db leaves
@@ -497,6 +503,7 @@ void		CSPhraseManager::updateMemoryDBAll()
 		for(uint i=0;i<PHRASE_MAX_MEMORY_SLOT;i++)
 		{
 			_MemoryDbLeaves[i]->setValue32(0);
+			_MemoryAltDbLeaves[i]->setValue32(0);
 		}
 	}
 	else
@@ -508,6 +515,12 @@ void		CSPhraseManager::updateMemoryDBAll()
 				_MemoryDbLeaves[i]->setValue32(0);
 			else
 				_MemoryDbLeaves[i]->setValue32(slot.Id);
+
+			CMemorySlot		&slotAlt= _Memories[0].Slot[i];
+			if(!slotAlt.isPhrase())
+				_MemoryAltDbLeaves[i]->setValue32(0);
+			else
+				_MemoryAltDbLeaves[i]->setValue32(slotAlt.Id);
 		}
 	}
 }
@@ -529,6 +542,15 @@ void		CSPhraseManager::updateMemoryDBSlot(uint32 memorySlot)
 			_MemoryDbLeaves[memorySlot]->setValue32(0);
 		else
 			_MemoryDbLeaves[memorySlot]->setValue32(slot.Id);
+	}
+
+	if (_SelectedMemoryDB == 0)
+	{
+		CMemorySlot		&slotAlt= _Memories[0].Slot[memorySlot];
+		if(!slotAlt.isPhrase())
+			_MemoryAltDbLeaves[memorySlot]->setValue32(0);
+		else
+			_MemoryAltDbLeaves[memorySlot]->setValue32(slotAlt.Id);
 	}
 }
 
@@ -873,6 +895,7 @@ void				CSPhraseManager::reset()
 		_LastProgressionNumDbFill[i]= 0;
 	}
 	_MemoryDbLeaves.clear();
+	_MemoryAltDbLeaves.clear();
 	_NextExecuteLeaf= NULL;
 	_NextExecuteIsCyclicLeaf= NULL;
 
@@ -2645,7 +2668,13 @@ static sint	getRightHandEnchantValue()
 void	CSPhraseManager::updateMemoryCtrlRegenTickRange(uint memorySlot, CDBCtrlSheet	*ctrl)
 {
 	//
-	uint	memoryLine= getSelectedMemoryLineDB();
+	sint32	memoryLine;
+	if (ctrl->isShortCut())
+		memoryLine = getSelectedMemoryLineDB();
+	else
+		memoryLine = 0;
+	if (memoryLine < 0)
+		return;
 	sint32	phraseId= getMemorizedPhrase(memoryLine, memorySlot);
 	//
 	if(phraseId)
@@ -2780,8 +2809,12 @@ void	CSPhraseManager::updateMemoryCtrlState(uint memorySlot, CDBCtrlSheet	*ctrl,
 	CSBrickManager		*pBM = CSBrickManager::getInstance();
 	CSkillManager		*pSM = CSkillManager::getInstance();
 
+	uint	memoryLine;
 	// get the slot info
-	uint	memoryLine= getSelectedMemoryLineDB();
+	if (ctrl->isShortCut()) // No memoryLine defined
+		memoryLine= getSelectedMemoryLineDB();
+	else
+		memoryLine= 0;
 	bool	newIsMacro= isMemorizedMacro(memoryLine, memorySlot);
 	sint32	macroId= getMemorizedMacro(memoryLine, memorySlot);
 	sint32	phraseId= getMemorizedPhrase(memoryLine, memorySlot);
@@ -3004,6 +3037,9 @@ void	CSPhraseManager::updateAllMemoryCtrlState()
 			// update the valid state.
 			updateMemoryCtrlState(i, ctrl, itemSkill);
 		}
+		CDBCtrlSheet	*ctrlAlt= dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(PhraseMemoryAltCtrlBase + toString(i)) );
+		if(ctrlAlt)
+			updateMemoryCtrlState(i, ctrlAlt, itemSkill);
 	}
 	TTicks endTime = CTime::getPerformanceTime();
 	//nldebug("***** %d ms for CSPhraseManager::updateAllMemoryCtrlState", (int) (1000 * CTime::ticksToSecond(endTime - startTime)));	
@@ -3031,13 +3067,30 @@ CDBCtrlSheet	*CSPhraseManager::getMemorySlotCtrl(uint memorySlot)
 }
 
 // ***************************************************************************
+CDBCtrlSheet	*CSPhraseManager::getMemoryAltSlotCtrl(uint memorySlot)
+{
+	if(memorySlot>=PHRASE_MAX_MEMORY_SLOT)
+		return NULL;
+
+	// Get the ctrl
+	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
+	return dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(PhraseMemoryAltCtrlBase + toString(memorySlot)));	
+}
+
+// ***************************************************************************
 void	CSPhraseManager::updateMemoryCtrlState(uint memorySlot)
 {	
 	CDBCtrlSheet	*ctrl= getMemorySlotCtrl(memorySlot);
+	CDBCtrlSheet	*ctrlAlt= getMemoryAltSlotCtrl(memorySlot);
 	if(ctrl)
 	{
 		// update the valid state.
 		updateMemoryCtrlState(memorySlot, ctrl, getRightHandItemSkill());
+	}
+	if(ctrlAlt)
+	{
+		// update the valid state.
+		updateMemoryCtrlState(memorySlot, ctrlAlt, getRightHandItemSkill());
 	}
 }
 
@@ -3045,10 +3098,16 @@ void	CSPhraseManager::updateMemoryCtrlState(uint memorySlot)
 void	CSPhraseManager::updateMemoryCtrlRegenTickRange(uint memorySlot)
 {
 	CDBCtrlSheet	*ctrl= getMemorySlotCtrl(memorySlot);
+	CDBCtrlSheet	*ctrlAlt= getMemoryAltSlotCtrl(memorySlot);
 	if(ctrl)
 	{
 		// update the valid state.
 		updateMemoryCtrlRegenTickRange(memorySlot, ctrl);
+	}
+	if(ctrlAlt)
+	{
+		// update the valid state.
+		updateMemoryCtrlRegenTickRange(memorySlot, ctrlAlt);
 	}
 }
 
