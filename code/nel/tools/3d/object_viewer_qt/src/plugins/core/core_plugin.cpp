@@ -66,6 +66,7 @@ bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 
 	generalSettings->applyGeneralSettings();
 	searchPathPage->applySearchPaths();
+	recureseSearchPathPage->applySearchPaths();
 	addAutoReleasedObject(generalSettings);
 	addAutoReleasedObject(searchPathPage);
 	addAutoReleasedObject(recureseSearchPathPage);

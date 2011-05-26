@@ -193,10 +193,11 @@ void CSearchPathsSettingsPage::writeSettings()
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
 	if (m_recurse)
-		paths = settings->value(Core::Constants::RECURSIVE_SEARCH_PATHS).toStringList();
+		settings->setValue(Core::Constants::RECURSIVE_SEARCH_PATHS, paths);
 	else
-		paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
+		settings->setValue(Core::Constants::SEARCH_PATHS, paths);
 	settings->endGroup();
+	settings->sync();
 }
 
 void CSearchPathsSettingsPage::checkEnabledButton()
