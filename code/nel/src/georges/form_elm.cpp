@@ -233,6 +233,7 @@ const CType* CFormElm::getType ()
 	warning (false, "getType", "This node is not an atom.");
 	return 0;
 }
+
 // ***************************************************************************
 
 bool CFormElm::getValue (string &/* result */, TEval /* evaluate */) const
