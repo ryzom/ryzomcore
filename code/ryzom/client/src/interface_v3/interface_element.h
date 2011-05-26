@@ -250,6 +250,9 @@ public:
 	/// Accessors : SET
 	void setId (const std::string &newID) { _Id = newID; }
 
+	inline void setName(const std::string &name) { _Name = name; }
+	inline const std::string& getName() { return _Name; }
+
 	virtual void setIdRecurse(const std::string &newID);
 
 	void setParent (CInterfaceGroup *pIG) { _Parent = pIG; }
@@ -509,6 +512,8 @@ protected:
 
 	///the id of the element
 	std::string _Id;
+
+	std::string	_Name;
 
 	///is the element active?
 	bool	_Active;

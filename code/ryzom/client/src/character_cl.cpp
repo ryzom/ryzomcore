@@ -5874,6 +5874,27 @@ void CCharacterCL::updateAttachedFX()
 	CMatrix alignMatrix;
 	buildAlignMatrix(alignMatrix);
 
+	std::list<CAttachedFX::CBuildInfo>::iterator itAttachedFxToStart = _AttachedFXListToStart.begin();
+	while(itAttachedFxToStart != _AttachedFXListToStart.end())
+	{
+		if ((*itAttachedFxToStart).DelayBeforeStart < (float)(TimeInSec - (*itAttachedFxToStart).StartTime))
+		{
+			uint index = (*itAttachedFxToStart).MaxNumAnimCount;
+			(*itAttachedFxToStart).MaxNumAnimCount = 0;
+			CAttachedFX::TSmartPtr fx = new CAttachedFX;
+			fx->create(*this, (*itAttachedFxToStart), CAttachedFX::CTargeterInfo());
+			if (!fx->FX.empty())
+			{
+				_AuraFX[index] = fx;
+			}
+			itAttachedFxToStart = _AttachedFXListToStart.erase(itAttachedFxToStart);
+		}
+		else
+		{
+			++itAttachedFxToStart;
+		}
+	}
+
 	// update tracks & pos for anim attachedfxs
 	std::list<CAttachedFX::TSmartPtr>::iterator itAttachedFx = _AttachedFXListForCurrentAnim.begin();
 	while(itAttachedFx != _AttachedFXListForCurrentAnim.end())
@@ -8993,16 +9014,40 @@ void CCharacterCL::setAuraFX(uint index, const CAnimationFX *sheet)
 	}
 	else
 	{
+		std::list<CAttachedFX::CBuildInfo>::iterator itAttachedFxToStart = _AttachedFXListToStart.begin();
+		while(itAttachedFxToStart != _AttachedFXListToStart.end())
+		{
+			if ((*itAttachedFxToStart).MaxNumAnimCount == index)
+				return;
+		}
 		// remove previous aura
 		_AuraFX[index] = NULL;
-		CAttachedFX::TSmartPtr fx = new CAttachedFX;
 		CAttachedFX::CBuildInfo bi;
 		bi.Sheet = sheet;
 		bi.TimeOut =  0.f;
-		fx->create(*this, bi, CAttachedFX::CTargeterInfo());
-		if (!fx->FX.empty())
+
+		if (sheet->Sheet->PSName == "misc_caravan_teleportout.ps")
 		{
-			_AuraFX[index] = fx;
+			bi.MaxNumAnimCount = index;
+			bi.StartTime = TimeInSec;
+			bi.DelayBeforeStart = 12.5f;
+			_AttachedFXListToStart.push_front(bi);
+		}
+		else if (sheet->Sheet->PSName == "misc_kami_teleportout.ps")
+		{
+			bi.MaxNumAnimCount = index;
+			bi.StartTime = TimeInSec;
+			bi.DelayBeforeStart = 11.5f;
+			_AttachedFXListToStart.push_front(bi);
+		}
+		else 
+		{
+			CAttachedFX::TSmartPtr fx = new CAttachedFX;
+			fx->create(*this, bi, CAttachedFX::CTargeterInfo());
+			if (!fx->FX.empty())
+			{
+				_AuraFX[index] = fx;
+			}
 		}
 	}
 }

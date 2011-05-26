@@ -999,7 +999,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 
 
 			}
-			rCTF.setTargetGroup(PeopleInterraction.TheUserChat.Filter.getTargetGroup());
+			rCTF.setTargetGroup(PeopleInterraction.TheUserChat.Filter.getTargetGroup(), PeopleInterraction.TheUserChat.Filter.getTargetDynamicChannelDbIndex());
 		}
 		else
 		{
@@ -1813,8 +1813,6 @@ void CPeopleInterraction::setupUserChatFromSummary(const CFilteredChatSummary &s
 //=================================================================================================================
 void CPeopleInterraction::setupUserDynChatFromSummary(const CFilteredDynChatSummary &summary, CFilteredChat &dest)
 {
-	// User Dest
-	dest.Filter.setTargetGroup(summary.Target, 0, false);
 	// src
 	for (uint8 i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
 	{
@@ -2666,12 +2664,12 @@ class CHandlerChatTargetSelected : public IActionHandler
 		// Case of user chat in grouped chat window
 		if (cw == PeopleInterraction.ChatGroup.Window)
 		{
-			PeopleInterraction.TheUserChat.Filter.setTargetGroup(cf.getTargetGroup());
+			PeopleInterraction.TheUserChat.Filter.setTargetGroup(cf.getTargetGroup(), cf.getTargetDynamicChannelDbIndex());
 			CInterfaceManager::getInstance()->runActionHandler("chat_group_filter", NULL, "user");
 		}
 		if (cw == PeopleInterraction.TheUserChat.Window)
 		{
-			PeopleInterraction.TheUserChat.Filter.setTargetGroup(cf.getTargetGroup());
+			PeopleInterraction.TheUserChat.Filter.setTargetGroup(cf.getTargetGroup(), cf.getTargetDynamicChannelDbIndex());
 			CInterfaceManager::getInstance()->runActionHandler("user_chat_active", NULL, "");
 		}
 

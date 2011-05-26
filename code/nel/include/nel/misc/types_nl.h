@@ -51,14 +51,10 @@
 #   ifndef _WIN32_WINNT
 #		define _WIN32_WINNT 0x0500	// Minimal OS = Windows 2000 (NeL is not supported on Windows 95/98)
 #   endif
-#	if _MSC_VER >= 1500
+#	if _MSC_VER >= 1600
+#		define NL_COMP_VC10
+#	elif _MSC_VER >= 1500
 #		define NL_COMP_VC9
-#		ifndef _STLPORT_VERSION // STLport doesn't depend on MS STL features
-#			if defined(_HAS_TR1) && (_HAS_TR1 + 0) // VC9 TR1 feature pack
-#				define NL_ISO_STDTR1_AVAILABLE
-#				define NL_ISO_STDTR1_HEADER(header) <header>
-#			endif
-#		endif
 #	elif _MSC_VER >= 1400
 #		define NL_COMP_VC8
 #		undef nl_time
@@ -78,6 +74,10 @@
 #	elif _MSC_VER >= 1200
 #		define NL_COMP_VC6
 #		define NL_COMP_NEED_PARAM_ON_METHOD
+#	endif
+#	if defined(_HAS_TR1) && (_HAS_TR1 + 0) // VC9 TR1 feature pack or later
+#		define NL_ISO_STDTR1_AVAILABLE
+#		define NL_ISO_STDTR1_HEADER(header) <header>
 #	endif
 #	ifdef _DEBUG
 #		define NL_DEBUG
@@ -117,6 +117,10 @@
 #	define NL_COMP_GCC
 #endif
 
+#if defined(_HAS_CPP0X) || defined(__GXX_EXPERIMENTAL_CXX0X__)
+#	define NL_ISO_CPP0X_AVAILABLE
+#endif
+
 // gcc 3.4 introduced ISO C++ with tough template rules
 //
 // NL_ISO_SYNTAX can be used using #if NL_ISO_SYNTAX or #if !NL_ISO_SYNTAX
@@ -149,7 +153,7 @@
 #	pragma warning (disable : 4390)			// don't warn in empty block "if(exp) ;"
 #	pragma warning (disable : 4996)			// 'vsnprintf': This function or variable may be unsafe. Consider using vsnprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
 // Debug : Sept 01 2006
-#	if defined(NL_COMP_VC8) || defined(NL_COMP_VC9)
+#	if defined(NL_COMP_VC8) || defined(NL_COMP_VC9) || defined(NL_COMP_VC10)
 #		pragma warning (disable : 4005)			// don't warn on redefinitions caused by xp platform sdk
 #	endif // NL_COMP_VC8 || NL_COMP_VC9
 #endif // NL_OS_WINDOWS
@@ -362,7 +366,7 @@ typedef	uint16	ucchar;
 
 // To define a 64bits constant; ie: UINT64_CONSTANT(0x123456781234)
 #ifdef NL_OS_WINDOWS
-#	if defined(NL_COMP_VC8) || defined(NL_COMP_VC9)
+#	if defined(NL_COMP_VC8) || defined(NL_COMP_VC9) || defined(NL_COMP_VC10)
 #		define INT64_CONSTANT(c)	(c##LL)
 #		define SINT64_CONSTANT(c)	(c##LL)
 #		define UINT64_CONSTANT(c)	(c##LL)

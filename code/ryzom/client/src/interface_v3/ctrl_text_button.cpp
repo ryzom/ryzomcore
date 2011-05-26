@@ -113,8 +113,8 @@ bool CCtrlTextButton::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		_TextureIdOver[2].setTexture((TxName+"_r.tga").c_str());
 	}
 
-	// Compute Bmp Sizes (crash with VC++ 2010)
-//	nlctassert(NumTexture==3);
+	// Compute Bmp Sizes
+	nlctassert(NumTexture==3);
 	rVR.getTextureSizeFromId(_TextureIdNormal[0], _BmpLeftW, _BmpH);
 	rVR.getTextureSizeFromId(_TextureIdNormal[1], _BmpMiddleW, _BmpH);
 	rVR.getTextureSizeFromId(_TextureIdNormal[2], _BmpRightW, _BmpH);

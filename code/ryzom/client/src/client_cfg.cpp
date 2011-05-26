@@ -1942,7 +1942,7 @@ void CClientConfig::init(const string &configFileName)
 	
 	// save the updated config file
 	NLMISC::COFile configFile(configFileName, false, true, false);
-	configFile.serialBuffer((uint8*)contentUtf8.c_str(), contentUtf8.size());
+	configFile.serialBuffer((uint8*)contentUtf8.c_str(), (uint)contentUtf8.size());
 	configFile.close();
 
 	// now we can continue loading and parsing the config file

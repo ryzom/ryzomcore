@@ -313,7 +313,7 @@ void CChatTargetFilter::msgEntered(const ucstring &msg, CChatWindow *chatWindow)
 		// the target must be a player, make a tell on him
 		ChatMngr.tell(_TargetPlayer.toString(), msg);
 		// direct output in the chat
-		chatWindow->displayLocalPlayerTell(msg);
+		chatWindow->displayLocalPlayerTell(_TargetPlayer.toString(), msg);
 	}
 	else
 	{
