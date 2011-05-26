@@ -232,7 +232,7 @@ CHashKey getHMacSHA1(const uint8 *text, uint32 text_len, const uint8 *key, uint3
 
 	// Get hash
 	SHA1Reset(&sha);
-	SHA1Input(&sha, (const uint8_t*)buffer1.c_str(), buffer1.size());
+	SHA1Input(&sha, (const uint8_t*)buffer1.c_str(), (uint)buffer1.size());
 	SHA1Result(&sha, SHA1_Key1);
 	CHashKey hk1 (SHA1_Key1);
 
@@ -246,7 +246,7 @@ CHashKey getHMacSHA1(const uint8 *text, uint32 text_len, const uint8 *key, uint3
 
 	// Get new hash
 	SHA1Reset(&sha);
-	SHA1Input(&sha, (const uint8_t*)buffer2.c_str(), buffer2.size());
+	SHA1Input(&sha, (const uint8_t*)buffer2.c_str(), (uint)buffer2.size());
 	SHA1Result(&sha, SHA1_Key2);
 	CHashKey hk (SHA1_Key2);
 
