@@ -33,8 +33,9 @@ namespace Core
 
 QString lastDir = ".";
 
-CSearchPathsSettingsPage::CSearchPathsSettingsPage(QObject *parent)
+CSearchPathsSettingsPage::CSearchPathsSettingsPage(bool recurse, QObject *parent)
 	: IOptionsPage(parent),
+	  m_recurse(recurse),
 	  m_page(0)
 {
 }
@@ -45,12 +46,18 @@ CSearchPathsSettingsPage::~CSearchPathsSettingsPage()
 
 QString CSearchPathsSettingsPage::id() const
 {
-	return QLatin1String("search_paths");
+	if (m_recurse)
+		return QLatin1String("search_recurse_paths");
+	else
+		return QLatin1String("search_paths");
 }
 
 QString CSearchPathsSettingsPage::trName() const
 {
-	return tr("Search Paths");
+	if (m_recurse)
+		return tr("Search Recurse Paths");
+	else
+		return tr("Search Paths");
 }
 
 QString CSearchPathsSettingsPage::category() const
@@ -95,7 +102,11 @@ void CSearchPathsSettingsPage::applySearchPaths()
 	QStringList paths, remapExt;
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-	paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
+	if (m_recurse)
+		paths = settings->value(Core::Constants::RECURSIVE_SEARCH_PATHS).toStringList();
+	else
+		paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
+
 	remapExt = settings->value(Core::Constants::REMAP_EXTENSIONS).toStringList();
 	settings->endGroup();
 
@@ -104,7 +115,7 @@ void CSearchPathsSettingsPage::applySearchPaths()
 
 	Q_FOREACH(QString path, paths)
 	{
-		NLMISC::CPath::addSearchPath(path.toStdString(), false, false);
+		NLMISC::CPath::addSearchPath(path.toStdString(), m_recurse, false);
 	}
 }
 
@@ -159,7 +170,10 @@ void CSearchPathsSettingsPage::readSettings()
 	QStringList paths;
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-	paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
+	if (m_recurse)
+		paths = settings->value(Core::Constants::RECURSIVE_SEARCH_PATHS).toStringList();
+	else
+		paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
 	settings->endGroup();
 	Q_FOREACH(QString path, paths)
 	{
@@ -178,7 +192,10 @@ void CSearchPathsSettingsPage::writeSettings()
 
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-	settings->setValue(Core::Constants::SEARCH_PATHS, paths);
+	if (m_recurse)
+		paths = settings->value(Core::Constants::RECURSIVE_SEARCH_PATHS).toStringList();
+	else
+		paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
 	settings->endGroup();
 }
 
