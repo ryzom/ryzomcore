@@ -2083,8 +2083,9 @@ static void DuplicatePrimitiveBlock(const CIndexBuffer &srcBlock, CIndexBuffer &
 	CIndexBufferReadWrite ibaWrite;
 	destBlock.lock (ibaWrite);
 
-
+#ifdef NL_FORCE_INDEX_BUFFER_16
 	nlassert(destBlock.getFormat() == CIndexBuffer::Indices16);
+#endif
 
 	// TMP TMP TMP
 	if (ibaRead.getFormat() == CIndexBuffer::Indices16)
