@@ -18,6 +18,7 @@
 // Project includes
 #include "context_manager.h"
 #include "icontext.h"
+#include "main_window.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -31,26 +32,26 @@ namespace Core
 
 struct ContextManagerPrivate
 {
-	explicit ContextManagerPrivate(ExtensionSystem::IPluginManager *pluginManager, QTabWidget *tabWidget);
-	ExtensionSystem::IPluginManager *m_pluginManager;
+	explicit ContextManagerPrivate(Core::MainWindow *mainWindow, QTabWidget *tabWidget);
+	Core::MainWindow *m_mainWindow;
 	QTabWidget *m_tabWidget;
 	QVector<IContext *> m_contexts;
 	int m_oldCurrent;
 };
 
-ContextManagerPrivate::ContextManagerPrivate(ExtensionSystem::IPluginManager *pluginManager, QTabWidget *tabWidget)
-	: m_pluginManager(pluginManager),
+ContextManagerPrivate::ContextManagerPrivate(Core::MainWindow *mainWindow, QTabWidget *tabWidget)
+	: m_mainWindow(mainWindow),
 	  m_tabWidget(tabWidget),
 	  m_oldCurrent(-1)
 {
 }
 
-ContextManager::ContextManager(ExtensionSystem::IPluginManager *pluginManager, QTabWidget *tabWidget)
-	: d(new ContextManagerPrivate(pluginManager, tabWidget))
+ContextManager::ContextManager(Core::MainWindow *mainWindow, QTabWidget *tabWidget)
+	: d(new ContextManagerPrivate(mainWindow, tabWidget))
 {
-	QObject::connect(d->m_pluginManager, SIGNAL(objectAdded(QObject *)),
+	QObject::connect(d->m_mainWindow->pluginManager(), SIGNAL(objectAdded(QObject *)),
 					 this, SLOT(objectAdded(QObject *)));
-	QObject::connect(d->m_pluginManager, SIGNAL(aboutToRemoveObject(QObject *)),
+	QObject::connect(d->m_mainWindow->pluginManager(), SIGNAL(aboutToRemoveObject(QObject *)),
 					 this, SLOT(aboutToRemoveObject(QObject *)));
 
 	QObject::connect(d->m_tabWidget, SIGNAL(currentChanged(int)), this, SLOT(currentTabChanged(int)));
@@ -61,7 +62,7 @@ ContextManager::~ContextManager()
 	delete d;
 }
 
-Core::IContext* ContextManager::currentContext() const
+Core::IContext *ContextManager::currentContext() const
 {
 	int currentIndex = d->m_tabWidget->currentIndex();
 	if (currentIndex < 0)
@@ -69,7 +70,7 @@ Core::IContext* ContextManager::currentContext() const
 	return d->m_contexts.at(currentIndex);
 }
 
-Core::IContext* ContextManager::context(const QString &id) const
+Core::IContext *ContextManager::context(const QString &id) const
 {
 	const int index = indexOf(id);
 	if (index >= 0)

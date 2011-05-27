@@ -86,6 +86,10 @@ public:
 		return m_simpleViewer;
 	}
 
+	virtual void open()
+	{
+	}
+
 	CSimpleViewer *m_simpleViewer;
 };
 

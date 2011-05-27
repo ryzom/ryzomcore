@@ -43,6 +43,7 @@ public:
 	virtual QString trName() const;
 	virtual QString category() const;
 	virtual QString trCategory() const;
+	QIcon categoryIcon() const;
 	virtual QWidget *createPage(QWidget *parent);
 
 	virtual void apply();

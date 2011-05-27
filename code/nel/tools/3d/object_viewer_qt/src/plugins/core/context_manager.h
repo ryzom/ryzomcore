@@ -21,8 +21,6 @@
 // Project includes
 #include "core_global.h"
 
-#include "../../extension_system/iplugin_manager.h"
-
 // Qt includes
 #include <QtCore/QObject>
 
@@ -33,6 +31,7 @@ QT_END_NAMESPACE
 namespace Core
 {
 class IContext;
+class MainWindow;
 struct ContextManagerPrivate;
 
 class CORE_EXPORT ContextManager : public QObject
@@ -40,11 +39,11 @@ class CORE_EXPORT ContextManager : public QObject
 	Q_OBJECT
 
 public:
-	explicit ContextManager(ExtensionSystem::IPluginManager *pluginManager, QTabWidget *tabWidget);
+	explicit ContextManager(Core::MainWindow *mainWindow, QTabWidget *tabWidget);
 	virtual ~ContextManager();
 
-	Core::IContext* currentContext() const;
-	Core::IContext* context(const QString &id) const;
+	Core::IContext *currentContext() const;
+	Core::IContext *context(const QString &id) const;
 
 Q_SIGNALS:
 	// the default argument '=0' is important for connects without the oldContext argument.

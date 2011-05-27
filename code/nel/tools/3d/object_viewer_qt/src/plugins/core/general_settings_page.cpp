@@ -65,6 +65,11 @@ QString GeneralSettingsPage::trCategory() const
 	return tr(Constants::SETTINGS_TR_CATEGORY_GENERAL);
 }
 
+QIcon GeneralSettingsPage::categoryIcon() const
+{
+	return QIcon();
+}
+
 void GeneralSettingsPage::applyGeneralSettings()
 {
 	QSettings *settings = Core::ICore::instance()->settings();

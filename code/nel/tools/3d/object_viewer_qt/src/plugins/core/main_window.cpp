@@ -42,6 +42,7 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 	  m_contextManager(0),
 	  m_coreImpl(0),
 	  m_lastDir("."),
+	  m_undoGroup(0),
 	  m_settings(0)
 {
 	QCoreApplication::setApplicationName(QLatin1String("ObjectViewerQt"));
@@ -65,10 +66,11 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 	m_tabWidget->setDocumentMode(true);
 	setCentralWidget(m_tabWidget);
 
-	m_contextManager = new ContextManager(m_pluginManager, m_tabWidget);
+	m_contextManager = new ContextManager(this, m_tabWidget);
 
 	setDockNestingEnabled(true);
 	m_originalPalette = QApplication::palette();
+	m_undoGroup = new QUndoGroup(this);
 
 	createDialogs();
 	createActions();
@@ -122,6 +124,7 @@ ExtensionSystem::IPluginManager *MainWindow::pluginManager() const
 
 void MainWindow::open()
 {
+	m_contextManager->currentContext()->open();
 }
 
 bool MainWindow::showOptionsDialog(const QString &group,
@@ -212,11 +215,14 @@ void MainWindow::createMenus()
 {
 	m_fileMenu = menuBar()->addMenu(tr("&File"));
 	menuManager()->registerMenu(m_fileMenu, Constants::M_FILE);
-//	m_fileMenu->addAction(m_openAction);
+	m_fileMenu->addAction(m_openAction);
 	m_fileMenu->addSeparator();
 	m_fileMenu->addAction(m_exitAction);
 
 	m_editMenu = menuBar()->addMenu(tr("&Edit"));
+	m_editMenu->addAction(m_undoGroup->createUndoAction(this));
+	m_editMenu->addAction(m_undoGroup->createRedoAction(this));
+	m_editMenu->addSeparator();
 	menuManager()->registerMenu(m_editMenu, Constants::M_EDIT);
 
 	m_viewMenu = menuBar()->addMenu(tr("&View"));

@@ -66,14 +66,19 @@ public:
 	{
 		return QLatin1String("ObjectViewer");
 	}
+
 	virtual QString trName() const
 	{
 		return tr("Object Viewer");
 	}
+
 	virtual QIcon icon() const
 	{
 		return QIcon();
 	}
+
+	virtual void open();
+
 	virtual QWidget *widget();
 };
 

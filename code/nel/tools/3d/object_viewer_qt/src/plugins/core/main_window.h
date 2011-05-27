@@ -26,6 +26,7 @@
 
 // Qt includes
 #include <QtGui/QMainWindow>
+#include <QtGui/QUndoGroup>
 #include <QtCore/QSettings>
 
 namespace Core
@@ -85,6 +86,7 @@ private:
 	QPalette m_originalPalette;
 	QString m_lastDir;
 
+	QUndoGroup *m_undoGroup;
 	QSettings *m_settings;
 
 	QTimer *m_mainTimer;

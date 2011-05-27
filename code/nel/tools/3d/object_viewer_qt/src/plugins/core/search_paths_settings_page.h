@@ -44,6 +44,7 @@ public:
 	QString trName() const;
 	QString category() const;
 	QString trCategory() const;
+	QIcon categoryIcon() const;
 	QWidget *createPage(QWidget *parent);
 
 	void apply();

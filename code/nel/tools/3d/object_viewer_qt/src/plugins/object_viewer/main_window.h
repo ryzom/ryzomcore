@@ -72,10 +72,12 @@ public:
 		return _SkeletonTreeModel;
 	}
 
-private Q_SLOTS:
+public Q_SLOTS:
 	void open();
 	void resetScene();
 	void reloadTextures();
+
+private Q_SLOTS:
 	void updateStatusBar();
 	void updateRender();
 	void setInterval(int value);

@@ -93,6 +93,11 @@ public:
 	{
 		return QIcon();
 	}
+
+	virtual void open()
+	{
+	}
+
 	virtual QWidget *widget();
 
 	LandscapeEditorWindow *m_landEditorWindow;

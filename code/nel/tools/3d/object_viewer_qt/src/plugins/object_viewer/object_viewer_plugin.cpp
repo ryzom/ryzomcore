@@ -89,6 +89,11 @@ void ObjectViewerPlugin::addAutoReleasedObject(QObject *obj)
 	_autoReleaseObjects.prepend(obj);
 }
 
+void CObjectViewerContext::open()
+{
+	Modules::mainWin().open();
+}
+
 QWidget *CObjectViewerContext::widget()
 {
 	return &Modules::mainWin();
