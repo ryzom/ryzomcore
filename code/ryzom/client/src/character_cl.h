@@ -675,6 +675,7 @@ protected:
 	/// List of attached to remove as soon as possible (when there are no particles left)
 	std::list<CAttachedFX::TSmartPtr>			_AttachedFXListToRemove;
 
+	std::list<CAttachedFX::CBuildInfo>			_AttachedFXListToStart;
 
 	CAttachedFX::TSmartPtr						_AuraFX[MaxNumAura]; // special case for aura
 	CAttachedFX::TSmartPtr						_LinkFX;             // special case for link

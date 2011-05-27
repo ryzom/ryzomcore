@@ -133,6 +133,9 @@ namespace MAGICFX
 		WaterWall = 11,
 		ThornWall = 12,
 		LightningWall = 13,
+		OtherFireWall = 14,
+		TeleportKami = 15, // No effect aura
+		TeleportKara = 16, // No effect aura
 	};
 }
 

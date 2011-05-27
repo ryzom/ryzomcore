@@ -37,7 +37,7 @@ class CSearchPathsSettingsPage : public Core::IOptionsPage
 	Q_OBJECT
 
 public:
-	CSearchPathsSettingsPage(QObject *parent = 0);
+	explicit CSearchPathsSettingsPage(bool recurse, QObject *parent = 0);
 	~CSearchPathsSettingsPage();
 
 	QString id() const;
@@ -64,6 +64,7 @@ private:
 	void writeSettings();
 	void checkEnabledButton();
 
+	bool m_recurse;
 	QWidget *m_page;
 	Ui::CSearchPathsSettingsPage m_ui;
 };

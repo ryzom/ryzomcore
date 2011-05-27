@@ -549,13 +549,13 @@ public:
 	bool		discreetPropertyHasChanged(const CPropertyHistory::CPropertyEntry& entry, const CMirrorPropValueRO<T>& currentValue, CLFECOMMON::TPropIndex propIndex, T* ) const
 	{
 		// Although the client should already know the sheet id of the controlled player, let's send it
-		//if ( (propIndex==PROPERTY_SHEET) && (TVPNodeServer::PrioContext.Slot == 0) )
+		//if ( (propIndex==CLFECOMMON::PROPERTY_SHEET) && (TVPNodeServer::PrioContext.Slot == 0) )
 		//	return false;
 
 		if (entry.HasValue)
 		{
 #ifdef NL_DEBUG
-			if ( (propIndex==PROPERTY_SHEET) && (currentValue() != *((T*)&(entry.LastSent))) )
+			if ( (propIndex==CLFECOMMON::PROPERTY_SHEET) && (currentValue() != *((T*)&(entry.LastSent))) )
 				LOG_WHAT_IS_SENT( "C%hu S%hu: sheet changes from %u to %u", TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.Slot, (uint32)entry.LastSent, asUInt32<T>(currentValue()) );
 #endif
 			return (currentValue() != *((T*)&(entry.LastSent)));
@@ -569,7 +569,7 @@ public:
 			{
 				// Not sent yet
 				//nldebug( "No history yet for C%hu - slot %hu - prop %hu", TVPNodeServer::PrioContext.ClientHost->clientId(), (uint16)TVPNodeServer::PrioContext.Slot, propIndex );
-				if ( (propIndex==PROPERTY_SHEET) )
+				if ( (propIndex==CLFECOMMON::PROPERTY_SHEET) )
 				{
 					CMirrorPropValueRO<T> currentValue( TheDataset, TVPNodeServer::PrioContext.EntityIndex, dsPropertyIndex );
 					LOG_WHAT_IS_SENT( "C%hu S%hu: sheet initializes to %u", TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.Slot,	asUInt32<T>(currentValue()) );
@@ -614,7 +614,7 @@ public:
 	bool		discreetPropertyHasChanged(const CPropertyHistory::CPropertyEntry& entry, TPropIndex propIndex, T* ) const
 	{
 		// Although the client should already know the sheet id of the controlled player, let's send it
-		//if ( (propIndex==PROPERTY_SHEET) && (TVPNodeServer::PrioContext.Slot == 0) )
+		//if ( (propIndex==CLFECOMMON::PROPERTY_SHEET) && (TVPNodeServer::PrioContext.Slot == 0) )
 		//	return false;
 
 		TPropertyIndex dsPropertyIndex = CEntityContainer::propertyIndexInDataSetToVisualPropIndex( propIndex );
@@ -625,7 +625,7 @@ public:
 			CMirrorPropValueRO<T> currentValue( TheDataset, TVPNodeServer::PrioContext.EntityIndex, dsPropertyIndex );
 
 #ifdef NL_DEBUG
-			if ( (propIndex==PROPERTY_SHEET) && (currentValue() != *((T*)&(entry.LastSent))) )
+			if ( (propIndex==CLFECOMMON::PROPERTY_SHEET) && (currentValue() != *((T*)&(entry.LastSent))) )
 				LOG_WHAT_IS_SENT( "C%hu S%hu: sheet changes from %u to %u", TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.Slot, (uint32)entry.LastSent, asUInt32<T>(currentValue()) );
 #endif
 
@@ -639,7 +639,7 @@ public:
 			{
 				// Not sent yet
 				//nldebug( "No history yet for C%hu - slot %hu - prop %hu", TVPNodeServer::PrioContext.ClientHost->clientId(), (uint16)TVPNodeServer::PrioContext.Slot, propIndex );
-				if ( (propIndex==PROPERTY_SHEET) )
+				if ( (propIndex==CLFECOMMON::PROPERTY_SHEET) )
 				{
 					CMirrorPropValueRO<T> currentValue( TheDataset, TVPNodeServer::PrioContext.EntityIndex, dsPropertyIndex );
 					LOG_WHAT_IS_SENT( "C%hu S%hu: sheet initializes to %u", TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.Slot,	asUInt32<T>(currentValue()) );
@@ -681,7 +681,7 @@ public:
 	bool		targetListHasChanged(const CPropertyHistory::CPropertyEntry& entry, CLFECOMMON::TPropIndex propIndex, T* ) const
 	{
 		// Although the client should already know the sheet id of the controlled player, let's send it
-		//if ( (propIndex==PROPERTY_SHEET) && (TVPNodeServer::PrioContext.Slot == 0) )
+		//if ( (propIndex==CLFECOMMON::PROPERTY_SHEET) && (TVPNodeServer::PrioContext.Slot == 0) )
 		//	return false;
 
 		TPropertyIndex dsPropertyIndex = CEntityContainer::propertyIndexInDataSetToVisualPropIndex( propIndex );

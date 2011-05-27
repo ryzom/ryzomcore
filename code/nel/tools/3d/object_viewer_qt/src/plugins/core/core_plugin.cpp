@@ -61,12 +61,15 @@ bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 	bool success = m_mainWindow->initialize(errorString);
 
 	GeneralSettingsPage *generalSettings = new GeneralSettingsPage(this);
-	CSearchPathsSettingsPage *searchPathPage = new CSearchPathsSettingsPage(this);
+	CSearchPathsSettingsPage *searchPathPage = new CSearchPathsSettingsPage(false, this);
+	CSearchPathsSettingsPage *recureseSearchPathPage = new CSearchPathsSettingsPage(true, this);
 
 	generalSettings->applyGeneralSettings();
 	searchPathPage->applySearchPaths();
+	recureseSearchPathPage->applySearchPaths();
 	addAutoReleasedObject(generalSettings);
 	addAutoReleasedObject(searchPathPage);
+	addAutoReleasedObject(recureseSearchPathPage);
 	return success;
 }
 

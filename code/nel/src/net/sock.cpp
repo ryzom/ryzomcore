@@ -22,10 +22,8 @@
 #include "nel/misc/hierarchical_timer.h"
 
 #ifdef NL_OS_WINDOWS
-# if defined(NL_COMP_VC7) || defined(NL_COMP_VC71) || defined(NL_COMP_VC8) || defined(NL_COMP_VC9)
-#	include <winsock2.h>
-# endif
 #	define NOMINMAX
+#	include <winsock2.h>
 #	include <windows.h>
 #	define socklen_t int
 #	define ERROR_NUM WSAGetLastError()

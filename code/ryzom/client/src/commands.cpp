@@ -1271,6 +1271,30 @@ NLMISC_COMMAND(7,"talk in 7th dynamic chat channel","<channel_nb> <sentence>")
 {
 	return talkInChan(7,args);
 }
+
+
+NLMISC_COMMAND(setItemName, "set name of items, sbrick, etc..","<sheet_id> <name> <desc> <desc2>")
+{
+	if (args.size() < 2) return false;
+	CSheetId id(args[0]);
+	ucstring name;
+	name.fromUtf8(args[1]);
+	ucstring desc;
+	ucstring desc2;
+	if (args.size() > 2)
+		desc.fromUtf8(args[2]);
+	if (args.size() > 2)
+		desc2.fromUtf8(args[3]);
+
+	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
+	if (pSMC)
+		pSMC->replaceSBrickName(id, name, desc, desc2);
+	else
+		return false;
+	return true;
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////

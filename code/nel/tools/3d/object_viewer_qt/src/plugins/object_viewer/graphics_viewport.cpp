@@ -134,6 +134,9 @@ bool CGraphicsViewport::winEvent(MSG *message, long *result)
 		if (driver)
 		{
 			winProc proc = (winProc)driver->getWindowProc();
+
+			// TODO: shouldn't it return false like the others? 
+			// see macEvent() and x11Event() below
 			return proc(driver, message->hwnd, message->message, message->wParam, message->lParam);
 		}
 	}
@@ -156,10 +159,12 @@ bool CGraphicsViewport::macEvent(EventHandlerCallRef caller, EventRef event)
 		if (driver)
 		{
 			cocoaProc proc = (cocoaProc)driver->getWindowProc();
-			return proc(driver, event);
+			proc(driver, event);
 		}
 	}
 
+	// return false to let Qt handle the event as well,  
+	// else the widget would never get focus
 	return false;
 }
 
@@ -175,10 +180,13 @@ bool CGraphicsViewport::x11Event(XEvent *event)
 		if (driver)
 		{
 			x11Proc proc = (x11Proc)driver->getWindowProc();
-			return proc(driver, event);
+			proc(driver, event);
 		}
 	}
 
+	// return false to let Qt handle the event as well,  
+	// else the widget would never get focus
+	// TODO: test me please, i have no linux at hand (rti)
 	return false;
 }
 #endif

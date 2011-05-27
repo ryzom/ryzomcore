@@ -86,6 +86,7 @@ QWidget *VegetableSettingsPage::createPage(QWidget *parent)
 	connect(m_ui.coarseToolButton, SIGNAL(clicked()), this, SLOT(setCoarseMeshTexture()));
 	connect(m_ui.addZoneToolButton, SIGNAL(clicked()), this, SLOT(addZone()));
 	connect(m_ui.removeZoneToolButton, SIGNAL(clicked()), this, SLOT(removeZone()));
+	connect(m_ui.clearButton, SIGNAL(clicked()), m_ui.zonesListWidget, SLOT(clear()));
 
 	return m_page;
 }

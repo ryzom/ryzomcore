@@ -42,7 +42,6 @@ using namespace std;
 using namespace NL3D;
 using namespace NLMISC;
 
-
 #ifdef NL_OS_WINDOWS
 int WINAPI WinMain( HINSTANCE hInstance, 
 									 HINSTANCE hPrevInstance, 
@@ -139,7 +138,7 @@ int main(int argc, char **argv)
 		tc.setScaleX (scale);
 		tc.setScaleZ (scale);
 		tc.printAt (0.1f, 0.3f, string("printAt Scale String"));
-		
+
 		// display the same string with no scale
 		tc.setHotSpot (CComputedString::TopLeft);
 		tc.setScaleX (1.0f);

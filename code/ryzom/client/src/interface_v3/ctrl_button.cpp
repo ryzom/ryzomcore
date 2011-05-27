@@ -333,4 +333,16 @@ void CCtrlButton::fitTexture()
 	setH(h);
 }
 
-
+// ***************************************************************************
+bool CCtrlButton::getMouseOverShape(string &texName, uint8 &rot, CRGBA &col)
+{
+	if (_AHOnLeftClickString == "browse")
+	{
+		texName = "curs_pick.tga";
+		rot= 0;
+		col = CRGBA::White;
+		return true;
+	}
+	
+	return false;
+}

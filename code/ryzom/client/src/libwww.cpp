@@ -218,6 +218,14 @@ HTAttr p_attr[] =
 	HTML_ATTR(P,QUICK_HELP_CONDITION),
 		HTML_ATTR(P,QUICK_HELP_EVENTS),
 		HTML_ATTR(P,QUICK_HELP_LINK),
+		HTML_ATTR(P,NAME),
+	{ 0 }
+};
+
+
+HTAttr div_attr[] =
+{
+	HTML_ATTR(DIV,NAME),
 	{ 0 }
 };
 
@@ -684,6 +692,8 @@ void initLibWWW()
 		HTML_DTD->tags[HTML_A].number_of_attributes = sizeof(a_attr) / sizeof(HTAttr) - 1;
 		//HTML_DTD->tags[HTML_I].attributes = a_attr;
 		HTML_DTD->tags[HTML_I].number_of_attributes = 0;
+		HTML_DTD->tags[HTML_DIV].attributes = div_attr;
+		HTML_DTD->tags[HTML_DIV].number_of_attributes = sizeof(div_attr) / sizeof(HTAttr) - 1;
 
 		// Set a request timeout
 //		HTHost_setEventTimeout (30000);
