@@ -108,6 +108,16 @@ LandscapeEditorContext::LandscapeEditorContext(QObject *parent)
 	m_landEditorWindow = new LandscapeEditorWindow();
 }
 
+QUndoStack *LandscapeEditorContext::undoStack()
+{
+	return m_landEditorWindow->undoStack();
+}
+
+void LandscapeEditorContext::open()
+{
+	m_landEditorWindow->open();
+}
+
 QWidget *LandscapeEditorContext::widget()
 {
 	return m_landEditorWindow;

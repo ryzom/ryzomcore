@@ -77,6 +77,8 @@ public:
 		return QIcon();
 	}
 
+	virtual QUndoStack *undoStack();
+
 	virtual void open();
 
 	virtual QWidget *widget();

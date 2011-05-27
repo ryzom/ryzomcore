@@ -89,6 +89,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 		_isSoundInitialized = true;
 	}
 
+	_undoStack = new QUndoStack(this);
 	_SkeletonTreeModel = new CSkeletonTreeModel(this);
 
 	createDialogs();

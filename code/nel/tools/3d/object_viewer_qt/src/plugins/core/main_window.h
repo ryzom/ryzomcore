@@ -56,6 +56,9 @@ public:
 
 	ExtensionSystem::IPluginManager *pluginManager() const;
 
+	void addContextObject(IContext *context);
+	void removeContextObject(IContext *context);
+
 public Q_SLOTS:
 	bool showOptionsDialog(const QString &group = QString(),
 						   const QString &page = QString(),
@@ -64,6 +67,7 @@ public Q_SLOTS:
 private Q_SLOTS:
 	void open();
 	void about();
+	void updateContext(Core::IContext *context);
 
 protected:
 	virtual void closeEvent(QCloseEvent *event);

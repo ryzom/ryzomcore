@@ -102,6 +102,7 @@ void ContextManager::aboutToRemoveObject(QObject *obj)
 void ContextManager::addContextObject(IContext *context)
 {
 	d->m_contexts.push_back(context);
+	d->m_mainWindow->addContextObject(context);
 
 	QWidget *tabWidget = new QWidget(d->m_tabWidget);
 	d->m_tabWidget->addTab(tabWidget, context->icon(), context->trName());
@@ -113,6 +114,8 @@ void ContextManager::addContextObject(IContext *context)
 
 void ContextManager::removeContextObject(IContext *context)
 {
+	d->m_mainWindow->removeContextObject(context);
+
 	const int index = indexOf(context->id());
 	QWidget *widget = d->m_tabWidget->widget(index);
 	d->m_tabWidget->removeTab(index);

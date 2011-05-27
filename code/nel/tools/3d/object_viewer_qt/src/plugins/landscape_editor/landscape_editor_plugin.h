@@ -94,9 +94,9 @@ public:
 		return QIcon();
 	}
 
-	virtual void open()
-	{
-	}
+	virtual void open();
+
+	virtual QUndoStack *undoStack();
 
 	virtual QWidget *widget();
 

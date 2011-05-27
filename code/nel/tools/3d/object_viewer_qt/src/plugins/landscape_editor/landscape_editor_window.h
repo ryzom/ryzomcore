@@ -18,9 +18,11 @@
 #ifndef LANDSCAPE_EDITOR_WINDOW_H
 #define LANDSCAPE_EDITOR_WINDOW_H
 
+// Project includes
 #include "ui_landscape_editor_window.h"
 
 // Qt includes
+#include <QtGui/QUndoStack>
 
 namespace LandscapeEditor
 {
@@ -33,14 +35,19 @@ public:
 	LandscapeEditorWindow(QWidget *parent = 0);
 	~LandscapeEditorWindow();
 
+	QUndoStack *undoStack() const;
+
 Q_SIGNALS:
 public Q_SLOTS:
+	void open();
+
 private Q_SLOTS:
 private:
 	void createMenus();
 	void readSettings();
 	void writeSettings();
 
+	QUndoStack *m_undoStack;
 	Ui::LandscapeEditorWindow m_ui;
 }; /* class LandscapeEditorWindow */
 

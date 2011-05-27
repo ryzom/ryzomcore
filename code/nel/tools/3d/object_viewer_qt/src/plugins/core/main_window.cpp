@@ -99,6 +99,9 @@ bool MainWindow::initialize(QString *errorString)
 void MainWindow::extensionsInitialized()
 {
 	readSettings();
+	connect(m_contextManager, SIGNAL(currentContextChanged(Core::IContext*)),
+			this, SLOT(updateContext(Core::IContext*)));
+	updateContext(m_contextManager->currentContext());
 	show();
 }
 
@@ -120,6 +123,16 @@ QSettings *MainWindow::settings() const
 ExtensionSystem::IPluginManager *MainWindow::pluginManager() const
 {
 	return m_pluginManager;
+}
+
+void MainWindow::addContextObject(IContext *context)
+{
+	m_undoGroup->addStack(context->undoStack());
+}
+
+void MainWindow::removeContextObject(IContext *context)
+{
+	m_undoGroup->removeStack(context->undoStack());
 }
 
 void MainWindow::open()
@@ -146,6 +159,11 @@ void MainWindow::about()
 	QMessageBox::about(this, tr("About Object Viewer Qt"),
 					   tr("<h2>Object Viewer Qt</h2>"
 						  "<p> Ryzom Core team <p>Compiled on %1 %2").arg(__DATE__).arg(__TIME__));
+}
+
+void MainWindow::updateContext(Core::IContext *context)
+{
+	m_undoGroup->setActiveStack(context->undoStack());
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

@@ -28,14 +28,19 @@
 
 // Qt includes
 #include <QtCore/QSettings>
+#include <QtGui/QFileDialog>
 
 namespace LandscapeEditor
 {
+QString _lastDir;
 
 LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
 	m_ui.setupUi(this);
+
+	m_undoStack = new QUndoStack(this);
+
 	createMenus();
 	readSettings();
 }
@@ -43,6 +48,26 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 LandscapeEditorWindow::~LandscapeEditorWindow()
 {
 	writeSettings();
+}
+
+QUndoStack *LandscapeEditorWindow::undoStack() const
+{
+	return m_undoStack;
+}
+
+void LandscapeEditorWindow::open()
+{
+	QStringList fileNames = QFileDialog::getOpenFileNames(this,
+							tr("Open NeL Ligo land file"), _lastDir,
+							tr("All NeL Ligo land files (*.land)"));
+
+	setCursor(Qt::WaitCursor);
+	if (!fileNames.isEmpty())
+	{
+		QStringList list = fileNames;
+		_lastDir = QFileInfo(list.front()).absolutePath();
+	}
+	setCursor(Qt::ArrowCursor);
 }
 
 void LandscapeEditorWindow::createMenus()
