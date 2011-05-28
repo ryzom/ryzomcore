@@ -21,6 +21,7 @@
 #include "nel/misc/types_nl.h"
 
 #include <memory>
+#include <iterator>
 
 #include "nel/misc/common.h"
 

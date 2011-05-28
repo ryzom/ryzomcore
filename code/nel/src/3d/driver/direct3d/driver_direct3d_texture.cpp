@@ -514,7 +514,7 @@ bool CDriverD3D::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 	if ( !tex.TextureDrvShare )
 	{
 		// insert into driver list. (so it is deleted when driver is deleted).
-		ItTexDrvSharePtrList	it= _TexDrvShares.insert(_TexDrvShares.end(), NULL);
+		ItTexDrvSharePtrList	it= _TexDrvShares.insert(_TexDrvShares.end(), (NL3D::CTextureDrvShare*)NULL);
 		// create and set iterator, for future deletion.
 		*it= tex.TextureDrvShare= new CTextureDrvShare(this, it, &tex);
 

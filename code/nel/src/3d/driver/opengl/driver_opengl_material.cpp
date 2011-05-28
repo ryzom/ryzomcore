@@ -276,7 +276,7 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 	if (!mat._MatDrvInfo)
 	{
 		// insert into driver list. (so it is deleted when driver is deleted).
-		ItMatDrvInfoPtrList		it= _MatDrvInfos.insert(_MatDrvInfos.end(), NULL);
+		ItMatDrvInfoPtrList		it= _MatDrvInfos.insert(_MatDrvInfos.end(), (NL3D::IMaterialDrvInfos*)NULL);
 		// create and set iterator, for future deletion.
 		*it= mat._MatDrvInfo= new CShaderGL(this, it);
 
