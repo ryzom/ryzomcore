@@ -80,6 +80,13 @@ const char * const LEVELDESIGN_PATH = "LevelDesignPath";
 const char * const ASSETS_PATH = "AssetsPath";
 const char * const REMAP_EXTENSIONS = "RemapExtensions";
 
+const char * const LOG_SECTION = "LogSettings";
+const char * const LOG_ERROR   = "LogError";
+const char * const LOG_WARNING = "LogWarning";
+const char * const LOG_DEBUG   = "LogDebug";
+const char * const LOG_ASSERT  = "LogAssert";
+const char * const LOG_INFO    = "LogInfo";
+
 //resources
 const char * const ICON_NEL = ":/core/images/nel.png";
 const char * const ICON_SETTINGS = ":/core/images/preferences.png";
