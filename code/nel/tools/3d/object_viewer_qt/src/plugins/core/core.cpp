@@ -18,6 +18,7 @@
 
 #include "core.h"
 #include "imenu_manager.h"
+#include "context_manager.h"
 #include "main_window.h"
 #include "../../extension_system/iplugin_manager.h"
 
@@ -52,6 +53,11 @@ bool CoreImpl::showOptionsDialog(const QString &group,
 IMenuManager *CoreImpl::menuManager() const
 {
 	return m_mainWindow->menuManager();
+}
+
+ContextManager *CoreImpl::contextManager() const
+{
+	return m_mainWindow->contextManager();
 }
 
 QSettings *CoreImpl::settings() const

@@ -1,4 +1,4 @@
-// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
@@ -15,50 +15,42 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-#ifndef SOUND_SETTINGS_PAGE_H
-#define SOUND_SETTINGS_PAGE_H
+#ifndef LANDSCAPE_EDITOR_WINDOW_H
+#define LANDSCAPE_EDITOR_WINDOW_H
 
 // Project includes
-#include "../core/ioptions_page.h"
-#include "ui_sound_settings_page.h"
+#include "ui_landscape_editor_window.h"
 
 // Qt includes
-#include <QtCore/QObject>
+#include <QtGui/QUndoStack>
 
-class QWidget;
-
-namespace NLQT
+namespace LandscapeEditor
 {
-/**
-@class SoundSettingsPage
-*/
-class SoundSettingsPage : public Core::IOptionsPage
+
+class LandscapeEditorWindow: public QMainWindow
 {
 	Q_OBJECT
+
 public:
-	SoundSettingsPage(QObject *parent = 0);
-	virtual ~SoundSettingsPage() {}
+	LandscapeEditorWindow(QWidget *parent = 0);
+	~LandscapeEditorWindow();
 
-	virtual QString id() const;
-	virtual QString trName() const;
-	virtual QString category() const;
-	virtual QString trCategory() const;
-	QIcon categoryIcon() const;
-	virtual QWidget *createPage(QWidget *parent);
+	QUndoStack *undoStack() const;
 
-	virtual void apply();
-	virtual void finish();
+Q_SIGNALS:
+public Q_SLOTS:
+	void open();
 
 private Q_SLOTS:
-	void setSheetPath();
-	void setSamplePath();
-
 private:
-	QWidget *m_page;
-	Ui::SoundSettingsPage m_ui;
-};
+	void createMenus();
+	void readSettings();
+	void writeSettings();
 
-} // namespace NLQT
+	QUndoStack *m_undoStack;
+	Ui::LandscapeEditorWindow m_ui;
+}; /* class LandscapeEditorWindow */
 
-#endif // SOUND_SETTINGS_H
+} /* namespace LandscapeEditor */
+
+#endif // LANDSCAPE_EDITOR_WINDOW_H

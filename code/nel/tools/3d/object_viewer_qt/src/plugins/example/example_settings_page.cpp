@@ -53,6 +53,11 @@ QString CExampleSettingsPage::trCategory() const
 	return tr("General");
 }
 
+QIcon CExampleSettingsPage::categoryIcon() const
+{
+	return QIcon();
+}
+
 QWidget *CExampleSettingsPage::createPage(QWidget *parent)
 {
 	_currentPage = new QWidget(parent);

@@ -1,4 +1,4 @@
-// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
@@ -15,42 +15,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef LANDSCAPE_EDITOR_CONSTANTS_H
+#define LANDSCAPE_EDITOR_CONSTANTS_H
 
-#ifndef SIMPLE_VIEWER_H
-#define SIMPLE_VIEWER_H
-
-// Project includes
-#include "qnel_widget.h"
-#include "../core/icore_listener.h"
-
-// Qt includes
-#include <QtCore/QObject>
-#include <QtGui/QUndoStack>
-class QWidget;
-
-namespace Plugin
+namespace LandscapeEditor
 {
-
-class CSimpleViewer : public QWidget
+namespace Constants
 {
-	Q_OBJECT
-public:
-	CSimpleViewer(QWidget *parent = 0);
-	virtual ~CSimpleViewer() {}
+const char * const LANDSCAPE_EDITOR_PLUGIN	= "LandscapeEditor";
 
-	QUndoStack *m_undoStack;
-};
+//settings
+const char * const LANDSCAPE_EDITOR_SECTION = "LandscapeEditor";
 
-class CCoreListener : public Core::ICoreListener
-{
-	Q_OBJECT
-public:
-	CCoreListener(QObject *parent = 0): ICoreListener(parent) {}
-	virtual ~CCoreListener() {}
+//resources
+const char * const ICON_LANDSCAPE_ITEM = ":/icons/ic_nel_landscape_item.png";
 
-	virtual bool closeMainWindow() const;
-};
 
-} // namespace Plugin
+} // namespace Constants
+} // namespace LandscapeEditor
 
-#endif // SIMPLE_VIEWER_H
+#endif // LANDSCAPE_EDITOR_CONSTANTS_H

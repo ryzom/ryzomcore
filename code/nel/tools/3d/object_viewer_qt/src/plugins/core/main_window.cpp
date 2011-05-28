@@ -20,6 +20,7 @@
 #include "icontext.h"
 #include "icore_listener.h"
 #include "menu_manager.h"
+#include "context_manager.h"
 #include "core.h"
 #include "core_constants.h"
 #include "settings_dialog.h"
@@ -38,8 +39,10 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 	: QMainWindow(parent),
 	  m_pluginManager(0),
 	  m_menuManager(0),
+	  m_contextManager(0),
 	  m_coreImpl(0),
 	  m_lastDir("."),
+	  m_undoGroup(0),
 	  m_settings(0)
 {
 	QCoreApplication::setApplicationName(QLatin1String("ObjectViewerQt"));
@@ -59,12 +62,15 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 
 	m_tabWidget = new QTabWidget(this);
 	m_tabWidget->setTabPosition(QTabWidget::South);
-	m_tabWidget->setMovable(true);
+	m_tabWidget->setMovable(false);
 	m_tabWidget->setDocumentMode(true);
 	setCentralWidget(m_tabWidget);
 
+	m_contextManager = new ContextManager(this, m_tabWidget);
+
 	setDockNestingEnabled(true);
 	m_originalPalette = QApplication::palette();
+	m_undoGroup = new QUndoGroup(this);
 
 	createDialogs();
 	createActions();
@@ -92,21 +98,21 @@ bool MainWindow::initialize(QString *errorString)
 
 void MainWindow::extensionsInitialized()
 {
-	QList<IContext *> listContexts = m_pluginManager->getObjects<IContext>();
-
-	Q_FOREACH(IContext *context, listContexts)
-	{
-		addContextObject(context);
-	}
-
-	connect(m_pluginManager, SIGNAL(objectAdded(QObject *)), this, SLOT(checkObject(QObject *)));
 	readSettings();
+	connect(m_contextManager, SIGNAL(currentContextChanged(Core::IContext*)),
+			this, SLOT(updateContext(Core::IContext*)));
+	updateContext(m_contextManager->currentContext());
 	show();
 }
 
 IMenuManager *MainWindow::menuManager() const
 {
 	return m_menuManager;
+}
+
+ContextManager *MainWindow::contextManager() const
+{
+	return m_contextManager;
 }
 
 QSettings *MainWindow::settings() const
@@ -119,15 +125,19 @@ ExtensionSystem::IPluginManager *MainWindow::pluginManager() const
 	return m_pluginManager;
 }
 
-void MainWindow::open()
+void MainWindow::addContextObject(IContext *context)
 {
+	m_undoGroup->addStack(context->undoStack());
 }
 
-void MainWindow::checkObject(QObject *obj)
+void MainWindow::removeContextObject(IContext *context)
 {
-	IContext *context = qobject_cast<IContext *>(obj);
-	if (context)
-		addContextObject(context);
+	m_undoGroup->removeStack(context->undoStack());
+}
+
+void MainWindow::open()
+{
+	m_contextManager->currentContext()->open();
 }
 
 bool MainWindow::showOptionsDialog(const QString &group,
@@ -151,6 +161,11 @@ void MainWindow::about()
 						  "<p> Ryzom Core team <p>Compiled on %1 %2").arg(__DATE__).arg(__TIME__));
 }
 
+void MainWindow::updateContext(Core::IContext *context)
+{
+	m_undoGroup->setActiveStack(context->undoStack());
+}
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
 	QList<ICoreListener *> listeners = m_pluginManager->getObjects<ICoreListener>();
@@ -166,16 +181,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 	writeSettings();
 	event->accept();
-}
-
-void MainWindow::addContextObject(IContext *context)
-{
-	QWidget *tabWidget = new QWidget(m_tabWidget);
-	m_tabWidget->addTab(tabWidget, context->icon(), context->trName());
-	QGridLayout *gridLayout = new QGridLayout(tabWidget);
-	gridLayout->setObjectName(QString::fromUtf8("gridLayout_") + context->id());
-	gridLayout->setContentsMargins(0, 0, 0, 0);
-	gridLayout->addWidget(context->widget(), 0, 0, 1, 1);
 }
 
 void MainWindow::createActions()
@@ -228,11 +233,14 @@ void MainWindow::createMenus()
 {
 	m_fileMenu = menuBar()->addMenu(tr("&File"));
 	menuManager()->registerMenu(m_fileMenu, Constants::M_FILE);
-//	m_fileMenu->addAction(m_openAction);
+	m_fileMenu->addAction(m_openAction);
 	m_fileMenu->addSeparator();
 	m_fileMenu->addAction(m_exitAction);
 
 	m_editMenu = menuBar()->addMenu(tr("&Edit"));
+	m_editMenu->addAction(m_undoGroup->createUndoAction(this));
+	m_editMenu->addAction(m_undoGroup->createRedoAction(this));
+	m_editMenu->addSeparator();
 	menuManager()->registerMenu(m_editMenu, Constants::M_EDIT);
 
 	m_viewMenu = menuBar()->addMenu(tr("&View"));

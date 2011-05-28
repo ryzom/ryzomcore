@@ -1,6 +1,7 @@
-// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
+// Parts by Nokia Corporation (qt-info@nokia.com) Copyright (C) 2009.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -15,42 +16,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef LANDSCAPE_EDITOR_GLOBAL_H
+#define LANDSCAPE_EDITOR_GLOBAL_H
 
-#ifndef SIMPLE_VIEWER_H
-#define SIMPLE_VIEWER_H
+#include <QtCore/qglobal.h>
 
-// Project includes
-#include "qnel_widget.h"
-#include "../core/icore_listener.h"
+#if defined(LANDSCAPE_EDITOR_LIBRARY)
+#  define LANDSCAPE_EDITOR_EXPORT Q_DECL_EXPORT
+#else
+#  define LANDSCAPE_EDITOR_EXPORT Q_DECL_IMPORT
+#endif
 
-// Qt includes
-#include <QtCore/QObject>
-#include <QtGui/QUndoStack>
-class QWidget;
-
-namespace Plugin
-{
-
-class CSimpleViewer : public QWidget
-{
-	Q_OBJECT
-public:
-	CSimpleViewer(QWidget *parent = 0);
-	virtual ~CSimpleViewer() {}
-
-	QUndoStack *m_undoStack;
-};
-
-class CCoreListener : public Core::ICoreListener
-{
-	Q_OBJECT
-public:
-	CCoreListener(QObject *parent = 0): ICoreListener(parent) {}
-	virtual ~CCoreListener() {}
-
-	virtual bool closeMainWindow() const;
-};
-
-} // namespace Plugin
-
-#endif // SIMPLE_VIEWER_H
+#endif // LANDSCAPE_EDITOR_GLOBAL_H

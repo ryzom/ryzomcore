@@ -27,6 +27,7 @@
 
 QT_BEGIN_NAMESPACE
 class QWidget;
+class QIcon;
 QT_END_NAMESPACE
 
 namespace Core
@@ -55,6 +56,8 @@ public:
 
 	/// trCategory() is the translated category
 	virtual QString trCategory() const = 0;
+
+	virtual QIcon categoryIcon() const = 0;
 
 	/// createPage() is called to retrieve the widget to show in the preferences dialog
 	/// The widget will be destroyed by the widget hierarchy when the dialog closes

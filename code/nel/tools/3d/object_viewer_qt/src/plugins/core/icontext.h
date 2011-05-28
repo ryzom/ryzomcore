@@ -28,6 +28,7 @@
 
 QT_BEGIN_NAMESPACE
 class QWidget;
+class QUndoStack;
 QT_END_NAMESPACE
 
 namespace Core
@@ -56,6 +57,10 @@ public:
 
 	/// The widget will be destroyed by the widget hierarchy when the main window closes
 	virtual QWidget *widget() = 0;
+
+	virtual QUndoStack *undoStack() = 0;
+
+	virtual void open() = 0;
 };
 
 } // namespace Core

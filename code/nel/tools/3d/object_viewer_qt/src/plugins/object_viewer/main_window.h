@@ -25,6 +25,7 @@
 // Qt includes
 #include <QtGui/QMainWindow>
 #include <QtGui/QLabel>
+#include <QtGui/QUndoStack>
 
 // NeL includes
 #include <nel/misc/config_file.h>
@@ -72,10 +73,17 @@ public:
 		return _SkeletonTreeModel;
 	}
 
-private Q_SLOTS:
+	QUndoStack *getUndoStack() const
+	{
+		return _undoStack;
+	}
+
+public Q_SLOTS:
 	void open();
 	void resetScene();
 	void reloadTextures();
+
+private Q_SLOTS:
 	void updateStatusBar();
 	void updateRender();
 	void setInterval(int value);
@@ -130,6 +138,7 @@ private:
 	QAction *_resetSceneAction;
 	QAction *_saveScreenshotAction;
 	QLabel *_statusInfo;
+	QUndoStack *_undoStack;
 
 	float _fps;
 	uint _numTri;

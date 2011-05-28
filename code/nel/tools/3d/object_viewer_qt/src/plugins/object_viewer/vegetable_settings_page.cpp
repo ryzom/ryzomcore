@@ -59,6 +59,11 @@ QString VegetableSettingsPage::trCategory() const
 	return tr("Object Viewer");
 }
 
+QIcon VegetableSettingsPage::categoryIcon() const
+{
+	return QIcon();
+}
+
 QWidget *VegetableSettingsPage::createPage(QWidget *parent)
 {
 	m_page = new QWidget(parent);
