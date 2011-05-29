@@ -1681,15 +1681,17 @@ NLMISC_CATEGORISED_COMMAND(nel, writeaccess, "write a uint8 value in an invalid 
 	uint8 val = 123;
 	uint8 *adr = (uint8*)0;
 	if(args.size() >= 1)
+	{
 #ifdef HAVE_X86_64
-	uint64 addr64;
-	NLMISC::fromString(args[0], addr64);
-	adr = (uint8*)addr64;
+		uint64 addr64;
+		NLMISC::fromString(args[0], addr64);
+		adr = (uint8*)addr64;
 #else
-	uint32 addr32;
-	NLMISC::fromString(args[0], addr32);
-	adr = (uint8*)addr32;
+		uint32 addr32;
+		NLMISC::fromString(args[0], addr32);
+		adr = (uint8*)addr32;
 #endif
+	}
 	if(args.size() >= 2) NLMISC::fromString(args[1], val);
 	*adr = val;
 	return true;
