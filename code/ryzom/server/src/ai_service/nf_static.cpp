@@ -674,7 +674,7 @@ void md5sum_s_s(CStateInstance* entity, CScriptStack& stack)
 {
 	std::string str = (std::string)stack.top();
 
-	std::string value = NLMISC::getMD5((uint8*)&str[0], str.size() ).toString();
+	std::string value = NLMISC::getMD5((uint8*)&str[0], (uint32)str.size() ).toString();
 	nlinfo(value.c_str());
 	stack.top() = value;
 }
