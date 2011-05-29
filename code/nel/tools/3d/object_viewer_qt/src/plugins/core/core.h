@@ -38,6 +38,7 @@ public:
 								   QWidget *parent = 0);
 
 	virtual IMenuManager *menuManager() const;
+	virtual ContextManager *contextManager() const;
 
 	virtual QSettings *settings() const;
 	virtual QMainWindow *mainWindow() const;

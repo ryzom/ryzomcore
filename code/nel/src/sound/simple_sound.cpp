@@ -77,7 +77,7 @@ void				CSimpleSound::getSubSoundList(std::vector<std::pair<std::string, CSound*
 {
 	// A little hack, we use the reference vector to tag unavailable sample.
 	if (!(_Buffername == CStringMapper::emptyId()) && const_cast<CSimpleSound*>(this)->getBuffer() == 0)
-		subsounds.push_back(pair<string, CSound*>(CStringMapper::unmap(_Buffername)+" (sample)", 0));
+		subsounds.push_back(pair<string, CSound*>(CStringMapper::unmap(_Buffername)+" (sample)", (CSound*)NULL));
 }
 
 

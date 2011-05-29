@@ -29,29 +29,39 @@ class QWidget;
 
 namespace Plugin
 {
-/**
-@class CLogSettingsPage
-*/
-class CLogSettingsPage : public Core::IOptionsPage
-{
-	Q_OBJECT
-public:
-	CLogSettingsPage(QObject *parent = 0);
-	virtual ~CLogSettingsPage() {}
+	/**
+	@class CLogSettingsPage
+	*/
+	class CLogSettingsPage : public Core::IOptionsPage
+	{
+		Q_OBJECT
+	public:
+		CLogSettingsPage(QObject *parent = 0);
+		virtual ~CLogSettingsPage() {}
 
-	virtual QString id() const;
-	virtual QString trName() const;
-	virtual QString category() const;
-	virtual QString trCategory() const;
-	virtual QWidget *createPage(QWidget *parent);
+		virtual QString id() const;
+		virtual QString trName() const;
+		virtual QString category() const;
+		virtual QString trCategory() const;
+		QIcon categoryIcon() const;
+		virtual QWidget *createPage(QWidget *parent);
 
-	virtual void apply();
-	virtual void finish() {}
+		virtual void apply();
+		virtual void finish() {}
 
-private:
-	QWidget *_currentPage;
-	Ui::CLogSettingsPage _ui;
-};
+	private:
+		void readSettings();
+		void writeSettings();
+
+		QWidget             *m_currentPage;
+		Ui::CLogSettingsPage m_ui;
+
+		bool m_error;
+		bool m_warning;
+		bool m_debug;
+		bool m_assert;
+		bool m_info;
+	};
 
 } // namespace Core
 

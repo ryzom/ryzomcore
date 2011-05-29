@@ -78,6 +78,7 @@
 #include <algorithm>
 #include <stdio.h>
 #include <time.h>
+#include <iterator>
 
 using namespace std;
 using namespace NLMISC;

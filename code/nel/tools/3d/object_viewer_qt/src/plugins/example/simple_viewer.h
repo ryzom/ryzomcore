@@ -25,7 +25,7 @@
 
 // Qt includes
 #include <QtCore/QObject>
-
+#include <QtGui/QUndoStack>
 class QWidget;
 
 namespace Plugin
@@ -37,6 +37,8 @@ class CSimpleViewer : public QWidget
 public:
 	CSimpleViewer(QWidget *parent = 0);
 	virtual ~CSimpleViewer() {}
+
+	QUndoStack *m_undoStack;
 };
 
 class CCoreListener : public Core::ICoreListener

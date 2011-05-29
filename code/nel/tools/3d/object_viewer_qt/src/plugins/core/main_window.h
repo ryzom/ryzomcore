@@ -26,6 +26,7 @@
 
 // Qt includes
 #include <QtGui/QMainWindow>
+#include <QtGui/QUndoGroup>
 #include <QtCore/QSettings>
 
 namespace Core
@@ -35,6 +36,7 @@ class CorePlugin;
 class IContext;
 class IMenuManager;
 class MenuManager;
+class ContextManager;
 class CoreImpl;
 
 class MainWindow : public QMainWindow
@@ -49,9 +51,13 @@ public:
 	void extensionsInitialized();
 
 	IMenuManager *menuManager() const;
+	ContextManager *contextManager() const;
 	QSettings *settings() const;
 
 	ExtensionSystem::IPluginManager *pluginManager() const;
+
+	void addContextObject(IContext *context);
+	void removeContextObject(IContext *context);
 
 public Q_SLOTS:
 	bool showOptionsDialog(const QString &group = QString(),
@@ -60,15 +66,13 @@ public Q_SLOTS:
 
 private Q_SLOTS:
 	void open();
-	void checkObject(QObject *obj);
 	void about();
+	void updateContext(Core::IContext *context);
 
 protected:
 	virtual void closeEvent(QCloseEvent *event);
 
 private:
-	void addContextObject(IContext *appPage);
-
 	void createActions();
 	void createMenus();
 	void createStatusBar();
@@ -80,11 +84,13 @@ private:
 	ExtensionSystem::IPluginManager *m_pluginManager;
 	ExtensionSystem::CPluginView *m_pluginView;
 	MenuManager *m_menuManager;
+	ContextManager *m_contextManager;
 	CoreImpl *m_coreImpl;
 
 	QPalette m_originalPalette;
 	QString m_lastDir;
 
+	QUndoGroup *m_undoGroup;
 	QSettings *m_settings;
 
 	QTimer *m_mainTimer;

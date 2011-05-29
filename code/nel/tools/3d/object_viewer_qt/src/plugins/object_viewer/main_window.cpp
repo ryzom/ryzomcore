@@ -89,6 +89,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 		_isSoundInitialized = true;
 	}
 
+	_undoStack = new QUndoStack(this);
 	_SkeletonTreeModel = new CSkeletonTreeModel(this);
 
 	createDialogs();
@@ -272,8 +273,8 @@ void CMainWindow::createMenus()
 	// add actions in file menu
 	QMenu *fileMenu = menuManager->menu(Core::Constants::M_FILE);
 	QAction *exitAction = menuManager->action(Core::Constants::EXIT);
-	fileMenu->insertAction(exitAction, _openAction);
-	fileMenu->insertSeparator(exitAction);
+	//fileMenu->insertAction(exitAction, _openAction);
+	//fileMenu->insertSeparator(exitAction);
 
 	// register actions for view menu
 	menuManager->registerAction(_setBackColorAction, "ObjectViewer.View.SetBackgroundColor");
