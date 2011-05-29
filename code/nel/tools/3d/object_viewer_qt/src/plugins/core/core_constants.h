@@ -92,6 +92,9 @@ const char * const ICON_NEL = ":/core/images/nel.png";
 const char * const ICON_SETTINGS = ":/core/images/preferences.png";
 const char * const ICON_PILL = ":/core/icons/ic_nel_pill.png";
 const char * const ICON_OPEN = ":/core/icons/ic_nel_open.png";
+const char * const ICON_NEW = ":/core/icons/ic_nel_new.png";
+const char * const ICON_SAVE = ":/core/icons/ic_nel_save.png";
+const char * const ICON_SAVE_AS = ":/core/icons/ic_nel_save_as.png";
 const char * const ICON_CRASH = ":/core/icons/ic_nel_crash.png";
 
 } // namespace Constants
