@@ -103,7 +103,7 @@ namespace Plugin
 
 	QString CLogPlugin::name() const
 	{
-		return "LogPlugin";
+		return "NeL Log";
 	}
 
 	QString CLogPlugin::version() const
@@ -118,7 +118,7 @@ namespace Plugin
 
 	QString CLogPlugin::description() const
 	{
-		return "DockWidget to display all log messages from NeL.";
+		return tr("DockWidget to display all log messages from NeL.");
 	}
 
 	QStringList CLogPlugin::dependencies() const
