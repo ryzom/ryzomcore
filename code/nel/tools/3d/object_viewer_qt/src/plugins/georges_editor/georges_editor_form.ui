@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GeorgesEditorForm</class>
+ <widget class="QMainWindow" name="GeorgesEditorForm">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Georges Editor</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="styleSheet">
+    <string notr="true">QWidget#centralwidget {
+	image: url(:/images/ic_nel_georges_editor.png);
+ }</string>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="georges_editor.qrc"/>
+ </resources>
+ <connections/>
+</ui>
