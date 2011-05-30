@@ -45,8 +45,6 @@ MACRO(_PCH_GET_COMPILE_FLAGS _out_compile_flags)
 		IF(${_targetType} STREQUAL SHARED_LIBRARY OR ${_targetType} STREQUAL MODULE_LIBRARY)
 			LIST(APPEND ${_out_compile_flags} "-fPIC")
 		ENDIF(${_targetType} STREQUAL SHARED_LIBRARY OR ${_targetType} STREQUAL MODULE_LIBRARY)
-	ELSE(CMAKE_COMPILER_IS_GNUCXX)
-		## TODO ... ? or does it work out of the box
 	ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 	GET_DIRECTORY_PROPERTY(DIRINC INCLUDE_DIRECTORIES )
@@ -115,6 +113,11 @@ MACRO(GET_PRECOMPILED_HEADER_OUTPUT _targetName _input _output)
 ENDMACRO(GET_PRECOMPILED_HEADER_OUTPUT _targetName _input)
 
 MACRO(ADD_PRECOMPILED_HEADER_TO_TARGET _targetName _input _pch_output_to_use )
+	GET_TARGET_PROPERTY(oldProps ${_targetName} COMPILE_FLAGS)
+	IF(${oldProps} MATCHES NOTFOUND)
+		SET(oldProps "")
+	ENDIF(${oldProps} MATCHES NOTFOUND)
+
 	IF(CMAKE_COMPILER_IS_GNUCXX)
 		# to do: test whether compiler flags match between target  _targetName
 		# and _pch_output_to_use
@@ -123,19 +126,15 @@ MACRO(ADD_PRECOMPILED_HEADER_TO_TARGET _targetName _input _pch_output_to_use )
 		# for use with distcc and gcc >4.0.1 if preprocessed files are accessible
 		# on all remote machines set
 		# PCH_ADDITIONAL_COMPILER_FLAGS to -fpch-preprocess
-		SET(_target_cflags "${PCH_ADDITIONAL_COMPILER_FLAGS}-include ${_input} -Winvalid-pch")
+		SET(_target_cflags "${oldProps} ${PCH_ADDITIONAL_COMPILER_FLAGS}-include ${_input} -Winvalid-pch")
 	ELSE(CMAKE_COMPILER_IS_GNUCXX)
 		IF(MSVC)
-			GET_TARGET_PROPERTY(oldProps ${_targetName} COMPILE_FLAGS)
-			IF(${oldProps} MATCHES NOTFOUND)
-				SET(oldProps "")
-			ENDIF(${oldProps} MATCHES NOTFOUND)
-
 			SET(_target_cflags "${oldProps} /Yu\"${_input}\" /FI\"${_input}\" /Fp\"${_pch_output_to_use}\"")
 		ENDIF(MSVC)
 	ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 	SET_TARGET_PROPERTIES(${_targetName} PROPERTIES COMPILE_FLAGS ${_target_cflags})
+	SET_TARGET_PROPERTIES(${_targetName}_pch_dephelp PROPERTIES COMPILE_FLAGS ${_target_cflags})
 	ADD_CUSTOM_TARGET(pch_Generate_${_targetName} DEPENDS ${_pch_output_to_use})
 	ADD_DEPENDENCIES(${_targetName} pch_Generate_${_targetName})
 ENDMACRO(ADD_PRECOMPILED_HEADER_TO_TARGET)

@@ -86,6 +86,15 @@ public:
 		return m_simpleViewer;
 	}
 
+	virtual QUndoStack *undoStack()
+	{
+		return m_simpleViewer->m_undoStack;
+	}
+
+	virtual void open()
+	{
+	}
+
 	CSimpleViewer *m_simpleViewer;
 };
 

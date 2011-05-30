@@ -1199,6 +1199,11 @@ class CHandlerTell : public IActionHandler
 		// display msg with good color
 //		TDataSetIndex dsi; // not used ....
 		PeopleInterraction.ChatInput.Tell.displayTellMessage(/*dsi, */finalMsg, receiver, prop.getRGBA());
+		
+		ucstring s = CI18N::get("youTellPlayer");
+		strFindReplace(s, "%name", receiver);
+		strFindReplace(finalMsg, CI18N::get("youTell"), s);
+		CInterfaceManager::getInstance()->log(finalMsg);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerTell, "tell");

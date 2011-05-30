@@ -155,7 +155,7 @@ void	CGroupTab::addTab(CCtrlTabButton * tabB, sint index)
 		{
 			if(i==index)
 			{
-				tabB->setId(string("tab") + count);
+				tabB->setId("tab" + NLMISC::toString(count));
 				tabB->setParentPos(lastTab);
 				if(i==0)
 					tabB->setParentPosRef(Hotspot_TL);
@@ -168,7 +168,7 @@ void	CGroupTab::addTab(CCtrlTabButton * tabB, sint index)
 				count++;
 			}
 
-			buttons[i]->setId(string("tab") + count);
+			buttons[i]->setId("tab" + NLMISC::toString(count));
 			buttons[i]->setParentPos(lastTab);
 			if(i==0 && index!=0)
 				buttons[i]->setParentPosRef(Hotspot_TL);
@@ -297,7 +297,7 @@ void	CGroupTab::removeTab(sint index)
 	{
 		if(i!=index)
 		{
-			buttons[i]->setId(string("tab")+count);
+			buttons[i]->setId("tab"+NLMISC::toString(count));
 			buttons[i]->setParentPos(lastTab);
 			if((i==0) || (index==0 && i==1))
 				buttons[i]->setParentPosRef(Hotspot_TL);

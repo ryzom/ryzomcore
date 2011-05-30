@@ -60,6 +60,7 @@ void	launchPhraseComposition(bool creation);
 const	std::string		PhraseComposition="ui:interface:phrase_composition";
 const	std::string		PhraseCompositionGroup="ui:interface:phrase_composition:header_opened";
 const	std::string		PhraseMemoryCtrlBase= "ui:interface:gestionsets:shortcuts:s";
+const	std::string		PhraseMemoryAltCtrlBase= "ui:interface:gestionsets2:header_closed:shortcuts:s";
 
 
 // **********************************************************************************************************
@@ -129,7 +130,11 @@ public:
 			if(pCSDst && pCSDst->isSPhraseId() && pCSDst->isSPhraseIdMemory())
 			{
 				// then will auto-memorize it in this slot
-				pPM->CompositionPhraseMemoryLineDest= pPM->getSelectedMemoryLineDB();
+				if (pCSDst->isShortCut())
+					pPM->CompositionPhraseMemoryLineDest= pPM->getSelectedMemoryLineDB();
+				else
+					pPM->CompositionPhraseMemoryLineDest= 0;
+
 				pPM->CompositionPhraseMemorySlotDest= pCSDst->getIndexInDB();
 			}
 			// else no auto memorize
@@ -1110,7 +1115,11 @@ public:
 			return;
 
 		// Ok, the user try to cast a phrase slot.
-		sint32	memoryLine= pPM->getSelectedMemoryLineDB();
+		sint32	memoryLine;
+		if (pCSDst->isShortCut())
+			memoryLine = pPM->getSelectedMemoryLineDB();
+		else
+			memoryLine = 0;
 		if(memoryLine<0)
 			return;
 
@@ -1249,12 +1258,16 @@ public:
 	{
 		sint	shortcut;
 		fromString(Params, shortcut);
-		if (shortcut>=0 && shortcut <= RYZOM_MAX_SHORTCUT)
+		if (shortcut>=0 && shortcut <= 2*RYZOM_MAX_SHORTCUT)
 		{
 			CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 			// get the control
-			CInterfaceElement	*elm= pIM->getElementFromId(PhraseMemoryCtrlBase + toString(shortcut) );
+			CInterfaceElement	*elm;
+			if (shortcut < RYZOM_MAX_SHORTCUT)
+				elm = pIM->getElementFromId(PhraseMemoryCtrlBase + toString(shortcut) );
+			else
+				elm = pIM->getElementFromId(PhraseMemoryAltCtrlBase + toString(shortcut-RYZOM_MAX_SHORTCUT) );
 			CDBCtrlSheet		*ctrl= dynamic_cast<CDBCtrlSheet*>(elm);
 			if(ctrl)
 			{
@@ -1491,7 +1504,11 @@ public:
 			return;
 
 		// Ok, the user try to cast a phrase slot.
-		sint32	memoryLine= pPM->getSelectedMemoryLineDB();
+		sint32	memoryLine;
+		if (pCSDst->isShortCut())
+			memoryLine = pPM->getSelectedMemoryLineDB();
+		else
+			memoryLine = 0;
 		if(memoryLine<0)
 			return;
 

@@ -1867,7 +1867,7 @@ void		CMeshMRMSkinnedGeom::updateRawSkinNormal(bool enabled, CMeshMRMSkinnedInst
 				CIndexBufferReadWrite ibaWrite;
 				skinLod.RdrPass[i].lock (ibaWrite);
 				#ifndef NL_SKINNED_MESH_MRM_INDEX16
-					nlassert(ibaWrite.getFormat() == CIndexBuffer::Indices32)
+					nlassert(ibaWrite.getFormat() == CIndexBuffer::Indices32);
 					uint32	*dstTriPtr= (uint32	*) ibaWrite.getPtr();
 					uint32	numIndices= lod.RdrPass[i].PBlock.size();
 					for(uint j=0;j<numIndices;j++, srcTriPtr++, dstTriPtr++)

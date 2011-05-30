@@ -199,7 +199,7 @@ bool CChatWindow::isVisible() const
 }
 
 //=================================================================================
-void CChatWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CChatGroup::TGroupType /* gt */, uint32 /* dynamicChatDbIndex */, uint numBlinks /* = 0*/, bool *windowVisible /*= NULL*/)
+void CChatWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks /* = 0*/, bool *windowVisible /*= NULL*/)
 {
 	if (!_Chat)
 	{
@@ -466,7 +466,7 @@ void CChatWindow::setHeaderColor(const std::string &n)
 }
 
 //=================================================================================
-void CChatWindow::displayLocalPlayerTell(const ucstring &msg, uint numBlinks /*= 0*/)
+void CChatWindow::displayLocalPlayerTell(const ucstring &receiver, const ucstring &msg, uint numBlinks /*= 0*/)
 {
 	ucstring finalMsg;
 	CInterfaceProperty prop;
@@ -484,7 +484,12 @@ void CChatWindow::displayLocalPlayerTell(const ucstring &msg, uint numBlinks /*=
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 	encodeColorTag(prop.getRGBA(), finalMsg, true);
 	finalMsg += msg;
+
+	ucstring s = CI18N::get("youTellPlayer");
+	strFindReplace(s, "%name", receiver);
+	strFindReplace(finalMsg, CI18N::get("youTell"), s);
 	displayMessage(finalMsg, prop.getRGBA(), CChatGroup::tell, 0, numBlinks);
+	CInterfaceManager::getInstance()->log(finalMsg);
 }
 
 void CChatWindow::encodeColorTag(const NLMISC::CRGBA &color, ucstring &text, bool append)
@@ -797,14 +802,6 @@ CGroupContainer *CChatGroupWindow::createFreeTeller(const ucstring &winNameIn, c
 			}
 		}
 
-		// Create the free teller in all the desktops
-		uint8 nMode = pIM->getMode();
-		pGC->setActive(false);
-		for (uint8 m = 0; m < MAX_NUM_MODES; ++m)
-		{
-			if (m != nMode)
-				pIM->updateGroupContainerImage(*pGC, m);
-		}
 		// the group is only active on the current desktop
 		pGC->setActive(true);
 	}
@@ -812,7 +809,7 @@ CGroupContainer *CChatGroupWindow::createFreeTeller(const ucstring &winNameIn, c
 	if (!winColor.empty())
 		_FreeTellers[i]->setHeaderColor(winColor);
 
-	updateFreeTellerHeader(*_FreeTellers[i]);
+//	updateFreeTellerHeader(*_FreeTellers[i]);
 	return _FreeTellers[i];
 }
 

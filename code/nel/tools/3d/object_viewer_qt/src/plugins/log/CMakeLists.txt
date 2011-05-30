@@ -1,7 +1,7 @@
 INCLUDE_DIRECTORIES(	${CMAKE_CURRENT_BINARY_DIR}
-			${CMAKE_CURRENT_SOURCE_DIR}
-			${LIBXML2_INCLUDE_DIR}
-			${QT_INCLUDES})
+			            ${CMAKE_CURRENT_SOURCE_DIR}
+			            ${LIBXML2_INCLUDE_DIR}
+                        ${QT_INCLUDES})
 
 FILE(GLOB SRC *.cpp *.h)
 SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.h

@@ -969,14 +969,12 @@ void force_exception_frame(...) {std::cout.flush();}
 static void exceptionTranslator(unsigned, EXCEPTION_POINTERS *pexp)
 {
 #ifndef NL_NO_DEBUG_FILES
-	FILE *file = fopen ("exception_catched", "wb");
-	fclose (file);
+	CFile::createEmptyFile(getLogDirectory() + "exception_catched");
 #endif
 	if (pexp->ExceptionRecord->ExceptionCode == EXCEPTION_BREAKPOINT)
 	{
 #ifndef NL_NO_DEBUG_FILES
-		FILE *file2 = fopen ("breakpointed", "wb");
-		fclose (file2);
+		CFile::createEmptyFile(getLogDirectory() + "breakpointed");
 #endif
 		return;
 	}
@@ -1683,12 +1681,18 @@ NLMISC_CATEGORISED_COMMAND(nel, writeaccess, "write a uint8 value in an invalid 
 	uint8 val = 123;
 	uint8 *adr = (uint8*)0;
 	if(args.size() >= 1)
+	{
 #ifdef HAVE_X86_64
-	  adr = (uint8*)(uint64)atoi(args[0].c_str());
+		uint64 addr64;
+		NLMISC::fromString(args[0], addr64);
+		adr = (uint8*)addr64;
 #else
-	  adr = (uint8*)atoi(args[0].c_str());
+		uint32 addr32;
+		NLMISC::fromString(args[0], addr32);
+		adr = (uint8*)addr32;
 #endif
-	if(args.size() >= 2) val = (uint8)atoi(args[1].c_str());
+	}
+	if(args.size() >= 2) NLMISC::fromString(args[1], val);
 	*adr = val;
 	return true;
 }
@@ -1698,11 +1702,17 @@ NLMISC_CATEGORISED_COMMAND(nel, readaccess, "read a uint8 value in an invalid ad
 	uint8 val;
 	uint8 *adr = (uint8*)0;
 	if(args.size() == 1)
+	{
 #ifdef HAVE_X86_64
-	  adr = (uint8*)(uint64)atoi(args[0].c_str());
+		uint64 addr64;
+		NLMISC::fromString(args[0], addr64);
+		adr = (uint8*)addr64;
 #else
-	  adr = (uint8*)atoi(args[0].c_str());
+		uint32 addr32;
+		NLMISC::fromString(args[0], addr32);
+		adr = (uint8*)addr32;
 #endif
+	}
 	val = *adr;
 	log.displayNL("value is %hu", (uint16)val);
 	return true;

@@ -154,6 +154,9 @@ void CGradientDialog::valueDown()
 		m_ui.listWidget->setCurrentRow(currentRow);
 	}
 	m_ui.listWidget->setCurrentRow(currentRow);
+	--currentRow;
+	QListWidgetItem *item = m_ui.listWidget->item(currentRow);
+	m_clientInterface->displayValue(currentRow, item);
 }
 
 void CGradientDialog::valueUp()

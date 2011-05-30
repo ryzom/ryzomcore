@@ -1761,7 +1761,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 				if (pCS->getInventoryIndex()==INVENTORIES::bag)
 				{
 					bool isTextEditionActive = false;
-					static const string itemTextEditionPriv = ":DEV:SGM:EM:";
+					static const string itemTextEditionPriv = ":DEV:SGM:GM:EM:";
 					if (!UserPrivileges.empty() && itemTextEditionPriv.find(UserPrivileges)!=std::string::npos)
 					{
 						isTextEditionActive = true;

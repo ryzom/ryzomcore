@@ -114,7 +114,7 @@ public:
 	/// \name Handlers
 	// @{
 	// Event part
-	void setActionOnLeftClick (const std::string &actionHandlerName) { _AHOnLeftClick = getAH(actionHandlerName, _AHLeftClickParams); }
+	void setActionOnLeftClick (const std::string &actionHandlerName) { _AHOnLeftClickString = actionHandlerName; _AHOnLeftClick = getAH(actionHandlerName, _AHLeftClickParams); }
 	void setActionOnRightClick (const std::string &actionHandlerName) { _AHOnRightClick = getAH(actionHandlerName, _AHRightClickParams); }
 	void setActionOnClockTick (const std::string &ahName) { _AHOnClockTick = getAH(ahName, _AHClockTickParams); }
 	void setParamsOnLeftClick (const std::string &paramsHandlerName) { _AHLeftClickParams = paramsHandlerName; }
@@ -203,6 +203,7 @@ protected:
 	//@{
 	IActionHandler *_AHOnOver;
 	CStringShared	_AHOverParams;
+	std::string		_AHOnLeftClickString;
 	IActionHandler *_AHOnLeftClick;
 	CStringShared	_AHLeftClickParams;
 	IActionHandler *_AHOnLeftDblClick;

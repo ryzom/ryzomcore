@@ -1641,8 +1641,6 @@ const ucchar *CStringManagerClient::getSquadLocalizedDescription(NLMISC::CSheetI
 // ***************************************************************************
 void		CStringManagerClient::replaceSBrickName(NLMISC::CSheetId id, const ucstring &name, const ucstring &desc, const ucstring &desc2)
 {
-	nlassert(!_SpecItem_MemoryCompressed);
-
 	std::string	label= id.toString();
 	if (label.empty())
 	{
@@ -1654,14 +1652,57 @@ void		CStringManagerClient::replaceSBrickName(NLMISC::CSheetId id, const ucstrin
 	lwrLabel= label;
 	strlwr(lwrLabel);
 
-	map<string, CItem>::iterator it(_SpecItem_TempMap.find(lwrLabel));
-	if (it == _SpecItem_TempMap.end())
-		return;
+	if (_SpecItem_MemoryCompressed)
+	{
+		ucchar *strName = (ucchar *)name.c_str();
+		ucchar *strDesc = (ucchar *)desc.c_str();
+		ucchar *strDesc2 = (ucchar *)desc2.c_str();
+		CItemLight tmp;
+		tmp.Label = (char*)lwrLabel.c_str();
+		vector<CItemLight>::iterator it = lower_bound(_SpecItems.begin(), _SpecItems.end(), tmp, CItemLightComp());
 
-	// Then replace
-	it->second.Name= name;
-	it->second.Desc= desc;
-	it->second.Desc2= desc2;
+		if (it != _SpecItems.end())
+		{
+			if (strcmp(it->Label, lwrLabel.c_str()) == 0)
+			{
+				it->Name = strName;
+				it->Desc = strDesc;
+				it->Desc2 = strDesc2;
+			}
+			else
+			{
+				it->Label = tmp.Label;
+				it->Name = strName;
+				it->Desc = strDesc;
+				it->Desc2 = strDesc2;
+			}
+		}
+		else
+		{
+			tmp.Name = strName;
+			tmp.Desc = strDesc;
+			tmp.Desc2 = strDesc2;
+			_SpecItems.push_back(tmp);
+		}
+	}
+	else
+	{
+		map<string, CItem>::iterator it(_SpecItem_TempMap.find(lwrLabel));
+		if (it != _SpecItem_TempMap.end())
+		{
+			it->second.Name= name;
+			it->second.Desc= desc;
+			it->second.Desc2= desc2;
+		}
+		else
+		{
+			CItem newItem;
+			newItem.Name = name;
+			newItem.Desc = desc;
+			newItem.Desc2 = desc2;
+			_SpecItem_TempMap.insert(pair<string,CItem>(lwrLabel,newItem));
+		}
+	}
 }
 
 

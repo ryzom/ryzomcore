@@ -25,6 +25,7 @@
 // Qt includes
 #include <QtGui/QMainWindow>
 #include <QtGui/QLabel>
+#include <QtGui/QUndoStack>
 
 // NeL includes
 #include <nel/misc/config_file.h>
@@ -71,15 +72,18 @@ public:
 	{
 		return _SkeletonTreeModel;
 	}
-	QPalette getOriginalPalette() const
+
+	QUndoStack *getUndoStack() const
 	{
-		return _originalPalette;
+		return _undoStack;
 	}
 
-private Q_SLOTS:
+public Q_SLOTS:
 	void open();
 	void resetScene();
 	void reloadTextures();
+
+private Q_SLOTS:
 	void updateStatusBar();
 	void updateRender();
 	void setInterval(int value);
@@ -95,10 +99,6 @@ private:
 	void createDialogs();
 
 	bool loadFile(const QString &fileName, const QString &skelName);
-
-	void cfcbQtStyle(NLMISC::CConfigFile::CVar &var);
-	void cfcbQtPalette(NLMISC::CConfigFile::CVar &var);
-	void cfcbSoundEnabled(NLMISC::CConfigFile::CVar &var);
 
 	bool _isGraphicsInitialized, _isGraphicsEnabled;
 	bool _isSoundInitialized, _isSoundEnabled;
@@ -122,7 +122,6 @@ private:
 
 	CCameraControl *_cameraControl;
 
-	QPalette _originalPalette;
 	QString _lastDir;
 
 	QTimer *_mainTimer;
@@ -139,6 +138,7 @@ private:
 	QAction *_resetSceneAction;
 	QAction *_saveScreenshotAction;
 	QLabel *_statusInfo;
+	QUndoStack *_undoStack;
 
 	float _fps;
 	uint _numTri;

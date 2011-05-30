@@ -49,6 +49,9 @@ namespace NLQT
 CGraphicsViewport::CGraphicsViewport(QWidget *parent)
 	: QNLWidget(parent)
 {
+	setAttribute(Qt::WA_OpaquePaintEvent);
+	setAttribute(Qt::WA_NoSystemBackground);
+	setAttribute(Qt::WA_PaintOnScreen);
 }
 
 CGraphicsViewport::~CGraphicsViewport()
@@ -77,7 +80,7 @@ void CGraphicsViewport::release()
 {
 	//H_AUTO2
 	nldebug("CGraphicsViewport::release");
-	
+
 	Modules::veget().release();
 	Modules::psEdit().release();
 	Modules::objView().release();
@@ -119,39 +122,6 @@ void CGraphicsViewport::resizeEvent(QResizeEvent *resizeEvent)
 		Modules::objView().setSizeViewport(resizeEvent->size().width(), resizeEvent->size().height());
 }
 
-#if defined(NL_OS_MAC)
-// Qt does not provide wheel events through winEvent() and macEvent() (but it 
-// does through x11Event(), which is inconsistent...)  
-// Workaround is to handle wheel events like implemented below.
-//
-// TODO: this is not a clean solution, because all but wheel events are 
-// handled using winEvent(), x11Event(), macEvent(). But this seems to be a 
-// limitation of current (4.7.1) Qt versions. (see e.g. qapplication_mac.mm)
-void CGraphicsViewport::wheelEvent(QWheelEvent *event)
-{
-	// Get relative positions.
-	float fX = 1.0f - (float)event->pos().x() / this->width();
-	float fY = 1.0f - (float)event->pos().y() / this->height();
-
-	// Get the buttons currently pressed.
-	uint32 buttons = NLMISC::noButton;
-	if(event->buttons() & Qt::LeftButton)        buttons |= NLMISC::leftButton;
-	if(event->buttons() & Qt::RightButton)       buttons |= NLMISC::rightButton;
-	if(event->buttons() & Qt::MidButton)         buttons |= NLMISC::middleButton;
-	if(event->modifiers() & Qt::ControlModifier) buttons |= NLMISC::ctrlButton;
-	if(event->modifiers() & Qt::ShiftModifier)   buttons |= NLMISC::shiftButton;
-	if(event->modifiers() & Qt::AltModifier)     buttons |= NLMISC::altButton;
-
-	if(event->delta() > 0)
-		Modules::objView().getDriver()->EventServer.postEvent(
-			new NLMISC::CEventMouseWheel(-fX, fY, (NLMISC::TMouseButton)buttons, true, NULL));
-	else
-		Modules::objView().getDriver()->EventServer.postEvent(
-			new NLMISC::CEventMouseWheel(-fX, fY, (NLMISC::TMouseButton)buttons, false, NULL));
-}
-#endif // defined(NL_OS_MAC)
-
-
 #if defined(NL_OS_WINDOWS)
 
 typedef bool (*winProc)(NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -164,6 +134,9 @@ bool CGraphicsViewport::winEvent(MSG *message, long *result)
 		if (driver)
 		{
 			winProc proc = (winProc)driver->getWindowProc();
+
+			// TODO: shouldn't it return false like the others? 
+			// see macEvent() and x11Event() below
 			return proc(driver, message->hwnd, message->message, message->wParam, message->lParam);
 		}
 	}
@@ -186,10 +159,12 @@ bool CGraphicsViewport::macEvent(EventHandlerCallRef caller, EventRef event)
 		if (driver)
 		{
 			cocoaProc proc = (cocoaProc)driver->getWindowProc();
-			return proc(driver, event);
+			proc(driver, event);
 		}
 	}
 
+	// return false to let Qt handle the event as well,  
+	// else the widget would never get focus
 	return false;
 }
 
@@ -205,10 +180,13 @@ bool CGraphicsViewport::x11Event(XEvent *event)
 		if (driver)
 		{
 			x11Proc proc = (x11Proc)driver->getWindowProc();
-			return proc(driver, event);
+			proc(driver, event);
 		}
 	}
 
+	// return false to let Qt handle the event as well,  
+	// else the widget would never get focus
+	// TODO: test me please, i have no linux at hand (rti)
 	return false;
 }
 #endif

@@ -79,7 +79,7 @@ private:
 	friend class CPluginManager;
 };
 
-} // namespace NLQT
+} // namespace ExtensionSystem
 
 #endif // PLUGINSPEC_H
 
