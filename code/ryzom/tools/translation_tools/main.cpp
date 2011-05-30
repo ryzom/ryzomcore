@@ -61,9 +61,11 @@
 *		trans_tool update_phrase_work
 *		trans_tool inject_clause
 *		trans_tool sort_trans_phrase
-
-
-
+*		trans_tool make_worksheet_diff
+*		trans_tool merge_worksheet_diff
+*		trans_tool crop_lines
+*		trans_tool extract_bot_names
+*		trans_tool extract_new_sheet_names
 
 */
 
