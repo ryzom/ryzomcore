@@ -30,7 +30,7 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(ovqt_plugin_translation_manager MODULE ${SRC} ${OVQT_PLUG_TRANSLATION_MANAGER_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_TRANSLATION_MANAGER_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(ovqt_plugin_translation_manager ovqt_plugin_core nelmisc nel3d ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
+TARGET_LINK_LIBRARIES(ovqt_plugin_translation_manager ovqt_plugin_core nelmisc nel3d nelligo nelgeorges ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
 
 NL_DEFAULT_PROPS(ovqt_plugin_translation_manager "NeL, Tools, 3D: Object Viewer Qt Plugin: Translation Manager")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_translation_manager)

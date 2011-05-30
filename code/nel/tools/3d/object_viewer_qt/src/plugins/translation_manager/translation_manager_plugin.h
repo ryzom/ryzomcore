@@ -13,6 +13,8 @@
 #include <QtCore/QObject>
 #include <QtGui/QIcon>
 
+using namespace std;
+
 namespace NLMISC
 {
 class CLibraryContext;
@@ -56,6 +58,11 @@ protected:
 private:
 	ExtensionSystem::IPluginManager *_plugMan;
 	QList<QObject *> _autoReleaseObjects;
+        list<string> ConvertQStringList(QStringList list);
+        
+
+private Q_SLOTS:
+        void extractBotNames();
 };
 
 class CTranslationManagerContext: public Core::IContext
@@ -87,6 +94,7 @@ public:
 	}
 
 	CSimpleViewer *m_simpleViewer;
+        
 };
 
 } // namespace Plugin

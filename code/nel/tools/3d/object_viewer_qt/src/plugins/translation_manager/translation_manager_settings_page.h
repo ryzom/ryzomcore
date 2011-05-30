@@ -47,10 +47,24 @@ public:
 
 	virtual void apply();
 	virtual void finish() {}
-
+private Q_SLOTS:
+        void pathAdd();
+        void pathDel();
+        void pathRAdd();
+        void pathRDel();
+        void georgeAdd();
+        void georgeDel();
+        void filterAdd();
+        void filterDel();
+        void languageAdd();
+        void languageDel();
+        void translationAdd();
+        void workAdd();
 private:
 	QWidget *_currentPage;
 	Ui::CTranslationManagerSettingsPage _ui;
+        void writeSettings();
+        void readSettings();
 };
 
 } // namespace Plugin
