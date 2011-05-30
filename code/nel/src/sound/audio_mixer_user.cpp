@@ -836,7 +836,7 @@ void CAudioMixerUser::buildSampleBankList()
 			nlinfo("Compiling sample bank [%s]", bankname.c_str());
 			std::string filename = buildSampleBank(bankDir[i], sbp, bankname);
 			if (bankFile.size() < i + 1) bankFile.resize(i + 1);
-			else bankFile.insert(bankFile.begin() + i, NULL);
+			else bankFile.insert(bankFile.begin() + i, std::string());
 			bankFile[i] = filename;
 		}
 		else if (bankname < CFile::getFilenameWithoutExtension(bankDir[i]))

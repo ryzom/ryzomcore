@@ -1305,7 +1305,7 @@ void ItemNamesSave()
 	output = "i";
 	output += data.splitTo( "prospector", true );
 
-	set<CSString, CUnsensitiveSStringLessPred>::iterator it = itemNames.begin();
+	CSortedStringSet::const_iterator it = itemNames.begin();
 
 	while ( it != itemNames.end() )
 	{

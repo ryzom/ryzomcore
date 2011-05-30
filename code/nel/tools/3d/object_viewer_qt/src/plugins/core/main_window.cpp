@@ -101,7 +101,8 @@ void MainWindow::extensionsInitialized()
 	readSettings();
 	connect(m_contextManager, SIGNAL(currentContextChanged(Core::IContext*)),
 			this, SLOT(updateContext(Core::IContext*)));
-	updateContext(m_contextManager->currentContext());
+	if (m_contextManager->currentContext() != NULL)
+		updateContext(m_contextManager->currentContext());
 	show();
 }
 

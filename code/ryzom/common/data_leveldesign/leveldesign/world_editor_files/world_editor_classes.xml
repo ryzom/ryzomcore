@@ -688,12 +688,15 @@
 		<DYNAMIC_CHILD CLASS_NAME="recv_named_item"/>
 		<DYNAMIC_CHILD CLASS_NAME="recv_xp"/>
 		<DYNAMIC_CHILD CLASS_NAME="destroy_item"/>
+		<DYNAMIC_CHILD CLASS_NAME="give_control" />
+		<DYNAMIC_CHILD CLASS_NAME="recv_charge_point" />
 	</PRIMITIVE>
 
 	
 	<PRIMITIVE CLASS_NAME="recv_money" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="recv_money $amount$"/>
 		<PARAMETER NAME="amount" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="guild" TYPE="boolean" VISIBLE="true" />
 	</PRIMITIVE>
 	
 	<PRIMITIVE CLASS_NAME="chain_mission" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
@@ -835,11 +838,20 @@
 		<PARAMETER NAME="faction" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="point" TYPE="string" VISIBLE="true"/>
 	</PRIMITIVE>
+	
+	<PRIMITIVE CLASS_NAME="give_control" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
+		<PARAMETER NAME="outpost_name" TYPE="string" VISIBLE="true" />
+	</PRIMITIVE>
+	
+	<PRIMITIVE CLASS_NAME="recv_charge_point" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
+		<PARAMETER NAME="charge_points" TYPE="string" VISIBLE="true" />
+	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="recv_fame" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="recv_fame $value$ $fame_owner$"/>
 		<PARAMETER NAME="faction" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="value" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="guild" TYPE="boolean" VISIBLE="true" />
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="recv_guild_xp" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
@@ -852,6 +864,7 @@
 		<PARAMETER NAME="npc_name" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="group" TYPE="boolean" VISIBLE="true"/>
+		<PARAMETER NAME="guild" TYPE="boolean" VISIBLE="true" />
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="learn_action" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
@@ -1007,6 +1020,7 @@
 		<PARAMETER NAME="npc_name" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="item/quantity" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="group" TYPE="boolean" VISIBLE="true"/>
+		<PARAMETER NAME="guild" TYPE="boolean" VISIBLE="true" />
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="recv_xp" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
@@ -1019,6 +1033,7 @@
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="destroy_item $item/quantity/quality$"/>
 		<PARAMETER NAME="npc_name" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
+		<PARAMETER NAME="guild" TYPE="boolean" VISIBLE="true" />
 	</PRIMITIVE>
 
 <!-- Fin actions -->
@@ -1093,6 +1108,8 @@
 		<DYNAMIC_CHILD CLASS_NAME="recv_named_item"/>
 		<DYNAMIC_CHILD CLASS_NAME="recv_xp"/>
 		<DYNAMIC_CHILD CLASS_NAME="destroy_item"/>
+		<DYNAMIC_CHILD CLASS_NAME="give_control" />
+		<DYNAMIC_CHILD CLASS_NAME="recv_charge_point" />
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="kill" TYPE="node" PARENT_CLASS="objective_parent">
@@ -1106,6 +1123,9 @@
 		<PARAMETER NAME="faction/quantity" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="place" TYPE="string" VISIBLE="true"/>
 	
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 	
 	<PRIMITIVE CLASS_NAME="talk_to" TYPE="node"  PARENT_CLASS="objective_parent">
@@ -1115,7 +1135,9 @@
 			<DEFAULT_VALUE VALUE="$giver$"/>
 		</PARAMETER>
 		<PARAMETER NAME="phrase" TYPE="string_array" VISIBLE="true" FILE_EXTENSION="txt"/>
-		
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="cast" TYPE="node" PARENT_CLASS="objective_parent">
@@ -1124,24 +1146,34 @@
 		<PARAMETER NAME="action" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="place" TYPE="string" VISIBLE="true"/>
 		
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
+		
 	</PRIMITIVE>
 	
 	<PRIMITIVE CLASS_NAME="forage" TYPE="node" PARENT_CLASS="objective_parent">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="forage"/>
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
-		
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="loot" TYPE="node" PARENT_CLASS="objective_parent">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="loot"/>
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
-		
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="craft" TYPE="node" PARENT_CLASS="objective_parent">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="craft"/>
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
-		
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="target" TYPE="node" PARENT_CLASS="objective_parent">
@@ -1150,20 +1182,27 @@
 		<PARAMETER NAME="races_to_target" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="faunas_to_target" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="place" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="sell" TYPE="node" PARENT_CLASS="objective_parent">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="sell"/>
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="npc_name" TYPE="string" VISIBLE="true"/>
-		
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="buy" TYPE="node" PARENT_CLASS="objective_parent">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="buy"/>
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="npc_name" TYPE="string" VISIBLE="true"/>
-		
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="give_item" TYPE="node" PARENT_CLASS="objective_parent">
@@ -1173,7 +1212,9 @@
 		<PARAMETER NAME="npc_name" TYPE="string" VISIBLE="true">
 			<DEFAULT_VALUE VALUE="$giver$"/>
 		</PARAMETER>
-		
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="give_money" TYPE="node" PARENT_CLASS="objective_parent">
@@ -1182,7 +1223,9 @@
 		<PARAMETER NAME="npc_name" TYPE="string" VISIBLE="true">
 			<DEFAULT_VALUE VALUE="$giver$"/>
 		</PARAMETER>
-		
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="visit" TYPE="node" PARENT_CLASS="objective_parent">
@@ -1190,7 +1233,9 @@
 						
 		<PARAMETER NAME="place" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="items_worn" TYPE="string_array" VISIBLE="true"/>
-		
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="escort" TYPE="node" PARENT_CLASS="objective_parent">
@@ -1198,26 +1243,35 @@
 						
 		<PARAMETER NAME="group_to_escort" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="save_all" TYPE="boolean" VISIBLE="true"/>
-		
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="skill" TYPE="node" PARENT_CLASS="objective_parent">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="skill $skill_name$ $level$"/>
 		<PARAMETER NAME="skill_name/level" TYPE="string_array" VISIBLE="true"/>
-		
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="do_mission" TYPE="node" PARENT_CLASS="objective_parent">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="do_mission"/>
 						
 		<PARAMETER NAME="mission_names" TYPE="string_array" VISIBLE="true"/>
-		
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="wait_ai_msg" TYPE="node" PARENT_CLASS="objective_parent">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="wait_ai_msg $msg_content$"/>
 						
 		<PARAMETER NAME="msg_content" TYPE="string_array" VISIBLE="true"/>
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="queue_start" TYPE="node" PARENT_CLASS="objective_parent">
@@ -1250,13 +1304,18 @@
 				<CONTEXT_VALUE VALUE="zorai_newbie"/>
 			</COMBO_VALUES>
 		</PARAMETER>
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="ring_scenario" TYPE="node" PARENT_CLASS="objective_parent">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="ring_scenario"/>
 						
 		<PARAMETER NAME="scenario_tag" TYPE="string" VISIBLE="true"/>
-		
+		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+			<DEFAULT_VALUE VALUE="1" />
+		</PARAMETER>
 	</PRIMITIVE>
 	
 

@@ -1156,7 +1156,7 @@ void CGroupSubMenu::addSeparatorAtIndex(uint index, const std::string &id)
 	tmp.CheckBox = NULL;
 	tmp.RightArrow = NULL;
 	_Lines.insert(_Lines.begin() + index, tmp);
-	_SubMenus.insert(_SubMenus.begin() + index, NULL);
+	_SubMenus.insert(_SubMenus.begin() + index, (CGroupSubMenu*)NULL);
 	_GroupMenu->invalidateCoords();
 }
 
@@ -1304,7 +1304,7 @@ CViewTextMenu* CGroupSubMenu::addLineAtIndex(uint index,  const ucstring &name, 
 	_Lines.insert(_Lines.begin() + index,  tmp);
 
 	// Add an empty sub menu by default
-	_SubMenus.insert(_SubMenus.begin() + index,  NULL);
+	_SubMenus.insert(_SubMenus.begin() + index,  (CGroupSubMenu*)NULL);
 
 	_GroupMenu->invalidateCoords();
 

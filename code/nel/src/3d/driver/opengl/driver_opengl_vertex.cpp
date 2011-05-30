@@ -140,7 +140,7 @@ bool CDriverGL::setupVertexBuffer(CVertexBuffer& VB)
 			// 1. Retrieve/Create driver shader.
 			//==================================
 			// insert into driver list. (so it is deleted when driver is deleted).
-			ItVBDrvInfoPtrList	it= _VBDrvInfos.insert(_VBDrvInfos.end(), NULL);
+			ItVBDrvInfoPtrList	it= _VBDrvInfos.insert(_VBDrvInfos.end(), (NL3D::IVBDrvInfos*)NULL);
 			// create and set iterator, for future deletion.
 			CVBDrvInfosGL *info = new CVBDrvInfosGL(this, it, &VB);
 			*it= VB.DrvInfos = info;
