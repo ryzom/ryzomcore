@@ -266,9 +266,6 @@ void MainWindow::createActions()
 
 	m_saveAllAction = new QAction(tr("&Save A&ll"), this);
 	m_saveAllAction->setShortcut(QKeySequence::SelectAll);
-#ifdef Q_WS_MAC
-	m_saveAllAction->setShortcut(QKeySequence(tr("Ctrl+Shift+S")));
-#endif
 	menuManager()->registerAction(m_saveAllAction, Constants::SAVE_ALL);
 	connect(m_saveAllAction, SIGNAL(triggered()), this, SLOT(saveAll()));
 	m_saveAllAction->setEnabled(false);
@@ -321,21 +318,17 @@ void MainWindow::createActions()
 	connect(m_gotoAction, SIGNAL(triggered()), this, SLOT(gotoPos()));
 	m_gotoAction->setEnabled(false);
 
-#ifndef Q_WS_MAC
+//#ifndef Q_WS_MAC
 	m_fullscreenAction = new QAction(tr("Fullscreen"), this);
 	m_fullscreenAction->setCheckable(true);
 	m_fullscreenAction->setShortcut(QKeySequence(tr("Ctrl+Shift+F11")));
 	menuManager()->registerAction(m_fullscreenAction, Constants::SETTINGS);
 	connect(m_fullscreenAction, SIGNAL(triggered(bool)), this, SLOT(setFullScreen(bool)));
-#endif
+//#endif
 
 	m_settingsAction = new QAction(tr("&Settings"), this);
 	m_settingsAction->setIcon(QIcon(":/images/preferences.png"));
 	m_settingsAction->setShortcut(QKeySequence::Preferences);
-#ifdef Q_WS_MAC
-	m_settingsAction->setShortcut(QKeySequence("Ctrl+,"));
-	m_settingsAction->setMenuRole(QAction::PreferencesRole);
-#endif
 	m_settingsAction->setStatusTip(tr("Open the settings dialog"));
 	menuManager()->registerAction(m_settingsAction, Constants::SETTINGS);
 	connect(m_settingsAction, SIGNAL(triggered()), this, SLOT(showOptionsDialog()));
@@ -359,6 +352,7 @@ void MainWindow::createActions()
 	m_exitAction->setMenuRole(QAction::QuitRole);
 	m_aboutAction->setMenuRole(QAction::AboutRole);
 	m_aboutQtAction->setMenuRole(QAction::AboutQtRole);
+	m_settingsAction->setMenuRole(QAction::PreferencesRole);
 	m_pluginViewAction->setMenuRole(QAction::ApplicationSpecificRole);
 #endif
 }
@@ -398,9 +392,9 @@ void MainWindow::createMenus()
 	menuManager()->registerMenu(m_editMenu, Constants::M_EDIT);
 
 	m_viewMenu = menuBar()->addMenu(tr("&View"));
-#ifndef Q_WS_MAC
+//#ifndef Q_WS_MAC
 	m_viewMenu->addAction(m_fullscreenAction);
-#endif
+//#endif
 	menuManager()->registerMenu(m_viewMenu, Constants::M_VIEW);
 
 	m_toolsMenu = menuBar()->addMenu(tr("&Tools"));
