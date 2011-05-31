@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <QLabel>
 #include <QAction>
+#include <QtGui/QUndoStack>
 
 namespace NLQT {
 	class QNLWidget;
@@ -26,7 +27,7 @@ public:
 
 	void loadConfig();
 	void saveConfig();
-
+	QUndoStack *getUndoStack() { return m_undoStack; }
 public Q_SLOTS:
 	void setToolMode(int value);
 	void setToolMode();
@@ -49,7 +50,7 @@ private:
 	QAction *_toolSelectModeAction;
 	QAction *_toolPickModeAction;
 	QMenu *_toolModeMenu;
-
+	QUndoStack *m_undoStack;
 	//QAction *m_setBackColorAction;
 };
 
