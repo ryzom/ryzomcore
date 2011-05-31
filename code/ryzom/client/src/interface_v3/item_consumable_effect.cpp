@@ -133,8 +133,8 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 			strFindReplace(result, "%minutes", toString(duration/60));
 			strFindReplace(result, "%secondes", toString(duration%60));
 			strFindReplace(result, "%radius", toString(radius));
-			strFindReplace(result, "%targetDisableTime", toString(targetDisableTime));
-			strFindReplace(result, "%userDisableTime", toString(userDisableTime));
+			strFindReplace(result, "%targetDisableTime", "0");
+			strFindReplace(result, "%userDisableTime", "0");
 
 			effects += result;
 			effects += "\n";
@@ -183,12 +183,12 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 			fromString(params[4].c_str(), userDisableTime);
 
 			ucstring result = CI18N::get("uiItemConsumableEffectStaminaAura");
-			strFindReplace(result, "%modifier", toString(regenMod));
+			strFindReplace(result, "%modifier", toString(bonus));
 			strFindReplace(result, "%minutes", toString(duration/60));
 			strFindReplace(result, "%secondes", toString(duration%60));
 			strFindReplace(result, "%radius", toString(radius));
-			strFindReplace(result, "%targetDisableTime", toString(targetDisableTime));
-			strFindReplace(result, "%userDisableTime", toString(userDisableTime));
+			strFindReplace(result, "%targetDisableTime", "0");
+			strFindReplace(result, "%userDisableTime", "0");
 
 			effects += result;
 			effects += "\n";
@@ -240,8 +240,8 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 			strFindReplace(result, "%minutes", toString(duration/60));
 			strFindReplace(result, "%secondes", toString(duration%60));
 			strFindReplace(result, "%radius", toString(radius));
-			strFindReplace(result, "%targetDisableTime", toString(targetDisableTime));
-			strFindReplace(result, "%userDisableTime", toString(userDisableTime));
+			strFindReplace(result, "%targetDisableTime", "0");
+			strFindReplace(result, "%userDisableTime", "0");
 
 			effects += result;
 			effects += "\n";

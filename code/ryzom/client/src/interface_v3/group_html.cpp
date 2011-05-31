@@ -871,6 +871,13 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 			{
 				_TextColor.push_back(_TextColor.empty() ? CRGBA::White : _TextColor.back());
 			}
+
+			if (present[HTML_FONT_SIZE] && value[HTML_FONT_SIZE])
+			{
+				uint fontsize;
+				fromString(value[HTML_FONT_SIZE], fontsize);
+				_FontSize.push_back(fontsize);
+			}
 		}
 			break;
 		case HTML_BR:
@@ -1407,6 +1414,7 @@ void CGroupHTML::endElement (uint element_number)
 		{
 		case HTML_FONT:
 			popIfNotEmpty (_TextColor);
+			popIfNotEmpty (_FontSize);
 		break;
 		case HTML_A:
 			popIfNotEmpty (_TextColor);
@@ -2251,8 +2259,9 @@ void CGroupHTML::addImage(const char *img, bool globalColor)
 			else*/
 			getParagraph()->addChild(newImage);
 			paragraphChange ();
-		} else {
-
+		}
+		else
+		{
 			//
 			// 2/ if it doesn't work, try to load the image in cache
 			//
@@ -3394,7 +3403,8 @@ int CGroupHTML::luaInsertText(CLuaState &ls)
 	ucstring text;
 	text.fromUtf8(ls.toString(2));
 
-	if (!_Forms.empty()) {
+	if (!_Forms.empty())
+	{
 		for (uint i=0; i<_Forms.back().Entries.size(); i++)
 		{
 			if (_Forms.back().Entries[i].TextArea && _Forms.back().Entries[i].Name == name)
@@ -3438,11 +3448,14 @@ int CGroupHTML::luaAddImage(CLuaState &ls)
 		paragraphChange();
 	}
 	string url = getLink();
-	if (!url.empty()) {
+	if (!url.empty())
+	{
 		string params = "name=" + getId() + "|url=" + getLink ();
 		addButton(CCtrlButton::PushButton, ls.toString(1), ls.toString(1), ls.toString(1),
 							"", ls.toBoolean(2), "browse", params.c_str(), "");
-	} else {
+	}
+	else
+	{
 		addImage(ls.toString(1), ls.toBoolean(2));
 	}
 

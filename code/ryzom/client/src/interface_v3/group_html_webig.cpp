@@ -277,7 +277,7 @@ string CGroupHTMLWebIG::home ()
 
 void CGroupHTMLWebIG::handle ()
 {
-	Home = "http://atys.ryzom.com/start/index.php";
+//	Home = "http://atys.ryzom.com/start/index.php";
 	CGroupHTML::handle ();
 }
 

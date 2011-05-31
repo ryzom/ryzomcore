@@ -88,12 +88,18 @@ public:
 	std::vector<TChanID> getCharacterRegisteredChannels(CCharacter * user);
 	/// return dynamic user channel TChanId subscribed by character, DYN_CHAT_INVALID_CHAN if character have no user channel
 	std::vector<TChanID> getCharacterUserChannels(CCharacter * user);
+	// brodcast message to channel
+	void broadcastMessage(TChanID channel, const ucstring& speakerName ,const ucstring& txt);
+	// send list of users to player
+	void sendChannelUsers(TChanID channel, CCharacter * user);
 	// add faction channel to character if needed
 	void addFactionChannelToCharacter(TChanID channel, CCharacter * user, bool writeRight = true, bool userChannel = false);
 	// remove faction channel for character
 	void removeFactionChannelForCharacter(TChanID channel, CCharacter * user, bool userChannel = false);
 	// add/remove faction channel to this character with privilege
 	void addRemoveFactionChannelToUserWithPriviledge(TChanID channel, CCharacter * user, bool s = true );
+	/// handle player connection
+	void playerConnects(CCharacter * user);
 	/// handle player disconnection
 	void playerDisconnects(CCharacter * user);
 	/// handle to add or remove faction channel to player of needed
@@ -201,6 +207,8 @@ private:
 	TMAPFactionChannel	_FactionChannel;
 	TMAPExtraFactionChannel	_ExtraFactionChannel;
 	TMAPExtraFactionChannel	_UserChannel;
+	typedef std::map< TChanID, std::vector<NLMISC::CEntityId> > TChannelsCharacter;
+	TChannelsCharacter	_UserChannelCharacters;
 	TMAPPassChannel _PassChannels;
 	/// character registered channel
 	typedef std::map< NLMISC::CEntityId, std::vector<TChanID> > TCharacterChannels;

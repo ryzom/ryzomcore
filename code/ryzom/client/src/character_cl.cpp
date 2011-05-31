@@ -9006,6 +9006,14 @@ void CCharacterCL::setAuraFX(uint index, const CAnimationFX *sheet)
 
 	if (sheet == NULL)
 	{
+		std::list<CAttachedFX::CBuildInfo>::iterator itAttachedFxToStart = _AttachedFXListToStart.begin();
+		while(itAttachedFxToStart != _AttachedFXListToStart.end())
+		{
+			if ((*itAttachedFxToStart).MaxNumAnimCount == index)
+				itAttachedFxToStart = _AttachedFXListToStart.erase(itAttachedFxToStart);
+			else
+				++itAttachedFxToStart;
+		}
 		// if there's already an aura attached, and if it is not already shutting down
 		if (_AuraFX[index] && _AuraFX[index]->TimeOutDate == 0.f)
 		{

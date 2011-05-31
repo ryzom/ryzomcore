@@ -344,6 +344,42 @@ void CPVPManager2::updateFactionChannel(CCharacter * user, bool b )
 	*/
 }
 
+void CPVPManager2::broadcastMessage(TChanID channel, const ucstring& speakerName, const ucstring& txt)
+{
+	CMessage msgout("DYN_CHAT:SERVICE_CHAT");
+	msgout.serial(channel);
+	msgout.serial(const_cast<ucstring&>(speakerName));
+	msgout.serial(const_cast<ucstring&>(txt));
+	sendMessageViaMirror("IOS", msgout);
+}
+
+void CPVPManager2::sendChannelUsers(TChanID channel, CCharacter * user)
+{
+	std::vector<NLMISC::CEntityId> lst;
+
+	TChannelsCharacter::iterator it = _UserChannelCharacters.find(channel);
+	if(it != _UserChannelCharacters.end())
+	{
+		lst = (*it).second;
+		string players = "";
+		for (uint i = 0; i < lst.size(); i++)
+		{
+			players += "\n"+CEntityIdTranslator::getInstance()->getByEntity(lst[i]).toString();
+		}
+
+		CMessage msgout("DYN_CHAT:SERVICE_TELL");
+		msgout.serial(channel);
+		ucstring users = ucstring("<USERS>");
+		msgout.serial(const_cast<ucstring&>(users));	
+		TDataSetRow senderRow = TheDataset.getDataSetRow(user->getId());
+		msgout.serial(senderRow);
+		ucstring txt = ucstring(players);
+		msgout.serial(const_cast<ucstring&>(txt));
+		sendMessageViaMirror( "IOS", msgout);
+	}
+}
+
+
 //----------------------------------------------------------------------------
 void CPVPManager2::addFactionChannelToCharacter(TChanID channel, CCharacter * user, bool writeRight, bool userChannel)
 {
@@ -361,6 +397,23 @@ void CPVPManager2::addFactionChannelToCharacter(TChanID channel, CCharacter * us
 				currentChannels.push_back(channel);
 				_CharacterUserChannels.erase(user->getId());
 				_CharacterUserChannels.insert( make_pair(user->getId(), currentChannels) );
+
+				TChannelsCharacter::iterator it = _UserChannelCharacters.find(channel);
+				if (it == _UserChannelCharacters.end())
+				{
+					std::vector<NLMISC::CEntityId> vect;
+					vect.push_back(user->getId());
+					_UserChannelCharacters[channel] = vect;
+				}
+				else
+				{
+					(*it).second.push_back(user->getId());
+				}
+
+				const string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
+				broadcastMessage(channel, string("<INFO>"), "<-- "+playerName);
+
+				sendChannelUsers(channel, user);
 			}
 		}
 	}
@@ -369,22 +422,40 @@ void CPVPManager2::addFactionChannelToCharacter(TChanID channel, CCharacter * us
 //----------------------------------------------------------------------------
 void CPVPManager2::removeFactionChannelForCharacter(TChanID channel, CCharacter * user, bool userChannel)
 {
-	std::vector<TChanID> currentChannels = getCharacterRegisteredChannels(user);
+	std::vector<TChanID> currentChannels;
+
+	if (channel == DYN_CHAT_INVALID_CHAN) // Send leaves message to all user channels
+	{
+		currentChannels = getCharacterUserChannels(user);
+		for (uint i = 0; i < currentChannels.size(); i++)
+		{
+			const string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
+			broadcastMessage(currentChannels[i], string("<INFO>"), playerName+" -->[]");
+		}
+	}
+
+	if (userChannel)
+	{
+		const string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
+		broadcastMessage(channel, string("<INFO>"), playerName+" -->[]");
+	}
+
+	currentChannels = getCharacterRegisteredChannels(user);
 	for (uint i = 0; i < currentChannels.size(); i++)
 	{
-		if (currentChannels[i] == channel)
+		if ((currentChannels[i] == channel))
 		{
-			DynChatEGS.removeSession(channel, user->getEntityRowId());
-			if (userChannel && (DynChatEGS.getSessionCount(channel) == 0))
+			DynChatEGS.removeSession(currentChannels[i], user->getEntityRowId());
+			if (userChannel && (DynChatEGS.getSessionCount(currentChannels[i]) == 0))
 			{
-				DynChatEGS.removeChan(channel);
-				TMAPPassChannel::iterator it = _PassChannels.find(channel);
+				DynChatEGS.removeChan(currentChannels[i]);
+				TMAPPassChannel::iterator it = _PassChannels.find(currentChannels[i]);
 				if (it != _PassChannels.end())
 					_PassChannels.erase(it);
 
 				for (TMAPExtraFactionChannel::iterator it2 = _UserChannel.begin(); it2 != _UserChannel.end(); ++it2)
 				{
-					if ((*it2).second == channel)
+					if ((*it2).second == currentChannels[i])
 						_UserChannel.erase(it2);
 				}
 			}
@@ -416,6 +487,14 @@ void CPVPManager2::removeFactionChannelForCharacter(TChanID channel, CCharacter 
 					_CharacterUserChannels.insert(make_pair(user->getId(), currentChannels));
 				}
 			}
+
+			TChannelsCharacter::iterator cit = _UserChannelCharacters.find(channel);
+			if (cit != _UserChannelCharacters.end())
+			{
+				std::vector<NLMISC::CEntityId> lst = _UserChannelCharacters[channel];
+				lst.erase(find(lst.begin(), lst.end(), user->getId()));
+				_UserChannelCharacters[channel] = lst;
+			}
 		}
 	}
 }
@@ -435,6 +514,17 @@ void CPVPManager2::addRemoveFactionChannelToUserWithPriviledge(TChanID channel, 
 	else
 		removeFactionChannelForCharacter(channel, user);
 
+}
+
+//----------------------------------------------------------------------------
+void CPVPManager2::playerConnects(CCharacter * user)
+{
+	std::vector<TChanID> currentChannels = getCharacterUserChannels(user);
+	for (uint i = 0; i < currentChannels.size(); i++)
+	{
+		const string playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId()).toString();
+		broadcastMessage(currentChannels[i], string("<INFO>"), "<-- "+playerName);
+	}
 }
 
 //----------------------------------------------------------------------------

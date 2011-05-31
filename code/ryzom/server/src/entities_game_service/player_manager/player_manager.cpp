@@ -2251,7 +2251,7 @@ bool CPlayerManager::hasBetterCSRGrade( CPlayer* p1, CPlayer *p2, bool devIsNorm
 	if ( p2->havePriv(":SGM:") )
 		return ( p1->havePriv(":SGM:") );
 	if ( p2->havePriv(":EM:") )
-		return ( p1->havePriv(":SGM:EM:") );
+		return ( p1->havePriv(":SGM:EM:GM:") );
 	if ( p2->havePriv(":GM:") )
 		return ( p1->havePriv(":SGM:EM:GM:") );
 	if ( p2->havePriv(":EG:") )
