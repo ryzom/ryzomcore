@@ -1304,9 +1304,9 @@
 				<CONTEXT_VALUE VALUE="zorai_newbie"/>
 			</COMBO_VALUES>
 		</PARAMETER>
-		<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
+		<!--<PARAMETER NAME="nb_guild_members_needed" TYPE="string" VISIBLE="true">
 			<DEFAULT_VALUE VALUE="1" />
-		</PARAMETER>
+		</PARAMETER>-->
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="ring_scenario" TYPE="node" PARENT_CLASS="objective_parent">
