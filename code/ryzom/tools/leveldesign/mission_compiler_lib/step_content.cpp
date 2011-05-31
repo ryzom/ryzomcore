@@ -142,6 +142,7 @@ REGISTER_STEP_CONTENT(CActionJumpTo, "jump_to");
 class CActionRecvMoney : public IStepContent
 {
 	string	_Amount;
+	bool	_Guild;
 	
 	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
@@ -152,18 +153,99 @@ public:
 	{
 		IStepContent::init(md, prim);
 		_Amount = md.getProperty(prim, "amount", true, false);
+
+		_Guild = md.getProperty(prim, "guild", false, true) == "true";
+		// Check: if _Guild is true then check if we are in a guild mission
+		if (_Guild && !md.isGuildMission())
+		{
+			string err = toString("primitive(%s): 'guild' option true 1 for non guild mission.", prim->getName().c_str());
+			throw EParseException(prim, err.c_str());
+		}
 	}
 	
 	string genCode(CMissionData &md)
 	{
 		if (!_Amount.empty())
-			return "recv_money : "+_Amount+NL;
+		{
+			string ret;
+			ret = "recv_money : "+_Amount;
+			if (_Guild)
+				ret += "; guild";
+			ret += NL;
+			return ret;
+		}
 		else
 			return string();
 	}
 	
 };
 REGISTER_STEP_CONTENT(CActionRecvMoney, "recv_money");
+
+
+// ---------------------------------------------------------------------------
+class CActionRecvChargePoint : public IStepContent
+{
+	string	_Amount;
+
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	{
+		numEntry = 0;
+	}
+public:
+	void init(CMissionData &md, IPrimitive *prim)
+	{
+		IStepContent::init(md, prim);
+		_Amount = md.getProperty(prim, "charge_points", true, false);
+	}
+
+	string genCode(CMissionData &md)
+	{
+		if (!_Amount.empty())
+		{
+			string ret;
+			ret = "recv_charge_point : "+_Amount;
+			ret += NL;
+			return ret;
+		}
+		else
+			return string();
+	}
+
+};
+REGISTER_STEP_CONTENT(CActionRecvChargePoint, "recv_charge_point");
+
+
+// ---------------------------------------------------------------------------
+class CActionGiveOutpostControl : public IStepContent
+{
+	string	_OutpostName;
+
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	{
+		numEntry = 0;
+	}
+public:
+	void init(CMissionData &md, IPrimitive *prim)
+	{
+		IStepContent::init(md, prim);
+		_OutpostName = md.getProperty(prim, "outpost_name", true, false);
+	}
+
+	string genCode(CMissionData &md)
+	{
+		if (!_OutpostName.empty())
+		{
+			string ret;
+			ret = "give_control : "+_OutpostName;
+			ret += NL;
+			return ret;
+		}
+		else
+			return string();
+	}
+
+};
+REGISTER_STEP_CONTENT(CActionGiveOutpostControl, "give_control");
 
 
 // ---------------------------------------------------------------------------
@@ -590,6 +672,7 @@ class CActionRecvFame : public IStepContent
 {
 	string	_Faction;
 	string	_Fame;
+	bool	_Guild;
 
 	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
@@ -602,12 +685,27 @@ public:
 
 		_Faction = md.getProperty(prim, "faction", true, false);
 		_Fame = md.getProperty(prim, "value", true, false);
+
+		_Guild = md.getProperty(prim, "guild", false, true) == "true";
+		// Check: if _Guild is true then check if we are in a guild mission
+		if (_Guild && !md.isGuildMission())
+		{
+			string err = toString("primitive(%s): 'guild' option true 1 for non guild mission.", prim->getName().c_str());
+			throw EParseException(prim, err.c_str());
+		}
 	}
 
 	string genCode(CMissionData &md)
 	{
 		if (!_Faction.empty() && !_Fame.empty())
-			return string("recv_fame : ")+_Faction+" "+_Fame+NL;
+		{
+			string ret;
+			ret = "recv_fame : "+_Faction+" "+_Fame;
+			if (_Guild)
+				ret += "; guild";
+			ret += NL;
+			return ret;
+		}
 		else
 			return string();
 	}
@@ -628,6 +726,7 @@ class CActionRecvItem : public IStepContent
 	vector<TItemDesc>	_Items;
 	bool				_QualSpec;
 	bool				_Group;
+	bool				_Guild;
 
 	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
@@ -675,6 +774,13 @@ public:
 		s = md.getProperty(prim, "group", true, false);
 		_Group = (strlwr(s) == "true");
 
+		_Guild = md.getProperty(prim, "guild", false, true) == "true";
+		// Check: if _Guild is true then check if we are in a guild mission
+		if (_Guild && !md.isGuildMission())
+		{
+			string err = toString("primitive(%s): 'guild' option true 1 for non guild mission.", prim->getName().c_str());
+			throw EParseException(prim, err.c_str());
+		}
 
 		IStepContent::init(md, prim);
 	}
@@ -693,6 +799,8 @@ public:
 				ret += " : "+_BotGiver;
 			if (_Group)
 				ret += " : group";
+			if (_Guild)
+				ret += "; guild";
 			ret += NL;
 		}
 
@@ -707,6 +815,7 @@ class CActionRecvNamedItem : public IStepContent
 {
 	vector<TItemDesc>	_Items;
 	bool				_Group;
+	bool				_Guild;
 	
 	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
@@ -743,6 +852,14 @@ public:
 		s = md.getProperty(prim, "group", true, false);
 		_Group = (strlwr(s) == "true");
 
+		_Guild = md.getProperty(prim, "guild", false, true) == "true";
+		// Check: if _Guild is true then check if we are in a guild mission
+		if (_Guild && !md.isGuildMission())
+		{
+			string err = toString("primitive(%s): 'guild' option true 1 for non guild mission.", prim->getName().c_str());
+			throw EParseException(prim, err.c_str());
+		}
+
 		IStepContent::init(md, prim);
 	}
 	
@@ -756,6 +873,8 @@ public:
 			ret += "recv_named_item : "+item.ItemName+" "+item.ItemQuant;
 			if (_Group)
 				ret += " : group";
+			if (_Guild)
+				ret += "; guild";
 			ret += NL;
 		}
 		
@@ -777,6 +896,7 @@ class CActionDestroyItem : public IStepContent
 
 	string				_BotDestroyer;
 	vector<CItemDesc>	_Items;
+	bool				_Guild;
 	
 	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
@@ -821,6 +941,14 @@ public:
 				_Items.push_back(item);
 			}
 		}
+
+		_Guild = md.getProperty(prim, "guild", false, true) == "true";
+		// Check: if _Guild is true then check if we are in a guild mission
+		if (_Guild && !md.isGuildMission())
+		{
+			string err = toString("primitive(%s): 'guild' option true 1 for non guild mission.", prim->getName().c_str());
+			throw EParseException(prim, err.c_str());
+		}
 		
 		IStepContent::init(md, prim);
 	}
@@ -839,6 +967,8 @@ public:
 				ret +=" "+item.Desc.ItemQual;
 			if (!_BotDestroyer.empty())
 				ret += " : "+_BotDestroyer;
+			if (_Guild)
+				ret += "; guild";
 			ret += NL;
 		}
 		
