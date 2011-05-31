@@ -874,7 +874,8 @@ void CGroupNpc::delNamedEntityListener(std::string const& name, std::string cons
 	last = _namedEntityListeners.upper_bound(std::make_pair(name, prop));
 	while (listener!=last)
 	{
-		if (listener->second==event) {
+		if (listener->second==event)
+		{
 			_namedEntityListeners.erase(listener);
 			CNamedEntityManager::getInstance()->get(name).delListenerGroup(prop, this);
 			break;
@@ -896,7 +897,8 @@ void CGroupNpc::delNamedEntityListener(std::string const& name, std::string cons
 	last = _namedEntityListeners2.upper_bound(std::make_pair(name, prop));
 	while (listener!=last)
 	{
-		if (listener->second==functionName) {
+		if (listener->second==functionName)
+		{
 			_namedEntityListeners2.erase(listener);
 			CNamedEntityManager::getInstance()->get(name).delListenerGroup(prop, this);
 			break;
@@ -920,7 +922,8 @@ void CGroupNpc::namedEntityListenerCb(std::string const& name, std::string const
 	std::queue<NLMISC::TStringId> listeners;
 	for (listener2=first2; listener2!=last2; ++listener2)
 		listeners.push(NLMISC::CStringMapper::map(listener2->second));
-	while(!listeners.empty()) {
+	while(!listeners.empty())
+	{
 		callScriptCallBack(this, listeners.front());
 		listeners.pop();
 	}

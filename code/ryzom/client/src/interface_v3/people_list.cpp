@@ -207,12 +207,14 @@ bool CPeopleList::sortExByOnline(const CPeople& a, const CPeople& b)
 	ucstring name_b = toUpper(b.getName());
 	
 	// We want order: online/alpha, offworld/alpha, offline/alpha
-	if (a.Online == b.Online) {
+	if (a.Online == b.Online)
+	{
 		return (name_a < name_b);
 	}
 	else {
 		// Compare online status
-		switch (a.Online) {
+		switch (a.Online)
+		{
 			case ccs_online:
 				// a is > if a is online
 				return true;
@@ -244,7 +246,8 @@ void CPeopleList::sortEx(TSortOrder order)
 		_BaseContainer->detachContainer(_Peoples[k].Container);
 	}
 	
-	switch (order) {
+	switch (order)
+	{
 		default:
 		case sort_index:
 			std::sort(_Peoples.begin(), _Peoples.end(), CPeopleList::sortExByContactId);

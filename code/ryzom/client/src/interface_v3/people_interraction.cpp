@@ -2277,7 +2277,8 @@ public:
 		CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
 
 		order = (CPeopleList::TSortOrder)(order + 1);
-		if (order == CPeopleList::END_SORT_ORDER) {
+		if (order == CPeopleList::END_SORT_ORDER)
+		{
 			order = CPeopleList::START_SORT_ORDER;
 		}
 
@@ -2654,8 +2655,10 @@ class CHandlerChatTargetSelected : public IActionHandler
 		}
 		else
 		{
-			for (uint i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++) {
-				if (nlstricmp(sParams, "dyn"+toString("%d", i)) == 0) {
+			for (uint i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
+			{
+				if (nlstricmp(sParams, "dyn"+toString("%d", i)) == 0)
+				{
 					cf.setTargetGroup(CChatGroup::dyn_chat, i);
 				}
 			}

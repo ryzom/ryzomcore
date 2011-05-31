@@ -4699,7 +4699,8 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 				c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=bad_sheet", getSalt());
 				return false;
 			}
-		} else if (command_args[1] == "bot_name")
+		}
+		else if (command_args[1] == "bot_name")
 		{
 			if (target.getType() == RYZOMID::player)
 			{

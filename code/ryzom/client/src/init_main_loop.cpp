@@ -187,7 +187,8 @@ struct CStatThread : public NLMISC::IRunnable
 	{
 		std::string chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		std::string s;
-		for (int i = 0; i < 32; i++) {
+		for (int i = 0; i < 32; i++)
+		{
 			s += chars[uint(frand(float(chars.size())))];
 		}
 		return s;

@@ -759,7 +759,8 @@ void loadFile_s_(CStateInstance* entity, CScriptStack& stack)
 		NLMISC::CIFile file(NLMISC::CPath::lookup(fileName));
 		
 		vector<string> lines;
-		while (!file.eof()) {
+		while (!file.eof())
+		{
 			const size_t bufferSize = 4*1024;
 			char buffer[bufferSize];
 			file.getline(buffer, bufferSize);

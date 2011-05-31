@@ -805,27 +805,35 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		else
 		{
 			ucstring::size_type index = finalString.find(ucstring("<BPFX>"));
-			if (index != ucstring::npos) {
+			if (index != ucstring::npos)
+			{
 				bubbleWanted = false;
 				finalString = finalString.substr(index+6,finalString.size());
 				ucstring::size_type index2 = finalString.find(ucstring(" "));
 				ucstring playerName;
-				if (index2 < (finalString.size()-3)) {
+				if (index2 < (finalString.size()-3))
+				{
 					playerName = finalString.substr(0,index2);
 					finalString = finalString.substr(index2+1,finalString.size());
 				}
 				if (!senderName.empty())
 				{
 					CEntityCL *senderEntity = EntitiesMngr.getEntityByName (CEntityCL::removeTitleAndShardFromName(senderName), true, true);
-					if (senderEntity) {
-						if (senderEntity->Type != CEntityCL::Player) {
-							if (playerName.empty()) {
+					if (senderEntity)
+					{
+						if (senderEntity->Type != CEntityCL::Player)
+						{
+							if (playerName.empty())
+							{
 								senderEntity->removeStateFx();
 								senderEntity->setStateFx(finalString.toString());
 								nlinfo("empty");
-							} else {
+							}
+							else
+							{
 								CEntityCL *destEntity = EntitiesMngr.getEntityByName (CEntityCL::removeTitleAndShardFromName(playerName), false, true);
-								if (destEntity) {
+								if (destEntity)
+								{
 									destEntity->removeStateFx();
 									destEntity->setStateFx(finalString.toString());
 									nlinfo("no empty");

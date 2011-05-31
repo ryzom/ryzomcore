@@ -3447,7 +3447,8 @@ static void parsePrimScript(const IPrimitive *prim, const std::string &mapName, 
 		std::vector<std::string>::const_iterator it = pcode->begin(), itEnd = pcode->end();
 		code = *it;
 		++it;
-		for(; it!=itEnd; ++it) {
+		for(; it!=itEnd; ++it)
+		{
 			code += "\n";
 			code += *it;
 		}

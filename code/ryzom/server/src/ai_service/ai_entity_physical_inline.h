@@ -413,7 +413,8 @@ void CTargetable<T>::removeTargeter(TTargetType type, TPtr const& targeter)
 	}
 	
 	NLMISC::CDbgPtr<T> current = _FirstTargeters[type];
-	while (!current.isNULL()) {
+	while (!current.isNULL())
+	{
 		NLMISC::CDbgPtr<T> next = current->_NextTargeter;
 		if (next == targeter)
 		{
