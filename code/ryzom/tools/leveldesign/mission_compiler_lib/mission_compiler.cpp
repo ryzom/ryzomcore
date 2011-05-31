@@ -17,6 +17,7 @@
 #include "mission_compiler.h"
 #include "step.h"
 #include "nel/misc/i18n.h"
+#include "nel/ligo/primitive_utils.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -526,7 +527,12 @@ bool CMissionCompiler::compileMission(NLLIGO::IPrimitive *rootPrim, const std::s
 	}
 
 	// first, start by reading mission variables
-	IPrimitive	*variables = getPrimitiveChild(mission, TPrimitiveClassPredicate("variables"));
+	IPrimitive	*variables;
+	{
+		TPrimitiveClassPredicate predTmp("variables");
+		variables= NLLIGO::getPrimitiveChild(mission, predTmp);
+	}
+
 	if (!variables)
 	{
 		nlwarning("Can't find variables !");
@@ -540,7 +546,12 @@ bool CMissionCompiler::compileMission(NLLIGO::IPrimitive *rootPrim, const std::s
 	// now, we can init the mission header phrase (they need variable knwoled)
 	md.initHeaderPhrase(rootPrim);
 	
-	IPrimitive	*preReq = getPrimitiveChild(mission, TPrimitiveClassPredicate("pre_requisite"));
+	IPrimitive	*preReq;
+	{
+		TPrimitiveClassPredicate predTmp("pre_requisite");
+		preReq = getPrimitiveChild(mission, predTmp);
+	}
+
 	if (!preReq)
 	{
 		nlwarning("Can't find pre requisite !");
@@ -598,7 +609,8 @@ bool	CMissionCompiler::compileMissions(IPrimitive *rootPrim, const std::string &
 	
 	CPrimitiveSet<TPrimitiveClassPredicate>	scriptsSet;
 	
-	scriptsSet.buildSet(rootPrim, TPrimitiveClassPredicate("mission_tree"), missionTrees);
+	TPrimitiveClassPredicate pred("mission_tree");
+	scriptsSet.buildSet(rootPrim, pred, missionTrees);
 	
 	nlinfo("Found %u mission tree in the primitive file", missionTrees.size());
 	
@@ -667,7 +679,8 @@ bool CMissionCompiler::installCompiledMission(NLLIGO::CLigoConfig &ligoConfig, c
 
 			TPrimitiveSet scripts;
 			CPrimitiveSet<TPrimitiveClassPredicate> filter;
-			filter.buildSet(primDoc->RootNode, TPrimitiveClassPredicate("mission"), scripts);
+			TPrimitiveClassPredicate pred("mission");
+			filter.buildSet(primDoc->RootNode, pred, scripts);
 			
 			// for each script, check if it was generated, and if so, check the name
 			// of the source primitive file.
@@ -732,7 +745,8 @@ bool CMissionCompiler::installCompiledMission(NLLIGO::CLigoConfig &ligoConfig, c
 
 			TPrimitiveSet bots;
 			CPrimitiveSet<TPrimitiveClassAndNamePredicate> filter;
-			filter.buildSet(primDoc->RootNode, TPrimitiveClassAndNamePredicate("npc_bot", mission.getGiverName()), bots);
+			TPrimitiveClassAndNamePredicate pred("npc_bot", mission.getGiverName());
+			filter.buildSet(primDoc->RootNode, pred, bots);
 
 			if (bots.empty())
 			{
@@ -961,7 +975,8 @@ bool CMissionCompiler::parseOneStep(CMissionData &md, IPrimitive *stepToParse, I
 bool CMissionCompiler::parseSteps(CMissionData &md, IPrimitive *steps, IStep *parent)
 {
 	TPrimitiveSet childs;
-	filterPrimitiveChilds(steps, TPrimitivePropertyPredicate("step_tag", "true"), childs);
+	TPrimitivePropertyPredicate pred("step_tag", "true");
+	filterPrimitiveChilds(steps, pred, childs);
 
 	if (childs.empty())
 	{

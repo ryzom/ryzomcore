@@ -37,7 +37,7 @@ void Modules::init()
 
 void Modules::release()
 {
-	delete _mainWindow;
+//	delete _mainWindow;
 	_mainWindow = NULL;
 	delete _particleEditor;
 	_particleEditor = NULL;

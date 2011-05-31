@@ -29,6 +29,7 @@
 #include "nel/misc/bit_mem_stream.h"
 //
 #include <limits>
+#include <iterator>
 //
 
 

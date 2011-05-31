@@ -36,6 +36,7 @@
 #include <limits>
 #include <numeric>
 #include <iomanip>
+#include <iterator>
 
 #include "nel/misc/vector.h"
 #include "nel/misc/path.h"

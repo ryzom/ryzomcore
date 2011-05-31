@@ -52,6 +52,7 @@
 #include <utility>
 #include <deque>
 #include <limits>
+#include <iterator>
 
 
 //----------------------------------------------------------------

@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>361</width>
+    <width>206</width>
     <height>555</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>300</width>
+    <width>200</width>
     <height>83</height>
    </size>
   </property>
@@ -33,21 +33,21 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tileTab">
        <attribute name="title">
-        <string>Paint Tiles</string>
+        <string>Tiles</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="colorTab">
        <attribute name="title">
-        <string>Paint Colors</string>
+        <string>Colors</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="displaceTab">
        <attribute name="title">
-        <string>Paint Displacement</string>
+        <string>Displacement</string>
        </attribute>
       </widget>
      </widget>

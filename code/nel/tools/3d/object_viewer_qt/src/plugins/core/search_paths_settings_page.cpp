@@ -70,6 +70,11 @@ QString CSearchPathsSettingsPage::trCategory() const
 	return tr(Constants::SETTINGS_TR_CATEGORY_GENERAL);
 }
 
+QIcon CSearchPathsSettingsPage::categoryIcon() const
+{
+	return QIcon();
+}
+
 QWidget *CSearchPathsSettingsPage::createPage(QWidget *parent)
 {
 	m_page = new QWidget(parent);

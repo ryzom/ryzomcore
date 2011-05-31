@@ -58,6 +58,11 @@ QString GraphicsSettingsPage::trCategory() const
 	return tr("Object Viewer");
 }
 
+QIcon GraphicsSettingsPage::categoryIcon() const
+{
+	return QIcon();
+}
+
 QWidget *GraphicsSettingsPage::createPage(QWidget *parent)
 {
 	m_page = new QWidget(parent);

@@ -22,7 +22,7 @@ ObjectViewerPlugin::~ObjectViewerPlugin()
 	}
 	qDeleteAll(_autoReleaseObjects);
 	_autoReleaseObjects.clear();
-	//Modules::release();
+	Modules::release();
 }
 
 bool ObjectViewerPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
@@ -43,7 +43,7 @@ void ObjectViewerPlugin::extensionsInitialized()
 
 void ObjectViewerPlugin::shutdown()
 {
-	Modules::release();
+//	Modules::release();
 }
 
 void ObjectViewerPlugin::setNelContext(NLMISC::INelContext *nelContext)
@@ -87,6 +87,16 @@ void ObjectViewerPlugin::addAutoReleasedObject(QObject *obj)
 {
 	_plugMan->addObject(obj);
 	_autoReleaseObjects.prepend(obj);
+}
+
+void CObjectViewerContext::open()
+{
+	Modules::mainWin().open();
+}
+
+QUndoStack *CObjectViewerContext::undoStack()
+{
+	return Modules::mainWin().getUndoStack();
 }
 
 QWidget *CObjectViewerContext::widget()

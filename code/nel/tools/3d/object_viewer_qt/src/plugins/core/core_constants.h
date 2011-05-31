@@ -23,10 +23,10 @@ namespace Core
 namespace Constants
 {
 
-const char * const OVQT_VERSION_LONG = "0.0.1";
+const char * const OVQT_VERSION_LONG = "0.1";
 const char * const OVQT_VENDOR = "Ryzom Core";
 const char * const OVQT_YEAR = "2010, 2011";
-const char * const OVQT_CORE_PLUGIN	= "Core";
+const char * const OVQT_CORE_PLUGIN = "Core";
 
 //mainwindow
 const char * const MAIN_WINDOW = "ObjectViewerQt.MainWindow";
@@ -43,12 +43,26 @@ const char * const M_TOOLS = "ObjectViewerQt.Menu.Tools";
 const char * const M_WINDOW = "ObjectViewerQt.Menu.Window";
 const char * const M_HELP = "ObjectViewerQt.Menu.Help";
 
+const char * const M_FILE_RECENTFILES = "ObjectViewerQt.Menu.File.RecentFiles";
 const char * const M_SHEET = "ObjectViewerQt.Menu.Sheet";
 
 //actions
 const char * const NEW = "ObjectViewerQt.New";
-const char * const OPEN	= "ObjectViewerQt.Open";
-const char * const EXIT	= "ObjectViewerQt.Exit";
+const char * const OPEN = "ObjectViewerQt.Open";
+const char * const SAVE = "ObjectViewerQt.Save";
+const char * const SAVE_AS = "ObjectViewerQt.SaveAs";
+const char * const SAVE_ALL = "ObjectViewerQt.SaveAll";
+const char * const EXIT = "ObjectViewerQt.Exit";
+
+const char * const UNDO = "ObjectViewerQt.Undo";
+const char * const REDO = "ObjectViewerQt.Redo";
+const char * const CUT = "ObjectViewerQt.Cut";
+const char * const COPY = "ObjectViewerQt.Copy";
+const char * const PASTE = "ObjectViewerQt.Paste";
+const char * const DEL = "ObjectViewerQt.Del";
+const char * const FIND = "ObjectViewerQt.Find";
+const char * const SELECT_ALL = "ObjectViewerQt.SelectAll";
+const char * const GOTO_POS = "ObjectViewerQt.Goto";
 
 const char * const SETTINGS = "ObjectViewerQt.Settings";
 const char * const TOGGLE_FULLSCREEN = "ObjectViewerQt.ToggleFullScreen";
@@ -80,11 +94,21 @@ const char * const LEVELDESIGN_PATH = "LevelDesignPath";
 const char * const ASSETS_PATH = "AssetsPath";
 const char * const REMAP_EXTENSIONS = "RemapExtensions";
 
+const char * const LOG_SECTION = "LogSettings";
+const char * const LOG_ERROR   = "LogError";
+const char * const LOG_WARNING = "LogWarning";
+const char * const LOG_DEBUG   = "LogDebug";
+const char * const LOG_ASSERT  = "LogAssert";
+const char * const LOG_INFO    = "LogInfo";
+
 //resources
 const char * const ICON_NEL = ":/core/images/nel.png";
 const char * const ICON_SETTINGS = ":/core/images/preferences.png";
 const char * const ICON_PILL = ":/core/icons/ic_nel_pill.png";
 const char * const ICON_OPEN = ":/core/icons/ic_nel_open.png";
+const char * const ICON_NEW = ":/core/icons/ic_nel_new.png";
+const char * const ICON_SAVE = ":/core/icons/ic_nel_save.png";
+const char * const ICON_SAVE_AS = ":/core/icons/ic_nel_save_as.png";
 const char * const ICON_CRASH = ":/core/icons/ic_nel_crash.png";
 
 } // namespace Constants

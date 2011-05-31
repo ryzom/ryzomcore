@@ -36,6 +36,7 @@ class IPluginManager;
 namespace Core
 {
 class IMenuManager;
+class ContextManager;
 
 class CORE_EXPORT ICore : public QObject
 {
@@ -52,6 +53,7 @@ public:
 								   QWidget *parent = 0) = 0;
 
 	virtual IMenuManager *menuManager() const = 0;
+	virtual ContextManager *contextManager() const = 0;
 
 	virtual QSettings *settings() const = 0;
 	virtual QMainWindow *mainWindow() const = 0;
