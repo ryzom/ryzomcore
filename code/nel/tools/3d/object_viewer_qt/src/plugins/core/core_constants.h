@@ -23,10 +23,10 @@ namespace Core
 namespace Constants
 {
 
-const char * const OVQT_VERSION_LONG = "0.0.1";
+const char * const OVQT_VERSION_LONG = "0.1";
 const char * const OVQT_VENDOR = "Ryzom Core";
 const char * const OVQT_YEAR = "2010, 2011";
-const char * const OVQT_CORE_PLUGIN	= "Core";
+const char * const OVQT_CORE_PLUGIN = "Core";
 
 //mainwindow
 const char * const MAIN_WINDOW = "ObjectViewerQt.MainWindow";
@@ -43,12 +43,26 @@ const char * const M_TOOLS = "ObjectViewerQt.Menu.Tools";
 const char * const M_WINDOW = "ObjectViewerQt.Menu.Window";
 const char * const M_HELP = "ObjectViewerQt.Menu.Help";
 
+const char * const M_FILE_RECENTFILES = "ObjectViewerQt.Menu.File.RecentFiles";
 const char * const M_SHEET = "ObjectViewerQt.Menu.Sheet";
 
 //actions
 const char * const NEW = "ObjectViewerQt.New";
-const char * const OPEN	= "ObjectViewerQt.Open";
-const char * const EXIT	= "ObjectViewerQt.Exit";
+const char * const OPEN = "ObjectViewerQt.Open";
+const char * const SAVE = "ObjectViewerQt.Save";
+const char * const SAVE_AS = "ObjectViewerQt.SaveAs";
+const char * const SAVE_ALL = "ObjectViewerQt.SaveAll";
+const char * const EXIT = "ObjectViewerQt.Exit";
+
+const char * const UNDO = "ObjectViewerQt.Undo";
+const char * const REDO = "ObjectViewerQt.Redo";
+const char * const CUT = "ObjectViewerQt.Cut";
+const char * const COPY = "ObjectViewerQt.Copy";
+const char * const PASTE = "ObjectViewerQt.Paste";
+const char * const DEL = "ObjectViewerQt.Del";
+const char * const FIND = "ObjectViewerQt.Find";
+const char * const SELECT_ALL = "ObjectViewerQt.SelectAll";
+const char * const GOTO_POS = "ObjectViewerQt.Goto";
 
 const char * const SETTINGS = "ObjectViewerQt.Settings";
 const char * const TOGGLE_FULLSCREEN = "ObjectViewerQt.ToggleFullScreen";

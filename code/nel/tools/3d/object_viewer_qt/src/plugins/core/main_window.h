@@ -66,6 +66,17 @@ public Q_SLOTS:
 
 private Q_SLOTS:
 	void open();
+	void newFile();
+	void save();
+	void saveAs();
+	void saveAll();
+	void cut();
+	void copy();
+	void paste();
+	void del();
+	void find();
+	void gotoPos();
+	void setFullScreen(bool enabled);
 	void about();
 	void updateContext(Core::IContext *context);
 
@@ -99,6 +110,7 @@ private:
 	QTabWidget *m_tabWidget;
 
 	QMenu *m_fileMenu;
+	QMenu *m_recentFilesMenu;
 	QMenu *m_editMenu;
 	QMenu *m_viewMenu;
 	QMenu *m_toolsMenu;
@@ -106,8 +118,20 @@ private:
 
 	QMenu *m_sheetMenu;
 
+	QAction *m_newAction;
 	QAction *m_openAction;
+	QAction *m_saveAction;
+	QAction *m_saveAsAction;
+	QAction *m_saveAllAction;
 	QAction *m_exitAction;
+	QAction *m_cutAction;
+	QAction *m_copyAction;
+	QAction *m_pasteAction;
+	QAction *m_delAction;
+	QAction *m_selectAllAction;
+	QAction *m_findAction;
+	QAction *m_gotoAction;
+	QAction *m_fullscreenAction;
 	QAction *m_settingsAction;
 	QAction *m_pluginViewAction;
 	QAction *m_aboutAction;

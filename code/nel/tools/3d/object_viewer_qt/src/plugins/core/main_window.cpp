@@ -141,6 +141,56 @@ void MainWindow::open()
 	m_contextManager->currentContext()->open();
 }
 
+void MainWindow::newFile()
+{
+}
+
+void MainWindow::save()
+{
+}
+
+void MainWindow::saveAs()
+{
+}
+
+void MainWindow::saveAll()
+{
+}
+
+void MainWindow::cut()
+{
+}
+
+void MainWindow::copy()
+{
+}
+
+void MainWindow::paste()
+{
+}
+
+void MainWindow::del()
+{
+}
+
+void MainWindow::find()
+{
+}
+
+void MainWindow::gotoPos()
+{
+}
+
+void MainWindow::setFullScreen(bool enabled)
+{
+	if (bool(windowState() & Qt::WindowFullScreen) == enabled)
+		return;
+	if (enabled)
+		setWindowState(windowState() | Qt::WindowFullScreen);
+	else
+		setWindowState(windowState() & ~Qt::WindowFullScreen);
+}
+
 bool MainWindow::showOptionsDialog(const QString &group,
 								   const QString &page,
 								   QWidget *parent)
@@ -186,6 +236,13 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::createActions()
 {
+	m_newAction = new QAction(tr("&New"), this);
+	m_newAction->setIcon(QIcon(Constants::ICON_NEW));
+	m_newAction->setShortcut(QKeySequence::New);
+	menuManager()->registerAction(m_newAction, Constants::NEW);
+	connect(m_newAction, SIGNAL(triggered()), this, SLOT(newFile()));
+	m_newAction->setEnabled(false);
+
 	m_openAction = new QAction(tr("&Open..."), this);
 	m_openAction->setIcon(QIcon(Constants::ICON_OPEN));
 	m_openAction->setShortcut(QKeySequence::Open);
@@ -193,15 +250,92 @@ void MainWindow::createActions()
 	menuManager()->registerAction(m_openAction, Constants::OPEN);
 	connect(m_openAction, SIGNAL(triggered()), this, SLOT(open()));
 
+	m_saveAction = new QAction(tr("&Save"), this);
+	m_saveAction->setIcon(QIcon(Constants::ICON_SAVE));
+	m_saveAction->setShortcut(QKeySequence::Save);
+	menuManager()->registerAction(m_saveAction, Constants::SAVE);
+	connect(m_saveAction, SIGNAL(triggered()), this, SLOT(save()));
+	m_saveAction->setEnabled(false);
+
+	m_saveAsAction = new QAction(tr("Save &As..."), this);
+	m_saveAsAction->setIcon(QIcon(Constants::ICON_SAVE_AS));
+	m_saveAsAction->setShortcut(QKeySequence::SaveAs);
+	menuManager()->registerAction(m_saveAsAction, Constants::SAVE_AS);
+	connect(m_saveAsAction, SIGNAL(triggered()), this, SLOT(saveAs()));
+	m_saveAsAction->setEnabled(false);
+
+	m_saveAllAction = new QAction(tr("&Save A&ll"), this);
+	m_saveAllAction->setShortcut(QKeySequence::SelectAll);
+#ifdef Q_WS_MAC
+	m_saveAllAction->setShortcut(QKeySequence(tr("Ctrl+Shift+S")));
+#endif
+	menuManager()->registerAction(m_saveAllAction, Constants::SAVE_ALL);
+	connect(m_saveAllAction, SIGNAL(triggered()), this, SLOT(saveAll()));
+	m_saveAllAction->setEnabled(false);
+
 	m_exitAction = new QAction(tr("E&xit"), this);
 	m_exitAction->setShortcut(QKeySequence(tr("Ctrl+Q")));
 	m_exitAction->setStatusTip(tr("Exit the application"));
 	menuManager()->registerAction(m_exitAction, Constants::EXIT);
 	connect(m_exitAction, SIGNAL(triggered()), this, SLOT(close()));
 
+	m_cutAction = new QAction(tr("Cu&t"), this);
+	m_cutAction->setShortcut(QKeySequence::Cut);
+	menuManager()->registerAction(m_cutAction, Constants::CUT);
+	connect(m_cutAction, SIGNAL(triggered()), this, SLOT(cut()));
+	m_cutAction->setEnabled(false);
+
+	m_copyAction = new QAction(tr("&Copy"), this);
+	m_copyAction->setShortcut(QKeySequence::Copy);
+	menuManager()->registerAction(m_copyAction, Constants::COPY);
+	connect(m_copyAction, SIGNAL(triggered()), this, SLOT(copy()));
+	m_copyAction->setEnabled(false);
+
+	m_pasteAction = new QAction(tr("&Paste"), this);
+	m_pasteAction->setShortcut(QKeySequence::Paste);
+	menuManager()->registerAction(m_pasteAction, Constants::PASTE);
+	connect(m_pasteAction, SIGNAL(triggered()), this, SLOT(paste()));
+	m_pasteAction->setEnabled(false);
+
+	m_delAction = new QAction(tr("&Delete"), this);
+	m_delAction->setShortcut(QKeySequence::Delete);
+	menuManager()->registerAction(m_delAction, Constants::DEL);
+	connect(m_delAction, SIGNAL(triggered()), this, SLOT(del()));
+	m_delAction->setEnabled(false);
+
+	m_selectAllAction = new QAction(tr("Select &All"), this);
+	m_selectAllAction->setShortcut(QKeySequence::SelectAll);
+	menuManager()->registerAction(m_selectAllAction, Constants::SELECT_ALL);
+	connect(m_selectAllAction, SIGNAL(triggered()), this, SLOT(selectAll()));
+	m_selectAllAction->setEnabled(false);
+
+	m_findAction = new QAction(tr("&Find"), this);
+	m_findAction->setShortcut(QKeySequence::Find);
+	menuManager()->registerAction(m_findAction, Constants::FIND);
+	connect(m_findAction, SIGNAL(triggered()), this, SLOT(find()));
+	m_findAction->setEnabled(false);
+
+	m_gotoAction = new QAction(tr("&Go To.."), this);
+	m_gotoAction->setShortcut(QKeySequence(tr("Ctrl+G")));
+	menuManager()->registerAction(m_gotoAction, Constants::GOTO_POS);
+	connect(m_gotoAction, SIGNAL(triggered()), this, SLOT(gotoPos()));
+	m_gotoAction->setEnabled(false);
+
+#ifndef Q_WS_MAC
+	m_fullscreenAction = new QAction(tr("Fullscreen"), this);
+	m_fullscreenAction->setCheckable(true);
+	m_fullscreenAction->setShortcut(QKeySequence(tr("Ctrl+Shift+F11")));
+	menuManager()->registerAction(m_fullscreenAction, Constants::SETTINGS);
+	connect(m_fullscreenAction, SIGNAL(triggered(bool)), this, SLOT(setFullScreen(bool)));
+#endif
+
 	m_settingsAction = new QAction(tr("&Settings"), this);
 	m_settingsAction->setIcon(QIcon(":/images/preferences.png"));
 	m_settingsAction->setShortcut(QKeySequence::Preferences);
+#ifdef Q_WS_MAC
+	m_settingsAction->setShortcut(QKeySequence("Ctrl+,"));
+	m_settingsAction->setMenuRole(QAction::PreferencesRole);
+#endif
 	m_settingsAction->setStatusTip(tr("Open the settings dialog"));
 	menuManager()->registerAction(m_settingsAction, Constants::SETTINGS);
 	connect(m_settingsAction, SIGNAL(triggered()), this, SLOT(showOptionsDialog()));
@@ -223,7 +357,6 @@ void MainWindow::createActions()
 
 #ifdef Q_WS_MAC
 	m_exitAction->setMenuRole(QAction::QuitRole);
-	m_settingsAction->setMenuRole(QAction::PreferencesRole);
 	m_aboutAction->setMenuRole(QAction::AboutRole);
 	m_aboutQtAction->setMenuRole(QAction::AboutQtRole);
 	m_pluginViewAction->setMenuRole(QAction::ApplicationSpecificRole);
@@ -234,7 +367,18 @@ void MainWindow::createMenus()
 {
 	m_fileMenu = menuBar()->addMenu(tr("&File"));
 	menuManager()->registerMenu(m_fileMenu, Constants::M_FILE);
+	m_fileMenu->addAction(m_newAction);
 	m_fileMenu->addAction(m_openAction);
+	m_fileMenu->addSeparator();
+	m_fileMenu->addAction(m_saveAction);
+	m_fileMenu->addAction(m_saveAsAction);
+	m_fileMenu->addAction(m_saveAllAction);
+	m_fileMenu->addSeparator();
+
+	m_recentFilesMenu = m_fileMenu->addMenu(tr("Recent &Files"));
+	m_recentFilesMenu->setEnabled(false);
+	menuManager()->registerMenu(m_recentFilesMenu, Constants::M_FILE_RECENTFILES);
+
 	m_fileMenu->addSeparator();
 	m_fileMenu->addAction(m_exitAction);
 
@@ -242,9 +386,21 @@ void MainWindow::createMenus()
 	m_editMenu->addAction(m_undoGroup->createUndoAction(this));
 	m_editMenu->addAction(m_undoGroup->createRedoAction(this));
 	m_editMenu->addSeparator();
+	m_editMenu->addAction(m_cutAction);
+	m_editMenu->addAction(m_copyAction);
+	m_editMenu->addAction(m_pasteAction);
+	m_editMenu->addAction(m_delAction);
+	m_editMenu->addSeparator();
+	m_editMenu->addAction(m_selectAllAction);
+	m_editMenu->addSeparator();
+	m_editMenu->addAction(m_findAction);
+	m_editMenu->addAction(m_gotoAction);
 	menuManager()->registerMenu(m_editMenu, Constants::M_EDIT);
 
 	m_viewMenu = menuBar()->addMenu(tr("&View"));
+#ifndef Q_WS_MAC
+	m_viewMenu->addAction(m_fullscreenAction);
+#endif
 	menuManager()->registerMenu(m_viewMenu, Constants::M_VIEW);
 
 	m_toolsMenu = menuBar()->addMenu(tr("&Tools"));
