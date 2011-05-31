@@ -69,12 +69,12 @@ void GeorgesEditorPlugin::setNelContext(NLMISC::INelContext *nelContext)
 
 QString GeorgesEditorPlugin::name() const
 {
-	return tr("GeorgesEditor");
+	return tr("Georges Editor");
 }
 
 QString GeorgesEditorPlugin::version() const
 {
-	return "0.1";
+	return "0.2";
 }
 
 QString GeorgesEditorPlugin::vendor() const
@@ -84,13 +84,14 @@ QString GeorgesEditorPlugin::vendor() const
 
 QString GeorgesEditorPlugin::description() const
 {
-	return "Tool to create & edit sheets or forms.";
+	return tr("Tool to create & edit sheets or forms.");
 }
 
 QStringList GeorgesEditorPlugin::dependencies() const
 {
 	QStringList list;
 	list.append(Core::Constants::OVQT_CORE_PLUGIN);
+	list.append("ObjectViewer"); // TODO
 	return list;
 }
 

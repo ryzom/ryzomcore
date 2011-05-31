@@ -26,6 +26,7 @@
 namespace Plugin
 {
 
+class CGeorgesDirTreeDialog;
 class GeorgesEditorForm: public QMainWindow
 {
 	Q_OBJECT
@@ -36,13 +37,12 @@ public:
 
 	QUndoStack *undoStack() const;
 
-Q_SIGNALS:
 public Q_SLOTS:
 	void open();
 	void newFile();
 	void save();
+	void settingsChanged();
 
-private Q_SLOTS:
 private:
 	void readSettings();
 	void writeSettings();
@@ -50,10 +50,13 @@ private:
 	QUndoStack *m_undoStack;
 	Ui::GeorgesEditorForm m_ui;
 
+	CGeorgesDirTreeDialog *m_georgesDirTreeDialog;
 	QToolBar *_fileToolBar;
 	QAction *_openAction;
 	QAction *_newAction;
 	QAction *_saveAction;
+
+	QString m_leveldesignPath;
 }; /* class GeorgesEditorForm */
 
 } /* namespace Plugin */

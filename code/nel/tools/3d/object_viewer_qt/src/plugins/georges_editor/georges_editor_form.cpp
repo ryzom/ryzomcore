@@ -17,6 +17,7 @@
 // Project includes
 #include "georges_editor_form.h"
 #include "georges_editor_constants.h"
+#include "georges_dirtree_dialog.h"
 
 #include "../core/icore.h"
 #include "../core/imenu_manager.h"
@@ -34,7 +35,8 @@ namespace Plugin
 {
 
 GeorgesEditorForm::GeorgesEditorForm(QWidget *parent)
-	: QMainWindow(parent)
+	: QMainWindow(parent),
+	  m_georgesDirTreeDialog(0)
 {
 	m_ui.setupUi(this);
 
@@ -64,6 +66,13 @@ GeorgesEditorForm::GeorgesEditorForm(QWidget *parent)
 	_fileToolBar->addAction(_saveAction);
 
 	readSettings();
+
+	// create leveldesign directory tree dockwidget
+	m_georgesDirTreeDialog = new CGeorgesDirTreeDialog(m_leveldesignPath, this);
+	addDockWidget(Qt::LeftDockWidgetArea, m_georgesDirTreeDialog);
+	//m_georgesDirTreeDialog->setVisible(false);
+	connect(Core::ICore::instance(), SIGNAL(changeSettings()),
+			this, SLOT(settingsChanged()));
 }
 
 GeorgesEditorForm::~GeorgesEditorForm()
@@ -98,6 +107,10 @@ void GeorgesEditorForm::readSettings()
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Constants::GEORGES_EDITOR_SECTION);
 	settings->endGroup();
+
+	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
+	m_leveldesignPath = settings->value(Core::Constants::LEVELDESIGN_PATH, "l:/leveldesign").toString();
+	settings->endGroup();
 }
 
 void GeorgesEditorForm::writeSettings()
@@ -106,6 +119,21 @@ void GeorgesEditorForm::writeSettings()
 	settings->beginGroup(Constants::GEORGES_EDITOR_SECTION);
 	settings->endGroup();
 	settings->sync();
+}
+
+void GeorgesEditorForm::settingsChanged()
+{
+	QSettings *settings = Core::ICore::instance()->settings();
+
+	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
+	QString oldLDPath = m_leveldesignPath;
+	m_leveldesignPath = settings->value(Core::Constants::LEVELDESIGN_PATH, "l:/leveldesign").toString();
+	settings->endGroup();
+
+	if (oldLDPath != m_leveldesignPath)
+	{
+		m_georgesDirTreeDialog->ldPathChanged(m_leveldesignPath);
+	}
 }
 
 } /* namespace Plugin */

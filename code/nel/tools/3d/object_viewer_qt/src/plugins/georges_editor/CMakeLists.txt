@@ -9,9 +9,11 @@ SET(OVQT_EXT_SYS_SRC  ${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin
                       ${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
 SET(OVQT_PLUG_GEORGES_EDITOR_HDR  georges_editor_plugin.h 
-                                  georges_editor_form.h)
+                                  georges_editor_form.h
+                                  georges_dirtree_dialog.h)
 
-SET(OVQT_PLUG_GEORGES_EDITOR_UIS  georges_editor_form.ui )
+SET(OVQT_PLUG_GEORGES_EDITOR_UIS  georges_editor_form.ui
+                                  georges_dirtree_form.ui)
 
 SET(OVQT_PLUGIN_GEORGES_EDITOR_RCS georges_editor.qrc)
 
