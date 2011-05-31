@@ -328,7 +328,7 @@ void MainWindow::createActions()
 	m_fullscreenAction = new QAction(tr("Fullscreen"), this);
 	m_fullscreenAction->setCheckable(true);
 	m_fullscreenAction->setShortcut(QKeySequence(tr("Ctrl+Shift+F11")));
-	menuManager()->registerAction(m_fullscreenAction, Constants::SETTINGS);
+	menuManager()->registerAction(m_fullscreenAction, Constants::TOGGLE_FULLSCREEN);
 	connect(m_fullscreenAction, SIGNAL(triggered(bool)), this, SLOT(setFullScreen(bool)));
 
 	m_settingsAction = new QAction(tr("&Settings"), this);
