@@ -115,7 +115,7 @@ private:
 	QMenu *m_viewMenu;
 	QMenu *m_toolsMenu;
 	QMenu *m_helpMenu;
-
+	QMenuBar *m_menuBar;
 	QMenu *m_sheetMenu;
 
 	QAction *m_newAction;

@@ -57,8 +57,15 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 	m_settings = m_pluginManager->settings();
 	m_coreImpl = new CoreImpl(this);
 
+#ifdef Q_WS_MAC
+	m_menuBar = new QMenuBar(0);
+#else
+	m_menuBar = new QMenuBar(this);
+	setMenuBar(m_menuBar);
+#endif
+
 	m_menuManager = new MenuManager(this);
-	m_menuManager->setMenuBar(menuBar());
+	m_menuManager->setMenuBar(m_menuBar);
 
 	m_tabWidget = new QTabWidget(this);
 	m_tabWidget->setTabPosition(QTabWidget::South);
@@ -318,13 +325,11 @@ void MainWindow::createActions()
 	connect(m_gotoAction, SIGNAL(triggered()), this, SLOT(gotoPos()));
 	m_gotoAction->setEnabled(false);
 
-//#ifndef Q_WS_MAC
 	m_fullscreenAction = new QAction(tr("Fullscreen"), this);
 	m_fullscreenAction->setCheckable(true);
 	m_fullscreenAction->setShortcut(QKeySequence(tr("Ctrl+Shift+F11")));
 	menuManager()->registerAction(m_fullscreenAction, Constants::SETTINGS);
 	connect(m_fullscreenAction, SIGNAL(triggered(bool)), this, SLOT(setFullScreen(bool)));
-//#endif
 
 	m_settingsAction = new QAction(tr("&Settings"), this);
 	m_settingsAction->setIcon(QIcon(":/images/preferences.png"));
@@ -350,16 +355,16 @@ void MainWindow::createActions()
 
 #ifdef Q_WS_MAC
 	m_exitAction->setMenuRole(QAction::QuitRole);
+	m_settingsAction->setMenuRole(QAction::PreferencesRole);
 	m_aboutAction->setMenuRole(QAction::AboutRole);
 	m_aboutQtAction->setMenuRole(QAction::AboutQtRole);
-	m_settingsAction->setMenuRole(QAction::PreferencesRole);
 	m_pluginViewAction->setMenuRole(QAction::ApplicationSpecificRole);
 #endif
 }
 
 void MainWindow::createMenus()
 {
-	m_fileMenu = menuBar()->addMenu(tr("&File"));
+	m_fileMenu = m_menuBar->addMenu(tr("&File"));
 	menuManager()->registerMenu(m_fileMenu, Constants::M_FILE);
 	m_fileMenu->addAction(m_newAction);
 	m_fileMenu->addAction(m_openAction);
@@ -376,7 +381,7 @@ void MainWindow::createMenus()
 	m_fileMenu->addSeparator();
 	m_fileMenu->addAction(m_exitAction);
 
-	m_editMenu = menuBar()->addMenu(tr("&Edit"));
+	m_editMenu = m_menuBar->addMenu(tr("&Edit"));
 	m_editMenu->addAction(m_undoGroup->createUndoAction(this));
 	m_editMenu->addAction(m_undoGroup->createRedoAction(this));
 	m_editMenu->addSeparator();
@@ -391,13 +396,11 @@ void MainWindow::createMenus()
 	m_editMenu->addAction(m_gotoAction);
 	menuManager()->registerMenu(m_editMenu, Constants::M_EDIT);
 
-	m_viewMenu = menuBar()->addMenu(tr("&View"));
-//#ifndef Q_WS_MAC
+	m_viewMenu = m_menuBar->addMenu(tr("&View"));
 	m_viewMenu->addAction(m_fullscreenAction);
-//#endif
 	menuManager()->registerMenu(m_viewMenu, Constants::M_VIEW);
 
-	m_toolsMenu = menuBar()->addMenu(tr("&Tools"));
+	m_toolsMenu = m_menuBar->addMenu(tr("&Tools"));
 	menuManager()->registerMenu(m_toolsMenu, Constants::M_TOOLS);
 
 	m_sheetMenu = m_toolsMenu->addMenu(tr("&Sheet"));
@@ -407,9 +410,9 @@ void MainWindow::createMenus()
 
 	m_toolsMenu->addAction(m_settingsAction);
 
-	menuBar()->addSeparator();
+	m_menuBar->addSeparator();
 
-	m_helpMenu = menuBar()->addMenu(tr("&Help"));
+	m_helpMenu = m_menuBar->addMenu(tr("&Help"));
 	menuManager()->registerMenu(m_helpMenu, Constants::M_HELP);
 	m_helpMenu->addAction(m_aboutAction);
 	m_helpMenu->addAction(m_aboutQtAction);
