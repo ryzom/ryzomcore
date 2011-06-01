@@ -82,6 +82,15 @@ void GeneralSettingsPage::applyGeneralSettings()
 	else
 		QApplication::setPalette(m_originalPalette);
 	settings->endGroup();
+
+	// Add primitives path and ligo config file to CPath
+	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
+	QString primitivePath = settings->value(Core::Constants::PRIMITIVES_PATH, "l:/primitives").toString();
+	QString ligoConfigFile = settings->value(Core::Constants::LIGOCONFIG_FILE, "l:/leveldesign/world_editor_files/world_editor_classes.xml").toString();
+	NLMISC::CPath::addSearchPath(primitivePath.toStdString(), true, false);
+	NLMISC::CPath::display();
+	NLMISC::CPath::addSearchFile(ligoConfigFile.toStdString());
+	settings->endGroup();
 }
 
 QWidget *GeneralSettingsPage::createPage(QWidget *parent)
@@ -94,6 +103,8 @@ QWidget *GeneralSettingsPage::createPage(QWidget *parent)
 	connect(m_ui.pluginsPathButton, SIGNAL(clicked()), this, SLOT(setPluginsPath()));
 	connect(m_ui.leveldesignPathButton, SIGNAL(clicked()), this, SLOT(setLevelDesignPath()));
 	connect(m_ui.assetsPathButton, SIGNAL(clicked()), this, SLOT(setAssetsPath()));
+	connect(m_ui.primitivesPathButton, SIGNAL(clicked()), this, SLOT(setPrimitivesPath()));
+	connect(m_ui.ligoConfigFileButton, SIGNAL(clicked()), this, SLOT(setLigoConfigFile()));
 	return m_page;
 }
 
@@ -135,6 +146,27 @@ void GeneralSettingsPage::setLevelDesignPath()
 	}
 }
 
+void GeneralSettingsPage::setPrimitivesPath()
+{
+	QString newPath = QFileDialog::getExistingDirectory(0, tr("Set the primitives path"),
+					  m_ui.primitivesPathLineEdit->text());
+	if (!newPath.isEmpty())
+	{
+		m_ui.primitivesPathLineEdit->setText(newPath);
+	}
+}
+
+void GeneralSettingsPage::setLigoConfigFile()
+{
+	QString newFile = QFileDialog::getOpenFileName(0, tr("Set the ligo config file"), 
+		m_ui.ligoConfigFileLineEdit->text());
+	if (!newFile.isEmpty())
+	{
+		m_ui.ligoConfigFileLineEdit->setText(newFile);
+	}
+}
+
+
 void GeneralSettingsPage::setAssetsPath()
 {
 	QString newPath = QFileDialog::getExistingDirectory(0, tr("Set the assets path"),
@@ -165,6 +197,8 @@ void GeneralSettingsPage::readSettings()
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
 	m_ui.leveldesignPathLineEdit->setText(settings->value(Core::Constants::LEVELDESIGN_PATH, "l:/leveldesign").toString());
 	m_ui.assetsPathLineEdit->setText(settings->value(Core::Constants::ASSETS_PATH, "w:/database").toString());
+	m_ui.primitivesPathLineEdit->setText(settings->value(Core::Constants::PRIMITIVES_PATH, "l:/primitives").toString());
+	m_ui.ligoConfigFileLineEdit->setText(settings->value(Core::Constants::LIGOCONFIG_FILE, "l:/leveldesign/world_editor_files/world_editor_classes.xml").toString());
 	settings->endGroup();
 }
 
@@ -185,6 +219,8 @@ void GeneralSettingsPage::writeSettings()
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
 	settings->setValue(Core::Constants::LEVELDESIGN_PATH, m_ui.leveldesignPathLineEdit->text());
 	settings->setValue(Core::Constants::ASSETS_PATH, m_ui.assetsPathLineEdit->text());
+	settings->setValue(Core::Constants::PRIMITIVES_PATH, m_ui.primitivesPathLineEdit->text());
+	settings->setValue(Core::Constants::LIGOCONFIG_FILE, m_ui.ligoConfigFileLineEdit->text());
 	settings->endGroup();
 	settings->sync();
 }
