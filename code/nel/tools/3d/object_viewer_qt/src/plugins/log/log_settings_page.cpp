@@ -99,11 +99,14 @@ namespace Plugin
 
 		writeSettings();
 		ExtensionSystem::IPluginManager *p = Core::ICore::instance()->pluginManager();
-		ExtensionSystem::IPlugin *plugin = p->pluginByName("LogPlugin")->plugin();
-		CLogPlugin* lp = dynamic_cast<CLogPlugin*>(plugin);
-		if (lp)
+		ExtensionSystem::IPluginSpec *spec = p->pluginByName("LogPlugin");
+		
+		if(spec)
 		{
-			lp->setDisplayers();
+			ExtensionSystem::IPlugin *plugin = spec->plugin();
+			CLogPlugin* lp = dynamic_cast<CLogPlugin*>(plugin);
+			if (lp)
+				lp->setDisplayers();
 		}
 	}
 
