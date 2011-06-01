@@ -25,6 +25,7 @@ MissionCompilerMainWindow::MissionCompilerMainWindow(QWidget *parent) :
 	m_undoStack = new QUndoStack(this);
 
 	// Populate the "all" primitives box.
+	QStringList list;
 	std::vector<std::string> paths;
 	NLMISC::CPath::getFileList("primitive", paths);
 	
@@ -32,9 +33,31 @@ MissionCompilerMainWindow::MissionCompilerMainWindow(QWidget *parent) :
 	while( itr != paths.end() )
 	{
 		const char *path2 = (*itr).c_str();
-		ui->allPrimitivesList->insertItem(0,path2);
+		list << path2;
 		++itr;
 	}
+
+	m_regexpFilter = new QRegExp();
+	m_regexpFilter->setPatternSyntax(QRegExp::FixedString);
+	m_regexpFilter->setCaseSensitivity(Qt::CaseInsensitive);
+	
+	m_allPrimitivesModel = new QStringListModel(list, this);
+	m_filteredProxyModel = new QSortFilterProxyModel(this);
+	m_filteredProxyModel->setSourceModel(m_allPrimitivesModel);
+	m_filteredProxyModel->setDynamicSortFilter(true);
+	m_filteredProxyModel->setFilterRegExp(*m_regexpFilter);
+	ui->allPrimitivesList->setModel(m_filteredProxyModel);
+	m_selectedPrimitivesModel = new QStringListModel(this);
+	ui->selectedPrimitivesList->setModel(m_selectedPrimitivesModel);
+
+	connect(ui->filterEdit, SIGNAL(textEdited(const QString&)), this, SLOT(handleFilterChanged(const QString&)));
+
+}
+
+void MissionCompilerMainWindow::handleFilterChanged(const QString &text)
+{
+	m_regexpFilter->setPattern(text);
+	m_filteredProxyModel->setFilterRegExp(*m_regexpFilter);
 }
 
 void MissionCompilerMainWindow::loadConfig() {

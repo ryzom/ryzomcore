@@ -1,0 +1,11 @@
+<RCC>
+  <qresource prefix="buttons">
+    <file>images/arrow-left-2.png</file>
+    <file>images/arrow-left-double-2.png</file>
+    <file>images/arrow-right-2.png</file>
+    <file>images/arrow-right-double-2.png</file>
+    <file>images/document-export-4.png</file>
+    <file>images/news-subscribe-2.png</file>
+    <file>images/run-build-2.png</file>
+  </qresource>
+</RCC>

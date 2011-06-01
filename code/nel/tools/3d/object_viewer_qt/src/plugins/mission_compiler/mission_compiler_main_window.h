@@ -7,6 +7,8 @@
 #include <QAction>
 #include <QtGui/QUndoStack>
 #include <QStringListModel>
+#include <QSortFilterProxyModel>
+#include <QRegExp>
 
 namespace Ui {
     class MissionCompilerMainWindow;
@@ -24,6 +26,8 @@ public:
 	void saveConfig();
 	QUndoStack *getUndoStack() { return m_undoStack; }
 
+public Q_SLOTS:
+	void handleFilterChanged(const QString &text);
 
 private:
     Ui::MissionCompilerMainWindow *ui;
@@ -31,6 +35,9 @@ private:
 	QMenu *_toolModeMenu;
 	QUndoStack *m_undoStack;
 	QStringListModel *m_allPrimitivesModel;
+	QStringListModel *m_selectedPrimitivesModel;
+	QSortFilterProxyModel *m_filteredProxyModel;
+	QRegExp *m_regexpFilter;
 };
 
 #endif // MISSION_COMPILER_MAIN_WINDOW_H

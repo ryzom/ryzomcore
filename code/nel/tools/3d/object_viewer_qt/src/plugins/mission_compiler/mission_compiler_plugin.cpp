@@ -6,7 +6,8 @@
 #include "../../extension_system/iplugin_spec.h"
 
 // NeL includes
-#include "nel/misc/debug.h"
+#include <nel/misc/debug.h>
+#include <nel/misc/path.h>
 
 // Qt includes
 #include <QtCore/QObject>
@@ -58,12 +59,12 @@ void MissionCompilerPlugin::extensionsInitialized()
 	//zoneMenu->addAction(exampleAction2);
 
 	// Initialize Ligo.
-	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-	QString ligoConfigFile = settings->value(Core::Constants::DATA_PATH_SECTION).toString();
-	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
+	//settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
+	//QString ligoConfigFile = settings->value(Core::Constants::DATA_PATH_SECTION).toString();
+	//settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
 
 	NLLIGO::Register();
-	LigoConfig.readPrimitiveClass(ligoConfigFile.toAscii().data(), false);
+	LigoConfig.readPrimitiveClass(NLMISC::CPath::lookup("world_editor_classes.xml").c_str(), false);
 	NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
 }
 
