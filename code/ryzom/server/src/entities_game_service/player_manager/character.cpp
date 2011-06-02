@@ -930,7 +930,7 @@ bool CCharacter::setValue( string var, string value )
 			sint32 &temp = lookupStat(var);
 			NLMISC::fromString(value, temp);
 		}
-		catch( CCharacter::EInvalidStat &e)
+		catch(const CCharacter::EInvalidStat &e)
 		{
 			nlwarning("<CCharacter::setValue> Exception : %s",e.what( var ) );
 			return false;
@@ -955,7 +955,7 @@ bool CCharacter::modifyValue( string var, string value )
 			NLMISC::fromString(value, valueInt);
 			temp = temp + valueInt;
 		}
-		catch( CCharacter::EInvalidStat &e)
+		catch(const CCharacter::EInvalidStat &e)
 		{
 			nlwarning("<CCharacter::modifyValue> Exception : %s",e.what( var ) );
 			return false;
@@ -974,7 +974,7 @@ bool CCharacter::getValue( string var, string& value )
 	{
 		CEntityBase::getValue( var, value );
 	}
-	catch( CCharacter::EInvalidStat &e)
+	catch(const CCharacter::EInvalidStat &e)
 	{
 		nlwarning("<CCharacter::getValue> Exception : %s",e.what( var ) );
 		return false;

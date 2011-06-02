@@ -286,7 +286,7 @@ static void readPrivileges(NLMISC::CBitMemStream &impulse)
 	{
 		impulse.serial(UserPrivileges);
 	}
-	catch(EStreamOverflow &)
+	catch(const EStreamOverflow &)
 	{
 		nlwarning("User privileges not serialised, assuming none");
 		UserPrivileges = "";
@@ -345,7 +345,7 @@ void copyKeySet(const std::string &srcPath, const std::string &destPath)
 		COFile ofile(destPath);
 		ofile.serialBuffer((uint8 *) &srcStr[0], (uint)srcStr.size());
 	}
-	catch(EStream &)
+	catch(const EStream &)
 	{
 		nlwarning("Couldn't copy %s to %s to create new character keyset", srcPath.c_str(), destPath.c_str());
 	}
@@ -2821,7 +2821,7 @@ void updateInventoryFromStream (NLMISC::CBitMemStream &impulse, const CInventory
 
 		CInventoryManager::getInstance()->sortBag();
 	}
-	catch ( Exception &e )
+	catch (const Exception &e)
 	{
 		nlwarning ("Problem while decoding a DB_UPD_INV msg, skipped: %s", e.what());
 	}

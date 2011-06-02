@@ -1825,7 +1825,7 @@ bool execLoadScript(CStringWriter& stringWriter, vector<string> const& args)
 		FOREACHC(itGrp, vector<CGroup*>, grps)
 			(*itGrp)->getPersistentStateInstance()->interpretCode(NULL, codePtr);
 	}
-	catch (EPathNotFound e)
+	catch (const EPathNotFound &e)
 	{
 		nlwarning("Path not found while loading AIS script %s", args[2].c_str());
 		return false;
