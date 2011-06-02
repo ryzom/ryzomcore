@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef ZONE_LIST_MODEL_H
-#define ZONE_LIST_MODEL_H
+#ifndef LIST_ZONES_MODEL_H
+#define LIST_ZONES_MODEL_H
 
 // Project includes
 
@@ -33,17 +33,17 @@ namespace LandscapeEditor
 {
 
 /**
-@class ZoneListModel
-@brief ZoneListModel contains the image database for QGraphicsScene and
+@class ListZonesModel
+@brief ListZonesModel contains the image database for QGraphicsScene and
 small images for QListView
 @details
 */
-class ZoneListModel : public QAbstractListModel
+class ListZonesModel : public QAbstractListModel
 {
 	Q_OBJECT
 public:
-	ZoneListModel(int pixmapSize = 64, QObject *parent = 0);
-	~ZoneListModel();
+	ListZonesModel(int pixmapSize = 64, QObject *parent = 0);
+	~ListZonesModel();
 
 	int rowCount(const QModelIndex &parent) const;
 	int columnCount(const QModelIndex &parent) const;
@@ -57,6 +57,8 @@ public:
 
 	/// Unload all images and reset model
 	void resetModel();
+
+	void setListZones(QStringList &listZones);
 
 	/// Load all images(png) from zonePath, list images gets from zoneBank
 	bool rebuildModel(const QString &zonePath, NLLIGO::CZoneBank &zoneBank);
@@ -79,4 +81,4 @@ private:
 
 } /* namespace LandscapeEditor */
 
-#endif // ZONE_LIST_MODEL_H
+#endif // LIST_ZONES_MODEL_H

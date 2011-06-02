@@ -12,12 +12,13 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 SET(OVQT_PLUGIN_LANDSCAPE_EDITOR_HDR	landscape_editor_plugin.h
 					landscape_editor_window.h
 					landscape_scene.h
-					zone_list_model.h
-					zone_list_widget.h
+					list_zones_model.h
+					list_zones_widget.h
+					landscape_actions.h
 )
 
 SET(OVQT_PLUGIN_LANDSCAPE_EDITOR_UIS	landscape_editor_window.ui
-					zone_list_widget.ui
+					list_zones_widget.ui
 )
 
 SET(OVQT_PLUGIN_LANDSCAPE_EDITOR_RCS landscape_editor.qrc)

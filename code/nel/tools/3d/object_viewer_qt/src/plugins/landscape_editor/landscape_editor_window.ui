@@ -42,14 +42,14 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="LandscapeEditor::ZoneListWidget" name="zoneListWidget"/>
+   <widget class="LandscapeEditor::ListZonesWidget" name="zoneListWidget"/>
   </widget>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>LandscapeEditor::ZoneListWidget</class>
+   <class>LandscapeEditor::ListZonesWidget</class>
    <extends>QWidget</extends>
-   <header>zone_list_widget.h</header>
+   <header>list_zones_widget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

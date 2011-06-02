@@ -17,7 +17,7 @@
 
 // Project includes
 #include "builder_zone.h"
-#include "zone_list_model.h"
+#include "list_zones_model.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -32,7 +32,7 @@ namespace LandscapeEditor
 ZoneBuilder::ZoneBuilder()
 	: m_zoneListModel(0)
 {
-	m_zoneListModel = new ZoneListModel();
+	m_zoneListModel = new ListZonesModel();
 	m_lastPathName = "";
 }
 
@@ -67,7 +67,6 @@ bool ZoneBuilder::init(const QString &pathName, bool makeAZone)
 			return false;
 		}
 	}
-
 	if ((makeAZone) && (bRet))
 		newZone();
 	return bRet;
@@ -92,7 +91,7 @@ bool ZoneBuilder::initZoneBank (const QString &pathName)
 	return true;
 }
 
-ZoneListModel *ZoneBuilder::zoneModel() const
+ListZonesModel *ZoneBuilder::zoneModel() const
 {
 	return m_zoneListModel;
 }

@@ -16,7 +16,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Project includes
-#include "zone_list_widget.h"
+#include "landscape_actions.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -25,20 +25,4 @@
 
 namespace LandscapeEditor
 {
-
-ZoneListWidget::ZoneListWidget(QWidget *parent)
-	: QWidget(parent)
-{
-	m_ui.setupUi(this);
-}
-
-ZoneListWidget::~ZoneListWidget()
-{
-}
-
-void ZoneListWidget::setModel(QAbstractItemModel *model)
-{
-	m_ui.listView->setModel(model);
-}
-
 } /* namespace LandscapeEditor */

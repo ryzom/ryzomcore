@@ -18,7 +18,7 @@
 // Project includes
 #include "landscape_editor_window.h"
 #include "landscape_editor_constants.h"
-#include "zone_list_model.h"
+#include "list_zones_model.h"
 
 #include "../core/icore.h"
 #include "../core/imenu_manager.h"
@@ -41,11 +41,11 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	m_ui.setupUi(this);
 
 	m_undoStack = new QUndoStack(this);
-	/*
-		m_zoneBuilder = new ZoneBuilder();
-		m_zoneBuilder->init("e:/-nel-/install/continents/newbieland", false);
-		m_ui.zoneListWidget->setModel(m_zoneBuilder->zoneModel());
-	*/
+	m_zoneBuilder = new ZoneBuilder();
+	m_zoneBuilder->init("e:/-nel-/install/continents/newbieland", false);
+	m_ui.zoneListWidget->setModel(m_zoneBuilder->zoneModel());
+	m_ui.zoneListWidget->setZoneBuilder(m_zoneBuilder);
+	m_ui.zoneListWidget->updateUi();
 	createMenus();
 	readSettings();
 }

@@ -15,11 +15,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef ZONE_LIST_WIDGET_H
-#define ZONE_LIST_WIDGET_H
+#ifndef LANDSCAPE_ACTIONS_H
+#define LANDSCAPE_ACTIONS_H
 
 // Project includes
-#include "ui_zone_list_widget.h"
 
 // NeL includes
 
@@ -27,28 +26,7 @@
 
 namespace LandscapeEditor
 {
-/**
-@class ZoneListWidget
-@brief ZoneListWidget
-@details
-*/
-class ZoneListWidget: public QWidget
-{
-	Q_OBJECT
-
-public:
-	ZoneListWidget(QWidget *parent = 0);
-	~ZoneListWidget();
-
-	void setModel(QAbstractItemModel *model);
-
-Q_SIGNALS:
-public Q_SLOTS:
-private Q_SLOTS:
-private:
-	Ui::ZoneListWidget m_ui;
-}; /* ZoneListWidget */
 
 } /* namespace LandscapeEditor */
 
-#endif // ZONE_LIST_WIDGET_H
+#endif // LANDSCAPE_ACTIONS_H

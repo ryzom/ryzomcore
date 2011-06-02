@@ -16,7 +16,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Project includes
-#include "zone_list_model.h"
+#include "list_zones_model.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -33,28 +33,28 @@
 namespace LandscapeEditor
 {
 
-ZoneListModel::ZoneListModel(int pixmapSize, QObject *parent)
+ListZonesModel::ListZonesModel(int pixmapSize, QObject *parent)
 	: QAbstractListModel(parent),
 	  m_pixmapSize(pixmapSize)
 {
 
 }
-ZoneListModel::~ZoneListModel()
+ListZonesModel::~ListZonesModel()
 {
 	resetModel();
 }
 
-int ZoneListModel::rowCount(const QModelIndex & /* parent */) const
+int ListZonesModel::rowCount(const QModelIndex & /* parent */) const
 {
-	return m_pixmapMap.count();
+	return m_pixmapNameList.count();
 }
 
-int ZoneListModel::columnCount(const QModelIndex & /* parent */) const
+int ListZonesModel::columnCount(const QModelIndex & /* parent */) const
 {
 	return 1;
 }
 
-QVariant ZoneListModel::data(const QModelIndex &index, int role) const
+QVariant ListZonesModel::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
 		return QVariant();
@@ -75,21 +75,29 @@ QVariant ZoneListModel::data(const QModelIndex &index, int role) const
 	return QVariant();
 }
 
-QVariant ZoneListModel::headerData(int section,
-								   Qt::Orientation /* orientation */,
-								   int role) const
+QVariant ListZonesModel::headerData(int section,
+									Qt::Orientation /* orientation */,
+									int role) const
 {
 	if (role != Qt::DisplayRole)
 		return QVariant();
 	return QVariant();
 }
 
-void ZoneListModel::setSmallPixmapSize(int pixmapSize)
+void ListZonesModel::setSmallPixmapSize(int pixmapSize)
 {
 	m_pixmapSize = pixmapSize;
 }
 
-void ZoneListModel::resetModel()
+void ListZonesModel::setListZones(QStringList &listZones)
+{
+	beginResetModel();
+	m_pixmapNameList.clear();
+	m_pixmapNameList = listZones;
+	endResetModel();
+}
+
+void ListZonesModel::resetModel()
 {
 	beginResetModel();
 	Q_FOREACH(QString name, m_pixmapNameList)
@@ -105,12 +113,13 @@ void ZoneListModel::resetModel()
 	endResetModel();
 }
 
-bool ZoneListModel::rebuildModel(const QString &zonePath, NLLIGO::CZoneBank &zoneBank)
+bool ListZonesModel::rebuildModel(const QString &zonePath, NLLIGO::CZoneBank &zoneBank)
 {
 	beginResetModel();
 	m_zonePath = zonePath;
 
 	QProgressDialog *progressDialog = new QProgressDialog();
+	progressDialog->show();
 
 	std::vector<std::string> zoneNames;
 	zoneBank.getCategoryValues ("zone", zoneNames);
@@ -129,19 +138,22 @@ bool ZoneListModel::rebuildModel(const QString &zonePath, NLLIGO::CZoneBank &zon
 		const std::vector<bool> &rMask = zoneBankItem->getMask();
 
 		QPixmap *pixmap = new QPixmap(zonePath + zonePixmapName + ".png");
+		if (pixmap->isNull())
+		{
+			// Generate filled pixmap
+		}
 		QPixmap *smallPixmap = new QPixmap(pixmap->scaled(m_pixmapSize * sizeX, m_pixmapSize * sizeY));
 
 		m_pixmapMap.insert(zonePixmapName, pixmap);
 		m_smallPixmapMap.insert(zonePixmapName, smallPixmap);
 
 	}
-	m_pixmapNameList = m_pixmapMap.keys();
 	endResetModel();
 	delete progressDialog;
-	return false;
+	return true;
 }
 
-QPixmap *ZoneListModel::getPixmap(const QString &zoneName) const
+QPixmap *ListZonesModel::getPixmap(const QString &zoneName) const
 {
 	QPixmap *result = 0;
 	if (!m_pixmapMap.contains(zoneName))
@@ -151,7 +163,7 @@ QPixmap *ZoneListModel::getPixmap(const QString &zoneName) const
 	return result;
 }
 
-QPixmap *ZoneListModel::getSmallPixmap(const QString &zoneName) const
+QPixmap *ListZonesModel::getSmallPixmap(const QString &zoneName) const
 {
 	QPixmap *result = 0;
 	if (!m_pixmapMap.contains(zoneName))

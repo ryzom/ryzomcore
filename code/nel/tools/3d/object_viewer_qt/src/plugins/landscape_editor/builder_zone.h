@@ -32,7 +32,7 @@
 
 namespace LandscapeEditor
 {
-class ZoneListModel;
+class ListZonesModel;
 
 /**
 @class ZoneBuilder
@@ -56,7 +56,7 @@ public:
 	{
 		return m_zoneBank;
 	}
-	ZoneListModel *zoneModel() const;
+	ListZonesModel *zoneModel() const;
 private:
 
 	// Scan ./zoneligos dir and add all *.ligozone files to zoneBank
@@ -65,7 +65,7 @@ private:
 	sint32 m_minX, m_maxX, m_minY, m_maxY;
 	QString m_lastPathName;
 
-	ZoneListModel *m_zoneListModel;
+	ListZonesModel *m_zoneListModel;
 	NLLIGO::CZoneBank m_zoneBank;
 	std::vector<NLLIGO::CZoneBankElement*> m_currentSelection;
 };
