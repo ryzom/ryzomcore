@@ -1424,6 +1424,9 @@ const ucchar * CStringManagerClient::getSpecialWord(const std::string &label, bo
 		map<string,CItem>::iterator it = _SpecItem_TempMap.find(lwrLabel);
 		if (it != _SpecItem_TempMap.end())
 		{
+			if( UseFemaleTitles && women )
+				if (!it->second.WomenName.empty())
+				return it->second.WomenName.c_str();
 			return it->second.Name.c_str();
 		}
 	}
