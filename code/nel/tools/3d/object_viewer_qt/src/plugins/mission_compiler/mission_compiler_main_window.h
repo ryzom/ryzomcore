@@ -36,12 +36,15 @@ public:
 public Q_SLOTS:
 	void handleFilterChanged(const QString &text);
 	void handleValidation();
+	void handleCompile();
+	void handlePublish();
 
 private:
     Ui::MissionCompilerMainWindow *ui;
 
 	void updateCompileLog();
 	bool parsePrimForMissions(NLLIGO::IPrimitive const *prim, TMissionContainer &missions);
+	void compileMission(bool publish=false);
 
 	QMenu *_toolModeMenu;
 	QUndoStack *m_undoStack;

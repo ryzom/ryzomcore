@@ -1,6 +1,7 @@
 #include "mission_compiler_main_window.h"
 #include "ui_mission_compiler_main_window.h"
 #include "validation_file.h"
+#include "mission_compiler.h"
 
 #include <QMenu>
 #include <QSignalMapper>
@@ -62,6 +63,8 @@ MissionCompilerMainWindow::MissionCompilerMainWindow(QWidget *parent) :
 
 	connect(ui->filterEdit, SIGNAL(textEdited(const QString&)), this, SLOT(handleFilterChanged(const QString&)));
 	connect(ui->actionValidate, SIGNAL(triggered()), this, SLOT(handleValidation()));
+	connect(ui->actionCompile, SIGNAL(triggered()), this, SLOT(handleCompile()));
+	connect(ui->actionPublish, SIGNAL(triggered()), this, SLOT(handlePublish()));
 
 	NLLIGO::Register();
 	m_ligoConfig.readPrimitiveClass(NLMISC::CPath::lookup("world_editor_classes.xml").c_str(), false);
@@ -72,6 +75,79 @@ void MissionCompilerMainWindow::handleFilterChanged(const QString &text)
 {
 	m_regexpFilter->setPattern(text);
 	m_filteredProxyModel->setFilterRegExp(*m_regexpFilter);
+}
+
+void MissionCompilerMainWindow::handleCompile()
+{
+	compileMission();
+}
+
+void MissionCompilerMainWindow::handlePublish()
+{
+	compileMission(true);
+}
+
+void MissionCompilerMainWindow::compileMission(bool publish)
+{
+	uint nbMission = 0;
+
+	// First switch toolbox pages to show the compilation output.
+	ui->toolBox->setCurrentIndex(2);
+
+	m_compileLog.append("Begin mission compilation.\n");
+	updateCompileLog();
+
+	// Go through each file.
+	QStringList list = m_selectedPrimitivesModel->stringList();
+	QStringListIterator itr(list);
+	while(itr.hasNext())
+	{
+		QString filename = itr.next();
+		m_compileLog.append("Compiling '"+filename+"'...\n");
+		updateCompileLog();
+
+		NLLIGO::CPrimitives primDoc;
+		NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
+		NLLIGO::loadXmlPrimitiveFile(primDoc, NLMISC::CPath::lookup(filename.toAscii().data(), false), m_ligoConfig);
+		NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
+
+		try
+		{
+			CMissionCompiler mc;
+			mc.compileMissions(primDoc.RootNode, filename.toStdString());
+			m_compileLog.append("Found "+QString::number(mc.getMissionsCount())+" valid missions\n");
+			updateCompileLog();
+
+			mc.installCompiledMission(m_ligoConfig, filename.toStdString());
+			nbMission += mc.getMissionsCount();
+
+			// publish files to selected servers
+			//if (publish)
+			//for (uint i=0 ; i<ServerPathPrim.size() ; i++)
+			//{
+			//	if (IsDlgButtonChecked(IDC_CHECK_SRV1 + i) != BST_CHECKED)
+			//		continue;
+
+			//	compileLog += toString("\r\nPublishing to %s ...\r\n", ServerName[i].c_str());
+			//	for (uint j=0 ; j<mc.getFileToPublishCount() ; j++)
+			//		compileLog += toString("   %s\r\n", (NLMISC::CFile::getFilename(mc.getFileToPublish(j))).c_str());
+			//	mc.publishFiles(ServerPathPrim[i], ServerPathText[i], LocalTextPath);
+			//}
+		}
+		catch(const EParseException &e)
+		{
+
+			if (e.Primitive != NULL)
+				m_compileLog.append("In '"+QString(buildPrimPath(e.Primitive).c_str())+"'\n");
+
+			m_compileLog.append("Error while compiling '"+filename+"' :\n"+QString(e.Why.c_str())+"\n");
+			updateCompileLog();
+			break;
+		}
+	}
+
+	m_compileLog.append("Mission compilation complete.\n");
+	updateCompileLog();
 }
 
 void MissionCompilerMainWindow::handleValidation()
@@ -92,7 +168,6 @@ void MissionCompilerMainWindow::handleValidation()
 	while(itr.hasNext())
 	{
 		QString filename = itr.next();
-		//QString filePath = NLMISC::CPath::lookup(filename.toAscii().data(), false).c_str();
 		m_compileLog.append("Parsing '"+filename+"'...\n");
 		updateCompileLog();
 

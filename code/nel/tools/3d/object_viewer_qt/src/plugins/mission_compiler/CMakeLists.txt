@@ -28,9 +28,15 @@ SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_PLUG_MISSION_COMPILER_MOC_SRC} ${OVQ
 SOURCE_GROUP("Mission Compiler Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
+# Mission Compiler Library
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/ryzom/tools/leveldesign/mission_compiler_lib)
+
+# Game Share Library
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/common/src)
+
 ADD_LIBRARY(ovqt_plugin_mission_compiler MODULE ${SRC} ${OVQT_PLUG_MISSION_COMPILER_MOC_SRC} ${OVQT_PLUG_MISSION_COMPILER_RC_SRCS} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_MISSION_COMPILER_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(ovqt_plugin_mission_compiler ovqt_plugin_core nelmisc nelligo ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
+TARGET_LINK_LIBRARIES(ovqt_plugin_mission_compiler ovqt_plugin_core nelmisc nelligo ryzom_mission_compiler_lib ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
 
 NL_DEFAULT_PROPS(ovqt_plugin_mission_compiler "NeL, Tools, 3D: Object Viewer Qt Plugin: Mission Compiler")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_mission_compiler)
