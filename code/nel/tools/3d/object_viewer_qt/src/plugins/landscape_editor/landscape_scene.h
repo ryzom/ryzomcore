@@ -15,44 +15,28 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef LANDSCAPE_EDITOR_WINDOW_H
-#define LANDSCAPE_EDITOR_WINDOW_H
+#ifndef LANDSCAPE_SCENE_H
+#define LANDSCAPE_SCENE_H
 
 // Project includes
-#include "ui_landscape_editor_window.h"
-#include "builder_zone.h"
+
+// NeL includes
 
 // Qt includes
-#include <QtGui/QUndoStack>
+#include <QGraphicsScene>
 
 namespace LandscapeEditor
 {
 
-class LandscapeEditorWindow: public QMainWindow
+class LandscapeScene : public QGraphicsScene
 {
 	Q_OBJECT
 
 public:
-	LandscapeEditorWindow(QWidget *parent = 0);
-	~LandscapeEditorWindow();
-
-	QUndoStack *undoStack() const;
-
-Q_SIGNALS:
-public Q_SLOTS:
-	void open();
-
-private Q_SLOTS:
-private:
-	void createMenus();
-	void readSettings();
-	void writeSettings();
-
-	ZoneBuilder *m_zoneBuilder;
-	QUndoStack *m_undoStack;
-	Ui::LandscapeEditorWindow m_ui;
-}; /* class LandscapeEditorWindow */
+	LandscapeScene(QObject *parent = 0);
+	virtual ~LandscapeScene();
+};
 
 } /* namespace LandscapeEditor */
 
-#endif // LANDSCAPE_EDITOR_WINDOW_H
+#endif // LANDSCAPE_SCENE_H

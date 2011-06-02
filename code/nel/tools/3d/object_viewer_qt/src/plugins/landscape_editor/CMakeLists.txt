@@ -11,9 +11,13 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 
 SET(OVQT_PLUGIN_LANDSCAPE_EDITOR_HDR	landscape_editor_plugin.h
 					landscape_editor_window.h
+					landscape_scene.h
+					zone_list_model.h
+					zone_list_widget.h
 )
 
 SET(OVQT_PLUGIN_LANDSCAPE_EDITOR_UIS	landscape_editor_window.ui
+					zone_list_widget.ui
 )
 
 SET(OVQT_PLUGIN_LANDSCAPE_EDITOR_RCS landscape_editor.qrc)
@@ -37,7 +41,7 @@ ADD_LIBRARY(ovqt_plugin_landscape_editor MODULE ${SRC}
 						${OVQT_PLUGIN_LANDSCAPE_EDITOR_UI_HDRS}
 						${OVQT_PLUGIN_LANDSCAPE_EDITOR_RC_SRCS})
 
-TARGET_LINK_LIBRARIES(ovqt_plugin_landscape_editor ovqt_plugin_core nelmisc nel3d ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
+TARGET_LINK_LIBRARIES(ovqt_plugin_landscape_editor ovqt_plugin_core nelmisc nel3d nelgeorges nelligo ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
 
 NL_DEFAULT_PROPS(ovqt_plugin_landscape_editor "NeL, Tools, 3D: Object Viewer Qt Plugin: Landscape Editor")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_landscape_editor)

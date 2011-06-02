@@ -91,7 +91,7 @@ public:
 	}
 	virtual QIcon icon() const
 	{
-		return QIcon();
+		return QIcon(Constants::ICON_LANDSCAPE_ITEM);
 	}
 
 	virtual void open();

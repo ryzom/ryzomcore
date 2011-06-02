@@ -35,7 +35,24 @@
     <bool>false</bool>
    </attribute>
   </widget>
+  <widget class="QDockWidget" name="dockWidget">
+   <property name="windowTitle">
+    <string>Zones</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="LandscapeEditor::ZoneListWidget" name="zoneListWidget"/>
+  </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LandscapeEditor::ZoneListWidget</class>
+   <extends>QWidget</extends>
+   <header>zone_list_widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="landscape_editor.qrc"/>
  </resources>
