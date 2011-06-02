@@ -9,8 +9,6 @@
 // NeL includes
 #include <nel/misc/app_context.h>
 #include <nel/misc/singleton.h>
-#include <nel/ligo/primitive.h>
-#include <nel/ligo/ligo_config.h>
 
 // Qt includes
 #include <QtCore/QObject>
@@ -52,8 +50,6 @@ public:
 
 	QObject *objectByName(const QString &name) const;
 	ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
-
-	NLLIGO::CLigoConfig LigoConfig;
 
 protected:
 	NLMISC::CLibraryContext *_LibContext;

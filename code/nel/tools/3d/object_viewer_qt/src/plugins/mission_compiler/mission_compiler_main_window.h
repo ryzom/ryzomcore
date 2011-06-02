@@ -10,9 +10,14 @@
 #include <QSortFilterProxyModel>
 #include <QRegExp>
 
+#include <nel/ligo/ligo_config.h>
+#include <nel/ligo/primitive.h>
+
 namespace Ui {
     class MissionCompilerMainWindow;
 }
+
+struct CMission;
 
 class MissionCompilerMainWindow : public QMainWindow
 {
@@ -26,11 +31,17 @@ public:
 	void saveConfig();
 	QUndoStack *getUndoStack() { return m_undoStack; }
 
+	typedef std::map<std::string, CMission> TMissionContainer;
+
 public Q_SLOTS:
 	void handleFilterChanged(const QString &text);
+	void handleValidation();
 
 private:
     Ui::MissionCompilerMainWindow *ui;
+
+	void updateCompileLog();
+	bool parsePrimForMissions(NLLIGO::IPrimitive const *prim, TMissionContainer &missions);
 
 	QMenu *_toolModeMenu;
 	QUndoStack *m_undoStack;
@@ -38,6 +49,9 @@ private:
 	QStringListModel *m_selectedPrimitivesModel;
 	QSortFilterProxyModel *m_filteredProxyModel;
 	QRegExp *m_regexpFilter;
+	QString m_compileLog;
+
+	NLLIGO::CLigoConfig m_ligoConfig;
 };
 
 #endif // MISSION_COMPILER_MAIN_WINDOW_H

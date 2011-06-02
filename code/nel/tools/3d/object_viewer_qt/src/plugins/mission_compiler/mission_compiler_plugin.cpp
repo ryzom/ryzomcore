@@ -62,10 +62,6 @@ void MissionCompilerPlugin::extensionsInitialized()
 	//settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
 	//QString ligoConfigFile = settings->value(Core::Constants::DATA_PATH_SECTION).toString();
 	//settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-
-	NLLIGO::Register();
-	LigoConfig.readPrimitiveClass(NLMISC::CPath::lookup("world_editor_classes.xml").c_str(), false);
-	NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
 }
 
 void MissionCompilerPlugin::setNelContext(NLMISC::INelContext *nelContext)
