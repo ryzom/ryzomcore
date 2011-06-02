@@ -772,7 +772,7 @@ void loadFile_s_(CStateInstance* entity, CScriptStack& stack)
 		// Interpret the code for the group
 		entity->interpretCode(NULL, codePtr);
 	}
-	catch (EPathNotFound e)
+	catch (const EPathNotFound &e)
 	{
 		nlwarning("Path not found while loading AIS script %s", fileName.c_str());
 	}

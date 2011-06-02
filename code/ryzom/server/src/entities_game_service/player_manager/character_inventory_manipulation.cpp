@@ -2484,7 +2484,7 @@ void CCharacter::sendItemInfos( uint16 slotId )
 			pInv->onItemChanged(slot, INVENTORIES::itc_info_version);
 		}
 	}
-	catch ( NLMISC::Exception & e )
+	catch (const NLMISC::Exception &e)
 	{
 		nlwarning("<ITEM_INFOS> exception : '%s'",e.what() );
 	}	

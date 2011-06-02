@@ -256,7 +256,7 @@ void CIGInfo::load(TShapeCache &shapeCache)
 		ig->serial(stream);
 		IG = ig; // commit
 	}
-	catch(EStream &e)
+	catch(const EStream &e)
 	{
 		nlwarning(e.what());
 	}

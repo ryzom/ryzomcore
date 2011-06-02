@@ -512,7 +512,7 @@ void CSoundManager::init(IProgressCallback *progressCallBack)
 		_AudioMixer->enableBackgroundMusicTimeConstraint(ClientCfg.EnableBackgroundMusicTimeConstraint);
 
 /*	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning( "Error: %s", e.what() );
 	}

@@ -1266,7 +1266,7 @@ void CContinent::dumpVillagesLoadingZones(const std::string &filename)
 		{
 			outBitmap.writeTGA(outFile, 24, true);
 		}
-		catch(EStream &)
+		catch(const EStream &)
 		{
 		}
 	}
@@ -1327,7 +1327,7 @@ void CContinent::dumpFogMap(CFogMapBuild::TMapType mapType, const std::string &f
 		{
 			outBitmap.writeTGA(outFile, 24);
 		}
-		catch(EStream &)
+		catch(const EStream &)
 		{
 		}
 	}

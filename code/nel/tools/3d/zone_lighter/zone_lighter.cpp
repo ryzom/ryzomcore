@@ -158,7 +158,7 @@ static void loadIGFromVillage(const NLGEORGES::UFormElm *villageItem, const std:
 				{
 					group->serial (inputFile);
 				}
-				catch(NLMISC::Exception &)
+				catch(const NLMISC::Exception &)
 				{
 					nlwarning ("Error while loading instance group %s\n", igName.c_str());	
 					continue;
@@ -266,7 +266,7 @@ static void loadIGFromContinent(NLMISC::CConfigFile &parameter, std::list<CInsta
 			nlwarning("Can't load continent form : %s", continentName.c_str());
 		}				
 	}	
-	catch (NLMISC::EUnknownVar &e)
+	catch (const NLMISC::EUnknownVar &e)
 	{
 		nlinfo(e.what());
 	}
@@ -581,7 +581,7 @@ int main(int argc, char* argv[])
 							}
 						}
 					}
-					catch (NLMISC::EUnknownVar &)
+					catch (const NLMISC::EUnknownVar &)
 					{
 						nlinfo("No additionnal ig's to load");
 					}

@@ -4721,7 +4721,7 @@ bool	CInterfaceParser::loadLUA(const std::string &fileName, std::string &error)
 	{
 		_LuaState->executeFile(pathName);
 	}
-	catch(ELuaError &e)
+	catch(const ELuaError &e)
 	{
 		nlwarning(e.luaWhat().c_str());
 		error= e.luaWhat();

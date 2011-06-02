@@ -99,7 +99,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 		// load the config file
 		cf.load(filename);
 	}
-	catch(exception &e)
+	catch(const exception &e)
 	{
 		nlwarning("can't parse config file : %s", filename.c_str());
 		nlwarning(e.what());
@@ -129,7 +129,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 	{
 		settings.output_format = cf.getVar("output_format").asString();
 	}
-	catch (NLMISC::EUnknownVar &)
+	catch (const NLMISC::EUnknownVar &)
 	{
 		settings.output_format = "jpg";
 	}
@@ -141,7 +141,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 		for (uint i=0; i < (uint)search_pathes.size(); ++i)
 			CPath::addSearchPath(CPath::standardizePath(search_pathes.asString(i)));
 	}
-	catch(EUnknownVar &)
+	catch(const EUnknownVar &)
 	{
 	}
 
@@ -152,7 +152,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 		for (uint i=0; i< (uint)recursive_search_pathes.size(); ++i)
 			CPath::addSearchPath(CPath::standardizePath(recursive_search_pathes.asString(i)), true, false);
 	}
-	catch(EUnknownVar &)
+	catch(const EUnknownVar &)
 	{
 	}
 
@@ -180,7 +180,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 	{
 		settings.preview_format = cf.getVar("preview_format").asString();
 	}
-	catch (NLMISC::EUnknownVar &)
+	catch (const NLMISC::EUnknownVar &)
 	{
 		settings.preview_format = "jpg";
 	}
@@ -190,7 +190,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 	{
 		settings.preview_width = cf.getVar("preview_width").asInt();								
 	}
-	catch (NLMISC::EUnknownVar &)
+	catch (const NLMISC::EUnknownVar &)
 	{
 		settings.preview_width = 256;
 	}
@@ -200,7 +200,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 	{
 		settings.preview_height = cf.getVar("preview_height").asInt();								
 	}
-	catch (NLMISC::EUnknownVar &)
+	catch (const NLMISC::EUnknownVar &)
 	{
 		settings.preview_height = 256;
 	}
@@ -210,7 +210,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 	{
 		settings.preview_quality = (uint8)cf.getVar("preview_quality").asInt();								
 	}
-	catch (NLMISC::EUnknownVar &)
+	catch (const NLMISC::EUnknownVar &)
 	{
 		settings.preview_quality = 90;
 	}
@@ -283,7 +283,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 	{
 		settings.output_steps_z = cf.getVar("output_steps_z").asInt();								
 	}
-	catch (NLMISC::EUnknownVar &)
+	catch (const NLMISC::EUnknownVar &)
 	{
 		settings.output_steps_z = 10;
 	}
@@ -293,7 +293,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 	{
 		settings.output_steps_x = cf.getVar("output_steps_x").asInt();								
 	}
-	catch (NLMISC::EUnknownVar &)
+	catch (const NLMISC::EUnknownVar &)
 	{
 		settings.output_steps_x = 10;
 	}
@@ -303,7 +303,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 	{
 		settings.output_width = cf.getVar("output_width").asInt();								
 	}
-	catch (NLMISC::EUnknownVar &)
+	catch (const NLMISC::EUnknownVar &)
 	{
 		settings.output_width = 256;
 	}
@@ -313,7 +313,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 	{
 		settings.output_height = cf.getVar("output_height").asInt();								
 	}
-	catch (NLMISC::EUnknownVar &)
+	catch (const NLMISC::EUnknownVar &)
 	{
 		settings.output_height = 256;
 	}
@@ -323,7 +323,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 	{
 		settings.output_antialiasing = (uint8)cf.getVar("output_antialiasing").asInt();								
 	}
-	catch (NLMISC::EUnknownVar &)
+	catch (const NLMISC::EUnknownVar &)
 	{
 		settings.output_antialiasing = 2;
 	}
@@ -333,7 +333,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 	{
 		settings.output_quality = (uint8)cf.getVar("output_quality").asInt();								
 	}
-	catch (NLMISC::EUnknownVar &)
+	catch (const NLMISC::EUnknownVar &)
 	{
 		settings.output_quality = 90;
 	}

@@ -288,7 +288,7 @@ void	CContinentContainer::initPacsPrim(const string &path)
 				nlwarning("Couldn't load prim block '%s'", fileNames[k].c_str());
 			}
 		}
-		catch (NLMISC::EStream &e)
+		catch (const NLMISC::EStream &e)
 		{
 			nlwarning("Couldn't load Pacs Primitive Block file '%s': %s", fileNames[k].c_str(), e.what());
 		}
@@ -389,7 +389,7 @@ void	CContinentContainer::loadPacsPrims(const CSheet &sheet, NLPACS::UMoveContai
 				}
 			}
 		}
-		catch(Exception &e)
+		catch(const Exception &e)
 		{
 			nlwarning("Failed to load IG '%s': %s", igs[i].c_str(), e.what());
 		}

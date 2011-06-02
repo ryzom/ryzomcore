@@ -929,7 +929,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			_EventEmitter.addEmitter(diee, true);
 		}
 	}
-	catch(EDirectInput &e)
+	catch(const EDirectInput &e)
 	{
 		nlinfo(e.what());
 	}

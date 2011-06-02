@@ -629,7 +629,7 @@ int main(int argc, char **argv)
 				picSrc.writePNG (output, 8);
 			}
 		}
-		catch(NLMISC::EWriteError &e)
+		catch(const NLMISC::EWriteError &e)
 		{
 			cerr<<e.what()<<endl;
 			return 1;
@@ -675,7 +675,7 @@ int main(int argc, char **argv)
 			CS3TCCompressor		comp;
 			comp.compress(picSrc, OptMipMap, algo, output);
 		}
-		catch(NLMISC::EWriteError &e)
+		catch(const NLMISC::EWriteError &e)
 		{
 			cerr<<e.what()<<endl;
 			return 1;

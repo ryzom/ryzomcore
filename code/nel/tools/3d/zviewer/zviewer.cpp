@@ -364,7 +364,7 @@ void displayZones()
 		CIFile bankFile (ViewerCfg.BanksPath + "/" + ViewerCfg.Bank);
 		Landscape->Landscape.TileBank.serial(bankFile);
 	}
-	catch(Exception)
+	catch(const Exception &)
 	{
 		string tmp = string("Cant load bankfile ")+ViewerCfg.BanksPath + "/" + ViewerCfg.Bank;
 		nlerror (tmp.c_str());
@@ -390,7 +390,7 @@ void displayZones()
 		CIFile farbankFile(ViewerCfg.BanksPath + "/" + farBank);
 		Landscape->Landscape.TileFarBank.serial(farbankFile);
 	}
-	catch(Exception)
+	catch(const Exception &)
 	{
 		string tmp = string("Cant load bankfile ")+ViewerCfg.BanksPath + "/" + farBank;
 		nlerror (tmp.c_str());
@@ -450,7 +450,7 @@ void displayZones()
 			// Add it to collision manager.
 			CollisionManager.addZone(zone.getZoneId());
 		}
-		catch(Exception &e)
+		catch(const Exception &e)
 		{
 			printf("%s\n", e.what ());
 		}		
@@ -472,7 +472,7 @@ void displayZones()
 			// Add it to the scene.
 			group->addToScene (*CNELU::Scene);
 		}
-		catch(Exception &e)
+		catch(const Exception &e)
 		{
 			printf("%s\n", e.what ());
 		}		

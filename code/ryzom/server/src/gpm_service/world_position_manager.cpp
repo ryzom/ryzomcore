@@ -412,7 +412,7 @@ void	CWorldPositionManager::loadPatatsInFile(const string &file)
 	{
 		_PatatSubscribeManager.usePrim(file);
 	}
-	catch (NLMISC::EStream &e)
+	catch (const NLMISC::EStream &e)
 	{
 		nlwarning("Couldn't load '%s' : %s", file.c_str(), e.what());
 	}

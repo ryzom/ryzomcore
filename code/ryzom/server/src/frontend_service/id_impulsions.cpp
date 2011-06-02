@@ -82,7 +82,7 @@ void impulsionCmd( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, 
 		bms.serial(cmd);
 		bms.serial(arg);
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<impulsionCmd> %s",e.what());
 		return;
@@ -119,7 +119,7 @@ void impulsionCmd( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, 
 		bms.serial(cmd);
 		bms.serial(arg);
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<impulsionAdmin> %s",e.what());
 		return;
@@ -147,7 +147,7 @@ void impulsionCmd( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, 
 //	{
 //		bms.serial(stringId);
 //	}
-//	catch( Exception& e )
+//	catch(const Exception &e)
 //	{
 //		nlwarning("<impulsionStringRequestId> %s", e.what());
 //		return;
@@ -173,7 +173,7 @@ void impulsionPhraseLearn( CEntityId& sender, CBitMemStream &bms, TGameCycle gam
 		bms.serial( phraseId );
 		bms.serial( phraseDesc );		
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<impulsionPhraseLearn> %s",e.what());
 		return;
@@ -203,7 +203,7 @@ void impulsionPhraseMemorize( CEntityId& sender, CBitMemStream &bms, TGameCycle 
 		bms.serial( phraseId );
 		bms.serial( phraseDesc );		
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<impulsionPhraseMemorize> %s",e.what());
 		return;
@@ -238,7 +238,7 @@ void impulsionExecuteFaber( CEntityId& sender, CBitMemStream &bms, TGameCycle ga
 		bms.serialCont( rmSelected );
 		bms.serialCont( rmFormulaSelected );
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<impulsionExecuteFaber> %s",e.what());
 		return;
@@ -276,7 +276,7 @@ void cbImpulsionGetNpcIconDesc( CEntityId& sender, CBitMemStream &bms, TGameCycl
 		CUnifiedNetwork::getInstance()->send("EGS", msgout);
 		//nldebug("Forwarding GET_DESC to EGS (%hu NPCs)", nb8 );
 	}
-	catch ( Exception& e )
+	catch (const Exception &e)
 	{
 		nlwarning("<cbImpulsionGetNpcIconDesc> %s", e.what());
 		return;
@@ -475,7 +475,7 @@ void routeImpulsionIdFromClient( NLMISC::CBitMemStream& bms, const NLMISC::CEnti
 			CUnifiedNetwork::getInstance()->send("BBS", msgout);
 		}*/
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<routeImpulsionIdFromClient> %s %s", msgName.c_str(), e.what() );
 		return;

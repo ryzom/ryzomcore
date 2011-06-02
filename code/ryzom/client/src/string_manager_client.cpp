@@ -175,7 +175,7 @@ namespace STRING_MANAGER
 
 				_CacheLoaded = true;
 			}
-			catch(NLMISC::Exception &e)
+			catch(const NLMISC::Exception &e)
 			{
 				nlinfo("SM : loadCache failed, exception : %s", e.what());
 				nlinfo("SM : cache deactivated");
@@ -620,7 +620,7 @@ restartLoop:
 							{
 								dynInfo.Message.serial(param.StringId);
 							}
-							catch(Exception &)
+							catch(const Exception &)
 							{
 								param.StringId = EmptyStringId;
 							}
@@ -631,7 +631,7 @@ restartLoop:
 							{
 								dynInfo.Message.serial(param.Integer);
 							}
-							catch(Exception &)
+							catch(const Exception &)
 							{
 								param.Integer= 0;
 							}
@@ -642,7 +642,7 @@ restartLoop:
 							{
 								dynInfo.Message.serial(param.Time);
 							}
-							catch(Exception &)
+							catch(const Exception &)
 							{
 								param.Time= 0;
 							}
@@ -653,7 +653,7 @@ restartLoop:
 							{
 								dynInfo.Message.serial(param.Money);
 							}
-							catch(Exception &)
+							catch(const Exception &)
 							{
 								param.Money= 0;
 							}
@@ -664,7 +664,7 @@ restartLoop:
 							{
 								dynInfo.Message.serial(param.DynStringId);
 							}
-							catch(Exception &)
+							catch(const Exception &)
 							{
 								param.DynStringId= EmptyDynStringId;
 							}

@@ -386,7 +386,7 @@ void CPatchManager::readClientVersionAndDescFile()
 			DescFilename = "unknown";
 		ValidDescFile = true;
 	}
-	catch(Exception &)
+	catch(const Exception &)
 	{
 		nlwarning("EXCEPTION CATCH: readClientVersionAndDescFile() failed - not important");
 		// Not important that there is no desc file
@@ -2492,7 +2492,7 @@ void CCheckThread::run ()
 		CheckOk = true;
 		Ended = true;
 	}
-	catch (NLMISC::EDiskFullError)
+	catch (const NLMISC::EDiskFullError &)
 	{
 		// more explicit message for this common error case
 		nlwarning("EXCEPTION CATCH: disk full");
@@ -2622,7 +2622,7 @@ void CPatchThread::run()
 		}
 
 	}
-	catch (NLMISC::EDiskFullError)
+	catch (const NLMISC::EDiskFullError &)
 	{
 		// more explicit message for this common error case
 		nlwarning("EXCEPTION CATCH: CPatchThread::run() Disk Full");
@@ -2630,7 +2630,7 @@ void CPatchThread::run()
 		sTranslate = CI18N::get("uiPatchDiskFull");
 		bErr = true;
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		nlwarning("EXCEPTION CATCH: CPatchThread::run() failed");
 		pPM->setState(true, ucstring(e.what()));
@@ -2803,7 +2803,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 					// else -> file comes from a previous download (with .tmp extension, and is up to date)
 					// the remaining code will just rename it with good name and exit
 				}
-				catch (NLMISC::EWriteError)
+				catch (const NLMISC::EWriteError &)
 				{
 					// this is a local error, rethrow ...
 					throw;
@@ -2814,7 +2814,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 					pPM->getServerFile(lzmaFile, false, "", &progress);
 				}
 			}
-			catch (NLMISC::EWriteError)
+			catch (const NLMISC::EWriteError &)
 			{
 				// this is a local error, rethrow ...
 				throw;
@@ -2837,7 +2837,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 					break;
 				}
 			}
-			catch (NLMISC::EWriteError)
+			catch (const NLMISC::EWriteError&)
 			{
 				throw;
 			}
@@ -2880,7 +2880,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 				// remove the subfolder name
 				PatchName = NLMISC::CFile::getFilename(PatchName);
 			}
-			catch (NLMISC::EWriteError)
+			catch (const NLMISC::EWriteError &)
 			{
 				throw;
 			}

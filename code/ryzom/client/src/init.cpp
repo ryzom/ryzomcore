@@ -1264,7 +1264,7 @@ void postlogInit()
 				{
 					SoundMngr->init(&ProgressBar);
 				}
-				catch(Exception &e)
+				catch(const Exception &e)
 				{
 					nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
 					// leak the alocated sound manager...

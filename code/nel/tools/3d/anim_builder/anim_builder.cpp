@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
 					animationOptimizer.addLowPrecisionTrack(anim_low_precision_tracks.asString(lpt));
 				}
 			}
-			catch(EUnknownVar &)
+			catch(const EUnknownVar &)
 			{
 				nlwarning("\"anim_low_precision_tracks\" not found in the parameter file. Add \"Finger\" and \"Ponytail\" by default");
 				animationOptimizer.addLowPrecisionTrack("Finger");
@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
 					animationOptimizer.setSampleFrameRate(sr);
 				}
 			}
-			catch(EUnknownVar &)
+			catch(const EUnknownVar &)
 			{
 				nlwarning("\"anim_sample_rate\" not found in the parameter file. Use Default of 30 fps.");
 				animationOptimizer.setSampleFrameRate(30);
@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
 			nlinfo("Anim skipped: %4d", numSkipped);
 
 		}
-		catch (Exception& except)
+		catch (const Exception& except)
 		{
 			// Error message
 			nlwarning ("ERROR %s\n", except.what());

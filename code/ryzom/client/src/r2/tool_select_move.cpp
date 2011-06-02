@@ -369,7 +369,7 @@ void CToolSelectMove::commitAction(CInstance &instance)
 							pos.setValue("y", _FinalPos.y);
 							pos.setValue("z", _FinalPos.z);
 						}
-						catch(ELuaNotATable &)
+						catch(const ELuaNotATable &)
 						{
 							nlwarning("Error while setting position of copied object");
 						}

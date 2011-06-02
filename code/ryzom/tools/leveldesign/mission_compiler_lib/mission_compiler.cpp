@@ -620,7 +620,7 @@ bool	CMissionCompiler::compileMissions(IPrimitive *rootPrim, const std::string &
 //		{
 			compileMission(missionTrees[i], primFileName);
 //		}
-//		catch (EParseException e)
+//		catch (const EParseException &e)
 //		{
 //			nlwarning("Error while parsing a mission: '%s'", e.Why.c_str());
 //			ret = false;

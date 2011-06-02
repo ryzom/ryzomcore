@@ -85,7 +85,7 @@ using namespace NLNET;
 // We don't catch(...) because these exception are already trapped with the se_translation that generate the NeL message box
 
 #define RYZOM_TRY(_block) try { nlinfo(_block" of Ryzom...");
-#define RYZOM_CATCH(_block) nlinfo(_block" of Ryzom success"); } catch(EFatalError &) { return EXIT_FAILURE; }
+#define RYZOM_CATCH(_block) nlinfo(_block" of Ryzom success"); } catch(const EFatalError &) { return EXIT_FAILURE; }
 
 /////////////
 // GLOBALS //
@@ -168,7 +168,7 @@ static bool connect()
 			goto end;
 		}
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		nlwarning("Can't connect to web server '%s': %s", server.c_str(), e.what());
 		goto end;

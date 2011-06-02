@@ -1706,7 +1706,7 @@ void CEditor::waitScenarioScreen()
 			if ( ! firewallTimeout )
 				NetMngr.update();
 		}
-		catch ( EBlockedByFirewall& )
+		catch (const EBlockedByFirewall&)
 		{
 			if ( NetMngr.getConnectionState() == CNetManager::Disconnect )
 			{
@@ -4414,11 +4414,11 @@ bool CEditor::doLuaScript(const char *filename, const char *fileDescText)
 		CLuaStackChecker ls(&getLua());
 		return true;
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		nlwarning("Error while loading R2 %s (file = %s) : %s", fileDescText, filename, e.what());
 	}
-	catch(ELuaError &e)
+	catch(const ELuaError &e)
 	{
 		//char filename[MAX_PATH];
 		std::string msg = e.what();

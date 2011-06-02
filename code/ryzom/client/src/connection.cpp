@@ -1011,7 +1011,7 @@ TInterfaceState globalMenu()
 			if ( ! firewallTimeout )
 				NetMngr.update();
 		}
-		catch ( EBlockedByFirewall& )
+		catch (const EBlockedByFirewall&)
 		{
 			if ( NetMngr.getConnectionState() == CNetManager::Disconnect )
 			{

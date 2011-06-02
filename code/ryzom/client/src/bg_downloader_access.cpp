@@ -336,21 +336,21 @@ void CBGDownloaderAccess::CDownloadCoTask::run()
 			}
 		}
 	}
-	catch(EDownloadException &e)
+	catch(const EDownloadException &e)
 	{
 		//shutdownDownloader();
 		Parent->_TaskResult = TaskResult_Error;
 		Parent->_ErrorMsg.fromUtf8(e.what());
 		Parent->_DownloadThreadPriority = ThreadPriority_DownloaderError;
 	}
-	catch(EDownloadTerminationRequested &e)
+	catch(const EDownloadTerminationRequested &e)
 	{
 		shutdownDownloader();
 		Parent->_TaskResult = TaskResult_Error;
 		Parent->_ErrorMsg = ucstring(e.what());
 		Parent->_DownloadThreadPriority = ThreadPriority_DownloaderError;
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		shutdownDownloader();
 		Parent->_TaskResult = TaskResult_Error;
@@ -358,7 +358,7 @@ void CBGDownloaderAccess::CDownloadCoTask::run()
 		Parent->_ErrorMsg = CI18N::get("uiBGD_ProtocolError") + ucstring(" : ") + ucstring(e.what());
 		Parent->_DownloadThreadPriority = ThreadPriority_DownloaderError;
 	}
-	catch (EWaitMessageTimeoutException &e)
+	catch (const EWaitMessageTimeoutException &e)
 	{
 		shutdownDownloader();
 		Parent->_TaskResult = TaskResult_Error;

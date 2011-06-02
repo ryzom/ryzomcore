@@ -228,7 +228,7 @@ void CGuildCharge::save()
 				}
 			}
 		}
-		catch( Exception& )
+		catch(const Exception &)
 		{
 			//f.close();
 			nlwarning("(EGS)<CPlayerManager::savePlayer>  :  Can't write file %s (disk full ?)",_FileName.c_str());

@@ -201,7 +201,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 		ifile.serialCont (container);
 		ifile.close ();
 	}
-	catch (NLMISC::Exception &e)
+	catch (const NLMISC::Exception &e)
 	{
 		// clear the container because it can contains partially loaded sheet so we must clean it before continue
 		container.clear ();
@@ -456,7 +456,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 			ofile.close ();
 		}
 	}
-	catch (NLMISC::Exception &e)
+	catch (const NLMISC::Exception &e)
 	{
 		nlinfo ("loadForm(): Exception during saving the packed file, it will be recreated next launch (%s)", e.what());
 	}
@@ -564,7 +564,7 @@ void loadForm2(const std::vector<std::string> &sheetFilters, const std::string &
 		ifile.serialPtrCont (container);
 		ifile.close ();
 	}
-	catch (NLMISC::Exception &e)
+	catch (const NLMISC::Exception &e)
 	{
 		// clear the container because it can contains partially loaded sheet so we must clean it before continue
 		container.clear ();
@@ -819,7 +819,7 @@ void loadForm2(const std::vector<std::string> &sheetFilters, const std::string &
 			ofile.close ();
 		}
 	}
-	catch (NLMISC::Exception &e)
+	catch (const NLMISC::Exception &e)
 	{
 		nlinfo ("loadForm(): Exception during saving the packed file, it will be recreated next launch (%s)", e.what());
 	}
@@ -925,7 +925,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 		ifile.serialCont (container);
 		ifile.close ();
 	}
-	catch (NLMISC::Exception &e)
+	catch (const NLMISC::Exception &e)
 	{
 		// clear the container because it can contains partially loaded sheet so we must clean it before continue
 		container.clear ();
@@ -1183,7 +1183,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 			ofile.close ();
 		}
 	}
-	catch (NLMISC::Exception &e)
+	catch (const NLMISC::Exception &e)
 	{
 		nlinfo ("loadForm(): Exception during saving the packed file, it will be recreated next launch (%s)", e.what());
 	}

@@ -213,7 +213,7 @@ void CSampleBank::load(bool async)
 
 		_SampleBankManager->m_LoadedSize += _ByteSize;
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		// loading failed !
 		nlwarning("Exception %s during loading of sample bank %s", e.what(), filename.c_str());

@@ -914,7 +914,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			// Get the localhost name
 			localhost = CInetAddress::localHost().hostName();
 		}
-		catch (NLNET::ESocket &)
+		catch (const NLNET::ESocket &)
 		{
 			localhost = "<UnknownHost>";
 		}

@@ -224,7 +224,7 @@ void CFogMap::load(NLMISC::CBitmap &bm, const std::string &filename)
 			inputFile.close();
 		}
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		nlwarning(e.what());
 		inputFile.close();

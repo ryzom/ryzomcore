@@ -541,7 +541,7 @@ bool CZoneBank::addElement (const std::string &elementName, std::string &error)
 			error = "Can't open file " + elementName;
 		}
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		error = "Error while loading ligozone "+elementName+" : "+e.what();
 	}

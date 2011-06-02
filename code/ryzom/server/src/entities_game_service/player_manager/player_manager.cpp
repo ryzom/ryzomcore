@@ -745,7 +745,7 @@ void CPlayerManager::savePlayerCharRecurs( uint32 userId, sint32 idx, std::set<C
 					BsiGlobal.sendFile( msg );
 				}
 			}
-			catch( Exception& )
+			catch(const Exception &)
 			{
 				nlwarning("(EGS)<CPlayerManager::savePlayer>  :  Can't serial file %s (connection with BS service down ?)",serialFileName.c_str());
 				return;
@@ -789,7 +789,7 @@ void CPlayerManager::savePlayerCharRecurs( uint32 userId, sint32 idx, std::set<C
 					BsiGlobal.sendFile( msg );
 				}
 			}
-			catch( Exception& )
+			catch(const Exception &)
 			{
 				nlwarning("(EGS)<CPlayerManager::savePlayer>  :  Can't serial file %s (connection with BS service down ?)",pdrFileName.c_str());
 				return;
@@ -824,7 +824,7 @@ void CPlayerManager::savePlayerCharRecurs( uint32 userId, sint32 idx, std::set<C
 					f.close();
 				}
 			}
-			catch( Exception& e)
+			catch(const Exception &e)
 			{
 				//f.close();
 				nlwarning("(EGS)<CPlayerManager::savePlayer>  :  Can't write file %s : %s", serialPathFileName.c_str(), e.what());
@@ -849,7 +849,7 @@ void CPlayerManager::savePlayerCharRecurs( uint32 userId, sint32 idx, std::set<C
 					pdr.writeToFile(pdrPathFileName.c_str());
 				}
 			}
-			catch( Exception& )
+			catch(const Exception &)
 			{
 				nlwarning("(EGS)<CPlayerManager::savePlayer>  :  Can't serial file %s (connection with BS service down ?)", pdrPathFileName.c_str());
 				return;

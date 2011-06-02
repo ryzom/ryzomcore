@@ -232,7 +232,7 @@ void cbInit (CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
 	{
 		UdpSock->connect( CInetAddress (ServerAddr, UDPPort) );
 	}
-	catch ( Exception& e )
+	catch (const Exception &e)
 	{
 		InfoLog->displayRawNL ("Cannot connect to remote UDP host '%s': %s", ServerAddr.c_str(), e.what() );
 		exit ("");
@@ -291,7 +291,7 @@ int main( int argc, char **argv )
 
 		InfoLog->displayRawNL ("Waiting the server answer...");
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		InfoLog->displayRawNL ("Can't connect to %s:%d (%s)\n", ServerAddr.c_str(), TCPPort, e.what());
 		exit ("");

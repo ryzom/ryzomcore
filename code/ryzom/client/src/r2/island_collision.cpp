@@ -432,7 +432,7 @@ CPackedWorld *CIslandCollision::reloadPackedIsland(const CScenarioEntryPoints::C
 				f.serialCheck((uint32) 'MHSI');
 				f.serial(_HeightMap);
 			}
-			catch(Exception &e)
+			catch(const Exception &e)
 			{
 				nlwarning(e.what());
 				_HeightMap.clear();
@@ -572,7 +572,7 @@ void CIslandCollision::loadEntryPoints()
 		{
 			sep.loadCompleteIslands();
 		}
-		catch (NLMISC::EStream &e)
+		catch (const NLMISC::EStream &e)
 		{
 			_EntryPointsLoadingFailure = true;
 			nlwarning(e.what());

@@ -419,7 +419,7 @@ void getNameOfMessageOrTransportClass( NLNET::CMessage& msgin, std::string& msgN
 			msgin.seek( msgin.getHeaderSize(), NLMISC::IStream::begin );
 			msgin.serial( msgName );
 		}
-		catch ( EStreamOverflow& )
+		catch (const EStreamOverflow&)
 		{
 			msgName = "<Name not found>";
 		}

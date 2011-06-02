@@ -850,7 +850,7 @@ void updateFromClientCfg()
 			{
 				SoundMngr->init(NULL);
 			}
-			catch(Exception &e)
+			catch(const Exception &e)
 			{
 				nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
 				SoundMngr = 0;

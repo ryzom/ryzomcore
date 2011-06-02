@@ -1235,7 +1235,7 @@ CInterfaceElement *CInterfaceElement::clone()
 		dupStream.fill(&datas[0], (uint32)datas.size());
 		dupStream.serialPolyPtr(begunThisCloneWarHas);
 	}
-	catch(NLMISC::EStream &)
+	catch(const NLMISC::EStream &)
 	{
 		// no-op -> caller has to handle the failure because NULL will be returned
 	}

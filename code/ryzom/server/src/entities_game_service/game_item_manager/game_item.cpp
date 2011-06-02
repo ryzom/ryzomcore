@@ -2457,7 +2457,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //			//NLMEMORY::CheckHeap (true);
 //		}
 ////	}
-////	catch( Exception& e )
+////	catch(const Exception &e)
 ////	{
 ////		nlwarning("<CGameItem::load> %s",e.what());
 ////	}

@@ -174,7 +174,7 @@ const std::string& CLoginStateMachine::toString(CLoginStateMachine::TEvent event
 					outputF.close();		\
 				}							\
 			} \
-			catch ( Exception & ) \
+			catch (const Exception &) \
 			{} \
 			_CurrentState = stateId;	\
 			break;						\
@@ -912,7 +912,7 @@ retryJoinEdit:
 				outputF.close();
 			}
 		}
-		catch ( Exception & )
+		catch (const Exception &)
 		{}
 
 		// If the session is not a permanent session and has vanished, pop the position

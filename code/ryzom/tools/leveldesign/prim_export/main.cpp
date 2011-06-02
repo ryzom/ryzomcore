@@ -854,7 +854,7 @@ int main (int argc, char**argv)
 							nlwarning ("Error : can't open the file (%s) for reading", files[i].c_str ());
 						}
 					}
-					catch(Exception &e)
+					catch(const Exception &e)
 					{
 						// Error in the log
 						nlwarning ("Error loading zone file (%s) : %s", files[i].c_str (), e.what ());
@@ -919,7 +919,7 @@ int main (int argc, char**argv)
 							nlwarning ("Error : can't open the file (%s) for reading", files[i].c_str ());
 						}
 					}
-					catch(Exception &e)
+					catch(const Exception &e)
 					{
 						// Error in the log
 						nlwarning ("Error loading primitive file (%s) : %s", files[i].c_str (), e.what ());

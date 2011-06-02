@@ -79,7 +79,7 @@ void CNetDisplayer::setLogServer (const CInetAddress& logServerAddr)
 	{
 		_Server->connect (_ServerAddr);
 	}
-	catch( ESocket& )
+	catch(const ESocket&)
 	{
 		// Silence
 	}
@@ -153,7 +153,7 @@ void CNetDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 		msg.serial( s );
 		_Server->send (msg, 0, false);
 	}
-	catch( NLMISC::Exception& )
+	catch(const NLMISC::Exception& )
 	{
 		// Silence
 	}

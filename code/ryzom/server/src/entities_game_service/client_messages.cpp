@@ -1870,7 +1870,7 @@ void cbClientSendEmote( NLNET::CMessage& msgin, const std::string &serviceName, 
 		msgin.serial( emoteTextId );
 
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		nlwarning("Bad emote serialisation '%s'", e.what());
 		return;
@@ -1915,7 +1915,7 @@ void cbClientSendCustomEmote( NLNET::CMessage& msgin, const std::string &service
 		msgin.serial( emoteCustomText );
 
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		nlwarning("Bad custom emote serialisation '%s'", e.what());
 		return;
@@ -2966,7 +2966,7 @@ void cbClientQuitGameRequest( NLNET::CMessage& msgin, const std::string & servic
 			}
 		}
 	}
-	catch ( Exception& e ) // will catch any serialization/security exception
+	catch (const Exception &e) // will catch any serialization/security exception
 	{
 		GIVEUP_IF(charId.isUnknownId(), "cbClientQuitGameRequest: unknown char", return);
 		nldebug("BypassDisconnectionTimer denied for %s: %s", charId.toString().c_str(), e.what());

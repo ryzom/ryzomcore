@@ -1659,7 +1659,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 			}
 		}
 	}
-	catch(NLMISC::EStream &)
+	catch(const NLMISC::EStream &)
 	{
 		f.close();
 		string	sFileNameBackup = sFileName+"backup";
@@ -1846,7 +1846,7 @@ bool CInterfaceManager::saveConfig (const string &filename)
 			return false;
 		}
 	}
-	catch(NLMISC::EStream &)
+	catch(const NLMISC::EStream &)
 	{
 		f.close();
 		nlwarning("Config saving failed.");
@@ -5754,7 +5754,7 @@ bool	CInterfaceManager::executeLuaScript(const std::string &luaScript, bool smal
 		else
 			_LuaState->executeScript(luaScript);
 	}
-	catch(ELuaError &e)
+	catch(const ELuaError &e)
 	{
 		std::string msg = e.luaWhat();
 		char filename[MAX_PATH];

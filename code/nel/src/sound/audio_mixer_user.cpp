@@ -883,7 +883,7 @@ void CAudioMixerUser::buildSampleBankList()
 					}
 				}
 			}
-			catch(Exception e)
+			catch(const Exception &)
 			{
 				upToDate = false;
 			}
@@ -2489,7 +2489,7 @@ void CAudioMixerUser::changeMaxTrack(uint maxTrack)
 				_FreeTracks.insert(_FreeTracks.begin(), _Tracks[i]);
 			}
 		}
-		catch ( ESoundDriver & )
+		catch (const ESoundDriver &)
 		{
 			delete _Tracks[i];
 			// If the source generation failed, keep only the generated number of sources

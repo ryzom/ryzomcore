@@ -141,7 +141,7 @@ void			initReceiveLog()
 			ReceiveLogger.displayNL( "LogReceive is on" ); // only when enabled
 		}
 	}
-	catch ( EConfigFile& )
+	catch (const EConfigFile&)
 	{}
 }
 
@@ -968,7 +968,7 @@ void	CNetworkConnection::sendSystemLogin()
 		//sendUDP (&(_Connection), message.buffer(), length);
 		_Connection.send( message.buffer(), length );
 	}
-	catch ( ESocket& e )
+	catch (const ESocket &e)
 	{
 #ifdef NL_OS_WINDOWS
 		// An exception (10004: Blocking operation interrupted) may occur if a firewall such as Kerio is
@@ -1123,7 +1123,7 @@ void	CNetworkConnection::receiveSystemSync(CBitMemStream &msgin)
 			if(xmlInvalid)
 				xmlInvalid = (checkMsgXml != _AltMsgXmlMD5 || checkDatabaseXml != _AltDatabaseXmlMD5);
 		}
-		catch (NLMISC::Exception&)
+		catch (const NLMISC::Exception&)
 		{
 		}
 
@@ -1720,7 +1720,7 @@ void	CNetworkConnection::decodeVisualProperties( CBitMemStream& msgin )
 			}
 		}
 	}
-	catch ( EStreamOverflow& )
+	catch (const EStreamOverflow&)
 	{
 		// End of stream (saves useless bits)
 	}

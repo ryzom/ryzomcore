@@ -120,7 +120,7 @@ void cbImpulsionChat( CMessage& msgin, const string &serviceName, TServiceId ser
 	{
 		msgin.serial(ucstr);
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<impulsionChat> %s",e.what());
 		return;
@@ -140,7 +140,7 @@ void cbImpulsionChat( CMessage& msgin, const string &serviceName, TServiceId ser
 		IOS->getChatManager().getClient(senderRow).updateAudience();
 		IOS->getChatManager().chat( senderRow, ucstr );
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<impulsionChat> %s",e.what());
 	}
@@ -161,7 +161,7 @@ void cbImpulsionChatTeam( CMessage& msgin, const string &serviceName, TServiceId
 	{
 		msgin.serial(ucstr);
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<impulsionChatTeam> %s",e.what());
 		return;
@@ -188,7 +188,7 @@ void cbImpulsionChatTeam( CMessage& msgin, const string &serviceName, TServiceId
 		// reset chat mode to old value
 		IOS->getChatManager().getClient(senderRow).setChatMode( chatModeBck );		
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<impulsionChatTeam> %s",e.what());
 	}
@@ -211,7 +211,7 @@ void cbImpulsionTell( CMessage& msgin, const string &serviceName, TServiceId ser
 		msgin.serial(receiver);
 		msgin.serial(str);
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<impulsionTell> %s",e.what());
 		return;
@@ -245,7 +245,7 @@ static void updateIgnoreStatus(CMessage& msgin, const string &serviceName, TServ
 		msgin.serial(ignoredId);
 		IOS->getChatManager().getClient(TheDataset.getDataSetRow(senderId)).setIgnoreStatus(ignoredId, ignored);	
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<impulsionIgnore> %s",e.what());
 		return;
@@ -288,7 +288,7 @@ void cbImpulsionUnignoreAll( CMessage& msgin, const string &serviceName, TServic
 			IOS->getChatManager().getClient(TheDataset.getDataSetRow(senderId)).setIgnoreStatus(*it, false);
 		}
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<impulsionIgnoreAll> %s",e.what());
 		return;
@@ -311,7 +311,7 @@ void cbImpulsionFilter( CMessage& msgin, const string &serviceName, TServiceId s
 	{
 		msgin.serial( filterId );
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<impulsionFilter> %s",e.what());
 		return;
@@ -324,7 +324,7 @@ void cbImpulsionFilter( CMessage& msgin, const string &serviceName, TServiceId s
 		{
 			IOS->getChatManager().getClient(TheDataset.getDataSetRow(sender)).filter( filterId );
 		}
-		catch( Exception& e )
+		catch(const Exception &e)
 		{
 			nlwarning("<impulsionFilter> %s",e.what());
 		}
@@ -369,7 +369,7 @@ void cbImpulsionChatMode( CMessage& msgin, const string &serviceName, TServiceId
 		msgin.serial( chatMode );
 		msgin.serial(chanID);
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<cbImpulsionChatMode> %s",e.what());
 		return;
@@ -400,7 +400,7 @@ void cbImpulsionChatMode( CMessage& msgin, const string &serviceName, TServiceId
 					nlwarning("<cbImpulsionChatMode>(CHAT_MODE) The chat mode %d is out of enum !", chatMode);
 			}
 		}
-		catch( Exception& e )
+		catch(const Exception &e)
 		{
 			nlwarning("<cbImpulsionChatMode> %s",e.what());
 		}
@@ -427,7 +427,7 @@ void cbImpulsionAfkTxt( CMessage& msgin, const string &serviceName, TServiceId s
 	{
 		msgin.serial( afkTxt );
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<cbImpulsionAfkTxt> %s",e.what());
 		return;
@@ -528,7 +528,7 @@ static void cbChatMessage(CMessage& msgin, const string &serviceName, TServiceId
 		msgin.serial(entityId);
 		msgin.serial(str);
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<cbChatMessage> %s",e.what());
 		return;
@@ -546,7 +546,7 @@ static void cbChatMessage(CMessage& msgin, const string &serviceName, TServiceId
 		if ( oldMode != CChatGroup::say )
 			IOS->getChatManager().getClient(entityId).setChatMode(oldMode);
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<cbChatMessage> %s",e.what());
 	}
@@ -565,7 +565,7 @@ static void cbChatMessage(CMessage& msgin, const string &serviceName, TServiceId
 	{
 		msgin.serial( entityId );
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<cbRemoveEntity> %s",e.what());
 		return;
@@ -595,7 +595,7 @@ static void cbCharacterName(CMessage& msgin, const string &serviceName, TService
 		// character's name
 		msgin.serial( name );
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<cbCharacterName> %s",e.what());
 		return;
@@ -621,7 +621,7 @@ static void cbCharacterNameId(CMessage& msgin, const string &serviceName, TServi
 		// character's string Id
 		msgin.serial( stringId );
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<cbCharacterName> %s",e.what());
 		return;
@@ -662,7 +662,7 @@ static void cbCharacterNameAndLang(CMessage& msgin, const string &serviceName, T
 		// privilege
 		msgin.serial( havePrivilege );
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<cbCharacterName> %s",e.what());
 		return;
@@ -695,7 +695,7 @@ static void cbCharacterEventFaction(CMessage& msgin, const string &serviceName, 
 		// event faction
 		msgin.serial( eventFaction );
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<cbCharacterEventFaction> %s", e.what());
 		return;
@@ -734,7 +734,7 @@ static void cbAddGroup( CMessage& msgin, const string &serviceName, TServiceId s
 		msgin.serial( gId );
 		msgin.serial( gType );
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<cbAddGroup> %s",e.what());
 		return;
@@ -765,7 +765,7 @@ static void cbAddNamedGroup( CMessage& msgin, const string &serviceName, TServic
 		msgin.serial( gType );
 		msgin.serial( name );
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<cbAddGroup> %s",e.what());
 		return;
@@ -793,7 +793,7 @@ static void cbRemoveGroup( CMessage& msgin, const string &serviceName, TServiceI
 	{
 		msgin.serial( gId );
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<cbRemoveGroup> %s",e.what());
 		return;
@@ -820,7 +820,7 @@ static void cbAddToGroup( CMessage& msgin, const string &serviceName, TServiceId
 		msgin.serial( gId );
 		msgin.serial( charId );
 	}
-	catch( Exception& e )
+	catch(const Exception& e)
 	{
 		nlwarning("<cbAddToGroup> %s",e.what());
 		return;
@@ -860,7 +860,7 @@ static void cbRemoveFromGroup( CMessage& msgin, const string &serviceName, TServ
 		msgin.serial( gId );
 		msgin.serial( charId );
 	}
-	catch( Exception& e )
+	catch(const Exception& e)
 	{
 		nlwarning("<cbRemoveFromGroup> %s",e.what());
 		return;
@@ -896,7 +896,7 @@ static void cbRemoveFromGroup( CMessage& msgin, const string &serviceName, TServ
 //		msgin.serial( clientId );
 //		msgin.serial( entityId );
 //	}
-//	catch( Exception& e )
+//	catch(const Exception& e)
 //	{
 //		nlwarning("<cbSendDynamicId> %s",e.what());
 //		return;
@@ -915,7 +915,7 @@ static void cbRemoveFromGroup( CMessage& msgin, const string &serviceName, TServ
 //					IOS->getChatManager().addDynStr( clientId, entityInfos->OldNameIndex, serviceId );
 //				}
 //			}
-//			catch( CChatManager::EChatClient& e )
+//			catch(const CChatManager::EChatClient& e)
 //			{
 //				nlwarning("<cbSendDynamicId> %s",e.what());
 //			}
@@ -986,7 +986,7 @@ void cbNpcTell( CMessage& msgin, const string &serviceName, TServiceId serviceId
 //		CChatClient &client = cm.getClient(sender);
 		cm.sendChat2(CChatGroup::tell, receiver, phraseId, sender);
 	}
-	catch(CChatManager::EChatClient e)
+	catch(const CChatManager::EChatClient &e)
 	{
 		nlwarning("cbNpcTell : ignoring chat because NPC info not available yet");
 	}
@@ -1037,7 +1037,7 @@ void cbNpcTellEx( CMessage& msgin, const string &serviceName, TServiceId service
 		//		CChatClient &client = cm.getClient(sender);
 		cm.sendChat2Ex(CChatGroup::tell, receiver, phraseId, sender);
 	}
-	catch(CChatManager::EChatClient e)
+	catch(const CChatManager::EChatClient &e)
 	{
 		nlwarning("cbNpcTell : ignoring chat because NPC info not available yet");
 	}
@@ -1075,7 +1075,7 @@ void cbNpcChatEx( CMessage& msgin, const string &serviceName, TServiceId service
 		client.updateAudience();
 		cm.chat2Ex(sender, phraseId);
 	}
-	catch(CChatManager::EChatClient e)
+	catch(const CChatManager::EChatClient &e)
 	{
 		nlwarning("cbNpcChatEx : ignoring chat because NPC info not available yet");
 	}
@@ -1112,7 +1112,7 @@ void cbNpcChat( CMessage& msgin, const string &serviceName, TServiceId serviceId
 		client.updateAudience();
 		cm.chat2(sender, phraseId);
 	}
-	catch(CChatManager::EChatClient e)
+	catch(const CChatManager::EChatClient &e)
 	{
 		nlwarning("cbNpcChat : ignoring chat because NPC info not available yet");
 	}
@@ -1159,7 +1159,7 @@ void cbNpcChatParam( CMessage& msgin, const string &serviceName, NLNET::TService
 		client.updateAudience();
 		cm.chatParam(sender, phraseId, params);
 	}
-	catch(CChatManager::EChatClient e)
+	catch(const CChatManager::EChatClient &e)
 	{
 		nlwarning("cbNpcChat : ignoring chat because NPC info not available yet");
 	}
@@ -1196,7 +1196,7 @@ void cbNpcChatSentence( CMessage& msgin, const string &serviceName, TServiceId s
 		client.updateAudience();
 		cm.chat(sender, sentence);
 	}
-	catch(CChatManager::EChatClient e)
+	catch(const CChatManager::EChatClient &e)
 	{
 		nlwarning("cbNpcChatSentence : ignoring chat because NPC info not available yet");
 	}
@@ -1316,7 +1316,7 @@ void cbGroupDynString( CMessage& msgin, const string &serviceName, TServiceId se
 			}
 		}	
 	}
-	catch(CChatManager::EChatClient e)
+	catch(const CChatManager::EChatClient &e)
 	{
 		nlwarning("cbGroupDynString : ignoring group message because entity info not available yet");
 	}
@@ -1439,7 +1439,7 @@ void cbUniverseMode( CMessage& msgin, const string &serviceName, TServiceId serv
 		{
 			IOS->getChatManager().getClient(TheDataset.getDataSetRow(userId)).setChatMode( type );
 		}
-		catch( Exception& e )
+		catch(const Exception& e)
 		{
 			nlwarning("<impulsionChatMode> %s",e.what());
 		}
@@ -1500,7 +1500,7 @@ void cbEmoteCrowd( CMessage& msgin, const string &serviceName, TServiceId servic
 		// send the phrase
 		cm.sendEmoteTextToAudience(sender, phraseTextId, params,ignored);
 	}
-	catch(CChatManager::EChatClient e)
+	catch(const CChatManager::EChatClient &e)
 	{
 		nlwarning("cbNpcChatEx : ignoring chat because NPC info not available yet");
 	}
@@ -1549,7 +1549,7 @@ void cbCustomEmote( CMessage& msgin, const string &serviceName, TServiceId servi
 		// send the phrase
 		cm.sendEmoteCustomTextToAll(sender, emoteCustomText);
 	}
-	catch(CChatManager::EChatClient e)
+	catch(const CChatManager::EChatClient &e)
 	{
 		nlwarning("<cbCustomEmote> exception, ignoring emote");
 	}

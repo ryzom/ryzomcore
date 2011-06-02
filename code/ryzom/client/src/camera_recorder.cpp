@@ -239,7 +239,7 @@ class CAHSaveCameraRecord : public IActionHandler
 				nlwarning("Couldn't compute camera recorder next filename");
 			}
 		}
-		catch(EStream &e)
+		catch(const EStream &e)
 		{
 			nlwarning(e.what());
 		}
@@ -283,7 +283,7 @@ NLMISC_COMMAND(loadCamRec, "Load a camera path record file (.cr)", "<filename>")
 			f.serialCont(Track);
 			State = Idle;
 		}
-		catch(EStream &e)
+		catch(const EStream &e)
 		{
 			nlwarning(e.what());
 		}

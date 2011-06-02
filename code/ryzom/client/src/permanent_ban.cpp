@@ -87,7 +87,7 @@ static void setPermanentBanFileMarker(const std::string &path, bool on)
 				SetFileAttributes(path.c_str(), FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM);
 			#endif
 		}
-		catch(EStream &e)
+		catch(const EStream &e)
 		{
 			nlinfo(e.what());
 		}

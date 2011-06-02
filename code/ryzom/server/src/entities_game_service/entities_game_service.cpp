@@ -1129,7 +1129,7 @@ void CPlayerService::initConfigFileVars()
 //		CConfigFile::CVar& cvDecay = ConfigFile.getVar("DecayDelay");
 //		GameItemManager.DecayDelay = cvDecay.asInt() * 60 * 10;
 //	}
-//	catch(EUnknownVar &)
+//	catch(const EUnknownVar &)
 //	{
 //		//nlwarning("<CPlayerService> var DecayDelay not found");
 //	}
@@ -1139,7 +1139,7 @@ void CPlayerService::initConfigFileVars()
 //		CConfigFile::CVar& cvCorpseToCarrion = ConfigFile.getVar("CorpseToCarrionDelay");
 //		GameItemManager.CorpseToCarrionDelay = cvCorpseToCarrion.asInt() * 60 * 10;
 //	}
-//	catch(EUnknownVar &)
+//	catch(const EUnknownVar &)
 //	{
 //		//nlwarning("<CPlayerService> var CorpseToCarrionDelay not found");
 //	}
@@ -1149,7 +1149,7 @@ void CPlayerService::initConfigFileVars()
 //		CConfigFile::CVar& cvCarrionDecay = ConfigFile.getVar("CarrionDecayDelay");
 //		GameItemManager.CarrionDecayDelay = cvCarrionDecay.asInt() * 60 * 10;
 //	}
-//	catch(EUnknownVar &)
+//	catch(const EUnknownVar &)
 //	{
 //		//nlwarning("<CPlayerService> var CarrionDecayDelay not found");
 //	}
@@ -1159,7 +1159,7 @@ void CPlayerService::initConfigFileVars()
 //		CConfigFile::CVar& cvCorpse = ConfigFile.getVar("CorpseMaxCount");
 //		GameItemManager.CorpseMaxCount = cvCorpse.asInt();
 //	}
-//	catch(EUnknownVar &)
+//	catch(const EUnknownVar &)
 //	{
 //		//nlwarning("<CPlayerService> var CorpseMaxCount not found");
 //	}
@@ -1273,7 +1273,7 @@ void CPlayerService::initConfigFileVars()
 			nlwarning("<CPlayerService::initConfigFileVars> bad size for var Mainlands : %d",mlsz);
 		}
 	}
-	catch(EUnknownVar &)
+	catch(const EUnknownVar &)
 	{
 		nlwarning("<CPlayerService::initConfigFileVars> var Mainlands not found");
 	}

@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 
 			system((string("\"C:\\Program Files\\Beyond Compare 2\\bc2.exe\" ")+string(tmp)+"/compiled_mission.script test_compilateur.script").c_str());
 		}
-		catch(EParseException e)
+		catch(const EParseException &e)
 		{
 			nlwarning(e.Why.c_str());
 			return -1;
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
 		}
 */
 	}
-	catch (EParseException e)
+	catch (const EParseException &e)
 	{
 		CPrimitiveContext::instance().CurrentLigoConfig = NULL;
 		nlerror("Compilation error : '%s'", e.Why.c_str());

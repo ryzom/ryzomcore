@@ -215,7 +215,7 @@ void processAllPasses(string &zoneName)
 			retriever.serial(outputRetriever);
 		}
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		printf("%s\n", e.what ());
 	}
@@ -392,7 +392,7 @@ void tessellateAndMoulineZone(string &zoneName)
 			outputChains.serialCont(fullChains);
 		}
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		printf(e.what ());
 	}
@@ -452,7 +452,7 @@ void processRetriever(string &zoneName)
 			retriever.serial(outputRetriever);
 		}
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		printf(e.what ());
 	}

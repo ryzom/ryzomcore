@@ -1670,7 +1670,7 @@ bool CPeopleInterraction::saveUserChatsInfos(NLMISC::IStream &f)
 			pCGW->saveFreeTeller(f);
 		}
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		nlwarning("Error while saving user chat infos : %s", e.what());
 		return false;
@@ -1691,7 +1691,7 @@ bool CPeopleInterraction::saveUserDynChatsInfos(NLMISC::IStream &f)
 			saveFilteredDynChat(f, TheUserChat);
 		}
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		nlwarning("Error while saving user dyn chat infos : %s", e.what());
 		return false;
@@ -1756,7 +1756,7 @@ bool CPeopleInterraction::loadUserChatsInfos(NLMISC::IStream &f)
 			if (pCGW) pCGW->loadFreeTeller(f);
 		}
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		nlwarning("Error while loading user chat infos : %s", e.what());
 		return false;
@@ -1786,7 +1786,7 @@ bool CPeopleInterraction::loadUserDynChatsInfos(NLMISC::IStream &f)
 			setupUserDynChatFromSummary(fcs, TheUserChat);
 		}
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		nlwarning("Error while loading user dyn chat infos : %s", e.what());
 		return false;

@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
 							}
 						}
 					}
-					catch (NLMISC::EUnknownVar &)
+					catch (const NLMISC::EUnknownVar &)
 					{
 						nlinfo("No additionnal ig's to load");
 					}

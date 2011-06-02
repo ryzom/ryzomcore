@@ -865,7 +865,7 @@ void initMainLoop()
 				// load hlsBank
 				Driver->loadHLSBank("characters.hlsbank");
 			}
-			catch(Exception &e)
+			catch(const Exception &e)
 			{
 				nlwarning("Can't load HLSBank: %s", e.what());
 			}

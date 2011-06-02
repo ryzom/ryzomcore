@@ -5137,7 +5137,7 @@ NLMISC_COMMAND(luaObject, "Dump the content of a lua object", "<table name> [max
 		// make a reference to the table to be inspected (is this this a primitive type, just make a copy)
 		luaState->executeScript(std::string(inspectedTable) + " = " + args[0]);
 	}
-	catch(ELuaError &e)
+	catch(const ELuaError &e)
 	{
 		CLuaIHM::debugInfo(e.what());
 		return false;
@@ -5407,7 +5407,7 @@ NLMISC_COMMAND(dumpPosAsPrim, "ld helper : add current position to pos.primitive
 			stream.open(path);
 			stream.serialBuffer((uint8 *) &srcFile[0], fileSize);
 		}
-		catch(NLMISC::EStream &e)
+		catch(const NLMISC::EStream &e)
 		{
 			nlinfo(e.what());
 			srcFile.clear();
@@ -5455,7 +5455,7 @@ NLMISC_COMMAND(dumpPosAsPrim, "ld helper : add current position to pos.primitive
 		stream.open(path);
 		stream.serialBuffer((uint8 *) &srcFile[0], (uint)srcFile.size());
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		nlinfo(e.what());
 	}

@@ -2146,7 +2146,7 @@ void CExport::loadLandscape (const string &LandFile)
 			inFile.close ();
 			_Landscape->addZone (zone);
 		}
-		catch(Exception &/*e*/)
+		catch(const Exception &/*e*/)
 		{
 			if (_ExportCB != NULL)
 				_ExportCB->dispWarning (string("Cant load ") + ZoneName + string(".zone(l,w)"));

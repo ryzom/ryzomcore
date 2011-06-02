@@ -1240,7 +1240,7 @@ public:
 	{
 		string FrontendServiceName = ConfigFile.getVar ("FrontendServiceName").asString();
 
-		try { FrontEndAddress = ConfigFile.getVar ("FrontEndAddress").asString(); } catch(Exception &) { }
+		try { FrontEndAddress = ConfigFile.getVar ("FrontEndAddress").asString(); } catch(const Exception &) { }
 
 		nlinfo ("Waiting frontend services named '%s'", FrontendServiceName.c_str());
 

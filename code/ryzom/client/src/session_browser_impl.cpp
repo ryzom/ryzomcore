@@ -427,7 +427,7 @@ void CSessionBrowserImpl::fill(const std::vector <RSMGR::TSessionDesc > &session
 		// call into lua
 		callRingAccessPointMethod("onSessionListReceived", 1, 0);
 	}
-	catch(ELuaError &)
+	catch(const ELuaError &)
 	{
 		// no-op (error msg already printed at exception launch)
 	}
@@ -454,7 +454,7 @@ void CSessionBrowserImpl::playerRatingFill(bool scenarioRated, uint32 rateFun, u
 		// call into lua
 		callScenarioScoresMethod("onScenarioScoresReceived", 1, 0);
 	}
-	catch(ELuaError &)
+	catch(const ELuaError &)
 	{
 		// no-op (error msg already printed at exception launch)
 	}
@@ -482,7 +482,7 @@ void CSessionBrowserImpl::averageScoresFill(bool scenarioRated, uint32 rateFun, 
 		// call into lua
 		callScenarioScoresMethod("onAverageScoresReceived", 1, 0);
 	}
-	catch(ELuaError &)
+	catch(const ELuaError &)
 	{
 		// no-op (error msg already printed at exception launch)
 	}
@@ -573,7 +573,7 @@ void CSessionBrowserImpl::on_scenarioAverageScores(NLNET::TSockId /* from */, bo
 		// call into lua
 		callScenarioScoresMethod("onScenarioAverageScoresReceived", 1, 0);
 	}
-	catch(ELuaError &)
+	catch(const ELuaError &)
 	{
 		// no-op (error msg already printed at exception launch)
 	}
@@ -647,7 +647,7 @@ void CSessionBrowserImpl::charsFill(const std::vector <RSMGR::TCharDesc > &chars
 		// call into lua
 		callRingCharTrackingMethod("onCharsListReceived", 1, 0);
 	}
-	catch(ELuaError &)
+	catch(const ELuaError &)
 	{
 		// no-op (error msg already printed at exception launch)
 	}
@@ -706,7 +706,7 @@ void CSessionBrowserImpl::ringStatsFill()
 			pSM->tryToUnblockTitleFromRingRatings( _LastAuthorRating, _LastAMRating, _LastMasterlessRating );
 		}
 	}
-	catch(ELuaError &)
+	catch(const ELuaError &)
 	{
 		// no-op (error msg already printed at exception launch)
 	}
