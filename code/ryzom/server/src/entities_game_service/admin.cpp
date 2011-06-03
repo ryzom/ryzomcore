@@ -575,7 +575,7 @@ string getSalt()
 			// read the file content into a buffer
 			uint32 size=NLMISC::CFile::getFileSize(f);
 			input.resize(size);
-			uint32 readSize= fread(&input[0],1,size,f);
+			uint32 readSize= (uint32)fread(&input[0],1,size,f);
 			fclose(f);
 			Salt = input;
 			return Salt;
@@ -589,7 +589,7 @@ void saveSalt(const string salt)
 {
 	Salt = salt;
 	CBackupMsgSaveFile msg("salt.txt", CBackupMsgSaveFile::SaveFile, Bsi );
-	msg.DataMsg.serialBuffer((uint8*)Salt.c_str(), Salt.size());
+	msg.DataMsg.serialBuffer((uint8*)Salt.c_str(), (uint)Salt.size());
 	Bsi.sendFile(msg);
 }
 
@@ -4948,7 +4948,7 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 		if (command_args.size () < 3) return false;
 
 		uint32 instanceNumber = c->getInstanceNumber(); 
-		uint32 nbString = command_args.size();
+		uint32 nbString = (uint32)command_args.size();
 	 
 		CMessage msgout("EVENT_NPC_GROUP_SCRIPT");
 		uint32 messageVersion = 1;
@@ -6414,7 +6414,7 @@ NLMISC_COMMAND(eScript, "executes a script on an event npc group", "<player eid>
 
 	uint32 instanceNumber = c->getInstanceNumber(); 
 
-	uint32 nbString = args.size();
+	uint32 nbString = (uint32)args.size();
  
 	CMessage msgout("EVENT_NPC_GROUP_SCRIPT");
 	uint32 messageVersion = 1;

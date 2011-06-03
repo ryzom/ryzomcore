@@ -13352,7 +13352,7 @@ void CCharacter::sendUrl(const string &url, const string &salt)
 	if (!salt.empty())
 	{
 		string checksum = salt+url;
-		control = "&hmac="+getHMacSHA1((uint8*)&url[0], url.size(), (uint8*)&salt[0], salt.size()).toString();;
+		control = "&hmac="+getHMacSHA1((uint8*)&url[0], (uint32)url.size(), (uint8*)&salt[0], (uint32)salt.size()).toString();;
 	}
 
 	nlinfo(url.c_str());
@@ -13477,7 +13477,7 @@ uint CCharacter::checkWebCommand(const string &url, const string &data, const st
 	if (slot == INVENTORIES::NbBagSlots)
 		return slot;
 	string checksum = url + data + getId().toString();
-	string realhmac = getHMacSHA1((uint8*)&checksum[0], checksum.size(), (uint8*)&salt[0], salt.size()).toString();
+	string realhmac = getHMacSHA1((uint8*)&checksum[0], (uint32)checksum.size(), (uint8*)&salt[0], (uint32)salt.size()).toString();
 	if (realhmac == hmac)
 		return slot;
 	return INVENTORIES::NbBagSlots;

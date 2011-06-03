@@ -963,7 +963,7 @@ void CClientChatManager::buildTellSentence(const ucstring &sender, const ucstrin
 		else
 		{
 			// Does the char have a CSR title?
-			csr = CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender)) ? ucstring("(CSR) ") : ucstring("");
+			if (CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender))) csr = ucstring("(CSR) ");
 		}
 
 		ucstring cur_time;
@@ -1018,7 +1018,7 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 
 	ucstring csr;
 	// Does the char have a CSR title?
-	csr = CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender)) ? ucstring("(CSR) ") : ucstring("");
+	if (CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender))) csr = ucstring("(CSR) ");
 
 	if (UserEntity && senderName == UserEntity->getDisplayName())
 	{
