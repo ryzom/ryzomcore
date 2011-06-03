@@ -52,13 +52,23 @@ MACRO(_PCH_GET_COMPILE_FLAGS _out_compile_flags)
 		LIST(APPEND ${_out_compile_flags} " ${_PCH_include_prefix}\"${item}\"")
 	ENDFOREACH(item)
 
+	# Required for CMake 2.6
+	SET(GLOBAL_DEFINITIONS "")
+	GET_DIRECTORY_PROPERTY(DEFINITIONS COMPILE_DEFINITIONS)
+	FOREACH(item ${DEFINITIONS})
+		LIST(APPEND GLOBAL_DEFINITIONS -D${item})
+	ENDFOREACH(item)
+
 	GET_DIRECTORY_PROPERTY(_directory_flags DEFINITIONS)
-	GET_DIRECTORY_PROPERTY(_global_definitions DIRECTORY ${CMAKE_SOURCE_DIR} DEFINITIONS)
+	GET_DIRECTORY_PROPERTY(_directory_definitions DIRECTORY ${CMAKE_SOURCE_DIR} DEFINITIONS)
+	LIST(APPEND ${_out_compile_flags} ${GLOBAL_DEFINITIONS})
 	LIST(APPEND ${_out_compile_flags} ${_directory_flags})
-	LIST(APPEND ${_out_compile_flags} ${_global_definitions})
+	LIST(APPEND ${_out_compile_flags} ${_directory_definitions})
 	LIST(APPEND ${_out_compile_flags} ${CMAKE_CXX_FLAGS})
 
+	# Format definitions and remove duplicates
 	SEPARATE_ARGUMENTS(${_out_compile_flags})
+	LIST(REMOVE_DUPLICATES ${_out_compile_flags})
 ENDMACRO(_PCH_GET_COMPILE_FLAGS)
 
 MACRO(_PCH_GET_PDB_FILENAME out_filename _target)
