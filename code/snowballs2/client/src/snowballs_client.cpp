@@ -593,8 +593,9 @@ void loopLogin()
 	displayLoadingState("Login");
 	if (ConfigFile->getVar("Local").asInt() == 0)
 	{
-	    // Only attempt to directly log in if we haven't been passed a cookie already.
-	    if(Cookie.empty() || FSAddr.empty()) {
+		// Only attempt to directly log in if we haven't been passed a cookie already.
+		if(Cookie.empty() || FSAddr.empty())
+		{
             if (ConfigFile->getVar("UseDirectClient").asInt() == 1)
             {
                 string result;
