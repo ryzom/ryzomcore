@@ -168,7 +168,7 @@ void impulseDatabaseInitPlayer(NLMISC::CBitMemStream &impulse)
 		IngameDbMngr.setInitPacketReceived();
 		nlinfo( "DB_INIT:PLR done (%u bytes)", impulse.getPos()-p );
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		BOMB( NLMISC::toString( "Problem while decoding a DB_INIT:PLR msg, skipped: %s", e.what() ), return );
 	}
@@ -185,7 +185,7 @@ void impulseDatabaseUpdatePlayer(NLMISC::CBitMemStream &impulse)
 		// read delta
 		IngameDbMngr.readDelta( serverTick, impulse, CDBPlayer ); // unlike on the server, here there is only one unified CCDBSynchronized object
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 
 		BOMB( NLMISC::toString( "Problem while decoding a DB_UPDATE_PLR msg, skipped: %s", e.what() ), return );
@@ -218,7 +218,7 @@ void impulseDatabaseUpdateBank(NLMISC::CBitMemStream &impulse)
 			updateInventoryFromStream( impulse, (INVENTORIES::CInventoryCategoryForGuild*)NULL, false );
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		BOMB( NLMISC::toString( "Problem while decoding a DB_GROUP:UPDATE_BANK %s msg, skipped: %s", CDBBankNames[bank], e.what() ), return );
 	}
@@ -248,7 +248,7 @@ void impulseDatabaseInitBank(NLMISC::CBitMemStream &impulse)
 			updateInventoryFromStream( impulse, (INVENTORIES::CInventoryCategoryForGuild*)NULL, false );
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		BOMB( NLMISC::toString( "Problem while decoding a DB_GROUP:INIT_BANK %s msg, skipped: %s", CDBBankNames[bank], e.what() ), return );
 	}
@@ -272,7 +272,7 @@ void impulseDatabaseResetBank(NLMISC::CBitMemStream &impulse)
 		IngameDbMngr.getNodePtr()->resetBank( serverTick, (TCDBBank)bank );
 		nldebug( "CDB: DB_GROUP:RESET_BANK %s", CDBBankNames[bank] );
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		BOMB( NLMISC::toString( "Problem while decoding a DB_GROUP:RESET_BANK %s msg, skipped: %s", CDBBankNames[bank], e.what() ), return );
 	}
@@ -1568,7 +1568,7 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 		}
 
 	}
-	catch (EStream &)
+	catch (const EStream &)
 	{
 		tpReason = ucstring("TP Reason");
 		tpCancelText = ucstring("Cancel TP"); // for test
@@ -2236,7 +2236,7 @@ void impulseCounter(NLMISC::CBitMemStream &impulse)
 			}
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("Problem while decoding a COUTNER msg, skipped: %s", e.what());
 	}

@@ -96,7 +96,7 @@ CFightScriptComp	*CFightSelectFilterReader::create	(const	std::string	&inStr)	th
 	{
 		scriptComp=createScriptComp(params[1]);
 	}
-	catch (ReadFightActionException &ex)
+	catch (const ReadFightActionException &ex)
 	{
 		throw	ReadFightActionException("cannot create sub ScriptComp : "+std::string(ex.what()));
 	}
@@ -164,7 +164,7 @@ public:
 		{
 			scriptComp=createScriptComp(params[0]);
 		}
-		catch (ReadFightActionException &ex)
+		catch (const ReadFightActionException &ex)
 		{
 			throw	ReadFightActionException("cannot create sub ScriptComp : "+string(ex.what()));
 		}
@@ -244,7 +244,7 @@ public:
 		{
 			scriptComp=createScriptComp(params[1]);
 		}
-		catch (ReadFightActionException &ex)
+		catch (const ReadFightActionException &ex)
 		{
 			throw	ReadFightActionException("cannot create sub ScriptComp : "+string(ex.what()));
 		}
@@ -315,7 +315,7 @@ public:
 		{
 			scriptComp=createScriptComp(params[1]);
 		}
-		catch (ReadFightActionException &ex)
+		catch (const ReadFightActionException &ex)
 		{
 			throw	ReadFightActionException("cannot create sub ScriptComp : "+string(ex.what()));
 		}
@@ -385,7 +385,7 @@ public:
 		{
 			scriptComp=createScriptComp(params[1]);
 		}
-		catch (ReadFightActionException &ex)
+		catch (const ReadFightActionException &ex)
 		{
 			throw	ReadFightActionException("cannot create sub ScriptComp : "+string(ex.what()));
 		}
@@ -456,7 +456,7 @@ public:
 		{
 			scriptComp=createScriptComp(params[1]);
 		}
-		catch (ReadFightActionException &ex)
+		catch (const ReadFightActionException &ex)
 		{
 			throw	ReadFightActionException("cannot create sub ScriptComp : "+string(ex.what()));
 		}
@@ -1012,7 +1012,7 @@ public:
 			for (uint32 i=0;i<nbSubScript;i++)
 				scriptComps.push_back(createScriptComp(params[i]));
 		}
-		catch (ReadFightActionException &ex)
+		catch (const ReadFightActionException &ex)
 		{
 			throw	ReadFightActionException("cannot create sub ScriptComp : "+string(ex.what()));
 		}
@@ -1085,7 +1085,7 @@ CFightScriptComp	*CFightScriptCompReader::createScriptComp	(const string &str)	t
 	{
 		return	getScriptReader	(scriptCompName)->create(str);
 	}
-	catch (ReadFightActionException &e)
+	catch (const ReadFightActionException &e)
 	{
 		throw	ReadFightActionException(string("ScriptComp creation failed : ")+string(e.what()));
 	}
