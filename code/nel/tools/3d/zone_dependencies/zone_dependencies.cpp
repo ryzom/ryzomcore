@@ -385,7 +385,7 @@ int main (int argc, char* argv[])
 								if (newZ<minZ)
 									minZ=newZ;
 							}
-							catch (Exception& e)
+							catch (const Exception& e)
 							{
 								// Error handling
 								nlwarning ("ERROR in file %s, %s", (dir+zoneName+ext).c_str(), e.what ());
@@ -571,7 +571,7 @@ int main (int argc, char* argv[])
 				nlwarning ("ERROR %s is not a valid zone name.\n", firstName.c_str());
 			}
 		}
-		catch (Exception &ee)
+		catch (const Exception &ee)
 		{
 			nlwarning ("ERROR %s\n", ee.what());
 		}

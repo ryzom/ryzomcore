@@ -63,7 +63,7 @@ namespace NLMISC
  * 		printf ("%d ", bar.asInt (i));
  * 	printf("\n");
  * }
- * catch (EConfigFile &e)
+ * catch (const EConfigFile &e)
  * {
  *	// Something goes wrong... catch that
  * 	printf ("%s\n", e.what ());

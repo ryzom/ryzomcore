@@ -4790,7 +4790,7 @@ bool	CInterfaceManager::saveKeys(const std::string &filename)
 			nlwarning ("Can't open the file %s", filename.c_str());
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("Error while writing the file %s : %s. Remove it.", filename.c_str(), e.what ());
 		CFile::deleteFile(filename);
@@ -6079,7 +6079,7 @@ void CInterfaceManager::createLocalBranch(const std::string &fileName, NLMISC::I
 			ServerToLocalAutoCopySkillPoints.init("USER");
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		// Output error
 		nlwarning ("CFormLoader: Error while loading the form %s: %s", fileName.c_str(), e.what());

@@ -897,7 +897,7 @@ void cbLSChooseShard (CMessage &msgin, const std::string &serviceName, TServiceI
 	{
 		msgin.serial (userPriv);
 	}
-	catch (Exception &)
+	catch (const Exception &)
 	{
 		nlwarning ("LS didn't give me the user privilege for user '%s', set to empty", userName.c_str());
 	}
@@ -906,7 +906,7 @@ void cbLSChooseShard (CMessage &msgin, const std::string &serviceName, TServiceI
 	{
 		msgin.serial (userExtended);
 	}
-	catch (Exception &)
+	catch (const Exception &)
 	{
 		nlwarning ("LS didn't give me the extended data for user '%s', set to empty", userName.c_str());
 	}
@@ -1154,7 +1154,7 @@ void	updateShardOpenFromFile(const std::string& filename)
 
 		nlinfo("Updated ShardOpen state to '%u' from file '%s'", ShardOpen.get(), filename.c_str());
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		nlwarning("Failed to update ShardOpen from file '%s', exception raised while getline() '%s'", filename.c_str(), e.what());
 	}

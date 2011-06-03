@@ -378,7 +378,7 @@ bool CLuaState::executeScriptNoThrow(const std::string &code, int numRet)
 	{
 		executeScript(code, numRet);
 	}
-	catch (ELuaError &e)
+	catch (const ELuaError &e)
 	{
 		nlwarning(e.what());
 		return false;

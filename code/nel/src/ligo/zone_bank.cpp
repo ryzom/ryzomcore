@@ -146,7 +146,7 @@ void CZoneBank::debugSaveInit (CZoneBankElement &zbeTmp, const string &fileName)
 		output.init (&fileOut);
 		zbeTmp.serial (output);
 	}
-	catch (Exception& /*e*/)
+	catch (const Exception& /*e*/)
 	{
 	}
 

@@ -282,7 +282,7 @@ int main(int argc, char* argv[])
 			f.serial(ymin);
 			f.serial(ymax);
 		}
-		catch (EStream &)
+		catch (const EStream &)
 		{
 			mustRebuild = true;
 		}
@@ -397,7 +397,7 @@ int main(int argc, char* argv[])
 					
 				}
 			}
-			catch (Exception &e)
+			catch (const Exception &e)
 			{
 				e; // avoid compile warning
 				nlwarning(e.what());

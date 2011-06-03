@@ -518,7 +518,7 @@ int main(int argc, char* argv[])
 						landscape->TileBank.serial (inputFile);
 						landscape->initTileBanks();
 					}
-					catch (Exception &e)
+					catch (const Exception &e)
 					{
 						// Error
 						nlwarning ("ERROR error loading tile bank %s\n%s\n", bankName.c_str(), e.what());
@@ -835,7 +835,7 @@ int main(int argc, char* argv[])
 								// load it
 								output.serial (zonelFile);
 							}
-							catch (Exception& except)
+							catch (const Exception& except)
 							{
 								// Error message
 								nlwarning ("ERROR reading %s: %s\n", argv[2], except.what());
@@ -860,7 +860,7 @@ int main(int argc, char* argv[])
 							{
 								output.serial (outputFile);
 							}
-							catch (Exception& except)
+							catch (const Exception& except)
 							{
 								nlwarning ("ERROR backuping %s: %s\n", bkupFile.c_str(), except.what());
 							}
@@ -886,7 +886,7 @@ int main(int argc, char* argv[])
 							// Save it
 							output.serial (outputFile);
 						}
-						catch (Exception& except)
+						catch (const Exception& except)
 						{
 							// Error message
 							nlwarning ("ERROR writing %s: %s\n", argv[2], except.what());
@@ -909,7 +909,7 @@ int main(int argc, char* argv[])
 						nlwarning ("ERROR Abort: files are missing.\n");
 				}
 			}
-			catch (Exception& except)
+			catch (const Exception& except)
 			{
 				// Error message
 				nlwarning ("ERROR %s\n", except.what());

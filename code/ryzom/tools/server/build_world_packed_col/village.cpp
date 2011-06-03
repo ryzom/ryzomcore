@@ -291,7 +291,7 @@ void CIGInfo::load(TShapeCache &shapeCache)
 						shapeCache[shapeName].swap(si);						
 					}
 				}
-				catch (EStream &e)
+				catch (const EStream &e)
 				{
 					// shape not loaded
 					nlwarning(e.what());

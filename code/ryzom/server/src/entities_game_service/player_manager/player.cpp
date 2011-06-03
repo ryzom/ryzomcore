@@ -362,7 +362,7 @@ void	CAsyncPlayerLoad::receivedCharacterFile(const CFileDescription& fileDescrip
 				success = true;
 			}
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			reason = e.what();
 		}
@@ -1504,7 +1504,7 @@ NLMISC_CATEGORISED_COMMAND(egs, convertToPdr, "Load all possible characters from
 				}
 			}
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			reason = e.what();
 		}

@@ -1094,7 +1094,7 @@ int main (int argc, char**argv)
 									nlwarning ("Error : can't open the file (%s) for writing.", igFilename.c_str ());
 								}
 							}
-							catch (Exception &e)
+							catch (const Exception &e)
 							{
 								// Error in the log
 								nlwarning ("Error writing the file (%s) : %s", igFilename.c_str (), e.what ());
@@ -1121,7 +1121,7 @@ int main (int argc, char**argv)
 			}
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		string sTmp = string("ERROR : ") + e.what();
 		outString (sTmp);

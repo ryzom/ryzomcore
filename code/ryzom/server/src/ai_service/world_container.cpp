@@ -82,7 +82,7 @@ void	CWorldContainer::loadContinent(const string &name)
 			msg.send("EGS");
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning("Unable to load continent '%s', aborted (%s)", name.c_str(), e.what());
 	}

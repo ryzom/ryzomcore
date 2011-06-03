@@ -190,7 +190,7 @@ void cbInit (CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
 			return;
 		}
 	}
-	catch (Exception &)
+	catch (const Exception &)
 	{
 		// bad client version, disconnect it
 		CallbackServer->disconnect (from);
@@ -611,7 +611,7 @@ void sendPing ()
 			// send the new ping to the client
 			ReceiveTask->DataSock->sendTo (msgout.buffer(), size, GETCLIENTA(it)->Address);
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			nlwarning ("Can't send UDP packet to '%s' (%s)", GETCLIENTA(it)->Address.asString().c_str(), e.what());
 		}
@@ -734,7 +734,7 @@ public:
 				updateStat ();
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			nlerrornoex ("Exception not catched: '%s'", e.what());
 		}

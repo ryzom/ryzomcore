@@ -264,7 +264,7 @@ void tessellateAndMoulineZone(string &zoneName)
 					nlinfo("WARNING: IG list no found");
 				}
 			}
-			catch (Exception &) { nlinfo("WARNING: IG list no found"); }
+			catch (const Exception &) { nlinfo("WARNING: IG list no found"); }
 
 			for (i=0; i<boxes.size(); ++i)
 			{
@@ -320,7 +320,7 @@ void tessellateAndMoulineZone(string &zoneName)
 							}
 						}
 					}
-					catch (Exception &e)
+					catch (const Exception &e)
 					{
 						nlwarning("%s", e.what());
 					}
@@ -933,7 +933,7 @@ void	processGlobalRetriever()
 					globalRetriever.makeInstance(retrieverId, 0, getZoneCenterById((uint16)getIdByCoord(x, y))); 
 				}
 			}
-			catch (Exception &e)
+			catch (const Exception &e)
 			{
 				printf("%s\n", e.what ());
 			}

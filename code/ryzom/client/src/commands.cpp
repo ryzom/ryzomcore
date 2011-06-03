@@ -1096,7 +1096,7 @@ NLMISC_COMMAND(execScript, "Execute a script file (.cmd)","<FileName>")
 					// read one byte
 					iFile.serialBuffer ((uint8 *)buffer, 1);
 				}
-				catch (EFile &)
+				catch (const EFile &)
 				{
 					*buffer = '\0';
 					eof = true;

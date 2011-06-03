@@ -111,7 +111,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 	{
 		settings.input_path = CPath::standardizePath(cf.getVar("input_path").asString());
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 	}
 
@@ -120,7 +120,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 	{
 		settings.output_path = CPath::standardizePath(cf.getVar("output_path").asString());
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 	}
 
@@ -171,7 +171,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 				CPath::remapExtension(extensions_remapping.asString(i), extensions_remapping.asString(i+1), true);
 		}
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 	}
 
@@ -223,7 +223,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 		settings.output_background.G = (uint8)var.asInt(1);
 		settings.output_background.B = (uint8)var.asInt(2);
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		settings.output_background = CRGBA::Black;
 	}
@@ -236,7 +236,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 		settings.light_ambiant.G = (uint8)var.asInt(1);
 		settings.light_ambiant.B = (uint8)var.asInt(2);
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		settings.light_ambiant = CRGBA::White;
 	}
@@ -249,7 +249,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 		settings.light_diffuse.G = (uint8)var.asInt(1);
 		settings.light_diffuse.B = (uint8)var.asInt(2);
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		settings.light_diffuse = CRGBA::White;
 	}
@@ -262,7 +262,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 		settings.light_specular.G = (uint8)var.asInt(1);
 		settings.light_specular.B = (uint8)var.asInt(2);
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		settings.light_specular = CRGBA::White;
 	}
@@ -273,7 +273,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 		CConfigFile::CVar &var = cf.getVar("light_direction");
 		settings.light_direction = CVector(var.asFloat(0), var.asFloat(1), var.asFloat(2));
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		settings.light_direction = CVector(0.f, 1.f, 0.f);
 	}

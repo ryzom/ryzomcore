@@ -3777,7 +3777,7 @@ void	updateMovieShooting()
 				{
 					MovieShooter.replayMovie(Driver, TextContext);
 				}
-				catch (Exception &e)
+				catch (const Exception &e)
 				{
 					Driver->systemMessageBox(e.what(), "MovieShooter");
 				}
@@ -3815,7 +3815,7 @@ void	updateMovieShooting()
 					// Save the movie.
 					MovieShooter.saveMovie(Driver, TextContext, theDir.c_str(), ClientCfg.MovieShooterFramePeriod, ClientCfg.MovieShooterBlend, ClientCfg.MovieShooterPrefix.c_str());
 				}
-				catch (Exception &e)
+				catch (const Exception &e)
 				{
 					Driver->systemMessageBox(e.what(), "MovieShooter");
 				}

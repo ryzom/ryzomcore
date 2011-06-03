@@ -1091,7 +1091,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 						return 10;
 					}
 				}
-				catch (ESocketConnectionFailed &)
+				catch (const ESocketConnectionFailed &)
 				{
 					nlinfo ("SERVICE: Could not connect to the Naming Service (%s). Retrying in a few seconds...", loc.asString().c_str());
 					nlSleep (5000);
@@ -1495,13 +1495,13 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			MyTAT.deactivate();
 		}
 	}
-	catch (EFatalError &)
+	catch (const EFatalError &)
 	{
 		// Somebody call nlerror, so we have to quit now, the message already display
 		// so we don't have to to anything
 		setExitStatus (EXIT_FAILURE);
 	}
-	catch (ESocket &e)
+	catch (const ESocket &e)
 	{
 		// Catch NeL network exception to release the system cleanly		setExitStatus (EXIT_FAILURE);
 		ErrorLog->displayNL( "NeL Exception in \"%s\": %s", _ShortName.c_str(), e.what() );
@@ -1560,7 +1560,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 
 		nlinfo ("SERVICE: Service released successfully");
 	}
-	catch (EFatalError &)
+	catch (const EFatalError &)
 	{
 		// Somebody call nlerror, so we have to quit now, the message already display
 		// so we don't have to to anything

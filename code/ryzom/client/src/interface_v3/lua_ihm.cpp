@@ -233,7 +233,7 @@ bool CLuaIHM::pop(CLuaState &ls,   NLMISC::CRGBA &dest)
 #endif
 		dest = luabind::object_cast<NLMISC::CRGBA>(obj);
 	}
-	catch(luabind::cast_failed &)
+	catch(const luabind::cast_failed &)
 	{
 		return false;
 	}
@@ -256,7 +256,7 @@ bool CLuaIHM::pop(CLuaState &ls,NLMISC::CVector2f &dest)
 #endif
 		dest = luabind::object_cast<NLMISC::CVector2f>(obj);
 	}
-	catch(luabind::cast_failed &)
+	catch(const luabind::cast_failed &)
 	{
 		return false;
 	}
@@ -279,7 +279,7 @@ bool CLuaIHM::pop(CLuaState &ls,   ucstring &dest)
 #endif
 		dest = luabind::object_cast<ucstring>(obj);
 	}
-	catch(luabind::cast_failed &)
+	catch(const luabind::cast_failed &)
 	{
 		return false;
 	}
@@ -3354,7 +3354,7 @@ bool CLuaIHM::popString(CLuaState &ls, std::string & dest)
 #endif
 		dest = luabind::object_cast<std::string>(obj);
 	}
-	catch(luabind::cast_failed &)
+	catch(const luabind::cast_failed &)
 	{
 		return false;
 	}
@@ -3376,7 +3376,7 @@ bool CLuaIHM::popSINT32(CLuaState &ls, sint32 & dest)
 #endif
 		dest = luabind::object_cast<sint32>(obj);
 	}
-	catch(luabind::cast_failed &)
+	catch(const luabind::cast_failed &)
 	{
 		return false;
 	}

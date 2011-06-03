@@ -419,7 +419,7 @@ CPackedWorld *CIslandCollision::reloadPackedIsland(const CScenarioEntryPoints::C
 			_PackedIslandName = islandDesc.Island;
 			_IslandDesc = islandDesc;
 		}
-		catch (Exception &)
+		catch (const Exception &)
 		{
 			_PackedIslandLoadingFailure = true;
 		}

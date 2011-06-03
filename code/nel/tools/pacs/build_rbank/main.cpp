@@ -258,7 +258,7 @@ void	initMoulinette()
 				ZoneNames.push_back(cvZones->asString(i));
 		}
 	}
-	catch (EConfigFile &e)
+	catch (const EConfigFile &e)
 	{
 		nlwarning("Problem in config file : %s\n", e.what ());
 	}
@@ -383,7 +383,7 @@ int main(int argc, char **argv)
 		if (Verbose)
 			nlinfo("total computation time: %d days, %d hours, %d minutes and %d seconds", workDay, workHour, workMinute, workSecond);
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("main trapped an exception: '%s'\n", e.what ());
 	}

@@ -986,7 +986,7 @@ void cbNpcTell( CMessage& msgin, const string &serviceName, TServiceId serviceId
 //		CChatClient &client = cm.getClient(sender);
 		cm.sendChat2(CChatGroup::tell, receiver, phraseId, sender);
 	}
-	catch(const CChatManager::EChatClient &e)
+	catch(const CChatManager::EChatClient &)
 	{
 		nlwarning("cbNpcTell : ignoring chat because NPC info not available yet");
 	}
@@ -1037,7 +1037,7 @@ void cbNpcTellEx( CMessage& msgin, const string &serviceName, TServiceId service
 		//		CChatClient &client = cm.getClient(sender);
 		cm.sendChat2Ex(CChatGroup::tell, receiver, phraseId, sender);
 	}
-	catch(const CChatManager::EChatClient &e)
+	catch(const CChatManager::EChatClient &)
 	{
 		nlwarning("cbNpcTell : ignoring chat because NPC info not available yet");
 	}
@@ -1075,7 +1075,7 @@ void cbNpcChatEx( CMessage& msgin, const string &serviceName, TServiceId service
 		client.updateAudience();
 		cm.chat2Ex(sender, phraseId);
 	}
-	catch(const CChatManager::EChatClient &e)
+	catch(const CChatManager::EChatClient &)
 	{
 		nlwarning("cbNpcChatEx : ignoring chat because NPC info not available yet");
 	}
@@ -1112,7 +1112,7 @@ void cbNpcChat( CMessage& msgin, const string &serviceName, TServiceId serviceId
 		client.updateAudience();
 		cm.chat2(sender, phraseId);
 	}
-	catch(const CChatManager::EChatClient &e)
+	catch(const CChatManager::EChatClient &)
 	{
 		nlwarning("cbNpcChat : ignoring chat because NPC info not available yet");
 	}
@@ -1159,7 +1159,7 @@ void cbNpcChatParam( CMessage& msgin, const string &serviceName, NLNET::TService
 		client.updateAudience();
 		cm.chatParam(sender, phraseId, params);
 	}
-	catch(const CChatManager::EChatClient &e)
+	catch(const CChatManager::EChatClient &)
 	{
 		nlwarning("cbNpcChat : ignoring chat because NPC info not available yet");
 	}
@@ -1196,7 +1196,7 @@ void cbNpcChatSentence( CMessage& msgin, const string &serviceName, TServiceId s
 		client.updateAudience();
 		cm.chat(sender, sentence);
 	}
-	catch(const CChatManager::EChatClient &e)
+	catch(const CChatManager::EChatClient &)
 	{
 		nlwarning("cbNpcChatSentence : ignoring chat because NPC info not available yet");
 	}
@@ -1316,7 +1316,7 @@ void cbGroupDynString( CMessage& msgin, const string &serviceName, TServiceId se
 			}
 		}	
 	}
-	catch(const CChatManager::EChatClient &e)
+	catch(const CChatManager::EChatClient &)
 	{
 		nlwarning("cbGroupDynString : ignoring group message because entity info not available yet");
 	}
@@ -1500,7 +1500,7 @@ void cbEmoteCrowd( CMessage& msgin, const string &serviceName, TServiceId servic
 		// send the phrase
 		cm.sendEmoteTextToAudience(sender, phraseTextId, params,ignored);
 	}
-	catch(const CChatManager::EChatClient &e)
+	catch(const CChatManager::EChatClient &)
 	{
 		nlwarning("cbNpcChatEx : ignoring chat because NPC info not available yet");
 	}
@@ -1549,7 +1549,7 @@ void cbCustomEmote( CMessage& msgin, const string &serviceName, TServiceId servi
 		// send the phrase
 		cm.sendEmoteCustomTextToAll(sender, emoteCustomText);
 	}
-	catch(const CChatManager::EChatClient &e)
+	catch(const CChatManager::EChatClient &)
 	{
 		nlwarning("<cbCustomEmote> exception, ignoring emote");
 	}

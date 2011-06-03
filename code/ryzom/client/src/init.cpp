@@ -1105,7 +1105,7 @@ void prelogInit()
 
 		FPU_CHECKER_ONCE
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		ExitClientError (e.what());
 	}
@@ -1433,7 +1433,7 @@ void postlogInit()
 
 		nlinfo ("PROFILE: %d seconds for postlogInit", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		ExitClientError (e.what());
 	}

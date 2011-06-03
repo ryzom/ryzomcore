@@ -844,7 +844,7 @@ void SaveZBuffer (CZoneLighter::CZBuffer &zbuffer, const char *filename)
 			// Save it
 			bitmap.writeJPG (outputZFile, 128);
 		}
-		catch (Exception& except)
+		catch (const Exception& except)
 		{
 			// Error message
 			nlwarning ("ERROR writing %s: %s\n", filename, except.what());

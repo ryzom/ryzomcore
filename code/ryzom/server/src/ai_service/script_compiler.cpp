@@ -1192,7 +1192,7 @@ CSmartPtr<const AIVM::CByteCode> CCompiler::compileCodeOld (const string &source
 
 		return tmp;
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning("compilation failed for %s", fullName.c_str());
 		nlwarning(e.what());

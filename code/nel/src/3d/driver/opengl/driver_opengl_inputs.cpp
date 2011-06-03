@@ -684,7 +684,7 @@ NLMISC::IMouseDevice* CDriverGL::enableLowLevelMouse(bool enable, bool exclusive
 			if (diee)
 				res = diee->getMouseDevice(exclusive);
 		}
-		catch (EDirectInput &)
+		catch (const EDirectInput &)
 		{
 		}
 	}
@@ -722,7 +722,7 @@ NLMISC::IKeyboardDevice* CDriverGL::enableLowLevelKeyboard(bool enable)
 			if (diee)
 				res = diee->getKeyboardDevice();
 		}
-		catch (EDirectInput &)
+		catch (const EDirectInput &)
 		{
 		}
 	}
@@ -778,7 +778,7 @@ uint CDriverGL::getDoubleClickDelay(bool hardwareMouse)
 			{
 				md = diee->getMouseDevice(hardwareMouse);
 			}
-			catch (EDirectInput &)
+			catch (const EDirectInput &)
 			{
 				// could not get device ..
 			}

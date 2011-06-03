@@ -93,7 +93,7 @@ bool CShader::loadShaderFile (const char *filename)
 				nlwarning ("Can't open the file %s for reading", _filename.c_str());
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			nlwarning ("Error while reading %s : %s", _filename.c_str(), e.what());
 		}

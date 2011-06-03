@@ -121,7 +121,7 @@ bool CInstanceGroupUser::init (const std::string &instanceGroup, bool async)
 			// Read the class
 			_InstanceGroup.serial (file);
 		}
-		catch (EStream& e)
+		catch (const EStream& e)
 		{
 			// Avoid visual warning
 			EStream ee=e;

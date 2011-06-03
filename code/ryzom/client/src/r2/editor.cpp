@@ -5038,7 +5038,7 @@ void CEditor::onErase(CObject *root, bool &foundInBase, std::string &nameInParen
 		{
 			(*inst).getLuaProjection()["User"].setValue("Erased", true);
 		}
-		catch (ELuaNotATable &e)
+		catch (const ELuaNotATable &e)
 		{
 			nlwarning(e.what());
 		}

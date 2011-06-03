@@ -281,7 +281,7 @@ void CSampleBank::load(bool async)
 			// Warn the sound bank that the sample are available.
 			CSoundBank::instance()->bufferLoaded(sampleName, ibuffer);
 		}
-		catch (ESoundDriver &e)
+		catch (const ESoundDriver &e)
 		{
 			if (ibuffer != NULL) {
 				delete ibuffer;

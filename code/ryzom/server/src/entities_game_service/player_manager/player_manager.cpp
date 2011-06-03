@@ -282,7 +282,7 @@ public:
 //				success = (_CharLoadCb == NULL || _CharLoadCb(player->UserId, charId, pdr));
 //			}
 //		}
-//		catch (Exception& e)
+//		catch (const Exception& e)
 //		{
 //			nlwarning("Failed to load user '%d' character '%d' from BS pdr stream: %s", player->UserId, charId, e.what());
 //		}

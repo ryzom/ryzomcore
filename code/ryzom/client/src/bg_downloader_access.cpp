@@ -517,7 +517,7 @@ void CBGDownloaderAccess::CDownloadCoTask::restartDownloader()
 				ok = true;
 				break;
 			}
-			catch (EWaitMessageTimeoutException &)
+			catch (const EWaitMessageTimeoutException &)
 			{
 				// no-op, just continue the loop for another try
 			}

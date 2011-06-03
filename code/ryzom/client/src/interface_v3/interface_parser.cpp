@@ -685,7 +685,7 @@ bool CInterfaceParser::parseInterface (const std::vector<std::string> & strings,
 			i++;
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		// Output error
 		// todo hulud interface syntax error

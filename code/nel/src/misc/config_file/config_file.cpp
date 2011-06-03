@@ -832,7 +832,7 @@ void CConfigFile::checkConfigFiles ()
 			{
 				(*it)->reparse ();
 			}
-			catch (EConfigFile &e)
+			catch (const EConfigFile &e)
 			{
 				nlwarning ("CF: Exception will re-read modified config file '%s': %s", (*it)->getFilename().c_str(), e.what ());
 			}

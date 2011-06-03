@@ -470,7 +470,7 @@ void	CWorldPositionManager::loadPatatManagerFile(const string &file)
 		f.serial(_PatatSubscribeManager);
 		_PatatSubscribeManager.displayPatatGridInfo();
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning("Couldn't load manager file '%s': %s", file.c_str(), e.what());
 	}
@@ -490,7 +490,7 @@ void	CWorldPositionManager::savePatatManagerFile(const string &file)
 		f.serial(_PatatSubscribeManager);
 		_PatatSubscribeManager.displayPatatGridInfo();
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning("Couldn't save manager file '%s': %s", file.c_str(), e.what());
 	}

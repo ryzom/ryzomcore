@@ -940,7 +940,7 @@ void initViewerConfig(const char * configFileName)
 		}
 
 	}
-	catch (EConfigFile &e)
+	catch (const EConfigFile &e)
 	{
 		nlerror("Problem in config file : %s\n", e.what ());
 	}
@@ -985,7 +985,7 @@ int main(int /* argc */, char ** /* argv */)
 		// release nelu
 		NL3D::CNELU::release();
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlerror("main trapped an exception: '%s'", e.what ());
 	}

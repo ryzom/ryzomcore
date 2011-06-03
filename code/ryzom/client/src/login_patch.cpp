@@ -1203,7 +1203,7 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 
 			downloadSuccess = true;
 		}
-		catch (EPatchDownloadException& e)
+		catch (const EPatchDownloadException& e)
 		{
 			//nlwarning("EXCEPTION CATCH: getServerFile() failed - try to find an alternative: %i: %s",UsedServer,PatchServers[UsedServer].DisplayedServerPath.c_str());
 
@@ -2501,7 +2501,7 @@ void CCheckThread::run ()
 		CheckOk = false;
 		Ended = true;
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning("EXCEPTION CATCH: CCheckThread::run() failed");
 		ucstring sTranslate = CI18N::get("uiCheckEndWithErr") + " " + e.what();
@@ -3139,7 +3139,7 @@ void CScanDataThread::run ()
 		CheckOk = true;
 		Ended = true;
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning("EXCEPTION CATCH: CScanDataThread::run() failed");
 		ucstring sTranslate = CI18N::get("uiCheckEndWithErr") + " " + e.what();
