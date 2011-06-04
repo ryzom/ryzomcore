@@ -29,16 +29,47 @@
 
 // Qt includes
 #include <QtCore/QString>
+#include <QtCore/QMap>
+#include <QtCore/QString>
+#include <QtGui/QPixmap>
 
 namespace LandscapeEditor
 {
-class ListZonesModel;
+
+/**
+@class PixmapDatabase
+@brief PixmapDatabase contains the image database
+@details
+*/
+class PixmapDatabase
+{
+public:
+	PixmapDatabase();
+	~PixmapDatabase();
+
+	/// Load all images(png) from zonePath, list images gets from zoneBank
+	bool loadPixmaps(const QString &zonePath, NLLIGO::CZoneBank &zoneBank);
+
+	/// Unload all images
+	void reset();
+
+	/// Get list names all loaded pixmaps
+	QStringList listPixmaps() const;
+
+	/// Get original pixmap
+	/// @return QPixmap* if the image is in the database ; otherwise returns 0.
+	QPixmap *pixmap(const QString &zoneName) const;
+private:
+
+	QMap<QString, QPixmap*> m_pixmapMap;
+};
+
 
 /**
 @class ZoneBuilder
 @brief ZoneBuilder contains all the shared data between the tools and the engine
 @details ZoneBank contains the macro zones that is composed of several zones plus a mask
-ZoneListModel contains the graphics for the zones
+PixmapDatabase contains the graphics for the zones
 */
 class ZoneBuilder
 {
@@ -56,7 +87,11 @@ public:
 	{
 		return m_zoneBank;
 	}
-	ListZonesModel *zoneModel() const;
+
+	PixmapDatabase *pixmapDatabase() const;
+
+	QString dataPath() const;
+
 private:
 
 	// Scan ./zoneligos dir and add all *.ligozone files to zoneBank
@@ -65,7 +100,7 @@ private:
 	sint32 m_minX, m_maxX, m_minY, m_maxY;
 	QString m_lastPathName;
 
-	ListZonesModel *m_zoneListModel;
+	PixmapDatabase *m_pixmapDatabase;
 	NLLIGO::CZoneBank m_zoneBank;
 	std::vector<NLLIGO::CZoneBankElement*> m_currentSelection;
 };

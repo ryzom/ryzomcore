@@ -31,18 +31,18 @@
 
 namespace LandscapeEditor
 {
+class PixmapDatabase;
 
 /**
 @class ListZonesModel
-@brief ListZonesModel contains the image database for QGraphicsScene and
-small images for QListView
+@brief ListZonesModel contains the small images for QListView
 @details
 */
 class ListZonesModel : public QAbstractListModel
 {
 	Q_OBJECT
 public:
-	ListZonesModel(int pixmapSize = 64, QObject *parent = 0);
+	ListZonesModel(int scaleRatio = 4, QObject *parent = 0);
 	~ListZonesModel();
 
 	int rowCount(const QModelIndex &parent) const;
@@ -53,30 +53,25 @@ public:
 
 	/// Set size for small pixmaps
 	/// Value should be set before calling rebuildModel
-	void setSmallPixmapSize(int pixmapSize);
+	void setScaleRatio(int scaleRatio);
 
 	/// Unload all images and reset model
 	void resetModel();
 
+	/// Set current list zones which will be available in QListView
 	void setListZones(QStringList &listZones);
 
-	/// Load all images(png) from zonePath, list images gets from zoneBank
-	bool rebuildModel(const QString &zonePath, NLLIGO::CZoneBank &zoneBank);
+	/// Build own pixmaps database(all images are scaled: width/scaleRatio, height/scaleRatio) from pixmapDatabase
+	void rebuildModel(PixmapDatabase *pixmapDatabase);
 
-	/// Get original pixmap
+private:
+	/// Get pixmap
 	/// @return QPixmap* if the image is in the database ; otherwise returns 0.
 	QPixmap *getPixmap(const QString &zoneName) const;
 
-	/// Get scaled pixmap (pixmapSize * zoneSize.sizeX, pixmapSize * zoneSize.sizeY)
-	/// @return QPixmap* if the image is in the database ; otherwise returns 0.
-	QPixmap *getSmallPixmap(const QString &zoneName) const;
-private:
-
-	QString m_zonePath;
-	int m_pixmapSize;
+	int m_scaleRatio;
 	QMap<QString, QPixmap*> m_pixmapMap;
-	QMap<QString, QPixmap*> m_smallPixmapMap;
-	QList<QString> m_pixmapNameList;
+	QStringList m_listNames;
 };
 
 } /* namespace LandscapeEditor */

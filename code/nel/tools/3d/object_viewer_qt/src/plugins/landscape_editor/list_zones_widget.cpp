@@ -37,9 +37,13 @@ namespace LandscapeEditor
 
 ListZonesWidget::ListZonesWidget(QWidget *parent)
 	: QWidget(parent),
+	  m_listZonesModel(0),
 	  m_zoneBuilder(0)
 {
 	m_ui.setupUi(this);
+
+	m_listZonesModel = new ListZonesModel(4, this);
+	m_ui.listView->setModel(m_listZonesModel);
 
 	m_ui.addFilterButton_1->setChecked(false);
 	m_ui.addFilterButton_2->setChecked(false);
@@ -81,6 +85,10 @@ void ListZonesWidget::updateUi()
 	m_ui.categoryTypeComboBox_2->clear();
 	m_ui.categoryTypeComboBox_3->clear();
 	m_ui.categoryTypeComboBox_4->clear();
+	m_ui.categoryValueComboBox_1->clear();
+	m_ui.categoryValueComboBox_2->clear();
+	m_ui.categoryValueComboBox_3->clear();
+	m_ui.categoryValueComboBox_4->clear();
 
 	m_ui.categoryTypeComboBox_1->addItems(listCategories);
 	m_ui.categoryTypeComboBox_2->addItems(listCategories);
@@ -88,11 +96,8 @@ void ListZonesWidget::updateUi()
 	m_ui.categoryTypeComboBox_4->addItems(listCategories);
 
 	disableSignals(false);
-}
 
-void ListZonesWidget::setModel(QAbstractItemModel *model)
-{
-	m_ui.listView->setModel(model);
+	m_listZonesModel->rebuildModel(m_zoneBuilder->pixmapDatabase());
 }
 
 void ListZonesWidget::setZoneBuilder(ZoneBuilder *zoneBuilder)
@@ -201,7 +206,8 @@ void ListZonesWidget::updateListZones()
 	QStringList listSelection;
 	for (size_t i = 0; i < currentSelection.size(); ++i)
 		listSelection << currentSelection[i]->getName().c_str();
-	m_zoneBuilder->zoneModel()->setListZones(listSelection);
+
+	m_listZonesModel->setListZones(listSelection);
 }
 
 void ListZonesWidget::disableSignals(bool block)

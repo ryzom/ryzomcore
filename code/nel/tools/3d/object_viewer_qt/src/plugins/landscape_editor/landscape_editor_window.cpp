@@ -18,7 +18,7 @@
 // Project includes
 #include "landscape_editor_window.h"
 #include "landscape_editor_constants.h"
-#include "list_zones_model.h"
+#include "project_settings_dialog.h"
 
 #include "../core/icore.h"
 #include "../core/imenu_manager.h"
@@ -43,15 +43,18 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	m_undoStack = new QUndoStack(this);
 	m_zoneBuilder = new ZoneBuilder();
 	m_zoneBuilder->init("e:/-nel-/install/continents/newbieland", false);
-	m_ui.zoneListWidget->setModel(m_zoneBuilder->zoneModel());
 	m_ui.zoneListWidget->setZoneBuilder(m_zoneBuilder);
 	m_ui.zoneListWidget->updateUi();
 	createMenus();
+	createToolBars();
 	readSettings();
+
+	connect(m_ui.projectSettingsAction, SIGNAL(triggered()), this, SLOT(openProjectSettings()));
 }
 
 LandscapeEditorWindow::~LandscapeEditorWindow()
 {
+	delete m_zoneBuilder;
 	writeSettings();
 }
 
@@ -75,9 +78,35 @@ void LandscapeEditorWindow::open()
 	setCursor(Qt::ArrowCursor);
 }
 
+void LandscapeEditorWindow::openProjectSettings()
+{
+	ProjectSettingsDialog *dialog = new ProjectSettingsDialog(m_zoneBuilder->dataPath(), this);
+	dialog->show();
+	int ok = dialog->exec();
+	if (ok == QDialog::Accepted)
+	{
+		m_zoneBuilder->init(dialog->dataPath(), false);
+		m_ui.zoneListWidget->updateUi();
+	}
+	delete dialog;
+}
+
 void LandscapeEditorWindow::createMenus()
 {
 	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
+}
+
+void LandscapeEditorWindow::createToolBars()
+{
+	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
+	//QAction *action = menuManager->action(Core::Constants::NEW);
+	//m_ui.fileToolBar->addAction(action);
+	QAction *action = menuManager->action(Core::Constants::OPEN);
+	m_ui.fileToolBar->addAction(action);
+	//action = menuManager->action(Core::Constants::SAVE);
+	//m_ui.fileToolBar->addAction(action);
+	//action = menuManager->action(Core::Constants::SAVE_AS);
+	//m_ui.fileToolBar->addAction(action);
 }
 
 void LandscapeEditorWindow::readSettings()

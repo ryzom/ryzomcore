@@ -15,53 +15,32 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef LIST_ZONES_WIDGET_H
-#define LIST_ZONES_WIDGET_H
+#ifndef PROJECT_SETTINGS_DIALOG_H
+#define PROJECT_SETTINGS_DIALOG_H
 
 // Project includes
-#include "ui_list_zones_widget.h"
-
-// NeL includes
+#include "ui_project_settings_dialog.h"
 
 // Qt includes
 
 namespace LandscapeEditor
 {
-class ZoneBuilder;
-class ListZonesModel;
 
-/**
-@class ZoneListWidget
-@brief ZoneListWidget displays list available zones in accordance with the filter settings
-@details
-*/
-class ListZonesWidget: public QWidget
+class ProjectSettingsDialog: public QDialog
 {
 	Q_OBJECT
 
 public:
-	ListZonesWidget(QWidget *parent = 0);
-	~ListZonesWidget();
+	ProjectSettingsDialog(const QString &dataPath, QWidget *parent = 0);
+	~ProjectSettingsDialog();
 
-	void updateUi();
-	void setZoneBuilder(ZoneBuilder *zoneBuilder);
-
-Q_SIGNALS:
-private Q_SLOTS:
-	void updateFilters_1(const QString &value);
-	void updateFilters_2(const QString &value);
-	void updateFilters_3(const QString &value);
-	void updateFilters_4(const QString &value);
-	void updateListZones();
+	QString dataPath() const;
 
 private:
-	void disableSignals(bool block);
 
-	ListZonesModel *m_listZonesModel;
-	ZoneBuilder *m_zoneBuilder;
-	Ui::ListZonesWidget m_ui;
-}; /* ZoneListWidget */
+	Ui::ProjectSettingsDialog m_ui;
+}; /* class ProjectSettingsDialog */
 
 } /* namespace LandscapeEditor */
 
-#endif // LIST_ZONES_WIDGET_H
+#endif // PROJECT_SETTINGS_DIALOG_H

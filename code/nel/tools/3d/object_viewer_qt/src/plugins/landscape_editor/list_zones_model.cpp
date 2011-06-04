@@ -17,6 +17,7 @@
 
 // Project includes
 #include "list_zones_model.h"
+#include "builder_zone.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -27,15 +28,14 @@
 
 // Qt includes
 #include <QApplication>
-#include <QSize>
 #include <QtGui/QProgressDialog>
 
 namespace LandscapeEditor
 {
 
-ListZonesModel::ListZonesModel(int pixmapSize, QObject *parent)
+ListZonesModel::ListZonesModel(int scaleRatio, QObject *parent)
 	: QAbstractListModel(parent),
-	  m_pixmapSize(pixmapSize)
+	  m_scaleRatio(scaleRatio)
 {
 
 }
@@ -46,7 +46,7 @@ ListZonesModel::~ListZonesModel()
 
 int ListZonesModel::rowCount(const QModelIndex & /* parent */) const
 {
-	return m_pixmapNameList.count();
+	return m_listNames.count();
 }
 
 int ListZonesModel::columnCount(const QModelIndex & /* parent */) const
@@ -65,11 +65,11 @@ QVariant ListZonesModel::data(const QModelIndex &index, int role) const
 	}
 	else if (role == Qt::DisplayRole)
 	{
-		return m_pixmapNameList.at(index.row());
+		return m_listNames.at(index.row());
 	}
 	else if (role == Qt::DecorationRole)
 	{
-		QPixmap *pixmap = getSmallPixmap(m_pixmapNameList.at(index.row()));
+		QPixmap *pixmap = getPixmap(m_listNames.at(index.row()));
 		return qVariantFromValue(*pixmap);
 	}
 	return QVariant();
@@ -84,73 +84,48 @@ QVariant ListZonesModel::headerData(int section,
 	return QVariant();
 }
 
-void ListZonesModel::setSmallPixmapSize(int pixmapSize)
+void ListZonesModel::setScaleRatio(int scaleRatio)
 {
-	m_pixmapSize = pixmapSize;
+	m_scaleRatio = scaleRatio;
 }
 
 void ListZonesModel::setListZones(QStringList &listZones)
 {
 	beginResetModel();
-	m_pixmapNameList.clear();
-	m_pixmapNameList = listZones;
+	m_listNames.clear();
+	m_listNames = listZones;
 	endResetModel();
 }
 
 void ListZonesModel::resetModel()
 {
 	beginResetModel();
-	Q_FOREACH(QString name, m_pixmapNameList)
+	QStringList listNames(m_pixmapMap.keys());
+	Q_FOREACH(QString name, listNames)
 	{
 		QPixmap *pixmap = m_pixmapMap.value(name);
 		delete pixmap;
-		QPixmap *smallPixmap = m_smallPixmapMap.value(name);
-		delete smallPixmap;
 	}
 	m_pixmapMap.clear();
-	m_pixmapNameList.clear();
-	m_smallPixmapMap.clear();
+	m_listNames.clear();
 	endResetModel();
 }
 
-bool ListZonesModel::rebuildModel(const QString &zonePath, NLLIGO::CZoneBank &zoneBank)
+void ListZonesModel::rebuildModel(PixmapDatabase *pixmapDatabase)
 {
+	resetModel();
+
 	beginResetModel();
-	m_zonePath = zonePath;
+	QStringList listNames;
+	listNames = pixmapDatabase->listPixmaps();
 
-	QProgressDialog *progressDialog = new QProgressDialog();
-	progressDialog->show();
-
-	std::vector<std::string> zoneNames;
-	zoneBank.getCategoryValues ("zone", zoneNames);
-	progressDialog->setRange(0, zoneNames.size());
-	for (uint i = 0; i < zoneNames.size(); ++i)
+	Q_FOREACH(QString name, listNames)
 	{
-		QApplication::processEvents();
-		progressDialog->setValue(i);
-
-		NLLIGO::CZoneBankElement *zoneBankItem = zoneBank.getElementByZoneName (zoneNames[i]);
-
-		// Read the texture file
-		QString zonePixmapName(zoneNames[i].c_str());
-		uint8 sizeX = zoneBankItem->getSizeX();
-		uint8 sizeY = zoneBankItem->getSizeY();
-		const std::vector<bool> &rMask = zoneBankItem->getMask();
-
-		QPixmap *pixmap = new QPixmap(zonePath + zonePixmapName + ".png");
-		if (pixmap->isNull())
-		{
-			// Generate filled pixmap
-		}
-		QPixmap *smallPixmap = new QPixmap(pixmap->scaled(m_pixmapSize * sizeX, m_pixmapSize * sizeY));
-
-		m_pixmapMap.insert(zonePixmapName, pixmap);
-		m_smallPixmapMap.insert(zonePixmapName, smallPixmap);
-
+		QPixmap *pixmap = pixmapDatabase->pixmap(name);
+		QPixmap *smallPixmap = new QPixmap(pixmap->scaled(pixmap->width() / m_scaleRatio, pixmap->height() / m_scaleRatio));
+		m_pixmapMap.insert(name, smallPixmap);
 	}
 	endResetModel();
-	delete progressDialog;
-	return true;
 }
 
 QPixmap *ListZonesModel::getPixmap(const QString &zoneName) const
@@ -162,16 +137,5 @@ QPixmap *ListZonesModel::getPixmap(const QString &zoneName) const
 		result = m_pixmapMap.value(zoneName);
 	return result;
 }
-
-QPixmap *ListZonesModel::getSmallPixmap(const QString &zoneName) const
-{
-	QPixmap *result = 0;
-	if (!m_pixmapMap.contains(zoneName))
-		nlwarning("QPixmap %s not found", zoneName.toStdString().c_str());
-	else
-		result = m_smallPixmapMap.value(zoneName);
-	return result;
-}
-
 
 } /* namespace LandscapeEditor */
