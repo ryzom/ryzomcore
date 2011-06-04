@@ -237,7 +237,9 @@ public:
 		if	(params.size()!=2)
 			throw	ReadFightActionException("EVERY_SEC Needs 2 Params: <time in seconds>,<ScriptComp>");
 
-		int	time=atoi(params[0].c_str())*10;
+		sint time;
+		NLMISC::fromString(params[0], time);
+		time *= 10;
 
 		CSmartPtr<CFightScriptComp>	scriptComp;
 		try
@@ -653,7 +655,9 @@ public:
 		if	(strings.size()!=1)
 			throw	ReadFightActionException("AGGRO_BLOCK Needs 1 param");
 
-		uint32	time=atoi(strings[0].c_str())*10;
+		uint32	time;
+		NLMISC::fromString(strings[0], time);
+		time *= 10;
 		return	new	CFightAggroBlock(time);
 	}
 
