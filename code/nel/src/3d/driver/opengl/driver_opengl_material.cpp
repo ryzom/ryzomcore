@@ -819,7 +819,7 @@ void			CDriverGL::setupLightMapPass(uint pass)
 				// fallBack if extension MulAdd not found. just mul factor with (Ambient+Diffuse)
 				if(_LightMapNoMulAddFallBack)
 				{
-					// do not use consant color to blend lightmap, but incoming diffuse color, for stage0 only.
+					// do not use constant color to blend lightmap, but incoming diffuse color, for stage0 only.
 					GLfloat	glcol[4];
 					convColor(lmapFactor, glcol);
 					_DriverGLStates.setEmissive(lmapFactor.getPacked(), glcol);
@@ -2191,7 +2191,7 @@ static const float IdentityTexMat[4] = { 1.f, 0.f, 0.f, 1.f };
 // ***************************************************************************
 void CDriverGL::setupWaterPassNV20(const CMaterial &mat)
 {
-	H_AUTO_OGL(CDriverGL_setupWaterPassNV20)
+	H_AUTO_OGL(CDriverGL_setupWaterPassNV20);
 
 #ifndef USE_OPENGLES
 	static bool setupDone = false;
