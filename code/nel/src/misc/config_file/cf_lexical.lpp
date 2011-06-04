@@ -27,7 +27,10 @@ using namespace NLMISC;
 #define YY_NEVER_INTERACTIVE 1
 
 #ifdef WIN32
+#define YY_NO_UNISTD_H 1
+#include <io.h>
 #define read _read
+#define isatty _isatty
 #endif
 
 /* Types */
@@ -122,6 +125,12 @@ string		\"[^\"\n]*\"
 				if (!cf_Ignore)
 				{
 					cflval.Val.Type = T_STRING;
+					if (strlen(yytext+1) >= sizeof(cflval.Val.String))
+					{
+						strcpy (cflval.Val.String, "");
+						DEBUG_PRINTF("lex: string '%s' exceeds max length\n", yytext);
+						return STRING;
+					}
 					strcpy (cflval.Val.String, yytext+1);
 					cflval.Val.String[strlen(cflval.Val.String)-1] = '\0';
 					DEBUG_PRINTF("lex: string '%s' '%s'\n", yytext, cflval.Val.String);
@@ -133,6 +142,12 @@ string		\"[^\"\n]*\"
 				if (!cf_Ignore)
 				{
 					cflval.Val.Type = T_STRING;
+					if (strlen(yytext+1) >= sizeof(cflval.Val.String))
+					{
+						strcpy (cflval.Val.String, "");
+						DEBUG_PRINTF("lex: string '%s' exceeds max length\n", yytext);
+						return VARIABLE;
+					}
 					strcpy (cflval.Val.String, yytext);
 					DEBUG_PRINTF("lex: variable '%s' '%s'\n", yytext, cflval.Val.String);
 					return VARIABLE;
