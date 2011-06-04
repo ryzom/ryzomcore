@@ -201,7 +201,7 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 				break;
 #endif
 			default:
-				nlwarning("Framebuffer incomplete\n");
+				nlwarning("Framebuffer incomplete status %d", (sint)status);
 				//nlassert(0);
 		}
 
@@ -505,7 +505,7 @@ static inline GLenum	translateMinFilterToGl(CTextureDrvInfosGL *glText)
 // ***************************************************************************
 static inline bool		sameDXTCFormat(ITexture &tex, GLint glfmt)
 {
-	H_AUTO_OGL(sameDXTCFormat)
+	H_AUTO_OGL(sameDXTCFormat);
 	if(glfmt==GL_COMPRESSED_RGB_S3TC_DXT1_EXT && tex.PixelFormat==CBitmap::DXTC1)
 		return true;
 	if(glfmt==GL_COMPRESSED_RGBA_S3TC_DXT1_EXT && tex.PixelFormat==CBitmap::DXTC1Alpha)
@@ -521,7 +521,7 @@ static inline bool		sameDXTCFormat(ITexture &tex, GLint glfmt)
 // ***************************************************************************
 static inline bool		isDXTCFormat(GLint glfmt)
 {
-	H_AUTO_OGL(isDXTCFormat)
+	H_AUTO_OGL(isDXTCFormat);
 	if(glfmt==GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
 		return true;
 	if(glfmt==GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)
