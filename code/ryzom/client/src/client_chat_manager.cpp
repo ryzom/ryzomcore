@@ -1267,6 +1267,12 @@ void CClientChatManager::updateChatModeAndButton(uint mode, uint32 dynamicChanne
 			const bool teamActive = pIM->getDbProp("SERVER:GROUP:0:PRESENT")->getValueBool();
 			const bool guildActive = pIM->getDbProp("SERVER:GUILD:NAME")->getValueBool();
 
+			if (m == CChatGroup::team && ! teamActive)
+				m = PeopleInterraction.TheUserChat.Filter.getTargetGroup();
+
+			if (m == CChatGroup::guild && ! guildActive)
+				m = PeopleInterraction.TheUserChat.Filter.getTargetGroup();
+
 			if (pUserBut)
 			{
 				switch(m)

@@ -2956,6 +2956,7 @@ uint32 CGameItem::weight() const
 			case ITEMFAMILY::HARVEST_TOOL:
 			case ITEMFAMILY::MISSION_ITEM:
 			case ITEMFAMILY::GENERIC_ITEM:
+			case ITEMFAMILY::ITEM_SAP_RECHARGE:
 				return _Form->Weight;
 			default:
 				return 0;
