@@ -697,6 +697,7 @@ public:
 	virtual	bool	addLinearFloatKey(const UKeyLinearFloat &key)
 	{
 		CKeyFloat	k;
+		k.OODeltaTime= 0.f;
 		k.Value= key.Value;
 		addKey(k, key.Time);
 		return true;

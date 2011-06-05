@@ -530,7 +530,7 @@ void handleReceivedPong (CClient *client, sint64 pongTime)
 		// init the UDP connection
 		if (client == NULL)
 		{
-			uint32 session;
+			uint32 session = 0;
 			msgin.serial (session);
 
 			// Find a new udp connection, find the linked 
@@ -568,13 +568,13 @@ void handleReceivedPong (CClient *client, sint64 pongTime)
 		}
 
 		// Read the message
-		sint64 pingTime;
+		sint64 pingTime = 0;
 		msgin.serial(pingTime);
 
-		uint32 pongNumber;
+		uint32 pongNumber = 0;
 		msgin.serial(pongNumber);
 
-		uint32 blockNumber;
+		uint32 blockNumber = 0;
 		msgin.serial(blockNumber);
 
 //		nlinfo ("receive a pong from %s pongnb %d %"NL_I64"d", CurrentInMsg->AddrFrom.asString().c_str(), pongNumber, pongTime - pingTime);

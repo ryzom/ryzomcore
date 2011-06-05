@@ -970,7 +970,7 @@ int main(int /* argc */, char ** /* argv */)
 		initViewerConfig("zviewer.cfg");
 
 		// Init NELU
-		NL3D::CNELU::init(ViewerCfg.Width, ViewerCfg.Height, CViewport(), ViewerCfg.Depth, ViewerCfg.Windowed, NULL, false, false);
+		NL3D::CNELU::init(ViewerCfg.Width, ViewerCfg.Height, CViewport(), ViewerCfg.Depth, ViewerCfg.Windowed, EmptyWindow, false, false);
 		NL3D::CNELU::Driver->setWindowTitle(ucstring("NeL ZViewer"));
 		NL3D::CNELU::Camera->setTransformMode(ITransformable::DirectMatrix);
 

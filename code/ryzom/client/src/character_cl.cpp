@@ -4521,6 +4521,10 @@ void CCharacterCL::applyBehaviourFlyingHPs(const CBehaviourContext &bc, const MB
 							else
 								deltaHPColor = ClientCfg.SystemInfoParams["dg"].Color;
 						}
+						else
+						{
+							deltaHPColor = CRGBA(127,127,127);
+						}
 					}
 					else
 					{
@@ -8333,7 +8337,7 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 	TextContext->printfAt(x, y, "(Walk)Run Factor: %f", runFactor());
 	y += lineStep;
 	// Display the current animation name(id)(offset)(nbloop) pour le channel MOVE.
-	TextContext->printfAt(x, y, "Current Animation: %s(%u)(%f)(%u loops)", animId(MOVE)==-1?"[NONE]":currentAnimationName().c_str(), animId(MOVE), animOffset(MOVE), _NbLoopAnim);
+	TextContext->printfAt(x, y, "Current Animation: %s(%u)(%lf)(%u loops)", animId(MOVE)==std::numeric_limits<uint>::max()?"[NONE]":currentAnimationName().c_str(), animId(MOVE), animOffset(MOVE), _NbLoopAnim);
 	y += lineStep;
 	// First Pos
 	if(_First_Pos)

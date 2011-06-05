@@ -2694,7 +2694,7 @@ void CGameItem::addHp( double hpGain )
 //-----------------------------------------------
 // changes the custom text of an item
 //-----------------------------------------------
-void CGameItem::setCustomText(ucstring val)
+void CGameItem::setCustomText(const ucstring &val)
 {
 	_CustomText = val;
 //	getInventory()->onItemChanged(getInventorySlot(), INVENTORIES::TItemChangeFlags(INVENTORIES::itc_custom_text));

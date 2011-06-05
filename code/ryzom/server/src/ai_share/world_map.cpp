@@ -218,24 +218,27 @@ private:
 
 void CDirectionLayer::serial(NLMISC::IStream& f)
 {
-	uint i;
-	for (i=0; i<9; ++i)
+	uint i, j;
+	for (i=0; i<3; ++i)
 	{
-		if (f.isReading())
-		{
-			delete Grid[0][i];
-			Grid[0][i] = NULL;
-		}
-
-		bool	present = (Grid[0][i] != NULL);
-		f.serial(present);
-
-		if (present)
+		for (j=0; j<3; ++j)
 		{
 			if (f.isReading())
-				Grid[0][i] =	I16x16Layer::load(f);
-			else
-				I16x16Layer::save(f, Grid[0][i]);
+			{
+				delete Grid[i][j];
+				Grid[i][j] = NULL;
+			}
+
+			bool	present = (Grid[i][j] != NULL);
+			f.serial(present);
+
+			if (present)
+			{
+				if (f.isReading())
+					Grid[i][j] =	I16x16Layer::load(f);
+				else
+					I16x16Layer::save(f, Grid[i][j]);
+			}
 		}
 	}
 }
@@ -1360,7 +1363,7 @@ void	CWorldMap::countCells(uint &compute, uint &white, uint &simple, uint &multi
 			const	uint32	startMasterTopo=startTopoNode.getMasterTopo(possibleFlag);
 			const	uint32	endMasterTopo=endTopoNode.getMasterTopo(possibleFlag);
 			if	(	(startMasterTopo^endMasterTopo)!=0
-				||	startMasterTopo==~0)	// if not same masterTopo or invalid masterTopo then bypass ..
+				||	startMasterTopo == std::numeric_limits<uint32>::max())	// if not same masterTopo or invalid masterTopo then bypass ..
 				continue;
 
 			res.set(possibleFlag, startMasterTopo);
@@ -1489,14 +1492,14 @@ bool CWorldMap::findAStarPath(CWorldPosition const& start, CWorldPosition const&
 		++nbHeapSteps;
 
 		// Get best node (popping it)
-		father = ~0; // :TODO: Remove that useless statement (since do while first loop ALWAYS overwrite it)
+		father = std::numeric_limits<uint>::max(); // :TODO: Remove that useless statement (since do while first loop ALWAYS overwrite it)
 		do
 		{
 			father = heap.pop();
 		}
 		while (!nodes[father].isOpened() && !heap.empty());
 
-		if (father==~0)
+		if (father == std::numeric_limits<uint>::max())
 			break;
 
 		// Mark current node as closed
@@ -2238,7 +2241,7 @@ bool	CWorldMap::setWorldPosition(sint32 z, CWorldPosition	&wpos,	const CAIVector
 
 	sint32 minDistZ = INT_MAX;
 	CSlot bestSlot;
-	sint32 bestZ;
+	sint32 bestZ = 0;
 	// Find best slot
 	for (uint32	s=0; s<3; ++s)
 	{

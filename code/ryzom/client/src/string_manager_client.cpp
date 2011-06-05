@@ -1206,15 +1206,15 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 				continue;
 
 			// Get the women name index if possible.
-			uint	womenNameColIndex;
+			uint	womenNameColIndex = std::numeric_limits<uint>::max();
 			if( !ws.findCol(womenNameColIdent, womenNameColIndex) )
 				womenNameColIndex= std::numeric_limits<uint>::max();
 
 			// Get the description index if possible.
-			uint	descColIndex;
+			uint	descColIndex = std::numeric_limits<uint>::max();
 			if( !ws.findCol(descColIdent, descColIndex) )
 				descColIndex= std::numeric_limits<uint>::max();
-			uint	descColIndex2;
+			uint	descColIndex2 = std::numeric_limits<uint>::max();
 			if( !ws.findCol(descColIdent2, descColIndex2) )
 				descColIndex2= std::numeric_limits<uint>::max();
 
