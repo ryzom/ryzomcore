@@ -266,7 +266,7 @@ void CIGInfo::load(TShapeCache &shapeCache)
 		for(uint k = 0; k < IG->getNumInstance(); ++k)
 		{
 			std::string shapeName = standardizeShapeName(IG->getShapeName(k));			
-			if (NLMISC::strlwr(CFile::getExtension(shapeName)) == "pacs_prim")
+			if (NLMISC::toLower(CFile::getExtension(shapeName)) == "pacs_prim")
 			{
 				continue;
 			}

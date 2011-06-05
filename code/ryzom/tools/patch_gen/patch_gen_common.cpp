@@ -429,8 +429,8 @@ void CPackageDescription::buildDefaultFileList()
 	std::vector<std::string> fileList;
 	NLMISC::CPath::getPathContent(_BnpDirectory,false,false,true,fileList);
 	for (uint32 i=0;i<fileList.size();++i)
-		if (NLMISC::strlwr(NLMISC::CFile::getExtension(fileList[i]))=="bnp")
-			_Categories.addFile("main",NLMISC::strlwr(NLMISC::CFile::getFilename(fileList[i])));
+		if (NLMISC::toLower(NLMISC::CFile::getExtension(fileList[i]))=="bnp")
+			_Categories.addFile("main",NLMISC::toLower(NLMISC::CFile::getFilename(fileList[i])));
 
 	_Categories.addFile("unpacked","root.bnp");
 }

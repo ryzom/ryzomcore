@@ -92,8 +92,7 @@ bool CCtrlBase::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"on_tooltip" );
 	if (prop)
 	{
-		_OnContextHelp= (const char*)prop;
-		NLMISC::strlwr(_OnContextHelp);
+		_OnContextHelp= NLMISC::toLower(std::string((const char*)prop));
 	}
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"on_tooltip_params" );
 	if (prop)

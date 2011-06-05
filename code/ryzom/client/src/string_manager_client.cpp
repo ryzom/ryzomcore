@@ -1225,9 +1225,8 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 				const ucstring &key=  ws.getData(j, keyColIndex);
 				const ucstring &name= ws.getData(j, nameColIndex);
 				// Append to the I18N.
-				string	keyStr= key.toString();
 				// avoid case problems
-				strlwr(keyStr);
+				string	keyStr= NLMISC::toLower(key.toString());
 
 				// append the special key extension.
 				keyStr+= keyExtenstion;

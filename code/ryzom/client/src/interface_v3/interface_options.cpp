@@ -85,7 +85,7 @@ bool CInterfaceOptions::parse (xmlNodePtr cur)
 			}
 			else
 			{
-				string name = strlwr (string((const char*)ptr));
+				string name = NLMISC::toLower(string((const char*)ptr));
 				string value = (string((const char*)val));
 				_ParamValue[name].init(value);
 			}
