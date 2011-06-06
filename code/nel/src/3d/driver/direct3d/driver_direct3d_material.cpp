@@ -318,7 +318,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 	if (!mat._MatDrvInfo)
 	{
 		// Insert into driver list. (so it is deleted when driver is deleted).
-		ItMatDrvInfoPtrList		it= _MatDrvInfos.insert(_MatDrvInfos.end(), NULL);
+		ItMatDrvInfoPtrList		it= _MatDrvInfos.insert(_MatDrvInfos.end(), (NL3D::IMaterialDrvInfos*)NULL);
 
 		*it = mat._MatDrvInfo = new CMaterialDrvInfosD3D(this, it);
 

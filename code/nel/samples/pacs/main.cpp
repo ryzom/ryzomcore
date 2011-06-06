@@ -371,7 +371,7 @@ int main ()
 		// Remove mouse listener
 		pDriver->delete3dMouseListener (plistener);
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 #ifdef NL_OS_WINDOWS
 		::MessageBox (NULL, e.what(), "Test collision move", MB_OK|MB_ICONEXCLAMATION);

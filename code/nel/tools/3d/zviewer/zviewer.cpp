@@ -364,7 +364,7 @@ void displayZones()
 		CIFile bankFile (ViewerCfg.BanksPath + "/" + ViewerCfg.Bank);
 		Landscape->Landscape.TileBank.serial(bankFile);
 	}
-	catch(Exception)
+	catch(const Exception &)
 	{
 		string tmp = string("Cant load bankfile ")+ViewerCfg.BanksPath + "/" + ViewerCfg.Bank;
 		nlerror (tmp.c_str());
@@ -390,7 +390,7 @@ void displayZones()
 		CIFile farbankFile(ViewerCfg.BanksPath + "/" + farBank);
 		Landscape->Landscape.TileFarBank.serial(farbankFile);
 	}
-	catch(Exception)
+	catch(const Exception &)
 	{
 		string tmp = string("Cant load bankfile ")+ViewerCfg.BanksPath + "/" + farBank;
 		nlerror (tmp.c_str());
@@ -450,7 +450,7 @@ void displayZones()
 			// Add it to collision manager.
 			CollisionManager.addZone(zone.getZoneId());
 		}
-		catch(Exception &e)
+		catch(const Exception &e)
 		{
 			printf("%s\n", e.what ());
 		}		
@@ -472,7 +472,7 @@ void displayZones()
 			// Add it to the scene.
 			group->addToScene (*CNELU::Scene);
 		}
-		catch(Exception &e)
+		catch(const Exception &e)
 		{
 			printf("%s\n", e.what ());
 		}		
@@ -940,7 +940,7 @@ void initViewerConfig(const char * configFileName)
 		}
 
 	}
-	catch (EConfigFile &e)
+	catch (const EConfigFile &e)
 	{
 		nlerror("Problem in config file : %s\n", e.what ());
 	}
@@ -970,7 +970,7 @@ int main(int /* argc */, char ** /* argv */)
 		initViewerConfig("zviewer.cfg");
 
 		// Init NELU
-		NL3D::CNELU::init(ViewerCfg.Width, ViewerCfg.Height, CViewport(), ViewerCfg.Depth, ViewerCfg.Windowed, NULL, false, false);
+		NL3D::CNELU::init(ViewerCfg.Width, ViewerCfg.Height, CViewport(), ViewerCfg.Depth, ViewerCfg.Windowed, EmptyWindow, false, false);
 		NL3D::CNELU::Driver->setWindowTitle(ucstring("NeL ZViewer"));
 		NL3D::CNELU::Camera->setTransformMode(ITransformable::DirectMatrix);
 
@@ -985,7 +985,7 @@ int main(int /* argc */, char ** /* argv */)
 		// release nelu
 		NL3D::CNELU::release();
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlerror("main trapped an exception: '%s'", e.what ());
 	}

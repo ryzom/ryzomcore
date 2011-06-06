@@ -362,7 +362,7 @@ void	CAsyncPlayerLoad::receivedCharacterFile(const CFileDescription& fileDescrip
 				success = true;
 			}
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			reason = e.what();
 		}
@@ -807,7 +807,7 @@ void CPlayer::loadAllCharacters()
 					characterFound = true;
 					egs_plinfo("LOADED Character '%s' from file: %s",pCh->getName().toUtf8().c_str(),serialBinFileName.c_str());
 				}
-				catch( Exception& e)
+				catch(const Exception &e)
 				{
 					nlwarning("Failed to load '%s': %s", serialBinFileName.c_str(), e.what());
 					string newfn = serialBinFileName+".wiped";
@@ -906,7 +906,7 @@ void CPlayer::loadAllCharacters()
 						}
 					}
 				}
-				catch( Exception& e)
+				catch(const Exception &e)
 				{
 					nlwarning("Failed to load '%s': %s", fileName.c_str(), e.what());
 					string newfn = fileName+".wiped";
@@ -933,7 +933,7 @@ void CPlayer::loadAllCharacters()
 							PlayerManager.savePlayerChar( _UserId, i );
 					}
 				}
-				catch( Exception& e)
+				catch(const Exception &e)
 				{
 					nlwarning("Failed to load '%s': %s", fileName.c_str(), e.what());
 					string newfn = fileName+".wiped";
@@ -979,7 +979,7 @@ void CPlayer::loadAllCharactersPdr()
 			if (!isOK)
 				continue;
 		}
-		catch( Exception& e)
+		catch(const Exception &e)
 		{
 			nlwarning("Failed to load '%s': %s", fileName.c_str(), e.what());
 			string newfn = fileName+".wiped";
@@ -1504,7 +1504,7 @@ NLMISC_CATEGORISED_COMMAND(egs, convertToPdr, "Load all possible characters from
 				}
 			}
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			reason = e.what();
 		}

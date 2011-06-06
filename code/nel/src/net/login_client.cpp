@@ -146,7 +146,7 @@ string CLoginClient::authenticateBegin(const string &loginServiceAddr, const ucs
 			_LSCallbackClient->disconnect();
 		_LSCallbackClient->connect (CInetAddress(addr));
 	}
-	catch (ESocket &e)
+	catch (const ESocket &e)
 	{
 		delete _LSCallbackClient;
 		_LSCallbackClient = 0;
@@ -226,7 +226,7 @@ string CLoginClient::connectToShard(CLoginCookie &lc, const std::string &addr, C
 		// have we received the answer?
 		if (!ShardValidate) return "FES disconnect me";
 	}
-	catch (ESocket &e)
+	catch (const ESocket &e)
 	{
 		return string("FES refused the connection (") + e.what () + ")";
 	}
@@ -250,7 +250,7 @@ string CLoginClient::connectToShard (const std::string &addr, CUdpSock &cnx)
 		//
 		cnx.connect (CInetAddress(addr));
 	}
-	catch (ESocket &e)
+	catch (const ESocket &e)
 	{
 		return string("FES refused the connection (") + e.what () + ")";
 	}
@@ -272,7 +272,7 @@ string CLoginClient::connectToShard (const std::string &addr, CUdpSimSock &cnx)
 		//
 		cnx.connect (CInetAddress(addr));
 	}
-	catch (ESocket &e)
+	catch (const ESocket &e)
 	{
 		return string("FES refused the connection (") + e.what () + ")";
 	}

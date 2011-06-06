@@ -1291,7 +1291,7 @@ bool CPSConstraintMesh::update(std::vector<sint> *numVertsVect /*= NULL*/)
 			{
 				_ModelBank->load(_MeshShapeFileName[k]);
 			}
-			catch (NLMISC::EPathNotFound &)
+			catch (const NLMISC::EPathNotFound &)
 			{
 				nlwarning("mesh not found : %s; used as a constraint mesh particle", _MeshShapeFileName[k].c_str());
 				// shape not found, so not present in the shape bank -> we create a dummy shape
@@ -2083,8 +2083,9 @@ static void DuplicatePrimitiveBlock(const CIndexBuffer &srcBlock, CIndexBuffer &
 	CIndexBufferReadWrite ibaWrite;
 	destBlock.lock (ibaWrite);
 
-
+#ifdef NL_FORCE_INDEX_BUFFER_16
 	nlassert(destBlock.getFormat() == CIndexBuffer::Indices16);
+#endif
 
 	// TMP TMP TMP
 	if (ibaRead.getFormat() == CIndexBuffer::Indices16)

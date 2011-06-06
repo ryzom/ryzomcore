@@ -1825,7 +1825,7 @@ bool execLoadScript(CStringWriter& stringWriter, vector<string> const& args)
 		FOREACHC(itGrp, vector<CGroup*>, grps)
 			(*itGrp)->getPersistentStateInstance()->interpretCode(NULL, codePtr);
 	}
-	catch (EPathNotFound e)
+	catch (const EPathNotFound &)
 	{
 		nlwarning("Path not found while loading AIS script %s", args[2].c_str());
 		return false;
@@ -2437,7 +2437,7 @@ NLMISC_COMMAND(setGrpTimers,"set the timer values for a given group","<grp id> <
 void cbTick();
 extern uint ForceTicks;
 
-NLMISC_COMMAND(updateAI,"call CAIS::update() (simulate a tick off-line)","")
+NLMISC_COMMAND(updateAI,"call CAIS::update() (simulate a tick off-line)","[tick]")
 {
 	if(args.size() >1)
 		return false;

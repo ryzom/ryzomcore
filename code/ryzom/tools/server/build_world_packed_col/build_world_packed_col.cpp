@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 	{
 		cf.load(argv[1]);		
 	}
-	catch(EStream &)
+	catch(const EStream &)
 	{
 		nlwarning("Error while reading config file\n");
 		return -1;
@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
 	{
 		sep.loadCompleteIslands();
 	}
-	catch(NLMISC::EStream &)
+	catch(const NLMISC::EStream &)
 	{
 		return -1;
 	}
@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
 				CIFile f(islandPath);
 				tmpPW.serialZoneNames(f);
 			}
-			catch(EStream &)
+			catch(const EStream &)
 			{
 				tmpPW.ZoneNames.clear();
 			}
@@ -207,7 +207,7 @@ int main(int argc, char* argv[])
 				CIFile f(islandPath);
 				f.serial(packedIsland->PW);
 			}
-			catch(EStream &)
+			catch(const EStream &)
 			{
 				mustRebuild = true; // damaged file or bad version ? -> force rebuild
 				delete packedIsland; // remove whatever was serialized
@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
 				COFile f(islandPath);
 				f.serial(packedIsland->PW);
 			}
-			catch(EStream &)
+			catch(const EStream &)
 			{
 				nlwarning("Island %s not saved.", ep.Island.c_str());
 			}
@@ -282,7 +282,7 @@ int main(int argc, char* argv[])
 			f.serial(ymin);
 			f.serial(ymax);
 		}
-		catch (EStream &)
+		catch (const EStream &)
 		{
 			mustRebuild = true;
 		}
@@ -388,7 +388,7 @@ int main(int argc, char* argv[])
 								tgaHM.writeTGA(f, 0, true);
 							}
 						}
-						catch(EStream &e)
+						catch(const EStream &e)
 						{
 							e; // avoid compile warning
 							nlwarning(e.what());
@@ -397,7 +397,7 @@ int main(int argc, char* argv[])
 					
 				}
 			}
-			catch (Exception &e)
+			catch (const Exception &e)
 			{
 				e; // avoid compile warning
 				nlwarning(e.what());

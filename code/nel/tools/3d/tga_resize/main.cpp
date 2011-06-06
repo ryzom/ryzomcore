@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 			}
 			btmp.writeTGA(outFile, depth);
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			printf("Error: %s\n", e.what());
 				return -1;

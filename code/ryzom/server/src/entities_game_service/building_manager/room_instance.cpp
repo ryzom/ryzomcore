@@ -152,7 +152,7 @@ void CRoomInstancePlayer::removeUser( CCharacter* user )
 	msgout.serial(phrase);
 	sendMessageViaMirror("IOS", msgout);
 
-	uint32 titleId = STRING_MANAGER::sendStringToUser(userId, "ANSWER_OK", titleParams);
+	uint32 titleId = STRING_MANAGER::sendStringToUser(userId, "web_transactions", titleParams);
 	uint32 textId = STRING_MANAGER::sendStringToUser(userId, "CLOSE_URL", textParams);
 	PlayerManager.sendImpulseToClient(user->getId(), "USER:POPUP", titleId, textId);
 
@@ -195,7 +195,7 @@ void CRoomInstancePlayer::addUser( CCharacter* user, CCharacter* owner )
 	msgout.serial(phrase);
 	sendMessageViaMirror("IOS", msgout);
 
-	uint32 titleId = STRING_MANAGER::sendStringToUser(userId, "ANSWER_OK", titleParams);
+	uint32 titleId = STRING_MANAGER::sendStringToUser(userId, "web_transactions", titleParams);
 	uint32 textId = STRING_MANAGER::sendStringToUser(userId, "RYZHOME_URL", textParams);
 	PlayerManager.sendImpulseToClient(user->getId(), "USER:POPUP", titleId, textId);
 

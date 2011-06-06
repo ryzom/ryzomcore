@@ -844,7 +844,7 @@ void SaveZBuffer (CZoneLighter::CZBuffer &zbuffer, const char *filename)
 			// Save it
 			bitmap.writeJPG (outputZFile, 128);
 		}
-		catch (Exception& except)
+		catch (const Exception& except)
 		{
 			// Error message
 			nlwarning ("ERROR writing %s: %s\n", filename, except.what());
@@ -3080,13 +3080,13 @@ void CZoneLighter::lightWater(CWaterShape &ws, const CMatrix &MT, const CLightDe
 				diffuseTex->writeTGA(of, 24);
 				of.close();
 			}
-			catch (NLMISC::Exception &)
+			catch (const NLMISC::Exception &)
 			{
 				nlwarning("Zone lighter : while lighting a water shape, writing %s failed! ", texFileName.c_str());
 			}
 		}
 	}
-	catch(NLMISC::Exception &e)
+	catch(const NLMISC::Exception &e)
 	{
 		nlwarning("Water shape lighting failed !");
 		nlwarning(e.what());

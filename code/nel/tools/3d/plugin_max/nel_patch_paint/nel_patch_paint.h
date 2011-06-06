@@ -578,13 +578,16 @@ class PaintPatchData : public LocalModData {
 		LocalModData *Clone() { return new PaintPatchData(*this); }
 
 		void SetFlag(DWORD f,BOOL on) 
-			{ 
-			if ( on ) {
+		{ 
+			if ( on )
+			{
 				flags|=f;
-			} else {
-				flags&=~f; 
-				}
 			}
+			else
+			{
+				flags&=~f; 
+			}
+		}
 		DWORD GetFlag(DWORD f) { return flags&f; }
 
 		EPTempData *TempData(PaintPatchMod *mod);

@@ -76,10 +76,12 @@ protected:
 
 public:
 	CContentItems( UINT nID, CString str ) :
-	  m_nImageID( nID ), m_csText( str ) {
+		m_nImageID( nID ), m_csText( str )
+	{
 	}
 
-	void operator = ( CContentItems& pItems ) {
+	void operator = ( CContentItems& pItems )
+	{
 		m_nImageID = pItems.m_nImageID;
 		m_csText = pItems.m_csText;
 	}

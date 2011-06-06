@@ -220,7 +220,7 @@ IFileAccess::TReturnCode	CLoadFile::execute(CFileAccessManager& manager)
 			fileRead = true;
 			f.close();
 		}
-		catch(NLMISC::Exception &)
+		catch(const NLMISC::Exception &)
 		{
 		}
 	}
@@ -389,7 +389,7 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 		if (VerboseLog)
 			nlinfo("%s %u octets to file '%s'", Append ? "Append" : "Save", Data.size(), Filename.c_str());
 	}
-	catch(NLMISC::Exception &)
+	catch(const NLMISC::Exception &)
 	{
 	}
 

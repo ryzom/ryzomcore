@@ -94,7 +94,7 @@ CInstanceGroup* LoadInstanceGroup(const char* sFilename)
 			newIG->serial (file);
 			// All is good
 		}
-		catch (Exception &)
+		catch (const Exception &)
 		{
 			// Cannot save the file
 			delete newIG;

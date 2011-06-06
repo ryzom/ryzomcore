@@ -141,7 +141,7 @@ void			initReceiveLog()
 			ReceiveLogger.displayNL( "LogReceive is on" ); // only when enabled
 		}
 	}
-	catch ( EConfigFile& )
+	catch (const EConfigFile&)
 	{}
 }
 
@@ -616,7 +616,7 @@ bool	CNetworkConnection::connect(string &result)
 									nlinfo ("Can't copy, same path '%s'", arg1.c_str());
 								}
 							}
-							catch (Exception &)
+							catch (const Exception &)
 							{
 								nlwarning ("Can't copy '%s' '%s', try the next file", arg1.c_str(), dstPath.c_str());
 							}
@@ -624,7 +624,7 @@ bool	CNetworkConnection::connect(string &result)
 						break;
 					}
 				}
-				catch (Exception &e)
+				catch (const Exception &e)
 				{
 					nlwarning (e.what ());
 				}
@@ -635,7 +635,7 @@ bool	CNetworkConnection::connect(string &result)
 			}
 		}
 	}
-	catch (Exception &)
+	catch (const Exception &)
 	{
 		nlinfo ("There's no shards.cfg, or bad file format, can't copy common files");
 	}
@@ -654,7 +654,7 @@ bool	CNetworkConnection::connect(string &result)
 		//
 		_Connection.connect (CInetAddress(_FrontendAddress));
 	}
-	catch (ESocket &e)
+	catch (const ESocket &e)
 	{
 		result = toString ("FS refused the connection (%s)", e.what());
 		return false;
@@ -847,7 +847,7 @@ bool	CNetworkConnection::update()
 		}
 		while (stateBroke);// && _TotalMessages<5);
 	}
-	catch (ESocket &)
+	catch (const ESocket &)
 	{
 		_ConnectionState = Disconnect;
 	}
@@ -968,7 +968,7 @@ void	CNetworkConnection::sendSystemLogin()
 		//sendUDP (&(_Connection), message.buffer(), length);
 		_Connection.send( message.buffer(), length );
 	}
-	catch ( ESocket& e )
+	catch (const ESocket &e)
 	{
 #ifdef NL_OS_WINDOWS
 		// An exception (10004: Blocking operation interrupted) may occur if a firewall such as Kerio is
@@ -1123,7 +1123,7 @@ void	CNetworkConnection::receiveSystemSync(CBitMemStream &msgin)
 			if(xmlInvalid)
 				xmlInvalid = (checkMsgXml != _AltMsgXmlMD5 || checkDatabaseXml != _AltDatabaseXmlMD5);
 		}
-		catch (NLMISC::Exception&)
+		catch (const NLMISC::Exception&)
 		{
 		}
 
@@ -1720,7 +1720,7 @@ void	CNetworkConnection::decodeVisualProperties( CBitMemStream& msgin )
 			}
 		}
 	}
-	catch ( EStreamOverflow& )
+	catch (const EStreamOverflow&)
 	{
 		// End of stream (saves useless bits)
 	}
@@ -2708,7 +2708,7 @@ void	CNetworkConnection::send(TGameCycle cycle)
 			sendNormalMessage();
 		}
 	}
-	catch (ESocket &/*e*/)
+	catch (const ESocket &/*e*/)
 	{
 		_ConnectionState = Disconnect;
 		disconnect(); // won't send disconnection message as state is already Disconnect
@@ -2732,7 +2732,7 @@ void	CNetworkConnection::send()
 			sendNormalMessage();
 		}
 	}
-	catch (ESocket &/*e*/)
+	catch (const ESocket &/*e*/)
 	{
 		_ConnectionState = Disconnect;
 	}

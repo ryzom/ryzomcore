@@ -177,7 +177,7 @@ CParticleTreeModel::~CParticleTreeModel()
 int CParticleTreeModel::columnCount(const QModelIndex &parent) const
 {
 	if (parent.isValid())
-		return static_cast<CParticleTreeItem*>(parent.internalPointer())->columnCount();
+		return static_cast<CParticleTreeItem *>(parent.internalPointer())->columnCount();
 	else
 		return _rootItem->columnCount();
 }

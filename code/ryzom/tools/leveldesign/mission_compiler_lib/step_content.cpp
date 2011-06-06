@@ -373,7 +373,7 @@ public:
 
 		string s;
 		s = md.getProperty(prim, "hide_others", true, false);
-		_HideOthers = (strlwr(s) == "true");
+		_HideOthers = (NLMISC::toLower(s) == "true");
 	}
 
 	string genCode(CMissionData &md)
@@ -673,7 +673,7 @@ public:
 
 		string s;
 		s = md.getProperty(prim, "group", true, false);
-		_Group = (strlwr(s) == "true");
+		_Group = (NLMISC::toLower(s) == "true");
 
 
 		IStepContent::init(md, prim);
@@ -741,7 +741,7 @@ public:
 		
 		string s;
 		s = md.getProperty(prim, "group", true, false);
-		_Group = (strlwr(s) == "true");
+		_Group = (NLMISC::toLower(s) == "true");
 
 		IStepContent::init(md, prim);
 	}
@@ -908,7 +908,7 @@ public:
 
 		string s;
 		s = md.getProperty(prim, "group", true, false);
-		_Group = (strlwr(s) == "true");
+		_Group = (NLMISC::toLower(s) == "true");
 
 		IStepContent::init(md, prim);
 	}
@@ -965,7 +965,7 @@ public:
 
 		string s;
 		s = md.getProperty(prim, "group", true, false);
-		_Group = (strlwr(s) == "true");
+		_Group = (NLMISC::toLower(s) == "true");
 
 		IStepContent::init(md, prim);
 	}
@@ -1114,7 +1114,7 @@ public:
 		_WorldPosition = md.getProperty(prim, "world_position", true, false);
 		string s;
 		prim->getPropertyByName("once", s);
-		_Once = (strlwr(s) == "true");
+		_Once = (NLMISC::toLower(s) == "true");
 	}
 
 	string genCode(CMissionData &md)
@@ -2863,7 +2863,7 @@ public:
 	{
 		_GroupName = md.getProperty(prim, "group_to_escort", true, false);
 		string s = md.getProperty(prim, "save_all", true, false);
-		_SaveAll = (strlwr(s) == "true");
+		_SaveAll = (NLMISC::toLower(s) == "true");
 
 		CContentObjective::init(md, prim);
 	}

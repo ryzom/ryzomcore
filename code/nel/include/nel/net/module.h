@@ -524,7 +524,7 @@ namespace NLNET
 				// run the module task command control to module task method
 				(_Module->*_TaskMethod)();
 			}
-			catch (NLMISC::Exception e)
+			catch (const NLMISC::Exception &e)
 			{
 				nlwarning("In module task '%s', exception '%e' thrown", typeid(this).name(), e.what());
 			}

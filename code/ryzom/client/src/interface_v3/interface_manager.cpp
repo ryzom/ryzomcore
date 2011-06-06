@@ -524,11 +524,11 @@ void CInterfaceManager::initOutGame()
 	ActionsContext.addActionsManager(&Actions, "");
 	ActionsContext.addActionsManager(&EditActions, RZ_CATEGORY_EDIT);
 
-
-	if (ClientCfg.SelectCharacter != -1) return;
-
 	// Init LUA Scripting
 	initLUA();
+
+	if (ClientCfg.SelectCharacter != -1) 
+		return;
 
 	{
 		if (SoundMngr != NULL)
@@ -1659,7 +1659,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 			}
 		}
 	}
-	catch(NLMISC::EStream &)
+	catch(const NLMISC::EStream &)
 	{
 		f.close();
 		string	sFileNameBackup = sFileName+"backup";
@@ -1846,7 +1846,7 @@ bool CInterfaceManager::saveConfig (const string &filename)
 			return false;
 		}
 	}
-	catch(NLMISC::EStream &)
+	catch(const NLMISC::EStream &)
 	{
 		f.close();
 		nlwarning("Config saving failed.");
@@ -4790,7 +4790,7 @@ bool	CInterfaceManager::saveKeys(const std::string &filename)
 			nlwarning ("Can't open the file %s", filename.c_str());
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("Error while writing the file %s : %s. Remove it.", filename.c_str(), e.what ());
 		CFile::deleteFile(filename);
@@ -5754,7 +5754,7 @@ bool	CInterfaceManager::executeLuaScript(const std::string &luaScript, bool smal
 		else
 			_LuaState->executeScript(luaScript);
 	}
-	catch(ELuaError &e)
+	catch(const ELuaError &e)
 	{
 		std::string msg = e.luaWhat();
 		char filename[MAX_PATH];
@@ -6079,7 +6079,7 @@ void CInterfaceManager::createLocalBranch(const std::string &fileName, NLMISC::I
 			ServerToLocalAutoCopySkillPoints.init("USER");
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		// Output error
 		nlwarning ("CFormLoader: Error while loading the form %s: %s", fileName.c_str(), e.what());

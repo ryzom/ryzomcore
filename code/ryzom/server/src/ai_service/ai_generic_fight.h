@@ -37,7 +37,8 @@ extern float getDistBetWeen(CAIEntityPhysical& creat1, CAIEntityPhysical& creat2
 template <class TVectorSrc, class TVectorDst>
 float buildDecalage(TVectorSrc const& src, TVectorDst const& dst, CAIVector* decalage)
 {
-	if (decalage!=NULL) {
+	if (decalage!=NULL)
+	{
 		CAIVector& vect = *decalage;
 		vect = dst;
 		vect -= src;
@@ -52,7 +53,9 @@ float buildDecalage(TVectorSrc const& src, TVectorDst const& dst, CAIVector* dec
 		// End of hack
 		float normXYZ = (float)sqrt(normXY*normXY + normZ*normZ);
 		return normXYZ;
-	} else {
+	}
+	else
+	{
 		CAIVector vect;
 		return buildDecalage(src, dst, &vect);
 	}

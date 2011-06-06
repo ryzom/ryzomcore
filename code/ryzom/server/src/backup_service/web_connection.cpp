@@ -116,7 +116,7 @@ void	updateWebConnection()
 					success = true;
 				}
 			}
-			catch (Exception &e)
+			catch (const Exception &e)
 			{
 				nlwarning ("Error during receiving: '%s'", e.what ());
 				reason = e.what();
@@ -138,7 +138,7 @@ void	updateWebConnection()
 			}
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("Error during update: '%s'", e.what ());
 	}

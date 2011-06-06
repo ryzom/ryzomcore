@@ -233,7 +233,7 @@ static void configFileChanged(const std::string &filename)
 			}
 		}
 	}
-	catch(EStream &)
+	catch(const EStream &)
 	{
 		printf("Error while reading config file\n");		
 	}
@@ -293,12 +293,12 @@ int main(int argc, char* argv[])
 			addLandscapeIG = addLandscapeIGVarPtr->asInt() != 0;
 		}
 	}
-	catch(EStream &)
+	catch(const EStream &)
 	{
 		printf("Error while reading config file\n");
 		return -1;
 	}
-	catch(EConfigFile &e)
+	catch(const EConfigFile &e)
 	{
 		printf(e.what());
 		return -1;
@@ -462,7 +462,7 @@ int main(int argc, char* argv[])
 							mustRebuild = false;
 							printf("Retrieving zone %d / %d from cache\n", (int) currZoneIndex + 1, (int) zones.size());
 						}
-						catch(EStream &)
+						catch(const EStream &)
 						{
 						}
 					}
@@ -496,7 +496,7 @@ int main(int argc, char* argv[])
 										zoneGrid(lx, ly)->Zone.serial(stream);										
 										zoneGrid(lx, ly)->Loaded = true;
 									}
-									catch(EStream &)
+									catch(const EStream &)
 									{
 										printf("Error while loading zone %s : zone not loaded \n");
 									}									
@@ -563,7 +563,7 @@ int main(int argc, char* argv[])
 						CPackedZoneBase *pb = packedZoneGrid(x, y);
 						f.serialPolyPtr(pb);						
 					}
-					catch(EStream &e)
+					catch(const EStream &e)
 					{
 						printf("Error while writing packed zone to cache : \n %s \n", e.what());
 					}

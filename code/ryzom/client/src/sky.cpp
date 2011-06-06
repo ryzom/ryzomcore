@@ -305,7 +305,7 @@ CBitmap *buildSharedBitmap(const std::string &filename,
 			// dump bitmap fisrt line
 			return builtBitmaps.back();
 		}
-		catch(EStream &)
+		catch(const EStream &)
 		{
 			return NULL;
 		}

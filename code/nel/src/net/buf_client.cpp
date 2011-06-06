@@ -451,7 +451,7 @@ void CClientReceiveTask::run()
 
 			NbLoop++;
 		}
-		catch ( ESocket& )
+		catch (const ESocket&)
 		{
 			LNETL1_DEBUG( "LNETL1: Client connection %s broken", sockId()->asString().c_str() );
 			sockId()->Sock->disconnect();

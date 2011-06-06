@@ -69,7 +69,7 @@ bool			CLodCharacterUserManager::addLodShapeBank(const std::string &filename)
 		// load and add the file to the main scene
 		Scene->loadCLodShapeBank(filename);
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		nlwarning(e.what());
 		return false;

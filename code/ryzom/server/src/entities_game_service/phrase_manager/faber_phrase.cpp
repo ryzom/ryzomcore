@@ -454,18 +454,16 @@ void CFaberPhrase::apply()
 		return;
 	}
 	
-	neededMp = _RootFaberPlan->Faber->NeededMps.size();
-    EGSPD::CPeople::TPeople civRestriction = _RootFaberPlan->CivRestriction;
+	neededMp = (uint32)_RootFaberPlan->Faber->NeededMps.size();
+	EGSPD::CPeople::TPeople civRestriction = _RootFaberPlan->CivRestriction;
 	uint32 usedMp=0;
 	vector< const CStaticItem * > usedMps = _Mps;
 
 	for( uint mp = 0; mp < neededMp; ++mp )
 	{
-		nlinfo("MP #%d\n", mp);
 		//for each type of Mp needed
 		for( uint k = 0; k < _RootFaberPlan->Faber->NeededMps[ mp ].Quantity; ++k )
 		{
-		   nlinfo(" usedmps : %d", usedMps.size());
 		   bool found_mp = false;
 		   for(uint u_mp = 0; u_mp < usedMps.size(); ++u_mp)
 		   {
@@ -540,7 +538,6 @@ void CFaberPhrase::apply()
 	}
 	if (!usedMps.empty())
 	{
-		nlinfo("final usedmps : %d", usedMps.size());
 		nlwarning( "<CFaberPhrase build> could not build action for plan brick %s", _RootFaberPlan->SheetId.toString().c_str() );
 		stop();
 		return;

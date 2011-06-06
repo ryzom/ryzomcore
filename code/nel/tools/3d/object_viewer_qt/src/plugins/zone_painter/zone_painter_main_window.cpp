@@ -77,7 +77,7 @@ ZonePainterMainWindow::ZonePainterMainWindow(QWidget *parent) :
 
     Core::ICore::instance()->mainWindow()->statusBar()->addPermanentWidget(m_statusInfo);
 
-	
+	m_undoStack = new QUndoStack(this);
 }
 
 void ZonePainterMainWindow::showEvent(QShowEvent *showEvent)

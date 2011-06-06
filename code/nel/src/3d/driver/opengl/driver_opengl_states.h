@@ -20,11 +20,15 @@
 #include "nel/misc/types_nl.h"
 #include "nel/3d/vertex_buffer.h"
 
-#ifdef NL_OS_MAC
-#	define GL_GLEXT_LEGACY
-#	include <OpenGL/gl.h>
+#ifdef USE_OPENGLES
+#	include <GLES/gl.h>
 #else
-#	include <GL/gl.h>
+#	ifdef NL_OS_MAC
+#		define GL_GLEXT_LEGACY
+#		include <OpenGL/gl.h>
+#	else
+#		include <GL/gl.h>
+#	endif
 #endif
 
 
@@ -41,7 +45,7 @@ namespace NL3D
 			- GL_ALPHA_TEST
 			- GL_LIGHTING
 			- GL_LIGHT0 + i .....
-			- GL_TEXTURE_2D or GL_TEXTURE_CUBE_MAP_ARB.
+			- GL_TEXTURE_2D or GL_TEXTURE_CUBE_MAP_ARB/OES.
 			- GL_TEXTURE_GEN_S, GL_TEXTURE_GEN_T, GL_TEXTURE_GEN_R
 			- GL_COLOR_MATERIAL
 			- GL_FOG

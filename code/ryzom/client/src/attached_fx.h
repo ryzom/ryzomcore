@@ -71,6 +71,8 @@ public:
 		const NLMISC::CMatrix *StaticMatrix;		// Useful if stick mode is "StaticMatrix"
 		uint				  MaxNumAnimCount;		// Number of frame on which the fx can  overlap when it is being shutdown
 		float				  TimeOut;
+		double				  StartTime;
+		float				  DelayBeforeStart;
 	public:
 		CBuildInfo()
 		{
@@ -80,6 +82,8 @@ public:
 			StaticMatrix = NULL;
 			MaxNumAnimCount = 0;
 			TimeOut = FX_MANAGER_DEFAULT_TIMEOUT;
+			StartTime = 0.0;
+			DelayBeforeStart = 0.f;
 		}
 	};
 	CAttachedFX();

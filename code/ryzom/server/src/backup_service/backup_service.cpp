@@ -384,7 +384,7 @@ static void	cbSaveCheckFile( CMessage& msgin, const std::string &serviceName, NL
 	{
 		NLMISC::CFile::copyFile( msg.FileName + string(".backup"), msg.FileName );
 	}
-	catch( Exception &e )
+	catch(const Exception &e)
 	{
 		nlwarning("Can't write file '%s' size %u : '%s', shard stalled until problem are resolved !!!", ( msg.FileName + string(".backup") ).c_str(), msg.Data.length(), e.what() );
 		// stall shard
@@ -411,7 +411,7 @@ static void	cbSaveCheckFile( CMessage& msgin, const std::string &serviceName, NL
 
 		DirStats.writeFile(msg.FileName, msg.Data.length());
 	}
-	catch( Exception &e )
+	catch(const Exception &e)
 	{
 		nlwarning("Can't write file '%s' size %u : '%s', shard stalled until problem are resolved !!!", msg.FileName.c_str(), msg.Data.length(), e.what());
 		// stall shard

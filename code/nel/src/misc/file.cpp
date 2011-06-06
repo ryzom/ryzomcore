@@ -365,7 +365,7 @@ void		CIFile::getline (char *buffer, uint32 bufferSize)
 			// read one byte
 			serialBuffer ((uint8 *)buffer, 1);
 		}
-		catch (EFile &)
+		catch (const EFile &)
 		{
 			*buffer = '\0';
 			return;

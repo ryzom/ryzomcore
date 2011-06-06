@@ -1334,7 +1334,7 @@ void CFrontEndService::init()
 
 		CActionGeneric::ServerSide = true;
 	}
-	catch ( Exception& e )
+	catch (const Exception &e)
 	{
 		nlerror( "Error: %s", e.what() );
 	}

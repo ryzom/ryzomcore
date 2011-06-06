@@ -222,7 +222,7 @@ namespace NLQT
 	{
 
 		COFile file;
-		std::string s = CPath::lookup(loadedForm.toStdString());
+		std::string s = CPath::lookup(loadedForm.toStdString(), false);
 		if (file.open (s)) 
 		{
 			try	
@@ -323,6 +323,8 @@ namespace NLQT
 					path,
 					"Images (*.png *.tga)"
 					);
+				if (file.isNull())
+					return;
 				QFileInfo info = QFileInfo(file);
 
 				// TODO?
@@ -333,7 +335,7 @@ namespace NLQT
 			}
 			else 
 			{
-				if (path.contains(".shape"))
+				if (path.contains(".shape") || path.contains(".ps"))
 				{
 					if (Modules::objViewInt()) 
 					{

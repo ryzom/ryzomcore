@@ -775,7 +775,7 @@ bool CGroupMap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 			_Islands.push_back(island);
 		}
 	}
-	catch(NLMISC::EFile &e)
+	catch(const NLMISC::EFile &e)
 	{
 		nlwarning(e.what());
 	}

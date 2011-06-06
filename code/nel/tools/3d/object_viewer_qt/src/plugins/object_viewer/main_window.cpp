@@ -66,7 +66,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 	  _isGraphicsInitialized(false),
 	  _isGraphicsEnabled(false),
 	  _isSoundInitialized(false),
-	  _isSoundEnabled(false),
+	  _isSoundEnabled(true),
 	  _GraphicsViewport(NULL),
 	  _lastDir("."),
 	  _mouseMode(NL3D::U3dMouseListener::edit3d)
@@ -80,19 +80,6 @@ CMainWindow::CMainWindow(QWidget *parent)
 
 	setDockNestingEnabled(true);
 
-	QSettings *settings = Core::ICore::instance()->settings();
-	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
-
-	// setup Qt style and palette from config file
-	_originalPalette = QApplication::palette();
-
-	QApplication::setStyle(QStyleFactory::create(settings->value(Constants::QT_STYLE, "").toString()));
-
-	if (settings->value(Constants::QT_PALETTE, true).toBool())
-		QApplication::setPalette(QApplication::style()->standardPalette());
-	else
-		QApplication::setPalette(_originalPalette);
-
 	_GraphicsViewport->init();
 	_isGraphicsInitialized = true;
 
@@ -102,6 +89,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 		_isSoundInitialized = true;
 	}
 
+	_undoStack = new QUndoStack(this);
 	_SkeletonTreeModel = new CSkeletonTreeModel(this);
 
 	createDialogs();
@@ -110,6 +98,9 @@ CMainWindow::CMainWindow(QWidget *parent)
 	createToolBars();
 
 	setWindowIcon(QIcon(":/images/nel.png"));
+
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
 
 	restoreState(settings->value("QtWindowState").toByteArray());
 	restoreGeometry(settings->value("QtWindowGeometry").toByteArray());
@@ -248,12 +239,6 @@ void CMainWindow::updateStatusBar()
 
 void CMainWindow::createActions()
 {
-	_openAction = new QAction(tr("&Open..."), this);
-	_openAction->setIcon(QIcon(Core::Constants::ICON_OPEN));
-	_openAction->setShortcut(QKeySequence::Open);
-	_openAction->setStatusTip(tr("Open an existing file"));
-	connect(_openAction, SIGNAL(triggered()), this, SLOT(open()));
-
 	_setBackColorAction = _GraphicsViewport->createSetBackgroundColor(this);
 	_setBackColorAction->setText(tr("Set &background color"));
 	_setBackColorAction->setIcon(QIcon(Constants::ICON_BGCOLOR));
@@ -268,7 +253,7 @@ void CMainWindow::createActions()
 	connect(_reloadTexturesAction, SIGNAL(triggered()), this, SLOT(reloadTextures()));
 
 	_saveScreenshotAction = _GraphicsViewport->createSaveScreenshotAction(this);
-	_saveScreenshotAction->setText(tr("Save &Screenshot"));
+	_saveScreenshotAction->setText(tr("Save Screenshot"));
 	_saveScreenshotAction->setStatusTip(tr("Make a screenshot of the current viewport and save"));
 }
 
@@ -276,14 +261,7 @@ void CMainWindow::createMenus()
 {
 	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
 
-	// register actions for file menu
-	menuManager->registerAction(_openAction, "ObjectViewer.File.Open");
-
-	// add actions in file menu
-	QMenu *fileMenu = menuManager->menu(Core::Constants::M_FILE);
-	QAction *exitAction = menuManager->action(Core::Constants::EXIT);
-	fileMenu->insertAction(exitAction, _openAction);
-	fileMenu->insertSeparator(exitAction);
+	_openAction = menuManager->action(Core::Constants::OPEN);
 
 	// register actions for view menu
 	menuManager->registerAction(_setBackColorAction, "ObjectViewer.View.SetBackgroundColor");
@@ -482,22 +460,6 @@ bool CMainWindow::loadFile(const QString &fileName, const QString &skelName)
 	}
 	//statusBar()->showMessage(tr("File loaded"),2000);
 	return true;
-}
-
-void CMainWindow::cfcbQtStyle(NLMISC::CConfigFile::CVar &var)
-{
-	QApplication::setStyle(QStyleFactory::create(var.asString().c_str()));
-}
-
-void CMainWindow::cfcbQtPalette(NLMISC::CConfigFile::CVar &var)
-{
-	if (var.asBool()) QApplication::setPalette(QApplication::style()->standardPalette());
-	else QApplication::setPalette(_originalPalette);
-}
-
-void CMainWindow::cfcbSoundEnabled(NLMISC::CConfigFile::CVar &var)
-{
-	_isSoundEnabled = var.asBool(); // update loop inits
 }
 
 void CMainWindow::updateRender()

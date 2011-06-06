@@ -34,6 +34,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stddef.h>
 #include <math.h>
 
 
@@ -51,6 +52,7 @@
 #include <utility>
 #include <deque>
 #include <limits>
+#include <iterator>
 
 
 //----------------------------------------------------------------

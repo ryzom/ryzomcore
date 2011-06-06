@@ -74,6 +74,6 @@ private:
 
 }; // class CPluginManager
 
-} // namespace NLQT
+} // namespace ExtensionSystem
 
 #endif // PLUGINMANAGER_H

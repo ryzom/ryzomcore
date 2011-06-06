@@ -2095,13 +2095,13 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 					rVR.draw11RotFlipBitmap (_RenderLayer, x, y, 0, false, _DispOverBmpId, armourCol);
 					// decal layer because must drawn after Items/Brick in DXTC
 					// NB: use OverColor, not Over2Color here. Because of hack in updateArmourColor()
-					rVR.draw11RotFlipBitmap (_RenderLayer+2, x, y, 0, false, _DispOver2BmpId, fastMulRGB(curSheetColor, _IconOverColor));
+					rVR.draw11RotFlipBitmap (_RenderLayer+1, x, y, 0, false, _DispOver2BmpId, fastMulRGB(curSheetColor, _IconOverColor));
 				}
 				else
 				{
 					// decal layer because must drawn after Items/Brick in DXTC
-					rVR.draw11RotFlipBitmap (_RenderLayer+2, x, y, 0, false, _DispOverBmpId, fastMulRGB(curSheetColor, _IconOverColor));
-					rVR.draw11RotFlipBitmap (_RenderLayer+2, x, y, 0, false, _DispOver2BmpId, fastMulRGB(curSheetColor, _IconOver2Color));
+					rVR.draw11RotFlipBitmap (_RenderLayer+1, x, y, 0, false, _DispOverBmpId, fastMulRGB(curSheetColor, _IconOverColor));
+					rVR.draw11RotFlipBitmap (_RenderLayer+1, x, y, 0, false, _DispOver2BmpId, fastMulRGB(curSheetColor, _IconOver2Color));
 				}
 
 				// Draw Quality. -1 for lookandfeel. Draw it with global color

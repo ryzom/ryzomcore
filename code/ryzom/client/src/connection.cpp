@@ -1011,7 +1011,7 @@ TInterfaceState globalMenu()
 			if ( ! firewallTimeout )
 				NetMngr.update();
 		}
-		catch ( EBlockedByFirewall& )
+		catch (const EBlockedByFirewall&)
 		{
 			if ( NetMngr.getConnectionState() == CNetManager::Disconnect )
 			{
@@ -1811,13 +1811,13 @@ string getTarget(CCtrlBase * /* ctrl */, const string &targetName)
 	if (!elem)
 	{
 		nlwarning("<CInterfaceExpr::getprop> : Element is NULL");
-		return false;
+		return "";
 	}
 	const CReflectedProperty *pRP = CReflectSystem ::getProperty(elem->getReflectedClassName(), rTI.PropertyName);
 
 	if (pRP->Type == CReflectedProperty::String)
 		return ((elem->*(pRP->GetMethod.GetString))());
-	return string("");
+	return "";
 }
 
 // ------------------------------------------------------------------------------------------------

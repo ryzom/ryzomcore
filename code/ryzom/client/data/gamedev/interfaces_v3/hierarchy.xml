@@ -16,6 +16,7 @@
 <tree node="inventory"/>
 <tree node="temp_inventory"/>
 <tree node="gestionsets"/> <!-- hands -->
+<tree node="gestionsets2"/> <!-- hands 2-->
 <tree node="team_share"/>
 <tree node="defense" />
 

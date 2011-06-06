@@ -1,24 +1,28 @@
-/*
-Log Plugin Qt
-Copyright (C) 2010 Adrian Jaekel <aj at elane2k dot com>
+// Object Viewer Qt - Log Plugin - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
+// Copyright (C) 2011  Adrian Jaekel <aj at elane2k dot com>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
-
+// Project includes
 #include "log_plugin.h"
 #include "log_settings_page.h"
+#include "qt_displayer.h"
+
+#include "../core/icore.h"
+#include "../core/core_constants.h"
+#include "../core/imenu_manager.h"
+#include "../../extension_system/iplugin_spec.h"
 
 // Qt includes
 #include <QtCore/QObject>
@@ -35,103 +39,153 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // NeL includes
 #include <nel/misc/debug.h>
 
-// Project includes
-#include "../core/icore.h"
-#include "../core/core_constants.h"
-#include "../core/imenu_manager.h"
-#include "qt_displayer.h"
-
-using namespace Plugin;
-
-namespace ExtensionSystem
+namespace Plugin
 {
-	class IPluginSpec;
-}
 
-CLogPlugin::CLogPlugin(QWidget *parent): QDockWidget(parent)
-{
-	_ui.setupUi(this);
-}
+	CLogPlugin::CLogPlugin(QWidget *parent): QDockWidget(parent)
+	{
+		m_ui.setupUi(this);
+	}
 
-CLogPlugin::~CLogPlugin() 
-{
-	_plugMan->removeObject(_logSettingsPage);
-	delete _logSettingsPage;
+	CLogPlugin::~CLogPlugin()
+	{
+		Q_FOREACH(QObject *obj, m_autoReleaseObjects)
+		{
+			m_plugMan->removeObject(obj);
+		}
+		qDeleteAll(m_autoReleaseObjects);
+		m_autoReleaseObjects.clear();
 
-	NLMISC::ErrorLog->removeDisplayer(_displayer);
-	NLMISC::WarningLog->removeDisplayer(_displayer);
-	NLMISC::DebugLog->removeDisplayer(_displayer);
-	NLMISC::AssertLog->removeDisplayer(_displayer);
-	NLMISC::InfoLog->removeDisplayer(_displayer);
-	delete _displayer;
-}
+		NLMISC::ErrorLog->removeDisplayer(m_displayer);
+		NLMISC::WarningLog->removeDisplayer(m_displayer);
+		NLMISC::DebugLog->removeDisplayer(m_displayer);
+		NLMISC::AssertLog->removeDisplayer(m_displayer);
+		NLMISC::InfoLog->removeDisplayer(m_displayer);
+		delete m_displayer;
+	}
 
-bool CLogPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
-{
-	Q_UNUSED(errorString);
-	_plugMan = pluginManager;
-	_logSettingsPage = new CLogSettingsPage(this);
-	_plugMan->addObject(_logSettingsPage);
-	return true;
-}
+	bool CLogPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
+	{
+		Q_UNUSED(errorString);
+		m_plugMan = pluginManager;
+		m_logSettingsPage = new CLogSettingsPage(this);
+		addAutoReleasedObject(m_logSettingsPage);
+		return true;
+	}
 
-void CLogPlugin::extensionsInitialized()
-{
-	NLMISC::ErrorLog->addDisplayer(_displayer);
-	NLMISC::WarningLog->addDisplayer(_displayer);
-	NLMISC::DebugLog->addDisplayer(_displayer);
-	NLMISC::AssertLog->addDisplayer(_displayer);
-	NLMISC::InfoLog->addDisplayer(_displayer);
+	void CLogPlugin::extensionsInitialized()
+	{
+		setDisplayers();
 
-	Core::ICore *core = Core::ICore::instance();
-	Core::IMenuManager *menuManager = core->menuManager();
-	QMenu *viewMenu = menuManager->menu(Core::Constants::M_VIEW);
+		Core::ICore *core = Core::ICore::instance();
+		Core::IMenuManager *menuManager = core->menuManager();
+		QMenu *viewMenu = menuManager->menu(Core::Constants::M_VIEW);
 
-	QMainWindow *wnd = Core::ICore::instance()->mainWindow();
-	wnd->addDockWidget(Qt::RightDockWidgetArea, this);
-	hide();
+		QMainWindow *wnd = Core::ICore::instance()->mainWindow();
+		wnd->addDockWidget(Qt::RightDockWidgetArea, this);
+		hide();
 
-	viewMenu->addAction(this->toggleViewAction());
-}
+		viewMenu->addAction(this->toggleViewAction());
+	}
 
-void CLogPlugin::setNelContext(NLMISC::INelContext *nelContext)
-{
-#ifdef NL_OS_WINDOWS 
-        // Ensure that a context doesn't exist yet.  
-        // This only applies to platforms without PIC, e.g. Windows.  
-        nlassert(!NLMISC::INelContext::isContextInitialised()); 
+	void CLogPlugin::setNelContext(NLMISC::INelContext *nelContext)
+	{
+#ifdef NL_OS_WINDOWS
+		// Ensure that a context doesn't exist yet.
+		// This only applies to platforms without PIC, e.g. Windows.
+		nlassert(!NLMISC::INelContext::isContextInitialised());
 #endif // fdef NL_OS_WINDOWS^M
-        _LibContext = new NLMISC::CLibraryContext(*nelContext); 
+		m_libContext = new NLMISC::CLibraryContext(*nelContext);
 
-	_displayer = new NLQT::CQtDisplayer(_ui.plainTextEdit);
+		m_displayer = new NLQT::CQtDisplayer(m_ui.plainTextEdit);
 
+	}
+
+	QString CLogPlugin::name() const
+	{
+		return "NeL Log";
+	}
+
+	QString CLogPlugin::version() const
+	{
+		return "1.1";
+	}
+
+	QString CLogPlugin::vendor() const
+	{
+		return "aquiles";
+	}
+
+	QString CLogPlugin::description() const
+	{
+		return tr("DockWidget to display all log messages from NeL.");
+	}
+
+	QStringList CLogPlugin::dependencies() const
+	{
+		QStringList list;
+		list.append(Core::Constants::OVQT_CORE_PLUGIN);
+		return list;
+	}
+
+	void CLogPlugin::addAutoReleasedObject(QObject *obj)
+	{
+		m_plugMan->addObject(obj);
+		m_autoReleaseObjects.prepend(obj);
+	}
+
+	void CLogPlugin::setDisplayers()
+	{
+		QSettings *settings = Core::ICore::instance()->settings();
+
+		settings->beginGroup(Core::Constants::LOG_SECTION);
+		bool error = settings->value(Core::Constants::LOG_ERROR,     true).toBool();
+		bool warning = settings->value(Core::Constants::LOG_WARNING, true).toBool();
+		bool debug = settings->value(Core::Constants::LOG_DEBUG,     true).toBool();
+		bool assert = settings->value(Core::Constants::LOG_ASSERT,   true).toBool();
+		bool info = settings->value(Core::Constants::LOG_INFO,       true).toBool();
+		settings->endGroup();
+
+		if (error) {
+			if (!NLMISC::ErrorLog->attached(m_displayer))
+				NLMISC::ErrorLog->addDisplayer(m_displayer);
+		} else {
+			if (m_displayer) {
+				NLMISC::ErrorLog->removeDisplayer(m_displayer);
+			}
+		}
+		if (warning) {
+			if (!NLMISC::WarningLog->attached(m_displayer))
+				NLMISC::WarningLog->addDisplayer(m_displayer);
+		} else {
+			if (m_displayer) {
+				NLMISC::WarningLog->removeDisplayer(m_displayer);
+			}
+		}
+		if (debug) {
+			if (!NLMISC::DebugLog->attached(m_displayer))
+				NLMISC::DebugLog->addDisplayer(m_displayer);
+		} else {
+			if (m_displayer) {
+				NLMISC::DebugLog->removeDisplayer(m_displayer);
+			}
+		}
+		if (assert) {
+			if (!NLMISC::AssertLog->attached(m_displayer))
+				NLMISC::AssertLog->addDisplayer(m_displayer);
+		} else {
+			if (m_displayer) {
+				NLMISC::AssertLog->removeDisplayer(m_displayer);
+			}
+		}
+		if (info) {
+			if (!NLMISC::InfoLog->attached(m_displayer))
+				NLMISC::InfoLog->addDisplayer(m_displayer);
+		} else {
+			if (m_displayer) {
+				NLMISC::InfoLog->removeDisplayer(m_displayer);
+			}
+		}
+	}
 }
-
-QString CLogPlugin::name() const
-{
-	return "LogPlugin";
-}
-
-QString CLogPlugin::version() const
-{
-	return "1.0";
-}
-
-QString CLogPlugin::vendor() const
-{
-	return "aquiles";
-}
-
-QString CLogPlugin::description() const
-{
-	return "DockWidget to display all log messages from NeL.";
-}
-
-QStringList CLogPlugin::dependencies() const
-{
-	QStringList list;
-	list.append(Core::Constants::OVQT_CORE_PLUGIN);
-	return list;
-}
-
-Q_EXPORT_PLUGIN(CLogPlugin)
+Q_EXPORT_PLUGIN(Plugin::CLogPlugin)

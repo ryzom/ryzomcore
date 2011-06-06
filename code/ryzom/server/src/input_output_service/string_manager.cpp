@@ -709,7 +709,7 @@ void CStringManager::broadcastSystemMessage(NLNET::CMessage &message, bool debug
 			}
 		}
 	}
-	catch(CChatManager::EChatClient e)
+	catch(const CChatManager::EChatClient &e)
 	{
 		nlwarning("%s", e.what());
 	}
@@ -1084,7 +1084,7 @@ void CStringManager::updateUserLanguage( uint32 userId, TServiceId frontEndId, c
 	{
 		CUnifiedNetwork::getInstance()->send( frontEndId, msgout);
 	}
-	catch( Exception& e )
+	catch(const Exception& e)
 	{
 		nlwarning( "CStringManager::updateUserLanguage : Error : %s", e.what() );
 	}
@@ -1102,7 +1102,7 @@ void CStringManager::setPhrase(NLNET::CMessage &message)
 		message.serial(phraseName);
 		message.serial(phraseContent);
 	}
-	catch( Exception& e )
+	catch(const Exception& e)
 	{
 		nlwarning("<setPhrase> %s",e.what());
 		return;

@@ -26,6 +26,7 @@
 
 // Qt includes
 #include <QtGui/QMainWindow>
+#include <QtGui/QUndoGroup>
 #include <QtCore/QSettings>
 
 namespace Core
@@ -35,6 +36,7 @@ class CorePlugin;
 class IContext;
 class IMenuManager;
 class MenuManager;
+class ContextManager;
 class CoreImpl;
 
 class MainWindow : public QMainWindow
@@ -49,9 +51,13 @@ public:
 	void extensionsInitialized();
 
 	IMenuManager *menuManager() const;
+	ContextManager *contextManager() const;
 	QSettings *settings() const;
 
 	ExtensionSystem::IPluginManager *pluginManager() const;
+
+	void addContextObject(IContext *context);
+	void removeContextObject(IContext *context);
 
 public Q_SLOTS:
 	bool showOptionsDialog(const QString &group = QString(),
@@ -59,15 +65,25 @@ public Q_SLOTS:
 						   QWidget *parent = 0);
 
 private Q_SLOTS:
-	void checkObject(QObject *obj);
+	void open();
+	void newFile();
+	void save();
+	void saveAs();
+	void saveAll();
+	void cut();
+	void copy();
+	void paste();
+	void del();
+	void find();
+	void gotoPos();
+	void setFullScreen(bool enabled);
 	void about();
+	void updateContext(Core::IContext *context);
 
 protected:
 	virtual void closeEvent(QCloseEvent *event);
 
 private:
-	void addContextObject(IContext *appPage);
-
 	void createActions();
 	void createMenus();
 	void createStatusBar();
@@ -79,11 +95,13 @@ private:
 	ExtensionSystem::IPluginManager *m_pluginManager;
 	ExtensionSystem::CPluginView *m_pluginView;
 	MenuManager *m_menuManager;
+	ContextManager *m_contextManager;
 	CoreImpl *m_coreImpl;
 
 	QPalette m_originalPalette;
 	QString m_lastDir;
 
+	QUndoGroup *m_undoGroup;
 	QSettings *m_settings;
 
 	QTimer *m_mainTimer;
@@ -92,15 +110,28 @@ private:
 	QTabWidget *m_tabWidget;
 
 	QMenu *m_fileMenu;
+	QMenu *m_recentFilesMenu;
 	QMenu *m_editMenu;
 	QMenu *m_viewMenu;
 	QMenu *m_toolsMenu;
 	QMenu *m_helpMenu;
-
+	QMenuBar *m_menuBar;
 	QMenu *m_sheetMenu;
 
+	QAction *m_newAction;
 	QAction *m_openAction;
+	QAction *m_saveAction;
+	QAction *m_saveAsAction;
+	QAction *m_saveAllAction;
 	QAction *m_exitAction;
+	QAction *m_cutAction;
+	QAction *m_copyAction;
+	QAction *m_pasteAction;
+	QAction *m_delAction;
+	QAction *m_selectAllAction;
+	QAction *m_findAction;
+	QAction *m_gotoAction;
+	QAction *m_fullscreenAction;
 	QAction *m_settingsAction;
 	QAction *m_pluginViewAction;
 	QAction *m_aboutAction;

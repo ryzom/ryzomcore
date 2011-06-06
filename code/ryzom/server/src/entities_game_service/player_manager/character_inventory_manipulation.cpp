@@ -72,6 +72,9 @@
 #include "server_share/log_item_gen.h"
 #include "egs_dynamic_sheet_manager.h"
 
+#include "game_share/visual_fx.h"
+#include "game_share/teleport_types.h"
+
 ///////////
 // USING //
 ///////////
@@ -2439,7 +2442,22 @@ void CCharacter::sendItemInfos( uint16 slotId )
 
 		infos.TypeSkillMods = item->getTypeSkillMods();
 		
-		infos.CustomText = item->getCustomText();
+		// Special case of web missions items
+		if (item->getStaticForm()->Name == "Web Transaction" || item->getStaticForm()->Family == ITEMFAMILY::SCROLL)
+		{
+			string cText = item->getCustomText().toString();
+			string::size_type sPos = cText.find(" ");
+			string::size_type ePos = cText.find("\n---\n");
+			if (sPos != string::npos && sPos != (cText.length()-1) && ePos != string::npos && ePos != (cText.length()-1))
+			{
+				string cUrl = cText.substr(sPos, ePos-sPos);
+				infos.CustomText = ucstring("@WEBIG "+cUrl);
+			}
+			else
+				infos.CustomText = "";
+		}
+		else
+			infos.CustomText = item->getCustomText();
 
 		CMessage msgout( "IMPULSION_ID" );
 		CBitMemStream bms;
@@ -2466,7 +2484,7 @@ void CCharacter::sendItemInfos( uint16 slotId )
 			pInv->onItemChanged(slot, INVENTORIES::itc_info_version);
 		}
 	}
-	catch ( NLMISC::Exception & e )
+	catch (const NLMISC::Exception &e)
 	{
 		nlwarning("<ITEM_INFOS> exception : '%s'",e.what() );
 	}	
@@ -2522,11 +2540,10 @@ void CCharacter::createCrystallizedActionItem(const std::vector<NLMISC::CSheetId
 // ****************************************************************************
 void CCharacter::createRechargeItem(uint32 sapRecharge)
 {
-	static const CSheetId rechargeSheetId("item_sap_recharge.sitem");
-
 	if (!EnchantSystemEnabled)
 		return;
 
+	/*** OLD METHOD **********************************************
 	if (!enterTempInventoryMode(TEMP_INV_MODE::Crystallize))
 		return;
 
@@ -2535,7 +2552,42 @@ void CCharacter::createRechargeItem(uint32 sapRecharge)
 	{
 		item->setSapLoad(sapRecharge);
 		addItemToInventory(INVENTORIES::temporary, item);
+	}******/
+
+	CInventoryPtr handlingInv = getInventory(INVENTORIES::handling);
+	if (handlingInv == NULL)
+		return;
+
+	CGameItemPtr rightHandItem = handlingInv->getItem(INVENTORIES::right); // item to reload
+	if (rightHandItem == NULL)
+	{
+		TVectorParamCheck params;
+		sendDynamicSystemMessage(_EntityRowId, "RIGHT_HAND_EMPTY", params);
+		return;
 	}
+
+	// check the right hand holds a weapon item
+	const CStaticItem * form = rightHandItem->getStaticForm();
+	if (form == NULL)
+	{
+		nlwarning("item %s has no static form", rightHandItem->getSheetId().toString().c_str());
+		return;
+	}
+
+	if ((form->Family != ITEMFAMILY::MELEE_WEAPON) && (form->Family != ITEMFAMILY::RANGE_WEAPON))
+	{
+		TVectorParamCheck params;
+		sendDynamicSystemMessage(_EntityRowId, "WEAPONS_ONLY_CAN_BEEN_RECHARGED", params);
+		return;
+	}
+
+	rightHandItem->reloadSapLoad(sapRecharge);
+
+	SM_STATIC_PARAMS_3(params, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::integer);
+	params[0].SheetId = rightHandItem->getSheetId();
+	params[1].Int = rightHandItem->sapLoad();
+	params[2].Int = rightHandItem->maxSapLoad();
+	sendDynamicSystemMessage(_EntityRowId, "ITEM_IS_RECHARGED", params);
 }
 
 // check if enchant or recharge an item 
@@ -2858,6 +2910,14 @@ void CCharacter::useItem(uint32 slot)
 
 	if ( form->Family  == ITEMFAMILY::TELEPORT )
 	{
+		pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegeance = getAllegiance();
+		if ((form->TpType == TELEPORT_TYPES::KAMI) && (allegeance.first == PVP_CLAN::Karavan)
+			|| (form->TpType == TELEPORT_TYPES::KARAVAN) && (allegeance.first == PVP_CLAN::Kami))
+		{
+			CCharacter::sendDynamicSystemMessage(_Id, "ALTAR_RESTRICTION");
+			return;
+		}
+
 		if( CPVPManager2::getInstance()->isTPValid(this, item) && IsRingShard == false )
 		{
 			// teleport dont work in the same way if the user is dead or alive
@@ -2891,6 +2951,35 @@ void CCharacter::useItem(uint32 slot)
 				//addSabrinaEffect( effect );
 				_TpTicketSlot = slot;
 				lockItem( INVENTORIES::bag, slot, 1 );
+
+				// add fx
+				CMirrorPropValue<TYPE_VISUAL_FX> visualFx( TheDataset, _EntityRowId, DSPropertyVISUAL_FX );
+				CVisualFX fx;
+				fx.unpack(visualFx.getValue());
+				if (allegeance.first != PVP_CLAN::None
+					&& allegeance.first != PVP_CLAN::Neutral
+					&& CFameInterface::getInstance().getFameIndexed(_Id, PVP_CLAN::getFactionIndex(allegeance.first)) >= 600000)
+				{
+					if (allegeance.first == PVP_CLAN::Kami)
+					{
+						fx.Aura = MAGICFX::TeleportKami;
+					}
+					else if (allegeance.first == PVP_CLAN::Karavan)
+					{
+						fx.Aura = MAGICFX::TeleportKara;
+					}
+					else
+					{
+						fx.Aura = MAGICFX::NoAura;
+					}
+				}
+				else
+				{
+					fx.Aura = MAGICFX::NoAura;
+				}
+				sint64 prop;
+				fx.pack(prop);
+				visualFx = (sint16)prop;
 
 				// add tp phrase in manager
 				static CSheetId tpBrick("bapa01.sbrick");
@@ -2964,6 +3053,13 @@ void CCharacter::useTeleport(const CStaticItem & form)
 	}
 	else
 	{	
+		CMirrorPropValue<TYPE_VISUAL_FX> visualFx( TheDataset, _EntityRowId, DSPropertyVISUAL_FX );
+		CVisualFX fx;
+		fx.unpack(visualFx.getValue());
+		fx.Aura = MAGICFX::NoAura;
+		sint64 prop;
+		fx.pack(prop);
+		visualFx = (sint16)prop;
 		sint32 x,y,z;
 		float theta;
 		zone->getRandomPoint( x,y,z,theta );

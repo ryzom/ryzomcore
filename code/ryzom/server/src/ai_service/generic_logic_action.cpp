@@ -614,10 +614,10 @@ public:
 
 		switch (args.size())
 		{
-		case 2:	_min=atoi(args[0].c_str()); if (args[0]!=NLMISC::toString(_min)) goto BadArgs;
-				_max=atoi(args[1].c_str()); if (args[1]!=NLMISC::toString(_max)) goto BadArgs;
+		case 2:	NLMISC::fromString(args[0], _min); if (args[0]!=NLMISC::toString(_min)) goto BadArgs;
+				NLMISC::fromString(args[1], _max); if (args[1]!=NLMISC::toString(_max)) goto BadArgs;
 				break;
-		case 1:	_min=atoi(args[0].c_str()); if (args[0]!=NLMISC::toString(_min)) goto BadArgs;
+		case 1:	NLMISC::fromString(args[0], _min); if (args[0]!=NLMISC::toString(_min)) goto BadArgs;
 				_max=_min;
 				break;
 		default: 
@@ -759,10 +759,10 @@ public:
 			_Mode = tm_timer;
 			switch (args.size())
 			{
-			case 2:	_Min=atoi(args[0].c_str()); if (args[0]!=NLMISC::toString(_Min)) goto BadArgs;
-					_Max=atoi(args[1].c_str()); if (args[1]!=NLMISC::toString(_Max)) goto BadArgs;
+			case 2:	NLMISC::fromString(args[0], _Min); if (args[0]!=NLMISC::toString(_Min)) goto BadArgs;
+					NLMISC::fromString(args[1], _Max); if (args[1]!=NLMISC::toString(_Max)) goto BadArgs;
 					break;
-			case 1:	_Min=atoi(args[0].c_str()); if (args[0]!=NLMISC::toString(_Min)) goto BadArgs;
+			case 1:	NLMISC::fromString(args[0], _Min); if (args[0]!=NLMISC::toString(_Min)) goto BadArgs;
 					_Max=_Min;
 					break;
 			default: 
@@ -2945,9 +2945,9 @@ public:
 		if(cstring=="DSS_")
 		{
 			_Id=true;
-			NLMISC::CSString tmp = NLMISC::CSString (_Sentence).right((unsigned int)_Sentence.length()-4);
+			NLMISC::CSString tmp = NLMISC::CSString (_Sentence).right((uint)_Sentence.length()-4);
 			NLMISC::CSString tmp2 = tmp.strtok(" ",false,false,false,false);
-			_ScenarioId = atoi(tmp2.c_str());
+			_ScenarioId = tmp2.atoui();
 			_Sentence = tmp;
 			nlwarning("<npc_say> scenario id : %d string id : %s ",_ScenarioId,_Sentence.c_str());
 		}

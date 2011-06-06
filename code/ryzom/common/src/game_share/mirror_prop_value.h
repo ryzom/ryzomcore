@@ -1022,14 +1022,14 @@ struct _CMirrorPropValueListIterator
 	CMirrorPropValueList<T,CPLC>	*_ParentList;
 	TSharedListRow					_Index;
 
-  typedef T value_type;
-  typedef value_type* pointer;
-  typedef const value_type* const_pointer;
-  typedef value_type& reference;
-  typedef const value_type& const_reference;
-  typedef size_t size_type;
-  typedef ptrdiff_t difference_type;
-  // typedef typename std::forward_iterator_tag iterator_category;
+	typedef T value_type;
+	typedef value_type* pointer;
+	typedef const value_type* const_pointer;
+	typedef value_type& reference;
+	typedef const value_type& const_reference;
+	typedef size_t size_type;
+	typedef ptrdiff_t difference_type;
+	// typedef typename std::forward_iterator_tag iterator_category;
 };
 
 
@@ -1050,15 +1050,14 @@ struct _CCMirrorPropValueListIterator
 	CMirrorPropValueList<T,CPLC>	*_ParentList;
 	TSharedListRow					_Index;
 
-  typedef T value_type;
-  typedef value_type* pointer;
-  typedef const value_type* const_pointer;
-  typedef value_type& reference;
-  typedef const value_type& const_reference;
-  typedef size_t size_type;
-  typedef ptrdiff_t difference_type;
-  // typedef typename std::forward_iterator_tag iterator_category;
-
+	typedef T value_type;
+	typedef value_type* pointer;
+	typedef const value_type* const_pointer;
+	typedef value_type& reference;
+	typedef const value_type& const_reference;
+	typedef size_t size_type;
+	typedef ptrdiff_t difference_type;
+	// typedef typename std::forward_iterator_tag iterator_category;
 };
 
 
@@ -1232,7 +1231,7 @@ class CMirrorPropValueList<NLMISC::CEntityId,CPropLocationUnpacked>
 {
 public:
 
-  typedef CPropLocationUnpacked CPropLocationClass;
+	typedef CPropLocationUnpacked CPropLocationClass;
 
 	typedef uint32													size_type;
 	typedef _CMirrorPropValueListIterator<NLMISC::CEntityId,CPropLocationClass>		iterator;

@@ -147,7 +147,7 @@ static void impulsionStringRequestUid(uint32 uid, CBitMemStream &bms, TGameCycle
 	{
 		bms.serial(stringId);
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<impulsionStringRequestUid> %s", e.what());
 		return;
@@ -307,7 +307,7 @@ void routeImpulsionUidFromClient( NLMISC::CBitMemStream& bms, const uint32& user
 			}
 		}
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning("<routeImpulsionUidFromClient> %s %s", msgName.c_str(), e.what() );
 		return;

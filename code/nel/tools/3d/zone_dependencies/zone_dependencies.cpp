@@ -385,7 +385,7 @@ int main (int argc, char* argv[])
 								if (newZ<minZ)
 									minZ=newZ;
 							}
-							catch (Exception& e)
+							catch (const Exception& e)
 							{
 								// Error handling
 								nlwarning ("ERROR in file %s, %s", (dir+zoneName+ext).c_str(), e.what ());
@@ -571,7 +571,7 @@ int main (int argc, char* argv[])
 				nlwarning ("ERROR %s is not a valid zone name.\n", firstName.c_str());
 			}
 		}
-		catch (Exception &ee)
+		catch (const Exception &ee)
 		{
 			nlwarning ("ERROR %s\n", ee.what());
 		}
@@ -654,7 +654,7 @@ static void computeIGBBox(const NL3D::CInstanceGroup &ig, CLightingBBox &result,
 						validBBox = true;
 					}
 					
-					catch (NLMISC::Exception &e)
+					catch (const NLMISC::Exception &e)
 					{
 						nlwarning("Error while loading shape %s. \n\t Reason : %s ", it->Name.c_str(), e.what());
 					}				
@@ -734,7 +734,7 @@ static void computeZoneIGBBox(const char *zoneName, CLightingBBox &result, TShap
 	{		
 		ig.serial(igFile);
 	}
-	catch (NLMISC::Exception &e)
+	catch (const NLMISC::Exception &e)
 	{
 		nlwarning("Error while reading an instance group file : %s \n reason : %s", pathName.c_str(), e.what());
 		return;
@@ -803,7 +803,7 @@ static void computeBBoxFromVillage(const NLGEORGES::UFormElm *villageItem,
 					computeIGBBox(group, currBBox, shapeMap);											
 					result.makeUnion(currBBox);					
 				}
-				catch(NLMISC::Exception &)
+				catch(const NLMISC::Exception &)
 				{
 					nlwarning ("Error while loading instance group %s\n", igName.c_str());	
 					continue;
@@ -909,7 +909,7 @@ static void computeIGBBoxFromContinent(NLMISC::CConfigFile &parameter,
 			nlwarning("Can't load continent form : %s", continentName.c_str());
 		}				
 	}	
-	catch (NLMISC::EUnknownVar &e)
+	catch (const NLMISC::EUnknownVar &e)
 	{
 		nlinfo(e.what());
 	}

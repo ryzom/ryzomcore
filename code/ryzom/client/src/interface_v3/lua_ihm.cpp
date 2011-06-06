@@ -115,6 +115,7 @@
 #include "game_share/scenario_entry_points.h"
 #include "game_share/bg_downloader_msg.h"
 #include "game_share/constants.h"
+#include "game_share/visual_slot_manager.h"
 
 #ifdef LUA_NEVRAX_VERSION
 	#include "lua_ide_dll_nevrax/include/lua_ide_dll/ide_interface.h" // external debugger
@@ -232,7 +233,7 @@ bool CLuaIHM::pop(CLuaState &ls,   NLMISC::CRGBA &dest)
 #endif
 		dest = luabind::object_cast<NLMISC::CRGBA>(obj);
 	}
-	catch(luabind::cast_failed &)
+	catch(const luabind::cast_failed &)
 	{
 		return false;
 	}
@@ -255,7 +256,7 @@ bool CLuaIHM::pop(CLuaState &ls,NLMISC::CVector2f &dest)
 #endif
 		dest = luabind::object_cast<NLMISC::CVector2f>(obj);
 	}
-	catch(luabind::cast_failed &)
+	catch(const luabind::cast_failed &)
 	{
 		return false;
 	}
@@ -278,7 +279,7 @@ bool CLuaIHM::pop(CLuaState &ls,   ucstring &dest)
 #endif
 		dest = luabind::object_cast<ucstring>(obj);
 	}
-	catch(luabind::cast_failed &)
+	catch(const luabind::cast_failed &)
 	{
 		return false;
 	}
@@ -1368,6 +1369,8 @@ void	CLuaIHM::registerIHM(CLuaState &ls)
 	ls.registerFunc("isPlayerNewbie", isPlayerNewbie);
 	ls.registerFunc("isInRingMode", isInRingMode);
 	ls.registerFunc("getUserRace",  getUserRace);
+	ls.registerFunc("getSheet2idx",  getSheet2idx);
+	
 	// Through LUABind API
 	lua_State	*L= ls.getStatePointer();
 
@@ -3351,7 +3354,7 @@ bool CLuaIHM::popString(CLuaState &ls, std::string & dest)
 #endif
 		dest = luabind::object_cast<std::string>(obj);
 	}
-	catch(luabind::cast_failed &)
+	catch(const luabind::cast_failed &)
 	{
 		return false;
 	}
@@ -3373,7 +3376,7 @@ bool CLuaIHM::popSINT32(CLuaState &ls, sint32 & dest)
 #endif
 		dest = luabind::object_cast<sint32>(obj);
 	}
-	catch(luabind::cast_failed &)
+	catch(const luabind::cast_failed &)
 	{
 		return false;
 	}
@@ -4409,6 +4412,28 @@ int CLuaIHM::getUserRace(CLuaState &ls)
 	{
 		ls.push(EGSPD::CPeople::toString(UserEntity->playerSheet()->People));
 	}
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHM::getSheet2idx(CLuaState &ls)
+{
+	CLuaIHM::checkArgCount(ls, "getSheet2idx", 2);
+	CLuaIHM::checkArgType(ls, "getSheet2idx", 1, LUA_TSTRING);
+	CLuaIHM::checkArgType(ls, "getSheet2idx", 2, LUA_TNUMBER);
+
+	const std::string & sheedtName = ls.toString(1);
+	uint32 slotId = (uint32)ls.toNumber(2);
+
+	NLMISC::CSheetId sheetId;
+
+	if (sheetId.buildSheetId(sheedtName))
+	{
+		uint32 idx = CVisualSlotManager::getInstance()->sheet2Index(sheetId, (SLOTTYPE::EVisualSlot)slotId);
+		ls.push((lua_Number)idx);
+	}
+	else
+		return 0;
 	return 1;
 }
 

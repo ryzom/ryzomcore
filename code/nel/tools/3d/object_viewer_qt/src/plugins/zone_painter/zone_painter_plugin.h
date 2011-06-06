@@ -101,6 +101,16 @@ public:
 	{
 		return m_zonePainterMainWindow;
 	}
+
+        virtual QUndoStack *undoStack()
+        {
+                return m_zonePainterMainWindow->getUndoStack();
+        }
+        virtual void open()
+        {
+        }
+
+
 	ZonePainterMainWindow *m_zonePainterMainWindow;
 };
 

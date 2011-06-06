@@ -109,7 +109,7 @@ int main (int argc, char **argv)
 		CInetAddress addr(LSHost+":3333");
 		Client->connect(addr);
 	}
-	catch(ESocket &e)
+	catch(const ESocket &e)
 	{
 		printf("%s\n", e.what());
 		return 0;

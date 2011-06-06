@@ -99,6 +99,7 @@ struct BNPHeader
 			fclose(f);
 			return false;
 		}
+
 		for (uint32 i = 0; i < nNbFile; ++i)
 		{
 			uint8 nStringSize = (uint8)Files[i].Name.size();

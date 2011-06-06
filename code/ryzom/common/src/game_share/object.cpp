@@ -1288,7 +1288,8 @@ void CObjectTable::clear()
 	CHECK_TABLE_INTEGRITY
 	TContainer::iterator first(_Value.begin());
 	TContainer::iterator last(_Value.end());
-	for (; first != last  ;++first) {
+	for (; first != last  ;++first)
+	{
 		delete first->second;
 	}
 	_Value.clear();
@@ -3044,7 +3045,8 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 				-- (serializer->Level);
 			}
 			uint endLength = stream.getPos();
-			if (serializer->Log) {
+			if (serializer->Log)
+			{
 				if (className.empty())
 				{
 					nldebug("R2NET: (%u) Table sent %u bytes",serializer->Level, endLength - initLength);

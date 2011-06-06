@@ -45,6 +45,7 @@ bool CMissionEvent::simMissionEvent(const std::vector< std::string > & script, C
 		NL_STRING_CONVERSION_TABLE_ENTRY(EnterZone)
 		NL_STRING_CONVERSION_TABLE_ENTRY(Cast)
 		NL_STRING_CONVERSION_TABLE_ENTRY(Kill)
+		NL_STRING_CONVERSION_TABLE_ENTRY(KillPlayer)
 		NL_STRING_CONVERSION_TABLE_ENTRY(BuyItem)
 		NL_STRING_CONVERSION_TABLE_ENTRY(SellItem)
 		NL_STRING_CONVERSION_TABLE_ENTRY(Forage)
@@ -92,6 +93,9 @@ bool CMissionEvent::simMissionEvent(const std::vector< std::string > & script, C
 		break;
 	case Kill:
 		event = new CMissionEventKill;
+		break;
+	case KillPlayer:
+		event = new CMissionEventKillPlayer;
 		break;
 	case BuyItem:
 		event = new CMissionEventBuyItem;
@@ -266,7 +270,24 @@ bool CMissionEventKill::buildFromScript( const std::vector< std::string > & scri
 	TargetEntity = c->getEntityRowId();
 	return true;
 }
-
+bool CMissionEventKillPlayer::buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log)
+{
+	if ( script.size() != 1 )
+	{
+		log.displayNL("param entity expected");
+		return false;
+	}
+	CEntityId id;
+	id.fromString( script[0].c_str() );
+	CCharacter *victim = PlayerManager.getChar( id );
+	if ( !victim )
+	{
+		log.displayNL("invalid victim entity %s",script[0].c_str() );
+		return false;
+	}
+	TargetEntity = victim->getEntityRowId();
+	return true;
+}
 bool CMissionEventBuyItem::buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log)
 {
 	bool ret = true;

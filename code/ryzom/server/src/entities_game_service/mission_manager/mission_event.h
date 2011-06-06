@@ -50,6 +50,7 @@ public:
 		EnterZone,
 		Cast,
 		Kill,
+		KillPlayer,
 		BuyItem,
 		SellItem,
 		Forage,
@@ -198,6 +199,18 @@ protected:
 	CMissionEventKill(){};
 	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
 	
+};
+
+/// "Kill player" event
+class CMissionEventKillPlayer : public CMissionEvent
+{
+public:
+	CMissionEventKillPlayer(const TDataSetRow & victimId)
+		:CMissionEvent(KillPlayer, victimId){}
+protected:
+	friend class CMissionEvent;
+	CMissionEventKillPlayer(){};
+	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
 };
 
 /// "buy" event

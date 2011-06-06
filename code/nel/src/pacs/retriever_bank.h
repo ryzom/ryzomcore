@@ -150,7 +150,7 @@ public:
 					{
 						f.serial(_Retrievers[i]);
 					}
-					catch (NLMISC::Exception &e)
+					catch (const NLMISC::Exception &e)
 					{
 						nlwarning("Couldn't load retriever file '%s', %s", fname.c_str(), e.what());
 						_Retrievers[i].clear();

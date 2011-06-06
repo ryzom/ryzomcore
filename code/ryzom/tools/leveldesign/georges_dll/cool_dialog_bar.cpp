@@ -568,8 +568,8 @@ void CCoolDialogBar::DrawGripper(CDC & dc)
 	ScreenToClient( gripper );
 	gripper.OffsetRect( -gripper.left, -gripper.top );
 	
-	if( m_dwStyle & CBRS_ORIENT_HORZ ) {
-		
+	if( m_dwStyle & CBRS_ORIENT_HORZ )
+	{
 		// gripper at left
 		m_rectGripper.top		= gripper.top + 40;
 		m_rectGripper.bottom	= gripper.bottom;
@@ -597,9 +597,8 @@ void CCoolDialogBar::DrawGripper(CDC & dc)
 		gripper.OffsetRect(4, 0);
         dc.Draw3dRect( gripper, m_clrBtnHilight, m_clrBtnShadow );
 	}
-	
-	else {
-		
+	else
+	{
 		// gripper at top
 		m_rectGripper.top		= gripper.top;
 		m_rectGripper.bottom	= gripper.top + 20;

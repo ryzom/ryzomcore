@@ -37,6 +37,7 @@
 #include <functional>
 #include <memory>
 #include <limits>
+#include <iterator>
 
 #include <nel/misc/common.h>
 #include <nel/misc/debug.h>

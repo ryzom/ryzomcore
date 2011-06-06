@@ -351,7 +351,7 @@ void CGuildManager::saveGuild( CGuild* guild )
 				msg.DataMsg.serialBuffer((uint8*)&buffer.front(), (uint)buffer.size());
 				Bsi.sendFile( msg );
 			}
-			catch( Exception& )
+			catch(const Exception &)
 			{
 				nlwarning("<guilds>  :  Can't serial file %s",fileName.c_str());
 				return;

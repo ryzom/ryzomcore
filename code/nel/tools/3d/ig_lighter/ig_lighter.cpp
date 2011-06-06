@@ -344,7 +344,7 @@ int main(int argc, char* argv[])
 			}
 
 		}
-		catch (Exception& except)
+		catch (const Exception& except)
 		{
 			// Error message
 			nlwarning ("ERROR %s\n", except.what());

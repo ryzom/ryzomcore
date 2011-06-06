@@ -21,6 +21,7 @@
 #include "group_editbox.h"
 #include "interface_manager.h"
 #include "input_handler_manager.h"
+#include "nel/misc/command.h"
 #include "view_text.h"
 #include "game_share/xml_auto_ptr.h"
 #include "interface_options.h"
@@ -56,6 +57,7 @@ CGroupEditBox::CGroupEditBox(const TCtorParam &param) :
 								_MaxCharsSize(32768),
 								_FirstVisibleChar(0),
 								_LastVisibleChar(0),
+								_SelectingText(false),
 								_ViewText(NULL),
 								_MaxHistoric(0),
 								_CurrentHistoricIndex(-1),
@@ -354,16 +356,27 @@ void CGroupEditBox::paste()
 	if (Driver->pasteTextFromClipboard(sString))
 	{
 		// append string now
-		appendString(sString);
+		appendStringFromClipboard(sString);
 	}
 }
 
 // ----------------------------------------------------------------------------
-void CGroupEditBox::appendString(const ucstring &str)
+void CGroupEditBox::appendStringFromClipboard(const ucstring &str)
 {
 	stopParentBlink();
 	makeTopWindow();
 
+	writeString(str, true, false);
+	nlinfo ("Chat input was pasted from the clipboard");
+
+	triggerOnChangeAH();
+
+	_CursorAtPreviousLineEnd = false;
+}
+
+// ----------------------------------------------------------------------------
+void CGroupEditBox::writeString(const ucstring &str, bool replace, bool atEnd)
+{
 	sint length = (sint)str.length();
 
 	ucstring toAppend;
@@ -500,13 +513,41 @@ void CGroupEditBox::appendString(const ucstring &str)
 		length = _MaxNumChar - (sint)_InputString.length();
 	}
 	ucstring toAdd = toAppend.substr(0, length);
-	_InputString = _InputString.substr(0, _CursorPos) + toAdd + _InputString.substr(_CursorPos);
-	_CursorPos += (sint32)toAdd.length();
-	nlinfo ("Chat input was pasted from the clipboard");
+	sint32	minPos;
+	sint32	maxPos;
+	if (_CurrSelection == this)
+	{
+		minPos = min(_CursorPos, _SelectCursorPos);
+		maxPos = max(_CursorPos, _SelectCursorPos);
+	}
+	else
+	{
+		minPos = _CursorPos;
+		maxPos = _CursorPos;
+	}
 
-	triggerOnChangeAH();
+	nlinfo("%d, %d", minPos, maxPos);
+	if (replace)
+	{
+		_InputString = _InputString.substr(0, minPos) + toAdd + _InputString.substr(maxPos);
+		_CursorPos = minPos+(sint32)toAdd.length();
+	}
+	else
+	{
+		if (atEnd)
+		{
+			_InputString = _InputString.substr(0, maxPos) + toAdd + _InputString.substr(maxPos);
+			_CursorPos = maxPos;
+			_SelectCursorPos = _CursorPos;
 
-	_CursorAtPreviousLineEnd = false;
+		}
+		else
+		{
+			_InputString = _InputString.substr(0, minPos) + toAdd + _InputString.substr(minPos);
+			_CursorPos = minPos+(sint32)toAdd.length();
+			_SelectCursorPos = maxPos+(sint32)toAdd.length();
+		}
+	}
 }
 
 // ----------------------------------------------------------------------------
@@ -672,7 +713,7 @@ void CGroupEditBox::handleEventChar(const CEventDescriptorKey &rEDK)
 // ----------------------------------------------------------------------------
 void CGroupEditBox::handleEventString(const CEventDescriptorKey &rEDK)
 {
-	appendString(rEDK.getString());
+	appendStringFromClipboard(rEDK.getString());
 }
 
 // ----------------------------------------------------------------------------
@@ -862,6 +903,7 @@ bool CGroupEditBox::handleEvent (const CEventDescriptor& event)
 		// if click, and not frozen, then get the focus
 		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown && !_Frozen)
 		{
+			_SelectingText = true;
 			stopParentBlink();
 			pIM->setCaptureKeyboard (this);
 			// set the right cursor position
@@ -872,7 +914,32 @@ bool CGroupEditBox::handleEvent (const CEventDescriptor& event)
 			_CursorPos = newCurPos;
 			_CursorPos -= (sint32)_Prompt.length();
 			_CursorPos = std::max(_CursorPos, sint32(0));
+			_SelectCursorPos = _CursorPos;
+			_CurrSelection = NULL;
 
+			return true;
+		}
+		// if click, and not frozen, then get the focus
+		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousemove && !_Frozen && _SelectingText)
+		{
+			// set the right cursor position
+			uint newCurPos;
+			bool cursorAtPreviousLineEnd;
+			_CurrSelection = this;
+			_ViewText->getCharacterIndexFromPosition(eventDesc.getX() - _ViewText->getXReal(), eventDesc.getY() - _ViewText->getYReal(), newCurPos, cursorAtPreviousLineEnd);
+			_SelectCursorPos = newCurPos;
+			_SelectCursorPos -= (sint32)_Prompt.length();
+			_SelectCursorPos = std::max(_SelectCursorPos, sint32(0));
+			return true;
+		}
+
+		// if click, and not frozen, then get the focus
+		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup && !_Frozen)
+		{
+			_SelectingText = false;
+			if (_SelectCursorPos == _CursorPos)
+				_CurrSelection = NULL;
+			
 			return true;
 		}
 

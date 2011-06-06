@@ -1799,7 +1799,8 @@ void	CActionPhraseFaber::updateItemResult()
 }
 
 /* Handle change of skill -> recompute success rate */
-void CActionPhraseFaber::CSkillObserver::onSkillChange() {
+void CActionPhraseFaber::CSkillObserver::onSkillChange()
+{
 	if (ActionPhraseFaber == NULL) ActionPhraseFaber = new CActionPhraseFaber;
 	// Dont update if the plan has not yet been selected
 	if(ActionPhraseFaber->_ExecuteFromItemPlanBrick==NULL)

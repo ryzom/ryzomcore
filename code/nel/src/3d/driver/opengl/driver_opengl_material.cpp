@@ -35,10 +35,18 @@ static void convBlend(CMaterial::TBlend blend, GLenum& glenum)
 		case CMaterial::srccolor:	glenum=GL_SRC_COLOR; break;
 		case CMaterial::invsrccolor:glenum=GL_ONE_MINUS_SRC_COLOR; break;
 		// Extended Blend modes.
+#ifdef USE_OPENGLES
+		case CMaterial::blendConstantColor:		glenum=GL_CONSTANT_COLOR; break;
+		case CMaterial::blendConstantInvColor:	glenum=GL_ONE_MINUS_CONSTANT_COLOR; break;
+		case CMaterial::blendConstantAlpha:		glenum=GL_CONSTANT_ALPHA; break;
+		case CMaterial::blendConstantInvAlpha:	glenum=GL_ONE_MINUS_CONSTANT_ALPHA; break;
+#else
 		case CMaterial::blendConstantColor:		glenum=GL_CONSTANT_COLOR_EXT; break;
 		case CMaterial::blendConstantInvColor:	glenum=GL_ONE_MINUS_CONSTANT_COLOR_EXT; break;
 		case CMaterial::blendConstantAlpha:		glenum=GL_CONSTANT_ALPHA_EXT; break;
 		case CMaterial::blendConstantInvAlpha:	glenum=GL_ONE_MINUS_CONSTANT_ALPHA_EXT; break;
+#endif
+
 		default: nlstop;
 	}
 }
@@ -137,7 +145,9 @@ void CDriverGL::setTextureEnvFunction(uint stage, CMaterial& mat)
 				_DriverGLStates.setTexGenMode (stage, GL_OBJECT_LINEAR);
 			}
 			else if(mode==CMaterial::TexCoordGenEyeSpace)
+			{
 				_DriverGLStates.setTexGenMode (stage, GL_EYE_LINEAR);
+			}
 		}
 		else
 		{
@@ -240,7 +250,9 @@ void CDriverGL::setTextureShaders(const uint8 *addressingModes, const CSmartPtr<
 		if (glAddrMode != _CurrentTexAddrMode[stage]) // addressing mode different from the one in the device?
 		{
 			_DriverGLStates.activeTextureARB(stage);
+#ifndef USE_OPENGLES
 			glTexEnvi(GL_TEXTURE_SHADER_NV, GL_SHADER_OPERATION_NV, glAddrMode);
+#endif
 			_CurrentTexAddrMode[stage] = glAddrMode;
 		}
 	}
@@ -264,7 +276,7 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 	if (!mat._MatDrvInfo)
 	{
 		// insert into driver list. (so it is deleted when driver is deleted).
-		ItMatDrvInfoPtrList		it= _MatDrvInfos.insert(_MatDrvInfos.end(), NULL);
+		ItMatDrvInfoPtrList		it= _MatDrvInfos.insert(_MatDrvInfos.end(), (NL3D::IMaterialDrvInfos*)NULL);
 		// create and set iterator, for future deletion.
 		*it= mat._MatDrvInfo= new CShaderGL(this, it);
 
@@ -807,7 +819,7 @@ void			CDriverGL::setupLightMapPass(uint pass)
 				// fallBack if extension MulAdd not found. just mul factor with (Ambient+Diffuse)
 				if(_LightMapNoMulAddFallBack)
 				{
-					// do not use consant color to blend lightmap, but incoming diffuse color, for stage0 only.
+					// do not use constant color to blend lightmap, but incoming diffuse color, for stage0 only.
 					GLfloat	glcol[4];
 					convColor(lmapFactor, glcol);
 					_DriverGLStates.setEmissive(lmapFactor.getPacked(), glcol);
@@ -918,7 +930,11 @@ void			CDriverGL::setupLightMapPass(uint pass)
 				if (mat._LightMapsMulx2)
 				{
 					// Multiply x 2
+#ifdef USE_OPENGLES
+					glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE, 2);
+#else
 					glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, 2);
+#endif
 				}
 			}
 		}
@@ -1027,7 +1043,11 @@ void			CDriverGL::endLightMapMultiPass()
 		for (uint32 i = 0; i < (_NLightMapPerPass+1); ++i)
 		{
 			_DriverGLStates.activeTextureARB(i);
+#ifdef USE_OPENGLES
+			glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE, 1);
+#else
 			glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, 1);
+#endif
 		}
 	}
 }
@@ -1102,13 +1122,16 @@ void			CDriverGL::setupSpecularBegin()
 	// todo hulud remove
 	// _DriverGLStates.setTextureMode(CDriverGLStates::TextureCubeMap);
 
+#ifdef USE_OPENGLES
+	_DriverGLStates.setTexGenMode (1, GL_REFLECTION_MAP_OES);
+#else
 	_DriverGLStates.setTexGenMode (1, GL_REFLECTION_MAP_ARB);
+#endif
+
 	// setup the good matrix for stage 1.
 	glMatrixMode(GL_TEXTURE);
 	glLoadMatrixf( _SpecularTexMtx.get() );
 	glMatrixMode(GL_MODELVIEW);
-
-
 }
 
 // ***************************************************************************
@@ -1292,7 +1315,8 @@ void			CDriverGL::setupSpecularPass(uint pass)
 			_DriverGLStates.setTextureMode(CDriverGLStates::TextureDisabled);
 		}
 		else
-		{ // Multiply texture1 by alpha_texture0 and display with add
+		{
+			// Multiply texture1 by alpha_texture0 and display with add
 			_DriverGLStates.enableBlend(true);
 			_DriverGLStates.blendFunc(GL_ONE, GL_ONE);
 
@@ -1957,7 +1981,9 @@ void		CDriverGL::endCloudMultiPass()
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Cloud);
 	if (ATICloudShaderHandle)
 	{
+#ifndef USE_OPENGLES
 		glDisable(GL_FRAGMENT_SHADER_ATI);
+#endif
 	}
 }
 
@@ -1975,7 +2001,9 @@ sint CDriverGL::beginWaterMultiPass()
   */
 void CDriverGL::setupWaterPassR200(const CMaterial &mat)
 {
-	H_AUTO_OGL(CDriverGL_setupWaterPassR200)
+	H_AUTO_OGL(CDriverGL_setupWaterPassR200);
+
+#ifndef USE_OPENGLES
 	uint k;
 	ITexture *tex = mat.getTexture(0);
 	if (tex)
@@ -2047,6 +2075,7 @@ void CDriverGL::setupWaterPassR200(const CMaterial &mat)
 		float cst[4] = { 1.f, 1.f, 1.f, 0.f };
 		nglSetFragmentShaderConstantATI(GL_CON_0_ATI, cst);
 	}
+#endif
 }
 
 // ***************************************************************************
@@ -2054,7 +2083,9 @@ void CDriverGL::setupWaterPassR200(const CMaterial &mat)
   */
 void CDriverGL::setupWaterPassARB(const CMaterial &mat)
 {
-	H_AUTO_OGL(CDriverGL_setupWaterPassARB)
+	H_AUTO_OGL(CDriverGL_setupWaterPassARB);
+
+#ifndef USE_OPENGLES
 	uint k;
 	ITexture *tex = mat.getTexture(0);
 	if (tex)
@@ -2133,6 +2164,7 @@ void CDriverGL::setupWaterPassARB(const CMaterial &mat)
 			}
 		}
 	}
+#endif
 }
 
 // ***************************************************************************
@@ -2159,8 +2191,9 @@ static const float IdentityTexMat[4] = { 1.f, 0.f, 0.f, 1.f };
 // ***************************************************************************
 void CDriverGL::setupWaterPassNV20(const CMaterial &mat)
 {
-	H_AUTO_OGL(CDriverGL_setupWaterPassNV20)
+	H_AUTO_OGL(CDriverGL_setupWaterPassNV20);
 
+#ifndef USE_OPENGLES
 	static bool setupDone = false;
 	static CMaterial::CTexEnv texEnvReplace;
 	static CMaterial::CTexEnv texEnvModulate;
@@ -2245,6 +2278,7 @@ void CDriverGL::setupWaterPassNV20(const CMaterial &mat)
 		activateTexEnvMode(2, texEnvReplace);
 		activateTexEnvMode(3, texEnvModulate);
 	}
+#endif
 }
 
 // ***************************************************************************
@@ -2272,7 +2306,9 @@ void CDriverGL::setupWaterPass(uint /* pass */)
 // ***************************************************************************
 void CDriverGL::endWaterMultiPass()
 {
-	H_AUTO_OGL(CDriverGL_endWaterMultiPass)
+	H_AUTO_OGL(CDriverGL_endWaterMultiPass);
+
+#ifndef USE_OPENGLES
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
 	// NB : as fragment shaders / programs bypass the texture envs, no special env enum is added (c.f CTexEnvSpecial)
 	if (_Extensions.NVTextureShader) return;
@@ -2284,6 +2320,7 @@ void CDriverGL::endWaterMultiPass()
 	{
 		glDisable(GL_FRAGMENT_SHADER_ATI);
 	}
+#endif
 }
 
 } // NL3D

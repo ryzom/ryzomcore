@@ -1227,7 +1227,7 @@ void	CMirrorService::processReceivedDelta( CMessage& msgin, TServiceId serviceId
 			++currentBlock;
 		}
 	}
-	catch ( EStreamOverflow& )
+	catch (const EStreamOverflow&)
 	{
 		nlwarning( "Stream overflow in received delta from %s, currentBlock=%u nbMsgs=%u iMsg=%u currentState=%u",
 			servStr(serviceId).c_str(), currentBlock, nbMsgs, i, currentState );
@@ -2068,7 +2068,7 @@ void	CMirrorService::processDataSetEntitiesSubscription( const std::string& data
 		nlinfo( "ROWMGT: MS %hu subscribes to dataset %s", msId.get(), dataSetName.c_str() );
 		allocateEntityTrackers( NDataSets[dataSetName], msId, clientServiceId, false, newTagOfRemoteMS );
 	}		
-	catch ( EMirror& )
+	catch (const EMirror&)
 	{
 		nlwarning( "MIRROR: Invalid dataset while receiving subscription" );
 	}
@@ -2892,7 +2892,7 @@ void	CMirrorService::receiveAcknowledgeAddEntityTrackerMS( NLNET::CMessage& msgi
 			}*/
 		}
 	}
-	catch( EMirror& )
+	catch(const EMirror& )
 	{
 		nlwarning( "Invalid dataset name %s for receiving ack of addEntityTracker", datasetname.c_str() );
 	}
@@ -3323,7 +3323,7 @@ void	CMirrorService::receiveSyncMirrorInformation( CMessage& msgin, TServiceId s
 		nlinfo( "Resync from client service %s succeeded", servStr(serviceId).c_str() );
 
 	}
-	catch ( EMirror& )
+	catch (const EMirror&)
 	{
 		nlwarning( "Dataset not found (SYNCMI)" );
 	}
@@ -3697,7 +3697,7 @@ void cbAddRemoveRemoteClientService( NLNET::CMessage& msgin, const std::string &
 			msgin.serial( tagOfNewClientService );
 			msgin.serial( remoteMSVersion );
 		}
-		catch ( EStreamOverflow& )
+		catch (const EStreamOverflow&)
 		{}
 		if ( MirrorServiceVersion != remoteMSVersion )
 			nlerror( "MS version mismatch! This MS: %s; Remote MS-%hu: %s", MirrorServiceVersion.c_str(), serviceId.get(), remoteMSVersion.c_str() ); 
@@ -3723,7 +3723,7 @@ void cbReleaseEntitiesInRanges( NLNET::CMessage& msgin, const std::string &servi
 		{
 			MSInstance->releaseEntitiesInRanges( MSInstance->NDataSets[datasetName], erasedRanges );
 		}
-		catch ( EMirror& )
+		catch (const EMirror&)
 		{
 			nlwarning( "Dataset %s not found", datasetName.c_str() );
 		}
@@ -3747,7 +3747,7 @@ void cbRecvBindingCountersByMessage( NLNET::CMessage& msgin, const std::string &
 	{
 		MSInstance->NDataSets[datasetName].receiveAllBindingCounters( msgin );
 	}
-	catch ( EMirror& )
+	catch (const EMirror&)
 	{
 		nlwarning( "Dataset %s not found", datasetName.c_str() );
 	}
@@ -3871,7 +3871,7 @@ NLMISC_COMMAND( displayMSTrackers, "Display the trackers for one of all dataset(
 		{
 			MSInstance->NDataSets[args[0]].displayTrackers();
 		}
-		catch ( EMirror& )
+		catch (const EMirror&)
 		{
 			log.displayNL( "Dataset not found" );
 		}

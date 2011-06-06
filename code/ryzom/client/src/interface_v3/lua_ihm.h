@@ -351,6 +351,7 @@ private:
 	static int	isPlayerNewbie(CLuaState &ls);
 	static int  isInRingMode(CLuaState &ls);
 	static int  getUserRace(CLuaState &ls);
+	static int  getSheet2idx(CLuaState &ls);
 
 
 	// LUA functions exported for Dev only (debug)

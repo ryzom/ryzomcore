@@ -1305,7 +1305,7 @@ void ItemNamesSave()
 	output = "i";
 	output += data.splitTo( "prospector", true );
 
-	set<CSString, CUnsensitiveSStringLessPred>::iterator it = itemNames.begin();
+	CSortedStringSet::const_iterator it = itemNames.begin();
 
 	while ( it != itemNames.end() )
 	{
@@ -1569,7 +1569,7 @@ int main( int argc, char* argv[] )
 	{
 		GenerateDoc();
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		nlwarning(e.what());
 		nlwarning("HTML Doc generation failed\n");

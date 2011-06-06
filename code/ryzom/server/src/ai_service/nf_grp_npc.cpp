@@ -295,6 +295,7 @@ void setActivity_s_(CStateInstance* entity, CScriptStack& stack)
 			spawnGroup->activityProfile().setAIProfile(new CGrpProfileBandit(spawnGroup));
 			break;
 		}
+
 		nlwarning("trying to set activity profile to an unknown profile name");
 	}
 }
@@ -401,6 +402,106 @@ void stopMoving__(CStateInstance* entity, CScriptStack& stack)
 	
 	spawnGroup->movingProfile().setAIProfile(new CGrpProfileIdle(spawnGroup));
 }
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection startWander_f_
+Set activity to wander in current pos:
+
+Arguments: f(Radius) ->
+@param[in] Radius dispersion of wander activity
+
+@code
+()startWander(100); // Gives a wander activity to the group with dispersion of 100
+@endcode
+
+*/
+// Spawned CGroupNpc not in a family behaviour
+void startWander_f_(CStateInstance* entity, CScriptStack& stack)
+{
+	uint32 dispersionRadius = (uint32)(float&)stack.top();
+	stack.pop();
+	
+	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	if (!aiInstance)
+		return;
+	
+	if (!entity) { nlwarning("setActivity failed!"); return; }
+	
+	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	if (!group)
+	{	nlwarning("startWander failed: no NPC group");
+		return;
+	}
+	CSpawnGroupNpc* spawnGroup = group->getSpawnObj();
+	if (!spawnGroup)
+	{	nlwarning("startWander failed: no spawned group");
+		return;
+	}
+
+	CAIVector centerPos;
+	if	(!spawnGroup->calcCenterPos(centerPos))	// true if there's some bots in the group.
+	{	nlwarning("startWander failed: no center pos");
+		return;
+	}
+
+	NLMISC::CSmartPtr<CNpcZonePlaceNoPrim> destZone = NLMISC::CSmartPtr<CNpcZonePlaceNoPrim>(new CNpcZonePlaceNoPrim());
+	destZone->setPosAndRadius(AITYPES::vp_auto, CAIPos(centerPos, 0, 0), (uint32)(dispersionRadius*1000.));
+	spawnGroup->movingProfile().setAIProfile(new CGrpProfileWanderNoPrim(spawnGroup, destZone));
+}
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection startMoving_fff_
+Set activity to wander in current pos:
+
+Arguments: f(Radius) ->
+@param[in] Radius dispersion of wander activity
+
+@code
+()startWander(100); // Gives a wander activity to the group with dispersion of 100
+@endcode
+
+*/
+// Spawned CGroupNpc not in a family behaviour
+void startMoving_fff_(CStateInstance* entity, CScriptStack& stack)
+{
+	uint32 dispersionRadius = (uint32)(float&)stack.top();
+	stack.pop();
+	float const y = (float&)stack.top();
+	stack.pop();
+	float const x = (float&)stack.top();
+ 	stack.pop();
+	
+	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	if (!aiInstance)
+		return;
+	
+	if (!entity) { nlwarning("setActivity failed!"); return; }
+	
+	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	if (!group)
+	{	nlwarning("setActivity failed: no NPC group");
+		return;
+	}
+	CSpawnGroupNpc* spawnGroup = group->getSpawnObj();
+	if (!spawnGroup)
+	{	nlwarning("setActivity failed: no spawned group");
+		return;
+	}
+
+	NLMISC::CSmartPtr<CNpcZonePlaceNoPrim> destZone = NLMISC::CSmartPtr<CNpcZonePlaceNoPrim>(new CNpcZonePlaceNoPrim());
+	destZone->setPosAndRadius(AITYPES::vp_auto, CAIPos(CAIVector(x, y), 0, 0), (uint32)(dispersionRadius*1000.));
+	spawnGroup->movingProfile().setAIProfile(new CGrpProfileWanderNoPrim(spawnGroup, destZone));
+
+	return;
+}
+
+
 
 //----------------------------------------------------------------------------
 /** @page code
@@ -2284,7 +2385,7 @@ void emote_css_(CStateInstance* entity, CScriptStack& stack)
 
 	//CBot& bot = spawnBot->getPersistent();
 	
-	// The entity Id must be valid (whe know that the bot is alive so its entity Id must be ok)
+	// The entity Id must be valid (we know that the bot is alive so its entity Id must be ok)
 	NLMISC::CEntityId	entityId=spawnBot->getEntityId();
 	if (entityId == NLMISC::CEntityId::Unknown)
 	{
@@ -2340,6 +2441,105 @@ void emote_ss_(CStateInstance* entity, CScriptStack& stack)
 	msgout.serial(bh);
 
 	NLNET::CUnifiedNetwork::getInstance()->send( "EGS", msgout );
+}
+
+
+
+void emote_s_(CStateInstance* entity, CScriptStack& stack)
+{
+	string emoteName = (string)stack.top(); stack.pop();
+
+	// Is the emote valid
+	uint32 emoteId = CAIS::instance().getEmotNumber(emoteName);
+	if (emoteId == ~0)
+		return;
+
+	// Get the behaviour Id
+	MBEHAV::EBehaviour behaviourId = (MBEHAV::EBehaviour)(emoteId + MBEHAV::EMOTE_BEGIN);
+	
+
+	CGroup* group = entity->getGroup();
+	
+	if (group->isSpawned())
+	{
+		FOREACH(itBot, CCont<CBot>, group->bots())
+		{
+			CBot* bot = *itBot;
+			if (bot)
+			{
+				// Change the behaviour
+				if (bot->isSpawned())
+				{
+					CSpawnBot *spawnBot = bot->getSpawnObj();
+					if (spawnBot)
+					{
+						CEntityId	botId = spawnBot->getEntityId();
+						NLNET::CMessage msgout("SET_BEHAVIOUR");
+						msgout.serial(botId);
+						MBEHAV::CBehaviour bh(behaviourId);
+						bh.Data = (uint16)(CTimeInterface::gameCycle());
+						msgout.serial(bh);
+
+						NLNET::CUnifiedNetwork::getInstance()->send( "EGS", msgout );
+					}
+				}
+			}
+		}
+	}
+	
+}
+
+void rename_s_(CStateInstance* entity, CScriptStack& stack)
+{
+	string newName = (string)stack.top(); stack.pop();	
+
+	CGroup* group = entity->getGroup();
+	
+	if (group->isSpawned())
+	{
+		FOREACH(itBot, CCont<CBot>, group->bots())
+		{
+			CBot* bot = *itBot;
+			if (bot)
+			{
+				if (bot->isSpawned())
+				{
+					CSpawnBot *spawnBot = bot->getSpawnObj(); 
+					if (spawnBot)
+					{
+						TDataSetRow	row = spawnBot->dataSetRow();
+						ucstring name;
+						name.fromUtf8(newName);
+						NLNET::CMessage	msgout("CHARACTER_NAME");
+						msgout.serial(row);
+						msgout.serial(name);
+						sendMessageViaMirror("IOS", msgout);
+					}
+				}
+			}
+		}
+	}
+	
+}
+
+void vpx_s_(CStateInstance* entity, CScriptStack& stack)
+{
+	string vpx = (string)stack.top(); stack.pop();	
+
+	CGroup* group = entity->getGroup();
+	
+	if (group->isSpawned())
+	{
+		FOREACH(itBot, CCont<CBot>, group->bots())
+		{
+			CBotNpc* bot = NLMISC::safe_cast<CBotNpc*>(*itBot);
+			if (bot)
+			{
+				bot->setVisualProperties(vpx);
+				bot->sendVisualProperties();
+			}
+		}
+	}	
 }
 
 //----------------------------------------------------------------------------
@@ -2446,6 +2646,8 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, setFactionProp_ss_);
 	REGISTER_NATIVE_FUNC(functions, moveToZone_ss_);
 	REGISTER_NATIVE_FUNC(functions, setActivity_s_);
+	REGISTER_NATIVE_FUNC(functions, startWander_f_);
+	REGISTER_NATIVE_FUNC(functions, startMoving_fff_);
 	REGISTER_NATIVE_FUNC(functions, waitInZone_s_);
 	REGISTER_NATIVE_FUNC(functions, stopMoving__);
 	REGISTER_NATIVE_FUNC(functions, wander__);
@@ -2481,6 +2683,9 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, facing_cscs_);
 	REGISTER_NATIVE_FUNC(functions, emote_css_);
 	REGISTER_NATIVE_FUNC(functions, emote_ss_);
+	REGISTER_NATIVE_FUNC(functions, emote_s_);
+	REGISTER_NATIVE_FUNC(functions, rename_s_);
+	REGISTER_NATIVE_FUNC(functions, vpx_s_);
 	REGISTER_NATIVE_FUNC(functions, npcSay_css_);
 	REGISTER_NATIVE_FUNC(functions, dssMessage_fsss_);
 	REGISTER_NATIVE_FUNC(functions, despawnBotByAlias_s_);	

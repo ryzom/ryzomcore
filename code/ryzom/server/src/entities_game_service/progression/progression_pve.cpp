@@ -401,12 +401,12 @@ void CCharacterProgressionPVE::creatureDeath(TDataSetRow creature)
 			else
 			{
 				const TDataSetRow rowId = TheDataset.getDataSetRow(creatureTakenDmg.PlayerInflictedDamage[index].PlayerId);
+				creaturePtr->enableLootRights(rowId);
 
 				TCharacterActionsContainer::iterator it = _CharacterActions.find(rowId);
 				if( it != _CharacterActions.end() )
 				{
 					// Enable loot rights for this player alone
-					creaturePtr->enableLootRights(rowId);
 
 					// Display XP gain
 					list<CEntityId> teamMembers;
@@ -1528,6 +1528,39 @@ void CCharacterProgressionPVE::enableXpGainForPlayer(const CEntityId &playerId, 
 	}
 }
 
+//----------------------------------------------------------------------------
+// CCharacterProgressionPVE::removeCreature
+//----------------------------------------------------------------------------
+void CCharacterProgressionPVE::removeXpCreature(TDataSetRow creature)
+{
+	TCreatureTakenDamageContainer::iterator itCreatureDamage = _CreatureTakenDamage.find(creature);
+	if (itCreatureDamage == _CreatureTakenDamage.end())
+		return;
+	// clear damage inflicted by players and teams on this creature
+	const vector<CTeamDamage> &damage = (*itCreatureDamage).second.PlayerInflictedDamage;
+	for (uint i = 0 ; i < damage.size() ; ++i )
+	{
+		if (damage[i].TeamId != CTEAM::InvalidTeamId)
+		{
+			// forget Xp gain on this creature for whole team
+			CTeam *team = TeamManager.getRealTeam(damage[i].TeamId);
+			if (team)
+			{
+				const list<CEntityId> &teamMembers = team->getTeamMembers();
+
+				for ( list<CEntityId>::const_iterator it = teamMembers.begin() ; it != teamMembers.end() ; ++it)
+				{
+					forgetXpGain(creature, TheDataset.getDataSetRow(*it));
+				}
+			}
+		}
+		else
+		{
+			// forget Xp gain on this creature
+			forgetXpGain(creature, TheDataset.getDataSetRow(damage[i].PlayerId));
+		}
+	}
+}
 
 //----------------------------------------------------------------------------
 // CCharacterProgressionPVE::removeCreature

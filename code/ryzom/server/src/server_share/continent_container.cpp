@@ -85,8 +85,8 @@ void	CContinentContainer::loadContinent(string name, string file, sint index, bo
 
 	for (its=_SheetMap.begin(); its!=_SheetMap.end(); ++its)
 	{
-		if (strlwr((*its).second.Name) == strlwr(name+".continent") ||
-			strlwr((*its).second.PacsRBank) == strlwr(name+".rbank"))
+		if (NLMISC::toLower((*its).second.Name) == NLMISC::toLower(name+".continent") ||
+			NLMISC::toLower((*its).second.PacsRBank) == NLMISC::toLower(name+".rbank"))
 		{
 			if (found == _SheetMap.end())
 			{
@@ -264,14 +264,14 @@ void	CContinentContainer::initPacsPrim(const string &path)
 	for(k=0; k<fileNames.size(); ++k)
 	{
 		// check extension
-		if (strlwr(CFile::getExtension(fileNames[k])) != "pacs_prim")
+		if (NLMISC::toLower(CFile::getExtension(fileNames[k])) != "pacs_prim")
 		{
 			// not a pacs primitive, skip it..			
 			continue;
 		}
 		try
 		{		
-			string	ppName = strlwr(CFile::getFilenameWithoutExtension(fileNames[k]));
+			string	ppName = NLMISC::toLower(CFile::getFilenameWithoutExtension(fileNames[k]));
 
 			if (_PacsPrimMap.find(ppName) != _PacsPrimMap.end())
 				continue;
@@ -288,7 +288,7 @@ void	CContinentContainer::initPacsPrim(const string &path)
 				nlwarning("Couldn't load prim block '%s'", fileNames[k].c_str());
 			}
 		}
-		catch (NLMISC::EStream &e)
+		catch (const NLMISC::EStream &e)
 		{
 			nlwarning("Couldn't load Pacs Primitive Block file '%s': %s", fileNames[k].c_str(), e.what());
 		}
@@ -348,8 +348,8 @@ void	CContinentContainer::loadPacsPrims(const CSheet &sheet, NLPACS::UMoveContai
 			{
 				TPacsPrimMap::iterator pbIt;
 
-				string	shapeName = strlwr(CFile::getFilenameWithoutExtension(igLoader.getShapeName(k)));
-				string	instanceName = strlwr(CFile::getFilenameWithoutExtension(igLoader.getInstanceName(k)));
+				string	shapeName = NLMISC::toLower(CFile::getFilenameWithoutExtension(igLoader.getShapeName(k)));
+				string	instanceName = NLMISC::toLower(CFile::getFilenameWithoutExtension(igLoader.getInstanceName(k)));
 
 				bool	isTrigger = false;
 				bool	isZC = false;
@@ -389,7 +389,7 @@ void	CContinentContainer::loadPacsPrims(const CSheet &sheet, NLPACS::UMoveContai
 				}
 			}
 		}
-		catch(Exception &e)
+		catch(const Exception &e)
 		{
 			nlwarning("Failed to load IG '%s': %s", igs[i].c_str(), e.what());
 		}

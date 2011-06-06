@@ -29,6 +29,7 @@
 #include "mission_manager/mission_parser.h"
 #include "nel/misc/algo.h"
 #include "game_share/fame.h"
+#include "game_share/pvp_clan.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -39,6 +40,7 @@ Steps linked with kill events
 	-kill_fauna
 	-kill_species ( from the GSPeople::EPeople enum )
 	-kill_npc
+	-kill_player
 ***************************************************************************************************/
 
 // ----------------------------------------------------------------------------
@@ -795,7 +797,6 @@ class CMissionStepKillByName : public IMissionStepTemplate
 	{
 		if ( event.Type == CMissionEvent::Kill )
 		{
-			CMissionStepKillByName & eventSpe = (CMissionStepKillByName&)event;
 			CCreature * c = CreatureManager.getCreature( event.TargetEntity );
 			if ( !c )
 			{
@@ -888,3 +889,206 @@ class CMissionStepKillByName : public IMissionStepTemplate
 	MISSION_STEP_GETNEWPTR(CMissionStepKillByName)
 };
 MISSION_REGISTER_STEP(CMissionStepKillByName,"kill_npc_by_name");
+
+
+
+
+
+
+// ----------------------------------------------------------------------------
+class CMissionStepKillPlayer : public IMissionStepTemplate
+{
+	struct CSubStep
+	{
+		sint32	Clan;
+		sint32	MinLevel;
+		sint32	MaxLevel;
+		uint16	Quantity;
+	};
+
+
+	virtual bool buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	{
+		_SourceLine = line;
+		_Place = 0xFFFF;
+
+		if ( script.size() < 2 || script.size() > 3)
+		{
+			MISLOGSYNTAXERROR("<clan_name> <min_level> <max_level> <quantity> *[; <clan_name> <min_level> <max_level> <quantity>] [:<place>]");
+			return false;
+		}
+		std::vector< std::string > subs;
+		NLMISC::splitString( script[1],";", subs );
+		for ( uint i = 0; i < subs.size(); i++ )
+		{
+			std::vector< std::string > args;
+			CMissionParser::tokenizeString( subs[i]," \t", args );
+			if ( args.size() != 4 )
+			{
+				MISLOGSYNTAXERROR("<clan_name> <min_level> <max_level> <quantity> *[; <clan_name> <min_level> <max_level> <quantity>] [:<place>]");
+				return false;
+			}
+			CSubStep subStep;
+			subStep.Clan = PVP_CLAN::getFactionIndex(PVP_CLAN::fromString(args[0]));
+			if ( subStep.Clan == CStaticFames::INVALID_FACTION_INDEX )
+			{
+				MISLOGERROR("invalid faction name (Allowed = kami/karavan/tryker/matis/fyros/zorai)");
+				return false;
+			}
+//			missionData.ChatParams.push_back( make_pair( args[0], STRING_MANAGER::clan ) );
+			subStep.MinLevel = atoi( args[1].c_str() ) * kFameMultipler;
+			subStep.MaxLevel = atoi( args[2].c_str() ) * kFameMultipler;
+			if ( subStep.MinLevel >= subStep.MaxLevel )
+			{
+				MISLOGERROR("min_level >= max_level");
+				return false;
+			}
+			subStep.Quantity = (uint16) atoi( args[3].c_str() );
+			if ( subStep.Quantity == 0 )
+			{
+				MISLOGERROR("invalid quantity 0");
+				return false;
+			}
+			_SubSteps.push_back( subStep );
+		}
+
+		if ( script.size() == 3 )
+		{
+			string placeStr = CMissionParser::getNoBlankString( script[2] );
+			missionData.ChatParams.push_back( make_pair(placeStr,STRING_MANAGER::place) );
+			CPlace * place = CZoneManager::getInstance().getPlaceFromName( placeStr );
+			if ( !place )
+			{
+				MISLOGERROR1("invalid place '%s'", script[2].c_str());
+				return false;
+			}
+			else {_Place = place->getId();}
+		}
+		return true;
+	}
+
+
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	{
+		if ( event.Type == CMissionEvent::KillPlayer )
+		{
+			CCharacter * victim = PlayerManager.getChar( event.TargetEntity );
+
+			if ( !victim )
+			{
+				LOGMISSIONSTEPERROR("kill_player : invalid victim " + toString(event.TargetEntity.getIndex()));
+			}
+			else
+			{
+				sint32 victimFame = CFameInterface::getInstance().getFameIndexed(victim->getId(), _SubSteps[subStepIndex].Clan);
+				if ( (victimFame > _SubSteps[subStepIndex].MinLevel) && 
+					 (victimFame < _SubSteps[subStepIndex].MaxLevel) )
+				{
+					if ( _Place != 0xFFFF )
+					{
+						float gooDistance;
+						const CPlace * stable = NULL;
+						std::vector<const CPlace *> places;
+						const CRegion * region = NULL;
+						const CContinent * continent = NULL;
+						if ( !CZoneManager::getInstance().getPlace( victim->getState().X, victim->getState().Y, gooDistance, &stable, places, &region , &continent ) )
+							return 0;
+						if ( continent && continent->getId() == _Place )
+						{
+							LOGMISSIONSTEPSUCCESS("kill_player");
+							return 1;
+						}
+						if ( region && region->getId() == _Place )
+						{
+							LOGMISSIONSTEPSUCCESS("kill_player");
+							return 1;
+						}
+						for ( uint i = 0; i < places.size(); i++ )
+						{
+							if ( places[i] && places[i]->getId() == _Place )
+							{
+								LOGMISSIONSTEPSUCCESS("kill_player");
+								return 1;
+							}
+						}
+						return 0;
+					}
+					else
+					{
+						LOGMISSIONSTEPSUCCESS("kill_player");
+						return 1;
+					}
+				}
+			}
+		}
+		return 0;
+	}
+	
+
+	void getInitState( std::vector<uint32>& ret )
+	{
+		ret.clear();
+		ret.resize( _SubSteps.size() );
+		for ( uint i = 0; i < _SubSteps.size(); i++ )
+		{
+			ret[i] = _SubSteps[i].Quantity;
+		}
+	}
+
+
+	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	{
+		static const std::string stepText = "MIS_KILL_PLAYER";
+		static const std::string stepTextLoc = "MIS_KILL_PLAYER_LOC";
+		if ( _Place != 0xFFFF )
+			retParams.resize(3);
+		else
+			retParams.resize(2);
+		textPtr = &stepText;
+		nlassert( _SubSteps.size() == subStepStates.size() );
+		for ( uint i  = 0; i < subStepStates.size(); i++ )
+		{
+			if( subStepStates[i] != 0 )
+			{
+				nbSubSteps++;
+				retParams.push_back(STRING_MANAGER::TParam());
+				retParams.back().Type = STRING_MANAGER::faction;
+				retParams.back().Enum = _SubSteps[i].Clan;
+	
+				retParams.push_back(STRING_MANAGER::TParam());
+				retParams.back().Type = STRING_MANAGER::integer;
+				retParams.back().Int = _SubSteps[i].MinLevel;
+
+				retParams.push_back(STRING_MANAGER::TParam());
+				retParams.back().Type = STRING_MANAGER::integer;
+				retParams.back().Int = _SubSteps[i].MaxLevel;
+			}
+		}
+		/*
+		if ( _Place != 0xFFFF )
+		{
+			STRING_MANAGER::TParam param;
+			param.Type = STRING_MANAGER::place;
+			CPlace * place = CZoneManager::getInstance().getPlaceFromId(_Place);
+			if ( !place )
+			{
+				MISLOG("sline:%u ERROR : kill_player : Invalid place %u", _SourceLine, _Place);
+			}
+			else
+			{
+				param.Identifier = place->getName();
+				retParams.push_back(param);
+			}
+			textPtr = &stepTextLoc;
+		}
+		else
+		*/
+		textPtr = &stepText;
+	}
+
+	std::vector< CSubStep >	_SubSteps;
+	uint16					_Place;
+
+	MISSION_STEP_GETNEWPTR(CMissionStepKillPlayer)
+};
+MISSION_REGISTER_STEP(CMissionStepKillPlayer, "kill_player");
