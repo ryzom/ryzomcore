@@ -179,6 +179,11 @@ public:
 	void removeMission(CMissionGuild * mission, TMissionResult result);
 	void addSuccessfulMission(CMissionTemplate * templ);
 	bool processMissionEvent( CMissionEvent & event, TAIAlias alias = CAIAliasTranslator::Invalid);
+	///\return the mission
+	inline std::vector<CMissionGuild*> & getMissions()
+	{
+		// To Do
+	}
 	//@}
 
 	/// inventory management

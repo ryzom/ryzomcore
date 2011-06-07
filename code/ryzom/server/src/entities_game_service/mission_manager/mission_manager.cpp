@@ -846,6 +846,10 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 		inst = module->pickMission( templ->Alias );
 		if (!inst)
 			return;
+
+		/// /!\ Do the same thing that the team missions but with the loop: for ( uint i = MaxGroupMissionCount; i < MaxGroupMissionCount + MaxGuildMissionCount; i++ )
+		/// Instead of for ( uint i = 0; i < MaxGroupMissionCount; i++ ), so that we use available space for guild missions
+
 		/// todo guild mission : see solo
 		/*
 		todo guild mission : implement that in module
