@@ -38,11 +38,15 @@ public Q_SLOTS:
 	void handleValidation();
 	void handleCompile();
 	void handlePublish();
+	void handleAllDoubleClick(const QModelIndex &index);
+	void handleDataDirButton();
+	void handleDataDirChanged(const QString &text);
 
 private:
     Ui::MissionCompilerMainWindow *ui;
 
 	void updateCompileLog();
+	void populateAllPrimitives(const QString &dataDir = QString());
 	bool parsePrimForMissions(NLLIGO::IPrimitive const *prim, TMissionContainer &missions);
 	void compileMission(bool publish=false);
 
@@ -53,6 +57,7 @@ private:
 	QSortFilterProxyModel *m_filteredProxyModel;
 	QRegExp *m_regexpFilter;
 	QString m_compileLog;
+	QString m_lastDir;
 
 	NLLIGO::CLigoConfig m_ligoConfig;
 };

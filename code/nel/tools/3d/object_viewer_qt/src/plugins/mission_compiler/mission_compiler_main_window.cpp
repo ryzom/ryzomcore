@@ -9,6 +9,8 @@
 #include <QColorDialog>
 #include <QSettings>
 #include <QTextStream>
+#include <QFileDialog>
+#include <QDirIterator>
 
 #include "../core/icore.h"
 #include "../core/imenu_manager.h"
@@ -27,6 +29,7 @@ MissionCompilerMainWindow::MissionCompilerMainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+	m_lastDir = ".";
 	m_compileLog = "";
 	updateCompileLog();
 
@@ -35,24 +38,11 @@ MissionCompilerMainWindow::MissionCompilerMainWindow(QWidget *parent) :
 
 	m_undoStack = new QUndoStack(this);
 
-	// Populate the "all" primitives box.
-	QStringList list;
-	std::vector<std::string> paths;
-	NLMISC::CPath::getFileList("primitive", paths);
-	
-	std::vector<std::string>::iterator itr = paths.begin();
-	while( itr != paths.end() )
-	{
-		const char *path2 = (*itr).c_str();
-		list << path2;
-		++itr;
-	}
-
 	m_regexpFilter = new QRegExp();
 	m_regexpFilter->setPatternSyntax(QRegExp::FixedString);
 	m_regexpFilter->setCaseSensitivity(Qt::CaseInsensitive);
 	
-	m_allPrimitivesModel = new QStringListModel(list, this);
+	m_allPrimitivesModel = new QStringListModel(this);
 	m_filteredProxyModel = new QSortFilterProxyModel(this);
 	m_filteredProxyModel->setSourceModel(m_allPrimitivesModel);
 	m_filteredProxyModel->setDynamicSortFilter(true);
@@ -65,10 +55,61 @@ MissionCompilerMainWindow::MissionCompilerMainWindow(QWidget *parent) :
 	connect(ui->actionValidate, SIGNAL(triggered()), this, SLOT(handleValidation()));
 	connect(ui->actionCompile, SIGNAL(triggered()), this, SLOT(handleCompile()));
 	connect(ui->actionPublish, SIGNAL(triggered()), this, SLOT(handlePublish()));
+	connect(ui->allPrimitivesList, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(handleAllDoubleClick(const QModelIndex &)));
+	connect(ui->dataDirButton, SIGNAL(clicked()), this, SLOT(handleDataDirButton()));
+	connect(ui->dataDirEdit, SIGNAL(textChanged(const QString &)), this, SLOT(handleDataDirChanged(const QString &)));
+
+	// Set the default data dir to the primitives path.
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
+	m_lastDir = settings->value(Core::Constants::PRIMITIVES_PATH).toString();
+	ui->dataDirEdit->setText(m_lastDir);
+	populateAllPrimitives(m_lastDir);
+	settings->endGroup();
 
 	NLLIGO::Register();
 	m_ligoConfig.readPrimitiveClass(NLMISC::CPath::lookup("world_editor_classes.xml").c_str(), false);
 	NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &m_ligoConfig;
+}
+
+void MissionCompilerMainWindow::populateAllPrimitives(const QString &dataDir)
+{
+	// First we need to clear out the models entirely.
+	QStringList emptyList;
+	m_selectedPrimitivesModel->setStringList(emptyList);
+	m_allPrimitivesModel->setStringList(emptyList);
+
+	
+	// Populate the "all" primitives box.
+	QStringList list;
+	
+	// Filter for only primitive files.
+	QStringList filters;
+	filters << "*.primitive";
+
+	QDirIterator it(dataDir, filters, QDir::Files, QDirIterator::Subdirectories|QDirIterator::FollowSymlinks);
+	while(it.hasNext())
+	{
+		it.next();
+		list <<  it.fileName();
+	}
+
+	m_allPrimitivesModel->setStringList(list);
+}
+void MissionCompilerMainWindow::handleDataDirChanged(const QString &text)
+{
+	populateAllPrimitives(text);
+}
+
+void MissionCompilerMainWindow::handleDataDirButton()
+{
+	QString newPath = QFileDialog::getExistingDirectory(this, "", m_lastDir);
+	if(!newPath.isEmpty())
+	{
+		ui->dataDirEdit->setText(newPath);
+		m_lastDir = newPath;
+		populateAllPrimitives(newPath);
+	}
 }
 
 void MissionCompilerMainWindow::handleFilterChanged(const QString &text)
@@ -85,6 +126,19 @@ void MissionCompilerMainWindow::handleCompile()
 void MissionCompilerMainWindow::handlePublish()
 {
 	compileMission(true);
+}
+
+void MissionCompilerMainWindow::handleAllDoubleClick(const QModelIndex &index)
+{
+	const QAbstractItemModel *model = index.model();
+	QString item = model->data(index).toString();
+	nlinfo("all primitives was double clicked: %s", item.toAscii().data());
+
+	m_filteredProxyModel->removeRows(index.row(),1);
+
+	QStringList list = m_selectedPrimitivesModel->stringList();
+	list << item;
+	m_selectedPrimitivesModel->setStringList(list);
 }
 
 void MissionCompilerMainWindow::compileMission(bool publish)
