@@ -50,14 +50,25 @@ MissionCompilerMainWindow::MissionCompilerMainWindow(QWidget *parent) :
 	ui->allPrimitivesList->setModel(m_filteredProxyModel);
 	m_selectedPrimitivesModel = new QStringListModel(this);
 	ui->selectedPrimitivesList->setModel(m_selectedPrimitivesModel);
-
-	connect(ui->filterEdit, SIGNAL(textEdited(const QString&)), this, SLOT(handleFilterChanged(const QString&)));
+	
+	// Connections for toolbar buttons.
 	connect(ui->actionValidate, SIGNAL(triggered()), this, SLOT(handleValidation()));
 	connect(ui->actionCompile, SIGNAL(triggered()), this, SLOT(handleCompile()));
 	connect(ui->actionPublish, SIGNAL(triggered()), this, SLOT(handlePublish()));
+	
+	// Connections for selected item moves.
 	connect(ui->allPrimitivesList, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(handleAllDoubleClick(const QModelIndex &)));
+	connect(ui->selectedPrimitivesList, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(handleSelDoubleClick(const QModelIndex &)));
+	connect(ui->addSelectedButton, SIGNAL(clicked()), this, SLOT(handleMoveSelectedRight()));
+	connect(ui->removeSelectedButton, SIGNAL(clicked()), this, SLOT(handleMoveSelectedLeft()));
+	connect(ui->addAllButton, SIGNAL(clicked()), this, SLOT(handleMoveAllRight()));
+	connect(ui->removeAllButton, SIGNAL(clicked()), this, SLOT(handleMoveAllLeft()));
+
+	// Connections for the filter group box.
 	connect(ui->dataDirButton, SIGNAL(clicked()), this, SLOT(handleDataDirButton()));
 	connect(ui->dataDirEdit, SIGNAL(textChanged(const QString &)), this, SLOT(handleDataDirChanged(const QString &)));
+	connect(ui->filterEdit, SIGNAL(textEdited(const QString&)), this, SLOT(handleFilterChanged(const QString&)));
+	connect(ui->resetFiltersButton, SIGNAL(clicked()), this, SLOT(handleResetFiltersButton()));
 
 	// Set the default data dir to the primitives path.
 	QSettings *settings = Core::ICore::instance()->settings();
@@ -96,6 +107,14 @@ void MissionCompilerMainWindow::populateAllPrimitives(const QString &dataDir)
 
 	m_allPrimitivesModel->setStringList(list);
 }
+
+void MissionCompilerMainWindow::handleResetFiltersButton()
+{
+	handleDataDirChanged(m_lastDir);
+	ui->filterEdit->setText("");
+	handleFilterChanged("");
+}
+
 void MissionCompilerMainWindow::handleDataDirChanged(const QString &text)
 {
 	populateAllPrimitives(text);
@@ -128,17 +147,58 @@ void MissionCompilerMainWindow::handlePublish()
 	compileMission(true);
 }
 
+void MissionCompilerMainWindow::handleMoveSelectedRight()
+{
+	QModelIndexList indexes = ui->allPrimitivesList->selectionModel()->selectedIndexes();
+	while(!indexes.isEmpty())
+	{
+		const QModelIndex index = indexes.takeFirst();
+		moveSelectedItem(index, m_allPrimitivesModel, m_selectedPrimitivesModel);
+		indexes = ui->allPrimitivesList->selectionModel()->selectedIndexes();
+	}
+}
+
+void MissionCompilerMainWindow::handleMoveAllRight()
+{
+	ui->allPrimitivesList->selectAll();
+	handleMoveSelectedRight();
+}
+
+void MissionCompilerMainWindow::handleMoveSelectedLeft()
+{
+	QModelIndexList indexes = ui->selectedPrimitivesList->selectionModel()->selectedIndexes();
+	while(!indexes.isEmpty())
+	{
+		const QModelIndex index = indexes.takeFirst();
+		moveSelectedItem(index, m_selectedPrimitivesModel, m_allPrimitivesModel);
+		indexes = ui->selectedPrimitivesList->selectionModel()->selectedIndexes();
+	}
+}
+
+void MissionCompilerMainWindow::handleMoveAllLeft()
+{
+	ui->selectedPrimitivesList->selectAll();
+	handleMoveSelectedLeft();
+}
+
+void MissionCompilerMainWindow::moveSelectedItem(const QModelIndex &index, QStringListModel *from, QStringListModel *to)
+{
+	QString item = from->data(index, Qt::DisplayRole).toString();
+
+	from->removeRows(index.row(),1);
+	QStringList list = to->stringList();
+	list << item;
+	to->setStringList(list);
+}
+
 void MissionCompilerMainWindow::handleAllDoubleClick(const QModelIndex &index)
 {
-	const QAbstractItemModel *model = index.model();
-	QString item = model->data(index).toString();
-	nlinfo("all primitives was double clicked: %s", item.toAscii().data());
+	moveSelectedItem(index, m_allPrimitivesModel, m_selectedPrimitivesModel);
+}
 
-	m_filteredProxyModel->removeRows(index.row(),1);
-
-	QStringList list = m_selectedPrimitivesModel->stringList();
-	list << item;
-	m_selectedPrimitivesModel->setStringList(list);
+void MissionCompilerMainWindow::handleSelDoubleClick(const QModelIndex &index)
+{
+	moveSelectedItem(index, m_selectedPrimitivesModel, m_allPrimitivesModel);
 }
 
 void MissionCompilerMainWindow::compileMission(bool publish)

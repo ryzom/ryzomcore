@@ -39,8 +39,14 @@ public Q_SLOTS:
 	void handleCompile();
 	void handlePublish();
 	void handleAllDoubleClick(const QModelIndex &index);
+	void handleSelDoubleClick(const QModelIndex &index);
+	void handleMoveSelectedRight();
+	void handleMoveSelectedLeft();
+	void handleMoveAllRight();
+	void handleMoveAllLeft();
 	void handleDataDirButton();
 	void handleDataDirChanged(const QString &text);
+	void handleResetFiltersButton();
 
 private:
     Ui::MissionCompilerMainWindow *ui;
@@ -49,6 +55,7 @@ private:
 	void populateAllPrimitives(const QString &dataDir = QString());
 	bool parsePrimForMissions(NLLIGO::IPrimitive const *prim, TMissionContainer &missions);
 	void compileMission(bool publish=false);
+	void moveSelectedItem(const QModelIndex &index, QStringListModel *from, QStringListModel *to);
 
 	QMenu *_toolModeMenu;
 	QUndoStack *m_undoStack;

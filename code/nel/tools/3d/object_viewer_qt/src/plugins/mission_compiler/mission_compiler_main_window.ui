@@ -239,6 +239,16 @@
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QPushButton" name="resetFiltersButton">
+               <property name="toolTip">
+                <string>Blanks out the filter and reloads all files from the data directory.</string>
+               </property>
+               <property name="text">
+                <string>Reset</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
           </layout>
