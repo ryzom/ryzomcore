@@ -1812,7 +1812,8 @@ bool execLoadScript(CStringWriter& stringWriter, vector<string> const& args)
 		NLMISC::CIFile file(NLMISC::CPath::lookup(args[2]));
 		
 		vector<string> lines;
-		while (!file.eof()) {
+		while (!file.eof())
+		{
 			const size_t bufferSize = 4*1024;
 			char buffer[bufferSize];
 			file.getline(buffer, bufferSize);
@@ -1844,7 +1845,8 @@ NLMISC_COMMAND(getInfo,"display returned values of buffered commands","")
 {
 	CLogStringWriter	stringWriter(&log);
 	
-	FOREACHC(strIt, vector<string>, bufferedRetStrings) {
+	FOREACHC(strIt, vector<string>, bufferedRetStrings)
+	{
 		stringWriter.append(*strIt);
 	}
 	
@@ -2995,7 +2997,8 @@ NLMISC_COMMAND(simulateBug, "simulate an old AIS bug; command is one of 'list', 
 				initBugSimulationTexts();
 				log.displayNL("Bug simulations");
 				log.displayNL("Id|Description                              |State");
-				for (int i=0; i<bugSimulationCount; ++i) {
+				for (int i=0; i<bugSimulationCount; ++i)
+				{
 					log.displayNL("%02d|%s|%s", i, simulateBugText(i), simulateBugs[i]?"on":"off");
 				}
 				return true;
