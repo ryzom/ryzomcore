@@ -21,8 +21,8 @@
 	named2csv: convert named_items.txt to .csv format and convert it back
 	to named_items.txt after changes.
 
-	use: named2csv.exe named_items.txt filter.script (to generate a .csv based on filter)
-		 named2csv.exe named_items.txt named_items.csv (to modify .txt with .csv)
+	use: named2csv named_items.txt filter.script (to generate a .csv based on filter)
+		 named2csv named_items.txt named_items.csv (to modify .txt with .csv)
 
  */
 
