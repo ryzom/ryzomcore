@@ -496,3 +496,44 @@ MACRO(RYZOM_SETUP_PREFIX_PATHS)
   ENDIF(NOT RYZOM_GAMES_PREFIX)
 
 ENDMACRO(RYZOM_SETUP_PREFIX_PATHS)
+
+MACRO(SETUP_EXTERNAL)
+  IF(WIN32)
+    FIND_PACKAGE(External REQUIRED)
+
+    INCLUDE(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake)
+    IF(MSVC10)
+      GET_FILENAME_COMPONENT(VC_ROOT_DIR "[HKEY_CURRENT_USER\\Software\\Microsoft\\VisualStudio\\10.0_Config;InstallDir]" ABSOLUTE)
+      # VC_ROOT_DIR is set to "registry" when a key is not found
+      IF(VC_ROOT_DIR MATCHES "registry")
+        GET_FILENAME_COMPONENT(VC_ROOT_DIR "[HKEY_CURRENT_USER\\Software\\Microsoft\\VCExpress\\10.0_Config;InstallDir]" ABSOLUTE)
+        IF(VC_ROOT_DIR MATCHES "registry")
+          MESSAGE(FATAL_ERROR "Unable to find VC++ 2010 directory!")
+        ENDIF(VC_ROOT_DIR MATCHES "registry")
+      ENDIF(VC_ROOT_DIR MATCHES "registry")
+      # convert IDE fullpath to VC++ path
+      STRING(REGEX REPLACE "Common7/.*" "VC" VC_DIR ${VC_ROOT_DIR})
+    ELSE(MSVC10)
+      IF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+        # convert IDE fullpath to VC++ path
+        STRING(REGEX REPLACE "Common7/.*" "VC" VC_DIR ${CMAKE_MAKE_PROGRAM})
+      ELSE(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+        # convert compiler fullpath to VC++ path
+        STRING(REGEX REPLACE "VC/bin/.+" "VC" VC_DIR ${CMAKE_CXX_COMPILER})
+      ENDIF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+    ENDIF(MSVC10)
+  ENDIF(WIN32)
+
+  IF(WITH_STLPORT)
+    FIND_PACKAGE(STLport REQUIRED)
+    INCLUDE_DIRECTORIES(${STLPORT_INCLUDE_DIR})
+    IF(WIN32)
+      SET(VC_INCLUDE_DIR "${VC_DIR}/include")
+
+      FIND_PACKAGE(WindowsSDK REQUIRED)
+      # use VC++ and Windows SDK include paths
+      INCLUDE_DIRECTORIES(${VC_INCLUDE_DIR} ${WINSDK_INCLUDE_DIR})
+    ENDIF(WIN32)
+  ENDIF(WITH_STLPORT)
+ 
+ENDMACRO(SETUP_EXTERNAL)
