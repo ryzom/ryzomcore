@@ -3027,7 +3027,7 @@ void CPatchThread::xDeltaPatch(const string &patch, const string &src, const str
 	}
 
 
-	// Launching xdelta.exe
+	// Launching xdelta
 /*
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;

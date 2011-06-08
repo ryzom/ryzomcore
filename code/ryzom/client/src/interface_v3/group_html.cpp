@@ -878,6 +878,10 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 				fromString(value[HTML_FONT_SIZE], fontsize);
 				_FontSize.push_back(fontsize);
 			}
+			else
+			{
+				_FontSize.push_back(_FontSize.empty() ? TextFontSize : _FontSize.back());
+			}
 		}
 			break;
 		case HTML_BR:

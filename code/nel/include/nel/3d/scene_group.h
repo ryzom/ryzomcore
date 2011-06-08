@@ -107,7 +107,7 @@ public:
 		bool	Visible;
 
 		/// Precomputed Lighting.
-		// If true (false by default), then the instance don't cast shadow (used by ig_lighter.exe).
+		// If true (false by default), then the instance don't cast shadow (used by ig_lighter).
 		bool	DontCastShadow;
 		// If true (false by default), then the instance's lighting will not be precomputed.
 		bool	AvoidStaticLightPreCompute;
@@ -120,7 +120,7 @@ public:
 		 *	If 0xFF => take Ambient of the sun.
 		 */
 		uint8	LocalAmbientId;
-		/** if true (false by default), the instance don't cast shadow, but ONLY FOR ig_lighter.exe (ig_lighter_lib)
+		/** if true (false by default), the instance don't cast shadow, but ONLY FOR ig_lighter (ig_lighter_lib)
 		 *	(zone_lighter and zone_ig_lighter ignore it).
 		 *	This is a special trick for the "Matis Serre" where the exterior mesh cast shadow in the interior, but
 		 *	is not visible in the interior in realTime because of cluster clipping.... omg :(
