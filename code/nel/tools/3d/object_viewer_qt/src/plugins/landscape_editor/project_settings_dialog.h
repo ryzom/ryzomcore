@@ -36,6 +36,9 @@ public:
 
 	QString dataPath() const;
 
+private Q_SLOTS:
+	void selectPath();
+
 private:
 
 	Ui::ProjectSettingsDialog m_ui;

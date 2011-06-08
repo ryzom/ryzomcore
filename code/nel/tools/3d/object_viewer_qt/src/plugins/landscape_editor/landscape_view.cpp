@@ -16,7 +16,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Project includes
-#include "project_settings_dialog.h"
+#include "landscape_view.h"
 #include "landscape_editor_constants.h"
 
 #include "../core/icore.h"
@@ -26,36 +26,27 @@
 #include <nel/misc/debug.h>
 
 // Qt includes
-#include <QtCore/QSettings>
-#include <QtGui/QFileDialog>
-#include <QtGui/QFileDialog>
+
 
 namespace LandscapeEditor
 {
 
-ProjectSettingsDialog::ProjectSettingsDialog(const QString &dataPath, QWidget *parent)
-	: QDialog(parent)
+LandscapeView::LandscapeView(QWidget *parent)
+	: QGraphicsView(parent)
 {
-	m_ui.setupUi(this);
-	m_ui.pathLineEdit->setText(dataPath);
-	setFixedHeight(sizeHint().height());
-	connect(m_ui.selectPathButton, SIGNAL(clicked()), this, SLOT(selectPath()));
+    setDragMode(ScrollHandDrag);
 }
 
-ProjectSettingsDialog::~ProjectSettingsDialog()
+LandscapeView::~LandscapeView()
 {
 }
 
-QString ProjectSettingsDialog::dataPath() const
+void LandscapeView::wheelEvent(QWheelEvent *event)
 {
-	return m_ui.pathLineEdit->text();
-}
-
-void ProjectSettingsDialog::selectPath()
-{
-	QString dataPath = QFileDialog::getExistingDirectory(this, tr("Select data path"), m_ui.pathLineEdit->text());
-	if (!dataPath.isEmpty())
-		m_ui.pathLineEdit->setText(dataPath);
+    double numDegrees = event->delta() / 8.0;
+    double numSteps = numDegrees / 15.0;
+    double factor = std::pow(1.125, numSteps);
+    scale(factor, factor);
 }
 
 } /* namespace LandscapeEditor */

@@ -164,6 +164,7 @@ bool ZoneBuilder::initZoneBank (const QString &pathName)
 		if (!m_zoneBank.addElement((pathName + file).toStdString(), error))
 			QMessageBox::critical(0, QObject::tr("Landscape editor"), QString(error.c_str()), QMessageBox::Ok);
 	}
+	delete dir;
 	return true;
 }
 

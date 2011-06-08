@@ -19,8 +19,18 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
+    <property name="margin">
+     <number>3</number>
+    </property>
+    <property name="spacing">
+     <number>3</number>
+    </property>
     <item row="0" column="0">
-     <widget class="QGraphicsView" name="graphicsView"/>
+     <widget class="LandscapeEditor::LandscapeView" name="graphicsView">
+      <property name="dragMode">
+       <enum>QGraphicsView::NoDrag</enum>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -72,6 +82,11 @@
    <extends>QWidget</extends>
    <header>list_zones_widget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LandscapeEditor::LandscapeView</class>
+   <extends>QGraphicsView</extends>
+   <header>landscape_view.h</header>
   </customwidget>
  </customwidgets>
  <resources>

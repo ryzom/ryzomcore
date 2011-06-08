@@ -18,6 +18,8 @@
 // Project includes
 #include "landscape_editor_window.h"
 #include "landscape_editor_constants.h"
+#include "builder_zone.h"
+#include "landscape_scene.h"
 #include "project_settings_dialog.h"
 
 #include "../core/icore.h"
@@ -30,6 +32,8 @@
 // Qt includes
 #include <QtCore/QSettings>
 #include <QtGui/QFileDialog>
+#include <QtOpenGL/QGLWidget>
+#include <QtGui/QGraphicsPixmapItem>
 
 namespace LandscapeEditor
 {
@@ -45,6 +49,12 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	m_zoneBuilder->init("e:/-nel-/install/continents/newbieland", false);
 	m_ui.zoneListWidget->setZoneBuilder(m_zoneBuilder);
 	m_ui.zoneListWidget->updateUi();
+
+	m_landscapeScene = new LandscapeScene(this);
+	m_ui.graphicsView->setScene(m_landscapeScene);
+	m_ui.graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::SampleBuffers)));
+
+
 	createMenus();
 	createToolBars();
 	readSettings();
@@ -113,6 +123,8 @@ void LandscapeEditorWindow::readSettings()
 {
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Constants::LANDSCAPE_EDITOR_SECTION);
+	restoreState(settings->value(Constants::LANDSCAPE_WINDOW_STATE).toByteArray());
+	restoreGeometry(settings->value(Constants::LANDSCAPE_WINDOW_GEOMETRY).toByteArray());
 	settings->endGroup();
 }
 
@@ -120,6 +132,8 @@ void LandscapeEditorWindow::writeSettings()
 {
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Constants::LANDSCAPE_EDITOR_SECTION);
+	settings->setValue(Constants::LANDSCAPE_WINDOW_STATE, saveState());
+	settings->setValue(Constants::LANDSCAPE_WINDOW_GEOMETRY, saveGeometry());
 	settings->endGroup();
 	settings->sync();
 }

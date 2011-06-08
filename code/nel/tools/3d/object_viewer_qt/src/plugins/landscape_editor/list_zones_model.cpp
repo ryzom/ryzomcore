@@ -59,28 +59,26 @@ QVariant ListZonesModel::data(const QModelIndex &index, int role) const
 	if (!index.isValid())
 		return QVariant();
 
-	if (role == Qt::TextAlignmentRole)
+	switch (role)
 	{
+	case Qt::TextAlignmentRole:
 		return int(Qt::AlignLeft | Qt::AlignVCenter);
-	}
-	else if (role == Qt::DisplayRole)
-	{
+	case Qt::DisplayRole:
 		return m_listNames.at(index.row());
-	}
-	else if (role == Qt::DecorationRole)
+	case Qt::DecorationRole:
 	{
 		QPixmap *pixmap = getPixmap(m_listNames.at(index.row()));
 		return qVariantFromValue(*pixmap);
 	}
-	return QVariant();
+	default:
+		return QVariant();
+	}
 }
 
 QVariant ListZonesModel::headerData(int section,
 									Qt::Orientation /* orientation */,
 									int role) const
 {
-	if (role != Qt::DisplayRole)
-		return QVariant();
 	return QVariant();
 }
 

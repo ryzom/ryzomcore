@@ -26,6 +26,8 @@ const char * const LANDSCAPE_EDITOR_PLUGIN	= "LandscapeEditor";
 
 //settings
 const char * const LANDSCAPE_EDITOR_SECTION = "LandscapeEditor";
+const char * const LANDSCAPE_WINDOW_STATE = "LandscapeWindowState";
+const char * const LANDSCAPE_WINDOW_GEOMETRY = "LandscapeWindowGeometry";
 
 //resources
 const char * const ICON_LANDSCAPE_ITEM = ":/icons/ic_nel_landscape_item.png";

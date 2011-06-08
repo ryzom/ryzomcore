@@ -290,7 +290,14 @@
     </widget>
    </item>
    <item row="2" column="0">
-    <widget class="QListView" name="listView"/>
+    <widget class="QListView" name="listView">
+     <property name="alternatingRowColors">
+      <bool>false</bool>
+     </property>
+     <property name="verticalScrollMode">
+      <enum>QAbstractItemView::ScrollPerPixel</enum>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
