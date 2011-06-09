@@ -21,9 +21,7 @@
 #ifndef CHARACTER_SYNC_ITF
 #define CHARACTER_SYNC_ITF
 #include "nel/misc/types_nl.h"
-#if defined(NL_COMP_VC8) || defined(NL_COMP_VC9)
-#	include <memory>
-#endif
+#include <memory>
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/string_conversion.h"
 #include "nel/net/message.h"
@@ -1139,12 +1137,12 @@ namespace CHARSYNC
 
 		}
 			//
-		ucstring getFullName() const
+		const ucstring& getFullName() const
 		{
 			return _FullName;
 		}
 
-		void setFullName(ucstring value)
+		void setFullName(const ucstring &value)
 		{
 
 				_FullName = value;

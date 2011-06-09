@@ -1150,7 +1150,7 @@ public:
 			_QueryStatus.write(TThreadStatus(qs_lql_state, toString("Finished query %u", queryNumber)));
 
 		}
-		catch (CQueryParser::EInvalidQuery iq)
+		catch (const CQueryParser::EInvalidQuery &iq)
 		{
 			uint index= (uint)(iq.It - query.begin());
 			_QueryStatus.write(TThreadStatus(qs_log, toString("Error will parsing query near char %u : %s", index+1, iq.ErrorStr)));

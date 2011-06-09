@@ -135,21 +135,28 @@ void CAuraRootEffect::createEffectOnEntity(CEntityBase *entity, CEntityBase *cre
 			}
 			else
 			{
-				auraEffect->addLifeTime();
+				if (_Value < auraEffect->getParamValue())
+				{
+					auraEffect->stopEffect();
+				}
+				else
+				{
+					auraEffect->addLifeTime();
+					return;
+				}
 			}
-			return;
 		}
 	}
 
 	// no effect found, create one if the entity can receive this effect
 	static NLMISC::TGameCycle endDate;
-	if (character->isAuraEffective(_PowerType, endDate, creator->getId()) )
+	if (character->isAuraEffective(_PowerType, endDate, creator->getId()) || _IsFromConsumable )
 	{
 		CAuraBaseEffect *effect = IAuraEffectFactory::buildEffectFromPowerType(_PowerType, *this, entity->getEntityRowId());
 		if (effect)
 		{
+			effect->setIsFromConsumable(_IsFromConsumable);
 			effect->setEffectDisabledEndDate( CTickEventHandler::getGameCycle() + _TargetDisableTime );
-			
 			entity->addSabrinaEffect(effect);
 			character->useAura(_PowerType, CTickEventHandler::getGameCycle(), CTickEventHandler::getGameCycle() + _TargetDisableTime, creator->getId());
 
@@ -218,6 +225,7 @@ CAuraBaseEffect::CAuraBaseEffect( const CAuraRootEffect &rootEffect, TDataSetRow
 						CTickEventHandler::getGameCycle() + (NLMISC::TGameCycle)AurasUpdateFrequency.get() + 10)
 {		
 	_PowerType = rootEffect.powerType();
+	_IsFromConsumable = false;
 }
 
 void CAuraBaseEffect::addLifeTime()
@@ -252,8 +260,10 @@ void CAuraBaseEffect::removed()
 	
 	if (_EffectIndexInDB >= 0)
 	{
-		//		player->removeEffectInDB((uint8)_EffectIndexInDB, true);
-		player->disableEffectInDB( (uint8)_EffectIndexInDB,true, _DisabledEndDate);
+		if (_IsFromConsumable)
+			player->removeEffectInDB((uint8)_EffectIndexInDB, true);
+		else
+			player->disableEffectInDB( (uint8)_EffectIndexInDB,true, _DisabledEndDate);
 	}
 } // removed //
 

@@ -106,7 +106,7 @@ struct SExportOptions
 			CConfigFile::CVar &cvLandFile = cf.getVar("LandFile");
 			LandFile = cvLandFile.asString();
 		}
-		catch (EConfigFile &e)
+		catch (const EConfigFile &e)
 		{
 			string sTmp = string("ERROR : Error in config file : ") + e.what() + "\n";
 			outString (sTmp);
@@ -173,7 +173,7 @@ CZoneRegion *loadLand (const string &filename)
 			outString (sTmp);
 		}
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		string sTmp = string("Error in land file : ") + e.what();
 		outString (sTmp);
@@ -194,7 +194,7 @@ CInstanceGroup* LoadInstanceGroup (const char* sFilename)
 		{
 			newIG->serial (file);
 		}
-		catch (Exception &)
+		catch (const Exception &)
 		{
 			// Cannot save the file
 			delete newIG;
@@ -220,7 +220,7 @@ void SaveInstanceGroup (const char* sFilename, CInstanceGroup *pIG)
 		{
 			pIG->serial (file);
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			outString(string(e.what()));
 		}
@@ -339,7 +339,7 @@ int main(int nNbArg, char**ppArgs)
 				HeightMap1 = NULL;
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			string sTmp = string("Cant load height map : ") + options.HeightMapFile1 + " : " + e.what();
 			outString (sTmp);
@@ -365,7 +365,7 @@ int main(int nNbArg, char**ppArgs)
 				HeightMap2 = NULL;
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			string sTmp = string("Cant load height map : ") + options.HeightMapFile2 + " : " + e.what() + "\n";
 			outString (sTmp);

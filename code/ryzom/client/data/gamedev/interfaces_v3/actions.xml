@@ -27,6 +27,7 @@
 	<value value="fame"					hardtext="uiFameTitle" contexts="game"/>
 
 	<value value="gestionsets"			hardtext="uiHands" contexts="game, r2ed_anim_test"/>
+	<value value="gestionsets2"			hardtext="uiHands2" contexts="game, r2ed_anim_test"/>
 	<value value="inventory"			hardtext="uiInventory" contexts="game, r2ed_anim_test"/>
 	<value value="phrase_book"			hardtext="uiPhraseBook" contexts="game, r2ed_anim_test"/>
 	<value value="mailbox"				hardtext="uiMailBox" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
@@ -165,6 +166,30 @@
 			<value value="19" hardtext="uiNumber20"/>
 		</parameter>
 	</action>
+	<action name="run_shortcut"				hardtext="uiRunShortcut2" contexts="game, r2ed_anim_test">
+		<parameter hardtext="uiShortcutNumber">
+			<value value="20" hardtext="uiNumber01"/>
+			<value value="21" hardtext="uiNumber02"/>
+			<value value="22" hardtext="uiNumber03"/>
+			<value value="23" hardtext="uiNumber04"/>
+			<value value="24" hardtext="uiNumber05"/>
+			<value value="25" hardtext="uiNumber06"/>
+			<value value="26" hardtext="uiNumber07"/>
+			<value value="27" hardtext="uiNumber08"/>
+			<value value="28" hardtext="uiNumber09"/>
+			<value value="29" hardtext="uiNumber10"/>
+			<value value="30" hardtext="uiNumber11"/>
+			<value value="31" hardtext="uiNumber12"/>
+			<value value="32" hardtext="uiNumber13"/>
+			<value value="33" hardtext="uiNumber14"/>
+			<value value="34" hardtext="uiNumber15"/>
+			<value value="35" hardtext="uiNumber16"/>
+			<value value="36" hardtext="uiNumber17"/>
+			<value value="37" hardtext="uiNumber18"/>
+			<value value="38" hardtext="uiNumber19"/>
+			<value value="39" hardtext="uiNumber20"/>
+		</parameter>
+	</action>
 	<action name="select_shortcut_bar"		hardtext="uiSelectShortcutBar" contexts="game, r2ed_anim_test">
 		<parameter hardtext="uiShortcutBarNumber">
 			<value value="1" hardtext="uiNumber01"/>
@@ -262,6 +287,8 @@
 	<action name="toggle_chat"			hardtext="uiDebugToggleChat" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
 	<action name="camera_up"			hardtext="uiCameraUp" />
 	<action name="camera_down"			hardtext="uiCameraDown" />
+	<action name="camera_foreward"			hardtext="uiMoveForward" />
+	<action name="camera_backward"			hardtext="uiMoveBackward" />
 </action_category>
 
 <action_category name="windows" hardtext="uiWindows" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">

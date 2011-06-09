@@ -155,7 +155,7 @@ void CCallbackNetBase::processOneMessage ()
 	{
 		receive (msgin, &tsid);
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning(e.what());
 		return;

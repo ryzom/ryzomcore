@@ -270,7 +270,7 @@ void weldZones(const char *center)
 				adjZonesName[i]="empty";
 			}
 		}
-		catch(exception &e)
+		catch(const exception &e)
 		{
 			nlwarning ("ERROR %s\n", e.what ());
 			adjZoneFileFound[i] = false;

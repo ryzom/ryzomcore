@@ -68,14 +68,14 @@ int main(int argc, char **argv)
 		if(!init())
 			return EXIT_FAILURE;
 	}
-	catch(EFatalError &) { return EXIT_FAILURE; /* nothing to do */ }
-	catch(Exception &e)
+	catch(const EFatalError &) { return EXIT_FAILURE; /* nothing to do */ }
+	catch(const Exception &e)
 	{
 		try
 		{
 			nlerror ("Initialization of the application failed : %s", e.what());
 		}
-		catch(EFatalError &)
+		catch(const EFatalError &)
 		{
 			// nothing to do
 		}
@@ -90,14 +90,14 @@ int main(int argc, char **argv)
 	{
 		release();
 	}
-	catch(EFatalError &) { return EXIT_FAILURE; /* nothing to do */ }
-	catch(Exception &e)
+	catch(const EFatalError &) { return EXIT_FAILURE; /* nothing to do */ }
+	catch(const Exception &e)
 	{
 		try
 		{
 			nlerror ("Release of the application failed: %s", e.what());
 		}
-		catch(EFatalError &)
+		catch(const EFatalError &)
 		{
 			// nothing to do
 		}

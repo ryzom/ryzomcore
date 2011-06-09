@@ -196,7 +196,7 @@ static uint CheckZone(std::string middleZoneFile, float weldThreshold, float mid
 				zones[k].reset(::LoadZone(xPos + posOffs[k][0], yPos + posOffs[k][1], ext.empty() ? "" : "." + ext));
 			}
 		}
-		catch (NLMISC::Exception &e)
+		catch (const NLMISC::Exception &e)
 		{
 			nlinfo("Zones loading failed : %d", e.what());
 			return 0;

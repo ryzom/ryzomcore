@@ -1348,7 +1348,7 @@ static void parsePrimGrpFaunaSpawn(const CAIAliasDescriptionNode *treeNode,const
 			executeArgs.push_back(CAIActions::CArg(theSheet));
 			executeArgs.push_back(count);
 		}
-		catch (parsePopException	e)
+		catch (const parsePopException &e)
 		{
 			nlwarning("FaunaGroup: %s of %s : %s", nodeName(child).c_str(), treeNode->fullName().c_str(), e.what());
 		}
@@ -2850,7 +2850,7 @@ static void parsePrimGroupTemplate(const CAIAliasDescriptionNode *aliasNode, con
 						executeArgs.push_back(CAIActions::CArg(theSheet));
 						executeArgs.push_back(count);
 					}
-					catch (parsePopException	e)
+					catch (const parsePopException &e)
 					{
 						nlwarning("FaunaGroup: %s of %s : %s", nodeName(child).c_str(), aliasNode->fullName().c_str(), e.what());
 					}
@@ -3447,7 +3447,8 @@ static void parsePrimScript(const IPrimitive *prim, const std::string &mapName, 
 		std::vector<std::string>::const_iterator it = pcode->begin(), itEnd = pcode->end();
 		code = *it;
 		++it;
-		for(; it!=itEnd; ++it) {
+		for(; it!=itEnd; ++it)
+		{
 			code += "\n";
 			code += *it;
 		}

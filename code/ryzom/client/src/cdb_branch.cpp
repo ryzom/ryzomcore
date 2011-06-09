@@ -87,7 +87,7 @@ extern const char *CDBBankNames[INVALID_CDB_BANK+1];
 // reset all static data
 void CCDBNodeBranch::reset()
 {
-	for ( uint b=0; b!=INVALID_CDB_BANK; ++b )
+	for ( uint b=0; b<NB_CDB_BANKS; ++b )
 		_CDBBankToUnifiedIndexMapping[b].clear();
 	_UnifiedIndexToBank.clear();
 	_CDBLastUnifiedIndex = 0;

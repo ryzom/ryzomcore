@@ -151,9 +151,9 @@ void CPluginManager::readPluginPaths()
 	{
 		const QDir dir(searchPaths.takeFirst());
 #ifdef Q_OS_WIN
-		const QFileInfoList files = dir.entryInfoList(QStringList() << QString("*.dll"), QDir::Files);
+		const QFileInfoList files = dir.entryInfoList(QStringList() << QString("ovqt_plugin_*.dll"), QDir::Files);
 #else
-		const QFileInfoList files = dir.entryInfoList(QStringList() << QString("*.so"), QDir::Files);
+		const QFileInfoList files = dir.entryInfoList(QStringList() << QString("libovqt_plugin_*.so"), QDir::Files);
 #endif
 		Q_FOREACH (const QFileInfo &file, files)
 		pluginsList << file.absoluteFilePath();
@@ -292,4 +292,4 @@ void CPluginManager::deleteAll()
 	}
 }
 
-}; // namespace NLQT
+}; // namespace ExtensionSystem

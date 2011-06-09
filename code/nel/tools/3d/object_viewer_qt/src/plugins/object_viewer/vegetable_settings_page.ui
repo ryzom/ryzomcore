@@ -181,6 +181,17 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QToolButton" name="clearButton">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="object_viewer.qrc">
+         <normaloff>:/icons/ic_nel_reset_all.png</normaloff>:/icons/ic_nel_reset_all.png</iconset>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item row="5" column="0" colspan="4">

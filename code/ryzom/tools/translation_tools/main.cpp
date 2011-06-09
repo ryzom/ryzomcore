@@ -61,9 +61,11 @@
 *		trans_tool update_phrase_work
 *		trans_tool inject_clause
 *		trans_tool sort_trans_phrase
-
-
-
+*		trans_tool make_worksheet_diff
+*		trans_tool merge_worksheet_diff
+*		trans_tool crop_lines
+*		trans_tool extract_bot_names
+*		trans_tool extract_new_sheet_names
 
 */
 
@@ -78,6 +80,7 @@
 #include <algorithm>
 #include <stdio.h>
 #include <time.h>
+#include <iterator>
 
 using namespace std;
 using namespace NLMISC;
@@ -733,7 +736,8 @@ void cleanComment(const std::string & filename)
 			else
 			{
 				ucstring::size_type commentEnd = text.find(ucstring("\n"), commentBegin);
-				if (commentEnd != ucstring::npos) {
+				if (commentEnd != ucstring::npos)
+				{
 					commentEnd += 1;
 					ucstring comment = text.substr(commentBegin, commentEnd - commentBegin);
 					if (comment.find(ucstring("// HASH_VALUE")) != ucstring::npos

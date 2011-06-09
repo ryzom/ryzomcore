@@ -56,6 +56,11 @@ QString SoundSettingsPage::trCategory() const
 	return tr("Object Viewer");
 }
 
+QIcon SoundSettingsPage::categoryIcon() const
+{
+	return QIcon();
+}
+
 QWidget *SoundSettingsPage::createPage(QWidget *parent)
 {
 	m_page = new QWidget(parent);

@@ -313,7 +313,7 @@ void CChatTargetFilter::msgEntered(const ucstring &msg, CChatWindow *chatWindow)
 		// the target must be a player, make a tell on him
 		ChatMngr.tell(_TargetPlayer.toString(), msg);
 		// direct output in the chat
-		chatWindow->displayLocalPlayerTell(msg);
+		chatWindow->displayLocalPlayerTell(_TargetPlayer.toString(), msg);
 	}
 	else
 	{
@@ -382,7 +382,7 @@ void CChatTargetFilter::setTargetGroup(CChatGroup::TGroupType groupType, uint32 
 			case CChatGroup::say:	entry+="SAY";	break;
 			case CChatGroup::shout:	entry+="SHOUT";	break;
 			case CChatGroup::team:	if(!teamActive) return; entry+="GROUP";	break;
-			case CChatGroup::guild:	if(!guildActive) return; entry+="CLADE";	break;
+			case CChatGroup::guild:	entry+="CLADE";	break;
 			case CChatGroup::civilization:	entry+="CIVILIZATION";	break;
 			case CChatGroup::territory:	entry+="TERRITORY";	break;
 			case CChatGroup::universe:

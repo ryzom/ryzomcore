@@ -293,7 +293,7 @@ void	CMailForumService::cbOpenSession( CMessage& msgin, const std::string &servi
 
 		openSession(shardId, userName, cookie);
 	}
-	catch(Exception& e)
+	catch(const Exception& e)
 	{
 		nlwarning("Failed to open session: %s", e.what());
 	}
@@ -311,7 +311,7 @@ void	CMailForumService::cbCloseSession( CMessage& msgin, const std::string &serv
 
 		closeSession(shardId, userName);
 	}
-	catch(Exception& e)
+	catch(const Exception& e)
 	{
 		nlwarning("Failed to close session: %s", e.what());
 	}
@@ -330,7 +330,7 @@ void CMailForumService::cbRemoveUser( CMessage& msgin, const std::string &servic
 
 		removeUser(shardId, userName);
 	}
-	catch(Exception& e)
+	catch(const Exception& e)
 	{
 		nlwarning("Failed to remove user: %s", e.what());
 	}
@@ -349,7 +349,7 @@ void CMailForumService::cbRemoveGuild( CMessage& msgin, const std::string &servi
 
 		removeGuild(shardId, guildName);
 	}
-	catch(Exception& e)
+	catch(const Exception& e)
 	{
 		nlwarning("Failed to remove guild: %s", e.what());
 	}
@@ -408,7 +408,7 @@ void	CMailForumService::cbChangeUserName( CMessage& msgin, const std::string &se
 
 		changeUserName(shardId, oldName, newName);
 	}
-	catch(Exception& e)
+	catch(const Exception& e)
 	{
 		nlwarning("Failed to close session: %s", e.what());
 	}

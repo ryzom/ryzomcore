@@ -208,7 +208,7 @@ void connectToDatabase()
 		DatabaseLogin = IService::getInstance ()->ConfigFile.getVar("DatabaseLogin").asString ();
 		DatabasePassword = IService::getInstance ()->ConfigFile.getVar("DatabasePassword").asString ();
 	}
-	catch(EConfigFile &e)
+	catch(const EConfigFile &e)
 	{
 		nlwarning(e.what());
 		return;

@@ -1105,7 +1105,7 @@ void prelogInit()
 
 		FPU_CHECKER_ONCE
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		ExitClientError (e.what());
 	}
@@ -1264,7 +1264,7 @@ void postlogInit()
 				{
 					SoundMngr->init(&ProgressBar);
 				}
-				catch(Exception &e)
+				catch(const Exception &e)
 				{
 					nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
 					// leak the alocated sound manager...
@@ -1326,7 +1326,7 @@ void postlogInit()
 			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 
 			CSBrickManager::getInstance()->init(); // Must be done after sheet loading
-			STRING_MANAGER::CStringManagerClient::specialWordsMemoryCompress(); // Must be done after brick manager init
+			//STRING_MANAGER::CStringManagerClient::specialWordsMemoryCompress(); // Must be done after brick manager init
 
 			initLast = initCurrent;
 			initCurrent = ryzomGetLocalTime();
@@ -1433,7 +1433,7 @@ void postlogInit()
 
 		nlinfo ("PROFILE: %d seconds for postlogInit", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		ExitClientError (e.what());
 	}

@@ -331,9 +331,9 @@ void	displayInfoFileInStream(FILE *logStream, const char *fileName, const set<st
 				fprintf(logStream, "    'StaticLight Not Computed' means the instance has a ASP flag or the ig is not yet lighted\n");
 				fprintf(logStream, "    If lighted, for each instance, the format is 'SunContribution(8Bit) - idLight0;idLight1 (or NOLIGHT) - LocalAmbientId (or GLOBAL_AMBIENT)' \n");
 				fprintf(logStream, "    DCS means the instance don't cast shadow (used in the lighter)\n");
-				fprintf(logStream, "    DCSINT Same but very special for ig_lighter.exe only\n");
-				fprintf(logStream, "    DCSEXT Same but very special for zone_lighter and zone_ig_lighter.exe only\n");
-				fprintf(logStream, "    ASP means the instance AvoidStaticLightPreCompute (used in the lighter.exe)\n");
+				fprintf(logStream, "    DCSINT Same but very special for ig_lighter only\n");
+				fprintf(logStream, "    DCSEXT Same but very special for zone_lighter and zone_ig_lighter only\n");
+				fprintf(logStream, "    ASP means the instance AvoidStaticLightPreCompute (used in the lighter)\n");
 				fprintf(logStream, "  -------------------------------------------------------------\n");
 				uint k;
 				for(k = 0; k < ig._InstancesInfos.size(); ++k)

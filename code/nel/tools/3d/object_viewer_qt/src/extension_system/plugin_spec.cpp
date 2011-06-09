@@ -266,4 +266,4 @@ bool CPluginSpec::reportError(const QString &err)
 	return false;
 }
 
-} // namespace NLQT
+} // namespace ExtensionSystem

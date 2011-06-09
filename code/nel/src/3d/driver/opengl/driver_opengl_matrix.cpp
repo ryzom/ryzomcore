@@ -15,24 +15,35 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdopengl.h"
-
 #include "driver_opengl.h"
+
 namespace NL3D {
 
 // ***************************************************************************
 void CDriverGL::setFrustum(float left, float right, float bottom, float top, float znear, float zfar, bool perspective)
 {
-	H_AUTO_OGL(CDriverGL_setFrustum)
+	H_AUTO_OGL(CDriverGL_setFrustum);
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
+
 	if (perspective)
 	{
+#ifdef USE_OPENGLES
+		glFrustumf(left,right,bottom,top,znear,zfar);
+#else
 		glFrustum(left,right,bottom,top,znear,zfar);
+#endif
 	}
 	else
 	{
+#ifdef USE_OPENGLES
+		glOrthof(left,right,bottom,top,znear,zfar);
+#else
 		glOrtho(left,right,bottom,top,znear,zfar);
+#endif
 	}
+
 	_ProjMatDirty = true;
 
 	// Backup znear and zfar for zbias setup

@@ -33,8 +33,9 @@ namespace Core
 
 QString lastDir = ".";
 
-CSearchPathsSettingsPage::CSearchPathsSettingsPage(QObject *parent)
+CSearchPathsSettingsPage::CSearchPathsSettingsPage(bool recurse, QObject *parent)
 	: IOptionsPage(parent),
+	  m_recurse(recurse),
 	  m_page(0)
 {
 }
@@ -45,22 +46,33 @@ CSearchPathsSettingsPage::~CSearchPathsSettingsPage()
 
 QString CSearchPathsSettingsPage::id() const
 {
-	return QLatin1String("SearchPaths");
+	if (m_recurse)
+		return QLatin1String("search_recurse_paths");
+	else
+		return QLatin1String("search_paths");
 }
 
 QString CSearchPathsSettingsPage::trName() const
 {
-	return tr("Search Paths");
+	if (m_recurse)
+		return tr("Search Recurse Paths");
+	else
+		return tr("Search Paths");
 }
 
 QString CSearchPathsSettingsPage::category() const
 {
-	return QLatin1String("General");
+	return QLatin1String(Constants::SETTINGS_CATEGORY_GENERAL);
 }
 
 QString CSearchPathsSettingsPage::trCategory() const
 {
-	return tr("General");
+	return tr(Constants::SETTINGS_TR_CATEGORY_GENERAL);
+}
+
+QIcon CSearchPathsSettingsPage::categoryIcon() const
+{
+	return QIcon();
 }
 
 QWidget *CSearchPathsSettingsPage::createPage(QWidget *parent)
@@ -92,17 +104,24 @@ void CSearchPathsSettingsPage::finish()
 
 void CSearchPathsSettingsPage::applySearchPaths()
 {
-	QStringList paths;
+	QStringList paths, remapExt;
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-	paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
+	if (m_recurse)
+		paths = settings->value(Core::Constants::RECURSIVE_SEARCH_PATHS).toStringList();
+	else
+		paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
+
+	remapExt = settings->value(Core::Constants::REMAP_EXTENSIONS).toStringList();
 	settings->endGroup();
+
+	for (int i = 1; i < remapExt.size(); i += 2)
+		NLMISC::CPath::remapExtension(remapExt.at(i - 1).toStdString(), remapExt.at(i).toStdString(), true);
+
 	Q_FOREACH(QString path, paths)
 	{
-		NLMISC::CPath::addSearchPath(path.toStdString(), false, false);
+		NLMISC::CPath::addSearchPath(path.toStdString(), m_recurse, false);
 	}
-	NLMISC::CPath::remapExtension("png", "tga", true);
-	NLMISC::CPath::remapExtension("png", "dds", true);
 }
 
 void CSearchPathsSettingsPage::addPath()
@@ -156,7 +175,10 @@ void CSearchPathsSettingsPage::readSettings()
 	QStringList paths;
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-	paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
+	if (m_recurse)
+		paths = settings->value(Core::Constants::RECURSIVE_SEARCH_PATHS).toStringList();
+	else
+		paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
 	settings->endGroup();
 	Q_FOREACH(QString path, paths)
 	{
@@ -175,8 +197,12 @@ void CSearchPathsSettingsPage::writeSettings()
 
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-	settings->setValue(Core::Constants::SEARCH_PATHS, paths);
+	if (m_recurse)
+		settings->setValue(Core::Constants::RECURSIVE_SEARCH_PATHS, paths);
+	else
+		settings->setValue(Core::Constants::SEARCH_PATHS, paths);
 	settings->endGroup();
+	settings->sync();
 }
 
 void CSearchPathsSettingsPage::checkEnabledButton()

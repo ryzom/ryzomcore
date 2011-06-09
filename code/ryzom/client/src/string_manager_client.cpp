@@ -175,7 +175,7 @@ namespace STRING_MANAGER
 
 				_CacheLoaded = true;
 			}
-			catch(NLMISC::Exception &e)
+			catch(const NLMISC::Exception &e)
 			{
 				nlinfo("SM : loadCache failed, exception : %s", e.what());
 				nlinfo("SM : cache deactivated");
@@ -620,7 +620,7 @@ restartLoop:
 							{
 								dynInfo.Message.serial(param.StringId);
 							}
-							catch(Exception &)
+							catch(const Exception &)
 							{
 								param.StringId = EmptyStringId;
 							}
@@ -631,7 +631,7 @@ restartLoop:
 							{
 								dynInfo.Message.serial(param.Integer);
 							}
-							catch(Exception &)
+							catch(const Exception &)
 							{
 								param.Integer= 0;
 							}
@@ -642,7 +642,7 @@ restartLoop:
 							{
 								dynInfo.Message.serial(param.Time);
 							}
-							catch(Exception &)
+							catch(const Exception &)
 							{
 								param.Time= 0;
 							}
@@ -653,7 +653,7 @@ restartLoop:
 							{
 								dynInfo.Message.serial(param.Money);
 							}
-							catch(Exception &)
+							catch(const Exception &)
 							{
 								param.Money= 0;
 							}
@@ -664,7 +664,7 @@ restartLoop:
 							{
 								dynInfo.Message.serial(param.DynStringId);
 							}
-							catch(Exception &)
+							catch(const Exception &)
 							{
 								param.DynStringId= EmptyDynStringId;
 							}
@@ -1206,15 +1206,15 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 				continue;
 
 			// Get the women name index if possible.
-			uint	womenNameColIndex;
+			uint	womenNameColIndex = std::numeric_limits<uint>::max();
 			if( !ws.findCol(womenNameColIdent, womenNameColIndex) )
 				womenNameColIndex= std::numeric_limits<uint>::max();
 
 			// Get the description index if possible.
-			uint	descColIndex;
+			uint	descColIndex = std::numeric_limits<uint>::max();
 			if( !ws.findCol(descColIdent, descColIndex) )
 				descColIndex= std::numeric_limits<uint>::max();
-			uint	descColIndex2;
+			uint	descColIndex2 = std::numeric_limits<uint>::max();
 			if( !ws.findCol(descColIdent2, descColIndex2) )
 				descColIndex2= std::numeric_limits<uint>::max();
 
@@ -1225,9 +1225,8 @@ void CStringManagerClient::initI18NSpecialWords(const std::string &languageCode)
 				const ucstring &key=  ws.getData(j, keyColIndex);
 				const ucstring &name= ws.getData(j, nameColIndex);
 				// Append to the I18N.
-				string	keyStr= key.toString();
 				// avoid case problems
-				strlwr(keyStr);
+				string	keyStr= NLMISC::toLower(key.toString());
 
 				// append the special key extension.
 				keyStr+= keyExtenstion;
@@ -1424,6 +1423,9 @@ const ucchar * CStringManagerClient::getSpecialWord(const std::string &label, bo
 		map<string,CItem>::iterator it = _SpecItem_TempMap.find(lwrLabel);
 		if (it != _SpecItem_TempMap.end())
 		{
+			if( UseFemaleTitles && women )
+				if (!it->second.WomenName.empty())
+				return it->second.WomenName.c_str();
 			return it->second.Name.c_str();
 		}
 	}
@@ -1641,8 +1643,6 @@ const ucchar *CStringManagerClient::getSquadLocalizedDescription(NLMISC::CSheetI
 // ***************************************************************************
 void		CStringManagerClient::replaceSBrickName(NLMISC::CSheetId id, const ucstring &name, const ucstring &desc, const ucstring &desc2)
 {
-	nlassert(!_SpecItem_MemoryCompressed);
-
 	std::string	label= id.toString();
 	if (label.empty())
 	{
@@ -1654,14 +1654,57 @@ void		CStringManagerClient::replaceSBrickName(NLMISC::CSheetId id, const ucstrin
 	lwrLabel= label;
 	strlwr(lwrLabel);
 
-	map<string, CItem>::iterator it(_SpecItem_TempMap.find(lwrLabel));
-	if (it == _SpecItem_TempMap.end())
-		return;
+	if (_SpecItem_MemoryCompressed)
+	{
+		ucchar *strName = (ucchar *)name.c_str();
+		ucchar *strDesc = (ucchar *)desc.c_str();
+		ucchar *strDesc2 = (ucchar *)desc2.c_str();
+		CItemLight tmp;
+		tmp.Label = (char*)lwrLabel.c_str();
+		vector<CItemLight>::iterator it = lower_bound(_SpecItems.begin(), _SpecItems.end(), tmp, CItemLightComp());
 
-	// Then replace
-	it->second.Name= name;
-	it->second.Desc= desc;
-	it->second.Desc2= desc2;
+		if (it != _SpecItems.end())
+		{
+			if (strcmp(it->Label, lwrLabel.c_str()) == 0)
+			{
+				it->Name = strName;
+				it->Desc = strDesc;
+				it->Desc2 = strDesc2;
+			}
+			else
+			{
+				it->Label = tmp.Label;
+				it->Name = strName;
+				it->Desc = strDesc;
+				it->Desc2 = strDesc2;
+			}
+		}
+		else
+		{
+			tmp.Name = strName;
+			tmp.Desc = strDesc;
+			tmp.Desc2 = strDesc2;
+			_SpecItems.push_back(tmp);
+		}
+	}
+	else
+	{
+		map<string, CItem>::iterator it(_SpecItem_TempMap.find(lwrLabel));
+		if (it != _SpecItem_TempMap.end())
+		{
+			it->second.Name= name;
+			it->second.Desc= desc;
+			it->second.Desc2= desc2;
+		}
+		else
+		{
+			CItem newItem;
+			newItem.Name = name;
+			newItem.Desc = desc;
+			newItem.Desc2 = desc2;
+			_SpecItem_TempMap.insert(pair<string,CItem>(lwrLabel,newItem));
+		}
+	}
 }
 
 

@@ -25,8 +25,6 @@
 // Qt includes
 #include <QtCore/QSettings>
 #include <QtGui/QWidget>
-#include <QtGui/QStyleFactory>
-#include <QtGui/QStyle>
 
 // NeL includes
 #include <nel/3d/bloom_effect.h>
@@ -60,6 +58,11 @@ QString GraphicsSettingsPage::trCategory() const
 	return tr("Object Viewer");
 }
 
+QIcon GraphicsSettingsPage::categoryIcon() const
+{
+	return QIcon();
+}
+
 QWidget *GraphicsSettingsPage::createPage(QWidget *parent)
 {
 	m_page = new QWidget(parent);
@@ -74,11 +77,6 @@ QWidget *GraphicsSettingsPage::createPage(QWidget *parent)
 	m_ui.enableBloomCheckBox->setChecked(settings->value(Constants::ENABLE_BLOOM, false).toBool());
 	m_ui.squareBloomCheckBox->setChecked(NL3D::CBloomEffect::instance().getSquareBloom());
 	m_ui.bloomDensityHorizontalSlider->setValue(NL3D::CBloomEffect::instance().getDensityBloom());
-
-	m_ui.styleComboBox->addItems(QStyleFactory::keys());
-	QString style = settings->value(Constants::QT_STYLE, "").toString();
-	m_ui.styleComboBox->setCurrentIndex(m_ui.styleComboBox->findText(style));
-	m_ui.paletteCheckBox->setChecked(settings->value(Constants::QT_PALETTE, true).toBool());
 
 	settings->endGroup();
 
@@ -103,16 +101,6 @@ void GraphicsSettingsPage::apply()
 	settings->setValue(Constants::ENABLE_BLOOM, m_ui.enableBloomCheckBox->isChecked());
 	settings->setValue(Constants::ENABLE_SQUARE_BLOOM, m_ui.squareBloomCheckBox->isChecked());
 	settings->setValue(Constants::BLOOM_DENSITY, m_ui.bloomDensityHorizontalSlider->value());
-	settings->setValue(Constants::QT_STYLE, m_ui.styleComboBox->currentText());
-	settings->setValue(Constants::QT_PALETTE, m_ui.paletteCheckBox->isChecked());
-
-	// apply qt style and palette
-	QApplication::setStyle(QStyleFactory::create(m_ui.styleComboBox->currentText()));
-
-	if (m_ui.paletteCheckBox->isChecked())
-		QApplication::setPalette(QApplication::style()->standardPalette());
-	else
-		QApplication::setPalette(Modules::mainWin().getOriginalPalette());
 
 	settings->endGroup();
 	settings->sync();

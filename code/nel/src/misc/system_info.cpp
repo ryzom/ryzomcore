@@ -66,15 +66,20 @@ namespace NLMISC {
 			vector<string> splitted;
 			explode(string(buffer), string("\n"), splitted, true);
 
+			std::string value;
+
 			for(uint32 i = 0; i < splitted.size(); i++)
 			{
 				vector<string> sline;
 				explode(splitted[i], string(":"), sline, true);
 				if(sline.size() == 2 && trim(sline[0]) == colname)
 				{
-					return trim(sline[1]);
+					value = sline[1];
 				}
 			}
+
+			if (!value.empty())
+				return trim(value);
 		}
 		nlwarning ("SI: Can't find the colname '%s' in /proc/cpuinfo", colname.c_str());
 		return "";
@@ -549,7 +554,7 @@ string CSystemInfo::getOS()
 				{
 					OSString += " Professional";
 				}
-				else 
+				else
 				{
 					if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
 						OSString += " Datacenter Server";
@@ -805,6 +810,9 @@ string CSystemInfo::getProc ()
 
 #elif defined NL_OS_UNIX
 
+	uint processors = 0;
+	if (fromString(getCpuInfo("processor"), processors)) ++processors;
+
 	ProcString = getCpuInfo("model name");
 	ProcString += " / ?";
 	ProcString += " Family " + getCpuInfo("cpu family");
@@ -815,7 +823,7 @@ string CSystemInfo::getProc ()
 	ProcString += " / ";
 	ProcString += getCpuInfo("cpu MHz")+"MHz";
 	ProcString += " / ";
-	ProcString += "? Processors found";
+	ProcString += toString("%u Processors found", processors);
 
 #endif
 

@@ -37,6 +37,8 @@ CSimpleViewer::CSimpleViewer(QWidget *parent)
 	gridLayout->setContentsMargins(0, 0, 0, 0);
 	NLQT::QNLWidget *_nelWidget = new NLQT::QNLWidget(this);
 	gridLayout->addWidget(_nelWidget, 0, 0, 1, 1);
+
+	m_undoStack = new QUndoStack(this);
 }
 
 bool CCoreListener::closeMainWindow() const

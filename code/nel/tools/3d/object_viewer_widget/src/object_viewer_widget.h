@@ -178,6 +178,10 @@ namespace NLQT
 		void updateRender();
 
 	private:
+	
+		/// Update the animation time for Particle System animation.
+		/// @param deltaTime - set the manual animation time.
+		void updateAnimatePS(uint64 deltaTime = 0);
 
 		static CObjectViewerWidget  *_objectViewerWidget;
 

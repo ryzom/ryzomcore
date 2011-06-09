@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
 				return -1;
 			}
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			// Error message
 			fprintf (stderr, "Error: %s\n", e.what());

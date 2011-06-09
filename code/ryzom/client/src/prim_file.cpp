@@ -167,7 +167,7 @@ void CPrimFileMgr::load (sint primFileIndex)
 				}
 
 			}
-			catch (Exception &e)
+			catch (const Exception &e)
 			{
 				// Error
 				nlwarning ("Error while reading the prim file (%s) : %s", pathName.c_str(), e.what ());

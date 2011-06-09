@@ -613,7 +613,7 @@ void CLuaObject::dump(uint maxDepth /*= 20*/, std::set<const void *> *alreadySee
 			NLMISC::InfoLog->forceDisplayRaw((res[k] + "\n") .c_str());
 		}
 	}
-	catch(std::exception &e)
+	catch(const std::exception &e)
 	{
 		CLuaIHM::dumpCallStack();
 		nlwarning(e.what());

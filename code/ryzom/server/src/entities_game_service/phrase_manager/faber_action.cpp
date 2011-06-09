@@ -662,10 +662,19 @@ protected:
 					for (it=effects.begin(), itEnd=effects.end(); it!=itEnd; ++it)
 					{
 						float rnd = RandomGenerator.frand();
-						if (rnd<it->EffectArgFloat[0])
+						double effect0 = it->EffectArgFloat[0];
+						double effect1 = it->EffectArgFloat[1];
+						// Clamp boost when player do not have required privs
+						if (!character->havePriv(":DEV:") && !character->havePriv(":SGM:"))
 						{
-							applyProcAddLimit(Params, statBitField, it->EffectArgFloat[1]);
-							PHRASE_UTILITIES::sendItemSpecialEffectProcMessage(ITEM_SPECIAL_EFFECT::ISE_CRAFT_ADD_LIMIT, character, NULL, (sint32)(it->EffectArgFloat[1]*100.f));
+							clamp(effect0, 0.0, 0.25);
+							clamp(effect1, 0.0, 0.25);
+						}
+
+						if (rnd < effect0)
+						{
+							applyProcAddLimit(Params, statBitField, effect1);
+							PHRASE_UTILITIES::sendItemSpecialEffectProcMessage(ITEM_SPECIAL_EFFECT::ISE_CRAFT_ADD_LIMIT, character, NULL, (sint32)(effect1*100.0));
 						}
 					}
 				}

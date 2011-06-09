@@ -120,7 +120,7 @@ void IDisplayer::display ( const CLog::TDisplayInfo& args, const char *message )
 	{
 		doDisplay( args, message );
 	}
-	catch (Exception &)
+	catch (const Exception &)
 	{
 		// silence
 	}

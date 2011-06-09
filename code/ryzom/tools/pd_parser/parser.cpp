@@ -96,16 +96,16 @@ string	xmlSpecialChars(string str)
 
 string	getFullStdPathNoExt(const string &path)
 {
-	string	dir = strlwr(NLMISC::CFile::getPath(path));
-	string	file = strlwr(NLMISC::CFile::getFilenameWithoutExtension(path));
+	string	dir = NLMISC::toLower(NLMISC::CFile::getPath(path));
+	string	file = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(path));
 
 	return dir.empty() ? file : NLMISC::CPath::standardizePath(dir)+file;
 }
 
 string	getFullStdPath(const string &path)
 {
-	string	dir = strlwr(NLMISC::CFile::getPath(path));
-	string	file = strlwr(NLMISC::CFile::getFilename(path));
+	string	dir = NLMISC::toLower(NLMISC::CFile::getPath(path));
+	string	file = NLMISC::toLower(NLMISC::CFile::getFilename(path));
 
 	return dir.empty() ? file : NLMISC::CPath::standardizePath(dir)+file;
 }
@@ -255,7 +255,7 @@ bool	CDbNode::epilog()
 	setEnv("db", Name);
 
 	string	fullfile = getFullStdPathNoExt(MainFile.empty() ? Name : MainFile);
-	string	filename = NLMISC::strlwr(NLMISC::CFile::getFilenameWithoutExtension(fullfile));
+	string	filename = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(fullfile));
 
 	setEnv("filename", filename);
 	setEnv("fullfilename", fullfile);
@@ -785,14 +785,14 @@ void	CDbNode::generateLogContent()
 // get file path from this file
 string	CDbNode::getFileNoExtPath(const std::string& file)
 {
-	string	thisPath = NLMISC::CFile::getPath(strlwr(getDbFile()));
-	string	filePath = NLMISC::CFile::getPath(strlwr(file));
-	string	fileName = NLMISC::CFile::getFilename(strlwr(file));
+	string	thisPath = NLMISC::CFile::getPath(NLMISC::toLower(getDbFile()));
+	string	filePath = NLMISC::CFile::getPath(NLMISC::toLower(file));
+	string	fileName = NLMISC::CFile::getFilename(NLMISC::toLower(file));
 
 	if (thisPath == filePath)
 		return CFile::getFilenameWithoutExtension(fileName);
 	else
-		return CPath::standardizePath(filePath)+CFile::getFilenameWithoutExtension(strlwr(file));
+		return CPath::standardizePath(filePath)+CFile::getFilenameWithoutExtension(NLMISC::toLower(file));
 }
 
 
@@ -822,7 +822,7 @@ bool	CFileNode::generateProlog()
 	if (!db->Description.empty())
 		Hpp << db->Description << "\n";
 
-	string	filename = strlwr(CFile::getFilenameWithoutExtension(Name));
+	string	filename = NLMISC::toLower(CFile::getFilenameWithoutExtension(Name));
 
 	setEnv("fullfilename", getFullStdPathNoExt(Name));
 	setEnv("filename", filename);
@@ -867,7 +867,7 @@ bool	CFileNode::generateProlog()
 	if (SeparatedFlag)
 	{
 		string	fullfile = getFullStdPathNoExt(db->MainFile.empty() ? db->Name : db->MainFile);
-		string	filename = NLMISC::strlwr(NLMISC::CFile::getFilenameWithoutExtension(fullfile));
+		string	filename = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(fullfile));
 		Hpp << "#include \"" << filename << ".h\"\n";
 		Hpp << "\n";
 	}
@@ -917,7 +917,7 @@ bool	CFileNode::generateEpilog()
 	CDbNode*	db = getDbNode();
 
 	string	fullfile = getFullStdPathNoExt(Name);
-	string	filename = strlwr(CFile::getFilenameWithoutExtension(Name));
+	string	filename = NLMISC::toLower(CFile::getFilenameWithoutExtension(Name));
 
 	Hpp.indent();
 	Hpp << "\n} // End of " << db->Name <<"\n";
@@ -945,14 +945,14 @@ bool	CFileNode::generateEpilog()
 
 string	CFileNode::getFileNoExtPath(const string& file)
 {
-	string	thisPath = NLMISC::CFile::getPath(strlwr(Name));
-	string	filePath = NLMISC::CFile::getPath(strlwr(file));
-	string	fileName = NLMISC::CFile::getFilename(strlwr(file));
+	string	thisPath = NLMISC::CFile::getPath(NLMISC::toLower(Name));
+	string	filePath = NLMISC::CFile::getPath(NLMISC::toLower(file));
+	string	fileName = NLMISC::CFile::getFilename(NLMISC::toLower(file));
 
 	if (thisPath == filePath)
 		return CFile::getFilenameWithoutExtension(fileName);
 	else
-		return CFile::getFilenameWithoutExtension(strlwr(file));
+		return CFile::getFilenameWithoutExtension(NLMISC::toLower(file));
 }
 
 void	CFileNode::writeFile()

@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
+
 // Nel Misc
 #include "nel/misc/types_nl.h"
 #include "nel/misc/file.h"
@@ -410,7 +412,7 @@ void	CWorldPositionManager::loadPatatsInFile(const string &file)
 	{
 		_PatatSubscribeManager.usePrim(file);
 	}
-	catch (NLMISC::EStream &e)
+	catch (const NLMISC::EStream &e)
 	{
 		nlwarning("Couldn't load '%s' : %s", file.c_str(), e.what());
 	}
@@ -468,7 +470,7 @@ void	CWorldPositionManager::loadPatatManagerFile(const string &file)
 		f.serial(_PatatSubscribeManager);
 		_PatatSubscribeManager.displayPatatGridInfo();
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning("Couldn't load manager file '%s': %s", file.c_str(), e.what());
 	}
@@ -488,7 +490,7 @@ void	CWorldPositionManager::savePatatManagerFile(const string &file)
 		f.serial(_PatatSubscribeManager);
 		_PatatSubscribeManager.displayPatatGridInfo();
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning("Couldn't save manager file '%s': %s", file.c_str(), e.what());
 	}

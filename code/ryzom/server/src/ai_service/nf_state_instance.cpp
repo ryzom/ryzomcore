@@ -759,7 +759,8 @@ void loadFile_s_(CStateInstance* entity, CScriptStack& stack)
 		NLMISC::CIFile file(NLMISC::CPath::lookup(fileName));
 		
 		vector<string> lines;
-		while (!file.eof()) {
+		while (!file.eof())
+		{
 			const size_t bufferSize = 4*1024;
 			char buffer[bufferSize];
 			file.getline(buffer, bufferSize);
@@ -771,7 +772,7 @@ void loadFile_s_(CStateInstance* entity, CScriptStack& stack)
 		// Interpret the code for the group
 		entity->interpretCode(NULL, codePtr);
 	}
-	catch (EPathNotFound e)
+	catch (const EPathNotFound &)
 	{
 		nlwarning("Path not found while loading AIS script %s", fileName.c_str());
 	}

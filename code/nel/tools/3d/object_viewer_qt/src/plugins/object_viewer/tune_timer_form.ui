@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>460</width>
-    <height>64</height>
+    <width>452</width>
+    <height>52</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>86</width>
-    <height>64</height>
+    <width>0</width>
+    <height>0</height>
    </size>
   </property>
   <property name="features">
@@ -24,6 +24,12 @@
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QGridLayout" name="gridLayout">
+    <property name="margin">
+     <number>3</number>
+    </property>
+    <property name="spacing">
+     <number>3</number>
+    </property>
     <item row="0" column="0">
      <widget class="QSlider" name="horizontalSlider">
       <property name="maximum">

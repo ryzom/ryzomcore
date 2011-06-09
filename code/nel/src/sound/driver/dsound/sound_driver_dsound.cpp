@@ -605,7 +605,7 @@ void CSoundDriverDSound::initDevice(const std::string &device, ISoundDriver::TSo
 			_SourceCount++;
 		}
 	}
-	catch (ESoundDriver& e)
+	catch (const ESoundDriver& e)
 	{
 		// Okay, here's the situation: I'm listening to WinAmp while debugging.
 		// The caps told me there were 31 buffers available. In reality, there were

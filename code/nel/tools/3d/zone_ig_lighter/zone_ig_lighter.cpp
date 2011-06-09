@@ -241,7 +241,7 @@ int main(int argc, char* argv[])
 						landscape->TileBank.serial (inputFile);
 						landscape->initTileBanks();
 					}
-					catch (Exception &e)
+					catch (const Exception &e)
 					{
 						// Error
 						nlwarning ("ERROR error loading tile bank %s\n%s\n", bank_name.c_str(), e.what());
@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
 							}
 						}
 					}
-					catch (NLMISC::EUnknownVar &)
+					catch (const NLMISC::EUnknownVar &)
 					{
 						nlinfo("No additionnal ig's to load");
 					}
@@ -515,7 +515,7 @@ int main(int argc, char* argv[])
 							// Save the new ig
 							outputFile.serial(output);
 						}
-						catch (Exception& except)
+						catch (const Exception& except)
 						{
 							// Error message
 							nlwarning ("ERROR writing %s: %s\n", argv[2], except.what());
@@ -533,7 +533,7 @@ int main(int argc, char* argv[])
 					nlwarning ("ERROR Abort: files are missing.\n");
 				}
 			}
-			catch (Exception& except)
+			catch (const Exception& except)
 			{
 				// Error message
 				nlwarning ("ERROR %s\n", except.what());

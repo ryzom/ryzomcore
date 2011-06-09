@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
 					NLMISC::CPath::addSearchPath(NLMISC::CPath::standardizePath(additionnal_paths.asString(k)),true, false);
 				}
 			}
-			catch (NLMISC::EUnknownVar &)
+			catch (const NLMISC::EUnknownVar &)
 			{
 			}
 
@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
 			{
 				_Path_Input_TexBases = NLMISC::CPath::standardizePath(cf.getVar ("input_path_texbase").asString());
 			}
-			catch (NLMISC::EUnknownVar &)
+			catch (const NLMISC::EUnknownVar &)
 			{
 			}
 
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
 			{
 				_Path_Input_Masks = NLMISC::CPath::standardizePath(cf.getVar ("input_path_mask").asString());
 			}
-			catch (NLMISC::EUnknownVar &)
+			catch (const NLMISC::EUnknownVar &)
 			{
 			}
 
@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
 			{
 				_Path_Output_MaksOptimized = NLMISC::CPath::standardizePath(cf.getVar ("output_path_mask_optimized").asString());
 			}
-			catch (NLMISC::EUnknownVar &)
+			catch (const NLMISC::EUnknownVar &)
 			{
 			}
 
@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
 			{
 				_Path_Output_Cgi = NLMISC::CPath::standardizePath(cf.getVar ("output_path_cgi").asString());
 			}
-			catch (NLMISC::EUnknownVar &)
+			catch (const NLMISC::EUnknownVar &)
 			{
 			}
 
@@ -185,12 +185,12 @@ int main(int argc, char* argv[])
 			{
 				_Path_Output_Gtm = NLMISC::CPath::standardizePath(cf.getVar ("output_path_gtm").asString());
 			}
-			catch (NLMISC::EUnknownVar &)
+			catch (const NLMISC::EUnknownVar &)
 			{
 			}
 
 		}
-		catch (std::exception &e)
+		catch (const std::exception &e)
 		{
 			nlwarning("Panoply building failed.");
 			nlwarning(e.what());
@@ -256,7 +256,7 @@ int main(int argc, char* argv[])
 						NLMISC::CPath::addSearchPath(NLMISC::CPath::standardizePath(additionnal_paths.asString(k)));
 					}
 				}
-				catch (NLMISC::EUnknownVar &)
+				catch (const NLMISC::EUnknownVar &)
 				{
 				}
 				
@@ -265,7 +265,7 @@ int main(int argc, char* argv[])
 				{
 					bi.InputPath = NLMISC::CPath::standardizePath(cf.getVar ("input_path").asString());
 				}
-				catch (NLMISC::EUnknownVar &)
+				catch (const NLMISC::EUnknownVar &)
 				{
 				}
 
@@ -274,7 +274,7 @@ int main(int argc, char* argv[])
 				{
 					bi.OutputPath = NLMISC::CPath::standardizePath(cf.getVar ("output_path").asString());
 				}
-				catch (NLMISC::EUnknownVar &)
+				catch (const NLMISC::EUnknownVar &)
 				{
 				}
 
@@ -283,7 +283,7 @@ int main(int argc, char* argv[])
 				{
 					bi.HlsInfoPath = NLMISC::CPath::standardizePath(cf.getVar("hls_info_path").asString());
 				}
-				catch (NLMISC::EUnknownVar &)
+				catch (const NLMISC::EUnknownVar &)
 				{
 					bi.HlsInfoPath = "hlsInfo/";
 				}
@@ -293,7 +293,7 @@ int main(int argc, char* argv[])
 				{
 					bi.CachePath = NLMISC::CPath::standardizePath(cf.getVar ("cache_path").asString());
 				}
-				catch (NLMISC::EUnknownVar &)
+				catch (const NLMISC::EUnknownVar &)
 				{
 				}
 
@@ -302,7 +302,7 @@ int main(int argc, char* argv[])
 				{
 					bi.OutputFormat = "." + cf.getVar ("output_format").asString();
 				}
-				catch (NLMISC::EUnknownVar &)
+				catch (const NLMISC::EUnknownVar &)
 				{
 					bi.OutputFormat = ".tga";
 				}
@@ -312,7 +312,7 @@ int main(int argc, char* argv[])
 				{
 					bi.DefaultSeparator = cf.getVar ("default_separator").asString();								
 				}
-				catch (NLMISC::EUnknownVar &)
+				catch (const NLMISC::EUnknownVar &)
 				{
 					bi.DefaultSeparator = '_';
 				}
@@ -330,7 +330,7 @@ int main(int argc, char* argv[])
 						}					
 					}				
 				}
-				catch (NLMISC::EUnknownVar &)
+				catch (const NLMISC::EUnknownVar &)
 				{
 					bi.BitmapExtensions[0].resize(1);
 					bi.BitmapExtensions[0] = bi.OutputFormat;
@@ -340,14 +340,14 @@ int main(int argc, char* argv[])
 				{
 					bi.LowDefShift = cf.getVar ("low_def_shift").asInt();								
 				}
-				catch (NLMISC::EUnknownVar &)
+				catch (const NLMISC::EUnknownVar &)
 				{
 					// tranform 512*512 to 64*64 by default
 					bi.LowDefShift= 3;
 				}
 
 			}
-			catch (std::exception &e)
+			catch (const std::exception &e)
 			{
 				nlwarning("Panoply building failed.");
 				nlwarning(e.what());
@@ -361,7 +361,7 @@ int main(int argc, char* argv[])
 		{
 			BuildColoredVersions(bi);
 		}
-		catch (std::exception &e)
+		catch (const std::exception &e)
 		{
 			nlwarning("Something went wrong while building bitmap : %s", e.what());
 			return -1;
@@ -389,7 +389,7 @@ static void validateCgiInfo()
 		f.serialCont(temp);
 
 	}
-	catch(std::exception &e)
+	catch(const std::exception &e)
 	{
 		nlwarning("Panoply building failed.");
 	}
@@ -491,7 +491,7 @@ static void BuildColoredVersions(const CBuildInfo &bi)
 							//nlwarning(("No need to rebuild " + NLMISC::CFile::getFilename(files[k])).c_str());
 						}
 					}
-					catch (std::exception &e)
+					catch (const std::exception &e)
 					{
 						nlwarning("Processing of %s failed : %s \n", files[k].c_str(), e.what());					
 					}
@@ -662,7 +662,7 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 				return;
 			}			
 		}
-		catch (NLMISC::Exception &)
+		catch (const NLMISC::Exception &)
 		{
 			nlwarning("File or format error with : %s. Processing next...", fileNameWithExtension.c_str());
 			return;
@@ -743,7 +743,7 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 					return;
 				}
 			}
-			catch (std::exception &e)
+			catch (const std::exception &e)
 			{
 				nlwarning("Error with : %s : %s. Aborting this bitmap processing", maskFileName.c_str(), e.what());				
 				return;
@@ -827,7 +827,7 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 					nlwarning(("Couldn't open " + bi.OutputPath + outputFileName + bi.OutputFormat + " for writing").c_str());
 				}
 			}
-			catch(NLMISC::EStream &e)
+			catch(const NLMISC::EStream &e)
 			{
 				nlwarning(("Couldn't write " + bi.OutputPath + outputFileName + bi.OutputFormat + " : " + e.what()).c_str());
 			}

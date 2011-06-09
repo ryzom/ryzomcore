@@ -149,7 +149,7 @@ static void cbHaltTick(CMessage& msgin, const string &serviceName, NLNET::TServi
 	{
 		msgin.serial(reason);
 	}
-	catch(Exception&)
+	catch(const Exception&)
 	{
 	}
 
@@ -600,7 +600,7 @@ void CTickService::init()
 	{
 		_GameTime = ConfigFile.getVar("GameTime").asFloat();
 	}
-	catch(Exception &)
+	catch(const Exception &)
 	{
 		// init the game time
 		_GameTime = 0.0f;
@@ -611,7 +611,7 @@ void CTickService::init()
 		_GameCycle = ConfigFile.getVar("GameCycle").asInt();
 		_SavedGameCycle = _GameCycle;
 	}
-	catch(Exception &)
+	catch(const Exception &)
 	{
 		// init the game cycle from file
 		loadGameCycle();
@@ -622,7 +622,7 @@ void CTickService::init()
 	{
 		_TickTimeStep = ConfigFile.getVar("TickTimeStep").asFloat();
 	}
-	catch(Exception &)
+	catch(const Exception &)
 	{
 		// tick service time step between two ticks
 		_TickTimeStep = 0.1f;
@@ -632,7 +632,7 @@ void CTickService::init()
 	{
 		_GameTimeStep = ConfigFile.getVar("GameTimeStep").asFloat();
 	}
-	catch(Exception &)
+	catch(const Exception &)
 	{
 		// game time between two ticks
 		_GameTimeStep = 0.1f;
@@ -747,7 +747,7 @@ bool CTickService::saveGameCycle()
 */
 		return true;
 	}
-	catch ( Exception& e )
+	catch (const Exception &e)
 	{
 		nlwarning( "Can't save game cycle: %s", e.what() );
 		return false;
@@ -810,7 +810,7 @@ bool CTickService::loadGameCycle()
 //		nlinfo( "Loaded game cycle %u from %s, will be saved every %u game cycles", _GameCycle, (CPath::standardizePath(IService::getInstance()->SaveFilesDirectory.toString()) + GAME_CYCLE_FILE).c_str(), INTERVAL_FOR_SAVING_GAME_CYCLE );
 //		return true;
 //	}
-//	catch ( Exception& e )
+//	catch (const Exception &e)
 //	{
 //		nlwarning( "Can't load game cycle: %s", e.what() );
 //		_GameCycle = 0;

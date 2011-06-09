@@ -37,16 +37,17 @@ ENDMACRO(NL_TARGET_DRIVER)
 # Argument:
 ###
 MACRO(NL_DEFAULT_PROPS name label)
+  IF(NOT MSVC10)
+    SET_TARGET_PROPERTIES(${name} PROPERTIES PROJECT_LABEL ${label})
+  ENDIF(NOT MSVC10)
   GET_TARGET_PROPERTY(type ${name} TYPE)
   IF(${type} STREQUAL SHARED_LIBRARY)
     # Set versions only if target is a shared library
     SET_TARGET_PROPERTIES(${name} PROPERTIES
-      VERSION ${NL_VERSION} SOVERSION ${NL_VERSION_MAJOR}
-      INSTALL_NAME_DIR ${NL_LIB_PREFIX}
-      PROJECT_LABEL ${label})
-  ELSE(${type} STREQUAL SHARED_LIBRARY)
-    SET_TARGET_PROPERTIES(${name} PROPERTIES
-      PROJECT_LABEL ${label})
+      VERSION ${NL_VERSION} SOVERSION ${NL_VERSION_MAJOR})
+    IF(NL_LIB_PREFIX)
+      SET_TARGET_PROPERTIES(${name} PROPERTIES INSTALL_NAME_DIR ${NL_LIB_PREFIX})
+    ENDIF(NL_LIB_PREFIX)
   ENDIF(${type} STREQUAL SHARED_LIBRARY)
   IF(WITH_STLPORT AND WIN32)
     SET_TARGET_PROPERTIES(${name} PROPERTIES COMPILE_FLAGS "/X")
@@ -93,6 +94,14 @@ MACRO(NL_ADD_STATIC_VID_DRIVERS name)
         TARGET_LINK_LIBRARIES(${name} nel_drv_opengl)
       ENDIF(WIN32)
     ENDIF(WITH_DRIVER_OPENGL)
+
+    IF(WITH_DRIVER_OPENGLES)
+      IF(WIN32)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_opengles_win)
+      ELSE(WIN32)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_opengles)
+      ENDIF(WIN32)
+    ENDIF(WITH_DRIVER_OPENGLES)
   ENDIF(WITH_STATIC_DRIVERS)
 ENDMACRO(NL_ADD_STATIC_VID_DRIVERS)
 
@@ -208,6 +217,7 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   # Drivers Support
   ###
   OPTION(WITH_DRIVER_OPENGL       "Build OpenGL Driver (3D)"                      ON )
+  OPTION(WITH_DRIVER_OPENGLES     "Build OpenGL ES Driver (3D)"                   OFF)
   OPTION(WITH_DRIVER_DIRECT3D     "Build Direct3D Driver (3D)"                    OFF)
   OPTION(WITH_DRIVER_OPENAL       "Build OpenAL Driver (Sound)"                   ON )
   OPTION(WITH_DRIVER_FMOD         "Build FMOD Driver (Sound)"                     OFF)
@@ -278,19 +288,56 @@ MACRO(NL_SETUP_BUILD)
     ENDIF(CMAKE_BUILD_TYPE MATCHES "Release")
   ENDIF(CMAKE_BUILD_TYPE MATCHES "Debug")
 
+  # Determine target CPU
+#  IF(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86")
+    IF(NOT CMAKE_SIZEOF_VOID_P)
+      INCLUDE (CheckTypeSize)
+      CHECK_TYPE_SIZE("void*"  CMAKE_SIZEOF_VOID_P)
+    ENDIF(NOT CMAKE_SIZEOF_VOID_P)
+
+    # Using 32 or 64 bits libraries
+    SET(TARGET_X86 1)
+    IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+      SET(ARCH "x86_64")
+      SET(TARGET_X64 1)
+      ADD_DEFINITIONS(-DHAVE_X86_64)
+    ELSE(CMAKE_SIZEOF_VOID_P EQUAL 8)
+      SET(ARCH "x86")
+      ADD_DEFINITIONS(-DHAVE_X86)
+    ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+#     ADD_DEFINITIONS(-DHAVE_IA64)
+#  ENDIF(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86")
+  
   IF(WIN32)
-    # don't use a /O[012x] flag if you want custom optimizations
-    SET(SPEED_OPTIMIZATIONS "/Ob2 /Oi /Ot /Oy /GT /GF /GS-")
-    # without inlining it's unusable, use custom optimizations again
-    SET(MIN_OPTIMIZATIONS "/Ob1")
+    IF(MSVC10)
+      # /Ox is working with VC++ 2010, but custom optimizations don't exist
+      SET(SPEED_OPTIMIZATIONS "/Ox /GF /GS-")
+      # without inlining it's unusable, use custom optimizations again
+      SET(MIN_OPTIMIZATIONS "/Od /Ob1")
+	ELSE(MSVC10)
+      # don't use a /O[012x] flag if you want custom optimizations
+      SET(SPEED_OPTIMIZATIONS "/Ob2 /Oi /Ot /Oy /GT /GF /GS-")
+      # without inlining it's unusable, use custom optimizations again
+      SET(MIN_OPTIMIZATIONS "/Ob1")
+    ENDIF(MSVC10)
 
-    SET(PLATFORM_CFLAGS "/D_CRT_SECURE_NO_WARNINGS /DWIN32 /D_WINDOWS /W3 /Zi /Zm1000")
-
-    # Exceptions are only set for C++
-    SET(PLATFORM_CXXFLAGS "${PLATFORM_CFLAGS} /EHa")
+    SET(PLATFORM_CFLAGS "/D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /DWIN32 /D_WINDOWS /W3 /Zi /Zm1000 /MP /Gy-")
 
     # Common link flags
     SET(PLATFORM_LINKFLAGS "-DEBUG")
+	
+    IF(TARGET_X64)
+      # Fix a bug with Intellisense
+      SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} /D_WIN64")
+      # Fix a compilation error for some big C++ files
+      SET(MIN_OPTIMIZATIONS "${MIN_OPTIMIZATIONS} /bigobj")
+    ELSE(TARGET_X64)
+      # Allows 32 bits applications to use 3 GB of RAM
+      SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} /LARGEADDRESSAWARE")
+    ENDIF(TARGET_X64)
+
+    # Exceptions are only set for C++
+    SET(PLATFORM_CXXFLAGS "${PLATFORM_CFLAGS} /EHa")
 
     SET(NL_DEBUG_CFLAGS "/MDd /RTC1 /D_DEBUG ${MIN_OPTIMIZATIONS}")
     SET(NL_RELEASE_CFLAGS "/MD /D NDEBUG ${SPEED_OPTIMIZATIONS}")
@@ -314,33 +361,10 @@ MACRO(NL_SETUP_BUILD)
 
     SET(NL_DEBUG_CFLAGS "-DNL_DEBUG -D_DEBUG")
     SET(NL_RELEASE_CFLAGS "-DNL_RELEASE -DNDEBUG -O6")
-
   ENDIF(WIN32)
-
-  # Determine host CPU
-  IF(UNIX AND NOT WIN32)
-    FIND_PROGRAM(CMAKE_UNAME uname /bin /usr/bin /usr/local/bin )
-    IF(CMAKE_UNAME)
-      EXEC_PROGRAM(uname ARGS -m OUTPUT_VARIABLE CMAKE_SYSTEM_PROCESSOR)
-      SET(CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR} CACHE INTERNAL "processor type (i386 and x86_64)")
-      IF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
-        ADD_DEFINITIONS(-DHAVE_X86_64)
-      ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "ia64")
-        ADD_DEFINITIONS(-DHAVE_IA64)
-      ELSE(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
-        ADD_DEFINITIONS(-DHAVE_X86)
-      ENDIF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
-    ELSE(CMAKE_UNAME)  # Assume that if uname is not found that we're x86.
-      ADD_DEFINITIONS(-DHAVE_X86)
-    ENDIF(CMAKE_UNAME)
-  ENDIF(UNIX AND NOT WIN32)
-
 ENDMACRO(NL_SETUP_BUILD)
 
 MACRO(NL_SETUP_BUILD_FLAGS)
-  #SET(CMAKE_DEBUG_POSTFIX "_d")
-  #SET(CMAKE_RELEASE_POSTFIX "_r")
-
   SET(CMAKE_C_FLAGS ${PLATFORM_CFLAGS} CACHE STRING "" FORCE)
   SET(CMAKE_CXX_FLAGS ${PLATFORM_CXXFLAGS} CACHE STRING "" FORCE)
 
@@ -472,3 +496,44 @@ MACRO(RYZOM_SETUP_PREFIX_PATHS)
   ENDIF(NOT RYZOM_GAMES_PREFIX)
 
 ENDMACRO(RYZOM_SETUP_PREFIX_PATHS)
+
+MACRO(SETUP_EXTERNAL)
+  IF(WIN32)
+    FIND_PACKAGE(External REQUIRED)
+
+    INCLUDE(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake)
+    IF(MSVC10)
+      GET_FILENAME_COMPONENT(VC_ROOT_DIR "[HKEY_CURRENT_USER\\Software\\Microsoft\\VisualStudio\\10.0_Config;InstallDir]" ABSOLUTE)
+      # VC_ROOT_DIR is set to "registry" when a key is not found
+      IF(VC_ROOT_DIR MATCHES "registry")
+        GET_FILENAME_COMPONENT(VC_ROOT_DIR "[HKEY_CURRENT_USER\\Software\\Microsoft\\VCExpress\\10.0_Config;InstallDir]" ABSOLUTE)
+        IF(VC_ROOT_DIR MATCHES "registry")
+          MESSAGE(FATAL_ERROR "Unable to find VC++ 2010 directory!")
+        ENDIF(VC_ROOT_DIR MATCHES "registry")
+      ENDIF(VC_ROOT_DIR MATCHES "registry")
+      # convert IDE fullpath to VC++ path
+      STRING(REGEX REPLACE "Common7/.*" "VC" VC_DIR ${VC_ROOT_DIR})
+    ELSE(MSVC10)
+      IF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+        # convert IDE fullpath to VC++ path
+        STRING(REGEX REPLACE "Common7/.*" "VC" VC_DIR ${CMAKE_MAKE_PROGRAM})
+      ELSE(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+        # convert compiler fullpath to VC++ path
+        STRING(REGEX REPLACE "VC/bin/.+" "VC" VC_DIR ${CMAKE_CXX_COMPILER})
+      ENDIF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+    ENDIF(MSVC10)
+  ENDIF(WIN32)
+
+  IF(WITH_STLPORT)
+    FIND_PACKAGE(STLport REQUIRED)
+    INCLUDE_DIRECTORIES(${STLPORT_INCLUDE_DIR})
+    IF(WIN32)
+      SET(VC_INCLUDE_DIR "${VC_DIR}/include")
+
+      FIND_PACKAGE(WindowsSDK REQUIRED)
+      # use VC++ and Windows SDK include paths
+      INCLUDE_DIRECTORIES(${VC_INCLUDE_DIR} ${WINSDK_INCLUDE_DIR})
+    ENDIF(WIN32)
+  ENDIF(WITH_STLPORT)
+ 
+ENDMACRO(SETUP_EXTERNAL)

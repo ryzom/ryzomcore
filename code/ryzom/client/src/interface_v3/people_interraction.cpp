@@ -999,7 +999,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 
 
 			}
-			rCTF.setTargetGroup(PeopleInterraction.TheUserChat.Filter.getTargetGroup());
+			rCTF.setTargetGroup(PeopleInterraction.TheUserChat.Filter.getTargetGroup(), PeopleInterraction.TheUserChat.Filter.getTargetDynamicChannelDbIndex());
 		}
 		else
 		{
@@ -1670,7 +1670,7 @@ bool CPeopleInterraction::saveUserChatsInfos(NLMISC::IStream &f)
 			pCGW->saveFreeTeller(f);
 		}
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		nlwarning("Error while saving user chat infos : %s", e.what());
 		return false;
@@ -1691,7 +1691,7 @@ bool CPeopleInterraction::saveUserDynChatsInfos(NLMISC::IStream &f)
 			saveFilteredDynChat(f, TheUserChat);
 		}
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		nlwarning("Error while saving user dyn chat infos : %s", e.what());
 		return false;
@@ -1756,7 +1756,7 @@ bool CPeopleInterraction::loadUserChatsInfos(NLMISC::IStream &f)
 			if (pCGW) pCGW->loadFreeTeller(f);
 		}
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		nlwarning("Error while loading user chat infos : %s", e.what());
 		return false;
@@ -1786,7 +1786,7 @@ bool CPeopleInterraction::loadUserDynChatsInfos(NLMISC::IStream &f)
 			setupUserDynChatFromSummary(fcs, TheUserChat);
 		}
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		nlwarning("Error while loading user dyn chat infos : %s", e.what());
 		return false;
@@ -1813,8 +1813,6 @@ void CPeopleInterraction::setupUserChatFromSummary(const CFilteredChatSummary &s
 //=================================================================================================================
 void CPeopleInterraction::setupUserDynChatFromSummary(const CFilteredDynChatSummary &summary, CFilteredChat &dest)
 {
-	// User Dest
-	dest.Filter.setTargetGroup(summary.Target, 0, false);
 	// src
 	for (uint8 i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
 	{
@@ -2279,7 +2277,8 @@ public:
 		CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
 
 		order = (CPeopleList::TSortOrder)(order + 1);
-		if (order == CPeopleList::END_SORT_ORDER) {
+		if (order == CPeopleList::END_SORT_ORDER)
+		{
 			order = CPeopleList::START_SORT_ORDER;
 		}
 
@@ -2656,8 +2655,10 @@ class CHandlerChatTargetSelected : public IActionHandler
 		}
 		else
 		{
-			for (uint i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++) {
-				if (nlstricmp(sParams, "dyn"+toString("%d", i)) == 0) {
+			for (uint i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
+			{
+				if (nlstricmp(sParams, "dyn"+toString("%d", i)) == 0)
+				{
 					cf.setTargetGroup(CChatGroup::dyn_chat, i);
 				}
 			}
@@ -2666,12 +2667,12 @@ class CHandlerChatTargetSelected : public IActionHandler
 		// Case of user chat in grouped chat window
 		if (cw == PeopleInterraction.ChatGroup.Window)
 		{
-			PeopleInterraction.TheUserChat.Filter.setTargetGroup(cf.getTargetGroup());
+			PeopleInterraction.TheUserChat.Filter.setTargetGroup(cf.getTargetGroup(), cf.getTargetDynamicChannelDbIndex());
 			CInterfaceManager::getInstance()->runActionHandler("chat_group_filter", NULL, "user");
 		}
 		if (cw == PeopleInterraction.TheUserChat.Window)
 		{
-			PeopleInterraction.TheUserChat.Filter.setTargetGroup(cf.getTargetGroup());
+			PeopleInterraction.TheUserChat.Filter.setTargetGroup(cf.getTargetGroup(), cf.getTargetDynamicChannelDbIndex());
 			CInterfaceManager::getInstance()->runActionHandler("user_chat_active", NULL, "");
 		}
 

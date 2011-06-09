@@ -1278,7 +1278,7 @@ bool CExport::doExport (SExportOptions &opt, IExportCB *expCB, vector<SExportPri
 
 			loadLandscape (_LandFile);
 		}
-		catch (Exception &/*e*/)
+		catch (const Exception &/*e*/)
 		{
 			if (_ExportCB)
 				_ExportCB->dispError ("Cannot load banks files");
@@ -1422,7 +1422,7 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 				tmpPrimRegion.serial (input);
 				allPrimRegion.push_back (tmpPrimRegion);
 			}
-			catch (Exception &/*e*/)
+			catch (const Exception &/*e*/)
 			{
 				if (_ExportCB != NULL)
 					_ExportCB->dispWarning (string("Cant load ") + allPrimFiles[i]);
@@ -1494,7 +1494,7 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 					}
 					SetCurrentDirectory (sCurDir);
 				}
-				catch (Exception &e)
+				catch (const Exception &e)
 				{
 					SetCurrentDirectory (sCurDir);
 					if (_ExportCB != NULL)
@@ -2078,7 +2078,7 @@ void CExport::writeFloraIG (const string &LandFile, bool bTestForWriting)
 			if (_ExportCB != NULL)
 				_ExportCB->dispInfo (ZoneName + " generated");
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			if (_ExportCB != NULL)
 				_ExportCB->dispWarning ("Cant write " + ZoneName + " (" + e.what() + ")");
@@ -2108,7 +2108,7 @@ void CExport::loadLandscape (const string &LandFile)
 				_ExportCB->dispWarning (string("Can't open file ") + LandFile);
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		if (_ExportCB != NULL)
 			_ExportCB->dispWarning (string("Cant load ") + LandFile + " : " + e.what());
@@ -2146,7 +2146,7 @@ void CExport::loadLandscape (const string &LandFile)
 			inFile.close ();
 			_Landscape->addZone (zone);
 		}
-		catch(Exception &/*e*/)
+		catch(const Exception &/*e*/)
 		{
 			if (_ExportCB != NULL)
 				_ExportCB->dispWarning (string("Cant load ") + ZoneName + string(".zone(l,w)"));

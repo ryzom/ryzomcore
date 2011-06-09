@@ -194,7 +194,7 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 		CIFile inFile (_Options->TileBankFile);
 		_ZeTileBank->serial (inFile);
 	}
-	catch (Exception &)
+	catch (const Exception &)
 	{
 		if (_ExportCB != NULL)
 			_ExportCB->dispError (string("Cant load tile bank : ") + _Options->TileBankFile);
@@ -223,7 +223,7 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 				_HeightMap = NULL;
 			}
 		}
-		catch (Exception &)
+		catch (const Exception &)
 		{
 			if (_ExportCB != NULL)
 				_ExportCB->dispWarning (string("Cant load height map : ") + _Options->HeightMapFile);
@@ -254,7 +254,7 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 				_HeightMap2 = NULL;
 			}
 		}
-		catch (Exception &)
+		catch (const Exception &)
 		{
 			if (_ExportCB != NULL)
 				_ExportCB->dispWarning (string("ERROR: Cant load height map : ") + _Options->HeightMapFile2);
@@ -285,7 +285,7 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 				_ColorMap = NULL;
 			}
 		}
-		catch (Exception &)
+		catch (const Exception &)
 		{
 			if (_ExportCB != NULL)
 				_ExportCB->dispWarning (string("ERROR: Cant load color map : ") + _Options->ColorMapFile);
@@ -323,7 +323,7 @@ bool CExport::export_ (SExportOptions &options, IExportCB *expCB)
 			NLMISC::CPath::getPathContent(_Options->OutIGDir, true, false, true, allOtherFiles);
 		allFiles.insert(allFiles.end(), allOtherFiles.begin(), allOtherFiles.end());
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		if (_ExportCB != NULL)
 			_ExportCB->dispError (string("GetPathcontent failed : ") + e.what());
@@ -638,7 +638,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 				bHaveToExportZone = false;
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			if (_ExportCB != NULL)
 			{
@@ -668,7 +668,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 				bHaveToExportIG = false;
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			if (_ExportCB != NULL)
 			{
@@ -864,7 +864,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 				COFile outFileNH (DstZoneNoHeightmapFileName);
 				UnitZoneNoHeightmap.serial (outFileNH);
 			}
-			catch (Exception &)
+			catch (const Exception &)
 			{
 				if (_ExportCB != NULL)
 					_ExportCB->dispWarning (string("Cant write ") + DstZoneFileName);
@@ -885,7 +885,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 				if (_ExportCB != NULL)
 					_ExportCB->dispInfo (string("Writing ") + getZoneNameFromXY(x+deltaX+i, y+deltaY+j) + ".ig");
 			}
-			catch (Exception &)
+			catch (const Exception &)
 			{
 				if (_ExportCB != NULL)
 					_ExportCB->dispWarning (string("Cant write ") + dstIGFileName);
@@ -2243,7 +2243,7 @@ void CExport::light (NL3D::CZone &zoneOut, NL3D::CZone &zoneIn)
 
 		zl.light (land, zoneOut, zoneIn.getZoneId(), ld, obstacle, listzone);
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		if (_ExportCB != NULL)
 			_ExportCB->dispError (e.what());
@@ -2425,7 +2425,7 @@ void CExport::transformCMB (const std::string &name, const NLMISC::CMatrix &tran
 					cmb.serial(outStream);
 					outStream.close();
 				}
-				catch (EStream &e)
+				catch (const EStream &e)
 				{
 					outStream.close();
 					if (_ExportCB != NULL)
@@ -2437,7 +2437,7 @@ void CExport::transformCMB (const std::string &name, const NLMISC::CMatrix &tran
 			}
 			inStream.close();
 		}
-		catch (EStream &e)
+		catch (const EStream &e)
 		{
 			inStream.close();
 			if (_ExportCB != NULL)
@@ -2537,7 +2537,7 @@ void CExport::transformAdditionnalIG (const std::string &name, const NLMISC::CMa
 					igOut.serial(outStream);
 					outStream.close();
 				}
-				catch (EStream &e)
+				catch (const EStream &e)
 				{
 					outStream.close();
 					if (_ExportCB != NULL)
@@ -2549,7 +2549,7 @@ void CExport::transformAdditionnalIG (const std::string &name, const NLMISC::CMa
 			}
 			inStream.close();
 		}
-		catch (EStream &e)
+		catch (const EStream &e)
 		{
 			inStream.close();
 			if (_ExportCB != NULL)

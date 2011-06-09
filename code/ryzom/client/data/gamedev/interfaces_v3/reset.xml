@@ -95,11 +95,233 @@
 </proc>
 
 <proc id="proc_reset_interface">
-		
-	<action handler="set" params="dblink=UI:SAVE:DAY_COLOR|value=makeRGB(219,254,174)" />	
+	<action handler="set" params="dblink=UI:SAVE:DAY_COLOR|value=makeRGB(219,254,174)" />
+    <action handler="set" params="dblink=UI:SAVE:DAY_COLOR|value=makeRGB(219,254,174)" />
+    <action handler="set" params="dblink=UI:SAVE:NIGHT_COLOR|value=makeRGB(127,190,254)" />
+	<!-- Reset all the items that are trivial -->
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:PLA|value=makeRGB(167,205,107)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:ANI|value=makeRGB(189,154,123)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:COM|value=makeRGB(255,237,89)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:INV|value=makeRGB(74,162,243)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:OPT|value=makeRGB(255,79,69)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:LAB|value=makeRGB(251,163,60)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:MEM|value=makeRGB(237,112,200)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:MAP|value=makeRGB(237,200,30)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:HELP|value=makeRGB(255,96,16)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:INFOS|value=makeRGB(255,0,0)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:TRADE|value=makeRGB(204,177,107)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:BOT|value=makeRGB(0,251,222)" />
+
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:R2_PALETTE|value=makeRGB(255,255,66)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:R2_SCENARIO|value=makeRGB(117,217,255)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:R2_PROP_WINDOW|value=makeRGB(26,251,142)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:R2_FORM|value=makeRGB(24,142,249)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:R2_CUSTOM_LOOK|value=makeRGB(239,170,33)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:R2_DIALOGS|value=makeRGB(117,163,255)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:R2_EVENTS|value=makeRGB(252,255,162)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:R2_ACTIVITIES|value=makeRGB(228,118,255)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:R2_FEATURE_HELP|value=makeRGB(117,255,189)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:R2_CONNECT|value=makeRGB(162,255,173)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:R2_SESSION_BROWSER|value=makeRGB(255,113,66)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:R2_SCENARIO_CONTROL|value=makeRGB(255,12,89)" />
+	<action handler="set" params="dblink=UI:SAVE:WIN:COLORS:R2_PLAYER_TRACKING|value=makeRGB(240,255,89)" />
+
+	<action handler="set" params="dblink=UI:SAVE:R2_PROP_SHEET:CONTAINER_ALPHA|value=255" />
+	<action handler="set" params="dblink=UI:SAVE:R2_PROP_SHEET:CONTENT_ALPHA|value=255" />
+	<action handler="set" params="dblink=UI:SAVE:R2_PROP_SHEET:ROLLOVER_CONTENT_ALPHA|value=0" />  
+	<action handler="set" params="dblink=UI:SAVE:R2_PROP_SHEET:ROLLOVER_CONTAINER_ALPHA|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:R2_PROP_SHEET:USE_GLOBAL_ALPHA_SETTINGS|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:R2_FORM:CONTAINER_ALPHA|value=255" />
+	<action handler="set" params="dblink=UI:SAVE:R2_FORM:CONTENT_ALPHA|value=255" />
+	<action handler="set" params="dblink=UI:SAVE:R2_FORM:ROLLOVER_CONTENT_ALPHA|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:R2_FORM:ROLLOVER_CONTAINER_ALPHA|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:R2_FORM:USE_GLOBAL_ALPHA_SETTINGS|value=1" />
+
+	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:DEAD|value=makeRGB(255,255,0)" />
+	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:USER|value=makeRGB(255,112,249)" />
+	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:PLAYER|value=makeRGB(77,144,255)" />
+	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:GROUP|value=makeRGB(185,76,255)" />
+	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:GUILD|value=makeRGB(120,0,200)" />
+	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:NPC|value=makeRGB(192,192,192)" />
+	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:FAUNA|value=makeRGB(249,179,29)" />
+	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:TARGET|value=makeRGB(255,255,255)" />
+	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:SOURCE|value=makeRGB(65,255,112)" />
+	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:MOUNT|value=makeRGB(217,255,114)" />
+	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:BEAST|value=makeRGB(158,216,0)" />
+	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:PVPENEMY|value=makeRGB(185,0,0)" />
+	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:PVPALLY|value=makeRGB(0,200,0)" />
+	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:PVPALLYINTEAM|value=makeRGB(140,200,140)" />
+	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:PVPALLYINGUILD|value=makeRGB(100,150,100)" />
+	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:PVPNEUTRAL|value=makeRGB(64,128,128)" />
+
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:GUILD_SYMBOL|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:NAME|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:TITLE|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:GUILD_NAME|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:HP|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:STA|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:SAP|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:FOCUS|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:ACTION|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:MESSAGES|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:PVP_LOGO|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:GUILD_SYMBOL|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:NAME|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:TITLE|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:GUILD_NAME|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:HP|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:STA|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:SAP|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:FOCUS|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:MESSAGES|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:PVP_LOGO|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:MISSION_ICON|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:MINI_MISSION_ICON|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:ENEMY:GUILD_SYMBOL|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:ENEMY:NAME|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:ENEMY:TITLE|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:ENEMY:GUILD_NAME|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:ENEMY:HP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:ENEMY:MESSAGES|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:ENEMY:PVP_LOGO|value=1" />
+
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:MISC|value=makeRGB(255,0,255)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:TRIBE|value=makeRGB(180,180,180)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:BANDIT|value=makeRGB(110,110,110)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:CITIZEN|value=makeRGB(255,255,255)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:FAUNA|value=makeRGB(255,100,0)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:FAUNAEXCEL|value=makeRGB(255,50,0)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:FAUNASUP|value=makeRGB(200,0,0)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:FORAGE|value=makeRGB(150,200,50)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:FORAGEEXCEL|value=makeRGB(50,200,0)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:FORAGESUP|value=makeRGB(0,150,0)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:SAP|value=makeRGB(150,200,50)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:AMBER|value=makeRGB(255,150,0)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:NODE|value=makeRGB(200,100,50)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:FIBER|value=makeRGB(255,255,150)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:BARK|value=makeRGB(150,100,0)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:SEED|value=makeRGB(100,50,50)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:SHELL|value=makeRGB(200,150,150)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:RESIN|value=makeRGB(50,100,0)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:WOOD|value=makeRGB(100,100,50)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:OIL|value=makeRGB(200,200,50)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:MISSION|value=makeRGB(200,50,150)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:FOOD|value=makeRGB(200,50,150)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:CONSTRUCTION|value=makeRGB(255,0,100)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:GOO|value=makeRGB(100,0,150)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:INSECT|value=makeRGB(50,100,150)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:KITIN|value=makeRGB(50,0,150)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:NOCIVE|value=makeRGB(50,0,100)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:PRESERVATIVE|value=makeRGB(50,0,50)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:PASSAGE|value=makeRGB(100,255,255)" />
+	<action handler="set" params="dblink=UI:SAVE:LANDMARK:COLORS:TELEPORTER|value=makeRGB(0,200,200)" />
+
+	<action handler="set" params="dblink=UI:SAVE:EXPAND_MISSION_LIST|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:MISSION_JOURNAL_HEADER_ACTIVE|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:CONTENT_ALPHA|value=255" />
+	<action handler="set" params="dblink=UI:SAVE:CONTAINER_ALPHA|value=255" />
+	<action handler="set" params="dblink=UI:SAVE:CONTENT_ROLLOVER_FACTOR|value=255" />
+	<action handler="set" params="dblink=UI:SAVE:CONTAINER_ROLLOVER_FACTOR|value=255" />
+	<action handler="set" params="dblink=UI:SAVE:ALPHA_ROLLOVER_SPEED|value=5" />
+	<action handler="set" params="dblink=UI:SAVE:DOUBLE_CLICK_SPEED|value=50" />
+	<action handler="set" params="dblink=UI:SAVE:KEY_REPEAT_SPEED|value=50" />
+	<action handler="set" params="dblink=UI:SAVE:USER_CHAR_FADE|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:USER_CHAR_OPA_MIN|value=160" />
 	<action handler="set" params="dblink=UI:SAVE:DAY_COLOR|value=makeRGB(219,254,174)" />
 	<action handler="set" params="dblink=UI:SAVE:NIGHT_COLOR|value=makeRGB(127,190,254)" />
-	
+	<action handler="set" params="dblink=UI:SAVE:SHOW_3D_ITEM_PREVIEW|value=1" />
+
+	<action handler="set" params="dblink=UI:SAVE:PLAYER:DISP_SAP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:PLAYER:DISP_STA|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:PLAYER:DISP_FOC|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:ACT_BAR_OUT|value=1" />
+
+	<action handler="set" params="dblink=UI:SAVE:CHAT:FONT_SIZE|value=10" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:MULTI_LINE_SPACE|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:SHADOWED_TEXT|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:SPEAKER|value=makeRGB(220,220,50)" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:SAY|value=makeRGB(255,255,255)" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:SHOUT|value=makeRGB(255,70,70)" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:GROUP|value=makeRGB(170,170,255)" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:CLADE|value=makeRGB(70,255,70)" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:CIVILIZATION|value=makeRGB(128,128,128)" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:TERRITORY|value=makeRGB(128,128,128)" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:UNIVERSE_NEW|value=makeRGB(255,127,0)" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:REGION|value=makeRGB(255,200,200)" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:TELL|value=makeRGB(170,170,170)" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:DYN|value=makeRGB(162,255,173)" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:ENTER_DONT_QUIT_CB|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB|value=0" />
+
+	<action handler="set" params="dblink=UI:SAVE:INV_BAG:SORT_TYPE|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_BAG:ICON_LIST|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_BAG:FILTER_ARMOR|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_BAG:FILTER_WEAPON|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_BAG:FILTER_TOOL|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_BAG:FILTER_MP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_BAG:FILTER_MISSMP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA0:SORT_TYPE|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA0:ICON_LIST|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA0:FILTER_ARMOR|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA0:FILTER_WEAPON|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA0:FILTER_TOOL|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA0:FILTER_MP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA0:FILTER_MISSMP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA1:SORT_TYPE|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA1:ICON_LIST|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA1:FILTER_ARMOR|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA1:FILTER_WEAPON|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA1:FILTER_TOOL|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA1:FILTER_MP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA1:FILTER_MISSMP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA2:SORT_TYPE|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA2:ICON_LIST|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA2:FILTER_ARMOR|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA2:FILTER_WEAPON|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA2:FILTER_TOOL|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA2:FILTER_MP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA2:FILTER_MISSMP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA3:SORT_TYPE|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA3:ICON_LIST|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA3:FILTER_ARMOR|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA3:FILTER_WEAPON|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA3:FILTER_TOOL|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA3:FILTER_MP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA3:FILTER_MISSMP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:SORT_TYPE|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:ICON_LIST|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:FILTER_ARMOR|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:FILTER_WEAPON|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:FILTER_TOOL|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:FILTER_MP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:FILTER_MISSMP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_ROOM:SORT_TYPE|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_ROOM:ICON_LIST|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:INV_ROOM:FILTER_ARMOR|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_ROOM:FILTER_WEAPON|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_ROOM:FILTER_TOOL|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_ROOM:FILTER_MP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_ROOM:FILTER_MISSMP|value=1" />
+
+	<action handler="set" params="dblink=UI:SAVE:ISDETACHED:MAIN_CHAT|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:ISDETACHED:GUILD_CHAT|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:ISDETACHED:TEAM_CHAT|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:ISDETACHED:SYSTEM_INFO|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:ISDETACHED:AROUND_ME|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:ISDETACHED:CHAT_GROUP|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:ISDETACHED:USER_CHAT|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:ISDETACHED:UNIVERSE_CHAT|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:ISDETACHED:REGION_CHAT|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:ISDETACHED:YUBO_CHAT|value=0" />
+	<action handler="set" params="dblink=UI:SAVE:ISENABLED:AROUND_ME|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:ISENABLED:REGION_CHAT|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:ISENABLED:TEAM_CHAT|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:ISENABLED:GUILD_CHAT|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:ISENABLED:UNIVERSE_CHAT|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:ISENABLED:SYSTEM_INFO|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:ISENABLED:YUBO_CHAT|value=1" />
+
 	<action handler="reset_virtual_desktop" params="vdesk=0" />
 	<action handler="reset_virtual_desktop" params="vdesk=1" />
 	<action handler="reset_virtual_desktop" params="vdesk=2" />

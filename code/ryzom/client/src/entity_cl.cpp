@@ -3064,7 +3064,8 @@ void	CEntityCL::updateVisiblePostPos(const NLMISC::TTime &/* currentTimeInMs */,
 		}
 	}
 
-	if (!_StateFX.empty()) {
+	if (!_StateFX.empty())
+	{
 		// Build a matrix for the fx
 		NLMISC::CMatrix mat;
 		mat.identity();
@@ -3529,8 +3530,10 @@ CVector CEntityCL::dirToTarget() const
 //----------------------------------------------------------------------
 void CEntityCL::setStateFx(const std::string &fxName)
 {
-	if (fxName != _StateFXName) {
-		if (!_StateFX.empty() && Scene) {
+	if (fxName != _StateFXName)
+	{
+		if (!_StateFX.empty() && Scene)
+		{
 			Scene->deleteInstance(_StateFX);
 		}
 
@@ -3556,7 +3559,8 @@ void CEntityCL::setStateFx(const std::string &fxName)
 //----------------------------------------------------------------------
 void CEntityCL::removeStateFx()
 {
-	if (!_StateFX.empty() && Scene) {
+	if (!_StateFX.empty() && Scene)
+	{
 		Scene->deleteInstance(_StateFX);
 		_StateFXName = "";
 	}

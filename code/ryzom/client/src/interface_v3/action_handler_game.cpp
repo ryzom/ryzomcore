@@ -2497,7 +2497,9 @@ class CAHAddShape : public IActionHandler
 			{
 				shape = sShape.substr(0, index);
 				sShape = sShape.substr(index+1);
-			} else {
+			}
+			else
+			{
 				shape = sShape;
 				have_shapes = false;
 			}

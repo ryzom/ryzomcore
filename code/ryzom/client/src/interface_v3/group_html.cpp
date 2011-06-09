@@ -442,6 +442,9 @@ void CGroupHTML::addText (const char * buf, int len)
 {
 	if (_Browsing)
 	{
+		if (_IgnoreText)
+			return;
+
 		// Build a UTF8 string
 		string inputString(buf, buf+len);
 //		inputString.resize (len);
@@ -524,6 +527,11 @@ void CGroupHTML::addLink (uint element_number, uint /* attribute_number */, HTCh
 				{
 					// in ah: command we don't respect the uri standard so the HTAnchor_address doesn't work correctly
 					_Link.push_back (suri);
+				}
+				else if (suri[0] == '#')
+				{
+					// Direct url (hack for lua beginElement)
+					_Link.push_back (suri.substr(1));	
 				}
 				else
 				{
@@ -839,6 +847,14 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 				}
 			}
 			break;
+		case HTML_DIV:
+		{
+			if (present[MY_HTML_DIV_NAME] && value[MY_HTML_DIV_NAME])
+			{
+				_DivName = value[MY_HTML_DIV_NAME];
+			}
+		}
+			break;
 		case HTML_FONT:
 		{
 			bool found = false;
@@ -855,8 +871,19 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 			{
 				_TextColor.push_back(_TextColor.empty() ? CRGBA::White : _TextColor.back());
 			}
+
+			if (present[HTML_FONT_SIZE] && value[HTML_FONT_SIZE])
+			{
+				uint fontsize;
+				fromString(value[HTML_FONT_SIZE], fontsize);
+				_FontSize.push_back(fontsize);
+			}
+			else
+			{
+				_FontSize.push_back(_FontSize.empty() ? TextFontSize : _FontSize.back());
+			}
 		}
-		break;
+			break;
 		case HTML_BR:
 			addString(ucstring ("\n"));
 			break;
@@ -1373,6 +1400,9 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 			_Object = true;
 
 			break;
+		case HTML_STYLE:
+			_IgnoreText = true;
+			break;
 		}
 	}
 }
@@ -1388,6 +1418,7 @@ void CGroupHTML::endElement (uint element_number)
 		{
 		case HTML_FONT:
 			popIfNotEmpty (_TextColor);
+			popIfNotEmpty (_FontSize);
 		break;
 		case HTML_A:
 			popIfNotEmpty (_TextColor);
@@ -1409,6 +1440,10 @@ void CGroupHTML::endElement (uint element_number)
 		case HTML_PRE:
 			popIfNotEmpty (_PRE);
 			break;
+		case HTML_DIV:
+			_DivName = "";
+			break;
+
 		case HTML_TABLE:
 			popIfNotEmpty (_CellParams);
 			popIfNotEmpty (_TR);
@@ -1493,6 +1528,9 @@ void CGroupHTML::endElement (uint element_number)
 				popIfNotEmpty (_UL);
 			}
 			break;
+		case HTML_STYLE:
+			_IgnoreText = false;
+			break;
 		case HTML_OBJECT:
 			if (_ObjectType=="application/ryzom-data")
 			{
@@ -1560,6 +1598,7 @@ CGroupHTML::CGroupHTML(const TCtorParam &param)
 
 	// init
 	_ParsingLua = false;
+	_IgnoreText = false;
 	_BrowseNextTime = false;
 	_PostNextTime = false;
 	_Browsing = false;
@@ -2224,8 +2263,9 @@ void CGroupHTML::addImage(const char *img, bool globalColor)
 			else*/
 			getParagraph()->addChild(newImage);
 			paragraphChange ();
-		} else {
-
+		}
+		else
+		{
 			//
 			// 2/ if it doesn't work, try to load the image in cache
 			//
@@ -2506,6 +2546,7 @@ void CGroupHTML::clearContext()
 	_Cells.clear();
 	_TR.clear();
 	_Forms.clear();
+	_Groups.clear();
 	_CellParams.clear();
 	_Title = false;
 	_TextArea = false;
@@ -2582,6 +2623,12 @@ void CGroupHTML::addGroup (CInterfaceGroup *group, uint beginSpace)
 	{
 		_Paragraph->getParent ()->delGroup(_Paragraph);
 		_Paragraph = NULL;
+	}
+
+	if (!_DivName.empty())
+	{
+		group->setName(_DivName);
+		_Groups.push_back(group);
 	}
 
 	group->setSizeRef(CInterfaceElement::width);
@@ -3334,6 +3381,175 @@ int CGroupHTML::luaRefresh(CLuaState &ls)
 	const char *funcName = "refresh";
 	CLuaIHM::checkArgCount(ls, funcName, 0);
 	refresh();
+	return 0;
+}
+
+// ***************************************************************************
+int CGroupHTML::luaRemoveContent(CLuaState &ls)
+{
+	const char *funcName = "refresh";
+	CLuaIHM::checkArgCount(ls, funcName, 0);
+	removeContent();
+	return 0;
+}
+
+// ***************************************************************************
+int CGroupHTML::luaInsertText(CLuaState &ls)	
+{
+	const char *funcName = "insertText";
+	CLuaIHM::checkArgCount(ls, funcName, 3);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TBOOLEAN);
+	
+	string name = ls.toString(1);
+
+	ucstring text;
+	text.fromUtf8(ls.toString(2));
+
+	if (!_Forms.empty())
+	{
+		for (uint i=0; i<_Forms.back().Entries.size(); i++)
+		{
+			if (_Forms.back().Entries[i].TextArea && _Forms.back().Entries[i].Name == name)
+			{
+				// Get the edit box view
+				CInterfaceGroup *group = _Forms.back().Entries[i].TextArea->getGroup ("eb");
+				if (group)
+				{
+					// Should be a CGroupEditBox
+					CGroupEditBox *editBox = dynamic_cast<CGroupEditBox*>(group);
+					if (editBox)
+						editBox->writeString(text, false, ls.toBoolean(3));
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+// ***************************************************************************
+int CGroupHTML::luaAddString(CLuaState &ls)
+{
+	const char *funcName = "addString";
+	CLuaIHM::checkArgCount(ls, funcName, 1);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+	addString(ucstring(ls.toString(1)));
+	return 0;
+}
+
+// ***************************************************************************
+int CGroupHTML::luaAddImage(CLuaState &ls)
+{
+	const char *funcName = "addImage";
+	CLuaIHM::checkArgCount(ls, funcName, 2);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TBOOLEAN);
+	if (!_Paragraph)
+	{
+		newParagraph(0);
+		paragraphChange();
+	}
+	string url = getLink();
+	if (!url.empty())
+	{
+		string params = "name=" + getId() + "|url=" + getLink ();
+		addButton(CCtrlButton::PushButton, ls.toString(1), ls.toString(1), ls.toString(1),
+							"", ls.toBoolean(2), "browse", params.c_str(), "");
+	}
+	else
+	{
+		addImage(ls.toString(1), ls.toBoolean(2));
+	}
+
+
+	return 0;
+}
+
+// ***************************************************************************
+int CGroupHTML::luaBeginElement(CLuaState &ls)
+{
+	const char *funcName = "beginElement";
+	CLuaIHM::checkArgCount(ls, funcName, 2);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TTABLE);
+
+	uint element_number = (uint)ls.toNumber(1);
+	std::vector<BOOL> present;
+	std::vector<const char *> value;
+	present.resize(30, false);
+	value.resize(30);
+
+	CLuaObject params;
+	params.pop(ls);
+	uint max_idx = 0;
+
+
+	ENUM_LUA_TABLE(params, it)
+	{
+		if (!it.nextKey().isNumber())
+		{
+			nlwarning("%s : bad key encountered with type %s, number expected.", funcName, it.nextKey().getTypename());
+			continue;
+		}
+		if (!it.nextValue().isString())
+		{
+			nlwarning("%s : bad value encountered with type %s for key %s, string expected.", funcName, it.nextValue().getTypename(), it.nextKey().toString().c_str());
+			continue;
+		}
+		uint idx = (uint)it.nextKey().toNumber();
+
+		present.insert(present.begin() + (uint)it.nextKey().toNumber(), true);
+
+		string str = it.nextValue().toString();
+		size_t size = str.size() + 1;
+		char * buffer = new char[ size ];
+		strncpy(buffer, str.c_str(), size );
+
+		value.insert(value.begin() + (uint)it.nextKey().toNumber(), buffer);
+	}
+
+	beginElement(element_number, &present[0], &value[0]);
+	if (element_number == HTML_A)
+		addLink(element_number, 0, NULL, &present[0], &value[0]);
+
+	return 0;
+}
+
+
+// ***************************************************************************
+int CGroupHTML::luaEndElement(CLuaState &ls)
+{
+	const char *funcName = "endElement";
+	CLuaIHM::checkArgCount(ls, funcName, 1);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+
+	uint element_number = (uint)ls.toNumber(1);
+	endElement(element_number);
+
+	return 0;
+}
+
+
+// ***************************************************************************
+int CGroupHTML::luaShowDiv(CLuaState &ls)
+{
+	const char *funcName = "showDiv";
+	CLuaIHM::checkArgCount(ls, funcName, 2);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TBOOLEAN);
+
+	if (!_Groups.empty()) {
+		for (uint i=0; i<_Groups.size(); i++)
+		{
+			CInterfaceGroup *group = _Groups[i];
+			if (group->getName() == ls.toString(1))
+			{
+				group->setActive(ls.toBoolean(2));
+			}
+		}
+	}
 	return 0;
 }
 

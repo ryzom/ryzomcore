@@ -1309,6 +1309,16 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		Params.push_back(new CSBrickParamLifeAura(tail)); 
 		break;
 
+	case TBrickParam::SP_LIFE_AURA2:
+		// $*STRUCT CSBrickParamLifeAura2 TBrickParam::SP_LIFE_AURA2
+		// $*-i uint16	RegenMod			// regen modifier (in %) proportionally to item level
+		// $*-f float	Duration			// duration in seconds
+		// $*-f float	Radius				// aura radius in meters
+		// $*-f float	TargetDisableTime	// disable life aura for x seconds on targets
+		// $*-f float	UserDisableTime		// disable life aura for x seconds on user
+		Params.push_back(new CSBrickParamLifeAura2(tail));
+		break;
+
 	case TBrickParam::SP_STAMINA_AURA:
 		// $*STRUCT CSBrickParamStaminaAura TBrickParam::SP_STAMINA_AURA
 		// $*-i uint16	RegenMod			// regen modifier (in %)
@@ -1319,6 +1329,16 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		Params.push_back(new CSBrickParamStaminaAura(tail)); 
 		break;
 
+	case TBrickParam::SP_STAMINA_AURA2:
+		// $*STRUCT CSBrickParamStaminaAura2 TBrickParam::SP_STAMINA_AURA2
+		// $*-i uint16	RegenMod			// regen modifier (in %) proportionally to item level
+		// $*-f float	Duration			// duration in seconds
+		// $*-f float	Radius				// aura radius in meters
+		// $*-f float	TargetDisableTime	// disable life aura for x seconds on targets
+		// $*-f float	UserDisableTime		// disable life aura for x seconds on user
+		Params.push_back(new CSBrickParamStaminaAura2(tail)); 
+		break;
+
 	case TBrickParam::SP_SAP_AURA:
 		// $*STRUCT CSBrickParamSapAura TBrickParam::SP_SAP_AURA
 		// $*-i uint16	RegenMod			// regen modifier (in %)
@@ -1327,6 +1347,16 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		// $*-f float	TargetDisableTime	// disable life aura for x seconds on targets
 		// $*-f float	UserDisableTime		// disable life aura for x seconds on user
 		Params.push_back(new CSBrickParamSapAura(tail)); 
+		break;
+
+	case TBrickParam::SP_SAP_AURA2:
+		// $*STRUCT CSBrickParamSapAura2 TBrickParam::SP_SAP_AURA2
+		// $*-i uint16	RegenMod			// regen modifier (in %) proportionally to item level
+		// $*-f float	Duration			// duration in seconds
+		// $*-f float	Radius				// aura radius in meters
+		// $*-f float	TargetDisableTime	// disable life aura for x seconds on targets
+		// $*-f float	UserDisableTime		// disable life aura for x seconds on user
+		Params.push_back(new CSBrickParamSapAura2(tail)); 
 		break;
 
 	case TBrickParam::SP_SPEEDING_UP:

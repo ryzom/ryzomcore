@@ -985,7 +985,31 @@
           tooltip_posref="TR TL"
           tooltip_posref_alt="TL TR" />
   </template>
-
+  <!-- Defines memory ctrl -->
+  <template name="ctrl_alt_memory"
+            index=""
+            posref="TL TL"
+            posparent="parent"
+            x="0"
+            y="0"
+            tx_noitem="">
+    <ctrl type="sheet"
+          id="s#index"
+          value="UI:PHRASE:MEMORY_ALT:#index"
+          nature="sphraseid"
+          brick_over="true"
+          x="#x"
+          y="#y"
+          posref="#posref"
+          posparent="#posparent"
+          tx_noitem="#tx_noitem"
+          dragable="false"
+          is_shortcut="false"
+          onclick_l="cast_phrase_or_create_new"
+          tooltip_parent="win"
+          tooltip_posref="TR TL"
+          tooltip_posref_alt="TL TR" />
+  </template>
   <!-- System: must update the memory ctrls regen range BRICK_TICK_RANGE database is changed -->
   <link expr="@SERVER:FLAGS:BRICK_TICK_RANGE"
         action="phrase_update_all_memory_ctrl_regen_tick_range" />
@@ -1290,6 +1314,143 @@
           params="value=add(@UI:PHRASE:SELECT_MEMORY,-1)" />
   </group>
   <tree node="gestionsets" />
+  <group type="container"
+         id="gestionsets2"
+         w="68"
+         h="280"
+         resizer="false"
+         header_active="false"
+         right_button="false"
+         group_onclick_r="active_menu"
+         group_params_r="menu=ui:interface:base_menu_with_color"
+         movable="true"
+         active="true"
+         opened="false"
+         openable="false"
+         global_color="false"
+         header_color="UI:SAVE:WIN:COLORS:INV"
+         locked="true"
+         on_active="set"
+         on_active_params="dblink=UI:VARIABLES:ISACTIVE:SETS2|value=1"
+         on_deactive="set"
+         on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:SETS2|value=0"
+         help_page="interf_action_bar.html">
+    <group id="header_closed"
+           x="0"
+           y="0"
+           w="68"
+           h="280"
+           posref="TL TL">
+    <group id="shortcuts"
+		   y="-1"
+           w="68"
+           h="278"
+           posref="TL TL">
+      <!-- The Shortcuts. Don't modify ids  -->
+      <instance template="ctrl_alt_memory"
+                index="0"
+                x="0"
+                y="0"
+                tx_noitem="W_slot_shortcut_id0.tga" />
+      <instance template="ctrl_alt_memory"
+                index="1"
+                y="-28"
+                x="0"
+                tx_noitem="W_slot_shortcut_id1.tga" />
+      <instance template="ctrl_alt_memory"
+                index="2"
+                y="-56"
+                x="0"
+                tx_noitem="W_slot_shortcut_id2.tga" />
+      <instance template="ctrl_alt_memory"
+                index="3"
+                y="-84"
+                x="0"
+                tx_noitem="W_slot_shortcut_id3.tga" />
+      <instance template="ctrl_alt_memory"
+                index="4"
+                y="-112"
+                x="0"
+                tx_noitem="W_slot_shortcut_id4.tga" />
+      <instance template="ctrl_alt_memory"
+                index="5"
+                y="-140"
+                x="0"
+                tx_noitem="W_slot_shortcut_id5.tga" />
+      <instance template="ctrl_alt_memory"
+                index="6"
+                y="-168"
+                x="0"
+                tx_noitem="W_slot_shortcut_id6.tga" />
+      <instance template="ctrl_alt_memory"
+                index="7"
+                y="-196"
+                x="0"
+                tx_noitem="W_slot_shortcut_id7.tga" />
+      <instance template="ctrl_alt_memory"
+                index="8"
+                y="-224"
+                x="0"
+                tx_noitem="W_slot_shortcut_id8.tga" />
+      <instance template="ctrl_alt_memory"
+                index="9"
+                y="-252"
+                x="0"
+                tx_noitem="W_slot_shortcut_id9.tga" />
+      <instance template="ctrl_alt_memory"
+                index="10"
+                y="-0"
+                x="26"
+                tx_noitem="W_slot_shortcut_shift_id0.tga" />
+      <instance template="ctrl_alt_memory"
+                index="11"
+                y="-28"
+                x="26"
+                tx_noitem="W_slot_shortcut_shift_id1.tga" />
+      <instance template="ctrl_alt_memory"
+                index="12"
+                y="-56"
+                x="26"
+                tx_noitem="W_slot_shortcut_shift_id2.tga" />
+      <instance template="ctrl_alt_memory"
+                index="13"
+                y="-84"
+                x="26"
+                tx_noitem="W_slot_shortcut_shift_id3.tga" />
+      <instance template="ctrl_alt_memory"
+                index="14"
+                y="-112"
+                x="26"
+                tx_noitem="W_slot_shortcut_shift_id4.tga" />
+      <instance template="ctrl_alt_memory"
+                index="15"
+                y="-140"
+                x="26"
+                tx_noitem="W_slot_shortcut_shift_id5.tga" />
+      <instance template="ctrl_alt_memory"
+                index="16"
+                y="-168"
+                x="26"
+                tx_noitem="W_slot_shortcut_shift_id6.tga" />
+      <instance template="ctrl_alt_memory"
+                index="17"
+                y="-196"
+                x="26"
+                tx_noitem="W_slot_shortcut_shift_id7.tga" />
+      <instance template="ctrl_alt_memory"
+                index="18"
+                y="-224"
+                x="26"
+                tx_noitem="W_slot_shortcut_shift_id8.tga" />
+      <instance template="ctrl_alt_memory"
+                index="19"
+                y="-252"
+                x="26"
+                tx_noitem="W_slot_shortcut_shift_id9.tga" />
+     </group>
+    </group>
+  </group>
+  <tree node="gestionsets2" />
   <!-- hands -->
   <!-- ************************* -->
   <!-- ** TEAM SHARING SYSTEM ** -->

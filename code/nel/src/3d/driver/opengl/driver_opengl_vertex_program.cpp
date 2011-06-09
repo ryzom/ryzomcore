@@ -111,7 +111,7 @@ bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
 			}
 
 			// Insert into driver list. (so it is deleted when driver is deleted).
-			ItVtxPrgDrvInfoPtrList	it= _VtxPrgDrvInfos.insert(_VtxPrgDrvInfos.end(), NULL);
+			ItVtxPrgDrvInfoPtrList	it= _VtxPrgDrvInfos.insert(_VtxPrgDrvInfos.end(), (NL3D::IVertexProgramDrvInfos*)NULL);
 
 			// Create a driver info
 			*it = drvInfo = new CVertexProgamDrvInfosGL (this, it);
@@ -309,7 +309,7 @@ static uint convInputRegisterToVBFlag(uint index)
 // For debugging with swizzling
 static void doSwizzle(GLuint res, GLuint in, GLenum outX, GLenum outY, GLenum outZ, GLenum outW)
 {
-	H_AUTO_OGL(doSwizzle)
+	H_AUTO_OGL(doSwizzle);
 	nglSwizzleEXT(res, in, outX, outY, outZ, outW);
 #ifdef DEBUG_SETUP_EXT_VERTEX_SHADER
 	std::string swzStr = "Swizzle : ";
@@ -359,7 +359,7 @@ static void doSwizzle(GLuint res, GLuint in, GLenum outX, GLenum outY, GLenum ou
 // Perform write mask and output de bug information
 static void doWriteMask(GLuint res, GLuint in, GLenum outX, GLenum outY, GLenum outZ, GLenum outW)
 {
-	H_AUTO_OGL(doWriteMask)
+	H_AUTO_OGL(doWriteMask);
 	nglWriteMaskEXT(res, in, outX, outY, outZ, outW);
 	#ifdef DEBUG_SETUP_EXT_VERTEX_SHADER
 	nlinfo("3D: Write Mask : %c%c%c%c",
@@ -376,7 +376,7 @@ static void doWriteMask(GLuint res, GLuint in, GLenum outX, GLenum outY, GLenum 
   */
 bool CDriverGL::setupEXTVertexShader(const CVPParser::TProgram &program, GLuint id, uint variants[EVSNumVariants], uint16 &usedInputRegisters)
 {
-	H_AUTO_OGL(CDriverGL_setupEXTVertexShader)
+	H_AUTO_OGL(CDriverGL_setupEXTVertexShader);
 	// counter to see what is generated
 	uint numOp = 0;
 	uint numOpIndex = 0;
@@ -1440,6 +1440,14 @@ bool CDriverGL::setupARBVertexProgram (const CVPParser::TProgram &inParsedProgra
 		nlassert(0);
 		return false;
 	}
+
+#ifdef NL_OS_MAC
+	// Wait for GPU to finish program upload, else draw comands might crash.
+	// Happened to CVegetableBlendLayerModel (glDrawElements()).
+	// For more information, see http://dev.ryzom.com/issues/1006
+	glFinish();
+#endif
+
 	return true;
 }
 
@@ -1472,7 +1480,7 @@ bool CDriverGL::activeARBVertexProgram (CVertexProgram *program)
 				return false;
 			}
 			// Insert into driver list. (so it is deleted when driver is deleted).
-			ItVtxPrgDrvInfoPtrList	it= _VtxPrgDrvInfos.insert(_VtxPrgDrvInfos.end(), NULL);
+			ItVtxPrgDrvInfoPtrList	it= _VtxPrgDrvInfos.insert(_VtxPrgDrvInfos.end(), (NL3D::IVertexProgramDrvInfos*)NULL);
 
 			// Create a driver info
 			*it = drvInfo = new CVertexProgamDrvInfosGL (this, it);
@@ -1554,7 +1562,7 @@ bool CDriverGL::activeEXTVertexShader (CVertexProgram *program)
 			*/
 
 			// Insert into driver list. (so it is deleted when driver is deleted).
-			ItVtxPrgDrvInfoPtrList	it= _VtxPrgDrvInfos.insert(_VtxPrgDrvInfos.end(), NULL);
+			ItVtxPrgDrvInfoPtrList	it= _VtxPrgDrvInfos.insert(_VtxPrgDrvInfos.end(), (NL3D::IVertexProgramDrvInfos*)NULL);
 
 			// Create a driver info
 			*it = drvInfo = new CVertexProgamDrvInfosGL (this, it);

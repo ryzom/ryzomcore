@@ -1096,7 +1096,7 @@ NLMISC_COMMAND(execScript, "Execute a script file (.cmd)","<FileName>")
 					// read one byte
 					iFile.serialBuffer ((uint8 *)buffer, 1);
 				}
-				catch (EFile &)
+				catch (const EFile &)
 				{
 					*buffer = '\0';
 					eof = true;
@@ -1271,6 +1271,30 @@ NLMISC_COMMAND(7,"talk in 7th dynamic chat channel","<channel_nb> <sentence>")
 {
 	return talkInChan(7,args);
 }
+
+
+NLMISC_COMMAND(setItemName, "set name of items, sbrick, etc..","<sheet_id> <name> <desc> <desc2>")
+{
+	if (args.size() < 2) return false;
+	CSheetId id(args[0]);
+	ucstring name;
+	name.fromUtf8(args[1]);
+	ucstring desc;
+	ucstring desc2;
+	if (args.size() > 2)
+		desc.fromUtf8(args[2]);
+	if (args.size() > 2)
+		desc2.fromUtf8(args[3]);
+
+	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
+	if (pSMC)
+		pSMC->replaceSBrickName(id, name, desc, desc2);
+	else
+		return false;
+	return true;
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
@@ -5113,7 +5137,7 @@ NLMISC_COMMAND(luaObject, "Dump the content of a lua object", "<table name> [max
 		// make a reference to the table to be inspected (is this this a primitive type, just make a copy)
 		luaState->executeScript(std::string(inspectedTable) + " = " + args[0]);
 	}
-	catch(ELuaError &e)
+	catch(const ELuaError &e)
 	{
 		CLuaIHM::debugInfo(e.what());
 		return false;
@@ -5383,7 +5407,7 @@ NLMISC_COMMAND(dumpPosAsPrim, "ld helper : add current position to pos.primitive
 			stream.open(path);
 			stream.serialBuffer((uint8 *) &srcFile[0], fileSize);
 		}
-		catch(NLMISC::EStream &e)
+		catch(const NLMISC::EStream &e)
 		{
 			nlinfo(e.what());
 			srcFile.clear();
@@ -5431,7 +5455,7 @@ NLMISC_COMMAND(dumpPosAsPrim, "ld helper : add current position to pos.primitive
 		stream.open(path);
 		stream.serialBuffer((uint8 *) &srcFile[0], (uint)srcFile.size());
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		nlinfo(e.what());
 	}

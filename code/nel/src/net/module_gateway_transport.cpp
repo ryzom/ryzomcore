@@ -684,7 +684,7 @@ namespace NLNET
 				route->CallbackClient.connect(addr);
 				nldebug("CGatewayL3ClientTransport : Connected to %s with connId %u", addr.asString().c_str(), connId);
 			}
-			catch (ESocketConnectionFailed e)
+			catch (const ESocketConnectionFailed &)
 			{
 				nlinfo("CGatewayL3ClientTransport : Failed to connect to server %s, retrying in %u seconds", addr.asString().c_str(), _RetryInterval);
 			}

@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdpch.h"
 
 // misc
 #include "nel/misc/command.h"
@@ -181,7 +182,7 @@ void cbEGSConnection( const std::string &serviceName, NLNET::TServiceId serviceI
 //		msgout.serialCont( continentsNames ),
 //		CUnifiedNetwork::getInstance()->send( "EGS", msgout );
 //	}
-//	catch(EUnknownVar &)
+//	catch(const EUnknownVar &)
 //	{
 //		nlwarning("<cbEGSConnection> UsedContinents not found, no continent used");
 //	}
@@ -349,7 +350,7 @@ void CGlobalPositionManagerService::init()
 				CWorldPositionManager::loadContinent(name, continents[i].ContinentName, continents[i].ContinentInstance);
 			}
 		}
-		catch(EUnknownVar &)
+		catch(const EUnknownVar &)
 		{
 			nlwarning("<CGlobalPositionManagerService::init> UsedContinents not found, no continent used");
 		}

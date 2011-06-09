@@ -892,12 +892,22 @@ void CSourceAL::setStreamingBuffersMax(uint buffers)
 
 	for(uint i = 0; i < _BuffersMax; ++i)
 	{
-		// create a new buffer
-		CBufferAL *buffer = static_cast<CBufferAL*>(_SoundDriver->createBuffer());
-		// use StorageSoftware because buffers will be reused
-		// deleting and recreating them is a waste of time
-		buffer->setStorageMode(IBuffer::StorageSoftware);
-		_Buffers[buffer->bufferName()] = buffer;
+		try
+		{
+			// create a new buffer
+			CBufferAL *buffer = static_cast<CBufferAL*>(_SoundDriver->createBuffer());
+			// use StorageSoftware because buffers will be reused
+			// deleting and recreating them is a waste of time
+			buffer->setStorageMode(IBuffer::StorageSoftware);
+			_Buffers[buffer->bufferName()] = buffer;
+		}
+		catch(const ESoundDriverGenBuf &e)
+		{
+			nlwarning("Cannot create %d buffers. openal fails after %d buffers", buffers, i);
+			_BuffersMax = i;
+			_BuffersName.resize(i);
+			break;
+		}
 	}
 }
 

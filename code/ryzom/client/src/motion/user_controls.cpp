@@ -619,6 +619,7 @@ void CUserControls::commonMove()
 	// MOUSE WHEEL //
 	CEventsListener::TWheelState wheelState = EventsListener.getWheelState();	// Done all the time, to reset the state
 	View.changeCameraDist((wheelState == CEventsListener::foreward), (wheelState == CEventsListener::backward));
+	View.changeCameraDist(Actions.valide("camera_foreward"), Actions.valide("camera_backward"));
 	// Camera Up/Down.
 	View.changeCameraHeight(Actions.valide("camera_up"), Actions.valide("camera_down"));
 	//////////////////

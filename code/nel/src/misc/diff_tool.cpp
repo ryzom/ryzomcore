@@ -84,7 +84,7 @@ bool loadStringFile(const std::string filename, vector<TStringInfo> &stringInfos
 		buffer = new uint8[size];
 		fp.serialBuffer(buffer, size);
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		nlinfo("Can't open file [%s] (%s)\n", filename.c_str(), e.what());
 		return true;

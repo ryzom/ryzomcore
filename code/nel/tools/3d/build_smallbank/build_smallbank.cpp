@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
 			}
 
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			// Error
 			nlwarning ("ERROR fatal error: %s", e.what());

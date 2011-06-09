@@ -20,6 +20,7 @@
 #include "icontext.h"
 #include "icore_listener.h"
 #include "menu_manager.h"
+#include "context_manager.h"
 #include "core.h"
 #include "core_constants.h"
 #include "settings_dialog.h"
@@ -38,8 +39,10 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 	: QMainWindow(parent),
 	  m_pluginManager(0),
 	  m_menuManager(0),
+	  m_contextManager(0),
 	  m_coreImpl(0),
 	  m_lastDir("."),
+	  m_undoGroup(0),
 	  m_settings(0)
 {
 	QCoreApplication::setApplicationName(QLatin1String("ObjectViewerQt"));
@@ -54,16 +57,27 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 	m_settings = m_pluginManager->settings();
 	m_coreImpl = new CoreImpl(this);
 
+#ifdef Q_WS_MAC
+	m_menuBar = new QMenuBar(0);
+#else
+	m_menuBar = new QMenuBar(this);
+	setMenuBar(m_menuBar);
+#endif
+
 	m_menuManager = new MenuManager(this);
-	m_menuManager->setMenuBar(menuBar());
+	m_menuManager->setMenuBar(m_menuBar);
 
 	m_tabWidget = new QTabWidget(this);
 	m_tabWidget->setTabPosition(QTabWidget::South);
-	m_tabWidget->setMovable(true);
+	m_tabWidget->setMovable(false);
+	m_tabWidget->setDocumentMode(true);
 	setCentralWidget(m_tabWidget);
+
+	m_contextManager = new ContextManager(this, m_tabWidget);
 
 	setDockNestingEnabled(true);
 	m_originalPalette = QApplication::palette();
+	m_undoGroup = new QUndoGroup(this);
 
 	createDialogs();
 	createActions();
@@ -91,21 +105,22 @@ bool MainWindow::initialize(QString *errorString)
 
 void MainWindow::extensionsInitialized()
 {
-	QList<IContext *> listContexts = m_pluginManager->getObjects<IContext>();
-
-	Q_FOREACH(IContext *context, listContexts)
-	{
-		addContextObject(context);
-	}
-
-	connect(m_pluginManager, SIGNAL(objectAdded(QObject *)), this, SLOT(checkObject(QObject *)));
 	readSettings();
+	connect(m_contextManager, SIGNAL(currentContextChanged(Core::IContext*)),
+			this, SLOT(updateContext(Core::IContext*)));
+	if (m_contextManager->currentContext() != NULL)
+		updateContext(m_contextManager->currentContext());
 	show();
 }
 
 IMenuManager *MainWindow::menuManager() const
 {
 	return m_menuManager;
+}
+
+ContextManager *MainWindow::contextManager() const
+{
+	return m_contextManager;
 }
 
 QSettings *MainWindow::settings() const
@@ -118,11 +133,69 @@ ExtensionSystem::IPluginManager *MainWindow::pluginManager() const
 	return m_pluginManager;
 }
 
-void MainWindow::checkObject(QObject *obj)
+void MainWindow::addContextObject(IContext *context)
 {
-	IContext *context = qobject_cast<IContext *>(obj);
-	if (context)
-		addContextObject(context);
+	m_undoGroup->addStack(context->undoStack());
+}
+
+void MainWindow::removeContextObject(IContext *context)
+{
+	m_undoGroup->removeStack(context->undoStack());
+}
+
+void MainWindow::open()
+{
+	m_contextManager->currentContext()->open();
+}
+
+void MainWindow::newFile()
+{
+}
+
+void MainWindow::save()
+{
+}
+
+void MainWindow::saveAs()
+{
+}
+
+void MainWindow::saveAll()
+{
+}
+
+void MainWindow::cut()
+{
+}
+
+void MainWindow::copy()
+{
+}
+
+void MainWindow::paste()
+{
+}
+
+void MainWindow::del()
+{
+}
+
+void MainWindow::find()
+{
+}
+
+void MainWindow::gotoPos()
+{
+}
+
+void MainWindow::setFullScreen(bool enabled)
+{
+	if (bool(windowState() & Qt::WindowFullScreen) == enabled)
+		return;
+	if (enabled)
+		setWindowState(windowState() | Qt::WindowFullScreen);
+	else
+		setWindowState(windowState() & ~Qt::WindowFullScreen);
 }
 
 bool MainWindow::showOptionsDialog(const QString &group,
@@ -133,7 +206,10 @@ bool MainWindow::showOptionsDialog(const QString &group,
 		parent = this;
 	CSettingsDialog settingsDialog(m_pluginManager, group, page, parent);
 	settingsDialog.show();
-	return settingsDialog.execDialog();
+	bool ok = settingsDialog.execDialog();
+	if (ok)
+		Q_EMIT m_coreImpl->changeSettings();
+	return ok;
 }
 
 void MainWindow::about()
@@ -141,6 +217,11 @@ void MainWindow::about()
 	QMessageBox::about(this, tr("About Object Viewer Qt"),
 					   tr("<h2>Object Viewer Qt</h2>"
 						  "<p> Ryzom Core team <p>Compiled on %1 %2").arg(__DATE__).arg(__TIME__));
+}
+
+void MainWindow::updateContext(Core::IContext *context)
+{
+	m_undoGroup->setActiveStack(context->undoStack());
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -160,30 +241,95 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	event->accept();
 }
 
-void MainWindow::addContextObject(IContext *context)
-{
-	QWidget *tabWidget = new QWidget(m_tabWidget);
-	m_tabWidget->addTab(tabWidget, context->icon(), context->trName());
-	QGridLayout *gridLayout = new QGridLayout(tabWidget);
-	gridLayout->setObjectName(QString::fromUtf8("gridLayout_") + context->id());
-	gridLayout->setContentsMargins(0, 0, 0, 0);
-	gridLayout->addWidget(context->widget(), 0, 0, 1, 1);
-}
-
 void MainWindow::createActions()
 {
+	m_newAction = new QAction(tr("&New"), this);
+	m_newAction->setIcon(QIcon(Constants::ICON_NEW));
+	m_newAction->setShortcut(QKeySequence::New);
+	menuManager()->registerAction(m_newAction, Constants::NEW);
+	connect(m_newAction, SIGNAL(triggered()), this, SLOT(newFile()));
+	m_newAction->setEnabled(false);
+
 	m_openAction = new QAction(tr("&Open..."), this);
 	m_openAction->setIcon(QIcon(Constants::ICON_OPEN));
 	m_openAction->setShortcut(QKeySequence::Open);
 	m_openAction->setStatusTip(tr("Open an existing file"));
 	menuManager()->registerAction(m_openAction, Constants::OPEN);
-//	connect(m_openAction, SIGNAL(triggered()), this, SLOT(open()));
+	connect(m_openAction, SIGNAL(triggered()), this, SLOT(open()));
+
+	m_saveAction = new QAction(tr("&Save"), this);
+	m_saveAction->setIcon(QIcon(Constants::ICON_SAVE));
+	m_saveAction->setShortcut(QKeySequence::Save);
+	menuManager()->registerAction(m_saveAction, Constants::SAVE);
+	connect(m_saveAction, SIGNAL(triggered()), this, SLOT(save()));
+	m_saveAction->setEnabled(false);
+
+	m_saveAsAction = new QAction(tr("Save &As..."), this);
+	m_saveAsAction->setIcon(QIcon(Constants::ICON_SAVE_AS));
+	m_saveAsAction->setShortcut(QKeySequence::SaveAs);
+	menuManager()->registerAction(m_saveAsAction, Constants::SAVE_AS);
+	connect(m_saveAsAction, SIGNAL(triggered()), this, SLOT(saveAs()));
+	m_saveAsAction->setEnabled(false);
+
+	m_saveAllAction = new QAction(tr("&Save A&ll"), this);
+	m_saveAllAction->setShortcut(QKeySequence::SelectAll);
+	menuManager()->registerAction(m_saveAllAction, Constants::SAVE_ALL);
+	connect(m_saveAllAction, SIGNAL(triggered()), this, SLOT(saveAll()));
+	m_saveAllAction->setEnabled(false);
 
 	m_exitAction = new QAction(tr("E&xit"), this);
 	m_exitAction->setShortcut(QKeySequence(tr("Ctrl+Q")));
 	m_exitAction->setStatusTip(tr("Exit the application"));
 	menuManager()->registerAction(m_exitAction, Constants::EXIT);
 	connect(m_exitAction, SIGNAL(triggered()), this, SLOT(close()));
+
+	m_cutAction = new QAction(tr("Cu&t"), this);
+	m_cutAction->setShortcut(QKeySequence::Cut);
+	menuManager()->registerAction(m_cutAction, Constants::CUT);
+	connect(m_cutAction, SIGNAL(triggered()), this, SLOT(cut()));
+	m_cutAction->setEnabled(false);
+
+	m_copyAction = new QAction(tr("&Copy"), this);
+	m_copyAction->setShortcut(QKeySequence::Copy);
+	menuManager()->registerAction(m_copyAction, Constants::COPY);
+	connect(m_copyAction, SIGNAL(triggered()), this, SLOT(copy()));
+	m_copyAction->setEnabled(false);
+
+	m_pasteAction = new QAction(tr("&Paste"), this);
+	m_pasteAction->setShortcut(QKeySequence::Paste);
+	menuManager()->registerAction(m_pasteAction, Constants::PASTE);
+	connect(m_pasteAction, SIGNAL(triggered()), this, SLOT(paste()));
+	m_pasteAction->setEnabled(false);
+
+	m_delAction = new QAction(tr("&Delete"), this);
+	m_delAction->setShortcut(QKeySequence::Delete);
+	menuManager()->registerAction(m_delAction, Constants::DEL);
+	connect(m_delAction, SIGNAL(triggered()), this, SLOT(del()));
+	m_delAction->setEnabled(false);
+
+	m_selectAllAction = new QAction(tr("Select &All"), this);
+	m_selectAllAction->setShortcut(QKeySequence::SelectAll);
+	menuManager()->registerAction(m_selectAllAction, Constants::SELECT_ALL);
+	connect(m_selectAllAction, SIGNAL(triggered()), this, SLOT(selectAll()));
+	m_selectAllAction->setEnabled(false);
+
+	m_findAction = new QAction(tr("&Find"), this);
+	m_findAction->setShortcut(QKeySequence::Find);
+	menuManager()->registerAction(m_findAction, Constants::FIND);
+	connect(m_findAction, SIGNAL(triggered()), this, SLOT(find()));
+	m_findAction->setEnabled(false);
+
+	m_gotoAction = new QAction(tr("&Go To.."), this);
+	m_gotoAction->setShortcut(QKeySequence(tr("Ctrl+G")));
+	menuManager()->registerAction(m_gotoAction, Constants::GOTO_POS);
+	connect(m_gotoAction, SIGNAL(triggered()), this, SLOT(gotoPos()));
+	m_gotoAction->setEnabled(false);
+
+	m_fullscreenAction = new QAction(tr("Fullscreen"), this);
+	m_fullscreenAction->setCheckable(true);
+	m_fullscreenAction->setShortcut(QKeySequence(tr("Ctrl+Shift+F11")));
+	menuManager()->registerAction(m_fullscreenAction, Constants::TOGGLE_FULLSCREEN);
+	connect(m_fullscreenAction, SIGNAL(triggered(bool)), this, SLOT(setFullScreen(bool)));
 
 	m_settingsAction = new QAction(tr("&Settings"), this);
 	m_settingsAction->setIcon(QIcon(":/images/preferences.png"));
@@ -218,18 +364,43 @@ void MainWindow::createActions()
 
 void MainWindow::createMenus()
 {
-	m_fileMenu = menuBar()->addMenu(tr("&File"));
+	m_fileMenu = m_menuBar->addMenu(tr("&File"));
 	menuManager()->registerMenu(m_fileMenu, Constants::M_FILE);
+	m_fileMenu->addAction(m_newAction);
+	m_fileMenu->addAction(m_openAction);
+	m_fileMenu->addSeparator();
+	m_fileMenu->addAction(m_saveAction);
+	m_fileMenu->addAction(m_saveAsAction);
+	m_fileMenu->addAction(m_saveAllAction);
+	m_fileMenu->addSeparator();
+
+	m_recentFilesMenu = m_fileMenu->addMenu(tr("Recent &Files"));
+	m_recentFilesMenu->setEnabled(false);
+	menuManager()->registerMenu(m_recentFilesMenu, Constants::M_FILE_RECENTFILES);
+
 	m_fileMenu->addSeparator();
 	m_fileMenu->addAction(m_exitAction);
 
-	m_editMenu = menuBar()->addMenu(tr("&Edit"));
+	m_editMenu = m_menuBar->addMenu(tr("&Edit"));
+	m_editMenu->addAction(m_undoGroup->createUndoAction(this));
+	m_editMenu->addAction(m_undoGroup->createRedoAction(this));
+	m_editMenu->addSeparator();
+	m_editMenu->addAction(m_cutAction);
+	m_editMenu->addAction(m_copyAction);
+	m_editMenu->addAction(m_pasteAction);
+	m_editMenu->addAction(m_delAction);
+	m_editMenu->addSeparator();
+	m_editMenu->addAction(m_selectAllAction);
+	m_editMenu->addSeparator();
+	m_editMenu->addAction(m_findAction);
+	m_editMenu->addAction(m_gotoAction);
 	menuManager()->registerMenu(m_editMenu, Constants::M_EDIT);
 
-	m_viewMenu = menuBar()->addMenu(tr("&View"));
+	m_viewMenu = m_menuBar->addMenu(tr("&View"));
+	m_viewMenu->addAction(m_fullscreenAction);
 	menuManager()->registerMenu(m_viewMenu, Constants::M_VIEW);
 
-	m_toolsMenu = menuBar()->addMenu(tr("&Tools"));
+	m_toolsMenu = m_menuBar->addMenu(tr("&Tools"));
 	menuManager()->registerMenu(m_toolsMenu, Constants::M_TOOLS);
 
 	m_sheetMenu = m_toolsMenu->addMenu(tr("&Sheet"));
@@ -239,9 +410,9 @@ void MainWindow::createMenus()
 
 	m_toolsMenu->addAction(m_settingsAction);
 
-	menuBar()->addSeparator();
+	m_menuBar->addSeparator();
 
-	m_helpMenu = menuBar()->addMenu(tr("&Help"));
+	m_helpMenu = m_menuBar->addMenu(tr("&Help"));
 	menuManager()->registerMenu(m_helpMenu, Constants::M_HELP);
 	m_helpMenu->addAction(m_aboutAction);
 	m_helpMenu->addAction(m_aboutQtAction);
@@ -260,17 +431,17 @@ void MainWindow::createDialogs()
 
 void MainWindow::readSettings()
 {
-	m_settings->beginGroup("MainWindow");
-	restoreState(m_settings->value("WindowState").toByteArray());
-	restoreGeometry(m_settings->value("WindowGeometry").toByteArray());
+	m_settings->beginGroup(Constants::MAIN_WINDOW_SECTION);
+	restoreState(m_settings->value(Constants::MAIN_WINDOW_STATE).toByteArray());
+	restoreGeometry(m_settings->value(Constants::MAIN_WINDOW_GEOMETRY).toByteArray());
 	m_settings->endGroup();
 }
 
 void MainWindow::writeSettings()
 {
-	m_settings->beginGroup("MainWindow");
-	m_settings->setValue("WindowState", saveState());
-	m_settings->setValue("WindowGeometry", saveGeometry());
+	m_settings->beginGroup(Constants::MAIN_WINDOW_SECTION);
+	m_settings->setValue(Constants::MAIN_WINDOW_STATE, saveState());
+	m_settings->setValue(Constants::MAIN_WINDOW_GEOMETRY, saveGeometry());
 	m_settings->endGroup();
 }
 

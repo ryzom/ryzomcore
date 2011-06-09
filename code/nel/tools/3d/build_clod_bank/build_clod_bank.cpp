@@ -173,7 +173,7 @@ int	main(int argc, char *argv[])
 						// NB: the key name here is the entire file, with the .anim, for easier georges editing.
 						lodBuilder.addAnim(animFileName.c_str(), anim, bakeFrameRate);
 					}
-					catch(EPathNotFound &)
+					catch(const EPathNotFound &)
 					{
 						printf("ERROR anim not found %s\n", animFileName.c_str());
 						delete	anim;
@@ -186,7 +186,7 @@ int	main(int argc, char *argv[])
 				uint32	shapeId= lodShapeBank.addShape();
 				*lodShapeBank.getShapeFullAcces(shapeId)= lodBuilder.getLodShape();
 			}
-			catch(EUnknownVar &evar)
+			catch(const EUnknownVar &evar)
 			{
 				nlwarning(evar.what());
 				// Any other exception will make the program quit.
@@ -205,7 +205,7 @@ int	main(int argc, char *argv[])
 		oFile.serial(lodShapeBank);
 		oFile.close();
 	}
-	catch (Exception& except)
+	catch (const Exception& except)
 	{
 		// Error message
 		printf ("ERROR %s.\n Aborting.\n", except.what());

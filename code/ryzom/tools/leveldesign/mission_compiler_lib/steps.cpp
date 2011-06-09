@@ -55,7 +55,11 @@ IStep::IStep(CMissionData &md, NLLIGO::IPrimitive *prim)
 	// parse the sub prim to create action & objectives;
 	IPrimitive *child;
 	// parse the preactions
-	child = getPrimitiveChild(prim, TPrimitiveClassAndNamePredicate("actions", "pre_actions"));
+	{
+		TPrimitiveClassAndNamePredicate pred("actions", "pre_actions");
+		child = getPrimitiveChild(prim, pred);
+	}
+
 	if (child)
 	{
 		for (uint i=0; i<child->getNumChildren(); ++i)
@@ -72,7 +76,10 @@ IStep::IStep(CMissionData &md, NLLIGO::IPrimitive *prim)
 		}
 	}
 	// parse the objectives
-	child = getPrimitiveChild(prim, TPrimitiveClassAndNamePredicate("mission_objectives", "objectives"));
+	{
+		TPrimitiveClassAndNamePredicate pred("mission_objectives", "objectives");
+		child = getPrimitiveChild(prim, pred);
+	}
 	if (child)
 	{
 		for (uint i=0; i<child->getNumChildren(); ++i)
@@ -89,7 +96,10 @@ IStep::IStep(CMissionData &md, NLLIGO::IPrimitive *prim)
 		}
 	}
 	// parse the post actions
-	child = getPrimitiveChild(prim, TPrimitiveClassAndNamePredicate("actions", "post_actions"));
+	{
+		TPrimitiveClassAndNamePredicate pred("actions", "post_actions");
+		child = getPrimitiveChild(prim, pred);
+	}
 	if (child)
 	{
 		for (uint i=0; i<child->getNumChildren(); ++i)
@@ -447,7 +457,10 @@ public:
 		// parse the sub prim to create action & objectives;
 		IPrimitive *child;
 		// parse the pre-actions
-		child = getPrimitiveChild(prim, TPrimitiveClassAndNamePredicate("actions", "actions"));
+		{
+			TPrimitiveClassAndNamePredicate pred("actions", "actions");
+			child = getPrimitiveChild(prim, pred);
+		}
 		if (child)
 		{
 			for (uint i=0; i<child->getNumChildren(); ++i)
@@ -464,7 +477,10 @@ public:
 			}
 		}
 		// look for an optional jump
-		child = getPrimitiveChild(prim, TPrimitiveClassPredicate("jump_to"));
+		{
+			TPrimitiveClassPredicate pred("jump_to");
+			child = getPrimitiveChild(prim, pred);
+		}
 		if (child)
 		{
 			// ok, we have a jump at end of fail step
@@ -515,7 +531,10 @@ public:
 		// parse the sub prim to create action & objectives;
 		IPrimitive *child;
 		// parse the pre-actions
-		child = getPrimitiveChild(prim, TPrimitiveClassAndNamePredicate("actions", "actions"));
+		{
+			TPrimitiveClassAndNamePredicate pred("actions", "actions");
+			child = getPrimitiveChild(prim, pred);
+		}
 		if (child)
 		{
 			for (uint i=0; i<child->getNumChildren(); ++i)
@@ -546,7 +565,10 @@ public:
 		}
 
 		// look for an optional jump
-		child = getPrimitiveChild(prim, TPrimitiveClassPredicate("jump_to"));
+		{
+			TPrimitiveClassPredicate pred("jump_to");
+			child = getPrimitiveChild(prim, pred);
+		}
 		if (child)
 		{
 			// ok, we have a jump at end of fail step
@@ -607,14 +629,20 @@ CStepPlayerReconnect::CStepPlayerReconnect(CMissionData &md, IPrimitive *prim) :
 	IPrimitive *child;
 
 	TPrimitiveSet resp;
-	filterPrimitiveChilds(prim, TPrimitivePropertyPredicate("step_tag", "true"), resp);
+	{
+		TPrimitivePropertyPredicate pred("step_tag", "true");
+		filterPrimitiveChilds(prim, pred, resp);
+	}
 	for (uint i=0; i<resp.size(); ++i)
 	{
 		_SubBranchs.push_back(resp[i]);
 	}
 
 	// look for an optional jump
-	child = getPrimitiveChild(prim, TPrimitiveClassPredicate("jump_to"));
+	{
+		TPrimitiveClassPredicate pred("jump_to");
+		child = getPrimitiveChild(prim, pred);
+	}
 	if (child)
 	{
 		// ok, we have a jump at end of fail step
@@ -721,12 +749,19 @@ public:
 		}
 
 		// build the sub branch list
-		IPrimitive *noResp = getPrimitiveChild(prim, TPrimitiveClassPredicate("no_answer"));
+		IPrimitive *noResp;
+		{
+			TPrimitiveClassPredicate pred("no_answer");
+			noResp = getPrimitiveChild(prim, pred);
+		}
 		nlassert(noResp);
 		_SubBranchs.push_back(noResp);
 		
 		TPrimitiveSet resp;
-		filterPrimitiveChilds(prim, TPrimitiveClassPredicate("dyn_answer"), resp);
+		{
+			TPrimitiveClassPredicate pred("dyn_answer");
+			filterPrimitiveChilds(prim, pred, resp);
+		}
 		_Responses.resize(resp.size());
 		for (uint i=0; i<resp.size(); ++i)
 		{
@@ -750,7 +785,10 @@ public:
 		for (uint i = 0; i < _SubBranchs.size(); ++i)
 		{
 			TPrimitiveSet childs;
-			filterPrimitiveChilds(_SubBranchs[i], TPrimitivePropertyPredicate("step_tag", "true"), childs);
+			{
+				TPrimitivePropertyPredicate pred("step_tag", "true");
+				filterPrimitiveChilds(_SubBranchs[i], pred, childs);
+			}
 			for (uint j = 0; j < childs.size(); ++j)
 				vStepsToReturn.push_back(childs[j]);
 		}
@@ -1008,7 +1046,10 @@ TPrimitiveSet CStepIf::getSubBranchs()
 	for (uint i = 0; i < _SubBranchs.size(); ++i)
 	{
 		TPrimitiveSet childs;
-		filterPrimitiveChilds(_SubBranchs[i], TPrimitivePropertyPredicate("step_tag", "true"), childs);
+		{
+			TPrimitivePropertyPredicate pred("step_tag", "true");
+			filterPrimitiveChilds(_SubBranchs[i], pred, childs);
+		}
 		for (uint j = 0; j < childs.size(); ++j)
 			vStepsToReturn.push_back(childs[j]);
 	}
@@ -1055,7 +1096,10 @@ string CStepIf::genCode(CMissionData &md)
 	vector<IStep*> noSteps;
 
 	// Get the 'yes branch' jump point
-	filterPrimitiveChilds(_SubBranchs[1], TPrimitivePropertyPredicate("step_tag", "true"), childs);
+	{
+		TPrimitivePropertyPredicate pred("step_tag", "true");
+		filterPrimitiveChilds(_SubBranchs[1], pred, childs);
+	}
 	if (!childs.empty())
 	{
 		for (i = 0; i < _SubSteps.size(); ++i)
@@ -1071,7 +1115,10 @@ string CStepIf::genCode(CMissionData &md)
 
 	// Get the 'no branch' jump point
 	childs.clear();
-	filterPrimitiveChilds(_SubBranchs[0], TPrimitivePropertyPredicate("step_tag", "true"), childs);
+	{
+		TPrimitivePropertyPredicate pred("step_tag", "true");
+		filterPrimitiveChilds(_SubBranchs[0], pred, childs);
+	}
 	if (!childs.empty())
 	{
 		for (i = 0; i < _SubSteps.size(); ++i)

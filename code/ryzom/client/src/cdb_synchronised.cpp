@@ -85,7 +85,7 @@ void CCDBSynchronised::init( const string &fileName, NLMISC::IProgressCallback &
 			_Database->init( read.getRootNode (), progressCallBack, true );
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		// Output error
 		nlwarning ("CFormLoader: Error while loading the form %s: %s", fileName.c_str(), e.what());

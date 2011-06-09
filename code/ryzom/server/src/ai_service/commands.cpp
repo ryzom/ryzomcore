@@ -1812,7 +1812,8 @@ bool execLoadScript(CStringWriter& stringWriter, vector<string> const& args)
 		NLMISC::CIFile file(NLMISC::CPath::lookup(args[2]));
 		
 		vector<string> lines;
-		while (!file.eof()) {
+		while (!file.eof())
+		{
 			const size_t bufferSize = 4*1024;
 			char buffer[bufferSize];
 			file.getline(buffer, bufferSize);
@@ -1825,7 +1826,7 @@ bool execLoadScript(CStringWriter& stringWriter, vector<string> const& args)
 		FOREACHC(itGrp, vector<CGroup*>, grps)
 			(*itGrp)->getPersistentStateInstance()->interpretCode(NULL, codePtr);
 	}
-	catch (EPathNotFound e)
+	catch (const EPathNotFound &)
 	{
 		nlwarning("Path not found while loading AIS script %s", args[2].c_str());
 		return false;
@@ -1844,7 +1845,8 @@ NLMISC_COMMAND(getInfo,"display returned values of buffered commands","")
 {
 	CLogStringWriter	stringWriter(&log);
 	
-	FOREACHC(strIt, vector<string>, bufferedRetStrings) {
+	FOREACHC(strIt, vector<string>, bufferedRetStrings)
+	{
 		stringWriter.append(*strIt);
 	}
 	
@@ -2437,7 +2439,7 @@ NLMISC_COMMAND(setGrpTimers,"set the timer values for a given group","<grp id> <
 void cbTick();
 extern uint ForceTicks;
 
-NLMISC_COMMAND(updateAI,"call CAIS::update() (simulate a tick off-line)","")
+NLMISC_COMMAND(updateAI,"call CAIS::update() (simulate a tick off-line)","[tick]")
 {
 	if(args.size() >1)
 		return false;
@@ -2995,7 +2997,8 @@ NLMISC_COMMAND(simulateBug, "simulate an old AIS bug; command is one of 'list', 
 				initBugSimulationTexts();
 				log.displayNL("Bug simulations");
 				log.displayNL("Id|Description                              |State");
-				for (int i=0; i<bugSimulationCount; ++i) {
+				for (int i=0; i<bugSimulationCount; ++i)
+				{
 					log.displayNL("%02d|%s|%s", i, simulateBugText(i), simulateBugs[i]?"on":"off");
 				}
 				return true;

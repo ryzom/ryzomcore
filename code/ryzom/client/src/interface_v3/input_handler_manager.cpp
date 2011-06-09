@@ -518,7 +518,7 @@ bool CInputHandlerManager::readInputConfigFile(const std::string & fileName)
 		root = read.getRootNode();
 
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		// Output error
 		root = NULL;

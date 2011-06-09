@@ -63,7 +63,7 @@ int main (int /* argc */, char ** /* argv */)
 	{
 		nlerror ("nlerror() %d", 4);
 	}
-	catch(EFatalError &)
+	catch(const EFatalError &)
 	{
 		// just continue...
 		nlinfo ("nlerror() generated an EFatalError exception, just ignore it");

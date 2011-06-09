@@ -473,7 +473,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 						// Set the texture for the coarse mesh manager
 						Scene->setCoarseMeshManagerTexture (CPath::lookup(seasonname).c_str());
 					}
-					catch (Exception &e)
+					catch (const Exception &e)
 					{
 						nlwarning (e.what());
 					}
@@ -509,7 +509,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 					{
 						LandscapeIGManager.initIG (Scene, CPath::lookup(LandscapeIG).c_str(), Driver, Season, &progress);
 					}
-					catch (Exception &e)
+					catch (const Exception &e)
 					{
 						nlwarning (e.what());
 					}
@@ -641,7 +641,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 							BackgroundIG = UInstanceGroup::createInstanceGroup(BackgroundIGName);
 						}
 					}
-					catch (Exception &e)
+					catch (const Exception &e)
 					{
 						nlwarning (e.what());
 					}
@@ -1266,7 +1266,7 @@ void CContinent::dumpVillagesLoadingZones(const std::string &filename)
 		{
 			outBitmap.writeTGA(outFile, 24, true);
 		}
-		catch(EStream &)
+		catch(const EStream &)
 		{
 		}
 	}
@@ -1327,7 +1327,7 @@ void CContinent::dumpFogMap(CFogMapBuild::TMapType mapType, const std::string &f
 		{
 			outBitmap.writeTGA(outFile, 24);
 		}
-		catch(EStream &)
+		catch(const EStream &)
 		{
 		}
 	}

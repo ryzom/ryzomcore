@@ -898,7 +898,7 @@ void	CUpdateLog::displayLogs(const CDBDescriptionParser& description,
 			{
 				file.serialCont(logs);
 			}
-			catch (NLMISC::Exception&)
+			catch (const NLMISC::Exception&)
 			{
 				break;
 			}
@@ -1032,7 +1032,7 @@ void	CUpdateLog::processLogs(const std::string& path,
 			{
 				file.serialCont(logs);
 			}
-			catch (NLMISC::Exception&)
+			catch (const NLMISC::Exception&)
 			{
 				break;
 			}

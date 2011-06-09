@@ -36,8 +36,8 @@ namespace NLMISC {
 	// Storage for file handles, necessary to close the handles
 	map<void*,HANDLE>	AccessAddressesToHandles;
 #else
-  // Storage for shmid, necessary to destroy the segments
-  map<TSharedMemId, int>   SharedMemIdsToShmids;
+	// Storage for shmid, necessary to destroy the segments
+	map<TSharedMemId, sint>   SharedMemIdsToShmids;
 #endif
 
 
@@ -71,7 +71,7 @@ void			*CSharedMemory::createSharedMemory( TSharedMemId sharedMemId, uint32 size
 #else
 
 	// Create a shared memory segment
-	int shmid = shmget( sharedMemId, size, IPC_CREAT | IPC_EXCL | 0666 );
+	sint shmid = shmget( sharedMemId, size, IPC_CREAT | IPC_EXCL | 0666 );
 	if ( shmid == -1 )
 		return NULL;
 	SharedMemIdsToShmids.insert( make_pair( sharedMemId, shmid ) );
@@ -82,6 +82,7 @@ void			*CSharedMemory::createSharedMemory( TSharedMemId sharedMemId, uint32 size
 		return NULL;
 	else
 		return accessAddress;
+
 #endif
 }
 

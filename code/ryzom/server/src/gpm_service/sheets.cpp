@@ -16,6 +16,7 @@
 
 
 
+#include "stdpch.h"
 
 // Misc
 #include "nel/misc/path.h"

@@ -83,7 +83,7 @@ int main(int argc, char **argv)
 		printf("TotalCells: %d\n", totalCells);
 
 	}
-	catch (std::exception &e)
+	catch (const std::exception &e)
 	{
 		printf("%s\n", e.what());
 	}

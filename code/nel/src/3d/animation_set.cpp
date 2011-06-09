@@ -227,7 +227,7 @@ bool CAnimationSet::loadFromFiles(const std::string &path, bool recurse /* = tru
 				iFile.close();
 
 			}
-			catch (NLMISC::EStream &e)
+			catch (const NLMISC::EStream &e)
 			{
 				if (wantWarningMessage)
 				{

@@ -317,7 +317,7 @@ void	extractNewWords(string workSheetFileName, string columnId, IWordListBuilder
 		{
 			CI18N::writeTextFile(workSheetFileName.c_str(), s, false);
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			nlwarning("cannot save file: '%s'. Reason: %s", workSheetFileName.c_str(), e.what());
 		}

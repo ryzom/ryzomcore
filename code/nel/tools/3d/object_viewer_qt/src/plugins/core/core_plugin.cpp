@@ -20,8 +20,8 @@
 #include "settings_dialog.h"
 #include "core_constants.h"
 #include "search_paths_settings_page.h"
+#include "general_settings_page.h"
 #include "../../extension_system/iplugin_spec.h"
-#include "qtwin.h"
 
 // NeL includes
 #include "nel/misc/debug.h"
@@ -42,37 +42,40 @@ CorePlugin::CorePlugin()
 
 CorePlugin::~CorePlugin()
 {
-	Q_FOREACH(QObject *obj, _autoReleaseObjects)
+	Q_FOREACH(QObject *obj, m_autoReleaseObjects)
 	{
-		_plugMan->removeObject(obj);
+		m_plugMan->removeObject(obj);
 	}
-	qDeleteAll(_autoReleaseObjects);
-	_autoReleaseObjects.clear();
+	qDeleteAll(m_autoReleaseObjects);
+	m_autoReleaseObjects.clear();
 
-	delete _mainWindow;
+	delete m_mainWindow;
 }
 
 bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
 	Q_UNUSED(errorString);
-	_plugMan = pluginManager;
+	m_plugMan = pluginManager;
 
-	_mainWindow = new MainWindow(pluginManager);
-	/*if (QtWin::isCompositionEnabled())
-	{
-		QtWin::extendFrameIntoClientArea(_mainWindow);
-		_mainWindow->setContentsMargins(0, 0, 0, 0);
-	}*/
-	bool success = _mainWindow->initialize(errorString);
-	CSearchPathsSettingsPage *serchPathPage = new CSearchPathsSettingsPage(this);
-	serchPathPage->applySearchPaths();
-	addAutoReleasedObject(serchPathPage);
+	m_mainWindow = new MainWindow(pluginManager);
+	bool success = m_mainWindow->initialize(errorString);
+
+	GeneralSettingsPage *generalSettings = new GeneralSettingsPage(this);
+	CSearchPathsSettingsPage *searchPathPage = new CSearchPathsSettingsPage(false, this);
+	CSearchPathsSettingsPage *recureseSearchPathPage = new CSearchPathsSettingsPage(true, this);
+
+	generalSettings->applyGeneralSettings();
+	searchPathPage->applySearchPaths();
+	recureseSearchPathPage->applySearchPaths();
+	addAutoReleasedObject(generalSettings);
+	addAutoReleasedObject(searchPathPage);
+	addAutoReleasedObject(recureseSearchPathPage);
 	return success;
 }
 
 void CorePlugin::extensionsInitialized()
 {
-	_mainWindow->extensionsInitialized();
+	m_mainWindow->extensionsInitialized();
 }
 
 void CorePlugin::shutdown()
@@ -86,7 +89,7 @@ void CorePlugin::setNelContext(NLMISC::INelContext *nelContext)
 	// This only applies to platforms without PIC, e.g. Windows.
 	nlassert(!NLMISC::INelContext::isContextInitialised());
 #endif // NL_OS_WINDOWS
-	_LibContext = new NLMISC::CLibraryContext(*nelContext);
+	m_libContext = new NLMISC::CLibraryContext(*nelContext);
 }
 
 QString CorePlugin::name() const
@@ -116,8 +119,8 @@ QStringList CorePlugin::dependencies() const
 
 void CorePlugin::addAutoReleasedObject(QObject *obj)
 {
-	_plugMan->addObject(obj);
-	_autoReleaseObjects.prepend(obj);
+	m_plugMan->addObject(obj);
+	m_autoReleaseObjects.prepend(obj);
 }
 
 Q_EXPORT_PLUGIN(CorePlugin)

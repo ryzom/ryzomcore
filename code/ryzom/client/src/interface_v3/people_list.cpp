@@ -207,12 +207,14 @@ bool CPeopleList::sortExByOnline(const CPeople& a, const CPeople& b)
 	ucstring name_b = toUpper(b.getName());
 	
 	// We want order: online/alpha, offworld/alpha, offline/alpha
-	if (a.Online == b.Online) {
+	if (a.Online == b.Online)
+	{
 		return (name_a < name_b);
 	}
 	else {
 		// Compare online status
-		switch (a.Online) {
+		switch (a.Online)
+		{
 			case ccs_online:
 				// a is > if a is online
 				return true;
@@ -244,7 +246,8 @@ void CPeopleList::sortEx(TSortOrder order)
 		_BaseContainer->detachContainer(_Peoples[k].Container);
 	}
 	
-	switch (order) {
+	switch (order)
+	{
 		default:
 		case sort_index:
 			std::sort(_Peoples.begin(), _Peoples.end(), CPeopleList::sortExByContactId);
@@ -441,7 +444,7 @@ void CPeopleList::setContactId(uint index, uint32 contactId)
 }
 
 //==================================================================
-void CPeopleList::displayLocalPlayerTell(uint index,const ucstring &msg,uint numBlinks /*=0*/)
+void CPeopleList::displayLocalPlayerTell(const ucstring &receiver, uint index, const ucstring &msg,uint numBlinks /*=0*/)
 {
 	if (_ContactType == CPeopleListDesc::Ignore)
 	{
@@ -475,7 +478,12 @@ void CPeopleList::displayLocalPlayerTell(uint index,const ucstring &msg,uint num
 	// display msg with good color
 	CInterfaceProperty prop;
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
+	
+	ucstring s = CI18N::get("youTellPlayer");
+	strFindReplace(s, "%name", receiver);
+	strFindReplace(finalMsg, CI18N::get("youTell"), s);
 	gl->addChild(getChatTextMngr().createMsgText(finalMsg, prop.getRGBA()));
+	CInterfaceManager::getInstance()->log(finalMsg);
 
 	// if the group is closed, make it blink
 	if (!gc->isOpen())
@@ -924,7 +932,7 @@ class CHandlerContactEntry : public IActionHandler
 				uint index;
 				if (PeopleInterraction.getPeopleFromContainerID(str, peopleList, index))
 				{
-					peopleList->displayLocalPlayerTell(index, text);
+					peopleList->displayLocalPlayerTell(str2, index, text);
 				}
 			}
 			else
@@ -948,6 +956,11 @@ class CHandlerContactEntry : public IActionHandler
 				CChatWindow::encodeColorTag(prop.getRGBA(), final, true);
 				final += text;
 				pWin->displayTellMessage(final, prop.getRGBA(), pWin->getFreeTellerName(str));
+
+				ucstring s = CI18N::get("youTellPlayer");
+				strFindReplace(s, "%name", pWin->getFreeTellerName(str));
+				strFindReplace(final, CI18N::get("youTell"), s);
+				CInterfaceManager::getInstance()->log(final);
 			}
 
 		}

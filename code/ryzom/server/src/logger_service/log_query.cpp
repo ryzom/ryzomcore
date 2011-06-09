@@ -157,7 +157,7 @@ CQueryParser::TParserResult CQueryParser::parseQuery(const std::string &queryStr
 
 		return pr;
 	}
-	catch (EInvalidQuery &iq)
+	catch (const EInvalidQuery &iq)
 	{
 		nlwarning("Error will parsing query near char %u : %s", iq.It - queryStr.begin(), iq.ErrorStr);
 

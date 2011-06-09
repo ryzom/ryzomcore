@@ -612,7 +612,7 @@ void	CLogAnalyserService::updateWebConnection()
 					reason = "unknown command "+toString(messageType);
 				}
 			}
-			catch (Exception &e)
+			catch (const Exception &e)
 			{
 				nlwarning ("Error during receiving: '%s'", e.what ());
 				reason = e.what();
@@ -634,7 +634,7 @@ void	CLogAnalyserService::updateWebConnection()
 			}
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("Error during update: '%s'", e.what ());
 	}

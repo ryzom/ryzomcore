@@ -49,7 +49,10 @@ bool CSpecialPower::validate(std::string &errorCode)
 		nlwarning("<CSpecialPower::validate> Cannot find actor entity or not a player");
 		return false;
 	}
-	
+
+	if (_ByPassDisablePowerTimer)
+		return true;
+
 	TGameCycle endDate;
 	if (!actor->canUsePower(_PowerType, (uint16)~0, endDate))
 	{
@@ -87,6 +90,8 @@ bool CSpecialPowerAuras::validate(std::string &errorCode)
 	if (actor->isDead())
 		return false;
 	
+	if (_ByPassTargetsDisableAuraTime)
+		return true;
 	TGameCycle endDate = actor->getForbidAuraUseEndDate();
 	if (actor->getForbidAuraUseEndDate() >= CTickEventHandler::getGameCycle())
 	{

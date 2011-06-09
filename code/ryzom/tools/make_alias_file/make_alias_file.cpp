@@ -182,7 +182,7 @@ int main( int argc, char ** argv )
 			sheetPaths.push_back( cvSheetPaths.asString(i) );
 		}
 	}
-	catch(EUnknownVar &) 
+	catch(const EUnknownVar &) 
 	{
 		nlwarning("var 'SheetPaths' not found");
 	}
@@ -202,7 +202,7 @@ int main( int argc, char ** argv )
 		CConfigFile::CVar &cvAliasFilename = configFile.getVar("AliasFilename");
 		aliasFilename = cvAliasFilename.asString();
 	}
-	catch(EUnknownVar &) 
+	catch(const EUnknownVar &) 
 	{
 		nlwarning("var 'AliasFilename' not found");
 	}
@@ -218,7 +218,7 @@ int main( int argc, char ** argv )
 			extensions.push_back( cvExtensions.asString(i) );
 		}
 	}
-	catch(EUnknownVar &) 
+	catch(const EUnknownVar &) 
 	{
 		nlwarning("var 'Extensions' not found");
 	}

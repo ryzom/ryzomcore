@@ -37,18 +37,20 @@ class CSearchPathsSettingsPage : public Core::IOptionsPage
 	Q_OBJECT
 
 public:
-	CSearchPathsSettingsPage(QObject *parent = 0);
+	explicit CSearchPathsSettingsPage(bool recurse, QObject *parent = 0);
 	~CSearchPathsSettingsPage();
 
 	QString id() const;
 	QString trName() const;
 	QString category() const;
 	QString trCategory() const;
+	QIcon categoryIcon() const;
 	QWidget *createPage(QWidget *parent);
 
 	void apply();
 	void finish();
 
+	// Set of the search paths(not recursive) and the remap extensions (loading from settings file)
 	void applySearchPaths();
 
 private Q_SLOTS:
@@ -62,6 +64,7 @@ private:
 	void writeSettings();
 	void checkEnabledButton();
 
+	bool m_recurse;
 	QWidget *m_page;
 	Ui::CSearchPathsSettingsPage m_ui;
 };

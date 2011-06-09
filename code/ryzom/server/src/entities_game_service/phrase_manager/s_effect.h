@@ -96,7 +96,7 @@ public:
 
 	///\ctor
 	CSEffect()
-		:_IsRemoved(false),_Value(0),_Power(0)
+		:_IsRemoved(false),_Value(0),_Power(0),_IsFromConsumable(false)
 	{
 		_UpdateTimer.setRemaining(1, new CUpdateEffectTimerEvent(this, true));
 		_Skill = SKILLS::unknown;
@@ -106,7 +106,7 @@ public:
 	}
 	
 	inline CSEffect( const TDataSetRow & creatorRowId, const TDataSetRow & targetRowId, EFFECT_FAMILIES::TEffectFamily family, bool stackable, sint32 effectValue, uint32 power)
-		:_CreatorRowId(creatorRowId),_TargetRowId(targetRowId),_Family(family),_Value(effectValue),_Power(power),_IsStackable(stackable),_IsRemoved(false)
+		:_CreatorRowId(creatorRowId),_TargetRowId(targetRowId),_Family(family),_Value(effectValue),_Power(power),_IsStackable(stackable),_IsRemoved(false),_IsFromConsumable(false)
 	{
 		++NbAllocatedEffects;
 		_EffectChatName = EFFECT_FAMILIES::getAssociatedChatId(family); // txt msg
@@ -160,7 +160,13 @@ public:
 	inline sint32							getParamValue()		const{ return	_Value;}
 	inline uint32							getPower()			const{ return	_Power;}
 	inline SKILLS::ESkills					getSkill()			const{ return	_Skill; }
-	virtual NLMISC::CSheetId				getAssociatedSheetId() const { return EFFECT_FAMILIES::getAssociatedSheetId(_Family); }
+	virtual NLMISC::CSheetId				getAssociatedSheetId() const
+	{
+		if (_IsFromConsumable)
+			return NLMISC::CSheetId("hatred.sbrick");
+		else
+			return EFFECT_FAMILIES::getAssociatedSheetId(_Family);
+	}
 	//@}
 
 	///\name write accessors
@@ -203,6 +209,10 @@ public:
 	/// set if the effect has been removed from affected entity
 	inline void isRemoved(bool removed) { _IsRemoved = removed; }
 
+	inline void setIsFromConsumable(bool fromConsumable) { _IsFromConsumable = fromConsumable; }
+	inline bool getIsFromConsumable() { return _IsFromConsumable; }
+
+
 protected:
 	/// send chat message for effect begin
 	void sendEffectBeginMessages();
@@ -244,6 +254,9 @@ protected:
 	CTimer							_UpdateTimer;
 	/// timer used to end the effect
 	CTimer							_EndTimer;
+
+	bool							_IsFromConsumable;
+
 
 public:
 	static uint32					NbAllocatedEffects;

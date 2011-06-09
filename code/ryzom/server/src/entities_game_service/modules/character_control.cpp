@@ -560,7 +560,7 @@ public:
 		else
 		{
 			CPlayer *p = PlayerManager.getPlayer(uint32(character->getId().getShortId())>>4);
-			if (p && p->havePriv(":SGM:GM:VG:SG:G"))
+			if (p && p->havePriv(":SGM:GM:VG:SG:G:"))
 			{
 				// do not override state with those from the ring
 			}

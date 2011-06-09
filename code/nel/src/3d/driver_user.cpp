@@ -1746,7 +1746,7 @@ void				CDriverUser::loadHLSBank(const std::string &fileName)
 			throw EPathNotFound(path);
 		fIn.serial(*hlsBank);
 	}
-	catch(Exception &)
+	catch(const Exception &)
 	{
 		delete hlsBank;
 		throw;

@@ -109,7 +109,7 @@ namespace NLNET
 							sd->serial(s);
 						}
 					}
-					catch(EStreamOverflow e)
+					catch(const EStreamOverflow &)
 					{
 						// FAILED to read the security block, rewind to old pos and serial as unknow
 						nlwarning("Error while reading stream for security data type %u", dataTag);

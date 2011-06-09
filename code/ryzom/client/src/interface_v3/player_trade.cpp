@@ -78,9 +78,9 @@ void CPlayerTrade::restoreItem(CDBCtrlSheet *exchangeSlot)
 
 	// *** If not an AMMO, try to 'auto-stack', as server does
 	bool	canAutoStack= false;
-	uint32	autoStackSheetId;
-	sint32	autoStackQuality;
-	sint32	autoStackMaxQuantity;
+	uint32	autoStackSheetId = 0;
+	sint32	autoStackQuality = 0;
+	sint32	autoStackMaxQuantity = 0;
 	const CItemSheet	*itemSheet= exchangeSlot->asItemSheet();
 	// NB: cannot auto stack ammo because their full props (dammage etc...) are not sent to client
 	if(itemSheet)

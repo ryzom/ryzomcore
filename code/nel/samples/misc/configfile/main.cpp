@@ -116,7 +116,7 @@ int main (int /* argc */, char ** /* argv */)
 		int val = cf.getVar ("unknown_variable").asInt();
 		nlinfo("unknown_variable = %d", val);
 	}
-	catch (EConfigFile &e)
+	catch (const EConfigFile &e)
 	{
 		nlinfo("something goes wrong with configfile: %s", e.what());
 	}

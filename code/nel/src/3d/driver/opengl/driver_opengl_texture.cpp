@@ -155,7 +155,11 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 
 		// check status
 		GLenum status;
+#ifdef USE_OPENGLES
+		status = (GLenum) nglCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES);
+#else
 		status = (GLenum) nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+#endif
 		switch(status) {
 			case GL_FRAMEBUFFER_COMPLETE_EXT:
 				InitFBO = true;
@@ -197,19 +201,31 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 				break;
 #endif
 			default:
-				nlwarning("Framebuffer incomplete\n");
+				nlwarning("Framebuffer incomplete status %d", (sint)status);
 				//nlassert(0);
 		}
 
 		// clean up resources if allocation failed
 		if (!InitFBO)
 		{
+#ifdef USE_OPENGLES
+			nglDeleteFramebuffersOES(1, &FBOId);
+#else
 			nglDeleteFramebuffersEXT(1, &FBOId);
+#endif
 			if (AttachDepthStencil)
 			{
+#ifdef USE_OPENGLES
+				nglDeleteRenderbuffersOES(1, &DepthFBOId);
+#else
 				nglDeleteRenderbuffersEXT(1, &DepthFBOId);
+#endif
 				if(!UsePackedDepthStencil)
+#ifdef USE_OPENGLES
+					nglDeleteRenderbuffersOES(1, &StencilFBOId);
+#else
 					nglDeleteRenderbuffersEXT(1, &StencilFBOId);
+#endif
 			}
 		}
 
@@ -226,14 +242,22 @@ bool CTextureDrvInfosGL::activeFrameBufferObject(ITexture * tex)
 		if(initFrameBufferObject(tex))
 		{
 			glBindTexture(TextureMode, 0);
+#ifdef USE_OPENGLES
+			nglBindFramebufferOES(GL_FRAMEBUFFER_OES, FBOId);
+#else
 			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, FBOId);
+#endif
 		}
 		else
 			return false;
 	}
 	else
 	{
+#ifdef USE_OPENGLES
+		nglBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+#else
 		nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+#endif
 	}
 
 	return true;
@@ -481,7 +505,7 @@ static inline GLenum	translateMinFilterToGl(CTextureDrvInfosGL *glText)
 // ***************************************************************************
 static inline bool		sameDXTCFormat(ITexture &tex, GLint glfmt)
 {
-	H_AUTO_OGL(sameDXTCFormat)
+	H_AUTO_OGL(sameDXTCFormat);
 	if(glfmt==GL_COMPRESSED_RGB_S3TC_DXT1_EXT && tex.PixelFormat==CBitmap::DXTC1)
 		return true;
 	if(glfmt==GL_COMPRESSED_RGBA_S3TC_DXT1_EXT && tex.PixelFormat==CBitmap::DXTC1Alpha)
@@ -497,7 +521,7 @@ static inline bool		sameDXTCFormat(ITexture &tex, GLint glfmt)
 // ***************************************************************************
 static inline bool		isDXTCFormat(GLint glfmt)
 {
-	H_AUTO_OGL(isDXTCFormat)
+	H_AUTO_OGL(isDXTCFormat);
 	if(glfmt==GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
 		return true;
 	if(glfmt==GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)
@@ -602,7 +626,7 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 	{
 		//nldebug("3D:   creating CTextureDrvShare()");
 		// insert into driver list. (so it is deleted when driver is deleted).
-		ItTexDrvSharePtrList	it= _TexDrvShares.insert(_TexDrvShares.end(), NULL);
+		ItTexDrvSharePtrList	it= _TexDrvShares.insert(_TexDrvShares.end(), (NL3D::CTextureDrvShare*)NULL);
 		// create and set iterator, for future deletion.
 		*it= tex.TextureDrvShare= new CTextureDrvShare(this, it, &tex);
 
@@ -840,8 +864,13 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 							sint	size= tex.getPixels(i).size();
 							if (bUpload)
 							{
+#ifdef USE_OPENGLES
+								glCompressedTexImage2D (GL_TEXTURE_2D, i-decalMipMapResize, glfmt,
+															tex.getWidth(i),tex.getHeight(i), 0, size, ptr);
+#else
 								nglCompressedTexImage2DARB (GL_TEXTURE_2D, i-decalMipMapResize, glfmt,
 															tex.getWidth(i),tex.getHeight(i), 0, size, ptr);
+#endif
 								bAllUploaded = true;
 							}
 							else

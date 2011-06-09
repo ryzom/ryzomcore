@@ -214,7 +214,7 @@ public:
 	{
 		return _FontGen;
 	}
-	
+
 	CSchemeManager *getSchemeManager () const
 	{
 		return _SchemeManager;

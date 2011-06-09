@@ -419,7 +419,7 @@ namespace NLMISC
 					}
 				}
 			}
-			catch(EStream &)
+			catch(const EStream &)
 			{
 				nlwarning("CInterWindowMsgQueue : Bad message format in inter window communication");
 			}

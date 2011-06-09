@@ -41,16 +41,15 @@ INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 # Force out of source builds.
 CHECK_OUT_OF_SOURCE()
 
-# Variables which must be set before PROJECT
-NL_SETUP_BUILD()
-NL_SETUP_BUILD_FLAGS()
-
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)
 SET(NL_VERSION_MAJOR 0)
 SET(NL_VERSION_MINOR 8)
 SET(NL_VERSION_PATCH 0)
 SET(NL_VERSION "${NL_VERSION_MAJOR}.${NL_VERSION_MINOR}.${NL_VERSION_PATCH}")
+
+NL_SETUP_BUILD()
+NL_SETUP_BUILD_FLAGS()
 
 #-----------------------------------------------------------------------------
 # Redirect output files
@@ -91,19 +90,10 @@ NL_CONFIGURE_CHECKS()
 #-----------------------------------------------------------------------------
 #Platform specifics
 
+SETUP_EXTERNAL()
+
 IF(WIN32)
-  INCLUDE(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake)
   SET(WINSOCK2_LIB ws2_32.lib)
-
-  FIND_PACKAGE(External REQUIRED)
-
-  IF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
-    # convert IDE fullpath to VC++ path
-    STRING(REGEX REPLACE "Common7/IDE/.+" "VC" VC_DIR ${CMAKE_MAKE_PROGRAM})
-  ELSE(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
-    # convert compiler fullpath to VC++ path
-    STRING(REGEX REPLACE "VC/bin/.+" "VC" VC_DIR ${CMAKE_CXX_COMPILER})
-  ENDIF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
 
   IF(WITH_MFC)
     FIND_PACKAGE(CustomMFC REQUIRED)
@@ -119,19 +109,14 @@ IF(WITH_STATIC)
   # libxml2 could need winsock2 library
   SET(LIBXML2_DEFINITIONS ${LIBXML2_DEFINITIONS} -DLIBXML_STATIC)
   SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${WINSOCK2_LIB})
+
+  # on Mac OS X libxml2 requieres iconv
+  IF(APPLE)
+    FIND_PACKAGE(Iconv REQUIRED)
+    SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${ICONV_LIBRARIES})
+    INCLUDE_DIRECTORIES(${ICONV_INCLUDE_DIR})
+  ENDIF(APPLE)
 ENDIF(WITH_STATIC)
-
-IF(WITH_STLPORT)
-  FIND_PACKAGE(STLport REQUIRED)
-  INCLUDE_DIRECTORIES(${STLPORT_INCLUDE_DIR})
-  IF(WIN32)
-    SET(VC_INCLUDE_DIR "${VC_DIR}/include")
-
-    FIND_PACKAGE(WindowsSDK REQUIRED)
-    # use VC++ and Windows SDK include paths
-    INCLUDE_DIRECTORIES(${VC_INCLUDE_DIR} ${WINSDK_INCLUDE_DIR})
-  ENDIF(WIN32)
-ENDIF(WITH_STLPORT)
 
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/PCHSupport.cmake)
 
