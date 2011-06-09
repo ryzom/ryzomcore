@@ -68,6 +68,9 @@ CAIInstance::~CAIInstance()
 
 static bool zoneHaveError = false;
 
+/// map of lastCreatedNpcGroup by player id
+static	std::map<CEntityId, string> _PlayersLastCreatedNpcGroup;
+
 void CAIInstance::addZone(string const& zoneName, CNpcZone* zone)
 {
 #if !FINAL_VERSION
@@ -850,12 +853,14 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 	sint32 orientation;
 	uint32 nbBots;
 	NLMISC::CSheetId sheetId;
+	CEntityId playerId;
 	double dispersionRadius;
 	bool spawnBots;
 	std::string botsName;
 	msgin.serial(messageVersion);
 	nlassert(messageVersion==1);
 	msgin.serial(instanceNumber);
+	msgin.serial(playerId);
 	msgin.serial(x);
 	msgin.serial(y);
 	msgin.serial(orientation);
@@ -867,7 +872,11 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 	CAIInstance* instance = CAIS::instance().getAIInstance(instanceNumber);
 	if (instance)
 	{
-		instance->eventCreateNpcGroup(nbBots, sheetId, CAIVector((double)x/1000., (double)y/1000.), dispersionRadius, spawnBots, (double)orientation/1000., botsName);
+		CGroupNpc* npcGroup = instance->eventCreateNpcGroup(nbBots, sheetId, CAIVector((double)x/1000., (double)y/1000.), dispersionRadius, spawnBots, (double)orientation/1000., botsName);
+		if (npcGroup != NULL)
+		{
+			_PlayersLastCreatedNpcGroup[playerId] = npcGroup->getName();
+		}
 	}
 }
 
@@ -882,12 +891,56 @@ void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceNa
 	msgin.serial(messageVersion);
 	nlassert(messageVersion==1);
 	msgin.serial(nbString);
-	strings.resize(nbString);
-	nlinfo("Event group script with %d strings", nbString);
-	for (uint32 i=0; i<nbString; ++i)
+	
+	string eid;
+	string firstCommand;
+	msgin.serial(eid); // Player or boteid
+	msgin.serial(firstCommand); // Player or boteid
+
+	if (firstCommand[0] == '(') // Old eventNpcGroupScript command : (boteid, commands...)
 	{
-		msgin.serial(strings[i]);
-		nlinfo("  %d '%s'", i, strings[i].c_str());
+		nlinfo("Event group script with %d strings :", nbString);
+		strings.resize(nbString);
+		strings[0] = eid;
+		nlinfo("  %d '%s'", 0, strings[0].c_str());
+		strings[1] = firstCommand;
+		nlinfo("  %d '%s'", 1, strings[1].c_str());
+		for (uint32 i=2; i<nbString-2; ++i)
+		{
+			msgin.serial(strings[i]);
+			nlinfo("  %d '%s'", i, strings[i].c_str());
+		}
+	}
+	else
+	{
+		nlinfo("Event group script with %d strings :", nbString-1);
+		CEntityId playerId(eid);
+		strings.resize(nbString-1);
+		NLMISC::CSString groupname = CSString(firstCommand);
+		if (firstCommand[0] == '#' && firstCommand[1] == '(')
+		{
+			NLMISC::CEntityId botEId = NLMISC::CEntityId(firstCommand.substr(1));
+			if (botEId==NLMISC::CEntityId::Unknown)
+				return;
+			CAIEntityPhysical* entity = CAIEntityPhysicalLocator::getInstance()->getEntity(botEId);
+			CSpawnBotNpc* bot = dynamic_cast<CSpawnBotNpc*>(entity);
+			if (!bot)
+				return;
+			if (!bot->getPersistent().getOwner())
+				return;
+
+			strings[0] = bot->getPersistent().getOwner()->getName();
+		}
+		else
+		{
+			strings[0] =  (string)groupname.replace("#last", _PlayersLastCreatedNpcGroup[playerId].c_str());
+		}
+		nlinfo("  %d '%s'", 0, strings[0].c_str());
+		for (uint32 i=1; i<nbString-1; ++i)
+		{
+			msgin.serial(strings[i]);
+			nlinfo("  %d '%s'", i, strings[i].c_str());
+		}
 	}
 	scriptCommands2.push_back(strings);
 }

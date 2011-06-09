@@ -838,7 +838,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 				ForceInsertParents = (fiparents->asInt() == 1);
 			nlinfo( "Force insert parents mode: %s", ForceInsertParents ? "ON" : "OFF" );
 		}
-		catch ( EConfigFile& e )
+		catch (const EConfigFile &e)
 		{
 			nlwarning( "Problem in directory mapping: %s", e.what() );
 		}

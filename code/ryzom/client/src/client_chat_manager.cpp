@@ -963,7 +963,7 @@ void CClientChatManager::buildTellSentence(const ucstring &sender, const ucstrin
 		else
 		{
 			// Does the char have a CSR title?
-			csr = CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender)) ? ucstring("(CSR) ") : ucstring("");
+			if (CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender))) csr = ucstring("(CSR) ");
 		}
 
 		ucstring cur_time;
@@ -1018,7 +1018,7 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 
 	ucstring csr;
 	// Does the char have a CSR title?
-	csr = CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender)) ? ucstring("(CSR) ") : ucstring("");
+	if (CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender))) csr = ucstring("(CSR) ");
 
 	if (UserEntity && senderName == UserEntity->getDisplayName())
 	{
@@ -1266,6 +1266,12 @@ void CClientChatManager::updateChatModeAndButton(uint mode, uint32 dynamicChanne
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			const bool teamActive = pIM->getDbProp("SERVER:GROUP:0:PRESENT")->getValueBool();
 			const bool guildActive = pIM->getDbProp("SERVER:GUILD:NAME")->getValueBool();
+
+			if (m == CChatGroup::team && ! teamActive)
+				m = PeopleInterraction.TheUserChat.Filter.getTargetGroup();
+
+			if (m == CChatGroup::guild && ! guildActive)
+				m = PeopleInterraction.TheUserChat.Filter.getTargetGroup();
 
 			if (pUserBut)
 			{

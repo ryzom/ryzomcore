@@ -2017,7 +2017,7 @@ void CClientConfig::release ()
 			// Save the camera distance
 			writeDouble("CameraDistance", ClientCfg.CameraDistance);
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			nlwarning ("Error while set config file variables : %s", e.what ());
 		}

@@ -258,15 +258,20 @@ void CListenerView::OnDraw(CDC* dc)
 				// linearly descending volume on a dB scale
 				double db1 = -100.0 * (x - _MinDist) / (_MaxDist - _MinDist);
 
-				if (_Alpha == 0.0) {
+				if (_Alpha == 0.0)
+				{
 					y = db1;
 
-				} else if (_Alpha > 0.0) {
+				}
+				else if (_Alpha > 0.0)
+				{
 					double amp2 = 0.0001 + 0.9999 * (_MaxDist - x) / (_MaxDist - _MinDist); // linear amp between 0.00001 and 1.0
 					double db2 = 20. * log10(amp2); 
 					y = ((1.0 - _Alpha) * db1 + _Alpha * db2);
 
-				} else if (_Alpha < 0.0) {
+				}
+				else if (_Alpha < 0.0)
+				{
 					double amp3 = _MinDist / x; // linear amplitude is 1/distance
 					double db3 = 20.0 * log10(amp3); 
 					y = ((1.0 + _Alpha) * db1 - _Alpha * db3);

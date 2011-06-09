@@ -51,7 +51,8 @@ void CCDBStructNodeLeaf::init( xmlNodePtr node, NLMISC::IProgressCallback &progr
 	// IF type is an INT with n bits [1,64].
 	if ((type.getDatas()[0] == 'I') || (type.getDatas()[0] == 'U'))
 	{
-		uint nbBit = atoi(type.getDatas() + 1);
+		uint nbBit;
+		NLMISC::fromString(type.getDatas() + 1, nbBit);
 		if(nbBit>=1 && nbBit<=64)
 			_Type=(ICDBStructNode::EPropType)nbBit;
 		else
@@ -62,7 +63,8 @@ void CCDBStructNodeLeaf::init( xmlNodePtr node, NLMISC::IProgressCallback &progr
 	}
 	else if (type.getDatas()[0] == 'S')
 	{
-		uint nbBit = atoi(type.getDatas() + 1);
+		uint nbBit;
+		NLMISC::fromString(type.getDatas() + 1, nbBit);
 		if(nbBit>=1 && nbBit<=64)
 			_Type = (ICDBStructNode::EPropType)nbBit; // all is I on the server (unlike the client)
 		else

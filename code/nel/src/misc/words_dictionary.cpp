@@ -55,7 +55,7 @@ bool CWordsDictionary::init( const string& configFileName )
 		cf.load( configFileName );
 		cfFound = true;
 	}
-	catch ( EConfigFile& e )
+	catch (const EConfigFile &e)
 	{
 		nlwarning( "WD: %s", e.what() );
 	}

@@ -1004,7 +1004,10 @@
 		<instance template="win_button" id="hands" color="UI:SAVE:WIN:COLORS:INV" text="uimwHands" posref="TL TL" x="0" y="-30"
 			pushflag="UI:VARIABLES:ISACTIVE:SETS" win_name="gestionsets" />
 
-		<instance template="win_button" id="invent" color="UI:SAVE:WIN:COLORS:INV" text="uimwInventory" posparent="hands" posref="BL TL" x="0" y="-4"
+		<instance template="win_button" id="hands2" color="UI:SAVE:WIN:COLORS:INV" text="uimwHands2" posparent="hands" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:SETS2" win_name="gestionsets2" />
+			
+		<instance template="win_button" id="invent" color="UI:SAVE:WIN:COLORS:INV" text="uimwInventory" posparent="hands2" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:INVENTORY" win_name="inventory" />
 
 		<instance template="win_button" id="action_book" color="UI:SAVE:WIN:COLORS:INV" text="uiPhraseBookTitle" posparent="invent" posref="BL TL" x="0" y="-4"
@@ -1140,8 +1143,8 @@
 		<instance template="win_button" id="mp3" color="UI:SAVE:WIN:COLORS:OPT" text="uimwMP3Player" posparent="connection" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:MP3PLAYER" win_name="mp3_player" />
 
-		<instance template="win_button" id="bg_downloader" color="UI:SAVE:WIN:COLORS:OPT" text="uimwBGDownloader" posparent="mp3" posref="BL TL" x="0" y="-4"
-			pushflag="UI:VARIABLES:ISACTIVE:BG_DOWNLOADER" win_name="bg_downloader" />
+<!--		<instance template="win_button" id="bg_downloader" color="UI:SAVE:WIN:COLORS:OPT" text="uimwBGDownloader" posparent="mp3" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:BG_DOWNLOADER" win_name="bg_downloader" /> -->
 		
     <!--<instance template="win_button" id="cosm" color="UI:SAVE:WIN:COLORS:OPT" text="uimwCosmetics" posparent="mp3" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:COSMETICS" win_name="cosmetics" />-->

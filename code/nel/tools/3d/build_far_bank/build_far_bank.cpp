@@ -120,7 +120,7 @@ bool fillTileFar (uint tile, const char* sName, CTileFarBank::TFarType type, CTi
 			// Ok.
 			return true;
 		}
-		catch (Exception& except)
+		catch (const Exception& except)
 		{
 			nlwarning ("ERROR %s\n", except.what());
 		}
@@ -409,7 +409,7 @@ int main (int argc, char **argv)
 					nlwarning ("ERROR Can't open file %s for writing\n", argv[2]);
 				}
 			}
-			catch (Exception& except)
+			catch (const Exception& except)
 			{
 				nlwarning ("ERROR %s\n", except.what());
 			}

@@ -90,26 +90,10 @@ NL_CONFIGURE_CHECKS()
 #-----------------------------------------------------------------------------
 #Platform specifics
 
+SETUP_EXTERNAL()
+
 IF(WIN32)
-  INCLUDE(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake)
   SET(WINSOCK2_LIB ws2_32.lib)
-
-  FIND_PACKAGE(External REQUIRED)
-
-  IF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
-    # convert IDE fullpath to VC++ path
-    STRING(REGEX REPLACE "Common7/IDE/.+" "VC" VC_DIR ${CMAKE_MAKE_PROGRAM})
-  ELSE(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
-    IF(${CMAKE_CXX_COMPILER} MATCHES "VC")
-      # convert compiler fullpath to VC++ path
-      STRING(REGEX REPLACE "VC/bin/.+" "VC" VC_DIR ${CMAKE_CXX_COMPILER})
-    ELSE(${CMAKE_CXX_COMPILER} MATCHES "VC")
-      # Hack for Visual C++ 2010 
-      GET_FILENAME_COMPONENT(VC_ROOT_PATH "[HKEY_CURRENT_USER\\Software\\Microsoft\\VCExpress\\10.0_Config;InstallDir]" ABSOLUTE)
-      # convert IDE fullpath to VC++ path
-      STRING(REGEX REPLACE "Common7/.*" "VC" VC_DIR ${VC_ROOT_PATH})
-    ENDIF(${CMAKE_CXX_COMPILER} MATCHES "VC")
-  ENDIF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
 
   IF(WITH_MFC)
     FIND_PACKAGE(CustomMFC REQUIRED)
@@ -130,20 +114,9 @@ IF(WITH_STATIC)
   IF(APPLE)
     FIND_PACKAGE(Iconv REQUIRED)
     SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${ICONV_LIBRARIES})
+    INCLUDE_DIRECTORIES(${ICONV_INCLUDE_DIR})
   ENDIF(APPLE)
 ENDIF(WITH_STATIC)
-
-IF(WITH_STLPORT)
-  FIND_PACKAGE(STLport REQUIRED)
-  INCLUDE_DIRECTORIES(${STLPORT_INCLUDE_DIR})
-  IF(WIN32)
-    SET(VC_INCLUDE_DIR "${VC_DIR}/include")
-
-    FIND_PACKAGE(WindowsSDK REQUIRED)
-    # use VC++ and Windows SDK include paths
-    INCLUDE_DIRECTORIES(${VC_INCLUDE_DIR} ${WINSDK_INCLUDE_DIR})
-  ENDIF(WIN32)
-ENDIF(WITH_STLPORT)
 
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/PCHSupport.cmake)
 

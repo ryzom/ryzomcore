@@ -361,7 +361,8 @@ bool CUserEntity::build(const CEntitySheet *sheet)	// virtual
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	{
 		CCDBNodeLeaf *node = pIM->getDbProp("SERVER:USER:IS_INVISIBLE", false);
-		if (node) {
+		if (node)
+		{
 			ICDBNode::CTextId textId;
 			node->addObserver(&_InvisibleObs, textId);
 		}

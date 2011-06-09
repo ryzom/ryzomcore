@@ -195,11 +195,11 @@ std::string CAIScriptDataManager::dirname()
 //	{
 //		file->load(fullfilename);
 //	}
-//	catch (EFileNotFound e)
+//	catch (const EFileNotFound &e)
 //	{
 //		nlwarning("File not found while trying to load an AI script data file %s", fullfilename.c_str());
 //	}
-//	catch (NLMISC::Exception e)
+//	catch (const NLMISC::Exception &e)
 //	{
 //		nlwarning("Error while loading AI script data file %s", fullfilename.c_str());
 //	}

@@ -15,10 +15,10 @@ addSkillPoints				:DEV:SGM:GM:EM:		// Add skill points of given type (Fight=0, M
 addXPToSkill				:DEV:SGM:GM:EM:		// Gain experience in the given skill: <xp> <skill> [<count>]
 broadcast					:DEV:SGM:GM:EM:VG:		// Broadcast a message: [repeat=<num repeat> or during=<time in seconds>] [every=<delay in secondes>] <message>
 changeHairCut				:DEV:SGM:GM:EM:		// Change the haircut of a player: <sheet name>
-changeMode					:DEV:SGM:GM:		// Change mode of a player: <mode>
-changeVar					:DEV:SGM:GM:		// Change a variable of a player: <var> <val>
+changeMode					:DEV:SGM:GM:EM:		// Change mode of a player: <mode>
+changeVar					:DEV:SGM:GM:EM:		// Change a variable of a player: <var> <val>
 checkTargetSP				:DEV:SGM:GM:		// Check target player skill points
-clearEventFaction			:DEV:SGM:GM:		// Clear the event faction of player: <player name>
+clearEventFaction			:DEV:SGM:GM:EM:		// Clear the event faction of player: <player name>
 clearFriendsList			:DEV:SGM:GM:		// Clear the friend list of a player
 clearGuildMessage						// Clear the guild message of the day
 clearIgnoreList				:DEV:SGM:GM:		// Clear the ignore list of a player
@@ -36,8 +36,8 @@ dodge								// Set the defense mode to dodge
 execPhrase					:DEV:SGM:GM:		// Execute a phrase with given bricks: <cyclic 0/1> [<brick ids>...]
 executeSabrinaPhrase		:DEV:SGM:GM:		// Execute a sabrina phrase: <cyclic 0/1> <phraseId>
 failMission					:DEV:SGM:GM:		// Force mission failure: <mission idx>
-forceTargetToDie			:DEV:SGM:GM:		// Force entity target to die
-getEventFaction				:DEV:SGM:GM:		// Get the event faction of player: <player name>
+forceTargetToDie			:DEV:SGM:GM:EM:		// Force entity target to die
+getEventFaction				:DEV:SGM:GM:EM:		// Get the event faction of player: <player name>
 giveRespawnPoint			:DEV:SGM:GM:		// Give a respawn point to a player: <respawn point name>
 guildInvite							// Send a guild invite to a player character without distance constrainte
 roomInvite							// Send a room invite
@@ -59,7 +59,7 @@ loadFromXML					:DEV:SGM:		// Load a character from an XML file: <file name>
 logXpGain					:DEV:SGM:GM:		// Log or not xp gain infos for specified player: <on/off>
 lPosFlags					:DEV:SGM:GM:VG:SG:G:EM:EG:	// List position flags (short format): [<radius in meters>]
 monitorMissions				:DEV:SGM:GM:		// Monitor missions of the given player: <player name>
-motd						:DEV:SGM:GM:VG:		// Set the current message of the day: <message to be displayed>
+motd						:DEV:SGM:GM:EM:VG:		// Set the current message of the day: <message to be displayed>
 mute						:DEV:SGM:GM:EM:VG:SG:	// Mute a user: <player name> <duration>
 muteUniverse				:DEV:SGM:GM:EM:VG:SG:	// Mute the universe channel: <duration>
 outpostBanGuild				:DEV:SGM:GM:EM:		// Ban a guild for an outpost conflit: <outpost_id> <guild_name> [<all|atk|def>]
@@ -70,14 +70,14 @@ parry								// Set the defense mode to parry
 progressMission				:DEV:SGM:GM:		// Force mission progression: <mission idx> [repeat]
 renameGuild					:DEV:SGM:GM:EM:		// Rename a guild: <guild name> <new guild name>
 renamePlayer		[SU]	:DEV:SGM:GM:EM:		// Rename a player: <player name> <new playerName>
-renamePlayerForEvent		:DEV:SGM:EM:EG:		// Rename a player temporarily for an event: <player name> <new playerName>
-resetPowerFlags				:DEV:SGM:GM:		// Reset the ineffective aura and the power flags for given character
+renamePlayerForEvent		:DEV:SGM:GM:EM:EG:		// Rename a player temporarily for an event: <player name> <new playerName>
+resetPowerFlags				:DEV:SGM:GM:EM:		// Reset the ineffective aura and the power flags for given character
 respawnAfterDeath						// Respawn after death at re-spawn point name, it must be valid (validated by PC and usable): <Respawn idx>
 resurrected							// Another PC resurrect PC by giving some energy: <Hp> <Sta> <Sap> <Focus>
 root						:DEV:SGM:GM:EM:VG:SG:		// Root a player: <player name> <time in seconds>
 saveToPDR					:DEV:SGM:		// Save a character to a binary PDR file: <file name>
 saveToXML					:DEV:SGM:		// Save a character to an XML file: <file name>
-setEventFaction				:DEV:SGM:GM:		// Set the event faction of player: <player name> <event faction>
+setEventFaction				:DEV:SGM:GM:EM:		// Set the event faction of player: <player name> <event faction>
 setGMGuild					:DEV:SGM:GM:		// Set the current GM guild
 setGuildChargePoint			:DEV:SGM:GM:EM:		// Set the charge points of a guild: <guild name> <points>
 setGuildDescription			:DEV:SGM:GM:EM:		// Set a guild description: <guild name> <new guild description>
@@ -90,13 +90,16 @@ setPvPTag									// Set player character PvP tag to true or false
 setSkillsToMaxValue			:DEV:SGM:GM:EM:		// Set player skills to max value
 showCSR						:DEV:SGM:GM:VG:SG:G:EM:EG:	// Show CSR title if the player is a CSR
 showFBT						:DEV:SGM:GM:EM:		// Show Focus Beta Tester title if the player is a FBT
-startEvent					:DEV:SGM:GM:		// Start an event with the given name: <event name>
+startEvent					:DEV:SGM:GM:EM:		// Start an event with the given name: <event name>
 stopEvent					:DEV:SGM:GM:EM:		// Stop previous started event
 stopMonitorMissions			:DEV:SGM:GM:		// Stop monitoring missions of the given player
 summon						:DEV:SGM:GM:VG:SG:EM:		// Summon a player in front of the CSR: <player name>
 targetInfos					:DEV:SGM:GM:EM:		// Give infos on the target
 teamInvite										// Send a team invite to a player character
 connectUserChannel								// Connect to User Channel Chat
+webExecCommand									// Execute web command (need HMAC signature)
+webDelCommandsIds								// Delete web transactions for web_app
+webAddCommandsIds								// Add web command transactions for web_app
 teleport					:DEV:SGM:GM:VG:SG:G:OBSERVER:EM:EG:	// Teleport the CSR in front of a player: <player name>
 tpPosFlag					:DEV:SGM:GM:VG:SG:G:EM:EG:	// Teleport a player to a position flag: <flag name>
 universe					:DEV:SGM:GM:EM:		// Chat in universe mode: <boolean>
@@ -113,8 +116,8 @@ addFactionAttackableToTarget		:DEV:			// add attackable possibility for player o
 forceMissionProgress			:DEV:			// force mission step progression (for debug purpose only)
 savePlayerActiveChar			:DEV:SGM:		// save immediatly a player active char, a specific filename can enter for backup a character in specific situation/context
 reloadPlayer				:DEV:SGM:		// set next filename used for loading a character (must be offline and log later) or relaod an online character to previous backup or with a specified filename.
-farTPPush					:DEV:SGM:GM:VG:SG:	// used to tp on a specific session
-farTPReturn					:DEV:SGM:GM:VG:SG:	// used to tp back to your previous session
+farTPPush					:DEV:SGM:GM:VG:SG:EM:	// used to tp on a specific session
+farTPReturn					:DEV:SGM:GM:VG:SG:EM:	// used to tp back to your previous session
 characterMissionDump			:DEV:SGM:GM:		//Dump mission list for a character
 removeMission				:DEV:SGM:GM:		//Remove a mission of a character
 addMission				:DEV:SGM:GM:		//add a mission to a character
@@ -135,11 +138,12 @@ Name					:DEV:SGM:GM:EM:		// Name of a player
 Position				:DEV:SGM:GM:VG:PR:OBSERVER:EM:EG:		// Position of a player (in meters) <posx>,<posy>[,<posz>]] | <bot name> | <player name> | home
 Priv					:DEV:			// User privilege
 PriviledgePVP			:DEV:SGM:GM:EM:EG:			// Turns PVP on/off on character (blame coder for typo)
-RyzomDate				:DEV:SGM:GM:		// Current ryzom date
-RyzomTime				:DEV:SGM:GM:		// Current ryzom time
+RyzomDate				:DEV:SGM:GM:EM:		// Current ryzom date
+RyzomTime				:DEV:SGM:GM:EM:		// Current ryzom time
 
 // Event commands
 eventCreateNpcGroup			:DEV:SGM:GM:EM:		// Create a npc group
+eScript						:DEV:SGM:GM:EM:		// Execute a script on an event npc group (new version)
 eventNpcGroupScript			:DEV:SGM:GM:EM:		// Execute a script on an event npc group
 eventSetBotName				:DEV:SGM:GM:EM:		// Set the name of a bot
 eventSetBotScale			:DEV:SGM:GM:EM:		// Set the scale of a bot
@@ -155,3 +159,4 @@ eventSetBotFaction			:DEV:SGM:GM:EM:		// Changes the faction of a bot: <faction 
 eventSetBotFameByKill			:DEV:SGM:GM:EM:		// Changes the amount of fame earned for bot faction when killing it: <fame value>
 eventSetBotURL					:DEV:SGM:GM:EM:     // Set the url of a bot
 eventSetBotURLName				:DEV:SGM:GM:EM:     // Set the url name of a bot
+eventSpawnToxic				:DEV:SGM:GM:EM:		// Add toxic cloud

@@ -1569,7 +1569,7 @@ int main( int argc, char* argv[] )
 	{
 		GenerateDoc();
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		nlwarning(e.what());
 		nlwarning("HTML Doc generation failed\n");

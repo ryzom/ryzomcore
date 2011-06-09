@@ -93,7 +93,7 @@ bool	CDBDescriptionParser::loadDescription(const uint8* description)
 		if (xmlStream.init(stream))
 			xmlParsed = true;
 	}
-	catch (EXmlParsingError &e)
+	catch (const EXmlParsingError &e)
 	{
 		nlwarning("CDBDescriptionParser::loadDescription(): failed, parse error in xml: %s", e.what());
 		return false;

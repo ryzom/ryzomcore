@@ -827,6 +827,9 @@ void CRewardedKills::addRewardedKill(NLMISC::CEntityId victimId, const std::vect
 	for (uint i = 0; i < killers.size(); i++)
 	{
 		addRewardedKiller(CRewardedKiller(killers[i], currentDate), rewardedKillers);
+		CCharacter *killer = PlayerManager.getChar(killers[i]);
+		CMissionEventKillPlayer killevent( TheDataset.getDataSetRow(victimId) );
+		killer->processMissionEvent( killevent );
 	}
 }
 

@@ -105,7 +105,7 @@ void CPositionFlagManager::serial(NLMISC::IStream & f) throw(NLMISC::EStream)
 				f.xmlPushEnd();
 				f.xmlPop();
 			}
-			catch (EStream &)
+			catch (const EStream &)
 			{
 				BOMB("<CPositionFlagManager::serial> invalid size or invalid flag", break);
 			}

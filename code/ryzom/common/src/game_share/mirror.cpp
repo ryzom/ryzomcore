@@ -634,7 +634,7 @@ void				CMirror::receiveTracker( bool entitiesOrProp, NLNET::CMessage& msgin )
 				++nbSent;
 			}
 		}
-		catch( EMirror& )
+		catch(const EMirror& )
 		{
 			nlwarning( "MIRROR:ROWMGT:ATE> Invalid dataset name %s for adding tracker", name.c_str() );
 		}
@@ -752,7 +752,7 @@ void				CMirror::receiveAcknowledgeAddEntityTracker( NLNET::CMessage& msgin, TSe
 		}
 
 	}
-	catch( EMirror& )
+	catch(const EMirror& )
 	{
 		nlwarning( "MIRROR: Invalid dataset name %s for receiving ack of addEntityTracker", datasetname.c_str() );
 	}
@@ -1043,7 +1043,7 @@ void cbAllMirrorsOnline( NLNET::CMessage& msgin, const std::string &/* serviceNa
 		msgin.serial( versionStr );
 		hasVersion = true;
 	}
-	catch ( EStreamOverflow& )
+	catch (const EStreamOverflow&)
 	{}
 	if ( (! hasVersion) || (MirrorVersion != versionStr) )
 		nlerror( "Mirror version mismatch! This service: %s; Local MS: %s", MirrorVersion.c_str(), versionStr.c_str() );
@@ -1174,7 +1174,7 @@ void	CMirror::receiveServiceHasMirrorReady( const std::string& serviceName, TSer
 			}
 		}
 	}
-	catch ( EStreamOverflow& )
+	catch (const EStreamOverflow&)
 	{
 		nlwarning( "Received SMIRU from old version service %s-%hu", serviceName.c_str(), serviceId.get() );
 	}
@@ -2484,7 +2484,7 @@ NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorRow, "Display the contents of th
 					return true;
 				}
 			}
-			catch ( EMirror& )
+			catch (const EMirror&)
 			{
 				log.displayNL( "Dataset not found" );
 				return true;
@@ -2682,7 +2682,7 @@ NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorEntities, "Display all of part o
 			}
 		}
 	}
-	catch ( EMirror& )
+	catch (const EMirror&)
 	{
 		log.displayNL( "Dataset not found" );
 	}
@@ -2727,7 +2727,7 @@ NLMISC_COMMAND( lookForMirrorValue, "Look for values with criteria (Value can be
 			}
 			MirrorInstance->getDataSet( args[0] ).lookForValue( log, propName, anyValue, valueSearchedStr, onlyEntityType, onlyCreatorId, onlyDynamicId, false, true, false, true );
 		}
-		catch ( EMirror& )
+		catch (const EMirror&)
 		{
 			log.displayNL( "Dataset not found" );
 		}
@@ -2747,7 +2747,7 @@ NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorTrackers, "Display the trackers 
 		{
 			MirrorInstance->getDataSet( args[0] ).displayTrackers( log );
 		}
-		catch ( EMirror& )
+		catch (const EMirror&)
 		{
 			log.displayNL( "Dataset not found" );
 		}
@@ -2794,7 +2794,7 @@ NLMISC_CATEGORISED_COMMAND(mirror, rescanExistingEntities, "Scan the entities to
 		CMirroredDataSet& dataset = MirrorInstance->getDataSet( args[0] );
 		MirrorInstance->rescanExistingEntities( dataset, log, true );
 	}
-	catch ( EMirror& )
+	catch (const EMirror&)
 	{
 		log.displayNL( "Dataset not found" );
 	}
@@ -2815,7 +2815,7 @@ NLMISC_CATEGORISED_COMMAND(mirror, displayUnknownOnlineEntities, "Scan the entit
 		CMirroredDataSet& dataset = MirrorInstance->getDataSet( args[0] );
 		MirrorInstance->rescanExistingEntities( dataset, log, false );
 	}
-	catch ( EMirror& )
+	catch (const EMirror&)
 	{
 		log.displayNL( "Dataset not found" );
 	}
@@ -2844,7 +2844,7 @@ NLMISC_CATEGORISED_COMMAND(mirror, monitorMirrorEntity, "Set/unset an entity for
 				else
 					log.displayNL( "Invalid entity index provided" );
 			}
-			catch ( EMirror& )
+			catch (const EMirror&)
 			{
 				log.displayNL( "Dataset not found" );
 			}
@@ -2867,7 +2867,7 @@ NLMISC_CATEGORISED_DYNVARIABLE(mirror, sint32, MainNbEntities, "Number of online
 			{
 				*pointer = MirrorInstance->getDataSet( "fe_temp" ).getNbOnlineEntities();
 			}
-			catch ( EMirror& )
+			catch (const EMirror&)
 			{
 				*pointer = -2; // silent
 			}
@@ -2888,7 +2888,7 @@ NLMISC_CATEGORISED_DYNVARIABLE(mirror, sint32, LocalEntities, "Number of online 
 			{
 				*pointer = MirrorInstance->getDataSet( "fe_temp" ).getNbOwnedEntities();
 			}
-			catch ( EMirror& )
+			catch (const EMirror&)
 			{
 				*pointer = -2; // silent
 			}

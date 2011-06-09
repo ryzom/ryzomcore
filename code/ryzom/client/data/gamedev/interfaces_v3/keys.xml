@@ -26,6 +26,8 @@
   <key name="KeyDELETE" action="toggle_run_walk" /> 
   <key name="KeyPRIOR" ctrl="1" action="camera_up" /> 
   <key name="KeyNEXT"  ctrl="1" action="camera_down" /> 
+  <key name="KeyPRIOR" shift="1" action="camera_foreward" /> 
+  <key name="KeyNEXT"  shift="1" action="camera_backward" /> 
  <!--  View 
   --> 
   <key name="KeyV" action="toggle_camera" /> 
@@ -82,6 +84,26 @@
   <key name="Key8" shift="1" action="run_shortcut" params="17" /> 
   <key name="Key9" shift="1" action="run_shortcut" params="18" /> 
   <key name="Key0" shift="1" action="run_shortcut" params="19" /> 
+  <key name="N/A" action="run_shortcut" params="20" /> 
+  <key name="N/A" action="run_shortcut" params="21" /> 
+  <key name="N/A" action="run_shortcut" params="22" /> 
+  <key name="N/A" action="run_shortcut" params="23" /> 
+  <key name="N/A" action="run_shortcut" params="24" /> 
+  <key name="N/A" action="run_shortcut" params="25" /> 
+  <key name="N/A" action="run_shortcut" params="26" /> 
+  <key name="N/A" action="run_shortcut" params="27" /> 
+  <key name="N/A" action="run_shortcut" params="28" /> 
+  <key name="N/A" action="run_shortcut" params="29" /> 
+  <key name="N/A" action="run_shortcut" params="30" /> 
+  <key name="N/A" action="run_shortcut" params="31" /> 
+  <key name="N/A" action="run_shortcut" params="32" /> 
+  <key name="N/A" action="run_shortcut" params="33" /> 
+  <key name="N/A" action="run_shortcut" params="34" /> 
+  <key name="N/A" action="run_shortcut" params="35" /> 
+  <key name="N/A" action="run_shortcut" params="36" /> 
+  <key name="N/A" action="run_shortcut" params="37" /> 
+  <key name="N/A" action="run_shortcut" params="38" /> 
+  <key name="N/A" action="run_shortcut" params="39" /> 
   <key name="Key1" ctrl="1" action="select_shortcut_bar" params="1" /> 
   <key name="Key2" ctrl="1" action="select_shortcut_bar" params="2" /> 
   <key name="Key3" ctrl="1" action="select_shortcut_bar" params="3" /> 

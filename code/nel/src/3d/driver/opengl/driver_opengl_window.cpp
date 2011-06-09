@@ -374,18 +374,25 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 	}
 #endif // HAVE_XRENDER
 
-	// list all supported extensions
-	sint nextensions = 0;
-	char **extensions = XListExtensions(_dpy, &nextensions);
+	nldebug("3D: Available X Extensions:");
 
-	std::string exts;
+	if (DebugLog)
+	{
+		// list all supported extensions
+		sint nextensions = 0;
+		char **extensions = XListExtensions(_dpy, &nextensions);
 
-	for(sint i = 0; i < nextensions; ++i)
-		exts += NLMISC::toString(" %s", extensions[i]);
+		for(sint i = 0; i < nextensions; ++i)
+		{
+			if(i%5==0) DebugLog->displayRaw("3D:     ");
+			DebugLog->displayRaw(NLMISC::toString("%s ", extensions[i]).c_str());
+			if(i%5==4) DebugLog->displayRaw("\n");
+		}
 
-	XFreeExtensionList(extensions);
+		DebugLog->displayRaw("\n");
 
-	nlinfo("X Extensions:%s", exts.c_str());
+		XFreeExtensionList(extensions);
+	}
 
 	// set default X errors handler
 	XSetErrorHandler(nelXErrorsHandler);
@@ -906,7 +913,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		_hRC=wglCreateContext(_hDC);
 
 		wglMakeCurrent(_hDC,_hRC);
-
 	}
 
 	/// release old emitter
@@ -929,7 +935,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			_EventEmitter.addEmitter(diee, true);
 		}
 	}
-	catch(EDirectInput &e)
+	catch(const EDirectInput &e)
 	{
 		nlinfo(e.what());
 	}
@@ -1577,7 +1583,7 @@ bool CDriverGL::destroyWindow()
 
 #elif defined(NL_OS_MAC)
 
-	if(_DestroyWindow)
+	if (_DestroyWindow)
 	{
 		[[containerView() window] release];
 		[containerView() release];
@@ -2297,7 +2303,7 @@ emptyProc CDriverGL::getWindowProc()
 // --------------------------------------------------
 bool CDriverGL::activate()
 {
-	H_AUTO_OGL(CDriverGL_activate)
+	H_AUTO_OGL(CDriverGL_activate);
 
 	if (_win == EmptyWindow)
 		return false;

@@ -2457,7 +2457,7 @@ void CGameItem::deleteItem(CGameItem *item)
 //			//NLMEMORY::CheckHeap (true);
 //		}
 ////	}
-////	catch( Exception& e )
+////	catch(const Exception &e)
 ////	{
 ////		nlwarning("<CGameItem::load> %s",e.what());
 ////	}
@@ -2694,7 +2694,7 @@ void CGameItem::addHp( double hpGain )
 //-----------------------------------------------
 // changes the custom text of an item
 //-----------------------------------------------
-void CGameItem::setCustomText(ucstring val)
+void CGameItem::setCustomText(const ucstring &val)
 {
 	_CustomText = val;
 //	getInventory()->onItemChanged(getInventorySlot(), INVENTORIES::TItemChangeFlags(INVENTORIES::itc_custom_text));
@@ -2956,6 +2956,7 @@ uint32 CGameItem::weight() const
 			case ITEMFAMILY::HARVEST_TOOL:
 			case ITEMFAMILY::MISSION_ITEM:
 			case ITEMFAMILY::GENERIC_ITEM:
+			case ITEMFAMILY::ITEM_SAP_RECHARGE:
 				return _Form->Weight;
 			default:
 				return 0;

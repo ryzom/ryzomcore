@@ -1291,7 +1291,7 @@ bool CPSConstraintMesh::update(std::vector<sint> *numVertsVect /*= NULL*/)
 			{
 				_ModelBank->load(_MeshShapeFileName[k]);
 			}
-			catch (NLMISC::EPathNotFound &)
+			catch (const NLMISC::EPathNotFound &)
 			{
 				nlwarning("mesh not found : %s; used as a constraint mesh particle", _MeshShapeFileName[k].c_str());
 				// shape not found, so not present in the shape bank -> we create a dummy shape

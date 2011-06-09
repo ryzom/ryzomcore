@@ -146,7 +146,7 @@ void	initConfig()
 		for (i=0; i<(uint)meshes.size(); i++)
 			Meshes.push_back(meshes.asString(i));
 	}
-	catch (EConfigFile &e)
+	catch (const EConfigFile &e)
 	{
 		printf ("Problem in config file : %s\n", e.what ());
 	}
@@ -195,7 +195,7 @@ void makeGlobalRetriever(vector<CVector> &translation)
 				ninst.push_back(iid);
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			nlwarning("WARNING: can't merge lr '%s.lr': %s", Meshes[i].c_str(), e.what());
 		}
@@ -303,7 +303,7 @@ void createRetriever(vector<CVector> &translation)
 			// Save the lr file
 			serialAndSave(lr, OutputPath+meshName+".lr");
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			nlwarning("WARNING: can compute lr '%s.lr': %s", meshName.c_str(), e.what());
 		}

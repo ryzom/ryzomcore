@@ -238,11 +238,11 @@ namespace STRING_MANAGER
 			return false;
 		}
 
-		bool findCol(ucstring colName, uint &colIndex)
+		bool findCol(const ucstring &colName, uint &colIndex)
 		{
 			if (Data.empty())
 				return false;
-			TWorksheet::TRow::iterator it = std::find(Data[0].begin(), Data[0].end(), ucstring(colName));
+			TWorksheet::TRow::iterator it = std::find(Data[0].begin(), Data[0].end(), colName);
 			if (it == Data[0].end())
 				return false;
 

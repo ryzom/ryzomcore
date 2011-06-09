@@ -34,6 +34,8 @@
 //
 #include "nel/net/message.h"
 
+#include "game_share/visual_fx.h"
+
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
@@ -186,6 +188,15 @@ CGameItemPtr CTPTimedAction::getAndUnlockTP(CEntityBase *actor)
 	
 	// unlock item, Tp player and destroy item
 	character->unLockItem(INVENTORIES::bag, ticketSlot,1);
+
+	// Remove fx
+	CMirrorPropValue<TYPE_VISUAL_FX> visualFx( TheDataset, character->getEntityRowId(), DSPropertyVISUAL_FX );
+	CVisualFX fx;
+	fx.unpack(visualFx.getValue());
+	fx.Aura = MAGICFX::NoAura;
+	sint64 prop;
+	fx.pack(prop);
+	visualFx = (sint16)prop;
 
 	return item;
 }

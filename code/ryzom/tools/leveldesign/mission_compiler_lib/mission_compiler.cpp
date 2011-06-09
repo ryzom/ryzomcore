@@ -620,7 +620,7 @@ bool	CMissionCompiler::compileMissions(IPrimitive *rootPrim, const std::string &
 //		{
 			compileMission(missionTrees[i], primFileName);
 //		}
-//		catch (EParseException e)
+//		catch (const EParseException &e)
 //		{
 //			nlwarning("Error while parsing a mission: '%s'", e.Why.c_str());
 //			ret = false;
@@ -1850,15 +1850,15 @@ void CMissionData::parseMissionHeader(NLLIGO::IPrimitive *prim)
 	else if (s == "guild")
 		_Guild = true;
 	
-	_NotInJournal = strlwr(getProperty(prim, "not_in_journal", false, false)) == "true";
-	_AutoRemoveFromJournal = strlwr(getProperty(prim, "auto_remove_from_journal", false, false)) == "true";
+	_NotInJournal = NLMISC::toLower(getProperty(prim, "not_in_journal", false, false)) == "true";
+	_AutoRemoveFromJournal = NLMISC::toLower(getProperty(prim, "auto_remove_from_journal", false, false)) == "true";
 	_MissionCategory = getProperty(prim, "mission_category", false, false);
-	_PlayerReplayTimer = atoi(getProperty(prim, "player_replay_timer", true, false).c_str());
-	_GlobalReplayTimer = atoi(getProperty(prim, "global_replay_timer", true, false).c_str());
-	_NotProposed = strlwr(getProperty(prim, "not_proposed", false, false)) == "true";
-	_MissionAuto = strlwr(getProperty(prim, "automatic", false, false)) == "true";
-	_NonAbandonnable = strlwr(getProperty(prim, "non_abandonnable", false, false)) == "true";
-	_FailIfInventoryIsFull = strlwr(getProperty(prim, "fail_if_inventory_is_full", false, false)) == "true";
+	NLMISC::fromString(getProperty(prim, "player_replay_timer", true, false), _PlayerReplayTimer);
+	NLMISC::fromString(getProperty(prim, "global_replay_timer", true, false), _GlobalReplayTimer);
+	_NotProposed = NLMISC::toLower(getProperty(prim, "not_proposed", false, false)) == "true";
+	_MissionAuto = NLMISC::toLower(getProperty(prim, "automatic", false, false)) == "true";
+	_NonAbandonnable = NLMISC::toLower(getProperty(prim, "non_abandonnable", false, false)) == "true";
+	_FailIfInventoryIsFull = NLMISC::toLower(getProperty(prim, "fail_if_inventory_is_full", false, false)) == "true";
 	_MissionIcon = getProperty(prim, "mission_icon", false, false);
 
 	if (_MissionAuto)

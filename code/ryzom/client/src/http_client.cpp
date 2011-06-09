@@ -57,7 +57,7 @@ bool CHttpClient::connect(std::string server)
 			nldebug("Connected to web server '%s'", server.c_str());
 		}
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		nlwarning("Can't connect to web server '%s': %s", server.c_str(), e.what());
 		goto end;

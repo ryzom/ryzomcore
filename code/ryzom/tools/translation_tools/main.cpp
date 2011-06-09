@@ -736,7 +736,8 @@ void cleanComment(const std::string & filename)
 			else
 			{
 				ucstring::size_type commentEnd = text.find(ucstring("\n"), commentBegin);
-				if (commentEnd != ucstring::npos) {
+				if (commentEnd != ucstring::npos)
+				{
 					commentEnd += 1;
 					ucstring comment = text.substr(commentBegin, commentEnd - commentBegin);
 					if (comment.find(ucstring("// HASH_VALUE")) != ucstring::npos

@@ -118,7 +118,7 @@ bool CSpecialPowerPhrase::buildFromConsumable(const TDataSetRow & actorRowId, co
 //-----------------------------------------------
 // CSpecialPowerPhrase processParams
 //-----------------------------------------------
-void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &params, bool /*isConsumable*/, uint16 quality)
+void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &params, bool isConsumable, uint16 quality)
 {
 	// process params
 	for ( uint j = 0 ; j < params.size() ; ++j)
@@ -172,6 +172,7 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 				power->setNoShieldProtection( ((CSBrickParamShielding *)param)->NoShieldProtectionFactor / 100.0f, ((CSBrickParamShielding *)param)->NoShieldProtectionMax);
 				power->setBucklerProtection( ((CSBrickParamShielding *)param)->BucklerProtectionFactor / 100.0f, ((CSBrickParamShielding *)param)->BucklerProtectionMax);
 				power->setShieldProtection( ((CSBrickParamShielding *)param)->ShieldProtectionFactor / 100.0f, ((CSBrickParamShielding *)param)->ShieldProtectionMax);
+				power->setByPass(isConsumable);
 				_Powers.push_back(power);
 			}
 			break;
@@ -191,11 +192,32 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 					lifeAura->setRadius(((CSBrickParamLifeAura *)param)->Radius);
 					lifeAura->setFamilies(EFFECT_FAMILIES::PowerRootLifeAura,EFFECT_FAMILIES::PowerLifeAura );
 					lifeAura->setParamValue(((CSBrickParamLifeAura *)param)->RegenMod);
+					lifeAura->setByPass(isConsumable);
 					_Powers.push_back(lifeAura);
 				}
 			}
 			break;
-		
+
+		case TBrickParam::SP_LIFE_AURA2:
+			{
+			// $*STRUCT CSBrickParamLifeAura: public TBrickParam::CId <TBrickParam::SP_LIFE_AURA2>
+			// $*-i uint16	RegenMod			// regen modifier proportionally to item level
+			// $*-f float	Duration			// duration in seconds
+			// $*-f float	Radius				// aura radius in meters
+			// $*-f float	TargetDisableTime	// disable life aura for x seconds on targets
+			// $*-f float	UserDisableTime		// disable life aura for x seconds on user
+				CSpecialPowerBasicAura *lifeAura = new CSpecialPowerBasicAura(_ActorRowId, this, ((CSBrickParamLifeAura *)param)->Duration, ((CSBrickParamLifeAura *)param)->UserDisableTime, ((CSBrickParamLifeAura *)param)->TargetDisableTime, POWERS::LifeAura);
+				if (lifeAura)
+				{
+					lifeAura->setRadius(((CSBrickParamLifeAura *)param)->Radius);
+					lifeAura->setFamilies(EFFECT_FAMILIES::PowerRootLifeAura,EFFECT_FAMILIES::PowerLifeAura );
+					lifeAura->setParamValue(((CSBrickParamLifeAura *)param)->RegenMod*quality);
+					lifeAura->setByPass(isConsumable);
+					_Powers.push_back(lifeAura);
+				}
+			}
+			break;
+
 		case TBrickParam::SP_STAMINA_AURA:
 			{
 				CSpecialPowerBasicAura *staminaAura = new CSpecialPowerBasicAura(_ActorRowId, this, ((CSBrickParamStaminaAura*)param)->Duration, ((CSBrickParamLifeAura *)param)->UserDisableTime, ((CSBrickParamStaminaAura *)param)->TargetDisableTime, POWERS::StaminaAura);
@@ -204,11 +226,26 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 					staminaAura->setRadius(((CSBrickParamStaminaAura *)param)->Radius);
 					staminaAura->setFamilies(EFFECT_FAMILIES::PowerRootStaminaAura,EFFECT_FAMILIES::PowerStaminaAura );
 					staminaAura->setParamValue(((CSBrickParamStaminaAura *)param)->RegenMod);
+					staminaAura->setByPass(isConsumable);
 					_Powers.push_back(staminaAura);
 				}
 			}
 			break;
-		
+
+		case TBrickParam::SP_STAMINA_AURA2:
+			{
+				CSpecialPowerBasicAura *staminaAura = new CSpecialPowerBasicAura(_ActorRowId, this, ((CSBrickParamStaminaAura*)param)->Duration, ((CSBrickParamLifeAura *)param)->UserDisableTime, ((CSBrickParamStaminaAura *)param)->TargetDisableTime, POWERS::StaminaAura);
+				if (staminaAura)
+				{
+					staminaAura->setRadius(((CSBrickParamStaminaAura *)param)->Radius);
+					staminaAura->setFamilies(EFFECT_FAMILIES::PowerRootStaminaAura,EFFECT_FAMILIES::PowerStaminaAura );
+					staminaAura->setParamValue(((CSBrickParamStaminaAura *)param)->RegenMod*quality);
+					staminaAura->setByPass(isConsumable);
+					_Powers.push_back(staminaAura);
+				}
+			}
+			break;
+
 		case TBrickParam::SP_SAP_AURA:
 			{
 				CSpecialPowerBasicAura *sapAura = new CSpecialPowerBasicAura(_ActorRowId, this, ((CSBrickParamSapAura*)param)->Duration, ((CSBrickParamLifeAura *)param)->UserDisableTime, ((CSBrickParamSapAura *)param)->TargetDisableTime, POWERS::SapAura);
@@ -217,11 +254,25 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 					sapAura->setRadius(((CSBrickParamSapAura *)param)->Radius);
 					sapAura->setFamilies(EFFECT_FAMILIES::PowerRootSapAura,EFFECT_FAMILIES::PowerSapAura );
 					sapAura->setParamValue(((CSBrickParamSapAura *)param)->RegenMod);
+					sapAura->setByPass(isConsumable);
 					_Powers.push_back(sapAura);
 				}
 			}
 			break;
 
+		case TBrickParam::SP_SAP_AURA2:
+			{
+				CSpecialPowerBasicAura *sapAura = new CSpecialPowerBasicAura(_ActorRowId, this, ((CSBrickParamSapAura*)param)->Duration, ((CSBrickParamLifeAura *)param)->UserDisableTime, ((CSBrickParamSapAura *)param)->TargetDisableTime, POWERS::SapAura);
+				if (sapAura)
+				{
+					sapAura->setRadius(((CSBrickParamSapAura *)param)->Radius);
+					sapAura->setFamilies(EFFECT_FAMILIES::PowerRootSapAura,EFFECT_FAMILIES::PowerSapAura );
+					sapAura->setParamValue(((CSBrickParamSapAura *)param)->RegenMod*quality);
+					sapAura->setByPass(isConsumable);
+					_Powers.push_back(sapAura);
+				}
+			}
+			break;
 
 		case TBrickParam::SP_SPEEDING_UP:
 			{
@@ -232,6 +283,7 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 				CSpecialPowerSpeedingUp *power = new CSpecialPowerSpeedingUp(_ActorRowId, this, (uint8)((CSBrickParamSpeedingUp *)param)->SpeedMod, ((CSBrickParamSpeedingUp *)param)->Duration, ((CSBrickParamSpeedingUp *)param)->DisableTime);
 				if (power)
 				{
+					power->setByPass(isConsumable);
 					_Powers.push_back(power);
 				}
 			}
@@ -246,6 +298,7 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 				if (power)
 				{
 					power->setEffectFamily( EFFECT_FAMILIES::PowerInvulnerability );
+					power->setByPass(isConsumable);
 					_Powers.push_back(power);
 				}
 			}
@@ -263,6 +316,7 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 				{
 					aura->setRadius(((CSBrickParamMeleeProtection *)param)->Radius);
 					aura->setFamilies(EFFECT_FAMILIES::PowerRootProtection,EFFECT_FAMILIES::PowerProtection );
+					aura->setByPass(isConsumable);
 					_Powers.push_back(aura);
 				}
 			}
@@ -280,6 +334,7 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 				{
 					aura->setRadius(((CSBrickParamRangeProtection *)param)->Radius);
 					aura->setFamilies(EFFECT_FAMILIES::PowerRootUmbrella,EFFECT_FAMILIES::PowerUmbrella);
+					aura->setByPass(isConsumable);
 					_Powers.push_back(aura);
 				}
 			}
@@ -297,6 +352,7 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 				{
 					aura->setRadius(((CSBrickParamMagicProtection *)param)->Radius);
 					aura->setFamilies(EFFECT_FAMILIES::PowerRootAntiMagicShield,EFFECT_FAMILIES::PowerAntiMagicShield);
+					aura->setByPass(isConsumable);
 					_Powers.push_back(aura);
 				}
 			}
@@ -316,6 +372,7 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 					aura->setParamValue(((CSBrickParamWarCry *)param)->DamageBonus);
 					aura->setRadius(((CSBrickParamWarCry *)param)->Radius);
 					aura->setFamilies(EFFECT_FAMILIES::PowerRootWarCry,EFFECT_FAMILIES::PowerWarCry);
+					aura->setByPass(isConsumable);
 					_Powers.push_back(aura);
 				}
 				break;
@@ -335,6 +392,7 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 					aura->setParamValue(((CSBrickParamFireWall *)param)->Damage);
 					aura->setRadius(((CSBrickParamFireWall *)param)->Radius);
 					aura->setFamilies(EFFECT_FAMILIES::PowerRootFireWall,EFFECT_FAMILIES::PowerFireWall);
+					aura->setByPass(isConsumable);
 					_Powers.push_back(aura);
 				}
 				break;
@@ -354,6 +412,7 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 					aura->setParamValue(((CSBrickParamThornWall *)param)->Damage);
 					aura->setRadius(((CSBrickParamThornWall *)param)->Radius);
 					aura->setFamilies(EFFECT_FAMILIES::PowerRootThornWall,EFFECT_FAMILIES::PowerThornWall);
+					aura->setByPass(isConsumable);
 					_Powers.push_back(aura);
 				}
 				break;
@@ -373,6 +432,7 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 					aura->setParamValue(((CSBrickParamWaterWall *)param)->Damage);
 					aura->setRadius(((CSBrickParamWaterWall *)param)->Radius);
 					aura->setFamilies(EFFECT_FAMILIES::PowerRootWaterWall,EFFECT_FAMILIES::PowerWaterWall);
+					aura->setByPass(isConsumable);
 					_Powers.push_back(aura);
 				}
 				break;
@@ -392,6 +452,7 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 					aura->setParamValue(((CSBrickParamLightningWall *)param)->Damage);
 					aura->setRadius(((CSBrickParamLightningWall *)param)->Radius);
 					aura->setFamilies(EFFECT_FAMILIES::PowerRootLightningWall,EFFECT_FAMILIES::PowerLightningWall);
+					aura->setByPass(isConsumable);
 					_Powers.push_back(aura);
 				}
 				break;
@@ -412,6 +473,7 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 					power->setDamagePerUpdate(((CSBrickParamBerserk *)param)->DamagePerUpdate);
 					power->setParamValue(((CSBrickParamBerserk *)param)->DamageBonus);
 					power->setEffectFamily( EFFECT_FAMILIES::PowerBerserker );
+					power->setByPass(isConsumable);
 					_Powers.push_back(power);
 				}
 			}
@@ -449,6 +511,7 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 				if (power)
 				{
 					power->setAffectedScore( SCORES::toScore(cp->AffectedScore) );
+					power->setByPass(isConsumable);
 					_Powers.push_back(power);
 				}
 			}
@@ -469,6 +532,7 @@ void CSpecialPowerPhrase::processParams(const vector<TBrickParam::IIdPtr> &param
 					if (power)
 					{
 						power->setAffectedScore( SCORES::toScore(cp->AffectedScore) );
+						power->setByPass(isConsumable);
 						_Powers.push_back(power);
 					}
 				}

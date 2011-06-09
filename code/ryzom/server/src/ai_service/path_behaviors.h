@@ -240,7 +240,8 @@ private:
 public:
 	static std::string toString(TFollowReason reason, RYAI_MAP_CRUNCH::CWorldMap::TFindInsideAStarPathReason fIASPReason = RYAI_MAP_CRUNCH::CWorldMap::FIASPR_NO_REASON)
 	{
-		switch (reason) {
+		switch (reason)
+		{
 		case FNP_NOT_INITIALIZED:
 			return "FOLLOW_NO_PATH::NOT_INITIALIZED";
 		case FNP_NO_INSIDE_ASTAR_PATH:

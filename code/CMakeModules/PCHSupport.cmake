@@ -52,13 +52,23 @@ MACRO(_PCH_GET_COMPILE_FLAGS _out_compile_flags)
 		LIST(APPEND ${_out_compile_flags} " ${_PCH_include_prefix}\"${item}\"")
 	ENDFOREACH(item)
 
+	# Required for CMake 2.6
+	SET(GLOBAL_DEFINITIONS "")
+	GET_DIRECTORY_PROPERTY(DEFINITIONS COMPILE_DEFINITIONS)
+	FOREACH(item ${DEFINITIONS})
+		LIST(APPEND GLOBAL_DEFINITIONS -D${item})
+	ENDFOREACH(item)
+
 	GET_DIRECTORY_PROPERTY(_directory_flags DEFINITIONS)
-	GET_DIRECTORY_PROPERTY(_global_definitions DIRECTORY ${CMAKE_SOURCE_DIR} DEFINITIONS)
+	GET_DIRECTORY_PROPERTY(_directory_definitions DIRECTORY ${CMAKE_SOURCE_DIR} DEFINITIONS)
+	LIST(APPEND ${_out_compile_flags} ${GLOBAL_DEFINITIONS})
 	LIST(APPEND ${_out_compile_flags} ${_directory_flags})
-	LIST(APPEND ${_out_compile_flags} ${_global_definitions})
+	LIST(APPEND ${_out_compile_flags} ${_directory_definitions})
 	LIST(APPEND ${_out_compile_flags} ${CMAKE_CXX_FLAGS})
 
+	# Format definitions and remove duplicates
 	SEPARATE_ARGUMENTS(${_out_compile_flags})
+	LIST(REMOVE_DUPLICATES ${_out_compile_flags})
 ENDMACRO(_PCH_GET_COMPILE_FLAGS)
 
 MACRO(_PCH_GET_PDB_FILENAME out_filename _target)
@@ -134,7 +144,9 @@ MACRO(ADD_PRECOMPILED_HEADER_TO_TARGET _targetName _input _pch_output_to_use )
 	ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 	SET_TARGET_PROPERTIES(${_targetName} PROPERTIES COMPILE_FLAGS ${_target_cflags})
-	SET_TARGET_PROPERTIES(${_targetName}_pch_dephelp PROPERTIES COMPILE_FLAGS ${_target_cflags})
+	IF(oldProps)
+		SET_TARGET_PROPERTIES(${_targetName}_pch_dephelp PROPERTIES COMPILE_FLAGS ${oldProps})
+	ENDIF(oldProps)
 	ADD_CUSTOM_TARGET(pch_Generate_${_targetName} DEPENDS ${_pch_output_to_use})
 	ADD_DEPENDENCIES(${_targetName} pch_Generate_${_targetName})
 ENDMACRO(ADD_PRECOMPILED_HEADER_TO_TARGET)

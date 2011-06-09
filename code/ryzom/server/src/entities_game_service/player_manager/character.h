@@ -702,6 +702,9 @@ public:
 	/// add a known brick
 	void addKnownBrick( const NLMISC::CSheetId& brickId );
 
+	/// check if have brick
+	bool haveBrick( const NLMISC::CSheetId& brickId );
+
 	/// remove a known brick
 	void removeKnownBrick( const NLMISC::CSheetId& brickId );
 
@@ -1608,6 +1611,18 @@ public:
 	/// get ammo item
 	virtual CGameItemPtr getAmmoItem() const;
 
+	/// send custom url
+	void sendUrl(const std::string &url, const std::string &salt);
+
+	/// add web command validation check
+	void addWebCommandCheck(const std::string &url, const std::string &data, const std::string &salt);
+
+	/// get web command validation check
+	uint getWebCommandCheck(const std::string &url);
+
+	/// validate web command. Return web command item index in bag if command is valid or INVENTORIES::NbBagSlots if not
+	uint checkWebCommand(const std::string &url, const std::string &data, const std::string &hmac, const std::string &salt);
+
 	/// get the available phrases
 	void getAvailablePhrasesList(const std::string &brickFilter, std::vector<NLMISC::CSheetId> &selectedPhrases, EGSPD::CPeople::TPeople people = EGSPD::CPeople::Common, bool bypassBrickRequirements = false, bool includeNonRolemasterBricks = true );
 
@@ -1833,7 +1848,6 @@ public:
 	void setLastPosXInDB(sint32 x);
 	/// set last Y pos in DB (for teammates)
 	void setLastPosYInDB(sint32 y);
-
 	
 	/// \name Friend/Ignore lists management.
 
@@ -3409,6 +3423,8 @@ private:
 
 	// duel opponent
 	CCharacter						* _DuelOpponent;
+
+	TAIAlias						_LastCreatedNpcGroup;
 
 	// :KLUDGE: ICDBStructNode non-const 'coz getName and getParent are not
 	// const methods. See CCDBSynchronised::getICDBStructNodeFromName for more

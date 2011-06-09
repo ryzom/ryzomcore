@@ -433,7 +433,7 @@ void CRewardSharing::setUsersDb()
 				shareItem.setPREREQUISIT_VALID(user->_PropertyDatabase, 0);
 			}
 		}
-		catch( NLMISC::Exception & e)
+		catch(const NLMISC::Exception &e)
 		{
 			nlwarning("exception in <CRewardSharing setUsersDb> :'%s'",e.what());
 		}

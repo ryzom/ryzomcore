@@ -97,7 +97,7 @@ void	cbStallMode( NLNET::CMessage& msgin, const std::string &serviceName, NLNET:
 			CUnifiedNetwork::getInstance()->send("TICKS", msgout);
 		}
 	}
-	catch (Exception&)
+	catch (const Exception&)
 	{
 	}
 

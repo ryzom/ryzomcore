@@ -1053,6 +1053,11 @@ bool CCombatPhrase::validate()
 	
 	if ( _Attacker->getItem( CCombatAttacker::RightHandItem, _RightWeapon) )
 	{
+
+		// forbid use of multi target with an area effect weapon !!!!
+		if ( FightAreaEffectOn && _RightWeapon.Area && _HitAllMeleeAggressors )
+			return false;
+
 		if (_RightWeapon.Family == ITEMFAMILY::MELEE_WEAPON )
 		{
 			_MeleeCombat = true;

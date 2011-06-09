@@ -398,7 +398,7 @@ NLMISC_COMMAND( guildDB, "Display or set the value of a property in the guild da
 		sint64 val = guild->_DbGroup.Database.x_getProp(args[1]);
 		log.displayNL( "property value is '%"NL_I64"d'", val );
 	}
-	catch ( CCDBSynchronised::ECDBNotFound& e )
+	catch (const CCDBSynchronised::ECDBNotFound &e)
 	{
 		log.displayNL( "exception %s", e.what() );
 	}

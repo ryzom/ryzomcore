@@ -400,7 +400,7 @@ void				CRangeMirrorManager::saveRanges()
 		else
 			throw EFileNotOpened( RANGE_MANAGER_BACKUP_FILE );
 	}
-	catch ( Exception& e )
+	catch (const Exception &e)
 	{
 		nlwarning( "Can't save ranges: %s", e.what() );
 	}
@@ -428,7 +428,7 @@ void				CRangeMirrorManager::loadRanges()
 			throw EFileNotOpened( RANGE_MANAGER_BACKUP_FILE );
 		nlinfo( "RangeMirrorManager: successfully loaded ranges" );
 	}
-	catch ( Exception& e )
+	catch (const Exception &e)
 	{
 		nlinfo( "Can't load ranges: %s", e.what() ); // Info because not a problem
 	}

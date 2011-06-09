@@ -158,7 +158,7 @@ void CMissionQueueManager::saveToFile()
 			}
 			Bsi.sendFile( msg );
 		}
-		catch( Exception& )
+		catch(const Exception &)
 		{
 			nlwarning("(EGS)<CMissionQueueManager::saveToFile>  :  Can't serial file %s (connection with BS service down ?)",sFilename.c_str());
 			return;

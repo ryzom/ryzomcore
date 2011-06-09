@@ -584,7 +584,7 @@ bool loadAndResaveCheckCharacters( const std::vector<string>& files, NLMISC::CLo
 				if (!(dump1 == dump2))
 					log.displayNL("WARNING: character %d:%d changed after saving!", id.PlayerId, id.Chars[i].CharId );
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				log.displayNL("Exception caught while executing command '%s' (%s): %s", currentCommand.c_str(), currentState.c_str(), e.what());
 				result = false;
@@ -1129,7 +1129,7 @@ void CPlayerService::initConfigFileVars()
 //		CConfigFile::CVar& cvDecay = ConfigFile.getVar("DecayDelay");
 //		GameItemManager.DecayDelay = cvDecay.asInt() * 60 * 10;
 //	}
-//	catch(EUnknownVar &)
+//	catch(const EUnknownVar &)
 //	{
 //		//nlwarning("<CPlayerService> var DecayDelay not found");
 //	}
@@ -1139,7 +1139,7 @@ void CPlayerService::initConfigFileVars()
 //		CConfigFile::CVar& cvCorpseToCarrion = ConfigFile.getVar("CorpseToCarrionDelay");
 //		GameItemManager.CorpseToCarrionDelay = cvCorpseToCarrion.asInt() * 60 * 10;
 //	}
-//	catch(EUnknownVar &)
+//	catch(const EUnknownVar &)
 //	{
 //		//nlwarning("<CPlayerService> var CorpseToCarrionDelay not found");
 //	}
@@ -1149,7 +1149,7 @@ void CPlayerService::initConfigFileVars()
 //		CConfigFile::CVar& cvCarrionDecay = ConfigFile.getVar("CarrionDecayDelay");
 //		GameItemManager.CarrionDecayDelay = cvCarrionDecay.asInt() * 60 * 10;
 //	}
-//	catch(EUnknownVar &)
+//	catch(const EUnknownVar &)
 //	{
 //		//nlwarning("<CPlayerService> var CarrionDecayDelay not found");
 //	}
@@ -1159,7 +1159,7 @@ void CPlayerService::initConfigFileVars()
 //		CConfigFile::CVar& cvCorpse = ConfigFile.getVar("CorpseMaxCount");
 //		GameItemManager.CorpseMaxCount = cvCorpse.asInt();
 //	}
-//	catch(EUnknownVar &)
+//	catch(const EUnknownVar &)
 //	{
 //		//nlwarning("<CPlayerService> var CorpseMaxCount not found");
 //	}
@@ -1273,7 +1273,7 @@ void CPlayerService::initConfigFileVars()
 			nlwarning("<CPlayerService::initConfigFileVars> bad size for var Mainlands : %d",mlsz);
 		}
 	}
-	catch(EUnknownVar &)
+	catch(const EUnknownVar &)
 	{
 		nlwarning("<CPlayerService::initConfigFileVars> var Mainlands not found");
 	}
@@ -3856,7 +3856,7 @@ NLMISC_COMMAND(displayDatabaseEntry," display a database entry value","<entity i
 				sint64 value = e->_PropertyDatabase.x_getProp(entry);
 				log.displayNL("For player %s, buffer %s : value %"NL_I64"d", id.toString().c_str(), entry.c_str(), value );
 			}
-			catch ( CCDBSynchronised::ECDBNotFound &)
+			catch (const CCDBSynchronised::ECDBNotFound &)
 			{
 				log.displayNL("%s isn't a valid database entry", entry.c_str());
 			}
@@ -3897,7 +3897,7 @@ NLMISC_COMMAND( db, "Display or set the value of a property in the database", "<
 				log.displayNL( "%"NL_I64"d", value );
 				res = true;
 			}
-			catch ( CCDBSynchronised::ECDBNotFound& )
+			catch (const CCDBSynchronised::ECDBNotFound& )
 			{
 				res = false;
 			}

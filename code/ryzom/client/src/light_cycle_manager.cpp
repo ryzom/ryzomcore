@@ -442,7 +442,7 @@ bool CLightCycleManager::isInDayInterval(float startHour, float endHour, float d
 float CLightCycleManager::getLightLevel(float hour) const
 {
 	H_AUTO_USE(RZ_LightCycleManager)
-	float lightValue;
+	float lightValue = 0.f;
 	if (isInDayInterval(_Desc.NightTransitionStartHour, _Desc.NightTransitionEndHour, _Desc.NumHours, hour, lightValue))
 		return lightValue;
 	if (isInDayInterval(_Desc.DawnTransitionStartHour, _Desc.DawnTransitionEndHour, _Desc.NumHours, hour, lightValue))

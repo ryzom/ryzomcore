@@ -1670,7 +1670,7 @@ bool CPeopleInterraction::saveUserChatsInfos(NLMISC::IStream &f)
 			pCGW->saveFreeTeller(f);
 		}
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		nlwarning("Error while saving user chat infos : %s", e.what());
 		return false;
@@ -1691,7 +1691,7 @@ bool CPeopleInterraction::saveUserDynChatsInfos(NLMISC::IStream &f)
 			saveFilteredDynChat(f, TheUserChat);
 		}
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		nlwarning("Error while saving user dyn chat infos : %s", e.what());
 		return false;
@@ -1756,7 +1756,7 @@ bool CPeopleInterraction::loadUserChatsInfos(NLMISC::IStream &f)
 			if (pCGW) pCGW->loadFreeTeller(f);
 		}
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		nlwarning("Error while loading user chat infos : %s", e.what());
 		return false;
@@ -1786,7 +1786,7 @@ bool CPeopleInterraction::loadUserDynChatsInfos(NLMISC::IStream &f)
 			setupUserDynChatFromSummary(fcs, TheUserChat);
 		}
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		nlwarning("Error while loading user dyn chat infos : %s", e.what());
 		return false;
@@ -2277,7 +2277,8 @@ public:
 		CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
 
 		order = (CPeopleList::TSortOrder)(order + 1);
-		if (order == CPeopleList::END_SORT_ORDER) {
+		if (order == CPeopleList::END_SORT_ORDER)
+		{
 			order = CPeopleList::START_SORT_ORDER;
 		}
 
@@ -2654,8 +2655,10 @@ class CHandlerChatTargetSelected : public IActionHandler
 		}
 		else
 		{
-			for (uint i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++) {
-				if (nlstricmp(sParams, "dyn"+toString("%d", i)) == 0) {
+			for (uint i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
+			{
+				if (nlstricmp(sParams, "dyn"+toString("%d", i)) == 0)
+				{
 					cf.setTargetGroup(CChatGroup::dyn_chat, i);
 				}
 			}

@@ -29,6 +29,7 @@
 #include "group_html.h"
 #include "../init_main_loop.h"
 #include "inventory_manager.h"
+#include "../client_chat_manager.h"
 
 #include "../connection.h"
 #include "../entity_cl.h"
@@ -48,6 +49,7 @@ using namespace std;
 using namespace NLMISC;
 
 extern CPeopleInterraction PeopleInterraction;
+extern CClientChatManager ChatMngr;
 
 NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupListAscensor, std::string, "list_sheet_guild");
 
@@ -539,6 +541,10 @@ void CGuildManager::closeAllInterfaces()
 	CGroupContainer *pGuildChat = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_GUILD_CHAT));
 	if (pGuildChat != NULL)
 		pGuildChat->setActive(false);
+
+	if (PeopleInterraction.TheUserChat.Filter.getTargetGroup() == CChatGroup::guild)
+		ChatMngr.updateChatModeAndButton(CChatGroup::say);
+
 }
 
 // ***************************************************************************

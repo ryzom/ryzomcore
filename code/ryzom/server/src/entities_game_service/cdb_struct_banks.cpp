@@ -107,7 +107,7 @@ void					CCDBStructBanks::doInit( const std::string& filename )
 			nlerror( "CDB: Cannot open file %s", filename.c_str() );
 		}
 	}
-	catch ( Exception &e )
+	catch (const Exception &e)
 	{
 		// Output error
 		nlerror ("CDB: Error while loading the form %s: %s", filename.c_str(), e.what());

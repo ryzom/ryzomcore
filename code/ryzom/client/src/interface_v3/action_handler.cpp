@@ -77,7 +77,7 @@ std::string IActionHandler::getParam (const string &Params, const string &ParamN
 		std::string::size_type e = allparam.find('=');
 		if (e == std::string::npos || e == 0) break;
 		std::string::size_type p = allparam.find('|');
-		string tmp = strlwr(allparam.substr(0,e));
+		string tmp = NLMISC::toLower(allparam.substr(0,e));
 		skipBlankAtEnd(tmp);
 		if (tmp == param)
 		{
@@ -103,7 +103,7 @@ void IActionHandler::getAllParams (const string &Params, vector< pair<string,str
 		std::string::size_type e = allparam.find('=');
 		if (e == std::string::npos || e == 0) break;
 		std::string::size_type p = allparam.find('|');
-		string tmp = strlwr(allparam.substr(0,e));
+		string tmp = NLMISC::toLower(allparam.substr(0,e));
 		skipBlankAtEnd(tmp);
 
 		string tmp2 = allparam.substr(e+1,p-e-1);

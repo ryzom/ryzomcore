@@ -168,7 +168,7 @@ void impulseDatabaseInitPlayer(NLMISC::CBitMemStream &impulse)
 		IngameDbMngr.setInitPacketReceived();
 		nlinfo( "DB_INIT:PLR done (%u bytes)", impulse.getPos()-p );
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		BOMB( NLMISC::toString( "Problem while decoding a DB_INIT:PLR msg, skipped: %s", e.what() ), return );
 	}
@@ -185,7 +185,7 @@ void impulseDatabaseUpdatePlayer(NLMISC::CBitMemStream &impulse)
 		// read delta
 		IngameDbMngr.readDelta( serverTick, impulse, CDBPlayer ); // unlike on the server, here there is only one unified CCDBSynchronized object
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 
 		BOMB( NLMISC::toString( "Problem while decoding a DB_UPDATE_PLR msg, skipped: %s", e.what() ), return );
@@ -218,7 +218,7 @@ void impulseDatabaseUpdateBank(NLMISC::CBitMemStream &impulse)
 			updateInventoryFromStream( impulse, (INVENTORIES::CInventoryCategoryForGuild*)NULL, false );
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		BOMB( NLMISC::toString( "Problem while decoding a DB_GROUP:UPDATE_BANK %s msg, skipped: %s", CDBBankNames[bank], e.what() ), return );
 	}
@@ -248,7 +248,7 @@ void impulseDatabaseInitBank(NLMISC::CBitMemStream &impulse)
 			updateInventoryFromStream( impulse, (INVENTORIES::CInventoryCategoryForGuild*)NULL, false );
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		BOMB( NLMISC::toString( "Problem while decoding a DB_GROUP:INIT_BANK %s msg, skipped: %s", CDBBankNames[bank], e.what() ), return );
 	}
@@ -272,7 +272,7 @@ void impulseDatabaseResetBank(NLMISC::CBitMemStream &impulse)
 		IngameDbMngr.getNodePtr()->resetBank( serverTick, (TCDBBank)bank );
 		nldebug( "CDB: DB_GROUP:RESET_BANK %s", CDBBankNames[bank] );
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		BOMB( NLMISC::toString( "Problem while decoding a DB_GROUP:RESET_BANK %s msg, skipped: %s", CDBBankNames[bank], e.what() ), return );
 	}
@@ -286,7 +286,7 @@ static void readPrivileges(NLMISC::CBitMemStream &impulse)
 	{
 		impulse.serial(UserPrivileges);
 	}
-	catch(EStreamOverflow &)
+	catch(const EStreamOverflow &)
 	{
 		nlwarning("User privileges not serialised, assuming none");
 		UserPrivileges = "";
@@ -345,7 +345,7 @@ void copyKeySet(const std::string &srcPath, const std::string &destPath)
 		COFile ofile(destPath);
 		ofile.serialBuffer((uint8 *) &srcStr[0], (uint)srcStr.size());
 	}
-	catch(EStream &)
+	catch(const EStream &)
 	{
 		nlwarning("Couldn't copy %s to %s to create new character keyset", srcPath.c_str(), destPath.c_str());
 	}
@@ -805,27 +805,35 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		else
 		{
 			ucstring::size_type index = finalString.find(ucstring("<BPFX>"));
-			if (index != ucstring::npos) {
+			if (index != ucstring::npos)
+			{
 				bubbleWanted = false;
 				finalString = finalString.substr(index+6,finalString.size());
 				ucstring::size_type index2 = finalString.find(ucstring(" "));
 				ucstring playerName;
-				if (index2 < (finalString.size()-3)) {
+				if (index2 < (finalString.size()-3))
+				{
 					playerName = finalString.substr(0,index2);
 					finalString = finalString.substr(index2+1,finalString.size());
 				}
 				if (!senderName.empty())
 				{
 					CEntityCL *senderEntity = EntitiesMngr.getEntityByName (CEntityCL::removeTitleAndShardFromName(senderName), true, true);
-					if (senderEntity) {
-						if (senderEntity->Type != CEntityCL::Player) {
-							if (playerName.empty()) {
+					if (senderEntity)
+					{
+						if (senderEntity->Type != CEntityCL::Player)
+						{
+							if (playerName.empty())
+							{
 								senderEntity->removeStateFx();
 								senderEntity->setStateFx(finalString.toString());
 								nlinfo("empty");
-							} else {
+							}
+							else
+							{
 								CEntityCL *destEntity = EntitiesMngr.getEntityByName (CEntityCL::removeTitleAndShardFromName(playerName), false, true);
-								if (destEntity) {
+								if (destEntity)
+								{
 									destEntity->removeStateFx();
 									destEntity->setStateFx(finalString.toString());
 									nlinfo("no empty");
@@ -1560,7 +1568,7 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 		}
 
 	}
-	catch (EStream &)
+	catch (const EStream &)
 	{
 		tpReason = ucstring("TP Reason");
 		tpCancelText = ucstring("Cancel TP"); // for test
@@ -2228,7 +2236,7 @@ void impulseCounter(NLMISC::CBitMemStream &impulse)
 			}
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("Problem while decoding a COUTNER msg, skipped: %s", e.what());
 	}
@@ -2813,7 +2821,7 @@ void updateInventoryFromStream (NLMISC::CBitMemStream &impulse, const CInventory
 
 		CInventoryManager::getInstance()->sortBag();
 	}
-	catch ( Exception &e )
+	catch (const Exception &e)
 	{
 		nlwarning ("Problem while decoding a DB_UPD_INV msg, skipped: %s", e.what());
 	}

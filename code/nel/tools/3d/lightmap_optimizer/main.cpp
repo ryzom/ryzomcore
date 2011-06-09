@@ -365,7 +365,7 @@ int main(int nNbArg, char **ppArgs)
 			CMeshBase *pMB = dynamic_cast<CMeshBase*>(mesh.getShapePointer());
 			AllShapes.push_back (pMB);
 		}
-		catch (NLMISC::EPathNotFound &e)
+		catch (const NLMISC::EPathNotFound &e)
 		{
 			outString(string("ERROR: shape not found ")+AllShapeNames[nShp]+" - "+e.what());
 			return -1;
@@ -529,7 +529,7 @@ int main(int nNbArg, char **ppArgs)
 				inFile.open(sTmp2);
 				CBitmap::loadSize(inFile, wRef, hRef);
 			}
-			catch (NLMISC::Exception &e)
+			catch (const NLMISC::Exception &e)
 			{
 				outString (string("ERROR :") + e.what());
 				return -1;
@@ -546,7 +546,7 @@ int main(int nNbArg, char **ppArgs)
 					inFile.open(sTmp3);
 					CBitmap::loadSize(inFile, wCur, hCur);
 				}
-				catch (NLMISC::Exception &)
+				catch (const NLMISC::Exception &)
 				{
 				}
 
@@ -595,7 +595,7 @@ int main(int nNbArg, char **ppArgs)
 				pBtmp->load(inFile);
 				AllLightmaps[i] = pBtmp;
 			}
-			catch (NLMISC::Exception &e)
+			catch (const NLMISC::Exception &e)
 			{
 				outString (string("ERROR :") + e.what());
 				return -1;
@@ -671,7 +671,7 @@ int main(int nNbArg, char **ppArgs)
 							BitmapJ.load (inFile);
 							inFile.close ();
 						}
-						catch (NLMISC::Exception &e)
+						catch (const NLMISC::Exception &e)
 						{
 							outString (string("ERROR :") + e.what());
 							return -1;
@@ -883,7 +883,7 @@ int main(int nNbArg, char **ppArgs)
 									meshfile.close ();
 								}
 							}
-							catch (NLMISC::EPathNotFound &e)
+							catch (const NLMISC::EPathNotFound &e)
 							{
 								outString(string("ERROR: cannot save shape ")+AllShapeNames[k]+" - "+e.what());
 								return -1;

@@ -349,17 +349,17 @@ void CLoginServer::init (const string &listenAddress)
 	try {
 		cfcbDefaultUserPriv(IService::getInstance()->ConfigFile.getVar("DefaultUserPriv"));
 		IService::getInstance()->ConfigFile.setCallback("DefaultUserPriv", cfcbDefaultUserPriv);
-	} catch(Exception &) { }
+	} catch(const Exception &) { }
 
 	try {
 		cfcbAcceptInvalidCookie (IService::getInstance()->ConfigFile.getVar("AcceptInvalidCookie"));
 		IService::getInstance()->ConfigFile.setCallback("AcceptInvalidCookie", cfcbAcceptInvalidCookie);
-	} catch(Exception &) { }
+	} catch(const Exception &) { }
 
 	try {
 		cfcbTimeBeforeEraseCookie (IService::getInstance()->ConfigFile.getVar("TimeBeforeEraseCookie"));
 		IService::getInstance()->ConfigFile.setCallback("TimeBeforeEraseCookie", cfcbTimeBeforeEraseCookie);
-	} catch(Exception &) { }
+	} catch(const Exception &) { }
 
 	// setup the listen address
 

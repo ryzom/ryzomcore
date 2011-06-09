@@ -142,11 +142,14 @@ namespace CEGUI
 
 		void captureCursor(bool capture) {
 			m_Captured=capture;
-			if(capture) {
+			if(capture)
+			{
 				m_Driver->setCapture(true);
 				m_Driver->showCursor(false);
 				m_InputDriver.activateMouse();
-			} else {
+			}
+			else
+			{
 				m_Driver->setCapture(false);
 				m_Driver->showCursor(true);
 				m_InputDriver.deactivateMouse();
@@ -178,7 +181,8 @@ namespace CEGUI
 		class NeLInputDriver : public NLMISC::IEventListener
 		{
 		public:
-			NeLInputDriver() {
+			NeLInputDriver()
+			{
 				m_MouseX=0.5f;
 				m_MouseY=0.5f;
 				m_Active=false;
@@ -189,7 +193,8 @@ namespace CEGUI
 			}
 			virtual ~NeLInputDriver() { ; }
 
-			void addToServer(NLMISC::CEventServer& server) {
+			void addToServer(NLMISC::CEventServer& server)
+			{
 				server.addListener(NLMISC::EventMouseMoveId, this);
 				server.addListener(NLMISC::EventMouseDownId, this);
 				server.addListener(NLMISC::EventMouseUpId, this);
@@ -200,7 +205,8 @@ namespace CEGUI
 				m_AsyncListener.addToServer(server);
 			}
 
-			void removeFromServer(NLMISC::CEventServer& server) {
+			void removeFromServer(NLMISC::CEventServer& server)
+			{
 				server.removeListener(NLMISC::EventMouseMoveId, this);
 				server.removeListener(NLMISC::EventMouseDownId, this);
 				server.removeListener(NLMISC::EventMouseUpId, this);
@@ -226,9 +232,11 @@ namespace CEGUI
 			 *
 			 * \param event An event, probably a CEventMouse or CEventKey/Char.
 			 */
-			virtual void operator ()(const NLMISC::CEvent& event) {
+			virtual void operator ()(const NLMISC::CEvent& event)
+			{
 				// don't process any input if we're inactive.
-				if(m_Active==false) {
+				if(m_Active==false)
+				{
 					return; // not processing ANY input
 				}
 
@@ -236,36 +244,51 @@ namespace CEGUI
 				{
 					// otherwise, on with the festivities.
 					 // catch ALL mouse event, just in case.
-					if(event==NLMISC::EventMouseDownId||event==NLMISC::EventMouseUpId||event==NLMISC::EventMouseMoveId||event==NLMISC::EventMouseDblClkId||event==NLMISC::EventMouseWheelId) {
-						if(!m_MouseActive) {
+					if(event==NLMISC::EventMouseDownId||event==NLMISC::EventMouseUpId||event==NLMISC::EventMouseMoveId||event==NLMISC::EventMouseDblClkId||event==NLMISC::EventMouseWheelId)
+					{
+						if(!m_MouseActive)
+						{
 							// we're not processing any mouse activity. The cursor isn't captured maybe?
 							return;
 						}
 
 						NLMISC::CEventMouse *mouseEvent=(NLMISC::CEventMouse *)&event;
 						// a mouse button was pressed.
-						if(event == NLMISC::EventMouseDownId) {
+						if(event == NLMISC::EventMouseDownId)
+						{
 							// it was the left button...
-							if (mouseEvent->Button & NLMISC::leftButton) {
+							if (mouseEvent->Button & NLMISC::leftButton)
+							{
 								CEGUI::System::getSingleton().injectMouseButtonDown(CEGUI::LeftButton);
 							// it was the right button...
-							} else if (mouseEvent->Button & NLMISC::rightButton) {
+							}
+							else if (mouseEvent->Button & NLMISC::rightButton)
+							{
 								CEGUI::System::getSingleton().injectMouseButtonDown(CEGUI::RightButton);
-							} else if (mouseEvent->Button & NLMISC::middleButton) {
+							}
+							else if (mouseEvent->Button & NLMISC::middleButton)
+							{
 								CEGUI::System::getSingleton().injectMouseButtonDown(CEGUI::MiddleButton);
 							}
 						// a mouse button was released
-						} else if (event == NLMISC::EventMouseUpId) {
+						}
+						else if (event == NLMISC::EventMouseUpId)
+						{
 							// it was the left button...
-							if(mouseEvent->Button & NLMISC::leftButton) {
+							if(mouseEvent->Button & NLMISC::leftButton)
+							{
 								CEGUI::System::getSingleton().injectMouseButtonUp(CEGUI::LeftButton);
 							// it was the right button...
-							} else if (mouseEvent->Button & NLMISC::rightButton) {
+							}
+							else if (mouseEvent->Button & NLMISC::rightButton)
+							{
 								CEGUI::System::getSingleton().injectMouseButtonUp(CEGUI::RightButton);
 							} else if (mouseEvent->Button & NLMISC::middleButton) {
 								CEGUI::System::getSingleton().injectMouseButtonUp(CEGUI::MiddleButton);
 							}
-						} else if (event == NLMISC::EventMouseMoveId) {
+						}
+						else if (event == NLMISC::EventMouseMoveId)
+						{
 							// convert into screen coordinates.
 							float delta_x=(float)(mouseEvent->X - m_MouseX)*m_Width;
 							float delta_y=(float)((1.0f-mouseEvent->Y) - m_MouseY)*m_Height;
@@ -276,18 +299,26 @@ namespace CEGUI
 							// and save for delta.
 							m_MouseX=mouseEvent->X;
 							m_MouseY=1.0f-mouseEvent->Y;
-						} else if (event == NLMISC::EventMouseWheelId) {
+						}
+						else if (event == NLMISC::EventMouseWheelId)
+						{
 							NLMISC::CEventMouseWheel *ev=(NLMISC::CEventMouseWheel *)&event;
 							float dir=0.0f;
 							if(ev->Direction) dir=0.5f;
 							else dir=-0.5f;
 							CEGUI::System::getSingleton().injectMouseWheelChange(dir);
 						}
-					} else { // assume otherwise that it's a character.
-						if(event==NLMISC::EventCharId) {
+					}
+					else
+					{
+						// assume otherwise that it's a character.
+						if(event==NLMISC::EventCharId)
+						{
 							unsigned char c = (char)((NLMISC::CEventChar&)event).Char;
 							CEGUI::System::getSingleton().injectChar((CEGUI::utf32)c);
-						} else if(event==NLMISC::EventKeyDownId) {
+						}
+						else if(event==NLMISC::EventKeyDownId)
+						{
 							NLMISC::CEventKeyDown *keyvent=(NLMISC::CEventKeyDown *)&event;
 							CEGUI::System::getSingleton().injectKeyDown(m_KeyMap[keyvent->Key]);
 						}
@@ -296,7 +327,8 @@ namespace CEGUI
 				catch (CEGUI::Exception) { }
 			}
 
-			void initKeyMap() {
+			void initKeyMap()
+			{
 				m_KeyMap[NLMISC::Key0              ]=CEGUI::Key::Zero;
 				m_KeyMap[NLMISC::Key1              ]=CEGUI::Key::One;
 				m_KeyMap[NLMISC::Key2              ]=CEGUI::Key::Two;

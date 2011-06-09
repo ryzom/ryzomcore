@@ -1359,7 +1359,7 @@ CObject* CComLuaModule::loadFromBuffer(const std::string& data, const std::strin
 			}
 		}
 	}
-	catch(ELuaError &e)
+	catch(const ELuaError &e)
 	{
 		nlwarning("%s", e.what());
 	}

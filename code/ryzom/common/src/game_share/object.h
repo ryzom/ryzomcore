@@ -206,9 +206,8 @@ protected:
 	uint32 _Validation;
 };
 
-/*inline std::ostream& operator<<( std::ostream& os,
-	const CObject& c ) {
-
+/*inline std::ostream& operator<<( std::ostream& os, const CObject& c )
+{
 	c.serialize(os);
 	return os;
 }*/

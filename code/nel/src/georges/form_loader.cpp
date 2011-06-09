@@ -105,7 +105,7 @@ CType *CFormLoader::loadType (const char *filename)
 				type = NULL;
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			// Output error
 			warning (false, "loadType", "Error while loading the form (%s): %s", filename, e.what());
@@ -179,7 +179,7 @@ CFormDfn *CFormLoader::loadFormDfn (const char *filename, bool forceLoad)
 				_MapFormDfn.erase (lowerStr);
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			// Output error
 			warning (false, "loadFormDfn", "Error while loading the form (%s): %s", filename, e.what());
@@ -276,7 +276,7 @@ UForm *CFormLoader::loadForm (const char *filename)
 				_MapForm.erase (lowerStr);
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			// Output error
 			warning (false, "loadForm", "Error while loading the form (%s): %s", filename, e.what());

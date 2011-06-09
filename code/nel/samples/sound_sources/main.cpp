@@ -85,7 +85,7 @@ void Init()
 		AudioMixer->getListener()->setOrientation( frontvec, upvec );
 
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlerror( "Error: %s", e.what() );
 	}

@@ -816,7 +816,7 @@ CVegetableShape				*CVegetableManager::getVegetableShape(const std::string &shap
 				ret = NULL;
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			// Warning
 			nlwarning ("CVegetableManager::getVegetableShape error while loading shape file '%s' : '%s'", shape.c_str (), e.what ());
