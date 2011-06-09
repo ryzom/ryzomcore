@@ -12,7 +12,7 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 SET(OVQT_PLUG_MISSION_COMPILER_HDR 	mission_compiler_plugin.h
 							mission_compiler_main_window.h)
 
-SET(OVQT_PLUG_MISSION_COMPILER_UIS	mission_compiler_main_window.ui)
+SET(OVQT_PLUG_MISSION_COMPILER_UIS	mission_compiler_main_window.ui server_entry_dialog.ui mission_compiler_settings_page.ui)
 
 SET(OVQT_PLUG_MISSION_COMPILER_RCS mission_compiler.qrc)
 
