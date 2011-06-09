@@ -760,6 +760,7 @@ class Model extends Overloadable {
  * @access public
  */
 	function setSource($tableName) {
+//		debug_print_backtrace();
 		$this->setDataSource($this->useDbConfig);
 		$db =& ConnectionManager::getDataSource($this->useDbConfig);
 		$db->cacheSources = ($this->cacheSources && $db->cacheSources);
@@ -2090,7 +2091,6 @@ class Model extends Overloadable {
 				$query = $this->{'_find' . ucfirst($type)}('before', $query);
 			}
 		}
-
 		if (!is_numeric($query['page']) || intval($query['page']) < 1) {
 			$query['page'] = 1;
 		}
@@ -2123,7 +2123,6 @@ class Model extends Overloadable {
 		if (!$db =& ConnectionManager::getDataSource($this->useDbConfig)) {
 			return false;
 		}
-
 		$results = $db->read($this, $query);
 		$this->resetAssociations();
 
@@ -2132,7 +2131,6 @@ class Model extends Overloadable {
 		}
 
 		$this->findQueryType = null;
-
 		if ($type === 'all') {
 			return $results;
 		} else {

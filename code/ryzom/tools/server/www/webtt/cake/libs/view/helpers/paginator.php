@@ -536,6 +536,7 @@ class PaginatorHelper extends AppHelper {
 		$options);
 
 		$paging = $this->params($options['model']);
+//		var_dump($paging['count']);
 		if ($paging['pageCount'] == 0) {
 			$paging['pageCount'] = 1;
 		}
@@ -544,6 +545,7 @@ class PaginatorHelper extends AppHelper {
 			$start = (($paging['page'] - 1) * $paging['options']['limit']) + 1;
 		}
 		$end = $start + $paging['options']['limit'] - 1;
+
 		if ($paging['count'] < $end) {
 			$end = $paging['count'];
 		}

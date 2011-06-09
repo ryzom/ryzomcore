@@ -105,6 +105,7 @@ if (empty($associations['hasMany'])) {
 if (empty($associations['hasAndBelongsToMany'])) {
 	$associations['hasAndBelongsToMany'] = array();
 }
+
 $relations = array_merge($associations['hasMany'], $associations['hasAndBelongsToMany']);
 $i = 0;
 foreach ($relations as $_alias => $_details):

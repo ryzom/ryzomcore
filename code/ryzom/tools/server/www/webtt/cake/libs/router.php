@@ -465,7 +465,6 @@ class Router {
 			$url = substr($url, 0, strpos($url, '?'));
 		}
 		extract($self->__parseExtension($url));
-
 		for ($i = 0, $len = count($self->routes); $i < $len; $i++) {
 			$route =& $self->routes[$i];
 			if (($r = $route->parse($url)) !== false) {

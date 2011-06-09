@@ -265,7 +265,7 @@ class Dispatcher extends Object {
 		extract($namedExpressions);
 		include CONFIGS . 'routes.php';
 		$params = array_merge(array('controller' => '', 'action' => ''), Router::parse($fromUrl), $params);
-
+		
 		if (empty($params['action'])) {
 			$params['action'] = 'index';
 		}
@@ -507,6 +507,7 @@ class Dispatcher extends Object {
 			}
 		} else {
 			$url = $_GET['url'];
+
 		}
 		if ($url{0} == '/') {
 			$url = substr($url, 1);

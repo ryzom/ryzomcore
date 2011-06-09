@@ -1202,6 +1202,7 @@ class Controller extends Object {
 				$parameters['recursive'] = $recursive;
 			}
 			$count = $object->find('count', array_merge($parameters, $extra));
+//			var_dump(array_merge($parameters, $extra));
 		}
 		$pageCount = intval(ceil($count / $limit));
 
