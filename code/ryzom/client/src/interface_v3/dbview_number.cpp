@@ -79,6 +79,10 @@ bool CDBViewNumber::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	if (ptr) _Positive = convertBool(ptr);
 	else _Positive = false;
 
+	ptr = xmlGetProp (cur, (xmlChar*)"format");
+	if (ptr) _Format = convertBool(ptr);
+	else _Format = false;
+
 	ptr = xmlGetProp (cur, (xmlChar*)"divisor");
 	if (ptr) fromString((const char*)ptr, _Divisor);
 
@@ -99,6 +103,30 @@ bool CDBViewNumber::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 }
 
 // ***************************************************************************
+// Helper function
+ucstring formatThousands(const ucstring& s, const ucstring& separator)
+{
+	int j;
+	int k;
+	int topI = s.length() - 1;
+
+	if (topI < 4) return s;
+
+	ucstring ns;
+    do
+    {
+        for (j = topI, k = 0; j >= 0 && k < 3; --j, ++k )
+        {
+            ns = s[j] + ns; // new char is added to front of ns
+            if( j > 0 && k == 2) ns = separator + ns; // j > 0 means still more digits
+        }
+        topI -= 3;
+       
+    } while(topI >= 0);
+	return ns;
+}
+
+// ***************************************************************************
 void CDBViewNumber::checkCoords()
 {
 	// change text
@@ -106,8 +134,10 @@ void CDBViewNumber::checkCoords()
 	if (_Cache != val)
 	{
 		_Cache= val;
-		if (_Positive) setText(val >= 0 ? ((string)_Prefix)+toString(val)+(string)_Suffix : "?");
-		else setText( ((string)_Prefix)+toString(val)+(string)_Suffix );
+		static ucstring separator = NLMISC::CI18N::get("uiThousandsSeparator");
+		ucstring value = _Format ? formatThousands(toString(val), separator) : toString(val);
+		if (_Positive) setText(val >= 0 ? ( ucstring(_Prefix) + value + ucstring(_Suffix) ) : ucstring("?"));
+		else setText( ucstring(_Prefix) + value + ucstring(_Suffix) );
 	}
 }
 
