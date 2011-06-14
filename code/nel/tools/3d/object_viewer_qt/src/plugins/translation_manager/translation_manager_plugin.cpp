@@ -57,10 +57,10 @@ void TranslationManagerPlugin::extensionsInitialized()
 	helpMenu->addSeparator();
 	helpMenu->insertAction(aboutQtAction, aboutTManPlugin);
 	QMenu *transMenu = menuManager->menuBar()->addMenu("Translation Manager");       
-        /* Words extraction*/     
-        QAction *botnamesAct = new QAction("Extract bot_names", this);
-        connect(botnamesAct, SIGNAL(triggered()), this, SLOT(extractBotNames()));
-        transMenu->addAction(botnamesAct);
+    // Words extraction     
+    QAction *botnamesAct = new QAction("Extract bot_names", this);
+    connect(botnamesAct, SIGNAL(triggered()), this, SLOT(extractBotNames()));
+    transMenu->addAction(botnamesAct);
 }
 
 void TranslationManagerPlugin::extractBotNames() 

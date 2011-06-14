@@ -36,6 +36,7 @@ vector<string>	Filters;
 static CLigoConfig		LigoConfig;
 static bool	RemoveOlds = false;
 
+
 struct TCreatureInfo
 {
 	CSheetId	SheetId;

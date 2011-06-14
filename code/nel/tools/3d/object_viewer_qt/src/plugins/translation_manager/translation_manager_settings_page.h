@@ -43,8 +43,9 @@ public:
 	virtual QString trName() const;
 	virtual QString category() const;
 	virtual QString trCategory() const;
+	virtual QIcon categoryIcon() const;
 	virtual QWidget *createPage(QWidget *parent);
-
+	
 	virtual void apply();
 	virtual void finish() {}
 private Q_SLOTS:
