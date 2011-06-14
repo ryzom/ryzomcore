@@ -26,15 +26,17 @@
 #include <nel/misc/debug.h>
 
 // Qt includes
-
+#include <QApplication>
 
 namespace LandscapeEditor
 {
 
 LandscapeView::LandscapeView(QWidget *parent)
-	: QGraphicsView(parent)
+	: QGraphicsView(parent),
+	  m_moveMouse(false)
 {
-    setDragMode(ScrollHandDrag);
+	setDragMode(ScrollHandDrag);
+	setTransformationAnchor(AnchorUnderMouse);
 }
 
 LandscapeView::~LandscapeView()
@@ -43,10 +45,33 @@ LandscapeView::~LandscapeView()
 
 void LandscapeView::wheelEvent(QWheelEvent *event)
 {
-    double numDegrees = event->delta() / 8.0;
-    double numSteps = numDegrees / 15.0;
-    double factor = std::pow(1.125, numSteps);
-    scale(factor, factor);
+	double numDegrees = event->delta() / 8.0;
+	double numSteps = numDegrees / 15.0;
+	double factor = std::pow(1.125, numSteps);
+	scale(factor, factor);
+}
+
+void LandscapeView::mousePressEvent(QMouseEvent *event)
+{
+	QGraphicsView::mousePressEvent(event);
+	if (event->button() != Qt::MiddleButton)
+		return;
+	m_moveMouse = true;
+	QApplication::setOverrideCursor(Qt::ClosedHandCursor);
+}
+
+void LandscapeView::mouseMoveEvent(QMouseEvent *event)
+{
+	if (m_moveMouse)
+		translate(0.001, 0.001);
+	QGraphicsView::mouseMoveEvent(event);
+}
+
+void LandscapeView::mouseReleaseEvent(QMouseEvent *event)
+{
+	QApplication::restoreOverrideCursor();
+	m_moveMouse = false;
+	QGraphicsView::mouseReleaseEvent(event);
 }
 
 } /* namespace LandscapeEditor */

@@ -36,6 +36,35 @@
 namespace LandscapeEditor
 {
 
+// Data
+struct LigoData
+{
+	uint32			PosX;
+	uint32			PosY;
+	qreal			Scale;
+	uint8			Rot;
+	uint8			Flip;
+	std::string		ZoneName;
+	std::string		SharingMatNames[4];
+	uint8			SharingCutEdges[4];
+	bool operator!= (const LigoData& other) const
+	{
+		return (PosX != other.PosX) ||
+			   (PosY != other.PosY) ||
+			   (Rot != other.Rot) ||
+			   (Flip != other.Flip) ||
+			   (ZoneName != other.ZoneName) ||
+			   (SharingMatNames[0] != other.SharingMatNames[0]) ||
+			   (SharingMatNames[1] != other.SharingMatNames[1]) ||
+			   (SharingMatNames[2] != other.SharingMatNames[2]) ||
+			   (SharingMatNames[3] != other.SharingMatNames[3]) ||
+			   (SharingCutEdges[0] != other.SharingCutEdges[0]) ||
+			   (SharingCutEdges[1] != other.SharingCutEdges[1]) ||
+			   (SharingCutEdges[2] != other.SharingCutEdges[2]) ||
+			   (SharingCutEdges[3] != other.SharingCutEdges[3]);
+	}
+};
+
 /**
 @class PixmapDatabase
 @brief PixmapDatabase contains the image database

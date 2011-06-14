@@ -19,13 +19,35 @@
 #define LANDSCAPE_ACTIONS_H
 
 // Project includes
+#include "builder_zone.h"
 
 // NeL includes
 
 // Qt includes
+#include <QtGui/QUndoCommand>
+#include <QtGui/QGraphicsScene>
+#include <QtGui/QGraphicsPixmapItem>
 
 namespace LandscapeEditor
 {
+class ZoneBuilder;
+
+class ActionLigoTile : public QUndoCommand
+{
+public:
+	ActionLigoTile(const LigoData &data, ZoneBuilder *zoneBuilder, QGraphicsScene *scene, QUndoCommand *parent = 0);
+	~ActionLigoTile();
+
+	virtual void undo();
+	virtual void redo();
+
+private:
+
+	LigoData m_ligoData;
+	QGraphicsPixmapItem *m_item;
+	ZoneBuilder *m_zoneBuilder;
+	QGraphicsScene *m_scene;
+};
 
 } /* namespace LandscapeEditor */
 

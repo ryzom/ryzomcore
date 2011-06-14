@@ -33,7 +33,6 @@
 #include <QtCore/QSettings>
 #include <QtGui/QFileDialog>
 #include <QtOpenGL/QGLWidget>
-#include <QtGui/QGraphicsPixmapItem>
 
 namespace LandscapeEditor
 {
@@ -50,10 +49,9 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	m_ui.zoneListWidget->setZoneBuilder(m_zoneBuilder);
 	m_ui.zoneListWidget->updateUi();
 
-	m_landscapeScene = new LandscapeScene(this);
+	m_landscapeScene = new LandscapeScene(m_undoStack, m_ui.zoneListWidget, m_zoneBuilder, this);
 	m_ui.graphicsView->setScene(m_landscapeScene);
-	m_ui.graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::SampleBuffers)));
-
+	//m_ui.graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::SampleBuffers)));
 
 	createMenus();
 	createToolBars();

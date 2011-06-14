@@ -17,22 +17,68 @@
 
 // Project includes
 #include "landscape_scene.h"
+#include "builder_zone.h"
+#include "landscape_actions.h"
+#include "list_zones_widget.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
 
 // Qt includes
+#include <QtGui/QPainter>
+#include <QtGui/QGraphicsPixmapItem>
 
 namespace LandscapeEditor
 {
 
-LandscapeScene::LandscapeScene(QObject *parent)
-	: QGraphicsScene(parent)
+LandscapeScene::LandscapeScene(QUndoStack *undoStack, ListZonesWidget *listZonesWidget, ZoneBuilder *zoneBuilder, QObject *parent)
+	: QGraphicsScene(parent),
+	  m_undoStack(undoStack),
+	  m_listZonesWidget(listZonesWidget),
+	  m_zoneBuilder(zoneBuilder)
 {
+	m_cellSize = 160;
+	createBackgroundPixmap();
 }
 
 LandscapeScene::~LandscapeScene()
 {
+}
+
+void LandscapeScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
+{
+	if (mouseEvent->button() != Qt::LeftButton)
+		return;
+
+	qreal x = mouseEvent->scenePos().rx();
+	qreal y = mouseEvent->scenePos().ry();
+	if ((x < 0) || (y < 0))
+		return;
+
+	LigoData ligoData = m_listZonesWidget->currentLigoData();
+	if (ligoData.ZoneName == "")
+		return;
+
+	ligoData.PosX = m_cellSize * int(x / m_cellSize);;
+	ligoData.PosY = m_cellSize * int(y / m_cellSize);
+	ligoData.Scale = m_cellSize / 256.0;
+
+	ActionLigoTile *action = new ActionLigoTile(ligoData, m_zoneBuilder, this);
+	m_undoStack->push(action);
+
+	QGraphicsScene::mousePressEvent(mouseEvent);
+}
+
+void LandscapeScene::createBackgroundPixmap()
+{
+	QPixmap pixmap(QSize(m_cellSize, m_cellSize));
+	QPainter painter(&pixmap);
+	//painter.setRenderHint(QPainter::Antialiasing, true);
+	painter.setBrush(QBrush(Qt::lightGray));
+	painter.setPen(QPen(Qt::black, 3, Qt::DotLine));
+	painter.drawRect(0, 0, pixmap.width(), pixmap.height());
+
+	setBackgroundBrush(pixmap);
 }
 
 } /* namespace LandscapeEditor */

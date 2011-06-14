@@ -23,18 +23,33 @@
 // NeL includes
 
 // Qt includes
-#include <QGraphicsScene>
+#include <QtGui/QGraphicsScene>
+#include <QtGui/QGraphicsSceneMouseEvent>
+#include <QtGui/QUndoStack>
 
 namespace LandscapeEditor
 {
+class ZoneBuilder;
+class ListZonesWidget;
 
 class LandscapeScene : public QGraphicsScene
 {
 	Q_OBJECT
 
 public:
-	LandscapeScene(QObject *parent = 0);
+	LandscapeScene(QUndoStack *undoStack, ListZonesWidget *listZonesWidget, ZoneBuilder *zoneBuilder, QObject *parent = 0);
 	virtual ~LandscapeScene();
+
+protected:
+	void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
+
+private:
+	void createBackgroundPixmap();
+
+	int m_cellSize;
+	ListZonesWidget *m_listZonesWidget;
+	QUndoStack *m_undoStack;
+	ZoneBuilder *m_zoneBuilder;
 };
 
 } /* namespace LandscapeEditor */

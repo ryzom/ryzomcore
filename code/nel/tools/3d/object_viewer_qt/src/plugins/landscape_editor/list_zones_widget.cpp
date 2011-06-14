@@ -17,7 +17,6 @@
 
 // Project includes
 #include "list_zones_widget.h"
-#include "builder_zone.h"
 #include "list_zones_model.h"
 
 // NeL includes
@@ -31,6 +30,7 @@
 
 // Qt includes
 #include <QtGui/QIcon>
+#include <QtCore/QModelIndex>
 
 namespace LandscapeEditor
 {
@@ -98,6 +98,16 @@ void ListZonesWidget::updateUi()
 	disableSignals(false);
 
 	m_listZonesModel->rebuildModel(m_zoneBuilder->pixmapDatabase());
+}
+
+LigoData ListZonesWidget::currentLigoData() const
+{
+	LigoData ligoData;
+	ligoData.ZoneName = "";
+	QModelIndex index = m_ui.listView->currentIndex();
+	if (index.isValid())
+		ligoData.ZoneName = index.data().toString().toStdString();
+	return ligoData;
 }
 
 void ListZonesWidget::setZoneBuilder(ZoneBuilder *zoneBuilder)

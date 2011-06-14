@@ -17,6 +17,7 @@
 
 // Project includes
 #include "landscape_actions.h"
+#include "builder_zone.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -25,4 +26,34 @@
 
 namespace LandscapeEditor
 {
+
+ActionLigoTile::ActionLigoTile(const LigoData &data, ZoneBuilder *zoneBuilder, QGraphicsScene *scene, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	  m_item(0),
+	  m_zoneBuilder(zoneBuilder),
+	  m_scene(scene)
+{
+	m_ligoData = data;
+}
+
+ActionLigoTile::~ActionLigoTile()
+{
+}
+
+void ActionLigoTile::undo()
+{
+	m_scene->removeItem(m_item);
+	delete m_item;
+	m_item = 0;
+}
+
+void ActionLigoTile::redo()
+{
+	QPixmap *pixmap = m_zoneBuilder->pixmapDatabase()->pixmap(QString(m_ligoData.ZoneName.c_str()));
+	m_item = new QGraphicsPixmapItem(*pixmap, 0, m_scene);
+	m_item->setPos(m_ligoData.PosX, m_ligoData.PosY);
+	m_item->setScale(m_ligoData.Scale);
+	setText(QObject::tr("Add tile(%1, %2)").arg(m_ligoData.PosX).arg(m_ligoData.PosY));
+}
+
 } /* namespace LandscapeEditor */
