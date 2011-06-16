@@ -27,7 +27,42 @@
 namespace LandscapeEditor
 {
 
-ActionLigoTile::ActionLigoTile(const LigoData &data, ZoneBuilder *zoneBuilder, QGraphicsScene *scene, QUndoCommand *parent)
+OpenLandscapeCommand::OpenLandscapeCommand(const QString &fileName, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	  m_fileName(fileName)
+{
+}
+
+OpenLandscapeCommand::~OpenLandscapeCommand()
+{
+}
+
+void OpenLandscapeCommand::undo()
+{
+}
+
+void OpenLandscapeCommand::redo()
+{
+}
+
+NewLandscapeCommand::NewLandscapeCommand(QUndoCommand *parent)
+	: QUndoCommand(parent)
+{
+}
+
+NewLandscapeCommand::~NewLandscapeCommand()
+{
+}
+
+void NewLandscapeCommand::undo()
+{
+}
+
+void NewLandscapeCommand::redo()
+{
+}
+
+LigoTileCommand::LigoTileCommand(const LigoData &data, ZoneBuilder *zoneBuilder, QGraphicsScene *scene, QUndoCommand *parent)
 	: QUndoCommand(parent),
 	  m_item(0),
 	  m_zoneBuilder(zoneBuilder),
@@ -36,23 +71,24 @@ ActionLigoTile::ActionLigoTile(const LigoData &data, ZoneBuilder *zoneBuilder, Q
 	m_ligoData = data;
 }
 
-ActionLigoTile::~ActionLigoTile()
+LigoTileCommand::~LigoTileCommand()
 {
 }
 
-void ActionLigoTile::undo()
+void LigoTileCommand::undo()
 {
 	m_scene->removeItem(m_item);
 	delete m_item;
 	m_item = 0;
 }
 
-void ActionLigoTile::redo()
+void LigoTileCommand::redo()
 {
 	QPixmap *pixmap = m_zoneBuilder->pixmapDatabase()->pixmap(QString(m_ligoData.ZoneName.c_str()));
 	m_item = new QGraphicsPixmapItem(*pixmap, 0, m_scene);
 	m_item->setPos(m_ligoData.PosX, m_ligoData.PosY);
 	m_item->setScale(m_ligoData.Scale);
+	m_item->setTransformationMode(Qt::SmoothTransformation);
 	setText(QObject::tr("Add tile(%1, %2)").arg(m_ligoData.PosX).arg(m_ligoData.PosY));
 }
 

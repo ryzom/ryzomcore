@@ -73,6 +73,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="projectSettingsAction"/>
+   <addaction name="enableGridAction"/>
   </widget>
   <action name="projectSettingsAction">
    <property name="icon">
@@ -81,6 +82,23 @@
    </property>
    <property name="text">
     <string>Project settings</string>
+   </property>
+  </action>
+  <action name="enableGridAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>EnableGrid</string>
+   </property>
+   <property name="toolTip">
+    <string>Show/Hide Grid</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
    </property>
   </action>
  </widget>

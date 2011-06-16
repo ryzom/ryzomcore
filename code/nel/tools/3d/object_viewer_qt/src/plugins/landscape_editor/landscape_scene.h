@@ -41,10 +41,9 @@ public:
 	virtual ~LandscapeScene();
 
 protected:
-	void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
+	virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
 
 private:
-	void createBackgroundPixmap();
 
 	int m_cellSize;
 	ListZonesWidget *m_listZonesWidget;

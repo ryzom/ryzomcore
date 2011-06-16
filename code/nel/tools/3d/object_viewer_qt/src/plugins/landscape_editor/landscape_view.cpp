@@ -33,14 +33,34 @@ namespace LandscapeEditor
 
 LandscapeView::LandscapeView(QWidget *parent)
 	: QGraphicsView(parent),
+	  m_visibleGrid(true),
 	  m_moveMouse(false)
 {
 	setDragMode(ScrollHandDrag);
 	setTransformationAnchor(AnchorUnderMouse);
+	setBackgroundBrush(QBrush(Qt::lightGray));
+	//setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+	//setRenderHints(QPainter::Antialiasing);
+	m_cellSize = 160;
+	m_numSteps = 0;
+	m_maxSteps = 20;
 }
 
 LandscapeView::~LandscapeView()
 {
+}
+
+bool LandscapeView::isVisibleGrid() const
+{
+	return m_visibleGrid;
+}
+
+void LandscapeView::setVisibleGrid(bool visible)
+{
+	m_visibleGrid = visible;
+
+	// hack for repaint view
+	translate(0.0001, 0.0001);
 }
 
 void LandscapeView::wheelEvent(QWheelEvent *event)
@@ -48,6 +68,20 @@ void LandscapeView::wheelEvent(QWheelEvent *event)
 	double numDegrees = event->delta() / 8.0;
 	double numSteps = numDegrees / 15.0;
 	double factor = std::pow(1.125, numSteps);
+	if (factor > 1.0)
+	{
+		// check max scale view
+		if (m_numSteps > m_maxSteps)
+			return;
+		++m_numSteps;
+	}
+	else
+	{
+		// check min scale view
+		if (m_numSteps < -m_maxSteps)
+			return;
+		--m_numSteps;
+	}
 	scale(factor, factor);
 }
 
@@ -72,6 +106,33 @@ void LandscapeView::mouseReleaseEvent(QMouseEvent *event)
 	QApplication::restoreOverrideCursor();
 	m_moveMouse = false;
 	QGraphicsView::mouseReleaseEvent(event);
+}
+
+void LandscapeView::drawForeground(QPainter *painter, const QRectF &rect)
+{
+	if (!m_visibleGrid)
+		return;
+
+	qreal scaleFactor = transform().m11();
+	painter->setPen(QPen(Qt::white, 1 / scaleFactor, Qt::SolidLine));
+
+	// draw grid
+	qreal left = m_cellSize * int(rect.left() / m_cellSize);
+	qreal top = m_cellSize * int(rect.top() / m_cellSize);
+
+	// draw vertical lines
+	while (left < rect.right())
+	{
+		painter->drawLine(int(left), int(rect.bottom()), int(left), int(rect.top()));
+		left += m_cellSize;
+	}
+
+	// draw horizontal lines
+	while (top < rect.bottom())
+	{
+		painter->drawLine(int(rect.left()), int(top), int(rect.right()), int(top));
+		top += m_cellSize;
+	}
 }
 
 } /* namespace LandscapeEditor */

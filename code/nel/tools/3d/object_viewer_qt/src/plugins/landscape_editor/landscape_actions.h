@@ -32,11 +32,33 @@ namespace LandscapeEditor
 {
 class ZoneBuilder;
 
-class ActionLigoTile : public QUndoCommand
+class OpenLandscapeCommand: public QUndoCommand
 {
 public:
-	ActionLigoTile(const LigoData &data, ZoneBuilder *zoneBuilder, QGraphicsScene *scene, QUndoCommand *parent = 0);
-	~ActionLigoTile();
+	OpenLandscapeCommand(const QString &fileName, QUndoCommand *parent = 0);
+	~OpenLandscapeCommand();
+	virtual void undo();
+	virtual void redo();
+private:
+
+	QString m_fileName;
+};
+
+class NewLandscapeCommand: public QUndoCommand
+{
+public:
+	NewLandscapeCommand(QUndoCommand *parent = 0);
+	~NewLandscapeCommand();
+	virtual void undo();
+	virtual void redo();
+private:
+};
+
+class LigoTileCommand: public QUndoCommand
+{
+public:
+	LigoTileCommand(const LigoData &data, ZoneBuilder *zoneBuilder, QGraphicsScene *scene, QUndoCommand *parent = 0);
+	~LigoTileCommand();
 
 	virtual void undo();
 	virtual void redo();

@@ -38,7 +38,6 @@ LandscapeScene::LandscapeScene(QUndoStack *undoStack, ListZonesWidget *listZones
 	  m_zoneBuilder(zoneBuilder)
 {
 	m_cellSize = 160;
-	createBackgroundPixmap();
 }
 
 LandscapeScene::~LandscapeScene()
@@ -63,22 +62,10 @@ void LandscapeScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 	ligoData.PosY = m_cellSize * int(y / m_cellSize);
 	ligoData.Scale = m_cellSize / 256.0;
 
-	ActionLigoTile *action = new ActionLigoTile(ligoData, m_zoneBuilder, this);
+	LigoTileCommand *action = new LigoTileCommand(ligoData, m_zoneBuilder, this);
 	m_undoStack->push(action);
 
 	QGraphicsScene::mousePressEvent(mouseEvent);
-}
-
-void LandscapeScene::createBackgroundPixmap()
-{
-	QPixmap pixmap(QSize(m_cellSize, m_cellSize));
-	QPainter painter(&pixmap);
-	//painter.setRenderHint(QPainter::Antialiasing, true);
-	painter.setBrush(QBrush(Qt::lightGray));
-	painter.setPen(QPen(Qt::black, 3, Qt::DotLine));
-	painter.drawRect(0, 0, pixmap.width(), pixmap.height());
-
-	setBackgroundBrush(pixmap);
 }
 
 } /* namespace LandscapeEditor */

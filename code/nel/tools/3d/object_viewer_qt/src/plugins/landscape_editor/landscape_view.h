@@ -19,6 +19,7 @@
 #define LANDSCAPE_VIEW_H
 
 // Project includes
+#include "landscape_editor_global.h"
 
 // Qt includes
 #include <QtGui/QGraphicsView>
@@ -27,24 +28,32 @@
 namespace LandscapeEditor
 {
 
-class LandscapeView: public QGraphicsView
+class LANDSCAPE_EDITOR_EXPORT LandscapeView: public QGraphicsView
 {
 	Q_OBJECT
 
 public:
 	LandscapeView(QWidget *parent = 0);
-	~LandscapeView();
+	virtual ~LandscapeView();
 
+	bool isVisibleGrid() const;
+
+public Q_SLOTS:
+	void setVisibleGrid(bool visible);
+
+private Q_SLOTS:
 protected:
 	virtual void wheelEvent(QWheelEvent *event);
 	virtual void mousePressEvent(QMouseEvent *event);
 	virtual void mouseMoveEvent(QMouseEvent *event);
 	virtual void mouseReleaseEvent(QMouseEvent *event);
-
-private Q_SLOTS:
+	virtual void drawForeground(QPainter *painter, const QRectF &rect);
 
 private:
 
+	bool m_visibleGrid;
+	int m_numSteps, m_maxSteps;
+	int m_cellSize;
 	bool m_moveMouse;
 }; /* class LandscapeView */
 

@@ -51,13 +51,14 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 
 	m_landscapeScene = new LandscapeScene(m_undoStack, m_ui.zoneListWidget, m_zoneBuilder, this);
 	m_ui.graphicsView->setScene(m_landscapeScene);
-	//m_ui.graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::SampleBuffers)));
+	m_ui.graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::SampleBuffers)));
 
 	createMenus();
 	createToolBars();
 	readSettings();
 
 	connect(m_ui.projectSettingsAction, SIGNAL(triggered()), this, SLOT(openProjectSettings()));
+	connect(m_ui.enableGridAction, SIGNAL(toggled(bool)), m_ui.graphicsView, SLOT(setVisibleGrid(bool)));
 }
 
 LandscapeEditorWindow::~LandscapeEditorWindow()
