@@ -4,7 +4,7 @@
 // Project includes
 #include "../../extension_system/iplugin.h"
 #include "../core/icontext.h"
-#include "simple_viewer.h"
+#include "translation_manager_main_window.h"
 
 // NeL includes
 #include "nel/misc/app_context.h"
@@ -28,12 +28,13 @@ class IPluginSpec;
 namespace Plugin
 {
 
+    class CTranslationManagerContext;
+    
 class TranslationManagerPlugin : public QObject, public ExtensionSystem::IPlugin
 {
 	Q_OBJECT
 	Q_INTERFACES(ExtensionSystem::IPlugin)
 public:
-
 	virtual ~TranslationManagerPlugin();
 
 	bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
@@ -58,11 +59,6 @@ protected:
 private:
 	ExtensionSystem::IPluginManager *_plugMan;
 	QList<QObject *> _autoReleaseObjects;
-        list<string> ConvertQStringList(QStringList list);
-        
-
-private Q_SLOTS:
-        void extractBotNames();
 };
 
 class CTranslationManagerContext: public Core::IContext
@@ -71,7 +67,7 @@ class CTranslationManagerContext: public Core::IContext
 public:
 	CTranslationManagerContext(QObject *parent = 0): IContext(parent)
 	{
-		m_simpleViewer = new CSimpleViewer();
+		m_MainWindow = new CMainWindow();
 	}
 
 	virtual ~CTranslationManagerContext() {}
@@ -90,18 +86,18 @@ public:
 	}
 	virtual QWidget *widget()
 	{
-		return m_simpleViewer;
+		return m_MainWindow;
 	}
 	virtual QUndoStack *undoStack()
 	{
-		return m_simpleViewer->m_undoStack;
+		return m_MainWindow->m_undoStack;
 	}
 	virtual void open()
 	{
 
 	}
 
-	CSimpleViewer *m_simpleViewer;
+	CMainWindow *m_MainWindow;
         
 };
 

@@ -10,11 +10,11 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 						${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
 SET(OVQT_PLUG_TRANSLATION_MANAGER_HDR 	translation_manager_plugin.h
-							qnel_widget.h
-							simple_viewer.h
+							translation_manager_main_window.h
 							translation_manager_settings_page.h)
 
-SET(OVQT_PLUG_TRANSLATION_MANAGER_UIS	translation_manager_settings_page.ui)
+SET(OVQT_PLUG_TRANSLATION_MANAGER_UIS	translation_manager_settings_page.ui
+                                                        translation_manager_main_window.ui)
 
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)

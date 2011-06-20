@@ -1,7 +1,7 @@
 // Project includes
 #include "translation_manager_plugin.h"
 #include "translation_manager_settings_page.h"
-#include "simple_viewer.h"
+#include "translation_manager_main_window.h"
 // Project system includes
 #include "../core/icore.h"
 #include "../core/core_constants.h"
@@ -14,12 +14,11 @@
 // Qt includes
 #include <QtCore/QObject>
 #include <QtGui/QMessageBox>
+#include <QtGui/QErrorMessage>
 #include <QtGui/QMainWindow>
 #include <QtGui/QMenu>
 #include <QtGui/QAction>
 #include <QtGui/QMenuBar>
-
-int extractBotNamesAll(map<string,list<string> > config_paths, string ligo_class_file, string trans_path, string work_path);
 
 namespace Plugin
 {
@@ -41,6 +40,7 @@ bool TranslationManagerPlugin::initialize(ExtensionSystem::IPluginManager *plugi
 	addAutoReleasedObject(new CTranslationManagerSettingsPage(this));
 	addAutoReleasedObject(new CTranslationManagerContext(this));
 	addAutoReleasedObject(new CCoreListener(this));
+        
 	return true;
 }
 
@@ -56,39 +56,6 @@ void TranslationManagerPlugin::extensionsInitialized()
 	QAction *aboutQtAction = menuManager->action(Core::Constants::ABOUT_QT);
 	helpMenu->addSeparator();
 	helpMenu->insertAction(aboutQtAction, aboutTManPlugin);
-	QMenu *transMenu = menuManager->menuBar()->addMenu("Translation Manager");       
-    // Words extraction     
-    QAction *botnamesAct = new QAction("Extract bot_names", this);
-    connect(botnamesAct, SIGNAL(triggered()), this, SLOT(extractBotNames()));
-    transMenu->addAction(botnamesAct);
-}
-
-void TranslationManagerPlugin::extractBotNames() 
-{
-        // prepare the config paths
-        list<string> paths,pathsR, georges, filters, languages;
-        string ligo, translation, work;
-        map<string, list<string> > config_paths;
-        
-	QSettings *settings = Core::ICore::instance()->settings();
-	settings->beginGroup("translationmanager");
-        
-	paths = ConvertQStringList(settings->value("paths").toStringList()); /* paths */
-        config_paths["paths"] = paths;
-        pathsR = ConvertQStringList(settings->value("pathsR").toStringList()); /* pathsR */
-        config_paths["pathsR"] = pathsR;
-        georges = ConvertQStringList(settings->value("georges").toStringList()); /* georges */
-        config_paths["georges"] = georges;
-        filters = ConvertQStringList(settings->value("filters").toStringList()); /* filters */
-        config_paths["filters"] = filters;
-        languages = ConvertQStringList(settings->value("languages").toStringList()); /* languages */
-        ligo = settings->value("ligo").toString().toStdString();
-        translation = settings->value("translation").toString().toStdString();
-        work = settings->value("work").toString().toStdString();
-	settings->endGroup();
-        
-        extractBotNamesAll(config_paths, ligo, translation, work);
-
 }
 
 void TranslationManagerPlugin::setNelContext(NLMISC::INelContext *nelContext)
@@ -99,17 +66,6 @@ void TranslationManagerPlugin::setNelContext(NLMISC::INelContext *nelContext)
 	nlassert(!NLMISC::INelContext::isContextInitialised());
 #endif // NL_OS_WINDOWS
 	_LibContext = new NLMISC::CLibraryContext(*nelContext);
-}
-
-list<string> TranslationManagerPlugin::ConvertQStringList(QStringList listq)
-{       
-        std::list<std::string> stdlist;
-    	Q_FOREACH(QString text, listq)
-	{
-            stdlist.push_back(text.toStdString());
-        }
-        
-        return stdlist;
 }
 
 QString TranslationManagerPlugin::name() const

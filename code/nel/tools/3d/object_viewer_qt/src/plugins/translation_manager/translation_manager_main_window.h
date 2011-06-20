@@ -16,29 +16,53 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef SIMPLE_VIEWER_H
-#define SIMPLE_VIEWER_H
+#ifndef MAIN_WINDOW_H
+#define MAIN_WINDOW_H
 
 // Project includes
-#include "qnel_widget.h"
 #include "../core/icore_listener.h"
 
 // Qt includes
 #include <QtCore/QObject>
 #include <QtGui/QUndoStack>
+#include <QtGui/QMainWindow>
+#include <QtGui/QGridLayout>
+#include <QtGui/QTabWidget>
+#include <QtGui/QMenu>
+
+#include "ui_translation_manager_main_window.h"
+#include <set>
+
 class QWidget;
+
+using namespace std;
 
 namespace Plugin
 {
 
-class CSimpleViewer : public QWidget
+class CMainWindow : public QMainWindow
 {
 	Q_OBJECT
 public:
-	CSimpleViewer(QWidget *parent = 0);
-	virtual ~CSimpleViewer() {}
-
-	QUndoStack *m_undoStack;
+        CMainWindow(QWidget *parent = 0);
+        virtual ~CMainWindow() {}
+        QUndoStack *m_undoStack;
+private:
+        Ui::CMainWindow _ui;
+        QMenu *_toolMenu;
+        map<string, list<string> > config_paths;
+        list<string> languages;
+        string ligo_path;
+        string translation_path;
+        string work_path;
+private Q_SLOTS:
+        void extractBotNames();
+private:
+        void compareBotNames();
+        bool verifySettings();
+        void readSettings();
+        list<string> convertQStringList(QStringList listq);
+        
 };
 
 class CCoreListener : public Core::ICoreListener

@@ -145,6 +145,15 @@ set<string>					GenericNames;
 map<string, TEntryInfo>		SimpleNames;
 set<string>					Functions;
 
+set<string> getGenericNames()
+{
+    return GenericNames;
+}
+
+map<string, TEntryInfo> getSimpleNames()
+{
+    return SimpleNames;
+}
 
 string	removeAndStoreFunction(const std::string &fullName)
 {
@@ -221,40 +230,6 @@ void addSimpleName(const std::string &name, const std::string &sheetName)
 
 int extractBotNamesAll(map<string,list<string> > config_paths, string ligo_class_file, string trans_path, string work_path)
 {
-	//-------------------------------------------------------------------
-	// read the parameters
-	/*for (int i=2; i<argc; ++i)
-	{
-		string s = argv[i];
-		if (s == "-r")
-		{
-			// active remove mode
-			RemoveOlds = true;
-		}
-		else
-		{
-			nlwarning("Unknow option '%s'", argv[i]);
-			return -1;
-		}
-	} */
-
-	//-------------------------------------------------------------------
-	// read the configuration file
-	//CConfigFile	cf;
-
-	//cf.load("bin/translation_tools.cfg");
-
-	//-------------------------------------------------------------------
-	// read the vars
-	//CConfigFile::CVar &paths = cf.getVar("Paths");
-	//CConfigFile::CVar &filtersVar = cf.getVar("Filters");
-	//CConfigFile::CVar &ligoClassFile= cf.getVar("LigoClassFile");
-	//CConfigFile::CVar &georgesPaths= cf.getVar("GeorgesPaths");
-	//CConfigFile::CVar &pathNoRecurse= cf.getVar("PathsNoRecurse");
-	//CConfigFile::CVar &workBotNamesFile= cf.getVar("WorkBotNamesFile");
-	//CConfigFile::CVar &transBotNamesFile= cf.getVar("TransBotNamesFile");
-	//CConfigFile::CVar &workTitleFile= cf.getVar("WorkTitleFile");
-
 	for (std::list<string>::iterator it = config_paths["paths"].begin(); it != config_paths["paths"].end(); ++it)
 	{
 		CPath::addSearchPath(*it, true, false);
@@ -268,7 +243,6 @@ int extractBotNamesAll(map<string,list<string> > config_paths, string ligo_class
 	{
 		Filters.push_back(*it);
 	}
-
 
 	//-------------------------------------------------------------------
 	// init the sheets
@@ -451,26 +425,62 @@ int extractBotNamesAll(map<string,list<string> > config_paths, string ligo_class
 				}
 				else
 				{
-					TEntryInfo ei;
 					addSimpleName(removeAndStoreFunction(name), sheetStr);
 				}
 			}
 		}
-	}
-
+	}        
+      
 	//-------------------------------------------------------------------
 	// step 2 : load the reference file
 
 	nlinfo("Looking for missing translation:");
+        
+                  string work_path_file = work_path + "/bot_names.txt";
+                  string trans_path_file = trans_path + "/bot_names.txt";
+                  string title_path_file =  work_path + "/title_words_wk.txt";
+                  
+                  TWorksheet    botNames;
+                  if (!CFile::fileExists(work_path_file) || !loadExcelSheet(work_path_file, botNames))
+	{
+                        botNames.resize(botNames.size() + 1);
+                        botNames.insertColumn(botNames.ColCount);
+                        botNames.setData(0,botNames.ColCount - 1,ucstring("bot name"));       
+                        botNames.insertColumn(botNames.ColCount);
+                        botNames.setData(0,botNames.ColCount - 1,ucstring("translated name"));  
+                        botNames.insertColumn(botNames.ColCount);
+                        botNames.setData(0,botNames.ColCount - 1,ucstring("sheet_name"));                      
+                  }
 
-	TWorksheet			botNames;
-	loadExcelSheet(work_path, botNames, true);
-	TWorksheet			transBotNames;
-	loadExcelSheet(trans_path, transBotNames, true);
+                  TWorksheet    transBotNames;
+                  if (!CFile::fileExists(trans_path_file) || !loadExcelSheet(trans_path_file, transBotNames))
+	{
+                        transBotNames.resize(transBotNames.size() + 1);
+                        transBotNames.insertColumn(transBotNames.ColCount);
+                        transBotNames.setData(0,transBotNames.ColCount - 1,ucstring("*HASH_VALUE"));   
+                        transBotNames.insertColumn(transBotNames.ColCount);
+                        transBotNames.setData(0,transBotNames.ColCount - 1,ucstring("bot name"));       
+                        transBotNames.insertColumn(transBotNames.ColCount);
+                        transBotNames.setData(0,transBotNames.ColCount - 1,ucstring("translated name"));  
+                        transBotNames.insertColumn(transBotNames.ColCount);
+                        transBotNames.setData(0,transBotNames.ColCount - 1,ucstring("sheet_name"));                    
+                  }
 
-	TWorksheet			fcts;
-	loadExcelSheet(work_path, fcts, true);
+                  TWorksheet    fcts;
+                  if (!CFile::fileExists(title_path_file) || !loadExcelSheet(title_path_file, fcts))
+	{
+                        fcts.resize(fcts.size() + 1);
+                        fcts.insertColumn(fcts.ColCount);
+                        fcts.setData(0,fcts.ColCount - 1,ucstring("title_id"));       
+                        fcts.insertColumn(fcts.ColCount);
+                        fcts.setData(0,fcts.ColCount - 1,ucstring("name"));  
+                        fcts.insertColumn(fcts.ColCount);
+                        fcts.setData(0,fcts.ColCount - 1,ucstring("women_name"));                    
+                  }
 
+	loadExcelSheet(work_path_file, botNames, true);
+	loadExcelSheet(trans_path_file, transBotNames, true);
+	loadExcelSheet(title_path_file, fcts, true);
 
 	// add missing element
 
@@ -482,9 +492,9 @@ int extractBotNamesAll(map<string,list<string> > config_paths, string ligo_class
 	nlverify(botNames.findId(botIdCol));
 	uint transIdCol;
 	nlverify(transBotNames.findId(transIdCol));
-	uint	fctsIdCol;
+	uint fctsIdCol;
 	nlverify(fcts.findId(fctsIdCol));
-
+        
 	// special treatment to add the sheet_name col
 	{
 		uint sheetCol;
@@ -743,14 +753,13 @@ int extractBotNamesAll(map<string,list<string> > config_paths, string ligo_class
 	nlinfo("Adding %u new generic name", nbAddGenericName);
 	nlinfo("Adding %u new function name", nbAddFunction);
 
-	// saving the modified files
-
+	// saving the modified files                  
 	ucstring s = prepareExcelSheet(botNames);
-	CI18N::writeTextFile(work_path, s, false);
+	CI18N::writeTextFile(work_path_file, s, false);
 	s = prepareExcelSheet(transBotNames);
-	CI18N::writeTextFile(trans_path, s, false);
+	CI18N::writeTextFile(trans_path_file, s, false);
 	s = prepareExcelSheet(fcts);
-	CI18N::writeTextFile(work_path, s, false);
+	CI18N::writeTextFile(title_path_file, s, false);
 
 	return 0;
 }

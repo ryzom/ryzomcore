@@ -68,7 +68,7 @@ QWidget *CTranslationManagerSettingsPage::createPage(QWidget *parent)
 {
 	_currentPage = new QWidget(parent);
 	_ui.setupUi(_currentPage);
-        readSettings();
+                  readSettings();
 	connect(_ui.paths_add, SIGNAL(clicked()), this, SLOT(pathAdd()));
 	connect(_ui.paths_del, SIGNAL(clicked()), this, SLOT(pathDel()));
 	connect(_ui.pathsR_add, SIGNAL(clicked()), this, SLOT(pathRAdd()));
@@ -79,8 +79,8 @@ QWidget *CTranslationManagerSettingsPage::createPage(QWidget *parent)
 	connect(_ui.filter_del, SIGNAL(clicked()), this, SLOT(filterDel()));
 	connect(_ui.lang_add, SIGNAL(clicked()), this, SLOT(languageAdd()));
 	connect(_ui.lang_del, SIGNAL(clicked()), this, SLOT(languageDel()));
-        connect(_ui.translation_add, SIGNAL(clicked()), this, SLOT(translationAdd()));
-        connect(_ui.work_add, SIGNAL(clicked()), this, SLOT(workAdd()));
+                  connect(_ui.translation_add, SIGNAL(clicked()), this, SLOT(translationAdd()));
+                  connect(_ui.work_add, SIGNAL(clicked()), this, SLOT(workAdd()));
         
 	return _currentPage;
 }
@@ -218,13 +218,13 @@ void CTranslationManagerSettingsPage::readSettings()
         pathsR = settings->value("pathsR").toStringList(); /* pathsR */
         georges = settings->value("georges").toStringList(); /* georges */
         filters = settings->value("filters").toStringList(); /* filters */
-        languages = settings->value("languages").toStringList(); /* languages */
+        languages = settings->value("trlanguages").toStringList(); /* languages */
         ligo = settings->value("ligo").toString();
         translation = settings->value("translation").toString();
         work = settings->value("work").toString();
         
 	settings->endGroup();
-        /* paths */
+        // paths 
 	Q_FOREACH(QString path, paths)
 	{
 		QListWidgetItem *newItem = new QListWidgetItem;
@@ -232,7 +232,7 @@ void CTranslationManagerSettingsPage::readSettings()
 		newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 		_ui.paths_list->addItem(newItem);
 	}
-        /* pathsR */
+        // pathsR
 	Q_FOREACH(QString pathR, pathsR)
 	{
 		QListWidgetItem *newItem = new QListWidgetItem;
@@ -240,7 +240,7 @@ void CTranslationManagerSettingsPage::readSettings()
 		newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 		_ui.pathsR_list->addItem(newItem);
 	}
-        /* georges */
+        // georges
 	Q_FOREACH(QString george, georges)
 	{
 		QListWidgetItem *newItem = new QListWidgetItem;
@@ -248,7 +248,7 @@ void CTranslationManagerSettingsPage::readSettings()
 		newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 		_ui.georges_list->addItem(newItem);
 	}
-        /* filter */
+        // filter
 	Q_FOREACH(QString filter, filters)
 	{
 		QListWidgetItem *newItem = new QListWidgetItem;
@@ -256,7 +256,7 @@ void CTranslationManagerSettingsPage::readSettings()
 		newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 		_ui.filter_list->addItem(newItem);
 	}  
-        /* languages */
+        // languages
 	Q_FOREACH(QString lang, languages)
 	{
 		QListWidgetItem *newItem = new QListWidgetItem;
@@ -264,11 +264,11 @@ void CTranslationManagerSettingsPage::readSettings()
 		newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 		_ui.lang_list->addItem(newItem);
 	}  
-        /* ligo */
+        // ligo
         _ui.ligo_edit->setText(ligo);
-        /* translation */
+        // translation 
         _ui.translation_edit->setText(translation);
-        /* work */
+        // work 
         _ui.work_edit->setText(work);
         
 }
@@ -277,25 +277,26 @@ void CTranslationManagerSettingsPage::writeSettings()
 {
 	QStringList paths, pathsR, georges, filters, languages;
         QString ligo, translation, work;
-        /* paths */
+        // paths 
 	for (int i = 0; i < _ui.paths_list->count(); ++i)
 		paths << _ui.paths_list->item(i)->text();
-        /* pathsR */
+        // pathsR
 	for (int i = 0; i < _ui.pathsR_list->count(); ++i)
 		pathsR << _ui.pathsR_list->item(i)->text();
-        /* georges */
+        // georges
 	for (int i = 0; i < _ui.georges_list->count(); ++i)
 		georges << _ui.georges_list->item(i)->text();
-        /* filters */
+        // filters 
 	for (int i = 0; i < _ui.filter_list->count(); ++i)
 		filters << _ui.filter_list->item(i)->text();
-        /* languages */
+        // languages
 	for (int i = 0; i < _ui.lang_list->count(); ++i)
 		languages << _ui.lang_list->item(i)->text();        
-        /* ligo path */
+        // ligo path
         ligo = _ui.ligo_edit->text();
-        /* translations path*/
+        // translations path
         translation = _ui.translation_edit->text();
+        // work path
         work = _ui.work_edit->text();
         
 	QSettings *settings = Core::ICore::instance()->settings();
@@ -304,11 +305,12 @@ void CTranslationManagerSettingsPage::writeSettings()
         settings->setValue("pathsR", pathsR);
         settings->setValue("georges", georges);
         settings->setValue("filters", filters);
-        settings->setValue("languages", languages);
+        settings->setValue("trlanguages", languages);
         settings->setValue("ligo", ligo);
         settings->setValue("translation", translation);
         settings->setValue("work", work);
 	settings->endGroup();
+        settings->sync();
 }
 
 
