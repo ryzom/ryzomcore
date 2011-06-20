@@ -44,6 +44,7 @@
 #include "egs_utils.h"
 #include "egs_pd.h"
 #include "guild_manager/guild_member_module.h"
+#include "guild_manager/guild_manager.h"
 #include "building_manager/building_manager.h"
 #include "building_manager/room_instance.h"
 #include "zone_manager.h"
@@ -853,7 +854,7 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 		CGuild * guild = CGuildManager::getInstance()->getGuildFromId( user->getGuildId() );
 		if (!guild)
 		{
-			nlwarning( "<MISSIONS>cant find guild ID : %d", _GuildId );
+			nlwarning( "<MISSIONS>cant find guild ID : %d", user->getGuildId() );
 			return;
 		}
 		if ( !templ->Tags.NoList && guild->getMissions().size() >= MaxGuildMissionCount)

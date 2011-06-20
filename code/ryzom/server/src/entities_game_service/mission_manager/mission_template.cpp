@@ -1307,21 +1307,57 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 	else if ( Type == MISSION_DESC::Guild )
 	{
 		/// todo guild mission
-		/*
-		CGuild * guild = user->getGuild();
+		
+		CGuild * guild = CGuildManager::getInstance()->getGuildFromId( user->getGuildId() );
 		if ( guild == NULL )
 		{
 			MISDBG("No guild");
 			return MISSION_DESC::PreReqFail;
+
+			/*if (logOnFail)
+				MISDBG("%s No guild", sDebugPrefix.c_str());
+
+			if (!fillPrereqInfos)
+				return MISSION_DESC::PreReqFail;
+
+			prereqDesc.Description = STRING_MANAGER::sendStringToClient(user->getEntityRowId(), "MISSION_PREREQ_TEAM", TVectorParamCheck());
+			prereqDesc.IsMandatory = true;
+			prereqDesc.Validated = false;
+			prereqInfos.Prerequisits.push_back(prereqDesc);
+
+			addedPrereqTexts.insert("MISSION_PREREQ_TEAM");
+
+			returnValue = MISSION_DESC::PreReqFail;
+			logOnFail = false;*/
 		}
 		// check if the mission is already picked
 		for ( uint j  = 0 ; j < guild->getMissions().size(); j++ )
 		{
-			if  ( guild->getMissions()[j]->getTemplate()->Alias == alias )
+			if  ( guild->getMissions()[j]->getTemplateId() == alias ||
+					guild->getMissions()[j]->getMainMissionTemplateId() == alias)
 			{
 				MISDBG("The guild already own this mission");
 				return MISSION_DESC::PreReqFail;
+
+				/*if (logOnFail)
+					MISDBG("%s The guild already own this mission", sDebugPrefix.c_str());
+
+				if (!fillPrereqInfos)
+					return MISSION_DESC::PreReqFail;
+
+				if (addedPrereqTexts.find("MISSION_PREREQ_ALREADY_DONE") == addedPrereqTexts.end())
+				{
+					prereqDesc.Description = STRING_MANAGER::sendStringToClient(user->getEntityRowId(), "MISSION_PREREQ_ALREADY_DONE", TVectorParamCheck());
+					prereqDesc.IsMandatory = true;
+					prereqDesc.Validated = false;
+					prereqInfos.Prerequisits.push_back(prereqDesc);
+					addedPrereqTexts.insert("MISSION_PREREQ_ALREADY_DONE");
+				}
+
+				returnValue = MISSION_DESC::PreReqFail;
+				logOnFail = false;*/
 			}
+
 		}
 		// check non replayable missions
 		if( !Tags.Replayable )
@@ -1329,11 +1365,29 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			if (guild->isMissionSuccessfull(alias))
 				//		if ( std::find(guild->getSuccessfulMissions().begin(),guild->getSuccessfulMissions().end(), alias) != guild->getSuccessfulMissions().end() )
 			{
-				MISDBG("solo non replayable");
+				MISDBG("mission non replayable");
 				return MISSION_DESC::PreReqFail;
+
+				/*if (logOnFail)
+					MISDBG("%s Guild mission already done and not replayable", sDebugPrefix.c_str());
+
+				if (!fillPrereqInfos)
+					return MISSION_DESC::PreReqFailAlreadyDone;
+
+				if (addedPrereqTexts.find("MISSION_PREREQ_ALREADY_DONE") == addedPrereqTexts.end())
+				{
+					prereqDesc.Description = STRING_MANAGER::sendStringToClient(user->getEntityRowId(), "MISSION_PREREQ_ALREADY_DONE", TVectorParamCheck());
+					prereqDesc.IsMandatory = true;
+					prereqDesc.Validated = false;
+					prereqInfos.Prerequisits.push_back(prereqDesc);
+					addedPrereqTexts.insert("MISSION_PREREQ_ALREADY_DONE");
+				}
+
+				returnValue = MISSION_DESC::PreReqFailAlreadyDone;
+				logOnFail = false;*/
 			}
 		}
-		*/
+		
 	}
 	else
 	{
@@ -1412,7 +1466,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				if ( templ->Type == MISSION_DESC::Guild )
 				{
 					/// todo guild mission
-					/*
+					CGuild* guild = CGuildManager::getInstance()->getGuildFromId( user->getGuildId() );
 					if  ( ! guild )
 					{
 						MISDBG("Require needed mission at line %u (guild mission but player has no guild)", Prerequisits.NeededMissions[i].Line);
@@ -1420,7 +1474,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 					}
 					if (guild->isMissionSuccessfull(templ->Alias))
 						break;
-						*/
+						
 				}
 				else if ( templ->Type == MISSION_DESC::Solo )
 				{
@@ -1473,15 +1527,14 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				else if ( templ->Type == MISSION_DESC::Guild )
 				{
 					/// todo guild mission
-					/*
+					CGuild* guild = CGuildManager::getInstance()->getGuildFromId( user->getGuildId() );
 					if  ( !guild )
 						break;
 					if (!guild->isMissionSuccessfull(templ->Alias))
-
-					if (!guild || !guild->isMissionSuccessfull(templ->Alias))
-
 						break;
-						*/
+					/*if (!guild || !guild->isMissionSuccessfull(templ->Alias))
+						break;*/
+						
 				}
 				else if ( templ->Type == MISSION_DESC::Solo )
 				{
@@ -1537,8 +1590,8 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 
 				/// todo guild mission
-				/*
-
+				
+				CGuild* guild = CGuildManager::getInstance()->getGuildFromId( user->getGuildId() );
 				if ( !guild )
 				{
 					MISDBG("Require running mission at line %u (guild mission but player has no guild)", Prerequisits.RunningMissions[i].Line );
@@ -1548,12 +1601,12 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 
 				for ( ; k < guild->getMissions().size(); k++ )
 				{
-					if  ( guild->getMissions()[k]->getTemplate()->Alias == templ->Alias )
+					if  ( guild->getMissions()[k]->getTemplateId() == templ->Alias )
 						break;
 				}
 				if (k != guild->getMissions().size())
 					break;
-					*/
+
 			}
 			else if ( templ->Type == MISSION_DESC::Solo )
 			{
@@ -1651,20 +1704,20 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 
 				/// todo guild mission
-				/*
-
+				
+				CGuild* guild = CGuildManager::getInstance()->getGuildFromId( user->getGuildId() );
 				if(!guild)
 					break;
 				uint k=0;
 
 				for ( ; k < guild->getMissions().size(); k++ )
 				{
-					if  ( guild->getMissions()[k]->getTemplate()->Alias == templ->Alias )
+					if  ( guild->getMissions()[k]->getTemplateId() == templ->Alias )
 						break;
 				}
 				if (k == guild->getMissions().size())
 					break;
-					*/
+
 			}
 			else if ( templ->Type == MISSION_DESC::Solo )
 			{
@@ -2040,6 +2093,15 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 					{
 						if (!fillPrereqInfos)
 							return MISSION_DESC::PreReqFail;
+
+						/*if (addedPrereqTexts.find("GUILD_BUILDING_BAD_GRADE") == addedPrereqTexts.end())
+						{
+							prereqDesc.Description = STRING_MANAGER::sendStringToClient(user->getEntityRowId(), "GUILD_BUILDING_BAD_GRADE", TVectorParamCheck());
+							prereqDesc.IsMandatory = true;
+							prereqDesc.Validated = false;
+							prereqInfos.Prerequisits.push_back(prereqDesc);
+							addedPrereqTexts.insert("GUILD_BUILDING_BAD_GRADE");
+						}*/
 
 						returnValue = MISSION_DESC::PreReqFail;
 						logOnFail = false;

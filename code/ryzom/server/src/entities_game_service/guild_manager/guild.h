@@ -182,9 +182,11 @@ public:
 	///\return the mission
 	inline std::vector<CMissionGuild*> & getMissions()
 	{
+		return std::vector<CMissionGuild*>();
 		// To Do
 	}
 	void addMission(CMissionGuild* guildMission) {}
+	bool isMissionSuccessfull(TAIAlias alias) { return false; }
 	//@}
 
 	/// inventory management
