@@ -184,6 +184,7 @@ public:
 	{
 		// To Do
 	}
+	void addMission(CMissionGuild* guildMission) {}
 	//@}
 
 	/// inventory management
