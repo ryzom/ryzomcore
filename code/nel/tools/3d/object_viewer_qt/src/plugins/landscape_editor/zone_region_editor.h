@@ -15,54 +15,48 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef LANDSCAPE_EDITOR_WINDOW_H
-#define LANDSCAPE_EDITOR_WINDOW_H
+#ifndef LANDSCAPE_EDITOR_H
+#define LANDSCAPE_EDITOR_H
 
 // Project includes
-#include "ui_landscape_editor_window.h"
-#include "zone_region_editor.h"
+
+// NeL includes
+#include <nel/ligo/zone_bank.h>
+#include <nel/ligo/zone_region.h>
+
+// STL includes
+#include <string>
 
 // Qt includes
-#include <QtGui/QUndoStack>
 
 namespace LandscapeEditor
 {
 
-class LandscapeScene;
-class ZoneBuilder;
-
-class LandscapeEditorWindow: public QMainWindow
+class ZoneRegionEditor
 {
-	Q_OBJECT
-
 public:
-	LandscapeEditorWindow(QWidget *parent = 0);
-	~LandscapeEditorWindow();
+	ZoneRegionEditor();
+	~ZoneRegionEditor();
 
-	QUndoStack *undoStack() const;
+	// Load landscape data from file
+	bool load(const std::string &fileName);
 
-Q_SIGNALS:
-public Q_SLOTS:
-	void open();
+	// Save landscape data to file
+	bool save();
 
-private Q_SLOTS:
-	void openProjectSettings();
-	void openSnapshotDialog();
+	// Set file name
+	void setFileName(const std::string &fileName);
+
+	NLLIGO::CZoneRegion &zoneRegion();
 
 private:
-	void createMenus();
-	void createToolBars();
-	void readSettings();
-	void writeSettings();
 
-	ZoneRegionEditor m_zoneRegionEditor;
-
-	LandscapeScene *m_landscapeScene;
-	ZoneBuilder *m_zoneBuilder;
-	QUndoStack *m_undoStack;
-	Ui::LandscapeEditorWindow m_ui;
-}; /* class LandscapeEditorWindow */
+	bool m_modified;
+	bool m_editable;
+	std::string m_fileName;
+	NLLIGO::CZoneRegion m_zoneRegion;
+};
 
 } /* namespace LandscapeEditor */
 
-#endif // LANDSCAPE_EDITOR_WINDOW_H
+#endif // LANDSCAPE_EDITOR_H

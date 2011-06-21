@@ -215,7 +215,7 @@
        <number>3</number>
       </property>
       <item row="0" column="0">
-       <widget class="QComboBox" name="comboBox">
+       <widget class="QComboBox" name="rotComboBox">
         <item>
          <property name="text">
           <string>0°</string>
@@ -233,7 +233,7 @@
         </item>
         <item>
          <property name="text">
-          <string>170°</string>
+          <string>270°</string>
          </property>
         </item>
         <item>
@@ -249,7 +249,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QComboBox" name="comboBox_2">
+       <widget class="QComboBox" name="flipComboBox">
         <item>
          <property name="text">
           <string>NoFlip</string>
@@ -273,14 +273,14 @@
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QCheckBox" name="checkBox">
+       <widget class="QCheckBox" name="forceCheckBox">
         <property name="text">
          <string>Force</string>
         </property>
        </widget>
       </item>
       <item row="0" column="3">
-       <widget class="QCheckBox" name="checkBox_2">
+       <widget class="QCheckBox" name="propogateCheckBox">
         <property name="text">
          <string>Not propogate</string>
         </property>

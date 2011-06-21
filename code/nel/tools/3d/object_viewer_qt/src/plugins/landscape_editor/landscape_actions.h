@@ -20,23 +20,24 @@
 
 // Project includes
 #include "builder_zone.h"
+#include "landscape_scene.h"
 
 // NeL includes
 
 // Qt includes
 #include <QtGui/QUndoCommand>
 #include <QtGui/QGraphicsScene>
-#include <QtGui/QGraphicsPixmapItem>
+#include <QtGui/QGraphicsItem>
 
 namespace LandscapeEditor
 {
-class ZoneBuilder;
 
 class OpenLandscapeCommand: public QUndoCommand
 {
 public:
 	OpenLandscapeCommand(const QString &fileName, QUndoCommand *parent = 0);
-	~OpenLandscapeCommand();
+	virtual ~OpenLandscapeCommand();
+
 	virtual void undo();
 	virtual void redo();
 private:
@@ -48,17 +49,18 @@ class NewLandscapeCommand: public QUndoCommand
 {
 public:
 	NewLandscapeCommand(QUndoCommand *parent = 0);
-	~NewLandscapeCommand();
+	virtual ~NewLandscapeCommand();
+
 	virtual void undo();
 	virtual void redo();
 private:
 };
 
-class LigoTileCommand: public QUndoCommand
+class AddLigoTileCommand: public QUndoCommand
 {
 public:
-	LigoTileCommand(const LigoData &data, ZoneBuilder *zoneBuilder, QGraphicsScene *scene, QUndoCommand *parent = 0);
-	~LigoTileCommand();
+	AddLigoTileCommand(const LigoData &data, LandscapeScene *scene, QUndoCommand *parent = 0);
+	virtual ~AddLigoTileCommand();
 
 	virtual void undo();
 	virtual void redo();
@@ -66,9 +68,24 @@ public:
 private:
 
 	LigoData m_ligoData;
-	QGraphicsPixmapItem *m_item;
-	ZoneBuilder *m_zoneBuilder;
-	QGraphicsScene *m_scene;
+	QGraphicsItem *m_item;
+	LandscapeScene *m_scene;
+};
+
+class DelLigoTileCommand: public QUndoCommand
+{
+public:
+	DelLigoTileCommand(const LigoData &data, LandscapeScene *scene, QUndoCommand *parent = 0);
+	virtual ~DelLigoTileCommand();
+
+	virtual void undo();
+	virtual void redo();
+
+private:
+
+	LigoData m_ligoData;
+	QGraphicsItem *m_item;
+	LandscapeScene *m_scene;
 };
 
 } /* namespace LandscapeEditor */

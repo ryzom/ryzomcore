@@ -21,6 +21,7 @@
 #include "builder_zone.h"
 #include "landscape_scene.h"
 #include "project_settings_dialog.h"
+#include "snapshot_dialog.h"
 
 #include "../core/icore.h"
 #include "../core/imenu_manager.h"
@@ -51,6 +52,7 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 
 	m_landscapeScene = new LandscapeScene(m_undoStack, m_ui.zoneListWidget, m_zoneBuilder, this);
 	m_ui.graphicsView->setScene(m_landscapeScene);
+	//m_ui.graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::DoubleBuffer)));
 	m_ui.graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::SampleBuffers)));
 
 	createMenus();
@@ -58,6 +60,7 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	readSettings();
 
 	connect(m_ui.projectSettingsAction, SIGNAL(triggered()), this, SLOT(openProjectSettings()));
+	connect(m_ui.snapshotAction, SIGNAL(triggered()), this, SLOT(openSnapshotDialog()));
 	connect(m_ui.enableGridAction, SIGNAL(toggled(bool)), m_ui.graphicsView, SLOT(setVisibleGrid(bool)));
 }
 
@@ -83,6 +86,14 @@ void LandscapeEditorWindow::open()
 	{
 		QStringList list = fileNames;
 		_lastDir = QFileInfo(list.front()).absolutePath();
+		Q_FOREACH(QString fileName, fileNames)
+		{
+			m_zoneRegionEditor.load(fileName.toStdString());
+			m_landscapeScene->processZoneRegion(m_zoneRegionEditor.zoneRegion());
+			m_landscapeScene->setCurrentZoneRegion(&m_zoneRegionEditor.zoneRegion());
+			m_ui.graphicsView->centerOn(m_zoneRegionEditor.zoneRegion().getMinX() * m_landscapeScene->cellSize(),
+										abs(m_zoneRegionEditor.zoneRegion().getMinY()) * m_landscapeScene->cellSize());
+		}
 	}
 	setCursor(Qt::ArrowCursor);
 }
@@ -96,6 +107,24 @@ void LandscapeEditorWindow::openProjectSettings()
 	{
 		m_zoneBuilder->init(dialog->dataPath(), false);
 		m_ui.zoneListWidget->updateUi();
+	}
+	delete dialog;
+}
+
+void LandscapeEditorWindow::openSnapshotDialog()
+{
+	SnapshotDialog *dialog = new SnapshotDialog(this);
+	dialog->show();
+	int ok = dialog->exec();
+	if (ok == QDialog::Accepted)
+	{
+		QString fileName = QFileDialog::getSaveFileName(this,
+						   tr("Save screenshot landscape"), _lastDir,
+						   tr("Image file (*.png)"));
+
+		setCursor(Qt::WaitCursor);
+		m_landscapeScene->snapshot(fileName, 128);
+		setCursor(Qt::ArrowCursor);
 	}
 	delete dialog;
 }

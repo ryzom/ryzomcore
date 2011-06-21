@@ -72,6 +72,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="snapshotAction"/>
    <addaction name="projectSettingsAction"/>
    <addaction name="enableGridAction"/>
   </widget>
@@ -99,6 +100,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="snapshotAction">
+   <property name="text">
+    <string>snapshot</string>
    </property>
   </action>
  </widget>

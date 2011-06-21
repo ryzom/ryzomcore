@@ -17,11 +17,13 @@ SET(OVQT_PLUGIN_LANDSCAPE_EDITOR_HDR	landscape_editor_plugin.h
 					landscape_actions.h
 					landscape_view.h
 					project_settings_dialog.h
+					snapshot_dialog.h
 )
 
 SET(OVQT_PLUGIN_LANDSCAPE_EDITOR_UIS	landscape_editor_window.ui
 					list_zones_widget.ui
 					project_settings_dialog.ui
+					shapshot_dialog.ui
 )
 
 SET(OVQT_PLUGIN_LANDSCAPE_EDITOR_RCS landscape_editor.qrc)

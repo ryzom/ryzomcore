@@ -21,6 +21,7 @@
 // Project includes
 #include "ui_list_zones_widget.h"
 #include "builder_zone.h"
+#include "landscape_scene.h"
 
 // NeL includes
 

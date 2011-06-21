@@ -15,54 +15,33 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef LANDSCAPE_EDITOR_WINDOW_H
-#define LANDSCAPE_EDITOR_WINDOW_H
+#ifndef SNAPSHOT_DIALOG_H
+#define SNAPSHOT_DIALOG_H
 
 // Project includes
-#include "ui_landscape_editor_window.h"
-#include "zone_region_editor.h"
+#include "ui_shapshot_dialog.h"
 
 // Qt includes
-#include <QtGui/QUndoStack>
 
 namespace LandscapeEditor
 {
 
-class LandscapeScene;
-class ZoneBuilder;
-
-class LandscapeEditorWindow: public QMainWindow
+class SnapshotDialog: public QDialog
 {
 	Q_OBJECT
 
 public:
-	LandscapeEditorWindow(QWidget *parent = 0);
-	~LandscapeEditorWindow();
-
-	QUndoStack *undoStack() const;
-
-Q_SIGNALS:
-public Q_SLOTS:
-	void open();
+	SnapshotDialog(QWidget *parent = 0);
+	~SnapshotDialog();
 
 private Q_SLOTS:
-	void openProjectSettings();
-	void openSnapshotDialog();
+
 
 private:
-	void createMenus();
-	void createToolBars();
-	void readSettings();
-	void writeSettings();
 
-	ZoneRegionEditor m_zoneRegionEditor;
-
-	LandscapeScene *m_landscapeScene;
-	ZoneBuilder *m_zoneBuilder;
-	QUndoStack *m_undoStack;
-	Ui::LandscapeEditorWindow m_ui;
-}; /* class LandscapeEditorWindow */
+	Ui::SnapshotDialog m_ui;
+}; /* class SnapshotDialog */
 
 } /* namespace LandscapeEditor */
 
-#endif // LANDSCAPE_EDITOR_WINDOW_H
+#endif // SNAPSHOT_DIALOG_H

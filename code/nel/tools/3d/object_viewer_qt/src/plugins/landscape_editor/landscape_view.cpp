@@ -114,11 +114,11 @@ void LandscapeView::drawForeground(QPainter *painter, const QRectF &rect)
 		return;
 
 	qreal scaleFactor = transform().m11();
-	painter->setPen(QPen(Qt::white, 1 / scaleFactor, Qt::SolidLine));
+	painter->setPen(QPen(Qt::white, 0, Qt::SolidLine));
 
 	// draw grid
-	qreal left = m_cellSize * int(rect.left() / m_cellSize);
-	qreal top = m_cellSize * int(rect.top() / m_cellSize);
+	qreal left = m_cellSize * floor(rect.left() / m_cellSize);
+	qreal top = m_cellSize * floor(rect.top() / m_cellSize);
 
 	// draw vertical lines
 	while (left < rect.right())

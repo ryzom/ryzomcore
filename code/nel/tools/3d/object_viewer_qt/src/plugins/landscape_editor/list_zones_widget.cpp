@@ -107,6 +107,9 @@ LigoData ListZonesWidget::currentLigoData() const
 	QModelIndex index = m_ui.listView->currentIndex();
 	if (index.isValid())
 		ligoData.ZoneName = index.data().toString().toStdString();
+
+	ligoData.Rot = m_ui.rotComboBox->currentIndex();
+	ligoData.Flip = m_ui.flipComboBox->currentIndex();
 	return ligoData;
 }
 

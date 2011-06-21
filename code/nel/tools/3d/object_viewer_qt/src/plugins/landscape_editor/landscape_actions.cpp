@@ -62,34 +62,54 @@ void NewLandscapeCommand::redo()
 {
 }
 
-LigoTileCommand::LigoTileCommand(const LigoData &data, ZoneBuilder *zoneBuilder, QGraphicsScene *scene, QUndoCommand *parent)
+AddLigoTileCommand::AddLigoTileCommand(const LigoData &data, LandscapeScene *scene, QUndoCommand *parent)
 	: QUndoCommand(parent),
 	  m_item(0),
-	  m_zoneBuilder(zoneBuilder),
 	  m_scene(scene)
 {
 	m_ligoData = data;
 }
 
-LigoTileCommand::~LigoTileCommand()
+AddLigoTileCommand::~AddLigoTileCommand()
 {
 }
 
-void LigoTileCommand::undo()
+void AddLigoTileCommand::undo()
 {
 	m_scene->removeItem(m_item);
 	delete m_item;
 	m_item = 0;
 }
 
-void LigoTileCommand::redo()
+void AddLigoTileCommand::redo()
 {
-	QPixmap *pixmap = m_zoneBuilder->pixmapDatabase()->pixmap(QString(m_ligoData.ZoneName.c_str()));
-	m_item = new QGraphicsPixmapItem(*pixmap, 0, m_scene);
-	m_item->setPos(m_ligoData.PosX, m_ligoData.PosY);
-	m_item->setScale(m_ligoData.Scale);
-	m_item->setTransformationMode(Qt::SmoothTransformation);
+	m_item = m_scene->createZoneItem(m_ligoData);
 	setText(QObject::tr("Add tile(%1, %2)").arg(m_ligoData.PosX).arg(m_ligoData.PosY));
+}
+
+DelLigoTileCommand::DelLigoTileCommand(const LigoData &data, LandscapeScene *scene, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	  m_item(0),
+	  m_scene(scene)
+{
+	m_ligoData = data;
+}
+
+DelLigoTileCommand::~DelLigoTileCommand()
+{
+}
+
+void DelLigoTileCommand::undo()
+{
+	m_item = m_scene->createZoneItem(m_ligoData);
+}
+
+void DelLigoTileCommand::redo()
+{
+	m_item = m_scene->itemAt(m_ligoData.PosX * m_scene->cellSize(), m_ligoData.PosY * m_scene->cellSize());
+	delete m_item;
+	m_item = 0;
+	setText(QObject::tr("Del tile(%1, %2)").arg(m_ligoData.PosX).arg(m_ligoData.PosY));
 }
 
 } /* namespace LandscapeEditor */
