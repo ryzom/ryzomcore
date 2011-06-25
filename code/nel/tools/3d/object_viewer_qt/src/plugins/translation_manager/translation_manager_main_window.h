@@ -22,6 +22,12 @@
 // Project includes
 #include "../core/icore_listener.h"
 
+// Nel includes
+#include "nel/misc/types_nl.h"
+#include "nel/misc/sheet_id.h"
+#include "nel/misc/path.h"
+#include "nel/misc/diff_tool.h"
+
 // Qt includes
 #include <QtCore/QObject>
 #include <QtGui/QUndoStack>
@@ -29,6 +35,8 @@
 #include <QtGui/QGridLayout>
 #include <QtGui/QTabWidget>
 #include <QtGui/QMenu>
+#include <QtGui/QMdiSubWindow>
+
 
 #include "ui_translation_manager_main_window.h"
 #include <set>
@@ -49,7 +57,10 @@ public:
         QUndoStack *m_undoStack;
 private:
         Ui::CMainWindow _ui;
-        QMenu *_toolMenu;
+        // actions
+        QAction *openAct;
+        QAction *saveAct;
+        // config
         map<string, list<string> > config_paths;
         list<string> languages;
         string ligo_path;
@@ -57,11 +68,17 @@ private:
         string work_path;
 private Q_SLOTS:
         void extractBotNames();
+        void open();
+        void save();
+        void sheetEditorChanged(int, int);
 private:
         void compareBotNames();
         bool verifySettings();
         void readSettings();
+        void createMenus();
+        void createToolbar();
         list<string> convertQStringList(QStringList listq);
+        
         
 };
 
@@ -73,6 +90,21 @@ public:
 	virtual ~CCoreListener() {}
 
 	virtual bool closeMainWindow() const;
+};
+
+class CMdiSubWindow : public QMdiSubWindow 
+{
+   private:
+       int window_type;
+    public:
+        int getWType()
+        {
+            return window_type;
+        }
+        void setWType(int nType)
+        {
+            window_type = nType;
+        }
 };
 
 } // namespace Plugin

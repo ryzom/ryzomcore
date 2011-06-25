@@ -18,6 +18,9 @@
 #include "translation_manager_main_window.h"
 // Project system includes
 #include "../core/icore.h"
+#include "../core/core_constants.h"
+#include "../core/imenu_manager.h"
+#include "../../extension_system/iplugin_spec.h"
 // Qt includes
 #include <QtGui/QWidget>
 #include <QtGui/QMessageBox>
@@ -27,10 +30,14 @@
 #include <QtGui/QErrorMessage>
 #include <QtCore/QSignalMapper>
 #include <QtGui/QTableWidget>
+#include <QtGui/QTableWidgetItem>
 #include <QtGui/QListWidget>
 #include <QtGui/QDockWidget>
 #include <QtCore/QSize>
 #include <QtGui/QGridLayout>
+#include <QtGui/QMdiSubWindow>
+#include <QtGui/QFileDialog>
+
 struct TEntryInfo
 {
 	string	SheetName;
@@ -48,17 +55,95 @@ CMainWindow::CMainWindow(QWidget *parent)
 {
          _ui.setupUi(this);
          
-        _toolMenu = new QMenu(tr("Primitives"), _ui.toolBar);
-        _ui.toolBar->addAction(_toolMenu->menuAction());
-        
-        QAction *extractBotNames = _toolMenu->addAction(tr("Extract bot names"));
-        extractBotNames->setStatusTip(tr("Extract bot names from primitives"));
-        connect(extractBotNames, SIGNAL(triggered()), this, SLOT(extractBotNames()));
-
-        
         
          readSettings();
+         createToolbar();
         m_undoStack = new QUndoStack(this);
+}
+
+void CMainWindow::createToolbar()
+{	
+        // Tools menu
+        Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
+        QMenu *translationManagerMenu = new QMenu("Translation Manager");
+        QAction *extractBotNamesAct = translationManagerMenu->addAction("Extract bot names");
+        extractBotNamesAct->setStatusTip(tr("Extract bot names from primitives"));
+        QMenu *toolMenu = menuManager->menu(Core::Constants::M_TOOLS);
+        toolMenu->addMenu(translationManagerMenu);
+
+        
+         // File menu
+         //QAction *action = menuManager->action(Core::Constants::NEW);
+        //_ui.toolBar->addAction(action);   
+        openAct = menuManager->action(Core::Constants::OPEN);
+        _ui.toolBar->addAction(openAct);
+        connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+        
+        saveAct = menuManager->action(Core::Constants::SAVE);
+        _ui.toolBar->addAction(saveAct);
+        connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
+        //action = menuManager->action(Core::Constants::SAVE_AS);
+        //_ui.toolBar->addAction(action);
+     
+}
+
+void CMainWindow::open()
+{
+        QString file_name = QFileDialog::getOpenFileName(this);
+         if (!file_name.isEmpty())
+         {       
+             STRING_MANAGER::TWorksheet wk_file;          
+             if(loadExcelSheet(file_name.toStdString(), wk_file, true) == true)
+             {
+                 QTableWidget *wk_table = new QTableWidget();  
+                 wk_table->setToolTip(file_name);
+                 wk_table->setWindowFilePath(file_name);
+                 wk_table->setColumnCount(wk_file.ColCount);
+                 wk_table->setRowCount(wk_file.size() - 1);
+                 // read columns name
+                 for(unsigned int i = 0; i < wk_file.ColCount; i++)
+                 {
+                     QTableWidgetItem *col = new QTableWidgetItem();
+                     ucstring col_name = wk_file.getData(0, i);
+                     col->setText(tr(col_name.toString().c_str()));
+
+                     wk_table->setHorizontalHeaderItem(i, col);
+                 }
+                 // read rows
+                 for(unsigned int i = 1; i < wk_file.size(); i++)
+                 {
+                     for(unsigned int j = 0; j < wk_file.ColCount; j++)
+                     {
+                        QTableWidgetItem *row = new QTableWidgetItem();
+                        ucstring row_value = wk_file.getData(i, j);
+                        row->setText(tr(row_value.toString().c_str()));
+                     
+                        wk_table->setItem(i - 1, j, row);          
+                     }
+                 } 
+                QMdiSubWindow *sub_window = new QMdiSubWindow(_ui.mdiArea);
+                sub_window->setWidget(wk_table);
+                wk_table->resizeColumnsToContents();
+                wk_table->resizeRowsToContents(); 
+                wk_table->showMaximized();
+                sub_window->activateWindow();
+                //_ui.mdiArea->addSubWindow(sub_window); 
+                // set editor signals
+                connect(wk_table, SIGNAL(cellChanged(int,int) ), this, SLOT(sheetEditorChanged(int,int)));
+             }
+         }
+               
+}
+
+void CMainWindow::sheetEditorChanged(int, int)
+{
+    saveAct->setEnabled(true);
+}
+
+void CMainWindow::save()
+{
+    QMdiSubWindow *current_window = _ui.mdiArea->currentSubWindow();
+
 }
 
 void CMainWindow::readSettings()
@@ -87,28 +172,7 @@ void CMainWindow::extractBotNames()
 {
         if(verifySettings() == true) 
         {
-           // int extract_bot_names = extractBotNamesAll(config_paths, ligo_path, translation_path, work_path);
- 
-            QGridLayout* mainLayout = new QGridLayout();
-            
-  
-     
-     //contentsWindow->setAllowedAreas(Qt::LeftDockWidgetArea);
- 
-    
-     QListWidget *listWidget = new QListWidget(this);
 
-       mainLayout->addWidget(QListWidget);
-   
-     
-     
-     QTableWidget *tableWidget = new QTableWidget(this);
-  
-     tableWidget->setRowCount(10);
-     tableWidget->setColumnCount(5);   
-     
-     mainLayout->addWidget(QTableWidget);
-     setCentralWidget(tableWidget);
         }    
 }
 
