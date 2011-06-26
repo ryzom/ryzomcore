@@ -37,6 +37,10 @@
 #include <QtGui/QGridLayout>
 #include <QtGui/QMdiSubWindow>
 #include <QtGui/QFileDialog>
+#include <QtCore/QResource>
+#include <QtGui/QMenuBar>
+#include <QtCore/QFileInfo>
+
 
 struct TEntryInfo
 {
@@ -54,7 +58,8 @@ CMainWindow::CMainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
          _ui.setupUi(this);
-         
+         _ui.mdiArea->closeAllSubWindows();
+         connect(_ui.mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)),this, SLOT(activeSubWindowChanged()));         
         
          readSettings();
          createToolbar();
@@ -72,19 +77,55 @@ void CMainWindow::createToolbar()
         toolMenu->addMenu(translationManagerMenu);
 
         
-         // File menu
-         //QAction *action = menuManager->action(Core::Constants::NEW);
-        //_ui.toolBar->addAction(action);   
-        openAct = menuManager->action(Core::Constants::OPEN);
+         // File menu        
+        openAct = new QAction(QIcon(Core::Constants::ICON_OPEN), "&Open...", this);
         _ui.toolBar->addAction(openAct);
         connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
         
-        saveAct = menuManager->action(Core::Constants::SAVE);
+        saveAct = new QAction(QIcon(Core::Constants::ICON_SAVE), "&Save...", this);
         _ui.toolBar->addAction(saveAct);
         connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
-        //action = menuManager->action(Core::Constants::SAVE_AS);
-        //_ui.toolBar->addAction(action);
-     
+        
+        saveAsAct = new QAction(QIcon(Core::Constants::ICON_SAVE_AS), "&Save as...", this);
+        _ui.toolBar->addAction(saveAsAct);
+        connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
+
+        // Windows menu
+        windowMapper = new QSignalMapper(this);
+        connect(windowMapper, SIGNAL(mapped(QWidget*)), this, SLOT(setActiveSubWindow(QWidget*)));
+        windowMenu = new QMenu(tr("&Windows..."), _ui.toolBar);
+        windowMenu->setIcon(QIcon(Core::Constants::ICON_PILL));
+        _ui.toolBar->addAction(windowMenu->menuAction());
+        connect(windowMenu, SIGNAL(aboutToShow()), this, SLOT(updateWindowsList()));
+
+
+}
+
+void CMainWindow::activeSubWindowChanged()
+{
+    updateWindowsList();
+}
+
+void CMainWindow::updateWindowsList()
+{
+        int i = 0;
+        windowMenu->clear();
+        QList<QMdiSubWindow *> windows = _ui.mdiArea->subWindowList();     
+        for (QList<QMdiSubWindow*>::iterator it = windows.begin(); it != windows.end(); ++it) {
+                QString window_file = QFileInfo((*it)->widget()->windowFilePath()).fileName();
+                QString action_text;
+                if (i < 9) {
+                        action_text = tr("&%1 %2").arg(i + 1).arg(window_file);
+                } else {
+                        action_text = tr("%1 %2").arg(i + 1).arg(window_file);
+                }
+                QAction *action  = windowMenu->addAction(action_text);
+                action->setCheckable(true);
+                action->setChecked((*it) == _ui.mdiArea->activeSubWindow());
+                connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));
+                windowMapper->setMapping(action, windows.at(i));
+                i++;
+        }    
 }
 
 void CMainWindow::open()
@@ -127,23 +168,126 @@ void CMainWindow::open()
                 wk_table->resizeRowsToContents(); 
                 wk_table->showMaximized();
                 sub_window->activateWindow();
-                //_ui.mdiArea->addSubWindow(sub_window); 
                 // set editor signals
                 connect(wk_table, SIGNAL(cellChanged(int,int) ), this, SLOT(sheetEditorChanged(int,int)));
+                // windows menu
+               updateWindowsList(); 
+             } else {
+                QErrorMessage error_settings;
+                error_settings.showMessage("This file is not a worksheet file.");
+                error_settings.exec();                 
              }
          }
                
 }
 
-void CMainWindow::sheetEditorChanged(int, int)
+void CMainWindow::sheetEditorChanged(int row, int column)
 {
     saveAct->setEnabled(true);
+    QMdiSubWindow *current_window = _ui.mdiArea->currentSubWindow();
+    if(modifiedCells.find(current_window) != modifiedCells.end()) // founded
+    {
+        list<CCelPos> cells = modifiedCells[current_window];
+        bool overwriteResult = false;
+        for(list<CCelPos>::iterator it = cells.begin(); it != cells.end(); ++it)
+        {
+            if((*it).row == row && (*it).col == column )
+                overwriteResult = true;
+        }
+        if(overwriteResult == false)
+        {
+            CCelPos v;
+            v.row = row;
+            v.col = column;
+            cells.push_back(v);        
+        }
+    } else { // not found
+        list<CCelPos> cells;
+        CCelPos v;     
+        v.row = row;
+        v.col = column;
+        cells.push_back(v);   
+        modifiedCells[current_window] = cells;
+    }
 }
 
 void CMainWindow::save()
 {
     QMdiSubWindow *current_window = _ui.mdiArea->currentSubWindow();
+    
+    if(QString(current_window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
+    {
+        QWidget *subwindow_widget = current_window->widget();
+        QTableWidget *table_editor = qobject_cast<QTableWidget*>(subwindow_widget);
+        QString file_path = table_editor->windowFilePath();
+        
+        if(modifiedCells.find(current_window) != modifiedCells.end())
+        {
+                STRING_MANAGER::TWorksheet wk_file;          
+                loadExcelSheet(file_path.toStdString(), wk_file, true);                    
+                list<CCelPos> cells = modifiedCells[current_window];
+                for(list<CCelPos>::iterator it = cells.begin(); it != cells.end(); ++it)
+                {
+                    QTableWidgetItem* edited_item = table_editor->item((*it).row, (*it).col);
+                    wk_file.setData((*it).row + 1, (*it).col, ucstring(edited_item->text().toStdString()));
+                    cells.erase(it);
+                }  
+                ucstring s = prepareExcelSheet(wk_file);            
+                NLMISC::CI18N::writeTextFile(file_path.toStdString(), s, false);
+                if(cells.size() == 0)
+                    modifiedCells.erase(current_window);
+        }
+    }
+}
 
+void CMainWindow::saveAs()
+{
+    QString file_name;
+    if (_ui.mdiArea->isActiveWindow())
+    {
+        file_name = QFileDialog::getSaveFileName(this);
+    }
+    
+    if (!file_name.isEmpty())
+    {    
+        QMdiSubWindow *current_window = _ui.mdiArea->currentSubWindow();
+    
+        if(QString(current_window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
+        {
+                QWidget *subwindow_widget = current_window->widget();
+                QTableWidget *table_editor = qobject_cast<QTableWidget*>(subwindow_widget);  
+                QString orig_file_path = table_editor->windowFilePath();
+                STRING_MANAGER::TWorksheet new_file, wk_file;  
+                loadExcelSheet(orig_file_path.toStdString(), wk_file, true);   
+                // set columns
+                new_file.resize(new_file.size() + 1);
+                for(unsigned int i = 0; i < wk_file.ColCount; i++)
+                {
+                    ucstring col_name = wk_file.getData(0, i);
+                    new_file.insertColumn(new_file.ColCount);
+                    new_file.setData(0, new_file.ColCount - 1, col_name);
+                } 
+                // read all the rows from table
+                uint rowIdx; 
+                for(int i = 0; i < table_editor->rowCount(); i++)
+                {
+                     rowIdx = new_file.size();
+                     new_file.resize(new_file.size() + 1);
+                     for(int j = 0; j < table_editor->columnCount(); j++)
+                     {
+                         QTableWidgetItem* item = table_editor->item(i, j);
+                         new_file.setData(rowIdx, j, ucstring(item->text().toStdString()));
+                     }   
+                 } 
+                ucstring s = prepareExcelSheet(new_file);            
+                NLMISC::CI18N::writeTextFile(file_name.toStdString(), s, false);
+        }             
+             
+    }    
+    
+             QErrorMessage error_settings;
+            error_settings.showMessage( file_name);
+            error_settings.exec();   
 }
 
 void CMainWindow::readSettings()
@@ -212,7 +356,14 @@ bool CMainWindow::verifySettings()
         return !count_errors;
         
 }
-
+ 
+ void CMainWindow::setActiveSubWindow(QWidget *window)
+ {
+     if (!window)
+        return;
+     _ui.mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
+ }
+ 
 list<string> CMainWindow::convertQStringList(QStringList listq)
 {       
         std::list<std::string> stdlist;

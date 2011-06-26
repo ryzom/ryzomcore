@@ -36,6 +36,8 @@
 #include <QtGui/QTabWidget>
 #include <QtGui/QMenu>
 #include <QtGui/QMdiSubWindow>
+#include <QtCore/QSignalMapper>
+
 
 
 #include "ui_translation_manager_main_window.h"
@@ -48,6 +50,12 @@ using namespace std;
 namespace Plugin
 {
 
+struct CCelPos
+{
+        int col;
+        int row;
+};
+    
 class CMainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -57,9 +65,14 @@ public:
         QUndoStack *m_undoStack;
 private:
         Ui::CMainWindow _ui;
+        
+        map<QMdiSubWindow*, list<CCelPos> > modifiedCells;
         // actions
         QAction *openAct;
         QAction *saveAct;
+        QAction *saveAsAct;
+        QMenu *windowMenu;
+        QSignalMapper *windowMapper;
         // config
         map<string, list<string> > config_paths;
         list<string> languages;
@@ -70,13 +83,17 @@ private Q_SLOTS:
         void extractBotNames();
         void open();
         void save();
+        void saveAs();
         void sheetEditorChanged(int, int);
+        void setActiveSubWindow(QWidget *window);
+        void activeSubWindowChanged();
 private:
         void compareBotNames();
         bool verifySettings();
         void readSettings();
         void createMenus();
         void createToolbar();
+        void updateWindowsList();
         list<string> convertQStringList(QStringList listq);
         
         
