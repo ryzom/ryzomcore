@@ -48,8 +48,13 @@ struct TEntryInfo
 };
 
 set<string> getGenericNames();
+void cleanGenericNames();
 map<string, TEntryInfo> getSimpleNames();
-int extractBotNamesAll(map<string,list<string> > config_paths, string ligo_class_file, string trans_path, string work_path);
+void cleanSimpleNames();
+void setPathsForPrimitives(map<string,list<string> > config_paths, string ligo_class_file);
+void extractBotNamesFromPrimitives();
+string cleanupName(const std::string &name);
+ucstring cleanupUcName(const ucstring &name);
 
 namespace Plugin
 {
@@ -61,6 +66,9 @@ CMainWindow::CMainWindow(QWidget *parent)
          _ui.mdiArea->closeAllSubWindows();
          connect(_ui.mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)),this, SLOT(activeSubWindowChanged()));         
         
+         // set extraction scripts counters
+         execution_count["extract_bot_names"] = 0;
+         
          readSettings();
          createToolbar();
         m_undoStack = new QUndoStack(this);
@@ -68,28 +76,25 @@ CMainWindow::CMainWindow(QWidget *parent)
 
 void CMainWindow::createToolbar()
 {	
-        // Tools menu
-        Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
-        QMenu *translationManagerMenu = new QMenu("Translation Manager");
-        QAction *extractBotNamesAct = translationManagerMenu->addAction("Extract bot names");
-        extractBotNamesAct->setStatusTip(tr("Extract bot names from primitives"));
-        QMenu *toolMenu = menuManager->menu(Core::Constants::M_TOOLS);
-        toolMenu->addMenu(translationManagerMenu);
-
-        
          // File menu        
         openAct = new QAction(QIcon(Core::Constants::ICON_OPEN), "&Open...", this);
         _ui.toolBar->addAction(openAct);
-        connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
-        
+        connect(openAct, SIGNAL(triggered()), this, SLOT(open()));       
         saveAct = new QAction(QIcon(Core::Constants::ICON_SAVE), "&Save...", this);
         _ui.toolBar->addAction(saveAct);
-        connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
-        
+        connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));       
         saveAsAct = new QAction(QIcon(Core::Constants::ICON_SAVE_AS), "&Save as...", this);
         _ui.toolBar->addAction(saveAsAct);
         connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
+        // Tools menu
+        QMenu *wordsExtractionMenu = new QMenu("&Words extraction...");
+        wordsExtractionMenu->setIcon(QIcon(Core::Constants::ICON_SETTINGS));
+        _ui.toolBar->addAction(wordsExtractionMenu->menuAction());
+        QAction *extractBotNamesAct = wordsExtractionMenu->addAction("&Extract bot names...");
+        extractBotNamesAct->setStatusTip(tr("Extract bot names from primitives."));
+        connect(extractBotNamesAct, SIGNAL(triggered()), this, SLOT(extractBotNames()));
+        
         // Windows menu
         windowMapper = new QSignalMapper(this);
         connect(windowMapper, SIGNAL(mapped(QWidget*)), this, SLOT(setActiveSubWindow(QWidget*)));
@@ -97,8 +102,6 @@ void CMainWindow::createToolbar()
         windowMenu->setIcon(QIcon(Core::Constants::ICON_PILL));
         _ui.toolBar->addAction(windowMenu->menuAction());
         connect(windowMenu, SIGNAL(aboutToShow()), this, SLOT(updateWindowsList()));
-
-
 }
 
 void CMainWindow::activeSubWindowChanged()
@@ -136,32 +139,60 @@ void CMainWindow::open()
              STRING_MANAGER::TWorksheet wk_file;          
              if(loadExcelSheet(file_name.toStdString(), wk_file, true) == true)
              {
+                  bool hasHashValue = false;
                  QTableWidget *wk_table = new QTableWidget();  
                  wk_table->setToolTip(file_name);
                  wk_table->setWindowFilePath(file_name);
-                 wk_table->setColumnCount(wk_file.ColCount);
+                 if(wk_file.getData(0, 0) == ucstring("*HASH_VALUE"))
+                 {
+                      wk_table->setColumnCount(wk_file.ColCount - 1);
+                      hasHashValue = true;
+                 } else {
+                      wk_table->setColumnCount(wk_file.ColCount);                   
+                 }
                  wk_table->setRowCount(wk_file.size() - 1);
                  // read columns name
+                
                  for(unsigned int i = 0; i < wk_file.ColCount; i++)
                  {
-                     QTableWidgetItem *col = new QTableWidgetItem();
-                     ucstring col_name = wk_file.getData(0, i);
-                     col->setText(tr(col_name.toString().c_str()));
-
-                     wk_table->setHorizontalHeaderItem(i, col);
+                     if(hasHashValue && i == 0)
+                     {
+                            // we don't show the column with hash value
+                     } else {
+                        QTableWidgetItem *col = new QTableWidgetItem();
+                        ucstring col_name = wk_file.getData(0, i);
+                        col->setText(tr(col_name.toString().c_str()));
+                        if(hasHashValue)
+                        {
+                                wk_table->setHorizontalHeaderItem(i - 1, col);                        
+                        } else {
+                                wk_table->setHorizontalHeaderItem(i, col);
+                        }
+                     }
                  }
                  // read rows
+
                  for(unsigned int i = 1; i < wk_file.size(); i++)
                  {
                      for(unsigned int j = 0; j < wk_file.ColCount; j++)
                      {
-                        QTableWidgetItem *row = new QTableWidgetItem();
-                        ucstring row_value = wk_file.getData(i, j);
-                        row->setText(tr(row_value.toString().c_str()));
-                     
-                        wk_table->setItem(i - 1, j, row);          
-                     }
-                 } 
+                        if(hasHashValue && j == 0)
+                        {
+                            // we don't show the column with hash value
+                        } else {
+                            QTableWidgetItem *row = new QTableWidgetItem();
+                            ucstring row_value = wk_file.getData(i, j);
+                            row->setText(tr(row_value.toString().c_str()));
+                            if(hasHashValue)
+                            {
+                                wk_table->setItem(i - 1, j - 1, row);    
+                            } else {
+                                wk_table->setItem(i - 1, j, row); 
+                            }
+                        }
+                    }
+                }
+            
                 QMdiSubWindow *sub_window = new QMdiSubWindow(_ui.mdiArea);
                 sub_window->setWidget(wk_table);
                 wk_table->resizeColumnsToContents();
@@ -170,7 +201,6 @@ void CMainWindow::open()
                 sub_window->activateWindow();
                 // set editor signals
                 connect(wk_table, SIGNAL(cellChanged(int,int) ), this, SLOT(sheetEditorChanged(int,int)));
-                // windows menu
                updateWindowsList(); 
              } else {
                 QErrorMessage error_settings;
@@ -284,10 +314,81 @@ void CMainWindow::saveAs()
         }             
              
     }    
-    
-             QErrorMessage error_settings;
-            error_settings.showMessage( file_name);
-            error_settings.exec();   
+}
+
+void CMainWindow::extractBotNames()
+{
+        if(verifySettings() == true) 
+        {
+                QMdiSubWindow *current_window = _ui.mdiArea->currentSubWindow();
+                if(QString(current_window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
+                {
+                    if(execution_count["extract_bot_names"] == 0)
+                        setPathsForPrimitives(config_paths, ligo_path);
+                    extractBotNamesFromPrimitives();
+                    execution_count["extract_bot_names"] = execution_count["extract_bot_names"]  + 1;
+ 
+                    QWidget *subwindow_widget = current_window->widget();
+                    QTableWidget *table_editor = qobject_cast<QTableWidget*>(subwindow_widget);  
+                    // get SimpleNames
+                    {                       
+                        map<string, TEntryInfo> SimpleNames =  getSimpleNames();
+                        map<string, TEntryInfo>::iterator it(SimpleNames.begin()), last(SimpleNames.end());
+
+                        for (; it != last; ++it)
+                        {  
+                            QList<QTableWidgetItem*> search_results = table_editor->findItems(tr(it->first.c_str()), Qt::MatchExactly);
+                            if(search_results.size() == 0)
+                            {
+                                const int currentRow = table_editor->rowCount();                     
+                                table_editor->setRowCount(currentRow + 1);
+                                QTableWidgetItem *bot_name_row = new QTableWidgetItem();
+                                bot_name_row->setText(tr(it->first.c_str()));    
+                                bot_name_row->setBackgroundColor(QColor("#F75D59"));
+                                table_editor ->setItem(currentRow, 0, bot_name_row);  
+                                QTableWidgetItem *translation_name_row = new QTableWidgetItem();
+                                translation_name_row->setBackgroundColor(QColor("#F75D59"));
+                                translation_name_row->setText(tr(it->first.c_str()));
+                                table_editor ->setItem(currentRow , 1, translation_name_row);               
+                                QTableWidgetItem *sheet_name_row = new QTableWidgetItem();
+                                sheet_name_row->setText(tr(it->second.SheetName.c_str()));      
+                                sheet_name_row->setBackgroundColor(QColor("#F75D59"));
+                                table_editor ->setItem(currentRow, 2, sheet_name_row);     
+                            }
+                        }  
+                        cleanSimpleNames();
+                    }
+                    // get GenericNames
+                    {
+                        set<string> GenericNames = getGenericNames();                       
+                        set<string>::iterator it(GenericNames.begin()), last(GenericNames.end());
+                        for (; it != last; ++it)
+                        {
+                            string gnName = "gn_" + cleanupName(*it);
+                            QList<QTableWidgetItem*> search_results = table_editor->findItems(tr((*it).c_str()), Qt::MatchExactly);
+                            if(search_results.size() == 0)
+                            {
+                                const int currentRow = table_editor->rowCount();                     
+                                table_editor->setRowCount(currentRow + 1);
+                                QTableWidgetItem *bot_name_row = new QTableWidgetItem();
+                                bot_name_row->setText(tr((*it).c_str()));    
+                                bot_name_row->setBackgroundColor(QColor("#F75D59"));
+                                table_editor ->setItem(currentRow, 0, bot_name_row);  
+                                QTableWidgetItem *translation_name_row = new QTableWidgetItem();
+                                translation_name_row->setBackgroundColor(QColor("#F75D59"));
+                                translation_name_row->setText(tr(gnName.c_str()));
+                                table_editor ->setItem(currentRow , 1, translation_name_row);               
+                                QTableWidgetItem *sheet_name_row = new QTableWidgetItem();
+                                sheet_name_row->setText(" ");      
+                                sheet_name_row->setBackgroundColor(QColor("#F75D59"));
+                                table_editor ->setItem(currentRow, 2, sheet_name_row);     
+                            }                         
+                        }
+                        cleanGenericNames();
+                    }
+                    
+                }
+        }    
 }
 
 void CMainWindow::readSettings()
@@ -312,15 +413,6 @@ void CMainWindow::readSettings()
             settings->endGroup();    
 }
 
-void CMainWindow::extractBotNames()
-{
-        if(verifySettings() == true) 
-        {
-
-        }    
-}
-
-
 bool CMainWindow::verifySettings()
 {
         bool count_errors = false;
@@ -338,19 +430,7 @@ bool CMainWindow::verifySettings()
             error_settings.exec();
             count_errors = true;
         }
-     
-        if((settings->value("ligo").toString().isEmpty()
-                || settings->value("translation").toString().isEmpty()
-                || settings->value("work").toString().isEmpty()
-                || settings->value("trlanguages").toList().count() == 0)
-                && count_errors == false)
-        {
-            QErrorMessage error_settings;
-            error_settings.showMessage("Please write the paths for ligo, translation and work files and the languages on the settings dialog." + settings->value("trlanguages").toString());
-            error_settings.exec();    
-            count_errors = true;
-        }
-        
+   
         settings->endGroup();
         
         return !count_errors;

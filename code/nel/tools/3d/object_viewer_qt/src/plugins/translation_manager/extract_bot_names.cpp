@@ -155,6 +155,16 @@ map<string, TEntryInfo> getSimpleNames()
     return SimpleNames;
 }
 
+void cleanSimpleNames()
+{       
+    SimpleNames.clear();
+}
+
+void cleanGenericNames()
+{
+    GenericNames.clear();
+}
+
 string	removeAndStoreFunction(const std::string &fullName)
 {
 	string::size_type pos = fullName.find("$");
@@ -228,7 +238,7 @@ void addSimpleName(const std::string &name, const std::string &sheetName)
 	}
 }
 
-int extractBotNamesAll(map<string,list<string> > config_paths, string ligo_class_file, string trans_path, string work_path)
+void setPathsForPrimitives(map<string,list<string> > config_paths, string ligo_class_file)
 {
 	for (std::list<string>::iterator it = config_paths["paths"].begin(); it != config_paths["paths"].end(); ++it)
 	{
@@ -265,8 +275,11 @@ int extractBotNamesAll(map<string,list<string> > config_paths, string ligo_class
 	LigoConfig.readPrimitiveClass(ligoPath.c_str(), false);
 	NLLIGO::Register();
 
-	CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
+	CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;    
+}
 
+void extractBotNamesFromPrimitives()
+{
 	//-------------------------------------------------------------------
 	// ok, ready for the real work,
 	// first, read the primitives files and parse the primitives
@@ -429,8 +442,13 @@ int extractBotNamesAll(map<string,list<string> > config_paths, string ligo_class
 				}
 			}
 		}
-	}        
-      
+	}       
+}
+
+int extractBotNamesAll(map<string,list<string> > config_paths, string ligo_class_file, string trans_path, string work_path)
+{
+     
+    /*  
 	//-------------------------------------------------------------------
 	// step 2 : load the reference file
 
@@ -760,7 +778,7 @@ int extractBotNamesAll(map<string,list<string> > config_paths, string ligo_class
 	CI18N::writeTextFile(trans_path_file, s, false);
 	s = prepareExcelSheet(fcts);
 	CI18N::writeTextFile(title_path_file, s, false);
-
+*/
 	return 0;
 }
 

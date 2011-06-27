@@ -79,6 +79,8 @@ private:
         string ligo_path;
         string translation_path;
         string work_path;
+        // counts
+        map<string, int> execution_count;
 private Q_SLOTS:
         void extractBotNames();
         void open();
