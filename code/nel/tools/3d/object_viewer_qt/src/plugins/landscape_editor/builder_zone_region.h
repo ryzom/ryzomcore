@@ -22,11 +22,79 @@
 
 // NeL includes
 #include <nel/ligo/zone_bank.h>
+#include <nel/ligo/zone_region.h>
+
+// STL includes
+#include <string>
+#include <vector>
+#include <queue>
 
 // Qt includes
 
 namespace LandscapeEditor
 {
+class ZoneBuilder;
+
+// CZoneRegion contains informations about the zones painted
+class BuilderZoneRegion
+{
+public:
+
+	BuilderZoneRegion(uint regionId);
+
+	// New interface
+	bool init(ZoneBuilder *zoneBuilder, std::string &error);
+	void add(sint32 x, sint32 y, uint8 rot, uint8 flip, NLLIGO::CZoneBankElement *zoneBankElement);
+	void invertCutEdge(sint32 x, sint32 y, uint8 cePos);
+	void cycleTransition(sint32 x, sint32 y);
+	bool addNotPropagate(sint32 x, sint32 y, uint8 rot, uint8 flip, NLLIGO::CZoneBankElement *zoneBankElement);
+
+	/// Brutal adding a zone over empty space do not propagate in any way -> can result
+	/// in inconsistency when trying the propagation mode
+	void addForce (sint32 x, sint32 y, uint8 rot, uint8 flip, NLLIGO::CZoneBankElement *zoneBankElement);
+	void del(sint32 x, sint32 y, bool transition = false, void *pInternal = NULL);
+	void move(sint32 x, sint32 y);
+	uint32 countZones();
+	void reduceMin();
+	uint getRegionId() const;
+
+private:
+
+	// An element of the graph
+	struct SMatNode
+	{
+		std::string			Name;
+		// Position in the tree (vector of nodes)
+		std::vector<uint32>	Arcs;
+	};
+
+	void addTransition(sint32 x, sint32 y, uint8 rot, uint8 flip, NLLIGO::CZoneBankElement *zoneBankElement);
+
+	void addToUpdateAndCreate(BuilderZoneRegion* builderZoneRegion, sint32 sharePos, sint32 x, sint32 y, const std::string &newMat, void *pInt1, void *pInt2);
+
+	void putTransitions(sint32 x, sint32 y, const NLLIGO::SPiece &mask, const std::string &matName, void *pInternal);
+	void updateTrans(sint32 x, sint32 y, NLLIGO::CZoneBankElement *zoneBankElement = NULL);
+
+	std::string getNextMatInTree(const std::string &matA, const std::string &matB);
+
+	/// Find the fastest way between posA and posB in the MatTree (Dijkstra)
+	void tryPath(uint32 posA, uint32 posB, std::vector<uint32> &path);
+
+	void set(sint32 x, sint32 y, sint32 posX, sint32 posY, const std::string &zoneName, bool transition=false);
+	void setRot(sint32 x, sint32 y, uint8 rot);
+	void setFlip(sint32 x, sint32 y, uint8 flip);
+	void resize(sint32 newMinX, sint32 newMaxX, sint32 newMinY, sint32 newMaxY);
+
+	uint m_regionId;
+
+	// To use the global mask
+	ZoneBuilder *m_zoneBuilder;
+
+	// The tree of transition between materials
+	std::vector<SMatNode> m_matTree;
+
+	bool m_firstInit;
+};
 
 } /* namespace LandscapeEditor */
 

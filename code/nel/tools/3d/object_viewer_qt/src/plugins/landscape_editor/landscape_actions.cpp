@@ -62,54 +62,111 @@ void NewLandscapeCommand::redo()
 {
 }
 
-AddLigoTileCommand::AddLigoTileCommand(const LigoData &data, LandscapeScene *scene, QUndoCommand *parent)
+LigoTileCommand::LigoTileCommand(const LigoData &data, const ZonePosition &zonePos,
+								 ZoneBuilder *zoneBuilder, LandscapeScene *scene,
+								 QUndoCommand *parent)
 	: QUndoCommand(parent),
-	  m_item(0),
+	  m_zoneBuilder(zoneBuilder),
 	  m_scene(scene)
 {
-	m_ligoData = data;
+	// Backup position
+	m_zonePos = zonePos;
+
+	// Backup new data
+	m_newLigoData = data;
+
+	// Backup old data
+	m_zoneBuilder->ligoData(m_oldLigoData, m_zonePos);
 }
 
-AddLigoTileCommand::~AddLigoTileCommand()
+LigoTileCommand::~LigoTileCommand()
 {
 }
 
-void AddLigoTileCommand::undo()
+void LigoTileCommand::undo ()
 {
-	m_scene->removeItem(m_item);
-	delete m_item;
-	m_item = 0;
+	m_zoneBuilder->setLigoData(m_oldLigoData, m_zonePos);
+	m_scene->createZoneItem(m_oldLigoData, m_zonePos);
 }
 
-void AddLigoTileCommand::redo()
+void LigoTileCommand::redo ()
 {
-	m_item = m_scene->createZoneItem(m_ligoData);
-	setText(QObject::tr("Add tile(%1, %2)").arg(m_ligoData.PosX).arg(m_ligoData.PosY));
+	m_zoneBuilder->setLigoData(m_newLigoData, m_zonePos);
+	m_scene->createZoneItem(m_newLigoData, m_zonePos);
 }
 
-DelLigoTileCommand::DelLigoTileCommand(const LigoData &data, LandscapeScene *scene, QUndoCommand *parent)
+LigoResizeCommand::LigoResizeCommand(int index, sint32 newMinX, sint32 newMaxX,
+									 sint32 newMinY, sint32 newMaxY, ZoneBuilder *zoneBuilder,
+									 QUndoCommand *parent)
 	: QUndoCommand(parent),
-	  m_item(0),
-	  m_scene(scene)
+	  m_zoneBuilder(zoneBuilder)
 {
-	m_ligoData = data;
+	m_index = index;
+	m_newMinX = newMinX;
+	m_newMaxX = newMaxX;
+	m_newMinY = newMinY;
+	m_newMaxY = newMaxY;
+
+	// Backup old region zone
+	m_oldZoneRegion = m_zoneBuilder->zoneRegion(m_index)->zoneRegion();
 }
 
-DelLigoTileCommand::~DelLigoTileCommand()
+LigoResizeCommand::~LigoResizeCommand()
 {
 }
 
-void DelLigoTileCommand::undo()
+void LigoResizeCommand::undo ()
 {
-	m_item = m_scene->createZoneItem(m_ligoData);
+	// Restore old region zone
+	m_zoneBuilder->zoneRegion(m_index)->setZoneRegion(m_oldZoneRegion);
 }
 
-void DelLigoTileCommand::redo()
+void LigoResizeCommand::redo ()
 {
-	m_item = m_scene->itemAt(m_ligoData.PosX * m_scene->cellSize(), m_ligoData.PosY * m_scene->cellSize());
-	delete m_item;
-	m_item = 0;
-	setText(QObject::tr("Del tile(%1, %2)").arg(m_ligoData.PosX).arg(m_ligoData.PosY));
+	// Get the zone region
+	NLLIGO::CZoneRegion &region = m_zoneBuilder->zoneRegion(m_index)->zoneRegion();
+
+	sint32 i, j;
+	std::vector<LigoData> newZones;
+	newZones.resize((1 + m_newMaxX - m_newMinX) * (1 + m_newMaxY - m_newMinY));
+
+	sint32 newStride = 1 + m_newMaxX - m_newMinX;
+	sint32 Stride = 1 + region.getMaxX() - region.getMinX();
+
+	for (j = m_newMinY; j <= m_newMaxY; ++j)
+		for (i = m_newMinX; i <= m_newMaxX; ++i)
+		{
+			// Ref on the new value
+			LigoData &data = newZones[(i - m_newMinX) + (j - m_newMinY) * newStride];
+
+			// In the old array ?
+			if ((i >= region.getMinX()) && (i <= region.getMaxX()) &&
+					(j >= region.getMinY()) && (j <= region.getMaxY()))
+			{
+				// Backup values
+				m_zoneBuilder->ligoData(data, ZonePosition(i, j, m_index));
+			}
+		}
+	region.resize(m_newMinX, m_newMaxX, m_newMinY, m_newMaxY);
+
+	for (j = m_newMinY; j <= m_newMaxY; ++j)
+		for (i = m_newMinX; i <= m_newMaxX; ++i)
+		{
+			// Ref on the new value
+			const LigoData &data = newZones[(i - m_newMinX) + (j - m_newMinY) * newStride];
+
+			region.setName(i, j, data.zoneName);
+			region.setPosX(i, j, data.posX);
+			region.setPosY(i, j, data.posY);
+			region.setRot(i, j, data.rot);
+			region.setFlip(i, j, data.flip);
+			uint k;
+			for (k = 0; k < 4; k++)
+			{
+				region.setSharingMatNames(i, j, k, data.sharingMatNames[k]);
+				region.setSharingCutEdges(i, j, k, data.sharingCutEdges[k]);
+			}
+		}
 }
 
 } /* namespace LandscapeEditor */

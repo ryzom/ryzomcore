@@ -18,6 +18,7 @@
 // Project includes
 #include "list_zones_widget.h"
 #include "list_zones_model.h"
+#include "builder_zone.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -100,17 +101,34 @@ void ListZonesWidget::updateUi()
 	m_listZonesModel->rebuildModel(m_zoneBuilder->pixmapDatabase());
 }
 
-LigoData ListZonesWidget::currentLigoData() const
+QString ListZonesWidget::currentZoneName() const
 {
-	LigoData ligoData;
-	ligoData.ZoneName = "";
+	QString zoneName = "";
 	QModelIndex index = m_ui.listView->currentIndex();
 	if (index.isValid())
-		ligoData.ZoneName = index.data().toString().toStdString();
+		zoneName = index.data().toString();
 
-	ligoData.Rot = m_ui.rotComboBox->currentIndex();
-	ligoData.Flip = m_ui.flipComboBox->currentIndex();
-	return ligoData;
+	return zoneName;
+}
+
+int ListZonesWidget::currentRot() const
+{
+	return m_ui.rotComboBox->currentIndex();
+}
+
+int ListZonesWidget::currentFlip() const
+{
+	return m_ui.flipComboBox->currentIndex();
+}
+
+bool ListZonesWidget::isNotPropogate() const
+{
+	return m_ui.propogateCheckBox->isChecked();
+}
+
+bool ListZonesWidget::isForce() const
+{
+	return m_ui.forceCheckBox->isChecked();
 }
 
 void ListZonesWidget::setZoneBuilder(ZoneBuilder *zoneBuilder)

@@ -19,9 +19,12 @@
 #define BUILDER_ZONE_H
 
 // Project includes
+#include "builder_zone_region.h"
+#include "zone_region_editor.h"
 
 // NeL includes
 #include <nel/ligo/zone_bank.h>
+#include <nel/ligo/zone_region.h>
 
 // STL includes
 #include <string>
@@ -30,11 +33,38 @@
 // Qt includes
 #include <QtCore/QString>
 #include <QtCore/QMap>
+#include <QtCore/QList>
 #include <QtCore/QString>
 #include <QtGui/QPixmap>
+#include <QtGui/QUndoStack>
 
 namespace LandscapeEditor
 {
+class ListZonesWidget;
+class LandscapeScene;
+
+// Data
+struct ZonePosition
+{
+	// Absolute position
+	sint32 x;
+	sint32 y;
+	int region;
+
+	ZonePosition()
+	{
+		x = 0xffffffff;
+		y = 0xffffffff;
+		region = -1;
+	}
+
+	ZonePosition(const sint32 posX, const sint32 posY, const int id)
+	{
+		x = posX;
+		y = posY;
+		region = id;
+	}
+};
 
 /**
 @class PixmapDatabase
@@ -59,8 +89,12 @@ public:
 	/// Get original pixmap
 	/// @return QPixmap* if the image is in the database ; otherwise returns 0.
 	QPixmap *pixmap(const QString &zoneName) const;
+
+	int textureSize() const;
+
 private:
 
+	int m_textureSize;
 	QMap<QString, QPixmap*> m_pixmapMap;
 };
 
@@ -74,13 +108,37 @@ PixmapDatabase contains the graphics for the zones
 class ZoneBuilder
 {
 public:
-	ZoneBuilder();
+	ZoneBuilder(ListZonesWidget *listZonesWidget, LandscapeScene *landscapeScene, QUndoStack *undoStack);
 	~ZoneBuilder();
 
-	// Init zoneBank and init zone pixmap database
+	/// Init zoneBank and init zone pixmap database
 	bool init(const QString &pathName, bool bMakeAZone);
 
-	void newZone(bool bDisplay=true);
+	void calcMask();
+	void newZone();
+	bool getZoneMask (sint32 x, sint32 y);
+	bool getZoneAmongRegions(ZonePosition &zonePos, BuilderZoneRegion *builderZoneRegionFrom, sint32 x, sint32 y);
+
+	// Ligo Actions
+	void actionLigoTile(const LigoData &data, const ZonePosition &zonePos);
+	void actionLigoMove(uint index, sint32 deltaX, sint32 deltaY);
+	void actionLigoResize(uint index, sint32 newMinX, sint32 newMaxX, sint32 newMinY, sint32 newMaxY);
+
+	// Zone Bricks
+	void addZone(sint32 posX, sint32 posY);
+	void addTransition(const sint32 posX, const sint32 posY);
+	void delZone(const sint32 posX, const sint32 posY);
+
+	// Zone Region
+	int createZoneRegion();
+	void deleteZoneRegion(int id);
+	void setCurrentZoneRegion(int id);
+	int currentIdZoneRegion() const;
+	ZoneRegionEditor *currentZoneRegion() const;
+	int countZoneRegion() const;
+	ZoneRegionEditor *zoneRegion(int id) const;
+	void ligoData(LigoData &data, const ZonePosition &zonePos);
+	void setLigoData(LigoData &data, const ZonePosition &zonePos);
 
 	// Accessors
 	NLLIGO::CZoneBank &getZoneBank()
@@ -94,15 +152,24 @@ public:
 
 private:
 
-	// Scan ./zoneligos dir and add all *.ligozone files to zoneBank
+	/// Scan ./zoneligos dir and add all *.ligozone files to zoneBank
 	bool initZoneBank (const QString &path);
 
 	sint32 m_minX, m_maxX, m_minY, m_maxY;
+	std::vector<bool> m_zoneMask;
+
 	QString m_lastPathName;
+
+	QList<ZoneRegionEditor *> m_zoneRegions;
+	int m_currentZoneRegion;
+
+	std::vector<BuilderZoneRegion *> m_builderZoneRegions;
 
 	PixmapDatabase *m_pixmapDatabase;
 	NLLIGO::CZoneBank m_zoneBank;
-	std::vector<NLLIGO::CZoneBankElement*> m_currentSelection;
+	ListZonesWidget *m_listZonesWidget;
+	LandscapeScene *m_landscapeScene;
+	QUndoStack *m_undoStack;
 };
 
 } /* namespace LandscapeEditor */

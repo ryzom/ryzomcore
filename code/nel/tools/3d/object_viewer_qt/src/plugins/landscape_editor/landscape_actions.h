@@ -56,36 +56,64 @@ public:
 private:
 };
 
-class AddLigoTileCommand: public QUndoCommand
+// Modify the landscape
+class LigoTileCommand: public QUndoCommand
 {
 public:
-	AddLigoTileCommand(const LigoData &data, LandscapeScene *scene, QUndoCommand *parent = 0);
-	virtual ~AddLigoTileCommand();
+	LigoTileCommand(const LigoData &data, const ZonePosition &zonePos,
+					ZoneBuilder *zoneBuilder, LandscapeScene *scene,
+					QUndoCommand *parent = 0);
+	virtual ~LigoTileCommand();
 
 	virtual void undo();
 	virtual void redo();
 
 private:
-
-	LigoData m_ligoData;
-	QGraphicsItem *m_item;
+	ZonePosition m_zonePos;
+	LigoData m_newLigoData;
+	LigoData m_oldLigoData;
+	ZoneBuilder *m_zoneBuilder;
 	LandscapeScene *m_scene;
 };
-
-class DelLigoTileCommand: public QUndoCommand
+/*
+// Move the landscape
+class LigoMoveCommand: public QUndoCommand
 {
 public:
-	DelLigoTileCommand(const LigoData &data, LandscapeScene *scene, QUndoCommand *parent = 0);
-	virtual ~DelLigoTileCommand();
+
+	LigoMoveCommand(int index, sint32 deltaX, sint32 deltaY, ZoneBuilder *zoneBuilder, QUndoCommand *parent = 0);
+	virtual ~LigoMoveCommand();
+
+	virtual void undo();
+	virtual void redo();
+private:
+
+	int m_index;
+	sint32 m_deltaX;
+	sint32 m_deltaY;
+	ZoneBuilder *m_zoneBuilder;
+};
+*/
+// Modify the landscape
+class LigoResizeCommand: public QUndoCommand
+{
+public:
+	LigoResizeCommand(int index, sint32 newMinX, sint32 newMaxX,
+					  sint32 newMinY, sint32 newMaxY, ZoneBuilder *zoneBuilder,
+					  QUndoCommand *parent = 0);
+	virtual ~LigoResizeCommand();
 
 	virtual void undo();
 	virtual void redo();
 
 private:
-
-	LigoData m_ligoData;
-	QGraphicsItem *m_item;
-	LandscapeScene *m_scene;
+	int m_index;
+	sint32 m_newMinX;
+	sint32 m_newMaxX;
+	sint32 m_newMinY;
+	sint32 m_newMaxY;
+	NLLIGO::CZoneRegion m_oldZoneRegion;
+	ZoneBuilder *m_zoneBuilder;
 };
 
 } /* namespace LandscapeEditor */

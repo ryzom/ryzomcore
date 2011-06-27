@@ -19,6 +19,8 @@
 #define LANDSCAPE_SCENE_H
 
 // Project includes
+#include "zone_region_editor.h"
+#include "builder_zone.h"
 
 // NeL includes
 #include <nel/ligo/zone_region.h>
@@ -26,54 +28,25 @@
 // Qt includes
 #include <QtGui/QGraphicsScene>
 #include <QtGui/QGraphicsSceneMouseEvent>
-#include <QtGui/QUndoStack>
 
 namespace LandscapeEditor
 {
-class ZoneBuilder;
-class ListZonesWidget;
-
-// Data
-struct LigoData
-{
-	sint32			PosX;
-	sint32			PosY;
-	uint8			Rot;
-	uint8			Flip;
-	std::string		ZoneName;
-	std::string		SharingMatNames[4];
-	uint8			SharingCutEdges[4];
-	bool operator!= (const LigoData& other) const
-	{
-		return (PosX != other.PosX) ||
-			   (PosY != other.PosY) ||
-			   (Rot != other.Rot) ||
-			   (Flip != other.Flip) ||
-			   (ZoneName != other.ZoneName) ||
-			   (SharingMatNames[0] != other.SharingMatNames[0]) ||
-			   (SharingMatNames[1] != other.SharingMatNames[1]) ||
-			   (SharingMatNames[2] != other.SharingMatNames[2]) ||
-			   (SharingMatNames[3] != other.SharingMatNames[3]) ||
-			   (SharingCutEdges[0] != other.SharingCutEdges[0]) ||
-			   (SharingCutEdges[1] != other.SharingCutEdges[1]) ||
-			   (SharingCutEdges[2] != other.SharingCutEdges[2]) ||
-			   (SharingCutEdges[3] != other.SharingCutEdges[3]);
-	}
-};
 
 class LandscapeScene : public QGraphicsScene
 {
 	Q_OBJECT
 
 public:
-	LandscapeScene(QUndoStack *undoStack, ListZonesWidget *listZonesWidget, ZoneBuilder *zoneBuilder, QObject *parent = 0);
+	LandscapeScene(QObject *parent = 0);
 	virtual ~LandscapeScene();
 
 	int cellSize() const;
+	void setZoneBuilder(ZoneBuilder *zoneBuilder);
 
-	QGraphicsItem *createZoneItem(const LigoData &data);
+	QGraphicsItem *createZoneItem(const LigoData &data, const ZonePosition &zonePos);
+	QGraphicsItem *createEmptyZoneItem(const ZonePosition &zonePos);
+	void deleteZoneItem(const ZonePosition &zonePos);
 	void processZoneRegion(const NLLIGO::CZoneRegion &zoneRegion);
-	void setCurrentZoneRegion(NLLIGO::CZoneRegion *zoneRegion);
 
 	void snapshot(const QString &fileName, int sizeSource);
 	void snapshot(const QString &fileName, int width, int height);
@@ -82,12 +55,10 @@ protected:
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
 
 private:
+	void checkUnderZone(const LigoData &data, const ZonePosition &zonePos);
 
 	int m_cellSize;
-	ListZonesWidget *m_listZonesWidget;
-	QUndoStack *m_undoStack;
 	ZoneBuilder *m_zoneBuilder;
-	NLLIGO::CZoneRegion *m_zoneRegion;
 };
 
 } /* namespace LandscapeEditor */

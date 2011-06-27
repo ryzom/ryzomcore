@@ -19,6 +19,7 @@
 #include "landscape_editor_window.h"
 #include "landscape_editor_constants.h"
 #include "builder_zone.h"
+#include "zone_region_editor.h"
 #include "landscape_scene.h"
 #include "project_settings_dialog.h"
 #include "snapshot_dialog.h"
@@ -45,12 +46,14 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	m_ui.setupUi(this);
 
 	m_undoStack = new QUndoStack(this);
-	m_zoneBuilder = new ZoneBuilder();
-	m_zoneBuilder->init("e:/-nel-/install/continents/newbieland", false);
+	m_landscapeScene = new LandscapeScene(this);
+
+	m_zoneBuilder = new ZoneBuilder(m_ui.zoneListWidget, m_landscapeScene, m_undoStack);
+	m_zoneBuilder->init("e:/-nel-/install/continents/newbieland", true);
 	m_ui.zoneListWidget->setZoneBuilder(m_zoneBuilder);
 	m_ui.zoneListWidget->updateUi();
 
-	m_landscapeScene = new LandscapeScene(m_undoStack, m_ui.zoneListWidget, m_zoneBuilder, this);
+	m_landscapeScene->setZoneBuilder(m_zoneBuilder);
 	m_ui.graphicsView->setScene(m_landscapeScene);
 	//m_ui.graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::DoubleBuffer)));
 	m_ui.graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::SampleBuffers)));
@@ -88,11 +91,14 @@ void LandscapeEditorWindow::open()
 		_lastDir = QFileInfo(list.front()).absolutePath();
 		Q_FOREACH(QString fileName, fileNames)
 		{
-			m_zoneRegionEditor.load(fileName.toStdString());
-			m_landscapeScene->processZoneRegion(m_zoneRegionEditor.zoneRegion());
-			m_landscapeScene->setCurrentZoneRegion(&m_zoneRegionEditor.zoneRegion());
-			m_ui.graphicsView->centerOn(m_zoneRegionEditor.zoneRegion().getMinX() * m_landscapeScene->cellSize(),
-										abs(m_zoneRegionEditor.zoneRegion().getMinY()) * m_landscapeScene->cellSize());
+			int id = m_zoneBuilder->createZoneRegion();
+			ZoneRegionEditor *zoneRegion = m_zoneBuilder->zoneRegion(id);
+			zoneRegion->load(fileName.toStdString());
+			m_landscapeScene->processZoneRegion(zoneRegion->zoneRegion());
+			m_ui.graphicsView->centerOn(zoneRegion->zoneRegion().getMinX() * m_landscapeScene->cellSize(),
+										abs(zoneRegion->zoneRegion().getMinY()) * m_landscapeScene->cellSize());
+
+			m_zoneBuilder->setCurrentZoneRegion(id);
 		}
 	}
 	setCursor(Qt::ArrowCursor);

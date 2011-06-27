@@ -17,9 +17,6 @@
 
 // Project includes
 #include "landscape_scene.h"
-#include "builder_zone.h"
-#include "landscape_actions.h"
-#include "list_zones_widget.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -32,12 +29,9 @@
 namespace LandscapeEditor
 {
 
-LandscapeScene::LandscapeScene(QUndoStack *undoStack, ListZonesWidget *listZonesWidget, ZoneBuilder *zoneBuilder, QObject *parent)
+LandscapeScene::LandscapeScene(QObject *parent)
 	: QGraphicsScene(parent),
-	  m_undoStack(undoStack),
-	  m_listZonesWidget(listZonesWidget),
-	  m_zoneBuilder(zoneBuilder),
-	  m_zoneRegion(0)
+	  m_zoneBuilder(0)
 {
 	m_cellSize = 160;
 }
@@ -51,20 +45,34 @@ int LandscapeScene::cellSize() const
 	return m_cellSize;
 }
 
-QGraphicsItem *LandscapeScene::createZoneItem(const LigoData &data)
+void LandscapeScene::setZoneBuilder(ZoneBuilder *zoneBuilder)
 {
+	m_zoneBuilder = zoneBuilder;
+}
+
+QGraphicsItem *LandscapeScene::createZoneItem(const LigoData &data, const ZonePosition &zonePos)
+{
+	if (data.zoneName == STRING_UNUSED)
+		return createEmptyZoneItem(zonePos);
+
+	if ((m_zoneBuilder == 0) || (data.zoneName.empty()) ||
+			(data.posX != 0) || (data.posY != 0))
+		return 0;
+
+	checkUnderZone(data, zonePos);
+
 	// Get image from pixmap database
-	QPixmap *pixmap = m_zoneBuilder->pixmapDatabase()->pixmap(QString(data.ZoneName.c_str()));
+	QPixmap *pixmap = m_zoneBuilder->pixmapDatabase()->pixmap(QString(data.zoneName.c_str()));
 	if (pixmap == 0)
 		return 0;
 
 	// Rotate the image counterclockwise
 	QMatrix matrix;
-	matrix.rotate(-data.Rot * 90.0);
+	matrix.rotate(-data.rot * 90.0);
 
 	QGraphicsPixmapItem *item;
 
-	if (data.Flip == 0)
+	if (data.flip == 0)
 	{
 		item = new QGraphicsPixmapItem(pixmap->transformed(matrix, Qt::SmoothTransformation), 0, this);
 	}
@@ -79,24 +87,49 @@ QGraphicsItem *LandscapeScene::createZoneItem(const LigoData &data)
 	item->setTransformationMode(Qt::SmoothTransformation);
 
 	// Set position graphics item with offset for large piece
-	NLLIGO::CZoneBankElement *zoneBankItem = m_zoneBuilder->getZoneBank().getElementByZoneName(data.ZoneName);
-	item->setPos(data.PosX * m_cellSize, (abs(data.PosY) - zoneBankItem->getSizeY() + 1) * m_cellSize);
+	NLLIGO::CZoneBankElement *zoneBankItem = m_zoneBuilder->getZoneBank().getElementByZoneName(data.zoneName);
+	item->setPos(zonePos.x * m_cellSize, (abs(zonePos.y) - zoneBankItem->getSizeY() + 1) * m_cellSize);
 
 	// The size graphics item should be equal or proportional m_cellSize
-	item->setScale(m_cellSize / 256.0);
-
-	// add debug info
-	QGraphicsSimpleTextItem *itemText = addSimpleText(QString("%1,%2 R-%3 F-%4").
-										arg(data.PosX).arg(data.PosY).
-										arg(data.Rot * 90.0).
-										arg(data.Flip),
-										QFont("Helvetica [Cronyx]", 14));
-
-	itemText->setZValue(2);
-	itemText->setPos(data.PosX * m_cellSize + 10, (abs(data.PosY) - zoneBankItem->getSizeY() + 1) * m_cellSize + 10);
-	itemText->setBrush(QBrush(Qt::white));
+	item->setScale(float(m_cellSize) / m_zoneBuilder->pixmapDatabase()->textureSize());
 
 	return item;
+}
+
+QGraphicsItem *LandscapeScene::createEmptyZoneItem(const ZonePosition &zonePos)
+{
+	if (m_zoneBuilder == 0)
+		return 0;
+
+	deleteZoneItem(zonePos);
+
+	// Get image from pixmap database
+	QPixmap *pixmap = m_zoneBuilder->pixmapDatabase()->pixmap(QString(STRING_UNUSED));
+	if (pixmap == 0)
+		return 0;
+
+	QGraphicsPixmapItem *item = new QGraphicsPixmapItem(*pixmap, 0, this);
+
+	// Enable bilinear filtering
+	item->setTransformationMode(Qt::SmoothTransformation);
+
+	// Set position graphics item
+	item->setPos(zonePos.x * m_cellSize, abs(int(zonePos.y)) * m_cellSize);
+
+	// The size graphics item should be equal or proportional m_cellSize
+	item->setScale(float(m_cellSize) / m_zoneBuilder->pixmapDatabase()->textureSize());
+
+	return item;
+}
+
+void LandscapeScene::deleteZoneItem(const ZonePosition &zonePos)
+{
+	QGraphicsItem *item = itemAt(zonePos.x * m_cellSize, abs(zonePos.y) * m_cellSize);
+	if (item != 0)
+	{
+		removeItem(item);
+		delete item;
+	}
 }
 
 void LandscapeScene::processZoneRegion(const NLLIGO::CZoneRegion &zoneRegion)
@@ -105,109 +138,105 @@ void LandscapeScene::processZoneRegion(const NLLIGO::CZoneRegion &zoneRegion)
 	{
 		for (sint32 j = zoneRegion.getMinY(); j <= zoneRegion.getMaxY(); ++j)
 		{
+			nlinfo(QString("%1 %2 %3").arg(i).arg(j).arg(zoneRegion.getName(i, j).c_str()).toStdString().c_str());
 			std::string zoneName = zoneRegion.getName(i, j);
-			if ((!zoneName.empty()) &&
-					(zoneName != STRING_UNUSED) &&
-					(zoneRegion.getPosX(i, j) == 0) &&
-					(zoneRegion.getPosY(i, j) == 0))
+			if (zoneName == STRING_UNUSED)
+			{
+				ZonePosition zonePos(i, j, -1);
+				QGraphicsItem *item = createEmptyZoneItem(zonePos);
+			}
+			else if (!zoneName.empty())
 			{
 				LigoData data;
-				data.PosX = i;
-				data.PosY = j;
-				data.ZoneName = zoneName;
-				data.Rot = zoneRegion.getRot(i, j);
-				data.Flip = zoneRegion.getFlip(i, j);
-				QGraphicsItem *item = createZoneItem(data);
+				ZonePosition zonePos(i, j, -1);
+				data.zoneName = zoneName;
+				data.rot = zoneRegion.getRot(i, j);
+				data.flip = zoneRegion.getFlip(i, j);
+				data.posX = zoneRegion.getPosX(i, j);
+				data.posY = zoneRegion.getPosY(i, j);
+				QGraphicsItem *item = createZoneItem(data, zonePos);
 			}
 		}
 	}
 }
 
-void LandscapeScene::setCurrentZoneRegion(NLLIGO::CZoneRegion *zoneRegion)
-{
-	m_zoneRegion = zoneRegion;
-}
-
 void LandscapeScene::snapshot(const QString &fileName, int sizeSource)
 {
-	if (m_zoneRegion == 0)
-		return;
+	/*	if (m_zoneRegion == 0)
+			return;
 
-	sint32 regionMinX = m_zoneRegion->getMinX();
-	sint32 regionMaxX = m_zoneRegion->getMaxX();
-	sint32 regionMinY = m_zoneRegion->getMinY();
-	sint32 regionMaxY = m_zoneRegion->getMaxY();
+		sint32 regionMinX = m_zoneRegion->getMinX();
+		sint32 regionMaxX = m_zoneRegion->getMaxX();
+		sint32 regionMinY = m_zoneRegion->getMinY();
+		sint32 regionMaxY = m_zoneRegion->getMaxY();
 
-	int regionWidth = (regionMaxX - regionMinX + 1);
-	int regionHeight = (regionMaxY - regionMinY + 1);
+		int regionWidth = (regionMaxX - regionMinX + 1);
+		int regionHeight = (regionMaxY - regionMinY + 1);
 
-	snapshot(fileName, regionWidth * sizeSource, regionHeight * sizeSource);
+		snapshot(fileName, regionWidth * sizeSource, regionHeight * sizeSource);
+		*/
 }
 
 void LandscapeScene::snapshot(const QString &fileName, int width, int height)
 {
-	if (m_zoneRegion == 0)
+	if (m_zoneBuilder == 0)
 		return;
 
-	sint32 regionMinX = m_zoneRegion->getMinX();
-	sint32 regionMaxX = m_zoneRegion->getMaxX();
-	sint32 regionMinY = m_zoneRegion->getMinY();
-	sint32 regionMaxY = m_zoneRegion->getMaxY();
+	/*	if (m_zoneRegion == 0)
+			return;
 
-	int regionWidth = (regionMaxX - regionMinX + 1);
-	int regionHeight = (regionMaxY - regionMinY + 1);
+		sint32 regionMinX = m_zoneRegion->getMinX();
+		sint32 regionMaxX = m_zoneRegion->getMaxX();
+		sint32 regionMinY = m_zoneRegion->getMinY();
+		sint32 regionMaxY = m_zoneRegion->getMaxY();
 
-	QImage image(width, height, QImage::Format_RGB888);
-	QPainter painter(&image);
-	painter.setRenderHint(QPainter::Antialiasing, true);
+		int regionWidth = (regionMaxX - regionMinX + 1);
+		int regionHeight = (regionMaxY - regionMinY + 1);
 
-	// add white background
-	painter.setBrush(QBrush(Qt::white));
-	painter.setPen(Qt::NoPen);
-	painter.drawRect(0, 0, width, height);
+		QImage image(width, height, QImage::Format_RGB888);
+		QPainter painter(&image);
+		painter.setRenderHint(QPainter::Antialiasing, true);
 
-	render(&painter, QRectF(0, 0, width, height),
-		   QRectF(regionMinX * m_cellSize, abs(regionMaxY) * m_cellSize, regionWidth * m_cellSize, regionHeight * m_cellSize));
+		// add white background
+		painter.setBrush(QBrush(Qt::white));
+		painter.setPen(Qt::NoPen);
+		painter.drawRect(0, 0, width, height);
 
-	image.save(fileName);
+		render(&painter, QRectF(0, 0, width, height),
+			   QRectF(regionMinX * m_cellSize, abs(regionMaxY) * m_cellSize, regionWidth * m_cellSize, regionHeight * m_cellSize));
 
+		image.save(fileName);
+	*/
 }
 
 void LandscapeScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
+	if (m_zoneBuilder == 0)
+		return;
+
 	qreal x = mouseEvent->scenePos().rx();
 	qreal y = mouseEvent->scenePos().ry();
 	if ((x < 0) || (y < 0))
 		return;
 
+	sint32 posX = sint32(floor(x / m_cellSize));
+	sint32 posY = sint32(-floor(y / m_cellSize));
+
 	if (mouseEvent->button() == Qt::LeftButton)
-	{
-		// Add new zone brick
-		LigoData ligoData = m_listZonesWidget->currentLigoData();
-		if (ligoData.ZoneName == "")
-			return;
+		m_zoneBuilder->addZone(posX, posY);
+	else if (mouseEvent->button() == Qt::RightButton)
+		m_zoneBuilder->delZone(posX, posY);
 
-		ligoData.PosX = int(floor(x / m_cellSize));
-		ligoData.PosY = int(-floor(y / m_cellSize));
-
-		AddLigoTileCommand *action = new AddLigoTileCommand(ligoData, this);
-		m_undoStack->push(action);
-	}
-
-	/*if (mouseEvent->button() == Qt::RightButton)
-	{
-		// Delete zone brick
-		LigoData ligoData;
-
-		ligoData.PosX = int(floor(x / m_cellSize));
-		ligoData.PosY = int(floor(y / m_cellSize));
-		ligoData.ZoneName = m_zoneRegion->getName(ligoData.PosX, -ligoData.PosY);
-		ligoData.Flip = m_zoneRegion->getFlip(ligoData.PosX, -ligoData.PosY);
-		ligoData.Rot = m_zoneRegion->getRot(ligoData.PosX, -ligoData.PosY);
-		DelLigoTileCommand *action = new DelLigoTileCommand(ligoData, this);
-		m_undoStack->push(action);
-	}*/
 	QGraphicsScene::mousePressEvent(mouseEvent);
+}
+
+void LandscapeScene::checkUnderZone(const LigoData &data, const ZonePosition &zonePos)
+{
+//	NLLIGO::CZoneBankElement *zoneBankItem = m_zoneBuilder->getZoneBank().getElementByZoneName(data.zoneName);
+//	uint8 sizeX = zoneBankItem->getSizeX();
+//	uint8 sizeY = zoneBankItem->getSizeY();
+//	std::vector<bool> &mask = zoneBankItem->getMask();
+	deleteZoneItem(zonePos);
 }
 
 } /* namespace LandscapeEditor */

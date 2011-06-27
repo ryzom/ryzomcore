@@ -20,8 +20,6 @@
 
 // Project includes
 #include "ui_list_zones_widget.h"
-#include "builder_zone.h"
-#include "landscape_scene.h"
 
 // NeL includes
 
@@ -30,6 +28,7 @@
 namespace LandscapeEditor
 {
 class ListZonesModel;
+class ZoneBuilder;
 
 /**
 @class ZoneListWidget
@@ -46,7 +45,11 @@ public:
 
 	void updateUi();
 	void setZoneBuilder(ZoneBuilder *zoneBuilder);
-	LigoData currentLigoData() const;
+	QString currentZoneName() const;
+	int currentRot() const;
+	int currentFlip() const;
+	bool isNotPropogate() const;
+	bool isForce() const;
 
 Q_SIGNALS:
 private Q_SLOTS:

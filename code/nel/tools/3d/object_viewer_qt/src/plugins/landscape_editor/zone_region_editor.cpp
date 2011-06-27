@@ -30,6 +30,23 @@
 namespace LandscapeEditor
 {
 
+LigoData::LigoData()
+{
+	posX = 0;
+	posY = 0;
+	zoneName = "";
+	rot = 0;
+	flip = 0;
+	sharingMatNames[0] = "";
+	sharingMatNames[1] = "";
+	sharingMatNames[2] = "";
+	sharingMatNames[3] = "";
+	sharingCutEdges[0] = 0;
+	sharingCutEdges[1] = 0;
+	sharingCutEdges[2] = 0;
+	sharingCutEdges[3] = 0;
+}
+
 ZoneRegionEditor::ZoneRegionEditor()
 {
 	m_fileName = "";
@@ -111,9 +128,58 @@ void ZoneRegionEditor::setFileName(const std::string &fileName)
 	m_fileName = fileName;
 }
 
+void ZoneRegionEditor::ligoData(LigoData &data, const sint32 x, const sint32 y)
+{
+	nlassert((x >= m_zoneRegion.getMinX()) &&
+			 (x <= m_zoneRegion.getMaxX()) &&
+			 (y >= m_zoneRegion.getMinY()) &&
+			 (y <= m_zoneRegion.getMaxY()));
+
+	data.posX = m_zoneRegion.getPosX(x, y);
+	data.posY = m_zoneRegion.getPosY(x, y);
+	data.zoneName = m_zoneRegion.getName(x, y);
+	data.rot = m_zoneRegion.getRot(x, y);
+	data.flip = m_zoneRegion.getFlip(x, y);
+	data.sharingMatNames[0] = m_zoneRegion.getSharingMatNames(x, y, 0);
+	data.sharingMatNames[1] = m_zoneRegion.getSharingMatNames(x, y, 1);
+	data.sharingMatNames[2] = m_zoneRegion.getSharingMatNames(x, y, 2);
+	data.sharingMatNames[3] = m_zoneRegion.getSharingMatNames(x, y, 3);
+	data.sharingCutEdges[0] = m_zoneRegion.getSharingCutEdges(x, y, 0);
+	data.sharingCutEdges[1] = m_zoneRegion.getSharingCutEdges(x, y, 1);
+	data.sharingCutEdges[2] = m_zoneRegion.getSharingCutEdges(x, y, 2);
+	data.sharingCutEdges[3] = m_zoneRegion.getSharingCutEdges(x, y, 3);
+}
+
+void ZoneRegionEditor::setLigoData(const LigoData &data, const sint32 x, const sint32 y)
+{
+	nlassert((x >= m_zoneRegion.getMinX()) &&
+			 (x <= m_zoneRegion.getMaxX()) &&
+			 (y >= m_zoneRegion.getMinY()) &&
+			 (y <= m_zoneRegion.getMaxY()));
+
+	m_zoneRegion.setPosX(x, y, data.posX);
+	m_zoneRegion.setPosY(x, y, data.posY);
+	m_zoneRegion.setName(x, y, data.zoneName);
+	m_zoneRegion.setRot(x, y, data.rot);
+	m_zoneRegion.setFlip(x, y, data.flip);
+	m_zoneRegion.setSharingMatNames(x, y, 0, data.sharingMatNames[0]);
+	m_zoneRegion.setSharingMatNames(x, y, 1, data.sharingMatNames[1]);
+	m_zoneRegion.setSharingMatNames(x, y, 2, data.sharingMatNames[2]);
+	m_zoneRegion.setSharingMatNames(x, y, 3, data.sharingMatNames[3]);
+	m_zoneRegion.setSharingCutEdges(x, y, 0, data.sharingCutEdges[0]);
+	m_zoneRegion.setSharingCutEdges(x, y, 1, data.sharingCutEdges[1]);
+	m_zoneRegion.setSharingCutEdges(x, y, 2, data.sharingCutEdges[2]);
+	m_zoneRegion.setSharingCutEdges(x, y, 3, data.sharingCutEdges[3]);
+}
+
 NLLIGO::CZoneRegion &ZoneRegionEditor::zoneRegion()
 {
 	return m_zoneRegion;
+}
+
+void ZoneRegionEditor::setZoneRegion(const NLLIGO::CZoneRegion &zoneRegion)
+{
+	m_zoneRegion = zoneRegion;
 }
 
 } /* namespace LandscapeEditor */

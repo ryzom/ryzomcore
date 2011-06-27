@@ -32,6 +32,36 @@
 namespace LandscapeEditor
 {
 
+struct LigoData
+{
+	uint8			posX;
+	uint8			posY;
+	uint8			rot;
+	uint8			flip;
+	std::string		zoneName;
+	std::string		sharingMatNames[4];
+	uint8			sharingCutEdges[4];
+
+	LigoData();
+
+	bool operator!= (const LigoData& other) const
+	{
+		return (posX != other.posX) ||
+			   (posY != other.posY) ||
+			   (rot != other.rot) ||
+			   (flip != other.flip) ||
+			   (zoneName != other.zoneName) ||
+			   (sharingMatNames[0] != other.sharingMatNames[0]) ||
+			   (sharingMatNames[1] != other.sharingMatNames[1]) ||
+			   (sharingMatNames[2] != other.sharingMatNames[2]) ||
+			   (sharingMatNames[3] != other.sharingMatNames[3]) ||
+			   (sharingCutEdges[0] != other.sharingCutEdges[0]) ||
+			   (sharingCutEdges[1] != other.sharingCutEdges[1]) ||
+			   (sharingCutEdges[2] != other.sharingCutEdges[2]) ||
+			   (sharingCutEdges[3] != other.sharingCutEdges[3]);
+	}
+};
+
 class ZoneRegionEditor
 {
 public:
@@ -44,10 +74,16 @@ public:
 	// Save landscape data to file
 	bool save();
 
+	void ligoData(LigoData &data, const sint32 x, const sint32 y);
+
+	void setLigoData(const LigoData &data, const sint32 x, const sint32 y);
+
 	// Set file name
 	void setFileName(const std::string &fileName);
 
 	NLLIGO::CZoneRegion &zoneRegion();
+
+	void setZoneRegion(const NLLIGO::CZoneRegion &zoneRegion);
 
 private:
 

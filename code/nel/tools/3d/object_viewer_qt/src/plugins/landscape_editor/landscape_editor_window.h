@@ -20,7 +20,6 @@
 
 // Project includes
 #include "ui_landscape_editor_window.h"
-#include "zone_region_editor.h"
 
 // Qt includes
 #include <QtGui/QUndoStack>
@@ -54,8 +53,6 @@ private:
 	void createToolBars();
 	void readSettings();
 	void writeSettings();
-
-	ZoneRegionEditor m_zoneRegionEditor;
 
 	LandscapeScene *m_landscapeScene;
 	ZoneBuilder *m_zoneBuilder;
