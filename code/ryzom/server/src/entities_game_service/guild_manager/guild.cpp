@@ -34,6 +34,7 @@
 #include "outpost_manager/outpost_manager.h"
 #include "primitives_parser.h"
 #include "modules/shard_unifier_client.h"
+#include "mission_manager/mission_manager.h"
 
 /// todo guild remove entity id translator
 #include "nel/misc/eid_translator.h"
@@ -686,23 +687,54 @@ void CGuild::unregisterGuild()
 //
 //}
 
-
 //----------------------------------------------------------------------------
-void CGuild::removeMission(CMissionGuild * mission, TMissionResult result)
+void CGuild::removeMission( uint idx, TMissionResult result)
 {
-	/// todo guild mission
+	if ( idx >= _Missions.size() )
+		return;
+
+	/// if the mission was finished, the result is success
+	if ( _Missions[idx]->getFinished() )
+	{
+		if ( _Missions[idx]->getMissionSuccess() )
+			result = mr_success;
+		else
+			result = mr_fail;
+	}
+
+	CMissionTemplate *tpl = CMissionManager::getInstance()->getTemplate(_Missions[idx]->getTemplateId());
+
+	if ( tpl && !tpl->Tags.NoList )
+	{
+		_Missions[idx]->clearUsersJournalEntry();
+	}
+
+	CMissionManager::getInstance()->deInstanciateMission(_Missions[idx]);
+	delete _Missions[idx];
+	_Missions.erase(_Missions.begin() + idx) ;
 }
 
 //----------------------------------------------------------------------------
 void CGuild::addSuccessfulMission(CMissionTemplate * templ)
 {
-	/// todo guild mission
+	/*TMissionHistory &mh = _MissionHistories[templ.Alias];
+	mh.Successfull = true;*/
+	/// TODO: Add the mission histories
 }
 
 //----------------------------------------------------------------------------
-bool CGuild::processMissionEvent( CMissionEvent & event, TAIAlias alias )
+bool CGuild::processMissionEvent( CMissionEvent & event, TAIAlias alias)
 {
-	/// todo guild mission
+	return true;
+}
+
+//----------------------------------------------------------------------------
+bool CGuild::isMissionSuccessfull(TAIAlias alias)
+{
+	/*std::map<TAIAlias, TMissionHistory>::iterator it(_MissionHistories.find(alias));
+	if (it != _MissionHistories.end())
+	return it->second.Successfull;*/
+	/// TODO: Add the mission histories
 	return false;
 }
 

@@ -27,6 +27,7 @@
 #include "outpost_manager/outpost_guild_db_updater.h"
 #include "guild_interface.h"
 #include "database_guild.h"
+#include "mission_manager/mission_guild.h"
 
 class CMissionGuild;
 class CGuildMember;
@@ -176,17 +177,30 @@ public:
 
 	///\name Mission management
 	//@{
-	void removeMission(CMissionGuild * mission, TMissionResult result);
+	void removeMission(CMissionGuild * mission, TMissionResult result)
+	{
+		for (uint i = 0; i < _Missions.size(); i++)
+		{
+			if ( _Missions[i] == mission )
+			{
+				removeMission(i, result);
+			}
+		}
+	}
+	void removeMission( uint idx, TMissionResult result);
 	void addSuccessfulMission(CMissionTemplate * templ);
 	bool processMissionEvent( CMissionEvent & event, TAIAlias alias = CAIAliasTranslator::Invalid);
+	bool isMissionSuccessfull(TAIAlias alias);
 	///\return the mission
 	inline std::vector<CMissionGuild*> & getMissions()
 	{
-		return std::vector<CMissionGuild*>();
-		// To Do
+		return _Missions;
 	}
-	void addMission(CMissionGuild* guildMission) {}
-	bool isMissionSuccessfull(TAIAlias alias) { return false; }
+	void addMission(CMissionGuild* guildMission)
+	{
+		_Missions.push_back(guildMission);
+		guildMission->updateUsersJournalEntry();
+	}
 	//@}
 
 	/// inventory management
@@ -358,6 +372,9 @@ private:
 	std::vector<TAIAlias>				_OwnedOutposts;
 	/// list of outposts challenged by guild
 	std::vector<TAIAlias>				_ChallengedOutposts;
+
+	///the missions took by the guild
+	std::vector<CMissionGuild*>			_Missions;
 
 	NLMISC_COMMAND_FRIEND( guildDB );
 };
