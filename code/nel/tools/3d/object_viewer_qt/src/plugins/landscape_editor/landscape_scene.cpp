@@ -56,19 +56,14 @@ void LandscapeScene::setZoneBuilder(ZoneBuilder *zoneBuilder)
 
 QGraphicsItem *LandscapeScene::createItemZone(const LigoData &data, const ZonePosition &zonePos)
 {
-	nlinfo(QString("%1,%2 (%3,%4)-%7 (%5,%6)").arg(zonePos.x).arg(zonePos.y).arg(data.posX).arg(data.posY).arg(data.rot).arg(data.flip).arg(data.zoneName.c_str()).toStdString().c_str());
 	if ((data.zoneName == STRING_OUT_OF_BOUND) || (checkUnderZone(zonePos.x, zonePos.y)))
 		return 0;
 
 	if (data.zoneName == STRING_UNUSED)
 		return createItemEmptyZone(zonePos);
 
-	if ((m_zoneBuilder == 0) || (data.zoneName.empty()) ||
-			(data.posX != 0) || (data.posY != 0))
+	if ((m_zoneBuilder == 0) || (data.zoneName.empty()))
 		return 0;
-
-//	if ((m_zoneBuilder == 0) || (data.zoneName.empty()))
-//		return 0;
 
 	// Get image from pixmap database
 	QPixmap *pixmap = m_zoneBuilder->pixmapDatabase()->pixmap(QString(data.zoneName.c_str()));
@@ -98,18 +93,69 @@ QGraphicsItem *LandscapeScene::createItemZone(const LigoData &data, const ZonePo
 	// Set position graphics item with offset for large piece
 	NLLIGO::CZoneBankElement *zoneBankItem = m_zoneBuilder->getZoneBank().getElementByZoneName(data.zoneName);
 
-	int delta = zoneBankItem->getSizeY() - 1;
-	if ((data.rot == 1) || (data.rot == 3))
-		delta = zoneBankItem->getSizeX() - 1;
+	sint32 deltaX = 0, deltaY = 0;
 
-	//item->setPos((zonePos.x - data.posX) * m_cellSize, (abs(int(zonePos.y)) + data.posY - delta) * m_cellSize);
-	item->setPos((zonePos.x) * m_cellSize, (abs(int(zonePos.y)) - delta) * m_cellSize);
+	// Calculate offset for graphics item (for items with size that are larger than 1)
+	if ((zoneBankItem->getSizeX() > 1) || (zoneBankItem->getSizeY() > 1))
+	{
+		sint32 sizeX = zoneBankItem->getSizeX(), sizeY = zoneBankItem->getSizeY();
+		if (data.flip == 0)
+		{
+			switch (data.rot)
+			{
+			case 0:
+				deltaX = -data.posX;
+				deltaY = -data.posY + sizeY - 1;
+				break;
+			case 1:
+				deltaX = -(sizeY - 1 - data.posY);
+				deltaY = -data.posX + sizeX - 1;
+				break;
+			case 2:
+				deltaX = -(sizeX - 1 - data.posX);
+				deltaY = data.posY;
+				break;
+			case 3:
+				deltaX = -data.posY;
+				deltaY = data.posX;
+				break;
+			}
+		}
+		else
+		{
+			switch (data.rot)
+			{
+			case 0:
+				deltaX = -(sizeX - 1 - data.posX);
+				deltaY = -data.posY + sizeY - 1;
+				break;
+			case 1:
+				deltaX = -(sizeY - 1 - data.posY);
+				deltaY = +data.posX;
+				break;
+			case 2:
+				deltaX = -data.posX;
+				deltaY = data.posY;
+				break;
+			case 3:
+				deltaX = -data.posY;
+				deltaY = -data.posX + sizeX - 1;
+				break;
+			}
+		}
+	}
+
+	// set position graphics item with taking into account the offset
+	item->setPos((zonePos.x + deltaX) * m_cellSize, (abs(int(zonePos.y + deltaY))) * m_cellSize);
 
 	// The size graphics item should be equal or proportional m_cellSize
 	item->setScale(float(m_cellSize) / m_zoneBuilder->pixmapDatabase()->textureSize());
 
 	item->setData(ZoneName, QString(data.zoneName.c_str()));
-	nlinfo("render");
+
+	// for not full item zone
+	item->setZValue(0);
+
 	return item;
 }
 
@@ -133,7 +179,10 @@ QGraphicsItem *LandscapeScene::createItemEmptyZone(const ZonePosition &zonePos)
 
 	// The size graphics item should be equal or proportional m_cellSize
 	item->setScale(float(m_cellSize) / m_zoneBuilder->pixmapDatabase()->textureSize());
-	nlinfo("render");
+
+	// for not full item zone
+	item->setZValue(1);
+
 	return item;
 }
 
@@ -153,7 +202,7 @@ void LandscapeScene::processZoneRegion(const NLLIGO::CZoneRegion &zoneRegion)
 	{
 		for (sint32 j = zoneRegion.getMinY(); j <= zoneRegion.getMaxY(); ++j)
 		{
-			nlinfo(QString("%1 %2 %3").arg(i).arg(j).arg(zoneRegion.getName(i, j).c_str()).toStdString().c_str());
+			//nlinfo(QString("%1 %2 %3").arg(i).arg(j).arg(zoneRegion.getName(i, j).c_str()).toStdString().c_str());
 			std::string zoneName = zoneRegion.getName(i, j);
 			if (zoneName == STRING_UNUSED)
 			{
@@ -254,34 +303,34 @@ void LandscapeScene::mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent)
 
 bool LandscapeScene::checkUnderZone(const int posX, const int posY)
 {
-	/*	QGraphicsItem *item = itemAt((posX * m_cellSize), abs(posY) * m_cellSize);
-		if (item != 0)
-		{
-			QString zoneName = item->data(ZoneName).toString();
-			return true;
-		}
-	*/	return false;
+	QGraphicsItem *item = itemAt((posX * m_cellSize), abs(posY) * m_cellSize);
+	if (item != 0)
+		return true;
+	return false;
 }
 
 void LandscapeScene::drawForeground(QPainter *painter, const QRectF &rect)
 {
 	QGraphicsScene::drawForeground(painter, rect);
-	painter->setPen(QPen(Qt::white, 0.5, Qt::SolidLine));
+	/*
+		// Render debug text (slow!)
+		painter->setPen(QPen(Qt::white, 0.5, Qt::SolidLine));
 
-	int left = int(floor(rect.left() / m_cellSize));
-	int right = int(floor(rect.right() / m_cellSize));
-	int top = int(floor(rect.top() / m_cellSize));
-	int bottom = int(floor(rect.bottom() / m_cellSize));
+		int left = int(floor(rect.left() / m_cellSize));
+		int right = int(floor(rect.right() / m_cellSize));
+		int top = int(floor(rect.top() / m_cellSize));
+		int bottom = int(floor(rect.bottom() / m_cellSize));
 
-	for (int i = left; i < right; ++i)
-	{
-		for (int j = top; j < bottom; ++j)
+		for (int i = left; i < right; ++i)
 		{
-			LigoData data;
-			m_zoneBuilder->currentZoneRegion()->ligoData(data, i, -j);
-			painter->drawText(i * m_cellSize + 10, j * m_cellSize + 10, QString("%1 %2 %3 %4").arg(i).arg(j).arg(data.posX).arg(data.posY));
+			for (int j = top; j < bottom; ++j)
+			{
+				LigoData data;
+				m_zoneBuilder->currentZoneRegion()->ligoData(data, i, -j);
+				painter->drawText(i * m_cellSize + 10, j * m_cellSize + 10, QString("%1 %2 %3 %4").arg(i).arg(j).arg(data.posX).arg(data.posY));
+			}
 		}
-	}
+	*/
 }
 
 } /* namespace LandscapeEditor */
