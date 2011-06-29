@@ -43,6 +43,7 @@ public:
 Q_SIGNALS:
 public Q_SLOTS:
 	void open();
+	void save();
 
 private Q_SLOTS:
 	void openProjectSettings();

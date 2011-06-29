@@ -167,18 +167,22 @@ bool ZoneBuilder::init(const QString &pathName, bool makeAZone)
 
 void ZoneBuilder::actionLigoTile(const LigoData &data, const ZonePosition &zonePos)
 {
+	checkBeginMacro();
 	nlinfo(QString("%1 %2 %3 (%4 %5)").arg(data.zoneName.c_str()).arg(zonePos.x).arg(zonePos.y).arg(data.posX).arg(data.posY).toStdString().c_str());
+	m_zonePositionList.push_back(zonePos);
 	m_undoStack->push(new LigoTileCommand(data, zonePos, this, m_landscapeScene));
 }
 
 void ZoneBuilder::actionLigoMove(uint index, sint32 deltaX, sint32 deltaY)
 {
+	checkBeginMacro();
 	nlinfo("ligoMove");
 	//m_undoStack->push(new LigoMoveCommand(index, deltaX, deltaY, this));
 }
 
 void ZoneBuilder::actionLigoResize(uint index, sint32 newMinX, sint32 newMaxX, sint32 newMinY, sint32 newMaxY)
 {
+	checkBeginMacro();
 	nlinfo(QString("minX=%1 maxX=%2 minY=%3 maxY=%4").arg(newMinX).arg(newMaxX).arg(newMinY).arg(newMaxY).toStdString().c_str());
 	m_undoStack->push(new LigoResizeCommand(index, newMinX, newMaxX, newMinY, newMaxY, this));
 }
@@ -201,7 +205,11 @@ void ZoneBuilder::addZone(sint32 posX, sint32 posY)
 
 	NLLIGO::CZoneBankElement *zoneBankElement = getZoneBank().getElementByZoneName(zoneName);
 
-	m_undoStack->beginMacro(QString("Add zone %1,%2").arg(posX).arg(posY));
+	m_titleAction = QString("Add zone %1,%2").arg(posX).arg(posY);
+	m_createdAction = false;
+	m_zonePositionList.clear();
+
+	nlinfo("---------");
 	if (m_listZonesWidget->isForce())
 	{
 		builderZoneRegion->addForce(posX, posY, rot, flip, zoneBankElement);
@@ -213,7 +221,7 @@ void ZoneBuilder::addZone(sint32 posX, sint32 posY)
 		else
 			builderZoneRegion->add(posX, posY, rot, flip, zoneBankElement);
 	}
-	m_undoStack->endMacro();
+	checkEndMacro();
 }
 
 void ZoneBuilder::addTransition(const sint32 posX, const sint32 posY)
@@ -225,17 +233,20 @@ void ZoneBuilder::delZone(const sint32 posX, const sint32 posY)
 	if (m_builderZoneRegions.empty())
 		return;
 
-	m_undoStack->beginMacro(QString("Del zone %1,%2").arg(posX).arg(posY));
+	m_titleAction = QString("Del zone %1,%2").arg(posX).arg(posY);
+	m_createdAction = false;
+
 	BuilderZoneRegion *builderZoneRegion = m_builderZoneRegions.at(m_currentZoneRegion);
 	std::string error;
+	nlinfo("---------");
 	builderZoneRegion->init(this, error);
 	builderZoneRegion->del(posX, posY);
-	m_undoStack->endMacro();
+	checkEndMacro();
 }
 
 int ZoneBuilder::createZoneRegion()
 {
-	ZoneRegionEditor *newZoneRegion = new ZoneRegionEditor();
+	ZoneRegionObject *newZoneRegion = new ZoneRegionObject();
 	m_zoneRegions.push_back(newZoneRegion);
 	if (m_currentZoneRegion == -1)
 		m_currentZoneRegion = m_zoneRegions.indexOf(newZoneRegion);
@@ -261,7 +272,7 @@ int ZoneBuilder::currentIdZoneRegion() const
 	return m_currentZoneRegion;
 }
 
-ZoneRegionEditor *ZoneBuilder::currentZoneRegion() const
+ZoneRegionObject *ZoneBuilder::currentZoneRegion() const
 {
 	return m_zoneRegions.at(m_currentZoneRegion);
 }
@@ -271,7 +282,7 @@ int ZoneBuilder::countZoneRegion() const
 	return m_zoneRegions.size();
 }
 
-ZoneRegionEditor *ZoneBuilder::zoneRegion(int id) const
+ZoneRegionObject *ZoneBuilder::zoneRegion(int id) const
 {
 	return m_zoneRegions.at(id);
 }
@@ -399,7 +410,7 @@ void ZoneBuilder::calcMask()
 
 bool ZoneBuilder::getZoneAmongRegions (ZonePosition &zonePos, BuilderZoneRegion *builderZoneRegionFrom, sint32 x, sint32 y)
 {
-	Q_FOREACH(ZoneRegionEditor *zoneRegion, m_zoneRegions)
+	Q_FOREACH(ZoneRegionObject *zoneRegion, m_zoneRegions)
 	{
 		const NLLIGO::CZoneRegion &region = zoneRegion->zoneRegion();
 		if ((x < region.getMinX()) || (x > region.getMaxX()) ||
@@ -422,6 +433,29 @@ bool ZoneBuilder::getZoneAmongRegions (ZonePosition &zonePos, BuilderZoneRegion 
 
 	zonePos = ZonePosition(x, y, builderZoneRegionFrom->getRegionId());
 	return true;
+}
+
+void ZoneBuilder::checkBeginMacro()
+{
+	if (!m_createdAction)
+	{
+		m_createdAction = true;
+		m_undoStack->beginMacro(m_titleAction);
+		m_undoScanRegionCommand = new UndoScanRegionCommand(this, m_landscapeScene);
+		m_undoStack->push(m_undoScanRegionCommand);
+	}
+}
+
+void ZoneBuilder::checkEndMacro()
+{
+	if (m_createdAction)
+	{
+		RedoScanRegionCommand *redoScanRegionCommand = new RedoScanRegionCommand(this, m_landscapeScene);
+		m_undoScanRegionCommand->setScanList(m_zonePositionList);
+		redoScanRegionCommand->setScanList(m_zonePositionList);
+		m_undoStack->push(redoScanRegionCommand);
+		m_undoStack->endMacro();
+	}
 }
 
 } /* namespace LandscapeEditor */

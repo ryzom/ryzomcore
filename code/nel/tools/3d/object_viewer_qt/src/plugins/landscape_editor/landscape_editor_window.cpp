@@ -62,6 +62,7 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	createToolBars();
 	readSettings();
 
+	connect(m_ui.saveAction, SIGNAL(triggered()), this, SLOT(save()));
 	connect(m_ui.projectSettingsAction, SIGNAL(triggered()), this, SLOT(openProjectSettings()));
 	connect(m_ui.snapshotAction, SIGNAL(triggered()), this, SLOT(openSnapshotDialog()));
 	connect(m_ui.enableGridAction, SIGNAL(toggled(bool)), m_ui.graphicsView, SLOT(setVisibleGrid(bool)));
@@ -92,7 +93,7 @@ void LandscapeEditorWindow::open()
 		Q_FOREACH(QString fileName, fileNames)
 		{
 			int id = m_zoneBuilder->createZoneRegion();
-			ZoneRegionEditor *zoneRegion = m_zoneBuilder->zoneRegion(id);
+			ZoneRegionObject *zoneRegion = m_zoneBuilder->zoneRegion(id);
 			zoneRegion->load(fileName.toStdString());
 			m_landscapeScene->processZoneRegion(zoneRegion->zoneRegion());
 			m_ui.graphicsView->centerOn(zoneRegion->zoneRegion().getMinX() * m_landscapeScene->cellSize(),
@@ -102,6 +103,20 @@ void LandscapeEditorWindow::open()
 		}
 	}
 	setCursor(Qt::ArrowCursor);
+}
+
+void LandscapeEditorWindow::save()
+{
+	ZoneRegionObject *zoneRegion = m_zoneBuilder->currentZoneRegion();
+	if (zoneRegion->fileName().empty())
+	{
+		QString fileName = QFileDialog::getSaveFileName(this,
+						   tr("Save NeL Ligo land file"), _lastDir,
+						   tr("NeL Ligo land file (*.land)"));
+		if (!fileName.isEmpty())
+			zoneRegion->setFileName(fileName.toStdString());
+	}
+	zoneRegion->save();
 }
 
 void LandscapeEditorWindow::openProjectSettings()

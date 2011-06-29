@@ -72,6 +72,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="saveAction"/>
    <addaction name="snapshotAction"/>
    <addaction name="projectSettingsAction"/>
    <addaction name="enableGridAction"/>
@@ -105,6 +106,11 @@
   <action name="snapshotAction">
    <property name="text">
     <string>snapshot</string>
+   </property>
+  </action>
+  <action name="saveAction">
+   <property name="text">
+    <string>Save</string>
    </property>
   </action>
  </widget>

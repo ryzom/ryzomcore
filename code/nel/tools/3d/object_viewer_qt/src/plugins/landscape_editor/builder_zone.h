@@ -42,6 +42,7 @@ namespace LandscapeEditor
 {
 class ListZonesWidget;
 class LandscapeScene;
+class UndoScanRegionCommand;
 
 // Data
 struct ZonePosition
@@ -134,9 +135,9 @@ public:
 	void deleteZoneRegion(int id);
 	void setCurrentZoneRegion(int id);
 	int currentIdZoneRegion() const;
-	ZoneRegionEditor *currentZoneRegion() const;
+	ZoneRegionObject *currentZoneRegion() const;
 	int countZoneRegion() const;
-	ZoneRegionEditor *zoneRegion(int id) const;
+	ZoneRegionObject *zoneRegion(int id) const;
 	void ligoData(LigoData &data, const ZonePosition &zonePos);
 	void setLigoData(LigoData &data, const ZonePosition &zonePos);
 
@@ -155,15 +156,23 @@ private:
 	/// Scan ./zoneligos dir and add all *.ligozone files to zoneBank
 	bool initZoneBank (const QString &path);
 
+	void checkBeginMacro();
+	void checkEndMacro();
+
 	sint32 m_minX, m_maxX, m_minY, m_maxY;
 	std::vector<bool> m_zoneMask;
 
 	QString m_lastPathName;
 
-	QList<ZoneRegionEditor *> m_zoneRegions;
+	QList<ZoneRegionObject *> m_zoneRegions;
 	int m_currentZoneRegion;
 
 	std::vector<BuilderZoneRegion *> m_builderZoneRegions;
+
+	bool m_createdAction;
+	QString m_titleAction;
+	QList<ZonePosition> m_zonePositionList;
+	UndoScanRegionCommand *m_undoScanRegionCommand;
 
 	PixmapDatabase *m_pixmapDatabase;
 	NLLIGO::CZoneBank m_zoneBank;

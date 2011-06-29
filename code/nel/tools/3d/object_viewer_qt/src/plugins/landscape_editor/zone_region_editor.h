@@ -44,29 +44,14 @@ struct LigoData
 
 	LigoData();
 
-	bool operator!= (const LigoData& other) const
-	{
-		return (posX != other.posX) ||
-			   (posY != other.posY) ||
-			   (rot != other.rot) ||
-			   (flip != other.flip) ||
-			   (zoneName != other.zoneName) ||
-			   (sharingMatNames[0] != other.sharingMatNames[0]) ||
-			   (sharingMatNames[1] != other.sharingMatNames[1]) ||
-			   (sharingMatNames[2] != other.sharingMatNames[2]) ||
-			   (sharingMatNames[3] != other.sharingMatNames[3]) ||
-			   (sharingCutEdges[0] != other.sharingCutEdges[0]) ||
-			   (sharingCutEdges[1] != other.sharingCutEdges[1]) ||
-			   (sharingCutEdges[2] != other.sharingCutEdges[2]) ||
-			   (sharingCutEdges[3] != other.sharingCutEdges[3]);
-	}
+	bool operator!= (const LigoData& other) const;
 };
 
-class ZoneRegionEditor
+class ZoneRegionObject
 {
 public:
-	ZoneRegionEditor();
-	~ZoneRegionEditor();
+	ZoneRegionObject();
+	~ZoneRegionObject();
 
 	// Load landscape data from file
 	bool load(const std::string &fileName);
@@ -78,12 +63,16 @@ public:
 
 	void setLigoData(const LigoData &data, const sint32 x, const sint32 y);
 
+	std::string fileName() const;
+
 	// Set file name
 	void setFileName(const std::string &fileName);
 
 	NLLIGO::CZoneRegion &zoneRegion();
 
 	void setZoneRegion(const NLLIGO::CZoneRegion &zoneRegion);
+
+	bool checkPos(const sint32 x, const sint32 y);
 
 private:
 

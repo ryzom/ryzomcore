@@ -110,6 +110,8 @@ void LandscapeView::mouseReleaseEvent(QMouseEvent *event)
 
 void LandscapeView::drawForeground(QPainter *painter, const QRectF &rect)
 {
+	QGraphicsView::drawForeground(painter, rect);
+
 	if (!m_visibleGrid)
 		return;
 

@@ -75,6 +75,41 @@ private:
 	ZoneBuilder *m_zoneBuilder;
 	LandscapeScene *m_scene;
 };
+
+class UndoScanRegionCommand: public QUndoCommand
+{
+public:
+	UndoScanRegionCommand(ZoneBuilder *zoneBuilder, LandscapeScene *scene, QUndoCommand *parent = 0);
+	virtual ~UndoScanRegionCommand();
+
+	void setScanList(const QList<ZonePosition> &zonePositionList);
+	virtual void undo();
+	virtual void redo();
+
+private:
+
+	QList<ZonePosition> m_zonePositionList;
+	ZoneBuilder *m_zoneBuilder;
+	LandscapeScene *m_scene;
+};
+
+class RedoScanRegionCommand: public QUndoCommand
+{
+public:
+	RedoScanRegionCommand(ZoneBuilder *zoneBuilder, LandscapeScene *scene, QUndoCommand *parent = 0);
+	virtual ~RedoScanRegionCommand();
+
+	void setScanList(const QList<ZonePosition> &zonePositionList);
+	virtual void undo();
+	virtual void redo();
+
+private:
+
+	QList<ZonePosition> m_zonePositionList;
+	ZoneBuilder *m_zoneBuilder;
+	LandscapeScene *m_scene;
+};
+
 /*
 // Move the landscape
 class LigoMoveCommand: public QUndoCommand

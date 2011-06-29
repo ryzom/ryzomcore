@@ -86,13 +86,79 @@ LigoTileCommand::~LigoTileCommand()
 void LigoTileCommand::undo ()
 {
 	m_zoneBuilder->setLigoData(m_oldLigoData, m_zonePos);
-	m_scene->createZoneItem(m_oldLigoData, m_zonePos);
 }
 
 void LigoTileCommand::redo ()
 {
 	m_zoneBuilder->setLigoData(m_newLigoData, m_zonePos);
-	m_scene->createZoneItem(m_newLigoData, m_zonePos);
+}
+
+UndoScanRegionCommand::UndoScanRegionCommand(ZoneBuilder *zoneBuilder, LandscapeScene *scene, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	  m_zoneBuilder(zoneBuilder),
+	  m_scene(scene)
+{
+}
+
+UndoScanRegionCommand::~UndoScanRegionCommand()
+{
+	m_zonePositionList.clear();
+}
+
+void UndoScanRegionCommand::setScanList(const QList<ZonePosition> &zonePositionList)
+{
+	m_zonePositionList = zonePositionList;
+}
+
+void UndoScanRegionCommand::undo()
+{
+	for (int i = 0; i < m_zonePositionList.size(); ++i)
+		m_scene->deleteItemZone(m_zonePositionList.at(i));
+	nlinfo("------");
+	for (int i = 0; i < m_zonePositionList.size(); ++i)
+	{
+		LigoData data;
+		m_zoneBuilder->ligoData(data, m_zonePositionList.at(i));
+		m_scene->createItemZone(data, m_zonePositionList.at(i));
+	}
+}
+
+void UndoScanRegionCommand::redo()
+{
+}
+
+RedoScanRegionCommand::RedoScanRegionCommand(ZoneBuilder *zoneBuilder, LandscapeScene *scene, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	  m_zoneBuilder(zoneBuilder),
+	  m_scene(scene)
+{
+}
+
+RedoScanRegionCommand::~RedoScanRegionCommand()
+{
+	m_zonePositionList.clear();
+}
+
+void RedoScanRegionCommand::setScanList(const QList<ZonePosition> &zonePositionList)
+{
+	m_zonePositionList = zonePositionList;
+}
+
+void RedoScanRegionCommand::undo()
+{
+}
+
+void RedoScanRegionCommand::redo()
+{
+	for (int i = 0; i < m_zonePositionList.size(); ++i)
+		m_scene->deleteItemZone(m_zonePositionList.at(i));
+	nlinfo("------");
+	for (int i = 0; i < m_zonePositionList.size(); ++i)
+	{
+		LigoData data;
+		m_zoneBuilder->ligoData(data, m_zonePositionList.at(i));
+		m_scene->createItemZone(data, m_zonePositionList.at(i));
+	}
 }
 
 LigoResizeCommand::LigoResizeCommand(int index, sint32 newMinX, sint32 newMaxX,

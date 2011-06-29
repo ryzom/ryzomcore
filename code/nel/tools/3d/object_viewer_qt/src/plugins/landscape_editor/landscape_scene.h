@@ -43,9 +43,9 @@ public:
 	int cellSize() const;
 	void setZoneBuilder(ZoneBuilder *zoneBuilder);
 
-	QGraphicsItem *createZoneItem(const LigoData &data, const ZonePosition &zonePos);
-	QGraphicsItem *createEmptyZoneItem(const ZonePosition &zonePos);
-	void deleteZoneItem(const ZonePosition &zonePos);
+	QGraphicsItem *createItemZone(const LigoData &data, const ZonePosition &zonePos);
+	QGraphicsItem *createItemEmptyZone(const ZonePosition &zonePos);
+	void deleteItemZone(const ZonePosition &zonePos);
 	void processZoneRegion(const NLLIGO::CZoneRegion &zoneRegion);
 
 	void snapshot(const QString &fileName, int sizeSource);
@@ -53,11 +53,14 @@ public:
 
 protected:
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
+	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent);
+	virtual void drawForeground(QPainter *painter, const QRectF &rect);
 
 private:
-	void checkUnderZone(const LigoData &data, const ZonePosition &zonePos);
+	bool checkUnderZone(const int posX, const int posY);
 
 	int m_cellSize;
+	qreal m_mouseX, m_mouseY;
 	ZoneBuilder *m_zoneBuilder;
 };
 
