@@ -20,7 +20,7 @@
 #include "../core/core_constants.h"
 #include "../core/icore.h"
 
-#include "ui_server_entry_dialog.h"
+#include "server_entry_dialog.h"
 
 // NeL includes
 #include <nel/misc/path.h>
@@ -58,12 +58,12 @@ QString MissionCompilerSettingsPage::trName() const
 
 QString MissionCompilerSettingsPage::category() const
 {
-	return QLatin1String("MissionCompilerSettings");
+	return QLatin1String("Mission Compiler");
 }
 
 QString MissionCompilerSettingsPage::trCategory() const
 {
-	return tr("MissionCompilerSettings");
+	return tr("Mission Compiler");
 }
 
 QIcon MissionCompilerSettingsPage::categoryIcon() const
@@ -77,19 +77,15 @@ QWidget *MissionCompilerSettingsPage::createPage(QWidget *parent)
 	m_ui.setupUi(m_page);
 
 	readSettings();
-	checkEnabledButton();
-	connect(m_ui.addToolButton, SIGNAL(clicked()), this, SLOT(addPath()));
-	connect(m_ui.removeToolButton, SIGNAL(clicked()), this, SLOT(delPath()));
-	connect(m_ui.upToolButton, SIGNAL(clicked()), this, SLOT(upPath()));
-	connect(m_ui.downToolButton, SIGNAL(clicked()), this, SLOT(downPath()));
-	//connect(m_ui.resetToolButton, SIGNAL(clicked()), m_ui.serversTreeWidget, SLOT(clear()));
+	connect(m_ui.addToolButton, SIGNAL(clicked()), this, SLOT(addServer()));
+	connect(m_ui.removeToolButton, SIGNAL(clicked()), this, SLOT(delServer()));
+	connect(m_ui.serversTableWidget, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(editServer(int,int)));
 	return m_page;
 }
 
 void MissionCompilerSettingsPage::apply()
 {
 	writeSettings();
-	applySearchPaths();
 }
 
 void MissionCompilerSettingsPage::finish()
@@ -98,74 +94,57 @@ void MissionCompilerSettingsPage::finish()
 	m_page = 0;
 }
 
-void MissionCompilerSettingsPage::applySearchPaths()
+void MissionCompilerSettingsPage::editServer(int row, int column)
 {
-	QStringList paths, remapExt;
-	QSettings *settings = Core::ICore::instance()->settings();
-	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-	if (m_recurse)
-		paths = settings->value(Core::Constants::RECURSIVE_SEARCH_PATHS).toStringList();
-	else
-		paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
+	ServerEntryDialog serverEntryDialog;
+	serverEntryDialog.setModal(true);
+	serverEntryDialog.show();
 
-	remapExt = settings->value(Core::Constants::REMAP_EXTENSIONS).toStringList();
-	settings->endGroup();
+	// Copy the values from the row to the dialog.
+	QTableWidgetItem *item1 = m_ui.serversTableWidget->item(row,0);
+	QTableWidgetItem *item2 = m_ui.serversTableWidget->item(row,1);
+	QTableWidgetItem *item3 = m_ui.serversTableWidget->item(row,2);
+	serverEntryDialog.setServerName(item1->text());
+	serverEntryDialog.setTextPath(item2->text());
+	serverEntryDialog.setPrimPath(item3->text());
 
-	for (int i = 1; i < remapExt.size(); i += 2)
-		NLMISC::CPath::remapExtension(remapExt.at(i - 1).toStdString(), remapExt.at(i).toStdString(), true);
-
-	Q_FOREACH(QString path, paths)
+	if(serverEntryDialog.exec())
 	{
-		NLMISC::CPath::addSearchPath(path.toStdString(), m_recurse, false);
+		item1->setText(serverEntryDialog.getServerName());
+		item2->setText(serverEntryDialog.getTextPath());
+		item3->setText(serverEntryDialog.getPrimPath());
 	}
 }
 
-void MissionCompilerSettingsPage::addPath()
+void MissionCompilerSettingsPage::addServer()
 {
-	Ui::ServerEntryDialog serverEntryDialog;
+	ServerEntryDialog serverEntryDialog;
+	serverEntryDialog.setModal(true);
+	serverEntryDialog.show();
+	
 
-	//QString newPath = QFileDialog::getExistingDirectory(m_page, "", lastDir);
-	//if (!newPath.isEmpty())
-	//{
-	//	QTreeWidgetItem *newItem = new QTreeWidgetItem;
-	//	newItem->setText(newPath);
-	//	newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-	//	m_ui.serversTreeWidget->addItem(newItem);
-	//	lastDir = newPath;
-	//}
+	if(serverEntryDialog.exec())
+	{
+		int row = m_ui.serversTableWidget->rowCount();
+		m_ui.serversTableWidget->insertRow(row);
+		QTableWidgetItem *item1 = new QTableWidgetItem(serverEntryDialog.getServerName());
+		QTableWidgetItem *item2 = new QTableWidgetItem(serverEntryDialog.getTextPath());
+		QTableWidgetItem *item3 = new QTableWidgetItem(serverEntryDialog.getPrimPath());
 
-	//checkEnabledButton();
+		m_ui.serversTableWidget->setItem(row, 0, item1);
+		m_ui.serversTableWidget->setItem(row, 1, item2);
+		m_ui.serversTableWidget->setItem(row, 2, item3);
+	}
 }
 
-void MissionCompilerSettingsPage::delPath()
+void MissionCompilerSettingsPage::delServer()
 {
-	//QTreeWidgetItem *removeItem = m_ui.serversTreeWidget->takeItem(m_ui.serversTreeWidget->currentRow());
-	//if (!removeItem)
-	//	delete removeItem;
-
-	//checkEnabledButton();
-}
-
-void MissionCompilerSettingsPage::upPath()
-{
-	//int currentRow = m_ui.serversTreeWidget->currentRow();
-	//if (!(currentRow == 0))
-	//{
-	//	QListWidgetItem *item = m_ui.serversListWidget->takeItem(currentRow);
-	//	m_ui.serversListWidget->insertItem(--currentRow, item);
-	//	m_ui.serversListWidget->setCurrentRow(currentRow);
-	//}
-}
-
-void MissionCompilerSettingsPage::downPath()
-{
-	//int currentRow = m_ui.serversListWidget->currentRow();
-	//if (!(currentRow == m_ui.serversListWidget->count()-1))
-	//{
-	//	QListWidgetItem *item = m_ui.serversListWidget->takeItem(currentRow);
-	//	m_ui.serversTreeWidget->insertItem(++currentRow, item);
-	//	m_ui.serversTreeWidget->setCurrentRow(currentRow);
-	//}
+	QList<QTableWidgetItem*> selectedItems = m_ui.serversTableWidget->selectedItems();
+	while(selectedItems.size() > 0)
+	{
+		m_ui.serversTableWidget->removeRow(selectedItems.back()->row());
+		selectedItems = m_ui.serversTableWidget->selectedItems();
+	}
 }
 
 void MissionCompilerSettingsPage::readSettings()
@@ -201,17 +180,6 @@ void MissionCompilerSettingsPage::writeSettings()
 	//	settings->setValue(Core::Constants::SEARCH_PATHS, paths);
 	//settings->endGroup();
 	//settings->sync();
-}
-
-void MissionCompilerSettingsPage::checkEnabledButton()
-{
-	//bool bEnabled = true;
-	//if (m_ui.serversTreeWidget->count() == 0)
-	//	bEnabled = false;
-
-	//m_ui.removeToolButton->setEnabled(bEnabled);
-	//m_ui.upToolButton->setEnabled(bEnabled);
-	//m_ui.downToolButton->setEnabled(bEnabled);
 }
 
 } /* namespace Plugin */

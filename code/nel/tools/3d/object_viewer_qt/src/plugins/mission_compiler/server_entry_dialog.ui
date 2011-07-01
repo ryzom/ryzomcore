@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>488</width>
+    <height>175</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="4" column="0">
+   <item row="1" column="0">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -24,48 +24,70 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="serverNameLabel">
-     <property name="text">
-      <string>Server Name</string>
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="serverSettingsBox">
+     <property name="title">
+      <string>Server Settings</string>
      </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="serverTextPathLabel">
-     <property name="text">
-      <string>Server Text Path</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="serverPrimPathLabel">
-     <property name="text">
-      <string>Server Primitive Path</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1" colspan="2">
-    <widget class="QLineEdit" name="serverNameEdit"/>
-   </item>
-   <item row="2" column="1">
-    <widget class="QLineEdit" name="serverTextPathEdit"/>
-   </item>
-   <item row="3" column="1">
-    <widget class="QLineEdit" name="serverPrimPathEdit"/>
-   </item>
-   <item row="2" column="2">
-    <widget class="QToolButton" name="serverTextPathButton">
-     <property name="text">
-      <string>...</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="2">
-    <widget class="QToolButton" name="serverPrimPathButton">
-     <property name="text">
-      <string>...</string>
-     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="serverNameLabel">
+        <property name="text">
+         <string>Server Name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" colspan="2">
+       <widget class="QLineEdit" name="serverNameEdit"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="serverTextPathLabel">
+        <property name="text">
+         <string>Server Text Path</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="serverTextPathEdit"/>
+      </item>
+      <item row="1" column="2">
+       <widget class="QToolButton" name="serverTextPathButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="serverPrimPathLabel">
+        <property name="text">
+         <string>Server Primitive Path</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="serverPrimPathEdit"/>
+      </item>
+      <item row="2" column="2">
+       <widget class="QToolButton" name="serverPrimPathButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="3">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>

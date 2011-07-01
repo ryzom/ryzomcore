@@ -17,6 +17,8 @@
 #include <QtGui/QAction>
 #include <QtGui/QMenuBar>
 
+#include "mission_compiler_settings_page.h"
+
 namespace Plugin
 {
 
@@ -35,7 +37,7 @@ bool MissionCompilerPlugin::initialize(ExtensionSystem::IPluginManager *pluginMa
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
 
-	//addAutoReleasedObject(new CZonePainterSettingsPage(this));
+	addAutoReleasedObject(new MissionCompilerSettingsPage(this));
 	addAutoReleasedObject(new CMissionCompilerContext(this));
 	//addAutoReleasedObject(new CCoreListener(this));
 	return true;

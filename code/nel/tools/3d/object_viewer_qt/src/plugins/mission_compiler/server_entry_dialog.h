@@ -16,53 +16,44 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef MISSION_COMPILER_SETTINGS_PAGE_H
-#define MISSION_COMPILER_SETTINGS_PAGE_H
+#ifndef SERVER_ENTRY_DIALOG_H
+#define SERVER_ENTRY_DIALOG_H
 
-#include <QtCore/QObject>
+#include <QDialog>
 
-#include "../core/ioptions_page.h"
-
-#include "ui_mission_compiler_settings_page.h"
-
-class QWidget;
+namespace Ui {
+    class ServerEntryDialog;
+}
 
 namespace Plugin
 {
 /**
-@class MissionCompilerSettingsPage
+@class ServerEntryDialog
 */
-class MissionCompilerSettingsPage : public Core::IOptionsPage
+class ServerEntryDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	MissionCompilerSettingsPage(QObject *parent = 0);
-	~MissionCompilerSettingsPage();
+	explicit ServerEntryDialog(QWidget *parent = 0);
+	~ServerEntryDialog();
 
-	QString id() const;
-	QString trName() const;
-	QString category() const;
-	QString trCategory() const;
-	QIcon categoryIcon() const;
-	QWidget *createPage(QWidget *parent);
+	QString getServerName();
+	QString getTextPath();
+	QString getPrimPath();
 
-	void apply();
-	void finish();
+	void setServerName(QString name);
+	void setTextPath(QString path);
+	void setPrimPath(QString path);
 
-private Q_SLOTS:
-	void addServer();
-	void delServer();
-	void editServer(int row, int column);
+public Q_SLOTS:
+	void lookupTextPath();
+	void lookupPrimPath();
 
 private:
-	void readSettings();
-	void writeSettings();
-
-	QWidget *m_page;
-	Ui::MissionCompilerSettingsPage m_ui;
+	Ui::ServerEntryDialog *m_ui;
 };
 
 } // namespace Plugin
 
-#endif // MISSION_COMPILER_SETTINGS_PAGE_H
+#endif // SERVER_ENTRY_DIALOG_H

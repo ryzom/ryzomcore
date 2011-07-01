@@ -79,6 +79,7 @@ MissionCompilerMainWindow::MissionCompilerMainWindow(QWidget *parent) :
 	settings->endGroup();
 
 	NLLIGO::Register();
+	// TODO try/catch exception. Crashes if path invalid.
 	m_ligoConfig.readPrimitiveClass(NLMISC::CPath::lookup("world_editor_classes.xml").c_str(), false);
 	NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &m_ligoConfig;
 }
