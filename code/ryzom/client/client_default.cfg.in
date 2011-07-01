@@ -239,14 +239,14 @@ SkinNbMaxPoly_ps1	= 70000;
 SkinNbMaxPoly_ps2	= 100000;
 SkinNbMaxPoly_ps3	= 200000;
 
-NbMaxSkeletonNotCLod		= 50;
+NbMaxSkeletonNotCLod		= 125;
 NbMaxSkeletonNotCLod_min	= 5;
-NbMaxSkeletonNotCLod_max	= 100;
+NbMaxSkeletonNotCLod_max	= 255;
 NbMaxSkeletonNotCLod_step	= 5;
 NbMaxSkeletonNotCLod_ps0	= 10;
-NbMaxSkeletonNotCLod_ps1	= 25;
-NbMaxSkeletonNotCLod_ps2	= 50;
-NbMaxSkeletonNotCLod_ps3	= 100;
+NbMaxSkeletonNotCLod_ps1	= 50;
+NbMaxSkeletonNotCLod_ps2	= 125;
+NbMaxSkeletonNotCLod_ps3	= 255;
 
 CharacterFarClip		= 200.0;
 CharacterFarClip_min	= 50.0;
@@ -386,21 +386,21 @@ SystemInfoColors =
 };
 
 PrintfCommands       = {
-	"52", "15", "55 55 0 255", "28", "uiChapterIV", "624", 
+	"52", "15", "55 55 0 255", "28", "uiChapterV", "624", 
 	"428", "0 0 0 255", "18", "", "624", "378", 
 	"0 0 0 255", "14", "", "644", "278", "0 0 0 255", 
 	"18", "", "52", "17", "255 255 255 255", "28", 
-	"uiChapterIV", "622", "430", "255 255 255 255", "18", "", 
+	"uiChapterV", "622", "430", "255 255 255 255", "18", "", 
 	"622", "380", "255 255 255 255", "14", "", "642", 
 	"280", "255 255 255 255", "18", ""
 };
 
 PrintfCommandsFreeTrial = {
-	"52", "15", "55 55 0 255", "28", "uiChapterIV", "624", 
+	"52", "15", "55 55 0 255", "28", "uiChapterV", "624", 
 	"428", "0 0 0 255", "18", "", "624", "378", 
 	"0 0 0 255", "14", "", "644", "278", "0 0 0 255", 
 	"18", "", "52", "17", "255 255 255 255", "28", 
-	"uiChapterIV", "622", "430", "255 255 255 255", "18", "", 
+	"uiChapterV", "622", "430", "255 255 255 255", "18", "", 
 	"622", "380", "255 255 255 255", "14", "", "642", 
 	"280", "255 255 255 255", "18", ""
 };

@@ -57,6 +57,7 @@ protected:
 	CInterfaceProperty		_Number;
 	sint64					_Cache;
 	bool                    _Positive; // only positive values are displayed
+	bool                    _Format; // the number will be formatted (like "1,000,000") if >= 10k
 	sint64					_Divisor, _Modulo;
 	// string to append to the value (eg: meters)
 	CStringShared			_Suffix;

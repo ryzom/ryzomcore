@@ -3540,7 +3540,8 @@ int CGroupHTML::luaShowDiv(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TBOOLEAN);
 
-	if (!_Groups.empty()) {
+	if (!_Groups.empty())
+	{
 		for (uint i=0; i<_Groups.size(); i++)
 		{
 			CInterfaceGroup *group = _Groups[i];

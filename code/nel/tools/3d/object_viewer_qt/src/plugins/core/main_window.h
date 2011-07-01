@@ -101,6 +101,7 @@ private:
 	QPalette m_originalPalette;
 	QString m_lastDir;
 
+	QDockWidget *m_dockWidget;
 	QUndoGroup *m_undoGroup;
 	QSettings *m_settings;
 
