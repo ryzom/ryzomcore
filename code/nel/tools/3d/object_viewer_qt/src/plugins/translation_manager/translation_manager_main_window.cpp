@@ -16,6 +16,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "translation_manager_main_window.h"
+#include "editor_worksheet.h"
+
 // Project system includes
 #include "../core/icore.h"
 #include "../core/core_constants.h"
@@ -40,6 +42,9 @@
 #include <QtCore/QResource>
 #include <QtGui/QMenuBar>
 #include <QtCore/QFileInfo>
+#include <QtCore/QEvent>
+#include <QtGui/QCloseEvent>
+
 
 
 struct TEntryInfo
@@ -63,9 +68,12 @@ CMainWindow::CMainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
          _ui.setupUi(this);
+         
          _ui.mdiArea->closeAllSubWindows();
          connect(_ui.mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)),this, SLOT(activeSubWindowChanged()));         
-        
+         windowMapper = new QSignalMapper(this);
+         connect(windowMapper, SIGNAL(mapped(QWidget*)), this, SLOT(setActiveSubWindow(QWidget*)));
+         
          // set extraction scripts counters
          execution_count["extract_bot_names"] = 0;
          
@@ -96,26 +104,52 @@ void CMainWindow::createToolbar()
         connect(extractBotNamesAct, SIGNAL(triggered()), this, SLOT(extractBotNames()));
         
         // Windows menu
-        windowMapper = new QSignalMapper(this);
-        connect(windowMapper, SIGNAL(mapped(QWidget*)), this, SLOT(setActiveSubWindow(QWidget*)));
         windowMenu = new QMenu(tr("&Windows..."), _ui.toolBar);
-        windowMenu->setIcon(QIcon(Core::Constants::ICON_PILL));
+        windowMenu->setIcon(QIcon(Core::Constants::ICON_PILL));     
+        updateWindowsList();
         _ui.toolBar->addAction(windowMenu->menuAction());
         connect(windowMenu, SIGNAL(aboutToShow()), this, SLOT(updateWindowsList()));
 }
 
+void CMainWindow::updateToolbar(QMdiSubWindow *window)
+{
+    if(_ui.mdiArea->subWindowList().size() > 0)
+    if(QString(window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
+    {
+        QAction *insertRowAct = windowMenu->addAction("Insert new row");
+        connect(insertRowAct, SIGNAL(triggered()), window, SLOT(insertRow())); 
+        QAction *deleteRowAct = windowMenu->addAction("Delete row");
+        connect(deleteRowAct, SIGNAL(triggered()), window, SLOT(deleteRow())); 
+        
+    }
+}
+
+void CMainWindow::setActiveSubWindow(QWidget* window)
+{
+        if (!window)
+        {
+                return;
+        }
+        QMdiSubWindow *cwindow = qobject_cast<QMdiSubWindow *>(window);
+        _ui.mdiArea->setActiveSubWindow(cwindow);   
+}
+
 void CMainWindow::activeSubWindowChanged()
 {
-    updateWindowsList();
+   
 }
 
 void CMainWindow::updateWindowsList()
 {
-        int i = 0;
         windowMenu->clear();
-        QList<QMdiSubWindow *> windows = _ui.mdiArea->subWindowList();     
-        for (QList<QMdiSubWindow*>::iterator it = windows.begin(); it != windows.end(); ++it) {
-                QString window_file = QFileInfo((*it)->widget()->windowFilePath()).fileName();
+        QMdiSubWindow *current_window = _ui.mdiArea->activeSubWindow();     
+        QList<QMdiSubWindow*> subWindows = _ui.mdiArea->subWindowList();      
+        
+        updateToolbar(current_window);
+        
+        for(int i = 0; i < subWindows.size(); ++i) 
+        {
+                QString window_file = QFileInfo(subWindows.at(i)->windowFilePath()).fileName();
                 QString action_text;
                 if (i < 9) {
                         action_text = tr("&%1 %2").arg(i + 1).arg(window_file);
@@ -124,149 +158,49 @@ void CMainWindow::updateWindowsList()
                 }
                 QAction *action  = windowMenu->addAction(action_text);
                 action->setCheckable(true);
-                action->setChecked((*it) == _ui.mdiArea->activeSubWindow());
-                connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));
-                windowMapper->setMapping(action, windows.at(i));
-                i++;
+                action->setChecked(subWindows.at(i) == current_window);
+                connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));             
+                windowMapper->setMapping(action, subWindows.at(i));
         }    
 }
 
 void CMainWindow::open()
 {
         QString file_name = QFileDialog::getOpenFileName(this);
-         if (!file_name.isEmpty())
-         {       
-             STRING_MANAGER::TWorksheet wk_file;          
-             if(loadExcelSheet(file_name.toStdString(), wk_file, true) == true)
-             {
-                  bool hasHashValue = false;
-                 QTableWidget *wk_table = new QTableWidget();  
-                 wk_table->setToolTip(file_name);
-                 wk_table->setWindowFilePath(file_name);
-                 if(wk_file.getData(0, 0) == ucstring("*HASH_VALUE"))
-                 {
-                      wk_table->setColumnCount(wk_file.ColCount - 1);
-                      hasHashValue = true;
-                 } else {
-                      wk_table->setColumnCount(wk_file.ColCount);                   
-                 }
-                 wk_table->setRowCount(wk_file.size() - 1);
-                 // read columns name
-                
-                 for(unsigned int i = 0; i < wk_file.ColCount; i++)
-                 {
-                     if(hasHashValue && i == 0)
-                     {
-                            // we don't show the column with hash value
-                     } else {
-                        QTableWidgetItem *col = new QTableWidgetItem();
-                        ucstring col_name = wk_file.getData(0, i);
-                        col->setText(tr(col_name.toString().c_str()));
-                        if(hasHashValue)
-                        {
-                                wk_table->setHorizontalHeaderItem(i - 1, col);                        
-                        } else {
-                                wk_table->setHorizontalHeaderItem(i, col);
-                        }
-                     }
-                 }
-                 // read rows
-
-                 for(unsigned int i = 1; i < wk_file.size(); i++)
-                 {
-                     for(unsigned int j = 0; j < wk_file.ColCount; j++)
-                     {
-                        if(hasHashValue && j == 0)
-                        {
-                            // we don't show the column with hash value
-                        } else {
-                            QTableWidgetItem *row = new QTableWidgetItem();
-                            ucstring row_value = wk_file.getData(i, j);
-                            row->setText(tr(row_value.toString().c_str()));
-                            if(hasHashValue)
-                            {
-                                wk_table->setItem(i - 1, j - 1, row);    
-                            } else {
-                                wk_table->setItem(i - 1, j, row); 
-                            }
-                        }
+        if(!file_name.isEmpty())
+        {
+            list<CEditor*> subWindows = convertSubWindowList(_ui.mdiArea->subWindowList());
+            list<CEditor*>::iterator it = subWindows.begin();
+            CEditor* current_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow());
+            for(; it != subWindows.end(); ++it)
+            {
+                QString sw_file = (*it)->subWindowFilePath();
+                if(file_name == sw_file)
+                {
+                    if((*it) != current_window)
+                    {
+                        (*it)->activateWindow();
                     }
+                    return;
                 }
-            
-                QMdiSubWindow *sub_window = new QMdiSubWindow(_ui.mdiArea);
-                sub_window->setWidget(wk_table);
-                wk_table->resizeColumnsToContents();
-                wk_table->resizeRowsToContents(); 
-                wk_table->showMaximized();
-                sub_window->activateWindow();
-                // set editor signals
-                connect(wk_table, SIGNAL(cellChanged(int,int) ), this, SLOT(sheetEditorChanged(int,int)));
-               updateWindowsList(); 
-             } else {
-                QErrorMessage error_settings;
-                error_settings.showMessage("This file is not a worksheet file.");
-                error_settings.exec();                 
+            }          
+             if(isWorksheetEditor(file_name))
+             {
+                 CEditorWorksheet *new_window = new CEditorWorksheet(_ui.mdiArea);                 
+                 new_window->open(file_name);  
+                 new_window->activateWindow();
              }
          }
                
 }
 
-void CMainWindow::sheetEditorChanged(int row, int column)
-{
-    saveAct->setEnabled(true);
-    QMdiSubWindow *current_window = _ui.mdiArea->currentSubWindow();
-    if(modifiedCells.find(current_window) != modifiedCells.end()) // founded
-    {
-        list<CCelPos> cells = modifiedCells[current_window];
-        bool overwriteResult = false;
-        for(list<CCelPos>::iterator it = cells.begin(); it != cells.end(); ++it)
-        {
-            if((*it).row == row && (*it).col == column )
-                overwriteResult = true;
-        }
-        if(overwriteResult == false)
-        {
-            CCelPos v;
-            v.row = row;
-            v.col = column;
-            cells.push_back(v);        
-        }
-    } else { // not found
-        list<CCelPos> cells;
-        CCelPos v;     
-        v.row = row;
-        v.col = column;
-        cells.push_back(v);   
-        modifiedCells[current_window] = cells;
-    }
-}
-
 void CMainWindow::save()
 {
-    QMdiSubWindow *current_window = _ui.mdiArea->currentSubWindow();
+    CEditor* current_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow());
     
     if(QString(current_window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
     {
-        QWidget *subwindow_widget = current_window->widget();
-        QTableWidget *table_editor = qobject_cast<QTableWidget*>(subwindow_widget);
-        QString file_path = table_editor->windowFilePath();
-        
-        if(modifiedCells.find(current_window) != modifiedCells.end())
-        {
-                STRING_MANAGER::TWorksheet wk_file;          
-                loadExcelSheet(file_path.toStdString(), wk_file, true);                    
-                list<CCelPos> cells = modifiedCells[current_window];
-                for(list<CCelPos>::iterator it = cells.begin(); it != cells.end(); ++it)
-                {
-                    QTableWidgetItem* edited_item = table_editor->item((*it).row, (*it).col);
-                    wk_file.setData((*it).row + 1, (*it).col, ucstring(edited_item->text().toStdString()));
-                    cells.erase(it);
-                }  
-                ucstring s = prepareExcelSheet(wk_file);            
-                NLMISC::CI18N::writeTextFile(file_path.toStdString(), s, false);
-                if(cells.size() == 0)
-                    modifiedCells.erase(current_window);
-        }
+        current_window->save();
     }
 }
 
@@ -280,37 +214,10 @@ void CMainWindow::saveAs()
     
     if (!file_name.isEmpty())
     {    
-        QMdiSubWindow *current_window = _ui.mdiArea->currentSubWindow();
-    
+        CEditor* current_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow());   
         if(QString(current_window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
         {
-                QWidget *subwindow_widget = current_window->widget();
-                QTableWidget *table_editor = qobject_cast<QTableWidget*>(subwindow_widget);  
-                QString orig_file_path = table_editor->windowFilePath();
-                STRING_MANAGER::TWorksheet new_file, wk_file;  
-                loadExcelSheet(orig_file_path.toStdString(), wk_file, true);   
-                // set columns
-                new_file.resize(new_file.size() + 1);
-                for(unsigned int i = 0; i < wk_file.ColCount; i++)
-                {
-                    ucstring col_name = wk_file.getData(0, i);
-                    new_file.insertColumn(new_file.ColCount);
-                    new_file.setData(0, new_file.ColCount - 1, col_name);
-                } 
-                // read all the rows from table
-                uint rowIdx; 
-                for(int i = 0; i < table_editor->rowCount(); i++)
-                {
-                     rowIdx = new_file.size();
-                     new_file.resize(new_file.size() + 1);
-                     for(int j = 0; j < table_editor->columnCount(); j++)
-                     {
-                         QTableWidgetItem* item = table_editor->item(i, j);
-                         new_file.setData(rowIdx, j, ucstring(item->text().toStdString()));
-                     }   
-                 } 
-                ucstring s = prepareExcelSheet(new_file);            
-                NLMISC::CI18N::writeTextFile(file_name.toStdString(), s, false);
+            current_window->saveAs(file_name);
         }             
              
     }    
@@ -320,72 +227,43 @@ void CMainWindow::extractBotNames()
 {
         if(verifySettings() == true) 
         {
-                QMdiSubWindow *current_window = _ui.mdiArea->currentSubWindow();
-                if(QString(current_window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
+                CEditor* editor_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow());
+                if(QString(editor_window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
                 {
+                    CEditorWorksheet* current_window = qobject_cast<CEditorWorksheet*>(editor_window);
+                    QString file_path = current_window->subWindowFilePath();
+                    if(!current_window->isBotNamesTable())
+                    {
+                        list<CEditor*> subWindows =  convertSubWindowList(_ui.mdiArea->subWindowList());
+                        list<CEditor*>::iterator it = subWindows.begin();
+                        bool finded = false;
+                        for(; it != subWindows.end(), finded != true; ++it)
+                        {                           
+                            current_window = qobject_cast<CEditorWorksheet*>((*it));
+                            file_path = current_window->subWindowFilePath();
+                            if(current_window->isBotNamesTable())
+                            {
+                                finded = true;
+                                current_window->activateWindow();
+                            }
+                        }
+                        if(!finded)
+                        {
+                            open();
+                            current_window = qobject_cast<CEditorWorksheet*>(_ui.mdiArea->currentSubWindow());
+                            file_path = current_window->windowFilePath();
+                        }
+                    }
                     if(execution_count["extract_bot_names"] == 0)
                         setPathsForPrimitives(config_paths, ligo_path);
                     extractBotNamesFromPrimitives();
                     execution_count["extract_bot_names"] = execution_count["extract_bot_names"]  + 1;
- 
-                    QWidget *subwindow_widget = current_window->widget();
-                    QTableWidget *table_editor = qobject_cast<QTableWidget*>(subwindow_widget);  
-                    // get SimpleNames
-                    {                       
-                        map<string, TEntryInfo> SimpleNames =  getSimpleNames();
-                        map<string, TEntryInfo>::iterator it(SimpleNames.begin()), last(SimpleNames.end());
-
-                        for (; it != last; ++it)
-                        {  
-                            QList<QTableWidgetItem*> search_results = table_editor->findItems(tr(it->first.c_str()), Qt::MatchExactly);
-                            if(search_results.size() == 0)
-                            {
-                                const int currentRow = table_editor->rowCount();                     
-                                table_editor->setRowCount(currentRow + 1);
-                                QTableWidgetItem *bot_name_row = new QTableWidgetItem();
-                                bot_name_row->setText(tr(it->first.c_str()));    
-                                bot_name_row->setBackgroundColor(QColor("#F75D59"));
-                                table_editor ->setItem(currentRow, 0, bot_name_row);  
-                                QTableWidgetItem *translation_name_row = new QTableWidgetItem();
-                                translation_name_row->setBackgroundColor(QColor("#F75D59"));
-                                translation_name_row->setText(tr(it->first.c_str()));
-                                table_editor ->setItem(currentRow , 1, translation_name_row);               
-                                QTableWidgetItem *sheet_name_row = new QTableWidgetItem();
-                                sheet_name_row->setText(tr(it->second.SheetName.c_str()));      
-                                sheet_name_row->setBackgroundColor(QColor("#F75D59"));
-                                table_editor ->setItem(currentRow, 2, sheet_name_row);     
-                            }
-                        }  
-                        cleanSimpleNames();
-                    }
-                    // get GenericNames
-                    {
-                        set<string> GenericNames = getGenericNames();                       
-                        set<string>::iterator it(GenericNames.begin()), last(GenericNames.end());
-                        for (; it != last; ++it)
-                        {
-                            string gnName = "gn_" + cleanupName(*it);
-                            QList<QTableWidgetItem*> search_results = table_editor->findItems(tr((*it).c_str()), Qt::MatchExactly);
-                            if(search_results.size() == 0)
-                            {
-                                const int currentRow = table_editor->rowCount();                     
-                                table_editor->setRowCount(currentRow + 1);
-                                QTableWidgetItem *bot_name_row = new QTableWidgetItem();
-                                bot_name_row->setText(tr((*it).c_str()));    
-                                bot_name_row->setBackgroundColor(QColor("#F75D59"));
-                                table_editor ->setItem(currentRow, 0, bot_name_row);  
-                                QTableWidgetItem *translation_name_row = new QTableWidgetItem();
-                                translation_name_row->setBackgroundColor(QColor("#F75D59"));
-                                translation_name_row->setText(tr(gnName.c_str()));
-                                table_editor ->setItem(currentRow , 1, translation_name_row);               
-                                QTableWidgetItem *sheet_name_row = new QTableWidgetItem();
-                                sheet_name_row->setText(" ");      
-                                sheet_name_row->setBackgroundColor(QColor("#F75D59"));
-                                table_editor ->setItem(currentRow, 2, sheet_name_row);     
-                            }                         
-                        }
-                        cleanGenericNames();
-                    }
+                    
+                    current_window->extractBotNames();
+                 //   if(current_window->isWindowModified())
+                  //  {
+                        
+                 //   }    
                     
                 }
         }    
@@ -413,6 +291,13 @@ void CMainWindow::readSettings()
             settings->endGroup();    
 }
 
+void CMainWindow::debug(QString text)
+{
+            QErrorMessage error_settings;
+            error_settings.showMessage(text);
+            error_settings.exec();    
+}
+
 bool CMainWindow::verifySettings()
 {
         bool count_errors = false;
@@ -436,14 +321,7 @@ bool CMainWindow::verifySettings()
         return !count_errors;
         
 }
- 
- void CMainWindow::setActiveSubWindow(QWidget *window)
- {
-     if (!window)
-        return;
-     _ui.mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
- }
- 
+
 list<string> CMainWindow::convertQStringList(QStringList listq)
 {       
         std::list<std::string> stdlist;
@@ -456,9 +334,36 @@ list<string> CMainWindow::convertQStringList(QStringList listq)
         return stdlist;
 }
 
+list<CEditor*> CMainWindow::convertSubWindowList(QList<QMdiSubWindow*> listq)
+{
+        list<CEditor*> subwindows;
+        QList<QMdiSubWindow*>::iterator it = listq.begin();
+        
+        for(; it != listq.end(); ++it)
+        {
+                CEditor* current_window = qobject_cast<CEditor*>((*it));
+                subwindows.push_back(current_window);
+        }
+        
+        return subwindows;
+}
+
+bool CMainWindow::isWorksheetEditor(QString filename)
+{
+             STRING_MANAGER::TWorksheet wk_file;          
+             if(loadExcelSheet(filename.toStdString(), wk_file, true) == true)
+             {
+                 return true;
+             }  else {
+                 return false;
+             }
+}
+
 bool CCoreListener::closeMainWindow() const
 {
     return true;
 }
 
 } /* namespace Plugin */
+
+

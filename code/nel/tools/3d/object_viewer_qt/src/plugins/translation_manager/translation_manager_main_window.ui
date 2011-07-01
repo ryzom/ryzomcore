@@ -16,27 +16,11 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="QSplitter" name="splitter">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <widget class="QMdiArea" name="mdiArea">
-       <property name="documentMode">
-        <bool>true</bool>
-       </property>
-       <widget class="QWidget" name="sheetEditor">
-        <property name="windowTitle">
-         <string/>
-        </property>
-       </widget>
-      </widget>
-     </widget>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QMdiArea" name="mdiArea"/>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

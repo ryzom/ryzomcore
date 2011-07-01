@@ -33,29 +33,31 @@
 #include <QtGui/QUndoStack>
 #include <QtGui/QMainWindow>
 #include <QtGui/QGridLayout>
-#include <QtGui/QTabWidget>
+#include <QtGui/QTableWidget>
 #include <QtGui/QMenu>
 #include <QtGui/QMdiSubWindow>
 #include <QtCore/QSignalMapper>
 
 
-
+#include "translation_manager_editor.h"
 #include "ui_translation_manager_main_window.h"
 #include <set>
 
 class QWidget;
 
+
 using namespace std;
 
 namespace Plugin
 {
-
-struct CCelPos
-{
-        int col;
-        int row;
-};
     
+class CMdiSubWindow;
+    
+struct WStatus
+{
+        bool modified;
+};
+   
 class CMainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -64,9 +66,8 @@ public:
         virtual ~CMainWindow() {}
         QUndoStack *m_undoStack;
 private:
-        Ui::CMainWindow _ui;
-        
-        map<QMdiSubWindow*, list<CCelPos> > modifiedCells;
+    
+        Ui::CMainWindow _ui;        
         // actions
         QAction *openAct;
         QAction *saveAct;
@@ -86,17 +87,22 @@ private Q_SLOTS:
         void open();
         void save();
         void saveAs();
-        void sheetEditorChanged(int, int);
-        void setActiveSubWindow(QWidget *window);
         void activeSubWindowChanged();
+        void setActiveSubWindow(QWidget *window);
+        void updateWindowsList();  
+       
+        void debug(QString text); // TODO
 private:
-        void compareBotNames();
+        void updateToolbar(QMdiSubWindow *window);
         bool verifySettings();
         void readSettings();
         void createMenus();
         void createToolbar();
-        void updateWindowsList();
+        
         list<string> convertQStringList(QStringList listq);
+        list<CEditor*> convertSubWindowList(QList<QMdiSubWindow*> listq);
+        bool isWorksheetEditor(QString filename);
+    
         
         
 };
@@ -111,21 +117,9 @@ public:
 	virtual bool closeMainWindow() const;
 };
 
-class CMdiSubWindow : public QMdiSubWindow 
-{
-   private:
-       int window_type;
-    public:
-        int getWType()
-        {
-            return window_type;
-        }
-        void setWType(int nType)
-        {
-            window_type = nType;
-        }
-};
 
 } // namespace Plugin
+
+
 
 #endif // SIMPLE_VIEWER_H

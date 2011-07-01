@@ -92,7 +92,7 @@ QStringList TranslationManagerPlugin::dependencies() const
 {
 	QStringList list;
 	list.append(Core::Constants::OVQT_CORE_PLUGIN);
-	list.append("ObjectViewer");
+	//list.append("ObjectViewer");
 	return list;
 }
 

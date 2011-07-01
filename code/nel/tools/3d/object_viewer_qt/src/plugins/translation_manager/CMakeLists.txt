@@ -11,7 +11,9 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 
 SET(OVQT_PLUG_TRANSLATION_MANAGER_HDR 	translation_manager_plugin.h
 							translation_manager_main_window.h
-							translation_manager_settings_page.h)
+							translation_manager_settings_page.h
+                                                                                                       translation_manager_editor.h
+                                                                                                       editor_worksheet.h)
 
 SET(OVQT_PLUG_TRANSLATION_MANAGER_UIS	translation_manager_settings_page.ui
                                                         translation_manager_main_window.ui)
