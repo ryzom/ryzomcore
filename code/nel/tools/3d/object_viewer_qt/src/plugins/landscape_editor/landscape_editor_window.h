@@ -23,6 +23,7 @@
 
 // Qt includes
 #include <QtGui/QUndoStack>
+#include <QtOpenGL/QGLWidget>
 
 namespace LandscapeEditor
 {
@@ -49,6 +50,9 @@ private Q_SLOTS:
 	void openProjectSettings();
 	void openSnapshotDialog();
 
+protected:
+	virtual void showEvent(QShowEvent *showEvent);
+
 private:
 	void createMenus();
 	void createToolBars();
@@ -58,6 +62,7 @@ private:
 	LandscapeScene *m_landscapeScene;
 	ZoneBuilder *m_zoneBuilder;
 	QUndoStack *m_undoStack;
+	QGLWidget *m_oglWidget;
 	Ui::LandscapeEditorWindow m_ui;
 }; /* class LandscapeEditorWindow */
 

@@ -34,14 +34,17 @@
 // Qt includes
 #include <QtCore/QSettings>
 #include <QtGui/QFileDialog>
-#include <QtOpenGL/QGLWidget>
 
 namespace LandscapeEditor
 {
 QString _lastDir;
 
 LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
-	: QMainWindow(parent)
+	: QMainWindow(parent),
+	  m_landscapeScene(0),
+	  m_zoneBuilder(0),
+	  m_undoStack(0),
+	  m_oglWidget(0)
 {
 	m_ui.setupUi(this);
 
@@ -55,8 +58,9 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 
 	m_landscapeScene->setZoneBuilder(m_zoneBuilder);
 	m_ui.graphicsView->setScene(m_landscapeScene);
-	//m_ui.graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::DoubleBuffer)));
-	m_ui.graphicsView->setViewport(new QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::SampleBuffers)));
+	//m_oglWidget = new QGLWidget(QGLFormat(QGL::DoubleBuffer));
+	m_oglWidget = new QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::SampleBuffers));
+	m_ui.graphicsView->setViewport(m_oglWidget);
 
 	createMenus();
 	createToolBars();
@@ -148,6 +152,12 @@ void LandscapeEditorWindow::openSnapshotDialog()
 		setCursor(Qt::ArrowCursor);
 	}
 	delete dialog;
+}
+
+void LandscapeEditorWindow::showEvent(QShowEvent *showEvent)
+{
+	QMainWindow::showEvent(showEvent);
+	m_oglWidget->makeCurrent();
 }
 
 void LandscapeEditorWindow::createMenus()
