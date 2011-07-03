@@ -78,7 +78,7 @@ bool PixmapDatabase::loadPixmaps(const QString &zonePath, NLLIGO::CZoneBank &zon
 			m_pixmapMap.insert(zonePixmapName, pixmap);
 	}
 
-	QPixmap *pixmap = new QPixmap(zonePath + "_UNUSED_.png");
+	QPixmap *pixmap = new QPixmap(zonePath + "_unused_.png");
 	QPixmap *scaledPixmap = new QPixmap(pixmap->scaled(m_textureSize, m_textureSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 	delete pixmap;
 	m_pixmapMap.insert(QString(STRING_UNUSED), scaledPixmap);
