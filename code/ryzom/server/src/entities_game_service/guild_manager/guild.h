@@ -190,6 +190,9 @@ public:
 	void removeMission( uint idx, TMissionResult result);
 	void addSuccessfulMission(CMissionTemplate * templ);
 	bool processMissionEvent( CMissionEvent & event, TAIAlias alias = CAIAliasTranslator::Invalid);
+	bool processGuildMissionEvent(std::list< CMissionEvent * > & eventList, TAIAlias missionAlias );
+	bool processGuildMissionStepEvent(std::list< CMissionEvent* > & eventList, TAIAlias missionAlias, uint32 stepIndex);
+	CMissionGuild* getMissionByAlias( TAIAlias missionAlias );
 	bool isMissionSuccessfull(TAIAlias alias);
 	///\return the mission
 	inline std::vector<CMissionGuild*> & getMissions()

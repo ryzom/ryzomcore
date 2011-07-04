@@ -729,6 +729,30 @@ bool CGuild::processMissionEvent( CMissionEvent & event, TAIAlias alias)
 }
 
 //----------------------------------------------------------------------------
+bool CGuild::processGuildMissionEvent(std::list< CMissionEvent *> & eventList, TAIAlias missionAlias)
+{
+	return true;
+}
+
+//----------------------------------------------------------------------------
+bool CGuild::processGuildMissionStepEvent(std::list< CMissionEvent*> & eventList, TAIAlias missionAlias, uint32 stepIndex)
+{
+	return true;
+}
+
+//----------------------------------------------------------------------------
+CMissionGuild* CGuild::getMissionByAlias( TAIAlias missionAlias )
+{
+	const uint size = (uint)_Missions.size();
+	for ( uint i = 0; i < size; i++ )
+	{
+		if ( _Missions[i] && _Missions[i]->getTemplateId() == missionAlias )
+			return _Missions[i];
+	}
+	return NULL;
+}
+
+//----------------------------------------------------------------------------
 bool CGuild::isMissionSuccessfull(TAIAlias alias)
 {
 	/*std::map<TAIAlias, TMissionHistory>::iterator it(_MissionHistories.find(alias));

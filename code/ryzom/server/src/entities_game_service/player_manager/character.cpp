@@ -10708,6 +10708,7 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 		}
 
 		CTeam * team = TeamManager.getRealTeam( _TeamId );
+		CGuild* guild = CGuildManager::getInstance()->getGuildFromId( _GuildId );
 		if (_BotGift == NULL)
 		{
 			nlwarning("Player %s has no bot gift", _Id.toString().c_str());
@@ -10730,6 +10731,15 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 				return;
 			}
 			mission = team->getMissionByAlias( missionAlias );
+		}
+		else if (type == MISSION_DESC::Guild)
+		{
+			if (guild == NULL)
+			{
+				nlwarning("CCharacter::acceptExchange : character %s ->  no guild",_Id.toString().c_str() );
+				return;
+			}
+			mission = guild->getMissionByAlias( missionAlias );
 		}
 
 		vector<CGameItemPtr> vect;
@@ -10764,6 +10774,8 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 					processMissionStepUserEvent( eventList,missionAlias,stepIndex );
 				else if ( type == MISSION_DESC::Group )
 					team->processTeamMissionStepEvent( eventList,missionAlias,stepIndex );
+				else if ( type == MISSION_DESC::Guild )
+					guild->processGuildMissionStepEvent( eventList,missionAlias,stepIndex );
 				eventList.pop_front();
 				for ( std::list< CMissionEvent* >::iterator it = eventList.begin(); it != eventList.end(); ++it  )
 					processMissionEvent(*(*it));
@@ -10783,6 +10795,8 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 							processMissionStepUserEvent( eventList,missionAlias,stepIndex );
 						else if ( type == MISSION_DESC::Group )
 							team->processTeamMissionStepEvent( eventList,missionAlias,stepIndex );
+						else if ( type == MISSION_DESC::Guild )
+							guild->processGuildMissionStepEvent( eventList,missionAlias,stepIndex );
 						eventList.pop_front();
 						for ( std::list< CMissionEvent* >::iterator it = eventList.begin(); it != eventList.end(); ++it  )
 							processMissionEvent(*(*it));
@@ -11615,7 +11629,7 @@ bool CCharacter::processMissionEventList( std::list< CMissionEvent* > & eventLis
 	bool processed = false;
 
 	bool firstEvent = true;
-	CGuild * guild = NULL;
+	CGuild * guild = CGuildManager::getInstance()->getGuildFromId( _GuildId );
 	while ( !eventList.empty() )
 	{
 		bool eventProcessed = false;
@@ -11650,6 +11664,13 @@ bool CCharacter::processMissionEventList( std::list< CMissionEvent* > & eventLis
 		{
 			if (team != NULL)
 				eventProcessed = team->processTeamMissionEvent(eventList, alias);
+		}
+
+		// THIRD - Check with guild missions (if event not already processed and char belongs to a guild)
+		if (!eventProcessed && (event.Restriction != CMissionEvent::NoGroup))
+		{
+			if (guild != NULL)
+				eventProcessed = guild->processGuildMissionEvent(eventList, alias);
 		}
 
 		processed |= eventProcessed;
