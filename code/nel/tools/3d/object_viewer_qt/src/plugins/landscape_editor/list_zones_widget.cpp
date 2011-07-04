@@ -38,6 +38,8 @@ namespace LandscapeEditor
 
 ListZonesWidget::ListZonesWidget(QWidget *parent)
 	: QWidget(parent),
+	  m_rotCycle(0),
+	  m_flipCycle(0),
 	  m_listZonesModel(0),
 	  m_zoneBuilder(0)
 {
@@ -101,24 +103,70 @@ void ListZonesWidget::updateUi()
 	m_listZonesModel->rebuildModel(m_zoneBuilder->pixmapDatabase());
 }
 
-QString ListZonesWidget::currentZoneName() const
+QString ListZonesWidget::currentZoneName()
 {
 	QString zoneName = "";
 	QModelIndex index = m_ui.listView->currentIndex();
 	if (index.isValid())
 		zoneName = index.data().toString();
-
+	if (m_ui.zoneSelectComboBox->currentIndex() == 1)
+	{
+		// Random value
+		if (m_listSelection.size() > 0)
+		{
+			uint32 randZone = uint32(NLMISC::frand(m_listSelection.size()));
+			NLMISC::clamp(randZone, (uint32)0, uint32(m_listSelection.size() - 1));
+			zoneName = m_listSelection[randZone];
+		}
+	}
+	else if (m_ui.zoneSelectComboBox->currentIndex() == 2)
+	{
+		// Full cycle
+		zoneName = m_listSelection[m_zoneNameCycle];
+		m_zoneNameCycle++;
+		m_zoneNameCycle = m_zoneNameCycle % m_listSelection.size();
+	}
 	return zoneName;
 }
 
-int ListZonesWidget::currentRot() const
+int ListZonesWidget::currentRot()
 {
-	return m_ui.rotComboBox->currentIndex();
+	int rot = m_ui.rotComboBox->currentIndex();
+	if (rot == 4)
+	{
+		// Random value
+		uint32 randRot = uint32(NLMISC::frand(4.0));
+		NLMISC::clamp(randRot, (uint32)0, (uint32)3);
+		rot = int(randRot);
+	}
+	else if (rot == 5)
+	{
+		// Full cycle
+		rot = m_rotCycle;
+		m_rotCycle++;
+		m_rotCycle = m_rotCycle % 4;
+	}
+	return rot;
 }
 
-int ListZonesWidget::currentFlip() const
+int ListZonesWidget::currentFlip()
 {
-	return m_ui.flipComboBox->currentIndex();
+	int flip = m_ui.flipComboBox->currentIndex();
+	if (flip == 2)
+	{
+		// Random value
+		uint32 randFlip = uint32(NLMISC::frand(2.0));
+		NLMISC::clamp (randFlip, (uint32)0, (uint32)1);
+		flip = int(randFlip);
+	}
+	else if (flip == 3)
+	{
+		// Full cycle
+		flip = m_flipCycle;
+		m_flipCycle++;
+		m_flipCycle = m_flipCycle % 2;
+	}
+	return flip;
 }
 
 bool ListZonesWidget::isNotPropogate() const
@@ -234,11 +282,12 @@ void ListZonesWidget::updateListZones()
 	std::vector<NLLIGO::CZoneBankElement *> currentSelection;
 	zoneBank.getSelection (currentSelection);
 
-	QStringList listSelection;
+	m_listSelection.clear();
+	m_zoneNameCycle = 0;
 	for (size_t i = 0; i < currentSelection.size(); ++i)
-		listSelection << currentSelection[i]->getName().c_str();
+		m_listSelection << currentSelection[i]->getName().c_str();
 
-	m_listZonesModel->setListZones(listSelection);
+	m_listZonesModel->setListZones(m_listSelection);
 }
 
 void ListZonesWidget::disableSignals(bool block)

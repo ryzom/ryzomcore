@@ -45,9 +45,9 @@ public:
 
 	void updateUi();
 	void setZoneBuilder(ZoneBuilder *zoneBuilder);
-	QString currentZoneName() const;
-	int currentRot() const;
-	int currentFlip() const;
+	QString currentZoneName();
+	int currentRot();
+	int currentFlip();
 	bool isNotPropogate() const;
 	bool isForce() const;
 
@@ -61,6 +61,10 @@ private Q_SLOTS:
 
 private:
 	void disableSignals(bool block);
+
+	int m_rotCycle, m_flipCycle;
+	int m_zoneNameCycle;
+	QStringList m_listSelection;
 
 	ListZonesModel *m_listZonesModel;
 	ZoneBuilder *m_zoneBuilder;

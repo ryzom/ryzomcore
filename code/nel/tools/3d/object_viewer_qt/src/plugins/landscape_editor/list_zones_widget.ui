@@ -39,7 +39,12 @@
        <widget class="QComboBox" name="categoryValueComboBox_1"/>
       </item>
       <item row="0" column="3">
-       <widget class="QComboBox" name="comboBox_11">
+       <widget class="QComboBox" name="zoneSelectComboBox">
+        <item>
+         <property name="text">
+          <string>Select</string>
+         </property>
+        </item>
         <item>
          <property name="text">
           <string>Random</string>
@@ -296,6 +301,9 @@
      </property>
      <property name="verticalScrollMode">
       <enum>QAbstractItemView::ScrollPerPixel</enum>
+     </property>
+     <property name="spacing">
+      <number>1</number>
      </property>
     </widget>
    </item>
