@@ -704,6 +704,8 @@ void CGuild::removeMission( uint idx, TMissionResult result)
 
 	CMissionTemplate *tpl = CMissionManager::getInstance()->getTemplate(_Missions[idx]->getTemplateId());
 
+	updateMissionHistories( _Missions[idx]->getTemplateId(), result);
+
 	if ( tpl && !tpl->Tags.NoList )
 	{
 		_Missions[idx]->clearUsersJournalEntry();
@@ -717,21 +719,53 @@ void CGuild::removeMission( uint idx, TMissionResult result)
 //----------------------------------------------------------------------------
 void CGuild::addSuccessfulMission(CMissionTemplate * templ)
 {
-	/*TMissionHistory &mh = _MissionHistories[templ.Alias];
-	mh.Successfull = true;*/
-	/// TODO: Add the mission histories
+	TMissionHistory &mh = _MissionHistories[templ->Alias];
+	mh.Successfull = true;
+}
+
+//----------------------------------------------------------------------------
+void CGuild::clearSuccessfulMissions()
+{
+	_MissionHistories.clear();
+}
+
+//----------------------------------------------------------------------------
+void CGuild::updateMissionHistories(TAIAlias missionAlias, uint32 result)
+{
+	TMissionHistory &mh = _MissionHistories[missionAlias];
+
+	switch(result)
+	{
+	case mr_success:
+	case mr_forced:
+		mh.Successfull = true;
+		// validate last try date
+		_MissionHistories[missionAlias].LastSuccessDate = CTickEventHandler::getGameCycle();
+		break;
+	}
 }
 
 //----------------------------------------------------------------------------
 bool CGuild::processMissionEvent( CMissionEvent & event, TAIAlias alias)
 {
-	return true;
+	std::list<CMissionEvent*> listEvents;
+	listEvents.push_back(&event);
+	return processGuildMissionEvent(listEvents, alias);
 }
 
 //----------------------------------------------------------------------------
 bool CGuild::processGuildMissionEvent(std::list< CMissionEvent *> & eventList, TAIAlias missionAlias)
 {
-	return true;
+	for (uint i = 0; i < _Missions.size(); i++ )
+	{
+		nlassert( _Missions[i] );
+		if ( missionAlias == CAIAliasTranslator::Invalid	|| _Missions[i]->getTemplateId() == missionAlias )
+		{
+			if ( processGuildMissionStepEvent( eventList, _Missions[i]->getTemplateId() ,0xFFFFFFFF) )
+				return true;
+		}
+	}
+	return false;
 }
 
 //----------------------------------------------------------------------------
@@ -755,10 +789,9 @@ CMissionGuild* CGuild::getMissionByAlias( TAIAlias missionAlias )
 //----------------------------------------------------------------------------
 bool CGuild::isMissionSuccessfull(TAIAlias alias)
 {
-	/*std::map<TAIAlias, TMissionHistory>::iterator it(_MissionHistories.find(alias));
+	std::map<TAIAlias, TMissionHistory>::iterator it(_MissionHistories.find(alias));
 	if (it != _MissionHistories.end())
-	return it->second.Successfull;*/
-	/// TODO: Add the mission histories
+		return it->second.Successfull;
 	return false;
 }
 

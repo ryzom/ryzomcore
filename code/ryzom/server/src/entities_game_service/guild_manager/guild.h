@@ -32,6 +32,10 @@
 class CMissionGuild;
 class CGuildMember;
 
+/* Storage class for mission history data.
+*/
+struct TMissionHistory;
+
 
 /**
  * A guild in ryzom
@@ -189,6 +193,8 @@ public:
 	}
 	void removeMission( uint idx, TMissionResult result);
 	void addSuccessfulMission(CMissionTemplate * templ);
+	void clearSuccessfulMissions();
+	void updateMissionHistories(TAIAlias missionAlias, uint32 result);
 	bool processMissionEvent( CMissionEvent & event, TAIAlias alias = CAIAliasTranslator::Invalid);
 	bool processGuildMissionEvent(std::list< CMissionEvent * > & eventList, TAIAlias missionAlias );
 	bool processGuildMissionStepEvent(std::list< CMissionEvent* > & eventList, TAIAlias missionAlias, uint32 stepIndex);
@@ -378,6 +384,8 @@ private:
 
 	///the missions took by the guild
 	std::vector<CMissionGuild*>			_Missions;
+	/// Successful missions
+	std::map<TAIAlias, TMissionHistory> _MissionHistories;
 
 	NLMISC_COMMAND_FRIEND( guildDB );
 };
