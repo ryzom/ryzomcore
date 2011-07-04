@@ -771,6 +771,72 @@ bool CGuild::processGuildMissionEvent(std::list< CMissionEvent *> & eventList, T
 //----------------------------------------------------------------------------
 bool CGuild::processGuildMissionStepEvent(std::list< CMissionEvent*> & eventList, TAIAlias missionAlias, uint32 stepIndex)
 {
+	CMissionGuild * mission = getMissionByAlias( missionAlias );
+	if (!mission )
+	{
+		nlwarning("invalid missionAlias");
+		return false;
+	}
+	// I don't know if i should pass _EId to this function
+	CMissionEvent::TResult result = mission->processEvent( TheDataset.getDataSetRow( _EId) ,eventList,stepIndex );
+	if ( result == CMissionEvent::Nothing )
+		return false;
+	else if ( result == CMissionEvent::MissionFailed )
+		return true;
+
+	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( mission->getTemplateId() );
+	nlassert( templ );
+	if ( result == CMissionEvent::MissionEnds )
+	{
+		CMissionEventMissionDone * event = new CMissionEventMissionDone(templ->Alias);
+		eventList.push_back(event);
+
+		addSuccessfulMission(templ);
+
+		for ( std::map<EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::iterator it = getMembersBegin();
+			it != getMembersEnd();++it )
+		{
+			CCharacter * user = PlayerManager.getChar( it->first );
+			if ( user )
+			{
+				if ( templ->Tags.NoList == false )
+					CCharacter::sendDynamicSystemMessage( user->getEntityRowId(),"EGS_MISSION_SUCCESS");
+			}
+		}
+
+		CMissionManager::getInstance()->missionDoneOnce(templ);
+		mission->stopChildren();
+
+		// only remove no list missions, other must be manually removed by user
+		if ( templ->Tags.NoList || mission->isChained() || templ->Tags.AutoRemove )
+		{
+			mission->updateEncyclopedia();
+			removeMission(mission, mr_success);
+		}
+		else
+		{
+			mission->setSuccessFlag();
+			mission->updateUsersJournalEntry();
+		}
+		return true;
+	}
+	else if ( result == CMissionEvent::StepEnds )
+	{
+		if ( templ->Tags.NoList == false )
+		{
+			for ( std::map<EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::iterator it = getMembersBegin();
+				it != getMembersEnd();++it )
+			{
+				CCharacter * user = PlayerManager.getChar( it->first );
+				if ( user )
+				{
+					if ( templ->Tags.NoList == false )
+						CCharacter::sendDynamicSystemMessage( user->getEntityRowId(),"EGS_MISSION_STEP_SUCCESS");
+				}
+			}
+		}
+	}
+	mission->updateUsersJournalEntry();
 	return true;
 }
 
