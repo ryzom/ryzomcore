@@ -1341,6 +1341,22 @@ uint32 CCharacter::tickUpdate()
 				}
 			}
 
+			// Adding UpdateCompass for guild missions
+			{
+				H_AUTO(CharacterUpdateGuildCompass);
+				CGuild * guild = CGuildManager::getInstance()->getGuildFromId( _GuildId );
+				if ( guild )
+				{
+					const uint size = (uint)guild->getMissions().size();
+					for ( uint i =  0; i < size; i++ )
+					{
+						nlassert(guild->getMissions()[i]);
+						guild->getMissions()[i]->updateCompass(*this, string(""));
+						guild->getMissions()[i]->updateCompass(*this, string("GROUP:"));
+					}
+				}
+			}
+
 			{
 				H_AUTO(CharacterUpdateTargetCoordinatesCompass);
 				// update compass coordinates information
