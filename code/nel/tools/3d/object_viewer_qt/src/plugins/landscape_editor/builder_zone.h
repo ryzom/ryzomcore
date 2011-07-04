@@ -21,6 +21,7 @@
 // Project includes
 #include "builder_zone_region.h"
 #include "zone_region_editor.h"
+#include "pixmap_database.h"
 
 // NeL includes
 #include <nel/ligo/zone_bank.h>
@@ -66,39 +67,6 @@ struct ZonePosition
 		region = id;
 	}
 };
-
-/**
-@class PixmapDatabase
-@brief PixmapDatabase contains the image database
-@details
-*/
-class PixmapDatabase
-{
-public:
-	PixmapDatabase();
-	~PixmapDatabase();
-
-	/// Load all images(png) from zonePath, list images gets from zoneBank
-	bool loadPixmaps(const QString &zonePath, NLLIGO::CZoneBank &zoneBank);
-
-	/// Unload all images
-	void reset();
-
-	/// Get list names all loaded pixmaps
-	QStringList listPixmaps() const;
-
-	/// Get original pixmap
-	/// @return QPixmap* if the image is in the database ; otherwise returns 0.
-	QPixmap *pixmap(const QString &zoneName) const;
-
-	int textureSize() const;
-
-private:
-
-	int m_textureSize;
-	QMap<QString, QPixmap*> m_pixmapMap;
-};
-
 
 /**
 @class ZoneBuilder
