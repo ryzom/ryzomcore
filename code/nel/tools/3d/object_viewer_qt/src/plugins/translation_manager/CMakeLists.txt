@@ -13,7 +13,9 @@ SET(OVQT_PLUG_TRANSLATION_MANAGER_HDR 	translation_manager_plugin.h
 							translation_manager_main_window.h
 							translation_manager_settings_page.h
                                                                                                        translation_manager_editor.h
-                                                                                                       editor_worksheet.h)
+                                                                                                       editor_worksheet.h
+                                                                                                       extract_new_sheet_names.h
+                                                                                                       extract_bot_names.h)
 
 SET(OVQT_PLUG_TRANSLATION_MANAGER_UIS	translation_manager_settings_page.ui
                                                         translation_manager_main_window.ui)

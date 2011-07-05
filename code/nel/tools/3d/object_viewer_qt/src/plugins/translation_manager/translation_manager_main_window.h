@@ -1,6 +1,6 @@
-// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Translation Manager Plugin - OVQT Plugin <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
-// Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
+// Copyright (C) 2011  Emanuel Costea <cemycc@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -27,6 +27,7 @@
 #include "nel/misc/sheet_id.h"
 #include "nel/misc/path.h"
 #include "nel/misc/diff_tool.h"
+#include "nel/ligo/ligo_config.h"
 
 // Qt includes
 #include <QtCore/QObject>
@@ -51,13 +52,6 @@ using namespace std;
 namespace Plugin
 {
     
-class CMdiSubWindow;
-    
-struct WStatus
-{
-        bool modified;
-};
-   
 class CMainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -75,15 +69,16 @@ private:
         QMenu *windowMenu;
         QSignalMapper *windowMapper;
         // config
-        map<string, list<string> > config_paths;
+        map<string,bool> initialize_settings;
+        list<string> filters;
         list<string> languages;
-        string ligo_path;
+        string level_design_path;
         string translation_path;
         string work_path;
-        // counts
-        map<string, int> execution_count;
+        NLLIGO::CLigoConfig ligoConfig;
 private Q_SLOTS:
         void extractBotNames();
+        void extractWords(QString);
         void open();
         void save();
         void saveAs();
@@ -93,12 +88,13 @@ private Q_SLOTS:
        
         void debug(QString text); // TODO
 private:
+        void openWorkFile(QString file);
         void updateToolbar(QMdiSubWindow *window);
         bool verifySettings();
         void readSettings();
         void createMenus();
         void createToolbar();
-        
+        void initializeSettings(bool georges);
         list<string> convertQStringList(QStringList listq);
         list<CEditor*> convertSubWindowList(QList<QMdiSubWindow*> listq);
         bool isWorksheetEditor(QString filename);

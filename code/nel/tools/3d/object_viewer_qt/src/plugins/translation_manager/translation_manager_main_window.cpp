@@ -1,6 +1,6 @@
-// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Translation Manager Plugin - OVQT Plugin <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
-// Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
+// Copyright (C) 2011  Emanuel Costea <cemycc@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -46,21 +46,6 @@
 #include <QtGui/QCloseEvent>
 
 
-
-struct TEntryInfo
-{
-	string	SheetName;
-};
-
-set<string> getGenericNames();
-void cleanGenericNames();
-map<string, TEntryInfo> getSimpleNames();
-void cleanSimpleNames();
-void setPathsForPrimitives(map<string,list<string> > config_paths, string ligo_class_file);
-void extractBotNamesFromPrimitives();
-string cleanupName(const std::string &name);
-ucstring cleanupUcName(const ucstring &name);
-
 namespace Plugin
 {
 
@@ -74,9 +59,8 @@ CMainWindow::CMainWindow(QWidget *parent)
          windowMapper = new QSignalMapper(this);
          connect(windowMapper, SIGNAL(mapped(QWidget*)), this, SLOT(setActiveSubWindow(QWidget*)));
          
-         // set extraction scripts counters
-         execution_count["extract_bot_names"] = 0;
-         
+         initialize_settings["georges"] = false;
+         initialize_settings["ligo"] = false;
          readSettings();
          createToolbar();
         m_undoStack = new QUndoStack(this);
@@ -99,9 +83,33 @@ void CMainWindow::createToolbar()
         QMenu *wordsExtractionMenu = new QMenu("&Words extraction...");
         wordsExtractionMenu->setIcon(QIcon(Core::Constants::ICON_SETTINGS));
         _ui.toolBar->addAction(wordsExtractionMenu->menuAction());
+        // extract bot names
         QAction *extractBotNamesAct = wordsExtractionMenu->addAction("&Extract bot names...");
         extractBotNamesAct->setStatusTip(tr("Extract bot names from primitives."));
         connect(extractBotNamesAct, SIGNAL(triggered()), this, SLOT(extractBotNames()));
+        // signal mapper for extraction words
+        QSignalMapper *wordsExtractionMapper = new QSignalMapper(this);
+        connect(wordsExtractionMapper, SIGNAL(mapped(QString)), this, SLOT(extractWords(QString)));
+        // extract item words
+        QAction *extractItemWordsAct = wordsExtractionMenu->addAction("&Extract item words...");
+        extractItemWordsAct->setStatusTip(tr("Extract item words"));
+        connect(extractItemWordsAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
+        wordsExtractionMapper->setMapping(extractItemWordsAct, "item");              
+        // extract creature words
+        QAction *extractCreatureWordsAct = wordsExtractionMenu->addAction("&Extract creature words...");
+        extractCreatureWordsAct->setStatusTip(tr("Extract creature words"));
+        connect(extractCreatureWordsAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
+        wordsExtractionMapper->setMapping(extractCreatureWordsAct, "creature");      
+        // extract sbrick words
+        QAction *extractSbrickWordsAct = wordsExtractionMenu->addAction("&Extract sbrick words...");
+        extractSbrickWordsAct->setStatusTip(tr("Extract sbrick words"));  
+        connect(extractSbrickWordsAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
+        wordsExtractionMapper->setMapping(extractSbrickWordsAct, "sbrick");   
+        // extract sphrase words
+        QAction *extractSphraseWordsAct = wordsExtractionMenu->addAction("&Extract sphrase words...");
+        extractSphraseWordsAct->setStatusTip(tr("Extract sphrase words"));
+        connect(extractSphraseWordsAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
+        wordsExtractionMapper->setMapping(extractSphraseWordsAct, "sphrase");   
         
         // Windows menu
         windowMenu = new QMenu(tr("&Windows..."), _ui.toolBar);
@@ -194,6 +202,29 @@ void CMainWindow::open()
                
 }
 
+void CMainWindow::openWorkFile(QString file)
+{
+    QFileInfo* file_path = new QFileInfo(QString("%1/%2").arg(QString(work_path.c_str())).arg(file));
+    if(file_path->exists())
+    {
+             if(isWorksheetEditor(file_path->filePath()))
+             {
+                 CEditorWorksheet *new_window = new CEditorWorksheet(_ui.mdiArea);                 
+                 new_window->open(file_path->filePath());  
+                 new_window->activateWindow();
+             }          
+    } else {
+            QErrorMessage error;
+            QString text;
+            text.append("The ");
+            text.append(file_path->fileName());
+            text.append(" file don't exists.");
+            error.showMessage(text);
+            error.exec();        
+    }
+  
+}
+
 void CMainWindow::save()
 {
     CEditor* current_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow());
@@ -223,49 +254,101 @@ void CMainWindow::saveAs()
     }    
 }
 
+void CMainWindow::initializeSettings(bool georges = false)
+{   
+    if(georges == true && initialize_settings["georges"] == false)
+    {
+        CPath::addSearchPath(level_design_path + "/DFN", true, false);
+        CPath::addSearchPath(level_design_path + "/Game_elem/Creature", true, false);
+        initialize_settings["georges"] = true;
+    }
+
+    if(initialize_settings["ligo"] == false)
+    {
+        //-------------------------------------------------------------------
+        // init ligo config      
+        string ligoPath = CPath::lookup("world_editor_classes.xml", true, true);
+        ligoConfig.readPrimitiveClass(ligoPath.c_str(), false);
+        NLLIGO::Register();
+        NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &ligoConfig;
+        initialize_settings["ligo"] = true;
+    }
+}
+
+void CMainWindow::extractWords(QString type)
+{
+    CEditor* editor_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow());
+    CEditorWorksheet* current_window = qobject_cast<CEditorWorksheet*>(editor_window);
+    
+   // initializeSettings(false);
+    
+    CSheetWordListBuilder	builder;
+    QString column_name;
+
+    if(type == "item")
+    {
+        column_name = "item ID";
+        builder.SheetExt = "sitem";
+        builder.SheetPath = level_design_path + "/game_element/sitem";      
+    } else if(type == "creature") {
+        column_name = "creature ID";
+        builder.SheetExt = "creature";
+        builder.SheetPath = level_design_path + "/Game_elem/Creature/fauna";        
+    } else if(type == "sbrick") {
+        column_name = "sbrick ID";
+        builder.SheetExt = "sbrick";
+        builder.SheetPath = level_design_path + "/game_element/sbrick";           
+    } else if(type == "sphrase") {
+        column_name = "sphrase ID";
+        builder.SheetExt = "sphrase";
+        builder.SheetPath = level_design_path + "/game_element/sphrase";          
+    } 
+    current_window->extractWords(current_window->windowFilePath(), column_name, builder);
+}
+
 void CMainWindow::extractBotNames()
 {
         if(verifySettings() == true) 
         {
+            CEditorWorksheet* current_window;
+            if(_ui.mdiArea->subWindowList().size() > 0)
+            {
                 CEditor* editor_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow());
                 if(QString(editor_window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
                 {
-                    CEditorWorksheet* current_window = qobject_cast<CEditorWorksheet*>(editor_window);
+                    current_window = qobject_cast<CEditorWorksheet*>(editor_window);
                     QString file_path = current_window->subWindowFilePath();
                     if(!current_window->isBotNamesTable())
                     {
                         list<CEditor*> subWindows =  convertSubWindowList(_ui.mdiArea->subWindowList());
                         list<CEditor*>::iterator it = subWindows.begin();
                         bool finded = false;
-                        for(; it != subWindows.end(), finded != true; ++it)
+                        
+                        for(; it != subWindows.end(); ++it)
                         {                           
-                            current_window = qobject_cast<CEditorWorksheet*>((*it));
-                            file_path = current_window->subWindowFilePath();
-                            if(current_window->isBotNamesTable())
-                            {
-                                finded = true;
-                                current_window->activateWindow();
-                            }
+                              current_window = qobject_cast<CEditorWorksheet*>((*it));
+                              file_path = current_window->subWindowFilePath();
+                              if(current_window->isBotNamesTable())
+                              {
+                                  finded = true;
+                                  current_window->activateWindow();
+                              }
                         }
                         if(!finded)
                         {
-                            open();
+                            openWorkFile("bot_names_wk.txt");
                             current_window = qobject_cast<CEditorWorksheet*>(_ui.mdiArea->currentSubWindow());
                             file_path = current_window->windowFilePath();
                         }
-                    }
-                    if(execution_count["extract_bot_names"] == 0)
-                        setPathsForPrimitives(config_paths, ligo_path);
-                    extractBotNamesFromPrimitives();
-                    execution_count["extract_bot_names"] = execution_count["extract_bot_names"]  + 1;
-                    
-                    current_window->extractBotNames();
-                 //   if(current_window->isWindowModified())
-                  //  {
-                        
-                 //   }    
-                    
+                    }  
                 }
+            } else {
+                openWorkFile("bot_names_wk.txt");
+                current_window = qobject_cast<CEditorWorksheet*>(_ui.mdiArea->currentSubWindow());
+                QString file_path = current_window->windowFilePath();                
+            }
+            initializeSettings(true);
+            current_window->extractBotNames(filters, level_design_path, ligoConfig);  
         }    
 }
 
@@ -273,22 +356,14 @@ void CMainWindow::readSettings()
 {
             QSettings *settings = Core::ICore::instance()->settings();
             settings->beginGroup("translationmanager");
-
-            list<string> paths = convertQStringList(settings->value("paths").toStringList()); /* paths */
-            config_paths["paths"] = paths;
-            list<string> pathsR = convertQStringList(settings->value("pathsR").toStringList()); /* pathsR */
-            config_paths["pathsR"] = pathsR;
-            list<string> georges = convertQStringList(settings->value("georges").toStringList()); /* georges */
-            config_paths["georges"] = georges;
-            list<string> filters = convertQStringList(settings->value("filters").toStringList()); /* filters */
-            config_paths["filters"] = filters;
-            
+            filters = convertQStringList(settings->value("filters").toStringList()); /* filters */            
             languages = convertQStringList(settings->value("trlanguages").toStringList()); /* languages */
-            ligo_path = settings->value("ligo").toString().toStdString();
             translation_path = settings->value("translation").toString().toStdString();
             work_path = settings->value("work").toString().toStdString();
-            
-            settings->endGroup();    
+            settings->endGroup(); 
+            settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
+            level_design_path = settings->value(Core::Constants::LEVELDESIGN_PATH).toString().toStdString();
+            settings->endGroup();              
 }
 
 void CMainWindow::debug(QString text)
@@ -305,10 +380,7 @@ bool CMainWindow::verifySettings()
         QSettings *settings = Core::ICore::instance()->settings();
         settings->beginGroup("translationmanager");
         
-        if(settings->value("paths").toList().count() == 0
-                || settings->value("pathsR").toList().count() == 0
-                || settings->value("georges").toList().count() == 0
-                || settings->value("filters").toList().count() == 0)
+        if(settings->value("filters").toList().count() == 0)
         {
             QErrorMessage error_settings;
             error_settings.showMessage("Please write all the paths on the settings dialog.");

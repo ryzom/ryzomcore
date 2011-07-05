@@ -1,6 +1,6 @@
-// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Translation Manager Plugin - OVQT Plugin <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
-// Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
+// Copyright (C) 2011  Emanuel Costea <cemycc@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -24,21 +24,9 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QCloseEvent>
 
+#include "extract_bot_names.h"
+
 using namespace std;
-
-struct TEntryInfo
-{
-	string	SheetName;
-};
-
-set<string> getGenericNames();
-void cleanGenericNames();
-map<string, TEntryInfo> getSimpleNames();
-void cleanSimpleNames();
-void setPathsForPrimitives(map<string,list<string> > config_paths, string ligo_class_file);
-void extractBotNamesFromPrimitives();
-string cleanupName(const std::string &name);
-ucstring cleanupUcName(const ucstring &name);
 
 namespace Plugin {
 
@@ -251,12 +239,15 @@ void CEditorWorksheet::worksheetEditorChanged(int row, int column)
     
 }
 
-void CEditorWorksheet::extractBotNames()
+void CEditorWorksheet::extractBotNames(list<string> filters, string level_design_path, NLLIGO::CLigoConfig ligoConfig)
 {
     bool modified = false;
-// get SimpleNames
+    ExtractBotNames ebn;
+    ebn.setRequiredSettings(filters, level_design_path);
+    ebn.extractBotNamesFromPrimitives(ligoConfig);
+                        // get SimpleNames
                     {                       
-                        map<string, TEntryInfo> SimpleNames =  getSimpleNames();
+                        map<string, TEntryInfo> SimpleNames =  ebn.getSimpleNames();
                         map<string, TEntryInfo>::iterator it(SimpleNames.begin()), last(SimpleNames.end());
 
                         for (; it != last; ++it)
@@ -281,15 +272,15 @@ void CEditorWorksheet::extractBotNames()
                                 if(!modified) modified = true;
                             }
                         }  
-                        cleanSimpleNames();
+                        ebn.cleanSimpleNames();
                     }
                     // get GenericNames
                     {
-                        set<string> GenericNames = getGenericNames();                       
+                        set<string> GenericNames = ebn.getGenericNames();                       
                         set<string>::iterator it(GenericNames.begin()), last(GenericNames.end());
                         for (; it != last; ++it)
                         {
-                            string gnName = "gn_" + cleanupName(*it);
+                            string gnName = "gn_" + ebn.cleanupName(*it);
                             QList<QTableWidgetItem*> search_results = table_editor->findItems(tr((*it).c_str()), Qt::MatchExactly);
                             if(search_results.size() == 0)
                             {
@@ -310,13 +301,84 @@ void CEditorWorksheet::extractBotNames()
                                 if(!modified) modified = true;
                             }                         
                         }
-                        cleanGenericNames();
+                        ebn.cleanGenericNames();
                     }  
                     if(modified)
                     {
                         setWindowModified(true);
                     }
            
+}
+
+void CEditorWorksheet::extractWords(QString filename, QString columnId, IWordListBuilder& wordListBuilder)
+{
+	uint	i;
+
+	// **** Load the excel sheet
+	// load
+	TWorksheet		workSheet;
+	if(!loadExcelSheet(filename.toStdString(), workSheet, true))
+	{
+		nlwarning("Error reading '%s'. Aborted", filename.toStdString().c_str());
+		return;
+	}
+	// get the key column index
+	uint	keyColIndex = 0;	
+	if(!workSheet.findCol(columnId.toStdString(), keyColIndex))
+	{
+		nlwarning("Error: Don't find the column '%s'. '%s' Aborted", columnId.toStdString().c_str(), filename.toStdString().c_str());
+		return;
+	}
+	// get the name column index
+	uint	nameColIndex;
+	if(!workSheet.findCol(ucstring("name"), nameColIndex))
+	{
+		nlwarning("Error: Don't find the column 'name'. '%s' Aborted", filename.toStdString().c_str());
+		return;
+	}    
+    
+	// **** List all words with the builder given
+	std::vector<string>		allWords;
+	if(!wordListBuilder.buildWordList(allWords, filename.toStdString()))
+               {
+		return;
+                }
+        bool modified = false;
+        for(i = 0; i < allWords.size(); i++)
+        {                   
+                string keyName = allWords[i];
+                QList<QTableWidgetItem*> search_results = table_editor->findItems(tr(keyName.c_str()), Qt::MatchExactly);
+                if(search_results.size() == 0)
+                {
+                   
+                        int knPos = 0, nPos = 0;
+                        if(workSheet.getData(0, 0) == ucstring("*HASH_VALUE"))
+                        {
+                            knPos = keyColIndex - 1;
+                            nPos = nameColIndex - 1;
+                        } else {
+                            knPos = keyColIndex;
+                            nPos = nameColIndex;
+                        }                       
+                        const int currentRow = table_editor->rowCount();                     
+                        table_editor->setRowCount(currentRow + 1);
+                        // keyName row
+                        QTableWidgetItem *key_name_row = new QTableWidgetItem();
+                        key_name_row->setText(tr(keyName.c_str()));    
+                        key_name_row->setBackgroundColor(QColor("#F75D59"));               
+                        table_editor ->setItem(currentRow, knPos, key_name_row); 
+                        // nameColumn key
+                        QTableWidgetItem *name_row = new QTableWidgetItem();
+                        name_row->setText(QString("<GEN>") + tr(keyName.c_str()));    
+                        name_row->setBackgroundColor(QColor("#F75D59"));                    
+                        table_editor ->setItem(currentRow, nPos, name_row);   
+                        if(!modified) modified = true;
+                }            
+        }
+        if(modified)
+       {
+              setWindowModified(true);
+       }
 }
 
 void CEditorWorksheet::setCurrentFile(QString filename)
