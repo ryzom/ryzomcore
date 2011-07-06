@@ -196,12 +196,12 @@ void ZoneRegionObject::setLigoData(const LigoData &data, const sint32 x, const s
 	m_zoneRegion.setSharingCutEdges(x, y, 3, data.sharingCutEdges[3]);
 }
 
-NLLIGO::CZoneRegion &ZoneRegionObject::zoneRegion()
+NLLIGO::CZoneRegion &ZoneRegionObject::ligoZoneRegion()
 {
 	return m_zoneRegion;
 }
 
-void ZoneRegionObject::setZoneRegion(const NLLIGO::CZoneRegion &zoneRegion)
+void ZoneRegionObject::setLigoZoneRegion(const NLLIGO::CZoneRegion &zoneRegion)
 {
 	m_zoneRegion = zoneRegion;
 }
@@ -212,6 +212,16 @@ bool ZoneRegionObject::checkPos(const sint32 x, const sint32 y)
 			(x <= m_zoneRegion.getMaxX()) &&
 			(y >= m_zoneRegion.getMinY()) &&
 			(y <= m_zoneRegion.getMaxY()));
+}
+
+bool ZoneRegionObject::isModified() const
+{
+	return m_modified;
+}
+
+void ZoneRegionObject::setModified(bool modified)
+{
+	m_modified = modified;
 }
 
 } /* namespace LandscapeEditor */

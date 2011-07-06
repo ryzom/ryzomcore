@@ -32,6 +32,7 @@
 namespace LandscapeEditor
 {
 
+// Data
 struct LigoData
 {
 	uint8			posX;
@@ -47,32 +48,49 @@ struct LigoData
 	bool operator!= (const LigoData& other) const;
 };
 
+/**
+@class ZoneRegionObject
+@brief
+@details
+*/
 class ZoneRegionObject
 {
 public:
 	ZoneRegionObject();
 	~ZoneRegionObject();
 
-	// Load landscape data from file
+	/// Load landscape data from file
 	bool load(const std::string &fileName);
 
-	// Save landscape data to file
+	/// Save landscape data to file (before save, should set file name).
 	bool save();
 
+	/// Get ligo data
 	void ligoData(LigoData &data, const sint32 x, const sint32 y);
 
+	/// Set ligo data
 	void setLigoData(const LigoData &data, const sint32 x, const sint32 y);
 
+	/// Get file name
 	std::string fileName() const;
 
-	// Set file name
+	/// Set file name, use for saving data in file
 	void setFileName(const std::string &fileName);
 
-	NLLIGO::CZoneRegion &zoneRegion();
+	/// Accessor to LIGO CZoneRegion
+	NLLIGO::CZoneRegion &ligoZoneRegion();
 
-	void setZoneRegion(const NLLIGO::CZoneRegion &zoneRegion);
+	void setLigoZoneRegion(const NLLIGO::CZoneRegion &zoneRegion);
 
+	/// Check position, it belongs to the landscape
 	bool checkPos(const sint32 x, const sint32 y);
+
+	/// Helper flag to know if a ps has been modified
+	/// @{
+	bool isModified() const;
+
+	void setModified(bool modified);
+	/// @}
 
 private:
 
