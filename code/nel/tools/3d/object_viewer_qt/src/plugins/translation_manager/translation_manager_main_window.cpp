@@ -16,6 +16,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "translation_manager_main_window.h"
+#include "translation_manager_constants.h"
 #include "editor_worksheet.h"
 
 // Project system includes
@@ -86,7 +87,9 @@ void CMainWindow::createToolbar()
         // extract bot names
         QAction *extractBotNamesAct = wordsExtractionMenu->addAction("&Extract bot names...");
         extractBotNamesAct->setStatusTip(tr("Extract bot names from primitives."));
-        connect(extractBotNamesAct, SIGNAL(triggered()), this, SLOT(extractBotNames()));
+        connect(extractBotNamesAct, SIGNAL(triggered()), this, SLOT(extractBotNames()));       
+        // Words extraction
+        // -----------------------------
         // signal mapper for extraction words
         QSignalMapper *wordsExtractionMapper = new QSignalMapper(this);
         connect(wordsExtractionMapper, SIGNAL(mapped(QString)), this, SLOT(extractWords(QString)));
@@ -94,23 +97,37 @@ void CMainWindow::createToolbar()
         QAction *extractItemWordsAct = wordsExtractionMenu->addAction("&Extract item words...");
         extractItemWordsAct->setStatusTip(tr("Extract item words"));
         connect(extractItemWordsAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
-        wordsExtractionMapper->setMapping(extractItemWordsAct, "item");              
+        wordsExtractionMapper->setMapping(extractItemWordsAct, tr(Constants::WK_ITEM));              
         // extract creature words
         QAction *extractCreatureWordsAct = wordsExtractionMenu->addAction("&Extract creature words...");
         extractCreatureWordsAct->setStatusTip(tr("Extract creature words"));
         connect(extractCreatureWordsAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
-        wordsExtractionMapper->setMapping(extractCreatureWordsAct, "creature");      
+        wordsExtractionMapper->setMapping(extractCreatureWordsAct, tr(Constants::WK_CREATURE));      
         // extract sbrick words
         QAction *extractSbrickWordsAct = wordsExtractionMenu->addAction("&Extract sbrick words...");
         extractSbrickWordsAct->setStatusTip(tr("Extract sbrick words"));  
         connect(extractSbrickWordsAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
-        wordsExtractionMapper->setMapping(extractSbrickWordsAct, "sbrick");   
+        wordsExtractionMapper->setMapping(extractSbrickWordsAct, tr(Constants::WK_SBRICK));   
         // extract sphrase words
         QAction *extractSphraseWordsAct = wordsExtractionMenu->addAction("&Extract sphrase words...");
         extractSphraseWordsAct->setStatusTip(tr("Extract sphrase words"));
         connect(extractSphraseWordsAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
-        wordsExtractionMapper->setMapping(extractSphraseWordsAct, "sphrase");   
-        
+        wordsExtractionMapper->setMapping(extractSphraseWordsAct, tr(Constants::WK_SPHRASE));   
+        // extract place and region names
+        QAction *extractPlaceNamesAct = wordsExtractionMenu->addAction("&Extract place and region names...");
+        extractPlaceNamesAct->setStatusTip(tr("Extract place and region names"));
+        connect(extractPlaceNamesAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
+        wordsExtractionMapper->setMapping(extractPlaceNamesAct, tr(Constants::WK_PLACE));   
+        // extract continent names
+        QAction *extractContinentNamesAct = wordsExtractionMenu->addAction("&Extract continent names...");
+        extractContinentNamesAct->setStatusTip(tr("Extract continent names"));
+        connect(extractContinentNamesAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
+        wordsExtractionMapper->setMapping(extractContinentNamesAct, tr(Constants::WK_CONTINENT));  
+        // extract stable names
+        QAction *extractStableNamesAct = wordsExtractionMenu->addAction("&Extract stable names...");
+        extractStableNamesAct->setStatusTip(tr("Extract stable names"));
+        connect(extractStableNamesAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
+        wordsExtractionMapper->setMapping(extractStableNamesAct, tr(Constants::WK_STABLE)); 
         // Windows menu
         windowMenu = new QMenu(tr("&Windows..."), _ui.toolBar);
         windowMenu->setIcon(QIcon(Core::Constants::ICON_PILL));     
@@ -144,7 +161,7 @@ void CMainWindow::setActiveSubWindow(QWidget* window)
 
 void CMainWindow::activeSubWindowChanged()
 {
-   
+
 }
 
 void CMainWindow::updateWindowsList()
@@ -215,11 +232,7 @@ void CMainWindow::openWorkFile(QString file)
              }          
     } else {
             QErrorMessage error;
-            QString text;
-            text.append("The ");
-            text.append(file_path->fileName());
-            text.append(" file don't exists.");
-            error.showMessage(text);
+            error.showMessage(QString("The %1 file don't exists.").arg(file_path->fileName()));
             error.exec();        
     }
   
@@ -227,11 +240,14 @@ void CMainWindow::openWorkFile(QString file)
 
 void CMainWindow::save()
 {
-    CEditor* current_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow());
-    
-    if(QString(current_window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
+    if(_ui.mdiArea->subWindowList().size() > 0)
     {
-        current_window->save();
+        CEditor* current_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow());
+    
+        if(QString(current_window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
+        {
+                current_window->save();
+        }
     }
 }
 
@@ -275,35 +291,111 @@ void CMainWindow::initializeSettings(bool georges = false)
     }
 }
 
-void CMainWindow::extractWords(QString type)
+void CMainWindow::extractWords(QString typeq)
 {
-    CEditor* editor_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow());
-    CEditorWorksheet* current_window = qobject_cast<CEditorWorksheet*>(editor_window);
-    
-   // initializeSettings(false);
-    
-    CSheetWordListBuilder	builder;
-    QString column_name;
-
-    if(type == "item")
-    {
-        column_name = "item ID";
-        builder.SheetExt = "sitem";
-        builder.SheetPath = level_design_path + "/game_element/sitem";      
-    } else if(type == "creature") {
-        column_name = "creature ID";
-        builder.SheetExt = "creature";
-        builder.SheetPath = level_design_path + "/Game_elem/Creature/fauna";        
-    } else if(type == "sbrick") {
-        column_name = "sbrick ID";
-        builder.SheetExt = "sbrick";
-        builder.SheetPath = level_design_path + "/game_element/sbrick";           
-    } else if(type == "sphrase") {
-        column_name = "sphrase ID";
-        builder.SheetExt = "sphrase";
-        builder.SheetPath = level_design_path + "/game_element/sphrase";          
-    } 
-    current_window->extractWords(current_window->windowFilePath(), column_name, builder);
+        if(verifySettings() == true) 
+        {
+            CEditorWorksheet* current_window;
+            if(_ui.mdiArea->subWindowList().size() > 0)
+            {
+                CEditor* editor_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow());
+                if(QString(editor_window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
+                {
+                    current_window = qobject_cast<CEditorWorksheet*>(editor_window);
+                    QString file_path = current_window->subWindowFilePath();
+                    if(!current_window->isSheetTable(typeq))
+                    {
+                        list<CEditor*> subWindows =  convertSubWindowList(_ui.mdiArea->subWindowList());
+                        list<CEditor*>::iterator it = subWindows.begin();
+                        bool finded = false;
+                        
+                        for(; it != subWindows.end(); ++it)
+                        {                           
+                              current_window = qobject_cast<CEditorWorksheet*>((*it));
+                              file_path = current_window->subWindowFilePath();
+                              if(current_window->isSheetTable(typeq))
+                              {
+                                  finded = true;
+                                  current_window->activateWindow();
+                              }
+                        }
+                        if(!finded)
+                        {
+                            openWorkFile(typeq);
+                            if(_ui.mdiArea->subWindowList().size() > 0)
+                            {
+                                    current_window = qobject_cast<CEditorWorksheet*>(_ui.mdiArea->currentSubWindow());
+                                    QString file_path = current_window->windowFilePath();                      
+                            } else {
+                                    return;
+                            }
+                        }
+                    }  
+                }
+            } else {
+                openWorkFile(typeq);
+                if(_ui.mdiArea->subWindowList().size() > 0)
+                {
+                        current_window = qobject_cast<CEditorWorksheet*>(_ui.mdiArea->currentSubWindow());
+                        QString file_path = current_window->windowFilePath();                      
+                } else {
+                        return;
+                }
+             
+            }
+            QString column_name;
+            // Sheet extraction
+            CSheetWordListBuilder	builderS;
+            // Primitives extraction
+            CRegionPrimWordListBuilder builderP;
+            bool isSheet = false;
+            if(typeq.toAscii() == Constants::WK_ITEM) {
+                column_name = "item ID";
+                builderS.SheetExt = "sitem";
+                builderS.SheetPath = level_design_path + "/game_element/sitem";  
+                isSheet = true;
+            } else if(typeq.toAscii() == Constants::WK_CREATURE) {
+                column_name = "creature ID";
+                builderS.SheetExt = "creature";
+                builderS.SheetPath = level_design_path + "/Game_elem/Creature/fauna";    
+                isSheet = true;
+            } else if(typeq.toAscii() == Constants::WK_SBRICK) {
+                column_name = "sbrick ID";
+                builderS.SheetExt = "sbrick";
+                builderS.SheetPath = level_design_path + "/game_element/sbrick";     
+                isSheet = true;
+            } else if(typeq.toAscii() == Constants::WK_SPHRASE) {
+                column_name = "sphrase ID";
+                builderS.SheetExt = "sphrase";
+                builderS.SheetPath = level_design_path + "/game_element/sphrase";  
+                isSheet = true;
+            } else if(typeq.toAscii() == Constants::WK_PLACE) {
+                column_name = "placeId";
+                builderP.PrimPath = primitives_path;
+                builderP.PrimFilter.push_back("region_*.primitive");
+                builderP.PrimFilter.push_back("indoors_*.primitive");
+                isSheet = false;
+            } else if(typeq.toAscii() == Constants::WK_CONTINENT) {
+                column_name = "placeId";
+                builderP.PrimPath = primitives_path;
+                builderP.PrimFilter.push_back("continent_*.primitive");
+                isSheet = false;                
+            } else if(typeq.toAscii() == Constants::WK_STABLE) {
+                column_name = "placeId";
+                builderP.PrimPath = primitives_path;
+                builderP.PrimFilter.push_back("stable_*.primitive");
+                isSheet = false;                
+            }
+     
+            if(isSheet)
+            {
+                current_window->extractWords(current_window->windowFilePath(), column_name, builderS);
+            } else {
+                initializeSettings(false);
+                current_window->extractWords(current_window->windowFilePath(), column_name, builderP);
+            }           
+        }     
+   
 }
 
 void CMainWindow::extractBotNames()
@@ -336,16 +428,26 @@ void CMainWindow::extractBotNames()
                         }
                         if(!finded)
                         {
-                            openWorkFile("bot_names_wk.txt");
-                            current_window = qobject_cast<CEditorWorksheet*>(_ui.mdiArea->currentSubWindow());
-                            file_path = current_window->windowFilePath();
+                            openWorkFile(tr(Constants::WK_BOTNAMES));
+                            if(_ui.mdiArea->subWindowList().size() > 0)
+                            {
+                                    current_window = qobject_cast<CEditorWorksheet*>(_ui.mdiArea->currentSubWindow());
+                                    QString file_path = current_window->windowFilePath();                      
+                            } else {
+                                    return;
+                            }
                         }
                     }  
                 }
             } else {
-                openWorkFile("bot_names_wk.txt");
-                current_window = qobject_cast<CEditorWorksheet*>(_ui.mdiArea->currentSubWindow());
-                QString file_path = current_window->windowFilePath();                
+                openWorkFile(tr(Constants::WK_BOTNAMES));
+                if(_ui.mdiArea->subWindowList().size() > 0)
+                {
+                        current_window = qobject_cast<CEditorWorksheet*>(_ui.mdiArea->currentSubWindow());
+                        QString file_path = current_window->windowFilePath();                      
+                } else {
+                        return;
+                }             
             }
             initializeSettings(true);
             current_window->extractBotNames(filters, level_design_path, ligoConfig);  
@@ -363,6 +465,7 @@ void CMainWindow::readSettings()
             settings->endGroup(); 
             settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
             level_design_path = settings->value(Core::Constants::LEVELDESIGN_PATH).toString().toStdString();
+            primitives_path = QString(Core::Constants::PRIMITIVES_PATH).toStdString();
             settings->endGroup();              
 }
 

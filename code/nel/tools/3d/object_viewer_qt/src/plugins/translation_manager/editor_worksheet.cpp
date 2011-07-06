@@ -25,6 +25,7 @@
 #include <QtGui/QCloseEvent>
 
 #include "extract_bot_names.h"
+#include "translation_manager_constants.h"
 
 using namespace std;
 
@@ -38,7 +39,7 @@ void CEditorWorksheet::open(QString filename)
              if(loadExcelSheet(filename.toStdString(), wk_file, true) == true)
              {
                  bool hasHashValue = false;
-                 table_editor = new QTableWidget();  
+                 table_editor = new QTableWidget(); 
                  if(wk_file.getData(0, 0) == ucstring("*HASH_VALUE"))
                  {
                       table_editor->setColumnCount(wk_file.ColCount - 1);
@@ -105,8 +106,7 @@ void CEditorWorksheet::open(QString filename)
 
 void CEditorWorksheet::activateWindow()
 {
-                showMaximized();
-                   
+                showMaximized();                   
 }
 
 void CEditorWorksheet::save()
@@ -209,7 +209,6 @@ void CEditorWorksheet::insertRow()
     for(int j = 0; j < table_editor->columnCount(); j++)
     {
         QTableWidgetItem* item = new QTableWidgetItem();
-        //item->setText(QString(" "));
         table_editor->setItem(last_row, j, item);
     }
 }
@@ -236,7 +235,8 @@ void CEditorWorksheet::deleteRow()
 
 void CEditorWorksheet::worksheetEditorChanged(int row, int column)
 {
-    
+    if(!isWindowModified())
+        setWindowModified(true);
 }
 
 void CEditorWorksheet::extractBotNames(list<string> filters, string level_design_path, NLLIGO::CLigoConfig ligoConfig)
@@ -378,7 +378,71 @@ void CEditorWorksheet::extractWords(QString filename, QString columnId, IWordLis
         if(modified)
        {
               setWindowModified(true);
+              table_editor->scrollToBottom();
        }
+}
+
+void CEditorWorksheet::mergeWorksheetFile(QString filename)
+{
+             STRING_MANAGER::TWorksheet wk_file;          
+             if(loadExcelSheet(filename.toStdString(), wk_file, true) == true)
+             {
+                 bool hasHashValue = false;  
+                 if(wk_file.getData(0, 0) == ucstring("*HASH_VALUE"))
+                 {
+                      table_editor->setColumnCount(wk_file.ColCount - 1);
+                      hasHashValue = true;
+                 } else {
+                      table_editor->setColumnCount(wk_file.ColCount);                   
+                 }
+                 table_editor->setRowCount(wk_file.size() - 1);
+                 
+                 // read columns name                
+                 for(unsigned int i = 0; i < wk_file.ColCount; i++)
+                 {
+                     if(hasHashValue && i == 0)
+                     {
+                            // we don't show the column with hash value
+                     } else {
+                        QTableWidgetItem *col = new QTableWidgetItem();
+                        ucstring col_name = wk_file.getData(0, i);
+                        col->setText(tr(col_name.toString().c_str()));
+                        if(hasHashValue)
+                        {
+                                table_editor->setHorizontalHeaderItem(i - 1, col);                        
+                        } else {
+                                table_editor->setHorizontalHeaderItem(i, col);
+                        }
+                     }
+                 }
+                 
+                 // read rows
+                 for(unsigned int i = 1; i < wk_file.size(); i++)
+                 {
+                     for(unsigned int j = 0; j < wk_file.ColCount; j++)
+                     {
+                        if(hasHashValue && j == 0)
+                        {
+                            // we don't show the column with hash value
+                        } else {
+                            QTableWidgetItem *row = new QTableWidgetItem();
+                            ucstring row_value = wk_file.getData(i, j);
+                            row->setText(tr(row_value.toString().c_str()));
+                            if(hasHashValue)
+                            {
+                                table_editor->setItem(i - 1, j - 1, row);    
+                            } else {
+                                table_editor->setItem(i - 1, j, row); 
+                            }
+                        }
+                    }
+                }
+             } else {
+                QErrorMessage error;
+                error.showMessage("This file is not a worksheet file.");
+                error.exec();                             
+             }
+        
 }
 
 void CEditorWorksheet::setCurrentFile(QString filename)
@@ -392,9 +456,35 @@ void CEditorWorksheet::setCurrentFile(QString filename)
 
 void CEditorWorksheet::closeEvent(QCloseEvent *event)
 {
-    close();
-    event->accept();
-    
+    if(isWindowModified())
+    {
+        QMessageBox msgBox;
+        msgBox.setText("The document has been modified.");
+        msgBox.setInformativeText("Do you want to save your changes?");
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Save);
+        int ret = msgBox.exec();
+        switch (ret) 
+        {
+                case QMessageBox::Save:
+                    save();
+                    event->accept();
+                    close();
+                    break;
+                case QMessageBox::Discard:
+                    event->accept();
+                    close();
+                    break;
+                case QMessageBox::Cancel:
+                    event->ignore();
+                    break;
+                default:
+                    break;
+        }
+    } else {
+        event->accept();
+        close();
+    }
 }
 
 bool CEditorWorksheet::isBotNamesTable()
@@ -408,6 +498,35 @@ bool CEditorWorksheet::isBotNamesTable()
    }
                  
     return status;
+}
+
+bool CEditorWorksheet::isSheetTable(QString type)
+{
+    QString column_name;
+    if(type.toAscii() == Constants::WK_ITEM)
+    {
+        column_name = "item ID";    
+    } else if(type.toAscii() == Constants::WK_CREATURE) {
+        column_name = "creature ID";   
+    } else if(type.toAscii() == Constants::WK_SBRICK) {
+        column_name = "sbrick ID";       
+    } else if(type.toAscii() == Constants::WK_SPHRASE) {
+        column_name = "sphrase ID";   
+    } else if(type.toAscii() == Constants::WK_PLACE) {
+        column_name = "placeId";
+    } else if(type.toAscii() == Constants::WK_CONTINENT) {
+        column_name = "placeId";
+    } else if(type.toAscii() == Constants::WK_STABLE) {
+        column_name = "placeId";
+     }
+   bool status = true;
+   if(table_editor->horizontalHeaderItem(0)->text() != column_name
+           || table_editor->horizontalHeaderItem(1)->text() != "name")
+   {
+       status = false;
+   }
+                 
+   return status;    
 }
 
 }

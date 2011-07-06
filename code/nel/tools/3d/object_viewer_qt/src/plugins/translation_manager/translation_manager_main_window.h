@@ -73,12 +73,13 @@ private:
         list<string> filters;
         list<string> languages;
         string level_design_path;
+        string primitives_path;
         string translation_path;
         string work_path;
         NLLIGO::CLigoConfig ligoConfig;
 private Q_SLOTS:
         void extractBotNames();
-        void extractWords(QString);
+        void extractWords(QString typeq);
         void open();
         void save();
         void saveAs();

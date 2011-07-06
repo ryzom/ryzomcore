@@ -108,12 +108,12 @@ bool	CRegionPrimWordListBuilder::buildWordList(std::vector<string> &allWords, st
 			// ok, read the file
 			CPrimitives PrimDoc;
 			CPrimitiveContext::instance().CurrentPrimitive = &PrimDoc;
-		//	if (!loadXmlPrimitiveFile(PrimDoc, allFiles[i], LigoConfig))
-		//	{
-		//		nlwarning("Error: cannot open file '%s'. '%s' Aborted", allFiles[i].c_str(), workSheetFileName.c_str());
-		//		CPrimitiveContext::instance().CurrentPrimitive = NULL;
-		//		return false;
-		//	}
+			if (!loadXmlPrimitiveFile(PrimDoc, allFiles[i], LigoConfig))
+			{
+				nlwarning("Error: cannot open file '%s'. '%s' Aborted", allFiles[i].c_str(), workSheetFileName.c_str());
+				CPrimitiveContext::instance().CurrentPrimitive = NULL;
+				return false;
+			}
 			CPrimitiveContext::instance().CurrentPrimitive = NULL;
 			
 			// For all primitives of interest
@@ -141,6 +141,7 @@ bool	CRegionPrimWordListBuilder::buildWordList(std::vector<string> &allWords, st
 						// avoid duplicate
 						if(allWordSet.insert(primName).second)
 						{
+                                                    nlinfo(primName.c_str()); //TODO: delete
 							allWords.push_back(primName);
 						}
 					}

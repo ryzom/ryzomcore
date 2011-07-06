@@ -60,6 +60,7 @@ struct CRegionPrimWordListBuilder : public IWordListBuilder
 {
 	string			PrimPath;
 	vector<string>	PrimFilter;
+               NLLIGO::CLigoConfig LigoConfig;
         virtual bool	buildWordList(std::vector<string> &allWords, string workSheetFileName);
 };
 

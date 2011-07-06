@@ -49,9 +49,11 @@ public:
     void save();
     void saveAs(QString filename);
     void activateWindow();
+    void mergeWorksheetFile(QString filename);
     void extractBotNames(list<string> filters, string level_design_path, NLLIGO::CLigoConfig ligoConfig);
     void extractWords(QString filename, QString columnId, IWordListBuilder &wordListBuilder);
     bool isBotNamesTable();
+    bool isSheetTable(QString type);
     void closeEvent(QCloseEvent *event);
 private Q_SLOTS:
     void worksheetEditorChanged(int,int);
