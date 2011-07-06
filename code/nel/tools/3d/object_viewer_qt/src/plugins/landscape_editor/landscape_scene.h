@@ -57,8 +57,7 @@ public:
 	void addZoneRegion(const NLLIGO::CZoneRegion &zoneRegion);
 	void delZoneRegion(const NLLIGO::CZoneRegion &zoneRegion);
 
-	void snapshot(const QString &fileName, int sizeSource);
-	void snapshot(const QString &fileName, int width, int height);
+	void snapshot(const QString &fileName, int width, int height, const QRectF &landRect);
 
 protected:
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);

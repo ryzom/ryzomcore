@@ -152,7 +152,33 @@ void LandscapeEditorWindow::openSnapshotDialog()
 						   tr("Image file (*.png)"));
 
 		setCursor(Qt::WaitCursor);
-		m_landscapeScene->snapshot(fileName, 128);
+
+		NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->currentZoneRegion()->ligoZoneRegion();
+		sint32 regionMinX = zoneRegion.getMinX();
+		sint32 regionMaxX = zoneRegion.getMaxX();
+		sint32 regionMinY = zoneRegion.getMinY();
+		sint32 regionMaxY = zoneRegion.getMaxY();
+
+		int regionWidth = (regionMaxX - regionMinX + 1);
+		int regionHeight = (regionMaxY - regionMinY + 1);
+
+		int cellSize = m_landscapeScene->cellSize();
+		QRectF rect(regionMinX * cellSize, abs(regionMaxY) * cellSize, regionWidth * cellSize, regionHeight * cellSize);
+
+		if (dialog->isCustomSize())
+		{
+			int widthSnapshot = dialog->widthSnapshot();
+			int heightSnapshot = dialog->heightSnapshot();
+			if (dialog->isKeepRatio())
+				heightSnapshot = (widthSnapshot / regionWidth) * regionHeight;
+
+			m_landscapeScene->snapshot(fileName, widthSnapshot, heightSnapshot, rect);
+		}
+		else
+		{
+			m_landscapeScene->snapshot(fileName, regionWidth * dialog->resolutionZone(),
+									   regionHeight * dialog->resolutionZone(), rect);
+		}
 		setCursor(Qt::ArrowCursor);
 	}
 	delete dialog;

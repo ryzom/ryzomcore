@@ -34,6 +34,12 @@ public:
 	SnapshotDialog(QWidget *parent = 0);
 	~SnapshotDialog();
 
+	bool isCustomSize() const;
+	bool isKeepRatio() const;
+	int resolutionZone() const;
+	int widthSnapshot() const;
+	int heightSnapshot() const;
+
 private Q_SLOTS:
 
 

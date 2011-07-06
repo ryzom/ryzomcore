@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>286</width>
-    <height>182</height>
+    <width>230</width>
+    <height>187</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,19 +15,33 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
-    <widget class="QRadioButton" name="originalSizeRadioButton">
-     <property name="text">
-      <string>Original size</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QRadioButton" name="originalSizeRadioButton">
+       <property name="text">
+        <string>Original size</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="resSpinBox">
+       <property name="maximum">
+        <number>1024</number>
+       </property>
+       <property name="value">
+        <number>128</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item row="1" column="0">
     <widget class="QRadioButton" name="customSizeRadioButton">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="text">
       <string>Custom size</string>
@@ -59,7 +73,7 @@
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>TextLabel</string>
+         <string>Height:</string>
         </property>
         <property name="buddy">
          <cstring>heightSpinBox</cstring>
@@ -82,7 +96,7 @@
       <item row="0" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>TextLabel</string>
+         <string>Width:</string>
         </property>
         <property name="buddy">
          <cstring>widthSpinBox</cstring>

@@ -218,7 +218,6 @@ void LandscapeScene::addZoneRegion(const NLLIGO::CZoneRegion &zoneRegion)
 		for (sint32 j = zoneRegion.getMinY(); j <= zoneRegion.getMaxY(); ++j)
 		{
 
-			//nlinfo(QString("%1 %2 %3").arg(i).arg(j).arg(zoneRegion.getName(i, j).c_str()).toStdString().c_str());
 			std::string zoneName = zoneRegion.getName(i, j);
 			if (zoneName == STRING_UNUSED)
 			{
@@ -251,53 +250,26 @@ void LandscapeScene::delZoneRegion(const NLLIGO::CZoneRegion &zoneRegion)
 	}
 }
 
-void LandscapeScene::snapshot(const QString &fileName, int sizeSource)
-{
-	/*	if (m_zoneRegion == 0)
-			return;
-
-		sint32 regionMinX = m_zoneRegion->getMinX();
-		sint32 regionMaxX = m_zoneRegion->getMaxX();
-		sint32 regionMinY = m_zoneRegion->getMinY();
-		sint32 regionMaxY = m_zoneRegion->getMaxY();
-
-		int regionWidth = (regionMaxX - regionMinX + 1);
-		int regionHeight = (regionMaxY - regionMinY + 1);
-
-		snapshot(fileName, regionWidth * sizeSource, regionHeight * sizeSource);
-		*/
-}
-
-void LandscapeScene::snapshot(const QString &fileName, int width, int height)
+void LandscapeScene::snapshot(const QString &fileName, int width, int height, const QRectF &landRect)
 {
 	if (m_zoneBuilder == 0)
 		return;
 
-	/*	if (m_zoneRegion == 0)
-			return;
+	// Create image
+	QImage image(landRect.width(), landRect.height(), QImage::Format_RGB888);
+	QPainter painter(&image);
+	painter.setRenderHint(QPainter::Antialiasing, true);
 
-		sint32 regionMinX = m_zoneRegion->getMinX();
-		sint32 regionMaxX = m_zoneRegion->getMaxX();
-		sint32 regionMinY = m_zoneRegion->getMinY();
-		sint32 regionMaxY = m_zoneRegion->getMaxY();
+	// Add white background
+	painter.setBrush(QBrush(Qt::white));
+	painter.setPen(Qt::NoPen);
+	painter.drawRect(0, 0, landRect.width(), landRect.height());
 
-		int regionWidth = (regionMaxX - regionMinX + 1);
-		int regionHeight = (regionMaxY - regionMinY + 1);
+	// Paint landscape
+	render(&painter, QRectF(0, 0, landRect.width(), landRect.height()), landRect);
 
-		QImage image(width, height, QImage::Format_RGB888);
-		QPainter painter(&image);
-		painter.setRenderHint(QPainter::Antialiasing, true);
-
-		// add white background
-		painter.setBrush(QBrush(Qt::white));
-		painter.setPen(Qt::NoPen);
-		painter.drawRect(0, 0, width, height);
-
-		render(&painter, QRectF(0, 0, width, height),
-			   QRectF(regionMinX * m_cellSize, abs(regionMaxY) * m_cellSize, regionWidth * m_cellSize, regionHeight * m_cellSize));
-
-		image.save(fileName);
-	*/
+	QImage scaledImage = image.scaled(width, height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+	scaledImage.save(fileName);
 }
 
 void LandscapeScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)

@@ -36,10 +36,36 @@ SnapshotDialog::SnapshotDialog(QWidget *parent)
 	: QDialog(parent)
 {
 	m_ui.setupUi(this);
+	setFixedHeight(sizeHint().height());
 }
 
 SnapshotDialog::~SnapshotDialog()
 {
+}
+
+bool SnapshotDialog::isCustomSize() const
+{
+	return m_ui.customSizeRadioButton->isChecked();
+}
+
+bool SnapshotDialog::isKeepRatio() const
+{
+	return m_ui.keepRatioCheckBox->isChecked();
+}
+
+int SnapshotDialog::resolutionZone() const
+{
+	return m_ui.resSpinBox->value();
+}
+
+int SnapshotDialog::widthSnapshot() const
+{
+	return m_ui.widthSpinBox->value();
+}
+
+int SnapshotDialog::heightSnapshot() const
+{
+	return m_ui.heightSpinBox->value();
 }
 
 } /* namespace LandscapeEditor */
