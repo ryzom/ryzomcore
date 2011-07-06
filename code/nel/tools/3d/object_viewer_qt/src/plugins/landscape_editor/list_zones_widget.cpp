@@ -122,9 +122,12 @@ QString ListZonesWidget::currentZoneName()
 	else if (m_ui.zoneSelectComboBox->currentIndex() == 2)
 	{
 		// Full cycle
-		zoneName = m_listSelection[m_zoneNameCycle];
-		m_zoneNameCycle++;
-		m_zoneNameCycle = m_zoneNameCycle % m_listSelection.size();
+		if (m_listSelection.size() > 0)
+		{
+			zoneName = m_listSelection[m_zoneNameCycle];
+			m_zoneNameCycle++;
+			m_zoneNameCycle = m_zoneNameCycle % m_listSelection.size();
+		}
 	}
 	return zoneName;
 }

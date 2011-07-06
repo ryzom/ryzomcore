@@ -44,14 +44,22 @@ public:
 	~ListZonesWidget();
 
 	void updateUi();
+
+	// Set zone builder, call this method before using this class
 	void setZoneBuilder(ZoneBuilder *zoneBuilder);
+
+	// Get current zone name which user selected from list.
 	QString currentZoneName();
+
+	// Get current rotation value which user selected (Rot 0-0deg, 1-90deg, 2-180deg, 3-270deg).
 	int currentRot();
+
+	// Get current flip value which user selected (Flip 0-false, 1-true).
 	int currentFlip();
+
 	bool isNotPropogate() const;
 	bool isForce() const;
 
-Q_SIGNALS:
 private Q_SLOTS:
 	void updateFilters_1(const QString &value);
 	void updateFilters_2(const QString &value);
