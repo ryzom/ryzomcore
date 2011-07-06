@@ -33,15 +33,20 @@
 
 // Qt includes
 #include <QtCore/QSettings>
+#include <QtGui/QMenu>
 #include <QtGui/QFileDialog>
 #include <QtGui/QMessageBox>
 
 namespace LandscapeEditor
 {
+
+static const int LANDSCAPE_ID = 32;
+int NewLandCounter = 0;
 QString _lastDir;
 
 LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	: QMainWindow(parent),
+	  m_currentRow(-1),
 	  m_landscapeScene(0),
 	  m_zoneBuilder(0),
 	  m_undoStack(0),
@@ -53,7 +58,7 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	m_landscapeScene = new LandscapeScene(this);
 
 	m_zoneBuilder = new ZoneBuilder(m_landscapeScene, m_ui.zoneListWidget, m_undoStack);
-	m_zoneBuilder->init("e:/-nel-/install/continents/newbieland", true);
+	m_zoneBuilder->init("e:/-nel-/install/continents/newbieland", false);
 	m_ui.zoneListWidget->setZoneBuilder(m_zoneBuilder);
 	m_ui.zoneListWidget->updateUi();
 
@@ -63,6 +68,12 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	m_oglWidget = new QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::SampleBuffers));
 	m_ui.graphicsView->setViewport(m_oglWidget);
 
+	m_ui.newLandAction->setIcon(QIcon(Core::Constants::ICON_NEW));
+	m_ui.saveAction->setIcon(QIcon(Core::Constants::ICON_SAVE));
+	m_ui.saveLandAction->setIcon(QIcon(Core::Constants::ICON_SAVE));
+	m_ui.saveAsLandAction->setIcon(QIcon(Core::Constants::ICON_SAVE_AS));
+	m_ui.deleteLandAction->setEnabled(false);
+
 	createMenus();
 	createToolBars();
 	readSettings();
@@ -71,6 +82,16 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	connect(m_ui.projectSettingsAction, SIGNAL(triggered()), this, SLOT(openProjectSettings()));
 	connect(m_ui.snapshotAction, SIGNAL(triggered()), this, SLOT(openSnapshotDialog()));
 	connect(m_ui.enableGridAction, SIGNAL(toggled(bool)), m_ui.graphicsView, SLOT(setVisibleGrid(bool)));
+
+	connect(m_ui.newLandAction, SIGNAL(triggered()), this, SLOT(newLand()));
+	connect(m_ui.setActiveLandAction, SIGNAL(triggered()), this, SLOT(setActiveLand()));
+	connect(m_ui.saveLandAction, SIGNAL(triggered()), this, SLOT(saveSelectedLand()));
+	connect(m_ui.saveAsLandAction, SIGNAL(triggered()), this, SLOT(saveAsSelectedLand()));
+	connect(m_ui.deleteLandAction, SIGNAL(triggered()), this, SLOT(deleteSelectedLand()));
+
+	connect(m_ui.landscapesListWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenu()));
+	m_ui.landscapesListWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+
 }
 
 LandscapeEditorWindow::~LandscapeEditorWindow()
@@ -97,17 +118,9 @@ void LandscapeEditorWindow::open()
 		_lastDir = QFileInfo(list.front()).absolutePath();
 		Q_FOREACH(QString fileName, fileNames)
 		{
-			int id = m_zoneBuilder->createZoneRegion(fileName);
-			if (id == -1)
-			{
-				QMessageBox::critical(this, "Landscape Editor", "Cannot add this zone because it overlaps existing ones");
-				continue;
-			}
-			ZoneRegionObject *zoneRegion = m_zoneBuilder->zoneRegion(id);
-			m_ui.graphicsView->centerOn(zoneRegion->ligoZoneRegion().getMinX() * m_landscapeScene->cellSize(),
-										abs(zoneRegion->ligoZoneRegion().getMinY()) * m_landscapeScene->cellSize());
-
-			m_zoneBuilder->setCurrentZoneRegion(id);
+			int row = createLandscape(fileName);
+			if (row != -1)
+				setActiveLandscape(row);
 		}
 	}
 	setCursor(Qt::ArrowCursor);
@@ -115,16 +128,7 @@ void LandscapeEditorWindow::open()
 
 void LandscapeEditorWindow::save()
 {
-	ZoneRegionObject *zoneRegion = m_zoneBuilder->currentZoneRegion();
-	if (zoneRegion->fileName().empty())
-	{
-		QString fileName = QFileDialog::getSaveFileName(this,
-						   tr("Save NeL Ligo land file"), _lastDir,
-						   tr("NeL Ligo land file (*.land)"));
-		if (!fileName.isEmpty())
-			zoneRegion->setFileName(fileName.toStdString());
-	}
-	zoneRegion->save();
+	saveLandscape(m_currentRow, true);
 }
 
 void LandscapeEditorWindow::openProjectSettings()
@@ -184,6 +188,133 @@ void LandscapeEditorWindow::openSnapshotDialog()
 	delete dialog;
 }
 
+void LandscapeEditorWindow::customContextMenu()
+{
+	if (m_ui.landscapesListWidget->currentRow() == -1)
+		return;
+	QMenu *popurMenu = new QMenu(this);
+	popurMenu->addAction(m_ui.setActiveLandAction);
+	popurMenu->addAction(m_ui.saveLandAction);
+	popurMenu->addAction(m_ui.saveAsLandAction);
+	popurMenu->addAction(m_ui.deleteLandAction);
+	popurMenu->exec(QCursor::pos());
+	delete popurMenu;
+}
+
+void LandscapeEditorWindow::newLand()
+{
+	createLandscape(QString());
+}
+
+void LandscapeEditorWindow::setActiveLand()
+{
+	setActiveLandscape(m_ui.landscapesListWidget->currentRow());
+}
+
+void LandscapeEditorWindow::saveSelectedLand()
+{
+	saveLandscape(m_ui.landscapesListWidget->currentRow(), true);
+}
+
+void LandscapeEditorWindow::saveAsSelectedLand()
+{
+	saveLandscape(m_ui.landscapesListWidget->currentRow(), false);
+}
+
+void LandscapeEditorWindow::deleteSelectedLand()
+{
+	int row = m_ui.landscapesListWidget->currentRow();
+	QListWidgetItem *item = m_ui.landscapesListWidget->item(row);
+	if (row == m_currentRow)
+	{
+		if (row == 0)
+			++row;
+		else
+			--row;
+		setActiveLandscape(row);
+	}
+	m_zoneBuilder->deleteZoneRegion(item->data(LANDSCAPE_ID).toInt());
+	m_ui.landscapesListWidget->removeItemWidget(item);
+	delete item;
+	if (m_ui.landscapesListWidget->count() == 1)
+		m_ui.deleteLandAction->setEnabled(false);
+}
+
+int LandscapeEditorWindow::createLandscape(const QString &fileName)
+{
+	int id;
+	if (fileName.isEmpty())
+		id = m_zoneBuilder->createZoneRegion();
+	else
+		id = m_zoneBuilder->createZoneRegion(fileName);
+
+	if (id == -1)
+	{
+		QMessageBox::critical(this, "Landscape Editor", "Cannot add this zone because it overlaps existing ones");
+		return -1;
+	}
+	ZoneRegionObject *zoneRegion = m_zoneBuilder->zoneRegion(id);
+	m_ui.graphicsView->centerOn(zoneRegion->ligoZoneRegion().getMinX() * m_landscapeScene->cellSize(),
+								abs(zoneRegion->ligoZoneRegion().getMinY()) * m_landscapeScene->cellSize());
+
+	QListWidgetItem *item;
+	if (fileName.isEmpty())
+		item = new QListWidgetItem(QString("NewLandscape%1").arg(NewLandCounter++), m_ui.landscapesListWidget);
+	else
+		item = new QListWidgetItem(fileName, m_ui.landscapesListWidget);
+
+	item->setData(LANDSCAPE_ID, id);
+	item->setFont(QFont("SansSerif", 9, QFont::Normal));
+
+	if (m_ui.landscapesListWidget->count() > 1)
+		m_ui.deleteLandAction->setEnabled(true);
+
+	return m_ui.landscapesListWidget->count() - 1;
+}
+
+void LandscapeEditorWindow::setActiveLandscape(int row)
+{
+	if ((0 <= row) && (row < m_ui.landscapesListWidget->count()))
+	{
+		if (m_currentRow != -1)
+		{
+			QListWidgetItem *item = m_ui.landscapesListWidget->item(m_currentRow);
+			item->setFont(QFont("SansSerif", 9, QFont::Normal));
+		}
+		QListWidgetItem *item = m_ui.landscapesListWidget->item(row);
+		item->setFont(QFont("SansSerif", 9, QFont::Bold));
+		m_zoneBuilder->setCurrentZoneRegion(item->data(LANDSCAPE_ID).toInt());
+		m_currentRow = row;
+	}
+}
+
+void LandscapeEditorWindow::saveLandscape(int row, bool force)
+{
+	if ((0 <= row) && (row < m_ui.landscapesListWidget->count()))
+	{
+		QListWidgetItem *item = m_ui.landscapesListWidget->item(row);
+		ZoneRegionObject *regionObject = m_zoneBuilder->zoneRegion(item->data(LANDSCAPE_ID).toInt());
+		if ((!force) || (regionObject->fileName().empty()))
+		{
+			QString fileName = QFileDialog::getSaveFileName(this,
+							   tr("Save NeL Ligo land file"), _lastDir,
+							   tr("NeL Ligo land file (*.land)"));
+			if (!fileName.isEmpty())
+			{
+				regionObject->setFileName(fileName.toStdString());
+				regionObject->save();
+				regionObject->setModified(false);
+				item->setText(fileName);
+			}
+		}
+		else
+		{
+			regionObject->save();
+			regionObject->setModified(false);
+		}
+	}
+}
+
 void LandscapeEditorWindow::showEvent(QShowEvent *showEvent)
 {
 	QMainWindow::showEvent(showEvent);
@@ -202,7 +333,23 @@ void LandscapeEditorWindow::createToolBars()
 	//QAction *action = menuManager->action(Core::Constants::NEW);
 	//m_ui.fileToolBar->addAction(action);
 	QAction *action = menuManager->action(Core::Constants::OPEN);
+	m_ui.fileToolBar->addAction(m_ui.newLandAction);
 	m_ui.fileToolBar->addAction(action);
+	m_ui.fileToolBar->addAction(m_ui.saveAction);
+
+	const char * const UNDO = "ObjectViewerQt.Undo";
+	const char * const REDO = "ObjectViewerQt.Redo";
+
+	//action = menuManager->action(Core::Constants::UNDO);
+	action = menuManager->action(UNDO);
+	if (action != 0)
+		m_ui.undoToolBar->addAction(action);
+
+	//action = menuManager->action(Core::Constants::REDO);
+	action = menuManager->action(REDO);
+	if (action != 0)
+		m_ui.undoToolBar->addAction(action);
+
 	//action = menuManager->action(Core::Constants::SAVE);
 	//m_ui.fileToolBar->addAction(action);
 	//action = menuManager->action(Core::Constants::SAVE_AS);

@@ -222,10 +222,11 @@ void ZoneBuilder::deleteZoneRegion(int id)
 {
 	if ((0 <= id) && (id < int(m_landscapeItems.size())))
 	{
+		if (m_landscapeItems.at(id).rectItem != 0)
+			delete m_landscapeItems.at(id).rectItem;
 		m_landscapeScene->delZoneRegion(m_landscapeItems.at(id).zoneRegionObject->ligoZoneRegion());
 		delete m_landscapeItems.at(id).zoneRegionObject;
 		delete m_landscapeItems.at(id).builderZoneRegion;
-		delete m_landscapeItems.at(id).rectItem;
 		m_landscapeItems.erase(m_landscapeItems.begin() + id);
 		calcMask();
 	}
@@ -236,10 +237,13 @@ void ZoneBuilder::setCurrentZoneRegion(int id)
 	if ((0 <= id) && (id < int(m_landscapeItems.size())))
 	{
 		if (currentIdZoneRegion() != -1)
-			m_landscapeItems.at(m_currentZoneRegion).rectItem = m_landscapeScene->createLayerBlackout(currentZoneRegion()->ligoZoneRegion());
-		m_currentZoneRegion = id;
+		{
+			NLLIGO::CZoneRegion &ligoRegion = m_landscapeItems.at(m_currentZoneRegion).zoneRegionObject->ligoZoneRegion();
+			m_landscapeItems.at(m_currentZoneRegion).rectItem = m_landscapeScene->createLayerBlackout(ligoRegion);
+		}
 		delete m_landscapeItems.at(id).rectItem;
 		m_landscapeItems.at(id).rectItem = 0;
+		m_currentZoneRegion = id;
 	}
 }
 

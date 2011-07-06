@@ -49,6 +49,12 @@ public Q_SLOTS:
 private Q_SLOTS:
 	void openProjectSettings();
 	void openSnapshotDialog();
+	void customContextMenu();
+	void newLand();
+	void setActiveLand();
+	void saveSelectedLand();
+	void saveAsSelectedLand();
+	void deleteSelectedLand();
 
 protected:
 	virtual void showEvent(QShowEvent *showEvent);
@@ -59,6 +65,11 @@ private:
 	void readSettings();
 	void writeSettings();
 
+	void setActiveLandscape(int row);
+	void saveLandscape(int row, bool force);
+	int createLandscape(const QString &fileName);
+
+	int m_currentRow;
 	LandscapeScene *m_landscapeScene;
 	ZoneBuilder *m_zoneBuilder;
 	QUndoStack *m_undoStack;
