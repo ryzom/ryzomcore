@@ -338,7 +338,7 @@ void CAsyncFileManager3D::CMeshLoad::run()
 		// Finally affect the pointer (Trans-Thread operation -> this operation must be atomic)
 		*_ppShp = mesh.getShapePointer();
 	}
-	catch(EPathNotFound &)
+	catch(const EPathNotFound &)
 	{
 		nlwarning ("Couldn't load '%s'", MeshName.c_str());
 		*_ppShp = (IShape*)-1;
@@ -382,7 +382,7 @@ void CAsyncFileManager3D::CIGLoad::run (void)
 
 		*_ppIG = pIG;
 	}
-	catch(EPathNotFound &)
+	catch(const EPathNotFound &)
 	{
 		nlwarning ("Couldn't load '%s'", _IGName.c_str());
 		*_ppIG = (CInstanceGroup*)-1;
@@ -429,7 +429,7 @@ void CAsyncFileManager3D::CIGLoadUser::run (void)
 			return;
 		}
 	}
-	catch(EPathNotFound &)
+	catch(const EPathNotFound &)
 	{
 		nlwarning ("Couldn't load '%s'", _IGName.c_str());
 		delete pIG;

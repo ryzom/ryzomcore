@@ -203,7 +203,7 @@ bool	CDBReferenceFile::prewrite(bool failIfNotExist)
 			return false;
 		}
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		nlwarning("CDBReferenceFile::prewrite(): failed, cannot read file '%s' header, exception '%s'", filepath.c_str(), e.what());
 		return false;
@@ -246,7 +246,7 @@ bool	CDBReferenceFile::postwrite()
 			return false;
 		}
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		nlwarning("CDBReferenceFile::postwrite(): failed, cannot read file '%s' header, exception '%s'", filepath.c_str(), e.what());
 		return false;
@@ -409,7 +409,7 @@ bool	CDBReferenceFile::preload()
 			return false;
 		}
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		nlwarning("CDBReferenceFile::preload(): failed, cannot read file '%s' header, exception '%s'", filepath.c_str(), e.what());
 		return false;

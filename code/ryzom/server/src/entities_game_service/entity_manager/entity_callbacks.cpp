@@ -887,7 +887,7 @@ void cbSelectChar( CMessage& msgin, const std::string &serviceName, NLNET::TServ
 			}
 		}
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning( "(PS)<cbGetChar> Error: %s", e.what() );
 	}
@@ -993,7 +993,7 @@ void cbCreateChar( CMessage& msgin, const std::string &serviceName, NLNET::TServ
 		{
 			CUnifiedNetwork::getInstance()->send(serviceId, msgout);
 		}
-		catch( Exception& e )
+		catch(const Exception &e)
 		{
 			nlwarning( "(PS)<cbCreateChar> Error: %s", e.what() );
 		}
@@ -1087,7 +1087,7 @@ void cbCreateChar_part2(uint32 userId, const CCreateCharMsg &createCharMsg, bool
 		ICharacter * cItf = ICharacter::getInterface( ch, false );
 		cItf->sendUserChar( userId, 0 /*auto*/, R2::TUserRole::ur_player );
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning( "(PS)<cbCreateChar> Error: %s", e.what() );
 	}
@@ -1140,7 +1140,7 @@ void sendIfNameIsValide( uint32 userId, bool nameValide )
 	{
 		CUnifiedNetwork::getInstance()->send( PlayerManager.getPlayerFrontEndId( userId ), msgoutName );
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning( "(PS)<cbCreateChar> Error: %s", e.what() );
 	}
@@ -1320,7 +1320,7 @@ void sendCharactersSummary( CPlayer *player, bool AllAutorized, uint32 bitfieldO
 	{
 		CUnifiedNetwork::getInstance()->send( frontEndId, msgout);
 	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning( "<sendCharactersSummary> Error: %s", e.what() );
 	}

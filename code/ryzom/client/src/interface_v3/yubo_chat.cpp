@@ -59,7 +59,7 @@ void	CYuboChat::connect(const string &url, const std::string &login, const std::
 			return;
 		}
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		addStringReceived(toString("ERROR: exception with server %s: %s", _URL.c_str(), e.what()));
 	}
@@ -78,7 +78,7 @@ void	CYuboChat::disconnect()
 		{
 			_Sock.disconnect();
 		}
-		catch(Exception &e)
+		catch(const Exception &e)
 		{
 			addStringReceived(toString("ERROR: exception with server %s: %s", _URL.c_str(), e.what()));
 		}
@@ -265,7 +265,7 @@ void CYuboChat::sendInternal(const ucstring &msg)
 			size= (uint32)toSend.size()-off;
 		}
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		addStringReceived(toString("ERROR: exception with server %s: %s", _URL.c_str(), e.what()));
 	}

@@ -87,8 +87,7 @@ void CAnimCombatState::build(const string &line)
 void	makeAnimMeleeImpact(const std::string &animSetFile, const set<CAnimCombatSet> &combatAnimSets)
 {
 	// look if this animSetFile is in the combat list to patch
-	string	shortName= CFile::getFilenameWithoutExtension(animSetFile);
-	strlwr(shortName);
+	string	shortName= NLMISC::toLower(CFile::getFilenameWithoutExtension(animSetFile));
 	CAnimCombatSet	key;
 	key.Name= shortName;
 	set<CAnimCombatSet>::const_iterator	it= combatAnimSets.find(key);
@@ -406,8 +405,7 @@ To generate the anim.txt file, this code has to be inserted in the client, in
 						if(anim && anim3d)
 						{
 							// name
-							string	name= _AnimationSet->getAnimationName(anim->id());
-							strlwr(name);
+							string	name= NLMISC::toLower(_AnimationSet->getAnimationName(anim->id()));
 							if(animName.empty())
 								animName= name;
 							else if(!extended)

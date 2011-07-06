@@ -1271,7 +1271,10 @@ NLMISC_COMMAND(outpostSpawnSquad, "Spawns a squad in an outpost", "<instance_num
 	string zoneName = args[5];
 	uint32 respawnTimeGC = 5*60*10;
 	if ( args.size() > 6 )
-		respawnTimeGC = atoi( args[6].c_str() ) * 10;
+	{
+		NLMISC::fromString(args[6], respawnTimeGC);
+		respawnTimeGC *= 10;
+	}
 	
 	for (size_t i=0; i<5; ++i)
 		if (args[i]=="")

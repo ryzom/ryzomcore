@@ -159,7 +159,7 @@ static bool LookupShopType(std::string name,std::vector<uint32> &shopList)
 				}
 			}
 		}
-		catch(EUnknownVar &) 
+		catch(const EUnknownVar &) 
 		{
 			nlwarning("<CShopTypeManager::initShopBase> shop_category.cfg or ShopCategory not found, no shop base type intialized...");
 		}

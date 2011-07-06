@@ -90,7 +90,7 @@ bool CGuildCharge::build( NLMISC::TStringId civ, const std::vector<std::string> 
 			return true;
 		}
 	}
-	catch (Exception & e)
+	catch (const Exception & e)
 	{
 		nlwarning("<CGuildCharge build> file '%s' exception '%s'",_FileName.c_str(),e.what());
 		return false;
@@ -197,7 +197,7 @@ void CGuildCharge::save()
 				}
 			}
 		}
-		catch (Exception & e)
+		catch (const Exception & e)
 		{
 			nlwarning("<CGuildCharge save> file %s exception '%s'",_FileName.c_str(),e.what());
 		}
@@ -228,7 +228,7 @@ void CGuildCharge::save()
 				}
 			}
 		}
-		catch( Exception& )
+		catch(const Exception &)
 		{
 			//f.close();
 			nlwarning("(EGS)<CPlayerManager::savePlayer>  :  Can't write file %s (disk full ?)",_FileName.c_str());

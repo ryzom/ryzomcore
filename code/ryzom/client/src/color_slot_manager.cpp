@@ -323,7 +323,7 @@ bool CColorSlotManager::addSlotsFromConfigFile(NLMISC::CConfigFile &cf, uint &st
 	{
 		mask_extensions = &cf.getVar("mask_extensions");
 	}
-	catch (NLMISC::EUnknownVar &)
+	catch (const NLMISC::EUnknownVar &)
 	{
 		return false;
 	}
@@ -343,7 +343,7 @@ bool CColorSlotManager::addSlotsFromConfigFile(NLMISC::CConfigFile &cf, uint &st
 				_Slots[k + startSlot][l] = extensions.asString(l);
 			}
 		}
-		catch (NLMISC::EUnknownVar &)
+		catch (const NLMISC::EUnknownVar &)
 		{
 			_Slots.resize(startSlot);
 			nlwarning(("CColorSlotManager::addSlotsFromConfigFile : invalid config file, variable not found :" + mask_extensions->asString(k) + "_color_id").c_str());
@@ -355,7 +355,7 @@ bool CColorSlotManager::addSlotsFromConfigFile(NLMISC::CConfigFile &cf, uint &st
 	{
 		_Separator = cf.getVar("default_separator").asString();
 	}
-	catch (NLMISC::EUnknownVar &)
+	catch (const NLMISC::EUnknownVar &)
 	{
 		_Separator = "_";
 	}

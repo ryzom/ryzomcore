@@ -220,7 +220,7 @@ bool CLigoConfig::readPrimitiveClass (const char *_fileName, bool parsePrimitive
 				syntaxError (filename.c_str(), root, "Wrong root node, should be NEL_LIGO_PRIMITIVE_CLASS");
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			errorMessage ("File read error (%s):%s", filename.c_str(), e.what ());
 		}

@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
 			}
 		}
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		fprintf (stderr, "FATAL: %s", e.what());
 	}

@@ -99,6 +99,7 @@ struct BNPHeader
 			fclose(f);
 			return false;
 		}
+
 		for (uint32 i = 0; i < nNbFile; ++i)
 		{
 			uint8 nStringSize = (uint8)Files[i].Name.size();
@@ -424,13 +425,13 @@ int main (int nNbArg, char **ppArgs)
 				}
 				else
 				{
-					nlwarning ("ERROR (bnp_make.exe) : can't set current directory to %s", ppArgs[2]);
+					nlwarning ("ERROR (bnp_make) : can't set current directory to %s", ppArgs[2]);
 					return -1;
 				}
 			}
 			else
 			{
-				nlwarning ("ERROR (bnp_make.exe) : can't set current directory to %s", ppArgs[3]);
+				nlwarning ("ERROR (bnp_make) : can't set current directory to %s", ppArgs[3]);
 				return -1;
 			}
 		}
@@ -438,7 +439,7 @@ int main (int nNbArg, char **ppArgs)
 		{
 			if (chdir (ppArgs[2]) == -1)
 			{
-				nlwarning ("ERROR (bnp_make.exe) : can't set current directory to %s", ppArgs[2]);
+				nlwarning ("ERROR (bnp_make) : can't set current directory to %s", ppArgs[2]);
 				return -1;
 			}
 			//getcwd (sCurDir, MAX_PATH);
@@ -475,7 +476,7 @@ int main (int nNbArg, char **ppArgs)
 			}
 			else
 			{
-				nlwarning ("ERROR (bnp_make.exe) : can't set current directory to %s", path.c_str());
+				nlwarning ("ERROR (bnp_make) : can't set current directory to %s", path.c_str());
 				return -1;
 			}
 		}
@@ -521,7 +522,7 @@ int main (int nNbArg, char **ppArgs)
 			}
 			else
 			{
-				nlwarning ("ERROR (bnp_make.exe) : can't set current directory to %s", path.c_str());
+				nlwarning ("ERROR (bnp_make) : can't set current directory to %s", path.c_str());
 				return -1;
 			}
 		}

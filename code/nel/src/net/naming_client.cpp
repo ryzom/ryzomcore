@@ -502,7 +502,7 @@ bool CNamingClient::lookupAndConnect (const std::string &name, CCallbackClient &
 			// connection succeeded
 			return true;
 		}
-		catch (ESocketConnectionFailed &e)
+		catch (const ESocketConnectionFailed &e)
 		{
 			nldebug( "NC: Connection to %s failed: %s, tring another service if available", servaddr.asString().c_str(), e.what() );
 

@@ -100,7 +100,7 @@ bool	computeOneShape(const char *lodFile, const char *shapeIn, const char *shape
 		COFile	dbgF("testDBG.tga");
 		dbg.writeTGA(dbgF, 32);*/
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		nlwarning("ERROR: %s", e.what());
 		return false;
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
 				LodFilters[i]= var.asString(i*2+1);
 			}
 		}
-		catch(Exception &e)
+		catch(const Exception &e)
 		{
 			// It is not an error to have a bad config file: files will be copied
 			nlwarning(e.what());

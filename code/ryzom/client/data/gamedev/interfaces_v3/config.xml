@@ -3177,6 +3177,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:VARIABLES:ISACTIVE:SETS"
             type="sint32"
             value="0" />
+  <variable entry="UI:VARIABLES:ISACTIVE:SETS2"
+            type="sint32"
+            value="0" />
   <variable entry="UI:VARIABLES:ISACTIVE:ACTIONS"
             type="sint32"
             value="0" />

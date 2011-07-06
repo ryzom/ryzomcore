@@ -171,7 +171,7 @@ bool	CPrimChecker::build(const string &primitivesPath, const string &igLandPath,
 				}
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			nlwarning("%s", e.what());
 		}

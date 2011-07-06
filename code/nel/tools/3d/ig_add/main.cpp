@@ -37,7 +37,7 @@ CInstanceGroup* LoadInstanceGroup (const char* sFilename)
 		{
 			newIG->serial (file);
 		}
-		catch (Exception &)
+		catch (const Exception &)
 		{
 			delete newIG;
 			return NULL;
@@ -62,7 +62,7 @@ bool SaveInstanceGroup (const char* sFilename, CInstanceGroup *pIG)
 		{
 			pIG->serial (file);
 		}
-		catch (Exception &)
+		catch (const Exception &)
 		{
 			return false;
 		}

@@ -261,7 +261,7 @@ void CPackedWorldBuilder::build(const std::vector<std::string> &zoneNames, const
 								nlinfo("Retrieving zone %d / %d from cache\n", (int) currZoneIndex + 1, (int) zones.size());
 							}
 						}
-						catch(EStream &)
+						catch(const EStream &)
 						{
 						}
 					}
@@ -295,7 +295,7 @@ void CPackedWorldBuilder::build(const std::vector<std::string> &zoneNames, const
 										zoneGrid(lx, ly)->Zone.serial(stream);										
 										zoneGrid(lx, ly)->Loaded = true;
 									}
-									catch(Exception &)
+									catch(const Exception &)
 									{
 										nlwarning("Error while loading zone %s : zone not loaded \n", zoneGrid(lx, ly)->Path.c_str());
 									}									
@@ -362,7 +362,7 @@ void CPackedWorldBuilder::build(const std::vector<std::string> &zoneNames, const
 						CPackedZoneBase *pb = packedZoneGrid(x, y);
 						f.serialPolyPtr(pb);						
 					}
-					catch(EStream &e)
+					catch(const EStream &e)
 					{
 						printf("Error while writing packed zone to cache : \n %s \n", e.what());
 					}

@@ -1573,7 +1573,7 @@ void CTileSet::loadTileVegetableDesc()
 			// load the TileVegetableDesc
 			f.serial(_TileVegetableDesc);
 		}
-		catch(Exception &e)
+		catch(const Exception &e)
 		{
 			nlinfo("Error loading TileVegetableDesc: %s", e.what());
 		}

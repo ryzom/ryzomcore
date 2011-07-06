@@ -188,7 +188,7 @@ bool ICommand::execute (const std::string &commandWithArgs, CLog &log, bool quie
 	{
 		return CCommandRegistry::getInstance().execute(commandWithArgs, log, quiet, human);
 	}
-	catch(exception e)
+	catch(const exception &e)
 	{
 		log.displayNL("Command '%s' thrown an exception :", commandWithArgs.c_str());
 		log.displayNL(e.what());

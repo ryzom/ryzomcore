@@ -112,7 +112,7 @@ void CPrimitivesParser::init()
 				_Primitives.back().FileName = fullName;
 //				_PrimitiveFiles.push_back(fullName);
 			}
-			catch( Exception & e )
+			catch(const Exception &e)
 			{
 				nlwarning("<CPrimitivesParser ctor> exception launched : %s",e.what() );
 				_Primitives.pop_back();

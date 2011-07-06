@@ -101,7 +101,7 @@ bool	CDBDeltaFile::write(uint32 index, const uint8* rowdata)
 				return false;
 			}
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			nlwarning("CDBDeltaFile::write(): failed, cannot write file '%s' header, exception '%s'", filepath.c_str(), e.what());
 			return false;
@@ -243,7 +243,7 @@ bool	CDBDeltaFile::preload()
 			return false;
 		}
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		nlwarning("CDBDeltaFile::read(): failed, cannot write file '%s' header, exception '%s'", filepath.c_str(), e.what());
 		return false;

@@ -709,7 +709,7 @@ bool	CDbManager::init()
 				}
 			}
 		}
-		catch (Exception&)
+		catch (const Exception&)
 		{
 		}
 

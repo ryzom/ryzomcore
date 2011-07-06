@@ -4421,14 +4421,20 @@ void getCurrentSpeakerEid__s(CStateInstance* entity, CScriptStack& stack)
 	return;
 }
 
-	
-
-//////////////////////////////////////////////////////////////////////////////
-// Undocumented methods                                                     //
-//////////////////////////////////////////////////////////////////////////////
-
 //----------------------------------------------------------------------------
-// CGroup
+/** @page code
+
+@subsection setSheet_s_
+Change the sheet of a creature
+
+Arguments: -> s(sheetName)
+
+@code
+()setSheet('ccdeb2');
+
+@endcode
+
+*/
 void setSheet_s_(CStateInstance* entity, CScriptStack& stack)
 {
 	string sheetname = stack.top();
@@ -4450,8 +4456,23 @@ void setSheet_s_(CStateInstance* entity, CScriptStack& stack)
 	}
 }
 
+
+/****************************************************************************/
+
 //----------------------------------------------------------------------------
-// CGroup
+/** @page code
+
+@subsection setHealer_f_
+Make the group healer (need test)
+
+Arguments: -> f(isHealer)
+
+@code
+()setHealer(1);
+
+@endcode
+
+*/
 void setHealer_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	bool value = ((float)stack.top())!=0.f;

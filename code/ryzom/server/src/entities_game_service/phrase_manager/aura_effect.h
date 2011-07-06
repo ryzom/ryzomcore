@@ -49,6 +49,7 @@ public:
 		_PowerType(powerType), _CreatedEffectFamily(effectFamily)
 	{
 		_AffectGuild = affectGuild;
+		_IsFromConsumable = false;
 #ifdef NL_DEBUG
 		_LastUpdateDate = CTickEventHandler::getGameCycle();
 #endif
@@ -69,6 +70,7 @@ public:
 	inline void setRadius(float radius) { _AuraRadius = radius; }	
 	// set disable time for targets
 	inline void setTargetDisableTime(NLMISC::TGameCycle time) { _TargetDisableTime = time; }
+	inline void setIsFromConsumable(bool fromConsumable) { _IsFromConsumable = fromConsumable; }
 
 protected:
 	/// create or update the real effect on target entity
@@ -92,6 +94,8 @@ private:
 	
 	// is aura affecting guild members ? (teammates are always affected)
 	bool					_AffectGuild;
+
+	bool					_IsFromConsumable;
 
 #ifdef NL_DEBUG
 	NLMISC::TGameCycle		_LastUpdateDate;

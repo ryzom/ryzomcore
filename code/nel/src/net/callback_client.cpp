@@ -280,7 +280,7 @@ void CCallbackClient::connect( const CInetAddress& addr )
 				_MR_Recorder.recordNext( _MR_UpdateCounter, Connecting, _BufSock, addrmsg );
 			}
 		}
-		catch ( ESocketConnectionFailed& )
+		catch (const ESocketConnectionFailed&)
 		{
 			if ( _MR_RecordingState == Record )
 			{

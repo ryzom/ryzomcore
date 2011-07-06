@@ -50,12 +50,12 @@ static inline void GetTextureSize(ITexture *tex, uint &width, uint &height)
 				width = srcWidth;
 				height = srcHeight;
 			}
-			catch (NLMISC::EPathNotFound &e)
+			catch (const NLMISC::EPathNotFound &e)
 			{
 				nlinfo("%s", e.what());
 				width = height = 0;
 			}
-			catch (NLMISC::EStream &e)
+			catch (const NLMISC::EStream &e)
 			{
 				nlinfo("unable to load size from a bitmap ! name = %s", tf->getFileName().c_str());
 				nlinfo("reason = %s", e.what());

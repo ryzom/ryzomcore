@@ -1016,7 +1016,7 @@ void getCallStack(std::string &result, sint skipNFirst)
 		array[0] = skipNFirst;
 		RaiseException (0xACE0ACE, 0, 1, array);
 	}
-	catch (EDebug &e)
+	catch (const EDebug &e)
 	{
 		result += e.what();
 	}
@@ -1051,7 +1051,7 @@ void getCallStackAndLog (string &result, sint /* skipNFirst */)
 //		array[0] = skipNFirst;
 //		RaiseException (0xACE0ACE, 0, 1, array);
 //	}
-//	catch (EDebug &e)
+//	catch (const EDebug &e)
 //	{
 //		result += e.what();
 //	}

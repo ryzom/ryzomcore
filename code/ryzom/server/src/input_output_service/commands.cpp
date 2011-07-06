@@ -538,7 +538,7 @@ NLMISC_COMMAND(mute,"Mute or unmute a player. the player can be muted for a fixe
 		{
 			IOS->getChatManager().getClient(charInfos->DataSetIndex).mute( delay );
 		}
-		catch( Exception& e )
+		catch(const Exception &e)
 		{
 			nlwarning("<mite> %s",e.what());
 		}

@@ -255,12 +255,12 @@ int main(int argc, char* argv[])
 				nlwarning ("WARNING no coarse mesh to compute, abort.\n");
 			}
 		}
-		catch (EConfigFile &e)
+		catch (const EConfigFile &e)
 		{
 			// Something goes wrong... catch that
 			nlwarning ("ERROR %s\n", e.what ());
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			// Something goes wrong... catch that
 			nlwarning ("ERROR %s\n", e.what ());

@@ -829,7 +829,7 @@ void CListenTask::run()
 
 			NbLoop++;
 		}
-		catch ( ESocket& e )
+		catch (const ESocket &e)
 		{
 			LNETL1_INFO( "LNETL1: Exception in listen thread: %s", e.what() );
 			// It can occur when too many sockets are open (e.g. 885 connections)
@@ -1131,12 +1131,12 @@ void CServerReceiveTask::run()
 						*/
 					}
 				}
-//				catch ( ESocketConnectionClosed& )
+//				catch (const ESocketConnectionClosed&)
 //				{
 //					LNETL1_DEBUG( "LNETL1: Connection %s closed", serverbufsock->asString().c_str() );
 //					// The socket went to _Connected=false when throwing the exception
 //				}
-				catch ( ESocket& )
+				catch (const ESocket&)
 				{
 					LNETL1_DEBUG( "LNETL1: Connection %s broken", serverbufsock->asString().c_str() );
 					(*ic)->Sock->disconnect();

@@ -641,6 +641,13 @@
               group="content:rpjobs"
               hardtext="uiRpJobs" 
               onclick_r=""
+			  params_r="" />
+        <ctrl style="tab_button_new" 
+              id="tab3"
+ 			  posparent="tab2"
+              group="content:webinfos"
+              hardtext="uiPlayerInfos" 
+              onclick_r=""
 			  params_r=""
               onclick_l=""
               params_l="" />
@@ -1416,81 +1423,188 @@
                   posref="TL TL"
                   x="0"
                   y="-150" />
-        <!--
-                        <group id="level_rrps" posref="TR TL" posparent="ecosystem_points" y="0" x="8" sizeref="w" w="-4" child_resize_h="true" child_resize_hmargin="16"> 
-                                
-                                <instance template="inner_thin_border_group" />         
-
-                                <instance template="level_rrps" id="rrps_20" posref="TL TL" x="8" y="-8" w="-16" tooltip="uiR2EDRrpsLevel20Tooltip"
-                                 text="uiR2EDRrpsLevel20" val="%rrps_level_20" />
-
-                                <instance template="level_rrps" id="rrps_50" posparent="rrps_20" posref="BL TL" y="0" tooltip="uiR2EDRrpsLevel50Tooltip"
-                                 text="uiR2EDRrpsLevel50" val="%rrps_level_50" />
-
-                                <instance template="level_rrps" id="rrps_100" posparent="rrps_50" posref="BL TL" y="0" tooltip="uiR2EDRrpsLevel100Tooltip"
-                                 text="uiR2EDRrpsLevel100" val="%rrps_level_100" />
-
-                                <instance template="level_rrps" id="rrps_150" posparent="rrps_100" posref="BL TL" y="0" tooltip="uiR2EDRrpsLevel150Tooltip"
-                                 text="uiR2EDRrpsLevel150" val="%rrps_level_150" />
-
-                                <instance template="level_rrps" id="rrps_200" posparent="rrps_150" posref="BL TL" y="0" tooltip="uiR2EDRrpsLevel200Tooltip"
-                                 text="uiR2EDRrpsLevel200" val="%rrps_level_200" />
-
-                                <instance template="level_rrps" id="rrps_250" posparent="rrps_200" posref="BL TL" y="0" tooltip="uiR2EDRrpsLevel250Tooltip"
-                                 text="uiR2EDRrpsLevel250" val="%rrps_level_250" />
-
-                        </group>
-                        <view type="text" id="level_rrps_title" posparent="level_rrps" posref="TL BL" x="0" y="0" hardtext="uiR2EDRrpsLevelTitle" shadow="true" color="255 255 255 255" global_color="false" fontsize="12"/>
-                        -->
-        <!--
-                        <group id="ring_rating" posref="BL TL" sizeparent="parent" posparent="ecosystem_points" y="-30" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="16"> 
-                                
-                                <instance template="inner_thin_border_group" />         
-
-                                <instance template="ring_rating" id="author_ring_rating" posref="TL TL" x="8" y="-8" w="-16" 
-                                 text="uiR2EDAuthorRingRating" />
-
-                                <instance template="ring_rating" id="am_ring_rating" posparent="author_ring_rating" posref="BL TL" y="0" 
-                                 text="uiR2EDAMRingRating" />
-
-                                <instance template="ring_rating" id="masterless_ring_rating" posparent="am_ring_rating" posref="BL TL" y="0" 
-                                 text="uiR2EDMasterlessRingRating" />
-                        </group>
-                        <view type="text" id="ring_rating_title" posparent="ring_rating" posref="TL BL" x="0" y="0" hardtext="uiR2EDRingRatingTitle" shadow="true" color="255 255 255 255" global_color="false" fontsize="12"/>
-                        -->
       </group>
 	  <group h="0" id="rpjobs" posref="TL TL" sizeref="wh" w="0" y="0">
-		  <group h="48" child_resize_hmargin="16" id="rpjobs_advanced" posref="TL TL" sizeref="w" w="-4" x="2" y="-5">
-			<instance color="255 155 255 255" template="rpjob_title" rpjob_icon="rpjob_advanced.tga" margin_x="0" id="rpjob_advanced_title" text="uiRpJobsAdvanced" posparent="rpjobs_advanced" posref="TL TL" />
-			<instance inherit_gc_alpha="true" posparent="rpjob_advanced_title" template="inner_thin_border"/>
-		  </group>
+	        <ctrl style="text_button_header"
+            button_type="push_button"
+            id="browse_home"
+            posref="TR TR"
+            x="-1"
+            y="-2"
+            hardtext="uiBrowseRefresh"
+            tooltip="uittBrowseRefresh"
+            onclick_l="browse_home"
+            params_l="name=ui:interface:info_player_skills:content:rpjobs:html" />
 
-		  <group h="48" child_resize_hmargin="16" active="false" id="rpjob_advanced_1" posparent="rpjobs_advanced" posref="BL TL" sizeref="w" y="-5">
-			<instance template="rpjob_infos" rpjob_icon="rpjob_advanced.tga" margin_x="20" id="rpjob_advanced_infos_1" w="-20" posparent="rpjobs_advanced_1" posref="TL TL" />
-			<instance inherit_gc_alpha="true" posparent="rpjob_advanced_infos_1" template="frame_widget" h="48" w="48" />
-		  </group>
-		  <group h="48" child_resize_hmargin="16" active="false" id="rpjob_advanced_2" posparent="rpjob_advanced_1" posref="BL TL" sizeref="w" y="-5">
-			<instance template="rpjob_infos" rpjob_icon="rpjob_advanced.tga" margin_x="20" id="rpjob_advanced_infos_2" w="-20" posparent="rpjobs_advanced_2" posref="TL TL" />
-			<instance inherit_gc_alpha="true" posparent="rpjob_advanced_infos_2" template="frame_widget" h="48" w="48" />
-		  </group>
-
-		  <group h="48" child_resize_hmargin="16" id="rpjobs_elementary" posparent="rpjob_advanced_2" posref="BL TL" sizeref="w" y="-5">
-			<instance color="155 255 155 255" template="rpjob_title" rpjob_icon="rpjob_elementary.tga" margin_x="0" id="rpjob_elementary_title" text="uiRpJobsElementary" posparent="rpjobs_elementary" posref="TL TL" />
-			<instance inherit_gc_alpha="true" posparent="rpjob_elementary_title" template="inner_thin_border"/>
-		  </group>
-		  <group h="48" child_resize_hmargin="16" active="false" id="rpjob_elementary_1" posparent="rpjobs_elementary" posref="BL TL" sizeref="w" y="-5">
-			<instance template="rpjob_infos" rpjob_icon="rpjob_elementary.tga" margin_x="20" id="rpjob_elementary_infos_1" w="-20" posparent="rpjobs_elementary_1" posref="TL TL" />
-			<instance inherit_gc_alpha="true" posparent="rpjob_elementary_infos_1" template="frame_widget" h="48" w="48" />
-		  </group>
-		  <group h="48" child_resize_hmargin="16" active="false" id="rpjob_elementary_2" posparent="rpjob_elementary_1" posref="BL TL" sizeref="w" y="-5">
-			<instance template="rpjob_infos" rpjob_icon="rpjob_elementary.tga" margin_x="20" id="rpjob_elementary_infos_2" w="-20" posparent="rpjobs_elementary_2" posref="TL TL" />
-			<instance inherit_gc_alpha="true" posparent="rpjob_elementary_infos_2" template="frame_widget" h="48" w="48" />
-		  </group>
-		  <group h="48" child_resize_hmargin="16" active="false" id="rpjob_elementary_3" posparent="rpjob_elementary_2" posref="BL TL" sizeref="w" y="-5">
-			<instance template="rpjob_infos" rpjob_icon="rpjob_elementary.tga" margin_x="20" id="rpjob_elementary_infos_3" w="-20" posparent="rpjobs_elementary_3" posref="TL TL" />
-			<instance inherit_gc_alpha="true" posparent="rpjob_elementary_infos_3" template="frame_widget" h="48" w="48" />
-		  </group>
+			<group type="webig_html"
+             id="html"
+             posref="TL TL"
+             url="http://atys.ryzom.com/start/app_rpjobs.php"
+             title_prefix=""
+             sizeref="wh"
+             x="0"
+             y="-8"
+             w="0"
+             h="0"
+             background_color="0 0 0 255"
+             error_color="255 240 48 255"
+             link_color="240 155 100 255"
+             text_color="210 210 210 255"
+             h1_color="255 255 255 255"
+             h2_color="255 255 255 255"
+             h3_color="255 255 255 255"
+             h4_color="255 255 255 255"
+             h5_color="255 255 255 255"
+             h6_color="100 255 100 255"
+             text_font_size="10"
+             h1_font_size="20"
+             h2_font_size="18"
+             h3_font_size="16"
+             h4_font_size="14"
+             h5_font_size="12"
+             h6_font_size="10"
+             paragraph_begin_space="1"
+             multi_line_space_factor="0.25"
+             td_begin_space="16"
+             li_begin_space="4"
+             ul_begin_space="12"
+             li_indent="0"
+             ul_indent="30"
+             checkbox_bitmap_normal="w_slot_on.tga"
+             checkbox_bitmap_pushed="w_opacity_on.tga"
+             checkbox_bitmap_over=""
+             background_bitmap_view="black2"
+             home="http://atys.ryzom.com/start/app_rpjobs.php"
+             browse_next_time="true"
+             form_text_area_group="edit_box_widget_multiline">
+			        <group id="black"
+               posref="BR BR"
+               sizeref="hw"
+               w="-12"
+               h="-12"
+               inherit_gc_alpha="true" />
+        <instance template="inner_thin_border"
+                  posparent="black"
+                  inherit_gc_alpha="true" />
+        <view type="bitmap"
+              id="black2"
+              posparent="black"
+              posref="MM MM"
+              sizeref="wh"
+              w="-2"
+              h="-2"
+              inherit_gc_alpha="true"
+              scale="true"
+              texture="blank.tga"
+              global_color="false" />
+        <group type="list"
+               id="text_list"
+               fontsize="9"
+               posref="TL TL"
+               posparent="black"
+               x="2"
+               y="-2"
+               space="0"
+               sizeref="hw"
+               w="-4"
+               h="-4"
+               maxelements="2000" />
+        <ctrl style="skin_scroll"
+              id="scroll_bar" />
+			 </group>
 		</group>
+		<group h="0" id="webinfos" posref="TL TL" sizeref="wh" w="0" y="0">
+	        <ctrl style="text_button_header"
+            button_type="push_button"
+            id="browse_home"
+            posref="TR TR"
+            x="-1"
+            y="-2"
+            hardtext="uiBrowseRefresh"
+            tooltip="uittBrowseRefresh"
+            onclick_l="browse_home"
+            params_l="name=ui:interface:info_player_skills:content:webinfos:html" />
+		
+		    <group type="webig_html"
+             id="html"
+             posref="TL TL"
+             posparent="parent"
+             url="http://atys.ryzom.com/start/app_profile.php"
+             title_prefix=""
+             sizeref="wh"
+             x="0"
+             y="-8"
+             w="0"
+             h="0"
+             background_color="0 0 0 255"
+             error_color="255 240 48 255"
+             link_color="240 155 100 255"
+             text_color="210 210 210 255"
+             h1_color="255 255 255 255"
+             h2_color="255 255 255 255"
+             h3_color="255 255 255 255"
+             h4_color="255 255 255 255"
+             h5_color="255 255 255 255"
+             h6_color="100 255 100 255"
+             text_font_size="10"
+             h1_font_size="20"
+             h2_font_size="18"
+             h3_font_size="16"
+             h4_font_size="14"
+             h5_font_size="12"
+             h6_font_size="10"
+             paragraph_begin_space="1"
+             multi_line_space_factor="0.25"
+             td_begin_space="16"
+             li_begin_space="4"
+             ul_begin_space="12"
+             li_indent="0"
+             ul_indent="30"
+             checkbox_bitmap_normal="w_slot_on.tga"
+             checkbox_bitmap_pushed="w_opacity_on.tga"
+             checkbox_bitmap_over=""
+             background_bitmap_view="black2"
+             home="http://atys.ryzom.com/start/app_profile.php"
+             browse_next_time="true"
+             form_text_area_group="edit_box_widget_multiline">
+			        <group id="black"
+               posref="BR BR"
+               sizeref="hw"
+               w="-12"
+               h="-12"
+               inherit_gc_alpha="true" />
+        <instance template="inner_thin_border"
+                  posparent="black"
+                  inherit_gc_alpha="true" />
+        <view type="bitmap"
+              id="black2"
+              posparent="black"
+              posref="MM MM"
+              sizeref="wh"
+              w="-2"
+              h="-2"
+              inherit_gc_alpha="true"
+              scale="true"
+              texture="blank.tga"
+              global_color="false" />
+        <group type="list"
+               id="text_list"
+               fontsize="9"
+               posref="TL TL"
+               posparent="black"
+               x="2"
+               y="-2"
+               space="0"
+               sizeref="hw"
+               w="-4"
+               h="-4"
+               maxelements="2000" />
+        <ctrl style="skin_scroll"
+              id="scroll_bar" />
+			 
+			 </group>
+		</group>
+
 	  <view color="166 166 166 255" h="1" id="sep" posparent="info_player_skills_tabs" posref="BR BL" scale="true" sizeparent="parent" sizeref="w" texture="blank.tga" type="bitmap" w="0"/>
     </group>
 	
@@ -3277,7 +3391,7 @@
         action="lua:game:onMissionJournalOpened()" />
   <link expr="depends(@SERVER:USER:IS_TRIAL)"
         action="lua:game:onMissionJournalOpened()" />
-  <link expr="depends(@LOCAL:INVENTORY:BAG)" action="lua:game:getRPJobs()" />
+  <!--<link expr="depends(@LOCAL:INVENTORY:BAG)" action="lua:game:getRPJobs()" />-->
   <!--***********************-->
   <!--*   POPUP  MESSAGES   *-->
   <!--***********************-->

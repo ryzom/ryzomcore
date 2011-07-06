@@ -1684,7 +1684,7 @@ void	CBotChatPageTrade::setupFactionPointPrice(bool /* sellMode */, uint default
 
 		// setup icon according to pvp clan
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		strlwr(factionName);
+		factionName = NLMISC::toLower(factionName);
 		string	factionIcon= pIM->getDefine(toString("faction_icon_%s", factionName.c_str()));
 		CViewBitmap		*vBmp= dynamic_cast<CViewBitmap*>(fpGroup->getView("unit_price:item_price:icone"));
 		if(vBmp)	vBmp->setTexture(factionIcon);

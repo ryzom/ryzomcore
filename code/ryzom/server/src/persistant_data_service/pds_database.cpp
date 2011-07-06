@@ -1583,7 +1583,7 @@ bool	CDatabase::buildDelta(const CTimestamp& starttime, const CTimestamp& endtim
 //			{
 //				logf.serialCont(_LogQueue);
 //			}
-//			catch (Exception& e)
+//			catch (const Exception& e)
 //			{
 //				PDS_WARNING("buildDelta(): exception occured while saving straight log : %s", e.what());
 //			}

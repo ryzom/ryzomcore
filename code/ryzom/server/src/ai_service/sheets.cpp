@@ -632,7 +632,7 @@ void AISHEETS::CCreature::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const&
 				scriptComp = CFightScriptCompReader::createScriptComp(scriptCompStr);
 				registerScriptComp(scriptComp);
 			}
-			catch (ReadFightActionException& ex)
+			catch (const ReadFightActionException& ex)
 			{
 				nlwarning("script read error (ignored): %s", ex.what());
 			}
@@ -769,7 +769,7 @@ void AISHEETS::CCreature::serial(NLMISC::IStream &s)
 				scriptComp = CFightScriptCompReader::createScriptComp(scriptCompStr);
 				registerScriptComp(scriptComp);
 			}
-			catch (ReadFightActionException& ex)
+			catch (const ReadFightActionException& ex)
 			{
 				nlwarning("script read error (ignored): %s", ex.what());
 			}

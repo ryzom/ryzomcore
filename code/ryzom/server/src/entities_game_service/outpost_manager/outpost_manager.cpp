@@ -799,7 +799,7 @@ void COutpostManager::saveOutpost(NLMISC::CSmartPtr<COutpost> outpost)
 			}
 			Bsi.sendFile( msg );
 		}
-		catch( Exception& )
+		catch(const Exception &)
 		{
 			OUTPOST_WRN("Can't serial file %s",fileName.c_str());
 			return;

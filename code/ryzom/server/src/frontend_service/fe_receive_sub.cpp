@@ -854,7 +854,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 						sint v = file.serialVersion( 0 );
 						file.serialCont( _AutoUidMap );
 					}
-					catch ( Exception& )
+					catch (const Exception&)
 					{
 						nlinfo( "No AutoAllocUserid data found yet" );
 					}
@@ -898,7 +898,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 					file.serialVersion( 0 );
 					file.serialCont( _AutoUidMap );
 				}
-				catch ( Exception& e )
+				catch (const Exception &e)
 				{
 					nlwarning( "Could not save AutoAllocUserid data: %s", e.what() );
 				}
@@ -1394,17 +1394,17 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 			}
 		}
 	}
-	catch( EStreamOverflow& )
+	catch(const EStreamOverflow& )
 	{
 		TUid userId = clienthost ? clienthost->Uid : 0;
 		rejectReceivedMessage( InsufficientSize, userId );
 	}
-	catch( EInvalidDataStream& )
+	catch(const EInvalidDataStream& )
 	{
 		TUid userId = clienthost ? clienthost->Uid : 0;
 		rejectReceivedMessage( HackedSizeInBuffer, userId );
 	}
-	catch ( Exception& )
+	catch (const Exception& )
 	{
 		TUid userId = clienthost ? clienthost->Uid : 0;
 		rejectReceivedMessage( UnknownExceptionType, userId );

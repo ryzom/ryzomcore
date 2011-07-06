@@ -283,7 +283,7 @@ void	CLandscapeUser::refreshZonesAround(const CVector &pos, float radius, std::s
 				{
 					_Landscape->Landscape.checkBinds(Work.Zone->getZoneId());
 				}
-				catch (EBadBind &e)
+				catch (const EBadBind &e)
 				{
 					nlwarning ("Bind error : %s", e.what());
 					nlstopex(("Zone Data Bind Error. Please send a report. You may continue but it should crash!"));

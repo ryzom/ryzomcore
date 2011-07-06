@@ -225,7 +225,7 @@ sint main( sint argc, char ** argv )
 	{
 		configFile.load( "skill_extractor.cfg" );
 	}
-	catch(Exception &e ) 
+	catch(const Exception &e ) 
 	{
 		nlwarning("<CShopTypeManager::initShopBase> skill_extractor.cfg %s",e.what());
 		return 1;

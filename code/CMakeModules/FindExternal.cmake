@@ -3,6 +3,7 @@
 # The following values are defined
 # EXTERNAL_PATH         - where to find external
 # EXTERNAL_INCLUDE_PATH - where to find external includes
+# EXTERNAL_BINARY_PATH  - where to find external binaries
 # EXTERNAL_LIBRARY_PATH - where to find external libraries
 # EXTERNAL_FOUND        - True if the external libraries are available
 
@@ -34,6 +35,13 @@ IF(EXTERNAL_PATH)
   SET(EXTERNAL_FOUND TRUE)
   SET(EXTERNAL_INCLUDE_PATH "${EXTERNAL_PATH}/include")
 
+  # Using 32 or 64 bits binaries
+  IF(TARGET_X64)
+    SET(EXTERNAL_BINARY_PATH "${EXTERNAL_PATH}/bin64")
+  ELSE(TARGET_X64)
+    SET(EXTERNAL_BINARY_PATH "${EXTERNAL_PATH}/bin")
+  ENDIF(TARGET_X64)
+  
   # Using 32 or 64 bits libraries
   IF(TARGET_X64)
     SET(EXTERNAL_LIBRARY_PATH "${EXTERNAL_PATH}/lib64")
@@ -61,4 +69,4 @@ ELSE(EXTERNAL_FOUND)
   ENDIF(External_FIND_REQUIRED)
 ENDIF(EXTERNAL_FOUND)
 
-MARK_AS_ADVANCED(EXTERNAL_INCLUDE_PATH EXTERNAL_LIBRARY_PATH)
+MARK_AS_ADVANCED(EXTERNAL_INCLUDE_PATH EXTERNAL_BINARY_PATH EXTERNAL_LIBRARY_PATH)

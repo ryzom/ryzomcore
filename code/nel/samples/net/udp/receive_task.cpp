@@ -108,7 +108,7 @@ void CReceiveTask::run()
 			DataSock->receivedFrom( _ReceivedMessage.userDataW(), _DatagramLength, _ReceivedMessage.AddrFrom );
 			d = CTime::getLocalTime ();
 		}
-		catch ( ESocket& )
+		catch (const ESocket&)
 		{
 			// Remove the client corresponding to the address
 			_ReceivedMessage.setTypeEvent( TReceivedMessage::RemoveClient );

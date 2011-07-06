@@ -101,7 +101,7 @@ public:
 		{
 			fsPort = IService::ConfigFile.getVar("FSPort").asInt();
 		}
-		catch ( EUnknownVar& )
+		catch (const EUnknownVar&)
 		{
 		}
 		_FServer.init(fsPort);
@@ -148,7 +148,7 @@ public:
 		{
 			fesPort = IService5::ConfigFile.getVar("FESPort").asInt();
 		}
-		catch ( EUnknownVar& )
+		catch (const EUnknownVar&)
 		{
 		}
 

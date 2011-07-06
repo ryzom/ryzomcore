@@ -73,7 +73,8 @@ void CLibrary::addLib(std::string const& name, std::vector<std::string> const& c
 
 void CLibrary::addLib(std::string const& name, NLMISC::CSmartPtr<CByteCode const> const& byteCode)
 {
-	if (byteCode==NULL) {
+	if (byteCode==NULL)
+	{
 		nlwarning("Trying to register an empty library script.");
 		return;
 	}

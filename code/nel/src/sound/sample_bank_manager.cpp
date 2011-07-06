@@ -36,7 +36,7 @@ using namespace NLMISC;
 
 namespace NLSOUND {
 
-CSampleBankManager::CSampleBankManager(CAudioMixerUser *audioMixer) : m_AudioMixer(audioMixer), m_LoadedSize(NULL)
+CSampleBankManager::CSampleBankManager(CAudioMixerUser *audioMixer) : m_AudioMixer(audioMixer), m_LoadedSize(0)
 {
 	
 }

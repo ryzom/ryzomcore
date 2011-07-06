@@ -976,7 +976,7 @@ public:
 				_ServiceInstances.addUniqueService( uniqueServices.asString(i), true );
 			}
 		}
-		catch(Exception &)
+		catch(const Exception &)
 		{}
 		try
 		{
@@ -986,7 +986,7 @@ public:
 				_ServiceInstances.addUniqueService( uniqueServicesM.asString(i), false );
 			}
 		}
-		catch(Exception &)
+		catch(const Exception &)
 		{}
 
 /*

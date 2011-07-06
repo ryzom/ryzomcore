@@ -429,6 +429,7 @@ void CCreature::initFormPointer(NLMISC::CSheetId sheetId)
 	if (_UserModelId.empty() || _PrimAlias == 0)
 	{
 		_Form = CSheets::getCreaturesForm( sheetId );
+		_SheetName = sheetId.toString();
 	}
 	else
 	{
@@ -1703,7 +1704,10 @@ void CCreature::kill(TDataSetRow killerRowId)
 	{
 		if( killer != this && killer->getId().getType() != RYZOMID::player )
 		{
-			PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->removeCreature(_EntityRowId);
+			if (_SheetName.size() != 15 || (_SheetName.size() == 15 && _SheetName[5] != '5' && _SheetName[5] != '6' && _SheetName[5] != '7')) 
+				PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->removeXpCreature(_EntityRowId);
+			else
+				PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->removeCreature(_EntityRowId);
 		}
 		else if( killer != this )
 		{

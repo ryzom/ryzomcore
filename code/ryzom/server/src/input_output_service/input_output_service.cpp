@@ -346,7 +346,7 @@ void CInputOutputService::init()
 //		CConfigFile::CVar& cvDynamicDB = ConfigFile.getVar("DynamicDB");
 //		dynamicDBFileName = cvDynamicDB.asString();
 //	}
-//	catch(EUnknownVar &) 
+//	catch(const EUnknownVar &) 
 //	{
 //		nlwarning("<CInputOutputService::init> using default chat files");
 //	}
@@ -358,7 +358,7 @@ void CInputOutputService::init()
 		CConfigFile::CVar& cvMaxDistShout = ConfigFile.getVar("MaxDistShout");
 		MaxDistShout = cvMaxDistShout.asInt();
 	}
-	catch(EUnknownVar &) 
+	catch(const EUnknownVar &) 
 	{
 		nlinfo("<CInputOutputService::init> using default chat max distance values");
 	}

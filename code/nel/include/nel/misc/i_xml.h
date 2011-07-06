@@ -71,7 +71,7 @@ struct EXmlParsingError : public EStream
 			// File not found
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		// Something wrong appends
 	}

@@ -837,7 +837,7 @@ bool CNameManager::loadAccountNamesFromDatabase()
 //	{
 //		CEntityIdTranslator::getInstance()->load(BsiGlobal.getLocalPath() + "eid_translation.data", IService::getInstance()->ConfigFile.getVar("InvalidEntityNamesFilename").asString());
 //	}
-//	catch(Exception &)
+//	catch(const Exception &)
 //	{
 //		// if we can't load the file, we force a check coherency
 //		nlwarning("Can't load the eid_translation.data");

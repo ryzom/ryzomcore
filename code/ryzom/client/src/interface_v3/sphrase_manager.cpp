@@ -503,7 +503,6 @@ void		CSPhraseManager::updateMemoryDBAll()
 		for(uint i=0;i<PHRASE_MAX_MEMORY_SLOT;i++)
 		{
 			_MemoryDbLeaves[i]->setValue32(0);
-			_MemoryAltDbLeaves[i]->setValue32(0);
 		}
 	}
 	else
@@ -515,7 +514,14 @@ void		CSPhraseManager::updateMemoryDBAll()
 				_MemoryDbLeaves[i]->setValue32(0);
 			else
 				_MemoryDbLeaves[i]->setValue32(slot.Id);
+		}
+	}
 
+	if(_SelectedMemoryDB != -1 && (sint32)_Memories.size() > 0)
+	{
+		// Always update alt gestionsets
+		for(uint i=0;i<PHRASE_MAX_MEMORY_SLOT;i++)
+		{
 			CMemorySlot		&slotAlt= _Memories[0].Slot[i];
 			if(!slotAlt.isPhrase())
 				_MemoryAltDbLeaves[i]->setValue32(0);
