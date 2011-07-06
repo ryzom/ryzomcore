@@ -17,6 +17,7 @@
 
 // Project includes
 #include "landscape_scene.h"
+#include "pixmap_database.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -29,7 +30,10 @@
 namespace LandscapeEditor
 {
 
-static const int ZoneName = 0;
+static const int ZONE_NAME = 0;
+static const int LAYER_ZONES = 2;
+static const int LAYER_EMPTY_ZONES = 3;
+static const int LAYER_BLACKOUT = 4;
 
 LandscapeScene::LandscapeScene(QObject *parent)
 	: QGraphicsScene(parent),
@@ -78,19 +82,18 @@ QGraphicsItem *LandscapeScene::createItemZone(const LigoData &data, const ZonePo
 
 	if (data.flip == 0)
 	{
-		item = new QGraphicsPixmapItem(pixmap->transformed(matrix, Qt::SmoothTransformation), 0, this);
+		item = addPixmap(pixmap->transformed(matrix, Qt::SmoothTransformation));
 	}
 	else
 	{
 		// mirror image
 		QImage mirrorImage = pixmap->toImage();
 		QPixmap mirrorPixmap = QPixmap::fromImage(mirrorImage.mirrored(true, false));
-		item = new QGraphicsPixmapItem(mirrorPixmap.transformed(matrix, Qt::SmoothTransformation), 0, this);
+		item = addPixmap(mirrorPixmap.transformed(matrix, Qt::SmoothTransformation));
 	}
 	// Enable bilinear filtering
 	item->setTransformationMode(Qt::SmoothTransformation);
 
-	// Set position graphics item with offset for large piece
 	NLLIGO::CZoneBankElement *zoneBankItem = m_zoneBuilder->getZoneBank().getElementByZoneName(data.zoneName);
 
 	sint32 deltaX = 0, deltaY = 0;
@@ -145,16 +148,16 @@ QGraphicsItem *LandscapeScene::createItemZone(const LigoData &data, const ZonePo
 		}
 	}
 
-	// set position graphics item with taking into account the offset
+	// Set position graphics item with offset for large piece
 	item->setPos((zonePos.x + deltaX) * m_cellSize, (abs(int(zonePos.y + deltaY))) * m_cellSize);
 
 	// The size graphics item should be equal or proportional m_cellSize
 	item->setScale(float(m_cellSize) / m_zoneBuilder->pixmapDatabase()->textureSize());
 
-	item->setData(ZoneName, QString(data.zoneName.c_str()));
+	//item->setData(ZONE_NAME, QString(data.zoneName.c_str()));
 
 	// for not full item zone
-	item->setZValue(0);
+	item->setZValue(LAYER_ZONES);
 
 	return item;
 }
@@ -169,7 +172,7 @@ QGraphicsItem *LandscapeScene::createItemEmptyZone(const ZonePosition &zonePos)
 	if (pixmap == 0)
 		return 0;
 
-	QGraphicsPixmapItem *item = new QGraphicsPixmapItem(*pixmap, 0, this);
+	QGraphicsPixmapItem *item = addPixmap(*pixmap);
 
 	// Enable bilinear filtering
 	item->setTransformationMode(Qt::SmoothTransformation);
@@ -181,9 +184,21 @@ QGraphicsItem *LandscapeScene::createItemEmptyZone(const ZonePosition &zonePos)
 	item->setScale(float(m_cellSize) / m_zoneBuilder->pixmapDatabase()->textureSize());
 
 	// for not full item zone
-	item->setZValue(1);
+	item->setZValue(LAYER_EMPTY_ZONES);
 
 	return item;
+}
+
+QGraphicsRectItem *LandscapeScene::createLayerBlackout(const NLLIGO::CZoneRegion &zoneRegion)
+{
+	QGraphicsRectItem *rectItem = addRect(zoneRegion.getMinX() * m_cellSize,
+										  abs(zoneRegion.getMaxY()) * m_cellSize,
+										  (abs(zoneRegion.getMaxX() - zoneRegion.getMinX()) + 1) * m_cellSize,
+										  (abs(zoneRegion.getMaxY() - zoneRegion.getMinY()) + 1) * m_cellSize,
+										  Qt::NoPen, QBrush(QColor(0, 0, 0, 50)));
+
+	rectItem->setZValue(LAYER_BLACKOUT);
+	return rectItem;
 }
 
 void LandscapeScene::deleteItemZone(const ZonePosition &zonePos)
@@ -196,12 +211,13 @@ void LandscapeScene::deleteItemZone(const ZonePosition &zonePos)
 	}
 }
 
-void LandscapeScene::processZoneRegion(const NLLIGO::CZoneRegion &zoneRegion)
+void LandscapeScene::addZoneRegion(const NLLIGO::CZoneRegion &zoneRegion)
 {
 	for (sint32 i = zoneRegion.getMinX(); i <= zoneRegion.getMaxX(); ++i)
 	{
 		for (sint32 j = zoneRegion.getMinY(); j <= zoneRegion.getMaxY(); ++j)
 		{
+
 			//nlinfo(QString("%1 %2 %3").arg(i).arg(j).arg(zoneRegion.getName(i, j).c_str()).toStdString().c_str());
 			std::string zoneName = zoneRegion.getName(i, j);
 			if (zoneName == STRING_UNUSED)
@@ -220,6 +236,17 @@ void LandscapeScene::processZoneRegion(const NLLIGO::CZoneRegion &zoneRegion)
 				data.posY = zoneRegion.getPosY(i, j);
 				QGraphicsItem *item = createItemZone(data, zonePos);
 			}
+		}
+	}
+}
+
+void LandscapeScene::delZoneRegion(const NLLIGO::CZoneRegion &zoneRegion)
+{
+	for (sint32 i = zoneRegion.getMinX(); i <= zoneRegion.getMaxX(); ++i)
+	{
+		for (sint32 j = zoneRegion.getMinY(); j <= zoneRegion.getMaxY(); ++j)
+		{
+			deleteItemZone(ZonePosition(i, -j, -1));
 		}
 	}
 }
@@ -305,7 +332,9 @@ bool LandscapeScene::checkUnderZone(const int posX, const int posY)
 {
 	QGraphicsItem *item = itemAt((posX * m_cellSize), abs(posY) * m_cellSize);
 	if (item != 0)
+	{
 		return true;
+	}
 	return false;
 }
 

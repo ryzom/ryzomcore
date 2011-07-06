@@ -32,13 +32,14 @@
 namespace LandscapeEditor
 {
 
-ZoneBuilder::ZoneBuilder(ListZonesWidget *listZonesWidget, LandscapeScene *landscapeScene, QUndoStack *undoStack)
+ZoneBuilder::ZoneBuilder(LandscapeScene *landscapeScene, ListZonesWidget *listZonesWidget, QUndoStack *undoStack)
 	: m_currentZoneRegion(-1),
 	  m_pixmapDatabase(0),
 	  m_listZonesWidget(listZonesWidget),
 	  m_landscapeScene(landscapeScene),
 	  m_undoStack(undoStack)
 {
+	nlassert(m_landscapeScene);
 	m_pixmapDatabase = new PixmapDatabase();
 	m_lastPathName = "";
 }
@@ -81,6 +82,9 @@ bool ZoneBuilder::init(const QString &pathName, bool makeAZone)
 
 void ZoneBuilder::actionLigoTile(const LigoData &data, const ZonePosition &zonePos)
 {
+	if (m_undoStack == 0)
+		return;
+
 	checkBeginMacro();
 	nlinfo(QString("%1 %2 %3 (%4 %5)").arg(data.zoneName.c_str()).arg(zonePos.x).arg(zonePos.y).arg(data.posX).arg(data.posY).toStdString().c_str());
 	m_zonePositionList.push_back(zonePos);
@@ -89,6 +93,9 @@ void ZoneBuilder::actionLigoTile(const LigoData &data, const ZonePosition &zoneP
 
 void ZoneBuilder::actionLigoMove(uint index, sint32 deltaX, sint32 deltaY)
 {
+	if (m_undoStack == 0)
+		return;
+
 	checkBeginMacro();
 	nlinfo("ligoMove");
 	//m_undoStack->push(new LigoMoveCommand(index, deltaX, deltaY, this));
@@ -96,6 +103,9 @@ void ZoneBuilder::actionLigoMove(uint index, sint32 deltaX, sint32 deltaY)
 
 void ZoneBuilder::actionLigoResize(uint index, sint32 newMinX, sint32 newMaxX, sint32 newMinY, sint32 newMaxY)
 {
+	if (m_undoStack == 0)
+		return;
+
 	checkBeginMacro();
 	nlinfo(QString("minX=%1 maxX=%2 minY=%3 maxY=%4").arg(newMinX).arg(newMaxX).arg(newMinY).arg(newMaxY).toStdString().c_str());
 	m_undoStack->push(new LigoResizeCommand(index, newMinX, newMaxX, newMinY, newMaxY, this));
@@ -103,16 +113,20 @@ void ZoneBuilder::actionLigoResize(uint index, sint32 newMinX, sint32 newMaxX, s
 
 void ZoneBuilder::addZone(sint32 posX, sint32 posY)
 {
-	if (m_builderZoneRegions.empty())
+	// Read-only mode
+	if ((m_listZonesWidget == 0) || (m_undoStack == 0))
 		return;
 
+	if (m_landscapeItems.empty())
+		return;
+
+	// Check zone name
 	std::string zoneName = m_listZonesWidget->currentZoneName().toStdString();
 	if (zoneName.empty())
 		return;
 
-	std::string error;
-	BuilderZoneRegion *builderZoneRegion = m_builderZoneRegions.at(m_currentZoneRegion);
-	builderZoneRegion->init(this, error);
+	BuilderZoneRegion *builderZoneRegion = m_landscapeItems.at(m_currentZoneRegion).builderZoneRegion;
+	builderZoneRegion->init(this);
 
 	uint8 rot = uint8(m_listZonesWidget->currentRot());
 	uint8 flip = uint8(m_listZonesWidget->currentFlip());
@@ -122,8 +136,6 @@ void ZoneBuilder::addZone(sint32 posX, sint32 posY)
 	m_titleAction = QString("Add zone %1,%2").arg(posX).arg(posY);
 	m_createdAction = false;
 	m_zonePositionList.clear();
-
-	nlinfo("---------");
 	if (m_listZonesWidget->isForce())
 	{
 		builderZoneRegion->addForce(posX, posY, rot, flip, zoneBankElement);
@@ -140,45 +152,95 @@ void ZoneBuilder::addZone(sint32 posX, sint32 posY)
 
 void ZoneBuilder::addTransition(const sint32 posX, const sint32 posY)
 {
+	if ((m_listZonesWidget == 0) || (m_undoStack == 0))
+		return;
 }
 
 void ZoneBuilder::delZone(const sint32 posX, const sint32 posY)
 {
-	if (m_builderZoneRegions.empty())
+	if ((m_listZonesWidget == 0) || (m_undoStack == 0))
+		return;
+
+	if (m_landscapeItems.empty())
 		return;
 
 	m_titleAction = QString("Del zone %1,%2").arg(posX).arg(posY);
 	m_createdAction = false;
 
-	BuilderZoneRegion *builderZoneRegion = m_builderZoneRegions.at(m_currentZoneRegion);
-	std::string error;
-	nlinfo("---------");
-	builderZoneRegion->init(this, error);
+	BuilderZoneRegion *builderZoneRegion = m_landscapeItems.at(m_currentZoneRegion).builderZoneRegion;
+
+	builderZoneRegion->init(this);
 	builderZoneRegion->del(posX, posY);
 	checkEndMacro();
 }
 
 int ZoneBuilder::createZoneRegion()
 {
-	ZoneRegionObject *newZoneRegion = new ZoneRegionObject();
-	m_zoneRegions.push_back(newZoneRegion);
-	if (m_currentZoneRegion == -1)
-		m_currentZoneRegion = m_zoneRegions.indexOf(newZoneRegion);
+	int newId = m_landscapeItems.size();
+	LandscapeItem landItem;
+	landItem.zoneRegionObject = new ZoneRegionObject();
+	landItem.builderZoneRegion = new BuilderZoneRegion(newId);
+	landItem.builderZoneRegion->init(this);
+	landItem.rectItem = 0;
 
 	newZone();
-	return m_zoneRegions.indexOf(newZoneRegion);
+	m_landscapeItems.push_back(landItem);
+	if (m_currentZoneRegion == -1)
+		setCurrentZoneRegion(newId);
+
+	return newId;
+}
+
+int ZoneBuilder::createZoneRegion(const QString &fileName)
+{
+	int newId = m_landscapeItems.size();
+	LandscapeItem landItem;
+	landItem.zoneRegionObject = new ZoneRegionObject();
+	landItem.zoneRegionObject->load(fileName.toStdString());
+
+	if (!checkOverlaps(landItem.zoneRegionObject->ligoZoneRegion()))
+	{
+		delete landItem.zoneRegionObject;
+		return -1;
+	}
+	landItem.builderZoneRegion = new BuilderZoneRegion(newId);
+	landItem.builderZoneRegion->init(this);
+
+	newZone();
+	m_landscapeItems.push_back(landItem);
+
+	m_landscapeScene->addZoneRegion(landItem.zoneRegionObject->ligoZoneRegion());
+	m_landscapeItems.at(newId).rectItem = m_landscapeScene->createLayerBlackout(landItem.zoneRegionObject->ligoZoneRegion());
+
+	if (m_currentZoneRegion == -1)
+		setCurrentZoneRegion(newId);
+
+	return newId;
 }
 
 void ZoneBuilder::deleteZoneRegion(int id)
 {
-	if ((0 <= id) && (id < m_zoneRegions.size()))
-		delete m_zoneRegions.takeAt(id);
+	if ((0 <= id) && (id < int(m_landscapeItems.size())))
+	{
+		m_landscapeScene->delZoneRegion(m_landscapeItems.at(id).zoneRegionObject->ligoZoneRegion());
+		delete m_landscapeItems.at(id).zoneRegionObject;
+		delete m_landscapeItems.at(id).builderZoneRegion;
+		delete m_landscapeItems.at(id).rectItem;
+		m_landscapeItems.erase(m_landscapeItems.begin() + id);
+		calcMask();
+	}
 }
 
 void ZoneBuilder::setCurrentZoneRegion(int id)
 {
-	if ((0 <= id) && (id < m_zoneRegions.size()))
+	if ((0 <= id) && (id < int(m_landscapeItems.size())))
+	{
+		if (currentIdZoneRegion() != -1)
+			m_landscapeItems.at(m_currentZoneRegion).rectItem = m_landscapeScene->createLayerBlackout(currentZoneRegion()->ligoZoneRegion());
 		m_currentZoneRegion = id;
+		delete m_landscapeItems.at(id).rectItem;
+		m_landscapeItems.at(id).rectItem = 0;
+	}
 }
 
 int ZoneBuilder::currentIdZoneRegion() const
@@ -188,27 +250,27 @@ int ZoneBuilder::currentIdZoneRegion() const
 
 ZoneRegionObject *ZoneBuilder::currentZoneRegion() const
 {
-	return m_zoneRegions.at(m_currentZoneRegion);
+	return m_landscapeItems.at(m_currentZoneRegion).zoneRegionObject;
 }
 
 int ZoneBuilder::countZoneRegion() const
 {
-	return m_zoneRegions.size();
+	return m_landscapeItems.size();
 }
 
 ZoneRegionObject *ZoneBuilder::zoneRegion(int id) const
 {
-	return m_zoneRegions.at(id);
+	return m_landscapeItems.at(id).zoneRegionObject;
 }
 
 void ZoneBuilder::ligoData(LigoData &data, const ZonePosition &zonePos)
 {
-	m_zoneRegions.at(zonePos.region)->ligoData(data, zonePos.x, zonePos.y);
+	m_landscapeItems.at(zonePos.region).zoneRegionObject->ligoData(data, zonePos.x, zonePos.y);
 }
 
 void ZoneBuilder::setLigoData(LigoData &data, const ZonePosition &zonePos)
 {
-	m_zoneRegions.at(zonePos.region)->setLigoData(data, zonePos.x, zonePos.y);
+	m_landscapeItems.at(zonePos.region).zoneRegionObject->setLigoData(data, zonePos.x, zonePos.y);
 }
 
 bool ZoneBuilder::initZoneBank (const QString &pathName)
@@ -243,16 +305,13 @@ QString ZoneBuilder::dataPath() const
 
 void ZoneBuilder::newZone()
 {
-	BuilderZoneRegion *builderZoneRegion = new BuilderZoneRegion(m_builderZoneRegions.size());
-	m_builderZoneRegions.push_back(builderZoneRegion);
-
 	// Select starting point for the moment 0,0
 	sint32 x = 0, y = 0;
 
 	// If there are some zone already present increase x until free
-	for (int i = 0; i < m_zoneRegions.size(); ++i)
+	for (size_t i = 0; i < m_landscapeItems.size(); ++i)
 	{
-		const NLLIGO::CZoneRegion &zoneRegion = m_zoneRegions.at(i)->zoneRegion();
+		const NLLIGO::CZoneRegion &zoneRegion = m_landscapeItems.at(i).zoneRegionObject->ligoZoneRegion();
 		const std::string &zoneName = zoneRegion.getName (x, y);
 		if ((zoneName != STRING_OUT_OF_BOUND) && (zoneName != STRING_UNUSED))
 		{
@@ -278,18 +337,17 @@ bool ZoneBuilder::getZoneMask(sint32 x, sint32 y)
 
 void ZoneBuilder::calcMask()
 {
-	sint32 i;
 	sint32 x, y;
 
 	m_minY = m_minX = 1000000;
 	m_maxY = m_maxX = -1000000;
 
-	if (m_builderZoneRegions.size() == 0)
+	if (m_landscapeItems.size() == 0)
 		return;
 
-	for (i = 0; i < (sint32)m_builderZoneRegions.size(); ++i)
+	for (size_t i = 0; i < m_landscapeItems.size(); ++i)
 	{
-		const NLLIGO::CZoneRegion &region = zoneRegion(i)->zoneRegion();
+		const NLLIGO::CZoneRegion &region = m_landscapeItems.at(i).zoneRegionObject->ligoZoneRegion();
 
 		if (m_minX > region.getMinX())
 			m_minX = region.getMinX();
@@ -308,10 +366,10 @@ void ZoneBuilder::calcMask()
 		{
 			m_zoneMask[x - m_minX + (y - m_minY) * stride] = true;
 
-			for (i = 0; i < (sint32)m_builderZoneRegions.size(); ++i)
-				if (i != m_currentZoneRegion)
+			for (size_t i = 0; i < m_landscapeItems.size(); ++i)
+				if (int(i) != m_currentZoneRegion)
 				{
-					const NLLIGO::CZoneRegion &region = zoneRegion(i)->zoneRegion();
+					const NLLIGO::CZoneRegion &region = zoneRegion(i)->ligoZoneRegion();
 
 					const std::string &rSZone = region.getName (x, y);
 					if ((rSZone != STRING_OUT_OF_BOUND) && (rSZone != STRING_UNUSED))
@@ -322,25 +380,24 @@ void ZoneBuilder::calcMask()
 		}
 }
 
-bool ZoneBuilder::getZoneAmongRegions (ZonePosition &zonePos, BuilderZoneRegion *builderZoneRegionFrom, sint32 x, sint32 y)
+bool ZoneBuilder::getZoneAmongRegions(ZonePosition &zonePos, BuilderZoneRegion *builderZoneRegionFrom, sint32 x, sint32 y)
 {
-	Q_FOREACH(ZoneRegionObject *zoneRegion, m_zoneRegions)
+	for (size_t i = 0; i < m_landscapeItems.size(); ++i)
 	{
-		const NLLIGO::CZoneRegion &region = zoneRegion->zoneRegion();
+		const NLLIGO::CZoneRegion &region = m_landscapeItems.at(i).zoneRegionObject->ligoZoneRegion();
 		if ((x < region.getMinX()) || (x > region.getMaxX()) ||
 				(y < region.getMinY()) || (y > region.getMaxY()))
 			continue;
 		if (region.getName(x, y) != STRING_UNUSED)
 		{
-			int index = m_zoneRegions.indexOf(zoneRegion);
-			builderZoneRegionFrom = m_builderZoneRegions.at(index);
-			zonePos = ZonePosition(x, y, index);
+			builderZoneRegionFrom = m_landscapeItems.at(i).builderZoneRegion;
+			zonePos = ZonePosition(x, y, i);
 			return true;
 		}
 	}
 
 	// The zone is not present in other region so it is an empty or oob zone of the current region
-	const NLLIGO::CZoneRegion &region = zoneRegion(builderZoneRegionFrom->getRegionId())->zoneRegion();
+	const NLLIGO::CZoneRegion &region = zoneRegion(builderZoneRegionFrom->getRegionId())->ligoZoneRegion();
 	if ((x < region.getMinX()) || (x > region.getMaxX()) ||
 			(y < region.getMinY()) || (y > region.getMaxY()))
 		return false; // Out Of Bound
@@ -370,6 +427,26 @@ void ZoneBuilder::checkEndMacro()
 		m_undoStack->push(redoScanRegionCommand);
 		m_undoStack->endMacro();
 	}
+}
+
+bool ZoneBuilder::checkOverlaps(const NLLIGO::CZoneRegion &newZoneRegion)
+{
+	for (size_t j = 0; j < m_landscapeItems.size(); ++j)
+	{
+		const NLLIGO::CZoneRegion &zoneRegion = m_landscapeItems.at(j).zoneRegionObject->ligoZoneRegion();
+		for (sint32 y = zoneRegion.getMinY(); y <= zoneRegion.getMaxY(); ++y)
+			for (sint32 x = zoneRegion.getMinX(); x <= zoneRegion.getMaxX(); ++x)
+			{
+				const std::string &refZoneName = zoneRegion.getName(x, y);
+				if (refZoneName != STRING_UNUSED)
+				{
+					const std::string &zoneName = newZoneRegion.getName(x, y);
+					if ((zoneName != STRING_UNUSED) && (zoneName != STRING_OUT_OF_BOUND))
+						return false;
+				}
+			}
+	}
+	return true;
 }
 
 } /* namespace LandscapeEditor */

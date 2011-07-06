@@ -41,6 +41,7 @@ LandscapeView::LandscapeView(QWidget *parent)
 	setBackgroundBrush(QBrush(Qt::lightGray));
 	//setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	//setRenderHints(QPainter::Antialiasing);
+	//setCacheMode(QGraphicsView::CacheBackground);
 	m_cellSize = 160;
 	m_numSteps = 0;
 	m_maxSteps = 20;
@@ -83,6 +84,7 @@ void LandscapeView::wheelEvent(QWheelEvent *event)
 		--m_numSteps;
 	}
 	scale(factor, factor);
+	QGraphicsView::wheelEvent(event);
 }
 
 void LandscapeView::mousePressEvent(QMouseEvent *event)

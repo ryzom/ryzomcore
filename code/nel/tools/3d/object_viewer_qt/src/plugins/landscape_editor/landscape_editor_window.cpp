@@ -34,6 +34,7 @@
 // Qt includes
 #include <QtCore/QSettings>
 #include <QtGui/QFileDialog>
+#include <QtGui/QMessageBox>
 
 namespace LandscapeEditor
 {
@@ -51,7 +52,7 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	m_undoStack = new QUndoStack(this);
 	m_landscapeScene = new LandscapeScene(this);
 
-	m_zoneBuilder = new ZoneBuilder(m_ui.zoneListWidget, m_landscapeScene, m_undoStack);
+	m_zoneBuilder = new ZoneBuilder(m_landscapeScene, m_ui.zoneListWidget, m_undoStack);
 	m_zoneBuilder->init("e:/-nel-/install/continents/newbieland", true);
 	m_ui.zoneListWidget->setZoneBuilder(m_zoneBuilder);
 	m_ui.zoneListWidget->updateUi();
@@ -96,12 +97,15 @@ void LandscapeEditorWindow::open()
 		_lastDir = QFileInfo(list.front()).absolutePath();
 		Q_FOREACH(QString fileName, fileNames)
 		{
-			int id = m_zoneBuilder->createZoneRegion();
+			int id = m_zoneBuilder->createZoneRegion(fileName);
+			if (id == -1)
+			{
+				QMessageBox::critical(this, "Landscape Editor", "Cannot add this zone because it overlaps existing ones");
+				continue;
+			}
 			ZoneRegionObject *zoneRegion = m_zoneBuilder->zoneRegion(id);
-			zoneRegion->load(fileName.toStdString());
-			m_landscapeScene->processZoneRegion(zoneRegion->zoneRegion());
-			m_ui.graphicsView->centerOn(zoneRegion->zoneRegion().getMinX() * m_landscapeScene->cellSize(),
-										abs(zoneRegion->zoneRegion().getMinY()) * m_landscapeScene->cellSize());
+			m_ui.graphicsView->centerOn(zoneRegion->ligoZoneRegion().getMinX() * m_landscapeScene->cellSize(),
+										abs(zoneRegion->ligoZoneRegion().getMinY()) * m_landscapeScene->cellSize());
 
 			m_zoneBuilder->setCurrentZoneRegion(id);
 		}
@@ -157,7 +161,8 @@ void LandscapeEditorWindow::openSnapshotDialog()
 void LandscapeEditorWindow::showEvent(QShowEvent *showEvent)
 {
 	QMainWindow::showEvent(showEvent);
-	m_oglWidget->makeCurrent();
+	if (m_oglWidget != 0)
+		m_oglWidget->makeCurrent();
 }
 
 void LandscapeEditorWindow::createMenus()

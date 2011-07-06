@@ -38,6 +38,7 @@
 #include <QtCore/QString>
 #include <QtGui/QPixmap>
 #include <QtGui/QUndoStack>
+#include <QtGui/QGraphicsRectItem>
 
 namespace LandscapeEditor
 {
@@ -77,7 +78,7 @@ PixmapDatabase contains the graphics for the zones
 class ZoneBuilder
 {
 public:
-	ZoneBuilder(ListZonesWidget *listZonesWidget, LandscapeScene *landscapeScene, QUndoStack *undoStack);
+	ZoneBuilder(LandscapeScene *landscapeScene, ListZonesWidget *listZonesWidget = 0, QUndoStack *undoStack = 0);
 	~ZoneBuilder();
 
 	/// Init zoneBank and init zone pixmap database
@@ -88,18 +89,24 @@ public:
 	bool getZoneMask (sint32 x, sint32 y);
 	bool getZoneAmongRegions(ZonePosition &zonePos, BuilderZoneRegion *builderZoneRegionFrom, sint32 x, sint32 y);
 
-	// Ligo Actions
+	/// Ligo Actions
+	/// @{
 	void actionLigoTile(const LigoData &data, const ZonePosition &zonePos);
 	void actionLigoMove(uint index, sint32 deltaX, sint32 deltaY);
 	void actionLigoResize(uint index, sint32 newMinX, sint32 newMaxX, sint32 newMinY, sint32 newMaxY);
+	/// @}
 
-	// Zone Bricks
+	/// Zone Bricks
+	/// @{
 	void addZone(sint32 posX, sint32 posY);
 	void addTransition(const sint32 posX, const sint32 posY);
 	void delZone(const sint32 posX, const sint32 posY);
+	/// @}
 
-	// Zone Region
+	/// Zone Region
+	/// @{
 	int createZoneRegion();
+	int createZoneRegion(const QString &fileName);
 	void deleteZoneRegion(int id);
 	void setCurrentZoneRegion(int id);
 	int currentIdZoneRegion() const;
@@ -108,6 +115,7 @@ public:
 	ZoneRegionObject *zoneRegion(int id) const;
 	void ligoData(LigoData &data, const ZonePosition &zonePos);
 	void setLigoData(LigoData &data, const ZonePosition &zonePos);
+	/// @}
 
 	// Accessors
 	NLLIGO::CZoneBank &getZoneBank()
@@ -127,15 +135,22 @@ private:
 	void checkBeginMacro();
 	void checkEndMacro();
 
+	bool checkOverlaps(const NLLIGO::CZoneRegion &newZoneRegion);
+
+	struct LandscapeItem
+	{
+		BuilderZoneRegion *builderZoneRegion;
+		ZoneRegionObject *zoneRegionObject;
+		QGraphicsRectItem *rectItem;
+	};
+
 	sint32 m_minX, m_maxX, m_minY, m_maxY;
 	std::vector<bool> m_zoneMask;
 
 	QString m_lastPathName;
 
-	QList<ZoneRegionObject *> m_zoneRegions;
 	int m_currentZoneRegion;
-
-	std::vector<BuilderZoneRegion *> m_builderZoneRegions;
+	std::vector<LandscapeItem> m_landscapeItems;
 
 	bool m_createdAction;
 	QString m_titleAction;

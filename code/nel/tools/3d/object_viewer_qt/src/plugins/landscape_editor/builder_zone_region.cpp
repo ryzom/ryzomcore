@@ -35,7 +35,7 @@ BuilderZoneRegion::BuilderZoneRegion(uint regionId)
 {
 }
 
-bool BuilderZoneRegion::init(ZoneBuilder *zoneBuilder, std::string &error)
+bool BuilderZoneRegion::init(ZoneBuilder *zoneBuilder)
 {
 	if (m_firstInit)
 		return true;
@@ -264,7 +264,7 @@ void BuilderZoneRegion::add(sint32 x, sint32 y, uint8 rot, uint8 flip, NLLIGO::C
 
 void BuilderZoneRegion::invertCutEdge(sint32 x, sint32 y, uint8 cePos)
 {
-	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->zoneRegion();
+	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 	if ((x < zoneRegion.getMinX ()) || (x > zoneRegion.getMaxX ()) ||
 			(y < zoneRegion.getMinY ()) || (y > zoneRegion.getMaxY ()))
 		return;
@@ -371,7 +371,7 @@ void BuilderZoneRegion::invertCutEdge(sint32 x, sint32 y, uint8 cePos)
 
 void BuilderZoneRegion::cycleTransition(sint32 x, sint32 y)
 {
-	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->zoneRegion();
+	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 	if ((x < zoneRegion.getMinX ()) || (x > zoneRegion.getMaxX ()) ||
 			(y < zoneRegion.getMinY ()) || (y > zoneRegion.getMaxY ()))
 		return;
@@ -391,7 +391,7 @@ void BuilderZoneRegion::cycleTransition(sint32 x, sint32 y)
 
 bool BuilderZoneRegion::addNotPropagate (sint32 x, sint32 y, uint8 rot, uint8 flip, NLLIGO::CZoneBankElement *zoneBankElement)
 {
-	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->zoneRegion();
+	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 	sint32 sizeX = zoneBankElement->getSizeX(), sizeY = zoneBankElement->getSizeY();
 	sint32 i, j;
 	NLLIGO::SPiece sMask, sPosX, sPosY;
@@ -472,7 +472,7 @@ bool BuilderZoneRegion::addNotPropagate (sint32 x, sint32 y, uint8 rot, uint8 fl
 
 void BuilderZoneRegion::addForce (sint32 x, sint32 y, uint8 rot, uint8 flip, NLLIGO::CZoneBankElement *zoneBankElement)
 {
-	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->zoneRegion();
+	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 	sint32 sizeX = zoneBankElement->getSizeX(), sizeY = zoneBankElement->getSizeY();
 	sint32 i, j;
 	NLLIGO::SPiece sMask, sPosX, sPosY;
@@ -636,7 +636,7 @@ uint8 TransToEdge[72][4] =
 
 void BuilderZoneRegion::addTransition (sint32 x, sint32 y, uint8 rot, uint8 flip, NLLIGO::CZoneBankElement *zoneBankElement)
 {
-	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->zoneRegion();
+	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 	uint32 i;
 	// Check that we write in an already defined place
 	if ((x < zoneRegion.getMinX ()) || (x > zoneRegion.getMaxX ()) ||
@@ -806,7 +806,7 @@ void BuilderZoneRegion::addTransition (sint32 x, sint32 y, uint8 rot, uint8 flip
 
 void BuilderZoneRegion::addToUpdateAndCreate(BuilderZoneRegion* builderZoneRegion, sint32 sharePos, sint32 x, sint32 y, const std::string &newMat, void *pInt1, void *pInt2)
 {
-	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->zoneRegion();
+	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 	ToUpdate *ptCreate = reinterpret_cast<ToUpdate *>(pInt1);
 	ToUpdate *ptUpdate = reinterpret_cast<ToUpdate *>(pInt2);
 	sint32 stride = (1 + zoneRegion.getMaxX() - zoneRegion.getMinX());
@@ -831,7 +831,7 @@ void BuilderZoneRegion::addToUpdateAndCreate(BuilderZoneRegion* builderZoneRegio
 void BuilderZoneRegion::putTransitions (sint32 inX, sint32 inY, const NLLIGO::SPiece &mask, const std::string &matName,
 										void *pInternal)
 {
-	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->zoneRegion();
+	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 	ToUpdate tCreate; // Transition to create
 	ToUpdate *ptUpdate = reinterpret_cast<ToUpdate *>(pInternal); // Transition to update
 
@@ -984,7 +984,7 @@ void BuilderZoneRegion::putTransitions (sint32 inX, sint32 inY, const NLLIGO::SP
 	// For all transition to update choose the cut edge
 	for (m = 0; m < (sint32)tCreate.size(); ++m)
 	{
-		const NLLIGO::CZoneRegion &zoneRegion2 = m_zoneBuilder->zoneRegion(tCreate.getBuilderZoneRegion(m)->getRegionId())->zoneRegion();
+		const NLLIGO::CZoneRegion &zoneRegion2 = m_zoneBuilder->zoneRegion(tCreate.getBuilderZoneRegion(m)->getRegionId())->ligoZoneRegion();
 		x = tCreate.getX(m);
 		y = tCreate.getY(m);
 
@@ -1145,7 +1145,7 @@ void BuilderZoneRegion::putTransitions (sint32 inX, sint32 inY, const NLLIGO::SP
 	// Finally update all transition
 	for (m = 0; m < (sint32)tCreate.size(); ++m)
 	{
-		const NLLIGO::CZoneRegion &zoneRegion2 = m_zoneBuilder->zoneRegion(tCreate.getBuilderZoneRegion(m)->getRegionId())->zoneRegion();
+		const NLLIGO::CZoneRegion &zoneRegion2 = m_zoneBuilder->zoneRegion(tCreate.getBuilderZoneRegion(m)->getRegionId())->ligoZoneRegion();
 		x = tCreate.getX(m);
 		y = tCreate.getY(m);
 
@@ -1155,7 +1155,7 @@ void BuilderZoneRegion::putTransitions (sint32 inX, sint32 inY, const NLLIGO::SP
 	}
 	for (m = 0; m < (sint32)ptUpdate->size(); ++m)
 	{
-		const NLLIGO::CZoneRegion &zoneRegion2 = m_zoneBuilder->zoneRegion(tCreate.getBuilderZoneRegion(m)->getRegionId())->zoneRegion();
+		const NLLIGO::CZoneRegion &zoneRegion2 = m_zoneBuilder->zoneRegion(tCreate.getBuilderZoneRegion(m)->getRegionId())->ligoZoneRegion();
 		x = ptUpdate->getX(m);
 		y = ptUpdate->getY(m);
 		if ((x >= zoneRegion2.getMinX()) && (x <= zoneRegion2.getMaxX()) &&
@@ -1166,7 +1166,7 @@ void BuilderZoneRegion::putTransitions (sint32 inX, sint32 inY, const NLLIGO::SP
 	// Cross material
 	for (m = 0; m < (sint32)tCreate.size(); ++m)
 	{
-		const NLLIGO::CZoneRegion &zoneRegion2 = m_zoneBuilder->zoneRegion(tCreate.getBuilderZoneRegion(m)->getRegionId())->zoneRegion();
+		const NLLIGO::CZoneRegion &zoneRegion2 = m_zoneBuilder->zoneRegion(tCreate.getBuilderZoneRegion(m)->getRegionId())->ligoZoneRegion();
 		x = tCreate.getX(m);
 		y = tCreate.getY(m);
 
@@ -1363,7 +1363,7 @@ STrans TranConvTable[128] =
 
 void BuilderZoneRegion::updateTrans (sint32 x, sint32 y, NLLIGO::CZoneBankElement *zoneBankElement)
 {
-	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->zoneRegion();
+	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 	if ((x < zoneRegion.getMinX()) || (x > zoneRegion.getMaxX()) ||
 			(y < zoneRegion.getMinY()) || (y > zoneRegion.getMaxY()))
 		return;
@@ -1564,7 +1564,7 @@ void BuilderZoneRegion::updateTrans (sint32 x, sint32 y, NLLIGO::CZoneBankElemen
 
 std::string BuilderZoneRegion::getNextMatInTree (const std::string &matA, const std::string &matB)
 {
-	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->zoneRegion();
+	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 	uint32 i, posA = 10000, posB = 10000;
 
 	if (matA == matB)
@@ -1600,7 +1600,7 @@ struct SNode
 
 void BuilderZoneRegion::tryPath(uint32 posA, uint32 posB, std::vector<uint32> &path)
 {
-	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->zoneRegion();
+	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 
 	// Build the adjascence matrix
 	std::vector<sint32> matAdj;
@@ -1662,7 +1662,7 @@ void BuilderZoneRegion::tryPath(uint32 posA, uint32 posB, std::vector<uint32> &p
 
 void BuilderZoneRegion::del(sint32 x, sint32 y, bool transition, void *pInternal)
 {
-	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->zoneRegion();
+	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 	if (!m_zoneBuilder->getZoneMask(x, y))
 		return;
 
@@ -1783,7 +1783,7 @@ void BuilderZoneRegion::move (sint32 x, sint32 y)
 
 uint32 BuilderZoneRegion::countZones ()
 {
-	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->zoneRegion();
+	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 	sint32 x, y;
 
 	uint32 counter = 0;
@@ -1799,7 +1799,7 @@ uint32 BuilderZoneRegion::countZones ()
 void BuilderZoneRegion::set(sint32 x, sint32 y, sint32 posX, sint32 posY,
 							const std::string &zoneName, bool transition)
 {
-	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->zoneRegion();
+	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 
 	// Do we need to resize ?
 	if ((x < zoneRegion.getMinX()) || (x > zoneRegion.getMaxX()) ||
@@ -1988,7 +1988,7 @@ void BuilderZoneRegion::setFlip(sint32 x, sint32 y, uint8 flip)
 
 void BuilderZoneRegion::reduceMin ()
 {
-	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->zoneRegion();
+	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 	sint32 i, j;
 
 	sint32 newMinX = zoneRegion.getMinX(), newMinY = zoneRegion.getMinY ();
@@ -2099,7 +2099,7 @@ uint BuilderZoneRegion::getRegionId() const
 
 void BuilderZoneRegion::resize (sint32 newMinX, sint32 newMaxX, sint32 newMinY, sint32 newMaxY)
 {
-	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->zoneRegion();
+	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 	if ((zoneRegion.getMinX ()!= newMinX) ||
 			(zoneRegion.getMaxX ()!= newMaxX) ||
 			(zoneRegion.getMinY ()!= newMinY) ||

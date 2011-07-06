@@ -43,7 +43,7 @@ public:
 	BuilderZoneRegion(uint regionId);
 
 	// New interface
-	bool init(ZoneBuilder *zoneBuilder, std::string &error);
+	bool init(ZoneBuilder *zoneBuilder);
 	void add(sint32 x, sint32 y, uint8 rot, uint8 flip, NLLIGO::CZoneBankElement *zoneBankElement);
 	void invertCutEdge(sint32 x, sint32 y, uint8 cePos);
 	void cycleTransition(sint32 x, sint32 y);

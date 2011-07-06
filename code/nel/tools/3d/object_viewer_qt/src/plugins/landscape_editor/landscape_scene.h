@@ -21,6 +21,7 @@
 // Project includes
 #include "zone_region_editor.h"
 #include "builder_zone.h"
+#include "landscape_editor_global.h"
 
 // NeL includes
 #include <nel/ligo/zone_region.h>
@@ -32,7 +33,12 @@
 namespace LandscapeEditor
 {
 
-class LandscapeScene : public QGraphicsScene
+/**
+@class LandscapeScene
+@brief
+@details
+*/
+class LANDSCAPE_EDITOR_EXPORT LandscapeScene : public QGraphicsScene
 {
 	Q_OBJECT
 
@@ -45,15 +51,18 @@ public:
 
 	QGraphicsItem *createItemZone(const LigoData &data, const ZonePosition &zonePos);
 	QGraphicsItem *createItemEmptyZone(const ZonePosition &zonePos);
+	QGraphicsRectItem *createLayerBlackout(const NLLIGO::CZoneRegion &zoneRegion);
 	void deleteItemZone(const ZonePosition &zonePos);
-	void processZoneRegion(const NLLIGO::CZoneRegion &zoneRegion);
+
+	void addZoneRegion(const NLLIGO::CZoneRegion &zoneRegion);
+	void delZoneRegion(const NLLIGO::CZoneRegion &zoneRegion);
 
 	void snapshot(const QString &fileName, int sizeSource);
 	void snapshot(const QString &fileName, int width, int height);
 
 protected:
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
-	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent);
+	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
 	virtual void drawForeground(QPainter *painter, const QRectF &rect);
 
 private:

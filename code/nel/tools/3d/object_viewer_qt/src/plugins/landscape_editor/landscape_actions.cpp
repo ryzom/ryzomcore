@@ -114,7 +114,6 @@ void UndoScanRegionCommand::undo()
 {
 	for (int i = 0; i < m_zonePositionList.size(); ++i)
 		m_scene->deleteItemZone(m_zonePositionList.at(i));
-	nlinfo("------");
 	for (int i = 0; i < m_zonePositionList.size(); ++i)
 	{
 		LigoData data;
@@ -152,7 +151,6 @@ void RedoScanRegionCommand::redo()
 {
 	for (int i = 0; i < m_zonePositionList.size(); ++i)
 		m_scene->deleteItemZone(m_zonePositionList.at(i));
-	nlinfo("------");
 	for (int i = 0; i < m_zonePositionList.size(); ++i)
 	{
 		LigoData data;
@@ -174,7 +172,7 @@ LigoResizeCommand::LigoResizeCommand(int index, sint32 newMinX, sint32 newMaxX,
 	m_newMaxY = newMaxY;
 
 	// Backup old region zone
-	m_oldZoneRegion = m_zoneBuilder->zoneRegion(m_index)->zoneRegion();
+	m_oldZoneRegion = m_zoneBuilder->zoneRegion(m_index)->ligoZoneRegion();
 }
 
 LigoResizeCommand::~LigoResizeCommand()
@@ -184,13 +182,13 @@ LigoResizeCommand::~LigoResizeCommand()
 void LigoResizeCommand::undo ()
 {
 	// Restore old region zone
-	m_zoneBuilder->zoneRegion(m_index)->setZoneRegion(m_oldZoneRegion);
+	m_zoneBuilder->zoneRegion(m_index)->setLigoZoneRegion(m_oldZoneRegion);
 }
 
 void LigoResizeCommand::redo ()
 {
 	// Get the zone region
-	NLLIGO::CZoneRegion &region = m_zoneBuilder->zoneRegion(m_index)->zoneRegion();
+	NLLIGO::CZoneRegion &region = m_zoneBuilder->zoneRegion(m_index)->ligoZoneRegion();
 
 	sint32 i, j;
 	std::vector<LigoData> newZones;
