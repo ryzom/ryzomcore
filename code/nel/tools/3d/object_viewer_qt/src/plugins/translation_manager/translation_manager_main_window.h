@@ -38,9 +38,11 @@
 #include <QtGui/QMenu>
 #include <QtGui/QMdiSubWindow>
 #include <QtCore/QSignalMapper>
+#include <QtGui/QDialog>
 
 
 #include "translation_manager_editor.h"
+#include "source_selection.h"
 #include "ui_translation_manager_main_window.h"
 #include <set>
 
@@ -86,7 +88,7 @@ private Q_SLOTS:
         void activeSubWindowChanged();
         void setActiveSubWindow(QWidget *window);
         void updateWindowsList();  
-       
+        void mergeSingleFile();
         void debug(QString text); // TODO
 private:
         void openWorkFile(QString file);

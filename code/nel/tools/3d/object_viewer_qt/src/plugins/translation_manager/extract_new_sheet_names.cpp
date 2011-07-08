@@ -141,7 +141,6 @@ bool	CRegionPrimWordListBuilder::buildWordList(std::vector<string> &allWords, st
 						// avoid duplicate
 						if(allWordSet.insert(primName).second)
 						{
-                                                    nlinfo(primName.c_str()); //TODO: delete
 							allWords.push_back(primName);
 						}
 					}

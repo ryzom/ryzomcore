@@ -50,6 +50,7 @@ public:
     void saveAs(QString filename);
     void activateWindow();
     void mergeWorksheetFile(QString filename);
+    bool compareWorksheetFile(QString filename);
     void extractBotNames(list<string> filters, string level_design_path, NLLIGO::CLigoConfig ligoConfig);
     void extractWords(QString filename, QString columnId, IWordListBuilder &wordListBuilder);
     bool isBotNamesTable();

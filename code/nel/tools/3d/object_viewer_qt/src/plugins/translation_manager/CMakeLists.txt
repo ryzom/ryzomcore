@@ -13,15 +13,20 @@ SET(OVQT_PLUG_TRANSLATION_MANAGER_HDR 	translation_manager_plugin.h
 							translation_manager_main_window.h
 							translation_manager_settings_page.h
                                                                                                        translation_manager_editor.h
+                                                                                                       source_selection.h
+                                                                                                       ftp_selection.h
                                                                                                        editor_worksheet.h
                                                                                                        extract_new_sheet_names.h
                                                                                                        extract_bot_names.h)
 
 SET(OVQT_PLUG_TRANSLATION_MANAGER_UIS	translation_manager_settings_page.ui
-                                                        translation_manager_main_window.ui)
+                                                        translation_manager_main_window.ui
+                                                        source_selection.ui
+                                                        ftp_selection.ui)
 
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
+SET(QT_USE_QTNETWORK TRUE)
 
 QT4_WRAP_CPP(OVQT_PLUG_TRANSLATION_MANAGER_MOC_SRC ${OVQT_PLUG_TRANSLATION_MANAGER_HDR})
 QT4_WRAP_UI(OVQT_PLUG_TRANSLATION_MANAGER_UI_HDRS ${OVQT_PLUG_TRANSLATION_MANAGER_UIS})
@@ -34,7 +39,7 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(ovqt_plugin_translation_manager MODULE ${SRC} ${OVQT_PLUG_TRANSLATION_MANAGER_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_TRANSLATION_MANAGER_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(ovqt_plugin_translation_manager ovqt_plugin_core nelmisc nel3d nelligo nelgeorges ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
+TARGET_LINK_LIBRARIES(ovqt_plugin_translation_manager ovqt_plugin_core nelmisc nel3d nelligo nelgeorges ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY} ${QT_QTNETWORK_LIBRARY} )
 
 NL_DEFAULT_PROPS(ovqt_plugin_translation_manager "NeL, Tools, 3D: Object Viewer Qt Plugin: Translation Manager")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_translation_manager)

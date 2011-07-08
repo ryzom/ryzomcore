@@ -139,14 +139,14 @@ void CEditorWorksheet::save()
                        colname = wk_file.getData(0, j + colIdx);
                        
                        rowIdf = uint(i + 1);
-                       if(wk_file.findRow(j + colIdx, colname, rowIdf))
+                       if(wk_file.findRow(j + colIdx, colname, rowIdf)) // search for the row
                        {
-                           if(wk_file.getData(i + 1, j + colIdx) != tvalue)
+                           if(wk_file.getData(i + 1, j + colIdx) != tvalue) // verify the current value
                            {
-                                wk_file.setData(i + 1, j + colIdx,  tvalue);
+                                wk_file.setData(i + 1, j + colIdx,  tvalue); // change the value
                            }
                        } else {
-                           wk_file.setData(i + 1, j + colIdx,  tvalue);
+                           wk_file.setData(i + 1, j + colIdx,  tvalue); // insert the value
                        }
                    }
                }
@@ -382,67 +382,74 @@ void CEditorWorksheet::extractWords(QString filename, QString columnId, IWordLis
        }
 }
 
+bool CEditorWorksheet::compareWorksheetFile(QString filename)
+{
+    STRING_MANAGER::TWorksheet wk_file; 
+    int colIndex = 0;
+    if(loadExcelSheet(filename.toStdString(), wk_file, true) == true)
+    {
+                 if(wk_file.getData(0, 0) == ucstring("*HASH_VALUE"))
+                 {
+                      colIndex = 1;
+                 }   
+                 if(wk_file.ColCount - colIndex != table_editor->columnCount())
+                 {
+                        return false;
+                 }
+                 for(int i = 0; i < table_editor->columnCount(); i++)
+                 {
+                     QString item = table_editor->horizontalHeaderItem(i)->text();
+                     ucstring itemC = wk_file.getData(0, i+ colIndex);
+                     if(item.toStdString() != itemC.toString())
+                     {
+                         nlwarning(item.toStdString().c_str());
+                         nlwarning(itemC.toString().c_str());
+                         return false;
+                     }
+                 }               
+    } else {
+        return false;
+    }
+    
+    return true;
+}
+
 void CEditorWorksheet::mergeWorksheetFile(QString filename)
 {
              STRING_MANAGER::TWorksheet wk_file;          
              if(loadExcelSheet(filename.toStdString(), wk_file, true) == true)
              {
-                 bool hasHashValue = false;  
+                 bool hasHashValue = false;
+                 int colIndex = 0;
                  if(wk_file.getData(0, 0) == ucstring("*HASH_VALUE"))
                  {
-                      table_editor->setColumnCount(wk_file.ColCount - 1);
                       hasHashValue = true;
-                 } else {
-                      table_editor->setColumnCount(wk_file.ColCount);                   
-                 }
-                 table_editor->setRowCount(wk_file.size() - 1);
-                 
-                 // read columns name                
-                 for(unsigned int i = 0; i < wk_file.ColCount; i++)
-                 {
-                     if(hasHashValue && i == 0)
-                     {
-                            // we don't show the column with hash value
-                     } else {
-                        QTableWidgetItem *col = new QTableWidgetItem();
-                        ucstring col_name = wk_file.getData(0, i);
-                        col->setText(tr(col_name.toString().c_str()));
-                        if(hasHashValue)
-                        {
-                                table_editor->setHorizontalHeaderItem(i - 1, col);                        
-                        } else {
-                                table_editor->setHorizontalHeaderItem(i, col);
-                        }
-                     }
-                 }
-                 
+                      colIndex = 1;
+                 }           
                  // read rows
                  for(unsigned int i = 1; i < wk_file.size(); i++)
                  {
-                     for(unsigned int j = 0; j < wk_file.ColCount; j++)
+                     // search with the first column
+                     ucstring rowId = wk_file.getData(i,colIndex);
+                     QList<QTableWidgetItem*> search_results = table_editor->findItems(tr(rowId.toString().c_str()), Qt::MatchExactly);
+                     if(search_results.size() == 0)
                      {
-                        if(hasHashValue && j == 0)
-                        {
-                            // we don't show the column with hash value
-                        } else {
-                            QTableWidgetItem *row = new QTableWidgetItem();
-                            ucstring row_value = wk_file.getData(i, j);
-                            row->setText(tr(row_value.toString().c_str()));
-                            if(hasHashValue)
-                            {
-                                table_editor->setItem(i - 1, j - 1, row);    
-                            } else {
-                                table_editor->setItem(i - 1, j, row); 
-                            }
-                        }
-                    }
-                }
-             } else {
-                QErrorMessage error;
-                error.showMessage("This file is not a worksheet file.");
-                error.exec();                             
-             }
-        
+                         const int lastRow = table_editor->rowCount();
+                         table_editor->setRowCount(lastRow + 1);
+                         for(unsigned int j = 0; j < table_editor->columnCount(); j++)
+                         {
+                             ucstring rowValue = wk_file.getData(i, j + colIndex); // get the value
+                             QTableWidgetItem *row = new QTableWidgetItem();
+                             row->setText(QString(rowValue.toString().c_str())); // set the value in table item
+                             table_editor->setItem(lastRow, j, row);
+                         }
+                     }
+                   }
+                 } else {
+                        QErrorMessage error;
+                        error.showMessage("This file is not a worksheet file.");
+                        error.exec();                             
+                 }
 }
 
 void CEditorWorksheet::setCurrentFile(QString filename)
@@ -514,11 +521,7 @@ bool CEditorWorksheet::isSheetTable(QString type)
         column_name = "sphrase ID";   
     } else if(type.toAscii() == Constants::WK_PLACE) {
         column_name = "placeId";
-    } else if(type.toAscii() == Constants::WK_CONTINENT) {
-        column_name = "placeId";
-    } else if(type.toAscii() == Constants::WK_STABLE) {
-        column_name = "placeId";
-     }
+    }
    bool status = true;
    if(table_editor->horizontalHeaderItem(0)->text() != column_name
            || table_editor->horizontalHeaderItem(1)->text() != "name")

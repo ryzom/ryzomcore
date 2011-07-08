@@ -18,6 +18,7 @@
 #include "translation_manager_main_window.h"
 #include "translation_manager_constants.h"
 #include "editor_worksheet.h"
+#include "ftp_selection.h"
 
 // Project system includes
 #include "../core/icore.h"
@@ -114,20 +115,15 @@ void CMainWindow::createToolbar()
         connect(extractSphraseWordsAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
         wordsExtractionMapper->setMapping(extractSphraseWordsAct, tr(Constants::WK_SPHRASE));   
         // extract place and region names
-        QAction *extractPlaceNamesAct = wordsExtractionMenu->addAction("&Extract place and region names...");
-        extractPlaceNamesAct->setStatusTip(tr("Extract place and region names"));
+        QAction *extractPlaceNamesAct = wordsExtractionMenu->addAction("&Extract place names...");
+        extractPlaceNamesAct->setStatusTip(tr("Extract place names from primitives"));
         connect(extractPlaceNamesAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
         wordsExtractionMapper->setMapping(extractPlaceNamesAct, tr(Constants::WK_PLACE));   
-        // extract continent names
-        QAction *extractContinentNamesAct = wordsExtractionMenu->addAction("&Extract continent names...");
-        extractContinentNamesAct->setStatusTip(tr("Extract continent names"));
-        connect(extractContinentNamesAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
-        wordsExtractionMapper->setMapping(extractContinentNamesAct, tr(Constants::WK_CONTINENT));  
-        // extract stable names
-        QAction *extractStableNamesAct = wordsExtractionMenu->addAction("&Extract stable names...");
-        extractStableNamesAct->setStatusTip(tr("Extract stable names"));
-        connect(extractStableNamesAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
-        wordsExtractionMapper->setMapping(extractStableNamesAct, tr(Constants::WK_STABLE)); 
+        // Merge options
+        // -----------------------------
+        QAction *mergeSingleFileAct = wordsExtractionMenu->addAction("&Merge worksheet file...");
+        mergeSingleFileAct->setStatusTip(tr("Merge worksheet file from local or remote directory"));
+        connect(mergeSingleFileAct, SIGNAL(triggered()), this, SLOT(mergeSingleFile()));
         // Windows menu
         windowMenu = new QMenu(tr("&Windows..."), _ui.toolBar);
         windowMenu->setIcon(QIcon(Core::Constants::ICON_PILL));     
@@ -375,16 +371,6 @@ void CMainWindow::extractWords(QString typeq)
                 builderP.PrimFilter.push_back("region_*.primitive");
                 builderP.PrimFilter.push_back("indoors_*.primitive");
                 isSheet = false;
-            } else if(typeq.toAscii() == Constants::WK_CONTINENT) {
-                column_name = "placeId";
-                builderP.PrimPath = primitives_path;
-                builderP.PrimFilter.push_back("continent_*.primitive");
-                isSheet = false;                
-            } else if(typeq.toAscii() == Constants::WK_STABLE) {
-                column_name = "placeId";
-                builderP.PrimPath = primitives_path;
-                builderP.PrimFilter.push_back("stable_*.primitive");
-                isSheet = false;                
             }
      
             if(isSheet)
@@ -452,6 +438,58 @@ void CMainWindow::extractBotNames()
             initializeSettings(true);
             current_window->extractBotNames(filters, level_design_path, ligoConfig);  
         }    
+}
+
+void CMainWindow::mergeSingleFile()
+{
+    CEditor* editor_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow());
+    CSourceDialog *dialog = new CSourceDialog(this);
+    map<QListWidgetItem*, int> methods;
+    // create items
+    QListWidgetItem* local_item = new QListWidgetItem();
+    local_item->setText("Local directory");
+    methods[local_item] = 0;
+    QListWidgetItem* ftp_item = new QListWidgetItem();
+    ftp_item->setText("From a FTP server");
+    methods[ftp_item] = 1;
+    
+    dialog->setSourceOptions(methods);
+    dialog->show();
+    dialog->exec();
+    if(dialog->selected_item == local_item) // Local directory
+    {
+        QString file_name;
+        if (_ui.mdiArea->subWindowList().size() > 0)
+        {
+            file_name = QFileDialog::getOpenFileName(this);
+        } else {
+            return;
+        }    
+        
+        if(QString(editor_window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
+        {
+            editor_window->activateWindow();
+            CEditorWorksheet* current_window = qobject_cast<CEditorWorksheet*>(editor_window);
+            if(current_window->windowFilePath() == file_name)
+                return;
+            if(current_window->compareWorksheetFile(file_name))
+            {
+                current_window->mergeWorksheetFile(file_name);
+            } else  {
+                QErrorMessage error;
+                error.showMessage(QString("The file: %1 has different columns from the current file in editor.").arg(file_name));
+                error.exec();                
+            }
+        }
+    } else if(dialog->selected_item == ftp_item)   { // Ftp directory
+        CFtpSelection* ftp_dialog = new CFtpSelection(this);
+        ftp_dialog->show();
+        ftp_dialog->exec();
+    } else {
+        return;
+    }
+        
+       
 }
 
 void CMainWindow::readSettings()
