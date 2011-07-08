@@ -1390,7 +1390,7 @@ void CInterfaceManager::runActionHandler (const string &ahCmdLine, CCtrlBase *pC
 	if(!ahUserParams.empty())
 		ahParams= ahUserParams;
 
-	// Execute the action hanlder
+	// Execute the action handler
 	CActionHandlerFactoryManager *pAHFM = CActionHandlerFactoryManager::getInstance();
 	map<string, IActionHandler*>::iterator it = pAHFM->FactoryMap.find (ahName);
 	if (it == pAHFM->FactoryMap.end())

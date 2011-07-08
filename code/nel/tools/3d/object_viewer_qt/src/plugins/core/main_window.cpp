@@ -30,6 +30,7 @@
 
 // Qt includes
 #include <QtCore/QCoreApplication>
+#include <QtGui/QUndoView>
 #include <QtGui/QtGui>
 
 namespace Core
@@ -382,8 +383,13 @@ void MainWindow::createMenus()
 	m_fileMenu->addAction(m_exitAction);
 
 	m_editMenu = m_menuBar->addMenu(tr("&Edit"));
-	m_editMenu->addAction(m_undoGroup->createUndoAction(this));
-	m_editMenu->addAction(m_undoGroup->createRedoAction(this));
+	QAction *undoAction = m_undoGroup->createUndoAction(this);
+	undoAction->setShortcut(QKeySequence::Undo);
+	QAction *redoAction = m_undoGroup->createRedoAction(this);
+	redoAction->setShortcut(QKeySequence::Redo);
+	m_editMenu->addAction(undoAction);
+	m_editMenu->addAction(redoAction);
+
 	m_editMenu->addSeparator();
 	m_editMenu->addAction(m_cutAction);
 	m_editMenu->addAction(m_copyAction);
@@ -398,6 +404,7 @@ void MainWindow::createMenus()
 
 	m_viewMenu = m_menuBar->addMenu(tr("&View"));
 	m_viewMenu->addAction(m_fullscreenAction);
+	m_viewMenu->addAction(m_dockWidget->toggleViewAction());
 	menuManager()->registerMenu(m_viewMenu, Constants::M_VIEW);
 
 	m_toolsMenu = m_menuBar->addMenu(tr("&Tools"));
@@ -427,6 +434,13 @@ void MainWindow::createStatusBar()
 void MainWindow::createDialogs()
 {
 	m_pluginView = new ExtensionSystem::CPluginView(m_pluginManager, this);
+
+	// Create undo/redo command list
+	m_dockWidget = new QDockWidget("Command List", this);
+	m_dockWidget->setObjectName(QString::fromUtf8("UndoRedoCommandDockWidget"));
+	QUndoView *undoView = new QUndoView(m_undoGroup, m_dockWidget);
+	m_dockWidget->setWidget(undoView);
+	addDockWidget(Qt::RightDockWidgetArea, m_dockWidget);
 }
 
 void MainWindow::readSettings()
