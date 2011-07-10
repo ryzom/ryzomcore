@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/">
+    <file>icons/ic_nel_world_editor.png</file>
+  </qresource>
+</RCC>

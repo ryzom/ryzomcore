@@ -1,0 +1,119 @@
+// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
+// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+// Project includes
+#include "world_editor_window.h"
+#include "world_editor_constants.h"
+
+#include "../core/icore.h"
+#include "../core/imenu_manager.h"
+#include "../core/core_constants.h"
+
+// Qt includes
+#include <QtCore/QSettings>
+
+namespace WorldEditor
+{
+QString _lastDir;
+
+WorldEditorWindow::WorldEditorWindow(QWidget *parent)
+	: QMainWindow(parent),
+	  m_undoStack(0)
+{
+	m_ui.setupUi(this);
+	m_undoStack = new QUndoStack(this);
+
+	createMenus();
+	createToolBars();
+//	readSettings();
+}
+
+WorldEditorWindow::~WorldEditorWindow()
+{
+//	writeSettings();
+}
+
+QUndoStack *WorldEditorWindow::undoStack() const
+{
+	return m_undoStack;
+}
+
+void WorldEditorWindow::open()
+{
+	/*	QStringList fileNames = QFileDialog::getOpenFileNames(this,
+								tr("Open NeL Ligo land file"), _lastDir,
+								tr("All NeL Ligo land files (*.land)"));
+
+		setCursor(Qt::WaitCursor);
+		if (!fileNames.isEmpty())
+		{
+			QStringList list = fileNames;
+			_lastDir = QFileInfo(list.front()).absolutePath();
+			Q_FOREACH(QString fileName, fileNames)
+			{
+			}
+		}
+		setCursor(Qt::ArrowCursor);*/
+}
+
+void WorldEditorWindow::createMenus()
+{
+	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
+}
+
+void WorldEditorWindow::createToolBars()
+{
+	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
+	//QAction *action = menuManager->action(Core::Constants::NEW);
+	//m_ui.fileToolBar->addAction(action);
+	QAction *action = menuManager->action(Core::Constants::OPEN);
+	m_ui.fileToolBar->addAction(action);
+
+	action = menuManager->action(Core::Constants::UNDO);
+	if (action != 0)
+		m_ui.undoToolBar->addAction(action);
+
+	action = menuManager->action(Core::Constants::REDO);
+	if (action != 0)
+		m_ui.undoToolBar->addAction(action);
+
+	//action = menuManager->action(Core::Constants::SAVE);
+	//m_ui.fileToolBar->addAction(action);
+	//action = menuManager->action(Core::Constants::SAVE_AS);
+	//m_ui.fileToolBar->addAction(action);
+}
+
+void WorldEditorWindow::readSettings()
+{
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::WORLD_EDITOR_SECTION);
+	restoreState(settings->value(Constants::WORLD_WINDOW_STATE).toByteArray());
+	restoreGeometry(settings->value(Constants::WORLD_WINDOW_GEOMETRY).toByteArray());
+	settings->endGroup();
+}
+
+void WorldEditorWindow::writeSettings()
+{
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::WORLD_EDITOR_SECTION);
+	settings->setValue(Constants::WORLD_WINDOW_STATE, saveState());
+	settings->setValue(Constants::WORLD_WINDOW_GEOMETRY, saveGeometry());
+	settings->endGroup();
+	settings->sync();
+}
+
+} /* namespace LandscapeEditor */
