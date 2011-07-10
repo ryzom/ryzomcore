@@ -69,7 +69,7 @@ private:
 	void saveLandscape(int row, bool force);
 	int createLandscape(const QString &fileName);
 
-	int m_currentRow;
+	QListWidgetItem *m_currentItem;
 	LandscapeScene *m_landscapeScene;
 	ZoneBuilder *m_zoneBuilder;
 	QUndoStack *m_undoStack;

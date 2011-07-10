@@ -85,7 +85,6 @@ public:
 	bool init(const QString &pathName, bool bMakeAZone);
 
 	void calcMask();
-	void newZone();
 	bool getZoneMask (sint32 x, sint32 y);
 	bool getZoneAmongRegions(ZonePosition &zonePos, BuilderZoneRegion *builderZoneRegionFrom, sint32 x, sint32 y);
 
@@ -150,7 +149,8 @@ private:
 	QString m_lastPathName;
 
 	int m_currentZoneRegion;
-	std::vector<LandscapeItem> m_landscapeItems;
+	//std::vector<LandscapeItem> m_landscapeItems;
+	QMap<int, LandscapeItem> m_landscapeMap;
 
 	bool m_createdAction;
 	QString m_titleAction;

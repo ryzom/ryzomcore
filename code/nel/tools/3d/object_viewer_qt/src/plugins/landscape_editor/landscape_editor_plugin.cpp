@@ -75,7 +75,7 @@ QString LandscapeEditorPlugin::name() const
 
 QString LandscapeEditorPlugin::version() const
 {
-	return "0.0.1";
+	return "0.1";
 }
 
 QString LandscapeEditorPlugin::vendor() const

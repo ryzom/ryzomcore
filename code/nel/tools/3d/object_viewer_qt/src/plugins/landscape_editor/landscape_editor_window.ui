@@ -38,6 +38,18 @@
       <property name="dragMode">
        <enum>QGraphicsView::NoDrag</enum>
       </property>
+      <property name="transformationAnchor">
+       <enum>QGraphicsView::AnchorUnderMouse</enum>
+      </property>
+      <property name="resizeAnchor">
+       <enum>QGraphicsView::AnchorUnderMouse</enum>
+      </property>
+      <property name="viewportUpdateMode">
+       <enum>QGraphicsView::FullViewportUpdate</enum>
+      </property>
+      <property name="optimizationFlags">
+       <set>QGraphicsView::DontSavePainterState</set>
+      </property>
      </widget>
     </item>
    </layout>

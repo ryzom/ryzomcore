@@ -62,6 +62,7 @@ public:
 protected:
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
 	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
+	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
 	virtual void drawForeground(QPainter *painter, const QRectF &rect);
 
 private:
@@ -69,6 +70,8 @@ private:
 
 	int m_cellSize;
 	qreal m_mouseX, m_mouseY;
+	sint32 m_posX, m_posY;
+	Qt::MouseButton m_mouseButton;
 	ZoneBuilder *m_zoneBuilder;
 };
 

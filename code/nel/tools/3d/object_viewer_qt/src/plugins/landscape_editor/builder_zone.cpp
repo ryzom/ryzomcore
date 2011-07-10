@@ -26,11 +26,11 @@
 // Qt includes
 #include <QtCore/QDir>
 #include <QtGui/QMessageBox>
-#include <QtGui/QApplication>
 #include <QtGui/QProgressDialog>
 
 namespace LandscapeEditor
 {
+int LandCounter = 0;
 
 ZoneBuilder::ZoneBuilder(LandscapeScene *landscapeScene, ListZonesWidget *listZonesWidget, QUndoStack *undoStack)
 	: m_currentZoneRegion(-1),
@@ -117,7 +117,7 @@ void ZoneBuilder::addZone(sint32 posX, sint32 posY)
 	if ((m_listZonesWidget == 0) || (m_undoStack == 0))
 		return;
 
-	if (m_landscapeItems.empty())
+	if (m_landscapeMap.empty())
 		return;
 
 	// Check zone name
@@ -125,7 +125,7 @@ void ZoneBuilder::addZone(sint32 posX, sint32 posY)
 	if (zoneName.empty())
 		return;
 
-	BuilderZoneRegion *builderZoneRegion = m_landscapeItems.at(m_currentZoneRegion).builderZoneRegion;
+	BuilderZoneRegion *builderZoneRegion = m_landscapeMap.value(m_currentZoneRegion).builderZoneRegion;
 	builderZoneRegion->init(this);
 
 	uint8 rot = uint8(m_listZonesWidget->currentRot());
@@ -161,13 +161,13 @@ void ZoneBuilder::delZone(const sint32 posX, const sint32 posY)
 	if ((m_listZonesWidget == 0) || (m_undoStack == 0))
 		return;
 
-	if (m_landscapeItems.empty())
+	if (m_landscapeMap.empty())
 		return;
 
 	m_titleAction = QString("Del zone %1,%2").arg(posX).arg(posY);
 	m_createdAction = false;
 
-	BuilderZoneRegion *builderZoneRegion = m_landscapeItems.at(m_currentZoneRegion).builderZoneRegion;
+	BuilderZoneRegion *builderZoneRegion = m_landscapeMap.value(m_currentZoneRegion).builderZoneRegion;
 
 	builderZoneRegion->init(this);
 	builderZoneRegion->del(posX, posY);
@@ -176,24 +176,22 @@ void ZoneBuilder::delZone(const sint32 posX, const sint32 posY)
 
 int ZoneBuilder::createZoneRegion()
 {
-	int newId = m_landscapeItems.size();
 	LandscapeItem landItem;
 	landItem.zoneRegionObject = new ZoneRegionObject();
-	landItem.builderZoneRegion = new BuilderZoneRegion(newId);
+	landItem.builderZoneRegion = new BuilderZoneRegion(LandCounter);
 	landItem.builderZoneRegion->init(this);
-	landItem.rectItem = 0;
+	landItem.rectItem = m_landscapeScene->createLayerBlackout(landItem.zoneRegionObject->ligoZoneRegion());
 
-	newZone();
-	m_landscapeItems.push_back(landItem);
+	m_landscapeMap.insert(LandCounter, landItem);
 	if (m_currentZoneRegion == -1)
-		setCurrentZoneRegion(newId);
+		setCurrentZoneRegion(LandCounter);
 
-	return newId;
+	calcMask();
+	return LandCounter++;
 }
 
 int ZoneBuilder::createZoneRegion(const QString &fileName)
 {
-	int newId = m_landscapeItems.size();
 	LandscapeItem landItem;
 	landItem.zoneRegionObject = new ZoneRegionObject();
 	landItem.zoneRegionObject->load(fileName.toStdString());
@@ -203,48 +201,52 @@ int ZoneBuilder::createZoneRegion(const QString &fileName)
 		delete landItem.zoneRegionObject;
 		return -1;
 	}
-	landItem.builderZoneRegion = new BuilderZoneRegion(newId);
+	landItem.builderZoneRegion = new BuilderZoneRegion(LandCounter);
 	landItem.builderZoneRegion->init(this);
 
-	newZone();
-	m_landscapeItems.push_back(landItem);
-
 	m_landscapeScene->addZoneRegion(landItem.zoneRegionObject->ligoZoneRegion());
-	m_landscapeItems.at(newId).rectItem = m_landscapeScene->createLayerBlackout(landItem.zoneRegionObject->ligoZoneRegion());
+	landItem.rectItem = m_landscapeScene->createLayerBlackout(landItem.zoneRegionObject->ligoZoneRegion());
+	m_landscapeMap.insert(LandCounter, landItem);
 
 	if (m_currentZoneRegion == -1)
-		setCurrentZoneRegion(newId);
+		setCurrentZoneRegion(LandCounter);
 
-	return newId;
+	calcMask();
+	return LandCounter++;
 }
 
 void ZoneBuilder::deleteZoneRegion(int id)
 {
-	if ((0 <= id) && (id < int(m_landscapeItems.size())))
+	if (m_landscapeMap.contains(id))
 	{
-		if (m_landscapeItems.at(id).rectItem != 0)
-			delete m_landscapeItems.at(id).rectItem;
-		m_landscapeScene->delZoneRegion(m_landscapeItems.at(id).zoneRegionObject->ligoZoneRegion());
-		delete m_landscapeItems.at(id).zoneRegionObject;
-		delete m_landscapeItems.at(id).builderZoneRegion;
-		m_landscapeItems.erase(m_landscapeItems.begin() + id);
+		if (m_landscapeMap.value(id).rectItem != 0)
+			delete m_landscapeMap.value(id).rectItem;
+		m_landscapeScene->delZoneRegion(m_landscapeMap.value(id).zoneRegionObject->ligoZoneRegion());
+		delete m_landscapeMap.value(id).zoneRegionObject;
+		delete m_landscapeMap.value(id).builderZoneRegion;
+		m_landscapeMap.remove(id);
 		calcMask();
 	}
+	else
+		nlwarning("Landscape (id %i) not found", id);
 }
 
 void ZoneBuilder::setCurrentZoneRegion(int id)
 {
-	if ((0 <= id) && (id < int(m_landscapeItems.size())))
+	if (m_landscapeMap.contains(id))
 	{
 		if (currentIdZoneRegion() != -1)
 		{
-			NLLIGO::CZoneRegion &ligoRegion = m_landscapeItems.at(m_currentZoneRegion).zoneRegionObject->ligoZoneRegion();
-			m_landscapeItems.at(m_currentZoneRegion).rectItem = m_landscapeScene->createLayerBlackout(ligoRegion);
+			NLLIGO::CZoneRegion &ligoRegion = m_landscapeMap.value(m_currentZoneRegion).zoneRegionObject->ligoZoneRegion();
+			m_landscapeMap[m_currentZoneRegion].rectItem = m_landscapeScene->createLayerBlackout(ligoRegion);
 		}
-		delete m_landscapeItems.at(id).rectItem;
-		m_landscapeItems.at(id).rectItem = 0;
+		delete m_landscapeMap.value(id).rectItem;
+		m_landscapeMap[id].rectItem = 0;
 		m_currentZoneRegion = id;
+		calcMask();
 	}
+	else
+		nlwarning("Landscape (id %i) not found", id);
 }
 
 int ZoneBuilder::currentIdZoneRegion() const
@@ -254,27 +256,27 @@ int ZoneBuilder::currentIdZoneRegion() const
 
 ZoneRegionObject *ZoneBuilder::currentZoneRegion() const
 {
-	return m_landscapeItems.at(m_currentZoneRegion).zoneRegionObject;
+	return m_landscapeMap.value(m_currentZoneRegion).zoneRegionObject;
 }
 
 int ZoneBuilder::countZoneRegion() const
 {
-	return m_landscapeItems.size();
+	return m_landscapeMap.size();
 }
 
 ZoneRegionObject *ZoneBuilder::zoneRegion(int id) const
 {
-	return m_landscapeItems.at(id).zoneRegionObject;
+	return m_landscapeMap.value(id).zoneRegionObject;
 }
 
 void ZoneBuilder::ligoData(LigoData &data, const ZonePosition &zonePos)
 {
-	m_landscapeItems.at(zonePos.region).zoneRegionObject->ligoData(data, zonePos.x, zonePos.y);
+	m_landscapeMap.value(zonePos.region).zoneRegionObject->ligoData(data, zonePos.x, zonePos.y);
 }
 
 void ZoneBuilder::setLigoData(LigoData &data, const ZonePosition &zonePos)
 {
-	m_landscapeItems.at(zonePos.region).zoneRegionObject->setLigoData(data, zonePos.x, zonePos.y);
+	m_landscapeMap.value(zonePos.region).zoneRegionObject->setLigoData(data, zonePos.x, zonePos.y);
 }
 
 bool ZoneBuilder::initZoneBank (const QString &pathName)
@@ -307,25 +309,6 @@ QString ZoneBuilder::dataPath() const
 	return m_lastPathName;
 }
 
-void ZoneBuilder::newZone()
-{
-	// Select starting point for the moment 0,0
-	sint32 x = 0, y = 0;
-
-	// If there are some zone already present increase x until free
-	for (size_t i = 0; i < m_landscapeItems.size(); ++i)
-	{
-		const NLLIGO::CZoneRegion &zoneRegion = m_landscapeItems.at(i).zoneRegionObject->ligoZoneRegion();
-		const std::string &zoneName = zoneRegion.getName (x, y);
-		if ((zoneName != STRING_OUT_OF_BOUND) && (zoneName != STRING_UNUSED))
-		{
-			++x;
-			i = -1;
-		}
-	}
-	calcMask();
-}
-
 bool ZoneBuilder::getZoneMask(sint32 x, sint32 y)
 {
 	if ((x < m_minX) || (x > m_maxX) ||
@@ -346,12 +329,14 @@ void ZoneBuilder::calcMask()
 	m_minY = m_minX = 1000000;
 	m_maxY = m_maxX = -1000000;
 
-	if (m_landscapeItems.size() == 0)
+	if (m_landscapeMap.size() == 0)
 		return;
 
-	for (size_t i = 0; i < m_landscapeItems.size(); ++i)
+	QMapIterator<int, LandscapeItem> i(m_landscapeMap);
+	while (i.hasNext())
 	{
-		const NLLIGO::CZoneRegion &region = m_landscapeItems.at(i).zoneRegionObject->ligoZoneRegion();
+		i.next();
+		const NLLIGO::CZoneRegion &region = i.value().zoneRegionObject->ligoZoneRegion();
 
 		if (m_minX > region.getMinX())
 			m_minX = region.getMinX();
@@ -370,10 +355,13 @@ void ZoneBuilder::calcMask()
 		{
 			m_zoneMask[x - m_minX + (y - m_minY) * stride] = true;
 
-			for (size_t i = 0; i < m_landscapeItems.size(); ++i)
-				if (int(i) != m_currentZoneRegion)
+			QMapIterator<int, LandscapeItem> it(m_landscapeMap);
+			while (it.hasNext())
+			{
+				it.next();
+				if (int(it.key()) != m_currentZoneRegion)
 				{
-					const NLLIGO::CZoneRegion &region = zoneRegion(i)->ligoZoneRegion();
+					const NLLIGO::CZoneRegion &region = it.value().zoneRegionObject->ligoZoneRegion();
 
 					const std::string &rSZone = region.getName (x, y);
 					if ((rSZone != STRING_OUT_OF_BOUND) && (rSZone != STRING_UNUSED))
@@ -381,21 +369,24 @@ void ZoneBuilder::calcMask()
 						m_zoneMask[x - m_minX + (y - m_minY) * stride] = false;
 					}
 				}
+			}
 		}
 }
 
 bool ZoneBuilder::getZoneAmongRegions(ZonePosition &zonePos, BuilderZoneRegion *builderZoneRegionFrom, sint32 x, sint32 y)
 {
-	for (size_t i = 0; i < m_landscapeItems.size(); ++i)
+	QMapIterator<int, LandscapeItem> it(m_landscapeMap);
+	while (it.hasNext())
 	{
-		const NLLIGO::CZoneRegion &region = m_landscapeItems.at(i).zoneRegionObject->ligoZoneRegion();
+		it.next();
+		const NLLIGO::CZoneRegion &region = it.value().zoneRegionObject->ligoZoneRegion();
 		if ((x < region.getMinX()) || (x > region.getMaxX()) ||
 				(y < region.getMinY()) || (y > region.getMaxY()))
 			continue;
 		if (region.getName(x, y) != STRING_UNUSED)
 		{
-			builderZoneRegionFrom = m_landscapeItems.at(i).builderZoneRegion;
-			zonePos = ZonePosition(x, y, i);
+			builderZoneRegionFrom = it.value().builderZoneRegion;
+			zonePos = ZonePosition(x, y, it.key());
 			return true;
 		}
 	}
@@ -435,9 +426,11 @@ void ZoneBuilder::checkEndMacro()
 
 bool ZoneBuilder::checkOverlaps(const NLLIGO::CZoneRegion &newZoneRegion)
 {
-	for (size_t j = 0; j < m_landscapeItems.size(); ++j)
+	QMapIterator<int, LandscapeItem> it(m_landscapeMap);
+	while (it.hasNext())
 	{
-		const NLLIGO::CZoneRegion &zoneRegion = m_landscapeItems.at(j).zoneRegionObject->ligoZoneRegion();
+		it.next();
+		const NLLIGO::CZoneRegion &zoneRegion = it.value().zoneRegionObject->ligoZoneRegion();
 		for (sint32 y = zoneRegion.getMinY(); y <= zoneRegion.getMaxY(); ++y)
 			for (sint32 x = zoneRegion.getMinX(); x <= zoneRegion.getMaxX(); ++x)
 			{

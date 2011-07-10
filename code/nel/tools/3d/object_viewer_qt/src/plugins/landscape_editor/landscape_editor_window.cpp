@@ -46,7 +46,7 @@ QString _lastDir;
 
 LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	: QMainWindow(parent),
-	  m_currentRow(-1),
+	  m_currentItem(0),
 	  m_landscapeScene(0),
 	  m_zoneBuilder(0),
 	  m_undoStack(0),
@@ -65,8 +65,7 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	m_landscapeScene->setZoneBuilder(m_zoneBuilder);
 	m_ui.graphicsView->setScene(m_landscapeScene);
 	//m_oglWidget = new QGLWidget(QGLFormat(QGL::DoubleBuffer));
-	m_oglWidget = new QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::SampleBuffers));
-	m_ui.graphicsView->setViewport(m_oglWidget);
+	//m_ui.graphicsView->setViewport(m_oglWidget);
 
 	m_ui.newLandAction->setIcon(QIcon(Core::Constants::ICON_NEW));
 	m_ui.saveAction->setIcon(QIcon(Core::Constants::ICON_SAVE));
@@ -128,7 +127,7 @@ void LandscapeEditorWindow::open()
 
 void LandscapeEditorWindow::save()
 {
-	saveLandscape(m_currentRow, true);
+	saveLandscape(m_ui.landscapesListWidget->row(m_currentItem), true);
 }
 
 void LandscapeEditorWindow::openProjectSettings()
@@ -203,7 +202,9 @@ void LandscapeEditorWindow::customContextMenu()
 
 void LandscapeEditorWindow::newLand()
 {
-	createLandscape(QString());
+	int row = createLandscape(QString());
+	if (row != -1)
+		setActiveLandscape(row);
 }
 
 void LandscapeEditorWindow::setActiveLand()
@@ -224,8 +225,9 @@ void LandscapeEditorWindow::saveAsSelectedLand()
 void LandscapeEditorWindow::deleteSelectedLand()
 {
 	int row = m_ui.landscapesListWidget->currentRow();
+	int current_row = m_ui.landscapesListWidget->row(m_currentItem);
 	QListWidgetItem *item = m_ui.landscapesListWidget->item(row);
-	if (row == m_currentRow)
+	if (row == current_row)
 	{
 		if (row == 0)
 			++row;
@@ -236,6 +238,7 @@ void LandscapeEditorWindow::deleteSelectedLand()
 	m_zoneBuilder->deleteZoneRegion(item->data(LANDSCAPE_ID).toInt());
 	m_ui.landscapesListWidget->removeItemWidget(item);
 	delete item;
+
 	if (m_ui.landscapesListWidget->count() == 1)
 		m_ui.deleteLandAction->setEnabled(false);
 }
@@ -276,15 +279,13 @@ void LandscapeEditorWindow::setActiveLandscape(int row)
 {
 	if ((0 <= row) && (row < m_ui.landscapesListWidget->count()))
 	{
-		if (m_currentRow != -1)
-		{
-			QListWidgetItem *item = m_ui.landscapesListWidget->item(m_currentRow);
-			item->setFont(QFont("SansSerif", 9, QFont::Normal));
-		}
+		if (m_currentItem != 0)
+			m_currentItem->setFont(QFont("SansSerif", 9, QFont::Normal));
+
 		QListWidgetItem *item = m_ui.landscapesListWidget->item(row);
 		item->setFont(QFont("SansSerif", 9, QFont::Bold));
 		m_zoneBuilder->setCurrentZoneRegion(item->data(LANDSCAPE_ID).toInt());
-		m_currentRow = row;
+		m_currentItem = item;
 	}
 }
 
@@ -337,16 +338,11 @@ void LandscapeEditorWindow::createToolBars()
 	m_ui.fileToolBar->addAction(action);
 	m_ui.fileToolBar->addAction(m_ui.saveAction);
 
-	const char * const UNDO = "ObjectViewerQt.Undo";
-	const char * const REDO = "ObjectViewerQt.Redo";
-
-	//action = menuManager->action(Core::Constants::UNDO);
-	action = menuManager->action(UNDO);
+	action = menuManager->action(Core::Constants::UNDO);
 	if (action != 0)
 		m_ui.undoToolBar->addAction(action);
 
-	//action = menuManager->action(Core::Constants::REDO);
-	action = menuManager->action(REDO);
+	action = menuManager->action(Core::Constants::REDO);
 	if (action != 0)
 		m_ui.undoToolBar->addAction(action);
 

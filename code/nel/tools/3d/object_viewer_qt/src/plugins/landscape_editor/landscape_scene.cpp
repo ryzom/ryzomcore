@@ -26,6 +26,7 @@
 #include <QtGui/QPainter>
 #include <QtGui/QGraphicsPixmapItem>
 #include <QtGui/QGraphicsSimpleTextItem>
+#include <QApplication>
 
 namespace LandscapeEditor
 {
@@ -34,11 +35,13 @@ static const int ZONE_NAME = 0;
 static const int LAYER_ZONES = 2;
 static const int LAYER_EMPTY_ZONES = 3;
 static const int LAYER_BLACKOUT = 4;
+const char * const LAYER_BLACKOUT_NAME = "blackout";
 
 LandscapeScene::LandscapeScene(QObject *parent)
 	: QGraphicsScene(parent),
 	  m_mouseX(0.0),
 	  m_mouseY(0.0),
+	  m_mouseButton(Qt::NoButton),
 	  m_zoneBuilder(0)
 {
 	m_cellSize = 160;
@@ -154,7 +157,7 @@ QGraphicsItem *LandscapeScene::createItemZone(const LigoData &data, const ZonePo
 	// The size graphics item should be equal or proportional m_cellSize
 	item->setScale(float(m_cellSize) / m_zoneBuilder->pixmapDatabase()->textureSize());
 
-	//item->setData(ZONE_NAME, QString(data.zoneName.c_str()));
+	item->setData(ZONE_NAME, QString(data.zoneName.c_str()));
 
 	// for not full item zone
 	item->setZValue(LAYER_ZONES);
@@ -198,13 +201,14 @@ QGraphicsRectItem *LandscapeScene::createLayerBlackout(const NLLIGO::CZoneRegion
 										  Qt::NoPen, QBrush(QColor(0, 0, 0, 50)));
 
 	rectItem->setZValue(LAYER_BLACKOUT);
+	rectItem->setData(ZONE_NAME, QString(LAYER_BLACKOUT_NAME));
 	return rectItem;
 }
 
 void LandscapeScene::deleteItemZone(const ZonePosition &zonePos)
 {
 	QGraphicsItem *item = itemAt(zonePos.x * m_cellSize, abs(zonePos.y) * m_cellSize);
-	if (item != 0)
+	if ((item != 0) && (item->data(ZONE_NAME).toString() != QString(LAYER_BLACKOUT_NAME)))
 	{
 		removeItem(item);
 		delete item;
@@ -282,22 +286,49 @@ void LandscapeScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 	if ((x < 0) || (y < 0))
 		return;
 
-	sint32 posX = sint32(floor(x / m_cellSize));
-	sint32 posY = sint32(-floor(y / m_cellSize));
+	m_posX = sint32(floor(x / m_cellSize));
+	m_posY = sint32(-floor(y / m_cellSize));
 
 	if (mouseEvent->button() == Qt::LeftButton)
-		m_zoneBuilder->addZone(posX, posY);
+		m_zoneBuilder->addZone(m_posX, m_posY);
 	else if (mouseEvent->button() == Qt::RightButton)
-		m_zoneBuilder->delZone(posX, posY);
+		m_zoneBuilder->delZone(m_posX, m_posY);
+
+	m_mouseButton = mouseEvent->button();
 
 	QGraphicsScene::mousePressEvent(mouseEvent);
 }
 
 void LandscapeScene::mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent)
 {
+	qreal x = mouseEvent->scenePos().rx();
+	qreal y = mouseEvent->scenePos().ry();
+
+	sint32 posX = sint32(floor(x / m_cellSize));
+	sint32 posY = sint32(-floor(y / m_cellSize));
+
+	if ((m_posX != posX || m_posY != posY) &&
+			(m_mouseButton == Qt::LeftButton ||
+			 m_mouseButton == Qt::RightButton))
+	{
+		if (m_mouseButton == Qt::LeftButton)
+			m_zoneBuilder->addZone(posX, posY);
+		else if (m_mouseButton == Qt::RightButton)
+			m_zoneBuilder->delZone(posX, posY);
+
+		m_posX = posX;
+		m_posY = posY;
+		QApplication::processEvents();
+	}
+
 	m_mouseX = mouseEvent->scenePos().x();
 	m_mouseY = mouseEvent->scenePos().y();
 	QGraphicsScene::mouseMoveEvent(mouseEvent);
+}
+
+void LandscapeScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
+{
+	m_mouseButton = Qt::NoButton;
 }
 
 bool LandscapeScene::checkUnderZone(const int posX, const int posY)
@@ -305,7 +336,10 @@ bool LandscapeScene::checkUnderZone(const int posX, const int posY)
 	QGraphicsItem *item = itemAt((posX * m_cellSize), abs(posY) * m_cellSize);
 	if (item != 0)
 	{
-		return true;
+		if (item->data(ZONE_NAME) == QString(LAYER_BLACKOUT_NAME))
+			return false;
+		else
+			return true;
 	}
 	return false;
 }
