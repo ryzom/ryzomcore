@@ -58,14 +58,11 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	m_landscapeScene = new LandscapeScene(this);
 
 	m_zoneBuilder = new ZoneBuilder(m_landscapeScene, m_ui.zoneListWidget, m_undoStack);
-	m_zoneBuilder->init("e:/-nel-/install/continents/newbieland", false);
 	m_ui.zoneListWidget->setZoneBuilder(m_zoneBuilder);
 	m_ui.zoneListWidget->updateUi();
 
 	m_landscapeScene->setZoneBuilder(m_zoneBuilder);
 	m_ui.graphicsView->setScene(m_landscapeScene);
-	//m_oglWidget = new QGLWidget(QGLFormat(QGL::DoubleBuffer));
-	//m_ui.graphicsView->setViewport(m_oglWidget);
 
 	m_ui.newLandAction->setIcon(QIcon(Core::Constants::ICON_NEW));
 	m_ui.saveAction->setIcon(QIcon(Core::Constants::ICON_SAVE));
@@ -95,8 +92,8 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 
 LandscapeEditorWindow::~LandscapeEditorWindow()
 {
-	delete m_zoneBuilder;
 	writeSettings();
+	delete m_zoneBuilder;
 }
 
 QUndoStack *LandscapeEditorWindow::undoStack() const
@@ -137,7 +134,7 @@ void LandscapeEditorWindow::openProjectSettings()
 	int ok = dialog->exec();
 	if (ok == QDialog::Accepted)
 	{
-		m_zoneBuilder->init(dialog->dataPath(), false);
+		m_zoneBuilder->init(dialog->dataPath(), true);
 		m_ui.zoneListWidget->updateUi();
 	}
 	delete dialog;
@@ -358,6 +355,18 @@ void LandscapeEditorWindow::readSettings()
 	settings->beginGroup(Constants::LANDSCAPE_EDITOR_SECTION);
 	restoreState(settings->value(Constants::LANDSCAPE_WINDOW_STATE).toByteArray());
 	restoreGeometry(settings->value(Constants::LANDSCAPE_WINDOW_GEOMETRY).toByteArray());
+
+	// Read landscape data directory (contains sub-paths: zone logos, zone bitmaps)
+	m_zoneBuilder->init(settings->value(Constants::LANDSCAPE_DATA_DIRECTORY).toString());
+	m_ui.zoneListWidget->updateUi();
+
+	// Use OpenGL graphics system instead raster graphics system
+	if (settings->value(Constants::LANDSCAPE_USE_OPENGL, false).toBool())
+	{
+		m_oglWidget = new QGLWidget(QGLFormat(QGL::DoubleBuffer));
+		m_ui.graphicsView->setViewport(m_oglWidget);
+	}
+
 	settings->endGroup();
 }
 
@@ -367,6 +376,7 @@ void LandscapeEditorWindow::writeSettings()
 	settings->beginGroup(Constants::LANDSCAPE_EDITOR_SECTION);
 	settings->setValue(Constants::LANDSCAPE_WINDOW_STATE, saveState());
 	settings->setValue(Constants::LANDSCAPE_WINDOW_GEOMETRY, saveGeometry());
+	settings->setValue(Constants::LANDSCAPE_DATA_DIRECTORY, m_zoneBuilder->dataPath());
 	settings->endGroup();
 	settings->sync();
 }

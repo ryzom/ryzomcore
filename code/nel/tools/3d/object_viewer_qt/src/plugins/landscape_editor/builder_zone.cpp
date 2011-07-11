@@ -49,9 +49,10 @@ ZoneBuilder::~ZoneBuilder()
 	delete m_pixmapDatabase;
 }
 
-bool ZoneBuilder::init(const QString &pathName, bool makeAZone)
+bool ZoneBuilder::init(const QString &pathName, bool displayProgress)
 {
-	bool bRet = true;
+	if (pathName.isEmpty())
+		return false;
 	if (pathName != m_lastPathName)
 	{
 		m_lastPathName = pathName;
@@ -59,25 +60,23 @@ bool ZoneBuilder::init(const QString &pathName, bool makeAZone)
 		zoneBankPath += "/zoneligos/";
 
 		// Init the ZoneBank
-		m_zoneBank.reset ();
+		m_zoneBank.reset();
 		if (!initZoneBank (zoneBankPath))
 		{
-			m_zoneBank.reset ();
+			m_zoneBank.reset();
 			return false;
 		}
 		// Construct the DataBase from the ZoneBank
 		QString zoneBitmapPath = pathName;
 		zoneBitmapPath += "/zonebitmaps/";
 		m_pixmapDatabase->reset();
-		if (!m_pixmapDatabase->loadPixmaps(zoneBitmapPath, m_zoneBank))
+		if (!m_pixmapDatabase->loadPixmaps(zoneBitmapPath, m_zoneBank, displayProgress))
 		{
 			m_zoneBank.reset();
 			return false;
 		}
 	}
-	if ((makeAZone) && (bRet))
-		createZoneRegion();
-	return bRet;
+	return true;
 }
 
 void ZoneBuilder::actionLigoTile(const LigoData &data, const ZonePosition &zonePos)

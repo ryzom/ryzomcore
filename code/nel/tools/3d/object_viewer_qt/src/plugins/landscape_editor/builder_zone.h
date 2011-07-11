@@ -82,7 +82,7 @@ public:
 	~ZoneBuilder();
 
 	/// Init zoneBank and init zone pixmap database
-	bool init(const QString &pathName, bool bMakeAZone);
+	bool init(const QString &pathName, bool displayProgress = false);
 
 	void calcMask();
 	bool getZoneMask (sint32 x, sint32 y);
