@@ -22,12 +22,14 @@
 #include <QtGui/QWidget>
 #include <QtGui/QMdiArea>
 #include <QtGui/QMdiSubWindow>
+#include <QtGui/QUndoStack>
 
 namespace Plugin {
     
 class CEditor : public QMdiSubWindow {
 Q_OBJECT
 protected:
+	QUndoStack* current_stack;
     QString current_file;
     int editor_type;
 public:
@@ -42,6 +44,10 @@ public:
     {
         return current_file;
     }
+	void setUndoStack(QUndoStack* stack)
+	{
+		current_stack = stack;
+	}
 };
 
 }

@@ -65,7 +65,9 @@ CMainWindow::CMainWindow(QWidget *parent)
          initialize_settings["ligo"] = false;
          readSettings();
          createToolbar();
-        m_undoStack = new QUndoStack(this);
+		m_undoStack = new QUndoStack(this);
+		_ui.toolBar->addAction(m_undoStack->createUndoAction(this));
+		_ui.toolBar->addAction(m_undoStack->createRedoAction(this));
 }
 
 void CMainWindow::createToolbar()
@@ -207,7 +209,8 @@ void CMainWindow::open()
             }          
              if(isWorksheetEditor(file_name))
              {
-                 CEditorWorksheet *new_window = new CEditorWorksheet(_ui.mdiArea);                 
+                 CEditorWorksheet *new_window = new CEditorWorksheet(_ui.mdiArea); 
+				 new_window->setUndoStack(m_undoStack);
                  new_window->open(file_name);  
                  new_window->activateWindow();
              }

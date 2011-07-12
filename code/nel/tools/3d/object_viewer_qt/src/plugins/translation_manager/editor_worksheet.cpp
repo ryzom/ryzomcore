@@ -95,7 +95,8 @@ void CEditorWorksheet::open(QString filename)
                 table_editor->resizeColumnsToContents();
                 table_editor->resizeRowsToContents(); 
                 // set editor signals
-                connect(table_editor, SIGNAL(cellChanged(int,int) ), this, SLOT(worksheetEditorChanged(int,int)));
+                connect(table_editor, SIGNAL(itemChanged(QTableWidgetItem*) ), this, SLOT(worksheetEditorChanged(QTableWidgetItem*)));				
+				connect(table_editor, SIGNAL(itemDoubleClicked(QTableWidgetItem*) ), this, SLOT(worksheetEditorCellEntered(QTableWidgetItem*)));
              } else {
                 QErrorMessage error;
                 error.showMessage("This file is not a worksheet file.");
@@ -233,8 +234,19 @@ void CEditorWorksheet::deleteRow()
   return;
 }
 
-void CEditorWorksheet::worksheetEditorChanged(int row, int column)
+void CEditorWorksheet::worksheetEditorCellEntered(QTableWidgetItem * item)
 {
+	temp_content = item->text();
+}
+
+void CEditorWorksheet::worksheetEditorChanged(QTableWidgetItem * item)
+{
+	if(temp_content != item->text())
+	{
+		QString i_text = item->text();
+		current_stack->push(new CUndoWorksheetCommand(item, temp_content, i_text));
+	}
+
     if(!isWindowModified())
         setWindowModified(true);
 }
@@ -493,6 +505,7 @@ void CEditorWorksheet::closeEvent(QCloseEvent *event)
         close();
     }
 }
+
 
 bool CEditorWorksheet::isBotNamesTable()
 {

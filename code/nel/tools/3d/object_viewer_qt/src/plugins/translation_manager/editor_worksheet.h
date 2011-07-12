@@ -31,6 +31,9 @@
 #include <QtGui/QMdiArea>
 #include <QtGui/QTableWidget>
 #include <QtGui/QMdiSubWindow>
+#include <QtGui/QUndoCommand>
+#include <QtGui/qundostack.h>
+
 
 #include "translation_manager_editor.h"
 #include "extract_new_sheet_names.h"
@@ -40,11 +43,12 @@ namespace Plugin {
 class CEditorWorksheet : public CEditor
 {
     Q_OBJECT
-private:
-    QTableWidget* table_editor;
+private:   
+	QString temp_content;
 public:
     CEditorWorksheet(QMdiArea* parent) : CEditor(parent) {}
     CEditorWorksheet() : CEditor() {}
+	QTableWidget* table_editor;
     void open(QString filename);
     void save();
     void saveAs(QString filename);
@@ -57,7 +61,8 @@ public:
     bool isSheetTable(QString type);
     void closeEvent(QCloseEvent *event);
 private Q_SLOTS:
-    void worksheetEditorChanged(int,int);
+	void worksheetEditorCellEntered(QTableWidgetItem * item);
+    void worksheetEditorChanged(QTableWidgetItem * item);
     void insertRow();
     void deleteRow();
 private:
@@ -65,6 +70,28 @@ private:
     
 };
 
+class CUndoWorksheetCommand : public QUndoCommand
+{
+public:
+	CUndoWorksheetCommand(QTableWidgetItem* item, const QString &ocontent, QString ccontent) :  QUndoCommand("Insert characters in cells"), m_item(item),  m_ocontent(ocontent), m_ccontent(ccontent) { }
+
+	virtual void redo()
+	{
+		
+		//m_ccontent = m_item->text();
+		m_item->setText(m_ccontent);
+		
+	}
+	virtual void undo()
+	{
+		m_item->setText(m_ocontent);
+	}
+private:
+	QTableWidgetItem* m_item;
+	QString m_ocontent;
+	QString m_ccontent;
 };
+
+}
 #endif	/* EDITOR_WORKSHEET_H */
 
