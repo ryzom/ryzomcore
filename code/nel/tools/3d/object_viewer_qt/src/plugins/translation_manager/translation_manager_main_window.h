@@ -45,6 +45,7 @@
 #include "source_selection.h"
 #include "ui_translation_manager_main_window.h"
 #include <set>
+#include "editor_worksheet.h"
 
 class QWidget;
 
@@ -72,12 +73,12 @@ private:
         QSignalMapper *windowMapper;
         // config
         map<string,bool> initialize_settings;
-        list<string> filters;
-        list<string> languages;
-        string level_design_path;
-        string primitives_path;
-        string translation_path;
-        string work_path;
+        QList<QString> filters;
+        QList<QString> languages;
+        QString level_design_path;
+        QString primitives_path;
+        QString translation_path;
+        QString work_path;
         NLLIGO::CLigoConfig ligoConfig;
 private Q_SLOTS:
         void extractBotNames();
@@ -99,7 +100,9 @@ private:
         void createToolbar();
         void initializeSettings(bool georges);
         list<string> convertQStringList(QStringList listq);
-        list<CEditor*> convertSubWindowList(QList<QMdiSubWindow*> listq);
+		CEditor* getEditorByWindowFilePath(const QString &fileName);
+		// Worksheet specific functions
+		CEditorWorksheet* getEditorByWorksheetType(const QString &type);
         bool isWorksheetEditor(QString filename);
     
         

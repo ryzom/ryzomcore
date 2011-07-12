@@ -46,17 +46,17 @@ QString CTranslationManagerSettingsPage::id() const
 
 QString CTranslationManagerSettingsPage::trName() const
 {
-	return tr("Translation Manager page");
+	return tr("Translation Manager");
 }
 
 QString CTranslationManagerSettingsPage::category() const
 {
-	return QLatin1String("General");
+	return QLatin1String("Translation Manager");
 }
 
 QString CTranslationManagerSettingsPage::trCategory() const
 {
-	return tr("General");
+	return tr("Translation Manager");
 }
 
 QIcon CTranslationManagerSettingsPage::categoryIcon() const
@@ -195,12 +195,12 @@ void CTranslationManagerSettingsPage::writeSettings()
         
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup("translationmanager");
-        settings->setValue("filters", filters);
-        settings->setValue("trlanguages", languages); 
-        settings->setValue("translation", translation);
-        settings->setValue("work", work);
+    settings->setValue("filters", filters);
+    settings->setValue("trlanguages", languages); 
+    settings->setValue("translation", translation);
+    settings->setValue("work", work);
 	settings->endGroup();
-        settings->sync();
+    settings->sync();
 }
 
 

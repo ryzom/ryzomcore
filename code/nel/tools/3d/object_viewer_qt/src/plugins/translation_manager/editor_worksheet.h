@@ -73,23 +73,26 @@ private:
 class CUndoWorksheetCommand : public QUndoCommand
 {
 public:
-	CUndoWorksheetCommand(QTableWidgetItem* item, const QString &ocontent, QString ccontent) :  QUndoCommand("Insert characters in cells"), m_item(item),  m_ocontent(ocontent), m_ccontent(ccontent) { }
+	CUndoWorksheetCommand(QTableWidget *table, QTableWidgetItem* item, const QString &ocontent, QUndoCommand *parent = 0) :  QUndoCommand("Insert characters in cells", parent), m_table(table), m_item(item),  m_ocontent(ocontent) 
+	{ 
+		m_ccontent = m_item->text();
+	}
 
-	virtual void redo()
+	void redo()
 	{
-		
-		//m_ccontent = m_item->text();
-		m_item->setText(m_ccontent);
-		
+		m_item->setText(m_ccontent);		
 	}
-	virtual void undo()
-	{
+	void undo()
+	{		
 		m_item->setText(m_ocontent);
+
 	}
+	
 private:
+	QTableWidget* m_table;
 	QTableWidgetItem* m_item;
-	QString m_ocontent;
 	QString m_ccontent;
+	QString m_ocontent;
 };
 
 }

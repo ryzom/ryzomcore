@@ -91,7 +91,7 @@ const char * const DATA_PATH_SECTION = "DataPath";
 const char * const SEARCH_PATHS = "SearchPaths";
 const char * const RECURSIVE_SEARCH_PATHS = "RecursiveSearchPathes";
 const char * const LEVELDESIGN_PATH = "LevelDesignPath";
-const char * const PRIMITIVES_PATH = "/home/cemycc/Ryzom/work/ryzom/code/ryzom/common/data_leveldesign/primitives";
+const char * const PRIMITIVES_PATH = "D:/Ryzom/ryzom/code/ryzom/common/data_leveldesign/primitives";
 const char * const ASSETS_PATH = "AssetsPath";
 const char * const REMAP_EXTENSIONS = "RemapExtensions";
 
