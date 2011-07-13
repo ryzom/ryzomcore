@@ -24,6 +24,8 @@
 // Qt includes
 #include <QtGui/QUndoStack>
 #include <QtOpenGL/QGLWidget>
+#include <QtGui/QLabel>
+#include <QtCore/QTimer>
 
 namespace LandscapeEditor
 {
@@ -50,6 +52,7 @@ private Q_SLOTS:
 	void openProjectSettings();
 	void openSnapshotDialog();
 	void customContextMenu();
+	void updateStatusBar();
 	void newLand();
 	void setActiveLand();
 	void saveSelectedLand();
@@ -58,6 +61,7 @@ private Q_SLOTS:
 
 protected:
 	virtual void showEvent(QShowEvent *showEvent);
+	virtual void hideEvent(QHideEvent *hideEvent);
 
 private:
 	void createMenus();
@@ -68,6 +72,9 @@ private:
 	void setActiveLandscape(int row);
 	void saveLandscape(int row, bool force);
 	int createLandscape(const QString &fileName);
+
+	QLabel *m_statusInfo;
+	QTimer *m_statusBarTimer;
 
 	QListWidgetItem *m_currentItem;
 	LandscapeScene *m_landscapeScene;

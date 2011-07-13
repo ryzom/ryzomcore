@@ -137,6 +137,27 @@ void LandscapeView::drawForeground(QPainter *painter, const QRectF &rect)
 		painter->drawLine(int(rect.left()), int(top), int(rect.right()), int(top));
 		top += m_cellSize;
 	}
+
+	// Render text (slow!)
+	if (m_numSteps > -m_maxSteps / 4)
+	{
+		painter->setPen(QPen(Qt::white, 0.5, Qt::SolidLine));
+
+		//painter->setFont(QFont("Helvetica [Cronyx]", 12));
+		int leftSide = int(floor(rect.left() / m_cellSize));
+		int rightSide = int(floor(rect.right() / m_cellSize));
+		int topSide = int(floor(rect.top() / m_cellSize));
+		int bottomSide = int(floor(rect.bottom() / m_cellSize));
+
+		for (int i = leftSide; i < rightSide + 1; ++i)
+		{
+			for (int j = topSide; j < bottomSide + 1; ++j)
+			{
+				QString text = QString("%1_%2%3").arg(j).arg(QChar('A' + (i / 26))).arg(QChar('A' + (i % 26)));
+				painter->drawText(i * m_cellSize + 5, j * m_cellSize + 15, text);
+			}
+		}
+	}
 }
 
 } /* namespace LandscapeEditor */

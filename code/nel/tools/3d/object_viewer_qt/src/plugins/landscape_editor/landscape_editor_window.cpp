@@ -36,6 +36,7 @@
 #include <QtGui/QMenu>
 #include <QtGui/QFileDialog>
 #include <QtGui/QMessageBox>
+#include <QtGui/QStatusBar>
 
 namespace LandscapeEditor
 {
@@ -88,6 +89,12 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	connect(m_ui.landscapesListWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenu()));
 	m_ui.landscapesListWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
+	m_statusBarTimer = new QTimer(this);
+	connect(m_statusBarTimer, SIGNAL(timeout()), this, SLOT(updateStatusBar()));
+
+	m_statusInfo = new QLabel(this);
+	m_statusInfo->hide();
+	Core::ICore::instance()->mainWindow()->statusBar()->addPermanentWidget(m_statusInfo);
 }
 
 LandscapeEditorWindow::~LandscapeEditorWindow()
@@ -318,6 +325,20 @@ void LandscapeEditorWindow::showEvent(QShowEvent *showEvent)
 	QMainWindow::showEvent(showEvent);
 	if (m_oglWidget != 0)
 		m_oglWidget->makeCurrent();
+	m_statusInfo->show();
+	m_statusBarTimer->start(100);
+}
+
+void LandscapeEditorWindow::hideEvent(QHideEvent *hideEvent)
+{
+	QMainWindow::hideEvent(hideEvent);
+	m_statusInfo->hide();
+	m_statusBarTimer->stop();
+}
+
+void LandscapeEditorWindow::updateStatusBar()
+{
+	m_statusInfo->setText(m_landscapeScene->zoneNameFromMousePos());
 }
 
 void LandscapeEditorWindow::createMenus()

@@ -39,8 +39,6 @@ const char * const LAYER_BLACKOUT_NAME = "blackout";
 
 LandscapeScene::LandscapeScene(QObject *parent)
 	: QGraphicsScene(parent),
-	  m_mouseX(0.0),
-	  m_mouseY(0.0),
 	  m_mouseButton(Qt::NoButton),
 	  m_zoneBuilder(0)
 {
@@ -170,6 +168,9 @@ QGraphicsItem *LandscapeScene::createItemEmptyZone(const ZonePosition &zonePos)
 	if (m_zoneBuilder == 0)
 		return 0;
 
+	if (checkUnderZone(zonePos.x, zonePos.y))
+		return 0;
+
 	// Get image from pixmap database
 	QPixmap *pixmap = m_zoneBuilder->pixmapDatabase()->pixmap(QString(STRING_UNUSED));
 	if (pixmap == 0)
@@ -276,11 +277,17 @@ void LandscapeScene::snapshot(const QString &fileName, int width, int height, co
 	scaledImage.save(fileName);
 }
 
+QString LandscapeScene::zoneNameFromMousePos() const
+{
+	if ((m_posY > 0) || (m_posY < -255) ||
+			(m_posX < 0) || (m_posX > 255))
+		return "NOT A VALID ZONE";
+
+	return QString("%1_%2%3").arg(-m_posY).arg(QChar('A' + (m_posX/26))).arg(QChar('A' + (m_posX%26)));
+}
+
 void LandscapeScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-	if (m_zoneBuilder == 0)
-		return;
-
 	qreal x = mouseEvent->scenePos().rx();
 	qreal y = mouseEvent->scenePos().ry();
 	if ((x < 0) || (y < 0))
@@ -288,6 +295,9 @@ void LandscapeScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 	m_posX = sint32(floor(x / m_cellSize));
 	m_posY = sint32(-floor(y / m_cellSize));
+
+	if (m_zoneBuilder == 0)
+		return;
 
 	if (mouseEvent->button() == Qt::LeftButton)
 		m_zoneBuilder->addZone(m_posX, m_posY);
@@ -321,8 +331,11 @@ void LandscapeScene::mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent)
 		QApplication::processEvents();
 	}
 
-	m_mouseX = mouseEvent->scenePos().x();
-	m_mouseY = mouseEvent->scenePos().y();
+	m_posX = posX;
+	m_posY = posY;
+
+	m_mouseX = mouseEvent->scenePos().rx();
+	m_mouseY = mouseEvent->scenePos().ry();
 	QGraphicsScene::mouseMoveEvent(mouseEvent);
 }
 
@@ -336,10 +349,10 @@ bool LandscapeScene::checkUnderZone(const int posX, const int posY)
 	QGraphicsItem *item = itemAt((posX * m_cellSize), abs(posY) * m_cellSize);
 	if (item != 0)
 	{
-		if (item->data(ZONE_NAME) == QString(LAYER_BLACKOUT_NAME))
-			return false;
-		else
-			return true;
+		//if (item->data(ZONE_NAME) == QString(LAYER_BLACKOUT_NAME))
+		//	return false;
+		//else
+		return true;
 	}
 	return false;
 }

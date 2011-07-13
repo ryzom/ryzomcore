@@ -59,6 +59,8 @@ public:
 
 	void snapshot(const QString &fileName, int width, int height, const QRectF &landRect);
 
+	QString zoneNameFromMousePos() const;
+
 protected:
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
 	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
