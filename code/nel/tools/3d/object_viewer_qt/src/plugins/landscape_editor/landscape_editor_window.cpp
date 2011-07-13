@@ -245,6 +245,8 @@ void LandscapeEditorWindow::deleteSelectedLand()
 
 	if (m_ui.landscapesListWidget->count() == 1)
 		m_ui.deleteLandAction->setEnabled(false);
+
+	m_undoStack->clear();
 }
 
 int LandscapeEditorWindow::createLandscape(const QString &fileName)
