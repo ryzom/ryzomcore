@@ -243,7 +243,7 @@ void CEditorWorksheet::worksheetEditorChanged(QTableWidgetItem * item)
 {
 	if(temp_content != item->text())
 	{
-		current_stack->push(new CUndoWorksheetCommand(table_editor, item, temp_content));
+		//current_stack->push(new CUndoWorksheetCommand(table_editor, item, temp_content));
 	}
 
     if(!isWindowModified())

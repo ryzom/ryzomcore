@@ -80,11 +80,11 @@ public:
 
 	void redo()
 	{
-		m_item->setText(m_ccontent);		
+		//m_item->setText(m_ccontent);		
 	}
 	void undo()
 	{		
-		m_item->setText(m_ocontent);
+		//m_item->setText(m_ocontent);
 
 	}
 	

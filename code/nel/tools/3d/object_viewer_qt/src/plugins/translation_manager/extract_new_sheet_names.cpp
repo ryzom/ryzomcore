@@ -34,7 +34,6 @@ namespace Plugin {
 bool	CSheetWordListBuilder::buildWordList(std::vector<string> &allWords, string workSheetFileName)
 	{
 		SheetExt= toLower(SheetExt);
-                nlinfo("aaaa");
 		// verify the directory is correct
 		if(!CFile::isDirectory(SheetPath))
 		{

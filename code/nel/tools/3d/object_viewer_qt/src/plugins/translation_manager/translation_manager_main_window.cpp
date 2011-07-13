@@ -483,7 +483,7 @@ CEditor *CMainWindow::getEditorByWindowFilePath(const QString &fileName)
     return NULL;
 }
 
-CEditorWorksheet *CMainWindow::getEditorByWorksheetType(const QString &type = NULL)
+CEditorWorksheet *CMainWindow::getEditorByWorksheetType(const QString &type)
 {
     Q_FOREACH(QMdiSubWindow *subWindow, _ui.mdiArea->subWindowList())
     {
@@ -491,16 +491,17 @@ CEditorWorksheet *CMainWindow::getEditorByWorksheetType(const QString &type = NU
 		if(QString(currentEditor->widget()->metaObject()->className()) == "QTableWidget")
 		{
 			CEditorWorksheet *editor = qobject_cast<CEditorWorksheet *>(currentEditor);
-			if(!type.isNull())
+			if(type != NULL) {
 				if(editor->isSheetTable(type))
 				{
 					return editor;
 				}
-			else
+			} else {
 				if(editor->isBotNamesTable())
 				{
 					return editor;
 				}
+			}
 		}
     }
     return NULL;
