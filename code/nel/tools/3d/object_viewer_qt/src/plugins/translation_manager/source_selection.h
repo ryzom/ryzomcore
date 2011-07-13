@@ -14,22 +14,21 @@ using namespace std;
 
 namespace Plugin 
 {
-        class CSourceDialog : public QDialog
-        {
-               Q_OBJECT
-        private:
-            Ui::SourceSelectionDialog _ui;
-            
-        private Q_SLOTS:
 
-		void OkButtonClicked();
-	public:
-		CSourceDialog(QWidget *parent = 0);
-		~CSourceDialog(){}
-                void setSourceOptions(map<QListWidgetItem*, int> options);
-                QListWidgetItem *selected_item;
+class CSourceDialog : public QDialog
+{
+	Q_OBJECT
+private:
+	Ui::SourceSelectionDialog _ui;
+	QListWidgetItem *selected_item;
+private Q_SLOTS:
+	void OkButtonClicked();
+public:
+	CSourceDialog(QWidget *parent = 0);
+	~CSourceDialog(){}
+    void setSourceOptions(map<QListWidgetItem*, int> options);
+};
 
-        };    
 }
 
 

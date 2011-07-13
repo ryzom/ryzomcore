@@ -19,7 +19,7 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
-// Project includes
+// Project system includes
 #include "../core/icore_listener.h"
 
 // Nel includes
@@ -33,14 +33,13 @@
 #include <QtCore/QObject>
 #include <QtGui/QUndoStack>
 #include <QtGui/QMainWindow>
-#include <QtGui/QGridLayout>
 #include <QtGui/QTableWidget>
 #include <QtGui/QMenu>
 #include <QtGui/QMdiSubWindow>
 #include <QtCore/QSignalMapper>
 #include <QtGui/QDialog>
 
-
+// Plugin includes
 #include "translation_manager_editor.h"
 #include "source_selection.h"
 #include "ui_translation_manager_main_window.h"
@@ -62,8 +61,7 @@ public:
         CMainWindow(QWidget *parent = 0);
         virtual ~CMainWindow() {}
         QUndoStack *m_undoStack;
-private:
-    
+private:  
         Ui::CMainWindow _ui;        
         // actions
         QAction *openAct;
@@ -90,7 +88,6 @@ private Q_SLOTS:
         void setActiveSubWindow(QWidget *window);
         void updateWindowsList();  
         void mergeSingleFile();
-        void debug(QString text); // TODO
 private:
         void openWorkFile(QString file);
         void updateToolbar(QMdiSubWindow *window);

@@ -15,29 +15,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "translation_manager_main_window.h"
-#include "translation_manager_constants.h"
-#include "ftp_selection.h"
-
 // Project system includes
 #include "../core/icore.h"
 #include "../core/core_constants.h"
 #include "../core/imenu_manager.h"
 #include "../../extension_system/iplugin_spec.h"
+
 // Qt includes
 #include <QtGui/QWidget>
 #include <QtGui/QMessageBox>
-#include <QtGui/QLabel>
-#include <QtGui/QTextEdit>
 #include <QtCore/QSettings>
 #include <QtGui/QErrorMessage>
 #include <QtCore/QSignalMapper>
 #include <QtGui/QTableWidget>
 #include <QtGui/QTableWidgetItem>
-#include <QtGui/QListWidget>
-#include <QtGui/QDockWidget>
-#include <QtCore/QSize>
-#include <QtGui/QGridLayout>
 #include <QtGui/QMdiSubWindow>
 #include <QtGui/QFileDialog>
 #include <QtCore/QResource>
@@ -45,6 +36,11 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QEvent>
 #include <QtGui/QCloseEvent>
+
+// Plugin includes
+#include "translation_manager_main_window.h"
+#include "translation_manager_constants.h"
+#include "ftp_selection.h"
 
 
 namespace Plugin
@@ -447,13 +443,6 @@ void CMainWindow::readSettings()
             level_design_path = settings->value(Core::Constants::LEVELDESIGN_PATH).toString();
             primitives_path = QString(Core::Constants::PRIMITIVES_PATH); //TODO
             settings->endGroup();              
-}
-
-void CMainWindow::debug(QString text)
-{
-            QErrorMessage error_settings;
-            error_settings.showMessage(text);
-            error_settings.exec();    
 }
 
 bool CMainWindow::verifySettings()

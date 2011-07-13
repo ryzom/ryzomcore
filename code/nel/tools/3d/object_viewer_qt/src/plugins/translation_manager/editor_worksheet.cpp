@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "editor_worksheet.h"
-#include <set>
 // Qt includes
 #include <QtGui/QErrorMessage>
 #include <QtGui/QTableWidgetItem>
@@ -24,8 +22,11 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QCloseEvent>
 
+// Project includes
+#include "editor_worksheet.h"
 #include "extract_bot_names.h"
 #include "translation_manager_constants.h"
+#include <set>
 
 using namespace std;
 
@@ -206,12 +207,7 @@ void CEditorWorksheet::saveAs(QString filename)
 void CEditorWorksheet::insertRow()
 {
     int last_row = table_editor->rowCount();
-    table_editor->setRowCount(last_row + 1);
-    for(int j = 0; j < table_editor->columnCount(); j++)
-    {
-        QTableWidgetItem* item = new QTableWidgetItem();
-        table_editor->setItem(last_row, j, item);
-    }
+	current_stack->push(new CUndoWorksheetNewCommand(table_editor, last_row));
 }
 
 void CEditorWorksheet::deleteRow()
@@ -223,10 +219,9 @@ void CEditorWorksheet::deleteRow()
  msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
  msgBox.setDefaultButton(QMessageBox::No);
  int ret = msgBox.exec(); 
- 
  if(ret == QMessageBox::Yes)
  {
-     table_editor->removeRow(selected_row);
+     current_stack->push(new CUndoWorksheetDeleteCommand(table_editor, selected_row));
  }
 
   table_editor->clearFocus();
@@ -237,6 +232,7 @@ void CEditorWorksheet::deleteRow()
 void CEditorWorksheet::worksheetEditorCellEntered(QTableWidgetItem * item)
 {
 	temp_content = item->text();
+	current_stack->push(new CUndoWorksheetCommand(table_editor, item, temp_content));
 }
 
 void CEditorWorksheet::worksheetEditorChanged(QTableWidgetItem * item)
@@ -250,9 +246,12 @@ void CEditorWorksheet::worksheetEditorChanged(QTableWidgetItem * item)
         setWindowModified(true);
 }
 
+
 void CEditorWorksheet::extractBotNames(list<string> filters, string level_design_path, NLLIGO::CLigoConfig ligoConfig)
 {
     bool modified = false;
+	QList<CTableWidgetItemStore> new_items;
+
     ExtractBotNames ebn;
     ebn.setRequiredSettings(filters, level_design_path);
     ebn.extractBotNamesFromPrimitives(ligoConfig);
@@ -271,7 +270,7 @@ void CEditorWorksheet::extractBotNames(list<string> filters, string level_design
                                 QTableWidgetItem *bot_name_row = new QTableWidgetItem();
                                 bot_name_row->setText(tr(it->first.c_str()));    
                                 bot_name_row->setBackgroundColor(QColor("#F75D59"));
-                                table_editor ->setItem(currentRow, 0, bot_name_row);  
+                                table_editor ->setItem(currentRow, 0, bot_name_row); 
                                 QTableWidgetItem *translation_name_row = new QTableWidgetItem();
                                 translation_name_row->setBackgroundColor(QColor("#F75D59"));
                                 translation_name_row->setText(tr(it->first.c_str()));
@@ -281,6 +280,12 @@ void CEditorWorksheet::extractBotNames(list<string> filters, string level_design
                                 sheet_name_row->setBackgroundColor(QColor("#F75D59"));
                                 table_editor ->setItem(currentRow, 2, sheet_name_row); 
                                 if(!modified) modified = true;
+								CTableWidgetItemStore bot_name_row_s(bot_name_row, currentRow, 0);
+								new_items.push_back(bot_name_row_s);
+								CTableWidgetItemStore translation_name_row_s(translation_name_row, currentRow, 1);
+								new_items.push_back(translation_name_row_s);
+								CTableWidgetItemStore sheet_name_row_s(sheet_name_row, currentRow, 2);
+								new_items.push_back(sheet_name_row_s);								
                             }
                         }  
                         ebn.cleanSimpleNames();
@@ -310,10 +315,18 @@ void CEditorWorksheet::extractBotNames(list<string> filters, string level_design
                                 sheet_name_row->setBackgroundColor(QColor("#F75D59"));
                                 table_editor ->setItem(currentRow, 2, sheet_name_row);   
                                 if(!modified) modified = true;
+								CTableWidgetItemStore bot_name_row_s(bot_name_row, currentRow, 0);
+								new_items.push_back(bot_name_row_s);
+								CTableWidgetItemStore translation_name_row_s(translation_name_row, currentRow, 1);
+								new_items.push_back(translation_name_row_s);
+								CTableWidgetItemStore sheet_name_row_s(sheet_name_row, currentRow, 2);
+								new_items.push_back(sheet_name_row_s);	
                             }                         
                         }
                         ebn.cleanGenericNames();
-                    }  
+                    } 
+					
+					current_stack->push(new CUndoWorksheetExtraction(new_items, table_editor));
                     if(modified)
                     {
                         setWindowModified(true);
@@ -355,6 +368,7 @@ void CEditorWorksheet::extractWords(QString filename, QString columnId, IWordLis
 		return;
                 }
         bool modified = false;
+		QList<CTableWidgetItemStore> new_items;
         for(i = 0; i < allWords.size(); i++)
         {                   
                 string keyName = allWords[i];
@@ -384,8 +398,14 @@ void CEditorWorksheet::extractWords(QString filename, QString columnId, IWordLis
                         name_row->setBackgroundColor(QColor("#F75D59"));                    
                         table_editor ->setItem(currentRow, nPos, name_row);   
                         if(!modified) modified = true;
+						CTableWidgetItemStore key_name_row_s(key_name_row, currentRow, knPos);
+						new_items.push_back(key_name_row_s);
+						CTableWidgetItemStore name_row_s(name_row, currentRow, nPos);
+						new_items.push_back(name_row_s);
+
                 }            
         }
+		current_stack->push(new CUndoWorksheetExtraction(new_items, table_editor));
         if(modified)
        {
               setWindowModified(true);
