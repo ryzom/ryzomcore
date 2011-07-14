@@ -38,8 +38,9 @@ namespace Plugin
 
 	class CLogPlugin;
 
-	CLogSettingsPage::CLogSettingsPage(QObject *parent)
+	CLogSettingsPage::CLogSettingsPage(CLogPlugin *logPlugin, QObject *parent)
 		: IOptionsPage(parent),
+		m_logPlugin(logPlugin),
 		m_currentPage(NULL),
 		m_error(true),
 		m_warning(true),
@@ -98,13 +99,7 @@ namespace Plugin
 		m_info = m_ui.infoCheck->isChecked();
 
 		writeSettings();
-		ExtensionSystem::IPluginManager *p = Core::ICore::instance()->pluginManager();
-		ExtensionSystem::IPlugin *plugin = p->pluginByName("LogPlugin")->plugin();
-		CLogPlugin* lp = dynamic_cast<CLogPlugin*>(plugin);
-		if (lp)
-		{
-			lp->setDisplayers();
-		}
+		m_logPlugin->setDisplayers();
 	}
 
 	void CLogSettingsPage::readSettings()

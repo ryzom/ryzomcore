@@ -110,6 +110,8 @@ const char * const ICON_NEW = ":/core/icons/ic_nel_new.png";
 const char * const ICON_SAVE = ":/core/icons/ic_nel_save.png";
 const char * const ICON_SAVE_AS = ":/core/icons/ic_nel_save_as.png";
 const char * const ICON_CRASH = ":/core/icons/ic_nel_crash.png";
+const char * const ICON_UNDO = ":/core/icons/ic_nel_undo.png";
+const char * const ICON_REDO = ":/core/icons/ic_nel_redo.png";
 
 } // namespace Constants
 } // namespace Core

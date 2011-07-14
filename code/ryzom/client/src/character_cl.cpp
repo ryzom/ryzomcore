@@ -4484,8 +4484,9 @@ bool CCharacterCL::isCurrentBehaviourAttackEnd() const
 		case MBEHAV::AREA_ATTACK:
 			return true;
 		default:
-			return false;
+			break;
 	}
+	return false;
 }
 
 
