@@ -9,11 +9,12 @@
 #define	FTP_SELECTION_H
 
 #include <QtCore/QObject>
+#include <QtCore/QUrl>
 #include <QtGui/QDialog>
 #include <QtCore/QString>
 #include <QtGui/QWidget>
+#include <QtCore/Qfile>
 #include <QtNetwork>
-#include <QtCore/QUrl>
 
 #include "ui_ftp_selection.h"
 
@@ -30,13 +31,15 @@ namespace Plugin {
         QHash<QString, bool> isDirectory;
         QString currentPath;
     private Q_SLOTS:
+		void cdToParent();
         void processItem(QTreeWidgetItem*,int);
-        void CancelButtonClicked();
         void ConnectButtonClicked();
         void DoneButtonClicked();
         void FtpCommandFinished(int, bool error);
         void AddToList(const QUrlInfo &urlInfo);
     public:
+		bool status;
+		QFile *file;
         CFtpSelection(QWidget* parent = 0);
         ~CFtpSelection() {}
     };

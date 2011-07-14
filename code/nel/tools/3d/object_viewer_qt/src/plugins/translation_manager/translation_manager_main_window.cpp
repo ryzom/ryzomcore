@@ -380,7 +380,26 @@ void CMainWindow::mergeSingleFile()
 {
     CEditor* editor_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow());
     CSourceDialog *dialog = new CSourceDialog(this);
+	CFtpSelection* ftp_dialog;
     map<QListWidgetItem*, int> methods;
+	QString file_name;
+
+    if (_ui.mdiArea->subWindowList().size() == 0)
+    {
+		QErrorMessage error;
+        error.showMessage(QString("Open a work file in editor for merge operation."));
+        error.exec(); 
+		return;
+	}
+
+    if(QString(editor_window->widget()->metaObject()->className()) != "QTableWidget") // Sheet Editor
+    {
+		QErrorMessage error;
+        error.showMessage(QString("Please open or activate the window with a sheet file."));
+        error.exec(); 
+		return;
+	}
+
     // create items
     QListWidgetItem* local_item = new QListWidgetItem();
     local_item->setText("Local directory");
@@ -392,40 +411,44 @@ void CMainWindow::mergeSingleFile()
     dialog->setSourceOptions(methods);
     dialog->show();
     dialog->exec();
+	// get the file for merge
     if(dialog->selected_item == local_item) // Local directory
     {
-        QString file_name;
-        if (_ui.mdiArea->subWindowList().size() > 0)
-        {
-            file_name = QFileDialog::getOpenFileName(this);
-        } else {
-            return;
-        }    
-        
-        if(QString(editor_window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
-        {
-            editor_window->activateWindow();
-            CEditorWorksheet* current_window = qobject_cast<CEditorWorksheet*>(editor_window);
-            if(current_window->windowFilePath() == file_name)
-                return;
-            if(current_window->compareWorksheetFile(file_name))
-            {
-                current_window->mergeWorksheetFile(file_name);
-            } else  {
-                QErrorMessage error;
-                error.showMessage(QString("The file: %1 has different columns from the current file in editor.").arg(file_name));
-                error.exec();                
-            }
-        }
+		file_name = QFileDialog::getOpenFileName(this);   
     } else if(dialog->selected_item == ftp_item)   { // Ftp directory
         CFtpSelection* ftp_dialog = new CFtpSelection(this);
         ftp_dialog->show();
         ftp_dialog->exec();
+		if(ftp_dialog->status == true)
+		{
+			file_name = ftp_dialog->file->fileName();			
+		}
     } else {
         return;
     }
-        
-       
+
+    editor_window->activateWindow();
+    CEditorWorksheet* current_window = qobject_cast<CEditorWorksheet*>(editor_window);
+    if(current_window->windowFilePath() == file_name)
+		return;
+    if(current_window->compareWorksheetFile(file_name))
+    {
+		current_window->mergeWorksheetFile(file_name);
+    } else  {
+		QErrorMessage error;
+        error.showMessage(QString("The file: %1 has different columns from the current file in editor.").arg(file_name));
+        error.exec();                
+    }
+    if(dialog->selected_item == ftp_item)
+	{
+		if(!ftp_dialog->file->remove())
+		{
+			QErrorMessage error;
+			error.showMessage(QString("Please remove the file from ftp server manually. The file is located on the same directory with OVQT application."));
+			error.exec(); 
+		}
+	
+	}
 }
 
 void CMainWindow::readSettings()

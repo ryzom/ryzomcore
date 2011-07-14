@@ -10,14 +10,21 @@ namespace Plugin
         _ui.setupUi(this);
         connect(_ui.connectButton, SIGNAL(clicked()), this, SLOT(ConnectButtonClicked()));
         connect(_ui.doneButton, SIGNAL(clicked()), this, SLOT(DoneButtonClicked()));
-        connect(_ui.cancelButton, SIGNAL(clicked()), this, SLOT(CancelButtonClicked()));
+		connect(_ui.cdToParrent, SIGNAL(clicked()), this, SLOT(cdToParent()));
+        connect(_ui.cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
         
-       // file list       
+        // file list       
         connect(_ui.fileList, SIGNAL(itemActivated(QTreeWidgetItem*,int)),this, SLOT(processItem(QTreeWidgetItem*,int)));
         _ui.fileList->setEnabled(false);
         _ui.fileList->setRootIsDecorated(false);
         _ui.fileList->setHeaderLabels(QStringList() << tr("Name") << tr("Size") << tr("Owner") << tr("Group") << tr("Time"));
         _ui.fileList->header()->setStretchLastSection(false);
+
+		// buttons
+		_ui.cdToParrent->setEnabled(false);
+		_ui.doneButton->setEnabled(false);
+
+		status = false;
     }
     
     void CFtpSelection::ConnectButtonClicked()
@@ -25,7 +32,9 @@ namespace Plugin
         conn = new QFtp(this);
         connect(conn, SIGNAL(commandFinished(int,bool)), this, SLOT(FtpCommandFinished(int,bool)));
         connect(conn, SIGNAL(listInfo(QUrlInfo)), this, SLOT(AddToList(QUrlInfo)));
-        
+		#ifndef QT_NO_CURSOR
+			setCursor(Qt::WaitCursor);
+		#endif       
         QUrl url(_ui.url->text());
         if (!url.isValid() || url.scheme().toLower() != QLatin1String("ftp")) {
                 conn->connectToHost(_ui.url->text(), 21);
@@ -44,6 +53,9 @@ namespace Plugin
     
     void CFtpSelection::FtpCommandFinished(int, bool error)
     {
+		#ifndef QT_NO_CURSOR
+			setCursor(Qt::ArrowCursor);
+		#endif
                 if (conn->currentCommand() == QFtp::ConnectToHost) 
                 {
                         if (error) 
@@ -64,6 +76,20 @@ namespace Plugin
                         conn->list();
                 }
                 
+				if (conn->currentCommand() == QFtp::Get) 
+				{
+					if(error)
+					{
+						status = false;
+						file->close();
+						file->remove();
+					} else {
+						file->close();
+						status = true;
+					}
+					_ui.cancelButton->setEnabled(true);
+				}
+
                 if (conn->currentCommand() == QFtp::List) 
                 {
                         if (isDirectory.isEmpty()) {                               
@@ -82,7 +108,7 @@ namespace Plugin
          item->setText(3, urlInfo.group());
          item->setText(4, urlInfo.lastModified().toString("MMM dd yyyy"));
 
-         QPixmap pixmap(urlInfo.isDir() ? ":/images/dir.png" : ":/images/file.png");
+         QPixmap pixmap(urlInfo.isDir() ? ":/translationManager/images/dir.png" : ":/translationManager/images/file.png");
          item->setIcon(0, pixmap);
 
          isDirectory[urlInfo.name()] = urlInfo.isDir();
@@ -104,18 +130,58 @@ namespace Plugin
                 currentPath += name;
                 conn->cd(name);
                 conn->list();
-                //TODO: cursor
+				#ifndef QT_NO_CURSOR
+					setCursor(Qt::WaitCursor);
+				#endif   
                 return;
-        }         
+        }  
+		_ui.doneButton->setEnabled(true);
     }
-    
+
+	void CFtpSelection::cdToParent()
+	{
+		 #ifndef QT_NO_CURSOR
+			 setCursor(Qt::WaitCursor);
+		 #endif
+			 _ui.fileList->clear();
+			 isDirectory.clear();
+			 currentPath = currentPath.left(currentPath.lastIndexOf('/'));
+			 if (currentPath.isEmpty()) {
+				 _ui.cdToParrent->setEnabled(false);
+				 conn->cd("/");
+			 } else {
+				 conn->cd(currentPath);
+			 }
+			 conn->list();
+	}
+
     void CFtpSelection::DoneButtonClicked()
     {
-        
+		 QString fileName = _ui.fileList->currentItem()->text(0);
+	 
+		 if (QFile::exists(fileName)) {
+			 QMessageBox::information(this, tr("FTP"),
+									  tr("There already exists a file called %1 in "
+										 "the current directory.")
+									  .arg(fileName));
+			 return;
+		 }
+
+		 file = new QFile(fileName);
+		 #ifndef QT_NO_CURSOR
+			setCursor(Qt::WaitCursor);
+		 #endif  
+		 if (!file->open(QIODevice::WriteOnly)) {
+			 QMessageBox::information(this, tr("FTP"),
+									  tr("Unable to save the file %1: %2.")
+									  .arg(fileName).arg(file->errorString()));
+			 delete file;
+			 return;
+		 }
+		 _ui.cancelButton->setEnabled(false);
+		 conn->get(_ui.fileList->currentItem()->text(0), file);
+
+	     reject();   
     }
     
-    void CFtpSelection::CancelButtonClicked()
-    {
-        
-    }
 }

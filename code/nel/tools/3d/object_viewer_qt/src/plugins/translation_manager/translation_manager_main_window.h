@@ -70,7 +70,7 @@ private:
         QMenu *windowMenu;
         QSignalMapper *windowMapper;
         // config
-        map<string,bool> initialize_settings;
+        QMap<string,bool> initialize_settings;
         QList<QString> filters;
         QList<QString> languages;
         QString level_design_path;

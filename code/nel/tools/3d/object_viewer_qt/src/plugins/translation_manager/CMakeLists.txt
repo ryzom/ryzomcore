@@ -24,6 +24,8 @@ SET(OVQT_PLUG_TRANSLATION_MANAGER_UIS	translation_manager_settings_page.ui
                                                         source_selection.ui
                                                         ftp_selection.ui)
 
+SET(OVQT_PLUG_TRANSLATION_MANAGER_RCS	ftp_selection.qrc)
+
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
 SET(QT_USE_QTNETWORK TRUE)
