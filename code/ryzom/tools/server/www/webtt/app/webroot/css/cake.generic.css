@@ -207,7 +207,7 @@ div.paging span a {
 dl {
 	line-height: 2em;
 	margin: 0em 0em;
-	width: 60%;
+	width: 80%;
 }
 dl .altrow {
 	background: #f4f4f4;
@@ -218,7 +218,7 @@ dt {
 	vertical-align: top;
 }
 dd {
-	margin-left: 10em;
+	margin-left: 15em;
 	margin-top: -2em;
 	vertical-align: top;
 }

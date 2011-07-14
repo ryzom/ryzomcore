@@ -8,11 +8,14 @@ class DATABASE_CONFIG {
 		'login' => 'webtt',
 		'password' => 'webtt77',
 		'database' => 'webtt2',
-		'encoding' => 'y'
+		'encoding' => 'utf8'
 	);
 	var $raw_files = array(
-		'driver' => "",
-		'datasource' => 'raw_files',
+		'datasource' => 'RawFilesSource',
+		'path' => '/home/kaczorek/projects/webtt/distfiles/translation',
+		'extension' => '(uxt|txt)',
+		'readonly' => true,
+		'recursive' => true,
 	);
 }
 ?>

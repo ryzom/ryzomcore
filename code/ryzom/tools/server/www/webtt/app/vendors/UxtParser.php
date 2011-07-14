@@ -2,6 +2,7 @@
 class UxtParser
 {
 	var $pipeline_directory = "/home/kaczorek/projects/webtt/distfiles/translation/";
+	var $debug = false;
 
 	function removeComments($str)
 	{
@@ -12,12 +13,16 @@ class UxtParser
 //		var_dump($str);
 //As a pertinent note, there's an issue with this function where parsing any string longer than 94326 characters long will silently return null. So be careful where you use it at.
 //http://pl.php.net/manual/en/function.preg-replace.php#98843
-		$returnString = preg_replace('!/\*.*?\*/!s', '', $str); // /* .*? */ s
+		ini_set('pcre.backtrack_limit', 10000000);
+		//$returnString = preg_replace('!/\*.*?\*/!s', '', $str); // /* .*? */ s
+		// added [^/] because there was //******* in translation file
+		$returnString = preg_replace('![^/]/\*.*?\*/!s', '', $str); // /* .*? */ s
 		// PHP 5.2.0
 		// if (PREG_NO_ERROR !== preg_last_error())
 		if ($returnString === null)
 		{
 			$returnStr = $str;
+			var_dump("PREG ERROR");
 			// exception
 		}
 		return $returnString;
@@ -57,11 +62,17 @@ class UxtParser
 				else
 					unset($type);
 			}
-/*			else if (mb_substr($str, 0, 8) == "// INDEX")
+			else if (mb_substr($str, 0, 8) == "// INDEX")
 			{
 				list($j, $type, $index) = explode(" ", $str);
+				$type = "internal_index";
 //				$arr = explode(" ", $str);
-			}*/
+			}
+			else if (mb_substr($str, 0, 13) == "// HASH_VALUE")
+			{
+				list($j, $type, $hash_value) = explode(" ", $str);
+				$type = "hash_value";
+			}
 /*			if (!isset($type))
 			{
 				var_dump(isset($type));
@@ -71,7 +82,7 @@ class UxtParser
 			if (isset($type))
 			{
 				$type = mb_strtolower($type);
-				$arr = compact("type","command","index");
+				$arr = compact("type","command","index","hash_value");
 			}
 		}
 		else if (!(mb_substr($str, 0, 2) == "//") && mb_strlen($str))
@@ -104,6 +115,7 @@ class UxtParser
 	{
 		$parsedEnt = array();
 		$newEnt = false;
+		$prevStringLine = false;
 		$entities = array();
 
 //		$file = file_get_contents($this->pipeline_directory . $file);
@@ -115,54 +127,107 @@ class UxtParser
 		$file = $this->removeComments($file);
 //		var_dump($file);
 		$lines = explode("\n", $file);
-//		echo "<pre>################################\n";
+		if ($this->debug)			
+		{
+			echo "<pre>\n\n";
+		}
+		$line_no=1;
 		foreach ($lines as $line)
 		{
+			if ($this->debug)
+			{
+				echo "\n\t#################### LINE NUMBER " . $line_no++ . "\n\n";
+			}
+
+//			var_dump($line);
 			$line = rtrim($line);
 			$parsedLine = $this->parseLine($line);
+
+			if ($this->debug)
+			{
+				echo "%%%% parsedLine\n";
+				var_dump($parsedLine);
+				echo "\n";
+			
+				echo "%%%% prevStringLine\n";
+				var_dump($prevStringLine);
+				echo "\n";
+			}
 
 			if (!$parsedLine)
 				continue;
 
-			if ($parsedLine["type"] == "index")
-				$parsedEnt["index"] = $parsedLine["index"];
+			// if line start with diff (diff files) or hash_value (translated files) and before was line with translation, then we start new ent
 
-			if ($parsedLine["type"] == "string")
+			if ($prevStringLine && (
+					($parsedLine["type"] == "diff" && $parsedEnt) || ($parsedLine["type"] == "hash_value" && $parsedEnt)
+				))
 			{
-/*				echo "%%%% parsedEnt %%%%%\n";
-				var_dump($parsedEnt);
-
-				echo "%%%% parsedLine %%%%%\n";
-				var_dump($parsedLine);
-*/
-
-				if (!$parsedLine['identifier'])
-				{
-//					echo "ZLACZENIE \n";
-					$parsedEnt['string'] .= "\n" . $parsedLine['string'];
-				}
-				else
-				{
-//					echo "DODANIE \n";
-					$parsedEnt += $parsedLine;
-				}
-
-/*				echo "%%%% parsedEnt after %%%%%\n";
+/*				echo "%%%% prevStringLine %%%%%\n";
 				var_dump($parsedEnt);*/
-			}
-
-			if ($parsedLine["type"] == "diff" && $parsedEnt)
-			{
 				$newEnt = true;
 			}
 
 			if ($newEnt)
 			{
-//				var_dump($parsedEnt);
+				if ($this->debug)			
+				{
+					echo "\t%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n";
+					echo "\t%%%% newEnt %%%%%%%%% newEnt %%%%%%%%% newEnt %%%%%%%%% newEnt %%%%%\n";
+					echo "\t%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n\n";
+					var_dump($parsedEnt);
+				}
+				if (!isset($parsedEnt["diff"]) && !isset($parsedEnt["index"]))
+					$parsedEnt["index"] = $parsedEnt["internal_index"];
+
 				$entities[] = $parsedEnt;
 				$parsedEnt =array();
 				$newEnt = false;
 			}
+
+			if ($parsedLine["type"] == "internal_index")
+					$parsedEnt["internal_index"] = $parsedLine["index"];
+
+			if ($parsedLine["type"] == "string")
+			{
+				$prevStringLine = true;
+
+				if ($this->debug)			
+				{
+					echo "%%%% parsedEnt %%%%%\n";
+					var_dump($parsedEnt);
+
+//					echo "%%%% parsedLine %%%%%\n";
+//					var_dump($parsedLine);
+				}
+
+				if (!$parsedLine['identifier'])
+				{
+					if ($this->debug) echo "ZLACZENIE \n";
+					if ($this->debug && !isset($parsedEnt['string']))
+					{
+						echo "!isset parsedEnt['string']\n";
+						var_dump($line);
+						var_dump($parsedEnt);
+						var_dump($parsedLine);
+					}
+					$parsedEnt['string'] .= $parsedLine['string'] . "\n";
+				}
+				else
+				{
+					if ($this->debug) echo "DODANIE \n";
+					$parsedEnt += $parsedLine;
+					$parsedEnt['string'] .= "\n";
+				}
+
+				if ($this->debug)			
+				{
+					echo "%%%% parsedEnt after %%%%%\n";
+					var_dump($parsedEnt);
+				}
+			}
+			else
+				$prevStringLine = false;
 
 			if ($parsedLine["type"] == "diff")
 			{
@@ -171,9 +236,19 @@ class UxtParser
 			}
 		}
 		if ($parsedEnt)
+		{
+			if (!isset($parsedEnt["diff"]) && !isset($parsedEnt["index"]))
+				$parsedEnt["index"] = $parsedEnt["internal_index"];
+
 			$entities[] = $parsedEnt;
-/*		var_dump($entities);
-		echo "</pre>\n";*/
+		}
+
+		if ($this->debug)			
+		{
+			echo "<pre>";
+			var_dump($entities);
+			echo "</pre>\n";
+		}
 		return $entities;
 	}
 }

@@ -17,7 +17,9 @@
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 ?>
-<h3><?php __('Languages'); ?></h3>
-<p>
-<?php echo $this->Html->link(__('List Languages', true), array('controller' => 'languages', 'action' => 'index')); ?>
-</p>
+<div class="grid_16">
+	<h3 id="page-heading"><?php __('Languages'); ?></h3>
+	<p>
+	<?php echo $this->Html->link(__('List Languages', true), array('controller' => 'languages', 'action' => 'index')); ?>
+	</p>
+</div>

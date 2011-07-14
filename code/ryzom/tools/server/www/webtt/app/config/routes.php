@@ -31,3 +31,9 @@
  * ...and connect the rest of 'Pages' controller's urls.
  */
 	Router::connect('/pages/*', array('controller' => 'pages', 'action' => 'display'));
+/**
+ * Connect 'Pages' controller's urls for admin prefix.
+ */
+	Router::connect('/admin/pages/*', array('controller' => 'pages', 'action' => 'display', 'admin' => true));
+	Router::connect('/admin/pages', array('controller' => 'pages', 'action' => 'display', 'admin' => true, 'home'));
+	Router::connect('/admin', array('controller' => 'pages', 'action' => 'display', 'admin' => true, 'home'));

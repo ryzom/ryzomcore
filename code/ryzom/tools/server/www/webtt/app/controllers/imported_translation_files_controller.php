@@ -2,7 +2,7 @@
 class ImportedTranslationFilesController extends AppController {
 
 	var $name = 'ImportedTranslationFiles';
-	var $layout = "default_debug";
+//	var $layout = "default_debug";
 	function index() {
 		$this->ImportedTranslationFile->recursive = 0;
 		$this->set('importedTranslationFiles', $this->paginate());
@@ -149,6 +149,7 @@ class ImportedTranslationFilesController extends AppController {
 	}
 	function admin_index() {
 		$this->ImportedTranslationFile->recursive = 0;
+//		FireCake::dump("??",$_SERVER);
 		$this->set('importedTranslationFiles', $this->paginate());
 	}
 
@@ -157,7 +158,7 @@ class ImportedTranslationFilesController extends AppController {
 			$this->Session->setFlash(__('Invalid translation file', true));
 			$this->redirect(array('action' => 'index'));
 		}
-		$this->set('translationFile', $this->ImportedTranslationFile->read(null, $id));
+		$this->set('importedTranslationFile', $this->ImportedTranslationFile->read(null, $id));
 	}
 
 	function admin_add() {

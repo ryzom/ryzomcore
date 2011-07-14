@@ -1,43 +1,79 @@
-<div class="votes view">
-<h2><?php  __('Vote');?></h2>
-	<dl><?php $i = 0; $class = ' class="altrow"';?>
-		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Id'); ?></dt>
-		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
+<div class="grid_3">
+	<div class="box menubox">		<h2>
+			<a href="#" id="toggle-admin-actions">Actions</a>
+		</h2>
+		<div class="inbox">
+		<div class="block" id="admin-actions">
+			<h5><?php echo __('Votes', true); ?></h5>
+			<ul class="menu">
+				<li><?php echo $this->Html->link(sprintf(__('Edit %s', true), __('Vote', true)), array('action' => 'edit', $vote['Vote']['id'])); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('Delete %s', true), __('Vote', true)), array('action' => 'delete', $vote['Vote']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $vote['Vote']['id'])); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Votes', true)), array('action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Vote', true)), array('action' => 'add')); ?> </li>
+			</ul>
+				
+			<h5>Translations</h5>
+			<ul class="menu">
+				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Translations', true)), array('controller' => 'translations', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Translation', true)), array('controller' => 'translations', 'action' => 'add')); ?> </li>
+			</ul>
+
+			<h5>Users</h5>
+			<ul class="menu">
+				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Users', true)), array('controller' => 'users', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('User', true)), array('controller' => 'users', 'action' => 'add')); ?> </li>
+			</ul>
+		</div>
+		</div>
+	</div>
+</div>
+
+<div class="grid_13">
+
+<div class="box">
+	<div class="votes view">
+	<h2><?php  __('Vote');?></h2>
+		<div class="block">
+			<div class="dl">
+			<?php $i = 1; $class = ' altrow';?>
+						<div class="dt<?php if ($i == 1) echo " dh"; else if ($i % 2 == 0) echo $class;?>"><?php __('Id'); ?></div>
+		<div class="dd<?php if ($i == 1) echo " dh"; else if ($i % 2 == 0) echo $class;?>">
 			<?php echo $vote['Vote']['id']; ?>
-			&nbsp;
-		</dd>
-		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Translation'); ?></dt>
-		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
+
+		</div>
+		<?php $i++; ?>
+		<div style="clear: both"></div>
+		<div class="dt<?php if ($i % 2 == 0) echo $class;?>"><?php __('Translation'); ?></div>
+		<div class="dd<?php if ($i % 2 == 0) echo $class;?>">
 			<?php echo $this->Html->link($vote['Translation']['translation_text'], array('controller' => 'translations', 'action' => 'view', $vote['Translation']['id'])); ?>
-			&nbsp;
-		</dd>
-		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('User'); ?></dt>
-		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
+		</div>
+		<?php $i++; ?>
+		<div style="clear: both"></div>
+		<div class="dt<?php if ($i % 2 == 0) echo $class;?>"><?php __('User'); ?></div>
+		<div class="dd<?php if ($i % 2 == 0) echo $class;?>">
 			<?php echo $this->Html->link($vote['User']['name'], array('controller' => 'users', 'action' => 'view', $vote['User']['id'])); ?>
-			&nbsp;
-		</dd>
-		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Created'); ?></dt>
-		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
+		</div>
+		<?php $i++; ?>
+		<div style="clear: both"></div>
+		<div class="dt<?php if ($i == 1) echo " dh"; else if ($i % 2 == 0) echo $class;?>"><?php __('Created'); ?></div>
+		<div class="dd<?php if ($i == 1) echo " dh"; else if ($i % 2 == 0) echo $class;?>">
 			<?php echo $vote['Vote']['created']; ?>
-			&nbsp;
-		</dd>
-		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Modified'); ?></dt>
-		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
+
+		</div>
+		<?php $i++; ?>
+		<div style="clear: both"></div>
+		<div class="dt<?php if ($i == 1) echo " dh"; else if ($i % 2 == 0) echo $class;?>"><?php __('Modified'); ?></div>
+		<div class="dd<?php if ($i == 1) echo " dh"; else if ($i % 2 == 0) echo $class;?>">
 			<?php echo $vote['Vote']['modified']; ?>
-			&nbsp;
-		</dd>
-	</dl>
+
+		</div>
+		<?php $i++; ?>
+		<div style="clear: both"></div>
+			</div>
+		</div>
+	</div>
 </div>
-<div class="actions">
-	<h3><?php __('Actions'); ?></h3>
-	<ul>
-		<li><?php echo $this->Html->link(__('Edit Vote', true), array('action' => 'edit', $vote['Vote']['id'])); ?> </li>
-		<li><?php echo $this->Html->link(__('Delete Vote', true), array('action' => 'delete', $vote['Vote']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $vote['Vote']['id'])); ?> </li>
-		<li><?php echo $this->Html->link(__('List Votes', true), array('action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Vote', true), array('action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Translations', true), array('controller' => 'translations', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Translation', true), array('controller' => 'translations', 'action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Users', true), array('controller' => 'users', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New User', true), array('controller' => 'users', 'action' => 'add')); ?> </li>
-	</ul>
+
+
 </div>
+<div class="clear"></div>

@@ -5,7 +5,10 @@ class TranslationsController extends AppController {
 
 	function index() {
 		$this->Translation->recursive = 0;
-		$this->set('translations', $this->paginate());
+		$conditions = null;
+		if (isset($this->passedArgs['identifier_id']) && $identifier = $this->passedArgs['identifier_id'])
+			$conditions = array('Translation.identifier_id' => $identifier);
+		$this->set('translations', $this->paginate($conditions));
 	}
 
 	function view($id = null) {
@@ -14,21 +17,34 @@ class TranslationsController extends AppController {
 			$this->redirect(array('action' => 'index'));
 		}
 //		$this->recursive=2;
-		$this->set('translation', $bumz = $this->Translation->read(null, $id));
-//		var_dump($bumz);
+		$this->set('translation', $translation = $this->Translation->read(null, $id));
+		$this->set('identifier', $identifier = $this->Translation->Identifier->read(null, $translation['Translation']['identifier_id']));
+//		var_dump($translation);
+//		var_dump($identifier);
 	}
 
 	function add() {
 		if (!empty($this->data)) {
 			$this->Translation->create();
-			if ($this->Translation->save($this->data)) {
+			if ($res = $this->Translation->save($this->data)) {
 				$this->Session->setFlash(__('The translation has been saved', true));
-				$this->redirect(array('action' => 'index'));
+				$this->redirect(array('action' => 'index', 'identifier_id' => $res['Translation']['identifier_id']));
 			} else {
 				$this->Session->setFlash(__('The translation could not be saved. Please, try again.', true));
 			}
 		}
-		$identifiers = $this->Translation->Identifier->find('list');
+		if (empty($this->passedArgs['identifier_id']))
+		{
+			$this->Session->setFlash(__('You need to choose identifier for translation', true));
+			$this->redirect(array('controller' => 'identifiers', 'action' => 'index'));
+		}
+		else
+		{
+			$identifier_id = $this->passedArgs['identifier_id'];
+			$this->set('identifier', $identifier = $this->Translation->Identifier->read(null, $identifier_id));
+//			$this->data['Translation.identifier_id'] = $identifier_id;
+		}
+//		$identifiers = $this->Translation->Identifier->find('list', array('recursive' => -1));
 		$users = $this->Translation->User->find('list');
 		$this->set(compact('identifiers', 'users'));
 	}
@@ -49,9 +65,11 @@ class TranslationsController extends AppController {
 		if (empty($this->data)) {
 			$this->data = $this->Translation->read(null, $id);
 		}
+//		var_dump($this->data);
+		$identifier = $this->Translation->Identifier->read(null, $this->data['Translation']['identifier_id']);
 		$identifiers = $this->Translation->Identifier->find('list');
 		$users = $this->Translation->User->find('list');
-		$this->set(compact('identifiers', 'users'));
+		$this->set(compact('identifiers', 'users', 'identifier'));
 	}
 
 	function delete($id = null) {
@@ -61,14 +79,28 @@ class TranslationsController extends AppController {
 		}
 		if ($this->Translation->delete($id)) {
 			$this->Session->setFlash(__('Translation deleted', true));
-			$this->redirect(array('action'=>'index'));
+//			$this->redirect(array('action'=>'index'));
+			$this->redirect($this->referer());
 		}
 		$this->Session->setFlash(__('Translation was not deleted', true));
 		$this->redirect(array('action' => 'index'));
 	}
 	function admin_index() {
-		$this->Translation->recursive = 0;
-		$this->set('translations', $this->paginate());
+		return $this->index();
+	}
+
+	function admin_setBest($id) {
+		if (!$id) {
+			$this->Session->setFlash(__('Invalid id for translation', true));
+			$this->redirect($this->referer());
+		}
+		if ($this->Translation->setBest($id))
+			$this->Session->setFlash(__('Set successful', true));
+		else
+			$this->Session->setFlash(__('Set error', true));
+		$this->redirect($this->referer());
+//		$this->index();
+//		$this->render('index');
 	}
 
 	function admin_view($id = null) {

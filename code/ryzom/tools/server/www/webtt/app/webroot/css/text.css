@@ -3,6 +3,8 @@
 	Learn more ~ http://960.gs/
 
 	Licensed under GPL and MIT.
+
+	WebTT template based on 960 Grid System (http://960.gs/)
 */
 
 /* =Basic HTML
@@ -10,7 +12,7 @@
 
 body
 {
-	font: 13px/1.5 Helvetica, Arial, 'Liberation Sans', FreeSans, sans-serif;
+	font: 13px/1.5 'lucida grande',verdana,helvetica,arial,'Liberation Sans', FreeSans, sans-serif
 }
 
 a:focus

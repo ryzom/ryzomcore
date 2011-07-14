@@ -1,24 +1,51 @@
-<div class="translationFiles form">
-<?php echo $this->Form->create('TranslationFile');?>
-	<fieldset>
-		<legend><?php __('Admin Edit Translation File'); ?></legend>
-	<?php
+<div class="grid_3">
+	<div class="box menubox">
+				<h2>
+			<a href="#" id="toggle-admin-actions">Actions</a>
+		</h2>
+		<div class="inbox">
+		<div class="block" id="admin-actions">
+			<h5><?php echo __('Imported Translation Files', true); ?></h5>
+			<ul class="menu">
+									<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Imported Translation Files', true)), array('action' => 'index'));?></li>			</ul>
+			
+			<h5>Languages</h5>
+			<ul class="menu">
+				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Languages', true)), array('controller' => 'languages', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Language', true)), array('controller' => 'languages', 'action' => 'add')); ?> </li>
+			</ul>
+
+			<h5>Raw Files</h5>
+			<ul class="menu">
+				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Raw Files', true)), array('controller' => 'raw_files', 'action' => 'index')); ?> </li>
+			</ul>
+
+			<h5>File Identifiers</h5>
+			<ul class="menu">
+				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('File Identifiers', true)), array('controller' => 'file_identifiers', 'action' => 'index')); ?> </li>
+			</ul>
+		</div>
+		</div>
+	</div>
+</div>
+
+<div class="grid_13">
+    <h2 id="page-heading"><?php printf(__('Admin Edit %s', true), __('Imported Translation File', true)); ?></h2>
+    
+	<div class="importedTranslationFiles form">
+	<?php echo $this->Form->create('ImportedTranslationFile');?>
+		<fieldset>
+						<legend><?php printf(__('Imported Translation File # %s', true), $this->Form->value('ImportedTranslationFile.id')); ?></legend>
+					<?php
 		echo $this->Form->input('id');
 		echo $this->Form->input('language_id');
 		echo $this->Form->input('filename');
+		echo $this->Form->input('merged');
+		echo $this->Form->input('file_last_modified_date');
 	?>
-	</fieldset>
-<?php echo $this->Form->end(__('Submit', true));?>
-</div>
-<div class="actions">
-	<h3><?php __('Actions'); ?></h3>
-	<ul>
+		</fieldset>
+	<?php echo $this->Form->end(__('Submit', true));?>
+	</div>
 
-		<li><?php echo $this->Html->link(__('Delete', true), array('action' => 'delete', $this->Form->value('TranslationFile.id')), null, sprintf(__('Are you sure you want to delete # %s?', true), $this->Form->value('TranslationFile.id'))); ?></li>
-		<li><?php echo $this->Html->link(__('List Translation Files', true), array('action' => 'index'));?></li>
-		<li><?php echo $this->Html->link(__('List Languages', true), array('controller' => 'languages', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Language', true), array('controller' => 'languages', 'action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List File Identifiers', true), array('controller' => 'file_identifiers', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New File Identifier', true), array('controller' => 'file_identifiers', 'action' => 'add')); ?> </li>
-	</ul>
 </div>
+<div class="clear"></div>

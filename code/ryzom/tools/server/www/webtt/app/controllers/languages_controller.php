@@ -9,6 +9,7 @@ class LanguagesController extends AppController {
 		FireCake::enable();
 		firecake('testestestes');
 		FireCake::dump('test','testsss');*/
+		App::import("Vendor","functions_render");
 		$this->Language->recursive = 0;
 		$this->set('languages', $this->paginate());
 	}

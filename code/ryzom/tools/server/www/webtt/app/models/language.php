@@ -2,11 +2,13 @@
 class Language extends AppModel {
 	var $name = 'Language';
 	var $displayField = 'name';
+
+	var $scaffoldForbiddenActions = array("add", "edit", "delete");
 	//The Associations below have been created with all possible keys, those that are not needed can be removed
 
 	var $hasMany = array(
-		'Identifier' => array(
-			'className' => 'Identifier',
+		'TranslationFile' => array(
+			'className' => 'TranslationFile',
 			'foreignKey' => 'language_id',
 			'dependent' => false,
 			'conditions' => '',
@@ -30,7 +32,20 @@ class Language extends AppModel {
 			'exclusive' => '',
 			'finderQuery' => '',
 			'counterQuery' => ''
-		)
+		),
+		'Identifier' => array(
+			'className' => 'Identifier',
+			'foreignKey' => 'language_id',
+			'dependent' => false,
+			'conditions' => '',
+			'fields' => '',
+			'order' => '',
+			'limit' => '',
+			'offset' => '',
+			'exclusive' => '',
+			'finderQuery' => '',
+			'counterQuery' => ''
+		),
 	);
 
 }

@@ -1,22 +1,42 @@
-<div class="votes form">
-<?php echo $this->Form->create('Vote');?>
-	<fieldset>
-		<legend><?php __('Add Vote'); ?></legend>
-	<?php
+<div class="grid_3">
+	<div class="box menubox">
+				<h2>
+			<a href="#" id="toggle-admin-actions">Actions</a>
+		</h2>
+		<div class="inbox">
+		<div class="block" id="admin-actions">
+			<h5><?php echo __('Votes', true); ?></h5>
+			<ul class="menu">
+						<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Votes', true)), array('action' => 'index'));?></li>			</ul>
+			
+			<h5>Translations</h5>
+			<ul class="menu">
+				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Translations', true)), array('controller' => 'translations', 'action' => 'index')); ?> </li>
+			</ul>
+
+			<h5>Users</h5>
+			<ul class="menu">
+				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Users', true)), array('controller' => 'users', 'action' => 'index')); ?> </li>
+			</ul>
+		</div>
+		</div>
+	</div>
+</div>
+
+<div class="grid_13">
+    <h2 id="page-heading"><?php printf(__('Add %s', true), __('Vote', true)); ?></h2>
+    
+	<div class="votes form">
+	<?php echo $this->Form->create('Vote');?>
+		<fieldset>
+				 		<legend><?php printf(__('Vote', true)); ?></legend>
+					<?php
 		echo $this->Form->input('translation_id');
 		echo $this->Form->input('user_id');
 	?>
-	</fieldset>
-<?php echo $this->Form->end(__('Submit', true));?>
-</div>
-<div class="actions">
-	<h3><?php __('Actions'); ?></h3>
-	<ul>
+		</fieldset>
+	<?php echo $this->Form->end(__('Submit', true));?>
+	</div>
 
-		<li><?php echo $this->Html->link(__('List Votes', true), array('action' => 'index'));?></li>
-		<li><?php echo $this->Html->link(__('List Translations', true), array('controller' => 'translations', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Translation', true), array('controller' => 'translations', 'action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Users', true), array('controller' => 'users', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New User', true), array('controller' => 'users', 'action' => 'add')); ?> </li>
-	</ul>
 </div>
+<div class="clear"></div>

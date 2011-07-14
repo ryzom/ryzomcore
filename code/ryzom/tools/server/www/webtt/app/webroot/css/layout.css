@@ -1,12 +1,18 @@
-/*
+/* WebTT template based on 960 Grid System (http://960.gs/)
+
 -----------------------------------------------
 Grey Box Method - Layout CSS
 ----------------------------------------------- */
 
 body {
-	background: #eee;
-	border-top: 5px solid #000;
-	color: #333;
+	background: #000;
+	background-image: url("http://www.ryzom.com/data/bg.jpg");
+	background-attachment:fixed;
+	background-repeat: repeat-x;
+//	border-top: 5px solid #000;
+	margin-top: 5px;
+//	color: #333;
+	color: #ddd;
 	font-size: 11px;
 	padding: 0 0 40px;
 }
@@ -15,12 +21,16 @@ body {
 /* anchors
 ----------------------------------------------- */
 a {
-	color: #000;
+//	color: #000;
+	color: inherit;
 	font-weight:bold;
 	text-decoration: none;
 }
 a:hover {
-	color:#333;
+//	color:#333;
+//	text-decoration: underline;
+//	text-shadow: #6374AB 0px 0px 2px;
+	text-shadow: #84AFBD 0px 0px 2px;
 }
 
 
@@ -28,7 +38,10 @@ a:hover {
 ----------------------------------------------- */
 .container_12,
 .container_16 {
-	background:#fff;
+	background: rgb(71,71,71);
+	background: rgba(0,0,0, 0.6);
+	border: 1px solid rgb(110,110,110);
+	border: 1px solid rgba(255,255,255, 0.5);
 }
 
 
@@ -42,6 +55,11 @@ h6 {font-size:1em; text-transform:uppercase;}
 
 h1 a {
 	font-weight:normal;
+	color: #ddd;
+}
+h1 a:hover {
+	font-weight:normal;
+	color: #ddd;
 }
 
 
@@ -70,28 +88,70 @@ h2#page-heading {
 /* boxes
 ----------------------------------------------- */
 .box {
-	background:#ddd;
+//	background:rgb(210,210,210);
+//	background:rgba(255,255,255,0.81);
 	margin-bottom:20px;
 	padding:10px 10px 1px 10px;
+//	color: #333;
+	color: #ddd;
+	border: 1px solid rgb(71,71,71);
+	border: 1px solid rgba(255,255,255,0.4);
 }
 .box h2 {
 	font-size:1em;
 	font-weight:normal;
 	text-transform:uppercase;
 	color:#fff;
-	background:#333;
+//	background:#333;
+	background:rgb(31,31,31);
+	background:rgba(90,90,0,0.6);
 	margin:-10px -10px 0 -10px;
 	padding:6px 12px;
 }
 .box h2 a,
 .box h2 a.visible {
-	color:#fff;
-	background:#333 url("../img/switch_minus.gif") 97% 50% no-repeat;
+//	color:#fff;
+	color: #ddd;
+//	background:#333 url("../img/switch_minus.gif") 97% 50% no-repeat;
+	background:url("../img/switch_minus.gif") 97% 50% no-repeat;
+	background:url("../img/switch_minus.gif") 97% 50% no-repeat;
 	display:block;
 	padding:6px 12px;
 	margin:-6px -12px;
 	border:none;
 }
+.box h2 a.hidden,
+.box h2 a.hidden:hover {
+	background-image: url("../img/switch_plus.gif");
+}
+.box h2 a:hover {
+	background-color:#111;
+}
+
+.menubox {
+	padding:0px;
+	color: #333;
+}
+.menubox .inbox {
+	background:rgb(210,210,210);
+	background:rgba(255,255,255,0.81);
+	padding: 0px 10px 1px;
+}
+.inbox a {
+	color: #000;
+}
+.menubox h2 {
+	margin: 0px;
+}
+.menubox h2 a,
+.menubox h2 a.visible {
+	background:rgb(31,31,31) url("../img/switch_minus.gif") 97% 50% no-repeat;
+	background:rgba(90,90,0,0.6) url("../img/switch_minus.gif") 97% 50% no-repeat;
+}
+.menubox h2 a:hover {
+	background-color:#111;
+}
+
 .grid_4 .box h2 a {
 	background-position: 97% 50%;
 }
@@ -103,13 +163,6 @@ h2#page-heading {
 }
 
 
-.box h2 a.hidden,
-.box h2 a.hidden:hover {
-	background-image: url("../img/switch_plus.gif");
-}
-.box h2 a:hover {
-	background-color:#111;
-}
 .block {
 	padding-top:10px;
 }
@@ -245,7 +298,9 @@ ul.section li.current > a.active:hover {
 ----------------------------------------------- */
 table {
 	width:100%;
-	border:1px solid #bbb;
+//	border:1px solid #bbb;
+	border:1px solid #aaa;
+//	border: 1px solid rgba(0,0,0,0.55);
 	margin-bottom:10px;
 }
 col.colC {
@@ -254,10 +309,12 @@ col.colC {
 th, td {
 	padding:.2em 1em;
 	text-align:left;
+	color: #333;
 }
 thead th {
 	border-bottom:2px solid #888;
-	background:#bbb;
+	background: #eee;
+	background:rgba(212,222,255,0.65);
 	padding:.4em 1em .2em;
 }
 thead th.table-head {
@@ -273,6 +330,7 @@ tbody td {
 	border-top:1px solid #bbb;
 	border-bottom:1px solid #bbb;
 	background:#eee;
+	background:rgba(255,255,255,0.85);
 }
 tbody tr.odd th,
 tbody tr.odd td {
@@ -282,6 +340,7 @@ tfoot th,
 tfoot td {
 	border-top:2px solid #666;
 	background:#eee;
+	background:rgba(212,222,255,0.65);
 }
 tfoot tr.total th,
 tfoot tr.total td {
@@ -295,7 +354,7 @@ td.currency {
 	text-align:right;
 }
 tfoot.dark th, tfoot.dark td {
-	background: #bbbbbb;
+//	background: #bbbbbb;
 }
 
 
@@ -309,12 +368,14 @@ fieldset {
 	padding:10px;
 	position:relative;
 	background:#e9e9e9;
+	background:rgba(255,255,255,0.81);
 	margin-bottom:10px;
+	color: #333;
 }
 legend {
 	font-size:1.1em;
 	padding:.4em .8em;
-	background:#fff;
+	background:#f5f5f5;
 	border:1px solid #bbb;
 }
 fieldset.login p {
@@ -531,7 +592,7 @@ div#flashMessage {
 	padding: 10px;
 	margin: 0px 13px 10px 11px;
 	border: 1px dashed #888;
-	background: #eee;
+	background: #ffcccc;
 	font-size: 14px;
 }
 div.flash-error {
@@ -552,6 +613,11 @@ div.flash-success {
 div.error-message {
 	color: #bf0000;
 	font-weight: bold;
+}
+div.form div.box {
+	padding: 10px;
+	background:#e9e9e9;
+	background: none repeat scroll 0 0 rgba(255, 255, 255, 0.81);
 }
 .input {
 	margin: 0px 0px 5px 0px;
@@ -588,7 +654,35 @@ dl {
 	margin: 0em 0em;
 	width: 60%;
 }
-dl .altrow {
+div.dl {
+	border: 1px solid #aaa;
+	color: #333;
+	margin-bottom: 10px;
+}
+div.dh {
+	background: none repeat scroll 0 0 rgba(212, 222, 255, 0.65);
+	padding: 0.4em 1em 0.2em;
+	font-weight: bold;
+	border-bottom: 1px solid #888888;
+	border-top: 0px none;
+}
+.dt, .dd {
+	padding: 0.4em 1em 0.2em;
+	border-top: 1px solid #888888;
+}
+div.dt {
+	float: left;
+	width: 10em;
+	background: transparent;
+	font-weight: bold;
+}
+.dd {
+	background: none repeat scroll 0 0 rgba(255, 255, 255, 0.85);
+}
+.dd:after {
+	clear: both;
+}
+dl .altrow, div .altrow {
 	background: #f4f4f4;
 }
 dt {

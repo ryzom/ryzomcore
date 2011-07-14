@@ -33,4 +33,6 @@
  */
 class AppModel extends Model {
 //	var $useDbConfig = 'raw_files';
+	var $scaffoldForbiddenActions = null;
+	var $scaffoldActions = null;
 }

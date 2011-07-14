@@ -2,6 +2,9 @@
 class ImportedTranslationFile extends AppModel {
 	var $name = 'ImportedTranslationFile';
 	var $displayField = 'filename';
+
+	var $scaffoldForbiddenActions = array("index", "add", "admin_add", "edit", "admin_edit", "delete", "admin_delete");
+
 	//The Associations below have been created with all possible keys, those that are not needed can be removed
 
 	var $actsAs = array('Containable');
@@ -13,7 +16,14 @@ class ImportedTranslationFile extends AppModel {
 			'conditions' => '',
 			'fields' => '',
 			'order' => ''
-		)
+		),
+		'TranslationFile' => array(
+			'className' => 'TranslationFile',
+			'foreignKey' => 'translation_file_id',
+			'conditions' => '',
+			'fields' => '',
+			'order' => ''
+		),
 	);
 
 	var $hasMany = array(
@@ -23,7 +33,7 @@ class ImportedTranslationFile extends AppModel {
 			'dependent' => true,
 			'conditions' => '',
 			'fields' => '',
-			'order' => '',
+			'order' => 'FileIdentifier.id',
 			'limit' => '',
 			'offset' => '',
 			'exclusive' => '',

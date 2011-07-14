@@ -33,5 +33,41 @@
  * @link http://book.cakephp.org/view/957/The-App-Controller
  */
 class AppController extends Controller {
-	var $components = array('DebugKit.Toolbar', 'Session');
+	var $components = array('DebugKit.Toolbar', 'Session', 'PathResolver', 'Auth' => array("authorize"=>"controller"));
+	var $layout = "new";
+	
+	function beforeFilter() {
+		parent::beforeFilter();
+		$this->Auth->loginAction = array('admin' => false, 'controller' => 'users', 'action' => 'login');
+
+		if ($this->Auth->user('role') == "admin")
+			$this->Auth->allow("*");
+		else if ($this->Auth->user())
+		{
+			// $this->Auth->allow('index', 'view', 'add', 'delete', 'edit');
+			foreach ($this->methods as $method)
+				if (mb_strpos($method, 'admin_') !== 0)
+					$this->Auth->allow($method);
+		}
+	}
+
+	function isAuthorized() {
+/*		if (isset($this->params['prefix']) && $this->params['prefix'] == "admin" && $this->Auth->user('role') != "admin")
+		{
+			return false;
+		}
+
+		return true;*/
+		$action = $this->params['action'];
+		$allowedActions = array_map('strtolower', $this->Auth->allowedActions);
+		$isAllowed = (
+			$this->Auth->allowedActions == array('*') ||
+			in_array($action, $allowedActions)
+		);
+//		$this->log($isAllowed);
+		return $isAllowed;
+//		
+	}
+
+
 }

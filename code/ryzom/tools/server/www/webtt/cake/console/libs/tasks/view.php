@@ -224,7 +224,7 @@ class ViewTask extends BakeTask {
 		$this->controllerPath = strtolower(Inflector::underscore($this->controllerName));
 
 		$prompt = sprintf(__("Would you like bake to build your views interactively?\nWarning: Choosing no will overwrite %s views if it exist.", true),  $this->controllerName);
-		$interactive = $this->in($prompt, array('y', 'n'), 'n');
+		$interactive = $this->in($prompt, array('y', 'n'), 'y');
 
 		if (strtolower($interactive) == 'n') {
 			$this->interactive = false;
@@ -233,12 +233,13 @@ class ViewTask extends BakeTask {
 		$prompt = __("Would you like to create some CRUD views\n(index, add, view, edit) for this controller?\nNOTE: Before doing so, you'll need to create your controller\nand model classes (including associated models).", true);
 		$wannaDoScaffold = $this->in($prompt, array('y','n'), 'y');
 
-		$wannaDoAdmin = $this->in(__("Would you like to create the views for admin routing?", true), array('y','n'), 'n');
+		$wannaDoAdmin = $this->in(__("Would you like to create the views for admin routing?", true), array('y','n'), 'y');
 
 		if (strtolower($wannaDoScaffold) == 'y' || strtolower($wannaDoAdmin) == 'y') {
 			$vars = $this->__loadController();
 			if (strtolower($wannaDoScaffold) == 'y') {
 				$actions = $this->scaffoldActions;
+				$vars['scaffoldPrefix'] = null;
 				$this->bakeActions($actions, $vars);
 			}
 			if (strtolower($wannaDoAdmin) == 'y') {
@@ -248,6 +249,7 @@ class ViewTask extends BakeTask {
 				foreach ($regularActions as $action) {
 					$adminActions[] = $admin . $action;
 				}
+				$vars['scaffoldPrefix'] = $admin;
 				$this->bakeActions($adminActions, $vars);
 			}
 			$this->hr();
@@ -298,17 +300,20 @@ class ViewTask extends BakeTask {
 			$schema = $modelObj->schema(true);
 			$fields = array_keys($schema);
 			$associations = $this->__associations($modelObj);
+			$scaffoldForbiddenActions = $modelObj->scaffoldForbiddenActions;
 		} else {
 			$primaryKey = $displayField = null;
 			$singularVar = Inflector::variable(Inflector::singularize($this->controllerName));
 			$singularHumanName = $this->_singularHumanName($this->controllerName);
 			$fields = $schema = $associations = array();
 		}
+		$controllerMethods = get_class_methods($controllerClassName);
+
 		$pluralVar = Inflector::variable($this->controllerName);
 		$pluralHumanName = $this->_pluralHumanName($this->controllerName);
 
 		return compact('modelClass', 'schema', 'primaryKey', 'displayField', 'singularVar', 'pluralVar',
-				'singularHumanName', 'pluralHumanName', 'fields','associations');
+				'singularHumanName', 'pluralHumanName', 'fields','associations', 'scaffoldForbiddenActions');
 	}
 
 /**
@@ -484,6 +489,8 @@ class ViewTask extends BakeTask {
 				$associations[$type][$assocKey]['foreignKey'] = $assocData['foreignKey'];
 				$associations[$type][$assocKey]['controller'] = Inflector::pluralize(Inflector::underscore($assocData['className']));
 				$associations[$type][$assocKey]['fields'] =  array_keys($model->{$assocKey}->schema(true));
+				$associations[$type][$assocKey]['scaffoldForbiddenActions'] = $model->{$assocKey}->scaffoldForbiddenActions;
+				$associations[$type][$assocKey]['scaffoldActions'] = $model->{$assocKey}->scaffoldActions;
 			}
 		}
 		return $associations;

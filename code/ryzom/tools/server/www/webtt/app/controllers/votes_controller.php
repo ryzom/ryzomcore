@@ -5,6 +5,13 @@ class VotesController extends AppController {
 
 	function index() {
 		$this->Vote->recursive = 0;
+//		var_dump($this->Vote->belongsTo);
+//		var_dump($this->Vote->getAssociated());
+//		$model = $this->{$this->modelClass};
+//		$this->log($tree=$this->PathResolver->getAssociationsTree($model));
+//		$this->log($this->PathResolver->getAssociationsGraph('User',$tree));
+//		$this->log($this->PathResolver->printPath($model), 'info');
+//		$this->log($this->PathResolver->node_path('Language', $tree));
 		$this->set('votes', $this->paginate());
 	}
 
@@ -29,6 +36,36 @@ class VotesController extends AppController {
 		$translations = $this->Vote->Translation->find('list');
 		$users = $this->Vote->User->find('list');
 		$this->set(compact('translations', 'users'));
+	}
+
+	function vote() {
+		if (empty($this->passedArgs['translation']))
+		{
+			$this->Session->setFlash(__('You need to choose translation for your vote', true));
+			$this->redirect(array('controller' => 'translations', 'action' => 'index'));
+		}
+		else
+		{
+			$translation_id = $this->passedArgs['translation'];
+			$translation = $this->Vote->Translation->read(null, $translation_id);
+			if (!$translation)
+			{
+				$this->Session->setFlash(__("Translation doesn't exist.", true));
+				$this->redirect(array('controller' => 'translations', 'action' => 'index'));
+			}
+			$vote = array("Vote" => array(
+							'translation_id' => $translation_id,
+							// TODO: authorized user
+							'user_id' => 1,
+						),
+					);
+			$this->Vote->create();
+			$this->Vote->save($vote);
+			$this->Session->setFlash(__('Vote added', true));
+			$this->redirect($this->referer(array('controller' => 'translations', 'action' => 'index')));
+//			$this->redirect(array('controller' => 'translations', 'action' => 'index'));
+//			$this->data['Translation.identifier_id'] = $identifier_id;
+		}
 	}
 
 	function edit($id = null) {

@@ -1,38 +1,36 @@
-<div class="grid_4">	
-	<div class="box">			
+<div class="grid_3">
+	<div class="box menubox">
 				<h2>
 			<a href="#" id="toggle-admin-actions">Actions</a>
 		</h2>
-		<div class="block" id="admin-actions">			
-			<h5>Languages</h5>
+		<div class="inbox">
+		<div class="block" id="admin-actions">
+			<h5><?php echo __('Languages', true); ?></h5>
 			<ul class="menu">
-								<li><?php echo $this->Html->link(__('Delete', true), array('action' => 'delete', $this->Form->value('Language.id')), null, sprintf(__('Are you sure you want to delete # %s?', true), $this->Form->value('Language.id'))); ?></li>
-								<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Languages', true)), array('action' => 'index'));?></li>
-			</ul>
+									<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Languages', true)), array('action' => 'index'));?></li>			</ul>
 			
 			<h5>Identifiers</h5>
 			<ul class="menu">
 				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Identifiers', true)), array('controller' => 'identifiers', 'action' => 'index')); ?> </li>
-				<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Identifier', true)), array('controller' => 'identifiers', 'action' => 'add')); ?> </li>
 			</ul>
 
-			<h5>Translation Files</h5>
+			<h5>Imported Translation Files</h5>
 			<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Translation Files', true)), array('controller' => 'translation_files', 'action' => 'index')); ?> </li>
-				<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Translation File', true)), array('controller' => 'translation_files', 'action' => 'add')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Imported Translation Files', true)), array('controller' => 'imported_translation_files', 'action' => 'index')); ?> </li>
 			</ul>
+		</div>
 		</div>
 	</div>
 </div>
 
-<div class="grid_12">
+<div class="grid_13">
     <h2 id="page-heading"><?php printf(__('Edit %s', true), __('Language', true)); ?></h2>
     
 	<div class="languages form">
 	<?php echo $this->Form->create('Language');?>
 		<fieldset>
-	 		<legend><?php printf(__('Language Record', true)); ?></legend>
-		<?php
+						<legend><?php printf(__('Language # %s', true), $this->Form->value('Language.id')); ?></legend>
+					<?php
 		echo $this->Form->input('id');
 		echo $this->Form->input('name');
 		echo $this->Form->input('code');

@@ -50,28 +50,7 @@ class RawFilesSource extends DataSource {
  *
  * @var string
  */
-	public $description = 'File Data Source';
-
-/**
- * Column delimiter
- *
- * @var string
- */
-	public $delimiter = ';';
-
-/**
- * Maximum Columns
- *
- * @var integer
- */
-	public $maxCol = 0;
-
-/**
- * Field Names
- *
- * @var mixed
- */
-	public $fields = null;
+	public $description = 'Directory Contents Data Source';
 
 /**
  * File Handle
@@ -81,41 +60,38 @@ class RawFilesSource extends DataSource {
 	public $handle = false;
 
 /**
- * Page to start on
- *
- * @var integer
- */
-	public $page = 1;
-
-/**
- * Limit of records
- *
- * @var integer
- */
-	public $limit = 99999;
-
-/**
  * Default configuration.
  *
  * @var array
  */
 	var $_baseConfig = array(
-		'datasource' => 'raw_files',
-		'path' => '/home/kaczorek/projects/webtt/distfiles/translation',
-		'extension' => 'uxt',
+		'datasource' => 'Datasources.RawFilesSource',
+		'path' => '.',
+		'extension' => 'txt',
 		'readonly' => true,
-		'recursive' => true);
+		'recursive' => false);
 
-	protected $_schema = array(
-		'files' => array(
+	var $_schema = array(
+//		'files' => array(
 			'filename' => array(
 				'type' => 'string',
 				'null' => false,
 				'key' => 'primary',
-				'lenght' => 255	
-				)
-			)
+				'length' => 255	
+				),
+			'size' => array(
+				'type' => 'string',
+				'null' => false,
+				'length' => 40,
+				),
+			'modified' => array(
+				'type' => 'string',
+				'null' => false,
+				'length' => 40,
+				),
+	//		)
 		);
+
 /**
  * Constructor
  *
@@ -132,7 +108,7 @@ class RawFilesSource extends DataSource {
 	}
 
 /**
- * Connects to the mailbox using options in the given configuration array.
+ * Connects to the directory using options in the given configuration array.
  *
  * @return boolean True if the file could be opened.
  */
@@ -159,68 +135,19 @@ class RawFilesSource extends DataSource {
 /**
  * List available sources
  *
- * @return array of available CSV files
+ * @return array of available files
  */
-	public function listSources() {
-		$this->config['database'] = 'csv';
-		$cache = parent::listSources();
-		if ($cache !== null) {
-			return $cache;
-		}
-
-		$extPattern = '\.' . preg_quote($this->config['extension']);
-		if ($this->config['recursive']) {
-			$list = $this->connection->findRecursive('.*' . $extPattern, true);
-			foreach($list as &$item) {
-				$item = mb_substr($item, mb_strlen($this->config['path'] . DS));
-			}
-		} else {
-			$list = $this->connection->find('.*' . $extPattern, true);
-		}
-
-		foreach ($list as &$item) {
-			$item = preg_replace('/' . $extPattern . '$/i', '', $item);
-		}
-
-		parent::listSources($list);
-		unset($this->config['database']);
-		return $list;
+ 	public function listSources() {
+		return array('raw_files');
 	}
 
 /**
- * Returns a Model description (metadata) or null if none found.
+ * Returns a Model description (metadata).
  *
  * @return mixed
  */
 	public function describe($model) {
-		$this->__getDescriptionFromFirstLine($model);
-		return $this->fields;
-	}
-
-/**
- * Get Description from First Line, and store into class vars
- *
- * @param Model $model
- * @return boolean True, Success
- */
-	private function __getDescriptionFromFirstLine($model) {
-		$filename = $model->table . '.' . $this->config['extension'];
-		$handle = fopen($this->config['path'] . DS .  $filename, 'r');
-		$line = rtrim(fgets($handle));
-		$data_comma = explode(',', $line);
-		$data_semicolon = explode(';', $line);
-
-		if (count($data_comma) > count($data_semicolon)) {
-			$this->delimiter = ',';
-			$this->fields = $data_comma;
-			$this->maxCol = count($data_comma);
-		} else {
-			$this->delimiter = ';';
-			$this->fields = $data_semicolon;
-			$this->maxCol = count($data_semicolon);
-		}
-		fclose($handle);
-		return true;
+		return $this->_schema;
 	}
 
 /**
@@ -232,7 +159,7 @@ class RawFilesSource extends DataSource {
 		if ($this->connected) {
 			if ($this->handle) {
 				foreach($this->handle as $h) {
-				  @fclose($h);
+					@fclose($h);
 				}
 				$this->handle = false;
 			}
@@ -240,31 +167,99 @@ class RawFilesSource extends DataSource {
 		}
 	}
 
+/**
+ * Private method to determine if file is in one of given directories
+ *
+ * @return boolean
+ */
+	private function fileInDir($filepath, $dirs)
+	{
+		foreach ($dirs as $dir)
+		{
+			$dir = $this->connection->realpath($this->config['path']) . DS . $dir;
+			if ($dir . DS . basename($filepath) === $filepath)
+				return true;
+		}
+		return false;
+	}
+
+/**
+ * Read Data
+ *
+ * @param Model $model
+ * @param array $queryData
+ * @param integer $recursive Number of levels of association
+ * @return mixed
+ */
 	public function read(&$model, $queryData = array(), $recursive = null) {
-		if ($queryData["conditions"] && $queryData["conditions"]["ext"])
-			$extension = $queryData["conditions"]["ext"];
+		if (isset($queryData["conditions"][$model->alias . ".extension"]))
+			$extension = preg_quote($queryData["conditions"][$model->alias . ".extension"]);
 		else
 			$extension = $this->config['extension'];
 
-		$extPattern = '\.' . preg_quote($extension);
+		if (isset($queryData["conditions"][$model->alias . ".filename"]))
+		{
+			$filename = $queryData["conditions"][$model->alias .".filename"];
+			$searchPattern = preg_quote($queryData["conditions"][$model->alias .".filename"], '/');
+		}
+		else
+		{
+//			$searchPattern = '.*' . '\.' . preg_quote($extension);
+			$searchPattern = '.*' . '\.' . $extension;
+		}
+
+		if (isset($queryData["conditions"][$model->alias . ".dir"]))
+		{
+//			$dir = $this->connection->realpath($this->config['path']) . DS . $queryData["conditions"][$model->alias . ".dir"];
+			$dir = is_array($dir = $queryData["conditions"][$model->alias . ".dir"]) ? $dir : array($dir);
+		}
+
+/*		var_dump($queryData);*/
+//		var_dump($searchPattern);
+
 		if ($this->config['recursive']) {
-			$list = $this->connection->findRecursive('.*' . $extPattern, true);
+			$list = $this->connection->findRecursive($searchPattern, true);
+/*			$this->log($list);
+			echo "list#\n";
+			var_dump($list);*/
 			foreach($list as &$item) {
-				$item = mb_substr($item, mb_strlen($this->connection->realpath($this->config['path']) . DS));
+				$temp = $item;
+				$item = array();
+				$item["full"] = $temp;
+				$item["short"] = mb_substr($temp, mb_strlen($this->connection->realpath($this->config['path']) . DS));
 			}
 			unset($item);
 		} else {
-			$list = $this->connection->find('.*' . $extPattern, true);
+			$list = $this->connection->find($searchPattern, true);
+			foreach($list as &$item) {
+				$temp = $item;
+				$item = array();
+				$item["full"] = $this->config['path'] . DS .$temp;
+				$item["short"] = $temp;
+			}
+			unset($item);
 		}
 
-		$nlist = array();
+		$resultSet = array();
 		foreach ($list as $item) {
-			$file = new File($path = $this->config['path'] . DS . $item, false);
+/*			if (isset($dir) && isset($filename))
+			{
+				echo "dirconcat#\n";
+				var_dump($dir . DS . $filename);
+				echo "itemfull#\n";
+				var_dump($item["full"]);
+				if ($dir . DS . $filename === $item["full"])
+					continue;
+			}*/
+			if (isset($dir))
+				if (!$this->fileInDir($item["full"], $dir))
+					continue;
+			$file = new File($path = $this->config['path'] . DS . $item["short"], false);
 //			var_dump($item);
 //			$item = preg_replace('/' . $extPattern . '$/i', '', $item);
 			$resultSet[] = array(
 				$model->alias => array(
-					'filename' => $item,
+					'filename' => $item["short"],
 					'size' => $file->size(),
 					'modified' => $file->lastChange(),
 					),
@@ -276,168 +271,6 @@ class RawFilesSource extends DataSource {
 
 		return $resultSet;
 	}
-/**
- * Read Data
- *
- * @param Model $model
- * @param array $queryData
- * @param integer $recursive Number of levels of association
- * @return mixed
- */
-	public function read_z(&$model, $queryData = array(), $recursive = null) {
-		$config = $this->config;
-		$filename = $config['path'] . DS . $model->table . '.' . $config['extension'];
-		if (!Set::extract($this->handle, $model->table)) {
-			$this->handle[$model->table] = fopen($filename, 'r');
-		} else {
-			fseek($this->handle[$model->table], 0, SEEK_SET) ;
-		}
-		$queryData = $this->__scrubQueryData($queryData);
-
-		if (isset($queryData['limit']) && !empty($queryData['limit'])) {
-			$this->limit = $queryData['limit'];
-		}
-
-		if (isset($queryData['page']) && !empty($queryData['page'])) {
-			$this->page = $queryData['page'];
-		}
-
-		if (empty($queryData['fields'])) {
-			$fields = $this->fields;
-			$allFields = true;
-		} else {
-			$fields = $queryData['fields'];
-			$allFields = false;
-			$_fieldIndex = array();
-			$index = 0;
-			// generate an index array of all wanted fields
-			foreach($this->fields as $field) {
-				if (in_array($field,  $fields)) {
-					$_fieldIndex[] = $index;
-				}
-				$index++;
-			}
-		}
-
-		$lineCount = 0;
-		$recordCount = 0;
-		$findCount = 0;
-		$resultSet = array();
-
-		// Daten werden aus der Datei in ein Array $data gelesen
-		while (($data = fgetcsv($this->handle[$model->table], 8192, $this->delimiter)) !== FALSE) {
-			if ($lineCount == 0) {
-				$lineCount++;
-				continue;
-			} else {
-				// Skip over records, that are not complete
-				if (count($data) < $this->maxCol) {
-					continue;
-				}
-
-				$record = array();
-				$i = 0;
-				foreach($this->fields as $field) {
-					$record[$model->alias][$field] = $data[$i++];
-				}
-
-				if ($this->__checkConditions($record, $queryData['conditions'], $model)) {
-					// Compute the virtual pagenumber
-					$_page = floor($findCount / $this->limit) + 1;
-					if ($this->page <= $_page) {
-						if (!$allFields) {
-							$record = array();
-							if (count($_fieldIndex) > 0) {
-								foreach($_fieldIndex as $i) {
-									$record[$model->alias][$this->fields[$i]] = $data[$i];
-								}
-							}
-						}
-						$resultSet[] = $record ;
-						$recordCount++;
-					}
-				}
-				unset($record);
-				$findCount++;
-
-				if ($recordCount >= $this->limit) {
-					break;
-				}
-			}
-		}
-
-		if ($model->findQueryType === 'count') {
-			return array(array(array('count' => count($resultSet))));
-		}
-		return $resultSet;
-	}
-
-/**
- * Private helper method to remove query metadata in given data array.
- *
- * @param array $data Data
- * @return array Cleaned Data
- */
-	private function __scrubQueryData($data) {
-		foreach (array('conditions', 'fields', 'joins', 'order', /*'limit', 'offset',*/ 'group') as $key) {
-			if (!isset($data[$key]) || empty($data[$key])) {
-				$data[$key] = array();
-			}
-		}
-		if (!isset($data['limit']) || empty($data['limit'])) {
-			$data['limit'] = PHP_INT_MAX;
-		}
-		if (!isset($data['offset']) || empty($data['offset'])) {
-			$data['offset'] = 0;
-		}
-		return $data;
-	}
-
-/**
- * Private helper method to check conditions.
- *
- * @param array $record
- * @param array $conditions
- * @return bool
- */
-	private function __checkConditions($record, $conditions, $model) {
-		$result = true;
-		foreach ($conditions as $name => $value) {
-            $alias = $model->alias;
-            if (strpos($name, '.') !== false) {
-                list($alias, $name) = explode('.', $name);
-            }
-
-			if (strtolower($name) === 'or') {
-				$cond = $value;
-				$result = false;
-				foreach ($cond as $name => $value) {
-					if (Set::matches($this->__createRule($name, $value), $record[$alias])) {
-						return true;
-					}
-				}
-			} else {
-				if (!Set::matches($this->__createRule($name, $value), $record[$alias])) {
-					return false;
-				}
-			}
-		}
-		return $result;
-	}
-
-/**
- * Private helper method to crete rule.
- *
- * @param string $name
- * @param string $value
- * @return string
- */
-	private function __createRule($name, $value) {
-		if (strpos($name, ' ') !== false) {
-			return array(str_replace(' ', '', $name) . $value);
-		}
-		return array("{$name}={$value}");
-	}
 
 /**
  * Calculate
@@ -445,7 +278,7 @@ class RawFilesSource extends DataSource {
  * @param Model $model 
  * @param mixed $func 
  * @param array $params 
- * @return array
+ * @return array with the field name with records count
  */
 	public function calculate(&$model, $func, $params = array()) {
 		return array('count');

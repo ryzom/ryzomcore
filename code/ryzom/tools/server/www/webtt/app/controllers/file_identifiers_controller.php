@@ -26,9 +26,9 @@ class FileIdentifiersController extends AppController {
 				$this->Session->setFlash(__('The file identifier could not be saved. Please, try again.', true));
 			}
 		}
-		$translationFiles = $this->FileIdentifier->TranslationFile->find('list');
+		$importedTranslationFiles = $this->FileIdentifier->ImportedTranslationFile->find('list');
 		$identifiers = $this->FileIdentifier->Identifier->find('list');
-		$this->set(compact('translationFiles', 'identifiers'));
+		$this->set(compact('importedTranslationFiles', 'identifiers'));
 	}
 
 	function edit($id = null) {
@@ -47,9 +47,9 @@ class FileIdentifiersController extends AppController {
 		if (empty($this->data)) {
 			$this->data = $this->FileIdentifier->read(null, $id);
 		}
-		$translationFiles = $this->FileIdentifier->TranslationFile->find('list');
+		$importedTranslationFiles = $this->FileIdentifier->ImportedTranslationFile->find('list');
 		$identifiers = $this->FileIdentifier->Identifier->find('list');
-		$this->set(compact('translationFiles', 'identifiers'));
+		$this->set(compact('importedTranslationFiles', 'identifiers'));
 	}
 
 	function delete($id = null) {
@@ -87,9 +87,9 @@ class FileIdentifiersController extends AppController {
 				$this->Session->setFlash(__('The file identifier could not be saved. Please, try again.', true));
 			}
 		}
-		$translationFiles = $this->FileIdentifier->TranslationFile->find('list');
+		$importedTranslationFiles = $this->FileIdentifier->ImportedTranslationFile->find('list');
 		$identifiers = $this->FileIdentifier->Identifier->find('list');
-		$this->set(compact('translationFiles', 'identifiers'));
+		$this->set(compact('importedTranslationFiles', 'identifiers'));
 	}
 
 	function admin_edit($id = null) {
@@ -108,9 +108,9 @@ class FileIdentifiersController extends AppController {
 		if (empty($this->data)) {
 			$this->data = $this->FileIdentifier->read(null, $id);
 		}
-		$translationFiles = $this->FileIdentifier->TranslationFile->find('list');
+		$importedTranslationFiles = $this->FileIdentifier->ImportedTranslationFile->find('list');
 		$identifiers = $this->FileIdentifier->Identifier->find('list');
-		$this->set(compact('translationFiles', 'identifiers'));
+		$this->set(compact('importedTranslationFiles', 'identifiers'));
 	}
 
 	function admin_delete($id = null) {
