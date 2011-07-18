@@ -97,7 +97,7 @@ public:
 
 	/// Zone Bricks
 	/// @{
-	void addZone(sint32 posX, sint32 posY);
+	void addZone(const sint32 posX, const sint32 posY);
 	void addTransition(const sint32 posX, const sint32 posY);
 	void delZone(const sint32 posX, const sint32 posY);
 	/// @}

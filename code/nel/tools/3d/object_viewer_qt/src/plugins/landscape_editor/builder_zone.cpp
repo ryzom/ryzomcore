@@ -151,8 +151,87 @@ void ZoneBuilder::addZone(sint32 posX, sint32 posY)
 
 void ZoneBuilder::addTransition(const sint32 posX, const sint32 posY)
 {
+	// Read-only mode
 	if ((m_listZonesWidget == 0) || (m_undoStack == 0))
 		return;
+
+	if (m_landscapeMap.empty())
+		return;
+
+	m_titleAction = QString("Transition zone %1,%2").arg(posX).arg(posY);
+	m_createdAction = false;
+	m_zonePositionList.clear();
+
+	nlinfo(QString("trans %1,%2").arg(posX).arg(posY).toStdString().c_str());
+
+	sint32 x = (sint32)floor(float(posX) / m_landscapeScene->cellSize());
+	sint32 y = (sint32)floor(float(posY) / m_landscapeScene->cellSize());
+	sint32 k;
+
+	// Detect if we are in a transition square to switch
+	BuilderZoneRegion *builderZoneRegion = m_landscapeMap.value(m_currentZoneRegion).builderZoneRegion;
+	builderZoneRegion->init(this);
+	const NLLIGO::CZoneRegion &zoneRegion = currentZoneRegion()->ligoZoneRegion();
+	bool bCutEdgeTouched = false;
+	for (uint8 transPos = 0; transPos < 4; ++transPos)
+	{
+		uint ce = zoneRegion.getCutEdge(x, y, transPos);
+
+		if ((ce > 0) && (ce < 3))
+			for (k = 0; k < 2; ++k)
+			{
+				float xTrans, yTrans;
+
+				if ((transPos == 0) || (transPos == 1))
+				{
+					if (ce == 1)
+						xTrans = m_landscapeScene->cellSize() / 3.0f;
+					else
+						xTrans = 2.0f * m_landscapeScene->cellSize() / 3.0f;
+				}
+				else
+				{
+					if (transPos == 2)
+						xTrans = 0;
+					else
+						xTrans = m_landscapeScene->cellSize();
+				}
+				xTrans += x * m_landscapeScene->cellSize();
+
+				if ((transPos == 2) || (transPos == 3))
+				{
+					if (ce == 1)
+						yTrans = m_landscapeScene->cellSize() / 3.0f;
+					else
+						yTrans = 2.0f * m_landscapeScene->cellSize() / 3.0f;
+				}
+				else
+				{
+					if (transPos == 1)
+						yTrans = 0;
+					else
+						yTrans = m_landscapeScene->cellSize();
+				}
+				yTrans += y * m_landscapeScene->cellSize();
+
+				if ((posX >= (xTrans - m_landscapeScene->cellSize() / 12.0f)) &&
+						(posX <= (xTrans + m_landscapeScene->cellSize() / 12.0f)) &&
+						(posY >= (yTrans - m_landscapeScene->cellSize() / 12.0f)) &&
+						(posY <= (yTrans + m_landscapeScene->cellSize() / 12.0f)))
+				{
+					builderZoneRegion->invertCutEdge (x, y, transPos);
+					bCutEdgeTouched = true;
+				}
+				ce = 3 - ce;
+			}
+	}
+
+	// If not clicked to change the cutEdge so the user want to change the transition
+	if (!bCutEdgeTouched)
+	{
+		builderZoneRegion->cycleTransition (x, y);
+	}
+	checkEndMacro();
 }
 
 void ZoneBuilder::delZone(const sint32 posX, const sint32 posY)
