@@ -43,7 +43,7 @@ class LANDSCAPE_EDITOR_EXPORT LandscapeScene : public QGraphicsScene
 	Q_OBJECT
 
 public:
-	LandscapeScene(QObject *parent = 0);
+	LandscapeScene(int sizeCell = 160, QObject *parent = 0);
 	virtual ~LandscapeScene();
 
 	int cellSize() const;
@@ -60,6 +60,10 @@ public:
 	void snapshot(const QString &fileName, int width, int height, const QRectF &landRect);
 
 	QString zoneNameFromMousePos() const;
+	bool transitionMode() const;
+
+public Q_SLOTS:
+	void setTransitionMode(bool enabled);
 
 protected:
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
@@ -67,10 +71,13 @@ protected:
 	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
 	virtual void drawForeground(QPainter *painter, const QRectF &rect);
 
+	void drawTransition(QPainter *painter, const QRectF &rect);
+
 private:
 	bool checkUnderZone(const int posX, const int posY);
 
 	int m_cellSize;
+	bool m_transitionMode;
 	qreal m_mouseX, m_mouseY;
 	sint32 m_posX, m_posY;
 	Qt::MouseButton m_mouseButton;

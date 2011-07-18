@@ -37,12 +37,17 @@ static const int LAYER_EMPTY_ZONES = 3;
 static const int LAYER_BLACKOUT = 4;
 const char * const LAYER_BLACKOUT_NAME = "blackout";
 
-LandscapeScene::LandscapeScene(QObject *parent)
+const int MAX_SCENE_WIDTH = 256;
+const int MAX_SCENE_HEIGHT = 256;
+
+LandscapeScene::LandscapeScene(int sizeCell, QObject *parent)
 	: QGraphicsScene(parent),
+	  m_cellSize(sizeCell),
+	  m_transitionMode(false),
 	  m_mouseButton(Qt::NoButton),
 	  m_zoneBuilder(0)
 {
-	m_cellSize = 160;
+	setSceneRect(QRectF(0, m_cellSize, MAX_SCENE_WIDTH * m_cellSize, MAX_SCENE_HEIGHT * m_cellSize));
 }
 
 LandscapeScene::~LandscapeScene()
@@ -279,17 +284,18 @@ void LandscapeScene::snapshot(const QString &fileName, int width, int height, co
 
 QString LandscapeScene::zoneNameFromMousePos() const
 {
-	if ((m_posY > 0) || (m_posY < -255) ||
-			(m_posX < 0) || (m_posX > 255))
+	if ((m_posY > 0) || (m_posY < -MAX_SCENE_HEIGHT) ||
+			(m_posX < 0) || (m_posX > MAX_SCENE_WIDTH))
 		return "NOT A VALID ZONE";
 
-	return QString("%1_%2%3").arg(-m_posY).arg(QChar('A' + (m_posX/26))).arg(QChar('A' + (m_posX%26)));
+	return QString("%1_%2%3  %4 %5  ").arg(-m_posY).arg(QChar('A' + (m_posX/26))).
+		   arg(QChar('A' + (m_posX%26))).arg(m_mouseX, 0,'f',2).arg(-m_mouseY, 0,'f',2);
 }
 
 void LandscapeScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-	qreal x = mouseEvent->scenePos().rx();
-	qreal y = mouseEvent->scenePos().ry();
+	qreal x = mouseEvent->scenePos().x();
+	qreal y = mouseEvent->scenePos().y();
 	if ((x < 0) || (y < 0))
 		return;
 
@@ -298,12 +304,20 @@ void LandscapeScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 	if (m_zoneBuilder == 0)
 		return;
+	if (m_transitionMode)
+	{
+		if (mouseEvent->button() == Qt::LeftButton)
 
-	if (mouseEvent->button() == Qt::LeftButton)
-		m_zoneBuilder->addZone(m_posX, m_posY);
-	else if (mouseEvent->button() == Qt::RightButton)
-		m_zoneBuilder->delZone(m_posX, m_posY);
-
+			// Need add offset(= cellSize) on y axes
+			m_zoneBuilder->addTransition(sint(x), sint(-y + m_cellSize));
+	}
+	else
+	{
+		if (mouseEvent->button() == Qt::LeftButton)
+			m_zoneBuilder->addZone(m_posX, m_posY);
+		else if (mouseEvent->button() == Qt::RightButton)
+			m_zoneBuilder->delZone(m_posX, m_posY);
+	}
 	m_mouseButton = mouseEvent->button();
 
 	QGraphicsScene::mousePressEvent(mouseEvent);
@@ -311,8 +325,8 @@ void LandscapeScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 void LandscapeScene::mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent)
 {
-	qreal x = mouseEvent->scenePos().rx();
-	qreal y = mouseEvent->scenePos().ry();
+	qreal x = mouseEvent->scenePos().x();
+	qreal y = mouseEvent->scenePos().y();
 
 	sint32 posX = sint32(floor(x / m_cellSize));
 	sint32 posY = sint32(-floor(y / m_cellSize));
@@ -321,11 +335,16 @@ void LandscapeScene::mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent)
 			(m_mouseButton == Qt::LeftButton ||
 			 m_mouseButton == Qt::RightButton))
 	{
-		if (m_mouseButton == Qt::LeftButton)
-			m_zoneBuilder->addZone(posX, posY);
-		else if (m_mouseButton == Qt::RightButton)
-			m_zoneBuilder->delZone(posX, posY);
-
+		if (m_transitionMode)
+		{
+		}
+		else
+		{
+			if (m_mouseButton == Qt::LeftButton)
+				m_zoneBuilder->addZone(posX, posY);
+			else if (m_mouseButton == Qt::RightButton)
+				m_zoneBuilder->delZone(posX, posY);
+		}
 		m_posX = posX;
 		m_posY = posY;
 		QApplication::processEvents();
@@ -334,8 +353,8 @@ void LandscapeScene::mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent)
 	m_posX = posX;
 	m_posY = posY;
 
-	m_mouseX = mouseEvent->scenePos().rx();
-	m_mouseY = mouseEvent->scenePos().ry();
+	m_mouseX = mouseEvent->scenePos().x();
+	m_mouseY = mouseEvent->scenePos().y() - m_cellSize;
 	QGraphicsScene::mouseMoveEvent(mouseEvent);
 }
 
@@ -357,9 +376,23 @@ bool LandscapeScene::checkUnderZone(const int posX, const int posY)
 	return false;
 }
 
+bool LandscapeScene::transitionMode() const
+{
+	return m_transitionMode;
+}
+
+void LandscapeScene::setTransitionMode(bool enabled)
+{
+	m_transitionMode = enabled;
+	update();
+}
+
 void LandscapeScene::drawForeground(QPainter *painter, const QRectF &rect)
 {
 	QGraphicsScene::drawForeground(painter, rect);
+	if ((m_zoneBuilder->currentIdZoneRegion() != -1) && (m_transitionMode))
+		drawTransition(painter, rect);
+
 	/*
 		// Render debug text (slow!)
 		painter->setPen(QPen(Qt::white, 0.5, Qt::SolidLine));
@@ -379,6 +412,102 @@ void LandscapeScene::drawForeground(QPainter *painter, const QRectF &rect)
 			}
 		}
 	*/
+}
+
+void LandscapeScene::drawTransition(QPainter *painter, const QRectF &rect)
+{
+	int left = int(floor(rect.left() / m_cellSize));
+	int right = int(floor(rect.right() / m_cellSize));
+	int top = int(floor(rect.top() / m_cellSize));
+	int bottom = int(floor(rect.bottom() / m_cellSize));
+
+	QVector<QLine> redLines;
+	QVector<QLine> whiteLines;
+
+	for (int i = left; i < right + 1; ++i)
+	{
+		for (int j = top; j < bottom + 1; ++j)
+		{
+			// Get LIGO data
+			NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->currentZoneRegion()->ligoZoneRegion();
+			uint8 ceUp = zoneRegion.getCutEdge (i, -j, 0);
+			uint8 ceLeft = zoneRegion.getCutEdge (i, -j, 2);
+			if ((ceUp > 0) && (ceUp < 3))
+			{
+				// Calculate position vertical lines
+				int x1, x2, y1, y2;
+
+				y1 = j * m_cellSize + m_cellSize / 12.0f;
+				y2 = y1 - (m_cellSize / 6.0f);
+
+				x1 = i * m_cellSize + 3.0f * m_cellSize / 12.0f;
+				x2 = i * m_cellSize + 5.0f * m_cellSize / 12.0f;
+				if (ceUp == 1)
+				{
+					whiteLines.push_back(QLine(x1, y1, x1, y2));
+					whiteLines.push_back(QLine(x2, y1, x2, y2));
+				}
+				else
+				{
+					redLines.push_back(QLine(x1, y1, x1, y2));
+					redLines.push_back(QLine(x2, y1, x2, y2));
+				}
+
+				x1 = i * m_cellSize + 7.0f * m_cellSize / 12.0f;
+				x2 = i * m_cellSize + 9.0f * m_cellSize / 12.0f;
+				if (ceUp == 1)
+				{
+					redLines.push_back(QLine(x1, y1, x1, y2));
+					redLines.push_back(QLine(x2, y1, x2, y2));
+				}
+				else
+				{
+					whiteLines.push_back(QLine(x1, y1, x1, y2));
+					whiteLines.push_back(QLine(x2, y1, x2, y2));
+				}
+			}
+			if ((ceLeft > 0) && (ceLeft < 3))
+			{
+				// Calculate position horizontal lines
+				int x1, x2, y1, y2;
+
+				x1 = i * m_cellSize - m_cellSize / 12.0f;
+				x2 = x1 + (m_cellSize / 6.0f);
+
+				y1 = j * m_cellSize + 3.0f * m_cellSize / 12.0f;
+				y2 = j * m_cellSize + 5.0f * m_cellSize / 12.0f;
+				if (ceLeft == 1)
+				{
+					redLines.push_back(QLine(x1, y1, x2, y1));
+					redLines.push_back(QLine(x1, y2, x2, y2));
+				}
+				else
+				{
+					whiteLines.push_back(QLine(x1, y1, x2, y1));
+					whiteLines.push_back(QLine(x1, y2, x2, y2));
+				}
+
+				y1 = j * m_cellSize + 7.0f * m_cellSize / 12.0f;
+				y2 = j * m_cellSize + 9.0f * m_cellSize / 12.0f;
+				if (ceLeft == 1)
+				{
+					whiteLines.push_back(QLine(x1, y1, x2, y1));
+					whiteLines.push_back(QLine(x1, y2, x2, y2));
+				}
+				else
+				{
+					redLines.push_back(QLine(x1, y1, x2, y1));
+					redLines.push_back(QLine(x1, y2, x2, y2));
+				}
+			}
+		}
+	}
+
+	// Draw lines
+	painter->setPen(QPen(Qt::red, 0, Qt::SolidLine));
+	painter->drawLines(redLines);
+	painter->setPen(QPen(Qt::white, 0, Qt::SolidLine));
+	painter->drawLines(whiteLines);
 }
 
 } /* namespace LandscapeEditor */
