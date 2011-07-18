@@ -56,7 +56,7 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	m_ui.setupUi(this);
 
 	m_undoStack = new QUndoStack(this);
-	m_landscapeScene = new LandscapeScene(this);
+	m_landscapeScene = new LandscapeScene(160, this);
 
 	m_zoneBuilder = new ZoneBuilder(m_landscapeScene, m_ui.zoneListWidget, m_undoStack);
 	m_ui.zoneListWidget->setZoneBuilder(m_zoneBuilder);
@@ -69,6 +69,9 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	m_ui.saveAction->setIcon(QIcon(Core::Constants::ICON_SAVE));
 	m_ui.saveLandAction->setIcon(QIcon(Core::Constants::ICON_SAVE));
 	m_ui.saveAsLandAction->setIcon(QIcon(Core::Constants::ICON_SAVE_AS));
+	m_ui.zonesDockWidget->toggleViewAction()->setIcon(QIcon(Constants::ICON_LANDSCAPE_ZONES));
+	m_ui.landscapesDockWidget->toggleViewAction()->setIcon(QIcon(Constants::ICON_ZONE_ITEM));
+
 	m_ui.deleteLandAction->setEnabled(false);
 
 	createMenus();
@@ -85,6 +88,7 @@ LandscapeEditorWindow::LandscapeEditorWindow(QWidget *parent)
 	connect(m_ui.saveLandAction, SIGNAL(triggered()), this, SLOT(saveSelectedLand()));
 	connect(m_ui.saveAsLandAction, SIGNAL(triggered()), this, SLOT(saveAsSelectedLand()));
 	connect(m_ui.deleteLandAction, SIGNAL(triggered()), this, SLOT(deleteSelectedLand()));
+	connect(m_ui.transitionModeAction, SIGNAL(toggled(bool)), m_landscapeScene, SLOT(setTransitionMode(bool)));
 
 	connect(m_ui.landscapesListWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenu()));
 	m_ui.landscapesListWidget->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -353,23 +357,27 @@ void LandscapeEditorWindow::createToolBars()
 	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
 	//QAction *action = menuManager->action(Core::Constants::NEW);
 	//m_ui.fileToolBar->addAction(action);
-	QAction *action = menuManager->action(Core::Constants::OPEN);
-	m_ui.fileToolBar->addAction(m_ui.newLandAction);
-	m_ui.fileToolBar->addAction(action);
-	m_ui.fileToolBar->addAction(m_ui.saveAction);
-
-	action = menuManager->action(Core::Constants::UNDO);
-	if (action != 0)
-		m_ui.undoToolBar->addAction(action);
-
-	action = menuManager->action(Core::Constants::REDO);
-	if (action != 0)
-		m_ui.undoToolBar->addAction(action);
-
 	//action = menuManager->action(Core::Constants::SAVE);
 	//m_ui.fileToolBar->addAction(action);
 	//action = menuManager->action(Core::Constants::SAVE_AS);
 	//m_ui.fileToolBar->addAction(action);
+
+	QAction *action = menuManager->action(Core::Constants::OPEN);
+	m_ui.fileToolBar->addAction(m_ui.newLandAction);
+	m_ui.fileToolBar->addAction(action);
+	m_ui.fileToolBar->addAction(m_ui.saveAction);
+	m_ui.fileToolBar->addSeparator();
+
+	action = menuManager->action(Core::Constants::UNDO);
+	if (action != 0)
+		m_ui.fileToolBar->addAction(action);
+
+	action = menuManager->action(Core::Constants::REDO);
+	if (action != 0)
+		m_ui.fileToolBar->addAction(action);
+
+	m_ui.zoneToolBar->insertAction(m_ui.enableGridAction, m_ui.landscapesDockWidget->toggleViewAction());
+	m_ui.zoneToolBar->insertAction(m_ui.enableGridAction, m_ui.zonesDockWidget->toggleViewAction());
 }
 
 void LandscapeEditorWindow::readSettings()

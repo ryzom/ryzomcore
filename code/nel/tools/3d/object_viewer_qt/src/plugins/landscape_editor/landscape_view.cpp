@@ -59,9 +59,7 @@ bool LandscapeView::isVisibleGrid() const
 void LandscapeView::setVisibleGrid(bool visible)
 {
 	m_visibleGrid = visible;
-
-	// hack for repaint view
-	translate(0.0001, 0.0001);
+	scene()->update();
 }
 
 void LandscapeView::wheelEvent(QWheelEvent *event)
@@ -117,45 +115,55 @@ void LandscapeView::drawForeground(QPainter *painter, const QRectF &rect)
 	if (!m_visibleGrid)
 		return;
 
-	qreal scaleFactor = transform().m11();
 	painter->setPen(QPen(Qt::white, 0, Qt::SolidLine));
+	drawGrid(painter, rect);
 
-	// draw grid
-	qreal left = m_cellSize * floor(rect.left() / m_cellSize);
-	qreal top = m_cellSize * floor(rect.top() / m_cellSize);
-
-	// draw vertical lines
-	while (left < rect.right())
-	{
-		painter->drawLine(int(left), int(rect.bottom()), int(left), int(rect.top()));
-		left += m_cellSize;
-	}
-
-	// draw horizontal lines
-	while (top < rect.bottom())
-	{
-		painter->drawLine(int(rect.left()), int(top), int(rect.right()), int(top));
-		top += m_cellSize;
-	}
-
-	// Render text (slow!)
 	if (m_numSteps > -m_maxSteps / 4)
 	{
 		painter->setPen(QPen(Qt::white, 0.5, Qt::SolidLine));
-
 		//painter->setFont(QFont("Helvetica [Cronyx]", 12));
-		int leftSide = int(floor(rect.left() / m_cellSize));
-		int rightSide = int(floor(rect.right() / m_cellSize));
-		int topSide = int(floor(rect.top() / m_cellSize));
-		int bottomSide = int(floor(rect.bottom() / m_cellSize));
+		drawZoneNames(painter, rect);
+	}
+}
 
-		for (int i = leftSide; i < rightSide + 1; ++i)
+void LandscapeView::drawGrid(QPainter *painter, const QRectF &rect)
+{
+	qreal left = m_cellSize * floor(rect.left() / m_cellSize);
+	qreal top = m_cellSize * floor(rect.top() / m_cellSize);
+
+	QVector<QLine> lines;
+
+	// Calculate vertical lines
+	while (left < rect.right())
+	{
+		lines.push_back(QLine(int(left), int(rect.bottom()), int(left), int(rect.top())));
+		left += m_cellSize;
+	}
+
+	// Calculate horizontal lines
+	while (top < rect.bottom())
+	{
+		lines.push_back(QLine(int(rect.left()), int(top), int(rect.right()), int(top)));
+		top += m_cellSize;
+	}
+
+	// Draw lines
+	painter->drawLines(lines);
+}
+
+void LandscapeView::drawZoneNames(QPainter *painter, const QRectF &rect)
+{
+	int leftSide = int(floor(rect.left() / m_cellSize));
+	int rightSide = int(floor(rect.right() / m_cellSize));
+	int topSide = int(floor(rect.top() / m_cellSize));
+	int bottomSide = int(floor(rect.bottom() / m_cellSize));
+
+	for (int i = leftSide; i < rightSide + 1; ++i)
+	{
+		for (int j = topSide; j < bottomSide + 1; ++j)
 		{
-			for (int j = topSide; j < bottomSide + 1; ++j)
-			{
-				QString text = QString("%1_%2%3").arg(j).arg(QChar('A' + (i / 26))).arg(QChar('A' + (i % 26)));
-				painter->drawText(i * m_cellSize + 5, j * m_cellSize + 15, text);
-			}
+			QString text = QString("%1_%2%3").arg(j).arg(QChar('A' + (i / 26))).arg(QChar('A' + (i % 26)));
+			painter->drawText(i * m_cellSize + 5, j * m_cellSize + 15, text);
 		}
 	}
 }

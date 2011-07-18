@@ -49,6 +49,8 @@ protected:
 	virtual void mouseReleaseEvent(QMouseEvent *event);
 	virtual void drawForeground(QPainter *painter, const QRectF &rect);
 
+	void drawGrid(QPainter *painter, const QRectF &rect);
+	void drawZoneNames(QPainter *painter, const QRectF &rect);
 private:
 
 	bool m_visibleGrid;

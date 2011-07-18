@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Snapshot</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="landscape_editor.qrc">
+    <normaloff>:/icons/ic_snapshot.png</normaloff>:/icons/ic_snapshot.png</iconset>
+  </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -136,7 +140,9 @@
   <tabstop>keepRatioCheckBox</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="landscape_editor.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>
