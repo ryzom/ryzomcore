@@ -200,6 +200,7 @@ public:
 	bool processGuildMissionStepEvent(std::list< CMissionEvent* > & eventList, TAIAlias missionAlias, uint32 stepIndex);
 	CMissionGuild* getMissionByAlias( TAIAlias missionAlias );
 	bool isMissionSuccessfull(TAIAlias alias);
+	void sendDynamicMessageToMembers(const std::string &msgName, const TVectorParamCheck &params, const std::set<NLMISC::CEntityId> &excluded) const;
 	///\return the mission
 	inline std::vector<CMissionGuild*> & getMissions()
 	{

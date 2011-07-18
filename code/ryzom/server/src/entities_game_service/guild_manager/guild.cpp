@@ -35,6 +35,7 @@
 #include "primitives_parser.h"
 #include "modules/shard_unifier_client.h"
 #include "mission_manager/mission_manager.h"
+#include "phrase_manager/phrase_utilities_functions.h"
 
 /// todo guild remove entity id translator
 #include "nel/misc/eid_translator.h"
@@ -742,6 +743,22 @@ void CGuild::updateMissionHistories(TAIAlias missionAlias, uint32 result)
 		// validate last try date
 		_MissionHistories[missionAlias].LastSuccessDate = CTickEventHandler::getGameCycle();
 		break;
+	}
+}
+
+//----------------------------------------------------------------------------
+void CGuild::sendDynamicMessageToMembers(const string &msgName, const TVectorParamCheck &params, const set<CEntityId> &excluded) const
+{
+	for ( std::map<EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::const_iterator it = getMembersBegin();
+			it != getMembersEnd();++it )
+	{
+		CCharacter * user = PlayerManager.getChar( it->first );
+
+		if ( excluded.find(it->first) == excluded.end())
+		{
+			const uint32 stringId = STRING_MANAGER::sendStringToClient(TheDataset.getDataSetRow(it->first), msgName, params );
+			PHRASE_UTILITIES::sendDynamicSystemMessage(TheDataset.getDataSetRow(it->first), stringId);
+		}
 	}
 }
 
