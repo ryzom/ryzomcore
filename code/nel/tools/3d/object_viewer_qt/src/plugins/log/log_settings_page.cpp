@@ -38,8 +38,9 @@ namespace Plugin
 
 	class CLogPlugin;
 
-	CLogSettingsPage::CLogSettingsPage(QObject *parent)
+	CLogSettingsPage::CLogSettingsPage(CLogPlugin *logPlugin, QObject *parent)
 		: IOptionsPage(parent),
+		m_logPlugin(logPlugin),
 		m_currentPage(NULL),
 		m_error(true),
 		m_warning(true),

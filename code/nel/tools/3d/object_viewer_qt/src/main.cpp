@@ -124,6 +124,7 @@ sint main(int argc, char **argv)
 
 		nlinfo("Welcome to NeL Object Viewer Qt!");
 	}
+	QApplication::setGraphicsSystem("raster");
 	QApplication app(argc, argv);
 	QSplashScreen *splash = new QSplashScreen();
 	splash->setPixmap(QPixmap(":/images/nel_ide_load.png"));
