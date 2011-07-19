@@ -170,7 +170,7 @@ public:
 			string ret;
 			ret = "recv_money : "+_Amount;
 			if (_Guild)
-				ret += "; guild";
+				ret += ": guild";
 			ret += NL;
 			return ret;
 		}
@@ -702,7 +702,7 @@ public:
 			string ret;
 			ret = "recv_fame : "+_Faction+" "+_Fame;
 			if (_Guild)
-				ret += "; guild";
+				ret += ": guild";
 			ret += NL;
 			return ret;
 		}
@@ -800,7 +800,7 @@ public:
 			if (_Group)
 				ret += " : group";
 			if (_Guild)
-				ret += "; guild";
+				ret += ": guild";
 			ret += NL;
 		}
 
@@ -874,7 +874,7 @@ public:
 			if (_Group)
 				ret += " : group";
 			if (_Guild)
-				ret += "; guild";
+				ret += ": guild";
 			ret += NL;
 		}
 		
@@ -968,7 +968,7 @@ public:
 			if (!_BotDestroyer.empty())
 				ret += " : "+_BotDestroyer;
 			if (_Guild)
-				ret += "; guild";
+				ret += ": guild";
 			ret += NL;
 		}
 		
@@ -1800,7 +1800,7 @@ std::string CContentObjective::genNbGuildMembersNeededOption(CMissionData &md)
 	// If we are in a guild mission we add the 'nb_guild_members_needed' option to the script
 	if (md.isGuildMission())
 	{
-		ret = "; nb_guild_members_needed: ";
+		ret = ": nb_guild_members_needed ";
 		ret += toString(_NbGuildMembersNeeded);
 	}
 
