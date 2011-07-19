@@ -1695,19 +1695,63 @@ class CMissionActionRecvMoney : public IMissionAction
 
 		std::vector<TDataSetRow> entities;
 		instance->getEntities(entities);
-		uint amount = _Amount / (uint)entities.size();
-		if ( amount == 0 || _Amount % entities.size() )
-			amount++;
-		for ( uint i = 0; i < entities.size(); i++ )
+
+		// If the guild parameter is not set we just divide the money and give it to each entity
+		if (!_Guild)
 		{
-			CCharacter * user = PlayerManager.getChar( entities[i] );
-			if ( user )
+
+			uint amount = _Amount / (uint)entities.size();
+			if ( amount == 0 || _Amount % entities.size() )
+				amount++;
+			for ( uint i = 0; i < entities.size(); i++ )
 			{
-				user->giveMoney( _Amount );
-				SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
-				params[0].Int = _Amount;
-				PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_RECV_MONEY",params);
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if ( user )
+				{
+					user->giveMoney( _Amount );
+					SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
+					params[0].Int = _Amount;
+					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_RECV_MONEY",params);
+				}
 			}
+
+		}
+		// Else we give the money to the guild
+		else
+		{
+			if (entities.size() == 0)
+				return;
+
+			CCharacter * user = PlayerManager.getChar( entities[0] );
+			if (!user)
+			{
+				LOGMISSIONACTION("recv_money : Invalid user");
+				return;
+			}
+
+			CGuild * guild = CGuildManager::getInstance()->getGuildFromId(user->getGuildId());
+			if (guild)
+			{
+				guild->addMoney(_Amount);
+			}
+			else
+			{
+				LOGMISSIONACTION("recv_money : Invalid guild id '" + NLMISC::toString(user->getGuildId()) + "'");
+				return;
+			}
+
+			// tell everyone some money has been given to the guild
+			for ( uint i = 0; i < entities.size(); i++ )
+			{
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if ( user )
+				{
+					SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
+					params[0].Int = _Amount;
+					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_GUILD_RECV_MONEY",params);
+				}
+			}
+
 		}
 	};
 	uint _Amount;
