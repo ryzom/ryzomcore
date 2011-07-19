@@ -511,9 +511,9 @@ class CMissionActionRecvItem : public IMissionAction
 	{
 		_SourceLine = line;
 		bool ret = true;
-		if ( script.size() != 2 && script.size() != 3 )
+		if ( script.size() != 2 && script.size() != 3 && script.size() != 4)
 		{
-			MISLOGSYNTAXERROR("<item> [<quantity>] [<quality>][:npc_name][:group]");
+			MISLOGSYNTAXERROR("<item> [<quantity>] [<quality>][:npc_name][:group][:guild]");
 			return false;
 		}
 		vector<string> args;
@@ -567,6 +567,17 @@ class CMissionActionRecvItem : public IMissionAction
 			string option = CMissionParser::getNoBlankString(script[2]);
 			if ( !nlstricmp(option,"group") )
 				_Group = true;
+		}
+
+		// We check for the guild option
+		_Guild = false;
+		for (std::vector< std::string >::const_iterator it = script.begin(); it != script.end(); ++it)
+		{
+			if (CMissionParser::getNoBlankString(*it) == "guild")
+			{
+				_Guild = true;
+				break;
+			}
 		}
 
 		
@@ -760,6 +771,7 @@ class CMissionActionRecvItem : public IMissionAction
 	uint16		 _Quantity;
 	CSheetId	 _SheetId;
 	bool		 _Group;
+	bool		_Guild;
 
 	MISSION_ACTION_GETNEWPTR(CMissionActionRecvItem)
 };
@@ -772,9 +784,9 @@ class CMissionActionRecvNamedItem : public IMissionAction
 	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
 	{
 		_SourceLine = line;
-		if ( script.size() != 2 && script.size() != 3 )
+		if ( script.size() != 2 && script.size() != 3 && script.size() != 4)
 		{
-			MISLOGSYNTAXERROR("<named_item> [<quantity>] [:group]");
+			MISLOGSYNTAXERROR("<named_item> [<quantity>] [:group] [:guild]");
 			return false;
 		}
 		vector<string> args;
@@ -811,6 +823,17 @@ class CMissionActionRecvNamedItem : public IMissionAction
 			string option = CMissionParser::getNoBlankString(script[2]);
 			if ( !nlstricmp(option,"group") )
 				_Group = true;
+		}
+
+		// We check for the guild option
+		_Guild = false;
+		for (std::vector< std::string >::const_iterator it = script.begin(); it != script.end(); ++it)
+		{
+			if (CMissionParser::getNoBlankString(*it) == "guild")
+			{
+				_Guild = true;
+				break;
+			}
 		}
 
 		if ( _Quantity == 0 )
@@ -945,6 +968,7 @@ class CMissionActionRecvNamedItem : public IMissionAction
 	std::string	 _NamedItem;
 	uint16		 _Quantity;
 	bool		 _Group;
+	bool		_Guild;
 
 	MISSION_ACTION_GETNEWPTR(CMissionActionRecvNamedItem)
 };
@@ -1043,9 +1067,9 @@ class CMissionActionDestroyItem :
 	{
 		// Parse the line
 		_SourceLine = line;
-		if ( script.size() != 2 && script.size() != 3)
+		if ( script.size() != 2 && script.size() != 3 && script.size() != 4)
 		{
-			MISLOGSYNTAXERROR("<item> [<quantity>] [<quality>]:[npc_name]");
+			MISLOGSYNTAXERROR("<item> [<quantity>] [<quality>]:[npc_name] [:guild]");
 			return false;
 		}
 
@@ -1058,6 +1082,17 @@ class CMissionActionDestroyItem :
 		{
 			if (!CMissionParser::parseBotName(script[2], _Npc, missionData))
 				ret= false;
+		}
+
+		// We check for the guild option
+		_Guild = false;
+		for (std::vector< std::string >::const_iterator it = script.begin(); it != script.end(); ++it)
+		{
+			if (CMissionParser::getNoBlankString(*it) == "guild")
+			{
+				_Guild = true;
+				break;
+			}
 		}
 
 		return ret;
@@ -1104,6 +1139,7 @@ class CMissionActionDestroyItem :
 		}
 	};
 	TAIAlias	_Npc;
+	bool		_Guild;
 
 	MISSION_ACTION_GETNEWPTR(CMissionActionDestroyItem)
 };
@@ -1607,9 +1643,9 @@ class CMissionActionRecvMoney : public IMissionAction
 	{
 		bool ret = true;
 		_SourceLine = line;
-		if ( script.size() != 2 )
+		if ( script.size() != 2 && script.size() != 3)
 		{
-			MISLOGSYNTAXERROR("<money> OR <item><quality><factor> *[;<item><quality><factor>]");
+			MISLOGSYNTAXERROR("<money> [: guild] OR <item><quality><factor> *[;<item><quality><factor>]");
 			return false;
 		}
 		
@@ -1637,6 +1673,18 @@ class CMissionActionRecvMoney : public IMissionAction
 					ret = false;
 			}
 		}
+
+		// We check for the guild option
+		_Guild = false;
+		for (std::vector< std::string >::const_iterator it = script.begin(); it != script.end(); ++it)
+		{
+			if (CMissionParser::getNoBlankString(*it) == "guild")
+			{
+				_Guild = true;
+				break;
+			}
+		}
+
 		return ret;
 	}
 
@@ -1663,6 +1711,7 @@ class CMissionActionRecvMoney : public IMissionAction
 		}
 	};
 	uint _Amount;
+	bool _Guild;
 
 	MISSION_ACTION_GETNEWPTR(CMissionActionRecvMoney)
 };
@@ -1675,9 +1724,9 @@ class CMissionActionRecvFame : public IMissionAction
 	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
 	{
 		_SourceLine = line;
-		if ( script.size() != 2 )
+		if ( script.size() != 2 && script.size() != 3)
 		{
-			MISLOGSYNTAXERROR("<faction> <value>");
+			MISLOGSYNTAXERROR("<faction> <value> [:guild]");
 			return false;
 		}
 		vector<string> args;
@@ -1700,6 +1749,18 @@ class CMissionActionRecvFame : public IMissionAction
 			MISLOGERROR("fame = 0");
 			return false;
 		}
+
+		// We check for the guild option
+		_Guild = false;
+		for (std::vector< std::string >::const_iterator it = script.begin(); it != script.end(); ++it)
+		{
+			if (CMissionParser::getNoBlankString(*it) == "guild")
+			{
+				_Guild = true;
+				break;
+			}
+		}
+
 		return true;
 		
 	}
@@ -1722,6 +1783,7 @@ class CMissionActionRecvFame : public IMissionAction
 	};
 	uint32		_Faction;
 	sint32		_Value;
+	bool		_Guild;
 
 	MISSION_ACTION_GETNEWPTR(CMissionActionRecvFame)
 };
