@@ -975,7 +975,7 @@ class CMissionActionRecvNamedItem : public IMissionAction
 				}
 			}
 		}
-		else if ( !_Group )
+		else if ( !_Group && !_Guild)
 		{
 			CCharacter * user = PlayerManager.getChar( entities[0] );
 			CTeam * team = TeamManager.getRealTeam(user->getTeamId());
@@ -986,41 +986,34 @@ class CMissionActionRecvNamedItem : public IMissionAction
 			}
 		}
 
-		// check free room space in inventory
-		// NB : in case of group, fail happens only if noone in the group have enough free space
-		CGameItemPtr itemTmp = CNamedItems::getInstance().createNamedItem(_NamedItem, _Quantity);
-		if( itemTmp != NULL )
+		// If the case we want to give the item to the guild
+		if (_Guild)
 		{
-			sint16 neededSlotCount = (sint16) ceil( (float)_Quantity / itemTmp->getMaxStackSize() );
-			uint32 neededBulk = _Quantity * itemTmp->getStackBulk();
-			itemTmp.deleteItem();
-			
-			bool fail = true;
-			for ( uint i = 0; i < entities.size(); i++ )
-			{
-				CCharacter * user = PlayerManager.getChar( entities[i] );
-				if ( user )
-				{
-					CInventoryPtr invBag = user->getInventory( INVENTORIES::bag );
-					sint16 freeSlotcount = invBag->getFreeSlotCount();
-					uint32 maxBulk = invBag->getMaxBulk();
+			if (entities.size() == 0)
+				return;
 
-					CInventoryPtr invTemp = user->getInventory( INVENTORIES::temporary );
-					if( invTemp )
-					{
-						freeSlotcount -= invTemp->getUsedSlotCount();
-						maxBulk -= invTemp->getInventoryBulk();
-					}
-					
-					if( (neededSlotCount <= freeSlotcount) && ( neededBulk + invBag->getInventoryBulk() <= maxBulk) )
-					{
-						fail = false;
-						break;
-					}
-				}
-				
+			CCharacter * user = PlayerManager.getChar( entities[0] );
+			if (!user)
+			{
+				LOGMISSIONACTION("recv_fame : Invalid user");
+				return;
 			}
-			if( fail )
+
+			CGuild * guild = CGuildManager::getInstance()->getGuildFromId(user->getGuildId());
+			if (!guild)
+			{
+				LOGMISSIONACTION("recv_fame : Invalid guild id '" + NLMISC::toString(user->getGuildId()) + "'");
+				return;
+			}
+
+			// add the item to inventory
+			CGameItemPtr item = CNamedItems::getInstance().createNamedItem(_NamedItem, _Quantity);
+			if (item == NULL)
+			{
+				LOGMISSIONACTION("named item '" + _NamedItem + "' is unknown");
+				return;
+			}
+			if (!guild->putItem(item))
 			{
 				CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( instance->getTemplateId() );
 				if ( templ )
@@ -1032,39 +1025,103 @@ class CMissionActionRecvNamedItem : public IMissionAction
 					}
 				}
 			}
+			else
+			{
+				for ( uint i = 0; i < entities.size(); i++ )
+				{
+					CCharacter * user = PlayerManager.getChar( entities[i] );
+					if ( user )
+					{
+						SM_STATIC_PARAMS_2(params, STRING_MANAGER::dyn_string_id, STRING_MANAGER::integer);
+						params[0].StringId = item->sendNameId(user);
+						params[1].Int = _Quantity;
+						PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_GUILD_RECV_NAMED_ITEM", params);
+					}
+				}
+			}
 		}
 		else
 		{
-			LOGMISSIONACTION("named item '" + _NamedItem + "' is unknown");
-			return;
-		}
-
-		// apply the action to all entities
-		for ( uint i = 0; i < entities.size(); i++ )
-		{
-			CCharacter * user = PlayerManager.getChar( entities[i] );
-			if ( user )
+			// check free room space in inventory
+			// NB : in case of group, fail happens only if noone in the group have enough free space
+			CGameItemPtr itemTmp = CNamedItems::getInstance().createNamedItem(_NamedItem, _Quantity);
+			if( itemTmp != NULL )
 			{
-				if (!user->enterTempInventoryMode(TEMP_INV_MODE::MissionReward))
-					continue;
+				sint16 neededSlotCount = (sint16) ceil( (float)_Quantity / itemTmp->getMaxStackSize() );
+				uint32 neededBulk = _Quantity * itemTmp->getStackBulk();
+				itemTmp.deleteItem();
+				
+				bool fail = true;
+				for ( uint i = 0; i < entities.size(); i++ )
+				{
+					CCharacter * user = PlayerManager.getChar( entities[i] );
+					if ( user )
+					{
+						CInventoryPtr invBag = user->getInventory( INVENTORIES::bag );
+						sint16 freeSlotcount = invBag->getFreeSlotCount();
+						uint32 maxBulk = invBag->getMaxBulk();
 
-				// add the item to inventory
-				CGameItemPtr item = CNamedItems::getInstance().createNamedItem(_NamedItem, _Quantity);
-				if (item == NULL)
-				{
-					LOGMISSIONACTION("named item '" + _NamedItem + "' is unknown");
-					return;
+						CInventoryPtr invTemp = user->getInventory( INVENTORIES::temporary );
+						if( invTemp )
+						{
+							freeSlotcount -= invTemp->getUsedSlotCount();
+							maxBulk -= invTemp->getInventoryBulk();
+						}
+						
+						if( (neededSlotCount <= freeSlotcount) && ( neededBulk + invBag->getInventoryBulk() <= maxBulk) )
+						{
+							fail = false;
+							break;
+						}
+					}
+					
 				}
-				if(!user->addItemToInventory(INVENTORIES::temporary, item))
+				if( fail )
 				{
-					item.deleteItem();
+					CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( instance->getTemplateId() );
+					if ( templ )
+					{
+						if ( templ->Tags.FailIfInventoryIsFull )
+						{
+							instance->setProcessingState(CMission::ActionFailed);
+							return;
+						}
+					}
 				}
-				else
+			}
+			else
+			{
+				LOGMISSIONACTION("named item '" + _NamedItem + "' is unknown");
+				return;
+			}
+
+			// apply the action to all entities
+			for ( uint i = 0; i < entities.size(); i++ )
+			{
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if ( user )
 				{
-					SM_STATIC_PARAMS_2(params, STRING_MANAGER::dyn_string_id, STRING_MANAGER::integer);
-					params[0].StringId = item->sendNameId(user);
-					params[1].Int = _Quantity;
-					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_RECV_NAMED_ITEM", params);
+					if (!user->enterTempInventoryMode(TEMP_INV_MODE::MissionReward))
+						continue;
+
+					// add the item to inventory
+					CGameItemPtr item = CNamedItems::getInstance().createNamedItem(_NamedItem, _Quantity);
+					if (item == NULL)
+					{
+						LOGMISSIONACTION("named item '" + _NamedItem + "' is unknown");
+						return;
+					}
+					if(!user->addItemToInventory(INVENTORIES::temporary, item))
+					{
+						item.deleteItem();
+					}
+					else
+					{
+						SM_STATIC_PARAMS_2(params, STRING_MANAGER::dyn_string_id, STRING_MANAGER::integer);
+						params[0].StringId = item->sendNameId(user);
+						params[1].Int = _Quantity;
+						PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_RECV_NAMED_ITEM", params);
+					}
 				}
 			}
 		}
