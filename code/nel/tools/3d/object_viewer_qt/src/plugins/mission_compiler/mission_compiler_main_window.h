@@ -59,6 +59,7 @@ private:
 	void moveSelectedItem(const QModelIndex &index, QStringListModel *from, QStringListModel *to);
 	void applyCheckboxes(const QStringList &servers);
 	
+	
 	QMenu *_toolModeMenu;
 	QUndoStack *m_undoStack;
 	QStringListModel *m_allPrimitivesModel;

@@ -245,17 +245,63 @@ void MissionCompilerMainWindow::compileMission(bool publish)
 			nbMission += mc.getMissionsCount();
 
 			// publish files to selected servers
-			//if (publish)
-			//for (uint i=0 ; i<ServerPathPrim.size() ; i++)
-			//{
-			//	if (IsDlgButtonChecked(IDC_CHECK_SRV1 + i) != BST_CHECKED)
-			//		continue;
+			if (publish)
+			{
+				m_compileLog.append("Begin publishing missions...\n");
+				QSettings *settings = Core::ICore::instance()->settings();
+				settings->beginGroup(MISSION_COMPILER_SECTION);
 
-			//	compileLog += toString("\r\nPublishing to %s ...\r\n", ServerName[i].c_str());
-			//	for (uint j=0 ; j<mc.getFileToPublishCount() ; j++)
-			//		compileLog += toString("   %s\r\n", (NLMISC::CFile::getFilename(mc.getFileToPublish(j))).c_str());
-			//	mc.publishFiles(ServerPathPrim[i], ServerPathText[i], LocalTextPath);
-			//}
+				// Retrieve the local text path.
+				QString localPath = settings->value(SETTING_LOCAL_TEXT_PATH).toString();
+				settings->endGroup();
+				QStringList checkedServers;
+				for(int i = 0; i<ui->publishServersList->count(); i++)
+				{
+
+					// Retrieve each checked server.
+					QListWidgetItem *item = ui->publishServersList->item(i);
+					if(item->checkState() == Qt::Checked)
+						checkedServers << item->text();
+				}
+				
+				Q_FOREACH(QString checkedServer, checkedServers)
+				{
+					m_compileLog.append("Processing publication configuration for '"+checkedServer+"'\n");
+					QStringList items = settings->value(SETTING_SERVERS_TABLE_ITEMS).toStringList();
+					int column = 0;
+					int row = 0;
+					QString servName;
+					QString primPath;
+					QString textPath;
+					Q_FOREACH(QString var, items)
+					{
+						// Check to see if we're starting a new row.
+						if(column > 2)
+						{
+							column = 0;
+							row++;
+						}
+						if(column == 0)
+							servName = var;
+						else if(column == 1)
+							textPath = var;
+						else if(column == 2)
+						{
+							primPath = var;
+
+							m_compileLog.append("Publishing to "+servName+" ...\n");
+							for (uint j=0 ; j<mc.getFileToPublishCount() ; j++)
+							{
+								m_compileLog.append("   "+QString(NLMISC::CFile::getFilename(mc.getFileToPublish(j)).c_str())+"\n");
+							}
+							mc.publishFiles(primPath.toStdString(), textPath.toStdString(), localPath.toStdString());
+						}
+						
+						column++;
+					}
+				}
+				m_compileLog.append("End publishing missions...\n");
+			}
 		}
 		catch(const EParseException &e)
 		{
@@ -449,6 +495,8 @@ void MissionCompilerMainWindow::applyCheckboxes(const QStringList &servers)
 	Q_FOREACH(QString server, servers)
 	{
 		QList<QListWidgetItem*> items = ui->publishServersList->findItems(server, Qt::MatchExactly);
+		if(items.size() != 1)
+			continue;
 		items.at(0)->setCheckState(Qt::Checked);
 	}
 }
