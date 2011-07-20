@@ -1031,6 +1031,88 @@ void CGuild::takeItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 s
 }
 
 //----------------------------------------------------------------------------
+uint CGuild::selectItems(NLMISC::CSheetId itemSheetId, uint32 quality, std::vector<CItemSlotId> *itemList)
+{
+	// For all items
+	uint	quantitySelected= 0;
+	for (uint32 i = 0; i < _Inventory->getSlotCount(); i++)
+	{
+		CGameItemPtr item = _Inventory->getItem(i);
+		if (item == NULL)
+			continue;
+
+		// if match, append to the list
+		if (item->getSheetId()==itemSheetId && item->quality()>=quality)
+		{
+			quantitySelected+= item->getStackSize();
+			if(itemList)
+			{
+				CItemSlotId		entry;
+				entry.Slot= i;
+				entry.Quality= item->quality();
+				itemList->push_back(entry);
+			}
+		}
+	}
+
+	return quantitySelected;
+}
+
+//----------------------------------------------------------------------------
+uint CGuild::destroyItems(const std::vector<CItemSlotId> &itemSlotIns, uint32 maxQuantity)
+{
+	// none to destroy actually?
+	if(maxQuantity==0 || itemSlotIns.empty())
+		return 0;
+
+	// If has to destroy only some of them, must sort to take first the ones of lowest quality
+	const std::vector<CItemSlotId> *itemSlots= NULL;
+	std::vector<CItemSlotId>	itemSlotSorted;
+	if(maxQuantity!=uint32(-1))
+	{
+		itemSlotSorted= itemSlotIns;
+		std::sort(itemSlotSorted.begin(), itemSlotSorted.end());
+		itemSlots= &itemSlotSorted;
+	}
+	else
+	{
+		// just point to the original one
+		itemSlots= &itemSlotIns;
+	}
+
+	// destroy items up to the maxquantity wanted
+	uint	index= 0;
+	uint	totalDestroyed= 0;
+	while(maxQuantity>0 && index<itemSlotIns.size())
+	{
+		const CItemSlotId	&itemSlot= (*itemSlots)[index];
+		// locate the item
+		CGameItemPtr	pItem= getItem(itemSlot.Slot);
+		if(pItem!=NULL)
+		{
+			// destroy
+			uint32	quantityToDestroy= maxQuantity;
+			quantityToDestroy= min(quantityToDestroy, pItem->getStackSize());
+
+			CGameItemPtr item = _Inventory->removeItem(itemSlot.Slot, quantityToDestroy);
+			item.deleteItem();
+
+			// decrease if not infinity
+			if(maxQuantity!=-1)
+				maxQuantity-= quantityToDestroy;
+
+			// increase count
+			totalDestroyed+= quantityToDestroy;
+		}
+
+		// next slot to destroy
+		index++;
+	}
+
+	return totalDestroyed;
+}
+
+//----------------------------------------------------------------------------
 void	CGuild::takeMoney( CCharacter * user, uint64 money, uint16 session )
 {
 	nlassert(user);

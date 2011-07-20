@@ -237,6 +237,22 @@ public:
 	/// add an item in the guild inventory (item can be deleted if not inserted : do not use it anymore in any case!)
 	bool putItem( CGameItemPtr item );
 
+	class CItemSlotId
+	{
+	public:
+		uint32						Slot;
+		uint32						Quality;
+		bool	operator<(const CItemSlotId &o) const
+		{
+			return Quality<o.Quality;
+		}
+	};
+
+	/// check the presence of an item (or several items in a stack) by its sheetId/quality
+	uint selectItems(NLMISC::CSheetId itemSheetId, uint32 quality, std::vector<CItemSlotId> *itemList= NULL);
+	/// destroy a list of items (up to maxQuantity to destroy)
+	uint destroyItems(const std::vector<CItemSlotId> &itemSlots, uint32 maxQuantity=-1);
+
 	/// return the inventory (const)
 	const NLMISC::CSmartPtr<CGuildInventory>& getInventory() const { return _Inventory; }
 	/// store for a character and return the current info version for an item of the guild inventory

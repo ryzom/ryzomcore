@@ -1270,32 +1270,81 @@ class CMissionActionDestroyItem :
 		instance->getEntities(entities);
 		if ( entities.empty() )
 			return;
-		for ( uint i = 0; i < entities.size(); i++ )
+
+		// If the "guild" parameter is not set, we destroy the items for the users
+		if (!_Guild)
 		{
-			CCharacter * user = PlayerManager.getChar( entities[i] );
-			if ( user )
+
+			for ( uint i = 0; i < entities.size(); i++ )
 			{
-				// Select the items in Bag AND mektoub that match the request
-				vector<CCharacter::CItemSlotId>		itemList;
-				user->selectItems(INVENTORIES::bag, _SheetId, _Quality, &itemList);
-				for(uint pa=0;pa<INVENTORIES::max_pet_animal;pa++)
-					user->selectItems(INVENTORIES::TInventory(INVENTORIES::pet_animal + pa), _SheetId, _Quality, &itemList);
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if ( user )
+				{
+					// Select the items in Bag AND mektoub that match the request
+					vector<CCharacter::CItemSlotId>		itemList;
+					user->selectItems(INVENTORIES::bag, _SheetId, _Quality, &itemList);
+					for(uint pa=0;pa<INVENTORIES::max_pet_animal;pa++)
+						user->selectItems(INVENTORIES::TInventory(INVENTORIES::pet_animal + pa), _SheetId, _Quality, &itemList);
 
-				// Destroy them, up to quantity wanted
-				// NB: don't care if destroying an item owned by a mektoub is strange because mektoub not near!
-				uint	quantityReallyDestroyed;
-				quantityReallyDestroyed= user->destroyItems(itemList, _Quantity);
+					// Destroy them, up to quantity wanted
+					// NB: don't care if destroying an item owned by a mektoub is strange because mektoub not near!
+					uint	quantityReallyDestroyed;
+					quantityReallyDestroyed= user->destroyItems(itemList, _Quantity);
 
-				// Send message
-				SM_STATIC_PARAMS_4(params, STRING_MANAGER::bot, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::integer);
-				TAIAlias	botAlias= _Npc;
-				if(botAlias==CAIAliasTranslator::Invalid)
-					botAlias= instance->getGiver();
-				params[0].setEIdAIAlias(CAIAliasTranslator::getInstance()->getEntityId( botAlias ), botAlias);
-				params[1].SheetId = _SheetId;
-				params[2].Int = quantityReallyDestroyed;
-				params[3].Int = _Quality;
-				PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_DESTROY_ITEM", params);
+					// Send message
+					SM_STATIC_PARAMS_4(params, STRING_MANAGER::bot, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::integer);
+					TAIAlias	botAlias= _Npc;
+					if(botAlias==CAIAliasTranslator::Invalid)
+						botAlias= instance->getGiver();
+					params[0].setEIdAIAlias(CAIAliasTranslator::getInstance()->getEntityId( botAlias ), botAlias);
+					params[1].SheetId = _SheetId;
+					params[2].Int = quantityReallyDestroyed;
+					params[3].Int = _Quality;
+					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_DESTROY_ITEM", params);
+				}
+			}
+
+		}
+		// We destroy the item in the guild
+		else
+		{
+			CCharacter * user = PlayerManager.getChar( entities[0] );
+			if (!user)
+			{
+				LOGMISSIONACTION("recv_fame : Invalid user");
+				return;
+			}
+
+			CGuild * guild = CGuildManager::getInstance()->getGuildFromId(user->getGuildId());
+			if (!guild)
+			{
+				LOGMISSIONACTION("recv_fame : Invalid guild id '" + NLMISC::toString(user->getGuildId()) + "'");
+				return;
+			}
+
+			vector<CGuild::CItemSlotId>		itemList;
+			guild->selectItems(_SheetId, _Quality, &itemList);
+
+			// Destroy them, up to quantity wanted
+			uint	quantityReallyDestroyed;
+			quantityReallyDestroyed = guild->destroyItems(itemList, _Quantity);
+
+			// Send message
+			for ( uint i = 0; i < entities.size(); i++ )
+			{
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if ( user )
+				{
+					SM_STATIC_PARAMS_4(params, STRING_MANAGER::bot, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::integer);
+					TAIAlias	botAlias= _Npc;
+					if(botAlias==CAIAliasTranslator::Invalid)
+						botAlias= instance->getGiver();
+					params[0].setEIdAIAlias(CAIAliasTranslator::getInstance()->getEntityId( botAlias ), botAlias);
+					params[1].SheetId = _SheetId;
+					params[2].Int = quantityReallyDestroyed;
+					params[3].Int = _Quality;
+					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_DESTROY_ITEM", params);
+				}
 			}
 		}
 	};
