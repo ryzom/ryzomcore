@@ -25,7 +25,7 @@ namespace Ui {
     class ServerEntryDialog;
 }
 
-namespace Plugin
+namespace MissionCompiler
 {
 /**
 @class ServerEntryDialog
@@ -54,6 +54,6 @@ private:
 	Ui::ServerEntryDialog *m_ui;
 };
 
-} // namespace Plugin
+} // namespace MissionCompiler
 
 #endif // SERVER_ENTRY_DIALOG_H

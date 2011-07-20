@@ -47,6 +47,7 @@ public Q_SLOTS:
 	void handleDataDirButton();
 	void handleDataDirChanged(const QString &text);
 	void handleResetFiltersButton();
+	void handleChangedSettings();
 
 private:
     Ui::MissionCompilerMainWindow *ui;
@@ -56,7 +57,8 @@ private:
 	bool parsePrimForMissions(NLLIGO::IPrimitive const *prim, TMissionContainer &missions);
 	void compileMission(bool publish=false);
 	void moveSelectedItem(const QModelIndex &index, QStringListModel *from, QStringListModel *to);
-
+	void applyCheckboxes(const QStringList &servers);
+	
 	QMenu *_toolModeMenu;
 	QUndoStack *m_undoStack;
 	QStringListModel *m_allPrimitivesModel;

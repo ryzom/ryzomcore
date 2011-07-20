@@ -2,6 +2,7 @@
 #include "ui_mission_compiler_main_window.h"
 #include "validation_file.h"
 #include "mission_compiler.h"
+#include "mission_compiler_plugin_constants.h"
 
 #include <QMenu>
 #include <QSignalMapper>
@@ -11,6 +12,8 @@
 #include <QTextStream>
 #include <QFileDialog>
 #include <QDirIterator>
+#include <QTableWidget>
+#include <QTableWidgetItem>
 
 #include "../core/icore.h"
 #include "../core/imenu_manager.h"
@@ -22,6 +25,8 @@
 #include <nel/ligo/primitive_utils.h>
 #include <nel/ligo/primitive.h>
 #include <nel/ligo/ligo_config.h>
+
+using namespace MissionCompiler::Constants;
 
 MissionCompilerMainWindow::MissionCompilerMainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -69,6 +74,9 @@ MissionCompilerMainWindow::MissionCompilerMainWindow(QWidget *parent) :
 	connect(ui->dataDirEdit, SIGNAL(textChanged(const QString &)), this, SLOT(handleDataDirChanged(const QString &)));
 	connect(ui->filterEdit, SIGNAL(textEdited(const QString&)), this, SLOT(handleFilterChanged(const QString&)));
 	connect(ui->resetFiltersButton, SIGNAL(clicked()), this, SLOT(handleResetFiltersButton()));
+
+	// Connect for settings changes.
+	connect(Core::ICore::instance(), SIGNAL(changeSettings()), this, SLOT(handleChangedSettings()));
 
 	// Set the default data dir to the primitives path.
 	QSettings *settings = Core::ICore::instance()->settings();
@@ -366,25 +374,87 @@ void MissionCompilerMainWindow::updateCompileLog()
 
 void MissionCompilerMainWindow::loadConfig() {
 	QSettings *settings = Core::ICore::instance()->settings();
-	settings->beginGroup("MissionCompiler");
+	settings->beginGroup(MISSION_COMPILER_SECTION);
 
-	//QColor color;
-	//color = settings->value("BackgroundColor", QColor(80, 80, 80)).value<QColor>();
-	//m_nelWidget->setBackgroundColor(NLMISC::CRGBA(color.red(), color.green(), color.blue(), color.alpha()));
+	// Retrieve the local text path.
+	QString localPath = settings->value(SETTING_LOCAL_TEXT_PATH).toString();
+	QListWidgetItem *item = new QListWidgetItem("Local");
+	item->setForeground(Qt::blue);
+	item->setCheckState(Qt::Unchecked);
+	ui->publishServersList->addItem(item);
+
+	QStringList items = settings->value(SETTING_SERVERS_TABLE_ITEMS).toStringList();
+	int column = 0;
+	int row = 0;
+	Q_FOREACH(QString var, items)
+	{
+		// Check to see if we're starting a new row.
+		if(column > 2)
+		{
+			column = 0;
+			row++;
+		}
+		if(column == 0)
+		{
+			item = new QListWidgetItem(var);
+			item->setCheckState(Qt::Unchecked);
+			ui->publishServersList->addItem(item);
+		}
+
+		column++;
+	}
+
+	// Reapply the checkboxes for servers we had checked previously.
+	QStringList servers = settings->value(SETTING_PUBLISH_SERVER_CHECKS).toStringList();
+	applyCheckboxes(servers);
+
+	settings->endGroup();
 }
 
 void MissionCompilerMainWindow::saveConfig() {
 	QSettings *settings = Core::ICore::instance()->settings();
-	settings->beginGroup("MissionCompiler" );
+	settings->beginGroup(MISSION_COMPILER_SECTION);
 
-	//QColor color(m_nelWidget->backgroundColor().R, m_nelWidget->backgroundColor().G, m_nelWidget->backgroundColor().B, m_nelWidget->backgroundColor().A);
-	//settings->setValue("BackgroundColor", color);
+	QStringList servers;
+	for(int row = 0; row < ui->publishServersList->count(); row++)
+	{
+		QListWidgetItem *item = ui->publishServersList->item(row);
+		if(item->checkState() == Qt::Checked)
+			servers << item->text();
+	}
+
+	settings->setValue(SETTING_PUBLISH_SERVER_CHECKS, servers);
 
 	settings->endGroup();
 	settings->sync();
 }
 
+void MissionCompilerMainWindow::handleChangedSettings()
+{
+	QStringList servers;
+	for(int row = 0; row < ui->publishServersList->count(); row++)
+	{
+		QListWidgetItem *item = ui->publishServersList->item(row);
+		if(item->checkState() == Qt::Checked)
+			servers << item->text();
+	}
+	ui->publishServersList->clear();
+	loadConfig();
+
+	applyCheckboxes(servers);
+}
+
+void MissionCompilerMainWindow::applyCheckboxes(const QStringList &servers)
+{
+	Q_FOREACH(QString server, servers)
+	{
+		QList<QListWidgetItem*> items = ui->publishServersList->findItems(server, Qt::MatchExactly);
+		items.at(0)->setCheckState(Qt::Checked);
+	}
+}
+
 MissionCompilerMainWindow::~MissionCompilerMainWindow()
 {
+	saveConfig();
     delete ui;
 }

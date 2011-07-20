@@ -24,7 +24,7 @@ namespace ExtensionSystem
 class IPluginSpec;
 }
 
-namespace Plugin
+namespace MissionCompiler
 {
 
 class MissionCompilerPlugin : public QObject, public ExtensionSystem::IPlugin
@@ -96,6 +96,6 @@ public:
 	MissionCompilerMainWindow *m_missionCompilerMainWindow;
 };
 
-} // namespace Plugin
+} // namespace MissionCompiler
 
 #endif // MISSION_COMPILER_PLUGIN_H

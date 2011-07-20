@@ -25,7 +25,7 @@
 // Qt includes
 #include <QFileDialog>
 
-namespace Plugin
+namespace MissionCompiler
 {
 
 ServerEntryDialog::ServerEntryDialog(QWidget *parent)
@@ -86,4 +86,4 @@ void ServerEntryDialog::lookupPrimPath()
 	QString path = QFileDialog::getExistingDirectory(this, "", curPath);
 	m_ui->serverPrimPathEdit->setText(path);
 }
-} /* namespace Plugin */
+} /* namespace MissionCompiler */

@@ -17,6 +17,7 @@
 
 // Project includes
 #include "mission_compiler_settings_page.h"
+#include "mission_compiler_plugin_constants.h"
 #include "../core/core_constants.h"
 #include "../core/icore.h"
 
@@ -31,7 +32,7 @@
 #include <QtGui/QFileDialog>
 #include <QtGui/QTreeWidgetItem>
 
-namespace Plugin
+namespace MissionCompiler
 {
 
 QString lastDir = ".";
@@ -149,37 +150,54 @@ void MissionCompilerSettingsPage::delServer()
 
 void MissionCompilerSettingsPage::readSettings()
 {
-	//QStringList paths;
-	//QSettings *settings = Core::ICore::instance()->settings();
-	//settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-	//if (m_recurse)
-	//	paths = settings->value(Core::Constants::RECURSIVE_SEARCH_PATHS).toStringList();
-	//else
-	//	paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
-	//settings->endGroup();
-	//Q_FOREACH(QString path, paths)
-	//{
-	//	QListWidgetItem *newItem = new QListWidgetItem;
-	//	newItem->setText(path);
-	//	newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-	//	m_ui.serversTreeWidget->addItem(newItem);
-	//}
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::MISSION_COMPILER_SECTION);
+
+	// Retrieve the local text path.
+	m_ui.localPathEdit->setText(settings->value(Constants::SETTING_LOCAL_TEXT_PATH).toString());
+
+	QStringList items = settings->value(Constants::SETTING_SERVERS_TABLE_ITEMS).toStringList();
+	int column = 0;
+	int row = 0;
+	m_ui.serversTableWidget->insertRow(row);
+	Q_FOREACH(QString var, items)
+	{
+		// Check to see if we're starting a new row.
+		if(column > 2)
+		{
+			column = 0;
+			row++;
+			m_ui.serversTableWidget->insertRow(row);
+		}
+		
+		QTableWidgetItem *item = new QTableWidgetItem(var);
+		m_ui.serversTableWidget->setItem(row, column, item);
+
+		column++;
+	}
+	settings->endGroup();
 }
 
 void MissionCompilerSettingsPage::writeSettings()
 {
-	//QStringList paths;
-	//for (int i = 0; i < m_ui.serversTreeWidget->count(); ++i)
-	//	paths << m_ui.serversTreeWidget->item(i)->text();
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::MISSION_COMPILER_SECTION);
+	
+	// Save the local text path.
+	settings->setValue(Constants::SETTING_LOCAL_TEXT_PATH, m_ui.localPathEdit->text());
 
-	//QSettings *settings = Core::ICore::instance()->settings();
-	//settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-	//if (m_recurse)
-	//	settings->setValue(Core::Constants::RECURSIVE_SEARCH_PATHS, paths);
-	//else
-	//	settings->setValue(Core::Constants::SEARCH_PATHS, paths);
-	//settings->endGroup();
-	//settings->sync();
+	QStringList items;
+	for(int row = 0; row < m_ui.serversTableWidget->rowCount(); row++)
+	{
+		for(int column = 0; column < m_ui.serversTableWidget->columnCount(); column++)
+		{
+			items << m_ui.serversTableWidget->item(row, column)->text();
+		}
+	}
+
+	settings->setValue(Constants::SETTING_SERVERS_TABLE_ITEMS, items);
+	settings->endGroup();
+	settings->sync();
 }
 
-} /* namespace Plugin */
+} /* namespace MissionCompiler */

@@ -27,7 +27,7 @@
 
 class QWidget;
 
-namespace Plugin
+namespace MissionCompiler
 {
 /**
 @class MissionCompilerSettingsPage
@@ -63,6 +63,6 @@ private:
 	Ui::MissionCompilerSettingsPage m_ui;
 };
 
-} // namespace Plugin
+} // namespace MissionCompiler
 
 #endif // MISSION_COMPILER_SETTINGS_PAGE_H

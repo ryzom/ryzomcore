@@ -19,7 +19,7 @@
 
 #include "mission_compiler_settings_page.h"
 
-namespace Plugin
+namespace MissionCompiler
 {
 
 MissionCompilerPlugin::~MissionCompilerPlugin()
@@ -128,4 +128,4 @@ ExtensionSystem::IPluginSpec *MissionCompilerPlugin::pluginByName(const QString 
 
 }
 
-Q_EXPORT_PLUGIN(Plugin::MissionCompilerPlugin)
+Q_EXPORT_PLUGIN(MissionCompiler::MissionCompilerPlugin)
