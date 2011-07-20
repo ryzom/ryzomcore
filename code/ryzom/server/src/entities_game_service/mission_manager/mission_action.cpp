@@ -1813,15 +1813,57 @@ class CMissionActionRecvFame : public IMissionAction
 		LOGMISSIONACTION("recv_fame");
 		std::vector<TDataSetRow> entities;
 		instance->getEntities(entities);
-		for ( uint i = 0; i < entities.size(); i++ )
-		{
-			CEntityId eid = TheDataset.getEntityId(entities[i]);
-			CFameInterface::getInstance().addFameIndexed(eid, _Faction, _Value, true);
 
-			// Make the client refresh the icons on mission giver NPCs, at once
-			CCharacter *character = PlayerManager.getChar(entities[i]);
-			if (character)
-				character->sendEventForMissionAvailabilityCheck();
+		// If there is no "guild" parameter we give the fame to every user
+		if (!_Guild)
+		{
+
+			for ( uint i = 0; i < entities.size(); i++ )
+			{
+				CEntityId eid = TheDataset.getEntityId(entities[i]);
+				CFameInterface::getInstance().addFameIndexed(eid, _Faction, _Value, true);
+
+				// Make the client refresh the icons on mission giver NPCs, at once
+				CCharacter *character = PlayerManager.getChar(entities[i]);
+				if (character)
+					character->sendEventForMissionAvailabilityCheck();
+			}
+
+		}
+		// Else we just give it to the guild
+		else
+		{
+
+			if (entities.size() == 0)
+				return;
+
+			CCharacter * user = PlayerManager.getChar( entities[0] );
+			if (!user)
+			{
+				LOGMISSIONACTION("recv_fame : Invalid user");
+				return;
+			}
+
+			CGuild * guild = CGuildManager::getInstance()->getGuildFromId(user->getGuildId());
+			if (guild)
+			{
+				CFameInterface::getInstance().addFameIndexed(guild->getEId(), _Faction, _Value, true);
+			}
+			else
+			{
+				LOGMISSIONACTION("recv_fame : Invalid guild id '" + NLMISC::toString(user->getGuildId()) + "'");
+				return;
+			}
+
+			// tell everyone some money has been given to the guild
+			for ( uint i = 0; i < entities.size(); i++ )
+			{
+				// Make the client refresh the icons on mission giver NPCs, at once
+				CCharacter *character = PlayerManager.getChar(entities[i]);
+				if (character)
+					character->sendEventForMissionAvailabilityCheck();
+			}
+
 		}
 
 	};
