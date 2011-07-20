@@ -25,6 +25,7 @@
 
 // NeL includes
 #include "nel/misc/app_context.h"
+#include <nel/ligo/ligo_config.h>
 
 // Qt includes
 #include <QtCore/QObject>
@@ -70,6 +71,7 @@ protected:
 	NLMISC::CLibraryContext *m_libContext;
 
 private:
+	NLLIGO::CLigoConfig m_ligoConfig;
 	ExtensionSystem::IPluginManager *m_plugMan;
 	QList<QObject *> m_autoReleaseObjects;
 };

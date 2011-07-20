@@ -28,6 +28,10 @@ const char * const WORLD_EDITOR_PLUGIN	= "WorldEditor";
 const char * const WORLD_EDITOR_SECTION = "WorldEditor";
 const char * const WORLD_WINDOW_STATE = "WorldWindowState";
 const char * const WORLD_WINDOW_GEOMETRY = "WorldWindowGeometry";
+const char * const WORLD_EDITOR_CELL_SIZE = "WorldEditorCellSize";
+const char * const WORLD_EDITOR_SNAP = "WorldEditorSnap";
+const char * const ZONE_SNAPSHOT_RES = "WorldEditorZoneSnapshotRes";
+const char * const PRIMITIVE_CLASS_FILENAME = "WorldEditorPrimitiveClassFilename";
 
 //resources
 const char * const ICON_WORLD_EDITOR = ":/icons/ic_nel_world_editor.png";

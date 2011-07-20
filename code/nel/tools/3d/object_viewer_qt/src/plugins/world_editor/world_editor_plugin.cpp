@@ -24,6 +24,9 @@
 
 // NeL includes
 #include "nel/misc/debug.h"
+#include <nel/misc/path.h>
+#include <nel/ligo/primitive_utils.h>
+#include <nel/ligo/primitive.h>
 
 // Qt includes
 #include <QtCore/QObject>
@@ -43,8 +46,35 @@ WorldEditorPlugin::~WorldEditorPlugin()
 
 bool WorldEditorPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
-	Q_UNUSED(errorString);
 	m_plugMan = pluginManager;
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::WORLD_EDITOR_SECTION);
+	m_ligoConfig.CellSize = settings->value(Constants::WORLD_EDITOR_CELL_SIZE, "160").toFloat();
+	m_ligoConfig.Snap = settings->value(Constants::WORLD_EDITOR_SNAP, "1").toFloat();
+	m_ligoConfig.ZoneSnapShotRes = settings->value(Constants::ZONE_SNAPSHOT_RES, "128").toUInt();
+	QString fileName = settings->value(Constants::PRIMITIVE_CLASS_FILENAME, "world_editor_classes.xml").toString();
+	settings->endGroup();
+	try
+	{
+		// Search path of file world_editor_classes.xml
+		std::string ligoPath = NLMISC::CPath::lookup(fileName.toStdString());
+		// Init LIGO
+		m_ligoConfig.readPrimitiveClass(ligoPath.c_str(), true);
+		NLLIGO::Register();
+		NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &m_ligoConfig;
+	}
+	catch (NLMISC::Exception &e)
+	{
+		*errorString = tr("(%1)").arg(e.what());
+		return false;
+	}
+
+	// Reset
+	m_ligoConfig.resetPrimitiveConfiguration ();
+
+	// Load
+	m_ligoConfig.readPrimitiveClass ("world_editor_primitive_configuration.xml", true);
+
 
 	addAutoReleasedObject(new WorldEditorContext(this));
 	return true;
@@ -115,7 +145,7 @@ QUndoStack *WorldEditorContext::undoStack()
 
 void WorldEditorContext::open()
 {
-	//m_worldEditorWindow->open();
+	m_worldEditorWindow->open();
 }
 
 QWidget *WorldEditorContext::widget()

@@ -15,47 +15,34 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef WORLD_EDITOR_WINDOW_H
-#define WORLD_EDITOR_WINDOW_H
+#ifndef WORLD_EDITOR_ACTIONS_H
+#define WORLD_EDITOR_ACTIONS_H
 
 // Project includes
-#include "ui_world_editor_window.h"
+
+// NeL includes
 
 // Qt includes
-#include <QtGui/QUndoStack>
+#include <QtGui/QUndoCommand>
+#include <QtGui/QGraphicsScene>
+#include <QtGui/QGraphicsItem>
 
 namespace WorldEditor
 {
-class PrimitivesTreeModel;
 
-class WorldEditorWindow: public QMainWindow
+class OpenLandscapeCommand: public QUndoCommand
 {
-	Q_OBJECT
-
 public:
-	WorldEditorWindow(QWidget *parent = 0);
-	~WorldEditorWindow();
+	OpenLandscapeCommand(const QString &fileName, QUndoCommand *parent = 0);
+	virtual ~OpenLandscapeCommand();
 
-	QUndoStack *undoStack() const;
-
-Q_SIGNALS:
-public Q_SLOTS:
-	void open();
-
-private Q_SLOTS:
+	virtual void undo();
+	virtual void redo();
 private:
-	void createMenus();
-	void createToolBars();
-	void readSettings();
-	void writeSettings();
 
-	void loadPrimitive(const QString &fileName);
-
-	PrimitivesTreeModel *m_primitivesModel;
-	QUndoStack *m_undoStack;
-	Ui::WorldEditorWindow m_ui;
-}; /* class WorldEditorWindow */
+	QString m_fileName;
+};
 
 } /* namespace WorldEditor */
 
-#endif // WORLD_EDITOR_WINDOW_H
+#endif // WORLD_EDITOR_ACTIONS_H

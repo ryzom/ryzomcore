@@ -20,7 +20,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="QGraphicsView" name="graphicsView"/>
+     <widget class="LandscapeEditor::LandscapeView" name="graphicsView"/>
     </item>
    </layout>
   </widget>
@@ -35,7 +35,7 @@
     <bool>false</bool>
    </attribute>
   </widget>
-  <widget class="QToolBar" name="undoToolBar">
+  <widget class="QToolBar" name="worldEditToolBar">
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
@@ -45,8 +45,45 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="newPrimitiveAction"/>
+   <addaction name="loadPrimitiveAction"/>
   </widget>
+  <widget class="QDockWidget" name="treePrimitivesDockWidget">
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <property name="margin">
+      <number>3</number>
+     </property>
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <item row="0" column="0">
+      <widget class="QTreeView" name="treePrimitivesView"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <action name="loadPrimitiveAction">
+   <property name="text">
+    <string>loadPrimitive</string>
+   </property>
+  </action>
+  <action name="newPrimitiveAction">
+   <property name="text">
+    <string>newPrimitive</string>
+   </property>
+  </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LandscapeEditor::LandscapeView</class>
+   <extends>QGraphicsView</extends>
+   <header>../landscape_editor/landscape_view.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="world_editor.qrc"/>
  </resources>

@@ -18,13 +18,25 @@
 // Project includes
 #include "world_editor_window.h"
 #include "world_editor_constants.h"
+#include "primitives_model.h"
 
 #include "../core/icore.h"
 #include "../core/imenu_manager.h"
 #include "../core/core_constants.h"
 
+// NeL includes
+#include <nel/misc/path.h>
+#include <nel/ligo/primitive_utils.h>
+#include <nel/ligo/primitive.h>
+
+#include <nel/misc/file.h>
+#include <nel/misc/i_xml.h>
+#include <nel/ligo/primitive_utils.h>
+#include <nel/ligo/primitive.h>
+
 // Qt includes
 #include <QtCore/QSettings>
+#include <QtGui/QFileDialog>
 
 namespace WorldEditor
 {
@@ -32,10 +44,14 @@ QString _lastDir;
 
 WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	: QMainWindow(parent),
+	  m_primitivesModel(0),
 	  m_undoStack(0)
 {
 	m_ui.setupUi(this);
 	m_undoStack = new QUndoStack(this);
+
+	m_primitivesModel = new PrimitivesTreeModel();
+	m_ui.treePrimitivesView->setModel(m_primitivesModel);
 
 	createMenus();
 	createToolBars();
@@ -54,20 +70,33 @@ QUndoStack *WorldEditorWindow::undoStack() const
 
 void WorldEditorWindow::open()
 {
-	/*	QStringList fileNames = QFileDialog::getOpenFileNames(this,
-								tr("Open NeL Ligo land file"), _lastDir,
-								tr("All NeL Ligo land files (*.land)"));
+	QStringList fileNames = QFileDialog::getOpenFileNames(this,
+							tr("Open NeL Ligo primitive file"), _lastDir,
+							tr("All NeL Ligo primitive files (*.primitive)"));
 
-		setCursor(Qt::WaitCursor);
-		if (!fileNames.isEmpty())
+	setCursor(Qt::WaitCursor);
+	if (!fileNames.isEmpty())
+	{
+		QStringList list = fileNames;
+		_lastDir = QFileInfo(list.front()).absolutePath();
+		Q_FOREACH(QString fileName, fileNames)
 		{
-			QStringList list = fileNames;
-			_lastDir = QFileInfo(list.front()).absolutePath();
-			Q_FOREACH(QString fileName, fileNames)
-			{
-			}
+			loadPrimitive(fileName);
 		}
-		setCursor(Qt::ArrowCursor);*/
+	}
+	setCursor(Qt::ArrowCursor);
+}
+
+void WorldEditorWindow::loadPrimitive(const QString &fileName)
+{
+	NLLIGO::CPrimitives *primitives = new NLLIGO::CPrimitives();
+
+	// set the primitive context
+	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = primitives;
+
+	NLLIGO::loadXmlPrimitiveFile(*primitives, fileName.toStdString(), *NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig);
+
+	m_primitivesModel->addPrimitives(fileName, primitives);
 }
 
 void WorldEditorWindow::createMenus()
@@ -82,14 +111,15 @@ void WorldEditorWindow::createToolBars()
 	//m_ui.fileToolBar->addAction(action);
 	QAction *action = menuManager->action(Core::Constants::OPEN);
 	m_ui.fileToolBar->addAction(action);
+	m_ui.fileToolBar->addSeparator();
 
 	action = menuManager->action(Core::Constants::UNDO);
 	if (action != 0)
-		m_ui.undoToolBar->addAction(action);
+		m_ui.fileToolBar->addAction(action);
 
 	action = menuManager->action(Core::Constants::REDO);
 	if (action != 0)
-		m_ui.undoToolBar->addAction(action);
+		m_ui.fileToolBar->addAction(action);
 
 	//action = menuManager->action(Core::Constants::SAVE);
 	//m_ui.fileToolBar->addAction(action);
