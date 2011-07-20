@@ -617,7 +617,7 @@ class CMissionActionRecvItem : public IMissionAction
 				}
 			}
 		}
-		else if ( !_Group )
+		else if ( !_Group && !_Guild)
 		{
 			CCharacter * user = PlayerManager.getChar( entities[0] );
 			CTeam * team = TeamManager.getRealTeam(user->getTeamId());
@@ -628,141 +628,245 @@ class CMissionActionRecvItem : public IMissionAction
 			}
 		}
 
-
-		// check free room space in inventory
-		// NB : in case of group, fail happens only if none in the group have enough free space
-		sint16 neededSlotCount = 0;
-		uint32 neededBulk = 0;
-		CSheetId sheet = ( _SheetId != CSheetId::Unknown )?_SheetId:_Item.getSheetId();
-		CGameItemPtr itemTmp = GameItemManager.createItem(sheet, _Quality, true, true);
-		if (itemTmp != NULL)
+		// If the case we want to give the item to the guild
+		if (_Guild)
 		{
-			neededSlotCount = (sint16) ceil( (float)_Quantity / itemTmp->getMaxStackSize() );
-			neededBulk = _Quantity * itemTmp->getStackBulk();
-			itemTmp.deleteItem();
+			if (entities.size() == 0)
+				return;
+
+			CCharacter * user = PlayerManager.getChar( entities[0] );
+			if (!user)
+			{
+				LOGMISSIONACTION("recv_fame : Invalid user");
+				return;
+			}
+
+			CGuild * guild = CGuildManager::getInstance()->getGuildFromId(user->getGuildId());
+			if (!guild)
+			{
+				LOGMISSIONACTION("recv_fame : Invalid guild id '" + NLMISC::toString(user->getGuildId()) + "'");
+				return;
+			}
+
+			SM_STATIC_PARAMS_3(params, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::integer);
+			if ( _SheetId != CSheetId::Unknown )
+			{
+				const CStaticItem * form = CSheets::getForm( _SheetId );
+				if ( !form )
+				{
+					LOGMISSIONACTION("sheetId '" + _SheetId.toString() + "' is unknown");
+					return;
+				}
+				if (form->Family != ITEMFAMILY::MISSION_ITEM)
+					return;
+
+				uint quantity = _Quantity;
+				while (quantity > 0)
+				{
+					CGameItemPtr item = user->createItem(_Quality, quantity, _SheetId);
+					if (item == NULL)
+						break;
+					const uint32 stackSize = item->getStackSize();
+
+					if (!guild->putItem(item))
+					{
+						CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( instance->getTemplateId() );
+						if ( templ )
+						{
+							if ( templ->Tags.FailIfInventoryIsFull )
+							{
+								instance->setProcessingState(CMission::ActionFailed);
+								return;
+							}
+						}
+					}
+					// from here item maybe NULL (because of autostack)
+
+					quantity -= stackSize;
+				}
+				params[2].Int = _Quality;
+			}
+			else
+			{
+				const CStaticItem * form = CSheets::getForm( _Item.getSheetId() );
+				if ( !form )
+				{
+					LOGMISSIONACTION("sheetId '" + _Item.getSheetId().toString() + "' is unknown");
+					return;
+				}
+				uint quantity = _Quantity;
+				while (quantity > 0)
+				{
+					CGameItemPtr item = _Item.createItem(quantity);
+					if (item == NULL)
+						break;
+
+					const uint32 stackSize = item->getStackSize();
+					if (!guild->putItem(item))
+					{
+						CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( instance->getTemplateId() );
+						if ( templ )
+						{
+							if ( templ->Tags.FailIfInventoryIsFull )
+							{
+								instance->setProcessingState(CMission::ActionFailed);
+								return;
+							}
+						}
+					}
+					// from here item maybe NULL (because of autostack)
+
+					quantity -= stackSize;
+				}
+				params[2].Int = _Item.getQuality();
+			}
+
+			params[0].SheetId = _SheetId;
+			params[1].Int = _Quantity;
+
+			for ( uint i = 0; i < entities.size(); i++ )
+			{
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if ( user )
+					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_GUILD_RECV_ITEM", params);
+			}
 		}
 		else
 		{
-			LOGMISSIONACTION("can't get static item from sheet " + sheet.toString());
-			return;
-		}
-		
-		
-		bool fail = true;
-		for ( uint i = 0; i < entities.size(); i++ )
-		{
-			CCharacter * user = PlayerManager.getChar( entities[i] );
-			if ( user )
+			// check free room space in inventory
+			// NB : in case of group, fail happens only if none in the group have enough free space
+			sint16 neededSlotCount = 0;
+			uint32 neededBulk = 0;
+			CSheetId sheet = ( _SheetId != CSheetId::Unknown )?_SheetId:_Item.getSheetId();
+			CGameItemPtr itemTmp = GameItemManager.createItem(sheet, _Quality, true, true);
+			if (itemTmp != NULL)
 			{
-				CInventoryPtr invBag = user->getInventory( INVENTORIES::bag );
-				sint16 freeSlotcount = invBag->getFreeSlotCount();
-				uint32 maxBulk = invBag->getMaxBulk();
-
-				CInventoryPtr invTemp = user->getInventory( INVENTORIES::temporary );
-				if( invTemp )
-				{
-					freeSlotcount -= invTemp->getUsedSlotCount();
-					maxBulk -= invTemp->getInventoryBulk();
-				}
-				
-				if( (neededSlotCount <= freeSlotcount) && ( neededBulk + invBag->getInventoryBulk() <= maxBulk) )
-				{
-					fail = false;
-					break;
-				}
+				neededSlotCount = (sint16) ceil( (float)_Quantity / itemTmp->getMaxStackSize() );
+				neededBulk = _Quantity * itemTmp->getStackBulk();
+				itemTmp.deleteItem();
 			}
-		}
-		if( fail )
-		{
-			CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( instance->getTemplateId() );
-			if ( templ )
+			else
 			{
-				if ( templ->Tags.FailIfInventoryIsFull )
-				{
-					instance->setProcessingState(CMission::ActionFailed);
-					return;
-				}
+				LOGMISSIONACTION("can't get static item from sheet " + sheet.toString());
+				return;
 			}
-		}
 
-		for ( uint i = 0; i < entities.size(); i++ )
-		{
-			CCharacter * user = PlayerManager.getChar( entities[i] );
-			if ( user )
+			bool fail = true;
+			for ( uint i = 0; i < entities.size(); i++ )
 			{
-				SM_STATIC_PARAMS_3(params, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::integer);
-				if ( _SheetId != CSheetId::Unknown )
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if ( user )
 				{
-					const CStaticItem * form = CSheets::getForm( _SheetId );
-					if ( !form )
+					CInventoryPtr invBag = user->getInventory( INVENTORIES::bag );
+					sint16 freeSlotcount = invBag->getFreeSlotCount();
+					uint32 maxBulk = invBag->getMaxBulk();
+
+					CInventoryPtr invTemp = user->getInventory( INVENTORIES::temporary );
+					if( invTemp )
 					{
-						LOGMISSIONACTION("sheetId '" + _SheetId.toString() + "' is unknown");
+						freeSlotcount -= invTemp->getUsedSlotCount();
+						maxBulk -= invTemp->getInventoryBulk();
+					}
+					
+					if( (neededSlotCount <= freeSlotcount) && ( neededBulk + invBag->getInventoryBulk() <= maxBulk) )
+					{
+						fail = false;
+						break;
+					}
+				}
+			}
+			if( fail )
+			{
+				CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( instance->getTemplateId() );
+				if ( templ )
+				{
+					if ( templ->Tags.FailIfInventoryIsFull )
+					{
+						instance->setProcessingState(CMission::ActionFailed);
 						return;
 					}
-					if (form->Family != ITEMFAMILY::MISSION_ITEM && !user->enterTempInventoryMode(TEMP_INV_MODE::MissionReward))
-						continue;
+				}
+			}
 
-					uint quantity = _Quantity;
-					while (quantity > 0)
+			for ( uint i = 0; i < entities.size(); i++ )
+			{
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if ( user )
+				{
+					SM_STATIC_PARAMS_3(params, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::integer);
+					if ( _SheetId != CSheetId::Unknown )
 					{
-						CGameItemPtr item = user->createItem(_Quality, quantity, _SheetId);
-						if (item == NULL)
-							break;
-						const uint32 stackSize = item->getStackSize();
-
-						if( form->Family != ITEMFAMILY::MISSION_ITEM )
+						const CStaticItem * form = CSheets::getForm( _SheetId );
+						if ( !form )
 						{
+							LOGMISSIONACTION("sheetId '" + _SheetId.toString() + "' is unknown");
+							return;
+						}
+						if (form->Family != ITEMFAMILY::MISSION_ITEM && !user->enterTempInventoryMode(TEMP_INV_MODE::MissionReward))
+							continue;
+
+						uint quantity = _Quantity;
+						while (quantity > 0)
+						{
+							CGameItemPtr item = user->createItem(_Quality, quantity, _SheetId);
+							if (item == NULL)
+								break;
+							const uint32 stackSize = item->getStackSize();
+
+							if( form->Family != ITEMFAMILY::MISSION_ITEM )
+							{
+								if (!user->addItemToInventory(INVENTORIES::temporary, item))
+								{
+									item.deleteItem();
+									break;
+								}
+							}
+							else
+							{
+								if (!user->addItemToInventory(INVENTORIES::bag, item))
+								{
+									item.deleteItem();
+									break;
+								}
+							}
+							// from here item maybe NULL (because of autostack)
+
+							quantity -= stackSize;
+						}
+						params[2].Int = _Quality;
+					}
+					else
+					{
+						const CStaticItem * form = CSheets::getForm( _Item.getSheetId() );
+						if ( !form )
+						{
+							LOGMISSIONACTION("sheetId '" + _Item.getSheetId().toString() + "' is unknown");
+							return;
+						}
+						uint quantity = _Quantity;
+						while (quantity > 0)
+						{
+							CGameItemPtr item = _Item.createItem(quantity);
+							if (item == NULL)
+								break;
+
+							const uint32 stackSize = item->getStackSize();
 							if (!user->addItemToInventory(INVENTORIES::temporary, item))
 							{
 								item.deleteItem();
 								break;
 							}
-						}
-						else
-						{
-							if (!user->addItemToInventory(INVENTORIES::bag, item))
-							{
-								item.deleteItem();
-								break;
-							}
-						}
-						// from here item maybe NULL (because of autostack)
+							// from here item maybe NULL (because of autostack)
 
-						quantity -= stackSize;
+							quantity -= stackSize;
+						}
+						params[2].Int = _Item.getQuality();
 					}
-					params[2].Int = _Quality;
+					
+					params[0].SheetId = _SheetId;
+					params[1].Int = _Quantity;
+					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_RECV_ITEM", params);
 				}
-				else
-				{
-					const CStaticItem * form = CSheets::getForm( _Item.getSheetId() );
-					if ( !form )
-					{
-						LOGMISSIONACTION("sheetId '" + _Item.getSheetId().toString() + "' is unknown");
-						return;
-					}
-					uint quantity = _Quantity;
-					while (quantity > 0)
-					{
-						CGameItemPtr item = _Item.createItem(quantity);
-						if (item == NULL)
-							break;
-
-						const uint32 stackSize = item->getStackSize();
-						if (!user->addItemToInventory(INVENTORIES::temporary, item))
-						{
-							item.deleteItem();
-							break;
-						}
-						// from here item maybe NULL (because of autostack)
-
-						quantity -= stackSize;
-					}
-					params[2].Int = _Item.getQuality();
-				}
-				
-				params[0].SheetId = _SheetId;
-				params[1].Int = _Quantity;
-				PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_RECV_ITEM", params);
 			}
 		}
 	};

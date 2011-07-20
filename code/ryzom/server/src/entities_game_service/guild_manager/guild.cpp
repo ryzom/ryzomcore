@@ -904,10 +904,12 @@ bool CGuild::canAccessToGuildInventory( CCharacter * user )
 }
 
 //----------------------------------------------------------------------------
-void CGuild::putItem( CGameItemPtr item )
+bool CGuild::putItem( CGameItemPtr item )
 {
-	if (_Inventory->insertItem(item, INVENTORIES::INSERT_IN_FIRST_FREE_SLOT, true) != CInventoryBase::ior_ok)
+	CInventoryBase::TInventoryOpResult res = _Inventory->insertItem(item, INVENTORIES::INSERT_IN_FIRST_FREE_SLOT, true);
+	if (res != CInventoryBase::ior_ok)
 		item.deleteItem();
+	return res == CInventoryBase::ior_ok;
 }
 
 //----------------------------------------------------------------------------

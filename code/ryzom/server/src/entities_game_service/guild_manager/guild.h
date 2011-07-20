@@ -235,7 +235,7 @@ public:
 		return _Inventory->getItem(slot);
 	}
 	/// add an item in the guild inventory (item can be deleted if not inserted : do not use it anymore in any case!)
-	void putItem( CGameItemPtr item );
+	bool putItem( CGameItemPtr item );
 
 	/// return the inventory (const)
 	const NLMISC::CSmartPtr<CGuildInventory>& getInventory() const { return _Inventory; }
