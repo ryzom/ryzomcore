@@ -3153,9 +3153,12 @@ class CContentMission: public CContentObjective
 	}
 
 public:
+	CContentMission(): _Prim(0) {}
+
 	void init(CMissionData &md, IPrimitive *prim)
 	{
 		_Missions = md.getPropertyArray(prim, "mission_names", true, false);
+		_Prim = prim;
 
 		CContentObjective::init(md, prim);
 	}
@@ -3172,6 +3175,14 @@ public:
 			ret += _Missions[i];
 			if (i < _Missions.size()-1)
 				ret += "; ";
+
+			// We check to see if we specified a number after the mission name. If so, we check if it's a guild mission
+			std::size_t pos = _Missions[i].find_first_of(" \t");
+			if (pos != std::string::npos && !md.isGuildMission())
+			{
+				string err = toString("primitive(%s): CContentMission: Number of members needed to complete the mission specified but the mission is not a guild mission.", _Prim->getName().c_str());
+				throw EParseException(_Prim, err.c_str());
+			}
 		}
 		// Add the 'nb_guild_members_needed' parameter if needed
 		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
@@ -3179,6 +3190,8 @@ public:
 
 		return ret;
 	}
+
+	IPrimitive *_Prim;
 };
 REGISTER_STEP_CONTENT(CContentMission, "do_mission");
 
