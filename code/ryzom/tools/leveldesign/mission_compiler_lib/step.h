@@ -194,9 +194,9 @@ protected:
 	bool						_HideObj;
 
 	// Option nb_guild_members_needed, available for each objective
-	int _NbGuildMembersNeeded;
+	/*int _NbGuildMembersNeeded;
 
-	std::string genNbGuildMembersNeededOption(CMissionData &md);
+	std::string genNbGuildMembersNeededOption(CMissionData &md);*/
 	
 public:
 	void init(CMissionData &md, NLLIGO::IPrimitive *prim);

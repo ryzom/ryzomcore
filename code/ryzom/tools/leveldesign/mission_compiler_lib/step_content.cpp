@@ -1762,7 +1762,7 @@ void CContentObjective::init(CMissionData &md, IPrimitive *prim)
 	_RoleplayPhrase.initPhrase(md, prim, _RoleplayObj, numEntry, params);
 
 	// check for the 'nb_guild_members_needed' option and see if it's correct for this mission
-	string nbGuildMembersNeeded = md.getProperty(prim, "nb_guild_members_needed", false, true);
+	/*string nbGuildMembersNeeded = md.getProperty(prim, "nb_guild_members_needed", false, true);
 	if (nbGuildMembersNeeded.empty())
 		nbGuildMembersNeeded = "1";
 	if (!fromString(nbGuildMembersNeeded.c_str(), _NbGuildMembersNeeded))
@@ -1773,7 +1773,7 @@ void CContentObjective::init(CMissionData &md, IPrimitive *prim)
 	{
 		string err = toString("primitive(%s): nb_guild_members_needed != 1 for non guild mission.", prim->getName().c_str());
 		throw EParseException(prim, err.c_str());
-	}
+	}*/
 }
 
 // ---------------------------------------------------------------------------
@@ -1794,7 +1794,7 @@ string CContentObjective::genCode(CMissionData &md)
 }
 
 // ---------------------------------------------------------------------------
-std::string CContentObjective::genNbGuildMembersNeededOption(CMissionData &md)
+/*std::string CContentObjective::genNbGuildMembersNeededOption(CMissionData &md)
 {
 	string ret = "";
 	// If we are in a guild mission we add the 'nb_guild_members_needed' option to the script
@@ -1805,7 +1805,7 @@ std::string CContentObjective::genNbGuildMembersNeededOption(CMissionData &md)
 	}
 
 	return ret;
-}
+}*/
 
 // ---------------------------------------------------------------------------
 string CContentObjective::genPhrase()
@@ -2109,7 +2109,7 @@ public:
 			ret += " : "+_Place;
 
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;
@@ -2166,7 +2166,7 @@ public:
 		if (!_Phrase.isEmpty())
 			ret += " : "+_Phrase.genScript(md);
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 		
 		return ret;
@@ -2242,7 +2242,7 @@ public:
 			ret += ": "+_Place;
 		}
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 		
 		return ret;
@@ -2317,7 +2317,7 @@ public:
 				ret += "; ";
 		}
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 		
 		return ret;
@@ -2444,7 +2444,7 @@ public:
 				ret += "; ";
 		}
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 		
 		return ret;
@@ -2519,7 +2519,7 @@ public:
 				ret += "; ";
 		}
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 		
 		return ret;
@@ -2651,7 +2651,7 @@ public:
 		if (!_Place.empty())
 			ret += " : " + _Place;
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;
@@ -2737,7 +2737,7 @@ public:
 			ret += " : "+_Npc;
 		}
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 		
 		return ret;
@@ -2820,7 +2820,7 @@ public:
 			ret += " : "+_Npc;
 		}
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 		
 		return ret;
@@ -2933,7 +2933,7 @@ public:
 		};
 		ret += " : "+_Npc;
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 		
 		return ret;
@@ -2971,7 +2971,7 @@ public:
 
 		ret += "give_money : "+_Amount+" : "+_Npc;
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;
@@ -3024,7 +3024,7 @@ public:
 			}
 		}
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;
@@ -3061,7 +3061,7 @@ public:
 		if (_SaveAll)
 			ret += " : save_all";
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;
@@ -3135,7 +3135,7 @@ public:
 				ret += "; ";
 		}
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;
@@ -3174,7 +3174,7 @@ public:
 				ret += "; ";
 		}
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;
@@ -3213,7 +3213,7 @@ public:
 				ret += " ";
 		}
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;
@@ -3430,7 +3430,7 @@ public:
 		ret += "ring_scenario : ";
 		ret += _ScenarioTag;
 		// Add the 'nb_guild_members_needed' parameter if needed
-		ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;
