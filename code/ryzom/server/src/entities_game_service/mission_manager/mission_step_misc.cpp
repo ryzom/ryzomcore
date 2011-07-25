@@ -1203,7 +1203,26 @@ class CMissionStepDoMissions : public IMissionStepTemplate
 	
 	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
 	{
-		static const std::string stepText = "ERROR_UNSPECIFIED_MISSION_TEXT";
+		/*static const std::string stepText = "ERROR_UNSPECIFIED_MISSION_TEXT";
+		textPtr = &stepText;*/
+
+		// Because we can specify the number of times we want a mission to be completed, we specify the parameters
+		static const std::string stepText = "MIS_DO_MISSION_";
+		nlassert( _Missions.size() == subStepStates.size() );
+		for ( uint i  = 0; i < subStepStates.size(); i++ )
+		{
+			if( subStepStates[i] != 0 )
+			{
+				nbSubSteps++;
+				retParams.push_back(STRING_MANAGER::TParam());
+				retParams.back().Type = STRING_MANAGER::integer;
+				retParams.back().Int = subStepStates[i];
+
+				retParams.push_back(STRING_MANAGER::TParam());
+				retParams.back().Type = STRING_MANAGER::literal;
+				retParams.back().Literal = _Missions[i].Mission;
+			}
+		}
 		textPtr = &stepText;
 	}
 	bool checkTextConsistency()
