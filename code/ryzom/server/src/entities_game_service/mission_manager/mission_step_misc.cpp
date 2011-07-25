@@ -1141,7 +1141,13 @@ MISSION_REGISTER_STEP(CMissionStepCast,"cast")
 // ----------------------------------------------------------------------------
 class CMissionStepDoMissions : public IMissionStepTemplate
 {
-	std::vector< std::string > _Missions;
+	struct MissionNb
+	{
+		std::string Mission;
+		uint32 NbNeedCompletion;
+	};
+
+	std::vector< MissionNb > _Missions;
 	
 	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
 	{	
@@ -1158,7 +1164,13 @@ class CMissionStepDoMissions : public IMissionStepTemplate
 		_Missions.resize(subs.size());
 		for ( uint i = 0; i < subs.size(); i++ )
 		{
-			_Missions[i] = CMissionParser::getNoBlankString( subs[i] );
+			std::vector< std::string > params;
+			NLMISC::splitString( subs[i]," \t", params );
+			_Missions[i].Mission = CMissionParser::getNoBlankString( params[0] );
+			if (params.size() > 1)
+				NLMISC::fromString(params[1], _Missions[i].NbNeedCompletion);
+			else
+				_Missions[i].NbNeedCompletion = 1;
 		}
 		return true;
 	}
@@ -1168,7 +1180,7 @@ class CMissionStepDoMissions : public IMissionStepTemplate
 		if ( event.Type == CMissionEvent::MissionDone )
 		{
 			CMissionEventMissionDone & eventSpe = (CMissionEventMissionDone&)event;
-			TAIAlias alias = CAIAliasTranslator::getInstance()->getMissionUniqueIdFromName( _Missions[subStepIndex] );
+			TAIAlias alias = CAIAliasTranslator::getInstance()->getMissionUniqueIdFromName( _Missions[subStepIndex].Mission );
 			if ( eventSpe.Mission == alias )
 			{
 				LOGMISSIONSTEPSUCCESS("mission");
@@ -1181,6 +1193,12 @@ class CMissionStepDoMissions : public IMissionStepTemplate
 	void getInitState( std::vector<uint32>& ret )
 	{
 		ret.resize( _Missions.size(), 1 );
+		uint32 i = 0;
+		for (std::vector<MissionNb>::const_iterator it = _Missions.begin(); it != _Missions.end(); ++it)
+		{
+			ret[i] = it->NbNeedCompletion;
+			i++;
+		}
 	}
 	
 	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
