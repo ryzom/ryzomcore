@@ -206,6 +206,10 @@ void CMainWindow::open()
 				editor->activateWindow(); 
 				return;
 			}
+			#ifndef QT_NO_CURSOR
+				QApplication::setOverrideCursor(Qt::WaitCursor);
+			#endif
+			// sheet editor
             if(isWorksheetEditor(file_name))
             {
                  CEditorWorksheet *new_window = new CEditorWorksheet(_ui.mdiArea); 
@@ -213,6 +217,9 @@ void CMainWindow::open()
                  new_window->open(file_name);  
                  new_window->activateWindow();
             }
+			#ifndef QT_NO_CURSOR
+				QApplication::restoreOverrideCursor();
+			#endif
          }
                
 }
@@ -241,11 +248,13 @@ void CMainWindow::save()
     if(_ui.mdiArea->subWindowList().size() > 0)
     {
         CEditor* current_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow());
-    
-        if(QString(current_window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
-        {
-                current_window->save();
-        }
+     	#ifndef QT_NO_CURSOR
+			QApplication::setOverrideCursor(Qt::WaitCursor);
+		#endif    
+		current_window->save();
+        #ifndef QT_NO_CURSOR
+			QApplication::restoreOverrideCursor();
+		#endif
     }
 }
 
@@ -258,13 +267,15 @@ void CMainWindow::saveAs()
     }
     
     if (!file_name.isEmpty())
-    {    
-        CEditor* current_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow());   
-        if(QString(current_window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
-        {
-            current_window->saveAs(file_name);
-        }             
-             
+    {  
+		CEditor* current_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow()); 
+     	#ifndef QT_NO_CURSOR
+			QApplication::setOverrideCursor(Qt::WaitCursor);
+		#endif
+        current_window->saveAs(file_name);
+        #ifndef QT_NO_CURSOR
+			QApplication::restoreOverrideCursor();
+		#endif                        
     }    
 }
 
@@ -341,14 +352,19 @@ void CMainWindow::extractWords(QString typeq)
                 builderP.PrimFilter.push_back("indoors_*.primitive");
                 isSheet = false;
             }
-     
+     		#ifndef QT_NO_CURSOR
+				QApplication::setOverrideCursor(Qt::WaitCursor);
+			#endif
             if(isSheet)
             {
                 editor_window->extractWords(editor_window->windowFilePath(), column_name, builderS);
             } else {
                 initializeSettings(false);
                 editor_window->extractWords(editor_window->windowFilePath(), column_name, builderP);
-            }       
+            } 
+			#ifndef QT_NO_CURSOR
+				QApplication::restoreOverrideCursor();
+			#endif
        }     
    
 }
@@ -371,8 +387,14 @@ void CMainWindow::extractBotNames()
 					QString file_path = editor_window->windowFilePath(); 
 				} else return;
 			}
+     		#ifndef QT_NO_CURSOR
+				QApplication::setOverrideCursor(Qt::WaitCursor);
+			#endif
             initializeSettings(true);
-			editor_window->extractBotNames(convertQStringList(filters), level_design_path.toStdString(), ligoConfig);  
+			editor_window->extractBotNames(convertQStringList(filters), level_design_path.toStdString(), ligoConfig);
+			#ifndef QT_NO_CURSOR
+				QApplication::restoreOverrideCursor();
+			#endif
         }    
 }
 
@@ -392,7 +414,7 @@ void CMainWindow::mergeSingleFile()
 		return;
 	}
 
-    if(QString(editor_window->widget()->metaObject()->className()) != "QTableWidget") // Sheet Editor
+    if(editor_window->eType() != Constants::ED_SHEET) // Sheet Editor
     {
 		QErrorMessage error;
         error.showMessage(QString("Please open or activate the window with a sheet file."));
@@ -500,7 +522,7 @@ CEditorWorksheet *CMainWindow::getEditorByWorksheetType(const QString &type)
     Q_FOREACH(QMdiSubWindow *subWindow, _ui.mdiArea->subWindowList())
     {
         CEditor *currentEditor = qobject_cast<CEditor*>(subWindow);
-		if(QString(currentEditor->widget()->metaObject()->className()) == "QTableWidget")
+		if(currentEditor->eType() == Constants::ED_SHEET)
 		{
 			CEditorWorksheet *editor = qobject_cast<CEditorWorksheet *>(currentEditor);
 			if(type != NULL) {

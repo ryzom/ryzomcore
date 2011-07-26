@@ -16,6 +16,7 @@ SET(OVQT_PLUG_TRANSLATION_MANAGER_HDR 	translation_manager_plugin.h
                                                                                                        source_selection.h
                                                                                                        ftp_selection.h
                                                                                                        editor_worksheet.h
+																									   editor_phrase.h
                                                                                                        extract_new_sheet_names.h
                                                                                                        extract_bot_names.h)
 

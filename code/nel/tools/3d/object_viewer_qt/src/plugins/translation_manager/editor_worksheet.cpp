@@ -93,6 +93,7 @@ void CEditorWorksheet::open(QString filename)
                 setCurrentFile(filename);
                 setAttribute(Qt::WA_DeleteOnClose);
                 setWidget(table_editor);
+				editor_type = Constants::ED_SHEET;
                 table_editor->resizeColumnsToContents();
                 table_editor->resizeRowsToContents(); 
                 // set editor signals

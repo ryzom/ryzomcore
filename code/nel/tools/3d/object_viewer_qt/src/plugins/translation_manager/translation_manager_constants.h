@@ -12,6 +12,9 @@ namespace Plugin
 {
     namespace Constants
     {
+		const int ED_SHEET = 1;
+		const int ED_PHRASE = 2;
+
         const char * const WK_BOTNAMES = "bot_names_wk.txt";
         const char * const WK_ITEM = "item_words_wk.txt";
         const char * const WK_CREATURE = "creature_words_wk.txt";

@@ -31,7 +31,7 @@ Q_OBJECT
 protected:
 	QUndoStack* current_stack;
     QString current_file;
-    int editor_type;
+	int editor_type;
 public:
     CEditor(QMdiArea* parent) : QMdiSubWindow(parent) {}
     CEditor() : QMdiSubWindow() {}
@@ -40,6 +40,10 @@ public:
     virtual void saveAs(QString filename) =0;
     virtual void activateWindow() =0;
 public:
+	int eType()
+	{
+		return editor_type;
+	}
     QString subWindowFilePath()
     {
         return current_file;
