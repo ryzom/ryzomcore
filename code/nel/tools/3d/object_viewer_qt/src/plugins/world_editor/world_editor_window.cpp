@@ -20,9 +20,13 @@
 #include "world_editor_constants.h"
 #include "primitives_model.h"
 
+// Core
 #include "../core/icore.h"
 #include "../core/imenu_manager.h"
 #include "../core/core_constants.h"
+
+// Lanscape Editor plugin
+//#include "../landscape_editor/project_settings_dialog.h"
 
 // NeL includes
 #include <nel/misc/path.h>
@@ -55,12 +59,12 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 
 	createMenus();
 	createToolBars();
-//	readSettings();
+	readSettings();
 }
 
 WorldEditorWindow::~WorldEditorWindow()
 {
-//	writeSettings();
+	writeSettings();
 }
 
 QUndoStack *WorldEditorWindow::undoStack() const
@@ -89,14 +93,20 @@ void WorldEditorWindow::open()
 
 void WorldEditorWindow::loadPrimitive(const QString &fileName)
 {
-	NLLIGO::CPrimitives *primitives = new NLLIGO::CPrimitives();
+	m_primitivesModel->loadPrimitive(fileName);
+}
 
-	// set the primitive context
-	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = primitives;
-
-	NLLIGO::loadXmlPrimitiveFile(*primitives, fileName.toStdString(), *NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig);
-
-	m_primitivesModel->addPrimitives(fileName, primitives);
+void WorldEditorWindow::openProjectSettings()
+{
+	/*
+		LandscapeEditor::ProjectSettingsDialog *dialog = new LandscapeEditor::ProjectSettingsDialog("", this);
+		dialog->show();
+		int ok = dialog->exec();
+		if (ok == QDialog::Accepted)
+		{
+		}
+		delete dialog;
+	*/
 }
 
 void WorldEditorWindow::createMenus()

@@ -61,7 +61,23 @@
       <number>3</number>
      </property>
      <item row="0" column="0">
-      <widget class="QTreeView" name="treePrimitivesView"/>
+      <widget class="WorldEditor::PrimitivesView" name="treePrimitivesView">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
+       </property>
+       <property name="animated">
+        <bool>true</bool>
+       </property>
+       <attribute name="headerCascadingSectionResizes">
+        <bool>true</bool>
+       </attribute>
+       <attribute name="headerDefaultSectionSize">
+        <number>250</number>
+       </attribute>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -82,6 +98,11 @@
    <class>LandscapeEditor::LandscapeView</class>
    <extends>QGraphicsView</extends>
    <header>../landscape_editor/landscape_view.h</header>
+  </customwidget>
+  <customwidget>
+   <class>WorldEditor::PrimitivesView</class>
+   <extends>QTreeView</extends>
+   <header>primitives_view.h</header>
   </customwidget>
  </customwidgets>
  <resources>

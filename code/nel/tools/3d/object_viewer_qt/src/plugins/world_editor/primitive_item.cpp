@@ -16,9 +16,14 @@
 
 // Project includes
 #include "primitive_item.h"
+#include "world_editor_misc.h"
+
+// NeL includes
+#include <nel/ligo/ligo_config.h>
 
 // Qt includes
-#include <QStringList>
+#include <QtCore/QStringList>
+#include <QtCore/QFile>
 
 namespace WorldEditor
 {
@@ -43,6 +48,11 @@ BaseTreeItem::~BaseTreeItem()
 void BaseTreeItem::appendChild(BaseTreeItem *item)
 {
 	m_childItems.append(item);
+}
+
+void BaseTreeItem::deleteChild(int row)
+{
+	delete m_childItems.takeAt(row);
 }
 
 BaseTreeItem *BaseTreeItem::child(int row)
@@ -104,12 +114,13 @@ PrimitiveItem::PrimitiveItem(NLLIGO::IPrimitive *primitive, BaseTreeItem *parent
 	m_primitive->getPropertyByName("class", className);
 
 	// Set Icon
-	QIcon icon(QString("./old_ico/%1.ico").arg(className.c_str()));
-	if (primitive->getParent() == NULL)
-		icon = QIcon("./old_ico/root.ico");
-	if (icon.isNull())
+	QString nameIcon = QString("./old_ico/%1.ico").arg(className.c_str());
+	QIcon icon(nameIcon);
+	if (!QFile::exists(nameIcon))
 	{
-		if (primitive->getNumChildren() == 0)
+		if (primitive->getParent() == NULL)
+			icon = QIcon("./old_ico/root.ico");
+		else if (primitive->getNumChildren() == 0)
 			icon = QIcon("./old_ico/property.ico");
 		else
 			icon = QIcon("./old_ico/folder_h.ico");
@@ -127,18 +138,29 @@ PrimitiveItem::~PrimitiveItem()
 {
 }
 
-PrimitivesItem::PrimitivesItem(const QString &name, NLLIGO::CPrimitives *primitives, BaseTreeItem *parent)
+NLLIGO::IPrimitive *PrimitiveItem::primitive() const
+{
+	return m_primitive;
+}
+
+const NLLIGO::CPrimitiveClass *PrimitiveItem::primitiveClass() const
+{
+	return NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig->getPrimitiveClass(*m_primitive);
+}
+
+
+RootPrimitiveItem::RootPrimitiveItem(const QString &name, NLLIGO::CPrimitives *primitives, BaseTreeItem *parent)
 	: PrimitiveItem(primitives->RootNode, parent),
 	  m_primitives(primitives)
 {
 	setData(1, name);
 }
 /*
-PrimitivesItem::PrimitivesItem(const PrimitiveItem &other)
+RootPrimitiveItem::RootPrimitiveItem(const RootPrimitiveItem &other)
 {
 }
 */
-PrimitivesItem::~PrimitivesItem()
+RootPrimitiveItem::~RootPrimitiveItem()
 {
 }
 

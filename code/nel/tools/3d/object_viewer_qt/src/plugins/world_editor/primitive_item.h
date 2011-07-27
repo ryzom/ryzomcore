@@ -21,6 +21,7 @@
 
 // NeL includes
 #include <nel/ligo/primitive.h>
+#include <nel/ligo/primitive_class.h>
 
 // Qt includes
 #include <QList>
@@ -43,6 +44,7 @@ public:
 	virtual ~BaseTreeItem();
 
 	void appendChild(BaseTreeItem *child);
+	void deleteChild(int row);
 
 	BaseTreeItem *child(int row);
 	int childCount() const;
@@ -74,6 +76,9 @@ public:
 	PrimitiveItem(const PrimitiveItem &other);
 	virtual ~PrimitiveItem();
 
+	NLLIGO::IPrimitive *primitive() const;
+	const NLLIGO::CPrimitiveClass *primitiveClass() const;
+
 private:
 	NLLIGO::IPrimitive *m_primitive;
 };
@@ -83,12 +88,12 @@ private:
 @brief
 @details
 */
-class PrimitivesItem: public PrimitiveItem
+class RootPrimitiveItem: public PrimitiveItem
 {
 public:
-	PrimitivesItem(const QString &name, NLLIGO::CPrimitives *primitives, BaseTreeItem *parent);
-	PrimitivesItem(const PrimitiveItem &other);
-	virtual ~PrimitivesItem();
+	RootPrimitiveItem(const QString &name, NLLIGO::CPrimitives *primitives, BaseTreeItem *parent);
+	RootPrimitiveItem(const RootPrimitiveItem &other);
+	virtual ~RootPrimitiveItem();
 
 private:
 	NLLIGO::CPrimitives *m_primitives;

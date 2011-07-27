@@ -43,6 +43,8 @@ public Q_SLOTS:
 	void open();
 
 private Q_SLOTS:
+	void openProjectSettings();
+
 private:
 	void createMenus();
 	void createToolBars();

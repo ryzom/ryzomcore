@@ -14,14 +14,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <nel/ligo/primitive.h>
-#include <nel/ligo/ligo_config.h>
-#include <nel/ligo/primitive_class.h>
-
-#include <QtGui>
-
+// Project includes
 #include "primitive_item.h"
 #include "primitives_model.h"
+#include "world_editor_misc.h"
+
+// NeL includes
+#include <nel/misc/debug.h>
+#include <nel/ligo/primitive.h>
+#include <nel/ligo/primitive_utils.h>
+
+// Qt includes
+#include <QtGui>
 
 namespace WorldEditor
 {
@@ -136,11 +140,77 @@ int PrimitivesTreeModel::rowCount(const QModelIndex &parent) const
 	return parentItem->childCount();
 }
 
-void PrimitivesTreeModel::addPrimitives(const QString &name, NLLIGO::CPrimitives *primitives)
+NLLIGO::IPrimitive *PrimitivesTreeModel::primitive(const QModelIndex &index)
+{
+	NLLIGO::IPrimitive *prim = 0;
+	if (index.isValid())
+	{
+		PrimitiveItem *item = static_cast<PrimitiveItem *>(index.internalPointer());
+		prim = item->primitive();
+	}
+	return prim;
+}
+
+const NLLIGO::CPrimitiveClass *PrimitivesTreeModel::primitiveClass(const QModelIndex &index)
+{
+	if (index.isValid())
+	{
+		NLLIGO::IPrimitive *prim = primitive(index);
+		return ligoConfig()->getPrimitiveClass(*prim);
+	}
+	return 0;
+}
+
+void PrimitivesTreeModel::loadPrimitive(const QString &fileName)
+{
+	NLLIGO::CPrimitives *primitives = new NLLIGO::CPrimitives();
+
+	// set the primitive context
+	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = primitives;
+
+	NLLIGO::loadXmlPrimitiveFile(*primitives, fileName.toStdString(), *NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig);
+
+	// unset the context
+	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
+
+	addRootPrimitive(fileName, primitives);
+}
+
+void PrimitivesTreeModel::newPrimitiveWithoutUndo(const QString &className, uint id, const QModelIndex &parent)
+{
+	const NLLIGO::CPrimitiveClass *primClass = primitiveClass(parent);
+	float delta = 10;
+
+	// TODO: Set the context
+	//CPrimitiveContext::instance().CurrentPrimitive = &_DataHierarchy[locator._LocateStack[0]].Primitives;
+
+	NLLIGO::IPrimitive *newPrimitive = createPrimitive(className.toStdString().c_str(), className.toStdString().c_str()
+									   , NLMISC::CVector(), delta, primClass->DynamicChildren[id].Parameters, primitive(parent));
+
+	// unset the context
+	//CPrimitiveContext::instance().CurrentPrimitive = NULL;
+
+	if (newPrimitive != 0)
+	{
+		scanPrimitive(newPrimitive, parent);
+	}
+}
+
+void PrimitivesTreeModel::deletePrimitiveWithoutUndo(const QModelIndex &index)
+{
+	deletePrimitive(primitive(index));
+	removeRows(index.row(), index.parent());
+}
+
+void PrimitivesTreeModel::addRootPrimitive(const QString &name, NLLIGO::CPrimitives *primitives)
 {
 	beginResetModel();
-	PrimitivesItem *newPrimitives = new PrimitivesItem(name, primitives, m_rootItem);
+
+	// Create root primitive
+	RootPrimitiveItem *newPrimitives = new RootPrimitiveItem(name, primitives, m_rootItem);
 	m_rootItem->appendChild(newPrimitives);
+
+	// Scan childs items and add in tree model
 	for (uint i = 0; i < primitives->RootNode->getNumChildren(); ++i)
 	{
 		NLLIGO::IPrimitive *childPrim;
@@ -150,23 +220,58 @@ void PrimitivesTreeModel::addPrimitives(const QString &name, NLLIGO::CPrimitives
 	endResetModel();
 }
 
-void PrimitivesTreeModel::scanPrimitive(NLLIGO::IPrimitive *prim, BaseTreeItem *parent)
+void PrimitivesTreeModel::scanPrimitive(NLLIGO::IPrimitive *prim, const QModelIndex &parentIndex)
 {
-//	const NLLIGO::CPrimitiveClass *primClass = NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig->getPrimitiveClass(*prim);
-//	nlassert (primClass);
-//	if (primClass->Type == NLLIGO::CPrimitiveClass::Alias)
-//		return;
-	if (prim->getClassName() == "CPrimAlias")
-		return;
+	PrimitiveItem *parent = static_cast<PrimitiveItem *>(parentIndex.internalPointer());
 
+	// Add in tree model
+	beginInsertRows(parentIndex, parent->childCount(), parent->childCount());
 	PrimitiveItem *newItem = new PrimitiveItem(prim, parent);
 	parent->appendChild(newItem);
+	endInsertRows();
+
+	// Scan childs items and add in tree model
+	QModelIndex childIndex = index(parent->childCount() - 1, 0, parentIndex);
+	for (uint i = 0; i < prim->getNumChildren(); ++i)
+	{
+		NLLIGO::IPrimitive *childPrim;
+		prim->getChild(childPrim, i);
+		scanPrimitive(childPrim, childIndex);
+	}
+}
+
+void PrimitivesTreeModel::scanPrimitive(NLLIGO::IPrimitive *prim, BaseTreeItem *parent)
+{
+	// Add in tree model
+	PrimitiveItem *newItem = new PrimitiveItem(prim, parent);
+	parent->appendChild(newItem);
+
+	// Scan childs items and add in tree model
 	for (uint i = 0; i < prim->getNumChildren(); ++i)
 	{
 		NLLIGO::IPrimitive *childPrim;
 		prim->getChild(childPrim, i);
 		scanPrimitive(childPrim, newItem);
 	}
+}
+
+void PrimitivesTreeModel::removeRows(int position, const QModelIndex &parent)
+{
+	BaseTreeItem *item = static_cast<BaseTreeItem *>(parent.internalPointer())->child(position);
+
+	// Delete all child items from tree model
+	while (item->childCount() != 0)
+		removeRows(0, parent.child(position, 0));
+
+	// Delete item
+	beginRemoveRows(parent, position, position);
+	static_cast<BaseTreeItem *>(parent.internalPointer())->deleteChild(position);
+	endRemoveRows();
+}
+
+NLLIGO::CLigoConfig *PrimitivesTreeModel::ligoConfig() const
+{
+	return NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig;
 }
 
 } /* namespace WorldEditor */

@@ -18,8 +18,13 @@
 #ifndef PRIMITIVES_MODEL_H
 #define PRIMITIVES_MODEL_H
 
+// NeL includes
+#include <nel/misc/vector.h>
 #include <nel/ligo/primitive.h>
+#include <nel/ligo/primitive_class.h>
+#include <nel/ligo/ligo_config.h>
 
+// Qt includes
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>
@@ -28,6 +33,7 @@ namespace WorldEditor
 {
 
 class BaseTreeItem;
+class PrimitiveItem;
 
 /**
 @class PrimitivesTreeModel
@@ -52,10 +58,30 @@ public:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
-	void addPrimitives(const QString &name, NLLIGO::CPrimitives *primitives);
+	// Get primitive
+	NLLIGO::IPrimitive *primitive(const QModelIndex &index);
+
+	// Get primitive class
+	const NLLIGO::CPrimitiveClass *primitiveClass(const QModelIndex &index);
+
+	// Load primitive from file
+	void loadPrimitive(const QString &fileName);
+
+	// Create new primitive and add in tree model
+	void newPrimitiveWithoutUndo(const QString &className, uint id, const QModelIndex &parent);
+
+	void deletePrimitiveWithoutUndo(const QModelIndex &index);
+
+	NLLIGO::CLigoConfig *ligoConfig() const;
 
 private:
+	// Add root primitive in tree model and add all its sub-items.
+	void addRootPrimitive(const QString &name, NLLIGO::CPrimitives *primitives);
+
+	void scanPrimitive(NLLIGO::IPrimitive *prim, const QModelIndex &parentIndex);
 	void scanPrimitive(NLLIGO::IPrimitive *prim, BaseTreeItem *parent = 0);
+
+	void removeRows(int position, const QModelIndex &parent);
 
 	BaseTreeItem *m_rootItem;
 };
