@@ -19,8 +19,6 @@
 #define BUILDER_ZONE_BASE_H
 
 // Project includes
-#include "zone_region_editor.h"
-#include "pixmap_database.h"
 #include "landscape_editor_global.h"
 
 // NeL includes
@@ -41,7 +39,9 @@
 
 namespace LandscapeEditor
 {
-class LandscapeScene;
+class LandscapeSceneBase;
+class PixmapDatabase;
+class ZoneRegionObject;
 
 // Data
 struct ZonePosition
@@ -75,27 +75,18 @@ PixmapDatabase contains the graphics for the zones
 class LANDSCAPE_EDITOR_EXPORT ZoneBuilderBase
 {
 public:
-	ZoneBuilderBase(LandscapeScene *landscapeScene);
+	ZoneBuilderBase(LandscapeSceneBase *landscapeScene);
 	virtual ~ZoneBuilderBase();
 
 	/// Init zoneBank and init zone pixmap database
 	bool init(const QString &pathName, bool displayProgress = false);
 
-	void calcMask();
-	bool getZoneMask (sint32 x, sint32 y);
-
 	/// Zone Region
 	/// @{
-	int createZoneRegion();
-	int createZoneRegion(const QString &fileName);
+	int loadZoneRegion(const QString &fileName);
 	void deleteZoneRegion(int id);
-	void setCurrentZoneRegion(int id);
-	int currentIdZoneRegion() const;
-	ZoneRegionObject *currentZoneRegion() const;
 	int countZoneRegion() const;
 	ZoneRegionObject *zoneRegion(int id) const;
-	void ligoData(LigoData &data, const ZonePosition &zonePos);
-	void setLigoData(LigoData &data, const ZonePosition &zonePos);
 	/// @}
 
 	// Accessors
@@ -113,25 +104,24 @@ private:
 	/// Scan ./zoneligos dir and add all *.ligozone files to zoneBank
 	bool initZoneBank (const QString &path);
 
+	void calcMask();
+
 	bool checkOverlaps(const NLLIGO::CZoneRegion &newZoneRegion);
 
 	struct LandscapeItem
 	{
 		ZoneRegionObject *zoneRegionObject;
-		QGraphicsRectItem *rectItem;
 	};
 
 	sint32 m_minX, m_maxX, m_minY, m_maxY;
-	std::vector<bool> m_zoneMask;
 
 	QString m_lastPathName;
 
-	int m_currentZoneRegion;
 	QMap<int, LandscapeItem> m_landscapeMap;
 
 	PixmapDatabase *m_pixmapDatabase;
 	NLLIGO::CZoneBank m_zoneBank;
-	LandscapeScene *m_landscapeScene;
+	LandscapeSceneBase *m_landscapeSceneBase;
 };
 
 } /* namespace LandscapeEditor */

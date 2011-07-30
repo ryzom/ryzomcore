@@ -29,13 +29,12 @@
 
 namespace LandscapeEditor
 {
-
 static const int ZONE_NAME = 0;
 static const int LAYER_ZONES = 2;
 static const int LAYER_EMPTY_ZONES = 3;
 
 // TODO: delete
-const char * const LAYER_BLACKOUT_NAME = "blackout";
+const char *const LAYER_BLACKOUT_NAME = "blackout";
 
 const int MAX_SCENE_WIDTH = 256;
 const int MAX_SCENE_HEIGHT = 256;
@@ -43,7 +42,7 @@ const int MAX_SCENE_HEIGHT = 256;
 LandscapeSceneBase::LandscapeSceneBase(int sizeCell, QObject *parent)
 	: QGraphicsScene(parent),
 	  m_cellSize(sizeCell),
-	  m_zoneBuilder(0)
+	  m_zoneBuilderBase(0)
 {
 	setSceneRect(QRectF(0, m_cellSize, MAX_SCENE_WIDTH * m_cellSize, MAX_SCENE_HEIGHT * m_cellSize));
 }
@@ -57,9 +56,9 @@ int LandscapeSceneBase::cellSize() const
 	return m_cellSize;
 }
 
-void LandscapeSceneBase::setZoneBuilder(ZoneBuilder *zoneBuilder)
+void LandscapeSceneBase::setZoneBuilder(ZoneBuilderBase *zoneBuilder)
 {
-	m_zoneBuilder = zoneBuilder;
+	m_zoneBuilderBase = zoneBuilder;
 }
 
 QGraphicsItem *LandscapeSceneBase::createItemZone(const LigoData &data, const ZonePosition &zonePos)
@@ -70,11 +69,11 @@ QGraphicsItem *LandscapeSceneBase::createItemZone(const LigoData &data, const Zo
 	if (data.zoneName == STRING_UNUSED)
 		return createItemEmptyZone(zonePos);
 
-	if ((m_zoneBuilder == 0) || (data.zoneName.empty()))
+	if ((m_zoneBuilderBase == 0) || (data.zoneName.empty()))
 		return 0;
 
 	// Get image from pixmap database
-	QPixmap *pixmap = m_zoneBuilder->pixmapDatabase()->pixmap(QString(data.zoneName.c_str()));
+	QPixmap *pixmap = m_zoneBuilderBase->pixmapDatabase()->pixmap(QString(data.zoneName.c_str()));
 	if (pixmap == 0)
 		return 0;
 
@@ -98,7 +97,7 @@ QGraphicsItem *LandscapeSceneBase::createItemZone(const LigoData &data, const Zo
 	// Enable bilinear filtering
 	item->setTransformationMode(Qt::SmoothTransformation);
 
-	NLLIGO::CZoneBankElement *zoneBankItem = m_zoneBuilder->getZoneBank().getElementByZoneName(data.zoneName);
+	NLLIGO::CZoneBankElement *zoneBankItem = m_zoneBuilderBase->getZoneBank().getElementByZoneName(data.zoneName);
 
 	sint32 deltaX = 0, deltaY = 0;
 
@@ -156,7 +155,7 @@ QGraphicsItem *LandscapeSceneBase::createItemZone(const LigoData &data, const Zo
 	item->setPos((zonePos.x + deltaX) * m_cellSize, (abs(int(zonePos.y + deltaY))) * m_cellSize);
 
 	// The size graphics item should be equal or proportional m_cellSize
-	item->setScale(float(m_cellSize) / m_zoneBuilder->pixmapDatabase()->textureSize());
+	item->setScale(float(m_cellSize) / m_zoneBuilderBase->pixmapDatabase()->textureSize());
 
 	item->setData(ZONE_NAME, QString(data.zoneName.c_str()));
 
@@ -168,14 +167,14 @@ QGraphicsItem *LandscapeSceneBase::createItemZone(const LigoData &data, const Zo
 
 QGraphicsItem *LandscapeSceneBase::createItemEmptyZone(const ZonePosition &zonePos)
 {
-	if (m_zoneBuilder == 0)
+	if (m_zoneBuilderBase == 0)
 		return 0;
 
 	if (checkUnderZone(zonePos.x, zonePos.y))
 		return 0;
 
 	// Get image from pixmap database
-	QPixmap *pixmap = m_zoneBuilder->pixmapDatabase()->pixmap(QString(STRING_UNUSED));
+	QPixmap *pixmap = m_zoneBuilderBase->pixmapDatabase()->pixmap(QString(STRING_UNUSED));
 	if (pixmap == 0)
 		return 0;
 
@@ -188,7 +187,7 @@ QGraphicsItem *LandscapeSceneBase::createItemEmptyZone(const ZonePosition &zoneP
 	item->setPos(zonePos.x * m_cellSize, abs(int(zonePos.y)) * m_cellSize);
 
 	// The size graphics item should be equal or proportional m_cellSize
-	item->setScale(float(m_cellSize) / m_zoneBuilder->pixmapDatabase()->textureSize());
+	item->setScale(float(m_cellSize) / m_zoneBuilderBase->pixmapDatabase()->textureSize());
 
 	// for not full item zone
 	item->setZValue(LAYER_EMPTY_ZONES);
@@ -249,7 +248,7 @@ void LandscapeSceneBase::delZoneRegion(const NLLIGO::CZoneRegion &zoneRegion)
 
 void LandscapeSceneBase::snapshot(const QString &fileName, int width, int height, const QRectF &landRect)
 {
-	if (m_zoneBuilder == 0)
+	if (m_zoneBuilderBase == 0)
 		return;
 
 	// Create image
@@ -291,7 +290,7 @@ void LandscapeSceneBase::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 	m_mouseButton = mouseEvent->button();
 }
 
-void LandscapeSceneBase::mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent)
+void LandscapeSceneBase::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
 	m_mouseX = mouseEvent->scenePos().x();
 	m_mouseY = mouseEvent->scenePos().y() - m_cellSize;

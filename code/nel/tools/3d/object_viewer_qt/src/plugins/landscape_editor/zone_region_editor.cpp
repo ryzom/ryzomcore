@@ -30,40 +30,6 @@
 namespace LandscapeEditor
 {
 
-LigoData::LigoData()
-{
-	posX = 0;
-	posY = 0;
-	zoneName = "";
-	rot = 0;
-	flip = 0;
-	sharingMatNames[0] = "";
-	sharingMatNames[1] = "";
-	sharingMatNames[2] = "";
-	sharingMatNames[3] = "";
-	sharingCutEdges[0] = 0;
-	sharingCutEdges[1] = 0;
-	sharingCutEdges[2] = 0;
-	sharingCutEdges[3] = 0;
-}
-
-bool LigoData::operator!= (const LigoData& other) const
-{
-	return (posX != other.posX) ||
-		   (posY != other.posY) ||
-		   (rot != other.rot) ||
-		   (flip != other.flip) ||
-		   (zoneName != other.zoneName) ||
-		   (sharingMatNames[0] != other.sharingMatNames[0]) ||
-		   (sharingMatNames[1] != other.sharingMatNames[1]) ||
-		   (sharingMatNames[2] != other.sharingMatNames[2]) ||
-		   (sharingMatNames[3] != other.sharingMatNames[3]) ||
-		   (sharingCutEdges[0] != other.sharingCutEdges[0]) ||
-		   (sharingCutEdges[1] != other.sharingCutEdges[1]) ||
-		   (sharingCutEdges[2] != other.sharingCutEdges[2]) ||
-		   (sharingCutEdges[3] != other.sharingCutEdges[3]);
-}
-
 ZoneRegionObject::ZoneRegionObject()
 {
 	m_fileName = "";
@@ -92,7 +58,7 @@ bool ZoneRegionObject::load(const std::string &fileName)
 			result = false;
 		}
 	}
-	catch (NLMISC::Exception& e)
+	catch (NLMISC::Exception &e)
 	{
 		nlwarning("Error reading file %s : %s", fileName.c_str(), e.what ());
 		result = false;
@@ -132,7 +98,7 @@ bool ZoneRegionObject::save()
 			result = false;
 		}
 	}
-	catch (NLMISC::Exception& e)
+	catch (NLMISC::Exception &e)
 	{
 		nlwarning("Error writing file %s : %s", m_fileName.c_str(), e.what());
 		result = false;

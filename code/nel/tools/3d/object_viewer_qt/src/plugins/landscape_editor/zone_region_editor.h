@@ -19,6 +19,7 @@
 #define LANDSCAPE_EDITOR_H
 
 // Project includes
+#include "landscape_editor_global.h"
 
 // NeL includes
 #include <nel/ligo/zone_bank.h>
@@ -43,9 +44,38 @@ struct LigoData
 	std::string		sharingMatNames[4];
 	uint8			sharingCutEdges[4];
 
-	LigoData();
-
-	bool operator!= (const LigoData& other) const;
+	LigoData()
+	{
+		posX = 0;
+		posY = 0;
+		zoneName = "";
+		rot = 0;
+		flip = 0;
+		sharingMatNames[0] = "";
+		sharingMatNames[1] = "";
+		sharingMatNames[2] = "";
+		sharingMatNames[3] = "";
+		sharingCutEdges[0] = 0;
+		sharingCutEdges[1] = 0;
+		sharingCutEdges[2] = 0;
+		sharingCutEdges[3] = 0;
+	}
+	bool operator!= (const LigoData &other) const
+	{
+		return (posX != other.posX) ||
+			   (posY != other.posY) ||
+			   (rot != other.rot) ||
+			   (flip != other.flip) ||
+			   (zoneName != other.zoneName) ||
+			   (sharingMatNames[0] != other.sharingMatNames[0]) ||
+			   (sharingMatNames[1] != other.sharingMatNames[1]) ||
+			   (sharingMatNames[2] != other.sharingMatNames[2]) ||
+			   (sharingMatNames[3] != other.sharingMatNames[3]) ||
+			   (sharingCutEdges[0] != other.sharingCutEdges[0]) ||
+			   (sharingCutEdges[1] != other.sharingCutEdges[1]) ||
+			   (sharingCutEdges[2] != other.sharingCutEdges[2]) ||
+			   (sharingCutEdges[3] != other.sharingCutEdges[3]);
+	}
 };
 
 /**
@@ -53,7 +83,7 @@ struct LigoData
 @brief
 @details
 */
-class ZoneRegionObject
+class LANDSCAPE_EDITOR_EXPORT ZoneRegionObject
 {
 public:
 	ZoneRegionObject();

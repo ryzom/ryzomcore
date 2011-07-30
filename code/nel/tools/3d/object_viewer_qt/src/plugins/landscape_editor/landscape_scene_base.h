@@ -18,9 +18,9 @@
 #define LANDSCAPE_SCENE_BASE_H
 
 // Project includes
-#include "zone_region_editor.h"
-#include "builder_zone.h"
 #include "landscape_editor_global.h"
+#include "builder_zone_base.h"
+#include "zone_region_editor.h"
 
 // NeL includes
 #include <nel/ligo/zone_region.h>
@@ -46,7 +46,7 @@ public:
 	virtual ~LandscapeSceneBase();
 
 	int cellSize() const;
-	virtual void setZoneBuilder(ZoneBuilder *zoneBuilder);
+	void setZoneBuilder(ZoneBuilderBase *zoneBuilder);
 
 	QGraphicsItem *createItemZone(const LigoData &data, const ZonePosition &zonePos);
 	QGraphicsItem *createItemEmptyZone(const ZonePosition &zonePos);
@@ -73,7 +73,7 @@ private:
 	qreal m_mouseX, m_mouseY;
 	sint32 m_posX, m_posY;
 	Qt::MouseButton m_mouseButton;
-	ZoneBuilder *m_zoneBuilder;
+	ZoneBuilderBase *m_zoneBuilderBase;
 };
 
 } /* namespace LandscapeEditor */
