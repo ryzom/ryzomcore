@@ -45,8 +45,6 @@ PrimitivesView::PrimitivesView(QWidget *parent)
 
 	connect(m_deleteAction, SIGNAL(triggered()), this, SLOT(deletePrimitives()));
 
-	connect(this, SIGNAL(clicked(QModelIndex)), this, SLOT(clickedItem(QModelIndex)));
-
 #ifdef Q_OS_DARWIN
 	setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 #endif
@@ -60,10 +58,6 @@ void PrimitivesView::setModel(PrimitivesTreeModel *model)
 {
 	QTreeView::setModel(model);
 	m_primitivesTreeModel = model;
-}
-
-void PrimitivesView::clickedItem(const QModelIndex &index)
-{
 }
 
 void PrimitivesView::deletePrimitives()

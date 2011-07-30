@@ -51,7 +51,6 @@ public:
 	virtual void setModel(PrimitivesTreeModel *model);
 
 private Q_SLOTS:
-	void clickedItem(const QModelIndex &index);
 	void deletePrimitives();
 	void addNewPrimitive(int value);
 	void generatePrimitives(int value);
