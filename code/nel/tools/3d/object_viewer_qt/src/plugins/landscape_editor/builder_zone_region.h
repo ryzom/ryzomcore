@@ -1,6 +1,5 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
-// Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -70,7 +69,7 @@ private:
 
 	void addTransition(sint32 x, sint32 y, uint8 rot, uint8 flip, NLLIGO::CZoneBankElement *zoneBankElement);
 
-	void addToUpdateAndCreate(BuilderZoneRegion* builderZoneRegion, sint32 sharePos, sint32 x, sint32 y, const std::string &newMat, void *pInt1, void *pInt2);
+	void addToUpdateAndCreate(BuilderZoneRegion *builderZoneRegion, sint32 sharePos, sint32 x, sint32 y, const std::string &newMat, void *pInt1, void *pInt2);
 
 	void putTransitions(sint32 x, sint32 y, const NLLIGO::SPiece &mask, const std::string &matName, void *pInternal);
 	void updateTrans(sint32 x, sint32 y, NLLIGO::CZoneBankElement *zoneBankElement = NULL);

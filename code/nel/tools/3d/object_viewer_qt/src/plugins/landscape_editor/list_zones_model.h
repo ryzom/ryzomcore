@@ -70,7 +70,7 @@ private:
 	QPixmap *getPixmap(const QString &zoneName) const;
 
 	int m_scaleRatio;
-	QMap<QString, QPixmap*> m_pixmapMap;
+	QMap<QString, QPixmap *> m_pixmapMap;
 	QStringList m_listNames;
 };
 

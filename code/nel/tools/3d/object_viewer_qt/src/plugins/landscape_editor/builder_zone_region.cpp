@@ -1,6 +1,5 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
-// Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -168,12 +167,12 @@ public:
 		return m_elements[m].y;
 	}
 
-	BuilderZoneRegion* getBuilderZoneRegion(uint32 m)
+	BuilderZoneRegion *getBuilderZoneRegion(uint32 m)
 	{
 		return m_elements[m].builderZoneRegion;
 	}
 
-	const std::string& getMat (uint32 m)
+	const std::string &getMat (uint32 m)
 	{
 		return m_elements[m].matPut;
 	}
@@ -804,7 +803,7 @@ void BuilderZoneRegion::addTransition (sint32 x, sint32 y, uint8 rot, uint8 flip
 	}
 }
 
-void BuilderZoneRegion::addToUpdateAndCreate(BuilderZoneRegion* builderZoneRegion, sint32 sharePos, sint32 x, sint32 y, const std::string &newMat, void *pInt1, void *pInt2)
+void BuilderZoneRegion::addToUpdateAndCreate(BuilderZoneRegion *builderZoneRegion, sint32 sharePos, sint32 x, sint32 y, const std::string &newMat, void *pInt1, void *pInt2)
 {
 	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 	ToUpdate *ptCreate = reinterpret_cast<ToUpdate *>(pInt1);

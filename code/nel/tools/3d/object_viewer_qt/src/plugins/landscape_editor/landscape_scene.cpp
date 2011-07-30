@@ -35,7 +35,7 @@ static const int ZONE_NAME = 0;
 static const int LAYER_ZONES = 2;
 static const int LAYER_EMPTY_ZONES = 3;
 static const int LAYER_BLACKOUT = 4;
-const char * const LAYER_BLACKOUT_NAME = "blackout";
+const char *const LAYER_BLACKOUT_NAME = "blackout";
 
 const int MAX_SCENE_WIDTH = 256;
 const int MAX_SCENE_HEIGHT = 256;
@@ -323,7 +323,7 @@ void LandscapeScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 	QGraphicsScene::mousePressEvent(mouseEvent);
 }
 
-void LandscapeScene::mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent)
+void LandscapeScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
 	qreal x = mouseEvent->scenePos().x();
 	qreal y = mouseEvent->scenePos().y();

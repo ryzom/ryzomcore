@@ -22,19 +22,19 @@ namespace LandscapeEditor
 {
 namespace Constants
 {
-const char * const LANDSCAPE_EDITOR_PLUGIN	= "LandscapeEditor";
+const char *const LANDSCAPE_EDITOR_PLUGIN	= "LandscapeEditor";
 
 //settings
-const char * const LANDSCAPE_EDITOR_SECTION = "LandscapeEditor";
-const char * const LANDSCAPE_WINDOW_STATE = "LandscapeWindowState";
-const char * const LANDSCAPE_WINDOW_GEOMETRY = "LandscapeWindowGeometry";
-const char * const LANDSCAPE_DATA_DIRECTORY = "LandscapeDataDirectory";
-const char * const LANDSCAPE_USE_OPENGL = "LandscapeUseOpenGL";
+const char *const LANDSCAPE_EDITOR_SECTION = "LandscapeEditor";
+const char *const LANDSCAPE_WINDOW_STATE = "LandscapeWindowState";
+const char *const LANDSCAPE_WINDOW_GEOMETRY = "LandscapeWindowGeometry";
+const char *const LANDSCAPE_DATA_DIRECTORY = "LandscapeDataDirectory";
+const char *const LANDSCAPE_USE_OPENGL = "LandscapeUseOpenGL";
 
 //resources
-const char * const ICON_LANDSCAPE_ITEM = ":/icons/ic_nel_landscape_item.png";
-const char * const ICON_ZONE_ITEM = ":/icons/ic_nel_zone.png";
-const char * const ICON_LANDSCAPE_ZONES = ":/icons/ic_nel_zones.png";
+const char *const ICON_LANDSCAPE_ITEM = ":/icons/ic_nel_landscape_item.png";
+const char *const ICON_ZONE_ITEM = ":/icons/ic_nel_zone.png";
+const char *const ICON_LANDSCAPE_ZONES = ":/icons/ic_nel_zones.png";
 
 
 } // namespace Constants

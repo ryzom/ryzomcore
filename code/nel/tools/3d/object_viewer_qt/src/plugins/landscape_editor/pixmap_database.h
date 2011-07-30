@@ -61,7 +61,7 @@ public:
 private:
 
 	int m_textureSize;
-	QMap<QString, QPixmap*> m_pixmapMap;
+	QMap<QString, QPixmap *> m_pixmapMap;
 };
 
 } /* namespace LandscapeEditor */
