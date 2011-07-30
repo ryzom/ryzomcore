@@ -19,6 +19,7 @@
 #include "world_editor_window.h"
 #include "world_editor_constants.h"
 #include "primitives_model.h"
+#include "world_editor_scene.h"
 
 // Core
 #include "../core/icore.h"
@@ -26,6 +27,7 @@
 #include "../core/core_constants.h"
 
 // Lanscape Editor plugin
+#include "../landscape_editor/builder_zone_base.h"
 //#include "../landscape_editor/project_settings_dialog.h"
 
 // NeL includes
@@ -55,6 +57,12 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	m_ui.setupUi(this);
 	m_undoStack = new QUndoStack(this);
 
+	m_worldEditorScene = new WorldEditorScene(160, this);
+	m_zoneBuilderBase = new LandscapeEditor::ZoneBuilderBase(m_worldEditorScene);
+	
+	m_worldEditorScene->setZoneBuilder(m_zoneBuilderBase);
+	m_ui.graphicsView->setScene(m_worldEditorScene);
+
 	QActionGroup *sceneModeGroup = new QActionGroup(this);
 	sceneModeGroup->addAction(m_ui.selectAction);
 	sceneModeGroup->addAction(m_ui.moveAction);
@@ -82,6 +90,8 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 WorldEditorWindow::~WorldEditorWindow()
 {
 	writeSettings();
+
+	delete m_zoneBuilderBase;
 }
 
 QUndoStack *WorldEditorWindow::undoStack() const

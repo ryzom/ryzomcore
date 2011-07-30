@@ -24,9 +24,15 @@
 // Qt includes
 #include <QtGui/QUndoStack>
 
+namespace LandscapeEditor
+{
+class ZoneBuilderBase;
+}
+
 namespace WorldEditor
 {
 class PrimitivesTreeModel;
+class WorldEditorScene;
 
 class WorldEditorWindow: public QMainWindow
 {
@@ -57,6 +63,8 @@ private:
 
 	PrimitivesTreeModel *m_primitivesModel;
 	QUndoStack *m_undoStack;
+	WorldEditorScene *m_worldEditorScene;
+	LandscapeEditor::ZoneBuilderBase *m_zoneBuilderBase;
 	Ui::WorldEditorWindow m_ui;
 }; /* class WorldEditorWindow */
 
