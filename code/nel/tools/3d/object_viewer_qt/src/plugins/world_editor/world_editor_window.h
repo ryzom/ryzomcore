@@ -43,6 +43,8 @@ public Q_SLOTS:
 	void open();
 
 private Q_SLOTS:
+	void newWorldEditFile();
+	void saveAllWorldEditFiles();
 	void openProjectSettings();
 
 private:

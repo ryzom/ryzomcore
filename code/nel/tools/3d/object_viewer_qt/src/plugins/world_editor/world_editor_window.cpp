@@ -40,6 +40,7 @@
 
 // Qt includes
 #include <QtCore/QSettings>
+#include <QtCore/QSignalMapper>
 #include <QtGui/QFileDialog>
 
 namespace WorldEditor
@@ -54,12 +55,28 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	m_ui.setupUi(this);
 	m_undoStack = new QUndoStack(this);
 
+	QActionGroup *sceneModeGroup = new QActionGroup(this);
+	sceneModeGroup->addAction(m_ui.selectAction);
+	sceneModeGroup->addAction(m_ui.moveAction);
+	sceneModeGroup->addAction(m_ui.rotateAction);
+	sceneModeGroup->addAction(m_ui.scaleAction);
+	sceneModeGroup->addAction(m_ui.turnAction);
+	sceneModeGroup->addAction(m_ui.radiusAction);
+	m_ui.selectAction->setChecked(true);
+
+	m_ui.newWorldEditAction->setIcon(QIcon(Core::Constants::ICON_NEW));
+	m_ui.saveWorldEditAction->setIcon(QIcon(Core::Constants::ICON_SAVE));
+
 	m_primitivesModel = new PrimitivesTreeModel();
 	m_ui.treePrimitivesView->setModel(m_primitivesModel);
 
 	createMenus();
 	createToolBars();
 	readSettings();
+
+	connect(m_ui.newWorldEditAction, SIGNAL(triggered()), this, SLOT(newWorldEditFile()));
+	connect(m_ui.saveWorldEditAction, SIGNAL(triggered()), this, SLOT(saveAllWorldEditFiles()));
+
 }
 
 WorldEditorWindow::~WorldEditorWindow()
@@ -96,6 +113,14 @@ void WorldEditorWindow::loadPrimitive(const QString &fileName)
 	m_primitivesModel->loadPrimitive(fileName);
 }
 
+void WorldEditorWindow::newWorldEditFile()
+{
+}
+
+void WorldEditorWindow::saveAllWorldEditFiles()
+{
+}
+
 void WorldEditorWindow::openProjectSettings()
 {
 	/*
@@ -119,8 +144,11 @@ void WorldEditorWindow::createToolBars()
 	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
 	//QAction *action = menuManager->action(Core::Constants::NEW);
 	//m_ui.fileToolBar->addAction(action);
+
+	m_ui.fileToolBar->addAction(m_ui.newWorldEditAction);
 	QAction *action = menuManager->action(Core::Constants::OPEN);
 	m_ui.fileToolBar->addAction(action);
+	m_ui.fileToolBar->addAction(m_ui.saveWorldEditAction);
 	m_ui.fileToolBar->addSeparator();
 
 	action = menuManager->action(Core::Constants::UNDO);
