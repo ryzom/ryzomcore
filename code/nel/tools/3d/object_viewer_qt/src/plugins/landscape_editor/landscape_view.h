@@ -1,5 +1,4 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -40,6 +39,7 @@ public:
 
 public Q_SLOTS:
 	void setVisibleGrid(bool visible);
+	void setVisibleText(bool visible);
 
 private Q_SLOTS:
 protected:
@@ -53,7 +53,7 @@ protected:
 	void drawZoneNames(QPainter *painter, const QRectF &rect);
 private:
 
-	bool m_visibleGrid;
+	bool m_visibleGrid, m_visibleText;
 	int m_numSteps, m_maxSteps;
 	int m_cellSize;
 	bool m_moveMouse;

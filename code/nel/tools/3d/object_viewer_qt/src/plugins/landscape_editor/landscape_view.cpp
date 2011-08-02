@@ -1,5 +1,4 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -34,9 +33,10 @@ namespace LandscapeEditor
 LandscapeView::LandscapeView(QWidget *parent)
 	: QGraphicsView(parent),
 	  m_visibleGrid(true),
+	  m_visibleText(true),
 	  m_moveMouse(false)
 {
-	setDragMode(ScrollHandDrag);
+	//setDragMode(ScrollHandDrag);
 	setTransformationAnchor(AnchorUnderMouse);
 	setBackgroundBrush(QBrush(Qt::lightGray));
 	//setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
@@ -59,6 +59,12 @@ bool LandscapeView::isVisibleGrid() const
 void LandscapeView::setVisibleGrid(bool visible)
 {
 	m_visibleGrid = visible;
+	scene()->update();
+}
+
+void LandscapeView::setVisibleText(bool visible)
+{
+	m_visibleText = visible;
 	scene()->update();
 }
 
@@ -117,6 +123,9 @@ void LandscapeView::drawForeground(QPainter *painter, const QRectF &rect)
 
 	painter->setPen(QPen(Qt::white, 0, Qt::SolidLine));
 	drawGrid(painter, rect);
+
+	if (!m_visibleText)
+		return;
 
 	if (m_numSteps > -m_maxSteps / 4)
 	{

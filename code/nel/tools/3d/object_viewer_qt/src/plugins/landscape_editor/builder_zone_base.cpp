@@ -77,7 +77,7 @@ bool ZoneBuilderBase::init(const QString &pathName, bool displayProgress)
 	return true;
 }
 
-int ZoneBuilderBase::loadZoneRegion(const QString &fileName)
+int ZoneBuilderBase::loadZoneRegion(const QString &fileName, int defaultId)
 {
 	LandscapeItem landItem;
 	landItem.zoneRegionObject = new ZoneRegionObject();
@@ -88,15 +88,18 @@ int ZoneBuilderBase::loadZoneRegion(const QString &fileName)
 		delete landItem.zoneRegionObject;
 		return -1;
 	}
+	int id = defaultId;
+	if (id == -1)
+		id = NewLandId++;
 //	landItem.builderZoneRegion = new BuilderZoneRegion(LandCounter);
 //	landItem.builderZoneRegion->init(this);
 
 	m_landscapeSceneBase->addZoneRegion(landItem.zoneRegionObject->ligoZoneRegion());
 //	landItem.rectItem = m_landscapeScene->createLayerBlackout(landItem.zoneRegionObject->ligoZoneRegion());
-	m_landscapeMap.insert(NewLandId, landItem);
+	m_landscapeMap.insert(id, landItem);
 
 	calcMask();
-	return NewLandId++;
+	return id;
 }
 
 void ZoneBuilderBase::deleteZoneRegion(int id)

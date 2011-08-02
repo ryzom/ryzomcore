@@ -83,7 +83,7 @@ public:
 
 	/// Zone Region
 	/// @{
-	int loadZoneRegion(const QString &fileName);
+	int loadZoneRegion(const QString &fileName, int defaultId = -1);
 	void deleteZoneRegion(int id);
 	int countZoneRegion() const;
 	ZoneRegionObject *zoneRegion(int id) const;
