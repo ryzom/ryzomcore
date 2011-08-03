@@ -1,5 +1,4 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -50,7 +49,7 @@ public Q_SLOTS:
 
 private Q_SLOTS:
 	void newWorldEditFile();
-	void saveAllWorldEditFiles();
+	void saveWorldEditFile();
 	void openProjectSettings();
 
 private:
@@ -59,7 +58,10 @@ private:
 	void readSettings();
 	void writeSettings();
 
-	void loadPrimitive(const QString &fileName);
+	void loadWorldEditFile(const QString &fileName);
+	void checkCurrentWorld();
+
+	QString m_lastDir;
 
 	PrimitivesTreeModel *m_primitivesModel;
 	QUndoStack *m_undoStack;

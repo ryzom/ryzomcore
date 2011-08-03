@@ -31,9 +31,15 @@
 
 namespace WorldEditor
 {
+class Node;
+class WorldEditNode;
 
-class BaseTreeItem;
-class PrimitiveItem;
+typedef QPair<int, int> PathItem;
+/*
+@typedef Path
+@brief It store a list of row and column numbers which have to walk through from the root index of the model to reach the need item
+*/
+typedef QList<PathItem> Path;
 
 /**
 @class PrimitivesTreeModel
@@ -58,32 +64,34 @@ public:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
-	// Get primitive
-	NLLIGO::IPrimitive *primitive(const QModelIndex &index);
+	/// Convert QModelIndex to the persistent index - @Path.
+	/// @Path is a list of [row,column] pairs showing us the way through the model.
+	Path pathFromIndex(const QModelIndex &index);
 
-	// Get primitive class
-	const NLLIGO::CPrimitiveClass *primitiveClass(const QModelIndex &index);
+	QModelIndex pathToIndex(const Path &path);
 
-	// Load primitive from file
-	void loadPrimitive(const QString &fileName);
+	void createWorldEditNode(const QString &fileName);
+	void deleteWorldEditNode();
 
-	// Create new primitive and add in tree model
-	void newPrimitiveWithoutUndo(const QString &className, uint id, const QModelIndex &parent);
+	/// Add new landscape node in tree model.
+	Path createLandscapeNode(const QString &fileName);
 
-	void deletePrimitiveWithoutUndo(const QModelIndex &index);
+	/// Add new root primitive node and all sub-primitives in the tree model.
+	Path createRootPrimitiveNode(const QString &fileName, NLLIGO::CPrimitives *primitives);
 
-	NLLIGO::CLigoConfig *ligoConfig() const;
+	/// Add new primitive node and all sub-primitives in the tree model.
+	Path createPrimitiveNode(NLLIGO::IPrimitive *primitive, const Path &parent);
+
+	/// Delete node and all child nodes from the tree model
+	void deleteNode(const Path &path);
 
 private:
-	// Add root primitive in tree model and add all its sub-items.
-	void addRootPrimitive(const QString &name, NLLIGO::CPrimitives *primitives);
+	void createChildNodes(NLLIGO::IPrimitive *primitive, const QModelIndex &parent);
 
-	void scanPrimitive(NLLIGO::IPrimitive *prim, const QModelIndex &parentIndex);
-	void scanPrimitive(NLLIGO::IPrimitive *prim, BaseTreeItem *parent = 0);
+	void removeChildNodes(Node *node, const QModelIndex &parent);
 
-	void removeRows(int position, const QModelIndex &parent);
-
-	BaseTreeItem *m_rootItem;
+	Node *m_rootNode;
+	WorldEditNode *m_worldEditNode;
 };
 
 } /* namespace WorldEditor */

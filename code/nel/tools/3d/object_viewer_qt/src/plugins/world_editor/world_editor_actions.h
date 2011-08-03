@@ -1,5 +1,4 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -19,6 +18,7 @@
 #define WORLD_EDITOR_ACTIONS_H
 
 // Project includes
+#include "primitives_model.h"
 
 // NeL includes
 
@@ -27,20 +27,110 @@
 #include <QtGui/QGraphicsScene>
 #include <QtGui/QGraphicsItem>
 
+namespace LandscapeEditor
+{
+class ZoneBuilderBase;
+}
+
 namespace WorldEditor
 {
 
-class OpenLandscapeCommand: public QUndoCommand
+/**
+@class CreateWorldCommand
+@brief
+@details
+*/
+class CreateWorldCommand: public QUndoCommand
 {
 public:
-	OpenLandscapeCommand(const QString &fileName, QUndoCommand *parent = 0);
-	virtual ~OpenLandscapeCommand();
+	CreateWorldCommand(const QString &fileName, PrimitivesTreeModel *model, QUndoCommand *parent = 0);
+	virtual ~CreateWorldCommand();
 
 	virtual void undo();
 	virtual void redo();
 private:
 
-	QString m_fileName;
+	const QString m_fileName;
+	PrimitivesTreeModel *const m_model;
+};
+
+/**
+@class LoadLandscapeCommand
+@brief
+@details
+*/
+class LoadLandscapeCommand: public QUndoCommand
+{
+public:
+	LoadLandscapeCommand(const QString &fileName, PrimitivesTreeModel *model,
+						 LandscapeEditor::ZoneBuilderBase *zoneBuilder, QUndoCommand *parent = 0);
+	virtual ~LoadLandscapeCommand();
+
+	virtual void undo();
+	virtual void redo();
+private:
+
+	Path landIndex;
+	int m_id;
+	const QString m_fileName;
+	PrimitivesTreeModel *const m_model;
+	LandscapeEditor::ZoneBuilderBase *const m_zoneBuilder;
+};
+
+class CreateRootPrimitiveCommand: public QUndoCommand
+{
+public:
+	CreateRootPrimitiveCommand(const QString &fileName, PrimitivesTreeModel *model, QUndoCommand *parent = 0);
+	virtual ~CreateRootPrimitiveCommand();
+
+	virtual void undo();
+	virtual void redo();
+private:
+
+	const QString m_fileName;
+	Path m_rootPrimIndex;
+	PrimitivesTreeModel *const m_model;
+};
+
+/**
+@class LoadPrimitiveCommand
+@brief
+@details
+*/
+class LoadRootPrimitiveCommand: public QUndoCommand
+{
+public:
+	LoadRootPrimitiveCommand(const QString &fileName, PrimitivesTreeModel *model, QUndoCommand *parent = 0);
+	virtual ~LoadRootPrimitiveCommand();
+
+	virtual void undo();
+	virtual void redo();
+private:
+
+	Path m_rootPrimIndex;
+	const QString m_fileName;
+	PrimitivesTreeModel *const m_model;
+};
+
+/**
+@class AddPrimitiveCommand
+@brief
+@details
+*/
+class AddPrimitiveByClassCommand: public QUndoCommand
+{
+public:
+	AddPrimitiveByClassCommand(const QString &className, const Path &parentIndex,
+							   PrimitivesTreeModel *model, QUndoCommand *parent = 0);
+	virtual ~AddPrimitiveByClassCommand();
+
+	virtual void undo();
+	virtual void redo();
+private:
+
+	const QString m_className;
+	Path m_parentIndex, m_newPrimIndex;
+	PrimitivesTreeModel *m_model;
 };
 
 } /* namespace WorldEditor */

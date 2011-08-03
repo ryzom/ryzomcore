@@ -28,11 +28,15 @@
 #include <QtCore/QVariant>
 #include <QtCore/QSignalMapper>
 #include <QPersistentModelIndex>
+#include <QtGui/QUndoStack>
+
+namespace LandscapeEditor
+{
+class ZoneBuilderBase;
+}
 
 namespace WorldEditor
 {
-
-class BaseTreeItem;
 class PrimitivesTreeModel;
 
 /**
@@ -48,23 +52,47 @@ public:
 	PrimitivesView(QWidget *parent = 0);
 	~PrimitivesView();
 
+	void setUndoStack(QUndoStack *undoStack);
+	void setZoneBuilder(LandscapeEditor::ZoneBuilderBase *zoneBuilder);
 	virtual void setModel(PrimitivesTreeModel *model);
 
 private Q_SLOTS:
+	void loadLandscape();
+	void loadRootPrimitive();
+	void createRootPrimitive();
+	void selectChildren();
+
 	void deletePrimitives();
-	void addNewPrimitive(int value);
+	void addNewPrimitiveByClass(int value);
 	void generatePrimitives(int value);
 	void openItem(int value);
 
 protected:
 	void contextMenuEvent(QContextMenuEvent *event);
 
+private:
+	void selectChildren(const QModelIndex &parent);
+	void fillMenu_WorldEdit(QMenu *menu);
+	void fillMenu_Landscape(QMenu *menu);
+	void fillMenu_RootPrimitive(QMenu *menu, const QModelIndex &index);
+	void fillMenu_Primitive(QMenu *menu, const QModelIndex &index);
+
+	QString m_lastDir;
+
+	QAction *m_unloadAction;
+	QAction *m_saveAction;
+	QAction *m_saveAsAction;
+	QAction *m_loadLandAction;
+	QAction *m_loadPrimitiveAction;
+	QAction *m_newPrimitiveAction;
 	QAction *m_deleteAction;
 	QAction *m_selectChildrenAction;
 	QAction *m_helpAction;
 	QAction *m_showAction;
 	QAction *m_hideAction;
 
+	QUndoStack *m_undoStack;
+	LandscapeEditor::ZoneBuilderBase *m_zoneBuilder;
 	PrimitivesTreeModel *m_primitivesTreeModel;
 };
 

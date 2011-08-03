@@ -1,5 +1,4 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -20,6 +19,8 @@
 #include "world_editor_constants.h"
 #include "primitives_model.h"
 #include "world_editor_scene.h"
+#include "world_editor_misc.h"
+#include "world_editor_actions.h"
 
 // Core
 #include "../core/icore.h"
@@ -28,17 +29,12 @@
 
 // Lanscape Editor plugin
 #include "../landscape_editor/builder_zone_base.h"
-//#include "../landscape_editor/project_settings_dialog.h"
 
 // NeL includes
 #include <nel/misc/path.h>
 #include <nel/ligo/primitive_utils.h>
 #include <nel/ligo/primitive.h>
-
-#include <nel/misc/file.h>
-#include <nel/misc/i_xml.h>
-#include <nel/ligo/primitive_utils.h>
-#include <nel/ligo/primitive.h>
+#include <nel/ligo/ligo_config.h>
 
 // Qt includes
 #include <QtCore/QSettings>
@@ -47,7 +43,6 @@
 
 namespace WorldEditor
 {
-QString _lastDir;
 
 WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	: QMainWindow(parent),
@@ -57,9 +52,9 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	m_ui.setupUi(this);
 	m_undoStack = new QUndoStack(this);
 
-	m_worldEditorScene = new WorldEditorScene(160, this);
+	m_worldEditorScene = new WorldEditorScene(NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig->CellSize, this);
 	m_zoneBuilderBase = new LandscapeEditor::ZoneBuilderBase(m_worldEditorScene);
-	
+
 	m_worldEditorScene->setZoneBuilder(m_zoneBuilderBase);
 	m_ui.graphicsView->setScene(m_worldEditorScene);
 
@@ -78,12 +73,16 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	m_primitivesModel = new PrimitivesTreeModel();
 	m_ui.treePrimitivesView->setModel(m_primitivesModel);
 
+	// TODO: ?
+	m_ui.treePrimitivesView->setUndoStack(m_undoStack);
+	m_ui.treePrimitivesView->setZoneBuilder(m_zoneBuilderBase);
+
 	createMenus();
 	createToolBars();
 	readSettings();
 
 	connect(m_ui.newWorldEditAction, SIGNAL(triggered()), this, SLOT(newWorldEditFile()));
-	connect(m_ui.saveWorldEditAction, SIGNAL(triggered()), this, SLOT(saveAllWorldEditFiles()));
+	connect(m_ui.saveWorldEditAction, SIGNAL(triggered()), this, SLOT(saveWorldEditFile()));
 
 }
 
@@ -101,33 +100,64 @@ QUndoStack *WorldEditorWindow::undoStack() const
 
 void WorldEditorWindow::open()
 {
-	QStringList fileNames = QFileDialog::getOpenFileNames(this,
-							tr("Open NeL Ligo primitive file"), _lastDir,
-							tr("All NeL Ligo primitive files (*.primitive)"));
+	QString fileName = QFileDialog::getOpenFileName(this,
+					   tr("Open NeL World Edit file"), m_lastDir,
+					   tr("All NeL World Editor file (*.worldedit)"));
 
 	setCursor(Qt::WaitCursor);
-	if (!fileNames.isEmpty())
+	if (!fileName.isEmpty())
 	{
-		QStringList list = fileNames;
-		_lastDir = QFileInfo(list.front()).absolutePath();
-		Q_FOREACH(QString fileName, fileNames)
-		{
-			loadPrimitive(fileName);
-		}
+		m_lastDir = QFileInfo(fileName).absolutePath();
+		loadWorldEditFile(fileName);
 	}
 	setCursor(Qt::ArrowCursor);
 }
 
-void WorldEditorWindow::loadPrimitive(const QString &fileName)
+void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 {
-	m_primitivesModel->loadPrimitive(fileName);
+	Utils::WorldEditList worldEditList;
+	if (!Utils::loadWorldEditFile(fileName.toStdString(), worldEditList))
+	{
+		return;
+	}
+
+	m_undoStack->beginMacro(QString("Load %1").arg(fileName));
+
+	checkCurrentWorld();
+
+	m_undoStack->push(new CreateWorldCommand(fileName, m_primitivesModel));
+	for (size_t i = 0; i < worldEditList.size(); ++i)
+	{
+		switch (worldEditList[i].first)
+		{
+		case Utils::DataDirectoryType:
+			m_zoneBuilderBase->init(QString(worldEditList[i].second.c_str()), true);
+			break;
+		case Utils::ContextType:
+			break;
+		case Utils::LandscapeType:
+			m_undoStack->push(new LoadLandscapeCommand(QString(worldEditList[i].second.c_str()), m_primitivesModel, m_zoneBuilderBase));
+			break;
+		case Utils::PrimitiveType:
+			m_undoStack->push(new LoadRootPrimitiveCommand(QString(worldEditList[i].second.c_str()), m_primitivesModel));
+			break;
+		};
+	}
+	m_undoStack->endMacro();
+}
+
+void WorldEditorWindow::checkCurrentWorld()
+{
 }
 
 void WorldEditorWindow::newWorldEditFile()
 {
+	checkCurrentWorld();
+
+	m_undoStack->push(new CreateWorldCommand("NewWorldEdit", m_primitivesModel));
 }
 
-void WorldEditorWindow::saveAllWorldEditFiles()
+void WorldEditorWindow::saveWorldEditFile()
 {
 }
 

@@ -17,6 +17,9 @@
 // Project includes
 #include "primitive_item.h"
 #include "world_editor_misc.h"
+#include "world_editor_constants.h"
+
+#include "../landscape_editor/landscape_editor_constants.h"
 
 // NeL includes
 #include <nel/ligo/ligo_config.h>
@@ -28,87 +31,160 @@
 namespace WorldEditor
 {
 
-BaseTreeItem::BaseTreeItem(BaseTreeItem *parent)
+Node::Node()
+	: m_parent(0)
 {
-	m_parentItem = parent;
-	m_itemData << QIcon() << "" << "" << "";
 }
 
-BaseTreeItem::BaseTreeItem(const QList<QVariant> &data, BaseTreeItem *parent)
+Node::~Node()
 {
-	m_parentItem = parent;
-	m_itemData = data;
+	if (m_parent)
+		m_parent->removeChildNode(this);
+
+	qDeleteAll(m_children);
+	nlassert(m_children.isEmpty());
+	m_data.clear();
 }
 
-BaseTreeItem::~BaseTreeItem()
+void Node::prependChildNode(Node *node)
 {
-	qDeleteAll(m_childItems);
+	// Node is already a child
+	nlassert(!m_children.contains(node));
+
+	// Node already has a parent
+	nlassert(!m_children.contains(node));
+
+	m_children.prepend(node);
+	node->m_parent = this;
 }
 
-void BaseTreeItem::appendChild(BaseTreeItem *item)
+void Node::appendChildNode(Node *node)
 {
-	m_childItems.append(item);
+	// Node is already a child
+	nlassert(!m_children.contains(node));
+
+	// Node already has a parent
+	nlassert(!m_children.contains(node));
+
+	m_children.append(node);
+	node->m_parent = this;
 }
 
-void BaseTreeItem::deleteChild(int row)
+void Node::insertChildNodeBefore(Node *node, Node *before)
 {
-	delete m_childItems.takeAt(row);
+	// Node is already a child
+	nlassert(!m_children.contains(node));
+
+	// Node already has a parent
+	nlassert(!m_children.contains(node));
+
+	int idx = before ? m_children.indexOf(before) : -1;
+	if (idx == -1)
+		m_children.append(node);
+	else
+		m_children.insert(idx, node);
+	node->m_parent = this;
 }
 
-BaseTreeItem *BaseTreeItem::child(int row)
+void Node::insertChildNodeAfter(Node *node, Node *after)
 {
-	return m_childItems.value(row);
+	// Node is already a child
+	nlassert(!m_children.contains(node));
+
+	// Node already has a parent
+	nlassert(!m_children.contains(node));
+
+	int idx = after ? m_children.indexOf(after) : -1;
+	if (idx == -1)
+		m_children.append(node);
+	else
+		m_children.insert(idx + 1, node);
+	node->m_parent = this;
 }
 
-int BaseTreeItem::childCount() const
+void Node::removeChildNode(Node *node)
 {
-	return m_childItems.count();
+	nlassert(m_children.contains(node));
+	nlassert(node->parent() == this);
+
+	m_children.removeOne(node);
+
+	node->m_parent = 0;
 }
 
-int BaseTreeItem::columnCount() const
+Node *Node::child(int row)
 {
-	return m_itemData.count();
+	return m_children.at(row);
 }
 
-QVariant BaseTreeItem::data(int column) const
+int Node::childCount() const
 {
-	return m_itemData.value(column);
+	return m_children.count();
 }
 
-void BaseTreeItem::setData(int column, const QVariant &data)
+QVariant Node::data(int key) const
 {
-	m_itemData[column] = data;
+	return m_data[key];
 }
 
-BaseTreeItem *BaseTreeItem::parent()
+void Node::setData(int key, const QVariant &data)
 {
-	return m_parentItem;
+	m_data[key] = data;
 }
 
-int BaseTreeItem::row() const
+Node *Node::parent()
 {
-	if (m_parentItem)
-		return m_parentItem->m_childItems.indexOf(const_cast<BaseTreeItem *>(this));
+	return m_parent;
+}
+
+int Node::row() const
+{
+	if (m_parent)
+		return m_parent->m_children.indexOf(const_cast<Node *>(this));
 
 	return 0;
 }
 
-void BaseTreeItem::setModified(bool value)
+Node::NodeType Node::type() const
 {
-	m_modified = value;
+	return BasicNodeType;
 }
 
-bool BaseTreeItem::isModified() const
+WorldEditNode::WorldEditNode(const QString &name)
 {
-	return m_modified;
+	setData(Qt::DisplayRole, name);
+	setData(Qt::DecorationRole, QIcon(Constants::ICON_WORLD_EDITOR));
 }
 
-PrimitiveItem::PrimitiveItem(NLLIGO::IPrimitive *primitive, BaseTreeItem *parent)
-	: BaseTreeItem(parent),
-	  m_primitive(primitive)
+WorldEditNode::~WorldEditNode()
 {
-	setData(1, QString(m_primitive->getName().c_str()));
-	setData(2, QString(m_primitive->getClassName().c_str()));
+}
+
+Node::NodeType WorldEditNode::type() const
+{
+	return WorldEditNodeType;
+}
+
+LandscapeNode::LandscapeNode(const QString &name)
+{
+	setData(Qt::DisplayRole, name);
+	setData(Qt::DecorationRole, QIcon(LandscapeEditor::Constants::ICON_ZONE_ITEM));
+}
+
+LandscapeNode::~LandscapeNode()
+{
+}
+
+Node::NodeType LandscapeNode::type() const
+{
+	return LandscapeNodeType;
+}
+
+PrimitiveNode::PrimitiveNode(NLLIGO::IPrimitive *primitive)
+	: m_primitive(primitive)
+{
+	setData(Qt::DisplayRole, QString(m_primitive->getName().c_str()));
+	setData(Qt::ToolTipRole, QString(m_primitive->getClassName().c_str()));
 
 	std::string className;
 	m_primitive->getPropertyByName("class", className);
@@ -125,43 +201,57 @@ PrimitiveItem::PrimitiveItem(NLLIGO::IPrimitive *primitive, BaseTreeItem *parent
 		else
 			icon = QIcon("./old_ico/folder_h.ico");
 	}
-	setData(0, icon);
+	setData(Qt::DecorationRole, icon);
 
-	setData(3, QString(className.c_str()));
+	//setData(3, QString(className.c_str()));
 }
-/*
-PrimitiveItem::PrimitiveItem(const PrimitiveItem &other)
-{
-}
-*/
-PrimitiveItem::~PrimitiveItem()
+
+PrimitiveNode::~PrimitiveNode()
 {
 }
 
-NLLIGO::IPrimitive *PrimitiveItem::primitive() const
+NLLIGO::IPrimitive *PrimitiveNode::primitive() const
 {
 	return m_primitive;
 }
 
-const NLLIGO::CPrimitiveClass *PrimitiveItem::primitiveClass() const
+const NLLIGO::CPrimitiveClass *PrimitiveNode::primitiveClass() const
 {
 	return NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig->getPrimitiveClass(*m_primitive);
 }
 
+RootPrimitiveNode *PrimitiveNode::rootPrimitiveNode()
+{
+	Node *node = this;
+	while (node && (node->type() != Node::RootPrimitiveNodeType))
+		node = node->parent();
+	return (RootPrimitiveNode *)node;
+}
 
-RootPrimitiveItem::RootPrimitiveItem(const QString &name, NLLIGO::CPrimitives *primitives, BaseTreeItem *parent)
-	: PrimitiveItem(primitives->RootNode, parent),
+Node::NodeType PrimitiveNode::type() const
+{
+	return PrimitiveNodeType;
+}
+
+RootPrimitiveNode::RootPrimitiveNode(const QString &name, NLLIGO::CPrimitives *primitives)
+	: PrimitiveNode(primitives->RootNode),
 	  m_primitives(primitives)
 {
-	setData(1, name);
+	setData(Qt::DisplayRole, name);
 }
-/*
-RootPrimitiveItem::RootPrimitiveItem(const RootPrimitiveItem &other)
+
+RootPrimitiveNode::~RootPrimitiveNode()
 {
 }
-*/
-RootPrimitiveItem::~RootPrimitiveItem()
+
+NLLIGO::CPrimitives *RootPrimitiveNode::primitives() const
 {
+	return m_primitives;
+}
+
+Node::NodeType RootPrimitiveNode::type() const
+{
+	return RootPrimitiveNodeType;
 }
 
 } /* namespace WorldEditor */

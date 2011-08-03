@@ -31,69 +31,144 @@
 namespace WorldEditor
 {
 
+class WorldEditNode;
+class RootPrimitiveNode;
+class LandscapeNode;
+class PrimitiveNode;
+
 /*
-@class BaseTreeItem
+@class Node
 @brief
 @details
 */
-class BaseTreeItem
+class Node
 {
 public:
-	BaseTreeItem(BaseTreeItem *parent = 0);
-	BaseTreeItem(const QList<QVariant> &data, BaseTreeItem *parent = 0);
-	virtual ~BaseTreeItem();
 
-	void appendChild(BaseTreeItem *child);
-	void deleteChild(int row);
+	enum NodeType
+	{
+		BasicNodeType,
+		WorldEditNodeType,
+		RootPrimitiveNodeType,
+		LandscapeNodeType,
+		PrimitiveNodeType,
+		UserNodeType = 1024
+	};
 
-	BaseTreeItem *child(int row);
+	Node();
+	virtual ~Node();
+
+	/// Remove child node from the child list.
+	void removeChildNode(Node *node);
+
+	/// Insert node at the beginning of the list.
+	void prependChildNode(Node *node);
+
+	/// Insert node at the end of the list.
+	void appendChildNode(Node *node);
+
+	/// Insert node in front of the node pointed to by the pointer before.
+	void insertChildNodeBefore(Node *node, Node *before);
+
+	/// Insert node in back of the node pointed to by the pointer after.
+	void insertChildNodeAfter(Node *node, Node *after);
+
+	/// Return the node at index position row in the child list.
+	Node *child(int row);
+
+	/// Return the number of nodes in the list.
 	int childCount() const;
-	int columnCount() const;
-	QVariant data(int column) const;
-	void setData(int column, const QVariant &data);
+
+	/// Return a row index this node.
 	int row() const;
-	BaseTreeItem *parent();
-	void setModified(bool value);
-	bool isModified() const;
+
+	/// Return a pointer to this node's parent item. If this node does not have a parent, 0 is returned.
+	Node *parent();
+
+	/// Set this node's custom data for the key key to value.
+	void setData(int key, const QVariant &data);
+
+	/// Return this node's custom data for the key key as a QVariant.
+	QVariant data(int key) const;
+
+	/// Return a type this node.
+	virtual NodeType type() const;
 
 private:
+	Q_DISABLE_COPY(Node)
 
-	bool m_modified;
-	QList<BaseTreeItem *> m_childItems;
-	QList<QVariant> m_itemData;
-	BaseTreeItem *m_parentItem;
+	Node *m_parent;
+	QList<Node *> m_children;
+	QHash<int, QVariant> m_data;
 };
 
 /*
-@class PrimitiveItem
+@class WorldEditNode
 @brief
 @details
 */
-class PrimitiveItem: public BaseTreeItem
+class WorldEditNode: public Node
 {
 public:
-	PrimitiveItem(NLLIGO::IPrimitive *primitive, BaseTreeItem *parent);
-	PrimitiveItem(const PrimitiveItem &other);
-	virtual ~PrimitiveItem();
+	WorldEditNode(const QString &name);
+	virtual ~WorldEditNode();
+
+	virtual NodeType type() const;
+
+private:
+};
+
+/*
+@class LandscapeNode
+@brief
+@details
+*/
+class LandscapeNode: public Node
+{
+public:
+	LandscapeNode(const QString &name);
+	virtual ~LandscapeNode();
+
+	virtual NodeType type() const;
+
+private:
+};
+
+/*
+@class PrimitiveNode
+@brief
+@details
+*/
+class PrimitiveNode: public Node
+{
+public:
+	PrimitiveNode(NLLIGO::IPrimitive *primitive);
+	virtual ~PrimitiveNode();
 
 	NLLIGO::IPrimitive *primitive() const;
 	const NLLIGO::CPrimitiveClass *primitiveClass() const;
+	RootPrimitiveNode *rootPrimitiveNode();
+
+	virtual NodeType type() const;
 
 private:
 	NLLIGO::IPrimitive *m_primitive;
 };
 
 /*
-@class PrimitivesItem
+@class RootPrimitiveNode
 @brief
 @details
 */
-class RootPrimitiveItem: public PrimitiveItem
+class RootPrimitiveNode: public PrimitiveNode
 {
 public:
-	RootPrimitiveItem(const QString &name, NLLIGO::CPrimitives *primitives, BaseTreeItem *parent);
-	RootPrimitiveItem(const RootPrimitiveItem &other);
-	virtual ~RootPrimitiveItem();
+	RootPrimitiveNode(const QString &name, NLLIGO::CPrimitives *primitives);
+	virtual ~RootPrimitiveNode();
+
+	NLLIGO::CPrimitives *primitives() const;
+
+	virtual NodeType type() const;
 
 private:
 	NLLIGO::CPrimitives *m_primitives;

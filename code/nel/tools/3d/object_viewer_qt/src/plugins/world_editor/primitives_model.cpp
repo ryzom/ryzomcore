@@ -31,24 +31,26 @@ namespace WorldEditor
 {
 
 PrimitivesTreeModel::PrimitivesTreeModel(QObject *parent)
-	: QAbstractItemModel(parent)
+	: QAbstractItemModel(parent),
+	  m_worldEditNode(0)
 {
-	QList<QVariant> rootData;
-	rootData << "Name" << "Class" << "Class";
-	m_rootItem = new BaseTreeItem(rootData);
+	m_rootNode = new Node();
+	m_rootNode->setData(Qt::DisplayRole, "Name");
 }
 
 PrimitivesTreeModel::~PrimitivesTreeModel()
 {
-	delete m_rootItem;
+	delete m_rootNode;
 }
 
 int PrimitivesTreeModel::columnCount(const QModelIndex &parent) const
 {
-	if (parent.isValid())
-		return static_cast<BaseTreeItem *>(parent.internalPointer())->columnCount();
-	else
-		return m_rootItem->columnCount();
+	/*	if (parent.isValid())
+			return static_cast<BaseTreeItem *>(parent.internalPointer())->columnCount();
+		else
+			return m_rootItem->columnCount();
+		*/
+	return 1;
 }
 
 QVariant PrimitivesTreeModel::data(const QModelIndex &index, int role) const
@@ -56,20 +58,15 @@ QVariant PrimitivesTreeModel::data(const QModelIndex &index, int role) const
 	if (!index.isValid())
 		return QVariant();
 
-	BaseTreeItem *item = static_cast<BaseTreeItem *>(index.internalPointer());
+	Node *item = static_cast<Node *>(index.internalPointer());
 	switch (role)
 	{
 //	case Qt::TextAlignmentRole:
 //		return int(Qt::AlignLeft | Qt::AlignVCenter);
 	case Qt::DisplayRole:
-		return item->data(index.column() + 1);
+		return item->data(Qt::DisplayRole);
 	case Qt::DecorationRole:
-	{
-		if (index.column() == 0)
-			return qVariantFromValue(item->data(0));
-		else
-			return QVariant();
-	}
+		return item->data(Qt::DecorationRole);
 	default:
 		return QVariant();
 	}
@@ -83,31 +80,30 @@ Qt::ItemFlags PrimitivesTreeModel::flags(const QModelIndex &index) const
 	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-QVariant PrimitivesTreeModel::headerData(int section, Qt::Orientation orientation,
-		int role) const
+QVariant PrimitivesTreeModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-		return m_rootItem->data(section);
+//		return m_rootNode->data(section);
+		return m_rootNode->data(Qt::DisplayRole);
 
 	return QVariant();
 }
 
-QModelIndex PrimitivesTreeModel::index(int row, int column, const QModelIndex &parent)
-const
+QModelIndex PrimitivesTreeModel::index(int row, int column, const QModelIndex &parent) const
 {
 	if (!hasIndex(row, column, parent))
 		return QModelIndex();
 
-	BaseTreeItem *parentItem;
+	Node *parentNode;
 
 	if (!parent.isValid())
-		parentItem = m_rootItem;
+		parentNode = m_rootNode;
 	else
-		parentItem = static_cast<BaseTreeItem *>(parent.internalPointer());
+		parentNode = static_cast<Node *>(parent.internalPointer());
 
-	BaseTreeItem *childItem = parentItem->child(row);
-	if (childItem)
-		return createIndex(row, column, childItem);
+	Node *childNode = parentNode->child(row);
+	if (childNode)
+		return createIndex(row, column, childNode);
 	else
 		return QModelIndex();
 }
@@ -117,161 +113,166 @@ QModelIndex PrimitivesTreeModel::parent(const QModelIndex &index) const
 	if (!index.isValid())
 		return QModelIndex();
 
-	BaseTreeItem *childItem = static_cast<BaseTreeItem *>(index.internalPointer());
-	BaseTreeItem *parentItem = childItem->parent();
+	Node *childNode = static_cast<Node *>(index.internalPointer());
+	Node *parentNode = childNode->parent();
 
-	if (parentItem == m_rootItem)
+	if (parentNode == m_rootNode)
 		return QModelIndex();
 
-	return createIndex(parentItem->row(), 0, parentItem);
+	return createIndex(parentNode->row(), 0, parentNode);
 }
 
 int PrimitivesTreeModel::rowCount(const QModelIndex &parent) const
 {
-	BaseTreeItem *parentItem;
+	Node *parentNode;
 	if (parent.column() > 0)
 		return 0;
 
 	if (!parent.isValid())
-		parentItem = m_rootItem;
+		parentNode = m_rootNode;
 	else
-		parentItem = static_cast<BaseTreeItem *>(parent.internalPointer());
+		parentNode = static_cast<Node *>(parent.internalPointer());
 
-	return parentItem->childCount();
+	return parentNode->childCount();
 }
 
-NLLIGO::IPrimitive *PrimitivesTreeModel::primitive(const QModelIndex &index)
+Path PrimitivesTreeModel::pathFromIndex(const QModelIndex &index)
 {
-	NLLIGO::IPrimitive *prim = 0;
-	if (index.isValid())
+	QModelIndex iter = index;
+	Path path;
+	while(iter.isValid())
 	{
-		PrimitiveItem *item = static_cast<PrimitiveItem *>(index.internalPointer());
-		prim = item->primitive();
+		path.prepend(PathItem(iter.row(), iter.column()));
+		iter = iter.parent();
 	}
-	return prim;
+	return path;
 }
 
-const NLLIGO::CPrimitiveClass *PrimitivesTreeModel::primitiveClass(const QModelIndex &index)
+QModelIndex PrimitivesTreeModel::pathToIndex(const Path &path)
 {
-	if (index.isValid())
+	QModelIndex iter;
+	for(int i = 0; i < path.size(); i++)
 	{
-		NLLIGO::IPrimitive *prim = primitive(index);
-		return ligoConfig()->getPrimitiveClass(*prim);
+		iter = index(path[i].first, path[i].second, iter);
 	}
-	return 0;
+	return iter;
 }
 
-void PrimitivesTreeModel::loadPrimitive(const QString &fileName)
-{
-	NLLIGO::CPrimitives *primitives = new NLLIGO::CPrimitives();
-
-	// set the primitive context
-	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = primitives;
-
-	NLLIGO::loadXmlPrimitiveFile(*primitives, fileName.toStdString(), *NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig);
-
-	// unset the context
-	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
-
-	addRootPrimitive(fileName, primitives);
-}
-
-void PrimitivesTreeModel::newPrimitiveWithoutUndo(const QString &className, uint id, const QModelIndex &parent)
-{
-	const NLLIGO::CPrimitiveClass *primClass = primitiveClass(parent);
-	float delta = 10;
-
-	// TODO: Set the context
-	//CPrimitiveContext::instance().CurrentPrimitive = &_DataHierarchy[locator._LocateStack[0]].Primitives;
-
-	NLLIGO::IPrimitive *newPrimitive = createPrimitive(className.toStdString().c_str(), className.toStdString().c_str()
-									   , NLMISC::CVector(), delta, primClass->DynamicChildren[id].Parameters, primitive(parent));
-
-	// unset the context
-	//CPrimitiveContext::instance().CurrentPrimitive = NULL;
-
-	if (newPrimitive != 0)
-	{
-		scanPrimitive(newPrimitive, parent);
-	}
-}
-
-void PrimitivesTreeModel::deletePrimitiveWithoutUndo(const QModelIndex &index)
-{
-	deletePrimitive(primitive(index));
-	removeRows(index.row(), index.parent());
-}
-
-void PrimitivesTreeModel::addRootPrimitive(const QString &name, NLLIGO::CPrimitives *primitives)
+void PrimitivesTreeModel::createWorldEditNode(const QString &fileName)
 {
 	beginResetModel();
+	m_worldEditNode = new WorldEditNode(fileName);
+	m_rootNode->appendChildNode(m_worldEditNode);
+	endResetModel();
+}
 
-	// Create root primitive
-	RootPrimitiveItem *newPrimitives = new RootPrimitiveItem(name, primitives, m_rootItem);
-	m_rootItem->appendChild(newPrimitives);
-
-	// Scan childs items and add in tree model
-	for (uint i = 0; i < primitives->RootNode->getNumChildren(); ++i)
+void PrimitivesTreeModel::deleteWorldEditNode()
+{
+	beginResetModel();
+	if (m_worldEditNode != 0)
 	{
-		NLLIGO::IPrimitive *childPrim;
-		primitives->RootNode->getChild(childPrim, i);
-		scanPrimitive(childPrim, newPrimitives);
+		delete m_worldEditNode;
+		m_worldEditNode = 0;
 	}
 	endResetModel();
 }
 
-void PrimitivesTreeModel::scanPrimitive(NLLIGO::IPrimitive *prim, const QModelIndex &parentIndex)
+Path PrimitivesTreeModel::createLandscapeNode(const QString &fileName)
 {
-	PrimitiveItem *parent = static_cast<PrimitiveItem *>(parentIndex.internalPointer());
+	if (m_worldEditNode == 0)
+		createWorldEditNode("NewWorldEdit");
 
-	// Add in tree model
-	beginInsertRows(parentIndex, parent->childCount(), parent->childCount());
-	PrimitiveItem *newItem = new PrimitiveItem(prim, parent);
-	parent->appendChild(newItem);
+	QModelIndex parentIndex = index(0, 0, QModelIndex());
+	beginInsertRows(parentIndex, 0, 0);
+	LandscapeNode *newNode = new LandscapeNode(fileName);
+	m_worldEditNode->prependChildNode(newNode);
+	endInsertRows();
+	return pathFromIndex(index(0, 0, index(0, 0, QModelIndex())));
+}
+
+
+Path PrimitivesTreeModel::createRootPrimitiveNode(const QString &fileName, NLLIGO::CPrimitives *primitives)
+{
+	if (m_worldEditNode == 0)
+		createWorldEditNode("NewWorldEdit");
+
+	// Get position
+	int pos = m_worldEditNode->childCount();
+
+	QModelIndex parentIndex = index(0, 0, QModelIndex());
+
+	// Add root node in tree model
+	beginInsertRows(parentIndex, pos, pos);
+	RootPrimitiveNode *newNode = new RootPrimitiveNode(fileName, primitives);
+	m_worldEditNode->appendChildNode(newNode);
 	endInsertRows();
 
-	// Scan childs items and add in tree model
-	QModelIndex childIndex = index(parent->childCount() - 1, 0, parentIndex);
-	for (uint i = 0; i < prim->getNumChildren(); ++i)
+	QModelIndex rootPrimIndex = index(pos, 0, parentIndex);
+
+	// Scan childs items and add in the tree model
+	for (uint i = 0; i < primitives->RootNode->getNumChildren(); ++i)
 	{
 		NLLIGO::IPrimitive *childPrim;
-		prim->getChild(childPrim, i);
-		scanPrimitive(childPrim, childIndex);
+		primitives->RootNode->getChild(childPrim, i);
+		createChildNodes(childPrim, rootPrimIndex);
+	}
+
+	return pathFromIndex(rootPrimIndex);
+}
+
+Path PrimitivesTreeModel::createPrimitiveNode(NLLIGO::IPrimitive *primitive, const Path &parent)
+{
+	QModelIndex parentIndex = pathToIndex(parent);
+	Node *parentNode = static_cast<Node *>(parentIndex.internalPointer());
+	int pos = parentNode->childCount();
+
+	createChildNodes(primitive, parentIndex);
+
+	return pathFromIndex(index(pos, 0, parentIndex));
+}
+
+void PrimitivesTreeModel::deleteNode(const Path &path)
+{
+	QModelIndex nodeIndex = pathToIndex(path);
+	QModelIndex parentIndex = nodeIndex.parent();
+	Node *node = static_cast<Node *>(nodeIndex.internalPointer());
+
+	// Scan childs items and delete from the tree model
+	removeChildNodes(node, parentIndex);
+}
+
+void PrimitivesTreeModel::createChildNodes(NLLIGO::IPrimitive *primitive, const QModelIndex &parent)
+{
+	Node *parentNode = static_cast<Node *>(parent.internalPointer());
+
+	int pos = parentNode->childCount();
+
+	// Add node in the tree model
+	beginInsertRows(parent, pos, pos);
+	PrimitiveNode *newNode = new PrimitiveNode(primitive);
+	parentNode->appendChildNode(newNode);
+	endInsertRows();
+
+	// Scan childs items and add in the tree model
+	QModelIndex childIndex = index(pos, 0, parent);
+	for (uint i = 0; i < primitive->getNumChildren(); ++i)
+	{
+		NLLIGO::IPrimitive *childPrim;
+		primitive->getChild(childPrim, i);
+		createChildNodes(childPrim, childIndex);
 	}
 }
 
-void PrimitivesTreeModel::scanPrimitive(NLLIGO::IPrimitive *prim, BaseTreeItem *parent)
+void PrimitivesTreeModel::removeChildNodes(Node *node, const QModelIndex &parent)
 {
-	// Add in tree model
-	PrimitiveItem *newItem = new PrimitiveItem(prim, parent);
-	parent->appendChild(newItem);
+	// Delete all child nodes from the tree model
+	while (node->childCount() != 0)
+		removeChildNodes(node->child(node->childCount() - 1), parent.child(node->row(), 0));
 
-	// Scan childs items and add in tree model
-	for (uint i = 0; i < prim->getNumChildren(); ++i)
-	{
-		NLLIGO::IPrimitive *childPrim;
-		prim->getChild(childPrim, i);
-		scanPrimitive(childPrim, newItem);
-	}
-}
-
-void PrimitivesTreeModel::removeRows(int position, const QModelIndex &parent)
-{
-	BaseTreeItem *item = static_cast<BaseTreeItem *>(parent.internalPointer())->child(position);
-
-	// Delete all child items from tree model
-	while (item->childCount() != 0)
-		removeRows(0, parent.child(position, 0));
-
-	// Delete item
-	beginRemoveRows(parent, position, position);
-	static_cast<BaseTreeItem *>(parent.internalPointer())->deleteChild(position);
+	// Delete node from the tree model
+	beginRemoveRows(parent, node->row(), node->row());
+	delete node;
 	endRemoveRows();
-}
-
-NLLIGO::CLigoConfig *PrimitivesTreeModel::ligoConfig() const
-{
-	return NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig;
 }
 
 } /* namespace WorldEditor */
