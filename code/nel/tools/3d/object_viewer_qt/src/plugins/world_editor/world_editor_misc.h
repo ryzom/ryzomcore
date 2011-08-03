@@ -25,13 +25,33 @@
 #include <nel/ligo/primitive.h>
 #include <nel/ligo/primitive_class.h>
 
-// Qt includes
+// STL includes
+#include <string>
+#include <vector>
+
+#define WORLD_EDITOR_FILE_VERSION 2
+#define WORLD_EDITOR_DATABASE_SIZE 100
 
 namespace WorldEditor
 {
+namespace Utils
+{
+enum ItemType
+{
+	DataDirectoryType = 0,
+	ContextType,
+	LandscapeType,
+	PrimitiveType
+};
+
+typedef std::pair<ItemType, std::string> WorldEditItem;
+typedef std::vector<WorldEditItem> WorldEditList;
 
 // Generate unique identificator
 uint32 getUniqueId();
+
+// Load *.worldedit file and return list primitives and landscapes.
+bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList);
 
 // Get root primitive
 NLLIGO::IPrimitive *getRootPrimitive(NLLIGO::IPrimitive *primitive);
@@ -50,6 +70,11 @@ NLLIGO::IPrimitive *createPrimitive(const char *className, const char *primName,
 
 void deletePrimitive(NLLIGO::IPrimitive *primitive);
 
+bool updateDefaultValues(NLLIGO::IPrimitive *primitive);
+
+bool recursiveUpdateDefaultValues(NLLIGO::IPrimitive *primitive);
+
+} /* namespace Utils */
 } /* namespace WorldEditor */
 
 #endif // WORLD_EDITOR_MISC_H

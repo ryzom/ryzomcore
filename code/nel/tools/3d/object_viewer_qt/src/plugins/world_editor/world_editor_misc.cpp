@@ -20,12 +20,51 @@
 
 // NeL includes
 #include <nel/misc/debug.h>
+#include <nel/misc/path.h>
+#include <nel/misc/file.h>
+#include <nel/misc/i_xml.h>
+#include <nel/misc/o_xml.h>
+#include <nel/ligo/primitive_utils.h>
 #include <nel/ligo/ligo_config.h>
+
 
 // Qt includes
 
 namespace WorldEditor
 {
+namespace Utils
+{
+
+void syntaxError(const char *filename, xmlNodePtr xmlNode, const char *format, ...)
+{
+	char buffer[1024];
+
+	if (format)
+	{
+		va_list args;
+		va_start( args, format );
+		sint ret = vsnprintf( buffer, 1024, format, args );
+		va_end( args );
+	}
+	else
+	{
+		strcpy(buffer, "Unknown error");
+	}
+
+	nlerror("(%s), node (%s), line (%d) :\n%s", filename, xmlNode->name, (int)xmlNode->content, buffer);
+}
+
+bool getPropertyString(std::string &result, const char *filename, xmlNodePtr xmlNode, const char *propName)
+{
+	// Call the CIXml version
+	if (!NLMISC::CIXml::getPropertyString(result, xmlNode, propName))
+	{
+		// Output a formated error
+		syntaxError(filename, xmlNode, "Missing XML node property (%s)", propName);
+		return false;
+	}
+	return true;
+}
 
 uint32 getUniqueId()
 {
@@ -37,6 +76,148 @@ uint32 getUniqueId()
 	}
 
 	return (uint32)time2;
+}
+
+bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList)
+{
+	bool result = false;
+
+	// Load the document
+	NLMISC::CIFile file;
+	if (file.open(fileName))
+	{
+		try
+		{
+			// Load the document in XML
+			NLMISC::CIXml xml;
+			xml.init(file);
+
+			// Get root node
+			xmlNodePtr rootNode = xml.getRootNode();
+			if (rootNode)
+			{
+				// Good header ?
+				if (strcmp((const char *)(rootNode->name), "NEL_WORLD_EDITOR_PROJECT") == 0)
+				{
+					// Read the version
+					int version = -1;
+
+					// Read the parameters
+					xmlNodePtr node = NLMISC::CIXml::getFirstChildNode(rootNode, "VERSION");
+					if (node)
+					{
+						std::string versionString;
+						if (NLMISC::CIXml::getContentString (versionString, node))
+							version = atoi(versionString.c_str ());
+					}
+
+					if (version == -1)
+					{
+						// Error
+						syntaxError(fileName.c_str(), rootNode, "No version node");
+					}
+					else
+					{
+						// Old format,
+						if (version <= 1)
+						{
+							syntaxError(fileName.c_str(), rootNode, "Old version node");
+						}
+						else
+						{
+							// Read it
+							if (version > WORLD_EDITOR_FILE_VERSION)
+							{
+								syntaxError(fileName.c_str(), node, "Unknown file version");
+							}
+							else
+							{
+								// Read data directory
+								node = NLMISC::CIXml::getFirstChildNode(rootNode, "DATA_DIRECTORY");
+								if (node)
+								{
+									std::string dataDir;
+									NLMISC::CIXml::getPropertyString(dataDir, node, "VALUE");
+									worldEditList.push_back(WorldEditItem(DataDirectoryType, dataDir));
+								}
+
+								// Read data directory
+								node = NLMISC::CIXml::getFirstChildNode(rootNode, "CONTEXT");
+								if (node)
+								{
+									std::string context;
+									NLMISC::CIXml::getPropertyString(context, node, "VALUE");
+									worldEditList.push_back(WorldEditItem(ContextType, context));
+								}
+
+								// Read the database element
+								node = NLMISC::CIXml::getFirstChildNode(rootNode, "DATABASE_ELEMENT");
+								if (node)
+								{
+									do
+									{
+										// Get the type
+										std::string type;
+										if (getPropertyString(type, fileName.c_str(), node, "TYPE"))
+										{
+											// Read the filename
+											std::string filenameChild;
+											if (getPropertyString(filenameChild, fileName.c_str(), node, "FILENAME"))
+											{
+												// Is it a landscape ?
+												if (type == "landscape")
+												{
+													worldEditList.push_back(WorldEditItem(LandscapeType, filenameChild));
+
+													// Get the primitives
+													xmlNodePtr primitives = NLMISC::CIXml::getFirstChildNode(node, "PRIMITIVES");
+													if (primitives)
+													{
+														NLLIGO::CPrimitives ligoPrimitives;
+
+														// Read it
+														ligoPrimitives.read(primitives, fileName.c_str(), *NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig);
+														//_DataHierarchy.back ().Primitives.read (primitives, filename, theApp.Config);
+
+														// Set the filename
+														//_DataHierarchy.back ().Filename = filenameChild;
+													}
+												}
+												else
+												{
+													worldEditList.push_back(WorldEditItem(PrimitiveType, filenameChild));
+												}
+
+											}
+										}
+									}
+									while (node = NLMISC::CIXml::getNextChildNode(node, "DATABASE_ELEMENT"));
+								}
+
+								// Done
+								result = true;
+							}
+						}
+					}
+				}
+				else
+				{
+					// Error
+					syntaxError(fileName.c_str(), rootNode, "Unknown file header : %s", rootNode->name);
+				}
+			}
+		}
+		catch (NLMISC::Exception &e)
+		{
+			nlerror("Error reading file %s : %s", fileName.c_str(), e.what());
+		}
+	}
+	else
+	{
+		nlerror("Can't open the file %s for reading.", fileName.c_str());
+	}
+
+	return result;
 }
 
 NLLIGO::IPrimitive *getRootPrimitive(NLLIGO::IPrimitive *primitive)
@@ -265,7 +446,7 @@ NLLIGO::IPrimitive *createPrimitive(const char *className, const char *primName,
 				// Make a vector of locator
 				//CDatabaseLocatorPointer locatorPtr;
 				//getLocator (locatorPtr, locator);
-				std::list<NLLIGO::IPrimitive*> locators;
+				std::list<NLLIGO::IPrimitive *> locators;
 				//locators.push_back (const_cast<IPrimitive*> (locatorPtr.Primitive));
 
 				// Yes, go
@@ -491,4 +672,21 @@ bool updateDefaultValues(NLLIGO::IPrimitive *primitive)
 	return modified;
 }
 
+bool recursiveUpdateDefaultValues(NLLIGO::IPrimitive *primitive)
+{
+	bool modified = updateDefaultValues(primitive);
+
+	const uint count = primitive->getNumChildren();
+	for (uint i = 0; i < count; ++i)
+	{
+		// Get the child
+		NLLIGO::IPrimitive *child;
+		nlverify(primitive->getChild(child, i));
+		modified |= recursiveUpdateDefaultValues(child);
+	}
+
+	return modified;
+}
+
+} /* namespace Utils */
 } /* namespace WorldEditor */
