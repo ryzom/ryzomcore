@@ -20,11 +20,14 @@
 
 // Qt includes
 #include <QtCore/QObject>
+#include <QtCore/QFile>
+#include <QtCore/QTextStream>
 #include <QtGui/QWidget>
 #include <QtGui/QMdiArea>
 #include <QtGui/QMdiSubWindow>
 #include <QtGui/QUndoCommand>
 #include <QtGui/QUndoStack>
+#include <QtGui/QTextEdit>
 
 // Project includes
 #include "translation_manager_editor.h"
@@ -34,6 +37,8 @@ namespace Plugin {
 class CEditorPhrase : public CEditor
 {
 	Q_OBJECT
+private:
+	QTextEdit *text_edit;
 public:
     CEditorPhrase(QMdiArea* parent) : CEditor(parent) {}
     CEditorPhrase() : CEditor() {}
@@ -41,6 +46,7 @@ public:
     void save();
     void saveAs(QString filename);
     void activateWindow();
+	void closeEvent(QCloseEvent *event);
 };
 
 }

@@ -65,8 +65,6 @@ private Q_SLOTS:
     void worksheetEditorChanged(QTableWidgetItem * item);
     void insertRow();
     void deleteRow();
-private:
-    void setCurrentFile(QString filename);
     
 };
 

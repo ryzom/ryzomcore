@@ -23,6 +23,7 @@
 #include <QtGui/QMdiArea>
 #include <QtGui/QMdiSubWindow>
 #include <QtGui/QUndoStack>
+#include <QtCore/QFileInfo>
 
 namespace Plugin {
     
@@ -52,6 +53,15 @@ public:
 	{
 		current_stack = stack;
 	}
+	void setCurrentFile(QString filename)
+	{
+		QFileInfo *file = new QFileInfo(filename);
+		current_file = file->canonicalFilePath();
+		setWindowModified(false);
+		setWindowTitle(file->fileName() + "[*]");  
+		setWindowFilePath(current_file);
+	}
+
 };
 
 }

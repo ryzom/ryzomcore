@@ -202,6 +202,7 @@ void CEditorWorksheet::saveAs(QString filename)
                 }
                 ucstring s = prepareExcelSheet(new_file);            
                 NLMISC::CI18N::writeTextFile(filename.toStdString(), s, false); 
+				current_file = filename;
                 setCurrentFile(filename);
 }
 
@@ -482,15 +483,6 @@ void CEditorWorksheet::mergeWorksheetFile(QString filename)
                         error.showMessage("This file is not a worksheet file.");
                         error.exec();                             
                  }
-}
-
-void CEditorWorksheet::setCurrentFile(QString filename)
-{
-     QFileInfo *file = new QFileInfo(filename);
-     current_file = file->canonicalFilePath();
-     setWindowModified(false);
-     setWindowTitle(file->fileName() + "[*]");  
-     setWindowFilePath(current_file);
 }
 
 void CEditorWorksheet::closeEvent(QCloseEvent *event)

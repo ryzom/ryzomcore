@@ -45,6 +45,7 @@
 #include "ui_translation_manager_main_window.h"
 #include <set>
 #include "editor_worksheet.h"
+#include "editor_phrase.h"
 
 class QWidget;
 
@@ -101,7 +102,7 @@ private:
 		// Worksheet specific functions
 		CEditorWorksheet* getEditorByWorksheetType(const QString &type);
         bool isWorksheetEditor(QString filename);
-    
+		bool isPhraseEditor(QString filename);
         
         
 };

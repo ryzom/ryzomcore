@@ -217,6 +217,14 @@ void CMainWindow::open()
                  new_window->open(file_name);  
                  new_window->activateWindow();
             }
+			// phrase editor
+			if(isPhraseEditor(file_name))
+			{
+				CEditorPhrase *new_window = new CEditorPhrase(_ui.mdiArea);
+				new_window->setUndoStack(m_undoStack);
+				new_window->open(file_name);
+				new_window->activateWindow();
+			}
 			#ifndef QT_NO_CURSOR
 				QApplication::restoreOverrideCursor();
 			#endif
@@ -559,10 +567,24 @@ bool CMainWindow::isWorksheetEditor(QString filename)
              STRING_MANAGER::TWorksheet wk_file;          
              if(loadExcelSheet(filename.toStdString(), wk_file, true) == true)
              {
-                 return true;
+				 if(wk_file.ColCount > 1)
+					return true;
+				 else
+					 return false;
              }  else {
                  return false;
              }
+}
+
+bool CMainWindow::isPhraseEditor(QString filename)
+{
+			vector<STRING_MANAGER::TPhrase> phrases;
+			if(readPhraseFile(filename.toStdString(), phrases, false))
+			{
+				return true;
+			} else {
+				return false;
+			}
 }
 
 bool CCoreListener::closeMainWindow() const
