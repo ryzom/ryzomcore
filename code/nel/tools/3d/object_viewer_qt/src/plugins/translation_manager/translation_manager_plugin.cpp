@@ -53,10 +53,12 @@ bool TranslationManagerPlugin::initialize(ExtensionSystem::IPluginManager *plugi
 {
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
+	// create the mainwindow
+	CMainWindow *mainWindow = new CMainWindow();
 
 	addAutoReleasedObject(new CTranslationManagerSettingsPage(this));
-	addAutoReleasedObject(new CTranslationManagerContext(this));
-	addAutoReleasedObject(new CCoreListener(this));
+	addAutoReleasedObject(new CTranslationManagerContext(mainWindow, this));
+	addAutoReleasedObject(new CCoreListener(mainWindow, this));
         
 	return true;
 }
@@ -74,6 +76,8 @@ void TranslationManagerPlugin::extensionsInitialized()
 	helpMenu->addSeparator();
 	helpMenu->insertAction(aboutQtAction, aboutTManPlugin);
 }
+
+
 
 void TranslationManagerPlugin::setNelContext(NLMISC::INelContext *nelContext)
 {

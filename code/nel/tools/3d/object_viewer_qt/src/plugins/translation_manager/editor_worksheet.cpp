@@ -21,6 +21,8 @@
 #include <QtCore/qfileinfo.h>
 #include <QtGui/QMessageBox>
 #include <QtGui/QCloseEvent>
+#include <QtGui/QAction>
+#include <QtGui/QMenu>
 
 // Project includes
 #include "editor_worksheet.h"
@@ -99,6 +101,7 @@ void CEditorWorksheet::open(QString filename)
                 // set editor signals
                 connect(table_editor, SIGNAL(itemChanged(QTableWidgetItem*) ), this, SLOT(worksheetEditorChanged(QTableWidgetItem*)));				
 				connect(table_editor, SIGNAL(itemDoubleClicked(QTableWidgetItem*) ), this, SLOT(worksheetEditorCellEntered(QTableWidgetItem*)));
+				connect (table_editor,SIGNAL(customContextMenuRequested(const QPoint &)), this,SLOT(contextMenuEvent(QContextMenuEvent*)));
              } else {
                 QErrorMessage error;
                 error.showMessage("This file is not a worksheet file.");
@@ -106,6 +109,23 @@ void CEditorWorksheet::open(QString filename)
              }
     
 }
+
+
+void CEditorWorksheet::contextMenuEvent(QContextMenuEvent *e)
+{
+    QAction *insertRowAct = new QAction("Insert new row", this);
+	connect(insertRowAct, SIGNAL(triggered()), this, SLOT(insertRow()));		
+    QAction *deleteRowAct = new QAction("Delete row", this);
+    connect(deleteRowAct, SIGNAL(triggered()), this, SLOT(deleteRow())); 
+
+	QMenu *contextMenu = new QMenu(this);
+	contextMenu->addAction(insertRowAct);
+	contextMenu->addAction(deleteRowAct);
+	contextMenu->exec( e->globalPos() );
+	delete contextMenu;
+	contextMenu = NULL;
+}
+
 
 void CEditorWorksheet::activateWindow()
 {
@@ -332,6 +352,7 @@ void CEditorWorksheet::extractBotNames(list<string> filters, string level_design
                     if(modified)
                     {
                         setWindowModified(true);
+						table_editor->scrollToBottom();
                     }
            
 }

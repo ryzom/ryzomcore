@@ -65,6 +65,7 @@ private Q_SLOTS:
     void worksheetEditorChanged(QTableWidgetItem * item);
     void insertRow();
     void deleteRow();
+	void contextMenuEvent(QContextMenuEvent *e);
     
 };
 
@@ -123,6 +124,7 @@ public:
 		{
 			QTableWidgetItem* item = new QTableWidgetItem();
 			m_table->setItem(m_rowID, j, item);
+			m_table->scrollToBottom();
 		}
 	}
 

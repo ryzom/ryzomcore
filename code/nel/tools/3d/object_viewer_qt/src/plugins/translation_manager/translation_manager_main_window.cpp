@@ -1,3 +1,4 @@
+
 // Translation Manager Plugin - OVQT Plugin <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Emanuel Costea <cemycc@gmail.com>
@@ -123,16 +124,14 @@ void CMainWindow::createToolbar()
         mergeSingleFileAct->setStatusTip(tr("Merge worksheet file from local or remote directory"));
         connect(mergeSingleFileAct, SIGNAL(triggered()), this, SLOT(mergeSingleFile()));
         // Windows menu
-        windowMenu = new QMenu(tr("&Windows..."), _ui.toolBar);
-        windowMenu->setIcon(QIcon(Core::Constants::ICON_PILL));     
+		Core::ICore *core = Core::ICore::instance();
+		Core::IMenuManager *menuManager = core->menuManager();
+		windowMenu = menuManager->menuBar()->addMenu("Window");  
         updateWindowsList();
-        _ui.toolBar->addAction(windowMenu->menuAction());
         connect(windowMenu, SIGNAL(aboutToShow()), this, SLOT(updateWindowsList()));
 
 		// Undo, Redo actions
 		// -----------------------------
-		Core::ICore *core = Core::ICore::instance();
-		Core::IMenuManager *menuManager = core->menuManager();
 		QAction* undoAction = menuManager->action(Core::Constants::UNDO);
         if (undoAction != 0)
                 _ui.toolBar->addAction(undoAction);
@@ -147,10 +146,15 @@ void CMainWindow::updateToolbar(QMdiSubWindow *window)
     if(_ui.mdiArea->subWindowList().size() > 0)
     if(QString(window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
     {
-        QAction *insertRowAct = windowMenu->addAction("Insert new row");
-        connect(insertRowAct, SIGNAL(triggered()), window, SLOT(insertRow())); 
-        QAction *deleteRowAct = windowMenu->addAction("Delete row");
+		//setContextMenuPolicy(Qt::ActionsContextMenu);
+        QAction *insertRowAct = new QAction("Insert new row", this);
+        connect(insertRowAct, SIGNAL(triggered()), window, SLOT(insertRow()));
+		//addAction(insertRowAct);
+		windowMenu->addAction(insertRowAct);
+        QAction *deleteRowAct = new QAction("Delete row", this);
         connect(deleteRowAct, SIGNAL(triggered()), window, SLOT(deleteRow())); 
+		//addAction(deleteRowAct);
+		windowMenu->addAction(deleteRowAct);
         
     }
 }
@@ -167,7 +171,7 @@ void CMainWindow::setActiveSubWindow(QWidget* window)
 
 void CMainWindow::activeSubWindowChanged()
 {
-	//TODO: nothing to be done here atm
+	
 }
 
 void CMainWindow::updateWindowsList()
@@ -187,10 +191,11 @@ void CMainWindow::updateWindowsList()
                 } else {
                         action_text = tr("%1 %2").arg(i + 1).arg(window_file);
                 }
-                QAction *action  = windowMenu->addAction(action_text);
+				QAction *action = new QAction(action_text, this);
                 action->setCheckable(true);
                 action->setChecked(subWindows.at(i) == current_window);
-                connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));             
+                connect(action, SIGNAL(triggered()), windowMapper, SLOT(map())); 
+				windowMenu->addAction(action);
                 windowMapper->setMapping(action, subWindows.at(i));
         }    
 }
@@ -589,7 +594,35 @@ bool CMainWindow::isPhraseEditor(QString filename)
 
 bool CCoreListener::closeMainWindow() const
 {
-    return true;
+    Q_FOREACH(QMdiSubWindow *subWindow, m_MainWindow->_ui.mdiArea->subWindowList())
+    {
+		CEditor *currentEditor = qobject_cast<CEditor*>(subWindow);
+		if(subWindow->isWindowModified())
+		{
+			QMessageBox msgBox;
+			msgBox.setText(tr("The document has been modified ( %1 ).").arg(currentEditor->windowFilePath()));
+			msgBox.setInformativeText("Do you want to save your changes?");
+			msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+			msgBox.setDefaultButton(QMessageBox::Save);
+			int ret = msgBox.exec();
+			switch (ret) 
+			{
+                case QMessageBox::Save:
+                    currentEditor->save();
+					return true;
+                    break;
+                case QMessageBox::Discard:
+					return true;
+                    break;
+                case QMessageBox::Cancel:
+                    return false;
+                    break;
+                default:
+                    break;
+			}
+		}
+
+    }
 }
 
 } /* namespace Plugin */

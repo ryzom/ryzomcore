@@ -62,8 +62,9 @@ public:
         CMainWindow(QWidget *parent = 0);
         virtual ~CMainWindow() {}
         QUndoStack *m_undoStack;
-private:  
-        Ui::CMainWindow _ui;        
+public:
+		Ui::CMainWindow _ui;
+private:          
         // actions
         QAction *openAct;
         QAction *saveAct;
@@ -111,11 +112,18 @@ class CCoreListener : public Core::ICoreListener
 {
 	Q_OBJECT
 public:
-	CCoreListener(QObject *parent = 0): ICoreListener(parent) {}
-	virtual ~CCoreListener() {}
+	CCoreListener(CMainWindow* mainWindow, QObject *parent = 0): ICoreListener(parent) 
+	{
+		m_MainWindow = mainWindow;
+	}
 
+	virtual ~CCoreListener() {}
 	virtual bool closeMainWindow() const;
+
+public:
+	CMainWindow *m_MainWindow;
 };
+
 
 
 } // namespace Plugin

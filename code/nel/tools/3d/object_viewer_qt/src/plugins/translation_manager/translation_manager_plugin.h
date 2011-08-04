@@ -82,9 +82,9 @@ class CTranslationManagerContext: public Core::IContext
 {
 	Q_OBJECT
 public:
-	CTranslationManagerContext(QObject *parent = 0): IContext(parent)
+	CTranslationManagerContext(CMainWindow* mainWindow, QObject *parent = 0): IContext(parent)
 	{
-		m_MainWindow = new CMainWindow();
+		m_MainWindow = mainWindow;
 	}
 
 	virtual ~CTranslationManagerContext() {}
