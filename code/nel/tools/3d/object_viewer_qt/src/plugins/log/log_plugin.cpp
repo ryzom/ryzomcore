@@ -103,7 +103,7 @@ namespace Plugin
 
 	QString CLogPlugin::name() const
 	{
-		return "NeL Log";
+		return "LogPlugin";
 	}
 
 	QString CLogPlugin::version() const

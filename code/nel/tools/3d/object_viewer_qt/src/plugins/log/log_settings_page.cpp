@@ -99,7 +99,16 @@ namespace Plugin
 		m_info = m_ui.infoCheck->isChecked();
 
 		writeSettings();
-		m_logPlugin->setDisplayers();
+		ExtensionSystem::IPluginManager *p = Core::ICore::instance()->pluginManager();
+		ExtensionSystem::IPluginSpec *spec = p->pluginByName("LogPlugin");
+		
+		if(spec)
+		{
+			ExtensionSystem::IPlugin *plugin = spec->plugin();
+			CLogPlugin* lp = dynamic_cast<CLogPlugin*>(plugin);
+			if (lp)
+				lp->setDisplayers();
+		}
 	}
 
 	void CLogSettingsPage::readSettings()
