@@ -11641,11 +11641,33 @@ bool CCharacter::processMissionEventList( std::list< CMissionEvent* > & eventLis
 			TAIAlias mission = eventSpe.Mission;
 			TAIAlias giver = eventSpe.Giver;
 			TAIAlias mainMission = eventSpe.MainMission;
+			bool missionForGuild = eventSpe.Guild;
 
 			// add mission event are always allocated on heap
 			delete ( CMissionEvent *) ( eventList.front() );
 			eventList.pop_front();
-			CMissionManager::getInstance()->instanciateMission(this, mission, giver ,eventList, mainMission);
+
+			// If the mission is not for guild members we just instanciate it
+			if (!missionForGuild)
+				CMissionManager::getInstance()->instanciateMission(this, mission, giver ,eventList, mainMission);
+			else
+			{
+				// We find the guild and each guild members and we instanciate the mission for them
+				if (guild)
+				{
+					for ( std::map<EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::iterator it = guild->getMembersBegin();
+						it != guild->getMembersEnd();++it )
+					{
+						CCharacter * guildUser = PlayerManager.getChar( it->first );
+						if ( !guildUser )
+						{
+							nlwarning( "<MISSIONS>cant find user %s", it->first.toString().c_str() );
+							continue;
+						}
+						CMissionManager::getInstance()->instanciateMission(guildUser, mission, giver ,eventList, mainMission);
+					}
+				}
+			}
 		}
 		// event may have been processed during instanciateMission
 		if ( eventList.empty() )
@@ -11667,7 +11689,7 @@ bool CCharacter::processMissionEventList( std::list< CMissionEvent* > & eventLis
 		}
 
 		// THIRD - Check with guild missions (if event not already processed and char belongs to a guild)
-		if (!eventProcessed && (event.Restriction != CMissionEvent::NoGroup))
+		if (!eventProcessed)// && (event.Restriction != CMissionEvent::NoGroup))
 		{
 			if (guild != NULL)
 				eventProcessed = guild->processGuildMissionEvent(eventList, alias);

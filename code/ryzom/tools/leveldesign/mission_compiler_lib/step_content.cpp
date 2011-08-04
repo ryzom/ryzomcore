@@ -254,6 +254,7 @@ class CActionSpawnMission : public IStepContent
 protected:
 	string	_MissionName;
 	string	_GiverName;
+	bool	_Guild;
 private:
 	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
@@ -268,17 +269,29 @@ public:
 		if (_GiverName.empty())
 		{
 			throw EParseException(prim, "giver_name is empty !");
-		}	
+		}
+
+		_Guild = md.getProperty(prim, "guild", false, true) == "true";
+		// Check: if _Guild is true then check if we are in a guild mission
+		if (_Guild && !md.isGuildMission())
+		{
+			string err = toString("primitive(%s): 'guild' option true 1 for non guild mission.", prim->getName().c_str());
+			throw EParseException(prim, err.c_str());
+		}
 	}
 	
 	string genCode(CMissionData &md)
 	{
+		string ret = "";
 		if (!_MissionName.empty())
-			return "spawn_mission : " + _MissionName + " : " + _GiverName + NL;
-		else
-			return string();
+		{
+			ret =  "spawn_mission : " + _MissionName + " : " + _GiverName;
+			if (_Guild)
+				ret += " : guild";
+			ret += NL;
+		}
+		return ret;
 	}
-	
 };
 REGISTER_STEP_CONTENT(CActionSpawnMission, "spawn_mission");
 

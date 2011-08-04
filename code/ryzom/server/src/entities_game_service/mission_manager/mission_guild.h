@@ -32,7 +32,7 @@ public:
 
 	CMissionGuild() : _Chained(false) { }
 
-	inline void setGuild( uint16 guildId );
+	inline void setGuild( uint32 guildId );
 	/// override
 	void updateUsersJournalEntry();
 	/// override
@@ -59,7 +59,7 @@ private:
 	bool _Chained;
 };
 
-void CMissionGuild::setGuild( uint16 guildId )
+void CMissionGuild::setGuild( uint32 guildId )
 {
 	_GuildId = guildId;
 }

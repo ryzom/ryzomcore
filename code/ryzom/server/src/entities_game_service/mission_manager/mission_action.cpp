@@ -4053,15 +4053,16 @@ protected:
 
 	TAIAlias	Mission;	
 	TAIAlias	NPCOwner;	// NPC giver the mission have to be attached at spawn time
+	bool		Guild;
 
 protected:
 
 	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
 	{
 		_SourceLine = line;
-		if ( script.size() != 3 )
+		if ( script.size() != 3 && script.size() != 4)
 		{
-			MISLOGSYNTAXERROR("<mission_name> : <giver_name>");
+			MISLOGSYNTAXERROR("<mission_name> : <giver_name> [: guild]");
 			return false;
 		}
 		string name = CMissionParser::getNoBlankString( script[1] );
@@ -4094,6 +4095,17 @@ protected:
 		if (vRet.size() > 0)
 			NPCOwner = vRet[0];
 
+		// We check for the guild option
+		Guild = false;
+		for (std::vector< std::string >::const_iterator it = script.begin(); it != script.end(); ++it)
+		{
+			if (CMissionParser::getNoBlankString(*it) == "guild")
+			{
+				Guild = true;
+				break;
+			}
+		}
+
 		return true;
 	}
 
@@ -4104,13 +4116,13 @@ protected:
 		{
 			CAIAliasTranslator::getInstance()->getNPCNameFromAlias(instance->getGiver(), sDebugBotName);
 			nlassert(instance);
-			CMissionEventAddMission * event = new CMissionEventAddMission( instance->getGiver(), Mission, mainMission );
+			CMissionEventAddMission * event = new CMissionEventAddMission( instance->getGiver(), Mission, mainMission, Guild );
 			eventList.push_back( event );
 		}
 		else
 		{
 			CAIAliasTranslator::getInstance()->getNPCNameFromAlias(NPCOwner, sDebugBotName);
-			CMissionEventAddMission * event = new CMissionEventAddMission( NPCOwner, Mission, mainMission );
+			CMissionEventAddMission * event = new CMissionEventAddMission( NPCOwner, Mission, mainMission, Guild );
 			eventList.push_back( event );
 		}
 		LOGMISSIONACTION("spawn_mission bot:" + sDebugBotName + " newmiss:" + CPrimitivesParser::aliasToString(Mission)

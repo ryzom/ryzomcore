@@ -707,6 +707,7 @@
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="spawn_mission : $mission_name$ : $giver_name$"/>
 		<PARAMETER NAME="mission_name" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="giver_name" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="guild" TYPE="boolean" VISIBLE="true" />
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="encyclo_unlock" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">

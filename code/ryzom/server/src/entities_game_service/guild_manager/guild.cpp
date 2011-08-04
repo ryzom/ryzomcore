@@ -795,7 +795,7 @@ bool CGuild::processGuildMissionStepEvent(std::list< CMissionEvent*> & eventList
 		return false;
 	}
 	// I don't know if i should pass _EId to this function
-	CMissionEvent::TResult result = mission->processEvent( TheDataset.getDataSetRow( _EId) ,eventList,stepIndex );
+	CMissionEvent::TResult result = mission->processEvent(TheDataset.getDataSetRow(getHighestGradeOnlineUser()) /*TheDataset.getDataSetRow( _EId)*/ ,eventList,stepIndex );
 	if ( result == CMissionEvent::Nothing )
 		return false;
 	else if ( result == CMissionEvent::MissionFailed )

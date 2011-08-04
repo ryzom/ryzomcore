@@ -1165,7 +1165,17 @@ class CMissionStepDoMissions : public IMissionStepTemplate
 		for ( uint i = 0; i < subs.size(); i++ )
 		{
 			std::vector< std::string > params;
-			NLMISC::splitString( subs[i]," \t", params );
+			//NLMISC::splitString( subs[i]," \t", params );
+			subs[i] = CMissionParser::getNoBlankString(subs[i]);
+			std::size_t pos = subs[i].find_first_of(" \t");
+			std::string str = subs[i].substr(0, pos);
+			params.push_back(str);
+			if (pos != std::string::npos)
+				str = subs[i].substr(pos + 1);
+			else
+				str = "";
+			params.push_back(str);
+			//std::size_t pos = _Missions[i].find_first_of(" \t");
 			_Missions[i].Mission = CMissionParser::getNoBlankString( params[0] );
 			if (params.size() > 1)
 				NLMISC::fromString(params[1], _Missions[i].NbNeedCompletion);
