@@ -1,5 +1,4 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -61,6 +60,7 @@ public:
 private:
 
 	int m_textureSize;
+	QPixmap *m_errorPixmap;
 	QMap<QString, QPixmap *> m_pixmapMap;
 };
 

@@ -27,6 +27,7 @@
 
 // Qt includes
 #include <QtCore/QDir>
+#include <QtGui/QPainter>
 #include <QtGui/QMessageBox>
 #include <QtGui/QApplication>
 #include <QtGui/QProgressDialog>
@@ -35,12 +36,23 @@ namespace LandscapeEditor
 {
 
 PixmapDatabase::PixmapDatabase(int textureSize)
-	: m_textureSize(textureSize)
+	: m_textureSize(textureSize),
+	  m_errorPixmap(0)
 {
+	m_errorPixmap = new QPixmap(QSize(m_textureSize, m_textureSize));
+	QPainter painter(m_errorPixmap);
+	painter.setRenderHint(QPainter::Antialiasing, true);
+	painter.fillRect(m_errorPixmap->rect(), QBrush(QColor(Qt::black)));
+	painter.setFont(QFont("Helvetica [Cronyx]", 14));
+	painter.setPen(QPen(Qt::red, 2, Qt::SolidLine));
+	painter.drawText(m_errorPixmap->rect(), Qt::AlignCenter | Qt::TextWordWrap,
+					 QObject::tr("Pixmap and LIGO files not found. Set the correct data path and reload landscape."));
+	painter.end();
 }
 
 PixmapDatabase::~PixmapDatabase()
 {
+	delete m_errorPixmap;
 	reset();
 }
 
@@ -73,9 +85,19 @@ bool PixmapDatabase::loadPixmaps(const QString &zonePath, NLLIGO::CZoneBank &zon
 		if (pixmap->isNull())
 		{
 			// Generate filled pixmap
+			QPixmap *emptyPixmap = new QPixmap(QSize(sizeX * m_textureSize, sizeY * m_textureSize));
+			QPainter painter(emptyPixmap);
+			painter.setRenderHint(QPainter::Antialiasing, true);
+			painter.fillRect(emptyPixmap->rect(), QBrush(QColor(Qt::black)));
+			painter.setFont(QFont("Helvetica [Cronyx]", 18));
+			painter.setPen(QPen(Qt::red, 2, Qt::SolidLine));
+			painter.drawText(emptyPixmap->rect(), Qt::AlignCenter, QObject::tr("Pixmap not found"));
+			painter.end();
+			delete pixmap;
+			m_pixmapMap.insert(zonePixmapName, emptyPixmap);
 		}
 		// All pixmaps must be have same size
-		if (pixmap->width() != sizeX * m_textureSize)
+		else if (pixmap->width() != sizeX * m_textureSize)
 		{
 			QPixmap *scaledPixmap = new QPixmap(pixmap->scaled(sizeX * m_textureSize, sizeY * m_textureSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 			delete pixmap;
@@ -114,7 +136,7 @@ QStringList PixmapDatabase::listPixmaps() const
 
 QPixmap *PixmapDatabase::pixmap(const QString &zoneName) const
 {
-	QPixmap *result = 0;
+	QPixmap *result = m_errorPixmap;
 	if (!m_pixmapMap.contains(zoneName))
 		nlwarning("QPixmap %s not found", zoneName.toStdString().c_str());
 	else

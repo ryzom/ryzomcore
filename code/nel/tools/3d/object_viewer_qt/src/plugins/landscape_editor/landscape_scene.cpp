@@ -1,5 +1,4 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -100,14 +99,15 @@ QGraphicsItem *LandscapeScene::createItemZone(const LigoData &data, const ZonePo
 	// Enable bilinear filtering
 	item->setTransformationMode(Qt::SmoothTransformation);
 
-	NLLIGO::CZoneBankElement *zoneBankItem = m_zoneBuilder->getZoneBank().getElementByZoneName(data.zoneName);
+	sint32 sizeX = 1, sizeY = 1;
+	sizeX = float(pixmap->width()) / m_zoneBuilder->pixmapDatabase()->textureSize();
+	sizeY = float(pixmap->width()) / m_zoneBuilder->pixmapDatabase()->textureSize();
 
 	sint32 deltaX = 0, deltaY = 0;
 
 	// Calculate offset for graphics item (for items with size that are larger than 1)
-	if ((zoneBankItem->getSizeX() > 1) || (zoneBankItem->getSizeY() > 1))
+	if ((sizeX > 1) || (sizeY > 1))
 	{
-		sint32 sizeX = zoneBankItem->getSizeX(), sizeY = zoneBankItem->getSizeY();
 		if (data.flip == 0)
 		{
 			switch (data.rot)
@@ -165,6 +165,8 @@ QGraphicsItem *LandscapeScene::createItemZone(const LigoData &data, const ZonePo
 	// for not full item zone
 	item->setZValue(LAYER_ZONES);
 
+	item->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
+
 	return item;
 }
 
@@ -178,6 +180,7 @@ QGraphicsItem *LandscapeScene::createItemEmptyZone(const ZonePosition &zonePos)
 
 	// Get image from pixmap database
 	QPixmap *pixmap = m_zoneBuilder->pixmapDatabase()->pixmap(QString(STRING_UNUSED));
+
 	if (pixmap == 0)
 		return 0;
 
@@ -194,6 +197,8 @@ QGraphicsItem *LandscapeScene::createItemEmptyZone(const ZonePosition &zonePos)
 
 	// for not full item zone
 	item->setZValue(LAYER_EMPTY_ZONES);
+
+	item->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
 
 	return item;
 }

@@ -97,14 +97,15 @@ QGraphicsItem *LandscapeSceneBase::createItemZone(const LigoData &data, const Zo
 	// Enable bilinear filtering
 	item->setTransformationMode(Qt::SmoothTransformation);
 
-	NLLIGO::CZoneBankElement *zoneBankItem = m_zoneBuilderBase->getZoneBank().getElementByZoneName(data.zoneName);
+	sint32 sizeX = 1, sizeY = 1;
+	sizeX = float(pixmap->width()) / m_zoneBuilderBase->pixmapDatabase()->textureSize();
+	sizeY = float(pixmap->width()) / m_zoneBuilderBase->pixmapDatabase()->textureSize();
 
 	sint32 deltaX = 0, deltaY = 0;
 
 	// Calculate offset for graphics item (for items with size that are larger than 1)
-	if ((zoneBankItem->getSizeX() > 1) || (zoneBankItem->getSizeY() > 1))
+	if ((sizeX > 1) || (sizeY > 1))
 	{
-		sint32 sizeX = zoneBankItem->getSizeX(), sizeY = zoneBankItem->getSizeY();
 		if (data.flip == 0)
 		{
 			switch (data.rot)
@@ -162,6 +163,8 @@ QGraphicsItem *LandscapeSceneBase::createItemZone(const LigoData &data, const Zo
 	// for not full item zone
 	item->setZValue(LAYER_ZONES);
 
+	item->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
+
 	return item;
 }
 
@@ -191,6 +194,8 @@ QGraphicsItem *LandscapeSceneBase::createItemEmptyZone(const ZonePosition &zoneP
 
 	// for not full item zone
 	item->setZValue(LAYER_EMPTY_ZONES);
+
+	item->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
 
 	return item;
 }
