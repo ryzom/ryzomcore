@@ -16,29 +16,29 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef GENERAL_SETTINGS_PAGE_H
-#define GENERAL_SETTINGS_PAGE_H
+#ifndef MISSION_COMPILER_SETTINGS_PAGE_H
+#define MISSION_COMPILER_SETTINGS_PAGE_H
 
 #include <QtCore/QObject>
 
-#include "ioptions_page.h"
+#include "../core/ioptions_page.h"
 
-#include "ui_general_settings_page.h"
+#include "ui_mission_compiler_settings_page.h"
 
 class QWidget;
 
-namespace Core
+namespace MissionCompiler
 {
 /**
-@class GeneralSettingsPage
+@class MissionCompilerSettingsPage
 */
-class GeneralSettingsPage : public Core::IOptionsPage
+class MissionCompilerSettingsPage : public Core::IOptionsPage
 {
 	Q_OBJECT
 
 public:
-	GeneralSettingsPage(QObject *parent = 0);
-	~GeneralSettingsPage();
+	MissionCompilerSettingsPage(QObject *parent = 0);
+	~MissionCompilerSettingsPage();
 
 	QString id() const;
 	QString trName() const;
@@ -50,25 +50,19 @@ public:
 	void apply();
 	void finish();
 
-	void applyGeneralSettings();
-
 private Q_SLOTS:
-	void changeLanguage(const QString &lang);
-	void setPluginsPath();
-	void setLevelDesignPath();
-	void setAssetsPath();
-	void setPrimitivesPath();
-	void setLigoConfigFile();
+	void addServer();
+	void delServer();
+	void editServer(int row, int column);
 
 private:
 	void readSettings();
 	void writeSettings();
 
-	QPalette m_originalPalette;
 	QWidget *m_page;
-	Ui::GeneralSettingsPage m_ui;
+	Ui::MissionCompilerSettingsPage m_ui;
 };
 
-} // namespace Core
+} // namespace MissionCompiler
 
-#endif // GENERAL_SETTINGS_H
+#endif // MISSION_COMPILER_SETTINGS_PAGE_H
