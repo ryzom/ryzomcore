@@ -384,8 +384,12 @@ void MainWindow::createMenus()
 
 	m_editMenu = m_menuBar->addMenu(tr("&Edit"));
 	QAction *undoAction = m_undoGroup->createUndoAction(this);
+	menuManager()->registerAction(undoAction, Constants::UNDO);
+	undoAction->setIcon(QIcon(Constants::ICON_UNDO));
 	undoAction->setShortcut(QKeySequence::Undo);
 	QAction *redoAction = m_undoGroup->createRedoAction(this);
+	menuManager()->registerAction(redoAction, Constants::REDO);
+	redoAction->setIcon(QIcon(Constants::ICON_REDO));
 	redoAction->setShortcut(QKeySequence::Redo);
 	m_editMenu->addAction(undoAction);
 	m_editMenu->addAction(redoAction);

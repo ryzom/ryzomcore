@@ -57,6 +57,8 @@ private Q_SLOTS:
 	void setPluginsPath();
 	void setLevelDesignPath();
 	void setAssetsPath();
+	void setPrimitivesPath();
+	void setLigoConfigFile();
 
 private:
 	void readSettings();

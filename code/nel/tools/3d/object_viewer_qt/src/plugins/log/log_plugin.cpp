@@ -68,7 +68,7 @@ namespace Plugin
 	{
 		Q_UNUSED(errorString);
 		m_plugMan = pluginManager;
-		m_logSettingsPage = new CLogSettingsPage(this);
+		m_logSettingsPage = new CLogSettingsPage(this, this);
 		addAutoReleasedObject(m_logSettingsPage);
 		return true;
 	}
@@ -103,7 +103,7 @@ namespace Plugin
 
 	QString CLogPlugin::name() const
 	{
-		return "NeL Log";
+		return "LogPlugin";
 	}
 
 	QString CLogPlugin::version() const

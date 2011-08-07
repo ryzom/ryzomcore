@@ -93,6 +93,8 @@ const char * const RECURSIVE_SEARCH_PATHS = "RecursiveSearchPathes";
 const char * const LEVELDESIGN_PATH = "LevelDesignPath";
 const char * const PRIMITIVES_PATH = "D:/Ryzom/ryzom/code/ryzom/common/data_leveldesign/primitives";
 const char * const ASSETS_PATH = "AssetsPath";
+const char * const PRIMITIVES_PATH = "PrimitivesPath";
+const char * const LIGOCONFIG_FILE = "LigoConfigFile";
 const char * const REMAP_EXTENSIONS = "RemapExtensions";
 
 const char * const LOG_SECTION = "LogSettings";
@@ -111,6 +113,8 @@ const char * const ICON_NEW = ":/core/icons/ic_nel_new.png";
 const char * const ICON_SAVE = ":/core/icons/ic_nel_save.png";
 const char * const ICON_SAVE_AS = ":/core/icons/ic_nel_save_as.png";
 const char * const ICON_CRASH = ":/core/icons/ic_nel_crash.png";
+const char * const ICON_UNDO = ":/core/icons/ic_nel_undo.png";
+const char * const ICON_REDO = ":/core/icons/ic_nel_redo.png";
 
 } // namespace Constants
 } // namespace Core
