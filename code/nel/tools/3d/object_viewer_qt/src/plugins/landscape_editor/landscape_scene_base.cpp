@@ -202,13 +202,16 @@ QGraphicsItem *LandscapeSceneBase::createItemEmptyZone(const ZonePosition &zoneP
 
 void LandscapeSceneBase::deleteItemZone(const ZonePosition &zonePos)
 {
-	QGraphicsItem *item = itemAt(zonePos.x * m_cellSize, abs(zonePos.y) * m_cellSize);
-
-	// TODO: delete LAYER_BLACKOUT_NAME
-	if ((item != 0) && (item->data(ZONE_NAME).toString() != QString(LAYER_BLACKOUT_NAME)))
+	QList<QGraphicsItem *> listItems = items(QPointF(zonePos.x * m_cellSize + 10, abs(zonePos.y) * m_cellSize + 10),
+									   Qt::IntersectsItemBoundingRect, Qt::AscendingOrder);
+	Q_FOREACH(QGraphicsItem *item, listItems)
 	{
-		removeItem(item);
-		delete item;
+		if (dynamic_cast<QGraphicsPixmapItem *>(item) != 0)
+		{
+			removeItem(item);
+			delete item;
+			return;
+		}
 	}
 }
 
@@ -246,6 +249,7 @@ void LandscapeSceneBase::delZoneRegion(const NLLIGO::CZoneRegion &zoneRegion)
 	{
 		for (sint32 j = zoneRegion.getMinY(); j <= zoneRegion.getMaxY(); ++j)
 		{
+
 			deleteItemZone(ZonePosition(i, -j, -1));
 		}
 	}
@@ -314,10 +318,13 @@ void LandscapeSceneBase::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 bool LandscapeSceneBase::checkUnderZone(const int posX, const int posY)
 {
-	// TODO: it will not work correctly in world editor
-	QGraphicsItem *item = itemAt((posX * m_cellSize), abs(posY) * m_cellSize);
-	if (item != 0)
-		return true;
+	QList<QGraphicsItem *> listItems = items(QPointF(posX * m_cellSize + 10, abs(posY) * m_cellSize + 10),
+									   Qt::IntersectsItemBoundingRect, Qt::AscendingOrder);
+	Q_FOREACH(QGraphicsItem *item, listItems)
+	{
+		if (dynamic_cast<QGraphicsPixmapItem *>(item) != 0)
+			return true;
+	}
 	return false;
 }
 
