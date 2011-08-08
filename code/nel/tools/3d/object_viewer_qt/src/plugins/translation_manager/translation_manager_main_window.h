@@ -104,6 +104,7 @@ private:
 		CEditorWorksheet* getEditorByWorksheetType(const QString &type);
         bool isWorksheetEditor(QString filename);
 		bool isPhraseEditor(QString filename);
+		
         
         
 };

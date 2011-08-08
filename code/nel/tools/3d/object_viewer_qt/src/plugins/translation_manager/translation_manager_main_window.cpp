@@ -221,7 +221,7 @@ void CMainWindow::open()
 				 new_window->setUndoStack(m_undoStack);
                  new_window->open(file_name);  
                  new_window->activateWindow();
-            }
+            } 
 			// phrase editor
 			if(isPhraseEditor(file_name))
 			{
@@ -592,8 +592,33 @@ bool CMainWindow::isPhraseEditor(QString filename)
 			}
 }
 
+/* void CMainWindow::keyPressEvent(QKeyEvent *event)
+{
+	CEditorPhrase* editor = qobject_cast<CEditorPhrase*>(_ui.mdiArea->currentSubWindow());
+
+    QString chars = event->text(); 
+    int index = editor->text_edit->textCursor().position();
+
+    switch (event->key()) 
+	{ 
+		case Qt::Key_Backspace: 
+            if (index > 0) 				
+                m_undoStack->push(new CUndoPhraseRemoveCommand(index--, 1, editor->text_edit)); 
+            break; 
+        case Qt::Key_Delete: 
+            if (index < editor->text_edit->toPlainText().length()) 
+                m_undoStack->push(new CUndoPhraseRemoveCommand(index, 1, editor->text_edit)); 
+            break; 
+        default: 
+            if (!chars.isEmpty()) 
+                m_undoStack->push(new CUndoPhraseInsertCommand(index, chars, editor->text_edit)); 
+            break; 
+	}
+} */
+
 bool CCoreListener::closeMainWindow() const
 {
+	bool okToClose = true;
     Q_FOREACH(QMdiSubWindow *subWindow, m_MainWindow->_ui.mdiArea->subWindowList())
     {
 		CEditor *currentEditor = qobject_cast<CEditor*>(subWindow);
@@ -605,24 +630,18 @@ bool CCoreListener::closeMainWindow() const
 			msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
 			msgBox.setDefaultButton(QMessageBox::Save);
 			int ret = msgBox.exec();
-			switch (ret) 
-			{
-                case QMessageBox::Save:
-                    currentEditor->save();
-					return true;
-                    break;
-                case QMessageBox::Discard:
-					return true;
-                    break;
-                case QMessageBox::Cancel:
-                    return false;
-                    break;
-                default:
-                    break;
-			}
+            if(ret == QMessageBox::Save)
+            {
+                currentEditor->save();
+            }
+            else if(ret == QMessageBox::Cancel)
+            {
+                okToClose = false;
+                break;
+            }
 		}
-
     }
+	return okToClose;
 }
 
 } /* namespace Plugin */

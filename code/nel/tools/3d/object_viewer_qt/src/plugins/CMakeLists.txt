@@ -7,11 +7,8 @@ ADD_SUBDIRECTORY(disp_sheet_id)
 ADD_SUBDIRECTORY(object_viewer)
 ADD_SUBDIRECTORY(zone_painter)
 ADD_SUBDIRECTORY(georges_editor)
-<<<<<<< local
 ADD_SUBDIRECTORY(translation_manager)
-=======
-
 # Ryzom Specific Plugins
 IF(WITH_RYZOM AND WITH_RYZOM_TOOLS)
   ADD_SUBDIRECTORY(mission_compiler)
-ENDIF(WITH_RYZOM AND WITH_RYZOM_TOOLS)>>>>>>> other
+ENDIF(WITH_RYZOM AND WITH_RYZOM_TOOLS)

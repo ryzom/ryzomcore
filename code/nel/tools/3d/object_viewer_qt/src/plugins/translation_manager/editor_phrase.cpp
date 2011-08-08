@@ -24,6 +24,10 @@
 #include <QtCore/qfileinfo.h>
 #include <QtGui/QMessageBox>
 #include <QtGui/QCloseEvent>
+#include <QtCore/QByteArray>
+#include <QtCore/qtextcodec.h>
+#include <QtGui/QTextCursor>
+
 
 // Project includes
 #include "editor_phrase.h"
@@ -38,24 +42,42 @@ void CEditorPhrase::open(QString filename)
 	vector<STRING_MANAGER::TPhrase> phrases;
 	if(readPhraseFile(filename.toStdString(), phrases, false))
 	{
-		text_edit = new QTextEdit();
+		text_edit = new QTextEdit(this);
+		SyntaxHighlighter *highlighter = new SyntaxHighlighter(text_edit);
+		text_edit->setUndoRedoEnabled(true);
+		text_edit->document()->setUndoRedoEnabled(true);
+		setWidget(text_edit);
 		// read the file content
 		QFile file(filename);
-		QTextStream in(&file);
-		// set the file content to the text edit
-		QString content = in.readAll();
-		text_edit->setText(content); 
+		file.open(QIODevice::ReadOnly | QIODevice::Text);
+		// set the file content to the text edit	
+		QByteArray data = file.readAll();
+		text_edit->append(data);
 		// window settings
 		setCurrentFile(filename);
         setAttribute(Qt::WA_DeleteOnClose);
-        setWidget(text_edit);
 		editor_type = Constants::ED_PHRASE;
 		current_file = filename;
+		connect(text_edit->document(), SIGNAL(contentsChange(int, int, int)), this, SLOT(contentsChangeNow(int position, int charsRemoved, int charsAdded)));
+		connect(text_edit->document(), SIGNAL(contentsChanged()), this, SLOT(docContentsChanged()));
 	} else {
         QErrorMessage error;
         error.showMessage("This file is not a phrase file.");
         error.exec();                             
     }
+}
+
+void CEditorPhrase::contentsChangeNow(int position, int charsRemoved, int charsAdded)
+{
+	if(charsRemoved > 0)
+		current_stack->push(new CUndoPhraseRemoveCommand(position-charsRemoved, charsRemoved, text_edit)); 
+	else if(charsAdded > 0)
+		current_stack->push(new CUndoPhraseInsertCommand(position, text_edit->toPlainText().right(charsAdded), text_edit));
+}
+
+void CEditorPhrase::docContentsChanged()
+{
+	setWindowModified(true);
 }
 
 void CEditorPhrase::activateWindow()
@@ -66,6 +88,7 @@ void CEditorPhrase::activateWindow()
 void CEditorPhrase::save()
 {
 	QFile file(current_file);
+	file.open(QIODevice::WriteOnly | QIODevice::Text);
 	QTextStream out(&file);
 	out<<text_edit->toPlainText();
 	setCurrentFile(current_file);
@@ -74,11 +97,14 @@ void CEditorPhrase::save()
 void CEditorPhrase::saveAs(QString filename)
 {
 	QFile file(filename);
+	file.open(QIODevice::WriteOnly | QIODevice::Text);
 	QTextStream out(&file);
 	out<<text_edit->toPlainText();
 	current_file = filename;
 	setCurrentFile(current_file);
 }
+
+
 
 void CEditorPhrase::closeEvent(QCloseEvent *event)
 {
