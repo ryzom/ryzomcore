@@ -267,8 +267,8 @@ int LandscapeEditorWindow::createLandscape(const QString &fileName)
 		return -1;
 	}
 	ZoneRegionObject *zoneRegion = m_zoneBuilder->zoneRegion(id);
-	m_ui.graphicsView->centerOn(zoneRegion->ligoZoneRegion().getMinX() * m_landscapeScene->cellSize(),
-								abs(zoneRegion->ligoZoneRegion().getMinY()) * m_landscapeScene->cellSize());
+	m_ui.graphicsView->setCenter(QPointF(zoneRegion->ligoZoneRegion().getMinX() * m_landscapeScene->cellSize(),
+										 abs(zoneRegion->ligoZoneRegion().getMinY()) * m_landscapeScene->cellSize()));
 
 	QListWidgetItem *item;
 	if (fileName.isEmpty())

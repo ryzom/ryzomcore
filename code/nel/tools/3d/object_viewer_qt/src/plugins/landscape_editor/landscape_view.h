@@ -35,6 +35,10 @@ public:
 	LandscapeView(QWidget *parent = 0);
 	virtual ~LandscapeView();
 
+	//Set the current centerpoint in the
+	void setCenter(const QPointF &centerPoint);
+	QPointF getCenter() const;
+
 	bool isVisibleGrid() const;
 
 public Q_SLOTS:
@@ -48,6 +52,7 @@ protected:
 	virtual void mouseMoveEvent(QMouseEvent *event);
 	virtual void mouseReleaseEvent(QMouseEvent *event);
 	virtual void drawForeground(QPainter *painter, const QRectF &rect);
+	virtual void resizeEvent(QResizeEvent *event);
 
 	void drawGrid(QPainter *painter, const QRectF &rect);
 	void drawZoneNames(QPainter *painter, const QRectF &rect);
@@ -56,7 +61,12 @@ private:
 	bool m_visibleGrid, m_visibleText;
 	int m_numSteps, m_maxSteps;
 	int m_cellSize;
-	bool m_moveMouse;
+
+	//Holds the current centerpoint for the view, used for panning and zooming
+	QPointF m_currentCenterPoint;
+
+	//From panning the view
+	QPoint m_lastPanPoint;
 }; /* class LandscapeView */
 
 } /* namespace LandscapeEditor */

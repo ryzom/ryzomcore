@@ -33,8 +33,7 @@ namespace LandscapeEditor
 LandscapeView::LandscapeView(QWidget *parent)
 	: QGraphicsView(parent),
 	  m_visibleGrid(true),
-	  m_visibleText(true),
-	  m_moveMouse(false)
+	  m_visibleText(false)
 {
 	//setDragMode(ScrollHandDrag);
 	setTransformationAnchor(AnchorUnderMouse);
@@ -45,6 +44,9 @@ LandscapeView::LandscapeView(QWidget *parent)
 	m_cellSize = 160;
 	m_numSteps = 0;
 	m_maxSteps = 20;
+
+	//A modified version of centerOn(), handles special cases
+	setCenter(QPointF(500.0, 500.0));
 }
 
 LandscapeView::~LandscapeView()
@@ -70,25 +72,54 @@ void LandscapeView::setVisibleText(bool visible)
 
 void LandscapeView::wheelEvent(QWheelEvent *event)
 {
-	double numDegrees = event->delta() / 8.0;
-	double numSteps = numDegrees / 15.0;
-	double factor = std::pow(1.125, numSteps);
-	if (factor > 1.0)
+	/*	double numDegrees = event->delta() / 8.0;
+		double numSteps = numDegrees / 15.0;
+		double factor = std::pow(1.125, numSteps);
+		if (factor > 1.0)
+		{
+			// check max scale view
+			if (m_numSteps > m_maxSteps)
+				return;
+			++m_numSteps;
+		}
+		else
+		{
+			// check min scale view
+			if (m_numSteps < -m_maxSteps)
+				return;
+			--m_numSteps;
+		}
+		scale(factor, factor);
+		QGraphicsView::wheelEvent(event);*/
+
+	//Get the position of the mouse before scaling, in scene coords
+	QPointF pointBeforeScale(mapToScene(event->pos()));
+
+	//Get the original screen centerpoint
+	QPointF screenCenter = getCenter(); //CurrentCenterPoint; //(visRect.center());
+
+	//Scale the view ie. do the zoom
+	double scaleFactor = 1.15; //How fast we zoom
+	if(event->delta() > 0)
 	{
-		// check max scale view
-		if (m_numSteps > m_maxSteps)
-			return;
-		++m_numSteps;
+		//Zoom in
+		scale(scaleFactor, scaleFactor);
 	}
 	else
 	{
-		// check min scale view
-		if (m_numSteps < -m_maxSteps)
-			return;
-		--m_numSteps;
+		//Zooming out
+		scale(1.0 / scaleFactor, 1.0 / scaleFactor);
 	}
-	scale(factor, factor);
-	QGraphicsView::wheelEvent(event);
+
+	//Get the position after scaling, in scene coords
+	QPointF pointAfterScale(mapToScene(event->pos()));
+
+	//Get the offset of how the screen moved
+	QPointF offset = pointBeforeScale - pointAfterScale;
+
+	//Adjust to the new center for correct zooming
+	QPointF newCenter = screenCenter + offset;
+	setCenter(newCenter);
 }
 
 void LandscapeView::mousePressEvent(QMouseEvent *event)
@@ -96,22 +127,106 @@ void LandscapeView::mousePressEvent(QMouseEvent *event)
 	QGraphicsView::mousePressEvent(event);
 	if (event->button() != Qt::MiddleButton)
 		return;
-	m_moveMouse = true;
-	QApplication::setOverrideCursor(Qt::ClosedHandCursor);
+
+	//For panning the view
+	m_lastPanPoint = event->pos();
+	setCursor(Qt::ClosedHandCursor);
 }
 
 void LandscapeView::mouseMoveEvent(QMouseEvent *event)
 {
-	if (m_moveMouse)
-		translate(0.001, 0.001);
+	if(!m_lastPanPoint.isNull())
+	{
+		//Get how much we panned
+		QPointF delta = mapToScene(m_lastPanPoint) - mapToScene(event->pos());
+		m_lastPanPoint = event->pos();
+
+		//Update the center ie. do the pan
+		setCenter(getCenter() + delta);
+	}
+
 	QGraphicsView::mouseMoveEvent(event);
 }
 
 void LandscapeView::mouseReleaseEvent(QMouseEvent *event)
 {
+	m_lastPanPoint = QPoint();
 	QApplication::restoreOverrideCursor();
-	m_moveMouse = false;
 	QGraphicsView::mouseReleaseEvent(event);
+}
+
+void LandscapeView::resizeEvent(QResizeEvent *event)
+{
+	//Get the rectangle of the visible area in scene coords
+	QRectF visibleArea = mapToScene(rect()).boundingRect();
+	setCenter(visibleArea.center());
+
+	//Call the subclass resize so the scrollbars are updated correctly
+	QGraphicsView::resizeEvent(event);
+}
+
+void LandscapeView::setCenter(const QPointF &centerPoint)
+{
+	//Get the rectangle of the visible area in scene coords
+	QRectF visibleArea = mapToScene(rect()).boundingRect();
+
+	//Get the scene area
+	QRectF sceneBounds = sceneRect();
+
+	double boundX = visibleArea.width() / 2.0;
+	double boundY = visibleArea.height() / 2.0;
+	double boundWidth = sceneBounds.width() - 2.0 * boundX;
+	double boundHeight = sceneBounds.height() - 2.0 * boundY;
+
+	//The max boundary that the centerPoint can be to
+	QRectF bounds(boundX, boundY, boundWidth, boundHeight);
+
+	if(bounds.contains(centerPoint))
+	{
+		//We are within the bounds
+		m_currentCenterPoint = centerPoint;
+	}
+	else
+	{
+		//We need to clamp or use the center of the screen
+		if(visibleArea.contains(sceneBounds))
+		{
+			//Use the center of scene ie. we can see the whole scene
+			m_currentCenterPoint = sceneBounds.center();
+		}
+		else
+		{
+			m_currentCenterPoint = centerPoint;
+
+			//We need to clamp the center. The centerPoint is too large
+			if (centerPoint.x() > bounds.x() + bounds.width())
+			{
+				m_currentCenterPoint.setX(bounds.x() + bounds.width());
+			}
+			else if(centerPoint.x() < bounds.x())
+			{
+				m_currentCenterPoint.setX(bounds.x());
+			}
+
+			if(centerPoint.y() > bounds.y() + bounds.height())
+			{
+				m_currentCenterPoint.setY(bounds.y() + bounds.height());
+			}
+			else if(centerPoint.y() < bounds.y())
+			{
+				m_currentCenterPoint.setY(bounds.y());
+			}
+
+		}
+	}
+
+	//Update the scrollbars
+	centerOn(m_currentCenterPoint);
+}
+
+QPointF LandscapeView::getCenter() const
+{
+	return m_currentCenterPoint;
 }
 
 void LandscapeView::drawForeground(QPainter *painter, const QRectF &rect)
