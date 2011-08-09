@@ -18,6 +18,8 @@
 #include "world_editor_actions.h"
 #include "world_editor_misc.h"
 #include "primitive_item.h"
+#include "world_editor_scene.h"
+#include "world_editor_scene_item.h"
 
 // Lanscape Editor plugin
 #include "../landscape_editor/builder_zone_base.h"
@@ -30,6 +32,7 @@
 #include <nel/misc/path.h>
 #include <nel/ligo/primitive_utils.h>
 #include <nel/ligo/primitive.h>
+#include <nel/ligo/primitive_class.h>
 #include <nel/misc/file.h>
 
 // Qt includes
@@ -37,6 +40,92 @@
 
 namespace WorldEditor
 {
+
+void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *model, WorldEditorScene *scene)
+{
+	PrimitiveNode *node = static_cast<PrimitiveNode *>(primIndex.internalPointer());
+
+	float cellSize = Utils::ligoConfig()->CellSize;
+	if (node != 0)
+	{
+		NLLIGO::IPrimitive *primitive = node->primitive();
+		NLLIGO::CPrimVector *vec = 0;
+		QGraphicsItem *item;
+		switch (node->primitiveClass()->Type)
+		{
+		case NLLIGO::CPrimitiveClass::Point:
+		{
+			vec = primitive->getPrimVector();
+			item = scene->addWorldItemPoint(QPointF(vec->x, -vec->y + cellSize), 0);
+			break;
+		}
+		case NLLIGO::CPrimitiveClass::Path:
+		{
+			QPolygonF polygon;
+			vec = primitive->getPrimVector();
+			int sizeVec = primitive->getNumVector();
+
+			for (int i = 0; i < sizeVec; ++i)
+			{
+				polygon << QPointF(vec->x, -vec->y + cellSize);
+				++vec;
+			}
+
+			item = scene->addWorldItemPath(polygon);
+			break;
+		}
+		case NLLIGO::CPrimitiveClass::Zone:
+		{
+			QPolygonF polygon;
+			vec = primitive->getPrimVector();
+			int sizeVec = primitive->getNumVector();
+
+			for (int i = 0; i < sizeVec; ++i)
+			{
+				polygon << QPointF(vec->x, -vec->y + cellSize);
+				++vec;
+			}
+			item = scene->addWorldItemZone(polygon);
+			break;
+		}
+		}
+
+		node->setGraphicsData(GRAPHICS_DATA_QT2D, item);
+	}
+
+	int count = model->rowCount(primIndex);
+	for (int i = 0; i < count; ++i)
+	{
+		addNewGraphicsItems(primIndex.child(i, 0), model, scene);
+	}
+}
+
+void removeGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *model, WorldEditorScene *scene)
+{
+	PrimitiveNode *node = static_cast<PrimitiveNode *>(primIndex.internalPointer());
+
+	if (node != 0)
+	{
+		switch (node->primitiveClass()->Type)
+		{
+		case NLLIGO::CPrimitiveClass::Point:
+		case NLLIGO::CPrimitiveClass::Path:
+		case NLLIGO::CPrimitiveClass::Zone:
+		{
+			QGraphicsItem *item = static_cast<QGraphicsItem *>(node->graphicsData(GRAPHICS_DATA_QT2D));
+			if (item != 0)
+				delete item;
+			break;
+		}
+		}
+	}
+
+	int count = model->rowCount(primIndex);
+	for (int i = 0; i < count; ++i)
+	{
+		removeGraphicsItems(primIndex.child(i, 0), model, scene);
+	}
+}
 
 CreateWorldCommand::CreateWorldCommand(const QString &fileName, PrimitivesTreeModel *model, QUndoCommand *parent)
 	: QUndoCommand(parent),
@@ -121,9 +210,11 @@ void CreateRootPrimitiveCommand::redo()
 }
 
 
-LoadRootPrimitiveCommand::LoadRootPrimitiveCommand(const QString &fileName, PrimitivesTreeModel *model, QUndoCommand *parent)
+LoadRootPrimitiveCommand::LoadRootPrimitiveCommand(const QString &fileName, WorldEditorScene *scene,
+		PrimitivesTreeModel *model, QUndoCommand *parent)
 	: QUndoCommand(parent),
 	  m_fileName(fileName),
+	  m_scene(scene),
 	  m_model(model)
 {
 	setText("Load primitive file");
@@ -136,6 +227,8 @@ LoadRootPrimitiveCommand::~LoadRootPrimitiveCommand()
 void LoadRootPrimitiveCommand::undo()
 {
 	QModelIndex index = m_model->pathToIndex(m_rootPrimIndex);
+
+	removeGraphicsItems(index, m_model, m_scene);
 
 	RootPrimitiveNode *node = static_cast<RootPrimitiveNode *>(index.internalPointer());
 
@@ -167,6 +260,8 @@ void LoadRootPrimitiveCommand::redo()
 	}
 
 	m_rootPrimIndex = m_model->createRootPrimitiveNode(m_fileName, primitives);
+
+	addNewGraphicsItems(m_model->pathToIndex(m_rootPrimIndex), m_model, m_scene);
 }
 
 AddPrimitiveByClassCommand::AddPrimitiveByClassCommand(const QString &className, const Path &parentIndex,

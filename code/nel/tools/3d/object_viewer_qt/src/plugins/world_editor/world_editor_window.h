@@ -22,6 +22,8 @@
 
 // Qt includes
 #include <QtGui/QUndoStack>
+#include <QtCore/QSignalMapper>
+#include <QtOpenGL/QGLWidget>
 
 namespace LandscapeEditor
 {
@@ -52,6 +54,12 @@ private Q_SLOTS:
 	void saveWorldEditFile();
 	void openProjectSettings();
 
+	void setMode(int value);
+
+protected:
+	virtual void showEvent(QShowEvent *showEvent);
+	virtual void hideEvent(QHideEvent *hideEvent);
+
 private:
 	void createMenus();
 	void createToolBars();
@@ -67,6 +75,8 @@ private:
 	QUndoStack *m_undoStack;
 	WorldEditorScene *m_worldEditorScene;
 	LandscapeEditor::ZoneBuilderBase *m_zoneBuilderBase;
+	QSignalMapper m_modeMapper;
+	QGLWidget *m_oglWidget;
 	Ui::WorldEditorWindow m_ui;
 }; /* class WorldEditorWindow */
 

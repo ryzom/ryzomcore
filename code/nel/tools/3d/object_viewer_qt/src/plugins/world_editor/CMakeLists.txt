@@ -12,11 +12,14 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 SET(OVQT_PLUGIN_WORLD_EDITOR_HDR	world_editor_plugin.h
 					world_editor_window.h
 					world_editor_scene.h
+					world_editor_scene_item.h
 					primitives_model.h
 					primitives_view.h
+					project_settings_dialog.h
 )
 
 SET(OVQT_PLUGIN_WORLD_EDITOR_UIS	world_editor_window.ui
+					project_settings_dialog.ui
 )
 
 SET(OVQT_PLUGIN_WORLD_EDITOR_RCS world_editor.qrc)

@@ -27,7 +27,6 @@
 #include <QtCore/QModelIndex>
 #include <QtCore/QVariant>
 #include <QtCore/QSignalMapper>
-#include <QPersistentModelIndex>
 #include <QtGui/QUndoStack>
 
 namespace LandscapeEditor
@@ -38,6 +37,7 @@ class ZoneBuilderBase;
 namespace WorldEditor
 {
 class PrimitivesTreeModel;
+class WorldEditorScene;
 
 /**
 @class PrimitivesView
@@ -54,6 +54,7 @@ public:
 
 	void setUndoStack(QUndoStack *undoStack);
 	void setZoneBuilder(LandscapeEditor::ZoneBuilderBase *zoneBuilder);
+	void setWorldScene(WorldEditorScene *worldEditorScene);
 	virtual void setModel(PrimitivesTreeModel *model);
 
 private Q_SLOTS:
@@ -92,6 +93,7 @@ private:
 	QAction *m_hideAction;
 
 	QUndoStack *m_undoStack;
+	WorldEditorScene *m_worldEditorScene;
 	LandscapeEditor::ZoneBuilderBase *m_zoneBuilder;
 	PrimitivesTreeModel *m_primitivesTreeModel;
 };

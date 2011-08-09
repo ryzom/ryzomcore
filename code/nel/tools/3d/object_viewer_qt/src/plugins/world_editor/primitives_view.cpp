@@ -40,6 +40,7 @@ namespace WorldEditor
 PrimitivesView::PrimitivesView(QWidget *parent)
 	: QTreeView(parent),
 	  m_undoStack(0),
+	  m_worldEditorScene(0),
 	  m_zoneBuilder(0),
 	  m_primitivesTreeModel(0)
 {
@@ -103,6 +104,11 @@ void PrimitivesView::setZoneBuilder(LandscapeEditor::ZoneBuilderBase *zoneBuilde
 	m_zoneBuilder = zoneBuilder;
 }
 
+void PrimitivesView::setWorldScene(WorldEditorScene *worldEditorScene)
+{
+	m_worldEditorScene = worldEditorScene;
+}
+
 void PrimitivesView::setModel(PrimitivesTreeModel *model)
 {
 	QTreeView::setModel(model);
@@ -127,7 +133,7 @@ void PrimitivesView::loadRootPrimitive()
 		Q_FOREACH(QString fileName, fileNames)
 		{
 			m_lastDir = QFileInfo(fileName).absolutePath();
-			m_undoStack->push(new LoadRootPrimitiveCommand(fileName, m_primitivesTreeModel));
+			m_undoStack->push(new LoadRootPrimitiveCommand(fileName, m_worldEditorScene, m_primitivesTreeModel));
 		}
 
 		if (fileNames.count() > 1)

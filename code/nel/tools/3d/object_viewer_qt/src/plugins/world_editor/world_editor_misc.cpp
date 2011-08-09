@@ -688,5 +688,10 @@ bool recursiveUpdateDefaultValues(NLLIGO::IPrimitive *primitive)
 	return modified;
 }
 
+NLLIGO::CLigoConfig	*ligoConfig()
+{
+	return NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig;
+}
+
 } /* namespace Utils */
 } /* namespace WorldEditor */

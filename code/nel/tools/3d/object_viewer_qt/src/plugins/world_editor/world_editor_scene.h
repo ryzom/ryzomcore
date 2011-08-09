@@ -19,6 +19,7 @@
 
 // Project includes
 #include "world_editor_global.h"
+#include "world_editor_scene_item.h"
 
 #include "../landscape_editor/landscape_scene_base.h"
 
@@ -39,17 +40,56 @@ class WORLD_EDITOR_EXPORT WorldEditorScene : public LandscapeEditor::LandscapeSc
 	Q_OBJECT
 
 public:
+	enum ModeEdit
+	{
+		SelectMode = 0,
+		MoveMode,
+		RotateMode,
+		ScaleMode,
+		TurnMode,
+		RadiusMode
+	};
+
 	WorldEditorScene(int sizeCell = 160, QObject *parent = 0);
 	virtual ~WorldEditorScene();
 
+	QGraphicsItem *addWorldItemPoint(const QPointF &point, const float angle);
+	QGraphicsItem *addWorldItemPath(const QPolygonF &polyline);
+	QGraphicsItem *addWorldItemZone(const QPolygonF &polygon);
+
+	void setModeEdit(WorldEditorScene::ModeEdit mode);
+	WorldEditorScene::ModeEdit editMode() const;
+
+	bool isEnabledEditPoint() const;
+
 public Q_SLOTS:
+	void setEnabledEditPoint(bool enabled);
 
 protected:
-//	virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
-//	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
-//	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
+	virtual void drawForeground(QPainter *painter, const QRectF &rect);
+
+	virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
+	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
+	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
 
 private:
+
+	QRectF calcBoundingRect(const QList<QGraphicsItem *> &listItems);
+	QPainterPath calcBoundingShape(const QList<QGraphicsItem *> &listItems);
+	void updateSelectedItems(bool value);
+
+	void updatePickSelection(const QPointF &point);
+
+	QPen m_pen;
+	QBrush m_brush;
+
+	QRectF m_selectionArea;
+	qreal m_firstPickX, m_firstPickY;
+	QList<QGraphicsItem *> m_selectedItems;
+	bool m_editedSelectedItems, m_firstSelection;
+	uint m_lastPickedPrimitive;
+	ModeEdit m_mode;
+	bool m_editMode;
 };
 
 } /* namespace WorldEditor */

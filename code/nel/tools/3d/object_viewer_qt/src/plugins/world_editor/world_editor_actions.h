@@ -34,6 +34,10 @@ class ZoneBuilderBase;
 
 namespace WorldEditor
 {
+class WorldEditorScene;
+
+void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *model, WorldEditorScene *scene);
+void removeGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *model, WorldEditorScene *scene);
 
 /**
 @class CreateWorldCommand
@@ -100,7 +104,8 @@ private:
 class LoadRootPrimitiveCommand: public QUndoCommand
 {
 public:
-	LoadRootPrimitiveCommand(const QString &fileName, PrimitivesTreeModel *model, QUndoCommand *parent = 0);
+	LoadRootPrimitiveCommand(const QString &fileName, WorldEditorScene *scene,
+							 PrimitivesTreeModel *model, QUndoCommand *parent = 0);
 	virtual ~LoadRootPrimitiveCommand();
 
 	virtual void undo();
@@ -109,6 +114,7 @@ private:
 
 	Path m_rootPrimIndex;
 	const QString m_fileName;
+	WorldEditorScene *const m_scene;
 	PrimitivesTreeModel *const m_model;
 };
 

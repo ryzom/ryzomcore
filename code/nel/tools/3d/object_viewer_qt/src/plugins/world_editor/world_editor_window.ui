@@ -21,14 +21,26 @@
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <widget class="LandscapeEditor::LandscapeView" name="graphicsView">
+      <property name="interactive">
+       <bool>true</bool>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+      </property>
       <property name="dragMode">
-       <enum>QGraphicsView::RubberBandDrag</enum>
+       <enum>QGraphicsView::NoDrag</enum>
       </property>
       <property name="transformationAnchor">
        <enum>QGraphicsView::AnchorUnderMouse</enum>
       </property>
       <property name="resizeAnchor">
        <enum>QGraphicsView::AnchorUnderMouse</enum>
+      </property>
+      <property name="viewportUpdateMode">
+       <enum>QGraphicsView::BoundingRectViewportUpdate</enum>
+      </property>
+      <property name="optimizationFlags">
+       <set>QGraphicsView::DontAdjustForAntialiasing|QGraphicsView::DontClipPainter</set>
       </property>
      </widget>
     </item>
@@ -87,9 +99,6 @@
        <property name="selectionMode">
         <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
-       <property name="animated">
-        <bool>true</bool>
-       </property>
        <attribute name="headerCascadingSectionResizes">
         <bool>true</bool>
        </attribute>
@@ -117,6 +126,8 @@
    <addaction name="visibleDetailsAction"/>
    <addaction name="visibleGridAction"/>
    <addaction name="visibleGridPointsAction"/>
+   <addaction name="separator"/>
+   <addaction name="settingsAction"/>
   </widget>
   <action name="loadPrimitiveAction">
    <property name="text">
@@ -137,18 +148,21 @@
     <string>loadLand</string>
    </property>
   </action>
-  <action name="landSettingsAction">
+  <action name="settingsAction">
    <property name="icon">
     <iconset resource="../landscape_editor/landscape_editor.qrc">
      <normaloff>:/icons/ic_nel_landscape_settings.png</normaloff>:/icons/ic_nel_landscape_settings.png</iconset>
    </property>
    <property name="text">
-    <string>LandSettings</string>
+    <string>Settings</string>
    </property>
   </action>
   <action name="visibleLandAction">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>S/H Land</string>
@@ -158,6 +172,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>S/H Primitives</string>
    </property>
@@ -165,6 +182,9 @@
   <action name="visibleLayersAction">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>S/H Layers</string>
@@ -174,6 +194,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>S/H Details</string>
    </property>
@@ -181,6 +204,9 @@
   <action name="visibleGridAction">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
    </property>
    <property name="icon">
     <iconset resource="../landscape_editor/landscape_editor.qrc">
@@ -193,6 +219,9 @@
   <action name="visibleGridPointsAction">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>S/H Grid points</string>
@@ -260,6 +289,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="world_editor.qrc">
      <normaloff>:/icons/ic_nel_turn.png</normaloff>:/icons/ic_nel_turn.png</iconset>
@@ -272,6 +304,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Radius</string>
    </property>
@@ -280,8 +315,20 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Edit points</string>
+   </property>
+  </action>
+  <action name="projectSettingsAction">
+   <property name="icon">
+    <iconset resource="../landscape_editor/landscape_editor.qrc">
+     <normaloff>:/icons/ic_nel_landscape_settings.png</normaloff>:/icons/ic_nel_landscape_settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Project settings</string>
    </property>
   </action>
  </widget>

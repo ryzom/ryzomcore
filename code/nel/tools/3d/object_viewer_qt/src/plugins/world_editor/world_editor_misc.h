@@ -74,6 +74,8 @@ bool updateDefaultValues(NLLIGO::IPrimitive *primitive);
 
 bool recursiveUpdateDefaultValues(NLLIGO::IPrimitive *primitive);
 
+NLLIGO::CLigoConfig	*ligoConfig();
+
 } /* namespace Utils */
 } /* namespace WorldEditor */
 

@@ -21,6 +21,8 @@
 #include "world_editor_scene.h"
 #include "world_editor_misc.h"
 #include "world_editor_actions.h"
+#include "world_editor_scene_item.h"
+#include "project_settings_dialog.h"
 
 // Core
 #include "../core/icore.h"
@@ -31,14 +33,9 @@
 #include "../landscape_editor/builder_zone_base.h"
 
 // NeL includes
-#include <nel/misc/path.h>
-#include <nel/ligo/primitive_utils.h>
-#include <nel/ligo/primitive.h>
-#include <nel/ligo/ligo_config.h>
 
 // Qt includes
 #include <QtCore/QSettings>
-#include <QtCore/QSignalMapper>
 #include <QtGui/QFileDialog>
 
 namespace WorldEditor
@@ -57,6 +54,7 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 
 	m_worldEditorScene->setZoneBuilder(m_zoneBuilderBase);
 	m_ui.graphicsView->setScene(m_worldEditorScene);
+	m_ui.graphicsView->setVisibleText(false);
 
 	QActionGroup *sceneModeGroup = new QActionGroup(this);
 	sceneModeGroup->addAction(m_ui.selectAction);
@@ -70,20 +68,38 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	m_ui.newWorldEditAction->setIcon(QIcon(Core::Constants::ICON_NEW));
 	m_ui.saveWorldEditAction->setIcon(QIcon(Core::Constants::ICON_SAVE));
 
-	m_primitivesModel = new PrimitivesTreeModel();
+	m_primitivesModel = new PrimitivesTreeModel(this);
 	m_ui.treePrimitivesView->setModel(m_primitivesModel);
 
 	// TODO: ?
 	m_ui.treePrimitivesView->setUndoStack(m_undoStack);
 	m_ui.treePrimitivesView->setZoneBuilder(m_zoneBuilderBase);
+	m_ui.treePrimitivesView->setWorldScene(m_worldEditorScene);
 
 	createMenus();
 	createToolBars();
 	readSettings();
 
+	QSignalMapper *m_modeMapper = new QSignalMapper(this);
+	connect(m_ui.selectAction, SIGNAL(triggered()), m_modeMapper, SLOT(map()));
+	m_modeMapper->setMapping(m_ui.selectAction, 0);
+	connect(m_ui.moveAction, SIGNAL(triggered()), m_modeMapper, SLOT(map()));
+	m_modeMapper->setMapping(m_ui.moveAction, 1);
+	connect(m_ui.rotateAction, SIGNAL(triggered()), m_modeMapper, SLOT(map()));
+	m_modeMapper->setMapping(m_ui.rotateAction, 2);
+	connect(m_ui.scaleAction, SIGNAL(triggered()), m_modeMapper, SLOT(map()));
+	m_modeMapper->setMapping(m_ui.scaleAction, 3);
+	connect(m_ui.turnAction, SIGNAL(triggered()), m_modeMapper, SLOT(map()));
+	m_modeMapper->setMapping(m_ui.turnAction, 4);
+	connect(m_ui.radiusAction, SIGNAL(triggered()), m_modeMapper, SLOT(map()));
+	m_modeMapper->setMapping(m_ui.radiusAction, 5);
+
+	connect(m_modeMapper, SIGNAL(mapped(int)), this, SLOT(setMode(int)));
+	connect(m_ui.pointsAction, SIGNAL(triggered(bool)), m_worldEditorScene, SLOT(setEnabledEditPoint(bool)));
+
+	connect(m_ui.settingsAction, SIGNAL(triggered()), this, SLOT(openProjectSettings()));
 	connect(m_ui.newWorldEditAction, SIGNAL(triggered()), this, SLOT(newWorldEditFile()));
 	connect(m_ui.saveWorldEditAction, SIGNAL(triggered()), this, SLOT(saveWorldEditFile()));
-
 }
 
 WorldEditorWindow::~WorldEditorWindow()
@@ -118,6 +134,7 @@ void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 	Utils::WorldEditList worldEditList;
 	if (!Utils::loadWorldEditFile(fileName.toStdString(), worldEditList))
 	{
+		// TODO: add the message box
 		return;
 	}
 
@@ -139,7 +156,7 @@ void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 			m_undoStack->push(new LoadLandscapeCommand(QString(worldEditList[i].second.c_str()), m_primitivesModel, m_zoneBuilderBase));
 			break;
 		case Utils::PrimitiveType:
-			m_undoStack->push(new LoadRootPrimitiveCommand(QString(worldEditList[i].second.c_str()), m_primitivesModel));
+			m_undoStack->push(new LoadRootPrimitiveCommand(QString(worldEditList[i].second.c_str()), m_worldEditorScene, m_primitivesModel));
 			break;
 		};
 	}
@@ -163,15 +180,55 @@ void WorldEditorWindow::saveWorldEditFile()
 
 void WorldEditorWindow::openProjectSettings()
 {
-	/*
-		LandscapeEditor::ProjectSettingsDialog *dialog = new LandscapeEditor::ProjectSettingsDialog("", this);
-		dialog->show();
-		int ok = dialog->exec();
-		if (ok == QDialog::Accepted)
-		{
-		}
-		delete dialog;
-	*/
+	ProjectSettingsDialog *dialog = new ProjectSettingsDialog(m_zoneBuilderBase->dataPath(), this);
+	dialog->show();
+	int ok = dialog->exec();
+	if (ok == QDialog::Accepted)
+	{
+		m_zoneBuilderBase->init(dialog->dataPath(), true);
+	}
+	delete dialog;
+}
+
+void WorldEditorWindow::setMode(int value)
+{
+	switch (value)
+	{
+	case 0:
+		m_worldEditorScene->setModeEdit(WorldEditorScene::SelectMode);
+		break;
+	case 1:
+		m_worldEditorScene->setModeEdit(WorldEditorScene::MoveMode);
+		break;
+	case 2:
+		m_worldEditorScene->setModeEdit(WorldEditorScene::RotateMode);
+		break;
+	case 3:
+		m_worldEditorScene->setModeEdit(WorldEditorScene::ScaleMode);
+		break;
+	case 4:
+		m_worldEditorScene->setModeEdit(WorldEditorScene::TurnMode);
+		break;
+	case 5:
+		m_worldEditorScene->setModeEdit(WorldEditorScene::RadiusMode);
+		break;
+	}
+}
+
+void WorldEditorWindow::showEvent(QShowEvent *showEvent)
+{
+	QMainWindow::showEvent(showEvent);
+	if (m_oglWidget != 0)
+		m_oglWidget->makeCurrent();
+	//m_statusInfo->show();
+	//m_statusBarTimer->start(100);
+}
+
+void WorldEditorWindow::hideEvent(QHideEvent *hideEvent)
+{
+	QMainWindow::hideEvent(hideEvent);
+	//m_statusInfo->hide();
+	//m_statusBarTimer->stop();
 }
 
 void WorldEditorWindow::createMenus()
@@ -211,6 +268,14 @@ void WorldEditorWindow::readSettings()
 	settings->beginGroup(Constants::WORLD_EDITOR_SECTION);
 	restoreState(settings->value(Constants::WORLD_WINDOW_STATE).toByteArray());
 	restoreGeometry(settings->value(Constants::WORLD_WINDOW_GEOMETRY).toByteArray());
+
+	// Use OpenGL graphics system instead raster graphics system
+	if (settings->value(Constants::WORLD_EDITOR_USE_OPENGL, true).toBool())
+	{
+		m_oglWidget = new QGLWidget(QGLFormat(QGL::DoubleBuffer));
+		m_ui.graphicsView->setViewport(m_oglWidget);
+	}
+
 	settings->endGroup();
 }
 
