@@ -20,14 +20,13 @@
 
 // Project includes
 #include "ui_project_settings_dialog.h"
-#include "landscape_editor_global.h"
 
 // Qt includes
 
 namespace LandscapeEditor
 {
 
-class LANDSCAPE_EDITOR_EXPORT ProjectSettingsDialog: public QDialog
+class ProjectSettingsDialog: public QDialog
 {
 	Q_OBJECT
 

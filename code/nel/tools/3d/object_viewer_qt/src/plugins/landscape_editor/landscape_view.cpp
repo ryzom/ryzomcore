@@ -151,7 +151,7 @@ void LandscapeView::mouseMoveEvent(QMouseEvent *event)
 void LandscapeView::mouseReleaseEvent(QMouseEvent *event)
 {
 	m_lastPanPoint = QPoint();
-	QApplication::restoreOverrideCursor();
+	setCursor(Qt::ArrowCursor);
 	QGraphicsView::mouseReleaseEvent(event);
 }
 

@@ -64,7 +64,6 @@ public Q_SLOTS:
 protected:
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
 	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
-	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
 
 private:
 	bool checkUnderZone(const int posX, const int posY);
@@ -72,7 +71,6 @@ private:
 	int m_cellSize;
 	qreal m_mouseX, m_mouseY;
 	sint32 m_posX, m_posY;
-	Qt::MouseButton m_mouseButton;
 	ZoneBuilderBase *m_zoneBuilderBase;
 };
 

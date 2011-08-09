@@ -206,7 +206,7 @@ void LandscapeSceneBase::deleteItemZone(const ZonePosition &zonePos)
 									   Qt::IntersectsItemBoundingRect, Qt::AscendingOrder);
 	Q_FOREACH(QGraphicsItem *item, listItems)
 	{
-		if (dynamic_cast<QGraphicsPixmapItem *>(item) != 0)
+		if (qgraphicsitem_cast<QGraphicsPixmapItem *>(item) != 0)
 		{
 			removeItem(item);
 			delete item;
@@ -295,8 +295,6 @@ void LandscapeSceneBase::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 	qreal y = mouseEvent->scenePos().y();
 	m_posX = sint32(floor(x / m_cellSize));
 	m_posY = sint32(-floor(y / m_cellSize));
-
-	m_mouseButton = mouseEvent->button();
 }
 
 void LandscapeSceneBase::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
@@ -310,20 +308,22 @@ void LandscapeSceneBase::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 	QGraphicsScene::mouseMoveEvent(mouseEvent);
 }
 
-void LandscapeSceneBase::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
-{
-	QGraphicsScene::mouseReleaseEvent(mouseEvent);
-	m_mouseButton = Qt::NoButton;
-}
-
 bool LandscapeSceneBase::checkUnderZone(const int posX, const int posY)
 {
-	QList<QGraphicsItem *> listItems = items(QPointF(posX * m_cellSize + 10, abs(posY) * m_cellSize + 10),
-									   Qt::IntersectsItemBoundingRect, Qt::AscendingOrder);
+	// TODO: Why crash program?
+	// QList<QGraphicsItem *> listItems = items(QPointF(posX * m_cellSize + 10, abs(posY) * m_cellSize + 10),
+	//									   Qt::IntersectsItemBoundingRect, Qt::AscendingOrder);
+
+	QList<QGraphicsItem *> listItems = items();
+
+	QPointF point(posX, abs(posY));
 	Q_FOREACH(QGraphicsItem *item, listItems)
 	{
-		if (dynamic_cast<QGraphicsPixmapItem *>(item) != 0)
-			return true;
+		if (item->pos() == point)
+		{
+			if (qgraphicsitem_cast<QGraphicsPixmapItem *>(item) != 0)
+				return true;
+		}
 	}
 	return false;
 }
