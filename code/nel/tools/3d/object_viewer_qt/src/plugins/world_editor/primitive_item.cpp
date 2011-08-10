@@ -132,16 +132,6 @@ void Node::setData(int key, const QVariant &data)
 	m_data[key] = data;
 }
 
-void Node::setGraphicsData(int key, void *pointerToData)
-{
-	m_graphicsData[key] = pointerToData;
-}
-
-void *Node::graphicsData(int key) const
-{
-	return m_graphicsData[key];
-}
-
 Node *Node::parent()
 {
 	return m_parent;

@@ -35,9 +35,6 @@ class RootPrimitiveNode;
 class LandscapeNode;
 class PrimitiveNode;
 
-const int GRAPHICS_DATA_QT2D = 0;
-const int GRAPHICS_DATA_NEL3D = 1;
-
 /*
 @class Node
 @brief
@@ -93,10 +90,6 @@ public:
 	/// Return this node's custom data for the key key as a QVariant.
 	QVariant data(int key) const;
 
-	void setGraphicsData(int key, void *pointerToData);
-
-	void *graphicsData(int key) const;
-
 	/// Return a type this node.
 	virtual NodeType type() const;
 
@@ -106,7 +99,6 @@ private:
 	Node *m_parent;
 	QList<Node *> m_children;
 	QHash<int, QVariant> m_data;
-	QHash<int, void *> m_graphicsData;
 };
 
 /*
@@ -182,5 +174,7 @@ private:
 };
 
 } /* namespace WorldEditor */
+
+Q_DECLARE_METATYPE(WorldEditor::Node *)
 
 #endif // PRIMITIVE_ITEM_H

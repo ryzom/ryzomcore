@@ -1,5 +1,4 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -23,6 +22,12 @@ namespace WorldEditor
 namespace Constants
 {
 const char *const WORLD_EDITOR_PLUGIN	= "WorldEditor";
+
+const int USER_TYPE = 65536;
+const int NODE_PERISTENT_INDEX = USER_TYPE + 1;
+const int WORLD_EDITOR_NODE = USER_TYPE + 2;
+const int GRAPHICS_DATA_QT4_2D = USER_TYPE + 3;
+const int GRAPHICS_DATA_NEL3D = USER_TYPE + 4;
 
 //settings
 const char *const WORLD_EDITOR_SECTION = "WorldEditor";

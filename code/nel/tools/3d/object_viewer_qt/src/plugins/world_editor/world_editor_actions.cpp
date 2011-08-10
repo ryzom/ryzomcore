@@ -16,6 +16,7 @@
 
 // Project includes
 #include "world_editor_actions.h"
+#include "world_editor_constants.h"
 #include "world_editor_misc.h"
 #include "primitive_item.h"
 #include "world_editor_scene.h"
@@ -37,6 +38,7 @@
 
 // Qt includes
 #include <QModelIndex>
+#include <QPersistentModelIndex>
 
 namespace WorldEditor
 {
@@ -89,8 +91,13 @@ void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 			break;
 		}
 		}
+		QVariant variantNode;
+		variantNode.setValue<Node *>(node);
+		item->setData(Constants::WORLD_EDITOR_NODE, variantNode);
 
-		node->setGraphicsData(GRAPHICS_DATA_QT2D, item);
+		QVariant graphicsData;
+		graphicsData.setValue<QGraphicsItem *>(item);
+		node->setData(Constants::GRAPHICS_DATA_QT4_2D, graphicsData);
 	}
 
 	int count = model->rowCount(primIndex);
@@ -112,7 +119,7 @@ void removeGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 		case NLLIGO::CPrimitiveClass::Path:
 		case NLLIGO::CPrimitiveClass::Zone:
 		{
-			QGraphicsItem *item = static_cast<QGraphicsItem *>(node->graphicsData(GRAPHICS_DATA_QT2D));
+			QGraphicsItem *item = qvariant_cast<QGraphicsItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
 			if (item != 0)
 				delete item;
 			break;
