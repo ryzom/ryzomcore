@@ -18,6 +18,7 @@
 // Project includes
 #include "world_editor_plugin.h"
 #include "world_editor_window.h"
+#include "world_editor_settings_page.h"
 
 #include "../core/icore.h"
 #include "../core/core_constants.h"
@@ -47,6 +48,10 @@ WorldEditorPlugin::~WorldEditorPlugin()
 bool WorldEditorPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
 	m_plugMan = pluginManager;
+
+	WorldEditorSettingsPage *weSettings = new WorldEditorSettingsPage(this);
+	addAutoReleasedObject(weSettings);
+
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Constants::WORLD_EDITOR_SECTION);
 	m_ligoConfig.CellSize = settings->value(Constants::WORLD_EDITOR_CELL_SIZE, "160").toFloat();

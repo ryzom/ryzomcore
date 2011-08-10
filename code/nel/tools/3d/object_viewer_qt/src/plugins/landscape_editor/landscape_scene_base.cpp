@@ -283,7 +283,7 @@ QString LandscapeSceneBase::zoneNameFromMousePos() const
 			(m_posX < 0) || (m_posX > MAX_SCENE_WIDTH))
 		return "NOT A VALID ZONE";
 
-	return QString("%1_%2%3  %4 %5  ").arg(-m_posY).arg(QChar('A' + (m_posX/26))).
+	return QString("%1_%2%3  %4 %5  ").arg(-m_posY+1).arg(QChar('A' + (m_posX/26))).
 		   arg(QChar('A' + (m_posX%26))).arg(m_mouseX, 0,'f',2).arg(-m_mouseY, 0,'f',2);
 }
 

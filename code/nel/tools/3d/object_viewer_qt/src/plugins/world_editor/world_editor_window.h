@@ -22,6 +22,8 @@
 
 // Qt includes
 #include <QtGui/QUndoStack>
+#include <QtGui/QLabel>
+#include <QtCore/QTimer>
 #include <QtCore/QSignalMapper>
 #include <QtOpenGL/QGLWidget>
 
@@ -55,6 +57,7 @@ private Q_SLOTS:
 	void openProjectSettings();
 
 	void setMode(int value);
+	void updateStatusBar();
 
 protected:
 	virtual void showEvent(QShowEvent *showEvent);
@@ -70,6 +73,9 @@ private:
 	void checkCurrentWorld();
 
 	QString m_lastDir;
+
+	QLabel *m_statusInfo;
+	QTimer *m_statusBarTimer;
 
 	PrimitivesTreeModel *m_primitivesModel;
 	QUndoStack *m_undoStack;

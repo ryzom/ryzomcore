@@ -16,10 +16,12 @@ SET(OVQT_PLUGIN_WORLD_EDITOR_HDR	world_editor_plugin.h
 					primitives_model.h
 					primitives_view.h
 					project_settings_dialog.h
+					world_editor_settings_page.h
 )
 
 SET(OVQT_PLUGIN_WORLD_EDITOR_UIS	world_editor_window.ui
 					project_settings_dialog.ui
+					world_editor_settings_page.ui
 )
 
 SET(OVQT_PLUGIN_WORLD_EDITOR_RCS world_editor.qrc)

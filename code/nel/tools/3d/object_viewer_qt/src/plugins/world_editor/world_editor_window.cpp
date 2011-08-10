@@ -37,6 +37,7 @@
 // Qt includes
 #include <QtCore/QSettings>
 #include <QtGui/QFileDialog>
+#include <QtGui/QStatusBar>
 
 namespace WorldEditor
 {
@@ -54,7 +55,7 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 
 	m_worldEditorScene->setZoneBuilder(m_zoneBuilderBase);
 	m_ui.graphicsView->setScene(m_worldEditorScene);
-	m_ui.graphicsView->setVisibleText(false);
+	//m_ui.graphicsView->setVisibleText(false);
 
 	QActionGroup *sceneModeGroup = new QActionGroup(this);
 	sceneModeGroup->addAction(m_ui.selectAction);
@@ -100,6 +101,14 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	connect(m_ui.settingsAction, SIGNAL(triggered()), this, SLOT(openProjectSettings()));
 	connect(m_ui.newWorldEditAction, SIGNAL(triggered()), this, SLOT(newWorldEditFile()));
 	connect(m_ui.saveWorldEditAction, SIGNAL(triggered()), this, SLOT(saveWorldEditFile()));
+	connect(m_ui.visibleGridAction, SIGNAL(toggled(bool)), m_ui.graphicsView, SLOT(setVisibleGrid(bool)));
+
+	m_statusBarTimer = new QTimer(this);
+	connect(m_statusBarTimer, SIGNAL(timeout()), this, SLOT(updateStatusBar()));
+
+	m_statusInfo = new QLabel(this);
+	m_statusInfo->hide();
+	Core::ICore::instance()->mainWindow()->statusBar()->addPermanentWidget(m_statusInfo);
 }
 
 WorldEditorWindow::~WorldEditorWindow()
@@ -215,20 +224,25 @@ void WorldEditorWindow::setMode(int value)
 	}
 }
 
+void WorldEditorWindow::updateStatusBar()
+{
+	m_statusInfo->setText(m_worldEditorScene->zoneNameFromMousePos());
+}
+
 void WorldEditorWindow::showEvent(QShowEvent *showEvent)
 {
 	QMainWindow::showEvent(showEvent);
 	if (m_oglWidget != 0)
 		m_oglWidget->makeCurrent();
-	//m_statusInfo->show();
-	//m_statusBarTimer->start(100);
+	m_statusInfo->show();
+	m_statusBarTimer->start(100);
 }
 
 void WorldEditorWindow::hideEvent(QHideEvent *hideEvent)
 {
 	QMainWindow::hideEvent(hideEvent);
-	//m_statusInfo->hide();
-	//m_statusBarTimer->stop();
+	m_statusInfo->hide();
+	m_statusBarTimer->stop();
 }
 
 void WorldEditorWindow::createMenus()
