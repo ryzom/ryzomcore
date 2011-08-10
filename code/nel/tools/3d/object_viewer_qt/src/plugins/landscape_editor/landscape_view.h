@@ -59,7 +59,7 @@ protected:
 private:
 
 	bool m_visibleGrid, m_visibleText;
-	int m_numSteps, m_maxSteps;
+	qreal m_maxView, m_minView, m_maxViewText;
 	int m_cellSize;
 
 	//Holds the current centerpoint for the view, used for panning and zooming

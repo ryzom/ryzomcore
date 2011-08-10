@@ -33,17 +33,15 @@ namespace LandscapeEditor
 LandscapeView::LandscapeView(QWidget *parent)
 	: QGraphicsView(parent),
 	  m_visibleGrid(true),
-	  m_visibleText(false)
+	  m_visibleText(true)
 {
-	//setDragMode(ScrollHandDrag);
 	setTransformationAnchor(AnchorUnderMouse);
 	setBackgroundBrush(QBrush(Qt::lightGray));
-	//setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-	//setRenderHints(QPainter::Antialiasing);
-	//setCacheMode(QGraphicsView::CacheBackground);
+
 	m_cellSize = 160;
-	m_numSteps = 0;
-	m_maxSteps = 20;
+	m_maxView = 0.06;
+	m_minView = 32.0;
+	m_maxViewText = 0.6;
 
 	//A modified version of centerOn(), handles special cases
 	setCenter(QPointF(500.0, 500.0));
@@ -72,25 +70,7 @@ void LandscapeView::setVisibleText(bool visible)
 
 void LandscapeView::wheelEvent(QWheelEvent *event)
 {
-	/*	double numDegrees = event->delta() / 8.0;
-		double numSteps = numDegrees / 15.0;
-		double factor = std::pow(1.125, numSteps);
-		if (factor > 1.0)
-		{
-			// check max scale view
-			if (m_numSteps > m_maxSteps)
-				return;
-			++m_numSteps;
-		}
-		else
-		{
-			// check min scale view
-			if (m_numSteps < -m_maxSteps)
-				return;
-			--m_numSteps;
-		}
-		scale(factor, factor);
-		QGraphicsView::wheelEvent(event);*/
+	//nlinfo(QString("%1").arg(transform().m11()).toStdString().c_str());
 
 	//Get the position of the mouse before scaling, in scene coords
 	QPointF pointBeforeScale(mapToScene(event->pos()));
@@ -102,11 +82,16 @@ void LandscapeView::wheelEvent(QWheelEvent *event)
 	double scaleFactor = 1.15; //How fast we zoom
 	if(event->delta() > 0)
 	{
+		if (transform().m11() > m_minView )
+			return;
 		//Zoom in
 		scale(scaleFactor, scaleFactor);
 	}
 	else
 	{
+		if (transform().m11() < m_maxView )
+			return;
+
 		//Zooming out
 		scale(1.0 / scaleFactor, 1.0 / scaleFactor);
 	}
@@ -242,7 +227,7 @@ void LandscapeView::drawForeground(QPainter *painter, const QRectF &rect)
 	if (!m_visibleText)
 		return;
 
-	if (m_numSteps > -m_maxSteps / 4)
+	if (transform().m11() > m_maxViewText)
 	{
 		painter->setPen(QPen(Qt::white, 0.5, Qt::SolidLine));
 		//painter->setFont(QFont("Helvetica [Cronyx]", 12));
