@@ -80,9 +80,10 @@ private:
 
 	void updatePickSelection(const QPointF &point);
 
-	QPen m_pen;
-	QBrush m_brush;
+	QPen m_pen1, m_pen2;
+	QBrush m_brush1, m_brush2;
 
+	QPointF m_firstPick;
 	QRectF m_selectionArea;
 	qreal m_firstPickX, m_firstPickY;
 	QList<QGraphicsItem *> m_selectedItems;

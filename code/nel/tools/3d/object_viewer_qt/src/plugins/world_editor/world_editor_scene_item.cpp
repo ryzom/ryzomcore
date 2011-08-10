@@ -328,6 +328,8 @@ WorldItemPoint::WorldItemPoint(const QPointF &point, const float angle, QGraphic
 {
 	setZValue(WORLD_POINT_LAYER);
 
+	//setFlag(ItemIgnoresTransformations);
+
 	setPos(point);
 
 	m_rect.setCoords(-SIZE_POINT, -SIZE_POINT, SIZE_POINT, SIZE_POINT);

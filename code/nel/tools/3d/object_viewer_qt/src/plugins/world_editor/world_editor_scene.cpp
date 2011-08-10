@@ -38,11 +38,17 @@ WorldEditorScene::WorldEditorScene(int sizeCell, QObject *parent)
 {
 	setItemIndexMethod(NoIndex);
 
-	m_pen.setColor(QColor(50, 255, 155));
-	m_pen.setWidth(0);
+	m_pen1.setColor(QColor(50, 255, 155));
+	m_pen1.setWidth(0);
 
-	m_brush.setColor(QColor(50, 255, 155, 80));
-	m_brush.setStyle(Qt::SolidPattern);
+	m_brush1.setColor(QColor(50, 255, 155, 80));
+	m_brush1.setStyle(Qt::SolidPattern);
+
+	m_pen2.setColor(QColor(100, 0, 255));
+	m_pen2.setWidth(0);
+
+	m_brush2.setColor(QColor(100, 0, 255, 80));
+	m_brush2.setStyle(Qt::SolidPattern);
 }
 
 WorldEditorScene::~WorldEditorScene()
@@ -75,8 +81,6 @@ void WorldEditorScene::setModeEdit(WorldEditorScene::ModeEdit mode)
 	if (mode == WorldEditorScene::SelectMode)
 		m_editedSelectedItems = false;
 
-	m_selectionArea = QRectF();
-
 	m_mode = mode;
 }
 
@@ -101,9 +105,18 @@ void WorldEditorScene::drawForeground(QPainter *painter, const QRectF &rect)
 
 	if ((m_selectionArea.left() != 0) && (m_selectionArea.right() != 0))
 	{
-		painter->setPen(m_pen);
-		painter->setBrush(m_brush);
+		if (m_selectionArea.left() < m_selectionArea.right())
+		{
+			painter->setPen(m_pen1);
+			painter->setBrush(m_brush1);
+		}
+		else
+		{
+			painter->setPen(m_pen2);
+			painter->setBrush(m_brush2);
+		}
 		painter->drawRect(m_selectionArea);
+
 	}
 }
 
@@ -116,6 +129,8 @@ void WorldEditorScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 	if (mouseEvent->button() != Qt::LeftButton)
 		return;
+
+	m_firstPick = mouseEvent->scenePos();
 
 //	if ((!m_editedSelectedItems) && (m_mode != WorldEditorScene::SelectMode))
 	if ((!m_editedSelectedItems && m_selectedItems.isEmpty()) ||
@@ -217,7 +232,7 @@ void WorldEditorScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 	/*m_mouseX = mouseEvent->scenePos().x();
 	m_mouseY = mouseEvent->scenePos().y() - m_cellSize;
 	*/
-	QGraphicsScene::mouseMoveEvent(mouseEvent);
+	LandscapeEditor::LandscapeSceneBase::mouseMoveEvent(mouseEvent);
 }
 
 void WorldEditorScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
@@ -261,12 +276,11 @@ void WorldEditorScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 			updatePickSelection(mouseEvent->scenePos());
 		else
 			m_firstSelection = false;
-	}
-//  Huck for standart selection model
-//	clearSelection();
-//	updateSelectedItems(true);
 
-	QGraphicsScene::mouseReleaseEvent(mouseEvent);
+		m_selectionArea = QRectF();
+	}
+
+	LandscapeEditor::LandscapeSceneBase::mouseReleaseEvent(mouseEvent);
 }
 
 QRectF WorldEditorScene::calcBoundingRect(const QList<QGraphicsItem *> &listItems)
@@ -317,15 +331,23 @@ void WorldEditorScene::updatePickSelection(const QPointF &point)
 
 	QList<QGraphicsItem *> listItems = items(point, Qt::ContainsItemShape,
 									   Qt::AscendingOrder);
-	if (!listItems.isEmpty())
+
+	QList<AbstractWorldItem *> worldItemsItems;
+
+	Q_FOREACH(QGraphicsItem *item, listItems)
+	{
+		AbstractWorldItem *worldItem = qgraphicsitem_cast<AbstractWorldItem *>(item);
+		if (worldItem != 0)
+			worldItemsItems.push_back(worldItem);
+	}
+
+	if (!worldItemsItems.isEmpty())
 	{
 		// Next primitives
 		m_lastPickedPrimitive++;
-		m_lastPickedPrimitive %= listItems.size();
-		QGraphicsItem *selectedItem = listItems.at(m_lastPickedPrimitive);
-		if (qgraphicsitem_cast<AbstractWorldItem *>(selectedItem) != 0)
-			m_selectedItems.push_back(selectedItem);
+		m_lastPickedPrimitive %= worldItemsItems.size();
 
+		m_selectedItems.push_back(worldItemsItems.at(m_lastPickedPrimitive));
 		updateSelectedItems(true);
 	}
 }
