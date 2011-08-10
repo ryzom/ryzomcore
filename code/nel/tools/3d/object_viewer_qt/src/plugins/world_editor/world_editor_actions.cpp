@@ -134,6 +134,24 @@ void removeGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 	}
 }
 
+QList<Path> graphicsItemsToPaths(const QList<QGraphicsItem *> &items, PrimitivesTreeModel *model)
+{
+	QList<Path> result;
+	Q_FOREACH(QGraphicsItem *item, items)
+	{
+		Node *node = qvariant_cast<Node *>(item->data(Constants::WORLD_EDITOR_NODE));
+		result.push_back(model->pathFromNode(node));
+	}
+	return result;
+}
+
+/*
+QList<GraphicsItem *> pathsToGraphicsItems(const QList<Path> &items, PrimitivesTreeModel *model)
+{
+	QList<GraphicsItem *> result;
+}
+*/
+
 CreateWorldCommand::CreateWorldCommand(const QString &fileName, PrimitivesTreeModel *model, QUndoCommand *parent)
 	: QUndoCommand(parent),
 	  m_fileName(fileName),
@@ -323,6 +341,126 @@ void AddPrimitiveByClassCommand::redo()
 	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
 
 	m_newPrimIndex = m_model->createPrimitiveNode(newPrimitive, m_parentIndex);
+}
+
+MoveWorldItemsCommand::MoveWorldItemsCommand(const QList<QGraphicsItem *> &items, const QPointF &offset,
+		PrimitivesTreeModel *model, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	  m_listPaths(graphicsItemsToPaths(items, model)),
+	  m_offset(offset),
+	  m_model(model),
+	  m_firstRun(true)
+{
+	setText("Move item(s)");
+}
+
+MoveWorldItemsCommand::~MoveWorldItemsCommand()
+{
+}
+
+void MoveWorldItemsCommand::undo()
+{
+	for (int i = 0; i < m_listPaths.count(); ++i)
+	{
+		Node *node = m_model->pathToNode(m_listPaths.at(i));
+		QGraphicsItem *item = qvariant_cast<QGraphicsItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+		qgraphicsitem_cast<AbstractWorldItem *>(item)->moveOn(-m_offset);
+	}
+}
+
+void MoveWorldItemsCommand::redo()
+{
+	if (!m_firstRun)
+	{
+		for (int i = 0; i < m_listPaths.count(); ++i)
+		{
+			Node *node = m_model->pathToNode(m_listPaths.at(i));
+			QGraphicsItem *item = qvariant_cast<QGraphicsItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+			qgraphicsitem_cast<AbstractWorldItem *>(item)->moveOn(m_offset);
+		}
+	}
+	m_firstRun = false;
+}
+
+RotateWorldItemsCommand::RotateWorldItemsCommand(const QList<QGraphicsItem *> &items, const qreal &angle,
+		const QPointF &pivot, PrimitivesTreeModel *model, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	  m_listPaths(graphicsItemsToPaths(items, model)),
+	  m_angle(angle),
+	  m_pivot(pivot),
+	  m_model(model),
+	  m_firstRun(true)
+{
+	setText("Rotate item(s)");
+}
+
+RotateWorldItemsCommand::~RotateWorldItemsCommand()
+{
+}
+
+void RotateWorldItemsCommand::undo()
+{
+	for (int i = 0; i < m_listPaths.count(); ++i)
+	{
+		Node *node = m_model->pathToNode(m_listPaths.at(i));
+		QGraphicsItem *item = qvariant_cast<QGraphicsItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+		qgraphicsitem_cast<AbstractWorldItem *>(item)->rotateOn(m_pivot, -m_angle);
+	}
+}
+
+void RotateWorldItemsCommand::redo()
+{
+	if (!m_firstRun)
+	{
+		for (int i = 0; i < m_listPaths.count(); ++i)
+		{
+			Node *node = m_model->pathToNode(m_listPaths.at(i));
+			QGraphicsItem *item = qvariant_cast<QGraphicsItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+			qgraphicsitem_cast<AbstractWorldItem *>(item)->rotateOn(m_pivot, m_angle);
+		}
+	}
+	m_firstRun = false;
+}
+
+ScaleWorldItemsCommand::ScaleWorldItemsCommand(const QList<QGraphicsItem *> &items, const QPointF &factor,
+		const QPointF &pivot, PrimitivesTreeModel *model, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	  m_listPaths(graphicsItemsToPaths(items, model)),
+	  m_factor(factor),
+	  m_pivot(pivot),
+	  m_model(model),
+	  m_firstRun(true)
+{
+	setText("Scale item(s)");
+}
+
+ScaleWorldItemsCommand::~ScaleWorldItemsCommand()
+{
+}
+
+void ScaleWorldItemsCommand::undo()
+{
+	QPointF m_invertFactor(1 / m_factor.x(), 1 / m_factor.y());
+	for (int i = 0; i < m_listPaths.count(); ++i)
+	{
+		Node *node = m_model->pathToNode(m_listPaths.at(i));
+		QGraphicsItem *item = qvariant_cast<QGraphicsItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+		qgraphicsitem_cast<AbstractWorldItem *>(item)->scaleOn(m_pivot, m_invertFactor);
+	}
+}
+
+void ScaleWorldItemsCommand::redo()
+{
+	if (!m_firstRun)
+	{
+		for (int i = 0; i < m_listPaths.count(); ++i)
+		{
+			Node *node = m_model->pathToNode(m_listPaths.at(i));
+			QGraphicsItem *item = qvariant_cast<QGraphicsItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+			qgraphicsitem_cast<AbstractWorldItem *>(item)->scaleOn(m_pivot, m_factor);
+		}
+	}
+	m_firstRun = false;
 }
 
 } /* namespace WorldEditor */

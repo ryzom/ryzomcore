@@ -16,6 +16,8 @@
 
 // Project includes
 #include "world_editor_scene.h"
+#include "world_editor_scene_item.h"
+#include "world_editor_actions.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -29,12 +31,14 @@
 namespace WorldEditor
 {
 
-WorldEditorScene::WorldEditorScene(int sizeCell, QObject *parent)
+WorldEditorScene::WorldEditorScene(int sizeCell, PrimitivesTreeModel *model, QUndoStack *undoStack, QObject *parent)
 	: LandscapeEditor::LandscapeSceneBase(sizeCell, parent),
 	  m_editedSelectedItems(false),
 	  m_lastPickedPrimitive(0),
 	  m_mode(SelectMode),
-	  m_editMode(false)
+	  m_editMode(false),
+	  m_undoStack(undoStack),
+	  m_model(model)
 {
 	setItemIndexMethod(NoIndex);
 
@@ -134,7 +138,7 @@ void WorldEditorScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 //	if ((!m_editedSelectedItems) && (m_mode != WorldEditorScene::SelectMode))
 	if ((!m_editedSelectedItems && m_selectedItems.isEmpty()) ||
-			(!calcBoundingShape(m_selectedItems).contains(mouseEvent->scenePos())))
+			(!calcBoundingRect(m_selectedItems).contains(mouseEvent->scenePos())))
 	{
 		updatePickSelection(mouseEvent->scenePos());
 		m_firstSelection = true;
@@ -190,29 +194,38 @@ void WorldEditorScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 		}
 		case WorldEditorScene::RotateMode:
 		{
-			QRectF pivot = calcBoundingRect(m_selectedItems);
+			QPointF pivot = calcBoundingRect(m_selectedItems).center();
 
 			// Caluculate angle between two line
-			QLineF firstLine(pivot.center(), mouseEvent->lastScenePos());
-			QLineF secondLine(pivot.center(), mouseEvent->scenePos());
+			QLineF firstLine(pivot, mouseEvent->lastScenePos());
+			QLineF secondLine(pivot, mouseEvent->scenePos());
 			qreal angle = secondLine.angleTo(firstLine);
 
 			Q_FOREACH(QGraphicsItem *item, m_selectedItems)
 			{
-				qgraphicsitem_cast<AbstractWorldItem *>(item)->rotateOn(pivot.center(), angle);
+				qgraphicsitem_cast<AbstractWorldItem *>(item)->rotateOn(pivot, angle);
 			}
 			break;
 		}
 		case WorldEditorScene::ScaleMode:
 		{
-			// float scale = (_SelectionMin.x - _SelectionMax.x + _SelectionMax.y - _SelectionMin.y) * SCALE_PER_PIXEL + 1.f;
-			// moveAction->setScale (std::max (0.001f, scale), _MainFrame->getTransformMode ()==CMainFrame::Scale, radius);
-
 			// TODO: perfomance
-			QRectF pivot = calcBoundingRect(m_selectedItems);
+			QPointF pivot = calcBoundingRect(m_selectedItems).center();
+
+			// Calculate scale factor
+			if (offset.x() > 0)
+				offset.setX(1.0 + (offset.x() / 5000));
+			else
+				offset.setX(1.0 / (1.0 + (-offset.x() / 5000)));
+
+			if (offset.y() < 0)
+				offset.setY(1.0 + (-offset.y() / 5000));
+			else
+				offset.setY(1.0 / (1.0 + (offset.y() / 5000)));
+
 			Q_FOREACH(QGraphicsItem *item, m_selectedItems)
 			{
-				qgraphicsitem_cast<AbstractWorldItem *>(item)->scaleOn(pivot.center(), offset);
+				qgraphicsitem_cast<AbstractWorldItem *>(item)->scaleOn(pivot, offset);
 			}
 			break;
 		}
@@ -239,6 +252,51 @@ void WorldEditorScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
 	if (mouseEvent->button() != Qt::LeftButton)
 		return;
+
+	if (m_editedSelectedItems)
+	{
+		switch (m_mode)
+		{
+		case WorldEditorScene::SelectMode:
+			break;
+
+		case WorldEditorScene::MoveMode:
+		{
+			QPointF offset = mouseEvent->scenePos() - m_firstPick;
+
+			m_undoStack->push(new MoveWorldItemsCommand(m_selectedItems, offset, m_model));
+			break;
+		}
+		case WorldEditorScene::RotateMode:
+		{
+			QPointF pivot = calcBoundingRect(m_selectedItems).center();
+
+			// Caluculate angle between two line
+			QLineF firstLine(pivot, m_firstPick);
+			QLineF secondLine(pivot, mouseEvent->scenePos());
+			qreal angle = secondLine.angleTo(firstLine);
+
+			m_undoStack->push(new RotateWorldItemsCommand(m_selectedItems, angle, pivot, m_model));
+			break;
+		}
+		case WorldEditorScene::ScaleMode:
+		{
+			QPointF pivot = calcBoundingRect(m_selectedItems).center();
+			QPointF offset = mouseEvent->scenePos() - m_firstPick;
+
+			// Calculate scale factor
+			offset.setX(1.0 + (offset.x() / 5000));
+			offset.setY(1.0 + (-offset.y() / 5000));
+
+			m_undoStack->push(new ScaleWorldItemsCommand(m_selectedItems, offset, pivot, m_model));
+			break;
+		}
+		case WorldEditorScene::TurnMode:
+			break;
+		case WorldEditorScene::RadiusMode:
+			break;
+		};
+	}
 
 	if ((m_selectionArea.left() != 0) && (m_selectionArea.right() != 0))
 	{

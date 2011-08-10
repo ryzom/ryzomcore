@@ -19,16 +19,17 @@
 
 // Project includes
 #include "world_editor_global.h"
-#include "world_editor_scene_item.h"
 
 #include "../landscape_editor/landscape_scene_base.h"
 
 // NeL includes
 
 // Qt includes
+#include <QtGui/QUndoStack>
 
 namespace WorldEditor
 {
+class PrimitivesTreeModel;
 
 /*
 @class WorldEditorScene
@@ -50,7 +51,8 @@ public:
 		RadiusMode
 	};
 
-	WorldEditorScene(int sizeCell = 160, QObject *parent = 0);
+	WorldEditorScene(int sizeCell, PrimitivesTreeModel *model,
+					 QUndoStack *undoStack, QObject *parent = 0);
 	virtual ~WorldEditorScene();
 
 	QGraphicsItem *addWorldItemPoint(const QPointF &point, const float angle);
@@ -91,6 +93,8 @@ private:
 	uint m_lastPickedPrimitive;
 	ModeEdit m_mode;
 	bool m_editMode;
+	QUndoStack *m_undoStack;
+	PrimitivesTreeModel *m_model;
 };
 
 } /* namespace WorldEditor */

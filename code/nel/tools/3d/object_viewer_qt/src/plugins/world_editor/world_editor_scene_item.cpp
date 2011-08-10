@@ -378,7 +378,7 @@ void WorldItemPoint::rotateOn(const QPointF &pivot, const qreal deltaAngle)
 	setPos(rotatedPolygon.boundingRect().center());
 }
 
-void WorldItemPoint::scaleOn(const QPointF &pivot, const QPointF &offset)
+void WorldItemPoint::scaleOn(const QPointF &pivot, const QPointF &factor)
 {
 	prepareGeometryChange();
 
@@ -389,7 +389,7 @@ void WorldItemPoint::scaleOn(const QPointF &pivot, const QPointF &offset)
 	scaledPolygon.translate(-pivot);
 
 	QTransform trans;
-	trans = trans.scale(1.0 + (offset.x() / 5000), 1.0 + (-offset.y() / 5000));
+	trans = trans.scale(factor.x(), factor.y());
 	scaledPolygon = trans.map(scaledPolygon);
 	scaledPolygon.translate(pivot);
 
@@ -485,7 +485,7 @@ void WorldItemPath::rotateOn(const QPointF &pivot, const qreal deltaAngle)
 	m_polygon.translate(pivot);
 }
 
-void WorldItemPath::scaleOn(const QPointF &pivot, const QPointF &offset)
+void WorldItemPath::scaleOn(const QPointF &pivot, const QPointF &factor)
 {
 	prepareGeometryChange();
 
@@ -493,7 +493,7 @@ void WorldItemPath::scaleOn(const QPointF &pivot, const QPointF &offset)
 	scaledPolygon.translate(-pivot);
 
 	QTransform trans;
-	trans = trans.scale(1.0 + (offset.x() / 5000), 1.0 + (-offset.y() / 5000));
+	trans = trans.scale(factor.x(), factor.y());
 	m_polygon = trans.map(scaledPolygon);
 
 	m_polygon.translate(pivot);
@@ -590,7 +590,7 @@ void WorldItemZone::rotateOn(const QPointF &pivot, const qreal deltaAngle)
 	m_polygon.translate(pivot);
 }
 
-void WorldItemZone::scaleOn(const QPointF &pivot, const QPointF &offset)
+void WorldItemZone::scaleOn(const QPointF &pivot, const QPointF &factor)
 {
 	prepareGeometryChange();
 
@@ -598,7 +598,7 @@ void WorldItemZone::scaleOn(const QPointF &pivot, const QPointF &offset)
 	scaledPolygon.translate(-pivot);
 
 	QTransform trans;
-	trans = trans.scale(1.0 + (offset.x() / 5000), 1.0 + (-offset.y() / 5000));
+	trans = trans.scale(factor.x(), factor.y());
 	m_polygon = trans.map(scaledPolygon);
 
 	m_polygon.translate(pivot);

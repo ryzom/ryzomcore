@@ -148,6 +148,18 @@ Path PrimitivesTreeModel::pathFromIndex(const QModelIndex &index)
 	return path;
 }
 
+Path PrimitivesTreeModel::pathFromNode(Node *node)
+{
+	Node *iter = node;
+	Path path;
+	while(iter != 0)
+	{
+		path.prepend(PathItem(iter->row(), 1));
+		iter = iter->parent();
+	}
+	return path;
+}
+
 QModelIndex PrimitivesTreeModel::pathToIndex(const Path &path)
 {
 	QModelIndex iter;
@@ -156,6 +168,16 @@ QModelIndex PrimitivesTreeModel::pathToIndex(const Path &path)
 		iter = index(path[i].first, path[i].second, iter);
 	}
 	return iter;
+}
+
+Node *PrimitivesTreeModel::pathToNode(const Path &path)
+{
+	Node *node = m_rootNode;
+	for(int i = 1; i < path.size(); i++)
+	{
+		node = node->child(path[i].first);
+	}
+	return node;
 }
 
 void PrimitivesTreeModel::createWorldEditNode(const QString &fileName)

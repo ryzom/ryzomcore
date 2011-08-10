@@ -131,7 +131,7 @@ public:
 	virtual void moveOn(const QPointF &offset) = 0;
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle) = 0;
 	// TODO: add modes: IgnoreAspectRatio, KeepAspectRatio
-	virtual void scaleOn(const QPointF &pivot, const QPointF &offset) = 0;
+	virtual void scaleOn(const QPointF &pivot, const QPointF &factor) = 0;
 	virtual void turnOn(const QPointF &offset) = 0;
 	virtual void radiusOn(const qreal radius) = 0;
 
@@ -152,7 +152,7 @@ public:
 
 	virtual void moveOn(const QPointF &offset);
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle);
-	virtual void scaleOn(const QPointF &pivot, const QPointF &offset);
+	virtual void scaleOn(const QPointF &pivot, const QPointF &factor);
 	virtual void turnOn(const QPointF &offset);
 	virtual void radiusOn(const qreal radius);
 
@@ -188,7 +188,7 @@ public:
 
 	virtual void moveOn(const QPointF &offset);
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle);
-	virtual void scaleOn(const QPointF &pivot, const QPointF &offset);
+	virtual void scaleOn(const QPointF &pivot, const QPointF &factor);
 	virtual void turnOn(const QPointF &offset);
 	virtual void radiusOn(const qreal radius);
 
@@ -216,7 +216,7 @@ public:
 
 	virtual void moveOn(const QPointF &offset);
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle);
-	virtual void scaleOn(const QPointF &pivot, const QPointF &offset);
+	virtual void scaleOn(const QPointF &pivot, const QPointF &factor);
 	virtual void turnOn(const QPointF &offset);
 	virtual void radiusOn(const qreal radius);
 
@@ -233,5 +233,7 @@ protected:
 };
 
 } /* namespace WorldEditor */
+
+Q_DECLARE_METATYPE(WorldEditor::AbstractWorldItem *)
 
 #endif // WORLD_EDITOR_SCENE_ITEM_H

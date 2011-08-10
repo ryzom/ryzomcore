@@ -50,12 +50,20 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	m_ui.setupUi(this);
 	m_undoStack = new QUndoStack(this);
 
-	m_worldEditorScene = new WorldEditorScene(NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig->CellSize, this);
+	m_primitivesModel = new PrimitivesTreeModel(this);
+
+	m_worldEditorScene = new WorldEditorScene(Utils::ligoConfig()->CellSize, m_primitivesModel, m_undoStack, this);
 	m_zoneBuilderBase = new LandscapeEditor::ZoneBuilderBase(m_worldEditorScene);
 
 	m_worldEditorScene->setZoneBuilder(m_zoneBuilderBase);
 	m_ui.graphicsView->setScene(m_worldEditorScene);
-	//m_ui.graphicsView->setVisibleText(false);
+	m_ui.graphicsView->setVisibleText(false);
+
+	m_ui.treePrimitivesView->setModel(m_primitivesModel);
+	// TODO: ?
+	m_ui.treePrimitivesView->setUndoStack(m_undoStack);
+	m_ui.treePrimitivesView->setZoneBuilder(m_zoneBuilderBase);
+	m_ui.treePrimitivesView->setWorldScene(m_worldEditorScene);
 
 	QActionGroup *sceneModeGroup = new QActionGroup(this);
 	sceneModeGroup->addAction(m_ui.selectAction);
@@ -68,14 +76,6 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 
 	m_ui.newWorldEditAction->setIcon(QIcon(Core::Constants::ICON_NEW));
 	m_ui.saveWorldEditAction->setIcon(QIcon(Core::Constants::ICON_SAVE));
-
-	m_primitivesModel = new PrimitivesTreeModel(this);
-	m_ui.treePrimitivesView->setModel(m_primitivesModel);
-
-	// TODO: ?
-	m_ui.treePrimitivesView->setUndoStack(m_undoStack);
-	m_ui.treePrimitivesView->setZoneBuilder(m_zoneBuilderBase);
-	m_ui.treePrimitivesView->setWorldScene(m_worldEditorScene);
 
 	createMenus();
 	createToolBars();

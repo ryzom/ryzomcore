@@ -68,9 +68,11 @@ public:
 	/// @Path is a list of [row,column] pairs showing us the way through the model.
 	Path pathFromIndex(const QModelIndex &index);
 
-	//Path pathFromNode(Node *index);
+	Path pathFromNode(Node *node);
 
 	QModelIndex pathToIndex(const Path &path);
+
+	Node *pathToNode(const Path &path);
 
 	void createWorldEditNode(const QString &fileName);
 	void deleteWorldEditNode();
