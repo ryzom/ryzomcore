@@ -52,7 +52,7 @@ class QWidget;
 
 using namespace std;
 
-namespace Plugin
+namespace TranslationManager
 {
     
 class CMainWindow : public QMainWindow

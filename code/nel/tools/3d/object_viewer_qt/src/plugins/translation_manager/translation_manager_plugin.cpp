@@ -37,7 +37,7 @@
 #include <QtGui/QAction>
 #include <QtGui/QMenuBar>
 
-namespace Plugin
+namespace TranslationManager
 {
 TranslationManagerPlugin::~TranslationManagerPlugin()
 {
@@ -137,8 +137,9 @@ ExtensionSystem::IPluginSpec *TranslationManagerPlugin::pluginByName(const QStri
 	if (spec->name() == name)
 		return spec;
 	return 0;
-}
 
 }
 
-Q_EXPORT_PLUGIN(Plugin::TranslationManagerPlugin)
+}
+
+Q_EXPORT_PLUGIN(TranslationManager::TranslationManagerPlugin)

@@ -35,14 +35,15 @@
 
 using namespace std;
 
-namespace Plugin {
+namespace TranslationManager {
 
 void CEditorPhrase::open(QString filename)
 {
 	vector<STRING_MANAGER::TPhrase> phrases;
 	if(readPhraseFile(filename.toStdString(), phrases, false))
 	{
-		text_edit = new QTextEdit(this);
+		text_edit = new CTextEdit(this);
+		text_edit->setUndoStack(current_stack);
 		SyntaxHighlighter *highlighter = new SyntaxHighlighter(text_edit);
 		text_edit->setUndoRedoEnabled(true);
 		text_edit->document()->setUndoRedoEnabled(true);
@@ -58,7 +59,6 @@ void CEditorPhrase::open(QString filename)
         setAttribute(Qt::WA_DeleteOnClose);
 		editor_type = Constants::ED_PHRASE;
 		current_file = filename;
-		connect(text_edit->document(), SIGNAL(contentsChange(int, int, int)), this, SLOT(contentsChangeNow(int position, int charsRemoved, int charsAdded)));
 		connect(text_edit->document(), SIGNAL(contentsChanged()), this, SLOT(docContentsChanged()));
 	} else {
         QErrorMessage error;
@@ -67,13 +67,28 @@ void CEditorPhrase::open(QString filename)
     }
 }
 
-void CEditorPhrase::contentsChangeNow(int position, int charsRemoved, int charsAdded)
+/* void CTextEdit::keyPressEvent(QKeyEvent *event)
 {
-	if(charsRemoved > 0)
-		current_stack->push(new CUndoPhraseRemoveCommand(position-charsRemoved, charsRemoved, text_edit)); 
-	else if(charsAdded > 0)
-		current_stack->push(new CUndoPhraseInsertCommand(position, text_edit->toPlainText().right(charsAdded), text_edit));
-}
+	QString chars = event->text();
+	int index = textCursor().position();
+
+	switch(event->key())
+	{
+		case Qt::Key_Backspace:
+            if (index > 0) 				
+                m_undoStack->push(new CUndoPhraseRemoveCommand(index--, 1, this)); 
+			break;
+		case Qt::Key_Delete:
+            if (index < toPlainText().length()) 
+                m_undoStack->push(new CUndoPhraseRemoveCommand(index, 1, this)); 
+			break;
+		 default:
+            if (!chars.isEmpty()) 
+                m_undoStack->push(new CUndoPhraseInsertCommand(index, chars, this)); 
+			break;
+	}
+
+} */
 
 void CEditorPhrase::docContentsChanged()
 {

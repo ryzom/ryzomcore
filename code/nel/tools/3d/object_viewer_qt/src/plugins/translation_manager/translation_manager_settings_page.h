@@ -26,7 +26,7 @@
 
 class QWidget;
 
-namespace Plugin
+namespace TranslationManager
 {
 /**
 @class CTranslationManagerSettingsPage

@@ -20,7 +20,7 @@
 
 using namespace std;
 
-namespace Plugin {
+namespace TranslationManager {
     
     class CFtpSelection : public QDialog
     {

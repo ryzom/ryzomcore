@@ -44,7 +44,7 @@
 #include "ftp_selection.h"
 
 
-namespace Plugin
+namespace TranslationManager
 {
 
 CMainWindow::CMainWindow(QWidget *parent)
@@ -591,30 +591,6 @@ bool CMainWindow::isPhraseEditor(QString filename)
 				return false;
 			}
 }
-
-/* void CMainWindow::keyPressEvent(QKeyEvent *event)
-{
-	CEditorPhrase* editor = qobject_cast<CEditorPhrase*>(_ui.mdiArea->currentSubWindow());
-
-    QString chars = event->text(); 
-    int index = editor->text_edit->textCursor().position();
-
-    switch (event->key()) 
-	{ 
-		case Qt::Key_Backspace: 
-            if (index > 0) 				
-                m_undoStack->push(new CUndoPhraseRemoveCommand(index--, 1, editor->text_edit)); 
-            break; 
-        case Qt::Key_Delete: 
-            if (index < editor->text_edit->toPlainText().length()) 
-                m_undoStack->push(new CUndoPhraseRemoveCommand(index, 1, editor->text_edit)); 
-            break; 
-        default: 
-            if (!chars.isEmpty()) 
-                m_undoStack->push(new CUndoPhraseInsertCommand(index, chars, editor->text_edit)); 
-            break; 
-	}
-} */
 
 bool CCoreListener::closeMainWindow() const
 {

@@ -3,7 +3,7 @@
 
 #include "source_selection.h"
 
-namespace Plugin
+namespace TranslationManager
 {
     
 

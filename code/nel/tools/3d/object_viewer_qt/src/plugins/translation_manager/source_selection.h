@@ -12,7 +12,7 @@
 
 using namespace std;
 
-namespace Plugin 
+namespace TranslationManager
 {
 
 class CSourceDialog : public QDialog

@@ -23,7 +23,7 @@ static bool	RemoveOlds = false;
 
 
 
-namespace Plugin 
+namespace TranslationManager
 {
 
 TCreatureInfo *ExtractBotNames::getCreature(const std::string &sheetName)

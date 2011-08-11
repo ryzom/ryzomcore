@@ -25,7 +25,7 @@
 #include <QtGui/QUndoStack>
 #include <QtCore/QFileInfo>
 
-namespace Plugin {
+namespace TranslationManager {
     
 class CEditor : public QMdiSubWindow {
 Q_OBJECT

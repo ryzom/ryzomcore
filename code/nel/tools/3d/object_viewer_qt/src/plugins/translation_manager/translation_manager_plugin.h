@@ -42,7 +42,7 @@ namespace ExtensionSystem
 class IPluginSpec;
 }
 
-namespace Plugin
+namespace TranslationManager
 {
 
     class CTranslationManagerContext;

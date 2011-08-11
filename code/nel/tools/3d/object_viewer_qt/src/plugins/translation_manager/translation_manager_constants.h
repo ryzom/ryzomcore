@@ -8,7 +8,7 @@
 #ifndef TRANSLATION_MANAGER_CONSTANTS_H
 #define	TRANSLATION_MANAGER_CONSTANTS_H
 
-namespace Plugin
+namespace TranslationManager
 {
     namespace Constants
     {

@@ -28,7 +28,7 @@
 // Project includes
 #include "../core/icore.h"
 
-namespace Plugin
+namespace TranslationManager
 {
 
 QString lastDir = ".";

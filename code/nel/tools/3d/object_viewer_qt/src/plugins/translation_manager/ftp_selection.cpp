@@ -3,7 +3,7 @@
 
 #include <QtGui/QMessageBox>
 #include <QtNetwork/QFtp>
-namespace Plugin
+namespace TranslationManager
 {
     CFtpSelection::CFtpSelection(QWidget *parent): QDialog(parent)
     {

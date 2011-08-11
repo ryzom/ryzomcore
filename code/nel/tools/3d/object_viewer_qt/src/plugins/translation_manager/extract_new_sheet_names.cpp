@@ -21,7 +21,8 @@ using namespace NLMISC;
 using namespace NLLIGO;
 using namespace STRING_MANAGER;
 
-namespace Plugin {
+namespace TranslationManager 
+{
     
 
 

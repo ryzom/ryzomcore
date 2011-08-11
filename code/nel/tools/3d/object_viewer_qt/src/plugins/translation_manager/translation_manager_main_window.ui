@@ -18,7 +18,14 @@
     <item row="0" column="0">
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
-       <widget class="QMdiArea" name="mdiArea"/>
+       <widget class="QMdiArea" name="mdiArea">
+        <property name="viewMode">
+         <enum>QMdiArea::TabbedView</enum>
+        </property>
+        <property name="documentMode">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

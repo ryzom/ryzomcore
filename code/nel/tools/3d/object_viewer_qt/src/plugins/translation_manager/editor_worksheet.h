@@ -38,7 +38,7 @@
 #include "translation_manager_editor.h"
 #include "extract_new_sheet_names.h"
 
-namespace Plugin {
+namespace TranslationManager {
 
 class CEditorWorksheet : public CEditor
 {
