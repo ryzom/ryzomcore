@@ -45,6 +45,7 @@ const int WORLD_PATH_LAYER = 200;
 const int MIDDLE_POINT_LAYER = 201;
 const int EDGE_POINT_LAYER = 201;
 
+const int SIZE_ARROW = 20;
 /*
 // Deprecated
 class GraphicsItemNode: public QGraphicsObject
@@ -132,8 +133,10 @@ public:
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle) = 0;
 	// TODO: add modes: IgnoreAspectRatio, KeepAspectRatio
 	virtual void scaleOn(const QPointF &pivot, const QPointF &factor) = 0;
-	virtual void turnOn(const QPointF &offset) = 0;
+	virtual void turnOn(const qreal angle) = 0;
 	virtual void radiusOn(const qreal radius) = 0;
+
+	virtual void setColor(const QColor &color) = 0;
 
 	// Enable the use of qgraphicsitem_cast with this item.
 	int type() const;
@@ -147,14 +150,16 @@ public:
 class WorldItemPoint: public AbstractWorldItem
 {
 public:
-	WorldItemPoint(const QPointF &point, const float angle, QGraphicsItem *parent = 0);
+	WorldItemPoint(const QPointF &point, const qreal angle, QGraphicsItem *parent = 0);
 	virtual ~WorldItemPoint();
 
 	virtual void moveOn(const QPointF &offset);
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle);
 	virtual void scaleOn(const QPointF &pivot, const QPointF &factor);
-	virtual void turnOn(const QPointF &offset);
+	virtual void turnOn(const qreal angle);
 	virtual void radiusOn(const qreal radius);
+
+	virtual void setColor(const QColor &color);
 
 	virtual QRectF boundingRect() const;
 	virtual QPainterPath shape() const;
@@ -166,13 +171,13 @@ protected:
 private:
 
 	// TODO
-	static const int SIZE_POINT = 7;
+	static const int SIZE_POINT = 4;
 
 	QPen m_pen, m_selectedPen;
 	QBrush m_brush, m_selectedBrush;
 
 	QRectF m_rect;
-	float m_angle;
+	qreal m_angle;
 };
 
 /*
@@ -189,8 +194,10 @@ public:
 	virtual void moveOn(const QPointF &offset);
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle);
 	virtual void scaleOn(const QPointF &pivot, const QPointF &factor);
-	virtual void turnOn(const QPointF &offset);
+	virtual void turnOn(const qreal angle);
 	virtual void radiusOn(const qreal radius);
+
+	virtual void setColor(const QColor &color);
 
 	virtual QRectF boundingRect() const;
 	virtual QPainterPath shape() const;
@@ -217,8 +224,10 @@ public:
 	virtual void moveOn(const QPointF &offset);
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle);
 	virtual void scaleOn(const QPointF &pivot, const QPointF &factor);
-	virtual void turnOn(const QPointF &offset);
+	virtual void turnOn(const qreal angle);
 	virtual void radiusOn(const qreal radius);
+
+	virtual void setColor(const QColor &color);
 
 	virtual QRectF boundingRect() const;
 	virtual QPainterPath shape() const;
@@ -226,6 +235,8 @@ public:
 
 protected:
 	virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+
+	static const int TRANSPARENCY = 28;
 
 	QPen m_pen, m_selectedPen;
 	QBrush m_brush, m_selectedBrush;

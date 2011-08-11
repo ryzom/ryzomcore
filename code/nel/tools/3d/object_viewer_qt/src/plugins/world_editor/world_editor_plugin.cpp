@@ -77,8 +77,8 @@ bool WorldEditorPlugin::initialize(ExtensionSystem::IPluginManager *pluginManage
 	// Reset
 	m_ligoConfig.resetPrimitiveConfiguration ();
 
-	// Load
-	m_ligoConfig.readPrimitiveClass ("world_editor_primitive_configuration.xml", true);
+	// TODO: get file names! from settings
+	m_ligoConfig.readPrimitiveClass("world_editor_primitive_configuration.xml", true);
 
 
 	addAutoReleasedObject(new WorldEditorContext(this));

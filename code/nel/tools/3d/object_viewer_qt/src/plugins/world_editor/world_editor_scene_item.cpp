@@ -322,9 +322,9 @@ int AbstractWorldItem::type() const
 	return Type;
 }
 
-WorldItemPoint::WorldItemPoint(const QPointF &point, const float angle, QGraphicsItem *parent)
+WorldItemPoint::WorldItemPoint(const QPointF &point, const qreal angle, QGraphicsItem *parent)
 	: AbstractWorldItem(parent),
-	  m_angle(angle)
+	  m_angle((2 * NLMISC::Pi - angle) * 180 / NLMISC::Pi)
 {
 	setZValue(WORLD_POINT_LAYER);
 
@@ -343,7 +343,7 @@ WorldItemPoint::WorldItemPoint(const QPointF &point, const float angle, QGraphic
 	m_brush.setColor(QColor(255, 100, 10));
 	m_brush.setStyle(Qt::SolidPattern);
 
-	m_selectedBrush.setColor(QColor(0, 255, 0));
+	m_selectedBrush.setColor(Qt::NoPen);
 	m_selectedBrush.setStyle(Qt::SolidPattern);
 
 	//setFlag(ItemIsSelectable);
@@ -396,12 +396,19 @@ void WorldItemPoint::scaleOn(const QPointF &pivot, const QPointF &factor)
 	setPos(scaledPolygon.boundingRect().center());
 }
 
-void WorldItemPoint::turnOn(const QPointF &offset)
+void WorldItemPoint::turnOn(const qreal angle)
 {
+	m_angle += angle;
+	update();
 }
 
 void WorldItemPoint::radiusOn(const qreal radius)
 {
+}
+
+void WorldItemPoint::setColor(const QColor &color)
+{
+	m_brush.setColor(color);
 }
 
 QPainterPath WorldItemPoint::shape() const
@@ -435,6 +442,14 @@ void WorldItemPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
 	}
 
 	painter->drawRect(m_rect);
+
+	painter->setPen(Qt::red);
+
+	painter->rotate(m_angle);
+
+	painter->drawLine(0, 0, SIZE_ARROW, 0);
+	painter->drawLine(SIZE_ARROW - 2, -2, SIZE_ARROW, 0);
+	painter->drawLine(SIZE_ARROW - 2, 2, SIZE_ARROW, 0);
 }
 
 QVariant WorldItemPoint::itemChange(GraphicsItemChange change, const QVariant &value)
@@ -453,10 +468,10 @@ WorldItemPath::WorldItemPath(const QPolygonF &polygon, QGraphicsItem *parent)
 
 	setZValue(WORLD_PATH_LAYER);
 
-	m_pen.setColor(QColor(0, 0, 0));
+	m_pen.setColor(Qt::black);
 	m_pen.setWidth(5);
 
-	m_selectedPen.setColor(QColor(255, 0, 0));
+	m_selectedPen.setColor(Qt::white);
 	m_selectedPen.setWidth(5);
 }
 
@@ -499,12 +514,17 @@ void WorldItemPath::scaleOn(const QPointF &pivot, const QPointF &factor)
 	m_polygon.translate(pivot);
 }
 
-void WorldItemPath::turnOn(const QPointF &offset)
+void WorldItemPath::turnOn(const qreal angle)
 {
 }
 
 void WorldItemPath::radiusOn(const qreal radius)
 {
+}
+
+void WorldItemPath::setColor(const QColor &color)
+{
+	m_pen.setColor(color);
 }
 
 QPainterPath WorldItemPath::shape() const
@@ -555,13 +575,13 @@ WorldItemZone::WorldItemZone(const QPolygonF &polygon, QGraphicsItem *parent)
 	m_pen.setColor(QColor(20, 100, 255));
 	m_pen.setWidth(0);
 
-	m_selectedPen.setColor(QColor(255, 0, 0));
+	m_selectedPen.setColor(Qt::white);
 	m_selectedPen.setWidth(0);
 
-	m_brush.setColor(QColor(20, 100, 255, 28));
+	m_brush.setColor(QColor(20, 100, 255, TRANSPARENCY));
 	m_brush.setStyle(Qt::SolidPattern);
 
-	m_selectedBrush.setColor(QColor(255, 0, 0, 128));
+	m_selectedBrush.setColor(QColor(255, 255, 255, 100));
 	m_selectedBrush.setStyle(Qt::SolidPattern);
 }
 
@@ -604,12 +624,22 @@ void WorldItemZone::scaleOn(const QPointF &pivot, const QPointF &factor)
 	m_polygon.translate(pivot);
 }
 
-void WorldItemZone::turnOn(const QPointF &offset)
+void WorldItemZone::turnOn(const qreal angle)
 {
 }
 
 void WorldItemZone::radiusOn(const qreal radius)
 {
+}
+
+void WorldItemZone::setColor(const QColor &color)
+{
+	m_pen.setColor(color);
+
+	QColor brushColor(color);
+	brushColor.setAlpha(TRANSPARENCY);
+
+	m_brush.setColor(brushColor);
 }
 
 QRectF WorldItemZone::boundingRect() const

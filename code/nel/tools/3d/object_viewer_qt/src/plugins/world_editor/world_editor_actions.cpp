@@ -52,13 +52,14 @@ void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 	{
 		NLLIGO::IPrimitive *primitive = node->primitive();
 		NLLIGO::CPrimVector *vec = 0;
-		QGraphicsItem *item;
+		AbstractWorldItem *item = 0;
 		switch (node->primitiveClass()->Type)
 		{
 		case NLLIGO::CPrimitiveClass::Point:
 		{
 			vec = primitive->getPrimVector();
-			item = scene->addWorldItemPoint(QPointF(vec->x, -vec->y + cellSize), 0);
+			NLLIGO::CPrimPoint *primPoint = static_cast<NLLIGO::CPrimPoint *>(primitive);
+			item = scene->addWorldItemPoint(QPointF(vec->x, -vec->y + cellSize), primPoint->Angle);
 			break;
 		}
 		case NLLIGO::CPrimitiveClass::Path:
@@ -91,12 +92,44 @@ void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 			break;
 		}
 		}
+
+		if (item != 0)
+		{
+			// Get color from world_editor_classes.xml
+			NLMISC::CRGBA color = Utils::ligoConfig()->getPrimitiveColor(*primitive);
+
+			/*
+			// Configurations (from world_editor_primitive_configuration.xml)
+			const std::vector<NLLIGO::CPrimitiveConfigurations> &configurations = Utils::ligoConfig()->getPrimitiveConfiguration();
+
+			// Look for the configuration
+			sint search = 0;
+			bool colorFound = false;
+			while ((search = theApp.getActiveConfiguration (*primitive, search)) != -1)
+			{
+				// Configuration activated ?
+				if (theApp.Configurations[search].Activated)
+				{
+					colorFound = true;
+					mainColor = configurations[search].Color;
+					break;
+				}
+				search++;
+			}
+
+			// try to get the primitive color ?
+			//if (!colorFound)*/
+			primitive->getPropertyByName ("Color", color);
+
+			item->setColor(QColor(color.R, color.G, color.B));
+		}
+
 		QVariant variantNode;
 		variantNode.setValue<Node *>(node);
 		item->setData(Constants::WORLD_EDITOR_NODE, variantNode);
 
 		QVariant graphicsData;
-		graphicsData.setValue<QGraphicsItem *>(item);
+		graphicsData.setValue<AbstractWorldItem *>(item);
 		node->setData(Constants::GRAPHICS_DATA_QT4_2D, graphicsData);
 	}
 
@@ -119,7 +152,7 @@ void removeGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 		case NLLIGO::CPrimitiveClass::Path:
 		case NLLIGO::CPrimitiveClass::Zone:
 		{
-			QGraphicsItem *item = qvariant_cast<QGraphicsItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+			QGraphicsItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
 			if (item != 0)
 				scene->removeWorldItem(item);
 			break;
@@ -363,8 +396,8 @@ void MoveWorldItemsCommand::undo()
 	for (int i = 0; i < m_listPaths.count(); ++i)
 	{
 		Node *node = m_model->pathToNode(m_listPaths.at(i));
-		QGraphicsItem *item = qvariant_cast<QGraphicsItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-		qgraphicsitem_cast<AbstractWorldItem *>(item)->moveOn(-m_offset);
+		AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+		item->moveOn(-m_offset);
 	}
 }
 
@@ -375,14 +408,14 @@ void MoveWorldItemsCommand::redo()
 		for (int i = 0; i < m_listPaths.count(); ++i)
 		{
 			Node *node = m_model->pathToNode(m_listPaths.at(i));
-			QGraphicsItem *item = qvariant_cast<QGraphicsItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-			qgraphicsitem_cast<AbstractWorldItem *>(item)->moveOn(m_offset);
+			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+			item->moveOn(m_offset);
 		}
 	}
 	m_firstRun = false;
 }
 
-RotateWorldItemsCommand::RotateWorldItemsCommand(const QList<QGraphicsItem *> &items, const qreal &angle,
+RotateWorldItemsCommand::RotateWorldItemsCommand(const QList<QGraphicsItem *> &items, const qreal angle,
 		const QPointF &pivot, PrimitivesTreeModel *model, QUndoCommand *parent)
 	: QUndoCommand(parent),
 	  m_listPaths(graphicsItemsToPaths(items, model)),
@@ -391,7 +424,7 @@ RotateWorldItemsCommand::RotateWorldItemsCommand(const QList<QGraphicsItem *> &i
 	  m_model(model),
 	  m_firstRun(true)
 {
-	setText("Rotate item(s)");
+	setText(QString("Rotate item(s) %1").arg(m_angle));
 }
 
 RotateWorldItemsCommand::~RotateWorldItemsCommand()
@@ -403,8 +436,8 @@ void RotateWorldItemsCommand::undo()
 	for (int i = 0; i < m_listPaths.count(); ++i)
 	{
 		Node *node = m_model->pathToNode(m_listPaths.at(i));
-		QGraphicsItem *item = qvariant_cast<QGraphicsItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-		qgraphicsitem_cast<AbstractWorldItem *>(item)->rotateOn(m_pivot, -m_angle);
+		AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+		item->rotateOn(m_pivot, -m_angle);
 	}
 }
 
@@ -415,8 +448,8 @@ void RotateWorldItemsCommand::redo()
 		for (int i = 0; i < m_listPaths.count(); ++i)
 		{
 			Node *node = m_model->pathToNode(m_listPaths.at(i));
-			QGraphicsItem *item = qvariant_cast<QGraphicsItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-			qgraphicsitem_cast<AbstractWorldItem *>(item)->rotateOn(m_pivot, m_angle);
+			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+			item->rotateOn(m_pivot, m_angle);
 		}
 	}
 	m_firstRun = false;
@@ -444,8 +477,8 @@ void ScaleWorldItemsCommand::undo()
 	for (int i = 0; i < m_listPaths.count(); ++i)
 	{
 		Node *node = m_model->pathToNode(m_listPaths.at(i));
-		QGraphicsItem *item = qvariant_cast<QGraphicsItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-		qgraphicsitem_cast<AbstractWorldItem *>(item)->scaleOn(m_pivot, m_invertFactor);
+		AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+		item->scaleOn(m_pivot, m_invertFactor);
 	}
 }
 
@@ -456,8 +489,47 @@ void ScaleWorldItemsCommand::redo()
 		for (int i = 0; i < m_listPaths.count(); ++i)
 		{
 			Node *node = m_model->pathToNode(m_listPaths.at(i));
-			QGraphicsItem *item = qvariant_cast<QGraphicsItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-			qgraphicsitem_cast<AbstractWorldItem *>(item)->scaleOn(m_pivot, m_factor);
+			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+			item->scaleOn(m_pivot, m_factor);
+		}
+	}
+	m_firstRun = false;
+}
+
+TurnWorldItemsCommand::TurnWorldItemsCommand(const QList<QGraphicsItem *> &items, const qreal angle,
+		PrimitivesTreeModel *model, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	  m_listPaths(graphicsItemsToPaths(items, model)),
+	  m_angle(angle),
+	  m_model(model),
+	  m_firstRun(true)
+{
+	setText(QString("Turn item(s) %1").arg(m_angle));
+}
+
+TurnWorldItemsCommand::~TurnWorldItemsCommand()
+{
+}
+
+void TurnWorldItemsCommand::undo()
+{
+	for (int i = 0; i < m_listPaths.count(); ++i)
+	{
+		Node *node = m_model->pathToNode(m_listPaths.at(i));
+		AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+		item->turnOn(-m_angle);
+	}
+}
+
+void TurnWorldItemsCommand::redo()
+{
+	if (!m_firstRun)
+	{
+		for (int i = 0; i < m_listPaths.count(); ++i)
+		{
+			Node *node = m_model->pathToNode(m_listPaths.at(i));
+			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+			item->turnOn(m_angle);
 		}
 	}
 	m_firstRun = false;

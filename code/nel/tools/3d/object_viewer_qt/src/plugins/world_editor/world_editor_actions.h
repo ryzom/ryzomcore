@@ -172,7 +172,7 @@ private:
 class RotateWorldItemsCommand: public QUndoCommand
 {
 public:
-	RotateWorldItemsCommand(const QList<QGraphicsItem *> &items, const qreal &angle,
+	RotateWorldItemsCommand(const QList<QGraphicsItem *> &items, const qreal angle,
 							const QPointF &pivot, PrimitivesTreeModel *model, QUndoCommand *parent = 0);
 	virtual ~RotateWorldItemsCommand();
 
@@ -209,6 +209,29 @@ private:
 	PrimitivesTreeModel *const m_model;
 	bool m_firstRun;
 };
+
+/**
+@class TurnWorldItemsCommand
+@brief
+@details
+*/
+class TurnWorldItemsCommand: public QUndoCommand
+{
+public:
+	TurnWorldItemsCommand(const QList<QGraphicsItem *> &items, const qreal angle,
+						  PrimitivesTreeModel *model, QUndoCommand *parent = 0);
+	virtual ~TurnWorldItemsCommand();
+
+	virtual void undo();
+	virtual void redo();
+private:
+
+	const QList<Path> m_listPaths;
+	const qreal m_angle;
+	PrimitivesTreeModel *const m_model;
+	bool m_firstRun;
+};
+
 
 } /* namespace WorldEditor */
 

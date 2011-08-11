@@ -30,6 +30,7 @@
 namespace WorldEditor
 {
 class PrimitivesTreeModel;
+class AbstractWorldItem;
 
 /*
 @class WorldEditorScene
@@ -55,9 +56,9 @@ public:
 					 QUndoStack *undoStack, QObject *parent = 0);
 	virtual ~WorldEditorScene();
 
-	QGraphicsItem *addWorldItemPoint(const QPointF &point, const float angle);
-	QGraphicsItem *addWorldItemPath(const QPolygonF &polyline);
-	QGraphicsItem *addWorldItemZone(const QPolygonF &polygon);
+	AbstractWorldItem *addWorldItemPoint(const QPointF &point, const float angle);
+	AbstractWorldItem *addWorldItemPath(const QPolygonF &polyline);
+	AbstractWorldItem *addWorldItemZone(const QPolygonF &polygon);
 
 	void removeWorldItem(QGraphicsItem *item);
 
@@ -87,9 +88,9 @@ private:
 	QPen m_pen1, m_pen2;
 	QBrush m_brush1, m_brush2;
 
-	QPointF m_firstPick, m_scaleFactor;
+	QPointF m_firstPick, m_scaleFactor, m_pivot;
 	QRectF m_selectionArea;
-	qreal m_firstPickX, m_firstPickY;
+	qreal m_firstPickX, m_firstPickY, m_angle;
 	QList<QGraphicsItem *> m_selectedItems;
 	bool m_editedSelectedItems, m_firstSelection;
 	uint m_lastPickedPrimitive;
