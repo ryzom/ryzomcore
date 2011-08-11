@@ -121,7 +121,7 @@ void removeGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 		{
 			QGraphicsItem *item = qvariant_cast<QGraphicsItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
 			if (item != 0)
-				delete item;
+				scene->removeWorldItem(item);
 			break;
 		}
 		}

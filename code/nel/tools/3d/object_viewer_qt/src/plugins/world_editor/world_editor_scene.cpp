@@ -80,6 +80,15 @@ QGraphicsItem *WorldEditorScene::addWorldItemZone(const QPolygonF &polygon)
 	return item;
 }
 
+void WorldEditorScene::removeWorldItem(QGraphicsItem *item)
+{
+	updateSelectedItems(true);
+	m_selectedItems.clear();
+	m_editedSelectedItems = false;
+	m_firstSelection = false;
+	delete item;
+}
+
 void WorldEditorScene::setModeEdit(WorldEditorScene::ModeEdit mode)
 {
 	if (mode == WorldEditorScene::SelectMode)

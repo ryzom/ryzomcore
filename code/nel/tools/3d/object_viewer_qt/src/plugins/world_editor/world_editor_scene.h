@@ -59,6 +59,8 @@ public:
 	QGraphicsItem *addWorldItemPath(const QPolygonF &polyline);
 	QGraphicsItem *addWorldItemZone(const QPolygonF &polygon);
 
+	void removeWorldItem(QGraphicsItem *item);
+
 	void setModeEdit(WorldEditorScene::ModeEdit mode);
 	WorldEditorScene::ModeEdit editMode() const;
 
