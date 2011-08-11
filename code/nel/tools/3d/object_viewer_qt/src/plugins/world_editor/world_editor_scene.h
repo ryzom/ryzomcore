@@ -85,7 +85,7 @@ private:
 	QPen m_pen1, m_pen2;
 	QBrush m_brush1, m_brush2;
 
-	QPointF m_firstPick;
+	QPointF m_firstPick, m_scaleFactor;
 	QRectF m_selectionArea;
 	qreal m_firstPickX, m_firstPickY;
 	QList<QGraphicsItem *> m_selectedItems;

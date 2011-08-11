@@ -160,6 +160,7 @@ void WorldEditorScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 	case WorldEditorScene::RotateMode:
 		break;
 	case WorldEditorScene::ScaleMode:
+		m_scaleFactor = QPointF(1.0, 1.0);
 		break;
 	case WorldEditorScene::TurnMode:
 		break;
@@ -223,6 +224,9 @@ void WorldEditorScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 			else
 				offset.setY(1.0 / (1.0 + (offset.y() / 5000)));
 
+			m_scaleFactor.setX(offset.x() * m_scaleFactor.x());
+			m_scaleFactor.setY(offset.y() * m_scaleFactor.y());
+
 			Q_FOREACH(QGraphicsItem *item, m_selectedItems)
 			{
 				qgraphicsitem_cast<AbstractWorldItem *>(item)->scaleOn(pivot, offset);
@@ -282,13 +286,8 @@ void WorldEditorScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 		case WorldEditorScene::ScaleMode:
 		{
 			QPointF pivot = calcBoundingRect(m_selectedItems).center();
-			QPointF offset = mouseEvent->scenePos() - m_firstPick;
+			m_undoStack->push(new ScaleWorldItemsCommand(m_selectedItems, m_scaleFactor, pivot, m_model));
 
-			// Calculate scale factor
-			offset.setX(1.0 + (offset.x() / 5000));
-			offset.setY(1.0 + (-offset.y() / 5000));
-
-			m_undoStack->push(new ScaleWorldItemsCommand(m_selectedItems, offset, pivot, m_model));
 			break;
 		}
 		case WorldEditorScene::TurnMode:
