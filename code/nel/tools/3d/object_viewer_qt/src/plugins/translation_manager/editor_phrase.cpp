@@ -60,11 +60,17 @@ void CEditorPhrase::open(QString filename)
 		editor_type = Constants::ED_PHRASE;
 		current_file = filename;
 		connect(text_edit->document(), SIGNAL(contentsChanged()), this, SLOT(docContentsChanged()));
+		connect(text_edit->document(), SIGNAL(undoCommandAdded()), this, SLOT(newUndoCommandAdded()));
 	} else {
         QErrorMessage error;
         error.showMessage("This file is not a phrase file.");
         error.exec();                             
     }
+}
+
+void CEditorPhrase::newUndoCommandAdded()
+{
+	 current_stack->push(new CUndoPhraseNewCommand(text_edit)); 
 }
 
 /* void CTextEdit::keyPressEvent(QKeyEvent *event)

@@ -43,7 +43,10 @@ class CTextEdit : public QTextEdit
 private:
 	QUndoStack* m_undoStack;
 public:
-	CTextEdit(QWidget* parent = 0) : QTextEdit(parent) { }
+	CTextEdit(QWidget* parent = 0) : QTextEdit(parent) 
+	{ 
+		setUndoRedoEnabled(true);
+	}
 	//void keyPressEvent(QKeyEvent *event);
 	void setUndoStack(QUndoStack* undoStack)
 	{
@@ -66,73 +69,31 @@ public:
 	void closeEvent(QCloseEvent *event);
 public Q_SLOTS:
 	void docContentsChanged();
+	void newUndoCommandAdded();
 
 };
 
-class CUndoPhraseInsertCommand : public QUndoCommand
+class CUndoPhraseNewCommand : public QUndoCommand
 {
 public:
-	CUndoPhraseInsertCommand(int index, const QString &chars, QTextEdit *document, QUndoCommand *parent = 0) : QUndoCommand("Insert characters", parent), 
-		m_index(index), 
-		m_chars(chars), 
-		m_document(document)
-	{ }
-	
-	virtual void redo() 
-	{
-		QString text = m_document->toPlainText();
-		text.insert(m_index, m_chars);
-		m_document->clear();
-		m_document->setPlainText(text); 
-	}
-
-	virtual void undo()
-	{
-		QString text = m_document->toPlainText();
-		text.remove(m_index, m_chars.length());
-		m_document->clear();
-		m_document->setPlainText(text); 
-		m_document->undo();
-	}
-
-private:
-	int m_index;
-	QString m_chars;
-	QTextEdit* m_document;
-
-};
-
-class CUndoPhraseRemoveCommand : public QUndoCommand
-{
-public:
-	CUndoPhraseRemoveCommand(int index, int count, QTextEdit *document, QUndoCommand *parent = 0) : QUndoCommand("Remove characters", parent), 
-		m_index(index), 
-		m_count(count), 
-		m_document(document)
+	CUndoPhraseNewCommand(CTextEdit *textEdit, QUndoCommand *parent = 0)
+		: QUndoCommand("Inserting/Removing characters", parent),
+		  m_textEdit(textEdit)
 	{ }
 
-	virtual void redo()
+	~CUndoPhraseNewCommand() {}
+
+	void undo()
 	{
-		QString text = m_document->toPlainText();
-		m_removedChars = text.mid(m_index, m_count);
-		text.remove(m_index, m_count);
-		m_document->clear();
-		m_document->setPlainText(text);
+		m_textEdit->undo();
 	}
 
-	virtual void undo()
+	void redo()
 	{
-		QString text = m_document->toPlainText();
-		text.insert(m_index, m_removedChars);
-		m_document->clear();
-		m_document->setPlainText(text);
+		m_textEdit->redo();
 	}
 private:
-	int m_index;
-	int m_count;
-	QString m_removedChars;
-	QTextEdit* m_document;
-
+	CTextEdit* m_textEdit;
 };
 
 class SyntaxHighlighter : public QSyntaxHighlighter
