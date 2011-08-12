@@ -322,9 +322,12 @@ int AbstractWorldItem::type() const
 	return Type;
 }
 
-WorldItemPoint::WorldItemPoint(const QPointF &point, const qreal angle, QGraphicsItem *parent)
+WorldItemPoint::WorldItemPoint(const QPointF &point, const qreal angle, const qreal radius,
+							   bool showArrow, QGraphicsItem *parent)
 	: AbstractWorldItem(parent),
-	  m_angle((2 * NLMISC::Pi - angle) * 180 / NLMISC::Pi)
+	  m_angle((2 * NLMISC::Pi - angle) * 180 / NLMISC::Pi),
+	  m_radius(radius),
+	  m_showArrow(showArrow)
 {
 	setZValue(WORLD_POINT_LAYER);
 
@@ -335,29 +338,46 @@ WorldItemPoint::WorldItemPoint(const QPointF &point, const qreal angle, QGraphic
 	m_rect.setCoords(-SIZE_POINT, -SIZE_POINT, SIZE_POINT, SIZE_POINT);
 
 	m_pen.setColor(QColor(255, 100, 10));
-	m_pen.setWidth(5);
+	//m_pen.setWidth(0);
 
-	m_selectedPen.setColor(QColor(0, 255, 0));
-	m_selectedPen.setWidth(5);
+	m_selectedPen.setColor(Qt::white);
+	//m_selectedPen.setWidth(0);
 
 	m_brush.setColor(QColor(255, 100, 10));
 	m_brush.setStyle(Qt::SolidPattern);
 
-	m_selectedBrush.setColor(Qt::NoPen);
+	m_selectedBrush.setColor(Qt::white);
 	m_selectedBrush.setStyle(Qt::SolidPattern);
+
+
+	if (m_radius != 0)
+	{
+		// Create circle
+		int segmentCount = 30;
+		QPointF circlePoint(m_radius, 0);
+		m_circle << circlePoint;
+		for (int i = 1; i < segmentCount + 1; ++i)
+		{
+			qreal angle = i * (2 * NLMISC::Pi / segmentCount);
+			circlePoint.setX(cos(angle) * m_radius);
+			circlePoint.setY(sin(angle) * m_radius);
+			m_circle << circlePoint;
+		}
+	}
+
+	// Create arrow
+	if (showArrow)
+	{
+		m_arrow.push_back(QLine(0, 0, SIZE_ARROW, 0));
+		m_arrow.push_back(QLine(SIZE_ARROW - 2, -2, SIZE_ARROW, 0));
+		m_arrow.push_back(QLine(SIZE_ARROW - 2, 2, SIZE_ARROW, 0));
+	}
 
 	//setFlag(ItemIsSelectable);
 }
 
 WorldItemPoint::~WorldItemPoint()
 {
-}
-
-void WorldItemPoint::moveOn(const QPointF &offset)
-{
-	prepareGeometryChange();
-
-	setPos(pos() + offset);
 }
 
 void WorldItemPoint::rotateOn(const QPointF &pivot, const qreal deltaAngle)
@@ -367,8 +387,8 @@ void WorldItemPoint::rotateOn(const QPointF &pivot, const qreal deltaAngle)
 	QPolygonF rotatedPolygon(m_rect);
 
 	// TODO
-	rotatedPolygon.translate(pos());
-	rotatedPolygon.translate(-pivot);
+	rotatedPolygon.translate(pos() - pivot);
+	//rotatedPolygon.translate(-pivot);
 
 	QTransform trans;
 	trans = trans.rotate(deltaAngle);
@@ -385,8 +405,8 @@ void WorldItemPoint::scaleOn(const QPointF &pivot, const QPointF &factor)
 	QPolygonF scaledPolygon(m_rect);
 
 	// TODO
-	scaledPolygon.translate(pos());
-	scaledPolygon.translate(-pivot);
+	scaledPolygon.translate(pos() - pivot);
+	//scaledPolygon.translate(-pivot);
 
 	QTransform trans;
 	trans = trans.scale(factor.x(), factor.y());
@@ -408,6 +428,7 @@ void WorldItemPoint::radiusOn(const qreal radius)
 
 void WorldItemPoint::setColor(const QColor &color)
 {
+	m_pen.setColor(color);
 	m_brush.setColor(color);
 }
 
@@ -430,26 +451,26 @@ void WorldItemPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
 	// Here comes the magic:
 	//painter->setClipRect(option->exposedRect);
 
-	painter->setPen(Qt::NoPen);
+	painter->setPen(m_pen);
 
-	if (option->state & QStyle::State_Selected)
-	{
-		painter->setBrush(m_selectedBrush);
-	}
-	else
-	{
-		painter->setBrush(m_brush);
-	}
-
-	painter->drawRect(m_rect);
-
-	painter->setPen(Qt::red);
+	// Draw circle
+	// Draws artefacts with using opengl painter
+	// painter->drawEllipse(-m_radius / 2, -m_radius / 2, m_radius, m_radius);
+	painter->drawPolygon(m_circle);
 
 	painter->rotate(m_angle);
 
-	painter->drawLine(0, 0, SIZE_ARROW, 0);
-	painter->drawLine(SIZE_ARROW - 2, -2, SIZE_ARROW, 0);
-	painter->drawLine(SIZE_ARROW - 2, 2, SIZE_ARROW, 0);
+	// Draw arrow
+	painter->drawLines(m_arrow);
+
+	painter->setPen(Qt::NoPen);
+	if (option->state & QStyle::State_Selected)
+		painter->setBrush(m_selectedBrush);
+	else
+		painter->setBrush(m_brush);
+
+	// Draw point
+	painter->drawRect(m_rect);
 }
 
 QVariant WorldItemPoint::itemChange(GraphicsItemChange change, const QVariant &value)
@@ -469,21 +490,20 @@ WorldItemPath::WorldItemPath(const QPolygonF &polygon, QGraphicsItem *parent)
 	setZValue(WORLD_PATH_LAYER);
 
 	m_pen.setColor(Qt::black);
-	m_pen.setWidth(5);
+	m_pen.setWidth(3);
+	m_pen.setJoinStyle(Qt::MiterJoin);
 
 	m_selectedPen.setColor(Qt::white);
-	m_selectedPen.setWidth(5);
+	m_selectedPen.setWidth(3);
+	m_selectedPen.setJoinStyle(Qt::MiterJoin);
+
+	QPointF center = m_polygon.boundingRect().center();
+	m_polygon.translate(-center);
+	setPos(center);
 }
 
 WorldItemPath::~WorldItemPath()
 {
-}
-
-void WorldItemPath::moveOn(const QPointF &offset)
-{
-	prepareGeometryChange();
-
-	m_polygon.translate(offset);
 }
 
 void WorldItemPath::rotateOn(const QPointF &pivot, const qreal deltaAngle)
@@ -491,13 +511,13 @@ void WorldItemPath::rotateOn(const QPointF &pivot, const qreal deltaAngle)
 	prepareGeometryChange();
 
 	QPolygonF rotatedPolygon(m_polygon);
-	rotatedPolygon.translate(-pivot);
+	rotatedPolygon.translate(pos() - pivot);
 
 	QTransform trans;
 	trans = trans.rotate(deltaAngle);
 	m_polygon = trans.map(rotatedPolygon);
 
-	m_polygon.translate(pivot);
+	m_polygon.translate(pivot - pos());
 }
 
 void WorldItemPath::scaleOn(const QPointF &pivot, const QPointF &factor)
@@ -505,13 +525,13 @@ void WorldItemPath::scaleOn(const QPointF &pivot, const QPointF &factor)
 	prepareGeometryChange();
 
 	QPolygonF scaledPolygon(m_polygon);
-	scaledPolygon.translate(-pivot);
+	scaledPolygon.translate(pos() - pivot);
 
 	QTransform trans;
 	trans = trans.scale(factor.x(), factor.y());
 	m_polygon = trans.map(scaledPolygon);
 
-	m_polygon.translate(pivot);
+	m_polygon.translate(pivot - pos());
 }
 
 void WorldItemPath::turnOn(const qreal angle)
@@ -583,17 +603,14 @@ WorldItemZone::WorldItemZone(const QPolygonF &polygon, QGraphicsItem *parent)
 
 	m_selectedBrush.setColor(QColor(255, 255, 255, 100));
 	m_selectedBrush.setStyle(Qt::SolidPattern);
+
+	QPointF center = m_polygon.boundingRect().center();
+	m_polygon.translate(-center);
+	setPos(center);
 }
 
 WorldItemZone::~WorldItemZone()
 {
-}
-
-void WorldItemZone::moveOn(const QPointF &offset)
-{
-	prepareGeometryChange();
-
-	m_polygon.translate(offset);
 }
 
 void WorldItemZone::rotateOn(const QPointF &pivot, const qreal deltaAngle)
@@ -601,13 +618,13 @@ void WorldItemZone::rotateOn(const QPointF &pivot, const qreal deltaAngle)
 	prepareGeometryChange();
 
 	QPolygonF rotatedPolygon(m_polygon);
-	rotatedPolygon.translate(-pivot);
+	rotatedPolygon.translate(pos() - pivot);
 
 	QTransform trans;
 	trans = trans.rotate(deltaAngle);
 	m_polygon = trans.map(rotatedPolygon);
 
-	m_polygon.translate(pivot);
+	m_polygon.translate(pivot - pos());
 }
 
 void WorldItemZone::scaleOn(const QPointF &pivot, const QPointF &factor)
@@ -615,13 +632,14 @@ void WorldItemZone::scaleOn(const QPointF &pivot, const QPointF &factor)
 	prepareGeometryChange();
 
 	QPolygonF scaledPolygon(m_polygon);
-	scaledPolygon.translate(-pivot);
+
+	scaledPolygon.translate(pos() - pivot);
 
 	QTransform trans;
 	trans = trans.scale(factor.x(), factor.y());
 	m_polygon = trans.map(scaledPolygon);
 
-	m_polygon.translate(pivot);
+	m_polygon.translate(pivot - pos());
 }
 
 void WorldItemZone::turnOn(const qreal angle)

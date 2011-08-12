@@ -56,7 +56,8 @@ public:
 					 QUndoStack *undoStack, QObject *parent = 0);
 	virtual ~WorldEditorScene();
 
-	AbstractWorldItem *addWorldItemPoint(const QPointF &point, const float angle);
+	AbstractWorldItem *addWorldItemPoint(const QPointF &point, const qreal angle,
+										 const qreal radius, bool showArrow);
 	AbstractWorldItem *addWorldItemPath(const QPolygonF &polyline);
 	AbstractWorldItem *addWorldItemZone(const QPolygonF &polygon);
 

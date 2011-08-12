@@ -59,7 +59,18 @@ void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 		{
 			vec = primitive->getPrimVector();
 			NLLIGO::CPrimPoint *primPoint = static_cast<NLLIGO::CPrimPoint *>(primitive);
-			item = scene->addWorldItemPoint(QPointF(vec->x, -vec->y + cellSize), primPoint->Angle);
+
+			// Draw arrow ?
+			bool showArrow = node->primitiveClass()->ShowArrow;
+
+			// Have a radius ?
+			std::string strRadius;
+			qreal radius = 0;
+			if (primitive->getPropertyByName ("radius", strRadius))
+				radius = atof(strRadius.c_str());
+
+			item = scene->addWorldItemPoint(QPointF(vec->x, -vec->y + cellSize),
+											primPoint->Angle, radius, showArrow);
 			break;
 		}
 		case NLLIGO::CPrimitiveClass::Path:
@@ -397,7 +408,7 @@ void MoveWorldItemsCommand::undo()
 	{
 		Node *node = m_model->pathToNode(m_listPaths.at(i));
 		AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-		item->moveOn(-m_offset);
+		item->moveBy(-m_offset.x(), -m_offset.y());
 	}
 }
 
@@ -409,7 +420,7 @@ void MoveWorldItemsCommand::redo()
 		{
 			Node *node = m_model->pathToNode(m_listPaths.at(i));
 			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-			item->moveOn(m_offset);
+			item->moveBy(m_offset.x(), m_offset.y());
 		}
 	}
 	m_firstRun = false;

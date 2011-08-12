@@ -59,9 +59,10 @@ WorldEditorScene::~WorldEditorScene()
 {
 }
 
-AbstractWorldItem *WorldEditorScene::addWorldItemPoint(const QPointF &point, const float angle)
+AbstractWorldItem *WorldEditorScene::addWorldItemPoint(const QPointF &point, const qreal angle,
+		const qreal radius, bool showArrow)
 {
-	WorldItemPoint *item = new WorldItemPoint(point, angle);
+	WorldItemPoint *item = new WorldItemPoint(point, angle, radius, showArrow);
 	addItem(item);
 	return item;
 }
@@ -203,7 +204,7 @@ void WorldEditorScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 		{
 			Q_FOREACH(QGraphicsItem *item, m_selectedItems)
 			{
-				qgraphicsitem_cast<AbstractWorldItem *>(item)->moveOn(offset);
+				item->moveBy(offset.x(), offset.y());
 			}
 			break;
 		}

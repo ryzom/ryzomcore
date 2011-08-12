@@ -38,6 +38,7 @@
 #include <QtCore/QSettings>
 #include <QtGui/QFileDialog>
 #include <QtGui/QStatusBar>
+#include <QtGui/QMessageBox>
 
 namespace WorldEditor
 {
@@ -45,7 +46,8 @@ namespace WorldEditor
 WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	: QMainWindow(parent),
 	  m_primitivesModel(0),
-	  m_undoStack(0)
+	  m_undoStack(0),
+	  m_oglWidget(0)
 {
 	m_ui.setupUi(this);
 	m_undoStack = new QUndoStack(this);
@@ -121,6 +123,25 @@ WorldEditorWindow::~WorldEditorWindow()
 QUndoStack *WorldEditorWindow::undoStack() const
 {
 	return m_undoStack;
+}
+
+void WorldEditorWindow::maybeSave()
+{
+	QMessageBox *messageBox = new QMessageBox(tr("SDI"),
+			tr("The data has been modified.\n"
+			   "Do you want to save your changes?"),
+			QMessageBox::Warning,
+			QMessageBox::Yes | QMessageBox::Default,
+			QMessageBox::No,
+			QMessageBox::Cancel | QMessageBox::Escape,
+			this, Qt::Sheet);
+
+	messageBox->setButtonText(QMessageBox::Yes,
+							  tr("Save"));
+
+	messageBox->setButtonText(QMessageBox::No, tr("Don’t Save"));
+
+	messageBox->show();
 }
 
 void WorldEditorWindow::open()

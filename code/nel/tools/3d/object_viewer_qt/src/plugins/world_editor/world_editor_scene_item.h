@@ -129,7 +129,6 @@ public:
 
 	enum { Type = QGraphicsItem::UserType + 1 };
 
-	virtual void moveOn(const QPointF &offset) = 0;
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle) = 0;
 	// TODO: add modes: IgnoreAspectRatio, KeepAspectRatio
 	virtual void scaleOn(const QPointF &pivot, const QPointF &factor) = 0;
@@ -150,10 +149,10 @@ public:
 class WorldItemPoint: public AbstractWorldItem
 {
 public:
-	WorldItemPoint(const QPointF &point, const qreal angle, QGraphicsItem *parent = 0);
+	WorldItemPoint(const QPointF &point, const qreal angle, const qreal radius,
+				   bool showArrow, QGraphicsItem *parent = 0);
 	virtual ~WorldItemPoint();
 
-	virtual void moveOn(const QPointF &offset);
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle);
 	virtual void scaleOn(const QPointF &pivot, const QPointF &factor);
 	virtual void turnOn(const qreal angle);
@@ -171,13 +170,16 @@ protected:
 private:
 
 	// TODO
-	static const int SIZE_POINT = 4;
+	static const int SIZE_POINT = 3;
 
 	QPen m_pen, m_selectedPen;
 	QBrush m_brush, m_selectedBrush;
 
+	QPolygonF m_circle;
+	QVector<QLine> m_arrow;
 	QRectF m_rect;
-	qreal m_angle;
+	qreal m_angle, m_radius;
+	bool m_showArrow;
 };
 
 /*
@@ -191,7 +193,6 @@ public:
 	WorldItemPath(const QPolygonF &polygon, QGraphicsItem *parent = 0);
 	virtual ~WorldItemPath();
 
-	virtual void moveOn(const QPointF &offset);
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle);
 	virtual void scaleOn(const QPointF &pivot, const QPointF &factor);
 	virtual void turnOn(const qreal angle);
@@ -221,7 +222,6 @@ public:
 	WorldItemZone(const QPolygonF &polygon, QGraphicsItem *parent = 0);
 	virtual ~WorldItemZone();
 
-	virtual void moveOn(const QPointF &offset);
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle);
 	virtual void scaleOn(const QPointF &pivot, const QPointF &factor);
 	virtual void turnOn(const qreal angle);
