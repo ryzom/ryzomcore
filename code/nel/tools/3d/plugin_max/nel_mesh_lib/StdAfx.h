@@ -32,7 +32,12 @@
 #include <stdmat.h>
 #include <shaders.h>
 #include <iparamb2.h>
-#include <Maxscrpt/maxscrpt.h>
+#include <maxversion.h>
+#if MAX_VERSION_MAJOR >= 14
+#	include <maxscript/maxscript.h>
+#else
+#	include <MaxScrpt/maxscrpt.h>
+#endif
 //#include <parser.h>
 
 // Character Studio SDK include
