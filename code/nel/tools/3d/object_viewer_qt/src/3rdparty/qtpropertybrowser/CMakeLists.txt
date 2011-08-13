@@ -36,6 +36,15 @@ LIST(REMOVE_ITEM QT_PROPERTY_EDITOR_MOC_SRC	${CMAKE_CURRENT_BINARY_DIR}/moc_qtbu
 						${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cxx
 						${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cxx)
 
+# We need to add new depencencies on removed files because we need them to be still generated
+SET_PROPERTY(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/qtbuttonpropertybrowser.cpp APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cxx)
+SET_PROPERTY(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/qteditorfactory.cpp APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cxx)
+SET_PROPERTY(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/qtgroupboxpropertybrowser.cpp APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cxx)
+SET_PROPERTY(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/qtpropertybrowser.cpp APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cxx)
+SET_PROPERTY(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/qtpropertymanager.cpp APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cxx)
+SET_PROPERTY(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/qttreepropertybrowser.cpp APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cxx)
+SET_PROPERTY(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/qtvariantproperty.cpp APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cxx)
+
 #set(
 #  qtpropertyeditor_HEADERS_ONLY_MOC
 #  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp
