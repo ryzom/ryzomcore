@@ -58,9 +58,8 @@ public:
 
 	AbstractWorldItem *addWorldItemPoint(const QPointF &point, const qreal angle,
 										 const qreal radius, bool showArrow);
-	AbstractWorldItem *addWorldItemPath(const QPolygonF &polyline);
+	AbstractWorldItem *addWorldItemPath(const QPolygonF &polyline, bool showArrow);
 	AbstractWorldItem *addWorldItemZone(const QPolygonF &polygon);
-
 	void removeWorldItem(QGraphicsItem *item);
 
 	void setModeEdit(WorldEditorScene::ModeEdit mode);
@@ -70,6 +69,7 @@ public:
 
 public Q_SLOTS:
 	void setEnabledEditPoint(bool enabled);
+	void updateSelection(const QList<QGraphicsItem *> &selected, const QList<QGraphicsItem *> &deselected);
 
 protected:
 	virtual void drawForeground(QPainter *painter, const QRectF &rect);
@@ -83,12 +83,13 @@ private:
 	QRectF calcBoundingRect(const QList<QGraphicsItem *> &listItems);
 	QPainterPath calcBoundingShape(const QList<QGraphicsItem *> &listItems);
 	void updateSelectedItems(bool value);
-
+	void updateSelectedItem(QGraphicsItem *item, bool value);
 	void updatePickSelection(const QPointF &point);
 
 	QPen m_pen1, m_pen2;
 	QBrush m_brush1, m_brush2;
 
+	bool m_selectHack;
 	QPointF m_firstPick, m_scaleFactor, m_pivot;
 	QRectF m_selectionArea;
 	qreal m_firstPickX, m_firstPickY, m_angle;

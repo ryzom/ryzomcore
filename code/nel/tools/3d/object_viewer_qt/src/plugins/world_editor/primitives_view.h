@@ -18,6 +18,9 @@
 #ifndef PRIMITIVES_VIEW_H
 #define PRIMITIVES_VIEW_H
 
+// Project includes
+#include "primitive_item.h"
+
 // NeL includes
 #include <nel/ligo/primitive.h>
 
@@ -28,6 +31,7 @@
 #include <QtCore/QVariant>
 #include <QtCore/QSignalMapper>
 #include <QtGui/QUndoStack>
+#include <QtGui/QItemSelection>
 
 namespace LandscapeEditor
 {
@@ -56,6 +60,9 @@ public:
 	void setZoneBuilder(LandscapeEditor::ZoneBuilderBase *zoneBuilder);
 	void setWorldScene(WorldEditorScene *worldEditorScene);
 	virtual void setModel(PrimitivesTreeModel *model);
+
+public Q_SLOTS:
+	//void selectPrimitives();
 
 private Q_SLOTS:
 	void loadLandscape();

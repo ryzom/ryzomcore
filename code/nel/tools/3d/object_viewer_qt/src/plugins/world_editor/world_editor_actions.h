@@ -36,7 +36,15 @@ namespace WorldEditor
 {
 class WorldEditorScene;
 
+// Auxiliary operations
+
+// Return QGraphicsItem if node contains it
+QGraphicsItem *getGraphicsItem(Node *node);
+
+// Scan primitives model for create/add necessary QGraphicsItems
 void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *model, WorldEditorScene *scene);
+
+// Recursive scan primitives model for delete Graphics Items
 void removeGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *model, WorldEditorScene *scene);
 QList<Path> graphicsItemsToPaths(const QList<QGraphicsItem *> &items, PrimitivesTreeModel *model);
 //QList<GraphicsItem *> pathsToGraphicsItems(const QList<Path> &items, PrimitivesTreeModel *model);
@@ -130,7 +138,8 @@ class AddPrimitiveByClassCommand: public QUndoCommand
 {
 public:
 	AddPrimitiveByClassCommand(const QString &className, const Path &parentIndex,
-							   PrimitivesTreeModel *model, QUndoCommand *parent = 0);
+							   WorldEditorScene *scene, PrimitivesTreeModel *model,
+							   QUndoCommand *parent = 0);
 	virtual ~AddPrimitiveByClassCommand();
 
 	virtual void undo();
@@ -139,6 +148,7 @@ private:
 
 	const QString m_className;
 	Path m_parentIndex, m_newPrimIndex;
+	WorldEditorScene *m_scene;
 	PrimitivesTreeModel *m_model;
 };
 

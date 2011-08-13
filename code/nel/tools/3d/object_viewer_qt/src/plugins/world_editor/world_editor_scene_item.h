@@ -168,6 +168,8 @@ protected:
 	virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
 private:
+	void createCircle();
+	void updateBoundingRect();
 
 	// TODO
 	static const int SIZE_POINT = 3;
@@ -177,7 +179,7 @@ private:
 
 	QPolygonF m_circle;
 	QVector<QLine> m_arrow;
-	QRectF m_rect;
+	QRectF m_rect, m_boundingRect;
 	qreal m_angle, m_radius;
 	bool m_showArrow;
 };
@@ -236,7 +238,7 @@ public:
 protected:
 	virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
-	static const int TRANSPARENCY = 28;
+	static const int TRANSPARENCY = 38;
 
 	QPen m_pen, m_selectedPen;
 	QBrush m_brush, m_selectedBrush;

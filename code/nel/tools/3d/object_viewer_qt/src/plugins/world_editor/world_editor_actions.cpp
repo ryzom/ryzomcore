@@ -43,6 +43,29 @@
 namespace WorldEditor
 {
 
+QGraphicsItem *getGraphicsItem(Node *node)
+{
+	QGraphicsItem *result = 0;
+	if (node->type() == Node::PrimitiveNodeType)
+	{
+		PrimitiveNode *primitiveNode = static_cast<PrimitiveNode *>(node);
+		if (primitiveNode != 0)
+		{
+			switch (primitiveNode->primitiveClass()->Type)
+			{
+			case NLLIGO::CPrimitiveClass::Point:
+			case NLLIGO::CPrimitiveClass::Path:
+			case NLLIGO::CPrimitiveClass::Zone:
+			{
+				result = qvariant_cast<AbstractWorldItem *>(primitiveNode->data(Constants::GRAPHICS_DATA_QT4_2D));
+				break;
+			}
+			}
+		}
+	}
+	return result;
+}
+
 void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *model, WorldEditorScene *scene)
 {
 	PrimitiveNode *node = static_cast<PrimitiveNode *>(primIndex.internalPointer());
@@ -53,15 +76,16 @@ void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 		NLLIGO::IPrimitive *primitive = node->primitive();
 		NLLIGO::CPrimVector *vec = 0;
 		AbstractWorldItem *item = 0;
+
+		// Draw arrow ?
+		bool showArrow = node->primitiveClass()->ShowArrow;
+
 		switch (node->primitiveClass()->Type)
 		{
 		case NLLIGO::CPrimitiveClass::Point:
 		{
 			vec = primitive->getPrimVector();
 			NLLIGO::CPrimPoint *primPoint = static_cast<NLLIGO::CPrimPoint *>(primitive);
-
-			// Draw arrow ?
-			bool showArrow = node->primitiveClass()->ShowArrow;
 
 			// Have a radius ?
 			std::string strRadius;
@@ -85,7 +109,7 @@ void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 				++vec;
 			}
 
-			item = scene->addWorldItemPath(polygon);
+			item = scene->addWorldItemPath(polygon, showArrow);
 			break;
 		}
 		case NLLIGO::CPrimitiveClass::Zone:
@@ -153,22 +177,13 @@ void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 
 void removeGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *model, WorldEditorScene *scene)
 {
-	PrimitiveNode *node = static_cast<PrimitiveNode *>(primIndex.internalPointer());
+	Node *node = static_cast<Node *>(primIndex.internalPointer());
 
 	if (node != 0)
 	{
-		switch (node->primitiveClass()->Type)
-		{
-		case NLLIGO::CPrimitiveClass::Point:
-		case NLLIGO::CPrimitiveClass::Path:
-		case NLLIGO::CPrimitiveClass::Zone:
-		{
-			QGraphicsItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-			if (item != 0)
-				scene->removeWorldItem(item);
-			break;
-		}
-		}
+		QGraphicsItem *item = getGraphicsItem(node);
+		if (item != 0)
+			scene->removeWorldItem(item);
 	}
 
 	int count = model->rowCount(primIndex);
@@ -334,10 +349,11 @@ void LoadRootPrimitiveCommand::redo()
 }
 
 AddPrimitiveByClassCommand::AddPrimitiveByClassCommand(const QString &className, const Path &parentIndex,
-		PrimitivesTreeModel *model, QUndoCommand *parent)
+		WorldEditorScene *scene, PrimitivesTreeModel *model, QUndoCommand *parent)
 	: QUndoCommand(parent),
 	  m_className(className),
 	  m_parentIndex(parentIndex),
+	  m_scene(scene),
 	  m_model(model)
 {
 	setText(QString("Add %1").arg(m_className));

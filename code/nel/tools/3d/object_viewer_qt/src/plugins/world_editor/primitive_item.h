@@ -173,6 +173,8 @@ private:
 	NLLIGO::CPrimitives *m_primitives;
 };
 
+typedef QList<Node *> NodeList;
+
 } /* namespace WorldEditor */
 
 Q_DECLARE_METATYPE(WorldEditor::Node *)

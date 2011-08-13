@@ -42,6 +42,9 @@ WorldEditorScene::WorldEditorScene(int sizeCell, PrimitivesTreeModel *model, QUn
 {
 	setItemIndexMethod(NoIndex);
 
+	// TODO: get params from settings
+	setSceneRect(QRectF(-20 * 160, -20 * 160, 256 * 160, 256 * 160));
+
 	m_pen1.setColor(QColor(50, 255, 155));
 	m_pen1.setWidth(0);
 
@@ -67,7 +70,7 @@ AbstractWorldItem *WorldEditorScene::addWorldItemPoint(const QPointF &point, con
 	return item;
 }
 
-AbstractWorldItem *WorldEditorScene::addWorldItemPath(const QPolygonF &polyline)
+AbstractWorldItem *WorldEditorScene::addWorldItemPath(const QPolygonF &polyline, bool showArrow)
 {
 	WorldItemPath *item = new WorldItemPath(polyline);
 	addItem(item);
@@ -113,6 +116,31 @@ void WorldEditorScene::setEnabledEditPoint(bool enabled)
 	m_editMode = enabled;
 }
 
+void WorldEditorScene::updateSelection(const QList<QGraphicsItem *> &selected, const QList<QGraphicsItem *> &deselected)
+{
+	// Deselect and remove from list graphics items.
+	Q_FOREACH(QGraphicsItem *item, deselected)
+	{
+		// Item is selected?
+		int i = m_selectedItems.indexOf(item);
+		if (i != -1)
+		{
+			updateSelectedItem(item, false);
+			m_selectedItems.takeAt(i);
+		}
+	}
+
+	// Select and add from list graphics items.
+	Q_FOREACH(QGraphicsItem *item, selected)
+	{
+		updateSelectedItem(item, true);
+		m_selectedItems.push_back(item);
+	}
+
+	update();
+	m_editedSelectedItems = true;
+}
+
 void WorldEditorScene::drawForeground(QPainter *painter, const QRectF &rect)
 {
 	QGraphicsScene::drawForeground(painter, rect);
@@ -138,15 +166,11 @@ void WorldEditorScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
 	LandscapeEditor::LandscapeSceneBase::mousePressEvent(mouseEvent);
 
-	qreal x = mouseEvent->scenePos().x();
-	qreal y = mouseEvent->scenePos().y();
-
 	if (mouseEvent->button() != Qt::LeftButton)
 		return;
 
 	m_firstPick = mouseEvent->scenePos();
 
-//	if ((!m_editedSelectedItems) && (m_mode != WorldEditorScene::SelectMode))
 	if ((!m_editedSelectedItems && m_selectedItems.isEmpty()) ||
 			(!calcBoundingRect(m_selectedItems).contains(mouseEvent->scenePos())))
 	{
@@ -183,12 +207,19 @@ void WorldEditorScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 		break;
 	};
 
+	m_selectHack = true;
 //	if (m_selectedItems.isEmpty())
 //		m_selectionArea.setTopLeft(mouseEvent->scenePos());
 }
 
 void WorldEditorScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
+	if (m_selectHack)
+	{
+		m_selectHack = false;
+		updateSelectedItems(true);
+	}
+
 	if (QApplication::mouseButtons() == Qt::LeftButton)
 	{
 
@@ -379,18 +410,23 @@ void WorldEditorScene::updateSelectedItems(bool value)
 {
 	Q_FOREACH(QGraphicsItem *item, m_selectedItems)
 	{
-		if (value)
-		{
-			item->setFlag(QGraphicsItem::ItemIsSelectable);
-			//item->setZValue(SELECTED_LAYER);
-		}
-		else
-		{
-			item->setFlag(QGraphicsItem::ItemIsSelectable, false);
-			//item->setZValue(UNSELECTED_LAYER);
-		}
-		item->setSelected(value);
+		updateSelectedItem(item, value);
 	}
+}
+
+void WorldEditorScene::updateSelectedItem(QGraphicsItem *item, bool value)
+{
+	if (value)
+	{
+		item->setFlag(QGraphicsItem::ItemIsSelectable);
+		//item->setZValue(SELECTED_LAYER);
+	}
+	else
+	{
+		item->setFlag(QGraphicsItem::ItemIsSelectable, false);
+		//item->setZValue(UNSELECTED_LAYER);
+	}
+	item->setSelected(value);
 }
 
 void WorldEditorScene::updatePickSelection(const QPointF &point)

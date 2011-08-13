@@ -60,6 +60,8 @@ private Q_SLOTS:
 	void setMode(int value);
 	void updateStatusBar();
 
+	void updateSelection(const QItemSelection &selected, const QItemSelection &deselected);
+
 protected:
 	virtual void showEvent(QShowEvent *showEvent);
 	virtual void hideEvent(QHideEvent *hideEvent);

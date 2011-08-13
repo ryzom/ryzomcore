@@ -16,7 +16,6 @@
 
 // Project includes
 #include "primitives_view.h"
-#include "primitive_item.h"
 #include "primitives_model.h"
 #include "world_editor_actions.h"
 
@@ -208,7 +207,7 @@ void PrimitivesView::addNewPrimitiveByClass(int value)
 	QString className = node->primitiveClass()->DynamicChildren[value].ClassName.c_str();
 
 	m_undoStack->push(new AddPrimitiveByClassCommand(className, m_primitivesTreeModel->pathFromIndex(indexList.first()),
-					  m_primitivesTreeModel));
+					  m_worldEditorScene, m_primitivesTreeModel));
 }
 
 void PrimitivesView::generatePrimitives(int value)

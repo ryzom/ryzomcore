@@ -105,6 +105,9 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	connect(m_ui.saveWorldEditAction, SIGNAL(triggered()), this, SLOT(saveWorldEditFile()));
 	connect(m_ui.visibleGridAction, SIGNAL(toggled(bool)), m_ui.graphicsView, SLOT(setVisibleGrid(bool)));
 
+	connect(m_ui.treePrimitivesView->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+			this, SLOT(updateSelection(QItemSelection, QItemSelection)));
+
 	m_statusBarTimer = new QTimer(this);
 	connect(m_statusBarTimer, SIGNAL(timeout()), this, SLOT(updateStatusBar()));
 
@@ -248,6 +251,47 @@ void WorldEditorWindow::setMode(int value)
 void WorldEditorWindow::updateStatusBar()
 {
 	m_statusInfo->setText(m_worldEditorScene->zoneNameFromMousePos());
+}
+
+void WorldEditorWindow::updateSelection(const QItemSelection &selected, const QItemSelection &deselected)
+{
+	m_ui.pointsAction->setChecked(false);
+
+	NodeList nodesSelected;
+	Q_FOREACH(QModelIndex modelIndex, selected.indexes())
+	{
+		Node *node = static_cast<Node *>(modelIndex.internalPointer());
+		nodesSelected.push_back(node);
+	}
+
+	NodeList nodesDeselected;
+	Q_FOREACH(QModelIndex modelIndex, deselected.indexes())
+	{
+		Node *node = static_cast<Node *>(modelIndex.internalPointer());
+		nodesDeselected.push_back(node);
+	}
+
+	// TODO: update property editor
+	// ...
+
+	QList<QGraphicsItem *> itemSelected;
+	Q_FOREACH(Node *node, nodesSelected)
+	{
+		QGraphicsItem *item = getGraphicsItem(node);
+		if (item != 0)
+			itemSelected.push_back(item);
+	}
+
+	QList<QGraphicsItem *> itemDeselected;
+	Q_FOREACH(Node *node, nodesDeselected)
+	{
+		QGraphicsItem *item = getGraphicsItem(node);
+		if (item != 0)
+			itemDeselected.push_back(item);
+	}
+
+	// Update world editor scene
+	m_worldEditorScene->updateSelection(itemSelected, itemDeselected);
 }
 
 void WorldEditorWindow::showEvent(QShowEvent *showEvent)

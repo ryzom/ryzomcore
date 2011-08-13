@@ -349,21 +349,7 @@ WorldItemPoint::WorldItemPoint(const QPointF &point, const qreal angle, const qr
 	m_selectedBrush.setColor(Qt::white);
 	m_selectedBrush.setStyle(Qt::SolidPattern);
 
-
-	if (m_radius != 0)
-	{
-		// Create circle
-		int segmentCount = 30;
-		QPointF circlePoint(m_radius, 0);
-		m_circle << circlePoint;
-		for (int i = 1; i < segmentCount + 1; ++i)
-		{
-			qreal angle = i * (2 * NLMISC::Pi / segmentCount);
-			circlePoint.setX(cos(angle) * m_radius);
-			circlePoint.setY(sin(angle) * m_radius);
-			m_circle << circlePoint;
-		}
-	}
+	createCircle();
 
 	// Create arrow
 	if (showArrow)
@@ -373,6 +359,7 @@ WorldItemPoint::WorldItemPoint(const QPointF &point, const qreal angle, const qr
 		m_arrow.push_back(QLine(SIZE_ARROW - 2, 2, SIZE_ARROW, 0));
 	}
 
+	updateBoundingRect();
 	//setFlag(ItemIsSelectable);
 }
 
@@ -424,6 +411,8 @@ void WorldItemPoint::turnOn(const qreal angle)
 
 void WorldItemPoint::radiusOn(const qreal radius)
 {
+	if (m_radius == 0)
+		return;
 }
 
 void WorldItemPoint::setColor(const QColor &color)
@@ -432,18 +421,43 @@ void WorldItemPoint::setColor(const QColor &color)
 	m_brush.setColor(color);
 }
 
+void WorldItemPoint::createCircle()
+{
+	if (m_radius != 0)
+	{
+		// Create circle
+		int segmentCount = 30;
+		QPointF circlePoint(m_radius, 0);
+		m_circle << circlePoint;
+		for (int i = 1; i < segmentCount + 1; ++i)
+		{
+			qreal angle = i * (2 * NLMISC::Pi / segmentCount);
+			circlePoint.setX(cos(angle) * m_radius);
+			circlePoint.setY(sin(angle) * m_radius);
+			m_circle << circlePoint;
+		}
+	}
+}
+
+void WorldItemPoint::updateBoundingRect()
+{
+	m_boundingRect.setCoords(-SIZE_POINT, -SIZE_POINT, SIZE_POINT, SIZE_POINT);
+	QRectF circleBoundingRect;
+	circleBoundingRect.setCoords(-m_radius, -m_radius, m_radius, m_radius);
+	m_boundingRect = m_boundingRect.united(circleBoundingRect);
+}
+
 QPainterPath WorldItemPoint::shape() const
 {
 	QPainterPath path;
 
-	path.addRect(m_rect);
-
+	path.addRect(m_boundingRect);
 	return qt_graphicsItem_shapeFromPath(path, m_pen);
 }
 
 QRectF WorldItemPoint::boundingRect() const
 {
-	return m_rect;
+	return m_boundingRect;
 }
 
 void WorldItemPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
