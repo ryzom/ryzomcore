@@ -41,7 +41,7 @@ IF(FREETYPE_ADDITIONAL_INCLUDE_DIR)
 ENDIF(FREETYPE_ADDITIONAL_INCLUDE_DIR)
 
 FIND_LIBRARY(FREETYPE_LIBRARY
-  NAMES freetype libfreetype freetype219
+  NAMES freetype libfreetype freetype219 freetype246
   PATHS
   $ENV{FREETYPE_DIR}/lib
   /usr/local/lib
