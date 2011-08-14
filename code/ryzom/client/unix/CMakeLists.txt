@@ -1,4 +1,11 @@
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/ryzom.desktop.in" "${CMAKE_CURRENT_BINARY_DIR}/ryzom.desktop")
 
-INSTALL(FILES ryzom.png DESTINATION share/pixmaps)
 INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/ryzom.desktop" DESTINATION share/applications)
+INSTALL(FILES ryzom.png DESTINATION share/pixmaps)
+INSTALL(FILES ryzom.xpm DESTINATION share/pixmaps)
+INSTALL(FILES res/ryzom16x16.png DESTINATION share/icons/hicolor/16x16/apps RENAME ryzom.png)
+INSTALL(FILES res/ryzom22x22.png DESTINATION share/icons/hicolor/22x22/apps RENAME ryzom.png)
+INSTALL(FILES res/ryzom24x24.png DESTINATION share/icons/hicolor/24x24/apps RENAME ryzom.png)
+INSTALL(FILES res/ryzom32x32.png DESTINATION share/icons/hicolor/32x32/apps RENAME ryzom.png)
+INSTALL(FILES res/ryzom48x48.png DESTINATION share/icons/hicolor/48x48/apps RENAME ryzom.png)
+INSTALL(FILES res/ryzom128x128.png DESTINATION share/icons/hicolor/128x128/apps RENAME ryzom.png)
