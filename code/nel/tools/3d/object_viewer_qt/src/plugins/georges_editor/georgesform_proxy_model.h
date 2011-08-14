@@ -14,49 +14,32 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef GEORGES_DIRTREE_DIALOG_H
-#define GEORGES_DIRTREE_DIALOG_H
+#ifndef GEORGESFORM_PROXY_MODEL_H
+#define GEORGESFORM_PROXY_MODEL_H
 
 // Qt includes
-#include <QtGui/QWidget>
+#include <QSortFilterProxyModel>
 
-// STL includes
-
-// NeL includes
-
-// Project includes
-#include "ui_georges_dirtree_form.h"
-#include "georges_filesystem_model.h"
-
-namespace Plugin
+namespace Plugin 
 {
 
-class CGeorgesDirTreeDialog: public QDockWidget
-{
-	Q_OBJECT
+	class CGeorgesFormProxyModel : public QSortFilterProxyModel 
+	{
 
-public:
-	CGeorgesDirTreeDialog(QString ldPath, QWidget *parent = 0);
-	~CGeorgesDirTreeDialog();
+	public:
+		CGeorgesFormProxyModel(QObject *parent = 0): QSortFilterProxyModel(parent)
+		{
+		}
+		~CGeorgesFormProxyModel() 
+		{
+		}
 
-	void ldPathChanged(QString);
+	protected:
+		virtual bool  filterAcceptsColumn ( int source_column, const QModelIndex & source_parent ) const ;
+		virtual bool  filterAcceptsRow ( int source_row, const QModelIndex & source_parent ) const ;
 
-private:
-	Ui::CGeorgesDirTreeDialog m_ui;
-
-	CGeorgesFileSystemModel *m_dirModel;
-	CGeorgesFileSystemProxyModel *m_proxyModel;
-	QString m_ldPath;
-
-Q_SIGNALS:
-	void selectedForm(const QString);
-
-private Q_SLOTS:
-	void fileSelected(QModelIndex index);
-	void changeFile(QString file);
-
-}; /* CGEorgesDirTreeDialog */
+	};/* class CGeorgesFormProxyModel */
 
 } /* namespace NLQT */
 
-#endif // GEORGES_DIRTREE_DIALOG_H
+#endif // GEORGESFORM_PROXY_MODEL_H

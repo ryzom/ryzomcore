@@ -74,7 +74,7 @@ QString GeorgesEditorPlugin::name() const
 
 QString GeorgesEditorPlugin::version() const
 {
-	return "0.2";
+	return "0.3";
 }
 
 QString GeorgesEditorPlugin::vendor() const

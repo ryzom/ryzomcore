@@ -14,49 +14,56 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef GEORGES_DIRTREE_DIALOG_H
-#define GEORGES_DIRTREE_DIALOG_H
+#ifndef GEORGES_H
+#define GEORGES_H
 
-// Qt includes
-#include <QtGui/QWidget>
+// Misc
 
 // STL includes
+#include <string>
 
 // NeL includes
 
+// Qt includes
+
 // Project includes
-#include "ui_georges_dirtree_form.h"
-#include "georges_filesystem_model.h"
 
-namespace Plugin
+namespace NLGEORGES
+{
+	class UType;
+	class UForm;
+	class UFormDfn;
+	class UFormLoader;
+}
+
+using namespace NLGEORGES;
+
+namespace Plugin 
 {
 
-class CGeorgesDirTreeDialog: public QDockWidget
-{
-	Q_OBJECT
+	/**
+	@class CGeorges
+	A CGeorges class loading and viewing sheets.
+	*/
+	class CGeorges
+	{
+	public:
+		/// Default constructor.
+		CGeorges();
+		virtual ~CGeorges();
 
-public:
-	CGeorgesDirTreeDialog(QString ldPath, QWidget *parent = 0);
-	~CGeorgesDirTreeDialog();
+		// Load the given form root
+		UForm* loadForm(std::string formName);
+		// Load a dfn
+		UFormDfn* loadFormDfn(std::string formName);
+		// Load a type
+		UType *loadFormType (std::string formName);
 
-	void ldPathChanged(QString);
+		// A form loader
+		UFormLoader	*FormLoader;
 
-private:
-	Ui::CGeorgesDirTreeDialog m_ui;
+	};/* class CGeorges */
 
-	CGeorgesFileSystemModel *m_dirModel;
-	CGeorgesFileSystemProxyModel *m_proxyModel;
-	QString m_ldPath;
+} /* namespace Plugin */
 
-Q_SIGNALS:
-	void selectedForm(const QString);
-
-private Q_SLOTS:
-	void fileSelected(QModelIndex index);
-	void changeFile(QString file);
-
-}; /* CGEorgesDirTreeDialog */
-
-} /* namespace NLQT */
-
-#endif // GEORGES_DIRTREE_DIALOG_H
+#endif // GEORGES_H

@@ -23,24 +23,35 @@
 
 // NeL includes
 
-//using namespace NLMISC;
-
 namespace Plugin
 {
 
 CGeorgesDirTreeDialog::CGeorgesDirTreeDialog(QString ldPath, QWidget *parent)
-	:QDockWidget(parent), m_ldPath(ldPath)
+	:QDockWidget(parent),
+	m_ldPath(ldPath),
+	m_proxyModel(0)
 {
 
 	m_ui.setupUi(this);
 
+	m_ui.filterResetButton->setIcon(
+		QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton));
+
 	m_dirModel = new CGeorgesFileSystemModel(m_ldPath);
-	m_ui.dirTree->setModel(m_dirModel);
+	m_proxyModel = new CGeorgesFileSystemProxyModel(this);
+
+	m_proxyModel->setSourceModel(m_dirModel);
+	m_ui.dirTree->setModel(m_proxyModel);
+
+	// TODO: filtering in tree model is ... complicated - so hide it for now
+	m_ui.filterLineEdit->hide();
+	m_ui.filterResetButton->hide();
+	m_ui.label->hide();
 
 	if (m_dirModel->isCorrectLDPath())
 	{
 		m_dirModel->setRootPath(m_ldPath);
-		m_ui.dirTree->setRootIndex(m_dirModel->index(m_ldPath));
+		m_ui.dirTree->setRootIndex(m_proxyModel->mapFromSource(m_dirModel->index(m_ldPath)));
 	}
 	else
 	{
@@ -61,10 +72,9 @@ CGeorgesDirTreeDialog::~CGeorgesDirTreeDialog()
 
 void CGeorgesDirTreeDialog::fileSelected(QModelIndex index)
 {
-	QString name;
-	if (index.isValid() && !m_dirModel->isDir(index))
+	if (index.isValid() && !m_dirModel->isDir(m_proxyModel->mapToSource(index)))
 	{
-		Q_EMIT selectedForm(m_dirModel->fileName(index));
+		Q_EMIT selectedForm(m_dirModel->fileName(m_proxyModel->mapToSource(index)));
 	}
 }
 
@@ -81,14 +91,18 @@ void CGeorgesDirTreeDialog::ldPathChanged(QString path)
 	m_ldPath = path;
 
 	delete m_dirModel;
+	delete m_proxyModel;
 
 	m_dirModel = new CGeorgesFileSystemModel(m_ldPath);
-	m_ui.dirTree->setModel(m_dirModel);
+	m_proxyModel = new CGeorgesFileSystemProxyModel(this);
+
+	m_proxyModel->setSourceModel(m_dirModel);
+	m_ui.dirTree->setModel(m_proxyModel);
 
 	if (m_dirModel->isCorrectLDPath())
 	{
 		m_dirModel->setRootPath(m_ldPath);
-		m_ui.dirTree->setRootIndex(m_dirModel->index(m_ldPath));
+		m_ui.dirTree->setRootIndex(m_proxyModel->mapFromSource(m_dirModel->index(m_ldPath)));
 	}
 	else
 	{
