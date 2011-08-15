@@ -65,10 +65,13 @@ public:
 	void setModeEdit(WorldEditorScene::ModeEdit mode);
 	WorldEditorScene::ModeEdit editMode() const;
 
-	bool isEnabledEditPoint() const;
+	bool isEnabledEditPoints() const;
+
+Q_SIGNALS:
+	void selectionUpdated(const QList<QGraphicsItem *> &selected, const QList<QGraphicsItem *> &deselected);
 
 public Q_SLOTS:
-	void setEnabledEditPoint(bool enabled);
+	void setEnabledEditPoints(bool enabled);
 	void updateSelection(const QList<QGraphicsItem *> &selected, const QList<QGraphicsItem *> &deselected);
 
 protected:
@@ -79,25 +82,31 @@ protected:
 	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
 
 private:
-
 	QRectF calcBoundingRect(const QList<QGraphicsItem *> &listItems);
 	QPainterPath calcBoundingShape(const QList<QGraphicsItem *> &listItems);
-	void updateSelectedItems(bool value);
-	void updateSelectedItem(QGraphicsItem *item, bool value);
+
+	void updateSelectedWorldItems(bool value);
+	void updateSelectedWorldItem(QGraphicsItem *item, bool value);
+	void updateSelectedPointItems(bool value);
+	void updateSelectedPointItem(QGraphicsItem *item, bool value);
 	void updatePickSelection(const QPointF &point);
+	void updatePickSelectionPoints(const QPointF &point);
+
+	void checkUndo();
 
 	QPen m_pen1, m_pen2;
 	QBrush m_brush1, m_brush2;
 
-	bool m_selectHack;
 	QPointF m_firstPick, m_scaleFactor, m_pivot;
 	QRectF m_selectionArea;
 	qreal m_firstPickX, m_firstPickY, m_angle;
 	QList<QGraphicsItem *> m_selectedItems;
+	QList<QGraphicsItem *> m_selectedPoints;
+	QList<QPolygonF> m_polygons;
 	bool m_editedSelectedItems, m_firstSelection;
 	uint m_lastPickedPrimitive;
 	ModeEdit m_mode;
-	bool m_editMode;
+	bool m_pointsMode;
 	QUndoStack *m_undoStack;
 	PrimitivesTreeModel *m_model;
 };

@@ -177,6 +177,7 @@ typedef QList<Node *> NodeList;
 
 } /* namespace WorldEditor */
 
+// Enable the use of QVariant with this class.
 Q_DECLARE_METATYPE(WorldEditor::Node *)
 
 #endif // PRIMITIVE_ITEM_H

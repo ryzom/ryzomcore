@@ -37,7 +37,7 @@
        <enum>QGraphicsView::AnchorUnderMouse</enum>
       </property>
       <property name="viewportUpdateMode">
-       <enum>QGraphicsView::BoundingRectViewportUpdate</enum>
+       <enum>QGraphicsView::FullViewportUpdate</enum>
       </property>
       <property name="optimizationFlags">
        <set>QGraphicsView::DontAdjustForAntialiasing|QGraphicsView::DontClipPainter</set>
@@ -128,6 +128,15 @@
    <addaction name="visibleGridPointsAction"/>
    <addaction name="separator"/>
    <addaction name="settingsAction"/>
+  </widget>
+  <widget class="QDockWidget" name="propertyEditDockWidget">
+   <property name="windowTitle">
+    <string>Property Editor</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="WorldEditor::PropertyEditorWidget" name="propertyEditWidget"/>
   </widget>
   <action name="loadPrimitiveAction">
    <property name="text">
@@ -319,7 +328,7 @@
     <bool>true</bool>
    </property>
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Edit points</string>
@@ -345,6 +354,12 @@
    <class>WorldEditor::PrimitivesView</class>
    <extends>QTreeView</extends>
    <header>primitives_view.h</header>
+  </customwidget>
+  <customwidget>
+   <class>WorldEditor::PropertyEditorWidget</class>
+   <extends>QWidget</extends>
+   <header>property_editor_widget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

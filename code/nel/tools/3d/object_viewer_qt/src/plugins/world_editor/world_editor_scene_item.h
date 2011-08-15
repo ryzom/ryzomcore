@@ -32,10 +32,15 @@
 
 namespace WorldEditor
 {
-class GraphicsItemZone;
-class GraphicsItemNode;
+class WorldItemSubPoint;
 
-typedef QPair<GraphicsItemNode *, GraphicsItemNode *> LineNode;
+typedef QPair<WorldItemSubPoint *, WorldItemSubPoint *> LineItem;
+
+struct LineStruct
+{
+	WorldItemSubPoint *itemPoint;
+	LineItem lineItem;
+};
 
 const int SELECTED_LAYER = 200;
 const int UNSELECTED_LAYER = 100;
@@ -46,75 +51,6 @@ const int MIDDLE_POINT_LAYER = 201;
 const int EDGE_POINT_LAYER = 201;
 
 const int SIZE_ARROW = 20;
-/*
-// Deprecated
-class GraphicsItemNode: public QGraphicsObject
-{
-	Q_OBJECT
-	Q_PROPERTY(QColor colorNode READ colorNode WRITE setColorNode)
-public:
-	enum NodeType
-	{
-		EdgeType = 0,
-		MiddleType
-	};
-
-	GraphicsItemNode(GraphicsItemZone *itemZone, QGraphicsItem *parent = 0);
-	virtual ~GraphicsItemNode();
-
-	void setColorNode(const QColor &color);
-	QColor colorNode() const
-	{
-		return m_color;
-	}
-
-	void setNodeType(NodeType nodeType);
-
-	virtual QRectF boundingRect() const;
-	//QPainterPath shape() const;
-	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-
-protected:
-	virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
-	virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
-
-private:
-
-	NodeType m_type;
-	GraphicsItemZone *m_itemZone;
-	QColor m_color;
-};
-
-// Deprecated
-class GraphicsItemZone: public QGraphicsPolygonItem
-{
-public:
-	GraphicsItemZone(QGraphicsScene *scene, QGraphicsItem *parent = 0);
-	virtual ~GraphicsItemZone();
-
-	void scanPolygon(const QPolygonF &polygon);
-	void updateMiddleNode(GraphicsItemNode *node);
-	bool deleteEdgePoint(GraphicsItemNode *node);
-	//void addNode(GraphicsItemNode *node);
-	void updateZone();
-	//QRectF boundingRect() const;
-	//void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-
-protected:
-	// QVariant itemChange(GraphicsItemChange change, const QVariant &value);
-
-private:
-	struct LineItem
-	{
-		GraphicsItemNode *itemPoint;
-		LineNode lineNode;
-	};
-	QGraphicsScene *m_scene;
-	QColor m_color;
-	QList<GraphicsItemNode *> m_listItems;
-	QList<LineItem> m_listLines;
-};
-*/
 
 /*
 @class WorldItemPoint
@@ -129,16 +65,40 @@ public:
 
 	enum { Type = QGraphicsItem::UserType + 1 };
 
-	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle) = 0;
+	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle) {};
 	// TODO: add modes: IgnoreAspectRatio, KeepAspectRatio
-	virtual void scaleOn(const QPointF &pivot, const QPointF &factor) = 0;
-	virtual void turnOn(const qreal angle) = 0;
-	virtual void radiusOn(const qreal radius) = 0;
+	virtual void scaleOn(const QPointF &pivot, const QPointF &factor) {};
+	virtual void turnOn(const qreal angle) {};
+	virtual void radiusOn(const qreal radius) {};
 
 	virtual void setColor(const QColor &color) = 0;
+	virtual void setEnabledSubPoints(bool enabled) = 0;
+
+	virtual void moveSubPoint(WorldItemSubPoint *subPoint) {}
+	virtual void addSubPoint(WorldItemSubPoint *subPoint) {}
+	virtual bool removeSubPoint(WorldItemSubPoint *subPoint)
+	{
+		return false;
+	}
+
+	virtual void setPolygon(const QPolygonF &polygon) {}
+	virtual QPolygonF polygon() const
+	{
+		return QPolygonF();
+	}
+
+	void setActived(bool actived);
+	bool isActived() const;
+
+	void setShapeChanged(bool value);
+	bool isShapeChanged() const;
 
 	// Enable the use of qgraphicsitem_cast with this item.
 	int type() const;
+
+protected:
+
+	bool m_active, m_shapeChanged;
 };
 
 /*
@@ -159,19 +119,16 @@ public:
 	virtual void radiusOn(const qreal radius);
 
 	virtual void setColor(const QColor &color);
+	virtual void setEnabledSubPoints(bool enabled) {}
 
 	virtual QRectF boundingRect() const;
 	virtual QPainterPath shape() const;
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
-protected:
-	virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
-
 private:
 	void createCircle();
 	void updateBoundingRect();
 
-	// TODO
 	static const int SIZE_POINT = 3;
 
 	QPen m_pen, m_selectedPen;
@@ -197,20 +154,31 @@ public:
 
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle);
 	virtual void scaleOn(const QPointF &pivot, const QPointF &factor);
-	virtual void turnOn(const qreal angle);
-	virtual void radiusOn(const qreal radius);
 
 	virtual void setColor(const QColor &color);
+	virtual void setEnabledSubPoints(bool enabled);
+
+	virtual void moveSubPoint(WorldItemSubPoint *subPoint);
+	virtual void addSubPoint(WorldItemSubPoint *subPoint);
+	virtual bool removeSubPoint(WorldItemSubPoint *subPoint);
+
+	virtual void setPolygon(const QPolygonF &polygon);
+	virtual QPolygonF polygon() const;
 
 	virtual QRectF boundingRect() const;
 	virtual QPainterPath shape() const;
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
-protected:
-	virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+private:
+	void createSubPoints();
+	void removeSubPoints();
 
 	QPen m_pen, m_selectedPen;
 	QPolygonF m_polygon;
+	bool m_pointEdit;
+
+	QList<WorldItemSubPoint *> m_listItems;
+	QList<LineStruct> m_listLines;
 };
 
 /*
@@ -226,27 +194,91 @@ public:
 
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle);
 	virtual void scaleOn(const QPointF &pivot, const QPointF &factor);
-	virtual void turnOn(const qreal angle);
-	virtual void radiusOn(const qreal radius);
 
 	virtual void setColor(const QColor &color);
+	virtual void setEnabledSubPoints(bool enabled);
+
+	virtual void moveSubPoint(WorldItemSubPoint *subPoint);
+	virtual void addSubPoint(WorldItemSubPoint *subPoint);
+	virtual bool removeSubPoint(WorldItemSubPoint *subPoint);
+
+	virtual void setPolygon(const QPolygonF &polygon);
+	virtual QPolygonF polygon() const;
 
 	virtual QRectF boundingRect() const;
 	virtual QPainterPath shape() const;
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
-protected:
-	virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+private:
+	void createSubPoints();
+	void removeSubPoints();
 
 	static const int TRANSPARENCY = 38;
 
 	QPen m_pen, m_selectedPen;
 	QBrush m_brush, m_selectedBrush;
 	QPolygonF m_polygon;
+	bool m_pointEdit;
+
+	QList<WorldItemSubPoint *> m_listItems;
+	QList<LineStruct> m_listLines;
+};
+
+/*
+@class WorldItemSubPoint
+@brief
+@details
+*/
+class WorldItemSubPoint: public QGraphicsObject
+{
+	Q_OBJECT
+public:
+	enum SubPointType
+	{
+		EdgeType = 0,
+		MiddleType
+	};
+
+	enum { Type = QGraphicsItem::UserType + 2 };
+
+	WorldItemSubPoint(SubPointType pointType, AbstractWorldItem *parent = 0);
+	virtual ~WorldItemSubPoint();
+
+	void setSubPointType(SubPointType nodeType);
+	SubPointType subPointType() const;
+
+	void rotateOn(const QPointF &pivot, const qreal deltaAngle);
+	void scaleOn(const QPointF &pivot, const QPointF &factor);
+
+	virtual QRectF boundingRect() const;
+	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+	void setActived(bool actived);
+	bool isActived() const;
+
+	// Enable the use of qgraphicsitem_cast with this item.
+	int type() const;
+
+protected:
+	virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+	virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
+
+private:
+	void updateBoundingRect();
+
+	static const int SIZE_POINT = 6;
+
+	QBrush m_brush, m_brushMiddle, m_selectedBrush;
+
+	QRectF m_rect, m_boundingRect;
+	SubPointType m_type;
+	bool m_active;
+	AbstractWorldItem *m_parent;
 };
 
 } /* namespace WorldEditor */
 
+// Enable the use of QVariant with this class.
 Q_DECLARE_METATYPE(WorldEditor::AbstractWorldItem *)
 
 #endif // WORLD_EDITOR_SCENE_ITEM_H

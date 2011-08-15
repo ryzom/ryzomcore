@@ -98,7 +98,7 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	m_modeMapper->setMapping(m_ui.radiusAction, 5);
 
 	connect(m_modeMapper, SIGNAL(mapped(int)), this, SLOT(setMode(int)));
-	connect(m_ui.pointsAction, SIGNAL(triggered(bool)), m_worldEditorScene, SLOT(setEnabledEditPoint(bool)));
+	connect(m_ui.pointsAction, SIGNAL(triggered(bool)), m_worldEditorScene, SLOT(setEnabledEditPoints(bool)));
 
 	connect(m_ui.settingsAction, SIGNAL(triggered()), this, SLOT(openProjectSettings()));
 	connect(m_ui.newWorldEditAction, SIGNAL(triggered()), this, SLOT(newWorldEditFile()));
@@ -256,6 +256,7 @@ void WorldEditorWindow::updateStatusBar()
 void WorldEditorWindow::updateSelection(const QItemSelection &selected, const QItemSelection &deselected)
 {
 	m_ui.pointsAction->setChecked(false);
+	m_worldEditorScene->setEnabledEditPoints(false);
 
 	NodeList nodesSelected;
 	Q_FOREACH(QModelIndex modelIndex, selected.indexes())

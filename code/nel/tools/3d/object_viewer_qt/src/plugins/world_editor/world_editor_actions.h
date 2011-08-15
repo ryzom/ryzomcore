@@ -47,7 +47,8 @@ void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 // Recursive scan primitives model for delete Graphics Items
 void removeGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *model, WorldEditorScene *scene);
 QList<Path> graphicsItemsToPaths(const QList<QGraphicsItem *> &items, PrimitivesTreeModel *model);
-//QList<GraphicsItem *> pathsToGraphicsItems(const QList<Path> &items, PrimitivesTreeModel *model);
+
+QList<QPolygonF> polygonsFromItems(const QList<QGraphicsItem *> &items);
 
 /**
 @class CreateWorldCommand
@@ -161,7 +162,8 @@ class MoveWorldItemsCommand: public QUndoCommand
 {
 public:
 	MoveWorldItemsCommand(const QList<QGraphicsItem *> &items, const QPointF &offset,
-						  PrimitivesTreeModel *model, QUndoCommand *parent = 0);
+						  WorldEditorScene *scene, PrimitivesTreeModel *model,
+						  QUndoCommand *parent = 0);
 	virtual ~MoveWorldItemsCommand();
 
 	virtual void undo();
@@ -171,6 +173,7 @@ private:
 	const QList<Path> m_listPaths;
 	const QPointF m_offset;
 	PrimitivesTreeModel *const m_model;
+	WorldEditorScene *m_scene;
 	bool m_firstRun;
 };
 
@@ -183,7 +186,8 @@ class RotateWorldItemsCommand: public QUndoCommand
 {
 public:
 	RotateWorldItemsCommand(const QList<QGraphicsItem *> &items, const qreal angle,
-							const QPointF &pivot, PrimitivesTreeModel *model, QUndoCommand *parent = 0);
+							const QPointF &pivot, WorldEditorScene *scene,
+							PrimitivesTreeModel *model, QUndoCommand *parent = 0);
 	virtual ~RotateWorldItemsCommand();
 
 	virtual void undo();
@@ -194,6 +198,7 @@ private:
 	const qreal m_angle;
 	const QPointF m_pivot;
 	PrimitivesTreeModel *const m_model;
+	WorldEditorScene *m_scene;
 	bool m_firstRun;
 };
 
@@ -206,7 +211,8 @@ class ScaleWorldItemsCommand: public QUndoCommand
 {
 public:
 	ScaleWorldItemsCommand(const QList<QGraphicsItem *> &items, const QPointF &factor,
-						   const QPointF &pivot, PrimitivesTreeModel *model, QUndoCommand *parent = 0);
+						   const QPointF &pivot, WorldEditorScene *scene,
+						   PrimitivesTreeModel *model, QUndoCommand *parent = 0);
 	virtual ~ScaleWorldItemsCommand();
 
 	virtual void undo();
@@ -217,6 +223,7 @@ private:
 	const QPointF m_factor;
 	const QPointF m_pivot;
 	PrimitivesTreeModel *const m_model;
+	WorldEditorScene *m_scene;
 	bool m_firstRun;
 };
 
@@ -229,7 +236,8 @@ class TurnWorldItemsCommand: public QUndoCommand
 {
 public:
 	TurnWorldItemsCommand(const QList<QGraphicsItem *> &items, const qreal angle,
-						  PrimitivesTreeModel *model, QUndoCommand *parent = 0);
+						  WorldEditorScene *scene, PrimitivesTreeModel *model,
+						  QUndoCommand *parent = 0);
 	virtual ~TurnWorldItemsCommand();
 
 	virtual void undo();
@@ -239,9 +247,34 @@ private:
 	const QList<Path> m_listPaths;
 	const qreal m_angle;
 	PrimitivesTreeModel *const m_model;
+	WorldEditorScene *m_scene;
 	bool m_firstRun;
 };
 
+/**
+@class TurnWorldItemsCommand
+@brief
+@details
+*/
+class ShapeWorldItemsCommand: public QUndoCommand
+{
+public:
+	ShapeWorldItemsCommand(const QList<QGraphicsItem *> &items, const QList<QPolygonF> &polygons,
+						   WorldEditorScene *scene, PrimitivesTreeModel *model,
+						   QUndoCommand *parent = 0);
+	virtual ~ShapeWorldItemsCommand();
+
+	virtual void undo();
+	virtual void redo();
+private:
+
+	const QList<Path> m_listPaths;
+	const QList<QPolygonF> m_redoPolygons;
+	const QList<QPolygonF> m_undoPolygons;
+	PrimitivesTreeModel *const m_model;
+	WorldEditorScene *m_scene;
+	bool m_firstRun;
+};
 
 } /* namespace WorldEditor */
 

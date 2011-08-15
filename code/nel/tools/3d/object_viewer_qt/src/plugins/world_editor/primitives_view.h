@@ -61,9 +61,6 @@ public:
 	void setWorldScene(WorldEditorScene *worldEditorScene);
 	virtual void setModel(PrimitivesTreeModel *model);
 
-public Q_SLOTS:
-	//void selectPrimitives();
-
 private Q_SLOTS:
 	void loadLandscape();
 	void loadRootPrimitive();
