@@ -1,7 +1,9 @@
 INCLUDE_DIRECTORIES(	${CMAKE_CURRENT_BINARY_DIR}
 			${CMAKE_CURRENT_SOURCE_DIR}
 			${LIBXML2_INCLUDE_DIR}
-			${QT_INCLUDES})
+			${QT_INCLUDES}
+			${CMAKE_CURRENT_SOURCE_DIR}/../../3rdparty/qtpropertybrowser
+			)
 
 FILE(GLOB SRC *.cpp *.h)
 
@@ -16,11 +18,13 @@ SET(OVQT_PLUGIN_WORLD_EDITOR_HDR	world_editor_plugin.h
 					primitives_model.h
 					primitives_view.h
 					project_settings_dialog.h
+					property_editor_widget.h
 					world_editor_settings_page.h
 )
 
 SET(OVQT_PLUGIN_WORLD_EDITOR_UIS	world_editor_window.ui
 					project_settings_dialog.ui
+					property_editor_widget.ui
 					world_editor_settings_page.ui
 )
 
@@ -45,7 +49,15 @@ ADD_LIBRARY(ovqt_plugin_world_editor MODULE ${SRC}
 						${OVQT_PLUGIN_WORLD_EDITOR_UI_HDRS}
 						${OVQT_PLUGIN_WORLD_EDITOR_RC_SRCS})
 
-TARGET_LINK_LIBRARIES(ovqt_plugin_world_editor ovqt_plugin_core ovqt_plugin_landscape_editor nelmisc nel3d ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
+TARGET_LINK_LIBRARIES(	ovqt_plugin_world_editor 
+						ovqt_plugin_core 
+						ovqt_plugin_landscape_editor 
+						nelmisc 
+						nel3d
+						qt_property_browser
+						${QT_LIBRARIES} 
+						${QT_QTOPENGL_LIBRARY}
+)
 
 NL_DEFAULT_PROPS(ovqt_plugin_world_editor "NeL, Tools, 3D: Object Viewer Qt Plugin: World Editor")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_world_editor)
