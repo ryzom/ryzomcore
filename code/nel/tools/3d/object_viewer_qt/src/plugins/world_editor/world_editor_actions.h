@@ -147,6 +147,8 @@ public:
 	virtual void redo();
 private:
 
+	QPointF m_initPos;
+	float m_delta;
 	const QString m_className;
 	Path m_parentIndex, m_newPrimIndex;
 	WorldEditorScene *m_scene;

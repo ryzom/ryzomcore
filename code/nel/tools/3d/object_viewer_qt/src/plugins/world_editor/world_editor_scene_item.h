@@ -129,7 +129,7 @@ private:
 	void createCircle();
 	void updateBoundingRect();
 
-	static const int SIZE_POINT = 3;
+	static const int SIZE_POINT = 2;
 
 	QPen m_pen, m_selectedPen;
 	QBrush m_brush, m_selectedBrush;

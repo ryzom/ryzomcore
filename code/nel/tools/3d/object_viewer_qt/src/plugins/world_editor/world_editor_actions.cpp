@@ -38,6 +38,7 @@
 
 // Qt includes
 #include <QModelIndex>
+#include <QGraphicsView>
 #include <QPersistentModelIndex>
 
 namespace WorldEditor
@@ -365,6 +366,13 @@ AddPrimitiveByClassCommand::AddPrimitiveByClassCommand(const QString &className,
 	  m_model(model)
 {
 	setText(QString("Add %1").arg(m_className));
+
+	QGraphicsView *view = m_scene->views().first();
+
+	// TODO: returns incorrect position when zoom in
+	QRectF visibleArea = view->mapToScene(view->rect()).boundingRect();
+	m_delta = visibleArea.height() / 10.0;
+	m_initPos = visibleArea.center();
 }
 
 AddPrimitiveByClassCommand::~AddPrimitiveByClassCommand()
@@ -380,6 +388,8 @@ void AddPrimitiveByClassCommand::undo()
 
 	// set the primitive context
 	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = node->rootPrimitiveNode()->primitives();
+
+	removeGraphicsItems(index, m_model, m_scene);
 
 	Utils::deletePrimitive(node->primitive());
 
@@ -397,7 +407,6 @@ void AddPrimitiveByClassCommand::redo()
 	PrimitiveNode *parentNode = static_cast<PrimitiveNode *>(parentIndex.internalPointer());
 	const NLLIGO::CPrimitiveClass *primClass = parentNode->primitiveClass();
 
-	float delta = 10;
 	int id = 0;
 	while (primClass->DynamicChildren[id].ClassName != m_className.toStdString())
 		++id;
@@ -407,12 +416,14 @@ void AddPrimitiveByClassCommand::redo()
 
 	QString namePrimititve = QString("%1_%2").arg(m_className).arg(parentNode->childCount());
 	NLLIGO::IPrimitive *newPrimitive = Utils::createPrimitive(m_className.toStdString().c_str(), namePrimititve.toStdString().c_str(),
-									   NLMISC::CVector(), delta, primClass->DynamicChildren[id].Parameters, parentNode->primitive());
+									   NLMISC::CVector(m_initPos.x(), -m_initPos.y(), 0.0), m_delta, primClass->DynamicChildren[id].Parameters, parentNode->primitive());
 
 	// unset the context
 	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
 
 	m_newPrimIndex = m_model->createPrimitiveNode(newPrimitive, m_parentIndex);
+
+	addNewGraphicsItems(m_model->pathToIndex(m_newPrimIndex), m_model, m_scene);
 }
 
 MoveWorldItemsCommand::MoveWorldItemsCommand(const QList<QGraphicsItem *> &items, const QPointF &offset,
@@ -471,7 +482,7 @@ RotateWorldItemsCommand::RotateWorldItemsCommand(const QList<QGraphicsItem *> &i
 	  m_scene(scene),
 	  m_firstRun(true)
 {
-	setText(QString("Rotate item(s) %1").arg(m_angle));
+	setText("Rotate item(s)");
 }
 
 RotateWorldItemsCommand::~RotateWorldItemsCommand()
@@ -565,7 +576,7 @@ TurnWorldItemsCommand::TurnWorldItemsCommand(const QList<QGraphicsItem *> &items
 	  m_scene(scene),
 	  m_firstRun(true)
 {
-	setText(QString("Turn item(s) %1").arg(m_angle));
+	setText("Turn item(s)");
 }
 
 TurnWorldItemsCommand::~TurnWorldItemsCommand()

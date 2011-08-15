@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>819</width>
     <height>600</height>
    </rect>
   </property>
@@ -121,8 +121,9 @@
     <bool>false</bool>
    </attribute>
    <addaction name="visibleLandAction"/>
-   <addaction name="visiblePrimitivesAction"/>
-   <addaction name="visibleLayersAction"/>
+   <addaction name="visibleZonePrimitivesAction"/>
+   <addaction name="visiblePathPrimitivesAction"/>
+   <addaction name="vidiblePointPrimitives"/>
    <addaction name="visibleDetailsAction"/>
    <addaction name="visibleGridAction"/>
    <addaction name="visibleGridPointsAction"/>
@@ -177,7 +178,7 @@
     <string>S/H Land</string>
    </property>
   </action>
-  <action name="visiblePrimitivesAction">
+  <action name="visibleZonePrimitivesAction">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -185,10 +186,13 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>S/H Primitives</string>
+    <string>S/H Zone primitives</string>
+   </property>
+   <property name="toolTip">
+    <string>S/H Zone Primitives</string>
    </property>
   </action>
-  <action name="visibleLayersAction">
+  <action name="visiblePathPrimitivesAction">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -196,7 +200,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>S/H Layers</string>
+    <string>S/H Path primitives</string>
    </property>
   </action>
   <action name="visibleDetailsAction">
@@ -341,6 +345,20 @@
    </property>
    <property name="text">
     <string>Project settings</string>
+   </property>
+  </action>
+  <action name="vidiblePointPrimitives">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>S/H Points primitives</string>
+   </property>
+   <property name="toolTip">
+    <string>S/H Points primitives</string>
    </property>
   </action>
  </widget>

@@ -365,11 +365,25 @@ NLLIGO::IPrimitive *createPrimitive(const char *className, const char *primName,
 		}
 		break;
 		case NLLIGO::CPrimitiveClass::Path:
-			primitive = new NLLIGO::CPrimPath;
+		{
+			NLLIGO::CPrimPath *path = new NLLIGO::CPrimPath;
+			primitive = path;
+			path->VPoints.push_back(NLLIGO::CPrimVector(initPos));
+			NLMISC::CVector secondPos = NLMISC::CVector(initPos.x + deltaPos, initPos.y, 0.0);
+			path->VPoints.push_back(NLLIGO::CPrimVector(secondPos));
 			break;
+		}
 		case NLLIGO::CPrimitiveClass::Zone:
-			primitive = new NLLIGO::CPrimZone;
+		{
+			NLLIGO::CPrimZone *zone = new NLLIGO::CPrimZone;
+			primitive = zone;
+			zone->VPoints.push_back(NLLIGO::CPrimVector(initPos));
+			NLMISC::CVector secondPos = NLMISC::CVector(initPos.x + deltaPos, initPos.y, 0.0);
+			zone->VPoints.push_back(NLLIGO::CPrimVector(secondPos));
+			secondPos.y = initPos.y + deltaPos;
+			zone->VPoints.push_back(NLLIGO::CPrimVector(secondPos));
 			break;
+		}
 		case NLLIGO::CPrimitiveClass::Alias:
 			primitive = new NLLIGO::CPrimAlias;
 			break;

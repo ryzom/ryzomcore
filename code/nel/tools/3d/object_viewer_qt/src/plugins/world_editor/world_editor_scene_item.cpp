@@ -187,7 +187,7 @@ void WorldItemPoint::createCircle()
 	if (m_radius != 0)
 	{
 		// Create circle
-		int segmentCount = 30;
+		int segmentCount = 20;
 		QPointF circlePoint(m_radius, 0);
 		m_circle << circlePoint;
 		for (int i = 1; i < segmentCount + 1; ++i)
@@ -241,9 +241,13 @@ void WorldItemPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
 	painter->setPen(Qt::NoPen);
 //	if (option->state & QStyle::State_Selected)
 	if (isActived())
+	{
 		painter->setBrush(m_selectedBrush);
+	}
 	else
+	{
 		painter->setBrush(m_brush);
+	}
 
 	// Draw point
 	painter->drawRect(m_rect);
