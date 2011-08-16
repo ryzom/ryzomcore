@@ -74,7 +74,7 @@ public:
 
 	virtual QIcon icon() const
 	{
-		return QIcon();
+		return QIcon(":/icons/ic_nel_pill.png");
 	}
 
 	virtual QUndoStack *undoStack();
