@@ -182,6 +182,17 @@ void WorldItemPoint::setColor(const QColor &color)
 	m_brush.setColor(color);
 }
 
+void WorldItemPoint::setPolygon(const QPolygonF &polygon)
+{
+}
+
+QPolygonF WorldItemPoint::polygon() const
+{
+	QPolygonF polygon;
+	polygon << QPointF(0, 0);
+	return polygon;
+}
+
 void WorldItemPoint::createCircle()
 {
 	if (m_radius != 0)
@@ -339,6 +350,7 @@ void WorldItemPath::moveSubPoint(WorldItemSubPoint *subPoint)
 		m_listLines.at(i).itemPoint->setPos((m_listLines.at(i).lineItem.first->pos() + m_listLines.at(i).lineItem.second->pos()) / 2);
 
 	m_polygon = polygon;
+	setShapeChanged(true);
 	update();
 }
 
@@ -381,6 +393,7 @@ void WorldItemPath::addSubPoint(WorldItemSubPoint *subPoint)
 			break;
 		}
 	}
+	setShapeChanged(true);
 }
 
 bool WorldItemPath::removeSubPoint(WorldItemSubPoint *subPoint)
@@ -427,6 +440,7 @@ bool WorldItemPath::removeSubPoint(WorldItemSubPoint *subPoint)
 	subPoint->setPos((newLineItem.lineItem.first->pos() + newLineItem.lineItem.second->pos()) / 2);
 	m_listLines.push_back(newLineItem);
 	subPoint->setFlag(ItemSendsScenePositionChanges, false);
+	setShapeChanged(true);
 
 	return true;
 }

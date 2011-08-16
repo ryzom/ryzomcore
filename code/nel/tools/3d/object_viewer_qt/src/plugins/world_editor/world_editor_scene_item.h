@@ -121,6 +121,9 @@ public:
 	virtual void setColor(const QColor &color);
 	virtual void setEnabledSubPoints(bool enabled) {}
 
+	virtual void setPolygon(const QPolygonF &polygon);
+	virtual QPolygonF polygon() const;
+
 	virtual QRectF boundingRect() const;
 	virtual QPainterPath shape() const;
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

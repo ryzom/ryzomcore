@@ -35,6 +35,7 @@ class ZoneBuilderBase;
 namespace WorldEditor
 {
 class WorldEditorScene;
+class AbstractWorldItem;
 
 // Auxiliary operations
 
@@ -49,6 +50,8 @@ void removeGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 QList<Path> graphicsItemsToPaths(const QList<QGraphicsItem *> &items, PrimitivesTreeModel *model);
 
 QList<QPolygonF> polygonsFromItems(const QList<QGraphicsItem *> &items);
+
+void updateGraphicsData(AbstractWorldItem *item);
 
 /**
 @class CreateWorldCommand

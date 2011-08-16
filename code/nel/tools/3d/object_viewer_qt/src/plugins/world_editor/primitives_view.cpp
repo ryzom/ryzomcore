@@ -197,7 +197,7 @@ void PrimitivesView::save()
 	QModelIndex index = indexList.first();
 
 	RootPrimitiveNode *node = static_cast<RootPrimitiveNode *>(index.internalPointer());
-	
+
 	if (node->data(Constants::PRIMITIVE_FILE_IS_CREATED).toBool())
 	{
 		if (!NLLIGO::saveXmlPrimitiveFile(*node->primitives(), node->fileName().toStdString()))
@@ -214,8 +214,8 @@ void PrimitivesView::saveAs()
 	nlassert(m_primitivesTreeModel);
 
 	QString fileName = QFileDialog::getSaveFileName(this,
-							tr("Save NeL Ligo primitive file"), m_lastDir,
-							tr("NeL Ligo primitive file (*.primitive)"));
+					   tr("Save NeL Ligo primitive file"), m_lastDir,
+					   tr("NeL Ligo primitive file (*.primitive)"));
 
 	setCursor(Qt::WaitCursor);
 	if (!fileName.isEmpty())
@@ -224,7 +224,7 @@ void PrimitivesView::saveAs()
 		QModelIndex index = indexList.first();
 
 		RootPrimitiveNode *node = static_cast<RootPrimitiveNode *>(index.internalPointer());
-	
+
 		if (!NLLIGO::saveXmlPrimitiveFile(*node->primitives(), fileName.toStdString()))
 			QMessageBox::warning(this, "World Editor Qt", QString("Error writing output file: %1").arg(fileName));
 		else
