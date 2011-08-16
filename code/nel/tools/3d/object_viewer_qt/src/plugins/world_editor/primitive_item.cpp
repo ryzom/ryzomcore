@@ -235,6 +235,7 @@ Node::NodeType PrimitiveNode::type() const
 
 RootPrimitiveNode::RootPrimitiveNode(const QString &name, NLLIGO::CPrimitives *primitives)
 	: PrimitiveNode(primitives->RootNode),
+	  m_fileName(name),
 	  m_primitives(primitives)
 {
 	setData(Qt::DisplayRole, name);
@@ -247,6 +248,17 @@ RootPrimitiveNode::~RootPrimitiveNode()
 NLLIGO::CPrimitives *RootPrimitiveNode::primitives() const
 {
 	return m_primitives;
+}
+
+void RootPrimitiveNode::setFileName(const QString &fileName)
+{
+	setData(Qt::DisplayRole, fileName);
+	m_fileName = fileName;
+}
+
+QString RootPrimitiveNode::fileName() const
+{
+	return m_fileName;
 }
 
 Node::NodeType RootPrimitiveNode::type() const

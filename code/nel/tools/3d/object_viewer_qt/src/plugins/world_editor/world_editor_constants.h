@@ -28,6 +28,8 @@ const int NODE_PERISTENT_INDEX = USER_TYPE + 1;
 const int WORLD_EDITOR_NODE = USER_TYPE + 2;
 const int GRAPHICS_DATA_QT4_2D = USER_TYPE + 3;
 const int GRAPHICS_DATA_NEL3D = USER_TYPE + 4;
+const int PRIMITIVE_IS_MODIFIED = USER_TYPE + 5;
+const int PRIMITIVE_FILE_IS_CREATED = USER_TYPE + 6;
 
 //settings
 const char *const WORLD_EDITOR_SECTION = "WorldEditor";

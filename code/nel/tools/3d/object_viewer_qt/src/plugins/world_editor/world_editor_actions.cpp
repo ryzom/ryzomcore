@@ -295,7 +295,7 @@ void CreateRootPrimitiveCommand::undo()
 void CreateRootPrimitiveCommand::redo()
 {
 	NLLIGO::CPrimitives *newRootPrim = new NLLIGO::CPrimitives();
-	m_rootPrimIndex = m_model->createRootPrimitiveNode(m_fileName, newRootPrim);
+	m_rootPrimIndex = m_model->createRootPrimitiveNode("", newRootPrim);
 }
 
 
@@ -337,7 +337,7 @@ void LoadRootPrimitiveCommand::redo()
 	// set the primitive context
 	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = primitives;
 
-	NLLIGO::loadXmlPrimitiveFile(*primitives, m_fileName.toStdString(), *NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig);
+	NLLIGO::loadXmlPrimitiveFile(*primitives, m_fileName.toStdString(), *Utils::ligoConfig());
 
 	// unset the context
 	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;

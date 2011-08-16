@@ -18,6 +18,7 @@
 #include "primitives_view.h"
 #include "primitives_model.h"
 #include "world_editor_actions.h"
+#include "world_editor_constants.h"
 
 #include "../core/core_constants.h"
 #include "../landscape_editor/landscape_editor_constants.h"
@@ -27,9 +28,11 @@
 #include <nel/ligo/primitive.h>
 #include <nel/ligo/ligo_config.h>
 #include <nel/ligo/primitive_class.h>
+#include <nel/ligo/primitive_utils.h>
 
 // Qt includes
 #include <QContextMenuEvent>
+#include <QMessageBox>
 #include <QtGui/QMenu>
 #include <QtGui/QFileDialog>
 
@@ -49,12 +52,10 @@ PrimitivesView::PrimitivesView(QWidget *parent)
 	m_unloadAction->setEnabled(false);
 
 	m_saveAction = new QAction("Save", this);
-	m_saveAction->setEnabled(false);
 	m_saveAction->setIcon(QIcon(Core::Constants::ICON_SAVE));
 
 	m_saveAsAction = new QAction("Save As...", this);
 	m_saveAsAction->setIcon(QIcon(Core::Constants::ICON_SAVE_AS));
-	m_saveAsAction->setEnabled(false);
 
 	m_loadLandAction = new QAction("Load landscape file", this);
 	m_loadLandAction->setIcon(QIcon(LandscapeEditor::Constants::ICON_ZONE_ITEM));
@@ -83,6 +84,8 @@ PrimitivesView::PrimitivesView(QWidget *parent)
 	connect(m_newPrimitiveAction, SIGNAL(triggered()), this, SLOT(createRootPrimitive()));
 	connect(m_selectChildrenAction, SIGNAL(triggered()), this, SLOT(selectChildren()));
 	connect(m_deleteAction, SIGNAL(triggered()), this, SLOT(deletePrimitives()));
+	connect(m_saveAction, SIGNAL(triggered()), this, SLOT(save()));
+	connect(m_saveAsAction, SIGNAL(triggered()), this, SLOT(saveAs()));
 
 #ifdef Q_OS_DARWIN
 	setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
@@ -186,6 +189,54 @@ void PrimitivesView::selectChildren()
 	selectChildren(parentIndex);
 }
 
+void PrimitivesView::save()
+{
+	nlassert(m_primitivesTreeModel);
+
+	QModelIndexList indexList = selectionModel()->selectedRows();
+	QModelIndex index = indexList.first();
+
+	RootPrimitiveNode *node = static_cast<RootPrimitiveNode *>(index.internalPointer());
+	
+	if (node->data(Constants::PRIMITIVE_FILE_IS_CREATED).toBool())
+	{
+		if (!NLLIGO::saveXmlPrimitiveFile(*node->primitives(), node->fileName().toStdString()))
+			QMessageBox::warning(this, "World Editor Qt", QString("Error writing output file: %1").arg(node->fileName()));
+		else
+			node->setData(Constants::PRIMITIVE_IS_MODIFIED, false);
+	}
+	else
+		saveAs();
+}
+
+void PrimitivesView::saveAs()
+{
+	nlassert(m_primitivesTreeModel);
+
+	QString fileName = QFileDialog::getSaveFileName(this,
+							tr("Save NeL Ligo primitive file"), m_lastDir,
+							tr("NeL Ligo primitive file (*.primitive)"));
+
+	setCursor(Qt::WaitCursor);
+	if (!fileName.isEmpty())
+	{
+		QModelIndexList indexList = selectionModel()->selectedRows();
+		QModelIndex index = indexList.first();
+
+		RootPrimitiveNode *node = static_cast<RootPrimitiveNode *>(index.internalPointer());
+	
+		if (!NLLIGO::saveXmlPrimitiveFile(*node->primitives(), fileName.toStdString()))
+			QMessageBox::warning(this, "World Editor Qt", QString("Error writing output file: %1").arg(fileName));
+		else
+		{
+			node->setFileName(fileName);
+			node->setData(Constants::PRIMITIVE_FILE_IS_CREATED, true);
+			node->setData(Constants::PRIMITIVE_IS_MODIFIED, false);
+		}
+	}
+	setCursor(Qt::ArrowCursor);
+}
+
 void PrimitivesView::deletePrimitives()
 {
 	nlassert(m_undoStack);
@@ -267,8 +318,8 @@ void PrimitivesView::selectChildren(const QModelIndex &parent)
 void PrimitivesView::fillMenu_WorldEdit(QMenu *menu)
 {
 	menu->addAction(m_unloadAction);
-	menu->addAction(m_saveAction);
-	menu->addAction(m_saveAsAction);
+	//menu->addAction(m_saveAction);
+	//menu->addAction(m_saveAsAction);
 	menu->addSeparator();
 	menu->addAction(m_loadLandAction);
 	menu->addAction(m_loadPrimitiveAction);
@@ -279,7 +330,7 @@ void PrimitivesView::fillMenu_WorldEdit(QMenu *menu)
 
 void PrimitivesView::fillMenu_Landscape(QMenu *menu)
 {
-	menu->addAction(m_deleteAction);
+	menu->addAction(m_unloadAction);
 	menu->addSeparator();
 	menu->addAction(m_showAction);
 	menu->addAction(m_hideAction);
@@ -289,7 +340,9 @@ void PrimitivesView::fillMenu_RootPrimitive(QMenu *menu, const QModelIndex &inde
 {
 	menu->addAction(m_saveAction);
 	menu->addAction(m_saveAsAction);
+	menu->addAction(m_unloadAction);
 	fillMenu_Primitive(menu, index);
+	menu->removeAction(m_deleteAction);
 }
 
 void PrimitivesView::fillMenu_Primitive(QMenu *menu, const QModelIndex &index)

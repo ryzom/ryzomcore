@@ -67,6 +67,8 @@ private Q_SLOTS:
 	void createRootPrimitive();
 	void selectChildren();
 
+	void save();
+	void saveAs();
 	void deletePrimitives();
 	void addNewPrimitiveByClass(int value);
 	void generatePrimitives(int value);

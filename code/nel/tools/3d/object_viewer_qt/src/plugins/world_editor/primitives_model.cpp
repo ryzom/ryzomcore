@@ -18,6 +18,7 @@
 #include "primitive_item.h"
 #include "primitives_model.h"
 #include "world_editor_misc.h"
+#include "world_editor_constants.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -218,6 +219,10 @@ Path PrimitivesTreeModel::createRootPrimitiveNode(const QString &fileName, NLLIG
 	if (m_worldEditNode == 0)
 		createWorldEditNode("NewWorldEdit");
 
+	QString name = "NewPrimitive";
+	if (!fileName.isEmpty())
+		name = fileName;
+
 	// Get position
 	int pos = m_worldEditNode->childCount();
 
@@ -225,9 +230,12 @@ Path PrimitivesTreeModel::createRootPrimitiveNode(const QString &fileName, NLLIG
 
 	// Add root node in tree model
 	beginInsertRows(parentIndex, pos, pos);
-	RootPrimitiveNode *newNode = new RootPrimitiveNode(fileName, primitives);
+	RootPrimitiveNode *newNode = new RootPrimitiveNode(name, primitives);
 	m_worldEditNode->appendChildNode(newNode);
 	endInsertRows();
+
+	newNode->setData(Constants::PRIMITIVE_FILE_IS_CREATED, !fileName.isEmpty());
+	newNode->setData(Constants::PRIMITIVE_IS_MODIFIED, false);
 
 	QModelIndex rootPrimIndex = index(pos, 0, parentIndex);
 

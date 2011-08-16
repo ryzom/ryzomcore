@@ -167,9 +167,13 @@ public:
 
 	NLLIGO::CPrimitives *primitives() const;
 
+	void setFileName(const QString &fileName);
+	QString fileName() const;
 	virtual NodeType type() const;
 
 private:
+
+	QString m_fileName;
 	NLLIGO::CPrimitives *m_primitives;
 };
 
