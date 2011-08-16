@@ -202,17 +202,6 @@ void removeGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 	}
 }
 
-QList<Path> graphicsItemsToPaths(const QList<QGraphicsItem *> &items, PrimitivesTreeModel *model)
-{
-	QList<Path> result;
-	Q_FOREACH(QGraphicsItem *item, items)
-	{
-		Node *node = qvariant_cast<Node *>(item->data(Constants::WORLD_EDITOR_NODE));
-		result.push_back(model->pathFromNode(node));
-	}
-	return result;
-}
-
 QList<QPolygonF> polygonsFromItems(const QList<QGraphicsItem *> &items)
 {
 	QList<QPolygonF> result;
@@ -222,49 +211,6 @@ QList<QPolygonF> polygonsFromItems(const QList<QGraphicsItem *> &items)
 		result.push_back(worldItem->polygon());
 	}
 	return result;
-}
-
-void updateGraphicsData(AbstractWorldItem *item)
-{
-	float cellSize = Utils::ligoConfig()->CellSize;
-	Node *node = qvariant_cast<Node *>(item->data(Constants::WORLD_EDITOR_NODE));
-	PrimitiveNode *primitiveNode = static_cast<PrimitiveNode *>(node);
-	if (primitiveNode != 0)
-	{
-		NLLIGO::IPrimitive *primitive = primitiveNode->primitive();
-
-		std::vector<NLLIGO::CPrimVector> vPoints;
-		QPolygonF polygon = item->polygon();
-		polygon.translate(item->pos());
-
-		for (int i = 0; i < polygon.size(); ++i)
-		{
-			NLMISC::CVector vec(polygon.at(i).x(), cellSize - polygon.at(i).y(), 0.0);
-			vPoints.push_back(NLLIGO::CPrimVector(vec));
-		}
-
-		switch (primitiveNode->primitiveClass()->Type)
-		{
-		case NLLIGO::CPrimitiveClass::Point:
-		{
-			NLLIGO::CPrimPoint *point = static_cast<NLLIGO::CPrimPoint *>(primitive);
-			point->Point = vPoints.front();
-			break;
-		}
-		case NLLIGO::CPrimitiveClass::Path:
-		{
-			NLLIGO::CPrimPath *path = static_cast<NLLIGO::CPrimPath *>(primitive);
-			path->VPoints = vPoints;
-			break;
-		}
-		case NLLIGO::CPrimitiveClass::Zone:
-		{
-			NLLIGO::CPrimZone *zone = static_cast<NLLIGO::CPrimZone *>(primitive);
-			zone->VPoints = vPoints;
-			break;
-		}
-		}
-	}
 }
 
 CreateWorldCommand::CreateWorldCommand(const QString &fileName, PrimitivesTreeModel *model, QUndoCommand *parent)
@@ -484,14 +430,122 @@ void AddPrimitiveByClassCommand::redo()
 	addNewGraphicsItems(m_model->pathToIndex(m_newPrimIndex), m_model, m_scene);
 }
 
-MoveWorldItemsCommand::MoveWorldItemsCommand(const QList<QGraphicsItem *> &items, const QPointF &offset,
-		WorldEditorScene *scene, PrimitivesTreeModel *model, QUndoCommand *parent)
+AbstractWorldItemCommand::AbstractWorldItemCommand(const QList<QGraphicsItem *> &items,
+		WorldEditorScene *scene,
+		PrimitivesTreeModel *model,
+		QUndoCommand *parent)
 	: QUndoCommand(parent),
 	  m_listPaths(graphicsItemsToPaths(items, model)),
-	  m_offset(offset),
 	  m_model(model),
 	  m_scene(scene),
 	  m_firstRun(true)
+{
+}
+
+AbstractWorldItemCommand::~AbstractWorldItemCommand()
+{
+}
+
+void AbstractWorldItemCommand::undo()
+{
+	bool pointsMode = m_scene->isEnabledEditPoints();
+	m_scene->setEnabledEditPoints(false);
+	for (int i = 0; i < m_listPaths.count(); ++i)
+	{
+		Node *node = m_model->pathToNode(m_listPaths.at(i));
+		AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+		undoChangeItem(i, item);
+		updatePrimitiveData(item);
+	}
+	m_scene->setEnabledEditPoints(pointsMode);
+}
+
+void AbstractWorldItemCommand::redo()
+{
+	if (!m_firstRun)
+	{
+		bool pointsMode = m_scene->isEnabledEditPoints();
+		m_scene->setEnabledEditPoints(false);
+		for (int i = 0; i < m_listPaths.count(); ++i)
+		{
+			Node *node = m_model->pathToNode(m_listPaths.at(i));
+			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+			redoChangeItem(i, item);
+			updatePrimitiveData(item);
+		}
+		m_scene->setEnabledEditPoints(pointsMode);
+	}
+	else
+	{
+		for (int i = 0; i < m_listPaths.count(); ++i)
+		{
+			Node *node = m_model->pathToNode(m_listPaths.at(i));
+			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+			updatePrimitiveData(item);
+		}
+	}
+
+	m_firstRun = false;
+}
+
+void AbstractWorldItemCommand::updatePrimitiveData(AbstractWorldItem *item)
+{
+	float cellSize = Utils::ligoConfig()->CellSize;
+	Node *node = qvariant_cast<Node *>(item->data(Constants::WORLD_EDITOR_NODE));
+	PrimitiveNode *primitiveNode = static_cast<PrimitiveNode *>(node);
+	if (primitiveNode != 0)
+	{
+		NLLIGO::IPrimitive *primitive = primitiveNode->primitive();
+
+		std::vector<NLLIGO::CPrimVector> vPoints;
+		QPolygonF polygon = item->polygon();
+		polygon.translate(item->pos());
+
+		for (int i = 0; i < polygon.size(); ++i)
+		{
+			NLMISC::CVector vec(polygon.at(i).x(), cellSize - polygon.at(i).y(), 0.0);
+			vPoints.push_back(NLLIGO::CPrimVector(vec));
+		}
+
+		switch (primitiveNode->primitiveClass()->Type)
+		{
+		case NLLIGO::CPrimitiveClass::Point:
+		{
+			NLLIGO::CPrimPoint *point = static_cast<NLLIGO::CPrimPoint *>(primitive);
+			point->Point = vPoints.front();
+			break;
+		}
+		case NLLIGO::CPrimitiveClass::Path:
+		{
+			NLLIGO::CPrimPath *path = static_cast<NLLIGO::CPrimPath *>(primitive);
+			path->VPoints = vPoints;
+			break;
+		}
+		case NLLIGO::CPrimitiveClass::Zone:
+		{
+			NLLIGO::CPrimZone *zone = static_cast<NLLIGO::CPrimZone *>(primitive);
+			zone->VPoints = vPoints;
+			break;
+		}
+		}
+	}
+}
+
+QList<Path> AbstractWorldItemCommand::graphicsItemsToPaths(const QList<QGraphicsItem *> &items, PrimitivesTreeModel *model)
+{
+	QList<Path> result;
+	Q_FOREACH(QGraphicsItem *item, items)
+	{
+		Node *node = qvariant_cast<Node *>(item->data(Constants::WORLD_EDITOR_NODE));
+		result.push_back(model->pathFromNode(node));
+	}
+	return result;
+}
+
+MoveWorldItemsCommand::MoveWorldItemsCommand(const QList<QGraphicsItem *> &items, const QPointF &offset,
+		WorldEditorScene *scene, PrimitivesTreeModel *model, QUndoCommand *parent)
+	: AbstractWorldItemCommand(items, scene, model, parent),
+	  m_offset(offset)
 {
 	setText("Move item(s)");
 }
@@ -500,57 +554,21 @@ MoveWorldItemsCommand::~MoveWorldItemsCommand()
 {
 }
 
-void MoveWorldItemsCommand::undo()
+void MoveWorldItemsCommand::undoChangeItem(int i, AbstractWorldItem *item)
 {
-	bool pointsMode = m_scene->isEnabledEditPoints();
-	m_scene->setEnabledEditPoints(false);
-	for (int i = 0; i < m_listPaths.count(); ++i)
-	{
-		Node *node = m_model->pathToNode(m_listPaths.at(i));
-		AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-		item->moveBy(-m_offset.x(), -m_offset.y());
-		updateGraphicsData(item);
-	}
-	m_scene->setEnabledEditPoints(pointsMode);
+	item->moveBy(-m_offset.x(), -m_offset.y());
 }
 
-void MoveWorldItemsCommand::redo()
+void MoveWorldItemsCommand::redoChangeItem(int i, AbstractWorldItem *item)
 {
-	if (!m_firstRun)
-	{
-		bool pointsMode = m_scene->isEnabledEditPoints();
-		m_scene->setEnabledEditPoints(false);
-		for (int i = 0; i < m_listPaths.count(); ++i)
-		{
-			Node *node = m_model->pathToNode(m_listPaths.at(i));
-			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-			item->moveBy(m_offset.x(), m_offset.y());
-			updateGraphicsData(item);
-		}
-		m_scene->setEnabledEditPoints(pointsMode);
-	}
-	else
-	{
-		for (int i = 0; i < m_listPaths.count(); ++i)
-		{
-			Node *node = m_model->pathToNode(m_listPaths.at(i));
-			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-			updateGraphicsData(item);
-		}
-	}
-
-	m_firstRun = false;
+	item->moveBy(m_offset.x(), m_offset.y());
 }
 
 RotateWorldItemsCommand::RotateWorldItemsCommand(const QList<QGraphicsItem *> &items, const qreal angle,
 		const QPointF &pivot, WorldEditorScene *scene, PrimitivesTreeModel *model, QUndoCommand *parent)
-	: QUndoCommand(parent),
-	  m_listPaths(graphicsItemsToPaths(items, model)),
+	: AbstractWorldItemCommand(items, scene, model, parent),
 	  m_angle(angle),
-	  m_pivot(pivot),
-	  m_model(model),
-	  m_scene(scene),
-	  m_firstRun(true)
+	  m_pivot(pivot)
 {
 	setText("Rotate item(s)");
 }
@@ -559,57 +577,21 @@ RotateWorldItemsCommand::~RotateWorldItemsCommand()
 {
 }
 
-void RotateWorldItemsCommand::undo()
+void RotateWorldItemsCommand::undoChangeItem(int i, AbstractWorldItem *item)
 {
-	bool pointsMode = m_scene->isEnabledEditPoints();
-	m_scene->setEnabledEditPoints(false);
-	for (int i = 0; i < m_listPaths.count(); ++i)
-	{
-		Node *node = m_model->pathToNode(m_listPaths.at(i));
-		AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-		item->rotateOn(m_pivot, -m_angle);
-		updateGraphicsData(item);
-	}
-	m_scene->setEnabledEditPoints(pointsMode);
+	item->rotateOn(m_pivot, -m_angle);
 }
 
-void RotateWorldItemsCommand::redo()
+void RotateWorldItemsCommand::redoChangeItem(int i, AbstractWorldItem *item)
 {
-	if (!m_firstRun)
-	{
-		bool pointsMode = m_scene->isEnabledEditPoints();
-		m_scene->setEnabledEditPoints(false);
-		for (int i = 0; i < m_listPaths.count(); ++i)
-		{
-			Node *node = m_model->pathToNode(m_listPaths.at(i));
-			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-			item->rotateOn(m_pivot, m_angle);
-			updateGraphicsData(item);
-		}
-		m_scene->setEnabledEditPoints(pointsMode);
-	}
-	else
-	{
-		for (int i = 0; i < m_listPaths.count(); ++i)
-		{
-			Node *node = m_model->pathToNode(m_listPaths.at(i));
-			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-			updateGraphicsData(item);
-		}
-	}
-
-	m_firstRun = false;
+	item->rotateOn(m_pivot, m_angle);
 }
 
 ScaleWorldItemsCommand::ScaleWorldItemsCommand(const QList<QGraphicsItem *> &items, const QPointF &factor,
 		const QPointF &pivot, WorldEditorScene *scene, PrimitivesTreeModel *model, QUndoCommand *parent)
-	: QUndoCommand(parent),
-	  m_listPaths(graphicsItemsToPaths(items, model)),
+	: AbstractWorldItemCommand(items, scene, model, parent),
 	  m_factor(factor),
-	  m_pivot(pivot),
-	  m_model(model),
-	  m_scene(scene),
-	  m_firstRun(true)
+	  m_pivot(pivot)
 {
 	setText("Scale item(s)");
 }
@@ -618,57 +600,21 @@ ScaleWorldItemsCommand::~ScaleWorldItemsCommand()
 {
 }
 
-void ScaleWorldItemsCommand::undo()
+void ScaleWorldItemsCommand::undoChangeItem(int i, AbstractWorldItem *item)
 {
-	bool pointsMode = m_scene->isEnabledEditPoints();
-	m_scene->setEnabledEditPoints(false);
 	QPointF m_invertFactor(1 / m_factor.x(), 1 / m_factor.y());
-	for (int i = 0; i < m_listPaths.count(); ++i)
-	{
-		Node *node = m_model->pathToNode(m_listPaths.at(i));
-		AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-		item->scaleOn(m_pivot, m_invertFactor);
-		updateGraphicsData(item);
-	}
-	m_scene->setEnabledEditPoints(pointsMode);
+	item->scaleOn(m_pivot, m_invertFactor);
 }
 
-void ScaleWorldItemsCommand::redo()
+void ScaleWorldItemsCommand::redoChangeItem(int i, AbstractWorldItem *item)
 {
-	if (!m_firstRun)
-	{
-		bool pointsMode = m_scene->isEnabledEditPoints();
-		m_scene->setEnabledEditPoints(false);
-		for (int i = 0; i < m_listPaths.count(); ++i)
-		{
-			Node *node = m_model->pathToNode(m_listPaths.at(i));
-			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-			item->scaleOn(m_pivot, m_factor);
-			updateGraphicsData(item);
-		}
-		m_scene->setEnabledEditPoints(pointsMode);
-	}
-	else
-	{
-		for (int i = 0; i < m_listPaths.count(); ++i)
-		{
-			Node *node = m_model->pathToNode(m_listPaths.at(i));
-			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-			updateGraphicsData(item);
-		}
-	}
-
-	m_firstRun = false;
+	item->scaleOn(m_pivot, m_factor);
 }
 
 TurnWorldItemsCommand::TurnWorldItemsCommand(const QList<QGraphicsItem *> &items, const qreal angle,
 		WorldEditorScene *scene, PrimitivesTreeModel *model, QUndoCommand *parent)
-	: QUndoCommand(parent),
-	  m_listPaths(graphicsItemsToPaths(items, model)),
-	  m_angle(angle),
-	  m_model(model),
-	  m_scene(scene),
-	  m_firstRun(true)
+	: AbstractWorldItemCommand(items, scene, model, parent),
+	  m_angle(angle)
 {
 	setText("Turn item(s)");
 }
@@ -677,58 +623,22 @@ TurnWorldItemsCommand::~TurnWorldItemsCommand()
 {
 }
 
-void TurnWorldItemsCommand::undo()
+void TurnWorldItemsCommand::undoChangeItem(int i, AbstractWorldItem *item)
 {
-	bool pointsMode = m_scene->isEnabledEditPoints();
-	m_scene->setEnabledEditPoints(false);
-	for (int i = 0; i < m_listPaths.count(); ++i)
-	{
-		Node *node = m_model->pathToNode(m_listPaths.at(i));
-		AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-		item->turnOn(-m_angle);
-		updateGraphicsData(item);
-	}
-	m_scene->setEnabledEditPoints(pointsMode);
+	item->turnOn(-m_angle);
 }
 
-void TurnWorldItemsCommand::redo()
+void TurnWorldItemsCommand::redoChangeItem(int i, AbstractWorldItem *item)
 {
-	if (!m_firstRun)
-	{
-		bool pointsMode = m_scene->isEnabledEditPoints();
-		m_scene->setEnabledEditPoints(false);
-		for (int i = 0; i < m_listPaths.count(); ++i)
-		{
-			Node *node = m_model->pathToNode(m_listPaths.at(i));
-			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-			item->turnOn(m_angle);
-			updateGraphicsData(item);
-		}
-		m_scene->setEnabledEditPoints(pointsMode);
-	}
-	else
-	{
-		for (int i = 0; i < m_listPaths.count(); ++i)
-		{
-			Node *node = m_model->pathToNode(m_listPaths.at(i));
-			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-			updateGraphicsData(item);
-		}
-	}
-
-	m_firstRun = false;
+	item->turnOn(m_angle);
 }
 
 ShapeWorldItemsCommand::ShapeWorldItemsCommand(const QList<QGraphicsItem *> &items, const QList<QPolygonF> &polygons,
 		WorldEditorScene *scene, PrimitivesTreeModel *model,
 		QUndoCommand *parent)
-	: QUndoCommand(parent),
-	  m_listPaths(graphicsItemsToPaths(items, model)),
+	: AbstractWorldItemCommand(items, scene, model, parent),
 	  m_redoPolygons(polygons),
-	  m_undoPolygons(polygonsFromItems(items)),
-	  m_model(model),
-	  m_scene(scene),
-	  m_firstRun(true)
+	  m_undoPolygons(polygonsFromItems(items))
 {
 	setText("Change shape");
 }
@@ -737,49 +647,14 @@ ShapeWorldItemsCommand::~ShapeWorldItemsCommand()
 {
 }
 
-void ShapeWorldItemsCommand::undo()
+void ShapeWorldItemsCommand::undoChangeItem(int i, AbstractWorldItem *item)
 {
-	bool pointsMode = m_scene->isEnabledEditPoints();
-	m_scene->setEnabledEditPoints(false);
-
-	for (int i = 0; i < m_listPaths.count(); ++i)
-	{
-		Node *node = m_model->pathToNode(m_listPaths.at(i));
-		AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-		item->setPolygon(m_redoPolygons.at(i));
-		updateGraphicsData(item);
-	}
-
-	m_scene->setEnabledEditPoints(pointsMode);
+	item->setPolygon(m_redoPolygons.at(i));
 }
 
-void ShapeWorldItemsCommand::redo()
+void ShapeWorldItemsCommand::redoChangeItem(int i, AbstractWorldItem *item)
 {
-	if (!m_firstRun)
-	{
-		bool pointsMode = m_scene->isEnabledEditPoints();
-		m_scene->setEnabledEditPoints(false);
-
-		for (int i = 0; i < m_listPaths.count(); ++i)
-		{
-			Node *node = m_model->pathToNode(m_listPaths.at(i));
-			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-			item->setPolygon(m_undoPolygons.at(i));
-			updateGraphicsData(item);
-		}
-		m_scene->setEnabledEditPoints(pointsMode);
-	}
-	else
-	{
-		for (int i = 0; i < m_listPaths.count(); ++i)
-		{
-			Node *node = m_model->pathToNode(m_listPaths.at(i));
-			AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
-			updateGraphicsData(item);
-		}
-	}
-
-	m_firstRun = false;
+	item->setPolygon(m_undoPolygons.at(i));
 }
 
 } /* namespace WorldEditor */
