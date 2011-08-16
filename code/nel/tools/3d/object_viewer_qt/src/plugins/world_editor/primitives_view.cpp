@@ -135,7 +135,7 @@ void PrimitivesView::loadRootPrimitive()
 		Q_FOREACH(QString fileName, fileNames)
 		{
 			m_lastDir = QFileInfo(fileName).absolutePath();
-			m_undoStack->push(new LoadRootPrimitiveCommand(fileName, m_worldEditorScene, m_primitivesTreeModel));
+			m_undoStack->push(new LoadRootPrimitiveCommand(fileName, m_worldEditorScene, m_primitivesTreeModel, this));
 		}
 
 		if (fileNames.count() > 1)
@@ -258,7 +258,7 @@ void PrimitivesView::addNewPrimitiveByClass(int value)
 	QString className = node->primitiveClass()->DynamicChildren[value].ClassName.c_str();
 
 	m_undoStack->push(new AddPrimitiveByClassCommand(className, m_primitivesTreeModel->pathFromIndex(indexList.first()),
-					  m_worldEditorScene, m_primitivesTreeModel));
+					  m_worldEditorScene, m_primitivesTreeModel, this));
 }
 
 void PrimitivesView::generatePrimitives(int value)

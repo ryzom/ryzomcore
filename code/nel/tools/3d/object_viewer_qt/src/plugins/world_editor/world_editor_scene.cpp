@@ -369,6 +369,9 @@ void WorldEditorScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 void WorldEditorScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
+	if (mouseEvent->button() == Qt::MidButton)
+		return;
+
 	if (m_pointsMode)
 	{
 		if (mouseEvent->button() == Qt::LeftButton)

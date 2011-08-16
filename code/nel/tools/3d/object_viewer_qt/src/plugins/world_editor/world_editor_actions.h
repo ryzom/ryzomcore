@@ -25,6 +25,7 @@
 // Qt includes
 #include <QtGui/QUndoCommand>
 #include <QtGui/QGraphicsScene>
+#include <QtGui/QTreeView>
 #include <QtGui/QGraphicsItem>
 #include <QPersistentModelIndex>
 
@@ -121,7 +122,8 @@ class LoadRootPrimitiveCommand: public QUndoCommand
 {
 public:
 	LoadRootPrimitiveCommand(const QString &fileName, WorldEditorScene *scene,
-							 PrimitivesTreeModel *model, QUndoCommand *parent = 0);
+							 PrimitivesTreeModel *model, QTreeView *view,
+							 QUndoCommand *parent = 0);
 	virtual ~LoadRootPrimitiveCommand();
 
 	virtual void undo();
@@ -132,6 +134,7 @@ private:
 	const QString m_fileName;
 	WorldEditorScene *const m_scene;
 	PrimitivesTreeModel *const m_model;
+	QTreeView *m_view;
 };
 
 /**
@@ -144,7 +147,7 @@ class AddPrimitiveByClassCommand: public QUndoCommand
 public:
 	AddPrimitiveByClassCommand(const QString &className, const Path &parentIndex,
 							   WorldEditorScene *scene, PrimitivesTreeModel *model,
-							   QUndoCommand *parent = 0);
+							   QTreeView *view, QUndoCommand *parent = 0);
 	virtual ~AddPrimitiveByClassCommand();
 
 	virtual void undo();
@@ -157,6 +160,7 @@ private:
 	Path m_parentIndex, m_newPrimIndex;
 	WorldEditorScene *m_scene;
 	PrimitivesTreeModel *m_model;
+	QTreeView *m_view;
 };
 
 /**

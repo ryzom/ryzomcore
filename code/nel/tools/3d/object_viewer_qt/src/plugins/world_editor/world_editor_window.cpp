@@ -193,7 +193,8 @@ void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 			m_undoStack->push(new LoadLandscapeCommand(QString(worldEditList[i].second.c_str()), m_primitivesModel, m_zoneBuilderBase));
 			break;
 		case Utils::PrimitiveType:
-			m_undoStack->push(new LoadRootPrimitiveCommand(QString(worldEditList[i].second.c_str()), m_worldEditorScene, m_primitivesModel));
+			m_undoStack->push(new LoadRootPrimitiveCommand(QString(worldEditList[i].second.c_str()),
+							  m_worldEditorScene, m_primitivesModel, m_ui.treePrimitivesView));
 			break;
 		};
 	}
@@ -383,7 +384,7 @@ void WorldEditorWindow::readSettings()
 	restoreGeometry(settings->value(Constants::WORLD_WINDOW_GEOMETRY).toByteArray());
 
 	// Use OpenGL graphics system instead raster graphics system
-	if (settings->value(Constants::WORLD_EDITOR_USE_OPENGL, true).toBool())
+	if (settings->value(Constants::WORLD_EDITOR_USE_OPENGL, false).toBool())
 	{
 		m_oglWidget = new QGLWidget(QGLFormat(QGL::DoubleBuffer));
 		m_ui.graphicsView->setViewport(m_oglWidget);

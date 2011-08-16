@@ -189,9 +189,10 @@ void removeGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 	{
 		QGraphicsItem *item = getGraphicsItem(node);
 		if (item != 0)
+		{
+			delete qvariant_cast<QPersistentModelIndex *>(item->data(Constants::NODE_PERISTENT_INDEX));
 			scene->removeWorldItem(item);
-
-		delete qvariant_cast<QPersistentModelIndex *>(item->data(Constants::NODE_PERISTENT_INDEX));
+		}
 	}
 
 	int count = model->rowCount(primIndex);
@@ -350,11 +351,12 @@ void CreateRootPrimitiveCommand::redo()
 
 
 LoadRootPrimitiveCommand::LoadRootPrimitiveCommand(const QString &fileName, WorldEditorScene *scene,
-		PrimitivesTreeModel *model, QUndoCommand *parent)
+		PrimitivesTreeModel *model, QTreeView *view, QUndoCommand *parent)
 	: QUndoCommand(parent),
 	  m_fileName(fileName),
 	  m_scene(scene),
-	  m_model(model)
+	  m_model(model),
+	  m_view(view)
 {
 	setText("Load primitive file");
 }
@@ -367,6 +369,8 @@ void LoadRootPrimitiveCommand::undo()
 {
 	// Disable edit points mode
 	m_scene->setEnabledEditPoints(false);
+
+	m_view->selectionModel()->clearSelection();
 
 	QModelIndex index = m_model->pathToIndex(m_rootPrimIndex);
 
@@ -409,19 +413,20 @@ void LoadRootPrimitiveCommand::redo()
 }
 
 AddPrimitiveByClassCommand::AddPrimitiveByClassCommand(const QString &className, const Path &parentIndex,
-		WorldEditorScene *scene, PrimitivesTreeModel *model, QUndoCommand *parent)
+		WorldEditorScene *scene, PrimitivesTreeModel *model, QTreeView *view, QUndoCommand *parent)
 	: QUndoCommand(parent),
 	  m_className(className),
 	  m_parentIndex(parentIndex),
 	  m_scene(scene),
-	  m_model(model)
+	  m_model(model),
+	  m_view(view)
 {
 	setText(QString("Add %1").arg(m_className));
 
-	QGraphicsView *view = m_scene->views().first();
+	QGraphicsView *graphicsView = m_scene->views().first();
 
 	// TODO: returns incorrect position when zoom in
-	QRectF visibleArea = view->mapToScene(view->rect()).boundingRect();
+	QRectF visibleArea = graphicsView->mapToScene(view->rect()).boundingRect();
 	m_delta = visibleArea.height() / 10.0;
 	m_initPos = visibleArea.center();
 }
@@ -433,6 +438,8 @@ AddPrimitiveByClassCommand::~AddPrimitiveByClassCommand()
 void AddPrimitiveByClassCommand::undo()
 {
 	m_scene->setEnabledEditPoints(false);
+
+	m_view->selectionModel()->clearSelection();
 
 	QModelIndex index = m_model->pathToIndex(m_newPrimIndex);
 	PrimitiveNode *node = static_cast<PrimitiveNode *>(index.internalPointer());
