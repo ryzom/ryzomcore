@@ -26,6 +26,7 @@
 #include <QtGui/QUndoCommand>
 #include <QtGui/QGraphicsScene>
 #include <QtGui/QGraphicsItem>
+#include <QPersistentModelIndex>
 
 namespace LandscapeEditor
 {
@@ -282,5 +283,8 @@ private:
 };
 
 } /* namespace WorldEditor */
+
+// Enable the use of QVariant with this class.
+Q_DECLARE_METATYPE(QPersistentModelIndex *)
 
 #endif // WORLD_EDITOR_ACTIONS_H

@@ -39,6 +39,7 @@
 #include <QtGui/QFileDialog>
 #include <QtGui/QStatusBar>
 #include <QtGui/QMessageBox>
+#include <QPersistentModelIndex>
 
 namespace WorldEditor
 {
@@ -107,6 +108,9 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 
 	connect(m_ui.treePrimitivesView->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
 			this, SLOT(updateSelection(QItemSelection, QItemSelection)));
+
+	connect(m_worldEditorScene, SIGNAL(updateSelectedItems(QList<QGraphicsItem *>)),
+			this, SLOT(selectedItemsInScene(QList<QGraphicsItem *>)));
 
 	m_statusBarTimer = new QTimer(this);
 	connect(m_statusBarTimer, SIGNAL(timeout()), this, SLOT(updateStatusBar()));
@@ -293,6 +297,35 @@ void WorldEditorWindow::updateSelection(const QItemSelection &selected, const QI
 
 	// Update world editor scene
 	m_worldEditorScene->updateSelection(itemSelected, itemDeselected);
+}
+
+void WorldEditorWindow::selectedItemsInScene(const QList<QGraphicsItem *> &selected)
+{
+	QItemSelectionModel *selectionModel = m_ui.treePrimitivesView->selectionModel();
+	disconnect(m_ui.treePrimitivesView->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+			   this, SLOT(updateSelection(QItemSelection, QItemSelection)));
+
+	selectionModel->clear();
+	QItemSelection itemSelection;
+	Q_FOREACH(QGraphicsItem *item, selected)
+	{
+		QPersistentModelIndex *index = qvariant_cast<QPersistentModelIndex *>(item->data(Constants::NODE_PERISTENT_INDEX));
+		if (index->isValid())
+		{
+			QModelIndex modelIndex = index->operator const QModelIndex &();
+			QItemSelection mergeItemSelection(modelIndex, modelIndex);
+			itemSelection.merge(mergeItemSelection, QItemSelectionModel::Select);
+		}
+		QApplication::processEvents();
+	}
+
+	selectionModel->select(itemSelection, QItemSelectionModel::Select);
+
+	// TODO: update property editor
+	// ...
+
+	connect(m_ui.treePrimitivesView->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+			this, SLOT(updateSelection(QItemSelection, QItemSelection)));
 }
 
 void WorldEditorWindow::showEvent(QShowEvent *showEvent)

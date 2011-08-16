@@ -167,6 +167,11 @@ void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 		QVariant graphicsData;
 		graphicsData.setValue<AbstractWorldItem *>(item);
 		node->setData(Constants::GRAPHICS_DATA_QT4_2D, graphicsData);
+
+		QVariant persistenVariant;
+		QPersistentModelIndex *persistentIndex = new QPersistentModelIndex(primIndex);
+		persistenVariant.setValue<QPersistentModelIndex *>(persistentIndex);
+		item->setData(Constants::NODE_PERISTENT_INDEX, persistenVariant);
 	}
 
 	int count = model->rowCount(primIndex);
@@ -185,6 +190,8 @@ void removeGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 		QGraphicsItem *item = getGraphicsItem(node);
 		if (item != 0)
 			scene->removeWorldItem(item);
+
+		delete qvariant_cast<QPersistentModelIndex *>(item->data(Constants::NODE_PERISTENT_INDEX));
 	}
 
 	int count = model->rowCount(primIndex);
@@ -358,6 +365,7 @@ LoadRootPrimitiveCommand::~LoadRootPrimitiveCommand()
 
 void LoadRootPrimitiveCommand::undo()
 {
+	// Disable edit points mode
 	m_scene->setEnabledEditPoints(false);
 
 	QModelIndex index = m_model->pathToIndex(m_rootPrimIndex);

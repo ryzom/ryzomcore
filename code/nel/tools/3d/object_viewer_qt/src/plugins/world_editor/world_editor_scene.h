@@ -68,7 +68,7 @@ public:
 	bool isEnabledEditPoints() const;
 
 Q_SIGNALS:
-	void selectionUpdated(const QList<QGraphicsItem *> &selected, const QList<QGraphicsItem *> &deselected);
+	void updateSelectedItems(const QList<QGraphicsItem *> &selected);
 
 public Q_SLOTS:
 	void setEnabledEditPoints(bool enabled);

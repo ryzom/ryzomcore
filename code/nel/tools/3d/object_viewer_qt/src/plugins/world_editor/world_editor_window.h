@@ -61,6 +61,7 @@ private Q_SLOTS:
 	void updateStatusBar();
 
 	void updateSelection(const QItemSelection &selected, const QItemSelection &deselected);
+	void selectedItemsInScene(const QList<QGraphicsItem *> &selected);
 
 protected:
 	virtual void showEvent(QShowEvent *showEvent);

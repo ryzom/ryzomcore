@@ -459,6 +459,9 @@ void WorldEditorScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 				m_selectedItems.push_back(item);
 			}
+
+			Q_EMIT updateSelectedItems(m_selectedItems);
+
 			updateSelectedWorldItems(true);
 			m_selectionArea = QRectF();
 			update();
@@ -556,6 +559,8 @@ void WorldEditorScene::updatePickSelection(const QPointF &point)
 		m_selectedItems.push_back(worldItemsItems.at(m_lastPickedPrimitive));
 		updateSelectedWorldItems(true);
 	}
+
+	Q_EMIT updateSelectedItems(m_selectedItems);
 }
 
 void WorldEditorScene::updatePickSelectionPoints(const QPointF &point)

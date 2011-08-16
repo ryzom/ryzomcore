@@ -155,7 +155,7 @@ Path PrimitivesTreeModel::pathFromNode(Node *node)
 	Path path;
 	while(iter != 0)
 	{
-		path.prepend(PathItem(iter->row(), 1));
+		path.prepend(PathItem(iter->row(), 0));
 		iter = iter->parent();
 	}
 	return path;
