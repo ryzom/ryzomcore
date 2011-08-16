@@ -28,8 +28,10 @@ CGeorgesFileSystemModel::CGeorgesFileSystemModel(QString ldPath, QObject *parent
 	  m_correct(false)
 {
 	checkLDPath();
-	connect(this, SIGNAL(directoryLoaded(QString)),
-			this, SLOT(dir(const QString)));
+
+	// this yielded no relevant performance boost on my observations
+	//connect(this, SIGNAL(directoryLoaded(QString)),
+	//		this, SLOT(dir(const QString)));
 }
 
 CGeorgesFileSystemModel::~CGeorgesFileSystemModel()
@@ -39,6 +41,8 @@ CGeorgesFileSystemModel::~CGeorgesFileSystemModel()
 
 void CGeorgesFileSystemModel::dir(const QString &dir)
 {
+	// in theory this should prefetch all directory entries for the 
+	// filesystem model to speed up later work
 	QModelIndex i = index(dir);
 
 	if (hasChildren(i)) {
@@ -117,18 +121,18 @@ void CGeorgesFileSystemModel::checkLDPath()
 //    return (!indexNode->populatedChildren);*/
 //}
 
-CGeorgesFileSystemProxyModel::CGeorgesFileSystemProxyModel(QObject *parent) : QSortFilterProxyModel(parent)
-{
-	setFilterCaseSensitivity(Qt::CaseInsensitive);
-}
+//CGeorgesFileSystemProxyModel::CGeorgesFileSystemProxyModel(QObject *parent) : QSortFilterProxyModel(parent)
+//{
+//	setFilterCaseSensitivity(Qt::CaseInsensitive);
+//}
 
-bool CGeorgesFileSystemProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
-{
+//bool CGeorgesFileSystemProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
+//{
 	// TODO this is not perfect as it could be
 	// eg it should filter all dirs which have no entry
-	QModelIndex idx = sourceModel()->index(source_row, 0, source_parent);
-	if (sourceModel()->hasChildren(idx))
-	{
+	//QModelIndex idx = sourceModel()->index(source_row, 0, source_parent);
+	//if (sourceModel()->hasChildren(idx))
+	//{
 	//	QString d = sourceModel()->data(idx).toString();
 	//	//QModelIndex i = mapFromSource(source_parent);
 	//	//if (hasChildren(i)) {
@@ -139,10 +143,10 @@ bool CGeorgesFileSystemProxyModel::filterAcceptsRow(int source_row, const QModel
 	//			bool test = filterAcceptsRow(c, child);
 	//		}*/
 	//	}
-		return true;
-	}
-	return QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent);
-}
+	//	return true;
+	//}
+	//return QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent);
+//}
 
 //QVariant CGeorgesFileSystemProxyModel::data ( const QModelIndex & index, int role ) const
 //{

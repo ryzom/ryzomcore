@@ -64,13 +64,16 @@ namespace Plugin
 	protected:
 		void closeEvent(QCloseEvent *event);
 
-    Q_SIGNALS:
+	Q_SIGNALS:
 		void changeFile(QString);
 		void modified(bool);
+		void closing();
+
 	public Q_SLOTS:
 		void setForm(const CForm*);
 		void loadFormIntoDialog(CForm *form = 0);
 		void modifiedFile( );
+
 	private Q_SLOTS:
 		void doubleClicked ( const QModelIndex & index );
 		void filterRows();

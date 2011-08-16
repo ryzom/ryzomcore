@@ -31,7 +31,7 @@
 #include "georges.h"
 #include "georgesform_model.h"
 #include "georgesform_proxy_model.h"
-//#include "formitem.h"
+#include "formitem.h"
 //#include "formdelegate.h"
 
 using namespace NLMISC;
@@ -72,7 +72,6 @@ namespace Plugin
 	{
 		//delete _ui.treeView->itemDelegateForColumn(1);
 		delete m_form;
-		deleteLater();
 		//QSettings settings("RyzomCore", "GeorgesQt");
 		//settings.setValue("dirViewGeometry", saveGeometry());
 	}
@@ -288,11 +287,18 @@ namespace Plugin
 	void CGeorgesTreeViewDialog::doubleClicked ( const QModelIndex & index ) 
 	{
 		// TODO: this is messy :( perhaps this can be done better
-		//CGeorgesFormProxyModel * mp = 
-		//	dynamic_cast<CGeorgesFormProxyModel *>(_ui.treeView->model());
-		//CGeorgesFormModel *m = 
-		//	dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());
-		//QModelIndex in = mp->mapToSource(index);
+		CGeorgesFormProxyModel * proxyModel = 
+			dynamic_cast<CGeorgesFormProxyModel *>(m_ui.treeView->model());
+		CGeorgesFormModel *model = 
+			dynamic_cast<CGeorgesFormModel *>(proxyModel->sourceModel());
+		QModelIndex sourceIndex = proxyModel->mapToSource(index);
+
+		CFormItem *item = model->getItem(sourceIndex);
+
+		if (item->parent() && item->parent()->data(0) == "parents")
+		{
+			Q_EMIT changeFile(CPath::lookup(item->data(0).toString().toStdString(),false).c_str());
+		}
 
 		//// col containing additional stuff like icons
 		//if (index.column() == 2) 
@@ -344,20 +350,8 @@ namespace Plugin
 
 	void CGeorgesTreeViewDialog::closeEvent(QCloseEvent *event) 
 	{
-		/*if (Modules::mainWin().getEmptyView() == this)
-		{
-			event->ignore();
-		}
-		else
-		{
-			if(Modules::mainWin().getTreeViewList().size() == 1)
-			{
-				Modules::mainWin().createEmptyView(
-					Modules::mainWin().getTreeViewList().takeFirst());
-			}
-			Modules::mainWin().getTreeViewList().removeOne(this);
-			deleteLater();
-		}*/
+		Q_EMIT closing();
+		deleteLater();
 	}
 
 	void CGeorgesTreeViewDialog::filterRows()

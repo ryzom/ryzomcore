@@ -44,6 +44,7 @@ public Q_SLOTS:
 	void save();
 	void settingsChanged();
 	void loadFile(const QString fileName);
+	void closingTreeView();
 
 private:
 	void readSettings();

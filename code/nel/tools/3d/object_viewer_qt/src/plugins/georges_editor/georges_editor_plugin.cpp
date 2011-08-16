@@ -90,8 +90,9 @@ QString GeorgesEditorPlugin::description() const
 QStringList GeorgesEditorPlugin::dependencies() const
 {
 	QStringList list;
-	list.append(Core::Constants::OVQT_CORE_PLUGIN);
-	list.append("ObjectViewer"); // TODO
+	// TODO
+	//list.append(Core::Constants::OVQT_CORE_PLUGIN);
+	//list.append("ObjectViewer");
 	return list;
 }
 

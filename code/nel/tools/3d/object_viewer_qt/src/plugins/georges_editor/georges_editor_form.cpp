@@ -198,23 +198,48 @@ namespace Plugin
 		{
 			m_dockedWidgets.append(new CGeorgesTreeViewDialog(m_mainDock));
 			m_mainDock->addDockWidget(Qt::RightDockWidgetArea, m_dockedWidgets.last());
+			connect(m_dockedWidgets.last(), SIGNAL(closing()),
+				this, SLOT(closingTreeView()));
 		}
 		else
 		{
+
+			Q_FOREACH(QDockWidget *wgt, m_dockedWidgets)
+			{
+				if (info.fileName() == wgt->windowTitle())
+				{
+					wgt->raise();
+					return;
+				}
+			}
 			m_dockedWidgets.append(new CGeorgesTreeViewDialog(m_mainDock));
+			connect(m_dockedWidgets.last(), SIGNAL(closing()),
+				this, SLOT(closingTreeView()));
 			Q_ASSERT(m_dockedWidgets.size() > 1);
 			m_mainDock->tabifyDockWidget(m_dockedWidgets.at(m_dockedWidgets.size() - 2), m_dockedWidgets.last());
 		}
 		CForm *form = m_dockedWidgets.last()->getFormByName(info.fileName());
 		if (form)
 		{
-		//	delete newView;
-		//	newView = createTreeView(fileName);
-		m_dockedWidgets.last()->setForm(form);
-		m_dockedWidgets.last()->loadFormIntoDialog(form);
-		//setCurrentFile(info.fileName());
-		//	return;
+			m_dockedWidgets.last()->setForm(form);
+			m_dockedWidgets.last()->loadFormIntoDialog(form);
+			QApplication::processEvents();
+			m_dockedWidgets.last()->raise();
+			connect(m_dockedWidgets.last(), SIGNAL(changeFile(QString)), 
+				m_georgesDirTreeDialog, SLOT(changeFile(QString)));
 		}
+		else
+		{
+			m_dockedWidgets.last()->close();
+		}
+	}
+
+	void GeorgesEditorForm::closingTreeView()
+	{
+		int i = m_dockedWidgets.size();
+		m_dockedWidgets.removeAll(qobject_cast<CGeorgesTreeViewDialog*>(sender()));
+		i = m_dockedWidgets.size();
+		int j = i;
 	}
 
 } /* namespace Plugin */

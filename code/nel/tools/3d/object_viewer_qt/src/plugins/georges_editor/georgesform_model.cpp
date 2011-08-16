@@ -573,12 +573,15 @@ namespace Plugin
 	void CGeorgesFormModel::loadFormHeader() 
 	{
 
-		CFormItem *fi_pars = new CFormItem(m_rootElm, QList<QVariant>() << "parents", m_rootItem);
-		m_rootItem->appendChild(fi_pars);
-
-		Q_FOREACH(QString str, m_parents) 
+		if (m_parents.size())
 		{
-			fi_pars->appendChild(new CFormItem(m_rootElm, QList<QVariant>() << str, fi_pars));
+			CFormItem *fi_pars = new CFormItem(m_rootElm, QList<QVariant>() << "parents" << "" << "", m_rootItem);
+			m_rootItem->appendChild(fi_pars);
+
+			Q_FOREACH(QString str, m_parents) 
+			{
+				fi_pars->appendChild(new CFormItem(m_rootElm, QList<QVariant>() << str << "" << "", fi_pars));
+			}
 		}
 
 		/*QStringList dfns = _dependencies["dfn"];

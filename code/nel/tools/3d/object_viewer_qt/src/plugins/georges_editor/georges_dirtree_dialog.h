@@ -45,7 +45,7 @@ private:
 	Ui::CGeorgesDirTreeDialog m_ui;
 
 	CGeorgesFileSystemModel *m_dirModel;
-	CGeorgesFileSystemProxyModel *m_proxyModel;
+	//CGeorgesFileSystemProxyModel *m_proxyModel;
 	QString m_ldPath;
 
 Q_SIGNALS:

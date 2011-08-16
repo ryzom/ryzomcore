@@ -61,18 +61,18 @@ private Q_SLOTS:
 
 	// A modified QSortFilterProxyModel that always accepts the root nodes in the tree
 	// so filtering is only done on the children.
-	class CGeorgesFileSystemProxyModel : public QSortFilterProxyModel
-	{
-		Q_OBJECT
+	//class CGeorgesFileSystemProxyModel : public QSortFilterProxyModel
+	//{
+	//	Q_OBJECT
 
-	public:
-		CGeorgesFileSystemProxyModel(QObject *parent = 0);
+	//public:
+	//	CGeorgesFileSystemProxyModel(QObject *parent = 0);
 
 		//QVariant data(const QModelIndex& index, int role) const ;
 
-	protected:
-		bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
-	};
+	//protected:
+	//	bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
+	//};
 
 } /* namespace NLQT */
 
