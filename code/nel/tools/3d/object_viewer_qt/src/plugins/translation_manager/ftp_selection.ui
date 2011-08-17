@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>388</width>
+    <width>446</width>
     <height>560</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>371</width>
+     <width>421</width>
      <height>541</height>
     </rect>
    </property>
@@ -29,9 +29,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>130</y>
-      <width>351</width>
-      <height>361</height>
+      <y>110</y>
+      <width>401</width>
+      <height>381</height>
      </rect>
     </property>
     <property name="title">
@@ -55,7 +55,7 @@
       <rect>
        <x>10</x>
        <y>40</y>
-       <width>331</width>
+       <width>381</width>
        <height>311</height>
       </rect>
      </property>
@@ -69,49 +69,9 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>11</x>
-      <y>29</y>
-      <width>351</width>
-      <height>101</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Ftp server</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="url"/>
-     </item>
-     <item row="2" column="0" colspan="3">
-      <widget class="QPushButton" name="connectButton">
-       <property name="text">
-        <string>Connect</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="2">
-      <widget class="QPushButton" name="cdToParrent">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="ftp_selection.qrc">
-         <normaloff>:/translationManager/images/cdtoparent.png</normaloff>:/translationManager/images/cdtoparent.png</iconset>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
+      <x>10</x>
       <y>500</y>
-      <width>371</width>
+      <width>401</width>
       <height>33</height>
      </rect>
     </property>
@@ -127,6 +87,46 @@
       <widget class="QPushButton" name="cancelButton">
        <property name="text">
         <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>411</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Ftp server</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="url"/>
+     </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="cdToParrent">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="ftp_selection.qrc">
+         <normaloff>:/translationManager/images/cdtoparent.png</normaloff>:/translationManager/images/cdtoparent.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="3">
+      <widget class="QPushButton" name="connectButton">
+       <property name="text">
+        <string>Connect</string>
        </property>
       </widget>
      </item>

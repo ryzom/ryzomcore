@@ -75,29 +75,6 @@ void CEditorPhrase::newUndoCommandAdded()
 	 current_stack->push(new CUndoPhraseNewCommand(text_edit)); 
 }
 
-/* void CTextEdit::keyPressEvent(QKeyEvent *event)
-{
-	QString chars = event->text();
-	int index = textCursor().position();
-
-	switch(event->key())
-	{
-		case Qt::Key_Backspace:
-            if (index > 0) 				
-                m_undoStack->push(new CUndoPhraseRemoveCommand(index--, 1, this)); 
-			break;
-		case Qt::Key_Delete:
-            if (index < toPlainText().length()) 
-                m_undoStack->push(new CUndoPhraseRemoveCommand(index, 1, this)); 
-			break;
-		 default:
-            if (!chars.isEmpty()) 
-                m_undoStack->push(new CUndoPhraseInsertCommand(index, chars, this)); 
-			break;
-	}
-
-} */
-
 void CEditorPhrase::docContentsChanged()
 {
 	setWindowModified(true);
@@ -110,13 +87,7 @@ void CEditorPhrase::activateWindow()
 
 void CEditorPhrase::save()
 {
-	QFile file(current_file);
-	file.open(QIODevice::WriteOnly | QIODevice::Text);
-	QTextStream out(&file);
-	out.setCodec("UTF-8");
-	out.setGenerateByteOrderMark(true);
-	out<<text_edit->toPlainText();
-	setCurrentFile(current_file);
+	saveAs(current_file);
 }
 
 void CEditorPhrase::saveAs(QString filename)

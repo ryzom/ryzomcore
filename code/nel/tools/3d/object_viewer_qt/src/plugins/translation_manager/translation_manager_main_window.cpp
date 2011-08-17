@@ -37,7 +37,6 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QEvent>
 #include <QtGui/QCloseEvent>
-#include <QtGui/qfont.h>
 // Plugin includes
 #include "translation_manager_main_window.h"
 #include "translation_manager_constants.h"
@@ -70,7 +69,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 void CMainWindow::createToolbar()
 {	
          // File menu        
-        openAct = new QAction(QIcon(Core::Constants::ICON_OPEN), "&Open...", this);
+        openAct = new QAction(QIcon(Core::Constants::ICON_OPEN), "&Open file(s)...", this);
         _ui.toolBar->addAction(openAct);
         connect(openAct, SIGNAL(triggered()), this, SLOT(open()));       
         saveAct = new QAction(QIcon(Core::Constants::ICON_SAVE), "&Save...", this);
@@ -147,11 +146,11 @@ void CMainWindow::updateToolbar(QMdiSubWindow *window)
     if(QString(window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
     {
 		//setContextMenuPolicy(Qt::ActionsContextMenu);
-        QAction *insertRowAct = new QAction("Insert new row", this);
+        QAction *insertRowAct = new QAction(tr("Insert new row"), this);
         connect(insertRowAct, SIGNAL(triggered()), window, SLOT(insertRow()));
 		//addAction(insertRowAct);
 		windowMenu->addAction(insertRowAct);
-        QAction *deleteRowAct = new QAction("Delete row", this);
+        QAction *deleteRowAct = new QAction(tr("Delete row"), this);
         connect(deleteRowAct, SIGNAL(triggered()), window, SLOT(deleteRow())); 
 		//addAction(deleteRowAct);
 		windowMenu->addAction(deleteRowAct);
@@ -202,7 +201,14 @@ void CMainWindow::updateWindowsList()
 
 void CMainWindow::open()
 {
-        QString file_name = QFileDialog::getOpenFileName(this);
+		QSettings *settings = Core::ICore::instance()->settings();
+		settings->beginGroup("translationmanager");
+		QString lastOpenLocation = settings->value("lastOpenLocation").toString();
+        QString file_name = QFileDialog::getOpenFileName(this, tr("Open translation file"), lastOpenLocation, tr("Translation files (*txt)"));
+		QFileInfo* file_info = new QFileInfo(file_name);
+		settings->setValue("lastOpenLocation", file_info->absolutePath());
+		settings->endGroup();
+
         if(!file_name.isEmpty())
         {
 			CEditor *editor = getEditorByWindowFilePath(file_name);
@@ -303,14 +309,22 @@ void CMainWindow::initializeSettings(bool georges = false)
 
     if(initialize_settings["ligo"] == false)
     {
-        //-------------------------------------------------------------------
-        // init ligo config      
-        string ligoPath = CPath::lookup("world_editor_classes.xml", true, true);
-        ligoConfig.readPrimitiveClass(ligoPath.c_str(), false);
-        NLLIGO::Register();
-        NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &ligoConfig;
-        initialize_settings["ligo"] = true;
+		try
+		{
+			// Search path of file world_editor_classes.xml
+			std::string ligoPath = NLMISC::CPath::lookup("world_editor_classes.xml");
+			// Init LIGO
+			ligoConfig.readPrimitiveClass(ligoPath.c_str(), true);
+			NLLIGO::Register();
+			NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &ligoConfig;
+			initialize_settings["ligo"] = true;
+		}
+		catch (NLMISC::Exception &e)
+		{
+			nlerror("Can't found path to world_editor_classes.xml");
+		}
     }
+
 }
 
 void CMainWindow::extractWords(QString typeq)
@@ -510,7 +524,7 @@ bool CMainWindow::verifySettings()
 		if(level_design_path.isNull() || primitives_path.isNull() || work_path.isNull())
         {
             QErrorMessage error_settings;
-            error_settings.showMessage("Please write all the paths on the settings dialog.");
+            error_settings.showMessage(tr("Please write all the paths on the settings dialog."));
             error_settings.exec();
             count_errors = true;
         }
@@ -574,11 +588,9 @@ bool CMainWindow::isWorksheetEditor(QString filename)
              {
 				 if(wk_file.ColCount > 1)
 					return true;
-				 else
-					 return false;
-             }  else {
-                 return false;
              }
+
+			 return false;
 }
 
 bool CMainWindow::isPhraseEditor(QString filename)

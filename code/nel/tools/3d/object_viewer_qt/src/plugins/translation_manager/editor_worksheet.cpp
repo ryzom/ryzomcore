@@ -34,8 +34,6 @@ using namespace std;
 
 namespace TranslationManager {
 
-
-
 void CEditorWorksheet::open(QString filename)
 {
              STRING_MANAGER::TWorksheet wk_file;          
@@ -134,54 +132,7 @@ void CEditorWorksheet::activateWindow()
 
 void CEditorWorksheet::save()
 {
-               STRING_MANAGER::TWorksheet wk_file;   
-               loadExcelSheet(current_file.toStdString(), wk_file, true);   
-               uint rowIdx;
-               uint colIdx = 0;
-               bool hasHashValue = false;
-               if(wk_file.getData(0, 0) == ucstring("*HASH_VALUE"))
-               {
-                   hasHashValue = true;
-                   colIdx = 1;
-               }
-               for(int i = 0; i < table_editor->rowCount(); i++)
-               {
-                   // maybe extra rows ?
-                   if((unsigned)table_editor->rowCount() > (wk_file.size() - 1))
-                   {
-                        rowIdx = wk_file.size();
-                        wk_file.resize(rowIdx + table_editor->rowCount() - wk_file.size() + 1);
-                   }
-                   for(int j = 0; j < table_editor->columnCount(); j++)
-                   {                       
-                       ucstring tvalue;
-                       ucstring colname;
-                       uint rowIdf;
-                       QString tvalueQt = table_editor->item(i, j)->text();				   					   
-					   tvalue.fromUtf8(std::string(tvalueQt.toUtf8()));										   
-                       colname = wk_file.getData(0, j + colIdx);
-                       
-                       rowIdf = uint(i + 1);
-                       if(wk_file.findRow(j + colIdx, colname, rowIdf)) // search for the row
-                       {
-                           if(wk_file.getData(i + 1, j + colIdx) != tvalue) // verify the current value
-                           {
-							   wk_file.setData(i + 1, j + colIdx,  tvalue); // change the value
-                           }
-                       } else {
-						   wk_file.setData(i + 1, j + colIdx,  tvalue); // insert the value
-                       }
-                   }
-               }
-               if(hasHashValue)
-               {
-                        // rewrite the hash codes
-                        makeHashCode(wk_file, true);
-               }
-               // write to file
-               ucstring s = prepareExcelSheet(wk_file);            
-               NLMISC::CI18N::writeTextFile(current_file.toStdString(), s, false);
-               setCurrentFile(current_file);
+	saveAs(current_file);
 }
 
 void CEditorWorksheet::saveAs(QString filename)
@@ -238,8 +189,8 @@ void CEditorWorksheet::deleteRow()
 {
  int selected_row = table_editor->currentRow();
  QMessageBox msgBox;
- msgBox.setText("The row will be deleted.");
- msgBox.setInformativeText("Do you want to delete the selected row ?");
+ msgBox.setText(tr("The row will be deleted."));
+ msgBox.setInformativeText(tr("Do you want to delete the selected row ?"));
  msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
  msgBox.setDefaultButton(QMessageBox::No);
  int ret = msgBox.exec(); 
@@ -286,30 +237,15 @@ void CEditorWorksheet::extractBotNames(list<string> filters, string level_design
 
                         for (; it != last; ++it)
                         {  
-                            QList<QTableWidgetItem*> search_results = table_editor->findItems(tr(it->first.c_str()), Qt::MatchExactly);
+                            QList<QTableWidgetItem*> search_results = table_editor->findItems(QString(it->first.c_str()), Qt::MatchExactly);
                             if(search_results.size() == 0)
                             {
-                                const int currentRow = table_editor->rowCount();                     
-                                table_editor->setRowCount(currentRow + 1);
-                                QTableWidgetItem *bot_name_row = new QTableWidgetItem();
-                                bot_name_row->setText(tr(it->first.c_str()));    
-                                bot_name_row->setBackgroundColor(QColor("#F75D59"));
-                                table_editor ->setItem(currentRow, 0, bot_name_row); 
-                                QTableWidgetItem *translation_name_row = new QTableWidgetItem();
-                                translation_name_row->setBackgroundColor(QColor("#F75D59"));
-                                translation_name_row->setText(tr(it->first.c_str()));
-                                table_editor ->setItem(currentRow , 1, translation_name_row);               
-                                QTableWidgetItem *sheet_name_row = new QTableWidgetItem();
-                                sheet_name_row->setText(tr(it->second.SheetName.c_str()));      
-                                sheet_name_row->setBackgroundColor(QColor("#F75D59"));
-                                table_editor ->setItem(currentRow, 2, sheet_name_row); 
-                                if(!modified) modified = true;
-								CTableWidgetItemStore bot_name_row_s(bot_name_row, currentRow, 0);
-								new_items.push_back(bot_name_row_s);
-								CTableWidgetItemStore translation_name_row_s(translation_name_row, currentRow, 1);
-								new_items.push_back(translation_name_row_s);
-								CTableWidgetItemStore sheet_name_row_s(sheet_name_row, currentRow, 2);
-								new_items.push_back(sheet_name_row_s);								
+								QList<QString> records;
+								records.push_back(tr(it->first.c_str()));
+								records.push_back(tr(it->first.c_str()));
+								records.push_back(tr(it->second.SheetName.c_str()));  
+								insertTableRecords(records, new_items);
+                                if(!modified) modified = true;							
                             }
                         }  
                         ebn.cleanSimpleNames();
@@ -321,30 +257,15 @@ void CEditorWorksheet::extractBotNames(list<string> filters, string level_design
                         for (; it != last; ++it)
                         {
                             string gnName = "gn_" + ebn.cleanupName(*it);
-                            QList<QTableWidgetItem*> search_results = table_editor->findItems(tr((*it).c_str()), Qt::MatchExactly);
+                            QList<QTableWidgetItem*> search_results = table_editor->findItems(QString((*it).c_str()), Qt::MatchExactly);
                             if(search_results.size() == 0)
                             {
-                                const int currentRow = table_editor->rowCount();                     
-                                table_editor->setRowCount(currentRow + 1);
-                                QTableWidgetItem *bot_name_row = new QTableWidgetItem();
-                                bot_name_row->setText(tr((*it).c_str()));    
-                                bot_name_row->setBackgroundColor(QColor("#F75D59"));
-                                table_editor ->setItem(currentRow, 0, bot_name_row);  
-                                QTableWidgetItem *translation_name_row = new QTableWidgetItem();
-                                translation_name_row->setBackgroundColor(QColor("#F75D59"));
-                                translation_name_row->setText(tr(gnName.c_str()));
-                                table_editor ->setItem(currentRow , 1, translation_name_row);               
-                                QTableWidgetItem *sheet_name_row = new QTableWidgetItem();
-                                sheet_name_row->setText(" ");      
-                                sheet_name_row->setBackgroundColor(QColor("#F75D59"));
-                                table_editor ->setItem(currentRow, 2, sheet_name_row);   
+								QList<QString> records;
+								records.push_back(tr((*it).c_str()));
+								records.push_back(tr(gnName.c_str()));
+								records.push_back(" ");  
+								insertTableRecords(records, new_items);
                                 if(!modified) modified = true;
-								CTableWidgetItemStore bot_name_row_s(bot_name_row, currentRow, 0);
-								new_items.push_back(bot_name_row_s);
-								CTableWidgetItemStore translation_name_row_s(translation_name_row, currentRow, 1);
-								new_items.push_back(translation_name_row_s);
-								CTableWidgetItemStore sheet_name_row_s(sheet_name_row, currentRow, 2);
-								new_items.push_back(sheet_name_row_s);	
                             }                         
                         }
                         ebn.cleanGenericNames();
@@ -399,8 +320,7 @@ void CEditorWorksheet::extractWords(QString filename, QString columnId, IWordLis
                 string keyName = allWords[i];
                 QList<QTableWidgetItem*> search_results = table_editor->findItems(tr(keyName.c_str()), Qt::MatchExactly);
                 if(search_results.size() == 0)
-                {
-                   
+                {                
                         int knPos = 0, nPos = 0;
                         if(workSheet.getData(0, 0) == ucstring("*HASH_VALUE"))
                         {
@@ -409,25 +329,13 @@ void CEditorWorksheet::extractWords(QString filename, QString columnId, IWordLis
                         } else {
                             knPos = keyColIndex;
                             nPos = nameColIndex;
-                        }                       
-                        const int currentRow = table_editor->rowCount();                     
-                        table_editor->setRowCount(currentRow + 1);
-                        // keyName row
-                        QTableWidgetItem *key_name_row = new QTableWidgetItem();
-                        key_name_row->setText(tr(keyName.c_str()));    
-                        key_name_row->setBackgroundColor(QColor("#F75D59"));               
-                        table_editor ->setItem(currentRow, knPos, key_name_row); 
-                        // nameColumn key
-                        QTableWidgetItem *name_row = new QTableWidgetItem();
-                        name_row->setText(QString("<GEN>") + tr(keyName.c_str()));    
-                        name_row->setBackgroundColor(QColor("#F75D59"));                    
-                        table_editor ->setItem(currentRow, nPos, name_row);   
-                        if(!modified) modified = true;
-						CTableWidgetItemStore key_name_row_s(key_name_row, currentRow, knPos);
-						new_items.push_back(key_name_row_s);
-						CTableWidgetItemStore name_row_s(name_row, currentRow, nPos);
-						new_items.push_back(name_row_s);
+                        }   
 
+						QList<QString> records;
+						records.push_back(tr(keyName.c_str()));
+						records.push_back(QString("<GEN>") + tr(keyName.c_str())); 
+						insertTableRecords(records, new_items);
+                        if(!modified) modified = true;
                 }            
         }
 		current_stack->push(new CUndoWorksheetExtraction(new_items, table_editor));
@@ -436,6 +344,23 @@ void CEditorWorksheet::extractWords(QString filename, QString columnId, IWordLis
               setWindowModified(true);
               table_editor->scrollToBottom();
        }
+}
+
+void CEditorWorksheet::insertTableRecords(QList<QString> records, QList<CTableWidgetItemStore> new_items)
+{
+	const int currentRow = table_editor->rowCount(); 
+	table_editor->setRowCount(currentRow + 1);
+	int n = 0;
+	Q_FOREACH(QString record, records)
+	{
+		QTableWidgetItem *rec = new QTableWidgetItem();
+		rec->setBackgroundColor(QColor("#F75D59"));
+		table_editor ->setItem(currentRow, n, rec);  
+		CTableWidgetItemStore rec_s(rec, currentRow, n);
+		new_items.push_back(rec_s);
+		n++;
+	}
+
 }
 
 bool CEditorWorksheet::compareWorksheetFile(QString filename)
@@ -503,7 +428,7 @@ void CEditorWorksheet::mergeWorksheetFile(QString filename)
                    }
                  } else {
                         QErrorMessage error;
-                        error.showMessage("This file is not a worksheet file.");
+                        error.showMessage(tr("This file is not a worksheet file."));
                         error.exec();                             
                  }
 }
@@ -513,8 +438,8 @@ void CEditorWorksheet::closeEvent(QCloseEvent *event)
     if(isWindowModified())
     {
         QMessageBox msgBox;
-        msgBox.setText("The document has been modified.");
-        msgBox.setInformativeText("Do you want to save your changes?");
+        msgBox.setText(tr("The document has been modified."));
+        msgBox.setInformativeText(tr("Do you want to save your changes?"));
         msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Save);
         int ret = msgBox.exec();

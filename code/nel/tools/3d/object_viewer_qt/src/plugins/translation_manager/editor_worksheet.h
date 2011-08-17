@@ -40,6 +40,18 @@
 
 namespace TranslationManager {
 
+struct CTableWidgetItemStore
+{
+public:
+	CTableWidgetItemStore(QTableWidgetItem *item, int row, int column) :
+		m_item(item),
+		m_row(row),
+		m_column(column) { }
+	QTableWidgetItem *m_item;
+	int m_row;
+	int m_column;
+};
+
 class CEditorWorksheet : public CEditor
 {
     Q_OBJECT
@@ -57,6 +69,7 @@ public:
     bool compareWorksheetFile(QString filename);
     void extractBotNames(list<string> filters, string level_design_path, NLLIGO::CLigoConfig ligoConfig);
     void extractWords(QString filename, QString columnId, IWordListBuilder &wordListBuilder);
+	void insertTableRecords(QList<QString> records, QList<CTableWidgetItemStore> new_items);
     bool isBotNamesTable();
     bool isSheetTable(QString type);
     void closeEvent(QCloseEvent *event);
@@ -67,18 +80,6 @@ private Q_SLOTS:
     void deleteRow();
 	void contextMenuEvent(QContextMenuEvent *e);
     
-};
-
-struct CTableWidgetItemStore
-{
-public:
-	CTableWidgetItemStore(QTableWidgetItem *item, int row, int column) :
-		m_item(item),
-		m_row(row),
-		m_column(column) { }
-	QTableWidgetItem *m_item;
-	int m_row;
-	int m_column;
 };
 
 class CUndoWorksheetCommand : public QUndoCommand
