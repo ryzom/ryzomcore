@@ -37,7 +37,7 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QEvent>
 #include <QtGui/QCloseEvent>
-
+#include <QtGui/qfont.h>
 // Plugin includes
 #include "translation_manager_main_window.h"
 #include "translation_manager_constants.h"

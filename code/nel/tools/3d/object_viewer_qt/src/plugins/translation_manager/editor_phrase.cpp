@@ -27,7 +27,8 @@
 #include <QtCore/QByteArray>
 #include <QtCore/qtextcodec.h>
 #include <QtGui/QTextCursor>
-
+#include <QtCore/qtextstream.h>
+#include <QtCore/qtextcodec.h>
 
 // Project includes
 #include "editor_phrase.h"
@@ -51,8 +52,9 @@ void CEditorPhrase::open(QString filename)
 		// read the file content
 		QFile file(filename);
 		file.open(QIODevice::ReadOnly | QIODevice::Text);
+		QTextStream in(&file);
 		// set the file content to the text edit	
-		QByteArray data = file.readAll();
+		QString data = in.readAll();
 		text_edit->append(data);
 		// window settings
 		setCurrentFile(filename);
@@ -111,6 +113,8 @@ void CEditorPhrase::save()
 	QFile file(current_file);
 	file.open(QIODevice::WriteOnly | QIODevice::Text);
 	QTextStream out(&file);
+	out.setCodec("UTF-8");
+	out.setGenerateByteOrderMark(true);
 	out<<text_edit->toPlainText();
 	setCurrentFile(current_file);
 }
@@ -120,6 +124,8 @@ void CEditorPhrase::saveAs(QString filename)
 	QFile file(filename);
 	file.open(QIODevice::WriteOnly | QIODevice::Text);
 	QTextStream out(&file);
+	out.setCodec("UTF-8");
+	out.setGenerateByteOrderMark(true);
 	out<<text_edit->toPlainText();
 	current_file = filename;
 	setCurrentFile(current_file);

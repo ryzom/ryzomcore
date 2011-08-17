@@ -1,4 +1,4 @@
-// Translation Manager Plugin - OVQT Plugin <http://dev.ryzom.com/projects/nel/>
+﻿// Translation Manager Plugin - OVQT Plugin <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Emanuel Costea <cemycc@gmail.com>
 //
@@ -82,7 +82,7 @@ void CEditorWorksheet::open(QString filename)
                         } else {
                             QTableWidgetItem *row = new QTableWidgetItem();
                             ucstring row_value = wk_file.getData(i, j);
-                            row->setText(tr(row_value.toString().c_str()));
+							row->setText(QString::fromUtf8(row_value.toUtf8().c_str()));
                             if(hasHashValue)
                             {
                                 table_editor->setItem(i - 1, j - 1, row);    
@@ -157,8 +157,8 @@ void CEditorWorksheet::save()
                        ucstring tvalue;
                        ucstring colname;
                        uint rowIdf;
-                       QString tvalueQt = table_editor->item(i, j)->text();
-                       tvalue = ucstring(tvalueQt.toStdString());
+                       QString tvalueQt = table_editor->item(i, j)->text();				   					   
+					   tvalue.fromUtf8(std::string(tvalueQt.toUtf8()));										   
                        colname = wk_file.getData(0, j + colIdx);
                        
                        rowIdf = uint(i + 1);
@@ -166,10 +166,10 @@ void CEditorWorksheet::save()
                        {
                            if(wk_file.getData(i + 1, j + colIdx) != tvalue) // verify the current value
                            {
-                                wk_file.setData(i + 1, j + colIdx,  tvalue); // change the value
+							   wk_file.setData(i + 1, j + colIdx,  tvalue); // change the value
                            }
                        } else {
-                           wk_file.setData(i + 1, j + colIdx,  tvalue); // insert the value
+						   wk_file.setData(i + 1, j + colIdx,  tvalue); // insert the value
                        }
                    }
                }
@@ -209,10 +209,12 @@ void CEditorWorksheet::saveAs(QString filename)
                 {
                      rowIdx = new_file.size();
                      new_file.resize(new_file.size() + 1);
+					 ucstring tvalue;
                      for(int j = 0; j < table_editor->columnCount(); j++)
                      {
                          QTableWidgetItem* item = table_editor->item(i, j);
-                         new_file.setData(rowIdx, j + colIdx, ucstring(item->text().toStdString()));
+						 tvalue.fromUtf8(std::string(item->text().toUtf8()));
+                         new_file.setData(rowIdx, j + colIdx, tvalue);
                      }   
                  } 
                 if(hasHashValue)
