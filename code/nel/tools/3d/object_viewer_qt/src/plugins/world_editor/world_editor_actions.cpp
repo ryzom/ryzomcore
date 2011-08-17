@@ -93,7 +93,7 @@ void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 			qreal radius = 0;
 			if (primitive->getPropertyByName ("radius", strRadius))
 				radius = atof(strRadius.c_str());
-
+			qreal angle = ((2 * NLMISC::Pi - primPoint->Angle) * 180 / NLMISC::Pi);
 			item = scene->addWorldItemPoint(QPointF(vec->x, -vec->y + cellSize),
 											primPoint->Angle, radius, showArrow);
 			break;
@@ -511,8 +511,11 @@ void AbstractWorldItemCommand::updatePrimitiveData(AbstractWorldItem *item)
 		{
 		case NLLIGO::CPrimitiveClass::Point:
 		{
+			qreal angle = static_cast<WorldItemPoint *>(item)->angle();
+			angle = 2 * NLMISC::Pi - (angle * NLMISC::Pi / 180.0);
 			NLLIGO::CPrimPoint *point = static_cast<NLLIGO::CPrimPoint *>(primitive);
 			point->Point = vPoints.front();
+			point->Angle = angle;
 			break;
 		}
 		case NLLIGO::CPrimitiveClass::Path:

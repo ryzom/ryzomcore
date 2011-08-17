@@ -91,7 +91,7 @@ bool AbstractWorldItem::isShapeChanged() const
 WorldItemPoint::WorldItemPoint(const QPointF &point, const qreal angle, const qreal radius,
 							   bool showArrow, QGraphicsItem *parent)
 	: AbstractWorldItem(parent),
-	  m_angle((2 * NLMISC::Pi - angle) * 180 / NLMISC::Pi),
+	  m_angle(angle),
 	  m_radius(radius),
 	  m_showArrow(showArrow)
 {
@@ -132,6 +132,11 @@ WorldItemPoint::~WorldItemPoint()
 {
 }
 
+qreal WorldItemPoint::angle() const
+{
+	return m_angle;
+}
+
 void WorldItemPoint::rotateOn(const QPointF &pivot, const qreal deltaAngle)
 {
 	prepareGeometryChange();
@@ -167,6 +172,7 @@ void WorldItemPoint::scaleOn(const QPointF &pivot, const QPointF &factor)
 void WorldItemPoint::turnOn(const qreal angle)
 {
 	m_angle += angle;
+	m_angle -= floor(m_angle / 360) * 360;
 	update();
 }
 
@@ -873,7 +879,6 @@ void WorldItemSubPoint::scaleOn(const QPointF &pivot, const QPointF &factor)
 
 	// TODO
 	scaledPolygon.translate(scenePos() - pivot);
-	//scaledPolygon.translate(-pivot);
 
 	QTransform trans;
 	trans = trans.scale(factor.x(), factor.y());

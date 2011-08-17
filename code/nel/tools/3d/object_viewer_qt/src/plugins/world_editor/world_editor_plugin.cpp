@@ -110,7 +110,7 @@ QString WorldEditorPlugin::name() const
 
 QString WorldEditorPlugin::version() const
 {
-	return "0.0.1";
+	return "0.1";
 }
 
 QString WorldEditorPlugin::vendor() const

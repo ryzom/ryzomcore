@@ -113,6 +113,8 @@ public:
 				   bool showArrow, QGraphicsItem *parent = 0);
 	virtual ~WorldItemPoint();
 
+	qreal angle() const;
+
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle);
 	virtual void scaleOn(const QPointF &pivot, const QPointF &factor);
 	virtual void turnOn(const qreal angle);
