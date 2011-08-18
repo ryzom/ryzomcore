@@ -32,6 +32,11 @@
 namespace LandscapeEditor
 {
 
+/**
+@class OpenLandscapeCommand
+@brief
+@details 
+*/
 class OpenLandscapeCommand: public QUndoCommand
 {
 public:
@@ -45,6 +50,11 @@ private:
 	QString m_fileName;
 };
 
+/**
+@class NewLandscapeCommand
+@brief
+@details 
+*/
 class NewLandscapeCommand: public QUndoCommand
 {
 public:
@@ -56,7 +66,11 @@ public:
 private:
 };
 
-// Modify the landscape
+/**
+@class LigoTileCommand
+@brief
+@details 
+*/
 class LigoTileCommand: public QUndoCommand
 {
 public:
@@ -76,10 +90,15 @@ private:
 	LandscapeScene *m_scene;
 };
 
+/**
+@class UndoScanRegionCommand
+@brief
+@details 
+*/
 class UndoScanRegionCommand: public QUndoCommand
 {
 public:
-	UndoScanRegionCommand(ZoneBuilder *zoneBuilder, LandscapeScene *scene, QUndoCommand *parent = 0);
+	UndoScanRegionCommand(bool direction, ZoneBuilder *zoneBuilder, LandscapeScene *scene, QUndoCommand *parent = 0);
 	virtual ~UndoScanRegionCommand();
 
 	void setScanList(const QList<ZonePosition> &zonePositionList);
@@ -87,49 +106,19 @@ public:
 	virtual void redo();
 
 private:
+	void applyChanges();
 
+	bool m_direction;
 	QList<ZonePosition> m_zonePositionList;
 	ZoneBuilder *m_zoneBuilder;
 	LandscapeScene *m_scene;
 };
 
-class RedoScanRegionCommand: public QUndoCommand
-{
-public:
-	RedoScanRegionCommand(ZoneBuilder *zoneBuilder, LandscapeScene *scene, QUndoCommand *parent = 0);
-	virtual ~RedoScanRegionCommand();
-
-	void setScanList(const QList<ZonePosition> &zonePositionList);
-	virtual void undo();
-	virtual void redo();
-
-private:
-
-	QList<ZonePosition> m_zonePositionList;
-	ZoneBuilder *m_zoneBuilder;
-	LandscapeScene *m_scene;
-};
-
-/*
-// Move the landscape
-class LigoMoveCommand: public QUndoCommand
-{
-public:
-
-	LigoMoveCommand(int index, sint32 deltaX, sint32 deltaY, ZoneBuilder *zoneBuilder, QUndoCommand *parent = 0);
-	virtual ~LigoMoveCommand();
-
-	virtual void undo();
-	virtual void redo();
-private:
-
-	int m_index;
-	sint32 m_deltaX;
-	sint32 m_deltaY;
-	ZoneBuilder *m_zoneBuilder;
-};
+/**
+@class LigoResizeCommand
+@brief
+@details 
 */
-// Modify the landscape
 class LigoResizeCommand: public QUndoCommand
 {
 public:

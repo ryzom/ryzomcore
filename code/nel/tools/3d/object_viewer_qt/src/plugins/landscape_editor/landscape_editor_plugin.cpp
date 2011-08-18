@@ -1,5 +1,4 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -75,7 +74,7 @@ QString LandscapeEditorPlugin::name() const
 
 QString LandscapeEditorPlugin::version() const
 {
-	return "0.1";
+	return "0.8";
 }
 
 QString LandscapeEditorPlugin::vendor() const

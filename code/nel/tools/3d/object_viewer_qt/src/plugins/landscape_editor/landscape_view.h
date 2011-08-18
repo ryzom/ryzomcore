@@ -27,6 +27,11 @@
 namespace LandscapeEditor
 {
 
+/**
+@class LandscapeView
+@brief Provides graphics view for viewing zone regions.
+@details Also provides zooming, panning and displaying grid
+*/
 class LANDSCAPE_EDITOR_EXPORT LandscapeView: public QGraphicsView
 {
 	Q_OBJECT
@@ -42,11 +47,16 @@ public:
 	bool isVisibleGrid() const;
 
 public Q_SLOTS:
+
+	/// Enable/disable displaying grid.
 	void setVisibleGrid(bool visible);
+
+	/// Enable/disable displaying text(coord.) above each zone bricks.
 	void setVisibleText(bool visible);
 
 private Q_SLOTS:
 protected:
+	//Take over the interaction
 	virtual void wheelEvent(QWheelEvent *event);
 	virtual void mousePressEvent(QMouseEvent *event);
 	virtual void mouseMoveEvent(QMouseEvent *event);

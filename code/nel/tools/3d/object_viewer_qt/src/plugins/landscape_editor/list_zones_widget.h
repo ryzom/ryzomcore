@@ -1,5 +1,4 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -45,16 +44,16 @@ public:
 
 	void updateUi();
 
-	// Set zone builder, call this method before using this class
+	/// Set zone builder, call this method before using this class
 	void setZoneBuilder(ZoneBuilder *zoneBuilder);
 
-	// Get current zone name which user selected from list.
+	/// Get current zone name which user selected from list.
 	QString currentZoneName();
 
-	// Get current rotation value which user selected (Rot 0-0deg, 1-90deg, 2-180deg, 3-270deg).
+	/// Get current rotation value which user selected (Rot 0-0deg, 1-90deg, 2-180deg, 3-270deg).
 	int currentRot();
 
-	// Get current flip value which user selected (Flip 0-false, 1-true).
+	/// Get current flip value which user selected (Flip 0-false, 1-true).
 	int currentFlip();
 
 	bool isNotPropogate() const;

@@ -1,5 +1,4 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -39,9 +38,6 @@ public:
 	int resolutionZone() const;
 	int widthSnapshot() const;
 	int heightSnapshot() const;
-
-private Q_SLOTS:
-
 
 private:
 

@@ -39,6 +39,7 @@ PixmapDatabase::PixmapDatabase(int textureSize)
 	: m_textureSize(textureSize),
 	  m_errorPixmap(0)
 {
+	// Create pixmap for case if pixmap and LIGO files not found
 	m_errorPixmap = new QPixmap(QSize(m_textureSize, m_textureSize));
 	QPainter painter(m_errorPixmap);
 	painter.setRenderHint(QPainter::Antialiasing, true);
@@ -46,7 +47,7 @@ PixmapDatabase::PixmapDatabase(int textureSize)
 	painter.setFont(QFont("Helvetica [Cronyx]", 14));
 	painter.setPen(QPen(Qt::red, 2, Qt::SolidLine));
 	painter.drawText(m_errorPixmap->rect(), Qt::AlignCenter | Qt::TextWordWrap,
-					 QObject::tr("Pixmap and LIGO files not found. Set the correct data path and reload landscape."));
+					 QObject::tr("Pixmap and LIGO files not found."));
 	painter.end();
 }
 
@@ -84,7 +85,7 @@ bool PixmapDatabase::loadPixmaps(const QString &zonePath, NLLIGO::CZoneBank &zon
 		QPixmap *pixmap = new QPixmap(zonePath + zonePixmapName + ".png");
 		if (pixmap->isNull())
 		{
-			// Generate filled pixmap
+			// Generate filled pixmap if could not load pixmap
 			QPixmap *emptyPixmap = new QPixmap(QSize(sizeX * m_textureSize, sizeY * m_textureSize));
 			QPainter painter(emptyPixmap);
 			painter.setRenderHint(QPainter::Antialiasing, true);

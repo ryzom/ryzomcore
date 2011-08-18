@@ -67,8 +67,8 @@ struct ZonePosition
 };
 
 /**
-@class ZoneBuilder
-@brief ZoneBuilder contains all the shared data between the tools and the engine.
+@class ZoneBuilderBase
+@brief ZoneBuilderBase contains all the shared data between the tools and the engine.
 @details ZoneBank contains the macro zones that is composed of several zones plus a mask.
 PixmapDatabase contains the graphics for the zones
 */

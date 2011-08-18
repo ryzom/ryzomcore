@@ -35,8 +35,8 @@ class PixmapDatabase;
 
 /**
 @class ListZonesModel
-@brief ListZonesModel contains the small images for QListView
-@details
+@brief ListZonesModel is used for managed list bricks by ListZonesWidget
+@details ListZonesModel contains the small images for QListView
 */
 class ListZonesModel : public QAbstractListModel
 {
@@ -55,7 +55,7 @@ public:
 	/// Value should be set before calling rebuildModel
 	void setScaleRatio(int scaleRatio);
 
-	/// Unload all images and reset model
+	/// Delete all small images and reset model
 	void resetModel();
 
 	/// Set current list zones which will be available in QListView

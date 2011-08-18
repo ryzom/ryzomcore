@@ -28,8 +28,6 @@
 // STL includes
 #include <string>
 
-// Qt includes
-
 namespace LandscapeEditor
 {
 
@@ -80,7 +78,7 @@ struct LigoData
 
 /**
 @class ZoneRegionObject
-@brief
+@brief The class contains NLLIGO::CZoneRegion object and provides basic operations above it
 @details
 */
 class LANDSCAPE_EDITOR_EXPORT ZoneRegionObject
@@ -115,7 +113,7 @@ public:
 	/// Check position, it belongs to the landscape
 	bool checkPos(const sint32 x, const sint32 y);
 
-	/// Helper flag to know if a ps has been modified
+	/// Helper flag to know if the zone region has been modified
 	/// @{
 	bool isModified() const;
 

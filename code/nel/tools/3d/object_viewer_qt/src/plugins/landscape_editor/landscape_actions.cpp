@@ -93,8 +93,9 @@ void LigoTileCommand::redo ()
 	m_zoneBuilder->setLigoData(m_newLigoData, m_zonePos);
 }
 
-UndoScanRegionCommand::UndoScanRegionCommand(ZoneBuilder *zoneBuilder, LandscapeScene *scene, QUndoCommand *parent)
+UndoScanRegionCommand::UndoScanRegionCommand(bool direction, ZoneBuilder *zoneBuilder, LandscapeScene *scene, QUndoCommand *parent)
 	: QUndoCommand(parent),
+	  m_direction(direction),
 	  m_zoneBuilder(zoneBuilder),
 	  m_scene(scene)
 {
@@ -112,45 +113,21 @@ void UndoScanRegionCommand::setScanList(const QList<ZonePosition> &zonePositionL
 
 void UndoScanRegionCommand::undo()
 {
-	for (int i = 0; i < m_zonePositionList.size(); ++i)
-		m_scene->deleteItemZone(m_zonePositionList.at(i));
-	for (int i = 0; i < m_zonePositionList.size(); ++i)
-	{
-		LigoData data;
-		m_zoneBuilder->ligoData(data, m_zonePositionList.at(i));
-		m_scene->createItemZone(data, m_zonePositionList.at(i));
-	}
+	if (m_direction)
+		applyChanges();
 }
 
 void UndoScanRegionCommand::redo()
 {
+	if (!m_direction)
+		applyChanges();
 }
 
-RedoScanRegionCommand::RedoScanRegionCommand(ZoneBuilder *zoneBuilder, LandscapeScene *scene, QUndoCommand *parent)
-	: QUndoCommand(parent),
-	  m_zoneBuilder(zoneBuilder),
-	  m_scene(scene)
-{
-}
-
-RedoScanRegionCommand::~RedoScanRegionCommand()
-{
-	m_zonePositionList.clear();
-}
-
-void RedoScanRegionCommand::setScanList(const QList<ZonePosition> &zonePositionList)
-{
-	m_zonePositionList = zonePositionList;
-}
-
-void RedoScanRegionCommand::undo()
-{
-}
-
-void RedoScanRegionCommand::redo()
+void UndoScanRegionCommand::applyChanges()
 {
 	for (int i = 0; i < m_zonePositionList.size(); ++i)
 		m_scene->deleteItemZone(m_zonePositionList.at(i));
+
 	for (int i = 0; i < m_zonePositionList.size(); ++i)
 	{
 		LigoData data;

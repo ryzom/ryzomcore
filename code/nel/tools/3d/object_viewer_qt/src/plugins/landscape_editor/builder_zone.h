@@ -59,17 +59,25 @@ public:
 	ZoneBuilder(LandscapeScene *landscapeScene, ListZonesWidget *listZonesWidget = 0, QUndoStack *undoStack = 0);
 	~ZoneBuilder();
 
-	/// Init zoneBank and init zone pixmap database
+	/// Inits zoneBank and init zone pixmap database
 	bool init(const QString &pathName, bool displayProgress = false);
 
 	void calcMask();
+
+	/// @return false if in point (x, y) placed zone brick, else true
 	bool getZoneMask (sint32 x, sint32 y);
+
 	bool getZoneAmongRegions(ZonePosition &zonePos, BuilderZoneRegion *builderZoneRegionFrom, sint32 x, sint32 y);
 
 	/// Ligo Actions
 	/// @{
+
+	/// Adds the LigoTileCommand in undo stack
 	void actionLigoTile(const LigoData &data, const ZonePosition &zonePos);
+
 	void actionLigoMove(uint index, sint32 deltaX, sint32 deltaY);
+
+	/// Adds the LigoResizeCommand in undo stack
 	void actionLigoResize(uint index, sint32 newMinX, sint32 newMaxX, sint32 newMinY, sint32 newMaxY);
 	/// @}
 
@@ -82,11 +90,24 @@ public:
 
 	/// Zone Region
 	/// @{
+
+	/// Creates empty zone region and adds in the workspace
+	/// @return id zone region
 	int createZoneRegion();
+
+	/// Loads zone region from file @fileName and adds in the workspace.
+	/// @return id zone region
 	int createZoneRegion(const QString &fileName);
+
+	/// Unloads zone region from the workspace
 	void deleteZoneRegion(int id);
+
+	/// Sets the current zone region with @id
 	void setCurrentZoneRegion(int id);
+
+	/// @return id the current zone region, if workspace is empty then returns (-1)
 	int currentIdZoneRegion() const;
+
 	ZoneRegionObject *currentZoneRegion() const;
 	int countZoneRegion() const;
 	ZoneRegionObject *zoneRegion(int id) const;
@@ -106,12 +127,18 @@ public:
 
 private:
 
-	/// Scan ./zoneligos dir and add all *.ligozone files to zoneBank
+	/// Scans ./zoneligos dir and add all *.ligozone files to zoneBank
 	bool initZoneBank (const QString &path);
 
+	/// Checks enabled beginMacro mode for undo stack, if false, then enables mode
 	void checkBeginMacro();
+
+	/// Checks enabled on beginMacro mode for undo stack, if true, then adds UndoScanRegionCommand
+	/// in undo stack and disables beginMacro mode
 	void checkEndMacro();
 
+	/// Checks intersects between them zone regions
+	/// @return true if newZoneRegion intersects with loaded zone regions, else return false
 	bool checkOverlaps(const NLLIGO::CZoneRegion &newZoneRegion);
 
 	struct LandscapeItem

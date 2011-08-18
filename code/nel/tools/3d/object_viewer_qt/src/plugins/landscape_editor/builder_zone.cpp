@@ -85,7 +85,7 @@ void ZoneBuilder::actionLigoTile(const LigoData &data, const ZonePosition &zoneP
 		return;
 
 	checkBeginMacro();
-	nlinfo(QString("%1 %2 %3 (%4 %5)").arg(data.zoneName.c_str()).arg(zonePos.x).arg(zonePos.y).arg(data.posX).arg(data.posY).toStdString().c_str());
+	// nlinfo(QString("%1 %2 %3 (%4 %5)").arg(data.zoneName.c_str()).arg(zonePos.x).arg(zonePos.y).arg(data.posX).arg(data.posY).toStdString().c_str());
 	m_zonePositionList.push_back(zonePos);
 	m_undoStack->push(new LigoTileCommand(data, zonePos, this, m_landscapeScene));
 }
@@ -96,7 +96,6 @@ void ZoneBuilder::actionLigoMove(uint index, sint32 deltaX, sint32 deltaY)
 		return;
 
 	checkBeginMacro();
-	nlinfo("ligoMove");
 	//m_undoStack->push(new LigoMoveCommand(index, deltaX, deltaY, this));
 }
 
@@ -106,7 +105,7 @@ void ZoneBuilder::actionLigoResize(uint index, sint32 newMinX, sint32 newMaxX, s
 		return;
 
 	checkBeginMacro();
-	nlinfo(QString("minX=%1 maxX=%2 minY=%3 maxY=%4").arg(newMinX).arg(newMaxX).arg(newMinY).arg(newMaxY).toStdString().c_str());
+	// nlinfo(QString("minX=%1 maxX=%2 minY=%3 maxY=%4").arg(newMinX).arg(newMaxX).arg(newMinY).arg(newMaxY).toStdString().c_str());
 	m_undoStack->push(new LigoResizeCommand(index, newMinX, newMaxX, newMinY, newMaxY, this));
 }
 
@@ -274,7 +273,7 @@ int ZoneBuilder::createZoneRegion(const QString &fileName)
 	landItem.zoneRegionObject = new ZoneRegionObject();
 	landItem.zoneRegionObject->load(fileName.toStdString());
 
-	if (!checkOverlaps(landItem.zoneRegionObject->ligoZoneRegion()))
+	if (checkOverlaps(landItem.zoneRegionObject->ligoZoneRegion()))
 	{
 		delete landItem.zoneRegionObject;
 		return -1;
@@ -334,7 +333,11 @@ int ZoneBuilder::currentIdZoneRegion() const
 
 ZoneRegionObject *ZoneBuilder::currentZoneRegion() const
 {
-	return m_landscapeMap.value(m_currentZoneRegion).zoneRegionObject;
+	ZoneRegionObject *result = 0;
+	if (m_landscapeMap.contains(m_currentZoneRegion))
+		result = m_landscapeMap.value(m_currentZoneRegion).zoneRegionObject;
+
+	return result;
 }
 
 int ZoneBuilder::countZoneRegion() const
@@ -344,17 +347,23 @@ int ZoneBuilder::countZoneRegion() const
 
 ZoneRegionObject *ZoneBuilder::zoneRegion(int id) const
 {
-	return m_landscapeMap.value(id).zoneRegionObject;
+	ZoneRegionObject *result = 0;
+	if (m_landscapeMap.contains(id))
+		result = m_landscapeMap.value(id).zoneRegionObject;
+
+	return result;
 }
 
 void ZoneBuilder::ligoData(LigoData &data, const ZonePosition &zonePos)
 {
-	m_landscapeMap.value(zonePos.region).zoneRegionObject->ligoData(data, zonePos.x, zonePos.y);
+	if (m_landscapeMap.contains(zonePos.region))
+		m_landscapeMap.value(zonePos.region).zoneRegionObject->ligoData(data, zonePos.x, zonePos.y);
 }
 
 void ZoneBuilder::setLigoData(LigoData &data, const ZonePosition &zonePos)
 {
-	m_landscapeMap.value(zonePos.region).zoneRegionObject->setLigoData(data, zonePos.x, zonePos.y);
+	if (m_landscapeMap.contains(zonePos.region))
+		m_landscapeMap.value(zonePos.region).zoneRegionObject->setLigoData(data, zonePos.x, zonePos.y);
 }
 
 bool ZoneBuilder::initZoneBank (const QString &pathName)
@@ -390,14 +399,10 @@ QString ZoneBuilder::dataPath() const
 bool ZoneBuilder::getZoneMask(sint32 x, sint32 y)
 {
 	if ((x < m_minX) || (x > m_maxX) ||
-			(y < m_minY) || (y > m_maxY))
-	{
+		(y < m_minY) || (y > m_maxY))
 		return true;
-	}
 	else
-	{
 		return m_zoneMask[(x - m_minX) + (y - m_minY) * (1 + m_maxX - m_minX)];
-	}
 }
 
 void ZoneBuilder::calcMask()
@@ -485,7 +490,7 @@ void ZoneBuilder::checkBeginMacro()
 	{
 		m_createdAction = true;
 		m_undoStack->beginMacro(m_titleAction);
-		m_undoScanRegionCommand = new UndoScanRegionCommand(this, m_landscapeScene);
+		m_undoScanRegionCommand = new UndoScanRegionCommand(true, this, m_landscapeScene);
 		m_undoStack->push(m_undoScanRegionCommand);
 	}
 }
@@ -494,9 +499,13 @@ void ZoneBuilder::checkEndMacro()
 {
 	if (m_createdAction)
 	{
-		RedoScanRegionCommand *redoScanRegionCommand = new RedoScanRegionCommand(this, m_landscapeScene);
+		UndoScanRegionCommand *redoScanRegionCommand = new UndoScanRegionCommand(false, this, m_landscapeScene);
+
+		// Sets list positions in which need apply changes
 		m_undoScanRegionCommand->setScanList(m_zonePositionList);
 		redoScanRegionCommand->setScanList(m_zonePositionList);
+		
+		// Adds command in the stack
 		m_undoStack->push(redoScanRegionCommand);
 		m_undoStack->endMacro();
 	}
@@ -517,11 +526,11 @@ bool ZoneBuilder::checkOverlaps(const NLLIGO::CZoneRegion &newZoneRegion)
 				{
 					const std::string &zoneName = newZoneRegion.getName(x, y);
 					if ((zoneName != STRING_UNUSED) && (zoneName != STRING_OUT_OF_BOUND))
-						return false;
+						return true;
 				}
 			}
 	}
-	return true;
+	return false;
 }
 
 } /* namespace LandscapeEditor */
