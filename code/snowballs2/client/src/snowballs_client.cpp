@@ -606,7 +606,7 @@ void loopLogin()
                 string LSHost(ConfigFile->getVar("LSHost").asString());
                 Login = ConfigFile->getVar("Login").asString();
                 string Password = ConfigFile->getVar("Password").asString();
-                CHashKeyMD5 hk = getMD5((uint8 *)Password.c_str(), Password.size());
+                CHashKeyMD5 hk = getMD5((uint8 *)Password.c_str(), (uint32)Password.size());
                 string CPassword = hk.toString();
                 nlinfo("The crypted password is %s", CPassword.c_str());
                 string Application = ConfigFile->getVar("ClientApplication").asString();
@@ -1077,8 +1077,8 @@ sint main(int argc, char **argv)
 	// extract the 2 first param (argv[1] and argv[2]) it must be cookie and addr
 
 	string cmd = cmdline;
-	int pos1 = cmd.find_first_not_of (' ');
-	int pos2;
+	string::size_type pos1 = cmd.find_first_not_of (' ');
+	string::size_type pos2;
 	if (pos1 != string::npos)
 	{
 		pos2 = cmd.find (' ', pos1);
