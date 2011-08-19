@@ -70,6 +70,10 @@
 #include "internationalization.h"
 #include "game_time.h"
 
+#ifdef NL_OS_WINDOWS
+#include <Windows.h>
+#endif
+
 using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
