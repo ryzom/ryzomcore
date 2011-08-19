@@ -1,5 +1,8 @@
-INCLUDE_DIRECTORIES( ${CMAKE_BINARY_DIR}/login_system/nel_launcher_qt/ )
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/login_system/nel_launcher_qt/ )
+INCLUDE_DIRECTORIES(    ${CMAKE_CURRENT_BINARY_DIR}
+                                                ${CMAKE_CURRENT_SOURCE_DIR}
+                                                ${LIBXML2_INCLUDE_DIR}
+                                                ${QT_INCLUDES})
+
 INCLUDE( ${QT_USE_FILE} )
 
 FILE(GLOB NEL_LAUNCHER_SRC *.cpp)
