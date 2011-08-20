@@ -24,6 +24,7 @@ INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${QT_INCLUDES})
 TARGET_LINK_LIBRARIES(nel_launcher_qt
 						${LIBXML2_LIBRARIES}
 						${QT_LIBRARIES}
+						${QT_QTMAIN_LIBRARY}
 						nelmisc
 						nelnet)
 
