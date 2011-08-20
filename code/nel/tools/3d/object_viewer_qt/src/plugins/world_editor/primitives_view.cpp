@@ -66,7 +66,7 @@ PrimitivesView::PrimitivesView(QWidget *parent)
 	m_newPrimitiveAction = new QAction("New primitive", this);
 
 	m_deleteAction = new QAction("Delete", this);
-	m_deleteAction->setEnabled(false);
+	//m_deleteAction->setEnabled(false);
 
 	m_selectChildrenAction = new QAction("Select children", this);
 
@@ -243,6 +243,14 @@ void PrimitivesView::deletePrimitives()
 	nlassert(m_primitivesTreeModel);
 
 	QModelIndexList indexList = selectionModel()->selectedRows();
+
+	QModelIndex index = indexList.first();
+
+	PrimitiveNode *node = static_cast<PrimitiveNode *>(index.internalPointer());
+
+	if (node->primitiveClass()->Deletable)
+		m_undoStack->push(new DeletePrimitiveCommand(index, m_primitivesTreeModel, m_worldEditorScene, this));
+
 }
 
 void PrimitivesView::addNewPrimitiveByClass(int value)

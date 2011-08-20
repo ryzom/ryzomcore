@@ -52,7 +52,7 @@ public:
 	QStringList listPixmaps() const;
 
 	/// Get original pixmap
-	/// @return QPixmap* if the image is in the database ; 
+	/// @return QPixmap* if the image is in the database ;
 	/// otherwise returns pixmap which contains error message.
 	QPixmap *pixmap(const QString &zoneName) const;
 

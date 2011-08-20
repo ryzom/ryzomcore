@@ -74,7 +74,6 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	sceneModeGroup->addAction(m_ui.rotateAction);
 	sceneModeGroup->addAction(m_ui.scaleAction);
 	sceneModeGroup->addAction(m_ui.turnAction);
-	sceneModeGroup->addAction(m_ui.radiusAction);
 	m_ui.selectAction->setChecked(true);
 
 	m_ui.newWorldEditAction->setIcon(QIcon(Core::Constants::ICON_NEW));
@@ -95,8 +94,6 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	m_modeMapper->setMapping(m_ui.scaleAction, 3);
 	connect(m_ui.turnAction, SIGNAL(triggered()), m_modeMapper, SLOT(map()));
 	m_modeMapper->setMapping(m_ui.turnAction, 4);
-	connect(m_ui.radiusAction, SIGNAL(triggered()), m_modeMapper, SLOT(map()));
-	m_modeMapper->setMapping(m_ui.radiusAction, 5);
 
 	connect(m_modeMapper, SIGNAL(mapped(int)), this, SLOT(setMode(int)));
 	connect(m_ui.pointsAction, SIGNAL(triggered(bool)), m_worldEditorScene, SLOT(setEnabledEditPoints(bool)));
@@ -384,9 +381,10 @@ void WorldEditorWindow::readSettings()
 	restoreGeometry(settings->value(Constants::WORLD_WINDOW_GEOMETRY).toByteArray());
 
 	// Use OpenGL graphics system instead raster graphics system
-	if (settings->value(Constants::WORLD_EDITOR_USE_OPENGL, false).toBool())
+	if (settings->value(Constants::WORLD_EDITOR_USE_OPENGL, true).toBool())
 	{
-		m_oglWidget = new QGLWidget(QGLFormat(QGL::DoubleBuffer));
+		//m_oglWidget = new QGLWidget(QGLFormat(QGL::DoubleBuffer));
+		m_oglWidget = new QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::SampleBuffers));
 		m_ui.graphicsView->setViewport(m_oglWidget);
 	}
 

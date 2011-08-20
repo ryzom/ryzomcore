@@ -34,6 +34,8 @@ namespace WorldEditor
 class Node;
 class WorldEditNode;
 
+const int AtTheEnd = -1;
+
 typedef QPair<int, int> PathItem;
 /*
 @typedef Path
@@ -81,16 +83,16 @@ public:
 	Path createLandscapeNode(const QString &fileName);
 
 	/// Add new root primitive node and all sub-primitives in the tree model.
-	Path createRootPrimitiveNode(const QString &fileName, NLLIGO::CPrimitives *primitives);
+	Path createRootPrimitiveNode(const QString &fileName, NLLIGO::CPrimitives *primitives, int pos = AtTheEnd);
 
 	/// Add new primitive node and all sub-primitives in the tree model.
-	Path createPrimitiveNode(NLLIGO::IPrimitive *primitive, const Path &parent);
+	Path createPrimitiveNode(NLLIGO::IPrimitive *primitive, const Path &parent, int pos = AtTheEnd);
 
 	/// Delete node and all child nodes from the tree model
 	void deleteNode(const Path &path);
 
 private:
-	void createChildNodes(NLLIGO::IPrimitive *primitive, const QModelIndex &parent);
+	void createChildNodes(NLLIGO::IPrimitive *primitive, int pos, const QModelIndex &parent);
 
 	void removeChildNodes(Node *node, const QModelIndex &parent);
 

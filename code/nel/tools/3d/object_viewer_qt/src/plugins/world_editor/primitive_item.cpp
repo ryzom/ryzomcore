@@ -34,6 +34,7 @@ namespace WorldEditor
 Node::Node()
 	: m_parent(0)
 {
+	setData(Constants::PRIMITIVE_IS_VISIBLE, true);
 }
 
 Node::~Node()
@@ -99,6 +100,18 @@ void Node::insertChildNodeAfter(Node *node, Node *after)
 		m_children.append(node);
 	else
 		m_children.insert(idx + 1, node);
+	node->m_parent = this;
+}
+
+void Node::insertChildNode(int pos, Node *node)
+{
+	// Node is already a child
+	nlassert(!m_children.contains(node));
+
+	// Node already has a parent
+	nlassert(!m_children.contains(node));
+
+	m_children.insert(pos, node);
 	node->m_parent = this;
 }
 

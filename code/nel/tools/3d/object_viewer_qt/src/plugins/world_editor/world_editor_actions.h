@@ -156,9 +156,33 @@ private:
 	float m_delta;
 	const QString m_className;
 	Path m_parentIndex, m_newPrimIndex;
-	WorldEditorScene *m_scene;
-	PrimitivesTreeModel *m_model;
-	QTreeView *m_view;
+	WorldEditorScene *const m_scene;
+	PrimitivesTreeModel *const m_model;
+	QTreeView *const m_view;
+};
+
+/**
+@class DeletePrimitiveCommand
+@brief
+@details
+*/
+class DeletePrimitiveCommand: public QUndoCommand
+{
+public:
+	DeletePrimitiveCommand(const QModelIndex &index, PrimitivesTreeModel *model,
+						   WorldEditorScene *scene, QTreeView *view, QUndoCommand *parent = 0);
+	virtual ~DeletePrimitiveCommand();
+
+	virtual void undo();
+	virtual void redo();
+private:
+
+	Path m_path, m_parentPath;
+	uint m_posPrimitive;
+	NLLIGO::IPrimitive *m_oldPrimitive;
+	WorldEditorScene *const m_scene;
+	PrimitivesTreeModel *const m_model;
+	QTreeView *const m_view;
 };
 
 /**
@@ -186,7 +210,7 @@ private:
 
 	const QList<Path> m_listPaths;
 	PrimitivesTreeModel *const m_model;
-	WorldEditorScene *m_scene;
+	WorldEditorScene *const m_scene;
 	bool m_firstRun;
 };
 

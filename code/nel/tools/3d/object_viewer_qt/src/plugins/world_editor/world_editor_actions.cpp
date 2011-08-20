@@ -95,7 +95,7 @@ void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 				radius = atof(strRadius.c_str());
 			qreal angle = ((2 * NLMISC::Pi - primPoint->Angle) * 180 / NLMISC::Pi);
 			item = scene->addWorldItemPoint(QPointF(vec->x, -vec->y + cellSize),
-											primPoint->Angle, radius, showArrow);
+											angle, radius, showArrow);
 			break;
 		}
 		case NLLIGO::CPrimitiveClass::Path:
@@ -428,6 +428,85 @@ void AddPrimitiveByClassCommand::redo()
 	m_newPrimIndex = m_model->createPrimitiveNode(newPrimitive, m_parentIndex);
 
 	addNewGraphicsItems(m_model->pathToIndex(m_newPrimIndex), m_model, m_scene);
+}
+
+DeletePrimitiveCommand::DeletePrimitiveCommand(const QModelIndex &index, PrimitivesTreeModel *model,
+		WorldEditorScene *scene, QTreeView *view, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	  m_scene(scene),
+	  m_model(model),
+	  m_view(view)
+{
+	setText("Delete primitive");
+
+	// Save path to primitive
+	m_path = m_model->pathFromIndex(index);
+	m_parentPath = m_model->pathFromIndex(index.parent());
+
+	PrimitiveNode *node = static_cast<PrimitiveNode *>(index.internalPointer());
+
+	NLLIGO::IPrimitive *primitive = node->primitive();
+
+	// Backup primitive
+	m_oldPrimitive = primitive->copy();
+
+	// Backup position primitive
+	primitive->getParent()->getChildId(m_posPrimitive, primitive);
+}
+
+DeletePrimitiveCommand::~DeletePrimitiveCommand()
+{
+	delete m_oldPrimitive;
+}
+
+void DeletePrimitiveCommand::undo()
+{
+	m_scene->setEnabledEditPoints(false);
+	m_view->selectionModel()->clearSelection();
+
+	QModelIndex parentIndex = m_model->pathToIndex(m_parentPath);
+	PrimitiveNode *parentNode = static_cast<PrimitiveNode *>(parentIndex.internalPointer());
+
+	// set the primitive context
+	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = parentNode->rootPrimitiveNode()->primitives();
+
+	NLLIGO::IPrimitive *newPrimitive = m_oldPrimitive->copy();
+	if (!parentNode->primitive()->insertChild(newPrimitive, m_posPrimitive))
+		nlerror("Primitive can't insert, m_posPrimitive is not a valid.");
+
+	// Insert primitive node in tree model
+	Path newPath = m_model->createPrimitiveNode(newPrimitive, m_parentPath, m_path.back().first);
+
+	// Scan graphics model
+	addNewGraphicsItems(m_model->pathToIndex(newPath), m_model, m_scene);
+
+	// unset the context
+	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
+}
+
+void DeletePrimitiveCommand::redo()
+{
+	m_scene->setEnabledEditPoints(false);
+	m_view->selectionModel()->clearSelection();
+
+	QModelIndex index = m_model->pathToIndex(m_path);
+	PrimitiveNode *node = static_cast<PrimitiveNode *>(index.internalPointer());
+	NLLIGO::IPrimitive *primitive = node->primitive();
+
+	// Removes all graphics items
+	removeGraphicsItems(index, m_model, m_scene);
+
+	// set the primitive context
+	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = node->rootPrimitiveNode()->primitives();
+
+	// Delete primitive
+	Utils::deletePrimitive(primitive);
+
+	// unset the context
+	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
+
+	// Remove primitive from tree model
+	m_model->deleteNode(m_path);
 }
 
 AbstractWorldItemCommand::AbstractWorldItemCommand(const QList<QGraphicsItem *> &items,

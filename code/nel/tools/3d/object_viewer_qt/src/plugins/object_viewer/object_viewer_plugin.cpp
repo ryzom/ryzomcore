@@ -68,7 +68,7 @@ QString ObjectViewerPlugin::version() const
 
 QString ObjectViewerPlugin::vendor() const
 {
-	return Core::Constants::OVQT_VENDOR;
+	return "GSoC2010_dnk-88";
 }
 
 QString ObjectViewerPlugin::description() const

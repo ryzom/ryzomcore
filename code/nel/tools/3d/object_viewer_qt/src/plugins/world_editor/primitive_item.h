@@ -72,6 +72,9 @@ public:
 	/// Insert node in back of the node pointed to by the pointer after.
 	void insertChildNodeAfter(Node *node, Node *after);
 
+	/// Insert node in pos
+	void insertChildNode(int pos, Node *node);
+
 	/// Return the node at index position row in the child list.
 	Node *child(int row);
 

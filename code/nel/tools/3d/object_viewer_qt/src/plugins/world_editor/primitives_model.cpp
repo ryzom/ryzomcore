@@ -214,7 +214,7 @@ Path PrimitivesTreeModel::createLandscapeNode(const QString &fileName)
 }
 
 
-Path PrimitivesTreeModel::createRootPrimitiveNode(const QString &fileName, NLLIGO::CPrimitives *primitives)
+Path PrimitivesTreeModel::createRootPrimitiveNode(const QString &fileName, NLLIGO::CPrimitives *primitives, int pos)
 {
 	if (m_worldEditNode == 0)
 		createWorldEditNode("NewWorldEdit");
@@ -223,42 +223,48 @@ Path PrimitivesTreeModel::createRootPrimitiveNode(const QString &fileName, NLLIG
 	if (!fileName.isEmpty())
 		name = fileName;
 
+	int insPos = pos;
+
 	// Get position
-	int pos = m_worldEditNode->childCount();
+	if (pos == AtTheEnd)
+		insPos = m_worldEditNode->childCount();
 
 	QModelIndex parentIndex = index(0, 0, QModelIndex());
 
 	// Add root node in tree model
-	beginInsertRows(parentIndex, pos, pos);
+	beginInsertRows(parentIndex, insPos, insPos);
 	RootPrimitiveNode *newNode = new RootPrimitiveNode(name, primitives);
-	m_worldEditNode->appendChildNode(newNode);
+	m_worldEditNode->insertChildNode(insPos, newNode);
 	endInsertRows();
 
 	newNode->setData(Constants::PRIMITIVE_FILE_IS_CREATED, !fileName.isEmpty());
 	newNode->setData(Constants::PRIMITIVE_IS_MODIFIED, false);
 
-	QModelIndex rootPrimIndex = index(pos, 0, parentIndex);
+	QModelIndex rootPrimIndex = index(insPos, 0, parentIndex);
 
 	// Scan childs items and add in the tree model
 	for (uint i = 0; i < primitives->RootNode->getNumChildren(); ++i)
 	{
 		NLLIGO::IPrimitive *childPrim;
 		primitives->RootNode->getChild(childPrim, i);
-		createChildNodes(childPrim, rootPrimIndex);
+		createChildNodes(childPrim, i, rootPrimIndex);
 	}
 
 	return pathFromIndex(rootPrimIndex);
 }
 
-Path PrimitivesTreeModel::createPrimitiveNode(NLLIGO::IPrimitive *primitive, const Path &parent)
+Path PrimitivesTreeModel::createPrimitiveNode(NLLIGO::IPrimitive *primitive, const Path &parent, int pos)
 {
 	QModelIndex parentIndex = pathToIndex(parent);
 	Node *parentNode = static_cast<Node *>(parentIndex.internalPointer());
-	int pos = parentNode->childCount();
 
-	createChildNodes(primitive, parentIndex);
+	int insPos = pos;
+	if (pos == AtTheEnd)
+		insPos = parentNode->childCount();
 
-	return pathFromIndex(index(pos, 0, parentIndex));
+	createChildNodes(primitive, insPos, parentIndex);
+
+	return pathFromIndex(index(insPos, 0, parentIndex));
 }
 
 void PrimitivesTreeModel::deleteNode(const Path &path)
@@ -271,16 +277,14 @@ void PrimitivesTreeModel::deleteNode(const Path &path)
 	removeChildNodes(node, parentIndex);
 }
 
-void PrimitivesTreeModel::createChildNodes(NLLIGO::IPrimitive *primitive, const QModelIndex &parent)
+void PrimitivesTreeModel::createChildNodes(NLLIGO::IPrimitive *primitive, int pos, const QModelIndex &parent)
 {
 	Node *parentNode = static_cast<Node *>(parent.internalPointer());
-
-	int pos = parentNode->childCount();
 
 	// Add node in the tree model
 	beginInsertRows(parent, pos, pos);
 	PrimitiveNode *newNode = new PrimitiveNode(primitive);
-	parentNode->appendChildNode(newNode);
+	parentNode->insertChildNode(pos, newNode);
 	endInsertRows();
 
 	// Scan childs items and add in the tree model
@@ -289,7 +293,7 @@ void PrimitivesTreeModel::createChildNodes(NLLIGO::IPrimitive *primitive, const 
 	{
 		NLLIGO::IPrimitive *childPrim;
 		primitive->getChild(childPrim, i);
-		createChildNodes(childPrim, childIndex);
+		createChildNodes(childPrim, i, childIndex);
 	}
 }
 

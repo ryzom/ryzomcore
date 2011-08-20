@@ -65,9 +65,6 @@ NLLIGO::IPrimitive *createPrimitive(const char *className, const char *primName,
 									const std::vector<NLLIGO::CPrimitiveClass::CInitParameters> &initParameters,
 									NLLIGO::IPrimitive *parent);
 
-// Remove the primitive and don't delete it.
-//void takeAtPrimitive(NLLIGO::IPrimitive *primitive);
-
 void deletePrimitive(NLLIGO::IPrimitive *primitive);
 
 bool updateDefaultValues(NLLIGO::IPrimitive *primitive);

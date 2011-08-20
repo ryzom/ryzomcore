@@ -30,6 +30,7 @@ const int GRAPHICS_DATA_QT4_2D = USER_TYPE + 3;
 const int GRAPHICS_DATA_NEL3D = USER_TYPE + 4;
 const int PRIMITIVE_IS_MODIFIED = USER_TYPE + 5;
 const int PRIMITIVE_FILE_IS_CREATED = USER_TYPE + 6;
+const int PRIMITIVE_IS_VISIBLE = USER_TYPE + 7;
 
 //settings
 const char *const WORLD_EDITOR_SECTION = "WorldEditor";
