@@ -5,14 +5,13 @@
 			<div class="block" id="admin-actions">
 				<h5><?php echo __('Votes', true); ?></h5>
 				<ul class="menu">				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Votes', true)), array('action' => 'index')); ?> </li>
-				<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Vote', true)), array('action' => 'add')); ?> </li>
 				</ul>				<h5><?php echo __('Translations', true); ?></h5>
 				<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Translations', true)), array('controller' => 'translations', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Translations', true)), array('controller' => 'translations', 'action' => 'index')); ?> </li>
 				</ul>
 				<h5><?php echo __('Users', true); ?></h5>
 				<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Users', true)), array('controller' => 'users', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Users', true)), array('controller' => 'users', 'action' => 'index')); ?> </li>
 				</ul>
 			</div>
 		</div>

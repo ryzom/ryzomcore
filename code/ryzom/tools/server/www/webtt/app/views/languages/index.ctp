@@ -4,10 +4,12 @@
 		<div class="inbox">
 			<div class="block" id="admin-actions">
 				<h5><?php echo __('Languages', true); ?></h5>
-				<ul class="menu">				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Languages', true)), array('action' => 'index')); ?> </li>
-				</ul>				<h5><?php echo __('Identifiers', true); ?></h5>
 				<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Identifiers', true)), array('controller' => 'identifiers', 'action' => 'index')); ?> </li>
+					<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Languages', true)), array('action' => 'index')); ?> </li>
+				</ul>
+				<h5><?php echo __('Translation Files', true); ?></h5>
+				<ul class="menu">
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Translation Files', true)), array('controller' => 'translation_files', 'action' => 'index')); ?> </li>
 				</ul>
 			</div>
 		</div>
@@ -15,6 +17,7 @@
 </div>
 
 <div class="grid_13">
+	<p class="help">Choose a language and click "List Translation Files" to see project language files you can translate.</p>
 	<h2 id="page-heading"><?php __('Languages');?></h2>
 	<table cellpadding="0" cellspacing="0">		<?php $tableHeaders = $html->tableHeaders(array($paginator->sort('id'),$paginator->sort('name'),$paginator->sort('code'),$paginator->sort('created'),$paginator->sort('modified'),__('Actions', true),));
 		echo '<thead>'.$tableHeaders.'</thead>'; ?>

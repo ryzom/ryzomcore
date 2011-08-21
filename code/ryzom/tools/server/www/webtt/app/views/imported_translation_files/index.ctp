@@ -38,7 +38,7 @@
 	<tr<?php echo $class;?>>
 		<td><?php echo $importedTranslationFile['ImportedTranslationFile']['id']; ?></td>
 		<td>
-			<?php echo $this->Html->link($importedTranslationFile['Language']['name'], array('controller' => 'languages', 'action' => 'view', $importedTranslationFile['Language']['id'])); ?>
+			<?php echo $this->Html->link($importedTranslationFile['TranslationFile']['filename_template'], array('controller' => 'translation_files', 'action' => 'view', $importedTranslationFile['TranslationFile']['id'])); ?>
 		</td>
 		<td><?php echo $importedTranslationFile['ImportedTranslationFile']['filename']; ?></td>
 		<td><?php echo $importedTranslationFile['ImportedTranslationFile']['merged']; ?></td>

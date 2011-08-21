@@ -195,6 +195,11 @@ ul, ol {
 	padding-top:0;
 }
 
+p.help {
+	padding: 5px;
+	background: rgba(255,255,255, 0.2);
+	font-weight: bold;
+}
 
 /* menus
 ----------------------------------------------- */
@@ -217,7 +222,6 @@ ul.menu li a:active {
 	background:#ccc;
 }
 
-
 /* submenus
 ----------------------------------------------- */
 ul.menu ul {
@@ -228,6 +232,15 @@ ul.menu ul li a {
 	padding-left:30px;
 }
 
+/* menu lists
+----------------------------------------------- */
+ul.list {
+	margin-bottom: 0px;
+	border-top: 0px none;
+}
+ul.list li.current {
+	padding: 4px 14px;
+}
 
 /* section menus
 ----------------------------------------------- */

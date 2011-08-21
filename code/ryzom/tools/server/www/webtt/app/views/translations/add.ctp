@@ -27,9 +27,12 @@
 		</div>
 		</div>
 	</div>
+
+	<?php echo $this->element('neighbours'); ?>
 </div>
 
-
+<?php // var_dump($identifierColumnsDetails); ?>
+<?php // var_dump($this->data['IdentifierColumn']); ?>
 
 <div class="grid_13">
 
@@ -39,17 +42,36 @@
 	<div class="translations form">
 	<?php echo $this->Form->create('Translation');?>
 		<fieldset>
-				 		<legend><?php printf(__('Translation', true)); ?></legend>
+				 		<legend><?php printf(__('Translation', true) . ' :: ' . $identifier['Identifier']['identifier']); ?></legend>
 					<?php
 //		echo ($identifiers[$identifier['Identifier']['id']
-		echo $this->Form->hidden('identifier_id', array('default' => $identifier['Identifier']['id']));
-		echo $this->Form->input('translation_text');
-		// TODO: change user_id for authorized user
-		echo $this->Form->hidden('user_id', array('default' => 1));
+		echo $form->hidden('Translation.identifier_id', array('default' => $identifier['Identifier']['id']));
+		echo $form->hidden('Translation.user_id', array('value' => $this->Session->read('Auth.User.id')));
+		if (!empty($identifier['IdentifierColumn']))
+		{
+			$i=0;
+			foreach($identifierColumns as $key => $column) {
+				echo $form->hidden('ChildTranslation.'.$i.'.identifier_column_id', array('default' => $key));
+				echo $form->input('ChildTranslation.'.$i.'.identifier_column_id', array('type' => 'text', 'name'=>'buzu', 'value'=>$column, 'readonly' => 'readonly'));
+				echo $form->input('ChildTranslation.'.$i.'.translation_text', array('default' => $identifierColumnsDetails[$key]['reference_string'], 'rows' => 1, 'cols' => 80));
+//				echo $form->input('ChildTranslation.'.$i.'.id');
+				echo $form->hidden('ChildTranslation.'.$i.'.user_id', array('value' => $this->Session->read('Auth.User.id')));
+				$i++;
+			}
+//			echo $this->Form->input('translation_text', array("rows" => 1, "cols" => 60));
+		}
+		else
+		{
+			echo $this->Form->hidden('identifier_id', array('default' => $identifier['Identifier']['id']));
+			echo $this->Form->input('translation_text', array('default' => $identifier['Identifier']['reference_string'], 'rows' => 8, 'cols' => 80));
+			echo $this->Form->hidden('user_id', array('value' => $this->Session->read('Auth.User.id')));
+		}
+		
 	?>
 		</fieldset>
 		<div class="box">
-		<?php echo $this->Form->end(__('Submit', true));?>
+		<?php echo $this->Form->end(array('label' => __('Save and go to next identifier', true), 'name' => 'Next'));?>
+		<?php echo $this->Form->end(__('Save', true));?>
 		</div>
 	</div>
 <div class="box">
@@ -65,9 +87,9 @@
 		</div>
 		<?php $i++; ?>
 		<div style="clear: both"></div>
-		<div class="dt<?php if ($i % 2 == 0) echo $class;?>"><?php __('Language'); ?></div>
+		<div class="dt<?php if ($i % 2 == 0) echo $class;?>"><?php __('Translation File'); ?></div>
 		<div class="dd<?php if ($i % 2 == 0) echo $class;?>">
-			<?php echo $this->Html->link($identifier['Language']['name'], array('controller' => 'languages', 'action' => 'view', $identifier['Language']['id'])); ?>
+			<?php echo $this->Html->link($identifier['TranslationFile']['filename_template'], array('controller' => 'translation_files', 'action' => 'view', $identifier['TranslationFile']['id'])); ?>
 		</div>
 		<?php $i++; ?>
 		<div style="clear: both"></div>

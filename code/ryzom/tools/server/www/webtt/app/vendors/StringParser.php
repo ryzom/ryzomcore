@@ -1,4 +1,23 @@
 <?php
+/*
+	Ryzom Core Web-Based Translation Tool
+	Copyright (C) 2011 Piotr Kaczmarek <p.kaczmarek@openlink.pl>
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+?>
+<?php
 class StringParser
 {
 	var $pipeline_directory = "/home/kaczorek/projects/webtt/distfiles/translation/";
@@ -224,13 +243,14 @@ class StringParser
 						var_dump($parsedEnt);
 						var_dump($parsedLine);
 					}
-					$parsedEnt['string'] .= $parsedLine['string'] . "\n";
+//					$parsedEnt['string'] .= $parsedLine['string'] . "\n";
+					$parsedEnt['string'] .= "\n" . $parsedLine['string'];
 				}
 				else
 				{
 					if ($this->debug) echo "DODANIE \n";
 					$parsedEnt += $parsedLine;
-					$parsedEnt['string'] .= "\n";
+//					$parsedEnt['string'] .= "\n";
 				}
 
 				if ($this->debug)			

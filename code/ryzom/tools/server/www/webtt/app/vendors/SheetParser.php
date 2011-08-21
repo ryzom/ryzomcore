@@ -1,11 +1,30 @@
 <?php
+/*
+	Ryzom Core Web-Based Translation Tool
+	Copyright (C) 2011 Piotr Kaczmarek <p.kaczmarek@openlink.pl>
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+?>
+<?php
 class SheetParser
 {
 	var $debug = false;
 
 	function parseLine($str)
 	{
-		$arr = str_getcsv($line, "\t");
+		$arr = str_getcsv($str, "\t");
 		return $arr;
 	}
 
@@ -26,6 +45,12 @@ class SheetParser
 			echo "<pre>\n\n";
 		}
 		$line_no=1;
+
+/*		var_dump(setlocale(LC_ALL,NULL));
+		var_dump(setlocale(LC_ALL,'pl_PL.UTF-8'));*/
+		// Need to set UTF-8 locale to get str_getcsv to work with UTF-8 cyryllic
+		setlocale(LC_ALL,'pl_PL.UTF-8');
+
 		foreach ($lines as $line)
 		{
 			if ($this->debug)
@@ -35,11 +60,6 @@ class SheetParser
 
 //			var_dump($line);
 			$line = rtrim($line,"\r\n");
-
-/*			var_dump(setlocale(LC_ALL,NULL));
-			var_dump(setlocale(LC_ALL,'pl_PL.UTF-8'));*/
-			// Need to set UTF-8 locale to get str_getcsv to work with UTF-8 cyryllic
-			setlocale(LC_ALL,'pl_PL.UTF-8')
 
 			$parsedLine = $this->parseLine($line);
 

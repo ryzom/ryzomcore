@@ -7,3 +7,6 @@
 .fileIdentifiers div.dt, .fileIdentifiers label {
     width: 17em;
 }
+.translationFiles div.dt, .translationFiles label {
+    width: 15em;
+}

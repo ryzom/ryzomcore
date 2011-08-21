@@ -9,11 +9,11 @@
 				</ul>
 				<h5><?php echo __('Languages', true); ?></h5>
 				<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Languages', true)), array('controller' => 'languages', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Languages', true)), array('controller' => 'languages', 'action' => 'index')); ?> </li>
 				</ul>
 				<h5><?php echo __('Identifiers', true); ?></h5>
 				<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Identifiers', true)), array('controller' => 'identifiers', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Identifiers', true)), array('controller' => 'identifiers', 'action' => 'index')); ?> </li>
 				</ul>
 			</div>
 		</div>
@@ -21,6 +21,7 @@
 </div>
 
 <div class="grid_13">
+	<p class="help">Choose a file and click "List Identifiers" to see identifiers you can translate.</p>
 	<h2 id="page-heading"><?php __('Translation Files');?></h2>
 	<table cellpadding="0" cellspacing="0">		<?php $tableHeaders = $html->tableHeaders(array($paginator->sort('id'),$paginator->sort('language_id'),$paginator->sort('filename_template'),$paginator->sort('created'),$paginator->sort('modified'),__('Actions', true),));
 		echo '<thead>'.$tableHeaders.'</thead>'; ?>

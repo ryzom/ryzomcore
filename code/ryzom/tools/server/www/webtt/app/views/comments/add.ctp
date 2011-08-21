@@ -33,8 +33,7 @@
 					<?php
 //		echo $this->Form->input('translation_id');
 		echo $this->Form->hidden('identifier_id', array('default' => $identifier['Identifier']['id']));
-		// TODO: change user_id for authorized user
-		echo $this->Form->hidden('user_id', array('default' => 1));
+		echo $this->Form->hidden('user_id', array('value' => $this->Session->read('Auth.User.id')));
 		echo $this->Form->input('comment');
 	?>
 		</fieldset>

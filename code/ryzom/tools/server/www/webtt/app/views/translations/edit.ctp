@@ -27,6 +27,8 @@
 		</div>
 		</div>
 	</div>
+
+	<?php echo $this->element('neighbours'); ?>
 </div>
 
 
@@ -39,15 +41,38 @@
 						<legend><?php printf(__('Translation # %s', true), $this->Form->value('Translation.id')); ?></legend>
 					<?php
 		echo $this->Form->input('id');
-		echo $this->Form->input('identifier_id', array('type' => 'text', 'name'=>'buzu', 'value'=>$identifiers[$this->Form->value('Translation.identifier_id')], 'readonly' => 'readonly'));
 		echo $this->Form->hidden('identifier_id', array('default' => $this->Form->value('Translation.identifier_id')));
-		echo $this->Form->input('translation_text');
-		// TODO: change user_id for authorized user
-		echo $this->Form->hidden('user_id', array('default' => 1));
+		echo $this->Form->hidden('user_id', array('value' => $this->Session->read('Auth.User.id')));
+		if (!empty($identifier['IdentifierColumn']))
+		{
+//			var_dump($this->data);
+//			var_dump($translation);
+//			var_dump($identifierColumnTranslations);
+//			var_dump($identifierColumnsDetails2);
+//			var_dump($mapChildTranslationsColumns);
+			$i=$j=0;
+			foreach($identifierColumns as $key => $column) {
+				if (isset($mapChildTranslationsColumns[$key]))
+					$i = $mapChildTranslationsColumns[$key];
+				else
+					$i = 'n'.$j++;
+				echo $form->hidden('ChildTranslation.'.$i.'.identifier_column_id', array('default' => $key));
+				echo $form->input('ChildTranslation.'.$i.'.identifier_column_id', array('type' => 'text', 'name'=>'buzu', 'value'=>$column, 'readonly' => 'readonly'));
+				echo $form->input('ChildTranslation.'.$i.'.translation_text', array('rows' => 1, 'cols' => 80));
+				echo $form->input('ChildTranslation.'.$i.'.id');
+				echo $form->hidden('ChildTranslation.'.$i.'.user_id', array('value' => $this->Session->read('Auth.User.id')));
+			}
+		}
+		else
+		{
+			echo $this->Form->input('identifier_id', array('type' => 'text', 'name'=>'buzu', 'value'=>$this->Form->value('Identifier.identifier'), 'readonly' => 'readonly'));
+			echo $this->Form->input('translation_text', array('rows' => 8, 'cols' => 80));
+		}
+		
 	?>
 		</fieldset>
 		<div class="box">
-		<?php echo $this->Form->end(__('Submit', true));?>
+		<?php echo $this->Form->end(__('Save', true));?>
 		</div>
 	</div>
 
@@ -64,9 +89,9 @@
 		</div>
 		<?php $i++; ?>
 		<div style="clear: both"></div>
-		<div class="dt<?php if ($i % 2 == 0) echo $class;?>"><?php __('Language'); ?></div>
+		<div class="dt<?php if ($i % 2 == 0) echo $class;?>"><?php __('Translation File'); ?></div>
 		<div class="dd<?php if ($i % 2 == 0) echo $class;?>">
-			<?php echo $this->Html->link($identifier['Language']['name'], array('controller' => 'languages', 'action' => 'view', $identifier['Language']['id'])); ?>
+			<?php echo $this->Html->link($identifier['TranslationFile']['filename_template'], array('controller' => 'translation_files', 'action' => 'view', $identifier['TranslationFile']['id'])); ?>
 		</div>
 		<?php $i++; ?>
 		<div style="clear: both"></div>

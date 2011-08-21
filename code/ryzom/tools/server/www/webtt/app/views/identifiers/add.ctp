@@ -27,6 +27,8 @@
 		</div>
 		</div>
 	</div>
+
+	<?php echo $this->element('neighbours'); ?>
 </div>
 
 <div class="grid_13">

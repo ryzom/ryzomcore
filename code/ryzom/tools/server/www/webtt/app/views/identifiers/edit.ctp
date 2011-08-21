@@ -27,7 +27,8 @@
 		</div>
 		</div>
 	</div>
-</div>
+
+	<?php echo $this->element('neighbours'); ?></div>
 
 <div class="grid_13">
     <h2 id="page-heading"><?php printf(__('Edit %s', true), __('Identifier', true)); ?></h2>

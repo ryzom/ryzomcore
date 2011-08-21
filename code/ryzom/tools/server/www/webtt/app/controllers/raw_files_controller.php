@@ -1,4 +1,23 @@
 <?php
+/*
+	Ryzom Core Web-Based Translation Tool
+	Copyright (C) 2011 Piotr Kaczmarek <p.kaczmarek@openlink.pl>
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+?>
+<?php
 class RawFilesController extends AppController {
 
 	var $name = 'RawFiles';
@@ -7,20 +26,14 @@ class RawFilesController extends AppController {
 
 	function admin_index() {
 		$this->RawFile->recursive = 1;
-//		var_dump($this->RawFile->find('count'));
-//		$db =& ConnectionManager::getDataSource($this->RawFile->useDbConfig);
-//		var_dump($db->calculate($this->RawFile, 'count'));
 		$conditions['RawFile.dir'] = array("diff","translated");
 		$this->set('rawFiles', $this->paginate($conditions));
-//		$this->log(Router::parse($this->referer()));
-//		var_dump($this->paginate());
 	}
 
 	function admin_listdir($extension = null) {
 		$this->RawFile->recursive = 0;
 		$this->set('rawFiles', $this->paginate(array("RawFile.extension" => $extension)));
 		$this->rendeR("admin_index");
-//		var_dump($this->paginate());
 	}
 
 	function admin_view($dir = null, $filename = null) {
@@ -34,8 +47,6 @@ class RawFilesController extends AppController {
 			$this->redirect(array('action' => 'index'));
 			return 0;
 		}
-//		$id = $dir . DS . $filename;
-//		$this->set('rawFile', $this->RawFile->read(null, $id));
 		$this->set('rawFile', $rawFile = $this->RawFile->find('first', array(
 			"conditions" => array(
 				"RawFile.dir" => $dir,
@@ -46,13 +57,7 @@ class RawFilesController extends AppController {
 		$this->set('fileContent', $this->RawFile->_currentFile->read());
 	}
 
-/*	function import($dir = null, $filename = null) {
-		$this->admin_import($dir, $filename);
-	}*/
-
 	function admin_import($dir = null, $filename = null) {
-//		$this->view = "index";
-//		App::import("Vendor","UxtParser", array("file" => 'UxtParser.php'));
 		if (!$filename) {
 			$this->Session->setFlash(__('Invalid file', true));
 			$this->redirect(array('action' => 'index'));
@@ -67,28 +72,19 @@ class RawFilesController extends AppController {
 		$importedTranslationFileModel = $this->RawFile->ImportedTranslationFile;
 		$translationFileModel = $importedTranslationFileModel->TranslationFile;
 		$languageModel = $translationFileModel->Language;
-//		$identifierModel = $languageModel->Identifier;
 		$identifierModel = $translationFileModel->Identifier;
 		$identifierColumnModel = $identifierModel->IdentifierColumn;
 		$translationModel = $identifierModel->Translation;
 		$fileIdentifierModel = $importedTranslationFileModel->FileIdentifier;
 
-//		$filename="diff/pl_diff_4DEC868A.uxt";
 		$importedTranslationFile = $importedTranslationFileModel->find('first', array('conditions' => array('ImportedTranslationFile.filename' => $dir . DS . $filename), "recursive" => -1));
-/*		var_dump($translationFile);
-		return 0;*/
 		if ($importedTranslationFile)
 		{
 			$this->Session->setFlash(__('Translation file already imported', true));
 			$this->redirect(array('action' => 'index'));
 			return 0;
 		}
-//		var_dump($file);
-//		$parser = new UxtParser();
-//		$arr = explode("_", basename($filename, ".uxt"));
-//		var_dump($arr);
 
-//		$language_id = 1;
 		$languageCode = $this->RawFile->getLanguageCode($filename);
 		if (!$languageCode)
 		{
@@ -103,10 +99,6 @@ class RawFilesController extends AppController {
 			$this->Session->setFlash(__('Can\'t find language in database', true));
 			$this->redirect(array('action' => 'index'));
 			return 0;
-		}
-		else
-		{
-//			var_dump($language_id);
 		}
 
 		$filename_template = preg_replace('/_diff/', '', $filename);
@@ -137,18 +129,12 @@ class RawFilesController extends AppController {
 		$translation_file_id = $translationFileModel->id;
 
 		$parsedFile = $this->RawFile->parseFile();
-/*		var_dump($parsedFile);
-		$this->render('index');
-		return 0;*/
-//		$this->log($parsedFile);
 		if (!$parsedFile)
 		{
 			$this->Session->setFlash(__('Error importing file', true));
 			$this->redirect(array('action' => 'index'));
 			return 0;
 		}
-//		$this->log($parsedFile);
-//		return 0;
 
 		ini_set('max_execution_time',0);
 
@@ -160,11 +146,9 @@ class RawFilesController extends AppController {
 		$data['ImportedTranslationFile']['filename'] = $dir . DS . $filename;
 		$data['ImportedTranslationFile']['file_last_modified_date'] = $this->RawFile->_currentFileLastChange;
 
-//			$data['TranslationFile'] = $tf_data;
 		$importedTranslationFileModel->saveAll($data);
 		$importedTranslationFile_id = $importedTranslationFileModel->id;
 
-		//$this->ImportedTranslationFile->save($data);
 		foreach ($parsedFile as $ent)
 		{
 			if (!isset($ent['type']))
@@ -188,23 +172,25 @@ class RawFilesController extends AppController {
 			if (isset($ent['arguments']))
 				$i_data['arguments'] = $ent['arguments'];
 	
-			if (isset($ent['diff']) && isset($ent['string']))
+			if (isset($ent['columns']) && is_array($ent['columns']) && !isset($ent['string']))
+			{
+				foreach ($ent['columns'] as $column_no => $value)
+				{
+					$ent['string'] .= $value . "\t";
+				}
+				$ent['string'] = substr($ent['string'], 0, -1);
+			}
+
+			if (isset($ent['diff']))
 			{
 				$i_data['reference_string'] = $ent['string'];
 			}
 
 			unset($identifierModel->id);
 			$identifier = $identifierModel->find('first',array('conditions' => array('Identifier.identifier' => $ent['identifier'], 'Identifier.translation_file_id' => $translation_file_id), 'contain' => 'IdentifierColumn'));
-			//App::import('Vendor', 'DebugKit.FireCake');
-//			FireCake::log($ent['identifier'], "Identifier");
-//			FireCake::dump("identifier",$identifier);
-/*			$this->log($ent['identifier']);
-			$this->log($identifier);*/
 			if ($identifier)
 			{
-//				var_dump($identifier);
 				$i_data['id']=$identifier['Identifier']['id'];
-//				$this->log("found");
 			}
 			else
 			{
@@ -213,28 +199,51 @@ class RawFilesController extends AppController {
 				if (isset($ent['diff']))
 					$i_data['translated'] = false;
 				$newIdentifier = true;
-//				$this->log("not found");
-//				$this->log("id: # " . $identifierModel->id . " #");
-//				$this->log($i_data);
-
 			}
-//			var_dump($i_data);
 			$res = $identifierModel->saveAll($tarr = array('Identifier' => $i_data));
 			$identifier_id = $identifierModel->id;
-/*			$this->log('identifier saveAll res');
-			$this->log($res);
-			$this->log(var_export($res,true));
-			$this->log($identifierModel->validationErrors);
-			$this->log($identifierModel);
-			$this->log('#identifier id');
-			$this->log($identifier_id);
-			$this->log("tarr");
-			$this->log($tarr);*/
+
+				if (!isset($ent['diff'])) // it is translated file and we add translation
+				{
+					unset($translationModel->id);
+					unset($t_data);
+					$translationHash = $translationModel->makeHash($ent);
+
+					if ($newIdentifier) // ovbiously there's no translation for identifier we just created
+						$translation = array();
+					else
+					{
+						$this->log('new translation check');
+						$this->log($translationHash);
+						$translation = $translationModel->find('first',array('conditions' => array('Translation.identifier_id' => $identifier_id, 'Translation.translation_text' => $ent["string"], 'Translation.translation_hash' => NULL), "recursive" => -1));
+						$this->log($translation);
+						if (!$translation)
+						{
+							$translation = $translationModel->find('first',array('conditions' => array('Translation.identifier_id' => $identifier_id, 'Translation.translation_hash' => $translationHash), "recursive" => -1));
+							$this->log($translation);
+						}
+						$this->log('new translation check end');
+					}
+
+					if (!$translation)
+					{
+						$this->log('new translation');
+						$t_data['identifier_id'] = $identifier_id;
+						$t_data['translation_text'] = $ent['string'];
+						$t_data['user_id'] = $this->Auth->user('id');
+						$t_data['translation_hash'] = $translationHash;
+						$translationModel->save(array('Translation' => $t_data));
+					}
+/*					else
+						$t_data['id'] = $translation['Translation']['id'];*/
+					if ($translation)
+						$parentTranslation_id = $translation['Translation']['id'];
+					else
+						$parentTranslation_id = $translationModel->id;
+				}
 
 			if (isset($ent['columns']) && is_array($ent['columns']))
 			{
-/*				$this->log($_columns);
-				$this->log($ent['columns']);*/
 				$ic_data = array();
 				foreach ($ent['columns'] as $column_no => $value)
 				{
@@ -242,8 +251,6 @@ class RawFilesController extends AppController {
 					$ic_arr = array();
 					$ic_arr['identifier_id'] = $identifier_id;
 					$column_name = $_columns[$column_no];
-/*					$this->log($identifier);
-					$this->log($column_name);*/
 					if (!$newIdentifier)
 					{
 						foreach ($identifier['IdentifierColumn'] as $identifierColumn_no => $identifierColumn)
@@ -259,61 +266,29 @@ class RawFilesController extends AppController {
 					if (isset($ent['diff']))
 						$ic_arr['reference_string'] = $value;
 					$ic_data[] = $ic_arr;
-//					$this->log($ic_arr);
 					$res = $identifierColumnModel->save($ic_arr);
-//					$this->log($res);
 					$identifierColumn_id = $identifierColumnModel->id;
-/*					$this->log($identifierColumnModel->validationErrors);
-					$this->log(var_export($res,true));*/
 					
 					if (!isset($ent['diff'])) // it is translated file and we add translation
 					{
 						unset($translationModel->id);
+						unset($t_data);
 						if ($newIdentifier) // ovbiously there's no translation for identifier we just created
 							$translation = array();
 						else
-							$translation = $translationModel->find('first',array('conditions' => array('Translation.identifier_column_id' => $identifierColumn_id, 'Translation.translation_text' => $value), "recursive" => -1));
+							$translation = $translationModel->find('first',array('conditions' => array('Translation.identifier_column_id' => $identifierColumn_id, 'Translation.translation_text' => $value, 'Translation.parent_id' => $parentTranslation_id), "recursive" => -1));
 
 						if (!$translation)
 						{
 							$t_data['identifier_column_id'] = $identifierColumn_id;
 							$t_data['translation_text'] = $value;
-							// TODO: change user_id for authorized user
-							$t_data['user_id'] = 1;
+							$t_data['user_id'] = $this->Auth->user('id');
+							$t_data['parent_id'] = $parentTranslation_id;
+							$translationModel->save(array('Translation' => $t_data));
 						}
-						else
-							$t_data['id'] = $translation['Translation']['id'];
-//						var_dump($i_data);
-						$translationModel->save(array('Translation' => $t_data));
+/*						else
+							$t_data['id'] = $translation['Translation']['id'];*/
 					}
-
-				}
-/*				$res = $identifierColumnModel->saveAll($tarr = array('IdentifierColumn' => $ic_data));
-				$this->log($tarr);
-				$this->log(var_export($res,true));
-				$this->log($identifierColumnModel->validationErrors);*/
-			}
-			else
-			{
-				if (!isset($ent['diff'])) // it is translated file and we add translation
-				{
-					unset($translationModel->id);
-					if ($newIdentifier) // ovbiously there's no translation for identifier we just created
-						$translation = array();
-					else
-						$translation = $translationModel->find('first',array('conditions' => array('Translation.identifier_id' => $identifier_id, 'Translation.translation_text' => $ent["string"]), "recursive" => -1));
-					if (!$translation)
-					{
-						$t_data['identifier_id'] = $identifier_id;
-						if (isset($ent['string'])) // sheets doesn't have string (they have columns)
-							$t_data['translation_text'] = $ent['string'];
-						// TODO: change user_id for authorized user
-						$t_data['user_id'] = 1;
-					}
-					else
-						$t_data['id'] = $translation['Translation']['id'];
-//					var_dump($i_data);
-					$translationModel->save(array('Translation' => $t_data));
 				}
 			}
 
@@ -341,35 +316,19 @@ class RawFilesController extends AppController {
 
 				if (isset($ent['index']))
 					$fi_data['translation_index'] = $ent['index'];
-//				$data['FileIdentifier']['identifier_id'] = ;
 				$fi_data['identifier_id'] = $identifier_id;
 
 				$res = $fileIdentifierModel->saveAll($tarr = array('FileIdentifier' => $fi_data));
-//				$this->log($res);
-/*				$this->log("#fi_data");
-				$this->log($fi_data);*/
 				$fileIdentifier_id = $fileIdentifierModel->id;
 			}
-
-//			$this->ImportedTranslationFile->FileIdentifier->create();
-//			$this->ImportedTranslationFile->FileIdentifier->save($data);
-//			$data['FileIdentifier'][] = $fi_data;
-//			$l_data['Language']['id'] = $language_id;
-//			$l_data['Identifier'][] = $i_data;
-//			$data['Identifier'][] = $i_data;
 
 			$processedEntities++;
 
 		}
-/*		$this->render('admin_index');
-		return 0;*/
-//		var_dump($data);
-//		$this->ImportedTranslationFile->Language->saveAll($l_data);
 		if ($processedEntities == 0)
 		{
 			$importedTranslationFileModel->delete($importedTranslationFile_id);
 			$this->Session->setFlash(__('File was not imported because it seems empty', true));
-//			$this->redirect(array('action' => 'index'));
 			$this->redirect($this->referer());
 			return 0;
 		}
@@ -377,26 +336,20 @@ class RawFilesController extends AppController {
 		{
 			$this->Session->setFlash(__('Translation file imported into database successfully. Processed entities: ' . $processedEntities, true));
 			$this->redirect(array('controller' => 'imported_translation_files', 'action' => 'view', $importedTranslationFileModel->id));
-//			$this->render('admin_index');
 			return 0;
 		}
-//		$this->ImportedTranslationFile->recursive = 0;
-//		$this->set('importedTranslationFiles', $this->paginate());
-//		$this->render('index');
 	}
 
 	function admin_export($dir = null, $filename = null, $importedTranslationFileId = null) {
 		if (!$filename) {
 			$this->Session->setFlash(__('Invalid file', true));
 			$this->redirect($this->referer());
-//			$this->redirect(array('action' => 'index'));
 			return 0;
 		}
 		if (!$this->RawFile->open($dir, $filename, $writable = true))
 		{
 			$this->Session->setFlash(__('Can\'t open file for writing', true));
 			$this->redirect($this->referer());
-//			$this->redirect(array('action' => 'index'));
 			return 0;
 		}
 
@@ -414,24 +367,19 @@ class RawFilesController extends AppController {
 			'conditions' => array(
 				'ImportedTranslationFile.filename' => $dir . DS . $filename
 				),
-//			'recursive' => 3
-//			'order' => 'FileIdentifier.translation_index',
 			)
 		);
-/*		var_dump($translationFile);
-		return 0;*/
 		if (!$importedTranslationFile)
 		{
 			$this->Session->setFlash(__('No imported translation file found for chosen file', true));
 			$this->redirect($this->referer());
-//			$this->redirect(array('controller' => 'imported_translation_files', 'action' => 'index'));
 			return 0;
 		}
 		
 		$translationFileModel = $importedTranslationFileModel->TranslationFile;
 		$identifierModel = $translationFileModel->Identifier;
 
-		// TODO: check if all identifiers have "best" translation
+		// check if all identifiers have "best" translation
 		$identifier_ids = $identifierModel->withoutBestTranslation(array('ImportedTranslationFile.id' => $importedTranslationFile['ImportedTranslationFile']['id']));
 		if ($identifier_ids === false)
 		{
@@ -476,16 +424,11 @@ class RawFilesController extends AppController {
 				'index' => ((isset($fileIdentifier['translation_index']) && !empty($fileIdentifier['translation_index'])) ? $fileIdentifier['translation_index'] : null),
 				'internal_index' => $i++,
 				'type' => ((count($fileIdentifier['Identifier']['IdentifierColumn']) > 0) ? 'sheet' : 'string'),
-//				'type' => ((isset($fileIdentifier['command']) && !empty($fileIdentifier['command'])) ? $fileIdentifier['command'] : null),
 				'identifier' => $fileIdentifier['Identifier']['identifier'],
 				'arguments' => ((isset($fileIdentifier['arguments']) && !empty($fileIdentifier['arguments'])) ? $fileIdentifier['arguments'] : null),
-//				'string' => '',
 			);
-//			$this->log($fileIdentifier['Identifier']['Translation']);
-//			if (Set::numeric(array_keys($fileIdentifier['Identifier']['Translation'])))
 			if (isset($fileIdentifier['Identifier']['Translation'][0]))
 			{
-//				$this->log('numeric');
 				$ent['string'] = $fileIdentifier['Identifier']['Translation'][0]['translation_text'];
 			}
 			else if (isset($fileIdentifier['Identifier']['Translation']['translation_text']))
@@ -501,9 +444,6 @@ class RawFilesController extends AppController {
 
 			foreach ($fileIdentifier['Identifier']['IdentifierColumn'] as $column_no => $identifierColumn)
 			{
-/*				if (isset($identifierColumn['Translation']['translation_text']))
-					$ent['columns'][$column_no] = $identifierColumn['Translation']['translation_text'];*/
-
 				if (isset($identifierColumn['Translation'][0]))
 					$ent['columns'][$column_no] = $identifierColumn['Translation'][0]['translation_text'];
 				else if (isset($identifierColumn['Translation']['translation_text']))
@@ -522,33 +462,10 @@ class RawFilesController extends AppController {
 
 			$entities[] = $ent;
 		}
-/*		$sources = ConnectionManager::sourceList();
-		$sqlLogs = array();
-		foreach ($sources as $source)
-		{
-			$db =& ConnectionManager::getDataSource($source);
-			if (!$db->isInterfaceSupported('getLog'))
-				continue;
-			$sqlLogs[$source] = $db->getLog();
-		}
-		$this->log($sqlLogs);*/
-
-//		$this->log($importedTranslationFile);
-/*		$this->log($sortResult);
-		$this->log($entities);*/
 
 		ini_set('max_execution_time',0);
 
 		$result = $this->RawFile->buildFile($entities);
-//		$this->log($result);
-//			$this->render('admin_index');
-//			$this->redirect(array('controller' => 'imported_translation_files', 'action' => 'index'));
-//			return 0;
-
-/*		var_dump($parsedFile);
-		$this->render('index');
-		return 0;*/
-//		$this->log($parsedFile);
 		if (!$result)
 		{
 			$this->Session->setFlash(__('Error exporting file', true));

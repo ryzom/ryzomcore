@@ -1,34 +1,23 @@
 <?php
-/**
- * Comma Separated Values Datasource
- *
- * PHP versions 4 and 5
- *
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright 2005-2009, Cake Software Foundation, Inc. (http://cakefoundation.org)
- *
- * Licensed under The MIT License
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright     Copyright 2005-2009, Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
- * @package       datasources
- * @subpackage    datasources.models.datasources
- * @since         CakePHP Datasources v 0.3
- * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
- *
- * A CakePHP datasource for interacting with files using comma separated value storage.
- *
- * Create a datasource in your config/database.php
- *   public $csvfile = array(
- *     'datasource' => 'Datasources.CsvSource',
- *     'path' => '/path/to/file', // Path
- *     'extension' => 'csv', // File extension
- *     'readonly' => true, // Mark for read only access
- *     'recursive' => false // Only false is supported at the moment
- *   );
- */
+/*
+	Ryzom Core Web-Based Translation Tool
+	Copyright (C) 2011 Piotr Kaczmarek <p.kaczmarek@openlink.pl>
 
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+?>
+<?php
 if (!class_exists('Folder')) {
 	App::import('Core', 'Folder');
 }

@@ -25,7 +25,7 @@
 
 <div class="grid_13">
 	<h2 id="page-heading"><?php __('Imported Translation Files');?></h2>
-	<table cellpadding="0" cellspacing="0">		<?php $tableHeaders = $html->tableHeaders(array($paginator->sort('id'),$paginator->sort('language_id'),$paginator->sort('filename'),$paginator->sort('merged'),$paginator->sort('file_last_modified_date'),$paginator->sort('created'),$paginator->sort('modified'),__('Actions', true),));
+	<table cellpadding="0" cellspacing="0">		<?php $tableHeaders = $html->tableHeaders(array($paginator->sort('id'),$paginator->sort('translation_file_id'),$paginator->sort('filename'),$paginator->sort('merged'),$paginator->sort('file_last_modified_date'),$paginator->sort('created'),$paginator->sort('modified'),__('Actions', true),));
 		echo '<thead>'.$tableHeaders.'</thead>'; ?>
 
 		<?php
@@ -39,7 +39,7 @@
 	<tr<?php echo $class;?>>
 		<td><?php echo $importedTranslationFile['ImportedTranslationFile']['id']; ?></td>
 		<td>
-			<?php echo $this->Html->link($importedTranslationFile['Language']['name'], array('controller' => 'languages', 'action' => 'view', $importedTranslationFile['Language']['id'])); ?>
+			<?php echo $this->Html->link($importedTranslationFile['TranslationFile']['filename_template'], array('controller' => 'translation_files', 'action' => 'view', $importedTranslationFile['TranslationFile']['id'])); ?>
 		</td>
 		<td><?php echo $importedTranslationFile['ImportedTranslationFile']['filename']; ?></td>
 		<td><?php echo $importedTranslationFile['ImportedTranslationFile']['merged']; ?></td>

@@ -143,7 +143,6 @@
 						<th><?php __('Translation Index'); ?></th>
 						<th><?php __('Identifier'); ?></th>
 						<th><?php __('Arguments'); ?></th>
-						<th><?php __('Reference String'); ?></th>
 						<th><?php __('Translated'); ?></th>
 						<th><?php __('Created'); ?></th>
 						<th><?php __('Modified'); ?></th>
@@ -165,7 +164,6 @@
 					<td><?php echo $identifier['translation_index'];?></td>
 					<td><?php echo $identifier['identifier'];?></td>
 					<td><?php echo $identifier['arguments'];?></td>
-					<td><?php echo $identifier['reference_string'];?></td>
 					<td><?php echo $identifier['translated'];?></td>
 					<td><?php echo $identifier['created'];?></td>
 					<td><?php echo $identifier['modified'];?></td>

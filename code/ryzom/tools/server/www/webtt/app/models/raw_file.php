@@ -1,4 +1,23 @@
 <?php
+/*
+	Ryzom Core Web-Based Translation Tool
+	Copyright (C) 2011 Piotr Kaczmarek <p.kaczmarek@openlink.pl>
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+?>
+<?php
 class RawFile extends AppModel {
 	var $name = 'RawFile';
 	var $useDbConfig = 'raw_files';
@@ -7,7 +26,6 @@ class RawFile extends AppModel {
 	var $primaryKey = 'filename';
 	
 	var $_parser;
-	//The Associations below have been created with all possible keys, those that are not needed can be removed
 
 	var $belongsTo = array(
 		'ImportedTranslationFile' => array(
@@ -18,21 +36,6 @@ class RawFile extends AppModel {
 			'order' => ''
 		),
 	);
-/*	var $hasOne = array(
-		'FileIdentifier' => array(
-			'className' => 'FileIdentifier',
-			'foreignKey' => 'translation_file_id',
-			'dependent' => true,
-			'conditions' => '',
-			'fields' => '',
-			'order' => '',
-			'limit' => '',
-			'offset' => '',
-			'exclusive' => '',
-			'finderQuery' => '',
-			'counterQuery' => ''
-		)
-	);*/
 
 	public function open($dir, $filename, $write = false)
 	{
@@ -47,7 +50,6 @@ class RawFile extends AppModel {
 			return false;
 		if ($write && !$file->writable())
 			return false;
-//		var_dump($filename);
 		$this->_currentFile = $file;
 		$this->_currentFileLastChange = $file->lastChange();
 		return $file;
@@ -55,7 +57,6 @@ class RawFile extends AppModel {
 
 	public function parseFile()
 	{
-//		var_dump($this->_currentFile);
 		if (!$this->_currentFile)
 			return false;
 
@@ -93,7 +94,6 @@ class RawFile extends AppModel {
 
 	public function buildFile($entities)
 	{
-//		var_dump($this->_currentFile);
 		if (!$this->_currentFile)
 			return false;
 
@@ -133,7 +133,6 @@ class RawFile extends AppModel {
 
 	public function getLanguageCode($filename)
 	{
-//		var_dump($filename);
 		if (preg_match('|^([a-z]{2})_diff_[A-F0-9]{8}\.uxt$|', $filename, $matches))
 			return $matches[1];
 		else if (preg_match('|^([a-z]{2})\.uxt$|', $filename, $matches))

@@ -15,6 +15,17 @@
 		echo $this->Html->script(array('jquery-1.3.2.min.js', 'jquery-ui.js', 'jquery-fluid16.js'));
 		echo $scripts_for_layout;
 	?>
+	<script>
+		function fix_layout() {
+			$('.dd').each(function(index) {
+				if ($.trim($(this).text()) == "")
+				{
+					$(this).html('&nbsp;');
+				}
+			});
+		}
+		$(function() { fix_layout(); });
+	</script>
 </head>
 <body>
 	<div class="container_16" style="background: none repeat scroll 0pt 0pt rgba(40, 60, 60, 0.6);">
@@ -22,7 +33,7 @@
 			<div style="text-align: right; float: right">
 				<a href="http://dev.ryzom.com/"><img border="0" alt="" src="http://www.ryzom.com/data/logo.gif"></a>
 			</div>
-			<h2 id="branding" style="background: none; float: left">
+			<h2 id="branding" style="float: left">
 				<a href="/">Ryzom Core: Web-Based Translation Tool</a>
 			</h1>
 		</div>
@@ -46,35 +57,44 @@
 		<?php
 	}
 	?>
-	<?php
-	if (isset($assocPath)) {
-		?>
-		<div class="container_16" style="background: none repeat scroll 0pt 0pt rgba(40, 60, 60, 0.9);">
-			<div class="grid_16">
-				<div style="margin:5px">
-				<h5>/
-				<?php
-				$path = $assocPath;
-				$text = null;
-				while ($path)
-				{
-					$model = key($path);
-					$path = $path[$model];
-					$controller = Inflector::pluralize(Inflector::underscore($model));
-					echo $this->Html->link(__(Inflector::pluralize($model), true), array('controller' => $controller, 'action' => 'index'));
-					if ($path)
-						echo " / ";
-				}
-				?>
-				</h5>
-				</div>		
+	<div class="container_16" style="background: none repeat scroll 0pt 0pt rgba(40, 60, 60, 0.9);">
+		<div class="grid_16">
+		<?php
+			if (isset($assocPath)) {
+			?>
+			<div style="margin:5px; float: left">
+			<h5>/
+			<?php
+			$path = $assocPath;
+			$text = null;
+			while ($path)
+			{
+				$model = key($path);
+				$path = $path[$model];
+				$controller = Inflector::pluralize(Inflector::underscore($model));
+				echo $this->Html->link(__(Inflector::pluralize($model), true), array('controller' => $controller, 'action' => 'index'));
+				if ($path)
+					echo " / ";
+			}
+			?>
+			</h5>
 			</div>
+			<?php
+			}
+			?>
+			<div style="margin: 5px; float: right"><h5>
+			<?php
+			if ($this->Session->read('Auth.User.id'))
+				echo $this->Html->link(__('Logout', true), array('admin' => false, 'controller' => 'users', 'action' => 'logout'));
+			else if ($this->params['controller'] == 'users')
+				echo $this->Html->link(__('Register', true), array('admin' => false, 'controller' => 'users', 'action' => 'register'));
+			?>
+			</h5></div>
 			<div style="clear: both"></div>
 		</div>
-		<div class="clear" style="height: 10px; width: 100%;" style="clear: both"></div>
-		<?php
-	}
-	?>
+		<div style="clear: both"></div>
+	</div>
+	<div class="clear" style="height: 10px; width: 100%;" style="clear: both"></div>
 	<div class="container_16">
 <!--		<div class="clear"></div>-->
 		

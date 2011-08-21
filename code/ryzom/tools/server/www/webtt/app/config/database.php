@@ -12,7 +12,7 @@ class DATABASE_CONFIG {
 	);
 	var $raw_files = array(
 		'datasource' => 'RawFilesSource',
-		'path' => '/home/kaczorek/projects/webtt/distfiles/translation',
+		'path' => '/path/to/translation',
 		'extension' => '(uxt|txt)',
 		'readonly' => true,
 		'recursive' => true,

@@ -1,18 +1,33 @@
 <?php
+/*
+	Ryzom Core Web-Based Translation Tool
+	Copyright (C) 2011 Piotr Kaczmarek <p.kaczmarek@openlink.pl>
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+?>
+<?php
 class VotesController extends AppController {
 
 	var $name = 'Votes';
 
 	function index() {
 		$this->Vote->recursive = 0;
-//		var_dump($this->Vote->belongsTo);
-//		var_dump($this->Vote->getAssociated());
-//		$model = $this->{$this->modelClass};
-//		$this->log($tree=$this->PathResolver->getAssociationsTree($model));
-//		$this->log($this->PathResolver->getAssociationsGraph('User',$tree));
-//		$this->log($this->PathResolver->printPath($model), 'info');
-//		$this->log($this->PathResolver->node_path('Language', $tree));
-		$this->set('votes', $this->paginate());
+		$conditions = null;
+		if (isset($this->passedArgs['translation_id']) && $translation_id = $this->passedArgs['translation_id'])
+			$conditions = array('Vote.translation_id' => $translation_id);
+		$this->set('votes', $this->paginate($conditions));
 	}
 
 	function view($id = null) {
@@ -39,14 +54,14 @@ class VotesController extends AppController {
 	}
 
 	function vote() {
-		if (empty($this->passedArgs['translation']))
+		if (empty($this->passedArgs['translation_id']))
 		{
 			$this->Session->setFlash(__('You need to choose translation for your vote', true));
 			$this->redirect(array('controller' => 'translations', 'action' => 'index'));
 		}
 		else
 		{
-			$translation_id = $this->passedArgs['translation'];
+			$translation_id = $this->passedArgs['translation_id'];
 			$translation = $this->Vote->Translation->read(null, $translation_id);
 			if (!$translation)
 			{
@@ -55,16 +70,13 @@ class VotesController extends AppController {
 			}
 			$vote = array("Vote" => array(
 							'translation_id' => $translation_id,
-							// TODO: authorized user
-							'user_id' => 1,
+							'user_id' => $this->Auth->user('id'),
 						),
 					);
 			$this->Vote->create();
 			$this->Vote->save($vote);
 			$this->Session->setFlash(__('Vote added', true));
-			$this->redirect($this->referer(array('controller' => 'translations', 'action' => 'index')));
-//			$this->redirect(array('controller' => 'translations', 'action' => 'index'));
-//			$this->data['Translation.identifier_id'] = $identifier_id;
+			$this->redirect($this->referer());
 		}
 	}
 

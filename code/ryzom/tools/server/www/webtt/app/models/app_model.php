@@ -32,7 +32,9 @@
  * @subpackage    cake.cake.libs.model
  */
 class AppModel extends Model {
-//	var $useDbConfig = 'raw_files';
+//	var $recursive = 0;
+
 	var $scaffoldForbiddenActions = null;
 	var $scaffoldActions = null;
+	var $scaffoldForbiddenFields = null;
 }

@@ -8,28 +8,28 @@
 			<ul class="menu">
 				<li><?php echo $this->Html->link(sprintf(__('Edit %s', true), __('Translation', true)), array('action' => 'edit', $translation['Translation']['id'])); ?> </li>
 				<li><?php echo $this->Html->link(sprintf(__('Delete %s', true), __('Translation', true)), array('action' => 'delete', $translation['Translation']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $translation['Translation']['id'])); ?> </li>
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Translations', true)), array('action' => 'index')); ?> </li>
-				<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Translation', true)), array('action' => 'add')); ?> </li>
 			</ul>
 				
 			<h5>Identifiers</h5>
 			<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Identifiers', true)), array('controller' => 'identifiers', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Identifiers', true)), array('controller' => 'identifiers', 'action' => 'index')); ?> </li>
 			</ul>
 
 			<h5>Users</h5>
 			<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Users', true)), array('controller' => 'users', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Users', true)), array('controller' => 'users', 'action' => 'index')); ?> </li>
 			</ul>
 
 			<h5>Votes</h5>
 			<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Votes', true)), array('controller' => 'votes', 'action' => 'index')); ?> </li>
-				<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Vote', true)), array('controller' => 'votes', 'action' => 'add')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List related %s', true), __('Votes', true)), array('controller' => 'votes', 'action' => 'index', 'translation_id' => $translation['Translation']['id'])); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('New related %s', true), __('Vote', true)), array('controller' => 'votes', 'action' => 'add', 'translation_id' => $translation['Translation']['id'])); ?> </li>
 			</ul>
 		</div>
 		</div>
 	</div>
+
+	<?php echo $this->element('neighbours'); ?>
 </div>
 
 <div class="grid_13">
@@ -81,6 +81,34 @@
 			<div style="clear: both"></div>
 			</div>
 		</div>
+
+			<?php if (!empty($identifier['IdentifierColumn'])):?>
+			<table cellpadding = "0" cellspacing = "0">
+				<thead>
+					<tr>
+						<th><?php __('Column Name'); ?></th>
+						<th><?php __('Reference String'); ?></th>
+						<th><?php __('Translation'); ?></th>
+					</tr>
+				</thead>
+				<?php
+				$i = 0;
+				foreach ($columnTranslations as $identifierColumn):
+					$class = null;
+					if ($i++ % 2 == 0) {
+						$class = ' class="altrow"';
+					}
+				?>
+				<tr<?php echo $class;?>>
+					<td><?php echo $identifierColumn['IdentifierColumn']['column_name'];?></td>
+					<td><?php echo $identifierColumn['IdentifierColumn']['reference_string'];?></td>
+					<td><?php echo $identifierColumn['Translation']['translation_text'];?></td>
+				</tr>
+				<?php endforeach; ?>
+			</table>
+			<?php endif; ?>
+
+
 	</div>
 </div>
 
@@ -97,9 +125,9 @@
 		</div>
 		<?php $i++; ?>
 		<div style="clear: both"></div>
-		<div class="dt<?php if ($i % 2 == 0) echo $class;?>"><?php __('Language'); ?></div>
+		<div class="dt<?php if ($i % 2 == 0) echo $class;?>"><?php __('Translation File'); ?></div>
 		<div class="dd<?php if ($i % 2 == 0) echo $class;?>">
-			<?php echo $this->Html->link($identifier['Language']['name'], array('controller' => 'languages', 'action' => 'view', $identifier['Language']['id'])); ?>
+			<?php echo $this->Html->link($identifier['TranslationFile']['filename_template'], array('controller' => 'translation_files', 'action' => 'view', $identifier['TranslationFile']['id'])); ?>
 		</div>
 		<?php $i++; ?>
 		<div style="clear: both"></div>
@@ -150,7 +178,6 @@
 	</div>
 </div>
 
-
 <div class="box">
 	<h2>
 		<a href="#" id="toggle-related-records"><?php echo (__('Related', true)); ?></a>
@@ -195,7 +222,8 @@
 
 			<div class="actions">
 				<ul>
-					<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Vote', true)), array('controller' => 'votes', 'action' => 'add'));?></li>
+					<li><?php echo $this->Html->link(sprintf(__('List related %s', true), __('Votes', true)), array('controller' => 'votes', 'action' => 'index', 'translation_id' => $translation['Translation']['id']));?></li>
+					<li><?php echo $this->Html->link(sprintf(__('New related %s', true), __('Vote', true)), array('controller' => 'votes', 'action' => 'vote', 'translation_id' => $translation['Translation']['id']));?></li>
 				</ul>
 			</div>
 		</div>

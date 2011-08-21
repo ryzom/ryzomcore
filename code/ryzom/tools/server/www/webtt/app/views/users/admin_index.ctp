@@ -4,17 +4,24 @@
 		<div class="inbox">
 			<div class="block" id="admin-actions">
 				<h5><?php echo __('Users', true); ?></h5>
-				<ul class="menu">				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Users', true)), array('action' => 'index')); ?> </li>
-				<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('User', true)), array('action' => 'add')); ?> </li>
-				</ul>				<h5><?php echo __('Translations', true); ?></h5>
 				<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Translations', true)), array('controller' => 'translations', 'action' => 'index')); ?> </li>
+					<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Users', true)), array('action' => 'index')); ?> </li>
+	<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('User', true)), array('action' => 'add')); ?> </li>
+				</ul>
+				<h5><?php echo __('Translations', true); ?></h5>
+				<ul class="menu">
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Translations', true)), array('controller' => 'translations', 'action' => 'index')); ?> </li>
 				<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Translation', true)), array('controller' => 'translations', 'action' => 'add')); ?> </li>
 				</ul>
 				<h5><?php echo __('Votes', true); ?></h5>
 				<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Votes', true)), array('controller' => 'votes', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Votes', true)), array('controller' => 'votes', 'action' => 'index')); ?> </li>
 				<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Vote', true)), array('controller' => 'votes', 'action' => 'add')); ?> </li>
+				</ul>
+				<h5><?php echo __('Comments', true); ?></h5>
+				<ul class="menu">
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Comments', true)), array('controller' => 'comments', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Comment', true)), array('controller' => 'comments', 'action' => 'add')); ?> </li>
 				</ul>
 			</div>
 		</div>
@@ -23,7 +30,7 @@
 
 <div class="grid_13">
 	<h2 id="page-heading"><?php __('Users');?></h2>
-	<table cellpadding="0" cellspacing="0">		<?php $tableHeaders = $html->tableHeaders(array($paginator->sort('id'),$paginator->sort('name'),$paginator->sort('created'),$paginator->sort('modified'),__('Actions', true),));
+	<table cellpadding="0" cellspacing="0">		<?php $tableHeaders = $html->tableHeaders(array($paginator->sort('id'),$paginator->sort('name'),$paginator->sort('email'),$paginator->sort('activated'),$paginator->sort('username'),$paginator->sort('role'),$paginator->sort('confirm_hash'),$paginator->sort('created'),$paginator->sort('modified'),__('Actions', true),));
 		echo '<thead>'.$tableHeaders.'</thead>'; ?>
 
 		<?php
@@ -37,6 +44,11 @@
 	<tr<?php echo $class;?>>
 		<td><?php echo $user['User']['id']; ?></td>
 		<td><?php echo $user['User']['name']; ?></td>
+		<td><?php echo $user['User']['email']; ?></td>
+		<td><?php echo $user['User']['activated']; ?></td>
+		<td><?php echo $user['User']['username']; ?></td>
+		<td><?php echo $user['User']['role']; ?></td>
+		<td><?php echo $user['User']['confirm_hash']; ?></td>
 		<td><?php echo $user['User']['created']; ?></td>
 		<td><?php echo $user['User']['modified']; ?></td>
 		<td class="actions">

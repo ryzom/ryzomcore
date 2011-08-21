@@ -44,9 +44,9 @@
 		</div>
 		<?php $i++; ?>
 		<div style="clear: both"></div>
-		<div class="dt<?php if ($i % 2 == 0) echo $class;?>"><?php __('Language'); ?></div>
+		<div class="dt<?php if ($i % 2 == 0) echo $class;?>"><?php __('Filename Template'); ?></div>
 		<div class="dd<?php if ($i % 2 == 0) echo $class;?>">
-			<?php echo $this->Html->link($importedTranslationFile['Language']['name'], array('controller' => 'languages', 'action' => 'view', $importedTranslationFile['Language']['id'])); ?>
+			<?php echo $this->Html->link($importedTranslationFile['TranslationFile']['filename_template'], array('controller' => 'translation_files', 'action' => 'view', $importedTranslationFile['TranslationFile']['id'])); ?>
 		</div>
 		<?php $i++; ?>
 		<div style="clear: both"></div>
@@ -137,7 +137,6 @@
 
 			<div class="actions">
 				<ul>
-					<li></li>
 				</ul>
 			</div>
 		</div>

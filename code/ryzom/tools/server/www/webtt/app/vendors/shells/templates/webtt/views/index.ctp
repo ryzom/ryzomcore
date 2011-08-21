@@ -15,6 +15,10 @@
  * @subpackage    cake.cake.console.libs.templates.views
  * @since         CakePHP(tm) v 0.10.0.1076
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+ *
+ * WebTT bake template based on 960grid template
+ * http://bakery.cakephp.org/articles/tom_m/2010/05/26/960-fluid-grid-system-bake-templates
+ *
  */
 ?>
 <div class="grid_3">
@@ -43,7 +47,7 @@
 							if ($details['controller'] != $this->name && !in_array($details['controller'], $done))
 							{
 								if (empty($details['scaffoldForbiddenActions']) || (!empty($details['scaffoldForbiddenActions']) && !in_array($scaffoldPrefix . "index", $details['scaffoldForbiddenActions'])))
-									echo "\t\t\t\t<li><?php echo \$this->Html->link(sprintf(__('List %s', true), __('" . Inflector::humanize($details['controller']) . "', true)), array('controller' => '{$details['controller']}', 'action' => 'index')); ?> </li>\n";
+									echo "\t\t\t\t<li><?php echo \$this->Html->link(sprintf(__('List all %s', true), __('" . Inflector::humanize($details['controller']) . "', true)), array('controller' => '{$details['controller']}', 'action' => 'index')); ?> </li>\n";
 								if (empty($details['scaffoldForbiddenActions']) || (!empty($details['scaffoldForbiddenActions']) && !in_array($scaffoldPrefix . "add", $details['scaffoldForbiddenActions'])))
 									echo "\t\t\t\t<li><?php echo \$this->Html->link(sprintf(__('New %s', true), __('" . Inflector::humanize(Inflector::underscore($alias)) . "', true)), array('controller' => '{$details['controller']}', 'action' => 'add')); ?> </li>\n";
 								$done[] = $details['controller'];
@@ -64,7 +68,10 @@
 		//// TABLE HEADERS
 		echo "\t\t<?php \$tableHeaders = \$html->tableHeaders(array("; 
 
-		foreach($fields as $field) { 
+		foreach($fields as $field) {
+			if (!(empty($scaffoldForbiddenFields) || !isset($scaffoldForbiddenFields[$scaffoldPrefix]) || (!empty($scaffoldForbiddenFields) && isset($scaffoldForbiddenFields[$scaffoldPrefix]) && !in_array($field, $scaffoldForbiddenFields[$scaffoldPrefix]))))
+				continue;
+
 			echo "\$paginator->sort('{$field}'),";
 		}
 		echo "__('Actions', true),";
@@ -82,6 +89,9 @@
 		?>\n";
 		echo "\t<tr<?php echo \$class;?>>\n";
 			foreach ($fields as $field) {
+				if (!(empty($scaffoldForbiddenFields) || !isset($scaffoldForbiddenFields[$scaffoldPrefix]) || (!empty($scaffoldForbiddenFields) && isset($scaffoldForbiddenFields[$scaffoldPrefix]) && !in_array($field, $scaffoldForbiddenFields[$scaffoldPrefix]))))
+					continue;
+
 				$isKey = false;
 				if (!empty($associations['belongsTo'])) {
 					foreach ($associations['belongsTo'] as $alias => $details) {

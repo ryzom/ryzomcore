@@ -1,3 +1,4 @@
+<div class="grid_6">
 <?php
 echo $this->Session->flash('email');
 
@@ -12,3 +13,4 @@ echo $this->Form->inputs(array(
 ));
 echo $this->Form->end('Register');
 ?>
+</div>

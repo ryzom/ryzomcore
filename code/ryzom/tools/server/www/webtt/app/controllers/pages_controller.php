@@ -89,12 +89,10 @@ class PagesController extends AppController {
 
 /*		if (isset($this->params['admin']))
 			array_shift($path);*/
-//var_dump($path);
 		if (!isset($path[0]) || $path[0] != 'admin') {
 			//This adds admin to the beginning of the path so the pages controller will look in the 'admin' folder in pages directory
 			$path = array_merge((array)'admin', $path);
 		}
-//		var_dump($path);
 		$count = count($path);
 		if (!$count) {
 			$this->redirect('/');

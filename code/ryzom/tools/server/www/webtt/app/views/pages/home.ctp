@@ -18,7 +18,7 @@
  */
 ?>
 <div class="grid_16">
-	<h3 id="page-heading"><?php __('Languages'); ?></h3>
+	<p class="help">Click the link below to list the languages in the project.</p>
 	<p>
 	<?php echo $this->Html->link(__('List Languages', true), array('controller' => 'languages', 'action' => 'index')); ?>
 	</p>

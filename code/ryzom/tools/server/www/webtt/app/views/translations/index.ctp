@@ -9,15 +9,15 @@
 				</ul>
 				<h5><?php echo __('Identifiers', true); ?></h5>
 				<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Identifiers', true)), array('controller' => 'identifiers', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Identifiers', true)), array('controller' => 'identifiers', 'action' => 'index')); ?> </li>
 				</ul>
 				<h5><?php echo __('Users', true); ?></h5>
 				<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Users', true)), array('controller' => 'users', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Users', true)), array('controller' => 'users', 'action' => 'index')); ?> </li>
 				</ul>
 				<h5><?php echo __('Votes', true); ?></h5>
 				<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Votes', true)), array('controller' => 'votes', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Votes', true)), array('controller' => 'votes', 'action' => 'index')); ?> </li>
 				</ul>
 			</div>
 		</div>
@@ -52,7 +52,7 @@
 			<?php echo $this->Html->link(__('View', true), array('action' => 'view', $translation['Translation']['id'])); ?>
 			<?php echo ' | ' . $this->Html->link(__('Edit', true), array('action' => 'edit', $translation['Translation']['id'])); ?>
 			<?php echo ' | ' . $this->Html->link(__('Delete', true), array('action' => 'delete', $translation['Translation']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $translation['Translation']['id'])); ?>
-			| <?php echo $this->Html->link(__('Vote', true), array('controller' => 'votes', 'action' => 'vote', 'translation' => $translation['Translation']['id'])); ?>
+			| <?php echo $this->Html->link(__('Vote', true), array('controller' => 'votes', 'action' => 'vote', 'translation_id' => $translation['Translation']['id'])); ?>
 		</td>
 	</tr>
 	<?php endforeach; ?>

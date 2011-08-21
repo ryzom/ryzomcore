@@ -11,12 +11,13 @@
 				
 			<h5>Languages</h5>
 			<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Languages', true)), array('controller' => 'languages', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Languages', true)), array('controller' => 'languages', 'action' => 'index')); ?> </li>
 			</ul>
 
 			<h5>Identifiers</h5>
 			<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Identifiers', true)), array('controller' => 'identifiers', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Identifiers', true)), array('controller' => 'identifiers', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List related %s', true), __('Identifiers', true)), array('controller' => 'identifiers', 'action' => 'index', 'translation_file_id' => $translationFile['TranslationFile']['id'])); ?> </li>
 			</ul>
 		</div>
 		</div>
@@ -70,67 +71,20 @@
 	</div>
 </div>
 
-<div class="box">
+<!--<div class="box">
 	<h2>
 		<a href="#" id="toggle-related-records"><?php echo (__('Related', true)); ?></a>
 	</h2>
 	<div class="block" id="related-records">
 		<!-- RELATED -->
 		<!-- Identifier -->
-		<div class="related">
-			<h3><?php printf(__('Related %s', true), __('Identifiers', true));?></h3>
-			<?php if (!empty($translationFile['Identifier'])):?>
-			<table cellpadding = "0" cellspacing = "0">
-				<thead>
-					<tr>
-						<th><?php __('Id'); ?></th>
-						<th><?php __('Language Id'); ?></th>
-						<th><?php __('Translation File Id'); ?></th>
-						<th><?php __('Translation Index'); ?></th>
-						<th><?php __('Identifier'); ?></th>
-						<th><?php __('Arguments'); ?></th>
-						<th><?php __('Reference String'); ?></th>
-						<th><?php __('Translated'); ?></th>
-						<th><?php __('Created'); ?></th>
-						<th><?php __('Modified'); ?></th>
-						<th class="actions"><?php __('Actions');?></th>
-					</tr>
-				</thead>
-				<?php
-				$i = 0;
-				foreach ($translationFile['Identifier'] as $identifier):
-					$class = null;
-					if ($i++ % 2 == 0) {
-						$class = ' class="altrow"';
-					}
-				?>
-				<tr<?php echo $class;?>>
-					<td><?php echo $identifier['id'];?></td>
-					<td><?php echo $identifier['language_id'];?></td>
-					<td><?php echo $identifier['translation_file_id'];?></td>
-					<td><?php echo $identifier['translation_index'];?></td>
-					<td><?php echo $identifier['identifier'];?></td>
-					<td><?php echo $identifier['arguments'];?></td>
-					<td><?php echo $identifier['reference_string'];?></td>
-					<td><?php echo $identifier['translated'];?></td>
-					<td><?php echo $identifier['created'];?></td>
-					<td><?php echo $identifier['modified'];?></td>
-					<td class="actions">
-						<?php echo $this->Html->link(__('View', true), array('controller' => 'identifiers', 'action' => 'view', $identifier['id'])); ?>
-					</td>
-				</tr>
-				<?php endforeach; ?>
-			</table>
-			<?php endif; ?>
-
 			<div class="actions">
 				<ul>
 				</ul>
 			</div>
-		</div>
 		<!-- /RELATED -->
 	</div>
-</div>
+</div>-->
 
 </div>
 <div class="clear"></div>

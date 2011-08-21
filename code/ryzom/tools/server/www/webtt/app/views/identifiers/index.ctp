@@ -7,11 +7,11 @@
 				<ul class="menu">				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Identifiers', true)), array('action' => 'index')); ?> </li>
 				</ul>				<h5><?php echo __('Languages', true); ?></h5>
 				<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Languages', true)), array('controller' => 'languages', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Languages', true)), array('controller' => 'languages', 'action' => 'index')); ?> </li>
 				</ul>
 				<h5><?php echo __('Translations', true); ?></h5>
 				<ul class="menu">
-				<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Translations', true)), array('controller' => 'translations', 'action' => 'index')); ?> </li>
+				<li><?php echo $this->Html->link(sprintf(__('List all %s', true), __('Translations', true)), array('controller' => 'translations', 'action' => 'index')); ?> </li>
 				</ul>
 			</div>
 		</div>
@@ -19,6 +19,7 @@
 </div>
 
 <div class="grid_13">
+	<p class="help">Choose an identifier you want to translate and click "View details and comments" to see details and its translations or use shortcut actions, ie. "Add Translation", "List Translations", "Add Comment".</p>
 	<h2 id="page-heading"><?php __('Identifiers');?></h2>
 	<table cellpadding="0" cellspacing="0">		<?php $tableHeaders = $html->tableHeaders(array($paginator->sort('id'),$paginator->sort('translation_file_id'),$paginator->sort('identifier'),$paginator->sort('arguments'),$paginator->sort('reference_string'),$paginator->sort('translated'),__('Actions', true),));
 		echo '<thead>'.$tableHeaders.'</thead>'; ?>

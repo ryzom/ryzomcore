@@ -15,11 +15,13 @@
  * @subpackage    cake.cake.console.libs.templates.views
  * @since         CakePHP(tm) v 1.2.0.5234
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+ * WebTT bake template based on 960grid template
+ * http://bakery.cakephp.org/articles/tom_m/2010/05/26/960-fluid-grid-system-bake-templates
+ *
  */
 ?>
 <div class="grid_3">
-	<div class="box menubox"><?php
-		//// ACTIONS ?>
+	<div class="box menubox">
 		<h2>
 			<a href="#" id="toggle-admin-actions">Actions</a>
 		</h2>
@@ -40,18 +42,26 @@
 			</ul>
 				<?php
 					$done = array();
-					foreach ($associations as $type => $data)
+					foreach ($associations as $_type => $_data)
 					{
-						foreach ($data as $alias => $details)
+						foreach ($_data as $alias => $details)
 						{
 							if (empty($details['scaffoldForbiddenActions']) || (!empty($details['scaffoldForbiddenActions']) && !in_array($scaffoldPrefix . "index", $details['scaffoldForbiddenActions'])))
 							{
 								echo "\n\t\t\t<h5>".Inflector::humanize($details['controller'])."</h5>";
 								echo "\n\t\t\t<ul class=\"menu\">\n";
 								if ($details['controller'] != $this->name && !in_array($details['controller'], $done)) {
-									echo "\t\t\t\t<li><?php echo \$this->Html->link(sprintf(__('List %s', true), __('" . Inflector::humanize($details['controller']) . "', true)), array('controller' => '{$details['controller']}', 'action' => 'index')); ?> </li>\n";
+									if ($_type == 'hasMany')
+									{
+										echo "\t\t\t\t<li><?php echo \$this->Html->link(sprintf(__('List related %s', true), __('" . Inflector::humanize($details['controller']) . "', true)), array('controller' => '{$details['controller']}', 'action' => 'index', '{$details['foreignKey']}' => \${$singularVar}['{$modelClass}']['{$primaryKey}'])); ?> </li>\n";
+										if (empty($details['scaffoldForbiddenActions']) || (!empty($details['scaffoldForbiddenActions']) && !in_array($scaffoldPrefix . "add", $details['scaffoldForbiddenActions'])))
+											echo "\t\t\t\t<li><?php echo \$this->Html->link(sprintf(__('New related %s', true), __('" . Inflector::humanize(Inflector::underscore($alias)) . "', true)), array('controller' => '{$details['controller']}', 'action' => 'add', '{$details['foreignKey']}' => \${$singularVar}['{$modelClass}']['{$primaryKey}'])); ?> </li>\n";
+									}
+									echo "\t\t\t\t<li><?php echo \$this->Html->link(sprintf(__('List all %s', true), __('" . Inflector::humanize($details['controller']) . "', true)), array('controller' => '{$details['controller']}', 'action' => 'index')); ?> </li>\n";
 									if (empty($details['scaffoldForbiddenActions']) || (!empty($details['scaffoldForbiddenActions']) && !in_array($scaffoldPrefix . "add", $details['scaffoldForbiddenActions'])))
+									{
 										echo "\t\t\t\t<li><?php echo \$this->Html->link(sprintf(__('New %s', true), __('" . Inflector::humanize(Inflector::underscore($alias)) . "', true)), array('controller' => '{$details['controller']}', 'action' => 'add')); ?> </li>\n";
+									}
 									$done[] = $details['controller'];
 								}
 								echo "\t\t\t</ul>\n";
@@ -71,9 +81,12 @@
 	<h2><?php echo "<?php  __('{$singularHumanName}');?>";?></h2>
 		<div class="block">
 			<div class="dl">
-			<?php echo "<?php \$i = 1; \$class = ' altrow';?>\n";?>
 				<?php
+				echo "<?php \$i = 1; \$class = ' altrow';?>\n";
 				foreach ($fields as $field) {
+					if (!(empty($scaffoldForbiddenFields) || !isset($scaffoldForbiddenFields[$scaffoldPrefix]) || (!empty($scaffoldForbiddenFields) && isset($scaffoldForbiddenFields[$scaffoldPrefix]) && !in_array($field, $scaffoldForbiddenFields[$scaffoldPrefix]))))
+						continue;
+
 					$isKey = false;
 					if (!empty($associations['belongsTo'])) {
 						foreach ($associations['belongsTo'] as $alias => $details) {
@@ -131,6 +144,14 @@
 
 				<div class="actions">
 					<ul>
+					<?php echo "<?php if (!empty(\${$singularVar}['{$alias}']['{$details['primaryKey']}'])):?>\n";
+					if (empty($details['scaffoldForbiddenActions']) || (!empty($details['scaffoldForbiddenActions']) && !in_array($scaffoldPrefix . "view", $details['scaffoldForbiddenActions']))) {
+						?>
+						<li><?php echo "<?php echo \$this->Html->link(sprintf(__('View %s', true), __('" . Inflector::humanize(Inflector::underscore($alias)) . "', true)), array('controller' => '{$details['controller']}', 'action' => 'view', \${$singularVar}['{$alias}']['{$details['primaryKey']}'])); ?>";
+						?></li><? echo "\n";
+					}
+					?>
+					<?php echo "<?php endif; ?>\n";?>
 					<?php echo "<?php if (!empty(\${$singularVar}['{$alias}']['{$details['primaryKey']}'])):?>\n";
 					if (empty($details['scaffoldForbiddenActions']) || (!empty($details['scaffoldForbiddenActions']) && !in_array($scaffoldPrefix . "add", $details['scaffoldForbiddenActions']))) {
 						?>
@@ -204,16 +225,21 @@
 			<?php echo "<?php endif; ?>\n\n";?>
 			<div class="actions">
 				<ul><?php echo "\n";
-					if (empty($details['scaffoldForbiddenActions']) || (!empty($details['scaffoldForbiddenActions']) && !in_array($scaffoldPrefix . "add", $details['scaffoldForbiddenActions']))) {
-						?>
-						<li><?php
-						echo "<?php echo \$this->Html->link(sprintf(__('New %s', true), __('" . Inflector::humanize(Inflector::underscore($alias)) . "', true)), array('controller' => '{$details['controller']}', 'action' => 'add'";
-						if (isset($details['scaffoldActions'][$scaffoldPrefix . "add"]) && $details['scaffoldActions'][$scaffoldPrefix . "add"] == "fk")
-							echo ", '{$details['foreignKey']}' => \${$singularVar}['{$modelClass}']['{$primaryKey}']";
-						echo "));?>";
-						?></li><? echo "\n";
-					}
-					?>
+				if (empty($details['scaffoldForbiddenActions']) || (!empty($details['scaffoldForbiddenActions']) && !in_array($scaffoldPrefix . "index", $details['scaffoldForbiddenActions']))) { ?>
+					<li><?php
+					echo "<?php echo \$this->Html->link(sprintf(__('List related %s', true), __('" . $otherPluralHumanName . "', true)), array('controller' => '{$details['controller']}', 'action' => 'index'";
+					echo ", '{$details['foreignKey']}' => \${$singularVar}['{$modelClass}']['{$primaryKey}']";
+					echo "));?>";
+					?></li><? echo "\n";
+				}
+				if (empty($details['scaffoldForbiddenActions']) || (!empty($details['scaffoldForbiddenActions']) && !in_array($scaffoldPrefix . "add", $details['scaffoldForbiddenActions']))) { ?>
+					<li><?php
+					echo "<?php echo \$this->Html->link(sprintf(__('New related %s', true), __('" . Inflector::humanize(Inflector::underscore($alias)) . "', true)), array('controller' => '{$details['controller']}', 'action' => 'add'";
+					echo ", '{$details['foreignKey']}' => \${$singularVar}['{$modelClass}']['{$primaryKey}']";
+					echo "));?>";
+					?></li><? echo "\n";
+				}
+				?>
 				</ul>
 			</div>
 		</div><?php

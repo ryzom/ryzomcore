@@ -23,7 +23,6 @@
 ?>
 <div class="grid_3">
 	<div class="box menubox">
-		<?php //// ACTIONS ?>
 		<h2>
 			<a href="#" id="toggle-admin-actions">Actions</a>
 		</h2>
@@ -33,26 +32,33 @@
 			<ul class="menu">
 			<?php if (strpos($action, 'add') === false): ?><?php
 				if (empty($scaffoldForbiddenActions) || (!empty($scaffoldForbiddenActions) && !in_array($scaffoldPrefix . "delete", $scaffoldForbiddenActions))) {
-				echo "\t\t\t"; ?><li><?php echo "<?php echo \$this->Html->link(__('Delete', true), array('action' => 'delete', \$this->Form->value('{$modelClass}.{$primaryKey}')), null, sprintf(__('Are you sure you want to delete # %s?', true), \$this->Form->value('{$modelClass}.{$primaryKey}'))); ?>";?></li><?php
+				echo "\t\t\t"; ?><li><?php echo "<?php echo \$this->Html->link(sprintf(__('Delete this %s', true), __('" . Inflector::humanize(Inflector::underscore($modelClass)) . "', true)),array('action' => 'delete', \$this->Form->value('{$modelClass}.{$primaryKey}')), null, sprintf(__('Are you sure you want to delete # %s?', true), \$this->Form->value('{$modelClass}.{$primaryKey}'))); ?>";?></li><?php
 				} ?>
 			<?php endif;?><?php
 				if (empty($scaffoldForbiddenActions) || (!empty($scaffoldForbiddenActions) && !in_array($scaffoldPrefix . "index", $scaffoldForbiddenActions))) {
-				echo "\t\t\t"; ?><li><?php echo "<?php echo \$this->Html->link(sprintf(__('List %s', true), __('{$pluralHumanName}', true)), array('action' => 'index'));?>";?></li><?php
+				echo "\t\t\t"; ?><li><?php echo "<?php echo \$this->Html->link(sprintf(__('List all %s', true), __('{$pluralHumanName}', true)), array('action' => 'index'));?>";?></li><?php
 				} ?>
 			</ul>
 			<?php
 					$done = array();
-					foreach ($associations as $type => $data)
+					foreach ($associations as $_type => $_data)
 					{
-						foreach ($data as $alias => $details)
+						foreach ($_data as $alias => $details)
 						{
 							if (empty($details['scaffoldForbiddenActions']) || (!empty($details['scaffoldForbiddenActions']) && !in_array($scaffoldPrefix . "index", $details['scaffoldForbiddenActions'])))
 							{
 								echo "\n\t\t\t<h5>".Inflector::humanize($details['controller'])."</h5>";
 								echo "\n\t\t\t<ul class=\"menu\">\n";
 								if ($details['controller'] != $this->name && !in_array($details['controller'], $done)) {
+									if ($_type == 'hasMany' && strpos($action, 'add') === false)
+									{
+										echo "\t\t\t\t<li><?php echo \$this->Html->link(sprintf(__('List related %s', true), __('" . Inflector::humanize($details['controller']) . "', true)), array('controller' => '{$details['controller']}', 'action' => 'index', '{$details['foreignKey']}' => \${$singularVar}['{$modelClass}']['{$primaryKey}'])); ?> </li>\n";
+										if (empty($details['scaffoldForbiddenActions']) || (!empty($details['scaffoldForbiddenActions']) && !in_array($scaffoldPrefix . "add", $details['scaffoldForbiddenActions'])))
+											echo "\t\t\t\t<li><?php echo \$this->Html->link(sprintf(__('New related %s', true), __('" . Inflector::humanize(Inflector::underscore($alias)) . "', true)), array('controller' => '{$details['controller']}', 'action' => 'add', '{$details['foreignKey']}' => \${$singularVar}['{$modelClass}']['{$primaryKey}'])); ?> </li>\n";
+									}
+
 									if (empty($details['scaffoldForbiddenActions']) || (!empty($details['scaffoldForbiddenActions']) && !in_array($scaffoldPrefix . "index", $details['scaffoldForbiddenActions'])))
-										echo "\t\t\t\t<li><?php echo \$this->Html->link(sprintf(__('List %s', true), __('" . Inflector::humanize($details['controller']) . "', true)), array('controller' => '{$details['controller']}', 'action' => 'index')); ?> </li>\n";
+										echo "\t\t\t\t<li><?php echo \$this->Html->link(sprintf(__('List all %s', true), __('" . Inflector::humanize($details['controller']) . "', true)), array('controller' => '{$details['controller']}', 'action' => 'index')); ?> </li>\n";
 									if (empty($details['scaffoldForbiddenActions']) || (!empty($details['scaffoldForbiddenActions']) && !in_array($scaffoldPrefix . "add", $details['scaffoldForbiddenActions'])))
 										echo "\t\t\t\t<li><?php echo \$this->Html->link(sprintf(__('New %s', true), __('" . Inflector::humanize(Inflector::underscore($alias)) . "', true)), array('controller' => '{$details['controller']}', 'action' => 'add')); ?> </li>\n";
 									$done[] = $details['controller'];
@@ -81,6 +87,9 @@
 	<?php
 			echo "\t<?php\n";
 			foreach ($fields as $field) {
+				if (!(empty($scaffoldForbiddenFields) || !isset($scaffoldForbiddenFields[$scaffoldPrefix]) || (!empty($scaffoldForbiddenFields) && isset($scaffoldForbiddenFields[$scaffoldPrefix]) && !in_array($field, $scaffoldForbiddenFields[$scaffoldPrefix]))))
+					continue;
+
 				if (strpos($action, 'add') !== false && $field == $primaryKey) {
 					continue;
 				} elseif (!in_array($field, array('created', 'modified', 'updated'))) {

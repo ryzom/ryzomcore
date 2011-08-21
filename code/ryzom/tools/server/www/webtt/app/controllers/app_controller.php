@@ -33,11 +33,16 @@
  * @link http://book.cakephp.org/view/957/The-App-Controller
  */
 class AppController extends Controller {
-	var $components = array('DebugKit.Toolbar', 'Session', 'PathResolver', 'Auth' => array("authorize"=>"controller"));
+	var $components = array('DebugKit.Toolbar' => array(
+//			'panels' => array('variables'=>false)
+		), 'Session', 'PathResolver', 'Auth');
 	var $layout = "new";
 	
 	function beforeFilter() {
 		parent::beforeFilter();
+		$this->Auth->autoRedirect = false;
+		$this->Auth->authorize = 'controller';
+		$this->Auth->userScope = array('User.activated' => true, 'User.confirm_hash' => null);
 		$this->Auth->loginAction = array('admin' => false, 'controller' => 'users', 'action' => 'login');
 
 		if ($this->Auth->user('role') == "admin")
@@ -66,8 +71,5 @@ class AppController extends Controller {
 		);
 //		$this->log($isAllowed);
 		return $isAllowed;
-//		
 	}
-
-
 }

@@ -1,4 +1,23 @@
 <?php
+/*
+	Ryzom Core Web-Based Translation Tool
+	Copyright (C) 2011 Piotr Kaczmarek <p.kaczmarek@openlink.pl>
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+?>
+<?php
 class CommentsController extends AppController {
 
 	var $name = 'Comments';
@@ -56,8 +75,9 @@ class CommentsController extends AppController {
 				$this->Session->setFlash(__('The comment could not be saved. Please, try again.', true));
 			}
 		}
+		$this->set('comment', $comment_data = $this->Comment->read(null, $id));
 		if (empty($this->data)) {
-			$this->data = $this->Comment->read(null, $id);
+			$this->data = $comment_data;
 		}
 		$translations = $this->Comment->Translation->find('list');
 		$identifiers = $this->Comment->Identifier->find('list');
@@ -119,8 +139,9 @@ class CommentsController extends AppController {
 				$this->Session->setFlash(__('The comment could not be saved. Please, try again.', true));
 			}
 		}
+		$this->set('comment', $comment_data = $this->Comment->read(null, $id));
 		if (empty($this->data)) {
-			$this->data = $this->Comment->read(null, $id);
+			$this->data = $comment_data;
 		}
 		$translations = $this->Comment->Translation->find('list');
 		$identifiers = $this->Comment->Identifier->find('list');
