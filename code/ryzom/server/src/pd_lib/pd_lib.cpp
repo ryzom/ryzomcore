@@ -1145,7 +1145,7 @@ NLMISC_DYNVARIABLE(uint, EnqueuedPDMessages, "Tells number of messages enqueued 
 //	{
 //		updateLog.serial(ifile);
 //	}
-//	catch (Exception& e)
+//	catch (const Exception& e)
 //	{
 //		nlwarning("Failed to load file '%s': %s", filename.c_str(), e.what());
 //		return false;

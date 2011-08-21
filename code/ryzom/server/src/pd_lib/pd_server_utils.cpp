@@ -49,7 +49,7 @@ bool	CRefIndex::load(const string& filename)
 	{
 		serial(ixml);
 	}
-	catch (Exception&)
+	catch (const Exception&)
 	{
 		return false;
 	}
@@ -84,7 +84,7 @@ bool	CRefIndex::save(const string& filename)
 	{
 		serial(oxml);
 	}
-	catch (Exception&)
+	catch (const Exception&)
 	{
 		return false;
 	}
@@ -384,7 +384,7 @@ bool	CDatabaseState::save(CRefIndex& ref)
 	{
 		serial(oxml);
 	}
-	catch (Exception&)
+	catch (const Exception&)
 	{
 		return false;
 	}
@@ -422,7 +422,7 @@ bool	CDatabaseState::load(const std::string& rootpath, bool usePrevious)
 	{
 		serial(ixml);
 	}
-	catch (Exception&)
+	catch (const Exception&)
 	{
 		return false;
 	}

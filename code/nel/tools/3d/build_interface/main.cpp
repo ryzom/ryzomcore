@@ -267,7 +267,7 @@ int main(int nNbArg, char **ppArgs)
 			pBtmp->load(inFile);
 			AllMaps[i] = pBtmp;
 		}
-		catch (NLMISC::Exception &e)
+		catch (const NLMISC::Exception &e)
 		{
 			outString (string("ERROR :") + e.what());
 			return -1;

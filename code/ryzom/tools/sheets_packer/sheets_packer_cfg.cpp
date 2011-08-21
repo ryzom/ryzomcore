@@ -170,7 +170,7 @@ void setValues()
 		for (uint i = 0; i < cvDataPath.size(); i++)
 			AppCfg.DataPath.push_back(cvDataPath.asString(i));
 	}
-	catch(EUnknownVar &) {nlwarning("Default value used for 'DataPath' !!!");}
+	catch(const EUnknownVar &) {nlwarning("Default value used for 'DataPath' !!!");}
 
 	// World sheet name
 	READ_STRING(WorldSheet)
@@ -192,7 +192,7 @@ void setValues()
 			DebugLog->addNegativeFilter (cvTmp.asString(k).c_str());
 		}
 	}
-	catch(EUnknownVar &) {}
+	catch(const EUnknownVar &) {}
 	try
 	{
 		CConfigFile::CVar &cvTmp = AppCfg.ConfigFile.getVar("NegFiltersInfo");
@@ -201,7 +201,7 @@ void setValues()
 			InfoLog->addNegativeFilter (cvTmp.asString(k).c_str());
 		}
 	}
-	catch(EUnknownVar &) {}
+	catch(const EUnknownVar &) {}
 	try
 	{
 		CConfigFile::CVar &cvTmp = AppCfg.ConfigFile.getVar("NegFiltersWarning");
@@ -210,7 +210,7 @@ void setValues()
 			WarningLog->addNegativeFilter (cvTmp.asString(k).c_str());
 		}
 	}
-	catch(EUnknownVar &) {}
+	catch(const EUnknownVar &) {}
 }// load //
 
 

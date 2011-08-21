@@ -47,6 +47,7 @@
 #include "game_share/time_weather_season/time_date_season_manager.h"
 #include "game_share/permanent_ban_magic_number.h"
 #include "game_share/fame.h"
+#include "game_share/outpost.h"
 #include "game_share/visual_slot_manager.h"
 #include "game_share/shard_names.h"
 #include "server_share/log_command_gen.h"
@@ -107,7 +108,6 @@
 //
 // Externs
 //
-
 
 // Max number of user channel character can be have
 #define NB_MAX_USER_CHANNELS				2
@@ -175,6 +175,10 @@ AdminCommandsInit[] =
 		"summonPet",						true,
 		"connectUserChannel",				true,
 
+		// Web commands managment
+		"webExecCommand",					true,
+		"webDelCommandsIds",				true,
+		"webAddCommandsIds",				true,
 
 		"addPetAnimal",						true,
 		"addSkillPoints",					true,
@@ -217,6 +221,7 @@ AdminCommandsInit[] =
 		"guildMOTD",						true,
 
 		// CSR commands
+		"setSalt",							true,
 		"motd",								false,
 		"broadcast",						false,
 		"summon",							true,
@@ -349,6 +354,7 @@ AdminCommandsInit[] =
 
 		"addFactionAttackableToTarget",		true,
 		"eventCreateNpcGroup",				true,
+		"eScript",							true,
 		"eventNpcGroupScript",				true,
 		"eventSetBotName",					true,
 		"eventSetBotScale",					true,
@@ -360,13 +366,13 @@ AdminCommandsInit[] =
 		"eventSetItemCustomText",			true,
 		"eventResetItemCustomText",			true,
 		"eventSetBotSheet",					true,
-//		"eventSetBotVPx",					true,
 		"eventSetBotFaction",				true,
 		"eventSetBotFameByKill",			true,
 		"dssTarget",						true,	//ring stuff
 		"forceMissionProgress",				true,
-		"eventSetBotURL",true,
-		"eventSetBotURLName",true,
+		"eventSetBotURL",					true,
+		"eventSetBotURLName",				true,
+		"eventSpawnToxic",					true,
 };
 
 static vector<CAdminCommand>	AdminCommands;
@@ -374,6 +380,7 @@ static string					CommandsPrivilegesFileName;
 static string					PositionFlagsFileName;
 static const char *				DefaultPriv = ":DEV:";
 
+static string					Salt;
 
 // forward declarations
 static void loadCommandsPrivileges(const string & fileName, bool init);
@@ -544,6 +551,46 @@ void initPositionFlags(const std::string & fileName)
 		CPositionFlagManager::getInstance().loadFromFile(fileName);
 	}
 	PositionFlagsFileName = fileName;
+}
+
+string getSalt()
+{
+	if (Salt.empty())
+	{
+		string fileNameAndPath = Bsi.getLocalPath() + "salt.txt";
+		if (CFile::fileExists(fileNameAndPath))
+		{
+			FILE* f;
+			string fileName;
+
+			// open the file
+			f=fopen(fileNameAndPath.c_str(),"rb");
+			if (f == NULL)
+			{
+				nlinfo("Failed to open file for reading: %s", fileName.c_str() );
+				return false;
+			}
+
+			CSString input;
+			// read the file content into a buffer
+			uint32 size=NLMISC::CFile::getFileSize(f);
+			input.resize(size);
+			uint32 readSize= (uint32)fread(&input[0],1,size,f);
+			fclose(f);
+			Salt = input;
+			return Salt;
+		}
+		return "";
+	}
+	return Salt;
+}
+
+void saveSalt(const string salt)
+{
+	Salt = salt;
+	CBackupMsgSaveFile msg("salt.txt", CBackupMsgSaveFile::SaveFile, Bsi );
+	msg.DataMsg.serialBuffer((uint8*)Salt.c_str(), (uint)Salt.size());
+	Bsi.sendFile(msg);
 }
 
 static void selectEntities (const string &entityName, vector <CEntityId> &entities)
@@ -2929,10 +2976,14 @@ void cbClientAdmin (NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 		TLogContext_Item_Command itemCtx(onTarget ? c->getTarget() : eid);
 		TLogContext_Character_BuyRolemasterPhrase characterCtx(onTarget ? c->getTarget() : eid);
 		std::string csName = CEntityIdTranslator::getInstance()->getByEntity(eid).toString();
-		
+
 		NLMISC::CSString cs_res = CSString(res);
 		cs_res = cs_res.replace("#player", eid.toString().c_str());
-		cs_res = cs_res.replace("#target", targetEid.toString().c_str());
+		if (c->getTarget() != CEntityId::Unknown)
+		{
+			cs_res = cs_res.replace("#target", c->getTarget().toString().c_str());
+			cs_res = cs_res.replace("#gtarget", string("#"+c->getTarget().toString()).c_str());
+		}
 		res = (string)cs_res;
 		nlinfo ("ADMIN: Player (%s,%s) will execute client admin command '%s' on target %s", eid.toString().c_str(), csName.c_str(), res.c_str(), targetName.c_str());
 
@@ -2943,7 +2994,7 @@ void cbClientAdmin (NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 		const std::deque<std::string>	&strs = CmdDisplayer->lockStrings ();
 		for (uint i = 0; i < strs.size(); i++)
 		{
-			InfoLog->displayNL(trim(strs[i]).c_str());
+			InfoLog->displayNL("%s", trim(strs[i]).c_str());
 
 			SM_STATIC_PARAMS_1(params,STRING_MANAGER::literal);
 			params[0].Literal = trim(strs[i]);
@@ -3027,7 +3078,7 @@ void cbClientAdminOffline (NLNET::CMessage& msgin, const std::string &serviceNam
 	if( cmdName == string("Position") )
 	{
 		// check validity of Position command
-		if( !c->havePriv(":DEV:SGM:GM:") )
+		if( !c->havePriv(":DEV:SGM:GM:EM:") )
 		{
 			nlwarning ("ADMIN: Player %s doesn't have privilege to execute the client admin command /c '%s' ", eid.toString().c_str(), cmdName.c_str());
 			chatToPlayer (eid, "You don't have privilege to execute this command");
@@ -4276,7 +4327,7 @@ NLMISC_COMMAND (ShowFactionChannels, "Show faction channels", "<csr id> <channel
 //----------------------------------------------------------------------------
 // If channel not exists create it
 NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <channel_name> [<pass>]")
-{ 
+{
 	if ((args.size() < 2) || (args.size() > 3))
 		return false;
 	GET_CHARACTER
@@ -4314,7 +4365,7 @@ NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <chan
 		}
 		else if (pass == string("*"))
 		{
-				inst->removeFactionChannelForCharacter(channel, c, true);
+			inst->removeFactionChannelForCharacter(channel, c, true);
 		}
 		else
 			log.displayNL("You don't have rights to connect to channel %s", name.c_str());
@@ -4324,6 +4375,775 @@ NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <chan
 
 	return false;
 
+}
+
+NLMISC_COMMAND (setSalt, "Set Salt", "<dev_eid> <salt>")
+{
+	if (args.size() != 2)
+		return false;
+
+	GET_CHARACTER
+
+	string salt = args[1];
+	if (salt.empty())
+		return false;
+
+	saveSalt(salt);
+	return true;
+}
+
+NLMISC_COMMAND (webAddCommandsIds, "Add ids of commands will be run from webig", "<user id> <bot_name> <web_app_url> <indexes>")
+{
+	if (args.size() != 4)
+		return false;
+
+	GET_CHARACTER
+
+	string web_app_url = args[2];
+	string indexes = args[3];
+	string salt = getSalt();
+
+	if (salt.empty())
+	{
+		nlwarning("no salt");
+		return false;
+	}
+
+	c->addWebCommandCheck(web_app_url, indexes, salt);
+	return true;
+}
+
+NLMISC_COMMAND (webDelCommandsIds, "Del ids of commands", "<user id> <web_app_url>")
+{
+	if (args.size() != 2)
+		return false;
+
+	GET_CHARACTER
+
+	string web_app_url = args[1];
+	uint item_idx = c->getWebCommandCheck(web_app_url);
+	if (item_idx == INVENTORIES::NbBagSlots)
+		return false;
+
+	CInventoryPtr inv = c->getInventory(INVENTORIES::bag);
+	CGameItemPtr item = inv->getItem(item_idx);
+	inv->removeItem(item_idx);
+	item.deleteItem();
+	c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=deleted", getSalt());
+	return true;
+}
+
+CInventoryPtr getInv(CCharacter *c, const string &inv)
+{
+	INVENTORIES::TInventory inventory = INVENTORIES::bag;
+	if (!inv.empty())
+	{
+		INVENTORIES::TInventory selectedInv = INVENTORIES::toInventory(inv);
+		switch (selectedInv)
+		{
+			case INVENTORIES::temporary:
+			case INVENTORIES::bag:
+			case INVENTORIES::equipment:
+			case INVENTORIES::pet_animal1:
+			case INVENTORIES::pet_animal2:
+			case INVENTORIES::pet_animal3:
+			case INVENTORIES::pet_animal4:
+			case INVENTORIES::guild:
+			case INVENTORIES::player_room:
+				inventory = selectedInv;
+				break;
+
+			default:
+				inventory = INVENTORIES::bag;
+		}
+	}
+	return c->getInventory(inventory);
+}
+
+NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url> <index> <command> <hmac>")
+{
+
+	if (args.size() != 5)
+		return false;
+
+	GET_CHARACTER
+
+	string web_app_url = args[1];
+	string index = args[2];
+	string command = args[3];
+	string hmac = args[4];
+
+	CInventoryPtr check_inv = c->getInventory(INVENTORIES::bag);
+	vector<string> infos;
+	CGameItemPtr item;
+
+	if (!c->havePriv(":DEV:") || (web_app_url != "debug"))
+	{
+		uint item_idx = c->checkWebCommand(web_app_url, index+command, hmac, getSalt());
+		if (item_idx == INVENTORIES::NbBagSlots)
+		{
+			nlwarning("Bad web command check");
+			return false;
+		}
+
+		item = check_inv->getItem(item_idx);
+		string cText = item->getCustomText().toString();
+		NLMISC::splitString(cText, "\n", infos);
+
+		vector<string> indexes;
+		NLMISC::splitString(infos[1], ",", indexes);
+
+		if (index != indexes[0])
+			return false;
+	}
+
+	std::vector<std::string> command_args;
+	NLMISC::splitString(command, "!", command_args);
+	if (command_args.empty())
+		return false;
+
+	//*************************************************
+	//***************** give_item
+	//*************************************************
+
+	if (command_args[0] == "give_item")
+	{
+		if (command_args.size() < 4)
+			return false;
+
+		const CSheetId sheetId(command_args[1]);
+		if (sheetId == CSheetId::Unknown)
+			return false;
+		const uint32 quality = (uint32)atoi(command_args[2].c_str());
+		if (quality == 0)
+			return false;
+		const uint32 quantity = (uint32)atoi(command_args[3].c_str());
+		if (quantity == 0)
+			return false;
+
+		string selected_inv;
+		if (command_args.size() == 5)
+			selected_inv = command_args[4];
+		CInventoryPtr inventory = getInv(c, selected_inv);
+
+		uint32 numberItem = 0;
+		for( uint32 i = 0; i < inventory->getSlotCount(); ++ i)
+		{
+			const CGameItemPtr itemPtr = inventory->getItem(i);
+			if( itemPtr != NULL )
+			{
+				if( (itemPtr->getSheetId() == sheetId) && (itemPtr->quality() >= quality) )
+				{
+					numberItem += itemPtr->getStackSize();
+				}
+			}
+		}
+
+		if (numberItem < quantity)
+		{
+			c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=no_items", getSalt());
+			return false;
+		}
+
+		numberItem = quantity;
+		for( uint32 i = 0; i < inventory->getSlotCount(); ++ i)
+		{
+			const CGameItemPtr itemPtr = inventory->getItem(i);
+			if( itemPtr != NULL )
+			{
+				if( (itemPtr->getSheetId() == sheetId) && (itemPtr->quality() >= quality) )
+				{
+					numberItem -= inventory->deleteStackItem(i, quantity);
+					if(numberItem == 0)
+						break;
+				}
+			}
+		}
+	}
+
+	//*************************************************
+	//***************** recv_item
+	//*************************************************
+
+	else if (command_args[0] == "recv_item")
+	{
+		if (command_args.size() < 4)
+			return false;
+
+		const CSheetId sheetId(command_args[1]);
+		if (sheetId == CSheetId::Unknown)
+			return false;
+		const uint32 quality = (uint32)atoi(command_args[2].c_str());
+		if (quality == 0)
+			return false;
+		const uint32 quantity = (uint32)atoi(command_args[3].c_str());
+		if (quantity == 0)
+			return false;
+
+		// Inventory to put item in; can be temp, bag or animals.
+		INVENTORIES::TInventory inventory = INVENTORIES::bag;
+		if (command_args.size() == 5)
+		{
+			INVENTORIES::TInventory inv = INVENTORIES::toInventory(command_args[4].c_str());
+			switch (inv)
+			{
+				case INVENTORIES::temporary:
+				case INVENTORIES::bag:
+				case INVENTORIES::pet_animal1:
+				case INVENTORIES::pet_animal2:
+				case INVENTORIES::pet_animal3:
+				case INVENTORIES::pet_animal4:
+				case INVENTORIES::guild:
+				case INVENTORIES::player_room:
+					inventory = inv;
+					break;
+
+				default:
+					inventory = INVENTORIES::bag;
+			}
+		}
+
+		CGameItemPtr new_item = c->createItem(quality, quantity, sheetId);
+
+		if (!c->addItemToInventory(inventory, new_item))
+		{
+			new_item.deleteItem();
+			c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=cant_add_item", getSalt());
+			return false;
+		}
+	}
+	//*************************************************
+	//***************** check_position
+	//*************************************************
+
+	else if (command_args[0] == "check_position")
+	{
+		if (command_args.size () != 5) return false;
+		sint32 x = (sint32)(c->getX() / 1000);
+		sint32 y = (sint32)(c->getY() / 1000);
+
+		sint32 min_x;
+		sint32 min_y;
+		sint32 max_x;
+		sint32 max_y;
+
+
+		NLMISC::fromString(command_args[1], min_x);
+		NLMISC::fromString(command_args[2], min_y);
+		NLMISC::fromString(command_args[3], max_x);
+		NLMISC::fromString(command_args[4], max_y);
+
+		nlinfo("x = %d, y = %d", x, y);
+		nlinfo("min_x = %d, min_y = %d", min_x, min_y);
+		nlinfo("max_x = %d, max_y = %d", max_x, max_y);
+		if ((x < min_x || y < min_y || x > max_x || y > max_y))
+		{
+			c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=bad_position", getSalt());
+			return false;
+		}
+	}
+
+	//*************************************************
+	//***************** check_fame
+	//*************************************************
+	else if (command_args[0] == "check_fame")
+	{
+		if (command_args.size () != 4) return false;
+
+
+		uint32 factionIndex	= PVP_CLAN::getFactionIndex(PVP_CLAN::fromString(command_args[1]));
+		sint32 fame = CFameInterface::getInstance().getFameIndexed(c->getId(), factionIndex);
+
+		sint32 value;
+		NLMISC::fromString(command_args[3], value);
+		value = value*6000;
+
+		nlinfo("fame = %d, value = %d", fame, value);
+
+		if ((command_args[2] != "below" && command_args[2] != "above"))
+			return false;
+
+		if ((command_args[2] == "below" && fame > value) || (command_args[2] == "above" && fame < value))
+		{
+			c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=bad_fame", getSalt());
+			return false;
+		}
+
+	}
+	
+	//*************************************************
+	//***************** check_target	
+	//*************************************************
+	else if (command_args[0] == "check_target")
+	{
+		if (command_args.size () != 3) return false;
+
+		const CEntityId &target = c->getTarget();
+		if (target == CEntityId::Unknown)
+		{
+			c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=no_target", getSalt());
+			return false;
+		}
+
+		if (command_args[1] == "sheet")
+		{
+			if (target.getType() == RYZOMID::player)
+			{
+				c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=bad_type", getSalt());
+				return false;
+			}
+			CSheetId creatureSheetId(command_args[2]);
+			CCreature *creature = CreatureManager.getCreature(target);
+			if (creature == NULL ||  creatureSheetId == CSheetId::Unknown || creatureSheetId != creature->getType())
+			{
+				c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=bad_sheet", getSalt());
+				return false;
+			}
+		}
+		else if (command_args[1] == "bot_name")
+		{
+			if (target.getType() == RYZOMID::player)
+			{
+				c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=bad_type", getSalt());
+				return false;
+			}
+			vector<TAIAlias> aliases;
+			CAIAliasTranslator::getInstance()->getNPCAliasesFromName(command_args[2], aliases);
+
+			bool found = false;
+			for(uint k = 0; k < aliases.size(); ++k)
+			{
+				const CEntityId & botId = CAIAliasTranslator::getInstance()->getEntityId(aliases[k]);
+				if (botId != CEntityId::Unknown && botId == target)
+				{
+					found = true;
+				}
+			}
+			if (!found)
+			{
+				c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=bad_bot", getSalt());
+				return false;
+			}
+		}
+		else if (command_args[1] == "player_name")
+		{
+			if (target.getType() != RYZOMID::player)
+			{
+				c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=bad_type", getSalt());
+				return false;
+			}
+			CEntityBase *entityBase = PlayerManager.getCharacterByName(CShardNames::getInstance().makeFullNameFromRelative(c->getHomeMainlandSessionId(), command_args[2]));
+			if (entityBase == NULL)
+			{
+				c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=bad_player", getSalt());
+				return false;
+			}
+		} else
+			return false;
+	}
+
+	//*************************************************
+	//***************** check_brick	
+	//*************************************************
+	else if (command_args[0] == "check_brick")
+	{
+		if (command_args.size () != 2) return false;
+
+		if (!c->haveBrick(CSheetId(command_args[1])))
+		{
+			c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=no_brick", getSalt());
+			return false;
+		}
+	}
+
+	//*************************************************
+	//***************** set_brick 	
+	//*************************************************
+	else if (command_args[0] == "set_brick")
+	{
+		if (command_args.size () != 3) return false;
+
+		if (command_args[1] == "add")
+		{
+			c->addKnownBrick(CSheetId(command_args[2]));
+		}
+		else if (command_args[1] == "del")
+		{
+			c->removeKnownBrick(CSheetId(command_args[2]));
+		}
+		else
+		{
+			c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=bad_action", getSalt());
+			return false;
+		}
+	}
+
+	//*************************************************
+	//***************** check_item
+	//*************************************************
+	else if (command_args[0] == "check_item")
+	{
+		if (command_args.size() < 4)
+			return false;
+
+		const CSheetId sheetId(command_args[1]);
+		if (sheetId == CSheetId::Unknown)
+			return false;
+		const uint32 quality = (uint32)atoi(command_args[2].c_str());
+		if (quality == 0)
+			return false;
+		const uint32 quantity = (uint32)atoi(command_args[3].c_str());
+		if (quantity == 0)
+			return false;
+
+		string selected_inv;
+		if (command_args.size() == 5)
+			selected_inv = command_args[4];
+		CInventoryPtr inventory = getInv(c, selected_inv);
+
+		uint32 numberItem = 0;
+		for( uint32 i = 0; i < inventory->getSlotCount(); ++ i)
+		{
+			const CGameItemPtr itemPtr = inventory->getItem(i);
+			if( itemPtr != NULL )
+			{
+				if( (itemPtr->getSheetId() == sheetId) && (itemPtr->quality() >= quality) )
+				{
+					numberItem += itemPtr->getStackSize();
+				}
+			}
+		}
+
+		if (numberItem < quantity)
+		{
+			c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=no_items", getSalt());
+			return false;
+		}
+	}
+
+	//*************************************************
+	//***************** check_outpost
+	//*************************************************
+	else if (command_args[0] == "check_outpost")
+	{
+		if (command_args.size() != 3)
+			return false;
+
+		CSmartPtr<COutpost> outpost;
+		TAIAlias outpostAlias = CPrimitivesParser::aliasFromString(command_args[1]);
+		outpost = COutpostManager::getInstance().getOutpostFromAlias(outpostAlias);
+		if (outpost == NULL)
+		{
+			CSheetId outpostSheet(command_args[1]);
+			outpost = COutpostManager::getInstance().getOutpostFromSheet(outpostSheet);
+		}
+		
+		if (outpost == NULL)
+		{
+			return false;
+		}
+		
+		if ((command_args[2] != "attacker") && (command_args[2] != "defender") && (command_args[2] != "attack") && (command_args[2] != "defend"))
+			return false;
+
+		nlinfo("oupost name : %s, State : %s, Owner : %d, Attacker = %d", outpost->getName().c_str(), outpost->getStateName().c_str(), outpost->getOwnerGuild(),  outpost->getAttackerGuild() );
+		if ((command_args[2] == "attacker" && (outpost->getAttackerGuild() == 0 || outpost->getAttackerGuild() != c->getGuildId())) ||
+			(command_args[2] == "defender" && (outpost->getOwnerGuild() == 0 || outpost->getOwnerGuild() != c->getGuildId())) ||
+			(command_args[2] == "attack" && outpost->getState() != OUTPOSTENUMS::AttackRound) ||
+			(command_args[2] == "defend" && outpost->getState() != OUTPOSTENUMS::DefenseRound))
+		{
+			c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc="+command_args[2], getSalt());
+			return false;
+		}
+	}
+
+	//*************************************************
+	//***************** create_group
+	//*************************************************
+	else if (command_args[0] == "create_group")
+	{
+		if (command_args.size () < 3) return false;
+
+		uint32 instanceNumber = c->getInstanceNumber();
+		sint32 x = c->getX();
+		sint32 y = c->getY();
+		sint32 orientation = 6666; // used to specify a random orientation
+
+		uint32 nbBots = NLMISC::atoui(command_args[1].c_str());
+		if (nbBots<=0)
+		{
+			log.displayNL("invalid bot count");
+			return true;
+		}
+
+		NLMISC::CSheetId sheetId(command_args[2]);
+		if (sheetId == NLMISC::CSheetId::Unknown)
+			sheetId = command_args[2] + ".creature";
+		if (sheetId == NLMISC::CSheetId::Unknown)
+			return true;
+
+		double dispersionRadius = 10.;
+		if (command_args.size()>3)
+		{
+			dispersionRadius = atof(command_args[3].c_str());
+			if (dispersionRadius < 0.)
+				return true;
+		}
+
+		bool spawnBots = true;
+
+		if (command_args.size()>4)
+		{
+			if (command_args[4] == "self")
+			{
+				orientation = (sint32)(c->getHeading() * 1000.0);
+			}
+			else if (command_args[4] != "random")
+			{
+				NLMISC::fromString(command_args[4], orientation);
+				orientation = (sint32)((double)orientation / 360.0 * (NLMISC::Pi * 2.0) * 1000.0);
+			}
+		}
+
+		string botsName;
+		if (command_args.size()>5) botsName = command_args[5];
+		if (botsName == "*")
+			botsName.clear();
+
+		if (command_args.size()>6)
+		{
+			NLMISC::fromString(command_args[6], x);
+			x = x * 1000;
+		}
+		if (command_args.size()>7)
+		{
+			NLMISC::fromString(command_args[7], y);
+			y = y * 1000;
+		}
+
+		CEntityId playerId = c->getId();
+
+		CMessage msgout("EVENT_CREATE_NPC_GROUP");
+		uint32 messageVersion = 1;
+		msgout.serial(messageVersion);
+		msgout.serial(instanceNumber);
+		msgout.serial(playerId);
+		msgout.serial(x);
+		msgout.serial(y);
+		msgout.serial(orientation);
+		msgout.serial(nbBots);
+		msgout.serial(sheetId);
+		msgout.serial(dispersionRadius);
+		msgout.serial(spawnBots);
+		msgout.serial(botsName);
+		CWorldInstances::instance().msgToAIInstance2(instanceNumber, msgout);
+	}
+
+	//*************************************************
+	//***************** group_script
+	//*************************************************
+	
+	else if (command_args[0] == "group_script")
+	{
+		if (command_args.size () < 3) return false;
+
+		uint32 instanceNumber = c->getInstanceNumber(); 
+		uint32 nbString = (uint32)command_args.size();
+	 
+		CMessage msgout("EVENT_NPC_GROUP_SCRIPT");
+		uint32 messageVersion = 1;
+		msgout.serial(messageVersion);
+		msgout.serial(nbString);
+
+		string command = command_args[0];
+		msgout.serial(command);
+		string botEid = command_args[1];
+		msgout.serial(botEid);
+		for (uint32 i=2; i<nbString; ++i)
+		{
+			string arg = command_args[i]+";";
+			msgout.serial(arg);
+		}
+		CWorldInstances::instance().msgToAIInstance2(instanceNumber, msgout);
+	}
+
+	//*************************************************
+	//***************** change_vpx
+	//*************************************************
+	
+	else if (command_args[0] == "change_vpx")
+	{
+		if (command_args.size () != 4) return false;
+	
+		CCharacter *target = PlayerManager.getCharacterByName(CShardNames::getInstance().makeFullNameFromRelative(c->getHomeMainlandSessionId(), command_args[1]));
+
+		string name = command_args[2];
+		uint32 value = (uint32)atoi(command_args[3].c_str());
+
+		if(target && target->getEnterFlag())
+		{
+			if( name == string("Sex") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyA(), PropertySubData.Sex, value );
+			}
+			else if( name == string("HatModel") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyA(), PropertySubData.HatModel, value );
+			}
+			else if( name == string("HatColor") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyA(), PropertySubData.HatColor, value );
+			}
+			else if( name == string("JacketModel") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyA(), PropertySubData.JacketModel, value );
+			}
+			else if( name == string("JacketColor") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyA(), PropertySubData.JacketColor, value );
+			}
+			else if( name == string("TrouserModel") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyA(), PropertySubData.TrouserModel, value );
+			}
+			else if( name == string("TrouserColor") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyA(), PropertySubData.TrouserColor, value );
+			}
+			else if( name == string("WeaponRightHand") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyA(), PropertySubData.WeaponRightHand, value );
+			}
+			else if( name == string("WeaponLeftHand") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyA(), PropertySubData.WeaponLeftHand, value );
+			}
+			else if( name == string("ArmModel") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyA(), PropertySubData.ArmModel, value );
+			}
+			else if( name == string("ArmColor") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyA(), PropertySubData.ArmColor, value );
+			}
+			else if( name == string("HandsModel") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyB(), PropertySubData.HandsModel, value );
+			}
+			else if( name == string("HandsColor") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyB(), PropertySubData.HandsColor, value );
+			}
+			else if( name == string("FeetModel") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyB(), PropertySubData.FeetModel, value );
+			}
+			else if( name == string("FeetColor") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyB(), PropertySubData.FeetColor, value );
+			}
+			else if( name == string("MorphTarget1") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyC(), PropertySubData.MorphTarget1, value );
+			}
+			else if( name == string("MorphTarget2") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyC(), PropertySubData.MorphTarget2, value );
+			}
+			else if( name == string("MorphTarget3") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyC(), PropertySubData.MorphTarget3, value );
+			}
+			else if( name == string("MorphTarget4") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyC(), PropertySubData.MorphTarget4, value );
+			}
+			else if( name == string("MorphTarget5") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyC(), PropertySubData.MorphTarget5, value );
+			}
+			else if( name == string("MorphTarget6") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyC(), PropertySubData.MorphTarget6, value );
+			}
+			else if( name == string("MorphTarget7") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyC(), PropertySubData.MorphTarget7, value );
+			}
+			else if( name == string("MorphTarget8") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyC(), PropertySubData.MorphTarget8, value );
+			}
+			else if( name == string("EyesColor") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyC(), PropertySubData.EyesColor, value );
+			}
+			else if( name == string("Tattoo") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyC(), PropertySubData.Tattoo, value );
+			}
+			else if( name == string("CharacterHeight") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyC(), PropertySubData.CharacterHeight, value );
+			}
+			else if( name == string("TorsoWidth") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyC(), PropertySubData.TorsoWidth, value );
+			}
+			else if( name == string("ArmsWidth") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyC(), PropertySubData.ArmsWidth, value );
+			}
+			else if( name == string("LegsWidth") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyC(), PropertySubData.LegsWidth, value );
+			}
+			else if( name == string("BreastSize") )
+			{
+				SET_STRUCT_MEMBER( target->getVisualPropertyC(), PropertySubData.BreastSize, value );
+			}
+		}
+		else
+		{
+			c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed", getSalt());
+		}
+	}
+	//*************************************************
+	//***************** set_title
+	//*************************************************
+	
+	else if (command_args[0] == "set_title")
+	{
+		if (command_args.size () != 2) return false;
+		TDataSetRow row = c->getEntityRowId();
+		ucstring name = ucstring(c->getName().toString()+"$"+command_args[1]+"$");
+		NLNET::CMessage	msgout("CHARACTER_NAME");
+		msgout.serial(row);
+		msgout.serial(name);
+		sendMessageViaMirror("IOS", msgout);
+	}
+	else
+		return false;
+
+
+	if (!c->havePriv(":DEV:") || (web_app_url != "debug"))
+	{
+		string::size_type pos = infos[1].find(",");
+		if (pos!=string::npos && pos!=(infos[1].length()-1))
+		{
+			item->setCustomText(ucstring(infos[0]+"\n"+infos[1].substr(pos+1)));
+		}
+		else
+		{
+			c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=finished", getSalt());
+		}
+	}
+	else
+	{
+		nlinfo("OK");
+	}
+
+	return true;
 }
 
 //----------------------------------------------------------------------------
@@ -5476,11 +6296,11 @@ NLMISC_COMMAND(setFamePlayer, "set the fame value of a player in the given facti
 NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <nbBots> <sheet> [<dispersionRadius=10m> [<spawnBots=true> [<orientation=random|self|-360..360> [<name> [<x> [<y>]]]]]]")
 {
 	if (args.size () < 3) return false;
-	GET_ENTITY
+	GET_CHARACTER
 
-	uint32 instanceNumber = e->getInstanceNumber();
-	sint32 x = e->getX();
-	sint32 y = e->getY();
+	uint32 instanceNumber = c->getInstanceNumber();
+	sint32 x = c->getX();
+	sint32 y = c->getY();
 	sint32 orientation = 6666; // used to specify a random orientation
 
 	uint32 nbBots = NLMISC::atoui(args[1].c_str());
@@ -5520,7 +6340,7 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <
 	{
 		if (args[5] == "self")
 		{
-			orientation = (sint32)(e->getHeading() * 1000.0);
+			orientation = (sint32)(c->getHeading() * 1000.0);
 		}
 		else if (args[5] != "random")
 		{
@@ -5542,10 +6362,13 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <
 		y = y * 1000;
 	}
 
+	CEntityId playerId = c->getId();
+
 	CMessage msgout("EVENT_CREATE_NPC_GROUP");
 	uint32 messageVersion = 1;
 	msgout.serial(messageVersion);
 	msgout.serial(instanceNumber);
+	msgout.serial(playerId);
 	msgout.serial(x);
 	msgout.serial(y);
 	msgout.serial(orientation);
@@ -5584,6 +6407,34 @@ NLMISC_COMMAND(eventNpcGroupScript, "executes a script on an event npc group", "
 }
 
 //----------------------------------------------------------------------------
+NLMISC_COMMAND(eScript, "executes a script on an event npc group", "<player eid> <botname> <script>")
+{
+	if (args.size () < 3) return false;
+	GET_CHARACTER
+
+	uint32 instanceNumber = c->getInstanceNumber(); 
+
+	uint32 nbString = (uint32)args.size();
+ 
+	CMessage msgout("EVENT_NPC_GROUP_SCRIPT");
+	uint32 messageVersion = 1;
+	msgout.serial(messageVersion);
+	msgout.serial(nbString);
+
+	string playerEid = args[0];
+	msgout.serial(playerEid);
+	string botEid = args[1];
+	msgout.serial(botEid);
+	for (uint32 i=2; i<nbString; ++i)
+	{
+		string arg = args[i]+";";
+		msgout.serial(arg);
+	}
+	CWorldInstances::instance().msgToAIInstance2(instanceNumber, msgout);
+
+	return true;
+}
+
 NLMISC_COMMAND(eventSetBotName, "changes the name of a bot", "<bot eid> <name>")
 {
 	if (args.size () < 2) return false;
@@ -5779,27 +6630,6 @@ NLMISC_COMMAND(eventSetBotSheet, "Change the sheet of a bot", "<bot eid> <sheet 
 }
 
 //----------------------------------------------------------------------------
-/*NLMISC_COMMAND(eventSetBotVPx, "Change the VPx of a bot", "<bot eid> <vpx>")
-{
-	if (args.size() < 2) return false;
-	GET_ENTITY
-
-	uint32 instanceNumber = e->getInstanceNumber();
-
-	uint32 messageVersion = 3;
-	string botName = args[0];
-	string vpx = args[1];
-
-	CMessage msgout("EVENT_BOT_VPX");
-	msgout.serial(messageVersion);
-	msgout.serial(botName);
-	msgout.serial(vpx);
-	CWorldInstances::instance().msgToAIInstance2(instanceNumber, msgout);
-
-	return true;
-}
-*/
-//----------------------------------------------------------------------------
 extern sint32 clientEventSetItemCustomText(CCharacter* character, INVENTORIES::TInventory inventory, uint32 slot, ucstring const& text);
 
 NLMISC_COMMAND(eventSetItemCustomText, "set an item custom text, which replaces help text", "<eId> <inventory> <slot in inventory> <text>")
@@ -5881,6 +6711,62 @@ NLMISC_COMMAND(eventResetItemCustomText, "set an item custom text, which replace
 	return true;
 }
 
+//----------------------------------------------------------------------------
+
+NLMISC_COMMAND(eventSpawnToxic, "Spawn a toxic cloud", "<player eid> <posXm> <posYm> <iRadius{0,1,2}=0> <dmgPerHit=0> <updateFrequency=ToxicCloudUpdateFrequency> <lifetimeInTicks=ToxicCloudDefaultLifetime>" )
+{
+	if ( args.size() < 1 )
+		return false;
+
+	GET_CHARACTER
+	
+	float x = (float)c->getX();
+	float y = (float)c->getY();
+
+	if (args.size() > 1)
+	{
+		NLMISC::fromString(args[1], x);
+	}
+	if (args.size() > 2)
+	{
+		NLMISC::fromString(args[2], y);
+	}
+
+	CVector cloudPos( x, y, 0.0f );
+	sint iRadius = 0;
+	sint32 dmgPerHit = 100;
+	TGameCycle updateFrequency = ToxicCloudUpdateFrequency;
+	TGameCycle lifetime = CToxicCloud::ToxicCloudDefaultLifetime;
+	if ( args.size() > 3 )
+	{
+		iRadius = atoi( args[3].c_str() );
+		if ( args.size() > 4 )
+		{
+			dmgPerHit = atoi( args[4].c_str() );
+			if ( args.size() > 5 )
+			{
+				updateFrequency = atoi( args[5].c_str() );
+				if ( args.size() > 6 )
+					lifetime = atoi( args[6].c_str() );
+			}
+		}
+	}
+	
+	CToxicCloud *tc = new CToxicCloud();
+	float radius = (float)(iRadius*2 + 1); // {1, 3, 5} corresponding to the 3 sheets
+	tc->init( cloudPos, radius, dmgPerHit, updateFrequency, lifetime );
+	CSheetId sheet( toString( "toxic_cloud_%d.fx", iRadius ));
+	if ( tc->spawn( sheet ) )
+	{
+		CEnvironmentalEffectManager::getInstance()->addEntity( tc );
+		log.displayNL( "Toxic cloud spawned (radius %g)", radius );
+	}
+	else
+	{
+		log.displayNL( "Unable to spawn toxic cloud (mirror range full?)" );
+	}
+	return true;
+}
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(useCatalyser, "use an xp catalyser", "<eId> [<slot in bag>]")
@@ -6252,7 +7138,8 @@ NLMISC_COMMAND(eventSetBotURL, "changes the url of a bot", "<bot eid> [<url>]")
 	}
 
 	uint32 program = creature->getBotChatProgram();
-	if(!(program & (1<<BOTCHATTYPE::WebPageFlag))) {
+	if(!(program & (1<<BOTCHATTYPE::WebPageFlag)))
+	{
 		if(program != 0)
 		{
 			log.displayNL("This creature already had a program 0x%x, cannot add a web program", program);
@@ -6265,7 +7152,8 @@ NLMISC_COMMAND(eventSetBotURL, "changes the url of a bot", "<bot eid> [<url>]")
 	}
 
 	const string &wp = creature->getWebPage();
-	if(args.size() < 2) {
+	if(args.size() < 2)
+	{
 		log.displayNL("Remove web program on this creature");
 		(string &)wp = "";
 		program &= ~(1 << BOTCHATTYPE::WebPageFlag);
@@ -6293,7 +7181,8 @@ NLMISC_COMMAND(eventSetBotURLName, "changes the url name of a bot", "<bot eid> <
 	}
 
 	uint32 program = creature->getBotChatProgram();
-	if(!(program & (1<<BOTCHATTYPE::WebPageFlag))) {
+	if(!(program & (1<<BOTCHATTYPE::WebPageFlag)))
+	{
 		log.displayNL("This creature is not flagged as chat in web 0x%x", program);
 		return false;
 	}

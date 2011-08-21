@@ -19,6 +19,8 @@
 
 namespace Plugin
 {
+	NLMISC_SAFE_SINGLETON_IMPL(CZoneManager)
+
 ZonePainterPlugin::~ZonePainterPlugin()
 {
 	Q_FOREACH(QObject *obj, _autoReleaseObjects)

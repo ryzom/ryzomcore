@@ -7,10 +7,12 @@
 #include "zone_painter_main_window.h"
 
 // NeL includes
-#include "nel/misc/app_context.h"
+#include <nel/misc/app_context.h>
+#include <nel/misc/singleton.h>
 #include <nel/3d/landscape.h>
 #include <nel/3d/patch.h>
 #include <nel/3d/zone.h>
+#include <nel/3d/u_scene.h>
 
 // Qt includes
 #include <QtCore/QObject>
@@ -29,16 +31,15 @@ class IPluginSpec;
 namespace Plugin
 {
 
-	class CZoneManager  {
+	class CZoneManager 
+	{
+		NLMISC_SAFE_SINGLETON_DECL(CZoneManager)
 	public:
-		NL3D::CZone zone;
-
-		std::string getZoneInfo() {
-			NL3D::CZone zone;
-			zone.getNumPatchs();
-
-			return "";
-		}
+		//m_painterLandscape = static_cast<NL3D::CLandscapeModel *>
+		
+	private:
+		NL3D::CLandscapeModel *m_painterLandscape;
+		NL3D::CZone *m_currentZone;
 	};
 
 class ZonePainterPlugin : public QObject, public ExtensionSystem::IPlugin
@@ -101,6 +102,16 @@ public:
 	{
 		return m_zonePainterMainWindow;
 	}
+
+        virtual QUndoStack *undoStack()
+        {
+                return m_zonePainterMainWindow->getUndoStack();
+        }
+        virtual void open()
+        {
+        }
+
+
 	ZonePainterMainWindow *m_zonePainterMainWindow;
 };
 

@@ -4454,6 +4454,10 @@
 		<shape id="object_2" name="tr_mo_dag.shape" pos="0.0 26.5 2.0" rot="0.0 0.0 0.0" />
 		<shape id="object_3" name="tr_mo_dag.shape" pos="0.0 26.5 2.0" rot="0.0 0.0 0.0" />
 		<shape id="object_4" name="tr_mo_dag.shape" pos="0.0 26.5 2.0" rot="0.0 0.0 0.0" />
+		<shape id="object_5" name="tr_mo_dag.shape" pos="0.0 26.5 2.0" rot="0.0 0.0 0.0" />
+		<shape id="object_6" name="tr_mo_dag.shape" pos="0.0 26.5 2.0" rot="0.0 0.0 0.0" />
+		<shape id="object_7" name="tr_mo_dag.shape" pos="0.0 26.5 2.0" rot="0.0 0.0 0.0" />
+		<shape id="object_8" name="tr_mo_dag.shape" pos="0.0 26.5 2.0" rot="0.0 0.0 0.0" />
 					
 	</scene3d>
 	<ctrl style="text_button_16"

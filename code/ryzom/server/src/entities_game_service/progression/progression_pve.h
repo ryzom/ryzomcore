@@ -272,13 +272,14 @@ struct CCreatureTakenDamage
 	/// return index of the team which has inflicted the most damage, returns -1 if most damage have been made by other creatures
 	sint16 getMaxInflictedDamageTeamIndex()
 	{
-		float maxDmg = TotalCreatureInflictedDamage;
+		float maxDmg = 0;//TotalCreatureInflictedDamage;
 		sint16 index = -1;
 		const uint size = (uint)PlayerInflictedDamage.size();
 		for ( uint i = 0 ; i < size ; ++i)
 		{
 			if ( PlayerInflictedDamage[i].TotalDamage > maxDmg )
 			{
+				nlinfo("set damage by player");
 				maxDmg = PlayerInflictedDamage[i].TotalDamage;
 				index = (sint16)i;
 			}
@@ -450,6 +451,8 @@ public:
 	void addDamage(const NLMISC::CEntityId &actorId, const NLMISC::CEntityId &targetId, uint32 damage);
 	/// enable Xp Gain for a player, set a list with all creatures on which he now has possible Xp Gain
 	void enableXpGainForPlayer(const NLMISC::CEntityId &playerId, uint16 skillValue, std::list<TDataSetRow> &enabledCreatures);
+	/// remove xp from a creature (so clear all references on it)
+	void removeXpCreature(TDataSetRow creature);
 	/// remove a creature (so clear all references on it)
 	void removeCreature(TDataSetRow creature);
 	/// apply regen of a creature

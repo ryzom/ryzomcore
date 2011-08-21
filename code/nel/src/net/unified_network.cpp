@@ -481,7 +481,7 @@ void	CAliveCheck::run()
 					CheckList[i].AddressValid = true;
 					cbc.disconnect();
 				}
-				catch (ESocketConnectionFailed &e)
+				catch (const ESocketConnectionFailed &e)
 				{
 #if FINAL_VERSION
 					nlinfo ("HNETL5: can't connect to %s-%hu now (%s)", CheckList[i].ServiceName.c_str(), CheckList[i].ServiceId.get(), e.what ());
@@ -587,7 +587,7 @@ bool	CUnifiedNetwork::init(const CInetAddress *addr, CCallbackNetBase::TRecordin
 			{
 				_CbServer->init(port);
 			}
-			catch (ESocket &)
+			catch (const ESocket &)
 			{
 				nlwarning("Failed to init the listen socket on port %u, is the service already running ?", port);
 				// wait a little before retrying
@@ -866,7 +866,7 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 			cbc->connect(addr[i]);
 			connectSuccess = true;
 		}
-		catch (ESocketConnectionFailed &e)
+		catch (const ESocketConnectionFailed &e)
 		{
 			nlwarning ("HNETL5: can't connect to %s (sid %u) now (%s) '%s'", name.c_str(), sid.get(), e.what (), addr[i].asString ().c_str());
 			connectSuccess = false;
@@ -1010,7 +1010,7 @@ void	CUnifiedNetwork::update(TTime timeout)
 					laddr[i].setPort(_ServerPort);
 				CNamingClient::resendRegisteration (_Name, laddr, _SId);
 			}
-			catch (ESocketConnectionFailed &)
+			catch (const ESocketConnectionFailed &)
 			{
 				nlwarning ("HNETL5: Could not connect to the Naming Service (%s). Retrying in a few seconds...", _NamingServiceAddr.asString().c_str());
 			}
@@ -1209,7 +1209,7 @@ void CUnifiedNetwork::autoReconnect( CUnifiedConnection &uc, uint connectionInde
 		// call the user callback
 		callServiceUpCallback (uc.ServiceName, uc.ServiceId);
 	}
-	catch (ESocketConnectionFailed &e)
+	catch (const ESocketConnectionFailed &e)
 	{
 #if FINAL_VERSION
 		nlinfo ("HNETL5: can't connect to %s-%hu now (%s)", uc.ServiceName.c_str(), uc.ServiceId.get(), e.what ());

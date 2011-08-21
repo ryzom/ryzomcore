@@ -193,7 +193,7 @@ public:
 		{
 			invokeModuleOperation(proxy, msg, resp);
 		}
-		catch(IModule::EInvokeFailed)
+		catch(const IModule::EInvokeFailed &)
 		{
 			ResponseReceived++;
 		}

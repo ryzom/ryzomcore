@@ -27,6 +27,7 @@ namespace Plugin
 {
 
 class CGeorgesDirTreeDialog;
+class CGeorgesTreeViewDialog;
 class GeorgesEditorForm: public QMainWindow
 {
 	Q_OBJECT
@@ -42,6 +43,8 @@ public Q_SLOTS:
 	void newFile();
 	void save();
 	void settingsChanged();
+	void loadFile(const QString fileName);
+	void closingTreeView();
 
 private:
 	void readSettings();
@@ -57,6 +60,12 @@ private:
 	QAction *_saveAction;
 
 	QString m_leveldesignPath;
+
+	QDockWidget *m_emptyDock;
+	QMainWindow *m_mainDock;
+		
+	QList<CGeorgesTreeViewDialog*> m_dockedWidgets;
+	QList<QTabBar*> m_tabBars;
 }; /* class GeorgesEditorForm */
 
 } /* namespace Plugin */

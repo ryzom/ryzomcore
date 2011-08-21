@@ -580,7 +580,7 @@ void CPredictWeather::generateWeatherStats(const std::string &fileName, const CW
 			outputFile.serial(output[n]);
 		}
 	}
-	catch (NLMISC::EStream &e)
+	catch (const NLMISC::EStream &e)
 	{
 		nlwarning(e.what());
 	}

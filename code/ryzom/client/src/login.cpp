@@ -1721,15 +1721,15 @@ class CAHReboot : public IActionHandler
 			}
 			LoginSM.pushEvent(CLoginStateMachine::ev_reboot);
 		}
-		catch (NLMISC::EDiskFullError &)
+		catch (const NLMISC::EDiskFullError &)
 		{
 			im->messageBoxWithHelp(CI18N::get("uiPatchDiskFull"), "ui:login");
 		}
-		catch (NLMISC::EWriteError &)
+		catch (const NLMISC::EWriteError &)
 		{
 			im->messageBoxWithHelp(CI18N::get("uiPatchWriteError"), "ui:login");
 		}
-		catch (std::exception &e)
+		catch (const std::exception &e)
 		{
 			im->messageBoxWithHelp(ucstring(e.what()), "ui:login", "login_quit");
 		}

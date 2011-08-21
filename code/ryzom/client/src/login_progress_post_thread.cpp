@@ -220,7 +220,7 @@ public:
 				if (StopWanted) break;
 			}
 		}
-		catch (std::exception &e)
+		catch (const std::exception &e)
 		{
 			nlwarning(e.what());
 		}

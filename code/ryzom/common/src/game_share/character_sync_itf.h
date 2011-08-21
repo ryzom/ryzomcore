@@ -1137,12 +1137,12 @@ namespace CHARSYNC
 
 		}
 			//
-		ucstring getFullName() const
+		const ucstring& getFullName() const
 		{
 			return _FullName;
 		}
 
-		void setFullName(ucstring value)
+		void setFullName(const ucstring &value)
 		{
 
 				_FullName = value;

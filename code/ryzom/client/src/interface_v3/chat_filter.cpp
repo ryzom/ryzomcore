@@ -382,7 +382,7 @@ void CChatTargetFilter::setTargetGroup(CChatGroup::TGroupType groupType, uint32 
 			case CChatGroup::say:	entry+="SAY";	break;
 			case CChatGroup::shout:	entry+="SHOUT";	break;
 			case CChatGroup::team:	if(!teamActive) return; entry+="GROUP";	break;
-			case CChatGroup::guild:	if(!guildActive) return; entry+="CLADE";	break;
+			case CChatGroup::guild:	entry+="CLADE";	break;
 			case CChatGroup::civilization:	entry+="CIVILIZATION";	break;
 			case CChatGroup::territory:	entry+="TERRITORY";	break;
 			case CChatGroup::universe:

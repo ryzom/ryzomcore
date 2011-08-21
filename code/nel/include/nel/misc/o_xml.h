@@ -64,7 +64,7 @@ namespace NLMISC {
 		// Close the file
 		file.close ();
 	}
- 	catch (Exception &e)
+ 	catch (const Exception &e)
 	{
 	}
 \endcode

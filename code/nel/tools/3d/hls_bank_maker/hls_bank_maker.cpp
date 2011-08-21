@@ -125,7 +125,7 @@ int		main(int argc, char *argv[])
 			f.serial(textInfo);
 			addTextToBank(textInfo, textBank);
 		}
-		catch(Exception &e)
+		catch(const Exception &e)
 		{
 			nlwarning("ERROR: Unable to process %s. Reason: %s. Processing next", hlsInfofiles[k].c_str(), e.what());
 		}
@@ -143,7 +143,7 @@ int		main(int argc, char *argv[])
 		fOut.serial(textBank);
 		fOut.close();
 	}
-	catch(Exception &e)
+	catch(const Exception &e)
 	{
 		nlwarning("ERROR: Unable to write HLS Bank %s: %s", argv[2], e.what());
 		exit(-1);

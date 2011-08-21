@@ -102,7 +102,7 @@ CFEReceiveTask::CFEReceiveTask( uint16 firstAcceptablePort, uint16 lastAcceptabl
 			DataSock->bind( actualPort );
 			break;
 		}
-		catch ( ESocket& e )
+		catch (const ESocket &e)
 		{
 			nlinfo( "Port %u not available: %s", actualPort, e.what() );
 		}
@@ -157,7 +157,7 @@ void CFEReceiveTask::run()
 			_ReceivedMessage.setTypeEvent( TReceivedMessage::User );
 			DataSock->receivedFrom( _ReceivedMessage.userDataW(), _DatagramLength, _ReceivedMessage.AddrFrom );
 		}
-		catch ( ESocket& )
+		catch (const ESocket&)
 		{
 			// Remove the client corresponding to the address
 			_ReceivedMessage.setTypeEvent( TReceivedMessage::RemoveClient );

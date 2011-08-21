@@ -123,8 +123,11 @@ public:
 		SP_TAUNT,
 		SP_SHIELDING,
 		SP_LIFE_AURA,
+		SP_LIFE_AURA2,
 		SP_STAMINA_AURA,
+		SP_STAMINA_AURA2,
 		SP_SAP_AURA,
+		SP_SAP_AURA2,
 		SP_SPEEDING_UP,
 		SP_INVULNERABILITY,
 		SP_MELEE_PROTECTION_AURA,
@@ -299,8 +302,11 @@ public:
 		if (copyOfStr=="sp_taunt") {_Value=SP_TAUNT; return *this;}
 		if (copyOfStr=="sp_shielding") {_Value=SP_SHIELDING; return *this;}
 		if (copyOfStr=="sp_life_aura") {_Value=SP_LIFE_AURA; return *this;}
+		if (copyOfStr=="sp_life_aura2") {_Value=SP_LIFE_AURA2; return *this;}
 		if (copyOfStr=="sp_stamina_aura") {_Value=SP_STAMINA_AURA; return *this;}
-		if (copyOfStr=="sp_sap_aura") {_Value=SP_SAP_AURA; return *this;}
+		if (copyOfStr=="sp_stamina_aura2") {_Value=SP_STAMINA_AURA2; return *this;}
+		if (copyOfStr=="sp_sap_aura") {_Value=SP_SAP_AURA; return *this;} 
+		if (copyOfStr=="sp_sap_aura2") {_Value=SP_SAP_AURA2; return *this;}
 		if (copyOfStr=="sp_speeding_up") {_Value=SP_SPEEDING_UP; return *this;}
 		if (copyOfStr=="sp_invulnerability") {_Value=SP_INVULNERABILITY; return *this;}
 		if (copyOfStr=="sp_melee_protection_aura") {_Value=SP_MELEE_PROTECTION_AURA; return *this;}
@@ -3843,6 +3849,54 @@ struct CSBrickParamLifeAura : public TBrickParam::IId
 };
 
 
+struct CSBrickParamLifeAura2 : public TBrickParam::IId
+{
+	// regen modifier (in %)
+	uint16 RegenMod;
+	// duration in seconds
+	float Duration;
+	// aura radius in meters
+	float Radius;
+	// disable life aura for x seconds on targets
+	float TargetDisableTime;
+	// disable life aura for x seconds on user
+	float UserDisableTime;
+
+	CSBrickParamLifeAura2():
+		RegenMod(),
+		Duration(),
+		Radius(),
+		TargetDisableTime(),
+		UserDisableTime()
+	{
+		_Id = TBrickParam::SP_LIFE_AURA2;
+	}
+
+	CSBrickParamLifeAura2(const std::string&str)
+	{
+		*this=CSBrickParamLifeAura2();
+		*this=str;
+	}
+
+	const CSBrickParamLifeAura2& operator=(const std::string& input)
+	{
+		std::vector<std::string> args;
+		convertInput(args, input);
+
+		if (args.size()!=5)
+			return *this;
+
+		ParsedOk=true;
+		RegenMod=atoi(args[0].c_str());
+		Duration=(float)atof(args[1].c_str());
+		Radius=(float)atof(args[2].c_str());
+		TargetDisableTime=(float)atof(args[3].c_str());
+		UserDisableTime=(float)atof(args[4].c_str());
+
+		return *this;
+	}
+};
+
 struct CSBrickParamStaminaAura : public TBrickParam::IId
 {
 	// regen modifier (in %)
@@ -3891,7 +3945,53 @@ struct CSBrickParamStaminaAura : public TBrickParam::IId
 	}
 };
 
+struct CSBrickParamStaminaAura2 : public TBrickParam::IId
+{
+	// regen modifier (in %)
+	uint16 RegenMod;
+	// duration in seconds
+	float Duration;
+	// aura radius in meters
+	float Radius;
+	// disable life aura for x seconds on targets
+	float TargetDisableTime;
+	// disable life aura for x seconds on user
+	float UserDisableTime;
 
+	CSBrickParamStaminaAura2():
+		RegenMod(),
+		Duration(),
+		Radius(),
+		TargetDisableTime(),
+		UserDisableTime()
+	{
+		_Id = TBrickParam::SP_STAMINA_AURA2;
+	}
+
+	CSBrickParamStaminaAura2(const std::string&str)
+	{
+		*this=CSBrickParamStaminaAura2();
+		*this=str;
+	}
+
+	const CSBrickParamStaminaAura2& operator=(const std::string& input)
+	{
+		std::vector<std::string> args;
+		convertInput(args, input);
+
+		if (args.size()!=5)
+			return *this;
+
+		ParsedOk=true;
+		RegenMod=atoi(args[0].c_str());
+		Duration=(float)atof(args[1].c_str());
+		Radius=(float)atof(args[2].c_str());
+		TargetDisableTime=(float)atof(args[3].c_str());
+		UserDisableTime=(float)atof(args[4].c_str());
+
+		return *this;
+	}
+};
 struct CSBrickParamSapAura : public TBrickParam::IId
 {
 	// regen modifier (in %)
@@ -3940,7 +4040,53 @@ struct CSBrickParamSapAura : public TBrickParam::IId
 	}
 };
 
+struct CSBrickParamSapAura2 : public TBrickParam::IId
+{
+	// regen modifier (in %)
+	uint16 RegenMod;
+	// duration in seconds
+	float Duration;
+	// aura radius in meters
+	float Radius;
+	// disable life aura for x seconds on targets
+	float TargetDisableTime;
+	// disable life aura for x seconds on user
+	float UserDisableTime;
 
+	CSBrickParamSapAura2():
+		RegenMod(),
+		Duration(),
+		Radius(),
+		TargetDisableTime(),
+		UserDisableTime()
+	{
+		_Id = TBrickParam::SP_SAP_AURA2;
+	}
+
+	CSBrickParamSapAura2(const std::string&str)
+	{
+		*this=CSBrickParamSapAura2();
+		*this=str;
+	}
+
+	const CSBrickParamSapAura2& operator=(const std::string& input)
+	{
+		std::vector<std::string> args;
+		convertInput(args, input);
+
+		if (args.size()!=5)
+			return *this;
+
+		ParsedOk=true;
+		RegenMod=atoi(args[0].c_str());
+		Duration=(float)atof(args[1].c_str());
+		Radius=(float)atof(args[2].c_str());
+		TargetDisableTime=(float)atof(args[3].c_str());
+		UserDisableTime=(float)atof(args[4].c_str());
+
+		return *this;
+	}
+};
 struct CSBrickParamSpeedingUp : public TBrickParam::IId
 {
 	// speed modifier (in %)

@@ -753,7 +753,7 @@ bool	NLPACS::CZoneTessellation::setup(uint16 zoneId, sint16 refinement, const CV
 		if (CPath::lookup(getZoneNameById(zoneId)+ZoneExt, false, false) == "")
 			return false;
 	}
-	catch (EPathNotFound &)
+	catch (const EPathNotFound &)
 	{
 		return false;
 	}

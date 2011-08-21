@@ -105,7 +105,7 @@
       <item row="0" column="0">
        <widget class="QLabel" name="pluginsPathLabel">
         <property name="text">
-         <string>Plugins path:</string>
+         <string>Plugins</string>
         </property>
        </widget>
       </item>
@@ -129,7 +129,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="leveldesignPathLabel">
         <property name="text">
-         <string>Level design path:</string>
+         <string>Sheets</string>
         </property>
        </widget>
       </item>
@@ -153,7 +153,7 @@
       <item row="2" column="0">
        <widget class="QLabel" name="assetsPathLabel">
         <property name="text">
-         <string>Assets path:</string>
+         <string>Assets Database:</string>
         </property>
        </widget>
       </item>
@@ -169,6 +169,40 @@
       </item>
       <item row="2" column="2">
        <widget class="QToolButton" name="assetsPathButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="primitivesPathLabel">
+        <property name="text">
+         <string>Primitives</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="primitivesPathLineEdit"/>
+      </item>
+      <item row="3" column="2">
+       <widget class="QToolButton" name="primitivesPathButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="ligoConfigFileLineEdit"/>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="ligoConfigFileLabel">
+        <property name="text">
+         <string>Ligo Config File</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QToolButton" name="ligoConfigFileButton">
         <property name="text">
          <string>...</string>
         </property>

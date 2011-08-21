@@ -105,7 +105,8 @@ void COutpostSquadDescriptor::init(NLMISC::CSheetId sheet, TAIAlias alias, const
 	_Alias = alias;
 	_Form = CSheets::getOutpostSquadForm(_Sheet);
 	nlassertex(_Form, ("Squad sheet %s not found", _Sheet.toString().c_str()));
-//	if (!(_Form)) {
+//	if (!(_Form))
+// {
 //		NLMISC::createDebug ();
 //		NLMISC::AssertLog->setPosition (__LINE__, __FILE__, __FUNCTION__);
 //		NLMISC::AssertLog->displayRawNL ("Squad sheet %s not found", _Sheet.toString().c_str());		// BUG with unsetPosition() called twice

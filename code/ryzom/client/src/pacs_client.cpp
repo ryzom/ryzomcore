@@ -243,7 +243,7 @@ void initPrimitiveBlocks()
 			{
 				addPacsPrim(primFile);
 			}
-			catch (NLMISC::Exception &)
+			catch (const NLMISC::Exception &)
 			{
 				nlwarning("Error while loading %s", primFile.c_str());
 			}

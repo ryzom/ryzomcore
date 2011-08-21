@@ -106,7 +106,7 @@ public:
 		void setOpened(bool opened) { Opened = opened; }
 		bool getOpened() const { return Opened; }
 		void setText(const ucstring &text) { Text = text; }
-		ucstring getText() const { return Text; }
+		const ucstring& getText() const { return Text; }
 		sint32 getFontSize() const { return FontSize; }
 		void setFontSize(sint32 value) { FontSize = value; }
 		sint32 getYDecal() const { return YDecal; }

@@ -16,7 +16,12 @@
 
 #include "std_afx.h"
 #include "nel_export.h"
-#include <MaxScrpt/strings.h>
+#include <maxversion.h>
+#if MAX_VERSION_MAJOR >= 14
+#	include <maxscript/foundation/strings.h>
+#else
+#	include <MaxScrpt/strings.h>
+#endif
 #include "../nel_mesh_lib/export_nel.h"
 #include "../nel_mesh_lib/export_appdata.h"
 

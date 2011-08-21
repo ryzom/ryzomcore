@@ -289,7 +289,7 @@ int main(int argc, char **argv)
 			{
 				picSrc.writeTGA (output, 16);
 			}
-			catch(NLMISC::EWriteError &e)
+			catch(const NLMISC::EWriteError &e)
 			{
 				cerr<<e.what()<<endl;
 				exit(1);

@@ -330,7 +330,7 @@ bool sendEmail (const string &smtpServer, const string &from, const string &to, 
 			ok = true;
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("EMAIL: Can't send email: %s", e.what());
 		goto end;

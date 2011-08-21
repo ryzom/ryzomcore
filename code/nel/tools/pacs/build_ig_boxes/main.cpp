@@ -112,7 +112,7 @@ void	init()
 			CPath::addSearchPath(cvPathes.asString(i));
 		}
 	}
-	catch (EConfigFile &e)
+	catch (const EConfigFile &e)
 	{
 		printf ("Problem in config file : %s\n", e.what ());
 	}
@@ -219,7 +219,7 @@ int main(int argc, char **argv)
 		COFile	output(Output);
 		output.serialCont(Boxes);
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		fprintf (stderr,"main trapped an exception: '%s'\n", e.what ());
 	}

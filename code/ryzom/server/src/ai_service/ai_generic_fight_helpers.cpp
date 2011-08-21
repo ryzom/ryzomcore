@@ -261,13 +261,18 @@ static void s_calcRanges(
 	_RangeMax = CBotProfileFightHeal::fightDefaultMaxRange;
 	if (_UseFightConfig)
 	{
-		if (useFightMelee && (useFightRange || useFightNuke || useFightHeal)) {
+		if (useFightMelee && (useFightRange || useFightNuke || useFightHeal))
+		{
 			_RangeMin = CBotProfileFightHeal::fightMixedMinRange;
 			_RangeMax = CBotProfileFightHeal::fightMixedMaxRange;
-		} else if (useFightMelee) {
+		}
+		else if (useFightMelee)
+		{
 			_RangeMin = CBotProfileFightHeal::fightMeleeMinRange;
 			_RangeMax = CBotProfileFightHeal::fightMeleeMaxRange;
-		} else {
+		}
+		else
+		{
 			_RangeMin = CBotProfileFightHeal::fightRangeMinRange;
 			_RangeMax = CBotProfileFightHeal::fightRangeMaxRange;
 		}

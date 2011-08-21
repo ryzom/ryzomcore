@@ -685,7 +685,7 @@ bool CInterfaceParser::parseInterface (const std::vector<std::string> & strings,
 			i++;
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		// Output error
 		// todo hulud interface syntax error
@@ -4721,7 +4721,7 @@ bool	CInterfaceParser::loadLUA(const std::string &fileName, std::string &error)
 	{
 		_LuaState->executeFile(pathName);
 	}
-	catch(ELuaError &e)
+	catch(const ELuaError &e)
 	{
 		nlwarning(e.luaWhat().c_str());
 		error= e.luaWhat();

@@ -1053,7 +1053,7 @@ DEFINE_ACTION_TEMPLATE1(ContextGroupDesc,GT_GPRM,FamilyT)
 		std::string param;
 		args[i].get(param);
 		
-		param = NLMISC::strlwr(param);
+		param = NLMISC::toLower(param);
 		
 		if	(	param == "contact camp"
 			||	param == "contact outpost"

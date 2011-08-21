@@ -37,9 +37,7 @@ ENDMACRO(NL_TARGET_DRIVER)
 # Argument:
 ###
 MACRO(NL_DEFAULT_PROPS name label)
-  IF(NOT MSVC10)
-    SET_TARGET_PROPERTIES(${name} PROPERTIES PROJECT_LABEL ${label})
-  ENDIF(NOT MSVC10)
+  SET_TARGET_PROPERTIES(${name} PROPERTIES PROJECT_LABEL ${label})
   GET_TARGET_PROPERTY(type ${name} TYPE)
   IF(${type} STREQUAL SHARED_LIBRARY)
     # Set versions only if target is a shared library
@@ -49,6 +47,15 @@ MACRO(NL_DEFAULT_PROPS name label)
       SET_TARGET_PROPERTIES(${name} PROPERTIES INSTALL_NAME_DIR ${NL_LIB_PREFIX})
     ENDIF(NL_LIB_PREFIX)
   ENDIF(${type} STREQUAL SHARED_LIBRARY)
+
+  IF(${type} STREQUAL EXECUTABLE AND WIN32)
+    SET_TARGET_PROPERTIES(${name} PROPERTIES
+      VERSION ${NL_VERSION}
+      SOVERSION ${NL_VERSION_MAJOR}
+      COMPILE_FLAGS "/GA"
+      LINK_FLAGS "/VERSION:${NL_VERSION}")
+  ENDIF(${type} STREQUAL EXECUTABLE AND WIN32)
+
   IF(WITH_STLPORT AND WIN32)
     SET_TARGET_PROPERTIES(${name} PROPERTIES COMPILE_FLAGS "/X")
   ENDIF(WITH_STLPORT AND WIN32)
@@ -171,6 +178,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
     OPTION(WITH_STATIC            "With static libraries."                        OFF)
   ENDIF(WIN32)
   OPTION(WITH_STATIC_DRIVERS      "With static drivers."                          OFF)
+  OPTION(WITH_STATIC_EXTERNAL     "With static external libraries"                OFF)
 
   ###
   # GUI toolkits
@@ -307,25 +315,32 @@ MACRO(NL_SETUP_BUILD)
     ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 #     ADD_DEFINITIONS(-DHAVE_IA64)
 #  ENDIF(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86")
-  
+
   IF(WIN32)
     IF(MSVC10)
       # /Ox is working with VC++ 2010, but custom optimizations don't exist
       SET(SPEED_OPTIMIZATIONS "/Ox /GF /GS-")
       # without inlining it's unusable, use custom optimizations again
       SET(MIN_OPTIMIZATIONS "/Od /Ob1")
-	ELSE(MSVC10)
+	ELSEIF(MSVC90)
       # don't use a /O[012x] flag if you want custom optimizations
       SET(SPEED_OPTIMIZATIONS "/Ob2 /Oi /Ot /Oy /GT /GF /GS-")
       # without inlining it's unusable, use custom optimizations again
       SET(MIN_OPTIMIZATIONS "/Ob1")
+	ELSEIF(MSVC80)
+      # don't use a /O[012x] flag if you want custom optimizations
+      SET(SPEED_OPTIMIZATIONS "/Ox /GF /GS-")
+      # without inlining it's unusable, use custom optimizations again
+      SET(MIN_OPTIMIZATIONS "/Od /Ob1")
+	ELSE(MSVC10)
+      MESSAGE(FATAL_ERROR "Can't determine compiler version ${MSVC_VERSION}")	
     ENDIF(MSVC10)
 
-    SET(PLATFORM_CFLAGS "/D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /DWIN32 /D_WINDOWS /W3 /Zi /Zm1000 /MP /Gy-")
+    SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /DWIN32 /D_WINDOWS /W3 /Zi /Zm1000 /MP /Gy-")
 
     # Common link flags
     SET(PLATFORM_LINKFLAGS "-DEBUG")
-	
+
     IF(TARGET_X64)
       # Fix a bug with Intellisense
       SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} /D_WIN64")
@@ -496,3 +511,56 @@ MACRO(RYZOM_SETUP_PREFIX_PATHS)
   ENDIF(NOT RYZOM_GAMES_PREFIX)
 
 ENDMACRO(RYZOM_SETUP_PREFIX_PATHS)
+
+MACRO(SETUP_EXTERNAL)
+  IF(WIN32)
+    FIND_PACKAGE(External REQUIRED)
+
+    INCLUDE(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake)
+    IF(MSVC10)
+      IF(NOT MSVC10_REDIST_DIR)
+        # If you have VC++ 2010 Express, put x64/Microsoft.VC100.CRT/*.dll in ${EXTERNAL_PATH}/redist
+        SET(MSVC10_REDIST_DIR "${EXTERNAL_PATH}/redist")
+      ENDIF(NOT MSVC10_REDIST_DIR)
+      GET_FILENAME_COMPONENT(VC_ROOT_DIR "[HKEY_CURRENT_USER\\Software\\Microsoft\\VisualStudio\\10.0_Config;InstallDir]" ABSOLUTE)
+      # VC_ROOT_DIR is set to "registry" when a key is not found
+      IF(VC_ROOT_DIR MATCHES "registry")
+        GET_FILENAME_COMPONENT(VC_ROOT_DIR "[HKEY_CURRENT_USER\\Software\\Microsoft\\VCExpress\\10.0_Config;InstallDir]" ABSOLUTE)
+        IF(VC_ROOT_DIR MATCHES "registry")
+          MESSAGE(FATAL_ERROR "Unable to find VC++ 2010 directory!")
+        ENDIF(VC_ROOT_DIR MATCHES "registry")
+      ENDIF(VC_ROOT_DIR MATCHES "registry")
+      # convert IDE fullpath to VC++ path
+      STRING(REGEX REPLACE "Common7/.*" "VC" VC_DIR ${VC_ROOT_DIR})
+    ELSE(MSVC10)
+      IF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+        # convert IDE fullpath to VC++ path
+        STRING(REGEX REPLACE "Common7/.*" "VC" VC_DIR ${CMAKE_MAKE_PROGRAM})
+      ELSE(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+        # convert compiler fullpath to VC++ path
+        STRING(REGEX REPLACE "VC/bin/.+" "VC" VC_DIR ${CMAKE_CXX_COMPILER})
+      ENDIF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+    ENDIF(MSVC10)
+  ELSE(WIN32)
+    IF(CMAKE_FIND_LIBRARY_SUFFIXES AND NOT APPLE)
+      IF(WITH_STATIC_EXTERNAL)
+        SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+      ELSE(WITH_STATIC_EXTERNAL)
+        SET(CMAKE_FIND_LIBRARY_SUFFIXES ".so")
+      ENDIF(WITH_STATIC_EXTERNAL)
+    ENDIF(CMAKE_FIND_LIBRARY_SUFFIXES AND NOT APPLE)
+  ENDIF(WIN32)
+
+  IF(WITH_STLPORT)
+    FIND_PACKAGE(STLport REQUIRED)
+    INCLUDE_DIRECTORIES(${STLPORT_INCLUDE_DIR})
+    IF(WIN32)
+      SET(VC_INCLUDE_DIR "${VC_DIR}/include")
+
+      FIND_PACKAGE(WindowsSDK REQUIRED)
+      # use VC++ and Windows SDK include paths
+      INCLUDE_DIRECTORIES(${VC_INCLUDE_DIR} ${WINSDK_INCLUDE_DIR})
+    ENDIF(WIN32)
+  ENDIF(WITH_STLPORT)
+ 
+ENDMACRO(SETUP_EXTERNAL)

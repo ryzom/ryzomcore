@@ -387,7 +387,7 @@ void	NLPACS::CGlobalRetriever::makeLinks(uint n)
 			instance.link(neighbor, _RetrieverBank->getRetrievers());
 			neighbor.link(instance, _RetrieverBank->getRetrievers());
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			nlwarning("in NLPACS::CGlobalRetriever::makeLinks()");
 			nlwarning("caught an exception during linkage of %d and %d: %s", instance.getInstanceId(), neighbor.getInstanceId(), e.what());

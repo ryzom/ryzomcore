@@ -370,7 +370,7 @@ void CAudioMixerUser::initDriver(const std::string &driverName)
 		_SoundDriver = ISoundDriver::createDriver(this, driverType);
 		nlassert(_SoundDriver);
 	}
-	catch (ESoundDriver &e)
+	catch (const ESoundDriver &e)
 	{
 		nlwarning(e.what());
 		delete _SoundDriver; _SoundDriver = NULL;
@@ -458,7 +458,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 			manualRolloff = false; // not really needed, but set anyway in case this is still used later in this function
 		}
 	}
-	catch (ESoundDriver &e)
+	catch (const ESoundDriver &e)
 	{
 		nlwarning(e.what());
 		delete _SoundDriver; _SoundDriver = NULL;
@@ -883,7 +883,7 @@ void CAudioMixerUser::buildSampleBankList()
 					}
 				}
 			}
-			catch(Exception e)
+			catch(const Exception &)
 			{
 				upToDate = false;
 			}
@@ -2100,7 +2100,7 @@ uint32			CAudioMixerUser::loadSampleBank(bool async, const std::string &name, st
 	{
 		bank->load(async);
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		if (notfoundfiles)
 		{
@@ -2489,7 +2489,7 @@ void CAudioMixerUser::changeMaxTrack(uint maxTrack)
 				_FreeTracks.insert(_FreeTracks.begin(), _Tracks[i]);
 			}
 		}
-		catch ( ESoundDriver & )
+		catch (const ESoundDriver &)
 		{
 			delete _Tracks[i];
 			// If the source generation failed, keep only the generated number of sources

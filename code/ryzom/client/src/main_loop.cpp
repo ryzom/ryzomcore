@@ -700,9 +700,6 @@ void updateFromClientCfg()
 	//---------------------------------------------------
 	if (Landscape)
 	{
-#ifdef NL_OS_MAC
-		Landscape->enableVegetable(false);
-#else
 		if (ClientCfg.MicroVeget != LastClientCfg.MicroVeget)
 		{
 			if(ClientCfg.MicroVeget)
@@ -722,7 +719,6 @@ void updateFromClientCfg()
 				Landscape->enableVegetable(false);
 			}
 		}
-#endif
 	}
 
 	//---------------------------------------------------
@@ -854,7 +850,7 @@ void updateFromClientCfg()
 			{
 				SoundMngr->init(NULL);
 			}
-			catch(Exception &e)
+			catch(const Exception &e)
 			{
 				nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
 				SoundMngr = 0;
@@ -3781,7 +3777,7 @@ void	updateMovieShooting()
 				{
 					MovieShooter.replayMovie(Driver, TextContext);
 				}
-				catch (Exception &e)
+				catch (const Exception &e)
 				{
 					Driver->systemMessageBox(e.what(), "MovieShooter");
 				}
@@ -3819,7 +3815,7 @@ void	updateMovieShooting()
 					// Save the movie.
 					MovieShooter.saveMovie(Driver, TextContext, theDir.c_str(), ClientCfg.MovieShooterFramePeriod, ClientCfg.MovieShooterBlend, ClientCfg.MovieShooterPrefix.c_str());
 				}
-				catch (Exception &e)
+				catch (const Exception &e)
 				{
 					Driver->systemMessageBox(e.what(), "MovieShooter");
 				}

@@ -38,7 +38,7 @@ class CSpecialPower
 	NL_INSTANCE_COUNTER_DECL(CSpecialPower);
 public:
 	/// Constructor
-	CSpecialPower() : _Phrase(NULL), _ApplyOnTargets(true), _PowerType(POWERS::UnknownType), _DisablePowerTime(0)
+	CSpecialPower() : _Phrase(NULL), _ApplyOnTargets(true), _PowerType(POWERS::UnknownType), _DisablePowerTime(0), _ByPassDisablePowerTimer(false)
 	{}
 
 	/// validate the power utilisation
@@ -50,6 +50,9 @@ public:
 	/// apply on targets or on actor
 	inline bool applyOnTargets() const { return _ApplyOnTargets; }
 	inline void applyOnTargets(bool b) { _ApplyOnTargets = b; }
+
+	/// set ByPass DisablePowerTimer
+	inline void setByPass(bool flag) { _ByPassDisablePowerTimer = flag; }
 
 protected:
 	/// actor
@@ -66,6 +69,8 @@ protected:
 
 	/// related phrase
 	CSpecialPowerPhrase	*_Phrase;
+
+	bool				_ByPassDisablePowerTimer;
 };
 
 /**
@@ -83,6 +88,7 @@ public:
 		_TargetsDisableAuraTime = 0;
 		_AuraRadius = 0.0f;
 		_AffectGuild = false;
+		_ByPassTargetsDisableAuraTime = false;
 	}
 
 	/// validate the power utilisation
@@ -96,6 +102,9 @@ public:
 
 	/// set affect guild flag
 	inline void affectGuild(bool flag) { _AffectGuild = flag; }
+
+	/// set ByPass TargetsDisableAuraTime
+	inline void setByPass(bool flag) { _ByPassTargetsDisableAuraTime = flag; }
 	
 protected:
 	// disable this aura on targets for x ticks
@@ -104,6 +113,9 @@ protected:
 	float				_AuraRadius;
 	/// affect guild members ? (always affect teammates)
 	bool				_AffectGuild;
+
+	bool				_ByPassTargetsDisableAuraTime;
+
 };
 
 #endif // RYZOM_SPECIAL_POWER_H

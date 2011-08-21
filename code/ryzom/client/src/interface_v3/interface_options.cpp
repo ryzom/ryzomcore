@@ -78,14 +78,14 @@ bool CInterfaceOptions::parse (xmlNodePtr cur)
 			CXMLAutoPtr ptr, val;
 			ptr = xmlGetProp (cur, (xmlChar*)"name");
 			val = xmlGetProp (cur, (xmlChar*)"value");
-			if ((ptr == NULL) || (val == NULL))
+			if (!ptr || !val)
 			{
 				nlinfo("param with no name or no value");
 				ok = false;
 			}
 			else
 			{
-				string name = strlwr (string((const char*)ptr));
+				string name = NLMISC::toLower(string((const char*)ptr));
 				string value = (string((const char*)val));
 				_ParamValue[name].init(value);
 			}
@@ -321,7 +321,7 @@ bool COptionsList::parse (xmlNodePtr cur)
 		{
 			CXMLAutoPtr ptr, val;
 			val = xmlGetProp (cur, (xmlChar*)"value");
-			if (val == NULL)
+			if (!val)
 			{
 				nlinfo("param with no name or no value");
 				ok = false;

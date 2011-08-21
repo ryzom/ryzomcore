@@ -291,7 +291,7 @@ bool CHoFGenerator::parseHDTFile(const std::string & fileName, CParsedData & par
 		H_AUTO(CHoFGenerator_parseHDTFile_1);
 		cfgFile.load(fileName);
 	}
-	catch (Exception & e)
+	catch (const Exception & e)
 	{
 		nlwarning("cannot load file '%s' : %s", fileName.c_str(), e.what());
 		return false;

@@ -160,21 +160,18 @@ bool CCtrlBaseButton::parse (xmlNodePtr cur,CInterfaceGroup * parentGroup)
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_l" );
 	if (prop)
 	{
-		string tmp = (const char *) prop;
-		_ListMenuLeft = strlwr(tmp);
+		_ListMenuLeft = NLMISC::toLower(std::string((const char *) prop));
 	}
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r" );
 	if (prop)
 	{
-		string tmp = (const char *) prop;
-		_ListMenuRight = strlwr(tmp);
+		_ListMenuRight = NLMISC::toLower(std::string((const char *) prop));
 	}
 	// list menu on both clicks
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_b" );
 	if (prop)
 	{
-		string tmp = (const char *) prop;
-		setListMenuBoth(strlwr(tmp));
+		setListMenuBoth(NLMISC::toLower(std::string((const char *) prop)));
 	}
 
 	prop= (char*) xmlGetProp (cur, (xmlChar*)"frozen");

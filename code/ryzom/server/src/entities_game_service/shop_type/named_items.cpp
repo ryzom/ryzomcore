@@ -60,7 +60,7 @@ void CNamedItems::loadNamedItemsFromFile(const std::string & fileName)
 	{
 		path = CPath::lookup(fileName);
 	}
-	catch (Exception &)
+	catch (const Exception &)
 	{
 		nlwarning("<NAMED_ITEMS> file '%s' was not found", fileName.c_str());
 		return;

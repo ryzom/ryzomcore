@@ -192,7 +192,7 @@ NLMISC_CATEGORISED_COMMAND(pd_log, displayLogFile, "display pd_log file human re
 		{
 			ifile.serialCont(updateLog);
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			log.displayNL("#! Failed to load file '%s': %s", filename.c_str(), e.what());
 			return false;
@@ -257,7 +257,7 @@ NLMISC_CATEGORISED_COMMAND(pd_log, displayLog, "display pd_log file human readab
 		{
 			ifile.serialCont(updateLog);
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			log.displayNL("#! Failed to load file '%s': %s", filename.c_str(), e.what());
 			return false;

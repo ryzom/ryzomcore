@@ -28,11 +28,32 @@ CGeorgesFileSystemModel::CGeorgesFileSystemModel(QString ldPath, QObject *parent
 	  m_correct(false)
 {
 	checkLDPath();
+
+	// this yielded no relevant performance boost on my observations
+	//connect(this, SIGNAL(directoryLoaded(QString)),
+	//		this, SLOT(dir(const QString)));
 }
 
 CGeorgesFileSystemModel::~CGeorgesFileSystemModel()
 {
 
+}
+
+void CGeorgesFileSystemModel::dir(const QString &dir)
+{
+	// in theory this should prefetch all directory entries for the 
+	// filesystem model to speed up later work
+	QModelIndex i = index(dir);
+
+	if (hasChildren(i)) {
+		int childCount = rowCount(i);
+		for (int c=0; c<childCount; c++) {
+			const QModelIndex child = index(c, 0, i);
+			if (child.isValid()) {
+				fetchMore(child);
+			}
+		}
+	}
 }
 
 QVariant CGeorgesFileSystemModel::data(const QModelIndex& index, int role) const
@@ -90,6 +111,54 @@ void CGeorgesFileSystemModel::checkLDPath()
 		m_correct = false;
 	}
 }
+//
+//bool CGeorgesFileSystemModel::canFetchMore(const QModelIndex &parent) const
+//{
+//	return true;
+//	
+//   /* Q_D(const QFileSystemModel);
+//    const QFileSystemModelPrivate::QFileSystemNode *indexNode = d->node(parent);
+//    return (!indexNode->populatedChildren);*/
+//}
+
+//CGeorgesFileSystemProxyModel::CGeorgesFileSystemProxyModel(QObject *parent) : QSortFilterProxyModel(parent)
+//{
+//	setFilterCaseSensitivity(Qt::CaseInsensitive);
+//}
+
+//bool CGeorgesFileSystemProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
+//{
+	// TODO this is not perfect as it could be
+	// eg it should filter all dirs which have no entry
+	//QModelIndex idx = sourceModel()->index(source_row, 0, source_parent);
+	//if (sourceModel()->hasChildren(idx))
+	//{
+	//	QString d = sourceModel()->data(idx).toString();
+	//	//QModelIndex i = mapFromSource(source_parent);
+	//	//if (hasChildren(i)) {
+	//	int childCount = sourceModel()->rowCount(idx);
+	//	for (int c=0; c<childCount; c++) {
+	//		/*const QModelIndex child = sourceModel()->index(c, 0, idx);
+	//		if (child.isValid()) {
+	//			bool test = filterAcceptsRow(c, child);
+	//		}*/
+	//	}
+	//	return true;
+	//}
+	//return QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent);
+//}
+
+//QVariant CGeorgesFileSystemProxyModel::data ( const QModelIndex & index, int role ) const
+//{
+//	if (role == Qt::DisplayRole)
+//	{
+//		QString test = QSortFilterProxyModel::data(index, role).toString();
+//		return test.append(QString(" (%1/%2)")).
+//			arg(rowCount(index)).
+//			arg(sourceModel()->rowCount(mapToSource(index)));
+//	}
+//	return QSortFilterProxyModel::data(index, role);
+//}
 } /* namespace NLQT */
 
 /* end of file */

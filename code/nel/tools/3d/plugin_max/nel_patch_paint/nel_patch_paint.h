@@ -3,7 +3,12 @@
 
 #include "resource.h"
 #include <algorithm>
-#include <MaxScrpt/maxscrpt.h>
+#include <maxversion.h>
+#if MAX_VERSION_MAJOR >= 14
+#	include <maxscript/maxscript.h>
+#else
+#	include <MaxScrpt/maxscrpt.h>
+#endif
 #include "namesel.h"
 #include "nsclip.h"
 #include "sbmtlapi.h"
@@ -578,13 +583,16 @@ class PaintPatchData : public LocalModData {
 		LocalModData *Clone() { return new PaintPatchData(*this); }
 
 		void SetFlag(DWORD f,BOOL on) 
-			{ 
-			if ( on ) {
+		{ 
+			if ( on )
+			{
 				flags|=f;
-			} else {
-				flags&=~f; 
-				}
 			}
+			else
+			{
+				flags&=~f; 
+			}
+		}
 		DWORD GetFlag(DWORD f) { return flags&f; }
 
 		EPTempData *TempData(PaintPatchMod *mod);

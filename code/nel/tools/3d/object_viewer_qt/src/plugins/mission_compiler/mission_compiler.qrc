@@ -1,0 +1,17 @@
+<RCC>
+  <qresource prefix="buttons">
+    <file>images/ic_nel_reset_all.png</file>
+    <file>images/ic_nel_add_item.png</file>
+    <file>images/ic_nel_delete_item.png</file>
+    <file>images/ic_nel_down_item.png</file>
+    <file>images/ic_nel_generic_settings.png</file>
+    <file>images/ic_nel_up_item.png</file>
+    <file>images/arrow-left-2.png</file>
+    <file>images/arrow-left-double-2.png</file>
+    <file>images/arrow-right-2.png</file>
+    <file>images/arrow-right-double-2.png</file>
+    <file>images/document-export-4.png</file>
+    <file>images/news-subscribe-2.png</file>
+    <file>images/run-build-2.png</file>
+  </qresource>
+</RCC>

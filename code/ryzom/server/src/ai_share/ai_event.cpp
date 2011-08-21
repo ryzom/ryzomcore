@@ -53,7 +53,7 @@ void CAIStunEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 				// seek takes a param in bytes (8 bits)
 				f.seek( size, NLMISC::IStream::current);
 			}
-			catch(ESeekNotSupported &)
+			catch(const ESeekNotSupported &)
 			{
 				uint8 tmp;
 				for (uint i = 0 ; i < size ; ++i)
@@ -100,7 +100,7 @@ void CAIAggroEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 				// seek takes a param in bytes (8 bits)
 				f.seek( size, NLMISC::IStream::current);
 			}
-			catch(ESeekNotSupported &)
+			catch(const ESeekNotSupported &)
 			{
 				uint8 tmp;
 				for (uint i = 0 ; i < size ; ++i)
@@ -150,7 +150,7 @@ void CAIStunEndEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 				// seek takes a param in bytes (8 bits)
 				f.seek( size, NLMISC::IStream::current);
 			}
-			catch(ESeekNotSupported &)
+			catch(const ESeekNotSupported &)
 			{
 				uint8 tmp;
 				for (uint i = 0 ; i < size ; ++i)
@@ -198,7 +198,7 @@ void CAISurvivalInstinctEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 				// seek takes a param in bytes (8 bits)
 				f.seek( size, NLMISC::IStream::current);
 			}
-			catch(ESeekNotSupported &)
+			catch(const ESeekNotSupported &)
 			{
 				uint8 tmp;
 				for (uint i = 0 ; i < size ; ++i)
@@ -249,7 +249,7 @@ void CAIFearEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 				// seek takes a param in bytes (8 bits)
 				f.seek( size, NLMISC::IStream::current);
 			}
-			catch(ESeekNotSupported &)
+			catch(const ESeekNotSupported &)
 			{
 				uint8 tmp;
 				for (uint i = 0 ; i < size ; ++i)
@@ -296,7 +296,7 @@ void CAIFearEndEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 				// seek takes a param in bytes (8 bits)
 				f.seek( size, NLMISC::IStream::current);
 			}
-			catch(ESeekNotSupported &)
+			catch(const ESeekNotSupported &)
 			{
 				uint8 tmp;
 				for (uint i = 0 ; i < size ; ++i)
@@ -344,7 +344,7 @@ void CAIHungerEvent::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 				// seek takes a param in bytes (8 bits)
 				f.seek( size, NLMISC::IStream::current);
 			}
-			catch(ESeekNotSupported &)
+			catch(const ESeekNotSupported &)
 			{
 				uint8 tmp;
 				for (uint i = 0 ; i < size ; ++i)

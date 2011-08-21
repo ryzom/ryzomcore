@@ -261,7 +261,7 @@ inline bool loadXmlPrimitiveFile(CPrimitives &primDoc, const std::string &fileNa
 		// Read it
 		return primDoc.read (xmlIn.getRootNode (), NLMISC::CFile::getFilename(fileName).c_str(), ligoConfig);
 	}
-	catch(NLMISC::Exception e)
+	catch(const NLMISC::Exception &e)
 	{
 		nlwarning("Error reading input file '%s': '%s'", fileName.c_str(), e.what());
 		return false;
@@ -294,7 +294,7 @@ inline bool saveXmlPrimitiveFile(CPrimitives &primDoc, const std::string &fileNa
 
 //		return xmlSaveFile(fileName.c_str(), xmlDoc) != -1;
 	}
-	catch(NLMISC::Exception e)
+	catch(const NLMISC::Exception &e)
 	{
 		nlwarning("Error writing output file '%s': '%s'", fileName.c_str(), e.what());
 		return false;

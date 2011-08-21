@@ -375,7 +375,7 @@ void	CFeSendSub::flushMessages()
 				++_SendCounter;
 				//nldebug( "%u: SENDING NOW %u bytes to %s", CTickEventHandler::getGameCycle(), (*isb).OutBox.length(), (*isb).DestAddress.asString().c_str() );
 			}
-			catch ( ESocket& )
+			catch (const ESocket&)
 			{
 				nlwarning( "Could not send data to client %u", isb-_CurrentFlushingBuffers->begin() );
 			}

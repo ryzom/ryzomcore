@@ -112,7 +112,7 @@ struct SOptions : public SExportOptions
 			CConfigFile::CVar &cvString = cf.getVar (var);
 			ret = cvString.asString ();
 		}
-		catch (EConfigFile &/*e*/)
+		catch (const EConfigFile &/*e*/)
 		{
 			outString (string("WARNING : variable not found : ") + var + " in " + FileName + "\n");
 		}
@@ -127,7 +127,7 @@ struct SOptions : public SExportOptions
 			CConfigFile::CVar &cvString = cf.getVar (var);
 			ret = cvString.asFloat ();
 		}
-		catch (EConfigFile &/*e*/)
+		catch (const EConfigFile &/*e*/)
 		{
 			outString (string("WARNING : variable not found : ") + var + " in " + FileName + "\n");
 		}
@@ -142,7 +142,7 @@ struct SOptions : public SExportOptions
 			CConfigFile::CVar &cvString = cf.getVar (var);
 			ret = cvString.asInt ();
 		}
-		catch (EConfigFile &/*e*/)
+		catch (const EConfigFile &/*e*/)
 		{
 			outString (string("WARNING : variable not found : ") + var + " in " + FileName + "\n");
 		}
@@ -187,7 +187,7 @@ struct SOptions : public SExportOptions
 			this->DFNDir = getStr("DFNDir");
 			this->ContinentsDir = getStr("ContinentsDir");
 		}
-		catch (EConfigFile &e)
+		catch (const EConfigFile &e)
 		{
 			string sTmp = string("ERROR : Error in config file : ") + e.what() + "\n";
 			outString (sTmp);
@@ -215,7 +215,7 @@ struct SOptions : public SExportOptions
 				return false;
 			}
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			string sTmp = string("Error in land file : ") + e.what();
 			outString (sTmp);

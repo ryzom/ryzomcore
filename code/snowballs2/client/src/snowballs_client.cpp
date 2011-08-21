@@ -70,6 +70,10 @@
 #include "internationalization.h"
 #include "game_time.h"
 
+#ifdef NL_OS_WINDOWS
+#include <Windows.h>
+#endif
+
 using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
@@ -593,15 +597,16 @@ void loopLogin()
 	displayLoadingState("Login");
 	if (ConfigFile->getVar("Local").asInt() == 0)
 	{
-	    // Only attempt to directly log in if we haven't been passed a cookie already.
-	    if(Cookie.empty() || FSAddr.empty()) {
+		// Only attempt to directly log in if we haven't been passed a cookie already.
+		if(Cookie.empty() || FSAddr.empty())
+		{
             if (ConfigFile->getVar("UseDirectClient").asInt() == 1)
             {
                 string result;
                 string LSHost(ConfigFile->getVar("LSHost").asString());
                 Login = ConfigFile->getVar("Login").asString();
                 string Password = ConfigFile->getVar("Password").asString();
-                CHashKeyMD5 hk = getMD5((uint8 *)Password.c_str(), Password.size());
+                CHashKeyMD5 hk = getMD5((uint8 *)Password.c_str(), (uint32)Password.size());
                 string CPassword = hk.toString();
                 nlinfo("The crypted password is %s", CPassword.c_str());
                 string Application = ConfigFile->getVar("ClientApplication").asString();
@@ -1072,8 +1077,8 @@ sint main(int argc, char **argv)
 	// extract the 2 first param (argv[1] and argv[2]) it must be cookie and addr
 
 	string cmd = cmdline;
-	int pos1 = cmd.find_first_not_of (' ');
-	int pos2;
+	string::size_type pos1 = cmd.find_first_not_of (' ');
+	string::size_type pos2;
 	if (pos1 != string::npos)
 	{
 		pos2 = cmd.find (' ', pos1);

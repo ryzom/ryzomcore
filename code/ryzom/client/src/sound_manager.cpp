@@ -512,7 +512,7 @@ void CSoundManager::init(IProgressCallback *progressCallBack)
 		_AudioMixer->enableBackgroundMusicTimeConstraint(ClientCfg.EnableBackgroundMusicTimeConstraint);
 
 /*	}
-	catch( Exception& e )
+	catch(const Exception &e)
 	{
 		nlwarning( "Error: %s", e.what() );
 	}
@@ -1732,7 +1732,7 @@ void		CSoundManager::updateEventAndGameMusicVolume()
 			materials.push_back( cvMaterials.asInt(i) );
 		}
 	}
-	catch (EConfigFile &e)
+	catch (const EConfigFile &e)
 	{
 		nlerror("Problem in the file %s : %s", fileName,e.what ());
 	}
@@ -1786,7 +1786,7 @@ void		CSoundManager::updateEventAndGameMusicVolume()
 		}
 		_Sounds.insert( make_pair( make_pair(moveType,soft), sounds) );
 	}
-	catch (EConfigFile &e)
+	catch (const EConfigFile &e)
 	{
 		nlwarning("Problem in the sounds by material config file : %s", e.what ());
 	}

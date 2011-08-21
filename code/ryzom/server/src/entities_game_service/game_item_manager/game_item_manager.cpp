@@ -587,7 +587,7 @@ void CGameItemManager::destroyItem( CGameItemPtr &ptr )
 //								}
 //							}
 //						}
-//						catch( Exception& e )
+//						catch(const Exception &e)
 //						{
 //							nlwarning("<CGameItemManager::dropOnTheGround> %s",e.what());
 //							return;
@@ -627,7 +627,7 @@ void CGameItemManager::destroyItem( CGameItemPtr &ptr )
 //					}*/
 //			}
 //		}
-//		catch( Exception& e )
+//		catch(const Exception &e)
 //		{
 //			nlwarning("<CGameItemManager::dropOnTheGround> %s",e.what());
 //			return;

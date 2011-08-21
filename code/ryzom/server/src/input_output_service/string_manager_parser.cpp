@@ -1820,7 +1820,7 @@ void CStringManager::init(NLMISC::CLog *log)
 		CConfigFile::CVar& cvDebugString = NLNET::IService::getInstance()->ConfigFile.getVar("ReadTranslationWork");
 		ReadTranslationWork = cvDebugString.asInt() != 0;
 	}
-	catch(EUnknownVar &) 
+	catch(const EUnknownVar &) 
 	{
 		log->displayNL("<CStringManager::init> using default ReadTranslationWork (false)");
 	}
@@ -1832,7 +1832,7 @@ void CStringManager::init(NLMISC::CLog *log)
 		CConfigFile::CVar& cvDebugString = NLNET::IService::getInstance()->ConfigFile.getVar("ReadWorkOnly");
 		readWorkOnly = cvDebugString.asInt() != 0;
 	}
-	catch(EUnknownVar &) 
+	catch(const EUnknownVar &) 
 	{
 		log->displayNL("<CStringManager::init> using default ReadWorkOnly (false)");
 	}
@@ -1844,7 +1844,7 @@ void CStringManager::init(NLMISC::CLog *log)
 		TranslationWorkPath = cvWorkPath.asString();
 		TranslationWorkPath = CPath::standardizePath(TranslationWorkPath, true);
 	}
-	catch(EUnknownVar &) 
+	catch(const EUnknownVar &) 
 	{
 		log->displayNL("<CStringManager::init> using default DebugStringManager (%s)", TranslationWorkPath.c_str());
 	}

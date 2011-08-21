@@ -2052,7 +2052,8 @@ void getItemText (CDBCtrlSheet *item, ucstring &itemText, const CItemSheet*pIS)
 	case ITEMFAMILY::CONSUMABLE :
 		{
 			strFindReplace(itemText, "%consumption_time", toString(pIS->Consumable.ConsumptionTime));
-			strFindReplace(itemText, "%overdose_timer", toString(pIS->Consumable.OverdoseTimer/60));
+			strFindReplace(itemText, "%overdose_timer_min", toString(pIS->Consumable.OverdoseTimer/60));
+			strFindReplace(itemText, "%overdose_timer_sec", toString(pIS->Consumable.OverdoseTimer % 60));
 			// Get Item Consumable infos
 			CItemConsumableEffectHelper::getInstance()->getItemConsumableEffectText(pIS, itemText, item->getQuality());
 		}

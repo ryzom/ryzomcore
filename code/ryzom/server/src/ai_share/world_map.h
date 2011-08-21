@@ -1173,9 +1173,10 @@ private:
 inline
 CDirectionLayer::CDirectionLayer()
 {
-	uint i;
-	for (i=0; i<9; ++i)
-		Grid[0][i] = NULL;
+	uint i, j;
+	for (i=0; i<3; ++i)
+		for (j=0; j<3; ++j)
+			Grid[i][j] = NULL;
 }
 
 inline
@@ -1205,39 +1206,42 @@ void CDirectionLayer::dump()
 		if (gridDirectionLayer)
 			motion = gridDirectionLayer->getDirection(y,x);
 		
+		char c = ' ';
+
 		switch (motion.getVal())
 		{
 		case CDirection::N:
-			output[y+i*16][x+j*16] = '^';
+			c = '^';
 			break;
 		case CDirection::S:
-			output[y+i*16][x+j*16] = 'v';
+			c = 'v';
 			break;
 		case CDirection::E:
-			output[y+i*16][x+j*16] = '>';
+			c = '>';
 			break;
 		case CDirection::W:
-			output[y+i*16][x+j*16] = '<';
+			c = '<';
 			break;
 		case CDirection::NE:
-			output[y+i*16][x+j*16] = '7';
+			c = '7';
 			break;
 		case CDirection::SW:
-			output[y+i*16][x+j*16] = 'L';
+			c = 'L';
 			break;
 		case CDirection::NW:
-			output[y+i*16][x+j*16] = 'r';
+			c = 'r';
 			break;
 		case CDirection::SE:
-			output[y+i*16][x+j*16] = '\\';
+			c = '\\';
 			break;
-		case 255:
-			output[y+i*16][x+j*16] = ' ';
-			break;
+//		case 255:
+//			c = ' ';
+//			break;
 		default:
-			output[y+i*16][x+j*16] = 'o';
+			c = 'o';
 			break;
 		}
+		output[y+i*16][x+j*16] = c;
 	}
 	
 	char op[256];

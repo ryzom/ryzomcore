@@ -859,7 +859,7 @@ bool CEntityBase::setValue( const string& var, const string& value )
 			}
 			temp = v;
 		}
-		catch( CEntityBase::EInvalidStat &e)
+		catch(const CEntityBase::EInvalidStat &e)
 		{
 			nlwarning("<CEntityBase::setValue> Exception : %s",e.what( var ) );
 			return false;
@@ -888,7 +888,7 @@ bool CEntityBase::modifyValue( const string& var, const string& value )
 			temp = temp + v;
 			//nlinfo(" Modify value %s of %s for entity %s, old value %d, new value %d", var.c_str(), value.c_str(), _Id.toString().c_str(), oldValue, temp.getValue() );
 		}
-		catch( CEntityBase::EInvalidStat &e)
+		catch(const CEntityBase::EInvalidStat &e)
 		{
 			nlwarning("<CEntityBase::modifyValue> Exception : %s",e.what( var ) );
 			return false;
@@ -913,7 +913,7 @@ bool CEntityBase::getValue( const string& var, string& value )
 		sint32 val = lookupStat(var);
 		value = toString(val);
 	}
-	catch( CEntityBase::EInvalidStat &e)
+	catch(const CEntityBase::EInvalidStat &e)
 	{
 		if( var == string("Behaviour") )
 		{

@@ -330,7 +330,7 @@ namespace NLNET
 				_onProcessModuleMessage(currentSender, currentMessage);
 				_CurrentMessageFailed = false;
 			}
-			catch (NLMISC::Exception e)
+			catch (const NLMISC::Exception &e)
 			{
 				nlwarning("In module task '%s' (cotask message receiver), exception '%e' thrown", typeid(this).name(), e.what());
 				// an exception have been thrown

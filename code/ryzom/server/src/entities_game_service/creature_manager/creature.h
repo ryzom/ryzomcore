@@ -552,6 +552,8 @@ private:
 	/// keep pointer on creature form
 	const CStaticCreatures *		_Form;
 
+	std::string						_SheetName;
+
 	uint32	_Faction;
 	bool	_FameByKillValid;
 	sint32	_FameByKill;

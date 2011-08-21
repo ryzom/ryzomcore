@@ -256,7 +256,7 @@ void CIGInfo::load(TShapeCache &shapeCache)
 		ig->serial(stream);
 		IG = ig; // commit
 	}
-	catch(EStream &e)
+	catch(const EStream &e)
 	{
 		nlwarning(e.what());
 	}
@@ -266,7 +266,7 @@ void CIGInfo::load(TShapeCache &shapeCache)
 		for(uint k = 0; k < IG->getNumInstance(); ++k)
 		{
 			std::string shapeName = standardizeShapeName(IG->getShapeName(k));			
-			if (NLMISC::strlwr(CFile::getExtension(shapeName)) == "pacs_prim")
+			if (NLMISC::toLower(CFile::getExtension(shapeName)) == "pacs_prim")
 			{
 				continue;
 			}
@@ -291,7 +291,7 @@ void CIGInfo::load(TShapeCache &shapeCache)
 						shapeCache[shapeName].swap(si);						
 					}
 				}
-				catch (EStream &e)
+				catch (const EStream &e)
 				{
 					// shape not loaded
 					nlwarning(e.what());
