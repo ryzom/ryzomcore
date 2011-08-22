@@ -70,6 +70,9 @@ private Q_SLOTS:
 	void save();
 	void saveAs();
 	void deletePrimitives();
+	void unload();
+	void showPrimitive();
+	void hidePrimitive();
 	void addNewPrimitiveByClass(int value);
 	void generatePrimitives(int value);
 	void openItem(int value);
@@ -78,7 +81,7 @@ protected:
 	void contextMenuEvent(QContextMenuEvent *event);
 
 private:
-	void selectChildren(const QModelIndex &parent);
+	void selectChildren(const QModelIndex &parent, QItemSelection &itemSelection);
 	void fillMenu_WorldEdit(QMenu *menu);
 	void fillMenu_Landscape(QMenu *menu);
 	void fillMenu_RootPrimitive(QMenu *menu, const QModelIndex &index);

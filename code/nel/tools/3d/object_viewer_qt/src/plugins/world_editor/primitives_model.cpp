@@ -200,17 +200,29 @@ void PrimitivesTreeModel::deleteWorldEditNode()
 	endResetModel();
 }
 
-Path PrimitivesTreeModel::createLandscapeNode(const QString &fileName)
+bool PrimitivesTreeModel::isWorldEditNodeLoaded() const
+{
+	if (m_worldEditNode == 0)
+		return false;
+	else
+		return true;
+}
+
+Path PrimitivesTreeModel::createLandscapeNode(const QString &fileName, int id, int pos)
 {
 	if (m_worldEditNode == 0)
 		createWorldEditNode("NewWorldEdit");
 
 	QModelIndex parentIndex = index(0, 0, QModelIndex());
-	beginInsertRows(parentIndex, 0, 0);
-	LandscapeNode *newNode = new LandscapeNode(fileName);
-	m_worldEditNode->prependChildNode(newNode);
+	int insPos = pos;
+	if (pos == -1)
+		insPos = 0;
+
+	beginInsertRows(parentIndex, insPos, insPos);
+	LandscapeNode *newNode = new LandscapeNode(fileName, id);
+	m_worldEditNode->insertChildNode(insPos, newNode);
 	endInsertRows();
-	return pathFromIndex(index(0, 0, index(0, 0, QModelIndex())));
+	return pathFromIndex(index(0, 0, index(insPos, 0, QModelIndex())));
 }
 
 

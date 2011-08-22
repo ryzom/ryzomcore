@@ -128,12 +128,18 @@ private:
 class LandscapeNode: public Node
 {
 public:
-	LandscapeNode(const QString &name);
+	LandscapeNode(const QString &name, int id);
 	virtual ~LandscapeNode();
+
+	int id() const;
+	QString fileName() const;
 
 	virtual NodeType type() const;
 
 private:
+
+	QString m_fileName;
+	int m_id;
 };
 
 /*

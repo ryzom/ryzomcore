@@ -34,8 +34,8 @@ class AbstractWorldItem;
 
 /*
 @class WorldEditorScene
-@brief
-@details
+@brief The WorldEditorScene provides a surface for managing a large number of 2D world items(point/path/zone).
+@details WorldEditorScene also provides 'selections model' functionality, which differs from standart selection model.
 */
 class WORLD_EDITOR_EXPORT WorldEditorScene : public LandscapeEditor::LandscapeSceneBase
 {
@@ -56,22 +56,38 @@ public:
 					 QUndoStack *undoStack, QObject *parent = 0);
 	virtual ~WorldEditorScene();
 
+	/// Create WorldItemPoint and add in scene.
 	AbstractWorldItem *addWorldItemPoint(const QPointF &point, const qreal angle,
 										 const qreal radius, bool showArrow);
+
+	/// Create WorldItemPath and add in scene.
 	AbstractWorldItem *addWorldItemPath(const QPolygonF &polyline, bool showArrow);
+
+	/// Create WorldItemZone and add in scene.
 	AbstractWorldItem *addWorldItemZone(const QPolygonF &polygon);
+
+	/// Remove a world item from the scene.
 	void removeWorldItem(QGraphicsItem *item);
 
+	/// Set current mode editing(select/move/rotate/scale/turn), above world items.
 	void setModeEdit(WorldEditorScene::ModeEdit mode);
+
 	WorldEditorScene::ModeEdit editMode() const;
 
+	/// @return true if edit points mode is enabled, else false.
 	bool isEnabledEditPoints() const;
 
 Q_SIGNALS:
+	/// This signal is emitted by WorldEditorScene when the selections changes.
+	/// The @selected value contains a list of all selected items.
 	void updateSelectedItems(const QList<QGraphicsItem *> &selected);
 
 public Q_SLOTS:
+	/// Enable/disable edit points mode (user can change shape of WorldItemZone and WorldItemPath)
+	///
 	void setEnabledEditPoints(bool enabled);
+
+	/// Update of selections
 	void updateSelection(const QList<QGraphicsItem *> &selected, const QList<QGraphicsItem *> &deselected);
 
 protected:
@@ -102,6 +118,7 @@ private:
 	qreal m_firstPickX, m_firstPickY, m_angle;
 	QList<QGraphicsItem *> m_selectedItems;
 	QList<QGraphicsItem *> m_selectedPoints;
+	QList<AbstractWorldItem *> m_worldItems;
 	QList<QPolygonF> m_polygons;
 	bool m_editedSelectedItems, m_firstSelection;
 	uint m_lastPickedPrimitive;

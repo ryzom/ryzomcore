@@ -69,18 +69,17 @@ public:
 	/// Convert QModelIndex to the persistent index - @Path.
 	/// @Path is a list of [row,column] pairs showing us the way through the model.
 	Path pathFromIndex(const QModelIndex &index);
-
-	Path pathFromNode(Node *node);
-
 	QModelIndex pathToIndex(const Path &path);
 
+	Path pathFromNode(Node *node);
 	Node *pathToNode(const Path &path);
 
 	void createWorldEditNode(const QString &fileName);
 	void deleteWorldEditNode();
+	bool isWorldEditNodeLoaded() const;
 
 	/// Add new landscape node in tree model.
-	Path createLandscapeNode(const QString &fileName);
+	Path createLandscapeNode(const QString &fileName, int id, int pos = AtTheEnd);
 
 	/// Add new root primitive node and all sub-primitives in the tree model.
 	Path createRootPrimitiveNode(const QString &fileName, NLLIGO::CPrimitives *primitives, int pos = AtTheEnd);

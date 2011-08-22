@@ -178,7 +178,9 @@ Node::NodeType WorldEditNode::type() const
 	return WorldEditNodeType;
 }
 
-LandscapeNode::LandscapeNode(const QString &name)
+LandscapeNode::LandscapeNode(const QString &name, int id)
+	: m_id(id),
+	  m_fileName(name)
 {
 	setData(Qt::DisplayRole, name);
 	setData(Qt::DecorationRole, QIcon(LandscapeEditor::Constants::ICON_ZONE_ITEM));
@@ -186,6 +188,16 @@ LandscapeNode::LandscapeNode(const QString &name)
 
 LandscapeNode::~LandscapeNode()
 {
+}
+
+QString LandscapeNode::fileName() const
+{
+	return m_fileName;
+}
+
+int LandscapeNode::id() const
+{
+	return m_id;
 }
 
 Node::NodeType LandscapeNode::type() const

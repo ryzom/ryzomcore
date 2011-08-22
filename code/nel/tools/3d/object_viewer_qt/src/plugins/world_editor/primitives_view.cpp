@@ -33,6 +33,7 @@
 // Qt includes
 #include <QContextMenuEvent>
 #include <QMessageBox>
+#include <QApplication>
 #include <QtGui/QMenu>
 #include <QtGui/QFileDialog>
 
@@ -49,7 +50,6 @@ PrimitivesView::PrimitivesView(QWidget *parent)
 	setContextMenuPolicy(Qt::DefaultContextMenu);
 
 	m_unloadAction = new QAction("Unload", this);
-	m_unloadAction->setEnabled(false);
 
 	m_saveAction = new QAction("Save", this);
 	m_saveAction->setIcon(QIcon(Core::Constants::ICON_SAVE));
@@ -66,7 +66,6 @@ PrimitivesView::PrimitivesView(QWidget *parent)
 	m_newPrimitiveAction = new QAction("New primitive", this);
 
 	m_deleteAction = new QAction("Delete", this);
-	//m_deleteAction->setEnabled(false);
 
 	m_selectChildrenAction = new QAction("Select children", this);
 
@@ -86,6 +85,9 @@ PrimitivesView::PrimitivesView(QWidget *parent)
 	connect(m_deleteAction, SIGNAL(triggered()), this, SLOT(deletePrimitives()));
 	connect(m_saveAction, SIGNAL(triggered()), this, SLOT(save()));
 	connect(m_saveAsAction, SIGNAL(triggered()), this, SLOT(saveAs()));
+	connect(m_unloadAction, SIGNAL(triggered()), this, SLOT(unload()));
+	connect(m_showAction, SIGNAL(triggered()), this, SLOT(showPrimitive()));
+	connect(m_hideAction, SIGNAL(triggered()), this, SLOT(hidePrimitive()));
 
 #ifdef Q_OS_DARWIN
 	setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
@@ -186,7 +188,10 @@ void PrimitivesView::selectChildren()
 	QModelIndex parentIndex = indexList.first();
 
 	selectionModel()->clearSelection();
-	selectChildren(parentIndex);
+
+	QItemSelection itemSelection;
+	selectChildren(parentIndex, itemSelection);
+	selectionModel()->select(itemSelection, QItemSelectionModel::Select);
 }
 
 void PrimitivesView::save()
@@ -253,6 +258,41 @@ void PrimitivesView::deletePrimitives()
 
 }
 
+void PrimitivesView::unload()
+{
+	nlassert(m_undoStack);
+	nlassert(m_primitivesTreeModel);
+
+	QModelIndexList indexList = selectionModel()->selectedRows();
+	QModelIndex index = indexList.first();
+	Node *node = static_cast<Node *>(index.internalPointer());
+	switch (node->type())
+	{
+	case Node::WorldEditNodeType:
+	{
+		break;
+	}
+	case Node::LandscapeNodeType:
+	{
+		m_undoStack->push(new UnloadLandscapeCommand(index, m_primitivesTreeModel, m_zoneBuilder));
+		break;
+	}
+	case Node::RootPrimitiveNodeType:
+	{
+		m_undoStack->push(new UnloadRootPrimitiveCommand(index, m_worldEditorScene, m_primitivesTreeModel, this));
+		break;
+	}
+	}
+}
+
+void PrimitivesView::showPrimitive()
+{
+}
+
+void PrimitivesView::hidePrimitive()
+{
+}
+
 void PrimitivesView::addNewPrimitiveByClass(int value)
 {
 	nlassert(m_undoStack);
@@ -311,21 +351,24 @@ void PrimitivesView::contextMenuEvent(QContextMenuEvent *event)
 	event->accept();
 }
 
-void PrimitivesView::selectChildren(const QModelIndex &parent)
+void PrimitivesView::selectChildren(const QModelIndex &parent, QItemSelection &itemSelection)
 {
 	const int rowCount = model()->rowCount(parent);
+
+	QItemSelection mergeItemSelection(parent.child(0, 0), parent.child(rowCount - 1, 0));
+	itemSelection.merge(mergeItemSelection, QItemSelectionModel::Select);
 
 	for (int i = 0; i < rowCount; ++i)
 	{
 		QModelIndex childIndex = parent.child(i, 0);
-		selectionModel()->select(childIndex, QItemSelectionModel::Select);
-		selectChildren(childIndex);
+		if (model()->rowCount(childIndex) != 0)
+			selectChildren(childIndex, itemSelection);
 	}
 }
 
 void PrimitivesView::fillMenu_WorldEdit(QMenu *menu)
 {
-	menu->addAction(m_unloadAction);
+	//menu->addAction(m_unloadAction);
 	//menu->addAction(m_saveAction);
 	//menu->addAction(m_saveAsAction);
 	menu->addSeparator();

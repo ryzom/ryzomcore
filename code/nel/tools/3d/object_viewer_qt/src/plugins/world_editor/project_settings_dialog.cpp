@@ -16,12 +16,14 @@
 
 // Project includes
 #include "project_settings_dialog.h"
+#include "world_editor_misc.h"
 
 #include "../core/icore.h"
 #include "../core/core_constants.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
+#include <nel/ligo/ligo_config.h>
 
 // Qt includes
 #include <QtCore/QSettings>
@@ -36,6 +38,13 @@ ProjectSettingsDialog::ProjectSettingsDialog(const QString &dataPath, QWidget *p
 {
 	m_ui.setupUi(this);
 	m_ui.pathLineEdit->setText(dataPath);
+	m_ui.contextComboBox->addItem("empty");
+
+	// Init the combo box
+	const std::vector<std::string> &contexts = Utils::ligoConfig()->getContextString();
+	for (uint i = 0; i < contexts.size(); i++)
+		m_ui.contextComboBox->addItem(QString(contexts[i].c_str()));
+
 	setFixedHeight(sizeHint().height());
 	connect(m_ui.selectPathButton, SIGNAL(clicked()), this, SLOT(selectPath()));
 }

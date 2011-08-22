@@ -399,7 +399,7 @@ QString ZoneBuilder::dataPath() const
 bool ZoneBuilder::getZoneMask(sint32 x, sint32 y)
 {
 	if ((x < m_minX) || (x > m_maxX) ||
-		(y < m_minY) || (y > m_maxY))
+			(y < m_minY) || (y > m_maxY))
 		return true;
 	else
 		return m_zoneMask[(x - m_minX) + (y - m_minY) * (1 + m_maxX - m_minX)];
@@ -504,7 +504,7 @@ void ZoneBuilder::checkEndMacro()
 		// Sets list positions in which need apply changes
 		m_undoScanRegionCommand->setScanList(m_zonePositionList);
 		redoScanRegionCommand->setScanList(m_zonePositionList);
-		
+
 		// Adds command in the stack
 		m_undoStack->push(redoScanRegionCommand);
 		m_undoStack->endMacro();

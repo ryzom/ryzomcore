@@ -95,6 +95,34 @@ private:
 	LandscapeEditor::ZoneBuilderBase *const m_zoneBuilder;
 };
 
+/**
+@class UnloadLandscapeCommand
+@brief
+@details
+*/
+class UnloadLandscapeCommand: public QUndoCommand
+{
+public:
+	UnloadLandscapeCommand(const QModelIndex &index, PrimitivesTreeModel *model,
+						   LandscapeEditor::ZoneBuilderBase *zoneBuilder, QUndoCommand *parent = 0);
+	virtual ~UnloadLandscapeCommand();
+
+	virtual void undo();
+	virtual void redo();
+private:
+
+	Path m_path;
+	int m_id;
+	QString m_fileName;
+	PrimitivesTreeModel *const m_model;
+	LandscapeEditor::ZoneBuilderBase *const m_zoneBuilder;
+};
+
+/**
+@class CreateRootPrimitiveCommand
+@brief
+@details
+*/
 class CreateRootPrimitiveCommand: public QUndoCommand
 {
 public:
@@ -112,7 +140,7 @@ private:
 };
 
 /**
-@class LoadPrimitiveCommand
+@class LoadRootPrimitiveCommand
 @brief
 @details
 */
@@ -136,7 +164,32 @@ private:
 };
 
 /**
-@class AddPrimitiveCommand
+@class UnloadRootPrimitiveCommand
+@brief
+@details
+*/
+class UnloadRootPrimitiveCommand: public QUndoCommand
+{
+public:
+	UnloadRootPrimitiveCommand(const QModelIndex &index, WorldEditorScene *scene,
+							   PrimitivesTreeModel *model, QTreeView *view,
+							   QUndoCommand *parent = 0);
+	virtual ~UnloadRootPrimitiveCommand();
+
+	virtual void undo();
+	virtual void redo();
+private:
+
+	Path m_path;
+	QString m_fileName;
+	NLLIGO::CPrimitives *m_primitives;
+	WorldEditorScene *const m_scene;
+	PrimitivesTreeModel *const m_model;
+	QTreeView *m_view;
+};
+
+/**
+@class AddPrimitiveByClassCommand
 @brief
 @details
 */

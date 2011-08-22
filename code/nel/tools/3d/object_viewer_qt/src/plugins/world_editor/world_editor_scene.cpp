@@ -67,6 +67,8 @@ AbstractWorldItem *WorldEditorScene::addWorldItemPoint(const QPointF &point, con
 {
 	WorldItemPoint *item = new WorldItemPoint(point, angle, radius, showArrow);
 	addItem(item);
+
+	m_worldItems.push_back(item);
 	return item;
 }
 
@@ -74,6 +76,8 @@ AbstractWorldItem *WorldEditorScene::addWorldItemPath(const QPolygonF &polyline,
 {
 	WorldItemPath *item = new WorldItemPath(polyline);
 	addItem(item);
+
+	m_worldItems.push_back(item);
 	return item;
 }
 
@@ -81,6 +85,8 @@ AbstractWorldItem *WorldEditorScene::addWorldItemZone(const QPolygonF &polygon)
 {
 	WorldItemZone *item = new WorldItemZone(polygon);
 	addItem(item);
+
+	m_worldItems.push_back(item);
 	return item;
 }
 
@@ -90,6 +96,10 @@ void WorldEditorScene::removeWorldItem(QGraphicsItem *item)
 	m_selectedItems.clear();
 	m_editedSelectedItems = false;
 	m_firstSelection = false;
+
+	// TODO
+	AbstractWorldItem *worldItem = qgraphicsitem_cast<AbstractWorldItem *>(item);
+	m_worldItems.removeOne(worldItem);
 	delete item;
 }
 

@@ -165,6 +165,9 @@ void WorldEditorWindow::open()
 
 void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 {
+	if (m_primitivesModel->isWorldEditNodeLoaded())
+		return;
+
 	Utils::WorldEditList worldEditList;
 	if (!Utils::loadWorldEditFile(fileName.toStdString(), worldEditList))
 	{

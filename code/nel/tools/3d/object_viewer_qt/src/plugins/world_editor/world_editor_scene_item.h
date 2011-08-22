@@ -53,8 +53,8 @@ const int EDGE_POINT_LAYER = 201;
 const int SIZE_ARROW = 20;
 
 /*
-@class WorldItemPoint
-@brief
+@class AbstractWorldItem
+@brief Abstract class for graphics item
 @details
 */
 class AbstractWorldItem: public QGraphicsItem
@@ -65,13 +65,21 @@ public:
 
 	enum { Type = QGraphicsItem::UserType + 1 };
 
+	/// Rotate item around @pivot point on &deltaAngle (deg).
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle) {};
+
+	/// Scales item relatively @pivot point
 	// TODO: add modes: IgnoreAspectRatio, KeepAspectRatio
 	virtual void scaleOn(const QPointF &pivot, const QPointF &factor) {};
+
+	/// Rotate arrow on angle (deg). (only for WorldItemPoint)
 	virtual void turnOn(const qreal angle) {};
 	virtual void radiusOn(const qreal radius) {};
 
+	/// Change color
 	virtual void setColor(const QColor &color) = 0;
+
+	/// Enable/disable the mode edit shape (only for WorldItemPath and WorldItemPath)
 	virtual void setEnabledSubPoints(bool enabled) = 0;
 
 	virtual void moveSubPoint(WorldItemSubPoint *subPoint) {}
@@ -103,7 +111,8 @@ protected:
 
 /*
 @class WorldItemPoint
-@brief
+@brief WorldItemPoint class provides a dot item with arrow and circle(@radius)
+that you can add to a WorldEditorScene.
 @details
 */
 class WorldItemPoint: public AbstractWorldItem
@@ -148,7 +157,7 @@ private:
 
 /*
 @class WorldItemPath
-@brief
+@brief WorldItemPath class provides a polyline item that you can add to a WorldEditorScene.
 @details
 */
 class WorldItemPath: public AbstractWorldItem
@@ -188,7 +197,7 @@ private:
 
 /*
 @class WorldItemZone
-@brief
+@brief The WorldItemZone class provides a polygon item that you can add to a WorldEditorScene.
 @details
 */
 class WorldItemZone: public AbstractWorldItem

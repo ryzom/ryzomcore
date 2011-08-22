@@ -218,7 +218,7 @@ CreateWorldCommand::CreateWorldCommand(const QString &fileName, PrimitivesTreeMo
 	  m_fileName(fileName),
 	  m_model(model)
 {
-	setText("Create new world");
+	setText(QObject::tr("Create new world"));
 }
 
 CreateWorldCommand::~CreateWorldCommand()
@@ -243,7 +243,7 @@ LoadLandscapeCommand::LoadLandscapeCommand(const QString &fileName, PrimitivesTr
 	  m_model(model),
 	  m_zoneBuilder(zoneBuilder)
 {
-	setText("Load land file");
+	setText(QObject::tr("Load land file"));
 }
 
 LoadLandscapeCommand::~LoadLandscapeCommand()
@@ -263,7 +263,41 @@ void LoadLandscapeCommand::redo()
 	else
 		m_zoneBuilder->loadZoneRegion(m_fileName, m_id);
 
-	landIndex = m_model->createLandscapeNode(m_fileName);
+	landIndex = m_model->createLandscapeNode(m_fileName, m_id);
+}
+
+
+UnloadLandscapeCommand::UnloadLandscapeCommand(const QModelIndex &index, PrimitivesTreeModel *model,
+		LandscapeEditor::ZoneBuilderBase *zoneBuilder, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	  m_model(model),
+	  m_zoneBuilder(zoneBuilder)
+{
+	setText(QObject::tr("Unload land file"));
+	m_path = m_model->pathFromIndex(index);
+}
+
+UnloadLandscapeCommand::~UnloadLandscapeCommand()
+{
+}
+
+void UnloadLandscapeCommand::undo()
+{
+	m_zoneBuilder->loadZoneRegion(m_fileName, m_id);
+
+	m_model->createLandscapeNode(m_fileName, m_id, m_path.back().first);
+}
+
+void UnloadLandscapeCommand::redo()
+{
+	QModelIndex index = m_model->pathToIndex(m_path);
+	LandscapeNode *node = static_cast<LandscapeNode *>(index.internalPointer());
+
+	m_id = node->id();
+	m_fileName = node->fileName();
+
+	m_zoneBuilder->deleteZoneRegion(m_id);
+	m_model->deleteNode(m_path);
 }
 
 CreateRootPrimitiveCommand::CreateRootPrimitiveCommand(const QString &fileName, PrimitivesTreeModel *model, QUndoCommand *parent)
@@ -271,7 +305,7 @@ CreateRootPrimitiveCommand::CreateRootPrimitiveCommand(const QString &fileName, 
 	  m_fileName(fileName),
 	  m_model(model)
 {
-	setText("Create new primitive");
+	setText(QObject::tr("Create new primitive"));
 }
 
 CreateRootPrimitiveCommand::~CreateRootPrimitiveCommand()
@@ -304,7 +338,7 @@ LoadRootPrimitiveCommand::LoadRootPrimitiveCommand(const QString &fileName, Worl
 	  m_model(model),
 	  m_view(view)
 {
-	setText("Load primitive file");
+	setText(QObject::tr("Load primitive file"));
 }
 
 LoadRootPrimitiveCommand::~LoadRootPrimitiveCommand()
@@ -358,6 +392,47 @@ void LoadRootPrimitiveCommand::redo()
 	addNewGraphicsItems(m_model->pathToIndex(m_rootPrimIndex), m_model, m_scene);
 }
 
+
+UnloadRootPrimitiveCommand::UnloadRootPrimitiveCommand(const QModelIndex &index, WorldEditorScene *scene,
+		PrimitivesTreeModel *model, QTreeView *view, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	  m_scene(scene),
+	  m_model(model),
+	  m_view(view)
+{
+	setText(QObject::tr("Unload primitive file"));
+	m_path = m_model->pathFromIndex(index);
+}
+
+UnloadRootPrimitiveCommand::~UnloadRootPrimitiveCommand()
+{
+}
+
+void UnloadRootPrimitiveCommand::undo()
+{
+	// Disable edit points mode
+	m_scene->setEnabledEditPoints(false);
+
+	m_path = m_model->createRootPrimitiveNode(m_fileName, m_primitives, m_path.back().first);
+
+	addNewGraphicsItems(m_model->pathToIndex(m_path), m_model, m_scene);
+}
+
+void UnloadRootPrimitiveCommand::redo()
+{
+	m_scene->setEnabledEditPoints(false);
+
+	m_view->selectionModel()->clearSelection();
+	QModelIndex index = m_model->pathToIndex(m_path);
+	RootPrimitiveNode *node = static_cast<RootPrimitiveNode *>(index.internalPointer());
+	m_fileName = node->fileName();
+	m_primitives = node->primitives();
+
+	removeGraphicsItems(index, m_model, m_scene);
+
+	m_model->deleteNode(m_path);
+}
+
 AddPrimitiveByClassCommand::AddPrimitiveByClassCommand(const QString &className, const Path &parentIndex,
 		WorldEditorScene *scene, PrimitivesTreeModel *model, QTreeView *view, QUndoCommand *parent)
 	: QUndoCommand(parent),
@@ -367,7 +442,7 @@ AddPrimitiveByClassCommand::AddPrimitiveByClassCommand(const QString &className,
 	  m_model(model),
 	  m_view(view)
 {
-	setText(QString("Add %1").arg(m_className));
+	setText(QObject::tr("Add %1").arg(m_className));
 
 	QGraphicsView *graphicsView = m_scene->views().first();
 
@@ -437,7 +512,7 @@ DeletePrimitiveCommand::DeletePrimitiveCommand(const QModelIndex &index, Primiti
 	  m_model(model),
 	  m_view(view)
 {
-	setText("Delete primitive");
+	setText(QObject::tr("Delete primitive"));
 
 	// Save path to primitive
 	m_path = m_model->pathFromIndex(index);
@@ -629,7 +704,7 @@ MoveWorldItemsCommand::MoveWorldItemsCommand(const QList<QGraphicsItem *> &items
 	: AbstractWorldItemCommand(items, scene, model, parent),
 	  m_offset(offset)
 {
-	setText("Move item(s)");
+	setText(QObject::tr("Move item(s)"));
 }
 
 MoveWorldItemsCommand::~MoveWorldItemsCommand()
@@ -652,7 +727,7 @@ RotateWorldItemsCommand::RotateWorldItemsCommand(const QList<QGraphicsItem *> &i
 	  m_angle(angle),
 	  m_pivot(pivot)
 {
-	setText("Rotate item(s)");
+	setText(QObject::tr("Rotate item(s)"));
 }
 
 RotateWorldItemsCommand::~RotateWorldItemsCommand()
@@ -675,7 +750,7 @@ ScaleWorldItemsCommand::ScaleWorldItemsCommand(const QList<QGraphicsItem *> &ite
 	  m_factor(factor),
 	  m_pivot(pivot)
 {
-	setText("Scale item(s)");
+	setText(QObject::tr("Scale item(s)"));
 }
 
 ScaleWorldItemsCommand::~ScaleWorldItemsCommand()
@@ -698,7 +773,7 @@ TurnWorldItemsCommand::TurnWorldItemsCommand(const QList<QGraphicsItem *> &items
 	: AbstractWorldItemCommand(items, scene, model, parent),
 	  m_angle(angle)
 {
-	setText("Turn item(s)");
+	setText(QObject::tr("Turn item(s)"));
 }
 
 TurnWorldItemsCommand::~TurnWorldItemsCommand()
@@ -722,7 +797,7 @@ ShapeWorldItemsCommand::ShapeWorldItemsCommand(const QList<QGraphicsItem *> &ite
 	  m_redoPolygons(polygons),
 	  m_undoPolygons(polygonsFromItems(items))
 {
-	setText("Change shape");
+	setText(QObject::tr("Change shape"));
 }
 
 ShapeWorldItemsCommand::~ShapeWorldItemsCommand()
