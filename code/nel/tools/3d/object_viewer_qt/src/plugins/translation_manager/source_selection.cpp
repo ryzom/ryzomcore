@@ -17,6 +17,7 @@ CSourceDialog::CSourceDialog(QWidget *parent): QDialog(parent)
     _ui.listWidget->setSortingEnabled(false);
 }
 
+// Insert options in the source dialog. Options like: from FTP Server, from Local directory etc.
 void CSourceDialog::setSourceOptions(map<QListWidgetItem*,int> options)
 {
     map<QListWidgetItem*,int>::iterator it;

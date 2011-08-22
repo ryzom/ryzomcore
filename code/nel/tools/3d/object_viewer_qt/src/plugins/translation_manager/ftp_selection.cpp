@@ -27,6 +27,7 @@ namespace TranslationManager
 		status = false;
     }
     
+	// Connection with the FTP Server. We retrieve the file list.
     void CFtpSelection::ConnectButtonClicked()
     {
         conn = new QFtp(this);
@@ -51,6 +52,7 @@ namespace TranslationManager
         }
     }
     
+	// Get the user action. 
     void CFtpSelection::FtpCommandFinished(int, bool error)
     {
 		#ifndef QT_NO_CURSOR
@@ -98,7 +100,7 @@ namespace TranslationManager
                         }                    
                 }
     }
- 
+	 // Make the file list with directories and files
      void CFtpSelection::AddToList(const QUrlInfo &urlInfo)
      {
          QTreeWidgetItem *item = new QTreeWidgetItem;
@@ -138,6 +140,7 @@ namespace TranslationManager
 		_ui.doneButton->setEnabled(true);
     }
 
+	// Exit from a directory
 	void CFtpSelection::cdToParent()
 	{
 		 #ifndef QT_NO_CURSOR
@@ -155,6 +158,7 @@ namespace TranslationManager
 			 conn->list();
 	}
 
+	// Done action
     void CFtpSelection::DoneButtonClicked()
     {
 		 QString fileName = _ui.fileList->currentItem()->text(0);

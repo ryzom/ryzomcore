@@ -51,8 +51,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 {
          _ui.setupUi(this);
          
-         _ui.mdiArea->closeAllSubWindows();
-         connect(_ui.mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)),this, SLOT(activeSubWindowChanged()));         
+         _ui.mdiArea->closeAllSubWindows();       
          windowMapper = new QSignalMapper(this);
          connect(windowMapper, SIGNAL(mapped(QWidget*)), this, SLOT(setActiveSubWindow(QWidget*)));
          
@@ -66,6 +65,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 
 }
 
+// Functions that will insert the plugin buttons
 void CMainWindow::createToolbar()
 {	
          // File menu        
@@ -96,27 +96,27 @@ void CMainWindow::createToolbar()
         QAction *extractItemWordsAct = wordsExtractionMenu->addAction("&Extract item words...");
         extractItemWordsAct->setStatusTip(tr("Extract item words"));
         connect(extractItemWordsAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
-        wordsExtractionMapper->setMapping(extractItemWordsAct, tr(Constants::WK_ITEM));              
+        wordsExtractionMapper->setMapping(extractItemWordsAct, QString(Constants::WK_ITEM));              
         // extract creature words
         QAction *extractCreatureWordsAct = wordsExtractionMenu->addAction("&Extract creature words...");
         extractCreatureWordsAct->setStatusTip(tr("Extract creature words"));
         connect(extractCreatureWordsAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
-        wordsExtractionMapper->setMapping(extractCreatureWordsAct, tr(Constants::WK_CREATURE));      
+        wordsExtractionMapper->setMapping(extractCreatureWordsAct, QString(Constants::WK_CREATURE));      
         // extract sbrick words
         QAction *extractSbrickWordsAct = wordsExtractionMenu->addAction("&Extract sbrick words...");
         extractSbrickWordsAct->setStatusTip(tr("Extract sbrick words"));  
         connect(extractSbrickWordsAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
-        wordsExtractionMapper->setMapping(extractSbrickWordsAct, tr(Constants::WK_SBRICK));   
+        wordsExtractionMapper->setMapping(extractSbrickWordsAct, QString(Constants::WK_SBRICK));   
         // extract sphrase words
         QAction *extractSphraseWordsAct = wordsExtractionMenu->addAction("&Extract sphrase words...");
         extractSphraseWordsAct->setStatusTip(tr("Extract sphrase words"));
         connect(extractSphraseWordsAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
-        wordsExtractionMapper->setMapping(extractSphraseWordsAct, tr(Constants::WK_SPHRASE));   
+        wordsExtractionMapper->setMapping(extractSphraseWordsAct, QString(Constants::WK_SPHRASE));   
         // extract place and region names
         QAction *extractPlaceNamesAct = wordsExtractionMenu->addAction("&Extract place names...");
         extractPlaceNamesAct->setStatusTip(tr("Extract place names from primitives"));
         connect(extractPlaceNamesAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));             
-        wordsExtractionMapper->setMapping(extractPlaceNamesAct, tr(Constants::WK_PLACE));   
+        wordsExtractionMapper->setMapping(extractPlaceNamesAct, QString(Constants::WK_PLACE));   
         // Merge options
         // -----------------------------
         QAction *mergeSingleFileAct = wordsExtractionMenu->addAction("&Merge worksheet file...");
@@ -140,24 +140,23 @@ void CMainWindow::createToolbar()
                 _ui.toolBar->addAction(redoAction);
 }
 
+// Update the toolbar if the editor is worksheet
 void CMainWindow::updateToolbar(QMdiSubWindow *window)
 {
     if(_ui.mdiArea->subWindowList().size() > 0)
     if(QString(window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
     {
-		//setContextMenuPolicy(Qt::ActionsContextMenu);
         QAction *insertRowAct = new QAction(tr("Insert new row"), this);
         connect(insertRowAct, SIGNAL(triggered()), window, SLOT(insertRow()));
-		//addAction(insertRowAct);
 		windowMenu->addAction(insertRowAct);
         QAction *deleteRowAct = new QAction(tr("Delete row"), this);
         connect(deleteRowAct, SIGNAL(triggered()), window, SLOT(deleteRow())); 
-		//addAction(deleteRowAct);
 		windowMenu->addAction(deleteRowAct);
         
     }
 }
 
+// Set the active subwindow
 void CMainWindow::setActiveSubWindow(QWidget* window)
 {
         if (!window)
@@ -168,13 +167,11 @@ void CMainWindow::setActiveSubWindow(QWidget* window)
         _ui.mdiArea->setActiveSubWindow(cwindow);   
 }
 
-void CMainWindow::activeSubWindowChanged()
-{
-	
-}
-
+// Functions for updating the windows list
 void CMainWindow::updateWindowsList()
 {
+	if(_ui.mdiArea->activeSubWindow())
+	{
         windowMenu->clear();
         QMdiSubWindow *current_window = _ui.mdiArea->activeSubWindow();     
         QList<QMdiSubWindow*> subWindows = _ui.mdiArea->subWindowList();      
@@ -186,9 +183,9 @@ void CMainWindow::updateWindowsList()
                 QString window_file = QFileInfo(subWindows.at(i)->windowFilePath()).fileName();
                 QString action_text;
                 if (i < 9) {
-                        action_text = tr("&%1 %2").arg(i + 1).arg(window_file);
+                        action_text = QString("&%1 %2").arg(i + 1).arg(window_file);
                 } else {
-                        action_text = tr("%1 %2").arg(i + 1).arg(window_file);
+                        action_text = QString("%1 %2").arg(i + 1).arg(window_file);
                 }
 				QAction *action = new QAction(action_text, this);
                 action->setCheckable(true);
@@ -196,9 +193,12 @@ void CMainWindow::updateWindowsList()
                 connect(action, SIGNAL(triggered()), windowMapper, SLOT(map())); 
 				windowMenu->addAction(action);
                 windowMapper->setMapping(action, subWindows.at(i));
-        }    
+        } 
+
+	}
 }
 
+// Open signal
 void CMainWindow::open()
 {
 		QSettings *settings = Core::ICore::instance()->settings();
@@ -243,6 +243,7 @@ void CMainWindow::open()
                
 }
 
+// Open a work file. You can set the directory for work file in the settings dialog
 void CMainWindow::openWorkFile(QString file)
 {
     QFileInfo* file_path = new QFileInfo(QString("%1/%2").arg(work_path).arg(file));
@@ -262,6 +263,7 @@ void CMainWindow::openWorkFile(QString file)
   
 }
 
+// Save signal
 void CMainWindow::save()
 {
     if(_ui.mdiArea->subWindowList().size() > 0)
@@ -277,6 +279,7 @@ void CMainWindow::save()
     }
 }
 
+// Save as signal
 void CMainWindow::saveAs()
 {
     QString file_name;
@@ -298,6 +301,7 @@ void CMainWindow::saveAs()
     }    
 }
 
+// This function is needed by extraction.
 void CMainWindow::initializeSettings(bool georges = false)
 {   
     if(georges == true && initialize_settings["georges"] == false)
@@ -327,6 +331,7 @@ void CMainWindow::initializeSettings(bool georges = false)
 
 }
 
+// Extracting words
 void CMainWindow::extractWords(QString typeq)
 {
         if(verifySettings() == true) 
@@ -396,6 +401,7 @@ void CMainWindow::extractWords(QString typeq)
    
 }
 
+// Extract bot names from primitives
 void CMainWindow::extractBotNames()
 {
         if(verifySettings() == true) 
@@ -425,6 +431,7 @@ void CMainWindow::extractBotNames()
         }    
 }
 
+// Merge the content for 2 worksheet files
 void CMainWindow::mergeSingleFile()
 {
     CEditor* editor_window = qobject_cast<CEditor*>(_ui.mdiArea->currentSubWindow());
@@ -485,7 +492,7 @@ void CMainWindow::mergeSingleFile()
 		current_window->mergeWorksheetFile(file_name);
     } else  {
 		QErrorMessage error;
-        error.showMessage(QString("The file: %1 has different columns from the current file in editor.").arg(file_name));
+        error.showMessage(tr("The file: %1 has different columns from the current file in editor.").arg(file_name));
         error.exec();                
     }
     if(dialog->selected_item == ftp_item)
@@ -493,13 +500,14 @@ void CMainWindow::mergeSingleFile()
 		if(!ftp_dialog->file->remove())
 		{
 			QErrorMessage error;
-			error.showMessage(QString("Please remove the file from ftp server manually. The file is located on the same directory with OVQT application."));
+			error.showMessage(tr("Please remove the file from ftp server manually. The file is located on the same directory with OVQT application."));
 			error.exec(); 
 		}
 	
 	}
 }
 
+// Read the settings from QSettings
 void CMainWindow::readSettings()
 {
             QSettings *settings = Core::ICore::instance()->settings();
@@ -517,6 +525,7 @@ void CMainWindow::readSettings()
             settings->endGroup();              
 }
 
+// Verify the settings
 bool CMainWindow::verifySettings()
 {
         bool count_errors = false;
@@ -533,6 +542,36 @@ bool CMainWindow::verifySettings()
         
 }
 
+bool CCoreListener::closeMainWindow() const
+{
+	bool okToClose = true;
+    Q_FOREACH(QMdiSubWindow *subWindow, m_MainWindow->_ui.mdiArea->subWindowList())
+    {
+		CEditor *currentEditor = qobject_cast<CEditor*>(subWindow);
+		if(subWindow->isWindowModified())
+		{
+			QMessageBox msgBox;
+			msgBox.setText(tr("The document has been modified ( %1 ).").arg(currentEditor->windowFilePath()));
+			msgBox.setInformativeText("Do you want to save your changes?");
+			msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+			msgBox.setDefaultButton(QMessageBox::Save);
+			int ret = msgBox.exec();
+            if(ret == QMessageBox::Save)
+            {
+                currentEditor->save();
+            }
+            else if(ret == QMessageBox::Cancel)
+            {
+                okToClose = false;
+                break;
+            }
+		}
+    }
+	return okToClose;
+}
+
+
+// Helper functions
 CEditor *CMainWindow::getEditorByWindowFilePath(const QString &fileName)
 {
     Q_FOREACH(QMdiSubWindow *subWindow, _ui.mdiArea->subWindowList())
@@ -602,34 +641,6 @@ bool CMainWindow::isPhraseEditor(QString filename)
 			} else {
 				return false;
 			}
-}
-
-bool CCoreListener::closeMainWindow() const
-{
-	bool okToClose = true;
-    Q_FOREACH(QMdiSubWindow *subWindow, m_MainWindow->_ui.mdiArea->subWindowList())
-    {
-		CEditor *currentEditor = qobject_cast<CEditor*>(subWindow);
-		if(subWindow->isWindowModified())
-		{
-			QMessageBox msgBox;
-			msgBox.setText(tr("The document has been modified ( %1 ).").arg(currentEditor->windowFilePath()));
-			msgBox.setInformativeText("Do you want to save your changes?");
-			msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-			msgBox.setDefaultButton(QMessageBox::Save);
-			int ret = msgBox.exec();
-            if(ret == QMessageBox::Save)
-            {
-                currentEditor->save();
-            }
-            else if(ret == QMessageBox::Cancel)
-            {
-                okToClose = false;
-                break;
-            }
-		}
-    }
-	return okToClose;
 }
 
 } /* namespace Plugin */

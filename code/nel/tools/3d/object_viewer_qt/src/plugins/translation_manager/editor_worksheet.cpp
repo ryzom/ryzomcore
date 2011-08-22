@@ -59,7 +59,7 @@ void CEditorWorksheet::open(QString filename)
                      } else {
                         QTableWidgetItem *col = new QTableWidgetItem();
                         ucstring col_name = wk_file.getData(0, i);
-                        col->setText(tr(col_name.toString().c_str()));
+                        col->setText(QString(col_name.toString().c_str()));
                         if(hasHashValue)
                         {
                                 table_editor->setHorizontalHeaderItem(i - 1, col);                        
@@ -241,9 +241,9 @@ void CEditorWorksheet::extractBotNames(list<string> filters, string level_design
                             if(search_results.size() == 0)
                             {
 								QList<QString> records;
-								records.push_back(tr(it->first.c_str()));
-								records.push_back(tr(it->first.c_str()));
-								records.push_back(tr(it->second.SheetName.c_str()));  
+								records.push_back(QString(it->first.c_str()));
+								records.push_back(QString(it->first.c_str()));
+								records.push_back(QString(it->second.SheetName.c_str()));  
 								insertTableRecords(records, new_items);
                                 if(!modified) modified = true;							
                             }
@@ -261,8 +261,8 @@ void CEditorWorksheet::extractBotNames(list<string> filters, string level_design
                             if(search_results.size() == 0)
                             {
 								QList<QString> records;
-								records.push_back(tr((*it).c_str()));
-								records.push_back(tr(gnName.c_str()));
+								records.push_back(QString((*it).c_str()));
+								records.push_back(QString(gnName.c_str()));
 								records.push_back(" ");  
 								insertTableRecords(records, new_items);
                                 if(!modified) modified = true;
@@ -318,7 +318,7 @@ void CEditorWorksheet::extractWords(QString filename, QString columnId, IWordLis
         for(i = 0; i < allWords.size(); i++)
         {                   
                 string keyName = allWords[i];
-                QList<QTableWidgetItem*> search_results = table_editor->findItems(tr(keyName.c_str()), Qt::MatchExactly);
+                QList<QTableWidgetItem*> search_results = table_editor->findItems(QString(keyName.c_str()), Qt::MatchExactly);
                 if(search_results.size() == 0)
                 {                
                         int knPos = 0, nPos = 0;
@@ -332,8 +332,8 @@ void CEditorWorksheet::extractWords(QString filename, QString columnId, IWordLis
                         }   
 
 						QList<QString> records;
-						records.push_back(tr(keyName.c_str()));
-						records.push_back(QString("<GEN>") + tr(keyName.c_str())); 
+						records.push_back(QString(keyName.c_str()));
+						records.push_back(QString("<GEN>") + QString(keyName.c_str())); 
 						insertTableRecords(records, new_items);
                         if(!modified) modified = true;
                 }            
@@ -412,7 +412,7 @@ void CEditorWorksheet::mergeWorksheetFile(QString filename)
                  {
                      // search with the first column
                      ucstring rowId = wk_file.getData(i,colIndex);
-                     QList<QTableWidgetItem*> search_results = table_editor->findItems(tr(rowId.toString().c_str()), Qt::MatchExactly);
+                     QList<QTableWidgetItem*> search_results = table_editor->findItems(QString(rowId.toString().c_str()), Qt::MatchExactly);
                      if(search_results.size() == 0)
                      {
                          const int lastRow = table_editor->rowCount();
