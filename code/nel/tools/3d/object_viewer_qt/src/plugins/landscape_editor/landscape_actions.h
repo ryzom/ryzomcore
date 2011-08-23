@@ -35,7 +35,7 @@ namespace LandscapeEditor
 /**
 @class OpenLandscapeCommand
 @brief
-@details 
+@details
 */
 class OpenLandscapeCommand: public QUndoCommand
 {
@@ -53,7 +53,7 @@ private:
 /**
 @class NewLandscapeCommand
 @brief
-@details 
+@details
 */
 class NewLandscapeCommand: public QUndoCommand
 {
@@ -69,7 +69,7 @@ private:
 /**
 @class LigoTileCommand
 @brief
-@details 
+@details
 */
 class LigoTileCommand: public QUndoCommand
 {
@@ -93,7 +93,7 @@ private:
 /**
 @class UndoScanRegionCommand
 @brief
-@details 
+@details
 */
 class UndoScanRegionCommand: public QUndoCommand
 {
@@ -117,7 +117,7 @@ private:
 /**
 @class LigoResizeCommand
 @brief
-@details 
+@details
 */
 class LigoResizeCommand: public QUndoCommand
 {
