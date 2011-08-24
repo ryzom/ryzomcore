@@ -26,6 +26,9 @@
 #include "team_manager/team_manager.h"
 #include "mission_manager/mission_team.h"
 #include "mission_manager/mission_log.h"
+#include "guild_manager/guild_manager.h"
+#include "guild_manager/guild.h"
+#include "guild_manager/guild_member.h"
 
 
 using namespace std;
@@ -222,50 +225,108 @@ void cbClientGroupAbandonMission( NLNET::CMessage& msgin, const std::string &ser
 	CCharacter * user = PlayerManager.getChar( userId );
 
 	user->setAfkState(false);
-	CTeam * team = TeamManager.getRealTeam( user->getTeamId() );
-	if ( !team )
-	{
-		MISLOG("user:%s cbClientGroupAbandonMission : Invalid team", userId.toString().c_str());
-		return;
-	}
-	if ( team->getLeader() != userId )
-	{
-		CCharacter::sendDynamicSystemMessage( user->getEntityRowId(), "REQ_LEADER_TO_ABANDON_MISSION" );
-		return;
-	}
 
-	if ( index >=  team->getMissions().size() )
+	// We check if it's a guild or team mission
+	if (index < MaxGroupMissionCount)
 	{
-		MISLOG("user:%s cbClientGroupAbandonMission : Invalid group mission %u ( count %u )", 
-						userId.toString().c_str(), index, team->getMissions().size());
-		return;
-	}
-	
+		// Team
 
-	CMissionTeam* mission = team->getMissions()[index];
-	nlassert(mission);
-	
-	if ( mission->getFinished() == false )
-	{
-		CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( mission->getTemplateId() );
-		if ( !templ )
+		CTeam * team = TeamManager.getRealTeam( user->getTeamId() );
+		if ( !team )
 		{
-			MISLOG("user:%s cbClientGroupAbandonMission : invalid group mission alias %u", 
-				userId.toString().c_str(), mission->getTemplateId());
+			MISLOG("user:%s cbClientGroupAbandonMission : Invalid team", userId.toString().c_str());
 			return;
 		}
-		if ( templ->Tags.NonAbandonnable )
+		if ( team->getLeader() != userId )
 		{
-			MISLOG("user:%s cbClientGroupAbandonMission : group mission alias %u is not abandonnable but user tries to abandon it", 
-				userId.toString().c_str(), mission->getTemplateId());
+			CCharacter::sendDynamicSystemMessage( user->getEntityRowId(), "REQ_LEADER_TO_ABANDON_MISSION" );
 			return;
 		}
-		set<CEntityId> excluded;
-		excluded.insert( userId );
+
+		if ( index >=  team->getMissions().size() )
+		{
+			MISLOG("user:%s cbClientGroupAbandonMission : Invalid group mission %u ( count %u )", 
+							userId.toString().c_str(), index, team->getMissions().size());
+			return;
+		}
 		
-		team->sendDynamicMessageToMembers( "ABANDON_GROUP_MISSION",TVectorParamCheck(), excluded );
+
+		CMissionTeam* mission = team->getMissions()[index];
+		nlassert(mission);
+		
+		if ( mission->getFinished() == false )
+		{
+			CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( mission->getTemplateId() );
+			if ( !templ )
+			{
+				MISLOG("user:%s cbClientGroupAbandonMission : invalid group mission alias %u", 
+					userId.toString().c_str(), mission->getTemplateId());
+				return;
+			}
+			if ( templ->Tags.NonAbandonnable )
+			{
+				MISLOG("user:%s cbClientGroupAbandonMission : group mission alias %u is not abandonnable but user tries to abandon it", 
+					userId.toString().c_str(), mission->getTemplateId());
+				return;
+			}
+			set<CEntityId> excluded;
+			excluded.insert( userId );
+			
+			team->sendDynamicMessageToMembers( "ABANDON_GROUP_MISSION",TVectorParamCheck(), excluded );
+		}
+		team->removeMission( index, mr_abandon );
 	}
-	team->removeMission( index, mr_abandon );
+	else
+	{
+		// Guild
+		// We set the correct index
+		index = MaxGroupMissionCount - index;
+
+		CGuild * guild = CGuildManager::getInstance()->getGuildFromId( user->getGuildId() );
+		if ( !guild )
+		{
+			MISLOG("user:%s cbClientGroupAbandonMission : Invalid team", userId.toString().c_str());
+			return;
+		}
+		if ( guild->getLeader()->getIngameEId() != userId )
+		{
+			CCharacter::sendDynamicSystemMessage( user->getEntityRowId(), "REQ_LEADER_TO_ABANDON_MISSION" );
+			return;
+		}
+
+		if ( index >=  guild->getMissions().size() )
+		{
+			MISLOG("user:%s cbClientGroupAbandonMission : Invalid group mission %u ( count %u )", 
+				userId.toString().c_str(), index, guild->getMissions().size());
+			return;
+		}
+
+
+		CMissionGuild* mission = guild->getMissions()[index];
+		nlassert(mission);
+
+		if ( mission->getFinished() == false )
+		{
+			CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( mission->getTemplateId() );
+			if ( !templ )
+			{
+				MISLOG("user:%s cbClientGroupAbandonMission : invalid group mission alias %u", 
+					userId.toString().c_str(), mission->getTemplateId());
+				return;
+			}
+			if ( templ->Tags.NonAbandonnable )
+			{
+				MISLOG("user:%s cbClientGroupAbandonMission : group mission alias %u is not abandonnable but user tries to abandon it", 
+					userId.toString().c_str(), mission->getTemplateId());
+				return;
+			}
+			set<CEntityId> excluded;
+			excluded.insert( userId );
+
+			guild->sendDynamicMessageToMembers( "ABANDON_GROUP_MISSION",TVectorParamCheck(), excluded );
+		}
+		guild->removeMission( index, mr_abandon );
+	}
 }
 
 //----------------------------------------------------------------------------
