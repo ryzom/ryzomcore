@@ -12,7 +12,8 @@ SET(OVQT_PLUG_GEORGES_EDITOR_HDR  georges_editor_plugin.h
                                   georges_editor_form.h
                                   georges_dirtree_dialog.h
                                   georges_filesystem_model.h
-                                  georges_treeview_dialog.h)
+                                  georges_treeview_dialog.h
+                                  expandable_headerview.h)
 
 SET(OVQT_PLUG_GEORGES_EDITOR_UIS  georges_editor_form.ui
                                   georges_dirtree_form.ui

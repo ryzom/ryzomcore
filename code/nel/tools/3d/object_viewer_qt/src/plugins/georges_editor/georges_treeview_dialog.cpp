@@ -32,7 +32,8 @@
 #include "georgesform_model.h"
 #include "georgesform_proxy_model.h"
 #include "formitem.h"
-//#include "formdelegate.h"
+#include "formdelegate.h"
+#include "expandable_headerview.h"
 
 using namespace NLMISC;
 using namespace NLGEORGES;
@@ -41,7 +42,8 @@ namespace Plugin
 {
 
 	CGeorgesTreeViewDialog::CGeorgesTreeViewDialog(QWidget *parent /*= 0*/)
-		: QDockWidget(parent)
+		: QDockWidget(parent),
+		m_header(0)
 	{
 		m_georges = new CGeorges;
 
@@ -49,16 +51,18 @@ namespace Plugin
 		m_modified = false;
 
 		m_ui.setupUi(this);
+		m_header = new ExpandableHeaderView(Qt::Horizontal, m_ui.treeView);
+		m_ui.treeView->setHeader(m_header);
 		m_ui.treeView->header()->setResizeMode(QHeaderView::ResizeToContents);
+		m_ui.treeView->header()->setStretchLastSection(true);
 		m_ui.treeViewTabWidget->setTabEnabled (2,false);
 
 		m_ui.checkBoxParent->setStyleSheet("background-color: rgba(0,255,0,30)");
 		m_ui.checkBoxDefaults->setStyleSheet("background-color: rgba(255,0,0,30)");
 		m_form = 0;
 
-		//FormDelegate *formdelegate = new FormDelegate(this);
-		//_ui.treeView->setItemDelegateForColumn(1, formdelegate);
-
+		FormDelegate *formdelegate = new FormDelegate(this);
+		m_ui.treeView->setItemDelegateForColumn(1, formdelegate);
 
 		connect(m_ui.treeView, SIGNAL(doubleClicked (QModelIndex)),
 			this, SLOT(doubleClicked (QModelIndex)));
@@ -66,14 +70,22 @@ namespace Plugin
 			this, SLOT(filterRows()));
 		connect(m_ui.checkBoxDefaults, SIGNAL(toggled(bool)),
 			this, SLOT(filterRows()));
+		connect(m_header, SIGNAL(headerClicked(int)),
+			this, SLOT(headerClicked(int)));
 	}
 
 	CGeorgesTreeViewDialog::~CGeorgesTreeViewDialog()
 	{
-		//delete _ui.treeView->itemDelegateForColumn(1);
 		delete m_form;
-		//QSettings settings("RyzomCore", "GeorgesQt");
-		//settings.setValue("dirViewGeometry", saveGeometry());
+	}
+
+	void CGeorgesTreeViewDialog::headerClicked(int section)
+	{
+		if (section == 0)
+			if (*(m_header->expanded()))
+				m_ui.treeView->expandAll();
+			else
+				m_ui.treeView->collapseAll();
 	}
 
 	void CGeorgesTreeViewDialog::setForm(const CForm *form) 
@@ -170,7 +182,7 @@ namespace Plugin
 		{
 			loadedForm = m_form->getFilename().c_str();
 
-			CGeorgesFormModel *model = new CGeorgesFormModel(root,deps,comments,parents);
+			CGeorgesFormModel *model = new CGeorgesFormModel(root,deps,comments,parents,m_header->expanded());
 			CGeorgesFormProxyModel *proxyModel = new CGeorgesFormProxyModel();
 			proxyModel->setSourceModel(model);
 			m_ui.treeView->setModel(proxyModel);

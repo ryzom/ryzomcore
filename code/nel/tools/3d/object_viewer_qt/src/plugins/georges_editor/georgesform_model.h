@@ -39,11 +39,11 @@ namespace Plugin
 		
 	public:
 		CGeorgesFormModel(NLGEORGES::UFormElm *root, QMap< QString, QStringList> deps,
-			QString comment, QStringList parents, QObject *parent = 0);
+			QString comment, QStringList parents, bool* expanded, QObject *parent = 0);
 		~CGeorgesFormModel();
 
 		QVariant data(const QModelIndex &index, int role) const;
-		//bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+		bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
 		Qt::ItemFlags flags(const QModelIndex &index) const;
 		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 		QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
@@ -71,6 +71,7 @@ namespace Plugin
 
 		bool						m_showParents;
 		bool						m_showDefaults;
+		bool					 *m_expanded;
 
 	};/* class CGeorgesFormModel */
 

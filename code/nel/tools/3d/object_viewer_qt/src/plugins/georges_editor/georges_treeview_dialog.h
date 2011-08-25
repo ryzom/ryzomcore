@@ -18,6 +18,7 @@
 #define GEORGES_TREEVIEWER_DIALOG_H
 
 #include "ui_georges_treeview_form.h"
+#include "expandable_headerview.h"
 
 // Qt includes
 #include <QtGui/QDockWidget>
@@ -77,9 +78,11 @@ namespace Plugin
 	private Q_SLOTS:
 		void doubleClicked ( const QModelIndex & index );
 		void filterRows();
+		void headerClicked(int);
 
 	private:
 		Ui::CGeorgesTreeViewDialog m_ui;
+		ExpandableHeaderView *m_header;
 		UForm    *m_form;
 		CGeorges *m_georges;
 

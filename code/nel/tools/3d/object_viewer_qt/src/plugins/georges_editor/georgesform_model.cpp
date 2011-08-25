@@ -30,10 +30,13 @@
 #include <QApplication>
 #include <QStyle>
 #include <QDebug>
+#include <QStylePainter>
+#include <QStyleOption>
+#include <QLabel>
+#include <QPixmap>
 
 // project includes
 #include "formitem.h"
-//#include "modules.h"
 
 using namespace NLGEORGES;
 
@@ -41,7 +44,7 @@ namespace Plugin
 {
 
 	CGeorgesFormModel::CGeorgesFormModel(UFormElm *rootElm, QMap< QString, QStringList> deps,
-		QString comment, QStringList parents, QObject *parent) : QAbstractItemModel(parent) 
+		QString comment, QStringList parents, bool *expanded, QObject *parent) : QAbstractItemModel(parent) 
 	{
 		QList<QVariant> rootData;
 		rootData << "Value" << "Data" << "Extra";// << "Type";
@@ -51,6 +54,7 @@ namespace Plugin
 		m_comments = comment;
 		m_parents = parents;
 		m_parentRows = new QList<const QModelIndex*>;
+		m_expanded = expanded;
 
 		setupModelData();
 	}
@@ -231,23 +235,23 @@ namespace Plugin
 
 	/******************************************************************************/
 
-	//bool CGeorgesFormModel::setData(const QModelIndex &index, const QVariant &value,
-	//	int role) 
-	//{
+	bool CGeorgesFormModel::setData(const QModelIndex &index, const QVariant &value,
+		int role) 
+	{
 
-	//	if (role != Qt::EditRole)
-	//		return false;
+		if (role != Qt::EditRole)
+			return false;
 
-	//	CFormItem *item = getItem(index);
-	//	bool result = item->setData(index.column(), value);
+		CFormItem *item = getItem(index);
+		bool result = item->setData(index.column(), value);
 
 	//	// TODO: ugly hack for updating icon too
 	//	if (result)
 	//		Q_EMIT dataChanged(index, this->index(index.row(),index.column()+1,index.parent()));
 
-	//	setupModelData();
-	//	return result;
-	//}
+		//setupModelData();
+		return result;
+	}
 
 	/******************************************************************************/
 
@@ -258,11 +262,8 @@ namespace Plugin
 
 		Qt::ItemFlags returnValue = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
-		//if(index.column() == 1)
-		//	returnValue |= Qt::ItemIsEditable;
-		// TODO?
-		// col 2 should go here too but i dont want to do another delegate
-		// so for now i just connected the dblClick in the dialog
+		if(index.column() == 1)
+			returnValue |= Qt::ItemIsEditable;
 
 		return returnValue;
 
@@ -273,11 +274,42 @@ namespace Plugin
 	QVariant CGeorgesFormModel::headerData(int section,
 		Qt::Orientation orientation, int role) const
 	{
-		if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-			return m_rootItem->data(section);
+		if (orientation == Qt::Horizontal)
+		{
+			if (role == Qt::DisplayRole)
+				return m_rootItem->data(section);
+			if (role == Qt::TextAlignmentRole)
+				return Qt::AlignLeft;
+			if (section == 0 && role == Qt::DecorationRole)
+			{
+				// transparent pixmap as we paint it ourself with tree brach
+				// if we extend the HeaderView::paintSection for the CE_HeaderLabel
+				// we could drop this
+				QPixmap pixmap = QPixmap(
+					QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize),
+					QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize));
+				// Create new picture for transparent
+				QPixmap transparent(pixmap.size());
 
+				// Do transparency
+				transparent.fill(Qt::transparent);
+				QPainter p(&transparent);
+				p.setCompositionMode(QPainter::CompositionMode_Source);
+				p.drawPixmap(0, 0, pixmap);
+				p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+				// Set transparency level to 150 (possible values are 0-255)
+				// The alpha channel of a color specifies the transparency effect, 
+				// 0 represents a fully transparent color, while 255 represents 
+				// a fully opaque color.
+				p.fillRect(transparent.rect(), QColor(0, 0, 0, 0));
+				p.end();
+
+				// Set original picture's reference to new transparent one
+				pixmap = transparent;
+				return pixmap;
+			}
+		}
 		return QVariant();
-
 	}
 
 	/******************************************************************************/

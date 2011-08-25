@@ -14,17 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "georgesform_proxy_model.h"
-#include "georgesform_model.h"
-
 // NeL includes
 #include <nel/misc/debug.h>
 #include <nel/georges/u_form_elm.h>
 
 // project includes
 #include "formitem.h"
-
-#include <QDebug>
+#include "georgesform_proxy_model.h"
+#include "georgesform_model.h"
 
 namespace Plugin 
 {
@@ -32,19 +29,10 @@ namespace Plugin
 	bool CGeorgesFormProxyModel::filterAcceptsRow(int sourceRow,
 		const QModelIndex &sourceParent) const
 	{
-		//nlinfo("CGeorgesFormProxyModel::filterAcceptsRow");
-
 		// column doesnt matter for item
 		CGeorgesFormModel *smodel = dynamic_cast<CGeorgesFormModel *>(sourceModel());
 		QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
 		CFormItem *item   = smodel->getItem(index);
-
-		//qDebug() << smodel->showParents() << (item->valueFrom() == NLGEORGES::UFormElm::NodeParentForm);
-		//nlinfo("%s %d %d %d %d", item->data(index.column()).toString().toStdString().c_str(), 
-		//	item->valueFrom(),
-		//	item->nodeFrom(),
-		//	smodel->showParents(), 
-		//	(item->valueFrom() == NLGEORGES::UFormElm::NodeParentForm));
 
 		// if elm not existing it must be some kind of default or type value
 		if(!item->getFormElm())
@@ -86,7 +74,6 @@ namespace Plugin
 	bool CGeorgesFormProxyModel::filterAcceptsColumn(int sourceRow,
          const QModelIndex &sourceParent) const
 	{
-		//nlinfo("CGeorgesFormProxyModel::filterAcceptsColumn");
 		return QSortFilterProxyModel::filterAcceptsColumn(sourceRow, sourceParent);
 	}
 } /* namespace Plugin */
