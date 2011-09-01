@@ -141,7 +141,7 @@ public:
 	float getAnimLength(std::string name);
 
 	/// Get slot infomation
-	void setSlotInfo(uint num, CSlotInfo& slotInfo)
+	void setSlotInfo(uint num, CSlotInfo &slotInfo)
 	{
 		_SlotInfo[num] = slotInfo;
 	}
