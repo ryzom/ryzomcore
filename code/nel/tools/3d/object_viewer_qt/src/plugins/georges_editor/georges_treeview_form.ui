@@ -22,6 +22,9 @@
     <height>165</height>
    </size>
   </property>
+  <property name="focusPolicy">
+   <enum>Qt::NoFocus</enum>
+  </property>
   <property name="windowTitle">
    <string/>
   </property>
@@ -36,6 +39,9 @@
        <number>0</number>
       </property>
       <widget class="QWidget" name="form_tab">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
        <attribute name="title">
         <string>Form</string>
        </attribute>

@@ -40,11 +40,14 @@ public:
 
 public Q_SLOTS:
 	void open();
+	void loadFile(const QString fileName);
 	void newFile();
 	void save();
 	void settingsChanged();
-	void loadFile(const QString fileName);
 	void closingTreeView();
+	void setModified();
+
+	void focusChanged(QWidget *old, QWidget *now);
 
 private:
 	void readSettings();
@@ -54,18 +57,17 @@ private:
 	Ui::GeorgesEditorForm m_ui;
 
 	CGeorgesDirTreeDialog *m_georgesDirTreeDialog;
-	QToolBar *_fileToolBar;
-	QAction *_openAction;
-	QAction *_newAction;
-	QAction *_saveAction;
+	QToolBar *m_fileToolBar;
+	QAction *m_openAction;
+	QAction *m_newAction;
+	QAction *m_saveAction;
 
 	QString m_leveldesignPath;
 
-	QDockWidget *m_emptyDock;
 	QMainWindow *m_mainDock;
 		
 	QList<CGeorgesTreeViewDialog*> m_dockedWidgets;
-	QList<QTabBar*> m_tabBars;
+	CGeorgesTreeViewDialog *m_lastActiveDock;
 }; /* class GeorgesEditorForm */
 
 } /* namespace Plugin */

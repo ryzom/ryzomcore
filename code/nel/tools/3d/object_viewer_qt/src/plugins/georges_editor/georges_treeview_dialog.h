@@ -50,7 +50,7 @@ namespace Plugin
 		CGeorgesTreeViewDialog(QWidget *parent = 0);
 		~CGeorgesTreeViewDialog();
 
-		bool modified() {return m_modified;}
+		bool isModified() {return m_modified;}
 		void setModified(bool m) {m_modified = m;}
 
 		CForm* getFormByName(const QString);
@@ -67,13 +67,14 @@ namespace Plugin
 
 	Q_SIGNALS:
 		void changeFile(QString);
-		void modified(bool);
+		void modified();
 		void closing();
 
 	public Q_SLOTS:
 		void setForm(const CForm*);
 		void loadFormIntoDialog(CForm *form = 0);
 		void modifiedFile( );
+		void checkVisibility(bool);
 
 	private Q_SLOTS:
 		void doubleClicked ( const QModelIndex & index );

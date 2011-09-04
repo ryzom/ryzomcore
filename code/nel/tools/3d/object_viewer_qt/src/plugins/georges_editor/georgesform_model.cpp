@@ -245,9 +245,7 @@ namespace Plugin
 		CFormItem *item = getItem(index);
 		bool result = item->setData(index.column(), value);
 
-	//	// TODO: ugly hack for updating icon too
-	//	if (result)
-	//		Q_EMIT dataChanged(index, this->index(index.row(),index.column()+1,index.parent()));
+		Q_EMIT dataChanged(index, index);
 
 		//setupModelData();
 		return result;

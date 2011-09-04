@@ -20,6 +20,7 @@
 #include <QtGui/QWidget>
 #include <QSettings>
 #include <QFileDialog>
+#include <QDebug>
 
 // NeL includes
 #include <nel/misc/path.h>
@@ -43,12 +44,12 @@ namespace Plugin
 
 	CGeorgesTreeViewDialog::CGeorgesTreeViewDialog(QWidget *parent /*= 0*/)
 		: QDockWidget(parent),
-		m_header(0)
+		m_header(0),
+		m_modified(false)
 	{
 		m_georges = new CGeorges;
 
 		loadedForm = "";
-		m_modified = false;
 
 		m_ui.setupUi(this);
 		m_header = new ExpandableHeaderView(Qt::Horizontal, m_ui.treeView);
@@ -77,6 +78,7 @@ namespace Plugin
 	CGeorgesTreeViewDialog::~CGeorgesTreeViewDialog()
 	{
 		delete m_form;
+		qDebug() << "DTOR";
 	}
 
 	void CGeorgesTreeViewDialog::headerClicked(int section)
@@ -193,8 +195,8 @@ namespace Plugin
 			filterRows();
 
 		//		//_ui.treeView->setRowHidden(0,QModelIndex(),true);
-		//		connect(model, SIGNAL(dataChanged(const QModelIndex, const QModelIndex)),
-		//			this, SLOT(modifiedFile()));
+			connect(model, SIGNAL(dataChanged(const QModelIndex, const QModelIndex)),
+				this, SLOT(modifiedFile()));
 
 			setWindowTitle(loadedForm);
 		//		//Modules::mainWin().getTabBar();			
@@ -208,13 +210,12 @@ namespace Plugin
 
 	void CGeorgesTreeViewDialog::modifiedFile( ) 
 	{
-		/*if (!_modified) 
+		if (!m_modified) 
 		{
-			_modified = true;
-			setWindowTitle(windowTitle()+"*");
-			Modules::mainWin().setWindowTitle(Modules::mainWin().windowTitle()+"*");
-			Q_EMIT modified(_modified);
-		}*/
+			m_modified = true;
+			setWindowTitle(windowTitle() + "*");
+		}
+		Q_EMIT modified();
 	}
 
 	void CGeorgesTreeViewDialog::write( ) 
@@ -366,52 +367,22 @@ namespace Plugin
 		deleteLater();
 	}
 
+	void CGeorgesTreeViewDialog::checkVisibility(bool visible) {
+		// this prevents invisible docks from getting tab focus
+		qDebug() << "checkVisibility" << visible;
+		setEnabled(visible);
+		//if (visible)
+			Q_EMIT modified();
+	}
+
 	void CGeorgesTreeViewDialog::filterRows()
 	{
-		nlinfo("CGeorgesTreeViewDialog::filterRows");
 		CGeorgesFormProxyModel * mp = dynamic_cast<CGeorgesFormProxyModel *>(m_ui.treeView->model());
 		CGeorgesFormModel *m = dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());
 		if (m) {
 			m->setShowParents(m_ui.checkBoxParent->isChecked());
 			m->setShowDefaults(m_ui.checkBoxDefaults->isChecked());
 		}
-
-		//CGeorgesFormProxyModel * mp = dynamic_cast<CGeorgesFormProxyModel *>(_ui.treeView->model());
-		//CGeorgesFormModel *m = dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());
-
-		//for (int i = 0; i < m->rowCount(); i++) 
-		//{
-		//	const QModelIndex in = m->index(i,0);
-		//	if (m->getItem(in)->nodeFrom() == UFormElm::NodeParentForm) 
-		//	{
-		//		if (newState == Qt::Checked) 
-		//		{
-		//			_ui.treeView->setRowHidden(in.row(),in.parent(),false);
-		//		}
-		//		else
-		//		{
-		//			_ui.treeView->setRowHidden(in.row(),in.parent(),true);
-		//		}
-		//	} 
-		//	else 
-		//	{ // search childs // recursive?
-		//		for (int j = 0; j < m->rowCount(in); j++) 
-		//		{
-		//			const QModelIndex in2 = m->index(j,0,in);
-		//			if (m->getItem(in2)->nodeFrom() == UFormElm::NodeParentForm) 
-		//			{
-		//				if (newState == Qt::Checked) 
-		//				{
-		//					_ui.treeView->setRowHidden(in2.row(),in,false);
-		//				}
-		//				else 
-		//				{
-		//					_ui.treeView->setRowHidden(in2.row(),in,true);
-		//				}
-		//			}
-		//		}
-		//	} // end of search childs
-		//}
 	}
 
 } /* namespace NLQT */

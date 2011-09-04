@@ -39,8 +39,8 @@ namespace Plugin
 	GeorgesEditorForm::GeorgesEditorForm(QWidget *parent)
 		: QMainWindow(parent),
 		m_georgesDirTreeDialog(0),
-		m_emptyDock(0),
-		m_mainDock(0)
+		m_mainDock(0),
+		m_lastActiveDock(0)
 	{
 		m_ui.setupUi(this);
 
@@ -64,34 +64,26 @@ namespace Plugin
 		m_undoStack = new QUndoStack(this);
 
 		Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
-		_openAction = menuManager->action(Core::Constants::OPEN);
+		m_openAction = menuManager->action(Core::Constants::OPEN);
 
-		/*_openAction = new QAction(tr("&Open..."), this);
-		_openAction->setIcon(QIcon(Core::Constants::ICON_OPEN));
-		_openAction->setShortcut(QKeySequence::Open);
-		_openAction->setStatusTip(tr("Open an existing file"));
-		connect(_openAction, SIGNAL(triggered()), this, SLOT(open()));*/
+		m_newAction = new QAction(tr("&New..."), this);
+		m_newAction->setIcon(QIcon(Core::Constants::ICON_NEW));
+		m_newAction->setShortcut(QKeySequence::New);
+		m_newAction->setStatusTip(tr("Create a new file"));
+		connect(m_newAction, SIGNAL(triggered()), this, SLOT(newFile()));
 
-		_newAction = new QAction(tr("&New..."), this);
-		_newAction->setIcon(QIcon(Core::Constants::ICON_NEW));
-		_newAction->setShortcut(QKeySequence::New);
-		_newAction->setStatusTip(tr("Create a new file"));
-		connect(_newAction, SIGNAL(triggered()), this, SLOT(newFile()));
+		m_saveAction = new QAction(tr("&Save..."), this);
+		m_saveAction->setIcon(QIcon(Core::Constants::ICON_SAVE));
+		m_saveAction->setShortcut(QKeySequence::Save);
+		m_saveAction->setStatusTip(tr("Save the current file"));
+		connect(m_saveAction, SIGNAL(triggered()), this, SLOT(save()));
 
-		_saveAction = new QAction(tr("&Save..."), this);
-		_saveAction->setIcon(QIcon(Core::Constants::ICON_SAVE));
-		_saveAction->setShortcut(QKeySequence::Save);
-		_saveAction->setStatusTip(tr("Save the current file"));
-		connect(_saveAction, SIGNAL(triggered()), this, SLOT(save()));
+		m_fileToolBar = addToolBar(tr("&File"));
+		m_fileToolBar->addAction(m_openAction);
+		m_fileToolBar->addAction(m_newAction);
+		m_fileToolBar->addAction(m_saveAction);
 
-		_fileToolBar = addToolBar(tr("&File"));
-		_fileToolBar->addAction(_openAction);
-		_fileToolBar->addAction(_newAction);
-		_fileToolBar->addAction(_saveAction);
-
-		//_openAction->setEnabled(false);
-		//_newAction->setEnabled(false);
-		//_saveAction->setEnabled(false);
+		m_saveAction->setEnabled(false);
 
 		readSettings();
 
@@ -104,6 +96,8 @@ namespace Plugin
 			this, SLOT(settingsChanged()));
 		connect(m_georgesDirTreeDialog, SIGNAL(selectedForm(const QString)), 
 			this, SLOT(loadFile(const QString)));
+		connect(qApp, SIGNAL(focusChanged(QWidget*, QWidget*)),
+			this, SLOT(focusChanged(QWidget*, QWidget*)));
 	}
 
 	GeorgesEditorForm::~GeorgesEditorForm()
@@ -196,25 +190,34 @@ namespace Plugin
 
 		if (!m_dockedWidgets.size())
 		{
-			m_dockedWidgets.append(new CGeorgesTreeViewDialog(m_mainDock));
+			CGeorgesTreeViewDialog *dock = new CGeorgesTreeViewDialog(m_mainDock);
+			m_lastActiveDock = dock;
+			m_dockedWidgets.append(dock);
+
 			m_mainDock->addDockWidget(Qt::RightDockWidgetArea, m_dockedWidgets.last());
 			connect(m_dockedWidgets.last(), SIGNAL(closing()),
 				this, SLOT(closingTreeView()));
+			connect(m_dockedWidgets.last(), SIGNAL(visibilityChanged(bool)),
+				m_dockedWidgets.last(), SLOT(checkVisibility(bool)));
 		}
 		else
 		{
 
-			Q_FOREACH(QDockWidget *wgt, m_dockedWidgets)
+			Q_FOREACH(CGeorgesTreeViewDialog *wgt, m_dockedWidgets)
 			{
-				if (info.fileName() == wgt->windowTitle())
+				if (info.fileName() == wgt->loadedForm)
 				{
 					wgt->raise();
 					return;
 				}
 			}
-			m_dockedWidgets.append(new CGeorgesTreeViewDialog(m_mainDock));
+			CGeorgesTreeViewDialog *dock = new CGeorgesTreeViewDialog(m_mainDock);
+			m_dockedWidgets.append(dock);
+
 			connect(m_dockedWidgets.last(), SIGNAL(closing()),
 				this, SLOT(closingTreeView()));
+			connect(m_dockedWidgets.last(), SIGNAL(visibilityChanged(bool)),
+				m_dockedWidgets.last(), SLOT(checkVisibility(bool)));
 			Q_ASSERT(m_dockedWidgets.size() > 1);
 			m_mainDock->tabifyDockWidget(m_dockedWidgets.at(m_dockedWidgets.size() - 2), m_dockedWidgets.last());
 		}
@@ -224,6 +227,8 @@ namespace Plugin
 			m_dockedWidgets.last()->setForm(form);
 			m_dockedWidgets.last()->loadFormIntoDialog(form);
 			QApplication::processEvents();
+			connect(m_dockedWidgets.last(), SIGNAL(modified()), 
+				this, SLOT(setModified()));
 			m_dockedWidgets.last()->raise();
 			connect(m_dockedWidgets.last(), SIGNAL(changeFile(QString)), 
 				m_georgesDirTreeDialog, SLOT(changeFile(QString)));
@@ -236,10 +241,47 @@ namespace Plugin
 
 	void GeorgesEditorForm::closingTreeView()
 	{
-		int i = m_dockedWidgets.size();
+		//qDebug() << "closingTreeView";
 		m_dockedWidgets.removeAll(qobject_cast<CGeorgesTreeViewDialog*>(sender()));
-		i = m_dockedWidgets.size();
-		int j = i;
+		if (qobject_cast<CGeorgesTreeViewDialog*>(sender()) == m_lastActiveDock)
+			m_lastActiveDock = 0;
 	}
 
+	void GeorgesEditorForm::setModified () 
+	{
+		qDebug() << "setModified";
+		if (m_lastActiveDock)
+			m_saveAction->setEnabled(m_lastActiveDock->isModified());
+		else
+			m_saveAction->setEnabled(false);
+	}
+
+	void GeorgesEditorForm::focusChanged ( QWidget * old, QWidget * now ) 
+	{
+		if (now) 
+		{
+			// ugly, UGLY hack for compensating QDockWidgets failure in focus API
+			if (now->objectName() == "treeView" ||
+				now->objectName() == "checkBoxDefaults" ||
+				now->objectName() == "checkBoxParent" ||
+				now->objectName() == "commentEdit") 
+			{
+				QWidget *dlg = 0;
+				QApplication::focusWidget()?
+					QApplication::focusWidget()->parentWidget()?
+					QApplication::focusWidget()->parentWidget()->parentWidget()?
+					QApplication::focusWidget()->parentWidget()->parentWidget()->parentWidget()?
+					QApplication::focusWidget()->parentWidget()->parentWidget()->parentWidget()->parentWidget()?
+					QApplication::focusWidget()->parentWidget()->parentWidget()->parentWidget()->parentWidget()->parentWidget()?
+					dlg=QApplication::focusWidget()->parentWidget()->parentWidget()->parentWidget()->parentWidget()->parentWidget():dlg=0:dlg=0:dlg=0:dlg=0:dlg=0:dlg=0;
+				CGeorgesTreeViewDialog *active = qobject_cast<CGeorgesTreeViewDialog*>(dlg);
+				if(active)
+				{
+					//qDebug() << "focusChanged" << active->loadedForm;
+					m_lastActiveDock = active;
+					m_saveAction->setEnabled(active->isModified());
+				}
+			}
+		}
+	}
 } /* namespace Plugin */
