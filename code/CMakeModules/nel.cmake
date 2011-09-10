@@ -178,6 +178,11 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
     OPTION(WITH_STATIC            "With static libraries."                        OFF)
   ENDIF(WIN32)
   OPTION(WITH_STATIC_DRIVERS      "With static drivers."                          OFF)
+  IF(WIN32)
+    OPTION(WITH_EXTERNAL          "With provided external."                       ON )
+  ELSE(WIN32)
+    OPTION(WITH_EXTERNAL          "With provided external."                       OFF)
+  ENDIF(WIN32)
   OPTION(WITH_STATIC_EXTERNAL     "With static external libraries"                OFF)
 
   ###
@@ -203,9 +208,9 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
 
   OPTION(BUILD_DASHBOARD          "Build to the CDash dashboard"                  OFF)
 
-  OPTION(WITH_NEL	              "Build NeL (nearly always required)."           ON )
-  OPTION(WITH_NELNS	              "Build NeL Network Services."                   OFF)
-  OPTION(WITH_RYZOM	              "Build Ryzom Core."                             ON )
+  OPTION(WITH_NEL                 "Build NeL (nearly always required)."           ON )
+  OPTION(WITH_NELNS               "Build NeL Network Services."                   OFF)
+  OPTION(WITH_RYZOM               "Build Ryzom Core."                             ON )
   OPTION(WITH_SNOWBALLS	          "Build Snowballs."                              OFF)
 ENDMACRO(NL_SETUP_DEFAULT_OPTIONS)
 
@@ -518,9 +523,11 @@ MACRO(RYZOM_SETUP_PREFIX_PATHS)
 ENDMACRO(RYZOM_SETUP_PREFIX_PATHS)
 
 MACRO(SETUP_EXTERNAL)
-  IF(WIN32)
+  IF(WITH_EXTERNAL)
     FIND_PACKAGE(External REQUIRED)
+  ENDIF(WITH_EXTERNAL)
 
+  IF(WIN32)
     INCLUDE(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake)
     IF(MSVC10)
       IF(NOT MSVC10_REDIST_DIR)
@@ -567,5 +574,4 @@ MACRO(SETUP_EXTERNAL)
       INCLUDE_DIRECTORIES(${VC_INCLUDE_DIR} ${WINSDK_INCLUDE_DIR})
     ENDIF(WIN32)
   ENDIF(WITH_STLPORT)
- 
 ENDMACRO(SETUP_EXTERNAL)
