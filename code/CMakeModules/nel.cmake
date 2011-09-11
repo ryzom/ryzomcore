@@ -3,10 +3,10 @@
 # Argument: name - the name of the .pc package, e.g. "nel-pacs.pc"
 ###
 MACRO(NL_GEN_PC name)
-  IF(NOT WIN32)
+  IF(NOT WIN32 AND WITH_INSTALL_LIBRARIES)
     CONFIGURE_FILE(${name}.in "${CMAKE_CURRENT_BINARY_DIR}/${name}")
     INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/${name}" DESTINATION lib/pkgconfig)
-  ENDIF(NOT WIN32)
+  ENDIF(NOT WIN32 AND WITH_INSTALL_LIBRARIES)
 ENDMACRO(NL_GEN_PC)
 
 ###
@@ -184,6 +184,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
     OPTION(WITH_EXTERNAL          "With provided external."                       OFF)
   ENDIF(WIN32)
   OPTION(WITH_STATIC_EXTERNAL     "With static external libraries"                OFF)
+  OPTION(WITH_INSTALL_LIBRARIES   "Install development files."                    ON )
 
   ###
   # GUI toolkits
@@ -211,7 +212,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_NEL                 "Build NeL (nearly always required)."           ON )
   OPTION(WITH_NELNS               "Build NeL Network Services."                   OFF)
   OPTION(WITH_RYZOM               "Build Ryzom Core."                             ON )
-  OPTION(WITH_SNOWBALLS	          "Build Snowballs."                              OFF)
+  OPTION(WITH_SNOWBALLS           "Build Snowballs."                              OFF)
 ENDMACRO(NL_SETUP_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
@@ -327,18 +328,18 @@ MACRO(NL_SETUP_BUILD)
       SET(SPEED_OPTIMIZATIONS "/Ox /GF /GS-")
       # without inlining it's unusable, use custom optimizations again
       SET(MIN_OPTIMIZATIONS "/Od /Ob1")
-	ELSEIF(MSVC90)
+    ELSEIF(MSVC90)
       # don't use a /O[012x] flag if you want custom optimizations
       SET(SPEED_OPTIMIZATIONS "/Ob2 /Oi /Ot /Oy /GT /GF /GS-")
       # without inlining it's unusable, use custom optimizations again
       SET(MIN_OPTIMIZATIONS "/Ob1")
-	ELSEIF(MSVC80)
+    ELSEIF(MSVC80)
       # don't use a /O[012x] flag if you want custom optimizations
       SET(SPEED_OPTIMIZATIONS "/Ox /GF /GS-")
       # without inlining it's unusable, use custom optimizations again
       SET(MIN_OPTIMIZATIONS "/Od /Ob1")
-	ELSE(MSVC10)
-      MESSAGE(FATAL_ERROR "Can't determine compiler version ${MSVC_VERSION}")	
+    ELSE(MSVC10)
+      MESSAGE(FATAL_ERROR "Can't determine compiler version ${MSVC_VERSION}")
     ENDIF(MSVC10)
 
     SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /DWIN32 /D_WINDOWS /W3 /Zi /Zm1000 /MP /Gy-")
@@ -480,43 +481,43 @@ MACRO(RYZOM_SETUP_PREFIX_PATHS)
     IF(WIN32)
       SET(RYZOM_ETC_PREFIX "." CACHE PATH "Installation path for configurations")
     ELSE(WIN32)
-      SET(RYZOM_ETC_PREFIX "${CMAKE_INSTALL_PREFIX}/etc/ryzom" CACHE PATH "Installation path for configurations")
+      SET(RYZOM_ETC_PREFIX "${RYZOM_PREFIX}/etc/ryzom" CACHE PATH "Installation path for configurations")
     ENDIF(WIN32)
   ENDIF(NOT RYZOM_ETC_PREFIX)
 
   ## Allow override of install_prefix/share path.
   IF(NOT RYZOM_SHARE_PREFIX)
     IF(WIN32)
-	  SET(RYZOM_SHARE_PREFIX "." CACHE PATH "Installation path for data.")
-	ELSE(WIN32)
-	  SET(RYZOM_SHARE_PREFIX "${CMAKE_INSTALL_PREFIX}/share/ryzom" CACHE PATH "Installation path for data.")
-	ENDIF(WIN32)
+      SET(RYZOM_SHARE_PREFIX "." CACHE PATH "Installation path for data.")
+    ELSE(WIN32)
+      SET(RYZOM_SHARE_PREFIX "${RYZOM_PREFIX}/share/ryzom" CACHE PATH "Installation path for data.")
+    ENDIF(WIN32)
   ENDIF(NOT RYZOM_SHARE_PREFIX)
 
   ## Allow override of install_prefix/sbin path.
   IF(NOT RYZOM_SBIN_PREFIX)
-	IF(WIN32)
-	  SET(RYZOM_SBIN_PREFIX "." CACHE PATH "Installation path for admin tools and services.")
-	ELSE(WIN32)
-	  SET(RYZOM_SBIN_PREFIX "${CMAKE_INSTALL_PREFIX}/sbin" CACHE PATH "Installation path for admin tools and services.")
-	ENDIF(WIN32)
+    IF(WIN32)
+      SET(RYZOM_SBIN_PREFIX "." CACHE PATH "Installation path for admin tools and services.")
+    ELSE(WIN32)
+      SET(RYZOM_SBIN_PREFIX "${RYZOM_PREFIX}/sbin" CACHE PATH "Installation path for admin tools and services.")
+    ENDIF(WIN32)
   ENDIF(NOT RYZOM_SBIN_PREFIX)
 
   ## Allow override of install_prefix/bin path.
   IF(NOT RYZOM_BIN_PREFIX)
     IF(WIN32)
-		SET(RYZOM_BIN_PREFIX "." CACHE PATH "Installation path for tools and applications.")
+      SET(RYZOM_BIN_PREFIX "." CACHE PATH "Installation path for tools and applications.")
     ELSE(WIN32)
-		SET(RYZOM_BIN_PREFIX "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation path for tools.")
+      SET(RYZOM_BIN_PREFIX "${RYZOM_PREFIX}/bin" CACHE PATH "Installation path for tools.")
     ENDIF(WIN32)
   ENDIF(NOT RYZOM_BIN_PREFIX)
 
   ## Allow override of install_prefix/games path.
   IF(NOT RYZOM_GAMES_PREFIX)
     IF(WIN32)
-		SET(RYZOM_GAMES_PREFIX "." CACHE PATH "Installation path for tools and applications.")
+      SET(RYZOM_GAMES_PREFIX "." CACHE PATH "Installation path for tools and applications.")
     ELSE(WIN32)
-		SET(RYZOM_GAMES_PREFIX "${CMAKE_INSTALL_PREFIX}/games" CACHE PATH "Installation path for client.")
+      SET(RYZOM_GAMES_PREFIX "${RYZOM_PREFIX}/games" CACHE PATH "Installation path for client.")
     ENDIF(WIN32)
   ENDIF(NOT RYZOM_GAMES_PREFIX)
 
