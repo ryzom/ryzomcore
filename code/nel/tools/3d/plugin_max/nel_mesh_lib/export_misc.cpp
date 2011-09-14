@@ -260,7 +260,11 @@ Control* CExportNel::getControlerByName (Animatable& node, const char* sName)
 			if (strcmp (paramDef.int_name, sName)==0)
 			{
 				// ok, return this subanim
+#if MAX_VERSION_MAJOR >= 14
+				return param->GetControllerByID(id);
+#else
 				return param->GetController(id);
+#endif
 			}
 		}
 	}

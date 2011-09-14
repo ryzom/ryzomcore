@@ -161,7 +161,7 @@ bool HoverPoints::eventFilter(QObject *object, QEvent *event)
 		case QEvent::TouchBegin:
 		case QEvent::TouchUpdate:
 		{
-			const QTouchEvent *const touchEvent = static_cast<const QTouchEvent*>(event);
+			const QTouchEvent *const touchEvent = static_cast<const QTouchEvent *>(event);
 			const QList<QTouchEvent::TouchPoint> points = touchEvent->touchPoints();
 			const qreal pointSize = qMax(m_pointSize.width(), m_pointSize.height());
 			Q_FOREACH (const QTouchEvent::TouchPoint &touchPoint, points)

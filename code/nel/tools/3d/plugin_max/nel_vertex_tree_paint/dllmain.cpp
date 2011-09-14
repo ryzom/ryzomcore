@@ -1,6 +1,6 @@
 #include "vertex_tree_paint.h"
 #include "../nel_3dsmax_shared/nel_3dsmax_shared.h"
-
+#include <maxversion.h>
 
 HINSTANCE hInstance;
 
@@ -18,7 +18,9 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 
 	switch (fdwReason) {
 		case DLL_PROCESS_ATTACH:
+#if MAX_VERSION_MAJOR < 14
 			InitCustomControls(hInstance);	// Initialize MAX's custom controls
+#endif
 			InitCommonControls();			// Initialize Win95 controls
 			break;
 		}

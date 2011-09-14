@@ -46,7 +46,7 @@
 namespace NLQT
 {
 
-static const char * const LocatedBindable[] =
+static const char *const LocatedBindable[] =
 {
 	QT_TR_NOOP("Point"),
 	QT_TR_NOOP("LookAt"),
@@ -220,7 +220,7 @@ void CParticleWorkspaceDialog::touchPSState(CParticleTreeItem *item)
 	}
 }
 
-void CParticleWorkspaceDialog::clickedItem(const QModelIndex & index)
+void CParticleWorkspaceDialog::clickedItem(const QModelIndex &index)
 {
 	if (_currentItem != 0)
 		_treeModel->getOwnerNode(_currentItem)->getPSPointer()->setCurrentEditedElement(NULL);

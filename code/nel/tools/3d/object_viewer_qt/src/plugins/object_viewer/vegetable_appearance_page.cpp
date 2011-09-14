@@ -60,7 +60,7 @@ CVegetableApperancePage::CVegetableApperancePage(QWidget *parent)
 	connect(_ui.removePushButton, SIGNAL(clicked()), this, SLOT(removeColor()));
 	connect(_ui.getListPushButton, SIGNAL(clicked()), this, SLOT(getFromListColors()));
 
-	connect(_ui.listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(browseColor(QListWidgetItem*)));
+	connect(_ui.listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(browseColor(QListWidgetItem *)));
 	setEnabled(false);
 }
 

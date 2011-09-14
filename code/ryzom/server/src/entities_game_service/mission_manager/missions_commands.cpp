@@ -30,7 +30,9 @@
 #include "team_manager/team_manager.h"
 #include "mission_manager/mission_team.h"
 #include "mission_manager/mission_step_ai.h"
+#include "mission_manager/mission_guild.h"
 #include "guild_manager/guild_manager.h"
+#include "guild_manager/guild.h"
 
 #include "admin.h"
 #include "creature_manager/creature_manager.h"
@@ -81,10 +83,18 @@ NLMISC_COMMAND(forceJournalUpdate,"force mission journal update","<player id(id:
 			team->getMissions()[i]->updateUsersJournalEntry();
 		}
 	}
-	for (uint i = 0; i < MaxGuildMissionCount; i++)
+	CGuild * guild = CGuildManager::getInstance()->getGuildFromId( user->getGuildId() );
+	if (guild)
+	{
+		for ( uint i  = 0; i < guild->getMissions().size(); i++ )
+		{
+			guild->getMissions()[i]->updateUsersJournalEntry();
+		}
+	}
+	/*for (uint i = 0; i < MaxGuildMissionCount; i++)
 	{
 		/// todo guild mission
-	}
+	}*/
 	return true;
 } // missionProgress //
 

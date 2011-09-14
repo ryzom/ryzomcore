@@ -10,10 +10,14 @@ SET(OVQT_EXT_SYS_SRC  ${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin
 
 SET(OVQT_PLUG_GEORGES_EDITOR_HDR  georges_editor_plugin.h 
                                   georges_editor_form.h
-                                  georges_dirtree_dialog.h)
+                                  georges_dirtree_dialog.h
+                                  georges_filesystem_model.h
+                                  georges_treeview_dialog.h
+                                  expandable_headerview.h)
 
 SET(OVQT_PLUG_GEORGES_EDITOR_UIS  georges_editor_form.ui
-                                  georges_dirtree_form.ui)
+                                  georges_dirtree_form.ui
+                                  georges_treeview_form.ui)
 
 SET(OVQT_PLUGIN_GEORGES_EDITOR_RCS georges_editor.qrc)
 
@@ -32,7 +36,7 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(ovqt_plugin_georges_editor MODULE ${SRC} ${OVQT_PLUG_GEORGES_EDITOR_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_GEORGES_EDITOR_UI_HDRS} ${OVQT_PLUGIN_GEORGES_EDITOR_RC_SRCS})
 
-TARGET_LINK_LIBRARIES(ovqt_plugin_georges_editor ovqt_plugin_core nelmisc ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(ovqt_plugin_georges_editor ovqt_plugin_core nelmisc nelgeorges ${QT_LIBRARIES})
 
 NL_DEFAULT_PROPS(ovqt_plugin_georges_editor "NeL, Tools, 3D: Object Viewer Qt Plugin: Georges Editor")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_georges_editor)

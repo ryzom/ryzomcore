@@ -107,8 +107,8 @@ bool MainWindow::initialize(QString *errorString)
 void MainWindow::extensionsInitialized()
 {
 	readSettings();
-	connect(m_contextManager, SIGNAL(currentContextChanged(Core::IContext*)),
-			this, SLOT(updateContext(Core::IContext*)));
+	connect(m_contextManager, SIGNAL(currentContextChanged(Core::IContext *)),
+			this, SLOT(updateContext(Core::IContext *)));
 	if (m_contextManager->currentContext() != NULL)
 		updateContext(m_contextManager->currentContext());
 	show();
@@ -437,7 +437,7 @@ void MainWindow::createStatusBar()
 
 void MainWindow::createDialogs()
 {
-	m_pluginView = new ExtensionSystem::CPluginView(m_pluginManager, this);
+	m_pluginView = new PluginView(m_pluginManager, this);
 
 	// Create undo/redo command list
 	m_dockWidget = new QDockWidget("Command List", this);

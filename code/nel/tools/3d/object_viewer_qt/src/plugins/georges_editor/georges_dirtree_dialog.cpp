@@ -23,19 +23,29 @@
 
 // NeL includes
 
-//using namespace NLMISC;
-
 namespace Plugin
 {
 
 CGeorgesDirTreeDialog::CGeorgesDirTreeDialog(QString ldPath, QWidget *parent)
-	:QDockWidget(parent), m_ldPath(ldPath)
+	:QDockWidget(parent),
+	m_ldPath(ldPath)
 {
 
 	m_ui.setupUi(this);
 
+	m_ui.filterResetButton->setIcon(
+		QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton));
+
 	m_dirModel = new CGeorgesFileSystemModel(m_ldPath);
+	//m_proxyModel = new CGeorgesFileSystemProxyModel(this);
+
+	//m_proxyModel->setSourceModel(m_dirModel);
 	m_ui.dirTree->setModel(m_dirModel);
+
+	// TODO: filtering in tree model is ... complicated - so hide it for now
+	m_ui.filterLineEdit->hide();
+	m_ui.filterResetButton->hide();
+	m_ui.label->hide();
 
 	if (m_dirModel->isCorrectLDPath())
 	{
@@ -61,7 +71,6 @@ CGeorgesDirTreeDialog::~CGeorgesDirTreeDialog()
 
 void CGeorgesDirTreeDialog::fileSelected(QModelIndex index)
 {
-	QString name;
 	if (index.isValid() && !m_dirModel->isDir(index))
 	{
 		Q_EMIT selectedForm(m_dirModel->fileName(index));
@@ -81,8 +90,12 @@ void CGeorgesDirTreeDialog::ldPathChanged(QString path)
 	m_ldPath = path;
 
 	delete m_dirModel;
+	//delete m_proxyModel;
 
 	m_dirModel = new CGeorgesFileSystemModel(m_ldPath);
+	//m_proxyModel = new CGeorgesFileSystemProxyModel(this);
+
+	//m_proxyModel->setSourceModel(m_dirModel);
 	m_ui.dirTree->setModel(m_dirModel);
 
 	if (m_dirModel->isCorrectLDPath())

@@ -44,6 +44,7 @@
 #include "egs_utils.h"
 #include "egs_pd.h"
 #include "guild_manager/guild_member_module.h"
+#include "guild_manager/guild_manager.h"
 #include "building_manager/building_manager.h"
 #include "building_manager/room_instance.h"
 #include "zone_manager.h"
@@ -836,25 +837,68 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 	}
 	else if ( templ->Type  == MISSION_DESC::Guild )
 	{
-		/// todo guild mission
+		/// Check to see if we can pick the mission
 		CGuildMemberModule * module;
 		if ( !user->getModuleParent().getModule( module ) )
 		{
 			MISDBG("%s user not in a guild", sDebugPrefix.c_str());
 			return;
 		}
-		inst = module->pickMission( templ->Alias );
-		if (!inst)
+		/* /// This is already checked in the prerequisites 
+		if (!module->pickMission( templ->Alias ))
+		{
+			/// Todo : error message for the member
 			return;
-		/// todo guild mission : see solo
-		/*
-		todo guild mission : implement that in module
-		teamMission->initBasics( giver );
-		soloMission->setTeam( user->getTeamId() );
+		}*/
+
+		CGuild * guild = CGuildManager::getInstance()->getGuildFromId( user->getGuildId() );
+		if (!guild)
+		{
+			nlwarning( "<MISSIONS>cant find guild ID : %d", user->getGuildId() );
+			return;
+		}
+		if ( !templ->Tags.NoList && guild->getMissions().size() >= MaxGuildMissionCount)
+		{
+			CCharacter::sendDynamicSystemMessage(user->getId(), "MISSION_MAX_GUILD_REACHED" );
+			return;
+		}
+
+		CMissionGuild * guildMission = EGS_PD_CAST<CMissionGuild*>( EGSPD::CMissionGuildPD::create( templ->Alias ) );
+		if ( !guildMission )
+		{
+			MISDBG("%s could not create guild mission", sDebugPrefix.c_str());
+			return;
+		}
+		guildMission->onCreation( giver );
+		guildMission->setGuild(user->getGuildId());
+
+		// Find a suitable client index (for non-invisible missions)
+		if ( templ->Tags.NoList == false )
+		{
+			uint8 idx = 0;
+			for ( uint i = MaxGroupMissionCount; i < MaxGroupMissionCount + MaxGuildMissionCount; i++ )
+			{
+				if ( ! CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(i).getTITLE(user->_PropertyDatabase))
+				{
+					idx = i;
+					break;
+				}
+			}
+			guildMission->setClientIndex( idx );
+		}
+
+		// Add mission
+		guild->addMission( guildMission );
+		inst = guildMission;
+
+		/// /!\ Do the same thing that the team missions but with the loop: for ( uint i = MaxGroupMissionCount; i < MaxGroupMissionCount + MaxGuildMissionCount; i++ )
+		/// Instead of for ( uint i = 0; i < MaxGroupMissionCount; i++ ), so that we use available space for guild missions
+
+		/*//teamMission->initBasics( giver );
+		//soloMission->setTeam( user->getTeamId() );
 		CGuild * guild = user->getGuild();
 		if ( guild )
 		{
-		mission->getguild
 			if ( guild->getMissions().size() >= MaxGuildMissionCount)
 			{
 				CCharacter::sendDynamicSystemMessage(user->getId(), "MISSION_MAX_GUILD_REACHED" );
@@ -880,8 +924,7 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 		else
 		{
 
-		}
-		*/
+		}*/
 	}
 	else
 	{
