@@ -112,7 +112,7 @@ except NameError:
 try:
 	WindowsExeDllCfgDirectories
 except NameError:
-	WindowsExeDllCfgDirectories = [ 'C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/x86', 'D:/libraries/external/bin', 'R:/build/dev/bin/Release', 'R:/code/nel/lib', 'R:/code/ryzom/bin', 'R:/code/ryzom/client', 'R:/code/ryzom/tools/client/client_config/bin' ]
+	WindowsExeDllCfgDirectories = [ 'C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/x86', 'D:/libraries/external/bin', 'R:/build/dev/bin/Release', 'R:/code/ryzom/client', 'R:/code/nel/lib', 'R:/code/ryzom/bin', 'R:/code/ryzom/tools/client/client_config/bin' ]
 try:
 	MaxAvailable
 except NameError:
