@@ -44,11 +44,11 @@ except NameError:
 try:
 	ToolDirectories
 except NameError:
-	ToolDirectories = [ 'R:/code/nel', 'R:/code/ryzom/tools' ]
+	ToolDirectories = [ 'R:/build/dev/bin/Release', 'D:/libraries/external/bin' ]
 try:
 	ToolSuffix
 except NameError:
-	ToolSuffix = "_r.exe"
+	ToolSuffix = ".exe"
 try:
 	ScriptDirectory
 except NameError:
@@ -112,7 +112,7 @@ except NameError:
 try:
 	WindowsExeDllCfgDirectories
 except NameError:
-	WindowsExeDllCfgDirectories = [ 'C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/x86', 'D:/source/external_local/bin/x86', 'D:/source/external_shared/bin/x86', 'R:/code/nel/lib', 'R:/code/ryzom/bin', 'R:/code/ryzom/client', 'R:/code/ryzom/tools/client/client_config/bin' ]
+	WindowsExeDllCfgDirectories = [ 'C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/x86', 'D:/libraries/external/bin', 'R:/build/dev/bin/Release', 'R:/code/nel/lib', 'R:/code/ryzom/bin', 'R:/code/ryzom/client', 'R:/code/ryzom/tools/client/client_config/bin' ]
 try:
 	MaxAvailable
 except NameError:
