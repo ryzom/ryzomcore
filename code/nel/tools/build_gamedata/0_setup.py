@@ -277,6 +277,11 @@ for projectName in ProjectsToProcess:
 	except Exception, e:
 		printLog(log, "<" + projectName + "> " + str(e))
 printLog(log, "")
+# Additional directories
+printLog(log, ">>> Setup additional directories <<<")
+mkPath(log, ClientDevDirectory)
+mkPath(log, ClientPatchDirectory)
+mkPath(log, ClientInstallDirectory)
 
 log.close()
 if os.path.isfile("0_setup.log"):
