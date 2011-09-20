@@ -24,8 +24,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess, distutils.dir_util, argparse
 sys.path.append("configuration")
+
+parser = argparse.ArgumentParser(description='Ryzom Core - Build Gamedata - Client Patch')
+parser.add_argument('--bnponly', '-bo', action='store_true')
+args = parser.parse_args()
 
 if os.path.isfile("log.log"):
 	os.remove("log.log")
@@ -59,56 +63,57 @@ printLog(log, "")
 
 if BnpMake == "":
 	toolLogFail(log, BnpMakeTool, ToolSuffix)
-elif PatchGen == "":
+elif PatchGen == "" and not args.bnponly:
 	toolLogFail(log, PatchGenTool, ToolSuffix)
-elif Lzma == "":
+elif Lzma == "" and not args.bnponly:
 	toolLogFail(log, "LZMA", ToolSuffix)
-elif XDelta == "":
+elif XDelta == "" and not args.bnponly:
 	toolLogFail(log, "XDELTA", ToolSuffix)
 elif os.path.dirname(Lzma) != os.path.dirname(XDelta):
 	printLog(log, "FAIL lzma.exe and xdelta.exe must be in the same directory")
 else:
 	mkPath(log, ClientPatchDirectory)
-	productXml = ClientPatchDirectory + "/" + ProductName + ".xml"
-	if not os.path.isfile(productXml):
-		printLog(log, ">>> Create new product <<<")
-		subprocess.call([ PatchGen, "createNewProduct", productXml ])
-	printLog(log, "")
-	printLog(log, ">>> Rewrite " + ProductName + ".xml <<<") # because we know better.
-	shutil.move(productXml, productXml + ".old")
-	oldCfg = open(productXml + ".old", "r")
-	cfg = open(productXml, "w")
-	inCategories = 0
-	for line in oldCfg:
-		if not inCategories:
-			if line.strip() == "<_Categories>":
-				inCategories = 1
-				cfg.write("\t<_Categories>\n")
-				for category in InstallClientData:
-					cfg.write("\t\t<_Category>\n")
-					cfg.write("\t\t\t<_Name type=\"STRING\" value=\"" + category["Name"] + "\"/>\n")
-					if category["UnpackTo"] != None:
-						if category["UnpackTo"] != "":
-							cfg.write("\t\t\t<_UnpackTo type=\"STRING\" value=\"./" + category["UnpackTo"] + "/\"/>\n")
-						else:
-							cfg.write("\t\t\t<_UnpackTo type=\"SINT32\" value=\"./\"/>\n")
-					cfg.write("\t\t\t<_IsOptional type=\"SINT32\" value=\"" + str(category["IsOptional"]) + "\"/>\n")
-					cfg.write("\t\t\t<_IsIncremental type=\"SINT32\" value=\"" + str(category["IsIncremental"]) + "\"/>\n")
-					for package in category["Packages"]:
-						if (len(package[1]) > 0):
-							cfg.write("\t\t\t<_Files type=\"STRING\" value=\"" + package[1][0] + "\"/>\n")
-						else:
-							cfg.write("\t\t\t<_Files type=\"STRING\" value=\"" + package[0] + ".bnp\"/>\n")
-					cfg.write("\t\t</_Category>\n")
-				cfg.write("\t</_Categories>\n")
+	if not args.bnponly:
+		productXml = ClientPatchDirectory + "/" + ProductName + ".xml"
+		if not os.path.isfile(productXml):
+			printLog(log, ">>> Create new product <<<")
+			subprocess.call([ PatchGen, "createNewProduct", productXml ])
+		printLog(log, "")
+		printLog(log, ">>> Rewrite " + ProductName + ".xml <<<") # because we know better.
+		shutil.move(productXml, productXml + ".old")
+		oldCfg = open(productXml + ".old", "r")
+		cfg = open(productXml, "w")
+		inCategories = 0
+		for line in oldCfg:
+			if not inCategories:
+				if line.strip() == "<_Categories>":
+					inCategories = 1
+					cfg.write("\t<_Categories>\n")
+					for category in InstallClientData:
+						cfg.write("\t\t<_Category>\n")
+						cfg.write("\t\t\t<_Name type=\"STRING\" value=\"" + category["Name"] + "\"/>\n")
+						if category["UnpackTo"] != None:
+							if category["UnpackTo"] != "":
+								cfg.write("\t\t\t<_UnpackTo type=\"STRING\" value=\"./" + category["UnpackTo"] + "/\"/>\n")
+							else:
+								cfg.write("\t\t\t<_UnpackTo type=\"SINT32\" value=\"./\"/>\n")
+						cfg.write("\t\t\t<_IsOptional type=\"SINT32\" value=\"" + str(category["IsOptional"]) + "\"/>\n")
+						cfg.write("\t\t\t<_IsIncremental type=\"SINT32\" value=\"" + str(category["IsIncremental"]) + "\"/>\n")
+						for package in category["Packages"]:
+							if (len(package[1]) > 0):
+								cfg.write("\t\t\t<_Files type=\"STRING\" value=\"" + package[1][0] + "\"/>\n")
+							else:
+								cfg.write("\t\t\t<_Files type=\"STRING\" value=\"" + package[0] + ".bnp\"/>\n")
+						cfg.write("\t\t</_Category>\n")
+					cfg.write("\t</_Categories>\n")
+				else:
+					cfg.write(line)
 			else:
-				cfg.write(line)
-		else:
-			if line.strip() == "</_Categories>":
-				inCategories = 0
-	oldCfg.close()
-	cfg.close()
-	os.remove(productXml + ".old")
+				if line.strip() == "</_Categories>":
+					inCategories = 0
+		oldCfg.close()
+		cfg.close()
+		os.remove(productXml + ".old")
 	printLog(log, "")
 	printLog(log, ">>> Make bnp <<<")
 	targetPath = ClientPatchDirectory + "/bnp"
@@ -133,13 +138,14 @@ else:
 			else:
 				printLog(log, "SKIP " + targetBnp)
 	printLog(log, "")
-	printLog(log, ">>> Update product <<<")
-	cwDir = os.getcwd().replace("\\", "/")
-	toolDir = os.path.dirname(Lzma).replace("\\", "/")
-	os.chdir(toolDir)
-	subprocess.call([ PatchGen, "updateProduct", productXml ])
-	os.chdir(cwDir)
-	printLog(log, "")
+	if not args.bnponly:
+		printLog(log, ">>> Update product <<<")
+		cwDir = os.getcwd().replace("\\", "/")
+		toolDir = os.path.dirname(Lzma).replace("\\", "/")
+		os.chdir(toolDir)
+		subprocess.call([ PatchGen, "updateProduct", productXml ])
+		os.chdir(cwDir)
+		printLog(log, "")
 
 
 log.close()
