@@ -36,7 +36,7 @@ IShape* CExportNel::buildParticleSystem(INode& node, TimeValue time)
 		// if not found, get from the APP_DATAS
 		shapeName = CExportNel::getNelObjectName(node);
 		if (shapeName.empty()) return NULL;
-		shapeName = NLMISC::CPath::lookup("shapeName", false);
+		shapeName = NLMISC::CPath::lookup(shapeName, false);
 		if (shapeName.empty()) return NULL;
 	}
 	
