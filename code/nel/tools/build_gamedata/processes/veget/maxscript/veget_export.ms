@@ -269,7 +269,9 @@ try
 catch 
 (
 	-- Error
-	nlerror("ERROR fatal error exporting 'veget' in folder %MaxSourceDirectory%")
+	nlerror("ERROR Fatal error exporting 'veget' in folder %MaxSourceDirectory%")
+	nlerror("FAIL Fatal error occured")
+	NelForceQuitRightNow()
 	removeRunningTag = false
 )
 
