@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<FORM Revision="" State="modified">
+  <STRUCT>
+    <ATOM Name="shape" Value="object_generic_mark.creature"/>
+    <ATOM Name="shape_when_constructing" Value="object_generic_mark.creature"/>
+    <ATOM Name="icon" Value="construction.tga"/>
+    <ATOM Name="icon background" Value="BK_outpost.tga"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG></LOG>
+</FORM>
