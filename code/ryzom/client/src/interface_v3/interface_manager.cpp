@@ -2372,7 +2372,7 @@ void CInterfaceManager::drawContextHelp ()
 			if(newCtrl)
 			{
 				// get the text
-				newCtrl->getContextHelp(_ContextHelpText);
+				newCtrl->getContextHelpToolTip(_ContextHelpText);
 				// UserDefined context help
 				if( !newCtrl->getContextHelpActionHandler().empty() )
 				{
