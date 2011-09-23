@@ -74,7 +74,7 @@ QString GeorgesEditorPlugin::name() const
 
 QString GeorgesEditorPlugin::version() const
 {
-	return "0.2";
+	return "0.4";
 }
 
 QString GeorgesEditorPlugin::vendor() const
@@ -90,8 +90,9 @@ QString GeorgesEditorPlugin::description() const
 QStringList GeorgesEditorPlugin::dependencies() const
 {
 	QStringList list;
-	list.append(Core::Constants::OVQT_CORE_PLUGIN);
-	list.append("ObjectViewer"); // TODO
+	// TODO
+	//list.append(Core::Constants::OVQT_CORE_PLUGIN);
+	//list.append("ObjectViewer");
 	return list;
 }
 

@@ -3,7 +3,12 @@
 
 #include "resource.h"
 #include <algorithm>
-#include <MaxScrpt/maxscrpt.h>
+#include <maxversion.h>
+#if MAX_VERSION_MAJOR >= 14
+#	include <maxscript/maxscript.h>
+#else
+#	include <MaxScrpt/maxscrpt.h>
+#endif
 #include "namesel.h"
 #include "nsclip.h"
 #include "sbmtlapi.h"

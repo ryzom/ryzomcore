@@ -93,7 +93,7 @@ private:
 	void writeSettings();
 
 	ExtensionSystem::IPluginManager *m_pluginManager;
-	ExtensionSystem::CPluginView *m_pluginView;
+	PluginView *m_pluginView;
 	MenuManager *m_menuManager;
 	ContextManager *m_contextManager;
 	CoreImpl *m_coreImpl;

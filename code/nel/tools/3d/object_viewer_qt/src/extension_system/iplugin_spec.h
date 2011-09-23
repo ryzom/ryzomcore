@@ -71,9 +71,13 @@ public:
 	virtual IPlugin *plugin() const = 0;
 
 	// state
-	virtual int getState() const = 0;
+	virtual int state() const = 0;
 	virtual bool hasError() const = 0;
 	virtual QString errorString() const = 0;
+
+	/// Enables/disables load this plugin after restart the program
+	virtual void setEnabled(bool enabled) = 0;
+	virtual bool isEnabled() const = 0;
 };
 
 } // namespace ExtensionSystem

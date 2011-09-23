@@ -194,8 +194,9 @@ void CMainWindow::updateWindowsList()
 				windowMenu->addAction(action);
                 windowMapper->setMapping(action, subWindows.at(i));
         } 
-
-	}
+	} else {
+        windowMenu->clear();   
+    }
 }
 
 // Open signal
@@ -622,27 +623,27 @@ list<string> CMainWindow::convertQStringList(QStringList listq)
 
 bool CMainWindow::isWorksheetEditor(QString filename)
 {
-             STRING_MANAGER::TWorksheet wk_file;          
-             if(loadExcelSheet(filename.toStdString(), wk_file, true) == true)
-             {
-				 if(wk_file.ColCount > 1)
-					return true;
-             }
+    STRING_MANAGER::TWorksheet wk_file;          
+    if(loadExcelSheet(filename.toStdString(), wk_file, true) == true)
+    {
+		if(wk_file.ColCount > 1)
+			return true;
+    }
 
-			 return false;
+	return false;
 }
 
 bool CMainWindow::isPhraseEditor(QString filename)
 {
-			vector<STRING_MANAGER::TPhrase> phrases;
-			if(readPhraseFile(filename.toStdString(), phrases, false))
-			{
-				return true;
-			} else {
-				return false;
-			}
+	vector<STRING_MANAGER::TPhrase> phrases;
+	if(readPhraseFile(filename.toStdString(), phrases, false))
+	{
+		return true;
+	} else {
+		return false;
+	}
 }
 
-} /* namespace Plugin */
+} /* namespace TranslationManager */
 
 

@@ -1344,6 +1344,22 @@ uint32 CCharacter::tickUpdate()
 				}
 			}
 
+			// Adding UpdateCompass for guild missions
+			{
+				H_AUTO(CharacterUpdateGuildCompass);
+				CGuild * guild = CGuildManager::getInstance()->getGuildFromId( _GuildId );
+				if ( guild )
+				{
+					const uint size = (uint)guild->getMissions().size();
+					for ( uint i =  0; i < size; i++ )
+					{
+						nlassert(guild->getMissions()[i]);
+						guild->getMissions()[i]->updateCompass(*this, string(""));
+						guild->getMissions()[i]->updateCompass(*this, string("GROUP:"));
+					}
+				}
+			}
+
 			{
 				H_AUTO(CharacterUpdateTargetCoordinatesCompass);
 				// update compass coordinates information
@@ -10709,6 +10725,7 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 		}
 
 		CTeam * team = TeamManager.getRealTeam( _TeamId );
+		CGuild* guild = CGuildManager::getInstance()->getGuildFromId( _GuildId );
 		if (_BotGift == NULL)
 		{
 			nlwarning("Player %s has no bot gift", _Id.toString().c_str());
@@ -10731,6 +10748,15 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 				return;
 			}
 			mission = team->getMissionByAlias( missionAlias );
+		}
+		else if (type == MISSION_DESC::Guild)
+		{
+			if (guild == NULL)
+			{
+				nlwarning("CCharacter::acceptExchange : character %s ->  no guild",_Id.toString().c_str() );
+				return;
+			}
+			mission = guild->getMissionByAlias( missionAlias );
 		}
 
 		vector<CGameItemPtr> vect;
@@ -10765,6 +10791,8 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 					processMissionStepUserEvent( eventList,missionAlias,stepIndex );
 				else if ( type == MISSION_DESC::Group )
 					team->processTeamMissionStepEvent( eventList,missionAlias,stepIndex );
+				else if ( type == MISSION_DESC::Guild )
+					guild->processGuildMissionStepEvent( eventList,missionAlias,stepIndex );
 				eventList.pop_front();
 				for ( std::list< CMissionEvent* >::iterator it = eventList.begin(); it != eventList.end(); ++it  )
 					processMissionEvent(*(*it));
@@ -10784,6 +10812,8 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 							processMissionStepUserEvent( eventList,missionAlias,stepIndex );
 						else if ( type == MISSION_DESC::Group )
 							team->processTeamMissionStepEvent( eventList,missionAlias,stepIndex );
+						else if ( type == MISSION_DESC::Guild )
+							guild->processGuildMissionStepEvent( eventList,missionAlias,stepIndex );
 						eventList.pop_front();
 						for ( std::list< CMissionEvent* >::iterator it = eventList.begin(); it != eventList.end(); ++it  )
 							processMissionEvent(*(*it));
@@ -11616,7 +11646,7 @@ bool CCharacter::processMissionEventList( std::list< CMissionEvent* > & eventLis
 	bool processed = false;
 
 	bool firstEvent = true;
-	CGuild * guild = NULL;
+	CGuild * guild = CGuildManager::getInstance()->getGuildFromId( _GuildId );
 	while ( !eventList.empty() )
 	{
 		bool eventProcessed = false;
@@ -11628,11 +11658,33 @@ bool CCharacter::processMissionEventList( std::list< CMissionEvent* > & eventLis
 			TAIAlias mission = eventSpe.Mission;
 			TAIAlias giver = eventSpe.Giver;
 			TAIAlias mainMission = eventSpe.MainMission;
+			bool missionForGuild = eventSpe.Guild;
 
 			// add mission event are always allocated on heap
 			delete ( CMissionEvent *) ( eventList.front() );
 			eventList.pop_front();
-			CMissionManager::getInstance()->instanciateMission(this, mission, giver ,eventList, mainMission);
+
+			// If the mission is not for guild members we just instanciate it
+			if (!missionForGuild)
+				CMissionManager::getInstance()->instanciateMission(this, mission, giver ,eventList, mainMission);
+			else
+			{
+				// We find the guild and each guild members and we instanciate the mission for them
+				if (guild)
+				{
+					for ( std::map<EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::iterator it = guild->getMembersBegin();
+						it != guild->getMembersEnd();++it )
+					{
+						CCharacter * guildUser = PlayerManager.getChar( it->first );
+						if ( !guildUser )
+						{
+							nlwarning( "<MISSIONS>cant find user %s", it->first.toString().c_str() );
+							continue;
+						}
+						CMissionManager::getInstance()->instanciateMission(guildUser, mission, giver ,eventList, mainMission);
+					}
+				}
+			}
 		}
 		// event may have been processed during instanciateMission
 		if ( eventList.empty() )
@@ -11651,6 +11703,13 @@ bool CCharacter::processMissionEventList( std::list< CMissionEvent* > & eventLis
 		{
 			if (team != NULL)
 				eventProcessed = team->processTeamMissionEvent(eventList, alias);
+		}
+
+		// THIRD - Check with guild missions (if event not already processed and char belongs to a guild)
+		if (!eventProcessed)// && (event.Restriction != CMissionEvent::NoGroup))
+		{
+			if (guild != NULL)
+				eventProcessed = guild->processGuildMissionEvent(eventList, alias);
 		}
 
 		processed |= eventProcessed;

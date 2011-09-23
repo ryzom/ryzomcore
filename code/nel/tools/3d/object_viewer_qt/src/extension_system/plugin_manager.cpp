@@ -34,6 +34,7 @@ CPluginManager::CPluginManager(QObject *parent)
 
 CPluginManager::~CPluginManager()
 {
+	writeSettings();
 	stopAll();
 	deleteAll();
 	qDeleteAll(m_pluginSpecs);
@@ -114,6 +115,7 @@ void CPluginManager::setPluginPaths(const QStringList &paths)
 {
 	m_pluginPaths = paths;
 	readPluginPaths();
+	readSettings();
 }
 
 QList<IPluginSpec *> CPluginManager::plugins() const
@@ -133,10 +135,41 @@ QSettings *CPluginManager::settings() const
 
 void CPluginManager::readSettings()
 {
+	if (m_settings)
+	{
+		QStringList blackList;
+		m_settings->beginGroup("PluginManager");
+		blackList = m_settings->value("BlackList").toStringList();
+		m_settings->endGroup();
+		Q_FOREACH (CPluginSpec *spec, m_pluginSpecs)
+		{
+			QString pluginName = spec->fileName();
+
+			if (blackList.contains(pluginName))
+			{
+				spec->setEnabled(false);
+				spec->setEnabledStartup(false);
+			}
+		}
+	}
 }
 
 void CPluginManager::writeSettings()
 {
+	if (m_settings)
+	{
+		QStringList blackList;
+		Q_FOREACH(CPluginSpec *spec, m_pluginSpecs)
+		{
+			nlinfo(spec->fileName().toStdString().c_str());
+			if (!spec->isEnabled())
+				blackList.push_back(spec->fileName());
+		}
+		m_settings->beginGroup("PluginManager");
+		m_settings->setValue("BlackList", blackList);
+		m_settings->endGroup();
+		m_settings->sync();
+	}
 }
 
 void CPluginManager::readPluginPaths()
@@ -176,7 +209,11 @@ void CPluginManager::readPluginPaths()
 
 void CPluginManager::setPluginState(CPluginSpec *spec, int destState)
 {
-	if (spec->hasError() || spec->getState() != destState-1)
+	if (spec->hasError() || spec->state() != destState-1)
+		return;
+
+	// plugin in black list
+	if (!spec->isEnabledStartup())
 		return;
 
 	switch (destState)
@@ -198,7 +235,7 @@ void CPluginManager::setPluginState(CPluginSpec *spec, int destState)
 	}
 	Q_FOREACH (const CPluginSpec *depSpec, spec->dependencySpecs())
 	{
-		if (depSpec->getState() != destState)
+		if (depSpec->state() != destState)
 		{
 			spec->m_hasError = true;
 			spec->m_errorString = tr("Cannot initializing plugin because dependency failed to load: %1\nReason: %2")
@@ -251,7 +288,7 @@ bool CPluginManager::loadQueue(CPluginSpec *spec, QList<CPluginSpec *> &queue,
 	}
 	circularityCheckQueue.append(spec);
 	// check if we have the dependencies
-	if (spec->getState() == State::Invalid || spec->getState() == State::Read)
+	if (spec->state() == State::Invalid || spec->state() == State::Read)
 	{
 		queue.append(spec);
 		return false;

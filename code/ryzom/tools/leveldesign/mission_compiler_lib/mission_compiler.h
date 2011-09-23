@@ -318,6 +318,11 @@ public:
 
 	bool isThereAJumpTo(const std::string &stepName);
 
+	bool isGuildMission() const
+	{
+		return _Guild;
+	}
+
 private:
 
 	std::string genPreRequisites();

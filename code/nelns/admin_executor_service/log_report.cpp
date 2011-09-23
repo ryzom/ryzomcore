@@ -16,6 +16,7 @@
 
 #include "log_report.h"
 #include <functional>
+#include <limits>
 #include "nel/misc/common.h"
 #include "nel/misc/displayer.h"
 #include "nel/misc/file.h"

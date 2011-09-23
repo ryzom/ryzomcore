@@ -86,7 +86,6 @@ private Q_SLOTS:
         void open();
         void save();
         void saveAs();
-        void activeSubWindowChanged();
         void setActiveSubWindow(QWidget *window);
         void updateWindowsList();  
         void mergeSingleFile();
@@ -99,11 +98,11 @@ private:
         void createToolbar();
         void initializeSettings(bool georges);
         list<string> convertQStringList(QStringList listq);
-		CEditor* getEditorByWindowFilePath(const QString &fileName);
-		// Worksheet specific functions
-		CEditorWorksheet* getEditorByWorksheetType(const QString &type);
+	CEditor* getEditorByWindowFilePath(const QString &fileName);
+	// Worksheet specific functions
+	CEditorWorksheet* getEditorByWorksheetType(const QString &type);
         bool isWorksheetEditor(QString filename);
-		bool isPhraseEditor(QString filename);
+	bool isPhraseEditor(QString filename);
 		
         
         
@@ -127,7 +126,7 @@ public:
 
 
 
-} // namespace Plugin
+} // namespace TranslationManager
 
 
 

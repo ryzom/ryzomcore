@@ -152,7 +152,7 @@ public:
 
 	/// Get entity from the scene
 	/// @return ref Entity
-	CEntity& getEntity(const std::string &name);
+	CEntity &getEntity(const std::string &name);
 
 	/// Get full list instances from the scene
 	/// @param listObj - ref of return list instances

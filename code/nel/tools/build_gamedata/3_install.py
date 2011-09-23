@@ -24,8 +24,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess, distutils.dir_util, argparse
 sys.path.append("configuration")
+
+parser = argparse.ArgumentParser(description='Ryzom Core - Build Gamedata - Install')
+# parser.add_argument('--haltonerror', '-eh', action='store_true')
+parser.add_argument('--includeproject', '-ipj', nargs='+')
+parser.add_argument('--excludeproject', '-epj', nargs='+')
+parser.add_argument('--includeprocess', '-ipc', nargs='+')
+parser.add_argument('--excludeprocess', '-epc', nargs='+')
+args = parser.parse_args()
+
+if not args.includeproject == None and not args.excludeproject == None:
+	print "ERROR --includeproject cannot be combined with --excludeproject, exit."
+	exit()
+
+if not args.includeprocess == None and not args.excludeprocess == None:
+	print "ERROR --includeprocess cannot be combined with --excludeprocess, exit."
+	exit()
 
 if os.path.isfile("log.log"):
 	os.remove("log.log")
@@ -46,20 +62,29 @@ printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 # For each project
 for projectName in ProjectsToProcess:
-	os.putenv("NELBUILDACTIVEPROJECT", os.path.abspath(WorkspaceDirectory + "/" + projectName))
-	os.chdir("processes")
-	try:
-		subprocess.call([ "python", "3_install.py" ])
-	except Exception, e:
-		printLog(log, "<" + projectName + "> " + str(e))
-	os.chdir("..")
-	try:
-		projectLog = open("processes/log.log", "r")
-		projectLogData = projectLog.read()
-		projectLog.close()
-		log.write(projectLogData)
-	except Exception, e:
-		printLog(log, "<" + projectName + "> " + str(e))
+	if ((args.includeproject == None or projectName in args.includeproject) and (args.excludeproject == None or not projectName in args.excludeproject)):
+		printLog(log, "PROJECT " + projectName)
+		os.putenv("NELBUILDACTIVEPROJECT", os.path.abspath(WorkspaceDirectory + "/" + projectName))
+		os.chdir("processes")
+		try:
+			if not args.includeprocess == None:
+				subprocess.call([ "python", "3_install.py", "--includeprocess" ] + args.includeprocess)
+			elif not args.excludeprocess == None:
+				subprocess.call([ "python", "3_install.py", "--excludeprocess" ] + args.excludeprocess)
+			else:
+				subprocess.call([ "python", "3_install.py" ])
+		except Exception, e:
+			printLog(log, "<" + projectName + "> " + str(e))
+		os.chdir("..")
+		try:
+			projectLog = open("processes/log.log", "r")
+			projectLogData = projectLog.read()
+			projectLog.close()
+			log.write(projectLogData)
+		except Exception, e:
+			printLog(log, "<" + projectName + "> " + str(e))
+	else:
+		printLog(log, "IGNORE PROJECT " + projectName)
 printLog(log, "")
 
 log.close()

@@ -40,6 +40,8 @@ CPluginSpec::CPluginSpec()
 	  m_vendor(""),
 	  m_description(""),
 	  m_state(State::Invalid),
+	  m_enabled(true),
+	  m_enabledStartup(true),
 	  m_hasError(false),
 	  m_errorString(""),
 	  m_plugin(0),
@@ -82,12 +84,12 @@ QString CPluginSpec::fileName() const
 	return m_fileName;
 }
 
-IPlugin* CPluginSpec::plugin() const
+IPlugin *CPluginSpec::plugin() const
 {
 	return m_plugin;
 }
 
-int CPluginSpec::getState() const
+int CPluginSpec::state() const
 {
 	return m_state;
 }
@@ -122,6 +124,16 @@ bool CPluginSpec::setFileName(const QString &fileName)
 
 	m_state = State::Read;
 	return true;
+}
+
+void CPluginSpec::setEnabled(bool enabled)
+{
+	m_enabled = enabled;
+}
+
+bool CPluginSpec::isEnabled() const
+{
+	return m_enabled;
 }
 
 bool CPluginSpec::loadLibrary()
@@ -257,6 +269,16 @@ void CPluginSpec::kill()
 	delete m_plugin;
 	m_plugin = 0;
 	m_state = State::Deleted;
+}
+
+void CPluginSpec::setEnabledStartup(bool enabled)
+{
+	m_enabledStartup = enabled;
+}
+
+bool CPluginSpec::isEnabledStartup() const
+{
+	return m_enabledStartup;
 }
 
 bool CPluginSpec::reportError(const QString &err)

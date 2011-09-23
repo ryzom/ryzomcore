@@ -3,6 +3,7 @@
 #include "nel/misc/debug.h"
 #include "nel/misc/app_context.h"
 #include "../nel_3dsmax_shared/nel_3dsmax_shared.h"
+#include <maxversion.h>
 
 HINSTANCE hInstance;
 int controlsInit = FALSE;
@@ -26,7 +27,9 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 		controlsInit = TRUE;
 		
 		// jaguar controls
+#if MAX_VERSION_MAJOR < 14
 		InitCustomControls(hInstance);
+#endif
 
 #ifdef OLD3DCONTROLS
 		// initialize 3D controls

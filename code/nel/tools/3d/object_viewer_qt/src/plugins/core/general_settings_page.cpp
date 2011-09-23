@@ -87,9 +87,11 @@ void GeneralSettingsPage::applyGeneralSettings()
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
 	QString primitivePath = settings->value(Core::Constants::PRIMITIVES_PATH, "l:/primitives").toString();
 	QString ligoConfigFile = settings->value(Core::Constants::LIGOCONFIG_FILE, "l:/leveldesign/world_editor_files/world_editor_classes.xml").toString();
+	QString leveldesignPath = settings->value(Core::Constants::LEVELDESIGN_PATH, "l:/leveldesign").toString();
 	NLMISC::CPath::addSearchPath(primitivePath.toStdString(), true, false);
 	NLMISC::CPath::display();
 	NLMISC::CPath::addSearchFile(ligoConfigFile.toStdString());
+	NLMISC::CPath::addSearchPath(leveldesignPath.toStdString(), true, false);
 	settings->endGroup();
 }
 

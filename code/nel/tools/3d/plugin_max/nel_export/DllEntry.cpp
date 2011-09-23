@@ -19,7 +19,7 @@
 #include "nel/3d/register_3d.h"
 #include "nel/misc/app_context.h"
 #include "../nel_3dsmax_shared/nel_3dsmax_shared.h"
-
+#include <maxversion.h>
 
 extern ClassDesc2* GetCNelExportDesc();
 
@@ -42,7 +42,9 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 	
 	if (!controlsInit) {
 		controlsInit = TRUE;
+#if MAX_VERSION_MAJOR < 14
 		InitCustomControls(hInstance);	// Initialize MAX's custom controls
+#endif
 		InitCommonControls();			// Initialize Win95 controls
 	}
 			

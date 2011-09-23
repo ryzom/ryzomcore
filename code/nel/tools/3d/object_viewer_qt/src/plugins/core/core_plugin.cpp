@@ -37,6 +37,8 @@
 using namespace Core;
 
 CorePlugin::CorePlugin()
+	: m_plugMan(0),
+	  m_mainWindow(0)
 {
 }
 
@@ -49,7 +51,8 @@ CorePlugin::~CorePlugin()
 	qDeleteAll(m_autoReleaseObjects);
 	m_autoReleaseObjects.clear();
 
-	delete m_mainWindow;
+	if (m_mainWindow)
+		delete m_mainWindow;
 }
 
 bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)

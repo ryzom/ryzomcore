@@ -13,7 +13,7 @@
 #include <QtGui/QDialog>
 #include <QtCore/QString>
 #include <QtGui/QWidget>
-#include <QtCore/Qfile>
+#include <QtCore/QFile>
 #include <QtNetwork>
 
 #include "ui_ftp_selection.h"

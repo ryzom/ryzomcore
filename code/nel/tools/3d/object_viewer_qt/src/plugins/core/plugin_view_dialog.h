@@ -20,28 +20,39 @@
 
 #include "ui_plugin_view_dialog.h"
 
+#include <QtCore/QMap>
+#include <QtCore/QStringList>
+
 namespace ExtensionSystem
 {
-
 class IPluginManager;
+class IPluginSpec;
+}
 
-class CPluginView: public QDialog
+namespace Core
+{
+
+class PluginView: public QDialog
 {
 	Q_OBJECT
 
 public:
-	CPluginView(IPluginManager *pluginManager, QWidget *parent = 0);
-	~CPluginView();
+	PluginView(ExtensionSystem::IPluginManager *pluginManager, QWidget *parent = 0);
+	~PluginView();
 
 private Q_SLOTS:
 	void updateList();
+	void updateSettings();
 
 private:
 
-	IPluginManager *_pluginManager;
-	Ui::CPluginView _ui;
-}; /* class CPluginView */
+	const int m_checkStateColumn;
+	QMap<ExtensionSystem::IPluginSpec *, QTreeWidgetItem *> m_specToItem;
+	QStringList m_whiteList;
+	ExtensionSystem::IPluginManager *m_pluginManager;
+	Ui::PluginView m_ui;
+}; /* class PluginView */
 
-} /* namespace NLQT */
+} /* namespace Core */
 
 #endif // PLUGIN_VIEW_H

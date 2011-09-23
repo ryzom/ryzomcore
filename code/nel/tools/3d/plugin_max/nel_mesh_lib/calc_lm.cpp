@@ -281,13 +281,21 @@ void SLightBuild::convertFromMaxLight (INode *node,TimeValue tvTime)
 	}
 
 #if (MAX_RELEASE < 4000)
-		// Convert exclusion list
-		NameTab& ntExclu = maxLight->GetExclusionList();
-		for( sint i = 0; i < ntExclu.Count(); ++i )
-		{
-			string tmp = *ntExclu.Addr(i);
-			this->setExclusion.insert( tmp );
-		}
+	// Convert exclusion list
+	NameTab& ntExclu = maxLight->GetExclusionList();
+	for (sint i = 0; i < ntExclu.Count(); ++i)
+	{
+		string tmp = *ntExclu.Addr(i);
+		this->setExclusion.insert(tmp);
+	}
+#else // (MAX_RELEASE < 4000)
+	ExclList& exclusionList = maxLight->GetExclusionList();
+	for (sint i = 0; i < exclusionList.Count(); ++i)
+	{
+		INode *exclNode = exclusionList[i];
+		string tmp = exclNode->GetName();
+		this->setExclusion.insert(tmp);
+	}
 #endif // (MAX_RELEASE < 4000)
 
 	// Get Soft Shadow informations
@@ -1999,11 +2007,12 @@ void CExportNel::deleteLM(INode& ZeNode)
 		sprintf( tmp, "%d", i );
 		sSaveName += tmp;
 		sSaveName += ".tga";
-		FILE	*file;
-		if( file = fopen(sSaveName.c_str(),"rb") )
+		if (CFile::fileExists(sSaveName))
 		{
-			fclose( file );
-			DeleteFile( sSaveName.c_str() );
+			if (!CFile::deleteFile(sSaveName))
+			{
+				nlwarning("Failed to delete file %s.", sSaveName.c_str());
+			}
 		}
 	}
 }
@@ -2576,11 +2585,12 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 					for (i = 0; i < 256; ++i)
 					{
 						string sLMName = sBaseName + NLMISC::toString(i) + ".tga";
-						CIFile ifi;
-						if (ifi.open(sLMName))
+						if (CFile::fileExists(sLMName))
 						{
-							ifi.close ();
-							DeleteFile (sLMName.c_str());
+							if (!CFile::deleteFile(sLMName))
+							{
+								nlwarning("Failed to delete file %s.", sLMName.c_str());
+							}
 						}
 					}
 				}
