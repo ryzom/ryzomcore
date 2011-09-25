@@ -103,33 +103,6 @@ void WorldEditorPlugin::setNelContext(NLMISC::INelContext *nelContext)
 	m_libContext = new NLMISC::CLibraryContext(*nelContext);
 }
 
-QString WorldEditorPlugin::name() const
-{
-	return tr("WorldEditor");
-}
-
-QString WorldEditorPlugin::version() const
-{
-	return "0.1";
-}
-
-QString WorldEditorPlugin::vendor() const
-{
-	return "GSoC2011_dnk-88";
-}
-
-QString WorldEditorPlugin::description() const
-{
-	return "World editor ovqt plugin.";
-}
-
-QStringList WorldEditorPlugin::dependencies() const
-{
-	QStringList list;
-	list.append(Core::Constants::OVQT_CORE_PLUGIN);
-	return list;
-}
-
 void WorldEditorPlugin::addAutoReleasedObject(QObject *obj)
 {
 	m_plugMan->addObject(obj);

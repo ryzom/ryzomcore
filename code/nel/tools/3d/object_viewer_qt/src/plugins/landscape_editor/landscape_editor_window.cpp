@@ -24,7 +24,7 @@
 #include "snapshot_dialog.h"
 
 #include "../core/icore.h"
-#include "../core/imenu_manager.h"
+#include "../core/menu_manager.h"
 #include "../core/core_constants.h"
 
 // NeL includes
@@ -348,12 +348,12 @@ void LandscapeEditorWindow::updateStatusBar()
 
 void LandscapeEditorWindow::createMenus()
 {
-	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
+	Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
 }
 
 void LandscapeEditorWindow::createToolBars()
 {
-	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
+	Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
 	//QAction *action = menuManager->action(Core::Constants::NEW);
 	//m_ui.fileToolBar->addAction(action);
 	//action = menuManager->action(Core::Constants::SAVE);

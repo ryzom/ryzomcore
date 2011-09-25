@@ -26,7 +26,7 @@
 
 // Core
 #include "../core/icore.h"
-#include "../core/imenu_manager.h"
+#include "../core/menu_manager.h"
 #include "../core/core_constants.h"
 
 // Lanscape Editor plugin
@@ -347,12 +347,12 @@ void WorldEditorWindow::hideEvent(QHideEvent *hideEvent)
 
 void WorldEditorWindow::createMenus()
 {
-	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
+	Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
 }
 
 void WorldEditorWindow::createToolBars()
 {
-	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
+	Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
 	//QAction *action = menuManager->action(Core::Constants::NEW);
 	//m_ui.fileToolBar->addAction(action);
 

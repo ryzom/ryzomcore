@@ -158,20 +158,20 @@ void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 			primitive->getPropertyByName ("Color", color);
 
 			item->setColor(QColor(color.R, color.G, color.B));
+
+			QVariant variantNode;
+			variantNode.setValue<Node *>(node);
+			item->setData(Constants::WORLD_EDITOR_NODE, variantNode);
+
+			QVariant graphicsData;
+			graphicsData.setValue<AbstractWorldItem *>(item);
+			node->setData(Constants::GRAPHICS_DATA_QT4_2D, graphicsData);
+
+			QVariant persistenVariant;
+			QPersistentModelIndex *persistentIndex = new QPersistentModelIndex(primIndex);
+			persistenVariant.setValue<QPersistentModelIndex *>(persistentIndex);
+			item->setData(Constants::NODE_PERISTENT_INDEX, persistenVariant);
 		}
-
-		QVariant variantNode;
-		variantNode.setValue<Node *>(node);
-		item->setData(Constants::WORLD_EDITOR_NODE, variantNode);
-
-		QVariant graphicsData;
-		graphicsData.setValue<AbstractWorldItem *>(item);
-		node->setData(Constants::GRAPHICS_DATA_QT4_2D, graphicsData);
-
-		QVariant persistenVariant;
-		QPersistentModelIndex *persistentIndex = new QPersistentModelIndex(primIndex);
-		persistenVariant.setValue<QPersistentModelIndex *>(persistentIndex);
-		item->setData(Constants::NODE_PERISTENT_INDEX, persistenVariant);
 	}
 
 	int count = model->rowCount(primIndex);
