@@ -160,8 +160,8 @@ void GeneralSettingsPage::setPrimitivesPath()
 
 void GeneralSettingsPage::setLigoConfigFile()
 {
-	QString newFile = QFileDialog::getOpenFileName(0, tr("Set the ligo config file"), 
-		m_ui.ligoConfigFileLineEdit->text());
+	QString newFile = QFileDialog::getOpenFileName(0, tr("Set the ligo config file"),
+					  m_ui.ligoConfigFileLineEdit->text());
 	if (!newFile.isEmpty())
 	{
 		m_ui.ligoConfigFileLineEdit->setText(newFile);

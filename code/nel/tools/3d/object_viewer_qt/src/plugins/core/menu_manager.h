@@ -19,39 +19,47 @@
 #define MENU_MANAGER_H
 
 // Project includes
-#include "imenu_manager.h"
+#include "core_global.h"
 
 // Qt includes
 #include <QtCore/QHash>
+#include <QtCore/QObject>
+#include <QtCore/QList>
+#include <QtGui/QMenu>
+#include <QtGui/QAction>
+#include <QtGui/QMenuBar>
 
 namespace Core
 {
+struct MenuManagerPrivate;
 
-class MenuManager : public IMenuManager
+/*
+@interface MenuManager
+@brief The MenuManager provide the interface for registration of menus and menu item.
+@details The MenuManager provides centralized access to menus and menu items.
+All menus and menu items should be registered in the MenuManager.
+*/
+class CORE_EXPORT MenuManager: public QObject
 {
 	Q_OBJECT
 
 public:
-	MenuManager(QObject *parent = 0);
+	explicit MenuManager(QMenuBar *menuBar, QObject *parent = 0);
 	virtual ~MenuManager();
 
-	virtual void registerMenu(QMenu *menu, const QString &id);
-	virtual void registerAction(QAction *action, const QString &id);
+	void registerMenu(QMenu *menu, const QString &id);
+	void registerAction(QAction *action, const QString &id);
 
-	virtual QMenu *menu(const QString &id) const;
-	virtual QAction *action(const QString &id) const;
+	QMenu *menu(const QString &id) const;
+	QAction *action(const QString &id) const;
 
-	virtual void unregisterMenu(const QString &id);
-	virtual void unregisterAction(const QString &id);
+	void unregisterMenu(const QString &id);
+	void unregisterAction(const QString &id);
 
-	virtual QMenuBar *menuBar() const;
-	void setMenuBar(QMenuBar *menuBar);
+	QMenuBar *menuBar() const;
 private:
-	QMenuBar *_menuBar;
-	typedef QHash<QString, QMenu *> IdMenuMap;
-	IdMenuMap _menuMap;
-	typedef QHash<QString, QAction *> IdActionMap;
-	IdActionMap _actionMap;
+
+	MenuManagerPrivate *d;
 };
 
 } // namespace Core
