@@ -21,74 +21,76 @@
 // NeL includes
 #include <nel/misc/debug.h>
 
-// Qt includes
-#include <QtGui/QMenu>
-#include <QtGui/QAction>
-#include <QtGui/QMenuBar>
-
 namespace Core
 {
-MenuManager::MenuManager(QObject *parent)
-	: IMenuManager(parent),
-	  _menuBar(0)
+struct MenuManagerPrivate
 {
+	MenuManagerPrivate(): m_menuBar(0) {}
+	QMenuBar *m_menuBar;
+	typedef QHash<QString, QMenu *> IdMenuMap;
+	IdMenuMap m_menuMap;
+	typedef QHash<QString, QAction *> IdActionMap;
+	IdActionMap m_actionMap;
+};
+
+MenuManager::MenuManager(QMenuBar *menuBar, QObject *parent)
+	: QObject(parent),
+	  d(new MenuManagerPrivate())
+{
+	d->m_menuBar = menuBar;
 }
 
 MenuManager::~MenuManager()
 {
-	_menuMap.clear();
+	d->m_menuMap.clear();
+	delete d;
 }
 
 void MenuManager::registerMenu(QMenu *menu, const QString &id)
 {
 	menu->setObjectName(id);
-	_menuMap.insert(id, menu);
+	d->m_menuMap.insert(id, menu);
 }
 
 void MenuManager::registerAction(QAction *action, const QString &id)
 {
 	action->setObjectName(id);
-	_actionMap.insert(id, action);
+	d->m_actionMap.insert(id, action);
 }
 
 QMenu *MenuManager::menu(const QString &id) const
 {
 	QMenu *result = 0;
-	if (!_menuMap.contains(id))
+	if (!d->m_menuMap.contains(id))
 		nlwarning("QMenu %s not found", id.toStdString().c_str());
 	else
-		result = _menuMap.value(id);
+		result = d->m_menuMap.value(id);
 	return result;
 }
 
 QAction *MenuManager::action(const QString &id) const
 {
 	QAction *result = 0;
-	if (!_actionMap.contains(id))
+	if (!d->m_actionMap.contains(id))
 		nlwarning("QAction %s not found", id.toStdString().c_str());
 	else
-		result = _actionMap.value(id);
+		result = d->m_actionMap.value(id);
 	return result;
 }
 
 void MenuManager::unregisterMenu(const QString &id)
 {
-	_menuMap.remove(id);
+	d->m_menuMap.remove(id);
 }
 
 void MenuManager::unregisterAction(const QString &id)
 {
-	_actionMap.remove(id);
+	d->m_actionMap.remove(id);
 }
 
 QMenuBar *MenuManager::menuBar() const
 {
-	return _menuBar;
-}
-
-void MenuManager::setMenuBar(QMenuBar *menuBar)
-{
-	_menuBar = menuBar;
+	return d->m_menuBar;
 }
 
 } /* namespace Core */

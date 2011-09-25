@@ -30,15 +30,15 @@ class QWidget;
 namespace Core
 {
 /**
-@class CSearchPathsSettingsPage
+@class SearchPathsSettingsPage
 */
-class CSearchPathsSettingsPage : public Core::IOptionsPage
+class SearchPathsSettingsPage : public Core::IOptionsPage
 {
 	Q_OBJECT
 
 public:
-	explicit CSearchPathsSettingsPage(bool recurse, QObject *parent = 0);
-	~CSearchPathsSettingsPage();
+	explicit SearchPathsSettingsPage(bool recurse, QObject *parent = 0);
+	~SearchPathsSettingsPage();
 
 	QString id() const;
 	QString trName() const;
@@ -66,7 +66,7 @@ private:
 
 	bool m_recurse;
 	QWidget *m_page;
-	Ui::CSearchPathsSettingsPage m_ui;
+	Ui::SearchPathsSettingsPage m_ui;
 };
 
 } // namespace Core

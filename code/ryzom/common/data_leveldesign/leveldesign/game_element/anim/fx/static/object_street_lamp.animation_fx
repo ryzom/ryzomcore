@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<FORM Revision="" State="modified">
+  <PARENT Filename="_aura.animation_fx"/>
+  <STRUCT>
+    <ATOM Name="PSName" Value="GE_Mission_reverbere.ps"/>
+    <ATOM Name="ScaleFX" Value="true"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG></LOG>
+</FORM>

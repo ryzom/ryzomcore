@@ -65,8 +65,7 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 	setMenuBar(m_menuBar);
 #endif
 
-	m_menuManager = new MenuManager(this);
-	m_menuManager->setMenuBar(m_menuBar);
+	m_menuManager = new MenuManager(m_menuBar, this);
 
 	m_tabWidget = new QTabWidget(this);
 	m_tabWidget->setTabPosition(QTabWidget::South);
@@ -114,7 +113,7 @@ void MainWindow::extensionsInitialized()
 	show();
 }
 
-IMenuManager *MainWindow::menuManager() const
+MenuManager *MainWindow::menuManager() const
 {
 	return m_menuManager;
 }
@@ -205,7 +204,7 @@ bool MainWindow::showOptionsDialog(const QString &group,
 {
 	if (!parent)
 		parent = this;
-	CSettingsDialog settingsDialog(m_pluginManager, group, page, parent);
+	SettingsDialog settingsDialog(m_pluginManager, group, page, parent);
 	settingsDialog.show();
 	bool ok = settingsDialog.execDialog();
 	if (ok)

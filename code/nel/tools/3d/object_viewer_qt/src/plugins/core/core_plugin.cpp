@@ -64,8 +64,8 @@ bool CorePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QStr
 	bool success = m_mainWindow->initialize(errorString);
 
 	GeneralSettingsPage *generalSettings = new GeneralSettingsPage(this);
-	CSearchPathsSettingsPage *searchPathPage = new CSearchPathsSettingsPage(false, this);
-	CSearchPathsSettingsPage *recureseSearchPathPage = new CSearchPathsSettingsPage(true, this);
+	SearchPathsSettingsPage *searchPathPage = new SearchPathsSettingsPage(false, this);
+	SearchPathsSettingsPage *recureseSearchPathPage = new SearchPathsSettingsPage(true, this);
 
 	generalSettings->applyGeneralSettings();
 	searchPathPage->applySearchPaths();
@@ -93,31 +93,6 @@ void CorePlugin::setNelContext(NLMISC::INelContext *nelContext)
 	nlassert(!NLMISC::INelContext::isContextInitialised());
 #endif // NL_OS_WINDOWS
 	m_libContext = new NLMISC::CLibraryContext(*nelContext);
-}
-
-QString CorePlugin::name() const
-{
-	return QLatin1String(Constants::OVQT_CORE_PLUGIN);
-}
-
-QString CorePlugin::version() const
-{
-	return Constants::OVQT_VERSION_LONG;
-}
-
-QString CorePlugin::vendor() const
-{
-	return Constants::OVQT_VENDOR;
-}
-
-QString CorePlugin::description() const
-{
-	return "Core plugin.";
-}
-
-QStringList CorePlugin::dependencies() const
-{
-	return QStringList();
 }
 
 void CorePlugin::addAutoReleasedObject(QObject *obj)

@@ -76,6 +76,7 @@ CopyWindowsExeDllCfgSourceFiles += [ "nel_drv_opengl_win_r.dll" ]
 CopyWindowsExeDllCfgSourceFiles += [ "nel_drv_xaudio2_win_r.dll" ]
 
 CopyWindowsExeDllCfgSourceFiles += [ "client_ryzom_r.exe" ]
+CopyWindowsExeDllCfgSourceFiles += [ "ryzom_client_r.exe" ] # i blame sfb
 CopyWindowsExeDllCfgSourceFiles += [ "ryzom_configuration_r.exe" ]
 
 

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<FORM Revision="" State="modified">
+  <STRUCT>
+    <ATOM Name="builded_ig" Value="gen_bt_tourgarde.ig"/>
+    <ATOM Name="name" Value="uiBuildingGuardTower"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG></LOG>
+</FORM>

@@ -29,15 +29,15 @@ namespace ExtensionSystem
 {
 
 class IPlugin;
-class CPluginSpec;
+class PluginSpec;
 
-class CPluginManager : public IPluginManager
+class PluginManager : public IPluginManager
 {
 	Q_OBJECT
 
 public:
-	CPluginManager(QObject *parent = 0);
-	~CPluginManager();
+	PluginManager(QObject *parent = 0);
+	~PluginManager();
 
 	// Object pool operations
 	virtual void addObject(QObject *obj);
@@ -49,7 +49,7 @@ public:
 	virtual QStringList getPluginPaths() const;
 	virtual void setPluginPaths(const QStringList &paths);
 	virtual QList<IPluginSpec *> plugins() const;
-	QList<CPluginSpec *> loadQueue();
+	QList<PluginSpec *> loadQueue();
 
 	// Settings
 	virtual void setSettings(QSettings *settings);
@@ -58,21 +58,22 @@ public:
 	void writeSettings();
 
 private:
-	void setPluginState(CPluginSpec *spec, int destState);
+	void setPluginState(PluginSpec *spec, int destState);
 	void readPluginPaths();
-	bool loadQueue(CPluginSpec *spec, QList<CPluginSpec *> &queue, QList<CPluginSpec *> &circularityCheckQueue);
+	bool loadQueue(PluginSpec *spec, QList<PluginSpec *> &queue, QList<PluginSpec *> &circularityCheckQueue);
 	void stopAll();
 	void deleteAll();
 
 	mutable QReadWriteLock m_lock;
 
 	QSettings *m_settings;
-	QList<CPluginSpec *> m_pluginSpecs;
+	QString m_extension;
+	QList<PluginSpec *> m_pluginSpecs;
 	QList<IPluginSpec *> m_ipluginSpecs;
 	QStringList m_pluginPaths;
 	QList<QObject *> m_allObjects;
 
-}; // class CPluginManager
+}; // class PluginManager
 
 } // namespace ExtensionSystem
 

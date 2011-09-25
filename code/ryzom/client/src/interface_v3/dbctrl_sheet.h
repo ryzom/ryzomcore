@@ -355,6 +355,9 @@ public:
 	/// Special ContextHelp for ctrl sheet.
 	virtual void			getContextHelp(ucstring &help) const;
 
+	/// Special ContextHelp for ctrl sheet.
+	virtual void			getContextHelpToolTip(ucstring &help) const;
+
 	/** true if an item of another ctrlSheet can be dropped on this slot.
 	 *	also return true if src is 0, or if _ItemSlot==UNDEFINED
 	 */

@@ -37,7 +37,7 @@ public:
 								   const QString &page = QString(),
 								   QWidget *parent = 0);
 
-	virtual IMenuManager *menuManager() const;
+	virtual MenuManager *menuManager() const;
 	virtual ContextManager *contextManager() const;
 
 	virtual QSettings *settings() const;

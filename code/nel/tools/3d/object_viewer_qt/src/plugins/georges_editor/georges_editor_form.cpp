@@ -21,7 +21,7 @@
 #include "georges_treeview_dialog.h"
 
 #include "../core/icore.h"
-#include "../core/imenu_manager.h"
+#include "../core/menu_manager.h"
 #include "../core/core_constants.h"
 
 // NeL includes
@@ -63,7 +63,7 @@ namespace Plugin
 
 		m_undoStack = new QUndoStack(this);
 
-		Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
+		Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
 		m_openAction = menuManager->action(Core::Constants::OPEN);
 
 		m_newAction = new QAction(tr("&New..."), this);

@@ -328,7 +328,9 @@ try
 catch 
 (
 	-- Error
-	nlerror("ERROR fatal error exporting 'ig' in folder %MaxSourceDirectory%")
+	nlerror("ERROR Fatal error exporting 'ig' in folder %MaxSourceDirectory%")
+	nlerror("FAIL Fatal error occured")
+	NelForceQuitRightNow()
 	removeRunningTag = false
 )
 

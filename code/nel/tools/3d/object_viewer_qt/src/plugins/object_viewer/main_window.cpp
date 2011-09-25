@@ -52,7 +52,7 @@
 #include "object_viewer_constants.h"
 
 #include "../core/icore.h"
-#include "../core/imenu_manager.h"
+#include "../core/menu_manager.h"
 #include "../core/core_constants.h"
 
 using namespace std;
@@ -259,7 +259,7 @@ void CMainWindow::createActions()
 
 void CMainWindow::createMenus()
 {
-	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
+	Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
 
 	_openAction = menuManager->action(Core::Constants::OPEN);
 

@@ -16,7 +16,7 @@
 #include <QTableWidgetItem>
 
 #include "../core/icore.h"
-#include "../core/imenu_manager.h"
+#include "../core/menu_manager.h"
 #include "../core/core_constants.h"
 
 #include <nel/misc/common.h>
