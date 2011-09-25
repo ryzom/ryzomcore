@@ -1,9 +1,12 @@
 // Project includes
-#include "zone_painter_plugin.h"
-#include "zone_painter_settings_page.h"
+#include "example_plugin.h"
+#include "example_settings_page.h"
+#include "simple_viewer.h"
+
 #include "../core/icore.h"
 #include "../core/core_constants.h"
 #include "../core/menu_manager.h"
+
 #include "../../extension_system/iplugin_spec.h"
 
 // NeL includes
@@ -19,9 +22,12 @@
 
 namespace Plugin
 {
-//	NLMISC_SAFE_SINGLETON_IMPL(CZoneManager)
 
-ZonePainterPlugin::~ZonePainterPlugin()
+ExamplePlugin::ExamplePlugin()
+{
+}
+
+ExamplePlugin::~ExamplePlugin()
 {
 	Q_FOREACH(QObject *obj, m_autoReleaseObjects)
 	{
@@ -31,24 +37,32 @@ ZonePainterPlugin::~ZonePainterPlugin()
 	m_autoReleaseObjects.clear();
 }
 
-bool ZonePainterPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
+bool ExamplePlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
 	Q_UNUSED(errorString);
 	m_plugMan = pluginManager;
 
-	addAutoReleasedObject(new CZonePainterSettingsPage(this));
-	addAutoReleasedObject(new CZonePainterContext(this));
-	//addAutoReleasedObject(new CCoreListener(this));
+	addAutoReleasedObject(new ExampleSettingsPage(this));
+	addAutoReleasedObject(new ExampleContext(this));
+	addAutoReleasedObject(new ExampleCoreListener(this));
 	return true;
 }
 
-void ZonePainterPlugin::extensionsInitialized()
+void ExamplePlugin::extensionsInitialized()
 {
 	Core::ICore *core = Core::ICore::instance();
 	Core::MenuManager *menuManager = core->menuManager();
+	QAction *exampleAction1 = new QAction("Example1", this);
+	QAction *exampleAction2 = new QAction("Example2", this);
+	QAction *aboutQtAction = menuManager->action(Core::Constants::ABOUT_QT);
+	QMenu *helpMenu = menuManager->menu(Core::Constants::M_HELP);
+	helpMenu->insertAction(aboutQtAction, exampleAction1);
+	helpMenu->addSeparator();
+	helpMenu->addAction(exampleAction2);
+	menuManager->menuBar()->addMenu("ExampleMenu");
 }
 
-void ZonePainterPlugin::setNelContext(NLMISC::INelContext *nelContext)
+void ExamplePlugin::setNelContext(NLMISC::INelContext *nelContext)
 {
 #ifdef NL_OS_WINDOWS
 	// Ensure that a context doesn't exist yet.
@@ -58,7 +72,7 @@ void ZonePainterPlugin::setNelContext(NLMISC::INelContext *nelContext)
 	m_LibContext = new NLMISC::CLibraryContext(*nelContext);
 }
 
-void ZonePainterPlugin::addAutoReleasedObject(QObject *obj)
+void ExamplePlugin::addAutoReleasedObject(QObject *obj)
 {
 	m_plugMan->addObject(obj);
 	m_autoReleaseObjects.prepend(obj);
@@ -66,4 +80,4 @@ void ZonePainterPlugin::addAutoReleasedObject(QObject *obj)
 
 }
 
-Q_EXPORT_PLUGIN(Plugin::ZonePainterPlugin)
+Q_EXPORT_PLUGIN(Plugin::ExamplePlugin)

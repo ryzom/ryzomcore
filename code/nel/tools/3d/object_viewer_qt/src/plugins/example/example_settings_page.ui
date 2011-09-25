@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CExampleSettingsPage</class>
- <widget class="QWidget" name="CExampleSettingsPage">
+ <class>ExampleSettingsPage</class>
+ <widget class="QWidget" name="ExampleSettingsPage">
   <property name="geometry">
    <rect>
     <x>0</x>

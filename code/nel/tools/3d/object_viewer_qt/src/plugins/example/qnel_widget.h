@@ -82,7 +82,7 @@ public:
 		return m_driver;
 	}
 
-	virtual QPaintEngine* paintEngine() const
+	virtual QPaintEngine *paintEngine() const
 	{
 		return NULL;
 	}

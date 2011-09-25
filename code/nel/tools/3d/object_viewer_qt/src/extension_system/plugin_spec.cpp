@@ -223,7 +223,7 @@ void PluginSpec::parseDependency(QXmlStreamReader &reader)
 								  .arg(PLUGIN_SPEC_DEPENDENCY_NAME));
 				return;
 			}
-			// Read version dependency plugin
+			// TODO: Read version dependency plugin
 			QString dependencyVersion = reader.attributes().value(PLUGIN_SPEC_DEPENDENCY_VERSION).toString();
 
 			m_dependencies.push_back(dependencyName);
