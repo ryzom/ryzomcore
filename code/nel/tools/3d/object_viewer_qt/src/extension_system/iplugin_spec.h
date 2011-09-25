@@ -37,8 +37,8 @@ struct State
 	{
 		Invalid = 1,
 		Read,
-		Loaded,
 		Resolved,
+		Loaded,
 		Initialized,
 		Running,
 		Stopped,
