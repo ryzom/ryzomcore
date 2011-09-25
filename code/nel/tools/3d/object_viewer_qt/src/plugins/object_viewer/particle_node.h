@@ -332,7 +332,7 @@ public:
 	/// Restick all objects, useful after loading
 	void restickAllObjects();
 
-	TNodeVect& getNodeList()
+	TNodeVect &getNodeList()
 	{
 		return _Nodes;
 	}

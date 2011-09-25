@@ -190,7 +190,7 @@ NLSOUND::USource *CSoundSystem::create(const std::string &soundName)
 	return NULL;
 }
 
-void CSoundSystem::playAnimation(std::string& name, float lastTime, float curTime, NLSOUND::CSoundContext &context)
+void CSoundSystem::playAnimation(std::string &name, float lastTime, float curTime, NLSOUND::CSoundContext &context)
 {
 	if (_AnimManager == NULL)
 	{
