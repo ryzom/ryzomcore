@@ -214,9 +214,6 @@ void PluginManager::setPluginState(PluginSpec *spec, int destState)
 
 	switch (destState)
 	{
-	case State::Loaded:
-		spec->loadLibrary();
-		return;
 	case State::Resolved:
 		spec->resolveDependencies(m_pluginSpecs);
 		return;
@@ -234,13 +231,16 @@ void PluginManager::setPluginState(PluginSpec *spec, int destState)
 		if (depSpec->state() != destState)
 		{
 			spec->m_hasError = true;
-			spec->m_errorString = tr("Cannot initializing plugin because dependency failed to load: %1\nReason: %2")
-								  .arg(depSpec->name()).arg(depSpec->errorString());
+			spec->m_errorString = tr("Cannot load plugin because dependency failed to load: %1")
+								  .arg(depSpec->name());
 			return;
 		}
 	}
 	switch (destState)
 	{
+	case State::Loaded:
+		spec->loadLibrary();
+		return;
 	case State::Initialized:
 		spec->initializePlugin();
 		break;
