@@ -28,12 +28,16 @@
 
 # *** PROCESS CONFIG ***
 ProcessToComplete = [ ]
+ProcessToComplete += [ "pacs_prim_list" ]
 ProcessToComplete += [ "copy" ]
 
 
 # *** COMMON NAMES AND PATHS ***
 CommonName = "data_common"
 CommonPath = "common/" + CommonName
+
+
+# *** PACS PRIM LIST OPTIONS ***
 
 
 # *** COPY DIR OPTIONS ***
