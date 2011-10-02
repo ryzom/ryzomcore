@@ -103,13 +103,11 @@ void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 			QPolygonF polygon;
 			vec = primitive->getPrimVector();
 			int sizeVec = primitive->getNumVector();
-
 			for (int i = 0; i < sizeVec; ++i)
 			{
 				polygon << QPointF(vec->x, -vec->y + cellSize);
 				++vec;
 			}
-
 			item = scene->addWorldItemPath(polygon, showArrow);
 			break;
 		}
@@ -118,7 +116,6 @@ void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 			QPolygonF polygon;
 			vec = primitive->getPrimVector();
 			int sizeVec = primitive->getNumVector();
-
 			for (int i = 0; i < sizeVec; ++i)
 			{
 				polygon << QPointF(vec->x, cellSize - vec->y);
@@ -133,30 +130,7 @@ void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 		{
 			// Get color from world_editor_classes.xml
 			NLMISC::CRGBA color = Utils::ligoConfig()->getPrimitiveColor(*primitive);
-
-			/*
-			// Configurations (from world_editor_primitive_configuration.xml)
-			const std::vector<NLLIGO::CPrimitiveConfigurations> &configurations = Utils::ligoConfig()->getPrimitiveConfiguration();
-
-			// Look for the configuration
-			sint search = 0;
-			bool colorFound = false;
-			while ((search = theApp.getActiveConfiguration (*primitive, search)) != -1)
-			{
-				// Configuration activated ?
-				if (theApp.Configurations[search].Activated)
-				{
-					colorFound = true;
-					mainColor = configurations[search].Color;
-					break;
-				}
-				search++;
-			}
-
-			// try to get the primitive color ?
-			//if (!colorFound)*/
 			primitive->getPropertyByName ("Color", color);
-
 			item->setColor(QColor(color.R, color.G, color.B));
 
 			QVariant variantNode;

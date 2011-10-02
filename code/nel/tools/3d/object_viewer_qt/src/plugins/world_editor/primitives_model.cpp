@@ -183,6 +183,10 @@ Node *PrimitivesTreeModel::pathToNode(const Path &path)
 
 void PrimitivesTreeModel::createWorldEditNode(const QString &fileName)
 {
+	// World edit node already is created, if yes is showing error message box
+	if (m_worldEditNode != 0)
+		nlerror("World edit node already is created.");
+
 	beginResetModel();
 	m_worldEditNode = new WorldEditNode(fileName);
 	m_rootNode->appendChildNode(m_worldEditNode);

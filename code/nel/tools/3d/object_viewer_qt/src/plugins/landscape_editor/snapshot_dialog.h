@@ -30,7 +30,7 @@ class SnapshotDialog: public QDialog
 	Q_OBJECT
 
 public:
-	SnapshotDialog(QWidget *parent = 0);
+	explicit SnapshotDialog(QWidget *parent = 0);
 	~SnapshotDialog();
 
 	bool isCustomSize() const;

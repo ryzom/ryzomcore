@@ -45,7 +45,7 @@ class PropertyEditorWidget: public QWidget
 	Q_OBJECT
 
 public:
-	PropertyEditorWidget(QWidget *parent = 0);
+	explicit PropertyEditorWidget(QWidget *parent = 0);
 	~PropertyEditorWidget();
 
 public Q_SLOTS:

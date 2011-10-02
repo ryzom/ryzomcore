@@ -53,7 +53,7 @@ class PrimitivesView : public QTreeView
 	Q_OBJECT
 
 public:
-	PrimitivesView(QWidget *parent = 0);
+	explicit PrimitivesView(QWidget *parent = 0);
 	~PrimitivesView();
 
 	void setUndoStack(QUndoStack *undoStack);

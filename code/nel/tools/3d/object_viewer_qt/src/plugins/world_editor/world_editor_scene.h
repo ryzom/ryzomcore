@@ -110,15 +110,14 @@ private:
 
 	void checkUndo();
 
-	QPen m_pen1, m_pen2;
-	QBrush m_brush1, m_brush2;
+	QPen m_greenPen, m_purplePen;
+	QBrush m_greenBrush, m_purpleBrush;
 
 	QPointF m_firstPick, m_scaleFactor, m_pivot;
 	QRectF m_selectionArea;
 	qreal m_firstPickX, m_firstPickY, m_angle;
 	QList<QGraphicsItem *> m_selectedItems;
 	QList<QGraphicsItem *> m_selectedPoints;
-	QList<AbstractWorldItem *> m_worldItems;
 	QList<QPolygonF> m_polygons;
 	bool m_editedSelectedItems, m_firstSelection;
 	uint m_lastPickedPrimitive;

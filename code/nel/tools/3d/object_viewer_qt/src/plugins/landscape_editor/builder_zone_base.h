@@ -75,7 +75,7 @@ PixmapDatabase contains the graphics for the zones
 class LANDSCAPE_EDITOR_EXPORT ZoneBuilderBase
 {
 public:
-	ZoneBuilderBase(LandscapeSceneBase *landscapeScene);
+	explicit ZoneBuilderBase(LandscapeSceneBase *landscapeScene);
 	virtual ~ZoneBuilderBase();
 
 	/// Init zoneBank and init zone pixmap database

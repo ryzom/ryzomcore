@@ -230,34 +230,18 @@ void BuilderZoneRegion::add(sint32 x, sint32 y, uint8 rot, uint8 flip, NLLIGO::C
 			}
 
 	// Delete all around all material that are not from the same as us
-	const std::string &curMat = zoneBankElement->getCategory ("material");
+	const std::string &curMat = zoneBankElement->getCategory("material");
 
 	if (curMat != STRING_NO_CAT_TYPE)
 	{
 		// This element is a valid material
 		// Place the piece
-		const std::string &eltName = zoneBankElement->getName ();
-		for (j = 0; j < sMask.h; ++j)
-			for (i = 0; i < sMask.w; ++i)
-				if (sMask.Tab[i + j * sMask.w])
-				{
-					set(x + i, y + j, sPosX.Tab[i + j * sPosX.w], sPosY.Tab[i + j * sPosY.w], eltName);
-					setRot(x + i, y + j, rot);
-					setFlip(x + i, y + j, flip);
-				}
+		const std::string &eltName = zoneBankElement->getName();
+		placePiece(x, y, rot, flip, sMask, sPosX, sPosY, eltName);
 
 		// Put all transitions between different materials
 		putTransitions (x, y, sMask, curMat, &tUpdate);
-
-		// Place the piece
-		for (j = 0; j < sMask.h; ++j)
-			for (i = 0; i < sMask.w; ++i)
-				if (sMask.Tab[i + j * sMask.w])
-				{
-					set(x + i, y + j, sPosX.Tab[i + j * sPosX.w], sPosY.Tab[i + j * sPosY.w], eltName);
-					setRot(x + i, y + j, rot);
-					setFlip(x + i, y + j, flip);
-				}
+		placePiece(x, y, rot, flip, sMask, sPosX, sPosY, eltName);
 	}
 }
 
@@ -449,21 +433,14 @@ bool BuilderZoneRegion::addNotPropagate (sint32 x, sint32 y, uint8 rot, uint8 fl
 				del(x + i, y + j, true, &tUpdate);
 			}
 
-	const std::string &curMat = zoneBankElement->getCategory ("material");
+	const std::string &curMat = zoneBankElement->getCategory("material");
 
 	if (curMat != STRING_NO_CAT_TYPE)
 	{
 		// This element is a valid material
 		// Place the piece
-		const std::string &EltName = zoneBankElement->getName ();
-		for (j = 0; j < sMask.h; ++j)
-			for (i = 0; i < sMask.w; ++i)
-				if (sMask.Tab[i + j * sMask.w])
-				{
-					set (x + i, y + j, sPosX.Tab[i + j * sPosX.w], sPosY.Tab[i + j * sPosY.w], EltName);
-					setRot (x + i, y + j, rot);
-					setFlip (x + i, y + j, flip);
-				}
+		const std::string &eltName = zoneBankElement->getName();
+		placePiece(x, y, rot, flip, sMask, sPosX, sPosY, eltName);
 	}
 
 	return true;
@@ -803,11 +780,10 @@ void BuilderZoneRegion::addTransition (sint32 x, sint32 y, uint8 rot, uint8 flip
 	}
 }
 
-void BuilderZoneRegion::addToUpdateAndCreate(BuilderZoneRegion *builderZoneRegion, sint32 sharePos, sint32 x, sint32 y, const std::string &newMat, void *pInt1, void *pInt2)
+void BuilderZoneRegion::addToUpdateAndCreate(BuilderZoneRegion *builderZoneRegion, sint32 sharePos, sint32 x, sint32 y,
+		const std::string &newMat, ToUpdate *ptCreate, ToUpdate *ptUpdate)
 {
 	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
-	ToUpdate *ptCreate = reinterpret_cast<ToUpdate *>(pInt1);
-	ToUpdate *ptUpdate = reinterpret_cast<ToUpdate *>(pInt2);
 	sint32 stride = (1 + zoneRegion.getMaxX() - zoneRegion.getMinX());
 
 	ZonePosition zonePos;
@@ -828,11 +804,10 @@ void BuilderZoneRegion::addToUpdateAndCreate(BuilderZoneRegion *builderZoneRegio
 }
 
 void BuilderZoneRegion::putTransitions (sint32 inX, sint32 inY, const NLLIGO::SPiece &mask, const std::string &matName,
-										void *pInternal)
+										ToUpdate *ptUpdate)
 {
 	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 	ToUpdate tCreate; // Transition to create
-	ToUpdate *ptUpdate = reinterpret_cast<ToUpdate *>(pInternal); // Transition to update
 
 	sint32 i, j, k, l, m;
 	sint32 x = inX, y = inY;
@@ -883,10 +858,8 @@ void BuilderZoneRegion::putTransitions (sint32 inX, sint32 inY, const NLLIGO::SP
 		if ( (corner < 4) && (m != 0) )
 		{
 			// The material can't be paused
-			dataZoneTemp.sharingMatNames[0] = STRING_UNUSED;
-			dataZoneTemp.sharingMatNames[1] = STRING_UNUSED;
-			dataZoneTemp.sharingMatNames[2] = STRING_UNUSED;
-			dataZoneTemp.sharingMatNames[3] = STRING_UNUSED;
+			for (int t = 0; i < 4; ++t)
+				dataZoneTemp.sharingMatNames[t] = STRING_UNUSED;
 
 			// Don't propagate any more
 		}
@@ -1659,16 +1632,13 @@ void BuilderZoneRegion::tryPath(uint32 posA, uint32 posB, std::vector<uint32> &p
 	}
 }
 
-void BuilderZoneRegion::del(sint32 x, sint32 y, bool transition, void *pInternal)
+void BuilderZoneRegion::del(sint32 x, sint32 y, bool transition, ToUpdate *pUpdate)
 {
 	const NLLIGO::CZoneRegion &zoneRegion = m_zoneBuilder->zoneRegion(m_regionId)->ligoZoneRegion();
 	if (!m_zoneBuilder->getZoneMask(x, y))
 		return;
 
 	const std::string &nameZone = zoneRegion.getName(x, y);
-
-	ToUpdate *pUpdate = reinterpret_cast<ToUpdate *>(pInternal);
-
 	NLLIGO::CZoneBankElement *zoneBankElement = m_zoneBuilder->getZoneBank().getElementByZoneName(nameZone);
 	if (zoneBankElement != NULL)
 	{
@@ -2106,6 +2076,20 @@ void BuilderZoneRegion::resize (sint32 newMinX, sint32 newMaxX, sint32 newMinY, 
 	{
 		m_zoneBuilder->actionLigoResize(m_regionId, newMinX, newMaxX, newMinY, newMaxY);
 	}
+}
+
+void BuilderZoneRegion::placePiece(sint32 x, sint32 y, uint8 rot, uint8 flip,
+								   NLLIGO::SPiece &sMask, NLLIGO::SPiece &sPosX, NLLIGO::SPiece &sPosY,
+								   const std::string &eltName)
+{
+	for (int j = 0; j < sMask.h; ++j)
+		for (int i = 0; i < sMask.w; ++i)
+			if (sMask.Tab[i + j * sMask.w])
+			{
+				set(x + i, y + j, sPosX.Tab[i + j * sPosX.w], sPosY.Tab[i + j * sPosY.w], eltName);
+				setRot(x + i, y + j, rot);
+				setFlip(x + i, y + j, flip);
+			}
 }
 
 } /* namespace LandscapeEditor */

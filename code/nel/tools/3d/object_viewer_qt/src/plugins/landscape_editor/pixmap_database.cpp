@@ -64,7 +64,7 @@ bool PixmapDatabase::loadPixmaps(const QString &zonePath, NLLIGO::CZoneBank &zon
 	zoneBank.getCategoryValues ("zone", listNames);
 	if (displayProgress)
 	{
-		progressDialog = new QProgressDialog("Loading ligo zones.", "Cancel", 0, listNames.size());
+		progressDialog = new QProgressDialog(QObject::tr("Loading ligo zones."), QObject::tr("Cancel"), 0, listNames.size());
 		progressDialog->show();
 	}
 

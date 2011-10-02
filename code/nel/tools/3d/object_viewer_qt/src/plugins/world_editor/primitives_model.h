@@ -39,7 +39,8 @@ const int AtTheEnd = -1;
 typedef QPair<int, int> PathItem;
 /*
 @typedef Path
-@brief It store a list of row and column numbers which have to walk through from the root index of the model to reach the need item
+@brief It store a list of row and column numbers which have to walk through from the root index of the model to reach the need item.
+It is used for undo/redo commands.
 */
 typedef QList<PathItem> Path;
 
@@ -53,7 +54,7 @@ class PrimitivesTreeModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
-	PrimitivesTreeModel(QObject *parent = 0);
+	explicit PrimitivesTreeModel(QObject *parent = 0);
 	~PrimitivesTreeModel();
 
 	QVariant data(const QModelIndex &index, int role) const;
@@ -92,7 +93,6 @@ public:
 
 private:
 	void createChildNodes(NLLIGO::IPrimitive *primitive, int pos, const QModelIndex &parent);
-
 	void removeChildNodes(Node *node, const QModelIndex &parent);
 
 	Node *m_rootNode;

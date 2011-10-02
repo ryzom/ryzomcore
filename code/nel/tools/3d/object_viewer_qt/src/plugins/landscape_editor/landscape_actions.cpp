@@ -27,41 +27,6 @@
 namespace LandscapeEditor
 {
 
-OpenLandscapeCommand::OpenLandscapeCommand(const QString &fileName, QUndoCommand *parent)
-	: QUndoCommand(parent),
-	  m_fileName(fileName)
-{
-}
-
-OpenLandscapeCommand::~OpenLandscapeCommand()
-{
-}
-
-void OpenLandscapeCommand::undo()
-{
-}
-
-void OpenLandscapeCommand::redo()
-{
-}
-
-NewLandscapeCommand::NewLandscapeCommand(QUndoCommand *parent)
-	: QUndoCommand(parent)
-{
-}
-
-NewLandscapeCommand::~NewLandscapeCommand()
-{
-}
-
-void NewLandscapeCommand::undo()
-{
-}
-
-void NewLandscapeCommand::redo()
-{
-}
-
 LigoTileCommand::LigoTileCommand(const LigoData &data, const ZonePosition &zonePos,
 								 ZoneBuilder *zoneBuilder, LandscapeScene *scene,
 								 QUndoCommand *parent)

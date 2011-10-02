@@ -397,26 +397,6 @@ void LandscapeScene::drawForeground(QPainter *painter, const QRectF &rect)
 	QGraphicsScene::drawForeground(painter, rect);
 	if ((m_zoneBuilder->currentIdZoneRegion() != -1) && (m_transitionMode))
 		drawTransition(painter, rect);
-
-	/*
-		// Render debug text (slow!)
-		painter->setPen(QPen(Qt::white, 0.5, Qt::SolidLine));
-
-		int left = int(floor(rect.left() / m_cellSize));
-		int right = int(floor(rect.right() / m_cellSize));
-		int top = int(floor(rect.top() / m_cellSize));
-		int bottom = int(floor(rect.bottom() / m_cellSize));
-
-		for (int i = left; i < right; ++i)
-		{
-			for (int j = top; j < bottom; ++j)
-			{
-				LigoData data;
-				m_zoneBuilder->currentZoneRegion()->ligoData(data, i, -j);
-				painter->drawText(i * m_cellSize + 10, j * m_cellSize + 10, QString("%1 %2 %3 %4").arg(i).arg(j).arg(data.posX).arg(data.posY));
-			}
-		}
-	*/
 }
 
 void LandscapeScene::drawTransition(QPainter *painter, const QRectF &rect)

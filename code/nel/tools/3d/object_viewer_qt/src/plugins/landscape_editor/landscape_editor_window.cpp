@@ -262,7 +262,7 @@ int LandscapeEditorWindow::createLandscape(const QString &fileName)
 
 	if (id == -1)
 	{
-		QMessageBox::critical(this, "Landscape Editor", "Cannot add this zone because it overlaps existing ones");
+		QMessageBox::critical(this, "Landscape Editor", tr("Cannot add this zone because it overlaps existing ones"));
 		return -1;
 	}
 	ZoneRegionObject *zoneRegion = m_zoneBuilder->zoneRegion(id);

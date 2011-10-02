@@ -215,20 +215,18 @@ PrimitiveNode::PrimitiveNode(NLLIGO::IPrimitive *primitive)
 	m_primitive->getPropertyByName("class", className);
 
 	// Set Icon
-	QString nameIcon = QString("./old_ico/%1.ico").arg(className.c_str());
+	QString nameIcon = QString("%1/%2.ico").arg(Constants::PATH_TO_OLD_ICONS).arg(className.c_str());
 	QIcon icon(nameIcon);
 	if (!QFile::exists(nameIcon))
 	{
 		if (primitive->getParent() == NULL)
-			icon = QIcon("./old_ico/root.ico");
+			icon = QIcon(Constants::ICON_ROOT_PRIMITIVE);
 		else if (primitive->getNumChildren() == 0)
-			icon = QIcon("./old_ico/property.ico");
+			icon = QIcon(Constants::ICON_PROPERTY);
 		else
-			icon = QIcon("./old_ico/folder_h.ico");
+			icon = QIcon(Constants::ICON_FOLDER);
 	}
 	setData(Qt::DecorationRole, icon);
-
-	//setData(3, QString(className.c_str()));
 }
 
 PrimitiveNode::~PrimitiveNode()
@@ -242,7 +240,7 @@ NLLIGO::IPrimitive *PrimitiveNode::primitive() const
 
 const NLLIGO::CPrimitiveClass *PrimitiveNode::primitiveClass() const
 {
-	return NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig->getPrimitiveClass(*m_primitive);
+	return Utils::ligoConfig()->getPrimitiveClass(*m_primitive);
 }
 
 RootPrimitiveNode *PrimitiveNode::rootPrimitiveNode()
@@ -250,7 +248,7 @@ RootPrimitiveNode *PrimitiveNode::rootPrimitiveNode()
 	Node *node = this;
 	while (node && (node->type() != Node::RootPrimitiveNodeType))
 		node = node->parent();
-	return (RootPrimitiveNode *)node;
+	return static_cast<RootPrimitiveNode *>(node);
 }
 
 Node::NodeType PrimitiveNode::type() const

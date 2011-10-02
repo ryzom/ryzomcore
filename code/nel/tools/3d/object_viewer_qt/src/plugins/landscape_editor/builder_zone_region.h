@@ -33,13 +33,15 @@
 namespace LandscapeEditor
 {
 class ZoneBuilder;
+class ToUpdate;
 
-// CZoneRegion contains informations about the zones painted
+// CZoneRegion contains informations about the zones painted.
+// (Legacy class from old world editor. It needs to refactoring!)
 class BuilderZoneRegion
 {
 public:
 
-	BuilderZoneRegion(uint regionId);
+	explicit BuilderZoneRegion(uint regionId);
 
 	// New interface
 	bool init(ZoneBuilder *zoneBuilder);
@@ -51,7 +53,7 @@ public:
 	/// Brutal adding a zone over empty space do not propagate in any way -> can result
 	/// in inconsistency when trying the propagation mode
 	void addForce (sint32 x, sint32 y, uint8 rot, uint8 flip, NLLIGO::CZoneBankElement *zoneBankElement);
-	void del(sint32 x, sint32 y, bool transition = false, void *pInternal = NULL);
+	void del(sint32 x, sint32 y, bool transition = false, ToUpdate *pUpdate = 0);
 	void move(sint32 x, sint32 y);
 	uint32 countZones();
 	void reduceMin();
@@ -62,27 +64,32 @@ private:
 	// An element of the graph
 	struct SMatNode
 	{
-		std::string			Name;
+		std::string Name;
 		// Position in the tree (vector of nodes)
 		std::vector<uint32>	Arcs;
 	};
 
 	void addTransition(sint32 x, sint32 y, uint8 rot, uint8 flip, NLLIGO::CZoneBankElement *zoneBankElement);
 
-	void addToUpdateAndCreate(BuilderZoneRegion *builderZoneRegion, sint32 sharePos, sint32 x, sint32 y, const std::string &newMat, void *pInt1, void *pInt2);
+	void addToUpdateAndCreate(BuilderZoneRegion *builderZoneRegion, sint32 sharePos, sint32 x, sint32 y,
+							  const std::string &newMat, ToUpdate *ptCreate, ToUpdate *ptUpdate);
 
-	void putTransitions(sint32 x, sint32 y, const NLLIGO::SPiece &mask, const std::string &matName, void *pInternal);
-	void updateTrans(sint32 x, sint32 y, NLLIGO::CZoneBankElement *zoneBankElement = NULL);
+	void putTransitions(sint32 x, sint32 y, const NLLIGO::SPiece &mask, const std::string &matName, ToUpdate *ptUpdate);
+	void updateTrans(sint32 x, sint32 y, NLLIGO::CZoneBankElement *zoneBankElement = 0);
 
 	std::string getNextMatInTree(const std::string &matA, const std::string &matB);
 
 	/// Find the fastest way between posA and posB in the MatTree (Dijkstra)
 	void tryPath(uint32 posA, uint32 posB, std::vector<uint32> &path);
 
-	void set(sint32 x, sint32 y, sint32 posX, sint32 posY, const std::string &zoneName, bool transition=false);
+	void set(sint32 x, sint32 y, sint32 posX, sint32 posY, const std::string &zoneName, bool transition = false);
 	void setRot(sint32 x, sint32 y, uint8 rot);
 	void setFlip(sint32 x, sint32 y, uint8 flip);
 	void resize(sint32 newMinX, sint32 newMaxX, sint32 newMinY, sint32 newMaxY);
+
+	void placePiece(sint32 x, sint32 y, uint8 rot, uint8 flip,
+					NLLIGO::SPiece &sMask, NLLIGO::SPiece &sPosX, NLLIGO::SPiece &sPosY,
+					const std::string &eltName);
 
 	uint m_regionId;
 

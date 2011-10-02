@@ -37,7 +37,7 @@ class LandscapeEditorWindow: public QMainWindow
 	Q_OBJECT
 
 public:
-	LandscapeEditorWindow(QWidget *parent = 0);
+	explicit LandscapeEditorWindow(QWidget *parent = 0);
 	~LandscapeEditorWindow();
 
 	QUndoStack *undoStack() const;

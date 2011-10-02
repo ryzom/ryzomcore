@@ -39,7 +39,7 @@ class ListZonesWidget: public QWidget
 	Q_OBJECT
 
 public:
-	ListZonesWidget(QWidget *parent = 0);
+	explicit ListZonesWidget(QWidget *parent = 0);
 	~ListZonesWidget();
 
 	void updateUi();

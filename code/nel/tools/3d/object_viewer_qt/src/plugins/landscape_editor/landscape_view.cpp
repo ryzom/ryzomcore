@@ -185,23 +185,14 @@ void LandscapeView::setCenter(const QPointF &centerPoint)
 
 			//We need to clamp the center. The centerPoint is too large
 			if (centerPoint.x() > bounds.x() + bounds.width())
-			{
 				m_currentCenterPoint.setX(bounds.x() + bounds.width());
-			}
 			else if(centerPoint.x() < bounds.x())
-			{
 				m_currentCenterPoint.setX(bounds.x());
-			}
 
 			if(centerPoint.y() > bounds.y() + bounds.height())
-			{
 				m_currentCenterPoint.setY(bounds.y() + bounds.height());
-			}
 			else if(centerPoint.y() < bounds.y())
-			{
 				m_currentCenterPoint.setY(bounds.y());
-			}
-
 		}
 	}
 
@@ -230,7 +221,6 @@ void LandscapeView::drawForeground(QPainter *painter, const QRectF &rect)
 	if (transform().m11() > m_maxViewText)
 	{
 		painter->setPen(QPen(Qt::white, 0.5, Qt::SolidLine));
-		//painter->setFont(QFont("Helvetica [Cronyx]", 12));
 		drawZoneNames(painter, rect);
 	}
 }

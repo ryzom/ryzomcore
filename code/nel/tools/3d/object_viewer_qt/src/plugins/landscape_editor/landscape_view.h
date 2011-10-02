@@ -37,7 +37,7 @@ class LANDSCAPE_EDITOR_EXPORT LandscapeView: public QGraphicsView
 	Q_OBJECT
 
 public:
-	LandscapeView(QWidget *parent = 0);
+	explicit LandscapeView(QWidget *parent = 0);
 	virtual ~LandscapeView();
 
 	//Set the current centerpoint in the

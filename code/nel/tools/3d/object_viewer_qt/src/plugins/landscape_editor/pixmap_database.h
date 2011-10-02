@@ -39,7 +39,7 @@ namespace LandscapeEditor
 class LANDSCAPE_EDITOR_EXPORT PixmapDatabase
 {
 public:
-	PixmapDatabase(int textureSize = 256);
+	explicit PixmapDatabase(int textureSize = 256);
 	~PixmapDatabase();
 
 	/// Load all images(png) from zonePath, list images gets from zoneBank

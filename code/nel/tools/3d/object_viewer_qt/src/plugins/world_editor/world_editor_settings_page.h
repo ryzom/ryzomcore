@@ -36,7 +36,7 @@ class WorldEditorSettingsPage : public Core::IOptionsPage
 {
 	Q_OBJECT
 public:
-	WorldEditorSettingsPage(QObject *parent = 0);
+	explicit WorldEditorSettingsPage(QObject *parent = 0);
 	virtual ~WorldEditorSettingsPage() {}
 
 	virtual QString id() const;

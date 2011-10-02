@@ -34,11 +34,6 @@ namespace NLMISC
 class CLibraryContext;
 }
 
-namespace ExtensionSystem
-{
-class IPluginSpec;
-}
-
 namespace LandscapeEditor
 {
 class LandscapeEditorWindow;
@@ -70,7 +65,7 @@ class LandscapeEditorContext: public Core::IContext
 {
 	Q_OBJECT
 public:
-	LandscapeEditorContext(QObject *parent = 0);
+	explicit LandscapeEditorContext(QObject *parent = 0);
 	virtual ~LandscapeEditorContext() {}
 
 	virtual QString id() const

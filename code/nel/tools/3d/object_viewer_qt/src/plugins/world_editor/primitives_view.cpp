@@ -61,7 +61,7 @@ PrimitivesView::PrimitivesView(QWidget *parent)
 	m_loadLandAction->setIcon(QIcon(LandscapeEditor::Constants::ICON_ZONE_ITEM));
 
 	m_loadPrimitiveAction = new QAction("Load primitive file", this);
-	m_loadPrimitiveAction->setIcon(QIcon("./old_ico/root.ico"));
+	m_loadPrimitiveAction->setIcon(QIcon(Constants::ICON_ROOT_PRIMITIVE));
 
 	m_newPrimitiveAction = new QAction("New primitive", this);
 
@@ -132,7 +132,7 @@ void PrimitivesView::loadRootPrimitive()
 	if (!fileNames.isEmpty())
 	{
 		if (fileNames.count() > 1)
-			m_undoStack->beginMacro("Load primitive files");
+			m_undoStack->beginMacro(tr("Load primitive files"));
 
 		Q_FOREACH(QString fileName, fileNames)
 		{
@@ -160,7 +160,7 @@ void PrimitivesView::loadLandscape()
 	if (!fileNames.isEmpty())
 	{
 		if (fileNames.count() > 1)
-			m_undoStack->beginMacro("Load land files");
+			m_undoStack->beginMacro(tr("Load land files"));
 
 		Q_FOREACH(QString fileName, fileNames)
 		{
@@ -206,7 +206,7 @@ void PrimitivesView::save()
 	if (node->data(Constants::PRIMITIVE_FILE_IS_CREATED).toBool())
 	{
 		if (!NLLIGO::saveXmlPrimitiveFile(*node->primitives(), node->fileName().toStdString()))
-			QMessageBox::warning(this, "World Editor Qt", QString("Error writing output file: %1").arg(node->fileName()));
+			QMessageBox::warning(this, "World Editor Qt", tr("Error writing output file: %1").arg(node->fileName()));
 		else
 			node->setData(Constants::PRIMITIVE_IS_MODIFIED, false);
 	}
@@ -231,7 +231,7 @@ void PrimitivesView::saveAs()
 		RootPrimitiveNode *node = static_cast<RootPrimitiveNode *>(index.internalPointer());
 
 		if (!NLLIGO::saveXmlPrimitiveFile(*node->primitives(), fileName.toStdString()))
-			QMessageBox::warning(this, "World Editor Qt", QString("Error writing output file: %1").arg(fileName));
+			QMessageBox::warning(this, "World Editor Qt", tr("Error writing output file: %1").arg(fileName));
 		else
 		{
 			node->setFileName(fileName);
@@ -407,7 +407,7 @@ void PrimitivesView::fillMenu_Primitive(QMenu *menu, const QModelIndex &index)
 
 	QSignalMapper *addSignalMapper = new QSignalMapper(menu);
 	QSignalMapper *generateSignalMapper = new QSignalMapper(menu);
-	QSignalMapper *openSignalMapper = new QSignalMapper(menu);
+	//QSignalMapper *openSignalMapper = new QSignalMapper(menu);
 	connect(addSignalMapper, SIGNAL(mapped(int)), this, SLOT(addNewPrimitiveByClass(int)));
 	connect(generateSignalMapper, SIGNAL(mapped(int)), this, SLOT(generatePrimitives(int)));
 	//connect(openSignalMapper, SIGNAL(mapped(int)), this, SLOT(openItem(int)));
@@ -427,10 +427,10 @@ void PrimitivesView::fillMenu_Primitive(QMenu *menu, const QModelIndex &index)
 			QString className = primClass->DynamicChildren[i].ClassName.c_str();
 
 			// Get icon
-			QIcon icon(QString("./old_ico/%1.ico").arg(className));
+			QIcon icon(QString("%1/%2.ico").arg(Constants::PATH_TO_OLD_ICONS).arg(className));
 
 			// Create and add action in popur menu
-			QAction *action = menu->addAction(icon, QString("Add %1").arg(className));
+			QAction *action = menu->addAction(icon, tr("Add %1").arg(className));
 			addSignalMapper->setMapping(action, i);
 			connect(action, SIGNAL(triggered()), addSignalMapper, SLOT(map()));
 		}
@@ -448,35 +448,11 @@ void PrimitivesView::fillMenu_Primitive(QMenu *menu, const QModelIndex &index)
 			QString childName = primClass->GeneratedChildren[i].ClassName.c_str();
 
 			// Create and add action in popur menu
-			QAction *action = menu->addAction(QString("Generate %1").arg(childName));
+			QAction *action = menu->addAction(tr("Generate %1").arg(childName));
 			generateSignalMapper->setMapping(action, i);
-			connect(generateSignalMapper, SIGNAL(triggered()), addSignalMapper, SLOT(map()));
+			connect(action, SIGNAL(triggered()), generateSignalMapper, SLOT(map()));
 		}
 	}
-	/*
-			// What class is it ?
-			if (primClass)
-			{
-				// Look for files
-				std::vector<std::string> filenames;
-
-				// Filenames
-				buildFilenameVector (*Selection.front (),  filenames);
-
-				// File names ?
-				if (!filenames.empty ())
-				{
-						// Add separator
-						popurMenu->addSeparator();
-
-						// Found ?
-						for (uint i = 0; i < filenames.size(); i++)
-						{
-							// Add a menu entry
-							pMenu->AppendMenu (MF_STRING, ID_EDIT_OPEN_FILE_BEGIN+i, ("Open "+NLMISC::CFile::getFilename (filenames[i])).c_str ());
-						}
-				}
-	*/
 }
 
 } /* namespace WorldEditor */

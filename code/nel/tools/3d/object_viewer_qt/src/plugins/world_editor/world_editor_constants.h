@@ -44,7 +44,10 @@ const char *const PRIMITIVE_CLASS_FILENAME = "WorldEditorPrimitiveClassFilename"
 
 //resources
 const char *const ICON_WORLD_EDITOR = ":/icons/ic_nel_world_editor.png";
-
+const char *const ICON_ROOT_PRIMITIVE = "./old_ico/root.ico";
+const char *const ICON_PROPERTY = "./old_ico/property.ico";
+const char *const ICON_FOLDER = "./old_ico/folder_h.ico";
+const char *const PATH_TO_OLD_ICONS = "./old_ico";
 
 } // namespace Constants
 } // namespace WorldEditor

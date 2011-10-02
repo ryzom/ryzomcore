@@ -36,11 +36,6 @@ namespace NLMISC
 class CLibraryContext;
 }
 
-namespace ExtensionSystem
-{
-class IPluginSpec;
-}
-
 namespace WorldEditor
 {
 class WorldEditorWindow;

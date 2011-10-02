@@ -45,17 +45,15 @@ WorldEditorScene::WorldEditorScene(int sizeCell, PrimitivesTreeModel *model, QUn
 	// TODO: get params from settings
 	setSceneRect(QRectF(-20 * 160, -20 * 160, 256 * 160, 256 * 160));
 
-	m_pen1.setColor(QColor(50, 255, 155));
-	m_pen1.setWidth(0);
+	m_greenPen.setColor(QColor(50, 255, 155));
+	m_greenPen.setWidth(0);
+	m_greenBrush.setColor(QColor(50, 255, 155, 80));
+	m_greenBrush.setStyle(Qt::SolidPattern);
 
-	m_brush1.setColor(QColor(50, 255, 155, 80));
-	m_brush1.setStyle(Qt::SolidPattern);
-
-	m_pen2.setColor(QColor(100, 0, 255));
-	m_pen2.setWidth(0);
-
-	m_brush2.setColor(QColor(100, 0, 255, 80));
-	m_brush2.setStyle(Qt::SolidPattern);
+	m_purplePen.setColor(QColor(100, 0, 255));
+	m_purplePen.setWidth(0);
+	m_purpleBrush.setColor(QColor(100, 0, 255, 80));
+	m_purpleBrush.setStyle(Qt::SolidPattern);
 }
 
 WorldEditorScene::~WorldEditorScene()
@@ -67,8 +65,6 @@ AbstractWorldItem *WorldEditorScene::addWorldItemPoint(const QPointF &point, con
 {
 	WorldItemPoint *item = new WorldItemPoint(point, angle, radius, showArrow);
 	addItem(item);
-
-	m_worldItems.push_back(item);
 	return item;
 }
 
@@ -76,8 +72,6 @@ AbstractWorldItem *WorldEditorScene::addWorldItemPath(const QPolygonF &polyline,
 {
 	WorldItemPath *item = new WorldItemPath(polyline);
 	addItem(item);
-
-	m_worldItems.push_back(item);
 	return item;
 }
 
@@ -85,8 +79,6 @@ AbstractWorldItem *WorldEditorScene::addWorldItemZone(const QPolygonF &polygon)
 {
 	WorldItemZone *item = new WorldItemZone(polygon);
 	addItem(item);
-
-	m_worldItems.push_back(item);
 	return item;
 }
 
@@ -96,10 +88,6 @@ void WorldEditorScene::removeWorldItem(QGraphicsItem *item)
 	m_selectedItems.clear();
 	m_editedSelectedItems = false;
 	m_firstSelection = false;
-
-	// TODO
-	AbstractWorldItem *worldItem = qgraphicsitem_cast<AbstractWorldItem *>(item);
-	m_worldItems.removeOne(worldItem);
 	delete item;
 }
 
@@ -174,18 +162,18 @@ void WorldEditorScene::drawForeground(QPainter *painter, const QRectF &rect)
 
 	if ((m_selectionArea.left() != 0) && (m_selectionArea.right() != 0))
 	{
+		// Draw selection area
 		if (m_selectionArea.left() < m_selectionArea.right())
 		{
-			painter->setPen(m_pen1);
-			painter->setBrush(m_brush1);
+			painter->setPen(m_greenPen);
+			painter->setBrush(m_greenBrush);
 		}
 		else
 		{
-			painter->setPen(m_pen2);
-			painter->setBrush(m_brush2);
+			painter->setPen(m_purplePen);
+			painter->setBrush(m_purpleBrush);
 		}
 		painter->drawRect(m_selectionArea);
-
 	}
 }
 

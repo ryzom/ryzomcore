@@ -63,7 +63,6 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	m_ui.graphicsView->setVisibleText(false);
 
 	m_ui.treePrimitivesView->setModel(m_primitivesModel);
-	// TODO: ?
 	m_ui.treePrimitivesView->setUndoStack(m_undoStack);
 	m_ui.treePrimitivesView->setZoneBuilder(m_zoneBuilderBase);
 	m_ui.treePrimitivesView->setWorldScene(m_worldEditorScene);
@@ -131,7 +130,7 @@ QUndoStack *WorldEditorWindow::undoStack() const
 
 void WorldEditorWindow::maybeSave()
 {
-	QMessageBox *messageBox = new QMessageBox(tr("SDI"),
+	QMessageBox *messageBox = new QMessageBox(tr("World Editor"),
 			tr("The data has been modified.\n"
 			   "Do you want to save your changes?"),
 			QMessageBox::Warning,
@@ -143,7 +142,7 @@ void WorldEditorWindow::maybeSave()
 	messageBox->setButtonText(QMessageBox::Yes,
 							  tr("Save"));
 
-	messageBox->setButtonText(QMessageBox::No, tr("Don’t Save"));
+	messageBox->setButtonText(QMessageBox::No, tr("Don't Save"));
 
 	messageBox->show();
 }
@@ -175,7 +174,7 @@ void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 		return;
 	}
 
-	m_undoStack->beginMacro(QString("Load %1").arg(fileName));
+	m_undoStack->beginMacro(tr("Load %1").arg(fileName));
 
 	checkCurrentWorld();
 
@@ -208,7 +207,6 @@ void WorldEditorWindow::checkCurrentWorld()
 void WorldEditorWindow::newWorldEditFile()
 {
 	checkCurrentWorld();
-
 	m_undoStack->push(new CreateWorldCommand("NewWorldEdit", m_primitivesModel));
 }
 
@@ -347,7 +345,7 @@ void WorldEditorWindow::hideEvent(QHideEvent *hideEvent)
 
 void WorldEditorWindow::createMenus()
 {
-	Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
+	//Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
 }
 
 void WorldEditorWindow::createToolBars()

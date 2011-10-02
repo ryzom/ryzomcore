@@ -118,12 +118,6 @@ void ZoneRegionObject::setFileName(const std::string &fileName)
 
 void ZoneRegionObject::ligoData(LigoData &data, const sint32 x, const sint32 y)
 {
-	/*
-		nlassert((x >= m_zoneRegion.getMinX()) &&
-				 (x <= m_zoneRegion.getMaxX()) &&
-				 (y >= m_zoneRegion.getMinY()) &&
-				 (y <= m_zoneRegion.getMaxY()));
-	*/
 	data.posX = m_zoneRegion.getPosX(x, y);
 	data.posY = m_zoneRegion.getPosY(x, y);
 	data.zoneName = m_zoneRegion.getName(x, y);
@@ -141,12 +135,6 @@ void ZoneRegionObject::ligoData(LigoData &data, const sint32 x, const sint32 y)
 
 void ZoneRegionObject::setLigoData(const LigoData &data, const sint32 x, const sint32 y)
 {
-	/*
-		nlassert((x >= m_zoneRegion.getMinX()) &&
-				 (x <= m_zoneRegion.getMaxX()) &&
-				 (y >= m_zoneRegion.getMinY()) &&
-				 (y <= m_zoneRegion.getMaxY()));
-	*/
 	m_zoneRegion.setPosX(x, y, data.posX);
 	m_zoneRegion.setPosY(x, y, data.posY);
 	m_zoneRegion.setName(x, y, data.zoneName);

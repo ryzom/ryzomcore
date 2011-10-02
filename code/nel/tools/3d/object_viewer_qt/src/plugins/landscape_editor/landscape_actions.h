@@ -33,40 +33,6 @@ namespace LandscapeEditor
 {
 
 /**
-@class OpenLandscapeCommand
-@brief
-@details
-*/
-class OpenLandscapeCommand: public QUndoCommand
-{
-public:
-	OpenLandscapeCommand(const QString &fileName, QUndoCommand *parent = 0);
-	virtual ~OpenLandscapeCommand();
-
-	virtual void undo();
-	virtual void redo();
-private:
-
-	QString m_fileName;
-};
-
-/**
-@class NewLandscapeCommand
-@brief
-@details
-*/
-class NewLandscapeCommand: public QUndoCommand
-{
-public:
-	NewLandscapeCommand(QUndoCommand *parent = 0);
-	virtual ~NewLandscapeCommand();
-
-	virtual void undo();
-	virtual void redo();
-private:
-};
-
-/**
 @class LigoTileCommand
 @brief
 @details

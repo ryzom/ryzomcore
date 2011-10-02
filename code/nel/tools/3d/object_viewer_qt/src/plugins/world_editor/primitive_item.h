@@ -30,10 +30,7 @@
 
 namespace WorldEditor
 {
-class WorldEditNode;
 class RootPrimitiveNode;
-class LandscapeNode;
-class PrimitiveNode;
 
 /*
 @class Node
@@ -150,7 +147,7 @@ private:
 class PrimitiveNode: public Node
 {
 public:
-	PrimitiveNode(NLLIGO::IPrimitive *primitive);
+	explicit PrimitiveNode(NLLIGO::IPrimitive *primitive);
 	virtual ~PrimitiveNode();
 
 	NLLIGO::IPrimitive *primitive() const;

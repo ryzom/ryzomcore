@@ -42,7 +42,7 @@ class WorldEditorWindow: public QMainWindow
 	Q_OBJECT
 
 public:
-	WorldEditorWindow(QWidget *parent = 0);
+	explicit WorldEditorWindow(QWidget *parent = 0);
 	~WorldEditorWindow();
 
 	QUndoStack *undoStack() const;

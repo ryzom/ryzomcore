@@ -1,6 +1,5 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
-// Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -99,7 +98,6 @@ bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList
 				// Good header ?
 				if (strcmp((const char *)(rootNode->name), "NEL_WORLD_EDITOR_PROJECT") == 0)
 				{
-					// Read the version
 					int version = -1;
 
 					// Read the parameters
@@ -112,10 +110,7 @@ bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList
 					}
 
 					if (version == -1)
-					{
-						// Error
 						syntaxError(fileName.c_str(), rootNode, "No version node");
-					}
 					else
 					{
 						// Old format,
@@ -213,9 +208,7 @@ bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList
 		}
 	}
 	else
-	{
 		nlerror("Can't open the file %s for reading.", fileName.c_str());
-	}
 
 	return result;
 }
@@ -255,12 +248,10 @@ void initPrimitiveParameters(const NLLIGO::CPrimitiveClass &primClass, NLLIGO::I
 		if (cp < primClass.Parameters.size())
 			type = primClass.Parameters[cp].Type;
 
-		// Name ?
 		if (initParameters[p].Name == "name")
 			type = NLLIGO::CPrimitiveClass::CParameter::String;
 
-		// Continue ?
-		if (cp<primClass.Parameters.size () || (initParameters[p].Name == "name"))
+		if (cp < primClass.Parameters.size () || (initParameters[p].Name == "name"))
 		{
 			// Default value ?
 			if (!parameter.DefaultValue.empty())
@@ -294,16 +285,12 @@ void initPrimitiveParameters(const NLLIGO::CPrimitiveClass &primClass, NLLIGO::I
 				{
 					bool Visible = false;
 					if (cp < primClass.Parameters.size() && !primClass.Parameters[cp].Visible)
-					{
 						Visible = true;
-					}
 					for (size_t i = 0; i < parameter.DefaultValue.size(); ++i)
 					{
 						// Generate a unique id ?
 						if (parameter.DefaultValue[i].GenID)
-						{
 							Visible = true;
-						}
 					}
 					if (Visible)
 					{
@@ -317,13 +304,9 @@ void initPrimitiveParameters(const NLLIGO::CPrimitiveClass &primClass, NLLIGO::I
 						{
 							// Generate a unique id ?
 							if (parameter.DefaultValue[i].GenID)
-							{
 								str->StringArray[i] = NLMISC::toString(getUniqueId());
-							}
 							else
-							{
 								str->StringArray[i] = "";
-							}
 						}
 						primitive.addPropertyByName(parameter.Name.c_str(), str);
 					}
@@ -347,7 +330,7 @@ NLLIGO::IPrimitive *createPrimitive(const char *className, const char *primName,
 									NLLIGO::IPrimitive *parent)
 {
 	// Get the prim class
-	const NLLIGO::CPrimitiveClass *primClass = NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig->getPrimitiveClass(className);
+	const NLLIGO::CPrimitiveClass *primClass = ligoConfig()->getPrimitiveClass(className);
 	if (primClass)
 	{
 		// Create the base primitive
@@ -438,41 +421,18 @@ NLLIGO::IPrimitive *createPrimitive(const char *className, const char *primName,
 			return NULL;
 		}
 
-		// Prim file ?
-		if (primClass->Type == NLLIGO::CPrimitiveClass::Bitmap)
-		{
-			// Create a dialog file
-			//CFileDialogEx dialog (BASE_REGISTRY_KEY, "image", TRUE, primClass->FileExtension.c_str (), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT,
-			//	(primClass->FileType+" (*."+primClass->FileExtension+")|*."+primClass->FileExtension+"|All Files (*.*)|*.*||").c_str (), getMainFrame ());
-			//if (dialog.DoModal() == IDOK)
-			//{
-			// Save filename
-			//	static_cast<CPrimBitmap*>(primitive)->init(dialog.GetPathName ());
-			//}
-		}
-
-		// Continue ?
 		if (primitive)
 		{
-			// Auto init ?
 			if (!primClass->AutoInit)
 			{
-				// Make a vector of locator
-				//CDatabaseLocatorPointer locatorPtr;
-				//getLocator (locatorPtr, locator);
-				std::list<NLLIGO::IPrimitive *> locators;
-				//locators.push_back (const_cast<IPrimitive*> (locatorPtr.Primitive));
-
-				// Yes, go
-				//CDialogProperties dialogProperty (locators, getMainFrame ());
-				//dialogProperty.DoModal ();
+				// TODO
 			}
 
 			// Eval the default name property
 			std::string name;
 			if (!primitive->getPropertyByName ("name", name) || name.empty())
 			{
-				const NLLIGO::CPrimitiveClass *primClass = NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig->getPrimitiveClass(*primitive);
+				const NLLIGO::CPrimitiveClass *primClass = ligoConfig()->getPrimitiveClass(*primitive);
 				if (primClass)
 				{
 					for (size_t i = 0; i < primClass->Parameters.size(); ++i)
@@ -491,17 +451,13 @@ NLLIGO::IPrimitive *createPrimitive(const char *className, const char *primName,
 				}
 			}
 
-			// Init primitive default values
-			primitive->initDefaultValues(*NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig);
+			primitive->initDefaultValues(*ligoConfig());
 		}
-
-		// Done
 		return primitive;
 	}
 	else
-	{
 		nlerror("Unknown primitive class name : %s", className);
-	}
+
 	return 0;
 }
 
@@ -521,11 +477,10 @@ void deletePrimitive(NLLIGO::IPrimitive *primitive)
 
 bool updateDefaultValues(NLLIGO::IPrimitive *primitive)
 {
-	// Modified
 	bool modified = false;
 
 	// Get the prim class
-	const NLLIGO::CPrimitiveClass *primClass = NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig->getPrimitiveClass(*primitive);
+	const NLLIGO::CPrimitiveClass *primClass = ligoConfig()->getPrimitiveClass(*primitive);
 	nlassert(primClass);
 
 	if (primClass)
