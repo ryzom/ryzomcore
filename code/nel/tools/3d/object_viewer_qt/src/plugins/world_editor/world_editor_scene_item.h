@@ -66,21 +66,21 @@ public:
 	enum { Type = QGraphicsItem::UserType + 1 };
 
 	/// Rotate item around @pivot point on &deltaAngle (deg).
-	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle) {};
+	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle) {}
 
 	/// Scales item relatively @pivot point
 	// TODO: add modes: IgnoreAspectRatio, KeepAspectRatio
-	virtual void scaleOn(const QPointF &pivot, const QPointF &factor) {};
+	virtual void scaleOn(const QPointF &pivot, const QPointF &factor) {}
 
 	/// Rotate arrow on angle (deg). (only for WorldItemPoint)
-	virtual void turnOn(const qreal angle) {};
-	virtual void radiusOn(const qreal radius) {};
+	virtual void turnOn(const qreal angle) {}
+	virtual void radiusOn(const qreal radius) {}
 
 	/// Change color
-	virtual void setColor(const QColor &color) = 0;
+	virtual void setColor(const QColor &color) {}
 
 	/// Enable/disable the mode edit shape (only for WorldItemPath and WorldItemPath)
-	virtual void setEnabledSubPoints(bool enabled) = 0;
+	virtual void setEnabledSubPoints(bool enabled) {}
 
 	virtual void moveSubPoint(WorldItemSubPoint *subPoint) {}
 	virtual void addSubPoint(WorldItemSubPoint *subPoint) {}
@@ -156,22 +156,20 @@ private:
 };
 
 /*
-@class WorldItemPath
-@brief WorldItemPath class provides a polyline item that you can add to a WorldEditorScene.
+@class BaseWorldItemPolyline
+@brief
 @details
 */
-class WorldItemPath: public AbstractWorldItem
+class BaseWorldItemPolyline: public AbstractWorldItem
 {
 public:
-	WorldItemPath(const QPolygonF &polygon, QGraphicsItem *parent = 0);
-	virtual ~WorldItemPath();
+	BaseWorldItemPolyline(const QPolygonF &polygon, QGraphicsItem *parent = 0);
+	virtual ~BaseWorldItemPolyline();
 
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle);
 	virtual void scaleOn(const QPointF &pivot, const QPointF &factor);
 
-	virtual void setColor(const QColor &color);
 	virtual void setEnabledSubPoints(bool enabled);
-
 	virtual void moveSubPoint(WorldItemSubPoint *subPoint);
 	virtual void addSubPoint(WorldItemSubPoint *subPoint);
 	virtual bool removeSubPoint(WorldItemSubPoint *subPoint);
@@ -180,19 +178,38 @@ public:
 	virtual QPolygonF polygon() const;
 
 	virtual QRectF boundingRect() const;
+
+protected:
+	virtual void createSubPoints();
+	virtual void removeSubPoints();
+
+	bool m_pointEdit;
+	QPolygonF m_polyline;
+	QPen m_pen, m_selectedPen;
+
+	QList<WorldItemSubPoint *> m_listItems;
+	QList<LineStruct> m_listLines;
+};
+
+/*
+@class WorldItemPath
+@brief WorldItemPath class provides a polyline item that you can add to a WorldEditorScene.
+@details
+*/
+class WorldItemPath: public BaseWorldItemPolyline
+{
+public:
+	WorldItemPath(const QPolygonF &polygon, QGraphicsItem *parent = 0);
+	virtual ~WorldItemPath();
+
+	virtual void setColor(const QColor &color);
+	virtual bool removeSubPoint(WorldItemSubPoint *subPoint);
 	virtual QPainterPath shape() const;
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 private:
-	void createSubPoints();
-	void removeSubPoints();
 
 	QPen m_pen, m_selectedPen;
-	QPolygonF m_polygon;
-	bool m_pointEdit;
-
-	QList<WorldItemSubPoint *> m_listItems;
-	QList<LineStruct> m_listLines;
 };
 
 /*
@@ -200,42 +217,27 @@ private:
 @brief The WorldItemZone class provides a polygon item that you can add to a WorldEditorScene.
 @details
 */
-class WorldItemZone: public AbstractWorldItem
+class WorldItemZone: public BaseWorldItemPolyline
 {
 public:
 	WorldItemZone(const QPolygonF &polygon, QGraphicsItem *parent = 0);
 	virtual ~WorldItemZone();
 
-	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle);
-	virtual void scaleOn(const QPointF &pivot, const QPointF &factor);
 
 	virtual void setColor(const QColor &color);
-	virtual void setEnabledSubPoints(bool enabled);
-
-	virtual void moveSubPoint(WorldItemSubPoint *subPoint);
-	virtual void addSubPoint(WorldItemSubPoint *subPoint);
 	virtual bool removeSubPoint(WorldItemSubPoint *subPoint);
 
-	virtual void setPolygon(const QPolygonF &polygon);
-	virtual QPolygonF polygon() const;
-
-	virtual QRectF boundingRect() const;
 	virtual QPainterPath shape() const;
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
-private:
-	void createSubPoints();
-	void removeSubPoints();
+protected:
+	virtual void createSubPoints();
 
+private:
 	static const int TRANSPARENCY = 38;
 
 	QPen m_pen, m_selectedPen;
 	QBrush m_brush, m_selectedBrush;
-	QPolygonF m_polygon;
-	bool m_pointEdit;
-
-	QList<WorldItemSubPoint *> m_listItems;
-	QList<LineStruct> m_listLines;
 };
 
 /*

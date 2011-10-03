@@ -180,6 +180,8 @@ void WorldItemPoint::radiusOn(const qreal radius)
 {
 	if (m_radius == 0)
 		return;
+
+	// TODO: implement
 }
 
 void WorldItemPoint::setColor(const QColor &color)
@@ -240,9 +242,6 @@ QRectF WorldItemPoint::boundingRect() const
 
 void WorldItemPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
 {
-	// Here comes the magic:
-	//painter->setClipRect(option->exposedRect);
-
 	painter->setPen(m_pen);
 
 	// Draw circle
@@ -256,353 +255,59 @@ void WorldItemPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
 	painter->drawLines(m_arrow);
 
 	painter->setPen(Qt::NoPen);
-//	if (option->state & QStyle::State_Selected)
 	if (isActived())
-	{
 		painter->setBrush(m_selectedBrush);
-	}
 	else
-	{
 		painter->setBrush(m_brush);
-	}
 
 	// Draw point
 	painter->drawRect(m_rect);
 }
 
-WorldItemPath::WorldItemPath(const QPolygonF &polygon, QGraphicsItem *parent)
+BaseWorldItemPolyline::BaseWorldItemPolyline(const QPolygonF &polygon, QGraphicsItem *parent)
 	: AbstractWorldItem(parent),
-	  m_polygon(polygon),
+	  m_polyline(polygon),
 	  m_pointEdit(false)
 {
 	//setFlag(ItemIsSelectable);
-
-	setZValue(WORLD_PATH_LAYER);
-
-	m_pen.setColor(Qt::black);
-	m_pen.setWidth(3);
-	m_pen.setJoinStyle(Qt::MiterJoin);
-
-	m_selectedPen.setColor(Qt::white);
-	m_selectedPen.setWidth(3);
-	m_selectedPen.setJoinStyle(Qt::MiterJoin);
-
-	QPointF center = m_polygon.boundingRect().center();
-	m_polygon.translate(-center);
+	QPointF center = m_polyline.boundingRect().center();
+	m_polyline.translate(-center);
 	setPos(center);
 }
 
-WorldItemPath::~WorldItemPath()
+BaseWorldItemPolyline::~BaseWorldItemPolyline()
 {
 }
 
-void WorldItemPath::rotateOn(const QPointF &pivot, const qreal deltaAngle)
+void BaseWorldItemPolyline::rotateOn(const QPointF &pivot, const qreal deltaAngle)
 {
 	prepareGeometryChange();
 
-	QPolygonF rotatedPolygon(m_polygon);
+	QPolygonF rotatedPolygon(m_polyline);
 	rotatedPolygon.translate(pos() - pivot);
 
 	QTransform trans;
 	trans = trans.rotate(deltaAngle);
-	m_polygon = trans.map(rotatedPolygon);
+	m_polyline = trans.map(rotatedPolygon);
 
-	m_polygon.translate(pivot - pos());
+	m_polyline.translate(pivot - pos());
 }
 
-void WorldItemPath::scaleOn(const QPointF &pivot, const QPointF &factor)
+void BaseWorldItemPolyline::scaleOn(const QPointF &pivot, const QPointF &factor)
 {
 	prepareGeometryChange();
 
-	QPolygonF scaledPolygon(m_polygon);
+	QPolygonF scaledPolygon(m_polyline);
 	scaledPolygon.translate(pos() - pivot);
 
 	QTransform trans;
 	trans = trans.scale(factor.x(), factor.y());
-	m_polygon = trans.map(scaledPolygon);
+	m_polyline = trans.map(scaledPolygon);
 
-	m_polygon.translate(pivot - pos());
+	m_polyline.translate(pivot - pos());
 }
 
-void WorldItemPath::setColor(const QColor &color)
-{
-	m_pen.setColor(color);
-}
-
-
-void WorldItemPath::setEnabledSubPoints(bool enabled)
-{
-	m_pointEdit = enabled;
-	if (m_pointEdit)
-		createSubPoints();
-	else
-		removeSubPoints();
-}
-
-void WorldItemPath::moveSubPoint(WorldItemSubPoint *subPoint)
-{
-	prepareGeometryChange();
-
-	QPolygonF polygon;
-
-	// Update polygon
-	Q_FOREACH(WorldItemSubPoint *node, m_listItems)
-	{
-		polygon << node->pos();
-	}
-
-	// Update middle points
-	for (int i = 0; i < m_listLines.size(); ++i)
-		m_listLines.at(i).itemPoint->setPos((m_listLines.at(i).lineItem.first->pos() + m_listLines.at(i).lineItem.second->pos()) / 2);
-
-	m_polygon = polygon;
-	setShapeChanged(true);
-	update();
-}
-
-void WorldItemPath::addSubPoint(WorldItemSubPoint *subPoint)
-{
-	prepareGeometryChange();
-
-	for (int i = 0; i < m_listLines.size(); ++i)
-	{
-		if (subPoint == m_listLines.at(i).itemPoint)
-		{
-			LineStruct oldLineItem = m_listLines[i];
-
-			// Create the first middle sub-point
-			WorldItemSubPoint *firstItem = new WorldItemSubPoint(WorldItemSubPoint::MiddleType, this);
-			firstItem->setPos((oldLineItem.lineItem.first->pos() + subPoint->pos()) / 2);
-
-			// Create the second middle sub-point
-			WorldItemSubPoint *secondItem = new WorldItemSubPoint(WorldItemSubPoint::MiddleType, this);
-			secondItem->setPos((oldLineItem.lineItem.second->pos() + subPoint->pos()) / 2);
-
-			// Add first line in the list
-			LineStruct firstNewLineItem;
-			firstNewLineItem.itemPoint = firstItem;
-			firstNewLineItem.lineItem = LineItem(oldLineItem.lineItem.first, subPoint);
-			m_listLines.push_back(firstNewLineItem);
-
-			// Add second line in the list
-			LineStruct secondNewLineItem;
-			secondNewLineItem.itemPoint = secondItem;
-			secondNewLineItem.lineItem = LineItem(subPoint, oldLineItem.lineItem.second);
-			m_listLines.push_back(secondNewLineItem);
-
-			m_listLines.removeAt(i);
-
-			int pos = m_listItems.indexOf(oldLineItem.lineItem.second);
-			m_listItems.insert(pos, subPoint);
-			subPoint->setFlag(ItemSendsScenePositionChanges);
-
-			break;
-		}
-	}
-	setShapeChanged(true);
-}
-
-bool WorldItemPath::removeSubPoint(WorldItemSubPoint *subPoint)
-{
-	int pos = m_listItems.indexOf(subPoint);
-
-	// First and second points can not be removed
-	if ((pos == 0) || (pos == m_listItems.size() - 1))
-		return false;
-
-	prepareGeometryChange();
-
-	m_listItems.takeAt(pos);
-
-	LineStruct newLineItem;
-
-	newLineItem.itemPoint = subPoint;
-
-	// Delete first line
-	for (int i = 0; i < m_listLines.size(); ++i)
-	{
-		if (subPoint == m_listLines.at(i).lineItem.first)
-		{
-			// Saving second point for new line
-			newLineItem.lineItem.second = m_listLines.at(i).lineItem.second;
-			delete m_listLines.at(i).itemPoint;
-			m_listLines.removeAt(i);
-			break;
-		}
-	}
-
-	// Delete second line
-	for (int i = 0; i < m_listLines.size(); ++i)
-	{
-		if (subPoint == m_listLines.at(i).lineItem.second)
-		{
-			// Saving first point for new line
-			newLineItem.lineItem.first = m_listLines.at(i).lineItem.first;
-			delete m_listLines.at(i).itemPoint;
-			m_listLines.removeAt(i);
-			break;
-		}
-	}
-	subPoint->setPos((newLineItem.lineItem.first->pos() + newLineItem.lineItem.second->pos()) / 2);
-	m_listLines.push_back(newLineItem);
-	subPoint->setFlag(ItemSendsScenePositionChanges, false);
-	setShapeChanged(true);
-
-	return true;
-}
-
-void WorldItemPath::setPolygon(const QPolygonF &polygon)
-{
-	prepareGeometryChange();
-
-	m_polygon = polygon;
-
-	update();
-}
-
-QPolygonF WorldItemPath::polygon() const
-{
-	return m_polygon;
-}
-
-QPainterPath WorldItemPath::shape() const
-{
-	QPainterPath path;
-
-	path.moveTo(m_polygon.first());
-	for (int i = 1; i < m_polygon.count(); ++i)
-		path.lineTo(m_polygon.at(i));
-
-	return qt_graphicsItem_shapeFromPath(path, m_pen);
-}
-
-QRectF WorldItemPath::boundingRect() const
-{
-	return m_polygon.boundingRect();
-}
-
-void WorldItemPath::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
-{
-	// Here comes the magic:
-	//painter->setClipRect(option->exposedRect);
-
-	//if (option->state & QStyle::State_Selected)
-	if (isActived())
-		painter->setPen(m_selectedPen);
-	else
-		painter->setPen(m_pen);
-
-	painter->drawPolyline(m_polygon);
-}
-
-void WorldItemPath::createSubPoints()
-{
-	WorldItemSubPoint *firstPoint;
-	firstPoint = new WorldItemSubPoint(WorldItemSubPoint::EdgeType, this);
-	firstPoint->setPos(m_polygon.front());
-	firstPoint->setFlag(ItemSendsScenePositionChanges);
-	m_listItems.push_back(firstPoint);
-
-	for (int i = 1; i < m_polygon.count(); ++i)
-	{
-		WorldItemSubPoint *secondPoint = new WorldItemSubPoint(WorldItemSubPoint::EdgeType, this);
-		secondPoint->setPos(m_polygon.at(i));
-		secondPoint->setFlag(ItemSendsScenePositionChanges);
-
-		WorldItemSubPoint *middlePoint = new WorldItemSubPoint(WorldItemSubPoint::MiddleType, this);
-		middlePoint->setPos((firstPoint->pos() + secondPoint->pos()) / 2);
-
-		LineStruct newLineItem;
-		newLineItem.itemPoint = middlePoint;
-		newLineItem.lineItem = LineItem(firstPoint, secondPoint);
-		m_listLines.push_back(newLineItem);
-
-		firstPoint = secondPoint;
-		m_listItems.push_back(firstPoint);
-	}
-}
-
-void WorldItemPath::removeSubPoints()
-{
-	for (int i = 0; i < m_listLines.count(); ++i)
-		delete m_listLines.at(i).itemPoint;
-
-	for (int i = 0; i < m_listItems.count(); ++i)
-		delete m_listItems.at(i);
-
-	m_listItems.clear();
-	m_listLines.clear();
-}
-
-WorldItemZone::WorldItemZone(const QPolygonF &polygon, QGraphicsItem *parent)
-	: AbstractWorldItem(parent),
-	  m_polygon(polygon),
-	  m_pointEdit(false)
-{
-	//setFlag(ItemIsSelectable);
-
-	setZValue(WORLD_ZONE_LAYER);
-
-	m_pen.setColor(QColor(20, 100, 255));
-	m_pen.setWidth(0);
-
-	m_selectedPen.setColor(Qt::white);
-	m_selectedPen.setWidth(0);
-
-	m_brush.setColor(QColor(20, 100, 255, TRANSPARENCY));
-	m_brush.setStyle(Qt::SolidPattern);
-
-	m_selectedBrush.setColor(QColor(255, 255, 255, 100));
-	m_selectedBrush.setStyle(Qt::SolidPattern);
-
-	QPointF center = m_polygon.boundingRect().center();
-	m_polygon.translate(-center);
-	setPos(center);
-}
-
-WorldItemZone::~WorldItemZone()
-{
-}
-
-void WorldItemZone::rotateOn(const QPointF &pivot, const qreal deltaAngle)
-{
-	prepareGeometryChange();
-
-	QPolygonF rotatedPolygon(m_polygon);
-	rotatedPolygon.translate(pos() - pivot);
-
-	QTransform trans;
-	trans = trans.rotate(deltaAngle);
-	m_polygon = trans.map(rotatedPolygon);
-
-	m_polygon.translate(pivot - pos());
-}
-
-void WorldItemZone::scaleOn(const QPointF &pivot, const QPointF &factor)
-{
-	prepareGeometryChange();
-
-	QPolygonF scaledPolygon(m_polygon);
-	scaledPolygon.translate(pos() - pivot);
-
-	QTransform trans;
-	trans = trans.scale(factor.x(), factor.y());
-	m_polygon = trans.map(scaledPolygon);
-
-	m_polygon.translate(pivot - pos());
-}
-
-void WorldItemZone::setColor(const QColor &color)
-{
-	m_pen.setColor(color);
-
-	QColor brushColor(color);
-	brushColor.setAlpha(TRANSPARENCY);
-
-	m_brush.setColor(brushColor);
-}
-
-void WorldItemZone::setEnabledSubPoints(bool enabled)
+void BaseWorldItemPolyline::setEnabledSubPoints(bool enabled)
 {
 	m_pointEdit = enabled;
 	if (m_pointEdit)
@@ -613,7 +318,7 @@ void WorldItemZone::setEnabledSubPoints(bool enabled)
 	setShapeChanged(false);
 }
 
-void WorldItemZone::moveSubPoint(WorldItemSubPoint *subPoint)
+void BaseWorldItemPolyline::moveSubPoint(WorldItemSubPoint *subPoint)
 {
 	prepareGeometryChange();
 
@@ -629,13 +334,12 @@ void WorldItemZone::moveSubPoint(WorldItemSubPoint *subPoint)
 	for (int i = 0; i < m_listLines.size(); ++i)
 		m_listLines.at(i).itemPoint->setPos((m_listLines.at(i).lineItem.first->pos() + m_listLines.at(i).lineItem.second->pos()) / 2);
 
-	m_polygon = polygon;
-	update();
-
+	m_polyline = polygon;
 	setShapeChanged(true);
+	update();
 }
 
-void WorldItemZone::addSubPoint(WorldItemSubPoint *subPoint)
+void BaseWorldItemPolyline::addSubPoint(WorldItemSubPoint *subPoint)
 {
 	prepareGeometryChange();
 
@@ -677,18 +381,13 @@ void WorldItemZone::addSubPoint(WorldItemSubPoint *subPoint)
 	setShapeChanged(true);
 }
 
-bool WorldItemZone::removeSubPoint(WorldItemSubPoint *subPoint)
+bool BaseWorldItemPolyline::removeSubPoint(WorldItemSubPoint *subPoint)
 {
 	prepareGeometryChange();
 
-	if (m_listItems.size() < 4)
-		return false;
-
 	int pos = m_listItems.indexOf(subPoint);
 	m_listItems.takeAt(pos);
-
 	LineStruct newLineItem;
-
 	newLineItem.itemPoint = subPoint;
 
 	// Delete first line
@@ -716,70 +415,42 @@ bool WorldItemZone::removeSubPoint(WorldItemSubPoint *subPoint)
 			break;
 		}
 	}
-	m_listLines.push_back(newLineItem);
 	subPoint->setPos((newLineItem.lineItem.first->pos() + newLineItem.lineItem.second->pos()) / 2);
+	m_listLines.push_back(newLineItem);
 	subPoint->setFlag(ItemSendsScenePositionChanges, false);
-
 	setShapeChanged(true);
-
 	return true;
 }
 
-void WorldItemZone::setPolygon(const QPolygonF &polygon)
+void BaseWorldItemPolyline::setPolygon(const QPolygonF &polygon)
 {
 	prepareGeometryChange();
-
-	m_polygon = polygon;
-
+	m_polyline = polygon;
 	update();
 }
 
-QPolygonF WorldItemZone::polygon() const
+QPolygonF BaseWorldItemPolyline::polygon() const
 {
-	return m_polygon;
+	return m_polyline;
 }
 
-QRectF WorldItemZone::boundingRect() const
+QRectF BaseWorldItemPolyline::boundingRect() const
 {
-	return m_polygon.boundingRect();
+	return m_polyline.boundingRect();
 }
 
-QPainterPath WorldItemZone::shape() const
-{
-	QPainterPath path;
-	path.addPolygon(m_polygon);
-	return qt_graphicsItem_shapeFromPath(path, m_pen);
-}
-
-void WorldItemZone::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
-{
-//	if (option->state & QStyle::State_Selected)
-	if (isActived())
-	{
-		painter->setPen(m_selectedPen);
-		painter->setBrush(m_selectedBrush);
-	}
-	else
-	{
-		painter->setPen(m_pen);
-		painter->setBrush(m_brush);
-	}
-
-	painter->drawPolygon(m_polygon);
-}
-
-void WorldItemZone::createSubPoints()
+void BaseWorldItemPolyline::createSubPoints()
 {
 	WorldItemSubPoint *firstPoint;
 	firstPoint = new WorldItemSubPoint(WorldItemSubPoint::EdgeType, this);
-	firstPoint->setPos(m_polygon.front());
+	firstPoint->setPos(m_polyline.front());
 	firstPoint->setFlag(ItemSendsScenePositionChanges);
 	m_listItems.push_back(firstPoint);
 
-	for (int i = 1; i < m_polygon.count(); ++i)
+	for (int i = 1; i < m_polyline.count(); ++i)
 	{
 		WorldItemSubPoint *secondPoint = new WorldItemSubPoint(WorldItemSubPoint::EdgeType, this);
-		secondPoint->setPos(m_polygon.at(i));
+		secondPoint->setPos(m_polyline.at(i));
 		secondPoint->setFlag(ItemSendsScenePositionChanges);
 
 		WorldItemSubPoint *middlePoint = new WorldItemSubPoint(WorldItemSubPoint::MiddleType, this);
@@ -793,15 +464,9 @@ void WorldItemZone::createSubPoints()
 		firstPoint = secondPoint;
 		m_listItems.push_back(firstPoint);
 	}
-
-	LineStruct endLineItem;
-	endLineItem.itemPoint = new WorldItemSubPoint(WorldItemSubPoint::MiddleType, this);
-	endLineItem.itemPoint->setPos((m_listItems.first()->pos() + m_listItems.last()->pos()) / 2);
-	endLineItem.lineItem = LineItem(m_listItems.last(), m_listItems.first());
-	m_listLines.push_back(endLineItem);
 }
 
-void WorldItemZone::removeSubPoints()
+void BaseWorldItemPolyline::removeSubPoints()
 {
 	for (int i = 0; i < m_listLines.count(); ++i)
 		delete m_listLines.at(i).itemPoint;
@@ -811,6 +476,131 @@ void WorldItemZone::removeSubPoints()
 
 	m_listItems.clear();
 	m_listLines.clear();
+}
+
+WorldItemPath::WorldItemPath(const QPolygonF &polygon, QGraphicsItem *parent)
+	: BaseWorldItemPolyline(polygon, parent)
+{
+	setZValue(WORLD_PATH_LAYER);
+
+	m_pen.setColor(Qt::black);
+	m_pen.setWidth(3);
+	m_pen.setJoinStyle(Qt::MiterJoin);
+
+	m_selectedPen.setColor(Qt::white);
+	m_selectedPen.setWidth(3);
+	m_selectedPen.setJoinStyle(Qt::MiterJoin);
+}
+
+WorldItemPath::~WorldItemPath()
+{
+}
+
+void WorldItemPath::setColor(const QColor &color)
+{
+	m_pen.setColor(color);
+}
+
+bool WorldItemPath::removeSubPoint(WorldItemSubPoint *subPoint)
+{
+	int pos = m_listItems.indexOf(subPoint);
+
+	// First and second points can not be removed
+	if ((pos == 0) || (pos == m_listItems.size() - 1))
+		return false;
+
+	return BaseWorldItemPolyline::removeSubPoint(subPoint);
+}
+
+QPainterPath WorldItemPath::shape() const
+{
+	QPainterPath path;
+
+	path.moveTo(m_polyline.first());
+	for (int i = 1; i < m_polyline.count(); ++i)
+		path.lineTo(m_polyline.at(i));
+
+	return qt_graphicsItem_shapeFromPath(path, m_pen);
+}
+
+void WorldItemPath::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
+{
+	if (isActived())
+		painter->setPen(m_selectedPen);
+	else
+		painter->setPen(m_pen);
+
+	painter->drawPolyline(m_polyline);
+}
+
+
+WorldItemZone::WorldItemZone(const QPolygonF &polygon, QGraphicsItem *parent)
+	: BaseWorldItemPolyline(polygon, parent)
+{
+	setZValue(WORLD_ZONE_LAYER);
+
+	m_pen.setColor(QColor(20, 100, 255));
+	m_pen.setWidth(0);
+	m_selectedPen.setColor(Qt::white);
+	m_selectedPen.setWidth(0);
+	m_brush.setColor(QColor(20, 100, 255, TRANSPARENCY));
+	m_brush.setStyle(Qt::SolidPattern);
+	m_selectedBrush.setColor(QColor(255, 255, 255, 100));
+	m_selectedBrush.setStyle(Qt::SolidPattern);
+}
+
+WorldItemZone::~WorldItemZone()
+{
+}
+
+void WorldItemZone::setColor(const QColor &color)
+{
+	m_pen.setColor(color);
+	QColor brushColor(color);
+	brushColor.setAlpha(TRANSPARENCY);
+	m_brush.setColor(brushColor);
+}
+
+bool WorldItemZone::removeSubPoint(WorldItemSubPoint *subPoint)
+{
+	if (m_listItems.size() < 4)
+		return false;
+
+	return BaseWorldItemPolyline::removeSubPoint(subPoint);
+}
+
+QPainterPath WorldItemZone::shape() const
+{
+	QPainterPath path;
+	path.addPolygon(m_polyline);
+	return qt_graphicsItem_shapeFromPath(path, m_pen);
+}
+
+void WorldItemZone::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
+{
+	if (isActived())
+	{
+		painter->setPen(m_selectedPen);
+		painter->setBrush(m_selectedBrush);
+	}
+	else
+	{
+		painter->setPen(m_pen);
+		painter->setBrush(m_brush);
+	}
+
+	painter->drawPolygon(m_polyline);
+}
+
+void WorldItemZone::createSubPoints()
+{
+	BaseWorldItemPolyline::createSubPoints();
+
+	LineStruct endLineItem;
+	endLineItem.itemPoint = new WorldItemSubPoint(WorldItemSubPoint::MiddleType, this);
+	endLineItem.itemPoint->setPos((m_listItems.first()->pos() + m_listItems.last()->pos()) / 2);
+	endLineItem.lineItem = LineItem(m_listItems.last(), m_listItems.first());
+	m_listLines.push_back(endLineItem);
 }
 
 //*******************************************
@@ -859,8 +649,6 @@ void WorldItemSubPoint::rotateOn(const QPointF &pivot, const qreal deltaAngle)
 	prepareGeometryChange();
 
 	QPolygonF rotatedPolygon(m_rect);
-
-	// TODO
 	rotatedPolygon.translate(scenePos() - pivot);
 
 	QTransform trans;
@@ -876,8 +664,6 @@ void WorldItemSubPoint::scaleOn(const QPointF &pivot, const QPointF &factor)
 	prepareGeometryChange();
 
 	QPolygonF scaledPolygon(m_rect);
-
-	// TODO
 	scaledPolygon.translate(scenePos() - pivot);
 
 	QTransform trans;
@@ -896,7 +682,6 @@ QRectF WorldItemSubPoint::boundingRect() const
 void WorldItemSubPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
 	painter->setPen(Qt::NoPen);
-
 	if (m_type == WorldItemSubPoint::EdgeType)
 	{
 		if (isActived())
@@ -905,9 +690,7 @@ void WorldItemSubPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem 
 			painter->setBrush(m_brush);
 	}
 	else
-	{
 		painter->setBrush(m_brushMiddle);
-	}
 
 	// Draw point
 	painter->drawRect(m_rect);

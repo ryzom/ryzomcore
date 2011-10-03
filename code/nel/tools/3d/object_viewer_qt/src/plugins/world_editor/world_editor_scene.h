@@ -105,20 +105,30 @@ private:
 	void updateSelectedWorldItem(QGraphicsItem *item, bool value);
 	void updateSelectedPointItems(bool value);
 	void updateSelectedPointItem(QGraphicsItem *item, bool value);
+
 	void updatePickSelection(const QPointF &point);
 	void updatePickSelectionPoints(const QPointF &point);
 
 	void checkUndo();
+	void checkUndoPointsMode();
+
+	void updateWorldItemsMove(QGraphicsSceneMouseEvent *mouseEvent);
+	void updateWorldItemsScale(QGraphicsSceneMouseEvent *mouseEvent);
+	void updateWorldItemsRotate(QGraphicsSceneMouseEvent *mouseEvent);
+	void updateWorldItemsTurn(QGraphicsSceneMouseEvent *mouseEvent);
+	void updateWorldItemsRadius(QGraphicsSceneMouseEvent *mouseEvent);
 
 	QPen m_greenPen, m_purplePen;
 	QBrush m_greenBrush, m_purpleBrush;
 
-	QPointF m_firstPick, m_scaleFactor, m_pivot;
+	QPointF m_firstPick, m_scaleFactor, m_pivot, m_offset;
 	QRectF m_selectionArea;
 	qreal m_firstPickX, m_firstPickY, m_angle;
+
 	QList<QGraphicsItem *> m_selectedItems;
 	QList<QGraphicsItem *> m_selectedPoints;
 	QList<QPolygonF> m_polygons;
+
 	bool m_editedSelectedItems, m_firstSelection;
 	uint m_lastPickedPrimitive;
 	ModeEdit m_mode;

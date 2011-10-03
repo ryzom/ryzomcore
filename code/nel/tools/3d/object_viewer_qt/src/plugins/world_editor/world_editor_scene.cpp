@@ -188,7 +188,7 @@ void WorldEditorScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 		if (mouseEvent->button() == Qt::LeftButton)
 		{
 			// Create new sub-points
-			// Call method mousePressEvent for point located under mouse
+			// Call method mousePressEvent for sub-point located under mouse
 			LandscapeEditor::LandscapeSceneBase::mousePressEvent(mouseEvent);
 
 			if ((!m_editedSelectedItems && m_selectedPoints.isEmpty()) ||
@@ -205,7 +205,7 @@ void WorldEditorScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 			m_selectedPoints.clear();
 
 			// Delete sub-points if it located under mouse
-			// Call method mousePressEvent for point located under mouse
+			// Call method mousePressEvent for sub-point located under mouse
 			LandscapeEditor::LandscapeSceneBase::mousePressEvent(mouseEvent);
 		}
 	}
@@ -232,119 +232,35 @@ void WorldEditorScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 	if (m_mode == WorldEditorScene::SelectMode)
 		m_selectionArea.setTopLeft(mouseEvent->scenePos());
-
-//	if (m_selectedItems.isEmpty())
-//		m_selectionArea.setTopLeft(mouseEvent->scenePos());
 }
 
 void WorldEditorScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
 	if (QApplication::mouseButtons() == Qt::LeftButton)
 	{
-		QPointF offset(mouseEvent->scenePos() - mouseEvent->lastScenePos());
-
 		m_selectionArea.setBottomRight(mouseEvent->scenePos());
-
 		switch (m_mode)
 		{
 		case WorldEditorScene::SelectMode:
 			break;
 		case WorldEditorScene::MoveMode:
-		{
-			if (m_pointsMode)
-			{
-				Q_FOREACH(QGraphicsItem *item, m_selectedPoints)
-				{
-					item->moveBy(offset.x(), offset.y());
-				}
-			}
-			else
-			{
-				Q_FOREACH(QGraphicsItem *item, m_selectedItems)
-				{
-					item->moveBy(offset.x(), offset.y());
-				}
-			}
+			updateWorldItemsMove(mouseEvent);
 			break;
-		}
 		case WorldEditorScene::RotateMode:
-		{
-			// Caluculate angle between two line
-			QLineF firstLine(m_pivot, mouseEvent->lastScenePos());
-			QLineF secondLine(m_pivot, mouseEvent->scenePos());
-			qreal angle = secondLine.angleTo(firstLine);
-
-			m_angle += angle;
-
-			if (m_pointsMode)
-			{
-				Q_FOREACH(QGraphicsItem *item, m_selectedPoints)
-				{
-					qgraphicsitem_cast<WorldItemSubPoint *>(item)->rotateOn(m_pivot, angle);
-				}
-			}
-			else
-			{
-				Q_FOREACH(QGraphicsItem *item, m_selectedItems)
-				{
-					qgraphicsitem_cast<AbstractWorldItem *>(item)->rotateOn(m_pivot, angle);
-				}
-			}
+			updateWorldItemsRotate(mouseEvent);
 			break;
-		}
 		case WorldEditorScene::ScaleMode:
-		{
-			// Calculate scale factor
-			if (offset.x() > 0)
-				offset.setX(1.0 + (offset.x() / 5000));
-			else
-				offset.setX(1.0 / (1.0 + (-offset.x() / 5000)));
-
-			if (offset.y() < 0)
-				offset.setY(1.0 + (-offset.y() / 5000));
-			else
-				offset.setY(1.0 / (1.0 + (offset.y() / 5000)));
-
-			m_scaleFactor.setX(offset.x() * m_scaleFactor.x());
-			m_scaleFactor.setY(offset.y() * m_scaleFactor.y());
-
-			if (m_pointsMode)
-			{
-				Q_FOREACH(QGraphicsItem *item, m_selectedPoints)
-				{
-					qgraphicsitem_cast<WorldItemSubPoint *>(item)->scaleOn(m_pivot, offset);
-				}
-			}
-			else
-			{
-				Q_FOREACH(QGraphicsItem *item, m_selectedItems)
-				{
-					qgraphicsitem_cast<AbstractWorldItem *>(item)->scaleOn(m_pivot, offset);
-				}
-			}
+			updateWorldItemsScale(mouseEvent);
 			break;
-		}
 		case WorldEditorScene::TurnMode:
-		{
-			// Caluculate angle between two line
-			QLineF firstLine(m_pivot, mouseEvent->lastScenePos());
-			QLineF secondLine(m_pivot, mouseEvent->scenePos());
-			qreal angle = secondLine.angleTo(firstLine);
-
-			m_angle += angle;
-
-			Q_FOREACH(QGraphicsItem *item, m_selectedItems)
-			{
-				qgraphicsitem_cast<AbstractWorldItem *>(item)->turnOn(angle);
-			}
-
+			updateWorldItemsTurn(mouseEvent);
 			break;
-		}
 		case WorldEditorScene::RadiusMode:
+			updateWorldItemsRadius(mouseEvent);
 			break;
 		};
 
-		if (m_pointsMode)
+		if (isEnabledEditPoints())
 		{
 			if ((editMode() != WorldEditorScene::SelectMode) && (!m_selectedPoints.isEmpty()))
 				m_editedSelectedItems = true;
@@ -358,7 +274,7 @@ void WorldEditorScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 			else
 				m_editedSelectedItems = false;
 		}
-
+		// Update render
 		update();
 	}
 
@@ -370,112 +286,63 @@ void WorldEditorScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 	if (mouseEvent->button() == Qt::MidButton)
 		return;
 
-	if (m_pointsMode)
+	if (mouseEvent->button() == Qt::LeftButton)
 	{
-		if (mouseEvent->button() == Qt::LeftButton)
-		{
-			if ((m_selectionArea.left() != 0) && (m_selectionArea.right() != 0))
-			{
-				QList<QGraphicsItem *> listItems;
-
-				// Clear selection
-				updateSelectedPointItems(false);
-				m_selectedPoints.clear();
-
-				if (m_selectionArea.left() < m_selectionArea.right())
-					listItems = items(m_selectionArea, Qt::IntersectsItemShape, Qt::AscendingOrder);
-				else
-					listItems = items(m_selectionArea, Qt::ContainsItemShape, Qt::AscendingOrder);
-
-				Q_FOREACH(QGraphicsItem *item, listItems)
-				{
-					if (qgraphicsitem_cast<WorldItemSubPoint *>(item) == 0)
-						continue;
-
-					m_selectedPoints.push_back(item);
-				}
-				updateSelectedPointItems(true);
-				m_selectionArea = QRectF();
-				update();
-			}
-			else
-			{
-				if ((!m_editedSelectedItems) && (!m_firstSelection))
-					updatePickSelectionPoints(mouseEvent->scenePos());
-				else
-					m_firstSelection = false;
-			}
-		}
-		checkUndo();
-	}
-	else
-	{
-		if (mouseEvent->button() != Qt::LeftButton)
-			return;
-
-		if (m_editedSelectedItems)
-		{
-			switch (m_mode)
-			{
-			case WorldEditorScene::SelectMode:
-				break;
-
-			case WorldEditorScene::MoveMode:
-			{
-				QPointF offset = mouseEvent->scenePos() - m_firstPick;
-				m_undoStack->push(new MoveWorldItemsCommand(m_selectedItems, offset, this, m_model));
-				break;
-			}
-			case WorldEditorScene::RotateMode:
-				m_undoStack->push(new RotateWorldItemsCommand(m_selectedItems, m_angle, m_pivot, this, m_model));
-				break;
-			case WorldEditorScene::ScaleMode:
-				m_undoStack->push(new ScaleWorldItemsCommand(m_selectedItems, m_scaleFactor, m_pivot, this, m_model));
-				break;
-			case WorldEditorScene::TurnMode:
-				m_undoStack->push(new TurnWorldItemsCommand(m_selectedItems, m_angle, this, m_model));
-				break;
-			case WorldEditorScene::RadiusMode:
-				break;
-			};
-		}
-
+		// Update selection
 		if ((m_selectionArea.left() != 0) && (m_selectionArea.right() != 0))
 		{
 			QList<QGraphicsItem *> listItems;
 
 			// Clear selection
-			updateSelectedWorldItems(false);
-			m_selectedItems.clear();
+			updateSelectedPointItems(false);
+			m_selectedPoints.clear();
 
+			// Return list of selected items
 			if (m_selectionArea.left() < m_selectionArea.right())
 				listItems = items(m_selectionArea, Qt::IntersectsItemShape, Qt::AscendingOrder);
 			else
 				listItems = items(m_selectionArea, Qt::ContainsItemShape, Qt::AscendingOrder);
 
-			Q_FOREACH(QGraphicsItem *item, listItems)
+			if (isEnabledEditPoints())
 			{
-				if (qgraphicsitem_cast<AbstractWorldItem *>(item) == 0)
-					continue;
-
-				m_selectedItems.push_back(item);
+				Q_FOREACH(QGraphicsItem *item, listItems)
+				{
+					if (qgraphicsitem_cast<WorldItemSubPoint *>(item) == 0)
+						continue;
+					m_selectedPoints.push_back(item);
+				}
+				updateSelectedPointItems(true);
 			}
-
-			Q_EMIT updateSelectedItems(m_selectedItems);
-
-			updateSelectedWorldItems(true);
+			else
+			{
+				Q_FOREACH(QGraphicsItem *item, listItems)
+				{
+					if (qgraphicsitem_cast<AbstractWorldItem *>(item) == 0)
+						continue;
+					m_selectedItems.push_back(item);
+				}
+				Q_EMIT updateSelectedItems(m_selectedItems);
+				updateSelectedWorldItems(true);
+			}
 			m_selectionArea = QRectF();
 			update();
 		}
 		else
 		{
 			if ((!m_editedSelectedItems) && (!m_firstSelection))
-				updatePickSelection(mouseEvent->scenePos());
+			{
+				if (isEnabledEditPoints())
+					updatePickSelectionPoints(mouseEvent->scenePos());
+				else
+					updatePickSelection(mouseEvent->scenePos());
+			}
 			else
 				m_firstSelection = false;
 		}
-	}
 
+		if (isEnabledEditPoints())
+			checkUndoPointsMode();
+	}
 	m_selectionArea = QRectF();
 	LandscapeEditor::LandscapeSceneBase::mouseReleaseEvent(mouseEvent);
 }
@@ -597,6 +464,32 @@ void WorldEditorScene::updatePickSelectionPoints(const QPointF &point)
 
 void WorldEditorScene::checkUndo()
 {
+	if (m_editedSelectedItems)
+	{
+		switch (m_mode)
+		{
+		case WorldEditorScene::SelectMode:
+			break;
+		case WorldEditorScene::MoveMode:
+			m_undoStack->push(new MoveWorldItemsCommand(m_selectedItems, m_offset, this, m_model));
+			break;
+		case WorldEditorScene::RotateMode:
+			m_undoStack->push(new RotateWorldItemsCommand(m_selectedItems, m_angle, m_pivot, this, m_model));
+			break;
+		case WorldEditorScene::ScaleMode:
+			m_undoStack->push(new ScaleWorldItemsCommand(m_selectedItems, m_scaleFactor, m_pivot, this, m_model));
+			break;
+		case WorldEditorScene::TurnMode:
+			m_undoStack->push(new TurnWorldItemsCommand(m_selectedItems, m_angle, this, m_model));
+			break;
+		case WorldEditorScene::RadiusMode:
+			break;
+		};
+	}
+}
+
+void WorldEditorScene::checkUndoPointsMode()
+{
 	if (m_pointsMode)
 	{
 		QList<QGraphicsItem *> items;
@@ -611,13 +504,97 @@ void WorldEditorScene::checkUndo()
 				worldItem->setShapeChanged(false);
 			}
 		}
-
 		if (!items.isEmpty())
 		{
 			m_undoStack->push(new ShapeWorldItemsCommand(items, polygons, this, m_model));
 			m_polygons.clear();
 		}
 	}
+}
+
+void WorldEditorScene::updateWorldItemsMove(QGraphicsSceneMouseEvent *mouseEvent)
+{
+	QPointF offset(mouseEvent->scenePos() - mouseEvent->lastScenePos());
+	if (m_pointsMode)
+		Q_FOREACH(QGraphicsItem *item, m_selectedPoints)
+	{
+		item->moveBy(offset.x(), offset.y());
+	}
+	else
+		Q_FOREACH(QGraphicsItem *item, m_selectedItems)
+	{
+		item->moveBy(offset.x(), offset.y());
+	}
+}
+
+void WorldEditorScene::updateWorldItemsScale(QGraphicsSceneMouseEvent *mouseEvent)
+{
+	QPointF offset(mouseEvent->scenePos() - mouseEvent->lastScenePos());
+
+	qreal scaleRatio = 5000;
+
+	// Calculate scale factor
+	if (offset.x() > 0)
+		offset.setX(1.0 + (offset.x() / scaleRatio));
+	else
+		offset.setX(1.0 / (1.0 + (-offset.x() / scaleRatio)));
+
+	if (offset.y() < 0)
+		offset.setY(1.0 - (offset.y() / scaleRatio));
+	else
+		offset.setY(1.0 / (1.0 + (offset.y() / scaleRatio)));
+
+	m_scaleFactor.setX(offset.x() * m_scaleFactor.x());
+	m_scaleFactor.setY(offset.y() * m_scaleFactor.y());
+
+	if (m_pointsMode)
+		Q_FOREACH(QGraphicsItem *item, m_selectedPoints)
+	{
+		qgraphicsitem_cast<WorldItemSubPoint *>(item)->scaleOn(m_pivot, offset);
+	}
+	else
+		Q_FOREACH(QGraphicsItem *item, m_selectedItems)
+	{
+		qgraphicsitem_cast<AbstractWorldItem *>(item)->scaleOn(m_pivot, offset);
+	}
+}
+
+void WorldEditorScene::updateWorldItemsRotate(QGraphicsSceneMouseEvent *mouseEvent)
+{
+	// Caluculate angle between two line
+	QLineF firstLine(m_pivot, mouseEvent->lastScenePos());
+	QLineF secondLine(m_pivot, mouseEvent->scenePos());
+	qreal angle = secondLine.angleTo(firstLine);
+	m_angle += angle;
+
+	if (m_pointsMode)
+		Q_FOREACH(QGraphicsItem *item, m_selectedPoints)
+	{
+		qgraphicsitem_cast<WorldItemSubPoint *>(item)->rotateOn(m_pivot, angle);
+	}
+	else
+		Q_FOREACH(QGraphicsItem *item, m_selectedItems)
+	{
+		qgraphicsitem_cast<AbstractWorldItem *>(item)->rotateOn(m_pivot, angle);
+	}
+}
+
+void WorldEditorScene::updateWorldItemsTurn(QGraphicsSceneMouseEvent *mouseEvent)
+{
+	// Caluculate angle between two line
+	QLineF firstLine(m_pivot, mouseEvent->lastScenePos());
+	QLineF secondLine(m_pivot, mouseEvent->scenePos());
+	qreal angle = secondLine.angleTo(firstLine);
+	m_angle += angle;
+
+	Q_FOREACH(QGraphicsItem *item, m_selectedItems)
+	{
+		qgraphicsitem_cast<AbstractWorldItem *>(item)->turnOn(angle);
+	}
+}
+
+void WorldEditorScene::updateWorldItemsRadius(QGraphicsSceneMouseEvent *mouseEvent)
+{
 }
 
 } /* namespace WorldEditor */
