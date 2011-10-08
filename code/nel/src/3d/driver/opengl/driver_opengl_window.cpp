@@ -188,6 +188,11 @@ bool GlWndProc(CDriverGL *driver, const void* e)
 static Atom XA_WM_STATE = 0;
 static Atom XA_WM_STATE_FULLSCREEN = 0;
 static Atom XA_WM_ICON = 0;
+static Atom XA_WM_WINDOW_TYPE = 0;
+static Atom XA_WM_WINDOW_TYPE_NORMAL = 0;
+static Atom XA_UTF8_STRING = 0;
+static Atom XA_WM_NAME = 0;
+static Atom XA_WM_ICON_NAME = 0;
 
 sint nelXErrorsHandler(Display *dpy, XErrorEvent *e)
 {
@@ -233,7 +238,7 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 		break;
 
 		case Expose:
-		nlwarning("Expose event");
+//		nlwarning("Expose event");
 		break;
 
 		case ConfigureNotify:
@@ -246,7 +251,7 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 				driver->_DecorationWidth = e.xconfigure.x - driver->_WindowX;
 				driver->_DecorationHeight = e.xconfigure.y - driver->_WindowY;
 
-				nlwarning("Decoration size x = %d, y = %d", driver->_DecorationWidth, driver->_DecorationHeight);
+//				nlwarning("Decoration size x = %d, y = %d", driver->_DecorationWidth, driver->_DecorationHeight);
 			}
 
 			driver->_CurrentMode.Width = e.xconfigure.width;
@@ -256,7 +261,7 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 
 			XConfigureEvent event = e.xconfigure;
 
-			nlwarning("Configure x = %d, y = %d, width = %d, height = %d, send event = %d", event.x, event.y, event.width, event.height, event.send_event);
+//			nlwarning("Configure x = %d, y = %d, width = %d, height = %d, send event = %d", event.x, event.y, event.width, event.height, event.send_event);
 		}
 
 		break;
@@ -401,6 +406,11 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 	XA_WM_STATE = XInternAtom(_dpy, "_NET_WM_STATE", False);
 	XA_WM_STATE_FULLSCREEN = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
 	XA_WM_ICON = XInternAtom(_dpy, "_NET_WM_ICON", False);
+	XA_WM_WINDOW_TYPE = XInternalAtom(_dpy, "_NET_WM_WINDOW_TYPE", False);
+	XA_WM_WINDOW_TYPE_NORMAL = XInternalAtom(_dpy, "_NET_WM_WINDOW_TYPE_NORMAL", False);
+	XA_UTF8_STRING = XInternAtom(_dpy, "UTF8_STRING", False);
+	XA_WM_NAME = XInternAtom(_dpy, "_NET_WM_NAME", False);
+	XA_WM_ICON_NAME = XInternAtom(_dpy, "_NET_WM_ICON_NAME", False);
 
 #endif
 
@@ -1528,6 +1538,42 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 		return false;
 	}
 
+	// normal window type
+	XChangeProperty(_dpy, window, XA_WM_WINDOW_TYPE, XA_ATOM, 32, PropModeReplace, (const unsigned char*)&XA_WM_WINDOW_TYPE_NORMAL, 1);
+
+	// set WM hints
+	XWMHints *wm_hints = XAllocWMHints();
+
+	if (wm_hints)
+	{
+		wm_hints->flags = StateHint | InputHint;
+		wm_hints->initial_state = NormalState;
+		wm_hints->input = True;
+
+		XSetWMHints(_dpy, window, wm_hints);
+		XFree(wm_hints);
+	}
+	else
+	{
+		nlwarning("3D: Couldn't allocate XWMHints");
+	}
+
+	// set class hints
+	XClassHint *class_hints = XAllocClassHint();
+
+	if (class_hints)
+	{
+		class_hints->res_name = (char*)"NeL";
+		class_hints->res_class = (char*)"nel";
+
+		XSetClassHint(_dpy, window, class_hints);
+		XFree(class_hints);
+	}
+	else
+	{
+		nlwarning("3D: Couldn't allocate XClassHint");
+	}
+	
 #endif // NL_OS_UNIX
 
 	_win = window;
@@ -2199,14 +2245,28 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 		[NSString stringWithUTF8String:title.toUtf8().c_str()]];
 
 #elif defined (NL_OS_UNIX)
+	char *utf8_title = (char*)title.toUtf8().c_str();
+	size_t utf8_title_length = title.toUtf8().length();
 
 #ifdef X_HAVE_UTF8_STRING
-	Xutf8SetWMProperties (_dpy, _win, (char*)title.toUtf8().c_str(), (char*)title.toUtf8().c_str(), NULL, 0, NULL, NULL, NULL);
+	// UTF8 properties
+	Xutf8SetWMProperties (_dpy, _win, utf8_title, utf8_title, NULL, 0, NULL, NULL, NULL);
 #else
+	// standard properties
 	XTextProperty text_property;
-	XStringListToTextProperty((char**)&title.toUtf8().c_str(), 1, &text_property);
-	XSetWMProperties (_dpy, _win, &text_property, &text_property,  0, 0, NULL, 0, 0);
+	if (XStringListToTextProperty(&utf8_title, 1, &text_property) != 0)
+	{
+		XSetWMProperties (_dpy, _win, &text_property, &text_property,  NULL, 0, NULL, NULL, NULL);
+	}
+	else
+	{
+		nlwarning("3D: Can't convert title to TextProperty");
+	}
 #endif
+
+	// new UTF8 properties
+	XChangeProperty(_dpy, _win, XA_WM_NAME, XA_UTF8_STRING, 8, PropModeReplace, (const unsigned char*)utf8_title, utf8_title_length);
+	XChangeProperty(_dpy, _win, XA_WM_ICON_NAME, XA_UTF8_STRING, 8, PropModeReplace, (const unsigned char*)utf8_title, utf8_title_length);
 
 #endif // NL_OS_WINDOWS
 }
