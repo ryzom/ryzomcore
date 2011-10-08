@@ -190,9 +190,6 @@ static Atom XA_WM_STATE_FULLSCREEN = 0;
 static Atom XA_WM_ICON = 0;
 static Atom XA_WM_WINDOW_TYPE = 0;
 static Atom XA_WM_WINDOW_TYPE_NORMAL = 0;
-static Atom XA_UTF8_STRING = 0;
-static Atom XA_WM_NAME = 0;
-static Atom XA_WM_ICON_NAME = 0;
 
 sint nelXErrorsHandler(Display *dpy, XErrorEvent *e)
 {
@@ -406,11 +403,8 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 	XA_WM_STATE = XInternAtom(_dpy, "_NET_WM_STATE", False);
 	XA_WM_STATE_FULLSCREEN = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
 	XA_WM_ICON = XInternAtom(_dpy, "_NET_WM_ICON", False);
-	XA_WM_WINDOW_TYPE = XInternalAtom(_dpy, "_NET_WM_WINDOW_TYPE", False);
-	XA_WM_WINDOW_TYPE_NORMAL = XInternalAtom(_dpy, "_NET_WM_WINDOW_TYPE_NORMAL", False);
-	XA_UTF8_STRING = XInternAtom(_dpy, "UTF8_STRING", False);
-	XA_WM_NAME = XInternAtom(_dpy, "_NET_WM_NAME", False);
-	XA_WM_ICON_NAME = XInternAtom(_dpy, "_NET_WM_ICON_NAME", False);
+	XA_WM_WINDOW_TYPE = XInternAtom(_dpy, "_NET_WM_WINDOW_TYPE", False);
+	XA_WM_WINDOW_TYPE_NORMAL = XInternAtom(_dpy, "_NET_WM_WINDOW_TYPE_NORMAL", False);
 
 #endif
 
@@ -2245,16 +2239,14 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 		[NSString stringWithUTF8String:title.toUtf8().c_str()]];
 
 #elif defined (NL_OS_UNIX)
-	char *utf8_title = (char*)title.toUtf8().c_str();
-	size_t utf8_title_length = title.toUtf8().length();
 
 #ifdef X_HAVE_UTF8_STRING
 	// UTF8 properties
-	Xutf8SetWMProperties (_dpy, _win, utf8_title, utf8_title, NULL, 0, NULL, NULL, NULL);
+	Xutf8SetWMProperties (_dpy, _win, (char*)title.toUtf8().c_str(), (char*)title.toUtf8().c_str(), NULL, 0, NULL, NULL, NULL);
 #else
 	// standard properties
 	XTextProperty text_property;
-	if (XStringListToTextProperty(&utf8_title, 1, &text_property) != 0)
+	if (XStringListToTextProperty((char**)&title.toUtf8().c_str(), 1, &text_property) != 0)
 	{
 		XSetWMProperties (_dpy, _win, &text_property, &text_property,  NULL, 0, NULL, NULL, NULL);
 	}
@@ -2263,10 +2255,6 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 		nlwarning("3D: Can't convert title to TextProperty");
 	}
 #endif
-
-	// new UTF8 properties
-	XChangeProperty(_dpy, _win, XA_WM_NAME, XA_UTF8_STRING, 8, PropModeReplace, (const unsigned char*)utf8_title, utf8_title_length);
-	XChangeProperty(_dpy, _win, XA_WM_ICON_NAME, XA_UTF8_STRING, 8, PropModeReplace, (const unsigned char*)utf8_title, utf8_title_length);
 
 #endif // NL_OS_WINDOWS
 }
