@@ -44,7 +44,7 @@ class CORE_EXPORT MenuManager: public QObject
 	Q_OBJECT
 
 public:
-	explicit MenuManager(QMenuBar *menuBar, QObject *parent = 0);
+	MenuManager(QMenuBar *menuBar, QObject *parent = 0);
 	virtual ~MenuManager();
 
 	void registerMenu(QMenu *menu, const QString &id);
