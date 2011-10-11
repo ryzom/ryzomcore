@@ -32,6 +32,10 @@ const int PRIMITIVE_IS_MODIFIED = USER_TYPE + 5;
 const int PRIMITIVE_FILE_IS_CREATED = USER_TYPE + 6;
 const int PRIMITIVE_IS_VISIBLE = USER_TYPE + 7;
 
+//properties editor
+const char *const DIFFERENT_VALUE_STRING = "<different values>";
+const char *const DIFFERENT_VALUE_MULTI_STRING = "<diff>";
+
 //settings
 const char *const WORLD_EDITOR_SECTION = "WorldEditor";
 const char *const WORLD_WINDOW_STATE = "WorldWindowState";

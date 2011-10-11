@@ -171,7 +171,7 @@ bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList
 														NLLIGO::CPrimitives ligoPrimitives;
 
 														// Read it
-														ligoPrimitives.read(primitives, fileName.c_str(), *NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig);
+														ligoPrimitives.read(primitives, fileName.c_str(), *ligoConfig());
 														//_DataHierarchy.back ().Primitives.read (primitives, filename, theApp.Config);
 
 														// Set the filename

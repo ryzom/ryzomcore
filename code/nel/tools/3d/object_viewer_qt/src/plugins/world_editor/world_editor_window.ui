@@ -28,7 +28,7 @@
        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
       </property>
       <property name="renderHints">
-       <set>QPainter::Antialiasing|QPainter::SmoothPixmapTransform|QPainter::TextAntialiasing</set>
+       <set>QPainter::SmoothPixmapTransform</set>
       </property>
       <property name="dragMode">
        <enum>QGraphicsView::NoDrag</enum>

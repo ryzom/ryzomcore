@@ -384,8 +384,8 @@ void WorldEditorWindow::readSettings()
 	// Use OpenGL graphics system instead raster graphics system
 	if (settings->value(Constants::WORLD_EDITOR_USE_OPENGL, true).toBool())
 	{
-		//m_oglWidget = new QGLWidget(QGLFormat(QGL::DoubleBuffer));
-		m_oglWidget = new QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::SampleBuffers));
+		m_oglWidget = new QGLWidget(QGLFormat(QGL::DoubleBuffer));
+		//m_oglWidget = new QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::SampleBuffers));
 		m_ui.graphicsView->setViewport(m_oglWidget);
 	}
 

@@ -181,7 +181,7 @@ void WorldEditorScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
 	m_firstPick = mouseEvent->scenePos();
 
-	if (m_pointsMode)
+	if (isEnabledEditPoints())
 	{
 		m_polygons = polygonsFromItems(m_selectedItems);
 
@@ -288,6 +288,8 @@ void WorldEditorScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 	if (mouseEvent->button() == Qt::LeftButton)
 	{
+		checkUndo();
+
 		// Update selection
 		if ((m_selectionArea.left() != 0) && (m_selectionArea.right() != 0))
 		{

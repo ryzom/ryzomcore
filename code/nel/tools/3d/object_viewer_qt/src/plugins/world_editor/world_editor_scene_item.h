@@ -223,10 +223,8 @@ public:
 	WorldItemZone(const QPolygonF &polygon, QGraphicsItem *parent = 0);
 	virtual ~WorldItemZone();
 
-
 	virtual void setColor(const QColor &color);
 	virtual bool removeSubPoint(WorldItemSubPoint *subPoint);
-
 	virtual QPainterPath shape() const;
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
