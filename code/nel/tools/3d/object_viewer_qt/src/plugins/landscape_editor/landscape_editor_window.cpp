@@ -20,7 +20,6 @@
 #include "landscape_editor_constants.h"
 
 #include "../core/icore.h"
-#include "../core/imenu_manager.h"
 #include "../core/core_constants.h"
 
 // NeL includes
@@ -72,7 +71,6 @@ void LandscapeEditorWindow::open()
 
 void LandscapeEditorWindow::createMenus()
 {
-	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
 }
 
 void LandscapeEditorWindow::readSettings()
