@@ -190,6 +190,7 @@ static Atom XA_WM_STATE_FULLSCREEN = 0;
 static Atom XA_WM_ICON = 0;
 static Atom XA_WM_WINDOW_TYPE = 0;
 static Atom XA_WM_WINDOW_TYPE_NORMAL = 0;
+static Atom XA_FRAME_EXTENTS = 0;
 
 sint nelXErrorsHandler(Display *dpy, XErrorEvent *e)
 {
@@ -245,20 +246,36 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 			// first time setting decoration sizes
 			if ((driver->_DecorationWidth == -1) || (driver->_DecorationWidth == 0))
 			{
-				driver->_DecorationWidth = e.xconfigure.x - driver->_WindowX;
-				driver->_DecorationHeight = e.xconfigure.y - driver->_WindowY;
+				Atom type_return = 0;
+				int format_return = 0;
+				unsigned long nitems_return = 0;
+				unsigned long bytes_after_return = 0;
+				long *data = NULL;
+			
+				int status = XGetWindowProperty(driver->_dpy, driver->_win, XA_FRAME_EXTENTS, 0, 4, False, XA_CARDINAL, &type_return, &format_return, &nitems_return, &bytes_after_return, (unsigned char**)&data);
 
-//				nlwarning("Decoration size x = %d, y = %d", driver->_DecorationWidth, driver->_DecorationHeight);
+				// succeeded to retrieve decoration size
+				if (status == Success && type_return == XA_CARDINAL && format_return == 32 && nitems_return == 4 && data)
+				{
+					driver->_DecorationWidth = data[0];
+					driver->_DecorationHeight = data[2];
+				}
+				else
+				{
+					// use difference between current position and previous one (set by application)
+					driver->_DecorationWidth = e.xconfigure.x - driver->_WindowX;
+					driver->_DecorationHeight = e.xconfigure.y - driver->_WindowY;
+				}
+				
+				// don't allow negative decoration sizes
+				if (driver->_DecorationWidth < 0) driver->_DecorationWidth = 0;
+				if (driver->_DecorationHeight < 0) driver->_DecorationHeight = 0;
 			}
 
 			driver->_CurrentMode.Width = e.xconfigure.width;
 			driver->_CurrentMode.Height = e.xconfigure.height;
 			driver->_WindowX = e.xconfigure.x - driver->_DecorationWidth;
 			driver->_WindowY = e.xconfigure.y - driver->_DecorationHeight;
-
-			XConfigureEvent event = e.xconfigure;
-
-//			nlwarning("Configure x = %d, y = %d, width = %d, height = %d, send event = %d", event.x, event.y, event.width, event.height, event.send_event);
 		}
 
 		break;
@@ -405,6 +422,7 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 	XA_WM_ICON = XInternAtom(_dpy, "_NET_WM_ICON", False);
 	XA_WM_WINDOW_TYPE = XInternAtom(_dpy, "_NET_WM_WINDOW_TYPE", False);
 	XA_WM_WINDOW_TYPE_NORMAL = XInternAtom(_dpy, "_NET_WM_WINDOW_TYPE_NORMAL", False);
+	XA_FRAME_EXTENTS = XInternAtom(_dpy, "_NET_FRAME_EXTENTS", False);
 
 #endif
 
