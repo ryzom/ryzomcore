@@ -65,16 +65,7 @@ bool TranslationManagerPlugin::initialize(ExtensionSystem::IPluginManager *plugi
 
 void TranslationManagerPlugin::extensionsInitialized()
 {
-	Core::ICore *core = Core::ICore::instance();
-	Core::MenuManager *menuManager = core->menuManager();
-	//menuManager = _plugMan->getObject<Core::IMenuManager>();
-	// Menu Actions for plugin
-	QAction *aboutTManPlugin = new QAction("Translation Manager", this);
-	// Locations
-	QMenu *helpMenu = menuManager->menu(Core::Constants::M_HELP);
-	QAction *aboutQtAction = menuManager->action(Core::Constants::ABOUT_QT);
-	helpMenu->addSeparator();
-	helpMenu->insertAction(aboutQtAction, aboutTManPlugin);
+
 }
 
 
