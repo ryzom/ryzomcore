@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<FORM Revision="" State="modified">
+  <STRUCT>
+    <STRUCT Name="FX0">
+      <ATOM Name="PSName" Value="ran_wea_missile.ps"/>
+      <STRUCT Name="StickMode">
+        <ATOM Name="StickMode" Value="UserBone"/>
+        <ATOM Name="UserBone" Value="box_arme"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG></LOG>
+</FORM>

@@ -2975,32 +2975,9 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 	}
 	else if(getType() == CCtrlSheetInfo::SheetType_Item)
 	{
-		const CItemSheet	*item= asItemSheet();
-		if(item)
-		{
-			if (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL || item->Family == ITEMFAMILY::JEWELRY || item->Family == ITEMFAMILY::ARMOR)
-			{
-				string luaMethodName = ( (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) ? "updateCrystallizedSpellTooltip" : "updateBuffItemTooltip");
-				CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
-				if ( ! getInventory().isItemInfoUpToDate(getInventory().getItemSlotId(ctrlSheet)))
-				{
-					// Prepare the waiter
-					ControlSheetTooltipUpdater.ItemSheet= ctrlSheet->getSheetId();
-					ControlSheetTooltipUpdater.LuaMethodName = luaMethodName;
-					ControlSheetTooltipUpdater.ItemSlotId= getInventory().getItemSlotId(ctrlSheet);
-					ControlSheetTooltipUpdater.CtrlSheet = ctrlSheet;
-
-					// Add the waiter
-					getInventory().addItemInfoWaiter(&ControlSheetTooltipUpdater);
-				}
-
-				help = ControlSheetTooltipUpdater.infoValidated(ctrlSheet, luaMethodName);
-
-			}
-			else
-				help= getItemActualName();
-
-		}
+		const CItemSheet *item = asItemSheet();
+		if (item)
+			help = getItemActualName();
 		else
 			help= _ContextHelp;
 	}
@@ -3104,6 +3081,42 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		else
 			help = _ContextHelp;
 	}
+}
+
+// ***************************************************************************
+void	CDBCtrlSheet::getContextHelpToolTip(ucstring &help) const
+{
+	// Special case for buff items and spell crystals, only for tooltips
+	if (getType() == CCtrlSheetInfo::SheetType_Item)
+	{
+		const CItemSheet *item = asItemSheet();
+		if (item)
+		{
+			if (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL 
+				|| item->Family == ITEMFAMILY::JEWELRY || item->Family == ITEMFAMILY::ARMOR)
+			{				
+				string luaMethodName = (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) ? "updateCrystallizedSpellTooltip" : "updateBuffItemTooltip";
+				CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
+				if ( ! getInventory().isItemInfoUpToDate(getInventory().getItemSlotId(ctrlSheet)))
+				{					
+					// Prepare the waiter
+					ControlSheetTooltipUpdater.ItemSheet= ctrlSheet->getSheetId();
+					ControlSheetTooltipUpdater.LuaMethodName = luaMethodName;
+					ControlSheetTooltipUpdater.ItemSlotId= getInventory().getItemSlotId(ctrlSheet);
+					ControlSheetTooltipUpdater.CtrlSheet = ctrlSheet;
+					
+					// Add the waiter
+					getInventory().addItemInfoWaiter(&ControlSheetTooltipUpdater);
+				}
+				
+				help = ControlSheetTooltipUpdater.infoValidated(ctrlSheet, luaMethodName);
+				return;
+			}
+		}
+	}
+
+	// Default
+	getContextHelp(help);
 }
 
 // ***************************************************************************

@@ -6,7 +6,7 @@
 # 
 # \file 1_export.py
 # \brief Export anim
-# \date 2010-09-26-08-38-GMT
+# \date 2011-09-21-20-51-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Export anim

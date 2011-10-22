@@ -56,33 +56,6 @@ void ObjectViewerPlugin::setNelContext(NLMISC::INelContext *nelContext)
 	_LibContext = new NLMISC::CLibraryContext(*nelContext);
 }
 
-QString ObjectViewerPlugin::name() const
-{
-	return "ObjectViewer";
-}
-
-QString ObjectViewerPlugin::version() const
-{
-	return "0.8";
-}
-
-QString ObjectViewerPlugin::vendor() const
-{
-	return Core::Constants::OVQT_VENDOR;
-}
-
-QString ObjectViewerPlugin::description() const
-{
-	return "Object Viewer plugin.";
-}
-
-QStringList ObjectViewerPlugin::dependencies() const
-{
-	QStringList list;
-	list.append(Core::Constants::OVQT_CORE_PLUGIN);
-	return list;
-}
-
 void ObjectViewerPlugin::addAutoReleasedObject(QObject *obj)
 {
 	_plugMan->addObject(obj);

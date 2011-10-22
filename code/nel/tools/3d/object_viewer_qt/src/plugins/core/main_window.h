@@ -34,7 +34,6 @@ namespace Core
 class CSettingsDialog;
 class CorePlugin;
 class IContext;
-class IMenuManager;
 class MenuManager;
 class ContextManager;
 class CoreImpl;
@@ -50,7 +49,7 @@ public:
 	bool initialize(QString *errorString);
 	void extensionsInitialized();
 
-	IMenuManager *menuManager() const;
+	MenuManager *menuManager() const;
 	ContextManager *contextManager() const;
 	QSettings *settings() const;
 

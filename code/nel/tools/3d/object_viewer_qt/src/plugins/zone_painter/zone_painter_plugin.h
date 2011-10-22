@@ -31,7 +31,7 @@ class IPluginSpec;
 namespace Plugin
 {
 
-	class CZoneManager 
+/*	class CZoneManager 
 	{
 		NLMISC_SAFE_SINGLETON_DECL(CZoneManager)
 	public:
@@ -41,7 +41,7 @@ namespace Plugin
 		NL3D::CLandscapeModel *m_painterLandscape;
 		NL3D::CZone *m_currentZone;
 	};
-
+*/
 class ZonePainterPlugin : public QObject, public ExtensionSystem::IPlugin
 {
 	Q_OBJECT
@@ -52,28 +52,16 @@ public:
 
 	bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
 	void extensionsInitialized();
-
 	void setNelContext(NLMISC::INelContext *nelContext);
-
-	QString name() const;
-	QString version() const;
-	QString vendor() const;
-	QString description() const;
-	QStringList dependencies() const;
 
 	void addAutoReleasedObject(QObject *obj);
 
-	QObject *objectByName(const QString &name) const;
-	ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
-
-
-
 protected:
-	NLMISC::CLibraryContext *_LibContext;
+	NLMISC::CLibraryContext *m_LibContext;
 
 private:
-	ExtensionSystem::IPluginManager *_plugMan;
-	QList<QObject *> _autoReleaseObjects;
+	ExtensionSystem::IPluginManager *m_plugMan;
+	QList<QObject *> m_autoReleaseObjects;
 };
 
 class CZonePainterContext: public Core::IContext

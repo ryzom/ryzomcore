@@ -148,7 +148,7 @@ sint main(int argc, char **argv)
 	NLMISC::CLibrary::addLibPath((qApp->applicationDirPath() + QString("/../PlugIns/nel")).toStdString());
 #endif
 
-	ExtensionSystem::CPluginManager pluginManager;
+	ExtensionSystem::PluginManager pluginManager;
 	pluginManager.setSettings(settings);
 	QStringList pluginPaths;
 #if !defined(NL_OS_MAC)

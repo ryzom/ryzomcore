@@ -30,14 +30,14 @@ class CoreImpl : public ICore
 	Q_OBJECT
 
 public:
-	CoreImpl(MainWindow *mainWindow);
+	explicit CoreImpl(MainWindow *mainWindow);
 	virtual ~CoreImpl();
 
 	virtual bool showOptionsDialog(const QString &group = QString(),
 								   const QString &page = QString(),
 								   QWidget *parent = 0);
 
-	virtual IMenuManager *menuManager() const;
+	virtual MenuManager *menuManager() const;
 	virtual ContextManager *contextManager() const;
 
 	virtual QSettings *settings() const;

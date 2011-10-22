@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <ATOM Name="Plant Name" Value="S3 mushroom"/>
+    <ATOM Name="Comment"/>
+    <STRUCT Name="3D">
+      <ATOM Name="Shape" Value="FO_S3_champignou_A.shape"/>
+      <ATOM Name="Shadow Shape" Value="FO_S3_champignou_A.shape"/>
+      <ATOM Name="Bounding Radius" Value="1.4"/>
+      <ATOM Name="Collision Radius" Value="1.4"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:17:45 2002 (corvazier) File converted from old format
+Tue Oct 08 16:16:31 2002 (Schnittger) .3D.Bounding Radius = 3
+Tue Oct 08 16:16:31 2002 (Schnittger) .3D.Collision Radius = 3
+Tue Oct 08 16:16:31 2002 (Schnittger) .3D.Shadow Shape = FO_S2_spiketree.shape
+Tue Oct 08 16:16:31 2002 (Schnittger) .3D.Shape = FO_S2_spiketree.shape
+Tue Oct 08 16:16:31 2002 (Schnittger) .Plant Name = S2 tree
+Wed Oct 09 17:28:56 2002 (Schnittger) .3D.Bounding Radius = 1.1
+Wed Oct 09 17:28:56 2002 (Schnittger) .3D.Collision Radius = 1.1
+Wed Oct 16 12:23:19 2002 (Schnittger) .3D.Shadow Shape = FO_S3_champignou_01.shape
+Wed Oct 16 12:23:19 2002 (Schnittger) .3D.Shape = FO_S3_champignou_01.shape
+Wed Oct 16 12:23:19 2002 (Schnittger) .Plant Name = S3 mushroom
+Wed Oct 16 12:24:28 2002 (Schnittger) .3D.Bounding Radius = 1.4
+Wed Oct 16 12:24:28 2002 (Schnittger) .3D.Collision Radius = 1.4
+Wed Nov 27 10:13:21 2002 (Schnittger) .3D.Shadow Shape = FO_S3_champignou_A.shape
+Wed Nov 27 10:13:21 2002 (Schnittger) .3D.Shape = FO_S3_champignou_A.shape</LOG>
+</FORM>

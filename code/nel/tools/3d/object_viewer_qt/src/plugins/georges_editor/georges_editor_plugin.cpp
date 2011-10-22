@@ -67,35 +67,6 @@ void GeorgesEditorPlugin::setNelContext(NLMISC::INelContext *nelContext)
 	m_libContext = new NLMISC::CLibraryContext(*nelContext);
 }
 
-QString GeorgesEditorPlugin::name() const
-{
-	return tr("Georges Editor");
-}
-
-QString GeorgesEditorPlugin::version() const
-{
-	return "0.4";
-}
-
-QString GeorgesEditorPlugin::vendor() const
-{
-	return "aquiles";
-}
-
-QString GeorgesEditorPlugin::description() const
-{
-	return tr("Tool to create & edit sheets or forms.");
-}
-
-QStringList GeorgesEditorPlugin::dependencies() const
-{
-	QStringList list;
-	// TODO
-	//list.append(Core::Constants::OVQT_CORE_PLUGIN);
-	//list.append("ObjectViewer");
-	return list;
-}
-
 void GeorgesEditorPlugin::addAutoReleasedObject(QObject *obj)
 {
 	m_plugMan->addObject(obj);

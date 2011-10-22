@@ -68,6 +68,8 @@ public:
 
 	/// Get the ContextHelp for this control. Default is to return _ContextHelp
 	virtual void		getContextHelp(ucstring &help) const {help= _ContextHelp;}
+	/// Get the ContextHelp for this control, with tooltip specific code. Default behaviour is identical to getContextHelp.
+	virtual void		getContextHelpToolTip(ucstring &help) const { getContextHelp(help); }
 	// Get the name of the context help window. Default to "context_help"
 	virtual std::string getContextHelpWindowName() const;
 	/// Get the ContextHelp ActionHandler. If "", noop

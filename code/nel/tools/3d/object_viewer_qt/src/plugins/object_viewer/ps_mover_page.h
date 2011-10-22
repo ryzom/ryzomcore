@@ -44,7 +44,7 @@ namespace NLQT
 class CLocatedBindableItem: public QListWidgetItem
 {
 public:
-	CLocatedBindableItem ( const QString & text, QListWidget * parent = 0, int type = UserType ):
+	CLocatedBindableItem ( const QString &text, QListWidget *parent = 0, int type = UserType ):
 		QListWidgetItem(text, parent, type), _lb(NULL) {}
 
 	void setUserData(NL3D::CPSLocatedBindable *loc)

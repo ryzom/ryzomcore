@@ -1,0 +1,159 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+    <ATOM Name="Plant Name" Value="Leaves"/>
+    <ATOM Name="Comment" Value="This is an FX"/>
+    <STRUCT Name="3D">
+      <ATOM Name="Bounding Radius" Value="0.5"/>
+      <ATOM Name="LOD 0 min"/>
+      <ATOM Name="Collision Radius" Value="0.5"/>
+      <STRUCT Name="SpringFX">
+        <ATOM Name="FXName" Value="Ju_Fo_Fishes.ps"/>
+        <ATOM Name="Mode" Value="AlwaysStarted"/>
+        <ATOM Name="CycleDuration" Value="24"/>
+        <ATOM Name="StartHourMin" Value="0.01"/>
+        <ATOM Name="StartHourMax" Value="24"/>
+        <ATOM Name="EndHourMin" Value="24"/>
+        <ATOM Name="EndHourMax" Value="24"/>
+        <ATOM Name="UserParam0Max" Value="1"/>
+        <ATOM Name="AngleMax" Value="60"/>
+      </STRUCT>
+      <STRUCT Name="SummerFX">
+        <ATOM Name="FXName" Value="Ju_Fo_Fishes.ps"/>
+        <ATOM Name="Mode" Value="AlwaysStarted"/>
+        <ATOM Name="CycleDuration" Value="24"/>
+        <ATOM Name="StartHourMin" Value="0.01"/>
+        <ATOM Name="StartHourMax" Value="24"/>
+        <ATOM Name="EndHourMin" Value="24"/>
+        <ATOM Name="EndHourMax" Value="24"/>
+        <ATOM Name="UserParam0Max" Value="1"/>
+        <ATOM Name="AngleMax" Value="60"/>
+      </STRUCT>
+      <STRUCT Name="AutomnFX">
+        <ATOM Name="FXName" Value="Ju_Fo_Fishes.ps"/>
+        <ATOM Name="Mode" Value="AlwaysStarted"/>
+        <ATOM Name="CycleDuration" Value="24"/>
+        <ATOM Name="StartHourMin" Value="0.01"/>
+        <ATOM Name="StartHourMax" Value="24"/>
+        <ATOM Name="EndHourMin" Value="24"/>
+        <ATOM Name="EndHourMax" Value="24"/>
+        <ATOM Name="UserParam0Max" Value="1"/>
+        <ATOM Name="AngleMax" Value="60"/>
+      </STRUCT>
+      <STRUCT Name="WinterFX">
+        <ATOM Name="FXName" Value="Ju_Fo_Fishes.ps"/>
+        <ATOM Name="Mode" Value="AlwaysStarted"/>
+        <ATOM Name="CycleDuration" Value="24"/>
+        <ATOM Name="StartHourMin" Value="0.01"/>
+        <ATOM Name="StartHourMax" Value="24"/>
+        <ATOM Name="EndHourMin" Value="24"/>
+        <ATOM Name="EndHourMax" Value="24"/>
+        <ATOM Name="UserParam0Max" Value="1"/>
+        <ATOM Name="AngleMax" Value="60"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:17:51 2002 (corvazier) File converted from old format
+Tue Jul 29 11:20:04 2003 (firroloni) .3D.Shape = Desert-SandBlast.ps
+Tue Jul 29 11:22:34 2003 (firroloni) .3D.Shape = Desert-SandBlastB.ps
+Tue Jul 29 11:23:34 2003 (firroloni) .3D.Shape = Fy-SandBlastADesert.ps
+Tue Jul 29 11:23:51 2003 (firroloni) .3D.Shape = Fy-SandBlastDesert.ps
+Wed Aug 06 11:53:50 2003 (firroloni) .3D.Shape = 
+Wed Aug 06 11:53:50 2003 (firroloni) .3D.SpringFX.FXName = Fy-SandBlastDesert.ps
+Wed Aug 06 11:53:50 2003 (firroloni) .3D.SpringFX.Mode = Spawn
+Wed Aug 06 11:53:50 2003 (firroloni) .3D.SpringFX.StartHourMax = 23.9
+Wed Aug 06 15:08:24 2003 (firroloni) .3D.SpringFX.CycleDuration = 1
+Wed Aug 06 15:08:24 2003 (firroloni) .3D.SpringFX.StartHourMax = .99
+Tue Aug 12 10:21:56 2003 (firroloni) .3D.SpringFX.CycleDuration = 24
+Tue Aug 12 10:21:56 2003 (firroloni) .3D.SpringFX.FXName = De_Scorpion2.ps
+Tue Aug 12 10:21:56 2003 (firroloni) .3D.SpringFX.StartHourMax = 20
+Tue Aug 12 10:21:56 2003 (firroloni) .3D.SpringFX.StartHourMin = 12
+Tue Aug 12 10:21:56 2003 (firroloni) formName Pasted = 
+Tue Aug 12 12:23:01 2003 (firroloni) .3D.Shape = FY_S1_baobab_A.shape
+Fri Oct 17 17:36:11 2003 (firroloni) .3D.Shape = 
+Mon Dec 01 15:07:38 2003 (firroloni) .3D.SpringFX.FXName = fy_geyser_feu.ps
+Mon Dec 01 15:07:38 2003 (firroloni) formName Pasted = 
+Mon Dec 01 15:12:52 2003 (firroloni) .3D.WinterFX.CycleDuration = 1
+Mon Dec 01 15:12:52 2003 (firroloni) .3D.WinterFX.StartHourMax = .9
+Mon Dec 01 15:12:52 2003 (firroloni) .3D.WinterFX.StartHourMin = 0
+Mon Dec 01 15:12:52 2003 (firroloni) formName Pasted = 
+Mon Dec 01 15:51:41 2003 (firroloni) .3D.SpringFX.CycleDuration = .1
+Mon Dec 01 15:51:41 2003 (firroloni) .3D.SpringFX.StartHourMax = .09
+Mon Dec 01 16:30:44 2003 (firroloni) .3D.SpringFX.CycleDuration = .5
+Mon Dec 01 16:30:44 2003 (firroloni) .3D.SpringFX.StartHourMax = .49
+Mon Dec 01 16:30:49 2003 (firroloni) formName Pasted = 
+Mon Dec 01 16:44:57 2003 (firroloni) .3D.SpringFX.FXName = fy_geyser_fumee.ps
+Mon Dec 01 16:44:57 2003 (firroloni) formName Pasted = 
+Mon Dec 01 17:16:20 2003 (firroloni) .3D.SpringFX.CycleDuration = 1.5
+Mon Dec 01 17:16:20 2003 (firroloni) .3D.SpringFX.StartHourMax = 1.49
+Mon Dec 01 17:16:20 2003 (firroloni) formName Pasted = 
+Mon Dec 01 17:52:48 2003 (firroloni) .3D.AutomnFX.EndHourMax = 15
+Mon Dec 01 17:52:48 2003 (firroloni) .3D.AutomnFX.EndHourMin = 14
+Mon Dec 01 17:52:48 2003 (firroloni) .3D.AutomnFX.StartHourMax = 2
+Mon Dec 01 17:52:48 2003 (firroloni) .3D.AutomnFX.StartHourMin = 1
+Mon Dec 01 17:52:48 2003 (firroloni) .3D.SpringFX.CycleDuration = 24
+Mon Dec 01 17:52:48 2003 (firroloni) .3D.SpringFX.EndHourMax = 9
+Mon Dec 01 17:52:48 2003 (firroloni) .3D.SpringFX.EndHourMin = 8
+Mon Dec 01 17:52:48 2003 (firroloni) .3D.SpringFX.FXName = fy_vapeurs.ps
+Mon Dec 01 17:52:48 2003 (firroloni) .3D.SpringFX.Mode = UseEndHour
+Mon Dec 01 17:52:48 2003 (firroloni) .3D.SpringFX.StartHourMax = 4
+Mon Dec 01 17:52:48 2003 (firroloni) .3D.SpringFX.StartHourMin = 3
+Mon Dec 01 17:52:48 2003 (firroloni) .3D.SummerFX.EndHourMax = 13
+Mon Dec 01 17:52:48 2003 (firroloni) .3D.SummerFX.EndHourMin = 12
+Mon Dec 01 17:52:48 2003 (firroloni) .3D.WinterFX.EndHourMax = 18
+Mon Dec 01 17:52:48 2003 (firroloni) .3D.WinterFX.EndHourMin = 17
+Mon Dec 01 17:52:48 2003 (firroloni) formName Pasted = 
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.AutomnFX.EndHourMax = 20
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.AutomnFX.EndHourMin = 18
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.AutomnFX.FXName = Fy-BirdA.ps
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.AutomnFX.StartHourMax = 14
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.AutomnFX.StartHourMin = 12
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.SpringFX.EndHourMax = 14
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.SpringFX.EndHourMin = 12
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.SpringFX.FXName = Fy-BirdA.ps
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.SpringFX.StartHourMax = 9
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.SpringFX.StartHourMin = 8
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.SummerFX.EndHourMax = 16
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.SummerFX.EndHourMin = 15
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.SummerFX.FXName = Fy-BirdA.ps
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.SummerFX.StartHourMax = 11
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.SummerFX.StartHourMin = 10
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.WinterFX.EndHourMax = 20
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.WinterFX.EndHourMin = 19
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.WinterFX.FXName = Fy-BirdA.ps
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.WinterFX.StartHourMax = 11
+Thu Dec 04 18:08:26 2003 (firroloni) .3D.WinterFX.StartHourMin = 10
+Fri Dec 05 15:57:49 2003 (firroloni) .3D.AutomnFX.UserParam0Max = 1
+Fri Dec 05 15:57:49 2003 (firroloni) .3D.SpringFX.UserParam0Max = 1
+Fri Dec 05 15:57:49 2003 (firroloni) .3D.SummerFX.UserParam0Max = 1
+Fri Dec 05 15:57:49 2003 (firroloni) .3D.WinterFX.UserParam0Max = 1
+Mon Dec 08 19:14:03 2003 (firroloni) .3D.AutomnFX.StartHourMax = 4
+Mon Dec 08 19:14:03 2003 (firroloni) .3D.AutomnFX.StartHourMin = 2
+Mon Dec 08 19:14:03 2003 (firroloni) .3D.SpringFX.EndHourMax = 16
+Mon Dec 08 19:14:03 2003 (firroloni) .3D.SpringFX.EndHourMin = 15
+Mon Dec 08 19:14:03 2003 (firroloni) .3D.SummerFX.EndHourMax = 19
+Mon Dec 08 19:14:03 2003 (firroloni) .3D.SummerFX.EndHourMin = 18
+Mon Dec 08 19:14:03 2003 (firroloni) .3D.SummerFX.StartHourMax = 6
+Mon Dec 08 19:14:03 2003 (firroloni) .3D.SummerFX.StartHourMin = 5
+Thu Feb 19 10:49:53 2004 (gatto) .3D.SpringFX.CycleDuration = 24
+Thu Feb 19 10:49:53 2004 (gatto) .3D.SpringFX.EndHourMax = 24
+Thu Feb 19 10:49:53 2004 (gatto) .3D.SpringFX.EndHourMin = 24
+Thu Feb 19 10:49:53 2004 (gatto) .3D.SpringFX.FXName = tr-fishesb.ps
+Thu Feb 19 10:49:53 2004 (gatto) .3D.SpringFX.StartHourMax = 24
+Thu Feb 19 10:49:53 2004 (gatto) .3D.SpringFX.StartHourMin = 0.01
+Thu Feb 19 10:50:02 2004 (gatto) .3D.SpringFX.AngleMax = 80
+Thu Feb 19 10:52:18 2004 (gatto) formName Pasted = 
+Thu Feb 19 10:53:42 2004 (gatto) .3D.SpringFX.FXName = tr-fishes.ps
+Thu Feb 19 10:53:42 2004 (gatto) formName Pasted = 
+Tue Mar 02 14:51:52 2004 (rang) .3D.SpringFX.FXName = Ju_Fo_Fishes.ps
+Tue Mar 02 14:51:52 2004 (rang) formName Pasted = 
+Tue Mar 02 15:18:18 2004 (rang) .3D.SpringFX.AngleMax = 60
+Tue Mar 02 15:18:18 2004 (rang) formName Pasted = 
+Fri Mar 05 15:58:50 2004 (rang) .3D.SpringFX.Mode = AlwaysStarted
+Fri Mar 05 15:58:50 2004 (rang) formName Pasted = </LOG>
+</FORM>

@@ -95,12 +95,6 @@ public:
 	@endcode
 	*/
 	virtual void setNelContext(NLMISC::INelContext *nelContext) = 0;
-
-	virtual QString name() const = 0;
-	virtual QString version() const = 0;
-	virtual QString vendor() const = 0;
-	virtual QString description() const = 0;
-	virtual QStringList dependencies() const = 0;
 };
 
 }; //namespace ExtensionSystem

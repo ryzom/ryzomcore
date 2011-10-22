@@ -21,12 +21,14 @@
 
 #include "iplugin_spec.h"
 
-#include "QtCore/QList"
+#include <QtCore/QList>
+#include <QtCore/QStringList>
+#include <QtCore/QXmlStreamReader>
 
 namespace ExtensionSystem
 {
 
-class CPluginSpec: public IPluginSpec
+class PluginSpec: public IPluginSpec
 {
 public:
 	virtual QString name() const;
@@ -44,18 +46,22 @@ public:
 	virtual int state() const;
 	virtual bool hasError() const;
 	virtual QString errorString() const;
-	QList<CPluginSpec *> dependencySpecs() const;
+	QList<PluginSpec *> dependencySpecs() const;
 
 	/// Enables/disables load this plugin after restart the program
 	virtual void setEnabled(bool enabled);
 	virtual bool isEnabled() const;
 
 private:
-	CPluginSpec();
+	PluginSpec();
 
 	bool setFileName(const QString &fileName);
+	bool setSpecFileName(const QString &specFileName);
+	bool readSpec();
+	void parseSpec(QXmlStreamReader &reader);
+	void parseDependency(QXmlStreamReader &reader);
 	bool loadLibrary();
-	bool resolveDependencies(const QList<CPluginSpec *> &specs);
+	bool resolveDependencies(const QList<PluginSpec *> &specs);
 	bool initializePlugin();
 	bool initializeExtensions();
 	void stop();
@@ -77,16 +83,19 @@ private:
 	QString m_vendor;
 	QString m_description;
 
+	QString m_nameSpecFile;
+	QString m_suffix;
 	int m_state;
 	bool m_enabled, m_enabledStartup;
 	bool m_hasError;
 	QString m_errorString;
+	QStringList m_dependencies;
 
 	IPlugin *m_plugin;
 	IPluginManager *m_pluginManager;
-	QList<CPluginSpec *> m_dependencySpecs;
+	QList<PluginSpec *> m_dependencySpecs;
 
-	friend class CPluginManager;
+	friend class PluginManager;
 };
 
 } // namespace ExtensionSystem

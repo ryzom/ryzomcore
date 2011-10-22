@@ -65,8 +65,8 @@ void SheetIdView::pushToTable()
 	m_ui.table->setColumnCount(2);
 	for (size_t i = 0; i < m_sheetList.size(); i++)
 	{
-		QTableWidgetItem* item1 = new QTableWidgetItem(QString(m_sheetList[i].toString().c_str()));
-		QTableWidgetItem* item2 = new QTableWidgetItem(QString("%1").arg(m_sheetList[i].asInt()));
+		QTableWidgetItem *item1 = new QTableWidgetItem(QString(m_sheetList[i].toString().c_str()));
+		QTableWidgetItem *item2 = new QTableWidgetItem(QString("%1").arg(m_sheetList[i].asInt()));
 		m_ui.table->setItem(i,1,item1);
 		m_ui.table->setItem(i,2,item2);
 	}

@@ -18,56 +18,41 @@ namespace NLMISC
 class CLibraryContext;
 }
 
-namespace ExtensionSystem
-{
-class IPluginSpec;
-}
-
 namespace Plugin
 {
 
-class MyPlugin : public QObject, public ExtensionSystem::IPlugin
+class ExamplePlugin : public QObject, public ExtensionSystem::IPlugin
 {
 	Q_OBJECT
 	Q_INTERFACES(ExtensionSystem::IPlugin)
 public:
-
-	virtual ~MyPlugin();
+	ExamplePlugin();
+	virtual ~ExamplePlugin();
 
 	bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
 	void extensionsInitialized();
-
 	void setNelContext(NLMISC::INelContext *nelContext);
-
-	QString name() const;
-	QString version() const;
-	QString vendor() const;
-	QString description() const;
-	QStringList dependencies() const;
 
 	void addAutoReleasedObject(QObject *obj);
 
-	QObject *objectByName(const QString &name) const;
-	ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
-
 protected:
-	NLMISC::CLibraryContext *_LibContext;
+	NLMISC::CLibraryContext *m_LibContext;
 
 private:
-	ExtensionSystem::IPluginManager *_plugMan;
-	QList<QObject *> _autoReleaseObjects;
+	ExtensionSystem::IPluginManager *m_plugMan;
+	QList<QObject *> m_autoReleaseObjects;
 };
 
-class CExampleContext: public Core::IContext
+class ExampleContext: public Core::IContext
 {
 	Q_OBJECT
 public:
-	CExampleContext(QObject *parent = 0): IContext(parent)
+	ExampleContext(QObject *parent = 0): IContext(parent)
 	{
-		m_simpleViewer = new CSimpleViewer();
+		m_simpleViewer = new SimpleViewer();
 	}
 
-	virtual ~CExampleContext() {}
+	virtual ~ExampleContext() {}
 
 	virtual QString id() const
 	{
@@ -95,7 +80,7 @@ public:
 	{
 	}
 
-	CSimpleViewer *m_simpleViewer;
+	SimpleViewer *m_simpleViewer;
 };
 
 } // namespace Plugin

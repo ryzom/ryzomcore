@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CSearchPathsSettingsPage</class>
- <widget class="QWidget" name="CSearchPathsSettingsPage">
+ <class>SearchPathsSettingsPage</class>
+ <widget class="QWidget" name="SearchPathsSettingsPage">
   <property name="geometry">
    <rect>
     <x>0</x>

@@ -19,7 +19,7 @@
 #include "sheetbuilderdialog.h"
 #include "sheetbuilderconfgdialog.h"
 #include "../core/icore.h"
-#include "../core/imenu_manager.h"
+#include "../core/menu_manager.h"
 #include "../core/core_constants.h"
 
 // NeL includes
@@ -38,14 +38,14 @@ using namespace Plugin;
 bool SheetBuilderPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
 	Q_UNUSED(errorString);
-	_plugMan = pluginManager;
+	m_plugMan = pluginManager;
 
 	return true;
 }
 
 void SheetBuilderPlugin::extensionsInitialized()
 {
-	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
+	Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
 
 	QMenu *sheetMenu = menuManager->menu(Core::Constants::M_SHEET);
 	QAction *sheetBuilderAction = sheetMenu->addAction(tr("Sheet builder"));
@@ -69,34 +69,7 @@ void SheetBuilderPlugin::setNelContext(NLMISC::INelContext *nelContext)
 	// This only applies to platforms without PIC, e.g. Windows.
 	nlassert(!NLMISC::INelContext::isContextInitialised());
 #endif // NL_OS_WINDOWS
-	_LibContext = new NLMISC::CLibraryContext(*nelContext);
-}
-
-QString SheetBuilderPlugin::name() const
-{
-	return "Sheet builder";
-}
-
-QString SheetBuilderPlugin::version() const
-{
-	return "1.0";
-}
-
-QString SheetBuilderPlugin::vendor() const
-{
-	return "kharvd";
-}
-
-QString SheetBuilderPlugin::description() const
-{
-	return "make_sheet_id equivalent";
-}
-
-QStringList SheetBuilderPlugin::dependencies() const
-{
-	QStringList list;
-	list.append(Core::Constants::OVQT_CORE_PLUGIN);
-	return list;
+	m_LibContext = new NLMISC::CLibraryContext(*nelContext);
 }
 
 Q_EXPORT_PLUGIN(SheetBuilderPlugin)

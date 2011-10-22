@@ -37,7 +37,7 @@ class GeneralSettingsPage : public Core::IOptionsPage
 	Q_OBJECT
 
 public:
-	GeneralSettingsPage(QObject *parent = 0);
+	explicit GeneralSettingsPage(QObject *parent = 0);
 	~GeneralSettingsPage();
 
 	QString id() const;

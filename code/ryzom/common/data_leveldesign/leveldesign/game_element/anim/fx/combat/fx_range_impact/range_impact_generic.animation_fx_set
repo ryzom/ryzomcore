@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<FORM Revision="" State="modified">
+  <STRUCT>
+    <STRUCT Name="FX0">
+      <ATOM Name="PSName" Value="ran_impact.ps"/>
+      <STRUCT Name="StickMode">
+        <ATOM Name="StickMode" Value="UserBoneOrientedTowardTargeter"/>
+        <ATOM Name="UserBone" Value="Bip01 Head"/>
+      </STRUCT>
+    </STRUCT>
+    <ATOM Name="CanReplaceStickMode0" Value="false"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG></LOG>
+</FORM>

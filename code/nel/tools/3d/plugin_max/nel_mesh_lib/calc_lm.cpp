@@ -2587,9 +2587,10 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 						string sLMName = sBaseName + NLMISC::toString(i) + ".tga";
 						if (CFile::fileExists(sLMName))
 						{
+							nlinfo("DELETE %s",  sLMName.c_str());
 							if (!CFile::deleteFile(sLMName))
 							{
-								nlwarning("Failed to delete file %s.", sLMName.c_str());
+								nlwarning("Failed to delete file %s", sLMName.c_str());
 							}
 						}
 					}
@@ -2608,6 +2609,7 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 				COFile f( sSaveName );
 				try
 				{
+					nlinfo("SAVE %s", sSaveName.c_str());
 					if (lmcEnabled)
 					{
 						// In fact the output is 32 bits because we need the alpha channel

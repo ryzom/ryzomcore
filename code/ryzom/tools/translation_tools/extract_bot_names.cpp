@@ -737,7 +737,7 @@ int extractBotNames(int argc, char *argv[])
 		}
 	}
 
-	// display resumé
+	// display summary
 	nlinfo("Adding %u new simple name", nbAddSimpleName);
 	nlinfo("Adding %u new generic name", nbAddGenericName);
 	nlinfo("Adding %u new function name", nbAddFunction);
