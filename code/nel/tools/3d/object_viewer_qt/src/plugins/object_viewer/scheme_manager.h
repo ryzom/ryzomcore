@@ -25,7 +25,7 @@
 
 namespace NL3D
 {
-class CPSAttribMakerBase;
+	class CPSAttribMakerBase;
 }
 
 namespace NLQT
@@ -50,9 +50,10 @@ public:
 	void    remove(NL3D::CPSAttribMakerBase *am);
 	// rename a scheme, given a pointer on it
 	void    rename(NL3D::CPSAttribMakerBase *am, const std::string &newName);
-protected:
+protected:	
+	// typedef std::pair<std::string, NL3D::CPSAttribMakerBase *> TSchemeInfo;
 	typedef std::multimap<std::string, TSchemeInfo> TSchemeMap;
-	TSchemeMap		_SchemeMap;
+	TSchemeMap		_SchemeMap;	
 };
 
 } /* namespace NLQT */

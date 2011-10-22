@@ -26,6 +26,8 @@
 #include <nel/ligo/primitive.h>
 #include <nel/ligo/ligo_config.h>
 
+#include <string.h>
+
 using namespace MissionCompiler::Constants;
 
 MissionCompilerMainWindow::MissionCompilerMainWindow(QWidget *parent) :
@@ -379,7 +381,7 @@ bool MissionCompilerMainWindow::parsePrimForMissions(NLLIGO::IPrimitive const *p
 {
 	std::string value;
 	// if the node is a mission parse it
-	if (prim->getPropertyByName("class",value) && !NLMISC::stricmp(value.c_str(),"mission") )
+	if (prim->getPropertyByName("class",value) && !stricmp(value.c_str(),"mission") )
 	{
 		std::string name;
 		prim->getPropertyByName("name",name);
