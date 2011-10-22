@@ -64,14 +64,14 @@ PluginSpec::PluginSpec()
 // Compilation mode specific suffixes
 #ifdef NL_OS_WINDOWS
 #	if defined(NL_DEBUG)
-m_suffix = "_d.dll";
+	m_suffix = "_d.dll";
 #	elif defined(NL_RELEASE)
-m_suffix = "_r.dll";
+	m_suffix = "_r.dll";
 #	else
 #		error "Unknown compilation mode, can't build suffix"
 #	endif
 #elif defined (NL_OS_UNIX)
-m_suffix = ".so";
+	m_suffix = ".so";
 #else
 #	error "You must define the lib suffix for your platform"
 #endif
