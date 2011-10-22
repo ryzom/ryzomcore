@@ -472,17 +472,23 @@ void CMainWindow::mergeSingleFile()
     if(dialog->selected_item == local_item) // Local directory
     {
 		file_name = QFileDialog::getOpenFileName(this);   
-    } else if(dialog->selected_item == ftp_item)   { // Ftp directory
+    } 
+	else if(dialog->selected_item == ftp_item) // Ftp directory
+	{
         CFtpSelection* ftp_dialog = new CFtpSelection(this);
         ftp_dialog->show();
-        ftp_dialog->exec();
-		if(ftp_dialog->status == true)
-		{
+
+		if(ftp_dialog->exec() && ftp_dialog->status == true)
 			file_name = ftp_dialog->file->fileName();			
-		}
-    } else {
+
+		delete ftp_dialog;
+    } 
+	else
         return;
-    }
+	
+	// Make sure we retrieved a file name
+	if(file_name.isEmpty())
+		return;
 
     editor_window->activateWindow();
     CEditorWorksheet* current_window = qobject_cast<CEditorWorksheet*>(editor_window);

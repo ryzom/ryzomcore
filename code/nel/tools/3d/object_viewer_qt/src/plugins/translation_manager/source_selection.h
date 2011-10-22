@@ -22,6 +22,7 @@ private:
 	Ui::SourceSelectionDialog _ui;	
 private Q_SLOTS:
 	void OkButtonClicked();
+	void itemDoubleClicked(QListWidgetItem *item);
 public:
 	CSourceDialog(QWidget *parent = 0);
 	~CSourceDialog(){}
