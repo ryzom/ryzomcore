@@ -59,12 +59,6 @@ public:
 
 	void setNelContext(NLMISC::INelContext *nelContext);
 
-	QString name() const;
-	QString version() const;
-	QString vendor() const;
-	QString description() const;
-	QStringList dependencies() const;
-
 	void addAutoReleasedObject(QObject *obj);
 
 	QObject *objectByName(const QString &name) const;

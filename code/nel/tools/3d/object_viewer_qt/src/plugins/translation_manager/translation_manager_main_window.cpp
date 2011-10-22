@@ -19,7 +19,7 @@
 // Project system includes
 #include "../core/icore.h"
 #include "../core/core_constants.h"
-#include "../core/imenu_manager.h"
+#include "../core/menu_manager.h"
 #include "../../extension_system/iplugin_spec.h"
 
 // Qt includes
@@ -124,7 +124,7 @@ void CMainWindow::createToolbar()
         connect(mergeSingleFileAct, SIGNAL(triggered()), this, SLOT(mergeSingleFile()));
         // Windows menu
 		Core::ICore *core = Core::ICore::instance();
-		Core::IMenuManager *menuManager = core->menuManager();
+		Core::MenuManager *menuManager = core->menuManager();
 		windowMenu = menuManager->menuBar()->addMenu("Window");  
         updateWindowsList();
         connect(windowMenu, SIGNAL(aboutToShow()), this, SLOT(updateWindowsList()));

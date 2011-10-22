@@ -22,7 +22,7 @@
 // Project system includes
 #include "../core/icore.h"
 #include "../core/core_constants.h"
-#include "../core/imenu_manager.h"
+#include "../core/menu_manager.h"
 #include "../../extension_system/iplugin_spec.h"
 
 // NeL includes
@@ -66,7 +66,7 @@ bool TranslationManagerPlugin::initialize(ExtensionSystem::IPluginManager *plugi
 void TranslationManagerPlugin::extensionsInitialized()
 {
 	Core::ICore *core = Core::ICore::instance();
-	Core::IMenuManager *menuManager = core->menuManager();
+	Core::MenuManager *menuManager = core->menuManager();
 	//menuManager = _plugMan->getObject<Core::IMenuManager>();
 	// Menu Actions for plugin
 	QAction *aboutTManPlugin = new QAction("Translation Manager", this);
@@ -87,34 +87,6 @@ void TranslationManagerPlugin::setNelContext(NLMISC::INelContext *nelContext)
 	nlassert(!NLMISC::INelContext::isContextInitialised());
 #endif // NL_OS_WINDOWS
 	_LibContext = new NLMISC::CLibraryContext(*nelContext);
-}
-
-QString TranslationManagerPlugin::name() const
-{
-	return "Translation Manager";
-}
-
-QString TranslationManagerPlugin::version() const
-{
-	return "0.1";
-}
-
-QString TranslationManagerPlugin::vendor() const
-{
-	return "cemycc";
-}
-
-QString TranslationManagerPlugin::description() const
-{
-	return "OVQT plugin for translation files.";
-}
-
-QStringList TranslationManagerPlugin::dependencies() const
-{
-	QStringList list;
-	list.append(Core::Constants::OVQT_CORE_PLUGIN);
-	//list.append("ObjectViewer");
-	return list;
 }
 
 void TranslationManagerPlugin::addAutoReleasedObject(QObject *obj)
