@@ -166,9 +166,13 @@ printLog(log, ">>> Upload data_common <<<")
 for target in UploadCommon:
 	uploadSftp(target[0], target[1], target[3], DataCommonDirectory, [ ])
 
-printLog(log, ">>> Upload data_leveldesign <<<")
+printLog(log, ">>> Upload data_leveldesign/leveldesign <<<")
 for target in UploadLeveldesign:
 	uploadSftp(target[0], target[1], target[3], LeveldesignDirectory, [ ])
+
+printLog(log, ">>> Upload data_leveldesign/primitives <<<")
+for target in UploadPrimitives:
+	uploadSftp(target[0], target[1], target[3], PrimitivesDirectory, [ ])
 
 log.close()
 if os.path.isfile("8_upload.log"):
