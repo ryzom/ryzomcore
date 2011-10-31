@@ -297,13 +297,13 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	<!-- ######################################################### -->
 	<!-- #####         branch template	(header)		   ####### -->
 	<!-- ######################################################### -->
-	<xsl:template name="branch_header" mode="header-server">
+	<xsl:template name="branch_header" match="IDONTKNOWWHATSHOULDGOHERE" mode="header-server">
 		<xsl:if test="not(@clientonly='1')">
 	class <xsl:call-template name="makeBranchType"/>
 	{
 	public:
 		<!-- generate sub class member -->
-		<xsl:for-each select="branch[not(@clientonly)]"><xsl:call-template name="branch_header" mmode="header-server"/></xsl:for-each>
+		<xsl:for-each select="branch[not(@clientonly)]"><xsl:call-template name="branch_header" /></xsl:for-each>
 
 	private:
 		ICDBStructNode	*_BranchNode;
