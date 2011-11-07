@@ -305,6 +305,8 @@ void CParticleWorkspaceDialog::customContextMenu()
 	_instanciateAction->setEnabled(stopped);
 	_savePSAction->setEnabled(stopped);
 	_saveAsPSAction->setEnabled(stopped);
+	_removeFromWSAction->setEnabled(stopped);
+	_clearContentAction->setEnabled(stopped);
 
 	popurMenu->exec(QCursor::pos());
 	delete popurMenu;
@@ -369,13 +371,14 @@ void CParticleWorkspaceDialog::clearContent()
 
 void CParticleWorkspaceDialog::removePS()
 {
-	if (_treeModel->getOwnerNode(_currentItem) == Modules::psEdit().getActiveNode())
+	CWorkspaceNode *node = _currentItem->getNode();
+	if (node == Modules::psEdit().getActiveNode())
 		Modules::psEdit().setActiveNode(NULL);
 
 	QModelIndex index = _ui.treeView->currentIndex();
 	_ui.treeView->setCurrentIndex(index.parent());
 	clickedItem(index.parent());
-	Modules::psEdit().getParticleWorkspace()->removeNode(static_cast<CParticleTreeItem *>(index.internalPointer())->getNode());
+	Modules::psEdit().getParticleWorkspace()->removeNode(node);
 	_treeModel->removeRows(index.row(), index.parent());
 }
 

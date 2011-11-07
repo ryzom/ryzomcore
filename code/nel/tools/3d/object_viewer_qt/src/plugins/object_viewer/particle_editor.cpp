@@ -78,6 +78,8 @@ void CParticleEditor::release()
 void CParticleEditor::setActiveNode(CWorkspaceNode *node)
 {
 	if (node == _ActiveNode) return;
+	if (node == 0)
+		_ActiveNode->getPSModel()->hide();
 	_ActiveNode = node;
 
 	bool wasRunning = _State == State::RunningSingle;
