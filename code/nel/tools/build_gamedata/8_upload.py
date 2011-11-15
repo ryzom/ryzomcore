@@ -57,7 +57,7 @@ printLog(log, "")
 Psftp = findFileMultiDir(log, ToolDirectories + WindowsExeDllCfgDirectories, UploadPsftpTool)
 printLog(log, "PSFTP " + Psftp)
 
-def downloadVersionTag(server, user, dir):
+def downloadVersionTag(server, user, sshkey, dir):
 	if os.path.isfile("upload.tag"):
 		os.remove("upload.tag")
 	if os.path.isfile("upload.batch"):
@@ -67,7 +67,7 @@ def downloadVersionTag(server, user, dir):
 	ub.write("get upload.tag upload.tag\n")
 	ub.write("quit\n")
 	ub.close()
-	subprocess.call([ Psftp, "-b", "upload.batch", user + "@" + server ])
+	subprocess.call([ Psftp, "-b", "upload.batch", "-i", sshkey, user + "@" + server ])
 	os.remove("upload.batch")
 	if os.path.isfile("upload.tag"):
 		ft = open("upload.tag")
@@ -122,8 +122,8 @@ def listDirectoryUpload(ft, ub, udb, dir):
 				printLog(log, "listDirectoryUpload: file not dir or file?!" + fileFull)
 	return nft
 
-def uploadSftp(server, user, dir_to, dir_from, addcmd):
-	ft = downloadVersionTag(server, user, dir_to)
+def uploadSftp(server, user, sshkey, dir_to, dir_from, addcmd):
+	ft = downloadVersionTag(server, user, sshkey, dir_to)
 	if isDirectoryNeeded(ft, dir_from):
 		if os.path.isfile("upload_dir.batch"):
 			os.remove("upload_dir.batch")
@@ -146,8 +146,8 @@ def uploadSftp(server, user, dir_to, dir_from, addcmd):
 		ub.close()
 		udb.write("quit\n")
 		udb.close()
-		subprocess.call([ Psftp, "-be", "-b", "upload_dir.batch", user + "@" + server ])
-		subprocess.call([ Psftp, "-b", "upload.batch", user + "@" + server ])
+		subprocess.call([ Psftp, "-be", "-b", "upload_dir.batch", "-i", sshkey, user + "@" + server ])
+		subprocess.call([ Psftp, "-b", "upload.batch", "-i", sshkey, user + "@" + server ])
 		os.remove("upload_dir.batch")
 		os.remove("upload.batch")
 		os.remove("upload.tag")
@@ -156,23 +156,23 @@ def uploadSftp(server, user, dir_to, dir_from, addcmd):
 
 printLog(log, ">>> Upload patch <<<")
 for target in UploadPatch:
-	uploadSftp(target[0], target[1], target[3], ClientPatchDirectory + "/patch", [ ])
+	uploadSftp(target[0], target[1], target[2], target[3], ClientPatchDirectory + "/patch", [ ])
 
 printLog(log, ">>> Upload data_shard <<<")
 for target in UploadShard:
-	uploadSftp(target[0], target[1], target[3], DataShardDirectory, [ "rm *.packed_sheets", "rm primitive_cache/*.binprim" ])
+	uploadSftp(target[0], target[1], target[2], target[3], DataShardDirectory, [ "rm *.packed_sheets", "rm primitive_cache/*.binprim" ])
 
 printLog(log, ">>> Upload data_common <<<")
 for target in UploadCommon:
-	uploadSftp(target[0], target[1], target[3], DataCommonDirectory, [ ])
+	uploadSftp(target[0], target[1], target[2], target[3], DataCommonDirectory, [ ])
 
 printLog(log, ">>> Upload data_leveldesign/leveldesign <<<")
 for target in UploadLeveldesign:
-	uploadSftp(target[0], target[1], target[3], LeveldesignDirectory, [ ])
+	uploadSftp(target[0], target[1], target[2], target[3], LeveldesignDirectory, [ ])
 
 printLog(log, ">>> Upload data_leveldesign/primitives <<<")
 for target in UploadPrimitives:
-	uploadSftp(target[0], target[1], target[3], PrimitivesDirectory, [ ])
+	uploadSftp(target[0], target[1], target[2], target[3], PrimitivesDirectory, [ ])
 
 log.close()
 if os.path.isfile("8_upload.log"):
