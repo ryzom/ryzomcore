@@ -1,0 +1,29 @@
+<RCC>
+  <qresource prefix="tileTools">
+    <file>images/add_tile.png</file>
+    <file>images/delete_image.png</file>
+    <file>images/delete_tile.png</file>
+    <file>images/replace_image.png</file>
+  </qresource>
+  <qresource prefix="movementIcons">
+    <file>images/ic_nel_add_item.png</file>
+    <file>images/ic_nel_new.png</file>
+    <file>images/ic_nel_open.png</file>
+    <file>images/ic_nel_save.png</file>
+    <file>images/ic_nel_save_as.png</file>
+    <file>images/down.png</file>
+    <file>images/left.png</file>
+    <file>images/reset.png</file>
+    <file>images/right.png</file>
+    <file>images/up.png</file>
+  </qresource>
+  <qresource prefix="tileRotation">
+    <file>images/rotation0.png</file>
+    <file>images/rotation90.png</file>
+    <file>images/rotation180.png</file>
+    <file>images/rotation270.png</file>
+  </qresource>
+  <qresource prefix="placeHolder">
+    <file>images/empty_image.png</file>
+  </qresource>
+</RCC>
