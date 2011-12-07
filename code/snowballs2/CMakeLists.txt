@@ -1,4 +1,8 @@
-SET(SNOWBALLS_CONFIG_FILE "${NL_ETC_PREFIX}/snowballs" CACHE FILEPATH "Snowballs config file location")
+IF(WIN32)
+  SET(SNOWBALLS_CONFIG_FILE "." CACHE FILEPATH "Snowballs config file location")
+ELSE(WIN32)
+  SET(SNOWBALLS_CONFIG_FILE "${NL_ETC_PREFIX}/snowballs" CACHE FILEPATH "Snowballs config file location")
+ENDIF(WIN32)
 SET(SNOWBALLS_DATA_FILE "${NL_SHARE_PREFIX}/games/snowballs" CACHE FILEPATH "Snowballs data file location")
 SET(SNOWBALLS_LOG_FILE "${NL_LOG_PREFIX}/snowballs" CACHE FILEPATH "Snowballs log file location")
 
