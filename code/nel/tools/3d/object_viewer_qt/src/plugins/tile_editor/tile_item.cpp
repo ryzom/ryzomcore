@@ -16,6 +16,8 @@
 
 #include "tile_item.h"
 
+#include <nel/misc/debug.h>
+
 TileItem::TileItem(const QVector<QVariant> &data, TileItem *parent)
 {
 	parentItem = parent;
@@ -121,6 +123,11 @@ TileItem *TileItem::parent()
 	return parentItem;
 }
 
+void TileItem::setParent(TileItem *parent)
+{
+	parentItem = parent;
+}
+
 void TileItem::appendRow(const QList<TileItem*> &items)
 {
 	Q_FOREACH(TileItem *item, items)
@@ -129,10 +136,33 @@ void TileItem::appendRow(const QList<TileItem*> &items)
 
 void TileItem::appendRow(TileItem *item)
 {
+	nlinfo("number of children: %d", childItems.size());
+	item->setParent(this);
 	childItems.append(item);
+	nlinfo("number of children: %d", childItems.size());
 }
 //QImage *TileItem::getTileImageFromChannel(int channel)
 //{
 //	return m_tileChannels[channel];
 //}
 
+
+///////////////////////////////////////////////////
+
+TileTypeTileItem::TileTypeTileItem(const QVector<QVariant> &data, TileItem *parent) : TileItem(data,parent)
+{
+}
+
+TileTypeTileItem::~TileTypeTileItem()
+{
+	qDeleteAll(childItems);
+}
+
+QVariant TileTypeTileItem::data(int column) const
+{
+	QVariant val = itemData.value(column);
+
+	nlinfo("the column is %d and the value is '%s'. there are %d values",
+		column, val.toString().toStdString().c_str(), itemData.size());
+	return itemData.value(column);
+}

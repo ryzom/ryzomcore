@@ -75,8 +75,11 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 
 	// Set up the tile set list view.
 	m_ui->tileSetLV->setModel(m_model);
-	m_ui->tileSetLV->setRootIndex(m_model->index(0,0));
+	//m_ui->tileSetLV->setRootIndex(m_model->index(0,0));
 	connect(m_ui->tileSetAddTB, SIGNAL(clicked()), this, SLOT(onTileSetAdd()));
+	connect(m_ui->tileSetLV->selectionModel(),
+             SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),
+             this, SLOT(changeActiveTileSet(const QModelIndex &, const QModelIndex &)));
 
 	// 128x128 List View
 	m_ui->listView128->setModel(m_model);
@@ -130,30 +133,71 @@ void TileEditorMainWindow::onTileSetAdd()
 		//else
 		//{
 
-		QModelIndex index = m_ui->tileSetLV->selectionModel()->currentIndex();
+		//QModelIndex index = m_ui->tileSetLV->selectionModel()->currentIndex();
 		TileModel *model = static_cast<TileModel*>(m_ui->tileSetLV->model());
 
-		if(index.isValid())
-		{
-			if(!model->insertRow(index.row()+1, index.parent()))
-				return;
+		//if(index.isValid())
+		//{
+		//	if(!model->insertRow(index.row()+1, index.parent()))
+		//		return;
 
-			//updateActions()
+		//	//updateActions()
 
-			for(int column=0; column<model->columnCount(index.parent()); column++)
-			{
-				QModelIndex child = model->index(index.row()+1, column, index.parent());
-				model->setData(child, QVariant(text), Qt::EditRole);
-			}
-		}
-		else
-		{
+		//	for(int column=0; column<model->columnCount(index.parent()); column++)
+		//	{
+		//		QModelIndex child = model->index(index.row()+1, column, index.parent());
+		//		model->setData(child, QVariant(text), Qt::EditRole);
+		//	}
+		//}
+		//else
+		//{
+			// Create the new tile set.
 			QVector<QVariant> items;
-			items.push_back(QVariant(text));
-			TileItem *item = new TileItem(items, 0);
-			model->appendRow(item);
+			items.push_back(text);
+			TileItem *tileSet = new TileItem(items);
+			
+			// child for 128x128 tiles
+			QVector<QVariant> tiles128;
+			tiles128.push_back(QString("128"));
+			TileTypeTileItem *tile128= new TileTypeTileItem(tiles128);
+
+			// child for 256x256 tiles
+			QVector<QVariant> tiles256;
+			tiles256.push_back(QString("256"));
+			TileTypeTileItem *tile256= new TileTypeTileItem(tiles256);
+			
+
+			// child for transition tiles.
+			QVector<QVariant> tilesTrans;
+			tilesTrans.push_back(QString("Transition"));
+			TileTypeTileItem *tileTrans= new TileTypeTileItem(tilesTrans);
+
+			// Add the default transition tiles.
+			// TODO tie this to CTileSet::count from NeL
+			for(int transPos=0; transPos < 48; transPos++)
+			{
+				QVector<QVariant> tileInfo;
+				tileInfo.push_back(QString("filename").append(QString::number(transPos+1)));
+				TileItem *transTile= new TileItem(tileInfo);
+				tileTrans->appendRow(transTile);
+			}
+
+			// child for displacement tiles
+			QVector<QVariant> tilesDisp;
+			tilesDisp.push_back(QString("Displacement"));
+			TileTypeTileItem *tileDisp= new TileTypeTileItem(tilesDisp);
+
+			// Append them in the correct order to the tile set.
+			tileSet->appendRow(tile128);
+			tileSet->appendRow(tile256);
+			tileSet->appendRow(tileTrans);
+			tileSet->appendRow(tileDisp);
+			
+			model->appendRow(tileSet);
+
+			m_ui->tileSetLV->reset();
 			//updateActions()
-		}
+		//}
 
 		//	tileBank.addTileSet( text.toStdString() );
 
@@ -168,4 +212,20 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 	QFileDialog::Options options;
 	QString selectedFilter;
 	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Choose Tile Texture", "." , "PNG Bitmap(*.png);;All Files (*.*);;", &selectedFilter, options);
+}
+
+void TileEditorMainWindow::changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex)
+{
+	
+	QModelIndex tile128Idx = newIndex.child(0,0);
+	QModelIndex tile256Idx = newIndex.child(1,0);
+	QModelIndex tileTransIdx = newIndex.child(2,0);
+	QModelIndex tileDispIdx = newIndex.child(3,0);
+
+
+	m_ui->listView128->setRootIndex(newIndex);
+	m_ui->listView256->setRootIndex(tile256Idx);
+	m_ui->listViewTransition->setRootIndex(tileTransIdx);
+	m_ui->listViewDisplacement->setRootIndex(tileDispIdx);
+//	m_ui->listView128->setModelColumn
 }

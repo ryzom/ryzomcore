@@ -46,6 +46,7 @@ public Q_SLOTS:
 	void onActionReplaceImage(bool triggered);
 	void onActionDeleteImage(bool triggered);
 	void onTileSetAdd();
+	void changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex);
 
 private:
 	void onActionAddTile(int tabId);

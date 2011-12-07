@@ -468,7 +468,7 @@
          </widget>
         </item>
         <item row="0" column="0">
-         <widget class="QListView" name="tileSetLV"/>
+         <widget class="QTreeView" name="tileSetLV"/>
         </item>
        </layout>
       </widget>

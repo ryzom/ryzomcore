@@ -27,7 +27,7 @@ class TileItem
 public:
 
 	TileItem(const QVector<QVariant> &data, TileItem *parent=0);
-	~TileItem();
+	virtual ~TileItem();
 
 	void appendChild(TileItem *child);
 
@@ -44,6 +44,7 @@ public:
 
 	int row() const;
 	TileItem *parent();
+	void setParent(TileItem *parent);
 
 	void appendRow(const QList<TileItem*> &items);
 	void appendRow(TileItem *item);
@@ -53,7 +54,7 @@ public:
 	//int getTileIndex() { return m_tileIndex; }
 	//QString getTileFilename() { return m_tileFilename; }
 
-private:
+protected:
 	QList<TileItem*> childItems;
 	QVector<QVariant> itemData;
 	TileItem *parentItem;
@@ -61,6 +62,14 @@ private:
 	//QMap<int, QImage*> m_tileChannels;
 	//int m_tileIndex;
 	//QString m_tileFilename;
+};
+
+class TileTypeTileItem : public TileItem
+{
+public:
+	TileTypeTileItem(const QVector<QVariant> &data, TileItem *parent=0);
+	virtual ~TileTypeTileItem();
+	QVariant data(int column) const;
 };
 
 #endif // TILE_ITEM_H
