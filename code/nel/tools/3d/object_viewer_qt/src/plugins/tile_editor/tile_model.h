@@ -28,8 +28,8 @@ class TileModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
-	TileModel::TileModel(const QStringList &headers, QObject *parent);
-    ~TileModel();
+	TileModel(const QStringList &headers, QObject *parent);
+	~TileModel();
 
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 	Qt::ItemFlags flags(const QModelIndex &index) const;

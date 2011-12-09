@@ -247,10 +247,10 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 
 void TileEditorMainWindow::changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex)
 {
-	QModelIndex &tile128Idx = newIndex.child(0,0);
-	QModelIndex &tile256Idx = newIndex.child(1,0);
-	QModelIndex &tileTransIdx = newIndex.child(2,0);
-	QModelIndex &tileDispIdx = newIndex.child(3,0);
+	const QModelIndex &tile128Idx = newIndex.child(0,0);
+	const QModelIndex &tile256Idx = newIndex.child(1,0);
+	const QModelIndex &tileTransIdx = newIndex.child(2,0);
+	const QModelIndex &tileDispIdx = newIndex.child(3,0);
 
 	m_ui->listView128->setRootIndex(tile128Idx);
 	m_ui->listView256->setRootIndex(tile256Idx);
