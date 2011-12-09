@@ -36,6 +36,7 @@ void TileItem::appendChild(TileItem *item)
 
 TileItem *TileItem::child(int row)
 {
+	//nlinfo("row %d and size %d", row, childItems.size());
 	return childItems.value(row);
 }
 
@@ -136,16 +137,9 @@ void TileItem::appendRow(const QList<TileItem*> &items)
 
 void TileItem::appendRow(TileItem *item)
 {
-	nlinfo("number of children: %d", childItems.size());
 	item->setParent(this);
 	childItems.append(item);
-	nlinfo("number of children: %d", childItems.size());
 }
-//QImage *TileItem::getTileImageFromChannel(int channel)
-//{
-//	return m_tileChannels[channel];
-//}
-
 
 ///////////////////////////////////////////////////
 

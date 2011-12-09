@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tileViewTabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab128">
        <attribute name="title">
@@ -66,7 +66,11 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout_11">
         <item row="0" column="0">
-         <widget class="QListView" name="listView256"/>
+         <widget class="QListView" name="listView256">
+          <property name="contextMenuPolicy">
+           <enum>Qt::ActionsContextMenu</enum>
+          </property>
+         </widget>
         </item>
         <item row="1" column="0">
          <widget class="QGroupBox" name="editChannel256GB">
@@ -105,7 +109,17 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout_12">
         <item row="0" column="0">
-         <widget class="QListView" name="listViewTransition"/>
+         <widget class="QListView" name="listViewTransition">
+          <property name="contextMenuPolicy">
+           <enum>Qt::ActionsContextMenu</enum>
+          </property>
+          <property name="flow">
+           <enum>QListView::LeftToRight</enum>
+          </property>
+          <property name="layoutMode">
+           <enum>QListView::Batched</enum>
+          </property>
+         </widget>
         </item>
         <item row="1" column="0">
          <widget class="QGroupBox" name="editChannelTransitionGB">
@@ -148,7 +162,11 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout_13">
         <item row="0" column="0">
-         <widget class="QListView" name="listViewDisplacement"/>
+         <widget class="QListView" name="listViewDisplacement">
+          <property name="contextMenuPolicy">
+           <enum>Qt::ActionsContextMenu</enum>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -468,7 +486,7 @@
          </widget>
         </item>
         <item row="0" column="0">
-         <widget class="QTreeView" name="tileSetLV"/>
+         <widget class="QListView" name="tileSetLV"/>
         </item>
        </layout>
       </widget>
