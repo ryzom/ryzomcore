@@ -16,6 +16,7 @@
 #include <QtGui/QMenu>
 #include <QtGui/QAction>
 #include <QtGui/QMenuBar>
+#include <QtGui/QFileDialog>
 
 namespace Plugin
 {
@@ -39,6 +40,7 @@ bool ZonePainterPlugin::initialize(ExtensionSystem::IPluginManager *pluginManage
 	addAutoReleasedObject(new CZonePainterSettingsPage(this));
 	addAutoReleasedObject(new CZonePainterContext(this));
 	//addAutoReleasedObject(new CCoreListener(this));
+
 	return true;
 }
 
@@ -46,7 +48,25 @@ void ZonePainterPlugin::extensionsInitialized()
 {
 	Core::ICore *core = Core::ICore::instance();
 	Core::MenuManager *menuManager = core->menuManager();
+	QAction *loadZoneAction = new QAction("Load Zone", this);
+	QAction *saveZoneAction = new QAction("Save Zone", this);
+
+	QMenu *toolsMenu = menuManager->menu(Core::Constants::M_TOOLS);
+	QMenu *zoneMenu = toolsMenu->addMenu("Zone Painter");
+	zoneMenu->addAction(loadZoneAction);
+	connect(loadZoneAction, SIGNAL(triggered()), this, SLOT(clickLoadZoneAction()));
+	zoneMenu->addAction(saveZoneAction);
 }
+
+/****** SLOTS ******/
+void ZonePainterPlugin::clickLoadZoneAction() {
+	QString zoneFile = QFileDialog::getOpenFileName(NULL, tr("Open Zone File"), ".", tr("Zone Files (*.zone);;"));
+}
+
+void ZonePainterPlugin::clickSaveZoneAction() {
+
+}
+/****** END SLOTS ******/
 
 void ZonePainterPlugin::setNelContext(NLMISC::INelContext *nelContext)
 {
