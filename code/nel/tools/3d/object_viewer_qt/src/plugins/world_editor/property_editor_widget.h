@@ -50,11 +50,16 @@ public:
 
 public Q_SLOTS:
 	void clearProperties();
-	void setCurrentPrimitive(PrimitiveNode *node);
+
+	/// Update of selections
+	void updateSelection(const NodeList &selected, const NodeList &deselected);
 
 private:
 
 	QtVariantPropertyManager *m_variantManager;
+	QtEnumPropertyManager *m_enumManager;
+	QtGroupPropertyManager *m_groupManager;
+
 	Ui::PropertyEditorWidget m_ui;
 }; /* PropertyEditorWidget */
 

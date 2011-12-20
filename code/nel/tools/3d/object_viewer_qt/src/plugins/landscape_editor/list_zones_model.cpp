@@ -75,9 +75,7 @@ QVariant ListZonesModel::data(const QModelIndex &index, int role) const
 	}
 }
 
-QVariant ListZonesModel::headerData(int section,
-									Qt::Orientation /* orientation */,
-									int role) const
+QVariant ListZonesModel::headerData(int section, Qt::Orientation, int role) const
 {
 	return QVariant();
 }

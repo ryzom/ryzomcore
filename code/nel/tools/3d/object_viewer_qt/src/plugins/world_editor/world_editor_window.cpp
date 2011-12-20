@@ -276,7 +276,7 @@ void WorldEditorWindow::updateSelection(const QItemSelection &selected, const QI
 	}
 
 	// TODO: update property editor
-	// ...
+	m_ui.propertyEditWidget->updateSelection(nodesSelected, nodesDeselected);
 
 	QList<QGraphicsItem *> itemSelected;
 	Q_FOREACH(Node *node, nodesSelected)
