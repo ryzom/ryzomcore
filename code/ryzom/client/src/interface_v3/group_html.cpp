@@ -63,6 +63,13 @@ using namespace NLMISC;
 CGroupHTML *CGroupHTML::_ConnectingLock = NULL;
 extern CActionsContext ActionsContext;
 
+// Check if domain is on TrustedDomain	
+bool CGroupHTML::isTrustedDomain(const string &domain) {
+	vector<string>::iterator it;
+	it = find (ClientCfg.WebIgTrustedDomains.begin(), ClientCfg.WebIgTrustedDomains.end(), domain);
+	return it != ClientCfg.WebIgTrustedDomains.end();
+}
+
 // Get an url and return the local filename with the path where the url image should be
 string CGroupHTML::localImageName(const string &url)
 {
@@ -215,6 +222,9 @@ bool CGroupHTML::addBnpDownload(const string &url, const string &action, const s
 
 void CGroupHTML::initBnpDownload()
 {
+	if (!_TrustedDomain)
+		return;
+
 #ifdef LOG_DL
 	nlwarning("Init Bnp Download");
 #endif
@@ -452,7 +462,7 @@ void CGroupHTML::addText (const char * buf, int len)
 //		for (i=0; i<(uint)len; i++)
 //			inputString[i] = buf[i];
 
-		if (_ParsingLua)
+		if (_ParsingLua && _TrustedDomain)
 		{
 			// we are parsing a lua script
 			_LuaScript += inputString;
@@ -523,12 +533,12 @@ void CGroupHTML::addLink (uint element_number, uint /* attribute_number */, HTCh
 			if (present[MY_HTML_A_HREF] && value[MY_HTML_A_HREF])
 			{
 				string suri = value[MY_HTML_A_HREF];
-				if(suri.find("ah:") == 0)
+				if(_TrustedDomain && suri.find("ah:") == 0)
 				{
 					// in ah: command we don't respect the uri standard so the HTAnchor_address doesn't work correctly
 					_Link.push_back (suri);
 				}
-				else if (suri[0] == '#')
+				else if (_TrustedDomain && suri[0] == '#')
 				{
 					// Direct url (hack for lua beginElement)
 					_Link.push_back (suri.substr(1));	
@@ -822,7 +832,7 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 			_A.push_back(true);
 
 			// Quick help
-			if (present[MY_HTML_A_Z_ACTION_SHORTCUT] && value[MY_HTML_A_Z_ACTION_SHORTCUT])
+			if (_TrustedDomain && present[MY_HTML_A_Z_ACTION_SHORTCUT] && value[MY_HTML_A_Z_ACTION_SHORTCUT])
 			{
 				// Get the action category
 				string category;
@@ -1532,19 +1542,23 @@ void CGroupHTML::endElement (uint element_number)
 			_IgnoreText = false;
 			break;
 		case HTML_OBJECT:
-			if (_ObjectType=="application/ryzom-data")
+			if (_TrustedDomain)
 			{
-				if (!_ObjectData.empty())
+				if (_ObjectType=="application/ryzom-data")
 				{
-					if (addBnpDownload(_ObjectData, _ObjectAction, _ObjectScript, _ObjectMD5Sum))
+					if (!_ObjectData.empty())
 					{
-						CInterfaceManager *pIM = CInterfaceManager::getInstance();
-						pIM->executeLuaScript(_ObjectScript, true);
+						if (addBnpDownload(_ObjectData, _ObjectAction, _ObjectScript, _ObjectMD5Sum))
+						{
+							CInterfaceManager *pIM = CInterfaceManager::getInstance();
+							pIM->executeLuaScript(_ObjectScript, true);
+						}
+						_ObjectScript = "";
 					}
-					_ObjectScript = "";
 				}
+				_Object = false;
 			}
-			_Object = false;
+			break;
 		}
 	}
 }
@@ -1556,7 +1570,7 @@ void CGroupHTML::beginUnparsedElement(const char *buffer, int length)
 	if (stricmp(str.c_str(), "lua") == 0)
 	{
 		// we receive an embeded lua script
-		_ParsingLua = true;
+		_ParsingLua = _TrustedDomain; // Only parse lua if TrustedDomain
 		_LuaScript = "";
 	}
 }
@@ -1567,7 +1581,7 @@ void CGroupHTML::endUnparsedElement(const char *buffer, int length)
 	string str(buffer, buffer+length);
 	if (stricmp(str.c_str(), "lua") == 0)
 	{
-		if (_ParsingLua)
+		if (_ParsingLua && _TrustedDomain)
 		{
 			_ParsingLua = false;
 			// execute the embeded lua script
@@ -2894,7 +2908,7 @@ void CGroupHTML::handle ()
 
 				// Init LibWWW
 				initLibWWW();
-				setCurrentDomain(finalUrl);
+				_TrustedDomain = isTrustedDomain(setCurrentDomain(finalUrl));
 
 				// Get the final URL
 				C3WSmartPtr uri = HTParse(finalUrl.c_str(), NULL, PARSE_ALL);
@@ -3045,7 +3059,7 @@ void CGroupHTML::handle ()
 
 				// Init LibWWW
 				initLibWWW();
-				setCurrentDomain(_URL);
+				_TrustedDomain = isTrustedDomain(setCurrentDomain(_URL));
 
 				// Get the final URL
 				C3WSmartPtr uri = HTParse(_URL.c_str(), NULL, PARSE_ALL);

@@ -203,8 +203,7 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 		nlSleep(1*60*1000);
 		while (true)
 		{
-			string url = "http://atys.ryzom.com/start/index.php?app=notif&rnd="+randomString();
-			//string url = "http://ryapp.bmsite.net/app_mail.php?page=ajax/inbox/unread&rnd="+randomString();
+			string url = "http://"+ClientCfg.WebIgMainDomain+"/start/index.php?app=notif&rnd="+randomString();
 			addWebIGParams(url);
 			get(url);
 			nlSleep(10*60*1000);

@@ -426,8 +426,12 @@ CClientConfig::CClientConfig()
 	PatchUrl = "";
 	PatchVersion = "";
 	PatchServer = "";
-	RingReleaseNotePath = "http://atys.ryzom.com/releasenotes_ring/index.php";
-	ReleaseNotePath = "http://atys.ryzom.com/releasenotes/index.php";
+
+	WebIgMainDomain = "atys.ryzom.com";
+	WebIgTrustedDomains.push_back(WebIgMainDomain);
+
+	RingReleaseNotePath = "http://"+WebIgMainDomain+"/releasenotes_ring/index.php";
+	ReleaseNotePath = "http://"+WebIgMainDomain+"/releasenotes/index.php";
 
 	///////////////
 	// ANIMATION //
@@ -1039,6 +1043,11 @@ void CClientConfig::setValues()
 	READ_STRING_DEV(RingReleaseNotePath)
 	READ_STRING_DEV(ReleaseNotePath)
 	READ_STRING_FV(PatchServer)
+
+	////////////////////////
+	// WEBIG //
+	READ_STRING_DEV(WebIgMainDomain);
+	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
 
 	///////////////
 	// ANIMATION //

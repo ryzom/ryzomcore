@@ -281,6 +281,9 @@ protected :
 	// Current URL
 	std::string		_URL;
 
+	// Current DOMAIN
+	bool			_TrustedDomain;
+
 	// Title prefix
 	ucstring		_TitlePrefix;
 
@@ -579,6 +582,7 @@ private:
 	void checkImageDownload();
 	void addImageDownload(const std::string &url, CViewBase *img);
 	std::string localImageName(const std::string &url);
+	bool isTrustedDomain(const std::string &domain);
 
 
 
