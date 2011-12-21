@@ -45,8 +45,8 @@ class IPluginSpec;
 namespace TranslationManager
 {
 
-    class CTranslationManagerContext;
-    
+class CTranslationManagerContext;
+
 class TranslationManagerPlugin : public QObject, public ExtensionSystem::IPlugin
 {
 	Q_OBJECT
@@ -58,11 +58,7 @@ public:
 	void extensionsInitialized();
 
 	void setNelContext(NLMISC::INelContext *nelContext);
-
 	void addAutoReleasedObject(QObject *obj);
-
-	QObject *objectByName(const QString &name) const;
-	ExtensionSystem::IPluginSpec *pluginByName(const QString &name) const;
 
 protected:
 	NLMISC::CLibraryContext *_LibContext;
@@ -75,8 +71,9 @@ private:
 class CTranslationManagerContext: public Core::IContext
 {
 	Q_OBJECT
+
 public:
-	CTranslationManagerContext(CMainWindow* mainWindow, QObject *parent = 0): IContext(parent)
+	CTranslationManagerContext(CMainWindow *mainWindow, QObject *parent = 0): IContext(parent)
 	{
 		m_MainWindow = mainWindow;
 	}
@@ -109,9 +106,8 @@ public:
 	}
 
 	CMainWindow *m_MainWindow;
-        
 };
 
-} // namespace Plugin
+}
 
 #endif // TRANSLATION_MANAGER_PLUGIN_H

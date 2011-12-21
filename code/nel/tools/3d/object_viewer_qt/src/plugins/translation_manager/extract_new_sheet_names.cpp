@@ -16,139 +16,135 @@
 
 #include "extract_new_sheet_names.h"
 
-using namespace std;
-using namespace NLMISC;
-using namespace NLLIGO;
-using namespace STRING_MANAGER;
-
-namespace TranslationManager 
+namespace TranslationManager
 {
-    
-
 
 // ***************************************************************************
 /*
  *	Specialisation of IWordListBuilder to list sheets in a directory
  */
- 
 
-bool	CSheetWordListBuilder::buildWordList(std::vector<string> &allWords, string workSheetFileName)
+bool CSheetWordListBuilder::buildWordList(std::vector<std::string> &allWords, std::string workSheetFileName)
+{
+	SheetExt = NLMISC::toLower(SheetExt);
+	// verify the directory is correct
+	if(!NLMISC::CFile::isDirectory(SheetPath))
 	{
-		SheetExt= toLower(SheetExt);
-		// verify the directory is correct
-		if(!CFile::isDirectory(SheetPath))
-		{
-			nlwarning("Error: Directory '%s' not found. '%s' Aborted", SheetPath.c_str(), workSheetFileName.c_str());
-			return false;
-		}
-		
-		// list all files.
-		std::vector<string>		allFiles;
-		allFiles.reserve(100000);
-		CPath::getPathContent(SheetPath, true, false, true, allFiles, NULL);
-		
-		// Keep only the extension we want, and remove "_" (parent)
-		allWords.clear();
-		allWords.reserve(allFiles.size());
-		for(uint i=0;i<allFiles.size();i++)
-		{
-			string	fileNameWithoutExt= CFile::getFilenameWithoutExtension(allFiles[i]);
-			string	extension= toLower(CFile::getExtension(allFiles[i]));
-			// bad extension?
-			if(extension!=SheetExt)
-				continue;
-			// parent?
-			if(fileNameWithoutExt.empty()||fileNameWithoutExt[0]=='_')
-				continue;
-			// ok, add
-			allWords.push_back(toLower(fileNameWithoutExt));
-		}
-
-		return true;
+		nlwarning("Error: Directory '%s' not found. '%s' Aborted", SheetPath.c_str(), workSheetFileName.c_str());
+		return false;
 	}
 
+	// list all files.
+	std::vector<std::string> allFiles;
+	allFiles.reserve(100000);
+	NLMISC::CPath::getPathContent(SheetPath, true, false, true, allFiles, NULL);
 
+	// Keep only the extension we want, and remove "_" (parent)
+	allWords.clear();
+	allWords.reserve(allFiles.size());
+	for(size_t i = 0; i < allFiles.size(); i++)
+	{
+		std::string fileNameWithoutExt = NLMISC::CFile::getFilenameWithoutExtension(allFiles[i]);
+		std::string extension = NLMISC::toLower(NLMISC::CFile::getExtension(allFiles[i]));
+
+		// bad extension?
+		if(extension!=SheetExt)
+			continue;
+
+		// parent?
+		if(fileNameWithoutExt.empty() || fileNameWithoutExt[0] == '_')
+			continue;
+
+		// ok, add
+		allWords.push_back(NLMISC::toLower(fileNameWithoutExt));
+	}
+	return true;
+}
 
 // ***************************************************************************
 /*
  *	Specialisation of IWordListBuilder to list new region/place name from .primitive
  */
-bool	CRegionPrimWordListBuilder::buildWordList(std::vector<string> &allWords, string workSheetFileName)
+bool CRegionPrimWordListBuilder::buildWordList(std::vector<std::string> &allWords, std::string workSheetFileName)
+{
+	// verify the directory is correct
+	if(!NLMISC::CFile::isDirectory(PrimPath))
 	{
-		// verify the directory is correct
-		if(!CFile::isDirectory(PrimPath))
+		nlwarning("Error: Directory '%s' not found. '%s' Aborted", PrimPath.c_str(), workSheetFileName.c_str());
+		return false;
+	}
+
+	// list all files.
+	std::vector<std::string> allFiles;
+	allFiles.reserve(100000);
+	NLMISC::CPath::getPathContent(PrimPath, true, false, true, allFiles, NULL);
+
+	// parse all primitive that match the filter
+	allWords.clear();
+	allWords.reserve(100000);
+	// to avoid duplicate
+	std::set<std::string> allWordSet;
+	for(size_t i = 0; i < allFiles.size(); i++)
+	{
+		std::string fileName = NLMISC::CFile::getFilename(allFiles[i]);
+		// filter don't match?
+		bool oneMatch= false;
+		for(size_t filter = 0; filter < PrimFilter.size(); filter++)
 		{
-			nlwarning("Error: Directory '%s' not found. '%s' Aborted", PrimPath.c_str(), workSheetFileName.c_str());
+			if(NLMISC::testWildCard(fileName, PrimFilter[filter]))
+				oneMatch= true;
+		}
+		if(!oneMatch)
+			continue;
+
+		// ok, read the file
+		NLLIGO::CPrimitives PrimDoc;
+		NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = &PrimDoc;
+		if (!NLLIGO::loadXmlPrimitiveFile(PrimDoc, allFiles[i], LigoConfig))
+		{
+			nlwarning("Error: cannot open file '%s'. '%s' Aborted", allFiles[i].c_str(), workSheetFileName.c_str());
+			NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
 			return false;
 		}
-		
-		// list all files.
-		std::vector<string>		allFiles;
-		allFiles.reserve(100000);
-		CPath::getPathContent(PrimPath, true, false, true, allFiles, NULL);
-		
-		// parse all primitive that match the filter
-		allWords.clear();
-		allWords.reserve(100000);
-		// to avoid duplicate
-		set<string>		allWordSet;
-		for(uint i=0;i<allFiles.size();i++)
-		{
-			string	fileName= CFile::getFilename(allFiles[i]);
-			// filter don't match?
-			bool	oneMatch= false;
-			for(uint filter=0;filter<PrimFilter.size();filter++)
-			{
-				if(testWildCard(fileName, PrimFilter[filter]))
-					oneMatch= true;
-			}
-			if(!oneMatch)
-				continue;
+		NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
 
-			// ok, read the file
-			CPrimitives PrimDoc;
-			CPrimitiveContext::instance().CurrentPrimitive = &PrimDoc;
-			if (!loadXmlPrimitiveFile(PrimDoc, allFiles[i], LigoConfig))
+		// For all primitives of interest
+		const char *listClass[] = {"continent", "region", "place", "stable",
+								   "teleport_destination", "room_template"
+								  };
+
+		const char *listProp[] = {"name", "name", "name", "name",
+								  "place_name", "place_name"
+								 };
+
+		const uint numListClass= sizeof(listClass)/sizeof(listClass[0]);
+		const uint numListProp= sizeof(listProp)/sizeof(listProp[0]);
+		nlctassert(numListProp == numListClass);
+		for(uint cid = 0; cid < numListClass; cid++)
+		{
+			// parse the whole hierarchy
+			NLLIGO::TPrimitiveClassPredicate predCont(listClass[cid]);
+			NLLIGO::CPrimitiveSet<NLLIGO::TPrimitiveClassPredicate> setPlace;
+			NLLIGO::TPrimitiveSet placeRes;
+			setPlace.buildSet(PrimDoc.RootNode, predCont, placeRes);
+
+			// for all found
+			for (size_t placeId = 0; placeId < placeRes.size(); ++placeId)
 			{
-				nlwarning("Error: cannot open file '%s'. '%s' Aborted", allFiles[i].c_str(), workSheetFileName.c_str());
-				CPrimitiveContext::instance().CurrentPrimitive = NULL;
-				return false;
-			}
-			CPrimitiveContext::instance().CurrentPrimitive = NULL;
-			
-			// For all primitives of interest
-			const char	*listClass[]= {"continent", "region", "place", "stable", 
-				"teleport_destination", "room_template"};
-			const char	*listProp[]= {"name", "name", "name", "name", 
-				"place_name", "place_name"};
-			const uint	numListClass= sizeof(listClass)/sizeof(listClass[0]);
-			const uint	numListProp= sizeof(listProp)/sizeof(listProp[0]);
-			nlctassert(numListProp==numListClass);
-			for(uint cid=0;cid<numListClass;cid++)
-			{
-				// parse the whole hierarchy
-				TPrimitiveClassPredicate predCont(listClass[cid]);
-				CPrimitiveSet<TPrimitiveClassPredicate> setPlace;
-				TPrimitiveSet placeRes;
-				setPlace.buildSet(PrimDoc.RootNode, predCont, placeRes);
-				// for all found
-				for (uint placeId= 0; placeId < placeRes.size(); ++placeId)
+				std::string primName;
+				if(placeRes[placeId]->getPropertyByName(listProp[cid], primName) && !primName.empty())
 				{
-					string primName;
-					if(placeRes[placeId]->getPropertyByName(listProp[cid], primName) && !primName.empty())
+					primName = NLMISC::toLower(primName);
+					// avoid duplicate
+					if(allWordSet.insert(primName).second)
 					{
-						primName= toLower(primName);
-						// avoid duplicate
-						if(allWordSet.insert(primName).second)
-						{
-							allWords.push_back(primName);
-						}
+						allWords.push_back(primName);
 					}
 				}
 			}
 		}
-		
-		return true;
 	}
+	return true;
+}
 
 }

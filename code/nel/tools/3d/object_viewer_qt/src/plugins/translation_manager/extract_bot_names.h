@@ -30,22 +30,16 @@
 #include "nel/ligo/primitive.h"
 #include "nel/ligo/primitive_utils.h"
 
-using namespace std;
-using namespace NLMISC;
-using namespace NLLIGO;
-using namespace STRING_MANAGER;
-
 namespace TranslationManager
 {
 
 struct TCreatureInfo
 {
-	CSheetId	SheetId;
-	bool		ForceSheetName;
-	bool		DisplayName;
+	NLMISC::CSheetId SheetId;
+	bool ForceSheetName;
+	bool DisplayName;
 
-
-	void	readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId)
+	void readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId)
 	{
 		const NLGEORGES::UFormElm &item=form->getRootNode();
 
@@ -61,51 +55,45 @@ struct TCreatureInfo
 		f.serial(DisplayName);
 	}
 
-
-	static uint getVersion () 
-	{ 
+	static uint getVersion ()
+	{
 		return 1;
 	}
 
 	void removed()
 	{
 	}
-	
 };
 
 struct TEntryInfo
 {
-	string	SheetName;
+	std::string SheetName;
 };
 
 struct ExtractBotNames
 {
 private:
-    vector<string>	Filters;
-    std::map<CSheetId, TCreatureInfo>	Creatures;
-    set<string>					GenericNames;
-    map<string, TEntryInfo>		SimpleNames;
-    set<string>					Functions;
+	std::vector<std::string> Filters;
+	std::map<NLMISC::CSheetId, TCreatureInfo> Creatures;
+	std::set<std::string> GenericNames;
+	std::map<std::string, TEntryInfo> SimpleNames;
+	std::set<std::string> Functions;
 private:
-    TCreatureInfo *getCreature(const std::string &sheetName);
-    ucstring makeGroupName(const ucstring & translationName);
-    string	removeAndStoreFunction(const std::string &fullName);
-    void addGenericName(const std::string &name, const std::string &sheetName);
-    void addSimpleName(const std::string &name, const std::string &sheetName);
+	TCreatureInfo *getCreature(const std::string &sheetName);
+	ucstring makeGroupName(const ucstring &translationName);
+	std::string removeAndStoreFunction(const std::string &fullName);
+	void addGenericName(const std::string &name, const std::string &sheetName);
+	void addSimpleName(const std::string &name, const std::string &sheetName);
 public:
-    void extractBotNamesFromPrimitives(CLigoConfig ligoConfig);
-    void setRequiredSettings(list<string> filters, string level_design_path);
-    set<string> getGenericNames();
-    map<string, TEntryInfo> getSimpleNames();
-    string cleanupName(const std::string &name);
-    ucstring cleanupUcName(const ucstring &name);
-    void cleanSimpleNames();
-    void cleanGenericNames();
-    
+	void extractBotNamesFromPrimitives(NLLIGO::CLigoConfig ligoConfig);
+	void setRequiredSettings(std::list<std::string> filters, std::string level_design_path);
+	std::set<std::string> getGenericNames();
+	std::map<std::string, TEntryInfo> getSimpleNames();
+	std::string cleanupName(const std::string &name);
+	ucstring cleanupUcName(const ucstring &name);
+	void cleanSimpleNames();
+	void cleanGenericNames();
 };
-
 }
 
-
 #endif	/* EXTRACT_BOT_NAMES_H */
-

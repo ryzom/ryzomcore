@@ -19,7 +19,8 @@
 #include "translation_manager_plugin.h"
 #include "translation_manager_settings_page.h"
 #include "translation_manager_main_window.h"
-// Project system includes
+
+// Core includes
 #include "../core/icore.h"
 #include "../core/core_constants.h"
 #include "../core/menu_manager.h"
@@ -59,16 +60,13 @@ bool TranslationManagerPlugin::initialize(ExtensionSystem::IPluginManager *plugi
 	addAutoReleasedObject(new CTranslationManagerSettingsPage(this));
 	addAutoReleasedObject(new CTranslationManagerContext(mainWindow, this));
 	addAutoReleasedObject(new CCoreListener(mainWindow, this));
-        
+
 	return true;
 }
 
 void TranslationManagerPlugin::extensionsInitialized()
 {
-
 }
-
-
 
 void TranslationManagerPlugin::setNelContext(NLMISC::INelContext *nelContext)
 {
@@ -84,23 +82,6 @@ void TranslationManagerPlugin::addAutoReleasedObject(QObject *obj)
 {
 	_plugMan->addObject(obj);
 	_autoReleaseObjects.prepend(obj);
-}
-
-QObject* TranslationManagerPlugin::objectByName(const QString &name) const
-{
-	Q_FOREACH (QObject *qobj, _plugMan->allObjects())
-	if (qobj->objectName() == name)
-		return qobj;
-	return 0;
-}
-
-ExtensionSystem::IPluginSpec *TranslationManagerPlugin::pluginByName(const QString &name) const
-{
-	Q_FOREACH (ExtensionSystem::IPluginSpec *spec, _plugMan->plugins())
-	if (spec->name() == name)
-		return spec;
-	return 0;
-
 }
 
 }

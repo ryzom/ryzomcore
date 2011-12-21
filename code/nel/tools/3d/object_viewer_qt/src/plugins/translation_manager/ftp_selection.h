@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   ftp_selection.h
  * Author: cemycc
  *
@@ -8,6 +8,8 @@
 #ifndef FTP_SELECTION_H
 #define	FTP_SELECTION_H
 
+#include "ui_ftp_selection.h"
+
 #include <QtCore/QObject>
 #include <QtCore/QUrl>
 #include <QtGui/QDialog>
@@ -16,34 +18,33 @@
 #include <QtCore/QFile>
 #include <QtNetwork>
 
-#include "ui_ftp_selection.h"
+namespace TranslationManager
+{
 
-using namespace std;
+class CFtpSelection : public QDialog
+{
+	Q_OBJECT
 
-namespace TranslationManager {
-    
-    class CFtpSelection : public QDialog
-    {
-        Q_OBJECT
-    private:
-        Ui::FtpSelectionDialog _ui;
-        QFtp *conn;
-        QHash<QString, bool> isDirectory;
-        QString currentPath;
-    private Q_SLOTS:
-		void cdToParent();
-        void processItem(QTreeWidgetItem*,int);
-        void ConnectButtonClicked();
-        void DoneButtonClicked();
-        void FtpCommandFinished(int, bool error);
-        void AddToList(const QUrlInfo &urlInfo);
-    public:
-		bool status;
-		QFile *file;
-        CFtpSelection(QWidget* parent = 0);
-        ~CFtpSelection() {}
-    };
+public:
+	CFtpSelection(QWidget *parent = 0);
+	~CFtpSelection() {}
+	bool status;
+	QFile *file;
+
+private Q_SLOTS:
+	void cdToParent();
+	void processItem(QTreeWidgetItem *,int);
+	void ConnectButtonClicked();
+	void DoneButtonClicked();
+	void FtpCommandFinished(int, bool error);
+	void AddToList(const QUrlInfo &urlInfo);
+
+private:
+	Ui::FtpSelectionDialog _ui;
+	QFtp *conn;
+	QHash<QString, bool> isDirectory;
+	QString currentPath;
+};
 }
 
 #endif	/* FTP_SELECTION_H */
-

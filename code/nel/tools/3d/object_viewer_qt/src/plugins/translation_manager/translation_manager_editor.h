@@ -1,5 +1,4 @@
 // Translation Manager Plugin - OVQT Plugin <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Emanuel Costea <cemycc@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -25,31 +24,30 @@
 #include <QtGui/QUndoStack>
 #include <QtCore/QFileInfo>
 
-namespace TranslationManager {
-    
-class CEditor : public QMdiSubWindow {
-Q_OBJECT
-protected:
-	QUndoStack* current_stack;
-    QString current_file;
-	int editor_type;
+namespace TranslationManager
+{
+
+class CEditor : public QMdiSubWindow
+{
+	Q_OBJECT
+
 public:
-    CEditor(QMdiArea* parent) : QMdiSubWindow(parent) {}
-    CEditor() : QMdiSubWindow() {}
-    virtual void open(QString filename) =0;
-    virtual void save() =0;
-    virtual void saveAs(QString filename) =0;
-    virtual void activateWindow() =0;
-public:
+	CEditor(QMdiArea *parent) : QMdiSubWindow(parent) {}
+	CEditor() : QMdiSubWindow() {}
+	virtual void open(QString filename) =0;
+	virtual void save() =0;
+	virtual void saveAs(QString filename) =0;
+	virtual void activateWindow() =0;
+
 	int eType()
 	{
 		return editor_type;
 	}
-    QString subWindowFilePath()
-    {
-        return current_file;
-    }
-	void setUndoStack(QUndoStack* stack)
+	QString subWindowFilePath()
+	{
+		return current_file;
+	}
+	void setUndoStack(QUndoStack *stack)
 	{
 		current_stack = stack;
 	}
@@ -58,14 +56,16 @@ public:
 		QFileInfo *file = new QFileInfo(filename);
 		current_file = file->canonicalFilePath();
 		setWindowModified(false);
-		setWindowTitle(file->fileName() + "[*]");  
+		setWindowTitle(file->fileName() + "[*]");
 		setWindowFilePath(current_file);
 	}
 
+protected:
+	QUndoStack *current_stack;
+	QString current_file;
+	int editor_type;
 };
 
 }
 
-
 #endif	/* TRANSLATION_MANAGER_EDITOR_H */
-

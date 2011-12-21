@@ -30,14 +30,8 @@
 #include "nel/ligo/primitive.h"
 #include "nel/ligo/primitive_utils.h"
 
-using namespace std;
-using namespace NLMISC;
-using namespace NLLIGO;
-using namespace STRING_MANAGER;
-
-namespace TranslationManager 
+namespace TranslationManager
 {
-
 
 // ***************************************************************************
 /*
@@ -45,28 +39,25 @@ namespace TranslationManager
  */
 struct IWordListBuilder
 {
-	virtual bool	buildWordList(std::vector<string> &allWords, string workSheetFileName) =0;
-        
+	virtual bool buildWordList(std::vector<std::string> &allWords, std::string workSheetFileName) =0;
 };
 
 struct CSheetWordListBuilder : public IWordListBuilder
 {
-	string		SheetExt;
-	string		SheetPath;
+	std::string SheetExt;
+	std::string SheetPath;
 
-      virtual bool	buildWordList(std::vector<string> &allWords, string workSheetFileName);
+	virtual bool buildWordList(std::vector<std::string> &allWords, std::string workSheetFileName);
 };
 
 struct CRegionPrimWordListBuilder : public IWordListBuilder
 {
-	string			PrimPath;
-	vector<string>	PrimFilter;
-               NLLIGO::CLigoConfig LigoConfig;
-        virtual bool	buildWordList(std::vector<string> &allWords, string workSheetFileName);
+	std::string PrimPath;
+	std::vector<std::string> PrimFilter;
+	NLLIGO::CLigoConfig LigoConfig;
+	virtual bool buildWordList(std::vector<std::string> &allWords, std::string workSheetFileName);
 };
 
 }
 
-
 #endif	/* EXTRACT_NEW_SHEET_NAMES_H */
-
