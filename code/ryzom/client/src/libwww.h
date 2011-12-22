@@ -35,7 +35,7 @@ class CCtrlBaseButton;
 void initLibWWW();
 
 // Get an url and setup a local domain
-void setCurrentDomain(const std::string &url);
+const std::string &setCurrentDomain(const std::string &url);
 
 extern std::string CurrentCookie;
 

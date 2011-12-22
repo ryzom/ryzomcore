@@ -520,7 +520,7 @@ int HTMIME_location_custom (HTRequest * request, HTResponse * response, char * t
 
 // ***************************************************************************
 
-void setCurrentDomain(const std::string &url)
+const std::string &setCurrentDomain(const std::string &url)
 {
 	if(url.find("http://") == 0)
 	{
@@ -532,6 +532,7 @@ void setCurrentDomain(const std::string &url)
 		HTTPCurrentDomain.clear();
 //		nlinfo("****cd: clear the domain");
 	}
+	return HTTPCurrentDomain;
 }
 
 void initLibWWW()

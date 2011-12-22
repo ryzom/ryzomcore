@@ -292,6 +292,10 @@ struct CClientConfig
 	std::string		RingReleaseNotePath;
 	std::string		ReleaseNotePath;
 
+	////////////////////////
+	// WEBIG //
+	std::string		WebIgMainDomain;
+	std::vector<string>	WebIgTrustedDomains;
 
 	///////////////
 	// ANIMATION //
