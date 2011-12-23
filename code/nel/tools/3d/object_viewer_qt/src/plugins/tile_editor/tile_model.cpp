@@ -25,7 +25,7 @@ TileModel::TileModel(const QStringList &headers, QObject *parent) : QAbstractIte
 	Q_FOREACH(QString header, headers)
 		rootData << header;
 
-	rootItem = new TileItem(rootData);
+	rootItem = new Node(rootData);
 }
 
 TileModel::~TileModel()
@@ -33,11 +33,11 @@ TileModel::~TileModel()
 	delete rootItem;
 }
 
-TileItem *TileModel::getItem(const QModelIndex &index) const
+Node *TileModel::getItem(const QModelIndex &index) const
 {
 	if(index.isValid())
 	{
-		TileItem *item = static_cast<TileItem*>(index.internalPointer());
+		Node *item = static_cast<Node*>(index.internalPointer());
 		if(item) return item;
 	}
 	return rootItem;
@@ -48,9 +48,9 @@ QModelIndex TileModel::index(int row, int column, const QModelIndex &parent) con
 	if(parent.isValid() && parent.column() != 0)
 		return QModelIndex();
 
-	TileItem *parentItem = getItem(parent);
+	Node *parentItem = getItem(parent);
 
-	TileItem *childItem = parentItem->child(row);
+	Node *childItem = parentItem->child(row);
 	if(childItem)
 		return createIndex(row, column, childItem);
 	else
@@ -62,8 +62,8 @@ QModelIndex TileModel::parent(const QModelIndex &index) const
 	if(!index.isValid())
 		return QModelIndex();
 
-	TileItem *childItem = getItem(index);
-	TileItem *parentItem = childItem->parent();
+	Node *childItem = getItem(index);
+	Node *parentItem = childItem->parent();
 
 	if(parentItem == rootItem)
 		return QModelIndex();
@@ -73,13 +73,13 @@ QModelIndex TileModel::parent(const QModelIndex &index) const
 
 int TileModel::rowCount(const QModelIndex &parent) const
 {
-	TileItem *parentItem = getItem(parent);
+	Node *parentItem = getItem(parent);
 	return parentItem->childCount();
 }
 
 int TileModel::columnCount(const QModelIndex &parent) const
 {
-	TileItem *parentItem = getItem(parent);
+	Node *parentItem = getItem(parent);
 	return parentItem->columnCount();
 }
 
@@ -91,7 +91,7 @@ QVariant TileModel::data(const QModelIndex &index, int role) const
 	if(role != Qt::DisplayRole)
 		return QVariant();
 
-	TileItem *item = static_cast<TileItem*>(index.internalPointer());
+	Node *item = static_cast<Node*>(index.internalPointer());
 	return item->data(index.column());
 }
 
@@ -111,13 +111,57 @@ QVariant TileModel::headerData(int section, Qt::Orientation orientation, int rol
 	return QVariant();
 }
 
-void TileModel::appendRow(const QList<TileItem*> &items)
+void TileModel::appendRow(const QList<Node*> &items)
 {
 	rootItem->appendRow(items);
 }
 
 
-void TileModel::appendRow(TileItem *item)
+void TileModel::appendRow(Node *item)
 {
 	rootItem->appendRow(item);
+}
+
+TileSetNode *TileModel::createTileSetNode(QString tileSetName)
+{
+	// Create the new tile set.
+	TileSetNode *tileSet = new TileSetNode(tileSetName);
+			
+	// child for 128x128 tiles
+	TileTypeNode *tile128= new TileTypeNode(TileTypeNode::Tile128);
+	
+	// child for 256x256 tiles
+	TileTypeNode *tile256= new TileTypeNode(TileTypeNode::Tile256);
+
+	// child for transition tiles.
+	TileTypeNode *tileTrans= new TileTypeNode(TileTypeNode::TileTransition);
+
+	// Add the default transition tiles.
+	// TODO tie this to CTileSet::count from NeL
+	for(int transPos=0; transPos<48; transPos++)
+	{				
+		TileItemNode *transTile= new TileItemNode(transPos, TileItemNode::TileDiffuse, QString("filename").append(QString::number(transPos+1)));
+		tileTrans->appendRow(transTile);
+	}
+
+	// child for displacement tiles
+	TileTypeNode *tileDisp= new TileTypeNode(TileTypeNode::TileDisplacement);
+
+	// Add the default displacement tiles.
+	// TODO tie this to CTileSet::CountDisplace from NeL
+	for(int dispPos=0; dispPos<16; dispPos++)
+	{
+		TileItemNode *dispTile= new TileItemNode(dispPos, TileItemNode::TileDiffuse, QString("filename").append(QString::number(dispPos+1)));
+		tileDisp->appendRow(dispTile);
+	}
+
+	// Append them in the correct order to the tile set.
+	tileSet->appendRow(tile128);
+	tileSet->appendRow(tile256);
+	tileSet->appendRow(tileTrans);
+	tileSet->appendRow(tileDisp);
+
+	this->appendRow(tileSet);
+
+	return tileSet;
 }

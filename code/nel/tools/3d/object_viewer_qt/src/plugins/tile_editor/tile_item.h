@@ -22,54 +22,90 @@
 #include <QAbstractListModel>
 #include <QVector>
 
-class TileItem
+class Node
 {
 public:
+	Node();
+	Node(const QVector<QVariant> &data, Node *parent=0);
+	virtual ~Node();
 
-	TileItem(const QVector<QVariant> &data, TileItem *parent=0);
-	virtual ~TileItem();
+	void appendChild(Node *child);
 
-	void appendChild(TileItem *child);
-
-	TileItem *child(int row);
+	Node *child(int row);
 	int childCount() const;
 	int childNumber() const;
 	int columnCount() const;
 	bool setData(int column, const QVariant &value);
-	QVariant data(int column) const;
+	virtual QVariant data(int column) const;
 
 	bool insertChildren(int position, int count, int columns);
 	bool removeChildren(int position, int count);
 	bool insertColumns(int position, int columns);
 
 	int row() const;
-	TileItem *parent();
-	void setParent(TileItem *parent);
+	Node *parent();
+	void setParent(Node *parent);
 
-	void appendRow(const QList<TileItem*> &items);
-	void appendRow(TileItem *item);
-
-	//QImage *getTileImageFromChannel(int channel);
-
-	//int getTileIndex() { return m_tileIndex; }
-	//QString getTileFilename() { return m_tileFilename; }
+	void appendRow(const QList<Node*> &items);
+	void appendRow(Node *item);
 
 protected:
-	QList<TileItem*> childItems;
-	QVector<QVariant> itemData;
-	TileItem *parentItem;
-
-	//QMap<int, QImage*> m_tileChannels;
-	//int m_tileIndex;
-	//QString m_tileFilename;
+	QList<Node*> m_childItems;
+	QVector<QVariant> m_itemData;
+	Node *m_parentItem;
 };
 
-class TileTypeTileItem : public TileItem
+class TileSetNode : public Node
 {
 public:
-	TileTypeTileItem(const QVector<QVariant> &data, TileItem *parent=0);
-	virtual ~TileTypeTileItem();
+	TileSetNode(QString tileSetName, Node *parent=0);
+	virtual ~TileSetNode();
 	QVariant data(int column) const;
+
+	const QString &getTileSetName();
+private:
+	QString m_tileSetName;
+};
+
+class TileTypeNode : public Node
+{
+public:
+	enum TNodeTileType
+	{
+		Tile128 = 0,
+		Tile256 = 1,
+		TileTransition = 2,
+		TileDisplacement = 3
+	};
+
+	TileTypeNode(TNodeTileType type, Node *parent=0);
+	virtual ~TileTypeNode();
+	QVariant data(int column) const;
+
+	TNodeTileType getTileType();
+
+	static const char *getTileTypeName(TNodeTileType type);
+private:
+	TNodeTileType m_nodeTileType;
+};
+
+class TileItemNode : public Node
+{
+public:
+	enum TTileChannel
+	{
+		TileDiffuse = 0,
+		TileAdditive = 1,
+		TileAlpha = 2,
+	};
+
+	TileItemNode(int tileId, TTileChannel channel, QString filename, Node *parent=0);
+	virtual ~TileItemNode();
+	QVariant data(int column) const;
+	void setTileFilename(TTileChannel channel, QString filename);
+private:
+	int m_tileId;
+	QMap<TTileChannel, QString> m_tileFilename;
 };
 
 #endif // TILE_ITEM_H

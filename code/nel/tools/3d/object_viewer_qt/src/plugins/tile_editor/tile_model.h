@@ -21,7 +21,8 @@
 
 #include <QAbstractListModel>
 
-class TileItem;
+class Node;
+class TileSetNode;
 
 class TileModel : public QAbstractItemModel
 {
@@ -40,15 +41,17 @@ public:
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 	// Tile Model specific functions
-	void appendRow(const QList<TileItem*> &items);
-	void appendRow(TileItem *item);
+	void appendRow(const QList<Node*> &items);
+	void appendRow(Node *item);
+
+	TileSetNode *createTileSetNode(QString tileSetName);
 
 private:
-	TileItem *getItem(const QModelIndex &index) const;
+	Node *getItem(const QModelIndex &index) const;
 
 	//QList<TileItem*> m_tiles;
 	//int m_activeEditChannel;
-	TileItem *rootItem;
+	Node *rootItem;
 };
 
-#endif // TILE_128_MODEL_H
+#endif // TILE_MODEL_H

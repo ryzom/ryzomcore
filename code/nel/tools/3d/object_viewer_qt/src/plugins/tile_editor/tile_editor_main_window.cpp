@@ -97,15 +97,11 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 
 	// Transition List View
 	m_ui->listViewTransition->setModel(m_model);
-	//m_ui->listViewTransition->addAction(m_ui->actionAddTile);
-	//m_ui->listViewTransition->addAction(m_ui->actionDeleteTile);
 	m_ui->listViewTransition->addAction(m_ui->actionReplaceImage);
 	m_ui->listViewTransition->addAction(m_ui->actionDeleteImage);
 
 	// Displacement List View
 	m_ui->listViewDisplacement->setModel(m_model);
-	//m_ui->listViewDisplacement->addAction(m_ui->actionAddTile);
-	//m_ui->listViewDisplacement->addAction(m_ui->actionDeleteTile);
 	m_ui->listViewDisplacement->addAction(m_ui->actionReplaceImage);
 	m_ui->listViewDisplacement->addAction(m_ui->actionDeleteImage);
 	
@@ -172,69 +168,11 @@ void TileEditorMainWindow::onTileSetAdd()
 		//}
 		//else
 		//{
-			// Create the new tile set.
-			QVector<QVariant> items;
-			items.push_back(text);
-			TileItem *tileSet = new TileItem(items);
 			
-			// child for 128x128 tiles
-			QVector<QVariant> tiles128;
-			tiles128.push_back(QString("128"));
-			TileTypeTileItem *tile128= new TileTypeTileItem(tiles128);
-
-			// child for 256x256 tiles
-			QVector<QVariant> tiles256;
-			tiles256.push_back(QString("256"));
-			TileTypeTileItem *tile256= new TileTypeTileItem(tiles256);
 			
+		TileSetNode *tileSet = model->createTileSetNode(text);
 
-			// child for transition tiles.
-			QVector<QVariant> tilesTrans;
-			tilesTrans.push_back(QString("Transition"));
-			TileTypeTileItem *tileTrans= new TileTypeTileItem(tilesTrans);
-
-			// Add the default transition tiles.
-			// TODO tie this to CTileSet::count from NeL
-			for(int transPos=0; transPos<48; transPos++)
-			{
-				QVector<QVariant> tileInfo;
-				tileInfo.push_back(QString("filename").append(QString::number(transPos+1)));
-				TileItem *transTile= new TileItem(tileInfo);
-				tileTrans->appendRow(transTile);
-			}
-
-			// child for displacement tiles
-			QVector<QVariant> tilesDisp;
-			tilesDisp.push_back(QString("Displacement"));
-			TileTypeTileItem *tileDisp= new TileTypeTileItem(tilesDisp);
-
-			// Add the default displacement tiles.
-			// TODO tie this to CTileSet::CountDisplace from NeL
-			for(int dispPos=0; dispPos<16; dispPos++)
-			{
-				QVector<QVariant> tileInfo;
-				tileInfo.push_back(QString("filename").append(QString::number(dispPos+1)));
-				TileItem *dispTile= new TileItem(tileInfo);
-				tileDisp->appendRow(dispTile);
-			}
-
-			// Append them in the correct order to the tile set.
-			tileSet->appendRow(tile128);
-			tileSet->appendRow(tile256);
-			tileSet->appendRow(tileTrans);
-			tileSet->appendRow(tileDisp);
-			
-			model->appendRow(tileSet);
-
-			m_ui->tileSetLV->reset();
-			//updateActions()
-		//}
-
-		//	tileBank.addTileSet( text.toStdString() );
-
-		//	ui.tileSetListWidget->addItem(text);
-		//	ui.tileSetListWidget->setCurrentRow(ui.tileSetListWidget->count() - 1);
-		//}
+		m_ui->tileSetLV->reset();
 	}
 }
 
@@ -256,4 +194,9 @@ void TileEditorMainWindow::changeActiveTileSet(const QModelIndex &newIndex, cons
 	m_ui->listView256->setRootIndex(tile256Idx);
 	m_ui->listViewTransition->setRootIndex(tileTransIdx);
 	m_ui->listViewDisplacement->setRootIndex(tileDispIdx);
+
+	m_ui->listView128->reset();
+	m_ui->listView256->reset();
+	m_ui->listViewTransition->reset();
+	m_ui->listViewDisplacement->reset();
 }
