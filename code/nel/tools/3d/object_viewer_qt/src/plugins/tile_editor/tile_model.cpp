@@ -88,11 +88,8 @@ QVariant TileModel::data(const QModelIndex &index, int role) const
 	if(!index.isValid())
 		return QVariant();
 
-	if(role != Qt::DisplayRole)
-		return QVariant();
-
 	Node *item = static_cast<Node*>(index.internalPointer());
-	return item->data(index.column());
+	return item->data(index.column(), role);
 }
 
 Qt::ItemFlags TileModel::flags(const QModelIndex &index) const
@@ -106,7 +103,7 @@ Qt::ItemFlags TileModel::flags(const QModelIndex &index) const
 QVariant TileModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
-		return rootItem->data(section);
+		return rootItem->data(section,role);
 
 	return QVariant();
 }
@@ -128,40 +125,75 @@ TileSetNode *TileModel::createTileSetNode(QString tileSetName)
 	TileSetNode *tileSet = new TileSetNode(tileSetName);
 			
 	// child for 128x128 tiles
-	TileTypeNode *tile128= new TileTypeNode(TileTypeNode::Tile128);
-	
+	TileTypeNode *tile128= new TileTypeNode(Tile128);
+	tileSet->appendRow(tile128);
+
 	// child for 256x256 tiles
-	TileTypeNode *tile256= new TileTypeNode(TileTypeNode::Tile256);
+	TileTypeNode *tile256= new TileTypeNode(Tile256);
+	tileSet->appendRow(tile256);
 
 	// child for transition tiles.
-	TileTypeNode *tileTrans= new TileTypeNode(TileTypeNode::TileTransition);
+	TileTypeNode *tileTrans= new TileTypeNode(TileTransition);
+	tileSet->appendRow(tileTrans);
 
 	// Add the default transition tiles.
 	// TODO tie this to CTileSet::count from NeL
 	for(int transPos=0; transPos<48; transPos++)
 	{				
-		TileItemNode *transTile= new TileItemNode(transPos, TileItemNode::TileDiffuse, QString("filename").append(QString::number(transPos+1)));
+		TileItemNode *transTile= new TileItemNode(transPos, TileDiffuse, QString("empty"));
 		tileTrans->appendRow(transTile);
 	}
 
 	// child for displacement tiles
-	TileTypeNode *tileDisp= new TileTypeNode(TileTypeNode::TileDisplacement);
+	TileTypeNode *tileDisp= new TileTypeNode(TileDisplacement);
+	tileSet->appendRow(tileDisp);
 
 	// Add the default displacement tiles.
 	// TODO tie this to CTileSet::CountDisplace from NeL
 	for(int dispPos=0; dispPos<16; dispPos++)
 	{
-		TileItemNode *dispTile= new TileItemNode(dispPos, TileItemNode::TileDiffuse, QString("filename").append(QString::number(dispPos+1)));
+		TileItemNode *dispTile= new TileItemNode(dispPos, TileDiffuse, QString("empty"));
 		tileDisp->appendRow(dispTile);
 	}
 
 	// Append them in the correct order to the tile set.
-	tileSet->appendRow(tile128);
-	tileSet->appendRow(tile256);
-	tileSet->appendRow(tileTrans);
-	tileSet->appendRow(tileDisp);
-
 	this->appendRow(tileSet);
 
 	return tileSet;
+}
+
+const char *TileModel::getTileTypeName(TileModel::TNodeTileType type)
+{
+	switch(type)
+	{
+	case Tile128:
+		return "128";
+	case Tile256:
+		return "256";
+	case TileTransition:
+		return "Transition";
+	case TileDisplacement:
+		return "Displacement";
+	default:
+		break;
+	}
+	return "UNKNOWN";
+}
+
+uint32 TileModel::getTileTypeSize(TileModel::TNodeTileType type)
+{
+	switch(type)
+	{
+	case Tile128:
+		return 128;
+	case Tile256:
+		return 256;
+	case TileTransition:
+		return 64;
+	case TileDisplacement:
+		return 32;
+	default:
+		break;
+	}
+	return 0;
 }

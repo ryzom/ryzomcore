@@ -29,6 +29,7 @@ namespace Ui {
 }
 
 class TileModel;
+class TileItemDelegate;
 
 class TileEditorMainWindow : public QMainWindow
 {
@@ -59,6 +60,7 @@ private:
 	QMenu *m_tileEditorMenu;
 
 	TileModel *m_model;
+	TileItemDelegate *m_tileItemDelegate;
 };
 
 #endif // TILE_EDITOR_MAIN_WINDOW_H

@@ -22,6 +22,10 @@
 #include <QAbstractListModel>
 #include <QVector>
 
+#include "tile_model.h"
+
+class TileWidget;
+
 class Node
 {
 public:
@@ -34,9 +38,9 @@ public:
 	Node *child(int row);
 	int childCount() const;
 	int childNumber() const;
-	int columnCount() const;
+	virtual int columnCount() const;
 	bool setData(int column, const QVariant &value);
-	virtual QVariant data(int column) const;
+	virtual QVariant data(int column, int role) const;
 
 	bool insertChildren(int position, int count, int columns);
 	bool removeChildren(int position, int count);
@@ -60,7 +64,8 @@ class TileSetNode : public Node
 public:
 	TileSetNode(QString tileSetName, Node *parent=0);
 	virtual ~TileSetNode();
-	QVariant data(int column) const;
+	QVariant data(int column, int role) const;
+	int columnCount() const;
 
 	const QString &getTileSetName();
 private:
@@ -70,42 +75,29 @@ private:
 class TileTypeNode : public Node
 {
 public:
-	enum TNodeTileType
-	{
-		Tile128 = 0,
-		Tile256 = 1,
-		TileTransition = 2,
-		TileDisplacement = 3
-	};
 
-	TileTypeNode(TNodeTileType type, Node *parent=0);
+	TileTypeNode(TileModel::TNodeTileType type, Node *parent=0);
 	virtual ~TileTypeNode();
-	QVariant data(int column) const;
+	QVariant data(int column, int role) const;
+	int columnCount() const;
 
-	TNodeTileType getTileType();
-
-	static const char *getTileTypeName(TNodeTileType type);
+	TileModel::TNodeTileType getTileType();
 private:
-	TNodeTileType m_nodeTileType;
+	TileModel::TNodeTileType m_nodeTileType;
 };
 
 class TileItemNode : public Node
 {
 public:
-	enum TTileChannel
-	{
-		TileDiffuse = 0,
-		TileAdditive = 1,
-		TileAlpha = 2,
-	};
-
-	TileItemNode(int tileId, TTileChannel channel, QString filename, Node *parent=0);
+	TileItemNode(int tileId, TileModel::TTileChannel channel, QString filename, Node *parent=0);
 	virtual ~TileItemNode();
-	QVariant data(int column) const;
-	void setTileFilename(TTileChannel channel, QString filename);
+	QVariant data(int column, int role) const;
+	int columnCount() const;
+	void setTileFilename(TileModel::TTileChannel channel, QString filename);
 private:
 	int m_tileId;
-	QMap<TTileChannel, QString> m_tileFilename;
+	QMap<TileModel::TTileChannel, QString> m_tileFilename;
+	QMap<TileModel::TTileChannel, TileWidget*> m_tileWidget;
 };
 
 #endif // TILE_ITEM_H

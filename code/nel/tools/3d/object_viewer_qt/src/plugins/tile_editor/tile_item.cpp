@@ -14,7 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <QPixmap>
+
 #include "tile_item.h"
+
+//#include "tile_widget.h"
 
 #include <nel/misc/debug.h>
 
@@ -109,9 +113,11 @@ int Node::columnCount() const
 	return m_itemData.count();
 }
 
-QVariant Node::data(int column) const
+QVariant Node::data(int column, int role) const
 {
-	return m_itemData.value(column);
+	if(role == Qt::DisplayRole)
+		return m_itemData.value(column);
+	return QVariant();
 }
 
 bool Node::setData(int column, const QVariant &value)
@@ -157,14 +163,21 @@ TileSetNode::~TileSetNode()
 	qDeleteAll(m_childItems);
 }
 
-QVariant TileSetNode::data(int column) const
+QVariant TileSetNode::data(int column, int role) const
 {
-	return QVariant(m_tileSetName);
+	if(role == Qt::DisplayRole)
+		return QVariant(m_tileSetName);
+	return QVariant();
+}
+
+int TileSetNode::columnCount() const
+{
+	return 1;
 }
 
 ///////////////////////////////////////////////////
 
-TileTypeNode::TileTypeNode(TNodeTileType type, Node *parent) : m_nodeTileType(type)
+TileTypeNode::TileTypeNode(TileModel::TNodeTileType type, Node *parent) : m_nodeTileType(type)
 {
 	m_parentItem = parent;
 }
@@ -174,42 +187,34 @@ TileTypeNode::~TileTypeNode()
 	qDeleteAll(m_childItems);
 }
 
-QVariant TileTypeNode::data(int column) const
+QVariant TileTypeNode::data(int column, int role) const
 {
-	return QVariant(getTileTypeName(m_nodeTileType));
+	if(role == Qt::DisplayRole)
+		return QVariant(TileModel::getTileTypeName(m_nodeTileType));
+	return QVariant();
+	
 }
 
-TileTypeNode::TNodeTileType TileTypeNode::getTileType()
+int TileTypeNode::columnCount() const
+{
+	return 1;
+}
+
+TileModel::TNodeTileType TileTypeNode::getTileType()
 {
 	return m_nodeTileType;
 }
 
 
-const char *TileTypeNode::getTileTypeName(TNodeTileType type)
-{
-	switch(type)
-	{
-	case Tile128:
-		return "128";
-	case Tile256:
-		return "256";
-	case TileTransition:
-		return "Transition";
-	case TileDisplacement:
-		return "Displacement";
-	default:
-		break;
-	}
-	return "UNKNOWN";
-}
+
 
 ///////////////////////////////////////////////////
 
-TileItemNode::TileItemNode(int tileId, TTileChannel channel, QString filename, Node *parent) : m_tileId(tileId)
+TileItemNode::TileItemNode(int tileId, TileModel::TTileChannel channel, QString filename, Node *parent) : m_tileId(tileId)
 {
 	m_tileFilename[channel] = filename;
 	m_parentItem = parent;
-	nlinfo("dispalying tile %d - %s", m_tileId, m_tileFilename[TileDiffuse].toStdString().c_str());
+	nlinfo("dispalying tile %d - %s", m_tileId, m_tileFilename[TileModel::TileDiffuse].toStdString().c_str());
 }
 
 TileItemNode::~TileItemNode()
@@ -217,14 +222,71 @@ TileItemNode::~TileItemNode()
 	qDeleteAll(m_childItems);
 }
 
-void TileItemNode::setTileFilename(TTileChannel channel, QString filename)
+void TileItemNode::setTileFilename(TileModel::TTileChannel channel, QString filename)
 {
 	m_tileFilename[channel] = filename;
 }
 
-QVariant TileItemNode::data(int column) const
+QVariant TileItemNode::data(int column, int role) const
 {
-	nlinfo("dispalying tile %d - %s", m_tileId, m_tileFilename[TileDiffuse].toStdString().c_str());
+	
+
+	nlinfo("dispalying tile %d - %s", m_tileId, m_tileFilename[TileModel::TileDiffuse].toStdString().c_str());
 	// find some way to know which file/bitmap to display
-	return QVariant(m_tileFilename[TileDiffuse]);
+	QString tileFilename = m_tileFilename[TileModel::TileDiffuse];
+	//TileWidget *tile = m_tileWidget[TileModel::TileDiffuse];
+
+	//
+	//
+	//	return QVariant();
+
+	//if(tile == NULL)
+	//{
+	//	
+	//	
+
+	//	// Create a new tile widget.
+	//	tile = new TileWidget();
+	//	tile->initWidget(tileFilename, tileFilename, tileSize);
+	//}
+
+	if(role == TileModel::TilePixmapRole)
+	{
+		TileTypeNode *parent = dynamic_cast<TileTypeNode*>(m_parentItem);
+		if(parent == NULL)
+			return QVariant();
+
+		// Retrieve the target tile size.
+		uint32 tileSize = TileModel::getTileTypeSize(parent->getTileType());
+
+		if(tileFilename.isEmpty() || tileFilename == "empty")
+			tileFilename = ":/placeHolder/images/empty_image.png";
+
+		QPixmap pixmap;// = new QPixmap();
+		if(!pixmap.load(tileFilename))
+			nlinfo("failed to load %s", tileFilename.toStdString().c_str());
+
+		//pixmap.scaled(tileSize*100, tileSize*100);
+
+		return pixmap;
+	}
+	else if(role == TileModel::TileFilenameRole)
+	{
+		return QVariant(tileFilename);
+	}
+	else if(role == TileModel::TileIndexRole)
+	{
+		return QVariant(tileFilename);
+	}
+	/*else if(role == Qt::TextAlignmentRole)
+	{
+		return QVariant(Qt::AlignHCenter|Qt::AlignVCenter);
+	}*/
+
+	return QVariant();
+}
+
+int TileItemNode::columnCount() const
+{
+	return 1;
 }

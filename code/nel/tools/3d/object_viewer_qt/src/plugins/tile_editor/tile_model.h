@@ -29,6 +29,29 @@ class TileModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
+	enum TTileChannel
+	{
+		TileDiffuse = 0,
+		TileAdditive = 1,
+		TileAlpha = 2,
+	};
+
+	enum TNodeTileType
+	{
+		Tile128 = 0,
+		Tile256 = 1,
+		TileTransition = 2,
+		TileDisplacement = 3
+	};
+
+	enum TTileItemRole
+	{
+		TilePixmapRole = Qt::UserRole+1,
+		TileFilenameRole = Qt::UserRole+2,
+		TileIndexRole = Qt::UserRole+3
+	};
+
+
 	TileModel(const QStringList &headers, QObject *parent);
 	~TileModel();
 
@@ -45,6 +68,9 @@ public:
 	void appendRow(Node *item);
 
 	TileSetNode *createTileSetNode(QString tileSetName);
+
+	static const char *getTileTypeName(TNodeTileType type);
+	static uint32 getTileTypeSize(TileModel::TNodeTileType type);
 
 private:
 	Node *getItem(const QModelIndex &index) const;

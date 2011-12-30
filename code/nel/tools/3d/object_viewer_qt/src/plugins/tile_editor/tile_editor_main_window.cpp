@@ -30,6 +30,7 @@
 
 #include "tile_model.h"
 #include "tile_item.h"
+#include "tile_item_delegate.h"
 
 TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	: QMainWindow(parent),
@@ -72,6 +73,7 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	QStringList headers;
 	headers << "Tile Set";
 	m_model = new TileModel(headers, this);
+	m_tileItemDelegate = new TileItemDelegate();
 
 	// Set up the tile set list view.
 	m_ui->tileSetLV->setModel(m_model);
@@ -82,6 +84,7 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
              this, SLOT(changeActiveTileSet(const QModelIndex &, const QModelIndex &)));
 
 	// 128x128 List View
+	m_ui->listView128->setItemDelegate(m_tileItemDelegate);
 	m_ui->listView128->setModel(m_model);
 	m_ui->listView128->addAction(m_ui->actionAddTile);
 	m_ui->listView128->addAction(m_ui->actionDeleteTile);
@@ -89,6 +92,7 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	m_ui->listView128->addAction(m_ui->actionDeleteImage);
 
 	// 256x256 List View
+	m_ui->listView256->setItemDelegate(m_tileItemDelegate);
 	m_ui->listView256->setModel(m_model);
 	m_ui->listView256->addAction(m_ui->actionAddTile);
 	m_ui->listView256->addAction(m_ui->actionDeleteTile);
@@ -96,14 +100,17 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	m_ui->listView256->addAction(m_ui->actionDeleteImage);
 
 	// Transition List View
+	m_ui->listViewTransition->setItemDelegate(m_tileItemDelegate);
 	m_ui->listViewTransition->setModel(m_model);
 	m_ui->listViewTransition->addAction(m_ui->actionReplaceImage);
 	m_ui->listViewTransition->addAction(m_ui->actionDeleteImage);
 
 	// Displacement List View
+	m_ui->listViewDisplacement->setItemDelegate(m_tileItemDelegate);
 	m_ui->listViewDisplacement->setModel(m_model);
 	m_ui->listViewDisplacement->addAction(m_ui->actionReplaceImage);
 	m_ui->listViewDisplacement->addAction(m_ui->actionDeleteImage);
+
 	
 	// Connect context menu actions up.
 	connect(m_ui->actionAddTile, SIGNAL(triggered(bool)), this, SLOT(onActionAddTile(bool)));
@@ -168,11 +175,15 @@ void TileEditorMainWindow::onTileSetAdd()
 		//}
 		//else
 		//{
-			
-			
+		
+		
+		// Create and append the new tile set to the model.
 		TileSetNode *tileSet = model->createTileSetNode(text);
-
+		
+		// Retrieve how many rows there currently are and set the current index using that.
 		m_ui->tileSetLV->reset();
+		uint32 rows = model->rowCount();
+		m_ui->tileSetLV->setCurrentIndex(model->index(rows-1, 0));
 	}
 }
 
@@ -180,23 +191,31 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 {
 	QFileDialog::Options options;
 	QString selectedFilter;
-	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Choose Tile Texture", "." , "PNG Bitmap(*.png);;All Files (*.*);;", &selectedFilter, options);
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Choose Tile Texture", "." , "Images (*.png);;All Files (*.*)", &selectedFilter, options);
 }
 
 void TileEditorMainWindow::changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex)
 {
-	const QModelIndex &tile128Idx = newIndex.child(0,0);
-	const QModelIndex &tile256Idx = newIndex.child(1,0);
-	const QModelIndex &tileTransIdx = newIndex.child(2,0);
-	const QModelIndex &tileDispIdx = newIndex.child(3,0);
+	TileModel *model = static_cast<TileModel*>(m_ui->tileSetLV->model());
+
+	QModelIndex tile128Idx = model->index(0, 0, newIndex);
+	QModelIndex tile256Idx = model->index(1, 0, newIndex);
+	QModelIndex tileTransIdx = model->index(2, 0, newIndex);
+	QModelIndex tileDispIdx = model->index(3, 0, newIndex);
 
 	m_ui->listView128->setRootIndex(tile128Idx);
+	m_ui->listView128->setCurrentIndex(m_ui->listView128->model()->index(0, 0, m_ui->listView128->rootIndex()));
 	m_ui->listView256->setRootIndex(tile256Idx);
+	m_ui->listView256->setCurrentIndex(m_ui->listView256->model()->index(0, 0, m_ui->listView256->rootIndex()));
 	m_ui->listViewTransition->setRootIndex(tileTransIdx);
+	m_ui->listViewTransition->setCurrentIndex(m_ui->listViewTransition->model()->index(0, 0, m_ui->listViewTransition->rootIndex()));
 	m_ui->listViewDisplacement->setRootIndex(tileDispIdx);
+	m_ui->listViewDisplacement->setCurrentIndex(m_ui->listViewDisplacement->model()->index(0, 0, m_ui->listViewDisplacement->rootIndex()));
 
-	m_ui->listView128->reset();
-	m_ui->listView256->reset();
-	m_ui->listViewTransition->reset();
-	m_ui->listViewDisplacement->reset();
+	//nlinfo("number of rows in displacement: %d", tileDispIdx.model()->rowCount(tileDispIdx));
+
+	//m_ui->listView128->reset();
+	//m_ui->listView256->reset();
+	//m_ui->listViewTransition->reset();
+	//m_ui->listViewDisplacement->reset();
 }
