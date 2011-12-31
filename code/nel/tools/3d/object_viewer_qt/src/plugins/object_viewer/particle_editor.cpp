@@ -73,6 +73,7 @@ void CParticleEditor::release()
 {
 	stop();
 	closeWorkspace();
+	delete _SchemeManager;
 }
 
 void CParticleEditor::setActiveNode(CWorkspaceNode *node)
