@@ -1018,8 +1018,8 @@ void			CPatchDLMContext::computeTextureFar()
 						// compute src pixel
 						const CRGBA	*srcPixel= pTile->getPixels(CTileFarBank::diffuse, CTileFarBank::order1);
 						// compute src info, for this tile rot and 256x256 context.
-						sint srcDeltaX;
-						sint srcDeltaY;
+						sint srcDeltaX = 0;
+						sint srcDeltaY = 0;
 						srcPixel= computeTileFarSrcDeltas(nRot, is256x256, uvOff, srcPixel, srcDeltaX, srcDeltaY);
 
 						// compute dst coordinate. start writing at pixel (1,1)
