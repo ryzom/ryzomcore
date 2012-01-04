@@ -1,0 +1,10 @@
+<plugin-spec>
+    <library-name>ovqt_plugin_bnp_manager</library-name>
+    <name>BNPManager</name>
+    <version>0.1</version>
+    <vendor>Krolock</vendor>
+    <description>Edit BNP Files</description>
+    <dependencies>
+        <dependency plugin-name="Core" version="0.8"/>
+    </dependencies>
+</plugin-spec>
