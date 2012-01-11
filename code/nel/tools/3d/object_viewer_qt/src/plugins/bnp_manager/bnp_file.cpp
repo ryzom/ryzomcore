@@ -85,8 +85,11 @@ bool BNPFileHandle::unpack(const string &dirName, const vector<string>& fileList
 				out.serialBuffer(ptr,it_files->m_size);
 				delete [] ptr;
 			}
+			out.close();
 		}
 	}
+
+	bnp.close();
 	return true;
 }
 // ***************************************************************************
@@ -101,7 +104,7 @@ bool BNPFileHandle::readHeader(const std::string &filePath)
 	bnp.open (filePath);
 
 	bnp.seek(0, IStream::end);
-	uint32 nFileSize=CFile::getFileSize (filePath );
+	uint32 nFileSize = bnp.getFileSize();
 	bnp.seek(nFileSize-sizeof(uint32), IStream::begin);
 
 	uint32 nOffsetFromBegining;
@@ -111,6 +114,7 @@ bool BNPFileHandle::readHeader(const std::string &filePath)
 	if ( !bnp.seek (nOffsetFromBegining, IStream::begin) )
 	{
 		nlwarning("Could not read offset from begining");
+		bnp.close();
 		return false;
 	}
 
@@ -135,6 +139,8 @@ bool BNPFileHandle::readHeader(const std::string &filePath)
 
 		m_packedFiles.push_back (tmpPackedFile);
 	}
+
+	bnp.close();
 	return true;
 }
 // ***************************************************************************
@@ -156,7 +162,9 @@ void BNPFileHandle::list(TPackedFilesList& FileList)
 bool BNPFileHandle::writeHeader( const std::string &filePath, uint32 offset )
 {
 	COFile bnp;
-	if ( !bnp.open(filePath, true) ) return false;
+	bnp.open(filePath, true);
+	if ( !bnp.isOpen() )
+		return false;
 
 	uint32 nNbFile = (uint32)m_packedFiles.size();
 	bnp.serial(nNbFile);
@@ -171,6 +179,8 @@ bool BNPFileHandle::writeHeader( const std::string &filePath, uint32 offset )
 	}
 
 	bnp.serial(offset);
+
+	bnp.close();
 
 	return true;
 }
@@ -255,7 +265,6 @@ void BNPFileHandle::deleteFiles( const vector<string>& fileNames)
 			it_packed++;
 		}
 	}
-	nldebug("Writing header...");
 
 	writeHeader(tmpFile, OffsetFromBegining);
 	
@@ -270,10 +279,12 @@ void BNPFileHandle::append(const string &destination, const PackedFile &source)
 	if ( !CFile::fileExists(destination) )
 		CFile::createEmptyFile( destination );
 
-	FILE *bnpfile = fopen(destination.c_str(), "ab");
-	FILE *packedfile = fopen(source.m_path.c_str(), "rb");
-	if (bnpfile == NULL) return;
-	if (packedfile == NULL) { fclose(bnpfile); return; }
+	COFile bnpfile;
+	CIFile packedfile; 
+	bnpfile.open(destination, true);
+	packedfile.open(source.m_path);
+	if ( !bnpfile.isOpen() ) return;
+
 	
 	uint8 *ptr = new uint8[source.m_size];
 
@@ -281,20 +292,18 @@ void BNPFileHandle::append(const string &destination, const PackedFile &source)
 	if ( nlstricmp( CFile::getExtension(source.m_path), "bnp" ) == 0 )
 	{
 		// Jump to the file position inside the bnp
-		nlfseek64(packedfile, source.m_pos, SEEK_SET);
+		packedfile.seek(source.m_pos, IStream::begin);
 	}
 	// Read the source
-	if (fread (ptr, source.m_size, 1, packedfile) != 1)
-		nlwarning("%s read error", source.m_path.c_str());
+	packedfile.serialBuffer(ptr, source.m_size);
 
 	// Append the data to the destination
-	if (fwrite (ptr, source.m_size, 1, bnpfile) != 1)
-		nlwarning("%s write error", destination.c_str());
+	bnpfile.serialBuffer(ptr, source.m_size);
 
 	delete [] ptr;
 	
-	fclose(packedfile);
-	fclose(bnpfile);
+	packedfile.close();
+	bnpfile.close();
 }
 // ***************************************************************************
 bool BNPFileHandle::compare(const PackedFile &left, const PackedFile &right)
