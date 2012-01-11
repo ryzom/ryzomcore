@@ -65,8 +65,7 @@ void BNPFileHandle::releaseInstance()
 bool BNPFileHandle::unpack(const string &dirName, const vector<string>& fileList)
 {
 	CIFile bnp;
-	if ( !bnp.open(m_openedBNPFile) )
-		return false;
+	bnp.open(m_openedBNPFile);
 
 	TPackedFilesList::iterator it_files = m_packedFiles.begin();
 
@@ -99,11 +98,7 @@ bool BNPFileHandle::readHeader(const std::string &filePath)
 	m_openedBNPFile = filePath;
 
 	CIFile bnp;
-	if ( !bnp.open (filePath) )
-	{
-		nlwarning("Could not open file!");
-		return false;
-	}
+	bnp.open (filePath);
 
 	bnp.seek(0, IStream::end);
 	uint32 nFileSize=CFile::getFileSize (filePath );
@@ -112,9 +107,6 @@ bool BNPFileHandle::readHeader(const std::string &filePath)
 	uint32 nOffsetFromBegining;
 
 	bnp.serial(nOffsetFromBegining);
-#ifdef NL_BIG_ENDIAN
-	NLMISC_BSWAP32(nOffsetFromBegining);
-#endif
 	
 	if ( !bnp.seek (nOffsetFromBegining, IStream::begin) )
 	{
@@ -125,33 +117,22 @@ bool BNPFileHandle::readHeader(const std::string &filePath)
 	uint32 nNbFile;
 	bnp.serial(nNbFile);
 
-#ifdef NL_BIG_ENDIAN
-	NLMISC_BSWAP32(nNbFile);
-#endif
-
 	for (uint32 i = 0; i < nNbFile; ++i)
 	{
 		uint8 nStringSize;
-		uint32 fileSize;
-		uint32 filePos;
 		char sName[256];
+
 		bnp.serial(nStringSize);
 		bnp.serialBuffer( (uint8*)sName, nStringSize);
 		sName[nStringSize] = 0;
+
 		PackedFile tmpPackedFile;
 		tmpPackedFile.m_name = sName;
 		tmpPackedFile.m_path = m_openedBNPFile;
 		
-		bnp.serial(fileSize);
-		tmpPackedFile.m_size = fileSize;
-#ifdef NL_BIG_ENDIAN
-		NLMISC_BSWAP32(tmpBNPFile.Size);
-#endif
-		bnp.serial(filePos);
-		tmpPackedFile.m_pos = filePos;
-#ifdef NL_BIG_ENDIAN
-		NLMISC_BSWAP32(tmpBNPFile.Pos);
-#endif
+		bnp.serial(tmpPackedFile.m_size);
+		bnp.serial(tmpPackedFile.m_pos);
+
 		m_packedFiles.push_back (tmpPackedFile);
 	}
 	return true;
