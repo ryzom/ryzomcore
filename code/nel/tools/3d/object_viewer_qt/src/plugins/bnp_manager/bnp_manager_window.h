@@ -136,8 +136,7 @@ private:
 	BnpFileListDialog *m_BnpFileListDialog;
 
 	QString m_DataPath;
-
-	BNPFileHandle *m_BNPFileHandle;
+	QString m_openedBNPFile;
 
 }; /* class BNPManagerWindow */
 

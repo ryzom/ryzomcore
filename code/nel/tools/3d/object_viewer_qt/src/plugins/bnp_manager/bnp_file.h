@@ -32,9 +32,11 @@ namespace BNPManager
 
 struct PackedFile
 {
+	PackedFile();
 	std::string m_name;
 	uint32 m_size;
 	uint32 m_pos;
+	std::string m_path;
 };
 
 typedef std::vector<PackedFile> TPackedFilesList;
@@ -64,7 +66,9 @@ public:
 	 * Read the header from the bnp file and create a filelist
 	 * \param filename (consisting the whole path)
 	 */
-	bool readHeader (const std::string &filename);
+	bool readHeader (const std::string &filePath);
+
+	bool writeHeader (const std::string &filePath, uint32 offset);
 
 	/**
 	 * Append the header to a created bnp file
@@ -73,10 +77,28 @@ public:
 	void appendHeader (const std::string &filename) {};
 
 	/**
-	 * Create a list of all packed files inside the bnp file
-	 * \param reference to the list, which has to be filled
+	 * Create a vector of all packed files inside the bnp file
+	 * \param reference to the vector, which has to be filled
 	 */
 	void list (TPackedFilesList& FileList);
+
+	/**
+	 * Create a vector of all file names inside the bnp file
+	 * \param reference to the vector, which has to be filled
+	 */
+	void fileNames( std::vector<std::string>& fileNames );
+
+	/**
+	 * Add files to the current aktive bnp file
+	 * \param vector of file pathes to add
+	 */
+	void addFiles( const std::vector<std::string>& filePathes );
+
+	/**
+	 * Delete files from the current aktive bnp file
+	 * \param vector of files names
+	 */
+	void deleteFiles (const std::vector<std::string>& fileNames);
 	
 	/**
 	 * Unpack the selected packed files into user defined dir
@@ -85,18 +107,32 @@ public:
 	 */
 	bool unpack (const std::string &dirName, const std::vector<std::string>& fileList);
 
+	/**
+	 * Compares two filenames
+	 * \param left: left packed file
+	 * \param right: right packed file
+	 * \return: TODO
+	 */
+	static bool compare(const PackedFile &left, const PackedFile &right);
+
 private:
+
+	/**
+	 * Append one file to an existing bnp file
+	 * \param destination: the active bnp file to append the file
+	 * \param source: the source file to pack
+	 */
+	void append( const std::string& destination, const PackedFile& source );
 
 	TPackedFilesList		m_packedFiles;
 
 	// currently opened and displayed bnp file
-	std::string				m_activeBNPFile;
+	std::string				m_openedBNPFile;
 
 	// offset where the header of the bnp file begins
 	uint32					m_offsetFromBeginning;
 
 };
-
 
 }
 

@@ -28,6 +28,7 @@
 
 // NeL includes
 #include <nel/misc/debug.h>
+#include <nel/misc/path.h>
 
 // Qt includes
 #include <QDebug>
@@ -153,9 +154,11 @@ void BNPManagerWindow::open()
 	fileName = QFileDialog::getOpenFileName(this,
 		tr("Open BNP file"), tr(m_DataPath.toStdString().c_str()), tr("BNP Files (*.bnp)"));
 
-	// check if there is a filename
+	// Check if filename is empty
 	if (fileName.isNull())
 		return;
+
+	m_openedBNPFile = fileName;
     loadFile(fileName);
 }
 // ***************************************************************************
@@ -166,12 +169,73 @@ void BNPManagerWindow::close()
 // ***************************************************************************
 void BNPManagerWindow::addFiles()
 {
-    //TODO
+	// reference to the BNPFileHandle singletone instance
+	BNPFileHandle& myBNPFileHandle = BNPFileHandle::getInstance();
+
+	// vector of all current packed filenames
+	vector<string> currentFiles;
+
+	// vector of files to add
+	vector<string> addFiles;
+
+    // open a file dialog and to add files
+	QStringList FileList;
+
+	FileList = QFileDialog::getOpenFileNames(this,tr("Add Files..."),
+							QDir::currentPath(), tr("All Files (*.*)") );
+	
+	// get all current filenames from the opened bnp file
+	myBNPFileHandle.fileNames(currentFiles);
+
+	QStringList::iterator it_list = FileList.begin();
+	while (it_list != FileList.end() )
+	{
+		string fileName = CFile::getFilename (it_list->toStdString() );
+		if ( std::find(currentFiles.begin(), currentFiles.end(), fileName ) !=  currentFiles.end() )
+		{
+			// Ask the user if he wants to override the existing file
+			// atm only warn the user and do not override
+			QMessageBox::warning(this, tr("BNP Manager"),
+                                tr("File is already in the list!"),
+                                QMessageBox::Ok,
+								QMessageBox::Ok);
+		}
+		else
+		{
+			addFiles.push_back( it_list->toStdString() );
+			// log it
+			nlinfo("Add file %s", fileName.c_str() );
+		}
+		it_list++;
+	}
+	
+	if ( !addFiles.empty() )
+	{
+		myBNPFileHandle.addFiles( addFiles );
+	}
+	loadFile(m_openedBNPFile);
 }
 // ***************************************************************************
 void BNPManagerWindow::deleteFiles()
 {
-    //TODO
+    QFileDialog filedialog(this);
+	BNPFileHandle& myBNPFileHandle = BNPFileHandle::getInstance();
+	vector<string> selectedRows;
+
+	m_BnpFileListDialog->getSelections(selectedRows);
+
+	// Check if files were selected. If not, inform the user.
+	if (selectedRows.empty())
+	{
+		QMessageBox::information(this, tr("BNP Manager"),
+                                tr("No files selected!"),
+                                QMessageBox::Ok,
+								QMessageBox::Ok);
+		return;
+	}
+	
+	myBNPFileHandle.deleteFiles(selectedRows);
+	loadFile(m_openedBNPFile);
 }
 // ***************************************************************************
 void BNPManagerWindow::unpackFiles()
@@ -188,7 +252,7 @@ void BNPManagerWindow::unpackFiles()
 	if (selectedrows.empty())
 	{
 		QMessageBox::information(this, tr("BNP Manager"),
-                                tr("No files were selected to unpack!"),
+                                tr("No files selected!"),
                                 QMessageBox::Ok,
 								QMessageBox::Ok);
 		return;
@@ -198,6 +262,10 @@ void BNPManagerWindow::unpackFiles()
 								tr(m_DataPath.toStdString().c_str()),
 								QFileDialog::ShowDirsOnly
 								| QFileDialog::DontResolveSymlinks);
+
+	// If anything went wrong or the user pressed "cancel"
+	if ( dir.isEmpty() )
+		return;
 	
 	if (myBNPFileHandle.unpack(dir.toStdString(),selectedrows))
 	{
