@@ -64,9 +64,8 @@ void BNPFileHandle::releaseInstance()
 // ***************************************************************************
 bool BNPFileHandle::unpack(const string &dirName, const vector<string>& fileList)
 {
-	FILE *bnp = fopen (m_openedBNPFile.c_str(), "rb");
-	FILE *out;
-	if (bnp == NULL)
+	CIFile bnp;
+	if ( !bnp.open(m_openedBNPFile) )
 		return false;
 
 	TPackedFilesList::iterator it_files = m_packedFiles.begin();
@@ -78,27 +77,17 @@ bool BNPFileHandle::unpack(const string &dirName, const vector<string>& fileList
 		{
 			string filename = dirName + "/" + it_files->m_name;
 
-			out = fopen (filename.c_str(), "wb");
-			if (out != NULL)
+			COFile out;
+			if ( out.open(filename) )
 			{
-				nlfseek64 (bnp, it_files->m_pos, SEEK_SET);
+				bnp.seek(it_files->m_pos, IStream::begin);
 				uint8 *ptr = new uint8[it_files->m_size];
-				if (fread (ptr, it_files->m_size, 1, bnp) != 1)
-				{
-					nlwarning("%s read error", filename.c_str());
-					return false;
-				}
-				if (fwrite (ptr, it_files->m_size, 1, out) != 1)
-				{
-					nlwarning("%s write error", filename.c_str());
-					return false;
-				}
-				fclose (out);
+				bnp.serialBuffer(ptr,it_files->m_size);
+				out.serialBuffer(ptr,it_files->m_size);
 				delete [] ptr;
 			}
 		}
 	}
-	fclose (bnp);
 	return true;
 }
 // ***************************************************************************
@@ -109,42 +98,32 @@ bool BNPFileHandle::readHeader(const std::string &filePath)
 
 	m_openedBNPFile = filePath;
 
-	FILE *f = fopen (filePath.c_str(), "rb");
-	if (f == NULL)
+	CIFile bnp;
+	if ( !bnp.open (filePath) )
 	{
 		nlwarning("Could not open file!");
 		return false;
 	}
 
-	nlfseek64 (f, 0, SEEK_END);
+	bnp.seek(0, IStream::end);
 	uint32 nFileSize=CFile::getFileSize (filePath );
-	nlfseek64 (f, nFileSize-sizeof(uint32), SEEK_SET);
+	bnp.seek(nFileSize-sizeof(uint32), IStream::begin);
 
 	uint32 nOffsetFromBegining;
 
-	if (fread (&nOffsetFromBegining, sizeof(uint32), 1, f) != 1)
-	{
-		fclose (f);
-		return false;
-	}
+	bnp.serial(nOffsetFromBegining);
 #ifdef NL_BIG_ENDIAN
 	NLMISC_BSWAP32(nOffsetFromBegining);
 #endif
 	
-	if (nlfseek64 (f, nOffsetFromBegining, SEEK_SET) != 0)
+	if ( !bnp.seek (nOffsetFromBegining, IStream::begin) )
 	{
 		nlwarning("Could not read offset from begining");
-		fclose (f);
 		return false;
 	}
 
 	uint32 nNbFile;
-	if (fread (&nNbFile, sizeof(uint32), 1, f) != 1)
-	{
-		nlwarning("Could not read number of files!");
-		fclose (f);
-		return false;
-	}
+	bnp.serial(nNbFile);
 
 #ifdef NL_BIG_ENDIAN
 	NLMISC_BSWAP32(nNbFile);
@@ -153,44 +132,28 @@ bool BNPFileHandle::readHeader(const std::string &filePath)
 	for (uint32 i = 0; i < nNbFile; ++i)
 	{
 		uint8 nStringSize;
+		uint32 fileSize;
+		uint32 filePos;
 		char sName[256];
-		if (fread (&nStringSize, 1, 1, f) != 1)
-		{
-			nlwarning("Error reading packed filename!");
-			fclose (f);
-			return false;
-		}
-		if (fread (sName, 1, nStringSize, f) != nStringSize)
-		{
-			fclose (f);
-				return false;
-		}
+		bnp.serial(nStringSize);
+		bnp.serialBuffer( (uint8*)sName, nStringSize);
 		sName[nStringSize] = 0;
 		PackedFile tmpPackedFile;
 		tmpPackedFile.m_name = sName;
 		tmpPackedFile.m_path = m_openedBNPFile;
-		if (fread (&tmpPackedFile.m_size, sizeof(uint32), 1, f) != 1)
-		{
-			nlwarning("Error reading packed file size!");
-			fclose (f);
-			return false;
-		}
+		
+		bnp.serial(fileSize);
+		tmpPackedFile.m_size = fileSize;
 #ifdef NL_BIG_ENDIAN
 		NLMISC_BSWAP32(tmpBNPFile.Size);
 #endif
-		if (fread (&tmpPackedFile.m_pos, sizeof(uint32), 1, f) != 1)
-		{
-			nlwarning("Error reading packed file position!");
-			fclose (f);
-			return false;
-		}
+		bnp.serial(filePos);
+		tmpPackedFile.m_pos = filePos;
 #ifdef NL_BIG_ENDIAN
 		NLMISC_BSWAP32(tmpBNPFile.Pos);
 #endif
 		m_packedFiles.push_back (tmpPackedFile);
 	}
-
-	fclose (f);
 	return true;
 }
 // ***************************************************************************
@@ -211,52 +174,24 @@ void BNPFileHandle::list(TPackedFilesList& FileList)
 // ***************************************************************************
 bool BNPFileHandle::writeHeader( const std::string &filePath, uint32 offset )
 {
-	FILE *f = fopen (filePath.c_str(), "ab");
-		if (f == NULL) return false;
+	COFile bnp;
+	if ( !bnp.open(filePath, true) ) return false;
 
-		uint32 nNbFile = (uint32)m_packedFiles.size();
-		if (fwrite (&nNbFile, sizeof(uint32), 1, f) != 1)
-		{
-			fclose(f);
-			return false;
-		}
+	uint32 nNbFile = (uint32)m_packedFiles.size();
+	bnp.serial(nNbFile);
 
-		for (uint32 i = 0; i < nNbFile; ++i)
-		{
-			uint8 nStringSize = (uint8)m_packedFiles[i].m_name.size();
-			if (fwrite (&nStringSize, 1, 1, f) != 1)
-			{
-				fclose(f);
-				return false;
-			}
+	for (uint32 i = 0; i < nNbFile; ++i)
+	{
+		uint8 nStringSize = (uint8)m_packedFiles[i].m_name.size();
+		bnp.serial( nStringSize );
+		bnp.serialBuffer( (uint8*)m_packedFiles[i].m_name.c_str(), nStringSize	 );
+		bnp.serial(m_packedFiles[i].m_size);
+		bnp.serial(m_packedFiles[i].m_pos);
+	}
 
-			if (fwrite (m_packedFiles[i].m_name.c_str(), 1, nStringSize, f) != nStringSize)
-			{
-				fclose(f);
-				return false;
-			}
+	bnp.serial(offset);
 
-			if (fwrite (&m_packedFiles[i].m_size, sizeof(uint32), 1, f) != 1)
-			{
-				fclose(f);
-				return false;
-			}
-
-			if (fwrite (&m_packedFiles[i].m_pos, sizeof(uint32), 1, f) != 1)
-			{
-				fclose(f);
-				return false;
-			}
-		}
-
-		if (fwrite (&offset, sizeof(uint32), 1, f) != 1)
-		{
-			fclose(f);
-			return false;
-		}
-
-		fclose (f);
-		return true;
+	return true;
 }
 // ***************************************************************************
 void BNPFileHandle::fileNames(std::vector<std::string> &fileNames)
