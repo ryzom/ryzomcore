@@ -22,6 +22,11 @@ TARGET_LINK_LIBRARIES(ryzom_client_patcher
 				ryzom_sevenzip
 				${CURL_LIBRARIES})
 
+IF(APPLE)
+  FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
+  TARGET_LINK_LIBRARIES(ryzom_client_patcher ${FOUNDATION_LIBRARY})
+ENDIF(APPLE)
+
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} ${CURL_DEFINITIONS} -DRZ_NO_CLIENT -DNL_USE_SEVENZIP)
 
 NL_DEFAULT_PROPS(ryzom_client_patcher "Ryzom, Tools: Ryzom Client Patcher")
