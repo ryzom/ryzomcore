@@ -858,7 +858,7 @@ void BuilderZoneRegion::putTransitions (sint32 inX, sint32 inY, const NLLIGO::SP
 		if ( (corner < 4) && (m != 0) )
 		{
 			// The material can't be paused
-			for (int t = 0; i < 4; ++t)
+			for (int t = 0; t < 4; ++t)
 				dataZoneTemp.sharingMatNames[t] = STRING_UNUSED;
 
 			// Don't propagate any more
