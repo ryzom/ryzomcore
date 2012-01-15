@@ -58,7 +58,7 @@ public:
 	/// Force to update dialog content
 	void updateUi();
 
-	/// Сonnects all the slots with signals
+	/// Connects all the slots with signals
 	void init();
 
 	/// Sets the pointer CWorkspaceNode* in the wrappers.
@@ -192,6 +192,7 @@ protected:
 	QDialog *_SchemeWidget;
 
 	Ui::CAttribWidget _ui;
+	friend class CSchemeBankDialog;
 }; /* class CAttribWidget */
 
 /**

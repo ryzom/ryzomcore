@@ -1,4 +1,5 @@
 FILE(GLOB SRC main.cpp
+	${CMAKE_SOURCE_DIR}/ryzom/client/src/app_bundle_utils.cpp
 	${CMAKE_SOURCE_DIR}/ryzom/client/src/client_cfg.cpp
 	${CMAKE_SOURCE_DIR}/ryzom/client/src/login_patch.cpp
 	${CMAKE_SOURCE_DIR}/ryzom/client/src/login_xdelta.cpp
@@ -20,6 +21,11 @@ TARGET_LINK_LIBRARIES(ryzom_client_patcher
 				ryzom_gameshare
 				ryzom_sevenzip
 				${CURL_LIBRARIES})
+
+IF(APPLE)
+  FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
+  TARGET_LINK_LIBRARIES(ryzom_client_patcher ${FOUNDATION_LIBRARY})
+ENDIF(APPLE)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} ${CURL_DEFINITIONS} -DRZ_NO_CLIENT -DNL_USE_SEVENZIP)
 
