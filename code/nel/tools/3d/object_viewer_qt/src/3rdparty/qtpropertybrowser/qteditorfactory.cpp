@@ -101,6 +101,13 @@
 #include <QtGui/QToolButton>
 #include <QtGui/QColorDialog>
 #include <QtGui/QFontDialog>
+#include <QtGui/QDialog>
+#include <QtGui/QPlainTextEdit>
+#include <QtGui/QTextEdit>
+#include <QCompleter>
+#include <QColumnView>
+#include <QStandardItemModel>
+#include <QtGui/QDialogButtonBox>
 #include <QtGui/QSpacerItem>
 #include <QtCore/QMap>
 
@@ -2599,6 +2606,231 @@ QWidget *QtFontEditorFactory::createEditor(QtFontPropertyManager *manager,
 void QtFontEditorFactory::disconnectPropertyManager(QtFontPropertyManager *manager)
 {
     disconnect(manager, SIGNAL(valueChanged(QtProperty*,QFont)), this, SLOT(slotPropertyChanged(QtProperty*,QFont)));
+}
+
+class QtTextEditWidget : public QWidget {
+    Q_OBJECT
+
+public:
+    QtTextEditWidget(QWidget *parent);
+
+    bool eventFilter(QObject *obj, QEvent *ev);
+
+public Q_SLOTS:
+    void setValue(const QString &value);
+
+private Q_SLOTS:
+    void buttonClicked();
+
+Q_SIGNALS:
+    void valueChanged(const QString &value);
+
+private:
+    QLineEdit *m_lineEdit;
+    QToolButton *m_defaultButton;
+    QToolButton *m_button;
+};
+
+QtTextEditWidget::QtTextEditWidget(QWidget *parent) :
+    QWidget(parent),
+    m_lineEdit(new QLineEdit),
+    m_defaultButton(new QToolButton),
+    m_button(new QToolButton)
+{
+    QHBoxLayout *lt = new QHBoxLayout(this);
+    lt->setContentsMargins(0, 0, 0, 0);
+    lt->setSpacing(0);
+    lt->addWidget(m_lineEdit);
+    m_lineEdit->setReadOnly(true);
+
+    m_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Ignored);
+    m_button->setFixedWidth(20);
+    setFocusProxy(m_button);
+    setFocusPolicy(m_button->focusPolicy());
+    m_button->setText(tr("..."));
+    m_button->installEventFilter(this);
+    connect(m_button, SIGNAL(clicked()), this, SLOT(buttonClicked()));
+    lt->addWidget(m_button);
+    lt->addWidget(m_defaultButton);
+    m_defaultButton->setEnabled(false);
+}
+
+void QtTextEditWidget::setValue(const QString &value)
+{
+    if (m_lineEdit->text() != value)
+        m_lineEdit->setText(value);
+}
+
+void QtTextEditWidget::buttonClicked()
+{
+    QGridLayout *gridLayout;
+    QPlainTextEdit *plainTextEdit;
+    QDialogButtonBox *buttonBox;
+    QDialog *dialog;
+
+    dialog = new QDialog(this);
+    dialog->resize(400, 300);
+    gridLayout = new QGridLayout(dialog);
+    plainTextEdit = new QPlainTextEdit(dialog);
+    
+    gridLayout->addWidget(plainTextEdit, 0, 0, 1, 1);
+
+    buttonBox = new QDialogButtonBox(dialog);
+    buttonBox->setOrientation(Qt::Horizontal);
+    buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+
+    gridLayout->addWidget(buttonBox, 1, 0, 1, 1);
+
+    QObject::connect(buttonBox, SIGNAL(accepted()), dialog, SLOT(accept()));
+    QObject::connect(buttonBox, SIGNAL(rejected()), dialog, SLOT(reject()));
+
+    plainTextEdit->textCursor().insertText(m_lineEdit->text());
+
+    dialog->setModal(true);
+    dialog->show();
+    int result = dialog->exec();
+
+    if (result == QDialog::Accepted)
+    {
+        QString newText = plainTextEdit->document()->toPlainText();	
+        
+        setValue(newText);
+        if (plainTextEdit->document()->isModified())
+            Q_EMIT valueChanged(newText);
+    }
+
+    delete dialog;
+}
+
+bool QtTextEditWidget::eventFilter(QObject *obj, QEvent *ev)
+{
+    if (obj == m_button) {
+        switch (ev->type()) {
+        case QEvent::KeyPress:
+        case QEvent::KeyRelease: { // Prevent the QToolButton from handling Enter/Escape meant control the delegate
+            switch (static_cast<const QKeyEvent*>(ev)->key()) {
+            case Qt::Key_Escape:
+            case Qt::Key_Enter:
+            case Qt::Key_Return:
+                ev->ignore();
+                return true;
+            default:
+                break;
+            }
+        }
+            break;
+        default:
+            break;
+        }
+    }
+    return QWidget::eventFilter(obj, ev);
+}
+
+// QtLineEditFactory
+
+class QtTextEditorFactoryPrivate : public EditorFactoryPrivate<QtTextEditWidget>
+{
+    QtTextEditorFactory *q_ptr;
+    Q_DECLARE_PUBLIC(QtTextEditorFactory)
+public:
+
+    void slotPropertyChanged(QtProperty *property, const QString &value);
+    void slotSetValue(const QString &value);
+};
+
+void QtTextEditorFactoryPrivate::slotPropertyChanged(QtProperty *property,
+                const QString &value)
+{
+    const PropertyToEditorListMap::iterator it = m_createdEditors.find(property);
+    if (it == m_createdEditors.end())
+        return;
+    QListIterator<QtTextEditWidget *> itEditor(it.value());
+
+    while (itEditor.hasNext())
+        itEditor.next()->setValue(value);
+}
+
+void QtTextEditorFactoryPrivate::slotSetValue(const QString &value)
+{
+    QObject *object = q_ptr->sender();
+    const EditorToPropertyMap::ConstIterator ecend = m_editorToProperty.constEnd();
+    for (EditorToPropertyMap::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend; ++itEditor)
+        if (itEditor.key() == object) {
+            QtProperty *property = itEditor.value();
+            QtTextPropertyManager *manager = q_ptr->propertyManager(property);
+            if (!manager)
+                return;
+            manager->setValue(property, value);
+            return;
+        }
+}
+/*!
+    \class QtTextEditFactory
+
+    \brief The QtTextEditFactory class provides QTextEdit widgets for
+    properties created by QtStringPropertyManager objects.
+
+    \sa QtAbstractEditorFactory, QtStringPropertyManager
+*/
+
+/*!
+    Creates a factory with the given \a parent.
+*/
+QtTextEditorFactory::QtTextEditorFactory(QObject *parent)
+    : QtAbstractEditorFactory<QtTextPropertyManager>(parent)
+{
+    d_ptr = new QtTextEditorFactoryPrivate();
+    d_ptr->q_ptr = this;
+
+}
+
+/*!
+    Destroys this factory, and all the widgets it has created.
+*/
+QtTextEditorFactory::~QtTextEditorFactory()
+{
+    qDeleteAll(d_ptr->m_editorToProperty.keys());
+    delete d_ptr;
+}
+
+/*!
+    \internal
+
+    Reimplemented from the QtAbstractEditorFactory class.
+*/
+void QtTextEditorFactory::connectPropertyManager(QtTextPropertyManager *manager)
+{
+    connect(manager, SIGNAL(valueChanged(QtProperty *, const QString &)),
+                this, SLOT(slotPropertyChanged(QtProperty *, const QString &)));
+}
+
+/*!
+    \internal
+
+    Reimplemented from the QtAbstractEditorFactory class.
+*/
+QWidget *QtTextEditorFactory::createEditor(QtTextPropertyManager *manager,
+        QtProperty *property, QWidget *parent)
+{
+
+    QtTextEditWidget *editor = d_ptr->createEditor(property, parent);
+
+    editor->setValue(manager->value(property));
+	
+	connect(editor, SIGNAL(valueChanged(QString)), this, SLOT(slotSetValue(QString)));
+    connect(editor, SIGNAL(destroyed(QObject *)), this, SLOT(slotEditorDestroyed(QObject *)));
+    return editor;
+}
+
+/*!
+    \internal
+
+    Reimplemented from the QtAbstractEditorFactory class.
+*/
+void QtTextEditorFactory::disconnectPropertyManager(QtTextPropertyManager *manager)
+{
+    disconnect(manager, SIGNAL(valueChanged(QtProperty *, const QString &)),
+                this, SLOT(slotPropertyChanged(QtProperty *, const QString &)));
 }
 
 #if QT_VERSION >= 0x040400

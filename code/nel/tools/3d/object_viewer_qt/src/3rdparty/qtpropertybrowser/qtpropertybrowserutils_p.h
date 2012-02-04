@@ -110,6 +110,7 @@ QT_BEGIN_NAMESPACE
 
 class QMouseEvent;
 class QCheckBox;
+class QToolButton;
 class QLineEdit;
 
 class QtCursorDatabase
@@ -168,6 +169,7 @@ protected:
 
 private:
     QCheckBox *m_checkBox;
+    QToolButton *m_defaultButton;
     bool m_textVisible;
 };
 

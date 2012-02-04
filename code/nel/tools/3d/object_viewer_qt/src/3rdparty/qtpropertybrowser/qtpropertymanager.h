@@ -789,6 +789,16 @@ private:
     Q_DISABLE_COPY(QtCursorPropertyManager)
 };
 
+class QT_QTPROPERTYBROWSER_EXPORT QtTextPropertyManager : public QtStringPropertyManager
+{
+    Q_OBJECT
+public:
+    QtTextPropertyManager(QObject *parent = 0):QtStringPropertyManager(parent) {}
+
+protected:
+    virtual QString valueText(const QtProperty *property) const;
+};
+
 #if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
 #endif

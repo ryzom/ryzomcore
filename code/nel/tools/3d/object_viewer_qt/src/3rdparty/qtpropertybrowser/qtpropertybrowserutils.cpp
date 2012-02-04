@@ -91,6 +91,7 @@
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QCheckBox>
+#include <QtGui/QToolButton>
 #include <QtGui/QLineEdit>
 #include <QtGui/QMenu>
 
@@ -260,6 +261,7 @@ QString QtPropertyBrowserUtils::fontValueText(const QFont &f)
 QtBoolEdit::QtBoolEdit(QWidget *parent) :
     QWidget(parent),
     m_checkBox(new QCheckBox(this)),
+    m_defaultButton(new QToolButton(this)),
     m_textVisible(true)
 {
     QHBoxLayout *lt = new QHBoxLayout;
@@ -268,6 +270,8 @@ QtBoolEdit::QtBoolEdit(QWidget *parent) :
     else
         lt->setContentsMargins(0, 0, 4, 0);
     lt->addWidget(m_checkBox);
+    lt->addWidget(m_defaultButton);
+    m_defaultButton->setEnabled(false);
     setLayout(lt);
     connect(m_checkBox, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
     setFocusProxy(m_checkBox);
