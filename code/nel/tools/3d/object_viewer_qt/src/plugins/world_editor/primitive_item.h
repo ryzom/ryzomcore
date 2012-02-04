@@ -112,9 +112,16 @@ public:
 	WorldEditNode(const QString &name);
 	virtual ~WorldEditNode();
 
+	void setContext(const QString &name);
+	QString context() const;
+	void setDataPath(const QString &path);
+	QString dataPath() const;
+
 	virtual NodeType type() const;
 
 private:
+	QString m_context;
+	QString m_dataPath;
 };
 
 /*

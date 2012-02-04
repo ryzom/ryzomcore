@@ -52,13 +52,29 @@ public Q_SLOTS:
 	void clearProperties();
 
 	/// Update of selections
-	void updateSelection(const NodeList &selected, const NodeList &deselected);
+	void updateSelection(Node *node);
 
 private:
+	QtProperty *addBoolProperty(const NLLIGO::IProperty *property,
+								const NLLIGO::CPrimitiveClass::CParameter &parameter,
+								const NLLIGO::IPrimitive *primitive);
+	QtProperty *addConstStringProperty(const NLLIGO::IProperty *property,
+									   const NLLIGO::CPrimitiveClass::CParameter &parameter,
+									   const NLLIGO::IPrimitive *primitive);
+	QtProperty *addStringProperty(const NLLIGO::IProperty *property,
+								  const NLLIGO::CPrimitiveClass::CParameter &parameter,
+								  const NLLIGO::IPrimitive *primitive);
+	QtProperty *addStringArrayProperty(const NLLIGO::IProperty *property,
+									   const NLLIGO::CPrimitiveClass::CParameter &parameter,
+									   const NLLIGO::IPrimitive *primitive);
+	QtProperty *addConstStringArrayProperty(const NLLIGO::IProperty *property,
+											const NLLIGO::CPrimitiveClass::CParameter &parameter,
+											const NLLIGO::IPrimitive *primitive);
 
 	QtVariantPropertyManager *m_variantManager;
 	QtEnumPropertyManager *m_enumManager;
 	QtGroupPropertyManager *m_groupManager;
+	QtTextPropertyManager *m_stringArrayManager;
 
 	Ui::PropertyEditorWidget m_ui;
 }; /* PropertyEditorWidget */

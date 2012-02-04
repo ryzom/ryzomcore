@@ -173,6 +173,26 @@ WorldEditNode::~WorldEditNode()
 {
 }
 
+void WorldEditNode::setContext(const QString &name)
+{
+	m_context = name;
+}
+
+QString WorldEditNode::context() const
+{
+	return m_context;
+}
+
+void WorldEditNode::setDataPath(const QString &path)
+{
+	m_dataPath = path;
+}
+
+QString WorldEditNode::dataPath() const
+{
+	return m_dataPath;
+}
+
 Node::NodeType WorldEditNode::type() const
 {
 	return WorldEditNodeType;

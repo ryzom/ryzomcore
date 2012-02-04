@@ -274,7 +274,7 @@ void WorldEditorScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 			else
 				m_editedSelectedItems = false;
 		}
-		// Update render
+		// Update render (drawing selection area when enabled multiple selection mode)
 		update();
 	}
 

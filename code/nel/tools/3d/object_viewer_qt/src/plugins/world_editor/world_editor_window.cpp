@@ -275,8 +275,16 @@ void WorldEditorWindow::updateSelection(const QItemSelection &selected, const QI
 		nodesDeselected.push_back(node);
 	}
 
-	// TODO: update property editor
-	m_ui.propertyEditWidget->updateSelection(nodesSelected, nodesDeselected);
+	// update property editor
+	if (nodesSelected.size() > 0)
+	{
+		// only single selection
+		m_ui.propertyEditWidget->updateSelection(nodesSelected.at(0));
+	}
+	else
+	{
+		m_ui.propertyEditWidget->clearProperties();
+	}
 
 	QList<QGraphicsItem *> itemSelected;
 	Q_FOREACH(Node *node, nodesSelected)
@@ -320,8 +328,17 @@ void WorldEditorWindow::selectedItemsInScene(const QList<QGraphicsItem *> &selec
 
 	selectionModel->select(itemSelection, QItemSelectionModel::Select);
 
-	// TODO: update property editor
-	// ...
+	// update property editor
+	if (!selected.isEmpty())
+	{
+		// only single selection
+		Node *node = qvariant_cast<Node *>(selected.at(0)->data(Constants::WORLD_EDITOR_NODE));
+		m_ui.propertyEditWidget->updateSelection(node);
+	}
+	else
+	{
+		m_ui.propertyEditWidget->clearProperties();
+	}
 
 	connect(m_ui.treePrimitivesView->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
 			this, SLOT(updateSelection(QItemSelection, QItemSelection)));
