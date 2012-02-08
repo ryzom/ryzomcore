@@ -1,4 +1,4 @@
-// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
+// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
