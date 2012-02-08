@@ -30,7 +30,7 @@
 //////////////
 #include "player_manager/cdb_branch.h"
 #include "player_manager/cdb_leaf.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include <libxml/parser.h>
 
 ////////////////

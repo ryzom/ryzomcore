@@ -19,7 +19,7 @@
 #include "stdpch.h"
 #include "interface_manager.h"
 #include "ctrl_scroll.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "group_menu.h"
 
 #include "lua_ihm.h"

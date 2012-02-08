@@ -19,7 +19,7 @@
 #include "stdpch.h"
 #include "dbgroup_combo_box.h"
 #include "group_menu.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "interface_manager.h"
 #include "ctrl_button.h"
 #include "action_handler.h"

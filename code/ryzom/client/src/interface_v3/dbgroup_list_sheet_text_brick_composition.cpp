@@ -17,7 +17,7 @@
 #include "stdpch.h"
 #include "dbgroup_list_sheet_text_brick_composition.h"
 #include "../client_sheets/sbrick_sheet.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../string_manager_client.h"
 #include "sbrick_manager.h"
 

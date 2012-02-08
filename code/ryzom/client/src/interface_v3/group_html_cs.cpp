@@ -22,7 +22,7 @@
 #include "stdpch.h"
 
 #include "group_html_cs.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../client_cfg.h"
 
 // used for login cookie to be sent to the web server

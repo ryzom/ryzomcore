@@ -18,7 +18,7 @@
 
 #include "stdpch.h"
 //
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 //
 #include "group_compas.h"
 #include "interface_3d_scene.h"

@@ -29,7 +29,7 @@
 #include "dbview_bar.h"
 
 #include "game_share/skills.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 #include "skill_manager.h"
 #include "nel/misc/i_xml.h"

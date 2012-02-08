@@ -23,7 +23,7 @@
 #include "input_handler_manager.h"
 #include "nel/misc/command.h"
 #include "view_text.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "interface_options.h"
 #include "dbctrl_sheet.h"
 #include "group_container.h"

@@ -22,7 +22,7 @@
 #include "../string_manager_client.h"
 #include "../user_entity.h"
 #include "../entities.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 using namespace STRING_MANAGER;
 

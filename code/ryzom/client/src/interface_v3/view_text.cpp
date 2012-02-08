@@ -26,7 +26,7 @@
 #include "group_container.h" // CCtrlResizer
 #include "ctrl_tooltip.h"
 
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "lua_ihm.h"
 
 #include "lua_ihm.h"

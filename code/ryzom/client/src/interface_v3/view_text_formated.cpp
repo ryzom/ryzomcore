@@ -23,7 +23,7 @@
 #include "../string_manager_client.h"
 #include "action_handler_misc.h"
 //
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 //
 #include "nel/misc/i18n.h"
 

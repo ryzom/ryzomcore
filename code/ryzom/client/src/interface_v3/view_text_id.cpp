@@ -22,7 +22,7 @@
 #include "interface_manager.h"
 #include "../string_manager_client.h"
 #include "view_text_id.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../client_cfg.h"
 #include "nel/misc/algo.h"
 
