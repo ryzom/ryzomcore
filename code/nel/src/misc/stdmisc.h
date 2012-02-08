@@ -52,7 +52,6 @@
 #include "nel/misc/stream.h"
 #include "nel/misc/path.h"
 #include "nel/misc/string_common.h"
-//#include "nel/misc/xml_auto_ptr.h"
 
 #ifdef NL_OS_WINDOWS
 	#define NOMINMAX
