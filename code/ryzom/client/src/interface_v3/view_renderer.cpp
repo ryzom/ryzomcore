@@ -30,45 +30,15 @@ using namespace NLMISC;
 using namespace std;
 using namespace NL3D;
 
-
-/*
- * constructor
- */
-CViewRenderer::CViewRenderer()
+CViewRenderer::CViewRenderer( NL3D::UDriver *driver )
 {
-	_ClipX = _ClipY = 0;
-	_ClipW = 800;
-	_ClipH = 600;
-	_ScreenW = 800;
-	_ScreenH = 600;
-	_OneOverScreenW= 1.0f / (float)_ScreenW;
-	_OneOverScreenH= 1.0f / (float)_ScreenH;
-	_IsMinimized= false;
-	_WFigurTexture= 0;
-	_HFigurTexture= 0;
-	_WFigurSeparatorTexture = 0;
-	_FigurSeparatorTextureId = -1;
-	_FigurBlankId = -1;
-	_BlankId = -1;
-	_WorldSpaceTransformation = true;
-	_CurrentZ = 10;
-	for(uint i=0;i<VR_NUM_LAYER;i++)
-	{
-		_StringRBLayers[i]= NULL;
-		_EmptyLayer[i]= true;
-	}
-	_BlankGlobalTexture  = NULL;
+	setup();
+
+	this->driver = driver;
 }
 
-
-/*
- * destructor
- */
 CViewRenderer::~CViewRenderer()
 {
-	if (!_Material.empty() && Driver)
-		Driver->deleteMaterial(_Material);
-
 	for(uint i=0;i<VR_NUM_LAYER;i++)
 	{
 		delete _StringRBLayers[i];
@@ -101,9 +71,9 @@ void CViewRenderer::setClipWindow (sint32 x, sint32 y, sint32 w, sint32 h)
  */
 void CViewRenderer::checkNewScreenSize ()
 {
-	if (!Driver) return;
+	if (!driver) return;
 	uint32 w, h;
-	Driver->getWindowSize (w, h);
+	driver->getWindowSize (w, h);
 	// not minimized? change coords
 	if(w!=0 && h!=0)
 	{
@@ -145,14 +115,40 @@ void CViewRenderer::getScreenOOSize (float &oow, float &ooh)
 	ooh= _OneOverScreenH;
 }
 
+void CViewRenderer::setup()
+{
+	_ClipX = _ClipY = 0;
+	_ClipW = 800;
+	_ClipH = 600;
+	_ScreenW = 800;
+	_ScreenH = 600;
+	_OneOverScreenW= 1.0f / (float)_ScreenW;
+	_OneOverScreenH= 1.0f / (float)_ScreenH;
+	_IsMinimized= false;
+	_WFigurTexture= 0;
+	_HFigurTexture= 0;
+	_WFigurSeparatorTexture = 0;
+	_FigurSeparatorTextureId = -1;
+	_FigurBlankId = -1;
+	_BlankId = -1;
+	_WorldSpaceTransformation = true;
+	_CurrentZ = 10;
+	for(uint i=0;i<VR_NUM_LAYER;i++)
+	{
+		_StringRBLayers[i]= NULL;
+		_EmptyLayer[i]= true;
+	}
+	_BlankGlobalTexture  = NULL;
+}
+
 
 /*
  * init: init material and string buffer
  */
 void CViewRenderer::init()
 {
-	if (!Driver) return;
-	_Material = Driver->createMaterial();
+	if (!driver) return;
+	_Material = driver->createMaterial();
 
 	setRenderStates();
 
@@ -188,7 +184,7 @@ void CViewRenderer::reset()
 		UTextureFile *tf = dynamic_cast<NL3D::UTextureFile *>(ite->Texture);
 		if (tf)
 		{
-			Driver->deleteTextureFile (tf);
+			driver->deleteTextureFile (tf);
 		}
 		ite++;
 	}
@@ -198,6 +194,10 @@ void CViewRenderer::reset()
 	_SImageIterators.clear();
 	_TextureMap.clear();
 	_IndexesToTextureIds.clear();
+}
+
+NL3D::UDriver* CViewRenderer::getDriver(){
+	return driver;
 }
 
 // ***************************************************************************
@@ -711,7 +711,7 @@ void CViewRenderer::loadTextures (const std::string &textureFileName, const std:
 	CIFile ifTmp;
 	if (ifTmp.open(filename))
 		CBitmap::loadSize (ifTmp, gt.Width, gt.Height);
-	gt.Texture = Driver->createTextureFile (filename);
+	gt.Texture = driver->createTextureFile (filename);
 	// Force to generate the texture now. This way we can extract the mouse bitmaps from it now without having to load it again.
 	// Its why we don't release it at the end, because it is likely to be uploaded soon)
 	CBitmap *texDatas = gt.Texture->generateDatas();
@@ -729,7 +729,7 @@ void CViewRenderer::loadTextures (const std::string &textureFileName, const std:
 
 	_GlobalTextures.push_back (gt);
 
-	Driver->setCursorScale(ClientCfg.HardwareCursorScale);
+	driver->setCursorScale(ClientCfg.HardwareCursorScale);
 
 	char bufTmp[256], tgaName[256];
 	string sTGAname;
@@ -781,7 +781,7 @@ void CViewRenderer::loadTextures (const std::string &textureFileName, const std:
 					CBitmap curs;
 					curs.resize(x1 - x0, y1 - y0);
 					curs.blit(*texDatas, x0, y0, (x1 - x0), (y1 - y0), 0, 0);
-					Driver->addCursor(image.Name, curs);
+					driver->addCursor(image.Name, curs);
 				}
 			}
 		}
@@ -877,7 +877,7 @@ sint32 CViewRenderer::createTexture (const std::string &sGlobalTextureName,
 				nlwarning("Failed to load the texture '%s', please check image format", filename.c_str());
 			}
 		}
-		gtTmp.Texture = Driver->createTextureFile (sLwrGTName);
+		gtTmp.Texture = driver->createTextureFile (sLwrGTName);
 		gtTmp.Name = sLwrGTName;
 		gtTmp.Texture->setFilterMode(UTexture::Nearest, UTexture::NearestMipMapOff);
 		if(uploadDXTC)
@@ -1007,7 +1007,7 @@ void CViewRenderer::deleteTexture (sint32 textureId)
 					UTextureFile *tf = dynamic_cast<NL3D::UTextureFile *>(iteGT->Texture);
 					if (tf)
 					{
-						Driver->deleteTextureFile (tf);
+						driver->deleteTextureFile (tf);
 					}
 					_GlobalTextures.erase (iteGT);
 					return;
@@ -1151,13 +1151,13 @@ void CViewRenderer::flush ()
 				// draw quads and empty list
 				if (layer.NbQuads != 0)
 				{
-					Driver->drawQuads (&(layer.Quads[0]), layer.NbQuads, _Material);
+					driver->drawQuads (&(layer.Quads[0]), layer.NbQuads, _Material);
 					layer.NbQuads = 0;
 				}
 
 				if (!layer.Tris.empty())
 				{
-					Driver->drawTriangles(layer.Tris, _Material);
+					driver->drawTriangles(layer.Tris, _Material);
 					layer.Tris.clear();
 				}
 
@@ -1178,12 +1178,12 @@ void CViewRenderer::flush ()
 				// alpha blended
 				if (!layer.FilteredAlphaBlendedQuads.empty())
 				{
-					Driver->drawQuads (&(layer.FilteredAlphaBlendedQuads[0]), (uint32)layer.FilteredAlphaBlendedQuads.size(), _Material);
+					driver->drawQuads (&(layer.FilteredAlphaBlendedQuads[0]), (uint32)layer.FilteredAlphaBlendedQuads.size(), _Material);
 					layer.FilteredAlphaBlendedQuads.clear();
 				}
 				if (!layer.FilteredAlphaBlendedTris.empty())
 				{
-					Driver->drawTriangles(layer.FilteredAlphaBlendedTris, _Material);
+					driver->drawTriangles(layer.FilteredAlphaBlendedTris, _Material);
 					layer.FilteredAlphaBlendedTris.clear();
 				}
 				// additif
@@ -1193,12 +1193,12 @@ void CViewRenderer::flush ()
 					_Material.setBlendFunc (NL3D::UMaterial::one, NL3D::UMaterial::one);
 					if (!layer.FilteredAdditifQuads.empty())
 					{
-						Driver->drawQuads (&(layer.FilteredAdditifQuads[0]), (uint32)layer.FilteredAdditifQuads.size(), _Material);
+						driver->drawQuads (&(layer.FilteredAdditifQuads[0]), (uint32)layer.FilteredAdditifQuads.size(), _Material);
 						layer.FilteredAdditifQuads.clear();
 					}
 					if (!layer.FilteredAdditifTris.empty())
 					{
-						Driver->drawTriangles(layer.FilteredAdditifTris, _Material);
+						driver->drawTriangles(layer.FilteredAdditifTris, _Material);
 						layer.FilteredAdditifTris.clear();
 					}
 					// restore alpha blend
@@ -1546,13 +1546,13 @@ URenderStringBuffer		*CViewRenderer::getStringRenderBuffer(sint layerId)
 // ***************************************************************************
 void CViewRenderer::drawWiredQuad(sint32 x, sint32 y, sint32 width, sint32 height, NLMISC::CRGBA col /*=NLMISC::CRGBA::White*/)
 {
-	Driver->drawWiredQuad(x * _OneOverScreenW, y * _OneOverScreenH, (x + width) * _OneOverScreenW, (y + height) * _OneOverScreenH, col);
+	driver->drawWiredQuad(x * _OneOverScreenW, y * _OneOverScreenH, (x + width) * _OneOverScreenW, (y + height) * _OneOverScreenH, col);
 }
 
 // ***************************************************************************
 void CViewRenderer::drawFilledQuad(sint32 x, sint32 y, sint32 width, sint32 height, NLMISC::CRGBA col /*=NLMISC::CRGBA::White*/)
 {
-	Driver->drawQuad(x * _OneOverScreenW, y * _OneOverScreenH, (x + width) * _OneOverScreenW, (y + height) * _OneOverScreenH, col);
+	driver->drawQuad(x * _OneOverScreenW, y * _OneOverScreenH, (x + width) * _OneOverScreenW, (y + height) * _OneOverScreenH, col);
 }
 
 
@@ -1610,7 +1610,7 @@ void CViewRenderer::drawCustom (sint32 x, sint32 y, sint32 width, sint32 height,
 		worldSpaceTransformation (qcoluv2_clipped);
 
 	// Draw clipped quad
-	Driver->drawQuads (&qcoluv2_clipped, 1, Mat);
+	driver->drawQuads (&qcoluv2_clipped, 1, Mat);
 }
 
 // ***************************************************************************
@@ -1658,7 +1658,7 @@ void CViewRenderer::drawCustom(sint32 x, sint32 y, sint32 width, sint32 height, 
 	}
 
 	// Draw clipped quad
-	Driver->drawQuads (&qcoluv_clipped, 1, Mat);
+	driver->drawQuads (&qcoluv_clipped, 1, Mat);
 }
 
 // ***************************************************************************
@@ -1716,7 +1716,7 @@ void CViewRenderer::drawCustom (sint32 x, sint32 y, sint32 width, sint32 height,
 		worldSpaceTransformation (qcoluv2_clipped);
 
 	// Draw clipped quad
-	Driver->drawQuads (&qcoluv2_clipped, 1, Mat);
+	driver->drawQuads (&qcoluv2_clipped, 1, Mat);
 }
 
 // ***************************************************************************

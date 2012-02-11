@@ -335,7 +335,7 @@ void CGroupEditBox::copy()
 	stopParentBlink();
 
 	// get the selection and copy it
-	if (Driver->copyTextToClipboard(getSelection()))
+	if (CInterfaceManager::getInstance()->getViewRenderer().getDriver()->copyTextToClipboard(getSelection()))
 		nlinfo ("Chat input was copied in the clipboard");
 }
 
@@ -353,7 +353,7 @@ void CGroupEditBox::paste()
 
 	ucstring sString;
 
-	if (Driver->pasteTextFromClipboard(sString))
+	if (CInterfaceManager::getInstance()->getViewRenderer().getDriver()->pasteTextFromClipboard(sString))
 	{
 		// append string now
 		appendStringFromClipboard(sString);

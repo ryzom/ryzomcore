@@ -3920,6 +3920,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		#ifdef NL_OS_WINDOWS
+			NL3D::UDriver *Driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
 			if (Driver)
 			{
 				HWND wnd = Driver->getDisplay();

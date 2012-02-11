@@ -300,7 +300,6 @@ void CObjectRefIdClient::getNameInParent(std::string &name, sint32 &indexInArray
 		nlwarning("ObservedObject parent instance ptr = %p", parent);
 		parent->getLuaProjection().dump();
 	}
-	Driver->systemMessageBox("Bug catched, please send log.log to vizerie@nevrax.com", "nevrax internal", NL3D::UDriver::okType, NL3D::UDriver::exclamationIcon);
 	nlassert(0); // not found in parent
 }
 

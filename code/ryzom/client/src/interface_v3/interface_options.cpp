@@ -414,7 +414,7 @@ COptionsAnimationSet::~COptionsAnimationSet()
 			BUT this is OK, since the actual animationSet is kept by SmartPtr through UPlayList
 			(see deleteAnimationSet() doc)
 		 */
-		Driver->deleteAnimationSet(AnimationSet);
+		CInterfaceManager::getInstance()->getViewRenderer().getDriver()->deleteAnimationSet(AnimationSet);
 		AnimationSet= NULL;
 	}
 }
@@ -424,10 +424,10 @@ bool COptionsAnimationSet::parse (xmlNodePtr cur)
 {
 	bool result = CInterfaceOptions::parse(cur);
 	if (!result) return false;
-	nlassert(Driver);
+	nlassert( CInterfaceManager::getInstance()->getViewRenderer().getDriver() );
 
 	// create the animation set
-	AnimationSet= Driver->createAnimationSet();
+	AnimationSet= CInterfaceManager::getInstance()->getViewRenderer().getDriver()->createAnimationSet();
 	nlassert(AnimationSet);
 
 	AnimMale.clear();

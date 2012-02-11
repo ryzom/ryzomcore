@@ -250,6 +250,7 @@ CCtrlSheetInfo::CCtrlSheetInfo()
 
 void CDBCtrlSheet::release ()
 {
+	NL3D::UDriver *Driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
 	if (Driver)
 		Driver->deleteMaterial(_GuildMat);
 
@@ -489,6 +490,8 @@ CDBCtrlSheet::CDBCtrlSheet(const TCtorParam &param)
 // ----------------------------------------------------------------------------
 CDBCtrlSheet::~CDBCtrlSheet()
 {
+	NL3D::UDriver *Driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
+
 	if (_GuildBack)
 	{
 		if (Driver)
@@ -1303,6 +1306,8 @@ void CDBCtrlSheet::setupGuildFlag ()
 
 		sint8 nLastGuildBack =	(sint8)(_MacroID&15);		// 4 bits en pos 0
 		sint8 nLastGuildSymbol = (sint8)((_MacroID>>4)&63);	// 6 bits en pos 4
+
+		NL3D::UDriver *Driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
 
 		if (_GuildMat.empty())
 		{

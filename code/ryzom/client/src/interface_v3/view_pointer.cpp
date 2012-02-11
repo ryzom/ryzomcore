@@ -701,7 +701,7 @@ void CViewPointer::drawCursor(sint32 texId, NLMISC::CRGBA col, uint8 rot)
 	{
 		// set new cursor for the hardware mouse
 		std::string name = rVR.getTextureNameFromId(texId);
-		Driver->setCursor(name, col, rot, (uint32) std::max(getX() - xPos, (sint32) 0), (uint32) std::max(getY() - yPos, (sint32) 0));
+		rVR.getDriver()->setCursor(name, col, rot, (uint32) std::max(getX() - xPos, (sint32) 0), (uint32) std::max(getY() - yPos, (sint32) 0));
 	}
 }
 

@@ -62,6 +62,7 @@
 #include "ingame_database_manager.h"
 #include "client_chat_manager.h"
 #include "interface_v3/input_handler_manager.h"
+#include "interface_v3/interface_manager.h"
 //#include "crtdbg.h"
 #include "sound_manager.h"
 #include "net_manager.h"
@@ -1073,6 +1074,8 @@ void prelogInit()
 		// Create a text context. We need to put the full path because we not already add search path
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);
+
+		CInterfaceManager::getInstance();
 
 		ProgressBar.setFontFactor(0.85f);
 

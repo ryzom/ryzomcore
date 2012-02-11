@@ -29,16 +29,6 @@
 #include "../ingame_database_manager.h"
 
 
-//the NEL 3d driver
-extern NL3D::UDriver* Driver;
-
-//the NEL 3d textcontext
-extern NL3D::UTextContext *TextContext;
-
-//the network database node
-extern CCDBSynchronised IngameDbMngr;
-
-
 // ***************************************************************************
 #define	VR_NUM_LAYER	32
 #define	VR_BIAS_LAYER	(VR_NUM_LAYER/2)
@@ -113,14 +103,12 @@ public:
 		sint32	_TextureId;
 	};
 
-	/**
-	 * destructor
-	 */
-	CViewRenderer ();
-	/**
-	 * destructor
-	 */
+	CViewRenderer( NL3D::UDriver *driver );
+
 	~CViewRenderer ();
+
+	/// setup the default values for everything
+	void setup();
 
 	/// init when TextContext and Driver are created
 	void init();
@@ -130,6 +118,9 @@ public:
 
 	/// Delete all textures and the like and reset the view renderer
 	void reset();
+
+	/// Retrieves the 3d driver we are using
+	NL3D::UDriver* getDriver();
 
 	/*
 	 * setClipWindow : set the current clipping window
@@ -567,7 +558,9 @@ private:
 	NL3D::CFrustum		_CameraFrustum;				// Transform from screen space to world space
 	NLMISC::CMatrix		_WorldSpaceMatrix;			// Matrix to be applied for world space transformation
 	bool				_WorldSpaceScale;
-
+	
+	
+	NL3D::UDriver *driver;
 };
 
 

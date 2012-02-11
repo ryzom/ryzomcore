@@ -253,7 +253,8 @@ int CInterfaceManager::DebugTrackGroupsGetId( CInterfaceGroup *pIG )
 #endif // AJM_DEBUG_TRACK_INTERFACE_GROUPS
 
 // ------------------------------------------------------------------------------------------------
-CInterfaceManager::CInterfaceManager()
+CInterfaceManager::CInterfaceManager() :
+_ViewRenderer( Driver )
 {
 	_Instance = this;
 	_DbRootNode = new CCDBNodeBranch("ROOT");

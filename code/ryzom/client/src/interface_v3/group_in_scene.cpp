@@ -86,8 +86,8 @@ void CGroupInScene::computeWindowPos(sint32 &newX, sint32 &newY, CVector &newPro
 			tmp = pVR.getFrustum().projectZ (tmp);
 
 			// Get the width and height
-			tmp.x *= (float)Driver->getWindowWidth();
-			tmp.y *= (float)Driver->getWindowHeight();
+			tmp.x *= (float)CInterfaceManager::getInstance()->getViewRenderer().getDriver()->getWindowWidth();
+			tmp.y *= (float)CInterfaceManager::getInstance()->getViewRenderer().getDriver()->getWindowHeight();
 
 			// position without offset, in float
 			newProjCenter.x= tmp.x;
