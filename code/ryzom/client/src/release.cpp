@@ -431,9 +431,6 @@ void releaseMainLoop(bool closeConnection)
 	// Unlink the net manager
 	NetMngr.setDataBase (NULL);
 
-	// Destroy interface manager
-	CInterfaceManager::destroy ();
-
 	// Send a msg to server
 	if(!ClientCfg.Local)
 	{
