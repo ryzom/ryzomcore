@@ -125,7 +125,7 @@ CViewText::	CViewText (const std::string& id, const std::string Text, sint FontS
 CViewText::~CViewText()
 {
 	if (_Index != 0xFFFFFFFF)
-		TextContext->erase (_Index);
+		CInterfaceManager::getInstance()->getTextContext()->erase (_Index);
 	clearLines();
 
 	if (!_Setuped)
@@ -139,7 +139,7 @@ CViewText::~CViewText()
 CViewText &CViewText::operator=(const CViewText &vt)
 {
 	if (_Index != 0xFFFFFFFF)
-		TextContext->erase (_Index);
+		CInterfaceManager::getInstance()->getTextContext()->erase (_Index);
 
 	// Create database entries
 	_Active = vt._Active;
@@ -436,6 +436,8 @@ void CViewText::draw ()
 		return;
 	rVR.getScreenOOSize (oow, ooh);
 
+	NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
+
 
 	// *** get current color
 	CRGBA col, shcol;
@@ -459,6 +461,7 @@ void CViewText::draw ()
 	{
 		if (_Lines.size() == 0) return;
 
+		NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
 
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
@@ -865,6 +868,8 @@ void CViewText::updateTextContextMultiLine(uint nMaxWidth)
 			rWidthCurrentLine= max(rWidthCurrentLine, (float)wordFormat.TabX*_FontWidth);
 		}
 
+		NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
+
 		// Parse the letter
 		{
 			ucLetter = _Text[i];
@@ -1041,7 +1046,7 @@ void CViewText::updateTextContextMultiLineJustified(uint nMaxWidth, bool expandS
 			// Get the word value.
 			wordValue = _Text.substr(spaceEnd, wordEnd - spaceEnd);
 			// compute width of word
-			si = TextContext->getStringInfo(wordValue);
+			si = CInterfaceManager::getInstance()->getTextContext()->getStringInfo(wordValue);
 
 			// compute size of spaces/Tab + word
 			newLineWidth = lineWidth + numSpaces * _SpaceWidth;
@@ -1120,7 +1125,7 @@ void CViewText::updateTextContextMultiLineJustified(uint nMaxWidth, bool expandS
 					for(currChar = 0; currChar < wordValue.length(); ++currChar)
 					{
 						oneChar = wordValue[currChar];
-						si = TextContext->getStringInfo(oneChar);
+						si = CInterfaceManager::getInstance()->getTextContext()->getStringInfo(oneChar);
 						if ((uint) (px + si.StringWidth) > nMaxWidth) break;
 						px += si.StringWidth;
 					}
@@ -1239,6 +1244,8 @@ void CViewText::updateTextContextMultiLineJustified(uint nMaxWidth, bool expandS
 // ***************************************************************************
 void CViewText::updateTextContext ()
 {
+	NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
+
 	TextContext->setHotSpot (UTextContext::BottomLeft);
 	TextContext->setShaded (_Shadow);
 	TextContext->setFontSize (_FontSize);
@@ -1549,6 +1556,7 @@ void        CViewText::setColorRGBA(NLMISC::CRGBA col)
 void CViewText::getCharacterPositionFromIndex(sint index, bool cursorAtPreviousLineEnd, sint &x, sint &y, sint &height) const
 {
 	NLMISC::clamp(index, 0, (sint) _Text.length());
+	NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
 	TextContext->setHotSpot (UTextContext::BottomLeft);
 	TextContext->setShaded (_Shadow);
 	TextContext->setFontSize (_FontSize);
@@ -1660,7 +1668,7 @@ static uint getCharacterIndex(const ucstring &textValue, float x)
 	{
 		// get character width
 		singleChar[0] = textValue[i];
-		si = TextContext->getStringInfo(singleChar);
+		si = CInterfaceManager::getInstance()->getTextContext()->getStringInfo(singleChar);
 		px += si.StringWidth;
 		 // the character is at the i - 1 position
 		if (px > x)
@@ -1677,6 +1685,8 @@ static uint getCharacterIndex(const ucstring &textValue, float x)
 // ***************************************************************************
 void CViewText::getCharacterIndexFromPosition(sint x, sint y, uint &index, bool &cursorAtPreviousLineEnd) const
 {
+	NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
+
 	// setup the text context
 	TextContext->setHotSpot (UTextContext::BottomLeft);
 	TextContext->setShaded (_Shadow);
@@ -1815,7 +1825,7 @@ void CViewText::setStringSelectionSkipingSpace(uint stringId, const ucstring &te
 			quadSize--;
 	}
 	// select what quad to skip
-	TextContext->setStringSelection(stringId, quadStart, quadSize);
+	CInterfaceManager::getInstance()->getTextContext()->setStringSelection(stringId, quadStart, quadSize);
 }
 
 // ***************************************************************************
@@ -1907,7 +1917,7 @@ void CViewText::CLine::clear()
 	for(uint k = 0; k < _Words.size(); ++k)
 	{
 		if (_Words[k].Index != 0xffffffff)
-			TextContext->erase(_Words[k].Index);
+			CInterfaceManager::getInstance()->getTextContext()->erase(_Words[k].Index);
 	}
 	_Words.clear();
 	_NumChars = 0;
@@ -1928,6 +1938,7 @@ void CViewText::CWord::build(const ucstring &text, uint numSpaces/*=0*/)
 {
 	Text = text;
 	NumSpaces = numSpaces;
+	NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
 	Index = TextContext->textPush(text);
 	Info = TextContext->getStringInfo(Index);
 }
@@ -1950,6 +1961,7 @@ sint32 CViewText::getMaxUsedW() const
 	static const ucstring lineFeedStr("\n");
 	float maxWidth = 0;
 
+	NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
 	TextContext->setHotSpot (UTextContext::BottomLeft);
 	TextContext->setShaded (_Shadow);
 	TextContext->setFontSize (_FontSize);
@@ -2033,6 +2045,7 @@ sint32 CViewText::getMinUsedW() const
 	// If we can't clip the words, return the size of the largest word
 	else if ((_TextMode == DontClipWord) || (_TextMode == Justified))
 	{
+		NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
 		TextContext->setFontSize (_FontSize);
@@ -2083,6 +2096,7 @@ void CViewText::onInvalidateContent()
 // ***************************************************************************
 void CViewText::computeFontSize ()
 {
+	NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
 	TextContext->setHotSpot (UTextContext::BottomLeft);
 	TextContext->setShaded (_Shadow);
 	TextContext->setFontSize (_FontSize);
@@ -2436,6 +2450,7 @@ void CViewText::setSingleLineTextFormatTaged(const ucstring &text)
 	}
 
 	// convert in ULetterColors
+	NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
 	ULetterColors * letterColors = TextContext->createLetterColors();
 	for(uint i=0; i<tempLetterColors.size(); i++)
 	{

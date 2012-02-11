@@ -48,9 +48,6 @@
 static const float ROLLOVER_MIN_DELTA_PER_MS = 0.28f;
 static const float ROLLOVER_MAX_DELTA_PER_MS = 0.12f;
 
-//the NEL 3d textcontext
-extern NL3D::UTextContext *TextContext;
-
 //the network database node
 extern CCDBSynchronised IngameDbMngr;
 
@@ -723,8 +720,12 @@ public:
 	/// Sets the current TextContext.
 	void setTextContext( NL3D::UTextContext *textcontext );
 
+	/// Retrueves the current TextContext
+	inline NL3D::UTextContext* getTextContext() const{ return textcontext; };
+
 // ------------------------------------------------------------------------------------------------
 private:
+	NL3D::UTextContext *textcontext;
 
 	// Observer for copying db branch changes
 	class CServerToLocalAutoCopy

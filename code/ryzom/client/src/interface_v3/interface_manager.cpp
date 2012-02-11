@@ -342,6 +342,7 @@ _ViewRenderer( Driver, TextContext )
 	_DebugTrackGroupCreateCount = 0;
 	_DebugTrackGroupDestroyCount = 0;
 #endif // AJM_DEBUG_TRACK_INTERFACE_GROUPS
+	textcontext = NULL;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1354,7 +1355,7 @@ void CInterfaceManager::updateFrameViews(NL3D::UCamera camera)
 	drawViews(camera);
 
 	// The interface manager may change usual Global setup. reset them.
-	TextContext->setShadeColor(CRGBA::Black);
+	textcontext->setShadeColor(CRGBA::Black);
 
 }
 
@@ -6603,5 +6604,6 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 
 void CInterfaceManager::setTextContext( NL3D::UTextContext *textcontext )
 {
+	this->textcontext = textcontext;
 	_ViewRenderer.setTextContext( textcontext );
 }
