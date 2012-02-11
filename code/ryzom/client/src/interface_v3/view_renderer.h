@@ -103,7 +103,7 @@ public:
 		sint32	_TextureId;
 	};
 
-	CViewRenderer( NL3D::UDriver *driver );
+	CViewRenderer( NL3D::UDriver *driver, NL3D::UTextContext *textcontext );
 
 	~CViewRenderer ();
 
@@ -121,6 +121,9 @@ public:
 
 	/// Retrieves the 3d driver we are using
 	NL3D::UDriver* getDriver();
+
+	/// Sets the current TextContext.
+	void setTextContext( NL3D::UTextContext *textcontext );
 
 	/*
 	 * setClipWindow : set the current clipping window
@@ -561,6 +564,7 @@ private:
 	
 	
 	NL3D::UDriver *driver;
+	NL3D::UTextContext *textcontext;
 };
 
 

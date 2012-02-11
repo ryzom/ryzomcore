@@ -83,6 +83,7 @@ void resetTextContext (const char *font, bool resetInterfaceManager)
 	if (resetInterfaceManager)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
+		im->setTextContext( TextContext );
 		im->resetTextIndex();
 	}
 }

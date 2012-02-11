@@ -720,6 +720,9 @@ public:
 	 */
 	static bool parseTokens(ucstring& ucstr);
 
+	/// Sets the current TextContext.
+	void setTextContext( NL3D::UTextContext *textcontext );
+
 // ------------------------------------------------------------------------------------------------
 private:
 

@@ -30,11 +30,12 @@ using namespace NLMISC;
 using namespace std;
 using namespace NL3D;
 
-CViewRenderer::CViewRenderer( NL3D::UDriver *driver )
+CViewRenderer::CViewRenderer( NL3D::UDriver *driver, NL3D::UTextContext *textcontext )
 {
 	setup();
 
 	this->driver = driver;
+	this->textcontext = textcontext;
 }
 
 CViewRenderer::~CViewRenderer()
@@ -155,7 +156,7 @@ void CViewRenderer::init()
 	// Init all renderBuffer
 	for(uint i=0;i<VR_NUM_LAYER;i++)
 	{
-		_StringRBLayers[i]= TextContext->createRenderBuffer();
+		_StringRBLayers[i]= textcontext->createRenderBuffer();
 	}
 }
 
@@ -198,6 +199,11 @@ void CViewRenderer::reset()
 
 NL3D::UDriver* CViewRenderer::getDriver(){
 	return driver;
+}
+
+void CViewRenderer::setTextContext(NL3D::UTextContext *textcontext)
+{
+	this->textcontext = textcontext;
 }
 
 // ***************************************************************************
@@ -1211,9 +1217,9 @@ void CViewRenderer::flush ()
 
 		// **** Display Computed Strings of this layer
 		if (_WorldSpaceTransformation)
-			TextContext->flushRenderBufferUnProjected(_StringRBLayers[layerId], false);
+			textcontext->flushRenderBufferUnProjected(_StringRBLayers[layerId], false);
 		else
-			TextContext->flushRenderBuffer(_StringRBLayers[layerId]);
+			textcontext->flushRenderBuffer(_StringRBLayers[layerId]);
 
 		// flushed
 		_EmptyLayer[layerId]= true;

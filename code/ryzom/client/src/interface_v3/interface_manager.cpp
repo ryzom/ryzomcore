@@ -254,7 +254,7 @@ int CInterfaceManager::DebugTrackGroupsGetId( CInterfaceGroup *pIG )
 
 // ------------------------------------------------------------------------------------------------
 CInterfaceManager::CInterfaceManager() :
-_ViewRenderer( Driver )
+_ViewRenderer( Driver, TextContext )
 {
 	_Instance = this;
 	_DbRootNode = new CCDBNodeBranch("ROOT");
@@ -6599,4 +6599,9 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 
 	ucstr = str;
 	return true;;
+}
+
+void CInterfaceManager::setTextContext( NL3D::UTextContext *textcontext )
+{
+	_ViewRenderer.setTextContext( textcontext );
 }
