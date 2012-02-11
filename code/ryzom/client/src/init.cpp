@@ -1075,7 +1075,7 @@ void prelogInit()
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);
 
-		CInterfaceManager::getInstance()->setTextContext( TextContext );
+		CInterfaceManager::create( Driver, TextContext );
 
 		ProgressBar.setFontFactor(0.85f);
 

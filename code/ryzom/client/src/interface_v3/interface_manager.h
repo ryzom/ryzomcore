@@ -113,10 +113,12 @@ public:
 	/// Singleton method : Get the unique interface loader instance
 	static CInterfaceManager* getInstance()
 	{
-		if (_Instance == NULL)
-			_Instance = new CInterfaceManager();
+		nlassert( _Instance != NULL );
 		return _Instance;
 	}
+
+	/// Create singleton
+	static void create(  NL3D::UDriver *driver, NL3D::UTextContext *textcontext  );
 
 	/// Destroy singleton
 	static void destroy ();
@@ -725,7 +727,6 @@ public:
 
 // ------------------------------------------------------------------------------------------------
 private:
-	NL3D::UTextContext *textcontext;
 
 	// Observer for copying db branch changes
 	class CServerToLocalAutoCopy
@@ -906,7 +907,7 @@ private:
 	uint8 _GlobalRolloverFactorContainer;
 
 	/// Constructor
-	CInterfaceManager();
+	CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext *textcontext );
 
 	///the singleton's instance
 	static CInterfaceManager* _Instance;
@@ -1067,6 +1068,8 @@ private:
 	// Update tooltip coordinate if they need to be (getInvalidCoords() returns a value != 0)
 	void updateTooltipCoords(CCtrlBase *newCtrl);
 
+	NL3D::UDriver *driver;
+	NL3D::UTextContext *textcontext;
 };
 
 #endif // NL_INTERFACE_MANAGER_H

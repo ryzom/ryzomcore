@@ -97,7 +97,7 @@
 #include "../login.h"
 
 #include "../sheet_manager.h"				// for emotes
-#include "../global.h"						// for emotes
+//#include "../global.h"						// for emotes
 #include "../entity_animation_manager.h"	// for emotes
 #include "../net_manager.h"				// for emotes
 #include "../client_chat_manager.h"		// for emotes
@@ -127,6 +127,7 @@ extern CContinentManager ContinentMngr;
 extern CStringMapper *_UIStringMapper;
 extern bool IsInRingSession;
 extern CEventsListener EventsListener;
+extern CEntityAnimationManager		*EAM;
 
 namespace R2
 {
@@ -163,7 +164,7 @@ using namespace NLNET;
 
 // ------------------------------------------------------------------------------------------------
 
-extern NL3D::UDriver *Driver;
+//extern NL3D::UDriver *Driver;
 extern bool loginFinished;
 // Edit actions
 CActionsManager EditActions;
@@ -253,9 +254,11 @@ int CInterfaceManager::DebugTrackGroupsGetId( CInterfaceGroup *pIG )
 #endif // AJM_DEBUG_TRACK_INTERFACE_GROUPS
 
 // ------------------------------------------------------------------------------------------------
-CInterfaceManager::CInterfaceManager() :
-_ViewRenderer( Driver, TextContext )
+CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext *textcontext ) :
+_ViewRenderer( driver, textcontext )
 {
+	this->driver = driver;
+	this->textcontext = textcontext;
 	_Instance = this;
 	_DbRootNode = new CCDBNodeBranch("ROOT");
 	_ScreenW = _ScreenH = 0;
@@ -428,6 +431,14 @@ void CInterfaceManager::resetShardSpecificData()
 	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(getElementFromId(WIN_TEMPINV));
 	if (pGC != NULL)
 		pGC->setActive(false);
+}
+
+// ------------------------------------------------------------------------------------------------
+
+void CInterfaceManager::create( NL3D::UDriver *driver, NL3D::UTextContext *textcontext )
+{
+	nlassert( _Instance == NULL );
+	new CInterfaceManager( driver, textcontext );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -646,7 +657,8 @@ void CInterfaceManager::uninitOutGame()
 
 void badXMLParseMessageBox()
 {
-	NL3D::UDriver::TMessageBoxId	ret = Driver->systemMessageBox(	"Interface XML reading failed!\n"
+	NL3D::UDriver *driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
+	NL3D::UDriver::TMessageBoxId	ret = driver->systemMessageBox(	"Interface XML reading failed!\n"
 																		"Some XML files are corrupted and may have been removed.\n"
 																		"Ryzom may need to be restarted to run properly.\n"
 																		"Would you like to quit now?",
@@ -1468,7 +1480,8 @@ void CInterfaceManager::setupOptions()
 
 	// Try to change font if any
 	string sFont = _SystemOptions[OptionFont].getValStr();
-	if ((!sFont.empty()) && (Driver != NULL))
+	extern void resetTextContext( const char*, bool );
+	if ((!sFont.empty()) && (driver != NULL))
 		resetTextContext(sFont.c_str(), true);
 
 	// Continue to parse the rest of the interface
@@ -2056,9 +2069,9 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 				{
 					if ( (nPriority == WIN_PRIORITY_WORLD_SPACE) && !camera.empty())
 					{
-						Driver->setViewMatrix(CMatrix::Identity);
-						Driver->setModelMatrix(CMatrix::Identity);
-						Driver->setFrustum(camera.getFrustum());
+						driver->setViewMatrix(CMatrix::Identity);
+						driver->setModelMatrix(CMatrix::Identity);
+						driver->setFrustum(camera.getFrustum());
 						_ViewRenderer.activateWorldSpaceMatrix (true);
 					}
 
@@ -2082,7 +2095,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 
 					if ( (nPriority == WIN_PRIORITY_WORLD_SPACE) && !camera.empty())
 					{
-						Driver->setMatrixMode2D11();
+						driver->setMatrixMode2D11();
 						_ViewRenderer.activateWorldSpaceMatrix (false);
 					}
 				}
@@ -2138,7 +2151,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 		_ViewRenderer.flush();
 
 		// todo hulud remove Return in 2d world
-		Driver->setMatrixMode2D11();
+		driver->setMatrixMode2D11();
 
 		// flush obs
 		CCDBNodeBranch::flushObserversCalls();
@@ -5615,9 +5628,9 @@ REGISTER_ACTION_HANDLER( CHandlerEmote, "emote");
 bool	CInterfaceManager::testDragCopyKey()
 {
 	// hardcoded for now
-	return Driver->AsyncListener.isKeyDown(KeyCONTROL) ||
-		Driver->AsyncListener.isKeyDown(KeyLCONTROL) ||
-		Driver->AsyncListener.isKeyDown(KeyRCONTROL);
+	return driver->AsyncListener.isKeyDown(KeyCONTROL) ||
+		driver->AsyncListener.isKeyDown(KeyLCONTROL) ||
+		driver->AsyncListener.isKeyDown(KeyRCONTROL);
 }
 
 // ***************************************************************************
