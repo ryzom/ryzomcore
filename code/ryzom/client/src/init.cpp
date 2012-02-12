@@ -1071,6 +1071,10 @@ void prelogInit()
 		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
 		InputHandlerManager->addToServer (&Driver->EventServer);
 
+		std::string filename = CPath::lookup( ClientCfg.XMLInputFile, false );
+		if( !filename.empty() )
+			InputHandlerManager->readInputConfigFile( filename );
+
 		// Create a text context. We need to put the full path because we not already add search path
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);

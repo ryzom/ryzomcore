@@ -297,13 +297,6 @@ _ViewRenderer( driver, textcontext )
 	// Global initialization
 	// *********************
 
-
-	//init the input handler through the parsing of a config file
-	CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
-	string filename = CPath::lookup(ClientCfg.XMLInputFile, false);
-	if (!filename.empty())
-		InputHandlerManager->readInputConfigFile(filename);
-
 	// Interface Manager init
 	_ViewRenderer.checkNewScreenSize();
 	_ViewRenderer.init();
