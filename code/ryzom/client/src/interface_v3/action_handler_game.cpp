@@ -4106,3 +4106,124 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerConfigureQuitDialogBox, "configure_quit_dialog_box");
+
+// ----------------------------------------------------------------------------
+static bool isSwimming()
+{
+	if (UserEntity != NULL)
+		return (UserEntity->mode() == MBEHAV::SWIM || UserEntity->mode() == MBEHAV::MOUNT_SWIM);
+	else
+		return false;
+}
+
+static bool isStunned()
+{
+	if (UserEntity != NULL)
+		return (UserEntity->behaviour() == MBEHAV::STUNNED);
+	else
+		return false;
+}
+
+static bool isDead()
+{
+	if (UserEntity != NULL)
+		return (UserEntity->mode() == MBEHAV::DEATH);
+	else
+		return false;
+}
+
+// ***************************************************************************
+
+class CHandlerEmote : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	{
+		// An emote is 2 things : a phrase and an animation
+		// Phrase is the phrase that server returns in chat system
+		// Behav is the animation played
+		// CustomPhrase is an user phrase which can replace default phrase
+		string sPhraseNb = getParam(sParams, "nb");
+		string sBehav = getParam(sParams, "behav");
+		string sCustomPhrase = getParam(sParams, "custom_phrase");
+
+		uint32 phraseNb;
+		fromString(sPhraseNb, phraseNb);
+		uint8 behaviour;
+		fromString(sBehav, behaviour);
+
+		MBEHAV::EBehaviour behavToSend = (MBEHAV::EBehaviour)(MBEHAV::EMOTE_BEGIN + behaviour);
+		uint16 phraseNbToSend = (uint16)phraseNb;
+
+		if (EAM)
+		{
+			const uint nbBehav = EAM->getNbEmots(); // Miscalled: this is the number of behaviour for all emotes
+			if ((behaviour >= nbBehav) || (behaviour == 255))
+				behavToSend = MBEHAV::IDLE;
+		}
+		else
+		{
+			if (behaviour == 255)
+				behavToSend = MBEHAV::IDLE;
+		}
+
+		/* Emotes forbidden when dead, emotes with behav forbidden when
+		 * stunned or swimming */
+		if ( ( behavToSend != MBEHAV::IDLE && (isSwimming() || isStunned() || isDead() ) ) )
+		{
+			return;
+		}
+
+		if( sCustomPhrase.empty() )
+		{
+			// Create the message and send.
+			const string msgName = "COMMAND:EMOTE";
+			CBitMemStream out;
+			if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
+			{
+				out.serialEnum(behavToSend);
+				out.serial(phraseNbToSend);
+				NetMngr.push(out);
+				//nlinfo("impulseCallBack : %s %d %d sent", msgName.c_str(), (uint32)behavToSend, phraseNbToSend);
+			}
+			else
+				nlwarning("command 'emote': unknown message named '%s'.", msgName.c_str());
+		}
+		else
+		{
+			// Create the message and send.
+			const string msgName = "COMMAND:CUSTOM_EMOTE";
+			CBitMemStream out;
+			if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
+			{
+				ucstring ucstr;
+				ucstr.fromUtf8(sCustomPhrase);
+
+				if( sCustomPhrase == "none" )
+				{
+					if( behavToSend == MBEHAV::IDLE )
+					{
+						// display "no animation for emote"
+						CInterfaceManager	*pIM= CInterfaceManager::getInstance();
+						ucstring msg = CI18N::get("msgCustomizedEmoteNoAnim");
+						string cat = getStringCategory(msg, msg);
+						pIM->displaySystemInfo(msg, cat);
+						return;
+					}
+				}
+				else
+				{
+					ucstr = ucstring("&EMT&") + UserEntity->getDisplayName() + ucstring(" ") + ucstr;
+				}
+
+				out.serialEnum(behavToSend);
+				out.serial(ucstr);
+				NetMngr.push(out);
+				//nlinfo("impulseCallBack : %s %d %s sent", msgName.c_str(), (uint32)behavToSend, sCustomPhrase.c_str());
+			}
+			else
+				nlwarning("command 'emote': unknown message named '%s'.", msgName.c_str());
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerEmote, "emote");
