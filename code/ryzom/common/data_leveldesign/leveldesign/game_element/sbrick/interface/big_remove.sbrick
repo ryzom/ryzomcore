@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="FamilyId" Value="BIG"/>
+      <ATOM Name="IndexInFamily" Value="1"/>
+      <ATOM Name="Level" Value="0"/>
+    </STRUCT>
+    <STRUCT Name="Client">
+      <ATOM Name="Icon" Value="No_Action.tga"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Thu Nov 06 18:40:35 2003 (berenguier) .Basics.IndexInFamily = 1
+Thu Nov 06 18:40:35 2003 (berenguier) .Basics.Level = 0
+Thu Nov 06 18:40:35 2003 (berenguier) .Client.Icon = MG_suppression.tga
+Thu Nov 06 18:40:35 2003 (berenguier) .Client.IconBack = 
+Thu Nov 06 18:40:35 2003 (berenguier) .Client.IconOver = 
+Thu Nov 06 18:41:10 2003 (berenguier) .Basics.Skill = 
+Thu Nov 06 18:49:21 2003 (berenguier) .Basics.FamilyId = BIG</LOG>
+</FORM>

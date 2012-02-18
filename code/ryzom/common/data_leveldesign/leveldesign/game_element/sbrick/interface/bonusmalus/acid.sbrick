@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="FamilyId" Value="BIG"/>
+      <ATOM Name="IndexInFamily" Value="3"/>
+    </STRUCT>
+    <STRUCT Name="Client">
+      <ATOM Name="Icon" Value="ICO_Acid.tga"/>
+      <ATOM Name="IconBack" Value="EF_Back.tga"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Jun 11 17:55:03 2004 (fleury) .Basics.FamilyId = BIG
+Fri Jun 11 17:55:27 2004 (fleury) .Basics.IndexInFamily = 3</LOG>
+</FORM>

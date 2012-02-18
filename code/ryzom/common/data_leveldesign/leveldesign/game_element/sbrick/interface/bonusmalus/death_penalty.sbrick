@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+	<STRUCT Name="Basics">
+      <ATOM Name="FamilyId" Value="BIG"/>
+      <ATOM Name="IndexInFamily" Value="98"/>
+    </STRUCT>
+    <STRUCT Name="Client">
+      <ATOM Name="Icon" Value="MP_skull.tga"/>
+      <ATOM Name="IconBack" Value="EF_Back.tga"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+</FORM>

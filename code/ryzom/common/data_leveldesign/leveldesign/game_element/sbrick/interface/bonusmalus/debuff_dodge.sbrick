@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="FamilyId" Value="BIG"/>
+      <ATOM Name="IndexInFamily" Value="9"/>
+    </STRUCT>
+    <STRUCT Name="Client">
+      <ATOM Name="Icon" Value="ICO_Dodge.tga"/>
+      <ATOM Name="IconBack" Value="EF_Back.tga"/>
+      <ATOM Name="IconOver"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Mon Aug 09 14:43:26 2004 (coutelas) .Client.IconBack = EF_Back.tga
+Mon Aug 09 14:43:43 2004 (coutelas) .Client.Icon = ICO_Dodge.tga</LOG>
+</FORM>

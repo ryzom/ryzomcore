@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="Basics">
+      <ATOM Name="FamilyId" Value="BIG"/>
+      <ATOM Name="IndexInFamily" Value="36"/>
+    </STRUCT>
+    <STRUCT Name="Client">
+      <ATOM Name="Icon" Value="FP_Melee.tga"/>
+      <ATOM Name="IconBack" Value="BK_Power.tga"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue May 31 15:32:44 2005 (vuarand) .Client.Icon = FP_Melee.tga
+Tue May 31 15:32:44 2005 (vuarand) .Client.IconOver = </LOG>
+</FORM>
