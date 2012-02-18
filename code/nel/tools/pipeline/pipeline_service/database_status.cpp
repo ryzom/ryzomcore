@@ -36,6 +36,7 @@
 #include <nel/misc/path.h>
 
 // Project includes
+#include "pipeline_service.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -71,13 +72,23 @@ CDatabaseStatus::~CDatabaseStatus()
 
 bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &filePath) const
 {
+	// mutex here when reading
 	return false;
 }
 
-void CDatabaseStatus::updateFileStatus(const TFileStatusCallback &callback, const std::string &filePath)
+void CDatabaseStatus::updateFileStatus(TFileStatusCallback &callback, const std::string &filePath)
 {
-	
+	// ONLY WHEN MASTER
+	// mutex when writing
+	// dummy
+	CFileStatus fs;
+	callback(filePath, fs);
+	// todo add to queue
 }
+
+// ******************************************************************
+
+namespace {
 
 struct CDatabaseStatusUpdater
 {
@@ -106,6 +117,38 @@ public:
 	}
 };
 
+void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater, const std::string &dir)
+{
+	std::string dirPath = CPath::standardizePath(dir, true);
+	std::vector<std::string> dirContents;
+
+	CPath::getPathContent(dirPath, false, true, true, dirContents);
+	
+	for (std::vector<std::string>::iterator it = dirContents.begin(), end = dirContents.end(); it != end; ++it)
+	{
+		const std::string subPath = *it;
+		
+		if (CFile::isDirectory(subPath)) // if the file is a directory!
+		{
+			updateDirectoryStatus(ds, updater, subPath);
+		}
+		else
+		{
+			updater.Mutex.enter();
+			++updater.FilesRequested;
+			updater.Mutex.leave();
+			
+			CFileStatus fileStatus;
+			if (!ds->getFileStatus(fileStatus, subPath))
+			{
+				ds->updateFileStatus(TFileStatusCallback(&updater, &CDatabaseStatusUpdater::fileUpdated), subPath);
+			}
+		}
+	}
+}
+
+} /* anonymous namespace */
+
 void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback)
 {
 	CDatabaseStatusUpdater updater;
@@ -115,14 +158,13 @@ void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback)
 	updater.Ready = false;
 	updater.CallbackCalled = false;
 
-	// recursive loop ...
-	{
-		updater.Mutex.enter();
-		++updater.FilesRequested;
-		updater.Mutex.leave();
-		updateFileStatus(TFileStatusCallback(&updater, &CDatabaseStatusUpdater::fileUpdated), "");
-	}
-	
+	nlinfo("Starting iteration through database, queueing file status updates.");
+
+	// recursive loop
+	updateDirectoryStatus(this, updater, g_DatabaseDirectory);
+
+	nlinfo("Iteration through database, queueing file status updates complete.");
+		
 	bool done = false;
 	updater.Mutex.enter();
 	updater.Ready = true;
@@ -135,6 +177,8 @@ void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback)
 	
 	if (done) updater.Callback();
 }
+
+// ******************************************************************
 
 } /* namespace PIPELINE */
 

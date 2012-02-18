@@ -46,6 +46,7 @@
 
 // Project includes
 #include "pipeline_workspace.h"
+#include "database_status.h"
 
 // using namespace std;
 using namespace NLMISC;
@@ -75,6 +76,7 @@ enum EState
 UFormLoader *s_FormLoader = NULL;
 CPipelineWorkspace *s_PipelineWorkspace = NULL;
 CTaskManager *s_TaskManager = NULL;
+CDatabaseStatus *s_DatabaseStatus = NULL;
 
 EState s_State = STATE_IDLE;
 CMutex s_StateMutex;
@@ -93,21 +95,35 @@ TUnifiedCallbackItem s_ShardCallbacks[] = // pipeline_server
 	{ "N", cbNull }, 
 };
 
+bool tryStateTask(EState state, IRunnable *task)
+{
+	bool result = false;
+	s_StateMutex.enter();
+	result = (s_State == STATE_IDLE);
+	if (result)
+	{
+		s_State = state;
+	}
+	s_StateMutex.leave();
+	if (!result) return false;
+	
+	s_TaskManager->addTask(task);
+	
+	return true;
+}
+
 // ******************************************************************
 
 void initSheets()
 {
-	std::string leveldesignDirectory = IService::getInstance()->ConfigFile.getVar("LeveldesignDirectory").asString();
 	std::string leveldesignDfnDirectory = IService::getInstance()->ConfigFile.getVar("LeveldesignDfnDirectory").asString();
-	
-	if (leveldesignDfnDirectory.find(leveldesignDirectory) == std::string::npos)
-	{
-		nlinfo("Adding 'LeveldesignDfnDirectory' to search path");
-		CPath::addSearchPath(leveldesignDfnDirectory, true, false);
-	}
-	
-	nlinfo("Adding 'LeveldesignDirectory' to search path");
-	CPath::addSearchPath(leveldesignDirectory, true, false);
+	std::string leveldesignPipelineDirectory = IService::getInstance()->ConfigFile.getVar("LeveldesignPipelineDirectory").asString();
+
+	nlinfo("Adding 'LeveldesignDfnDirectory' to search path (%s)", leveldesignDfnDirectory.c_str());
+	CPath::addSearchPath(leveldesignDfnDirectory, true, false);
+
+	nlinfo("Adding 'LeveldesignPipelineDirectory' to search path (%s)", leveldesignPipelineDirectory.c_str());
+	CPath::addSearchPath(leveldesignPipelineDirectory, true, false);
 	
 	s_FormLoader = UFormLoader::createLoader();
 	
@@ -144,19 +160,33 @@ CReloadSheets s_ReloadSheets;
 
 bool reloadSheets()
 {
-	bool result = false;
-	s_StateMutex.enter();
-	result = (s_State == STATE_IDLE);
-	if (result)
+	return tryStateTask(STATE_RELOAD_SHEETS, &s_ReloadSheets);
+}
+
+// ******************************************************************
+
+class CUpdateDatabaseStatus : public IRunnable
+{
+	virtual void getName (std::string &result) const 
+	{ result = "CUpdateDatabaseStatus"; }
+	
+	void databaseStatusUpdated()
 	{
-		s_State = STATE_RELOAD_SHEETS;
+		s_StateMutex.enter();
+		s_State = STATE_IDLE;
+		s_StateMutex.leave();
 	}
-	s_StateMutex.leave();
-	if (!result) return false;
-	
-	s_TaskManager->addTask(&s_ReloadSheets);
-	
-	return true;
+
+	virtual void run()
+	{
+		s_DatabaseStatus->updateDatabaseStatus(CCallback<void>(this, &CUpdateDatabaseStatus::databaseStatusUpdated));
+	}
+};
+CUpdateDatabaseStatus s_UpdateDatabaseStatus;
+
+bool updateDatabaseStatus()
+{
+	return tryStateTask(STATE_DATABASE_STATUS, &s_UpdateDatabaseStatus);
 }
 
 // ******************************************************************
@@ -206,6 +236,8 @@ public:
 		s_TaskManager = new CTaskManager();
 		
 		initSheets();
+
+		s_DatabaseStatus = new CDatabaseStatus();
 	}
 	
 	/// This function is called every "frame" (you must call init() before). It returns false if the service is stopped.
@@ -217,9 +249,13 @@ public:
 	/// Finalization. Release the service. For example, this function frees all allocations made in the init() function.
 	virtual void release()
 	{
+		delete s_DatabaseStatus;
+		s_DatabaseStatus = NULL;
+
 		releaseSheets();
 
 		delete s_TaskManager;
+		s_TaskManager = NULL;
 	}
 	
 }; /* class CPipelineService */
@@ -252,15 +288,22 @@ NLMISC_COMMAND(reloadSheets, "Reload all sheets.", "")
 {
 	if(args.size() != 0) return false;
 	if (!PIPELINE::reloadSheets())
+	{
 		nlinfo("I'm afraid I cannot do this, my friend.");
+		return false;
+	}
 	return true;
 }
 
 NLMISC_COMMAND(updateDatabaseStatus, "Updates the entire database status. This also happens on the fly during build.", "")
 {
 	if(args.size() != 0) return false;
-	
-	
+	if (!PIPELINE::updateDatabaseStatus())
+	{
+		nlinfo("I'm afraid I cannot do this, my friend.");
+		return false;
+	}
+	return true;
 }
 
 NLNET_SERVICE_MAIN(PIPELINE::CPipelineService, PIPELINE_SHORT_SERVICE_NAME, PIPELINE_LONG_SERVICE_NAME, 0, PIPELINE::s_ShardCallbacks, "", "")

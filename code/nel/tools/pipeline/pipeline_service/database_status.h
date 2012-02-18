@@ -90,7 +90,7 @@ public:
 	/// Tries to read the last file status. Return false if the status is invalid. Call updateFileStatus if the result is false to update asynchronously.
 	bool getFileStatus(CFileStatus &fileStatus, const std::string &filePath) const;
 	/// Updates the file status asynchronously. The new file status is broadcast to clients and slaves afterwards.
-	void updateFileStatus(const TFileStatusCallback &callback, const std::string &filePath);
+	void updateFileStatus(TFileStatusCallback &callback, const std::string &filePath);
 	/// Forces an update of the complete database status.
 	void updateDatabaseStatus(const CCallback<void> &callback);
 	
