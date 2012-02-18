@@ -1,0 +1,268 @@
+/**
+ * \file pipeline_service.cpp
+ * \brief CPipelineService
+ * \date 2012-02-18 17:25GMT
+ * \author Jan Boon (Kaetemi)
+ * CPipelineService
+ */
+
+/* 
+ * Copyright (C) 2012  by authors
+ * 
+ * This file is part of RYZOM CORE PIPELINE.
+ * RYZOM CORE PIPELINE is free software: you can redistribute it
+ * and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 2 of
+ * the License, or (at your option) any later version.
+ * 
+ * RYZOM CORE PIPELINE is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with RYZOM CORE PIPELINE; see the file COPYING.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+
+#include <nel/misc/types_nl.h>
+#include "pipeline_service.h"
+
+// STL includes
+#include <stdio.h>
+#ifdef NL_OS_WINDOWS
+#	define NOMINMAX
+#	include <windows.h>
+#endif
+
+// NeL includes
+#include <nel/misc/debug.h>
+#include <nel/misc/bit_mem_stream.h>
+#include <nel/misc/sheet_id.h>
+#include <nel/net/service.h>
+#include <nel/georges/u_form_loader.h>
+#include <nel/misc/mutex.h>
+#include <nel/misc/task_manager.h>
+
+// Project includes
+#include "pipeline_workspace.h"
+
+// using namespace std;
+using namespace NLMISC;
+using namespace NLNET;
+using namespace NLGEORGES;
+
+namespace PIPELINE {
+
+bool g_IsMaster = false;
+std::string g_DatabaseDirectory;
+std::string g_PipelineDirectory;
+
+namespace {
+
+#define PIPELINE_LONG_SERVICE_NAME "pipeline_service"
+#define PIPELINE_SHORT_SERVICE_NAME "PLS"
+
+/// Enum
+enum EState
+{
+	STATE_IDLE, 
+	STATE_RELOAD_SHEETS, 
+	STATE_DATABASE_STATUS, 
+};
+
+/// Data
+UFormLoader *s_FormLoader = NULL;
+CPipelineWorkspace *s_PipelineWorkspace = NULL;
+CTaskManager *s_TaskManager = NULL;
+
+EState s_State = STATE_IDLE;
+CMutex s_StateMutex;
+
+// ******************************************************************
+
+/// Service wants to broadcast all users trough pipeline
+void cbNull(CMessage & /* msgin */, const std::string & /* serviceName */, TServiceId /* sid */) // pipeline_server
+{
+	// null
+}
+
+/// Callbacks from shard
+TUnifiedCallbackItem s_ShardCallbacks[] = // pipeline_server
+{
+	{ "N", cbNull }, 
+};
+
+// ******************************************************************
+
+void initSheets()
+{
+	std::string leveldesignDirectory = IService::getInstance()->ConfigFile.getVar("LeveldesignDirectory").asString();
+	std::string leveldesignDfnDirectory = IService::getInstance()->ConfigFile.getVar("LeveldesignDfnDirectory").asString();
+	
+	if (leveldesignDfnDirectory.find(leveldesignDirectory) == std::string::npos)
+	{
+		nlinfo("Adding 'LeveldesignDfnDirectory' to search path");
+		CPath::addSearchPath(leveldesignDfnDirectory, true, false);
+	}
+	
+	nlinfo("Adding 'LeveldesignDirectory' to search path");
+	CPath::addSearchPath(leveldesignDirectory, true, false);
+	
+	s_FormLoader = UFormLoader::createLoader();
+	
+	s_PipelineWorkspace = new CPipelineWorkspace(s_FormLoader, IService::getInstance()->ConfigFile.getVar("WorkspaceSheet").asString());
+}
+
+void releaseSheets()
+{
+	delete s_PipelineWorkspace;
+	s_PipelineWorkspace = NULL;
+
+	UFormLoader::releaseLoader(s_FormLoader);
+	s_FormLoader = NULL;
+
+	CPath::releaseInstance();
+}
+
+class CReloadSheets : public IRunnable
+{
+	virtual void getName (std::string &result) const 
+	{ result = "CReloadSheets"; }
+	
+	virtual void run()
+	{
+		releaseSheets();
+		initSheets();
+		
+		s_StateMutex.enter();
+		s_State = STATE_IDLE;
+		s_StateMutex.leave();
+	}
+};
+CReloadSheets s_ReloadSheets;
+
+bool reloadSheets()
+{
+	bool result = false;
+	s_StateMutex.enter();
+	result = (s_State == STATE_IDLE);
+	if (result)
+	{
+		s_State = STATE_RELOAD_SHEETS;
+	}
+	s_StateMutex.leave();
+	if (!result) return false;
+	
+	s_TaskManager->addTask(&s_ReloadSheets);
+	
+	return true;
+}
+
+// ******************************************************************
+
+/**
+ * \brief CPipelineService
+ * \date 2012-02-18 17:25GMT
+ * \author Jan Boon (Kaetemi)
+ * CPipelineService
+ */
+class CPipelineService : public IService
+{
+private:
+
+public:
+	CPipelineService()
+	{
+		
+	}
+	
+	virtual ~CPipelineService()
+	{
+		
+	}
+	
+	/** Called before the displayer is created, no displayer or network connection are built.
+	    Use this callback to check some args and perform some command line based stuff */
+	virtual void commandStart() 
+	{
+		// setup the randomizer properly
+		{
+			// get a good seed value from cpu dependent ticks or just milliseconds local
+			uint32 s = (uint32)(CTime::getPerformanceTime() & 0xFFFFFFFF);
+			if (!s) s = (uint32)(CTime::getLocalTime() & 0xFFFFFFFF);
+			// seed the randomizer
+			srand(s);
+		}
+	}
+	
+	/// Initializes the service (must be called before the first call to update())
+	virtual void init()
+	{
+		g_IsMaster = ConfigFile.getVar("IsMaster").asBool();
+		g_DatabaseDirectory = ConfigFile.getVar("DatabaseDirectory").asString();
+		g_PipelineDirectory = ConfigFile.getVar("PipelineDirectory").asString();
+
+		s_TaskManager = new CTaskManager();
+		
+		initSheets();
+	}
+	
+	/// This function is called every "frame" (you must call init() before). It returns false if the service is stopped.
+	virtual bool update()
+	{
+		return true;
+	}
+	
+	/// Finalization. Release the service. For example, this function frees all allocations made in the init() function.
+	virtual void release()
+	{
+		releaseSheets();
+
+		delete s_TaskManager;
+	}
+	
+}; /* class CPipelineService */
+
+} /* anonymous namespace */
+
+} /* namespace PIPELINE */
+
+NLMISC_DYNVARIABLE(std::string, pipelineServiceState, "State of the pipeline service.")
+{
+	// we can only read the value
+	if (get)
+	{
+		switch (PIPELINE::s_State)
+		{
+			case PIPELINE::STATE_IDLE:
+				*pointer = "IDLE";
+				break;
+			case PIPELINE::STATE_RELOAD_SHEETS:
+				*pointer = "RELOAD_SHEETS";
+				break;
+			case PIPELINE::STATE_DATABASE_STATUS:
+				*pointer = "DATABASE_STATUS";
+				break;
+		}
+	}
+}
+
+NLMISC_COMMAND(reloadSheets, "Reload all sheets.", "")
+{
+	if(args.size() != 0) return false;
+	if (!PIPELINE::reloadSheets())
+		nlinfo("I'm afraid I cannot do this, my friend.");
+	return true;
+}
+
+NLMISC_COMMAND(updateDatabaseStatus, "Updates the entire database status. This also happens on the fly during build.", "")
+{
+	if(args.size() != 0) return false;
+	
+	
+}
+
+NLNET_SERVICE_MAIN(PIPELINE::CPipelineService, PIPELINE_SHORT_SERVICE_NAME, PIPELINE_LONG_SERVICE_NAME, 0, PIPELINE::s_ShardCallbacks, "", "")
+
+/* end of file */
