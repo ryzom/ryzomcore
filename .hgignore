@@ -144,6 +144,7 @@ external
 external_stlport
 3rdParty
 .svn
+*.lnk
 
 # build
 code/nel/build/*
@@ -206,3 +207,15 @@ code/ryzom/server/src/ryzom_admin_service/ryzom_admin_service
 code/ryzom/server/src/ryzom_naming_service/ryzom_naming_service
 code/ryzom/server/src/ryzom_welcome_service/ryzom_welcome_service
 code/ryzom/server/src/tick_service/tick_service
+
+# Pipeline garbage and output
+*/generated/*
+code/ryzom/server/data_shard/collisions/*
+code/ryzom/common/data_common/visual_slot.tab
+code/ryzom/common/data_common/landscape_col_prim_pacs_list.txt
+code/ryzom/client/data/gamedev/*_words_*
+code/ryzom/client/data/gamedev/*.uxt
+code/ryzom/common/data_leveldesign/leveldesign/Game_elem/sheets.txt
+code/ryzom/common/data_leveldesign/leveldesign/Game_elem/sheet_id.bin
+code/nel/tools/build_gamedata/configuration/buildsite.py
+code/nel/tools/build_gamedata/configuration/upload.py
