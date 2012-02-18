@@ -29,11 +29,13 @@
 #include "database_status.h"
 
 // STL includes
+#include <boost/crc.hpp>
 
 // NeL includes
 // #include <nel/misc/debug.h>
 #include <nel/misc/async_file_manager.h>
 #include <nel/misc/path.h>
+#include <nel/misc/file.h>
 
 // Project includes
 #include "pipeline_service.h"
@@ -42,6 +44,23 @@ using namespace std;
 using namespace NLMISC;
 
 namespace PIPELINE {
+
+namespace {
+
+std::string dropDatabaseDirectory(const std::string &path)
+{
+	if (path.find(g_DatabaseDirectory) == 0)
+	{
+		return path.substr(g_DatabaseDirectory.length());
+	}
+	else
+	{
+		nlerror("Path is not in database.");
+		return path;
+	}
+}
+
+} /* anonymous namespace */
 
 void CFileError::serial(NLMISC::IStream &stream)
 {
@@ -62,7 +81,8 @@ void CFileStatus::serial(NLMISC::IStream &stream)
 
 CDatabaseStatus::CDatabaseStatus()
 {
-	
+	CFile::createDirectoryTree(g_PipelineDirectory + PIPELINE_DATABASE_STATUS_SUBDIR);
+	CFile::createDirectoryTree(g_PipelineDirectory + PIPELINE_DATABASE_ERRORS_SUBDIR);
 }
 
 CDatabaseStatus::~CDatabaseStatus()
@@ -76,14 +96,83 @@ bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &
 	return false;
 }
 
-void CDatabaseStatus::updateFileStatus(TFileStatusCallback &callback, const std::string &filePath)
+namespace {
+
+class CUpdateFileStatus : public IRunnable
 {
-	// ONLY WHEN MASTER
-	// mutex when writing
-	// dummy
-	CFileStatus fs;
-	callback(filePath, fs);
-	// todo add to queue
+public:
+	virtual void getName(std::string &result) const 
+	{ result = "CUpdateFileStatus"; }
+
+	TFileStatusCallback Callback;
+	std::string FilePath;
+	CMutex *StatusMutex;
+
+	virtual void run()
+	{
+		nldebug("Run this");
+		bool firstSeen = false;
+		uint32 time = CTime::getSecondsSince1970();
+		std::string statusPath = g_PipelineDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(FilePath) + ".status";
+		CFileStatus fs;
+		StatusMutex->enter();
+		if (CFile::fileExists(statusPath))
+		{
+			CIFile ifs(statusPath, false);
+			fs.serial(ifs);
+			ifs.close();
+		}
+		else
+		{
+			firstSeen = true;
+		}
+		StatusMutex->leave();
+		if (firstSeen)
+		{
+			fs.FirstSeen = time;
+			fs.CRC32 = 0;
+			nldebug("First seen file: '%s'", FilePath.c_str());
+			
+			// create dir
+			CFile::createDirectoryTree(g_PipelineDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(CFile::getPath(FilePath)));
+		}
+		fs.LastChanged = CFile::getFileModificationDate(FilePath);
+		fs.LastUpdate = time;
+		
+		nldebug("Calculate crc32 of file: '%s'", FilePath.c_str());
+		nlSleep(1000);
+		// calculate crc32 etcetera etcetera
+		
+		StatusMutex->enter();
+		{
+			COFile ofs(statusPath, false, false, true);
+			fs.serial(ofs);
+			ofs.flush();
+			ofs.close();
+		}
+		StatusMutex->leave();
+		nldebug("Callback");
+		Callback(FilePath, fs);		
+		nldebug("Delete this");
+		delete this;
+	}
+};
+
+} /* anonymous namespace */
+
+void CDatabaseStatus::updateFileStatus(const TFileStatusCallback &callback, const std::string &filePath)
+{
+	if (!g_IsMaster)
+	{
+		nlerror("Not master, not allowed.");
+		return;
+	}
+
+	CUpdateFileStatus *ufs = new CUpdateFileStatus();
+	ufs->StatusMutex = &m_StatusMutex;
+	ufs->FilePath = filePath;
+	ufs->Callback = callback;
+	CAsyncFileManager::getInstance().addLoadTask(ufs);
 }
 
 // ******************************************************************
@@ -103,6 +192,8 @@ public:
 
 	void fileUpdated(const std::string &filePath, const CFileStatus &fileStatus)
 	{
+		nldebug("File updated callback");
+
 		bool done = false;
 		Mutex.enter();
 		++FilesUpdated;

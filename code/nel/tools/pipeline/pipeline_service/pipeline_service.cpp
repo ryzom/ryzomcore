@@ -143,7 +143,7 @@ void releaseSheets()
 
 class CReloadSheets : public IRunnable
 {
-	virtual void getName (std::string &result) const 
+	virtual void getName(std::string &result) const 
 	{ result = "CReloadSheets"; }
 	
 	virtual void run()
@@ -167,7 +167,7 @@ bool reloadSheets()
 
 class CUpdateDatabaseStatus : public IRunnable
 {
-	virtual void getName (std::string &result) const 
+	virtual void getName(std::string &result) const 
 	{ result = "CUpdateDatabaseStatus"; }
 	
 	void databaseStatusUpdated()
@@ -230,8 +230,10 @@ public:
 	virtual void init()
 	{
 		g_IsMaster = ConfigFile.getVar("IsMaster").asBool();
-		g_DatabaseDirectory = ConfigFile.getVar("DatabaseDirectory").asString();
-		g_PipelineDirectory = ConfigFile.getVar("PipelineDirectory").asString();
+		g_DatabaseDirectory = CPath::standardizePath(ConfigFile.getVar("DatabaseDirectory").asString(), true);
+		if (!CFile::isDirectory(g_DatabaseDirectory)) nlwarning("'DatabaseDirectory' does not exist! (%s)", g_DatabaseDirectory.c_str());
+		g_PipelineDirectory = CPath::standardizePath(ConfigFile.getVar("PipelineDirectory").asString(), true);
+		if (!CFile::isDirectory(g_PipelineDirectory)) nlwarning("'PipelineDirectory' does not exist! (%s)", g_PipelineDirectory.c_str());
 
 		s_TaskManager = new CTaskManager();
 		
