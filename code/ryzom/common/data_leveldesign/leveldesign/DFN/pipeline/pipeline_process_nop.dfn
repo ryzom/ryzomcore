@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision$" State="modified">
+  <PARENT Name="pipeline_process.dfn"/>
+  <ELEMENT Name="Directories" Type="Type" Filename="string.typ" Array="true"/>
+  <ELEMENT Name="Files" Type="Type" Filename="string.typ" Array="true"/>
+  <LOG>Sat Feb 18 14:25:58 2012 (Kaetemi) Dfn Parents = 
+Sat Feb 18 14:25:58 2012 (Kaetemi) Dfn Structure = </LOG>
+</DFN>

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision$" State="modified">
+  <PARENT Filename="_parent.pipeline_process_interface"/>
+  <STRUCT>
+    <ATOM Name="OutputFile" Value="interfaces_{{ProcessName}}.tga"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Sat Feb 18 14:39:16 2012 (Kaetemi) Form Parents = 
+Sat Feb 18 14:39:30 2012 (Kaetemi) .OutputFile = interfaces_{{Name}}.tga
+Sat Feb 18 14:40:18 2012 (Kaetemi) .OutputFile = interfaces_{{ProcessName}}.tga
+Sat Feb 18 14:49:56 2012 (Kaetemi) Form Parents = </LOG>
+</FORM>

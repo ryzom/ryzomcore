@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision$" State="modified">
+  <STRUCT>
+    <ATOM Name="Script" Value="interface.lua"/>
+    <ATOM Name="InterfaceTool" Value="&amp;&amp;InterfaceTool"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Sat Feb 18 14:29:16 2012 (Kaetemi) .InterfaceTool = &amp;&amp;InterfaceTool
+Sat Feb 18 14:29:16 2012 (Kaetemi) .Script = interface.lua</LOG>
+</FORM>

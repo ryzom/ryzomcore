@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision$" State="modified">
+  <ELEMENT Name="Description" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="DependentProcesses" Type="Type" Filename="filename.typ" Array="true"/>
+  <ELEMENT Name="Script" Type="Type" Filename="filename.typ" FilenameExt="*.lua"/>
+  <LOG>Sat Feb 18 13:29:48 2012 (Kaetemi) Dfn Structure = 
+Sat Feb 18 13:31:26 2012 (Kaetemi) Dfn Structure = 
+Sat Feb 18 13:34:37 2012 (Kaetemi) Dfn Structure = 
+Sat Feb 18 13:44:39 2012 (Kaetemi) Dfn Structure = </LOG>
+</DFN>

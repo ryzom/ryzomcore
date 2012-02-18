@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision$" State="modified">
+  <STRUCT>
+    <ATOM Name="Script" Value="nop.lua"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Sat Feb 18 14:28:07 2012 (Kaetemi) .Script = nop.lua</LOG>
+</FORM>

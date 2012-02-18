@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision$" State="modified">
+  <STRUCT>
+    <ATOM Name="Description" Value="Ryzom Core"/>
+    <ARRAY Name="Projects">
+      <ATOM Value="common_interface.pipeline_project"/>
+    </ARRAY>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Sat Feb 18 13:48:48 2012 (Kaetemi) .Name = Ryzom Core
+Sat Feb 18 13:48:48 2012 (Kaetemi) formName Resized = 1
+Sat Feb 18 14:44:25 2012 (Kaetemi) .Description = Ryzom Core
+Sat Feb 18 14:44:37 2012 (Kaetemi) .Projects[0] = common_interface.pipeline_project</LOG>
+</FORM>

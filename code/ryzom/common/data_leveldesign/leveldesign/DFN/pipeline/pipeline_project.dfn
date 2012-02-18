@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision$" State="modified">
+  <ELEMENT Name="Description" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="DependentProjects" Type="Type" Filename="filename.typ" Array="true"/>
+  <ELEMENT Name="Processes" Type="Type" Filename="filename.typ" Array="true"/>
+  <LOG>Sat Feb 18 13:35:41 2012 (Kaetemi) Dfn Structure = 
+Sat Feb 18 13:36:45 2012 (Kaetemi) Dfn Structure = 
+Sat Feb 18 13:44:45 2012 (Kaetemi) Dfn Structure = </LOG>
+</DFN>
