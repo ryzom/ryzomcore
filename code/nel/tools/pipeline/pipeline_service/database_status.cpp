@@ -93,6 +93,7 @@ std::string getStatusFilePath(const std::string &path)
 	else
 	{
 		nlerror("Path is not in database or pipeline");
+		return path + PIPELINE_DATABASE_STATUS_SUFFIX;
 	}
 }
 
@@ -337,7 +338,7 @@ public:
 	}
 };
 
-void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater, const std::string &dir)
+void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater, const std::string &dir, bool recurse)
 {
 	std::string dirPath = CPath::standardizePath(dir, true);
 	std::vector<std::string> dirContents;
@@ -350,7 +351,8 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 		
 		if (CFile::isDirectory(subPath)) // if the file is a directory!
 		{
-			updateDirectoryStatus(ds, updater, subPath);
+			if (recurse)
+				updateDirectoryStatus(ds, updater, subPath, recurse); // lol recurse is true anyway
 		}
 		else
 		{
@@ -377,6 +379,13 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 
 void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback)
 {
+	std::vector<std::string> paths;
+	paths.push_back(g_DatabaseDirectory);
+	updateDatabaseStatus(callback, paths, true);
+}
+
+void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback, const std::vector<std::string> &paths, bool recurse)
+{
 	CDatabaseStatusUpdater *updater = new CDatabaseStatusUpdater();
 	updater->Callback = callback;
 	updater->FilesRequested = 0;
@@ -385,10 +394,10 @@ void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback)
 	updater->CallbackCalled = false;
 
 	nlinfo("Starting iteration through database, queueing file status updates.");
-
-	// recursive loop
-	updateDirectoryStatus(this, *updater, g_DatabaseDirectory);
-
+	
+	for (std::vector<std::string>::const_iterator it = paths.begin(), end = paths.end(); it != end; ++it)
+		updateDirectoryStatus(this, *updater, unMacroPath(*it), recurse);
+	
 	nlinfo("Iteration through database, queueing file status updates complete.");
 		
 	bool done = false;
