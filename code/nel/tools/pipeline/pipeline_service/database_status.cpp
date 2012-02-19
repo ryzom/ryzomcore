@@ -108,11 +108,10 @@ void CFileError::serial(NLMISC::IStream &stream)
 
 void CFileStatus::serial(NLMISC::IStream &stream)
 {
-	// TODO_ADD_FILESIZE_REFERENCE
-	uint version = stream.serialVersion(1);
+	uint version = stream.serialVersion(2);
 	stream.serial(FirstSeen);
-	stream.serial(LastChanged/*Reference*/);
-	//if (version >= 2) stream.serial(FileSizeReference);
+	stream.serial(LastChangedReference);
+	if (version >= 2) stream.serial(LastFileSizeReference);
 	stream.serial(LastUpdate);
 	stream.serial(CRC32);
 }
@@ -140,12 +139,16 @@ bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &
 		fileStatus.serial(ifs);
 		ifs.close();
 		uint32 fmdt = CFile::getFileModificationDate(stdPath);
-		seemsValid = (fmdt == fileStatus.LastChanged);
+		uint32 fisz = CFile::getFileSize(stdPath);
+		seemsValid =
+			((fmdt == fileStatus.LastChangedReference)
+			&& (fisz == fileStatus.LastFileSizeReference));
 	}
 	else
 	{
 		fileStatus.FirstSeen = 0;
-		fileStatus.LastChanged = 0;
+		fileStatus.LastChangedReference = 0;
+		fileStatus.LastFileSizeReference = ~0;
 		fileStatus.LastUpdate = 0;
 		fileStatus.CRC32 = 0;
 	}
@@ -184,10 +187,11 @@ public:
 			else
 			{
 				firstSeen = true;
-				fs.LastChanged= 0;
+				fs.LastChangedReference = 0;
+				fs.LastFileSizeReference = ~0;
 			}
 			StatusMutex->leave();
-			if (fs.LastChanged == fmdt)
+			if (fs.LastChangedReference == fmdt && fs.LastFileSizeReference == CFile::getFileSize(FilePath))
 			{
 				nlinfo("Skipping already updated status, may have been queued twice (%s)", FilePath.c_str());
 				if (firstSeen) nlerror("File first seen has same last changed time, not possible.");
@@ -203,11 +207,12 @@ public:
 					// create dir
 					CFile::createDirectoryTree(CFile::getPath(statusPath));
 				}
-				fs.LastChanged = fmdt;
+				fs.LastChangedReference = fmdt;
 				fs.LastUpdate = time;
 				
 				// nldebug("Calculate crc32 of file: '%s'", FilePath.c_str());
 				{
+					uint32 fisz = 0;
 					CIFile ifs(FilePath, false);
 					boost::crc_32_type result;
 					while (!ifs.eof())
@@ -215,10 +220,11 @@ public:
 						uint8 byte;
 						ifs.serial(byte);
 						result.process_byte(byte);
+						++fisz;
 					}
 					ifs.close();
 					fs.CRC32 = result.checksum();
-					
+					fs.LastFileSizeReference = fisz;
 				}
 				
 				StatusMutex->enter();

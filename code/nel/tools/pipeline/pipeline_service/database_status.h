@@ -68,7 +68,8 @@ struct CFileStatus
 {
 public:
 	uint32 FirstSeen;
-	uint32 LastChanged; // The modification date value read when the CRC32 was calculated.
+	uint32 LastChangedReference; // The modification date value read when the CRC32 was calculated.
+	uint32 LastFileSizeReference; // The filesize when the CRC32 was calculated.
 	uint32 LastUpdate; // The start time when the CRC32 was calculated.
 	uint32 CRC32;
 
