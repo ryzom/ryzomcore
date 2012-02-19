@@ -130,9 +130,9 @@ CDatabaseStatus::~CDatabaseStatus()
 bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &filePath) const
 {
 	bool seemsValid = false;
-	std::string stdPath = CPath::standardizePath(filePath, false);
+	std::string stdPath = unMacroPath(filePath);
 	std::string statusPath = getStatusFilePath(filePath);
-	m_StatusMutex.enter();
+	m_StatusMutex.enterReader();
 	if (CFile::fileExists(statusPath))
 	{
 		CIFile ifs(statusPath, false);
@@ -152,7 +152,7 @@ bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &
 		fileStatus.LastUpdate = 0;
 		fileStatus.CRC32 = 0;
 	}
-	m_StatusMutex.leave();
+	m_StatusMutex.leaveReader();
 	return seemsValid;
 }
 
@@ -166,7 +166,7 @@ public:
 
 	TFileStatusCallback Callback;
 	std::string FilePath; // Standardized!
-	CMutex *StatusMutex;
+	CReaderWriter *StatusMutex;
 
 	virtual void run()
 	{
@@ -177,7 +177,7 @@ public:
 			uint32 time = CTime::getSecondsSince1970();
 			uint32 fmdt = CFile::getFileModificationDate(FilePath);
 			std::string statusPath = getStatusFilePath(FilePath); // g_PipelineDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(FilePath) + ".status";
-			StatusMutex->enter();
+			StatusMutex->enterReader();
 			if (CFile::fileExists(statusPath))
 			{
 				CIFile ifs(statusPath, false);
@@ -190,7 +190,7 @@ public:
 				fs.LastChangedReference = 0;
 				fs.LastFileSizeReference = ~0;
 			}
-			StatusMutex->leave();
+			StatusMutex->leaveReader();
 			if (fs.LastChangedReference == fmdt && fs.LastFileSizeReference == CFile::getFileSize(FilePath))
 			{
 				nlinfo("Skipping already updated status, may have been queued twice (%s)", FilePath.c_str());
@@ -227,14 +227,14 @@ public:
 					fs.LastFileSizeReference = fisz;
 				}
 				
-				StatusMutex->enter();
+				StatusMutex->enterWriter();
 				{
 					COFile ofs(statusPath, false, false, true);
 					fs.serial(ofs);
 					ofs.flush();
 					ofs.close();
 				}
-				StatusMutex->leave();
+				StatusMutex->leaveWriter();
 			}
 			Callback(FilePath, fs, true);
 		}
@@ -258,7 +258,7 @@ IRunnable *CDatabaseStatus::updateFileStatus(const TFileStatusCallback &callback
 
 	CUpdateFileStatus *ufs = new CUpdateFileStatus();
 	ufs->StatusMutex = &m_StatusMutex;
-	ufs->FilePath = filePath;
+	ufs->FilePath = unMacroPath(filePath);
 	ufs->Callback = callback;
 	CAsyncFileManager::getInstance().addLoadTask(ufs);
 	return ufs;

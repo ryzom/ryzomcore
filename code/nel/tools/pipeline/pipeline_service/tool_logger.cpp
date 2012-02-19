@@ -1,9 +1,9 @@
 /**
- * \file pipeline_service.h
- * \brief CPipelineService
- * \date 2012-02-18 17:25GMT
+ * \file tool_logger.cpp
+ * \brief CToolLogger
+ * \date 2012-02-19 10:33GMT
  * \author Jan Boon (Kaetemi)
- * CPipelineService
+ * CToolLogger
  */
 
 /* 
@@ -25,36 +25,23 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIPELINE_PIPELINE_SERVICE_H
-#define PIPELINE_PIPELINE_SERVICE_H
 #include <nel/misc/types_nl.h>
+#include "tool_logger.h"
 
 // STL includes
-#include <string>
 
 // NeL includes
+// #include <nel/misc/debug.h>
 
 // Project includes
 
+using namespace std;
+// using namespace NLMISC;
+
 namespace PIPELINE {
 
-extern bool g_IsMaster;
-extern std::string g_DatabaseDirectory;
-extern std::string g_PipelineDirectory;
-
-#define PIPELINE_MACRO_DATABASE_DIRECTORY "{{DatabaseDirectory}}"
-#define PIPELINE_MACRO_PIPELINE_DIRECTORY "{{PipelineDirectory}}"
-
-/// Unmacros a path, and standardizes it as well.
-std::string unMacroPath(const std::string &path);
-
-/// Macros a path, and standardizes it in advance.
-std::string macroPath(const std::string &path);
-
-extern bool g_IsExiting;
+void dummmmmmmyyyyyyyyyyyyyyyyy_tool_logger_cpp() { }
 
 } /* namespace PIPELINE */
-
-#endif /* #ifndef PIPELINE_PIPELINE_SERVICE_H */
 
 /* end of file */

@@ -44,6 +44,7 @@
 #include <nel/misc/mutex.h>
 #include <nel/misc/task_manager.h>
 #include <nel/misc/async_file_manager.h>
+#include <nel/misc/algo.h>
 
 // Project includes
 #include "pipeline_workspace.h"
@@ -60,6 +61,24 @@ bool g_IsMaster = false;
 std::string g_DatabaseDirectory;
 std::string g_PipelineDirectory;
 bool g_IsExiting = false;
+
+std::string unMacroPath(const std::string &path)
+{
+	std::string result = path;
+	strFindReplace(result, PIPELINE_MACRO_DATABASE_DIRECTORY, g_DatabaseDirectory);
+	strFindReplace(result, PIPELINE_MACRO_PIPELINE_DIRECTORY, g_PipelineDirectory);
+	return CPath::standardizePath(result, false);
+}
+
+std::string macroPath(const std::string &path)
+{
+	std::string result = CPath::standardizePath(path, false);
+	strFindReplace(result, g_DatabaseDirectory, PIPELINE_MACRO_DATABASE_DIRECTORY "/");
+	strFindReplace(result, g_PipelineDirectory, PIPELINE_MACRO_PIPELINE_DIRECTORY "/");
+	return result;
+}
+
+// ******************************************************************
 
 namespace {
 

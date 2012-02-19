@@ -483,6 +483,7 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 		if (_NeedHeader)
 		{
 			const char *hs = HeaderString();
+			// TODO: I think strlen(hs), 1 should be swapped (might have influence on "t" usage).
 			fwrite (hs, strlen (hs), 1, _FilePointer);
 			_NeedHeader = false;
 		}

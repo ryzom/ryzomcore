@@ -34,6 +34,7 @@
 
 // NeL includes
 #include <nel/misc/mutex.h>
+#include <nel/misc/reader_writer.h>
 #include <nel/misc/stream.h>
 
 // Project includes
@@ -47,8 +48,14 @@ namespace PIPELINE {
 
 #define PIPELINE_DATABASE_STATUS_SUBDIR "database.status/"
 #define PIPELINE_DATABASE_ERRORS_SUBDIR "database.errors/"
+#define PIPELINE_DATABASE_DEPEND_SUFFIX "database.depend/"
 #define PIPELINE_DATABASE_STATUS_SUFFIX ".status"
 #define PIPELINE_DATABASE_ERRORS_SUFFIX ".errors"
+#define PIPELINE_DATABASE_DEPEND_SUFFIX ".depend"
+
+// Status is generated CRC32 for reference.
+// Errors are errors caused by using this file as an input or output file.
+
 
 struct CFileError
 {
@@ -87,7 +94,7 @@ typedef CCallback<void, const std::string &/*filePath*/, const CFileStatus &/*fi
 class CDatabaseStatus
 {
 protected:
-	mutable NLMISC::CMutex m_StatusMutex;
+	mutable NLMISC::CReaderWriter m_StatusMutex;
 	mutable NLMISC::CMutex m_ErrorMutex;
 	
 public:
