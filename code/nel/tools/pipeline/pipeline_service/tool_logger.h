@@ -34,11 +34,15 @@
 
 // NeL includes
 #include <nel/misc/file.h>
+#include <nel/misc/string_common.h>
 
 // Project includes
 
 namespace PIPELINE {
 
+#ifdef ERROR
+#undef ERROR
+#endif
 enum EError
 {
 	ERROR, 
@@ -105,11 +109,31 @@ public:
 	{
 		if (m_ErrorLog)
 		{
-			// TODO_ERROR_LOG
+			switch (type)
+			{
+			case ERROR:
+				fwrite("ERROR", 1, 5, m_ErrorLog);
+				break;
+			case WARNING:
+				fwrite("WARNING", 1, 7, m_ErrorLog);
+				break;
+			case MESSAGE:
+				fwrite("MESSAGE", 1, 7, m_ErrorLog);
+				break;
+			}
+			fwrite("\t", 1, 1, m_ErrorLog);
+			fwrite(path.c_str(), 1, path.length(), m_ErrorLog);
+			fwrite("\t", 1, 1, m_ErrorLog);
+			std::string time = NLMISC::toString(NLMISC::CTime::getSecondsSince1970());
+			fwrite(time.c_str(), 1, time.length(), m_ErrorLog);
+			fwrite("\t", 1, 1, m_ErrorLog);
+			fwrite(error.c_str(), 1, error.length(), m_ErrorLog);
+			fwrite("\n", 1, 1, m_ErrorLog);
+			fflush(m_ErrorLog);
 		}
 	}
 
-	/// inputFile can only be file. May be not-yet-existing file for expected input. Directories are handled on process level.
+	/// inputFile can only be file. May be not-yet-existing file for expected input. Directories are handled on process level. You should call this before calling writeError on inputFile, so the error is also linked from the outputFile.
 	void writeDepend(const std::string &outputFile, const std::string &inputFile)
 	{
 		if (m_DependLog)

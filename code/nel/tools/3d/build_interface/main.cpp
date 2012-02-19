@@ -14,10 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// lightmap_optimizer
-// ------------------
-// the goal is to regroup lightmap of a level into lightmap with a higher level
-
 #include "nel/misc/common.h"
 #include "nel/misc/file.h"
 #include "nel/misc/bitmap.h"
@@ -273,6 +269,9 @@ int main(int nNbArg, char **ppArgs)
 	{
 		try
 		{
+			ToolLogger.writeDepend(tgaName, AllMapNames[i]); // Write depend before error can occur.
+			ToolLogger.writeDepend(uvName, AllMapNames[i]);
+
 			NLMISC::CBitmap *pBtmp = new NLMISC::CBitmap;
 			NLMISC::CIFile inFile;
 			inFile.open( AllMapNames[i] );
@@ -430,6 +429,10 @@ int main(int nNbArg, char **ppArgs)
 		// Load existing uv file
 		CIFile iFile;
 		string filename = CPath::lookup (existingUVfilename, false);
+
+		ToolLogger.writeDepend(tgaName, existingUVfilename); // Write depend before error can occur.
+		ToolLogger.writeDepend(uvName, existingUVfilename);
+
 		if( (filename == "") || (!iFile.open(filename)) )
 		{
 			outString (string("ERROR : could not open file ") + existingUVfilename + "\n");
