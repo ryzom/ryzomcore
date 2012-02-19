@@ -93,19 +93,13 @@ CDatabaseStatus::~CDatabaseStatus()
 
 bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &filePath) const
 {
+	// TODO_GET_FILE_STATUS
 	// mutex here when reading
 	return false;
 }
 
 namespace {
-/*
-class CUpdateFileStatusCancel : public CAsyncFileManager::ICancelCallback
-{
-	// cancel callback
-	virtual bool callback(const IRunnable *prunnable) const;
-};
-CUpdateFileStatusCancel s_UpdateFileStatusCancel;
-*/
+
 class CUpdateFileStatus : public IRunnable
 {
 public:
@@ -150,7 +144,7 @@ public:
 			
 			nldebug("Calculate crc32 of file: '%s'", FilePath.c_str());
 			nlSleep(1000);
-			// calculate crc32 etcetera etcetera
+			// TODO_CALCULATE_CRC32
 			
 			StatusMutex->enter();
 			{
@@ -169,21 +163,6 @@ public:
 		delete this;
 	}
 };
-/*
-bool CUpdateFileStatusCancel::callback(const IRunnable *prunnable) const
-{
-	std::string name;
-	prunnable->getName(name);
-	if (name.find("CUpdateFileStatus") != std::string::npos)
-	{
-		CUpdateFileStatus *ufs = const_cast<CUpdateFileStatus *>(static_cast<const CUpdateFileStatus *>(prunnable));
-		CFileStatus fs;
-		ufs->Callback(ufs->FilePath, fs, false);
-		// delete ufs; CALLER DELETES THIS!
-		return true;
-	}
-	return false;
-}*/
 
 } /* anonymous namespace */
 
