@@ -48,16 +48,51 @@ namespace PIPELINE {
 
 namespace {
 
-std::string dropDatabaseDirectory(const std::string &path)
+/// Input must be normalized path
+bool isInDatabaseDirectoryFast(const std::string &path)
 {
-	if (path.find(g_DatabaseDirectory) == 0)
+	return path.find(g_DatabaseDirectory) == 0;
+}
+
+/// Input must be normalized path
+bool isInPipelineDirectoryFast(const std::string &path)
+{
+	return path.find(g_PipelineDirectory) == 0;
+}
+
+/// Input must be normalized path in database directory
+std::string dropDatabaseDirectoryFast(const std::string &path)
+{
+	return path.substr(g_DatabaseDirectory.length());
+}
+
+/// Input must be normalized path in pipeline directory
+std::string dropPipelineDirectoryFast(const std::string &path)
+{
+	return path.substr(g_PipelineDirectory.length());
+}
+
+/// Create status file path
+std::string getStatusFilePath(const std::string &path)
+{
+	std::string stdPath = CPath::standardizePath(path, false);
+	if (isInDatabaseDirectoryFast(stdPath))
 	{
-		return path.substr(g_DatabaseDirectory.length());
+		std::string relPath = dropDatabaseDirectoryFast(stdPath);
+		return g_PipelineDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + relPath + PIPELINE_DATABASE_STATUS_SUFFIX;
+	}
+	else if (isInPipelineDirectoryFast(stdPath))
+	{
+		// TODO_TEST
+		std::string relPath = dropPipelineDirectoryFast(stdPath);
+		std::string::size_type slashPos = relPath.find_first_of('/');
+		std::string proProName = relPath.substr(0, slashPos);
+		std::string subPath = relPath.substr(slashPos);
+		return g_PipelineDirectory + proProName + PIPELINE_DATABASE_STATUS_SUFFIX + subPath + PIPELINE_DATABASE_STATUS_SUFFIX;
 	}
 	else
 	{
-		nlerror("Path is not in database.");
-		return path;
+		nlerror("Path is not in database or pipeline");
 	}
 }
 
@@ -73,9 +108,11 @@ void CFileError::serial(NLMISC::IStream &stream)
 
 void CFileStatus::serial(NLMISC::IStream &stream)
 {
+	// TODO_ADD_FILESIZE_REFERENCE
 	uint version = stream.serialVersion(1);
 	stream.serial(FirstSeen);
-	stream.serial(LastChanged);
+	stream.serial(LastChanged/*Reference*/);
+	//if (version >= 2) stream.serial(FileSizeReference);
 	stream.serial(LastUpdate);
 	stream.serial(CRC32);
 }
@@ -93,9 +130,27 @@ CDatabaseStatus::~CDatabaseStatus()
 
 bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &filePath) const
 {
-	// TODO_GET_FILE_STATUS
-	// mutex here when reading
-	return false;
+	bool seemsValid = false;
+	std::string stdPath = CPath::standardizePath(filePath, false);
+	std::string statusPath = getStatusFilePath(filePath);
+	m_StatusMutex.enter();
+	if (CFile::fileExists(statusPath))
+	{
+		CIFile ifs(statusPath, false);
+		fileStatus.serial(ifs);
+		ifs.close();
+		uint32 fmdt = CFile::getFileModificationDate(stdPath);
+		seemsValid = (fmdt == fileStatus.LastChanged);
+	}
+	else
+	{
+		fileStatus.FirstSeen = 0;
+		fileStatus.LastChanged = 0;
+		fileStatus.LastUpdate = 0;
+		fileStatus.CRC32 = 0;
+	}
+	m_StatusMutex.leave();
+	return seemsValid;
 }
 
 namespace {
@@ -107,7 +162,7 @@ public:
 	{ result = "CUpdateFileStatus"; }
 
 	TFileStatusCallback Callback;
-	std::string FilePath;
+	std::string FilePath; // Standardized!
 	CMutex *StatusMutex;
 
 	virtual void run()
@@ -117,7 +172,8 @@ public:
 		{
 			bool firstSeen = false;
 			uint32 time = CTime::getSecondsSince1970();
-			std::string statusPath = g_PipelineDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(FilePath) + ".status";
+			uint32 fmdt = CFile::getFileModificationDate(FilePath);
+			std::string statusPath = getStatusFilePath(FilePath); // g_PipelineDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(FilePath) + ".status";
 			StatusMutex->enter();
 			if (CFile::fileExists(statusPath))
 			{
@@ -128,32 +184,52 @@ public:
 			else
 			{
 				firstSeen = true;
+				fs.LastChanged= 0;
 			}
 			StatusMutex->leave();
-			if (firstSeen)
+			if (fs.LastChanged == fmdt)
 			{
-				fs.FirstSeen = time;
-				fs.CRC32 = 0;
-				nldebug("First seen file: '%s'", FilePath.c_str());
+				nlinfo("Skipping already updated status, may have been queued twice (%s)", FilePath.c_str());
+				if (firstSeen) nlerror("File first seen has same last changed time, not possible.");
+			}
+			else
+			{
+				if (firstSeen)
+				{
+					fs.FirstSeen = time;
+					fs.CRC32 = 0;
+					// nldebug("First seen file: '%s'", FilePath.c_str());
+					
+					// create dir
+					CFile::createDirectoryTree(CFile::getPath(statusPath));
+				}
+				fs.LastChanged = fmdt;
+				fs.LastUpdate = time;
 				
-				// create dir
-				CFile::createDirectoryTree(g_PipelineDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(CFile::getPath(FilePath)));
+				// nldebug("Calculate crc32 of file: '%s'", FilePath.c_str());
+				{
+					CIFile ifs(FilePath, false);
+					boost::crc_32_type result;
+					while (!ifs.eof())
+					{
+						uint8 byte;
+						ifs.serial(byte);
+						result.process_byte(byte);
+					}
+					ifs.close();
+					fs.CRC32 = result.checksum();
+					
+				}
+				
+				StatusMutex->enter();
+				{
+					COFile ofs(statusPath, false, false, true);
+					fs.serial(ofs);
+					ofs.flush();
+					ofs.close();
+				}
+				StatusMutex->leave();
 			}
-			fs.LastChanged = CFile::getFileModificationDate(FilePath);
-			fs.LastUpdate = time;
-			
-			nldebug("Calculate crc32 of file: '%s'", FilePath.c_str());
-			nlSleep(1000);
-			// TODO_CALCULATE_CRC32
-			
-			StatusMutex->enter();
-			{
-				COFile ofs(statusPath, false, false, true);
-				fs.serial(ofs);
-				ofs.flush();
-				ofs.close();
-			}
-			StatusMutex->leave();
 			Callback(FilePath, fs, true);
 		}
 		else
@@ -272,7 +348,6 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 		}
 		else
 		{
-			
 			CFileStatus fileStatus;
 			if (!ds->getFileStatus(fileStatus, subPath))
 			{

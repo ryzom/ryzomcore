@@ -296,6 +296,15 @@ NLMISC_DYNVARIABLE(std::string, pipelineServiceState, "State of the pipeline ser
 	}
 }
 
+NLMISC_DYNVARIABLE(uint, asyncFileQueueCount, "Number of tasks remaining in the async file manager.")
+{
+	// we can only read the value
+	if (get)
+	{
+		*pointer = NLMISC::CAsyncFileManager::getInstance().getNumWaitingTasks();
+	}
+}
+
 NLMISC_COMMAND(reloadSheets, "Reload all sheets.", "")
 {
 	if(args.size() != 0) return false;

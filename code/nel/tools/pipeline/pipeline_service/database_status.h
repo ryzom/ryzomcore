@@ -47,6 +47,8 @@ namespace PIPELINE {
 
 #define PIPELINE_DATABASE_STATUS_SUBDIR "database.status/"
 #define PIPELINE_DATABASE_ERRORS_SUBDIR "database.errors/"
+#define PIPELINE_DATABASE_STATUS_SUFFIX ".status"
+#define PIPELINE_DATABASE_ERRORS_SUFFIX ".errors"
 
 struct CFileError
 {
@@ -84,8 +86,8 @@ typedef CCallback<void, const std::string &/*filePath*/, const CFileStatus &/*fi
 class CDatabaseStatus
 {
 protected:
-	NLMISC::CMutex m_StatusMutex;
-	NLMISC::CMutex m_ErrorMutex;
+	mutable NLMISC::CMutex m_StatusMutex;
+	mutable NLMISC::CMutex m_ErrorMutex;
 	
 public:
 	CDatabaseStatus();
