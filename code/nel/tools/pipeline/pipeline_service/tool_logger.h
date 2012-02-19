@@ -52,7 +52,7 @@ const std::string s_Error = "ERROR";
 const std::string s_Warning = "WARNING";
 const std::string s_Message = "MESSAGE";
 
-const std::string s_ErrorHeader = "type\tfile\ttime\terror";
+const std::string s_ErrorHeader = "type\tpath\ttime\terror";
 const std::string s_DependHeader = "output_file\tinput_file";
 
 }
@@ -65,10 +65,11 @@ const std::string s_DependHeader = "output_file\tinput_file";
  */
 class CToolLogger
 {
-public:
+private:
 	FILE *m_ErrorLog;
 	FILE *m_DependLog;
 
+public:
 	CToolLogger()
 	{
 
@@ -76,8 +77,7 @@ public:
 
 	virtual ~CToolLogger()
 	{
-		releaseError();
-		releaseDepend();
+		release();
 	}
 
 	void initError(const std::string &errorLog)
@@ -101,7 +101,7 @@ public:
 		fflush(m_DependLog);
 	}
 
-	void writeError(EError type, const std::string &file, const std::string &error)
+	void writeError(EError type, const std::string &path, const std::string &error)
 	{
 		if (m_ErrorLog)
 		{
@@ -109,6 +109,7 @@ public:
 		}
 	}
 
+	/// inputFile can only be file. May be not-yet-existing file for expected input. Directories are handled on process level.
 	void writeDepend(const std::string &outputFile, const std::string &inputFile)
 	{
 		if (m_DependLog)
@@ -117,6 +118,7 @@ public:
 			fwrite("\t", 1, 1, m_DependLog);
 			fwrite(inputFile.c_str(), 1, inputFile.length(), m_DependLog);
 			fwrite("\n", 1, 1, m_DependLog);
+			fflush(m_DependLog);
 		}
 	}
 
@@ -138,6 +140,12 @@ public:
 			fclose(m_DependLog);
 			m_DependLog = NULL;
 		}
+	}
+
+	void release()
+	{
+		releaseError();
+		releaseDepend();
 	}
 }; /* class CToolLogger */
 
