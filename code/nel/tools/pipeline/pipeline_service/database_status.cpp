@@ -381,10 +381,10 @@ void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback)
 {
 	std::vector<std::string> paths;
 	paths.push_back(g_DatabaseDirectory);
-	updateDatabaseStatus(callback, paths, true);
+	updateDatabaseStatus(callback, paths, false, true);
 }
 
-void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback, const std::vector<std::string> &paths, bool recurse)
+void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback, const std::vector<std::string> &paths, bool wait, bool recurse)
 {
 	CDatabaseStatusUpdater *updater = new CDatabaseStatusUpdater();
 	updater->Callback = callback;
@@ -411,6 +411,16 @@ void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback, cons
 	updater->Mutex.leave();
 	
 	if (done) updater->doneRemove();
+
+	if (wait)
+	{
+		// UGLY_CODE ->
+		while (!updater->CallbackCalled)
+		{
+			nlSleep(10);
+		}
+		// <- UGLY_CODE
+	}
 }
 
 // ******************************************************************

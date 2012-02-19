@@ -106,10 +106,10 @@ public:
 	bool getFileStatus(CFileStatus &fileStatus, const std::string &filePath) const;
 	/// Updates the file status asynchronously. The new file status is broadcast to clients and slaves afterwards. Warning: If g_IsExiting during callback then update likely did not happen.
 	NLMISC::IRunnable *updateFileStatus(const TFileStatusCallback &callback, const std::string &filePath);
-	/// Runs an update of the complete {{DatabaseDirectory}} status. Warning: If g_IsExiting during callback then update is incomplete. Callback is always called when done (or failed).
+	/// Runs an update of the complete {{DatabaseDirectory}} status asynchronously. Warning: If g_IsExiting during callback then update is incomplete. Callback is always called when done (or failed).
 	void updateDatabaseStatus(const CCallback<void> &callback);
-	/// Runs an update of the file status of given paths. Warning: If g_IsExiting during callback then update is incomplete. Callback is always called when done (or failed). Do NOT use recurse, please. Recurse directories beforehand. Paths may contain db and pl macros.
-	void updateDatabaseStatus(const CCallback<void> &callback, const std::vector<std::string> &paths, bool recurse = false);
+	/// Runs an update of the file status of given paths asynchronously. Warning: If g_IsExiting during callback then update is incomplete. Callback is always called when done (or failed). Do NOT use the wait parameter. Do NOT use recurse, please. Recurse directories beforehand. Paths may contain db and pl macros.
+	void updateDatabaseStatus(const CCallback<void> &callback, const std::vector<std::string> &paths, bool wait = false, bool recurse = false);
 	
 	void getFileErrors(CFileErrors &fileErrors, const std::string &filePath, uint32 newerThan = 0) const;
 	void addFileError(const std::string &filePath, const CFileError &fileError);
