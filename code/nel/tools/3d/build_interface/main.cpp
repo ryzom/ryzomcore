@@ -263,9 +263,10 @@ int main(int nNbArg, char **ppArgs)
 	sint32 i, j;
 
 	// Load all maps
-	sint32 mapSize = (sint32)AllMapNames.size();
-	AllMaps.resize( mapSize );
-	for( i = 0; i < mapSize; ++i )
+	//sint32 mapSize = (sint32)AllMapNames.size();
+	//AllMaps.resize( mapSize );
+	AllMaps.reserve(AllMapNames.size());
+	for (std::vector<std::string>::size_type i = 0; i < AllMapNames.size(); ++i)
 	{
 		try
 		{
@@ -276,17 +277,22 @@ int main(int nNbArg, char **ppArgs)
 			NLMISC::CIFile inFile;
 			inFile.open( AllMapNames[i] );
 			pBtmp->load(inFile);
-			AllMaps[i] = pBtmp;
+			AllMaps.push_back(pBtmp);
 		}
 		catch (const NLMISC::Exception &e)
 		{
-			outString (string("ERROR :") + e.what());
-			ToolLogger.writeError(PIPELINE::ERROR, AllMapNames[i], e.what());
-			ToolLogger.release();
-			return -1;
-		}
-	}
+			// Allow the build process to continue without the bad file.
 
+			outString (string("ERROR :") + e.what());
+			ToolLogger.writeError(PIPELINE::WARNING, AllMapNames[i], e.what());
+
+			AllMapNames.erase(AllMapNames.begin() + i);
+			--i;
+		}
+		nlassert(AllMaps.size() == i + 1); // It's a coding error otherwise.
+	}
+	
+	sint32 mapSize = (sint32)AllMapNames.size();
 	// Sort all maps by decreasing size
 	for (i = 0; i < mapSize-1; ++i)
 	for (j = i+1; j < mapSize; ++j)
