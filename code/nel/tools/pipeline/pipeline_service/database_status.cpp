@@ -36,6 +36,7 @@
 #include <nel/misc/async_file_manager.h>
 #include <nel/misc/path.h>
 #include <nel/misc/file.h>
+#include <nel/net/service.h>
 
 // Project includes
 #include "pipeline_service.h"
@@ -97,7 +98,14 @@ bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &
 }
 
 namespace {
-
+/*
+class CUpdateFileStatusCancel : public CAsyncFileManager::ICancelCallback
+{
+	// cancel callback
+	virtual bool callback(const IRunnable *prunnable) const;
+};
+CUpdateFileStatusCancel s_UpdateFileStatusCancel;
+*/
 class CUpdateFileStatus : public IRunnable
 {
 public:
@@ -110,62 +118,81 @@ public:
 
 	virtual void run()
 	{
-		nldebug("Run this");
-		bool firstSeen = false;
-		uint32 time = CTime::getSecondsSince1970();
-		std::string statusPath = g_PipelineDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(FilePath) + ".status";
 		CFileStatus fs;
-		StatusMutex->enter();
-		if (CFile::fileExists(statusPath))
+		if (!g_IsExiting)
 		{
-			CIFile ifs(statusPath, false);
-			fs.serial(ifs);
-			ifs.close();
+			bool firstSeen = false;
+			uint32 time = CTime::getSecondsSince1970();
+			std::string statusPath = g_PipelineDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(FilePath) + ".status";
+			StatusMutex->enter();
+			if (CFile::fileExists(statusPath))
+			{
+				CIFile ifs(statusPath, false);
+				fs.serial(ifs);
+				ifs.close();
+			}
+			else
+			{
+				firstSeen = true;
+			}
+			StatusMutex->leave();
+			if (firstSeen)
+			{
+				fs.FirstSeen = time;
+				fs.CRC32 = 0;
+				nldebug("First seen file: '%s'", FilePath.c_str());
+				
+				// create dir
+				CFile::createDirectoryTree(g_PipelineDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(CFile::getPath(FilePath)));
+			}
+			fs.LastChanged = CFile::getFileModificationDate(FilePath);
+			fs.LastUpdate = time;
+			
+			nldebug("Calculate crc32 of file: '%s'", FilePath.c_str());
+			nlSleep(1000);
+			// calculate crc32 etcetera etcetera
+			
+			StatusMutex->enter();
+			{
+				COFile ofs(statusPath, false, false, true);
+				fs.serial(ofs);
+				ofs.flush();
+				ofs.close();
+			}
+			StatusMutex->leave();
+			Callback(FilePath, fs, true);
 		}
 		else
 		{
-			firstSeen = true;
-		}
-		StatusMutex->leave();
-		if (firstSeen)
-		{
-			fs.FirstSeen = time;
-			fs.CRC32 = 0;
-			nldebug("First seen file: '%s'", FilePath.c_str());
-			
-			// create dir
-			CFile::createDirectoryTree(g_PipelineDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(CFile::getPath(FilePath)));
-		}
-		fs.LastChanged = CFile::getFileModificationDate(FilePath);
-		fs.LastUpdate = time;
-		
-		nldebug("Calculate crc32 of file: '%s'", FilePath.c_str());
-		nlSleep(1000);
-		// calculate crc32 etcetera etcetera
-		
-		StatusMutex->enter();
-		{
-			COFile ofs(statusPath, false, false, true);
-			fs.serial(ofs);
-			ofs.flush();
-			ofs.close();
-		}
-		StatusMutex->leave();
-		nldebug("Callback");
-		Callback(FilePath, fs);		
-		nldebug("Delete this");
+			Callback(FilePath, fs, false);
+		}	
 		delete this;
 	}
 };
+/*
+bool CUpdateFileStatusCancel::callback(const IRunnable *prunnable) const
+{
+	std::string name;
+	prunnable->getName(name);
+	if (name.find("CUpdateFileStatus") != std::string::npos)
+	{
+		CUpdateFileStatus *ufs = const_cast<CUpdateFileStatus *>(static_cast<const CUpdateFileStatus *>(prunnable));
+		CFileStatus fs;
+		ufs->Callback(ufs->FilePath, fs, false);
+		// delete ufs; CALLER DELETES THIS!
+		return true;
+	}
+	return false;
+}*/
 
 } /* anonymous namespace */
 
-void CDatabaseStatus::updateFileStatus(const TFileStatusCallback &callback, const std::string &filePath)
+IRunnable *CDatabaseStatus::updateFileStatus(const TFileStatusCallback &callback, const std::string &filePath)
 {
 	if (!g_IsMaster)
 	{
 		nlerror("Not master, not allowed.");
-		return;
+		return NULL;
 	}
 
 	CUpdateFileStatus *ufs = new CUpdateFileStatus();
@@ -173,6 +200,7 @@ void CDatabaseStatus::updateFileStatus(const TFileStatusCallback &callback, cons
 	ufs->FilePath = filePath;
 	ufs->Callback = callback;
 	CAsyncFileManager::getInstance().addLoadTask(ufs);
+	return ufs;
 }
 
 // ******************************************************************
@@ -190,9 +218,11 @@ public:
 	bool Ready;
 	bool CallbackCalled;
 
-	void fileUpdated(const std::string &filePath, const CFileStatus &fileStatus)
+	std::vector<IRunnable *> RequestTasks;
+
+	void fileUpdated(const std::string &filePath, const CFileStatus &fileStatus, bool success)
 	{
-		nldebug("File updated callback");
+		// warning: may be g_IsExiting during this callback!
 
 		bool done = false;
 		Mutex.enter();
@@ -204,7 +234,45 @@ public:
 		}
 		Mutex.leave();
 
-		if (done) Callback();
+		if (done) doneRemove();
+
+		if (g_IsExiting)
+		{
+			abortExit();
+		}
+	}
+
+	void abortExit()
+	{
+		nlinfo("Abort database status update.");
+
+		Mutex.enter();
+		for (std::vector<IRunnable *>::iterator it = RequestTasks.begin(), end = RequestTasks.end(); it != end; ++it)
+		{
+			if (CAsyncFileManager::getInstance().deleteTask(*it))
+			{
+				++FilesUpdated;
+				delete *it;
+			}
+		}
+
+		bool done = false;
+		if (!CallbackCalled)
+		{
+			done = true;
+			CallbackCalled = true;
+		}
+		Mutex.leave();
+
+		if (done) doneRemove();
+	}
+
+	void doneRemove()
+	{
+		nlinfo("Database status update done.");
+
+		Callback();
+		delete this;
 	}
 };
 
@@ -225,16 +293,23 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 		}
 		else
 		{
-			updater.Mutex.enter();
-			++updater.FilesRequested;
-			updater.Mutex.leave();
 			
 			CFileStatus fileStatus;
 			if (!ds->getFileStatus(fileStatus, subPath))
 			{
-				ds->updateFileStatus(TFileStatusCallback(&updater, &CDatabaseStatusUpdater::fileUpdated), subPath);
+				updater.Mutex.enter();
+				if (!updater.CallbackCalled) // on abort.
+				{
+					++updater.FilesRequested;
+					IRunnable *runnable = ds->updateFileStatus(TFileStatusCallback(&updater, &CDatabaseStatusUpdater::fileUpdated), subPath);
+					updater.RequestTasks.push_back(runnable);
+				}
+				updater.Mutex.leave();
 			}
 		}
+
+		if (g_IsExiting)
+			return;
 	}
 }
 
@@ -242,31 +317,31 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 
 void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback)
 {
-	CDatabaseStatusUpdater updater;
-	updater.Callback = callback;
-	updater.FilesRequested = 0;
-	updater.FilesUpdated = 0;
-	updater.Ready = false;
-	updater.CallbackCalled = false;
+	CDatabaseStatusUpdater *updater = new CDatabaseStatusUpdater();
+	updater->Callback = callback;
+	updater->FilesRequested = 0;
+	updater->FilesUpdated = 0;
+	updater->Ready = false;
+	updater->CallbackCalled = false;
 
 	nlinfo("Starting iteration through database, queueing file status updates.");
 
 	// recursive loop
-	updateDirectoryStatus(this, updater, g_DatabaseDirectory);
+	updateDirectoryStatus(this, *updater, g_DatabaseDirectory);
 
 	nlinfo("Iteration through database, queueing file status updates complete.");
 		
 	bool done = false;
-	updater.Mutex.enter();
-	updater.Ready = true;
-	if (updater.FilesRequested == updater.FilesUpdated && !updater.CallbackCalled)
+	updater->Mutex.enter();
+	updater->Ready = true;
+	if (updater->FilesRequested == updater->FilesUpdated && !updater->CallbackCalled)
 	{
 		done = true;
-		updater.CallbackCalled = true;
+		updater->CallbackCalled = true;
 	}
-	updater.Mutex.leave();
+	updater->Mutex.leave();
 	
-	if (done) updater.Callback();
+	if (done) updater->doneRemove();
 }
 
 // ******************************************************************

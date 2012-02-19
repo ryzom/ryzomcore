@@ -39,6 +39,10 @@
 // Project includes
 #include "callback.h"
 
+namespace NLMISC {
+	class IRunnable;
+}
+
 namespace PIPELINE {
 
 #define PIPELINE_DATABASE_STATUS_SUBDIR "database.status/"
@@ -69,7 +73,7 @@ public:
 	void serial(NLMISC::IStream &stream);
 };
 
-typedef CCallback<void, const std::string &/*filePath*/, const CFileStatus &/*fileStatus*/> TFileStatusCallback;
+typedef CCallback<void, const std::string &/*filePath*/, const CFileStatus &/*fileStatus*/, bool /*success*/> TFileStatusCallback;
 
 /**
  * \brief CDatabaseStatus
@@ -89,9 +93,9 @@ public:
 	
 	/// Tries to read the last file status. Return false if the status is invalid. Call updateFileStatus if the result is false to update asynchronously.
 	bool getFileStatus(CFileStatus &fileStatus, const std::string &filePath) const;
-	/// Updates the file status asynchronously. The new file status is broadcast to clients and slaves afterwards.
-	void updateFileStatus(const TFileStatusCallback &callback, const std::string &filePath);
-	/// Forces an update of the complete database status.
+	/// Updates the file status asynchronously. The new file status is broadcast to clients and slaves afterwards. Warning: If g_IsExiting during callback then update likely did not happen.
+	NLMISC::IRunnable *updateFileStatus(const TFileStatusCallback &callback, const std::string &filePath);
+	/// Forces an update of the complete database status. Warning: If g_IsExiting during callback then update is incomplete.
 	void updateDatabaseStatus(const CCallback<void> &callback);
 	
 	void getFileErrors(CFileErrors &fileErrors, const std::string &filePath, uint32 newerThan = 0) const;

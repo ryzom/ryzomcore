@@ -42,6 +42,8 @@ extern bool g_IsMaster;
 extern std::string g_DatabaseDirectory;
 extern std::string g_PipelineDirectory;
 
+extern bool g_IsExiting;
+
 } /* namespace PIPELINE */
 
 #endif /* #ifndef PIPELINE_PIPELINE_SERVICE_H */

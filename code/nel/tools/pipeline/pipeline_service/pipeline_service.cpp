@@ -43,6 +43,7 @@
 #include <nel/georges/u_form_loader.h>
 #include <nel/misc/mutex.h>
 #include <nel/misc/task_manager.h>
+#include <nel/misc/async_file_manager.h>
 
 // Project includes
 #include "pipeline_workspace.h"
@@ -58,6 +59,7 @@ namespace PIPELINE {
 bool g_IsMaster = false;
 std::string g_DatabaseDirectory;
 std::string g_PipelineDirectory;
+bool g_IsExiting = false;
 
 namespace {
 
@@ -251,6 +253,14 @@ public:
 	/// Finalization. Release the service. For example, this function frees all allocations made in the init() function.
 	virtual void release()
 	{
+		g_IsExiting = true;
+
+		while (NLMISC::CAsyncFileManager::getInstance().getNumWaitingTasks() > 0)
+		{
+			nlSleep(10);
+		}
+		NLMISC::CAsyncFileManager::terminate();
+
 		delete s_DatabaseStatus;
 		s_DatabaseStatus = NULL;
 
