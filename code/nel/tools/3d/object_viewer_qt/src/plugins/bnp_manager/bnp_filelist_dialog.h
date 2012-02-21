@@ -51,7 +51,7 @@ public:
 	 * \param Filename
 	 * \return true if everything went well
 	 */
-	bool loadTable(const QString filename);
+	bool loadTable(const QString filePath);
 
 	/**
 	 * Set the dimension of the table
@@ -67,8 +67,10 @@ public:
 	 */
 	void getSelections(TSelectionList& SelectionList);
 
+protected:
+	void dragEnterEvent (QDragEnterEvent *event);
+	void dropEvent(QDropEvent *event);
 private:
-
 	Ui::BnpFileListDialog m_ui;
 
 	// common data path as root folder for the dirtree view
