@@ -25,7 +25,6 @@ namespace BNPManager
 BNPFileSystemModel::BNPFileSystemModel(QObject *parent)
 	: QFileSystemModel(parent)
 {
-
 }
 // ***************************************************************************
 BNPFileSystemModel::~BNPFileSystemModel()

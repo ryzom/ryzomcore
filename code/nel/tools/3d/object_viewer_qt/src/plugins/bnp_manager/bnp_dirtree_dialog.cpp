@@ -17,6 +17,7 @@
 // Project includes
 #include "bnp_dirtree_dialog.h"
 #include "bnp_filesystem_model.h"
+#include "bnp_proxy_model.h"
 
 // Qt includes
 #include <QtGui/QWidget>
@@ -39,18 +40,22 @@ CBnpDirTreeDialog::CBnpDirTreeDialog(QString bnpPath, QWidget *parent)
 	// Bnp file: opened and displayed
 	// all other files: added to the currently opened bnp file
 	QStringList filter;
-    filter << tr("*.bnp");
+    //filter << tr("*.bnp");
 
 	// Setup the directory tree model
-	m_dirModel= new BNPFileSystemModel;
+	m_dirModel= new BNPFileSystemModel();
+	m_proxyModel = new BNPSortProxyModel();
 	m_dirModel->setRootPath(m_DataPath);
 	m_dirModel->setFilter(QDir::AllDirs | QDir::NoDotAndDotDot | QDir::AllEntries);
 	m_dirModel->setNameFilters(filter);
     m_dirModel->setNameFilterDisables(0);
 
-	m_ui.dirTree->setModel(m_dirModel);
+	m_proxyModel->setSourceModel(m_dirModel);
 
-	m_ui.dirTree->setRootIndex(m_dirModel->index(m_DataPath));
+	m_ui.dirTree->setModel(m_proxyModel);
+
+	m_ui.dirTree->setRootIndex( m_proxyModel->mapFromSource (m_dirModel->index(m_DataPath) ) );
+	m_ui.dirTree->setSortingEnabled(true);
 
 	// Trigger if one filename is activated
 	// In future drag&drop should be also possible
@@ -65,10 +70,11 @@ CBnpDirTreeDialog::~CBnpDirTreeDialog()
 // ***************************************************************************
 void CBnpDirTreeDialog::fileSelected(QModelIndex index)
 {
-	if (index.isValid() && !m_dirModel->isDir(index))
+	QModelIndex source = m_proxyModel->mapToSource(index);
+	if (source.isValid() && !m_dirModel->isDir(source))
 	{
 		// emit the according signal to BNPManagerWindow class
-		Q_EMIT selectedForm(m_dirModel->fileInfo(index).filePath());
+		Q_EMIT selectedFile(m_dirModel->fileInfo(source).filePath());
 	}
 }
 // ***************************************************************************

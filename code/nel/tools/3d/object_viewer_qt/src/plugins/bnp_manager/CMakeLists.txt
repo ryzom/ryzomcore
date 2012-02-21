@@ -14,6 +14,7 @@ SET(OVQT_PLUG_BNP_MANAGER_HDR  bnp_manager_plugin.h
 								  bnp_filesystem_model.h
 								  bnp_file.h
 								  bnp_filelist_dialog.h
+								  bnp_proxy_model.h
                                   )
 SET(OVQT_PLUG_BNP_MANAGER_UIS	bnp_dirtree_form.ui
 								bnp_filelist_dialog.ui

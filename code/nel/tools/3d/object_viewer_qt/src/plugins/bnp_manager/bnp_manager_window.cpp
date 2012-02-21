@@ -67,7 +67,7 @@ BNPManagerWindow::BNPManagerWindow(QWidget *parent)
 	
 	// this SLOT is triggered if the user activates a bnp files in the 
 	// dirtree view
-	connect(m_BnpDirTreeDialog, SIGNAL(selectedForm(const QString)), 
+	connect(m_BnpDirTreeDialog, SIGNAL(selectedFile(const QString)), 
 			this, SLOT(loadFile(const QString)));
 
 	// not used

@@ -31,6 +31,7 @@ namespace BNPManager
 {
 
 class BNPFileSystemModel;
+class BNPSortProxyModel;
 
 class CBnpDirTreeDialog : public QDockWidget
 {
@@ -63,8 +64,10 @@ private:
 
 	BNPFileSystemModel		*m_dirModel;
 
+	BNPSortProxyModel		*m_proxyModel;
+
 Q_SIGNALS:
-	void selectedForm(const QString);
+	void selectedFile(const QString);
 
 private Q_SLOTS:
 	/**
