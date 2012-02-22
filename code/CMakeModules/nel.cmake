@@ -37,7 +37,9 @@ ENDMACRO(NL_TARGET_DRIVER)
 # Argument:
 ###
 MACRO(NL_DEFAULT_PROPS name label)
-  SET_TARGET_PROPERTIES(${name} PROPERTIES PROJECT_LABEL ${label})
+  IF(NOT MSVC10)
+    SET_TARGET_PROPERTIES(${name} PROPERTIES PROJECT_LABEL ${label})
+  ENDIF(NOT MSVC10)
   GET_TARGET_PROPERTY(type ${name} TYPE)
   IF(${type} STREQUAL SHARED_LIBRARY)
     # Set versions only if target is a shared library
