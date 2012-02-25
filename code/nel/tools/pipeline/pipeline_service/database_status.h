@@ -32,9 +32,10 @@
 // STL includes
 #include <string>
 #include <vector>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/shared_mutex.hpp>
 
 // NeL includes
-#include <nel/misc/mutex.h>
 #include <nel/misc/reader_writer.h>
 #include <nel/misc/stream.h>
 
@@ -95,8 +96,8 @@ typedef CCallback<void, const std::string &/*filePath*/, const CFileStatus &/*fi
 class CDatabaseStatus
 {
 protected:
-	mutable NLMISC::CReaderWriter m_StatusMutex;
-	mutable NLMISC::CMutex m_ErrorMutex;
+	mutable boost::shared_mutex m_StatusMutex;
+	mutable boost::mutex m_ErrorMutex;
 	
 public:
 	CDatabaseStatus();

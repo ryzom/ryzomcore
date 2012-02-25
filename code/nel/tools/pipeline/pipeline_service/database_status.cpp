@@ -133,7 +133,7 @@ bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &
 	bool seemsValid = false;
 	std::string stdPath = unMacroPath(filePath);
 	std::string statusPath = getStatusFilePath(filePath);
-	m_StatusMutex.enterReader();
+	m_StatusMutex.lock_shared();
 	if (CFile::fileExists(statusPath))
 	{
 		CIFile ifs(statusPath, false);
@@ -153,7 +153,7 @@ bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &
 		fileStatus.LastUpdate = 0;
 		fileStatus.CRC32 = 0;
 	}
-	m_StatusMutex.leaveReader();
+	m_StatusMutex.unlock_shared();
 	return seemsValid;
 }
 
@@ -167,7 +167,7 @@ public:
 
 	TFileStatusCallback Callback;
 	std::string FilePath; // Standardized!
-	CReaderWriter *StatusMutex;
+	boost::shared_mutex *StatusMutex;
 
 	virtual void run()
 	{
@@ -178,7 +178,7 @@ public:
 			uint32 time = CTime::getSecondsSince1970();
 			uint32 fmdt = CFile::getFileModificationDate(FilePath);
 			std::string statusPath = getStatusFilePath(FilePath); // g_PipelineDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(FilePath) + ".status";
-			StatusMutex->enterReader();
+			StatusMutex->lock_shared();
 			if (CFile::fileExists(statusPath))
 			{
 				CIFile ifs(statusPath, false);
@@ -191,7 +191,7 @@ public:
 				fs.LastChangedReference = 0;
 				fs.LastFileSizeReference = ~0;
 			}
-			StatusMutex->leaveReader();
+			StatusMutex->unlock_shared();
 			if (fs.LastChangedReference == fmdt && fs.LastFileSizeReference == CFile::getFileSize(FilePath))
 			{
 				nlinfo("Skipping already updated status, may have been queued twice (%s)", FilePath.c_str());
@@ -228,14 +228,14 @@ public:
 					fs.LastFileSizeReference = fisz;
 				}
 				
-				StatusMutex->enterWriter();
+				StatusMutex->lock();
 				{
 					COFile ofs(statusPath, false, false, true);
 					fs.serial(ofs);
 					ofs.flush();
 					ofs.close();
 				}
-				StatusMutex->leaveWriter();
+				StatusMutex->unlock();
 			}
 			Callback(FilePath, fs, true);
 		}
