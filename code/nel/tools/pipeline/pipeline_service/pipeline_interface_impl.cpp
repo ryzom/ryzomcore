@@ -34,6 +34,7 @@
 #include <nel/misc/app_context.h>
 #include <nel/misc/debug.h>
 #include <nel/net/service.h>
+#include <nel/misc/class_registry.h>
 
 // Project includes
 
@@ -56,6 +57,13 @@ CPipelineInterfaceImpl::~CPipelineInterfaceImpl()
 NLMISC::CConfigFile &CPipelineInterfaceImpl::getConfigFile()
 {
 	return NLNET::IService::getInstance()->ConfigFile;
+}
+
+void CPipelineInterfaceImpl::registerClass(const std::string &className, NLMISC::IClassable* (*creator)(), const std::string &typeidCheck) throw(NLMISC::ERegistry)
+{
+	NLMISC::CClassRegistry::registerClass(className, creator, typeidCheck);
+	RegisteredClasses.push_back(className);
+	nldebug("Registered class '%s'", className.c_str());
 }
 
 } /* namespace PIPELINE */

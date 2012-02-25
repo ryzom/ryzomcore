@@ -32,6 +32,7 @@
 // STL includes
 
 // NeL includes
+#include <nel/misc/class_registry.h>
 
 // Project includes
 
@@ -53,10 +54,14 @@ public:
 	IPipelineInterface() { }
 	virtual ~IPipelineInterface() { }
 
-	IPipelineInterface *getInstance();
+	static IPipelineInterface *getInstance();
 
 	virtual NLMISC::CConfigFile &getConfigFile() = 0;
+	virtual void registerClass(const std::string &className, NLMISC::IClassable* (*creator)(), const std::string &typeidCheck) throw(NLMISC::ERegistry) = 0;
+
 }; /* class IPipelineInterface */
+
+#define	PIPELINE_REGISTER_CLASS(_class_) PIPELINE::IPipelineInterface::getInstance()->registerClass(#_class_, _class_::creator, typeid(_class_).name());
 
 } /* namespace PIPELINE */
 

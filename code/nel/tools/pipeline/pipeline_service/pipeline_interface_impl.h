@@ -30,6 +30,8 @@
 #include <nel/misc/types_nl.h>
 
 // STL includes
+#include <vector>
+#include <string>
 
 // NeL includes
 
@@ -46,6 +48,8 @@ namespace PIPELINE {
  */
 class CPipelineInterfaceImpl : public IPipelineInterface
 {
+public:
+	std::vector<std::string> RegisteredClasses;
 protected:
 	// pointers
 	// ...
@@ -57,6 +61,7 @@ public:
 	virtual ~CPipelineInterfaceImpl();
 
 	virtual NLMISC::CConfigFile &getConfigFile();
+	virtual void registerClass(const std::string &className, NLMISC::IClassable* (*creator)(), const std::string &typeidCheck) throw(NLMISC::ERegistry);
 }; /* class CPipelineInterfaceImpl */
 
 } /* namespace PIPELINE */

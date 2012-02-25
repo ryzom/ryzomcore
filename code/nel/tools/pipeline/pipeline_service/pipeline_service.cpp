@@ -50,6 +50,7 @@
 // Project includes
 #include "pipeline_workspace.h"
 #include "database_status.h"
+#include "pipeline_interface_impl.h"
 
 // using namespace std;
 using namespace NLMISC;
@@ -108,6 +109,7 @@ UFormLoader *s_FormLoader = NULL;
 CPipelineWorkspace *s_PipelineWorkspace = NULL;
 CTaskManager *s_TaskManager = NULL;
 CDatabaseStatus *s_DatabaseStatus = NULL;
+CPipelineInterfaceImpl *s_PipelineInterfaceImpl = NULL;
 
 EState s_State = STATE_IDLE;
 CMutex s_StateMutex;
@@ -273,6 +275,8 @@ public:
 
 		s_DatabaseStatus = new CDatabaseStatus();
 
+		s_PipelineInterfaceImpl = new CPipelineInterfaceImpl();
+
 		// Load libraries
 		const CConfigFile::CVar &usedPlugins = ConfigFile.getVar("UsedPlugins");
 		s_LoadedLibraries.reserve(usedPlugins.size());
@@ -310,6 +314,9 @@ public:
 			delete (*it);
 		}
 		s_LoadedLibraries.clear();
+
+		delete s_PipelineInterfaceImpl;
+		s_PipelineInterfaceImpl = NULL;
 
 		delete s_DatabaseStatus;
 		s_DatabaseStatus = NULL;

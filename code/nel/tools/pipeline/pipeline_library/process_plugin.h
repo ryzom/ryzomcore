@@ -32,6 +32,7 @@
 // STL includes
 
 // NeL includes
+#include <nel/misc/class_registry.h>
 
 // Project includes
 
@@ -47,7 +48,7 @@ namespace PIPELINE {
  * The master service may dispatch these seperately to different slave services to executa a single process sheets using multiple process plugins.
  * This enables creating seperate plugins for different file formats for the same process, to allow handling files from different modeling packages on different build servers.
  */
-class IProcessPlugin
+class IProcessPlugin : public NLMISC::IClassable
 {
 protected:
 	// pointers

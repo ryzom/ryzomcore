@@ -34,6 +34,7 @@
 // NeL includes
 
 // Project includes
+#include "../pipeline_library/process_plugin.h"
 
 namespace PIPELINE {
 
@@ -43,7 +44,7 @@ namespace PIPELINE {
  * \author Jan Boon (Kaetemi)
  * CProcessMaxShape
  */
-class CProcessMaxShape
+class CProcessMaxShape : public IProcessPlugin
 {
 protected:
 	// pointers
@@ -54,6 +55,8 @@ protected:
 public:
 	CProcessMaxShape();
 	virtual ~CProcessMaxShape();
+
+	NLMISC_DECLARE_CLASS(CProcessMaxShape)
 }; /* class CProcessMaxShape */
 
 } /* namespace PIPELINE */

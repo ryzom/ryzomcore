@@ -35,6 +35,8 @@
 #include "nel/misc/debug.h"
 
 // Project includes
+#include "../pipeline_library/pipeline_interface.h"
+#include "process_max_shape.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -43,9 +45,17 @@ namespace PIPELINE {
 
 // ******************************************************************
 
-class CPipelinePluginMaxNelLibrary : public NLMISC::INelLibrary { 
-	void onLibraryLoaded(bool /* firstTime */) { nldebug("Library loaded: CPipelinePluginMax"); } 
-	void onLibraryUnloaded(bool /* lastTime */) { nldebug("Library unloaded: CPipelinePluginMax"); }  
+class CPipelinePluginMaxNelLibrary : public NLMISC::INelLibrary 
+{ 
+	void onLibraryLoaded(bool /* firstTime */) 
+	{
+		nldebug("Library loaded: CPipelinePluginMax");
+		PIPELINE_REGISTER_CLASS(CProcessMaxShape);
+	} 
+	void onLibraryUnloaded(bool /* lastTime */) 
+	{ 
+		nldebug("Library unloaded: CPipelinePluginMax"); 
+	}  
 };
 NLMISC_DECL_PURE_LIB(CPipelinePluginMaxNelLibrary)
 
