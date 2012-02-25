@@ -1,9 +1,9 @@
 /**
- * \file pipeline_plugin_max.cpp
- * \brief CPipelinePluginMax
- * \date 2012-02-25 10:39GMT
+ * \file pipeline_interface.cpp
+ * \brief IPipelineInterface
+ * \date 2012-02-25 12:10GMT
  * \author Jan Boon (Kaetemi)
- * CPipelinePluginMax
+ * IPipelineInterface
  */
 
 /* 
@@ -26,13 +26,12 @@
  */
 
 #include <nel/misc/types_nl.h>
-#include "pipeline_plugin_max.h"
+#include "pipeline_interface.h"
 
 // STL includes
 
 // NeL includes
-#include "nel/misc/dynloadlib.h"
-#include "nel/misc/debug.h"
+// #include <nel/misc/debug.h>
 
 // Project includes
 
@@ -41,32 +40,7 @@ using namespace std;
 
 namespace PIPELINE {
 
-// ******************************************************************
-
-class CPipelinePluginMaxNelLibrary : public NLMISC::INelLibrary { 
-	void onLibraryLoaded(bool /* firstTime */) { nldebug("Library loaded: CPipelinePluginMax"); } 
-	void onLibraryUnloaded(bool /* lastTime */) { nldebug("Library unloaded: CPipelinePluginMax"); }  
-};
-NLMISC_DECL_PURE_LIB(CPipelinePluginMaxNelLibrary)
-
-HINSTANCE CPipelinePluginMaxDllHandle = NULL;
-BOOL WINAPI DllMain(HANDLE hModule, DWORD /* ul_reason_for_call */, LPVOID /* lpReserved */)
-{
-	CPipelinePluginMaxDllHandle = (HINSTANCE)hModule;
-	return TRUE;
-}
-
-// ******************************************************************
-
-CPipelinePluginMax::CPipelinePluginMax()
-{
-	
-}
-
-CPipelinePluginMax::~CPipelinePluginMax()
-{
-	
-}
+void fksjdlfkjdskfljdsklfjdslkfjdsf() { }
 
 } /* namespace PIPELINE */
 

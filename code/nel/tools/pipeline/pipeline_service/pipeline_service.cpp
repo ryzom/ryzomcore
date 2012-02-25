@@ -45,6 +45,7 @@
 #include <nel/misc/task_manager.h>
 #include <nel/misc/async_file_manager.h>
 #include <nel/misc/algo.h>
+#include <nel/misc/dynloadlib.h>
 
 // Project includes
 #include "pipeline_workspace.h"
@@ -57,7 +58,6 @@ using namespace NLGEORGES;
 
 namespace PIPELINE {
 
-bool g_IsMaster = false;
 std::string g_DatabaseDirectory;
 std::string g_PipelineDirectory;
 bool g_IsExiting = false;
@@ -89,6 +89,12 @@ namespace {
 #define PIPELINE_SHORT_SERVICE_NAME "PLSS"
 #endif
 
+#ifdef NL_DEBUG
+#define PIPELINE_SERVICE_DIRECTORY "R:\\build\\dev\\bin\\Release"
+#else
+#define PIPELINE_SERVICE_DIRECTORY ""
+#endif
+
 /// Enum
 enum EState
 {
@@ -105,6 +111,8 @@ CDatabaseStatus *s_DatabaseStatus = NULL;
 
 EState s_State = STATE_IDLE;
 CMutex s_StateMutex;
+
+std::vector<NLMISC::CLibrary *> s_LoadedLibraries;
 
 // ******************************************************************
 
@@ -254,7 +262,6 @@ public:
 	/// Initializes the service (must be called before the first call to update())
 	virtual void init()
 	{
-		g_IsMaster = ConfigFile.getVar("IsMaster").asBool();
 		g_DatabaseDirectory = CPath::standardizePath(ConfigFile.getVar("DatabaseDirectory").asString(), true);
 		if (!CFile::isDirectory(g_DatabaseDirectory)) nlwarning("'DatabaseDirectory' does not exist! (%s)", g_DatabaseDirectory.c_str());
 		g_PipelineDirectory = CPath::standardizePath(ConfigFile.getVar("PipelineDirectory").asString(), true);
@@ -265,6 +272,18 @@ public:
 		initSheets();
 
 		s_DatabaseStatus = new CDatabaseStatus();
+
+		// Load libraries
+		const CConfigFile::CVar &usedPlugins = ConfigFile.getVar("UsedPlugins");
+		for (uint i = 0; i < usedPlugins.size(); ++i)
+		{
+			CLibrary *library = new CLibrary();
+			if (library->loadLibrary(usedPlugins.asString(i), true, true, true))
+			{
+				s_LoadedLibraries.push_back(library);
+			}
+			else delete library;
+		}
 	}
 	
 	/// This function is called every "frame" (you must call init() before). It returns false if the service is stopped.
@@ -350,6 +369,6 @@ NLMISC_COMMAND(updateDatabaseStatus, "Updates the entire database status. This a
 	return true;
 }
 
-NLNET_SERVICE_MAIN(PIPELINE::CPipelineService, PIPELINE_SHORT_SERVICE_NAME, PIPELINE_LONG_SERVICE_NAME, 0, PIPELINE::s_ShardCallbacks, "", "")
+NLNET_SERVICE_MAIN(PIPELINE::CPipelineService, PIPELINE_SHORT_SERVICE_NAME, PIPELINE_LONG_SERVICE_NAME, 0, PIPELINE::s_ShardCallbacks, PIPELINE_SERVICE_DIRECTORY, PIPELINE_SERVICE_DIRECTORY)
 
 /* end of file */
