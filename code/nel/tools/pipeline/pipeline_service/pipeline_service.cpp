@@ -405,7 +405,7 @@ NLMISC_COMMAND(reloadSheets, "Reload all sheets.", "")
 	if(args.size() != 0) return false;
 	if (!PIPELINE::reloadSheets())
 	{
-		nlinfo("I'm afraid I cannot do this, my friend.");
+		log.displayNL("I'm afraid I cannot do this, my friend.");
 		return false;
 	}
 	return true;
@@ -416,9 +416,29 @@ NLMISC_COMMAND(updateDatabaseStatus, "Updates the entire database status. This a
 	if(args.size() != 0) return false;
 	if (!PIPELINE::updateDatabaseStatus())
 	{
-		nlinfo("I'm afraid I cannot do this, my friend.");
+		log.displayNL("I'm afraid I cannot do this, my friend.");
 		return false;
 	}
+	return true;
+}
+
+NLMISC_COMMAND(dumpTaskManager, "Dumps the task manager.", "")
+{
+	if(args.size() != 0) return false;
+	std::vector<std::string> output;
+	PIPELINE::s_TaskManager->dump(output);
+	for (std::vector<std::string>::iterator it = output.begin(), end = output.end(); it != end; ++it)
+		log.displayNL("DUMP: %s", (*it).c_str());
+	return true;
+}
+
+NLMISC_COMMAND(dumpAsyncFileManager, "Dumps the async file manager.", "")
+{
+	if(args.size() != 0) return false;
+	std::vector<std::string> output;
+	NLMISC::CAsyncFileManager::getInstance().dump(output);
+	for (std::vector<std::string>::iterator it = output.begin(), end = output.end(); it != end; ++it)
+		log.displayNL("DUMP: %s", (*it).c_str());
 	return true;
 }
 

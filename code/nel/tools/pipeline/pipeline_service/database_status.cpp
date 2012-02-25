@@ -318,12 +318,14 @@ public:
 		}
 
 		bool done = false;
-		if (!CallbackCalled)
+		if (!CallbackCalled && Ready)
 		{
 			done = true;
 			CallbackCalled = true;
 		}
 		Mutex.leave();
+
+		nlassert(FilesUpdated == FilesRequested);
 
 		if (done) doneRemove();
 	}
