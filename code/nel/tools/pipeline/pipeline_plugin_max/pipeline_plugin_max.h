@@ -42,7 +42,7 @@ namespace PIPELINE {
  * \date 2012-02-25 10:39GMT
  * \author Jan Boon (Kaetemi)
  * CPipelinePluginMax
- */
+ *//*
 class CPipelinePluginMax
 {
 protected:
@@ -54,7 +54,7 @@ protected:
 public:
 	CPipelinePluginMax();
 	virtual ~CPipelinePluginMax();
-}; /* class CPipelinePluginMax */
+};*/ /* class CPipelinePluginMax */
 
 } /* namespace PIPELINE */
 

@@ -57,12 +57,15 @@ namespace {
 
 class CMaxExportShapeCommand : public NLMISC::IRunnable
 {
+public:
+	NLMISC::CLog *Log;
+
 	virtual void getName(std::string &result) const 
 	{ result = "CMaxExportShapeCommand"; }
 
 	virtual void run()
 	{
-		// ...
+		std::string tempDirectory = PIPELINE::IPipelineInterface::getInstance()->getTempDir();
 
 		PIPELINE::IPipelineInterface::getInstance()->endedRunnableTask();
 	}
@@ -76,6 +79,7 @@ CMaxExportShapeCommand s_MaxExportShapeCommand;
 NLMISC_CATEGORISED_COMMAND(max, maxExportShape, "Export shapes from a .max file manually.", "<filePath> <outDirectory>")
 {
 	if(args.size() != 2) return false;
+	PIPELINE::s_MaxExportShapeCommand.Log = &log;
 	if (!PIPELINE::IPipelineInterface::getInstance()->tryRunnableTask("COMMAND_MAX_EXPORT_SHAPE", &PIPELINE::s_MaxExportShapeCommand))
 	{
 		log.displayNL("Busy.");

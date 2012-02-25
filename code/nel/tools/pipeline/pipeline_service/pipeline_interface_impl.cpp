@@ -29,6 +29,7 @@
 #include "pipeline_interface_impl.h"
 
 // STL includes
+#include <sstream>
 
 // NeL includes
 #include <nel/misc/app_context.h>
@@ -75,6 +76,27 @@ bool CPipelineInterfaceImpl::tryRunnableTask(std::string stateName, NLMISC::IRun
 void CPipelineInterfaceImpl::endedRunnableTask()
 {
 	PIPELINE::endedRunnableTask();
+}
+
+std::string CPipelineInterfaceImpl::getProjectValue(const std::string &name)
+{
+	return ""; // TODO
+}
+
+std::string CPipelineInterfaceImpl::getTempDir()
+{
+	// IF PROJECT blahblah TODO
+	// ELSE
+
+	{
+		std::stringstream ss;
+		ss << g_PipelineDirectory;
+		ss << NLMISC::CTime::getSecondsSince1970();
+		ss << ".";
+		ss << rand();
+		ss << PIPELINE_DIRECTORY_TEMP_SUFFIX;
+		return ss.str();
+	}
 }
 
 } /* namespace PIPELINE */

@@ -49,7 +49,7 @@ namespace PIPELINE {
 
 #define PIPELINE_DATABASE_STATUS_SUBDIR "database.status/"
 #define PIPELINE_DATABASE_ERRORS_SUBDIR "database.errors/"
-#define PIPELINE_DATABASE_DEPEND_SUFFIX "database.depend/"
+#define PIPELINE_DATABASE_DEPEND_SUBDIR "database.depend/"
 #define PIPELINE_DATABASE_STATUS_SUFFIX ".status"
 #define PIPELINE_DATABASE_ERRORS_SUFFIX ".errors"
 #define PIPELINE_DATABASE_DEPEND_SUFFIX ".depend"

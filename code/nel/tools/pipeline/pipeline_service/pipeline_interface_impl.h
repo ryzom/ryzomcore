@@ -40,6 +40,8 @@
 
 namespace PIPELINE {
 
+#define PIPELINE_DIRECTORY_TEMP_SUFFIX ".temp"
+
 /**
  * \brief CPipelineInterfaceImpl
  * \date 2012-02-25 12:21GMT
@@ -64,6 +66,8 @@ public:
 	virtual void registerClass(const std::string &className, NLMISC::IClassable* (*creator)(), const std::string &typeidCheck) throw(NLMISC::ERegistry);
 	virtual bool tryRunnableTask(std::string stateName, NLMISC::IRunnable *task);
 	virtual void endedRunnableTask();
+	virtual std::string getProjectValue(const std::string &name);
+	virtual std::string getTempDir();
 }; /* class CPipelineInterfaceImpl */
 
 } /* namespace PIPELINE */

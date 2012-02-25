@@ -58,6 +58,8 @@ public:
 
 	static IPipelineInterface *getInstance();
 
+	// ***************** PLUGIN UTILITY FUNCTIONS *****************
+
 	/// Get the configuration file of the pipeline service. Must only be used for configuration values that may be different on different services, such as tool paths.
 	virtual NLMISC::CConfigFile &getConfigFile() = 0;
 
@@ -70,6 +72,14 @@ public:
 	/// Call when a runnable task has ended to reset to STATE_IDLE.
 	virtual void endedRunnableTask() = 0;
 
+	// ***************** PROCESS FUNCTIONS *****************
+
+	/// Get a parsed georges sheets value from the current project. (example: OutputDirectory)
+	virtual std::string getProjectValue(const std::string &name) = 0;
+
+	/// Get the temporary directory for the current process. The directory must be deleted when the process ends. May return random temporary directories if no process is running.
+	virtual std::string getTempDir() = 0;
+	
 }; /* class IPipelineInterface */
 
 #define	PIPELINE_REGISTER_CLASS(_class_) PIPELINE::IPipelineInterface::getInstance()->registerClass(#_class_, _class_::creator, typeid(_class_).name());
