@@ -251,18 +251,17 @@ public:
 
 IRunnable *CDatabaseStatus::updateFileStatus(const TFileStatusCallback &callback, const std::string &filePath)
 {
-	if (!g_IsMaster)
-	{
-		nlerror("Not master, not allowed.");
-		return NULL;
-	}
-
+#if defined(PIPELINE_MASTER)
 	CUpdateFileStatus *ufs = new CUpdateFileStatus();
 	ufs->StatusMutex = &m_StatusMutex;
 	ufs->FilePath = unMacroPath(filePath);
 	ufs->Callback = callback;
 	CAsyncFileManager::getInstance().addLoadTask(ufs);
 	return ufs;
+#else
+	nlerror("Not master, not allowed.");
+	return NULL;
+#endif
 }
 
 // ******************************************************************

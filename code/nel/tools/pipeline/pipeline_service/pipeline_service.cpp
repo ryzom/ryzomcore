@@ -83,7 +83,11 @@ std::string macroPath(const std::string &path)
 namespace {
 
 #define PIPELINE_LONG_SERVICE_NAME "pipeline_service"
-#define PIPELINE_SHORT_SERVICE_NAME "PLS"
+#ifdef PIPELINE_MASTER
+#define PIPELINE_SHORT_SERVICE_NAME "PLSM"
+#else
+#define PIPELINE_SHORT_SERVICE_NAME "PLSS"
+#endif
 
 /// Enum
 enum EState

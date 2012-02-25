@@ -1,9 +1,9 @@
 /**
- * \file tool_logger.cpp
- * \brief CToolLogger
- * \date 2012-02-19 10:33GMT
+ * \file pipeline_plugin.h
+ * \brief IPipelinePlugin
+ * \date 2012-02-25 10:27GMT
  * \author Jan Boon (Kaetemi)
- * CToolLogger
+ * IPipelinePlugin
  */
 
 /* 
@@ -25,23 +25,39 @@
  * <http://www.gnu.org/licenses/>.
  */
 
+#ifndef PIPELINE_PIPELINE_PLUGIN_H
+#define PIPELINE_PIPELINE_PLUGIN_H
 #include <nel/misc/types_nl.h>
-#include "tool_logger.h"
 
 // STL includes
 
 // NeL includes
-// #include <nel/misc/debug.h>
 
 // Project includes
 
-using namespace std;
-// using namespace NLMISC;
-
 namespace PIPELINE {
 
-void dummmmmmmyyyyyyyyyyyyyyyyy_tool_logger_cpp() { }
+/**
+ * \brief IPipelinePlugin
+ * \date 2012-02-25 10:27GMT
+ * \author Jan Boon (Kaetemi)
+ * A pipeline plugin (dll) exposes multiple process plugins.
+ */
+class IPipelinePlugin
+{
+protected:
+	// pointers
+	// ...
+	
+	// instances
+	// ...
+public:
+	IPipelinePlugin();
+	virtual ~IPipelinePlugin();
+}; /* class IPipelinePlugin */
 
 } /* namespace PIPELINE */
+
+#endif /* #ifndef PIPELINE_PIPELINE_PLUGIN_H */
 
 /* end of file */

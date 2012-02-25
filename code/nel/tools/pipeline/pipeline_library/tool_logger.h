@@ -3,7 +3,8 @@
  * \brief CToolLogger
  * \date 2012-02-19 10:33GMT
  * \author Jan Boon (Kaetemi)
- * CToolLogger
+ * Tool logger is fully implemented in header so small tools do not 
+ * need to link to this library unnecessarily.
  */
 
 /* 

@@ -38,7 +38,15 @@
 
 namespace PIPELINE {
 
-extern bool g_IsMaster;
+#if defined(PIPELINE_MASTER)
+#	if defined(PIPELINE_SLAVE)
+#		error Cannot define both PIPELINE_MASTER and PIPELINE_SLAVE at the same time.
+#	endif
+#elif defined (PIPELINE_SLAVE)
+#else
+#	error Must define either PIPELINE_MASTER or PIPELINE_SLAVE. Create 2 projects that output pipeline_service_master and pipeline_service_slave executables.
+#endif
+
 extern std::string g_DatabaseDirectory;
 extern std::string g_PipelineDirectory;
 
