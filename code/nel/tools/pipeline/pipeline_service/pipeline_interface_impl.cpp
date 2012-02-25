@@ -37,6 +37,7 @@
 #include <nel/misc/class_registry.h>
 
 // Project includes
+#include "pipeline_service.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -64,6 +65,16 @@ void CPipelineInterfaceImpl::registerClass(const std::string &className, NLMISC:
 	NLMISC::CClassRegistry::registerClass(className, creator, typeidCheck);
 	RegisteredClasses.push_back(className);
 	nldebug("Registered class '%s'", className.c_str());
+}
+
+bool CPipelineInterfaceImpl::tryRunnableTask(std::string stateName, NLMISC::IRunnable *task)
+{
+	return PIPELINE::tryRunnableTask(stateName, task);
+}
+
+void CPipelineInterfaceImpl::endedRunnableTask()
+{
+	PIPELINE::endedRunnableTask();
 }
 
 } /* namespace PIPELINE */

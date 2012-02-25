@@ -102,6 +102,7 @@ enum EState
 	STATE_IDLE, 
 	STATE_RELOAD_SHEETS, 
 	STATE_DATABASE_STATUS, 
+	STATE_RUNNABLE_TASK, 
 };
 
 /// Data
@@ -112,6 +113,7 @@ CDatabaseStatus *s_DatabaseStatus = NULL;
 CPipelineInterfaceImpl *s_PipelineInterfaceImpl = NULL;
 
 EState s_State = STATE_IDLE;
+std::string s_StateRunnableTaskName = "";
 CMutex s_StateMutex;
 
 std::vector<NLMISC::CLibrary *> s_LoadedLibraries;
@@ -141,13 +143,50 @@ bool tryStateTask(EState state, IRunnable *task)
 	}
 	s_StateMutex.leave();
 	if (!result) return false;
+
+	nlassert(s_State != STATE_IDLE);
 	
 	s_TaskManager->addTask(task);
 	
 	return true;
 }
 
+} /* anonymous namespace */
+
+bool tryRunnableTask(std::string stateName, IRunnable *task)
+{
+	// copy paste from above.
+
+	bool result = false;
+	s_StateMutex.enter();
+	result = (s_State == STATE_IDLE);
+	if (result)
+	{
+		s_State = STATE_RUNNABLE_TASK;
+		s_StateRunnableTaskName = stateName;
+	}
+	s_StateMutex.leave();
+	if (!result) return false;
+
+	nlassert(s_State != STATE_IDLE);
+	
+	s_TaskManager->addTask(task);
+	
+	return true;
+}
+
+void endedRunnableTask()
+{
+	nlassert(s_State != STATE_IDLE);
+
+	s_StateMutex.enter();
+	s_State = STATE_IDLE;
+	s_StateMutex.leave();
+}
+
 // ******************************************************************
+
+namespace {
 
 void initSheets()
 {
@@ -186,9 +225,7 @@ class CReloadSheets : public IRunnable
 		releaseSheets();
 		initSheets();
 		
-		s_StateMutex.enter();
-		s_State = STATE_IDLE;
-		s_StateMutex.leave();
+		endedRunnableTask();
 	}
 };
 CReloadSheets s_ReloadSheets;
@@ -207,9 +244,7 @@ class CUpdateDatabaseStatus : public IRunnable
 	
 	void databaseStatusUpdated()
 	{
-		s_StateMutex.enter();
-		s_State = STATE_IDLE;
-		s_StateMutex.leave();
+		endedRunnableTask();
 	}
 
 	virtual void run()
@@ -348,6 +383,9 @@ NLMISC_DYNVARIABLE(std::string, pipelineServiceState, "State of the pipeline ser
 				break;
 			case PIPELINE::STATE_DATABASE_STATUS:
 				*pointer = "DATABASE_STATUS";
+				break;
+			case PIPELINE::STATE_RUNNABLE_TASK:
+				*pointer = PIPELINE::s_StateRunnableTaskName;
 				break;
 		}
 	}

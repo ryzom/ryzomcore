@@ -32,8 +32,11 @@
 
 // NeL includes
 // #include <nel/misc/debug.h>
+#include <nel/misc/command.h>
+#include <nel/misc/task_manager.h>
 
 // Project includes
+#include "../pipeline_library/pipeline_interface.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -50,6 +53,35 @@ CProcessMaxShape::~CProcessMaxShape()
 	
 }
 
+namespace {
+
+class CMaxExportShapeCommand : public NLMISC::IRunnable
+{
+	virtual void getName(std::string &result) const 
+	{ result = "CMaxExportShapeCommand"; }
+
+	virtual void run()
+	{
+		// ...
+
+		PIPELINE::IPipelineInterface::getInstance()->endedRunnableTask();
+	}
+};
+CMaxExportShapeCommand s_MaxExportShapeCommand;
+
+} /* anonymous namespace */
+
 } /* namespace PIPELINE */
+
+NLMISC_CATEGORISED_COMMAND(max, maxExportShape, "Export shapes from a .max file manually.", "<filePath> <outDirectory>")
+{
+	if(args.size() != 2) return false;
+	if (!PIPELINE::IPipelineInterface::getInstance()->tryRunnableTask("COMMAND_MAX_EXPORT_SHAPE", &PIPELINE::s_MaxExportShapeCommand))
+	{
+		log.displayNL("Busy.");
+		return false;
+	}
+	return true;
+}
 
 /* end of file */

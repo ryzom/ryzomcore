@@ -33,11 +33,13 @@
 
 // NeL includes
 #include <nel/misc/class_registry.h>
+#include <nel/misc/command.h>
 
 // Project includes
 
 namespace NLMISC {
 	class CConfigFile;
+	class IRunnable;
 }
 
 namespace PIPELINE {
@@ -56,8 +58,17 @@ public:
 
 	static IPipelineInterface *getInstance();
 
+	/// Get the configuration file of the pipeline service. Must only be used for configuration values that may be different on different services, such as tool paths.
 	virtual NLMISC::CConfigFile &getConfigFile() = 0;
+
+	/// Register a process class with the pipeline service. You should use the PIPELINE_REGISTER_CLASS macro.
 	virtual void registerClass(const std::string &className, NLMISC::IClassable* (*creator)(), const std::string &typeidCheck) throw(NLMISC::ERegistry) = 0;
+
+	/// Runs a runnable task if STATE_IDLE. You must call endedRunnableTask when the task has ended.
+	virtual bool tryRunnableTask(std::string stateName, NLMISC::IRunnable *task) = 0;
+
+	/// Call when a runnable task has ended to reset to STATE_IDLE.
+	virtual void endedRunnableTask() = 0;
 
 }; /* class IPipelineInterface */
 

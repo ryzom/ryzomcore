@@ -62,6 +62,8 @@ public:
 
 	virtual NLMISC::CConfigFile &getConfigFile();
 	virtual void registerClass(const std::string &className, NLMISC::IClassable* (*creator)(), const std::string &typeidCheck) throw(NLMISC::ERegistry);
+	virtual bool tryRunnableTask(std::string stateName, NLMISC::IRunnable *task);
+	virtual void endedRunnableTask();
 }; /* class CPipelineInterfaceImpl */
 
 } /* namespace PIPELINE */
