@@ -55,6 +55,8 @@ protected:
 public:
 	CPipelineInterfaceImpl();
 	virtual ~CPipelineInterfaceImpl();
+
+	virtual NLMISC::CConfigFile &getConfigFile();
 }; /* class CPipelineInterfaceImpl */
 
 } /* namespace PIPELINE */

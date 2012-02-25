@@ -35,6 +35,10 @@
 
 // Project includes
 
+namespace NLMISC {
+	class CConfigFile;
+}
+
 namespace PIPELINE {
 
 /**
@@ -48,6 +52,10 @@ class IPipelineInterface
 public:
 	IPipelineInterface() { }
 	virtual ~IPipelineInterface() { }
+
+	IPipelineInterface *getInstance();
+
+	virtual NLMISC::CConfigFile &getConfigFile() = 0;
 }; /* class IPipelineInterface */
 
 } /* namespace PIPELINE */

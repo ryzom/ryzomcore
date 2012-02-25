@@ -275,6 +275,7 @@ public:
 
 		// Load libraries
 		const CConfigFile::CVar &usedPlugins = ConfigFile.getVar("UsedPlugins");
+		s_LoadedLibraries.reserve(usedPlugins.size());
 		for (uint i = 0; i < usedPlugins.size(); ++i)
 		{
 			CLibrary *library = new CLibrary();
@@ -302,6 +303,13 @@ public:
 			nlSleep(10);
 		}
 		NLMISC::CAsyncFileManager::terminate();
+
+		for (std::vector<NLMISC::CLibrary *>::iterator it = s_LoadedLibraries.begin(), end = s_LoadedLibraries.end(); it != end; ++it)
+		{
+			(*it)->freeLibrary();
+			delete (*it);
+		}
+		s_LoadedLibraries.clear();
 
 		delete s_DatabaseStatus;
 		s_DatabaseStatus = NULL;

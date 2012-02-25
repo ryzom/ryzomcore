@@ -31,7 +31,8 @@
 // STL includes
 
 // NeL includes
-// #include <nel/misc/debug.h>
+#include <nel/misc/app_context.h>
+#include <nel/misc/debug.h>
 
 // Project includes
 
@@ -41,6 +42,12 @@ using namespace std;
 namespace PIPELINE {
 
 void fksjdlfkjdskfljdsklfjdslkfjdsf() { }
+
+IPipelineInterface *IPipelineInterface::getInstance()
+{
+	nlassert(NLMISC::INelContext::isContextInitialised());
+	return static_cast<IPipelineInterface *>(NLMISC::INelContext::getInstance().getSingletonPointer("IPipelineInterface"));
+}
 
 } /* namespace PIPELINE */
 

@@ -31,9 +31,9 @@
 // STL includes
 
 // NeL includes
-// #include <nel/misc/debug.h>
 #include <nel/misc/app_context.h>
 #include <nel/misc/debug.h>
+#include <nel/net/service.h>
 
 // Project includes
 
@@ -44,14 +44,18 @@ namespace PIPELINE {
 
 CPipelineInterfaceImpl::CPipelineInterfaceImpl()
 {
-	nlassert(NLMISC::INelContext::isContextInitialised());
-	nlassert(NLMISC::INelContext::getInstance().getSingletonPointer("IPipelineInterface") == NULL);
+	nlassert(getInstance() == NULL);
 	NLMISC::INelContext::getInstance().setSingletonPointer("IPipelineInterface", this);
 }
 
 CPipelineInterfaceImpl::~CPipelineInterfaceImpl()
 {
-	
+	NLMISC::INelContext::getInstance().releaseSingletonPointer("IPipelineInterface", this);
+}
+
+NLMISC::CConfigFile &CPipelineInterfaceImpl::getConfigFile()
+{
+	return NLNET::IService::getInstance()->ConfigFile;
 }
 
 } /* namespace PIPELINE */
