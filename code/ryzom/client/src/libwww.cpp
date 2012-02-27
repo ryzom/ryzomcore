@@ -225,7 +225,10 @@ HTAttr p_attr[] =
 
 HTAttr div_attr[] =
 {
-	HTML_ATTR(DIV,NAME),
+	HTML_ATTR(DIV,CLASS),
+		HTML_ATTR(DIV,ID),
+		HTML_ATTR(DIV,NAME),
+		HTML_ATTR(DIV,STYLE),
 	{ 0 }
 };
 
@@ -534,6 +537,7 @@ const std::string &setCurrentDomain(const std::string &url)
 	}
 	return HTTPCurrentDomain;
 }
+
 
 void initLibWWW()
 {

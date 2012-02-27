@@ -30,6 +30,7 @@
 #include "game_share/pvp_clan.h"
 #include "../string_manager_client.h"
 #include "../entity_cl.h"
+#include "nel/misc/common.h"
 
 
 using namespace NLMISC;
@@ -264,7 +265,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 		{
 			STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 			text += string("\n") + pSMC->getOutpostBuildingLocalizedDescription(CSheetId(Ctrl->getSheetId()));
-			text += "\n" + CI18N::get("uiBotChatPrice") + toString(pOBS->CostDapper);
+			text += "\n" + CI18N::get("uiBotChatPrice") + NLMISC::formatThousands(toString(pOBS->CostDapper));
 			text += CI18N::get("uiBotChatTime") + toString(pOBS->CostTime/60) + CI18N::get("uiBotChatTimeMinute");
 			if ((pOBS->CostTime % 60) != 0)
 				text += toString(pOBS->CostTime%60) + CI18N::get("uiBotChatTimeSecond");
@@ -341,7 +342,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 				if (pIS && pIS->Family == ITEMFAMILY::GUILD_OPTION)
 				{
 					text+= "\n" + CI18N::get("uiBotChatSkillPointCost") + toString(pIS->GuildOption.XPCost);
-					text+= "\n" + CI18N::get("uiBotChatPrice") + toString(pIS->GuildOption.MoneyCost);
+					text+= "\n" + CI18N::get("uiBotChatPrice") + NLMISC::formatThousands(toString(pIS->GuildOption.MoneyCost));
 					guildOption= true;
 				}
 			}
@@ -376,10 +377,10 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 					if (LastPrice > 0)
 					{
 						if(displayMulPrice)
-							text+= "\n" + CI18N::get("uiBotChatPrice") + toString(sint32(LastPrice * priceFactor)) + " ("
-								+ toString( sint32(factor) * sint32(LastPrice * priceFactor) ) + ")";
+							text+= "\n" + CI18N::get("uiBotChatPrice") + NLMISC::formatThousands(toString(sint32(LastPrice * priceFactor))) + " ("
+								+ NLMISC::formatThousands(toString( sint32(factor) * sint32(LastPrice * priceFactor) )) + ")";
 						else
-							text+= "\n" + CI18N::get("uiBotChatPrice") + toString( sint32(factor * LastPrice * priceFactor) );
+							text+= "\n" + CI18N::get("uiBotChatPrice") + NLMISC::formatThousands(toString( sint32(factor * LastPrice * priceFactor) ));
 					}
 
 					if ((LastFactionPointPrice != 0) && (LastFactionType >= PVP_CLAN::BeginClans) && (LastFactionType <= PVP_CLAN::EndClans))
@@ -390,7 +391,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 							text+= "\n";
 
 						text+= CI18N::get("uiBotChatFactionType") + PVP_CLAN::toString((PVP_CLAN::TPVPClan)LastFactionType)
-							+  CI18N::get("uiBotChatFactionPointPrice") + toString(LastFactionPointPrice);
+							+  CI18N::get("uiBotChatFactionPointPrice") + NLMISC::formatThousands(toString(LastFactionPointPrice));
 					}
 
 					// some additional info for resale
@@ -402,10 +403,10 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 						{
 							// append price
 							if(pIS && pIS->Stackable>1 && zeFather->getMultiplyPriceByQuantityFlag())
-								text+= CI18N::get("uiBotChatRetirePrice") + toString(LastPriceRetire) + " ("
-									+ toString(factor * LastPriceRetire) + ")";
+								text+= CI18N::get("uiBotChatRetirePrice") + NLMISC::formatThousands(toString(LastPriceRetire)) + " ("
+									+ NLMISC::formatThousands(toString(factor * LastPriceRetire)) + ")";
 							else
-								text+= CI18N::get("uiBotChatRetirePrice") + toString(factor * LastPriceRetire);
+								text+= CI18N::get("uiBotChatRetirePrice") + NLMISC::formatThousands(toString(factor * LastPriceRetire));
 							// set resale time left
 							ucstring	fmt= CI18N::get("uiBotChatResaleTimeLeft");
 							strFindReplace(fmt, "%d", toString(LastResaleTimeLeft/RYZOM_DAY_IN_HOUR));
@@ -480,6 +481,12 @@ bool CDBGroupListSheetTrade::CSheetChildTrade::isSheetValid(CDBGroupListSheetTex
 		CInventoryManager *pInv = CInventoryManager::getInstance();
 		if (pInv->isBagItemWeared(Ctrl->getIndexInDB()))
 			return false;
+	}
+
+	// Locked by owner; cannot trade
+	if (Ctrl->getLockedByOwner())
+	{
+		return false;
 	}
 
 	// Check seller type?

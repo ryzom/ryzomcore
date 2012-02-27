@@ -378,7 +378,7 @@ void CChatTargetFilter::setTargetGroup(CChatGroup::TGroupType groupType, uint32 
 		const bool guildActive = pIM->getDbProp("SERVER:GUILD:NAME")->getValueBool();
 		switch(groupType)
 		{
-			case CChatGroup::dyn_chat: entry+="DYN"; break;
+			case CChatGroup::dyn_chat: entry+="DYN:" + NLMISC::toString(dynamicChannelDbIndex); break;
 			case CChatGroup::say:	entry+="SAY";	break;
 			case CChatGroup::shout:	entry+="SHOUT";	break;
 			case CChatGroup::team:	if(!teamActive) return; entry+="GROUP";	break;

@@ -143,7 +143,7 @@ extern NLMISC::CLog	g_log;
 extern CContinentManager ContinentMngr;
 extern uint8 PlayerSelectedSlot;
 extern CClientChatManager		ChatMngr;
-extern void addWebIGParams (string &url);
+extern void addWebIGParams (string &url, bool trustedDomain);
 
 // declare ostream << operator for ucstring -> registration of ucstring iin luabind will build a 'tostring' function from it
 std::ostream &operator<<(std::ostream &str, const ucstring &value)
@@ -1323,6 +1323,7 @@ void	CLuaIHM::registerIHM(CLuaState &ls)
 	ls.registerFunc("getIndexInDB", getIndexInDB);
 	ls.registerFunc("getUIId",    getUIId);
 	ls.registerFunc("createGroupInstance", createGroupInstance);
+	ls.registerFunc("createRootGroupInstance", createRootGroupInstance);
 	ls.registerFunc("createUIElement", createUIElement);
 	ls.registerFunc("launchContextMenuInGame",    launchContextMenuInGame);
 	ls.registerFunc("parseInterfaceFromString",    parseInterfaceFromString);
@@ -1356,6 +1357,19 @@ void	CLuaIHM::registerIHM(CLuaState &ls)
 	ls.registerFunc("enableModalWindow", enableModalWindow);
 	ls.registerFunc("disableModalWindow", disableModalWindow);
 	ls.registerFunc("getPlayerPos", getPlayerPos);
+	ls.registerFunc("getPlayerFront", getPlayerFront);
+	ls.registerFunc("getPlayerDirection", getPlayerDirection);
+	ls.registerFunc("getPlayerGender", getPlayerGender);
+	ls.registerFunc("getPlayerName", getPlayerName);
+	ls.registerFunc("getPlayerTitleRaw", getPlayerTitleRaw);
+	ls.registerFunc("getPlayerTitle", getPlayerTitle);
+	ls.registerFunc("getTargetPos", getTargetPos);
+	ls.registerFunc("getTargetFront", getTargetFront);
+	ls.registerFunc("getTargetDirection", getTargetDirection);
+	ls.registerFunc("getTargetGender", getTargetGender);
+	ls.registerFunc("getTargetName", getTargetName);
+	ls.registerFunc("getTargetTitleRaw", getTargetTitleRaw);
+	ls.registerFunc("getTargetTitle", getTargetTitle);
 	ls.registerFunc("addSearchPathUser", addSearchPathUser);
 	ls.registerFunc("displaySystemInfo", displaySystemInfo);
 	ls.registerFunc("disableContextHelpForControl", disableContextHelpForControl);
@@ -1363,6 +1377,7 @@ void	CLuaIHM::registerIHM(CLuaState &ls)
 	ls.registerFunc("setWeatherValue", setWeatherValue);
 	ls.registerFunc("getWeatherValue", getWeatherValue);
 	ls.registerFunc("getCompleteIslands", getCompleteIslands);
+	ls.registerFunc("displayBubble", displayBubble);
 	ls.registerFunc("getIslandId", getIslandId);
 	ls.registerFunc("getClientCfgVar", getClientCfgVar);
 	ls.registerFunc("isPlayerFreeTrial", isPlayerFreeTrial);
@@ -1370,14 +1385,18 @@ void	CLuaIHM::registerIHM(CLuaState &ls)
 	ls.registerFunc("isInRingMode", isInRingMode);
 	ls.registerFunc("getUserRace",  getUserRace);
 	ls.registerFunc("getSheet2idx",  getSheet2idx);
+	ls.registerFunc("getTargetSlot",  getTargetSlot);
+	ls.registerFunc("getSlotDataSetId",  getSlotDataSetId);
 	
 	// Through LUABind API
 	lua_State	*L= ls.getStatePointer();
 
 	luabind::module(L)
 	[
+		LUABIND_FUNC(addDbProp),
 		LUABIND_FUNC(getDbProp),
 		LUABIND_FUNC(setDbProp),
+		LUABIND_FUNC(delDbProp),
 		LUABIND_FUNC(debugInfo),
 		LUABIND_FUNC(rawDebugInfo),
 		LUABIND_FUNC(dumpCallStack),
@@ -1456,9 +1475,16 @@ void	CLuaIHM::registerIHM(CLuaState &ls)
 		luabind::def("shellExecute",  CMiscFunctions::shellExecute),
 
 		LUABIND_FUNC(getPlayerLevel),
+		LUABIND_FUNC(getPlayerVpa),
+		LUABIND_FUNC(getPlayerVpb),
+		LUABIND_FUNC(getPlayerVpc),
 		LUABIND_FUNC(getTargetLevel),
 		LUABIND_FUNC(getTargetForceRegion),
 		LUABIND_FUNC(getTargetLevelForce),
+		LUABIND_FUNC(getTargetSheet),
+		LUABIND_FUNC(getTargetVpa),
+		LUABIND_FUNC(getTargetVpb),
+		LUABIND_FUNC(getTargetVpc),
 		LUABIND_FUNC(isTargetNPC),
 		LUABIND_FUNC(isTargetPlayer), // return 'true' if the target is an npc
 		LUABIND_FUNC(isTargetUser),
@@ -1686,12 +1712,60 @@ void	CLuaIHM::setDbProp(const std::string &dbProp,    sint32 value)
 	// Write to the DB if found
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CCDBNodeLeaf	*node= pIM->getDbProp(dbProp,    false);
+
 	if(node)
 		node->setValue32(value);
 	else
 		debugInfo(toString("setDbProp(): '%s' dbProp Not found",    dbProp.c_str()));
 }
 
+void	CLuaIHM::delDbProp(const string &dbProp)
+{
+	//H_AUTO(Lua_CLuaIHM_setDbProp)
+	// Do not allow Write on SERVER: or LOCAL:
+	static const string	dbServer= "SERVER:";
+	static const string	dbLocal= "LOCAL:";
+	static const string	dbLocalR2= "LOCAL:R2";
+	if( (0==dbProp.compare(0,    dbServer.size(),    dbServer)) ||
+		(0==dbProp.compare(0,    dbLocal.size(),    dbLocal))
+		)
+	{
+		if (0!=dbProp.compare(0,    dbLocalR2.size(),    dbLocalR2))
+		{
+			nlstop;
+			throw ELuaIHMException("setDbProp(): You are not allowed to write on 'SERVER:...' or 'LOCAL:...' database");
+		}
+	}
+
+	// Write to the DB if found
+	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
+	pIM->delDbProp(dbProp);
+}
+
+void	CLuaIHM::addDbProp(const std::string &dbProp,    sint32 value)
+{
+	//H_AUTO(Lua_CLuaIHM_setDbProp)
+	// Do not allow Write on SERVER: or LOCAL:
+	static const std::string	dbServer= "SERVER:";
+	static const std::string	dbLocal= "LOCAL:";
+	static const std::string	dbLocalR2= "LOCAL:R2";
+	if( (0==dbProp.compare(0,    dbServer.size(),    dbServer)) ||
+		(0==dbProp.compare(0,    dbLocal.size(),    dbLocal))
+		)
+	{
+		if (0!=dbProp.compare(0,    dbLocalR2.size(),    dbLocalR2))
+		{
+			nlstop;
+			throw ELuaIHMException("setDbProp(): You are not allowed to write on 'SERVER:...' or 'LOCAL:...' database");
+		}
+	}
+
+	// Write to the DB if found
+	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
+	CCDBNodeLeaf	*node= pIM->getDbProp(dbProp, true);
+	if(node)
+		node->setValue32(value);
+}
 
 // ***************************************************************************
 void		CLuaIHM::debugInfo(const std::string &cstDbg)
@@ -1865,7 +1939,21 @@ std::string	CLuaIHM::getDefine(const std::string &def)
 
 
 // ***************************************************************************
-static CEntityCL *getTargetSlot()
+static sint32 getTargetSlotNr()
+{
+	const char *dbPath = "UI:VARIABLES:TARGET:SLOT";
+	CInterfaceManager *im = CInterfaceManager::getInstance();
+	CCDBNodeLeaf *node = im->getDbProp(dbPath, false);
+	if (!node) return NULL;
+	if ((uint8) node->getValue32() == (uint8) CLFECOMMON::INVALID_SLOT)
+	{
+		return NULL;
+	}
+	return node->getValue32();		
+}
+
+// ***************************************************************************
+static CEntityCL *getTargetEntity()
 {
 	const char *dbPath = "UI:VARIABLES:TARGET:SLOT";
 	CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -1876,6 +1964,12 @@ static CEntityCL *getTargetSlot()
 		return NULL;
 	}
 	return EntitiesMngr.entity((uint) node->getValue32());		
+}
+
+// ***************************************************************************
+static CEntityCL *getSlotEntity(uint slot)
+{
+	return EntitiesMngr.entity(slot);	
 }
 
 // ***************************************************************************
@@ -1891,9 +1985,30 @@ sint32 CLuaIHM::getPlayerLevel()
 }
 
 // ***************************************************************************
+sint64 CLuaIHM::getPlayerVpa()
+{
+	sint64 prop = CInterfaceManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	return prop;
+}
+
+// ***************************************************************************
+sint64 CLuaIHM::getPlayerVpb()
+{
+	sint64 prop = CInterfaceManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	return prop;
+}
+
+// ***************************************************************************
+sint64 CLuaIHM::getPlayerVpc()
+{
+	sint64 prop = CInterfaceManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	return prop;
+}
+
+// ***************************************************************************
 sint32 CLuaIHM::getTargetLevel()
 {
-	CEntityCL *target = getTargetSlot();
+	CEntityCL *target = getTargetEntity();
 	if (!target) return -1;
 	if ( target->isPlayer() )
 	{
@@ -1914,9 +2029,51 @@ sint32 CLuaIHM::getTargetLevel()
 }
 
 // ***************************************************************************
+ucstring CLuaIHM::getTargetSheet()
+{
+	CEntityCL *target = getTargetEntity();
+	if (!target) return "";
+
+	return target->sheetId().toString();
+}
+
+// ***************************************************************************
+sint64 CLuaIHM::getTargetVpa()
+{
+	CEntityCL *target = getTargetEntity();
+	if (!target) return 0;
+
+	sint64 prop = CInterfaceManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", getTargetSlotNr())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+
+	return prop;
+}
+
+// ***************************************************************************
+sint64 CLuaIHM::getTargetVpb()
+{
+	CEntityCL *target = getTargetEntity();
+	if (!target) return 0;
+
+	sint64 prop = CInterfaceManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", getTargetSlotNr())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+
+	return prop;
+}
+
+// ***************************************************************************
+sint64 CLuaIHM::getTargetVpc()
+{
+	CEntityCL *target = getTargetEntity();
+	if (!target) return 0;
+
+	sint64 prop = CInterfaceManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", getTargetSlotNr())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+
+	return prop;
+}
+
+// ***************************************************************************
 sint32 CLuaIHM::getTargetForceRegion()
 {	
-	CEntityCL *target = getTargetSlot();
+	CEntityCL *target = getTargetEntity();
 	if (!target) return -1;
 	if ( target->isPlayer() )
 	{			
@@ -1944,7 +2101,7 @@ sint32 CLuaIHM::getTargetForceRegion()
 // ***************************************************************************
 sint32 CLuaIHM::getTargetLevelForce()
 {
-	CEntityCL *target = getTargetSlot();
+	CEntityCL *target = getTargetEntity();
 	if (!target) return -1;
 	if ( target->isPlayer() )
 	{
@@ -1972,7 +2129,7 @@ sint32 CLuaIHM::getTargetLevelForce()
 // ***************************************************************************
 bool CLuaIHM::isTargetNPC()
 {
-	CEntityCL *target = getTargetSlot();
+	CEntityCL *target = getTargetEntity();
 	if (!target) return false;
 	return target->isNPC();
 }
@@ -1980,7 +2137,7 @@ bool CLuaIHM::isTargetNPC()
 // ***************************************************************************
 bool CLuaIHM::isTargetPlayer()
 {
-	CEntityCL *target = getTargetSlot();
+	CEntityCL *target = getTargetEntity();
 	if (!target) return false;
 	return target->isPlayer();
 }
@@ -1989,7 +2146,7 @@ bool CLuaIHM::isTargetPlayer()
 // ***************************************************************************
 bool CLuaIHM::isTargetUser()
 {
-	CEntityCL *target = getTargetSlot();
+	CEntityCL *target = getTargetEntity();
 	if (!target) return false;
 	return target->isUser();
 }
@@ -1998,15 +2155,15 @@ bool CLuaIHM::isTargetUser()
 bool CLuaIHM::isPlayerInPVPMode()
 {
 	if (!UserEntity) return false;
-	return (UserEntity->getPvpMode() & PVP_MODE::PvpFaction || UserEntity->getPvpMode() & PVP_MODE::PvpFactionFlagged || UserEntity->getPvpMode() & PVP_MODE::PvpZoneFaction);
+	return (UserEntity->getPvpMode() & PVP_MODE::PvpFaction || UserEntity->getPvpMode() & PVP_MODE::PvpFactionFlagged || UserEntity->getPvpMode() & PVP_MODE::PvpZoneFaction)  != 0;
 }
 
 // ***************************************************************************
 bool CLuaIHM::isTargetInPVPMode()
 {
-	CEntityCL *target = getTargetSlot();
+	CEntityCL *target = getTargetEntity();
 	if (!target) return false;
-	return (target->getPvpMode() & PVP_MODE::PvpFaction || target->getPvpMode() & PVP_MODE::PvpFactionFlagged || target->getPvpMode() & PVP_MODE::PvpZoneFaction);
+	return (target->getPvpMode() & PVP_MODE::PvpFaction || target->getPvpMode() & PVP_MODE::PvpFactionFlagged || target->getPvpMode() & PVP_MODE::PvpZoneFaction)  != 0;
 }
 
 // ***************************************************************************
@@ -2369,6 +2526,53 @@ int CLuaIHM::createGroupInstance(CLuaState &ls)
 }
 
 // ***************************************************************************
+int CLuaIHM::createRootGroupInstance(CLuaState &ls)
+{
+	//H_AUTO(Lua_CLuaIHM_createGroupInstance)
+	const char *funcName = "createRootGroupInstance";
+	CLuaIHM::checkArgCount(ls, funcName, 3);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TTABLE);
+	std::vector<std::pair<std::string, std::string> > templateParams;
+	CLuaObject params;
+	params.pop(ls);
+	ENUM_LUA_TABLE(params, it)
+	{
+		if (!it.nextKey().isString())
+		{
+			nlwarning("%s : bad key encountered with type %s, string expected.", funcName, it.nextKey().getTypename());
+			continue;
+		}
+		if (!it.nextValue().isString())
+		{
+			nlwarning("%s : bad value encountered with type %s for key %s, string expected.", funcName, it.nextValue().getTypename(), it.nextKey().toString().c_str());
+			continue;
+		}
+		templateParams.push_back(std::pair<std::string, std::string>(it.nextKey().toString(), it.nextValue().toString())); // strange compilation bug here when I use std::make_pair ... :(
+	}
+	CInterfaceManager *im = CInterfaceManager::getInstance();
+	CInterfaceGroup *result = im->createGroupInstance(ls.toString(1), "ui:interface:"+string(ls.toString(2)), templateParams);
+	if (!result)
+	{
+		ls.pushNil();
+	}
+	else
+	{
+		result->setId("ui:interface:"+string(ls.toString(2)));
+		result->updateCoords();
+		im->addWindowToMasterGroup("ui:interface", result);
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
+		result->setParent(pRoot);
+		if (pRoot)
+			pRoot->addGroup(result);
+		result->setActive(true);
+		CLuaIHM::pushUIOnStack(ls, result);
+	}
+	return 1;
+}
+
+// ***************************************************************************
 int CLuaIHM::createUIElement(CLuaState &ls)
 {
 	//H_AUTO(Lua_CLuaIHM_createUIElement)
@@ -2406,6 +2610,42 @@ int CLuaIHM::createUIElement(CLuaState &ls)
 	}
 	return 1;
 }
+
+
+// ***************************************************************************
+int CLuaIHM::displayBubble(CLuaState &ls)
+{
+	//H_AUTO(Lua_CLuaIHM_createUIElement)
+	const char *funcName = "displayBubble";
+	CLuaIHM::checkArgCount(ls, funcName, 3);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TTABLE);
+	std::vector<std::string> strs;
+	std::vector<std::string> links;
+	CLuaObject params;
+	params.pop(ls);
+	ENUM_LUA_TABLE(params, it)
+	{
+		if (!it.nextKey().isString())
+		{
+			nlwarning("%s : bad key encountered with type %s, string expected.", funcName, it.nextKey().getTypename());
+			continue;
+		}
+		if (!it.nextValue().isString())
+		{
+			nlwarning("%s : bad value encountered with type %s for key %s, string expected.", funcName, it.nextValue().getTypename(), it.nextKey().toString().c_str());
+			continue;
+		}
+		links.push_back(it.nextValue().toString());
+		strs.push_back(it.nextKey().toString());
+	}
+	
+	InSceneBubbleManager.webIgChatOpen((uint32)ls.toNumber(1), ls.toString(2), strs, links);
+	
+	return 1;
+}
+
 
 // ***************************************************************************
 int CLuaIHM::getCompleteIslands(CLuaState &ls)
@@ -3523,7 +3763,7 @@ void	CLuaIHM::browseNpcWebPage(const std::string &htmlId, const std::string &url
 					string("&lang=") + ClientCfg.getHtmlLanguageCode() +
 					string("&guild_name=") + guildName;
 		}
-/*
+/* Already added by GroupHtml
 		if(webig)
 		{
 			// append special webig auth params
@@ -4243,6 +4483,126 @@ int CLuaIHM::getPlayerPos(CLuaState &ls)
 }
 
 // ***************************************************************************
+int CLuaIHM::getPlayerFront(CLuaState &ls)
+{
+	checkArgCount(ls, "getPlayerFront", 0);
+	ls.push(atan2(UserEntity->front().y, UserEntity->front().x));
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHM::getPlayerDirection(CLuaState &ls)
+{
+	checkArgCount(ls, "getPlayerDirection", 0);
+	ls.push(atan2(UserEntity->dir().y, UserEntity->dir().x));
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHM::getPlayerGender(CLuaState &ls)
+{
+	checkArgCount(ls, "getPlayerGender", 0);
+	ls.push((lua_Number)(UserEntity->getGender()));
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHM::getPlayerName(CLuaState &ls)
+{
+	checkArgCount(ls, "getPlayerName", 0);
+	ls.push(UserEntity->getEntityName().toUtf8());
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHM::getPlayerTitleRaw(CLuaState &ls)
+{
+	checkArgCount(ls, "getPlayerTitleRaw", 0);
+	ls.push(UserEntity->getTitleRaw().toUtf8());
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHM::getPlayerTitle(CLuaState &ls)
+{
+	checkArgCount(ls, "getPlayerTitle", 0);
+	ls.push(UserEntity->getTitle().toUtf8());
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHM::getTargetPos(CLuaState &ls)
+{
+	checkArgCount(ls, "getTargetPos", 0);
+	CEntityCL *target = getTargetEntity();
+	if (!target) return 0;
+	ls.push(target->pos().x);
+	ls.push(target->pos().y);
+	ls.push(target->pos().z);
+	return 3;
+}
+
+// ***************************************************************************
+int CLuaIHM::getTargetFront(CLuaState &ls)
+{
+	checkArgCount(ls, "getTargetFront", 0);
+	CEntityCL *target = getTargetEntity();
+	if (!target) return 0;
+	ls.push(atan2(target->front().y, target->front().x));
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHM::getTargetDirection(CLuaState &ls)
+{
+	checkArgCount(ls, "getTargetDirection", 0);
+	CEntityCL *target = getTargetEntity();
+	if (!target) return 0;
+	ls.push(atan2(target->dir().y, target->dir().x));
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHM::getTargetGender(CLuaState &ls)
+{
+	checkArgCount(ls, "getTargetGender", 0);
+	CCharacterCL* target = (CCharacterCL*)getTargetEntity();
+	if (!target) return (int)GSGENDER::unknown;
+	ls.push((lua_Number)(target->getGender()));
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHM::getTargetName(CLuaState &ls)
+{
+	checkArgCount(ls, "getTargetName", 0);
+	CEntityCL *target = getTargetEntity();
+	if (!target) return 0;
+	ls.push(target->getEntityName().toUtf8());
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHM::getTargetTitleRaw(CLuaState &ls)
+{
+	checkArgCount(ls, "getTargetTitleRaw", 0);
+	CEntityCL *target = getTargetEntity();
+	if (!target) return 0;
+	ls.push(target->getTitleRaw().toUtf8());
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHM::getTargetTitle(CLuaState &ls)
+{
+	checkArgCount(ls, "getTargetTitle", 0);
+	CEntityCL *target = getTargetEntity();
+	if (!target) return 0;
+	ls.push(target->getTitle().toUtf8());
+	return 1;
+}
+
+// ***************************************************************************
 int CLuaIHM::addSearchPathUser(CLuaState &ls)
 {
 	//H_AUTO(Lua_CLuaIHM_addSearchPathUser)
@@ -4437,3 +4797,23 @@ int CLuaIHM::getSheet2idx(CLuaState &ls)
 	return 1;
 }
 
+// ***************************************************************************
+int CLuaIHM::getTargetSlot(CLuaState &ls)
+{
+	uint32 slot = (uint32)getTargetSlotNr();
+	ls.push((lua_Number)slot);
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHM::getSlotDataSetId(CLuaState &ls)
+{
+	CLuaIHM::checkArgCount(ls, "getSlotDataSetId", 1);
+	CLuaIHM::checkArgType(ls, "getSlotDataSetId", 1, LUA_TNUMBER);
+
+	uint32 slot = (uint32)ls.toNumber(1);
+	CEntityCL *e = getSlotEntity(slot);
+	string id = toString(e->dataSetId());
+	ls.push(id);
+	return 1;
+}

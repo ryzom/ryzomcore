@@ -115,7 +115,7 @@ NLMISC::CRGBA	CEntityCL::_UserPackAnimalColor;
 NLMISC::CRGBA	CEntityCL::_PvpEnemyColor;
 NLMISC::CRGBA	CEntityCL::_PvpNeutralColor;
 NLMISC::CRGBA	CEntityCL::_PvpAllyInTeamColor;
-NLMISC::CRGBA	CEntityCL::_PvpAllyInGuildColor;
+NLMISC::CRGBA	CEntityCL::_PvpAllyInLeagueColor;
 NLMISC::CRGBA	CEntityCL::_PvpAllyColor;
 NLMISC::CRGBA	CEntityCL::_GMTitleColor[CHARACTER_TITLE::EndGmTitle - CHARACTER_TITLE::BeginGmTitle + 1];
 uint8 CEntityCL::_InvalidGMTitleCode = 0xFF;
@@ -2295,6 +2295,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 					womenTitle = true;
 			}
 			const ucstring replacement(STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw,womenTitle));
+			_Tags = STRING_MANAGER::CStringManagerClient::getTitleInfos(_TitleRaw,womenTitle);
 			if (!replacement.empty() || !ClientCfg.DebugStringManager)
 			{
 				// build the final name
@@ -2436,7 +2437,6 @@ public:
 		CEntityCL::_PvpEnemyColor = pIM->getDbProp("UI:SAVE:ENTITY:COLORS:PVPENEMY")->getValueRGBA();
 		CEntityCL::_PvpAllyColor = pIM->getDbProp("UI:SAVE:ENTITY:COLORS:PVPALLY")->getValueRGBA();
 		CEntityCL::_PvpAllyInTeamColor = pIM->getDbProp("UI:SAVE:ENTITY:COLORS:PVPALLYINTEAM")->getValueRGBA();
-		CEntityCL::_PvpAllyInGuildColor = pIM->getDbProp("UI:SAVE:ENTITY:COLORS:PVPALLYINGUILD")->getValueRGBA();
 		CEntityCL::_PvpNeutralColor = pIM->getDbProp("UI:SAVE:ENTITY:COLORS:PVPNEUTRAL")->getValueRGBA();
 
 		// don't save these colors in .icfg because players can't change them
@@ -2463,7 +2463,7 @@ bool CEntityCL::isTarget () const
 
 //-----------------------------------------------
 
-bool CEntityCL::isInGuild () const
+bool CEntityCL::isInSameGuild () const
 {
 	if (Type != Player && Type != User)
 		return false;
@@ -2475,6 +2475,33 @@ bool CEntityCL::isInGuild () const
 	return false;
 }
 
+//-----------------------------------------------
+
+bool CEntityCL::oneInLeague () const
+{
+	if (Type != Player && Type != User)
+		return false;
+
+	const uint32 leagueID = getLeagueID();
+	if ((UserEntity && (UserEntity->getLeagueID() != 0)) || leagueID != 0)
+		return true;
+
+	return false;
+}
+
+//-----------------------------------------------
+
+bool CEntityCL::isInSameLeague () const
+{
+	if (Type != Player && Type != User)
+		return false;
+
+	const uint32 leagueID = getLeagueID();
+	if ((leagueID != 0) && UserEntity && (leagueID == UserEntity->getLeagueID()))
+		return true;
+
+	return false;
+}
 //-----------------------------------------------
 
 NLMISC::CRGBA	CEntityCL::getColor () const
@@ -2511,46 +2538,43 @@ NLMISC::CRGBA	CEntityCL::getColor () const
 		{
 			if (isEnemy())
 			{
-				if (getPvpMode()&PVP_MODE::PvpFactionFlagged || getPvpMode()&PVP_MODE::PvpChallenge)
-					return _PvpEnemyColor;
+				if (getPvpMode()&PVP_MODE::PvpFaction)
+					return CRGBA::CRGBA(min(255, _PvpEnemyColor.R+150), min(255, _PvpEnemyColor.G+150), min(255, _PvpEnemyColor.B+150),_PvpEnemyColor.A);
 				else
-					return CRGBA(min(255, _PvpEnemyColor.R+150), min(255, _PvpEnemyColor.G+150), min(255, _PvpEnemyColor.B+150),_PvpEnemyColor.A);
+					return _PvpEnemyColor;
 			}
 		}
-		// neutral pvp
-		if (isNeutralPVP())
-		{
-			if (isInTeam())
-				return _PvpAllyInTeamColor;
-			if (isInGuild())
-				return _PvpAllyInGuildColor;
 
-			return _PvpNeutralColor;
-		}
 		// ally
 		if (isAlly())
 		{
 			if (getPvpMode() & PVP_MODE::PvpFactionFlagged)
 			{
-				if (isInTeam())
-					return _PvpAllyInTeamColor;
-				if(isInGuild())
-					return _PvpAllyInGuildColor;
-				return _PvpAllyColor;
+				if(isInSameLeague())
+					return CRGBA::CRGBA(max(0, _PvpAllyColor.R-100), max(0, _PvpAllyColor.G-100), max(0, _PvpAllyColor.B-100),_PvpAllyColor.A);
+				return CRGBA::CRGBA(max(0, _PvpAllyInTeamColor.R-100), max(0, _PvpAllyInTeamColor.G-100), max(0, _PvpAllyInTeamColor.B-100),_PvpAllyInTeamColor.A);
 			}
 			else
 			{
-				if (isInTeam())
-					return CRGBA(min(255, _PvpAllyInTeamColor.R+150), min(255, _PvpAllyInTeamColor.G+150), min(255, _PvpAllyInTeamColor.B+150),_PvpAllyInTeamColor.A);
-				if(isInGuild())
-					return CRGBA(min(255, _PvpAllyInGuildColor.R+150), min(255, _PvpAllyInGuildColor.G+150), min(255, _PvpAllyInGuildColor.B+150),_PvpAllyInGuildColor.A);
-				return CRGBA(min(255, _PvpAllyColor.R+150), min(255, _PvpAllyColor.G+150), min(255, _PvpAllyColor.B+150),_PvpAllyColor.A);
+				if(isInSameLeague())
+					return _PvpAllyColor;
+				return _PvpAllyInTeamColor;
 			}
 		}
+
+		// neutral pvp
+		if (isNeutralPVP())
+			return _PvpNeutralColor;
+
 		// neutral
 		if (isInTeam())
 			return _GroupColor;
-		if (isInGuild())
+
+		// neutral
+		if (isInSameLeague())
+			return CRGBA::CRGBA(min(255, _GroupColor.R+50), min(255, _GroupColor.G+50), min(255, _GroupColor.B+50),_GroupColor.A);
+
+		if (isInSameGuild())
 			return _GuildColor;
 	}
 	return _EntitiesColor[Type];

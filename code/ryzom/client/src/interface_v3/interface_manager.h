@@ -232,6 +232,7 @@ public:
 	CCDBNodeBranch *getDB() const { return _DbRootNode; }
 	// yoyo: should avoid to try creating DbPropr with this system... very dangerous
 	CCDBNodeLeaf* getDbProp (const std::string & name, bool bCreate=true);
+	void delDbProp(const std::string & name);
 	// get a Db Branch by its name. NULL if don't exist or not a branch (never try to create it)
 	CCDBNodeBranch *getDbBranch(const std::string &name);
 	// return the DB as an int32. return 0 if the DB does not exist (never create)
