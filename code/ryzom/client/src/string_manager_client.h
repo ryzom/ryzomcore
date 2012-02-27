@@ -107,7 +107,7 @@ public:
 
 	// Get the Localized Title name
 	static const ucchar *getTitleLocalizedName(const std::string &titleId, bool women);
-	static std::vector<ucstring> CStringManagerClient::getTitleInfos(const std::string &titleId, bool women);
+	static std::vector<ucstring> getTitleInfos(const std::string &titleId, bool women);
 	// Get the Localized name of a classification type
 	static const ucchar *getClassificationTypeLocalizedName(EGSPD::CClassificationType::TClassificationType type);
 

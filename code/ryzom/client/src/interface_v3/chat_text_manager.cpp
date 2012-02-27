@@ -148,7 +148,7 @@ CViewBase *CChatTextManager::createMsgText(const ucstring &cstMsg, NLMISC::CRGBA
 	vt->setMultiLineSpace(getTextMultiLineSpace());
 	vt->setModulateGlobalColor(false);
 
-	ucstring cur_time = "";
+	ucstring cur_time;
 	static CCDBNodeLeaf* node = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
 	if (node)
 	{

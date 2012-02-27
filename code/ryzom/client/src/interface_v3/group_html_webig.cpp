@@ -74,6 +74,7 @@ void addWebIGParams (string &url, bool trustedDomain)
 		string("shardid=") + toString(CharacterHomeSessionId) +
 		string("&name=") + UserEntity->getLoginName().toUtf8() +
 		string("&lang=") + CI18N::getCurrentLanguageCode() +
+		string("&datasetid=") + toString(UserEntity->dataSetId()) +
 		string("&ig=1");
 	if (trustedDomain)
 	{
@@ -82,7 +83,6 @@ void addWebIGParams (string &url, bool trustedDomain)
 		
 		if (url.find('$') != string::npos)
 		{
-			strFindReplace(url, "$datasetid$", toString(UserEntity->dataSetId()));
 			strFindReplace(url, "$gender$", GSGENDER::toString(UserEntity->getGender()));
 			strFindReplace(url, "$displayName$", UserEntity->getDisplayName().toString());
 			strFindReplace(url, "$posx$", toString(UserEntity->pos().x));

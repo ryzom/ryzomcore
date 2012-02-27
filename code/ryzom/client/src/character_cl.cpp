@@ -1877,7 +1877,6 @@ void CCharacterCL::updateVisualPropertyPvpMode(const NLMISC::TGameCycle &/* game
 void CCharacterCL::updateVisualPropertyPvpClan(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)
 {
 	_LeagueId = uint32(prop);
-	buildInSceneInterface();
 
 	if (isUser())
 	{

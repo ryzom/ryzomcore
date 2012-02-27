@@ -1174,7 +1174,7 @@ class CHandlerTell : public IActionHandler
 		ucstring finalMsg;
 		CChatWindow::encodeColorTag(prop.getRGBA(), finalMsg, false);
 
-		ucstring csr = CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "";
+		ucstring csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
 		finalMsg += csr + CI18N::get("youTell") + ": ";
 		prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 		CChatWindow::encodeColorTag(prop.getRGBA(), finalMsg, true);
@@ -1182,7 +1182,7 @@ class CHandlerTell : public IActionHandler
 		// display msg with good color
 //		TDataSetIndex dsi; // not used ....
 		PeopleInterraction.ChatInput.Tell.displayTellMessage(/*dsi, */finalMsg, receiver, prop.getRGBA());
-		
+
 		ucstring s = CI18N::get("youTellPlayer");
 		strFindReplace(s, "%name", receiver);
 		strFindReplace(finalMsg, CI18N::get("youTell"), s);

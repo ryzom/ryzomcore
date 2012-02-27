@@ -2539,7 +2539,7 @@ NLMISC::CRGBA	CEntityCL::getColor () const
 			if (isEnemy())
 			{
 				if (getPvpMode()&PVP_MODE::PvpFaction)
-					return CRGBA::CRGBA(min(255, _PvpEnemyColor.R+150), min(255, _PvpEnemyColor.G+150), min(255, _PvpEnemyColor.B+150),_PvpEnemyColor.A);
+					return CRGBA(min(255, _PvpEnemyColor.R+150), min(255, _PvpEnemyColor.G+150), min(255, _PvpEnemyColor.B+150),_PvpEnemyColor.A);
 				else
 					return _PvpEnemyColor;
 			}
@@ -2551,8 +2551,8 @@ NLMISC::CRGBA	CEntityCL::getColor () const
 			if (getPvpMode() & PVP_MODE::PvpFactionFlagged)
 			{
 				if(isInSameLeague())
-					return CRGBA::CRGBA(max(0, _PvpAllyColor.R-100), max(0, _PvpAllyColor.G-100), max(0, _PvpAllyColor.B-100),_PvpAllyColor.A);
-				return CRGBA::CRGBA(max(0, _PvpAllyInTeamColor.R-100), max(0, _PvpAllyInTeamColor.G-100), max(0, _PvpAllyInTeamColor.B-100),_PvpAllyInTeamColor.A);
+					return CRGBA(max(0, _PvpAllyColor.R-100), max(0, _PvpAllyColor.G-100), max(0, _PvpAllyColor.B-100),_PvpAllyColor.A);
+				return CRGBA(max(0, _PvpAllyInTeamColor.R-100), max(0, _PvpAllyInTeamColor.G-100), max(0, _PvpAllyInTeamColor.B-100),_PvpAllyInTeamColor.A);
 			}
 			else
 			{
@@ -2572,7 +2572,7 @@ NLMISC::CRGBA	CEntityCL::getColor () const
 
 		// neutral
 		if (isInSameLeague())
-			return CRGBA::CRGBA(min(255, _GroupColor.R+50), min(255, _GroupColor.G+50), min(255, _GroupColor.B+50),_GroupColor.A);
+			return CRGBA(min(255, _GroupColor.R+50), min(255, _GroupColor.G+50), min(255, _GroupColor.B+50),_GroupColor.A);
 
 		if (isInSameGuild())
 			return _GuildColor;

@@ -1944,12 +1944,12 @@ static sint32 getTargetSlotNr()
 	const char *dbPath = "UI:VARIABLES:TARGET:SLOT";
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CCDBNodeLeaf *node = im->getDbProp(dbPath, false);
-	if (!node) return NULL;
+	if (!node) return 0;
 	if ((uint8) node->getValue32() == (uint8) CLFECOMMON::INVALID_SLOT)
 	{
-		return NULL;
+		return 0;
 	}
-	return node->getValue32();		
+	return node->getValue32();
 }
 
 // ***************************************************************************
@@ -1963,13 +1963,13 @@ static CEntityCL *getTargetEntity()
 	{
 		return NULL;
 	}
-	return EntitiesMngr.entity((uint) node->getValue32());		
+	return EntitiesMngr.entity((uint) node->getValue32());
 }
 
 // ***************************************************************************
 static CEntityCL *getSlotEntity(uint slot)
 {
-	return EntitiesMngr.entity(slot);	
+	return EntitiesMngr.entity(slot);
 }
 
 // ***************************************************************************
@@ -2032,7 +2032,7 @@ sint32 CLuaIHM::getTargetLevel()
 ucstring CLuaIHM::getTargetSheet()
 {
 	CEntityCL *target = getTargetEntity();
-	if (!target) return "";
+	if (!target) return ucstring();
 
 	return target->sheetId().toString();
 }
