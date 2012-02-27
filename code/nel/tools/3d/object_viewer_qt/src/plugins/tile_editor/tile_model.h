@@ -48,7 +48,15 @@ public:
 	{
 		TilePixmapRole = Qt::UserRole+1,
 		TileFilenameRole = Qt::UserRole+2,
-		TileIndexRole = Qt::UserRole+3
+		TileIndexRole = Qt::UserRole+3,
+		TileFilenameIndexRole = Qt::UserRole+4
+	};
+
+	enum TTileZoomFactor
+	{
+		TileZoom50 = 0,
+		TileZoom100 = 1,
+		TileZoom200 = 2
 	};
 
 
@@ -72,8 +80,17 @@ public:
 	static const char *getTileTypeName(TNodeTileType type);
 	static uint32 getTileTypeSize(TileModel::TNodeTileType type);
 
+public Q_SLOTS:
+	void selectFilenameDisplay(bool selected);
+	void selectIndexDisplay(bool selected);
+	void onZoomFactor(int level);
+
 private:
 	Node *getItem(const QModelIndex &index) const;
+
+	bool m_fileDisplay;
+	bool m_indexDisplay;
+	TTileZoomFactor m_tileZoomFactor;
 
 	//QList<TileItem*> m_tiles;
 	//int m_activeEditChannel;

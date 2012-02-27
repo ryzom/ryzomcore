@@ -46,8 +46,12 @@ class TileItemDelegate : public QStyledItemDelegate
 	TZoomFactor getZoomFactor();
 	void setZoomFactor(TZoomFactor zoomFactor);
 
+public Q_SLOTS:
+	void currentTab(int index);
+
  private:
 	TZoomFactor m_zoomFactor;
+	int m_imageHint;
  };
 
 #endif // TILE_ITEM_DELEGATE_H

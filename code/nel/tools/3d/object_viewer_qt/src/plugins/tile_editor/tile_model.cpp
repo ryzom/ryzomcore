@@ -19,6 +19,8 @@
 
 #include <QStringList>
 
+#include <nel/misc/debug.h>
+
 TileModel::TileModel(const QStringList &headers, QObject *parent) : QAbstractItemModel(parent)
 {
 	QVector<QVariant> rootData;
@@ -26,6 +28,10 @@ TileModel::TileModel(const QStringList &headers, QObject *parent) : QAbstractIte
 		rootData << header;
 
 	rootItem = new Node(rootData);
+
+	m_tileZoomFactor = TileZoom100;
+	m_indexDisplay = true;
+	m_fileDisplay = true;
 }
 
 TileModel::~TileModel()
@@ -89,6 +95,18 @@ QVariant TileModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 
 	Node *item = static_cast<Node*>(index.internalPointer());
+	
+	// Translate the display role to the settings-specific role.
+	
+	if(role == Qt::DisplayRole)
+	{
+		if(m_indexDisplay && m_fileDisplay)
+			role = TileFilenameIndexRole;
+		else if(m_fileDisplay)
+			role = TileFilenameRole;
+		else if(m_indexDisplay)
+			role = TileIndexRole;
+	}
 	return item->data(index.column(), role);
 }
 
@@ -196,4 +214,37 @@ uint32 TileModel::getTileTypeSize(TileModel::TNodeTileType type)
 		break;
 	}
 	return 0;
+}
+
+void TileModel::selectFilenameDisplay(bool selected)
+{
+	m_fileDisplay = selected;
+}
+
+void TileModel::selectIndexDisplay(bool selected)
+{
+	m_indexDisplay = selected;
+}
+
+void TileModel::onZoomFactor(int level)
+{
+	switch(level)
+	{
+	// Zoom Level 50%
+	case 0:
+		nlinfo("zooming to 50%");
+		m_tileZoomFactor = TileZoom50;
+		break;
+	case 1:
+		nlinfo("zooming to 100%");
+		m_tileZoomFactor = TileZoom100;
+		break;
+	case 2:
+		nlinfo("zooming to 200%");
+		m_tileZoomFactor = TileZoom200;
+		break;
+	default:
+		nlwarning("Invalid Time Zoom Factor passed.");
+		break;
+	};
 }

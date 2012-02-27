@@ -161,14 +161,17 @@
           <property name="isWrapping" stdset="0">
            <bool>true</bool>
           </property>
+          <property name="resizeMode">
+           <enum>QListView::Adjust</enum>
+          </property>
           <property name="layoutMode">
-           <enum>QListView::Batched</enum>
+           <enum>QListView::SinglePass</enum>
           </property>
           <property name="viewMode">
            <enum>QListView::IconMode</enum>
           </property>
           <property name="uniformItemSizes">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -678,6 +681,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Index</string>
    </property>
@@ -687,6 +693,9 @@
   </action>
   <action name="actionTileDisplayFilename">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
     <bool>true</bool>
    </property>
    <property name="text">
@@ -742,6 +751,33 @@
    </property>
    <property name="toolTip">
     <string>Delete Image</string>
+   </property>
+  </action>
+  <action name="actionZoom50">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Zoom 50%</string>
+   </property>
+  </action>
+  <action name="actionZoom100">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Zoom 100%</string>
+   </property>
+  </action>
+  <action name="actionZoom200">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Zoom 200%</string>
    </property>
   </action>
  </widget>

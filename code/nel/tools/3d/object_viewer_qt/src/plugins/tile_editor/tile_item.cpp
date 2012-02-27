@@ -115,7 +115,10 @@ int Node::columnCount() const
 
 QVariant Node::data(int column, int role) const
 {
-	if(role == Qt::DisplayRole)
+	if(role == Qt::DisplayRole || 
+		role == TileModel::TileFilenameIndexRole || 
+		role == TileModel::TileFilenameRole || 
+		role == TileModel::TileIndexRole)
 		return m_itemData.value(column);
 	return QVariant();
 }
@@ -165,7 +168,10 @@ TileSetNode::~TileSetNode()
 
 QVariant TileSetNode::data(int column, int role) const
 {
-	if(role == Qt::DisplayRole)
+	if(role == Qt::DisplayRole || 
+		role == TileModel::TileFilenameIndexRole || 
+		role == TileModel::TileFilenameRole || 
+		role == TileModel::TileIndexRole)
 		return QVariant(m_tileSetName);
 	return QVariant();
 }
@@ -189,7 +195,10 @@ TileTypeNode::~TileTypeNode()
 
 QVariant TileTypeNode::data(int column, int role) const
 {
-	if(role == Qt::DisplayRole)
+	if(role == Qt::DisplayRole || 
+		role == TileModel::TileFilenameIndexRole || 
+		role == TileModel::TileFilenameRole || 
+		role == TileModel::TileIndexRole)
 		return QVariant(TileModel::getTileTypeName(m_nodeTileType));
 	return QVariant();
 	
@@ -228,29 +237,11 @@ void TileItemNode::setTileFilename(TileModel::TTileChannel channel, QString file
 }
 
 QVariant TileItemNode::data(int column, int role) const
-{
-	
-
-	nlinfo("dispalying tile %d - %s", m_tileId, m_tileFilename[TileModel::TileDiffuse].toStdString().c_str());
+{	
 	// find some way to know which file/bitmap to display
 	QString tileFilename = m_tileFilename[TileModel::TileDiffuse];
-	//TileWidget *tile = m_tileWidget[TileModel::TileDiffuse];
 
-	//
-	//
-	//	return QVariant();
-
-	//if(tile == NULL)
-	//{
-	//	
-	//	
-
-	//	// Create a new tile widget.
-	//	tile = new TileWidget();
-	//	tile->initWidget(tileFilename, tileFilename, tileSize);
-	//}
-
-	if(role == TileModel::TilePixmapRole)
+	if(role == TileModel::TilePixmapRole || role == Qt::DecorationRole)
 	{
 		TileTypeNode *parent = dynamic_cast<TileTypeNode*>(m_parentItem);
 		if(parent == NULL)
@@ -270,18 +261,22 @@ QVariant TileItemNode::data(int column, int role) const
 
 		return pixmap;
 	}
+	else if(role == Qt::DisplayRole)
+	{
+		return QVariant(tileFilename);
+	}
 	else if(role == TileModel::TileFilenameRole)
 	{
 		return QVariant(tileFilename);
 	}
 	else if(role == TileModel::TileIndexRole)
 	{
-		return QVariant(tileFilename);
+		return QVariant("("+QString::number(m_tileId)+")");
 	}
-	/*else if(role == Qt::TextAlignmentRole)
+	else if(role == TileModel::TileFilenameIndexRole)
 	{
-		return QVariant(Qt::AlignHCenter|Qt::AlignVCenter);
-	}*/
+		return QVariant(tileFilename + " ("+QString::number(m_tileId)+")");
+	}
 
 	return QVariant();
 }

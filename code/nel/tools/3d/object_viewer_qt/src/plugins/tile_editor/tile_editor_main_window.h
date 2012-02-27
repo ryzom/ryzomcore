@@ -23,6 +23,7 @@
 #include "nel/misc/sheet_id.h"
 
 #include <QtGui/QUndoStack>
+#include <QSignalMapper>
 
 namespace Ui {
     class TileEditorMainWindow;
@@ -47,7 +48,7 @@ public Q_SLOTS:
 	void onActionReplaceImage(bool triggered);
 	void onActionDeleteImage(bool triggered);
 	void onTileSetAdd();
-	void changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex);
+	void changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex);	
 
 private:
 	void onActionAddTile(int tabId);
@@ -55,9 +56,13 @@ private:
 	Ui::TileEditorMainWindow *m_ui;
 	QUndoStack *m_undoStack;
 	QMenu *m_rotationMenu;
-	QMenu *m_zoomMenu;
+	
 	QMenu *m_tileDisplayMenu;
 	QMenu *m_tileEditorMenu;
+
+	QMenu *m_zoomMenu;
+	QActionGroup *m_zoomActionGroup;
+	QSignalMapper *m_zoomSignalMapper;
 
 	TileModel *m_model;
 	TileItemDelegate *m_tileItemDelegate;

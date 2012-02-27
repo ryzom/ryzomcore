@@ -25,6 +25,7 @@
 TileItemDelegate::TileItemDelegate()
 {
 	m_zoomFactor = ZoomNormal;
+	m_imageHint = 128;
 }
 
 TileItemDelegate::~TileItemDelegate()
@@ -38,41 +39,48 @@ void TileItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 	painter->save();
 
 	QFont font = QApplication::font();
-	QFont SubFont = QApplication::font();
-	//font.setPixelSize(font.weight()+);
-	font.setBold(true);
-	SubFont.setWeight(SubFont.weight()-2);
+
+	//font.setBold(true);
+	//SubFont.setWeight(SubFont.weight()-2);
 	QFontMetrics fm(font);
 
 	QPixmap tile = qvariant_cast<QPixmap>(index.data(TileModel::TilePixmapRole));
-	QString headerText = qvariant_cast<QString>(index.data(TileModel::TileFilenameRole));
-	QString subText = qvariant_cast<QString>(index.data(TileModel::TileIndexRole));
+	QString tileFileText = qvariant_cast<QString>(index.data(TileModel::TileFilenameRole));
+	QString tileIdText = qvariant_cast<QString>(index.data(TileModel::TileIndexRole));
 
 	QSize tileSize = tile.size();
 
-	QRect headerRect = option.rect;
-	QRect subheaderRect = option.rect;
-	QRect tileRect = subheaderRect;
+	//QRect headerRect = option.rect;
+	QRect rect(option.rect);
+	//QRect tileRect(option.rect);
+	int textHeight = fm.height();
+    int iconPosModX = PIXMAP_MARGIN + (tile.width() / 2);
+    int iconPosModY = (option.rect.height() - tile.height()) / 2;
 
-	tileRect.setRight(tileSize.width()+30);
-	tileRect.setTop(tileRect.top()+5);
-	headerRect.setLeft(tileRect.right());
-	subheaderRect.setLeft(tileRect.right());
-	headerRect.setTop(headerRect.top()+5);
-	headerRect.setBottom(headerRect.top()+fm.height());
+	painter->drawPixmap(rect.adjusted(iconPosModX, iconPosModY, iconPosModX, iconPosModY).topLeft(), tile);
 
-	subheaderRect.setTop(headerRect.bottom()+2);
+
+
+	//tileRect.setRight(tileSize.width()+30);
+	//tileRect.setTop(tileRect.top()+5);
+	//headerRect.setLeft(tileRect.right());
+	//subheaderRect.setLeft(tileRect.right());
+	//headerRect.setTop(headerRect.top()+5);
+	//headerRect.setBottom(headerRect.top()+fm.height());
+
+	//subheaderRect.setTop(headerRect.bottom()+2);
     
+	//painter->drawPixmap(targetrect, pixmap, sourcerect)
     
 	//painter->drawPixmap(QPoint(iconRect.right()/2,iconRect.top()/2),icon.pixmap(iconsize.width(),iconsize.height()));
-	painter->drawPixmap(QPoint(tileRect.left()+tileSize.width()/2+2,tileRect.top()+tileSize.height()/2+3),tile);
+	//painter->drawPixmap(QPoint(tileRect.left()+tileSize.width()/2+2,tileRect.top()+tileSize.height()/2+3),tile);
     
-	painter->setFont(font);
-	painter->drawText(headerRect,headerText);
+	//painter->setFont(font);
+	//painter->drawText(headerRect,headerText);
 
 
-	painter->setFont(SubFont);
-	painter->drawText(subheaderRect.left(),subheaderRect.top()+17,subText);
+	//painter->setFont(SubFont);
+	//painter->drawText(subheaderRect.left(),subheaderRect.top()+17,subText);
 
 	painter->restore();
 }
@@ -80,11 +88,11 @@ void TileItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 QSize TileItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index ) const
 {
 	QPixmap tile = qvariant_cast<QPixmap>(index.data(TileModel::TilePixmapRole));
-	QSize tileSize = tile.size();//tile.actualSize(option.decorationSize);
+	QSize tileSize = tile.size();
 	QFont font = QApplication::font();
 	QFontMetrics fm(font);
     
-	return(QSize(tileSize.width(), tileSize.height()+fm.height()+8 ));
+	return(QSize(tileSize.width()+(2*PIXMAP_MARGIN), tileSize.height()+fm.height()+(2*PIXMAP_MARGIN)));
 }
 
 TileItemDelegate::TZoomFactor TileItemDelegate::getZoomFactor()
@@ -95,4 +103,20 @@ TileItemDelegate::TZoomFactor TileItemDelegate::getZoomFactor()
 void TileItemDelegate::setZoomFactor(TileItemDelegate::TZoomFactor zoomFactor)
 {
 	m_zoomFactor = zoomFactor;
+}
+
+// SLOTS
+
+void TileItemDelegate::currentTab(int index)
+{
+	if(index == 1)
+	{
+		nlinfo("switching delegate to 1 or 256");
+		m_imageHint = 256;
+	}
+	else
+	{
+		nlinfo("switching delegate to 0,2,3 or 128");
+		m_imageHint = 128;
+	}	
 }

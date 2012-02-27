@@ -43,7 +43,6 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	Core::ICore *core = Core::ICore::instance();
 	Core::MenuManager *menuManager = core->menuManager();
 	
-	QMenu *m_tileEditorMenu;
 	// Create tile rotation drop down toolbar menu.
 	m_rotationMenu = new QMenu(tr("Rotate Tile"), m_ui->toolBar);
 	m_rotationMenu->setIcon(QIcon(":/tileRotation/images/rotation0.png"));
@@ -57,7 +56,17 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 
 	// Create the tile zoom menu.
 	m_zoomMenu = new QMenu(tr("Zoom"), m_ui->toolBar);
+	m_zoomActionGroup = new QActionGroup(this);
+	m_zoomSignalMapper = new QSignalMapper(this);
 	QList<QAction*> zoomActions;
+	zoomActions.push_back(m_ui->actionZoom50);
+	zoomActions.push_back(m_ui->actionZoom100);
+	zoomActions.push_back(m_ui->actionZoom200);
+	m_zoomActionGroup->addAction(m_ui->actionZoom50);
+	m_zoomActionGroup->addAction(m_ui->actionZoom100);
+	m_zoomActionGroup->addAction(m_ui->actionZoom200);
+	m_zoomMenu->addActions(zoomActions);
+	m_ui->toolBar->addAction(m_zoomMenu->menuAction());
 
 	m_tileEditorMenu = new QMenu(tr("Tile Editor"), core->menuManager()->menuBar());
 	m_tileDisplayMenu = new QMenu(tr("Tile Display"), m_ui->toolBar);
@@ -84,7 +93,7 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
              this, SLOT(changeActiveTileSet(const QModelIndex &, const QModelIndex &)));
 
 	// 128x128 List View
-	m_ui->listView128->setItemDelegate(m_tileItemDelegate);
+	//m_ui->listView128->setItemDelegate(m_tileItemDelegate);
 	m_ui->listView128->setModel(m_model);
 	m_ui->listView128->addAction(m_ui->actionAddTile);
 	m_ui->listView128->addAction(m_ui->actionDeleteTile);
@@ -92,7 +101,7 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	m_ui->listView128->addAction(m_ui->actionDeleteImage);
 
 	// 256x256 List View
-	m_ui->listView256->setItemDelegate(m_tileItemDelegate);
+	//m_ui->listView256->setItemDelegate(m_tileItemDelegate);
 	m_ui->listView256->setModel(m_model);
 	m_ui->listView256->addAction(m_ui->actionAddTile);
 	m_ui->listView256->addAction(m_ui->actionDeleteTile);
@@ -100,13 +109,13 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	m_ui->listView256->addAction(m_ui->actionDeleteImage);
 
 	// Transition List View
-	m_ui->listViewTransition->setItemDelegate(m_tileItemDelegate);
+	//m_ui->listViewTransition->setItemDelegate(m_tileItemDelegate);
 	m_ui->listViewTransition->setModel(m_model);
 	m_ui->listViewTransition->addAction(m_ui->actionReplaceImage);
 	m_ui->listViewTransition->addAction(m_ui->actionDeleteImage);
 
 	// Displacement List View
-	m_ui->listViewDisplacement->setItemDelegate(m_tileItemDelegate);
+	//m_ui->listViewDisplacement->setItemDelegate(m_tileItemDelegate);
 	m_ui->listViewDisplacement->setModel(m_model);
 	m_ui->listViewDisplacement->addAction(m_ui->actionReplaceImage);
 	m_ui->listViewDisplacement->addAction(m_ui->actionDeleteImage);
@@ -117,6 +126,20 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	connect(m_ui->actionDeleteTile, SIGNAL(triggered(bool)), this, SLOT(onActionDeleteTile(bool)));
 	connect(m_ui->actionReplaceImage, SIGNAL(triggered(bool)), this, SLOT(onActionReplaceImage(bool)));
 	connect(m_ui->actionDeleteImage, SIGNAL(triggered(bool)), this, SLOT(onActioneleteImage(bool)));
+
+	connect(m_ui->actionTileDisplayFilename, SIGNAL(toggled(bool)), m_model, SLOT(selectFilenameDisplay(bool)));
+	connect(m_ui->actionTileDisplayIndex, SIGNAL(toggled(bool)), m_model, SLOT(selectIndexDisplay(bool)));
+
+	//connect(m_ui->tileViewTabWidget, SIGNAL(currentChanged(int)), m_tileItemDelegate, SLOT(currentTab(int)));
+
+	// Connect the zoom buttons.
+	connect(m_ui->actionZoom50, SIGNAL(triggered()), m_zoomSignalMapper, SLOT(map()));
+	m_zoomSignalMapper->setMapping(m_ui->actionZoom50, 0);
+	connect(m_ui->actionZoom100, SIGNAL(triggered()), m_zoomSignalMapper, SLOT(map()));
+	m_zoomSignalMapper->setMapping(m_ui->actionZoom100, 1);
+	connect(m_ui->actionZoom200, SIGNAL(triggered()), m_zoomSignalMapper, SLOT(map()));
+	m_zoomSignalMapper->setMapping(m_ui->actionZoom200, 2);
+	connect(m_zoomSignalMapper, SIGNAL(mapped(int)), m_model, SLOT(onZoomFactor(int)));
 }
 
 TileEditorMainWindow::~TileEditorMainWindow()
@@ -125,6 +148,14 @@ TileEditorMainWindow::~TileEditorMainWindow()
 	delete m_undoStack;
 	delete m_rotationMenu;
 	delete m_zoomMenu;
+
+		
+	delete m_tileDisplayMenu;
+	delete m_tileEditorMenu;
+
+	delete m_zoomMenu;
+	delete m_zoomActionGroup;
+	delete m_zoomSignalMapper;
 }
 
 void TileEditorMainWindow::onActionAddTile(bool triggered)
