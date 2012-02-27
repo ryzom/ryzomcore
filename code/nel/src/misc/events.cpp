@@ -179,7 +179,7 @@ static const CStringConversion<TKey>::CPair stringTable [] =
 	{ "KeyNONAME", KeyNONAME },
 	{ "KeyPA1", KeyPA1 },
 	{ "KeyOEM_CLEAR", KeyOEM_CLEAR },
-};
+}
 
 
 static	CStringConversion<TKey> KeyConversion(stringTable, sizeof(stringTable) / sizeof(stringTable[0]),  KeyCount);

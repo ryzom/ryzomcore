@@ -58,7 +58,7 @@ bool			CNELU::initDriver (uint w, uint h, uint bpp, bool windowed, nlWindow syst
 	CNELU::Driver = NULL;
 
 	// Init driver.
-#if defined(NL_OS_WINDOWS)
+#ifdef NL_OS_WINDOWS
 	if (direct3d)
 	{
 		CNELU::Driver= CDRU::createD3DDriver();
@@ -75,6 +75,7 @@ bool			CNELU::initDriver (uint w, uint h, uint bpp, bool windowed, nlWindow syst
 		nlwarning ("CNELU::initDriver: no driver found");
 		return false;
 	}
+
 	if (!CNELU::Driver->init())
 	{
 		nlwarning ("CNELU::initDriver: init() failed");
