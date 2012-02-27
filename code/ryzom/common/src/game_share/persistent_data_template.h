@@ -176,16 +176,20 @@
 inline uint32 saveGameCycleToSecond(NLMISC::TGameCycle tick)
 {
 	// Evaluate the UTC of this event (with the current date of save). Suppose that 1 second==10 tick
-	return  sint32(NLMISC::CTime::getSecondsSince1970()) + (sint32(tick) - sint32(CTickEventHandler::getGameCycle()))/10;
+	if (tick < CTickEventHandler::getGameCycle())
+		return NLMISC::CTime::getSecondsSince1970();
+	else
+		return  NLMISC::CTime::getSecondsSince1970() + (tick - CTickEventHandler::getGameCycle())/10;
 	// NB: result should be positive since no event should have been launched before 1970!
 }
 
 inline NLMISC::TGameCycle loadSecondToGameCycle(uint32 second)
 {
+	if (second < NLMISC::CTime::getSecondsSince1970())
+		return 0;
+	
 	// Convert UTC of the event to game cycle. Suppose that 1 second==10 tick
-	sint32	newTick= CTickEventHandler::getGameCycle() + (sint32(second) - sint32(NLMISC::CTime::getSecondsSince1970()))*10;
-	// If game cycle is loaded on a server where current game cycle is too young, we can have here negative values => avoid them
-	return std::max(newTick, sint32(0));
+	return CTickEventHandler::getGameCycle() + (second - NLMISC::CTime::getSecondsSince1970())*10;
 }
 #endif
 

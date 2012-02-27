@@ -32,10 +32,12 @@ namespace PVP_MODE
 		PvpZoneOutpost		= 32,
 		PvpFaction			= 64,
 		PvpFactionFlagged	= 128,
+		PvpZoneSafe			= 256,
+		PvpSafe				= 512,
 
 		Unknown,
 		NbModes = Unknown,
-		NbBits = 8 // number of bits needed to store all valid values
+		NbBits = 10 // number of bits needed to store all valid values
 	};
 
 
