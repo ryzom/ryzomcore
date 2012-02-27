@@ -206,6 +206,7 @@ SYNTAXE:
 	positive="true"
 	suffix=""
 	prefix=""
+	format="false"			// make the number thousands formatted 
 />
 
 
