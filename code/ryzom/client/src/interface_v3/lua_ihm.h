@@ -185,9 +185,16 @@ private:
 
 	// LUA exported Functions with luabind
 	static sint32		getPlayerLevel();		// get max level among player skills (magi, combat, crafting ,foraging)
+	static sint64		getPlayerVpa();
+	static sint64		getPlayerVpb();
+	static sint64		getPlayerVpc();
 	static sint32		getTargetLevel();		// get current, precise level of the selected target, or -1 if there's no such selected target
 	static sint32		getTargetForceRegion(); // get 'force region' for current target, or -1 if there's no selected target
-	static sint32		getTargetLevelForce();  // get 'level force' for current target, or -1 if there's no selected target
+	static sint32		getTargetLevelForce();	// get 'level force' for current target, or -1 if there's no selected target
+	static ucstring		getTargetSheet();		// get the name of the target sheet (like 'zoha2old.creature')
+	static sint64		getTargetVpa();
+	static sint64		getTargetVpb();
+	static sint64		getTargetVpc();
 	static bool			isTargetNPC(); // return 'true' if the target is an npc
 	static bool			isTargetPlayer(); // return 'true' if the target is a player
 	static bool			isTargetUser(); // return 'true' if the target is the user
@@ -202,10 +209,12 @@ private:
 	static bool			isInGame();
 	static uint32		getPlayerSelectedSlot();
 	static bool			isPlayerSlotNewbieLand(uint32 slot);  // test if one of the player slot is a newbieland one, if not so, client must be patched in order to continue
-	static uint32       getLocalTime();
+	static uint32		getLocalTime();
 	static double		getPreciseLocalTime();
 	static sint32		getDbProp(const std::string &dbProp);					// return 0 if not found.
 	static void			setDbProp(const std::string &dbProp, sint32 value);		// Nb: the db prop is not created if not present.
+	static void			addDbProp(const std::string &dbProp, sint32 value);		// Nb: the db prop is created if not present.
+	static void			delDbProp(const std::string &dbProp);
 	static std::string	getDefine(const std::string &def);
 	static void			messageBox(const ucstring &text);
 	static void			messageBox(const ucstring &text, const std::string &masterGroup);
@@ -286,17 +295,24 @@ private:
 	static int	getUICaller(CLuaState &ls);		// params: none. return: CInterfaceElement*  (nil if error)
 	static int	getCurrentWindowUnder(CLuaState &ls);		// params: none. return: CInterfaceElement*  (nil if none)
 	static int	getUI(CLuaState &ls);			// params: "ui:interface:...". return: CInterfaceElement*  (nil if error), an additionnal boolean parameter
-	                                            //         can specify verbose display when the element is note found (default is true)
+												//		   can specify verbose display when the element is note found (default is true)
 	static int  createGroupInstance(CLuaState &ls); // params : param 1 = template name,
-	                                                // param 2 = id of parent where the instance will be inserted
-	                                                // param 3 = table with ("template_param", "template_param_value") key/value pairs
+													// param 2 = id of parent where the instance will be inserted
+													// param 3 = table with ("template_param", "template_param_value") key/value pairs
 													// such as { id="foo", x="10" } etc. -> returns a new instance of the template, or nil on fail
+	static int  createRootGroupInstance(CLuaState &ls); // params : param 1 = template name,
+														// param 2 = id of parent where the instance will be inserted
+														// param 3 = table with ("template_param", "template_param_value") key/value pairs
+														// such as { id="foo", x="10" } etc. -> returns a new instance of the template, or nil on fail
 	static int  createUIElement(CLuaState &ls); // params : param 1 = template name,
-	                                            // param 2 = id of parent where the instance will be inserted
-	                                            // param 3 = table with ("template_param", "template_param_value") key/value pairs
+												// param 2 = id of parent where the instance will be inserted
+												// param 3 = table with ("template_param", "template_param_value") key/value pairs
 											    // such as { id="foo", x="10" } etc. -> returns a new instance of the template, or nil on fail
 
-
+	static int	displayBubble(CLuaState &ls);	// params : param 1 = bot id
+												// param 2 = text
+												// param 3 = table with all strings and urls
+												// {"main text"="http:///", "text option 1"="http:///", "text option 2"="http:///") etc...
 	static int	getIndexInDB(CLuaState &ls);	// params: CDBCtrlSheet*.... return: index, or 0 if error
 	static int	getUIId(CLuaState &ls);			// params: CInterfaceElement*. return: ui id (empty if error)
 	static int	runAH(CLuaState &ls);			// params: CInterfaceElement *, "ah", "params". return: none
@@ -334,9 +350,9 @@ private:
 	static int  getServerSeason(CLuaState &ls); // get the last season sent by the server
 												// 0->auto, computed locally from the current day (or not received from server yet)
 												// 1->server force spring
-												// 2->' '        ' summer
-												// 3->' '        ' autumn
-												// 4->' '        ' winter
+												// 2->' '		 ' summer
+												// 3->' '		 ' autumn
+												// 4->' '		 ' winter
 	static int	computeCurrSeason(CLuaState &ls); // compute current displayed season (1->spring, etc .)
 	static int	getAutoSeason(CLuaState &ls); // compute automatic season that would be at this time (1->spring, etc .)
 
@@ -345,6 +361,19 @@ private:
 	static int	enableModalWindow(CLuaState &ls);
 	static int	disableModalWindow(CLuaState &ls);
 	static int	getPlayerPos(CLuaState &ls);
+	static int	getPlayerFront(CLuaState &ls);
+	static int	getPlayerDirection(CLuaState &ls);
+	static int	getPlayerGender(CLuaState &ls);
+	static int	getPlayerName(CLuaState &ls);
+	static int	getPlayerTitleRaw(CLuaState &ls);
+	static int	getPlayerTitle(CLuaState &ls);
+	static int	getTargetPos(CLuaState &ls);
+	static int	getTargetFront(CLuaState &ls);
+	static int	getTargetDirection(CLuaState &ls);
+	static int	getTargetGender(CLuaState &ls);
+	static int	getTargetName(CLuaState &ls);
+	static int	getTargetTitleRaw(CLuaState &ls);
+	static int	getTargetTitle(CLuaState &ls);
 	static int  addSearchPathUser(CLuaState &ls);
 	static int  getClientCfgVar(CLuaState &ls);
 	static int	isPlayerFreeTrial(CLuaState &ls);
@@ -352,6 +381,8 @@ private:
 	static int  isInRingMode(CLuaState &ls);
 	static int  getUserRace(CLuaState &ls);
 	static int  getSheet2idx(CLuaState &ls);
+	static int	getTargetSlot(CLuaState &ls);
+	static int  getSlotDataSetId(CLuaState &ls);
 
 
 	// LUA functions exported for Dev only (debug)

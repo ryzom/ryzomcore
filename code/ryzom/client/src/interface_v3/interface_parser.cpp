@@ -517,7 +517,7 @@ bool CInterfaceParser::parseInterface (const std::vector<std::string> & strings,
 {
 	bool	ok;
 
-	bool needCheck = checkInData;
+	bool needCheck = false;
 
 #if !FINAL_VERSION
 	needCheck = false;
@@ -554,10 +554,12 @@ bool CInterfaceParser::parseInterface (const std::vector<std::string> & strings,
 			string::size_type pos = filename.find ("@");
 			if (pos != string::npos)
 			{
-				std::string bigFilename = CBigFile::getInstance().getBigFileName(filename.substr(0, pos));
-				std::string path = "data/"+filename.substr(0, pos);
-
-				isInData = bigFilename.find(path) != std::string::npos;
+				vector<string> bigFilePaths;
+				CBigFile::getInstance().getBigFilePaths(bigFilePaths);
+				if (CBigFile::getInstance().getBigFileName(filename.substr(0, pos)) != "data/"+filename.substr(0, pos))
+					isInData = false;
+				else
+					isInData = true;
 			}
 
 			if ((needCheck && !isInData) || !file.open (CPath::lookup(firstFileName)))
@@ -4685,7 +4687,7 @@ bool	CInterfaceParser::loadLUA(const std::string &fileName, std::string &error)
 {
 	// get file
 
-	bool needCheck = true;
+	bool needCheck = false;
 
 	#if !FINAL_VERSION
 		needCheck = false;
@@ -4702,10 +4704,10 @@ bool	CInterfaceParser::loadLUA(const std::string &fileName, std::string &error)
 	std::string::size_type pos = pathName.find("@");
 	if (pos != string::npos)
 	{
-		std::string bigFilename = CBigFile::getInstance().getBigFileName(pathName.substr(0, pos));
-		std::string path = "data/"+pathName.substr(0, pos);
-
-		isInData = bigFilename.find(path) != std::string::npos;
+		if (CBigFile::getInstance().getBigFileName(pathName.substr(0, pos)) != "data/"+pathName.substr(0, pos))
+			isInData = false;
+		else
+			isInData = true;
 	}
 
 	if (needCheck && !isInData)
