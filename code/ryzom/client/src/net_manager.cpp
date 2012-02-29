@@ -665,7 +665,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 
 		// select DB
 		sint32	dbIndex = ChatMngr.getDynamicChannelDbIndexFromId(dynChatId);
-		clamp(dbIndex,0 , CChatGroup::MaxDynChanPerPlayer);
+		clamp(dbIndex, (sint32)0 , (sint32)CChatGroup::MaxDynChanPerPlayer);
 		string entry="UI:SAVE:CHAT:COLORS:";
 		switch(mode)
 		{
