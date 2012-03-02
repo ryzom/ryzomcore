@@ -40,7 +40,7 @@ public:
 	explicit TileEditorMainWindow(QWidget *parent = 0);
     ~TileEditorMainWindow();
 
-	QUndoStack *getUndoStack() { return m_undoStack; }
+	QUndoStack *getUndoStack() { return m_undoStack; }	
 
 public Q_SLOTS:
 	void onActionAddTile(bool triggered);
@@ -48,7 +48,8 @@ public Q_SLOTS:
 	void onActionReplaceImage(bool triggered);
 	void onActionDeleteImage(bool triggered);
 	void onTileSetAdd();
-	void changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex);	
+	void changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex);
+	void onZoomFactor(int level);
 
 private:
 	void onActionAddTile(int tabId);

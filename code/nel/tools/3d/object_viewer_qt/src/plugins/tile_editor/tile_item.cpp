@@ -223,7 +223,7 @@ TileItemNode::TileItemNode(int tileId, TileModel::TTileChannel channel, QString 
 {
 	m_tileFilename[channel] = filename;
 	m_parentItem = parent;
-	nlinfo("dispalying tile %d - %s", m_tileId, m_tileFilename[TileModel::TileDiffuse].toStdString().c_str());
+	//nlinfo("dispalying tile %d - %s", m_tileId, m_tileFilename[TileModel::TileDiffuse].toStdString().c_str());
 }
 
 TileItemNode::~TileItemNode()
@@ -257,7 +257,12 @@ QVariant TileItemNode::data(int column, int role) const
 		if(!pixmap.load(tileFilename))
 			nlinfo("failed to load %s", tileFilename.toStdString().c_str());
 
-		//pixmap.scaled(tileSize*100, tileSize*100);
+		if(TileModel::CurrentZoomFactor == TileModel::TileZoom200)
+			tileSize *= 2;
+		else if(TileModel::CurrentZoomFactor == TileModel::TileZoom50)
+			tileSize /= 2;
+
+		pixmap.scaled(tileSize, tileSize);
 
 		return pixmap;
 	}

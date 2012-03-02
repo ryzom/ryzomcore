@@ -21,6 +21,9 @@
 
 #include <nel/misc/debug.h>
 
+// Initialize the static members
+TileModel::TTileZoomFactor TileModel::CurrentZoomFactor;
+
 TileModel::TileModel(const QStringList &headers, QObject *parent) : QAbstractItemModel(parent)
 {
 	QVector<QVariant> rootData;
@@ -29,7 +32,7 @@ TileModel::TileModel(const QStringList &headers, QObject *parent) : QAbstractIte
 
 	rootItem = new Node(rootData);
 
-	m_tileZoomFactor = TileZoom100;
+	TileModel::CurrentZoomFactor = TileModel::TileZoom100;
 	m_indexDisplay = true;
 	m_fileDisplay = true;
 }
@@ -224,27 +227,4 @@ void TileModel::selectFilenameDisplay(bool selected)
 void TileModel::selectIndexDisplay(bool selected)
 {
 	m_indexDisplay = selected;
-}
-
-void TileModel::onZoomFactor(int level)
-{
-	switch(level)
-	{
-	// Zoom Level 50%
-	case 0:
-		nlinfo("zooming to 50%");
-		m_tileZoomFactor = TileZoom50;
-		break;
-	case 1:
-		nlinfo("zooming to 100%");
-		m_tileZoomFactor = TileZoom100;
-		break;
-	case 2:
-		nlinfo("zooming to 200%");
-		m_tileZoomFactor = TileZoom200;
-		break;
-	default:
-		nlwarning("Invalid Time Zoom Factor passed.");
-		break;
-	};
 }

@@ -59,6 +59,11 @@ public:
 		TileZoom200 = 2
 	};
 
+	static const int TILE_DISPLACE_BASE_SIZE = 32;
+	static const int TILE_TRANSITION_BASE_SIZE = 64;
+	static const int TILE_128_BASE_SIZE = 128;
+	static const int TILE_256_BASE_SIZE = 256;
+
 
 	TileModel(const QStringList &headers, QObject *parent);
 	~TileModel();
@@ -80,17 +85,18 @@ public:
 	static const char *getTileTypeName(TNodeTileType type);
 	static uint32 getTileTypeSize(TileModel::TNodeTileType type);
 
+	static TTileZoomFactor CurrentZoomFactor;
+
 public Q_SLOTS:
 	void selectFilenameDisplay(bool selected);
-	void selectIndexDisplay(bool selected);
-	void onZoomFactor(int level);
+	void selectIndexDisplay(bool selected);	
 
 private:
 	Node *getItem(const QModelIndex &index) const;
 
 	bool m_fileDisplay;
 	bool m_indexDisplay;
-	TTileZoomFactor m_tileZoomFactor;
+	//TTileZoomFactor m_tileZoomFactor;
 
 	//QList<TileItem*> m_tiles;
 	//int m_activeEditChannel;

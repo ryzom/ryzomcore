@@ -139,7 +139,7 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	m_zoomSignalMapper->setMapping(m_ui->actionZoom100, 1);
 	connect(m_ui->actionZoom200, SIGNAL(triggered()), m_zoomSignalMapper, SLOT(map()));
 	m_zoomSignalMapper->setMapping(m_ui->actionZoom200, 2);
-	connect(m_zoomSignalMapper, SIGNAL(mapped(int)), m_model, SLOT(onZoomFactor(int)));
+	connect(m_zoomSignalMapper, SIGNAL(mapped(int)), this, SLOT(onZoomFactor(int)));
 }
 
 TileEditorMainWindow::~TileEditorMainWindow()
@@ -156,6 +156,53 @@ TileEditorMainWindow::~TileEditorMainWindow()
 	delete m_zoomMenu;
 	delete m_zoomActionGroup;
 	delete m_zoomSignalMapper;
+}
+
+void TileEditorMainWindow::onZoomFactor(int level)
+{
+	int tile128Scaled=TileModel::TILE_128_BASE_SIZE;
+	int tile256Scaled=TileModel::TILE_256_BASE_SIZE;
+	int tileTransScaled=TileModel::TILE_TRANSITION_BASE_SIZE;
+	int tileDispScaled=TileModel::TILE_DISPLACE_BASE_SIZE;
+	switch(level)
+	{
+	// Zoom Level 50%
+	case 0:
+		nlinfo("zooming to 50%");
+		TileModel::CurrentZoomFactor = TileModel::TileZoom50;
+		tile128Scaled /= 2;
+		tile256Scaled /= 2;
+		tileTransScaled /= 2;
+		tileDispScaled /= 2;
+		break;
+	case 1:
+		nlinfo("zooming to 100%");
+		TileModel::CurrentZoomFactor = TileModel::TileZoom100;
+		break;
+	case 2:
+		nlinfo("zooming to 200%");
+		TileModel::CurrentZoomFactor = TileModel::TileZoom200;
+		tile128Scaled *= 2;
+		tile256Scaled *= 2;
+		tileTransScaled *= 2;
+		tileDispScaled *= 2;
+		break;
+	default:
+		nlwarning("Invalid Time Zoom Factor passed.");
+		break;
+	};
+
+	nlinfo("resizing transition view. base size: %d factor %d to: %d", TileModel::TILE_TRANSITION_BASE_SIZE, level, tileTransScaled);
+
+	m_ui->listView128->setIconSize(QSize(tile128Scaled, tile128Scaled));
+	m_ui->listView128->setCurrentIndex(m_ui->listView128->model()->index(0, 0, m_ui->listView128->rootIndex()));
+	m_ui->listView256->setIconSize(QSize(tile256Scaled, tile256Scaled));
+	m_ui->listView256->setCurrentIndex(m_ui->listView256->model()->index(0, 0, m_ui->listView256->rootIndex()));
+	m_ui->listViewTransition->setIconSize(QSize(tileTransScaled, tileTransScaled));
+	m_ui->listViewTransition->setCurrentIndex(m_ui->listViewTransition->model()->index(0, 0, m_ui->listViewTransition->rootIndex()));
+	m_ui->listViewDisplacement->setIconSize(QSize(tileDispScaled, tileDispScaled));
+	m_ui->listViewDisplacement->setCurrentIndex(m_ui->listViewDisplacement->model()->index(0, 0, m_ui->listViewDisplacement->rootIndex()));
+	m_ui->listViewTransition->repaint();
 }
 
 void TileEditorMainWindow::onActionAddTile(bool triggered)
