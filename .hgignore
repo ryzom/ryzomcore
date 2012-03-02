@@ -144,6 +144,8 @@ external
 external_stlport
 3rdParty
 .svn
+thumbs.db
+Thumbs.db
 
 # build
 code/nel/build/*
