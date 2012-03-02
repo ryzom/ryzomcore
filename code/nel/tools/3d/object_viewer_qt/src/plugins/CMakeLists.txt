@@ -7,6 +7,7 @@ ADD_SUBDIRECTORY(disp_sheet_id)
 ADD_SUBDIRECTORY(object_viewer)
 ADD_SUBDIRECTORY(georges_editor)
 ADD_SUBDIRECTORY(translation_manager)
+ADD_SUBDIRECTORY(bnp_manager)
 # Note: Temporarily disabled until development continues.
 #ADD_SUBDIRECTORY(zone_painter)
 # Ryzom Specific Plugins
