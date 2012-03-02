@@ -417,6 +417,17 @@ void CEntityIdTranslator::checkEntity (const CEntityId &eid, const ucstring &ent
 	}
 }
 
+void CEntityIdTranslator::removeShardFromName(ucstring& name)
+{
+	// The string must contain a '(' and a ')'
+	ucstring::size_type	p0= name.find('(');
+	ucstring::size_type	p1= name.find(')');
+	if (p0 == ucstring::npos || p1 == ucstring::npos || p1 <= p0)
+		return;
+
+	name = name.substr(0, p0) + name.substr(p1 + 1);
+}
+
 // this callback is call when the file is changed
 void cbInvalidEntityNamesFilename(const std::string &invalidEntityNamesFilename)
 {

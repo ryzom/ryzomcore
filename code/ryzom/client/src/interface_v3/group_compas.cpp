@@ -587,6 +587,12 @@ bool CGroupCompasMenu::parse(xmlNodePtr cur, CInterfaceGroup *parent /*=NULL*/)
 	return true;
 }
 
+// Helper for sorting landmarks
+static inline bool UserLandMarksSortPredicate(const CUserLandMark& lm1, const CUserLandMark& lm2)
+{
+	return toLower(lm1.Title) < toLower(lm2.Title);
+}
+
 // ***************************************************************************
 // Called when we activate the compass menu
 void CGroupCompasMenu::setActive (bool state)
@@ -803,6 +809,10 @@ void CGroupCompasMenu::setActive (bool state)
 				}
 				// User landmarks
 				uint nbUserLandMarks = std::min( uint(currCont->UserLandMarks.size()), CContinent::getMaxNbUserLandMarks() );
+
+				// Sort the landmarks
+				std::sort(currCont->UserLandMarks.begin(), currCont->UserLandMarks.end(), UserLandMarksSortPredicate);
+
 				for(k = 0; k < nbUserLandMarks; ++k)
 				{
 					if (currCont->UserLandMarks[k].Type < CUserLandMark::UserLandMarkTypeCount)

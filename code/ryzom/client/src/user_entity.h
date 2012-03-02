@@ -477,6 +477,14 @@ public:
 	/// true if current behaviour allows to change front
 	bool canChangeFront();
 
+	ucstring getLoginName()
+	{
+		if (_LoginName == ucstring(""))
+			_LoginName = getDisplayName();
+
+		return _LoginName;
+	}
+
 protected:
 	class CSpeedFactor : public ICDBNode::IPropertyObserver
 	{
@@ -741,6 +749,8 @@ private:
 	/// previous items in hand before they have been changed by an auto-equip due to an action (ex: forage)
 	CItemSnapshot			_PreviousRightHandItem;
 	CItemSnapshot			_PreviousLeftHandItem;
+
+	ucstring _LoginName;
 };
 
 /// Out game received position

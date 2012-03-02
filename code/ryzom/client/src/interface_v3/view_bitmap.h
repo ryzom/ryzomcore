@@ -72,6 +72,8 @@ public:
 
 	bool  getScale() const { return _Scale; }
 	void setScale (bool s) { _Scale = s; }
+	bool  getTile() const { return _Tile; }
+	void setTile (bool s) { _Tile = s; }
 	void setColor (const NLMISC::CRGBA &r) { _Color = r; }
 
 	// Reflected

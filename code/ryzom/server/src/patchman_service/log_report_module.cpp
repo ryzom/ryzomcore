@@ -26,6 +26,7 @@
 
 // game_share
 #include "game_share/utils.h"
+#include "game_share/deployment_configuration.h"
 
 // patchman
 #include "administered_module.h"

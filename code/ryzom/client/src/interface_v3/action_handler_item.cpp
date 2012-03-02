@@ -31,9 +31,11 @@
 #include "../net_manager.h"
 #include "group_menu.h"
 #include "../global.h"
+#include "group_html.h"
 
 //
 #include "game_share/inventories.h"
+#include "game_share/bot_chat_types.h"
 
 #include "macrocmd_manager.h"
 #include "inventory_manager.h"
@@ -43,6 +45,7 @@
 #include "view_bitmap.h"
 
 extern CSheetManager SheetMngr;
+extern NLMISC::CLog	g_log;
 
 using namespace std;
 using namespace NLMISC;
@@ -80,8 +83,6 @@ void CInterfaceItemEdition::setCurrWindow(CDBCtrlSheet* ctrlSheet, const std::st
 		_CurrWindow.IsInEditionMode = isInEditionMode;
 		_CurrWindow.begin();
 	}
-
-	
 }
 
 // ********************************************************************************************
@@ -153,13 +154,26 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 					if (itemInfo.CustomText.empty())
 						display->setTextFormatTaged(ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id)));
 					else
-						display->setTextFormatTaged(itemInfo.CustomText);		
+					{
+						ucstring text = itemInfo.CustomText;
+						string::size_type delimiter = text.find(' ');
+						if(text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
+						{
+							CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId("ui:interface:web_transactions:content:html"));
+							if (pGH)
+								pGH->browse(ucstring(text.substr(4, delimiter-4)).toString().c_str());
+							if (delimiter == string::npos)
+								group->setActive(false);
+							else
+								text = text.substr(delimiter, text.size()-delimiter);
+						}
+						
+						display->setTextFormatTaged(text);		
+					}
 				}
-
 			}
 		}
 	}
-
 }
 
 
@@ -278,7 +292,21 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 						if (itemInfo.CustomText.empty())
 							display->setTextFormatTaged(ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id)));
 						else
-							display->setTextFormatTaged(itemInfo.CustomText);
+						{
+							ucstring text = itemInfo.CustomText;
+							string::size_type delimiter = text.find(' ');
+							if(text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
+							{
+								CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId("ui:interface:web_transactions:content:html"));
+								if (pGH)
+									pGH->browse(ucstring(text.substr(4, delimiter-4)).toString().c_str());
+								if (delimiter == string::npos)
+									group->setActive(false);
+								else
+									text = text.substr(delimiter, text.size()-delimiter);
+							}
+							display->setTextFormatTaged(text);
+						}
 					}
 					else
 					{
@@ -287,7 +315,6 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 					}
 				}
 			}
-
 		}
 	}
 }
@@ -366,7 +393,6 @@ void CInterfaceItemEdition::CItemEditionWindow::validate()
 				text = editBoxLarge->getInputString();
 			}
 			 
-
 			if (textValid)
 			{
 				CBitMemStream out;
@@ -972,6 +998,12 @@ bool checkCanExchangeItem(CDBCtrlSheet *pCSSrc)
 		bDropOrSell = pIS->canExchangeOrGive(PlayerTrade.BotChatGiftContext);
 	}
 
+	// Locked by owner; cannot trade
+	if (pCSSrc->getLockedByOwner())
+	{
+		return false;
+	}
+
 	// Special case if this is an animal ticket
 	if ((pIS != NULL) && (pIS->Family == ITEMFAMILY::PET_ANIMAL_TICKET))
 	{
@@ -1209,6 +1241,13 @@ class CHandlerDestroyItem : public IActionHandler
 			nlwarning("<CHandlerDestroyItem::execute> no caller sheet found");
 			return;
 		}
+
+		// Don't destroy locked items
+		if (item->getLockedByOwner())
+		{
+			return;
+		}
+
 		// if the item is currently selected, removes the selection
 		if (item == CDBCtrlSheet::getCurrSelection())
 		{
@@ -1712,11 +1751,15 @@ class CHandlerItemMenuCheck : public IActionHandler
 		CViewTextMenu	*pXpCatalyserUse = dynamic_cast<CViewTextMenu*>(pMenu->getView("xp_catalyser_use"));
 		CViewTextMenu	*pDrop = dynamic_cast<CViewTextMenu*>(pMenu->getView("drop"));
 		CViewTextMenu	*pDestroy = dynamic_cast<CViewTextMenu*>(pMenu->getView("destroy"));
+		CViewTextMenu	*pLockUnlock = dynamic_cast<CViewTextMenu*>(pMenu->getView("lockunlock"));
 		CViewTextMenu	*pMoveSubMenu = dynamic_cast<CViewTextMenu*>(pMenu->getView("move"));
 		CViewTextMenu	*pMoveToBag = dynamic_cast<CViewTextMenu*>(pMenu->getView("bag"));
 		CViewTextMenu	*pMoveToGuild = dynamic_cast<CViewTextMenu*>(pMenu->getView("guild"));
 		CViewTextMenu	*pMoveToRoom = dynamic_cast<CViewTextMenu*>(pMenu->getView("room"));
 		CViewTextMenu	*pMoveToPa[MAX_INVENTORY_ANIMAL];
+
+		bool bIsLockedByOwner = pCS->getLockedByOwner();
+
 		for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 		{
 			pMoveToPa[i]= dynamic_cast<CViewTextMenu*>(pMenu->getView(toString("pa%d", i)));
@@ -1735,24 +1778,27 @@ class CHandlerItemMenuCheck : public IActionHandler
 		if(pXpCatalyserUse) pXpCatalyserUse->setActive(false);
 		if(pItemTextDisplay) pItemTextDisplay->setActive(false);
 		if(pItemTextEdition) pItemTextEdition->setActive(false);
+
+		if(pLockUnlock) pLockUnlock->setActive(true);
+
 		const CItemSheet *pIS = pCS->asItemSheet();
 		if (invId != INVENTORIES::guild)
 		if (pIS != NULL)
 		{
-			if (pCrisEnchant && pIS->Family == ITEMFAMILY::CRYSTALLIZED_SPELL)
+			if (pCrisEnchant && pIS->Family == ITEMFAMILY::CRYSTALLIZED_SPELL && !bIsLockedByOwner)
 				pCrisEnchant->setActive(true);
-			if (pCrisReload && pIS->Family == ITEMFAMILY::ITEM_SAP_RECHARGE)
+			if (pCrisReload && pIS->Family == ITEMFAMILY::ITEM_SAP_RECHARGE && !bIsLockedByOwner)
 				pCrisReload->setActive(true);
 			// teleport can be used only from bag (NB: should not exist in mektoub....)
-			if (pTeleportUse && pIS->Family == ITEMFAMILY::TELEPORT && pCS->getInventoryIndex()==INVENTORIES::bag)
+			if (pTeleportUse && pIS->Family == ITEMFAMILY::TELEPORT && pCS->getInventoryIndex()==INVENTORIES::bag && !bIsLockedByOwner)
 			{
 				pTeleportUse->setActive(true);
 			}
-			if (pItemConsume && pIS->IsConsumable == true && pCS->getInventoryIndex()==INVENTORIES::bag)
+			if (pItemConsume && pIS->IsConsumable == true && pCS->getInventoryIndex()==INVENTORIES::bag && !bIsLockedByOwner)
 			{
 				pItemConsume->setActive(true);
 			}
-			if (pXpCatalyserUse && pIS->Family == ITEMFAMILY::XP_CATALYSER && pCS->getInventoryIndex()==INVENTORIES::bag)
+			if (pXpCatalyserUse && pIS->Family == ITEMFAMILY::XP_CATALYSER && pCS->getInventoryIndex()==INVENTORIES::bag && !bIsLockedByOwner)
 			{
 				pXpCatalyserUse->setActive(true);
 			}
@@ -1815,9 +1861,10 @@ class CHandlerItemMenuCheck : public IActionHandler
 			for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 				if(pMoveToPa[i]) pMoveToPa[i]->setActive(false);
 
-			// additionnaly, cannot drop/destroy an animal item.
+			// additionnaly, cannot drop/destroy/lock an animal item.
 			if(pDrop)			pDrop->setActive(false);
 			if(pDestroy)		pDestroy->setActive(false);
+			if(pLockUnlock)		pLockUnlock->setActive(false);
 		}
 		else
 		{
@@ -1845,6 +1892,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			// std case: can drop / destroy
 			if(pDrop)		pDrop->setActive(invId!=INVENTORIES::guild);
 			if(pDestroy)	pDestroy->setActive(invId!=INVENTORIES::guild);
+			if(pLockUnlock)	pLockUnlock->setActive(invId!=INVENTORIES::guild);
 		}
 
 		// hide the move entry completely?
@@ -1899,6 +1947,29 @@ class CHandlerItemMenuCheck : public IActionHandler
 			pItemTextDisplay->setGrayed(pIM->getDbProp("UI:VARIABLES:ISACTIVE:PHRASE_EDIT_CUSTOM")->getValueBool());
 		}
 
+		if (pCS->getGrayed())
+		{
+			if (pEquip) pEquip->setActive(false);
+			if (pDestroy) pDestroy->setActive(false);
+			if (pLockUnlock) pLockUnlock->setActive(false);
+			if (pMoveSubMenu) pMoveSubMenu->setActive(false);
+		}
+
+		if (bIsLockedByOwner) 
+		{
+			if (pLockUnlock) pLockUnlock->setHardText("uimUnlockItem");
+			// Cannot drop/destroy if locked by owner
+			if (pDrop)    pDrop->setActive(false);
+			if (pDestroy) pDestroy->setActive(false);
+		}
+		else
+		{
+			if (pLockUnlock) pLockUnlock->setHardText("uimLockItem");
+		}
+
+		// Only show lock menu item if inventory contains the info
+		if (pLockUnlock) pLockUnlock->setActive(pCS->canOwnerLock());
+
 
 		// **** Gray Entries
 		// If ourselves are not available, then gray all
@@ -1911,6 +1982,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			if(pXpCatalyserUse)	pXpCatalyserUse->setGrayed(true);
 			if(pDrop)			pDrop->setGrayed(true);
 			if(pDestroy)		pDestroy->setGrayed(true);
+			if(pLockUnlock)		pLockUnlock->setGrayed(true);
 			if(pMoveSubMenu)	pMoveSubMenu->setGrayed(true);
 			if(pMoveToBag)		pMoveToBag->setGrayed(true);
 			for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
@@ -1929,6 +2001,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			if(pXpCatalyserUse)	pXpCatalyserUse->setGrayed(false);
 			if(pDrop)			pDrop->setGrayed(false);
 			if(pDestroy)		pDestroy->setGrayed(false);
+			if(pLockUnlock)		pLockUnlock->setGrayed(false);
 			if(pMoveSubMenu)	pMoveSubMenu->setGrayed(false);
 
 			// check each inventory dest if available
@@ -1955,6 +2028,45 @@ class CHandlerItemMenuDeactivate : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerItemMenuDeactivate, "item_menu_deactivate" );
+
+
+// ***************************************************************************
+
+class CHandlerItemMenuBaseCheck : public IActionHandler
+{
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
+		// Get the ctrl sheet that launched this menu
+		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(pIM->getCtrlLaunchingModal());
+		if (pCS == NULL) return;
+		INVENTORIES::TInventory		invId= (INVENTORIES::TInventory)pCS->getInventoryIndex();
+
+		// Get the menu launched
+		CInterfaceGroup	  *pMenu= dynamic_cast<CInterfaceGroup*>(pCaller);
+		if(!pMenu)	return;
+
+		// Get all needed text entries
+		CViewTextMenu	*pDestroy = dynamic_cast<CViewTextMenu*>(pMenu->getView("destroy"));
+		CViewTextMenu	*pLockUnlock = dynamic_cast<CViewTextMenu*>(pMenu->getView("lockunlock"));
+
+		if (pCS->getLockedByOwner()) 
+		{
+			pLockUnlock->setHardText("uimUnlockItem");
+			// Cannot destroy if locked by owner
+			if (pDestroy) pDestroy->setActive(false);
+		}
+		else
+		{
+			pLockUnlock->setHardText("uimLockItem");
+			if (pDestroy) pDestroy->setActive(true);
+		}
+
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerItemMenuBaseCheck, "item_menu_base_check" );
+
 
 // ***************************************************************************
 static void sendMsgUseItem(uint16 slot)

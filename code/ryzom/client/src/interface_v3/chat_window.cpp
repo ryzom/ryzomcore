@@ -472,15 +472,9 @@ void CChatWindow::displayLocalPlayerTell(const ucstring &receiver, const ucstrin
 	CInterfaceProperty prop;
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:SPEAKER"," ");
 	encodeColorTag(prop.getRGBA(), finalMsg, false);
-	ucstring cur_time;
-	CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
-	if (pNL && pNL->getValueBool())
-	{
-		cur_time = CInterfaceManager::getTimestampHuman();
-	}
-	ucstring csr;
-	if (CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw())) csr += ucstring("(CSR) ");
-	finalMsg += cur_time + csr + CI18N::get("youTell") + ": ";
+
+	ucstring csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
+	finalMsg += csr + CI18N::get("youTell") + ": ";
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 	encodeColorTag(prop.getRGBA(), finalMsg, true);
 	finalMsg += msg;
@@ -1294,8 +1288,18 @@ public:
 			CChatWindow::_ChatWindowLaunchingCommand = chat;
 			string str = text.toUtf8();
 			string cmdWithArgs = str.substr(1);
-			/* In the chat context, only ' ' is a possible separator */
+
+			// Get the command name from the string, can contain spaces
 			string cmd = cmdWithArgs.substr(0, cmdWithArgs.find(' '));
+			if (cmdWithArgs.find('"') == 0)
+			{
+				string::size_type pos = cmdWithArgs.find('"', 1);
+				if (string::npos != pos)
+				{
+					cmd = cmdWithArgs.substr(1, pos - 1);
+				}
+			}
+
 			if ( NLMISC::ICommand::exists( cmd ) )
 			{
 				NLMISC::ICommand::execute( cmdWithArgs, g_log );
@@ -1314,7 +1318,7 @@ public:
 			}
 		}
 		// Clear input string
-		pEB->setInputString (string(""));
+		pEB->setInputString (ucstring(""));
 		CGroupContainer *gc = pEB->getEnclosingContainer();
 		if (gc)
 		{

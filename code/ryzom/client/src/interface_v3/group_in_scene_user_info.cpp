@@ -97,7 +97,7 @@ CRGBA CGroupInSceneUserInfo::BarColorHPNegative = CRGBA(127, 32, 0);
 #define nlfsinfo2 if ( _Entity->isForageSource() ) nlinfo
 
 
-CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
+CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 {
 	// Get the interface manager
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -129,6 +129,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 	bool forageSourceBarDisplayed= false;
 	bool needPvPLogo= false;
 	bool permanentContent = false;
+	bool rpTags = false;
 	bool displayMissionIcons = pIM->getDbProp("UI:SAVE:INSCENE:FRIEND:MISSION_ICON")->getValueBool();
 
 	// Names
@@ -136,6 +137,12 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 	ucstring theTribeName;
 	ucstring entityName = entity->getDisplayName();
 	ucstring entityTitle = entity->getTitle();
+
+	ucstring entityTag1 = entity->getTag(1);
+	ucstring entityTag2 = entity->getTag(2);
+	ucstring entityTag3 = entity->getTag(3);
+	ucstring entityTag4 = entity->getTag(4);
+
 	string entityPermanentContent = entity->getPermanentStatutIcon();
 
 	// Active fields and bars
@@ -160,6 +167,8 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 	}
 	else if(npcFriendAndNeutral)
 	{
+		string dbEntry;
+		getBarSettings( pIM, user, entity->isPlayer(), _friend, dbEntry, bars );
 		// For RoleMasters, merchants etc... must display name and function, and nothing else
 		for(uint i=0;i<NumBars;i++)
 			bars[i]= false;
@@ -168,6 +177,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 		title= true;
 		guildName= false;
 		templateName = "in_scene_user_info";
+		rpTags = (!entityTag1.empty()  ||  !entityTag2.empty()  || !entityTag3.empty()  || !entityTag4.empty() ) && pIM->getDbProp(dbEntry+"RPTAGS")->getValueBool();
 	}
 	else
 	{
@@ -176,6 +186,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 		getBarSettings( pIM, user, entity->isPlayer(), _friend, dbEntry, bars );
 		name = !entityName.empty() && pIM->getDbProp(dbEntry+"NAME")->getValueBool();
 		title = !entityTitle.empty() && pIM->getDbProp(dbEntry+"TITLE")->getValueBool();
+		rpTags = (!entityTag1.empty()  ||  !entityTag2.empty()  || !entityTag3.empty()  || !entityTag4.empty() ) && pIM->getDbProp(dbEntry+"RPTAGS")->getValueBool();
 		// if name is empty but not title, title is displayed as name
 		if (!title && entityName.empty() && !entityTitle.empty() && pIM->getDbProp(dbEntry+"NAME")->getValueBool())
 			title = true;
@@ -369,6 +380,26 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 			else
 				stringSpace += textH;
 
+			if (rpTags)
+			{
+				CPlayerCL * pPlayer = dynamic_cast<CPlayerCL*>(entity);
+				CViewBitmap *bitmap;
+				if (pPlayer == NULL || (pPlayer != NULL && pPlayer->getPvpMode() & PVP_MODE::PvpFaction))
+				{
+					bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_1"));
+					if (bitmap)
+						bitmap->setTexture(entityTag1.toString());
+					bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_2"));
+					if (bitmap)
+						bitmap->setTexture(entityTag2.toString());
+				}
+				bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_3"));
+				if (bitmap)
+					bitmap->setTexture(entityTag3.toString());
+				bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_4"));
+				if (bitmap)
+					bitmap->setTexture(entityTag4.toString());
+			}
 
 			// Get the permanent content bitmap
 			if(permanentContent)
@@ -539,162 +570,96 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 						info->_MissionTarget = bitmap;
 				}
 
-				CViewBase * pvpCivLogo = info->getView ("pvp_faction_civ_logo");
-				CViewBase * pvpCultLogo = info->getView ("pvp_faction_cult_logo");
+				CViewBase * pvpFactionLogo = info->getView ("pvp_faction_logo");
+				CViewBase * pvpOutpostLogo = info->getView ("pvp_outpost_logo");
+				CViewBase * pvpDuelLogo = info->getView ("pvp_duel_logo");
 
 				CPlayerCL * pPlayer = dynamic_cast<CPlayerCL*>(entity);
 				if (pPlayer == NULL)
 					needPvPLogo = false;
 
-				// set or inactive pvp logos
-				bool needCivPvpLogo = needPvPLogo;
-				bool needCultPvpLogo = needPvPLogo;
 
-				if (pPlayer != NULL && needPvPLogo && pvpCivLogo && pvpCultLogo)
+				if (pPlayer != NULL && needPvPLogo)
 				{
-					uint8 civToDisplay = (uint8)(pPlayer->getClanCivMaxFame() & 0xFF);
-					uint8 cultToDisplay = (uint8)(pPlayer->getClanCultMaxFame() & 0xFF);
-
-					if (!entity->isUser())
+					if (pvpFactionLogo) 
 					{
-						bool civEnnemies = false;
-						for (uint8 i = 0; i < 4; i++)
+						pvpFactionLogo->setActive(true);
+						CViewBitmap * pvpFactionBitmap = dynamic_cast<CViewBitmap *>(pvpFactionLogo);
+						if( pvpFactionBitmap )
 						{
-							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpEnnemy(i)) ||
-								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpAlly(i)) )
+							if (user)
 							{
-								civEnnemies = true;
-								if ( civToDisplay == i)
-									break;
-								else
-									 civToDisplay = i;
-							}
-							
-							if (!civEnnemies)
-							{
-								if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpAlly(i)) ||
-									 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpEnnemy(i)) )
+								if (pPlayer->getPvpMode() & PVP_MODE::PvpChallenge)
 								{
-									if ( civToDisplay == i)
-										break;
-									else
-										 civToDisplay = i;
+									pvpFactionBitmap->setTexture("ico_curse.tga");
 								}
-							}
-						}
-
-
-						for (uint8 i = 4; i < 7; i++)
-						{
-							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpEnnemy(i)) ||
-								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpAlly(i)) )
-							{
-								if ( cultToDisplay == i)
-									break;
+								else if (pPlayer->getPvpMode() & PVP_MODE::PvpFaction)
+								{
+									if (pPlayer->getPvpMode() & PVP_MODE::PvpZoneSafe)
+										pvpFactionBitmap->setTexture("pvp_neutral.tga");
+									else
+										pvpFactionBitmap->setTexture("pvp_enemy_tag.tga");
+								}
+								else if (pPlayer->getPvpMode() & PVP_MODE::PvpFactionFlagged)
+								{
+									if (pPlayer->getPvpMode() & PVP_MODE::PvpSafe)
+										pvpFactionBitmap->setTexture("pvp_neutral.tga");
+									else
+										pvpFactionBitmap->setTexture("pvp_enemy_flag.tga");
+								}
 								else
-									 cultToDisplay = i;
-							}
-
-							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpAlly(i)) ||
-								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpEnnemy(i)) )
-							{
-								if ( cultToDisplay == i)
-									break;
-								else
-									 cultToDisplay = i;
-							}
-						}
-					}
-
-					if ((pPlayer->getPvpMode() & PVP_MODE::PvpFaction) || (pPlayer->getPvpMode() & PVP_MODE::PvpFactionFlagged))
-					{
-						CViewBitmap * pvpCivLogoBmp = dynamic_cast<CViewBitmap *>(pvpCivLogo);
-						if( pvpCivLogoBmp )
-						{
-							if (pPlayer->isPvpAlly(civToDisplay))
-							{
-								if (pPlayer->isPvpRanger())
-									pvpCivLogoBmp->setTexture("pvp_ally_ranger.tga");
-								else
-									pvpCivLogoBmp->setTexture("pvp_ally_"+toString(civToDisplay)+".tga");
-							}
-							else if (pPlayer->isPvpEnnemy(civToDisplay))
-							{
-								if (pPlayer->isPvpMarauder())
-									pvpCivLogoBmp->setTexture("pvp_enemy_marauder.tga");
-								else
-									pvpCivLogoBmp->setTexture("pvp_enemy_"+toString(civToDisplay)+".tga");
+									pvpFactionLogo->setActive(false);
 							}
 							else
 							{
-								needCivPvpLogo = false;
-							}
-						}
-
-						CViewBitmap * pvpCultLogoBmp = dynamic_cast<CViewBitmap *>(pvpCultLogo);
-						if( pvpCultLogoBmp )
-						{
-							if (pPlayer->isPvpAlly(cultToDisplay))
-							{
-								if (pPlayer->isPvpPrimas())
-									pvpCultLogoBmp->setTexture("pvp_ally_primas.tga");
+								if (pPlayer->getPvpMode() & PVP_MODE::PvpChallenge)
+									pvpFactionBitmap->setTexture("ico_curse.tga");
+								else if (pPlayer->isNeutralPVP())
+									pvpFactionBitmap->setTexture("pvp_neutral.tga");
+								else if (pPlayer->isAlly() && (pPlayer->getPvpMode() & PVP_MODE::PvpFactionFlagged))
+									pvpFactionBitmap->setTexture("pvp_ally_flag.tga");
+								else if (pPlayer->isAlly() && (pPlayer->getPvpMode() & PVP_MODE::PvpFaction))
+									pvpFactionBitmap->setTexture("pvp_ally_tag.tga");
+								else if (pPlayer->isEnemy() && (pPlayer->getPvpMode() & PVP_MODE::PvpFactionFlagged))
+									pvpFactionBitmap->setTexture("pvp_enemy_flag.tga");
+								else if (pPlayer->isEnemy() && (pPlayer->getPvpMode() & PVP_MODE::PvpFaction))
+									pvpFactionBitmap->setTexture("pvp_enemy_tag.tga");
+								else if (pPlayer->getPvpMode() & PVP_MODE::PvpFactionFlagged)
+									pvpFactionBitmap->setTexture("pvp_enemy_flag.tga");
+								else if (pPlayer->getPvpMode() & PVP_MODE::PvpFaction)
+									pvpFactionBitmap->setTexture("pvp_enemy_tag.tga");
 								else
-									pvpCultLogoBmp->setTexture("pvp_ally_"+toString(cultToDisplay)+".tga");
-							}
-							else if (pPlayer->isPvpEnnemy(cultToDisplay))
-							{
-								if (pPlayer->isPvpTrytonist())
-									pvpCultLogoBmp->setTexture("pvp_enemy_trytonist.tga");
-								else
-									pvpCultLogoBmp->setTexture("pvp_enemy_"+toString(cultToDisplay)+".tga");
-							}
-							else
-							{
-								needCultPvpLogo = false;
+									pvpFactionLogo->setActive(false);
 							}
 						}
 					}
-					else 
-					{
-						needCivPvpLogo = false;
-						needCultPvpLogo = false;
-					}
-				
-					CViewBase * pvpOutpostLogo = info->getView ("pvp_outpost_logo");
+									
 					if (pvpOutpostLogo)
 					{
-						if( pPlayer->getOutpostId() == 0 )
-						{
+						if( pPlayer->getOutpostId() != 0 )
+							pvpOutpostLogo->setActive(true);
+						else
 							pvpOutpostLogo->setActive(false);
-						}
 					}
-
-					CViewBase * pvpDuelLogo = info->getView ("pvp_duel_logo");
+	
 					if (pvpDuelLogo)
 					{
-						if( !(pPlayer->getPvpMode()&PVP_MODE::PvpDuel || pPlayer->getPvpMode()&PVP_MODE::PvpChallenge) )
-						{
+						if( pPlayer->getPvpMode()&PVP_MODE::PvpDuel )
+							pvpDuelLogo->setActive(true);
+						else
 							pvpDuelLogo->setActive(false);
-						}
 					}
+
 				}
 				else
 				{
-					CViewBase * pvpOutpostLogo = info->getView ("pvp_outpost_logo");
+					if (pvpFactionLogo)
+						pvpFactionLogo->setActive(false);
 					if (pvpOutpostLogo)
 						pvpOutpostLogo->setActive(false);
-
-					CViewBase * pvpDuelLogo = info->getView ("pvp_duel_logo");
 					if (pvpDuelLogo)
-					pvpDuelLogo->setActive(false);
+						pvpDuelLogo->setActive(false);
 				}
-
-				if (pvpCivLogo)
-					pvpCivLogo->setActive(needCivPvpLogo);
-
-				if (pvpCultLogo)
-					pvpCultLogo->setActive(needCultPvpLogo);
-
 			}
 
 			// No bar and no string ?

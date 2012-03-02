@@ -27,7 +27,7 @@
 // game share
 #include "game_share/utils.h"
 #include "game_share/file_description_container.h"
-
+#include "game_share/deployment_configuration.h"
 // local
 #include "administered_module.h"
 #include "file_receiver.h"
@@ -263,7 +263,7 @@ void CPatchmanAdminModule::cbFileDownloadSuccess(const CSString& fileName,const 
 		NLMISC::CPath::setCurrentPath(oldDirectory.c_str());
 		time_t rawtime;
 		nl_time ( &rawtime );
-		setStateVariable("Environment",NLMISC::toString("Updated %s",nl_asctime (nl_localtime ( &rawtime ))));
+		setStateVariable("Environment",NLMISC::toString("Updated %s",asctime (nl_localtime ( &rawtime ))));
 
 		return;
 	}

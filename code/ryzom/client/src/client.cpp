@@ -422,15 +422,12 @@ int main(int argc, char **argv)
 
 	string sCmdLine = cmdline;
 #if FINAL_VERSION
-	if (sCmdLine.find("/multi") == string::npos) // If '/multi' not found
-	{
-		HANDLE mutex = CreateMutex (NULL, false, "RyzomClient");
-		if (mutex && GetLastError() == ERROR_ALREADY_EXISTS)
-		{
-			delete appContext;
-			return 0;
-		}
-	}
+	//if (sCmdLine.find("/multi") == string::npos) // If '/multi' not found
+	//{
+	//	HANDLE mutex = CreateMutex (NULL, false, "RyzomClient");
+	//	if (mutex && GetLastError() == ERROR_ALREADY_EXISTS)
+	//		exit (0);
+	//}
 
 	initCrashReport ();
 #endif // FINAL_VERSION
