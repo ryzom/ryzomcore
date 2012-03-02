@@ -3,9 +3,11 @@
   <ELEMENT Name="Description" Type="Type" Filename="string.typ"/>
   <ELEMENT Name="Macros" Type="Type" Filename="string.typ" Array="true"/>
   <ELEMENT Name="DependentProjects" Type="Type" Filename="filename.typ" Array="true"/>
-  <ELEMENT Name="Processes" Type="Type" Filename="filename.typ" Array="true"/>
+  <ELEMENT Name="Processes" Type="Type" Filename="string.typ" Array="true"/>
+  <ELEMENT Name="Interface" Type="Dfn" Filename="pipeline_process_interface.dfn"/>
   <LOG>Sat Feb 18 13:35:41 2012 (Kaetemi) Dfn Structure = 
 Sat Feb 18 13:36:45 2012 (Kaetemi) Dfn Structure = 
 Sat Feb 18 13:44:45 2012 (Kaetemi) Dfn Structure = 
-Sat Feb 18 15:28:54 2012 (Kaetemi) Dfn Structure = </LOG>
+Sat Feb 18 15:28:54 2012 (Kaetemi) Dfn Structure = 
+Fri Mar 02 21:21:25 2012 (Kaetemi) Dfn Structure = </LOG>
 </DFN>
