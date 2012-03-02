@@ -21,11 +21,11 @@
 		nt_auth_set_session_var('view_shard_id', $view_shard_id);
 	}
 
-	if (isset($HTTP_GET_VARS['domain']))
+	if (isset($_GET['domain']))
 	{
-		if ($view_domain_id != $HTTP_GET_VARS['domain'])
+		if ($view_domain_id != $_GET['domain'])
 		{
-			$view_domain_id = $HTTP_GET_VARS['domain'];
+			$view_domain_id = $_GET['domain'];
 			nt_auth_set_session_var('view_domain_id', $view_domain_id);
 
 			$view_shard_id = null;
@@ -33,9 +33,9 @@
 		}
 	}
 
-	if (isset($HTTP_GET_VARS['shard']))
+	if (isset($_GET['shard']))
 	{
-		$view_shard_id = $HTTP_GET_VARS['shard'];
+		$view_shard_id = $_GET['shard'];
 		nt_auth_set_session_var('view_shard_id', $view_shard_id);
 	}
 
@@ -44,11 +44,11 @@
 
 	$current_refresh_rate = nt_auth_get_session_var('current_refresh_rate');
 
-	if (isset($HTTP_POST_VARS['services_refresh']))
+	if (isset($_POST['services_refresh']))
 	{
-		if ($current_refresh_rate != $HTTP_POST_VARS['services_refresh'])
+		if ($current_refresh_rate != $_POST['services_refresh'])
 		{
-			$current_refresh_rate = $HTTP_POST_VARS['services_refresh'];
+			$current_refresh_rate = $_POST['services_refresh'];
 			nt_auth_set_session_var('current_refresh_rate',$current_refresh_rate);
 		}
 	}
@@ -637,10 +637,10 @@
 					//	exit();
 					//}
 				}
-				elseif (isset($HTTP_POST_VARS['shards_update']) && tool_admin_applications_check('tool_main_shard_autostart'))
+				elseif (isset($_POST['shards_update']) && tool_admin_applications_check('tool_main_shard_autostart'))
 				{
-					$shard_update_mode	= $HTTP_POST_VARS['shards_update'];
-					$shard_update_name	= $HTTP_POST_VARS['shards_update_name'];
+					$shard_update_mode	= $_POST['shards_update'];
+					$shard_update_name	= $_POST['shards_update_name'];
 
 					switch ($shard_update_mode)
 					{
@@ -678,14 +678,14 @@
 					}
 
 				}
-				elseif (isset($HTTP_POST_VARS['ws_update']) && tool_admin_applications_check('tool_main_ws'))
+				elseif (isset($_POST['ws_update']) && tool_admin_applications_check('tool_main_ws'))
 				{
-					$shard_ws_su			= $HTTP_POST_VARS['ws_su'];
-					$shard_ws_shard_name	= $HTTP_POST_VARS['ws_shard_name'];
-					$shard_ws_shard_id		= $HTTP_POST_VARS['ws_shard_id'];
+					$shard_ws_su			= $_POST['ws_su'];
+					$shard_ws_shard_name	= $_POST['ws_shard_name'];
+					$shard_ws_shard_id		= $_POST['ws_shard_id'];
 
-					$shard_ws_state			= $HTTP_POST_VARS['ws_state_'. $shard_ws_shard_name];
-					$shard_ws_motd			= $HTTP_POST_VARS['ws_motd_'. $shard_ws_shard_name];
+					$shard_ws_state			= $_POST['ws_state_'. $shard_ws_shard_name];
+					$shard_ws_motd			= $_POST['ws_motd_'. $shard_ws_shard_name];
 
 					// coders don't know how to write it seems
 					// ace: now they know if ($shard_ws_state == 'close') $shard_ws_state = 'closed';
@@ -705,9 +705,9 @@
 					$tpl->clear_assign('tool_execute_result');
 					nt_sleep(VIEW_DELAY);
 				}
-				elseif (isset($HTTP_POST_VARS['services_update']))
+				elseif (isset($_POST['services_update']))
 				{
-					$service_update_mode	= $HTTP_POST_VARS['services_update'];
+					$service_update_mode	= $_POST['services_update'];
 
 					switch ($service_update_mode)
 					{
@@ -997,9 +997,9 @@
 						case 'execute':
 							if (tool_admin_applications_check('tool_main_execute'))
 							{
-								if (isset($HTTP_POST_VARS['service_command']))
+								if (isset($_POST['service_command']))
 								{
-									$service_command = trim(stripslashes(html_entity_decode($HTTP_POST_VARS['service_command'], ENT_QUOTES)));
+									$service_command = trim(stripslashes(html_entity_decode($_POST['service_command'], ENT_QUOTES)));
 									$service_list = tool_main_get_checked_services();
 									if (sizeof($service_list))
 									{

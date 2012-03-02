@@ -176,13 +176,17 @@ public:
 	void	setRightClickHandlerParams(const std::string &params) { _AHOnRightClickParams = params; }
 	void	setOnActiveHandler(const std::string &h) { _AHOnActive = getAH(h,_AHOnActiveParams); }
 	void	setOnActiveParams(const std::string &p) { _AHOnActiveParams = p; }
-	std::string getOnActiveParams() const { return _AHOnActiveParams; }
 	void	setOnDeactiveHandler(const std::string &h) { _AHOnDeactive = getAH(h,_AHOnDeactiveParams); }
 	void	setOnDeactiveParams(const std::string &p) { _AHOnDeactiveParams = p; }
-	std::string	getOnDeactiveParams() const { return _AHOnDeactiveParams; }
 
 	const std::string &getLeftClickHandler() const { return getAHName(_AHOnLeftClick); }
 	const std::string &getLeftClickHandlerParams() const { return _AHOnLeftClickParams; }
+	const std::string &getRightClickHandler() const { return getAHName(_AHOnRightClick); }
+	const std::string &getRightClickHandlerParams() const { return _AHOnRightClickParams; }
+	const std::string &getOnActiveHandler() const { return getAHName(_AHOnActive); }
+	const std::string &getOnActiveParams() const { return _AHOnActiveParams; }
+	const std::string &getOnDeactiveHandler() const { return getAHName(_AHOnDeactive); }
+	const std::string &getOnDeactiveParams() const { return _AHOnDeactiveParams; }
 
 	// find a sub view/ctrl/group in this group from its id
 	int luaFind(CLuaState &ls);
@@ -205,8 +209,18 @@ public:
 		REFLECT_LUA_METHOD("delGroup", luaDelGroup);
 		REFLECT_LUA_METHOD("getNumGroups", luaGetNumGroups);
 		REFLECT_LUA_METHOD("getGroup", luaGetGroup);
+		REFLECT_STRING ("left_click", getLeftClickHandler, setLeftClickHandler);
+		REFLECT_STRING ("right_click", getRightClickHandler, setRightClickHandler);
+		REFLECT_STRING ("left_click_params", getLeftClickHandlerParams, setLeftClickHandlerParams);
+		REFLECT_STRING ("right_click_params", getRightClickHandlerParams, setRightClickHandlerParams);
+		REFLECT_STRING ("on_active", getOnActiveHandler, setOnActiveHandler);
 		REFLECT_STRING ("on_active_params", getOnActiveParams, setOnActiveParams);
+		REFLECT_STRING ("on_deactive", getOnDeactiveHandler, setOnDeactiveHandler);
 		REFLECT_STRING ("on_deactive_params", getOnDeactiveParams, setOnDeactiveParams);
+		REFLECT_STRING ("on_enter", getAHOnEnter, setAHOnEnter);
+		REFLECT_STRING ("on_enter_params", getAHOnEnterParams, setAHOnEnterParams);
+		REFLECT_STRING ("on_escape", getAHOnEscape, setAHOnEscape);
+		REFLECT_STRING ("on_escape_params", getAHOnEscapeParams, setAHOnEscapeParams);
 		REFLECT_SINT32 ("ofsx", getOfsX, setOfsX);
 		REFLECT_SINT32 ("ofsy", getOfsY, setOfsY);
 		REFLECT_BOOL("child_resize_w", getResizeFromChildW, setResizeFromChildW);

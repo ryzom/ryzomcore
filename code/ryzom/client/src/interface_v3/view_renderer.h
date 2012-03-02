@@ -75,6 +75,7 @@ public:
 		RegenTexture,
 		RegenBackTexture,
 		GlowStarTexture,
+		ItemLockedByOwnerTexture,
 		NumSystemTextures,		
 	};
 

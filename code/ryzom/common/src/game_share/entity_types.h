@@ -130,7 +130,7 @@ const TCoord		THRESHOLD_BEHAVIOUR			= 60000;
 
 // Name
 const TPropIndex	PROPERTY_NAME_STRING_ID		= 6;
-const TCoord		THRESHOLD_NAME_STRING_ID	= 25000;
+const TCoord		THRESHOLD_NAME_STRING_ID	= 100000;
 
 // Main target
 const TPropIndex	PROPERTY_TARGET_ID			= 7;

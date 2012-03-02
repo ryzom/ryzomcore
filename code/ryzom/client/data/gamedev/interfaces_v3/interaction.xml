@@ -301,7 +301,6 @@
       <view type="bitmap"
             id="tag_1"
             posref="TL TL"
-			posparent="pvp_tags"
             x="2"
             y="0"
             texture="alpha_10.tga"
@@ -2116,7 +2115,14 @@
             name="uimDismiss"
             handler="dismiss_member"
             params="" />
-    <!--            <action id="successor"  name="uimSetSuccesor" handler="set_successor" params=""/>-->
+    <action id="leader"
+            name="uimSetTeamLeader"
+            handler="set_team_leader"
+            params=""/>
+    <action id="successor"
+            name="uimSetSuccesor"
+            handler="set_successor"
+            params=""/>
     <!--            <action id="emote" name="uimEmotes" hanlder="" params="">
                         <action id="emote1"  name="uimEmote1" handler="emote" params="emote_id=0"/>     
                         <action id="emote2"  name="uimEmote2" handler="emote" params="emote_id=1"/>     
@@ -2147,6 +2153,10 @@
   <!-- links to enable leader options -->
   <link expr="eq(band(@SERVER:GROUP:LEADER_INDEX, 15), 15)"
         target="ui:interface:team_member_menu:dismiss:active" />
+  <link expr="eq(band(@SERVER:GROUP:LEADER_INDEX, 15), 15)"
+        target="ui:interface:team_member_menu:leader:active" />
+  <link expr="eq(band(@SERVER:GROUP:LEADER_INDEX, 15), 15)"
+        target="ui:interface:team_member_menu:successor:active" />
   <!-- menu on the chat of the team for the leader -->
   <group type="menu"
          id="team_chat_leader_menu"
@@ -2481,21 +2491,13 @@
     <view type="text"
           id="text"
           posref="TM TM"
-          color="233 197 42 255"
+          color="42 197 233 255"
           x="10"
           y="-10"
-          fontsize="14"
+          fontsize="12"
           global_color="false"
           shadow="true"
-          hardtext="uiJoinDuelProposal" />
-    <view type="bitmap"
-          id="warning"
-          posparent="text"
-          posref="ML MR"
-          y="4"
-          x="-4"
-          global_color="false"
-          texture="w_warning.tga" />
+          hardtext="uiJoinLeagueProposal" />
     <group id="content"
            child_resize_h="true"
            child_resize_hmargin="10">

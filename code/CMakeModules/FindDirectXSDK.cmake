@@ -14,17 +14,22 @@ FIND_PATH(DXSDK_DIR
   "Include/dxsdkver.h"
   PATHS
   "$ENV{DXSDK_DIR}"
+  "C:/Program Files (x86)/Microsoft DirectX SDK (June 2010)"
+  "C:/Program Files/Microsoft DirectX SDK (June 2010)"
+  "C:/Program Files (x86)/Microsoft DirectX SDK (February 2010)"
+  "C:/Program Files/Microsoft DirectX SDK (February 2010)"
+  "C:/Program Files (x86)/Microsoft DirectX SDK (November 2007)"
+  "C:/Program Files/Microsoft DirectX SDK (November 2007)"
+  "C:/Program Files (x86)/Microsoft DirectX SDK"
+  "C:/Program Files/Microsoft DirectX SDK"
 )
 
 MACRO(FIND_DXSDK_LIBRARY MYLIBRARY MYLIBRARYNAME)        
   FIND_LIBRARY(${MYLIBRARY}
                NAMES ${MYLIBRARYNAME}
                PATHS
-			   "${DXSDK_LIBRARY_DIR}"
-               "$ENV{DXSDK_DIR}"
-               "$ENV{DXSDK_DIR}/Lib"
-               "$ENV{DXSDK_DIR}/Lib/x86"
-               )               
+               "${DXSDK_LIBRARY_DIR}"
+               )
 ENDMACRO(FIND_DXSDK_LIBRARY MYLIBRARY MYLIBRARYNAME)
 
 IF(DXSDK_DIR)

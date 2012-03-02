@@ -64,6 +64,15 @@ void refreshItemHelp(CSheetHelpSetup &setup);
 // refresh help for a mission
 void refreshMissionHelp(CSheetHelpSetup &setup, const CPrerequisitInfos &infos);
 
+class CPetAnimalItemInfoWaiter : public IItemInfoWaiter
+{
+	void infoReceived()
+	{
+		//ItemSheet
+		//ItemSlotId
+		CClientItemInfo info = getInventory().getItemInfo(ItemSlotId);
+	}
+};
 
 
 // ***************************************************************************

@@ -192,7 +192,7 @@ NLMISC_COMMAND(where, "Ask information on the position", "")
 	return false;
 }
 
-NLMISC_COMMAND(who, "Display all players currently in game","[<options (GM)>]")
+NLMISC_COMMAND(who, "Display all players currently in region","[<options (GM, channel name)>]")
 {
 	// Check parameters.
 	if(args.size() > 1)
@@ -1177,7 +1177,7 @@ NLMISC_COMMAND(db, "Modify Database","<Property> <Value>")
 		if(node)
 			node->setValue64(value);
 		else
-			pIM->displaySystemInfo(toString("DB %s don't exist.", args[0].c_str()));
+			pIM->displaySystemInfo(toString("DB '%s' does not exist.", args[0].c_str()));
 #else
 		pIM->displaySystemInfo(ucstring("Can't write to DB when in Final Version."));
 #endif
@@ -1193,7 +1193,7 @@ NLMISC_COMMAND(db, "Modify Database","<Property> <Value>")
 			nlinfo("%s", str.c_str());
 		}
 		else
-			pIM->displaySystemInfo(toString("DB %s don't exist.", args[0].c_str()));
+			pIM->displaySystemInfo(toString("DB '%s' does not exist.", args[0].c_str()));
 		return true;
 	}
 	else
@@ -1293,6 +1293,24 @@ NLMISC_COMMAND(setItemName, "set name of items, sbrick, etc..","<sheet_id> <name
 		return false;
 	return true;
 }
+
+
+NLMISC_COMMAND(setMissingDynstringText, "set text of missing dynamic string"," <name> <text>")
+{
+	if (args.size() < 2) return false;
+	ucstring name;
+	name.fromUtf8(args[0]);
+	ucstring text;
+	text.fromUtf8(args[1]);
+
+	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
+	if (pSMC)
+		pSMC->replaceDynString(name, text);
+	else
+		return false;
+	return true;
+}
+
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -5243,7 +5261,7 @@ bool CUserCommand::execute(const std::string &/* rawCommandString */, const std:
 			{
 				if ((uint)index >= args.size())
 				{
-					// Not enough argument
+					// Not enough arguments
 					pIM->displaySystemInfo (ucstring(CommandName+" : ")+CI18N::get ("uiCommandWrongArgumentCount"));
 					return false;
 				}
@@ -5253,11 +5271,18 @@ bool CUserCommand::execute(const std::string &/* rawCommandString */, const std:
 						finalArgs += /*ucstring(*/args[index++]/*).toUtf8()*/;
 					else
 					{
-						finalArgs += /*ucstring(*/args[index++]/*).toUtf8()*/;
 						while (index<args.size())
 						{
-							finalArgs += " ";
-							finalArgs += /*ucstring(*/args[index++]/*).toUtf8()*/;
+							finalArgs += (index > 0) ? " " : "";
+							// If arg contains spaces then put it in quotes
+							if (string::npos != args[index].find(" "))
+							{
+								finalArgs += "\"" + args[index++] + "\"";
+							}
+							else 
+							{
+								finalArgs += args[index++];
+							}
 						}
 					}
 				}

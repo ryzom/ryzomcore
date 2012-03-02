@@ -963,16 +963,10 @@ void CClientChatManager::buildTellSentence(const ucstring &sender, const ucstrin
 		else
 		{
 			// Does the char have a CSR title?
-			if (CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender))) csr = ucstring("(CSR) ");
+			csr = CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender)) ? ucstring("(CSR) ") : ucstring("");
 		}
 
-		ucstring cur_time;
-		CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
-		if (pNL && pNL->getValueBool())
-		{
-			cur_time = CInterfaceManager::getTimestampHuman();
-		}
-		result = cur_time + csr + name + ucstring(" ") + CI18N::get("tellsYou") + ucstring(": ") + msg;
+		result = csr + name + ucstring(" ") + CI18N::get("tellsYou") + ucstring(": ") + msg;
 	}
 }
 
@@ -1002,23 +996,18 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 	if (!catStr.empty())
 		cat = string("&")+catStr+"&";
 
+	if ( ! cat.empty())
+	{
+		result = msg;
+		return;
+	}
+
 	// Format the sentence with the provided sender name
 	ucstring senderName = CEntityCL::removeTitleAndShardFromName(sender);
 
-	// Add time if not a &bbl&
-	ucstring cur_time;
-	if (cat.toString() != "&bbl&")
-	{
-		CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
-		if (pNL && pNL->getValueBool())
-		{
-			cur_time = CInterfaceManager::getTimestampHuman();
-		}
-	}
-
 	ucstring csr;
 	// Does the char have a CSR title?
-	if (CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender))) csr = ucstring("(CSR) ");
+	csr = CHARACTER_TITLE::isCsrTitle(CEntityCL::getTitleFromName(sender)) ? ucstring("(CSR) ") : ucstring("");
 
 	if (UserEntity && senderName == UserEntity->getDisplayName())
 	{
@@ -1026,10 +1015,10 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 		switch(type)
 		{
 			case CChatGroup::shout:
-				result = cat + cur_time + csr + CI18N::get("youShout") + ucstring(": ") + finalMsg;
+				result = cat + csr + CI18N::get("youShout") + ucstring(": ") + finalMsg;
 			break;
 			default:
-				result = cat + cur_time + csr + CI18N::get("youSay") + ucstring(": ") + finalMsg;
+				result = cat + csr + CI18N::get("youSay") + ucstring(": ") + finalMsg;
 			break;
 		}
 	}
@@ -1048,10 +1037,10 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 		switch(type)
 		{
 			case CChatGroup::shout:
-				result = cat + cur_time + csr + senderName + ucstring(" ") + CI18N::get("heShout") + ucstring(": ") + finalMsg;
+				result = cat + csr + senderName + ucstring(" ") + CI18N::get("heShout") + ucstring(": ") + finalMsg;
 			break;
 			default:
-				result = cat + cur_time + csr + senderName + ucstring(" ") + CI18N::get("heSays") + ucstring(": ") + finalMsg;
+				result = cat + csr + senderName + ucstring(" ") + CI18N::get("heSays") + ucstring(": ") + finalMsg;
 			break;
 		}
 	}
@@ -1185,21 +1174,15 @@ class CHandlerTell : public IActionHandler
 		ucstring finalMsg;
 		CChatWindow::encodeColorTag(prop.getRGBA(), finalMsg, false);
 
-		ucstring cur_time;
-		CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
-		if (pNL && pNL->getValueBool())
-			cur_time = CInterfaceManager::getTimestampHuman();
-
-		ucstring csr;
-		if (CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw())) csr += ucstring("(CSR) ");
-		finalMsg += cur_time + csr + CI18N::get("youTell") + ": ";
+		ucstring csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
+		finalMsg += csr + CI18N::get("youTell") + ": ";
 		prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 		CChatWindow::encodeColorTag(prop.getRGBA(), finalMsg, true);
 		finalMsg += message;
 		// display msg with good color
 //		TDataSetIndex dsi; // not used ....
 		PeopleInterraction.ChatInput.Tell.displayTellMessage(/*dsi, */finalMsg, receiver, prop.getRGBA());
-		
+
 		ucstring s = CI18N::get("youTellPlayer");
 		strFindReplace(s, "%name", receiver);
 		strFindReplace(finalMsg, CI18N::get("youTell"), s);
@@ -1351,8 +1334,18 @@ class CHandlerTalk : public IActionHandler
 			{
 				string str = text.toUtf8();
 				string cmdWithArgs = str.substr(1);
-				/* In the chat context, only ' ' is a possible separator */
+
+				// Get the command name from the string, can contain spaces
 				string cmd = cmdWithArgs.substr(0, cmdWithArgs.find(' '));
+				if (cmdWithArgs.find('"') == 0)
+				{
+					string::size_type pos = cmdWithArgs.find('"', 1);
+					if (string::npos != pos)
+					{
+						cmd = cmdWithArgs.substr(1, pos - 1);
+					}
+				}
+
 				if ( NLMISC::ICommand::exists( cmd ) )
 				{
 					NLMISC::ICommand::execute( cmdWithArgs, g_log );

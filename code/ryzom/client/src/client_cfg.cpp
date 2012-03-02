@@ -424,6 +424,7 @@ CClientConfig::CClientConfig()
 	PatchWanted = false;
 #endif
 	PatchUrl = "";
+	PatchletUrl = "";
 	PatchVersion = "";
 	PatchServer = "";
 
@@ -432,6 +433,7 @@ CClientConfig::CClientConfig()
 
 	RingReleaseNotePath = "http://"+WebIgMainDomain+"/releasenotes_ring/index.php";
 	ReleaseNotePath = "http://"+WebIgMainDomain+"/releasenotes/index.php";
+
 
 	///////////////
 	// ANIMATION //
@@ -1044,9 +1046,13 @@ void CClientConfig::setValues()
 	READ_STRING_DEV(ReleaseNotePath)
 	READ_STRING_FV(PatchServer)
 
+	/////////////////////////
+	// NEW PATCHLET SYSTEM //	
+	READ_STRING_FV(PatchletUrl)
+
 	////////////////////////
 	// WEBIG //
-	READ_STRING_DEV(WebIgMainDomain);
+	READ_STRING_FV(WebIgMainDomain);
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
 
 	///////////////

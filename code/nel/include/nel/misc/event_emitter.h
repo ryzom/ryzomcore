@@ -49,7 +49,7 @@ public:
 	 * \param server
 	 */
 	virtual void submitEvents(CEventServer & server, bool allWindows) = 0;
-	
+
 	/**
 	 * Instruct the event emitter to send CGDMouseMove instead of CEventMouseMove.
 	 * 
