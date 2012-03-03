@@ -38,34 +38,48 @@
 
 // Project includes
 #include "pipeline_service.h"
+#include "pipeline_project.h"
 
 using namespace std;
 // using namespace NLMISC;
 
 namespace PIPELINE {
 
-CPipelineProcessImpl::CPipelineProcessImpl()
+CPipelineProcessImpl::CPipelineProcessImpl(CPipelineProject *activeProject) : m_ActiveProject(activeProject)
 {
-	nlassert(getInstance() == NULL);
-	NLMISC::INelContext::getInstance().setSingletonPointer("IPipelineProcess", this);
+	if (activeProject == NULL)
+	{
+		nlassert(getInstance() == NULL);
+		NLMISC::INelContext::getInstance().setSingletonPointer("IPipelineProcess", this);
+	}
 }
 
 CPipelineProcessImpl::~CPipelineProcessImpl()
 {
-	NLMISC::INelContext::getInstance().releaseSingletonPointer("IPipelineProcess", this);
-}
-
-std::string CPipelineProcessImpl::getProjectValue(const std::string &name)
-{
-	return ""; // TODO
-}
-
-std::string CPipelineProcessImpl::getTempDir()
-{
-	// IF PROJECT blahblah TODO
-	// ELSE
-
+	if (m_ActiveProject == NULL)
 	{
+		NLMISC::INelContext::getInstance().releaseSingletonPointer("IPipelineProcess", this);
+	}
+}
+
+std::string CPipelineProcessImpl::getOutputDirectory()
+{
+	if (m_ActiveProject == NULL)
+	{
+		nlwarning("(m_ActiveProject == NULL)");
+		return getTempDirectory();
+	}
+	else
+	{
+		return m_ActiveProject->getOutputDirectory();
+	}
+}
+
+std::string CPipelineProcessImpl::getTempDirectory()
+{
+	if (m_ActiveProject == NULL)
+	{
+		nlwarning("(m_ActiveProject == NULL)");
 		std::stringstream ss;
 		ss << g_PipelineDirectory;
 		ss << NLMISC::CTime::getSecondsSince1970();
@@ -73,6 +87,49 @@ std::string CPipelineProcessImpl::getTempDir()
 		ss << rand();
 		ss << PIPELINE_DIRECTORY_TEMP_SUFFIX;
 		return ss.str();
+	}
+	else
+	{
+		return m_ActiveProject->getTempDirectory();
+	}
+}
+
+bool CPipelineProcessImpl::getValue(std::string &result, const std::string &name)
+{
+	if (m_ActiveProject == NULL)
+	{
+		nlwarning("(m_ActiveProject == NULL)");
+		return false;
+	}
+	else
+	{
+		return m_ActiveProject->getValue(result, name);
+	}
+}
+
+bool CPipelineProcessImpl::getValues(std::vector<std::string> &resultAppend, const std::string &name)
+{
+	if (m_ActiveProject == NULL)
+	{
+		nlwarning("(m_ActiveProject == NULL)");
+		return false;
+	}
+	else
+	{
+		return m_ActiveProject->getValues(resultAppend, name);
+	}
+}
+
+bool CPipelineProcessImpl::getValueNb(uint &result, const std::string &name)
+{
+	if (m_ActiveProject == NULL)
+	{
+		nlwarning("(m_ActiveProject == NULL)");
+		return false;
+	}
+	else
+	{
+		return m_ActiveProject->getValueNb(result, name);
 	}
 }
 

@@ -56,7 +56,6 @@ public:
 	CProcessInterfaceInfo();
 	virtual ~CProcessInterfaceInfo();
 	
-	virtual void getDependentDirectoriesRecursive(std::vector<std::string> &result);	
 	virtual void getDependentDirectories(std::vector<std::string> &result);	
 	virtual void getDependentFiles(std::vector<std::string> &result);
 

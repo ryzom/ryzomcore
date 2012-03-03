@@ -66,7 +66,7 @@ public:
 
 	virtual void run()
 	{
-		std::string tempDirectory = PIPELINE::IPipelineProcess::getInstance()->getTempDir();
+		std::string tempDirectory = PIPELINE::IPipelineProcess::getInstance()->getTempDirectory();
 
 		PIPELINE::IPipelineInterface::getInstance()->endedRunnableTask();
 	}

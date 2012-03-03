@@ -29,6 +29,7 @@
 #include "process_interface_info.h"
 
 // STL includes
+#include <sstream>
 
 // NeL includes
 // #include <nel/misc/debug.h>
@@ -50,14 +51,42 @@ CProcessInterfaceInfo::~CProcessInterfaceInfo()
 	
 }
 
-void CProcessInterfaceInfo::getDependentDirectoriesRecursive(std::vector<std::string> &result)
-{
-	
-}
-
 void CProcessInterfaceInfo::getDependentDirectories(std::vector<std::string> &result)
 {
-	
+	{
+		uint nb;
+		if (m_PipelineProcess->getValueNb(nb, "Interface.Atlas"))
+		{
+			for (uint i = 0; i < nb; ++i)
+			{
+				std::stringstream ss;
+				ss << "Interface.Atlas[" << i << "].SrcDirectories";
+				m_PipelineProcess->getValues(result, ss.str());
+			}
+		}
+	}
+	{
+		uint nb;
+		if (m_PipelineProcess->getValueNb(nb, "Interface.AtlasDxtc"))
+		{
+			for (uint i = 0; i < nb; ++i)
+			{
+				std::stringstream ss;
+				ss << "Interface.AtlasDxtc[" << i << "].SrcDirectories";
+				m_PipelineProcess->getValues(result, ss.str());
+			}
+		}
+	}
+	{
+		std::stringstream ss;
+		ss << "Interface.Fullscreen.SrcDirectories";
+		m_PipelineProcess->getValues(result, ss.str());
+	}
+	{
+		std::stringstream ss;
+		ss << "Interface.3D.SrcDirectories";
+		m_PipelineProcess->getValues(result, ss.str());
+	}
 }
 
 void CProcessInterfaceInfo::getDependentFiles(std::vector<std::string> &result)

@@ -37,6 +37,7 @@
 #include "../plugin_library/pipeline_process.h"
 
 namespace PIPELINE {
+	class CPipelineProject;
 
 /**
  * \brief CPipelineProcessImpl
@@ -46,12 +47,19 @@ namespace PIPELINE {
  */
 class CPipelineProcessImpl : public IPipelineProcess
 {
-public:
-	CPipelineProcessImpl();
-	virtual ~CPipelineProcessImpl();
+private:
+	CPipelineProject *m_ActiveProject;
 
-	virtual std::string getProjectValue(const std::string &name);
-	virtual std::string getTempDir();
+public:
+	CPipelineProcessImpl(CPipelineProject *activeProject);
+	virtual ~CPipelineProcessImpl();
+	
+	virtual std::string getOutputDirectory();
+	virtual std::string getTempDirectory();
+	virtual bool getValue(std::string &result, const std::string &name);
+	virtual bool getValues(std::vector<std::string> &resultAppend, const std::string &name);
+	virtual bool getValueNb(uint &result, const std::string &name);
+
 }; /* class CPipelineProcessImpl */
 
 } /* namespace PIPELINE */

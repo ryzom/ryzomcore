@@ -53,7 +53,7 @@
 #include "database_status.h"
 #include "pipeline_interface_impl.h"
 #include "pipeline_process_impl.h"
-
+#include "../plugin_library/process_info.h"
 
 // using namespace std;
 using namespace NLMISC;
@@ -318,7 +318,7 @@ public:
 		s_DatabaseStatus = new CDatabaseStatus();
 
 		s_PipelineInterfaceImpl = new CPipelineInterfaceImpl();
-		s_PipelineProcessImpl = new CPipelineProcessImpl();
+		s_PipelineProcessImpl = new CPipelineProcessImpl(NULL); // Create a singleton impl for global usage without running project for test purposes.
 
 		// Load libraries
 		const CConfigFile::CVar &usedPlugins = ConfigFile.getVar("UsedPlugins");
@@ -524,6 +524,48 @@ NLMISC_COMMAND(showProjectValue, "Show project value.", "<projectName> <valueNam
 		log.displayNL("VALUE: Project '%s' does not exist", args[0].c_str());
 		return false;
 	}
+}
+
+NLMISC_COMMAND(showDependencies, "Show dependencies.", "<projectName> <processName>")
+{
+	if(args.size() != 2) return false;
+	std::vector<PIPELINE::CProcessPluginInfo> plugins;
+	PIPELINE::g_PipelineWorkspace->getProcessPlugins(plugins, args[1]);
+	PIPELINE::CPipelineProject *project = PIPELINE::g_PipelineWorkspace->getProject(args[0]);
+	if (project)
+	{
+		PIPELINE::IPipelineProcess *pipelineProcess = new PIPELINE::CPipelineProcessImpl(project);
+		for (std::vector<PIPELINE::CProcessPluginInfo>::iterator plugin_it = plugins.begin(), plugin_end = plugins.end(); plugin_it != plugin_end; ++plugin_it)
+		{
+			switch (plugin_it->InfoType)
+			{
+			case PIPELINE::PLUGIN_REGISTERED_CLASS:
+				{
+					PIPELINE::IProcessInfo *processInfo = static_cast<PIPELINE::IProcessInfo *>(NLMISC::CClassRegistry::create(plugin_it->Info));
+					log.displayNL("PROCESS_INFO: %s", plugin_it->Info.c_str());
+					processInfo->setPipelineProcess(pipelineProcess);
+					std::vector<std::string> result;
+					processInfo->getDependentDirectories(result);
+					for (std::vector<std::string>::iterator it = result.begin(), end = result.end(); it != end; ++it)
+						log.displayNL("DIRECTORY: %s", it->c_str());
+					result.clear();
+					processInfo->getDependentFiles(result);
+					for (std::vector<std::string>::iterator it = result.begin(), end = result.end(); it != end; ++it)
+						log.displayNL("FILE: %s", it->c_str());
+				}
+				break;
+			default:
+				nlwarning("Not implemented.");
+				break;
+			}
+		}
+	}
+	else
+	{
+		log.displayNL("Project '%s' does not exist", args[0].c_str());
+		return false;
+	}
+	return true;
 }
 
 NLNET_SERVICE_MAIN(PIPELINE::CPipelineService, PIPELINE_SHORT_SERVICE_NAME, PIPELINE_LONG_SERVICE_NAME, 0, PIPELINE::s_ShardCallbacks, PIPELINE_SERVICE_DIRECTORY, PIPELINE_SERVICE_DIRECTORY)

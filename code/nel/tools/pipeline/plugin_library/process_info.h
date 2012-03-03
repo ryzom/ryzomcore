@@ -38,6 +38,7 @@
 #include <nel/misc/class_registry.h>
 
 // Project includes
+#include "pipeline_process.h"
 
 namespace PIPELINE {
 
@@ -49,16 +50,19 @@ namespace PIPELINE {
  */
 class IProcessInfo : public NLMISC::IClassable
 {
+protected:
+	IPipelineProcess *m_PipelineProcess;
+
 public:
-	IProcessInfo() { }
+	IProcessInfo() : m_PipelineProcess(IPipelineProcess::getInstance()) { }
 	virtual ~IProcessInfo() { }	
+	
+	void setPipelineProcess(IPipelineProcess *pipelineProcess) { m_PipelineProcess = pipelineProcess; }
 	
 	/// Dependency information used to store the initial state of files on which the process depends.
 	/// A process handler is not allowed to depend on any files it does not list here.
 	
-	/// Must return all directories on which the process handler recursively depends.
-	virtual void getDependentDirectoriesRecursive(std::vector<std::string> &result) = 0;	
-	/// Must return all directories on which the process handler depends.
+	/// Must return all directories on which the process handler depends, these are NOT RECURSIVE.
 	virtual void getDependentDirectories(std::vector<std::string> &result) = 0;	
 	/// Must return all files on which the process handler depends, ONLY if these are not in dependent directories.
 	virtual void getDependentFiles(std::vector<std::string> &result) = 0;

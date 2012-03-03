@@ -48,16 +48,21 @@ class IPipelineProcess
 public:
 	IPipelineProcess() { }
 	virtual ~IPipelineProcess() { }
-
+	
 	static IPipelineProcess *getInstance();
-
+	
 	// ***************** PROCESS FUNCTIONS (EASILY EXPOSABLE TO SCRIPTS ETCETERA) *****************
-
-	/// Get a parsed georges sheets value from the current project. (example: Interface.DstDirectory)
-	virtual std::string getProjectValue(const std::string &name) = 0;
-
+	
+	/// Gets the output directory for the project.
+	virtual std::string getOutputDirectory() = 0;
+	
 	/// Get the temporary directory for the current process. The directory must be deleted when the process ends. May return random temporary directories if no process is running.
-	virtual std::string getTempDir() = 0;
+	virtual std::string getTempDirectory() = 0;
+	
+	/// Get a value from the currently active project configuration
+	virtual bool getValue(std::string &result, const std::string &name) = 0;
+	virtual bool getValues(std::vector<std::string> &resultAppend, const std::string &name) = 0;
+	virtual bool getValueNb(uint &result, const std::string &name) = 0;
 }; /* class IPipelineProcess */
 
 } /* namespace PIPELINE */
