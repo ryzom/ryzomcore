@@ -34,6 +34,7 @@
 // NeL includes
 // #include <nel/misc/debug.h>
 #include <nel/georges/u_form_elm.h>
+#include <nel/georges/u_type.h>
 #include <nel/net/service.h>
 #include <nel/misc/config_file.h>
 #include <nel/misc/path.h>
@@ -58,13 +59,30 @@ CPipelineProject::~CPipelineProject()
 
 bool CPipelineProject::getValue(std::string &result, const std::string &name)
 {
+	NLGEORGES::UFormElm *valueElm;
+	if (!m_Form->getRootNode().getNodeByName(&valueElm, name.c_str()))
+	{
+		nlwarning("Node '%s' not found in '%s'", name.c_str(), m_Form->getFilename().c_str());
+		return false;
+	}
 	std::string value;
-	if (!m_Form->getRootNode().getValueByName(value, name.c_str()))
+	if (!valueElm->getValue(value))
 	{
 		nlwarning("Value '%s' not found in '%s'", name.c_str(), m_Form->getFilename().c_str());
 		return false;
 	}
-	parseValue(result, value);
+	std::string parsed;
+	parseValue(parsed, value);
+	std::string typComment = valueElm->getType()->getComment();
+	if (typComment == "PIPELINE_PATH")
+	{
+		parsed = NLMISC::CPath::standardizePath(parsed, false);
+	}
+	else if (typComment == "PIPELINE_PATH_ENDSLASH")
+	{
+		parsed = NLMISC::CPath::standardizePath(parsed, true);
+	}
+	result = parsed;
 	return true;
 }
 
@@ -86,8 +104,15 @@ bool CPipelineProject::getValues(std::vector<std::string> &resultAppend, const s
 	resultAppend.reserve(resultAppend.size() + (std::vector<std::string>::size_type)size);
 	for (uint i = 0; i < size; ++i)
 	{
+		NLGEORGES::UFormElm *valueElm;
+		if (!elm->getArrayNode(&valueElm, i))
+		{
+			nlwarning("Array node of node '%s' at '%i' not found in '%s'", name.c_str(), i, m_Form->getFilename().c_str());
+			resultAppend.resize(originalSize);
+			return false;
+		}
 		std::string value;
-		if (!elm->getArrayValue(value, i))
+		if (!valueElm->getValue(value))
 		{
 			nlwarning("Array value of node '%s' at '%i' not found in '%s'", name.c_str(), i, m_Form->getFilename().c_str());
 			resultAppend.resize(originalSize);
@@ -95,6 +120,15 @@ bool CPipelineProject::getValues(std::vector<std::string> &resultAppend, const s
 		}
 		std::string parsed;
 		parseValue(parsed, value);
+		std::string typComment = valueElm->getType()->getComment();
+		if (typComment == "PIPELINE_PATH")
+		{
+			parsed = NLMISC::CPath::standardizePath(parsed, false);
+		}
+		else if (typComment == "PIPELINE_PATH_ENDSLASH")
+		{
+			parsed = NLMISC::CPath::standardizePath(parsed, true);
+		}
 		resultAppend.push_back(parsed);
 	}
 	return true;

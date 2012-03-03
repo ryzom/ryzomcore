@@ -2,7 +2,7 @@
 <DFN Revision="$Revision$" State="modified">
   <ELEMENT Name="Description" Type="Type" Filename="string.typ"/>
   <ELEMENT Name="Macros" Type="Dfn" Filename="pipeline_macro.dfn" Array="true"/>
-  <ELEMENT Name="DependentProjects" Type="Type" Filename="filename.typ" Array="true"/>
+  <ELEMENT Name="DependentProjects" Type="Type" Filename="filename.typ" FilenameExt="*.pipeline_project" Array="true"/>
   <ELEMENT Name="Processes" Type="Type" Filename="string.typ" Array="true"/>
   <ELEMENT Name="Interface" Type="Dfn" Filename="pipeline_process_interface.dfn"/>
   <LOG>Sat Feb 18 13:35:41 2012 (Kaetemi) Dfn Structure = 
