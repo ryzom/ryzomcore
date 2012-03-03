@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <DFN Revision="$Revision$" State="checked">
-  <ELEMENT Name="InputDirectories" Type="Type" Filename="string.typ" Array="true"/>
-  <ELEMENT Name="OutputFile" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="SrcDirectories" Type="Type" Filename="string.typ" Array="true"/>
+  <ELEMENT Name="DstFile" Type="Type" Filename="string.typ"/>
   <COMMENTS>dfsd</COMMENTS>
   <LOG>Sat Feb 18 13:50:40 2012 (Kaetemi) Dfn Parents = 
 Sat Feb 18 13:58:21 2012 (Kaetemi) Dfn Structure = 
