@@ -194,7 +194,7 @@ public:
 			StatusMutex->unlock_shared();
 			if (fs.LastChangedReference == fmdt && fs.LastFileSizeReference == CFile::getFileSize(FilePath))
 			{
-				nlinfo("Skipping already updated status, may have been queued twice (%s)", FilePath.c_str());
+				// nlinfo("Skipping already updated status, may have been queued twice (%s)", FilePath.c_str());
 				if (firstSeen) nlerror("File first seen has same last changed time, not possible.");
 			}
 			else

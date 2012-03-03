@@ -82,11 +82,11 @@ public:
 	{
 		if (moduleProxy->getModuleClassName() == "ModulePipelineMaster")
 		{
+			nlinfo("Master UP (%s)", moduleProxy->getModuleName().c_str());
+
 			nlassert(m_Master == NULL);
 			
 			m_Master = new CModulePipelineMasterProxy(moduleProxy);
-
-			nlinfo("Master UP (%s)", moduleProxy->getModuleName().c_str());
 		}
 	}
 	
@@ -94,12 +94,12 @@ public:
 	{
 		if (moduleProxy->getModuleClassName() == "ModulePipelineMaster")
 		{
+			nlinfo("Master DOWN (%s)", moduleProxy->getModuleName().c_str());
+
 			nlassert(m_Master->getModuleProxy() == moduleProxy);
 
 			delete m_Master;
 			m_Master = NULL;
-
-			nlinfo("Slave DOWN (%s)", moduleProxy->getModuleName().c_str());
 		}
 	}
 
