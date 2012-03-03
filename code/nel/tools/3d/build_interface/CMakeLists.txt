@@ -1,5 +1,7 @@
 FILE(GLOB SRC *.cpp *.h)
 
+SOURCE_GROUP("" FILES ${SRC})
+
 ADD_EXECUTABLE(build_interface ${SRC})
 
 TARGET_LINK_LIBRARIES(build_interface nelmisc)

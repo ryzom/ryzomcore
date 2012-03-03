@@ -36,7 +36,7 @@
 #include <nel/misc/task_manager.h>
 
 // Project includes
-#include "../pipeline_library/pipeline_interface.h"
+#include "../plugin_library/pipeline_interface.h"
 
 using namespace std;
 // using namespace NLMISC;

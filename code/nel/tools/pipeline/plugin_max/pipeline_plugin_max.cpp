@@ -35,7 +35,7 @@
 #include "nel/misc/debug.h"
 
 // Project includes
-#include "../pipeline_library/pipeline_interface.h"
+#include "../plugin_library/pipeline_interface.h"
 #include "process_max_shape.h"
 
 using namespace std;

@@ -34,7 +34,7 @@
 // NeL includes
 
 // Project includes
-#include "../pipeline_library/process_plugin.h"
+#include "../plugin_library/process_plugin.h"
 
 namespace PIPELINE {
 

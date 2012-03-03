@@ -41,7 +41,7 @@ namespace NLMISC {
 }
 
 namespace PIPELINE {
-
+/*
 #if defined(PIPELINE_MASTER)
 #	if defined(PIPELINE_SLAVE)
 #		error Cannot define both PIPELINE_MASTER and PIPELINE_SLAVE at the same time.
@@ -50,6 +50,9 @@ namespace PIPELINE {
 #else
 #	error Must define either PIPELINE_MASTER or PIPELINE_SLAVE. Create 2 projects that output pipeline_service_master and pipeline_service_slave executables.
 #endif
+*/
+
+#define PIPELINE_MASTER
 
 extern std::string g_DatabaseDirectory;
 extern std::string g_PipelineDirectory;
