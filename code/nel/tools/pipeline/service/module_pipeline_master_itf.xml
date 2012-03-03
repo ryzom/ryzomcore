@@ -1,0 +1,17 @@
+<generator header_tag="PIPELINE_MODULE_PIPELINE_MASTER_ITF_H">
+
+	<namespace name="PIPELINE">
+
+		<module_interface name="CModulePipelineMaster">
+
+			<method name="slaveFinishedBuildTask" msg="SFBT">
+				<doc line=""/>
+
+				<param type="uint32"		name="taskId"	/>
+			</method>
+
+		</module_interface>
+
+	</namespace>
+
+</generator>

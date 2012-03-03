@@ -339,6 +339,31 @@ public:
 	}
 };
 
+void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater, const std::string &dir, bool recurse);
+void updatePathStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater, const std::string &subPath, bool recurse, bool recurseOnce)
+{
+	if (CFile::isDirectory(subPath)) // if the file is a directory!
+	{
+		if (recurse || recurseOnce)
+			updateDirectoryStatus(ds, updater, subPath, recurse);
+	}
+	else
+	{
+		CFileStatus fileStatus;
+		if (!ds->getFileStatus(fileStatus, subPath))
+		{
+			updater.Mutex.enter();
+			if (!updater.CallbackCalled) // on abort.
+			{
+				++updater.FilesRequested;
+				IRunnable *runnable = ds->updateFileStatus(TFileStatusCallback(&updater, &CDatabaseStatusUpdater::fileUpdated), subPath);
+				updater.RequestTasks.push_back(runnable);
+			}
+			updater.Mutex.leave();
+		}
+	}
+}
+
 void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater, const std::string &dir, bool recurse)
 {
 	std::string dirPath = CPath::standardizePath(dir, true);
@@ -350,27 +375,8 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 	{
 		const std::string subPath = *it;
 		
-		if (CFile::isDirectory(subPath)) // if the file is a directory!
-		{
-			if (recurse)
-				updateDirectoryStatus(ds, updater, subPath, recurse); // lol recurse is true anyway
-		}
-		else
-		{
-			CFileStatus fileStatus;
-			if (!ds->getFileStatus(fileStatus, subPath))
-			{
-				updater.Mutex.enter();
-				if (!updater.CallbackCalled) // on abort.
-				{
-					++updater.FilesRequested;
-					IRunnable *runnable = ds->updateFileStatus(TFileStatusCallback(&updater, &CDatabaseStatusUpdater::fileUpdated), subPath);
-					updater.RequestTasks.push_back(runnable);
-				}
-				updater.Mutex.leave();
-			}
-		}
-
+		updatePathStatus(ds, updater, subPath, recurse, false);
+		
 		if (g_IsExiting)
 			return;
 	}
@@ -393,14 +399,14 @@ void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback, cons
 	updater->FilesUpdated = 0;
 	updater->Ready = false;
 	updater->CallbackCalled = false;
-
+	
 	nlinfo("Starting iteration through database, queueing file status updates.");
 	
 	for (std::vector<std::string>::const_iterator it = paths.begin(), end = paths.end(); it != end; ++it)
-		updateDirectoryStatus(this, *updater, unMacroPath(*it), recurse);
+		updatePathStatus(this, *updater, unMacroPath(*it), recurse, true);
 	
 	nlinfo("Iteration through database, queueing file status updates complete.");
-		
+	
 	bool done = false;
 	updater->Mutex.enter();
 	updater->Ready = true;

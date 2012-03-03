@@ -85,6 +85,9 @@ std::string macroPath(const std::string &path)
 	return result;
 }
 
+extern void module_pipeline_master_forceLink();
+extern void module_pipeline_slave_forceLink();
+
 // ******************************************************************
 
 namespace {
@@ -275,7 +278,8 @@ private:
 public:
 	CPipelineService()
 	{
-		
+		module_pipeline_master_forceLink();
+		module_pipeline_slave_forceLink();
 	}
 	
 	virtual ~CPipelineService()

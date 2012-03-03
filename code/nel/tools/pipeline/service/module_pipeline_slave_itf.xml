@@ -1,0 +1,19 @@
+<generator header_tag="PIPELINE_MODULE_PIPELINE_SLAVE_ITF_H">
+
+	<namespace name="PIPELINE">
+
+		<module_interface name="CModulePipelineSlave">
+
+			<method name="startBuildTask" msg="SBT">
+				<doc line=""/>
+
+				<param type="uint32"			name="taskId"	/>
+				<param type="std::string"		name="projectName"		byref="true"/>
+				<param type="std::string"		name="processHandler"		byref="true"/>
+			</method>
+
+		</module_interface>
+
+	</namespace>
+
+</generator>
