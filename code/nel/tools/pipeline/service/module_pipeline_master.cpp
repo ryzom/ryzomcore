@@ -70,7 +70,7 @@ class CModulePipelineMaster :
 
 		void cbUpdateDatabaseStatus()
 		{
-			
+			Proxy.masterUpdatedDatabaseStatus(Master);
 		}
 	};
 	

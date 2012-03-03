@@ -35,6 +35,10 @@
 
 // Project includes
 #include "module_pipeline_master_itf.h"
+#include "pipeline_service.h"
+#include "../plugin_library/process_info.h"
+#include "pipeline_workspace.h"
+#include "pipeline_process_impl.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -51,12 +55,13 @@ namespace PIPELINE {
 class CModulePipelineSlave :
 	public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >,
 	public CModulePipelineSlaveSkel
-{	
-protected:
+{
+public:
 	CModulePipelineMasterProxy *m_Master;
+	bool m_TestCommand;
 	
 public:
-	CModulePipelineSlave() : m_Master(NULL)
+	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false)
 	{
 		
 	}
@@ -107,10 +112,109 @@ public:
 
 	virtual void masterUpdatedDatabaseStatus(NLNET::IModuleProxy *sender)
 	{
-		
+		if (m_TestCommand)
+		{
+			endedRunnableTask();
+		}
+		else
+		{
+			nlwarning("NOT_IMPLEMENTED");
+		}
 	}
 	
+protected:
+	NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CModulePipelineSlave, CModuleBase)
+		NLMISC_COMMAND_HANDLER_ADD(CModulePipelineSlave, testUpdateDatabaseStatus, "Test master request for database status update on dependencies", "<projectName> <processName>")
+	NLMISC_COMMAND_HANDLER_TABLE_END
+
+	NLMISC_CLASS_COMMAND_DECL(testUpdateDatabaseStatus);
+
 }; /* class CModulePipelineSlave */
+
+//return PIPELINE::tryRunnableTask(stateName, task);
+
+namespace {
+
+class CTestUpdateDatabaseStatusCommand : public NLMISC::IRunnable
+{
+public:
+	NLMISC::CLog *Log;
+	std::string Project;
+	std::string Process;
+	CModulePipelineSlave *Slave;
+
+	virtual void getName(std::string &result) const 
+	{ result = "CTestUpdateDatabaseStatusCommand"; }
+
+	virtual void run()
+	{
+		Slave->m_TestCommand = true;
+
+		// std::string tempDirectory = PIPELINE::IPipelineProcess::getInstance()->getTempDirectory();
+		std::vector<PIPELINE::CProcessPluginInfo> plugins;
+		PIPELINE::g_PipelineWorkspace->getProcessPlugins(plugins, Process);
+		PIPELINE::CPipelineProject *project = PIPELINE::g_PipelineWorkspace->getProject(Project);
+		if (project)
+		{
+			std::vector<std::string> result;
+			PIPELINE::IPipelineProcess *pipelineProcess = new PIPELINE::CPipelineProcessImpl(project);
+			for (std::vector<PIPELINE::CProcessPluginInfo>::iterator plugin_it = plugins.begin(), plugin_end = plugins.end(); plugin_it != plugin_end; ++plugin_it)
+			{
+				switch (plugin_it->InfoType)
+				{
+				case PIPELINE::PLUGIN_REGISTERED_CLASS:
+					{
+						PIPELINE::IProcessInfo *processInfo = static_cast<PIPELINE::IProcessInfo *>(NLMISC::CClassRegistry::create(plugin_it->Info));
+						processInfo->setPipelineProcess(pipelineProcess);
+						processInfo->getDependentDirectories(result);
+						for (std::vector<std::string>::iterator it = result.begin(), end = result.end(); it != end; ++it)
+							Slave->m_Master->vectorPushString(Slave, *it);
+						result.clear();
+						processInfo->getDependentFiles(result);
+						for (std::vector<std::string>::iterator it = result.begin(), end = result.end(); it != end; ++it)
+							Slave->m_Master->vectorPushString(Slave, *it);
+					}
+					break;
+				default:
+					nlwarning("Not implemented.");
+					break;
+				}
+			}
+		}
+		else
+		{
+			Log->displayNL("Project '%s' does not exist", Project.c_str());
+		}
+
+		Slave->m_Master->updateDatabaseStatusByVector(Slave);
+		
+		delete this;
+	}
+};
+
+} /* anonymous namespace */
+
+NLMISC_CLASS_COMMAND_IMPL(CModulePipelineSlave, testUpdateDatabaseStatus)
+{
+	if (args.size() != 2) return false;
+	
+	PIPELINE::CPipelineProject *project = PIPELINE::g_PipelineWorkspace->getProject(args[0]);
+	if (!project)
+	{ 
+		log.displayNL("Project '%s' does not exist", args[0].c_str());
+		return false;
+	}
+	
+	CTestUpdateDatabaseStatusCommand *runnableCommand = new CTestUpdateDatabaseStatusCommand();
+	runnableCommand->Log = &log;
+	runnableCommand->Project = args[0];
+	runnableCommand->Process = args[1];
+	runnableCommand->Slave = this;
+	
+	if (!tryRunnableTask("SLAVE_TEST_UPD_DB_STATUS", runnableCommand))
+	{ log.displayNL("BUSY"); delete runnableCommand; return false; }
+	return true;
+}
 
 void module_pipeline_slave_forceLink() { }
 NLNET_REGISTER_MODULE_FACTORY(CModulePipelineSlave, "ModulePipelineSlave");
