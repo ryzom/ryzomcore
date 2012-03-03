@@ -1,9 +1,9 @@
 /**
- * \file pipeline_interface.cpp
- * \brief IPipelineInterface
- * \date 2012-02-25 12:10GMT
+ * \file process_interface_impl.cpp
+ * \brief CProcessInterfaceImpl
+ * \date 2012-03-03 09:33GMT
  * \author Jan Boon (Kaetemi)
- * IPipelineInterface
+ * CProcessInterfaceImpl
  */
 
 /* 
@@ -26,13 +26,12 @@
  */
 
 #include <nel/misc/types_nl.h>
-#include "pipeline_interface.h"
+#include "process_interface_impl.h"
 
 // STL includes
 
 // NeL includes
-#include <nel/misc/app_context.h>
-#include <nel/misc/debug.h>
+// #include <nel/misc/debug.h>
 
 // Project includes
 
@@ -41,10 +40,14 @@ using namespace std;
 
 namespace PIPELINE {
 
-IPipelineInterface *IPipelineInterface::getInstance()
+CProcessInterfaceImpl::CProcessInterfaceImpl()
 {
-	nlassert(NLMISC::INelContext::isContextInitialised());
-	return static_cast<IPipelineInterface *>(NLMISC::INelContext::getInstance().getSingletonPointer("IPipelineInterface"));
+	
+}
+
+CProcessInterfaceImpl::~CProcessInterfaceImpl()
+{
+	
 }
 
 } /* namespace PIPELINE */

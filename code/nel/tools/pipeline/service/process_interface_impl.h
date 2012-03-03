@@ -1,9 +1,9 @@
 /**
- * \file pipeline_interface.cpp
- * \brief IPipelineInterface
- * \date 2012-02-25 12:10GMT
+ * \file process_interface_impl.h
+ * \brief CProcessInterfaceImpl
+ * \date 2012-03-03 09:33GMT
  * \author Jan Boon (Kaetemi)
- * IPipelineInterface
+ * CProcessInterfaceImpl
  */
 
 /* 
@@ -25,28 +25,37 @@
  * <http://www.gnu.org/licenses/>.
  */
 
+#ifndef PIPELINE_PROCESS_INTERFACE_IMPL_H
+#define PIPELINE_PROCESS_INTERFACE_IMPL_H
 #include <nel/misc/types_nl.h>
-#include "pipeline_interface.h"
 
 // STL includes
 
 // NeL includes
-#include <nel/misc/app_context.h>
-#include <nel/misc/debug.h>
 
 // Project includes
-
-using namespace std;
-// using namespace NLMISC;
+#include "../plugin_library/process_interface.h"
 
 namespace PIPELINE {
 
-IPipelineInterface *IPipelineInterface::getInstance()
+/**
+ * \brief CProcessInterfaceImpl
+ * \date 2012-03-03 09:33GMT
+ * \author Jan Boon (Kaetemi)
+ * CProcessInterfaceImpl
+ */
+class CProcessInterfaceImpl : public IProcessInterface
 {
-	nlassert(NLMISC::INelContext::isContextInitialised());
-	return static_cast<IPipelineInterface *>(NLMISC::INelContext::getInstance().getSingletonPointer("IPipelineInterface"));
-}
+public:
+	CProcessInterfaceImpl();
+	virtual ~CProcessInterfaceImpl();
+
+	virtual std::string getProjectValue(const std::string &name);
+	virtual std::string getTempDir();
+}; /* class CProcessInterfaceImpl */
 
 } /* namespace PIPELINE */
+
+#endif /* #ifndef PIPELINE_PROCESS_INTERFACE_IMPL_H */
 
 /* end of file */

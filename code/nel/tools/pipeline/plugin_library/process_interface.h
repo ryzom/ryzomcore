@@ -1,9 +1,9 @@
 /**
- * \file pipeline_interface.cpp
- * \brief IPipelineInterface
- * \date 2012-02-25 12:10GMT
+ * \file process_interface.h
+ * \brief IProcessInterface
+ * \date 2012-03-03 09:22GMT
  * \author Jan Boon (Kaetemi)
- * IPipelineInterface
+ * IProcessInterface
  */
 
 /* 
@@ -25,28 +25,43 @@
  * <http://www.gnu.org/licenses/>.
  */
 
+#ifndef PIPELINE_PROCESS_INTERFACE_H
+#define PIPELINE_PROCESS_INTERFACE_H
 #include <nel/misc/types_nl.h>
-#include "pipeline_interface.h"
 
 // STL includes
 
 // NeL includes
-#include <nel/misc/app_context.h>
-#include <nel/misc/debug.h>
 
 // Project includes
 
-using namespace std;
-// using namespace NLMISC;
-
 namespace PIPELINE {
 
-IPipelineInterface *IPipelineInterface::getInstance()
+/**
+ * \brief IProcessInterface
+ * \date 2012-03-03 09:22GMT
+ * \author Jan Boon (Kaetemi)
+ * IProcessInterface
+ */
+class IProcessInterface
 {
-	nlassert(NLMISC::INelContext::isContextInitialised());
-	return static_cast<IPipelineInterface *>(NLMISC::INelContext::getInstance().getSingletonPointer("IPipelineInterface"));
-}
+public:
+	IProcessInterface();
+	virtual ~IProcessInterface();
+
+	static IProcessInterface *getInstance();
+
+	// ***************** PROCESS FUNCTIONS (EASILY EXPOSABLE TO SCRIPTS ETCETERA) *****************
+
+	/// Get a parsed georges sheets value from the current project. (example: Interface.DstDirectory)
+	virtual std::string getProjectValue(const std::string &name) = 0;
+
+	/// Get the temporary directory for the current process. The directory must be deleted when the process ends. May return random temporary directories if no process is running.
+	virtual std::string getTempDir() = 0;
+}; /* class IProcessInterface */
 
 } /* namespace PIPELINE */
+
+#endif /* #ifndef PIPELINE_PROCESS_INTERFACE_H */
 
 /* end of file */

@@ -1,9 +1,9 @@
 /**
- * \file pipeline_interface.cpp
- * \brief IPipelineInterface
- * \date 2012-02-25 12:10GMT
+ * \file process_interface.cpp
+ * \brief IProcessInterface
+ * \date 2012-03-03 09:22GMT
  * \author Jan Boon (Kaetemi)
- * IPipelineInterface
+ * IProcessInterface
  */
 
 /* 
@@ -26,7 +26,7 @@
  */
 
 #include <nel/misc/types_nl.h>
-#include "pipeline_interface.h"
+#include "process_interface.h"
 
 // STL includes
 
@@ -41,10 +41,10 @@ using namespace std;
 
 namespace PIPELINE {
 
-IPipelineInterface *IPipelineInterface::getInstance()
+IProcessInterface *IProcessInterface::getInstance()
 {
 	nlassert(NLMISC::INelContext::isContextInitialised());
-	return static_cast<IPipelineInterface *>(NLMISC::INelContext::getInstance().getSingletonPointer("IPipelineInterface"));
+	return static_cast<IProcessInterface *>(NLMISC::INelContext::getInstance().getSingletonPointer("IProcessInterface"));
 }
 
 } /* namespace PIPELINE */

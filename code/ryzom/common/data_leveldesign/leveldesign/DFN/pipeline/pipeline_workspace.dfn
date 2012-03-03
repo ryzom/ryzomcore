@@ -1,8 +1,10 @@
 <?xml version="1.0"?>
 <DFN Revision="$Revision$" State="modified">
   <ELEMENT Name="Description" Type="Type" Filename="string.typ"/>
-  <ELEMENT Name="Projects" Type="Type" Filename="filename.typ" Array="true"/>
+  <ELEMENT Name="Projects" Type="Type" Filename="filename.typ" FilenameExt="*.pipeline_project" Array="true"/>
+  <ELEMENT Name="Plugins" Type="Type" Filename="filename.typ" FilenameExt="*.pipeline_plugin" Array="true"/>
   <LOG>Sat Feb 18 13:34:33 2012 (Kaetemi) Dfn Structure = 
 Sat Feb 18 13:34:44 2012 (Kaetemi) Dfn Structure = 
-Sat Feb 18 13:44:42 2012 (Kaetemi) Dfn Structure = </LOG>
+Sat Feb 18 13:44:42 2012 (Kaetemi) Dfn Structure = 
+Sat Mar 03 10:57:33 2012 (Kaetemi) Dfn Structure = </LOG>
 </DFN>

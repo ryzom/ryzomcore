@@ -52,12 +52,7 @@ class CPipelineInterfaceImpl : public IPipelineInterface
 {
 public:
 	std::vector<std::string> RegisteredClasses;
-protected:
-	// pointers
-	// ...
-	
-	// instances
-	// ...
+
 public:
 	CPipelineInterfaceImpl();
 	virtual ~CPipelineInterfaceImpl();
@@ -66,8 +61,6 @@ public:
 	virtual void registerClass(const std::string &className, NLMISC::IClassable* (*creator)(), const std::string &typeidCheck) throw(NLMISC::ERegistry);
 	virtual bool tryRunnableTask(std::string stateName, NLMISC::IRunnable *task);
 	virtual void endedRunnableTask();
-	virtual std::string getProjectValue(const std::string &name);
-	virtual std::string getTempDir();
 }; /* class CPipelineInterfaceImpl */
 
 } /* namespace PIPELINE */

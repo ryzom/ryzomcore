@@ -71,14 +71,6 @@ public:
 
 	/// Call when a runnable task has ended to reset to STATE_IDLE.
 	virtual void endedRunnableTask() = 0;
-
-	// ***************** PROCESS FUNCTIONS *****************
-
-	/// Get a parsed georges sheets value from the current project. (example: OutputDirectory)
-	virtual std::string getProjectValue(const std::string &name) = 0;
-
-	/// Get the temporary directory for the current process. The directory must be deleted when the process ends. May return random temporary directories if no process is running.
-	virtual std::string getTempDir() = 0;
 	
 }; /* class IPipelineInterface */
 
