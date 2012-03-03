@@ -51,7 +51,7 @@ CProcessInterfaceInfo::~CProcessInterfaceInfo()
 	
 }
 
-void CProcessInterfaceInfo::getDependentDirectories(std::vector<std::string> &result)
+void CProcessInterfaceInfo::getDependentDirectories(std::vector<std::string> &resultAppend)
 {
 	{
 		uint nb;
@@ -61,7 +61,7 @@ void CProcessInterfaceInfo::getDependentDirectories(std::vector<std::string> &re
 			{
 				std::stringstream ss;
 				ss << "Interface.Atlas[" << i << "].SrcDirectories";
-				m_PipelineProcess->getValues(result, ss.str());
+				m_PipelineProcess->getValues(resultAppend, ss.str());
 			}
 		}
 	}
@@ -73,23 +73,23 @@ void CProcessInterfaceInfo::getDependentDirectories(std::vector<std::string> &re
 			{
 				std::stringstream ss;
 				ss << "Interface.AtlasDxtc[" << i << "].SrcDirectories";
-				m_PipelineProcess->getValues(result, ss.str());
+				m_PipelineProcess->getValues(resultAppend, ss.str());
 			}
 		}
 	}
 	{
 		std::stringstream ss;
 		ss << "Interface.Fullscreen.SrcDirectories";
-		m_PipelineProcess->getValues(result, ss.str());
+		m_PipelineProcess->getValues(resultAppend, ss.str());
 	}
 	{
 		std::stringstream ss;
 		ss << "Interface.3D.SrcDirectories";
-		m_PipelineProcess->getValues(result, ss.str());
+		m_PipelineProcess->getValues(resultAppend, ss.str());
 	}
 }
 
-void CProcessInterfaceInfo::getDependentFiles(std::vector<std::string> &result)
+void CProcessInterfaceInfo::getDependentFiles(std::vector<std::string> &resultAppend)
 {
 	
 }

@@ -40,7 +40,11 @@ using namespace std;
 
 namespace PIPELINE {
 
-void sjdflkmsdjfmlkqsjlkfdj() { }
+void IProcessInfo::getDependentPaths(std::vector<std::string> &resultAppend)
+{
+	getDependentDirectories(resultAppend);
+	getDependentFiles(resultAppend);
+}
 
 } /* namespace PIPELINE */
 

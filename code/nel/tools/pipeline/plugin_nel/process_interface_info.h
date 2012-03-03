@@ -56,8 +56,8 @@ public:
 	CProcessInterfaceInfo();
 	virtual ~CProcessInterfaceInfo();
 	
-	virtual void getDependentDirectories(std::vector<std::string> &result);	
-	virtual void getDependentFiles(std::vector<std::string> &result);
+	virtual void getDependentDirectories(std::vector<std::string> &resultAppend);	
+	virtual void getDependentFiles(std::vector<std::string> &resultAppend);
 
 	NLMISC_DECLARE_CLASS(CProcessInterfaceInfo)
 }; /* class CProcessInterfaceInfo */

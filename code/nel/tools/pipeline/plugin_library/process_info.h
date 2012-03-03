@@ -66,6 +66,8 @@ public:
 	virtual void getDependentDirectories(std::vector<std::string> &resultAppend) = 0;	
 	/// Must return all files on which the process handler depends, ONLY if these are not in dependent directories.
 	virtual void getDependentFiles(std::vector<std::string> &resultAppend) = 0;
+	/// Combines getDependentDirectories and getDependentFiles.
+	void getDependentPaths(std::vector<std::string> &resultAppend);
 
 }; /* class IProcessInfo */
 
