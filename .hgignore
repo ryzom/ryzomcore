@@ -221,3 +221,35 @@ code/ryzom/common/data_leveldesign/leveldesign/Game_elem/sheets.txt
 code/ryzom/common/data_leveldesign/leveldesign/Game_elem/sheet_id.bin
 code/nel/tools/build_gamedata/configuration/buildsite.py
 code/nel/tools/build_gamedata/configuration/upload.py
+
+# Temporary ignores
+code/nel/tools/build_gamedata/processes/ai_wmap/ai_build_wmap.cfg
+code/nel/tools/build_gamedata/processes/sheets/item_association.dbg
+code/nel/tools/build_gamedata/processes/sheets/sheets_packer.cfg
+code/ryzom/client/client_default - Copy.cfg
+code/ryzom/common/data_leveldesign/leveldesign/Ecosystems/rocky.ecosystem
+code/ryzom/common/data_leveldesign/leveldesign/Game_elem/items/armor/creature_armor/light_slashing_arms.item
+code/ryzom/common/data_leveldesign/leveldesign/Game_elem/items/armor/creature_armor/medium_slashing_arms.item
+code/ryzom/common/data_leveldesign/leveldesign/World/crater/crater.continent
+code/ryzom/common/data_leveldesign/leveldesign/World/crater/delete_me.cfg
+code/ryzom/common/data_leveldesign/leveldesign/game_element/sitem/armor/tryker/light_armor/ictalbfunny.sitem
+code/ryzom/common/data_leveldesign/leveldesign/game_element/sitem/armor/tryker/light_armor/my_funny_item.sitem
+code/ryzom/common/data_leveldesign/leveldesign/game_element/sitem/handled_item/ge_banner_mikoto.sitem
+code/ryzom/common/data_leveldesign/primitives/atlantis/region_atlantis.primitive
+code/ryzom/common/data_leveldesign/primitives/crater/region_crater.primitive
+code/ryzom/tools/build_gamedata/workspace/continents/crater/directories.py
+code/ryzom/tools/build_gamedata/workspace/continents/crater/process.py
+code/ryzom/tools/build_gamedata/workspace/continents/crater/properties_base.cfg
+code/ryzom/tools/build_gamedata/workspace/continents/crater/properties_draft.cfg
+code/ryzom/tools/build_gamedata/workspace/continents/crater/properties_final.cfg
+code/ryzom/tools/build_gamedata/workspace/ecosystems/rocky/directories.py
+code/ryzom/tools/build_gamedata/workspace/ecosystems/rocky/process.py
+
+
+
+
+
+
+
+
+
