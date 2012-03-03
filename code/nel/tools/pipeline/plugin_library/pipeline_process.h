@@ -1,9 +1,9 @@
 /**
- * \file process_plugin.cpp
- * \brief IProcessPlugin
- * \date 2012-02-25 10:19GMT
+ * \file pipeline_process.h
+ * \brief IPipelineProcess
+ * \date 2012-03-03 09:22GMT
  * \author Jan Boon (Kaetemi)
- * IProcessPlugin
+ * IPipelineProcess
  */
 
 /* 
@@ -25,31 +25,43 @@
  * <http://www.gnu.org/licenses/>.
  */
 
+#ifndef PIPELINE_PIPELINE_PROCESS_H
+#define PIPELINE_PIPELINE_PROCESS_H
 #include <nel/misc/types_nl.h>
-#include "process_plugin.h"
 
 // STL includes
 
 // NeL includes
-// #include <nel/misc/debug.h>
 
 // Project includes
 
-using namespace std;
-// using namespace NLMISC;
-
 namespace PIPELINE {
 
-IProcessPlugin::IProcessPlugin()
+/**
+ * \brief IPipelineProcess
+ * \date 2012-03-03 09:22GMT
+ * \author Jan Boon (Kaetemi)
+ * IPipelineProcess
+ */
+class IPipelineProcess
 {
-	
-}
+public:
+	IPipelineProcess() { }
+	virtual ~IPipelineProcess() { }
 
-IProcessPlugin::~IProcessPlugin()
-{
-	
-}
+	static IPipelineProcess *getInstance();
+
+	// ***************** PROCESS FUNCTIONS (EASILY EXPOSABLE TO SCRIPTS ETCETERA) *****************
+
+	/// Get a parsed georges sheets value from the current project. (example: Interface.DstDirectory)
+	virtual std::string getProjectValue(const std::string &name) = 0;
+
+	/// Get the temporary directory for the current process. The directory must be deleted when the process ends. May return random temporary directories if no process is running.
+	virtual std::string getTempDir() = 0;
+}; /* class IPipelineProcess */
 
 } /* namespace PIPELINE */
+
+#endif /* #ifndef PIPELINE_PIPELINE_PROCESS_H */
 
 /* end of file */

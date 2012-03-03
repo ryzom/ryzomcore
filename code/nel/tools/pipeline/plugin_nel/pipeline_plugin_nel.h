@@ -1,9 +1,9 @@
 /**
- * \file process_interface_impl.cpp
- * \brief CProcessInterfaceImpl
- * \date 2012-03-03 09:33GMT
+ * \file pipeline_plugin_nel.h
+ * \brief CPipelinePluginNeL
+ * \date 2012-03-03 10:09GMT
  * \author Jan Boon (Kaetemi)
- * CProcessInterfaceImpl
+ * CPipelinePluginNeL
  */
 
 /* 
@@ -25,31 +25,41 @@
  * <http://www.gnu.org/licenses/>.
  */
 
+#ifndef PIPELINE_PIPELINE_PLUGIN_NEL_H
+#define PIPELINE_PIPELINE_PLUGIN_NEL_H
 #include <nel/misc/types_nl.h>
-#include "process_interface_impl.h"
 
 // STL includes
 
 // NeL includes
-// #include <nel/misc/debug.h>
 
 // Project includes
 
-using namespace std;
-// using namespace NLMISC;
-
 namespace PIPELINE {
 
-CProcessInterfaceImpl::CProcessInterfaceImpl()
+/*
+/**
+ * \brief CPipelinePluginNeL
+ * \date 2012-03-03 10:09GMT
+ * \author Jan Boon (Kaetemi)
+ * CPipelinePluginNeL
+ *
+class CPipelinePluginNeL
 {
+protected:
+	// pointers
+	// ...
 	
-}
-
-CProcessInterfaceImpl::~CProcessInterfaceImpl()
-{
-	
-}
+	// instances
+	// ...
+public:
+	CPipelinePluginNeL();
+	virtual ~CPipelinePluginNeL();
+}; /* class CPipelinePluginNeL *
+*/
 
 } /* namespace PIPELINE */
+
+#endif /* #ifndef PIPELINE_PIPELINE_PLUGIN_NEL_H */
 
 /* end of file */

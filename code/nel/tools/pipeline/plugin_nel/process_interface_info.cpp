@@ -1,9 +1,9 @@
 /**
- * \file process_max_shape.h
- * \brief CProcessMaxShape
- * \date 2012-02-25 10:45GMT
+ * \file process_interface_info.cpp
+ * \brief CProcessInterfaceInfo
+ * \date 2012-03-03 10:10GMT
  * \author Jan Boon (Kaetemi)
- * CProcessMaxShape
+ * CProcessInterfaceInfo
  */
 
 /* 
@@ -25,42 +25,46 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIPELINE_PROCESS_MAX_SHAPE_H
-#define PIPELINE_PROCESS_MAX_SHAPE_H
 #include <nel/misc/types_nl.h>
+#include "process_interface_info.h"
 
 // STL includes
 
 // NeL includes
+// #include <nel/misc/debug.h>
 
 // Project includes
-#include "../plugin_library/process_handler.h"
+
+using namespace std;
+// using namespace NLMISC;
 
 namespace PIPELINE {
 
-/**
- * \brief CProcessMaxShape
- * \date 2012-02-25 10:45GMT
- * \author Jan Boon (Kaetemi)
- * CProcessMaxShape
- */
-class CProcessMaxShape : public IProcessHandler
+CProcessInterfaceInfo::CProcessInterfaceInfo()
 {
-protected:
-	// pointers
-	// ...
 	
-	// instances
-	// ...
-public:
-	CProcessMaxShape();
-	virtual ~CProcessMaxShape();
+}
 
-	NLMISC_DECLARE_CLASS(CProcessMaxShape)
-}; /* class CProcessMaxShape */
+CProcessInterfaceInfo::~CProcessInterfaceInfo()
+{
+	
+}
+
+void CProcessInterfaceInfo::getDependentDirectoriesRecursive(std::vector<std::string> &result)
+{
+
+}
+
+void CProcessInterfaceInfo::getDependentDirectories(std::vector<std::string> &result)
+{
+
+}
+
+void CProcessInterfaceInfo::getDependentFiles(std::vector<std::string> &result)
+{
+
+}
 
 } /* namespace PIPELINE */
-
-#endif /* #ifndef PIPELINE_PROCESS_MAX_SHAPE_H */
 
 /* end of file */

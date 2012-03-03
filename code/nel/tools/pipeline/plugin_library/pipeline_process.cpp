@@ -1,9 +1,9 @@
 /**
- * \file process_max_shape.h
- * \brief CProcessMaxShape
- * \date 2012-02-25 10:45GMT
+ * \file pipeline_process.cpp
+ * \brief IPipelineProcess
+ * \date 2012-03-03 09:22GMT
  * \author Jan Boon (Kaetemi)
- * CProcessMaxShape
+ * IPipelineProcess
  */
 
 /* 
@@ -25,42 +25,28 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIPELINE_PROCESS_MAX_SHAPE_H
-#define PIPELINE_PROCESS_MAX_SHAPE_H
 #include <nel/misc/types_nl.h>
+#include "pipeline_process.h"
 
 // STL includes
 
 // NeL includes
+#include <nel/misc/app_context.h>
+#include <nel/misc/debug.h>
 
 // Project includes
-#include "../plugin_library/process_handler.h"
+
+using namespace std;
+// using namespace NLMISC;
 
 namespace PIPELINE {
 
-/**
- * \brief CProcessMaxShape
- * \date 2012-02-25 10:45GMT
- * \author Jan Boon (Kaetemi)
- * CProcessMaxShape
- */
-class CProcessMaxShape : public IProcessHandler
+IPipelineProcess *IPipelineProcess::getInstance()
 {
-protected:
-	// pointers
-	// ...
-	
-	// instances
-	// ...
-public:
-	CProcessMaxShape();
-	virtual ~CProcessMaxShape();
-
-	NLMISC_DECLARE_CLASS(CProcessMaxShape)
-}; /* class CProcessMaxShape */
+	nlassert(NLMISC::INelContext::isContextInitialised());
+	return static_cast<IPipelineProcess *>(NLMISC::INelContext::getInstance().getSingletonPointer("IPipelineProcess"));
+}
 
 } /* namespace PIPELINE */
-
-#endif /* #ifndef PIPELINE_PROCESS_MAX_SHAPE_H */
 
 /* end of file */

@@ -1,9 +1,9 @@
 /**
- * \file process_interface_impl.h
- * \brief CProcessInterfaceImpl
- * \date 2012-03-03 09:33GMT
+ * \file process_interface.h
+ * \brief CProcessInterface
+ * \date 2012-03-03 10:10GMT
  * \author Jan Boon (Kaetemi)
- * CProcessInterfaceImpl
+ * CProcessInterface
  */
 
 /* 
@@ -25,8 +25,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIPELINE_PROCESS_INTERFACE_IMPL_H
-#define PIPELINE_PROCESS_INTERFACE_IMPL_H
+#ifndef PIPELINE_PROCESS_INTERFACE_H
+#define PIPELINE_PROCESS_INTERFACE_H
 #include <nel/misc/types_nl.h>
 
 // STL includes
@@ -34,28 +34,33 @@
 // NeL includes
 
 // Project includes
-#include "../plugin_library/process_interface.h"
+#include "../plugin_library/process_handler.h"
 
 namespace PIPELINE {
 
 /**
- * \brief CProcessInterfaceImpl
- * \date 2012-03-03 09:33GMT
+ * \brief CProcessInterface
+ * \date 2012-03-03 10:10GMT
  * \author Jan Boon (Kaetemi)
- * CProcessInterfaceImpl
+ * CProcessInterface
  */
-class CProcessInterfaceImpl : public IProcessInterface
+class CProcessInterface : public IProcessHandler
 {
+protected:
+	// pointers
+	// ...
+	
+	// instances
+	// ...
 public:
-	CProcessInterfaceImpl();
-	virtual ~CProcessInterfaceImpl();
+	CProcessInterface();
+	virtual ~CProcessInterface();
 
-	virtual std::string getProjectValue(const std::string &name);
-	virtual std::string getTempDir();
-}; /* class CProcessInterfaceImpl */
+	NLMISC_DECLARE_CLASS(CProcessInterface)
+}; /* class CProcessInterface */
 
 } /* namespace PIPELINE */
 
-#endif /* #ifndef PIPELINE_PROCESS_INTERFACE_IMPL_H */
+#endif /* #ifndef PIPELINE_PROCESS_INTERFACE_H */
 
 /* end of file */

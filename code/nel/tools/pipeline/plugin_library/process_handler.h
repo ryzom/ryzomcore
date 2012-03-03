@@ -1,9 +1,9 @@
 /**
- * \file process_interface.cpp
- * \brief IProcessInterface
- * \date 2012-03-03 09:22GMT
+ * \file process_handler.h
+ * \brief IProcessHandler
+ * \date 2012-03-03 10:14GMT
  * \author Jan Boon (Kaetemi)
- * IProcessInterface
+ * IProcessHandler
  */
 
 /* 
@@ -25,28 +25,41 @@
  * <http://www.gnu.org/licenses/>.
  */
 
+#ifndef PIPELINE_PROCESS_HANDLER_H
+#define PIPELINE_PROCESS_HANDLER_H
 #include <nel/misc/types_nl.h>
-#include "process_interface.h"
 
 // STL includes
 
 // NeL includes
-#include <nel/misc/app_context.h>
-#include <nel/misc/debug.h>
+#include <nel/misc/class_registry.h>
 
 // Project includes
 
-using namespace std;
-// using namespace NLMISC;
-
 namespace PIPELINE {
 
-IProcessInterface *IProcessInterface::getInstance()
+/**
+ * \brief IProcessHandler
+ * \date 2012-03-03 10:14GMT
+ * \author Jan Boon (Kaetemi)
+ * IProcessHandler
+ * A process handler is executed by the PLS SLAVE services. Processes can have multiple handlers. These are configured under the workspace plugins sheet.
+ */
+class IProcessHandler : public NLMISC::IClassable
 {
-	nlassert(NLMISC::INelContext::isContextInitialised());
-	return static_cast<IProcessInterface *>(NLMISC::INelContext::getInstance().getSingletonPointer("IProcessInterface"));
-}
+protected:
+	// pointers
+	// ...
+	
+	// instances
+	// ...
+public:
+	IProcessHandler();
+	virtual ~IProcessHandler();
+}; /* class IProcessHandler */
 
 } /* namespace PIPELINE */
+
+#endif /* #ifndef PIPELINE_PROCESS_HANDLER_H */
 
 /* end of file */

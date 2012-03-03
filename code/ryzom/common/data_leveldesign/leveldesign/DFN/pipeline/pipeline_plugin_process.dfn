@@ -4,7 +4,10 @@
   <ELEMENT Name="Process" Type="Type" Filename="string.typ"/>
   <ELEMENT Name="HandlerType" Type="Type" Filename="pipeline_plugin_process_type.typ"/>
   <ELEMENT Name="Handler" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="InfoType" Type="Type" Filename="pipeline_plugin_process_type.typ"/>
+  <ELEMENT Name="Info" Type="Type" Filename="string.typ"/>
   <LOG>Sat Feb 18 13:34:33 2012 (Kaetemi) Dfn Structure = 
 Sat Feb 18 13:34:44 2012 (Kaetemi) Dfn Structure = 
-Sat Feb 18 13:44:42 2012 (Kaetemi) Dfn Structure = </LOG>
+Sat Feb 18 13:44:42 2012 (Kaetemi) Dfn Structure = 
+Sat Mar 03 11:06:35 2012 (Kaetemi) Dfn Structure = </LOG>
 </DFN>

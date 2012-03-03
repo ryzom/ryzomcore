@@ -37,6 +37,7 @@
 
 // Project includes
 #include "../plugin_library/pipeline_interface.h"
+#include "../plugin_library/pipeline_process.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -65,7 +66,7 @@ public:
 
 	virtual void run()
 	{
-		std::string tempDirectory = PIPELINE::IPipelineInterface::getInstance()->getTempDir();
+		std::string tempDirectory = PIPELINE::IPipelineProcess::getInstance()->getTempDir();
 
 		PIPELINE::IPipelineInterface::getInstance()->endedRunnableTask();
 	}

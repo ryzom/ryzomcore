@@ -1,9 +1,9 @@
 /**
- * \file pipeline_interface_impl.cpp
- * \brief CPipelineInterfaceImpl
- * \date 2012-02-25 12:21GMT
+ * \file pipeline_process_impl.cpp
+ * \brief CPipelineProcessImpl
+ * \date 2012-03-03 09:33GMT
  * \author Jan Boon (Kaetemi)
- * CPipelineInterfaceImpl
+ * CPipelineProcessImpl
  */
 
 /* 
@@ -26,16 +26,15 @@
  */
 
 #include <nel/misc/types_nl.h>
-#include "pipeline_interface_impl.h"
+#include "pipeline_process_impl.h"
 
 // STL includes
 #include <sstream>
 
 // NeL includes
+#include <nel/misc/time_nl.h>
 #include <nel/misc/app_context.h>
 #include <nel/misc/debug.h>
-#include <nel/net/service.h>
-#include <nel/misc/class_registry.h>
 
 // Project includes
 #include "pipeline_service.h"
@@ -45,37 +44,36 @@ using namespace std;
 
 namespace PIPELINE {
 
-CPipelineInterfaceImpl::CPipelineInterfaceImpl()
+CPipelineProcessImpl::CPipelineProcessImpl()
 {
 	nlassert(getInstance() == NULL);
-	NLMISC::INelContext::getInstance().setSingletonPointer("IPipelineInterface", this);
+	NLMISC::INelContext::getInstance().setSingletonPointer("IPipelineProcess", this);
 }
 
-CPipelineInterfaceImpl::~CPipelineInterfaceImpl()
+CPipelineProcessImpl::~CPipelineProcessImpl()
 {
-	NLMISC::INelContext::getInstance().releaseSingletonPointer("IPipelineInterface", this);
+	NLMISC::INelContext::getInstance().releaseSingletonPointer("IPipelineProcess", this);
 }
 
-NLMISC::CConfigFile &CPipelineInterfaceImpl::getConfigFile()
+std::string CPipelineProcessImpl::getProjectValue(const std::string &name)
 {
-	return NLNET::IService::getInstance()->ConfigFile;
+	return ""; // TODO
 }
 
-void CPipelineInterfaceImpl::registerClass(const std::string &className, NLMISC::IClassable* (*creator)(), const std::string &typeidCheck) throw(NLMISC::ERegistry)
+std::string CPipelineProcessImpl::getTempDir()
 {
-	NLMISC::CClassRegistry::registerClass(className, creator, typeidCheck);
-	RegisteredClasses.push_back(className);
-	nldebug("Registered class '%s'", className.c_str());
-}
+	// IF PROJECT blahblah TODO
+	// ELSE
 
-bool CPipelineInterfaceImpl::tryRunnableTask(std::string stateName, NLMISC::IRunnable *task)
-{
-	return PIPELINE::tryRunnableTask(stateName, task);
-}
-
-void CPipelineInterfaceImpl::endedRunnableTask()
-{
-	PIPELINE::endedRunnableTask();
+	{
+		std::stringstream ss;
+		ss << g_PipelineDirectory;
+		ss << NLMISC::CTime::getSecondsSince1970();
+		ss << ".";
+		ss << rand();
+		ss << PIPELINE_DIRECTORY_TEMP_SUFFIX;
+		return ss.str();
+	}
 }
 
 } /* namespace PIPELINE */

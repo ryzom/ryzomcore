@@ -1,9 +1,9 @@
 /**
- * \file pipeline_interface_impl.h
- * \brief CPipelineInterfaceImpl
- * \date 2012-02-25 12:21GMT
+ * \file pipeline_process_impl.h
+ * \brief CPipelineProcessImpl
+ * \date 2012-03-03 09:33GMT
  * \author Jan Boon (Kaetemi)
- * CPipelineInterfaceImpl
+ * CPipelineProcessImpl
  */
 
 /* 
@@ -25,44 +25,37 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIPELINE_PIPELINE_INTERFACE_IMPL_H
-#define PIPELINE_PIPELINE_INTERFACE_IMPL_H
+#ifndef PIPELINE_PIPELINE_PROCESS_IMPL_H
+#define PIPELINE_PIPELINE_PROCESS_IMPL_H
 #include <nel/misc/types_nl.h>
 
 // STL includes
-#include <vector>
-#include <string>
 
 // NeL includes
 
 // Project includes
-#include "../plugin_library/pipeline_interface.h"
+#include "../plugin_library/pipeline_process.h"
 
 namespace PIPELINE {
 
 /**
- * \brief CPipelineInterfaceImpl
- * \date 2012-02-25 12:21GMT
+ * \brief CPipelineProcessImpl
+ * \date 2012-03-03 09:33GMT
  * \author Jan Boon (Kaetemi)
- * CPipelineInterfaceImpl
+ * CPipelineProcessImpl
  */
-class CPipelineInterfaceImpl : public IPipelineInterface
+class CPipelineProcessImpl : public IPipelineProcess
 {
 public:
-	std::vector<std::string> RegisteredClasses;
+	CPipelineProcessImpl();
+	virtual ~CPipelineProcessImpl();
 
-public:
-	CPipelineInterfaceImpl();
-	virtual ~CPipelineInterfaceImpl();
-
-	virtual NLMISC::CConfigFile &getConfigFile();
-	virtual void registerClass(const std::string &className, NLMISC::IClassable* (*creator)(), const std::string &typeidCheck) throw(NLMISC::ERegistry);
-	virtual bool tryRunnableTask(std::string stateName, NLMISC::IRunnable *task);
-	virtual void endedRunnableTask();
-}; /* class CPipelineInterfaceImpl */
+	virtual std::string getProjectValue(const std::string &name);
+	virtual std::string getTempDir();
+}; /* class CPipelineProcessImpl */
 
 } /* namespace PIPELINE */
 
-#endif /* #ifndef PIPELINE_PIPELINE_INTERFACE_IMPL_H */
+#endif /* #ifndef PIPELINE_PIPELINE_PROCESS_IMPL_H */
 
 /* end of file */

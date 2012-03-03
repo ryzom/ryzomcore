@@ -6,6 +6,7 @@
         <ATOM Name="Process" Value="ExportShape"/>
         <ATOM Name="HandlerType" Value="RegisteredClass"/>
         <ATOM Name="Handler" Value="CProcessMaxShape"/>
+        <ATOM Name="Info" Value="CProcessMaxShapeInfo"/>
       </STRUCT>
     </ARRAY>
   </STRUCT>
@@ -16,5 +17,6 @@
   <LOG>Sat Mar 03 10:55:24 2012 (Kaetemi) .ProcessHandlers[0].Handler = CProcessMaxShape
 Sat Mar 03 10:55:24 2012 (Kaetemi) .ProcessHandlers[0].HandlerType = RegisteredClass
 Sat Mar 03 10:55:24 2012 (Kaetemi) .ProcessHandlers[0].Process = ExportShape
-Sat Mar 03 10:55:24 2012 (Kaetemi) formName Resized = 1</LOG>
+Sat Mar 03 10:55:24 2012 (Kaetemi) formName Resized = 1
+Sat Mar 03 11:07:09 2012 (Kaetemi) .ProcessHandlers[0].Info = CProcessMaxShapeInfo</LOG>
 </FORM>

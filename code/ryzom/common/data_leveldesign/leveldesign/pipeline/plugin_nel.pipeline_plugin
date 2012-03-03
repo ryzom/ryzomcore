@@ -6,6 +6,7 @@
         <ATOM Name="Process" Value="Interface"/>
         <ATOM Name="HandlerType" Value="RegisteredClass"/>
         <ATOM Name="Handler" Value="CProcessInterface"/>
+        <ATOM Name="Info" Value="CProcessInterfaceInfo"/>
       </STRUCT>
     </ARRAY>
   </STRUCT>
@@ -18,5 +19,6 @@ Sat Mar 03 10:55:24 2012 (Kaetemi) .ProcessHandlers[0].HandlerType = RegisteredC
 Sat Mar 03 10:55:24 2012 (Kaetemi) .ProcessHandlers[0].Process = ExportShape
 Sat Mar 03 10:55:24 2012 (Kaetemi) formName Resized = 1
 Sat Mar 03 10:56:08 2012 (Kaetemi) .ProcessHandlers[0].Handler = CProcessInterface
-Sat Mar 03 10:56:08 2012 (Kaetemi) .ProcessHandlers[0].Process = Interface</LOG>
+Sat Mar 03 10:56:08 2012 (Kaetemi) .ProcessHandlers[0].Process = Interface
+Sat Mar 03 11:13:55 2012 (Kaetemi) .ProcessHandlers[0].Info = CProcessInterfaceInfo</LOG>
 </FORM>

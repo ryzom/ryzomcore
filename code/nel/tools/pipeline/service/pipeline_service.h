@@ -57,8 +57,10 @@ namespace PIPELINE {
 extern std::string g_DatabaseDirectory;
 extern std::string g_PipelineDirectory;
 
-#define PIPELINE_MACRO_DATABASE_DIRECTORY "{{DatabaseDirectory}}"
-#define PIPELINE_MACRO_PIPELINE_DIRECTORY "{{PipelineDirectory}}"
+#define PIPELINE_MACRO_DATABASE_DIRECTORY "[$DatabaseDirectory]"
+#define PIPELINE_MACRO_PIPELINE_DIRECTORY "[$PipelineDirectory]"
+
+#define PIPELINE_DIRECTORY_TEMP_SUFFIX ".temp"
 
 /// Unmacros a path, and standardizes it as well.
 std::string unMacroPath(const std::string &path);
