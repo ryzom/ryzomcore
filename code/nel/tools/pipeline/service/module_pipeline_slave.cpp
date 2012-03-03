@@ -31,9 +31,10 @@
 // STL includes
 
 // NeL includes
-// #include <nel/misc/debug.h>
+#include <nel/misc/debug.h>
 
 // Project includes
+#include "module_pipeline_master_itf.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -50,15 +51,12 @@ namespace PIPELINE {
 class CModulePipelineSlave :
 	public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >,
 	public CModulePipelineSlaveSkel
-{
+{	
 protected:
-	// pointers
-	// ...
+	CModulePipelineMasterProxy *m_Master;
 	
-	// instances
-	// ...
 public:
-	CModulePipelineSlave()
+	CModulePipelineSlave() : m_Master(NULL)
 	{
 		
 	}
@@ -68,9 +66,43 @@ public:
 		
 	}
 
+	virtual bool initModule(const TParsedCommandLine &initInfo)
+	{
+		CModuleBase::initModule(initInfo);
+		CModulePipelineSlaveSkel::init(this);
+		return true;
+	}
+
+	virtual void onModuleUp(IModuleProxy *moduleProxy)
+	{
+		if (moduleProxy->getModuleClassName() == "ModulePipelineMaster")
+		{
+			nlassert(m_Master == NULL);
+			
+			m_Master = new CModulePipelineMasterProxy(moduleProxy);
+
+			nlinfo("Master UP (%s)", moduleProxy->getModuleName().c_str());
+		}
+	}
+	
+	virtual void onModuleDown(IModuleProxy *moduleProxy)
+	{
+		if (moduleProxy->getModuleClassName() == "ModulePipelineMaster")
+		{
+			nlassert(m_Master->getModuleProxy() == moduleProxy);
+
+			delete m_Master;
+			m_Master = NULL;
+
+			nlinfo("Slave DOWN (%s)", moduleProxy->getModuleName().c_str());
+		}
+	}
+
 	virtual void startBuildTask(NLNET::IModuleProxy *sender, uint32 taskId, const std::string &projectName, const std::string &processHandler)
 	{
-
+		//this->queueModuleTask
+		CModulePipelineMasterProxy master(sender);
+		master.slaveRefusedBuildTask(this, taskId);
 	}
 	
 }; /* class CModulePipelineSlave */

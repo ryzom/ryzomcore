@@ -29,11 +29,14 @@
 #include "module_pipeline_master_itf.h"
 
 // STL includes
+#include <map>
+#include <boost/thread/mutex.hpp>
 
 // NeL includes
-// #include <nel/misc/debug.h>
+#include <nel/misc/debug.h>
 
 // Project includes
+#include "module_pipeline_slave_itf.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -48,15 +51,25 @@ namespace PIPELINE {
  * CModulePipelineMaster
  */
 class CModulePipelineMaster :
-	public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >,
-	public CModulePipelineMasterSkel
+	public CModulePipelineMasterSkel, 
+	public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >
 {
-protected:
-	// pointers
-	// ...
+	struct CSlave
+	{
+	public:
+		CSlave(IModuleProxy *moduleProxy) 
+			: Proxy(moduleProxy), 
+			  ActiveTaskId(0) { }
+
+		CModulePipelineSlaveProxy Proxy;
+		uint32 ActiveTaskId;
+	};
 	
-	// instances
-	// ...
+protected:
+	typedef std::map<IModuleProxy *, CSlave *> TSlaveMap;
+	TSlaveMap m_Slaves;
+	mutable boost::mutex m_SlavesMutex;
+
 public:
 	CModulePipelineMaster()
 	{
@@ -65,13 +78,77 @@ public:
 
 	virtual ~CModulePipelineMaster()
 	{
+		m_SlavesMutex.lock();
+		
+		for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
+			delete it->second;
+		m_Slaves.clear();
+		
+		m_SlavesMutex.unlock();
+	}
 
+	virtual bool initModule(const TParsedCommandLine &initInfo)
+	{
+		CModuleBase::initModule(initInfo);
+		CModulePipelineMasterSkel::init(this);
+		return true;
+	}
+
+	virtual void onModuleUp(IModuleProxy *moduleProxy)
+	{
+		if (moduleProxy->getModuleClassName() == "ModulePipelineSlave")
+		{
+			nlassert(m_Slaves.find(moduleProxy) == m_Slaves.end());
+
+			nlinfo("Slave UP (%s)", moduleProxy->getModuleName().c_str());
+			
+			m_SlavesMutex.lock();
+
+			CSlave *slave = new CSlave(moduleProxy);
+			m_Slaves[moduleProxy] = slave;
+
+			m_SlavesMutex.unlock();
+		}
+	}
+	
+	virtual void onModuleDown(IModuleProxy *moduleProxy)
+	{
+		if (moduleProxy->getModuleClassName() == "ModulePipelineSlave")
+		{
+			nlinfo("Slave DOWN (%s)", moduleProxy->getModuleName().c_str());
+
+			m_SlavesMutex.lock();
+
+			TSlaveMap::iterator slaveIt = m_Slaves.find(moduleProxy);
+			CSlave *slave = slaveIt->second;
+
+			if (slave->ActiveTaskId)
+			{
+				// ...
+			}
+			
+			m_Slaves.erase(slaveIt);
+			delete slave;
+			
+			m_SlavesMutex.unlock();
+		}
+	}
+
+	virtual void onModuleUpdate()
+	{
+		// if state build, iterate trough all slaves to see if any is free, and check if there's any waiting tasks
 	}
 
 	virtual void slaveFinishedBuildTask(NLNET::IModuleProxy *sender, uint32 taskId)
 	{
-
+		// TODO
 	}
+
+	virtual void slaveRefusedBuildTask(NLNET::IModuleProxy *sender, uint32 taskId)
+	{
+		// TODO
+	}
+
 }; /* class CModulePipelineMaster */
 
 void module_pipeline_master_forceLink() { }

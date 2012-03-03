@@ -10,6 +10,12 @@
 				<param type="uint32"		name="taskId"	/>
 			</method>
 
+			<method name="slaveRefusedBuildTask" msg="SRBT">
+				<doc line=""/>
+
+				<param type="uint32"		name="taskId"	/>
+			</method>
+
 		</module_interface>
 
 	</namespace>
