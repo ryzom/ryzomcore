@@ -51,9 +51,18 @@ class CPipelineProject
 protected:
 	CPipelineWorkspace *m_Workspace;
 	NLMISC::CRefPtr<NLGEORGES::UForm> m_Form;
+
 public:
 	CPipelineProject(CPipelineWorkspace *workspace, NLGEORGES::UForm *form);
 	virtual ~CPipelineProject();
+
+	bool getValue(std::string &result, const std::string &name);
+	bool getValues(std::vector<std::string> &resultAppend, const std::string &name);
+	bool getValueNb(uint &result, const std::string &name);
+
+private:
+	// Strip all macros and turn all macro paths into real paths.
+	void parseValue(std::string &result, const std::string &value);
 
 }; /* class CPipelineProject */
 

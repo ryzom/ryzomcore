@@ -64,6 +64,8 @@ struct CProcessPluginInfo
  */
 class CPipelineWorkspace
 {
+	friend class CPipelineProject;
+
 protected:
 	NLGEORGES::UFormLoader *m_FormLoader;
 	NLMISC::CRefPtr<NLGEORGES::UForm> m_Form;

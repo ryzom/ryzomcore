@@ -29,9 +29,11 @@
 #include "pipeline_project.h"
 
 // STL includes
+#include <sstream>
 
 // NeL includes
 // #include <nel/misc/debug.h>
+#include <nel/georges/u_form_elm.h>
 
 // Project includes
 
@@ -48,6 +50,96 @@ CPipelineProject::CPipelineProject(CPipelineWorkspace *workspace, NLGEORGES::UFo
 CPipelineProject::~CPipelineProject()
 {
 	
+}
+
+bool CPipelineProject::getValue(std::string &result, const std::string &name)
+{
+	std::string value;
+	if (!m_Form->getRootNode().getValueByName(value, name.c_str()))
+	{
+		nlwarning("Value '%s' not found in '%s'", name.c_str(), m_Form->getFilename().c_str());
+		return false;
+	}
+	parseValue(result, value);
+	return true;
+}
+
+bool CPipelineProject::getValues(std::vector<std::string> &resultAppend, const std::string &name)
+{
+	NLGEORGES::UFormElm *elm;
+	if (!m_Form->getRootNode().getNodeByName(&elm, name.c_str()))
+	{
+		nlwarning("Node '%s' not found in '%s'", name.c_str(), m_Form->getFilename().c_str());
+		return false;
+	}
+	uint size;
+	if (!elm->getArraySize(size))
+	{
+		nlwarning("Array size of node '%s' not found in '%s'", name.c_str(), m_Form->getFilename().c_str());
+		return false;
+	}
+	std::vector<std::string>::size_type originalSize = resultAppend.size();
+	resultAppend.reserve(resultAppend.size() + (std::vector<std::string>::size_type)size);
+	for (uint i = 0; i < size; ++i)
+	{
+		std::string value;
+		if (!elm->getArrayValue(value, i))
+		{
+			nlwarning("Array value of node '%s' at '%i' not found in '%s'", name.c_str(), i, m_Form->getFilename().c_str());
+			resultAppend.resize(originalSize);
+			return false;
+		}
+		std::string parsed;
+		parseValue(parsed, value);
+		resultAppend.push_back(parsed);
+	}
+	return true;
+}
+
+bool CPipelineProject::getValueNb(uint &result, const std::string &name)
+{
+	NLGEORGES::UFormElm *elm;
+	if (!m_Form->getRootNode().getNodeByName(&elm, name.c_str()))
+	{
+		nlwarning("Node '%s' not found in '%s'", name.c_str(), m_Form->getFilename().c_str());
+		return false;
+	}
+	if (!elm->getArraySize(result))
+	{
+		nlwarning("Array size of node '%s' not found in '%s'", name.c_str(), m_Form->getFilename().c_str());
+		return false;
+	}
+	return true;
+}
+
+void CPipelineProject::parseValue(std::string &result, const std::string &value)
+{
+	std::stringstream ss;
+
+	std::string::const_iterator lastEnd = value.begin();
+	std::string::const_iterator findOpen = find(lastEnd, value.end(), '[');
+	ss << std::string(lastEnd, findOpen);
+	while (findOpen != value.end())
+	{
+		++findOpen;
+		switch (*findOpen)
+		{
+		case '$':
+			// TODO
+			break;
+		case '@':
+			// TODO
+			break;
+		case '#':
+			// TODO
+			break;
+		default:			
+			// TODO
+			break;
+		}
+	}
+
+	result = ss.str();
 }
 
 } /* namespace PIPELINE */
