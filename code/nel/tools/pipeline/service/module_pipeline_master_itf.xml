@@ -4,16 +4,26 @@
 
 		<module_interface name="CModulePipelineMaster">
 
-			<method name="slaveFinishedBuildTask" msg="SFBT">
+			<method name="slaveFinishedBuildTask" msg="RE_BT_OK">
 				<doc line=""/>
 
 				<param type="uint32"		name="taskId"	/>
 			</method>
 
-			<method name="slaveRefusedBuildTask" msg="SRBT">
+			<method name="slaveRefusedBuildTask" msg="RE_BT_FAIL">
 				<doc line=""/>
 
 				<param type="uint32"		name="taskId"	/>
+			</method>
+
+			<method name="vectorPushString" msg="VEC_PUSH_STR">
+				<doc line=""/>
+				
+				<param type="std::string"		name="str"		byref="true"/>
+			</method>
+
+			<method name="updateDatabaseStatusByVector" msg="UPD_DB_ST">
+				<doc line=""/>
 			</method>
 
 		</module_interface>

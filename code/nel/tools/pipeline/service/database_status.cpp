@@ -251,17 +251,18 @@ public:
 
 IRunnable *CDatabaseStatus::updateFileStatus(const TFileStatusCallback &callback, const std::string &filePath)
 {
-#if defined(PIPELINE_MASTER)
+	if (!g_IsMaster)
+	{
+		nlerror("Not master, not allowed.");
+		return NULL;
+	}
+
 	CUpdateFileStatus *ufs = new CUpdateFileStatus();
 	ufs->StatusMutex = &m_StatusMutex;
 	ufs->FilePath = unMacroPath(filePath);
 	ufs->Callback = callback;
 	CAsyncFileManager::getInstance().addLoadTask(ufs);
 	return ufs;
-#else
-	nlerror("Not master, not allowed.");
-	return NULL;
-#endif
 }
 
 // ******************************************************************
@@ -386,6 +387,11 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 
 void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback)
 {
+	if (!g_IsMaster)
+	{
+		nlerror("Not master, not allowed.");
+	}
+
 	std::vector<std::string> paths;
 	paths.push_back(g_DatabaseDirectory);
 	updateDatabaseStatus(callback, paths, false, true);
@@ -393,6 +399,11 @@ void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback)
 
 void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback, const std::vector<std::string> &paths, bool wait, bool recurse)
 {
+	if (!g_IsMaster)
+	{
+		nlerror("Not master, not allowed.");
+	}
+
 	CDatabaseStatusUpdater *updater = new CDatabaseStatusUpdater();
 	updater->Callback = callback;
 	updater->FilesRequested = 0;

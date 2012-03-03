@@ -63,9 +63,9 @@ public:
 	/// A process handler is not allowed to depend on any files it does not list here.
 	
 	/// Must return all directories on which the process handler depends, these are NOT RECURSIVE.
-	virtual void getDependentDirectories(std::vector<std::string> &result) = 0;	
+	virtual void getDependentDirectories(std::vector<std::string> &resultAppend) = 0;	
 	/// Must return all files on which the process handler depends, ONLY if these are not in dependent directories.
-	virtual void getDependentFiles(std::vector<std::string> &result) = 0;
+	virtual void getDependentFiles(std::vector<std::string> &resultAppend) = 0;
 
 }; /* class IProcessInfo */
 

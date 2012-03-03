@@ -37,6 +37,8 @@
 
 // Project includes
 #include "module_pipeline_slave_itf.h"
+#include "pipeline_service.h"
+#include "database_status.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -57,12 +59,19 @@ class CModulePipelineMaster :
 	struct CSlave
 	{
 	public:
-		CSlave(IModuleProxy *moduleProxy) 
-			: Proxy(moduleProxy), 
-			  ActiveTaskId(0) { }
-
+		CSlave(CModulePipelineMaster *master, IModuleProxy *moduleProxy) 
+			: Master(master), 
+			Proxy(moduleProxy), 
+			ActiveTaskId(0) { }
+		CModulePipelineMaster *Master;
 		CModulePipelineSlaveProxy Proxy;
+		std::vector<std::string> Vector;
 		uint32 ActiveTaskId;
+
+		void cbUpdateDatabaseStatus()
+		{
+			
+		}
 	};
 	
 protected:
@@ -73,11 +82,13 @@ protected:
 public:
 	CModulePipelineMaster()
 	{
-
+		g_IsMaster = true;
 	}
 
 	virtual ~CModulePipelineMaster()
 	{
+		g_IsMaster = false;
+
 		m_SlavesMutex.lock();
 		
 		for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
@@ -104,7 +115,7 @@ public:
 			
 			m_SlavesMutex.lock();
 
-			CSlave *slave = new CSlave(moduleProxy);
+			CSlave *slave = new CSlave(this, moduleProxy);
 			m_Slaves[moduleProxy] = slave;
 
 			m_SlavesMutex.unlock();
@@ -147,6 +158,19 @@ public:
 	virtual void slaveRefusedBuildTask(NLNET::IModuleProxy *sender, uint32 taskId)
 	{
 		// TODO
+	}
+
+	virtual void vectorPushString(NLNET::IModuleProxy *sender, const std::string &str)
+	{
+		CSlave *slave = m_Slaves[sender];
+		slave->Vector.push_back(str);
+	}
+	 
+	virtual void updateDatabaseStatusByVector(NLNET::IModuleProxy *sender)
+	{
+		CSlave *slave = m_Slaves[sender];
+		g_DatabaseStatus->updateDatabaseStatus(CCallback<void>(slave, &CSlave::cbUpdateDatabaseStatus), slave->Vector, false, false);
+		slave->Vector.clear();
 	}
 
 }; /* class CModulePipelineMaster */

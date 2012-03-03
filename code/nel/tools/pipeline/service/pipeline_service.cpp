@@ -65,9 +65,11 @@ namespace PIPELINE {
 std::string g_DatabaseDirectory;
 std::string g_PipelineDirectory;
 bool g_IsExiting = false;
+bool g_IsMaster = false;
 
 NLGEORGES::UFormLoader *g_FormLoader = NULL;
-CPipelineWorkspace *g_PipelineWorkspace;
+CPipelineWorkspace *g_PipelineWorkspace = NULL;
+CDatabaseStatus *g_DatabaseStatus = NULL;
 
 std::string unMacroPath(const std::string &path)
 {
@@ -112,7 +114,6 @@ enum EState
 
 /// Data
 CTaskManager *s_TaskManager = NULL;
-CDatabaseStatus *s_DatabaseStatus = NULL;
 CPipelineInterfaceImpl *s_PipelineInterfaceImpl = NULL;
 CPipelineProcessImpl *s_PipelineProcessImpl = NULL;
 
@@ -253,7 +254,7 @@ class CUpdateDatabaseStatus : public IRunnable
 
 	virtual void run()
 	{
-		s_DatabaseStatus->updateDatabaseStatus(CCallback<void>(this, &CUpdateDatabaseStatus::databaseStatusUpdated));
+		g_DatabaseStatus->updateDatabaseStatus(CCallback<void>(this, &CUpdateDatabaseStatus::databaseStatusUpdated));
 	}
 };
 CUpdateDatabaseStatus s_UpdateDatabaseStatus;
@@ -315,7 +316,7 @@ public:
 		
 		initSheets();
 
-		s_DatabaseStatus = new CDatabaseStatus();
+		g_DatabaseStatus = new CDatabaseStatus();
 
 		s_PipelineInterfaceImpl = new CPipelineInterfaceImpl();
 		s_PipelineProcessImpl = new CPipelineProcessImpl(NULL); // Create a singleton impl for global usage without running project for test purposes.
@@ -364,8 +365,8 @@ public:
 		delete s_PipelineInterfaceImpl;
 		s_PipelineInterfaceImpl = NULL;
 
-		delete s_DatabaseStatus;
-		s_DatabaseStatus = NULL;
+		delete g_DatabaseStatus;
+		g_DatabaseStatus = NULL;
 
 		releaseSheets();
 

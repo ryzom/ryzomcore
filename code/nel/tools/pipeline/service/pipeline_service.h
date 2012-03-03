@@ -46,21 +46,12 @@ namespace NLGEORGES {
 
 namespace PIPELINE {
 	class CPipelineWorkspace;
-
-/*
-#if defined(PIPELINE_MASTER)
-#	if defined(PIPELINE_SLAVE)
-#		error Cannot define both PIPELINE_MASTER and PIPELINE_SLAVE at the same time.
-#	endif
-#elif defined (PIPELINE_SLAVE)
-#else
-#	error Must define either PIPELINE_MASTER or PIPELINE_SLAVE. Create 2 projects that output pipeline_service_master and pipeline_service_slave executables.
-#endif
-*/
+	class CDatabaseStatus;
 
 #define PIPELINE_MASTER
 
 extern bool g_IsExiting;
+extern bool g_IsMaster;
 
 extern std::string g_DatabaseDirectory;
 extern std::string g_PipelineDirectory;
@@ -81,6 +72,7 @@ void endedRunnableTask();
 
 extern NLGEORGES::UFormLoader *g_FormLoader;
 extern CPipelineWorkspace *g_PipelineWorkspace;
+extern CDatabaseStatus *g_DatabaseStatus;
 
 } /* namespace PIPELINE */
 

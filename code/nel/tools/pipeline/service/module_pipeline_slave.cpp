@@ -104,6 +104,11 @@ public:
 		CModulePipelineMasterProxy master(sender);
 		master.slaveRefusedBuildTask(this, taskId);
 	}
+
+	virtual void masterUpdatedDatabaseStatus(NLNET::IModuleProxy *sender)
+	{
+		
+	}
 	
 }; /* class CModulePipelineSlave */
 

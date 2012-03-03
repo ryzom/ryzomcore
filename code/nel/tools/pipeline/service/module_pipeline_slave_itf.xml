@@ -4,12 +4,16 @@
 
 		<module_interface name="CModulePipelineSlave">
 
-			<method name="startBuildTask" msg="SBT">
+			<method name="startBuildTask" msg="GO_BT">
 				<doc line=""/>
 
 				<param type="uint32"			name="taskId"	/>
 				<param type="std::string"		name="projectName"		byref="true"/>
 				<param type="std::string"		name="processHandler"		byref="true"/>
+			</method>
+
+			<method name="masterUpdatedDatabaseStatus" msg="RE_UPD_DB_ST">
+				<doc line=""/>
 			</method>
 
 		</module_interface>
