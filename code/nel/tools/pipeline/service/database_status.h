@@ -67,7 +67,7 @@ public:
 	std::string Process;
 	std::string Message;
 
-	void serial(NLMISC::IStream &stream);
+	void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
 };
 
 /// Errors set by a process when the file causes a build failure.
@@ -82,7 +82,7 @@ public:
 	uint32 LastUpdate; // The start time when the CRC32 was calculated.
 	uint32 CRC32;
 
-	void serial(NLMISC::IStream &stream);
+	void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
 };
 
 typedef CCallback<void, const std::string &/*filePath*/, const CFileStatus &/*fileStatus*/, bool /*success*/> TFileStatusCallback;

@@ -41,6 +41,20 @@
 
 namespace PIPELINE {
 
+enum TPluginType
+{
+	PLUGIN_REGISTERED_CLASS, 
+	PLUGIN_LUA_SCRIPT, 
+};
+
+struct CProcessPluginInfo
+{
+	TPluginType HandlerType;
+	std::string Handler;
+	TPluginType InfoType;
+	std::string Info;
+};
+
 /**
  * \brief CPipelineWorkspace
  * \date 2012-02-18 17:23GMT
@@ -50,15 +64,17 @@ namespace PIPELINE {
 class CPipelineWorkspace
 {
 protected:
-	// pointers
 	NLGEORGES::UFormLoader *m_FormLoader;
 	NLMISC::CRefPtr<NLGEORGES::UForm> m_Form;
-	
-	// instances
-	// ...
+	std::vector<NLMISC::CRefPtr<NLGEORGES::UForm> > m_Projects;
+	std::vector<NLMISC::CRefPtr<NLGEORGES::UForm> > m_Plugins;
+
 public:
 	CPipelineWorkspace(NLGEORGES::UFormLoader *formLoader, const std::string &sheetName);
 	virtual ~CPipelineWorkspace();
+
+	void getProcessPlugins(std::vector<CProcessPluginInfo> &result, const std::string &process);
+
 }; /* class CPipelineWorkspace */
 
 } /* namespace PIPELINE */

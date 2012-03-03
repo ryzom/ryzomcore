@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <FORM Revision="$Revision$" State="modified">
   <STRUCT>
+    <ATOM Name="Description" Value="Common Interface"/>
     <ARRAY Name="Processes">
       <ATOM Value="CProcessInterface"/>
     </ARRAY>
@@ -70,5 +71,5 @@
   <STRUCT/>
   <STRUCT/>
   <STRUCT/>
-  <LOG></LOG>
+  <LOG>Sat Mar 03 12:10:45 2012 (Kaetemi) .Description = Common Interface</LOG>
 </FORM>

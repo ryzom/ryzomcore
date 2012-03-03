@@ -40,7 +40,13 @@ namespace NLMISC {
 	class IRunnable;
 }
 
+namespace NLGEORGES {
+	class UFormLoader;
+}
+
 namespace PIPELINE {
+	class CPipelineWorkspace;
+
 /*
 #if defined(PIPELINE_MASTER)
 #	if defined(PIPELINE_SLAVE)
@@ -53,6 +59,8 @@ namespace PIPELINE {
 */
 
 #define PIPELINE_MASTER
+
+extern bool g_IsExiting;
 
 extern std::string g_DatabaseDirectory;
 extern std::string g_PipelineDirectory;
@@ -71,7 +79,8 @@ std::string macroPath(const std::string &path);
 bool tryRunnableTask(std::string stateName, NLMISC::IRunnable *task);
 void endedRunnableTask();
 
-extern bool g_IsExiting;
+extern NLGEORGES::UFormLoader *g_FormLoader;
+extern CPipelineWorkspace *g_PipelineWorkspace;
 
 } /* namespace PIPELINE */
 

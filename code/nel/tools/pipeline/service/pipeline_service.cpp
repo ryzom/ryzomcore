@@ -51,6 +51,8 @@
 #include "pipeline_workspace.h"
 #include "database_status.h"
 #include "pipeline_interface_impl.h"
+#include "pipeline_process_impl.h"
+
 
 // using namespace std;
 using namespace NLMISC;
@@ -62,6 +64,9 @@ namespace PIPELINE {
 std::string g_DatabaseDirectory;
 std::string g_PipelineDirectory;
 bool g_IsExiting = false;
+
+NLGEORGES::UFormLoader *g_FormLoader = NULL;
+CPipelineWorkspace *g_PipelineWorkspace;
 
 std::string unMacroPath(const std::string &path)
 {
@@ -102,11 +107,10 @@ enum EState
 };
 
 /// Data
-UFormLoader *s_FormLoader = NULL;
-CPipelineWorkspace *s_PipelineWorkspace = NULL;
 CTaskManager *s_TaskManager = NULL;
 CDatabaseStatus *s_DatabaseStatus = NULL;
 CPipelineInterfaceImpl *s_PipelineInterfaceImpl = NULL;
+CPipelineProcessImpl *s_PipelineProcessImpl = NULL;
 
 EState s_State = STATE_IDLE;
 std::string s_StateRunnableTaskName = "";
@@ -195,18 +199,18 @@ void initSheets()
 	nlinfo("Adding 'LeveldesignPipelineDirectory' to search path (%s)", leveldesignPipelineDirectory.c_str());
 	CPath::addSearchPath(leveldesignPipelineDirectory, true, false);
 	
-	s_FormLoader = UFormLoader::createLoader();
+	g_FormLoader = UFormLoader::createLoader();
 	
-	s_PipelineWorkspace = new CPipelineWorkspace(s_FormLoader, IService::getInstance()->ConfigFile.getVar("WorkspaceSheet").asString());
+	g_PipelineWorkspace = new CPipelineWorkspace(g_FormLoader, IService::getInstance()->ConfigFile.getVar("WorkspaceSheet").asString());
 }
 
 void releaseSheets()
 {
-	delete s_PipelineWorkspace;
-	s_PipelineWorkspace = NULL;
+	delete g_PipelineWorkspace;
+	g_PipelineWorkspace = NULL;
 
-	UFormLoader::releaseLoader(s_FormLoader);
-	s_FormLoader = NULL;
+	UFormLoader::releaseLoader(g_FormLoader);
+	g_FormLoader = NULL;
 
 	CPath::releaseInstance();
 }
@@ -307,6 +311,7 @@ public:
 		s_DatabaseStatus = new CDatabaseStatus();
 
 		s_PipelineInterfaceImpl = new CPipelineInterfaceImpl();
+		s_PipelineProcessImpl = new CPipelineProcessImpl();
 
 		// Load libraries
 		const CConfigFile::CVar &usedPlugins = ConfigFile.getVar("UsedPlugins");
@@ -345,6 +350,9 @@ public:
 			delete (*it);
 		}
 		s_LoadedLibraries.clear();
+
+		delete s_PipelineProcessImpl;
+		s_PipelineProcessImpl = NULL;
 
 		delete s_PipelineInterfaceImpl;
 		s_PipelineInterfaceImpl = NULL;
@@ -436,6 +444,42 @@ NLMISC_COMMAND(dumpAsyncFileManager, "Dumps the async file manager.", "")
 	for (std::vector<std::string>::iterator it = output.begin(), end = output.end(); it != end; ++it)
 		log.displayNL("DUMP: %s", (*it).c_str());
 	return true;
+}
+
+NLMISC_COMMAND(listProcessPlugins, "List process plugins.", "<processName>")
+{
+	if(args.size() != 1) return false;
+	std::vector<PIPELINE::CProcessPluginInfo> result;
+	PIPELINE::g_PipelineWorkspace->getProcessPlugins(result, args[0]);
+	for (std::vector<PIPELINE::CProcessPluginInfo>::iterator it = result.begin(), end = result.end(); it != end; ++it)
+	{
+		std::string statusHandler;
+		switch (it->HandlerType)
+		{
+		case PIPELINE::PLUGIN_REGISTERED_CLASS:
+			if (std::find(PIPELINE::s_PipelineInterfaceImpl->RegisteredClasses.begin(), PIPELINE::s_PipelineInterfaceImpl->RegisteredClasses.end(), it->Handler) != PIPELINE::s_PipelineInterfaceImpl->RegisteredClasses.end())
+				statusHandler = "AVAILABLE";
+			else
+				statusHandler = "NOT FOUND";
+			break;
+		default:
+			statusHandler = "UNKNOWN";
+			break;
+		}
+		std::string statusInfo;
+		switch (it->InfoType)
+		{
+		case PIPELINE::PLUGIN_REGISTERED_CLASS:if (std::find(PIPELINE::s_PipelineInterfaceImpl->RegisteredClasses.begin(), PIPELINE::s_PipelineInterfaceImpl->RegisteredClasses.end(), it->Info) != PIPELINE::s_PipelineInterfaceImpl->RegisteredClasses.end())
+				statusInfo = "AVAILABLE";
+			else
+				statusInfo = "NOT FOUND";
+			break;
+		default:
+			statusInfo = "UNKNOWN";
+			break;
+		}
+		log.displayNL("LISTPP '%s': '%s' (%s), '%s' (%s)", args[0].c_str(), it->Handler.c_str(), statusHandler.c_str(), it->Info.c_str(), statusInfo.c_str());
+	}
 }
 
 NLNET_SERVICE_MAIN(PIPELINE::CPipelineService, PIPELINE_SHORT_SERVICE_NAME, PIPELINE_LONG_SERVICE_NAME, 0, PIPELINE::s_ShardCallbacks, PIPELINE_SERVICE_DIRECTORY, PIPELINE_SERVICE_DIRECTORY)

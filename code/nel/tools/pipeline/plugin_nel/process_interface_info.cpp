@@ -52,17 +52,17 @@ CProcessInterfaceInfo::~CProcessInterfaceInfo()
 
 void CProcessInterfaceInfo::getDependentDirectoriesRecursive(std::vector<std::string> &result)
 {
-
+	
 }
 
 void CProcessInterfaceInfo::getDependentDirectories(std::vector<std::string> &result)
 {
-
+	
 }
 
 void CProcessInterfaceInfo::getDependentFiles(std::vector<std::string> &result)
 {
-
+	
 }
 
 } /* namespace PIPELINE */

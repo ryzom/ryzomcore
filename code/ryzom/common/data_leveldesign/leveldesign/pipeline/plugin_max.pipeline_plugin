@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <FORM Revision="$Revision$" State="modified">
   <STRUCT>
+    <ATOM Name="Description" Value="Pipeline Plugin Max"/>
     <ARRAY Name="ProcessHandlers">
       <STRUCT>
         <ATOM Name="Process" Value="ExportShape"/>
@@ -18,5 +19,6 @@
 Sat Mar 03 10:55:24 2012 (Kaetemi) .ProcessHandlers[0].HandlerType = RegisteredClass
 Sat Mar 03 10:55:24 2012 (Kaetemi) .ProcessHandlers[0].Process = ExportShape
 Sat Mar 03 10:55:24 2012 (Kaetemi) formName Resized = 1
-Sat Mar 03 11:07:09 2012 (Kaetemi) .ProcessHandlers[0].Info = CProcessMaxShapeInfo</LOG>
+Sat Mar 03 11:07:09 2012 (Kaetemi) .ProcessHandlers[0].Info = CProcessMaxShapeInfo
+Sat Mar 03 12:10:36 2012 (Kaetemi) .Description = Pipeline Plugin Max</LOG>
 </FORM>
