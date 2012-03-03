@@ -33,8 +33,10 @@
 // NeL includes
 // #include <nel/misc/debug.h>
 #include <nel/georges/u_form_elm.h>
+#include <nel/misc/path.h>
 
 // Project includes
+#include "pipeline_project.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -73,7 +75,7 @@ CPipelineWorkspace::CPipelineWorkspace(NLGEORGES::UFormLoader *formLoader, const
 			nlwarning("Missing 'Plugins' in '%s'", m_Form->getFilename().c_str());
 		}
 	}
-
+	
 	{
 		UFormElm *projects;
 		if (m_Form->getRootNode().getNodeByName(&projects, "Projects"))
@@ -85,7 +87,11 @@ CPipelineWorkspace::CPipelineWorkspace(NLGEORGES::UFormLoader *formLoader, const
 				std::string projectSheet;
 				if (projects->getArrayValue(projectSheet, i))
 				{
-					m_Projects.push_back(formLoader->loadForm(projectSheet.c_str()));
+					std::string projectName = NLMISC::CFile::getFilenameWithoutExtension(projectSheet);
+					if (m_Projects.find(projectName) == m_Projects.end())
+						m_Projects[projectName] = new CPipelineProject(this, formLoader->loadForm(projectSheet.c_str()));
+					else
+						nlwarning("Project '%s' in '%s' already", projectSheet.c_str(), m_Form->getFilename().c_str());
 				}
 				else
 				{
@@ -102,7 +108,9 @@ CPipelineWorkspace::CPipelineWorkspace(NLGEORGES::UFormLoader *formLoader, const
 
 CPipelineWorkspace::~CPipelineWorkspace()
 {
-	
+	for (std::map<std::string, CPipelineProject *>::iterator it = m_Projects.begin(), end = m_Projects.end(); it != end; ++it)
+		delete (*it).second;
+	m_Projects.clear();
 }
 
 void CPipelineWorkspace::getProcessPlugins(std::vector<CProcessPluginInfo> &result, const std::string &process)

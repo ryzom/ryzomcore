@@ -1,9 +1,9 @@
 /**
- * \file pipeline_workspace.h
- * \brief CPipelineWorkspace
- * \date 2012-02-18 17:23GMT
+ * \file pipeline_project.h
+ * \brief CPipelineProject
+ * \date 2012-03-03 11:31GMT
  * \author Jan Boon (Kaetemi)
- * CPipelineWorkspace
+ * CPipelineProject
  */
 
 /* 
@@ -25,62 +25,40 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIPELINE_PIPELINE_WORKSPACE_H
-#define PIPELINE_PIPELINE_WORKSPACE_H
+#ifndef PIPELINE_PIPELINE_PROJECT_H
+#define PIPELINE_PIPELINE_PROJECT_H
 #include <nel/misc/types_nl.h>
 
 // STL includes
-#include <string>
-#include <map>
 
 // NeL includes
-#include <nel/georges/u_form_loader.h>
+#include <nel/misc/smart_ptr.h>
 #include <nel/georges/u_form.h>
 
 // Project includes
 
 namespace PIPELINE {
-	class CPipelineProject;
-
-enum TPluginType
-{
-	PLUGIN_REGISTERED_CLASS, 
-	PLUGIN_LUA_SCRIPT, 
-};
-
-struct CProcessPluginInfo
-{
-	TPluginType HandlerType;
-	std::string Handler;
-	TPluginType InfoType;
-	std::string Info;
-};
+	class CPipelineWorkspace;
 
 /**
- * \brief CPipelineWorkspace
- * \date 2012-02-18 17:23GMT
+ * \brief CPipelineProject
+ * \date 2012-03-03 11:31GMT
  * \author Jan Boon (Kaetemi)
- * CPipelineWorkspace
+ * CPipelineProject
  */
-class CPipelineWorkspace
+class CPipelineProject
 {
 protected:
-	NLGEORGES::UFormLoader *m_FormLoader;
+	CPipelineWorkspace *m_Workspace;
 	NLMISC::CRefPtr<NLGEORGES::UForm> m_Form;
-	std::vector<NLMISC::CRefPtr<NLGEORGES::UForm> > m_Plugins;
-	std::map<std::string, CPipelineProject *> m_Projects;
-
 public:
-	CPipelineWorkspace(NLGEORGES::UFormLoader *formLoader, const std::string &sheetName);
-	virtual ~CPipelineWorkspace();
+	CPipelineProject(CPipelineWorkspace *workspace, NLGEORGES::UForm *form);
+	virtual ~CPipelineProject();
 
-	void getProcessPlugins(std::vector<CProcessPluginInfo> &result, const std::string &process);
-	CPipelineProject *getProject(const std::string &project) { return m_Projects[project]; }
-
-}; /* class CPipelineWorkspace */
+}; /* class CPipelineProject */
 
 } /* namespace PIPELINE */
 
-#endif /* #ifndef PIPELINE_PIPELINE_WORKSPACE_H */
+#endif /* #ifndef PIPELINE_PIPELINE_PROJECT_H */
 
 /* end of file */
