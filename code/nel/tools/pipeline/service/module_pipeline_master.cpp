@@ -109,9 +109,9 @@ public:
 	{
 		if (moduleProxy->getModuleClassName() == "ModulePipelineSlave")
 		{
-			nlassert(m_Slaves.find(moduleProxy) == m_Slaves.end());
-
 			nlinfo("Slave UP (%s)", moduleProxy->getModuleName().c_str());
+			
+			nlassert(m_Slaves.find(moduleProxy) == m_Slaves.end());
 			
 			m_SlavesMutex.lock();
 
@@ -127,7 +127,9 @@ public:
 		if (moduleProxy->getModuleClassName() == "ModulePipelineSlave")
 		{
 			nlinfo("Slave DOWN (%s)", moduleProxy->getModuleName().c_str());
-
+			
+			nlassert(m_Slaves.find(moduleProxy) != m_Slaves.end());
+			
 			m_SlavesMutex.lock();
 
 			TSlaveMap::iterator slaveIt = m_Slaves.find(moduleProxy);
