@@ -170,6 +170,17 @@ void CPipelineWorkspace::getProcessPlugins(std::vector<CProcessPluginInfo> &resu
 	}
 }
 
+CPipelineProject *CPipelineWorkspace::getProject(const std::string &project)
+{
+	std::map<std::string, CPipelineProject *>::const_iterator it = m_Projects.find(project);
+	if (it == m_Projects.end())
+	{
+		nlwarning("Project '%s' does not exist", project.c_str());
+		return NULL;
+	}
+	return it->second;
+}
+
 } /* namespace PIPELINE */
 
 /* end of file */

@@ -2,6 +2,16 @@
 <FORM Revision="$Revision$" State="modified">
   <STRUCT>
     <ATOM Name="Description" Value="Common Interface"/>
+    <ARRAY Name="Macros">
+      <STRUCT>
+        <ATOM Name="Name" Value="DstInterfaceAtlas"/>
+        <ATOM Name="Value" Value="[!OutputDirectory]/interface_atlas/"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="Name" Value="DstInterfaceAtlasDxtc"/>
+        <ATOM Name="Value" Value="[!OutputDirectory]/interface_atlas_dxtc/"/>
+      </STRUCT>
+    </ARRAY>
     <ARRAY Name="Processes">
       <ATOM Value="CProcessInterface"/>
     </ARRAY>
@@ -12,19 +22,19 @@
             <ATOM Value="[$DatabaseDirectory]/interfaces/v3"/>
             <ATOM Value="[$DatabaseDirectory]/interfaces/r2_interface"/>
           </ARRAY>
-          <ATOM Name="OutputFile" Value="[$OutputDirectory]/interface_atlas/texture_interfaces_v3.tga"/>
+          <ATOM Name="OutputFile" Value="[&amp;DstInterfaceAtlas]/texture_interfaces_v3.tga"/>
         </STRUCT>
         <STRUCT>
           <ARRAY Name="InputDirectories">
             <ATOM Value="[$DatabaseDirectory]/interfaces/v3_login"/>
           </ARRAY>
-          <ATOM Name="OutputFile" Value="[$OutputDirectory]/interface_atlas/texture_interfaces_v3_login.tga"/>
+          <ATOM Name="OutputFile" Value="[&amp;DstInterfaceAtlas]/texture_interfaces_v3_login.tga"/>
         </STRUCT>
         <STRUCT>
           <ARRAY Name="InputDirectories">
             <ATOM Value="[$DatabaseDirectory]/interfaces/v3_outgame/ui"/>
           </ARRAY>
-          <ATOM Name="OutputFile" Value="[$OutputDirectory]/interface_atlas/texture_interfaces_v3_outgame_ui.tga"/>
+          <ATOM Name="OutputFile" Value="[&amp;DstInterfaceAtlas]/texture_interfaces_v3_outgame_ui.tga"/>
         </STRUCT>
       </ARRAY>
       <ARRAY Name="AtlasDxtc">
@@ -34,7 +44,7 @@
             <ATOM Value="[$DatabaseDirectory]/interfaces/v3_items"/>
             <ATOM Value="[$DatabaseDirectory]/interfaces/v3_dxtc_misc"/>
           </ARRAY>
-          <ATOM Name="OutputFile" Value="[$OutputDirectory]/interface_atlas_dxtc/texture_interfaces_dxtc.tga"/>
+          <ATOM Name="OutputFile" Value="[&amp;DstInterfaceAtlasDxtc]/texture_interfaces_dxtc.tga"/>
         </STRUCT>
       </ARRAY>
       <STRUCT Name="Fullscreen">
@@ -53,7 +63,7 @@
           <ATOM Value="[$DatabaseDirectory]/interfaces/v3_quick_help/graph"/>
           <ATOM Value="[$DatabaseDirectory]/interfaces/r2_decals"/>
         </ARRAY>
-        <ATOM Name="OutputDirectory" Value="[$OutputDirectory]/interface_fullscreen"/>
+        <ATOM Name="OutputDirectory" Value="[!OutputDirectory]/interface_fullscreen"/>
       </STRUCT>
       <STRUCT Name="3D">
         <ARRAY Name="InputDirectories">
@@ -63,7 +73,7 @@
           <ATOM Value="[$DatabaseDirectory]/interfaces/v3_quick_help"/>
           <ATOM Value="[$DatabaseDirectory]/interfaces/r2_3d"/>
         </ARRAY>
-        <ATOM Name="OutputDirectory" Value="[$OutputDirectory]/interface_3d"/>
+        <ATOM Name="OutputDirectory" Value="[!OutputDirectory]/interface_3d"/>
       </STRUCT>
     </STRUCT>
   </STRUCT>
@@ -71,5 +81,16 @@
   <STRUCT/>
   <STRUCT/>
   <STRUCT/>
-  <LOG>Sat Mar 03 12:10:45 2012 (Kaetemi) .Description = Common Interface</LOG>
+  <LOG>Sat Mar 03 12:10:45 2012 (Kaetemi) .Description = Common Interface
+Sat Mar 03 13:33:24 2012 (Kaetemi) .Interface.Atlas[0].OutputFile = [&amp;DstInterfaceAtlas]/texture_interfaces_v3.tga
+Sat Mar 03 13:33:24 2012 (Kaetemi) .Macros[0].Name = DstInterfaceAtlas
+Sat Mar 03 13:33:24 2012 (Kaetemi) .Macros[0].Value = [!OutputDirectory]/interface_atlas/
+Sat Mar 03 13:33:24 2012 (Kaetemi) formName Resized = 1
+Sat Mar 03 13:33:28 2012 (Kaetemi) .Interface.Atlas[1].OutputFile = [&amp;DstInterfaceAtlas]/texture_interfaces_v3_login.tga
+Sat Mar 03 13:34:02 2012 (Kaetemi) .Interface.Atlas[1].OutputFile = [&amp;DstInterfaceAtlas]/texture_interfaces_v3_login.tga
+Sat Mar 03 13:34:02 2012 (Kaetemi) .Interface.Atlas[2].OutputFile = [&amp;DstInterfaceAtlas]/texture_interfaces_v3_outgame_ui.tga
+Sat Mar 03 13:34:02 2012 (Kaetemi) .Macros[1].Name = DstInterfaceAtlasDxtc
+Sat Mar 03 13:34:02 2012 (Kaetemi) .Macros[1].Value = [!OutputDirectory]/interface_atlas_dxtc/
+Sat Mar 03 13:34:02 2012 (Kaetemi) formName Resized = 2
+Sat Mar 03 13:34:32 2012 (Kaetemi) .Interface.AtlasDxtc[0].OutputFile = [&amp;DstInterfaceAtlasDxtc]/texture_interfaces_dxtc.tga</LOG>
 </FORM>

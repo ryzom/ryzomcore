@@ -51,6 +51,7 @@ class CPipelineProject
 protected:
 	CPipelineWorkspace *m_Workspace;
 	NLMISC::CRefPtr<NLGEORGES::UForm> m_Form;
+	std::string m_TempDirectory;
 
 public:
 	CPipelineProject(CPipelineWorkspace *workspace, NLGEORGES::UForm *form);
@@ -59,6 +60,17 @@ public:
 	bool getValue(std::string &result, const std::string &name);
 	bool getValues(std::vector<std::string> &resultAppend, const std::string &name);
 	bool getValueNb(uint &result, const std::string &name);
+
+	bool getMacro(std::string &result, const std::string &name);
+
+	/// Gets the project name.
+	std::string getName();
+
+	/// Gets the output directory for the project.
+	std::string getOutputDirectory();
+
+	/// Gets a temporary directory for the current process. Should be created/deleted by process when (no longer) needed. Temp directories MUST NOT be shared between seperate processes, as these may run in different systems.
+	std::string getTempDirectory();
 
 private:
 	// Strip all macros and turn all macro paths into real paths.

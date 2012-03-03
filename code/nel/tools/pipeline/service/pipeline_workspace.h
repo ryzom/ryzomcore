@@ -77,7 +77,7 @@ public:
 	virtual ~CPipelineWorkspace();
 
 	void getProcessPlugins(std::vector<CProcessPluginInfo> &result, const std::string &process);
-	CPipelineProject *getProject(const std::string &project) { return m_Projects[project]; }
+	CPipelineProject *getProject(const std::string &project);
 
 }; /* class CPipelineWorkspace */
 

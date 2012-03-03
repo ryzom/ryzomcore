@@ -49,6 +49,7 @@
 
 // Project includes
 #include "pipeline_workspace.h"
+#include "pipeline_project.h"
 #include "database_status.h"
 #include "pipeline_interface_impl.h"
 #include "pipeline_process_impl.h"
@@ -301,8 +302,10 @@ public:
 	{
 		g_DatabaseDirectory = CPath::standardizePath(ConfigFile.getVar("DatabaseDirectory").asString(), true);
 		if (!CFile::isDirectory(g_DatabaseDirectory)) nlwarning("'DatabaseDirectory' does not exist! (%s)", g_DatabaseDirectory.c_str());
+		ConfigFile.getVar("DatabaseDirectory").setAsString(g_DatabaseDirectory);
 		g_PipelineDirectory = CPath::standardizePath(ConfigFile.getVar("PipelineDirectory").asString(), true);
 		if (!CFile::isDirectory(g_PipelineDirectory)) nlwarning("'PipelineDirectory' does not exist! (%s)", g_PipelineDirectory.c_str());
+		ConfigFile.getVar("PipelineDirectory").setAsString(g_PipelineDirectory);
 
 		s_TaskManager = new CTaskManager();
 		
@@ -479,6 +482,43 @@ NLMISC_COMMAND(listProcessPlugins, "List process plugins.", "<processName>")
 			break;
 		}
 		log.displayNL("LISTPP '%s': '%s' (%s), '%s' (%s)", args[0].c_str(), it->Handler.c_str(), statusHandler.c_str(), it->Info.c_str(), statusInfo.c_str());
+	}
+	return true;
+}
+
+NLMISC_COMMAND(showProjectMacro, "Show project macro.", "<projectName> <macroName>")
+{
+	if(args.size() != 2) return false;
+	PIPELINE::CPipelineProject *project = PIPELINE::g_PipelineWorkspace->getProject(args[0]);
+	if (project)
+	{
+		std::string result;
+		project->getMacro(result, args[1]);
+		log.displayNL("MACRO: '%s', '%s': '%s'", args[0].c_str(), args[1].c_str(), result.c_str());
+		return true;
+	}
+	else
+	{
+		log.displayNL("MACRO: Project '%s' does not exist", args[0].c_str());
+		return false;
+	}
+}
+
+NLMISC_COMMAND(showProjectValue, "Show project value.", "<projectName> <valueName>")
+{
+	if(args.size() != 2) return false;
+	PIPELINE::CPipelineProject *project = PIPELINE::g_PipelineWorkspace->getProject(args[0]);
+	if (project)
+	{
+		std::string result;
+		project->getValue(result, args[1]);
+		log.displayNL("VALUE: '%s', '%s': '%s'", args[0].c_str(), args[1].c_str(), result.c_str());
+		return true;
+	}
+	else
+	{
+		log.displayNL("VALUE: Project '%s' does not exist", args[0].c_str());
+		return false;
 	}
 }
 

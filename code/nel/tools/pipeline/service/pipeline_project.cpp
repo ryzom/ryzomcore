@@ -34,8 +34,12 @@
 // NeL includes
 // #include <nel/misc/debug.h>
 #include <nel/georges/u_form_elm.h>
+#include <nel/net/service.h>
+#include <nel/misc/config_file.h>
+#include <nel/misc/path.h>
 
 // Project includes
+#include "pipeline_service.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -112,31 +116,165 @@ bool CPipelineProject::getValueNb(uint &result, const std::string &name)
 	return true;
 }
 
+bool CPipelineProject::getMacro(std::string &result, const std::string &name)
+{
+	// TODO: Maybe preload the macros into a map.
+
+	NLGEORGES::UFormElm *elm;
+	if (!m_Form->getRootNode().getNodeByName(&elm, "Macros"))
+	{
+		nlwarning("Node 'Macros' not found in '%s'", m_Form->getFilename().c_str());
+		return false;
+	}
+	uint size;
+	if (!elm->getArraySize(size))
+	{
+		nlwarning("Array size of node 'Macros' not found in '%s'", name.c_str(), m_Form->getFilename().c_str());
+		return false;
+	}
+	for (uint i = 0; i < size; ++i)
+	{
+		NLGEORGES::UFormElm *macro;
+		if (!elm->getArrayNode(&macro, i))
+		{
+			nlwarning("Array node of node 'Macros' at '%i' not found in '%s'", i, m_Form->getFilename().c_str());
+			return false;
+		}
+		std::string macroName;
+		if (!macro->getValueByName(macroName, "Name"))
+		{
+			nlwarning("Macro does not contain value 'Name' at '%i' in '%s'", i, m_Form->getFilename().c_str());
+			return false;
+		}
+		if (macroName == name)
+		{
+			std::string macroValue;
+			if (!macro->getValueByName(macroValue, "Value"))
+			{
+				nlwarning("Macro does not contain value 'Value' at '%i' in '%s'", i, m_Form->getFilename().c_str());
+				return false;
+			}
+			parseValue(result, macroValue);
+			return true;
+		}
+	}
+
+	nlwarning("Macro '%s' not found in '%s'", name.c_str(), m_Form->getFilename().c_str());
+	result = std::string("[&") + name + std::string("]");
+	return false;
+}
+
+std::string CPipelineProject::getName()
+{
+	return NLMISC::CFile::getFilenameWithoutExtension(m_Form->getFilename());
+}
+
+
+std::string CPipelineProject::getOutputDirectory()
+{
+	return g_PipelineDirectory + getName() + "/";
+}
+
+std::string CPipelineProject::getTempDirectory()
+{
+	if (m_TempDirectory.empty())
+	{
+		std::stringstream ss;
+		ss << g_PipelineDirectory;
+		ss << getName();
+		ss << ".";
+		ss << NLMISC::CTime::getSecondsSince1970();
+		ss << ".";
+		ss << rand();
+		ss << PIPELINE_DIRECTORY_TEMP_SUFFIX;
+		m_TempDirectory = ss.str();
+	}
+	return m_TempDirectory;
+}
+
 void CPipelineProject::parseValue(std::string &result, const std::string &value)
 {
 	std::stringstream ss;
 
-	std::string::const_iterator lastEnd = value.begin();
-	std::string::const_iterator findOpen = find(lastEnd, value.end(), '[');
-	ss << std::string(lastEnd, findOpen);
+	std::string::const_iterator lastEndPP = value.begin();
+	std::string::const_iterator findOpen = find(lastEndPP, value.end(), '[');
+	ss << std::string(lastEndPP, findOpen);
 	while (findOpen != value.end())
 	{
 		++findOpen;
 		switch (*findOpen)
 		{
-		case '$':
-			// TODO
+		case '$': // SERVICE CONFIGURATION VALUE
+			{
+				++findOpen;
+				lastEndPP = find(findOpen, value.end(), ']');
+				std::string tagName = std::string(findOpen, lastEndPP);
+				if (NLNET::IService::getInstance()->ConfigFile.exists(tagName))
+				{
+					std::string cfgValue = NLNET::IService::getInstance()->ConfigFile.getVar(tagName).asString();
+					ss << cfgValue;
+				}
+				else
+				{
+					nlwarning("Unknown service configuration value '%s' in '%s'", tagName.c_str(), m_Form->getFilename().c_str());
+					ss << "[$";
+					ss << tagName;
+					ss << "]";
+				}
+				++lastEndPP;
+			}
 			break;
-		case '@':
-			// TODO
+		case '!': // SPECIAL PROJECT VALUE
+			{
+				++findOpen;
+				lastEndPP = find(findOpen, value.end(), ']');
+				std::string tagName = std::string(findOpen, lastEndPP);
+				if (tagName == "OutputDirectory")
+				{
+					ss << getOutputDirectory();
+				}
+				else if (tagName == "TempDirectory")
+				{
+					ss << getTempDirectory();
+				}
+				else
+				{
+					nlwarning("Unknown special project value '%s' in '%s'", tagName.c_str(), m_Form->getFilename().c_str());
+					ss << "[!";
+					ss << tagName;
+					ss << "]";
+				}
+				++lastEndPP;
+			}
 			break;
-		case '#':
-			// TODO
+		case '&': // PROJECT MACRO VALUE
+			{
+				++findOpen;
+				lastEndPP = find(findOpen, value.end(), ']');
+				std::string tagName = std::string(findOpen, lastEndPP);
+				std::string macroValue;
+				getMacro(macroValue, tagName);
+				ss << macroValue;
+				++lastEndPP;
+			}
 			break;
-		default:			
+		case '@': // WORKSPACE PROJECT VALUE
 			// TODO
+			// break;
+		case '#': // LEVELDESIGN SHEET VALUE
+			// TODO
+			// break;
+		default:
+			lastEndPP = find(findOpen, value.end(), ']');
+			--findOpen;
+			++lastEndPP;
+			std::string unknownTag = std::string(findOpen, lastEndPP);
+			ss << unknownTag;
+			nlwarning("Unknown tag '%s'", unknownTag.c_str());
 			break;
 		}
+		findOpen = find(lastEndPP, value.end(), '[');
+		ss << std::string(lastEndPP, findOpen);
 	}
 
 	result = ss.str();
