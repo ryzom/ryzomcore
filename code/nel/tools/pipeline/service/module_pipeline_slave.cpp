@@ -34,6 +34,7 @@
 #include <nel/misc/debug.h>
 
 // Project includes
+#include "info_flags.h"
 #include "module_pipeline_master_itf.h"
 #include "pipeline_service.h"
 #include "../plugin_library/process_info.h"
@@ -45,6 +46,15 @@ using namespace NLMISC;
 using namespace NLNET;
 
 namespace PIPELINE {
+
+#define PIPELINE_INFO_SLAVE_RELOAD_SHEETS "SLAVE_RELOAD_SHEETS"
+
+enum TRequestState
+{
+	REQUEST_NONE, 
+	REQUEST_MADE, 
+	REQUEST_WORKING, 
+};
 
 /**
  * \brief CModulePipelineSlave
@@ -59,10 +69,10 @@ class CModulePipelineSlave :
 public:
 	CModulePipelineMasterProxy *m_Master;
 	bool m_TestCommand;
-	bool m_RequestedReloadSheets;
+	TRequestState m_ReloadSheetsState;
 	
 public:
-	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_RequestedReloadSheets(false)
+	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE)
 	{
 		
 	}
@@ -106,8 +116,22 @@ public:
 
 	virtual void onModuleUpdate()
 	{
-		if (m_RequestedReloadSheets)
-			m_RequestedReloadSheets = !PIPELINE::reloadSheets();
+		if (m_ReloadSheetsState == REQUEST_MADE)
+		{
+			if (PIPELINE::reloadSheets())
+			{
+				m_ReloadSheetsState = REQUEST_WORKING;
+			}
+		}
+		else if (m_ReloadSheetsState == REQUEST_WORKING)
+		{
+			if (PIPELINE::isServiceStateIdle())
+			{
+				m_ReloadSheetsState = REQUEST_NONE;
+				m_Master->slaveReloadedSheets(this);
+				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_SLAVE_RELOAD_SHEETS);
+			}
+		}
 	}
 
 	virtual void startBuildTask(NLNET::IModuleProxy *sender, uint32 taskId, const std::string &projectName, const std::string &processHandler)
@@ -131,8 +155,9 @@ public:
 
 	virtual void reloadSheets(NLNET::IModuleProxy *sender)
 	{
-		if (!PIPELINE::reloadSheets())
-			m_RequestedReloadSheets = true;
+		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_RELOAD_SHEETS);
+		if (PIPELINE::reloadSheets()) m_ReloadSheetsState = REQUEST_WORKING;
+		else m_ReloadSheetsState = REQUEST_MADE;
 	}
 	
 protected:

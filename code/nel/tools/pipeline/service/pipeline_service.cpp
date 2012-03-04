@@ -46,8 +46,10 @@
 #include <nel/misc/async_file_manager.h>
 #include <nel/misc/algo.h>
 #include <nel/misc/dynloadlib.h>
+#include <nel/net/module_manager.h>
 
 // Project includes
+#include "info_flags.h"
 #include "pipeline_workspace.h"
 #include "pipeline_project.h"
 #include "database_status.h"
@@ -110,9 +112,12 @@ enum EState
 	STATE_RELOAD_SHEETS, 
 	STATE_DATABASE_STATUS, 
 	STATE_RUNNABLE_TASK, 
+	STATE_BUSY_TEST, 
+	STATE_DIRECT_CODE, 
 };
 
 /// Data
+CInfoFlags *s_InfoFlags = NULL;
 CTaskManager *s_TaskManager = NULL;
 CPipelineInterfaceImpl *s_PipelineInterfaceImpl = NULL;
 CPipelineProcessImpl *s_PipelineProcessImpl = NULL;
@@ -158,6 +163,11 @@ bool tryStateTask(EState state, IRunnable *task)
 
 } /* anonymous namespace */
 
+bool isServiceStateIdle()
+{
+	return (s_State == STATE_IDLE);
+}
+
 bool tryRunnableTask(std::string stateName, IRunnable *task)
 {
 	// copy paste from above.
@@ -173,20 +183,52 @@ bool tryRunnableTask(std::string stateName, IRunnable *task)
 	s_StateMutex.leave();
 	if (!result) return false;
 
-	nlassert(s_State != STATE_IDLE);
+	nlassert(s_State == STATE_RUNNABLE_TASK);
 	
 	s_TaskManager->addTask(task);
 	
 	return true;
 }
 
-void endedRunnableTask()
+namespace {
+
+void endedRunnableTask(EState state)
 {
-	nlassert(s_State != STATE_IDLE);
+	nlassert(s_State == state);
 
 	s_StateMutex.enter();
 	s_State = STATE_IDLE;
 	s_StateMutex.leave();
+}
+
+} /* anonymous namespace */
+
+void endedRunnableTask()
+{
+	endedRunnableTask(STATE_RUNNABLE_TASK);
+}
+
+bool tryDirectTask(const std::string &stateName)
+{
+	bool result = false;
+	s_StateMutex.enter();
+	result = (s_State == STATE_IDLE);
+	if (result)
+	{
+		s_State = STATE_DIRECT_CODE;
+		s_StateRunnableTaskName = stateName;
+	}
+	s_StateMutex.leave();
+	if (!result) return false;
+
+	nlassert(s_State == STATE_DIRECT_CODE);
+	
+	return true;
+}
+
+void endedDirectTask()
+{
+	endedRunnableTask(STATE_DIRECT_CODE);
 }
 
 // ******************************************************************
@@ -230,7 +272,7 @@ class CReloadSheets : public IRunnable
 		releaseSheets();
 		initSheets();
 		
-		endedRunnableTask();
+		endedRunnableTask(STATE_RELOAD_SHEETS);
 	}
 };
 CReloadSheets s_ReloadSheets;
@@ -253,7 +295,7 @@ class CUpdateDatabaseStatus : public IRunnable
 	
 	void databaseStatusUpdated()
 	{
-		endedRunnableTask();
+		endedRunnableTask(STATE_DATABASE_STATUS);
 	}
 
 	virtual void run()
@@ -266,6 +308,28 @@ CUpdateDatabaseStatus s_UpdateDatabaseStatus;
 bool updateDatabaseStatus()
 {
 	return tryStateTask(STATE_DATABASE_STATUS, &s_UpdateDatabaseStatus);
+}
+
+// ******************************************************************
+
+// ******************************************************************
+
+class CBusyTestStatus : public IRunnable
+{
+	virtual void getName(std::string &result) const 
+	{ result = "CBusyTestStatus"; }
+
+	virtual void run()
+	{
+		nlSleep(20000);
+		endedRunnableTask(STATE_BUSY_TEST);
+	}
+};
+CBusyTestStatus s_BusyTestStatus;
+
+bool busyTestStatus()
+{
+	return tryStateTask(STATE_BUSY_TEST, &s_BusyTestStatus);
 }
 
 // ******************************************************************
@@ -309,6 +373,10 @@ public:
 	/// Initializes the service (must be called before the first call to update())
 	virtual void init()
 	{
+		s_InfoFlags = new CInfoFlags();
+
+		s_InfoFlags->addFlag("INIT");
+
 		g_DatabaseDirectory = CPath::standardizePath(ConfigFile.getVar("DatabaseDirectory").asString(), true);
 		if (!CFile::isDirectory(g_DatabaseDirectory)) nlwarning("'DatabaseDirectory' does not exist! (%s)", g_DatabaseDirectory.c_str());
 		ConfigFile.getVar("DatabaseDirectory").setAsString(g_DatabaseDirectory);
@@ -337,6 +405,8 @@ public:
 			}
 			else delete library;
 		}
+
+		s_InfoFlags->removeFlag("INIT");
 	}
 	
 	/// This function is called every "frame" (you must call init() before). It returns false if the service is stopped.
@@ -349,6 +419,10 @@ public:
 	virtual void release()
 	{
 		g_IsExiting = true;
+
+		s_InfoFlags->addFlag("RELEASE");
+
+		NLNET::IModuleManager::releaseInstance();
 
 		while (NLMISC::CAsyncFileManager::getInstance().getNumWaitingTasks() > 0)
 		{
@@ -363,6 +437,8 @@ public:
 		}
 		s_LoadedLibraries.clear();
 
+		CClassRegistry::release();
+
 		delete s_PipelineProcessImpl;
 		s_PipelineProcessImpl = NULL;
 
@@ -376,6 +452,11 @@ public:
 
 		delete s_TaskManager;
 		s_TaskManager = NULL;
+
+		s_InfoFlags->removeFlag("RELEASE");
+
+		delete s_InfoFlags;
+		s_InfoFlags = NULL;
 	}
 	
 }; /* class CPipelineService */
@@ -401,7 +482,13 @@ NLMISC_DYNVARIABLE(std::string, pipelineServiceState, "State of the pipeline ser
 				*pointer = "DATABASE_STATUS";
 				break;
 			case PIPELINE::STATE_RUNNABLE_TASK:
-				*pointer = PIPELINE::s_StateRunnableTaskName;
+				*pointer = "RT: " + PIPELINE::s_StateRunnableTaskName;
+				break;
+			case PIPELINE::STATE_DIRECT_CODE:
+				*pointer = "DC: " + PIPELINE::s_StateRunnableTaskName;
+				break;
+			case PIPELINE::STATE_BUSY_TEST:
+				*pointer = "BUSY_TEST";
 				break;
 		}
 	}
@@ -433,6 +520,17 @@ NLMISC_COMMAND(updateDatabaseStatus, "Updates the entire database status. This a
 	if (!PIPELINE::updateDatabaseStatus())
 	{
 		log.displayNL("I'm afraid I cannot do this, my friend.");
+		return false;
+	}
+	return true;
+}
+
+NLMISC_COMMAND(busyTestState, "Keeps the service busy for twenty seconds.", "")
+{
+	if(args.size() != 0) return false;
+	if (!PIPELINE::busyTestStatus())
+	{
+		log.displayNL("Already busy");
 		return false;
 	}
 	return true;

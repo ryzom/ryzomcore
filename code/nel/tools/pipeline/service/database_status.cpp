@@ -157,6 +157,15 @@ bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &
 	return seemsValid;
 }
 
+bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStatusMap, const std::vector<std::string> &paths)
+{
+	for (std::vector<std::string>::const_iterator it = paths.begin(), end = paths.end(); it != end; ++it)
+	{
+		
+	}
+	return false;
+}
+
 namespace {
 
 class CUpdateFileStatus : public IRunnable

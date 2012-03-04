@@ -4,13 +4,14 @@
 
 		<module_interface name="CModulePipelineMaster">
 
-			<method name="slaveFinishedBuildTask" msg="RE_BT_OK">
+			<method name="slaveFinishedBuildTask" msg="RE_BT_DONE">
 				<doc line=""/>
 
 				<param type="uint32"		name="taskId"	/>
+				<param type="uint8"			name="errorLevel"	/>
 			</method>
 
-			<method name="slaveRefusedBuildTask" msg="RE_BT_FAIL">
+			<method name="slaveRefusedBuildTask" msg="RE_BT_REFUSED">
 				<doc line=""/>
 
 				<param type="uint32"		name="taskId"	/>

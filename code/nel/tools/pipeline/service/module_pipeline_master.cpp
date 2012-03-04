@@ -36,6 +36,7 @@
 #include <nel/misc/debug.h>
 
 // Project includes
+#include "info_flags.h"
 #include "module_pipeline_slave_itf.h"
 #include "pipeline_service.h"
 #include "database_status.h"
@@ -45,6 +46,8 @@ using namespace NLMISC;
 using namespace NLNET;
 
 namespace PIPELINE {
+
+#define PIPELINE_INFO_MASTER_RELOAD_SHEETS "MASTER_RELOAD_SHEETS"
 
 /**
  * \brief CModulePipelineMaster
@@ -69,6 +72,14 @@ class CModulePipelineMaster :
 		std::vector<std::string> Vector;
 		uint32 ActiveTaskId;
 		bool SheetsOk;
+
+		~CSlave()
+		{
+			if (!SheetsOk)
+			{
+				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_MASTER_RELOAD_SHEETS);
+			}
+		}
 
 		void cbUpdateDatabaseStatus()
 		{
@@ -159,11 +170,11 @@ public:
 		// if state build, iterate trough all slaves to see if any is free, and check if there's any waiting tasks
 	}
 
-	virtual void slaveFinishedBuildTask(NLNET::IModuleProxy *sender, uint32 taskId)
+	virtual void slaveFinishedBuildTask(NLNET::IModuleProxy *sender, uint32 taskId, uint8 errorLevel)
 	{
 		// TODO
 	}
-
+	
 	virtual void slaveRefusedBuildTask(NLNET::IModuleProxy *sender, uint32 taskId)
 	{
 		// TODO
@@ -173,6 +184,7 @@ public:
 	{
 		CSlave *slave = m_Slaves[sender];
 		slave->SheetsOk = true;
+		CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_MASTER_RELOAD_SHEETS);
 	}
 
 	virtual void vectorPushString(NLNET::IModuleProxy *sender, const std::string &str)
@@ -180,7 +192,7 @@ public:
 		CSlave *slave = m_Slaves[sender];
 		slave->Vector.push_back(str);
 	}
-	 
+	
 	virtual void updateDatabaseStatusByVector(NLNET::IModuleProxy *sender)
 	{
 		CSlave *slave = m_Slaves[sender];
@@ -197,18 +209,29 @@ protected:
 	{
 		if (args.size() != 0) return false;
 
-		m_SlavesMutex.lock();
-		
-		for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
+		if (PIPELINE::tryDirectTask("MASTER_RELOAD_SHEETS"))
 		{
-			CSlave *slave = it->second;
-			slave->SheetsOk = false;
-			slave->Proxy.reloadSheets(this);
-		}
-		
-		m_SlavesMutex.unlock();
+			m_SlavesMutex.lock();
+			
+			for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
+			{
+				CSlave *slave = it->second;
+				slave->SheetsOk = false;
+				slave->Proxy.reloadSheets(this);
+				CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_MASTER_RELOAD_SHEETS);
+			}
+			
+			m_SlavesMutex.unlock();
 
-		return true;
+			PIPELINE::endedDirectTask();
+
+			return true;
+		}
+		else
+		{
+			log.displayNL("Busy");
+			return false;
+		}
 	}
 
 }; /* class CModulePipelineMaster */

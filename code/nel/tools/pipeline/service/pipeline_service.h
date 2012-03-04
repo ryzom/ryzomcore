@@ -70,6 +70,12 @@ std::string macroPath(const std::string &path);
 bool tryRunnableTask(std::string stateName, NLMISC::IRunnable *task);
 void endedRunnableTask();
 
+bool tryDirectTask(const std::string &stateName);
+void endedDirectTask();
+
+/// Only use for informational purposes, service may not be idle after calling this. Not for thread safe usage.
+bool isServiceStateIdle();
+
 bool reloadSheets();
 
 extern NLGEORGES::UFormLoader *g_FormLoader;
