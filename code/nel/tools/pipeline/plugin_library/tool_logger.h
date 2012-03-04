@@ -41,6 +41,8 @@
 
 namespace PIPELINE {
 
+namespace {
+
 #ifdef ERROR
 #undef ERROR
 #endif
@@ -51,16 +53,12 @@ enum EError
 	MESSAGE, 
 };
 
-namespace {
-
 const std::string s_Error = "ERROR";
 const std::string s_Warning = "WARNING";
 const std::string s_Message = "MESSAGE";
 
 const std::string s_ErrorHeader = "type\tpath\ttime\terror";
 const std::string s_DependHeader = "output_file\tinput_file";
-
-}
 
 /**
  * \brief CToolLogger
@@ -134,7 +132,7 @@ public:
 		}
 	}
 
-	/// inputFile can only be file. May be not-yet-existing file for expected input. Directories are handled on process level. You should call this before calling writeError on inputFile, so the error is also linked from the outputFile.
+	/// inputFile can only be file. May be not-yet-existing file for expected input for future build runs. Directories are handled on process level. You should call this before calling writeError on inputFile, so the error is also linked from the outputFile.
 	void writeDepend(const std::string &outputFile, const std::string &inputFile)
 	{
 		if (m_DependLog)
@@ -173,6 +171,8 @@ public:
 		releaseDepend();
 	}
 }; /* class CToolLogger */
+
+} /* anonymous namespace */
 
 } /* namespace PIPELINE */
 
