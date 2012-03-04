@@ -89,6 +89,12 @@ public:
 	void fileNames( std::vector<std::string>& fileNames );
 
 	/**
+	 * Create a new bnp file
+	 * \param string file path
+	 */
+	void createFile( std::string filePath );
+
+	/**
 	 * Add files to the current aktive bnp file
 	 * \param vector of file pathes to add
 	 */
