@@ -235,10 +235,14 @@ class CReloadSheets : public IRunnable
 };
 CReloadSheets s_ReloadSheets;
 
+} /* anonymous namespace */
+
 bool reloadSheets()
 {
 	return tryStateTask(STATE_RELOAD_SHEETS, &s_ReloadSheets);
 }
+
+namespace {
 
 // ******************************************************************
 

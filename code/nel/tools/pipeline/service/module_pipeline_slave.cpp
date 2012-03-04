@@ -59,9 +59,10 @@ class CModulePipelineSlave :
 public:
 	CModulePipelineMasterProxy *m_Master;
 	bool m_TestCommand;
+	bool m_RequestedReloadSheets;
 	
 public:
-	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false)
+	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_RequestedReloadSheets(false)
 	{
 		
 	}
@@ -103,6 +104,12 @@ public:
 		}
 	}
 
+	virtual void onModuleUpdate()
+	{
+		if (m_RequestedReloadSheets)
+			m_RequestedReloadSheets = !PIPELINE::reloadSheets();
+	}
+
 	virtual void startBuildTask(NLNET::IModuleProxy *sender, uint32 taskId, const std::string &projectName, const std::string &processHandler)
 	{
 		//this->queueModuleTask
@@ -120,6 +127,12 @@ public:
 		{
 			nlwarning("NOT_IMPLEMENTED");
 		}
+	}
+
+	virtual void reloadSheets(NLNET::IModuleProxy *sender)
+	{
+		if (!PIPELINE::reloadSheets())
+			m_RequestedReloadSheets = true;
 	}
 	
 protected:

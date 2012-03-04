@@ -62,15 +62,22 @@ class CModulePipelineMaster :
 		CSlave(CModulePipelineMaster *master, IModuleProxy *moduleProxy) 
 			: Master(master), 
 			Proxy(moduleProxy), 
-			ActiveTaskId(0) { }
+			ActiveTaskId(0),
+			SheetsOk(true) { }
 		CModulePipelineMaster *Master;
 		CModulePipelineSlaveProxy Proxy;
 		std::vector<std::string> Vector;
 		uint32 ActiveTaskId;
+		bool SheetsOk;
 
 		void cbUpdateDatabaseStatus()
 		{
 			Proxy.masterUpdatedDatabaseStatus(Master);
+		}
+
+		bool canAcceptTask()
+		{
+			return SheetsOk && (ActiveTaskId == 0);
 		}
 	};
 	
@@ -162,6 +169,12 @@ public:
 		// TODO
 	}
 
+	virtual void slaveReloadedSheets(NLNET::IModuleProxy *sender)
+	{
+		CSlave *slave = m_Slaves[sender];
+		slave->SheetsOk = true;
+	}
+
 	virtual void vectorPushString(NLNET::IModuleProxy *sender, const std::string &str)
 	{
 		CSlave *slave = m_Slaves[sender];
@@ -173,6 +186,29 @@ public:
 		CSlave *slave = m_Slaves[sender];
 		g_DatabaseStatus->updateDatabaseStatus(CCallback<void>(slave, &CSlave::cbUpdateDatabaseStatus), slave->Vector, false, false);
 		slave->Vector.clear();
+	}
+	
+protected:
+	NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CModulePipelineMaster, CModuleBase)
+		NLMISC_COMMAND_HANDLER_ADD(CModulePipelineMaster, reloadSheets, "Reload sheets across all services", "")
+	NLMISC_COMMAND_HANDLER_TABLE_END
+
+	NLMISC_CLASS_COMMAND_DECL(reloadSheets)
+	{
+		if (args.size() != 0) return false;
+
+		m_SlavesMutex.lock();
+		
+		for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
+		{
+			CSlave *slave = it->second;
+			slave->SheetsOk = false;
+			slave->Proxy.reloadSheets(this);
+		}
+		
+		m_SlavesMutex.unlock();
+
+		return true;
 	}
 
 }; /* class CModulePipelineMaster */

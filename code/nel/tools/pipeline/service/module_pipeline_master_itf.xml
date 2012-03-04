@@ -16,6 +16,10 @@
 				<param type="uint32"		name="taskId"	/>
 			</method>
 
+			<method name="slaveReloadedSheets" msg="RE_SHEETS_OK">
+				<doc line=""/>
+			</method>
+
 			<method name="vectorPushString" msg="VEC_PUSH_STR">
 				<doc line=""/>
 				

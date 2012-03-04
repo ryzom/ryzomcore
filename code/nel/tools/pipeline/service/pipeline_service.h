@@ -70,6 +70,8 @@ std::string macroPath(const std::string &path);
 bool tryRunnableTask(std::string stateName, NLMISC::IRunnable *task);
 void endedRunnableTask();
 
+bool reloadSheets();
+
 extern NLGEORGES::UFormLoader *g_FormLoader;
 extern CPipelineWorkspace *g_PipelineWorkspace;
 extern CDatabaseStatus *g_DatabaseStatus;

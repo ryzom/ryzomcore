@@ -16,6 +16,9 @@
 				<doc line=""/>
 			</method>
 
+			<method name="reloadSheets" msg="RELOAD_SHEETS">
+			</method>
+
 		</module_interface>
 
 	</namespace>
