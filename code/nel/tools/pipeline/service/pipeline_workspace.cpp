@@ -115,6 +115,7 @@ CPipelineWorkspace::~CPipelineWorkspace()
 
 void CPipelineWorkspace::getProcessPlugins(std::vector<CProcessPluginInfo> &result, const std::string &process)
 {
+	uint16 pluginId = 0;
 	for (std::vector<NLMISC::CRefPtr<NLGEORGES::UForm> >::iterator it = m_Plugins.begin(), end = m_Plugins.end(); it != end; ++it)
 	{
 		UFormElm *processHandlers;
@@ -142,6 +143,8 @@ void CPipelineWorkspace::getProcessPlugins(std::vector<CProcessPluginInfo> &resu
 							{
 								processPlugin.HandlerType = (TPluginType)handlerType;
 								processPlugin.InfoType = (TPluginType)infoType;
+								processPlugin.Id.Sub.Plugin = pluginId;
+								processPlugin.Id.Sub.Handler = i;
 								result.push_back(processPlugin);
 
 								nldebug("Found '%s': '%s', '%s'", process.c_str(), processPlugin.Handler.c_str(), processPlugin.Info.c_str());
@@ -167,7 +170,37 @@ void CPipelineWorkspace::getProcessPlugins(std::vector<CProcessPluginInfo> &resu
 		{
 			nlwarning("Missing 'ProcessHandlers' in '%s'", (*it)->getFilename().c_str());
 		}
+		++pluginId;
 	}
+}
+
+bool CPipelineWorkspace::getProcessPlugin(CProcessPluginInfo &result, uint32 globalId)
+{
+	CProcessPluginId id;
+	id.Global = globalId;
+	if (id.Sub.Plugin >= m_Plugins.size())
+	{
+		nlwarning("Plugin id out of range");
+		return false;
+	}
+	NLMISC::CRefPtr<NLGEORGES::UForm> pluginForm = m_Plugins[id.Sub.Plugin];
+	UFormElm *processHandlers;
+	if (!pluginForm->getRootNode().getNodeByName(&processHandlers, "ProcessHandlers")) return false;
+	UFormElm *handler;
+	if (!processHandlers->getArrayNode(&handler, id.Sub.Handler)) return false;
+	uint32 handlerType;
+	uint32 infoType;
+	if (handler->getValueByName(handlerType, "HandlerType")
+		&& handler->getValueByName(result.Handler, "Handler")
+		&& handler->getValueByName(infoType, "InfoType")
+		&& handler->getValueByName(result.Info, "Info"))
+	{
+		result.HandlerType = (TPluginType)handlerType;
+		result.InfoType = (TPluginType)infoType;
+		result.Id = id;
+		return true;
+	}
+	else return false;
 }
 
 CPipelineProject *CPipelineWorkspace::getProject(const std::string &project)

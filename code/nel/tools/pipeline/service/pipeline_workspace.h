@@ -48,8 +48,22 @@ enum TPluginType
 	PLUGIN_LUA_SCRIPT, 
 };
 
+struct CProcessPluginId
+{
+	union
+	{
+		struct 
+		{
+			uint16 Plugin;
+			uint16 Handler;
+		} Sub;
+		uint32 Global;
+	};
+};
+
 struct CProcessPluginInfo
 {
+	CProcessPluginId Id;
 	TPluginType HandlerType;
 	std::string Handler;
 	TPluginType InfoType;
@@ -78,6 +92,7 @@ public:
 
 	void getProcessPlugins(std::vector<CProcessPluginInfo> &result, const std::string &process);
 	CPipelineProject *getProject(const std::string &project);
+	bool getProcessPlugin(CProcessPluginInfo &result, uint32 globalId);
 
 }; /* class CPipelineWorkspace */
 
