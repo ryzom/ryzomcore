@@ -997,7 +997,7 @@ void CBotChatPageTrade::startSellDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCal
 	CCtrlTextButton *confirmButton =  dynamic_cast<CCtrlTextButton*>(ig->getCtrl("ok"));
 	if (confirmButton)
 	{
-		confirmButton->setActive( sheet->getLockedByOwner() );
+		confirmButton->setActive( !sheet->getLockedByOwner() );
 		confirmButton->setText(CI18N::get("uiSellImmediately"));
 		confirmButton->setDefaultContextHelp(CI18N::get("uittDirectSellButton"));
 	}
