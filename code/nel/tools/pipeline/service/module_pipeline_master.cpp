@@ -47,7 +47,8 @@ using namespace NLNET;
 
 namespace PIPELINE {
 
-#define PIPELINE_INFO_MASTER_RELOAD_SHEETS "MASTER_RELOAD_SHEETS"
+#define PIPELINE_INFO_MASTER_RELOAD_SHEETS "M_RELOAD_SHEETS"
+#define PIPELINE_INFO_MASTER_UPDATE_DATABASE_FOR_SLAVE "M_UPD_DB_FOR_S"
 
 /**
  * \brief CModulePipelineMaster
@@ -72,7 +73,7 @@ class CModulePipelineMaster :
 		std::vector<std::string> Vector;
 		uint32 ActiveTaskId;
 		bool SheetsOk;
-
+		
 		~CSlave()
 		{
 			if (!SheetsOk)
@@ -80,10 +81,12 @@ class CModulePipelineMaster :
 				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_MASTER_RELOAD_SHEETS);
 			}
 		}
-
+		
+		// TODO: THIS WILL CRASH IF CALLED WHEN THE SLAVE ALREADY DISCONNECTED!!! USE A SELF DELETING CLASS INSTEAD (and check g_IsExiting there too)!!!
 		void cbUpdateDatabaseStatus()
 		{
 			Proxy.masterUpdatedDatabaseStatus(Master);
+			CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_MASTER_UPDATE_DATABASE_FOR_SLAVE);
 		}
 
 		bool canAcceptTask()
@@ -196,6 +199,7 @@ public:
 	virtual void updateDatabaseStatusByVector(NLNET::IModuleProxy *sender)
 	{
 		CSlave *slave = m_Slaves[sender];
+		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_MASTER_UPDATE_DATABASE_FOR_SLAVE);
 		g_DatabaseStatus->updateDatabaseStatus(CCallback<void>(slave, &CSlave::cbUpdateDatabaseStatus), slave->Vector, false, false);
 		slave->Vector.clear();
 	}

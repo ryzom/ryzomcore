@@ -206,15 +206,16 @@ public:
 						processInfo->setPipelineProcess(pipelineProcess);
 						processInfo->getDependentDirectories(result);
 						for (std::vector<std::string>::iterator it = result.begin(), end = result.end(); it != end; ++it)
-							Slave->m_Master->vectorPushString(Slave, *it);
+							Slave->m_Master->vectorPushString(Slave, PIPELINE::macroPath(*it));
 						result.clear();
 						processInfo->getDependentFiles(result);
 						for (std::vector<std::string>::iterator it = result.begin(), end = result.end(); it != end; ++it)
-							Slave->m_Master->vectorPushString(Slave, *it);
+							Slave->m_Master->vectorPushString(Slave, PIPELINE::macroPath(*it));
+						result.clear();
 					}
 					break;
 				default:
-					nlwarning("Not implemented.");
+					nlwarning("Not implemented");
 					break;
 				}
 			}
@@ -234,6 +235,8 @@ public:
 
 NLMISC_CLASS_COMMAND_IMPL(CModulePipelineSlave, testUpdateDatabaseStatus)
 {
+	// EXAMPLE USAGE: slave.testUpdateDatabaseStatus common_interface Interface
+
 	if (args.size() != 2) return false;
 	
 	PIPELINE::CPipelineProject *project = PIPELINE::g_PipelineWorkspace->getProject(args[0]);
