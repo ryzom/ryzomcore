@@ -705,9 +705,9 @@ public :
 	const CItemCraftParameters * getCraftParameters() const { return _CraftParameters; }
 
 	/// get custom string (for scroll-like items)
-	ucstring getCustomText() const { return _CustomText; }
+	const ucstring& getCustomText() const { return _CustomText; }
 	/// set custom string (for scroll-like items)
-	void setCustomText(ucstring val);
+	void setCustomText(const ucstring &val);
 
 	uint8 getPetIndex() const { return _PetIndex; }
 	void setPetIndex(uint8 val) { _PetIndex = val; }
