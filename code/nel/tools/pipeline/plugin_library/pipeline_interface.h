@@ -67,10 +67,16 @@ public:
 	virtual void registerClass(const std::string &className, NLMISC::IClassable* (*creator)(), const std::string &typeidCheck) throw(NLMISC::ERegistry) = 0;
 
 	/// Runs a runnable task if STATE_IDLE. You must call endedRunnableTask when the task has ended.
-	virtual bool tryRunnableTask(std::string stateName, NLMISC::IRunnable *task) = 0;
+	virtual bool tryRunnableTask(const std::string &stateName, NLMISC::IRunnable *task) = 0;
 
 	/// Call when a runnable task has ended to reset to STATE_IDLE.
 	virtual void endedRunnableTask() = 0;
+
+	/// Runs a runnable task if STATE_IDLE. You must call endedRunnableTask when the task has ended.
+	virtual bool tryDirectCode(const std::string &stateName) = 0;
+
+	/// Call when a runnable task has ended to reset to STATE_IDLE.
+	virtual void endedDirectCode() = 0;
 	
 }; /* class IPipelineInterface */
 

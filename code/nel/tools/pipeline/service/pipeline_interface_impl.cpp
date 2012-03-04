@@ -68,7 +68,7 @@ void CPipelineInterfaceImpl::registerClass(const std::string &className, NLMISC:
 	nldebug("Registered class '%s'", className.c_str());
 }
 
-bool CPipelineInterfaceImpl::tryRunnableTask(std::string stateName, NLMISC::IRunnable *task)
+bool CPipelineInterfaceImpl::tryRunnableTask(const std::string &stateName, NLMISC::IRunnable *task)
 {
 	return PIPELINE::tryRunnableTask(stateName, task);
 }
@@ -76,6 +76,16 @@ bool CPipelineInterfaceImpl::tryRunnableTask(std::string stateName, NLMISC::IRun
 void CPipelineInterfaceImpl::endedRunnableTask()
 {
 	PIPELINE::endedRunnableTask();
+}
+
+bool CPipelineInterfaceImpl::tryDirectCode(const std::string &stateName)
+{
+	return PIPELINE::tryDirectTask(stateName);
+}
+
+void CPipelineInterfaceImpl::endedDirectCode()
+{
+	PIPELINE::endedDirectTask();
 }
 
 } /* namespace PIPELINE */

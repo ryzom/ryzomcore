@@ -168,7 +168,7 @@ bool isServiceStateIdle()
 	return (s_State == STATE_IDLE);
 }
 
-bool tryRunnableTask(std::string stateName, IRunnable *task)
+bool tryRunnableTask(const std::string &stateName, IRunnable *task)
 {
 	// copy paste from above.
 

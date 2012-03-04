@@ -67,7 +67,7 @@ std::string unMacroPath(const std::string &path);
 /// Macros a path, and standardizes it in advance.
 std::string macroPath(const std::string &path);
 
-bool tryRunnableTask(std::string stateName, NLMISC::IRunnable *task);
+bool tryRunnableTask(const std::string &stateName, NLMISC::IRunnable *task);
 void endedRunnableTask();
 
 bool tryDirectTask(const std::string &stateName);

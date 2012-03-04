@@ -96,6 +96,8 @@ public:
 			nlinfo("Master UP (%s)", moduleProxy->getModuleName().c_str());
 
 			nlassert(m_Master == NULL);
+
+			// TODO: SAY HELLO
 			
 			m_Master = new CModulePipelineMasterProxy(moduleProxy);
 		}
@@ -108,6 +110,8 @@ public:
 			nlinfo("Master DOWN (%s)", moduleProxy->getModuleName().c_str());
 
 			nlassert(m_Master->getModuleProxy() == moduleProxy);
+
+			// TODO: ABORT RUNNING BUILD PROCESS
 
 			delete m_Master;
 			m_Master = NULL;
