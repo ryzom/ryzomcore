@@ -72,6 +72,7 @@ bool g_IsMaster = false;
 NLGEORGES::UFormLoader *g_FormLoader = NULL;
 CPipelineWorkspace *g_PipelineWorkspace = NULL;
 CDatabaseStatus *g_DatabaseStatus = NULL;
+CPipelineInterfaceImpl *g_PipelineInterfaceImpl = NULL;
 
 std::string unMacroPath(const std::string &path)
 {
@@ -119,7 +120,6 @@ enum EState
 /// Data
 CInfoFlags *s_InfoFlags = NULL;
 CTaskManager *s_TaskManager = NULL;
-CPipelineInterfaceImpl *s_PipelineInterfaceImpl = NULL;
 CPipelineProcessImpl *s_PipelineProcessImpl = NULL;
 
 EState s_State = STATE_IDLE;
@@ -390,7 +390,7 @@ public:
 
 		g_DatabaseStatus = new CDatabaseStatus();
 
-		s_PipelineInterfaceImpl = new CPipelineInterfaceImpl();
+		g_PipelineInterfaceImpl = new CPipelineInterfaceImpl();
 		s_PipelineProcessImpl = new CPipelineProcessImpl(NULL); // Create a singleton impl for global usage without running project for test purposes.
 
 		// Load libraries
@@ -442,8 +442,8 @@ public:
 		delete s_PipelineProcessImpl;
 		s_PipelineProcessImpl = NULL;
 
-		delete s_PipelineInterfaceImpl;
-		s_PipelineInterfaceImpl = NULL;
+		delete g_PipelineInterfaceImpl;
+		g_PipelineInterfaceImpl = NULL;
 
 		delete g_DatabaseStatus;
 		g_DatabaseStatus = NULL;
@@ -567,7 +567,7 @@ NLMISC_COMMAND(listProcessPlugins, "List process plugins.", "<processName>")
 		switch (it->HandlerType)
 		{
 		case PIPELINE::PLUGIN_REGISTERED_CLASS:
-			if (std::find(PIPELINE::s_PipelineInterfaceImpl->RegisteredClasses.begin(), PIPELINE::s_PipelineInterfaceImpl->RegisteredClasses.end(), it->Handler) != PIPELINE::s_PipelineInterfaceImpl->RegisteredClasses.end())
+			if (std::find(PIPELINE::g_PipelineInterfaceImpl->RegisteredClasses.begin(), PIPELINE::g_PipelineInterfaceImpl->RegisteredClasses.end(), it->Handler) != PIPELINE::g_PipelineInterfaceImpl->RegisteredClasses.end())
 				statusHandler = "AVAILABLE";
 			else
 				statusHandler = "NOT FOUND";
@@ -579,7 +579,7 @@ NLMISC_COMMAND(listProcessPlugins, "List process plugins.", "<processName>")
 		std::string statusInfo;
 		switch (it->InfoType)
 		{
-		case PIPELINE::PLUGIN_REGISTERED_CLASS:if (std::find(PIPELINE::s_PipelineInterfaceImpl->RegisteredClasses.begin(), PIPELINE::s_PipelineInterfaceImpl->RegisteredClasses.end(), it->Info) != PIPELINE::s_PipelineInterfaceImpl->RegisteredClasses.end())
+		case PIPELINE::PLUGIN_REGISTERED_CLASS:if (std::find(PIPELINE::g_PipelineInterfaceImpl->RegisteredClasses.begin(), PIPELINE::g_PipelineInterfaceImpl->RegisteredClasses.end(), it->Info) != PIPELINE::g_PipelineInterfaceImpl->RegisteredClasses.end())
 				statusInfo = "AVAILABLE";
 			else
 				statusInfo = "NOT FOUND";

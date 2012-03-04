@@ -37,6 +37,8 @@
 
 // Project includes
 #include "pipeline_project.h"
+#include "pipeline_service.h"
+#include "pipeline_interface_impl.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -113,7 +115,7 @@ CPipelineWorkspace::~CPipelineWorkspace()
 	m_Projects.clear();
 }
 
-void CPipelineWorkspace::getProcessPlugins(std::vector<CProcessPluginInfo> &result, const std::string &process)
+void CPipelineWorkspace::getProcessPlugins(std::vector<CProcessPluginInfo> &resultAppend, const std::string &process)
 {
 	uint16 pluginId = 0;
 	for (std::vector<NLMISC::CRefPtr<NLGEORGES::UForm> >::iterator it = m_Plugins.begin(), end = m_Plugins.end(); it != end; ++it)
@@ -145,7 +147,7 @@ void CPipelineWorkspace::getProcessPlugins(std::vector<CProcessPluginInfo> &resu
 								processPlugin.InfoType = (TPluginType)infoType;
 								processPlugin.Id.Sub.Plugin = pluginId;
 								processPlugin.Id.Sub.Handler = i;
-								result.push_back(processPlugin);
+								resultAppend.push_back(processPlugin);
 
 								nldebug("Found '%s': '%s', '%s'", process.c_str(), processPlugin.Handler.c_str(), processPlugin.Info.c_str());
 							}
@@ -201,6 +203,93 @@ bool CPipelineWorkspace::getProcessPlugin(CProcessPluginInfo &result, uint32 glo
 		return true;
 	}
 	else return false;
+}
+
+void CPipelineWorkspace::listAvailablePlugins(std::vector<uint32> &result)
+{
+	result.clear();
+	uint16 pluginId = 0;
+	for (std::vector<NLMISC::CRefPtr<NLGEORGES::UForm> >::iterator it = m_Plugins.begin(), end = m_Plugins.end(); it != end; ++it)
+	{
+		UFormElm *processHandlers;
+		if ((*it)->getRootNode().getNodeByName(&processHandlers, "ProcessHandlers"))
+		{
+			uint nb;
+			processHandlers->getArraySize(nb);
+			for (uint i = 0; i < nb; ++i)
+			{
+				UFormElm *handler;
+				if (processHandlers->getArrayNode(&handler, i))
+				{
+					std::string handlerProcess;
+					if (handler->getValueByName(handlerProcess, "Process"))
+					{
+						CProcessPluginInfo processPlugin;
+						uint32 handlerType;
+						uint32 infoType;
+						if (handler->getValueByName(handlerType, "HandlerType")
+							&& handler->getValueByName(processPlugin.Handler, "Handler")
+							&& handler->getValueByName(infoType, "InfoType")
+							&& handler->getValueByName(processPlugin.Info, "Info"))
+						{
+							processPlugin.HandlerType = (TPluginType)handlerType;
+							processPlugin.InfoType = (TPluginType)infoType;
+							processPlugin.Id.Sub.Plugin = pluginId;
+							processPlugin.Id.Sub.Handler = i;
+							
+							bool handlerAvailable = false;
+							switch (processPlugin.HandlerType)
+							{
+							case PLUGIN_REGISTERED_CLASS:
+								handlerAvailable = (find(g_PipelineInterfaceImpl->RegisteredClasses.begin(), g_PipelineInterfaceImpl->RegisteredClasses.end(), processPlugin.Handler) != g_PipelineInterfaceImpl->RegisteredClasses.end());
+								break;
+							default:
+								nlwarning("Not implemented");
+								break;
+							}
+
+							if (handlerAvailable)
+							{
+								bool infoAvailable = false;
+								switch (processPlugin.InfoType)
+								{
+								case PLUGIN_REGISTERED_CLASS:
+									infoAvailable = (find(g_PipelineInterfaceImpl->RegisteredClasses.begin(), g_PipelineInterfaceImpl->RegisteredClasses.end(), processPlugin.Info) != g_PipelineInterfaceImpl->RegisteredClasses.end());
+									break;
+								default:
+									nlwarning("Not implemented");
+									break;
+								}
+								if (infoAvailable)
+								{
+									nldebug("Available '%s', '%s'", processPlugin.Handler.c_str(), processPlugin.Info.c_str());
+									result.push_back(processPlugin.Id.Global);
+								}
+							}
+							
+						}
+						else
+						{
+							nlwarning("Missing value in '%s' at 'ProcessHandlers' at '%i'", (*it)->getFilename().c_str(), i);
+						}
+					}
+					else
+					{
+						nlwarning("Missing 'Process' in '%s' at 'ProcessHandlers' at '%i'", (*it)->getFilename().c_str(), i);
+					}
+				}
+				else
+				{
+					nlwarning("Array error in '%s'", (*it)->getFilename().c_str());
+				}
+			}
+		}
+		else
+		{
+			nlwarning("Missing 'ProcessHandlers' in '%s'", (*it)->getFilename().c_str());
+		}
+		++pluginId;
+	}
 }
 
 CPipelineProject *CPipelineWorkspace::getProject(const std::string &project)

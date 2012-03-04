@@ -31,6 +31,12 @@
 				<doc line=""/>
 			</method>
 
+			<method name="setAvailablePlugins" msg="SET_A_PLG">
+				<doc line=""/>
+				
+				<param type="std::vector&lt;uint32&gt;" name="pluginsAvailable" byref="true" serial="Cont" />
+			</method>
+
 		</module_interface>
 
 	</namespace>

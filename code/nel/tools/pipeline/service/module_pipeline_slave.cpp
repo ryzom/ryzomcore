@@ -96,10 +96,11 @@ public:
 			nlinfo("Master UP (%s)", moduleProxy->getModuleName().c_str());
 
 			nlassert(m_Master == NULL);
-
-			// TODO: SAY HELLO
 			
 			m_Master = new CModulePipelineMasterProxy(moduleProxy);
+
+			// TODO: AUTHENTICATE OR GATEWAY SECURITY?
+			sendMasterAvailablePlugins();
 		}
 	}
 	
@@ -132,6 +133,7 @@ public:
 			if (PIPELINE::isServiceStateIdle())
 			{
 				m_ReloadSheetsState = REQUEST_NONE;
+				sendMasterAvailablePlugins();
 				m_Master->slaveReloadedSheets(this);
 				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_SLAVE_RELOAD_SHEETS);
 			}
@@ -162,6 +164,13 @@ public:
 		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_RELOAD_SHEETS);
 		if (PIPELINE::reloadSheets()) m_ReloadSheetsState = REQUEST_WORKING;
 		else m_ReloadSheetsState = REQUEST_MADE;
+	}
+
+	void sendMasterAvailablePlugins()
+	{
+		std::vector<uint32> availablePlugins;
+		g_PipelineWorkspace->listAvailablePlugins(availablePlugins);
+		m_Master->setAvailablePlugins(this, availablePlugins);
 	}
 	
 protected:

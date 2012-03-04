@@ -73,6 +73,7 @@ class CModulePipelineMaster :
 		std::vector<std::string> Vector;
 		uint32 ActiveTaskId;
 		bool SheetsOk;
+		std::vector<uint32> PluginsAvailable;
 		
 		~CSlave()
 		{
@@ -203,6 +204,12 @@ public:
 		g_DatabaseStatus->updateDatabaseStatus(CCallback<void>(slave, &CSlave::cbUpdateDatabaseStatus), slave->Vector, false, false);
 		slave->Vector.clear();
 	}
+
+	void setAvailablePlugins(NLNET::IModuleProxy *sender, const std::vector<uint32> &pluginsAvailable)
+	{
+		CSlave *slave = m_Slaves[sender];
+		slave->PluginsAvailable = pluginsAvailable;
+	}
 	
 protected:
 	NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CModulePipelineMaster, CModuleBase)
@@ -221,6 +228,7 @@ protected:
 			{
 				CSlave *slave = it->second;
 				slave->SheetsOk = false;
+				slave->PluginsAvailable.clear();
 				slave->Proxy.reloadSheets(this);
 				CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_MASTER_RELOAD_SHEETS);
 			}

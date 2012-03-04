@@ -90,9 +90,12 @@ public:
 	CPipelineWorkspace(NLGEORGES::UFormLoader *formLoader, const std::string &sheetName);
 	virtual ~CPipelineWorkspace();
 
-	void getProcessPlugins(std::vector<CProcessPluginInfo> &result, const std::string &process);
+	void getProcessPlugins(std::vector<CProcessPluginInfo> &resultAppend, const std::string &process);
 	CPipelineProject *getProject(const std::string &project);
 	bool getProcessPlugin(CProcessPluginInfo &result, uint32 globalId);
+
+	/// Makes a list of the global id of all available plugins to this service
+	void listAvailablePlugins(std::vector<uint32> &result);
 
 }; /* class CPipelineWorkspace */
 

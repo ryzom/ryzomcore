@@ -47,6 +47,7 @@ namespace NLGEORGES {
 namespace PIPELINE {
 	class CPipelineWorkspace;
 	class CDatabaseStatus;
+	class CPipelineInterfaceImpl;
 
 #define PIPELINE_MASTER
 
@@ -81,6 +82,7 @@ bool reloadSheets();
 extern NLGEORGES::UFormLoader *g_FormLoader;
 extern CPipelineWorkspace *g_PipelineWorkspace;
 extern CDatabaseStatus *g_DatabaseStatus;
+extern CPipelineInterfaceImpl *g_PipelineInterfaceImpl;
 
 } /* namespace PIPELINE */
 
