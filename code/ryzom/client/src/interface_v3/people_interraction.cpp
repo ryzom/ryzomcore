@@ -2088,7 +2088,7 @@ public:
 					if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 					{
 						uint8 teamMember = (uint8) peopleIndex;
-						out.serialEnum(teamMember);
+						out.serial(teamMember);
 						NetMngr.push(out);
 						//nlinfo("impulseCallBack : %s %d sent", msgName.c_str(), teamMember);
 					}

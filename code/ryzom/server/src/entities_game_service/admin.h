@@ -43,6 +43,8 @@ struct CAdminCommand
 void initAdmin ();
 void initCommandsPrivileges(const std::string & fileName);
 void initPositionFlags(const std::string & fileName);
+void initSalt();
+const std::string &getSalt();
 
 CAdminCommand * findAdminCommand(const std::string & name);
 

@@ -3139,7 +3139,10 @@ void CBankAccessor_PLR::TPACK_ANIMAL::TBEAST::init(ICDBStructNode *parent, uint 
 	node  = parent->getNode( ICDBStructNode::CTextId("DESPAWN"), false );
 	nlassert(node != NULL);
 	_DESPAWN = node;
-	
+
+	node  = parent->getNode( ICDBStructNode::CTextId("NAME"), true );
+	nlassert(node != NULL);
+	_NAME = node;
 
 	// branch init
 	

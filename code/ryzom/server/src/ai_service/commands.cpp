@@ -259,7 +259,7 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<aiInstanceId>
 	std::string botsName;
 	if (args.size()>8) botsName = args[8];
 
-	aiInstance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(x, y), dispersionRadius, spawnBots, orientation, botsName);
+	aiInstance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(x, y), dispersionRadius, spawnBots, orientation, botsName, "");
 	
 	return true;
 }

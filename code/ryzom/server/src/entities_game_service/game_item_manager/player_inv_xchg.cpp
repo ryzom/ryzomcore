@@ -84,6 +84,10 @@ bool CExchangeView::putItemInExchange(uint32 bagSlot, uint32 exchangeSlot, uint3
 	if (_InterlocutorView != NULL && (!form->DropOrSell && form->Family != ITEMFAMILY::PET_ANIMAL_TICKET))
 		return false;
 
+	// Can't trade items locked by owner
+	if (item->getLockedByOwner())
+		return false;
+
 	if( getCharacter()->isAnActiveXpCatalyser(item) )
 		return false;
 

@@ -131,6 +131,13 @@ inline const NLMISC::CEntityId & CCharacter::getTeamInvitor() const
 
 //------------------------------------------------------------------------------
 
+inline const NLMISC::CEntityId & CCharacter::getLeagueInvitor() const
+{
+	return _LeagueInvitor; 
+}
+
+//------------------------------------------------------------------------------
+
 inline const NLMISC::CEntityId &CCharacter::harvestedEntity() const
 {
 	return _MpSourceId; 
@@ -847,7 +854,7 @@ inline uint16 CCharacter::getKilledPvPRegion()
 
 //------------------------------------------------------------------------------
 
-inline bool CCharacter::getSafeInPvPSafeZone()
+inline bool CCharacter::getSafeInPvPSafeZone() const
 {
 	return _PvPSafeZoneActive; 
 }
@@ -875,10 +882,25 @@ inline uint32 CCharacter::getLastConnectedTime() const
 
 //------------------------------------------------------------------------------
 
+inline uint32 CCharacter::getLastConnectedDate() const
+{
+	return _LastConnectedDate; 
+}
+
+//------------------------------------------------------------------------------
+
 inline uint32 CCharacter::getPlayedTime() const
 {
 	return _PlayedTime; 
 }
+
+//------------------------------------------------------------------------------
+
+inline uint32 CCharacter::getOrganization() const
+{
+	return _Organization; 
+}
+
 
 //------------------------------------------------------------------------------
 

@@ -446,6 +446,8 @@ void cbClientReady( CMessage& msgin, const std::string &serviceName, NLNET::TSer
 	c->initAnimalHungerDb();
 
 	c->initFactionPointDb();
+	c->initPvpPointDb();
+	c->initOrganizationInfos();
 
 	c->updateOutpostAdminFlagInDB();
 
@@ -516,17 +518,6 @@ void cbClientReady( CMessage& msgin, const std::string &serviceName, NLNET::TSer
 	// ask backup for offline commands file
 	COfflineCharacterCommand::getInstance()->characterOnline( characterId );
 
-	if( CGameEventManager::getInstance().getChannelEventId() != TChanID::Unknown )
-	{
-		if( c->haveAnyPrivilege() )
-		{
-			DynChatEGS.addSession(CGameEventManager::getInstance().getChannelEventId(), entityIndex, true);
-		}
-		else
-		{
-			DynChatEGS.addSession(CGameEventManager::getInstance().getChannelEventId(), entityIndex, false);
-		}
-	}
 	c->onConnection();
 } // cbClientReady //
 
@@ -679,6 +670,9 @@ void finalizeClientReady( uint32 userId, uint32 index )
 	CPVPManager2::getInstance()->updateFactionChannel( c );
 	CPVPManager2::getInstance()->setPVPModeInMirror( c );
 	c->updatePVPClanVP();
+
+	// Add character to event channel if event is active
+	CGameEventManager::getInstance().addCharacterToChannelEvent( c );
 
 	// for GM player, trigger a 'infos' command to remember their persistent state
 	if (!PlayerManager.getPlayer(uint32(c->getId().getShortId())>>4)->getUserPriv().empty())
@@ -1594,6 +1588,53 @@ void cbJoinTeamProposal( NLNET::CMessage& msgin, const std::string &serviceName,
 	character->setAfkState(false);
 	TeamManager.joinProposal( character, character->getTarget() );
 } // cbJoinTeamProposal //
+
+
+//---------------------------------------------------
+// cbJoinLeague: join specified League
+//---------------------------------------------------
+void cbJoinLeague( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
+{
+	H_AUTO(cbJoinLeague);
+	
+	CEntityId charId;
+	msgin.serial( charId );
+	TeamManager.joinLeagueAccept( charId );
+} // cbJoinLeague //
+
+//---------------------------------------------------
+// cbJoinLeagueDecline: player decline the proposition
+//---------------------------------------------------
+void cbJoinLeagueDecline( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
+{
+	H_AUTO(cbJoinLeagueDecline);
+	
+	CEntityId charId;
+	msgin.serial( charId );
+	TeamManager.joinLeagueDecline( charId );
+} // cbJoinLeagueDecline //
+
+
+//---------------------------------------------------
+// cbJoinLeagueProposal: propose a player (current target) to enter the League
+//---------------------------------------------------
+void cbJoinLeagueProposal( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
+{
+	H_AUTO(cbJoinLeagueProposal);
+	
+	CEntityId charId;
+	msgin.serial( charId );
+
+	CCharacter *character = PlayerManager.getChar( charId );
+	if (character == NULL || !character->getEnterFlag())
+	{
+		nlwarning("<cbJoinLeagueProposal> Invalid player Id %s", charId.toString().c_str() );
+		return;
+	}
+	character->setAfkState(false);
+	TeamManager.joinLeagueProposal( character, character->getTarget() );
+} // cbJoinLeagueProposal //
+
 
 
 //---------------------------------------------------
