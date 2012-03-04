@@ -7,9 +7,12 @@
 			<method name="startBuildTask" msg="GO_BT">
 				<doc line=""/>
 
-				<param type="uint32"			name="taskId"	/>
 				<param type="std::string"		name="projectName"		byref="true"/>
-				<param type="std::string"		name="processHandler"		byref="true"/>
+				<param type="uint32"		name="pluginId"		byref="true"/>
+			</method>
+
+			<method name="abortBuildTask" msg="ABORT_BT">
+				<doc line=""/>
 			</method>
 
 			<method name="masterUpdatedDatabaseStatus" msg="RE_UPD_DB_ST">

@@ -81,7 +81,8 @@ std::string CPipelineProcessImpl::getTempDirectory()
 	{
 		nlwarning("(m_ActiveProject == NULL)");
 		std::stringstream ss;
-		ss << g_PipelineDirectory;
+		ss << g_WorkDir;
+		ss << PIPELINE_DIRECTORY_UNKNOWN_PREFIX;
 		ss << NLMISC::CTime::getSecondsSince1970();
 		ss << ".";
 		ss << rand();

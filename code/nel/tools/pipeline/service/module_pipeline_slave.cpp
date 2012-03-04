@@ -140,11 +140,18 @@ public:
 		}
 	}
 
-	virtual void startBuildTask(NLNET::IModuleProxy *sender, uint32 taskId, const std::string &projectName, const std::string &processHandler)
+	virtual void startBuildTask(NLNET::IModuleProxy *sender, const std::string &projectName, const uint32 &pluginId)
 	{
+		// TODO
+
 		//this->queueModuleTask
 		CModulePipelineMasterProxy master(sender);
-		master.slaveRefusedBuildTask(this, taskId);
+		master.slaveRefusedBuildTask(this, 999999999); // NO MORE TASK ID
+	}
+
+	virtual void abortBuildTask(NLNET::IModuleProxy *sender)
+	{
+		// TODO
 	}
 
 	virtual void masterUpdatedDatabaseStatus(NLNET::IModuleProxy *sender)

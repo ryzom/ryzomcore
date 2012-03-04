@@ -206,7 +206,7 @@ std::string CPipelineProject::getName()
 
 std::string CPipelineProject::getOutputDirectory()
 {
-	return g_PipelineDirectory + getName() + "/";
+	return g_WorkDir + PIPELINE_DIRECTORY_PREFIX_PROJECT + getName() + "/";
 }
 
 std::string CPipelineProject::getTempDirectory()
@@ -214,7 +214,8 @@ std::string CPipelineProject::getTempDirectory()
 	if (m_TempDirectory.empty())
 	{
 		std::stringstream ss;
-		ss << g_PipelineDirectory;
+		ss << g_WorkDir;
+		ss << PIPELINE_DIRECTORY_PREFIX_PROJECT;
 		ss << getName();
 		ss << ".";
 		ss << NLMISC::CTime::getSecondsSince1970();

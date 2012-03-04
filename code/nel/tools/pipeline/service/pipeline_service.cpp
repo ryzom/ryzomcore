@@ -64,8 +64,7 @@ using namespace NLGEORGES;
 
 namespace PIPELINE {
 
-std::string g_DatabaseDirectory;
-std::string g_PipelineDirectory;
+std::string g_WorkDir;
 bool g_IsExiting = false;
 bool g_IsMaster = false;
 
@@ -74,19 +73,46 @@ CPipelineWorkspace *g_PipelineWorkspace = NULL;
 CDatabaseStatus *g_DatabaseStatus = NULL;
 CPipelineInterfaceImpl *g_PipelineInterfaceImpl = NULL;
 
+#define PIPELINE_MACRO_WORKSPACE_DIRECTORY "[$WorkspaceDirectory]"
+
 std::string unMacroPath(const std::string &path)
 {
 	std::string result = path;
-	strFindReplace(result, PIPELINE_MACRO_DATABASE_DIRECTORY, g_DatabaseDirectory);
-	strFindReplace(result, PIPELINE_MACRO_PIPELINE_DIRECTORY, g_PipelineDirectory);
+
+	strFindReplace(result, PIPELINE_MACRO_WORKSPACE_DIRECTORY, g_WorkDir);
+
+	CConfigFile::CVar &rootDirectories = NLNET::IService::getInstance()->ConfigFile.getVar("RootDirectories");
+	for (uint i = 0; i < rootDirectories.size(); ++i)
+	{
+		std::string rootDirectoryName = rootDirectories.asString(i);
+		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(rootDirectoryName);
+		std::string rootDirectoryPath = CPath::standardizePath(dir.asString(), true);
+		std::string macroName = "[$" + rootDirectoryName + "]";
+		strFindReplace(result, macroName, rootDirectoryPath);
+	}
+
 	return CPath::standardizePath(result, false);
 }
 
 std::string macroPath(const std::string &path)
 {
 	std::string result = CPath::standardizePath(path, false);
-	strFindReplace(result, g_DatabaseDirectory, PIPELINE_MACRO_DATABASE_DIRECTORY "/");
-	strFindReplace(result, g_PipelineDirectory, PIPELINE_MACRO_PIPELINE_DIRECTORY "/");
+
+	strFindReplace(result, g_WorkDir, PIPELINE_MACRO_WORKSPACE_DIRECTORY "/");
+	
+	CConfigFile::CVar &rootDirectories = NLNET::IService::getInstance()->ConfigFile.getVar("RootDirectories");
+	for (uint i = 0; i < rootDirectories.size(); ++i)
+	{
+		std::string rootDirectoryName = rootDirectories.asString(i);
+		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(rootDirectoryName);
+		std::string rootDirectoryPath = CPath::standardizePath(dir.asString(), true);
+		std::string macroName = "[$" + rootDirectoryName + "]";
+		strFindReplace(result, rootDirectoryPath,  macroName);
+	}
+
+	if (result[0] != '[' || result[1] != '$')
+		nlerror("Invalid macro path %s", result.c_str());
+
 	return result;
 }
 
@@ -237,14 +263,26 @@ namespace {
 
 void initSheets()
 {
-	std::string leveldesignDfnDirectory = IService::getInstance()->ConfigFile.getVar("LeveldesignDfnDirectory").asString();
-	std::string leveldesignPipelineDirectory = IService::getInstance()->ConfigFile.getVar("LeveldesignPipelineDirectory").asString();
+	std::string dfnDirectory = IService::getInstance()->ConfigFile.getVar("WorkspaceDfnDirectory").asString();
+	std::string sheetDirectory = IService::getInstance()->ConfigFile.getVar("WorkspaceSheetDirectory").asString();
+	
+	if (!CFile::isDirectory(dfnDirectory)) nlerror("'WorkspaceDfnDirectory' does not exist! (%s)", dfnDirectory.c_str());
+	nlinfo("Adding 'WorkspaceDfnDirectory' to search path (%s)", dfnDirectory.c_str());
+	CPath::addSearchPath(dfnDirectory, true, false);
+	
+	if (!CFile::isDirectory(sheetDirectory)) nlerror("'WorkspaceSheetDirectory' does not exist! (%s)", sheetDirectory.c_str());
+	nlinfo("Adding 'WorkspaceSheetDirectory' to search path (%s)", sheetDirectory.c_str());
+	CPath::addSearchPath(sheetDirectory, true, false);
 
-	nlinfo("Adding 'LeveldesignDfnDirectory' to search path (%s)", leveldesignDfnDirectory.c_str());
-	CPath::addSearchPath(leveldesignDfnDirectory, true, false);
-
-	nlinfo("Adding 'LeveldesignPipelineDirectory' to search path (%s)", leveldesignPipelineDirectory.c_str());
-	CPath::addSearchPath(leveldesignPipelineDirectory, true, false);
+	CConfigFile::CVar &georgesDirectories = NLNET::IService::getInstance()->ConfigFile.getVar("GeorgesDirectories");
+	for (uint i = 0; i < georgesDirectories.size(); ++i)
+	{
+		std::string rootName = georgesDirectories.asString(i);
+		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(rootName);
+		std::string dirName = CPath::standardizePath(dir.asString(), true);
+		if (!CFile::isDirectory(dirName)) nlerror("'%s' does not exist! (%s)", rootName.c_str(), dirName.c_str());
+		CPath::addSearchPath(dirName, true, false);
+	}
 	
 	g_FormLoader = UFormLoader::createLoader();
 	
@@ -377,12 +415,23 @@ public:
 
 		s_InfoFlags->addFlag("INIT");
 
-		g_DatabaseDirectory = CPath::standardizePath(ConfigFile.getVar("DatabaseDirectory").asString(), true);
-		if (!CFile::isDirectory(g_DatabaseDirectory)) nlwarning("'DatabaseDirectory' does not exist! (%s)", g_DatabaseDirectory.c_str());
-		ConfigFile.getVar("DatabaseDirectory").setAsString(g_DatabaseDirectory);
-		g_PipelineDirectory = CPath::standardizePath(ConfigFile.getVar("PipelineDirectory").asString(), true);
-		if (!CFile::isDirectory(g_PipelineDirectory)) nlwarning("'PipelineDirectory' does not exist! (%s)", g_PipelineDirectory.c_str());
-		ConfigFile.getVar("PipelineDirectory").setAsString(g_PipelineDirectory);
+		//g_DatabaseDirectory = CPath::standardizePath(ConfigFile.getVar("DatabaseDirectory").asString(), true);
+		//if (!CFile::isDirectory(g_DatabaseDirectory)) nlwarning("'DatabaseDirectory' does not exist! (%s)", g_DatabaseDirectory.c_str());
+		//ConfigFile.getVar("DatabaseDirectory").setAsString(g_DatabaseDirectory);
+		g_WorkDir = CPath::standardizePath(ConfigFile.getVar("WorkspaceDirectory").asString(), true);
+		if (!CFile::isDirectory(g_WorkDir)) nlerror("'WorkspaceDirectory' does not exist! (%s)", g_WorkDir.c_str());
+		ConfigFile.getVar("WorkspaceDirectory").setAsString(g_WorkDir);
+
+		// Cleanup root directory names
+		CConfigFile::CVar &rootDirectories = ConfigFile.getVar("RootDirectories");
+		for (uint i = 0; i < rootDirectories.size(); ++i)
+		{
+			std::string rootName = rootDirectories.asString(i);
+			CConfigFile::CVar &dir = ConfigFile.getVar(rootName);
+			std::string dirName = CPath::standardizePath(dir.asString(), true);
+			if (!CFile::isDirectory(dirName)) nlerror("'%s' does not exist! (%s)", rootName.c_str(), dirName.c_str());
+			dir.setAsString(dirName);
+		}
 
 		s_TaskManager = new CTaskManager();
 		

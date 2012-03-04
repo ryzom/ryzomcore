@@ -49,52 +49,75 @@ namespace PIPELINE {
 namespace {
 
 /// Input must be normalized path
-bool isInDatabaseDirectoryFast(const std::string &path)
+bool isInRootDirectoryFast(std::string &rootDirectoryName, std::string &rootDirectoryPath, const std::string &path)
 {
-	return path.find(g_DatabaseDirectory) == 0;
+	//return path.find(g_DatabaseDirectory) == 0;
+	CConfigFile::CVar &rootDirectories = NLNET::IService::getInstance()->ConfigFile.getVar("RootDirectories");
+	for (uint i = 0; i < rootDirectories.size(); ++i)
+	{
+		rootDirectoryName = rootDirectories.asString(i);
+		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(rootDirectoryName);
+		rootDirectoryPath = CPath::standardizePath(dir.asString(), true);
+		if (path.find(rootDirectoryPath) == 0) return true;
+	}
+	return false;
 }
 
 /// Input must be normalized path
-bool isInPipelineDirectoryFast(const std::string &path)
+bool isInWorkspaceDirectoryFast(const std::string &path)
 {
-	return path.find(g_PipelineDirectory) == 0;
+	return path.find(g_WorkDir) == 0;
 }
 
 /// Input must be normalized path in database directory
-std::string dropDatabaseDirectoryFast(const std::string &path)
+std::string dropRootDirectoryFast(const std::string &path, const std::string &rootDirectoryPath)
 {
-	return path.substr(g_DatabaseDirectory.length());
+	return path.substr(rootDirectoryPath.length());
 }
 
 /// Input must be normalized path in pipeline directory
-std::string dropPipelineDirectoryFast(const std::string &path)
+std::string dropWorkspaceDirectoryFast(const std::string &path)
 {
-	return path.substr(g_PipelineDirectory.length());
+	return path.substr(g_WorkDir.length());
 }
+
+} /* anonymous namespace */
+
+std::string getMetaFilePath(const std::string &path, const std::string &dotSuffix)
+{
+	std::string stdPath = CPath::standardizePath(path, false);
+	if (isInWorkspaceDirectoryFast(stdPath))
+	{
+		// TODO_TEST
+		std::string relPath = dropWorkspaceDirectoryFast(stdPath);
+		std::string::size_type slashPos = relPath.find_first_of('/');
+		std::string proProName = relPath.substr(0, slashPos);
+		std::string subPath = relPath.substr(slashPos);
+		return g_WorkDir + proProName + PIPELINE_DATABASE_META_SUFFIX + subPath + dotSuffix;
+	}
+	else
+	{
+		std::string rootDirectoryName;
+		std::string rootDirectoryPath;
+		if (isInRootDirectoryFast(rootDirectoryName, rootDirectoryPath, stdPath))
+		{
+			std::string relPath = dropRootDirectoryFast(stdPath, rootDirectoryPath);
+			return g_WorkDir + PIPELINE_DIRECTORY_PREFIX_ROOT + NLMISC::toLower(rootDirectoryName) + PIPELINE_DATABASE_META_SUFFIX + "/" + relPath + dotSuffix;
+		}
+		else
+		{
+			nlerror("Path is not in database or pipeline (%s)", path.c_str());
+			return path + dotSuffix;
+		}
+	}
+}
+
+namespace {
 
 /// Create status file path
 std::string getStatusFilePath(const std::string &path)
 {
-	std::string stdPath = CPath::standardizePath(path, false);
-	if (isInDatabaseDirectoryFast(stdPath))
-	{
-		std::string relPath = dropDatabaseDirectoryFast(stdPath);
-		return g_PipelineDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + relPath + PIPELINE_DATABASE_STATUS_SUFFIX;
-	}
-	else if (isInPipelineDirectoryFast(stdPath))
-	{
-		// TODO_TEST
-		std::string relPath = dropPipelineDirectoryFast(stdPath);
-		std::string::size_type slashPos = relPath.find_first_of('/');
-		std::string proProName = relPath.substr(0, slashPos);
-		std::string subPath = relPath.substr(slashPos);
-		return g_PipelineDirectory + proProName + PIPELINE_DATABASE_STATUS_SUFFIX + subPath + PIPELINE_DATABASE_STATUS_SUFFIX;
-	}
-	else
-	{
-		nlerror("Path is not in database or pipeline");
-		return path + PIPELINE_DATABASE_STATUS_SUFFIX;
-	}
+	return getMetaFilePath(path, PIPELINE_DATABASE_STATUS_SUFFIX);
 }
 
 } /* anonymous namespace */
@@ -119,8 +142,8 @@ void CFileStatus::serial(NLMISC::IStream &stream)
 
 CDatabaseStatus::CDatabaseStatus()
 {
-	CFile::createDirectoryTree(g_PipelineDirectory + PIPELINE_DATABASE_STATUS_SUBDIR);
-	CFile::createDirectoryTree(g_PipelineDirectory + PIPELINE_DATABASE_ERRORS_SUBDIR);
+	//CFile::createDirectoryTree(g_WorkspaceDirectory + PIPELINE_DATABASE_STATUS_SUBDIR);
+	//CFile::createDirectoryTree(g_WorkspaceDirectory + PIPELINE_DATABASE_ERRORS_SUBDIR);
 }
 
 CDatabaseStatus::~CDatabaseStatus()
@@ -186,7 +209,7 @@ public:
 			bool firstSeen = false;
 			uint32 time = CTime::getSecondsSince1970();
 			uint32 fmdt = CFile::getFileModificationDate(FilePath);
-			std::string statusPath = getStatusFilePath(FilePath); // g_PipelineDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(FilePath) + ".status";
+			std::string statusPath = getStatusFilePath(FilePath); // g_WorkspaceDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(FilePath) + ".status";
 			StatusMutex->lock_shared();
 			if (CFile::fileExists(statusPath))
 			{
@@ -402,7 +425,15 @@ void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback)
 	}
 
 	std::vector<std::string> paths;
-	paths.push_back(g_DatabaseDirectory);
+	//paths.push_back(g_DatabaseDirectory);
+	CConfigFile::CVar &rootDirectories = NLNET::IService::getInstance()->ConfigFile.getVar("RootDirectories");
+	for (uint i = 0; i < rootDirectories.size(); ++i)
+	{
+		std::string rootDirectoryName = rootDirectories.asString(i);
+		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(rootDirectoryName);
+		std::string rootDirectoryPath = CPath::standardizePath(dir.asString(), true);
+		paths.push_back(rootDirectoryPath);
+	}
 	updateDatabaseStatus(callback, paths, false, true);
 }
 

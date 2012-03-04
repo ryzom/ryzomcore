@@ -54,12 +54,11 @@ namespace PIPELINE {
 extern bool g_IsExiting;
 extern bool g_IsMaster;
 
-extern std::string g_DatabaseDirectory;
-extern std::string g_PipelineDirectory;
+extern std::string g_WorkDir;
 
-#define PIPELINE_MACRO_DATABASE_DIRECTORY "[$DatabaseDirectory]"
-#define PIPELINE_MACRO_PIPELINE_DIRECTORY "[$PipelineDirectory]"
-
+#define PIPELINE_DIRECTORY_UNKNOWN_PREFIX "unknown."
+#define PIPELINE_DIRECTORY_PREFIX_PROJECT "project."
+#define PIPELINE_DIRECTORY_PREFIX_ROOT "root."
 #define PIPELINE_DIRECTORY_TEMP_SUFFIX ".temp"
 
 /// Unmacros a path, and standardizes it as well.

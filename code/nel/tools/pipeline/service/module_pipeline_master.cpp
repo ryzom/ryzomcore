@@ -50,6 +50,8 @@ namespace PIPELINE {
 #define PIPELINE_INFO_MASTER_RELOAD_SHEETS "M_RELOAD_SHEETS"
 #define PIPELINE_INFO_MASTER_UPDATE_DATABASE_FOR_SLAVE "M_UPD_DB_FOR_S"
 
+#define PIPELINE_INFO_CODE_ERROR_UNMACRO "CODE_ERROR_UNMACRO"
+
 /**
  * \brief CModulePipelineMaster
  * \date 2012-03-03 16:26GMT
@@ -67,13 +69,15 @@ class CModulePipelineMaster :
 			: Master(master), 
 			Proxy(moduleProxy), 
 			ActiveTaskId(0),
-			SheetsOk(true) { }
+			SheetsOk(true),
+			SaneBehaviour(3) { }
 		CModulePipelineMaster *Master;
 		CModulePipelineSlaveProxy Proxy;
 		std::vector<std::string> Vector;
 		uint32 ActiveTaskId;
 		bool SheetsOk;
 		std::vector<uint32> PluginsAvailable;
+		sint SaneBehaviour;
 		
 		~CSlave()
 		{
@@ -92,7 +96,7 @@ class CModulePipelineMaster :
 
 		bool canAcceptTask()
 		{
-			return SheetsOk && (ActiveTaskId == 0);
+			return SheetsOk && (ActiveTaskId == 0) && SaneBehaviour > 0;
 		}
 	};
 	
@@ -201,7 +205,25 @@ public:
 	{
 		CSlave *slave = m_Slaves[sender];
 		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_MASTER_UPDATE_DATABASE_FOR_SLAVE);
-		g_DatabaseStatus->updateDatabaseStatus(CCallback<void>(slave, &CSlave::cbUpdateDatabaseStatus), slave->Vector, false, false);
+
+		bool ok = true;
+		for (std::vector<std::string>::size_type i = 0; i < slave->Vector.size(); ++i)
+		{
+			// not real security, just an extra for catching coding errors
+			std::string &str = slave->Vector[i];
+			if ((str[0] != '[') || (str[1] != '$'))
+			{
+				CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_CODE_ERROR_UNMACRO); // permanent flag
+				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_MASTER_UPDATE_DATABASE_FOR_SLAVE);
+				--slave->SaneBehaviour;
+				slave->Proxy.abortBuildTask(this);
+				ok = false;
+				break;
+			}
+		}
+		
+		if (ok) g_DatabaseStatus->updateDatabaseStatus(CCallback<void>(slave, &CSlave::cbUpdateDatabaseStatus), slave->Vector, false, false);
+		
 		slave->Vector.clear();
 	}
 
