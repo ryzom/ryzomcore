@@ -207,7 +207,7 @@ public:
 			return NULL;
 	}
 
-	CGroupNpc* eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, double dispersionRadius, bool spawnBots, double orientation, const std::string &botsName);
+	CGroupNpc* eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, double dispersionRadius, bool spawnBots, double orientation, const std::string &botsName, const std::string &look);
 
 	/// create a new easter egg
 	CBotEasterEgg* createEasterEgg(uint32 easterEggId, NLMISC::CSheetId const& sheetId, std::string const& botName, double x, double y, double z, double heading, const std::string& look);

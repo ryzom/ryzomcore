@@ -47,7 +47,7 @@ std::string buildChatDebugString(const std::vector<uint32> &ShopCategories,
 class CNpcChatProfile
 {
 public:
-	CNpcChatProfile() : /*_guildCreator(false),*/ /*_dynamicMissionGiver(false),*/ _FilterExplicitActionTradeByPlayerRace(false), 
+	CNpcChatProfile() : /*_guildCreator(false),*/ /*_dynamicMissionGiver(false),*/ _Organization(0), _FilterExplicitActionTradeByPlayerRace(false), 
 		_ExplicitActionSPType(EGSPD::CSPType::Unknown), _FilterExplicitActionTradeByBotRace(true){}
 	CNpcChatProfile(const CNpcChatProfile &other0,const CNpcChatProfile &other1);
 	virtual ~CNpcChatProfile() {}
@@ -84,6 +84,7 @@ public:
 	const std::string					&getWebPageName() const		{ return _WebPageName; }
 
 	const NLMISC::CSheetId				&getOutpost() const			{ return _Outpost; }
+	const uint32						getOrganization() const			{ return _Organization; }
 	
 protected:
 	std::vector< RYMSG::TExplicitSale >	_ExplicitSales;
@@ -125,6 +126,8 @@ protected:
 	std::vector<std::string>		_OptionalProperties;
 	
 	NLMISC::CSheetId				_Outpost;
+
+	uint32							_Organization;
 };
 
 //----------------------------------------------------------------

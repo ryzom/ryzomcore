@@ -873,14 +873,20 @@ void COutpost::createSquad(CGroupDesc<COutpostSquadFamily> const* groupDesc, COu
 	// Attack only the declared ennemies of the outpost
 	if (side==OUTPOSTENUMS::OutpostOwner)
 	{
-	//	grp->faction      ().addProperty(NLMISC::toString("outpost:%s:defender", getAliasString().c_str()));
-	//	grp->friendFaction().addProperty(NLMISC::toString("outpost:%s:defender", getAliasString().c_str()));
+		// Bots factions
+		grp->faction      ().addProperty(NLMISC::toString("outpost:%s:bot_defender", getAliasString().c_str()));
+		grp->friendFaction().addProperty(NLMISC::toString("outpost:%s:bot_defender", getAliasString().c_str()));
+		grp->ennemyFaction().addProperty(NLMISC::toString("outpost:%s:bot_attacker", getAliasString().c_str()));
+		// Players faction
 		grp->ennemyFaction().addProperty(NLMISC::toString("outpost:%s:attacker", getAliasString().c_str()));
 	}
 	if (side==OUTPOSTENUMS::OutpostAttacker)
 	{
-	//	grp->faction      ().addProperty(NLMISC::toString("outpost:%s:attacker", getAliasString().c_str()));
-	//	grp->friendFaction().addProperty(NLMISC::toString("outpost:%s:attacker", getAliasString().c_str()));
+		// Bots factions
+		grp->faction      ().addProperty(NLMISC::toString("outpost:%s:bot_attacker", getAliasString().c_str()));
+		grp->friendFaction().addProperty(NLMISC::toString("outpost:%s:bot_attacker", getAliasString().c_str()));
+		grp->ennemyFaction().addProperty(NLMISC::toString("outpost:%s:bot_defender", getAliasString().c_str()));
+		// Players faction
 		grp->ennemyFaction().addProperty(NLMISC::toString("outpost:%s:defender", getAliasString().c_str()));
 	}
 	grp->_AggroRange = 25;

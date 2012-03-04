@@ -42,6 +42,7 @@ public:
 	uint16				PetIdx;	// must be returned to EGS with CPetSpawnConfirmationMsg class
 	sint32				Coordinate_X, Coordinate_Y, Coordinate_H; //For NEAR_POINT mode
 	float				Heading; //For NEAR_POINT mode
+	ucstring			CustomName;
 
 	virtual void description ()
 	{
@@ -55,6 +56,7 @@ public:
 		property ("Coordinate_Y", PropSInt32, (sint32)0, Coordinate_Y);
 		property ("Coordinate_H", PropSInt32, (sint32)0, Coordinate_H);
 		property ("Heading", PropFloat, 0.0f, Heading);
+		property ("CustomName", PropUCString, ucstring(""), CustomName);
 	}
 
 	virtual void callback (const std::string &name, NLNET::TServiceId id) {};

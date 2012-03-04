@@ -673,6 +673,7 @@ public:
 	}
 
 	void setPhrase(NLNET::CMessage &message);
+	void setPhraseLang(NLNET::CMessage &message);
 	void setPhrase(std::string const& phraseName, ucstring const& phraseContent);
 	void setPhrase(std::string const& phraseName, ucstring const& phraseContent, TLanguages language);
 	/// Returns the language used in the setPhrase command.

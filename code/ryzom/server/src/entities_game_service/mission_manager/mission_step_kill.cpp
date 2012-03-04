@@ -48,6 +48,7 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 {
 	struct CSubStep
 	{
+		string		Dynamic;
 		CSheetId	Sheet;
 		uint16		Quantity;
 	};
@@ -56,7 +57,7 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 		_SourceLine = line;
 		_Place = 0xFFFF;
 		bool ret = true;
-		if ( script.size() < 2 || script.size() > 3)
+		if (script.size() < 2 || script.size() > 3)
 		{
 			MISLOGSYNTAXERROR("<creature> <quantity> *[; <creature> <quantity>] [: <place>]");
 			return false;

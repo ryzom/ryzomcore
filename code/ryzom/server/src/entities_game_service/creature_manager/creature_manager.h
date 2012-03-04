@@ -72,9 +72,28 @@ public:
 };
 
 /**
+ * Implementation of the set Max HP message for creatures
+ */
+class CChangeCreatureMaxHPImp : public CChangeCreatureMaxHPMsg
+{
+public:
+	virtual void callback (const std::string &name, NLNET::TServiceId id);
+};
+
+/**
  * Implementation of the change HP message for creatures
  */
 class CChangeCreatureHPImp : public CChangeCreatureHPMsg
+{
+public:
+	virtual void callback (const std::string &name, NLNET::TServiceId id);
+};
+
+
+/**
+ * Implementation of the change setUrl message for creatures
+ */
+class CCreatureSetUrlImp : public CCreatureSetUrlMsg
 {
 public:
 	virtual void callback (const std::string &name, NLNET::TServiceId id);
