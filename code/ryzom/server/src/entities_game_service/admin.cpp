@@ -4720,9 +4720,6 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 		if (command_args.size() < 4)
 			return false;
 
-		const CSheetId sheetId(command_args[1]);
-		if (sheetId == CSheetId::Unknown)
-			return false;
 		uint32 quality;
 		fromString(command_args[2], quality);
 		if (quality == 0)
@@ -4755,7 +4752,22 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 			}
 		}
 
-		CGameItemPtr new_item = c->createItem(quality, quantity, sheetId);
+		CGameItemPtr new_item;
+		string sheet = command_args[1];
+
+		if ( sheet.find(".sitem") == string::npos ) // try named item
+		{
+			new_item = CNamedItems::getInstance().createNamedItem(command_args[1], quantity);
+			if (new_item == NULL)
+				return true;
+		}
+		else
+		{
+			const CSheetId sheetId(sheet);
+			if (sheetId == CSheetId::Unknown)
+				return true;
+			new_item = c->createItem(quality, quantity, sheetId);
+		}
 
 		if (!c->addItemToInventory(inventory, new_item))
 		{
