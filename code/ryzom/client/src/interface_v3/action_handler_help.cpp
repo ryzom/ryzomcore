@@ -251,8 +251,10 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 		CDBCtrlSheet		*ctrlSrc= elt;
 		// get the ctrl sheet in this help window.
 		CDBCtrlSheet		*ctrlDst= dynamic_cast<CDBCtrlSheet*>(group->getCtrl(":ctrl_slot"));
+		bool showSlotAndCreator = false;
 		if(ctrlDst && ctrlSrc)
 		{
+			showSlotAndCreator = true;
 			// if same Aspect
 			if( ctrlSrc->sameAspect(ctrlDst) )
 			{
@@ -277,6 +279,13 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 				}
 			}
 		}
+
+		CInterfaceElement *ctrl = group->getElement(group->getId()+":content:ctrl_slot");
+		if (ctrl) ctrl->setActive(showSlotAndCreator);
+		ctrl = group->getElement(group->getId()+":content:creator");
+		if (ctrl) ctrl->setActive(showSlotAndCreator);
+		ctrl = group->getElement(group->getId()+":content:creator_header");
+		if (ctrl) ctrl->setActive(showSlotAndCreator);
 	}
 
 	// If some free window possible, search which to take

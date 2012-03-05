@@ -1605,28 +1605,37 @@ const ucchar *CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CShee
 // ***************************************************************************
 const ucchar *CStringManagerClient::getTitleLocalizedName(const std::string &titleId, bool women)
 {
-	const ucchar * infos = getSpecialWord(titleId, women);
-	ucstring infosUC(infos);
+	vector<ucstring> listInfos = getTitleInfos(titleId, women);
 
-	vector<ucstring> listInfos;
-	splitUCString(infosUC, ucstring("#"), listInfos);
-	if (listInfos.empty())
-		return infos;
-
-	_TitleWords.push_back(listInfos[0]);
-	return _TitleWords.back().c_str();
+	if (listInfos.size() > 0)
+	{
+		_TitleWords.push_back(listInfos[0]);
+		return _TitleWords.back().c_str();
+	}
+	
+	ucstring ucId;
+	ucId.fromUtf8(titleId);
+	return ucId.c_str();
 }
 
+// ***************************************************************************
 vector<ucstring> CStringManagerClient::getTitleInfos(const std::string &titleId, bool women)
 {
-	const ucchar * infos = getSpecialWord(titleId, women);
-	ucstring infosUC(infos);
-
+	ucstring infosUC;
+	infosUC.fromUtf8(titleId);
 	vector<ucstring> listInfos;
 	splitUCString(infosUC, ucstring("#"), listInfos);
+
+	if (listInfos.size() > 0)
+	{
+		string title = listInfos[0].toUtf8();
+		if (titleId[0] == '#')
+			title = "#" + title;
+		listInfos[0] = getSpecialWord(title, women);
+	}
+
 	return listInfos;
 }
-
 
 // ***************************************************************************
 const ucchar *CStringManagerClient::getClassificationTypeLocalizedName(EGSPD::CClassificationType::TClassificationType type)
