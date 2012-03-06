@@ -10,6 +10,33 @@ MACRO(NL_GEN_PC name)
 ENDMACRO(NL_GEN_PC)
 
 ###
+# Helper macro that generates revision.h from revision.h.in
+###
+MACRO(NL_GEN_REVISION_H)
+  IF(EXISTS ${CMAKE_SOURCE_DIR}/revision.h.in)
+    INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
+    ADD_DEFINITIONS(-DHAVE_REVISION_H)
+    SET(HAVE_REVISION_H ON)
+
+    # a custom target that is always built
+    ADD_CUSTOM_TARGET(revision ALL
+      DEPENDS ${CMAKE_BINARY_DIR}/revision.h)
+
+    # creates revision.h using cmake script
+    ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/revision.h
+      COMMAND ${CMAKE_COMMAND}
+      -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+      -DROOT_DIR=${CMAKE_SOURCE_DIR}/..
+      -P ${CMAKE_SOURCE_DIR}/CMakeModules/GetRevision.cmake)
+
+    # revision.h is a generated file
+    SET_SOURCE_FILES_PROPERTIES(${CMAKE_BINARY_DIR}/revision.h
+      PROPERTIES GENERATED TRUE
+      HEADER_FILE_ONLY TRUE)
+  ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/revision.h.in)
+ENDMACRO(NL_GEN_REVISION_H)
+
+###
 #
 ###
 MACRO(NL_TARGET_LIB name)
