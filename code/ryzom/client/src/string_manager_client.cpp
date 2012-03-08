@@ -1628,10 +1628,10 @@ vector<ucstring> CStringManagerClient::getTitleInfos(const std::string &titleId,
 
 	if (listInfos.size() > 0)
 	{
-		string title = listInfos[0].toUtf8();
-		if (titleId[0] == '#')
-			title = "#" + title;
-		listInfos[0] = getSpecialWord(title, women);
+		if (titleId[0] != '#')
+		{
+			listInfos[0] = getSpecialWord(listInfos[0].toUtf8(), women);
+		}
 	}
 
 	return listInfos;

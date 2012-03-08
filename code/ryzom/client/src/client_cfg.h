@@ -635,12 +635,15 @@ struct CClientConfig
 	// Mode is the display settings :
 	// Normal	: just display in the system info window
 	// Over		: must be displayed at bottom of the screen and in system info window
+	// OverOnly		: must be displayed at bottom of the screen
 	// Center	; must be displayed at the center of the screen and in system info window
+	// Around	; must be displayed in the around chat window
+	// CenterAround	; must be displayed at the center of the screen and in around chat window
 	struct SSysInfoParam
 	{
 		CRGBA Color;
 		std::string SysInfoFxName;
-		enum TMode { Normal, Over, OverOnly, Center, Around };
+		enum TMode { Normal, Over, OverOnly, Center, Around, CenterAround };
 		TMode Mode;
 		SSysInfoParam()
 		{
