@@ -70,16 +70,20 @@ public:
 	CModulePipelineMasterProxy *m_Master;
 	bool m_TestCommand;
 	TRequestState m_ReloadSheetsState;
+	bool m_BuildReadyState;
 	
 public:
-	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE)
+	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false)
 	{
 		
 	}
 
 	virtual ~CModulePipelineSlave()
 	{
-		
+		// TODO: IF MASTER STILL CONNECTED, NOTIFY INSANITY
+		// TODO: ABORT RUNNING BUILD PROCESS
+		abortBuildTask(NULL);
+		leaveBuildReadyState(NULL);
 	}
 
 	virtual bool initModule(const TParsedCommandLine &initInfo)
@@ -98,10 +102,14 @@ public:
 			nlassert(m_Master == NULL);
 			
 			m_Master = new CModulePipelineMasterProxy(moduleProxy);
-
-			// TODO: AUTHENTICATE OR GATEWAY SECURITY?
-			sendMasterAvailablePlugins();
 		}
+	}
+
+	virtual void submitToMaster(NLNET::IModuleProxy *sender)
+	{
+		// TODO: AUTHENTICATE OR GATEWAY SECURITY?
+		CModulePipelineMasterProxy master(sender);
+		sendMasterAvailablePlugins(&master);
 	}
 	
 	virtual void onModuleDown(IModuleProxy *moduleProxy)
@@ -113,6 +121,8 @@ public:
 			nlassert(m_Master->getModuleProxy() == moduleProxy);
 
 			// TODO: ABORT RUNNING BUILD PROCESS
+			abortBuildTask(NULL);
+			leaveBuildReadyState(NULL); // leave state if building
 
 			delete m_Master;
 			m_Master = NULL;
@@ -133,7 +143,7 @@ public:
 			if (PIPELINE::isServiceStateIdle())
 			{
 				m_ReloadSheetsState = REQUEST_NONE;
-				sendMasterAvailablePlugins();
+				sendMasterAvailablePlugins(m_Master);
 				m_Master->slaveReloadedSheets(this);
 				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_SLAVE_RELOAD_SHEETS);
 			}
@@ -175,8 +185,9 @@ public:
 	
 	virtual void enterBuildReadyState(NLNET::IModuleProxy *sender)
 	{
-		if (PIPELINE::tryBuildReady())
+		if (!m_BuildReadyState && PIPELINE::tryBuildReady())
 		{
+			m_BuildReadyState = true;
 			m_Master->slaveBuildReadySuccess(this);
 		}
 		else
@@ -187,14 +198,18 @@ public:
 	
 	virtual void leaveBuildReadyState(NLNET::IModuleProxy *sender)
 	{
-		PIPELINE::endedBuildReady();
+		if (m_BuildReadyState)
+		{
+			m_BuildReadyState = false;
+			PIPELINE::endedBuildReady();
+		}
 	}
 
-	void sendMasterAvailablePlugins()
+	void sendMasterAvailablePlugins(CModulePipelineMasterProxy *master)
 	{
 		std::vector<uint32> availablePlugins;
 		g_PipelineWorkspace->listAvailablePlugins(availablePlugins);
-		m_Master->setAvailablePlugins(this, availablePlugins);
+		master->setAvailablePlugins(this, availablePlugins);
 	}
 	
 protected:

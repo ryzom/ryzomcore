@@ -76,6 +76,9 @@ void endedDirectTask();
 bool tryBuildReady();
 void endedBuildReady();
 
+bool tryBuildReadyMaster();
+void endedBuildReadyMaster();
+
 bool tryBuildProcess(const std::string &stateName);
 void endedBuildProcess();
 

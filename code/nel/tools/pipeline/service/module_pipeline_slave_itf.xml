@@ -4,6 +4,10 @@
 
 		<module_interface name="CModulePipelineSlave">
 
+			<method name="submitToMaster" msg="M_HELLO">
+				<doc line=""/>
+			</method>
+
 			<method name="startBuildTask" msg="GO_BT">
 				<doc line=""/>
 

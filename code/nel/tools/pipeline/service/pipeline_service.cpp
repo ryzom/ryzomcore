@@ -261,6 +261,36 @@ void endedDirectTask()
 	endedRunnableTask(STATE_DIRECT_CODE);
 }
 
+bool tryBuildReadyMaster()
+{
+	bool result = false;
+	s_StateMutex.enter();
+	result = (s_State == STATE_IDLE);
+	if (result)
+	{
+		s_State = STATE_BUILD_READY;
+		++s_BuildReadyRecursive;
+	}
+	s_StateMutex.leave();
+	if (!result) return false;
+
+	nlassert((s_State == STATE_BUILD_READY) && (s_BuildReadyRecursive > 0));
+	
+	return true;
+}
+
+void endedBuildReadyMaster()
+{
+	nlassert((s_State == STATE_BUILD_READY) && (s_BuildReadyRecursive > 0));
+
+	s_StateMutex.enter();
+	--s_BuildReadyRecursive;
+	s_State = STATE_IDLE;
+	s_StateMutex.leave();
+
+	nlassert(s_BuildReadyRecursive == 0);
+}
+
 bool tryBuildReady()
 {
 	bool result = false;
@@ -275,14 +305,14 @@ bool tryBuildReady()
 	s_StateMutex.leave();
 	if (!result) return false;
 
-	nlassert(s_State == STATE_BUILD_READY && s_BuildReadyRecursive > 0);
+	nlassert((s_State == STATE_BUILD_READY) && (s_BuildReadyRecursive > 0));
 	
 	return true;
 }
 
 void endedBuildReady()
 {
-	nlassert(s_State == STATE_BUILD_READY && s_BuildReadyRecursive > 0);
+	nlassert((s_State == STATE_BUILD_READY) && (s_BuildReadyRecursive > 0));
 
 	s_StateMutex.enter();
 	--s_BuildReadyRecursive;

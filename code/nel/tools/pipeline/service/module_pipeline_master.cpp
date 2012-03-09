@@ -41,6 +41,7 @@
 #include "pipeline_service.h"
 #include "database_status.h"
 #include "build_task_queue.h"
+#include "pipeline_workspace.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -126,6 +127,9 @@ public:
 
 	virtual ~CModulePipelineMaster()
 	{
+		if (m_BuildWorking)
+			this->abort();
+
 		g_IsMaster = false;
 
 		m_SlavesMutex.lock();
@@ -158,6 +162,8 @@ public:
 			m_Slaves[moduleProxy] = slave;
 
 			m_SlavesMutex.unlock();
+
+			slave->Proxy.submitToMaster(this);
 		}
 	}
 	
@@ -222,6 +228,13 @@ public:
 							it->second->ActiveTaskId = taskInfo->Id.Global;
 							it->second->Proxy.startBuildTask(this, taskInfo->ProjectName, taskInfo->ProcessPluginId);
 							// the slave may either reject; or not answer until it's finished with this task
+							// Display information to user terminals
+							{
+								// TODO_TERMINAL_SYNC
+								CProcessPluginInfo pluginInfo;
+								g_PipelineWorkspace->getProcessPlugin(pluginInfo, taskInfo->ProcessPluginId);
+								nlinfo("Dispatching task '%i' ('%s': '%s') to slave '%s'", taskInfo->Id.Global, taskInfo->ProjectName.c_str(), pluginInfo.Handler.c_str(), it->second->Proxy.getModuleProxy()->getModuleName().c_str());
+							}
 						}
 					}
 				}
@@ -243,7 +256,7 @@ public:
 				}
 				m_SlavesMutex.unlock();
 				
-				PIPELINE::endedBuildReady();
+				PIPELINE::endedBuildReadyMaster();
 			}
 		}
 	}
@@ -262,7 +275,10 @@ public:
 	virtual void slaveRefusedBuildTask(NLNET::IModuleProxy *sender)
 	{
 		// TODO
+		//m_SlavesMutex.lock();
 		CSlave *slave = m_Slaves[sender];
+		if (slave == NULL) { nlerror("Received 'slaveRefusedBuildTask' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		//m_SlavesMutex.unlock();
 		m_BuildTaskQueue.rejectedTask(slave->ActiveTaskId);
 		slave->ActiveTaskId = 0;
 		--slave->SaneBehaviour;
@@ -272,20 +288,29 @@ public:
 
 	virtual void slaveReloadedSheets(NLNET::IModuleProxy *sender)
 	{
+		//m_SlavesMutex.lock();
 		CSlave *slave = m_Slaves[sender];
+		if (slave == NULL) { nlerror("Received 'slaveReloadedSheets' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		//m_SlavesMutex.unlock();
 		slave->SheetsOk = true;
 		CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_MASTER_RELOAD_SHEETS);
 	}
 	
 	virtual void slaveBuildReadySuccess(NLNET::IModuleProxy *sender)
 	{
+		//m_SlavesMutex.lock();
 		CSlave *slave = m_Slaves[sender];
+		if (slave == NULL) { nlerror("Received 'slaveBuildReadySuccess' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		//m_SlavesMutex.unlock();
 		slave->BuildReadyState = 2;
 	}
 	
 	virtual void slaveBuildReadyFail(NLNET::IModuleProxy *sender)
 	{
+		//m_SlavesMutex.lock();
 		CSlave *slave = m_Slaves[sender];
+		if (slave == NULL) { nlerror("Received 'slaveBuildReadyFail' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		//m_SlavesMutex.unlock();
 		slave->BuildReadyState = 0;
 		--slave->SaneBehaviour;
 		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_REJECTED);
@@ -293,13 +318,19 @@ public:
 
 	virtual void vectorPushString(NLNET::IModuleProxy *sender, const std::string &str)
 	{
+		//m_SlavesMutex.lock();
 		CSlave *slave = m_Slaves[sender];
+		if (slave == NULL) { nlerror("Received 'vectorPushString' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		//m_SlavesMutex.unlock();
 		slave->Vector.push_back(str);
 	}
 	
 	virtual void updateDatabaseStatusByVector(NLNET::IModuleProxy *sender)
 	{
+		//m_SlavesMutex.lock();
 		CSlave *slave = m_Slaves[sender];
+		if (slave == NULL) { nlerror("Received 'updateDatabaseStatusByVector' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		//m_SlavesMutex.unlock();
 		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_MASTER_UPDATE_DATABASE_FOR_SLAVE);
 
 		bool ok = true;
@@ -325,13 +356,16 @@ public:
 
 	void setAvailablePlugins(NLNET::IModuleProxy *sender, const std::vector<uint32> &pluginsAvailable)
 	{
+		//m_SlavesMutex.lock();
 		CSlave *slave = m_Slaves[sender];
+		if (slave == NULL) { nlerror("Received 'setAvailablePlugins' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		//m_SlavesMutex.unlock();
 		slave->PluginsAvailable = pluginsAvailable;
 	}
 
 	bool build(bool bypassEros, bool verifyOnly)
 	{
-		if (PIPELINE::tryBuildReady())
+		if (PIPELINE::tryBuildReadyMaster())
 		{
 			m_BuildWorking = true;
 			m_BypassErrors = bypassEros;
@@ -345,18 +379,25 @@ public:
 
 	bool abort()
 	{
-		m_BuildTaskQueue.abortQueue();
-
-		m_SlavesMutex.lock();
-		// Abort all slaves.
-		for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
+		if (m_BuildWorking)
 		{
-			if (it->second->ActiveTaskId != 0)
-				it->second->Proxy.abortBuildTask(this);
-		}
-		m_SlavesMutex.unlock();
+			m_BuildTaskQueue.abortQueue();
 
-		return true;
+			m_SlavesMutex.lock();
+			// Abort all slaves.
+			for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
+			{
+				if (it->second->ActiveTaskId != 0)
+					it->second->Proxy.abortBuildTask(this);
+			}
+			m_SlavesMutex.unlock();
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 	
 protected:
@@ -429,14 +470,30 @@ protected:
 		}
 		else
 		{
-			return build(bypassErrors, verifyOnly);
+			if (build(bypassErrors, verifyOnly))
+			{
+				return true;
+			}
+			else
+			{
+				log.displayNL("Bad command usage");
+				return false;
+			}
 		}
 	}
 
 	NLMISC_CLASS_COMMAND_DECL(abort)
 	{
 		if (args.size() != 0) return false;
-		return this->abort();
+		if (this->abort())
+		{
+			return true;
+		}
+		else
+		{
+			log.displayNL("Bad command usage");
+			return false;
+		}
 	}
 
 }; /* class CModulePipelineMaster */

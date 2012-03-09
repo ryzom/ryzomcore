@@ -12,9 +12,7 @@
       <STRUCT>
         <ATOM Name="Description" Value="Builds interface textures"/>
         <ATOM Name="Process" Value="Interface"/>
-        <ARRAY Name="ProcessDependencies">
-          <ATOM Value="Dummy"/>
-        </ARRAY>
+        
         <ATOM Name="HandlerType" Value="RegisteredClass"/>
         <ATOM Name="Handler" Value="CProcessInterface"/>
         <ATOM Name="Info" Value="CProcessInterfaceInfo"/>
