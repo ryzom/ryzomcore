@@ -8,44 +8,40 @@
 #   ADD_PRECOMPILED_HEADER_TO_TARGET _targetName _input _pch_output_to_use
 #   ADD_NATIVE_PRECOMPILED_HEADER _targetName _inputh _inputcpp
 
-IF(CMAKE_COMPILER_IS_GNUCXX)
+IF(MSVC)
+	SET(PCHSupport_FOUND TRUE)
+	SET(_PCH_include_prefix "/I")
+ELSE(MSVC)
+	IF(CMAKE_COMPILER_IS_GNUCXX)
+		EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
+			ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+			OUTPUT_VARIABLE gcc_compiler_version)
 
-	EXEC_PROGRAM(
-		${CMAKE_CXX_COMPILER}
-		ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
-		OUTPUT_VARIABLE gcc_compiler_version)
-
-	IF(gcc_compiler_version MATCHES "4\\.[0-9]\\.[0-9]")
-		SET(PCHSupport_FOUND TRUE)
-	ELSE(gcc_compiler_version MATCHES "4\\.[0-9]\\.[0-9]")
-		IF(gcc_compiler_version MATCHES "3\\.4\\.[0-9]")
+		IF(gcc_compiler_version MATCHES "4\\.[0-9]\\.[0-9]")
 			SET(PCHSupport_FOUND TRUE)
-		ENDIF(gcc_compiler_version MATCHES "3\\.4\\.[0-9]")
-	ENDIF(gcc_compiler_version MATCHES "4\\.[0-9]\\.[0-9]")
+		ELSE(gcc_compiler_version MATCHES "4\\.[0-9]\\.[0-9]")
+			IF(gcc_compiler_version MATCHES "3\\.4\\.[0-9]")
+				SET(PCHSupport_FOUND TRUE)
+			ENDIF(gcc_compiler_version MATCHES "3\\.4\\.[0-9]")
+		ENDIF(gcc_compiler_version MATCHES "4\\.[0-9]\\.[0-9]")
+	ELSE(CMAKE_COMPILER_IS_GNUCXX)
+		# TODO: make tests for other compilers than GCC
+		SET(PCHSupport_FOUND TRUE)
+	ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 	SET(_PCH_include_prefix "-I")
-
-ELSE(CMAKE_COMPILER_IS_GNUCXX)
-
-	IF(WIN32)
-		SET(PCHSupport_FOUND TRUE) # for experimental msvc support
-		SET(_PCH_include_prefix "/I")
-	ELSE(WIN32)
-		SET(PCHSupport_FOUND FALSE)
-	ENDIF(WIN32)
-
-ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+ENDIF(MSVC)
 
 MACRO(_PCH_GET_COMPILE_FLAGS _out_compile_flags)
 	STRING(TOUPPER "CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}" _flags_var_name)
 	SET(${_out_compile_flags} ${${_flags_var_name}} )
 
-	IF(CMAKE_COMPILER_IS_GNUCXX)
+	IF(NOT MSVC)
 		GET_TARGET_PROPERTY(_targetType ${_PCH_current_target} TYPE)
 		IF(${_targetType} STREQUAL SHARED_LIBRARY OR ${_targetType} STREQUAL MODULE_LIBRARY)
 			LIST(APPEND ${_out_compile_flags} "-fPIC")
 		ENDIF(${_targetType} STREQUAL SHARED_LIBRARY OR ${_targetType} STREQUAL MODULE_LIBRARY)
-	ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+	ENDIF(NOT MSVC)
 
 	GET_DIRECTORY_PROPERTY(DIRINC INCLUDE_DIRECTORIES )
 	FOREACH(item ${DIRINC})
@@ -100,17 +96,13 @@ MACRO(_PCH_GET_COMPILE_COMMAND out_command _input _inputcpp _output)
 		SET(pchsupport_compiler_cxx_arg1 "")
 	ENDIF(CMAKE_CXX_COMPILER_ARG1)
 
-	IF(CMAKE_COMPILER_IS_GNUCXX)
-		SET(${out_command}
-			${CMAKE_CXX_COMPILER} ${pchsupport_compiler_cxx_arg1} ${_compile_FLAGS}	-x c++-header -o ${_output} -c ${_input}
-			)
-	ELSE(CMAKE_COMPILER_IS_GNUCXX)
+	IF(MSVC)
 		_PCH_GET_PDB_FILENAME(PDB_FILE ${_PCH_current_target})
-		SET(${out_command}
-			${CMAKE_CXX_COMPILER} ${pchsupport_compiler_cxx_arg1} ${_compile_FLAGS}	/Yc  /Fp\"${_output}\" ${_inputcpp} /c /Fd\"${PDB_FILE}\"
-			)
-	ENDIF(CMAKE_COMPILER_IS_GNUCXX)
-ENDMACRO(_PCH_GET_COMPILE_COMMAND )
+		SET(${out_command} ${CMAKE_CXX_COMPILER} ${pchsupport_compiler_cxx_arg1} ${_compile_FLAGS}	/Yc  /Fp\"${_output}\" ${_inputcpp} /c /Fd\"${PDB_FILE}\")
+	ELSE(MSVC)
+		SET(${out_command} ${CMAKE_CXX_COMPILER} ${pchsupport_compiler_cxx_arg1} ${_compile_FLAGS}	-x c++-header -o ${_output} -c ${_input})
+	ENDIF(MSVC)
+ENDMACRO(_PCH_GET_COMPILE_COMMAND)
 
 MACRO(GET_PRECOMPILED_HEADER_OUTPUT _targetName _input _output)
 	IF(MSVC)
@@ -128,7 +120,9 @@ MACRO(ADD_PRECOMPILED_HEADER_TO_TARGET _targetName _input _pch_output_to_use )
 		SET(oldProps "")
 	ENDIF(${oldProps} MATCHES NOTFOUND)
 
-	IF(CMAKE_COMPILER_IS_GNUCXX)
+	IF(MSVC)
+		SET(_target_cflags "${oldProps} /Yu\"${_input}\" /FI\"${_input}\" /Fp\"${_pch_output_to_use}\"")
+	ELSE(MSVC)
 		# to do: test whether compiler flags match between target  _targetName
 		# and _pch_output_to_use
 		FILE(TO_NATIVE_PATH ${_pch_output_to_use} _native_pch_path)
@@ -137,11 +131,7 @@ MACRO(ADD_PRECOMPILED_HEADER_TO_TARGET _targetName _input _pch_output_to_use )
 		# on all remote machines set
 		# PCH_ADDITIONAL_COMPILER_FLAGS to -fpch-preprocess
 		SET(_target_cflags "${oldProps} ${PCH_ADDITIONAL_COMPILER_FLAGS}-include ${_input} -Winvalid-pch")
-	ELSE(CMAKE_COMPILER_IS_GNUCXX)
-		IF(MSVC)
-			SET(_target_cflags "${oldProps} /Yu\"${_input}\" /FI\"${_input}\" /Fp\"${_pch_output_to_use}\"")
-		ENDIF(MSVC)
-	ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+	ENDIF(MSVC)
 
 	SET_TARGET_PROPERTIES(${_targetName} PROPERTIES COMPILE_FLAGS ${_target_cflags})
 	IF(oldProps)
@@ -184,8 +174,31 @@ MACRO(ADD_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
 	ADD_PRECOMPILED_HEADER_TO_TARGET(${_targetName} ${_inputh} ${_output})
 ENDMACRO(ADD_PRECOMPILED_HEADER)
 
+# Macro to move PCH creation file to the front of files list
+MACRO(FIX_PRECOMPILED_HEADER _files _pch)
+	# Remove .cpp creating PCH from the list
+	LIST(REMOVE_ITEM ${_files} ${_pch})
+	# Prepend .cpp creating PCH to the list
+	LIST(INSERT ${_files} 0 ${_pch})
+ENDMACRO(FIX_PRECOMPILED_HEADER)
+
 MACRO(ADD_NATIVE_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
-	IF(CMAKE_GENERATOR MATCHES Visual*)
+	SET(PCH_METHOD 0)
+
+	# 0 => creating a new target for PCH, works for all makefiles
+	# 1 => setting PCH for VC++ project, works for VC++ projects
+	# 2 => setting PCH for XCode project, works for XCode projects
+	IF(CMAKE_GENERATOR MATCHES "Visual Studio")
+		SET(PCH_METHOD 1)
+	ELSEIF(CMAKE_GENERATOR MATCHES "NMake Makefiles" AND MFC_FOUND AND CMAKE_MFC_FLAG)
+		# To fix a bug with MFC
+		# Don't forget to use FIX_PRECOMPILED_HEADER before creating the target
+#		SET(PCH_METHOD 1)
+	ELSEIF(CMAKE_GENERATOR MATCHES "Xcode")
+		SET(PCH_METHOD 2)
+	ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio")
+
+	IF(PCH_METHOD EQUAL 1)
 		# Auto include the precompile (useful for moc processing, since the use of
 		# precompiled is specified at the target level
 		# and I don't want to specifiy /F- for each moc/res/ui generated files (using Qt)
@@ -200,26 +213,24 @@ MACRO(ADD_NATIVE_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
 
 		#also inlude ${oldProps} to have the same compile options
 		SET_SOURCE_FILES_PROPERTIES(${_inputcpp} PROPERTIES COMPILE_FLAGS "${oldProps} /Yc\"${_inputh}\"")
-	ELSE(CMAKE_GENERATOR MATCHES Visual*)
-		IF(CMAKE_GENERATOR MATCHES Xcode)
-			# For Xcode, cmake needs my patch to process
-			# GCC_PREFIX_HEADER and GCC_PRECOMPILE_PREFIX_HEADER as target properties
+	ELSEIF(PCH_METHOD EQUAL 2)
+		# For Xcode, cmake needs my patch to process
+		# GCC_PREFIX_HEADER and GCC_PRECOMPILE_PREFIX_HEADER as target properties
 
-			GET_TARGET_PROPERTY(oldProps ${_targetName} COMPILE_FLAGS)
-			IF(${oldProps} MATCHES NOTFOUND)
-				SET(oldProps "")
-			ENDIF(${oldProps} MATCHES NOTFOUND)
+		GET_TARGET_PROPERTY(oldProps ${_targetName} COMPILE_FLAGS)
+		IF(${oldProps} MATCHES NOTFOUND)
+			SET(oldProps "")
+		ENDIF(${oldProps} MATCHES NOTFOUND)
 
-			# When buiding out of the tree, precompiled may not be located
-			# Use full path instead.
-			GET_FILENAME_COMPONENT(fullPath ${_inputh} ABSOLUTE)
+		# When buiding out of the tree, precompiled may not be located
+		# Use full path instead.
+		GET_FILENAME_COMPONENT(fullPath ${_inputh} ABSOLUTE)
 
-			SET_TARGET_PROPERTIES(${_targetName} PROPERTIES XCODE_ATTRIBUTE_GCC_PREFIX_HEADER "${fullPath}")
-			SET_TARGET_PROPERTIES(${_targetName} PROPERTIES XCODE_ATTRIBUTE_GCC_PRECOMPILE_PREFIX_HEADER "YES")
-		ELSE(CMAKE_GENERATOR MATCHES Xcode)
-			#Fallback to the "old" precompiled suppport
-			ADD_PRECOMPILED_HEADER(${_targetName} ${_inputh} ${_inputcpp})
-		ENDIF(CMAKE_GENERATOR MATCHES Xcode)
-	ENDIF(CMAKE_GENERATOR MATCHES Visual*)
+		SET_TARGET_PROPERTIES(${_targetName} PROPERTIES XCODE_ATTRIBUTE_GCC_PREFIX_HEADER "${fullPath}")
+		SET_TARGET_PROPERTIES(${_targetName} PROPERTIES XCODE_ATTRIBUTE_GCC_PRECOMPILE_PREFIX_HEADER "YES")
+	ELSE(PCH_METHOD EQUAL 1)
+		#Fallback to the "old" precompiled suppport
+		ADD_PRECOMPILED_HEADER(${_targetName} ${_inputh} ${_inputcpp})
+	ENDIF(PCH_METHOD EQUAL 1)
 
 ENDMACRO(ADD_NATIVE_PRECOMPILED_HEADER)
