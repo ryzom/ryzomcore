@@ -40,6 +40,9 @@ forceTargetToDie			:DEV:SGM:GM:EM:		// Force entity target to die
 getEventFaction				:DEV:SGM:GM:EM:		// Get the event faction of player: <player name>
 giveRespawnPoint			:DEV:SGM:GM:		// Give a respawn point to a player: <respawn point name>
 guildInvite							// Send a guild invite to a player character without distance constrainte
+setLeague							// Create a League 
+leagueInvite							// Send a League invite to a Team Leader character without distance constrainte
+leagueKick							// Kick a player or team from league
 roomInvite							// Send a room invite
 roomKick							// Remove a room invite
 guildMOTD							// Set the guild message of the day, command effective only for officer and more graded guild members
@@ -72,8 +75,6 @@ renameGuild					:DEV:SGM:GM:EM:		// Rename a guild: <guild name> <new guild name
 renamePlayer		[SU]	:DEV:SGM:GM:EM:		// Rename a player: <player name> <new playerName>
 renamePlayerForEvent		:DEV:SGM:GM:EM:EG:		// Rename a player temporarily for an event: <player name> <new playerName>
 resetPowerFlags				:DEV:SGM:GM:EM:		// Reset the ineffective aura and the power flags for given character
-respawnAfterDeath						// Respawn after death at re-spawn point name, it must be valid (validated by PC and usable): <Respawn idx>
-resurrected							// Another PC resurrect PC by giving some energy: <Hp> <Sta> <Sap> <Focus>
 root						:DEV:SGM:GM:EM:VG:SG:		// Root a player: <player name> <time in seconds>
 saveToPDR					:DEV:SGM:		// Save a character to a binary PDR file: <file name>
 saveToXML					:DEV:SGM:		// Save a character to an XML file: <file name>
@@ -87,6 +88,8 @@ setGuildMessage							// Set the guild message of the day: <message>
 setItemSapLoad				:DEV:SGM:GM:EM:		// Set an item sap load: <slot index in bag (starts at 0)> <float value>
 setPosFlag					:DEV:SGM:GM:EM		// Set a position flag: <flag name>
 setPvPTag									// Set player character PvP tag to true or false
+setFamePlayer				:DEV:SGM:GM:EM:		// Set the fame value of a player in the given faction: <faction> <fame>
+resetPVPTimers				:DEV:SGM:GM:EM:		// Reset the pvp timers of a player: <player name>
 setSkillsToMaxValue			:DEV:SGM:GM:EM:		// Set player skills to max value
 showCSR						:DEV:SGM:GM:VG:SG:G:EM:EG:	// Show CSR title if the player is a CSR
 showFBT						:DEV:SGM:GM:EM:		// Show Focus Beta Tester title if the player is a FBT
@@ -100,6 +103,7 @@ connectUserChannel								// Connect to User Channel Chat
 webExecCommand									// Execute web command (need HMAC signature)
 webDelCommandsIds								// Delete web transactions for web_app
 webAddCommandsIds								// Add web command transactions for web_app
+updateTarget									// Update current target
 teleport					:DEV:SGM:GM:VG:SG:G:OBSERVER:EM:EG:	// Teleport the CSR in front of a player: <player name>
 tpPosFlag					:DEV:SGM:GM:VG:SG:G:EM:EG:	// Teleport a player to a position flag: <flag name>
 universe					:DEV:SGM:GM:EM:		// Chat in universe mode: <boolean>
@@ -107,7 +111,6 @@ unmute						:DEV:SGM:GM:EM:VG:SG:		// Unmute a user: <player name>
 unmuteUniverse				:DEV:SGM:GM:EM:VG:SG:		// Unmute the universe channel
 unroot						:DEV:SGM:GM:EM:VG:SG:		// Stop rooting a player: <player name>
 updateGuildMembersList		:DEV:SGM:GM:		// update guild members list on members clients: <guild name>
-validateRespawnPoint						// Validate re-spawn point: <Re-spawn point idx>
 //setPvpClan				:DEV:			// choose a clan for pvp
 summonPet							// player can summon it's pet one time only
 allowSummonPet				:DEV:SGM:GM:		// autorize player to summon it's pet one time per pet
@@ -121,6 +124,14 @@ farTPReturn					:DEV:SGM:GM:VG:SG:EM:	// used to tp back to your previous sessio
 characterMissionDump			:DEV:SGM:GM:		//Dump mission list for a character
 removeMission				:DEV:SGM:GM:		//Remove a mission of a character
 addMission				:DEV:SGM:GM:		//add a mission to a character
+characterInventoryDump		:DEV:SGM:GM:EM:		// Dump character inventory info: <inventory> <from slot> <to slot>
+deleteInventoryItem			:DEV:SGM:GM:EM:		// Delete an item from a characters inventory: <inventory> <slot> <sheetname> <quality> <quantity>
+lockItem										// Lock/unlock item for trading, selling, destruction.
+setTeamLeader									// Set the team leader
+setPetAnimalSatiety			:DEV:SGM:GM:EM:		// Set the satiety of pet animal (petIndex in 0..3): <petIndex> full|<value> [<nameForAnswer>]
+getPetAnimalSatiety			:DEV:SGM:GM:EM:		// Get the satiety of pet animal (petIndex in 0..3): <petIndex> [<nameForAnswer>]
+setPetAnimalName			:DEV:SGM:GM:EM:EG:	// Set the name of a pet animal (petIndex in 0..3): <petIndex> <name>
+setSimplePhrase				:DEV:SGM:GM:EM:		// Set an IOS phrase: <id> <phrase> [<language code>]
 
 // Variables
 //
@@ -138,6 +149,7 @@ Name					:DEV:SGM:GM:EM:		// Name of a player
 Position				:DEV:SGM:GM:VG:PR:OBSERVER:EM:EG:		// Position of a player (in meters) <posx>,<posy>[,<posz>]] | <bot name> | <player name> | home
 Priv					:DEV:			// User privilege
 PriviledgePVP			:DEV:SGM:GM:EM:EG:			// Turns PVP on/off on character (blame coder for typo)
+FullPVP			:DEV:SGM:GM:EM:EG:			// Turns Full PVP on/off on character (blame coder for typo)
 RyzomDate				:DEV:SGM:GM:EM:		// Current ryzom date
 RyzomTime				:DEV:SGM:GM:EM:		// Current ryzom time
 
@@ -160,3 +172,8 @@ eventSetBotFameByKill			:DEV:SGM:GM:EM:		// Changes the amount of fame earned fo
 eventSetBotURL					:DEV:SGM:GM:EM:     // Set the url of a bot
 eventSetBotURLName				:DEV:SGM:GM:EM:     // Set the url name of a bot
 eventSpawnToxic				:DEV:SGM:GM:EM:		// Add toxic cloud
+eventNpcSay					:DEV:SGM:GM:EM:		// Have an NPC say a text
+eventSetBotFacing			:DEV:SGM:GM:EM:		// Set the direction in which a bot faces
+eventGiveControl			:DEV:SGM:GM:EM:		// Give control of entity A to entity B : <master eid> <slave eid>
+eventLeaveControl			:DEV:SGM:GM:EM:		// Leave control of entity : <master eid>
+resetName										// Reset player's name; undo a temporary rename

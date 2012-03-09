@@ -911,7 +911,7 @@ inline const std::list<TCharacterLogTime>& CCharacter::getLastLogStats() const
 
 //------------------------------------------------------------------------------
 
-inline bool CCharacter::isChannelAdded()
+inline bool CCharacter::isChannelAdded() const
 {
 	return _ChannelAdded; 
 }

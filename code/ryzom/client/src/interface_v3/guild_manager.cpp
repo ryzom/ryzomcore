@@ -370,8 +370,14 @@ void CGuildManager::update()
 				{
 					for (uint j = 0; j < CachedGuildMembers.size(); ++j)
 					{
-						if ((CachedGuildMembers[j].Name == _GuildMembers[i].Name) &&
-							(CachedGuildMembers[j].Online != _GuildMembers[i].Online))
+						// Status change is from offline to online/abroad online or vice versa. 
+						TCharConnectionState prevState = CachedGuildMembers[j].Online;
+						TCharConnectionState curState = _GuildMembers[i].Online;
+						bool showMsg = (prevState != curState) && 
+									   (CachedGuildMembers[j].Name == _GuildMembers[i].Name) &&
+									   (prevState == ccs_offline || curState == ccs_offline);
+
+						if (showMsg)
 						{
 							ucstring msg = (_GuildMembers[i].Online != ccs_offline) ? onlineMessage : offlineMessage;
 							strFindReplace(msg, "%s", _GuildMembers[i].Name);

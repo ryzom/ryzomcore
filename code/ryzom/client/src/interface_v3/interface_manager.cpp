@@ -4404,12 +4404,14 @@ void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat
 		}
 	}
 
+	if (mode == CClientConfig::SSysInfoParam::Center || mode == CClientConfig::SSysInfoParam::CenterAround)
+		InSceneBubbleManager.addMessagePopupCenter(str, color);
+
 	// If over popup a string at the bottom of the screen
 	if ((mode == CClientConfig::SSysInfoParam::Over) || (mode == CClientConfig::SSysInfoParam::OverOnly))
 		InSceneBubbleManager.addMessagePopup(str, color);
-	else if (mode == CClientConfig::SSysInfoParam::Center)
-		InSceneBubbleManager.addMessagePopupCenter(str, color);
-	else if (mode == CClientConfig::SSysInfoParam::Around && PeopleInterraction.AroundMe.Window)
+	else if ( (mode == CClientConfig::SSysInfoParam::Around || mode == CClientConfig::SSysInfoParam::CenterAround) 
+		&& PeopleInterraction.AroundMe.Window)
 		PeopleInterraction.ChatInput.AroundMe.displayMessage(str, color, 2);
 }
 

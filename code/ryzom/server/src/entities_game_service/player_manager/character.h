@@ -2391,9 +2391,9 @@ public:
 	void haveToUpdateItemsPrerequisit( bool b );
 
 	void channelAdded( bool b );
-	bool isChannelAdded();
+	bool isChannelAdded() const;
 
-	uint8 getNbUserChannels() { return _NbUserChannels; };
+	uint8 getNbUserChannels() const { return _NbUserChannels; };
 	void addUserChannel() { _NbUserChannels++; };
 	void removeUserChannel() { _NbUserChannels--; };
 
@@ -2403,7 +2403,7 @@ public:
 	bool isAnActiveXpCatalyser( CGameItemPtr item );
 	
 	void setShowFactionChannelsMode(TChanID channel, bool s);
-	bool showFactionChannelsMode(TChanID channel);
+	bool showFactionChannelsMode(TChanID channel) const;
 
 	// from offline command
 	void contactListRefChangeFromCommand(const NLMISC::CEntityId &id, const std::string &operation);
