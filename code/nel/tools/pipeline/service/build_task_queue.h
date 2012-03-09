@@ -121,6 +121,10 @@ public:
 private:
 	// void countDependencies(uint &waitingResult, uint &failAbortResult, CBuildTaskInfo *taskInfo);
 	
+	/// Same as next but only counts depending tasks that are waiting.	
+	void countWaitingDependents(uint &dependentResult, CBuildTaskInfo *taskInfo);
+	void flagWaitingDependents(std::vector<bool> &dependentResult, CBuildTaskInfo *taskInfo);
+
 	/// Recursively count the number of tasks that depend on this task.
 	void countDependents(uint &dependentResult, CBuildTaskInfo *taskInfo);
 	void flagDependents(std::vector<bool> &dependentResult, CBuildTaskInfo *taskInfo);
@@ -129,6 +133,7 @@ private:
 	
 	void createBuildableTaskList(std::vector<CBuildTaskInfo *> &result, bool bypassError);
 	void sortBuildableTaskListByMostDependents(std::vector<CBuildTaskInfo *> &result);
+	void sortBuildableTaskListByMostWaitingDependents(std::vector<CBuildTaskInfo *> &result);
 
 }; /* class CBuildTaskQueue */
 

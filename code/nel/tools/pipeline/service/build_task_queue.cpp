@@ -129,7 +129,7 @@ CBuildTaskInfo *CBuildTaskQueue::getTaskForSlave(const std::vector<uint32> &avai
 	m_Mutex.lock();
 	std::vector<CBuildTaskInfo *> availableTasks;
 	createBuildableTaskList(availableTasks, m_BypassDependencyError);
-	sortBuildableTaskListByMostDependents(availableTasks);
+	sortBuildableTaskListByMostWaitingDependents(availableTasks);
 	for (std::vector<CBuildTaskInfo *>::iterator it = availableTasks.begin(), end = availableTasks.end(); it != end; ++it)
 	{
 		CBuildTaskInfo *task = (*it);
@@ -243,9 +243,23 @@ uint CBuildTaskQueue::countRemainingBuildableTasksAndWorkingTasks()
 void CBuildTaskQueue::listTaskQueueByMostDependents(std::vector<CBuildTaskInfo *> &result)
 {
 	result.clear();
-	result.reserve(m_Tasks.size());
-	/*copy(m_Tasks.begin(), m_Tasks.end(), result);
-	sortBuildableTaskListByMostDependents(result);*/
+	result = m_Tasks; // copy
+	sortBuildableTaskListByMostDependents(result);
+}
+
+void CBuildTaskQueue::countWaitingDependents(uint &dependentResult, CBuildTaskInfo *taskInfo)
+{
+	uint nb = 0;
+	for (std::vector<uint16>::size_type i = 0; i < m_Tasks.size(); ++i)
+		if (m_Tasks[i]->State == TASK_WAITING && doesTaskDependOnTask(m_Tasks[i], taskInfo)) ++nb;
+	dependentResult = nb;
+}
+
+void CBuildTaskQueue::flagWaitingDependents(std::vector<bool> &dependentResult, CBuildTaskInfo *taskInfo)
+{
+	dependentResult.resize(m_Tasks.size());
+	for (std::vector<bool>::size_type i = 0; i < dependentResult.size(); ++i)
+		dependentResult[i] = (m_Tasks[i]->State == TASK_WAITING && doesTaskDependOnTask(m_Tasks[i], taskInfo));
 }
 
 void CBuildTaskQueue::countDependents(uint &dependentResult, CBuildTaskInfo *taskInfo)
@@ -314,6 +328,29 @@ void CBuildTaskQueue::sortBuildableTaskListByMostDependents(std::vector<CBuildTa
 	dependentsCache.resize(result.size());
 	for (std::vector<uint>::size_type i = 0; i < dependentsCache.size(); ++i)
 		countDependents(dependentsCache[i], result[i]);
+	uint sc;
+	do
+	{
+		sc = 0;
+		for (std::vector<uint>::size_type i = 0; i < dependentsCache.size() - 1; ++i)
+		{
+			if (dependentsCache[i + 1] > dependentsCache[i])
+			{
+				swap(dependentsCache[i], dependentsCache[i + 1]);
+				swap(result[i], result[i + 1]);
+				++sc;
+			}
+		}
+	} while (sc != 0);
+}
+
+void CBuildTaskQueue::sortBuildableTaskListByMostWaitingDependents(std::vector<CBuildTaskInfo *> &result)
+{
+	// brings most urgent tasks on top
+	std::vector<uint> dependentsCache;
+	dependentsCache.resize(result.size());
+	for (std::vector<uint>::size_type i = 0; i < dependentsCache.size(); ++i)
+		countWaitingDependents(dependentsCache[i], result[i]);
 	uint sc;
 	do
 	{

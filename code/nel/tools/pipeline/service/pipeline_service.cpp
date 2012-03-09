@@ -56,6 +56,7 @@
 #include "pipeline_interface_impl.h"
 #include "pipeline_process_impl.h"
 #include "../plugin_library/process_info.h"
+#include "build_task_queue.h"
 
 // using namespace std;
 using namespace NLMISC;
@@ -717,6 +718,35 @@ NLMISC_COMMAND(showDependencies, "Show dependencies.", "<projectName> <processNa
 		log.displayNL("Project '%s' does not exist", args[0].c_str());
 		return false;
 	}
+	return true;
+}
+
+NLMISC_COMMAND(dumpTestTaskQueueLoad, "Test task queue generation. You MUST NOT reload workspace sheets while running this.", "")
+{
+	if(args.size() != 0) return false;
+	
+	log.displayNL("**********************************************************************");
+
+	PIPELINE::CBuildTaskQueue taskQueue;
+	taskQueue.loadQueue(PIPELINE::g_PipelineWorkspace, false);
+
+	std::vector<PIPELINE::CBuildTaskInfo *> tasks;
+	taskQueue.listTaskQueueByMostDependents(tasks);
+
+	log.displayNL("COUNT: %i", tasks.size());
+	
+	for (std::vector<PIPELINE::CBuildTaskInfo *>::iterator it = tasks.begin(), end = tasks.end(); it != end; ++it)
+	{
+		PIPELINE::CBuildTaskInfo *task = *it;
+		PIPELINE::CProcessPluginInfo pluginInfo;
+		PIPELINE::g_PipelineWorkspace->getProcessPlugin(pluginInfo, task->ProcessPluginId);
+		log.displayNL("TASK: %i: %s, %s", task->Id.Global, task->ProjectName.c_str(), pluginInfo.Handler.c_str());
+	}
+
+	taskQueue.abortQueue();
+	
+	log.displayNL("**********************************************************************");
+	
 	return true;
 }
 
