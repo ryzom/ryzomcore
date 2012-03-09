@@ -205,6 +205,38 @@ bool CPipelineWorkspace::getProcessPlugin(CProcessPluginInfo &result, uint32 glo
 	else return false;
 }
 
+bool CPipelineWorkspace::getProcessPluginDependencies(std::vector<std::string> &resultProcesses, uint32 globalId)
+{
+	resultProcesses.clear();
+	CProcessPluginId id;
+	id.Global = globalId;
+	if (id.Sub.Plugin >= m_Plugins.size())
+	{
+		nlwarning("Plugin id out of range");
+		return false;
+	}
+	NLMISC::CRefPtr<NLGEORGES::UForm> pluginForm = m_Plugins[id.Sub.Plugin];
+	UFormElm *processHandlers;
+	if (!pluginForm->getRootNode().getNodeByName(&processHandlers, "ProcessHandlers")) return false;
+	UFormElm *handler;
+	if (!processHandlers->getArrayNode(&handler, id.Sub.Handler)) return false;
+	UFormElm *processDependencies;
+	if (!handler->getNodeByName(&processDependencies, "ProcessDependencies")) return false;
+	if (!processDependencies) return false;
+	uint nb;
+	if (!processDependencies->getArraySize(nb)) return false;
+	resultProcesses.resize(nb);
+	for (uint i = 0; i < nb; ++i)
+	{
+		if (!processDependencies->getArrayValue(resultProcesses[i], i))
+		{
+			resultProcesses.clear();
+			return false;
+		}
+	}
+	return true;
+}
+
 void CPipelineWorkspace::listAvailablePlugins(std::vector<uint32> &result)
 {
 	result.clear();

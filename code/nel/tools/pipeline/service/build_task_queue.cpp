@@ -95,14 +95,58 @@ void CBuildTaskQueue::loadQueue(CPipelineWorkspace *workspace, bool bypassDepend
 				m_Tasks.push_back(info);
 				info->ProjectName = projectName;
 				info->ProcessPluginId = processHandlerId;
-				// info->Dependencies
+
+				nlassert(builtTaskByPlugin.find(processHandlerId) == builtTaskByPlugin.end());
+				builtTaskByPlugin[processHandlerId] = info;
 			}
 
-			// TODO: PROCESS DEPENDENCIES
+			if (processHandlers.size() == 0)
+			{
+				nlwarning("Project '%s' tries to use unknown process '%s'", projectName.c_str(), processName.c_str());
+			}
 		}
 
-		// TODO: PROJECT DEPENDENCIES
+		// Dependencies between processes inside a project
+		for (std::map<uint32, CBuildTaskInfo *>::iterator it = builtTaskByPlugin.begin(), end = builtTaskByPlugin.end(); it != end; ++it)
+		{
+			CBuildTaskInfo *task = it->second;
+			std::vector<std::string> processDependencies;
+			workspace->getProcessPluginDependencies(processDependencies, task->ProcessPluginId);
+			
+			for (std::vector<std::string>::iterator dep_it = processDependencies.begin(), dep_end = processDependencies.end(); dep_it != dep_end; ++dep_it)
+			{
+				std::string &processName = (*dep_it);
+				std::vector<CProcessPluginInfo> processHandlers;
+				workspace->getProcessPlugins(processHandlers, processName);
+
+				for (std::vector<CProcessPluginInfo>::iterator h_it = processHandlers.begin(), h_end = processHandlers.end(); h_it != h_end; ++h_it)
+				{
+					uint32 processHandlerId = (*h_it).Id.Global;
+
+					std::map<uint32, CBuildTaskInfo *>::iterator depIt = builtTaskByPlugin.find(processHandlerId);
+					if (depIt != builtTaskByPlugin.end())
+					{
+						task->Dependencies.push_back(depIt->second->Id.Sub.Task);
+					}
+					else
+					{
+						CProcessPluginInfo badProcessPlugin;
+						workspace->getProcessPlugin(badProcessPlugin, task->ProcessPluginId);
+						nlwarning("Project '%s' task process handler '%s' depends on process '%s' which is not part of the project", projectName.c_str(), badProcessPlugin.Handler.c_str(), processName.c_str());
+					}
+				}
+				
+				if (processHandlers.size() == 0)
+				{
+					CProcessPluginInfo badProcessPlugin;
+					workspace->getProcessPlugin(badProcessPlugin, task->ProcessPluginId);
+					nlwarning("Project '%s' task process handler '%s' depends on process '%s' which does not exist in any known plugin", projectName.c_str(), badProcessPlugin.Handler.c_str(), processName.c_str());
+				}
+			}
+		}
 	}
+
+	// TODO_TODO_TODO Dependencies between projects *************************************************************************
 
 	m_Mutex.unlock();
 }

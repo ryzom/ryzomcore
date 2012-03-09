@@ -93,6 +93,7 @@ public:
 	void getProcessPlugins(std::vector<CProcessPluginInfo> &resultAppend, const std::string &process);
 	CPipelineProject *getProject(const std::string &project);
 	bool getProcessPlugin(CProcessPluginInfo &result, uint32 globalId);
+	bool getProcessPluginDependencies(std::vector<std::string> &resultProcesses, uint32 globalId);
 
 	inline const std::map<std::string, CPipelineProject *> &getProjects() { return m_Projects; }
 
