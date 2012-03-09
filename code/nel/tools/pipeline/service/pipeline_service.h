@@ -73,6 +73,12 @@ void endedRunnableTask();
 bool tryDirectTask(const std::string &stateName);
 void endedDirectTask();
 
+bool tryBuildReady();
+void endedBuildReady();
+
+bool tryBuildProcess(const std::string &stateName);
+void endedBuildProcess();
+
 /// Only use for informational purposes, service may not be idle after calling this. Not for thread safe usage.
 bool isServiceStateIdle();
 

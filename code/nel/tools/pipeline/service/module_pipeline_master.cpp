@@ -40,6 +40,7 @@
 #include "module_pipeline_slave_itf.h"
 #include "pipeline_service.h"
 #include "database_status.h"
+#include "build_task_queue.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -47,10 +48,14 @@ using namespace NLNET;
 
 namespace PIPELINE {
 
+// temporary flags
 #define PIPELINE_INFO_MASTER_RELOAD_SHEETS "M_RELOAD_SHEETS"
 #define PIPELINE_INFO_MASTER_UPDATE_DATABASE_FOR_SLAVE "M_UPD_DB_FOR_S"
 
+// permanent flags
 #define PIPELINE_INFO_CODE_ERROR_UNMACRO "CODE_ERROR_UNMACRO"
+#define PIPELINE_INFO_SLAVE_REJECTED "SLAVE_REJECT"
+#define PIPELINE_INFO_SLAVE_CRASHED "SLAVE_CRASH"
 
 /**
  * \brief CModulePipelineMaster
@@ -70,7 +75,8 @@ class CModulePipelineMaster :
 			Proxy(moduleProxy), 
 			ActiveTaskId(0),
 			SheetsOk(true),
-			SaneBehaviour(3) { }
+			SaneBehaviour(3),
+			BuildReadyState(0) { }
 		CModulePipelineMaster *Master;
 		CModulePipelineSlaveProxy Proxy;
 		std::vector<std::string> Vector;
@@ -78,6 +84,7 @@ class CModulePipelineMaster :
 		bool SheetsOk;
 		std::vector<uint32> PluginsAvailable;
 		sint SaneBehaviour;
+		uint BuildReadyState;
 		
 		~CSlave()
 		{
@@ -96,7 +103,7 @@ class CModulePipelineMaster :
 
 		bool canAcceptTask()
 		{
-			return SheetsOk && (ActiveTaskId == 0) && SaneBehaviour > 0;
+			return SheetsOk && (ActiveTaskId == 0) && SaneBehaviour > 0 && BuildReadyState == 2;
 		}
 	};
 	
@@ -104,9 +111,15 @@ protected:
 	typedef std::map<IModuleProxy *, CSlave *> TSlaveMap;
 	TSlaveMap m_Slaves;
 	mutable boost::mutex m_SlavesMutex;
+	CBuildTaskQueue m_BuildTaskQueue;
+	bool m_BuildWorking;
+
+	// build command
+	bool m_BypassErrors;
+	bool m_VerifyOnly;
 
 public:
-	CModulePipelineMaster()
+	CModulePipelineMaster() : m_BuildWorking(false)
 	{
 		g_IsMaster = true;
 	}
@@ -163,7 +176,9 @@ public:
 
 			if (slave->ActiveTaskId)
 			{
-				// ...
+				// if it goes down while busy on a task it crashed (or was poorly stopped by user...)
+				CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_CRASHED);
+				// ... TODO ...
 			}
 			
 			m_Slaves.erase(slaveIt);
@@ -176,15 +191,82 @@ public:
 	virtual void onModuleUpdate()
 	{
 		// if state build, iterate trough all slaves to see if any is free, and check if there's any waiting tasks
+		if (m_BuildWorking)
+		{
+			m_SlavesMutex.lock();
+			// iterate trough all slaves to tell them the enter build_ready state.
+			for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
+			{
+				if (it->second->BuildReadyState == 0 && it->second->SaneBehaviour > 0 && it->second->SheetsOk)
+				{
+					it->second->BuildReadyState = 1;
+					it->second->Proxy.enterBuildReadyState(this);
+				}				
+				// wait for confirmation, set BuildReadyState = 2 in that callback!
+			}
+			m_SlavesMutex.unlock();
+
+			uint nbBuildable, nbWorking;
+			m_BuildTaskQueue.countRemainingBuildableTasksAndWorkingTasks(nbBuildable, nbWorking);
+			if (nbBuildable > 0)
+			{
+				m_SlavesMutex.lock();
+				// Iterate trough all slaves to see if any is free for a building task.
+				for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
+				{
+					if (it->second->canAcceptTask())
+					{
+						CBuildTaskInfo *taskInfo = m_BuildTaskQueue.getTaskForSlave(it->second->PluginsAvailable);
+						if (taskInfo != NULL)
+						{
+							it->second->ActiveTaskId = taskInfo->Id.Global;
+							it->second->Proxy.startBuildTask(this, taskInfo->ProjectName, taskInfo->ProcessPluginId);
+							// the slave may either reject; or not answer until it's finished with this task
+						}
+					}
+				}
+				m_SlavesMutex.unlock();
+			}
+			else if (nbWorking == 0)
+			{
+				// done (or stuck)
+				
+				m_BuildWorking = false;
+				
+				m_SlavesMutex.lock();
+				// Iterate trough all slaves to tell them to end build_ready state.
+				for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
+				{
+					it->second->BuildReadyState = 0;
+					it->second->Proxy.leaveBuildReadyState(this);
+					nlassert(it->second->ActiveTaskId == 0);
+				}
+				m_SlavesMutex.unlock();
+				
+				PIPELINE::endedBuildReady();
+			}
+		}
 	}
 
-	virtual void slaveFinishedBuildTask(NLNET::IModuleProxy *sender, uint32 taskId, uint8 errorLevel)
+	virtual void slaveFinishedBuildTask(NLNET::IModuleProxy *sender, uint8 errorLevel)
+	{
+		// TODO
+	}
+
+	virtual void slaveAbortedBuildTask(NLNET::IModuleProxy *sender)
 	{
 		// TODO
 	}
 	
-	virtual void slaveRefusedBuildTask(NLNET::IModuleProxy *sender, uint32 taskId)
+	// in fact slaves are not allowed to refuse tasks, but they may do this if the user is toying around with the slave service
+	virtual void slaveRefusedBuildTask(NLNET::IModuleProxy *sender)
 	{
+		// TODO
+		CSlave *slave = m_Slaves[sender];
+		m_BuildTaskQueue.rejectedTask(slave->ActiveTaskId);
+		slave->ActiveTaskId = 0;
+		--slave->SaneBehaviour;
+		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_REJECTED);
 		// TODO
 	}
 
@@ -193,6 +275,20 @@ public:
 		CSlave *slave = m_Slaves[sender];
 		slave->SheetsOk = true;
 		CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_MASTER_RELOAD_SHEETS);
+	}
+	
+	virtual void slaveBuildReadySuccess(NLNET::IModuleProxy *sender)
+	{
+		CSlave *slave = m_Slaves[sender];
+		slave->BuildReadyState = 2;
+	}
+	
+	virtual void slaveBuildReadyFail(NLNET::IModuleProxy *sender)
+	{
+		CSlave *slave = m_Slaves[sender];
+		slave->BuildReadyState = 0;
+		--slave->SaneBehaviour;
+		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_REJECTED);
 	}
 
 	virtual void vectorPushString(NLNET::IModuleProxy *sender, const std::string &str)
@@ -232,10 +328,42 @@ public:
 		CSlave *slave = m_Slaves[sender];
 		slave->PluginsAvailable = pluginsAvailable;
 	}
+
+	bool build(bool bypassEros, bool verifyOnly)
+	{
+		if (PIPELINE::tryBuildReady())
+		{
+			m_BuildWorking = true;
+			m_BypassErrors = bypassEros;
+			m_VerifyOnly = verifyOnly;
+			m_BuildTaskQueue.resetQueue();
+			m_BuildTaskQueue.loadQueue(g_PipelineWorkspace, bypassEros);
+			return true;
+		}
+		return false;
+	}
+
+	bool abort()
+	{
+		m_BuildTaskQueue.abortQueue();
+
+		m_SlavesMutex.lock();
+		// Abort all slaves.
+		for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
+		{
+			if (it->second->ActiveTaskId != 0)
+				it->second->Proxy.abortBuildTask(this);
+		}
+		m_SlavesMutex.unlock();
+
+		return true;
+	}
 	
 protected:
 	NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CModulePipelineMaster, CModuleBase)
 		NLMISC_COMMAND_HANDLER_ADD(CModulePipelineMaster, reloadSheets, "Reload sheets across all services", "")
+		NLMISC_COMMAND_HANDLER_ADD(CModulePipelineMaster, build, "Build", "")
+		NLMISC_COMMAND_HANDLER_ADD(CModulePipelineMaster, abort, "Abort", "")
 	NLMISC_COMMAND_HANDLER_TABLE_END
 
 	NLMISC_CLASS_COMMAND_DECL(reloadSheets)
@@ -266,6 +394,49 @@ protected:
 			log.displayNL("Busy");
 			return false;
 		}
+	}
+
+	NLMISC_CLASS_COMMAND_DECL(build)
+	{
+		bool bypassErrors = false;
+		bool verifyOnly = false;
+		std::vector<std::string> unknownVec;
+		std::vector<std::string> &workingVec = unknownVec;
+
+		for (std::vector<std::string>::const_iterator it = args.begin(), end = args.end(); it != end; ++it)
+		{
+			if ((*it)[0] == '-')
+			{
+				workingVec = unknownVec;
+				if (((*it) == "--bypassErrors") || ((*it) == "-be"))
+					bypassErrors = true;
+				else if (((*it) == "--verifyOnly") || ((*it) == "-vo"))
+					bypassErrors = true;
+				else
+					unknownVec.push_back(*it);
+			}
+			else
+			{
+				workingVec.push_back(*it);
+			}
+		}
+
+		if (unknownVec.size() > 0)
+		{
+			for (std::vector<std::string>::iterator it = unknownVec.begin(), end = unknownVec.end(); it != end; ++it)
+				log.displayNL("Unknown build parameter: %s", (*it).c_str());
+			return false;
+		}
+		else
+		{
+			return build(bypassErrors, verifyOnly);
+		}
+	}
+
+	NLMISC_CLASS_COMMAND_DECL(abort)
+	{
+		if (args.size() != 0) return false;
+		return this->abort();
 	}
 
 }; /* class CModulePipelineMaster */

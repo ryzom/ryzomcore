@@ -4,7 +4,17 @@
     <ATOM Name="Description" Value="Pipeline Plugin NeL"/>
     <ARRAY Name="ProcessHandlers">
       <STRUCT>
+        <ATOM Name="Description" Value="Invalid process for testing"/>
+        <ATOM Name="Process" Value="Dummy"/>
+        <ATOM Name="Handler" Value="CProcessDummy"/>
+        <ATOM Name="Info" Value="CProcessDummy"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="Description" Value="Builds interface textures"/>
         <ATOM Name="Process" Value="Interface"/>
+        <ARRAY Name="ProcessDependencies">
+          <ATOM Value="Dummy"/>
+        </ARRAY>
         <ATOM Name="HandlerType" Value="RegisteredClass"/>
         <ATOM Name="Handler" Value="CProcessInterface"/>
         <ATOM Name="Info" Value="CProcessInterfaceInfo"/>
@@ -22,5 +32,15 @@ Sat Mar 03 10:55:24 2012 (Kaetemi) formName Resized = 1
 Sat Mar 03 10:56:08 2012 (Kaetemi) .ProcessHandlers[0].Handler = CProcessInterface
 Sat Mar 03 10:56:08 2012 (Kaetemi) .ProcessHandlers[0].Process = Interface
 Sat Mar 03 11:13:55 2012 (Kaetemi) .ProcessHandlers[0].Info = CProcessInterfaceInfo
-Sat Mar 03 12:10:28 2012 (Kaetemi) .Description = Pipeline Plugin NeL</LOG>
+Sat Mar 03 12:10:28 2012 (Kaetemi) .Description = Pipeline Plugin NeL
+Fri Mar 09 19:48:26 2012 (Kaetemi) .ProcessHandlers[0].Description = Invalid process for testing
+Fri Mar 09 19:48:26 2012 (Kaetemi) .ProcessHandlers[0].Handler = CProcessDummy
+Fri Mar 09 19:48:26 2012 (Kaetemi) .ProcessHandlers[0].Info = CProcessDummy
+Fri Mar 09 19:48:26 2012 (Kaetemi) .ProcessHandlers[0].Process = Dummy
+Fri Mar 09 19:48:26 2012 (Kaetemi) .ProcessHandlers[1].Description = Builds interface textures
+Fri Mar 09 19:48:26 2012 (Kaetemi) Array Insert = 0
+Fri Mar 09 19:48:26 2012 (Kaetemi) formName Deleted = 
+Fri Mar 09 19:48:26 2012 (Kaetemi) formName Resized = 2
+Fri Mar 09 19:48:39 2012 (Kaetemi) .ProcessHandlers[1].ProcessDependencies[0] = Dummy
+Fri Mar 09 19:48:39 2012 (Kaetemi) formName Resized = 1</LOG>
 </FORM>

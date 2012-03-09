@@ -149,7 +149,7 @@ void CPipelineWorkspace::getProcessPlugins(std::vector<CProcessPluginInfo> &resu
 								processPlugin.Id.Sub.Handler = i;
 								resultAppend.push_back(processPlugin);
 
-								nldebug("Found '%s': '%s', '%s'", process.c_str(), processPlugin.Handler.c_str(), processPlugin.Info.c_str());
+								// nldebug("Found '%s': '%s', '%s'", process.c_str(), processPlugin.Handler.c_str(), processPlugin.Info.c_str());
 							}
 							else
 							{

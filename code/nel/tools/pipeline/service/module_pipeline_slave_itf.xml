@@ -22,6 +22,14 @@
 			<method name="reloadSheets" msg="RELOAD_SHEETS">
 			</method>
 
+			<method name="enterBuildReadyState" msg="BRT_ENTER">
+				<doc line=""/>
+			</method>
+
+			<method name="leaveBuildReadyState" msg="BRT_LEAVE">
+				<doc line=""/>
+			</method>
+
 		</module_interface>
 
 	</namespace>

@@ -227,17 +227,18 @@ uint CBuildTaskQueue::countWorkingTasks()
 	return nb;
 }
 
-uint CBuildTaskQueue::countRemainingBuildableTasksAndWorkingTasks()
+void CBuildTaskQueue::countRemainingBuildableTasksAndWorkingTasks(uint &buildable, uint &working)
 {
 	m_Mutex.lock();
 	std::vector<CBuildTaskInfo *> availableTasks;
 	createBuildableTaskList(availableTasks, m_BypassDependencyError);
-	uint nb = availableTasks.size();
+	buildable = availableTasks.size();
+	uint nb = 0;
 	for (std::vector<CBuildTaskInfo *>::iterator it = m_Tasks.begin(), end = m_Tasks.end(); it != end; ++it)
 		if ((*it)->State == TASK_WORKING)
 			++nb;
+	working = nb;
 	m_Mutex.unlock();
-	return nb;
 }
 
 void CBuildTaskQueue::listTaskQueueByMostDependents(std::vector<CBuildTaskInfo *> &result)

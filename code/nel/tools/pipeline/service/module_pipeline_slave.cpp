@@ -146,7 +146,7 @@ public:
 
 		//this->queueModuleTask
 		CModulePipelineMasterProxy master(sender);
-		master.slaveRefusedBuildTask(this, 999999999); // NO MORE TASK ID
+		master.slaveRefusedBuildTask(this); // NO MORE TASK ID
 	}
 
 	virtual void abortBuildTask(NLNET::IModuleProxy *sender)
@@ -171,6 +171,23 @@ public:
 		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_RELOAD_SHEETS);
 		if (PIPELINE::reloadSheets()) m_ReloadSheetsState = REQUEST_WORKING;
 		else m_ReloadSheetsState = REQUEST_MADE;
+	}
+	
+	virtual void enterBuildReadyState(NLNET::IModuleProxy *sender)
+	{
+		if (PIPELINE::tryBuildReady())
+		{
+			m_Master->slaveBuildReadySuccess(this);
+		}
+		else
+		{
+			m_Master->slaveBuildReadyFail(this);
+		}
+	}
+	
+	virtual void leaveBuildReadyState(NLNET::IModuleProxy *sender)
+	{
+		PIPELINE::endedBuildReady();
 	}
 
 	void sendMasterAvailablePlugins()

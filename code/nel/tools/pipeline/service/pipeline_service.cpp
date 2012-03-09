@@ -142,6 +142,8 @@ enum EState
 	STATE_RUNNABLE_TASK, 
 	STATE_BUSY_TEST, 
 	STATE_DIRECT_CODE, 
+	STATE_BUILD_READY, 
+	STATE_BUILD_PROCESS, 
 };
 
 /// Data
@@ -152,6 +154,7 @@ CPipelineProcessImpl *s_PipelineProcessImpl = NULL;
 EState s_State = STATE_IDLE;
 std::string s_StateRunnableTaskName = "";
 CMutex s_StateMutex;
+uint s_BuildReadyRecursive = 0;
 
 std::vector<NLMISC::CLibrary *> s_LoadedLibraries;
 
@@ -256,6 +259,63 @@ bool tryDirectTask(const std::string &stateName)
 void endedDirectTask()
 {
 	endedRunnableTask(STATE_DIRECT_CODE);
+}
+
+bool tryBuildReady()
+{
+	bool result = false;
+	s_StateMutex.enter();
+	result = (s_State == STATE_IDLE)
+		|| (s_State == STATE_BUILD_READY);
+	if (result)
+	{
+		s_State = STATE_BUILD_READY;
+		++s_BuildReadyRecursive;
+	}
+	s_StateMutex.leave();
+	if (!result) return false;
+
+	nlassert(s_State == STATE_BUILD_READY && s_BuildReadyRecursive > 0);
+	
+	return true;
+}
+
+void endedBuildReady()
+{
+	nlassert(s_State == STATE_BUILD_READY && s_BuildReadyRecursive > 0);
+
+	s_StateMutex.enter();
+	--s_BuildReadyRecursive;
+	if (s_BuildReadyRecursive == 0)
+		s_State = STATE_IDLE;
+	s_StateMutex.leave();
+}
+
+bool tryBuildProcess(const std::string &stateName)
+{
+	bool result = false;
+	s_StateMutex.enter();
+	result = (s_State == STATE_BUILD_READY);
+	if (result)
+	{
+		s_State = STATE_BUILD_PROCESS;
+		s_StateRunnableTaskName = stateName;
+	}
+	s_StateMutex.leave();
+	if (!result) return false;
+
+	nlassert(s_State == STATE_BUILD_PROCESS);
+	
+	return true;
+}
+
+void endedBuildProcess()
+{
+	nlassert(s_State == STATE_BUILD_PROCESS);
+
+	s_StateMutex.enter();
+	s_State = STATE_BUILD_READY;
+	s_StateMutex.leave();
 }
 
 // ******************************************************************
@@ -472,14 +532,14 @@ public:
 
 		s_InfoFlags->addFlag("RELEASE");
 
-		NLNET::IModuleManager::releaseInstance();
-
 		while (NLMISC::CAsyncFileManager::getInstance().getNumWaitingTasks() > 0)
 		{
 			nlSleep(10);
 		}
 		NLMISC::CAsyncFileManager::terminate();
-
+		
+		NLNET::IModuleManager::releaseInstance();
+		
 		for (std::vector<NLMISC::CLibrary *>::iterator it = s_LoadedLibraries.begin(), end = s_LoadedLibraries.end(); it != end; ++it)
 		{
 			(*it)->freeLibrary();
@@ -539,6 +599,17 @@ NLMISC_DYNVARIABLE(std::string, pipelineServiceState, "State of the pipeline ser
 				break;
 			case PIPELINE::STATE_BUSY_TEST:
 				*pointer = "BUSY_TEST";
+				break;
+			case PIPELINE::STATE_BUILD_READY:
+				if (PIPELINE::s_BuildReadyRecursive == 1)
+					*pointer = "BUILD_READY (S)";
+				else if (PIPELINE::s_BuildReadyRecursive == 2)
+					*pointer = "BUILD_READY (M)";
+				else
+					*pointer = "BUILD_READY (???)";
+				break;
+			case PIPELINE::STATE_BUILD_PROCESS:
+				*pointer = "BP: " + PIPELINE::s_StateRunnableTaskName;
 				break;
 		}
 	}

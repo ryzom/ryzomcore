@@ -113,7 +113,7 @@ public:
 	uint countRemainingBuildableTasks();
 	uint countWorkingTasks();
 	// when next are 0 the build should stop
-	uint countRemainingBuildableTasksAndWorkingTasks();
+	void countRemainingBuildableTasksAndWorkingTasks(uint &buildable, uint &working);
 
 	// informational listing for sending initial task listing to terminals
 	void listTaskQueueByMostDependents(std::vector<CBuildTaskInfo *> &result);
