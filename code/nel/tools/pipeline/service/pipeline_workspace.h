@@ -94,6 +94,8 @@ public:
 	CPipelineProject *getProject(const std::string &project);
 	bool getProcessPlugin(CProcessPluginInfo &result, uint32 globalId);
 
+	inline const std::map<std::string, CPipelineProject *> &getProjects() { return m_Projects; }
+
 	/// Makes a list of the global id of all available plugins to this service
 	void listAvailablePlugins(std::vector<uint32> &result);
 

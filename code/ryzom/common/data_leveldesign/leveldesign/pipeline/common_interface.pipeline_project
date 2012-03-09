@@ -13,7 +13,7 @@
       </STRUCT>
     </ARRAY>
     <ARRAY Name="Processes">
-      <ATOM Value="CProcessInterface"/>
+      <ATOM Value="Interface"/>
     </ARRAY>
     <STRUCT Name="Interface">
       <ARRAY Name="Atlas">
