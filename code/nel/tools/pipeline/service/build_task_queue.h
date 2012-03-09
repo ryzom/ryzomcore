@@ -54,8 +54,8 @@ struct CBuildTaskId
 	{
 		struct 
 		{
-			uint16 Queue;
 			uint16 Task;
+			uint16 Queue;
 		} Sub;
 		uint32 Global;
 	};

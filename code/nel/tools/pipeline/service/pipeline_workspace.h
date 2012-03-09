@@ -54,8 +54,8 @@ struct CProcessPluginId
 	{
 		struct 
 		{
-			uint16 Plugin;
 			uint16 Handler;
+			uint16 Plugin;
 		} Sub;
 		uint32 Global;
 	};
