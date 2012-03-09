@@ -54,9 +54,10 @@ namespace PIPELINE {
 #define PIPELINE_INFO_MASTER_UPDATE_DATABASE_FOR_SLAVE "M_UPD_DB_FOR_S"
 
 // permanent flags
-#define PIPELINE_INFO_CODE_ERROR_UNMACRO "CODE_ERROR_UNMACRO"
-#define PIPELINE_INFO_SLAVE_REJECTED "SLAVE_REJECT"
-#define PIPELINE_INFO_SLAVE_CRASHED "SLAVE_CRASH"
+#define PIPELINE_INFO_CODE_ERROR_UNMACRO "#CODE_ERROR_UNMACRO"
+#define PIPELINE_INFO_SLAVE_REJECTED "#M_SLAVE_REJECT"
+#define PIPELINE_INFO_SLAVE_CRASHED "#M_SLAVE_CRASH"
+#define PIPELINE_INFO_SLAVE_NOT_READY "#M_SLAVE_NOT_R"
 
 /**
  * \brief CModulePipelineMaster
@@ -77,7 +78,8 @@ class CModulePipelineMaster :
 			ActiveTaskId(0),
 			SheetsOk(true),
 			SaneBehaviour(3),
-			BuildReadyState(0) { }
+			BuildReadyState(0),
+			TimeOutStamp(0) { }
 		CModulePipelineMaster *Master;
 		CModulePipelineSlaveProxy Proxy;
 		std::vector<std::string> Vector;
@@ -86,6 +88,7 @@ class CModulePipelineMaster :
 		std::vector<uint32> PluginsAvailable;
 		sint SaneBehaviour;
 		uint BuildReadyState;
+		uint32 TimeOutStamp;
 		
 		~CSlave()
 		{
@@ -104,7 +107,7 @@ class CModulePipelineMaster :
 
 		bool canAcceptTask()
 		{
-			return SheetsOk && (ActiveTaskId == 0) && SaneBehaviour > 0 && BuildReadyState == 2;
+			return SheetsOk && (ActiveTaskId == 0) && SaneBehaviour > 0 && BuildReadyState == 2 && TimeOutStamp < NLMISC::CTime::getSecondsSince1970();
 		}
 	};
 	
@@ -203,7 +206,7 @@ public:
 			// iterate trough all slaves to tell them the enter build_ready state.
 			for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
 			{
-				if (it->second->BuildReadyState == 0 && it->second->SaneBehaviour > 0 && it->second->SheetsOk)
+				if (it->second->BuildReadyState == 0 && it->second->SaneBehaviour > 0 && it->second->SheetsOk && it->second->TimeOutStamp < NLMISC::CTime::getSecondsSince1970())
 				{
 					it->second->BuildReadyState = 1;
 					it->second->Proxy.enterBuildReadyState(this);
@@ -282,6 +285,7 @@ public:
 		m_BuildTaskQueue.rejectedTask(slave->ActiveTaskId);
 		slave->ActiveTaskId = 0;
 		--slave->SaneBehaviour;
+		slave->TimeOutStamp = NLMISC::CTime::getSecondsSince1970() + 3; // timeout for 3 seconds on this slave
 		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_REJECTED);
 		// TODO
 	}
@@ -312,8 +316,9 @@ public:
 		if (slave == NULL) { nlerror("Received 'slaveBuildReadyFail' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
 		//m_SlavesMutex.unlock();
 		slave->BuildReadyState = 0;
-		--slave->SaneBehaviour;
-		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_REJECTED);
+		// --slave->SaneBehaviour; // allow this behaviour.
+		slave->TimeOutStamp = NLMISC::CTime::getSecondsSince1970() + 3; // timeout for 3 seconds on this slave
+		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_NOT_READY);
 	}
 
 	virtual void vectorPushString(NLNET::IModuleProxy *sender, const std::string &str)
