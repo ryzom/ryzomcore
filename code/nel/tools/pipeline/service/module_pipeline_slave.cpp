@@ -105,6 +105,7 @@ public:
 		}
 	}
 
+	/// This is here instead of inside onModuleUp because we don't know the order of onModuleUp on local systems. This is only called once per master up like onModuleUp.
 	virtual void submitToMaster(NLNET::IModuleProxy *sender)
 	{
 		// TODO: AUTHENTICATE OR GATEWAY SECURITY?
