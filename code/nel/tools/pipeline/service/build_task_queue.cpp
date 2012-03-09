@@ -49,7 +49,7 @@ CBuildTaskQueue::CBuildTaskQueue() : m_QueueId(0)
 
 CBuildTaskQueue::~CBuildTaskQueue()
 {
-	
+	resetQueue();
 }
 
 namespace {
@@ -58,14 +58,15 @@ namespace {
 
 } /* anonymous namespace */
 
-void CBuildTaskQueue::loadQueue(CPipelineWorkspace *workspace)
+void CBuildTaskQueue::loadQueue(CPipelineWorkspace *workspace, bool bypassDependencyError)
 {
 	m_Mutex.lock();
 	nlassert(m_Tasks.empty());
 	
 	++m_QueueId;
+	m_BypassDependencyError = bypassDependencyError;
 	const std::map<std::string, CPipelineProject *> &projects = workspace->getProjects();
-	
+
 	std::map<std::string, std::map<uint32, CBuildTaskInfo *> > builtTaskByProjectAndPlugin;
 	
 	for (std::map<std::string, CPipelineProject *>::const_iterator pr_it = projects.begin(), pr_end = projects.end(); pr_it != pr_end; ++pr_it)
@@ -123,30 +124,94 @@ CBuildTaskInfo *CBuildTaskQueue::getTaskInfo(uint32 taskId)
 	return m_Tasks[id.Sub.Task];
 }
 
-CBuildTaskInfo *CBuildTaskQueue::getTaskForSlave(const std::vector<uint32> &availablePlugins, bool bypassDependencyError)
+CBuildTaskInfo *CBuildTaskQueue::getTaskForSlave(const std::vector<uint32> &availablePlugins)
 {
 	m_Mutex.lock();
-	std::vector<CBuildTaskId> availableTasks;
-	createBuildableTaskList(availableTasks, bypassDependencyError);
+	std::vector<CBuildTaskInfo *> availableTasks;
+	createBuildableTaskList(availableTasks, m_BypassDependencyError);
 	sortBuildableTaskListByMostDependents(availableTasks);
-	for (std::vector<CBuildTaskId>::iterator it = availableTasks.begin(), end = availableTasks.end(); it != end; ++it)
+	for (std::vector<CBuildTaskInfo *>::iterator it = availableTasks.begin(), end = availableTasks.end(); it != end; ++it)
 	{
-		CBuildTaskInfo *task = m_Tasks[(*it).Sub.Task];
+		CBuildTaskInfo *task = (*it);
 		if (find(availablePlugins.begin(), availablePlugins.end(), task->ProcessPluginId) != availablePlugins.end())
 		{
+			task->State = TASK_WORKING;
 			m_Mutex.unlock();
-			return m_Tasks[(*it).Sub.Task];
+			return task;
 		}
 	}
 	m_Mutex.unlock();
 	return NULL; // no task available for slave.
 }
 
-uint CBuildTaskQueue::countRemainingBuildableTasks(bool bypassDependencyError)
+void CBuildTaskQueue::abortedTask(uint32 taskId)
 {
 	m_Mutex.lock();
-	std::vector<CBuildTaskId> availableTasks;
-	createBuildableTaskList(availableTasks, bypassDependencyError);
+	CBuildTaskInfo *info = getTaskInfo(taskId);
+	info->State = TASK_ABORTED;
+	m_Mutex.unlock();
+}
+
+void CBuildTaskQueue::rejectedTask(uint32 taskId)
+{
+	m_Mutex.lock();
+	CBuildTaskInfo *info = getTaskInfo(taskId);
+	info->State = TASK_WAITING; // make available again
+	m_Mutex.unlock();
+}
+
+void CBuildTaskQueue::erroredTask(uint32 taskId)
+{
+	m_Mutex.lock();
+	CBuildTaskInfo *info = getTaskInfo(taskId);
+	info->State = TASK_ERRORED;
+	m_Mutex.unlock();
+}
+
+void CBuildTaskQueue::successTask(uint32 taskId)
+{
+	m_Mutex.lock();
+	CBuildTaskInfo *info = getTaskInfo(taskId);
+	info->State = TASK_SUCCESS;
+	m_Mutex.unlock();
+}
+
+void CBuildTaskQueue::abortQueue()
+{
+	m_Mutex.lock();
+	for (std::vector<CBuildTaskInfo *>::iterator it = m_Tasks.begin(), end = m_Tasks.end(); it != end; ++it)
+	{
+		if ((*it)->State == TASK_WAITING)
+			(*it)->State = TASK_ABORTED;
+	}
+	m_Mutex.unlock();
+}
+
+void CBuildTaskQueue::resetQueue()
+{
+	m_Mutex.lock();
+
+	// count remaining and working first and assert its 0
+	std::vector<CBuildTaskInfo *> availableTasks;
+	createBuildableTaskList(availableTasks, m_BypassDependencyError);
+	uint nb = availableTasks.size();
+	for (std::vector<CBuildTaskInfo *>::iterator it = m_Tasks.begin(), end = m_Tasks.end(); it != end; ++it)
+		if ((*it)->State == TASK_WORKING)
+			++nb;
+	nlassert(nb == 0);
+
+	for (std::vector<CBuildTaskInfo *>::iterator it = m_Tasks.begin(), end = m_Tasks.end(); it != end; ++it)
+		delete (*it);
+	m_Tasks.clear();
+
+	m_Mutex.unlock();
+}
+
+uint CBuildTaskQueue::countRemainingBuildableTasks()
+{
+	m_Mutex.lock();
+	std::vector<CBuildTaskInfo *> availableTasks;
+	createBuildableTaskList(availableTasks, m_BypassDependencyError);
 	m_Mutex.unlock();
 	return availableTasks.size();
 }
@@ -162,17 +227,25 @@ uint CBuildTaskQueue::countWorkingTasks()
 	return nb;
 }
 
-uint CBuildTaskQueue::countRemainingBuildableTasksAndWorkingTasks(bool bypassDependencyError)
+uint CBuildTaskQueue::countRemainingBuildableTasksAndWorkingTasks()
 {
 	m_Mutex.lock();
-	std::vector<CBuildTaskId> availableTasks;
-	createBuildableTaskList(availableTasks, bypassDependencyError);
+	std::vector<CBuildTaskInfo *> availableTasks;
+	createBuildableTaskList(availableTasks, m_BypassDependencyError);
 	uint nb = availableTasks.size();
 	for (std::vector<CBuildTaskInfo *>::iterator it = m_Tasks.begin(), end = m_Tasks.end(); it != end; ++it)
 		if ((*it)->State == TASK_WORKING)
 			++nb;
 	m_Mutex.unlock();
 	return nb;
+}
+
+void CBuildTaskQueue::listTaskQueueByMostDependents(std::vector<CBuildTaskInfo *> &result)
+{
+	result.clear();
+	result.reserve(m_Tasks.size());
+	/*copy(m_Tasks.begin(), m_Tasks.end(), result);
+	sortBuildableTaskListByMostDependents(result);*/
 }
 
 void CBuildTaskQueue::countDependents(uint &dependentResult, CBuildTaskInfo *taskInfo)
@@ -203,7 +276,7 @@ bool CBuildTaskQueue::doesTaskDependOnTask(CBuildTaskInfo *doesThisTask, CBuildT
 	return false;
 }
 
-void CBuildTaskQueue::createBuildableTaskList(std::vector<CBuildTaskId> &result, bool bypassError)
+void CBuildTaskQueue::createBuildableTaskList(std::vector<CBuildTaskInfo *> &result, bool bypassError)
 {
 	// makes a list of tasks where all dependencies are ready
 	result.clear();
@@ -219,7 +292,7 @@ void CBuildTaskQueue::createBuildableTaskList(std::vector<CBuildTaskId> &result,
 				if (((dependencyState == TASK_ERRORED) && !bypassError)
 					|| dependencyState == TASK_WAITING
 					|| dependencyState == TASK_WORKING
-					|| dependencyState == TASK_ABORTED)
+					|| (dependencyState == TASK_ABORTED && !bypassError))
 				{
 					ok = false;
 					break;
@@ -227,20 +300,20 @@ void CBuildTaskQueue::createBuildableTaskList(std::vector<CBuildTaskId> &result,
 			}
 			if (ok)
 			{
-				result.push_back((*it)->Id);
+				result.push_back((*it));
 			}
 		}
 	}
 	// sortBuildableTaskListByMostDependents(result);
 }
 
-void CBuildTaskQueue::sortBuildableTaskListByMostDependents(std::vector<CBuildTaskId> &result)
+void CBuildTaskQueue::sortBuildableTaskListByMostDependents(std::vector<CBuildTaskInfo *> &result)
 {
 	// brings most urgent tasks on top
 	std::vector<uint> dependentsCache;
 	dependentsCache.resize(result.size());
 	for (std::vector<uint>::size_type i = 0; i < dependentsCache.size(); ++i)
-		countDependents(dependentsCache[i], m_Tasks[result[i].Sub.Task]);
+		countDependents(dependentsCache[i], result[i]);
 	uint sc;
 	do
 	{

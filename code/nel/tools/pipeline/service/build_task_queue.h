@@ -91,23 +91,35 @@ protected:
 	boost::mutex m_Mutex;
 
 	std::vector<CBuildTaskInfo *> m_Tasks;
+	bool m_BypassDependencyError;
 
 public:
 	CBuildTaskQueue();
 	virtual ~CBuildTaskQueue();
 	
-	void loadQueue(CPipelineWorkspace *workspace);
+	void loadQueue(CPipelineWorkspace *workspace, bool bypassDependencyError);
 	CBuildTaskInfo *getTaskInfo(uint32 taskId);
 	
-	CBuildTaskInfo *getTaskForSlave(const std::vector<uint32> &availablePlugins, bool bypassDependencyError);
+	/// Gets task for slave, state is set to TASK_WORKING, returns NULL if none available
+	CBuildTaskInfo *getTaskForSlave(const std::vector<uint32> &availablePlugins);
+	void abortedTask(uint32 taskId);
+	void rejectedTask(uint32 taskId);
+	void erroredTask(uint32 taskId);
+	void successTask(uint32 taskId);
 
-	uint countRemainingBuildableTasks(bool bypassDependencyError);
+	void abortQueue();
+	void resetQueue();
+
+	uint countRemainingBuildableTasks();
 	uint countWorkingTasks();
 	// when next are 0 the build should stop
-	uint countRemainingBuildableTasksAndWorkingTasks(bool bypassDependencyError);
+	uint countRemainingBuildableTasksAndWorkingTasks();
+
+	// informational listing for sending initial task listing to terminals
+	void listTaskQueueByMostDependents(std::vector<CBuildTaskInfo *> &result);
 	
 private:
-	void countDependencies(uint &waitingResult, uint &failAbortResult, CBuildTaskInfo *taskInfo);
+	// void countDependencies(uint &waitingResult, uint &failAbortResult, CBuildTaskInfo *taskInfo);
 	
 	/// Recursively count the number of tasks that depend on this task.
 	void countDependents(uint &dependentResult, CBuildTaskInfo *taskInfo);
@@ -115,8 +127,8 @@ private:
 	
 	bool doesTaskDependOnTask(CBuildTaskInfo *doesThisTask, CBuildTaskInfo *dependOnThisTask);
 	
-	void createBuildableTaskList(std::vector<CBuildTaskId> &result, bool bypassError);
-	void sortBuildableTaskListByMostDependents(std::vector<CBuildTaskId> &result);
+	void createBuildableTaskList(std::vector<CBuildTaskInfo *> &result, bool bypassError);
+	void sortBuildableTaskListByMostDependents(std::vector<CBuildTaskInfo *> &result);
 
 }; /* class CBuildTaskQueue */
 
