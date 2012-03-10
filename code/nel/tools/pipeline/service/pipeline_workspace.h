@@ -83,7 +83,7 @@ class CPipelineWorkspace
 protected:
 	NLGEORGES::UFormLoader *m_FormLoader;
 	NLMISC::CRefPtr<NLGEORGES::UForm> m_Form;
-	std::vector<NLMISC::CRefPtr<NLGEORGES::UForm> > m_Plugins;
+	std::vector<NLMISC::CRefPtr<NLGEORGES::UForm> > m_Plugins; // TODO: CRC32 VERIFICATION ON PLUGINS SHEETS!
 	std::map<std::string, CPipelineProject *> m_Projects;
 	uint32 m_ChangedReference;
 	uint32 m_FileSizeReference;

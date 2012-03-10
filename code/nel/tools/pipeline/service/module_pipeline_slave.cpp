@@ -48,6 +48,7 @@ using namespace NLNET;
 namespace PIPELINE {
 
 #define PIPELINE_INFO_SLAVE_RELOAD_SHEETS "SLAVE_RELOAD_SHEETS"
+#define PIPELINE_ERROR_SHEETS_CRC32_FAILED "Failed sheets CRC32. Sheets were modified inbetween launching services. This causes newly loaded services to be out of sync. Not allowed. Reload the sheets from the master service, and restart this slave service"
 
 enum TRequestState
 {
@@ -111,7 +112,7 @@ public:
 		// TODO: AUTHENTICATE OR GATEWAY SECURITY?
 		CModulePipelineMasterProxy master(sender);
 		if (!g_PipelineWorkspace->loadCRC32())
-			nlerror("Failed sheets CRC32. Sheets were modified inbetween launching services. This causes newly loaded services to be out of sync. Not allowed");
+			nlerror(PIPELINE_ERROR_SHEETS_CRC32_FAILED);
 		sendMasterAvailablePlugins(&master);
 	}
 	
@@ -147,7 +148,7 @@ public:
 			{
 				m_ReloadSheetsState = REQUEST_NONE;
 				if (!g_PipelineWorkspace->loadCRC32())
-					nlerror("Failed sheets CRC32. Sheets were modified inbetween launching services. This causes newly loaded services to be out of sync. Not allowed");
+					nlerror(PIPELINE_ERROR_SHEETS_CRC32_FAILED);
 				sendMasterAvailablePlugins(m_Master);
 				m_Master->slaveReloadedSheets(this);
 				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_SLAVE_RELOAD_SHEETS);
