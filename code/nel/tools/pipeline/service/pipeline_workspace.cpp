@@ -39,6 +39,7 @@
 #include "pipeline_project.h"
 #include "pipeline_service.h"
 #include "pipeline_interface_impl.h"
+#include "database_status.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -46,8 +47,14 @@ using namespace NLGEORGES;
 
 namespace PIPELINE {
 
-CPipelineWorkspace::CPipelineWorkspace(NLGEORGES::UFormLoader *formLoader, const std::string &sheetName) : m_FormLoader(formLoader)
+CPipelineWorkspace::CPipelineWorkspace(NLGEORGES::UFormLoader *formLoader, const std::string &sheetName) : m_FormLoader(formLoader), m_ChangedReference(0), m_FileSizeReference(0), m_CRC32(0)
 {
+	std::string fullSheetPath = NLMISC::CPath::lookup(sheetName);
+	{
+		m_ChangedReference = NLMISC::CFile::getFileModificationDate(fullSheetPath);
+		m_FileSizeReference = NLMISC::CFile::getFileSize(fullSheetPath);
+	}
+
 	m_Form = formLoader->loadForm(sheetName.c_str());
 	std::string description;
 	m_Form->getRootNode().getValueByName(description, "Description");
@@ -91,7 +98,17 @@ CPipelineWorkspace::CPipelineWorkspace(NLGEORGES::UFormLoader *formLoader, const
 				{
 					std::string projectName = NLMISC::CFile::getFilenameWithoutExtension(projectSheet);
 					if (m_Projects.find(projectName) == m_Projects.end())
-						m_Projects[projectName] = new CPipelineProject(this, formLoader->loadForm(projectSheet.c_str()));
+					{
+						std::string fullProjectSheetPath = NLMISC::CPath::lookup(projectSheet);
+						uint32 changedReference = NLMISC::CFile::getFileModificationDate(fullProjectSheetPath);
+						uint32 fileSizeReference = NLMISC::CFile::getFileSize(fullProjectSheetPath);
+						CPipelineProject *project = new CPipelineProject(this, formLoader->loadForm(projectSheet.c_str()));
+						m_Projects[projectName] = project;
+						nlassert(changedReference == NLMISC::CFile::getFileModificationDate(fullProjectSheetPath));
+						nlassert(fileSizeReference == NLMISC::CFile::getFileSize(fullProjectSheetPath));
+						project->m_ChangedReference = changedReference;
+						project->m_FileSizeReference = fileSizeReference;
+					}
 					else
 						nlwarning("Project '%s' in '%s' already", projectSheet.c_str(), m_Form->getFilename().c_str());
 				}
@@ -105,6 +122,11 @@ CPipelineWorkspace::CPipelineWorkspace(NLGEORGES::UFormLoader *formLoader, const
 		{
 			nlwarning("Missing 'Projects' in '%s'", m_Form->getFilename().c_str());
 		}
+	}
+
+	{
+		nlassert(m_ChangedReference == NLMISC::CFile::getFileModificationDate(fullSheetPath));
+		nlassert(m_FileSizeReference == NLMISC::CFile::getFileSize(fullSheetPath));
 	}
 }
 
@@ -333,6 +355,54 @@ CPipelineProject *CPipelineWorkspace::getProject(const std::string &project)
 		return NULL;
 	}
 	return it->second;
+}
+
+bool CPipelineWorkspace::loadCRC32()
+{
+	bool ok = true;
+	{
+		std::string sheetPath = NLMISC::CPath::lookup(m_Form->getFilename());
+		CFileStatus fileStatus;
+		if (g_DatabaseStatus->getFileStatus(fileStatus, sheetPath)
+			&& fileStatus.LastChangedReference == m_ChangedReference
+			&& fileStatus.LastFileSizeReference == m_FileSizeReference)
+		{
+			m_CRC32 = fileStatus.CRC32;
+		}
+		else
+		{
+			nlwarning("Workspace sheet '%s' not synchronized", sheetPath.c_str());
+			ok = false;
+		}
+	}
+	for (std::map<std::string, CPipelineProject *>::iterator it = m_Projects.begin(), end = m_Projects.end(); it != end; ++it)
+	{
+		CPipelineProject *project = it->second;
+		{
+			std::string sheetPath = NLMISC::CPath::lookup(project->m_Form->getFilename());
+			CFileStatus fileStatus;
+			if (g_DatabaseStatus->getFileStatus(fileStatus, sheetPath)
+				&& fileStatus.LastChangedReference == project->m_ChangedReference
+				&& fileStatus.LastFileSizeReference == project->m_FileSizeReference)
+			{
+				project->m_CRC32 = fileStatus.CRC32;
+			}
+			else
+			{
+				nlwarning("Workspace sheet '%s' not synchronized", sheetPath.c_str());
+				ok = false;
+			}
+		}
+	}
+	if (!ok)
+	{
+		nlwarning("Workspace not synchronized");
+	}
+	else
+	{
+		nldebug("Workspace CRC32 synchronized");
+	}
+	return ok;
 }
 
 } /* namespace PIPELINE */

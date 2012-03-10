@@ -354,8 +354,10 @@ namespace {
 
 void initSheets()
 {
-	std::string dfnDirectory = IService::getInstance()->ConfigFile.getVar("WorkspaceDfnDirectory").asString();
-	std::string sheetDirectory = IService::getInstance()->ConfigFile.getVar("WorkspaceSheetDirectory").asString();
+	std::string dfnDirectory = CPath::standardizePath(IService::getInstance()->ConfigFile.getVar("WorkspaceDfnDirectory").asString(), true);
+	IService::getInstance()->ConfigFile.getVar("WorkspaceDfnDirectory").setAsString(dfnDirectory);
+	std::string sheetDirectory = CPath::standardizePath(IService::getInstance()->ConfigFile.getVar("WorkspaceSheetDirectory").asString(), true);
+	IService::getInstance()->ConfigFile.getVar("WorkspaceSheetDirectory").setAsString(sheetDirectory);
 	
 	if (!CFile::isDirectory(dfnDirectory)) nlerror("'WorkspaceDfnDirectory' does not exist! (%s)", dfnDirectory.c_str());
 	nlinfo("Adding 'WorkspaceDfnDirectory' to search path (%s)", dfnDirectory.c_str());

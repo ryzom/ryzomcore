@@ -48,10 +48,15 @@ namespace PIPELINE {
  */
 class CPipelineProject
 {
+	friend class PIPELINE::CPipelineWorkspace;
+
 protected:
 	CPipelineWorkspace *m_Workspace;
 	NLMISC::CRefPtr<NLGEORGES::UForm> m_Form;
 	std::string m_TempDirectory;
+	uint32 m_ChangedReference;
+	uint32 m_FileSizeReference;
+	uint32 m_CRC32;
 
 public:
 	CPipelineProject(CPipelineWorkspace *workspace, NLGEORGES::UForm *form);

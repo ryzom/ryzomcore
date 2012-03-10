@@ -78,13 +78,16 @@ struct CProcessPluginInfo
  */
 class CPipelineWorkspace
 {
-	friend class CPipelineProject;
+	friend class PIPELINE::CPipelineProject;
 
 protected:
 	NLGEORGES::UFormLoader *m_FormLoader;
 	NLMISC::CRefPtr<NLGEORGES::UForm> m_Form;
 	std::vector<NLMISC::CRefPtr<NLGEORGES::UForm> > m_Plugins;
 	std::map<std::string, CPipelineProject *> m_Projects;
+	uint32 m_ChangedReference;
+	uint32 m_FileSizeReference;
+	uint32 m_CRC32;
 
 public:
 	CPipelineWorkspace(NLGEORGES::UFormLoader *formLoader, const std::string &sheetName);
@@ -99,6 +102,9 @@ public:
 
 	/// Makes a list of the global id of all available plugins to this service
 	void listAvailablePlugins(std::vector<uint32> &result);
+
+	/// Loads the CRC32 of the sheets, false if something out of sync
+	bool loadCRC32();
 
 }; /* class CPipelineWorkspace */
 

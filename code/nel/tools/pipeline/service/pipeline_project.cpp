@@ -47,7 +47,7 @@ using namespace std;
 
 namespace PIPELINE {
 
-CPipelineProject::CPipelineProject(CPipelineWorkspace *workspace, NLGEORGES::UForm *form) : m_Workspace(workspace), m_Form(form)
+CPipelineProject::CPipelineProject(CPipelineWorkspace *workspace, NLGEORGES::UForm *form) : m_Workspace(workspace), m_Form(form), m_ChangedReference(0), m_FileSizeReference(0), m_CRC32(0)
 {
 	
 }

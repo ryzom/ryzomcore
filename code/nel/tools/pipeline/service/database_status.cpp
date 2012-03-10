@@ -63,6 +63,23 @@ bool isInRootDirectoryFast(std::string &rootDirectoryName, std::string &rootDire
 	return false;
 }
 
+bool isInSheetsDirectoryFast(std::string &sheetDirectoryName, std::string &sheetDirectoryPath, const std::string &path)
+{
+	{
+		sheetDirectoryName = "WorkspaceDfnDirectory";
+		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(sheetDirectoryName);
+		sheetDirectoryPath = CPath::standardizePath(dir.asString(), true);
+		if (path.find(sheetDirectoryPath) == 0) return true;
+	}
+	{
+		sheetDirectoryName = "WorkspaceSheetDirectory";
+		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(sheetDirectoryName);
+		sheetDirectoryPath = CPath::standardizePath(dir.asString(), true);
+		if (path.find(sheetDirectoryPath) == 0) return true;
+	}
+	return false;
+}
+
 /// Input must be normalized path
 bool isInWorkspaceDirectoryFast(const std::string &path)
 {
@@ -73,6 +90,12 @@ bool isInWorkspaceDirectoryFast(const std::string &path)
 std::string dropRootDirectoryFast(const std::string &path, const std::string &rootDirectoryPath)
 {
 	return path.substr(rootDirectoryPath.length());
+}
+
+/// Input must be normalized path in sheets directory
+std::string dropSheetDirectoryFast(const std::string &path, const std::string &sheetDirectoryPath)
+{
+	return path.substr(sheetDirectoryPath.length());
 }
 
 /// Input must be normalized path in pipeline directory
@@ -99,15 +122,23 @@ std::string getMetaFilePath(const std::string &path, const std::string &dotSuffi
 	{
 		std::string rootDirectoryName;
 		std::string rootDirectoryPath;
-		if (isInRootDirectoryFast(rootDirectoryName, rootDirectoryPath, stdPath))
+		if (isInSheetsDirectoryFast(rootDirectoryName, rootDirectoryPath, stdPath))
 		{
-			std::string relPath = dropRootDirectoryFast(stdPath, rootDirectoryPath);
-			return g_WorkDir + PIPELINE_DIRECTORY_PREFIX_ROOT + NLMISC::toLower(rootDirectoryName) + PIPELINE_DATABASE_META_SUFFIX + "/" + relPath + dotSuffix;
+			std::string relPath = dropSheetDirectoryFast(stdPath, rootDirectoryPath);
+			return g_WorkDir + PIPELINE_DIRECTORY_PREFIX_SHEET + NLMISC::toLower(rootDirectoryName) + PIPELINE_DATABASE_META_SUFFIX + "/" + relPath + dotSuffix;
 		}
 		else
 		{
-			nlerror("Path is not in database or pipeline (%s)", path.c_str());
-			return path + dotSuffix;
+			if (isInRootDirectoryFast(rootDirectoryName, rootDirectoryPath, stdPath))
+			{
+				std::string relPath = dropRootDirectoryFast(stdPath, rootDirectoryPath);
+				return g_WorkDir + PIPELINE_DIRECTORY_PREFIX_ROOT + NLMISC::toLower(rootDirectoryName) + PIPELINE_DATABASE_META_SUFFIX + "/" + relPath + dotSuffix;
+			}
+			else
+			{
+				nlerror("Path is not in database or pipeline (%s)", path.c_str());
+				return path + dotSuffix;
+			}
 		}
 	}
 }

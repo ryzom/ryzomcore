@@ -59,6 +59,8 @@ extern std::string g_WorkDir;
 #define PIPELINE_DIRECTORY_UNKNOWN_PREFIX "unknown."
 #define PIPELINE_DIRECTORY_PREFIX_PROJECT "project."
 #define PIPELINE_DIRECTORY_PREFIX_ROOT "root."
+#define PIPELINE_DIRECTORY_PREFIX_SHEET "pipeline."
+
 #define PIPELINE_DIRECTORY_TEMP_SUFFIX ".temp"
 
 /// Unmacros a path, and standardizes it as well.

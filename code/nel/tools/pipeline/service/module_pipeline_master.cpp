@@ -34,6 +34,7 @@
 
 // NeL includes
 #include <nel/misc/debug.h>
+#include <nel/net/service.h>
 
 // Project includes
 #include "info_flags.h"
@@ -148,7 +149,28 @@ public:
 	{
 		CModuleBase::initModule(initInfo);
 		CModulePipelineMasterSkel::init(this);
+		if (PIPELINE::tryDirectTask("MASTER_INIT_SHEETS"))
+		{
+			updateSheetsDatabaseStatus(CCallback<void>(this, &CModulePipelineMaster::cbMasterInitSheets));
+		}
+		else
+		{
+			nlerror("Cannot initialize master, the service is busy. This should never happen");
+		}
 		return true;
+	}
+
+	void updateSheetsDatabaseStatus(const CCallback<void> &callback)
+	{
+		std::vector<std::string> sheetPaths;
+		// sheetPaths.push_back(NLNET::IService::getInstance()->ConfigFile.getVar("WorkspaceDfnDirectory").asString()); // not really necessary to check the dfn's
+		sheetPaths.push_back(NLNET::IService::getInstance()->ConfigFile.getVar("WorkspaceSheetDirectory").asString());
+		g_DatabaseStatus->updateDatabaseStatus(callback, sheetPaths, false, true);
+	}
+
+	void cbMasterInitSheets()
+	{
+		PIPELINE::endedDirectTask();
 	}
 
 	virtual void onModuleUp(IModuleProxy *moduleProxy)
@@ -418,20 +440,7 @@ protected:
 
 		if (PIPELINE::tryDirectTask("MASTER_RELOAD_SHEETS"))
 		{
-			m_SlavesMutex.lock();
-			
-			for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
-			{
-				CSlave *slave = it->second;
-				slave->SheetsOk = false;
-				slave->PluginsAvailable.clear();
-				slave->Proxy.reloadSheets(this);
-				CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_MASTER_RELOAD_SHEETS);
-			}
-			
-			m_SlavesMutex.unlock();
-
-			PIPELINE::endedDirectTask();
+			updateSheetsDatabaseStatus(CCallback<void>(this, &CModulePipelineMaster::cbMasterSheetReloadUpdate));
 
 			return true;
 		}
@@ -440,6 +449,24 @@ protected:
 			log.displayNL("Busy");
 			return false;
 		}
+	}
+	
+	void cbMasterSheetReloadUpdate()
+	{
+		m_SlavesMutex.lock();
+			
+		for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
+		{
+			CSlave *slave = it->second;
+			slave->SheetsOk = false;
+			slave->PluginsAvailable.clear();
+			slave->Proxy.reloadSheets(this);
+			CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_MASTER_RELOAD_SHEETS);
+		}
+		
+		m_SlavesMutex.unlock();
+
+		PIPELINE::endedDirectTask();
 	}
 
 	NLMISC_CLASS_COMMAND_DECL(build)

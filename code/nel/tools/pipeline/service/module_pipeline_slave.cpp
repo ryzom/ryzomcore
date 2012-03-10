@@ -110,6 +110,8 @@ public:
 	{
 		// TODO: AUTHENTICATE OR GATEWAY SECURITY?
 		CModulePipelineMasterProxy master(sender);
+		if (!g_PipelineWorkspace->loadCRC32())
+			nlerror("Failed sheets CRC32. Sheets were modified inbetween launching services. This causes newly loaded services to be out of sync. Not allowed");
 		sendMasterAvailablePlugins(&master);
 	}
 	
@@ -144,6 +146,8 @@ public:
 			if (PIPELINE::isServiceStateIdle())
 			{
 				m_ReloadSheetsState = REQUEST_NONE;
+				if (!g_PipelineWorkspace->loadCRC32())
+					nlerror("Failed sheets CRC32. Sheets were modified inbetween launching services. This causes newly loaded services to be out of sync. Not allowed");
 				sendMasterAvailablePlugins(m_Master);
 				m_Master->slaveReloadedSheets(this);
 				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_SLAVE_RELOAD_SHEETS);
