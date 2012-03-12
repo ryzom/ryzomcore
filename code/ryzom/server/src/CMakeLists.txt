@@ -34,7 +34,7 @@ ADD_SUBDIRECTORY(patchman_service)
 #ADD_SUBDIRECTORY(ags_test)
 #ADD_SUBDIRECTORY(ai_data_service)
 #ADD_SUBDIRECTORY(entity_view_service)
-#ADD_SUBDIRECTORY(general_utilities_service)
+ADD_SUBDIRECTORY(general_utilities_service)
 
 # Not sure, no longer used maybe?
 #sabrina
