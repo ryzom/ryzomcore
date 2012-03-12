@@ -128,6 +128,11 @@ QSettings *MainWindow::settings() const
 	return m_settings;
 }
 
+QUndoGroup *MainWindow::undoGroup() const
+{
+	return m_undoGroup;
+}
+
 ExtensionSystem::IPluginManager *MainWindow::pluginManager() const
 {
 	return m_pluginManager;
@@ -135,12 +140,16 @@ ExtensionSystem::IPluginManager *MainWindow::pluginManager() const
 
 void MainWindow::addContextObject(IContext *context)
 {
-	m_undoGroup->addStack(context->undoStack());
+	QUndoStack *stack = context->undoStack();
+	if (stack)
+		m_undoGroup->addStack(stack);
 }
 
 void MainWindow::removeContextObject(IContext *context)
 {
-	m_undoGroup->removeStack(context->undoStack());
+	QUndoStack *stack = context->undoStack();
+	if (stack)
+		m_undoGroup->removeStack(stack);
 }
 
 void MainWindow::open()

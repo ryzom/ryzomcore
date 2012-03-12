@@ -52,6 +52,7 @@ public:
 	MenuManager *menuManager() const;
 	ContextManager *contextManager() const;
 	QSettings *settings() const;
+	QUndoGroup *undoGroup() const;
 
 	ExtensionSystem::IPluginManager *pluginManager() const;
 
@@ -62,6 +63,7 @@ public Q_SLOTS:
 	bool showOptionsDialog(const QString &group = QString(),
 						   const QString &page = QString(),
 						   QWidget *parent = 0);
+	void updateContext(Core::IContext *context);
 
 private Q_SLOTS:
 	void open();
@@ -77,7 +79,6 @@ private Q_SLOTS:
 	void gotoPos();
 	void setFullScreen(bool enabled);
 	void about();
-	void updateContext(Core::IContext *context);
 
 protected:
 	virtual void closeEvent(QCloseEvent *event);
