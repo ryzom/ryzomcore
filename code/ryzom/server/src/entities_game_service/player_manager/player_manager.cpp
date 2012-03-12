@@ -2357,7 +2357,7 @@ void CPlayerManager::broadcastMessageUpdate()
 		msg= msg.replace("$seconds$",secondsStr.c_str());
 		msg= msg.replace("$minutes$",minutesStr.c_str());
 		msg= msg.replace("$hours$",hoursStr.c_str());
-		nlinfo("braodcasting message: %s",msg.c_str());
+		nlinfo("broadcasting message: %s",msg.c_str());
 
 		SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
 		params[0].Literal.fromUtf8(msg);

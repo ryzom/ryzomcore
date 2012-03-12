@@ -231,7 +231,8 @@ public:
 			{
 
 				static const string NAME("name");
-				if (rep.Format != NAME)
+				CSString format = rep.Format;
+				if (format.left(4) != NAME)
 				{
 					// can't replace this parameter, write a del char
 					const static string s("\010");
@@ -270,7 +271,8 @@ public:
 			if (playerInfo != 0)
 			{
 				static const string NAME("name");
-				if (rep.Format != NAME)
+				CSString format = rep.Format;
+				if (format.left(4) != NAME)
 				{
 					// can't replace this parameter, write a del char
 					const static string s("\010");

@@ -1083,25 +1083,33 @@ CSmartPtr<const AIVM::CByteCode> CCompiler::compileCode (const std::vector<std::
 	FOREACHC(itArg, TList, sourceCodeLines)
 	{
 		const string &str=*itArg;
-		size_t firstIndex=str.find_first_of("/",0);
-		while (firstIndex!=string::npos)
-		{
-			firstIndex++;
-			if (firstIndex>=str.size())
+		size_t index = str.find("//",0);
+		if (index == string::npos)
+			code += str;
+		else {
+			// We have a potential comment. Now check if it is quoted or not
+			bool inQuote = false;
+			uint i = 0;
+			for (;;)
 			{
-				firstIndex=string::npos;
-				break;
-			}
+				if ('"' == str[i])
+					inQuote = !inQuote;
 
-			if (str.at(firstIndex)=='/')
-			{
-				code+=str.substr(0, firstIndex-1);
-				break;
+				if ( !inQuote && ('/' == str[i]) )
+				{
+					++i;
+					if ('/' == str[i])
+						break;
+
+					code += '/';
+				}
+				code += str[i];
+				++i;
+				if (str.size() == i)
+					break;
 			}
-			firstIndex=str.find_first_of("/",firstIndex);
 		}
-		if (firstIndex==string::npos)
-			code+=str;
+
 		code+="\n "; // additional ..
 	}
 	code+="}";

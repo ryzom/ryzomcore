@@ -290,6 +290,11 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 			}
 			
 			botPet->setSheet(sheet);
+
+			if (!CustomName.empty())
+			{
+				botPet->setCustomName(CustomName);
+			}
 			
 			if (!botPet->spawn())
 			{
@@ -314,7 +319,7 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 #endif
 				return;
 			}
-			
+
 			botPet->getSpawn()->setAIProfile(new CAIPetProfileStand(botPet->getSpawn()));
 			
 			confirmMsg.PetMirrorRow = botPet->getSpawn()->dataSetRow();

@@ -248,6 +248,23 @@ bool CDynChatEGS::removeSession(TChanID chan,const TDataSetRow &client)
 	return true;
 }
 
+//============================================================================================================
+bool CDynChatEGS::getPlayersInChan(TChanID chanID, std::vector<NLMISC::CEntityId> &players)
+{
+	CDynChatChan *chan = _DynChat.getChan(chanID);
+	if (!chan) return false;	
+		
+	CDynChatSession *currSession = chan->getFirstSession();
+	bool havePlayers = false;
+	while (currSession)
+	{
+		players.push_back(TheDataset.getEntityId(currSession->getClient()->getID()));
+		havePlayers = true;
+		currSession = currSession->getNextChannelSession();
+	}
+	return havePlayers;
+}
+
 
 //============================================================================================================
 void CDynChatEGS::iosSetHistoricSize(TChanID chan, uint32 size)

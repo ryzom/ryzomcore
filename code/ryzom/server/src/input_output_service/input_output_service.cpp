@@ -495,8 +495,8 @@ void CInputOutputService::scanMirrorChanges()
 		if (entityId.getType() == RYZOMID::player)
 		{
 			// init event faction ID in mirror
-			CMirrorPropValue<TYPE_EVENT_FACTION_ID> propEventFactionId( TheDataset, entityIndex, DSPropertyEVENT_FACTION_ID );
-			propEventFactionId = 0;
+			//CMirrorPropValue<TYPE_EVENT_FACTION_ID> propEventFactionId( TheDataset, entityIndex, DSPropertyEVENT_FACTION_ID );
+			//propEventFactionId = 0;
 		}
 
 		entityIndex = DataSet->getNextAddedEntity();
@@ -620,7 +620,7 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 			if( itInfos == _NameToInfos.end() )
 			{
 				// New name does not exist
-				charInfos->ShortName = ucstring(name);
+				charInfos->ShortName.fromUtf8(name);
 			}
 
 			// Save the old name only if new name is not found (and the player is getting original name back)

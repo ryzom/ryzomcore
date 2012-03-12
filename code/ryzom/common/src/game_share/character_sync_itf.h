@@ -1108,9 +1108,7 @@ namespace CHARSYNC
 
 		void setResult(TCharacterNameResult value)
 		{
-
 				_Result = value;
-
 		}
 			//
 		uint32 getUserId() const
@@ -1120,9 +1118,7 @@ namespace CHARSYNC
 
 		void setUserId(uint32 value)
 		{
-
 				_UserId = value;
-
 		}
 			//
 		uint8 getCharIndex() const
@@ -1132,9 +1128,7 @@ namespace CHARSYNC
 
 		void setCharIndex(uint8 value)
 		{
-
 				_CharIndex = value;
-
 		}
 			//
 		const ucstring& getFullName() const
@@ -1144,9 +1138,7 @@ namespace CHARSYNC
 
 		void setFullName(const ucstring &value)
 		{
-
 				_FullName = value;
-
 		}
 
 		bool operator == (const CValidateNameResult &other) const
@@ -1161,7 +1153,6 @@ namespace CHARSYNC
 		// constructor
 		CValidateNameResult()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
@@ -1170,7 +1161,6 @@ namespace CHARSYNC
 			s.serial(_UserId);
 			s.serial(_CharIndex);
 			s.serial(_FullName);
-
 		}
 
 

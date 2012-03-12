@@ -582,6 +582,8 @@ namespace ENTITYLOC
 
 		void _charConnected(NLNET::IModuleProxy *sender, uint32 charId, uint32 lastDisconnectionDate, uint32 shardId)
 		{
+			uint32 lastConnectionDate = CTime::getSecondsSince1970();
+
 			TCharMap::iterator it(_ConnectedChars.find(charId));
 			if (it != _ConnectedChars.end())
 			{
@@ -605,7 +607,7 @@ namespace ENTITYLOC
 					ci.CharName = toLower(fullName);
 
 					// update the last played date
-					character->setLastPlayedDate(CTime::getSecondsSince1970());
+					character->setLastPlayedDate(lastConnectionDate);
 					character->update(_RingDB);
 				}
 
@@ -634,6 +636,7 @@ namespace ENTITYLOC
 			cce.setCharId(charId);
 			cce.setConnection(true);
 			cce.setPrivilege(privilege);
+			cce.setlastConnectionDate(lastConnectionDate);
 			connections.push_back(cce);
 
 			CEntityLocatorClientProxy::broadcast_connectionEvents(_ClientTracker.getTrackedModules().begin(), _ClientTracker.getTrackedModules().end(),
@@ -658,7 +661,7 @@ namespace ENTITYLOC
 			if (character !=NULL)
 			{
 				// update the last played date
-				character->setLastPlayedDate(CTime::getSecondsSince1970());
+				character->setLastPlayedDate(0);
 				character->update(_RingDB);
 			}
 

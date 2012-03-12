@@ -29,7 +29,7 @@
 #	include <maxscript/foundation/mxstime.h>
 #	include <maxscript/maxwrapper/mxsobjects.h>
 #	include <maxscript/compiler/parser.h>
-#	include <maxscript/foundation/functions.h>
+#	include <maxscript/macros/define_instantiation_functions.h>
 #else
 #	include <MaxScrpt/MAXScrpt.h>
 #	include <MaxScrpt/3dmath.h>

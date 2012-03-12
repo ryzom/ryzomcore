@@ -230,7 +230,6 @@ void cbClientGroupAbandonMission( NLNET::CMessage& msgin, const std::string &ser
 	if (index < MaxGroupMissionCount)
 	{
 		// Team
-
 		CTeam * team = TeamManager.getRealTeam( user->getTeamId() );
 		if ( !team )
 		{
@@ -249,11 +248,10 @@ void cbClientGroupAbandonMission( NLNET::CMessage& msgin, const std::string &ser
 							userId.toString().c_str(), index, team->getMissions().size());
 			return;
 		}
-		
 
 		CMissionTeam* mission = team->getMissions()[index];
 		nlassert(mission);
-		
+
 		if ( mission->getFinished() == false )
 		{
 			CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( mission->getTemplateId() );
@@ -271,7 +269,7 @@ void cbClientGroupAbandonMission( NLNET::CMessage& msgin, const std::string &ser
 			}
 			set<CEntityId> excluded;
 			excluded.insert( userId );
-			
+
 			team->sendDynamicMessageToMembers( "ABANDON_GROUP_MISSION",TVectorParamCheck(), excluded );
 		}
 		team->removeMission( index, mr_abandon );
@@ -300,7 +298,6 @@ void cbClientGroupAbandonMission( NLNET::CMessage& msgin, const std::string &ser
 				userId.toString().c_str(), index, guild->getMissions().size());
 			return;
 		}
-
 
 		CMissionGuild* mission = guild->getMissions()[index];
 		nlassert(mission);

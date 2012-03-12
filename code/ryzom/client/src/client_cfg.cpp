@@ -1347,6 +1347,7 @@ void CClientConfig::setValues()
 				if (stricmp(mode, "over") == 0)	p.Mode = SSysInfoParam::Over;
 				else if (stricmp(mode, "overonly") == 0) p.Mode = SSysInfoParam::OverOnly;
 				else if (stricmp(mode, "center") == 0)	p.Mode = SSysInfoParam::Center;
+				else if (stricmp(mode, "centeraround") == 0)	p.Mode = SSysInfoParam::CenterAround;
 				else if (stricmp(mode, "around") == 0)	p.Mode = SSysInfoParam::Around;
 
 				ClientCfg.SystemInfoParams[toLower(sic->asString(2 * k))] = p;

@@ -248,9 +248,9 @@ public :
 	 * \param target is the id of the target char
 	 * \param phraseId is the phrase id (uint32)
 	 */
-	void sendEmoteTextToPlayer(  const TDataSetRow& target,uint32 phraseId )
+	void sendEmoteTextToPlayer(  const TDataSetRow& sender, const TDataSetRow& target, uint32 phraseId )
 	{
-		sendChat2Ex( CChatGroup::say, target, phraseId );
+		sendChat2Ex( CChatGroup::say, target, phraseId, sender );
 	}
 
 	/**

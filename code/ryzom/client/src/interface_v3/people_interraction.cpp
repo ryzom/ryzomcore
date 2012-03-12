@@ -1420,11 +1420,9 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 		sint index = FriendList.getIndexFromContactId(contactId);
 		if (index != -1)
 		{
+			// Only do work if online status has changed
 			if (FriendList.getOnline(index) != online)
 			{
-				// Only do work if online status has changed
-				FriendList.setOnline(index, online);
-
 				CCDBNodeLeaf* node = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB", false);
 				if (node && node->getValueBool())
 				{
@@ -1441,8 +1439,11 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 						}
 					}
 					
-					// Player is not in my guild
-					if (bOnlyFriend)
+					TCharConnectionState prevState = FriendList.getOnline(index);
+					bool showMsg = bOnlyFriend && (prevState == ccs_offline || online == ccs_offline);
+
+					// Player is not in my guild, and the status change is from offline to online/abroad online or vice versa. 
+					if (showMsg)
 					{
 						ucstring msg = (online != ccs_offline) ? CI18N::get("uiPlayerOnline") : CI18N::get("uiPlayerOffline");
 						strFindReplace(msg, "%s", FriendList.getName(index));
@@ -1458,6 +1459,8 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 						PeopleInterraction.ChatInput.AroundMe.displayMessage(msg, col, 2, &dummy);
 					}
 				}
+
+				FriendList.setOnline(index, online);
 			}
 		}
 	}
@@ -2088,7 +2091,7 @@ public:
 					if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 					{
 						uint8 teamMember = (uint8) peopleIndex;
-						out.serialEnum(teamMember);
+						out.serial(teamMember);
 						NetMngr.push(out);
 						//nlinfo("impulseCallBack : %s %d sent", msgName.c_str(), teamMember);
 					}

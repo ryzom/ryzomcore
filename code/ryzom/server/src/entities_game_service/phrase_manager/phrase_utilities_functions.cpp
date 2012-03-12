@@ -1528,21 +1528,21 @@ bool testOffensiveActionAllowed( const NLMISC::CEntityId &actorId, const NLMISC:
 		return false;
 	}
 
-	// test target isn't invulnerable
-	if (target->getContextualProperty().directAccessForStructMembers().invulnerable())
-	{
-		// check target Faction attackable flags
-		CCreature *creature = dynamic_cast<CCreature *> (target);
-		if (!creature || !creature->checkFactionAttackable(actorId))
-		{
-			errorCode = "BS_TARGET_NOT_ATTACKABLE";
-			return false;
-		}
-	}
-
 	// AI 
 	if (actorId.getType() != RYZOMID::player)
 	{
+		// test target isn't invulnerable
+		if (target->getContextualProperty().directAccessForStructMembers().invulnerable())
+		{
+			// check target Faction attackable flags
+			CCreature *creature = dynamic_cast<CCreature *> (target);
+			if (!creature || !creature->checkFactionAttackable(actorId))
+			{
+				errorCode = "BS_TARGET_NOT_ATTACKABLE";
+				return false;
+			}
+		}
+
 		if (mainTarget == true)
 			return true;
 		else

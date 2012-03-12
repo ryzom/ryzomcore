@@ -1794,6 +1794,7 @@ class CAHOpenURL : public IActionHandler
 		}
 		else
 		{
+			DWORD ret = 0;
 			LPVOID lpMsgBuf;
 			FormatMessage(
 				FORMAT_MESSAGE_ALLOCATE_BUFFER |

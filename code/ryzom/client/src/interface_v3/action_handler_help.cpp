@@ -244,6 +244,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 			i++;
 	}
 
+	bool showSlotAndCreator = false;
 	// If an active window get the same object, abort, but make it top.
 	for(i=0;i<_ActiveWindows.size();i++)
 	{
@@ -261,6 +262,8 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 				// for items, must also test if they have the same itemSlotId, cause relies also on "ItemInfo system"
 				if(elt->getType() == CCtrlSheetInfo::SheetType_Item)
 				{
+					showSlotAndCreator = true;
+
 					CDBCtrlSheet		*realCtrlDst= _InfoWindows[_ActiveWindows[i]].CtrlSheet;
 					if(!realCtrlDst)
 						ok= false;
@@ -343,6 +346,13 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 	// get the next window
 	CInterfaceGroup	*group= _InfoWindows[newIndexWindow].Window;
 	nlassert(group);
+
+	CInterfaceElement *ctrl = group->getElement(group->getId()+":content:ctrl_slot");
+	if (ctrl) ctrl->setActive(showSlotAndCreator);
+	ctrl = group->getElement(group->getId()+":content:creator");
+	if (ctrl) ctrl->setActive(showSlotAndCreator);
+	ctrl = group->getElement(group->getId()+":content:creator_header");
+	if (ctrl) ctrl->setActive(showSlotAndCreator);
 
 	// activate it, set top, copy item watched
 	group->setActive(true);
@@ -1217,6 +1227,7 @@ static void setupSkillToTradeHelp(CSheetHelpSetup &setup)
 	if(setup.DestSheet)
 	{
 		setup.SrcSheet->copyAspect(setup.DestSheet);
+		setup.DestSheet->setActive(true);
 	}
 
 	ucstring	skillText;
@@ -2278,6 +2289,7 @@ static void setupItemHelp(CSheetHelpSetup &setup)
 	if(setup.DestSheet)
 	{
 		setup.SrcSheet->copyAspect(setup.DestSheet);
+		setup.DestSheet->setActive(true);
 	}
 
 	// NB: for raw materials only, must do each once only, must not do it at refresh, cause combo reseted
@@ -2566,6 +2578,7 @@ static void setupPactHelp(CSheetHelpSetup &setup)
 	if(setup.DestSheet)
 	{
 		setup.SrcSheet->copyAspect(setup.DestSheet);
+		setup.DestSheet->setActive(true);
 	}
 
 
@@ -2603,6 +2616,7 @@ static void setupMissionHelp(CSheetHelpSetup &setup)
 	if(setup.DestSheet)
 	{
 		setup.SrcSheet->copyAspect(setup.DestSheet);
+		setup.DestSheet->setActive(true);
 	}
 
 	// get detail text id from db
@@ -2840,6 +2854,7 @@ void setupOutpostBuildingHelp(CSheetHelpSetup &setup)
 	if(setup.DestSheet)
 	{
 		setup.SrcSheet->copyAspect(setup.DestSheet);
+		setup.DestSheet->setActive(true);
 	}
 
 	const COutpostBuildingSheet *pOBS = setup.SrcSheet->asOutpostBuildingSheet();
@@ -3164,6 +3179,7 @@ void setupSabrinaPhraseHelp(CSheetHelpSetup &setup, const CSPhraseCom &phrase, u
 	if(setup.DestSheet)
 	{
 		setup.SrcSheet->copyAspect(setup.DestSheet);
+		setup.DestSheet->setActive(true);
 	}
 
 	// **** setup the phrase Text info
@@ -3233,6 +3249,7 @@ static void setupSabrinaBrickHelp(CSheetHelpSetup &setup, bool auraDisabled)
 	if(setup.DestSheet)
 	{
 		setup.SrcSheet->copyAspect(setup.DestSheet);
+		setup.DestSheet->setActive(true);
 	}
 
 
