@@ -211,7 +211,8 @@ bool CPeopleList::sortExByOnline(const CPeople& a, const CPeople& b)
 	{
 		return (name_a < name_b);
 	}
-	else {
+	else
+	{
 		// Compare online status
 		switch (a.Online)
 		{
@@ -467,18 +468,12 @@ void CPeopleList::displayLocalPlayerTell(const ucstring &receiver, uint index, c
 		return;
 	}
 
-	ucstring cur_time;
-	CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
-	if (pNL && pNL->getValueBool())
-		cur_time = CInterfaceManager::getTimestampHuman();
-
- 	ucstring csr;
-	if (CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw())) csr += ucstring("(CSR) ");
-	ucstring finalMsg = cur_time + csr + CI18N::get("youTell") + ": " + msg;
+ 	ucstring csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
+	ucstring finalMsg = csr + CI18N::get("youTell") + ": " + msg;
 	// display msg with good color
 	CInterfaceProperty prop;
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
-	
+
 	ucstring s = CI18N::get("youTellPlayer");
 	strFindReplace(s, "%name", receiver);
 	strFindReplace(finalMsg, CI18N::get("youTell"), s);
@@ -783,10 +778,6 @@ void CPeopleList::setOnline(uint index, TCharConnectionState online)
 
 	_Peoples[index].Online = online;
 
-	// If the people goes offline remove eventually opened chat
-	if (online == ccs_offline)
-		openCloseChat(index, false);
-
 	updatePeopleMenu(index);
 }
 
@@ -944,14 +935,8 @@ class CHandlerContactEntry : public IActionHandler
 				ucstring final;
 				CChatWindow::encodeColorTag(prop.getRGBA(), final, false);
 
-				ucstring cur_time;
-				CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
-				if (pNL && pNL->getValueBool())
-					cur_time = CInterfaceManager::getTimestampHuman();
-
-				ucstring csr;
-				if (CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw())) csr += ucstring("(CSR) ");
-				final += cur_time + csr + CI18N::get("youTell")+": ";
+				ucstring csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
+				final += csr + CI18N::get("youTell")+": ";
 				prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 				CChatWindow::encodeColorTag(prop.getRGBA(), final, true);
 				final += text;
@@ -962,7 +947,6 @@ class CHandlerContactEntry : public IActionHandler
 				strFindReplace(final, CI18N::get("youTell"), s);
 				CInterfaceManager::getInstance()->log(final);
 			}
-
 		}
 	}
 };

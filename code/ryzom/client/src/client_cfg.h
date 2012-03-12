@@ -286,11 +286,15 @@ struct CClientConfig
 	// NEW PATCHING SYSTEM //
 	bool			PatchWanted;
 	std::string		PatchUrl;
+	std::string		PatchletUrl;
 	std::string		PatchVersion;
 	std::string		PatchServer;
 
 	std::string		RingReleaseNotePath;
 	std::string		ReleaseNotePath;
+
+	std::string		WebIgMainDomain;
+	std::vector<string>	WebIgTrustedDomains;
 
 
 	///////////////

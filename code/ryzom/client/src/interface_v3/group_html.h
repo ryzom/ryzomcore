@@ -30,6 +30,8 @@
 #include "ctrl_button.h"
 #include "group_table.h"
 
+typedef std::map<std::string, std::string>	TStyle;
+
 extern "C"
 {
 #include "WWWInit.h"
@@ -147,6 +149,7 @@ public:
 	std::string		DefaultCheckBoxBitmapPushed;
 	std::string		DefaultCheckBoxBitmapOver;
 	std::string		DefaultBackgroundBitmapView;
+	std::string		CurrentLinkTitle;
 
 	// Browser home
 	std::string		Home;
@@ -216,16 +219,19 @@ protected :
 	virtual void endUnparsedElement(const char *buffer, int length);
 
 	// Add GET params to the url
-	virtual void addHTTPGetParams (std::string &url);
+	virtual void addHTTPGetParams (std::string &url, bool trustedDomain);
 
 	// Add POST params to the libwww list
-	virtual void addHTTPPostParams (HTAssocList *formfields);
+	virtual void addHTTPPostParams (HTAssocList *formfields, bool trustedDomain);
 
 	// the current request is terminated
 	virtual void requestTerminated(HTRequest *request);
 
 	// Get Home URL
 	virtual std::string	home();
+
+	// Parse style html tag
+	TStyle parseStyle(const std::string &str_styles);
 
 	// Handle some work at each pass
 	virtual void handle ();
@@ -251,7 +257,7 @@ protected :
 	void addString(const ucstring &str);
 
 	// Add an image in the current paragraph
-	void addImage(const char *image, bool globalColor);
+	void addImage(const char *image, bool globalColor, bool reloadImg=false);
 
 	// Add a text area in the current paragraph
 	CInterfaceGroup *addTextArea (const std::string &templateName, const char *name, uint rows, uint cols, bool multiLine, const ucstring &content);
@@ -265,6 +271,9 @@ protected :
 
 	// Set the background color
 	void setBackgroundColor (const NLMISC::CRGBA &bgcolor);
+
+	// Set the background
+	void setBackground (const std::string &bgtex, bool scale, bool tile);
 
 	// Force the current string to be in a single string
 	void flushString();
@@ -280,6 +289,9 @@ protected :
 
 	// Current URL
 	std::string		_URL;
+
+	// Current DOMAIN
+	bool			_TrustedDomain;
 
 	// Title prefix
 	ucstring		_TitlePrefix;
@@ -394,6 +406,30 @@ protected :
 		return _Link.back().c_str();
 	}
 
+	std::vector<std::string>	_LinkTitle;
+	inline const char *getLinkTitle() const
+	{
+		if (_LinkTitle.empty())
+			return "";
+		return _LinkTitle.back().c_str();
+	}
+	std::vector<std::string>		_LinkClass;
+	inline const char *getLinkClass() const
+	{
+		if (_LinkClass.empty())
+			return "";
+		return _LinkClass.back().c_str();
+	}
+	
+	// Divs (i.e. interface group)
+	std::vector<class CInterfaceGroup*>	_Divs;
+	inline CInterfaceGroup *getDiv() const
+	{
+		if (_Divs.empty())
+			return NULL;
+		return _Divs.back();
+	}
+
 	// Tables
 	std::vector<class CGroupTable*>	_Tables;
 	inline CGroupTable *getTable() const
@@ -472,6 +508,7 @@ protected :
 			NoWrap = false;
 		}
 		NLMISC::CRGBA	BgColor;
+		std::string		Style;
 		CGroupCell::TAlign	Align;
 		CGroupCell::TVAlign	VAlign;
 		sint32	LeftMargin;
@@ -580,7 +617,8 @@ private:
 	void addImageDownload(const std::string &url, CViewBase *img);
 	std::string localImageName(const std::string &url);
 
-
+	bool isTrustedDomain(const std::string &domain);
+	void setImage(CViewBase *view, const std::string &file);
 
 	// BnpDownload system
 	void initBnpDownload();

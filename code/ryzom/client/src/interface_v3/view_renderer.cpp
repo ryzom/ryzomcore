@@ -743,8 +743,8 @@ void CViewRenderer::loadTextures (const std::string &textureFileName, const std:
 		image.UVMin.V = uvMinV;
 		image.UVMax.U = uvMaxU;
 		image.UVMax.V = uvMaxV;
-		sTGAname = tgaName;
-		sTGAname = toLower(sTGAname);
+		sTGAname = toLower(string(tgaName));
+
 		string::size_type stripPng = sTGAname.find(".png");
 		if (stripPng != string::npos)
 		{
@@ -752,6 +752,7 @@ void CViewRenderer::loadTextures (const std::string &textureFileName, const std:
 			sTGAname[stripPng + 2] = 'g';
 			sTGAname[stripPng + 3] = 'a';
 		}
+
 		image.Name = sTGAname;
 		image.GlobalTexturePtr = &(_GlobalTextures.back());
 		if (getTextureIdFromName(sTGAname) != -1)
@@ -1029,6 +1030,7 @@ sint32 CViewRenderer::getTextureIdFromName (const string &sName) const
 
 	// convert to lowCase
 	string nameLwr = toLower(sName);
+
 	string::size_type stripPng = nameLwr.find(".png");
 	if (stripPng != string::npos)
 	{
@@ -1036,7 +1038,7 @@ sint32 CViewRenderer::getTextureIdFromName (const string &sName) const
 		nameLwr[stripPng + 2] = 'g';
 		nameLwr[stripPng + 3] = 'a';
 	}
-	
+
 	// Search in map
 	TTextureMap::const_iterator		it= _TextureMap.find(nameLwr);
 	if( it==_TextureMap.end() )
@@ -1531,6 +1533,7 @@ void	CViewRenderer::initSystemTextures()
 	addSystemTexture(RegenTexture, "regen.tga");
 	addSystemTexture(RegenBackTexture, "regen_back.tga");
 	addSystemTexture(GlowStarTexture, "glow_star_24.tga");
+	addSystemTexture(ItemLockedByOwnerTexture, "r2ed_toolbar_lock_small.tga");
 }
 
 

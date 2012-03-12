@@ -416,7 +416,7 @@ class CAHUIShowHide : public IActionHandler
 					nlwarning("%s is not a group html", window.c_str());
 					return;
 				}
-				pGH->setURL("http://atys.ryzom.com/start/index.php?app="+webapp);
+				pGH->setURL("http://"+ClientCfg.WebIgMainDomain+"/start/index.php?app="+webapp);
 			}
 		}
 		else

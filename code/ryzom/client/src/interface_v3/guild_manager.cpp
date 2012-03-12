@@ -358,15 +358,54 @@ void CGuildManager::update()
 		// If all is valid no more need update and if guild is opened update the interface
 		if (bAllValid)
 		{
+			CCDBNodeLeaf* node = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB", false);
+			if (node && node->getValueBool())
+			{
+				// See if we need to show any online/offline messages
+				static vector<SGuildMember> CachedGuildMembers;
+				ucstring onlineMessage = CI18N::get("uiPlayerOnline");
+				ucstring offlineMessage = CI18N::get("uiPlayerOffline");
+
+				for (uint i = 0; i < _GuildMembers.size(); ++i)
+				{
+					for (uint j = 0; j < CachedGuildMembers.size(); ++j)
+					{
+						if ((CachedGuildMembers[j].Name == _GuildMembers[i].Name) &&
+							(CachedGuildMembers[j].Online != _GuildMembers[i].Online))
+						{
+							ucstring msg = (_GuildMembers[i].Online != ccs_offline) ? onlineMessage : offlineMessage;
+							strFindReplace(msg, "%s", _GuildMembers[i].Name);
+							string cat = getStringCategory(msg, msg);
+							map<string, CClientConfig::SSysInfoParam>::const_iterator it;
+							NLMISC::CRGBA col = CRGBA::Yellow;
+							it = ClientCfg.SystemInfoParams.find(toLower(cat));
+							if (it != ClientCfg.SystemInfoParams.end())
+							{
+								col = it->second.Color;
+							}
+							bool dummy;
+							PeopleInterraction.ChatInput.Guild.displayMessage(msg, col, 2, &dummy);
+							break;
+						}
+					}
+				}
+
+				CachedGuildMembers.clear();
+				for (uint i = 0; i < _GuildMembers.size(); ++i)
+				{
+					CachedGuildMembers.push_back(_GuildMembers[i]);
+				}
+			}
+
 			// Search for UserEntity to find our own grade
 			if ((UserEntity != NULL) && (_GuildMembers.size() > 0))
 			{
 				uint i;
 				_Grade = EGSPD::CGuildGrade::Member;
-				string sUserName = strlwr(UserEntity->getEntityName().toString());
+				ucstring sUserName = toLower(UserEntity->getEntityName());
 				for (i = 0; i < _GuildMembers.size(); ++i)
 				{
-					if (strlwr(_GuildMembers[i].Name.toString()) == sUserName)
+					if (toLower(_GuildMembers[i].Name) == sUserName)
 					{
 						_Grade = _GuildMembers[i].Grade;
 						break;
@@ -1048,10 +1087,26 @@ class CAHGuildSheetSetLeader : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		sendMsgSetGrade(EGSPD::CGuildGrade::Leader);
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
+		// Ask if they are sure
+		pIM->validMessageBox(CInterfaceManager::QuestionIconMsg, CI18N::get("uiQSetLeader"), "guild_member_do_change_leader");
 	}
 };
 REGISTER_ACTION_HANDLER (CAHGuildSheetSetLeader, "guild_member_chg_to_leader");
+		
+// ***************************************************************************
+class CAHGuildSheetSetLeaderConfirm : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		// Leadership change confirmed
+		sendMsgSetGrade(EGSPD::CGuildGrade::Leader);
+	}
+};
+REGISTER_ACTION_HANDLER (CAHGuildSheetSetLeaderConfirm, "guild_member_do_change_leader");
+
+
 
 // ***************************************************************************
 class CAHGuildSheetSetHighOfficer : public IActionHandler

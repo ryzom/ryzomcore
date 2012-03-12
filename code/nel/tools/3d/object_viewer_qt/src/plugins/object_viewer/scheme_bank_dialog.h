@@ -27,11 +27,36 @@
 #include "nel/3d/particle_system.h"
 
 // Project includes
+#include "attrib_widget.h"
 #include "ps_wrapper.h"
 
 namespace NLQT
 {
 class CAttribWidget;
+
+/**
+@class CSchemeItem
+@brief Contain pointer to NL3D::CPSAttribMakerBase.
+*/
+class CSchemeItem: public QListWidgetItem
+{
+public:
+	CSchemeItem(const QString &text, QListWidget *parent = 0, int type = UserType ):
+		QListWidgetItem(text, parent, type), _attrib(NULL) {}
+
+	void setUserData(NL3D::CPSAttribMakerBase *attrib)
+	{
+		_attrib = attrib;
+	}
+	NL3D::CPSAttribMakerBase *getUserData() const
+	{
+		return _attrib;
+	}
+
+private:
+
+	NL3D::CPSAttribMakerBase *_attrib;
+}; /* class CSchemeItem */
 
 class CSchemeBankDialog: public QDialog
 {
@@ -47,6 +72,8 @@ private Q_SLOTS:
 	void removeScheme();
 	void saveBank();
 	void loadBank();
+	void enableButtons();
+	void changeNameScheme(QListWidgetItem *item);
 
 private:
 	void buildList();

@@ -70,6 +70,10 @@ public:
 
 	// from CInterfaceElement
 	virtual void visit(CInterfaceElementVisitor *visitor);
+
+	// special for mouse over : return true and fill the name of the cursor to display
+	virtual bool getMouseOverShape(std::string &/* texName */, uint8 &/* rot */, NLMISC::CRGBA &/* col */) { return false; }
+
 };
 
 

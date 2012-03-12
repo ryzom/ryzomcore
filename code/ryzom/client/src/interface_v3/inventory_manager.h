@@ -25,6 +25,7 @@
 #include "game_share/item_infos.h"
 #include "game_share/temp_inventory_mode.h"
 #include "game_share/inventories.h"
+#include "game_share/bot_chat_types.h"
 
 class CCDBNodeBranch;
 class CDBCtrlSheet;
@@ -62,6 +63,7 @@ public:
 	CCDBNodeLeaf *Weight;
 	CCDBNodeLeaf *NameId;
 	CCDBNodeLeaf *InfoVersion;
+	CCDBNodeLeaf *ResaleFlag;
 
 public:
 	// ctor
@@ -77,6 +79,8 @@ public:
 	uint32 getWeight() const						{ return (uint32)			(Weight ? Weight->getValue32() : 0); }
 	uint32 getNameId() const						{ return (uint32)			(NameId ? NameId->getValue32() : 0); }
 	uint8  getInfoVersion() const					{ return (uint8)			(InfoVersion ? (uint8) InfoVersion->getValue8() : 0); }
+	uint8  getResaleFlag() const					{ return (uint8)			(ResaleFlag ? (uint8) ResaleFlag->getValue8() : 0); }
+	bool   getLockedByOwner() const                 { return (bool)             (ResaleFlag ? (ResaleFlag->getValue8() == BOTCHATTYPE::ResaleKOLockedByOwner) : false); }
 	//
 	void   setSheetID(uint32 si)					{ if (Sheet) Sheet->setValue32((sint32) si); }
 	void   setQuality(uint16 quality)				{ if (Quality) Quality->setValue16((sint16) quality); }
@@ -86,6 +90,7 @@ public:
 	void   setWeight(uint32 wgt)					{ if (Weight) Weight->setValue32((sint32) wgt); }
 	void   setNameId(uint32 nid)					{ if (NameId) NameId->setValue32((sint32) nid); }
 	void   setInfoVersion(uint8 iv)					{ if (InfoVersion) InfoVersion->setValue8((sint8) iv); }
+	void   setResaleFlag(uint8 resale)				{ if (ResaleFlag) ResaleFlag->setValue8(resale); }
 };
 
 
@@ -504,18 +509,20 @@ struct SBagOptions
 	CCDBNodeLeaf *DbFilterTool;
 	CCDBNodeLeaf *DbFilterMP;
 	CCDBNodeLeaf *DbFilterMissMP;
+	CCDBNodeLeaf *DbFilterTP;
 
 	bool LastDbFilterArmor;
 	bool LastDbFilterWeapon;
 	bool LastDbFilterTool;
 	bool LastDbFilterMP;
 	bool LastDbFilterMissMP;
+	bool LastDbFilterTP;
 	// -----------------------
 	SBagOptions()
 	{
 		InvType = CInventoryManager::InvUnknown;
-		DbFilterArmor = DbFilterWeapon = DbFilterTool = DbFilterMP = DbFilterMissMP = NULL;
-		LastDbFilterArmor = LastDbFilterWeapon = LastDbFilterTool = LastDbFilterMP = LastDbFilterMissMP = false;
+		DbFilterArmor = DbFilterWeapon = DbFilterTool = DbFilterMP = DbFilterMissMP = DbFilterTP = NULL;
+		LastDbFilterArmor = LastDbFilterWeapon = LastDbFilterTool = LastDbFilterMP = LastDbFilterMissMP = LastDbFilterTP = false;
 	}
 
 	bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
@@ -550,6 +557,12 @@ struct SBagOptions
 	{
 		if (DbFilterMissMP == NULL) return true;
 		return (DbFilterMissMP->getValue8()!=0);
+	}
+
+	bool getFilterTP() const
+	{
+		if (DbFilterTP == NULL) return true;
+		return (DbFilterTP->getValue8() != 0);
 	}
 
 	// Return true if the sheet can be displayed due to filters

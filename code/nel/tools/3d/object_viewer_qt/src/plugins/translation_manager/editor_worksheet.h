@@ -18,6 +18,10 @@
 #ifndef EDITOR_WORKSHEET_H
 #define EDITOR_WORKSHEET_H
 
+// Project includes
+#include "translation_manager_editor.h"
+#include "extract_new_sheet_names.h"
+
 // Nel includes
 #include "nel/misc/types_nl.h"
 #include "nel/misc/sheet_id.h"
@@ -34,11 +38,9 @@
 #include <QtGui/QUndoCommand>
 #include <QtGui/QUndoStack>
 
-// Project includes
-#include "translation_manager_editor.h"
-#include "extract_new_sheet_names.h"
 
-namespace TranslationManager {
+namespace TranslationManager
+{
 
 struct CTableWidgetItemStore
 {
@@ -47,6 +49,7 @@ public:
 		m_item(item),
 		m_row(row),
 		m_column(column) { }
+
 	QTableWidgetItem *m_item;
 	int m_row;
 	int m_column;
@@ -54,39 +57,41 @@ public:
 
 class CEditorWorksheet : public CEditor
 {
-    Q_OBJECT
-private:   
-	QString temp_content;
+	Q_OBJECT
+
 public:
-    CEditorWorksheet(QMdiArea* parent) : CEditor(parent) {}
-    CEditorWorksheet() : CEditor() {}
-	QTableWidget* table_editor;
-    void open(QString filename);
-    void save();
-    void saveAs(QString filename);
-    void activateWindow();
-    void mergeWorksheetFile(QString filename);
-    bool compareWorksheetFile(QString filename);
-    void extractBotNames(list<string> filters, string level_design_path, NLLIGO::CLigoConfig ligoConfig);
-    void extractWords(QString filename, QString columnId, IWordListBuilder &wordListBuilder);
+	CEditorWorksheet(QMdiArea *parent) : CEditor(parent) {}
+	CEditorWorksheet() : CEditor() {}
+	QTableWidget *table_editor;
+	void open(QString filename);
+	void save();
+	void saveAs(QString filename);
+	void activateWindow();
+	void mergeWorksheetFile(QString filename);
+	bool compareWorksheetFile(QString filename);
+	void extractBotNames(std::list<std::string> filters, std::string level_design_path, NLLIGO::CLigoConfig ligoConfig);
+	void extractWords(QString filename, QString columnId, IWordListBuilder &wordListBuilder);
 	void insertTableRecords(QList<QString> records, QList<CTableWidgetItemStore> new_items);
-    bool isBotNamesTable();
-    bool isSheetTable(QString type);
-    void closeEvent(QCloseEvent *event);
+	bool isBotNamesTable();
+	bool isSheetTable(QString type);
+	void closeEvent(QCloseEvent *event);
+
 private Q_SLOTS:
-	void worksheetEditorCellEntered(QTableWidgetItem * item);
-    void worksheetEditorChanged(QTableWidgetItem * item);
-    void insertRow();
-    void deleteRow();
+	void worksheetEditorCellEntered(QTableWidgetItem *item);
+	void worksheetEditorChanged(QTableWidgetItem *item);
+	void insertRow();
+	void deleteRow();
 	void contextMenuEvent(QContextMenuEvent *e);
-    
+
+private:
+	QString temp_content;
 };
 
 class CUndoWorksheetCommand : public QUndoCommand
 {
 public:
-	CUndoWorksheetCommand(QTableWidget *table, QTableWidgetItem* item, const QString &ocontent, QUndoCommand *parent = 0) :  QUndoCommand("Insert characters in cells", parent), m_table(table), m_item(item),  m_ocontent(ocontent) 
-	{ 
+	CUndoWorksheetCommand(QTableWidget *table, QTableWidgetItem *item, const QString &ocontent, QUndoCommand *parent = 0) :  QUndoCommand("Insert characters in cells", parent), m_table(table), m_item(item),  m_ocontent(ocontent)
+	{
 		m_ccontent = m_ocontent;
 	}
 
@@ -98,16 +103,16 @@ public:
 		}
 	}
 	void undo()
-	{		
+	{
 		if(m_item->text() != m_ocontent)
 		{
 			m_ccontent = m_item->text();
 		}
 		m_item->setText(m_ocontent);
-	}	
+	}
 private:
-	QTableWidget* m_table;
-	QTableWidgetItem* m_item;
+	QTableWidget *m_table;
+	QTableWidgetItem *m_item;
 	QString m_ocontent;
 	QString m_ccontent;
 };
@@ -123,7 +128,7 @@ public:
 		m_table->setRowCount(m_rowID + 1);
 		for(int j = 0; j < m_table->columnCount(); j++)
 		{
-			QTableWidgetItem* item = new QTableWidgetItem();
+			QTableWidgetItem *item = new QTableWidgetItem();
 			m_table->setItem(m_rowID, j, item);
 			m_table->scrollToBottom();
 		}
@@ -133,16 +138,16 @@ public:
 	{
 		m_table->removeRow(m_rowID);
 	}
-private:
-	QTableWidget* m_table;
-	int m_rowID;
 
+private:
+	QTableWidget *m_table;
+	int m_rowID;
 };
 
 class CUndoWorksheetExtraction : public QUndoCommand
 {
 public:
-	CUndoWorksheetExtraction(QList<CTableWidgetItemStore> items, QTableWidget *table, QUndoCommand *parent = 0) : QUndoCommand("Word extraction", parent), 
+	CUndoWorksheetExtraction(QList<CTableWidgetItemStore> items, QTableWidget *table, QUndoCommand *parent = 0) : QUndoCommand("Word extraction", parent),
 		m_items(items),
 		m_table(table)
 	{   }
@@ -153,7 +158,6 @@ public:
 		{
 			m_table->setItem(is.m_row, is.m_column, is.m_item);
 		}
-
 	}
 
 	void undo()
@@ -161,14 +165,13 @@ public:
 		Q_FOREACH(CTableWidgetItemStore is, m_items)
 		{
 			m_table->setItem(is.m_row, is.m_column, is.m_item);
-			m_table->takeItem(is.m_row, is.m_column);	
+			m_table->takeItem(is.m_row, is.m_column);
 		}
-		
 	}
 
 private:
 	QList<CTableWidgetItemStore> m_items;
-	QTableWidget* m_table;
+	QTableWidget *m_table;
 };
 
 class CUndoWorksheetDeleteCommand : public QUndoCommand
@@ -181,8 +184,8 @@ public:
 	{
 		for(int i = 0; i < m_table->columnCount(); i++)
 		{
-			QTableWidgetItem* item = new QTableWidgetItem();
-			QTableWidgetItem* table_item = m_table->item(m_rowID, i);
+			QTableWidgetItem *item = new QTableWidgetItem();
+			QTableWidgetItem *table_item = m_table->item(m_rowID, i);
 			item->setText(table_item->text());
 			m_deletedItems.push_back(item);
 		}
@@ -203,8 +206,8 @@ public:
 	}
 
 private:
-	QList<QTableWidgetItem*> m_deletedItems;
-	QTableWidget* m_table;
+	QList<QTableWidgetItem *> m_deletedItems;
+	QTableWidget *m_table;
 	int m_rowID;
 };
 

@@ -17,18 +17,14 @@
 
 #include "extract_bot_names.h"
 
-
 static bool	RemoveOlds = false;
-
-
-
 
 namespace TranslationManager
 {
 
 TCreatureInfo *ExtractBotNames::getCreature(const std::string &sheetName)
 {
-	CSheetId id(sheetName+".creature");
+	NLMISC::CSheetId id(sheetName+".creature");
 
 	if (Creatures.find(id) != Creatures.end())
 		return &(Creatures.find(id)->second);
@@ -36,18 +32,17 @@ TCreatureInfo *ExtractBotNames::getCreature(const std::string &sheetName)
 		return NULL;
 }
 
-string ExtractBotNames::cleanupName(const std::string &name)
+std::string ExtractBotNames::cleanupName(const std::string &name)
 {
-	string ret;
+	std::string ret;
 
-	for (uint i=0; i<name.size(); ++i)
+	for (size_t i = 0; i < name.size(); ++i)
 	{
 		if (name[i] != ' ')
 			ret += name[i];
 		else
 			ret += '_';
 	}
-
 	return ret;
 }
 
@@ -55,14 +50,13 @@ ucstring ExtractBotNames::cleanupUcName(const ucstring &name)
 {
 	ucstring ret;
 
-	for (uint i=0; i<name.size(); ++i)
+	for (size_t i = 0; i < name.size(); ++i)
 	{
 		if (name[i] != ' ')
 			ret += name[i];
 		else
 			ret += '_';
 	}
-
 	return ret;
 }
 
@@ -70,82 +64,78 @@ ucstring ExtractBotNames::cleanupUcName(const ucstring &name)
 /*
 	Removes first and last '$'
 */
-ucstring ExtractBotNames::makeGroupName(const ucstring & translationName)
+ucstring ExtractBotNames::makeGroupName(const ucstring &translationName)
 {
 	ucstring ret = translationName;
 	if (ret.size() >= 2)
 	{
-		if ( *ret.begin() == ucchar('$'))
+		if (*ret.begin() == ucchar('$'))
 		{
 			ret=ret.substr(1);
 		}
-		if ( *ret.rbegin() == ucchar('$'))
+		if (*ret.rbegin() == ucchar('$'))
 		{
-			ret = ret.substr(0, ret.size()-1);
+			ret = ret.substr(0, ret.size() - 1);
 		}
 	}
 	ret = cleanupUcName(ret);
-	return ret;	
+	return ret;
 }
 
-
-
-
-
-set<string> ExtractBotNames::getGenericNames()
+std::set<std::string> ExtractBotNames::getGenericNames()
 {
-    return GenericNames;
+	return GenericNames;
 }
 
-map<string, TEntryInfo> ExtractBotNames::getSimpleNames()
+std::map<std::string, TEntryInfo> ExtractBotNames::getSimpleNames()
 {
-    return SimpleNames;
+	return SimpleNames;
 }
 
 void ExtractBotNames::cleanSimpleNames()
-{       
-    SimpleNames.clear();
+{
+	SimpleNames.clear();
 }
 
 void ExtractBotNames::cleanGenericNames()
 {
-    GenericNames.clear();
+	GenericNames.clear();
 }
 
-string	ExtractBotNames::removeAndStoreFunction(const std::string &fullName)
+std::string ExtractBotNames::removeAndStoreFunction(const std::string &fullName)
 {
-	string::size_type pos = fullName.find("$");
-	if (pos == string::npos)
+	std::string::size_type pos = fullName.find("$");
+	if (pos == std::string::npos)
+	{
 		return fullName;
+	}
 	else
 	{
 		// extract and store the function name
-		string ret;
+		std::string ret;
 
 		ret = fullName.substr(0, pos);
-		string::size_type pos2 = fullName.find("$", pos+1);
+		std::string::size_type pos2 = fullName.find("$", pos+1);
 
-		string fct = fullName.substr(pos+1, pos2-(pos+1));
+		std::string fct = fullName.substr(pos + 1, pos2 - (pos + 1));
 
-		ret += fullName.substr(pos2+1);
+		ret += fullName.substr(pos2 + 1);
 
 		if (Functions.find(fct) == Functions.end())
 		{
 			nldebug("Adding function '%s'", fct.c_str());
 			Functions.insert(fct);
 		}
-
 		return ret;
 	}
 }
-
 
 void ExtractBotNames::addGenericName(const std::string &name, const std::string &sheetName)
 {
 	TCreatureInfo *c = getCreature(sheetName);
 	if (!c || c->ForceSheetName || !c->DisplayName)
 		return;
-	
+
 	if (SimpleNames.find(name) != SimpleNames.end())
 	{
 		nldebug("Name '%s' is now a generic name", name.c_str());
@@ -177,7 +167,7 @@ void ExtractBotNames::addSimpleName(const std::string &name, const std::string &
 	else
 	{
 		nldebug("Adding simple name '%s'", name.c_str());
-		
+
 		TEntryInfo ei;
 		ei.SheetName = sheetName;
 
@@ -185,75 +175,72 @@ void ExtractBotNames::addSimpleName(const std::string &name, const std::string &
 	}
 }
 
-void ExtractBotNames::setRequiredSettings(list<string> filters, string level_design_path)
+void ExtractBotNames::setRequiredSettings(std::list<std::string> filters, std::string level_design_path)
 {
-	for (std::list<string>::iterator it = filters.begin(); it != filters.end(); ++it)
+	for (std::list<std::string>::iterator it = filters.begin(); it != filters.end(); ++it)
 	{
 		Filters.push_back(*it);
 	}
 
 	//-------------------------------------------------------------------
 	// init the sheets
-	CSheetId::init(false);
-	const string PACKED_SHEETS_NAME = "bin/translation_tools_creature.packed_sheets";
+	NLMISC::CSheetId::init(false);
+	const std::string PACKED_SHEETS_NAME = "bin/translation_tools_creature.packed_sheets";
 	loadForm("creature", PACKED_SHEETS_NAME, Creatures, false, false);
 
 	if (Creatures.empty())
 	{
-                loadForm("creature", PACKED_SHEETS_NAME, Creatures, true);
+		loadForm("creature", PACKED_SHEETS_NAME, Creatures, true);
 	}
-  
 }
 
-void ExtractBotNames::extractBotNamesFromPrimitives(CLigoConfig ligoConfig)
+void ExtractBotNames::extractBotNamesFromPrimitives(NLLIGO::CLigoConfig ligoConfig)
 {
-
 	//-------------------------------------------------------------------
 	// ok, ready for the real work,
 	// first, read the primitives files and parse the primitives
-	vector<string>	files;
-	CPath::getFileList("primitive", files);
-
+	std::vector<std::string>	files;
+	NLMISC::CPath::getFileList("primitive", files);
 
 	for (uint i=0; i<files.size(); ++i)
 	{
-		string pathName = files[i];
-		pathName = CPath::lookup(pathName);
+		std::string pathName = files[i];
+		pathName = NLMISC::CPath::lookup(pathName);
 
-                
-                
-		// check filters
-		uint j=0;
-		for (j=0; j<Filters.size(); ++j)
-		{
-			if (pathName.find(Filters[j]) != string::npos)
-				break;
-		}
-		if (j != Filters.size())
-			// skip this file
-			continue;
+		/*
+				// dnk-88: what is it?
+				// check filters
+				uint j = 0;
+				for (size_t j = 0; j < Filters.size(); ++j)
+				{
+					if (pathName.find(Filters[j]) != std::string::npos)
+						break;
+				}
+				if (j != Filters.size())
+					// skip this file
+					continue;
+		*/
+		nlinfo("Loading file '%s'...", NLMISC::CFile::getFilename(pathName).c_str());
 
-		nlinfo("Loading file '%s'...", CFile::getFilename(pathName).c_str());
-		
-		CPrimitives primDoc;
-		CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
+		NLLIGO::CPrimitives primDoc;
+		NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = &primDoc;
 		loadXmlPrimitiveFile(primDoc, pathName, ligoConfig);
 
 		// now parse the file
 
 		// look for group template
 		{
-			TPrimitiveClassPredicate pred("group_template_npc");
-			TPrimitiveSet result;
+			NLLIGO::TPrimitiveClassPredicate pred("group_template_npc");
+			NLLIGO::TPrimitiveSet result;
 
-			CPrimitiveSet<TPrimitiveClassPredicate> ps;
+			NLLIGO::CPrimitiveSet<NLLIGO::TPrimitiveClassPredicate> ps;
 			ps.buildSet(primDoc.RootNode, pred, result);
 
-			for (uint i=0; i<result.size(); ++i)
+			for (uint i = 0; i < result.size(); ++i)
 			{
-				string name;
-				string countStr;
-				string sheetStr;
+				std::string name;
+				std::string countStr;
+				std::string sheetStr;
 				result[i]->getPropertyByName("name", name);
 				result[i]->getPropertyByName("count", countStr);
 				result[i]->getPropertyByName("bot_sheet_look", sheetStr);
@@ -276,16 +263,16 @@ void ExtractBotNames::extractBotNamesFromPrimitives(CLigoConfig ligoConfig)
 		}
 		// look for bot template
 		{
-			TPrimitiveClassPredicate pred("bot_template_npc");
-			TPrimitiveSet result;
+			NLLIGO::TPrimitiveClassPredicate pred("bot_template_npc");
+			NLLIGO::TPrimitiveSet result;
 
-			CPrimitiveSet<TPrimitiveClassPredicate> ps;
+			NLLIGO::CPrimitiveSet<NLLIGO::TPrimitiveClassPredicate> ps;
 			ps.buildSet(primDoc.RootNode, pred, result);
 
-			for (uint i=0; i<result.size(); ++i)
+			for (size_t i = 0; i < result.size(); ++i)
 			{
-				string name;
-				string sheetStr;
+				std::string name;
+				std::string sheetStr;
 				result[i]->getPropertyByName("name", name);
 				result[i]->getPropertyByName("sheet_look", sheetStr);
 
@@ -305,19 +292,19 @@ void ExtractBotNames::extractBotNamesFromPrimitives(CLigoConfig ligoConfig)
 				}
 			}
 		}
-		// look for npc_group 
+		// look for npc_group
 		{
-			TPrimitiveClassPredicate pred("npc_group");
-			TPrimitiveSet result;
+			NLLIGO::TPrimitiveClassPredicate pred("npc_group");
+			NLLIGO::TPrimitiveSet result;
 
-			CPrimitiveSet<TPrimitiveClassPredicate> ps;
+			NLLIGO::CPrimitiveSet<NLLIGO::TPrimitiveClassPredicate> ps;
 			ps.buildSet(primDoc.RootNode, pred, result);
 
-			for (uint i=0; i<result.size(); ++i)
+			for (size_t i = 0; i < result.size(); ++i)
 			{
-				string name;
-				string countStr;
-				string sheetStr;
+				std::string name;
+				std::string countStr;
+				std::string sheetStr;
 				result[i]->getPropertyByName("name", name);
 				result[i]->getPropertyByName("count", countStr);
 				result[i]->getPropertyByName("bot_sheet_client", sheetStr);
@@ -342,18 +329,18 @@ void ExtractBotNames::extractBotNamesFromPrimitives(CLigoConfig ligoConfig)
 				}
 			}
 		}
-		// look for bot 
+		// look for bot
 		{
-			TPrimitiveClassPredicate pred("npc_bot");
-			TPrimitiveSet result;
+			NLLIGO::TPrimitiveClassPredicate pred("npc_bot");
+			NLLIGO::TPrimitiveSet result;
 
-			CPrimitiveSet<TPrimitiveClassPredicate> ps;
+			NLLIGO::CPrimitiveSet<NLLIGO::TPrimitiveClassPredicate> ps;
 			ps.buildSet(primDoc.RootNode, pred, result);
 
-			for (uint i=0; i<result.size(); ++i)
+			for (size_t i = 0; i < result.size(); ++i)
 			{
-				string name;
-				string sheetStr;
+				std::string name;
+				std::string sheetStr;
 				result[i]->getPropertyByName("name", name);
 				result[i]->getPropertyByName("sheet_client", sheetStr);
 
@@ -373,7 +360,7 @@ void ExtractBotNames::extractBotNamesFromPrimitives(CLigoConfig ligoConfig)
 				}
 			}
 		}
-	}       
+	}
 }
-  
+
 }

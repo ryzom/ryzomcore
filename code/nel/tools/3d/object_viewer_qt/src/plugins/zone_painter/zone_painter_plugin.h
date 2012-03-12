@@ -56,12 +56,17 @@ public:
 
 	void addAutoReleasedObject(QObject *obj);
 
+public Q_SLOTS:
+	void clickLoadZoneAction();
+	void clickSaveZoneAction();
 protected:
 	NLMISC::CLibraryContext *m_LibContext;
 
 private:
 	ExtensionSystem::IPluginManager *m_plugMan;
 	QList<QObject *> m_autoReleaseObjects;
+
+	NL3D::CLandscapeModel *m_Landscape;
 };
 
 class CZonePainterContext: public Core::IContext

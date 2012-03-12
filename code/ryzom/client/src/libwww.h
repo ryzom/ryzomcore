@@ -35,7 +35,7 @@ class CCtrlBaseButton;
 void initLibWWW();
 
 // Get an url and setup a local domain
-void setCurrentDomain(const std::string &url);
+const std::string &setCurrentDomain(const std::string &url);
 
 extern std::string CurrentCookie;
 
@@ -206,7 +206,10 @@ enum
 
 enum
 {
-	HTML_ATTR(DIV,NAME) = 0,
+	HTML_ATTR(DIV,CLASS) = 0,
+	HTML_ATTR(DIV,ID),
+	HTML_ATTR(DIV,NAME),
+	HTML_ATTR(DIV,STYLE),
 };
 
 

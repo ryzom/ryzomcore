@@ -342,6 +342,8 @@ std::string secondsToHumanReadable (uint32 time);
 /// Get a bytes or time in string format and convert it in seconds or bytes
 uint32 fromHumanReadable (const std::string &str);
 
+/// Add digit grouping seperator to if value >= 10 000. Assumes input is numerical string.
+std::string formatThousands(const std::string& s);
 
 /// This function executes a program in the background and returns instantly (used for example to launch services in AES).
 /// The program will be launched in the current directory

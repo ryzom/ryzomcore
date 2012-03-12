@@ -25,6 +25,7 @@
 // game share
 #include "game_share/utils.h"
 #include "game_share/file_description_container.h"
+#include "game_share/deployment_configuration.h"
 
 // local
 #include "administered_module.h"
@@ -214,7 +215,7 @@ static bool untar(const NLMISC::CSString& tarFile,const NLMISC::CSString& destin
 	return ok;
 }
 
-static uint32 readVersionFile(const NLMISC::CSString& fileName)
+uint32 readVersionFile(const NLMISC::CSString& fileName)
 {
 	if (!NLMISC::CFile::fileExists(fileName))
 	{
@@ -226,7 +227,7 @@ static uint32 readVersionFile(const NLMISC::CSString& fileName)
 	return s.strip().atoi();
 }
 
-static void writeVersionFile(const NLMISC::CSString& fileName, uint32 version)
+void writeVersionFile(const NLMISC::CSString& fileName, uint32 version)
 {
 	NLMISC::CSString(NLMISC::toString(version)).writeToFile(fileName);
 }

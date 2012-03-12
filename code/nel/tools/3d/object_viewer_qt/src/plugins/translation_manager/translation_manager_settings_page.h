@@ -24,13 +24,9 @@
 
 #include "ui_translation_manager_settings_page.h"
 
-class QWidget;
-
 namespace TranslationManager
 {
-/**
-@class CTranslationManagerSettingsPage
-*/
+
 class CTranslationManagerSettingsPage : public Core::IOptionsPage
 {
 	Q_OBJECT
@@ -44,23 +40,23 @@ public:
 	virtual QString trCategory() const;
 	virtual QIcon categoryIcon() const;
 	virtual QWidget *createPage(QWidget *parent);
-	
+
 	virtual void apply();
 	virtual void finish() {}
 private Q_SLOTS:
-        void filterAdd();
-        void filterDel();
-        void languageAdd();
-        void languageDel();
-        void translationAdd();
-        void workAdd();
+	void filterAdd();
+	void filterDel();
+	void languageAdd();
+	void languageDel();
+	void translationAdd();
+	void workAdd();
 private:
 	QWidget *_currentPage;
 	Ui::CTranslationManagerSettingsPage _ui;
-        void writeSettings();
-        void readSettings();
+	void writeSettings();
+	void readSettings();
 };
 
-} // namespace Plugin
+}
 
 #endif // TRANSLATION_MANAGER_SETTINGS_H

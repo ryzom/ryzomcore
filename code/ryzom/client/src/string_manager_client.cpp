@@ -34,6 +34,8 @@ namespace STRING_MANAGER
 
 	// ***************************************************************************
 	map<string, CStringManagerClient::CItem> CStringManagerClient::_SpecItem_TempMap;
+	map<ucstring, ucstring> CStringManagerClient::_DynStrings;
+	vector<ucstring> CStringManagerClient::_TitleWords;
 	bool CStringManagerClient::_SpecItem_MemoryCompressed = false;
 	char *CStringManagerClient::_SpecItem_Labels = NULL;
 	ucchar *CStringManagerClient::_SpecItem_NameDesc = NULL;
@@ -381,7 +383,15 @@ restartLoop4:
 				result = ucstring(tmp) + it->second;
 			}
 			else
+			{
 				result = it->second;
+				if (result.size() > 9 && result.substr(0, 9) == ucstring("<missing:")) 
+				{
+					map<ucstring, ucstring>::iterator itds = _DynStrings.find(result.substr(9, result.size()-10));
+					if (itds != _DynStrings.end())
+						result = itds->second;
+				}
+			}
 		}
 
 		return true;
@@ -1595,8 +1605,28 @@ const ucchar *CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CShee
 // ***************************************************************************
 const ucchar *CStringManagerClient::getTitleLocalizedName(const std::string &titleId, bool women)
 {
-	return getSpecialWord(titleId,women);
+	const ucchar * infos = getSpecialWord(titleId, women);
+	ucstring infosUC(infos);
+
+	vector<ucstring> listInfos;
+	splitUCString(infosUC, ucstring("#"), listInfos);
+	if (listInfos.empty())
+		return infos;
+
+	_TitleWords.push_back(listInfos[0]);
+	return _TitleWords.back().c_str();
 }
+
+vector<ucstring> CStringManagerClient::getTitleInfos(const std::string &titleId, bool women)
+{
+	const ucchar * infos = getSpecialWord(titleId, women);
+	ucstring infosUC(infos);
+
+	vector<ucstring> listInfos;
+	splitUCString(infosUC, ucstring("#"), listInfos);
+	return listInfos;
+}
+
 
 // ***************************************************************************
 const ucchar *CStringManagerClient::getClassificationTypeLocalizedName(EGSPD::CClassificationType::TClassificationType type)
@@ -1641,7 +1671,14 @@ const ucchar *CStringManagerClient::getSquadLocalizedDescription(NLMISC::CSheetI
 }
 
 // ***************************************************************************
-void		CStringManagerClient::replaceSBrickName(NLMISC::CSheetId id, const ucstring &name, const ucstring &desc, const ucstring &desc2)
+void CStringManagerClient::replaceDynString(const ucstring &name, const ucstring &text)
+{
+	_DynStrings[name] = text;
+}
+
+
+// ***************************************************************************
+void CStringManagerClient::replaceSBrickName(NLMISC::CSheetId id, const ucstring &name, const ucstring &desc, const ucstring &desc2)
 {
 	std::string	label= id.toString();
 	if (label.empty())

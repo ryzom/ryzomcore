@@ -507,7 +507,7 @@ void CUserEntity::updateVisualPropertyName(const NLMISC::TGameCycle &gameCycle, 
 	CPlayerCL::updateVisualPropertyName(gameCycle, prop);
 
 	// Name changed ?
-	if (oldNameId != _NameId)
+/*	if (oldNameId != _NameId)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInterfaceElement *element = pIM->getElementFromId("ui:interface:mailbox:content:html");
@@ -518,7 +518,7 @@ void CUserEntity::updateVisualPropertyName(const NLMISC::TGameCycle &gameCycle, 
 				html->browse("home");
 		}
 	}
-
+*/	
 }// updateVisualPropertyName //
 
 //-----------------------------------------------
@@ -2657,36 +2657,39 @@ void CUserEntity::selection(const CLFECOMMON::TCLEntityId &slot)	// virtual
 			playerGiftNeeded->setValue32(0);
 		}
 	}
+/* TODO ULU : Add RP tags */
 
 	// update pvp tags
-	CViewBase * tagView = dynamic_cast<CViewBase*>(pIM->getElementFromId("ui:interface:target:pvp_tags"));
-	CViewBase * contentView = dynamic_cast<CViewBase*>(pIM->getElementFromId("ui:interface:target:content"));
-
 	if ((tgtSlot!=CLFECOMMON::INVALID_SLOT) && entity)
 	{
 		CPlayerCL *pPlayer = dynamic_cast<CPlayerCL*>(entity);
 
 		if (pPlayer)
 		{
-			for (uint8 i = 0; i < 7; i++)
+			/*// Pvp Mode
+			CViewBitmap * tagMode = dynamic_cast<CViewBitmap*>(pIM->getElementFromId("ui:interface:target:pvp_tags:mode"));
+			if (tagMode)
 			{
-				CViewBitmap * tag = dynamic_cast<CViewBitmap*>(pIM->getElementFromId("ui:interface:target:pvp_tags:tag_"+toString(i)));
-				if (tag)
-				{
-					if ((pPlayer->getPvpMode()&PVP_MODE::PvpFaction || pPlayer->getPvpMode()&PVP_MODE::PvpFactionFlagged) && pPlayer->isPvpAlly(i))
-					{
-						tag->setTexture("pvp_ally_"+toString(i)+".tga");
-					}
-					else if ((pPlayer->getPvpMode()&PVP_MODE::PvpFaction || pPlayer->getPvpMode()&PVP_MODE::PvpFactionFlagged) && pPlayer->isPvpEnnemy(i))
-					{
-						tag->setTexture("pvp_enemy_"+toString(i)+".tga");
-					}
-					else
-					{
-						tag->setTexture("alpha_10.tga");
-					}
-				}
+				if (pPlayer->getPvpMode()&PVP_MODE::PvpFaction)
+					tagMode->setTexture("pvp_orange.tga");
+				else if (pPlayer->getPvpMode()&PVP_MODE::PvpFactionFlagged)
+					tagMode->setTexture("pvp_red.tga");
+				else
+					tagMode->setTexture("alpha_10.tga");
 			}
+*/
+			/*// Pvp available actions (attack, heal, both)
+			CViewBitmap * tagMode = dynamic_cast<CViewBitmap*>(pIM->getElementFromId("ui:interface:target:pvp_tags:actions"));
+			if (tagMode)
+			{
+				if (pPlayer->getPvpMode()&PVP_MODE::PvpFaction)
+					tag->setTexture("pvp_orange.tga");
+				else if (pPlayer->getPvpMode()&PVP_MODE::PvpFactionFlagged)
+					tag->setTexture("pvp_red.tga");
+				else
+					tag->setTexture("alpha_10.tga");
+			}*/
+
 		}
 	}
 
