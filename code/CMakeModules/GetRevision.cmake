@@ -3,17 +3,32 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6.3)
 # ROOT_DIR should be set to root of the repository (where to find the .svn or .hg directory)
 # SOURCE_DIR should be set to root of your code (where to find CMakeLists.txt)
 
-SET(CMAKE_MODULE_PATH "${SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
+# Replace spaces by semi-columns
+IF(CMAKE_MODULE_PATH)
+  STRING(REPLACE " " ";" CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
+ENDIF(CMAKE_MODULE_PATH)
+
+SET(CMAKE_MODULE_PATH ${SOURCE_DIR}/CMakeModules ${CMAKE_MODULE_PATH})
+
+IF(NOT ROOT_DIR AND SOURCE_DIR)
+  SET(ROOT_DIR ${SOURCE_DIR})
+ENDIF(NOT ROOT_DIR AND SOURCE_DIR)
+
+IF(NOT SOURCE_DIR AND ROOT_DIR)
+  SET(SOURCE_DIR ${ROOT_DIR})
+ENDIF(NOT SOURCE_DIR AND ROOT_DIR)
 
 MACRO(NOW RESULT)
   IF (WIN32)
     EXECUTE_PROCESS(COMMAND "wmic" "os" "get" "localdatetime" OUTPUT_VARIABLE DATETIME)
-    STRING(REGEX REPLACE ".*\n([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])([0-9][0-9])([0-9][0-9])([0-9][0-9]).*" "\\1-\\2-\\3 \\4:\\5:\\6" ${RESULT} ${DATETIME})
+    IF(NOT DATETIME MATCHES "ERROR")
+      STRING(REGEX REPLACE ".*\n([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])([0-9][0-9])([0-9][0-9])([0-9][0-9]).*" "\\1-\\2-\\3 \\4:\\5:\\6" ${RESULT} "${DATETIME}")
+    ENDIF(NOT DATETIME MATCHES "ERROR")
   ELSEIF(UNIX)
     EXECUTE_PROCESS(COMMAND "date" "+'%Y-%m-%d %H:%M:%S'" OUTPUT_VARIABLE ${RESULT})
   ELSE (WIN32)
     MESSAGE(SEND_ERROR "date not implemented")
-    SET(${RESULT} 000000)
+    SET(${RESULT} "0000-00-00 00:00:00")
   ENDIF (WIN32)
 ENDMACRO(NOW)
 
