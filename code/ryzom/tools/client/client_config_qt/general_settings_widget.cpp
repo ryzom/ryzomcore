@@ -90,7 +90,7 @@ void CGeneralSettingsWidget::onLanguageChanged()
 	}
 
 	currentTranslator = new QTranslator();
-	if( currentTranslator->load( QString( "ryzom_configuration_%1" ).arg( languageCodes[ i ] ) ) )
+	if( currentTranslator->load( QString( ":/translations/ryzom_configuration_%1" ).arg( languageCodes[ i ] ) ) )
 		qApp->installTranslator( currentTranslator );
 
 	emit changed();

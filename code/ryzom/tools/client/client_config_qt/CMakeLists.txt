@@ -1,17 +1,16 @@
 INCLUDE_DIRECTORIES(  ${CMAKE_CURRENT_BINARY_DIR}
                       ${CMAKE_CURRENT_SOURCE_DIR}
                       ${QT_INCLUDES} )
+
 FILE( GLOB SRC *.cpp *.h )
 
 SET( CLIENT_CONFIG_HDR
                       client_config_dialog.h
-                      config.h
                       display_settings_advanced_widget.h
                       display_settings_details_widget.h
                       display_settings_widget.h
                       general_settings_widget.h
                       sound_settings_widget.h
-                      system.h
                       sys_info_d3d_widget.h
                       sys_info_opengl_widget.h
                       sys_info_widget.h
@@ -30,21 +29,29 @@ SET( CLIENT_CONFIG_UIS
                       sys_info_widget.ui
 )
 
-SET( CLIENT_CONFIG_RCS resources.qrc )
+SET( CLIENT_CONFIG_TRANS
+                     translations/ryzom_configuration_en.ts
+                     translations/ryzom_configuration_hu.ts
+)
+
+CONFIGURE_FILE( translations/translations.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc COPYONLY )
+SET( CLIENT_CONFIG_RCS resources.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc )
 SET( QT_USE_QTGUI TRUE )
 SET( QT_USE_QTOPENGL TRUE )
 SET( QT_USE_QTCORE TRUE )
+QT4_ADD_TRANSLATION( CLIENT_CONFIG_QM ${CLIENT_CONFIG_TRANS} )
 QT4_ADD_RESOURCES( CLIENT_CONFIG_RC_SRCS ${CLIENT_CONFIG_RCS} )
 QT4_WRAP_CPP( CLIENT_CONFIG_MOC_SRC ${CLIENT_CONFIG_HDR} )
 QT4_WRAP_UI( CLIENT_CONFIG_UI_HDRS ${CLIENT_CONFIG_UIS} )
-SOURCE_GROUP( "Resources" FILES ${CLIENT_CONFIG_UIS} ${CLIENT_CONFIG_RCS} )
+SOURCE_GROUP( "Resources" FILES ${CLIENT_CONFIG_RCS} )
+SOURCE_GROUP( "Forms" FILES ${CLIENT_CONFIG_UIS} )
 SOURCE_GROUP( "Generated Files" FILES ${CLIENT_CONFIG_UI_HDRS} ${CLIENT_CONFIG_MOC_SRC} )
-SOURCE_GROUP( "Sources" FILES ${SRC} )
+SOURCE_GROUP( "Translation Files" FILES ${CLIENT_CONFIG_TRANS} )
 ADD_DEFINITIONS( ${QT_DEFINITIONS} )
-ADD_EXECUTABLE( ryzom_configuration_qt ${SRC} ${CLIENT_CONFIG_MOC_SRC} ${CLIENT_CONFIG_UI_HDRS} ${CLIENT_CONFIG_RC_SRCS} )
+ADD_EXECUTABLE( ryzom_configuration_qt WIN32 MACOSX_BUNDLE ${SRC} ${CLIENT_CONFIG_MOC_SRC} ${CLIENT_CONFIG_UI_HDRS} ${CLIENT_CONFIG_RC_SRCS} ${CLIENT_CONFIG_TRANS} )
 NL_DEFAULT_PROPS( ryzom_configuration_qt "Ryzom, Tools: Ryzom Configuration Qt" )
 NL_ADD_RUNTIME_FLAGS( ryzom_configuration_qt )
 NL_ADD_LIB_SUFFIX( ryzom_configuration_qt )
-TARGET_LINK_LIBRARIES( ryzom_configuration_qt nelmisc nel3d ${QT_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} ${OPENGL_gl_LIBRARY} )
+TARGET_LINK_LIBRARIES( ryzom_configuration_qt nelmisc nel3d ${QT_LIBRARIES} ${QT_QTMAIN_LIBRARY} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} ${OPENGL_gl_LIBRARY} )
 INSTALL( TARGETS ryzom_configuration_qt RUNTIME DESTINATION games COMPONENT client BUNDLE DESTINATION /Applications )
 
