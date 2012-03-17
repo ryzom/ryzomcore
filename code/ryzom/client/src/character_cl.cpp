@@ -1878,6 +1878,8 @@ void CCharacterCL::updateVisualPropertyPvpClan(const NLMISC::TGameCycle &/* game
 {
 	_LeagueId = uint32(prop);
 
+	buildInSceneInterface();
+
 	if (isUser())
 	{
 		uint i;
