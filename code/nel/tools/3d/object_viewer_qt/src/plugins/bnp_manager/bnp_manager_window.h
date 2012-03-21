@@ -59,8 +59,13 @@ public:
 public Q_SLOTS:
 
 	/**
-	 * Open a file dialog to choose which file should be opened.
+	 * Create a new file
 	 * \return Filename string 
+	 */
+	void newFile();
+
+	/**
+	 * Open a file dialog to choose which file should be opened.
 	 */
     void open();
 
@@ -81,6 +86,7 @@ public Q_SLOTS:
 	 * \param Filelist
 	 */
     void addFiles();
+	void addFiles( QStringList FileList );
 
 	/**
 	 * Unpack the files marked in the filelist dialog into user defined 
@@ -95,6 +101,10 @@ public Q_SLOTS:
 	 * \param TBD
 	 */
     void deleteFiles();
+
+protected:
+	void dragEnterEvent (QDragEnterEvent *event);
+	void dropEvent(QDropEvent *event);
 
 private:
 
@@ -126,6 +136,7 @@ private:
 	QToolBar *m_fileToolBar;
 	QToolBar *m_toolsBar;
 
+	QAction *m_newAction;
     QAction *m_openAction;
     QAction *m_closeAction;
     QAction *m_addFilesAction;
