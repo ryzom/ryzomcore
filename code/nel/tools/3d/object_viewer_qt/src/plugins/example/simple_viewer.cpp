@@ -29,19 +29,19 @@
 namespace Plugin
 {
 
-CSimpleViewer::CSimpleViewer(QWidget *parent)
+SimpleViewer::SimpleViewer(QWidget *parent)
 	: QWidget(parent)
 {
 	QGridLayout *gridLayout = new QGridLayout(this);
 	gridLayout->setObjectName(QString::fromUtf8("gridLayoutSimpleViewer"));
 	gridLayout->setContentsMargins(0, 0, 0, 0);
-	NLQT::QNLWidget *_nelWidget = new NLQT::QNLWidget(this);
-	gridLayout->addWidget(_nelWidget, 0, 0, 1, 1);
+	NLQT::QNLWidget *m_nelWidget = new NLQT::QNLWidget(this);
+	gridLayout->addWidget(m_nelWidget, 0, 0, 1, 1);
 
 	m_undoStack = new QUndoStack(this);
 }
 
-bool CCoreListener::closeMainWindow() const
+bool ExampleCoreListener::closeMainWindow() const
 {
 	int ret = QMessageBox::question(0, tr("Example close event hook"),
 									tr("Do you want to close window?"),

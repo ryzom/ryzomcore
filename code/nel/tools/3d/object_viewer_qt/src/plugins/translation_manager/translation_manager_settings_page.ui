@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CTranslationManagerSettingsPage</class>
+ <widget class="QWidget" name="CTranslationManagerSettingsPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>589</width>
+    <height>490</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_5">
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Translation Manager Plugin</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="0">
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Filters</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="filter_edit"/>
+        </item>
+        <item row="0" column="2">
+         <widget class="QToolButton" name="filter_add">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../core/core.qrc">
+            <normaloff>:/core/icons/ic_nel_add_item.png</normaloff>:/core/icons/ic_nel_add_item.png</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QToolButton" name="filter_del">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../core/core.qrc">
+            <normaloff>:/core/icons/ic_nel_delete_item.png</normaloff>:/core/icons/ic_nel_delete_item.png</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>Languages</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
+         <widget class="QLineEdit" name="lang_edit"/>
+        </item>
+        <item row="0" column="6">
+         <widget class="QToolButton" name="lang_add">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../core/core.qrc">
+            <normaloff>:/core/icons/ic_nel_add_item.png</normaloff>:/core/icons/ic_nel_add_item.png</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="7">
+         <widget class="QToolButton" name="lang_del">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../core/core.qrc">
+            <normaloff>:/core/icons/ic_nel_delete_item.png</normaloff>:/core/icons/ic_nel_delete_item.png</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="4">
+         <widget class="QListWidget" name="filter_list"/>
+        </item>
+        <item row="1" column="4" colspan="4">
+         <widget class="QListWidget" name="lang_list"/>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="0">
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Work directory</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLineEdit" name="work_edit"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="QToolButton" name="work_add">
+          <property name="text">
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="0">
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Translation directory</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLineEdit" name="translation_edit"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="QToolButton" name="translation_add">
+          <property name="text">
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../core/core.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -59,7 +59,7 @@ public:
 	CGraphicsViewport(QWidget *parent);
 	virtual ~CGraphicsViewport();
 
-	virtual QPaintEngine* paintEngine() const
+	virtual QPaintEngine *paintEngine() const
 	{
 		return NULL;
 	}

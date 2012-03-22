@@ -824,6 +824,21 @@ void CInterfaceManager::initInGame()
 	{
 		gc->setTarget(gc->getSavedTarget());
 	}
+
+	CCDBNodeLeaf *node = getDbProp("UI:SAVE:CHATLOG_STATE", false);
+	if (node)
+	{
+		_LogState = (node->getValue32() != 0);
+	}
+
+	if (_LogState)
+	{
+		displaySystemInfo(CI18N::get("uiLogTurnedOn"));
+	}
+	else
+	{
+		displaySystemInfo(CI18N::get("uiLogTurnedOff"));
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -2372,6 +2387,7 @@ void CInterfaceManager::drawContextHelp ()
 			if(newCtrl)
 			{
 				// get the text
+				//newCtrl->getContextHelpToolTip(_ContextHelpText);
 				newCtrl->getContextHelp(_ContextHelpText);
 				// UserDefined context help
 				if( !newCtrl->getContextHelpActionHandler().empty() )
@@ -3409,6 +3425,13 @@ CCDBNodeLeaf* CInterfaceManager::getDbProp(const std::string & name, bool bCreat
 }
 
 // ------------------------------------------------------------------------------------------------
+void CInterfaceManager::delDbProp(const std::string & name)
+{
+	if (name.empty()) return;
+	_DbRootNode->removeNode( ICDBNode::CTextId(name) );
+}
+
+// ------------------------------------------------------------------------------------------------
 CCDBNodeBranch *CInterfaceManager::getDbBranch(const std::string &name)
 {
 	if (name.empty()) return NULL;
@@ -4381,12 +4404,14 @@ void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat
 		}
 	}
 
+	if (mode == CClientConfig::SSysInfoParam::Center || mode == CClientConfig::SSysInfoParam::CenterAround)
+		InSceneBubbleManager.addMessagePopupCenter(str, color);
+
 	// If over popup a string at the bottom of the screen
 	if ((mode == CClientConfig::SSysInfoParam::Over) || (mode == CClientConfig::SSysInfoParam::OverOnly))
 		InSceneBubbleManager.addMessagePopup(str, color);
-	else if (mode == CClientConfig::SSysInfoParam::Center)
-		InSceneBubbleManager.addMessagePopupCenter(str, color);
-	else if (mode == CClientConfig::SSysInfoParam::Around && PeopleInterraction.AroundMe.Window)
+	else if ( (mode == CClientConfig::SSysInfoParam::Around || mode == CClientConfig::SSysInfoParam::CenterAround) 
+		&& PeopleInterraction.AroundMe.Window)
 		PeopleInterraction.ChatInput.AroundMe.displayMessage(str, color, 2);
 }
 
@@ -5759,7 +5784,7 @@ bool	CInterfaceManager::executeLuaScript(const std::string &luaScript, bool smal
 		std::string msg = e.luaWhat();
 		char filename[MAX_PATH];
 		char exceptionName[MAX_PATH];
-		int line;
+		uint32 line;
 		// Hamster: quick fix on AJM code but sscanf is still awfull
 		if (sscanf(msg.c_str(), "%s: %s.lua:%d:",exceptionName, filename, &line) == 3) // NB: test not exact here, but should work in 99,9 % of cases
 		{
@@ -5770,6 +5795,20 @@ bool	CInterfaceManager::executeLuaScript(const std::string &luaScript, bool smal
 		else	// AJM: handle the other 0.1% of cases
 		{
 			// Yoyo: seems that previous test doesn't work.... btw, must still print the message please...
+			std::vector<string> error;
+			splitString(msg.c_str(), ":", error);
+			if (error.size() > 3)
+			{
+				std::vector<string> contextList;
+				explode(luaScript, string("\n"), contextList);
+				fromString(error[2], line);
+				if (line >= 3 && contextList.size() >= line)
+					msg = error[0]+": \n>>> "+contextList[line-3]+"\n>>> "+contextList[line-2]+"\n>>> "+contextList[line-1]+"\nError:"+error[2]+": "+error[3];
+				else if (line >= 2 && contextList.size() >= line)
+					msg = error[0]+": \n>>>"+contextList[line-2]+"\n>>>"+contextList[line-1]+"\nError:"+error[2]+": "+error[3];
+				else if (line >= 1 && contextList.size() >= line)
+					msg = error[0]+": \n>>>"+contextList[line-1]+"\nError:"+error[2]+": "+error[3];
+			}
 			nlwarning(formatLuaErrorNlWarn(msg).c_str());
 			displaySystemInfo(formatLuaErrorSysInfo(msg));
 		}
@@ -6374,7 +6413,7 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		// Get everything between the two "$"
 		size_t token_start_pos = start_pos + start_token.length();
 		size_t token_end_pos   = end_pos - end_token.length();
-		if (token_start_pos < token_end_pos)
+		if (token_start_pos > token_end_pos)
 		{
 			// Wrong formatting; give up on this one.
 			start_pos = end_pos;

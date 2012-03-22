@@ -2889,6 +2889,7 @@ bool mainLoop()
 		// This code must remain at the very end of the main loop.
 		if(LoginSM.getCurrentState() == CLoginStateMachine::st_enter_far_tp_main_loop)
 		{
+			CInterfaceManager::getInstance()->executeLuaScript("game:onFarTpStart()");
 			// Will loop the network until the end of the relogging process
 			FarTP.farTPmainLoop();
 
@@ -2965,6 +2966,8 @@ bool mainLoop()
 			// Get the Connection State (must be done after any Far TP to prevent the uiDisconnected box to be displayed)
 			lastConnectionState = CNetworkConnection::Connected;
 			connectionState = NetMngr.getConnectionState();
+
+			CInterfaceManager::getInstance()->executeLuaScript("game:onFarTpEnd()");
 		}
 
 	} // end of main loop

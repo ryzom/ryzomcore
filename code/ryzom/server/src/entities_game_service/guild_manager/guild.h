@@ -27,9 +27,14 @@
 #include "outpost_manager/outpost_guild_db_updater.h"
 #include "guild_interface.h"
 #include "database_guild.h"
+#include "mission_manager/mission_guild.h"
 
 class CMissionGuild;
 class CGuildMember;
+
+/* Storage class for mission history data.
+*/
+struct TMissionHistory;
 
 
 /**
@@ -176,9 +181,36 @@ public:
 
 	///\name Mission management
 	//@{
-	void removeMission(CMissionGuild * mission, TMissionResult result);
+	void removeMission(CMissionGuild * mission, TMissionResult result)
+	{
+		for (uint i = 0; i < _Missions.size(); i++)
+		{
+			if ( _Missions[i] == mission )
+			{
+				removeMission(i, result);
+			}
+		}
+	}
+	void removeMission( uint idx, TMissionResult result);
 	void addSuccessfulMission(CMissionTemplate * templ);
+	void clearSuccessfulMissions();
+	void updateMissionHistories(TAIAlias missionAlias, uint32 result);
 	bool processMissionEvent( CMissionEvent & event, TAIAlias alias = CAIAliasTranslator::Invalid);
+	bool processGuildMissionEvent(std::list< CMissionEvent * > & eventList, TAIAlias missionAlias );
+	bool processGuildMissionStepEvent(std::list< CMissionEvent* > & eventList, TAIAlias missionAlias, uint32 stepIndex);
+	CMissionGuild* getMissionByAlias( TAIAlias missionAlias );
+	bool isMissionSuccessfull(TAIAlias alias);
+	void sendDynamicMessageToMembers(const std::string &msgName, const TVectorParamCheck &params, const std::set<NLMISC::CEntityId> &excluded) const;
+	///\return the mission
+	inline std::vector<CMissionGuild*> & getMissions()
+	{
+		return _Missions;
+	}
+	void addMission(CMissionGuild* guildMission)
+	{
+		_Missions.push_back(guildMission);
+		guildMission->updateUsersJournalEntry();
+	}
 	//@}
 
 	/// inventory management
@@ -203,7 +235,23 @@ public:
 		return _Inventory->getItem(slot);
 	}
 	/// add an item in the guild inventory (item can be deleted if not inserted : do not use it anymore in any case!)
-	void putItem( CGameItemPtr item );
+	bool putItem( CGameItemPtr item );
+
+	class CItemSlotId
+	{
+	public:
+		uint32						Slot;
+		uint32						Quality;
+		bool	operator<(const CItemSlotId &o) const
+		{
+			return Quality<o.Quality;
+		}
+	};
+
+	/// check the presence of an item (or several items in a stack) by its sheetId/quality
+	uint selectItems(NLMISC::CSheetId itemSheetId, uint32 quality, std::vector<CItemSlotId> *itemList= NULL);
+	/// destroy a list of items (up to maxQuantity to destroy)
+	uint destroyItems(const std::vector<CItemSlotId> &itemSlots, uint32 maxQuantity=-1);
 
 	/// return the inventory (const)
 	const NLMISC::CSmartPtr<CGuildInventory>& getInventory() const { return _Inventory; }
@@ -350,6 +398,11 @@ private:
 	std::vector<TAIAlias>				_OwnedOutposts;
 	/// list of outposts challenged by guild
 	std::vector<TAIAlias>				_ChallengedOutposts;
+
+	///the missions took by the guild
+	std::vector<CMissionGuild*>			_Missions;
+	/// Successful missions
+	std::map<TAIAlias, TMissionHistory> _MissionHistories;
 
 	NLMISC_COMMAND_FRIEND( guildDB );
 };

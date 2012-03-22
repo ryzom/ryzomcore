@@ -34,6 +34,7 @@ extern "C"
 #include "view_link.h"
 #include "ctrl_scroll.h"
 #include "ctrl_button.h"
+#include "dbctrl_sheet.h"
 #include "ctrl_text_button.h"
 #include "action_handler.h"
 #include "group_paragraph.h"
@@ -62,6 +63,55 @@ using namespace NLMISC;
 
 CGroupHTML *CGroupHTML::_ConnectingLock = NULL;
 extern CActionsContext ActionsContext;
+
+// Check if domain is on TrustedDomain
+bool CGroupHTML::isTrustedDomain(const string &domain)
+{
+	vector<string>::iterator it;
+	it = find (ClientCfg.WebIgTrustedDomains.begin(), ClientCfg.WebIgTrustedDomains.end(), domain);
+	return it != ClientCfg.WebIgTrustedDomains.end();
+}
+
+void CGroupHTML::setImage(CViewBase * view, const string &file)
+{
+	CCtrlButton *btn = dynamic_cast<CCtrlButton*>(view);
+	if(btn)
+	{
+		btn->setTexture (file);
+		btn->setTexturePushed(file);
+		btn->invalidateCoords();
+		btn->invalidateContent();
+		btn->resetInvalidCoords();
+		btn->updateCoords();
+		paragraphChange();
+	}
+	else
+	{
+		CViewBitmap *btm = dynamic_cast<CViewBitmap*>(view);
+		if(btm)
+		{
+			btm->setTexture (file);
+			btm->invalidateCoords();
+			btm->invalidateContent();
+			btm->resetInvalidCoords();
+			btm->updateCoords();
+			paragraphChange();
+		}
+		else
+		{
+			CGroupCell *btgc = dynamic_cast<CGroupCell*>(view);
+			if(btgc)
+			{
+				btgc->setTexture (file);
+				btgc->invalidateCoords();
+				btgc->invalidateContent();
+				btgc->resetInvalidCoords();
+				btgc->updateCoords();
+				paragraphChange();
+			}
+		}
+	}
+}
 
 // Get an url and return the local filename with the path where the url image should be
 string CGroupHTML::localImageName(const string &url)
@@ -92,30 +142,38 @@ void CGroupHTML::addImageDownload(const string &url, CViewBase *img)
 	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
-	string dest = localImageName(url)+".tmp";
+	string dest = localImageName(url);
+	string tmpdest = localImageName(url)+".tmp";
 #ifdef LOG_DL
 	nlwarning("add to download '%s' dest '%s' img %p", url.c_str(), dest.c_str(), img);
 #endif
-	// create the local file
-	if (NLMISC::CFile::fileExists(dest))
-	{
-		CFile::setRWAccess(dest);
-		NLMISC::CFile::deleteFile(dest);
-	}
-	FILE *fp = fopen (dest.c_str(), "wb");
-	if (fp == NULL)
-	{
-		nlwarning("Can't open file '%s' for writing: code=%d '%s'", dest.c_str (), errno, strerror(errno));
-		return;
-	}
-	curl_easy_setopt(curl, CURLOPT_FILE, fp);
 
-	curl_multi_add_handle(MultiCurl, curl);
-	Curls.push_back(CDataDownload(curl, url, fp, ImgType, img, "", ""));
-#ifdef LOG_DL
-	nlwarning("adding handle %x, %d curls", curl, Curls.size());
-#endif
-	RunningCurls++;
+		// erase the tmp file if exists
+	if (NLMISC::CFile::fileExists(tmpdest))
+		NLMISC::CFile::deleteFile(tmpdest);
+
+	if (!NLMISC::CFile::fileExists(dest))
+	{
+
+		FILE *fp = fopen (tmpdest.c_str(), "wb");
+		if (fp == NULL)
+		{
+			nlwarning("Can't open file '%s' for writing: code=%d '%s'", tmpdest.c_str (), errno, strerror(errno));
+			return;
+		}
+		curl_easy_setopt(curl, CURLOPT_FILE, fp);
+
+		curl_multi_add_handle(MultiCurl, curl);
+		Curls.push_back(CDataDownload(curl, url, fp, ImgType, img, "", ""));
+	#ifdef LOG_DL
+		nlwarning("adding handle %x, %d curls", curl, Curls.size());
+	#endif
+		RunningCurls++;
+	}
+	else
+	{
+		setImage(img, dest);
+	}
 }
 
 void CGroupHTML::initImageDownload()
@@ -180,7 +238,7 @@ bool CGroupHTML::addBnpDownload(const string &url, const string &action, const s
 		}
 		else
 		{
-			return true;	
+			return true;
 		}
 	}
 	if (action != "delete")
@@ -215,6 +273,9 @@ bool CGroupHTML::addBnpDownload(const string &url, const string &action, const s
 
 void CGroupHTML::initBnpDownload()
 {
+	if (!_TrustedDomain)
+		return;
+
 #ifdef LOG_DL
 	nlwarning("Init Bnp Download");
 #endif
@@ -287,41 +348,11 @@ void CGroupHTML::checkDownloads()
 									for(uint i = 0; i < it->imgs.size(); i++)
 									{
 										// don't display image that are not power of 2
-										uint32 w, h;
-										CBitmap::loadSize (file, w, h);
-										if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
-											file.clear();
-
-										CCtrlButton *btn = dynamic_cast<CCtrlButton*>(it->imgs[i]);
-										if(btn)
-										{
-	#ifdef LOG_DL
-											nlwarning("refresh new downloading image %d button %p", i, it->imgs[i]);
-	#endif
-											btn->setTexture (file);
-											btn->setTexturePushed(file);
-											btn->invalidateCoords();
-											btn->invalidateContent();
-											btn->resetInvalidCoords();
-											btn->updateCoords();
-											paragraphChange();
-										}
-										else
-										{
-											CViewBitmap *btm = dynamic_cast<CViewBitmap*>(it->imgs[i]);
-											if(btm)
-											{
-	#ifdef LOG_DL
-												nlwarning("refresh new downloading image %d image %p", i, it->imgs[i]);
-	#endif
-												btm->setTexture (file);
-												btm->invalidateCoords();
-												btm->invalidateContent();
-												btm->resetInvalidCoords();
-												btm->updateCoords();
-												paragraphChange();
-											}
-										}
+										//uint32 w, h;
+										//CBitmap::loadSize (file, w, h);
+										//if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
+										//	file.clear();
+										setImage(it->imgs[i], file);
 									}
 								}
 							}
@@ -330,7 +361,6 @@ void CGroupHTML::checkDownloads()
 								CFile::moveFile(file.c_str(), (file+".tmp").c_str());
 								if (lookupLocalFile (finalUrl, file.c_str(), false))
 								{
-									
 									CInterfaceManager *pIM = CInterfaceManager::getInstance();
 									pIM->executeLuaScript(it->luaScript, true);
 								}
@@ -436,6 +466,28 @@ void CGroupHTML::beginBuild ()
 }
 
 
+TStyle CGroupHTML::parseStyle (const string &str_styles)
+{
+	TStyle	styles;
+	vector<string> elements;
+	NLMISC::splitString(str_styles, ";", elements);
+
+	for(uint i = 0; i < elements.size(); ++i)
+	{
+		vector<string> style;
+		NLMISC::splitString(elements[i], ":", style);
+		if (style.size() >= 2)
+		{
+			string fullstyle = style[1];
+			for (uint j=2; j < style.size(); j++)
+				fullstyle += ":"+style[j];
+			styles[trim(style[0])] = fullstyle;
+		}
+	}
+
+	return styles;
+}
+
 // ***************************************************************************
 
 void CGroupHTML::addText (const char * buf, int len)
@@ -452,7 +504,7 @@ void CGroupHTML::addText (const char * buf, int len)
 //		for (i=0; i<(uint)len; i++)
 //			inputString[i] = buf[i];
 
-		if (_ParsingLua)
+		if (_ParsingLua && _TrustedDomain)
 		{
 			// we are parsing a lua script
 			_LuaScript += inputString;
@@ -523,15 +575,15 @@ void CGroupHTML::addLink (uint element_number, uint /* attribute_number */, HTCh
 			if (present[MY_HTML_A_HREF] && value[MY_HTML_A_HREF])
 			{
 				string suri = value[MY_HTML_A_HREF];
-				if(suri.find("ah:") == 0)
+				if(_TrustedDomain && suri.find("ah:") == 0)
 				{
 					// in ah: command we don't respect the uri standard so the HTAnchor_address doesn't work correctly
 					_Link.push_back (suri);
 				}
-				else if (suri[0] == '#')
+				else if (_TrustedDomain && suri[0] == '#')
 				{
 					// Direct url (hack for lua beginElement)
-					_Link.push_back (suri.substr(1));	
+					_Link.push_back (suri.substr(1));
 				}
 				else
 				{
@@ -546,9 +598,31 @@ void CGroupHTML::addLink (uint element_number, uint /* attribute_number */, HTCh
 						_Link.push_back("");
 					}
 				}
+
+				for(uint8 i = MY_HTML_A_ACCESSKEY; i < MY_HTML_A_Z_ACTION_SHORTCUT; i++)
+				{
+					if (present[i] && value[i])
+					{
+						string title = value[i];
+					//	nlinfo("key %d = %s", i, title.c_str());
+					}
+				}
+				//nlinfo("key of TITLE is : %d", MY_HTML_A_Z_ACTION_PARAMS);
+				if (present[MY_HTML_A_Z_ACTION_PARAMS] && value[MY_HTML_A_Z_ACTION_PARAMS])
+				{
+					string title = value[MY_HTML_A_Z_ACTION_PARAMS];
+					_LinkTitle.push_back(title);
+				}
+				else
+					_LinkTitle.push_back("");
 			}
 			else
+			{
 				_Link.push_back("");
+				_LinkTitle.push_back("");
+			}
+
+			
 		}
 	}
 }
@@ -615,7 +689,6 @@ static const char *scanColorComponent(const char *src, uint8 &intensity)
 	intensity = value;
 	return src;
 }
-
 
 class CNameToCol
 {
@@ -821,8 +894,13 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 			_GlobalColor.push_back(LinkColorGlobalColor);
 			_A.push_back(true);
 
+			if (present[MY_HTML_A_TITLE] && value[MY_HTML_A_TITLE])
+				_LinkTitle.push_back(value[MY_HTML_A_TITLE]);
+			if (present[MY_HTML_A_CLASS] && value[MY_HTML_A_CLASS])
+				_LinkClass.push_back(value[MY_HTML_A_CLASS]);
+
 			// Quick help
-			if (present[MY_HTML_A_Z_ACTION_SHORTCUT] && value[MY_HTML_A_Z_ACTION_SHORTCUT])
+			if (_TrustedDomain && present[MY_HTML_A_Z_ACTION_SHORTCUT] && value[MY_HTML_A_Z_ACTION_SHORTCUT])
 			{
 				// Get the action category
 				string category;
@@ -846,15 +924,87 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 					}
 				}
 			}
+
 			break;
 		case HTML_DIV:
 		{
 			if (present[MY_HTML_DIV_NAME] && value[MY_HTML_DIV_NAME])
-			{
 				_DivName = value[MY_HTML_DIV_NAME];
+
+			string instClass;
+			if (present[MY_HTML_DIV_CLASS] && value[MY_HTML_DIV_CLASS])
+				instClass = value[MY_HTML_DIV_CLASS];
+
+			// use generic template system
+			if (_TrustedDomain && !instClass.empty() && instClass == "ryzom-ui-grouptemplate")
+			{
+				string id;
+				if (present[MY_HTML_DIV_ID] && value[MY_HTML_DIV_ID])
+					id = value[MY_HTML_DIV_ID];
+
+				string style;
+				if (present[MY_HTML_DIV_STYLE] && value[MY_HTML_DIV_STYLE])
+					style = value[MY_HTML_DIV_STYLE];
+
+				typedef pair<string, string> TTmplParam;
+				vector<TTmplParam> tmplParams;
+				
+				string templateName;
+				if (!style.empty())
+				{
+					TStyle styles = parseStyle(style);
+					TStyle::iterator	it;
+					for (it=styles.begin(); it != styles.end(); it++)
+					{
+						if ((*it).first == "template")
+							templateName = (*it).second;
+						else
+							tmplParams.push_back(TTmplParam((*it).first, (*it).second));
+					}
+				}
+
+				if (!templateName.empty())
+				{
+					string parentId;
+					bool haveParentDiv = getDiv() != NULL;
+					if (haveParentDiv)
+						parentId = getDiv()->getId();
+					else
+						parentId = _Paragraph->getId();
+
+					CInterfaceManager *im = CInterfaceManager::getInstance();
+					CInterfaceGroup *inst = im->createGroupInstance(templateName, parentId+":"+id, tmplParams);
+					if (inst)
+					{
+						inst->setId(parentId+":"+id);
+						inst->updateCoords();
+						if (haveParentDiv)
+						{
+								inst->setParent(getDiv());
+								inst->setParentSize(getDiv());
+								inst->setParentPos(getDiv());
+								inst->setPosRef(Hotspot_TL);
+								inst->setParentPosRef(Hotspot_TL);
+								getDiv()->addGroup(inst);
+						}
+						else
+						{
+							if (!_Paragraph)
+							{
+								newParagraph (0);
+								paragraphChange ();
+							}
+
+							getParagraph()->addChild(inst);
+							paragraphChange();
+						}
+						_Divs.push_back(inst);
+					}
+				}
 			}
 		}
 			break;
+
 		case HTML_FONT:
 		{
 			bool found = false;
@@ -888,11 +1038,42 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 			addString(ucstring ("\n"));
 			break;
 		case HTML_BODY:
-			if (present[HTML_BODY_BGCOLOR] && value[HTML_BODY_BGCOLOR])
 			{
-				// Get the color
-				CRGBA bgColor = getColor (value[HTML_BODY_BGCOLOR]);
-				setBackgroundColor (bgColor);
+				if (present[HTML_BODY_BGCOLOR] && value[HTML_BODY_BGCOLOR])
+				{
+					CRGBA bgColor = getColor (value[HTML_BODY_BGCOLOR]);
+					setBackgroundColor (bgColor);
+				}
+				
+				string style;
+				if (present[HTML_BODY_STYLE] && value[HTML_BODY_STYLE])
+					style = value[HTML_BODY_STYLE];
+				
+				
+				if (!style.empty())
+				{
+					TStyle styles = parseStyle(style);
+					TStyle::iterator	it;
+
+					it = styles.find("background-repeat");
+					bool repeat = (it != styles.end() && it->second == "1");
+					
+					// Webig only
+					it = styles.find("background-scale");
+					bool scale = (it != styles.end() && it->second == "1");
+
+					it = styles.find("background-image");
+					if (it != styles.end())
+					{
+						string image = it->second;
+						string::size_type texExt = strlwr(image).find("url(");
+						// Url image
+						if (texExt != string::npos)
+							// Remove url()
+							image = image.substr(4, image.size()-5);
+						setBackground (image, scale, repeat);
+					}
+				}
 			}
 			break;
 		case HTML_FORM:
@@ -990,7 +1171,24 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 					}
 					else
 					{
-						addImage (value[MY_HTML_IMG_SRC], globalColor);
+						// Get the option to reload (class==reload)
+						bool reloadImg = false;
+
+						string style;
+						if (present[MY_HTML_IMG_STYLE] && value[MY_HTML_IMG_STYLE])
+							style = value[MY_HTML_IMG_STYLE];
+
+						if (!style.empty())
+						{
+							TStyle styles = parseStyle(style);
+							TStyle::iterator	it;
+
+							it = styles.find("reload");
+							if (it != styles.end() && (*it).second == "1")
+								reloadImg = true;
+						}
+						
+						addImage (value[MY_HTML_IMG_SRC], globalColor, reloadImg);
 					}
 				}
 			}
@@ -1302,8 +1500,43 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 					if (!_Cells.empty())
 					{
 						_Cells.back() = new CGroupCell(CViewBase::TCtorParam());
+						string style;
+						if (present[MY_HTML_TD_STYLE] && value[MY_HTML_TD_STYLE])
+							style = value[MY_HTML_TD_STYLE];
 
 						// Set the cell parameters
+						if (!style.empty())
+						{
+							TStyle styles = parseStyle(style);
+							TStyle::iterator	it;
+
+							it = styles.find("background-repeat");
+							_Cells.back()->setTextureTile(it != styles.end());
+
+							// Webig only
+							it = styles.find("background-scale");
+							_Cells.back()->setTextureScale(it != styles.end());
+
+							it = styles.find("background-image");
+							if (it != styles.end())
+							{
+								nlinfo("found background-image %s", it->second.c_str());
+								string image = (*it).second;
+								string::size_type texExt = strlwr(image).find("url(");
+								// Url image
+								if (texExt != string::npos)
+								{
+									// Remove url()
+									image = image.substr(4, image.size()-5);
+									addImageDownload(image, _Cells.back());
+								// Image in BNP
+								}
+								else
+								{
+									_Cells.back()->setTexture(image);
+								}
+							}
+						}
 						_Cells.back()->BgColor = _CellParams.back().BgColor;
 						_Cells.back()->Align = _CellParams.back().Align;
 						_Cells.back()->VAlign = _CellParams.back().VAlign;
@@ -1425,6 +1658,8 @@ void CGroupHTML::endElement (uint element_number)
 			popIfNotEmpty (_GlobalColor);
 			popIfNotEmpty (_A);
 			popIfNotEmpty (_Link);
+			popIfNotEmpty (_LinkTitle);
+			popIfNotEmpty (_LinkClass);
 			break;
 		case HTML_H1:
 		case HTML_H2:
@@ -1442,6 +1677,7 @@ void CGroupHTML::endElement (uint element_number)
 			break;
 		case HTML_DIV:
 			_DivName = "";
+			popIfNotEmpty (_Divs);
 			break;
 
 		case HTML_TABLE:
@@ -1532,19 +1768,23 @@ void CGroupHTML::endElement (uint element_number)
 			_IgnoreText = false;
 			break;
 		case HTML_OBJECT:
-			if (_ObjectType=="application/ryzom-data")
+			if (_TrustedDomain)
 			{
-				if (!_ObjectData.empty())
+				if (_ObjectType=="application/ryzom-data")
 				{
-					if (addBnpDownload(_ObjectData, _ObjectAction, _ObjectScript, _ObjectMD5Sum))
+					if (!_ObjectData.empty())
 					{
-						CInterfaceManager *pIM = CInterfaceManager::getInstance();
-						pIM->executeLuaScript(_ObjectScript, true);
+						if (addBnpDownload(_ObjectData, _ObjectAction, _ObjectScript, _ObjectMD5Sum))
+						{
+							CInterfaceManager *pIM = CInterfaceManager::getInstance();
+							pIM->executeLuaScript("\nlocal __ALLREADYDL__=true\n"+_ObjectScript, true);
+						}
+						_ObjectScript = "";
 					}
-					_ObjectScript = "";
 				}
+				_Object = false;
 			}
-			_Object = false;
+			break;
 		}
 	}
 }
@@ -1556,7 +1796,7 @@ void CGroupHTML::beginUnparsedElement(const char *buffer, int length)
 	if (stricmp(str.c_str(), "lua") == 0)
 	{
 		// we receive an embeded lua script
-		_ParsingLua = true;
+		_ParsingLua = _TrustedDomain; // Only parse lua if TrustedDomain
 		_LuaScript = "";
 	}
 }
@@ -1567,11 +1807,12 @@ void CGroupHTML::endUnparsedElement(const char *buffer, int length)
 	string str(buffer, buffer+length);
 	if (stricmp(str.c_str(), "lua") == 0)
 	{
-		if (_ParsingLua)
+		if (_ParsingLua && _TrustedDomain)
 		{
 			_ParsingLua = false;
 			// execute the embeded lua script
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
+			_LuaScript = "\nlocal __CURRENT_WINDOW__=\""+this->_Id+"\" \n"+_LuaScript;
 			pIM->executeLuaScript(_LuaScript, true);
 		}
 	}
@@ -1593,7 +1834,7 @@ CGroupHTML::CGroupHTML(const TCtorParam &param)
 	_TimeoutValue(DEFAULT_RYZOM_CONNECTION_TIMEOUT)
 {
 	// add it to map of group html created
-	_GroupHtmlUID= ++_GroupHtmlUIDPool;		// valid assigned Id begin to 1!
+	_GroupHtmlUID= ++_GroupHtmlUIDPool; // valid assigned Id begin to 1!
 	_GroupHtmlByUID[_GroupHtmlUID]= this;
 
 	// init
@@ -2197,40 +2438,77 @@ void CGroupHTML::addString(const ucstring &str)
 		// Not added ?
 		if (!added)
 		{
-			CViewLink *newLink = new CViewLink(CViewBase::TCtorParam());
-			if (getA())
+			if (getA() && string(getLinkClass()) == "ryzom-ui-button")
 			{
-				newLink->Link = getLink();
-				if (!newLink->Link.empty())
-				{
-					newLink->setHTMLView (this);
-					newLink->setUnderlined (true);
-				}
-			}
-			newLink->setText(tmpStr);
-			newLink->setColor(getTextColor());
-			newLink->setFontSize(getFontSize());
-			newLink->setMultiLineSpace((uint)((float)getFontSize()*LineSpaceFontFactor));
-			newLink->setMultiLine(true);
-			newLink->setModulateGlobalColor(getGlobalColor());
-			// newLink->setLineAtBottom (true);
+				string buttonTemplate = DefaultButtonGroup;
+				// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
+				string param = "name=" + this->_Id + "|url=" + getLink();
 
-			if (getA() && !newLink->Link.empty())
-			{
-				getParagraph()->addChildLink(newLink);
+				CInterfaceManager *im = CInterfaceManager::getInstance();
+				typedef pair<string, string> TTmplParam;
+				vector<TTmplParam> tmplParams;
+				tmplParams.push_back(TTmplParam("id", ""));
+				tmplParams.push_back(TTmplParam("onclick", "browse"));
+				tmplParams.push_back(TTmplParam("onclick_param", param));
+				tmplParams.push_back(TTmplParam("active", "true"));
+				CInterfaceGroup *buttonGroup = im->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
+				if (buttonGroup)
+				{
+
+					// Add the ctrl button
+					CCtrlTextButton *ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("button"));
+					if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
+					if (ctrlButton)
+					{
+						ctrlButton->setModulateGlobalColorAll (false);
+
+						// Translate the tooltip
+						ctrlButton->setDefaultContextHelp(ucstring::makeFromUtf8(getLinkTitle()));
+						ctrlButton->setText(tmpStr);
+					}
+					getParagraph()->addChild (buttonGroup);
+					paragraphChange ();
+				}
+	
 			}
 			else
 			{
-				getParagraph()->addChild(newLink);
+				CViewLink *newLink = new CViewLink(CViewBase::TCtorParam());
+				if (getA())
+				{
+					newLink->Link = getLink();
+					newLink->LinkTitle = getLinkTitle();
+					if (!newLink->Link.empty())
+					{
+						newLink->setHTMLView (this);
+						newLink->setUnderlined (true);
+					}
+				}
+				newLink->setText(tmpStr);
+				newLink->setColor(getTextColor());
+				newLink->setFontSize(getFontSize());
+				newLink->setMultiLineSpace((uint)((float)getFontSize()*LineSpaceFontFactor));
+				newLink->setMultiLine(true);
+				newLink->setModulateGlobalColor(getGlobalColor());
+				// newLink->setLineAtBottom (true);
+
+				if (getA() && !newLink->Link.empty())
+				{
+					getParagraph()->addChildLink(newLink);
+				}
+				else
+				{
+					getParagraph()->addChild(newLink);
+				}
+				paragraphChange ();
 			}
-			paragraphChange ();
 		}
 	}
 }
 
 // ***************************************************************************
 
-void CGroupHTML::addImage(const char *img, bool globalColor)
+void CGroupHTML::addImage(const char *img, bool globalColor, bool reloadImg)
 {
 	// In a paragraph ?
 	if (_Paragraph)
@@ -2254,6 +2532,7 @@ void CGroupHTML::addImage(const char *img, bool globalColor)
 				newImage->Link = getLink();
 				newImage->setHTMLView (this);
 			}*/
+			newImage->setRenderLayer(getRenderLayer()+1);
 			newImage->setTexture (finalUrl);
 			newImage->setModulateGlobalColor(globalColor);
 
@@ -2270,7 +2549,7 @@ void CGroupHTML::addImage(const char *img, bool globalColor)
 			// 2/ if it doesn't work, try to load the image in cache
 			//
 			image = localImageName(img);
-			if (lookupLocalFile (finalUrl, image.c_str(), false))
+			if (!reloadImg && lookupLocalFile (finalUrl, image.c_str(), false))
 			{
 				// No more text in this text view
 				_CurrentViewLink = NULL;
@@ -2300,7 +2579,9 @@ void CGroupHTML::addImage(const char *img, bool globalColor)
 				else*/
 				getParagraph()->addChild(newImage);
 				paragraphChange ();
-			} else {
+			}
+			else
+			{
 
 				//
 				// 3/ if it doesn't work, display a placeholder and ask to dl the image into the cache
@@ -2513,6 +2794,9 @@ CCtrlButton *CGroupHTML::addButton(CCtrlButton::EType type, const std::string &/
 
 		ctrlButton->setInstantContextHelp(true);
 		ctrlButton->setToolTipParent(TTMouse);
+		ctrlButton->setToolTipParentPosRef(Hotspot_TTAuto);
+		ctrlButton->setToolTipPosRef(Hotspot_TTAuto);
+		ctrlButton->setActionOnLeftClickParams(tooltip);
 	}
 
 	getParagraph()->addChild (ctrlButton);
@@ -2542,6 +2826,7 @@ void CGroupHTML::clearContext()
 	_UL.clear();
 	_A.clear();
 	_Link.clear();
+	_LinkTitle.clear();
 	_Tables.clear();
 	_Cells.clear();
 	_TR.clear();
@@ -2618,6 +2903,9 @@ CInterfaceGroup *CGroupHTML::getCurrentGroup()
 
 void CGroupHTML::addGroup (CInterfaceGroup *group, uint beginSpace)
 {
+	if (!group)
+		return;
+
 	// Remove previous paragraph if empty
 	if (_Paragraph && (_Paragraph->getNumChildren() == 0))
 	{
@@ -2782,7 +3070,30 @@ void CGroupHTML::setBackgroundColor (const CRGBA &bgcolor)
 		{
 			// Change the background color
 			bitmap->setColor (bgcolor);
-			bitmap->setModulateGlobalColor(true);
+			bitmap->setModulateGlobalColor(false);
+		}
+	}
+}
+
+// ***************************************************************************
+
+void CGroupHTML::setBackground (const string &bgtex, bool scale, bool tile)
+{
+	// Should have a child named bg
+	CViewBase *view = getView (DefaultBackgroundBitmapView);
+	if (view)
+	{
+		CViewBitmap *bitmap = dynamic_cast<CViewBitmap*> (view);
+		if (bitmap)
+		{
+			bitmap->setParentPosRef(Hotspot_TL);
+			bitmap->setPosRef(Hotspot_TL);
+			bitmap->setX(0);
+			bitmap->setY(0);
+			bitmap->setRenderLayer(-2);
+			bitmap->setScale(scale);
+			bitmap->setTile(tile);
+			addImageDownload(bgtex, view);
 		}
 	}
 }
@@ -2802,7 +3113,7 @@ struct CButtonFreezer : public CInterfaceElementVisitor
 
 static int timer_called = 0;
 
-static int 
+static int
 timer_callback(HTTimer *   const timer     ,
                void *      const user_data ,
                HTEventType const event     )
@@ -2813,7 +3124,7 @@ timer_callback(HTTimer *   const timer     ,
     nlassert(event == HTEvent_TIMEOUT);
     timer_called = 1;
     HTEventList_stopLoop();
-    
+
     /* XXX - The meaning of this return value is undocumented, but close
     ** inspection of libwww's source suggests that we want to return HT_OK. */
     return HT_OK;
@@ -2883,9 +3194,6 @@ void CGroupHTML::handle ()
 				_Browsing = true;
 				updateRefreshButton();
 
-				// Add custom get params
-				addHTTPGetParams (finalUrl);
-
 				// Save new url
 				_URL = finalUrl;
 
@@ -2894,7 +3202,11 @@ void CGroupHTML::handle ()
 
 				// Init LibWWW
 				initLibWWW();
-				setCurrentDomain(finalUrl);
+				_TrustedDomain = isTrustedDomain(setCurrentDomain(finalUrl));
+
+				// Add custom get params
+				addHTTPGetParams (finalUrl, _TrustedDomain);
+
 
 				// Get the final URL
 				C3WSmartPtr uri = HTParse(finalUrl.c_str(), NULL, PARSE_ALL);
@@ -3016,7 +3328,7 @@ void CGroupHTML::handle ()
 				HTParseFormInput(formfields, (_PostFormSubmitButton + "_y=0").c_str());
 
 				// Add custom params
-				addHTTPPostParams (formfields);
+				addHTTPPostParams(formfields, _TrustedDomain);
 
 				// Reset the title
 				if(_TitlePrefix.empty())
@@ -3045,7 +3357,7 @@ void CGroupHTML::handle ()
 
 				// Init LibWWW
 				initLibWWW();
-				setCurrentDomain(_URL);
+				_TrustedDomain = isTrustedDomain(setCurrentDomain(_URL));
 
 				// Get the final URL
 				C3WSmartPtr uri = HTParse(_URL.c_str(), NULL, PARSE_ALL);
@@ -3132,13 +3444,13 @@ void CGroupHTML::endBuild ()
 
 // ***************************************************************************
 
-void CGroupHTML::addHTTPGetParams (string &/* url */)
+void CGroupHTML::addHTTPGetParams (string &/* url */, bool /*trustedDomain*/)
 {
 }
 
 // ***************************************************************************
 
-void CGroupHTML::addHTTPPostParams (HTAssocList * /* formfields */)
+void CGroupHTML::addHTTPPostParams (HTAssocList * /* formfields */, bool /*trustedDomain*/)
 {
 }
 
@@ -3387,7 +3699,7 @@ int CGroupHTML::luaRefresh(CLuaState &ls)
 // ***************************************************************************
 int CGroupHTML::luaRemoveContent(CLuaState &ls)
 {
-	const char *funcName = "refresh";
+	const char *funcName = "removeContent";
 	CLuaIHM::checkArgCount(ls, funcName, 0);
 	removeContent();
 	return 0;

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>BnpFileListDialog</class>
+ <widget class="QDockWidget" name="BnpFileListDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>200</width>
+    <height>141</height>
+   </size>
+  </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
+  <property name="features">
+   <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+  </property>
+  <property name="windowTitle">
+   <string>BNP File List</string>
+  </property>
+  <widget class="QWidget" name="dockWidgetContents">
+   <property name="minimumSize">
+    <size>
+     <width>50</width>
+     <height>0</height>
+    </size>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QTableWidget" name="tableWidget">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="showGrid">
+       <bool>false</bool>
+      </property>
+      <attribute name="horizontalHeaderMinimumSectionSize">
+       <number>15</number>
+      </attribute>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../../object_viewer_qt.qrc"/>
+  <include location="../core/core.qrc"/>
+  <include location="bnp_manager.qrc"/>
+ </resources>
+ <connections/>
+</ui>

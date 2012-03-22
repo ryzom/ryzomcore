@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CBnpDirTreeDialog</class>
+ <widget class="QDockWidget" name="CBnpDirTreeDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>200</width>
+    <height>141</height>
+   </size>
+  </property>
+  <property name="features">
+   <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+  </property>
+  <property name="windowTitle">
+   <string>BNP Datapath</string>
+  </property>
+  <widget class="QWidget" name="dockWidgetContents">
+   <property name="minimumSize">
+    <size>
+     <width>50</width>
+     <height>0</height>
+    </size>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0" colspan="2">
+     <widget class="QTreeView" name="dirTree">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../../object_viewer_qt.qrc"/>
+  <include location="../core/core.qrc"/>
+  <include location="bnp_manager.qrc"/>
+ </resources>
+ <connections/>
+</ui>

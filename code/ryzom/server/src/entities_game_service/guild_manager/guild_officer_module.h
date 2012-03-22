@@ -34,6 +34,14 @@ public:
 		:CGuildMemberModule(proxy,guildMember){}	
 	virtual bool canAffectGrade(EGSPD::CGuildGrade::TGuildGrade grade)const;
 	virtual bool canInvite()const;
+
+	// Function to check if the member can pick a mission.
+	// By default only Officers and above can pick a guild mission.
+	// So we don't need to implement this function for the other grades
+	virtual bool canPickMission(TAIAlias alias)
+	{
+		return true;
+	}
 };
 ;
 

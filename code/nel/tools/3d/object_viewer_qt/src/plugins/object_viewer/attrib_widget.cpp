@@ -186,12 +186,11 @@ void CAttribWidget::changeUseScheme(int index)
 
 void CAttribWidget::openSchemeBankDialog()
 {
-	CSchemeBankDialog *dialog = new CSchemeBankDialog(this);
-	dialog->setModal(true);
-	dialog->show();
-	dialog->exec();
-	delete dialog;
-	//updateUi();
+	CSchemeBankDialog dialog(this);
+	dialog.setModal(true);
+	dialog.show();
+	dialog.exec();
+	updateUi();
 }
 
 void CAttribWidget::inputValueUpdate(void)

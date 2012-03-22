@@ -1096,10 +1096,22 @@ public:
 					// this is a special user, store it in the appropriate container
 					_OnlineSpecialEntities[cci.getPrivilege()].insert(charEid);
 				}
+
+				// Update LastPlayedDate
+				ICharacter *character = ICharacter::getInterface(IPlayerManager::getInstance().getActiveChar(uint32(charEid.getShortId()>>4)), true);
+				if (character)
+					character->setLastConnectionDate(cci.getlastConnectionDate());
+
 			}
 			else
 			{
 				nldebug("  Char %s has disconnected", charEid.toString().c_str());
+
+				// Update LastPlayedDate
+				ICharacter *character = ICharacter::getInterface(IPlayerManager::getInstance().getActiveChar(uint32(charEid.getShortId()>>4)), true);
+				if (character)
+					character->setLastConnectionDate(0);
+
 				// this character disconnected
 				_OnlineEntities.erase(charEid);
 

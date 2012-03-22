@@ -30,6 +30,7 @@
 
 #include "nel/misc/command.h"
 #include "nel/misc/path.h"
+#include "nel/misc/i18n.h"
 
 using namespace std;
 
@@ -526,6 +527,31 @@ void		toUpper(char *str)
 	}
 }
 
+std::string formatThousands(const std::string& s)
+{
+	int i, k;
+	int remaining = s.length() - 1;
+	static std::string separator = NLMISC::CI18N::get("uiThousandsSeparator").toUtf8();
+
+	// Don't add separator if the number is < 10k
+	if (remaining < 4) return s;
+
+	std::string ns;
+
+	do
+	{
+	for (i = remaining, k = 0; i >= 0 && k < 3; --i, ++k )
+		{
+			ns = s[i] + ns; // New char is added to front of ns
+			if ( i > 0 && k == 2) ns = separator + ns; // j > 0 means still more digits
+		}
+
+		remaining -= 3;
+	}
+	while (remaining >= 0);
+
+	return ns;
+}
 
 //
 // Exceptions

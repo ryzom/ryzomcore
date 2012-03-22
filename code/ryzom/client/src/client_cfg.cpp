@@ -424,10 +424,16 @@ CClientConfig::CClientConfig()
 	PatchWanted = false;
 #endif
 	PatchUrl = "";
+	PatchletUrl = "";
 	PatchVersion = "";
 	PatchServer = "";
-	RingReleaseNotePath = "http://atys.ryzom.com/releasenotes_ring/index.php";
-	ReleaseNotePath = "http://atys.ryzom.com/releasenotes/index.php";
+
+	WebIgMainDomain = "atys.ryzom.com";
+	WebIgTrustedDomains.push_back(WebIgMainDomain);
+
+	RingReleaseNotePath = "http://"+WebIgMainDomain+"/releasenotes_ring/index.php";
+	ReleaseNotePath = "http://"+WebIgMainDomain+"/releasenotes/index.php";
+
 
 	///////////////
 	// ANIMATION //
@@ -1040,6 +1046,15 @@ void CClientConfig::setValues()
 	READ_STRING_DEV(ReleaseNotePath)
 	READ_STRING_FV(PatchServer)
 
+	/////////////////////////
+	// NEW PATCHLET SYSTEM //	
+	READ_STRING_FV(PatchletUrl)
+
+	////////////////////////
+	// WEBIG //
+	READ_STRING_FV(WebIgMainDomain);
+	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
+
 	///////////////
 	// ANIMATION //
 	// AnimatedAngleThreshold
@@ -1332,6 +1347,7 @@ void CClientConfig::setValues()
 				if (stricmp(mode, "over") == 0)	p.Mode = SSysInfoParam::Over;
 				else if (stricmp(mode, "overonly") == 0) p.Mode = SSysInfoParam::OverOnly;
 				else if (stricmp(mode, "center") == 0)	p.Mode = SSysInfoParam::Center;
+				else if (stricmp(mode, "centeraround") == 0)	p.Mode = SSysInfoParam::CenterAround;
 				else if (stricmp(mode, "around") == 0)	p.Mode = SSysInfoParam::Around;
 
 				ClientCfg.SystemInfoParams[toLower(sic->asString(2 * k))] = p;

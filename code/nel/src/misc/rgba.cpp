@@ -643,6 +643,8 @@ bool CRGBA::convertToHLS(float &h, float &l, float &s) const
 	{
 		h = 2.f + (b - r) / diff;
 	}
+#if defined(GCC_VERSION) && (GCC_VERSION == 40204)
+	// use the fix only if using the specific GCC version
 	else if (maxV == b)
 	{
 		h = 4.f + (r - g) / diff;
@@ -652,6 +654,12 @@ bool CRGBA::convertToHLS(float &h, float &l, float &s) const
 		// this case is to fix a compiler bug
 		h = (g - b) / diff;
 	}
+#else
+	else
+	{
+		h = 4.f + (r - g) / diff;
+	}
+#endif
 
 	h *= 60.f; // scale to [0..360]
 

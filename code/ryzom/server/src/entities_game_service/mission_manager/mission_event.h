@@ -429,11 +429,12 @@ protected:
 class CMissionEventAddMission: public CMissionEvent
 {
 public:
-	CMissionEventAddMission( TAIAlias giver, TAIAlias mission, TAIAlias mainMission )
-		:CMissionEvent(AddMission, TDataSetRow()) ,Giver(giver),Mission(mission),MainMission(mainMission) {}
+	CMissionEventAddMission( TAIAlias giver, TAIAlias mission, TAIAlias mainMission, bool guild )
+		:CMissionEvent(AddMission, TDataSetRow()) ,Giver(giver),Mission(mission),MainMission(mainMission), Guild(guild) {}
 	TAIAlias Mission;
 	TAIAlias Giver;
 	TAIAlias MainMission;
+	bool Guild;
 protected:
 	friend class CMissionEvent;
 	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log){return false;}

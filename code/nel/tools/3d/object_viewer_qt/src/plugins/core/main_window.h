@@ -34,7 +34,6 @@ namespace Core
 class CSettingsDialog;
 class CorePlugin;
 class IContext;
-class IMenuManager;
 class MenuManager;
 class ContextManager;
 class CoreImpl;
@@ -50,9 +49,10 @@ public:
 	bool initialize(QString *errorString);
 	void extensionsInitialized();
 
-	IMenuManager *menuManager() const;
+	MenuManager *menuManager() const;
 	ContextManager *contextManager() const;
 	QSettings *settings() const;
+	QUndoGroup *undoGroup() const;
 
 	ExtensionSystem::IPluginManager *pluginManager() const;
 
@@ -63,6 +63,7 @@ public Q_SLOTS:
 	bool showOptionsDialog(const QString &group = QString(),
 						   const QString &page = QString(),
 						   QWidget *parent = 0);
+	void updateContext(Core::IContext *context);
 
 private Q_SLOTS:
 	void open();
@@ -78,7 +79,6 @@ private Q_SLOTS:
 	void gotoPos();
 	void setFullScreen(bool enabled);
 	void about();
-	void updateContext(Core::IContext *context);
 
 protected:
 	virtual void closeEvent(QCloseEvent *event);
@@ -93,7 +93,7 @@ private:
 	void writeSettings();
 
 	ExtensionSystem::IPluginManager *m_pluginManager;
-	ExtensionSystem::CPluginView *m_pluginView;
+	PluginView *m_pluginView;
 	MenuManager *m_menuManager;
 	ContextManager *m_contextManager;
 	CoreImpl *m_coreImpl;

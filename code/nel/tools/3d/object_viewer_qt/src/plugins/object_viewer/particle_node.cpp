@@ -378,6 +378,7 @@ void CParticleWorkspace::removeNode(uint index)
 {
 	nlassert(index < _Nodes.size());
 	_Nodes[index] = NULL; // delete the smart-ptr target
+	delete _Nodes[index];
 	_Nodes.erase(_Nodes.begin() + index);
 	touch();
 }

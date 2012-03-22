@@ -49,6 +49,7 @@ mkPath(log, installPath)
 printLog(log, ">>> Install sheets <<<")
 mkPath(log, ExportBuildDirectory + "/" + SheetsBuildDirectory)
 copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SheetsBuildDirectory, installPath, ".packed_sheets")
+copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + SheetsBuildDirectory, installPath, ".packed")
 
 printLog(log, "")
 log.close()

@@ -48,6 +48,7 @@
 #include "../sheet_manager.h"
 #include "../user_entity.h"
 #include "view_bitmap.h"
+#include "nel/misc/common.h"
 
 using namespace std::rel_ops;
 
@@ -996,7 +997,7 @@ void CBotChatPageTrade::startSellDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCal
 	CCtrlTextButton *confirmButton =  dynamic_cast<CCtrlTextButton*>(ig->getCtrl("ok"));
 	if (confirmButton)
 	{
-		confirmButton->setActive( true );
+		confirmButton->setActive( !sheet->getLockedByOwner() );
 		confirmButton->setText(CI18N::get("uiSellImmediately"));
 		confirmButton->setDefaultContextHelp(CI18N::get("uittDirectSellButton"));
 	}
@@ -1538,10 +1539,12 @@ void	CBotChatPageTrade::setupResellGroup(bool sellMode, uint defaultQuantity, CI
 			CViewText *vt= dynamic_cast<CViewText*>(cantResellGroup->getView("reason"));
 			if(vt)
 			{
-				if(resaleFlag==BOTCHATTYPE::ResaleKOBroken)
+				if(resaleFlag == BOTCHATTYPE::ResaleKOBroken)
 					vt->setHardText("uiCantResaleCauseDamaged");
-				else
+				else if (resaleFlag == BOTCHATTYPE::ResaleKONoTimeLeft)
 					vt->setHardText("uiCantResaleCauseTooLate");
+				else
+					vt->setHardText("uiCantResaleLockedByOwner");
 			}
 		}
 		// else setup "can_resell:choose_resell group"
@@ -2575,9 +2578,9 @@ static DECLARE_INTERFACE_USER_FCT(getPriceWithFame)
 	if(value==-1)
 		result.setUCString(CI18N::get("uiBadPrice"));
 	else if(value==valueFame)
-		result.setUCString(toString(value));
+		result.setUCString(NLMISC::formatThousands(toString(value)));
 	else
-		result.setUCString(toString("%d (%d)", valueFame, value));
+		result.setUCString(NLMISC::formatThousands(toString(valueFame)) + " (" + NLMISC::formatThousands(toString(value)) + ")");
 
 	return true;
 }
@@ -2592,8 +2595,8 @@ static DECLARE_INTERFACE_USER_FCT(getBonusOnResale)
 
 	sint	valueHigh= (sint)args[0].getInteger();
 	sint	valueLow= (sint)args[1].getInteger();
-	sint diff = valueHigh - valueLow;
-	result.setUCString(toString("+%d", diff));
+	sint	diff = valueHigh - valueLow;
+	result.setUCString("+" + NLMISC::formatThousands(toString(diff)));
 
 	return true;
 }

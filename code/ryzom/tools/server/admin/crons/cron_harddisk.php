@@ -6,7 +6,7 @@
     define('NELTOOL_NO_USER_NEEDED',    true);
     define('NELTOOL_CRON_DEBUG',        false);
 
-	if ($HTTP_GET_VARS['dbg']) define('NELTOOL_CRON_DEBUG', true);
+	if ($_GET['dbg']) define('NELTOOL_CRON_DEBUG', true);
 
 	if (defined('NELTOOL_CRON_DEBUG')) echo "Checking HDs ... \n";
 

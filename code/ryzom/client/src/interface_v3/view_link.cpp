@@ -43,4 +43,22 @@ void CViewLink::setHTMLView(CGroupHTML *html)
 }
 
 // ***************************************************************************
+bool CViewLink::getMouseOverShape(string &texName, uint8 &rot, CRGBA &col)
+{
+	if (HTML != NULL)
+	{
+		if (!LinkTitle.empty())
+		{
+			texName = LinkTitle;
+			rot= 0;
+			col = CRGBA::White;
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+
+// ***************************************************************************
 

@@ -358,17 +358,8 @@ CCharacterCL::CCharacterCL()
 
 	_EventFactionId = 0;
 	_PvpMode = PVP_MODE::None;
-	_PvpClan = PVP_CLAN::None;
 
-	for (uint8 i = 0; i < PVP_CLAN::NbClans; i++)
-	{
-		_PvpAllies[i] = false;
-		_PvpEnemies[i] = false;
-	}
-
-	_ClanCivMaxFame  = PVP_CLAN::None;
-	_ClanCultMaxFame = PVP_CLAN::None;
-
+	_LeagueId = 0;
 	_OutpostId = 0;
 	_OutpostSide = OUTPOSTENUMS::UnknownPVPSide;
 
@@ -1842,9 +1833,30 @@ void CCharacterCL::updateVisualPropertyGuildNameID(const NLMISC::TGameCycle &/* 
 //-----------------------------------------------
 void CCharacterCL::updateVisualPropertyEventFactionID(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)
 {
-	_EventFactionId = uint32(prop);
+	// ODD Hack by Ulukyn
+	//_EventFactionId = uint32(prop);
+	_PvpMode = uint32(prop);
+
 	buildInSceneInterface();
 
+	if (isUser())
+	{
+		uint i;
+		uint numEntity = (uint)EntitiesMngr.entities().size();
+		for (i=0; i<numEntity; i++)
+		{
+			CEntityCL *entity = EntitiesMngr.entity(i);
+			if (entity)
+			{
+				CCharacterCL *character = dynamic_cast<CCharacterCL*>(entity);
+				if (character)
+				{
+					if( character->getPvpMode() != 0 && !character->isUser())
+						character->buildInSceneInterface ();
+				}
+			}
+		}
+	}
 } // updateVisualPropertyEventFactionID //
 
 //-----------------------------------------------
@@ -1853,8 +1865,8 @@ void CCharacterCL::updateVisualPropertyEventFactionID(const NLMISC::TGameCycle &
 //-----------------------------------------------
 void CCharacterCL::updateVisualPropertyPvpMode(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)
 {
-	_PvpMode = (uint8)prop;
-	buildInSceneInterface();
+	//_PvpMode = uint32(prop);
+	//buildInSceneInterface();
 
 } // updateVisualPropertyPvpMode //
 
@@ -1864,18 +1876,28 @@ void CCharacterCL::updateVisualPropertyPvpMode(const NLMISC::TGameCycle &/* game
 //-----------------------------------------------
 void CCharacterCL::updateVisualPropertyPvpClan(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)
 {
-	// get fames signs from prop
-	for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
-	{
-		_PvpAllies[fameIdx] = (prop & (SINT64_CONSTANT(1) << (2*fameIdx))) != 0;
-		_PvpEnemies[fameIdx] = (prop & (SINT64_CONSTANT(1) << (2*fameIdx+1))) != 0;
-	}
-
-	_ClanCivMaxFame = PVP_CLAN::TPVPClan((prop & (0x03 << 2*7)) >> 2*7);
-	_ClanCultMaxFame = PVP_CLAN::TPVPClan(4 + ((prop & (0x03 << 2*8)) >> 2*8));
+	_LeagueId = uint32(prop);
 
 	buildInSceneInterface();
 
+	if (isUser())
+	{
+		uint i;
+		uint numEntity = (uint)EntitiesMngr.entities().size();
+		for (i=0; i<numEntity; i++)
+		{
+			CEntityCL *entity = EntitiesMngr.entity(i);
+			if (entity)
+			{
+				CCharacterCL *character = dynamic_cast<CCharacterCL*>(entity);
+				if (character)
+				{
+					if( character->getPvpMode() != 0 && !character->isUser())
+						character->buildInSceneInterface ();
+				}
+			}
+		}
+	}
 } // updateVisualPropertyPvpClan //
 
 //-----------------------------------------------
@@ -4521,10 +4543,6 @@ void CCharacterCL::applyBehaviourFlyingHPs(const CBehaviourContext &bc, const MB
 								deltaHPColor = ClientCfg.SystemInfoParams["dgp"].Color;
 							else
 								deltaHPColor = ClientCfg.SystemInfoParams["dg"].Color;
-						}
-						else
-						{
-							deltaHPColor = CRGBA(127,127,127);
 						}
 					}
 					else
@@ -10252,7 +10270,7 @@ NLMISC_COMMAND(pvpMode, "modify pvp mode", "[<pvp mode> <state>]")
 
 	if( args.size() == 0 )
 	{
-		uint8 pvpMode = playerTarget->getPvpMode();
+		uint16 pvpMode = playerTarget->getPvpMode();
 		string str;
 		if( pvpMode&PVP_MODE::PvpDuel )
 			str+="duel ";
@@ -10270,6 +10288,10 @@ NLMISC_COMMAND(pvpMode, "modify pvp mode", "[<pvp mode> <state>]")
 			str+="faction ";
 		if( pvpMode&PVP_MODE::PvpFactionFlagged)
 			str+="faction_flagged ";
+		if( pvpMode&PVP_MODE::PvpZoneSafe)
+			str+="in_safe_zone ";
+		if( pvpMode&PVP_MODE::PvpSafe)
+			str+="safe ";
 		IM->displaySystemInfo(ucstring(str));
 		nlinfo("<pvpMode> %s",str.c_str());
 	}
@@ -10280,14 +10302,14 @@ NLMISC_COMMAND(pvpMode, "modify pvp mode", "[<pvp mode> <state>]")
 		fromString(args[1], state);
 		if( state )
 		{
-			uint8 currentPVPMode = playerTarget->getPvpMode();
+			uint16 currentPVPMode = playerTarget->getPvpMode();
 			currentPVPMode |= pvpMode;
 			playerTarget->setPvpMode(currentPVPMode);
 			IM->displaySystemInfo(toString("<pvpMode> adding pvp mode %s",args[0].c_str()));
 		}
 		else
 		{
-			uint8 currentPVPMode = playerTarget->getPvpMode();
+			uint16 currentPVPMode = playerTarget->getPvpMode();
 			currentPVPMode &= ~pvpMode;
 			playerTarget->setPvpMode(currentPVPMode);
 			IM->displaySystemInfo(toString("<pvpMode> removing pvp mode %s",args[0].c_str()));
@@ -10297,7 +10319,7 @@ NLMISC_COMMAND(pvpMode, "modify pvp mode", "[<pvp mode> <state>]")
 	return true;
 }
 
-
+/*
 NLMISC_COMMAND(pvpClan, "modify pvp clan", "<pvp clan>")
 {
 	if (args.size() != 1) return false;
@@ -10319,13 +10341,13 @@ NLMISC_COMMAND(pvpClan, "modify pvp clan", "<pvp clan>")
 	if (!playerTarget)
 		return false;
 
-	PVP_CLAN::TPVPClan clan = PVP_CLAN::fromString(args[0]);
-	playerTarget->setPvpClan(clan);
+//	PVP_CLAN::TPVPClan clan = PVP_CLAN::fromString(args[0]);
+//	playerTarget->setPvpClan(clan);
 	playerTarget->buildInSceneInterface();
 
 	return true;
 }
-
+*/
 #endif // !FINAL_VERSION
 
 #include "r2/editor.h"

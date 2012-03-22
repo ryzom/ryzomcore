@@ -221,6 +221,11 @@ public:
 	{
 		return _CreatureChangeHPList;
 	}
+
+	CChangeCreatureMaxHPMsg &getCreatureChangeMaxHP()
+	{
+		return _CreatureChangeMaxHPList;
+	}
 	
 	enum	TSearchType
 	{
@@ -288,6 +293,7 @@ private:
 	// Faunas descriptions to be sent each frame 
 	CFaunaBotDescription	_FaunaDescriptionList;
 	CChangeCreatureHPMsg	_CreatureChangeHPList;
+	CChangeCreatureMaxHPMsg	_CreatureChangeMaxHPList;
 
 	/// The emot identifiers
 	std::map<std::string, uint32>	_EmotNames;

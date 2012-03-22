@@ -17,6 +17,10 @@
 #include "collision_service.h"
 #include <nel/3d/u_instance_group.h>
 
+#ifdef NL_OS_WINDOWS
+#include <Windows.h>
+#endif
+
 using namespace SBSERVICE;
 using namespace NLMISC;
 using namespace NLNET;

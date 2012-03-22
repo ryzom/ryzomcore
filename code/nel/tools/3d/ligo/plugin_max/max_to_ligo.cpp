@@ -17,7 +17,12 @@
 #include <assert.h>
 
 // From MAXSDK
-#include <MaxScrpt/maxscrpt.h>
+#include <maxversion.h>
+#if MAX_VERSION_MAJOR >= 14
+#	include <maxscript/maxscript.h>
+#else
+#	include <MaxScrpt/maxscrpt.h>
+#endif
 
 #include "max_to_ligo.h"
 

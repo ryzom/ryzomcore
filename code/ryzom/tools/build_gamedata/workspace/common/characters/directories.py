@@ -91,6 +91,7 @@ ShapeSourceDirectories += [ "stuff/caravan/agents/actors/visages" ]
 ShapeSourceDirectories += [ "stuff/caravan/agents/actors/ship" ]
 ShapeSourceDirectories += [ "stuff/generique/agents/actors/female" ]
 ShapeSourceDirectories += [ "stuff/generique/agents/actors/male" ]
+ShapeSourceDirectories += [ "stuff/generique/agents/actors/visages" ]
 
 # Animation directories
 AnimSourceDirectories = [ ]

@@ -221,10 +221,12 @@ arguments.
 - @ref moveToZone_ss_
 - @ref waitInZone_s_
 - @ref stopMoving__
+- @ref followPlayer_sf_
 - @ref wander__
 - @ref downScaleHP_f_
 - @ref upScaleHP_f_
 - @ref scaleHP_f_
+- @ref setMaxHP_ff_
 - @ref setHPLevel_f_
 - @ref addHP_f_
 - @ref aiAction_s_

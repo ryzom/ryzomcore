@@ -36,14 +36,7 @@ public:
 	bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
 	void extensionsInitialized();
 	void shutdown();
-
 	void setNelContext(NLMISC::INelContext *nelContext);
-
-	QString name() const;
-	QString version() const;
-	QString vendor() const;
-	QString description() const;
-	QStringList dependencies() const;
 
 	void addAutoReleasedObject(QObject *obj);
 
@@ -74,7 +67,7 @@ public:
 
 	virtual QIcon icon() const
 	{
-		return QIcon();
+		return QIcon(":/icons/ic_nel_pill.png");
 	}
 
 	virtual QUndoStack *undoStack();

@@ -18,7 +18,12 @@
 
 // For MAX_RELEASE
 #include <plugapi.h>
-#include <MaxScrpt/maxscrpt.h>
+#include <maxversion.h>
+#if MAX_VERSION_MAJOR >= 14
+#	include <maxscript/maxscript.h>
+#else
+#	include <MaxScrpt/maxscrpt.h>
+#endif
 
 #include "rpo.h"
 #include "nel/3d/zone.h"

@@ -107,6 +107,9 @@ void CSoundSystem::init()
 		std::string mess = std::string("Unable to init sound :") + e.what();
 		nlwarning ("Init sound: %s", mess.c_str());
 		_AudioMixer = NULL;
+		QSettings *settings = Core::ICore::instance()->settings();
+		if (settings->group() == Constants::OBJECT_VIEWER_SECTION)
+			settings->endGroup();
 		return;
 	}
 
@@ -187,7 +190,7 @@ NLSOUND::USource *CSoundSystem::create(const std::string &soundName)
 	return NULL;
 }
 
-void CSoundSystem::playAnimation(std::string& name, float lastTime, float curTime, NLSOUND::CSoundContext &context)
+void CSoundSystem::playAnimation(std::string &name, float lastTime, float curTime, NLSOUND::CSoundContext &context)
 {
 	if (_AnimManager == NULL)
 	{

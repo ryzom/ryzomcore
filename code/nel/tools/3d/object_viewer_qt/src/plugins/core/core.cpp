@@ -17,7 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "core.h"
-#include "imenu_manager.h"
 #include "context_manager.h"
 #include "main_window.h"
 #include "../../extension_system/iplugin_manager.h"
@@ -50,7 +49,7 @@ bool CoreImpl::showOptionsDialog(const QString &group,
 	return m_mainWindow->showOptionsDialog(group, page, parent);
 }
 
-IMenuManager *CoreImpl::menuManager() const
+MenuManager *CoreImpl::menuManager() const
 {
 	return m_mainWindow->menuManager();
 }

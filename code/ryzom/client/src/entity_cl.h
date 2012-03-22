@@ -686,7 +686,7 @@ public:
 	virtual bool isNeutralPVP() const { return false; }
 
 	/// Return true if this player has the viewing properties of a friend (inscene bars...)
-	virtual bool isViewedAsFriend() const { return isNeutral() || isFriend() || isInTeam() || isInGuild(); }
+	virtual bool isViewedAsFriend() const { return isNeutral() || isFriend() || isInTeam() || isInSameGuild() || isInSameLeague(); }
 
 	/// Return the People for the entity (unknown by default)
 	virtual EGSPD::CPeople::TPeople people() const;
@@ -733,7 +733,13 @@ public:
 	bool isInTeam () const { return _IsInTeam; }
 
 	// Return true if this entity is in the user guild
-	bool isInGuild () const;
+	bool isInSameGuild () const;
+
+	// Return true if this entity is in the user league
+	bool isInSameLeague () const;
+
+	// Return true if this entity or the user is in a league
+	bool oneInLeague () const;
 
 	// Return true if this entity is a Mount owned by the User
 	bool isUserMount () const {return _IsUserMount;}
@@ -746,8 +752,9 @@ public:
 	virtual uint64 getGuildSymbol () const { return 0; }
 
 	virtual uint32 getEventFactionID() const { return 0; }
-	virtual uint8 getPvpMode() const { return PVP_MODE::None; }
+	virtual uint16 getPvpMode() const { return PVP_MODE::None; }
 	virtual PVP_CLAN::TPVPClan getPvpClan() const { return PVP_CLAN::None; }
+	virtual uint32 getLeagueID() const { return 0; }
 
 	virtual uint16					getOutpostId() const { return 0; }
 	virtual OUTPOSTENUMS::TPVPSide	getOutpostSide() const { return OUTPOSTENUMS::UnknownPVPSide; }
@@ -758,6 +765,16 @@ public:
 	const ucstring &getTitle() const
 	{
 		return _Title;
+	}
+
+	/// Return the entity tags
+	const ucstring &getTag(uint8 id) const
+	{
+		if (_Tags.size() > id) {
+			return _Tags[id];
+		}
+		static ucstring empty;
+		return empty;
 	}
 
 	/// Return the raw unparsed entity title
@@ -910,6 +927,8 @@ protected:
 	ucstring						_EntityName;
 	// Current entity title
 	ucstring						_Title;
+	// Current entity tags
+	std::vector<ucstring>			_Tags;
 	// Current entity title string id
 	std::string						_TitleRaw;
 	// Current permanent content symbol for the entity
@@ -1006,7 +1025,7 @@ protected:
 	static NLMISC::CRGBA		_PvpEnemyColor;
 	static NLMISC::CRGBA		_PvpNeutralColor;
 	static NLMISC::CRGBA		_PvpAllyInTeamColor;
-	static NLMISC::CRGBA		_PvpAllyInGuildColor;
+	static NLMISC::CRGBA		_PvpAllyInLeagueColor;
 	static NLMISC::CRGBA		_PvpAllyColor;
 	// colors for GM players
 	static NLMISC::CRGBA		_GMTitleColor[CHARACTER_TITLE::EndGmTitle - CHARACTER_TITLE::BeginGmTitle + 1];

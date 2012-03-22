@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<FORM Revision="" State="modified">
+  <STRUCT>
+    <ATOM Name="PSName" Value="ran_impact.ps"/>
+    <ATOM Name="RepeatMode" Value="Respawn"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG></LOG>
+</FORM>

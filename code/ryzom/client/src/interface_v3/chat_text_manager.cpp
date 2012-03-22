@@ -148,18 +148,43 @@ CViewBase *CChatTextManager::createMsgText(const ucstring &cstMsg, NLMISC::CRGBA
 	vt->setMultiLineSpace(getTextMultiLineSpace());
 	vt->setModulateGlobalColor(false);
 
+	ucstring cur_time;
+	static CCDBNodeLeaf* node = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
+	if (node)
+	{
+		if (node->getValueBool())
+		{
+			cur_time = CInterfaceManager::getTimestampHuman();
+		}
+	}
+
 	// if text contain any color code, set the text formated and white,
 	// otherwise, set text normal and apply global color
-	if (msg.find(ucstring("@{")) != ucstring::npos)
+	size_t codePos = msg.find(ucstring("@{"));
+	if (codePos != ucstring::npos)
 	{
+		// Prepend the current time (do it after the color if the color at first position.
+		if (codePos == 0)
+		{
+			codePos = msg.find(ucstring("}"));
+			msg = msg.substr(0, codePos + 1) + cur_time + msg.substr(codePos + 1, msg.length() - codePos);
+		}
+		else
+		{
+			msg = cur_time + msg;
+		}
+		
+
 		vt->setTextFormatTaged(msg);
 		vt->setColor(NLMISC::CRGBA::White);
 	}
 	else
 	{
+		msg = cur_time + msg;
 		vt->setText(msg);
 		vt->setColor(col);
 	}
+
 	if (!commandGroup)
 	{
 		return vt;

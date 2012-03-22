@@ -178,7 +178,7 @@ static const CStringConversion<TKey>::CPair stringTable [] =
 	{ "KeyZOOM", KeyZOOM },
 	{ "KeyNONAME", KeyNONAME },
 	{ "KeyPA1", KeyPA1 },
-	{ "KeyOEM_CLEAR", KeyOEM_CLEAR },
+	{ "KeyOEM_CLEAR", KeyOEM_CLEAR }
 };
 
 

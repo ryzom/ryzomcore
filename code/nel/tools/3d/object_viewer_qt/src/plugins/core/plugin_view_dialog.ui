@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CPluginView</class>
- <widget class="QDialog" name="CPluginView">
+ <class>PluginView</class>
+ <widget class="QDialog" name="PluginView">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>691</width>
-    <height>249</height>
+    <width>756</width>
+    <height>296</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,14 +37,6 @@
      <property name="sortingEnabled">
       <bool>true</bool>
      </property>
-     <attribute name="headerDefaultSectionSize">
-      <number>100</number>
-     </attribute>
-     <column>
-      <property name="text">
-       <string>State</string>
-      </property>
-     </column>
      <column>
       <property name="text">
        <string>Name</string>
@@ -120,13 +112,13 @@
   </layout>
  </widget>
  <resources>
-  <include location="../object_viewer_qt.qrc"/>
+  <include location="../../object_viewer_qt.qrc"/>
  </resources>
  <connections>
   <connection>
    <sender>closePushButton</sender>
    <signal>clicked()</signal>
-   <receiver>CPluginView</receiver>
+   <receiver>PluginView</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">

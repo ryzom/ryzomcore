@@ -1,0 +1,10 @@
+<plugin-spec>
+    <library-name>ovqt_plugin_object_viewer</library-name>
+    <name>ObjectViewer</name>
+    <version>0.8</version>
+    <vendor>Ryzom Core</vendor>
+    <description>Object Viewer plugin.</description>
+    <dependencies>
+        <dependency plugin-name="Core" version="0.8"/>
+    </dependencies>
+</plugin-spec>

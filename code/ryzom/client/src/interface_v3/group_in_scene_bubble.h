@@ -64,6 +64,9 @@ public:
 	// Open a Dynamic Chat
 	void dynChatOpen (uint32 nBotUID, uint32 nBotName, const std::vector<uint32> &DynStrs);
 
+	// Open a Dynamic Chat from webig
+	void webIgChatOpen (uint32 nBotUID, std::string sBotName, const std::vector<std::string> &strs, const std::vector<std::string> &links);
+
 	// Close a Dynamic Chat
 	void dynChatClose (uint32 nBotUID);
 

@@ -16,6 +16,7 @@
 
 #include "stdpch.h"
 #include "ai_bot_pet.h"
+#include "visual_properties_interface.h"
 
 #include "nel/misc/random.h"
 #include "ai_grp_pet.h"
@@ -91,4 +92,29 @@ void CSpawnBotPet::updatePos()
 CSpawnGroupPet& CSpawnBotPet::spawnGrp()
 {
 	return static_cast<CSpawnGroupPet&>(CSpawnBot::spawnGrp());
+}
+
+void CSpawnBotPet::setVisualPropertiesName()
+{
+	CBotPet& botRef = CSpawnBotPet::getPersistent();
+	ucstring name = botRef.getName();
+	
+	if (CVisualPropertiesInterface::UseIdForName)
+	{
+		name = NLMISC::toString("AI:%s", botRef.getIndexString().c_str());
+	}
+	
+	if (name.empty() && CVisualPropertiesInterface::ForceNames)
+	{
+		name = NLMISC::CFile::getFilenameWithoutExtension(botRef.getSheet()->SheetId().toString().c_str());
+	}
+	
+	if (!botRef.getCustomName().empty())
+		name = botRef.getCustomName();
+
+	//	no name the bot will appear without name on the client.
+	if (name.empty())
+		return;
+		
+	CVisualPropertiesInterface::setName(dataSetRow(), name);
 }

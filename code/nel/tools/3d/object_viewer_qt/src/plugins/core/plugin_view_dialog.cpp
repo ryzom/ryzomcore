@@ -16,11 +16,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "plugin_view_dialog.h"
+#include "core_constants.h"
+
+#include "nel/misc/debug.h"
 
 // Qt includes
 #include <QtCore/QDir>
-#include <QtCore/QString>
-#include <QtCore/QStringList>
 #include <QtGui/QIcon>
 #include <QtGui/QStyle>
 #include <QtGui/QTreeWidgetItem>
@@ -29,45 +30,79 @@
 #include "../../extension_system/iplugin_spec.h"
 #include "../../extension_system/iplugin_manager.h"
 
-namespace ExtensionSystem
+namespace Core
 {
 
-CPluginView::CPluginView(IPluginManager *pluginManager, QWidget *parent)
-	: QDialog(parent)
+PluginView::PluginView(ExtensionSystem::IPluginManager *pluginManager, QWidget *parent)
+	: QDialog(parent),
+	  m_checkStateColumn(0)
 {
-	_ui.setupUi(this);
-	_pluginManager = pluginManager;
+	m_ui.setupUi(this);
+	m_pluginManager = pluginManager;
 
-	connect(_pluginManager, SIGNAL(pluginsChanged()), this, SLOT(updateList()));
+	connect(m_pluginManager, SIGNAL(pluginsChanged()), this, SLOT(updateList()));
+	connect(this, SIGNAL(accepted()), this, SLOT(updateSettings()));
 
+	// WhiteList is list of plugins which can not disable.
+	m_whiteList << Constants::OVQT_CORE_PLUGIN;
 	updateList();
 }
 
-CPluginView::~CPluginView()
+PluginView::~PluginView()
 {
 }
 
-void CPluginView::updateList()
+void PluginView::updateList()
 {
 	static QIcon okIcon = QApplication::style()->standardIcon(QStyle::SP_DialogApplyButton);
 	static QIcon errorIcon = QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton);
+	static QIcon notLoadedIcon = QApplication::style()->standardIcon(QStyle::SP_DialogResetButton);
+
+	m_specToItem.clear();
 
 	QList<QTreeWidgetItem *> items;
-	Q_FOREACH (IPluginSpec *spec, _pluginManager->plugins())
+	Q_FOREACH (ExtensionSystem::IPluginSpec *spec, m_pluginManager->plugins())
 	{
 		QTreeWidgetItem *item = new QTreeWidgetItem(QStringList()
-				<< ""
 				<< spec->name()
 				<< QString("%1").arg(spec->version())
 				<< spec->vendor()
 				<< QDir::toNativeSeparators(spec->filePath()));
-		item->setIcon(0, spec->hasError() ? errorIcon : okIcon);
+
+		bool ok = !spec->hasError();
+		QIcon icon = ok ? okIcon : errorIcon;
+		if (ok && (spec->state() != ExtensionSystem::State::Running))
+			icon = notLoadedIcon;
+
+		item->setIcon(m_checkStateColumn, icon);
+
+		if (!m_whiteList.contains(spec->name()))
+			item->setCheckState(m_checkStateColumn, spec->isEnabled() ? Qt::Checked : Qt::Unchecked);
+
 		items.append(item);
+		m_specToItem.insert(spec, item);
 	}
 
-	_ui.pluginTreeWidget->clear();
+	m_ui.pluginTreeWidget->clear();
 	if (!items.isEmpty())
-		_ui.pluginTreeWidget->addTopLevelItems(items);
+		m_ui.pluginTreeWidget->addTopLevelItems(items);
+
+	m_ui.pluginTreeWidget->resizeColumnToContents(m_checkStateColumn);
 }
 
-} /* namespace NLQT */
+void PluginView::updateSettings()
+{
+	Q_FOREACH (ExtensionSystem::IPluginSpec *spec, m_pluginManager->plugins())
+	{
+		if (m_specToItem.contains(spec) && (!m_whiteList.contains(spec->name())))
+		{
+			QTreeWidgetItem *item = m_specToItem.value(spec);
+			if (item->checkState(m_checkStateColumn) == Qt::Checked)
+				spec->setEnabled(true);
+			else
+				spec->setEnabled(false);
+		}
+	}
+}
+
+} /* namespace Core */

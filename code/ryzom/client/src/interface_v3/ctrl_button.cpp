@@ -338,7 +338,14 @@ bool CCtrlButton::getMouseOverShape(string &texName, uint8 &rot, CRGBA &col)
 {
 	if (_AHOnLeftClickString == "browse")
 	{
-		texName = "curs_pick.tga";
+		if (!_AHOnLeftClickStringParams.empty())
+		{
+			texName = "@curs_pick.tga@"+_AHOnLeftClickStringParams;
+		}
+		else
+		{
+			texName = "curs_pick.tga";
+		}
 		rot= 0;
 		col = CRGBA::White;
 		return true;

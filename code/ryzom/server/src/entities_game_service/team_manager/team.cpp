@@ -57,6 +57,7 @@ void CTeam::init( CCharacter*  leader, uint16 teamId )
 	_ValidityFlags.Fake = false;
 	_NbMembers = 1;
 	_TeamId  = teamId;
+	_LeagueId = leader->getLeagueId();
 	_LeaderId = leader->getId();
 	_TeamMembers.push_back(_LeaderId);
 	// init the team chat group
@@ -120,6 +121,12 @@ void CTeam::release()
 	PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->disbandTeam(_TeamId, _TeamMembers);
 	PROGRESSIONPVP::CCharacterProgressionPVP::getInstance()->disbandTeam(_TeamId, _TeamMembers);
 
+	if (_LeagueId != DYN_CHAT_INVALID_CHAN)
+	{
+		DynChatEGS.removeChan(_LeagueId);
+	}
+
+	_LeagueId = DYN_CHAT_INVALID_CHAN;
 	_TeamId = CTEAM::InvalidTeamId;
 	_TeamMembers.clear();
 	_NbMembers = 0;
@@ -167,7 +174,8 @@ void CTeam::addCharacter(CCharacter *newCharacter)
 	else
 	{
 //		newCharacter->_PropertyDatabase.setProp( "GROUP:SUCCESSOR_INDEX", 1  );
-		CBankAccessor_PLR::getGROUP().setSUCCESSOR_INDEX(newCharacter->_PropertyDatabase, 1);
+		uint8 index = getSuccessorIndex();
+		CBankAccessor_PLR::getGROUP().setSUCCESSOR_INDEX(newCharacter->_PropertyDatabase, index);
 	}
 	
 	// update all member's DB
@@ -283,6 +291,9 @@ void CTeam::addCharacter(CCharacter *newCharacter)
 	// set the character team
 	newCharacter->setTeamId(_TeamId);
 
+	// set the character alliance
+	newCharacter->setLeagueId(_LeagueId);
+
 	// Add character to chat group
 	TGroupId idGroupe = CHAT_GROUPS_IDS::getTeamChatGroupId(_TeamId);
 	CMessage msgout("ADD_TO_GROUP");
@@ -383,6 +394,7 @@ void CTeam::removeCharacter( CCharacter * player )
 
 	///\todo give him a player team Id
 	player->setTeamId( CTEAM::InvalidTeamId );
+	player->setLeagueId(DYN_CHAT_INVALID_CHAN);
 	player->updateTargetingChars();
 
 	// tell progression system this player has been removed from his team
@@ -410,12 +422,18 @@ void CTeam::removeCharacter( CCharacter * player )
 		clearPlayerTeamDB( *_TeamMembers.begin() );
 		CCharacter * lastPlayer = PlayerManager.getOnlineChar( *_TeamMembers.begin() );
 		if ( lastPlayer )
+		{
 			lastPlayer->setTeamId( CTEAM::InvalidTeamId );
+			lastPlayer->setLeagueId(DYN_CHAT_INVALID_CHAN);
+		}
 		else
 		{
 			nlwarning("<CTeam removeCharacter> charId %s not found in the team", (*_TeamMembers.begin()).toString().c_str() );
 			return;
 		}
+
+		// remove league
+		setLeague("");
 
 		// remove the team chat group
 		TGroupId idGroupe = CHAT_GROUPS_IDS::getTeamChatGroupId(_TeamId);
@@ -437,80 +455,26 @@ void CTeam::removeCharacter( CCharacter * player )
 	// if that was the leader, get another one
 	else if ( _LeaderId == charId )
 	{
-		_LeaderId = _SuccessorId;
-		_SuccessorId = CEntityId::Unknown;
-		for (list<CEntityId>::const_iterator it = _TeamMembers.begin(); it != _TeamMembers.end(); ++it)
-		{
-			if ( (*it) != _LeaderId )
-			{
-				_SuccessorId = (*it );
-				break;
-			}
-		}
-
-
-		// switch dyn chat speaker
-		CMissionManager::getInstance()->switchDynChatSpeaker(player,_LeaderId);
-
-		// inform the new leader
-		SM_STATIC_PARAMS_1(params1, STRING_MANAGER::player);		
-		params1[0].setEId( charId );
-		PHRASE_UTILITIES::sendDynamicSystemMessage(TheDataset.getDataSetRow(_LeaderId), "TEAM_YOU_NEW_LEADER", params1);
-
-		// inform the group 
-		SM_STATIC_PARAMS_2(params, STRING_MANAGER::player, STRING_MANAGER::player);		
-		params[0].setEId( charId );
-		params[1].setEId( _LeaderId );
-
-		set<CEntityId> exclude;
-		exclude.insert( _LeaderId );
-		exclude.insert( charId );
-		sendDynamicMessageToMembers("TEAM_NEW_LEADER", params, exclude);
-
-		// update leader DB
-		CCharacter *leader = PlayerManager.getOnlineChar( _LeaderId );
-		if (leader)
-		{
-//			leader->_PropertyDatabase.setProp( "GROUP:LEADER_INDEX", -1 );
-			CBankAccessor_PLR::getGROUP().setLEADER_INDEX(leader->_PropertyDatabase, 0xf);
-//			leader->_PropertyDatabase.setProp( "GROUP:SUCCESSOR_INDEX", 0 );
-			CBankAccessor_PLR::getGROUP().setSUCCESSOR_INDEX(leader->_PropertyDatabase, 0);
-		}
-		else
-			nlwarning("<CTeam removeCharacter> invalid new leader %s", _LeaderId.toString().c_str() );
+		setLeader(_SuccessorId);
 	}
-	// if that was the successor, inform the new one
-/*	else if ( formerPos == 1 && _NbMembers > 2)
-	{
-		list<CEntityId>::iterator itTmp = _TeamMembers.begin();
-		++itTmp;
-		const CEntityId & successorId = *(itTmp);
-		CCharacter *successor = PlayerManager.getOnlineChar( successorId );
-		if (successor)
-		{
-			successor->_PropertyDatabase.setProp( "GROUP:SUCCESSOR_INDEX", -1 );
-		}
-		else
-			nlwarning("<CTeam removeCharacter> invalid new successor %s", successorId.toString().c_str() );
-
-	}
-*/
 	else if ( _SuccessorId == charId )
 	{
-		for (list<CEntityId>::const_iterator it = _TeamMembers.begin(); it != _TeamMembers.end(); ++it)
+		// The current successor dropped from team; set it to the next in line after leader
+		setSuccessor(1);
+	}
+	else
+	{
+		// A random member dropped from team; make sure the current successor is shown currectly
+		// in all team lists.
+		uint8 index = 0;
+		for (std::list<NLMISC::CEntityId>::iterator it = _TeamMembers.begin() ; it != _TeamMembers.end() ; ++it)
 		{
-			if ( (*it) != _LeaderId )
-			{
-				_SuccessorId = (*it );
-				CCharacter *successor = PlayerManager.getOnlineChar( _SuccessorId );
-				if (successor)
-				{
-//					successor->_PropertyDatabase.setProp( "GROUP:SUCCESSOR_INDEX", -1 );
-					CBankAccessor_PLR::getGROUP().setSUCCESSOR_INDEX(successor->_PropertyDatabase, 0xf);
-				}
+			if (_SuccessorId == (*it))
 				break;
-			}
+			++index;
 		}
+		// Don't show a message because the successor hasn't actually changed.
+		setSuccessor(index, false);
 	}
 
 	for (std::list<NLMISC::CEntityId>::iterator it = _TeamMembers.begin() ; it != _TeamMembers.end() ; ++it)
@@ -607,9 +571,106 @@ void CTeam::removeCharacter( CCharacter * player )
 
 }// CTeam removeCharacter
 
-void CTeam::setSuccessor( uint8 memberIdx )
+void CTeam::setLeague(const string &leagueName)
 {
-	/*
+	TChanID chanId = _LeagueId;
+	if (_LeagueId != DYN_CHAT_INVALID_CHAN)
+	{
+		// Remove players from previous channel
+		_LeagueId = DYN_CHAT_INVALID_CHAN;
+		updateLeague();
+		// Remove channel if empty
+		vector<CEntityId> players;
+		if (!DynChatEGS.getPlayersInChan(chanId, players))
+			DynChatEGS.removeChan(chanId);
+	}
+
+	if (!leagueName.empty())
+	{
+		_LeagueId = DynChatEGS.addChan("league_"+toString(DynChatEGS.getNextChanID()), leagueName);
+		if (_LeagueId == DYN_CHAT_INVALID_CHAN)
+		{
+			nlinfo("Error channel creation !!!");
+			return;
+		}
+		// set historic size of the newly created channel
+		DynChatEGS.setHistoricSize(_LeagueId, 100);
+	}
+	
+	updateLeague();
+}
+
+void CTeam::updateLeague()
+{
+	for (list<CEntityId>::iterator it = _TeamMembers.begin() ; it != _TeamMembers.end() ; ++it)
+	{
+		CCharacter * ch = PlayerManager.getOnlineChar((*it));
+		if (ch != NULL && ch->getLeagueId() != _LeagueId)
+		{
+			ch->setLeagueId(_LeagueId);
+		}
+	}
+}
+
+uint8 CTeam::getSuccessorIndex()
+{
+	list<CEntityId>::const_iterator it = _TeamMembers.begin();
+	uint8 i = 0;
+	for (; it != _TeamMembers.end(); ++it)
+	{
+		if ( (*it) == _SuccessorId )
+			break;
+		++i;
+	}
+	return i;
+}
+
+void CTeam::setLeader(CEntityId id, bool bMessage)
+{
+	_LeaderId = id;
+
+	// Move new leader to top of list
+	_TeamMembers.remove(_LeaderId);
+	_TeamMembers.insert(_TeamMembers.begin(), _LeaderId);
+
+	// inform the new leader
+	SM_STATIC_PARAMS_1(params1, STRING_MANAGER::player);		
+	params1[0].setEId( id );
+	PHRASE_UTILITIES::sendDynamicSystemMessage(TheDataset.getDataSetRow(_LeaderId), "TEAM_YOU_NEW_LEADER", params1);
+
+	// inform the group 
+	SM_STATIC_PARAMS_2(params, STRING_MANAGER::player, STRING_MANAGER::player);		
+	params[0].setEId( id );
+	params[1].setEId( _LeaderId );
+
+	set<CEntityId> exclude;
+	exclude.insert( _LeaderId );
+	exclude.insert( id );
+	sendDynamicMessageToMembers("TEAM_NEW_LEADER", params, exclude);
+
+	// New leader was successor, choose a new successor
+	if (id == _SuccessorId)
+	{
+		_SuccessorId = CEntityId::Unknown;
+		// Set the new successor to next in line
+		setSuccessor(1);
+	}
+
+	// update leader DB
+	CCharacter *leader = PlayerManager.getOnlineChar( _LeaderId );
+	if (leader)
+	{
+		// switch dyn chat speaker
+		CMissionManager::getInstance()->switchDynChatSpeaker(leader, _LeaderId);
+
+		CBankAccessor_PLR::getGROUP().setLEADER_INDEX(leader->_PropertyDatabase, 0xf);
+	}
+	else
+		nlwarning("<CTeam setLeader> invalid new leader %s", _LeaderId.toString().c_str() );
+}
+
+void CTeam::setLeader(uint8 memberIdx, bool bMessage)
+{
 	list<CEntityId>::const_iterator it = _TeamMembers.begin();
 	uint8 i = 0;
 	for (; it != _TeamMembers.end(); ++it)
@@ -623,98 +684,58 @@ void CTeam::setSuccessor( uint8 memberIdx )
 		nlwarning("invalid team member %u : count is %u", memberIdx,_TeamMembers.size() );
 		return;
 	}
-	_SuccessorId = (*it);
-	SM_STATIC_PARAMS_1( params,STRING_MANAGER::player );
-	params[0].EId = (*it );
-	sendDynamicMessageToMembers("TEAM_NEW_SUCCESSOR",params);
+	CEntityId newLeaderId = (*it);
+	setLeader(newLeaderId, bMessage);
+}
 
-	for (std::list<CEntityId>::const_iterator it = _TeamMembers.begin() ; it != _TeamMembers.end() ; ++it)
+void CTeam::setSuccessor( uint8 memberIdx, bool bMessage)
+{
+	list<CEntityId>::const_iterator it = _TeamMembers.begin();
+	uint8 i = 0;
+	for (; it != _TeamMembers.end(); ++it)
 	{
-		uint8 hp, sap, stamina;
-		uint32 nameId;
-		CCharacter* character = PlayerManager.getOnlineChar( (*it) );
-		if (character != NULL)
-		{
-			// update the current character team slot
-///\todo: can be done outside the loop
-			if ( newCharacter->getPhysScores()._PhysicalScores[ SCORES::hit_points ].Max != 0)
-				hp = (uint8) ( ( float(TeamMembersStatusMaxValue) * ( newCharacter->getPhysScores()._PhysicalScores[ SCORES::hit_points ].Current ) ) / ( newCharacter->getPhysScores()._PhysicalScores[ SCORES::hit_points ].Max ) );
-			else
-				hp = 0;
-
-			if ( newCharacter->getPhysScores()._PhysicalScores[ SCORES::sap ].Max != 0)
-				sap = (uint8) ( ( float(TeamMembersStatusMaxValue) * ( newCharacter->getPhysScores()._PhysicalScores[ SCORES::sap ].Current ) ) / ( newCharacter->getPhysScores()._PhysicalScores[ SCORES::sap ].Max ) );
-			else
-				sap = 0;
-
-			if ( newCharacter->getPhysScores()._PhysicalScores[ SCORES::stamina ].Max != 0)
-				stamina = (uint8) ( ( float(TeamMembersStatusMaxValue) * ( newCharacter->getPhysScores()._PhysicalScores[ SCORES::stamina ].Current ) ) / ( newCharacter->getPhysScores()._PhysicalScores[ SCORES::stamina ].Max ) );
-			else
-				stamina = 0;
-
-			CMirrorPropValueRO<uint32> nameIndexValue1( TheDataset, newCharacter->getId(), "NameIndex" );
-			nameId = nameIndexValue1();
-				
-			sprintf(buffer, "GROUP:%d:HP",position );
-			character->_PropertyDatabase.setProp( buffer, hp );
-
-			sprintf(buffer, "GROUP:%d:SAP",position );
-			character->_PropertyDatabase.setProp( buffer, sap );
-
-			sprintf(buffer, "GROUP:%d:STA",position );
-			character->_PropertyDatabase.setProp( buffer, stamina );
-
-			sprintf(buffer, "GROUP:%d:NAME",position );
-			character->_PropertyDatabase.setProp( buffer, nameId );
-
-			sprintf(buffer, "GROUP:%d:UID",position );
-			character->_PropertyDatabase.setProp( buffer, newCharacter->getEntityRowId().getCompressedIndex() );
-
-			sprintf(buffer, "GROUP:%d:PRESENT",position );
-			character->_PropertyDatabase.setProp( buffer, (uint8)1 );
-
-			// update the new character team slot corresponding to character
-			if ( character->getPhysScores()._PhysicalScores[ SCORES::hit_points ].Max != 0)
-				hp = (uint8)  ( ( float(TeamMembersStatusMaxValue) * ( character->getPhysScores()._PhysicalScores[ SCORES::hit_points ].Current ) ) / ( character->getPhysScores()._PhysicalScores[ SCORES::hit_points ].Max ) );
-			else
-				hp = 0;
-				
-			if ( character->getPhysScores()._PhysicalScores[ SCORES::sap ].Max != 0)
-				sap = (uint8) ( ( float(TeamMembersStatusMaxValue) * ( character->getPhysScores()._PhysicalScores[ SCORES::sap ].Current ) ) / ( character->getPhysScores()._PhysicalScores[ SCORES::sap ].Max ) );
-			else
-				sap = 0;
-
-			if ( character->getPhysScores()._PhysicalScores[ SCORES::stamina ].Max != 0)
-				stamina = (uint8) ( ( float(TeamMembersStatusMaxValue) * ( character->getPhysScores()._PhysicalScores[ SCORES::stamina ].Current ) ) / ( character->getPhysScores()._PhysicalScores[ SCORES::stamina ].Max ) );
-			else
-				stamina = 0;
-
-			CMirrorPropValueRO<uint32> nameIndexValue2( TheDataset, character->getId(), "NameIndex" );
-			nameId = nameIndexValue2();
-
-			sprintf(buffer, "GROUP:%d:HP",i );
-			newCharacter->_PropertyDatabase.setProp( buffer, hp );
-				
-			sprintf(buffer, "GROUP:%d:SAP",i );
-			newCharacter->_PropertyDatabase.setProp( buffer, sap );
-
-			sprintf(buffer, "GROUP:%d:STA",i );
-			newCharacter->_PropertyDatabase.setProp( buffer, stamina );
-
-			sprintf(buffer, "GROUP:%d:NAME",i );
-			newCharacter->_PropertyDatabase.setProp( buffer, nameId );
-
-			sprintf(buffer, "GROUP:%d:UID",i );
-			newCharacter->_PropertyDatabase.setProp( buffer, character->getEntityRowId().getCompressedIndex() );
-
-			sprintf(buffer, "GROUP:%d:PRESENT",i );
-			newCharacter->_PropertyDatabase.setProp( buffer, (uint8)1 );
-		}
-		else
-			nlwarning("<CTeam::addCharacter> Unknown character %s", (*it).toString().c_str() );
+		if ( i == memberIdx )
+			break;
 		++i;
 	}
-	*/
+	if ( it == _TeamMembers.end() )
+	{
+		nlwarning("invalid team member %u : count is %u", memberIdx,_TeamMembers.size() );
+		return;
+	}
+
+	_SuccessorId = (*it);
+	i = 0;
+	for (it = _TeamMembers.begin() ; it != _TeamMembers.end() ; ++it)
+	{
+		CCharacter * ch = PlayerManager.getOnlineChar( (*it) );
+		if (ch)
+		{
+			// If this char is the successor, don't show
+			if (i == memberIdx)
+			{
+				CBankAccessor_PLR::getGROUP().setSUCCESSOR_INDEX(ch->_PropertyDatabase, 0xf);
+			}
+			else if (i < memberIdx)
+			{
+				// If the successor comes after this player in the list,
+				// bump it up one.
+				CBankAccessor_PLR::getGROUP().setSUCCESSOR_INDEX(ch->_PropertyDatabase, memberIdx - 1);
+			}
+			else
+			{
+				CBankAccessor_PLR::getGROUP().setSUCCESSOR_INDEX(ch->_PropertyDatabase, memberIdx);
+			}
+		}
+		++i;
+	}
+
+	if (bMessage)
+	{
+		SM_STATIC_PARAMS_1( params,STRING_MANAGER::player );
+		params[0].setEIdAIAlias(_SuccessorId, CAIAliasTranslator::getInstance()->getAIAlias(_SuccessorId));
+		sendDynamicMessageToMembers("TEAM_NEW_SUCCESSOR", params);
+	}
 }
 
 //---------------------------------------------------
@@ -1130,22 +1151,65 @@ CMissionTeam* CTeam::getMissionByAlias( TAIAlias missionAlias )
 	return NULL;
 }
 
+void CTeam::updateMembersDb()
+{
+	for (std::list<NLMISC::CEntityId>::iterator it = _TeamMembers.begin() ; it != _TeamMembers.end() ; ++it)
+	{
+		uint8 hp, sap, stamina;
+		uint32 nameId;
+		uint pos = 0;
 
+		CCharacter * ch1 = PlayerManager.getOnlineChar( (*it) );
 
+		if (ch1->getId() == _LeaderId)
+		{
+			CBankAccessor_PLR::getGROUP().setLEADER_INDEX(ch1->_PropertyDatabase, 0xf);
+		}
+		else 
+		{
+			CBankAccessor_PLR::getGROUP().setLEADER_INDEX(ch1->_PropertyDatabase, 0);
+		}
+		///\todo log if nothing
+		if (ch1)
+		{
+			for (std::list<NLMISC::CEntityId>::iterator it2 = _TeamMembers.begin() ; it2 != _TeamMembers.end() ; ++it2)
+			{
+				if ( (*it) == (*it2) )
+					continue;	
 
+				CBankAccessor_PLR::TGROUP::TArray &groupItem = CBankAccessor_PLR::getGROUP().getArray(pos);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+				CCharacter * ch2 = PlayerManager.getOnlineChar( (*it2) );	
+				if (ch2 != NULL)
+				{
+					// update new char for old char
+					if ( ch2->getPhysScores()._PhysicalScores[ SCORES::hit_points ].Max != 0)
+						hp = (uint8) ( ( float(TeamMembersStatusMaxValue) * ( ch2->getPhysScores()._PhysicalScores[ SCORES::hit_points ].Current ) ) / ( ch2->getPhysScores()._PhysicalScores[ SCORES::hit_points ].Max ) );
+					else
+						hp = 0;
+					if ( ch2->getPhysScores()._PhysicalScores[ SCORES::sap ].Max != 0)
+						sap = (uint8) ( ( float(TeamMembersStatusMaxValue) * ( ch2->getPhysScores()._PhysicalScores[ SCORES::sap ].Current ) ) / ( ch2->getPhysScores()._PhysicalScores[ SCORES::sap ].Max ) );
+					else
+						sap = 0;
+					if ( ch2->getPhysScores()._PhysicalScores[ SCORES::stamina ].Max != 0)
+						stamina = (uint8) ( ( float(TeamMembersStatusMaxValue) * ( ch2->getPhysScores()._PhysicalScores[ SCORES::stamina ].Current ) ) / ( ch2->getPhysScores()._PhysicalScores[ SCORES::stamina ].Max ) );
+					else
+						stamina = 0;
+					
+					CMirrorPropValueRO<uint32> nameIndexValue( TheDataset, ch2->getId(), "NameIndex" );
+					nameId = nameIndexValue();
+									
+					groupItem.setHP(ch1->_PropertyDatabase, hp);
+					groupItem.setSAP(ch1->_PropertyDatabase, sap);
+					groupItem.setSTA(ch1->_PropertyDatabase, stamina);
+					groupItem.setNAME(ch1->_PropertyDatabase, nameId);
+					groupItem.setUID(ch1->_PropertyDatabase, ch2->getEntityRowId().getCompressedIndex());
+					groupItem.setPRESENT(ch1->_PropertyDatabase, true);
+				}
+				pos++;
+			}
+		}
+	}
+}
 
 

@@ -244,20 +244,20 @@ class CAHOnReloadTestPage: public IActionHandler
 REGISTER_ACTION_HANDLER (CAHOnReloadTestPage, "on_reload_test_page");
 
 
-//void initWebBrowser()
-//{
-//	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
-//
-//	// start the browser
-//	CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
-//
-//	if (pGH)
-//	{
-//		pGH->setActive(true);
-//		pGH->browse(MainPageURL.c_str());
-//	}
-//}
+void initWebBrowser()
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	//pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
+
+	// start the browser
+	CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
+
+	if (pGH)
+	{
+		pGH->setActive(true);
+		pGH->browse(ClientCfg.PatchletUrl.c_str());
+	}
+}
 
 
 // ------------------------------------------------------------------------------------------------
@@ -392,9 +392,6 @@ bool connection (const string &cookie, const string &fsaddr)
 	pIM->getDbProp ("UI:CURRENT_SCREEN")->setValue32(ClientCfg.Local ? 6 : -1); // TMP TMP
 	CCDBNodeBranch::flushObserversCalls();
 
-	// Init web box
-	//initWebBrowser();
-
 	// Active inputs
 	Actions.enable(true);
 	EditActions.enable(true);
@@ -421,6 +418,10 @@ bool connection (const string &cookie, const string &fsaddr)
 	nlinfo ("PROFILE: %d seconds (%d total) for Initializing user interface", (uint32)(connCurrent-connLast)/1000, (uint32)(connCurrent-connStart)/1000);
 
 	nlinfo ("PROFILE: %d seconds for connection", (uint32)(ryzomGetLocalTime ()-connStart)/1000);
+
+	// Init web box
+	nlinfo("ok");
+	initWebBrowser();
 
 	// TMP TMP
 	if (ClientCfg.Local)

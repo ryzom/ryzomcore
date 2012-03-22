@@ -76,6 +76,9 @@ public:
 	bool				setWriteRight(TChanID chan, const TDataSetRow &client, bool writeRight);
 	// Set size of historic for a given channel
 	void				setHistoricSize(TChanID chan, uint32 size);
+	// Get list of players in channel
+	bool 				getPlayersInChan(TChanID chanID, std::vector<NLMISC::CEntityId> &players);
+
 	// Resend all channel / sessions to the IOS
 	void				iosConnection();	
 	// Get all channel names (for read only)
@@ -83,6 +86,7 @@ public:
 	const TChanIDToName	&getChanIDToNameMap() const { return _ChanNames.getAToBMap(); }
 	// Get pointer on all channels
 	void				getChans(std::vector<CDynChatChan *> &channels) { _DynChat.getChans(channels); }
+	const TChanID				getNextChanID() const { return _NextChanID; }
 
 	/// Message from a service that need to create a new dynamic channel
 	static void			cbServiceAddChan(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);

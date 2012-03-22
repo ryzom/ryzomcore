@@ -41,7 +41,7 @@ public:
 	//@{
 	/// ctor
 	inline IMissionStepTemplate()
-		:_OOOStepIndex(0xFFFFFFFF),_Any(false),_Displayed(true),_IconDisplayedOnStepNPC(true),_IsInOverridenOOO(false) {}	
+		:_OOOStepIndex(0xFFFFFFFF),_Any(false),_Displayed(true),_IconDisplayedOnStepNPC(true),_IsInOverridenOOO(false),_User(NULL) {}	
 
 	//BRIANCODE my appologies, need access to this data from CMissionStepGiveItem	
 	struct CSubStep
@@ -164,7 +164,8 @@ protected:
 	bool								_AddDefaultParams;
 	/// flag set to true if the step is in an OOO block which text wad overriden
 	bool								_IsInOverridenOOO;
-
+	/// Player running the mission
+	CCharacter * 						_User;
 };
 
 

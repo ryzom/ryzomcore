@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+    <STRUCT Name="3D">
+      <ATOM Name="Shape" Value="tr_s2_bamboo_a.shape"/>
+      <ATOM Name="Bounding Radius" Value="5"/>
+      <ATOM Name="Collision Radius" Value="3"/>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:17:35 2002 (corvazier) File converted from old format
+Mon Jun 30 10:46:13 2003 (mauduit) .3D.Shape = tr_s2_bamboo_a.shape
+Mon Jun 30 10:54:00 2003 (mauduit) .3D.Bounding Radius = 2.5
+Mon Jun 30 10:54:00 2003 (mauduit) .3D.Collision Radius = 1.5
+Mon Jun 30 16:38:25 2003 (mauduit) .3D.Bounding Radius = 5
+Mon Jun 30 16:38:25 2003 (mauduit) .3D.Collision Radius = 3</LOG>
+</FORM>

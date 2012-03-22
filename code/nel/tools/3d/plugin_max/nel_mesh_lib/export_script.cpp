@@ -15,8 +15,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdafx.h"
-#include <MaxScrpt/parser.h>
-#include <MaxScrpt/strings.h>
+#include <maxversion.h>
+#if MAX_VERSION_MAJOR >= 14
+#	include <maxscript/compiler/parser.h>
+#	include <maxscript/foundation/strings.h>
+#else
+#	include <MaxScrpt/parser.h>
+#	include <MaxScrpt/strings.h>
+#endif
 #include "export_nel.h"
 #include "export_appdata.h"
 

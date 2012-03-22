@@ -1111,6 +1111,30 @@ void CStringManager::setPhrase(NLNET::CMessage &message)
 }
 
 /*
+ * Replace a phrase in specified language (message handler)
+ */
+void CStringManager::setPhraseLang(NLNET::CMessage &message)
+{
+	std::string phraseName;
+	ucstring phraseContent;
+	std::string langString;
+	try
+	{
+		message.serial(phraseName);
+		message.serial(phraseContent);
+		message.serial(langString);
+	}
+	catch( Exception& e )
+	{
+		nlwarning("<setPhrase> %s",e.what());
+		return;
+	}
+
+	TLanguages lang = checkLanguageCode(langString);
+	setPhrase(phraseName, phraseContent, lang);
+}
+
+/*
  * Replace a phrase in default language(s)
  */
 void CStringManager::setPhrase(std::string const& phraseName, ucstring const& phraseContent)

@@ -194,16 +194,20 @@ public:
 	void setActionOnLeftClick (const std::string &ActionHandlerName) { _AHOnLeftClick = getAH(ActionHandlerName, _AHLeftClickParams); }
 	void setActionOnRightClick (const std::string &ActionHandlerName) { _AHOnRightClick = getAH(ActionHandlerName, _AHRightClickParams); }
 	void setActionOnDrop (const std::string &ActionHandlerName) { _AHOnDrop = getAH(ActionHandlerName, _AHDropParams); }
+	void setActionOnCanDrop (const std::string &ActionHandlerName) { _AHOnCanDrop = getAH(ActionHandlerName, _AHCanDropParams); }
 	void setParamsOnLeftClick (const std::string &ParamsHandlerName) { _AHLeftClickParams = ParamsHandlerName; }
 	void setParamsOnRightClick (const std::string &ParamsHandlerName) { _AHRightClickParams = ParamsHandlerName; }
 	void setParamsOnDrop (const std::string &ParamsHandlerName) { _AHDropParams = ParamsHandlerName; }
+	void setParamsOnCanDrop (const std::string &ParamsHandlerName) { _AHCanDropParams = ParamsHandlerName; }
 
 	const std::string &getActionOnLeftClick () const { return getAHName(_AHOnLeftClick); }
 	const std::string &getActionOnRightClick () const { return getAHName(_AHOnRightClick); }
 	const std::string &getActionOnDrop () const { return getAHName(_AHOnDrop); }
+	const std::string &getActionOnCanDrop () const { return getAHName(_AHOnCanDrop); }
 	const std::string &getParamsOnLeftClick () const { return _AHLeftClickParams; }
 	const std::string &getParamsOnRightClick () const { return _AHRightClickParams; }
 	const std::string &getParamsOnDrop () const { return _AHDropParams; }
+	const std::string &getParamsOnCanDrop () const { return _AHCanDropParams; }
 
 	void setListMenuLeft (const std::string &cm) { CCtrlSheetInfo::setListMenuLeft(cm); }
 	void setListMenuRight (const std::string &cm) { CCtrlSheetInfo::setListMenuRight(cm); }
@@ -215,6 +219,7 @@ public:
 	void	setCanDrop (bool cd) { _CanDrop = cd; }
 	bool	getCanDrop () const { return _CanDrop; }
 	bool	isDragable() { return _Dragable; }
+	void	setDragable(bool dragable) {  _Dragable = dragable; }
 	bool	isDraging() { return _Draging; }
 	sint32	getDeltaDragX() {return _DeltaDragX;}
 	sint32	getDeltaDragY() {return _DeltaDragY;}
@@ -265,19 +270,35 @@ public:
 		REFLECT_SINT32("back", getGuildBack, setGuildBack);
 		REFLECT_SINT32("symbol", getGuildSymbol, setGuildSymbol);
 		REFLECT_BOOL("invert_symbol", getInvertGuildSymbol, setInvertGuildSymbol);
+		REFLECT_BOOL("dragable", isDragable, setDragable);
+		REFLECT_BOOL("can_drop", getCanDrop, setCanDrop);
+		REFLECT_STRING ("left_click", getActionOnLeftClick, setActionOnLeftClick);
+		REFLECT_STRING ("right_click", getActionOnRightClick, setActionOnRightClick);
+		REFLECT_STRING ("left_click_params", getParamsOnLeftClick, setParamsOnLeftClick);
+		REFLECT_STRING ("right_click_params", getParamsOnRightClick, setParamsOnRightClick);
+		REFLECT_STRING ("on_drop", getActionOnDrop, setActionOnDrop);
+		REFLECT_STRING ("on_drop_params", getParamsOnDrop, setParamsOnDrop);
+		REFLECT_STRING ("on_can_drop", getActionOnCanDrop, setActionOnCanDrop);
+		REFLECT_STRING ("on_can_drop_params", getParamsOnCanDrop, setParamsOnCanDrop);
+		REFLECT_LUA_METHOD("getDraggedSheet",	luaGetDraggedSheet)
 		REFLECT_LUA_METHOD("getHpBuff",	luaGetHpBuff)
 		REFLECT_LUA_METHOD("getSapBuff",	luaGetSapBuff)
 		REFLECT_LUA_METHOD("getFocusBuff",	luaGetFocusBuff)
 		REFLECT_LUA_METHOD("getStaBuff",	luaGetStaBuff)
 		REFLECT_LUA_METHOD("getName",		luaGetName)
+		REFLECT_LUA_METHOD("getCreatorName", luaGetCreatorName)
+		REFLECT_LUA_METHOD("waitInfo", luaWaitInfo)
 		REFLECT_LUA_METHOD("buildCrystallizedSpellListBrick",		luaBuildCrystallizedSpellListBrick)
 	REFLECT_EXPORT_END
 
+	int luaGetDraggedSheet(CLuaState &ls);
 	int luaGetHpBuff(CLuaState &ls);
 	int luaGetSapBuff(CLuaState &ls);
 	int luaGetFocusBuff(CLuaState &ls);
 	int luaGetStaBuff(CLuaState &ls);
 	int luaGetName(CLuaState &ls);
+	int luaGetCreatorName(CLuaState &ls);
+	int luaWaitInfo(CLuaState &ls);
 	int luaBuildCrystallizedSpellListBrick(CLuaState &ls);
 
 	// hardcode creation. User must setup other CtrlBase value (parent etc...)
@@ -354,6 +375,9 @@ public:
 
 	/// Special ContextHelp for ctrl sheet.
 	virtual void			getContextHelp(ucstring &help) const;
+
+	virtual void			getContextHelpToolTip(ucstring &help) const;
+
 
 	/** true if an item of another ctrlSheet can be dropped on this slot.
 	 *	also return true if src is 0, or if _ItemSlot==UNDEFINED
@@ -490,6 +514,12 @@ public:
 	CCDBNodeLeaf *getItemResaleFlagPtr() const;
 	// set item RESALE_FLAG
 	void setItemResaleFlag(sint32 rf);
+
+	// get item locked by owner
+	bool getLockedByOwner() const;
+
+	// true if the inventory supports owner locking
+	bool canOwnerLock() const;
 
 	// get item SELLER_TYPE. 0 if no DB
 	sint32 getItemSellerType() const;

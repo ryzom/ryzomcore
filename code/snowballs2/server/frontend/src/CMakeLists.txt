@@ -1,6 +1,6 @@
 FILE(GLOB SRC *.cpp *.h)
 
-ADD_EXECUTABLE(snowballs_frontend_service ${SRC})
+ADD_EXECUTABLE(snowballs_frontend_service WIN32 ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 

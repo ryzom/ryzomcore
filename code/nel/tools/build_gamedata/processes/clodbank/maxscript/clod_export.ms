@@ -279,7 +279,9 @@ try
 catch 
 (
 	-- Error
-	nlerror("ERROR fatal error exporting 'clod' in folder %MaxSourceDirectory%")
+	nlerror("ERROR Fatal error exporting 'clod' in folder %MaxSourceDirectory%")
+	nlerror("FAIL Fatal error occured")
+	NelForceQuitRightNow()
 	removeRunningTag = false
 )
 

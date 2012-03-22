@@ -95,16 +95,10 @@ public:
 	@endcode
 	*/
 	virtual void setNelContext(NLMISC::INelContext *nelContext) = 0;
-
-	virtual QString name() const = 0;
-	virtual QString version() const = 0;
-	virtual QString vendor() const = 0;
-	virtual QString description() const = 0;
-	virtual QStringList dependencies() const = 0;
 };
 
 }; //namespace ExtensionSystem
 
-Q_DECLARE_INTERFACE(ExtensionSystem::IPlugin, "dev.ryzom.com.ObjectViewerQt.IPlugin/0.9.1")
+Q_DECLARE_INTERFACE(ExtensionSystem::IPlugin, "dev.ryzom.com.ObjectViewerQt.IPlugin/0.9.2")
 
 #endif // IPLUGIN_H

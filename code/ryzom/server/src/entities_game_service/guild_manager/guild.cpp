@@ -34,6 +34,8 @@
 #include "outpost_manager/outpost_manager.h"
 #include "primitives_parser.h"
 #include "modules/shard_unifier_client.h"
+#include "mission_manager/mission_manager.h"
+#include "phrase_manager/phrase_utilities_functions.h"
 
 /// todo guild remove entity id translator
 #include "nel/misc/eid_translator.h"
@@ -215,7 +217,7 @@ void CGuild::setBuilding(TAIAlias buildingAlias)
 	if (getBuilding() != CAIAliasTranslator::Invalid)
 	{
 		CBuildingManager::getInstance()->removeGuildBuilding( getId() );
-		_Inventory->clearInventory();
+		//_Inventory->clearInventory();
 	}
 
 	// set the new guild building
@@ -686,23 +688,193 @@ void CGuild::unregisterGuild()
 //
 //}
 
-
 //----------------------------------------------------------------------------
-void CGuild::removeMission(CMissionGuild * mission, TMissionResult result)
+void CGuild::removeMission( uint idx, TMissionResult result)
 {
-	/// todo guild mission
+	if ( idx >= _Missions.size() )
+		return;
+
+	/// if the mission was finished, the result is success
+	if ( _Missions[idx]->getFinished() )
+	{
+		if ( _Missions[idx]->getMissionSuccess() )
+			result = mr_success;
+		else
+			result = mr_fail;
+	}
+
+	CMissionTemplate *tpl = CMissionManager::getInstance()->getTemplate(_Missions[idx]->getTemplateId());
+
+	updateMissionHistories( _Missions[idx]->getTemplateId(), result);
+
+	if ( tpl && !tpl->Tags.NoList )
+	{
+		_Missions[idx]->clearUsersJournalEntry();
+	}
+
+	CMissionManager::getInstance()->deInstanciateMission(_Missions[idx]);
+	delete _Missions[idx];
+	_Missions.erase(_Missions.begin() + idx) ;
 }
 
 //----------------------------------------------------------------------------
 void CGuild::addSuccessfulMission(CMissionTemplate * templ)
 {
-	/// todo guild mission
+	TMissionHistory &mh = _MissionHistories[templ->Alias];
+	mh.Successfull = true;
 }
 
 //----------------------------------------------------------------------------
-bool CGuild::processMissionEvent( CMissionEvent & event, TAIAlias alias )
+void CGuild::clearSuccessfulMissions()
 {
-	/// todo guild mission
+	_MissionHistories.clear();
+}
+
+//----------------------------------------------------------------------------
+void CGuild::updateMissionHistories(TAIAlias missionAlias, uint32 result)
+{
+	TMissionHistory &mh = _MissionHistories[missionAlias];
+
+	switch(result)
+	{
+	case mr_success:
+	case mr_forced:
+		mh.Successfull = true;
+		// validate last try date
+		_MissionHistories[missionAlias].LastSuccessDate = CTickEventHandler::getGameCycle();
+		break;
+	}
+}
+
+//----------------------------------------------------------------------------
+void CGuild::sendDynamicMessageToMembers(const string &msgName, const TVectorParamCheck &params, const set<CEntityId> &excluded) const
+{
+	for ( std::map<EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::const_iterator it = getMembersBegin();
+			it != getMembersEnd();++it )
+	{
+		CCharacter * user = PlayerManager.getChar( it->first );
+
+		if ( excluded.find(it->first) == excluded.end())
+		{
+			const uint32 stringId = STRING_MANAGER::sendStringToClient(TheDataset.getDataSetRow(it->first), msgName, params );
+			PHRASE_UTILITIES::sendDynamicSystemMessage(TheDataset.getDataSetRow(it->first), stringId);
+		}
+	}
+}
+
+//----------------------------------------------------------------------------
+bool CGuild::processMissionEvent( CMissionEvent & event, TAIAlias alias)
+{
+	std::list<CMissionEvent*> listEvents;
+	listEvents.push_back(&event);
+	return processGuildMissionEvent(listEvents, alias);
+}
+
+//----------------------------------------------------------------------------
+bool CGuild::processGuildMissionEvent(std::list< CMissionEvent *> & eventList, TAIAlias missionAlias)
+{
+	for (uint i = 0; i < _Missions.size(); i++ )
+	{
+		nlassert( _Missions[i] );
+		if ( missionAlias == CAIAliasTranslator::Invalid	|| _Missions[i]->getTemplateId() == missionAlias )
+		{
+			if ( processGuildMissionStepEvent( eventList, _Missions[i]->getTemplateId() ,0xFFFFFFFF) )
+				return true;
+		}
+	}
+	return false;
+}
+
+//----------------------------------------------------------------------------
+bool CGuild::processGuildMissionStepEvent(std::list< CMissionEvent*> & eventList, TAIAlias missionAlias, uint32 stepIndex)
+{
+	CMissionGuild * mission = getMissionByAlias( missionAlias );
+	if (!mission )
+	{
+		nlwarning("invalid missionAlias");
+		return false;
+	}
+	// I don't know if i should pass _EId to this function
+	CMissionEvent::TResult result = mission->processEvent(TheDataset.getDataSetRow(getHighestGradeOnlineUser()) /*TheDataset.getDataSetRow( _EId)*/ ,eventList,stepIndex );
+	if ( result == CMissionEvent::Nothing )
+		return false;
+	else if ( result == CMissionEvent::MissionFailed )
+		return true;
+
+	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( mission->getTemplateId() );
+	nlassert( templ );
+	if ( result == CMissionEvent::MissionEnds )
+	{
+		CMissionEventMissionDone * event = new CMissionEventMissionDone(templ->Alias);
+		eventList.push_back(event);
+
+		addSuccessfulMission(templ);
+
+		for ( std::map<EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::iterator it = getMembersBegin();
+			it != getMembersEnd();++it )
+		{
+			CCharacter * user = PlayerManager.getChar( it->first );
+			if ( user )
+			{
+				if ( templ->Tags.NoList == false )
+					CCharacter::sendDynamicSystemMessage( user->getEntityRowId(),"EGS_MISSION_SUCCESS");
+			}
+		}
+
+		CMissionManager::getInstance()->missionDoneOnce(templ);
+		mission->stopChildren();
+
+		// only remove no list missions, other must be manually removed by user
+		if ( templ->Tags.NoList || mission->isChained() || templ->Tags.AutoRemove )
+		{
+			mission->updateEncyclopedia();
+			removeMission(mission, mr_success);
+		}
+		else
+		{
+			mission->setSuccessFlag();
+			mission->updateUsersJournalEntry();
+		}
+		return true;
+	}
+	else if ( result == CMissionEvent::StepEnds )
+	{
+		if ( templ->Tags.NoList == false )
+		{
+			for ( std::map<EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::iterator it = getMembersBegin();
+				it != getMembersEnd();++it )
+			{
+				CCharacter * user = PlayerManager.getChar( it->first );
+				if ( user )
+				{
+					if ( templ->Tags.NoList == false )
+						CCharacter::sendDynamicSystemMessage( user->getEntityRowId(),"EGS_MISSION_STEP_SUCCESS");
+				}
+			}
+		}
+	}
+	mission->updateUsersJournalEntry();
+	return true;
+}
+
+//----------------------------------------------------------------------------
+CMissionGuild* CGuild::getMissionByAlias( TAIAlias missionAlias )
+{
+	const uint size = (uint)_Missions.size();
+	for ( uint i = 0; i < size; i++ )
+	{
+		if ( _Missions[i] && _Missions[i]->getTemplateId() == missionAlias )
+			return _Missions[i];
+	}
+	return NULL;
+}
+
+//----------------------------------------------------------------------------
+bool CGuild::isMissionSuccessfull(TAIAlias alias)
+{
+	std::map<TAIAlias, TMissionHistory>::iterator it(_MissionHistories.find(alias));
+	if (it != _MissionHistories.end())
+		return it->second.Successfull;
 	return false;
 }
 
@@ -732,10 +904,12 @@ bool CGuild::canAccessToGuildInventory( CCharacter * user )
 }
 
 //----------------------------------------------------------------------------
-void CGuild::putItem( CGameItemPtr item )
+bool CGuild::putItem( CGameItemPtr item )
 {
-	if (_Inventory->insertItem(item, INVENTORIES::INSERT_IN_FIRST_FREE_SLOT, true) != CInventoryBase::ior_ok)
+	CInventoryBase::TInventoryOpResult res = _Inventory->insertItem(item, INVENTORIES::INSERT_IN_FIRST_FREE_SLOT, true);
+	if (res != CInventoryBase::ior_ok)
 		item.deleteItem();
+	return res == CInventoryBase::ior_ok;
 }
 
 //----------------------------------------------------------------------------
@@ -854,6 +1028,88 @@ void CGuild::takeItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 s
 		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_PLAYER_BAG_FULL" );
 		return;
 	}
+}
+
+//----------------------------------------------------------------------------
+uint CGuild::selectItems(NLMISC::CSheetId itemSheetId, uint32 quality, std::vector<CItemSlotId> *itemList)
+{
+	// For all items
+	uint	quantitySelected= 0;
+	for (uint32 i = 0; i < _Inventory->getSlotCount(); i++)
+	{
+		CGameItemPtr item = _Inventory->getItem(i);
+		if (item == NULL)
+			continue;
+
+		// if match, append to the list
+		if (item->getSheetId()==itemSheetId && item->quality()>=quality)
+		{
+			quantitySelected+= item->getStackSize();
+			if(itemList)
+			{
+				CItemSlotId		entry;
+				entry.Slot= i;
+				entry.Quality= item->quality();
+				itemList->push_back(entry);
+			}
+		}
+	}
+
+	return quantitySelected;
+}
+
+//----------------------------------------------------------------------------
+uint CGuild::destroyItems(const std::vector<CItemSlotId> &itemSlotIns, uint32 maxQuantity)
+{
+	// none to destroy actually?
+	if(maxQuantity==0 || itemSlotIns.empty())
+		return 0;
+
+	// If has to destroy only some of them, must sort to take first the ones of lowest quality
+	const std::vector<CItemSlotId> *itemSlots= NULL;
+	std::vector<CItemSlotId>	itemSlotSorted;
+	if(maxQuantity!=uint32(-1))
+	{
+		itemSlotSorted= itemSlotIns;
+		std::sort(itemSlotSorted.begin(), itemSlotSorted.end());
+		itemSlots= &itemSlotSorted;
+	}
+	else
+	{
+		// just point to the original one
+		itemSlots= &itemSlotIns;
+	}
+
+	// destroy items up to the maxquantity wanted
+	uint	index= 0;
+	uint	totalDestroyed= 0;
+	while(maxQuantity>0 && index<itemSlotIns.size())
+	{
+		const CItemSlotId	&itemSlot= (*itemSlots)[index];
+		// locate the item
+		CGameItemPtr	pItem= getItem(itemSlot.Slot);
+		if(pItem!=NULL)
+		{
+			// destroy
+			uint32	quantityToDestroy= maxQuantity;
+			quantityToDestroy= min(quantityToDestroy, pItem->getStackSize());
+
+			CGameItemPtr item = _Inventory->removeItem(itemSlot.Slot, quantityToDestroy);
+			item.deleteItem();
+
+			// decrease if not infinity
+			if(maxQuantity!=-1)
+				maxQuantity-= quantityToDestroy;
+
+			// increase count
+			totalDestroyed+= quantityToDestroy;
+		}
+
+		// next slot to destroy
+		index++;
+	}
+
+	return totalDestroyed;
 }
 
 //----------------------------------------------------------------------------
@@ -1042,23 +1298,34 @@ uint16 CGuild::getMaxGradeCount(EGSPD::CGuildGrade::TGuildGrade grade)const
 	for ( uint i = 0; i < size; ++i )
 		count+=_GradeCounts[i];
 	
-	if ( grade == EGSPD::CGuildGrade::Leader )
-		return 1;
-	if ( grade == EGSPD::CGuildGrade::HighOfficer )
+	switch (grade)
 	{
-		count *= 5;
-		if ( count %100 == 0 )
-			return count/100;
-		else
-			return count/100 + 1;
-	}
-	if ( grade == EGSPD::CGuildGrade::Officer )
-	{
-		count *= 10;
-		if ( count %100 == 0 )
-			return count/100;
-		else
-			return count/100 + 1;
+		case EGSPD::CGuildGrade::Leader:
+			return 1;
+			break;
+		case EGSPD::CGuildGrade::HighOfficer:
+		{
+			return GuildMaxMemberCount;
+			/*
+			count *= 5;
+			if ( count %100 == 0 )
+				return count/100;
+			else
+				return count/100 + 1;
+			*/
+		}
+		break;
+		case EGSPD::CGuildGrade::Officer:
+		{
+			return GuildMaxMemberCount;
+			/*
+			count *= 10;
+			if ( count %100 == 0 )
+				return count/100;
+			else
+				return count/100 + 1;
+			*/
+		}
 	}
 	return 0xFFFF;
 }
@@ -1982,7 +2249,7 @@ void	IGuild::updateMembersStringIds()
 //-----------------------------------------------------------------------------
 /**
  * This class is used to load old guild inventory, DO NOT BREAK IT!
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005
  */

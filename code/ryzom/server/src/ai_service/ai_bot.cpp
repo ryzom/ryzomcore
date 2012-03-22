@@ -61,7 +61,7 @@ CAIInstance* CSpawnBot::getAIInstance() const
 void CSpawnBot::setVisualPropertiesName()
 {
 	CBot& botRef = CSpawnBot::getPersistent();
-	std::string name = botRef.getName();
+	ucstring name = botRef.getName();
 	
 	if (CVisualPropertiesInterface::UseIdForName)
 	{
@@ -85,7 +85,7 @@ void CSpawnBot::setVisualPropertiesName()
 	if (! botRef.getFaunaBotUseBotName()) //false by default
 	{
 		if (botRef.getSheet()->ForceDisplayCreatureName())
-		return;
+			return;
 		// the npc name is displayed as a fauna
 	}
 
@@ -403,8 +403,8 @@ std::vector<std::string> CBot::getMultiLineInfoString() const
 	pushTitle(container, "CBot");
 	pushEntry(container, "id=" + getIndexString());
 	container.back() += " eid=" + getEntityIdString();
-	container.back() += " alias=" + getAliasTreeOwner()->getAliasString();
-	container.back() += " name=" + getName();
+	container.back() += " alias=" + getAliasTreeOwner()->getAliasString() + " raw alias=" + NLMISC::toString(getAliasTreeOwner()->getAlias());
+	pushEntry(container, " name=" + getName());
 	if (isSheetValid())
 		container.back() += " sheet=" + NLMISC::CFile::getFilenameWithoutExtension(getSheet()->SheetId().toString());
 	pushEntry(container, "fullname=" + getFullName());

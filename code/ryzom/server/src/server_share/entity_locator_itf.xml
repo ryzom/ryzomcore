@@ -70,7 +70,8 @@
 
 			<property type="uint32"			name="CharId"		doc="The character id the the character"/>
 			<property type="bool"			name="Connection"	doc="Type of the event : true for a connection, false otherwise"/>
-			<property type="std::string"	name="Privilege"	doc="The privilege of the character (e.g :GM:)"/>
+			<property type="std::string"	name="Privilege"	doc="The privilege of the character (e.g :GM:DEV:)"/>
+			<property type="uint32"			name="lastConnectionDate"		doc="Last Connection Date"/>
 		</class>
 
 

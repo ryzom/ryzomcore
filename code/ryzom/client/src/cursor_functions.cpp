@@ -484,6 +484,9 @@ void checkUnderCursor()
 							if(ContextCur.context("ATTACK"))
 								return;
 						}
+
+						if(testMissionOption(0))
+							return;
 					}
 					// Dead
 					else

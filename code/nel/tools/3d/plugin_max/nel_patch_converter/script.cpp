@@ -22,24 +22,38 @@
 #define _CRT_SECURE_NO_DEPRECATE
 
 #include <assert.h>
-#include <MaxScrpt/maxscrpt.h>
-#include <MaxScrpt/3dmath.h>
 
-// Various MAX and MXS includes
-#include <MaxScrpt/Numbers.h>
-#include <MaxScrpt/MAXclses.h>
-#include <MaxScrpt/Streams.h>
-#include <MaxScrpt/MSTime.h>
-#include <MaxScrpt/MAXObj.h>
-#include <MaxScrpt/Parser.h>
+#include <maxversion.h>
+#if MAX_VERSION_MAJOR >= 14
+#	include <maxscript/maxscript.h>
+#	include <maxscript/foundation/3dmath.h>
+#	include <maxscript/foundation/numbers.h>
+#	include <maxscript/maxwrapper/maxclasses.h>
+#	include <maxscript/foundation/streams.h>
+#	include <maxscript/foundation/mxstime.h>
+#	include <maxscript/maxwrapper/mxsobjects.h>
+#	include <maxscript/compiler/parser.h>
+#	include <maxscript/macros/define_instantiation_functions.h>
+#else
+#	include <MaxScrpt/maxscrpt.h>
+#	include <MaxScrpt/3dmath.h>
+//	Various MAX and MXS includes
+#	include <MaxScrpt/Numbers.h>
+#	include <MaxScrpt/MAXclses.h>
+#	include <MaxScrpt/Streams.h>
+#	include <MaxScrpt/MSTime.h>
+#	include <MaxScrpt/MAXObj.h>
+#	include <MaxScrpt/Parser.h>
+//	define the new primitives using macros from SDK
+#	include <MaxScrpt/definsfn.h>
+#endif
+
 #include <modstack.h>
 #include <decomp.h>
 
 #include <max.h>
 #include <stdmat.h>
 
-// define the new primitives using macros from SDK
-#include <MaxScrpt/definsfn.h>
 
 #undef _CRT_SECURE_NO_DEPRECATE
 
@@ -109,9 +123,9 @@ def_visible_primitive( set_tile_bank,			"NelSetTileBank");
 def_visible_primitive( export_zone,				"ExportRykolZone");
 def_visible_primitive( import_zone,				"NeLImportZone");
 
-/* permettre l'acces ‡ auto/manual intrior edges
+/* permettre l'acces ÅEauto/manual intrior edges
 faire une methode pour interfacer la fonction compute interior edge
-donner un acces ‡ tiledmode/patchmode (on/off)
+donner un acces ÅEtiledmode/patchmode (on/off)
 faire un getselectedvertex
 faire un getselectedpatch
 faire un getselectedtile */

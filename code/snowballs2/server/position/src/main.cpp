@@ -41,6 +41,9 @@
 
 #include "physics.h"
 
+#ifdef NL_OS_WINDOWS
+#include <Windows.h>
+#endif
 
 using namespace NLMISC;
 using namespace NLNET;

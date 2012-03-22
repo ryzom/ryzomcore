@@ -65,8 +65,7 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 	setMenuBar(m_menuBar);
 #endif
 
-	m_menuManager = new MenuManager(this);
-	m_menuManager->setMenuBar(m_menuBar);
+	m_menuManager = new MenuManager(m_menuBar, this);
 
 	m_tabWidget = new QTabWidget(this);
 	m_tabWidget->setTabPosition(QTabWidget::South);
@@ -107,14 +106,14 @@ bool MainWindow::initialize(QString *errorString)
 void MainWindow::extensionsInitialized()
 {
 	readSettings();
-	connect(m_contextManager, SIGNAL(currentContextChanged(Core::IContext*)),
-			this, SLOT(updateContext(Core::IContext*)));
+	connect(m_contextManager, SIGNAL(currentContextChanged(Core::IContext *)),
+			this, SLOT(updateContext(Core::IContext *)));
 	if (m_contextManager->currentContext() != NULL)
 		updateContext(m_contextManager->currentContext());
 	show();
 }
 
-IMenuManager *MainWindow::menuManager() const
+MenuManager *MainWindow::menuManager() const
 {
 	return m_menuManager;
 }
@@ -129,6 +128,11 @@ QSettings *MainWindow::settings() const
 	return m_settings;
 }
 
+QUndoGroup *MainWindow::undoGroup() const
+{
+	return m_undoGroup;
+}
+
 ExtensionSystem::IPluginManager *MainWindow::pluginManager() const
 {
 	return m_pluginManager;
@@ -136,12 +140,16 @@ ExtensionSystem::IPluginManager *MainWindow::pluginManager() const
 
 void MainWindow::addContextObject(IContext *context)
 {
-	m_undoGroup->addStack(context->undoStack());
+	QUndoStack *stack = context->undoStack();
+	if (stack)
+		m_undoGroup->addStack(stack);
 }
 
 void MainWindow::removeContextObject(IContext *context)
 {
-	m_undoGroup->removeStack(context->undoStack());
+	QUndoStack *stack = context->undoStack();
+	if (stack)
+		m_undoGroup->removeStack(stack);
 }
 
 void MainWindow::open()
@@ -205,7 +213,7 @@ bool MainWindow::showOptionsDialog(const QString &group,
 {
 	if (!parent)
 		parent = this;
-	CSettingsDialog settingsDialog(m_pluginManager, group, page, parent);
+	SettingsDialog settingsDialog(m_pluginManager, group, page, parent);
 	settingsDialog.show();
 	bool ok = settingsDialog.execDialog();
 	if (ok)
@@ -437,7 +445,7 @@ void MainWindow::createStatusBar()
 
 void MainWindow::createDialogs()
 {
-	m_pluginView = new ExtensionSystem::CPluginView(m_pluginManager, this);
+	m_pluginView = new PluginView(m_pluginManager, this);
 
 	// Create undo/redo command list
 	m_dockWidget = new QDockWidget("Command List", this);
