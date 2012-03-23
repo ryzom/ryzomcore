@@ -40,11 +40,12 @@ CBnpDirTreeDialog::CBnpDirTreeDialog(QString bnpPath, QWidget *parent)
 	// Bnp file: opened and displayed
 	// all other files: added to the currently opened bnp file
 	QStringList filter;
-    //filter << tr("*.bnp");
+    filter << tr("*.bnp");
 
 	// Setup the directory tree model
 	m_dirModel= new BNPFileSystemModel();
 	m_proxyModel = new BNPSortProxyModel();
+	m_ui.dirTree->setSortingEnabled(true);
 	m_dirModel->setRootPath(m_DataPath);
 	m_dirModel->setFilter(QDir::AllDirs | QDir::NoDotAndDotDot | QDir::AllEntries);
 	m_dirModel->setNameFilters(filter);
@@ -55,7 +56,6 @@ CBnpDirTreeDialog::CBnpDirTreeDialog(QString bnpPath, QWidget *parent)
 	m_ui.dirTree->setModel(m_proxyModel);
 
 	m_ui.dirTree->setRootIndex( m_proxyModel->mapFromSource (m_dirModel->index(m_DataPath) ) );
-	m_ui.dirTree->setSortingEnabled(true);
 
 	// Trigger if one filename is activated
 	// In future drag&drop should be also possible

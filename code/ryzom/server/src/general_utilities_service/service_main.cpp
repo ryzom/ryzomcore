@@ -28,11 +28,15 @@
 #include "game_share/ryzom_version.h"
 #include "game_share/tick_event_handler.h"
 #include "game_share/singleton_registry.h"
-#include "game_share/handy_commands.h"
+#include "server_share/handy_commands.h"
 
 // local
 #include "service_main.h"
 
+#ifdef NL_OS_WINDOWS
+#	define NOMINMAX
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
 
 //-----------------------------------------------------------------------------
 // namespaces

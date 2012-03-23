@@ -60,6 +60,11 @@ public:
 	void setupTable(int nbrows);
 
 	/**
+	 * When BNP files is closed, clear the filelist table
+	 */
+	void clearTable();
+
+	/**
 	 * Fill the files selected in the table view to
 	 * unpack them.
 	 * \param reference to a vector of filenames.
@@ -67,9 +72,6 @@ public:
 	 */
 	void getSelections(TSelectionList& SelectionList);
 
-protected:
-	void dragEnterEvent (QDragEnterEvent *event);
-	void dropEvent(QDropEvent *event);
 private:
 	Ui::BnpFileListDialog m_ui;
 

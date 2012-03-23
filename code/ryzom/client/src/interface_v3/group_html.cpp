@@ -238,7 +238,7 @@ bool CGroupHTML::addBnpDownload(const string &url, const string &action, const s
 		}
 		else
 		{
-			return true;	
+			return true;
 		}
 	}
 	if (action != "delete")
@@ -361,7 +361,6 @@ void CGroupHTML::checkDownloads()
 								CFile::moveFile(file.c_str(), (file+".tmp").c_str());
 								if (lookupLocalFile (finalUrl, file.c_str(), false))
 								{
-									
 									CInterfaceManager *pIM = CInterfaceManager::getInstance();
 									pIM->executeLuaScript(it->luaScript, true);
 								}
@@ -469,10 +468,10 @@ void CGroupHTML::beginBuild ()
 
 TStyle CGroupHTML::parseStyle (const string &str_styles)
 {
-	TStyle	styles;	
+	TStyle	styles;
 	vector<string> elements;
 	NLMISC::splitString(str_styles, ";", elements);
-	
+
 	for(uint i = 0; i < elements.size(); ++i)
 	{
 		vector<string> style;
@@ -485,7 +484,7 @@ TStyle CGroupHTML::parseStyle (const string &str_styles)
 			styles[trim(style[0])] = fullstyle;
 		}
 	}
-		
+
 	return styles;
 }
 
@@ -584,7 +583,7 @@ void CGroupHTML::addLink (uint element_number, uint /* attribute_number */, HTCh
 				else if (_TrustedDomain && suri[0] == '#')
 				{
 					// Direct url (hack for lua beginElement)
-					_Link.push_back (suri.substr(1));	
+					_Link.push_back (suri.substr(1));
 				}
 				else
 				{
@@ -615,7 +614,7 @@ void CGroupHTML::addLink (uint element_number, uint /* attribute_number */, HTCh
 					_LinkTitle.push_back(title);
 				}
 				else
-					_LinkTitle.push_back("");					
+					_LinkTitle.push_back("");
 			}
 			else
 			{
@@ -964,8 +963,8 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 					}
 				}
 
-				if (!templateName.empty()) 
-				{ 
+				if (!templateName.empty())
+				{
 					string parentId;
 					bool haveParentDiv = getDiv() != NULL;
 					if (haveParentDiv)
@@ -1175,7 +1174,7 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 						// Get the option to reload (class==reload)
 						bool reloadImg = false;
 
-						string style;						
+						string style;
 						if (present[MY_HTML_IMG_STYLE] && value[MY_HTML_IMG_STYLE])
 							style = value[MY_HTML_IMG_STYLE];
 
@@ -1189,7 +1188,7 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 								reloadImg = true;
 						}
 						
-						addImage (value[MY_HTML_IMG_SRC], globalColor, reloadImg);						
+						addImage (value[MY_HTML_IMG_SRC], globalColor, reloadImg);
 					}
 				}
 			}
@@ -1835,7 +1834,7 @@ CGroupHTML::CGroupHTML(const TCtorParam &param)
 	_TimeoutValue(DEFAULT_RYZOM_CONNECTION_TIMEOUT)
 {
 	// add it to map of group html created
-	_GroupHtmlUID= ++_GroupHtmlUIDPool;		// valid assigned Id begin to 1!
+	_GroupHtmlUID= ++_GroupHtmlUIDPool; // valid assigned Id begin to 1!
 	_GroupHtmlByUID[_GroupHtmlUID]= this;
 
 	// init
@@ -3114,7 +3113,7 @@ struct CButtonFreezer : public CInterfaceElementVisitor
 
 static int timer_called = 0;
 
-static int 
+static int
 timer_callback(HTTimer *   const timer     ,
                void *      const user_data ,
                HTEventType const event     )
@@ -3125,7 +3124,7 @@ timer_callback(HTTimer *   const timer     ,
     nlassert(event == HTEvent_TIMEOUT);
     timer_called = 1;
     HTEventList_stopLoop();
-    
+
     /* XXX - The meaning of this return value is undocumented, but close
     ** inspection of libwww's source suggests that we want to return HT_OK. */
     return HT_OK;

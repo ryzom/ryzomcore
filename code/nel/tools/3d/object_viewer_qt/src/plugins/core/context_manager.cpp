@@ -78,11 +78,28 @@ Core::IContext *ContextManager::context(const QString &id) const
 	return 0;
 }
 
+void ContextManager::registerUndoStack(QUndoStack *stack)
+{
+	nlassert(stack);
+	d->m_mainWindow->undoGroup()->addStack(stack);
+}
+
+void ContextManager::unregisterUndoStack(QUndoStack *stack)
+{
+	nlassert(stack);
+	d->m_mainWindow->undoGroup()->removeStack(stack);
+}
+
 void ContextManager::activateContext(const QString &id)
 {
 	const int index = indexOf(id);
 	if (index >= 0)
 		d->m_tabWidget->setCurrentIndex(index);
+}
+
+void ContextManager::updateCurrentContext()
+{
+	d->m_mainWindow->updateContext(currentContext());
 }
 
 void ContextManager::objectAdded(QObject *obj)

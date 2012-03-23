@@ -62,6 +62,15 @@ void BNPFileHandle::releaseInstance()
 	}
 }
 // ***************************************************************************
+void BNPFileHandle::createFile(string filePath)
+{
+	// Only set the filepath. Header will be created after files have been added
+	m_openedBNPFile = filePath;
+	m_packedFiles.clear();
+
+	nlinfo("Created file %s.", filePath.c_str() );
+}
+// ***************************************************************************
 bool BNPFileHandle::unpack(const string &dirName, const vector<string>& fileList)
 {
 	CIFile bnp;
@@ -231,8 +240,10 @@ void BNPFileHandle::addFiles( const vector<string> &filePathes)
 	}
 
 	writeHeader(m_openedBNPFile + ".tmp", OffsetFromBegining);
-	
-	CFile::deleteFile( m_openedBNPFile );
+
+	// Delete any previous existing file
+	if (CFile::fileExists( m_openedBNPFile ))
+		CFile::deleteFile( m_openedBNPFile );
 	string src = m_openedBNPFile + ".tmp";
 	CFile::moveFile( m_openedBNPFile.c_str(), src.c_str() );
 }

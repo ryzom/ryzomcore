@@ -245,7 +245,8 @@ code/ryzom/tools/build_gamedata/workspace/continents/crater/properties_final.cfg
 code/ryzom/tools/build_gamedata/workspace/ecosystems/rocky/directories.py
 code/ryzom/tools/build_gamedata/workspace/ecosystems/rocky/process.py
 
-
+# WebTT temp dir
+code/ryzom/tools/server/www/webtt/app/tmp
 
 
 

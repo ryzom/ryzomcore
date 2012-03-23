@@ -30,6 +30,10 @@
 #include <nel/misc/debug.h>
 #include <nel/misc/path.h>
 
+// STL includes
+#include <vector>
+#include <string>
+
 // Qt includes
 #include <QDebug>
 #include <QFileDialog>
@@ -37,6 +41,11 @@
 #include <QTableWidget>
 #include <QMessageBox>
 #include <QSettings>
+#include <QDragEnterEvent>
+#include <QMimeData>
+#include <QUrl>
+#include <QEvent>
+#include <QInputDialog>
 
 using namespace std;
 using namespace NLMISC;
@@ -52,6 +61,8 @@ BNPManagerWindow::BNPManagerWindow(QWidget *parent)
 	QTableWidget* hideWidget = new QTableWidget(0,0,this);
 	setCentralWidget(hideWidget);
 	hideWidget->hide();
+
+	setAcceptDrops(true);
 
 	// Read the settings
 	readSettings();
@@ -98,6 +109,12 @@ void BNPManagerWindow::createDialogs()
 // ***************************************************************************
 void BNPManagerWindow::createActions()
 {
+	// new action
+	m_newAction = new QAction(tr("&New..."), this);
+	m_newAction->setIcon(QIcon(Core::Constants::ICON_NEW));
+    m_newAction->setStatusTip(tr("New file"));
+	connect(m_newAction, SIGNAL(triggered()), this, SLOT( newFile() ));
+
 	// open action
 	m_openAction = new QAction(tr("&Open..."), this);
 	m_openAction->setIcon(QIcon(Core::Constants::ICON_OPEN));
@@ -132,6 +149,7 @@ void BNPManagerWindow::createActions()
 void BNPManagerWindow::createToolBars()
 {
 	m_fileToolBar = addToolBar(tr("&File"));
+	m_fileToolBar->addAction(m_newAction);
 	m_fileToolBar->addAction(m_openAction);
 	m_fileToolBar->addAction(m_closeAction);
 
@@ -143,8 +161,34 @@ void BNPManagerWindow::createToolBars()
 // ***************************************************************************
 bool BNPManagerWindow::loadFile(const QString fileName)
 {
+	// Store the filename for later use
+	m_openedBNPFile = fileName;
 	m_BnpFileListDialog->loadTable(fileName);
 	return true;
+}
+// ***************************************************************************
+void BNPManagerWindow::newFile()
+{
+	// reference to the BNPFileHandle singletone instance
+	BNPFileHandle& myBNPFileHandle = BNPFileHandle::getInstance();
+
+	m_openedBNPFile = "";
+	m_BnpFileListDialog->clearTable();
+
+	QString filePath = QFileDialog::getSaveFileName(this, tr("Create File"),QDir::currentPath(),
+                            tr("BNP File (*.bnp)"));
+
+	if (filePath.isEmpty() )
+		return;
+
+	if ( !filePath.endsWith(".bnp", Qt::CaseInsensitive) )
+		filePath.append(".bnp");
+
+	m_openedBNPFile = filePath;
+	m_BnpFileListDialog->setWindowTitle (filePath);
+
+	myBNPFileHandle.createFile ( filePath.toStdString() );
+
 }
 // ***************************************************************************
 void BNPManagerWindow::open()
@@ -158,13 +202,13 @@ void BNPManagerWindow::open()
 	if (fileName.isNull())
 		return;
 
-	m_openedBNPFile = fileName;
     loadFile(fileName);
 }
 // ***************************************************************************
 void BNPManagerWindow::close()
 {
-    //TODO
+    m_openedBNPFile = "";
+	m_BnpFileListDialog->clearTable();
 }
 // ***************************************************************************
 void BNPManagerWindow::addFiles()
@@ -183,6 +227,49 @@ void BNPManagerWindow::addFiles()
 
 	FileList = QFileDialog::getOpenFileNames(this,tr("Add Files..."),
 							QDir::currentPath(), tr("All Files (*.*)") );
+	
+	// get all current filenames from the opened bnp file
+	myBNPFileHandle.fileNames(currentFiles);
+
+	QStringList::iterator it_list = FileList.begin();
+	while (it_list != FileList.end() )
+	{
+		string fileName = CFile::getFilename (it_list->toStdString() );
+		if ( std::find(currentFiles.begin(), currentFiles.end(), fileName ) !=  currentFiles.end() )
+		{
+			// Ask the user if he wants to override the existing file
+			// atm only warn the user and do not override
+			QMessageBox::warning(this, tr("BNP Manager"),
+                                tr("File is already in the list!"),
+                                QMessageBox::Ok,
+								QMessageBox::Ok);
+		}
+		else
+		{
+			addFiles.push_back( it_list->toStdString() );
+			// log it
+			nlinfo("Add file %s", fileName.c_str() );
+		}
+		it_list++;
+	}
+	
+	if ( !addFiles.empty() )
+	{
+		myBNPFileHandle.addFiles( addFiles );
+	}
+	loadFile(m_openedBNPFile);
+}
+// ***************************************************************************
+void BNPManagerWindow::addFiles( QStringList FileList )
+{
+	// reference to the BNPFileHandle singletone instance
+	BNPFileHandle& myBNPFileHandle = BNPFileHandle::getInstance();
+
+	// vector of all current packed filenames
+	vector<string> currentFiles;
+
+	// vector of files to add
+	vector<string> addFiles;
 	
 	// get all current filenames from the opened bnp file
 	myBNPFileHandle.fileNames(currentFiles);
@@ -287,5 +374,71 @@ void BNPManagerWindow::readSettings()
 // ***************************************************************************
 void BNPManagerWindow::writeSettings()
 {
+}
+
+// ***************************************************************************
+void BNPManagerWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+	// Accept only one file
+	// In the future a tabbed FileListDialog would accept more
+	if ( event->mimeData()->hasUrls() )
+		event->acceptProposedAction();
+}
+// ***************************************************************************
+void BNPManagerWindow::dropEvent(QDropEvent *event)
+{
+	// reference to the BNPFileHandle singletone instance
+	BNPFileHandle& myBNPFileHandle = BNPFileHandle::getInstance();
+
+	// Excraft the local file url from the drop object and fill the table
+	const QMimeData *mimeData = event->mimeData();
+	QList<QUrl> urlList = mimeData->urls();
+	QString filePath;
+	QStringList fileList;
+
+	if ( urlList.count() == 1 )
+	{
+		// If it is a bnp file, open it
+		// If it is not a bnp file add it
+
+		filePath = urlList.first().toLocalFile();
+		if ( filePath.endsWith(".bnp", Qt::CaseInsensitive) )
+		{
+			loadFile(filePath);
+		}
+		else
+		{
+			if ( m_openedBNPFile == "")
+				newFile();
+			// Create a QStringList and pass it to addfiles
+			fileList.push_back( filePath );
+			addFiles( fileList );
+			// Reload current bnp
+			loadFile(m_openedBNPFile);
+		}
+	}
+	else if ( urlList.count() > 1 )
+	{
+		// Dont accept any bnp file
+		QList<QUrl>::iterator it = urlList.begin();
+		while ( it != urlList.end() )
+		{
+			filePath = it->toLocalFile();
+			if ( filePath.endsWith(".bnp") )
+			{
+				nlwarning("Could not add a bnp file!", filePath.toStdString().c_str() );
+			}
+			else
+			{
+				fileList.push_back( filePath );
+			}
+			++it;
+		}
+		if ( m_openedBNPFile == "")
+			newFile();
+		addFiles( fileList );
+		// Reload current bnp
+		loadFile(m_openedBNPFile);
+	}
 }
 } // namespace BNPManager
