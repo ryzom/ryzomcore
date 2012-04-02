@@ -26,7 +26,7 @@
 #include <vector>
 #include <string>
 
-#include "../../pipeline/pipeline_library/tool_logger.h"
+#include "nel/misc/tool_logger.h"
 
 // ---------------------------------------------------------------------------
 

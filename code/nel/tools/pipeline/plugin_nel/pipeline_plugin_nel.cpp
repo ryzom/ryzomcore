@@ -61,12 +61,14 @@ class CPipelinePluginNeLNelLibrary : public NLMISC::INelLibrary
 };
 NLMISC_DECL_PURE_LIB(CPipelinePluginNeLNelLibrary)
 
+#ifdef NL_OS_WINDOWS
 HINSTANCE CPipelinePluginNeLDllHandle = NULL;
 BOOL WINAPI DllMain(HANDLE hModule, DWORD /* ul_reason_for_call */, LPVOID /* lpReserved */)
 {
 	CPipelinePluginNeLDllHandle = (HINSTANCE)hModule;
 	return TRUE;
 }
+#endif
 
 // ******************************************************************
 

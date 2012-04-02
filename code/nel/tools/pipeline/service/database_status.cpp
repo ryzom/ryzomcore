@@ -153,7 +153,7 @@ std::string getStatusFilePath(const std::string &path)
 
 } /* anonymous namespace */
 
-void CFileError::serial(NLMISC::IStream &stream)
+void CFileError::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 {
 	uint version = stream.serialVersion(1);
 	stream.serial(Project);
@@ -161,7 +161,7 @@ void CFileError::serial(NLMISC::IStream &stream)
 	stream.serial(Message);
 }
 
-void CFileStatus::serial(NLMISC::IStream &stream)
+void CFileStatus::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 {
 	uint version = stream.serialVersion(2);
 	stream.serial(FirstSeen);

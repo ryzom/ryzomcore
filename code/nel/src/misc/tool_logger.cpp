@@ -26,7 +26,7 @@
  */
 
 #include <nel/misc/types_nl.h>
-#include "tool_logger.h"
+#include "nel/misc/tool_logger.h"
 
 // STL includes
 

@@ -59,12 +59,14 @@ class CPipelinePluginMaxNelLibrary : public NLMISC::INelLibrary
 };
 NLMISC_DECL_PURE_LIB(CPipelinePluginMaxNelLibrary)
 
+#ifdef NL_OS_WINDOWS
 HINSTANCE CPipelinePluginMaxDllHandle = NULL;
 BOOL WINAPI DllMain(HANDLE hModule, DWORD /* ul_reason_for_call */, LPVOID /* lpReserved */)
 {
 	CPipelinePluginMaxDllHandle = (HINSTANCE)hModule;
 	return TRUE;
 }
+#endif
 
 // ******************************************************************
 /*

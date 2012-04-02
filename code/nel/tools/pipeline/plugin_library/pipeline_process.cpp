@@ -29,6 +29,7 @@
 #include "pipeline_process.h"
 
 // STL includes
+#include <vector>
 
 // NeL includes
 #include <nel/misc/app_context.h>

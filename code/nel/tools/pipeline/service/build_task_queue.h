@@ -31,6 +31,7 @@
 
 // STL includes
 #include <boost/thread/mutex.hpp>
+#include <vector>
 
 // NeL includes
 

@@ -30,6 +30,8 @@
 #include <nel/misc/types_nl.h>
 
 // STL includes
+#include <vector>
+#include <string>
 
 // NeL includes
 
