@@ -134,7 +134,8 @@ bool CPatchmanAdminModule::initModule(const TParsedCommandLine &initInfo)
 	CDeploymentConfigurationSynchroniser::init(this);
 
 	// now that the base classes have been initialised, we can cumulate the module manifests
-	_Manifest= (CFileReceiver::getModuleManifest()+_Manifest).strip();
+	_Manifest= (CFileReceiver::getModuleManifest()+_Manifest);
+	_Manifest = _Manifest.strip();
 
 	// we're all done so let the world know
 	registerProgress(string("PAM Initialised: ")+logMsg+" "+_Manifest);

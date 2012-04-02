@@ -257,7 +257,7 @@ IF(WIN32)
   IF(WITH_TOOLS)
     SET(CMAKE_INSTALL_MFC_LIBRARIES TRUE)
   ENDIF(WITH_TOOLS)
-  INCLUDE(InstallRequiredSystemLibraries)
+  #INCLUDE(InstallRequiredSystemLibraries)
 ENDIF(WIN32)
 
 INCLUDE(CPack)
