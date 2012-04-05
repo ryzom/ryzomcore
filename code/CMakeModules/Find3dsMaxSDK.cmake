@@ -18,6 +18,7 @@ find_path(MAXSDK_INCLUDE_DIR max.h
   "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2009 SDK/maxsdk/include"
   "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2008 SDK/maxsdk/include"
   "$ENV{PROGRAMFILES}/Autodesk/3ds Max 9 SDK/maxsdk/include"
+  "C:/3dsmax7/maxsdk/include"
 ) 
 
 find_path(MAXSDK_CS_INCLUDE_DIR bipexp.h
@@ -28,18 +29,20 @@ find_path(MAXSDK_CS_INCLUDE_DIR bipexp.h
   "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2009 SDK/maxsdk/include/CS"
   "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2008 SDK/maxsdk/include/CS"
   "$ENV{PROGRAMFILES}/Autodesk/3ds Max 9 SDK/maxsdk/include/CS"
+  "C:/3dsmax7/maxsdk/include/CS"
 )
 
 MACRO(FIND_3DS_LIBRARY MYLIBRARY MYLIBRARYNAME)          
   FIND_LIBRARY(${MYLIBRARY}
                NAMES ${MYLIBRARYNAME}
                PATHS 
-			   "$ENV{ADSK_3DSMAX_SDK_2012}/maxsdk/lib"
-			   "$ENV{3DSMAX_2011_SDK_PATH}/maxsdk/lib"
+               "$ENV{ADSK_3DSMAX_SDK_2012}/maxsdk/lib"
+               "$ENV{3DSMAX_2011_SDK_PATH}/maxsdk/lib"
                "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2010 SDK/maxsdk/lib"
                "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2009 SDK/maxsdk/lib"
                "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2008 SDK/maxsdk/lib"
                "$ENV{PROGRAMFILES}/Autodesk/3ds Max 9 SDK/maxsdk/lib"
+               "C:/3dsmax7/maxsdk/lib"
                )
 ENDMACRO(FIND_3DS_LIBRARY MYLIBRARY MYLIBRARYNAME)
 
