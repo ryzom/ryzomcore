@@ -937,7 +937,7 @@ CMirrorPropValueAlice<T,CPropLocationClass>&	CMirrorPropValueAlice<T,CPropLocati
 	}
 	else
 	{
-		tempReassign( srcValue );
+		this->tempReassign( srcValue );
 	}
 	return *this;
 }
