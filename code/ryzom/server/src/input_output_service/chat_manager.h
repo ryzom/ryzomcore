@@ -58,13 +58,13 @@ public :
 	/// exception thrown when client is unknown
 	struct EChatClient : public NLMISC::Exception
 	{
-		EChatClient( const NLMISC::CEntityId& id ) : Exception ("Don't have chat infos for the char "+id.toString()) {};
+		EChatClient( const NLMISC::CEntityId& id ) : Exception ("Don't have chat infos for the char "+id.toString()) {}
 	};
 
 	/// exception thrown when group is unknown
 	struct EChatGroup : public NLMISC::Exception
 	{
-		EChatGroup( const TGroupId& gId ) : Exception ("Can't find the group "+gId.toString()) {};
+		EChatGroup( const TGroupId& gId ) : Exception ("Can't find the group "+gId.toString()) {}
 	};
 
 	/**

@@ -31,7 +31,7 @@ class CEGSProgressCallback : public NLMISC::IProgressCallback
 {
 public:
 	CEGSProgressCallback():IProgressCallback() {}
-	virtual void progress (float progressValue) {};
+	virtual void progress (float progressValue) {}
 	virtual ~CEGSProgressCallback() {}
 
 };

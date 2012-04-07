@@ -53,6 +53,7 @@ public:
 class ICharInfoExtractorBuilder: public NLMISC::CRefCount
 {
 public:
+	virtual ~ICharInfoExtractorBuilder() {}
 	virtual const char* getName()=0;
 	virtual const char* getDescription()=0;
 	virtual const char* getFields()=0;

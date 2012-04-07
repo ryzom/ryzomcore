@@ -216,7 +216,7 @@ public :
 	/**
 	 * Inform a node of its parenthood
 	 */
-	virtual void setParent(CCDBStructNodeBranch *parent) { nlassertex(0,("setParent() not overloaded for given node type!")); }
+	virtual void setParent(CCDBStructNodeBranch * /* parent */) { nlassertex(0,("setParent() not overloaded for given node type!")); }
 
 	/**
 	 * get the parent of a node
@@ -248,7 +248,7 @@ public :
 	 * Browse the tree, and for each atom branch encountered, call the callback passing the argument
 	 * provided and the index of the atom branch.
 	 */
-	virtual void			foreachAtomBranchCall( void (*callback)(void*,TCDBDataIndex), void *arg ) const {};
+	virtual void			foreachAtomBranchCall( void (*callback)(void*,TCDBDataIndex), void *arg ) const {}
 
 	/**
 	 * Browse the tree, building the text id, and for each leaf encountered, call the callback

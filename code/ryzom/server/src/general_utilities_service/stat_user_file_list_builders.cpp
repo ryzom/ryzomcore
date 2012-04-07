@@ -73,7 +73,8 @@ FILE_LIST_BUILDER(MinFileSize,"<min_file_size>")
 		return false;
 	}
 
-	for (uint32 i=fdc.size();i--;)
+	uint32 ttlNumFiles= fdc.size();
+	for (uint32 i=ttlNumFiles;i--;)
 	{
 		if (fdc[i].FileSize<minSize)
 			fdc.removeFile(i);
@@ -91,7 +92,8 @@ FILE_LIST_BUILDER(MaxFileSize,"<max_file_size>")
 		return false;
 	}
 
-	for (uint32 i=fdc.size();i--;)
+	uint32 ttlNumFiles= fdc.size();
+	for (uint32 i=ttlNumFiles;i--;)
 	{
 		if (fdc[i].FileSize>maxSize)
 			fdc.removeFile(i);

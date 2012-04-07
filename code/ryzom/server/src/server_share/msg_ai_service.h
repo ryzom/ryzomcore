@@ -49,7 +49,7 @@ public:
 		propertyCont ("Character", PropDataSetRow, Character);
 		propertyCont ("Creature", PropDataSetRow, Creature);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------

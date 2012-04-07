@@ -53,7 +53,7 @@ public:
 
 private:
 	// private data - internal to job
-	typedef enum { INIT, WORK, CLOSED, ERROR } TState;
+	enum TState { INIT, WORK, CLOSED, ERROR };
 	TState _State;
 	uint32 _NextFile;
 	CFileDescriptionContainer _Files;

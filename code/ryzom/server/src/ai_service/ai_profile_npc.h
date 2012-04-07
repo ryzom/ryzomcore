@@ -633,7 +633,7 @@ public CMoveProfile
 {
 public:
 	CGrpProfileFollowPlayer(CProfileOwner* owner, TDataSetRow const& playerRow, uint32 dispersionRadius);
-	virtual ~CGrpProfileFollowPlayer() {};
+	virtual ~CGrpProfileFollowPlayer() {}
 
 	void setBotStandProfile(AITYPES::TProfiles	botStandProfileType, IAIProfileFactory* botStandProfileFactory);
 
@@ -641,16 +641,16 @@ public:
 	//@{
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile() {};
+	virtual void endProfile() {}
 	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::BOT_FOLLOW_POS; }
 	virtual std::string getOneLineInfoString() const { return std::string("follow_player group profile"); }
 	//@}
 
-	void	stateChangeProfile() {};
+	void	stateChangeProfile() {}
 	bool	destinationReach() const;
 
-	void		addBot			(CBot*	bot) {};
-	void		removeBot		(CBot*	bot) {};
+	void		addBot			(CBot*	bot) {}
+	void		removeBot		(CBot*	bot) {}
 	CPathCont*	getPathCont		(CBot const*	bot) { return NULL; };
 
 

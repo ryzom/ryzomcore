@@ -99,15 +99,15 @@ public:
 	/// \name Streaming source controls
 	//@{
 	/// Set the sample format. (channels = 1, 2, ...; bitsPerSample = 8, 16; frequency = samples per second, 44100, ...)
-	virtual void					setFormat(uint8 channels, uint8 bitsPerSample, uint32 frequency) { nlassert(false); }
+	virtual void					setFormat(uint8 /* channels */, uint8 /* bitsPerSample */, uint32 /* frequency */) { nlassert(false); }
 	/// Return the sample format information.
-	virtual void					getFormat(uint8 &channels, uint8 &bitsPerSample, uint32 &frequency) const { nlassert(false); }
+	virtual void					getFormat(uint8 &/* channels */, uint8 &/* bitsPerSample */, uint32 &/* frequency */) const { nlassert(false); }
 	/// Get a writable pointer to the buffer of specified size. Use capacity to specify the required bytes. Returns NULL when all the buffer space is already filled. Call setFormat() first.
-	virtual uint8					*lock(uint capacity) { nlassert(false); return NULL; }
+	virtual uint8					*lock(uint /* capacity */) { nlassert(false); return NULL; }
 	/// Notify that you are done writing to the locked buffer, so it can be copied over to hardware if needed. Set size to the number of bytes actually written to the buffer. Returns true if ok.
-	virtual bool					unlock(uint size) { nlassert(false); return false; }
+	virtual bool					unlock(uint /* size */) { nlassert(false); return false; }
 	/// Get the recommended buffer size to use with lock()/unlock()
-	virtual void					getRecommendedBufferSize(uint &samples, uint &bytes) const { nlassert(false); }
+	virtual void					getRecommendedBufferSize(uint &/* samples */, uint &/* bytes */) const { nlassert(false); }
 	/// Get the recommended sleep time based on the size of the last submitted buffer and the available buffer space
 	virtual uint32					getRecommendedSleepTime() const { nlassert(false); return 0; }
 	/// Return if there are still buffers available for playback.

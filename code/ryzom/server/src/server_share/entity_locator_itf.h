@@ -139,9 +139,9 @@ namespace ENTITYLOC
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {};
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {};
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {};
+		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -384,9 +384,9 @@ namespace ENTITYLOC
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {};
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {};
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {};
+		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);

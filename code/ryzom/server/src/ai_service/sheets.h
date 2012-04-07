@@ -644,6 +644,7 @@ class IRaceStats
 : public NLMISC::CRefCount
 {
 public:
+	virtual ~IRaceStats() {}
 	virtual NLMISC::CSheetId SheetId() const = 0;
 	virtual std::string Race() const = 0;
 };

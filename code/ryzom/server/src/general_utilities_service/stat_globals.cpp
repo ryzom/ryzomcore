@@ -61,19 +61,19 @@ namespace STAT_GLOBALS
 	NLMISC::CSString getInputFilePath(const NLMISC::CSString& path)
 	{
 		NLMISC::CSString pathRoot= NLMISC::CPath::standardizePath(InputFileDirectory.get());
-		return (path.left(pathRoot.size())==pathRoot)? path: pathRoot+path;
+		return (path.left((uint)pathRoot.size())==pathRoot)? path: pathRoot+path;
 	}
 
 	NLMISC::CSString getScriptFilePath(const NLMISC::CSString& path)
 	{
 		NLMISC::CSString pathRoot= NLMISC::CPath::standardizePath(ScriptDirectory.get());
-		return (path.left(pathRoot.size())==pathRoot)? path: pathRoot+path;
+		return (path.left((uint)pathRoot.size())==pathRoot)? path: pathRoot+path;
 	}
 
 	NLMISC::CSString getOutputFilePath(const NLMISC::CSString& path)
 	{
 		NLMISC::CSString pathRoot= NLMISC::CPath::standardizePath(OutputDirectory.get());
-		return (path.left(pathRoot.size())==pathRoot)? path: pathRoot+path;
+		return (path.left((uint)pathRoot.size())==pathRoot)? path: pathRoot+path;
 	}
 
 

@@ -65,7 +65,7 @@ public:
 	/**
 	  * Destructor must uninitialise the plugin interface
 	  */
-	virtual ~IEditPlugin () {};
+	virtual ~IEditPlugin () {}
 
 	/// Window related
 
@@ -157,7 +157,7 @@ public:
 	/**
 	  * Destructor must uninitialise the plugin interface
 	  */
-	virtual ~IEditDocumentPlugin () {};
+	virtual ~IEditDocumentPlugin () {}
 
 	/// Event message
 

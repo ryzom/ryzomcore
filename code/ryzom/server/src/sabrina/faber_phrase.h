@@ -64,21 +64,21 @@ public:
 	/**
 	 * set the actor
 	 */
-	virtual void setActor( const TDataSetRow &entityRowId ){};
+	virtual void setActor( const TDataSetRow &entityRowId ){}
 	
 	/**
 	 * called at the end of the latency time
 	 */
-	virtual void end(){};
+	virtual void end(){}
 	//@}
 
 	///\unused basic methods from CSPhrase
 	//@{
-	virtual void setPrimaryItem( CGameItemPtr itemPtr ){};
-	virtual void setSecondaryItem( CGameItemPtr itemPtr ){};
-	virtual void addConsumableItem( CGameItemPtr itemPtr ){};
-	virtual void setPrimaryTarget( const TDataSetRow& ) {};
-	virtual void addTargetEntity( const TDataSetRow& ) {};
+	virtual void setPrimaryItem( CGameItemPtr itemPtr ){}
+	virtual void setSecondaryItem( CGameItemPtr itemPtr ){}
+	virtual void addConsumableItem( CGameItemPtr itemPtr ){}
+	virtual void setPrimaryTarget( const TDataSetRow& ) {}
+	virtual void addTargetEntity( const TDataSetRow& ) {}
 	//@}
 
 	inline const TDataSetRow & getActor() { return _ActorRowId;}

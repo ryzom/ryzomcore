@@ -56,7 +56,7 @@ public:
 		property ("Length", PropUInt8, (uint8)0,Length);
 	}
 
-	virtual void callback (const std::string &name, uint8 id) {};
+	virtual void callback (const std::string &name, uint8 id) {}
 
 };
 */
@@ -115,7 +115,7 @@ public:
 		property ("RewardType", PropUInt8, (uint8)MISSION_DESC::NbReward, RewardType);
 	}
 	
-	virtual void callback (const std::string &name, uint8 id) {};
+	virtual void callback (const std::string &name, uint8 id) {}
 };
 */
 
