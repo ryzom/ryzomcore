@@ -529,8 +529,8 @@ void		toUpper(char *str)
 
 std::string formatThousands(const std::string& s)
 {
-	int i, k;
-	int remaining = s.length() - 1;
+	sint i, k;
+	sint remaining = (sint)s.length() - 1;
 	static std::string separator = NLMISC::CI18N::get("uiThousandsSeparator").toUtf8();
 
 	// Don't add separator if the number is < 10k
@@ -540,7 +540,7 @@ std::string formatThousands(const std::string& s)
 
 	do
 	{
-	for (i = remaining, k = 0; i >= 0 && k < 3; --i, ++k )
+		for (i = remaining, k = 0; i >= 0 && k < 3; --i, ++k )
 		{
 			ns = s[i] + ns; // New char is added to front of ns
 			if ( i > 0 && k == 2) ns = separator + ns; // j > 0 means still more digits

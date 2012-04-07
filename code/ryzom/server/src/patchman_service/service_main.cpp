@@ -115,12 +115,12 @@ void CTaskScheduler::update()
 	// check to see if we've broken our max sheduled tasks record...
 	if (_MaxTasks < _Tasks.size())
 	{
-		_MaxTasks = _Tasks.size();
+		_MaxTasks = (uint32)_Tasks.size();
 		nldebug("New scheduled task record: %u",_MaxTasks);
 	}
 
 	// iterate over all scheduled tasks (we go backwards to simplify deletion of executed tasks as we go)
-	for (uint32 i=_Tasks.size();i--;)
+	for (uint32 i=(uint32)_Tasks.size();i--;)
 	{
 		// get a refference to the next task
 		STask& theTask= _Tasks[i];

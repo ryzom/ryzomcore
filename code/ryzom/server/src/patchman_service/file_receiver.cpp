@@ -347,7 +347,7 @@ namespace PATCHMAN
 
 		// add the data to the file
 		CSString& theBuffer= theRequest->DataSoFar;
-		uint32 oldSize= theBuffer.size();
+		uint32 oldSize= (uint32)theBuffer.size();
 		theBuffer.resize(oldSize+data.getBufferSize());
 		memcpy(&(theBuffer[oldSize]), data.getBuffer(), data.getBufferSize());
 
@@ -355,7 +355,7 @@ namespace PATCHMAN
 		if (theRequest->DataSoFar.size()>=theRequest->ExpectedFileSize)
 		{
 			// we've reached the end of file
-			_dealWithReceivedFile(sender,theRequest,NLNET::TBinBuffer((const uint8 *)&theRequest->DataSoFar[0],theRequest->DataSoFar.size()));
+			_dealWithReceivedFile(sender,theRequest,NLNET::TBinBuffer((const uint8 *)&theRequest->DataSoFar[0],(uint32)theRequest->DataSoFar.size()));
 			return;
 		}
 
@@ -374,7 +374,7 @@ namespace PATCHMAN
 		}
 
 		// log our progress
-		_downloadLog(fileName,theRequest->DataSoFar.size(),theRequest->ExpectedFileSize);
+		_downloadLog(fileName,(uint32)theRequest->DataSoFar.size(),theRequest->ExpectedFileSize);
 	}
 
 	void CFileReceiver::cbFileDataFailure(NLNET::IModuleProxy *sender, const std::string &fileName)

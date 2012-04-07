@@ -52,7 +52,7 @@ NLMISC::CSString getRepositoryIndexFileName(const NLMISC::CSString& repositoryNa
 uint32 getFileVersion(const NLMISC::CSString& fileName)
 {
 	// start at the back of the file name and scan forwards until we find a '/' or '\\' or ':' or a digit
-	uint32 i= fileName.size();
+	uint32 i= (uint32)fileName.size();
 	while (i--)
 	{
 		char c= fileName[i];
@@ -184,9 +184,9 @@ void CRepository::updateFile(NLMISC::CSString fileName)
 	nldebug(("GUSREP_Updating repository entry for file: '"+fileName+"'").c_str());
 
 	// if the name of the file that has changed contains the target directory name then crop it
-	if (fileName.left(_TargetDirectory.size())==_TargetDirectory)
+	if (fileName.left((uint32)_TargetDirectory.size())==_TargetDirectory)
 	{
-		fileName=fileName.leftCrop(_TargetDirectory.size());
+		fileName=fileName.leftCrop((uint32)_TargetDirectory.size());
 	}
 
 	// lookup the file in the map
@@ -219,9 +219,9 @@ void CRepository::addFileStub(NLMISC::CSString fileName)
 	nldebug(("GUSREP_Adding repository stub for file: '"+fileName+"'").c_str());
 
 	// if the name of the file that has changed contains the target directory name then crop it
-	if (fileName.left(_TargetDirectory.size())==_TargetDirectory)
+	if (fileName.left((uint32)_TargetDirectory.size())==_TargetDirectory)
 	{
-		fileName=fileName.leftCrop(_TargetDirectory.size());
+		fileName=fileName.leftCrop((uint32)_TargetDirectory.size());
 	}
 
 	// make sure the file didn't already exist in the map
@@ -258,7 +258,7 @@ uint32 CRepository::update()
 
 		// get hold of the file name for the next file
 //		CSString fileName= NLMISC::CFile::getFilename(theFile.FileName);
-		CSString fileName= theFile.FileName.leftCrop(_TargetDirectory.size());
+		CSString fileName= theFile.FileName.leftCrop((uint32)_TargetDirectory.size());
 
 		// extract the version number from the file name and skip the file if it's too recent or the version number was invalid
 		uint32 fileVersion= getFileVersion(fileName);
@@ -345,7 +345,7 @@ void CRepository::setVersion(uint32 version)
 
 uint32 CRepository::size() const
 {
-	return _Files.size();
+	return (uint32)_Files.size();
 }
 
 const CRepository::CFilesMapEntry& CRepository::operator[](const NLMISC::CSString& key) const
