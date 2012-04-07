@@ -801,11 +801,7 @@ void	displayBitStream( const CBitMemStream& msg, sint beginbitpos, sint endbitpo
 inline std::string CBMSDbgInfo::getEventLegendAtBitPos( CBitMemStream& bms, sint32 eventId )
 {
 #ifdef NL_DEBUG
-	if ( eventId == -1 )
-	{
-		return std::string();
-	}
-	else
+	if ( eventId != -1 )
 	{
 		nlassert( eventId < (sint32)_DbgData->List.size() );
 		TBMSSerialInfo& serialItem = _DbgData->List[eventId]; // works only with a vector!
@@ -814,8 +810,11 @@ inline std::string CBMSDbgInfo::getEventLegendAtBitPos( CBitMemStream& bms, sint
 					bms.getSerialItem( serialItem ).c_str(), (serialItem.Symbol!=NULL)?serialItem.Symbol:"" );
 	}
 #else
-	return std::string();
+	nlunreferenced(bms);
+	nlunreferenced(eventId);
 #endif
+
+	return std::string();
 }
 
 
