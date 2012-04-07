@@ -59,7 +59,7 @@ public:
 		property ("CustomName", PropUCString, ucstring(""), CustomName);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 		
@@ -93,7 +93,7 @@ public:
 		property ("PetMirrorRow",		PropDataSetRow,	TDataSetRow(), PetMirrorRow);
 		property ("PetIndex", PropUInt16, (uint16)0, PetIdx);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 
@@ -123,7 +123,7 @@ public:
 		property ("Heading", PropFloat, 0.0f, Heading);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------
@@ -151,7 +151,7 @@ public:
 		className ("CPetCommandConfirmationMsg");
 		property ("CommandError", PropUInt16, (uint16)NO_ERROR_COMMAND, CommandError);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------
@@ -171,7 +171,7 @@ public:
 		property ("PetMirrorRow", PropDataSetRow, TDataSetRow(), PetMirrorRow);
 	}
 	
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 #endif //RY_PET_INTERFACE_MESSAGES_H

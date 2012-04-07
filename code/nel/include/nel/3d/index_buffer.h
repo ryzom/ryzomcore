@@ -782,7 +782,7 @@ inline void CIndexBuffer::lock (CIndexBufferRead &accessor, uint first, uint las
 
 // ***************************************************************************
 
-inline void CIndexBuffer::unlock (uint first, uint end)
+inline void CIndexBuffer::unlock (uint /* first */, uint /* end */)
 {
 	nlassertex (_LockCounter!=0, ("Index buffer not locked"));
 	nlassert (_LockedBuffer || (!isResident() && _NonResidentIndexes.empty()));
