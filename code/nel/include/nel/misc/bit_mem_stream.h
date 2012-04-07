@@ -209,6 +209,8 @@ public:
 	{
 #ifdef NL_DEBUG
 		std::swap(_DbgData, other._DbgData);
+#else
+		nlunreferenced(other);
 #endif
 	}
 
@@ -225,6 +227,10 @@ public:
 		TBMSSerialInfo serialItem( bitpos, size, type, _DbgData->NextSymbol );
 		_DbgData->List.push_back( serialItem );
 		_DbgData->NextSymbol = NULL;
+#else
+		nlunreferenced(bitpos);
+		nlunreferenced(size);
+		nlunreferenced(type);
 #endif
 	}
 
@@ -258,6 +264,10 @@ public:
 			nlwarning( "Missing reserve() corresponding to poke()" );
 		}
 		_DbgData->NextSymbol = NULL;
+#else
+		nlunreferenced(bitpos);
+		nlunreferenced(size);
+		nlunreferenced(type);
 #endif
 	}
 
@@ -266,6 +276,8 @@ public:
 	{
 #ifdef NL_DEBUG
 		_DbgData->NextSymbol = symbol;
+#else
+		nlunreferenced(symbol);
 #endif
 	}
 
@@ -308,6 +320,8 @@ public:
 			}
 			//nlassert( bitpos < (*_List)[_CurrentBrowsedItem].BitPos ); // occurs if stream overflow
 		}
+#else
+		nlunreferenced(bitpos);
 #endif
 		*eventId = -1;
 		return std::string();
