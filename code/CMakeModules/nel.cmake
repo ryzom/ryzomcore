@@ -185,7 +185,7 @@ Remove the CMakeCache.txt file and try again from another folder, e.g.:
    rm CMakeCache.txt
    mkdir cmake
    cd cmake
-   cmake -G \"Unix Makefiles\" ..
+   cmake ..
     ")
   ENDIF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 
@@ -333,6 +333,12 @@ MACRO(NL_SETUP_BUILD)
 
   SET(HOST_CPU ${CMAKE_SYSTEM_PROCESSOR})
 
+  IF(HOST_CPU MATCHES "amd64")
+    SET(HOST_CPU "x86_64")
+  ELSEIF(HOST_CPU MATCHES "i.86")
+    SET(HOST_CPU "x86")
+  ENDIF(HOST_CPU MATCHES "amd64")
+  
   # Determine target CPU
   IF(NOT TARGET_CPU)
     SET(TARGET_CPU $ENV{DEB_HOST_GNU_CPU})
@@ -375,10 +381,10 @@ MACRO(NL_SETUP_BUILD)
 
   IF(TARGET_CPU STREQUAL "x86_64")
     SET(TARGET_X64 1)
-    SET(PLATFORM_CFLAGS "-DHAVE_X86_64")
+    SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -DHAVE_X86_64")
   ELSEIF(TARGET_CPU STREQUAL "x86")
     SET(TARGET_X86 1)
-    SET(PLATFORM_CFLAGS "-DHAVE_X86")
+    SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -DHAVE_X86")
   ENDIF(TARGET_CPU STREQUAL "x86_64")
 
   # Fix library paths suffixes for Debian MultiArch
@@ -614,30 +620,41 @@ MACRO(SETUP_EXTERNAL)
   ENDIF(WITH_EXTERNAL)
 
   IF(WIN32)
-    INCLUDE(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake)
+    FIND_PACKAGE(External REQUIRED)
+
     IF(MSVC10)
       IF(NOT MSVC10_REDIST_DIR)
         # If you have VC++ 2010 Express, put x64/Microsoft.VC100.CRT/*.dll in ${EXTERNAL_PATH}/redist
         SET(MSVC10_REDIST_DIR "${EXTERNAL_PATH}/redist")
       ENDIF(NOT MSVC10_REDIST_DIR)
-      GET_FILENAME_COMPONENT(VC_ROOT_DIR "[HKEY_CURRENT_USER\\Software\\Microsoft\\VisualStudio\\10.0_Config;InstallDir]" ABSOLUTE)
-      # VC_ROOT_DIR is set to "registry" when a key is not found
-      IF(VC_ROOT_DIR MATCHES "registry")
-        GET_FILENAME_COMPONENT(VC_ROOT_DIR "[HKEY_CURRENT_USER\\Software\\Microsoft\\VCExpress\\10.0_Config;InstallDir]" ABSOLUTE)
-        IF(VC_ROOT_DIR MATCHES "registry")
-          MESSAGE(FATAL_ERROR "Unable to find VC++ 2010 directory!")
-        ENDIF(VC_ROOT_DIR MATCHES "registry")
-      ENDIF(VC_ROOT_DIR MATCHES "registry")
-      # convert IDE fullpath to VC++ path
-      STRING(REGEX REPLACE "Common7/.*" "VC" VC_DIR ${VC_ROOT_DIR})
-    ELSE(MSVC10)
-      IF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+
+      IF(NOT VC_DIR)
+        IF(NOT VC_ROOT_DIR)
+          GET_FILENAME_COMPONENT(VC_ROOT_DIR "[HKEY_CURRENT_USER\\Software\\Microsoft\\VisualStudio\\10.0_Config;InstallDir]" ABSOLUTE)
+          # VC_ROOT_DIR is set to "registry" when a key is not found
+          IF(VC_ROOT_DIR MATCHES "registry")
+            GET_FILENAME_COMPONENT(VC_ROOT_DIR "[HKEY_CURRENT_USER\\Software\\Microsoft\\VCExpress\\10.0_Config;InstallDir]" ABSOLUTE)
+            IF(VC_ROOT_DIR MATCHES "registry")
+              FILE(TO_CMAKE_PATH $ENV{VS100COMNTOOLS} VC_ROOT_DIR)
+              IF(NOT VC_ROOT_DIR)
+                MESSAGE(FATAL_ERROR "Unable to find VC++ 2010 directory!")
+              ENDIF(NOT VC_ROOT_DIR)
+            ENDIF(VC_ROOT_DIR MATCHES "registry")
+          ENDIF(VC_ROOT_DIR MATCHES "registry")
+        ENDIF(NOT VC_ROOT_DIR)
         # convert IDE fullpath to VC++ path
-        STRING(REGEX REPLACE "Common7/.*" "VC" VC_DIR ${CMAKE_MAKE_PROGRAM})
-      ELSE(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
-        # convert compiler fullpath to VC++ path
-        STRING(REGEX REPLACE "VC/bin/.+" "VC" VC_DIR ${CMAKE_CXX_COMPILER})
-      ENDIF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+        STRING(REGEX REPLACE "Common7/.*" "VC" VC_DIR ${VC_ROOT_DIR})
+      ENDIF(NOT VC_DIR)
+    ELSE(MSVC10)
+      IF(NOT VC_DIR)
+        IF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+          # convert IDE fullpath to VC++ path
+          STRING(REGEX REPLACE "Common7/.*" "VC" VC_DIR ${CMAKE_MAKE_PROGRAM})
+        ELSE(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+          # convert compiler fullpath to VC++ path
+          STRING(REGEX REPLACE "VC/bin/.+" "VC" VC_DIR ${CMAKE_CXX_COMPILER})
+        ENDIF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
+      ENDIF(NOT VC_DIR)
     ENDIF(MSVC10)
   ELSE(WIN32)
     IF(APPLE)
@@ -658,12 +675,12 @@ MACRO(SETUP_EXTERNAL)
   IF(WITH_STLPORT)
     FIND_PACKAGE(STLport REQUIRED)
     INCLUDE_DIRECTORIES(${STLPORT_INCLUDE_DIR})
-    IF(WIN32)
+    IF(MSVC)
       SET(VC_INCLUDE_DIR "${VC_DIR}/include")
 
       FIND_PACKAGE(WindowsSDK REQUIRED)
       # use VC++ and Windows SDK include paths
       INCLUDE_DIRECTORIES(${VC_INCLUDE_DIR} ${WINSDK_INCLUDE_DIR})
-    ENDIF(WIN32)
+    ENDIF(MSVC)
   ENDIF(WITH_STLPORT)
 ENDMACRO(SETUP_EXTERNAL)
