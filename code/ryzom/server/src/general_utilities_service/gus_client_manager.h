@@ -93,6 +93,7 @@ namespace GUS
 		class IConnectionHandler: public NLMISC::CRefCount
 		{
 		public:
+			virtual ~IConnectionHandler() {}
 			virtual void connect(TClientId)=0;
 			virtual void disconnect(TClientId)=0;
 		};
