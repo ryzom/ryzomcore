@@ -172,6 +172,7 @@ IAiFactory<IFamilyProfile>	*_ProfileNpc=&_singleProfileNpc;
 
 extern	IAiFactory<IFamilyProfile>	*_ProfileTribe;	//	in another cpp.
 
+NL_ISO_TEMPLATE_SPEC CAiFactoryContainer<IFamilyProfile, TStringId> *CAiFactoryContainer<IFamilyProfile, TStringId>::_Instance = NULL;
 
 CFamilyProfileFactory::CFamilyProfileFactory()
 {
@@ -216,10 +217,6 @@ IFamilyProfile*	CFamilyProfileFactory::createFamilyProfile(const	TStringId	&keyW
 	nlwarning("DYN: createProfile no profile available for %s", NLMISC::CStringMapper::unmap(keyWord).c_str());
 	return	NULL;
 }	
-
-
-NL_ISO_TEMPLATE_SPEC CAiFactoryContainer<IFamilyProfile, TStringId>	*CAiFactoryContainer<IFamilyProfile, TStringId>::_Instance = NULL;
-
 
 IFamilyProfile*	IFamilyProfile::createFamilyProfile(const	TStringId	&profileName, const	IFamilyProfile::CtorParam&	ctorParam)
 {
