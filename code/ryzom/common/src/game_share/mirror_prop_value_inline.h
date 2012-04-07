@@ -1005,7 +1005,7 @@ NLNET::TServiceId8					CMirrorPropValueAlice<T,CPropLocationClass>::getWriterSer
 	if ( _InMirror )
 		return CMirrorPropValue<T,CPropLocationClass>::getWriterServiceId();
 	else
-		return ~0;
+		return NLNET::TServiceId8(std::numeric_limits<uint8>::max());
 }
 #endif
 
