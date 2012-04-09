@@ -48,7 +48,7 @@
 #define NL_SOUND_DATA "."
 #endif // NL_SOUND_DATA
 
-#define SAMPLE_OGG "O:/src/samples/music_stream/data/aeon_1_10_mystic_river.ogg"
+#define SAMPLE_OGG "D:/source/kaetemi/toverhex/src/samples/music_stream/data/aeon_1_10_mystic_river.ogg"
 
 using namespace std;
 using namespace NLMISC;
@@ -430,7 +430,7 @@ static void runSample()
 	
 	printf("End of song\n");
 	printf("Press ANY key to exit\n");
-	while (!_kbhit()) { s_AudioMixer->update(); Sleep(10); } _getch();
+	while (!_kbhit()) { s_AudioMixer->update(); nlSleep(10); } _getch();
 	return;
 }
 
