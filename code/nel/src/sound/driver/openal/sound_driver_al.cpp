@@ -619,12 +619,8 @@ void CSoundDriverAL::commit3DChanges()
 	// Sync up sources & listener 3d position.
 	if (getOption(OptionManualRolloff))
 	{
-		set<CSourceAL*>::iterator it = _Sources.begin(), iend = _Sources.end();
-		while(it != iend)
-		{
+		for (std::set<CSourceAL *>::iterator it(_Sources.begin()), end(_Sources.end()); it != end; ++it)
 			(*it)->updateManualRolloff();
-			++it;
-		}
 	}
 
 	// update the music (XFade etc...)
