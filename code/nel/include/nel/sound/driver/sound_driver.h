@@ -39,7 +39,9 @@ namespace NLSOUND
 #endif
 
 /*
- * Sound sample format
+ * Deprecated sound sample format.
+ * For compatibility with old code.
+ * Do not modify.
  */
 enum TSampleFormat { Mono8, Mono16ADPCM, Mono16, Stereo8, Stereo16, SampleFormatUnknown = (~0) };
 
