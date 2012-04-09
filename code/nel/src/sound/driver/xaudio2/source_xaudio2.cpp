@@ -793,7 +793,14 @@ bool CSourceXAudio2::getSourceRelativeMode() const
 void CSourceXAudio2::setMinMaxDistances(float mindist, float maxdist, bool /* deferred */)
 {
 	// nldebug(NLSOUND_XAUDIO2_PREFIX "setMinMaxDistances %f, %f", mindist, maxdist);
-
+	
+	static float maxSqrt = sqrt(std::numeric_limits<float>::max());
+	if (maxdist >= maxSqrt)
+	{
+		nlwarning("SOUND_DEV (XAudio2): Ridiculously high max distance set on source");
+		maxdist = maxSqrt;
+	}
+	
 	_Emitter.InnerRadius = mindist;
 	_MinDistance = mindist;
 	_MaxDistance = maxdist;
