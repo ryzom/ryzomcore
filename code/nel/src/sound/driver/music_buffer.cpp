@@ -46,7 +46,8 @@ IMusicBuffer *IMusicBuffer::createMusicBuffer(const std::string &filepath, bool 
 	string type = CFile::getExtension(filepath);
 
 	CIFile *ifile = new CIFile();
-	ifile->setAsyncLoading(async);
+	ifile->setCacheFileOnOpen(!async);
+ 	ifile->allowBNPCacheFileOnOpen(!async);
 	ifile->open(lookup);
 
 	IMusicBuffer *mb = createMusicBuffer(type, ifile, loop);
