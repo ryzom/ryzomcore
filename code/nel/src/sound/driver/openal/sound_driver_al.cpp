@@ -198,7 +198,7 @@ CSoundDriverAL::~CSoundDriverAL()
 	{
 		nlwarning("AL: _Sources.size(): '%u'", (uint32)_Sources.size());
 		set<CSourceAL *>::iterator it(_Sources.begin()), end(_Sources.end());
-		for (; it != end; ++it) delete *it;
+		for (; it != end; ++it) it->release();
 		_Sources.clear();
 	}
 	if (!_Buffers.empty()) alDeleteBuffers(compactAliveNames(_Buffers, alIsBuffer), &*_Buffers.begin());	
@@ -207,7 +207,7 @@ CSoundDriverAL::~CSoundDriverAL()
 	{
 		nlwarning("AL: _Effects.size(): '%u'", (uint32)_Effects.size());
 		set<CEffectAL *>::iterator it(_Effects.begin()), end(_Effects.end());
-		for (; it != end; ++it) delete *it;
+		for (; it != end; ++it) it->release();
 		_Effects.clear();
 	}
 
