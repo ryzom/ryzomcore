@@ -121,8 +121,7 @@ void CSourceXAudio2::commit3DChanges()
 {
 	nlassert(_SourceVoice);
 	
-	// Only mono buffers get 3d sound, multi-channel buffers go directly to the speakers (calculate rolloff too!!).
-	// Todo: stereo buffers calculate distance ?
+	// Only mono buffers get 3d sound, multi-channel buffers go directly to the speakers without any distance rolloff.
 	if (_Channels > 1)
 	{
 		// _SoundDriver->getDSPSettings()->DstChannelCount = 1;
@@ -535,7 +534,7 @@ bool CSourceXAudio2::preparePlay(IBuffer::TBufferFormat bufferFormat, uint8 chan
 		// destroy adpcm utility (if it exists)
 		delete _AdpcmUtility; _AdpcmUtility = NULL;
 		// reset current stuff
-		_Format = (IBuffer::TBufferFormat)~0;
+		_Format = IBuffer::FormatNotSet;
 		_Channels = 0;
 		_BitsPerSample = 0;
 	}
