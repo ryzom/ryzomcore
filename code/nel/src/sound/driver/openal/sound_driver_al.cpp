@@ -183,6 +183,9 @@ _NbExpBuffers(0), _NbExpSources(0), _RolloffFactor(1.f)
  */
 CSoundDriverAL::~CSoundDriverAL()
 {
+	// WARNING: Only internal resources are released here, 
+	// the created instances must still be released by the user!
+	
 	// Remove the allocated (but not exported) source and buffer names-
 	// Release internal resources of all remaining ISource instances
 	if (_Sources.size())
