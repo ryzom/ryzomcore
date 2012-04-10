@@ -27,6 +27,8 @@
 #include "nel/sound/music_sound.h"
 #include "nel/sound/stream_sound.h"
 
+#include "nel/sound/group_controller.h"
+
 using namespace std;
 using namespace NLMISC;
 
@@ -134,6 +136,23 @@ void	CSound::serial(NLMISC::IStream &s)
 		std::string name = CStringMapper::unmap(_Name);
 		s.serial(name);
 	}
+	
+	nlassert(CAudioMixerUser::instance()); // not sure
+#if NLSOUND_SHEET_VERSION_BUILT < 2
+	if (s.isReading()) _GroupController = static_cast<CGroupController *>(CAudioMixerUser::instance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER));
+#else
+	if (s.isReading())
+	{
+		std::string groupControllerPath;
+		s.serial(groupControllerPath);
+		_GroupController = static_cast<CGroupController *>(CAudioMixerUser::instance()->getGroupController(groupControllerPath));
+	}
+	else
+	{
+		std::string groupControllerPath = _GroupController->getPath();
+		s.serial(groupControllerPath);
+	}
+#endif
 }
 
 
@@ -225,6 +244,15 @@ void				CSound::importForm(const std::string& filename, NLGEORGES::UFormElm& roo
 	default:
 		_Priority = MidPri;
 	}
+
+#if NLSOUND_SHEET_VERSION_BUILT < 2
+	_GroupController = static_cast<CGroupController *>(CAudioMixerUser::instance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER));
+#else
+	std::string groupControllerPath;
+	root.getValueByName(groupControllerPath, ".GroupControllerPath");
+	_GroupController = static_cast<CGroupController *>(CAudioMixerUser::instance()->getGroupController(groupControllerPath));
+#endif
+
 }
 
 

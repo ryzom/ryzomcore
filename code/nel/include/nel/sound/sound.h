@@ -105,7 +105,7 @@ public:
 	/// Return the max distance (if detailed())
 	virtual float		getMaxDistance() const				{ return _MaxDist; }
 
-	inline CGroupController *getGroupController() const { return NULL; } // TODO, RETURN THE GROUP CONTROLLER
+	inline CGroupController *getGroupController() const { return _GroupController; }
 
 	/// Set looping
 	void				setLooping( bool looping ) { _Looping = looping; }
@@ -144,6 +144,9 @@ protected:
 	NLMISC::TStringId	_Name;
 	/// An optional user var controler.
 	NLMISC::TStringId	_UserVarControler;
+
+	/// The group controller, always exists, owned by the audio mixer
+	CGroupController	*_GroupController;
 
 };
 

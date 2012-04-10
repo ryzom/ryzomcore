@@ -35,13 +35,12 @@
 
 // NeL includes
 #include <nel/misc/common.h>
-#include <nel/sound/audio_mixer_user.h>
 #include <nel/sound/u_group_controller.h>
+#include <nel/sound/containers.h>
 
 // Project includes
 
 namespace NLSOUND {
-	class CSourceCommon;
 	class CGroupControllerRoot;
 
 /**
@@ -64,7 +63,7 @@ private:
 	float m_FinalGain;
 
 	int m_NbSourcesInclChild;
-	CAudioMixerUser::TSourceContainer m_Sources;
+	TSourceContainer m_Sources;
 
 public:
 	CGroupController(CGroupController *parent);
@@ -83,8 +82,12 @@ public:
 	void addSource(CSourceCommon *source);
 	void removeSource(CSourceCommon *source);
 
-private:
+	virtual std::string getPath();
+
+protected:
 	virtual ~CGroupController(); // subnodes can only be deleted by the root
+
+private:
 	inline float calculateTotalGain() { return m_DevGain * m_UserGain; }
 	virtual void calculateFinalGain();
 	virtual void increaseSources();

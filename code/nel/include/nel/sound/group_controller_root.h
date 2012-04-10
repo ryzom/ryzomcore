@@ -54,6 +54,7 @@ public:
 	CGroupController *getGroupController(const std::string &path);
 
 protected:
+	virtual std::string getPath();
 	virtual void calculateFinalGain();
 	virtual void increaseSources();
 	virtual void decreaseSources();

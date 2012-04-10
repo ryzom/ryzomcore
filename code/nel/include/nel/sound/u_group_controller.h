@@ -52,7 +52,7 @@ class UGroupController
 	virtual float getUserGain() = 0;
 
 protected:
-	virtual ~UGroupController();
+	virtual ~UGroupController() { }
 
 }; /* class UGroupController */
 

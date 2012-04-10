@@ -72,6 +72,22 @@ void CGroupController::removeSource(CSourceCommon *source)
 	m_Sources.erase(source);
 }
 
+std::string CGroupController::getPath() // overridden by root
+{
+	for (std::map<std::string, CGroupController *>::iterator it(m_Parent->m_Children.begin()), end(m_Parent->m_Children.end()); it != end; ++it)
+	{
+		if (it->second == this)
+		{
+			const std::string &name = it->first;
+			std::string returnPath = m_Parent->getPath() + "/" + name;
+			if (returnPath[0] == '/')
+				returnPath = returnPath.substr(1);
+			return returnPath;
+		}
+	}
+	
+}
+
 void CGroupController::calculateFinalGain() // overridden by root
 {
 	m_FinalGain = calculateTotalGain() * m_Parent->getFinalGain();
@@ -83,7 +99,7 @@ void CGroupController::updateSourceGain()
 	if (m_NbSourcesInclChild)
 	{
 		calculateFinalGain();
-		for (CAudioMixerUser::TSourceContainer::iterator it(m_Sources.begin()), end(m_Sources.end()); it != end; ++it)
+		for (TSourceContainer::iterator it(m_Sources.begin()), end(m_Sources.end()); it != end; ++it)
 			(*it)->updateFinalGain();
 		for (std::map<std::string, CGroupController *>::iterator it(m_Children.begin()), end(m_Children.end()); it != end; ++it)
 			(*it).second->updateSourceGain();

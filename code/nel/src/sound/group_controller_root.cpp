@@ -51,12 +51,17 @@ CGroupControllerRoot::~CGroupControllerRoot()
 	
 }
 
+std::string CGroupControllerRoot::getPath()
+{
+	return "";
+}
+
 void CGroupControllerRoot::calculateFinalGain()
 {
 	m_FinalGain = calculateTotalGain();
 }
 
-void CGroupController::increaseSources()
+void CGroupControllerRoot::increaseSources()
 {
 	++m_NbSourcesInclChild;
 
@@ -65,7 +70,7 @@ void CGroupController::increaseSources()
 		updateSourceGain();
 }
 
-void CGroupController::decreaseSources()
+void CGroupControllerRoot::decreaseSources()
 {
 	--m_NbSourcesInclChild;
 }

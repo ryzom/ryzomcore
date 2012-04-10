@@ -286,6 +286,10 @@ public:
 	/// Get a TSoundId from a name (returns NULL if not found)
 	virtual TSoundId	getSoundId( const NLMISC::TStringId &name ) = 0;
 
+	/// Gets the group controller for the given group tree path with separator '/', if it doesn't exist yet it will be created.
+	/// Examples: "music", "effects", "dialog", "music/background", "music/loading", "music/player", etcetera
+	virtual UGroupController *getGroupController(const std::string &path) = 0;
+
 	/** Add a logical sound source (returns NULL if name not found).
 	 * If spawn is true, the source will auto-delete after playing. If so, the return USource* pointer
 	 * is valid only before the time when calling play() plus the duration of the sound. You can

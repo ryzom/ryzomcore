@@ -52,6 +52,7 @@
 #include "nel/sound/sample_bank.h"
 #include "nel/sound/sound_bank.h"
 #include "nel/sound/group_controller.h"
+#include "nel/sound/containers.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -1827,6 +1828,10 @@ bool CAudioMixerUser::tryToLoadSampleBank(const std::string &sampleName)
 	}
 }
 
+UGroupController *CAudioMixerUser::getGroupController(const std::string &path)
+{
+	return static_cast<UGroupController *>(_GroupController.getGroupController(path));
+}
 
 // ******************************************************************
 

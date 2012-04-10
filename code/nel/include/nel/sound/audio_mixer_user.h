@@ -34,6 +34,14 @@
 #include "nel/sound/mixing_track.h"
 #include "nel/sound/sound.h"
 #include "nel/sound/music_channel_fader.h"
+#include "nel/sound/group_controller_root.h"
+
+// Current version is 2, Ryzom Live uses 1
+// Provided to allow compatibility with old binary files
+#define NLSOUND_SHEET_VERSION_BUILT 1
+#define NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER "effects"
+#define NLSOUND_SHEET_V1_DEFAULT_SOUND_MUSIC_GROUP_CONTROLLER "music"
+#define NLSOUND_SHEET_V1_DEFAULT_SOUND_STREAM_GROUP_CONTROLLER "dialog"
 
 namespace NLLIGO {
 	class CLigoConfig;
@@ -50,26 +58,6 @@ namespace NLSOUND {
 	class CBackgroundSoundManager;
 	class CMusicSoundManager;
 	class IReverbEffect;
-
-/// Hasher functor for hashed container with pointer key.
-template <class Pointer>
-struct THashPtr : public std::unary_function<const Pointer &, size_t>
-{
-	static const size_t bucket_size = 4;
-	static const size_t min_buckets = 8;
-	size_t operator () (const Pointer &ptr) const
-	{
-		//CHashSet<uint>::hasher	h;
-		// transtype the pointer into int then hash it
-		//return h.operator()(uint(uintptr_t(ptr)));
-		return (size_t)(uintptr_t)ptr;
-	}
-	inline bool operator() (const Pointer &ptr1, const Pointer &ptr2) const
-	{
-		// delegate the work to someone else as well?
-		return (uintptr_t)ptr1 < (uintptr_t)ptr2;
-	}
-};
 
 /**
  * Implementation of UAudioMixer
@@ -197,6 +185,9 @@ public:
 	/// Get a TSoundId from a name (returns NULL if not found)
 	virtual TSoundId			getSoundId( const NLMISC::TStringId &name );
 
+	/// Gets the group controller for the given group tree path with separator '/', if it doesn't exist yet it will be created.
+	/// Examples: "music", "effects", "dialog", "music/background", "music/loading", "music/player", etcetera
+	virtual UGroupController *getGroupController(const std::string &path);
 
 	/** Add a logical sound source (returns NULL if name not found).
 	 * If spawn is true, the source will auto-delete after playing. If so, the return USource* pointer
@@ -431,9 +422,6 @@ private:
 	// utility function for automatic sample bank loading.
 	bool tryToLoadSampleBank(const std::string &sampleName);
 
-public:
-	typedef CHashSet<CSourceCommon*, THashPtr<CSourceCommon*> >					TSourceContainer;
-private:
 	typedef CHashSet<IMixerUpdate*, THashPtr<IMixerUpdate*> >						TMixerUpdateContainer;
 	typedef CHashMap<IBuffer*, std::vector<class CSound*>, THashPtr<IBuffer*> >	TBufferToSourceContainer;
 //	typedef std::multimap<NLMISC::TTime, IMixerEvent*>									TTimedEventContainer;
@@ -565,6 +553,9 @@ private:
 
 	// Instance of the background music manager
 	CMusicSoundManager			*_BackgroundMusicManager;
+
+	/// Group controller
+	CGroupControllerRoot		_GroupController;
 
 public:
 	struct TSampleBankHeader
