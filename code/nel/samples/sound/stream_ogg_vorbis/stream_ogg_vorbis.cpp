@@ -40,6 +40,7 @@
 #include <nel/sound/u_audio_mixer.h>
 #include <nel/sound/u_listener.h>
 #include <nel/sound/u_stream_source.h>
+#include <nel/sound/u_group_controller.h>
 #include <nel/misc/hierarchical_timer.h>
 
 // Project includes
@@ -325,6 +326,7 @@ static ov_callbacks OV_CALLBACKS_NLMISC_STREAM = {
 static UAudioMixer *s_AudioMixer = NULL;
 static UStreamSource *s_StreamSource = NULL;
 static IAudioDecoder *s_AudioDecoder = NULL;
+static UGroupController *s_GroupController = NULL;
 
 static void initSample()
 {
@@ -368,6 +370,8 @@ static void initSample()
 	s_AudioDecoder = IAudioDecoder::createAudioDecoder(sample, false, false);
 	s_StreamSource->setFormat(s_AudioDecoder->getChannels(), s_AudioDecoder->getBitsPerSample(), (uint32)s_AudioDecoder->getSamplesPerSec());
 	s_StreamSource->setPitch(2.0f);
+
+	s_GroupController = s_AudioMixer->getGroupController("dialog");
 }
 
 //CMutex *s_Mutex = NULL;
@@ -405,13 +409,23 @@ static void runSample()
 
 	s_StreamSource->play();
 	
-	printf("Press ANY key to exit\n");
+	printf("Change volume with - and +\n");
+	printf("Press ANY other key to exit\n");
 	while (!s_AudioDecoder->isMusicEnded())
 	{
 		if (_kbhit())
 		{
-			_getch();
-			return;
+			switch (_getch())
+			{
+			case '+':
+				s_GroupController->setUserGain(s_GroupController->getUserGain() + 0.1f);
+				break;
+			case '-':
+				s_GroupController->setUserGain(s_GroupController->getUserGain() - 0.1f);
+				break;
+			default:
+				return;
+			}
 		}
 		bufferMore(bytes);
 		s_AudioMixer->update();
@@ -440,6 +454,7 @@ static void runSample()
 static void releaseSample()
 {
 	//NLMISC::CHTimer::clear();
+	s_GroupController = NULL;
 	delete s_AudioDecoder; s_AudioDecoder = NULL;
 	delete s_StreamSource; s_StreamSource = NULL;
 	delete s_AudioMixer; s_AudioMixer = NULL;

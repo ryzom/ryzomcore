@@ -32,6 +32,7 @@
 // STL includes
 
 // NeL includes
+#include <nel/misc/singleton.h>
 
 // Project includes
 #include <nel/sound/group_controller.h>
@@ -44,7 +45,7 @@ namespace NLSOUND {
  * \author Jan Boon (Kaetemi)
  * CGroupControllerRoot
  */
-class CGroupControllerRoot : public CGroupController
+class CGroupControllerRoot : public CGroupController, public NLMISC::CManualSingleton<CGroupControllerRoot>
 {
 public:
 	CGroupControllerRoot();

@@ -21,7 +21,7 @@
 #include "nel/georges/u_form_elm.h"
 
 #if NLSOUND_SHEET_VERSION_BUILT < 2
-#	include "nel/sound/audio_mixer_user.h"
+#	include "nel/sound/group_controller_root.h"
 #endif
 
 using namespace std;
@@ -76,7 +76,7 @@ void		CMusicSound::importForm(const std::string& filename, NLGEORGES::UFormElm& 
 	root.getValueByName(_TimeBeforeCanReplay, ".SoundType.TimeBeforeCanReplay");
 
 #if NLSOUND_SHEET_VERSION_BUILT < 2
-	_GroupController = static_cast<CGroupController *>(CAudioMixerUser::instance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_MUSIC_GROUP_CONTROLLER));
+	_GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_MUSIC_GROUP_CONTROLLER);
 #endif
 
 }
@@ -106,7 +106,7 @@ void		CMusicSound::serial(NLMISC::IStream &s)
 	s.serial(_MinimumPlayTime, _TimeBeforeCanReplay);
 	
 #if NLSOUND_SHEET_VERSION_BUILT < 2
-	if (s.isReading()) _GroupController = static_cast<CGroupController *>(CAudioMixerUser::instance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_MUSIC_GROUP_CONTROLLER));
+	if (s.isReading()) _GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_MUSIC_GROUP_CONTROLLER);
 #endif
 	
 }

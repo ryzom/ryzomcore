@@ -39,9 +39,6 @@
 // Current version is 2, Ryzom Live uses 1
 // Provided to allow compatibility with old binary files
 #define NLSOUND_SHEET_VERSION_BUILT 1
-#define NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER "effects"
-#define NLSOUND_SHEET_V1_DEFAULT_SOUND_MUSIC_GROUP_CONTROLLER "music"
-#define NLSOUND_SHEET_V1_DEFAULT_SOUND_STREAM_GROUP_CONTROLLER "dialog"
 
 namespace NLLIGO {
 	class CLigoConfig;

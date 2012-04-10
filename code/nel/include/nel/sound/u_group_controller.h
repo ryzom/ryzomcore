@@ -35,6 +35,10 @@
 
 // Project includes
 
+#define NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER "effects"
+#define NLSOUND_SHEET_V1_DEFAULT_SOUND_MUSIC_GROUP_CONTROLLER "music"
+#define NLSOUND_SHEET_V1_DEFAULT_SOUND_STREAM_GROUP_CONTROLLER "dialog"
+
 namespace NLSOUND {
 
 /**
@@ -45,6 +49,7 @@ namespace NLSOUND {
  */
 class UGroupController
 {
+public:
 	virtual void setDevGain(float gain) = 0;
 	virtual float getDevGain() = 0;
 

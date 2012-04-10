@@ -45,7 +45,7 @@ CSourceCommon::CSourceCommon(TSoundId id, bool spawn, TSpawnEndCallback cb, void
 	_GroupController(groupController ? groupController : id->getGroupController())
 {
 	CAudioMixerUser::instance()->addSource(this);
-	groupController->addSource(this);
+	_GroupController->addSource(this);
 
 	// get a local copy of the sound parameter
 	_InitialGain = _Gain = id->getGain();
