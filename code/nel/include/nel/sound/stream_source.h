@@ -41,7 +41,7 @@ namespace NLSOUND {
 class CStreamSource : public CSourceCommon
 {
 public:
-	CStreamSource(CStreamSound *streamSound = NULL, bool spawn = false, TSpawnEndCallback cb = 0, void *cbUserParam = 0, NL3D::CCluster *cluster = 0);
+	CStreamSource(CStreamSound *streamSound = NULL, bool spawn = false, TSpawnEndCallback cb = 0, void *cbUserParam = 0, NL3D::CCluster *cluster = 0, CGroupController *groupController = NULL);
 	virtual ~CStreamSource();
 	
 	/// Return the sound binded to the source (or NULL if there is no sound)
@@ -80,18 +80,7 @@ public:
 	virtual void					setVelocity(const NLMISC::CVector& vel);
 	/// Set the direction vector (3D mode only, ignored in stereo mode) (default: (0,0,0) as non-directional)
 	virtual void					setDirection(const NLMISC::CVector& dir);
-	/** Set the gain (volume value inside [0 , 1]). (default: 1)
-	 * 0.0 -> silence
-	 * 0.5 -> -6dB
-	 * 1.0 -> no attenuation
-	 * values > 1 (amplification) not supported by most drivers
-	 */
-	virtual void					setGain(float gain);
-	
-	/** Set the gain amount (value inside [0, 1]) to map between 0 and the nominal gain
-	 * (which is getSource()->getGain()). Does nothing if getSource() is null.
-	 */
-	virtual void					setRelativeGain(float gain);
+	virtual void					updateFinalGain();
 	/** Shift the frequency. 1.0f equals identity, each reduction of 50% equals a pitch shift
 	 * of one octave. 0 is not a legal value.
 	 */

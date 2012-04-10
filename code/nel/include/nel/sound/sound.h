@@ -30,6 +30,7 @@ namespace NLSOUND {
 class ISoundDriver;
 class IBuffer;
 class CSound;
+class CGroupController;
 
 
 /// Sound names hash map
@@ -103,6 +104,8 @@ public:
 	virtual float		getMinDistance() const				{ return _MinDist; }
 	/// Return the max distance (if detailed())
 	virtual float		getMaxDistance() const				{ return _MaxDist; }
+
+	inline CGroupController *getGroupController() const { return NULL; } // TODO, RETURN THE GROUP CONTROLLER
 
 	/// Set looping
 	void				setLooping( bool looping ) { _Looping = looping; }

@@ -51,6 +51,7 @@
 #include "nel/sound/sample_bank_manager.h"
 #include "nel/sound/sample_bank.h"
 #include "nel/sound/sound_bank.h"
+#include "nel/sound/group_controller.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -1689,7 +1690,7 @@ void				CAudioMixerUser::update()
 //							_Tracks[i]->DrvSource->setPos(source->getPos() * (1-css->PosAlpha) + css->Position*(css->PosAlpha));
 							_Tracks[i]->getPhysicalSource()->setPos(source->getPos() * (1-css->PosAlpha) + vpos*(css->PosAlpha));
 							// update the relative gain
-							_Tracks[i]->getPhysicalSource()->setGain(source->getRelativeGain()*source->getGain()*css->Gain);
+							_Tracks[i]->getPhysicalSource()->setGain(source->getFinalGain() * css->Gain);
 #if EAX_AVAILABLE == 1
 							if (_UseEax)
 							{
@@ -1829,7 +1830,7 @@ bool CAudioMixerUser::tryToLoadSampleBank(const std::string &sampleName)
 
 // ******************************************************************
 
-USource				*CAudioMixerUser::createSource( TSoundId id, bool spawn, TSpawnEndCallback cb, void *userParam, NL3D::CCluster *cluster, CSoundContext *context )
+USource				*CAudioMixerUser::createSource( TSoundId id, bool spawn, TSpawnEndCallback cb, void *userParam, NL3D::CCluster *cluster, CSoundContext *context, UGroupController *groupController )
 {
 #if NL_PROFILE_MIXER
 	TTicks start = CTime::getPerformanceTime();
@@ -1915,7 +1916,7 @@ retrySound:
 			}
 
 			// Create source
-			CSimpleSource *source = new CSimpleSource( simpleSound, spawn, cb, userParam, cluster);
+			CSimpleSource *source = new CSimpleSource( simpleSound, spawn, cb, userParam, cluster, static_cast<CGroupController *>(groupController));
 
 	//		nldebug("Mixer : source %p created", source);
 
@@ -1939,28 +1940,28 @@ retrySound:
 		{
 			CStreamSound *streamSound = static_cast<CStreamSound *>(id);
 			// This is a stream thingy.
-			ret = new CStreamSource(streamSound, spawn, cb, userParam, cluster);
+			ret = new CStreamSource(streamSound, spawn, cb, userParam, cluster, static_cast<CGroupController *>(groupController));
 		}
 		break;
 	case CSound::SOUND_COMPLEX:
 		{
 			CComplexSound *complexSound = static_cast<CComplexSound *>(id);
 			// This is a pattern sound.
-			ret = new CComplexSource(complexSound, spawn, cb, userParam, cluster);
+			ret = new CComplexSource(complexSound, spawn, cb, userParam, cluster, static_cast<CGroupController *>(groupController));
 		}
 		break;
 	case CSound::SOUND_BACKGROUND:
 		{
 			// This is a background sound.
 			CBackgroundSound *bgSound = static_cast<CBackgroundSound *>(id);
-			ret = new CBackgroundSource(bgSound, spawn, cb, userParam, cluster);
+			ret = new CBackgroundSource(bgSound, spawn, cb, userParam, cluster, static_cast<CGroupController *>(groupController));
 		}
 		break;
 	case CSound::SOUND_MUSIC:
 		{
 			// This is a background music sound
 			CMusicSound *music_sound= static_cast<CMusicSound *>(id);
-			ret = new CMusicSource(music_sound, spawn, cb, userParam, cluster);
+			ret = new CMusicSource(music_sound, spawn, cb, userParam, cluster, static_cast<CGroupController *>(groupController));
 		}
 		break;
 	case CSound::SOUND_CONTEXT:
@@ -1974,7 +1975,7 @@ retrySound:
 			CSound *sound = ctxSound->getContextSound(*context);
 			if (sound != 0)
 			{
-				ret = createSource(sound, spawn, cb, userParam, cluster);
+				ret = createSource(sound, spawn, cb, userParam, cluster, NULL, static_cast<CGroupController *>(groupController));
 				// Set the volume of the source according to the context volume
 				if (ret != 0)
 				{
@@ -2007,9 +2008,9 @@ retrySound:
 
 // ******************************************************************
 
-USource				*CAudioMixerUser::createSource( const NLMISC::TStringId &name, bool spawn, TSpawnEndCallback cb, void *userParam, NL3D::CCluster *cluster, CSoundContext *context)
+USource				*CAudioMixerUser::createSource( const NLMISC::TStringId &name, bool spawn, TSpawnEndCallback cb, void *userParam, NL3D::CCluster *cluster, CSoundContext *context, UGroupController *groupController)
 {
-	return createSource( getSoundId( name ), spawn, cb, userParam, cluster, context);
+	return createSource( getSoundId( name ), spawn, cb, userParam, cluster, context, groupController);
 }
 
 

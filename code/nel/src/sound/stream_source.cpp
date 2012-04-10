@@ -28,8 +28,8 @@ using namespace NLMISC;
 
 namespace NLSOUND {
 
-CStreamSource::CStreamSource(CStreamSound *streamSound, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster)
-	: CSourceCommon(streamSound, spawn, cb, cbUserParam, cluster), 
+CStreamSource::CStreamSource(CStreamSound *streamSound, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster, CGroupController *groupController)
+	: CSourceCommon(streamSound, spawn, cb, cbUserParam, cluster, groupController), 
 	m_StreamSound(streamSound), 
 	m_Alpha(0.0f), 
 	m_Track(NULL), 
@@ -177,7 +177,7 @@ void CStreamSource::play()
 				setDirection(_Direction); // because there is a workaround inside
 				pSource->setVelocity(_Velocity);
 			}
-			pSource->setGain(_Gain);
+			pSource->setGain(getFinalGain());
 			pSource->setSourceRelativeMode(_RelativeMode);
 			// pSource->setLooping(_Looping);
 			pSource->setPitch(_Pitch);
@@ -294,22 +294,12 @@ void CStreamSource::setDirection(const NLMISC::CVector& dir)
 	}
 }
 
-void CStreamSource::setGain(float gain)
+void CStreamSource::updateFinalGain()
 {
 	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
-
-	CSourceCommon::setGain(gain);
+	
 	if (hasPhysicalSource())
-		getPhysicalSource()->setGain(gain);
-}
-
-void CStreamSource::setRelativeGain(float gain)
-{
-	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
-
-	CSourceCommon::setRelativeGain(gain);
-	if (hasPhysicalSource())
-		getPhysicalSource()->setGain(_Gain);
+		getPhysicalSource()->setGain(getFinalGain());
 }
 
 void CStreamSource::setPitch(float pitch)

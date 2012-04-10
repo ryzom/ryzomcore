@@ -204,9 +204,9 @@ public:
 	 * pass a callback function that will be called (if not NULL) just before deleting the spawned
 	 * source.
 	 */
-	virtual USource				*createSource( const NLMISC::TStringId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0 );
+	virtual USource				*createSource( const NLMISC::TStringId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL);
 	/// Add a logical sound source (by sound id). To remove a source, just delete it. See createSource(const char*)
-	virtual USource				*createSource( TSoundId id, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0 );
+	virtual USource				*createSource( TSoundId id, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL);
 	/// Add a source which was created by an EnvSound
 	void						addSource( CSourceCommon *source );
 	/** Delete a logical sound source. If you don't call it, the source will be auto-deleted
@@ -431,8 +431,9 @@ private:
 	// utility function for automatic sample bank loading.
 	bool tryToLoadSampleBank(const std::string &sampleName);
 
-
+public:
 	typedef CHashSet<CSourceCommon*, THashPtr<CSourceCommon*> >					TSourceContainer;
+private:
 	typedef CHashSet<IMixerUpdate*, THashPtr<IMixerUpdate*> >						TMixerUpdateContainer;
 	typedef CHashMap<IBuffer*, std::vector<class CSound*>, THashPtr<IBuffer*> >	TBufferToSourceContainer;
 //	typedef std::multimap<NLMISC::TTime, IMixerEvent*>									TTimedEventContainer;
