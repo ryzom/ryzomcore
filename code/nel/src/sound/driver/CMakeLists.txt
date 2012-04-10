@@ -3,15 +3,6 @@ FILE(GLOB HEADERS ../../../include/nel/sound/driver/*.h)
 
 NL_TARGET_LIB(nelsnd_lowlevel ${HEADERS} ${SRC})
 
-INCLUDE_DIRECTORIES(${VORBIS_INCLUDE_DIR})
-
-TARGET_LINK_LIBRARIES(nelsnd_lowlevel nelmisc ${VORBISFILE_LIBRARY} ${VORBIS_LIBRARY})
-
-IF(WITH_STATIC)
-  # Add libogg dependency only if target is static because to libvorbisfile
-  TARGET_LINK_LIBRARIES(nelsnd_lowlevel ${OGG_LIBRARY})
-ENDIF(WITH_STATIC)
-
 SET_TARGET_PROPERTIES(nelsnd_lowlevel PROPERTIES LINK_INTERFACE_LIBRARIES "")
 NL_DEFAULT_PROPS(nelsnd_lowlevel "NeL, Library: Sound Lowlevel")
 NL_ADD_RUNTIME_FLAGS(nelsnd_lowlevel)
