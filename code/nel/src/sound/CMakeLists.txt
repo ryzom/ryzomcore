@@ -55,6 +55,11 @@ FILE(GLOB STREAM
 	stream_source.cpp ../../include/nel/sound/stream_source.h
 )
 
+FILE(GLOB STREAM_FILE
+	audio_decoder.cpp ../../include/nel/sound/audio_decoder.h
+	audio_decoder_vorbis.cpp ../../include/nel/sound/audio_decoder_vorbis.h
+)
+
 FILE(GLOB USER_CLASSES
 	../../include/nel/sound/u_audio_mixer.h
 	../../include/nel/sound/u_group_controller.h
@@ -71,6 +76,7 @@ SOURCE_GROUP("mixer" FILES ${MIXER})
 SOURCE_GROUP("music_deprecated" FILES ${MUSIC})
 SOURCE_GROUP("sound" FILES ${SOUND})
 SOURCE_GROUP("stream" FILES ${STREAM})
+SOURCE_GROUP("stream_file" FILES ${STREAM_FILE})
 SOURCE_GROUP("user_classes" FILES ${USER_CLASSES})
 
 
