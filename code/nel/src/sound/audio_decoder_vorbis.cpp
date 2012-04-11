@@ -219,6 +219,11 @@ float CAudioDecoderVorbis::getLength()
 	return (float)ov_time_total(&_OggVorbisFile, -1);
 }
 
+void CAudioDecoderVorbis::setLooping(bool loop)
+{
+	 _Loop = loop;
+}
+
 } /* namespace NLSOUND */
 
 /* end of file */

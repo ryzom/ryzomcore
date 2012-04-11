@@ -99,6 +99,9 @@ public:
 
 	/// Get the total time in seconds.
 	virtual float getLength();
+
+	/// Set looping
+	virtual void setLooping(bool loop);
 }; /* class CAudioDecoderVorbis */
 
 } /* namespace NLSOUND */
