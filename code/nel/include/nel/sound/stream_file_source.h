@@ -81,6 +81,7 @@ public:
 	// TODO: getTime
 
 private:
+	void prepareDecoder();
 	void bufferMore(uint bytes);
 
 private:

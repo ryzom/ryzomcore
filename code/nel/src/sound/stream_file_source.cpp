@@ -84,12 +84,32 @@ void CStreamFileSource::play()
 			// thread may be stopping from stop call
 			m_Thread->wait();
 		}
-		nlassert(!_Playing);
+		else
+		{
+			nlwarning("Already playing");
+		}
+		if (!getStreamFileSound()->getAsync())
+			prepareDecoder();
+		// else load audiodecoder in thread
 		m_WaitingForPlay = true;
 		m_Thread->start();
 		m_Thread->setPriority(NLMISC::ThreadPriorityHighest);
-		CAudioMixerUser *mixer = CAudioMixerUser::instance();
-		mixer->addSourceWaitingForPlay(this);
+		if (!getStreamFileSound()->getAsync())
+		{
+			// wait until at least one buffer is ready
+			while (!(m_NextBuffer || !m_FreeBuffers))
+				NLMISC::nlSleep(10);
+			CStreamSource::play();
+			if (!_Playing)
+			{
+				nlwarning("Failed to synchronously start playing a file stream source. This happens when all physical tracks are in use. Use a Highest Priority sound");
+			}
+		}
+		else
+		{
+			CAudioMixerUser *mixer = CAudioMixerUser::instance();
+			mixer->addSourceWaitingForPlay(this);
+		}
 	}
 	
 	/*if (!m_WaitingForPlay)
@@ -162,21 +182,10 @@ bool CStreamFileSource::isEnded()
 	return (!m_Thread->isRunning() && !_Playing && !m_WaitingForPlay && !m_Paused);
 }
 
-void CStreamFileSource::bufferMore(uint bytes) // buffer from bytes (minimum) to bytes * 2 (maximum)
+void CStreamFileSource::prepareDecoder()
 {
-	uint8 *buffer = this->lock(bytes * 2);
-	if (buffer)
-	{
-		uint32 result = m_AudioDecoder->getNextBytes(buffer, bytes, bytes * 2);
-		this->unlock(result);
-	}
-}
+	// creates a new decoder or keeps going with the current decoder if the stream was paused
 
-void CStreamFileSource::run()
-{
-	nldebug("run");
-
-	bool looping = _Looping;
 	if (m_Paused)
 	{
 		// handle paused!
@@ -199,6 +208,25 @@ void CStreamFileSource::run()
 		}
 		this->setFormat(m_AudioDecoder->getChannels(), m_AudioDecoder->getBitsPerSample(), (uint32)m_AudioDecoder->getSamplesPerSec());
 	}
+}
+
+void CStreamFileSource::bufferMore(uint bytes) // buffer from bytes (minimum) to bytes * 2 (maximum)
+{
+	uint8 *buffer = this->lock(bytes * 2);
+	if (buffer)
+	{
+		uint32 result = m_AudioDecoder->getNextBytes(buffer, bytes, bytes * 2);
+		this->unlock(result);
+	}
+}
+
+void CStreamFileSource::run()
+{
+	nldebug("run");
+
+	bool looping = _Looping;
+	if (getStreamFileSound()->getAsync())
+		prepareDecoder();
 	uint samples, bytes;
 	this->getRecommendedBufferSize(samples, bytes);
 	bufferMore(bytes);
