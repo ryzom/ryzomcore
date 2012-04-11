@@ -48,7 +48,7 @@ namespace NLSOUND {
 class CStreamFileSound : public CStreamSound
 {
 public:
-	friend CSourceMusicChannel;
+	friend class CSourceMusicChannel;
 
 public:
 	CStreamFileSound();
