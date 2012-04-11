@@ -494,40 +494,59 @@ uint32 CAudioDecoderVorbis::getRequiredBytes()
 
 uint32 CAudioDecoderVorbis::getNextBytes(uint8 *buffer, uint32 minimum, uint32 maximum)
 {
-	int current_section = 0; // ???
+	sint current_section = 0; // ???
 	if (_IsMusicEnded) return 0;
 	nlassert(minimum <= maximum); // can't have this..
 	uint32 bytes_read = 0;
+#ifdef NL_BIG_ENDIAN
+	sint endianness = 1;
+#else
+	sint endianness = 0;
+#endif
 	do
 	{
 		// signed 16-bit or unsigned 8-bit little-endian samples
-		int br = ov_read(&_OggVorbisFile, (char *)&buffer[bytes_read], maximum - bytes_read, 
-			0, // Specifies big or little endian byte packing. 0 for little endian, 1 for b ig endian. Typical value is 0.
+		sint br = ov_read(&_OggVorbisFile, (char *)&buffer[bytes_read], maximum - bytes_read, 
+			endianness, // Specifies big or little endian byte packing. 0 for little endian, 1 for b ig endian. Typical value is 0.
 			getBitsPerSample() == 8 ? 1 : 2, 
 			getBitsPerSample() == 8 ? 0 : 1, // Signed or unsigned data. 0 for unsigned, 1 for signed. Typically 1.
 			&current_section);
 		// nlinfo(NLSOUND_XAUDIO2_PREFIX "current_section: %i", current_section);
-		if (br <= 0) 
-		{ 
-			if (br == 0)
+		if (br > 0)
+		{
+			bytes_read += (uint32)br;
+		}
+		else if (br == 0) // EOF
+		{
+			if (_Loop)
 			{
-				if (_Loop)
-				{
-					ov_pcm_seek(&_OggVorbisFile, 0);
-					//_Stream->seek(0, NLMISC::IStream::begin);
-				}
-				else 
-				{
-					_IsMusicEnded = true;
-					break; 
-				}
+				ov_pcm_seek(&_OggVorbisFile, 0);
+				//_Stream->seek(0, NLMISC::IStream::begin);
 			}
-			else
+			else 
 			{
-				nlwarning("ov_read: %i", br);
+				_IsMusicEnded = true;
+				break; 
 			}
 		}
-		else bytes_read += (uint32)br;
+		else
+		{ 
+			// error
+			switch(br)
+			{
+			case OV_HOLE:
+				nlwarning("ov_read returned OV_HOLE");
+				break;
+			case OV_EINVAL:
+				nlwarning("ov_read returned OV_EINVAL");
+				break;
+			case OV_EBADLINK:
+				nlwarning("ov_read returned OV_EBADLINK");
+				break;
+			default:
+				nlwarning("ov_read returned %d", br);
+			}
+		}
 	} while (bytes_read < minimum);
 	return bytes_read;
 }
