@@ -62,10 +62,10 @@ void CStreamFileSource::play()
 {
 	// note: CStreamSource will assert crash if already physically playing!
 
-	nldebug("play");
 
 	if (m_Thread->isRunning() && m_WaitingForPlay)
 	{
+		nldebug("play waiting %s", getStreamFileSound()->getFilePath().c_str());
 		if (m_NextBuffer || !m_FreeBuffers)
 		{
 			CStreamSource::play();
@@ -79,6 +79,7 @@ void CStreamFileSource::play()
 	}
 	else if (!_Playing)
 	{
+		nldebug("play waiting %s", getStreamFileSound()->getFilePath().c_str());
 		if (!m_WaitingForPlay)
 		{
 			// thread may be stopping from stop call
@@ -86,7 +87,7 @@ void CStreamFileSource::play()
 		}
 		else
 		{
-			nlwarning("Already playing");
+			nlwarning("Already waiting for play");
 		}
 		if (!getStreamFileSound()->getAsync())
 			prepareDecoder();
@@ -97,7 +98,7 @@ void CStreamFileSource::play()
 		if (!getStreamFileSound()->getAsync())
 		{
 			// wait until at least one buffer is ready
-			while (!(m_NextBuffer || !m_FreeBuffers))
+			while (!(m_NextBuffer || !m_FreeBuffers) && m_WaitingForPlay)
 				NLMISC::nlSleep(10);
 			CStreamSource::play();
 			if (!_Playing)
@@ -111,6 +112,11 @@ void CStreamFileSource::play()
 			mixer->addSourceWaitingForPlay(this);
 		}
 	}
+	else
+	{
+		nlwarning("Already playing");
+	}
+
 	
 	/*if (!m_WaitingForPlay)
 	{
@@ -127,7 +133,7 @@ void CStreamFileSource::play()
 
 void CStreamFileSource::stop()
 {
-	nldebug("stop");
+	nldebug("stop %s", getStreamFileSound()->getFilePath().c_str());
 
 	CStreamSource::stop();
 

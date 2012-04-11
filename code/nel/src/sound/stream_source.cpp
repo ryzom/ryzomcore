@@ -264,6 +264,8 @@ void CStreamSource::stop()
 			_SpawnEndCb(this, _CbUserParam);
 		delete this;
 	}
+
+	m_WaitingForPlay = false;
 }
 
 void CStreamSource::setPos(const NLMISC::CVector& pos)
