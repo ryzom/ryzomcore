@@ -18,7 +18,11 @@
 
 // STL includes
 #include <stdio.h>
-#include <conio.h>
+#ifdef NL_OS_WINDOWS
+#	include <conio.h>
+#else
+#	include <curses.h>
+#endif
 
 // NeL includes
 #include <nel/misc/app_context.h>
@@ -110,9 +114,16 @@ static void runSample()
 	printf("Press ANY other key to exit\n");
 	for (; ; )
 	{
+#ifdef NL_OS_WINDOWS
 		if (_kbhit())
 		{
 			switch (_getch())
+#else
+		char ch;
+		if (read(0, &ch, 1))
+		{
+			switch (ch)
+#endif
 			{
 			case '+':
 				s_GroupController->setUserGain(s_GroupController->getUserGain() + 0.1f);
