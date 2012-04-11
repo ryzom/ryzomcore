@@ -94,7 +94,7 @@ static void initSample()
 	string sample = SAMPLE_OGG;
 	s_AudioDecoder = IAudioDecoder::createAudioDecoder(sample, false, false);
 	s_StreamSource->setFormat(s_AudioDecoder->getChannels(), s_AudioDecoder->getBitsPerSample(), (uint32)s_AudioDecoder->getSamplesPerSec());
-	s_StreamSource->setPitch(2.0f);
+	//s_StreamSource->setPitch(2.0f);
 
 	s_GroupController = s_AudioMixer->getGroupController("dialog");
 }
