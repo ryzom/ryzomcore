@@ -55,6 +55,9 @@ public:
 	virtual void					setLooping(bool l);
 	/// Play
 	virtual void					play();
+protected:
+	void							stopInt();
+public:
 	/// Stop playing
 	virtual void					stop();
 	/// Get playing state. Return false even if the source has stopped on its own.

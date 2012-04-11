@@ -60,6 +60,9 @@ bool CSourceMusicChannel::play(const std::string &filepath, bool async, bool loo
 	m_Sound.setMusicFilePath(filepath, async, loop);
 
 	m_Source = new CStreamFileSource(&m_Sound, false, NULL, NULL, NULL, NULL);
+	m_Source->setSourceRelativeMode(true);
+	m_Source->setPos(NLMISC::CVector::Null);
+	m_Source->setRelativeGain(m_Gain);
 
 	m_Source->play();
 

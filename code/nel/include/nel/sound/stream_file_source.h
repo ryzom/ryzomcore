@@ -86,7 +86,7 @@ public:
 
 private:
 	void prepareDecoder();
-	void bufferMore(uint bytes);
+	inline bool bufferMore(uint bytes);
 
 private:
 	CStreamFileSource(const CStreamFileSource &);

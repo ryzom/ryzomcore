@@ -160,7 +160,8 @@ void CStreamSource::play()
 					_SpawnEndCb(this, _CbUserParam);
 				delete this;
 			}
-			// nldebug("CStreamSource %p : play FAILED !", (CAudioMixerUser::IMixerEvent*)this);
+			nldebug("CStreamSource %p : play FAILED, source is too far away !", (CAudioMixerUser::IMixerEvent*)this);
+			m_WaitingForPlay = false;
 			return;
 		}
 		
@@ -216,6 +217,7 @@ void CStreamSource::play()
 						_SpawnEndCb(this, _CbUserParam);					
 					delete this;
 				}
+				m_WaitingForPlay = false;
 				return;
 			}
 		}
@@ -232,8 +234,7 @@ void CStreamSource::play()
 #endif
 }
 
-/// Stop playing
-void CStreamSource::stop()
+void CStreamSource::stopInt()
 {
 	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
 	
@@ -248,7 +249,10 @@ void CStreamSource::stop()
 	}
 	
 	if (!_Playing)
+	{
+		m_WaitingForPlay = false;
 		return;
+	}
 	
 	if (hasPhysicalSource())
 		releasePhysicalSource();
@@ -258,14 +262,20 @@ void CStreamSource::stop()
 	m_FreeBuffers = 3;
 	m_NextBuffer = 0;
 	
+	m_WaitingForPlay = false;
+}
+
+/// Stop playing
+void CStreamSource::stop()
+{
+	stopInt();
+	
 	if (_Spawn)
 	{
 		if (_SpawnEndCb != NULL)
 			_SpawnEndCb(this, _CbUserParam);
 		delete this;
 	}
-
-	m_WaitingForPlay = false;
 }
 
 void CStreamSource::setPos(const NLMISC::CVector& pos)

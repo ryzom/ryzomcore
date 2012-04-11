@@ -65,13 +65,18 @@ void CStreamFileSource::play()
 
 	if (m_Thread->isRunning() && m_WaitingForPlay)
 	{
-		nldebug("play waiting %s", getStreamFileSound()->getFilePath().c_str());
 		if (m_NextBuffer || !m_FreeBuffers)
 		{
+			nldebug("play waiting, play stream %s", getStreamFileSound()->getFilePath().c_str());
 			CStreamSource::play();
+			if (!_Playing && !m_WaitingForPlay)
+			{
+				nldebug("playing not possible or necessary for some reason");
+			}
 		}
 		else
 		{
+			nldebug("play waiting, hop onto waiting list %s", getStreamFileSound()->getFilePath().c_str());
 			m_WaitingForPlay = true;
 			CAudioMixerUser *mixer = CAudioMixerUser::instance();
 			mixer->addSourceWaitingForPlay(this);
@@ -79,7 +84,7 @@ void CStreamFileSource::play()
 	}
 	else if (!_Playing)
 	{
-		nldebug("play waiting %s", getStreamFileSound()->getFilePath().c_str());
+		nldebug("play go %s", getStreamFileSound()->getFilePath().c_str());
 		if (!m_WaitingForPlay)
 		{
 			// thread may be stopping from stop call
@@ -98,12 +103,18 @@ void CStreamFileSource::play()
 		if (!getStreamFileSound()->getAsync())
 		{
 			// wait until at least one buffer is ready
-			while (!(m_NextBuffer || !m_FreeBuffers) && m_WaitingForPlay)
-				NLMISC::nlSleep(10);
-			CStreamSource::play();
-			if (!_Playing)
+			while (!(m_NextBuffer || !m_FreeBuffers) && m_WaitingForPlay && m_Thread->isRunning())
 			{
-				nlwarning("Failed to synchronously start playing a file stream source. This happens when all physical tracks are in use. Use a Highest Priority sound");
+				nldebug("wait buffer");
+				NLMISC::nlSleep(100);
+			}
+			if (m_WaitingForPlay && m_Thread->isRunning())
+			{
+				CStreamSource::play();
+				if (!_Playing)
+				{
+					nlwarning("Failed to synchronously start playing a file stream source. This happens when all physical tracks are in use. Use a Highest Priority sound");
+				}
 			}
 		}
 		else
@@ -135,7 +146,19 @@ void CStreamFileSource::stop()
 {
 	nldebug("stop %s", getStreamFileSound()->getFilePath().c_str());
 
-	CStreamSource::stop();
+	CStreamSource::stopInt();
+
+	nldebug("stopInt ok");
+
+	if (_Spawn)
+	{
+		if (_SpawnEndCb != NULL)
+			_SpawnEndCb(this, _CbUserParam);
+		m_Thread->wait();
+		delete this;
+	}
+
+	nldebug("stop ok");
 
 	// thread will check _Playing to stop
 }
@@ -229,30 +252,41 @@ void CStreamFileSource::prepareDecoder()
 	this->preAllocate(bytes * 2);
 }
 
-void CStreamFileSource::bufferMore(uint bytes) // buffer from bytes (minimum) to bytes * 2 (maximum)
+inline bool CStreamFileSource::bufferMore(uint bytes) // buffer from bytes (minimum) to bytes * 2 (maximum)
 {
 	uint8 *buffer = this->lock(bytes * 2);
 	if (buffer)
 	{
 		uint32 result = m_AudioDecoder->getNextBytes(buffer, bytes, bytes * 2);
 		this->unlock(result);
+		return true;
 	}
+	return false;
 }
 
 void CStreamFileSource::run()
 {
-	nldebug("run");
+	nldebug("run %s", getStreamFileSound()->getFilePath().c_str());
+	uint dumpI = 0;
 
 	bool looping = _Looping;
 	if (getStreamFileSound()->getAsync())
 		prepareDecoder();
 	uint samples, bytes;
 	this->getRecommendedBufferSize(samples, bytes);
-	bufferMore(bytes);
+	uint32 recSleep = 40;
+	uint32 doSleep = 10;
 	while (_Playing || m_WaitingForPlay)
 	{
 		if (!m_AudioDecoder->isMusicEnded())
 		{
+			++dumpI;
+			if (!(dumpI % 100)) 
+			{
+				nldebug("buffer %s %s %s", _Playing ? "PLAYING" : "NP", m_WaitingForPlay ? "WAITING" : "NW", getStreamFileSound()->getFilePath().c_str());
+				nldebug("gain %f", hasPhysicalSource() ? getPhysicalSource()->getGain() : -1.0f);
+			}
+
 			bool newLooping = _Looping;
 			if (looping != newLooping)
 			{
@@ -260,14 +294,19 @@ void CStreamFileSource::run()
 				looping = newLooping;
 			}
 			
-			bufferMore(bytes);
-			NLMISC::nlSleep(this->getRecommendedSleepTime());
+			// reduce sleeping time if nothing was buffered
+			if (bufferMore(bytes)) recSleep = doSleep = this->getRecommendedSleepTime();
+			else doSleep = recSleep >> 2; // /4
+			NLMISC::nlSleep(doSleep);
 		}
 		else
 		{
 			// wait until done playing buffers
-			while (this->hasFilledBuffersAvailable())
+			while (this->hasFilledBuffersAvailable() && (_Playing || m_WaitingForPlay))
+			{
+				nldebug("music ended, wait until done %s", getStreamFileSound()->getFilePath().c_str());
 				NLMISC::nlSleep(40);
+			}
 			// stop the physical source
 			// if (hasPhysicalSource())
 			// 	getPhysicalSource()->stop();
@@ -284,6 +323,11 @@ void CStreamFileSource::run()
 		delete m_AudioDecoder;
 		m_AudioDecoder = NULL;
 	}
+	// drop buffers
+	m_FreeBuffers = 3;
+	m_NextBuffer = 0;
+
+	nldebug("run end %s", getStreamFileSound()->getFilePath().c_str());
 }
 
 } /* namespace NLSOUND */
