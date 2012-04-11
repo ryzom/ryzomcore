@@ -477,7 +477,11 @@ MACRO(NL_SETUP_BUILD)
       SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -m64")
     ENDIF(HOST_CPU STREQUAL "x86" AND TARGET_CPU STREQUAL "x86_64")
 
-    SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -D_REENTRANT -pipe -ftemplate-depth-48 -Wall -ansi -W -Wpointer-arith -Wsign-compare -Wno-deprecated-declarations -Wno-multichar -Wno-unused -fno-strict-aliasing")
+    SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -D_REENTRANT -pipe -ftemplate-depth-48 -Wall -W -Wpointer-arith -Wsign-compare -Wno-deprecated-declarations -Wno-multichar -Wno-unused -fno-strict-aliasing")
+
+    IF(NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+      SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -ansi")
+    ENDIF(NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
 
     IF(WITH_COVERAGE)
       SET(PLATFORM_CFLAGS "-fprofile-arcs -ftest-coverage ${PLATFORM_CFLAGS}")
