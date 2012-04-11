@@ -196,7 +196,7 @@ void CPThread::wait ()
 {
 	if (_State == ThreadStateRunning)
 	{
-		int error = pthread_join(_ThreadHandle, 0) != 0;
+		int error = pthread_join(_ThreadHandle, 0);
 		switch (error)
 		{
 		case 0:
