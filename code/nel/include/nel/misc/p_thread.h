@@ -59,8 +59,9 @@ public:
 	/// Internal use
 	IRunnable	*Runnable;
 
+	uint8		_StateV2; // 0=not created, 1=started, 2=ended, 3=finished
+
 private:
-	uint8		_State; // 0=not created, 1=started, 2=finished
 	uint32		_StackSize;
 	pthread_t	_ThreadHandle;
 };

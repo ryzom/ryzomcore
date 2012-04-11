@@ -84,6 +84,8 @@ static void *ProxyFunc( void *arg )
 	// Run the code of the thread
 	parent->Runnable->run();
 
+	parent->_StateV2 = 2;
+
 	// Allow some clean
 //	pthread_exit(0);
 	return NULL;
@@ -96,7 +98,7 @@ static void *ProxyFunc( void *arg )
  */
 CPThread::CPThread(IRunnable *runnable, uint32 stackSize)
 	:	Runnable(runnable),
-		_State(0),
+		_StateV2(0),
 		_StackSize(stackSize)
 {}
 
@@ -106,10 +108,10 @@ CPThread::CPThread(IRunnable *runnable, uint32 stackSize)
  */
 CPThread::~CPThread()
 {
-	if(_State == 1)
+	if(_StateV2 == 1 || _StateV2 == 2)
 		terminate(); // force the end of the thread if not already ended
 
-	if(_State > 0)
+	if(_StateV2 > 0)
 		pthread_detach(_ThreadHandle); // free allocated resources only if it was created
 }
 
@@ -132,13 +134,14 @@ void CPThread::start()
 	{
 		throw EThread("Cannot start new thread");
 	}
-	_State = 1;
+	_StateV2 = 1;
 }
 
 bool CPThread::isRunning()
 {
-	// TODO : need a real implementation here that check thread status
-	return _State == 1;
+	// ExTODO : need a real implementation here that check thread status
+	// DONE : some sort of implementation
+	return _StateV2 == 1;
 }
 
 /*
@@ -146,11 +149,11 @@ bool CPThread::isRunning()
  */
 void CPThread::terminate()
 {
-	if(_State == 1)
+	if (_StateV2 == 1 || _StateV2 == 2)
 	{
 		// cancel only if started
 		pthread_cancel(_ThreadHandle);
-		_State = 2;	// set to finished
+		_StateV2 = 3;	// set to finished
 	}
 }
 
@@ -159,13 +162,13 @@ void CPThread::terminate()
  */
 void CPThread::wait ()
 {
-	if(_State == 1)
+	if (_StateV2 == 1 || _StateV2 == 2)
 	{
 		if(pthread_join(_ThreadHandle, 0) != 0)
 		{
 			throw EThread( "Cannot join with thread" );
 		}
-		_State = 2;	// set to finished
+		_StateV2 = 3;	// set to finished
 	}
 }
 
@@ -209,27 +212,29 @@ uint64 CPThread::getCPUMask()
 
 void CPThread::setPriority(TThreadPriority priority)
 {
-	// TODO: Verify and test this
+	// TODO: Test this
+	sched_param sp;
 	switch (priority)
 	{
 	case ThreadPriorityHigh:
 	{
 		int minPrio = sched_get_priority_min(SCHED_FIFO);
 		int maxPrio = sched_get_priority_max(SCHED_FIFO);
-		int prio = ((maxPrio - minPrio) / 4) + minPrio;
-		pthread_setschedparam(_ThreadHandle, SCHED_FIFO, prio);
+		sp.sched_priority = ((maxPrio - minPrio) / 4) + minPrio;
+		pthread_setschedparam(_ThreadHandle, SCHED_FIFO, &sp);
 		break;
 	}
 	case ThreadPriorityHighest:
 	{
 		int minPrio = sched_get_priority_min(SCHED_FIFO);
 		int maxPrio = sched_get_priority_max(SCHED_FIFO);
-		int prio = ((maxPrio - minPrio) / 2) + minPrio;
-		pthread_setschedparam(_ThreadHandle, SCHED_FIFO, prio);
+		sp.sched_priority = ((maxPrio - minPrio) / 2) + minPrio;
+		pthread_setschedparam(_ThreadHandle, SCHED_FIFO, &sp);
 		break;
 	}
 	default:
-		pthread_setschedparam(_ThreadHandle, SCHED_OTHER, 0);
+		sp.sched_priority = 0;
+		pthread_setschedparam(_ThreadHandle, SCHED_OTHER, &sp);
 	}
 }
 
