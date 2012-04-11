@@ -84,6 +84,7 @@ public:
 	inline void enter() { EnterCriticalSection(&cs); }
 	inline void leave() { LeaveCriticalSection(&cs); }
 };
+CWinCriticalSection s_CS;
 }/* anonymous namespace */
 
 CWinThread::CWinThread (void* threadHandle, uint32 threadId)
@@ -112,12 +113,11 @@ CWinThread::CWinThread (void* threadHandle, uint32 threadId)
 		nlassert(0); // WARNING: following code has not tested! don't know if it work fo real ...
 					 // This is just a suggestion of a possible solution, should this situation one day occur ...
 		// Ensure that this thread don't get deleted, or we could suspend the main thread
-		static CWinCriticalSection cs;
-		cs.enter();
+		s_CS.enter();
 		// the 2 following statement must be executed atomicaly among the threads of the current process !
 		SuspendThread(threadHandle);
 		_SuspendCount = ResumeThread(threadHandle);
-		cs.leave();
+		s_CS.leave();
 	}
 }
 
@@ -159,10 +159,10 @@ void CWinThread::resume()
 	}
 }
 
-void CWinThread::setPriority(int priority)
+void CWinThread::setPriority(TThreadPriority priority)
 {
 	nlassert(ThreadHandle); // 'start' was not called !!
-	BOOL result = SetThreadPriority(ThreadHandle, priority);
+	BOOL result = SetThreadPriority(ThreadHandle, (int)priority);
 	nlassert(result);
 }
 

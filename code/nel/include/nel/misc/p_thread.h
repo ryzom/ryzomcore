@@ -48,6 +48,7 @@ public:
 	virtual void wait();
 	virtual bool setCPUMask(uint64 cpuMask);
 	virtual uint64 getCPUMask();
+	virtual void setPriority(TThreadPriority priority);
 	virtual std::string getUserName();
 
 	virtual IRunnable *getRunnable()

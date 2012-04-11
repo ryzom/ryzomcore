@@ -49,6 +49,7 @@ public:
 	virtual void wait();
 	virtual bool setCPUMask(uint64 cpuMask);
 	virtual uint64 getCPUMask();
+	virtual void setPriority(TThreadPriority priority);
 	virtual std::string getUserName();
 
 	virtual IRunnable *getRunnable()
@@ -69,8 +70,7 @@ public:
 	void suspend();
 	// Resume the thread. No-op if already resumed
 	void resume();
-	// set priority as defined by "SetThreadpriority"
-	void setPriority(int priority);
+	// Priority boost
 	void enablePriorityBoost(bool enabled);
 
 	/// private use

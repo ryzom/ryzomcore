@@ -207,6 +207,32 @@ uint64 CPThread::getCPUMask()
 	return cpuMask;
 }
 
+void CPThread::setPriority(TThreadPriority priority)
+{
+	// TODO: Verify and test this
+	switch (priority)
+	{
+	case ThreadPriorityHigh:
+	{
+		int minPrio = sched_get_priority_min(SCHED_FIFO);
+		int maxPrio = sched_get_priority_max(SCHED_FIFO);
+		int prio = ((maxPrio - minPrio) / 4) + minPrio;
+		pthread_setschedparam(_ThreadHandle, SCHED_FIFO, prio);
+		break;
+	}
+	case ThreadPriorityHighest:
+	{
+		int minPrio = sched_get_priority_min(SCHED_FIFO);
+		int maxPrio = sched_get_priority_max(SCHED_FIFO);
+		int prio = ((maxPrio - minPrio) / 2) + minPrio;
+		pthread_setschedparam(_ThreadHandle, SCHED_FIFO, prio);
+		break;
+	}
+	default:
+		pthread_setschedparam(_ThreadHandle, SCHED_OTHER, 0);
+	}
+}
+
 /*
  * getUserName
  */
