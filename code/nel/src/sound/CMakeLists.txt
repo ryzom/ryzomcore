@@ -58,6 +58,8 @@ FILE(GLOB STREAM
 FILE(GLOB STREAM_FILE
 	audio_decoder.cpp ../../include/nel/sound/audio_decoder.h
 	audio_decoder_vorbis.cpp ../../include/nel/sound/audio_decoder_vorbis.h
+	stream_file_sound.cpp ../../include/nel/sound/stream_file_sound.h
+	stream_file_source.cpp ../../include/nel/sound/stream_file_source.h
 )
 
 FILE(GLOB USER_CLASSES

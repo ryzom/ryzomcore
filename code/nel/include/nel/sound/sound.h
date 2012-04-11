@@ -61,8 +61,9 @@ public:
 		SOUND_COMPLEX,
 		SOUND_BACKGROUND,
 		SOUND_CONTEXT,
-		SOUND_MUSIC,
-		SOUND_STREAM
+		SOUND_MUSIC, // soon to be deprecated hopefully
+		SOUND_STREAM,
+		SOUND_STREAM_FILE
 	};
 
 

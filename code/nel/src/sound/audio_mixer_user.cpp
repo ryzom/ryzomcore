@@ -45,6 +45,7 @@
 #include "nel/sound/context_sound.h"
 #include "nel/sound/music_source.h"
 #include "nel/sound/stream_source.h"
+#include "nel/sound/stream_file_source.h"
 #include "nel/sound/simple_sound.h"
 #include "nel/sound/music_sound.h"
 #include "nel/sound/stream_sound.h"
@@ -250,6 +251,16 @@ void CAudioMixerUser::addSourceWaitingForPlay(CSourceCommon *source)
 	_SourceWaitingForPlay.push_back(source);
 }
 
+// ******************************************************************
+
+void CAudioMixerUser::removeSourceWaitingForPlay(CSourceCommon *source)
+{
+	std::list<CSourceCommon *>::iterator it = find(_SourceWaitingForPlay.begin(), _SourceWaitingForPlay.end(), source);
+	if (it != _SourceWaitingForPlay.end())
+	{
+		_SourceWaitingForPlay.erase(it);
+	}
+}
 
 // ******************************************************************
 
@@ -1946,6 +1957,13 @@ retrySound:
 			CStreamSound *streamSound = static_cast<CStreamSound *>(id);
 			// This is a stream thingy.
 			ret = new CStreamSource(streamSound, spawn, cb, userParam, cluster, static_cast<CGroupController *>(groupController));
+		}
+		break;
+	case CSound::SOUND_STREAM_FILE:
+		{
+			CStreamFileSound *streamFileSound = static_cast<CStreamFileSound *>(id);
+			// This is a stream file thingy.
+			ret = new CStreamFileSource(streamFileSound, spawn, cb, userParam, cluster, static_cast<CGroupController *>(groupController));
 		}
 		break;
 	case CSound::SOUND_COMPLEX:

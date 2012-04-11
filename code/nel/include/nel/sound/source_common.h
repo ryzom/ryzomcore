@@ -37,7 +37,8 @@ public:
 		SOURCE_COMPLEX,
 		SOURCE_BACKGROUND,
 		SOURCE_MUSIC, // DEPRECATED
-		SOURCE_STREAM
+		SOURCE_STREAM,
+		SOURCE_STREAM_FILE
 	};
 
 	/// When groupController is NULL it will use the groupcontroller specified in the TSoundId. You should manually specify the groupController if this source is a child of another source, so that the parent source controller of the user-specified .sound file is the one that will be used.

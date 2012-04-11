@@ -142,6 +142,8 @@ private:
 	/// True when the sound is played muted and until the mixer event notifying the end.
 	bool							_PlayMuted;
 
+	bool							_WaitingForPlay;
+
 };
 
 

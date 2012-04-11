@@ -32,7 +32,8 @@ CSimpleSource::CSimpleSource(CSimpleSound *simpleSound, bool spawn, TSpawnEndCal
 	: CSourceCommon(simpleSound, spawn, cb, cbUserParam, cluster, groupController), 
 	_SimpleSound(simpleSound),
 	_Track(NULL), 
-	_PlayMuted(false)
+	_PlayMuted(false),
+	_WaitingForPlay(false)
 {
 	nlassert(_SimpleSound != 0);
 
@@ -183,6 +184,7 @@ void CSimpleSource::play()
 		{
 			// This sound is not discardable, add it in waiting playlist
 			mixer->addSourceWaitingForPlay(this);
+			_WaitingForPlay = true;
 			return;
 		}
 		// there is no available track, just do a 'muted' play
@@ -193,6 +195,7 @@ void CSimpleSource::play()
 	}
 
 	CSourceCommon::play();
+	_WaitingForPlay = false;
 }
 
 /// Mixer event call when doing muted play
@@ -218,6 +221,13 @@ void CSimpleSource::stop()
 {
 	// nldebug("CSimpleSource %p : stop", (CAudioMixerUser::IMixerEvent*)this);
 	// nlassert(_Playing);
+
+	if (_WaitingForPlay)
+	{
+		nlassert(!_Playing); // cannot already be playing if waiting for play
+		CAudioMixerUser *mixer = CAudioMixerUser::instance();
+		mixer->removeSourceWaitingForPlay(this);
+	}
 
 	if (!_Playing)
 		return;

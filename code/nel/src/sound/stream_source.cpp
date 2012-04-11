@@ -36,12 +36,15 @@ CStreamSource::CStreamSource(CStreamSound *streamSound, bool spawn, TSpawnEndCal
 	m_FreeBuffers(3),
 	m_NextBuffer(0),
 	m_LastSize(0),
-	m_BytesPerSecond(0)
+	m_BytesPerSecond(0),
+	m_WaitingForPlay(false),
+	m_PitchInv(1.0f)
 {
 	nlassert(m_StreamSound != 0);
 
 	// get a local copy of the stream sound parameter
 	m_Alpha = m_StreamSound->getAlpha();//m_Buffers
+	m_PitchInv = 1.0f / _Pitch;
 	
 	// create the three buffer objects
 	CAudioMixerUser *mixer = CAudioMixerUser::instance();
@@ -107,6 +110,8 @@ bool CStreamSource::isPlaying()
 /// Set looping on/off for future playbacks (default: off)
 void CStreamSource::setLooping(bool l)
 {
+	CSourceCommon::setLooping(l);
+
 	//CAutoMutex<CMutex> autoMutex(m_BufferMutex);
 	//
 	//CSourceCommon::setLooping(l);
@@ -166,7 +171,9 @@ void CStreamSource::play()
 			ISource *pSource = getPhysicalSource();
 			nlassert(pSource != NULL);
 			
-			for (uint i = 0; i < m_NextBuffer; ++i)
+			uint nbS = m_NextBuffer;
+			if (!m_NextBuffer && !m_FreeBuffers) nbS = 3;
+			for (uint i = 0; i < nbS; ++i)
 				pSource->submitStreamingBuffer(m_Buffers[i]);
 			
 			// pSource->setPos( _Position, false);
@@ -184,6 +191,7 @@ void CStreamSource::play()
 			pSource->setAlpha(m_Alpha);
 			
 			// and play the sound
+			nlassert(nbS); // must have buffered already!
 			play = pSource->play();
 			// nldebug("CStreamSource %p : REAL play done", (CAudioMixerUser::IMixerEvent*)this);
 		}
@@ -193,6 +201,7 @@ void CStreamSource::play()
 			{
 				// This sound is not discardable, add it in waiting playlist
 				mixer->addSourceWaitingForPlay(this);
+				m_WaitingForPlay = true;
 				return;
 			}
 			else
@@ -209,10 +218,15 @@ void CStreamSource::play()
 		}
 		
 		if (play)
+		{
 			CSourceCommon::play();
+			m_WaitingForPlay = false;
+		}
 	}
 
+#ifdef NL_DEBUG
 	nlassert(play);
+#endif
 }
 
 /// Stop playing
@@ -222,6 +236,13 @@ void CStreamSource::stop()
 	
 	// nldebug("CStreamSource %p : stop", (CAudioMixerUser::IMixerEvent*)this);
 	// nlassert(_Playing);
+
+	if (m_WaitingForPlay)
+	{
+		nlassert(!_Playing); // cannot already be playing if waiting for play
+		CAudioMixerUser *mixer = CAudioMixerUser::instance();
+		mixer->removeSourceWaitingForPlay(this);
+	}
 	
 	if (!_Playing)
 		return;
@@ -305,7 +326,7 @@ void CStreamSource::updateFinalGain()
 void CStreamSource::setPitch(float pitch)
 {
 	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
-
+	m_PitchInv = 1.0f / pitch;
 	CSourceCommon::setPitch(pitch);
 	if (hasPhysicalSource())
 		getPhysicalSource()->setPitch(pitch);
@@ -372,7 +393,9 @@ bool CStreamSource::unlock(uint size)
 		++m_NextBuffer; m_NextBuffer %= 3;
 		--m_FreeBuffers;
 		if (hasPhysicalSource())
+		{
 			getPhysicalSource()->submitStreamingBuffer(buffer);
+		}
 		m_LastSize = size;
 	}
 
@@ -396,7 +419,7 @@ void CStreamSource::getRecommendedBufferSize(uint &samples, uint &bytes) const
 uint32 CStreamSource::getRecommendedSleepTime() const
 {
 	if (m_FreeBuffers > 0) return 0;
-	uint32 sleepTime = (uint32)((1000.0f * ((float)m_LastSize) / (float)m_BytesPerSecond) / _Pitch);
+	uint32 sleepTime = (uint32)((1000.0f * ((float)m_LastSize) / (float)m_BytesPerSecond) * m_PitchInv);
 	clamp(sleepTime, (uint32)0, (uint32)1000);
 	return sleepTime;
 }

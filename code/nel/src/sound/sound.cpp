@@ -26,6 +26,7 @@
 #include "nel/sound/context_sound.h"
 #include "nel/sound/music_sound.h"
 #include "nel/sound/stream_sound.h"
+#include "nel/sound/stream_file_sound.h"
 
 #include "nel/sound/group_controller.h"
 #include "nel/sound/group_controller_root.h"
@@ -82,6 +83,11 @@ CSound *CSound::createSound(const std::string &filename, NLGEORGES::UFormElm& fo
 		else if (dfnName == "stream_sound.dfn")
 		{
 			ret = new CStreamSound();
+			ret->importForm(filename, formRoot);
+		}
+		else if (dfnName == "stream_file_sound.dfn")
+		{
+			ret = new CStreamFileSound();
 			ret->importForm(filename, formRoot);
 		}
 		else

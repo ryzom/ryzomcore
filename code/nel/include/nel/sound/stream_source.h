@@ -114,7 +114,7 @@ private:
 	CStreamSource(const CStreamSource &);
 	CStreamSource &operator=(const CStreamSource &);
 	
-private:
+protected:
 	/// Return the source type
 	TSOURCE_TYPE					getType() const								{ return SOURCE_STREAM; }
 
@@ -162,7 +162,13 @@ private:
 
 	/// The bytes per second according to the buffer format
 	uint							m_BytesPerSecond;
-	
+
+	/// Waiting for play for high priority sources
+	bool							m_WaitingForPlay;
+
+	/// Inverse pitch
+	float							m_PitchInv;
+
 }; /* class CStreamSource */
 
 } /* namespace NLSOUND */

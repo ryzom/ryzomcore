@@ -403,6 +403,7 @@ public:
 
 	/// Add a source for play as possible (for non discadable sound)
 	void						addSourceWaitingForPlay(CSourceCommon *source);
+	void						removeSourceWaitingForPlay(CSourceCommon *source);
 
 	/// Read all user controled var sheets
 	void						initUserVar();

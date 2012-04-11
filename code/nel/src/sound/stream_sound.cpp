@@ -35,14 +35,15 @@ CStreamSound::~CStreamSound()
 
 void CStreamSound::importForm(const std::string &filename, NLGEORGES::UFormElm &root)
 {
-	NLGEORGES::UFormElm *psoundType;
+	// cannot do this debug check because used also by CStreamFileSound
+	/*NLGEORGES::UFormElm *psoundType;
 	std::string dfnName;
 
 	// some basic checking.
 	root.getNodeByName(&psoundType, ".SoundType");
 	nlassert(psoundType != NULL);
 	psoundType->getDfnName(dfnName);
-	nlassert(dfnName == "stream_sound.dfn");
+	nlassert(dfnName == "stream_sound.dfn");*/
 
 	// Call the base class
 	CSound::importForm(filename, root);
