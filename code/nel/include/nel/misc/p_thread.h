@@ -36,6 +36,12 @@ namespace NLMISC {
 class CPThread : public IThread
 {
 public:
+	enum TThreadState
+	{
+		ThreadStateNone, 
+		ThreadStateRunning, 
+		ThreadStateFinished, 
+	};
 
 	/// Constructor
 	CPThread( IRunnable *runnable, uint32 stackSize);
@@ -59,11 +65,11 @@ public:
 	/// Internal use
 	IRunnable	*Runnable;
 
-	uint8		_StateV2; // 0=not created, 1=started, 2=ended, 3=finished
+	TThreadState	_State;
+	pthread_t	_ThreadHandle;
 
 private:
 	uint32		_StackSize;
-	pthread_t	_ThreadHandle;
 };
 
 /**

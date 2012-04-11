@@ -84,7 +84,16 @@ static void *ProxyFunc( void *arg )
 	// Run the code of the thread
 	parent->Runnable->run();
 
-	parent->_StateV2 = 2;
+	{
+		pthread_t thread_self = pthread_self();
+		// Make sure the parent still cares
+		// If this thread was replaced with a new thread (which should not happen),
+		// and the IThread object has been deleted, this will likely crash.
+		if (parent->_ThreadHandle == thread_self)
+			parent->_State = CPThread::ThreadStateFinished;
+		else
+			throw EThread("Thread ended after being detached, this should not happen");
+	}
 
 	// Allow some clean
 //	pthread_exit(0);
@@ -98,7 +107,7 @@ static void *ProxyFunc( void *arg )
  */
 CPThread::CPThread(IRunnable *runnable, uint32 stackSize)
 	:	Runnable(runnable),
-		_StateV2(0),
+		_State(ThreadStateNone),
 		_StackSize(stackSize)
 {}
 
@@ -108,10 +117,9 @@ CPThread::CPThread(IRunnable *runnable, uint32 stackSize)
  */
 CPThread::~CPThread()
 {
-	if(_StateV2 == 1 || _StateV2 == 2)
-		terminate(); // force the end of the thread if not already ended
+	terminate(); // force the end of the thread if not already ended
 
-	if(_StateV2 > 0)
+	if (_State != ThreadStateNone)
 		pthread_detach(_ThreadHandle); // free allocated resources only if it was created
 }
 
@@ -121,27 +129,51 @@ CPThread::~CPThread()
 void CPThread::start()
 {
 	pthread_attr_t tattr;
-	pthread_t tid;
 	int ret;
 
-	/* initialized with default attributes */
-	ret = pthread_attr_init(&tattr);
+	if (_StackSize != 0)
+	{
+		/* initialized with default attributes */
+		ret = pthread_attr_init(&tattr);
 
-	/* setting the size of the stack also */
-	ret = pthread_attr_setstacksize(&tattr, _StackSize);
+		/* setting the size of the stack also */
+		ret = pthread_attr_setstacksize(&tattr, _StackSize);
+	}
+	
+	bool detach_old_thread = false;
+	pthread_t old_thread_handle;
+	if (_State != ThreadStateNone)
+	{
+		if (_State == ThreadStateRunning)
+		{
+			// I don't know if this behaviour is allowed, but neither thread implementations
+			// check the start function, and both simply let the existing running thread for what it is...
+			// From now on, this is not allowed.
+			throw EThread("Starting a thread that is already started, existing thread will continue running, this should not happen");
+		}
+		detach_old_thread = true;
+		old_thread_handle = _ThreadHandle;
+	}
 
-	if(pthread_create(&_ThreadHandle, _StackSize != 0 ? &tattr : 0, ProxyFunc, this) != 0)
+	if (pthread_create(&_ThreadHandle, _StackSize != 0 ? &tattr : NULL, ProxyFunc, this) != 0)
 	{
 		throw EThread("Cannot start new thread");
 	}
-	_StateV2 = 1;
+	_State = ThreadStateRunning;
+
+	if (detach_old_thread)
+	{
+		// Docs don't say anything about what happens when pthread_create is called with existing handle referenced.
+		if (old_thread_handle == _ThreadHandle)
+			throw EThread("Thread handle did not change, this should not happen");
+		// Don't care about old thread, free resources when it terminates.
+		pthread_detach(old_thread_handle);
+	}
 }
 
 bool CPThread::isRunning()
 {
-	// ExTODO : need a real implementation here that check thread status
-	// DONE : some sort of implementation
-	return _StateV2 == 1;
+	return _State == ThreadStateRunning;
 }
 
 /*
@@ -149,11 +181,11 @@ bool CPThread::isRunning()
  */
 void CPThread::terminate()
 {
-	if (_StateV2 == 1 || _StateV2 == 2)
+	if (_State == ThreadStateRunning)
 	{
 		// cancel only if started
 		pthread_cancel(_ThreadHandle);
-		_StateV2 = 3;	// set to finished
+		_State = ThreadStateFinished; // set to finished
 	}
 }
 
@@ -162,13 +194,24 @@ void CPThread::terminate()
  */
 void CPThread::wait ()
 {
-	if (_StateV2 == 1 || _StateV2 == 2)
+	if (_State == ThreadStateRunning)
 	{
-		if(pthread_join(_ThreadHandle, 0) != 0)
+		int error = pthread_join(_ThreadHandle, 0) != 0;
+		switch (error)
 		{
-			throw EThread( "Cannot join with thread" );
+		case 0:
+			break;
+		case EINVAL:
+			throw EThread("Thread is not joinable");
+		case ESRCH:
+			throw EThread("No thread found with this id");
+		case EDEADLK:
+			throw EThread("Deadlock detected or calling thread waits for itself");
+		default:
+			throw EThread("Unknown thread join error");
 		}
-		_StateV2 = 3;	// set to finished
+		if(_State != ThreadStateFinished)
+			throw EThread("Thread did not finish, this should not happen");
 	}
 }
 
