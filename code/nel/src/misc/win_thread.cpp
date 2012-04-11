@@ -73,6 +73,19 @@ CWinThread::CWinThread (IRunnable *runnable, uint32 stackSize)
 	_MainThread = false;
 }
 
+namespace {
+class CWinCriticalSection
+{
+private:
+	CRITICAL_SECTION cs;
+public:
+	CWinCriticalSection() { InitializeCriticalSection(&cs); }
+	~CWinCriticalSection() { DeleteCriticalSection(&cs); }
+	inline void enter() { EnterCriticalSection(&cs); }
+	inline void leave() { LeaveCriticalSection(&cs); }
+};
+}/* anonymous namespace */
+
 CWinThread::CWinThread (void* threadHandle, uint32 threadId)
 {
 	// Main thread
@@ -99,14 +112,12 @@ CWinThread::CWinThread (void* threadHandle, uint32 threadId)
 		nlassert(0); // WARNING: following code has not tested! don't know if it work fo real ...
 					 // This is just a suggestion of a possible solution, should this situation one day occur ...
 		// Ensure that this thread don't get deleted, or we could suspend the main thread
-		CRITICAL_SECTION cs;
-		InitializeCriticalSection(&cs);
-		EnterCriticalSection(&cs);
+		static CWinCriticalSection cs;
+		cs.enter();
 		// the 2 following statement must be executed atomicaly among the threads of the current process !
 		SuspendThread(threadHandle);
 		_SuspendCount = ResumeThread(threadHandle);
-		LeaveCriticalSection(&cs);
-		DeleteCriticalSection(&cs);
+		cs.leave();
 	}
 }
 
