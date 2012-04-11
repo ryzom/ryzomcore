@@ -75,6 +75,8 @@ public:
 
 	virtual void setUserGain(float gain) { NLMISC::clamp(gain, 0.0f, 1.0f); m_UserGain = gain; updateSourceGain(); }
 	virtual float getUserGain() { return m_UserGain; }
+
+	virtual void setGain(float devGain, float userGain) { NLMISC::clamp(devGain, 0.0f, 1.0f); NLMISC::clamp(userGain, 0.0f, 1.0f); m_DevGain = devGain; m_UserGain = userGain; updateSourceGain(); }
 	//@}
 
 	inline float getFinalGain() const { return m_FinalGain; }

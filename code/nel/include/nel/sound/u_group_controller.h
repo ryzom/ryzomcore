@@ -56,6 +56,8 @@ public:
 	virtual void setUserGain(float gain) = 0;
 	virtual float getUserGain() = 0;
 
+	virtual void setGain(float devGain, float userGain) = 0;
+
 protected:
 	virtual ~UGroupController() { }
 

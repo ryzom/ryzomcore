@@ -138,9 +138,11 @@ CSoundManager::~CSoundManager()
 	// detach the sound from the particule system
 	NL3D::UParticleSystemSound::setPSSound(NULL);
 
+	_GroupControllerEffects = NULL;
+
 	// free the audio mixer (and delete all sources)
-	if (_AudioMixer)
-		delete _AudioMixer;
+	delete _AudioMixer;
+	_AudioMixer = NULL;
 
 	// release sound anim properly
 	releaseSoundAnim();
@@ -404,6 +406,8 @@ void CSoundManager::reset ()
 
 	NL3D::UParticleSystemSound::setPSSound(NULL);
 
+	_GroupControllerEffects = NULL;
+
 	delete _AudioMixer;
 	_AudioMixer = NULL;
 
@@ -476,6 +480,9 @@ void CSoundManager::init(IProgressCallback *progressCallBack)
 		 * Access the singleton with CSoundAnimManager::instance().
 		 */
 		new CSoundAnimManager(_AudioMixer);
+
+		// get the controller group for effects
+		_GroupControllerEffects = _AudioMixer->getGroupController("effects");
 
 		// restore the volume
 		SoundMngr->setSFXVolume(ClientCfg.SoundSFXVolume);
@@ -1536,7 +1543,7 @@ void		CSoundManager::updateVolume()
 		_AudioMixer->setEventMusicVolume(_GameMusicVolume);
 
 		// update sfx volume
-		_AudioMixer->getListener()->setGain(_SFXVolume*_FadeSFXVolume);
+		_GroupControllerEffects->setGain(_FadeSFXVolume, _SFXVolume);
 	}
 }
 
