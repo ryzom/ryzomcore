@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<DFN Version="0.0" State="modified">
+  <ELEMENT Name="Type" Type="Type" Filename="_type.typ"/>
+  <ELEMENT Name="Enum" Type="Type" Filename="boolean.typ"/>
+  <ELEMENT Name="Formula" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Lowlimit" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Highlimit" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="DefaultValue" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Predef" Type="Dfn" Filename="_typ.dfn" Array="true"/>
+  <COMMENTS></COMMENTS>
+</DFN>

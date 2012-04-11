@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="UseEax" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="HighestPriorityReserve" Type="Type" Filename="int.typ" Default="32"/>
+  <ELEMENT Name="HighPriorityReserve" Type="Type" Filename="int.typ" Default="32"/>
+  <ELEMENT Name="MidPriorityReserve" Type="Type" Filename="int.typ" Default="32"/>
+  <ELEMENT Name="LowPriorityReserve" Type="Type" Filename="int.typ" Default="32"/>
+  <ELEMENT Name="LowWaterMark" Type="Type" Filename="int.typ" Default="2"/>
+  <ELEMENT Name="SampleBanks" Type="Type" Filename="string.typ" Array="true"/>
+  <ELEMENT Name="BackgroundFlags" Type="Dfn" Filename="background_flag_config.dfn" Array="true"/>
+  <LOG>Thu Jan 02 14:33:42 2003 (boucher) Dfn Structure = 
+Thu Jan 02 14:40:05 2003 (boucher) Dfn Structure = 
+Thu Jan 02 14:41:32 2003 (boucher) Dfn Structure = </LOG>
+</DFN>
