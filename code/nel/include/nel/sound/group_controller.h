@@ -52,7 +52,7 @@ namespace NLSOUND {
 class CGroupController : public UGroupController
 {
 public:
-	friend CGroupControllerRoot;
+	friend class CGroupControllerRoot;
 
 private:
 	CGroupController *m_Parent;

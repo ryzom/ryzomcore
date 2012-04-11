@@ -3,6 +3,8 @@ FILE(GLOB HEADERS ../../../include/nel/sound/driver/*.h)
 
 NL_TARGET_LIB(nelsnd_lowlevel ${HEADERS} ${SRC})
 
+TARGET_LINK_LIBRARIES(nelsnd_lowlevel nelmisc)
+
 SET_TARGET_PROPERTIES(nelsnd_lowlevel PROPERTIES LINK_INTERFACE_LIBRARIES "")
 NL_DEFAULT_PROPS(nelsnd_lowlevel "NeL, Library: Sound Lowlevel")
 NL_ADD_RUNTIME_FLAGS(nelsnd_lowlevel)

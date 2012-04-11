@@ -87,7 +87,8 @@ std::string CGroupController::getPath() // overridden by root
 			return returnPath;
 		}
 	}
-	
+	nlerror("Group Controller not child of parent");
+	return "";
 }
 
 void CGroupController::calculateFinalGain() // overridden by root
