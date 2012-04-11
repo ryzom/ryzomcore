@@ -107,6 +107,9 @@ public:
 	virtual bool					hasFilledBuffersAvailable() const;
 	//@}
 	
+	/// Prepare the buffers in this stream for the given maximum capacity. (TODO: Move this into UStreamSource)
+	void preAllocate(uint capacity);
+	
 	/// Return the track
 	CTrack							*getTrack()									{ return m_Track; }
 

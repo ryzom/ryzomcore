@@ -87,6 +87,8 @@ public:
 	void init(ISoundDriver *soundDriver);
 	void release();
 
+	void reset();
+
 	void update(); // time in seconds
 	inline bool isInitOk() { return _SoundDriver != NULL; }
 

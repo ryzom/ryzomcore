@@ -32,6 +32,7 @@
 
 // NeL includes
 // #include <nel/misc/debug.h>
+#include <nel/sound/group_controller_root.h>
 
 // Project includes
 
@@ -84,6 +85,7 @@ void CStreamFileSound::setMusicFilePath(const std::string &filePath, bool async,
 	_MinDist = 1000.0f;
 	m_Async = async;
 	m_FilePath = filePath;
+	_GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_MUSIC_GROUP_CONTROLLER);
 }
 
 } /* namespace NLSOUND */

@@ -269,8 +269,8 @@ void CAudioMixerUser::reset()
 	_Leaving = true;
 
 	_SourceWaitingForPlay.clear();
-
-	/* TODO: Stop music channels */
+	
+	_MusicChannelFaders->reset();
 
 	// Stop tracks
 	uint i;

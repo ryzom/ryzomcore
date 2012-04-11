@@ -38,6 +38,7 @@ FILE(GLOB MUSIC
 	music_sound.cpp ../../include/nel/sound/music_sound.h
 	music_sound_manager.cpp ../../include/nel/sound/music_sound_manager.h
 	music_source.cpp ../../include/nel/sound/music_source.h
+	source_music_channel.cpp ../../include/nel/sound/source_music_channel.h
 )
 
 FILE(GLOB SOUND

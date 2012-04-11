@@ -42,6 +42,8 @@
 #define NL_SOUND_DATA "."
 #endif // NL_SOUND_DATA
 
+#define SAMPLE_OGG "D:/source/kaetemi/toverhex/src/samples/music_stream/data/aeon_1_10_mystic_river.ogg"
+
 using namespace std;
 using namespace NLMISC;
 using namespace NLSOUND;
@@ -129,6 +131,9 @@ static void runSample()
 				break;
 			case 'r':
 				s_StreamFileSource->resume();
+				break;
+			case 'e':
+				s_AudioMixer->playMusic(SAMPLE_OGG, 1000, true, false);
 				break;
 			default:
 				return;

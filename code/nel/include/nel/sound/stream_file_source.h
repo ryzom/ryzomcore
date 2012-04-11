@@ -70,6 +70,10 @@ public:
 	void resume();
 	/// check if song ended (following legacy music channel implementation)
 	bool isEnded();
+	/// (following legacy music channel implementation)
+	float getLength();
+	/// check if still loading (following legacy music channel implementation)
+	bool isLoadingAsync();
 	//@}
 
 	/// \name Decoding thread

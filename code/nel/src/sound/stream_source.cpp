@@ -50,8 +50,11 @@ CStreamSource::CStreamSource(CStreamSound *streamSound, bool spawn, TSpawnEndCal
 	CAudioMixerUser *mixer = CAudioMixerUser::instance();
 	ISoundDriver *driver = mixer->getSoundDriver();
 	m_Buffers[0] = driver->createBuffer();
+	m_Buffers[0]->setStorageMode(IBuffer::StorageSoftware);
 	m_Buffers[1] = driver->createBuffer();
+	m_Buffers[1]->setStorageMode(IBuffer::StorageSoftware);
 	m_Buffers[2] = driver->createBuffer();
+	m_Buffers[2]->setStorageMode(IBuffer::StorageSoftware);
 }
 
 CStreamSource::~CStreamSource()
@@ -429,6 +432,19 @@ bool CStreamSource::hasFilledBuffersAvailable() const
 {
 	const_cast<CStreamSource *>(this)->updateAvailableBuffers();
 	return m_FreeBuffers < 3;
+}
+
+void CStreamSource::preAllocate(uint capacity)
+{
+	uint8 *b0 = m_Buffers[0]->lock(capacity);
+	memset(b0, 0, capacity);
+	m_Buffers[0]->unlock(capacity);
+	uint8 *b1 = m_Buffers[1]->lock(capacity);
+	memset(b1, 0, capacity);
+	m_Buffers[1]->unlock(capacity);
+	uint8 *b2 = m_Buffers[2]->lock(capacity);
+	memset(b2, 0, capacity);
+	m_Buffers[2]->unlock(capacity);
 }
 
 } /* namespace NLSOUND */

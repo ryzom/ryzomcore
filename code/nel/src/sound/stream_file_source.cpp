@@ -182,6 +182,16 @@ bool CStreamFileSource::isEnded()
 	return (!m_Thread->isRunning() && !_Playing && !m_WaitingForPlay && !m_Paused);
 }
 
+float CStreamFileSource::getLength()
+{
+	return m_AudioDecoder->getLength();
+}
+
+bool CStreamFileSource::isLoadingAsync()
+{
+	return m_WaitingForPlay;
+}
+
 void CStreamFileSource::prepareDecoder()
 {
 	// creates a new decoder or keeps going with the current decoder if the stream was paused
@@ -208,6 +218,9 @@ void CStreamFileSource::prepareDecoder()
 		}
 		this->setFormat(m_AudioDecoder->getChannels(), m_AudioDecoder->getBitsPerSample(), (uint32)m_AudioDecoder->getSamplesPerSec());
 	}
+	uint samples, bytes;
+	this->getRecommendedBufferSize(samples, bytes);
+	this->preAllocate(bytes * 2);
 }
 
 void CStreamFileSource::bufferMore(uint bytes) // buffer from bytes (minimum) to bytes * 2 (maximum)
