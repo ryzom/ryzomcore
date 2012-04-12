@@ -46,7 +46,8 @@
 #define NL_SOUND_DATA "."
 #endif // NL_SOUND_DATA
 
-#define SAMPLE_OGG "D:/source/kaetemi/toverhex/src/samples/music_stream/data/aeon_1_10_mystic_river.ogg"
+#define RYZOM_DATA "P:/data"
+#define SAMPLE_OGG "Pyr Entrance.ogg"
 
 using namespace std;
 using namespace NLMISC;
@@ -93,6 +94,8 @@ static void initSample()
 	CVector upvec(0.0f, 0.0f, 1.0f);
 	s_AudioMixer->getListener()->setPos(initpos);
 	s_AudioMixer->getListener()->setOrientation(frontvec, upvec);
+
+	CPath::addSearchPath(RYZOM_DATA, true, false);
 	
 	//NLMISC::CHTimer::startBench();
 

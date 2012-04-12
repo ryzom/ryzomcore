@@ -161,7 +161,7 @@ void CStreamSource::play()
 				delete this;
 			}
 			nldebug("CStreamSource %p : play FAILED, source is too far away !", (CAudioMixerUser::IMixerEvent*)this);
-			m_WaitingForPlay = false;
+			// m_WaitingForPlay = false; // not necessary, delete ensures waiting for thread stop
 			return;
 		}
 		
@@ -182,12 +182,9 @@ void CStreamSource::play()
 			
 			// pSource->setPos( _Position, false);
 			pSource->setPos(getVirtualPos(), false);
-			if (!m_Buffers[0]->isStereo())
-			{
-				pSource->setMinMaxDistances(m_StreamSound->getMinDistance(), m_StreamSound->getMaxDistance(), false);
-				setDirection(_Direction); // because there is a workaround inside
-				pSource->setVelocity(_Velocity);
-			}
+			pSource->setMinMaxDistances(m_StreamSound->getMinDistance(), m_StreamSound->getMaxDistance(), false);
+			setDirection(_Direction); // because there is a workaround inside
+			pSource->setVelocity(_Velocity);
 			pSource->setGain(getFinalGain());
 			pSource->setSourceRelativeMode(_RelativeMode);
 			// pSource->setLooping(_Looping);
@@ -435,7 +432,7 @@ uint32 CStreamSource::getRecommendedSleepTime() const
 {
 	if (m_FreeBuffers > 0) return 0;
 	uint32 sleepTime = (uint32)((1000.0f * ((float)m_LastSize) / (float)m_BytesPerSecond) * m_PitchInv);
-	clamp(sleepTime, (uint32)0, (uint32)1000);
+	clamp(sleepTime, (uint32)0, (uint32)80);
 	return sleepTime;
 }
 

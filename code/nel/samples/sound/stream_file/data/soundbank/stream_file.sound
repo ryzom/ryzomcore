@@ -5,7 +5,7 @@
       <ATOM Name="MinDistance" Value="100000"/>
       <ATOM Name="MaxDistance" Value="200000"/>
 	  <ATOM Name="Async" Value ="true"/>
-	  <ATOM Name="FilePath" Value="D:/source/kaetemi/toverhex/src/samples/music_stream/data/aeon_1_10_mystic_river.ogg"/>
+	  <ATOM Name="FilePath" Value="Pyr Entrance.ogg"/>
     </VSTRUCT>
     <ATOM Name="AbsolutePosition" Value="false"/>
     <ATOM Name="Priority" Value="Highest"/>

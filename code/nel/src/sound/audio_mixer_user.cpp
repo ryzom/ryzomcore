@@ -1651,6 +1651,7 @@ void				CAudioMixerUser::update()
 		_MusicChannelFaders[i].update();
 
 	// Check all playing track and stop any terminated buffer.
+	std::list<CSourceCommon *>::size_type nbWaitingSources = _Sources.size();
 	for (i=0; i<_Tracks.size(); ++i)
 	{
 		if (!_Tracks[i]->isPlaying())
@@ -1662,13 +1663,14 @@ void				CAudioMixerUser::update()
 			}
 
 			// try to play any waiting source.
-			if (!_SourceWaitingForPlay.empty())
+			if (!_SourceWaitingForPlay.empty() && nbWaitingSources)
 			{
 				// check if the source still exist before trying to play it
 				if (_Sources.find(_SourceWaitingForPlay.front()) != _Sources.end())
 					_SourceWaitingForPlay.front()->play();
 //				nldebug("Before POP Sources waiting : %u", _SourceWaitingForPlay.size());
 				_SourceWaitingForPlay.pop_front();
+				--nbWaitingSources;
 //				nldebug("After POP Sources waiting : %u", _SourceWaitingForPlay.size());
 			}
 		}

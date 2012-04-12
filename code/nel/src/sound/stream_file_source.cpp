@@ -63,39 +63,53 @@ void CStreamFileSource::play()
 	// note: CStreamSource will assert crash if already physically playing!
 
 
-	if (m_Thread->isRunning() && m_WaitingForPlay)
+	if (m_WaitingForPlay)
 	{
-		if (m_NextBuffer || !m_FreeBuffers)
+		if (m_Thread->isRunning())
 		{
-			nldebug("play waiting, play stream %s", getStreamFileSound()->getFilePath().c_str());
-			CStreamSource::play();
-			if (!_Playing && !m_WaitingForPlay)
+			if (m_NextBuffer || !m_FreeBuffers)
 			{
-				nldebug("playing not possible or necessary for some reason");
+				nldebug("play waiting, play stream %s", getStreamFileSound()->getFilePath().c_str());
+				CStreamSource::play();
+				if (!_Playing && !m_WaitingForPlay)
+				{
+					nldebug("playing not possible or necessary for some reason");
+				}
+			}
+			else
+			{
+				nldebug("play waiting, hop onto waiting list %s", getStreamFileSound()->getFilePath().c_str());
+				m_WaitingForPlay = true;
+				CAudioMixerUser *mixer = CAudioMixerUser::instance();
+				mixer->addSourceWaitingForPlay(this);
 			}
 		}
 		else
 		{
-			nldebug("play waiting, hop onto waiting list %s", getStreamFileSound()->getFilePath().c_str());
-			m_WaitingForPlay = true;
-			CAudioMixerUser *mixer = CAudioMixerUser::instance();
-			mixer->addSourceWaitingForPlay(this);
+			// thread went kaboom while not started playing yet, probably the audiodecoder cannot be started
+			// don't play
+			m_WaitingForPlay = false;
 		}
 	}
 	else if (!_Playing)
 	{
 		nldebug("play go %s", getStreamFileSound()->getFilePath().c_str());
-		if (!m_WaitingForPlay)
-		{
+		//if (!m_WaitingForPlay)
+		//{
 			// thread may be stopping from stop call
 			m_Thread->wait();
-		}
-		else
-		{
-			nlwarning("Already waiting for play");
-		}
+		//}
+		//else
+		//{
+		//	nlwarning("Already waiting for play");
+		//}
 		if (!getStreamFileSound()->getAsync())
-			prepareDecoder();
+		{
+			if (!prepareDecoder())
+			{
+				return;
+			}
+		}
 		// else load audiodecoder in thread
 		m_WaitingForPlay = true;
 		m_Thread->start();
@@ -221,7 +235,7 @@ bool CStreamFileSource::isLoadingAsync()
 	return m_WaitingForPlay;
 }
 
-void CStreamFileSource::prepareDecoder()
+bool CStreamFileSource::prepareDecoder()
 {
 	// creates a new decoder or keeps going with the current decoder if the stream was paused
 
@@ -243,13 +257,15 @@ void CStreamFileSource::prepareDecoder()
 		if (!m_AudioDecoder)
 		{
 			nlwarning("Failed to create IAudioDecoder, likely invalid format");
-			return;
+			return false;
 		}
 		this->setFormat(m_AudioDecoder->getChannels(), m_AudioDecoder->getBitsPerSample(), (uint32)m_AudioDecoder->getSamplesPerSec());
 	}
 	uint samples, bytes;
 	this->getRecommendedBufferSize(samples, bytes);
 	this->preAllocate(bytes * 2);
+
+	return true;
 }
 
 inline bool CStreamFileSource::bufferMore(uint bytes) // buffer from bytes (minimum) to bytes * 2 (maximum)
@@ -271,7 +287,10 @@ void CStreamFileSource::run()
 
 	bool looping = _Looping;
 	if (getStreamFileSound()->getAsync())
-		prepareDecoder();
+	{
+		if (!prepareDecoder())
+			return;
+	}
 	uint samples, bytes;
 	this->getRecommendedBufferSize(samples, bytes);
 	uint32 recSleep = 40;
