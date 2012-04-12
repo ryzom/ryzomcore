@@ -26,6 +26,8 @@
 // using namespace std;
 using namespace NLMISC;
 
+// #define NLSOUND_DEBUG_STREAM
+
 namespace NLSOUND {
 
 CStreamSource::CStreamSource(CStreamSound *streamSound, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster, CGroupController *groupController)
@@ -160,7 +162,9 @@ void CStreamSource::play()
 					_SpawnEndCb(this, _CbUserParam);
 				delete this;
 			}
+#ifdef NLSOUND_DEBUG_STREAM
 			nldebug("CStreamSource %p : play FAILED, source is too far away !", (CAudioMixerUser::IMixerEvent*)this);
+#endif
 			// m_WaitingForPlay = false; // not necessary, delete ensures waiting for thread stop
 			return;
 		}
@@ -190,7 +194,7 @@ void CStreamSource::play()
 			}
 			else
 			{
-				pSource->setDirection(NLMISC::CVector::Null);
+				pSource->setDirection(NLMISC::CVector::I);
 				pSource->setCone(float(Pi * 2), float(Pi * 2), 1.0f);
 				pSource->setVelocity(NLMISC::CVector::Null);
 			}
@@ -232,7 +236,7 @@ void CStreamSource::play()
 		{
 			CSourceCommon::play();
 			m_WaitingForPlay = false;
-#if 1
+#ifdef NLSOUND_DEBUG_STREAM
 			// Dump source info
 			nlwarning("--- DUMP SOURCE INFO ---");
 			nlwarning(" * getLooping: %s", getPhysicalSource()->getLooping() ? "YES" : "NO");

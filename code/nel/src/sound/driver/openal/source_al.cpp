@@ -254,6 +254,7 @@ bool CSourceAL::play()
 	else
 	{
 		nlwarning("Invalid play call, not streaming and no static buffer assigned");
+		return false;
 	}
 }
 
