@@ -61,6 +61,7 @@ private:
 	NLMISC::TTime _StartTime;
 
 	bool _IsStreaming;
+	bool _RelativeMode;
 
 	NLMISC::CVector _Pos;
 	float _Gain;

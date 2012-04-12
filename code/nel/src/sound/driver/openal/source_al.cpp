@@ -22,6 +22,8 @@
 #include "source_al.h"
 #include "ext_al.h"
 
+// #define NLSOUND_DEBUG_GAIN
+
 using namespace std;
 using namespace NLMISC;
 
@@ -30,7 +32,7 @@ namespace NLSOUND {
 CSourceAL::CSourceAL(CSoundDriverAL *soundDriver) :
 _SoundDriver(NULL), _Buffer(NULL), _Source(AL_NONE),
 _DirectFilter(AL_FILTER_NULL), _EffectFilter(AL_FILTER_NULL), 
-_IsPlaying(false), _IsPaused(false), _StartTime(0), _IsStreaming(false),  
+_IsPlaying(false), _IsPaused(false), _StartTime(0), _IsStreaming(false), _RelativeMode(false), 
 _Pos(0.0f, 0.0f, 0.0f), _Gain(NLSOUND_DEFAULT_GAIN), _Alpha(1.0), 
 _MinDistance(1.0f), _MaxDistance(numeric_limits<float>::max()), 
 _Effect(NULL), _Direct(true), 
@@ -92,11 +94,17 @@ void CSourceAL::release()
 /// (Internal) Update the 3d changes.
 void CSourceAL::updateManualRolloff()
 {
-	CVector distanceVector = _Pos - CListenerAL::getInstance()->getPos();
+	CVector distanceVector = _RelativeMode ? _Pos : (_Pos - CListenerAL::getInstance()->getPos());
 	float distanceSquare = distanceVector.sqrnorm();
 	float rolloff = ISource::computeManualRolloff(_Alpha, distanceSquare, _MinDistance, _MaxDistance);
 	alSourcef(_Source, AL_GAIN, _Gain * rolloff);
 	alTestError();
+#ifdef NLSOUND_DEBUG_GAIN
+	ALfloat gain;
+	alGetSourcef(_Source, AL_GAIN, &gain);
+	nlwarning("Called updateManualRolloff(), physical gain is %f, configured gain is %f, distanceSquare is %f, rolloff is %f", gain, _Gain, distanceSquare, rolloff);
+	alTestError();
+#endif
 }
 
 /// Enable or disable streaming mode. Source must be stopped to call this.
@@ -210,6 +218,13 @@ bool CSourceAL::getLooping() const
 /// Play the static buffer (or stream in and play)
 bool CSourceAL::play()
 {
+#ifdef NLSOUND_DEBUG_GAIN
+	if (_IsStreaming)
+	{
+		nlwarning("Called play on a streaming source");
+	}
+#endif
+
 	// Commit 3D changes before starting play
 	if (_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
 		updateManualRolloff();
@@ -422,15 +437,23 @@ void CSourceAL::setGain(float gain)
 		alSourcef(_Source, AL_GAIN, _Gain);
 		alTestError();
 	}
+#ifdef NLSOUND_DEBUG_GAIN
+	else
+	{
+		nlwarning("Called setGain(), manual rolloff, commit deferred to play or update, physical gain is %f, configured gain is %f", gain, _Gain);
+	}
+#endif
 }
 
 /// Get the gain
 float CSourceAL::getGain() const
 {
-	//ALfloat gain;
-	//alGetSourcef(_Source, AL_GAIN, &gain);
-	//alTestError();
-	//return gain;
+#ifdef NLSOUND_DEBUG_GAIN
+	ALfloat gain;
+	alGetSourcef(_Source, AL_GAIN, &gain);
+	nlwarning("Called getGain(), physical gain is %f, configured gain is %f", gain, _Gain);
+	alTestError();
+#endif
 	return _Gain;
 }
 
@@ -453,6 +476,7 @@ float CSourceAL::getPitch() const
 /// Set the source relative mode. If true, positions are interpreted relative to the listener position.
 void CSourceAL::setSourceRelativeMode( bool mode )
 {
+	_RelativeMode = mode;
 	alSourcei(_Source, AL_SOURCE_RELATIVE, mode?AL_TRUE:AL_FALSE );
 	alTestError();
 }
@@ -460,10 +484,11 @@ void CSourceAL::setSourceRelativeMode( bool mode )
 /// Get the source relative mode (3D mode only)
 bool CSourceAL::getSourceRelativeMode() const
 {
-	ALint b;
-	alGetSourcei(_Source, AL_SOURCE_RELATIVE, &b );
-	alTestError();
-	return (b==AL_TRUE);
+	//ALint b;
+	//alGetSourcei(_Source, AL_SOURCE_RELATIVE, &b );
+	//alTestError();
+	//return (b==AL_TRUE);
+	return _RelativeMode;
 }
 
 /// Set the min and max distances (3D mode only)
