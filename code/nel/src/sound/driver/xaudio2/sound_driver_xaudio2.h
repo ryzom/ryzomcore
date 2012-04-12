@@ -62,8 +62,6 @@ protected:
 	std::set<CSourceXAudio2 *> _Sources;
 	/// Array with the allocated effects created by client code.
 	std::set<CEffectXAudio2 *> _Effects;
-	/// Array with the allocated music channels created by client code.
-	std::set<CMusicChannelXAudio2 *> _MusicChannels;
 	/// Initialization Handle of X3DAudio.
 	X3DAUDIO_HANDLE _X3DAudioHandle; //I
 	/// Operation set counter
@@ -73,7 +71,6 @@ protected:
 	uint _PerformancePCMBufferSize;
 	uint _PerformanceADPCMBufferSize;
 	uint _PerformanceSourcePlayCounter;
-	uint _PerformanceMusicPlayCounter;
 	uint _PerformanceCommit3DCounter;
 	
 	// user init vars
@@ -108,8 +105,6 @@ public:
 	}
 	/// (Internal) Increase the source play counter by one.
 	inline void performanceIncreaseSourcePlayCounter() { ++_PerformanceSourcePlayCounter; }
-	/// (Internal) Increase the music play counter by one.
-	inline void performanceIncreaseMusicPlayCounter() { ++_PerformanceMusicPlayCounter; }
 	/// (Internal) Increase the commit 3d counter by one.
 	inline void performanceIncreaseCommit3DCounter() { ++_PerformanceCommit3DCounter; }
 	
@@ -172,16 +167,6 @@ public:
 	virtual void startBench();
 	virtual void endBench();
 	virtual void displayBench(NLMISC::CLog *log);
-	
-	/// Create a music channel, destroy with destroyMusicChannel.
-	virtual IMusicChannel *createMusicChannel();
-	
-	/** Get music info. Returns false if the song is not found or the function is not implemented.
-	 *  \param filepath path to file, CPath::lookup done by driver
-	 *  \param artist returns the song artist (empty if not available)
-	 *  \param title returns the title (empty if not available)
-	 */
-	virtual bool getMusicInfo(const std::string &filepath, std::string &artist, std::string &title);
 
 	/// Get audio/container extensions that are supported natively by the driver implementation.
 	virtual void getMusicExtensions(std::vector<std::string> & /* extensions */) const { }
@@ -192,8 +177,6 @@ public:
 	void removeBuffer(CBufferXAudio2 *buffer);	
 	/// (Internal) Remove a source (should be called by the destructor of the source class).
 	void removeSource(CSourceXAudio2 *source);
-	/// (Internal) Remove a source (should be called by the destructor of the music channel class).
-	void removeMusicChannel(CMusicChannelXAudio2 *musicChannel);	
 	/// (Internal) Remove the listener (should be called by the destructor of the listener class)
 	inline void removeListener(CListenerXAudio2 *listener) { nlassert(_Listener == listener); _Listener = NULL; }
 	/// (Internal) Remove an effect (should be called by the destructor of the effect class)

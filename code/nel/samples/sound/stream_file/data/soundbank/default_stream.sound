@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision$" State="modified">
+  <STRUCT>
+    <VSTRUCT DfnName="stream_sound.dfn" Name="SoundType">
+      <ATOM Name="MinDistance" Value="100000"/>
+      <ATOM Name="MaxDistance" Value="200000"/>
+    </VSTRUCT>
+    <ATOM Name="AbsolutePosition" Value="false"/>
+    <ATOM Name="Priority" Value="Highest"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Thu Jan 28 23:30:44 2010 (Kaetemi) .AbsolutePosition = false
+Thu Jan 28 23:30:44 2010 (Kaetemi) .Priority = Highest
+Thu Jan 28 23:30:44 2010 (Kaetemi) .SoundType = stream_sound.dfn
+Thu Jan 28 23:30:44 2010 (Kaetemi) .SoundType.MaxDistance = 100000
+Thu Jan 28 23:30:44 2010 (Kaetemi) .SoundType.MinDistance = 200000</LOG>
+</FORM>

@@ -22,7 +22,7 @@
 #include "nel/sound/u_stream_source.h"
 #include "nel/3d/cluster.h"
 #include "nel/sound/sound.h"
-
+#include "nel/sound/group_controller.h"
 
 namespace NLSOUND {
 
@@ -36,11 +36,13 @@ public:
 		SOURCE_SIMPLE,
 		SOURCE_COMPLEX,
 		SOURCE_BACKGROUND,
-		SOURCE_MUSIC,
-		SOURCE_STREAM
+		SOURCE_MUSIC, // DEPRECATED
+		SOURCE_STREAM,
+		SOURCE_STREAM_FILE
 	};
 
-	CSourceCommon(TSoundId id, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster);
+	/// When groupController is NULL it will use the groupcontroller specified in the TSoundId. You should manually specify the groupController if this source is a child of another source, so that the parent source controller of the user-specified .sound file is the one that will be used.
+	CSourceCommon(TSoundId id, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster, CGroupController *groupController);
 
 	~CSourceCommon();
 
@@ -63,6 +65,8 @@ public:
 	void					setGain( float gain );
 	void					setRelativeGain( float gain );
 	float					getRelativeGain() const;
+	/// Called whenever the gain is changed trough setGain, setRelativeGain or the group controller's gain settings change.
+	virtual void					updateFinalGain()							{ }
 	void					setSourceRelativeMode( bool mode );
 	/// return the user param for the user callback
 	void							*getCallbackUserParam(void) const			{ return _CbUserParam; }
@@ -74,6 +78,8 @@ public:
 	virtual void					getDirection( NLMISC::CVector& dir ) const	{ dir = _Direction; }
 	/// Get the gain
 	virtual float					getGain() const								{ return _Gain; }
+	/// Get the final gain, including group controller changes. Use this when setting the physical source output gain.
+	inline float					getFinalGain() const						{ return _Gain * _GroupController->getFinalGain(); }
 	/// Get the pitch
 	virtual float					getPitch() const							{ return _Pitch; }
 	/// Get the source relative mode
@@ -144,6 +150,9 @@ protected:
 
 	/// An optional user var controler.
 	NLMISC::TStringId				_UserVarControler;
+
+	/// Group controller for gain
+	CGroupController				*_GroupController;
 
 };
 

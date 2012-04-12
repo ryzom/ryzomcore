@@ -1,21 +1,33 @@
-// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/**
+ * \file audio_decoder_vorbis.h
+ * \brief CAudioDecoderVorbis
+ * \date 2012-04-11 09:35GMT
+ * \author Jan Boon (Kaetemi)
+ * CAudioDecoderVorbis
+ */
 
-#ifndef NLSOUND_MUSIC_BUFFER_VORBIS_H
-#define NLSOUND_MUSIC_BUFFER_VORBIS_H
+/* 
+ * Copyright (C) 2008-2012  by authors
+ * 
+ * This file is part of RYZOM CORE.
+ * RYZOM CORE is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * RYZOM CORE is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public
+ * License along with RYZOM CORE.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef NLSOUND_AUDIO_DECODER_VORBIS_H
+#define NLSOUND_AUDIO_DECODER_VORBIS_H
+#include <nel/misc/types_nl.h>
 
 // STL includes
 
@@ -30,21 +42,20 @@
 #endif
 
 // NeL includes
+#include <nel/sound/audio_decoder.h>
 
 // Project includes
-#include "music_buffer.h"
 
-namespace NLSOUND
-{
+namespace NLSOUND {
 
 /**
- * \brief CMusicBufferVorbis
+ * \brief CAudioDecoderVorbis
  * \date 2008-08-30 11:38GMT
  * \author Jan Boon (Kaetemi)
- * CMusicBufferVorbis
- * Create trough IMusicBuffer, type "ogg"
+ * CAudioDecoderVorbis
+ * Create trough IAudioDecoder, type "ogg"
  */
-class CMusicBufferVorbis : public IMusicBuffer
+class CAudioDecoderVorbis : public IAudioDecoder
 {
 protected:
 	// outside pointers
@@ -59,8 +70,8 @@ protected:
 	sint32 _StreamOffset;
 	sint32 _StreamSize;
 public:
-	CMusicBufferVorbis(NLMISC::IStream *stream, bool loop);
-	virtual ~CMusicBufferVorbis();
+	CAudioDecoderVorbis(NLMISC::IStream *stream, bool loop);
+	virtual ~CAudioDecoderVorbis();
 	inline NLMISC::IStream *getStream() { return _Stream; }
 	inline sint32 getStreamSize() { return _StreamSize; }
 	inline sint32 getStreamOffset() { return _StreamOffset; }
@@ -78,7 +89,7 @@ public:
 	virtual uint8 getChannels();
 
 	/// Get the samples per second (often 44100) in output.
-	virtual uint32 getSamplesPerSec();
+	virtual uint getSamplesPerSec();
 
 	/// Get the bits per sample (often 16) in output.
 	virtual uint8 getBitsPerSample();
@@ -89,12 +100,12 @@ public:
 	/// Get the total time in seconds.
 	virtual float getLength();
 
-	/// Get the size of uncompressed data in bytes.
-	virtual uint getUncompressedSize();
-}; /* class CMusicBufferVorbis */
+	/// Set looping
+	virtual void setLooping(bool loop);
+}; /* class CAudioDecoderVorbis */
 
 } /* namespace NLSOUND */
 
-#endif /* #ifndef NLSOUND_MUSIC_BUFFER_VORBIS_H */
+#endif /* #ifndef NLSOUND_AUDIO_DECODER_VORBIS_H */
 
 /* end of file */

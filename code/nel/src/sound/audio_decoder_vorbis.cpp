@@ -1,38 +1,53 @@
-// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/**
+ * \file audio_decoder_vorbis.cpp
+ * \brief CAudioDecoderVorbis
+ * \date 2012-04-11 09:35GMT
+ * \author Jan Boon (Kaetemi)
+ * CAudioDecoderVorbis
+ */
 
-#include "stdsound_lowlevel.h"
+/* 
+ * Copyright (C) 2008-2012  by authors
+ * 
+ * This file is part of RYZOM CORE.
+ * RYZOM CORE is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * RYZOM CORE is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public
+ * License along with RYZOM CORE.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+
+#include "stdsound.h"
+#include <nel/sound/audio_decoder_vorbis.h>
+
+// STL includes
+
+// NeL includes
+#include <nel/misc/debug.h>
 
 // Project includes
-#include "nel/sound/driver/music_buffer_vorbis.h"
 
 using namespace std;
 using namespace NLMISC;
 
-namespace NLSOUND
-{
+namespace NLSOUND {
 
 size_t vorbisReadFunc(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
-	CMusicBufferVorbis *music_buffer_vorbis = (CMusicBufferVorbis *)datasource;
-	NLMISC::IStream *stream = music_buffer_vorbis->getStream();
+	CAudioDecoderVorbis *audio_decoder_vorbis = (CAudioDecoderVorbis *)datasource;
+	NLMISC::IStream *stream = audio_decoder_vorbis->getStream();
 	nlassert(stream->isReading());
 	sint32 length = (sint32)(size * nmemb);
-	if (length > music_buffer_vorbis->getStreamSize() - stream->getPos())
-		length = music_buffer_vorbis->getStreamSize() - stream->getPos();
+	if (length > audio_decoder_vorbis->getStreamSize() - stream->getPos())
+		length = audio_decoder_vorbis->getStreamSize() - stream->getPos();
 	stream->serialBuffer((uint8 *)ptr, length);
 	return length;
 }
@@ -45,7 +60,7 @@ int vorbisSeekFunc(void *datasource, ogg_int64_t offset, int whence)
 		return 0; // ooookkaaaaaayyy
 	}
 
-	CMusicBufferVorbis *music_buffer_vorbis = (CMusicBufferVorbis *)datasource;
+	CAudioDecoderVorbis *audio_decoder_vorbis = (CAudioDecoderVorbis *)datasource;
 
 	NLMISC::IStream::TSeekOrigin origin;
 	switch (whence)
@@ -64,19 +79,19 @@ int vorbisSeekFunc(void *datasource, ogg_int64_t offset, int whence)
 		return -1;
 	}
 
-	if (music_buffer_vorbis->getStream()->seek(SEEK_SET ? music_buffer_vorbis->getStreamOffset() + (sint32)offset : (sint32)offset, origin)) return 0;
+	if (audio_decoder_vorbis->getStream()->seek(SEEK_SET ? audio_decoder_vorbis->getStreamOffset() + (sint32)offset : (sint32)offset, origin)) return 0;
 	else return -1;
 }
 
 //int vorbisCloseFunc(void *datasource)
 //{
-//	//CMusicBufferVorbis *music_buffer_vorbis = (CMusicBufferVorbis *)datasource;
+//	//CAudioDecoderVorbis *audio_decoder_vorbis = (CAudioDecoderVorbis *)datasource;
 //}
 
 long vorbisTellFunc(void *datasource)
 {
-	CMusicBufferVorbis *music_buffer_vorbis = (CMusicBufferVorbis *)datasource;
-	return (long)(music_buffer_vorbis->getStream()->getPos() - music_buffer_vorbis->getStreamOffset());
+	CAudioDecoderVorbis *audio_decoder_vorbis = (CAudioDecoderVorbis *)datasource;
+	return (long)(audio_decoder_vorbis->getStream()->getPos() - audio_decoder_vorbis->getStreamOffset());
 }
 
 static ov_callbacks OV_CALLBACKS_NLMISC_STREAM = {
@@ -86,8 +101,8 @@ static ov_callbacks OV_CALLBACKS_NLMISC_STREAM = {
   (long (*)(void *))							vorbisTellFunc
 };
 
-CMusicBufferVorbis::CMusicBufferVorbis(NLMISC::IStream *stream, bool loop) 
-: _Stream(stream), _Loop(loop), _IsMusicEnded(false)
+CAudioDecoderVorbis::CAudioDecoderVorbis(NLMISC::IStream *stream, bool loop) 
+: _Stream(stream), _Loop(loop), _IsMusicEnded(false), _StreamSize(0)
 {
 	_StreamOffset = stream->getPos();
 	stream->seek(0, NLMISC::IStream::end);
@@ -96,15 +111,15 @@ CMusicBufferVorbis::CMusicBufferVorbis(NLMISC::IStream *stream, bool loop)
 	ov_open_callbacks(this, &_OggVorbisFile, NULL, 0, OV_CALLBACKS_NLMISC_STREAM);
 }
 
-CMusicBufferVorbis::~CMusicBufferVorbis()
+CAudioDecoderVorbis::~CAudioDecoderVorbis()
 {
 	ov_clear(&_OggVorbisFile);
 }
 
 /// Get information on a music file (only artist and title at the moment).
-bool CMusicBufferVorbis::getInfo(NLMISC::IStream *stream, std::string &artist, std::string &title)
+bool CAudioDecoderVorbis::getInfo(NLMISC::IStream *stream, std::string &artist, std::string &title)
 {
-	CMusicBufferVorbis mbv(stream, false); // just opens and closes the oggvorbisfile thing :)
+	CAudioDecoderVorbis mbv(stream, false); // just opens and closes the oggvorbisfile thing :)
 	vorbis_comment *vc = ov_comment(&mbv._OggVorbisFile, -1);
 	char *title_c = vorbis_comment_query(vc, "title", 0);
 	if (title_c) title = title_c; else title.clear();
@@ -113,29 +128,27 @@ bool CMusicBufferVorbis::getInfo(NLMISC::IStream *stream, std::string &artist, s
 	return true;
 }
 
-uint32 CMusicBufferVorbis::getRequiredBytes()
+uint32 CAudioDecoderVorbis::getRequiredBytes()
 {
 	return 0; // no minimum requirement of bytes to buffer out
 }
 
-uint32 CMusicBufferVorbis::getNextBytes(uint8 *buffer, uint32 minimum, uint32 maximum)
+uint32 CAudioDecoderVorbis::getNextBytes(uint8 *buffer, uint32 minimum, uint32 maximum)
 {
 	sint current_section = 0; // ???
 	if (_IsMusicEnded) return 0;
 	nlassert(minimum <= maximum); // can't have this..
 	uint32 bytes_read = 0;
-
 #ifdef NL_BIG_ENDIAN
 	sint endianness = 1;
 #else
 	sint endianness = 0;
 #endif
-	
 	do
 	{
 		// signed 16-bit or unsigned 8-bit little-endian samples
 		sint br = ov_read(&_OggVorbisFile, (char *)&buffer[bytes_read], maximum - bytes_read, 
-			endianness, // Specifies big or little endian byte packing. 0 for little endian, 1 for big endian. Typical value is 0.
+			endianness, // Specifies big or little endian byte packing. 0 for little endian, 1 for b ig endian. Typical value is 0.
 			getBitsPerSample() == 8 ? 1 : 2, 
 			getBitsPerSample() == 8 ? 0 : 1, // Signed or unsigned data. 0 for unsigned, 1 for signed. Typically 1.
 			&current_section);
@@ -162,58 +175,53 @@ uint32 CMusicBufferVorbis::getNextBytes(uint8 *buffer, uint32 minimum, uint32 ma
 			// error
 			switch(br)
 			{
-				case OV_HOLE:
+			case OV_HOLE:
 				nlwarning("ov_read returned OV_HOLE");
 				break;
-
-				case OV_EINVAL:
+			case OV_EINVAL:
 				nlwarning("ov_read returned OV_EINVAL");
 				break;
-
-				case OV_EBADLINK:
+			case OV_EBADLINK:
 				nlwarning("ov_read returned OV_EBADLINK");
 				break;
-
-				default:
+			default:
 				nlwarning("ov_read returned %d", br);
 			}
-
-			return 0;
 		}
 	} while (bytes_read < minimum);
 	return bytes_read;
 }
 
-uint8 CMusicBufferVorbis::getChannels()
+uint8 CAudioDecoderVorbis::getChannels()
 {
 	vorbis_info *vi = ov_info(&_OggVorbisFile, -1);
 	return (uint8)vi->channels;
 }
 
-uint32 CMusicBufferVorbis::getSamplesPerSec()
+uint CAudioDecoderVorbis::getSamplesPerSec()
 {
 	vorbis_info *vi = ov_info(&_OggVorbisFile, -1);
-	return vi->rate;
+	return (uint)vi->rate;
 }
 
-uint8 CMusicBufferVorbis::getBitsPerSample()
+uint8 CAudioDecoderVorbis::getBitsPerSample()
 {
 	return 16;
 }
 
-bool CMusicBufferVorbis::isMusicEnded()
+bool CAudioDecoderVorbis::isMusicEnded()
 {
 	return _IsMusicEnded;
 }
 
-float CMusicBufferVorbis::getLength()
+float CAudioDecoderVorbis::getLength()
 {
 	return (float)ov_time_total(&_OggVorbisFile, -1);
 }
 
-uint CMusicBufferVorbis::getUncompressedSize()
+void CAudioDecoderVorbis::setLooping(bool loop)
 {
-	return (uint)ov_pcm_total(&_OggVorbisFile, -1) * (getBitsPerSample() / 2) * getChannels();
+	 _Loop = loop;
 }
 
 } /* namespace NLSOUND */

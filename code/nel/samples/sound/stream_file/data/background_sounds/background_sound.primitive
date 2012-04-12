@@ -1,0 +1,144 @@
+<?xml version="1.0"?>
+<PRIMITIVES VERSION="1">
+  <ROOT_PRIMITIVE TYPE="CPrimNode">
+    <ALIAS LAST_GENERATED="0"/>
+<!--@expanded-->
+    <CHILD TYPE="CPrimNode">
+<!--@selected@expanded-->
+      <PROPERTY TYPE="string">
+        <NAME>class</NAME>
+        <STRING>audio</STRING>
+      </PROPERTY>
+      <PROPERTY TYPE="string">
+        <NAME>name</NAME>
+        <STRING>test_audio</STRING>
+      </PROPERTY>
+      <CHILD TYPE="CPrimNode">
+<!--@expanded-->
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>sounds</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>sounds</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimZone">
+          <PT X="1528.726440" Y="-1102.857666" Z="0.000000"/>
+          <PT X="1546.326416" Y="-1311.857666" Z="0.000000"/>
+          <PT X="1742.126465" Y="-1316.257690" Z="0.000000"/>
+          <PT X="1746.526367" Y="-1061.057617" Z="0.000000" SELECTED="true"/>
+<!--@expanded-->
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>sound_zone</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>test_zone</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>sound</NAME>
+            <STRING>beep.sound</STRING>
+          </PROPERTY>
+        </CHILD>
+        <CHILD TYPE="CPrimPath">
+          <PT X="1744.326416" Y="-1001.657654" Z="0.000000"/>
+          <PT X="1805.926392" Y="-1131.457642" Z="0.000000"/>
+          <PT X="1805.926392" Y="-1283.257690" Z="0.000000"/>
+          <PT X="1722.326416" Y="-1377.857666" Z="0.000000"/>
+          <PT X="1605.726440" Y="-1402.057617" Z="0.000000" SELECTED="true"/>
+<!--@expanded-->
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>sound_path</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>test_path</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>sound</NAME>
+            <STRING>tuut.sound</STRING>
+          </PROPERTY>
+        </CHILD>
+        <CHILD TYPE="CPrimPoint">
+          <PT X="1379.126465" Y="-1152.357544" Z="0.000000"/>
+<!--@expanded-->
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>sound_point</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>test_point</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>sound</NAME>
+            <STRING>tuut.sound</STRING>
+          </PROPERTY>
+        </CHILD>
+      </CHILD>
+      <CHILD TYPE="CPrimNode">
+<!--@expanded-->
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>sample_banks</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>sample_banks</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimZone">
+          <PT X="1262.800293" Y="-1123.099976" Z="0.000000"/>
+          <PT X="1515.800293" Y="-1481.699951" Z="0.000000"/>
+          <PT X="2087.800293" Y="-1334.299927" Z="0.000000"/>
+          <PT X="1744.600342" Y="-898.699951" Z="0.000000" SELECTED="true"/>
+<!--@expanded-->
+          <PROPERTY TYPE="string_array">
+            <NAME>bank_names</NAME>
+            <STRING>base_samples</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>sample_bank_zone</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>base_sample_zone</STRING>
+          </PROPERTY>
+        </CHILD>
+      </CHILD>
+      <CHILD TYPE="CPrimNode">
+<!--@expanded-->
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>env_fx</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>env_fx</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimZone">
+          <PT X="1623.326416" Y="-1120.457642" Z="0.000000"/>
+          <PT X="1559.526367" Y="-1228.257690" Z="0.000000"/>
+          <PT X="1700.326416" Y="-1265.657715" Z="0.000000"/>
+          <PT X="1720.126465" Y="-1168.857666" Z="0.000000" SELECTED="true"/>
+<!--@expanded-->
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>env_fx_zone</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>fx_name</NAME>
+            <STRING>BATHROOM</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>test_fx</STRING>
+          </PROPERTY>
+        </CHILD>
+      </CHILD>
+    </CHILD>
+  </ROOT_PRIMITIVE>
+</PRIMITIVES>
