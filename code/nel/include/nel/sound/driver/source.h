@@ -353,7 +353,7 @@ public:
 	 * In streaming mode, the time spent during buffer outruns is not 
 	 * counted towards the playback time, and the playback time is 
 	 * be the current time position in the entire submitted queue.
-	 * When using static buffers, the result is the tot time that the 
+	 * When using static buffers, the result is the total time that the 
 	 * attached buffer has been playing. If the source is looping, the 
 	 * time will be the total of all playbacks of the buffer.
 	 * When the source is stopped, this will return the time where the 

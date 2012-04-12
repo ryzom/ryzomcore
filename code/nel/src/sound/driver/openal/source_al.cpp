@@ -30,7 +30,7 @@ namespace NLSOUND {
 CSourceAL::CSourceAL(CSoundDriverAL *soundDriver) :
 _SoundDriver(NULL), _Buffer(NULL), _Source(AL_NONE),
 _DirectFilter(AL_FILTER_NULL), _EffectFilter(AL_FILTER_NULL), 
-_IsPlaying(false), _IsPaused(false), _StartTime(0), 
+_IsPlaying(false), _IsPaused(false), _StartTime(0), _IsStreaming(false),  
 _Pos(0.0f, 0.0f, 0.0f), _Gain(NLSOUND_DEFAULT_GAIN), _Alpha(1.0), 
 _MinDistance(1.0f), _MaxDistance(numeric_limits<float>::max()), 
 _Effect(NULL), _Direct(true), 
@@ -100,7 +100,7 @@ void CSourceAL::updateManualRolloff()
 }
 
 /// Enable or disable streaming mode. Source must be stopped to call this.
-void CSourceAL::setStreaming(bool /* streaming */)
+void CSourceAL::setStreaming(bool streaming)
 {
 	nlassert(isStopped());
 
@@ -108,6 +108,7 @@ void CSourceAL::setStreaming(bool /* streaming */)
 	alSourcei(_Source, AL_BUFFER, AL_NONE);
 	alTestError();
 	_Buffer = NULL;
+	_IsStreaming = streaming;
 }
 
 /* Set the buffer that will be played (no streaming)
@@ -209,27 +210,35 @@ bool CSourceAL::getLooping() const
 /// Play the static buffer (or stream in and play)
 bool CSourceAL::play()
 {
-	if ( _Buffer != NULL )
+	// Commit 3D changes before starting play
+	if (_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
+		updateManualRolloff();
+
+	if (_Buffer)
 	{
 		// Static playing mode
 		_IsPaused = false;
 		alSourcePlay(_Source);
-		_IsPlaying = alGetError() == AL_NO_ERROR;
+		_IsPlaying = (alGetError() == AL_NO_ERROR);
 		if (_IsPlaying)
 			_StartTime = CTime::getLocalTime();
 		return _IsPlaying;
 	}
-	else
+	else if (_IsStreaming)
 	{
-		// TODO: Verify streaming mode?
 		_IsPaused = false;
 		alSourcePlay(_Source);
-		_IsPlaying = true;
-		_StartTime = CTime::getLocalTime(); // TODO: Played time should freeze when buffering fails, and be calculated based on the number of buffers played plus passed time. This is necessary for synchronizing animation with sound.
-		return true;
+		_IsPlaying = (alGetError() == AL_NO_ERROR);
+		if (_IsPlaying)
+			_StartTime = CTime::getLocalTime(); // TODO: Played time should freeze when buffering fails, and be calculated based on the number of buffers played plus passed time. This is necessary for synchronizing animation with sound.
+		return _IsPlaying;
 		// Streaming mode
 		//nlwarning("AL: Cannot play null buffer; streaming not implemented" );
 		//nlstop;
+	}
+	else
+	{
+		nlwarning("Invalid play call, not streaming and no static buffer assigned");
 	}
 }
 

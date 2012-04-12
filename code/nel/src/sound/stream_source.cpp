@@ -183,8 +183,17 @@ void CStreamSource::play()
 			// pSource->setPos( _Position, false);
 			pSource->setPos(getVirtualPos(), false);
 			pSource->setMinMaxDistances(m_StreamSound->getMinDistance(), m_StreamSound->getMaxDistance(), false);
-			setDirection(_Direction); // because there is a workaround inside
-			pSource->setVelocity(_Velocity);
+			if (!m_Buffers[0]->isStereo())
+			{
+				setDirection(_Direction); // because there is a workaround inside
+				pSource->setVelocity(_Velocity);
+			}
+			else
+			{
+				pSource->setDirection(NLMISC::CVector::Null);
+				pSource->setCone(float(Pi * 2), float(Pi * 2), 1.0f);
+				pSource->setVelocity(NLMISC::CVector::Null);
+			}
 			pSource->setGain(getFinalGain());
 			pSource->setSourceRelativeMode(_RelativeMode);
 			// pSource->setLooping(_Looping);
@@ -223,6 +232,34 @@ void CStreamSource::play()
 		{
 			CSourceCommon::play();
 			m_WaitingForPlay = false;
+#if 1
+			// Dump source info
+			nlwarning("--- DUMP SOURCE INFO ---");
+			nlwarning(" * getLooping: %s", getPhysicalSource()->getLooping() ? "YES" : "NO");
+			nlwarning(" * isPlaying: %s", getPhysicalSource()->isPlaying() ? "YES" : "NO");
+			nlwarning(" * isStopped: %s", getPhysicalSource()->isStopped() ? "YES" : "NO");
+			nlwarning(" * isPaused: %s", getPhysicalSource()->isPaused() ? "YES" : "NO");
+			nlwarning(" * getPos: %f, %f, %f", getPhysicalSource()->getPos().x, getPhysicalSource()->getPos().y, getPhysicalSource()->getPos().z);
+			NLMISC::CVector v;
+			getPhysicalSource()->getVelocity(v);
+			nlwarning(" * getVelocity: %f, %f, %f", v.x, v.y, v.z);
+			getPhysicalSource()->getDirection(v);
+			nlwarning(" * getDirection: %f, %f, %f", v.x, v.y, v.z);
+			nlwarning(" * getGain: %f", getPhysicalSource()->getGain());
+			nlwarning(" * getPitch: %f", getPhysicalSource()->getPitch());
+			nlwarning(" * getSourceRelativeMode: %s", getPhysicalSource()->getSourceRelativeMode() ? "YES" : "NO");
+			float a, b, c;
+			getPhysicalSource()->getMinMaxDistances(a, b);
+			nlwarning(" * getMinMaxDistances: %f, %f", a, b);
+			getPhysicalSource()->getCone(a, b, c);
+			nlwarning(" * getCone: %f, %f", a, b, c);
+			nlwarning(" * getDirect: %s", getPhysicalSource()->getDirect() ? "YES" : "NO");
+			nlwarning(" * getDirectGain: %f", getPhysicalSource()->getDirectGain());
+			nlwarning(" * isDirectFilterEnabled: %s", getPhysicalSource()->isDirectFilterEnabled() ? "YES" : "NO");
+			nlwarning(" * getEffect: %s", getPhysicalSource()->getEffect() ? "YES" : "NO");
+			nlwarning(" * getEffectGain: %f", getPhysicalSource()->getEffectGain());
+			nlwarning(" * isEffectFilterEnabled: %s", getPhysicalSource()->isEffectFilterEnabled() ? "YES" : "NO");
+#endif
 		}
 	}
 

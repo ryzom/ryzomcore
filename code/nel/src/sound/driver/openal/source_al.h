@@ -60,6 +60,8 @@ private:
 	bool _IsPaused;
 	NLMISC::TTime _StartTime;
 
+	bool _IsStreaming;
+
 	NLMISC::CVector _Pos;
 	float _Gain;
 	double _Alpha;

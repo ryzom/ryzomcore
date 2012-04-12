@@ -493,8 +493,10 @@ bool CSourceXAudio2::initFormat(IBuffer::TBufferFormat bufferFormat, uint8 chann
 	_SourceVoice->SetVolume(_Gain, _OperationSet);
 	setupVoiceSends();
 	_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
-
-
+	
+	// Also commit any 3D settings that were already done
+	commit3DChanges();
+	
 	// test
 	//XAUDIO2_VOICE_DETAILS voice_details;
 	//_SourceVoice->GetVoiceDetails(&voice_details);
@@ -580,6 +582,11 @@ bool CSourceXAudio2::preparePlay(IBuffer::TBufferFormat bufferFormat, uint8 chan
 bool CSourceXAudio2::play()
 {	
 	// nldebug(NLSOUND_XAUDIO2_PREFIX "play");
+
+	// Commit 3D changes before starting play
+	if (_SourceVoice)
+		commit3DChanges();
+	// else it is commit by the preparePlay > initFormat function
 
 	if (_IsPaused)
 	{
