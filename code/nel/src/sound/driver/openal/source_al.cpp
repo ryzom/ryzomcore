@@ -496,6 +496,14 @@ bool CSourceAL::getSourceRelativeMode() const
 void CSourceAL::setMinMaxDistances( float mindist, float maxdist, bool /* deferred */)
 {
 	nlassert( (mindist >= 0.0f) && (maxdist >= 0.0f) );
+
+	static float maxSqrt = sqrt(std::numeric_limits<float>::max());
+ 	if (maxdist >= maxSqrt)
+ 	{
+ 	       nlwarning("SOUND_DEV (OpenAL): Ridiculously high max distance set on source");
+ 	       maxdist = maxSqrt;
+ 	}
+
 	_MinDistance = mindist;
 	_MaxDistance = maxdist;
 	if (!_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
