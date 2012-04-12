@@ -42,7 +42,7 @@ _DirectFilterPassGain(NLSOUND_DEFAULT_FILTER_PASS_GAIN), _EffectFilterPassGain(N
 _DirectFilterLowFrequency(NLSOUND_DEFAULT_FILTER_PASS_LF), _DirectFilterHighFrequency(NLSOUND_DEFAULT_FILTER_PASS_HF), 
 _EffectFilterLowFrequency(NLSOUND_DEFAULT_FILTER_PASS_LF), _EffectFilterHighFrequency(NLSOUND_DEFAULT_FILTER_PASS_HF), 
 _IsPlaying(false), _IsPaused(false), _IsLooping(false), _Pitch(1.0f), 
-_Gain(1.0f), _MinDistance(1.0f), _MaxDistance(numeric_limits<float>::max()),
+_Gain(1.0f), _MinDistance(1.0f), _MaxDistance(sqrt(numeric_limits<float>::max())),
 _AdpcmUtility(NULL), _Channels(0), _BitsPerSample(0), _BufferStreaming(false)
 {
 	// nlwarning(NLSOUND_XAUDIO2_PREFIX "Inititializing CSourceXAudio2");
