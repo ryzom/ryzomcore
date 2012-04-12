@@ -156,6 +156,7 @@ void CStreamSource::play()
 		if ((_RelativeMode ? getPos().sqrnorm() : (mixer->getListenPosVector() - getPos()).sqrnorm()) > m_StreamSound->getMaxDistance() * m_StreamSound->getMaxDistance())
 		{
 			// Source is too far to play
+			m_WaitingForPlay = false;
 			if (_Spawn)
 			{
 				if (_SpawnEndCb != NULL)
@@ -165,7 +166,6 @@ void CStreamSource::play()
 #ifdef NLSOUND_DEBUG_STREAM
 			nldebug("CStreamSource %p : play FAILED, source is too far away !", (CAudioMixerUser::IMixerEvent*)this);
 #endif
-			// m_WaitingForPlay = false; // not necessary, delete ensures waiting for thread stop
 			return;
 		}
 		
@@ -221,13 +221,13 @@ void CStreamSource::play()
 			else
 			{
 				// No source available, kill.
+				m_WaitingForPlay = false;
 				if (_Spawn)
 				{
 					if (_SpawnEndCb != NULL)
 						_SpawnEndCb(this, _CbUserParam);					
 					delete this;
 				}
-				m_WaitingForPlay = false;
 				return;
 			}
 		}
@@ -269,6 +269,9 @@ void CStreamSource::play()
 
 #ifdef NL_DEBUG
 	nlassert(play);
+#else
+	if (!play)
+		nlwarning("Failed to play physical sound source. This is a serious error");
 #endif
 }
 
