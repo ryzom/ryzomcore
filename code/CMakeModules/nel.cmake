@@ -1,3 +1,11 @@
+# Force Release configuration for compiler checks
+SET(CMAKE_TRY_COMPILE_CONFIGURATION "Release")
+
+# Force Release configuration by default
+IF(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
 ###
 # Helper macro that generates .pc and installs it.
 # Argument: name - the name of the .pc package, e.g. "nel-pacs.pc"
