@@ -301,7 +301,7 @@ public:
 	 * If you are using the stream only in output mode, you can use this method as a faster version
 	 * of clear() *if you don't serialize pointers*.
 	 */
-	void			resetBufPos() { _Buffer.Pos = 0; }
+	virtual void		resetBufPos() { _Buffer.Pos = 0; }
 
 	/**
 	 * Resize the message buffer and fill data at position 0.
@@ -340,7 +340,7 @@ public:
 	 * fill it with raw data using any filling function (warning: don't fill more than 'msgsize'
 	 * bytes!), then you are ready to read, using serial(), the data you've just filled.
 	 */
-	uint8			*bufferToFill( uint32 msgsize )
+	virtual uint8		*bufferToFill( uint32 msgsize )
 	{
 #ifdef NL_DEBUG
 		nlassert( isReading() );
