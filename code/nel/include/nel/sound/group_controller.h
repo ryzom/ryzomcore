@@ -57,9 +57,11 @@ public:
 private:
 	CGroupController *m_Parent;
 	std::map<std::string, CGroupController *> m_Children;
-
-	float m_DevGain;
-	float m_UserGain;
+	
+	/// Gain as set by the interface
+	float m_Gain;
+	
+	/// Gain including parent gain
 	float m_FinalGain;
 
 	int m_NbSourcesInclChild;
@@ -70,27 +72,22 @@ public:
 
 	/// \name UGroupController
 	//@{
-	virtual void setDevGain(float gain) { NLMISC::clamp(gain, 0.0f, 1.0f); m_DevGain = gain; updateSourceGain(); }
-	virtual float getDevGain() { return m_DevGain; }
-
-	virtual void setUserGain(float gain) { NLMISC::clamp(gain, 0.0f, 1.0f); m_UserGain = gain; updateSourceGain(); }
-	virtual float getUserGain() { return m_UserGain; }
-
-	virtual void setGain(float devGain, float userGain) { NLMISC::clamp(devGain, 0.0f, 1.0f); NLMISC::clamp(userGain, 0.0f, 1.0f); m_DevGain = devGain; m_UserGain = userGain; updateSourceGain(); }
+	virtual void setGain(float gain) { NLMISC::clamp(gain, 0.0f, 1.0f); if (m_Gain != gain) { m_Gain = gain; updateSourceGain(); } }
+	virtual float getGain() { return m_Gain; }
 	//@}
-
+	
 	inline float getFinalGain() const { return m_FinalGain; }
-
+	
 	void addSource(CSourceCommon *source);
 	void removeSource(CSourceCommon *source);
-
+	
 	virtual std::string getPath();
-
+	
 protected:
 	virtual ~CGroupController(); // subnodes can only be deleted by the root
 
 private:
-	inline float calculateTotalGain() { return m_DevGain * m_UserGain; }
+	inline float calculateTotalGain() { return m_Gain; }
 	virtual void calculateFinalGain();
 	virtual void increaseSources();
 	virtual void decreaseSources();

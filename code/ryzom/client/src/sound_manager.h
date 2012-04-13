@@ -332,8 +332,11 @@ private:
 	/// Pointer on the audio mixer object
 	NLSOUND::UAudioMixer		*_AudioMixer;
 
-	/// The root effects group controller for volume settings
+	/// The root effects group controller for effects volume settings by the user
 	NLSOUND::UGroupController	*_GroupControllerEffects;
+
+	/// The root effects group controller for effects fading by the game
+	NLSOUND::UGroupController	*_GroupControllerEffectsGame;
 
 	/// Pointer on the root of the environmental sounds tree (if any)
 	NLSOUND::UEnvSound			*_EnvSoundRoot;

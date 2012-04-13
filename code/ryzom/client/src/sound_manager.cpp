@@ -107,6 +107,8 @@ enum TFilterMapping
 //-----------------------------------------------
 CSoundManager::CSoundManager(IProgressCallback * /* progressCallBack */)
 :	_AudioMixer(NULL), 
+	_GroupControllerEffects(NULL),
+	_GroupControllerEffectsGame(NULL),  
 	_EnvSoundRoot(NULL), 
 	_UserEntitySoundLevel(1.0f), 
 	_Sources(NULL)
@@ -139,6 +141,7 @@ CSoundManager::~CSoundManager()
 	NL3D::UParticleSystemSound::setPSSound(NULL);
 
 	_GroupControllerEffects = NULL;
+	_GroupControllerEffectsGame = NULL;
 
 	// free the audio mixer (and delete all sources)
 	delete _AudioMixer;
@@ -407,6 +410,7 @@ void CSoundManager::reset ()
 	NL3D::UParticleSystemSound::setPSSound(NULL);
 
 	_GroupControllerEffects = NULL;
+	_GroupControllerEffectsGame = NULL;
 
 	delete _AudioMixer;
 	_AudioMixer = NULL;
@@ -482,7 +486,8 @@ void CSoundManager::init(IProgressCallback *progressCallBack)
 		new CSoundAnimManager(_AudioMixer);
 
 		// get the controller group for effects
-		_GroupControllerEffects = _AudioMixer->getGroupController("effects");
+		_GroupControllerEffects = _AudioMixer->getGroupController("sound:effects");
+		_GroupControllerEffectsGame = _AudioMixer->getGroupController("sound:effects:game");
 
 		// restore the volume
 		SoundMngr->setSFXVolume(ClientCfg.SoundSFXVolume);
@@ -1543,7 +1548,8 @@ void		CSoundManager::updateVolume()
 		_AudioMixer->setEventMusicVolume(_GameMusicVolume);
 
 		// update sfx volume
-		_GroupControllerEffects->setGain(_FadeSFXVolume, _SFXVolume);
+		_GroupControllerEffects->setGain(_SFXVolume);
+		_GroupControllerEffectsGame->setGain(_FadeSFXVolume);
 	}
 }
 

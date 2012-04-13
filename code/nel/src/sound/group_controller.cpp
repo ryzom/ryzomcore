@@ -42,7 +42,7 @@ using namespace std;
 namespace NLSOUND {
 
 CGroupController::CGroupController(CGroupController *parent) : 
-	m_Parent(parent), m_DevGain(1.0f), m_UserGain(1.0f), m_NbSourcesInclChild(0)
+	m_Parent(parent), m_Gain(1.0f), m_NbSourcesInclChild(0)
 {
 	
 }
@@ -81,9 +81,7 @@ std::string CGroupController::getPath() // overridden by root
 		if (it->second == this)
 		{
 			const std::string &name = it->first;
-			std::string returnPath = m_Parent->getPath() + "/" + name;
-			if (returnPath[0] == '/')
-				returnPath = returnPath.substr(1);
+			std::string returnPath = m_Parent->getPath() + ":" + name;
 			return returnPath;
 		}
 	}

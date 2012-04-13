@@ -106,7 +106,7 @@ static void initSample()
 	// s_Source->setSourceRelativeMode(true);	
 	// s_Source->setPitch(2.0f);
 
-	s_GroupController = s_AudioMixer->getGroupController("dialog");
+	s_GroupController = s_AudioMixer->getGroupController("sound:dialog");
 }
 
 static void runSample()
@@ -129,10 +129,10 @@ static void runSample()
 #endif
 			{
 			case '+':
-				s_GroupController->setUserGain(s_GroupController->getUserGain() + 0.1f);
+				s_GroupController->setGain(s_GroupController->getGain() + 0.1f);
 				break;
 			case '-':
-				s_GroupController->setUserGain(s_GroupController->getUserGain() - 0.1f);
+				s_GroupController->setGain(s_GroupController->getGain() - 0.1f);
 				break;
 			case 'x':
 				s_Source->stop();

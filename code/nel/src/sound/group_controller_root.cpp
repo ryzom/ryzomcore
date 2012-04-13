@@ -39,6 +39,8 @@
 using namespace std;
 // using namespace NLMISC;
 
+#define NLSOUND_GROUP_CONTROLLER_ROOT_PATH "sound"
+
 namespace NLSOUND {
 
 CGroupControllerRoot::CGroupControllerRoot() : CGroupController(NULL)
@@ -53,7 +55,8 @@ CGroupControllerRoot::~CGroupControllerRoot()
 
 std::string CGroupControllerRoot::getPath()
 {
-	return "";
+	// The root node is always called sound
+	return NLSOUND_GROUP_CONTROLLER_ROOT_PATH;
 }
 
 void CGroupControllerRoot::calculateFinalGain()
@@ -78,9 +81,13 @@ void CGroupControllerRoot::decreaseSources()
 CGroupController *CGroupControllerRoot::getGroupController(const std::string &path)
 {
 	std::vector<std::string> pathNodes;
-	NLMISC::splitString(NLMISC::toLower(path), "/", pathNodes);
+	NLMISC::splitString(NLMISC::toLower(path), ":", pathNodes);
 	CGroupController *active = this;
-	for (std::vector<std::string>::iterator it(pathNodes.begin()), end(pathNodes.end()); it != end; ++it)
+	if (pathNodes[0] != NLSOUND_GROUP_CONTROLLER_ROOT_PATH)
+	{
+		nlerror("Root node for group controller must always be 'sound', invalid group '%s' requested", path.c_str());
+	}
+	for (std::vector<std::string>::iterator it(pathNodes.begin() + 1), end(pathNodes.end()); it != end; ++it)
 	{
 		if (!(*it).empty())
 		{
