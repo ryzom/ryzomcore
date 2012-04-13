@@ -78,6 +78,18 @@ void CGroupControllerRoot::decreaseSources()
 	--m_NbSourcesInclChild;
 }
 
+bool CGroupControllerRoot::isReservedName(const std::string &nodeName)
+{
+	// These node names are reserved, in case these category controllers can be integrated with CDB.
+	// I do not forsee any functionality for changing environment effect settings for entire categories.
+	// The nodeName parameter is already lowercase, see CGroupControllerRoot::getGroupController.
+	if (nodeName == NLSOUND_GROUP_CONTROLLER_ROOT_PATH) return true; // Root node name can only used by root.
+	if (nodeName == "gain") return true;
+	if (nodeName == "pitch") return true;
+	if (nodeName == "enable" || nodeName == "enabled") return true;
+	return true;
+}
+
 CGroupController *CGroupControllerRoot::getGroupController(const std::string &path)
 {
 	std::vector<std::string> pathNodes;
@@ -91,6 +103,10 @@ CGroupController *CGroupControllerRoot::getGroupController(const std::string &pa
 	{
 		if (!(*it).empty())
 		{
+			if (isReservedName(*it))
+			{
+				nlerror("Attempt to use reserved node name '%s' in group controller path '%s'", (*it).c_str(), path.c_str());
+			}
 			std::map<std::string, CGroupController *>::iterator found = active->m_Children.find(*it);
 			if (found == active->m_Children.end())
 			{
