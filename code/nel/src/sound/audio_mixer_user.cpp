@@ -221,6 +221,7 @@ void CAudioMixerUser::writeProfile(std::string& out)
 */
 	out += "Sound mixer: \n";
 	out += "\tPlaying sources: " + toString (getPlayingSourcesCount()) + " \n";
+	out += "\tPlaying simple sources: " + toString(countPlayingSimpleSources()) + " / " + toString(countSimpleSources()) + " \n";
 	out += "\tAvailable tracks: " + toString (getAvailableTracksCount()) + " \n";
 	out += "\tUsed tracks: " + toString (getUsedTracksCount()) + " \n";
 //	out << "\tMuted sources: " << nb << " \n";
@@ -270,7 +271,8 @@ void CAudioMixerUser::reset()
 
 	_SourceWaitingForPlay.clear();
 	
-	_MusicChannelFaders->reset();
+	for (uint i = 0; i < _NbMusicChannelFaders; ++i)
+		_MusicChannelFaders[i].reset();
 
 	// Stop tracks
 	uint i;
@@ -2172,6 +2174,32 @@ uint			CAudioMixerUser::getPlayingSourcesCount() const
 {
 	return _PlayingSources;
 }
+
+
+// ******************************************************************
+
+uint			CAudioMixerUser::countPlayingSimpleSources() const
+{
+	uint count = 0;
+	for (TSourceContainer::const_iterator it(_Sources.begin()), end(_Sources.end()); it != end; ++it)
+	{
+		if ((*it)->getType() == CSourceCommon::SOURCE_SIMPLE && (*it)->isPlaying())
+			++count;
+	}
+	return count;
+}
+
+uint			CAudioMixerUser::countSimpleSources() const
+{
+	uint count = 0;
+	for (TSourceContainer::const_iterator it(_Sources.begin()), end(_Sources.end()); it != end; ++it)
+	{
+		if ((*it)->getType() == CSourceCommon::SOURCE_SIMPLE)
+			++count;
+	}
+	return count;
+}
+
 
 // ******************************************************************
 

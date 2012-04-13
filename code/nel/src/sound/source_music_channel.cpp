@@ -48,6 +48,7 @@ CSourceMusicChannel::CSourceMusicChannel() : m_Source(NULL), m_Gain(1.0f)
 
 CSourceMusicChannel::~CSourceMusicChannel()
 {
+	nlassert(!m_Source);
 	delete m_Source;
 	m_Source = NULL;
 }

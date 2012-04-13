@@ -230,6 +230,8 @@ public:
 	virtual uint				getSourcesInstanceCount() const { return (uint)_Sources.size(); }
 	/// Return the number of playing sources (slow)
 	virtual uint				getPlayingSourcesCount() const;
+	uint 						countPlayingSimpleSources() const; // debug
+	uint						countSimpleSources() const; // debug
 	/// Return the number of available tracks
 	virtual uint				getAvailableTracksCount() const;
 	/// Return the number of used tracks
