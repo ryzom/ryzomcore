@@ -110,8 +110,8 @@ CSoundManager::CSoundManager(IProgressCallback * /* progressCallBack */)
 	_GroupControllerEffects(NULL),
 	_GroupControllerEffectsGame(NULL),  
 	_EnvSoundRoot(NULL), 
-	_UserEntitySoundLevel(1.0f), 
-	_Sources(NULL)
+	_Sources(NULL), 
+	_UserEntitySoundLevel(1.0f)
 {
 	_EnableBackgroundMusicAtTime= 0;
 	_GameMusicVolume= 1.f;
@@ -747,7 +747,7 @@ nldebug("nb sources = %d", _Sources.size() );
 		{
 			if ( (*it).second == sourceId )
 			{
-				(*it).second = NULL;
+				(*it).second = 0;
 //				itOld = it;
 //				++it;
 
