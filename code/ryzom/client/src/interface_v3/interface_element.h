@@ -361,7 +361,7 @@ public:
 	  */
 	virtual void forceOpen() { setActive(true); }
 
-	virtual void enableBlink(int /* numBlinks */ = 0) {}
+	virtual void enableBlink(uint /* numBlinks */ = 0) {}
 	virtual void disableBlink() {}
 	virtual bool getBlink() const { return false; }
 
