@@ -87,7 +87,7 @@ bool CGroupControllerRoot::isReservedName(const std::string &nodeName)
 	if (nodeName == "gain") return true;
 	if (nodeName == "pitch") return true;
 	if (nodeName == "enable" || nodeName == "enabled") return true;
-	return true;
+	return false;
 }
 
 CGroupController *CGroupControllerRoot::getGroupController(const std::string &path)
