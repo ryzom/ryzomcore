@@ -1063,7 +1063,8 @@ private:
 
 	// Update tooltip coordinate if they need to be (getInvalidCoords() returns a value != 0)
 	void updateTooltipCoords(CCtrlBase *newCtrl);
-
+	
+	CInterfaceLink::CInterfaceLinkUpdater *interfaceLinkUpdater;
 };
 
 #endif // NL_INTERFACE_MANAGER_H

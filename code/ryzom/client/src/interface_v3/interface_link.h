@@ -19,12 +19,9 @@
 #ifndef CL_INTERFACE_LINK_H
 #define CL_INTERFACE_LINK_H
 
-#include "../cdb.h"
-#include "nel/misc/smart_ptr.h"
+#include "../cdb_branch.h"
 
 class CInterfaceElement;
-class ICDBNode;
-class CCDBNodeLeaf;
 class CReflectedProperty;
 class CInterfaceExprValue;
 class CInterfaceGroup;
@@ -66,6 +63,17 @@ public:
 		  */
 		bool affect(const CInterfaceExprValue &value);
 	};
+
+
+	/// Updates triggered interface links when triggered by the observed branch
+	class CInterfaceLinkUpdater : public CCDBNodeBranch::IBranchObserverCallFlushObserver
+	{
+	public:
+		CInterfaceLinkUpdater();
+		~CInterfaceLinkUpdater();
+		void onObserverCallFlush();
+	};
+
 public:
 	CInterfaceLink();
 	~CInterfaceLink(); // this object should only be destroyed by a CInterfaceElement

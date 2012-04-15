@@ -31,6 +31,12 @@
 class CCDBNodeBranch : public ICDBNode
 {
 public:
+	/// Triggered when the branch observers are updated
+	class IBranchObserverCallFlushObserver : public NLMISC::CRefCount{
+	public:
+		virtual ~IBranchObserverCallFlushObserver(){}
+		virtual void onObserverCallFlush() = 0;
+	};
 
 	// default constructor
 	CCDBNodeBranch(const std::string &name) : ICDBNode(name)
@@ -212,6 +218,13 @@ public:
 	  */
 	static void flushObserversCalls();
 
+private:
+	static void triggerFlushObservers();
+
+public:
+	static void addFlushObserver( IBranchObserverCallFlushObserver *observer );
+	static void removeFlushObserver( IBranchObserverCallFlushObserver *observer );
+
 	// mark this branch and parent branch as 'modified'. This is usually called by sub-leaves
 	void linkInModifiedNodeList(NLMISC::TStringId modifiedLeafName);
 
@@ -324,6 +337,11 @@ protected:
 	/// called by clear
 	void			removeAllBranchObserver();
 	void			removeBranchInfoIt(TObsList::iterator it);
+
+
+private:
+	static std::vector< IBranchObserverCallFlushObserver* > flushObservers;
+
 };
 
 

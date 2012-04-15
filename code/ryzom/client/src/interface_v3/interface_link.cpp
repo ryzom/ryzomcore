@@ -130,7 +130,20 @@ static bool affect(const CInterfaceExprValue &value, CInterfaceElement &destElem
 	return true;
 }
 
+CInterfaceLink::CInterfaceLinkUpdater::CInterfaceLinkUpdater()
+{
+	CCDBNodeBranch::addFlushObserver( this );
+}
 
+CInterfaceLink::CInterfaceLinkUpdater::~CInterfaceLinkUpdater()
+{
+	CCDBNodeBranch::removeFlushObserver( this );
+}
+
+void CInterfaceLink::CInterfaceLinkUpdater::onObserverCallFlush()
+{
+	CInterfaceLink::updateTrigeredLinks();
+}
 
 /////////////
 // MEMBERS //

@@ -16,8 +16,6 @@
 
 
 
-#include "stdpch.h"
-
 //#define TRACE_READ_DELTA
 //#define TRACE_WRITE_DELTA
 //#define TRACE_SET_VALUE
@@ -32,7 +30,6 @@
 #include "cdb_leaf.h"
 #include "game_share/xml_auto_ptr.h"
 //#include <iostream.h>
-#include "interface_v3/interface_manager.h"
 
 ////////////////
 // Namespaces //
@@ -83,6 +80,8 @@ uint CCDBNodeBranch::_CDBLastUnifiedIndex = 0;
 uint CCDBNodeBranch::_FirstLevelIdBitsByBank [NB_CDB_BANKS];
 
 extern const char *CDBBankNames[INVALID_CDB_BANK+1];
+
+std::vector< CCDBNodeBranch::IBranchObserverCallFlushObserver* > CCDBNodeBranch::flushObservers;
 
 // reset all static data
 void CCDBNodeBranch::reset()
@@ -703,13 +702,44 @@ void CCDBNodeBranch::flushObserversCalls()
 		}
 		nlassert(_FirstNotifiedObs[1 - _CurrNotifiedObsList] == NULL);
 		nlassert(_LastNotifiedObs[1 - _CurrNotifiedObsList] == NULL);
-		// update triggered link
-		CInterfaceLink::updateTrigeredLinks();
+		triggerFlushObservers();
 		// examine other list to see if nodes have been registered
 		_CurrNotifiedObs = _FirstNotifiedObs[_CurrNotifiedObsList];
 	}
-	CInterfaceLink::updateTrigeredLinks(); // should call it at least once
+	triggerFlushObservers();
 //	nlassert(_CrtCheckMemory());
+}
+
+void CCDBNodeBranch::triggerFlushObservers()
+{
+	for( std::vector< IBranchObserverCallFlushObserver* >::iterator itr = flushObservers.begin(); itr != flushObservers.end(); itr++ )
+	{
+		(*itr)->onObserverCallFlush();
+	}
+}
+
+void CCDBNodeBranch::addFlushObserver( CCDBNodeBranch::IBranchObserverCallFlushObserver *observer )
+{	
+	std::vector< IBranchObserverCallFlushObserver* >::iterator itr 
+		= std::find( flushObservers.begin(), flushObservers.end(), observer );
+	
+	// Already exists
+	if( itr != flushObservers.end() )
+		return;
+
+	flushObservers.push_back( observer );
+}
+
+void CCDBNodeBranch::removeFlushObserver( CCDBNodeBranch::IBranchObserverCallFlushObserver *observer )
+{
+	std::vector< IBranchObserverCallFlushObserver* >::iterator itr 
+		= std::find( flushObservers.begin(), flushObservers.end(), observer );
+	
+	// Isn't in our list
+	if( itr == flushObservers.end() )
+		return;
+
+	flushObservers.erase( itr );
 }
 
 //-----------------------------------------------

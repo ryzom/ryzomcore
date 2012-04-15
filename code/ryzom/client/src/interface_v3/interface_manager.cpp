@@ -257,6 +257,7 @@ CInterfaceManager::CInterfaceManager()
 {
 	_Instance = this;
 	_DbRootNode = new CCDBNodeBranch("ROOT");
+	interfaceLinkUpdater = new CInterfaceLink::CInterfaceLinkUpdater();
 	_ScreenW = _ScreenH = 0;
 	_LastInGameScreenW = _LastInGameScreenH = 0;
 	_Pointer = NULL;
@@ -372,6 +373,8 @@ CInterfaceManager::~CInterfaceManager()
 
 	// release the database observers
 	releaseServerToLocalAutoCopyObservers();
+	delete interfaceLinkUpdater;
+	interfaceLinkUpdater = NULL;
 }
 
 // ------------------------------------------------------------------------------------------------
