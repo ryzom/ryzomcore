@@ -84,7 +84,7 @@ public:
 	 * Update the database from a stream coming from the FE
 	 * \param f the stream
 	 */
-	void readDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream& s, TCDBBank bank );
+	void readDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream& s, uint bank );
 
 	/**
 	 * Return the value of a property (the update flag is set to false)

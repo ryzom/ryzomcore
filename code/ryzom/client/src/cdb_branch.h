@@ -20,7 +20,11 @@
 #define CDB_BRANCH_H
 
 #include "cdb.h"
-#include "game_share/ryzom_database_banks.h"
+
+enum{
+	CDB_BANKS_MAX = 3,
+	CDB_BANK_INVALID
+};
 
 /**
  * Database Node which contains a set of properties
@@ -99,7 +103,7 @@ public:
 	void write( CTextId& id, FILE * f);
 
 	/// Update the database from the delta, but map the first level with the bank mapping (see _CDBBankToUnifiedIndexMapping)
-	void readAndMapDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream& s, TCDBBank bank );
+	void readAndMapDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream& s, uint bank );
 
 	/// Update the database from a stream coming from the FE
 	void readDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream & f );
@@ -125,7 +129,7 @@ public:
 	void clear();
 
 	/// Reset the data corresponding to the bank (works only on top level node)
-	void resetBank( NLMISC::TGameCycle gc, TCDBBank bank)
+	void resetBank( NLMISC::TGameCycle gc, uint bank)
 	{
 		//nlassert( getParent() == NULL );
 		for ( uint i=0; i!=_Nodes.size(); ++i )
@@ -323,16 +327,16 @@ protected:
 	static CDBBranchObsInfo *_NextNotifiedObs;
 
 	/// Mapping from server database index to client database index (first-level nodes)
-	static std::vector<uint> _CDBBankToUnifiedIndexMapping [NB_CDB_BANKS];
+	static std::vector<uint> _CDBBankToUnifiedIndexMapping [CDB_BANKS_MAX];
 
 	// Mapping from client database index to TCDBBank (first-level nodes)
-	static std::vector<TCDBBank> _UnifiedIndexToBank;
+	static std::vector<uint> _UnifiedIndexToBank;
 
 	/// Last index mapped
 	static uint				_CDBLastUnifiedIndex;
 
 	/// Number of bits for first-level branches, by bank
-	static uint				_FirstLevelIdBitsByBank [NB_CDB_BANKS];
+	static uint				_FirstLevelIdBitsByBank [CDB_BANKS_MAX];
 
 	/// called by clear
 	void			removeAllBranchObserver();

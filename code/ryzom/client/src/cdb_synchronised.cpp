@@ -16,8 +16,6 @@
 
 
 
-#include "stdpch.h"
-
 //#define TRACE_READ_DELTA
 //#define TRACE_WRITE_DELTA
 //#define TRACE_SET_VALUE
@@ -175,7 +173,7 @@ void CCDBSynchronised::write( const string &fileName )
 //	readDelta
 //
 //-----------------------------------------------
-void CCDBSynchronised::readDelta( NLMISC::TGameCycle gc, CBitMemStream& s, TCDBBank bank )
+void CCDBSynchronised::readDelta( NLMISC::TGameCycle gc, CBitMemStream& s, uint bank )
 {
 	nldebug("Update DB");
 

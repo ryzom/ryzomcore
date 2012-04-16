@@ -68,25 +68,25 @@ CCDBNodeBranch::CDBBranchObsInfo *CCDBNodeBranch::_NextNotifiedObs = NULL;
 uint CCDBNodeBranch::_CurrNotifiedObsList = 0;
 
 // Mapping from server database index to client database index (first-level nodes)
-vector<uint> CCDBNodeBranch::_CDBBankToUnifiedIndexMapping [NB_CDB_BANKS];
+vector<uint> CCDBNodeBranch::_CDBBankToUnifiedIndexMapping [CDB_BANKS_MAX];
 
 // Mapping from client database index to TCDBBank (first-level nodes)
-vector<TCDBBank> CCDBNodeBranch::_UnifiedIndexToBank;
+vector<uint> CCDBNodeBranch::_UnifiedIndexToBank;
 
 // Last index mapped
 uint CCDBNodeBranch::_CDBLastUnifiedIndex = 0;
 
 // Number of bits for first-level branches, by bank
-uint CCDBNodeBranch::_FirstLevelIdBitsByBank [NB_CDB_BANKS];
+uint CCDBNodeBranch::_FirstLevelIdBitsByBank [CDB_BANKS_MAX];
 
-extern const char *CDBBankNames[INVALID_CDB_BANK+1];
+extern const char *CDBBankNames[CDB_BANK_INVALID+1];
 
 std::vector< CCDBNodeBranch::IBranchObserverCallFlushObserver* > CCDBNodeBranch::flushObservers;
 
 // reset all static data
 void CCDBNodeBranch::reset()
 {
-	for ( uint b=0; b<NB_CDB_BANKS; ++b )
+	for ( uint b=0; b<CDB_BANKS_MAX; ++b )
 		_CDBBankToUnifiedIndexMapping[b].clear();
 	_UnifiedIndexToBank.clear();
 	_CDBLastUnifiedIndex = 0;
@@ -111,14 +111,14 @@ void CCDBNodeBranch::mapNodeByBank( ICDBNode * /* node */, const string& bankStr
 	}
 	else*/ // now clientOnly indices are known by the server as well
 	{
-		for ( uint b=0; b!=INVALID_CDB_BANK; ++b )
+		for ( uint b=0; b!=CDB_BANK_INVALID; ++b )
 		{
 			if ( string(CDBBankNames[b]) == bankStr )
 			{
 				//nldebug( "CDB: Mapping %s.%u to Unified.%u", CDBBankNames[b], _CDBBankToUnifiedIndexMapping[b].size(), _CDBLastUnifiedIndex );
 				_CDBBankToUnifiedIndexMapping[b].push_back( _CDBLastUnifiedIndex );
 				++_CDBLastUnifiedIndex;
-				_UnifiedIndexToBank.push_back( (TCDBBank)b );
+				_UnifiedIndexToBank.push_back( b );
 				break;
 			}
 		}
@@ -270,7 +270,7 @@ void CCDBNodeBranch::init( xmlNodePtr node, NLMISC::IProgressCallback &progressC
 		nlassertex( _UnifiedIndexToBank.size() == countNode, ("Mapped: %u Nodes: %u", _UnifiedIndexToBank.size(), countNode) );
 
 		_IdBits = 0;
-		for ( uint b=0; b!=NB_CDB_BANKS; ++b )
+		for ( uint b=0; b!=CDB_BANKS_MAX; ++b )
 		{
 			uint nbNodesOfBank = (uint)_CDBBankToUnifiedIndexMapping[b].size();
 			uint idb = 0;
@@ -459,7 +459,7 @@ bool CCDBNodeBranch::setProp( CTextId& id, sint64 value )
 /*
  * Update the database from the delta, but map the first level with the bank mapping (see _CDBBankToUnifiedIndexMapping)
  */
-void CCDBNodeBranch::readAndMapDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream& s, TCDBBank bank )
+void CCDBNodeBranch::readAndMapDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream& s, uint bank )
 {
 	nlassert( ! isAtomic() ); // root node mustn't be atomic
 

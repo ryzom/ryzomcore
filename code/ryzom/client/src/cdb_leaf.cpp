@@ -16,9 +16,6 @@
 
 
 
-#include "stdpch.h"
-
-
 //#define TRACE_READ_DELTA
 //#define TRACE_WRITE_DELTA
 //#define TRACE_SET_VALUE
@@ -31,7 +28,6 @@
 #include "cdb_leaf.h"
 #include "game_share/xml_auto_ptr.h"
 //#include <iostream.h>
-#include "interface_v3/interface_manager.h"
 
 ////////////////
 // Namespaces //
