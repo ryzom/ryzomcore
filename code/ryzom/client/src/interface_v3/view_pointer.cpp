@@ -28,7 +28,7 @@
 #include "group_html.h"
 #include "group_map.h"
 //
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 //
 #include "group_container.h"
 #include "interface_3d_scene.h"

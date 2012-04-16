@@ -24,7 +24,7 @@
 #include "group_container.h"
 #include "../misc.h"
 #include "interface_link.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "lua_ihm.h"
 #include "nel/misc/mem_stream.h"
 //

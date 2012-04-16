@@ -19,7 +19,7 @@
 #include "view_bitmap_faber_mp.h"
 #include "interface_manager.h"
 #include "../sheet_manager.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 extern CSheetManager SheetMngr;
 

@@ -27,7 +27,7 @@
 #include "../libwww.h"
 #include "interface_manager.h"
 #include "action_handler.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 #include "../client_cfg.h"
 

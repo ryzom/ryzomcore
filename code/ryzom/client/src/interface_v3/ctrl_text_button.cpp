@@ -22,7 +22,7 @@
 
 #include "ctrl_text_button.h"
 #include "interface_manager.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "view_text.h"
 #include "view_text_id.h"
 #include "group_container.h"

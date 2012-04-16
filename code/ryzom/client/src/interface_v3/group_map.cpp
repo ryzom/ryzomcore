@@ -38,7 +38,7 @@
 #include "../global.h"
 #include "ctrl_quad.h"
 //
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "game_share/mission_desc.h"
 #include "game_share/inventories.h"
 #include "game_share/animal_type.h"

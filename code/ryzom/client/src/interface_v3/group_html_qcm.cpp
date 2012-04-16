@@ -22,7 +22,7 @@
 #include "stdpch.h"
 
 #include "group_html_qcm.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../client_cfg.h"
 #include "interface_manager.h"
 #include "../user_entity.h"

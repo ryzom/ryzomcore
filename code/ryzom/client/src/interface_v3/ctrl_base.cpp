@@ -19,7 +19,7 @@
 #include "stdpch.h"
 
 #include "ctrl_base.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "interface_manager.h"
 
 using namespace NLMISC;

@@ -27,7 +27,7 @@
 #include "nel/misc/factory.h"
 #include "nel/misc/big_file.h"
 
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 #include "interface_parser.h"
 #include "interface_observer.h"

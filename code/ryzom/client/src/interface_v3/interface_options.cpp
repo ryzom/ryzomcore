@@ -22,7 +22,7 @@
 #include "interface_options.h"
 #include "interface_manager.h"
 #include "group_menu.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../net_manager.h"
 #include "../sheet_manager.h"
 #include "../entity_animation_manager.h"

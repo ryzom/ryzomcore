@@ -24,7 +24,7 @@
 #include "group_in_scene.h"
 #include "interface_manager.h"
 #include "view_renderer.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 using namespace std;
 using namespace NLMISC;

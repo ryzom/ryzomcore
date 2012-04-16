@@ -23,7 +23,7 @@
 #include <libxml/parser.h>
 #include "nel/misc/types_nl.h"
 #include "nel/misc/debug.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include <map>
 
 extern bool game_exit;

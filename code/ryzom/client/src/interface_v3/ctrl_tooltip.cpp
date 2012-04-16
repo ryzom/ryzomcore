@@ -21,7 +21,7 @@
 
 #include "ctrl_tooltip.h"
 #include "interface_manager.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 // ----------------------------------------------------------------------------
 using namespace std;

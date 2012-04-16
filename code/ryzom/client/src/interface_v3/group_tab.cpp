@@ -19,7 +19,7 @@
 #include "stdpch.h"
 
 #include "group_tab.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../time_client.h"
 #include "interface_manager.h"
 

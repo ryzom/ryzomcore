@@ -19,7 +19,7 @@
 #include "stdpch.h"
 #include "dbgroup_list_sheet_text_share.h"
 #include "../client_sheets/sbrick_sheet.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "interface_manager.h"
 #include "view_bitmap.h"
 #include "ctrl_text_button.h"

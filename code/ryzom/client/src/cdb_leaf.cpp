@@ -26,7 +26,7 @@
 // Includes //
 //////////////
 #include "cdb_leaf.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 //#include <iostream.h>
 
 ////////////////

@@ -29,7 +29,7 @@
 #include "nel/3d/u_particle_system_instance.h"
 #include "nel/3d/u_animation_set.h"
 
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "action_handler.h"
 
 #include "lua_ihm.h"

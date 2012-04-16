@@ -22,7 +22,7 @@
 #include "nel/misc/file.h"
 #include "nel/misc/game_device_events.h"
 
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 #include "input_handler_manager.h"
 #include "interface_manager.h"

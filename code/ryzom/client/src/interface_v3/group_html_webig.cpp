@@ -17,7 +17,7 @@
 #include "stdpch.h"
 
 #include "group_html_webig.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../client_cfg.h"
 #include "../user_entity.h"
 #include "../entities.h"

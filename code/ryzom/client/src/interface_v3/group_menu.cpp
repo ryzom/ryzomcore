@@ -21,7 +21,7 @@
 #include "interface_manager.h"
 #include "interface_expr.h"
 #include "group_menu.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "view_bitmap.h"
 #include "action_handler.h" // Just for getAllParams
 #include "lua_ihm.h"

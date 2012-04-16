@@ -43,7 +43,7 @@
 #include "sbrick_manager.h"
 #include "sphrase_manager.h"
 #include "../client_sheets/sphrase_sheet.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "lua_ihm.h"
 #include "game_share/bot_chat_types.h"
 

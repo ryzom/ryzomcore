@@ -20,7 +20,7 @@
 #include "dbgroup_list_sheet_text.h"
 #include "group_container.h"
 #include "interface_manager.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../sheet_manager.h"
 #include "ctrl_button.h"
 #include "view_text.h"

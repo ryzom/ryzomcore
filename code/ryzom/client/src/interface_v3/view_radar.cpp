@@ -22,7 +22,7 @@
 
 #include "view_radar.h"
 #include "interface_manager.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "group_container.h"
 #include "../npc_icon.h"
 #include "nel/misc/fast_floor.h"
