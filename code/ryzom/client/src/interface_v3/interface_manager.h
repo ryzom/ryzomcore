@@ -229,12 +229,12 @@ public:
 
 
 	/// Get the root of the database
-	CCDBNodeBranch *getDB() const { return _DbRootNode; }
+	NLMISC::CCDBNodeBranch *getDB() const { return _DbRootNode; }
 	// yoyo: should avoid to try creating DbPropr with this system... very dangerous
-	CCDBNodeLeaf* getDbProp (const std::string & name, bool bCreate=true);
+	NLMISC::CCDBNodeLeaf* getDbProp (const std::string & name, bool bCreate=true);
 	void delDbProp(const std::string & name);
 	// get a Db Branch by its name. NULL if don't exist or not a branch (never try to create it)
-	CCDBNodeBranch *getDbBranch(const std::string &name);
+	NLMISC::CCDBNodeBranch *getDbBranch(const std::string &name);
 	// return the DB as an int32. return 0 if the DB does not exist (never create)
 	sint32			getDbValue32 (const std::string & name);
 
@@ -448,7 +448,7 @@ public:
 	 * \param id :  the text id of the element to observe
 	 * \return true if success
 	 */
-	bool addDBObserver (ICDBNode::IPropertyObserver* observer, ICDBNode::CTextId  id);
+	bool addDBObserver (NLMISC::ICDBNode::IPropertyObserver* observer, NLMISC::ICDBNode::CTextId  id);
 
 	/**
 	 * add an observer to a database entry
@@ -456,17 +456,17 @@ public:
 	 * \param id :  the text id of the element to observe
 	 * \return true if success
 	 */
-	bool addDBObserver (ICDBNode::IPropertyObserver* observer, const std::string& id)
+	bool addDBObserver (NLMISC::ICDBNode::IPropertyObserver* observer, const std::string& id)
 	{
-		return addDBObserver(observer, ICDBNode::CTextId(id));
+		return addDBObserver(observer, NLMISC::ICDBNode::CTextId(id));
 	}
 
 	/** remove the observer from the dataBase
 	 */
-	bool removeDBObserver (ICDBNode::IPropertyObserver* observer, ICDBNode::CTextId  id);
-	bool removeDBObserver (ICDBNode::IPropertyObserver* observer, const std::string& id)
+	bool removeDBObserver (NLMISC::ICDBNode::IPropertyObserver* observer, NLMISC::ICDBNode::CTextId  id);
+	bool removeDBObserver (NLMISC::ICDBNode::IPropertyObserver* observer, const std::string& id)
 	{
-		return removeDBObserver(observer, ICDBNode::CTextId(id));
+		return removeDBObserver(observer, NLMISC::ICDBNode::CTextId(id));
 	}
 
 	/// \name Global Interface Options
@@ -658,7 +658,7 @@ public:
 	uint8			getLocalSyncActionCounter() const {return _LocalSyncActionCounter;}
 	uint8			getLocalSyncActionCounterMask() const {return _LocalSyncActionCounterMask;}
 
-	bool			localActionCounterSynchronizedWith(CCDBNodeLeaf *leaf)
+	bool			localActionCounterSynchronizedWith(NLMISC::CCDBNodeLeaf *leaf)
 	{
 		if (!leaf) return false;
 		uint	srvVal= leaf->getValue32();
@@ -737,31 +737,31 @@ private:
 		void	release();
 
 		// When something in the SERVER DB changes
-		void	onServerChange(ICDBNode *serverNode);
+		void	onServerChange(NLMISC::ICDBNode *serverNode);
 		// When something in the LOCAL DB changes
-		void	onLocalChange(ICDBNode *localNode);
+		void	onLocalChange(NLMISC::ICDBNode *localNode);
 
 	private:
-		class CLocalDBObserver : public ICDBNode::IPropertyObserver
+		class CLocalDBObserver : public NLMISC::ICDBNode::IPropertyObserver
 		{
 		public:
 			CServerToLocalAutoCopy	&_Owner;
 			CLocalDBObserver(CServerToLocalAutoCopy	&owner) : _Owner(owner) {}
-			virtual void	update(ICDBNode *node)	{_Owner.onLocalChange(node);}
+			virtual void	update(NLMISC::ICDBNode *node)	{_Owner.onLocalChange(node);}
 		};
-		class CServerDBObserver : public ICDBNode::IPropertyObserver
+		class CServerDBObserver : public NLMISC::ICDBNode::IPropertyObserver
 		{
 		public:
 			CServerToLocalAutoCopy	&_Owner;
 			CServerDBObserver(CServerToLocalAutoCopy	&owner) : _Owner(owner) {}
-			virtual void	update(ICDBNode *node)	{_Owner.onServerChange(node);}
+			virtual void	update(NLMISC::ICDBNode *node)	{_Owner.onServerChange(node);}
 		};
 
 		// A node here is a pair Server<->Local
 		struct CNode
 		{
-			CCDBNodeLeaf	*ServerNode;
-			CCDBNodeLeaf	*LocalNode;
+			NLMISC::CCDBNodeLeaf	*ServerNode;
+			NLMISC::CCDBNodeLeaf	*LocalNode;
 			bool			InsertedInUpdateList;
 			CNode()
 			{
@@ -786,7 +786,7 @@ private:
 
 	private:
 		// Counter Node
-		CCDBNodeLeaf			*_ServerCounter;
+		NLMISC::CCDBNodeLeaf			*_ServerCounter;
 		// updaters
 		CLocalDBObserver		_LocalObserver;
 		CServerDBObserver		_ServerObserver;
@@ -802,7 +802,7 @@ private:
 		// List of nodes to update until next synchonized client-server counter
 		std::vector<CNode*>			_UpdateList;
 
-		void	buildRecursLocalLeaves(CCDBNodeBranch *branch, std::vector<CCDBNodeLeaf*> &leaves);
+		void	buildRecursLocalLeaves(NLMISC::CCDBNodeBranch *branch, std::vector<NLMISC::CCDBNodeLeaf*> &leaves);
 	};
 
 	// Infos about a modal window.
@@ -833,10 +833,10 @@ private:
 
 
 	// Database management stuff
-	class CDBLandmarkObs : public ICDBNode::IPropertyObserver
+	class CDBLandmarkObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode *node);
+		virtual void update(NLMISC::ICDBNode *node);
 	};
 
 	// EMOTES
@@ -858,22 +858,22 @@ private:
 // ------------------------------------------------------------------------------------------------
 public:
 	// cache and expose some commonly used db nodes
-	CCDBNodeBranch *_DBB_UI_DUMMY;
-	CCDBNodeLeaf *_DB_UI_DUMMY_QUANTITY;
-	CCDBNodeLeaf *_DB_UI_DUMMY_QUALITY;
-	CCDBNodeLeaf *_DB_UI_DUMMY_SHEET;
-	CCDBNodeLeaf *_DB_UI_DUMMY_NAMEID;
-	CCDBNodeLeaf *_DB_UI_DUMMY_ENCHANT;
-	CCDBNodeLeaf *_DB_UI_DUMMY_SLOT_TYPE;
-	CCDBNodeLeaf *_DB_UI_DUMMY_PHRASE;
-	CCDBNodeLeaf *_DB_UI_DUMMY_WORNED;
-	CCDBNodeLeaf *_DB_UI_DUMMY_PREREQUISIT_VALID;
-	CCDBNodeLeaf *_DB_UI_DUMMY_FACTION_TYPE;
+	NLMISC::CCDBNodeBranch *_DBB_UI_DUMMY;
+	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_QUANTITY;
+	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_QUALITY;
+	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_SHEET;
+	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_NAMEID;
+	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_ENCHANT;
+	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_SLOT_TYPE;
+	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_PHRASE;
+	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_WORNED;
+	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_PREREQUISIT_VALID;
+	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_FACTION_TYPE;
 
 private:
 
-	CCDBNodeLeaf *_CheckMailNode;
-	CCDBNodeLeaf *_CheckForumNode;
+	NLMISC::CCDBNodeLeaf *_CheckMailNode;
+	NLMISC::CCDBNodeLeaf *_CheckForumNode;
 	sint64 _UpdateWeatherTime;
 
 	// @}
@@ -908,7 +908,7 @@ private:
 	///the singleton's instance
 	static CInterfaceManager* _Instance;
 
-	CCDBNodeLeaf	   *_DescTextTarget;
+	NLMISC::CCDBNodeLeaf	   *_DescTextTarget;
 
 	// Capture
 	NLMISC::CRefPtr<CCtrlBase>	_CaptureKeyboard;
@@ -960,7 +960,7 @@ private:
 	sint32			_LastInGameScreenW, _LastInGameScreenH; // Resolution used for last InGame interface
 
 	// root node for interfaces properties in the databases
-	CCDBNodeBranch *_DbRootNode;
+	NLMISC::CCDBNodeBranch *_DbRootNode;
 
 	// List of active Anims
 	std::vector<CInterfaceAnim*> _ActiveAnims;
@@ -998,14 +998,14 @@ private:
 	void    restoreAllContainersBackupPosition();
 
 	// Some Node leaf
-	CCDBNodeLeaf *_NeutralColor;
-	CCDBNodeLeaf *_WarningColor;
-	CCDBNodeLeaf *_ErrorColor;
-	CCDBNodeLeaf *_RProp;
-	CCDBNodeLeaf *_GProp;
-	CCDBNodeLeaf *_BProp;
-	CCDBNodeLeaf *_AProp;
-	CCDBNodeLeaf *_AlphaRolloverSpeedDB;
+	NLMISC::CCDBNodeLeaf *_NeutralColor;
+	NLMISC::CCDBNodeLeaf *_WarningColor;
+	NLMISC::CCDBNodeLeaf *_ErrorColor;
+	NLMISC::CCDBNodeLeaf *_RProp;
+	NLMISC::CCDBNodeLeaf *_GProp;
+	NLMISC::CCDBNodeLeaf *_BProp;
+	NLMISC::CCDBNodeLeaf *_AProp;
+	NLMISC::CCDBNodeLeaf *_AlphaRolloverSpeedDB;
 
 	// The next ViewText to draw for Over
 	NLMISC::CRefPtr<CInterfaceElement>	_OverExtendViewText;

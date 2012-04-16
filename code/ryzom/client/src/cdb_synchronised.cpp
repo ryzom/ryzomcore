@@ -48,7 +48,7 @@ using namespace NLMISC;
 using namespace std;
 
 
-bool VerboseDatabase = false;
+bool NLMISC::VerboseDatabase = false;
 uint32 NbDatabaseChanges = 0;
 
 

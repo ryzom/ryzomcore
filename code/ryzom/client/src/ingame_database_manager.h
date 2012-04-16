@@ -27,9 +27,9 @@
 // Misc.
 #include "nel/misc/types_nl.h"
 // Game share.
-#include "cdb.h"
-#include "cdb_leaf.h"
-#include "cdb_branch.h"
+#include "nel/misc/cdb.h"
+#include "nel/misc/cdb_leaf.h"
+#include "nel/misc/cdb_branch.h"
 #include "cdb_synchronised.h"
 
 

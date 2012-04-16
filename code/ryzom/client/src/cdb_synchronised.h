@@ -20,8 +20,8 @@
 #define CDB_SYNCHRONISED_H
 
 
-#include "cdb.h"
-#include "cdb_branch.h"
+#include "nel/misc/cdb.h"
+#include "nel/misc/cdb_branch.h"
 
 /**
  * Class to manage a database of properties
@@ -32,7 +32,7 @@
 class CCDBSynchronised
 {
 	/// database
-	NLMISC::CRefPtr<CCDBNodeBranch> _Database;
+	NLMISC::CRefPtr<NLMISC::CCDBNodeBranch> _Database;
 
 	/// string associations
 	std::map<uint32,std::string> _Strings;
@@ -60,7 +60,7 @@ public:
 	 * Return a ptr on the node
 	 * \return ptr on the node
 	 */
-	CCDBNodeBranch * getNodePtr() { return _Database; }
+	NLMISC::CCDBNodeBranch * getNodePtr() { return _Database; }
 
 	/**
 	 *	Build the structure of the database from a file

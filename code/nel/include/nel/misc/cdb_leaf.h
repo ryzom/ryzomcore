@@ -21,7 +21,10 @@
 
 #include "cdb.h"
 #include "cdb_branch.h"
-#include "nel/misc/time_nl.h"
+#include "time_nl.h"
+#include "rgba.h"
+
+namespace NLMISC{
 
 /**
  * Database node which contains a unique property
@@ -50,16 +53,16 @@ public:
 	void setValue8 (sint8 prop);
 	inline bool getValueBool() { return (_Property!=(sint64)0 ); }
 	void setValueBool (bool prop);
-	inline NLMISC::CRGBA getValueRGBA()
+	inline CRGBA getValueRGBA()
 	{
-		NLMISC::CRGBA col;
+		CRGBA col;
 		col.R = (uint8)(_Property&0xff);
 		col.G = (uint8)((_Property>>8)&0xff);
 		col.B = (uint8)((_Property>>16)&0xff);
 		col.A = (uint8)((_Property>>24)&0xff);
 		return col;
 	}
-	void setValueRGBA (const NLMISC::CRGBA &color);
+	void setValueRGBA (const CRGBA &color);
 
 	/// Return the value of the property before the database change
 	inline sint64 getOldValue64() { return _oldProperty; }
@@ -98,7 +101,7 @@ public:
 	 *	Build the structure of the database from a file
 	 * \param f is the stream
 	 */
-	void init( xmlNodePtr node, NLMISC::IProgressCallback &progressCallBack, bool mapBanks=false );
+	void init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks=false );
 
 	/**
 	 * Get a node
@@ -132,7 +135,7 @@ public:
 	 * Update the database from a stream coming from the FE
 	 * \param f : the stream.
 	 */
-	void readDelta(NLMISC::TGameCycle gc, NLMISC::CBitMemStream & f );
+	void readDelta(TGameCycle gc, CBitMemStream & f );
 
 	/**
 	 * Return the value of a property (the update flag is set to false)
@@ -154,10 +157,10 @@ public:
 	/**
 	 * Set the value of a property, only if gc>=_LastChangeGC
 	 */
-	bool setPropCheckGC(NLMISC::TGameCycle gc, sint64 value);
+	bool setPropCheckGC(TGameCycle gc, sint64 value);
 
 	/// Reset all leaf data from this point
-	void resetData(NLMISC::TGameCycle gc, bool forceReset=false);
+	void resetData(TGameCycle gc, bool forceReset=false);
 
 	/**
 	 * Clear the node and his children
@@ -215,7 +218,7 @@ public:
 
 
 	/// get the last change GameCycle (server tick) for this value
-	NLMISC::TGameCycle	getLastChangeGC() const {return _LastChangeGC;}
+	TGameCycle	getLastChangeGC() const {return _LastChangeGC;}
 
 
 private:
@@ -234,7 +237,7 @@ private:
 
 	/// gamecycle (servertick) of the last change for this value.
 	/// change are made in readDelta only for change >= _LastChangeGC
-	NLMISC::TGameCycle	_LastChangeGC;
+	TGameCycle	_LastChangeGC;
 
 	/// observers to call when the value really change
 	std::vector<IPropertyObserver*> _Observers;
@@ -249,7 +252,7 @@ private:
 ////////////////////
 
 
-
+}
 
 
 #endif // CDB_LEAF_H

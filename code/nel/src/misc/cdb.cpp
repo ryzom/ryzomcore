@@ -16,21 +16,19 @@
 
 
 
-#include "stdpch.h"
-
 //////////////
 // Includes //
 //////////////
-#include "cdb.h"
-#include "cdb_branch.h"
-#include <nel/misc/bit_mem_stream.h>
+#include "nel/misc/cdb.h"
+#include "nel/misc/cdb_branch.h"
+#include "nel/misc/bit_mem_stream.h"
 
 ////////////////
 // Namespaces //
 ////////////////
-using namespace NLMISC;
 using namespace std;
 
+namespace NLMISC{
 
 CStringMapper *ICDBNode::_DBSM = NULL;
 
@@ -82,3 +80,6 @@ void ICDBNode::releaseStringMapper()
 		delete _DBSM;
 	_DBSM = NULL;
 }
+
+}
+

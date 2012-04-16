@@ -24,7 +24,7 @@
 #include "interface_manager.h"
 #include "interface_expr_node.h"
 #include "reflect.h"
-#include "../cdb_branch.h"
+#include "nel/misc/cdb_branch.h"
 
 using namespace std;
 using namespace NLMISC;

@@ -16,9 +16,10 @@
 
 
 
-#include "stdpch.h"
-#include "cdb_check_sum.h"
+#include "nel/misc/cdb_check_sum.h"
 
+
+namespace NLMISC{
 
 /*
  * Constructor
@@ -40,3 +41,6 @@ void CCDBCheckSum::add(uint8 el)
 	_Factor = (cipher + _Factor) * _Const1 + _Const2;
 	_Sum += cipher;
 }
+
+}
+

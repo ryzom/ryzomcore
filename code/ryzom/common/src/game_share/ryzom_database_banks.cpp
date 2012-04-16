@@ -17,7 +17,9 @@
 #include "stdpch.h"
 #include "ryzom_database_banks.h"
 
+namespace NLMISC{
 const char *CDBBankNames[INVALID_CDB_BANK+1] = { "PLR", "GUILD", /* "CONTINENT", */ "OUTPOST", /* "GLOBAL", */ "<NB>", "INVALID" };
+}
 
 
 // leave not static else this workaround don't work

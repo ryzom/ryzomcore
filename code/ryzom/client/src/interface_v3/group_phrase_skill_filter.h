@@ -53,12 +53,12 @@ private:
 private:
 
 	// observer to know that brick family are modified
-	struct CBrickFamilyObs : public ICDBNode::IPropertyObserver
+	struct CBrickFamilyObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 		CGroupPhraseSkillFilter			*Owner;
 		BRICK_FAMILIES::TBrickFamily	BrickFamily;
 
-		virtual void update (ICDBNode *node);
+		virtual void update (NLMISC::ICDBNode *node);
 	};
 	friend struct CBrickFamilyObs;
 	CBrickFamilyObs		_BrickFamilyObs[BRICK_FAMILIES::NbFamilies];

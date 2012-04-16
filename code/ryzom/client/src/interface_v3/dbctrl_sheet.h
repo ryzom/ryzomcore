@@ -318,7 +318,7 @@ public:
 	static	void		   setCurrSelection(CDBCtrlSheet *selected);
 
 	// get the root branch containing the properties for that sheet
-	CCDBNodeBranch        *getRootBranch() const;
+	NLMISC::CCDBNodeBranch        *getRootBranch() const;
 
 	/** If the branch in setSheet(branch) is of the form ...:# (where # is a number), return this number.
 	 *	The value is hence modified by setSheet(). return 0 if not of this form.
@@ -443,7 +443,7 @@ public:
 	sint							getIndexInParent() const;
 
 	// get the 'LOCKED' field in the db
-	CCDBNodeLeaf		*getLockValuePtr() { return _GrayedLink; }
+	NLMISC::CCDBNodeLeaf		*getLockValuePtr() { return _GrayedLink; }
 
 	/// \name Macro
 	// @{
@@ -483,35 +483,35 @@ public:
 	void initSheetSize();
 	// @}
 
-	CCDBNodeLeaf *getSlotType() const { return _TradeSlotType.getNodePtr(); }
+	NLMISC::CCDBNodeLeaf *getSlotType() const { return _TradeSlotType.getNodePtr(); }
 
 	// get item weight
 	uint16 getItemWeight() const;
-	CCDBNodeLeaf *getItemWeightPtr() const;
+	NLMISC::CCDBNodeLeaf *getItemWeightPtr() const;
 	// set item weight
 	void setItemWeight(uint16 weight);
 
 	// get item info version
 	uint8 getItemInfoVersion() const;
-	CCDBNodeLeaf *getItemInfoVersionPtr() const;
+	NLMISC::CCDBNodeLeaf *getItemInfoVersionPtr() const;
 	// set item info version
 	void setItemInfoVersion(uint8 infoVersion);
 
 	// get item Locked state
 	uint16 getItemLocked() const;
-	CCDBNodeLeaf *getItemLockedPtr() const;
+	NLMISC::CCDBNodeLeaf *getItemLockedPtr() const;
 	// set item locked state
 	void setItemLocked(uint16 lock);
 
 	// get item PRICE. 0 if no DB
 	sint32 getItemPrice() const;
-	CCDBNodeLeaf *getItemPricePtr() const;
+	NLMISC::CCDBNodeLeaf *getItemPricePtr() const;
 	// set item PRICE
 	void setItemPrice(sint32 price);
 
 	// get item RESALE_FLAG. 0 if no DB
 	sint32 getItemResaleFlag() const;
-	CCDBNodeLeaf *getItemResaleFlagPtr() const;
+	NLMISC::CCDBNodeLeaf *getItemResaleFlagPtr() const;
 	// set item RESALE_FLAG
 	void setItemResaleFlag(sint32 rf);
 
@@ -523,25 +523,25 @@ public:
 
 	// get item SELLER_TYPE. 0 if no DB
 	sint32 getItemSellerType() const;
-	CCDBNodeLeaf *getItemSellerTypePtr() const;
+	NLMISC::CCDBNodeLeaf *getItemSellerTypePtr() const;
 	// set item SELLER_TYPE
 	void setItemSellerType(sint32 rf);
 
 	// get item FABER_QUALITY. 0 if no DB
 	RM_CLASS_TYPE::TRMClassType getItemRMClassType() const;
-	CCDBNodeLeaf *getItemRMClassTypePtr() const {return _ItemRMClassType;}
+	NLMISC::CCDBNodeLeaf *getItemRMClassTypePtr() const {return _ItemRMClassType;}
 	// set item FABER_QUALITY
 	void setItemRMClassType(sint32 fq);
 
 	// get item FABER_STAT_TYPE. 0 if no DB
 	RM_FABER_STAT_TYPE::TRMStatType getItemRMFaberStatType() const;
-	CCDBNodeLeaf *getItemRMFaberStatTypePtr() const {return _ItemRMFaberStatType;}
+	NLMISC::CCDBNodeLeaf *getItemRMFaberStatTypePtr() const {return _ItemRMFaberStatType;}
 	// set item FABER_STAT_TYPE
 	void setItemRMFaberStatType(sint32 fss);
 
 	// get item PREREQUISIT_VALID. true of no DB
 	bool getItemPrerequisitValid() const;
-	CCDBNodeLeaf *getItemPrerequisitValidPtr() const;
+	NLMISC::CCDBNodeLeaf *getItemPrerequisitValidPtr() const;
 	// set item PREREQUISIT_VALID
 	void setItemPrerequisitValid(bool prv);
 
@@ -610,8 +610,8 @@ protected:
 	CInterfaceProperty	_Worned; // if true means that item is worned (red cross, no longer usable unless it's a tool)
 
 	// As node leaf for backward compatibilities
-	CCDBNodeLeaf		*_ItemRMClassType;
-	CCDBNodeLeaf		*_ItemRMFaberStatType;
+	NLMISC::CCDBNodeLeaf		*_ItemRMClassType;
+	NLMISC::CCDBNodeLeaf		*_ItemRMFaberStatType;
 
 	mutable sint32		_LastSheetId;
 
@@ -703,7 +703,7 @@ protected:
 	// This String is optional and usage dependent for Item, Macro, or Sentence
 	std::string			_OptString;
 
-	CCDBNodeLeaf		*_GrayedLink;
+	NLMISC::CCDBNodeLeaf		*_GrayedLink;
 
 	// Macro or sentence String compiled as texture Ids and positions, from the _OptString.
 	struct	CCharBitmap
@@ -734,7 +734,7 @@ protected:
 	sint32								_ItemCaracReqValue;
 
 	// Special for Armour
-	CCDBNodeLeaf		*_UserColor;
+	NLMISC::CCDBNodeLeaf		*_UserColor;
 
 	// keep pointer on item sheet
 	const CItemSheet	*_ItemSheet;

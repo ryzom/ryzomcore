@@ -21,6 +21,8 @@
 
 #include "cdb.h"
 
+namespace NLMISC{
+
 enum{
 	CDB_BANKS_MAX = 3,
 	CDB_BANK_INVALID
@@ -36,7 +38,7 @@ class CCDBNodeBranch : public ICDBNode
 {
 public:
 	/// Triggered when the branch observers are updated
-	class IBranchObserverCallFlushObserver : public NLMISC::CRefCount{
+	class IBranchObserverCallFlushObserver : public CRefCount{
 	public:
 		virtual ~IBranchObserverCallFlushObserver(){}
 		virtual void onObserverCallFlush() = 0;
@@ -54,7 +56,7 @@ public:
 	 *	Build the structure of the database from a file
 	 * \param f is the stream
 	 */
-	void init( xmlNodePtr node, class NLMISC::IProgressCallback &progressCallBack, bool mapBanks=false );
+	void init( xmlNodePtr node, class IProgressCallback &progressCallBack, bool mapBanks=false );
 
 	/**
 	 * Add a new sub node
@@ -103,10 +105,10 @@ public:
 	void write( CTextId& id, FILE * f);
 
 	/// Update the database from the delta, but map the first level with the bank mapping (see _CDBBankToUnifiedIndexMapping)
-	void readAndMapDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream& s, uint bank );
+	void readAndMapDelta( TGameCycle gc, CBitMemStream& s, uint bank );
 
 	/// Update the database from a stream coming from the FE
-	void readDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream & f );
+	void readDelta( TGameCycle gc, CBitMemStream & f );
 
 	/**
 	 * Return the value of a property (the update flag is set to false)
@@ -129,7 +131,7 @@ public:
 	void clear();
 
 	/// Reset the data corresponding to the bank (works only on top level node)
-	void resetBank( NLMISC::TGameCycle gc, uint bank)
+	void resetBank( TGameCycle gc, uint bank)
 	{
 		//nlassert( getParent() == NULL );
 		for ( uint i=0; i!=_Nodes.size(); ++i )
@@ -140,7 +142,7 @@ public:
 	}
 
 	/// Reset all leaf data from this point
-	void resetData(NLMISC::TGameCycle gc, bool forceReset=false)
+	void resetData(TGameCycle gc, bool forceReset=false)
 	{
 		for ( uint i=0; i!=_Nodes.size(); ++i )
 		{
@@ -230,7 +232,7 @@ public:
 	static void removeFlushObserver( IBranchObserverCallFlushObserver *observer );
 
 	// mark this branch and parent branch as 'modified'. This is usually called by sub-leaves
-	void linkInModifiedNodeList(NLMISC::TStringId modifiedLeafName);
+	void linkInModifiedNodeList(TStringId modifiedLeafName);
 
 	/// Find a subnode at this level
 	ICDBNode * find (const std::string &nodeName);
@@ -254,7 +256,7 @@ protected:
 	class CDBBranchObsInfo
 	{
 		public:
-			NLMISC::CRefPtr<IPropertyObserver> Observer;
+			CRefPtr<IPropertyObserver> Observer;
 			// 2 linked list are required : while the observer is notified, it can triger one other observer, so we must link it in another list
 			bool               Touched[2];
 			CDBBranchObsInfo   *PrevNotifiedObserver[2]; // NULL means this is the head
@@ -265,7 +267,7 @@ protected:
 			// This is equivalent to creating a sub-branch containing only the specified leaves
 			// and setting a branch observer on it, except you don't need to change your database paths
 			// and update large amounts of code and script!
-			std::vector<NLMISC::TStringId> PositiveLeafNameFilter;
+			std::vector<TStringId> PositiveLeafNameFilter;
 
 		public:
 
@@ -294,7 +296,7 @@ protected:
 			}
 			// Unlink from the given list. This also clear the '_Touched' flag
 			void unlink(uint list);			
-			void link(uint list, NLMISC::TStringId modifiedLeafName);
+			void link(uint list, TStringId modifiedLeafName);
 	};
 
 	typedef std::list<CDBBranchObsInfo> TObsList; // must use a list because pointers on CDBObserverInfo instances must remains valids
@@ -348,6 +350,7 @@ private:
 
 };
 
+}
 
 #endif // CDB_BRANCH_H
 

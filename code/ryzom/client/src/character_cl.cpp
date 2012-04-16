@@ -76,7 +76,7 @@
 #include "user_entity.h"
 #include "projectile_manager.h"
 #include "init_main_loop.h"
-#include "cdb_branch.h"
+#include "nel/misc/cdb_branch.h"
 #include "animation_fx_misc.h"
 #include "attack_list.h"
 #include "animation_fx_id_array.h"

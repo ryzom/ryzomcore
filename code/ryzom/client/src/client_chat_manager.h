@@ -32,6 +32,10 @@
 #include <map>
 #include <string>
 
+namespace NLMISC{
+class CCDBNodeLeaf;
+}
+
 
 //#define OLD_STRING_SYSTEM
 
@@ -338,8 +342,8 @@ private :
 	/// \name Dynamic Chat channel mgt
 	// @{
 	TChanID				_ChatDynamicChannelId;
-	class CCDBNodeLeaf	*_DynamicChannelNameLeaf[CChatGroup::MaxDynChanPerPlayer];
-	class CCDBNodeLeaf	*_DynamicChannelIdLeaf[CChatGroup::MaxDynChanPerPlayer];
+	NLMISC::CCDBNodeLeaf	*_DynamicChannelNameLeaf[CChatGroup::MaxDynChanPerPlayer];
+	NLMISC::CCDBNodeLeaf	*_DynamicChannelIdLeaf[CChatGroup::MaxDynChanPerPlayer];
 	// Id cached. If different from precedent, then the channel must be flushed
 	enum	{DynamicChannelEmptyId=-1};
 	uint32				_DynamicChannelIdCache[CChatGroup::MaxDynChanPerPlayer];

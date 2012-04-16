@@ -143,18 +143,18 @@ private:
 	// The Inventory manipulated.
 	std::vector<CItem>		_InventoryMirror;
 	bool					_InventoryObsSetup;
-	class CDBInventoryObs : public ICDBNode::IPropertyObserver
+	class CDBInventoryObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node);
 	};
 	CDBInventoryObs			_DBInventoryObs;
 	friend class			CDBInventoryObs;
 	// The animals Status
-	class CDBAnimalObs : public ICDBNode::IPropertyObserver
+	class CDBAnimalObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node);
 	};
 	CDBAnimalObs			_DBAnimalObs;
 	friend class			CDBAnimalObs;

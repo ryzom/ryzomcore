@@ -18,8 +18,12 @@
 
 #include "stdpch.h"
 #include "interface_expr_node.h"
-#include "../cdb_leaf.h"
-#include "../cdb_branch.h"
+#include "nel/misc/cdb_leaf.h"
+#include "nel/misc/cdb_branch.h"
+
+using NLMISC::ICDBNode;
+using NLMISC::CCDBNodeBranch;
+using NLMISC::CCDBNodeLeaf;
 
 // *******************************************************************************************************
 void CInterfaceExprNodeValue::eval(CInterfaceExprValue &result)

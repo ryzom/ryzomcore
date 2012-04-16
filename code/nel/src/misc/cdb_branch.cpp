@@ -26,15 +26,14 @@
 //////////////
 // Includes //
 //////////////
-#include "cdb_branch.h"
-#include "cdb_leaf.h"
+#include "nel/misc/cdb_branch.h"
+#include "nel/misc/cdb_leaf.h"
 #include "nel/misc/xml_auto_ptr.h"
 //#include <iostream.h>
 
 ////////////////
 // Namespaces //
 ////////////////
-using namespace NLMISC;
 using namespace std;
 
 
@@ -43,6 +42,8 @@ using namespace std;
 #include "nel/misc/file.h"
 #include "nel/misc/i_xml.h"
 #include "nel/misc/progress_callback.h"
+#include "nel/misc/bit_mem_stream.h"
+#include "nel/misc/bit_set.h"
 
 #include <libxml/parser.h>
 //#include <io.h>
@@ -53,7 +54,9 @@ using namespace std;
 
 
 using namespace std;
-using namespace NLMISC;
+
+
+namespace NLMISC{
 
 /////////////
 // GLOBALS //
@@ -134,7 +137,7 @@ static /*inline*/ void addNode( ICDBNode *newNode, std::string newName, CCDBNode
 						    std::vector<ICDBNode *> &nodes, std::vector<ICDBNode *> &nodesSorted,
 							xmlNodePtr &child, const string& bankName,
 							bool atomBranch, bool clientOnly,
-							NLMISC::IProgressCallback &progressCallBack,
+							IProgressCallback &progressCallBack,
 							bool mapBanks )
 {
 	nodesSorted.push_back(newNode);
@@ -158,7 +161,7 @@ static /*inline*/ void addNode( ICDBNode *newNode, std::string newName, CCDBNode
 	}
 }
 
-void CCDBNodeBranch::init( xmlNodePtr node, NLMISC::IProgressCallback &progressCallBack, bool mapBanks )
+void CCDBNodeBranch::init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks )
 {
 	xmlNodePtr child;
 
@@ -459,7 +462,7 @@ bool CCDBNodeBranch::setProp( CTextId& id, sint64 value )
 /*
  * Update the database from the delta, but map the first level with the bank mapping (see _CDBBankToUnifiedIndexMapping)
  */
-void CCDBNodeBranch::readAndMapDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream& s, uint bank )
+void CCDBNodeBranch::readAndMapDelta( TGameCycle gc, CBitMemStream& s, uint bank )
 {
 	nlassert( ! isAtomic() ); // root node mustn't be atomic
 
@@ -491,7 +494,7 @@ void CCDBNodeBranch::readAndMapDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStre
 //	readDelta
 //
 //-----------------------------------------------
-void CCDBNodeBranch::readDelta( NLMISC::TGameCycle gc, CBitMemStream & f )
+void CCDBNodeBranch::readDelta( TGameCycle gc, CBitMemStream & f )
 {
 	if ( isAtomic() )
 	{
@@ -679,8 +682,6 @@ void CCDBNodeBranch::removeNode (const CTextId& id)
 //-----------------------------------------------
 void CCDBNodeBranch::flushObserversCalls()
 {
-	H_AUTO ( RZ_Interface_flushObserversCalls )
-
 //	nlassert(_CrtCheckMemory());
 	_CurrNotifiedObs = _FirstNotifiedObs[_CurrNotifiedObsList];
 	while (_CurrNotifiedObs)
@@ -743,7 +744,7 @@ void CCDBNodeBranch::removeFlushObserver( CCDBNodeBranch::IBranchObserverCallFlu
 }
 
 //-----------------------------------------------
-void CCDBNodeBranch::CDBBranchObsInfo::link(uint list, NLMISC::TStringId modifiedLeafName)
+void CCDBNodeBranch::CDBBranchObsInfo::link(uint list, TStringId modifiedLeafName)
 {
 	// If there a filter set?
 	if (!PositiveLeafNameFilter.empty())
@@ -810,7 +811,7 @@ void CCDBNodeBranch::CDBBranchObsInfo::unlink(uint list)
 }
 
 //-----------------------------------------------
-void CCDBNodeBranch::linkInModifiedNodeList(NLMISC::TStringId modifiedLeafName)
+void CCDBNodeBranch::linkInModifiedNodeList(TStringId modifiedLeafName)
 {
 //	nlassert(_CrtCheckMemory());
 	CCDBNodeBranch *curr = this;
@@ -913,7 +914,15 @@ void CCDBNodeBranch::addBranchObserver(const char *dbPathFromThisNode, ICDBNode:
 	else
 	{
 		branchNode = safe_cast<CCDBNodeBranch*>(getNode(ICDBNode::CTextId(dbPathFromThisNode), false));
-		BOMB_IF (!branchNode, (*getName()) << ":" << dbPathFromThisNode << " branch missing in DB", return);
+		if( branchNode == NULL ){
+			std::string msg = *getName();
+			msg += ":";
+			msg += dbPathFromThisNode;
+			msg += " branch missing in DB";
+
+			nlerror( msg.c_str() );
+			return;
+		}
 	}
 	std::vector<std::string> leavesToMonitor(positiveLeafNameFilterSize);
 	for (uint i=0; i!=positiveLeafNameFilterSize; ++i)
@@ -927,7 +936,14 @@ void CCDBNodeBranch::addBranchObserver(const char *dbPathFromThisNode, ICDBNode:
 void CCDBNodeBranch::removeBranchObserver(const char *dbPathFromThisNode, ICDBNode::IPropertyObserver& observer)
 {
 	CCDBNodeBranch *branchNode = safe_cast<CCDBNodeBranch*>(getNode(ICDBNode::CTextId(dbPathFromThisNode), false));
-	BOMB_IF (!branchNode, (*getName()) << ":" << dbPathFromThisNode << " branch missing in DB", return);
+	if( branchNode == NULL ){
+		std::string msg = *getName();
+		msg += ":";
+		msg += dbPathFromThisNode;
+		msg += " branch missing in DB";
+		nlerror( msg.c_str() );
+		return;
+	}
 	branchNode->removeBranchObserver(&observer);
 }
 
@@ -1042,4 +1058,6 @@ ICDBNode *CCDBNodeBranch::find(const std::string &nodeName)
 #ifdef TRACE_SET_VALUE
 #undef TRACE_SET_VALUE
 #endif
+
+}
 

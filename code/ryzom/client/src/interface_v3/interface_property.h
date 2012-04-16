@@ -22,9 +22,9 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/rgba.h"
 
-#include "../cdb.h"
-#include "../cdb_leaf.h"
-#include "../cdb_branch.h"
+#include "nel/misc/cdb.h"
+#include "nel/misc/cdb_leaf.h"
+#include "nel/misc/cdb_branch.h"
 #include "../cdb_synchronised.h"
 
 
@@ -50,20 +50,20 @@ public:
 		_VolatileValue = NULL;
 	}
 
-	CCDBNodeLeaf* getNodePtr() const
+	NLMISC::CCDBNodeLeaf* getNodePtr() const
 	{
 		return _VolatileValue;
 	}
 
-	void setNodePtr(CCDBNodeLeaf *ptr)
+	void setNodePtr(NLMISC::CCDBNodeLeaf *ptr)
 	{
 		_VolatileValue = ptr;
 	}
 
 
 	bool link (const char *DBProp);
-	bool link( CCDBNodeLeaf *dbNode );
-	bool link( CCDBNodeBranch *dbNode, const std::string &leafId, CCDBNodeLeaf *defaultLeaf = NULL  );
+	bool link( NLMISC::CCDBNodeLeaf *dbNode );
+	bool link( NLMISC::CCDBNodeBranch *dbNode, const std::string &leafId, NLMISC::CCDBNodeLeaf *defaultLeaf = NULL  );
 
 	/// float operations
 	void setDouble (double value) {setSInt64((sint64&) value);}
@@ -99,7 +99,7 @@ public:
 
 private:
 	/// volatile value of the property (pointer to a leaf of the database)
-	CCDBNodeLeaf* _VolatileValue;
+	NLMISC::CCDBNodeLeaf* _VolatileValue;
 };
 
 #endif // NL_INTERFACE_PROPERTY_H

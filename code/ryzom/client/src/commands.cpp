@@ -74,7 +74,7 @@
 #include "commands.h"
 #include "entities.h"
 #include "teleport.h"
-#include "cdb_leaf.h"
+#include "nel/misc/cdb_leaf.h"
 #include "view.h"
 #include "misc.h"
 #include "demo.h"

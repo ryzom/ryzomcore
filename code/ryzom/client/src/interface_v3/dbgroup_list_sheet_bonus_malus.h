@@ -44,7 +44,7 @@ public:
 private:
 	sint32							_TextId;
 
-	std::vector<CCDBNodeLeaf*>		_DisableStates;
+	std::vector<NLMISC::CCDBNodeLeaf*>		_DisableStates;
 };
 
 

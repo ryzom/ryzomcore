@@ -27,7 +27,7 @@
 #include "../misc.h"
 #include "../entities.h"
 #include "../pacs_client.h"
-#include "../cdb_leaf.h"
+#include "nel/misc/cdb_leaf.h"
 #include "../interface_v3/interface_manager.h"
 #include "entity_sorter.h"
 //

@@ -19,8 +19,9 @@
 #ifndef NL_CDB_CHECK_SUM_H
 #define NL_CDB_CHECK_SUM_H
 
-#include "nel/misc/types_nl.h"
+#include "types_nl.h"
 
+namespace NLMISC{
 
 /**
  * class implementing check sum for the client database
@@ -81,6 +82,7 @@ private:
 };
 
 
+}
 
 #endif // NL_CDB_CHECK_SUM_H
 

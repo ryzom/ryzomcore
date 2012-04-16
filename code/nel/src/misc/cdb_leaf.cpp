@@ -25,21 +25,23 @@
 //////////////
 // Includes //
 //////////////
-#include "cdb_leaf.h"
+#include "nel/misc/cdb_leaf.h"
 #include "nel/misc/xml_auto_ptr.h"
+#include "nel/misc/bit_mem_stream.h"
 //#include <iostream.h>
 
 ////////////////
 // Namespaces //
 ////////////////
-using namespace NLMISC;
 using namespace std;
+
+namespace NLMISC{
 
 
 //-----------------------------------------------
 //	init
 //-----------------------------------------------
-void CCDBNodeLeaf::init(  xmlNodePtr node, NLMISC::IProgressCallback &/* progressCallBack */, bool /* mapBanks */ )
+void CCDBNodeLeaf::init(  xmlNodePtr node, IProgressCallback &/* progressCallBack */, bool /* mapBanks */ )
 {
 	CXMLAutoPtr type((const char*)xmlGetProp (node, (xmlChar*)"type"));
 	nlassert((const char *) type != NULL);
@@ -124,7 +126,7 @@ void CCDBNodeLeaf::write( CTextId& id, FILE * f)
 //-----------------------------------------------
 //	readDelta
 //-----------------------------------------------
-void CCDBNodeLeaf::readDelta(NLMISC::TGameCycle gc, CBitMemStream & f )
+void CCDBNodeLeaf::readDelta(TGameCycle gc, CBitMemStream & f )
 {
 	// If the property Type is valid.
 	if(_Type > UNKNOWN && _Type < Nb_Prop_Type)
@@ -180,7 +182,7 @@ void CCDBNodeLeaf::readDelta(NLMISC::TGameCycle gc, CBitMemStream & f )
 //-----------------------------------------------
 // resetData
 //-----------------------------------------------
-void CCDBNodeLeaf::resetData(NLMISC::TGameCycle gc, bool forceReset)
+void CCDBNodeLeaf::resetData(TGameCycle gc, bool forceReset)
 {
 	if(forceReset)
 	{
@@ -247,7 +249,7 @@ bool CCDBNodeLeaf::setProp( CTextId& id, sint64 value )
 //-----------------------------------------------
 //	setPropCheckGC
 //-----------------------------------------------
-bool CCDBNodeLeaf::setPropCheckGC(NLMISC::TGameCycle gc, sint64 value)
+bool CCDBNodeLeaf::setPropCheckGC(TGameCycle gc, sint64 value)
 {
 	// Apply only if happens after the DB change
 	if(gc>=_LastChangeGC)
@@ -318,7 +320,7 @@ void CCDBNodeLeaf::setValueBool(bool prop)
 	setValue64(newVal);
 }
 
-void CCDBNodeLeaf::setValueRGBA (const NLMISC::CRGBA &color)
+void CCDBNodeLeaf::setValueRGBA (const CRGBA &color)
 {
 	sint64 newVal = (uint32)(color.R+(color.G<<8)+(color.B<<16)+(color.A<<24));
 	setValue64(newVal);
@@ -385,4 +387,6 @@ void CCDBNodeLeaf::notifyObservers()
 #undef TRACE_SET_VALUE
 #endif
 //#############################################################################################
+
+}
 

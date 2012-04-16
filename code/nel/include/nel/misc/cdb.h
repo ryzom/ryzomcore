@@ -20,18 +20,17 @@
 #define CDB_H
 
 // misc
-#include "nel/misc/types_nl.h"
-#include "nel/misc/smart_ptr.h"
-#include "nel/misc/string_mapper.h"
+#include "types_nl.h"
+#include "smart_ptr.h"
+#include "string_mapper.h"
+#include "sstring.h"
 
 #include <libxml/parser.h>
 
 namespace NLMISC
 {
-	class IProgressCallback;
-	class CBitMemStream;
-}
-
+class IProgressCallback;
+class CBitMemStream;
 class CCDBNodeLeaf;
 class CCDBNodeBranch;
 
@@ -48,7 +47,7 @@ extern bool VerboseDatabase;
  * \date 2002
  */
 
-class ICDBNode : public NLMISC::CRefCount
+class ICDBNode : public CRefCount
 {
 	//-----------------------------------------------------------------------
 	// end of IDBNode interface
@@ -78,7 +77,7 @@ public:
 	 * \author Nevrax France
 	 * \date 2002
 	 */
-	class IPropertyObserver : public NLMISC::CRefCount
+	class IPropertyObserver : public CRefCount
 	{
 	public :
 		virtual ~IPropertyObserver()	{}
@@ -198,7 +197,7 @@ public :
 	 *	Build the structure of the database from a file
 	 * \param f is the stream
 	 */
-	virtual void init( xmlNodePtr node, NLMISC::IProgressCallback &progressCallBack, bool mapBanks=false ) = 0;
+	virtual void init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks=false ) = 0;
 
 	/**
 	 * Save a backup of the database
@@ -212,7 +211,7 @@ public :
 	 * \param gc the server gameCycle of this update. Any outdated update are aborted
 	 * \param f : the stream.
 	 */
-	virtual void readDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream & f ) = 0;
+	virtual void readDelta( TGameCycle gc, CBitMemStream & f ) = 0;
 
 	/**
 	 * Get a node . Create it if it does not exist yet
@@ -252,7 +251,7 @@ public :
 	virtual bool setProp( CTextId& id, sint64 value ) = 0;
 
 	/// Reset all leaf data from this point
-	virtual void resetData(NLMISC::TGameCycle gc, bool forceReset=false) = 0;
+	virtual void resetData(TGameCycle gc, bool forceReset=false) = 0;
 
 	/**
 	 * Clear the node and his children
@@ -314,16 +313,16 @@ public :
 	virtual void display (const std::string &/* prefix */){}
 
 	/// Return the string id corresponding to the argument
-	static NLMISC::TStringId getStringId(const std::string& nodeName)
+	static TStringId getStringId(const std::string& nodeName)
 	{
-		if (_DBSM == NULL) _DBSM = NLMISC::CStringMapper::createLocalMapper();
+		if (_DBSM == NULL) _DBSM = CStringMapper::createLocalMapper();
 		return _DBSM->localMap(nodeName);
 	}
 
 	/// Return a pointer to the string corresponding to the argument
-	static const std::string *getStringFromId(NLMISC::TStringId nodeStringId)
+	static const std::string *getStringFromId(TStringId nodeStringId)
 	{
-		if (_DBSM == NULL) _DBSM = NLMISC::CStringMapper::createLocalMapper();
+		if (_DBSM == NULL) _DBSM = CStringMapper::createLocalMapper();
 		return &_DBSM->localUnmap(nodeStringId);
 	}
 
@@ -335,32 +334,34 @@ protected:
 	/// Constructor
 	ICDBNode() : _AtomicFlag(false)
 	{
-		if (_DBSM == NULL) _DBSM = NLMISC::CStringMapper::createLocalMapper();
-		_Name = NLMISC::CStringMapper::emptyId();
+		if (_DBSM == NULL) _DBSM = CStringMapper::createLocalMapper();
+		_Name = CStringMapper::emptyId();
 	}
 
 	/// Constructor
 	ICDBNode (const std::string &name) : _AtomicFlag(false)
 	{
-		if (_DBSM == NULL) _DBSM = NLMISC::CStringMapper::createLocalMapper();
+		if (_DBSM == NULL) _DBSM = CStringMapper::createLocalMapper();
 		_Name = _DBSM->localMap(name);
 		//_NameDbg = name;
 	}
 
 	// utility to build full name efficiently (without reallocating the string at each parent level)
-	void _buildFullName(NLMISC::CSString &fullName);
+	void _buildFullName(CSString &fullName);
 
 	/// Atomic flag: is the branch an atomic group, or is the leaf a member of an atomic group
 	bool			_AtomicFlag		: 1;
 
 	/// Name of the node
-	NLMISC::TStringId	_Name;
+	TStringId	_Name;
 	//std::string _NameDbg;
 
-	static NLMISC::CStringMapper *_DBSM;
+	static CStringMapper *_DBSM;
 
 };
 
+
+}
 
 
 #endif // CDB_H

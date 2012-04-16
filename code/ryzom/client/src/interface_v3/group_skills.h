@@ -51,10 +51,10 @@ private:
 private:
 
 	// observer to know that skills are modified
-	struct CSkillsObs : public ICDBNode::IPropertyObserver
+	struct CSkillsObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 		CGroupSkills *Owner;
-		virtual void update (ICDBNode *node);
+		virtual void update (NLMISC::ICDBNode *node);
 	} _SkillsObs;
 	friend struct CSkillsObs;
 

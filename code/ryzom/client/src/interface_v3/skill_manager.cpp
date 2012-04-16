@@ -24,7 +24,7 @@
 #include "game_share/character_title.h"
 #include "game_share/fame.h"
 #include "../sheet_manager.h"
-#include "../cdb_leaf.h"
+#include "nel/misc/cdb_leaf.h"
 #include "action_handler.h"
 #include "sbrick_manager.h"
 #include "dbgroup_combo_box.h"

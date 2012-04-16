@@ -140,7 +140,7 @@ protected:
 	bool	_ApplyFamePriceFactor;
 
 	// keep pointer on leaf for fame price factor
-	CCDBNodeLeaf *	_FamePriceFactorLeaf;
+	NLMISC::CCDBNodeLeaf *	_FamePriceFactorLeaf;
 	sint16			_LastFamePriceFactor;
 
 	TSellerTypeFilter		_SellerTypeFilter;

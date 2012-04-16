@@ -24,6 +24,8 @@
 #include "group_compas.h"
 #include "game_share/animal_status.h"
 
+using NLMISC::CCDBNodeLeaf;
+
 // ***************************************************************************
 // CPositionState
 // ***************************************************************************

@@ -29,6 +29,8 @@
 
 static const char *WIN_BOT_CHAT_PAGE_PLAYER_GIFT = "ui:interface:bot_chat_player_gift";
 
+using NLMISC::CCDBNodeLeaf;
+
 // *************************************************************************************
 void CBotChatPagePlayerGift::begin()
 {

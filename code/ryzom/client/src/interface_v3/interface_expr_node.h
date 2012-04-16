@@ -33,9 +33,9 @@ public:
 	// eval result of expression, and eventually get the nodes the epression depends on
 	virtual void eval(CInterfaceExprValue &result) = 0;
 	// The same, but get db nodes the expression depends on (appended to vector)
-	virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<ICDBNode *> &nodes) = 0;
+	virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> &nodes) = 0;
 	// Get dependencies of the node (appended to vector)
-	virtual void getDepends(std::vector<ICDBNode *> &nodes) = 0;
+	virtual void getDepends(std::vector<NLMISC::ICDBNode *> &nodes) = 0;
 };
 
 
@@ -48,8 +48,8 @@ public:
 	CInterfaceExprValue Value;
 public:
 	virtual void eval(CInterfaceExprValue &result);
-	virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<ICDBNode *> &nodes);
-	virtual void getDepends(std::vector<ICDBNode *> &nodes);
+	virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> &nodes);
+	virtual void getDepends(std::vector<NLMISC::ICDBNode *> &nodes);
 };
 
 // *******************************************************************************************************
@@ -63,8 +63,8 @@ public:
 	std::vector<CInterfaceExprNode *> Params;
 public:
 	virtual void eval(CInterfaceExprValue &result);
-	virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<ICDBNode *> &nodes);
-	virtual void getDepends(std::vector<ICDBNode *> &nodes);
+	virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> &nodes);
+	virtual void getDepends(std::vector<NLMISC::ICDBNode *> &nodes);
 	virtual ~CInterfaceExprNodeValueFnCall();
 };
 
@@ -74,11 +74,11 @@ public:
 class CInterfaceExprNodeDBLeaf : public CInterfaceExprNode
 {
 public:
-	class CCDBNodeLeaf *Leaf;
+	class NLMISC::CCDBNodeLeaf *Leaf;
 public:
 	virtual void eval(CInterfaceExprValue &result);
-	virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<ICDBNode *> &nodes);
-	virtual void getDepends(std::vector<ICDBNode *> &nodes);
+	virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> &nodes);
+	virtual void getDepends(std::vector<NLMISC::ICDBNode *> &nodes);
 };
 
 // *******************************************************************************************************
@@ -87,11 +87,11 @@ public:
 class CInterfaceExprNodeDBBranch : public CInterfaceExprNode
 {
 public:
-	class CCDBNodeBranch *Branch;
+	class NLMISC::CCDBNodeBranch *Branch;
 public:
 	virtual void eval(CInterfaceExprValue &result);
-	virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<ICDBNode *> &nodes);
-	virtual void getDepends(std::vector<ICDBNode *> &nodes);
+	virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> &nodes);
+	virtual void getDepends(std::vector<NLMISC::ICDBNode *> &nodes);
 };
 
 // *******************************************************************************************************
@@ -104,8 +104,8 @@ public:
 	std::string Expr;
 public:
 	virtual void eval(CInterfaceExprValue &result);
-	virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<ICDBNode *> &nodes);
-	virtual void getDepends(std::vector<ICDBNode *> &nodes);
+	virtual void evalWithDepends(CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> &nodes);
+	virtual void getDepends(std::vector<NLMISC::ICDBNode *> &nodes);
 };
 
 

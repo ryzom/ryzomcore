@@ -22,8 +22,9 @@
 #include "nel/misc/types_nl.h"
 #include "view_text.h"
 
-
+namespace NLMISC{
 class CCDBNodeLeaf;
+}
 
 // ***************************************************************************
 class IOnReceiveTextId
@@ -91,7 +92,7 @@ public:
 	  */
 	bool setDBTextID(const std::string &dbPath);
 	// set a text from a db leaf
-	void setDBLeaf(CCDBNodeLeaf *leaf);
+	void setDBLeaf(NLMISC::CCDBNodeLeaf *leaf);
 
 	std::string getTextIdDbLink() const;
 	void setTextIdDbLink(const std::string &link);

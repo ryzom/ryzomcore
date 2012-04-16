@@ -19,7 +19,7 @@
 #ifndef CL_INTERFACE_LINK_H
 #define CL_INTERFACE_LINK_H
 
-#include "../cdb_branch.h"
+#include "nel/misc/cdb_branch.h"
 
 class CInterfaceElement;
 class CReflectedProperty;
@@ -45,7 +45,7 @@ class CInterfaceExprNode;
   * \author Nevrax France
   * \date 2002
   */
-class CInterfaceLink : public ICDBNode::IPropertyObserver
+class CInterfaceLink : public NLMISC::ICDBNode::IPropertyObserver
 {
 public:
 	#ifdef NL_DEBUG
@@ -66,7 +66,7 @@ public:
 
 
 	/// Updates triggered interface links when triggered by the observed branch
-	class CInterfaceLinkUpdater : public CCDBNodeBranch::IBranchObserverCallFlushObserver
+	class CInterfaceLinkUpdater : public NLMISC::CCDBNodeBranch::IBranchObserverCallFlushObserver
 	{
 	public:
 		CInterfaceLinkUpdater();
@@ -119,7 +119,7 @@ private:
 	typedef std::list<CInterfaceLink *> TLinkList;
 	typedef NLMISC::CSmartPtr<CInterfaceLink> TLinkSmartPtr;
 	typedef std::vector<TLinkSmartPtr> TLinkVect;
-	typedef std::vector<ICDBNode *> TNodeVect;
+	typedef std::vector<NLMISC::ICDBNode *> TNodeVect;
 private:
 	std::vector<CTarget>         _Targets;
 	TNodeVect					 _ObservedNodes;
@@ -161,7 +161,7 @@ private:
 	  * This doesn't update the node directly, but mark it as 'triggered'
 	  * The node is really updated during the call to 'updateTrigeredLinks()'
 	  */
-	virtual void update(ICDBNode *node);
+	virtual void update(NLMISC::ICDBNode *node);
 	void    createObservers(const TNodeVect &nodes);
 	void    removeObservers(const TNodeVect &nodes);
 	// debug : check that there are as many targets as reference to a link

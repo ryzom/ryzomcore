@@ -45,7 +45,7 @@ public:
 		virtual bool isInvalidated(CDBGroupListSheet *pFather);
 		virtual void update(CDBGroupListSheet *pFather);
 		virtual sint getSectionId() const;
-		CCDBNodeLeaf	*LevelDB;
+		NLMISC::CCDBNodeLeaf	*LevelDB;
 		uint			LevelCache;
 	};
 

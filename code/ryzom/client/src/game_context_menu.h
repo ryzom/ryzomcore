@@ -30,7 +30,9 @@
 // ***************************************************************************
 class CGroupMenu;
 class CViewTextMenu;
+namespace NLMISC{
 class CCDBNodeLeaf;
+}
 
 // ***************************************************************************
 /**
@@ -77,21 +79,21 @@ private:
 
 	// MilkoPad
 	CInterfaceGroupPtr _GroupMilkoPad;
-	CCDBNodeLeaf	*_MilkoAttackDisengage;
+	NLMISC::CCDBNodeLeaf	*_MilkoAttackDisengage;
 	CCtrlTextButtonPtr	_MilkoAttDisBut1;
 	CCtrlTextButtonPtr	_MilkoAttDisBut2;
 
 	CGroupMenu		*_GroupMenu;
-	CCDBNodeLeaf	*_ContextVal;
-	CCDBNodeLeaf	*_AvailablePrograms;
-	CCDBNodeLeaf	*_ServerTeamPresent;
-	CCDBNodeLeaf	*_MissionOption[NUM_MISSION_OPTIONS];
-	CCDBNodeLeaf	*_ServerInDuel;
-	CCDBNodeLeaf	*_ServerInPvpChallenge;
-	CCDBNodeLeaf	*_WebPageTitle;
-	CCDBNodeLeaf	*_OutpostSheet;
-	CCDBNodeLeaf	*_OutpostRightToBannish;
-	CCDBNodeLeaf	*_MissionRing[BOTCHATTYPE::MaxR2MissionEntryDatabase];
+	NLMISC::CCDBNodeLeaf	*_ContextVal;
+	NLMISC::CCDBNodeLeaf	*_AvailablePrograms;
+	NLMISC::CCDBNodeLeaf	*_ServerTeamPresent;
+	NLMISC::CCDBNodeLeaf	*_MissionOption[NUM_MISSION_OPTIONS];
+	NLMISC::CCDBNodeLeaf	*_ServerInDuel;
+	NLMISC::CCDBNodeLeaf	*_ServerInPvpChallenge;
+	NLMISC::CCDBNodeLeaf	*_WebPageTitle;
+	NLMISC::CCDBNodeLeaf	*_OutpostSheet;
+	NLMISC::CCDBNodeLeaf	*_OutpostRightToBannish;
+	NLMISC::CCDBNodeLeaf	*_MissionRing[BOTCHATTYPE::MaxR2MissionEntryDatabase];
 
 
 	CViewTextMenuPtr _TextLootAction;

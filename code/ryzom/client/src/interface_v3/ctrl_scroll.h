@@ -28,7 +28,7 @@
  * \author Nevrax France
  * \date 2002
  */
-class CCtrlScroll : public CCtrlBase, public ICDBNode::IPropertyObserver
+class CCtrlScroll : public CCtrlBase, public NLMISC::ICDBNode::IPropertyObserver
 {
 
 public:
@@ -183,7 +183,7 @@ protected:
 	void	computeTargetOfsFromPos();
 
 	// from IPropertyObserver
-	virtual void update(ICDBNode *node);
+	virtual void update(NLMISC::ICDBNode *node);
 
 	// step the value, and clamp it
 	void	normalizeValue(sint32 &value);

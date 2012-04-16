@@ -28,6 +28,7 @@
 
 using namespace std;
 using namespace STRING_MANAGER;
+using NLMISC::CCDBNodeLeaf;
 
 NLMISC_REGISTER_OBJECT(CViewBase, CViewTextID, std::string, "text_id");
 
