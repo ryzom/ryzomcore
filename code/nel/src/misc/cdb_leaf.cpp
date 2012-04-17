@@ -41,7 +41,7 @@ namespace NLMISC{
 //-----------------------------------------------
 //	init
 //-----------------------------------------------
-void CCDBNodeLeaf::init(  xmlNodePtr node, IProgressCallback &/* progressCallBack */, bool /* mapBanks */ )
+void CCDBNodeLeaf::init(  xmlNodePtr node, IProgressCallback &/* progressCallBack */, bool /* mapBanks */, CCDBBankHandler * /* bankHandler */ )
 {
 	CXMLAutoPtr type((const char*)xmlGetProp (node, (xmlChar*)"type"));
 	nlassert((const char *) type != NULL);

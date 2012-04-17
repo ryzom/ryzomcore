@@ -101,7 +101,7 @@ public:
 	 *	Build the structure of the database from a file
 	 * \param f is the stream
 	 */
-	void init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks=false );
+	void init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks=false, CCDBBankHandler *bankHandler = NULL );
 
 	/**
 	 * Get a node

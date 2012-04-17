@@ -22,6 +22,7 @@
 
 #include "nel/misc/cdb.h"
 #include "nel/misc/cdb_branch.h"
+#include "nel/misc/cdb_bank_handler.h"
 
 /**
  * Class to manage a database of properties
@@ -144,6 +145,8 @@ public:
 		}
 	}
 
+	void resetBank( uint gc, uint bank );
+
 private:
 
 	friend void impulseDatabaseInitPlayer( NLMISC::CBitMemStream &impulse );
@@ -153,6 +156,8 @@ private:
 	bool allInitPacketReceived() const { return _InitDeltaReceived == 2; } // Classic database + inventory
 
 	void writeInitInProgressIntoUIDB();
+
+	NLMISC::CCDBBankHandler bankHandler;
 };
 
 

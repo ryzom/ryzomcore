@@ -23,11 +23,6 @@
 
 namespace NLMISC{
 
-enum{
-	CDB_BANKS_MAX = 3,
-	CDB_BANK_INVALID
-};
-
 /**
  * Database Node which contains a set of properties
  * \author Stephane Coutelas
@@ -56,7 +51,7 @@ public:
 	 *	Build the structure of the database from a file
 	 * \param f is the stream
 	 */
-	void init( xmlNodePtr node, class IProgressCallback &progressCallBack, bool mapBanks=false );
+	void init( xmlNodePtr node, class IProgressCallback &progressCallBack, bool mapBanks=false, CCDBBankHandler *bankHandler = NULL );
 
 	/**
 	 * Add a new sub node
@@ -105,7 +100,7 @@ public:
 	void write( CTextId& id, FILE * f);
 
 	/// Update the database from the delta, but map the first level with the bank mapping (see _CDBBankToUnifiedIndexMapping)
-	void readAndMapDelta( TGameCycle gc, CBitMemStream& s, uint bank );
+	void readAndMapDelta( TGameCycle gc, CBitMemStream& s, uint bank, CCDBBankHandler *bankHandler );
 
 	/// Update the database from a stream coming from the FE
 	void readDelta( TGameCycle gc, CBitMemStream & f );
@@ -130,15 +125,12 @@ public:
 	/// Clear the node and his children
 	void clear();
 
-	/// Reset the data corresponding to the bank (works only on top level node)
-	void resetBank( TGameCycle gc, uint bank)
+	void resetNode( TGameCycle gc, uint node )
 	{
-		//nlassert( getParent() == NULL );
-		for ( uint i=0; i!=_Nodes.size(); ++i )
-		{
-			if ( _UnifiedIndexToBank[i] == bank )
-				_Nodes[i]->resetData(gc);
-		}
+		if( node > _Nodes.size() )
+			return;
+		
+		_Nodes[ node ]->resetData( gc );
 	}
 
 	/// Reset all leaf data from this point
@@ -237,14 +229,8 @@ public:
 	/// Find a subnode at this level
 	ICDBNode * find (const std::string &nodeName);
 
-	/// Main init
-	static void resetNodeBankMapping() { _UnifiedIndexToBank.clear(); }
-
 	// reset all static mappings
 	static void reset();
-
-	/// Internal use only
-	static void mapNodeByBank( ICDBNode *node, const std::string& bankStr, bool clientOnly, uint nodeIndex );
 
 protected:
 
@@ -327,18 +313,6 @@ protected:
 	// current & next observers being notified : if such observer if removed during notification, pointer will be valids
 	static CDBBranchObsInfo *_CurrNotifiedObs;
 	static CDBBranchObsInfo *_NextNotifiedObs;
-
-	/// Mapping from server database index to client database index (first-level nodes)
-	static std::vector<uint> _CDBBankToUnifiedIndexMapping [CDB_BANKS_MAX];
-
-	// Mapping from client database index to TCDBBank (first-level nodes)
-	static std::vector<uint> _UnifiedIndexToBank;
-
-	/// Last index mapped
-	static uint				_CDBLastUnifiedIndex;
-
-	/// Number of bits for first-level branches, by bank
-	static uint				_FirstLevelIdBitsByBank [CDB_BANKS_MAX];
 
 	/// called by clear
 	void			removeAllBranchObserver();

@@ -141,9 +141,7 @@ extern bool CharNameValid;
 bool IsInRingSession = false;
 TSessionId HighestMainlandSessionId; // highest in the position stack
 
-namespace NLMISC{
 extern const char *CDBBankNames[INVALID_CDB_BANK+1];
-}
 
 void cbImpulsionGatewayOpen(NLMISC::CBitMemStream &bms);
 void cbImpulsionGatewayMessage(NLMISC::CBitMemStream &bms);
@@ -222,7 +220,7 @@ void impulseDatabaseUpdateBank(NLMISC::CBitMemStream &impulse)
 	}
 	catch (const Exception &e)
 	{
-		BOMB( NLMISC::toString( "Problem while decoding a DB_GROUP:UPDATE_BANK %s msg, skipped: %s", NLMISC::CDBBankNames[bank], e.what() ), return );
+		BOMB( NLMISC::toString( "Problem while decoding a DB_GROUP:UPDATE_BANK %s msg, skipped: %s", CDBBankNames[bank], e.what() ), return );
 	}
 }
 
@@ -242,7 +240,7 @@ void impulseDatabaseInitBank(NLMISC::CBitMemStream &impulse)
 
 		// read delta
 		IngameDbMngr.readDelta( serverTick, impulse, (TCDBBank)bank );
-		nldebug( "CDB: DB_GROUP:INIT_BANK %s", NLMISC::CDBBankNames[bank] );
+		nldebug( "CDB: DB_GROUP:INIT_BANK %s", CDBBankNames[bank] );
 
 		// read guild inventory update
 		if ( bank == CDBGuild )
@@ -252,7 +250,7 @@ void impulseDatabaseInitBank(NLMISC::CBitMemStream &impulse)
 	}
 	catch (const Exception &e)
 	{
-		BOMB( NLMISC::toString( "Problem while decoding a DB_GROUP:INIT_BANK %s msg, skipped: %s", NLMISC::CDBBankNames[bank], e.what() ), return );
+		BOMB( NLMISC::toString( "Problem while decoding a DB_GROUP:INIT_BANK %s msg, skipped: %s", CDBBankNames[bank], e.what() ), return );
 	}
 }
 
@@ -271,12 +269,12 @@ void impulseDatabaseResetBank(NLMISC::CBitMemStream &impulse)
 		impulse.serial( bank, nbits );
 
 		// reset the bank
-		IngameDbMngr.getNodePtr()->resetBank( serverTick, (TCDBBank)bank );
-		nldebug( "CDB: DB_GROUP:RESET_BANK %s", NLMISC::CDBBankNames[bank] );
+		IngameDbMngr.resetBank( serverTick, bank );
+		nldebug( "CDB: DB_GROUP:RESET_BANK %s", CDBBankNames[bank] );
 	}
 	catch (const Exception &e)
 	{
-		BOMB( NLMISC::toString( "Problem while decoding a DB_GROUP:RESET_BANK %s msg, skipped: %s", NLMISC::CDBBankNames[bank], e.what() ), return );
+		BOMB( NLMISC::toString( "Problem while decoding a DB_GROUP:RESET_BANK %s msg, skipped: %s", CDBBankNames[bank], e.what() ), return );
 	}
 }
 

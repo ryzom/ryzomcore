@@ -33,6 +33,7 @@ class IProgressCallback;
 class CBitMemStream;
 class CCDBNodeLeaf;
 class CCDBNodeBranch;
+class CCDBBankHandler;
 
 ///global bool, must be set to true if we want to display database modification. See displayDBModifs in commands.cpp
 extern bool VerboseDatabase;
@@ -197,7 +198,7 @@ public :
 	 *	Build the structure of the database from a file
 	 * \param f is the stream
 	 */
-	virtual void init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks=false ) = 0;
+	virtual void init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks=false, CCDBBankHandler *bankHandler = NULL ) = 0;
 
 	/**
 	 * Save a backup of the database

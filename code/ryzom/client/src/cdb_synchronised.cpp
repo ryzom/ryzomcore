@@ -40,6 +40,8 @@
 
 #include <string>
 
+#include "../../common/src/game_share/ryzom_database_banks.h"
+
 
 ////////////////
 // Namespaces //
@@ -56,11 +58,11 @@ uint32 NbDatabaseChanges = 0;
 //	CCDBSynchronised
 //
 //-----------------------------------------------
-CCDBSynchronised::CCDBSynchronised() : _Database(0), _InitInProgress(true), _InitDeltaReceived(0)
+CCDBSynchronised::CCDBSynchronised() : _Database(0), _InitInProgress(true), _InitDeltaReceived(0), bankHandler( NB_CDB_BANKS )
 {
 }
 
-
+extern const char *CDBBankNames[INVALID_CDB_BANK+1];
 
 //-----------------------------------------------
 //	init
@@ -78,9 +80,10 @@ void CCDBSynchronised::init( const string &fileName, NLMISC::IProgressCallback &
 			read.init (file);
 
 			//Parse the parser output!!!
-			CCDBNodeBranch::resetNodeBankMapping(); // in case the game is restarted from start
+			bankHandler.resetNodeBankMapping(); // in case the game is restarted from start
+			bankHandler.fillBankNames( CDBBankNames, INVALID_CDB_BANK + 1 );
 			_Database = new CCDBNodeBranch("SERVER");
-			_Database->init( read.getRootNode (), progressCallBack, true );
+			_Database->init( read.getRootNode (), progressCallBack, true, &bankHandler );
 		}
 	}
 	catch (const Exception &e)
@@ -193,7 +196,7 @@ void CCDBSynchronised::readDelta( NLMISC::TGameCycle gc, CBitMemStream& s, uint 
 
 	for( uint i=0; i!=propertyCount; ++i )
 	{
-		_Database->readAndMapDelta( gc, s, bank );
+		_Database->readAndMapDelta( gc, s, bank, &bankHandler );
 	}
 
 	/*// Read "client only" property changes
@@ -307,6 +310,7 @@ void CCDBSynchronised::clear()
 
 	// clear CCDBNodeBranch static data
 	CCDBNodeBranch::reset();
+	bankHandler.reset();
 }
 
 
@@ -320,6 +324,9 @@ void CCDBSynchronised::writeInitInProgressIntoUIDB()
 }
 
 
+void CCDBSynchronised::resetBank( uint gc, uint bank ){
+	_Database->resetNode( gc, bankHandler.getUIDForBank( bank ) );
+}
 
 #ifdef TRACE_READ_DELTA
 #undef TRACE_READ_DELTA

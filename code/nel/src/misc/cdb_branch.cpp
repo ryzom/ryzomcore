@@ -44,6 +44,7 @@ using namespace std;
 #include "nel/misc/progress_callback.h"
 #include "nel/misc/bit_mem_stream.h"
 #include "nel/misc/bit_set.h"
+#include "nel/misc/cdb_bank_handler.h"
 
 #include <libxml/parser.h>
 //#include <io.h>
@@ -70,30 +71,11 @@ CCDBNodeBranch::CDBBranchObsInfo *CCDBNodeBranch::_NextNotifiedObs = NULL;
 //
 uint CCDBNodeBranch::_CurrNotifiedObsList = 0;
 
-// Mapping from server database index to client database index (first-level nodes)
-vector<uint> CCDBNodeBranch::_CDBBankToUnifiedIndexMapping [CDB_BANKS_MAX];
-
-// Mapping from client database index to TCDBBank (first-level nodes)
-vector<uint> CCDBNodeBranch::_UnifiedIndexToBank;
-
-// Last index mapped
-uint CCDBNodeBranch::_CDBLastUnifiedIndex = 0;
-
-// Number of bits for first-level branches, by bank
-uint CCDBNodeBranch::_FirstLevelIdBitsByBank [CDB_BANKS_MAX];
-
-extern const char *CDBBankNames[CDB_BANK_INVALID+1];
-
 std::vector< CCDBNodeBranch::IBranchObserverCallFlushObserver* > CCDBNodeBranch::flushObservers;
 
 // reset all static data
 void CCDBNodeBranch::reset()
 {
-	for ( uint b=0; b<CDB_BANKS_MAX; ++b )
-		_CDBBankToUnifiedIndexMapping[b].clear();
-	_UnifiedIndexToBank.clear();
-	_CDBLastUnifiedIndex = 0;
-
 	_FirstNotifiedObs[0] = NULL;
 	_FirstNotifiedObs[1] = NULL;
 	_LastNotifiedObs[0] = NULL;
@@ -101,31 +83,6 @@ void CCDBNodeBranch::reset()
 	_CurrNotifiedObsList = 0;
 	_CurrNotifiedObs = NULL;
 	_NextNotifiedObs = NULL;
-}
-
-// Internal use only. First-level bank-mapping.
-void CCDBNodeBranch::mapNodeByBank( ICDBNode * /* node */, const string& bankStr, bool /* clientOnly */, uint /* nodeIndex */ )
-{
-	/*if ( clientOnly )
-	{
-		//nldebug( "CDB: Unified.%u is ClientOnly", _CDBLastUnifiedIndex );
-		++_CDBLastUnifiedIndex;
-		_UnifiedIndexToBank.push_back( CDBPlayer );
-	}
-	else*/ // now clientOnly indices are known by the server as well
-	{
-		for ( uint b=0; b!=CDB_BANK_INVALID; ++b )
-		{
-			if ( string(CDBBankNames[b]) == bankStr )
-			{
-				//nldebug( "CDB: Mapping %s.%u to Unified.%u", CDBBankNames[b], _CDBBankToUnifiedIndexMapping[b].size(), _CDBLastUnifiedIndex );
-				_CDBBankToUnifiedIndexMapping[b].push_back( _CDBLastUnifiedIndex );
-				++_CDBLastUnifiedIndex;
-				_UnifiedIndexToBank.push_back( b );
-				break;
-			}
-		}
-	}
 }
 
 
@@ -138,7 +95,7 @@ static /*inline*/ void addNode( ICDBNode *newNode, std::string newName, CCDBNode
 							xmlNodePtr &child, const string& bankName,
 							bool atomBranch, bool clientOnly,
 							IProgressCallback &progressCallBack,
-							bool mapBanks )
+							bool mapBanks, CCDBBankHandler *bankHandler = NULL )
 {
 	nodesSorted.push_back(newNode);
 	nodes.push_back(newNode);
@@ -151,7 +108,7 @@ static /*inline*/ void addNode( ICDBNode *newNode, std::string newName, CCDBNode
 	{
 		if ( ! bankName.empty() )
 		{
-			CCDBNodeBranch::mapNodeByBank( newNode, bankName, clientOnly, (uint)nodes.size()-1 );
+			bankHandler->mapNodeByBank( bankName );
 			//nldebug( "CDB: Mapping %s for %s (node %u)", newName.c_str(), bankName.c_str(), nodes.size()-1 );
 		}
 		else
@@ -161,7 +118,7 @@ static /*inline*/ void addNode( ICDBNode *newNode, std::string newName, CCDBNode
 	}
 }
 
-void CCDBNodeBranch::init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks )
+void CCDBNodeBranch::init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks, CCDBBankHandler *bankHandler )
 {
 	xmlNodePtr child;
 
@@ -200,7 +157,7 @@ void CCDBNodeBranch::init( xmlNodePtr node, IProgressCallback &progressCallBack,
 
 //				nlinfo("+ %s%d",name,i);
 				string newName = string(name.getDatas())+toString(i);
-				addNode( new CCDBNodeBranch(newName), newName, this, _Nodes, _NodesByName, child, sBank, sAtom=="1", sClientonly=="1", progressCallBack, mapBanks );
+				addNode( new CCDBNodeBranch(newName), newName, this, _Nodes, _NodesByName, child, sBank, sAtom=="1", sClientonly=="1", progressCallBack, mapBanks, bankHandler );
 //				nlinfo("-");
 
 				// Progress bar
@@ -212,7 +169,7 @@ void CCDBNodeBranch::init( xmlNodePtr node, IProgressCallback &progressCallBack,
 			// dealing with a single entry
 //			nlinfo("+ %s",name);
 			string newName = string(name.getDatas());
-			addNode( new CCDBNodeBranch(newName), newName, this, _Nodes, _NodesByName, child, sBank, sAtom=="1", sClientonly=="1", progressCallBack, mapBanks );
+			addNode( new CCDBNodeBranch(newName), newName, this, _Nodes, _NodesByName, child, sBank, sAtom=="1", sClientonly=="1", progressCallBack, mapBanks, bankHandler );
 //			nlinfo("-");
 		}
 
@@ -249,7 +206,7 @@ void CCDBNodeBranch::init( xmlNodePtr node, IProgressCallback &progressCallBack,
 
 //				nlinfo("  %s%d",name,i);
 				string newName = string(name.getDatas())+toString(i);
-				addNode( new CCDBNodeLeaf(newName), newName, this, _Nodes, _NodesByName, child, sBank, false, false, progressCallBack, mapBanks );
+				addNode( new CCDBNodeLeaf(newName), newName, this, _Nodes, _NodesByName, child, sBank, false, false, progressCallBack, mapBanks, bankHandler );
 
 				// Progress bar
 				progressCallBack.popCropedValues ();
@@ -259,7 +216,7 @@ void CCDBNodeBranch::init( xmlNodePtr node, IProgressCallback &progressCallBack,
 		{
 //			nlinfo("  %s",name);
 			string newName = string(name.getDatas());
-			addNode( new CCDBNodeLeaf(newName), newName, this, _Nodes, _NodesByName, child, sBank, false, false, progressCallBack, mapBanks );
+			addNode( new CCDBNodeLeaf(newName), newName, this, _Nodes, _NodesByName, child, sBank, false, false, progressCallBack, mapBanks, bankHandler );
 		}
 
 		// Progress bar
@@ -269,18 +226,11 @@ void CCDBNodeBranch::init( xmlNodePtr node, IProgressCallback &progressCallBack,
 
 	// count number of bits required to store the id
 	if ( (mapBanks) && (getParent() == NULL) )
-	{
-		nlassertex( _UnifiedIndexToBank.size() == countNode, ("Mapped: %u Nodes: %u", _UnifiedIndexToBank.size(), countNode) );
-
+	{		
+		nlassert( bankHandler != NULL );
+		nlassertex( bankHandler->getUnifiedIndexToBankSize() == countNode, ("Mapped: %u Nodes: %u", bankHandler->getUnifiedIndexToBankSize(), countNode) );
+		bankHandler->calcIdBitsByBank();
 		_IdBits = 0;
-		for ( uint b=0; b!=CDB_BANKS_MAX; ++b )
-		{
-			uint nbNodesOfBank = (uint)_CDBBankToUnifiedIndexMapping[b].size();
-			uint idb = 0;
-			if ( nbNodesOfBank > 0 )
-				for ( idb=1; nbNodesOfBank > unsigned(1<<idb) ; idb++ ) {}
-			_FirstLevelIdBitsByBank[b] = idb;
-		}
 	}
 	else
 	{
@@ -462,16 +412,16 @@ bool CCDBNodeBranch::setProp( CTextId& id, sint64 value )
 /*
  * Update the database from the delta, but map the first level with the bank mapping (see _CDBBankToUnifiedIndexMapping)
  */
-void CCDBNodeBranch::readAndMapDelta( TGameCycle gc, CBitMemStream& s, uint bank )
+void CCDBNodeBranch::readAndMapDelta( TGameCycle gc, CBitMemStream& s, uint bank, CCDBBankHandler *bankHandler )
 {
 	nlassert( ! isAtomic() ); // root node mustn't be atomic
 
 	// Read index
 	uint32 idx;
-	s.serial( idx, _FirstLevelIdBitsByBank[bank] );
+	s.serial( idx, bankHandler->getFirstLevelIdBits( bank ) );
 
 	// Translate bank index -> unified index
-	idx = _CDBBankToUnifiedIndexMapping[bank][idx];
+	idx = bankHandler->getServerToClientUIDMapping( bank, idx );
 	if (idx >= _Nodes.size())
 	{
 		throw Exception ("idx %d > _Nodes.size() %d ", idx, _Nodes.size());
