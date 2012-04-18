@@ -109,7 +109,7 @@ static void jpgDecompressSkip(j_decompress_ptr cinfo, long num_bytes)
 	}
 }
 
-static void jpgDecompressTerm(j_decompress_ptr cinfo)
+static void jpgDecompressTerm(j_decompress_ptr /* cinfo */)
 {
 }
 

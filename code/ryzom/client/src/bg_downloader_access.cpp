@@ -764,7 +764,7 @@ bool CBGDownloaderAccess::CDownloadCoTask::defaultMessageHandling(BGDownloader::
 	{
 		case BGD_Priority:
 		{
-			TThreadPriority tp;
+			BGDownloader::TThreadPriority tp;
 			msg.serialEnum(tp);
 			if (tp != Parent->_DownloadThreadPriority)
 			{

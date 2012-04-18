@@ -391,13 +391,13 @@ class CHarvestSourceManager : public CSimpleEntityManager<CHarvestSource>
 public:
 
 	/// Singleton access
-	static CHarvestSourceManager *getInstance() { return (CHarvestSourceManager*)_Instance; }
+	static CHarvestSourceManager *getInstance();
 
 	/// Initialization
 	void		init( TDataSetIndex baseRowIndex, TDataSetIndex size );
 
 	/// Release
-	static void	release() { delete (CHarvestSourceManager*)_Instance; }
+	static void	release();
 };
 
 

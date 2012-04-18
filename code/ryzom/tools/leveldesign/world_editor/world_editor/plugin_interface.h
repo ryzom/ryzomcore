@@ -163,7 +163,7 @@ public:
 	/// Init the plugin. The plugin receive the world editor interface.
 	virtual void		init(IPluginAccess *pluginAccess) =0;
 	/// Delete the plugin.
-	virtual ~IPluginCallback() {};
+	virtual ~IPluginCallback() {}
 
 	/// The current region has changed.
 //	virtual void		primRegionChanged(const std::vector<NLLIGO::CPrimRegion*> &regions) = 0;

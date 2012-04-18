@@ -84,12 +84,12 @@ public:
 	uint		Item, SubItem, ColumnCount;
 	uint		DlgIndex;
 
-	virtual		TItemEdit getItemEditMode (uint item, uint subItem) {return EditFixedCombo;};
+	virtual		TItemEdit getItemEditMode (uint item, uint subItem) {return EditFixedCombo;}
 	virtual		void getComboBoxStrings (uint item, uint subItem, std::vector<std::string> &retStrings);
-	virtual		void getMemComboBoxProp (uint item, uint subItem, std::string &regAdr, bool &browse) { regAdr = ""; browse = false; };
-	virtual		void getNewItemText (uint item, uint subItem, std::string &ret) { ret = "new"; };
-	virtual		void getBrowseInfo (uint item, uint subItem, std::string &defExt, std::string &defFilename, std::string &defDir, std::string &filter) { defExt=""; defFilename=""; filter=""; defDir="";};
-	virtual		void onItemChanged (uint item, uint subItem) {};
+	virtual		void getMemComboBoxProp (uint item, uint subItem, std::string &regAdr, bool &browse) { regAdr = ""; browse = false; }
+	virtual		void getNewItemText (uint item, uint subItem, std::string &ret) { ret = "new"; }
+	virtual		void getBrowseInfo (uint item, uint subItem, std::string &defExt, std::string &defFilename, std::string &defDir, std::string &filter) { defExt=""; defFilename=""; filter=""; defDir="";}
+	virtual		void onItemChanged (uint item, uint subItem) {}
 
 	void	memComboBoxAsChange (bool selChange);
 	void	closeMemComboBox (bool update);

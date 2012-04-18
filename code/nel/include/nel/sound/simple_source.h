@@ -40,7 +40,7 @@ class CSimpleSource : public CSourceCommon, public CAudioMixerUser::IMixerEvent 
 {
 public:
 	/// Constructor
-	CSimpleSource(CSimpleSound *simpleSound = NULL, bool spawn = false, TSpawnEndCallback cb = 0, void *cbUserParam = 0, NL3D::CCluster *cluster = 0);
+	CSimpleSource(CSimpleSound *simpleSound = NULL, bool spawn = false, TSpawnEndCallback cb = 0, void *cbUserParam = 0, NL3D::CCluster *cluster = 0, CGroupController *groupController = NULL);
 	/// Destructor
 	virtual ~CSimpleSource();
 	
@@ -97,14 +97,7 @@ public:
 	 * 1.0 -> no attenuation
 	 * values > 1 (amplification) not supported by most drivers
 	 */
-	virtual void					setGain( float gain );
-	/** Set the gain amount (value inside [0, 1]) to map between 0 and the nominal gain
-	 * (which is getSource()->getGain()). Does nothing if getSource() is null.
-	 */
-	virtual void					setRelativeGain( float gain );
-	/** Shift the frequency. 1.0f equals identity, each reduction of 50% equals a pitch shift
-	 * of one octave. 0 is not a legal value.
-	 */
+	virtual void					updateFinalGain();
 	virtual void					setPitch( float pitch );
 	/// Set the source relative mode. If true, positions are interpreted relative to the listener position (default: false)
 	virtual void					setSourceRelativeMode( bool mode );
@@ -148,6 +141,8 @@ private:
 
 	/// True when the sound is played muted and until the mixer event notifying the end.
 	bool							_PlayMuted;
+
+	bool							_WaitingForPlay;
 
 };
 

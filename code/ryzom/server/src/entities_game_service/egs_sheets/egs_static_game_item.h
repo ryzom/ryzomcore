@@ -429,7 +429,7 @@ struct SShield : public SArmor
 	NL_INSTANCE_COUNTER_DECL(SShield);
 public:
 
-	inline SShield() : SArmor(),ShieldType(SHIELDTYPE::NONE),Unbreakable(false){};
+	inline SShield() : SArmor(),ShieldType(SHIELDTYPE::NONE),Unbreakable(false){}
 	
 	virtual void serial(class NLMISC::IStream &f)
 	{

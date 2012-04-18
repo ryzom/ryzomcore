@@ -91,6 +91,14 @@ sint8 ExplosionResetPeriod = 50; // 5 s
 CHarvestSource AutoSpawnSourceIniProperties;
 
 /*
+ * Access to singleton
+ */
+CHarvestSourceManager *CHarvestSourceManager::getInstance()
+{
+	return (CHarvestSourceManager*)_Instance;
+}
+
+/*
  * Initialization of source manager
  */
 void CHarvestSourceManager::init( TDataSetIndex baseRowIndex, TDataSetIndex size )
@@ -103,7 +111,10 @@ void CHarvestSourceManager::init( TDataSetIndex baseRowIndex, TDataSetIndex size
 	//AutoSpawnSourceIniProperties.setDistVis( 100 );
 }
 
-
+void CHarvestSourceManager::release()
+{
+	delete (CHarvestSourceManager*)_Instance;
+}
 
 /*
  * HarvestSource constructor

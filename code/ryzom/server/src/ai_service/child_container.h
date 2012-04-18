@@ -546,13 +546,13 @@ CAliasTreeOwner* CAliasCont<TChld>::getAliasChildByAlias(uint32 alias) const
 template <class TChld>
 CAliasTreeOwner* CAliasCont<TChld>::addAliasChild(CAliasTreeOwner* child)
 {
-	return NLMISC::type_cast<CAliasTreeOwner*>(addChild(static_cast<TChld*>(child)));
+	return NLMISC::type_cast<CAliasTreeOwner*>(this->addChild(static_cast<TChld*>(child)));
 }
 
 template <class TChld>
 CAliasTreeOwner* CAliasCont<TChld>::addAliasChild(CAliasTreeOwner* child, uint32 index)
 {
-	return NLMISC::type_cast<CAliasTreeOwner*>(addChild(static_cast<TChld*>(child), index));
+	return NLMISC::type_cast<CAliasTreeOwner*>(this->addChild(static_cast<TChld*>(child), index));
 }
 
 template <class TChld>

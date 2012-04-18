@@ -121,14 +121,14 @@ public:
 	/// exception thrown when creature is unknown
 	struct ECreature : public NLMISC::Exception
 	{
-		ECreature( const NLMISC::CEntityId& id ) : Exception ("The creature "+id.toString()+" doesn't exist") {};
+		ECreature( const NLMISC::CEntityId& id ) : Exception ("The creature "+id.toString()+" doesn't exist") {}
 	};
 
 	/// structure describing an unaffected fauna group ( because the description is received before mirror update )
 	struct SUnaffectedFaunaGroup
 	{
 		SUnaffectedFaunaGroup(const TDataSetRow& entityIndex,TAIAlias	groupAlias)
-			:EntityIndex( entityIndex ),GroupAlias( groupAlias ){};
+			:EntityIndex( entityIndex ),GroupAlias( groupAlias ){}
 		TDataSetRow EntityIndex;
 		TAIAlias	GroupAlias;
 	};

@@ -335,7 +335,7 @@ protected:
 
 		T *Value;
 
-		virtual void serialDefaultValue (NLMISC::IStream &f)
+		virtual void serialDefaultValue (NLMISC::IStream &/* f */)
 		{
 			// nothing
 		}

@@ -436,7 +436,7 @@ NLMISC_CLASS_COMMAND_IMPL(CPatchmanAdminModule, download)
 			}
 
 			// iterate over matching files, adding them to the download list
-			for (uint32 i=fileInfo.size();i--;)
+			for (uint i=(uint)fileInfo.size();i--;)
 			{
 				_DownloadRequests[fileInfo[i].FileName]= NLMISC::CPath::standardizePath(destination);
 				requestFile(fileInfo[i].FileName);

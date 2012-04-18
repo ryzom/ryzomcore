@@ -50,12 +50,12 @@ public:
 	/// exception thrown when database is not initialized
 	struct EDBNotInit : public NLMISC::Exception
 	{
-		EDBNotInit() : Exception("CDB: Property Database not initialized") {};
+		EDBNotInit() : Exception("CDB: Property Database not initialized") {}
 	};
 
 	struct ECDBNotFound : public NLMISC::Exception
 	{
-		ECDBNotFound() : Exception("CDB: Property not found") {};
+		ECDBNotFound() : Exception("CDB: Property not found") {}
 	};
 
 	/*struct CPropForClientOnly

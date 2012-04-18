@@ -35,7 +35,7 @@ class CMusicSource : public CSourceCommon
 {
 public:
 	/// Constructor
-	CMusicSource	(class CMusicSound *sound=NULL, bool spawn=false, TSpawnEndCallback cb=0, void *cbUserParam = 0, NL3D::CCluster *cluster = 0);
+	CMusicSource	(class CMusicSound *sound=NULL, bool spawn=false, TSpawnEndCallback cb=0, void *cbUserParam = 0, NL3D::CCluster *cluster = 0, CGroupController *groupController = NULL);
 	/// Destructor
 	~CMusicSource	();
 

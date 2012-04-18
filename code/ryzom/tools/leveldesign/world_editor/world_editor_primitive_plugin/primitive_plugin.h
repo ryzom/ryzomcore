@@ -51,9 +51,9 @@ public:
 
 	CPrimitivePlugin();
 
-	virtual void		positionMoved(const NLMISC::CVector &position) {};
-	virtual void		lostPositionControl() {};
-	virtual void		onIdle() {};
+	virtual void		positionMoved(const NLMISC::CVector &position) {}
+	virtual void		lostPositionControl() {}
+	virtual void		onIdle() {}
 
 	virtual void drawPrimitive(const NLLIGO::IPrimitive *primitive, const TRenderContext &renderContext);
 
@@ -72,9 +72,9 @@ private:
 
 		void	serial (NLMISC::IStream &s);
 
-		static uint getVersion ();
+		static uint getVersion ()
 
-		void removed() {};
+		void removed() {}
 	};
 
 	std::map<NLMISC::CSheetId, TCreatureInfo>	_CreatureInfos;

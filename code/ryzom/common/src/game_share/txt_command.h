@@ -50,21 +50,21 @@ static CTxtCommandSetPtr<__CTxtCommandSet_##setName> setName;
 //-------------------------------------------------------------------------------------------------
 
 #define TXT_COMMAND(cmdName,setName,CONTEXT_CLASS)\
-struct __CTxtCommand_##cmdName: public ITxtCommand<CONTEXT_CLASS>\
+struct __CTxtCommand_##cmdName##CONTEXT_CLASS: public ITxtCommand<CONTEXT_CLASS>\
 {\
-	static __CTxtCommand_##cmdName* getInstance()\
+	static __CTxtCommand_##cmdName##CONTEXT_CLASS* getInstance()\
 	{\
-		static __CTxtCommand_##cmdName *p=NULL;\
-		if (p==NULL) p= new __CTxtCommand_##cmdName;\
+		static __CTxtCommand_##cmdName##CONTEXT_CLASS *p=NULL;\
+		if (p==NULL) p= new __CTxtCommand_##cmdName##CONTEXT_CLASS;\
 		return p;\
 	}\
 	virtual const char* getName() const {return #cmdName;}\
 	virtual CTxtCommandResult execute(CONTEXT_CLASS& context,const NLMISC::CVectorSString& args,const NLMISC::CSString& rawArgs,const NLMISC::CSString& fullCmdLine);\
 private:\
-	__CTxtCommand_##cmdName() {}\
+	__CTxtCommand_##cmdName##CONTEXT_CLASS() {}\
 };\
-static ITxtCommandRegisterer<__CTxtCommand_##cmdName,__CTxtCommandSet_##setName> __CTxtCommand_##cmdName##_Registerer;\
-CTxtCommandResult __CTxtCommand_##cmdName::execute(CONTEXT_CLASS& context,const NLMISC::CVectorSString& args,const NLMISC::CSString& rawArgs,const NLMISC::CSString& fullCmdLine)
+static ITxtCommandRegisterer<__CTxtCommand_##cmdName##CONTEXT_CLASS,__CTxtCommandSet_##setName> __CTxtCommand_##cmdName##CONTEXT_CLASS##_Registerer;\
+CTxtCommandResult __CTxtCommand_##cmdName##CONTEXT_CLASS::execute(CONTEXT_CLASS& context,const NLMISC::CVectorSString& args,const NLMISC::CSString& rawArgs,const NLMISC::CSString& fullCmdLine)
 
 
 //-------------------------------------------------------------------------------------------------

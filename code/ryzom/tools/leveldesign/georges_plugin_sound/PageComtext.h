@@ -34,7 +34,7 @@ class CPageComtext : public CPageBase
 
 // Construction
 public:
-	CPageComtext(){};
+	CPageComtext(){}
 	CPageComtext(NLGEORGES::CSoundDialog *soundDialog);
 	~CPageComtext();
 

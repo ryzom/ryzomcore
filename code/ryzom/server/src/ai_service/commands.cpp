@@ -844,7 +844,7 @@ public:
 	}
 protected:	
 private:
-	size_t	_index;
+	uint32	_index;
 	float	_value;
 	bool	_detailled;
 	mutable	CLogStringWriter	_stringWriter;

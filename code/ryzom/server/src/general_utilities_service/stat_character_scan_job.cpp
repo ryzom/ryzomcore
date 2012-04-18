@@ -293,7 +293,7 @@ bool CCharacterScanJob::runForFile(const std::string& fileName)
 	c.apply(pdr);
 
 	// iterate over the filters executing their core code
-	for (uint32 i=_Filters.size();i--;)
+	for (uint32 i=(uint32)_Filters.size();i--;)
 	{
 		if (!_Filters[i]->evaluate(&c))
 			return true;

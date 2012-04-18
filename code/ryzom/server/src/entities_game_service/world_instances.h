@@ -56,7 +56,7 @@ public:
 	struct IAIInstanceReady
 	{
 		virtual void onAiInstanceReady(const CReportStaticAIInstanceMsg &msg) = 0;
-		virtual void onAiInstanceDown(const CReportStaticAIInstanceMsg &msg) {}; // not mandatory
+		virtual void onAiInstanceDown(const CReportStaticAIInstanceMsg &msg) {} // not mandatory
 	};
 
 	/// Singleton access
