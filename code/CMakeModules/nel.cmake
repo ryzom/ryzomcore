@@ -64,9 +64,10 @@ ENDMACRO(NL_TARGET_DRIVER)
 # Argument:
 ###
 MACRO(NL_DEFAULT_PROPS name label)
-  IF(NOT MSVC10)
-    SET_TARGET_PROPERTIES(${name} PROPERTIES PROJECT_LABEL ${label})
-  ENDIF(NOT MSVC10)
+  # Note: This is just a workaround for a CMake bug generating VS10 files with a colon in the project name.
+  # CMake Bug ID: http://www.cmake.org/Bug/view.php?id=11819
+  STRING(REGEX REPLACE "\\:" " -" proj_label ${label})
+  SET_TARGET_PROPERTIES(${name} PROPERTIES PROJECT_LABEL ${proj_label})
   GET_TARGET_PROPERTY(type ${name} TYPE)
   IF(${type} STREQUAL SHARED_LIBRARY)
     # Set versions only if target is a shared library
