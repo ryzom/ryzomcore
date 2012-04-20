@@ -176,6 +176,7 @@ namespace Plugin
 		if (!m_dockedWidgets.size())
 		{
 			CGeorgesTreeViewDialog *dock = new CGeorgesTreeViewDialog(m_mainDock);
+			dock->setUndoStack(m_undoStack);
 			m_lastActiveDock = dock;
 			m_dockedWidgets.append(dock);
 
@@ -197,6 +198,7 @@ namespace Plugin
 				}
 			}
 			CGeorgesTreeViewDialog *dock = new CGeorgesTreeViewDialog(m_mainDock);
+			dock->setUndoStack(m_undoStack);
 			m_dockedWidgets.append(dock);
 
 			connect(m_dockedWidgets.last(), SIGNAL(closing()),

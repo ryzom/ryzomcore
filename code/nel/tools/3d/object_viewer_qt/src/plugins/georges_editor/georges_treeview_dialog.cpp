@@ -21,6 +21,7 @@
 #include <QSettings>
 #include <QFileDialog>
 #include <QDebug>
+#include <QMenu>
 
 // NeL includes
 #include <nel/misc/path.h>
@@ -64,6 +65,10 @@ namespace Plugin
 
 		FormDelegate *formdelegate = new FormDelegate(this);
 		m_ui.treeView->setItemDelegateForColumn(1, formdelegate);
+
+		// Set up custom context menu.
+		setContextMenuPolicy(Qt::CustomContextMenu);
+		connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 
 		connect(m_ui.treeView, SIGNAL(doubleClicked (QModelIndex)),
 			this, SLOT(doubleClicked (QModelIndex)));
@@ -382,6 +387,54 @@ namespace Plugin
 		if (m) {
 			m->setShowParents(m_ui.checkBoxParent->isChecked());
 			m->setShowDefaults(m_ui.checkBoxDefaults->isChecked());
+		}
+	}
+
+	void CGeorgesTreeViewDialog::showContextMenu(const QPoint &pos)
+	{
+		QMenu contextMenu;
+		QPoint globalPos = this->mapToGlobal(pos);
+		
+		// Fisrt we're going to see if we've right clicked on a new item and select it.
+		QModelIndex &index = this->m_ui.treeView->currentIndex();
+
+		if(!index.isValid())
+			return;
+
+		CGeorgesFormProxyModel * mp = dynamic_cast<CGeorgesFormProxyModel *>(m_ui.treeView->model());
+		CGeorgesFormModel *m = dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());
+		QModelIndex sourceIndex = mp->mapToSource(index);
+
+		if (m) 
+		{
+			
+			CFormItem *item = m->getItem(sourceIndex);
+
+			if ((item->parent() && item->parent()->data(0) == "parents") || item->data(0) == "parents")
+				contextMenu.addAction("Add parent...");
+			else if(item->getFormElm()->isArray())
+				contextMenu.addAction("Add array entry...");
+			else if(item->getFormElm()->isStruct())
+				contextMenu.addAction("Add element...");
+			else if(item->getFormElm()->isAtom() && item->valueFrom() == NLGEORGES::UFormElm::ValueForm)
+				contextMenu.addAction("Revert to parent/default...");
+			else if(item->getFormElm()->isAtom() && item->valueFrom() == NLGEORGES::UFormElm::ValueParentForm)
+				contextMenu.addAction("Override parent/default value...");
+			else
+				contextMenu.addAction("Add element...");
+
+			QAction *selectedItem = contextMenu.exec(globalPos);
+			if(selectedItem)
+			{
+				if(selectedItem->text() == "Add parent...")
+				{
+					QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Select parent sheets..."));
+					if(!fileNames.isEmpty())
+					{
+						// add some parents.
+					}
+				}
+			}
 		}
 	}
 

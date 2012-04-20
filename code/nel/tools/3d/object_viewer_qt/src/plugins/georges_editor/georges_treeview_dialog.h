@@ -22,6 +22,9 @@
 
 // Qt includes
 #include <QtGui/QDockWidget>
+#include <QtGui/QUndoCommand>
+#include <QtGui/QUndoStack>
+
 
 // STL includes
 
@@ -60,6 +63,10 @@ namespace Plugin
 
 		QTabWidget* tabWidget() { return m_ui.treeViewTabWidget; }
 
+		void setUndoStack(QUndoStack *stack) {
+			m_undoStack = stack;
+		}
+
 		QString loadedForm;
 
 	protected:
@@ -75,6 +82,7 @@ namespace Plugin
 		void loadFormIntoDialog(CForm *form = 0);
 		void modifiedFile( );
 		void checkVisibility(bool);
+		void showContextMenu(const QPoint &pos);
 
 	private Q_SLOTS:
 		void doubleClicked ( const QModelIndex & index );
@@ -86,6 +94,8 @@ namespace Plugin
 		ExpandableHeaderView *m_header;
 		UForm    *m_form;
 		CGeorges *m_georges;
+
+		QUndoStack *m_undoStack;
 
 		bool m_modified;
 
