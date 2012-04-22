@@ -30,6 +30,7 @@
 #include "nel/misc/cdb.h"
 #include "nel/misc/cdb_leaf.h"
 #include "nel/misc/cdb_branch.h"
+#include "nel/misc/cdb_branch_observing_handler.h"
 #include "cdb_synchronised.h"
 
 

@@ -1236,7 +1236,8 @@ void CInterfaceManager::updateFrameEvents()
 		CInterfaceAnim *pIA = vTmp[i];
 		pIA->update();
 	}
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::flushObserverCalls();
 	//
 	// Next : Test if we have to remove anims
 	for (i = 0; i < (sint)_ActiveAnims.size(); ++i)
@@ -1249,7 +1250,8 @@ void CInterfaceManager::updateFrameEvents()
 		}
 	}
 	//
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 
 	// Handle waiting texts from server
 	processServerIDString();
@@ -1341,7 +1343,8 @@ void CInterfaceManager::updateFrameEvents()
 	{
 		(*it)->handleEvent(clockTick);
 	}
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 
  	// Update SPhrase manager
  	CSPhraseManager	*pPM= CSPhraseManager::getInstance();
@@ -1985,8 +1988,9 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 		H_AUTO ( RZ_Interface_DrawViews_Setup )
 
 		_ViewRenderer.activateWorldSpaceMatrix (false);
-
-		CCDBNodeBranch::flushObserversCalls();
+		
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 
 		// If an element has captured the keyboard, make sure it is alway visible (all parent windows active)
 		if (_CaptureKeyboard != NULL)
@@ -2058,7 +2062,8 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 			To minimize texture swapping, we first sort per Window, then we sort per layer, then we render per Global Texture.
 			Computed String are rendered in on big drawQuads at last part of each layer
 		*/
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 		//
 		for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 		{
@@ -2108,8 +2113,9 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 
 	{
 		H_AUTO ( RZ_Interface_DrawViews_After )
-
-		CCDBNodeBranch::flushObserversCalls();
+		
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 
 		// draw the special over extend text
 		drawOverExtendViewText();
@@ -2157,7 +2163,8 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 		Driver->setMatrixMode2D11();
 
 		// flush obs
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 	}
 }
 
@@ -2725,7 +2732,8 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 				if(_CaptureKeyboard && _CaptureKeyboard->getRootWindow()==tw)
 				{
 					bool result = _CaptureKeyboard->handleEvent(event);
-					CCDBNodeBranch::flushObserversCalls();
+					IngameDbMngr.flushObserverCalls();
+					CInterfaceManager::getInstance()->flushObserverCalls();
 					return result;
 				}
 				else
@@ -2782,7 +2790,8 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 		if (_CaptureKeyboard != NULL && !handled)
 		{
 			bool result = _CaptureKeyboard->handleEvent(event);
-			CCDBNodeBranch::flushObserversCalls();
+			IngameDbMngr.flushObserverCalls();
+			CInterfaceManager::getInstance()->flushObserverCalls();
 			return result;
 		}
 	}
@@ -3042,7 +3051,8 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 		handled|= _MouseOverWindow;
 	}
 
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 	// event handled?
 	return handled;
 }
@@ -6641,3 +6651,86 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 	ucstr = str;
 	return true;;
 }
+
+void CInterfaceManager::addBranchObserver( const char *branchName, NLMISC::ICDBNode::IPropertyObserver *observer, const std::vector< std::string >& positiveLeafNameFilter )
+{
+	CCDBNodeBranch *b = dynamic_cast< CCDBNodeBranch* >( _DbRootNode->getNode( ICDBNode::CTextId( std::string( branchName ) ), false ) );
+	if( b == NULL )
+		return;
+
+	branchObservingHandler.addBranchObserver( b, observer, positiveLeafNameFilter );
+}
+
+void CInterfaceManager::addBranchObserver( NLMISC::CCDBNodeBranch *branch, NLMISC::ICDBNode::IPropertyObserver *observer, const std::vector< std::string >& positiveLeafNameFilter )
+{
+	if( branch == NULL )
+		return;
+
+	branchObservingHandler.addBranchObserver( branch, observer, positiveLeafNameFilter );
+}
+
+void CInterfaceManager::addBranchObserver( const char *branchName, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter, uint positiveLeafNameFilterSize )
+{
+	CCDBNodeBranch *b = dynamic_cast< CCDBNodeBranch* >( _DbRootNode->getNode( ICDBNode::CTextId( std::string( branchName ) ), false ) );
+	if( b == NULL )
+		return;
+
+	branchObservingHandler.addBranchObserver( b, dbPathFromThisNode, observer, positiveLeafNameFilter, positiveLeafNameFilterSize );
+}
+
+void CInterfaceManager::addBranchObserver( NLMISC::CCDBNodeBranch *branch, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter, uint positiveLeafNameFilterSize )
+{
+	if( branch == NULL )
+		return;
+	branchObservingHandler.addBranchObserver( branch, dbPathFromThisNode, observer, positiveLeafNameFilter, positiveLeafNameFilterSize );
+}
+
+void CInterfaceManager::removeBranchObserver( const char *branchName, NLMISC::ICDBNode::IPropertyObserver* observer )
+{
+	CCDBNodeBranch *b = dynamic_cast< CCDBNodeBranch* >( _DbRootNode->getNode( ICDBNode::CTextId( std::string( branchName ) ), false ) );
+	if( b == NULL )
+		return;
+	branchObservingHandler.removeBranchObserver( b, observer );
+}
+
+void CInterfaceManager::removeBranchObserver( NLMISC::CCDBNodeBranch *branch, NLMISC::ICDBNode::IPropertyObserver* observer )
+{
+	if( branch == NULL )
+		return;
+	branchObservingHandler.removeBranchObserver( branch, observer );
+}
+
+void CInterfaceManager::removeBranchObserver( const char *branchName, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer )
+{
+	CCDBNodeBranch *b = dynamic_cast< CCDBNodeBranch* >( _DbRootNode->getNode( ICDBNode::CTextId( std::string( branchName ) ), false ) );
+	if( b == NULL )
+		return;
+	branchObservingHandler.removeBranchObserver( b, dbPathFromThisNode, observer );
+}
+
+void CInterfaceManager::removeBranchObserver( NLMISC::CCDBNodeBranch *branch, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer )
+{
+	if( branch == NULL )
+		return;
+	branchObservingHandler.removeBranchObserver( branch, dbPathFromThisNode, observer );
+}
+
+void CInterfaceManager::addFlushObserver( NLMISC::CCDBBranchObservingHandler::IBranchObserverCallFlushObserver *observer )
+{
+	if( observer == NULL )
+		return;
+	branchObservingHandler.addFlushObserver( observer );
+}
+
+void CInterfaceManager::removeFlushObserver( NLMISC::CCDBBranchObservingHandler::IBranchObserverCallFlushObserver *observer )
+{
+	if( observer == NULL )
+		return;
+	branchObservingHandler.removeFlushObserver( observer );
+}
+
+void CInterfaceManager::flushObserverCalls()
+{
+	branchObservingHandler.flushObserverCalls();
+}
+

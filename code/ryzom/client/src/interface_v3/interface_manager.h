@@ -1065,6 +1065,20 @@ private:
 	void updateTooltipCoords(CCtrlBase *newCtrl);
 	
 	CInterfaceLink::CInterfaceLinkUpdater *interfaceLinkUpdater;
+	NLMISC::CCDBBranchObservingHandler branchObservingHandler;
+
+public:
+	void addBranchObserver( const char *branchName, NLMISC::ICDBNode::IPropertyObserver *observer, const std::vector< std::string >& positiveLeafNameFilter = std::vector< std::string >() );
+	void addBranchObserver( NLMISC::CCDBNodeBranch *branch, NLMISC::ICDBNode::IPropertyObserver *observer, const std::vector< std::string >& positiveLeafNameFilter = std::vector< std::string >() );
+	void addBranchObserver( const char *branchName, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter = NULL, uint positiveLeafNameFilterSize = 0 );
+	void addBranchObserver( NLMISC::CCDBNodeBranch *branch, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter, uint positiveLeafNameFilterSize );
+	void removeBranchObserver( const char *branchName, NLMISC::ICDBNode::IPropertyObserver* observer );
+	void removeBranchObserver( NLMISC::CCDBNodeBranch *branch, NLMISC::ICDBNode::IPropertyObserver* observer );
+	void removeBranchObserver( const char *branchName, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer );
+	void removeBranchObserver( NLMISC::CCDBNodeBranch *branch, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer );
+	void addFlushObserver( NLMISC::CCDBBranchObservingHandler::IBranchObserverCallFlushObserver *observer );
+	void removeFlushObserver( NLMISC::CCDBBranchObservingHandler::IBranchObserverCallFlushObserver *observer );
+	void flushObserverCalls();
 };
 
 #endif // NL_INTERFACE_MANAGER_H

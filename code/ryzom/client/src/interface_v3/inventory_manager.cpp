@@ -1864,7 +1864,8 @@ void CTempInvManager::open(TEMP_INV_MODE::TInventoryMode m)
 	}
 	pIM->getDbProp("LOCAL:INVENTORY:TEMP:TYPE")->setValue8((uint8)_Mode);
 
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 
 	if (pGC != NULL)
 	{

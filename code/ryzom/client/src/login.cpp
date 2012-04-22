@@ -360,7 +360,8 @@ void loginMainLoop()
 			&& LoginSM.getCurrentState() != CLoginStateMachine::st_ingame)
 //	while (loginFinished == false)
 	{
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 
 		// Update the DT T0 and T1 global variables
 		updateClientTime();
@@ -378,7 +379,8 @@ void loginMainLoop()
 		// Interface handling & displaying
 		pIM->updateFrameEvents();
 		pIM->updateFrameViews(NULL);
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 
 
 
@@ -810,7 +812,8 @@ bool login()
 		loginIntro();
 
 	pIM->initLogin();
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 
 	bool tmpDI = ClientCfg.DisableDirectInput;
 	ClientCfg.DisableDirectInput = true;
@@ -3031,8 +3034,8 @@ void loginIntro()
 
 			const ucstring nmsg("");
 			ProgressBar.newMessage (nmsg);
-
-			CCDBNodeBranch::flushObserversCalls();
+			IngameDbMngr.flushObserverCalls();
+			CInterfaceManager::getInstance()->flushObserverCalls();
 		}
 	}
 	beginLoading(StartBackground);

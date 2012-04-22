@@ -20,6 +20,7 @@
 #define CL_INTERFACE_LINK_H
 
 #include "nel/misc/cdb_branch.h"
+#include "nel/misc/cdb_branch_observing_handler.h"
 
 class CInterfaceElement;
 class CReflectedProperty;
@@ -66,7 +67,7 @@ public:
 
 
 	/// Updates triggered interface links when triggered by the observed branch
-	class CInterfaceLinkUpdater : public NLMISC::CCDBNodeBranch::IBranchObserverCallFlushObserver
+	class CInterfaceLinkUpdater : public NLMISC::CCDBBranchObservingHandler::IBranchObserverCallFlushObserver
 	{
 	public:
 		CInterfaceLinkUpdater();

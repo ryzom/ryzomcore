@@ -309,7 +309,7 @@ void CCDBSynchronised::clear()
 	}
 
 	// clear CCDBNodeBranch static data
-	CCDBNodeBranch::reset();
+	branchObservingHandler.reset();
 	bankHandler.reset();
 }
 
@@ -327,6 +327,89 @@ void CCDBSynchronised::writeInitInProgressIntoUIDB()
 void CCDBSynchronised::resetBank( uint gc, uint bank ){
 	_Database->resetNode( gc, bankHandler.getUIDForBank( bank ) );
 }
+
+void CCDBSynchronised::addBranchObserver( const char *branchName, NLMISC::ICDBNode::IPropertyObserver *observer, const std::vector< std::string >& positiveLeafNameFilter )
+{
+	CCDBNodeBranch *b = dynamic_cast< CCDBNodeBranch* >( _Database->getNode( ICDBNode::CTextId( std::string( branchName ) ), false ) );
+	if( b == NULL )
+		return;
+
+	branchObservingHandler.addBranchObserver( b, observer, positiveLeafNameFilter );
+}
+
+void CCDBSynchronised::addBranchObserver( NLMISC::CCDBNodeBranch *branch, NLMISC::ICDBNode::IPropertyObserver *observer, const std::vector< std::string >& positiveLeafNameFilter )
+{
+	if( branch == NULL )
+		return;
+
+	branchObservingHandler.addBranchObserver( branch, observer, positiveLeafNameFilter );
+}
+
+void CCDBSynchronised::addBranchObserver( const char *branchName, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter, uint positiveLeafNameFilterSize )
+{
+	CCDBNodeBranch *b = dynamic_cast< CCDBNodeBranch* >( _Database->getNode( ICDBNode::CTextId( std::string( branchName ) ), false ) );
+	if( b == NULL )
+		return;
+
+	branchObservingHandler.addBranchObserver( b, dbPathFromThisNode, observer, positiveLeafNameFilter, positiveLeafNameFilterSize );
+}
+
+void CCDBSynchronised::addBranchObserver( NLMISC::CCDBNodeBranch *branch, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter, uint positiveLeafNameFilterSize )
+{
+	if( branch == NULL )
+		return;
+	branchObservingHandler.addBranchObserver( branch, dbPathFromThisNode, observer, positiveLeafNameFilter, positiveLeafNameFilterSize );
+}
+
+void CCDBSynchronised::removeBranchObserver( const char *branchName, NLMISC::ICDBNode::IPropertyObserver* observer )
+{
+	CCDBNodeBranch *b = dynamic_cast< CCDBNodeBranch* >( _Database->getNode( ICDBNode::CTextId( std::string( branchName ) ), false ) );
+	if( b == NULL )
+		return;
+	branchObservingHandler.removeBranchObserver( b, observer );
+}
+
+void CCDBSynchronised::removeBranchObserver( NLMISC::CCDBNodeBranch *branch, NLMISC::ICDBNode::IPropertyObserver* observer )
+{
+	if( branch == NULL )
+		return;
+	branchObservingHandler.removeBranchObserver( branch, observer );
+}
+
+void CCDBSynchronised::removeBranchObserver( const char *branchName, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer )
+{
+	CCDBNodeBranch *b = dynamic_cast< CCDBNodeBranch* >( _Database->getNode( ICDBNode::CTextId( std::string( branchName ) ), false ) );
+	if( b == NULL )
+		return;
+	branchObservingHandler.removeBranchObserver( b, dbPathFromThisNode, observer );
+}
+
+void CCDBSynchronised::removeBranchObserver( NLMISC::CCDBNodeBranch *branch, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer )
+{
+	if( branch == NULL )
+		return;
+	branchObservingHandler.removeBranchObserver( branch, dbPathFromThisNode, observer );
+}
+
+void CCDBSynchronised::addFlushObserver( NLMISC::CCDBBranchObservingHandler::IBranchObserverCallFlushObserver *observer )
+{
+	if( observer == NULL )
+		return;
+	branchObservingHandler.addFlushObserver( observer );
+}
+
+void CCDBSynchronised::removeFlushObserver( NLMISC::CCDBBranchObservingHandler::IBranchObserverCallFlushObserver *observer )
+{
+	if( observer == NULL )
+		return;
+	branchObservingHandler.removeFlushObserver( observer );
+}
+
+void CCDBSynchronised::flushObserverCalls()
+{
+	branchObservingHandler.flushObserverCalls();
+}
+
 
 #ifdef TRACE_READ_DELTA
 #undef TRACE_READ_DELTA

@@ -1638,7 +1638,8 @@ bool mainLoop()
 
 
 			// flush observers
-			CCDBNodeBranch::flushObserversCalls();
+			IngameDbMngr.flushObserverCalls();
+			CInterfaceManager::getInstance()->flushObserverCalls();
 		}
 
 
@@ -1655,7 +1656,8 @@ bool mainLoop()
 
 			// NetWork Update.
 			NetMngr.update();
-			CCDBNodeBranch::flushObserversCalls();
+			IngameDbMngr.flushObserverCalls();
+			CInterfaceManager::getInstance()->flushObserverCalls();
 			// lets some CPU.
 			NetMngr.send();
 			nlSleep(100);
@@ -1764,7 +1766,8 @@ bool mainLoop()
 		{
 
 			NetMngr.update();
-			CCDBNodeBranch::flushObserversCalls();
+			IngameDbMngr.flushObserverCalls();
+			CInterfaceManager::getInstance()->flushObserverCalls();
 			bool prevDatabaseInitStatus = IngameDbMngr.initInProgress();
 			IngameDbMngr.setChangesProcessed();
 			bool newDatabaseInitStatus = IngameDbMngr.initInProgress();
@@ -1834,7 +1837,8 @@ bool mainLoop()
 
 		// update bot chat
 		CBotChatManager::getInstance()->update();
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 
 		// updateItemEdition
 		CInterfaceItemEdition::getInstance()->update();

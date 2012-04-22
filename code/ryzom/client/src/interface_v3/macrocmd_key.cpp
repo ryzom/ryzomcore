@@ -582,12 +582,14 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 	pCB = dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId(WinName+WIN_EDITCMD_COMBO_CATEGORY));
 	pCB->setSelection(catCBIndex);
 	onChangeCategory();
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 	//pIM->runActionHandler("editcmd_change_category",NULL);
 	pCB = dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId(WinName+WIN_EDITCMD_COMBO_ACTION));
 	pCB->setSelection(actCBIndex);
 	onChangeAction();
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 	//pIM->runActionHandler("editcmd_change_action",NULL);
 
 	// Count number of displayed param

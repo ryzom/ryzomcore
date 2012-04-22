@@ -1724,7 +1724,8 @@ void CEditor::waitScenarioScreen()
 			}
 
 		}
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 
 		// check if we can send another dated block
 		if (NetMngr.getCurrentServerTick() != serverTick)
@@ -1769,7 +1770,8 @@ void CEditor::waitScenarioScreen()
 		if (sysInfo) sysInfo->setActive(false);
 
 		getUI().updateFrameViews(NULL);
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 
 		// Movie shooter
 		globalMenuMovieShooter();

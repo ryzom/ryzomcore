@@ -158,7 +158,7 @@ void CSkillManager::initInGame()
 	// Get a node used to inform interface that a skill has changed
 	_TrackSkillChange= pIM->getDbProp("UI:VARIABLES:TRACK_SKILL_CHANGE", true);
 	// Add a branch observer on skill value change
-	pIM->getDbBranch("SERVER:CHARACTER_INFO:SKILLS")->addBranchObserver(&_SkillChangeObs);
+	pIM->addBranchObserver( "SERVER:CHARACTER_INFO:SKILLS", &_SkillChangeObs );
 
 }
 

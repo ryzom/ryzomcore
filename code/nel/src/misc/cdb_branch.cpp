@@ -59,33 +59,6 @@ using namespace std;
 
 namespace NLMISC{
 
-/////////////
-// GLOBALS //
-/////////////
-
-CCDBNodeBranch::CDBBranchObsInfo *CCDBNodeBranch::_FirstNotifiedObs[2] = { NULL, NULL };
-CCDBNodeBranch::CDBBranchObsInfo *CCDBNodeBranch::_LastNotifiedObs[2] = { NULL, NULL };
-CCDBNodeBranch::CDBBranchObsInfo *CCDBNodeBranch::_CurrNotifiedObs = NULL;
-CCDBNodeBranch::CDBBranchObsInfo *CCDBNodeBranch::_NextNotifiedObs = NULL;
-
-//
-uint CCDBNodeBranch::_CurrNotifiedObsList = 0;
-
-std::vector< CCDBNodeBranch::IBranchObserverCallFlushObserver* > CCDBNodeBranch::flushObservers;
-
-// reset all static data
-void CCDBNodeBranch::reset()
-{
-	_FirstNotifiedObs[0] = NULL;
-	_FirstNotifiedObs[1] = NULL;
-	_LastNotifiedObs[0] = NULL;
-	_LastNotifiedObs[1] = NULL;
-	_CurrNotifiedObsList = 0;
-	_CurrNotifiedObs = NULL;
-	_NextNotifiedObs = NULL;
-}
-
-
 //-----------------------------------------------
 //	init
 //
@@ -626,155 +599,14 @@ void CCDBNodeBranch::removeNode (const CTextId& id)
 	delete pNode;
 }
 
-
-
-
-//-----------------------------------------------
-void CCDBNodeBranch::flushObserversCalls()
+void CCDBNodeBranch::onLeafChanged( NLMISC::TStringId leafName )
 {
-//	nlassert(_CrtCheckMemory());
-	_CurrNotifiedObs = _FirstNotifiedObs[_CurrNotifiedObsList];
-	while (_CurrNotifiedObs)
-	{
-		// modified node should now store them in other list when they're modified
-		_CurrNotifiedObsList = 1 - _CurrNotifiedObsList;
-		// switch list so that modified node are stored in the other list
-		while (_CurrNotifiedObs)
-		{
-			_NextNotifiedObs = _CurrNotifiedObs->NextNotifiedObserver[1 - _CurrNotifiedObsList];
-			nlassert(_CurrNotifiedObs->Owner);
-			if (_CurrNotifiedObs->Observer)
-				_CurrNotifiedObs->Observer->update(_CurrNotifiedObs->Owner);
-			if (_CurrNotifiedObs) // this may be modified by the call (if current observer is removed)
-			{
-				_CurrNotifiedObs->unlink(1 - _CurrNotifiedObsList);
-			}
-			_CurrNotifiedObs = _NextNotifiedObs;
-		}
-		nlassert(_FirstNotifiedObs[1 - _CurrNotifiedObsList] == NULL);
-		nlassert(_LastNotifiedObs[1 - _CurrNotifiedObsList] == NULL);
-		triggerFlushObservers();
-		// examine other list to see if nodes have been registered
-		_CurrNotifiedObs = _FirstNotifiedObs[_CurrNotifiedObsList];
-	}
-	triggerFlushObservers();
-//	nlassert(_CrtCheckMemory());
-}
+	for( TObserverHandleList::iterator itr = observerHandles.begin(); itr != observerHandles.end(); ++itr )
+		if( (*itr)->observesLeaf( *leafName ) )
+			(*itr)->addToFlushableList();
 
-void CCDBNodeBranch::triggerFlushObservers()
-{
-	for( std::vector< IBranchObserverCallFlushObserver* >::iterator itr = flushObservers.begin(); itr != flushObservers.end(); itr++ )
-	{
-		(*itr)->onObserverCallFlush();
-	}
-}
-
-void CCDBNodeBranch::addFlushObserver( CCDBNodeBranch::IBranchObserverCallFlushObserver *observer )
-{	
-	std::vector< IBranchObserverCallFlushObserver* >::iterator itr 
-		= std::find( flushObservers.begin(), flushObservers.end(), observer );
-	
-	// Already exists
-	if( itr != flushObservers.end() )
-		return;
-
-	flushObservers.push_back( observer );
-}
-
-void CCDBNodeBranch::removeFlushObserver( CCDBNodeBranch::IBranchObserverCallFlushObserver *observer )
-{
-	std::vector< IBranchObserverCallFlushObserver* >::iterator itr 
-		= std::find( flushObservers.begin(), flushObservers.end(), observer );
-	
-	// Isn't in our list
-	if( itr == flushObservers.end() )
-		return;
-
-	flushObservers.erase( itr );
-}
-
-//-----------------------------------------------
-void CCDBNodeBranch::CDBBranchObsInfo::link(uint list, TStringId modifiedLeafName)
-{
-	// If there a filter set?
-	if (!PositiveLeafNameFilter.empty())
-	{
-		// Don't link if modifiedLeafName is not in the filter
-		if (std::find(PositiveLeafNameFilter.begin(), PositiveLeafNameFilter.end(), modifiedLeafName) == PositiveLeafNameFilter.end())
-			return;
-	}
-
-//	nlassert(_CrtCheckMemory());
-	nlassert(list < 2);
-	if (Touched[list]) return; // already inserted in list
-	Touched[list] = true;
-	nlassert(!PrevNotifiedObserver[list]);
-	nlassert(!NextNotifiedObserver[list]);
-	if (!_FirstNotifiedObs[list])
-	{
-		_FirstNotifiedObs[list] = _LastNotifiedObs[list] = this;
-	}
-	else
-	{
-		nlassert(!_LastNotifiedObs[list]->NextNotifiedObserver[list]);
-		_LastNotifiedObs[list]->NextNotifiedObserver[list] = this;
-		PrevNotifiedObserver[list] = _LastNotifiedObs[list];
-		_LastNotifiedObs[list] = this;
-	}
-//	nlassert(_CrtCheckMemory());
-}
-
-//-----------------------------------------------
-void CCDBNodeBranch::CDBBranchObsInfo::unlink(uint list)
-{
-//	nlassert(_CrtCheckMemory());
-	nlassert(list < 2);
-	if (!Touched[list])
-	{
-		// not linked in this list
-		nlassert(PrevNotifiedObserver[list] == NULL);
-		nlassert(NextNotifiedObserver[list] == NULL);
-		return;
-	}
-	if (PrevNotifiedObserver[list])
-	{
-		PrevNotifiedObserver[list]->NextNotifiedObserver[list] = NextNotifiedObserver[list];
-	}
-	else
-	{
-		// this was the first node
-		_FirstNotifiedObs[list] = NextNotifiedObserver[list];
-	}
-	if (NextNotifiedObserver[list])
-	{
-		NextNotifiedObserver[list]->PrevNotifiedObserver[list] = PrevNotifiedObserver[list];
-	}
-	else
-	{
-		// this was the last node
-		_LastNotifiedObs[list] = PrevNotifiedObserver[list];
-	}
-	PrevNotifiedObserver[list] = NULL;
-	NextNotifiedObserver[list] = NULL;
-	Touched[list] = false;
-//	nlassert(_CrtCheckMemory());
-}
-
-//-----------------------------------------------
-void CCDBNodeBranch::linkInModifiedNodeList(TStringId modifiedLeafName)
-{
-//	nlassert(_CrtCheckMemory());
-	CCDBNodeBranch *curr = this;
-	do
-	{
-		for(TObsList::iterator it = curr->_Observers.begin(); it != curr->_Observers.end(); ++it)
-		{
-			it->link(_CurrNotifiedObsList, modifiedLeafName);
-		}
-		curr = curr->getParent();
-	}
-	while(curr);
-//	nlassert(_CrtCheckMemory());
+	if( _Parent != NULL )
+		_Parent->onLeafChanged( leafName );
 }
 
 
@@ -847,14 +679,21 @@ bool CCDBNodeBranch::removeObserver(IPropertyObserver* observer, CTextId& id)
 
 
 //-----------------------------------------------
-void CCDBNodeBranch::addBranchObserver(IPropertyObserver* observer, const std::vector<std::string>& positiveLeafNameFilter)
+void CCDBNodeBranch::addBranchObserver( ICDBDBBranchObserverHandle *handle, const std::vector<std::string>& positiveLeafNameFilter)
 {
-	CDBBranchObsInfo oi(observer, this, positiveLeafNameFilter);
-	_Observers.push_front(oi);
+	CCDBNodeBranch::TObserverHandleList::iterator itr
+		= std::find( observerHandles.begin(), observerHandles.end(), handle );
+
+	if( itr != observerHandles.end() ){
+		delete handle;
+		return;
+	}
+
+	observerHandles.push_back( handle );
 }
 
 //-----------------------------------------------
-void CCDBNodeBranch::addBranchObserver(const char *dbPathFromThisNode, ICDBNode::IPropertyObserver& observer, const char **positiveLeafNameFilter, uint positiveLeafNameFilterSize)
+void CCDBNodeBranch::addBranchObserver( ICDBDBBranchObserverHandle *handle, const char *dbPathFromThisNode, const char **positiveLeafNameFilter, uint positiveLeafNameFilterSize)
 {
 	CCDBNodeBranch *branchNode;
 	if (dbPathFromThisNode[0] == '\0') // empty string
@@ -871,6 +710,7 @@ void CCDBNodeBranch::addBranchObserver(const char *dbPathFromThisNode, ICDBNode:
 			msg += " branch missing in DB";
 
 			nlerror( msg.c_str() );
+			delete handle;
 			return;
 		}
 	}
@@ -879,7 +719,7 @@ void CCDBNodeBranch::addBranchObserver(const char *dbPathFromThisNode, ICDBNode:
 	{
 		leavesToMonitor[i] = string(positiveLeafNameFilter[i]);
 	}
-	branchNode->addBranchObserver(&observer, leavesToMonitor);
+	branchNode->addBranchObserver(handle, leavesToMonitor);
 }
 
 //-----------------------------------------------
@@ -902,54 +742,37 @@ void CCDBNodeBranch::removeBranchObserver(const char *dbPathFromThisNode, ICDBNo
 bool CCDBNodeBranch::removeBranchObserver(IPropertyObserver* observer)
 {
 	bool found = false;
-	TObsList::iterator it = _Observers.begin();
-	while (it != _Observers.end())
+
+	TObserverHandleList::iterator itr = observerHandles.begin();
+	while( itr != observerHandles.end() )
 	{
-		if (it->Observer == observer)
+		if( (*itr)->observer() == observer )
 		{
-			removeBranchInfoIt(it);
-			it = _Observers.erase(it);
+			(*itr)->removeFromFlushableList();
+			delete *itr;
+			itr = observerHandles.erase( itr );
 			found = true;
 		}
 		else
 		{
-			++it;
+			++itr;
 		}
 	}
+
 	return found;
 }
 
 //-----------------------------------------------
 void CCDBNodeBranch::removeAllBranchObserver()
 {
-	TObsList::iterator it = _Observers.begin();
-	while (it != _Observers.end())
-	{
-		removeBranchInfoIt(it);
-		++it;
+	for( TObserverHandleList::iterator itr = observerHandles.begin();
+		itr != observerHandles.end(); ++itr ){
+		(*itr)->removeFromFlushableList();
+		delete *itr;
 	}
-	_Observers.clear();
-}
 
-//-----------------------------------------------
-void CCDBNodeBranch::removeBranchInfoIt(TObsList::iterator it)
-{
-	CDBBranchObsInfo *oi = &(*it);
-	// if this node is currenlty being notified, update iterators
-	if (oi == _CurrNotifiedObs)
-	{
-		_CurrNotifiedObs = NULL;
-	}
-	if (oi == _NextNotifiedObs)
-	{
-		nlassert(_CurrNotifiedObsList < 2);
-		_NextNotifiedObs = _NextNotifiedObs->NextNotifiedObserver[1 - _CurrNotifiedObsList];
-	}
-	// unlink observer from both update lists
-	oi->unlink(0);
-	oi->unlink(1);
+	observerHandles.clear();
 }
-
 
 //-----------------------------------------------
 // Useful for find

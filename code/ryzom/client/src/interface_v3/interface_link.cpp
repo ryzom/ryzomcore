@@ -132,12 +132,12 @@ static bool affect(const CInterfaceExprValue &value, CInterfaceElement &destElem
 
 CInterfaceLink::CInterfaceLinkUpdater::CInterfaceLinkUpdater()
 {
-	CCDBNodeBranch::addFlushObserver( this );
+	CInterfaceManager::getInstance()->addFlushObserver( this );
 }
 
 CInterfaceLink::CInterfaceLinkUpdater::~CInterfaceLinkUpdater()
 {
-	CCDBNodeBranch::removeFlushObserver( this );
+	CInterfaceManager::getInstance()->removeFlushObserver( this );
 }
 
 void CInterfaceLink::CInterfaceLinkUpdater::onObserverCallFlush()
@@ -276,7 +276,7 @@ void CInterfaceLink::createObservers(const TNodeVect &nodes)
 		else
 		{
 			CCDBNodeBranch *br = static_cast<CCDBNodeBranch *>(*it);
-			br->addBranchObserver(this);
+			CInterfaceManager::getInstance()->addBranchObserver( br, this );
 		}
 	}
 }
@@ -294,7 +294,7 @@ void CInterfaceLink::removeObservers(const TNodeVect &nodes)
 		else
 		{
 			CCDBNodeBranch *br = static_cast<CCDBNodeBranch *>(*it);
-			br->removeBranchObserver(this);
+			CInterfaceManager::getInstance()->removeBranchObserver( br, this );
 		}
 	}
 }

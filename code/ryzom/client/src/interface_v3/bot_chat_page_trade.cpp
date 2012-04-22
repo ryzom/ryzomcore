@@ -161,7 +161,7 @@ void CBotChatPageTrade::init()
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	if (im->getDbBranch("SERVER:TRADING"))
 	{
-		im->getDbBranch("SERVER:TRADING")->addBranchObserver(&_TradePagesObs);
+		im->addBranchObserver( "SERVER:TRADING", &_TradePagesObs);
 	}
 
 	_FamePriceFactorLeaf = im->getDbProp("SERVER:TRADING:FAME_PRICE_FACTOR");
@@ -2990,7 +2990,8 @@ NLMISC_COMMAND( testResaleItems, "Temp : test resale", "" )
 	//
 
 	// Force for next page
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 
 	return true;
 }

@@ -150,24 +150,24 @@ void		CNPCIconCache::addObservers()
 
 	// Mission Journal
 	static const char *missionStartStopLeavesToMonitor [2] = {"TITLE", "FINISHED"};
-	IngameDbMngr.getNodePtr()->addBranchObserver("MISSIONS", MissionStartStopObserver, missionStartStopLeavesToMonitor, getArraySize(missionStartStopLeavesToMonitor));
+	IngameDbMngr.addBranchObserver( IngameDbMngr.getNodePtr(), "MISSIONS", MissionStartStopObserver, missionStartStopLeavesToMonitor, getArraySize(missionStartStopLeavesToMonitor));
 	static const char *missionNpcAliasLeavesToMonitor [1] = {"NPC_ALIAS"};
-	IngameDbMngr.getNodePtr()->addBranchObserver("MISSIONS", MissionNpcAliasObserver, missionNpcAliasLeavesToMonitor, getArraySize(missionNpcAliasLeavesToMonitor));
+	IngameDbMngr.addBranchObserver( IngameDbMngr.getNodePtr(), "MISSIONS", MissionNpcAliasObserver, missionNpcAliasLeavesToMonitor, getArraySize(missionNpcAliasLeavesToMonitor));
 
 	// Skills
 	static const char *skillLeavesToMonitor [2] = {"SKILL", "BaseSKILL"};
-	IngameDbMngr.getNodePtr()->addBranchObserver("CHARACTER_INFO:SKILLS", MissionPrerequisitEventObserver, skillLeavesToMonitor, getArraySize(skillLeavesToMonitor));
+	IngameDbMngr.addBranchObserver( IngameDbMngr.getNodePtr(), "CHARACTER_INFO:SKILLS", MissionPrerequisitEventObserver, skillLeavesToMonitor, getArraySize(skillLeavesToMonitor));
 
 	// Owned Items
 	static const char *bagLeavesToMonitor [1] = {"SHEET"}; // just saves 2000 bytes or so (500 * observer pointer entry in vector) compared to one observer per bag slot
-	IngameDbMngr.getNodePtr()->addBranchObserver("INVENTORY:BAG", MissionPrerequisitEventObserver, bagLeavesToMonitor, getArraySize(bagLeavesToMonitor));
+	IngameDbMngr.addBranchObserver( IngameDbMngr.getNodePtr(), "INVENTORY:BAG", MissionPrerequisitEventObserver, bagLeavesToMonitor, getArraySize(bagLeavesToMonitor));
 
 	// Worn Items
-	IngameDbMngr.getNodePtr()->addBranchObserver("INVENTORY:HAND", MissionPrerequisitEventObserver);
-	IngameDbMngr.getNodePtr()->addBranchObserver("INVENTORY:EQUIP", MissionPrerequisitEventObserver);
+	IngameDbMngr.addBranchObserver( "INVENTORY:HAND", &MissionPrerequisitEventObserver);
+	IngameDbMngr.addBranchObserver( "INVENTORY:EQUIP", &MissionPrerequisitEventObserver);
 
 	// Known Bricks
-	IngameDbMngr.getNodePtr()->addBranchObserver("BRICK_FAMILY", MissionPrerequisitEventObserver);
+	IngameDbMngr.addBranchObserver( "BRICK_FAMILY", &MissionPrerequisitEventObserver);
 
 	// For other events, search for calls of onEventForMissionAvailabilityForThisChar()
 }

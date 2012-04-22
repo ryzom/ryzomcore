@@ -672,20 +672,14 @@ void CGuildManager::initDBObservers()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	// add an observer on the whole guild
-	CCDBNodeBranch *pGuild = pIM->getDbBranch("SERVER:GUILD");
-	if (pGuild != NULL)
-		pGuild->addBranchObserver(&_DBObs);
+	pIM->addBranchObserver( "SERVER:GUILD", &_DBObs );
 
 	// add an observer on members only => need to update all
-	CCDBNodeBranch *pGuildMembers = pIM->getDbBranch("SERVER:GUILD:MEMBERS");
-	if (pGuildMembers != NULL)
-		pGuildMembers->addBranchObserver(&_DBObsMembers);
+	pIM->addBranchObserver("SERVER:GUILD:MEMBERS", &_DBObsMembers);
 
 	// observer on ascencors
 	Ascensors.setListType(CHugeListObs::Ascensor);
-	CCDBNodeBranch *pAscensor = pIM->getDbBranch("SERVER:ASCENSOR");
-	if (pAscensor != NULL)
-		pAscensor->addBranchObserver(&Ascensors);
+	pIM->addBranchObserver("SERVER:ASCENSOR", &Ascensors);
 }
 
 // ***************************************************************************

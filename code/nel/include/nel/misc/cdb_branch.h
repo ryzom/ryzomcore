@@ -32,11 +32,20 @@ namespace NLMISC{
 class CCDBNodeBranch : public ICDBNode
 {
 public:
-	/// Triggered when the branch observers are updated
-	class IBranchObserverCallFlushObserver : public CRefCount{
+
+	class ICDBDBBranchObserverHandle
+	{
 	public:
-		virtual ~IBranchObserverCallFlushObserver(){}
-		virtual void onObserverCallFlush() = 0;
+		virtual ~ICDBDBBranchObserverHandle(){}
+
+		virtual ICDBNode* owner()                                 = 0;
+		virtual IPropertyObserver* observer()                     = 0;
+		virtual bool observesLeaf( const std::string &leafName )  = 0;
+		virtual bool inList( uint list )                          = 0;
+		virtual void addToFlushableList()                         = 0;
+		virtual void removeFromFlushableList( uint list )         = 0;
+		virtual void removeFromFlushableList()                    = 0;
+
 	};
 
 	// default constructor
@@ -194,7 +203,7 @@ public:
 	 * and setting a branch observer on it, except you don't need to change your database paths
 	 * and update large amounts of code!).
 	 */
-	void addBranchObserver(IPropertyObserver* observer, const std::vector<std::string>& positiveLeafNameFilter=std::vector<std::string>());
+	void addBranchObserver( ICDBDBBranchObserverHandle* handle, const std::vector<std::string>& positiveLeafNameFilter=std::vector<std::string>());
 
 	/**
 	 * Easy version of addBranchObserver() (see above).
@@ -202,7 +211,7 @@ public:
 	 * "" -> this node
 	 * "FOO:BAR" ->  sub-branch "BAR" of "FOO" which is a sub-branch of this node
 	 */
-	void addBranchObserver(const char *dbPathFromThisNode, ICDBNode::IPropertyObserver& observer, const char **positiveLeafNameFilter=NULL, uint positiveLeafNameFilterSize=0);
+	void addBranchObserver( ICDBDBBranchObserverHandle *handle, const char *dbPathFromThisNode, const char **positiveLeafNameFilter=NULL, uint positiveLeafNameFilterSize=0);
 
 	// Remove observer from all sub-leaves
 	bool removeBranchObserver(IPropertyObserver* observer);
@@ -212,83 +221,14 @@ public:
 
 	virtual bool isLeaf() const { return false; }
 
-	/** Update all observers of branchs that have been modified
-	  */
-	static void flushObserversCalls();
-
-private:
-	static void triggerFlushObservers();
-
-public:
-	static void addFlushObserver( IBranchObserverCallFlushObserver *observer );
-	static void removeFlushObserver( IBranchObserverCallFlushObserver *observer );
-
 	// mark this branch and parent branch as 'modified'. This is usually called by sub-leaves
-	void linkInModifiedNodeList(TStringId modifiedLeafName);
+	void onLeafChanged( TStringId leafName );
 
 	/// Find a subnode at this level
 	ICDBNode * find (const std::string &nodeName);
 
-	// reset all static mappings
-	static void reset();
-
 protected:
-
-
-		/** Struct identifying an observer of a db branch
-	  * This struct can be linked in a list so that we can update observers only once per pass.
-	  * An observer that watch a whole branch can be updated once and only once after each element of the branch has been modified
-	  */
-	class CDBBranchObsInfo
-	{
-		public:
-			CRefPtr<IPropertyObserver> Observer;
-			// 2 linked list are required : while the observer is notified, it can triger one other observer, so we must link it in another list
-			bool               Touched[2];
-			CDBBranchObsInfo   *PrevNotifiedObserver[2]; // NULL means this is the head
-			CDBBranchObsInfo   *NextNotifiedObserver[2];
-			ICDBNode		   *Owner;
-
-			// If non-empty, only a leaf whose name is found here will notify something
-			// This is equivalent to creating a sub-branch containing only the specified leaves
-			// and setting a branch observer on it, except you don't need to change your database paths
-			// and update large amounts of code and script!
-			std::vector<TStringId> PositiveLeafNameFilter;
-
-		public:
-
-			/// Constructor. See above for usage of positiveLeafNameFilter.
-			CDBBranchObsInfo(IPropertyObserver *obs = NULL, ICDBNode *owner = NULL, const std::vector<std::string>& positiveLeafNameFilter=std::vector<std::string>())
-			{
-				Owner = owner;
-				Observer = obs;
-				Touched[0] = Touched[1] = false;
-				PrevNotifiedObserver[0] = PrevNotifiedObserver[1] = NULL;
-				NextNotifiedObserver[0] = NextNotifiedObserver[1]  = NULL;
-				for (std::vector<std::string>::const_iterator ipf=positiveLeafNameFilter.begin(); ipf!=positiveLeafNameFilter.end(); ++ipf)
-				{
-					PositiveLeafNameFilter.push_back(ICDBNode::getStringId(*ipf)); // the ids are also mapped at database init, we don't need to unmap them in destructor
-				}
-			}
-			~CDBBranchObsInfo()
-			{
-				// should have been unlinked
-				nlassert(Touched[0] == false);
-				nlassert(Touched[1] == false);
-				nlassert(PrevNotifiedObserver[0] == NULL);
-				nlassert(PrevNotifiedObserver[1] == NULL);
-				nlassert(NextNotifiedObserver[0] == NULL);
-				nlassert(NextNotifiedObserver[1] == NULL);
-			}
-			// Unlink from the given list. This also clear the '_Touched' flag
-			void unlink(uint list);			
-			void link(uint list, TStringId modifiedLeafName);
-	};
-
-	typedef std::list<CDBBranchObsInfo> TObsList; // must use a list because pointers on CDBObserverInfo instances must remains valids
-
-protected:
-
+	typedef std::list< ICDBDBBranchObserverHandle* > TObserverHandleList;
 
 	CCDBNodeBranch			*_Parent;
 
@@ -303,25 +243,10 @@ protected:
 	bool					_Sorted : 1;
 
 	// observers for this node or branch
-	TObsList				_Observers;
-
-	friend class CDBBranchObsInfo;
-	// Global list of modified nodes
-	static CDBBranchObsInfo *_FirstNotifiedObs[2];
-	static CDBBranchObsInfo *_LastNotifiedObs[2];
-	static uint			   _CurrNotifiedObsList; // 0 or 1 => tell in which list observers of modified values must be added
-	// current & next observers being notified : if such observer if removed during notification, pointer will be valids
-	static CDBBranchObsInfo *_CurrNotifiedObs;
-	static CDBBranchObsInfo *_NextNotifiedObs;
+	TObserverHandleList		observerHandles;
 
 	/// called by clear
 	void			removeAllBranchObserver();
-	void			removeBranchInfoIt(TObsList::iterator it);
-
-
-private:
-	static std::vector< IBranchObserverCallFlushObserver* > flushObservers;
-
 };
 
 }

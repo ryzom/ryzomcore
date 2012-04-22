@@ -365,9 +365,7 @@ void CCDBNodeLeaf::notifyObservers()
 	}
 	// mark parent branchs
 	if (_Parent)
-	{
-		_Parent->linkInModifiedNodeList(_Name);
-	}
+		_Parent->onLeafChanged( _Name );
 }
 
 

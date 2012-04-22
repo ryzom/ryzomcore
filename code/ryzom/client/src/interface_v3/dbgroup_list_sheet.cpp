@@ -123,7 +123,7 @@ bool CDBGroupListSheet::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 		_DbBranch= branch;
 		_DbBranchName= (const char*)prop;
 		// add observer
-		_DbBranch->addBranchObserver(&_DbBranchObs);
+		pIM->addBranchObserver(branch, &_DbBranchObs);
 	}
 
 	// parse the common ctrl info

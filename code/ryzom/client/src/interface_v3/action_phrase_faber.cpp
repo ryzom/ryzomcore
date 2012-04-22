@@ -186,16 +186,16 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 	// ensure remove (if setuped before), then add
 	CCDBNodeBranch	*branch;
 	branch= pIM->getDbBranch("LOCAL:INVENTORY:BAG");
-	if(branch) branch->removeBranchObserver(&_DBInventoryObs);
-	if(branch) branch->addBranchObserver(&_DBInventoryObs);
+	if(branch) pIM->removeBranchObserver( "LOCAL:INVENTORY:BAG",&_DBInventoryObs);
+	if(branch) pIM->addBranchObserver( "LOCAL:INVENTORY:BAG",&_DBInventoryObs);
 
 	// and for all pack animals
 	uint	i;
 	for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 	{
 		branch= pIM->getDbBranch(toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i));
-		if(branch) branch->removeBranchObserver(&_DBInventoryObs);
-		if(branch) branch->addBranchObserver(&_DBInventoryObs);
+		if(branch) pIM->removeBranchObserver( toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i).c_str(), &_DBInventoryObs);
+		if(branch) pIM->addBranchObserver( toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i).c_str(), &_DBInventoryObs);
 	}
 
 	// Add observers on animal status, cause inventory may become unavailabe during the process

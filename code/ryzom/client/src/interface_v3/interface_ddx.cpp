@@ -790,7 +790,8 @@ void CInterfaceDDX::updateRealtime(CCtrlBase *pSB, bool updateOnScrollEnd)
 		ClientCfg.IsInvalidated = true;
 	}
 
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 
 	for (i = 0; i < _Parameters.size(); ++i)
 	{
