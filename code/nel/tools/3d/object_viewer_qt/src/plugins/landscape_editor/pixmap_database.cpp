@@ -96,6 +96,7 @@ bool PixmapDatabase::loadPixmaps(const QString &zonePath, NLLIGO::CZoneBank &zon
 			painter.end();
 			delete pixmap;
 			m_pixmapMap.insert(zonePixmapName, emptyPixmap);
+			nlwarning(QString("not found " + zonePath + zonePixmapName + ".png").toStdString().c_str());
 		}
 		// All pixmaps must be have same size
 		else if (pixmap->width() != sizeX * m_textureSize)

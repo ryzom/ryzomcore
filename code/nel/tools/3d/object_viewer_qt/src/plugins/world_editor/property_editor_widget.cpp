@@ -150,7 +150,7 @@ void PropertyEditorWidget::updateSelection(Node *node)
 			prop = addConstStringArrayProperty(ligoProperty, parameter, primitive);
 		else
 			// hmn?
-			prop = addBoolProperty(parameter, primitive);
+			prop = addBoolProperty(ligoProperty, parameter, primitive);
 
 		// Default value ?
 		if	((ligoProperty == NULL)	|| (ligoProperty->Default))

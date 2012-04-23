@@ -227,6 +227,7 @@ void WorldEditorScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 	}
 
 	m_editedSelectedItems = false;
+	m_offset = QPointF(0, 0);
 	m_angle = 0;
 	m_scaleFactor = QPointF(1.0, 1.0);
 
@@ -516,7 +517,8 @@ void WorldEditorScene::checkUndoPointsMode()
 
 void WorldEditorScene::updateWorldItemsMove(QGraphicsSceneMouseEvent *mouseEvent)
 {
-	QPointF offset(mouseEvent->scenePos() - mouseEvent->lastScenePos());
+	QPointF offset = mouseEvent->scenePos() - mouseEvent->lastScenePos();
+	m_offset += offset;
 	if (m_pointsMode)
 		Q_FOREACH(QGraphicsItem *item, m_selectedPoints)
 	{
