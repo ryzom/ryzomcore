@@ -33,7 +33,7 @@
 #include <QToolBar>
 #include <QDebug>
 
-namespace Plugin
+namespace GeorgesQt
 {
 
 	GeorgesEditorForm::GeorgesEditorForm(QWidget *parent)
@@ -271,4 +271,4 @@ namespace Plugin
 			}
 		}
 	}
-} /* namespace Plugin */
+} /* namespace GeorgesQt */

@@ -23,7 +23,7 @@
 
 // NeL includes
 
-namespace Plugin
+namespace GeorgesQt
 {
 
 CGeorgesDirTreeDialog::CGeorgesDirTreeDialog(QString ldPath, QWidget *parent)
@@ -109,4 +109,4 @@ void CGeorgesDirTreeDialog::ldPathChanged(QString path)
 	}
 }
 
-} /* namespace NLQT */
+} /* namespace GeorgesQt */

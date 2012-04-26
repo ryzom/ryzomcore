@@ -29,7 +29,7 @@ namespace NLGEORGES {
 	class UFormElm;
 }
 
-namespace Plugin 
+namespace GeorgesQt 
 {
 
 	class CFormItem;
@@ -56,6 +56,9 @@ namespace Plugin
 		bool showDefaults() { return m_showDefaults;}
 		void setShowParents( bool show );
 		void setShowDefaults( bool show );
+		void addParentForm(QString parentForm);
+		void removeParentForm(QString parentForm);
+		NLGEORGES::UFormElm *getRootForm() { return m_rootElm; }
 
 	private:
 		void setupModelData();
@@ -64,6 +67,7 @@ namespace Plugin
 
 		CFormItem*                  m_rootItem;
 		NLGEORGES::UFormElm*        m_rootElm;
+		QList<QVariant>				m_rootData;
 		QMap< QString, QStringList> m_dependencies;
 		QString                     m_comments;
 		QStringList                 m_parents;
@@ -71,10 +75,10 @@ namespace Plugin
 
 		bool						m_showParents;
 		bool						m_showDefaults;
-		bool					 *m_expanded;
+		bool						*m_expanded;
 
 	};/* class CGeorgesFormModel */
 
-} /* namespace Plugin */
+} /* namespace GeorgesQt */
 
 #endif // GEORGESFORM_MODEL_H

@@ -23,7 +23,7 @@
 // Qt includes
 #include <QtGui/QUndoStack>
 
-namespace Plugin
+namespace GeorgesQt
 {
 
 class CGeorgesDirTreeDialog;
@@ -70,6 +70,6 @@ private:
 	CGeorgesTreeViewDialog *m_lastActiveDock;
 }; /* class GeorgesEditorForm */
 
-} /* namespace Plugin */
+} /* namespace GeorgesQt */
 
 #endif // GEORGES_EDITOR_FORM_H
