@@ -28,7 +28,7 @@
 #include "ui_georges_dirtree_form.h"
 #include "georges_filesystem_model.h"
 
-namespace Plugin
+namespace GeorgesQt
 {
 
 class CGeorgesDirTreeDialog: public QDockWidget
@@ -57,6 +57,6 @@ private Q_SLOTS:
 
 }; /* CGEorgesDirTreeDialog */
 
-} /* namespace NLQT */
+} /* namespace GeorgesQt */
 
 #endif // GEORGES_DIRTREE_DIALOG_H

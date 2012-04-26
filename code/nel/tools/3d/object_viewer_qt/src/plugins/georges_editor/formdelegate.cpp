@@ -37,7 +37,7 @@
 #include "georgesform_proxy_model.h"
 #include "formitem.h"
 
-namespace Plugin 
+namespace GeorgesQt 
 {
 
 	FormDelegate::FormDelegate(QObject *parent)
@@ -275,4 +275,4 @@ namespace Plugin
 		QRect r = option.rect;
 		editor->setGeometry(r);
 	}
-} /* namespace Plugin */
+} /* namespace GeorgesQt */

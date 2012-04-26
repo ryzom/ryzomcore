@@ -40,7 +40,7 @@ namespace NLGEORGES
 
 using namespace NLGEORGES;
 
-namespace Plugin 
+namespace GeorgesQt 
 {
 
 	class CGeorges;
@@ -57,7 +57,7 @@ namespace Plugin
 		void setModified(bool m) {m_modified = m;}
 
 		CForm* getFormByName(const QString);
-		void addParentForm(CForm *form);
+		void addParentForm(QString parentFormNm);
 
 		void write (  );
 
@@ -97,10 +97,13 @@ namespace Plugin
 
 		QUndoStack *m_undoStack;
 
+		/// Contains a record of the last directory a sheet file dialog was opened for.
+		QString m_lastSheetDir;
+
 		bool m_modified;
 
 	}; /* CGeorgesTreeViewDialog */
 
-} /* namespace NLQT */
+} /* namespace GeorgesQt */
 
 #endif // GEORGES_TREEVIEWER_DIALOG_H

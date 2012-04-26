@@ -22,7 +22,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 
-namespace Plugin
+namespace GeorgesQt
 {
 
 	ExpandableHeaderView::ExpandableHeaderView(Qt::Orientation orientation, QWidget * parent) 
