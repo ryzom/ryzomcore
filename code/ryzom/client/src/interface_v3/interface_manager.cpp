@@ -103,6 +103,8 @@
 #include "../client_chat_manager.h"		// for emotes
 #include "../entities.h"
 
+#include "../../common/src/game_share/ryzom_database_banks.h"
+
 #include "chat_text_manager.h"
 #include "../npc_icon.h"
 
@@ -253,10 +255,9 @@ int CInterfaceManager::DebugTrackGroupsGetId( CInterfaceGroup *pIG )
 #endif // AJM_DEBUG_TRACK_INTERFACE_GROUPS
 
 // ------------------------------------------------------------------------------------------------
-CInterfaceManager::CInterfaceManager()
+CInterfaceManager::CInterfaceManager() : NLMISC::CCDBManager( "ROOT", NB_CDB_BANKS )
 {
 	_Instance = this;
-	_DbRootNode = new CCDBNodeBranch("ROOT");
 	interfaceLinkUpdater = new CInterfaceLink::CInterfaceLinkUpdater();
 	_ScreenW = _ScreenH = 0;
 	_LastInGameScreenW = _LastInGameScreenH = 0;
@@ -361,10 +362,11 @@ CInterfaceManager::~CInterfaceManager()
 	_Templates.clear();
 	_Instance = NULL;
 
-	if (_DbRootNode)
+	if (_Database)
 	{
-		delete _DbRootNode;
-		_DbRootNode = NULL;
+		_Database->clear();
+		delete _Database;
+		_Database = NULL;
 	}
 
 	// release the local string mapper
@@ -502,7 +504,7 @@ void CInterfaceManager::uninitLogin()
 	CInterfaceLink::removeAllLinks();
 
 	ICDBNode::CTextId textId("UI");
-	_DbRootNode->removeNode(textId);
+	_Database->removeNode(textId);
 
 	{
 		uninitActions();
@@ -597,7 +599,7 @@ void CInterfaceManager::uninitOutGame()
 
 	disableModalWindow();
 
-	//_DbRootNode->display("");
+	//_Database->display("");
 	CBotChatManager::getInstance()->setCurrPage(NULL);
 
 	CInterfaceItemEdition::getInstance()->setCurrWindow(NULL);
@@ -627,7 +629,7 @@ void CInterfaceManager::uninitOutGame()
 	//nlinfo ("%d seconds for removeAllLinks", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
 	ICDBNode::CTextId textId("UI");
-	_DbRootNode->removeNode(textId);
+	_Database->removeNode(textId);
 	//nlinfo ("%d seconds for removeNode", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 
 	// Init the action manager
@@ -1160,7 +1162,7 @@ void CInterfaceManager::uninitInGame1 ()
 
 	// remove DB entry
 	ICDBNode::CTextId textId("UI");
-	_DbRootNode->removeNode(textId);
+	_Database->removeNode(textId);
 
 	// Uninit the action manager
 	{
@@ -3327,13 +3329,13 @@ void CInterfaceManager::updateAllLocalisedElements()
 // ------------------------------------------------------------------------------------------------
 bool CInterfaceManager::addDBObserver (ICDBNode::IPropertyObserver* observer, ICDBNode::CTextId   id)
 {
-	return _DbRootNode->addObserver(observer, id);
+	return _Database->addObserver(observer, id);
 }
 
 // ------------------------------------------------------------------------------------------------
 bool CInterfaceManager::removeDBObserver (ICDBNode::IPropertyObserver* observer, ICDBNode::CTextId  id)
 {
-	return _DbRootNode->removeObserver(observer, id);
+	return _Database->removeObserver(observer, id);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -3431,26 +3433,13 @@ sint32		CInterfaceManager::getDbValue32 (const std::string & name)
 // ------------------------------------------------------------------------------------------------
 CCDBNodeLeaf* CInterfaceManager::getDbProp(const std::string & name, bool bCreate)
 {
-	if (name.empty()) return NULL;
-	CCDBNodeLeaf *pDBNL = NULL;
-	pDBNL = dynamic_cast<CCDBNodeLeaf*>(_DbRootNode->getNode( ICDBNode::CTextId(name), bCreate ));
-	return pDBNL;
+	return getDbLeaf( name, bCreate );
 }
 
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::delDbProp(const std::string & name)
 {
-	if (name.empty()) return;
-	_DbRootNode->removeNode( ICDBNode::CTextId(name) );
-}
-
-// ------------------------------------------------------------------------------------------------
-CCDBNodeBranch *CInterfaceManager::getDbBranch(const std::string &name)
-{
-	if (name.empty()) return NULL;
-	CCDBNodeBranch	*nodeBranch;
-	nodeBranch = dynamic_cast<CCDBNodeBranch*>(_DbRootNode->getNode( ICDBNode::CTextId(name), false ));
-	return nodeBranch;
+	delDbNode( name );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -6113,7 +6102,7 @@ void CInterfaceManager::createLocalBranch(const std::string &fileName, NLMISC::I
 			//Parse the parser output!!!
 			CCDBNodeBranch *localNode = new CCDBNodeBranch("LOCAL");
 			localNode->init( read.getRootNode (), progressCallBack );
-			_DbRootNode->attachChild(localNode,"LOCAL");
+			_Database->attachChild(localNode,"LOCAL");
 
 			// Create the observers for auto-copy SERVER->LOCAL of inventory
 			ServerToLocalAutoCopyInventory.init("INVENTORY");
@@ -6650,87 +6639,5 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 
 	ucstr = str;
 	return true;;
-}
-
-void CInterfaceManager::addBranchObserver( const char *branchName, NLMISC::ICDBNode::IPropertyObserver *observer, const std::vector< std::string >& positiveLeafNameFilter )
-{
-	CCDBNodeBranch *b = dynamic_cast< CCDBNodeBranch* >( _DbRootNode->getNode( ICDBNode::CTextId( std::string( branchName ) ), false ) );
-	if( b == NULL )
-		return;
-
-	branchObservingHandler.addBranchObserver( b, observer, positiveLeafNameFilter );
-}
-
-void CInterfaceManager::addBranchObserver( NLMISC::CCDBNodeBranch *branch, NLMISC::ICDBNode::IPropertyObserver *observer, const std::vector< std::string >& positiveLeafNameFilter )
-{
-	if( branch == NULL )
-		return;
-
-	branchObservingHandler.addBranchObserver( branch, observer, positiveLeafNameFilter );
-}
-
-void CInterfaceManager::addBranchObserver( const char *branchName, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter, uint positiveLeafNameFilterSize )
-{
-	CCDBNodeBranch *b = dynamic_cast< CCDBNodeBranch* >( _DbRootNode->getNode( ICDBNode::CTextId( std::string( branchName ) ), false ) );
-	if( b == NULL )
-		return;
-
-	branchObservingHandler.addBranchObserver( b, dbPathFromThisNode, observer, positiveLeafNameFilter, positiveLeafNameFilterSize );
-}
-
-void CInterfaceManager::addBranchObserver( NLMISC::CCDBNodeBranch *branch, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter, uint positiveLeafNameFilterSize )
-{
-	if( branch == NULL )
-		return;
-	branchObservingHandler.addBranchObserver( branch, dbPathFromThisNode, observer, positiveLeafNameFilter, positiveLeafNameFilterSize );
-}
-
-void CInterfaceManager::removeBranchObserver( const char *branchName, NLMISC::ICDBNode::IPropertyObserver* observer )
-{
-	CCDBNodeBranch *b = dynamic_cast< CCDBNodeBranch* >( _DbRootNode->getNode( ICDBNode::CTextId( std::string( branchName ) ), false ) );
-	if( b == NULL )
-		return;
-	branchObservingHandler.removeBranchObserver( b, observer );
-}
-
-void CInterfaceManager::removeBranchObserver( NLMISC::CCDBNodeBranch *branch, NLMISC::ICDBNode::IPropertyObserver* observer )
-{
-	if( branch == NULL )
-		return;
-	branchObservingHandler.removeBranchObserver( branch, observer );
-}
-
-void CInterfaceManager::removeBranchObserver( const char *branchName, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer )
-{
-	CCDBNodeBranch *b = dynamic_cast< CCDBNodeBranch* >( _DbRootNode->getNode( ICDBNode::CTextId( std::string( branchName ) ), false ) );
-	if( b == NULL )
-		return;
-	branchObservingHandler.removeBranchObserver( b, dbPathFromThisNode, observer );
-}
-
-void CInterfaceManager::removeBranchObserver( NLMISC::CCDBNodeBranch *branch, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer )
-{
-	if( branch == NULL )
-		return;
-	branchObservingHandler.removeBranchObserver( branch, dbPathFromThisNode, observer );
-}
-
-void CInterfaceManager::addFlushObserver( NLMISC::CCDBBranchObservingHandler::IBranchObserverCallFlushObserver *observer )
-{
-	if( observer == NULL )
-		return;
-	branchObservingHandler.addFlushObserver( observer );
-}
-
-void CInterfaceManager::removeFlushObserver( NLMISC::CCDBBranchObservingHandler::IBranchObserverCallFlushObserver *observer )
-{
-	if( observer == NULL )
-		return;
-	branchObservingHandler.removeFlushObserver( observer );
-}
-
-void CInterfaceManager::flushObserverCalls()
-{
-	branchObservingHandler.flushObserverCalls();
 }
 

@@ -22,8 +22,7 @@
 
 #include "nel/misc/cdb.h"
 #include "nel/misc/cdb_branch.h"
-#include "nel/misc/cdb_bank_handler.h"
-#include "nel/misc/cdb_branch_observing_handler.h"
+#include "nel/misc/cdb_manager.h"
 
 /**
  * Class to manage a database of properties
@@ -31,11 +30,8 @@
  * \author Nevrax France
  * \date 2002
  */
-class CCDBSynchronised
+class CCDBSynchronised : public NLMISC::CCDBManager
 {
-	/// database
-	NLMISC::CRefPtr<NLMISC::CCDBNodeBranch> _Database;
-
 	/// string associations
 	std::map<uint32,std::string> _Strings;
 
@@ -146,8 +142,6 @@ public:
 		}
 	}
 
-	void resetBank( uint gc, uint bank );
-
 private:
 
 	friend void impulseDatabaseInitPlayer( NLMISC::CBitMemStream &impulse );
@@ -157,22 +151,6 @@ private:
 	bool allInitPacketReceived() const { return _InitDeltaReceived == 2; } // Classic database + inventory
 
 	void writeInitInProgressIntoUIDB();
-
-	NLMISC::CCDBBankHandler bankHandler;
-	NLMISC::CCDBBranchObservingHandler branchObservingHandler;
-
-public:
-	void addBranchObserver( const char *branchName, NLMISC::ICDBNode::IPropertyObserver *observer, const std::vector< std::string >& positiveLeafNameFilter = std::vector< std::string >() );
-	void addBranchObserver( NLMISC::CCDBNodeBranch *branch, NLMISC::ICDBNode::IPropertyObserver *observer, const std::vector< std::string >& positiveLeafNameFilter = std::vector< std::string >() );
-	void addBranchObserver( const char *branchName, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter = NULL, uint positiveLeafNameFilterSize = 0 );
-	void addBranchObserver( NLMISC::CCDBNodeBranch *branch, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter, uint positiveLeafNameFilterSize );
-	void removeBranchObserver( const char *branchName, NLMISC::ICDBNode::IPropertyObserver* observer );
-	void removeBranchObserver( NLMISC::CCDBNodeBranch *branch, NLMISC::ICDBNode::IPropertyObserver* observer );
-	void removeBranchObserver( const char *branchName, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer );
-	void removeBranchObserver( NLMISC::CCDBNodeBranch *branch, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer );
-	void addFlushObserver( NLMISC::CCDBBranchObservingHandler::IBranchObserverCallFlushObserver *observer );
-	void removeFlushObserver( NLMISC::CCDBBranchObservingHandler::IBranchObserverCallFlushObserver *observer );
-	void flushObserverCalls();
 };
 
 

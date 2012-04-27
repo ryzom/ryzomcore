@@ -20,6 +20,7 @@
 #define NL_INTERFACE_MANAGER_H
 
 #include "nel/misc/types_nl.h"
+#include "nel/misc/cdb_manager.h"
 #include "nel/3d/u_texture.h"
 #include "nel/3d/u_text_context.h"
 #include "interface_group.h"
@@ -77,7 +78,7 @@ class CGroupMenu;
  * \author Nevrax France
  * \date 2002
  */
-class CInterfaceManager : public CInterfaceParser
+class CInterfaceManager : public CInterfaceParser, public NLMISC::CCDBManager
 {
 public:
 
@@ -229,12 +230,10 @@ public:
 
 
 	/// Get the root of the database
-	NLMISC::CCDBNodeBranch *getDB() const { return _DbRootNode; }
+	NLMISC::CCDBNodeBranch *getDB() const { return _Database; }
 	// yoyo: should avoid to try creating DbPropr with this system... very dangerous
 	NLMISC::CCDBNodeLeaf* getDbProp (const std::string & name, bool bCreate=true);
 	void delDbProp(const std::string & name);
-	// get a Db Branch by its name. NULL if don't exist or not a branch (never try to create it)
-	NLMISC::CCDBNodeBranch *getDbBranch(const std::string &name);
 	// return the DB as an int32. return 0 if the DB does not exist (never create)
 	sint32			getDbValue32 (const std::string & name);
 
@@ -959,9 +958,6 @@ private:
 	NLMISC::CRGBA	_GlobalColor;
 	sint32			_LastInGameScreenW, _LastInGameScreenH; // Resolution used for last InGame interface
 
-	// root node for interfaces properties in the databases
-	NLMISC::CCDBNodeBranch *_DbRootNode;
-
 	// List of active Anims
 	std::vector<CInterfaceAnim*> _ActiveAnims;
 
@@ -1065,20 +1061,6 @@ private:
 	void updateTooltipCoords(CCtrlBase *newCtrl);
 	
 	CInterfaceLink::CInterfaceLinkUpdater *interfaceLinkUpdater;
-	NLMISC::CCDBBranchObservingHandler branchObservingHandler;
-
-public:
-	void addBranchObserver( const char *branchName, NLMISC::ICDBNode::IPropertyObserver *observer, const std::vector< std::string >& positiveLeafNameFilter = std::vector< std::string >() );
-	void addBranchObserver( NLMISC::CCDBNodeBranch *branch, NLMISC::ICDBNode::IPropertyObserver *observer, const std::vector< std::string >& positiveLeafNameFilter = std::vector< std::string >() );
-	void addBranchObserver( const char *branchName, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter = NULL, uint positiveLeafNameFilterSize = 0 );
-	void addBranchObserver( NLMISC::CCDBNodeBranch *branch, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter, uint positiveLeafNameFilterSize );
-	void removeBranchObserver( const char *branchName, NLMISC::ICDBNode::IPropertyObserver* observer );
-	void removeBranchObserver( NLMISC::CCDBNodeBranch *branch, NLMISC::ICDBNode::IPropertyObserver* observer );
-	void removeBranchObserver( const char *branchName, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer );
-	void removeBranchObserver( NLMISC::CCDBNodeBranch *branch, const char *dbPathFromThisNode, NLMISC::ICDBNode::IPropertyObserver &observer );
-	void addFlushObserver( NLMISC::CCDBBranchObservingHandler::IBranchObserverCallFlushObserver *observer );
-	void removeFlushObserver( NLMISC::CCDBBranchObservingHandler::IBranchObserverCallFlushObserver *observer );
-	void flushObserverCalls();
 };
 
 #endif // NL_INTERFACE_MANAGER_H
