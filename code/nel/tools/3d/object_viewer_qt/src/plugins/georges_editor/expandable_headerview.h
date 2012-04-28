@@ -20,7 +20,7 @@
 // Qt includes
 #include <QHeaderView>
 
-namespace Plugin
+namespace GeorgesQt
 {
 	class ExpandableHeaderView : public QHeaderView
 	{

@@ -28,7 +28,7 @@
 
 using namespace NLGEORGES;
 
-namespace Plugin 
+namespace GeorgesQt 
 {
 
 	CGeorges::CGeorges(): FormLoader(0) 
@@ -61,4 +61,4 @@ namespace Plugin
 		return type;
 	}
 
-} /* namespace Plugin */
+} /* namespace GeorgesQt */

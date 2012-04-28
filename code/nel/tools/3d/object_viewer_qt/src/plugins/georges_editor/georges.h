@@ -38,7 +38,7 @@ namespace NLGEORGES
 
 using namespace NLGEORGES;
 
-namespace Plugin 
+namespace GeorgesQt 
 {
 
 	/**
@@ -64,6 +64,6 @@ namespace Plugin
 
 	};/* class CGeorges */
 
-} /* namespace Plugin */
+} /* namespace GeorgesQt */
 
 #endif // GEORGES_H

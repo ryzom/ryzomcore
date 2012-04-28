@@ -38,7 +38,7 @@ namespace ExtensionSystem
 class IPluginSpec;
 }
 
-namespace Plugin
+namespace GeorgesQt
 {
 class GeorgesEditorForm;
 class GeorgesEditorPlugin : public QObject, public ExtensionSystem::IPlugin
@@ -93,6 +93,6 @@ public:
 	GeorgesEditorForm *m_georgesEditorForm;
 };
 
-} // namespace Plugin
+} // namespace GeorgesQt
 
 #endif // LANDSCAPE_EDITOR_PLUGIN_H

@@ -23,7 +23,7 @@
 #include "georgesform_proxy_model.h"
 #include "georgesform_model.h"
 
-namespace Plugin 
+namespace GeorgesQt 
 {
 
 	bool CGeorgesFormProxyModel::filterAcceptsRow(int sourceRow,
@@ -76,6 +76,6 @@ namespace Plugin
 	{
 		return QSortFilterProxyModel::filterAcceptsColumn(sourceRow, sourceParent);
 	}
-} /* namespace Plugin */
+} /* namespace GeorgesQt */
 
 /* end of file */
