@@ -33,7 +33,7 @@
 #include <QToolBar>
 #include <QDebug>
 
-namespace Plugin
+namespace GeorgesQt
 {
 
 	GeorgesEditorForm::GeorgesEditorForm(QWidget *parent)
@@ -112,24 +112,9 @@ namespace Plugin
 
 	void GeorgesEditorForm::open()
 	{
-		/*qDebug() << "GeorgesEditorForm::open()";
-		if (!m_dockedWidgets.size())
-		{
-			m_dockedWidgets.append(new CGeorgesTreeViewDialog(m_mainDock));
-			m_mainDock->addDockWidget(Qt::RightDockWidgetArea, m_dockedWidgets.last());
-		}
-		else
-		{
-			m_dockedWidgets.append(new CGeorgesTreeViewDialog(m_mainDock));
-			Q_ASSERT(m_dockedWidgets.size() > 1);
-			m_mainDock->tabifyDockWidget(m_dockedWidgets.at(m_dockedWidgets.size() - 2), m_dockedWidgets.last());
-		}*/
-		
-		// TODO: FileDialog & loadFile();
-		//m_mainDock->addDockWidget(Qt::TopDockWidgetArea, new CGeorgesTreeViewDialog(m_mainDock, true));
-		//m_mainDock->addDockWidget(Qt::LeftDockWidgetArea, new CGeorgesTreeViewDialog(m_mainDock, true));
-		//QString fileName = QFileDialog::getOpenFileName();
-		//loadFile(fileName);
+		QString fileName = QFileDialog::getOpenFileName(this, tr("Open Form"));
+		if(!fileName.isNull())
+			loadFile(fileName);
 	}
 
 	void GeorgesEditorForm::newFile()
@@ -191,6 +176,7 @@ namespace Plugin
 		if (!m_dockedWidgets.size())
 		{
 			CGeorgesTreeViewDialog *dock = new CGeorgesTreeViewDialog(m_mainDock);
+			dock->setUndoStack(m_undoStack);
 			m_lastActiveDock = dock;
 			m_dockedWidgets.append(dock);
 
@@ -212,6 +198,7 @@ namespace Plugin
 				}
 			}
 			CGeorgesTreeViewDialog *dock = new CGeorgesTreeViewDialog(m_mainDock);
+			dock->setUndoStack(m_undoStack);
 			m_dockedWidgets.append(dock);
 
 			connect(m_dockedWidgets.last(), SIGNAL(closing()),
@@ -284,4 +271,4 @@ namespace Plugin
 			}
 		}
 	}
-} /* namespace Plugin */
+} /* namespace GeorgesQt */

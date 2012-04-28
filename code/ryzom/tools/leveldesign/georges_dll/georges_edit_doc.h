@@ -311,7 +311,7 @@ public:
 class CGeorgesEditDocType : public CGeorgesEditDoc
 {
 protected: // create from serialization only
-	CGeorgesEditDocType() {};
+	CGeorgesEditDocType() {}
 	DECLARE_DYNCREATE(CGeorgesEditDocType)
 
 	// Document is a type ?
@@ -341,7 +341,7 @@ protected:
 class CGeorgesEditDocDfn : public CGeorgesEditDoc
 {
 protected: // create from serialization only
-	CGeorgesEditDocDfn() {};
+	CGeorgesEditDocDfn() {}
 	DECLARE_DYNCREATE(CGeorgesEditDocDfn)
 
 	// Document is a dfn ?
@@ -371,7 +371,7 @@ protected:
 class CGeorgesEditDocForm : public CGeorgesEditDoc
 {
 protected: // create from serialization only
-	CGeorgesEditDocForm() {};
+	CGeorgesEditDocForm() {}
 	DECLARE_DYNCREATE(CGeorgesEditDocForm)
 
 	// Docuemnt is a form ?

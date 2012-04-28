@@ -19,7 +19,7 @@
 
 #include <QStyledItemDelegate>
 
-namespace Plugin 
+namespace GeorgesQt 
 {
 
 	class FormDelegate : public QStyledItemDelegate

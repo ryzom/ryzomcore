@@ -244,20 +244,20 @@ class CAHOnReloadTestPage: public IActionHandler
 REGISTER_ACTION_HANDLER (CAHOnReloadTestPage, "on_reload_test_page");
 
 
-//void initWebBrowser()
-//{
-//	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
-//
-//	// start the browser
-//	CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
-//
-//	if (pGH)
-//	{
-//		pGH->setActive(true);
-//		pGH->browse(MainPageURL.c_str());
-//	}
-//}
+void initWebBrowser()
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	//pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
+
+	// start the browser
+	CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
+
+	if (pGH)
+	{
+		pGH->setActive(true);
+		pGH->browse(ClientCfg.PatchletUrl.c_str());
+	}
+}
 
 
 // ------------------------------------------------------------------------------------------------
@@ -390,10 +390,8 @@ bool connection (const string &cookie, const string &fsaddr)
 
 	pIM->activateMasterGroup ("ui:outgame", true);
 	pIM->getDbProp ("UI:CURRENT_SCREEN")->setValue32(ClientCfg.Local ? 6 : -1); // TMP TMP
-	CCDBNodeBranch::flushObserversCalls();
-
-	// Init web box
-	//initWebBrowser();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 
 	// Active inputs
 	Actions.enable(true);
@@ -421,6 +419,10 @@ bool connection (const string &cookie, const string &fsaddr)
 	nlinfo ("PROFILE: %d seconds (%d total) for Initializing user interface", (uint32)(connCurrent-connLast)/1000, (uint32)(connCurrent-connStart)/1000);
 
 	nlinfo ("PROFILE: %d seconds for connection", (uint32)(ryzomGetLocalTime ()-connStart)/1000);
+
+	// Init web box
+	nlinfo("ok");
+	initWebBrowser();
 
 	// TMP TMP
 	if (ClientCfg.Local)
@@ -552,7 +554,8 @@ bool reconnection()
 
 	pIM->activateMasterGroup ("ui:outgame", true);
 	pIM->getDbProp ("UI:CURRENT_SCREEN")->setValue32(-1);
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 
 	// Active inputs
 	Actions.enable(true);
@@ -991,7 +994,8 @@ TInterfaceState globalMenu()
 				pIM->initOutGame();
 				pIM->activateMasterGroup ("ui:outgame", true);
 				pIM->getDbProp ("UI:CURRENT_SCREEN")->setValue32(2); // TMP TMP
-				CCDBNodeBranch::flushObserversCalls();
+				IngameDbMngr.flushObserverCalls();
+				CInterfaceManager::getInstance()->flushObserverCalls();
 				pIM->getElementFromId("ui:outgame:charsel")->setActive(false);
 				pIM->getElementFromId("ui:outgame:charsel")->setActive(true);
 				// Active inputs
@@ -1029,7 +1033,8 @@ TInterfaceState globalMenu()
 			}
 
 		}
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 
 		// check if we can send another dated block
 		if (NetMngr.getCurrentServerTick() != serverTick)
@@ -1055,7 +1060,8 @@ TInterfaceState globalMenu()
 		// Interface handling & displaying (processes clicks...)
 		pIM->updateFrameEvents();
 		pIM->updateFrameViews(NULL);
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 
 		// Movie shooter
 		globalMenuMovieShooter();
@@ -1120,9 +1126,11 @@ TInterfaceState globalMenu()
 						if (pNL != NULL)
 						{
 							pNL->setValue64 (1); // Send impulse to interface observers
-							CCDBNodeBranch::flushObserversCalls();
+							IngameDbMngr.flushObserverCalls();
+							CInterfaceManager::getInstance()->flushObserverCalls();
 							pNL->setValue64 (0);
-							CCDBNodeBranch::flushObserversCalls();
+							IngameDbMngr.flushObserverCalls();
+							CInterfaceManager::getInstance()->flushObserverCalls();
 						}
 					}
 					else
@@ -1183,9 +1191,11 @@ TInterfaceState globalMenu()
 					if (pNL != NULL)
 					{
 						pNL->setValue64 (1); // Send impulse to interface observers
-						CCDBNodeBranch::flushObserversCalls();
+						IngameDbMngr.flushObserverCalls();
+						CInterfaceManager::getInstance()->flushObserverCalls();
 						pNL->setValue64 (0);
-						CCDBNodeBranch::flushObserversCalls();
+						IngameDbMngr.flushObserverCalls();
+						CInterfaceManager::getInstance()->flushObserverCalls();
 					}
 				}
 			}

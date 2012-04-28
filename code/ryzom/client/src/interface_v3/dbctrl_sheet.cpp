@@ -45,6 +45,7 @@
 #include "../client_sheets/sphrase_sheet.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "lua_ihm.h"
+#include "game_share/bot_chat_types.h"
 
 #include "../r2/editor.h"
 
@@ -123,6 +124,14 @@ ucstring CControlSheetTooltipInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet, 
 
 	return help;
 }
+
+// ***************************************************************************
+int CDBCtrlSheet::luaGetDraggedSheet(CLuaState &ls)
+{
+	CLuaIHM::pushUIOnStack(ls, dynamic_cast<CInterfaceElement *>(_LastDraggedSheet));
+	return 1;
+}
+
 // ***************************************************************************
 int CDBCtrlSheet::luaGetHpBuff(CLuaState &ls)
 {
@@ -179,6 +188,62 @@ int CDBCtrlSheet::luaGetName(CLuaState &ls)
 	return 1;
 }
 
+// **********************************************************************************************************
+class LuaInfoWaiter : public IItemInfoWaiter
+{
+public:
+	volatile bool done;
+
+public:
+	virtual void infoReceived();
+};
+
+
+void LuaInfoWaiter::infoReceived()
+{
+	getInventory().removeItemInfoWaiter(this);
+	this->done = true;
+}
+
+static LuaInfoWaiter luaInfoWaiter;
+
+// ***************************************************************************
+int CDBCtrlSheet::luaGetCreatorName(CLuaState &ls)
+{
+	uint32	itemSlotId = getInventory().getItemSlotId(this);
+	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
+	ucstring creatorName;
+	STRING_MANAGER::CStringManagerClient::instance()->getString(itemInfo.CreatorName, creatorName);
+	CLuaIHM::push(ls, creatorName);
+	
+	return 1;
+}
+
+// ***************************************************************************
+int CDBCtrlSheet::luaWaitInfo(CLuaState &ls)
+{
+	static bool sent = false;
+	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
+	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
+	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
+
+	if (sent || itemInfo.versionInfo != 0)
+	{
+		ls.push((bool)(luaInfoWaiter.done));
+		if (luaInfoWaiter.done)
+			sent = false;
+		return luaInfoWaiter.done ? 1 : 0;
+	}
+	else
+	{
+		luaInfoWaiter.ItemSlotId = itemSlotId;
+		luaInfoWaiter.ItemSheet = this->getSheetId();
+		luaInfoWaiter.done = false;
+		getInventory().addItemInfoWaiter(&luaInfoWaiter);
+		sent = true;
+	}
+	return 0;
+}
 
 // ***************************************************************************
 int CDBCtrlSheet::luaBuildCrystallizedSpellListBrick(CLuaState &ls)
@@ -1802,8 +1867,16 @@ void CDBCtrlSheet::draw()
 				string params = string("src=") + pCSSrc->getId();
 				if (!_AHCanDropParams.empty())
 				{
-					string sTmp = _AHCanDropParams;
-					params = sTmp + "|" + params;
+					if (getAHName(_AHOnCanDrop) == "lua")
+					{
+						params = _AHCanDropParams;
+						strFindReplace(params, "%src", pCSSrc->getId());
+					}
+					else
+					{
+						string sTmp = _AHCanDropParams;
+						params = sTmp + "|" + params;
+					}
 				}
 				pIM->runActionHandler (_AHOnCanDrop, this, params);
 			}
@@ -2143,6 +2216,12 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 
 				// if a raw material for example, must add special icon text.
 				displayCharBitmaps(_RenderLayer+2, x, y, curSheetColor);
+
+				// Add the lock overlay if needed
+				if (getLockedByOwner())
+				{
+					rVR.draw11RotFlipBitmap (_RenderLayer+1, x - 2, y + 8, 0, false, rVR.getSystemTextureId(CViewRenderer::ItemLockedByOwnerTexture), curSheetColor);
+				}
 			}
 			break;
 		// Action
@@ -2605,8 +2684,16 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 							string params = string("src=") + _Id;
 							if (!pCSdest->_AHCanDropParams.empty())
 							{
-								string sTmp = pCSdest->_AHCanDropParams;
-								params = sTmp + "|" + params;
+								if (getAHName(pCSdest->_AHOnCanDrop) == "lua")
+								{
+									params = pCSdest->_AHCanDropParams;
+									strFindReplace(params, "%src", _Id);
+								}
+								else
+								{
+									string sTmp = pCSdest->_AHCanDropParams;
+									params = sTmp + "|" + params;
+								}
 							}
 							pIM->runActionHandler (pCSdest->_AHOnCanDrop, pCSdest, params);
 
@@ -2617,8 +2704,16 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 								string params = string("src=") + _Id;
 								if (!pCSdest->_AHDropParams.empty())
 								{
-									string sTmp = pCSdest->_AHDropParams;
-									params = sTmp + "|" + params; // must copy 'drop' params at start because it could be the name of a procedure
+									if (getAHName(pCSdest->_AHOnDrop) == "lua")
+									{
+										params = pCSdest->_AHDropParams;
+										strFindReplace(params, "%src", _Id);
+									}
+									else
+									{
+										string sTmp = pCSdest->_AHDropParams;
+										params = sTmp + "|" + params;// must copy 'drop' params at start because it could be the name of a procedure
+									}
 								}
 								// call action
 								pIM->runActionHandler (pCSdest->_AHOnDrop, pCSdest, params);
@@ -2654,8 +2749,16 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 								string params = string("src=") + _Id;
 								if (!pList->getCtrlSheetInfo()._AHCanDropParams.empty())
 								{
-									string sTmp = pList->getCtrlSheetInfo()._AHCanDropParams;
-									params = sTmp + "|" + params;
+									if (getAHName(pList->getCtrlSheetInfo()._AHOnCanDrop) == "lua")
+									{
+										params = pList->getCtrlSheetInfo()._AHCanDropParams;
+										strFindReplace(params, "%src", _Id);
+									}
+									else
+									{
+										string sTmp = pList->getCtrlSheetInfo()._AHCanDropParams;
+										params = sTmp + "|" + params;
+									}
 								}
 								pIM->runActionHandler (pList->getCtrlSheetInfo()._AHOnCanDrop, pList, params);
 
@@ -2666,8 +2769,16 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 									string params = string("src=") + _Id;
 									if (!pList->getCtrlSheetInfo()._AHDropParams.empty())
 									{
-										string sTmp = pList->getCtrlSheetInfo()._AHDropParams;
-										params = sTmp + "|" + params; // must copy 'drop' params at start because it could be the name of a procedure
+										if (getAHName(pList->getCtrlSheetInfo()._AHOnDrop) == "lua")
+										{
+											params = pList->getCtrlSheetInfo()._AHDropParams;
+											strFindReplace(params, "%src", _Id);
+										}
+										else
+										{
+											string sTmp = pList->getCtrlSheetInfo()._AHDropParams;
+											params = sTmp + "|" + params; // must copy 'drop' params at start because it could be the name of a procedure
+										}
 									}
 									// call action
 									pIM->runActionHandler (pList->getCtrlSheetInfo()._AHOnDrop, pList, params);
@@ -2980,9 +3091,32 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 	}
 	else if(getType() == CCtrlSheetInfo::SheetType_Item)
 	{
-		const CItemSheet *item = asItemSheet();
-		if (item)
-			help = getItemActualName();
+		const CItemSheet	*item= asItemSheet();
+		if(item)
+		{
+			if (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL || item->Family == ITEMFAMILY::JEWELRY || item->Family == ITEMFAMILY::ARMOR)
+			{
+				string luaMethodName = ( (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) ? "updateCrystallizedSpellTooltip" : "updateBuffItemTooltip");
+				CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
+				if ( ! getInventory().isItemInfoUpToDate(getInventory().getItemSlotId(ctrlSheet)))
+				{
+					// Prepare the waiter
+					ControlSheetTooltipUpdater.ItemSheet= ctrlSheet->getSheetId();
+					ControlSheetTooltipUpdater.LuaMethodName = luaMethodName;
+					ControlSheetTooltipUpdater.ItemSlotId= getInventory().getItemSlotId(ctrlSheet);
+					ControlSheetTooltipUpdater.CtrlSheet = ctrlSheet;
+
+					// Add the waiter
+					getInventory().addItemInfoWaiter(&ControlSheetTooltipUpdater);
+				}
+
+				help = ControlSheetTooltipUpdater.infoValidated(ctrlSheet, luaMethodName);
+
+			}
+			else
+				help= getItemActualName();
+
+		}
 		else
 			help= _ContextHelp;
 	}
@@ -3941,6 +4075,17 @@ void CDBCtrlSheet::setItemResaleFlag(sint32 rf)
 	node->setValue32(rf);
 }
 
+// ***************************************************************************
+bool CDBCtrlSheet::getLockedByOwner() const
+{
+	return (getItemResaleFlag() == BOTCHATTYPE::ResaleKOLockedByOwner);
+}
+
+// ***************************************************************************
+bool CDBCtrlSheet::canOwnerLock() const
+{
+	return (NULL != getItemResaleFlagPtr());
+}
 
 // ***************************************************************************
 sint32 CDBCtrlSheet::getItemSellerType() const

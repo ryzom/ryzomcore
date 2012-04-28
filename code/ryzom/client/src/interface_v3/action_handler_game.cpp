@@ -2571,7 +2571,9 @@ class CAHAddShape : public IActionHandler
 						skel.setPos(CVector((float)x, (float)y, (float)z));
 						skel.setRotQuat(dir.getRot());
 					}
-				} else {
+				}
+				else
+				{
 					instance.setScale(instance.getScale()*s);
 					instance.setPos(CVector((float)x, (float)y, (float)z));
 					instance.setRotQuat(dir.getRot());
@@ -3168,7 +3170,6 @@ class CHandlerGameConfigFullscreen : public IActionHandler
 			// hide frequencies combo
 			pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
 			if (pCB) pCB->setActive(false);
-
 		}
 
 		// **** dirt the apply button of the DDX

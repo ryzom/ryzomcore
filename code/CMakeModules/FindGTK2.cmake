@@ -66,6 +66,7 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
         /usr/lib64/glib-2.0/include
         /usr/lib/glib-2.0/include
         /sw/lib/glib-2.0/include
+        /usr/lib/x86_64-linux-gnu/glib-2.0/include
     )
     gtk2_debug_message("GTK2_GLIBCONFIG_INCLUDE_DIR is ${GTK2_GLIBCONFIG_INCLUDE_DIR}")
 
@@ -95,8 +96,24 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
         /usr/lib/gtk-2.0/include
         /usr/lib64/gtk-2.0/include
         /sw/lib/gtk-2.0/include
+        /usr/lib/x86_64-linux-gnu/gtk-2.0/include
     )
     gtk2_debug_message("GTK2_GDK_INCLUDE_DIR is ${GTK2_GDK_INCLUDE_DIR}")
+
+    find_path(GTK2_GDK_PIXBUF_INCLUDE_DIR
+      NAMES
+        gdk-pixbuf/gdk-pixbuf.h
+      PATHS
+        ${_GDK2IncDir}
+        /opt/gnome/lib/gtk-2.0/include
+        /opt/gnome/lib64/gtk-2.0/include
+        /opt/lib/gtk-2.0/include
+        /usr/lib/gtk-2.0/include
+        /usr/lib64/gtk-2.0/include
+        /sw/lib/gtk-2.0/include
+        /usr/include/gdk-pixbuf-2.0
+    )
+    gtk2_debug_message("GTK2_GDK_PIXBUF_INCLUDE_DIR is ${GTK2_GDK_PIXBUF_INCLUDE_DIR}")
 
     find_path(GTK2_GTKGL_INCLUDE_DIR
       NAMES
@@ -357,6 +374,7 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
       ${GTK2_GLIBCONFIG_INCLUDE_DIR}
       ${GTK2_GLIB_INCLUDE_DIR}
       ${GTK2_GDK_INCLUDE_DIR}
+      ${GTK2_GDK_PIXBUF_INCLUDE_DIR}
       ${GTK2_GLADE_INCLUDE_DIR}
       ${GTK2_PANGO_INCLUDE_DIR}
       ${GTK2_CAIRO_INCLUDE_DIR}
@@ -364,7 +382,7 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
     )
 
     if (GTK2_GTK_LIBRARY AND GTK2_GTK_INCLUDE_DIR)
-      if (GTK2_GDK_LIBRARY AND GTK2_GDK_PIXBUF_LIBRARY AND GTK2_GDK_INCLUDE_DIR)
+      if (GTK2_GDK_LIBRARY AND GTK2_GDK_PIXBUF_LIBRARY AND GTK2_GDK_INCLUDE_DIR AND GTK2_GDK_PIXBUF_INCLUDE_DIR)
         if (GTK2_GMODULE_LIBRARY)
           if (GTK2_GTHREAD_LIBRARY)
             if (GTK2_GOBJECT_LIBRARY)
@@ -423,9 +441,9 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
         else (GTK2_GMODULE_LIBRARY)
           message(SEND_ERROR "Could not find GMODULE")
         endif (GTK2_GMODULE_LIBRARY)
-      else (GTK2_GDK_LIBRARY AND GTK2_GDK_PIXBUF_LIBRARY AND GTK2_GDK_INCLUDE_DIR)
+      else (GTK2_GDK_LIBRARY AND GTK2_GDK_PIXBUF_LIBRARY AND GTK2_GDK_INCLUDE_DIR AND GTK2_GDK_PIXBUF_INCLUDE_DIR)
         message(SEND_ERROR "Could not find GDK (GDK_PIXBUF)")
-      endif (GTK2_GDK_LIBRARY AND GTK2_GDK_PIXBUF_LIBRARY AND GTK2_GDK_INCLUDE_DIR)
+      endif (GTK2_GDK_LIBRARY AND GTK2_GDK_PIXBUF_LIBRARY AND GTK2_GDK_INCLUDE_DIR AND GTK2_GDK_PIXBUF_INCLUDE_DIR)
     else (GTK2_GTK_LIBRARY AND GTK2_GTK_INCLUDE_DIR)
       message(SEND_ERROR "Could not find GTK2-X11")
     endif (GTK2_GTK_LIBRARY AND GTK2_GTK_INCLUDE_DIR)

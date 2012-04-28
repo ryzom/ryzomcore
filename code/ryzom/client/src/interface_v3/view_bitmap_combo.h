@@ -20,7 +20,7 @@
 #ifndef NL_VIEW_BITMAP_COMBO_H
 #define NL_VIEW_BITMAP_COMBO_H
 
-#include "../cdb.h"
+#include "nel/misc/cdb.h"
 #include "view_base.h"
 #include "nel/3d/u_texture.h"
 #include <string>
@@ -67,7 +67,7 @@
 struct CComboBoxDesc
 {
 	bool	parse(xmlNodePtr cur, CInterfaceElement *owner);
-	void	addObserver(ICDBNode::IPropertyObserver *obs);
+	void	addObserver(NLMISC::ICDBNode::IPropertyObserver *obs);
 	void	getGridSize(uint &numRow,uint &numCol) const;
 	void    getDimensions(uint &width, uint &height) const;
 	CInterfaceProperty      NumRow;
@@ -94,7 +94,7 @@ struct CComboBoxDesc
  * \author Nevrax France
  * \date 2002
  */
-class CViewBitmapCombo : public CViewBase, public ICDBNode::IPropertyObserver
+class CViewBitmapCombo : public CViewBase, public NLMISC::ICDBNode::IPropertyObserver
 {
 public:
 	typedef std::vector<sint32> TIdArray;
@@ -160,7 +160,7 @@ private:
 	void	setupSize();
 	void	getDimensions(uint &numRow, uint &numCol);
 	// From ICDBNode::IPropertyObserver
-	void update(ICDBNode *leaf);
+	void update(NLMISC::ICDBNode *leaf);
 	// Return a color from the array, or white if it is empty
 	static NLMISC::CRGBA getCol(const TColorArray &array, uint index);
 	static const std::string   *getTex(const TStringArray &array, uint index);

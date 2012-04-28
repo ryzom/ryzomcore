@@ -31,7 +31,7 @@ class CCharacter;
 
 ///\todo: avoid team reallocation problems?
 ///\todo: check if we have to remove team from IOS if crash/shutdown
-///\todo successor index sert à rien???
+///\todo successor index is useful ?
 
 /**
  * CTeamManager
@@ -47,9 +47,12 @@ public:
 	{
 		AlreadyInvited,
 		AlreadyInTeam,
+		AlreadyInLeague,
 		CantInviteEnemy,
 		CantInvite,
 		Ok,
+		NotInTeam,
+		NotLeader,
 	};
 	/// default constructor
 	CTeamManager()
@@ -57,6 +60,13 @@ public:
 
 	/// add all created to chat groups
 	void addAllTeamsToChatGroup();
+
+	/// player leaderId invites player targetId to join his League. Only leaders can invite other leaders
+	void joinLeagueProposal( CCharacter * leader, const NLMISC::CEntityId &targetId );
+	/// player charId declines an invitation
+	void joinLeagueDecline( const NLMISC::CEntityId &charId );
+	/// player charId accepts an invitation
+	void joinLeagueAccept( const NLMISC::CEntityId &charId );
 
 	/// player leaderId invites plyer targetId to join his team. Only leaders can invite
 	void joinProposal( CCharacter * leader, const NLMISC::CEntityId &targetId );
@@ -103,6 +113,13 @@ public:
 	 * \return true if the invited is invitable by the invitor
 	 */
 	TInviteRetCode isInvitableBy(CCharacter * invited, CCharacter * invitor );
+
+	/**
+	 * \param invited: character being invited
+	 * \param invitor: character inviting the other one
+	 * \return true if the invited is invitable by the invitor
+	 */
+	TInviteRetCode isLeagueInvitableBy(CCharacter * invited, CCharacter * invitor );
 
 	/**
 	 * PvP attack occurs in a team

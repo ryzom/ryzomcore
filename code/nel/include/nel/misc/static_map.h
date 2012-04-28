@@ -93,7 +93,7 @@ public:
 	{
 	}
 
-	explicit CStaticMap (const Comp& __comp) : _DataSorted(true)
+	explicit CStaticMap (const Comp& /* __comp */) : _DataSorted(true)
 	{
 	}
 

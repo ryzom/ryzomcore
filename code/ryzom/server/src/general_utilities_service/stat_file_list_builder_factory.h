@@ -54,6 +54,7 @@ public:
 class IFileListBuilderBuilder: public NLMISC::CRefCount
 {
 public:
+	virtual ~IFileListBuilderBuilder() {}
 	virtual const char* getName()=0;
 	virtual const char* getDescription()=0;
 	virtual IFileListBuilder* build(const std::string& rawArgs)=0;

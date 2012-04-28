@@ -42,7 +42,7 @@ _DirectFilterPassGain(NLSOUND_DEFAULT_FILTER_PASS_GAIN), _EffectFilterPassGain(N
 _DirectFilterLowFrequency(NLSOUND_DEFAULT_FILTER_PASS_LF), _DirectFilterHighFrequency(NLSOUND_DEFAULT_FILTER_PASS_HF), 
 _EffectFilterLowFrequency(NLSOUND_DEFAULT_FILTER_PASS_LF), _EffectFilterHighFrequency(NLSOUND_DEFAULT_FILTER_PASS_HF), 
 _IsPlaying(false), _IsPaused(false), _IsLooping(false), _Pitch(1.0f), 
-_Gain(1.0f), _MinDistance(1.0f), _MaxDistance(numeric_limits<float>::max()),
+_Gain(1.0f), _MinDistance(1.0f), _MaxDistance(sqrt(numeric_limits<float>::max())),
 _AdpcmUtility(NULL), _Channels(0), _BitsPerSample(0), _BufferStreaming(false)
 {
 	// nlwarning(NLSOUND_XAUDIO2_PREFIX "Inititializing CSourceXAudio2");
@@ -121,8 +121,7 @@ void CSourceXAudio2::commit3DChanges()
 {
 	nlassert(_SourceVoice);
 	
-	// Only mono buffers get 3d sound, multi-channel buffers go directly to the speakers (calculate rolloff too!!).
-	// Todo: stereo buffers calculate distance ?
+	// Only mono buffers get 3d sound, multi-channel buffers go directly to the speakers without any distance rolloff.
 	if (_Channels > 1)
 	{
 		// _SoundDriver->getDSPSettings()->DstChannelCount = 1;
@@ -494,8 +493,10 @@ bool CSourceXAudio2::initFormat(IBuffer::TBufferFormat bufferFormat, uint8 chann
 	_SourceVoice->SetVolume(_Gain, _OperationSet);
 	setupVoiceSends();
 	_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
-
-
+	
+	// Also commit any 3D settings that were already done
+	commit3DChanges();
+	
 	// test
 	//XAUDIO2_VOICE_DETAILS voice_details;
 	//_SourceVoice->GetVoiceDetails(&voice_details);
@@ -535,7 +536,7 @@ bool CSourceXAudio2::preparePlay(IBuffer::TBufferFormat bufferFormat, uint8 chan
 		// destroy adpcm utility (if it exists)
 		delete _AdpcmUtility; _AdpcmUtility = NULL;
 		// reset current stuff
-		_Format = (IBuffer::TBufferFormat)~0;
+		_Format = IBuffer::FormatNotSet;
 		_Channels = 0;
 		_BitsPerSample = 0;
 	}
@@ -581,6 +582,11 @@ bool CSourceXAudio2::preparePlay(IBuffer::TBufferFormat bufferFormat, uint8 chan
 bool CSourceXAudio2::play()
 {	
 	// nldebug(NLSOUND_XAUDIO2_PREFIX "play");
+
+	// Commit 3D changes before starting play
+	if (_SourceVoice)
+		commit3DChanges();
+	// else it is commit by the preparePlay > initFormat function
 
 	if (_IsPaused)
 	{
@@ -793,7 +799,14 @@ bool CSourceXAudio2::getSourceRelativeMode() const
 void CSourceXAudio2::setMinMaxDistances(float mindist, float maxdist, bool /* deferred */)
 {
 	// nldebug(NLSOUND_XAUDIO2_PREFIX "setMinMaxDistances %f, %f", mindist, maxdist);
-
+	
+	static float maxSqrt = sqrt(std::numeric_limits<float>::max());
+	if (maxdist >= maxSqrt)
+	{
+		nlwarning("SOUND_DEV (XAudio2): Ridiculously high max distance set on source");
+		maxdist = maxSqrt;
+	}
+	
 	_Emitter.InnerRadius = mindist;
 	_MinDistance = mindist;
 	_MaxDistance = maxdist;

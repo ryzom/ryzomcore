@@ -132,7 +132,7 @@ void CSBrickManager::initInGame()
 	}
 
 	// Add a branch observer on brick family
-	pIM->getDbBranch("SERVER:BRICK_FAMILY")->addBranchObserver(&_BrickFamilyObs);
+	pIM->addBranchObserver( "SERVER:BRICK_FAMILY", &_BrickFamilyObs);
 }
 
 // ***************************************************************************

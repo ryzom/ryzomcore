@@ -269,7 +269,7 @@ void impulseDatabaseResetBank(NLMISC::CBitMemStream &impulse)
 		impulse.serial( bank, nbits );
 
 		// reset the bank
-		IngameDbMngr.getNodePtr()->resetBank( serverTick, (TCDBBank)bank );
+		IngameDbMngr.resetBank( serverTick, bank );
 		nldebug( "CDB: DB_GROUP:RESET_BANK %s", CDBBankNames[bank] );
 	}
 	catch (const Exception &e)
@@ -664,10 +664,12 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		}
 
 		// select DB
+		sint32	dbIndex = ChatMngr.getDynamicChannelDbIndexFromId(dynChatId);
+		clamp(dbIndex, (sint32)0 , (sint32)CChatGroup::MaxDynChanPerPlayer);
 		string entry="UI:SAVE:CHAT:COLORS:";
 		switch(mode)
 		{
-		case CChatGroup::dyn_chat:	entry+="DYN";	break;
+		case CChatGroup::dyn_chat:	entry+="DYN:" + NLMISC::toString(dbIndex);	break;
 		case CChatGroup::say:	entry+="SAY";	break;
 		case CChatGroup::shout:	entry+="SHOUT";	break;
 		case CChatGroup::team:	entry+="GROUP";	break;
@@ -695,6 +697,11 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 				col = it->second.Color;
 			}
 		}
+	}
+
+	if (stringCategory == "emt")
+	{
+		bubbleWanted = false;
 	}
 
 	if (mode != CChatGroup::system)
@@ -3206,7 +3213,7 @@ void impulseOutpostDeclareWarAck(NLMISC::CBitMemStream &impulse)
 		node->setValue32(timeStartAttack);
 }
 
-extern void addWebIGParams (string &url);
+extern void addWebIGParams(string &url, bool trustedDomain);
 
 //-----------------------------------------------
 //-----------------------------------------------
@@ -3290,7 +3297,6 @@ private:
 			string group = titleStr.toString();
 			// <missing:XXX>
 			group = group.substr(9, group.size()-10);
-			nlinfo("group = %s", group.c_str());
 			groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId("ui:interface:"+group+":content:html"));
 			if (!groupHtml)
 			{
@@ -3312,7 +3318,7 @@ private:
 						if (group == "webig")
 							pGC->setActive(true);
 						string url = contentStr.toString();
-						addWebIGParams(url);
+						addWebIGParams(url, true);
 						groupHtml->browse(url.c_str());
 						pIM->setTopWindow(pGC);
 					}

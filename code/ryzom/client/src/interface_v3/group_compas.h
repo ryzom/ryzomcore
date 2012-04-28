@@ -110,7 +110,7 @@ private:
 	CCompassTarget					_SavedTarget;
 	bool							_SavedTargetValid;
 
-	CCDBNodeLeaf					*_DynamicTargetPos;
+	NLMISC::CCDBNodeLeaf					*_DynamicTargetPos;
 	uint32							_LastDynamicTargetPos;
 
 	// Color for each type of target

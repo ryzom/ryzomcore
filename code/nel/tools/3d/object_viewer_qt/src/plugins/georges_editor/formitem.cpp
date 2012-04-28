@@ -23,7 +23,7 @@
 #include <nel/georges/u_type.h>
 #include <nel/georges/form.h>
 
-namespace Plugin 
+namespace GeorgesQt 
 {
 
 	CFormItem::CFormItem(NLGEORGES::UFormElm* elm, const QList<QVariant> &data, CFormItem *parent,

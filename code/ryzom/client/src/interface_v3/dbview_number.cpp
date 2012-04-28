@@ -21,6 +21,7 @@
 #include "dbview_number.h"
 #include "interface_manager.h"
 #include "nel/misc/xml_auto_ptr.h"
+#include "nel/misc/common.h"
 
 using namespace std;
 using namespace NL3D;
@@ -103,30 +104,6 @@ bool CDBViewNumber::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 }
 
 // ***************************************************************************
-// Helper function
-ucstring formatThousands(const ucstring& s, const ucstring& separator)
-{
-	int j;
-	int k;
-	int topI = s.length() - 1;
-
-	if (topI < 4) return s;
-
-	ucstring ns;
-    do
-    {
-        for (j = topI, k = 0; j >= 0 && k < 3; --j, ++k )
-        {
-            ns = s[j] + ns; // new char is added to front of ns
-            if( j > 0 && k == 2) ns = separator + ns; // j > 0 means still more digits
-        }
-        topI -= 3;
-       
-    } while(topI >= 0);
-	return ns;
-}
-
-// ***************************************************************************
 void CDBViewNumber::checkCoords()
 {
 	// change text
@@ -134,8 +111,7 @@ void CDBViewNumber::checkCoords()
 	if (_Cache != val)
 	{
 		_Cache= val;
-		static ucstring separator = NLMISC::CI18N::get("uiThousandsSeparator");
-		ucstring value = _Format ? formatThousands(toString(val), separator) : toString(val);
+		ucstring value = _Format ? NLMISC::formatThousands(toString(val)) : toString(val);
 		if (_Positive) setText(val >= 0 ? ( ucstring(_Prefix) + value + ucstring(_Suffix) ) : ucstring("?"));
 		else setText( ucstring(_Prefix) + value + ucstring(_Suffix) );
 	}

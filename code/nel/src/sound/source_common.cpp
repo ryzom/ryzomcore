@@ -25,7 +25,7 @@ using namespace NLMISC;
 namespace NLSOUND
 {
 
-CSourceCommon::CSourceCommon(TSoundId id, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster)
+CSourceCommon::CSourceCommon(TSoundId id, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster, CGroupController *groupController)
 :	_Priority(MidPri),
 	_Playing(false),
 	_Looping(false),
@@ -41,9 +41,11 @@ CSourceCommon::CSourceCommon(TSoundId id, bool spawn, TSpawnEndCallback cb, void
 	_SpawnEndCb(cb),
 	_CbUserParam(cbUserParam),
 	_Cluster(cluster),
-	_UserVarControler(id->getUserVarControler())
+	_UserVarControler(id->getUserVarControler()),
+	_GroupController(groupController ? groupController : id->getGroupController())
 {
 	CAudioMixerUser::instance()->addSource(this);
+	_GroupController->addSource(this);
 
 	// get a local copy of the sound parameter
 	_InitialGain = _Gain = id->getGain();
@@ -51,11 +53,11 @@ CSourceCommon::CSourceCommon(TSoundId id, bool spawn, TSpawnEndCallback cb, void
 	_Looping = id->getLooping();
 	_Priority = id->getPriority();
 	_Direction = id->getDirectionVector();
-
 }
 
 CSourceCommon::~CSourceCommon()
 {
+	_GroupController->removeSource(this);
 	CAudioMixerUser::instance()->removeSource(this);
 }
 
@@ -177,6 +179,7 @@ void					CSourceCommon::setGain( float gain )
 {
 	clamp(gain, 0.0f, 1.0f);
 	_InitialGain = _Gain = gain;
+	updateFinalGain();
 }
 
 /* Set the gain amount (value inside [0, 1]) to map between 0 and the nominal gain
@@ -185,8 +188,8 @@ void					CSourceCommon::setGain( float gain )
 void					CSourceCommon::setRelativeGain( float gain )
 {
 	clamp(gain, 0.0f, 1.0f);
-
 	_Gain = _InitialGain * gain;
+	updateFinalGain();
 }
 
 /*

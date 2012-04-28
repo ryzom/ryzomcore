@@ -1267,7 +1267,8 @@ void CFarTP::sendReady()
 			CInputHandlerManager::getInstance()->pumpEventsNoIM();
 			// Update Network.
 			NetMngr.update();
-			CCDBNodeBranch::flushObserversCalls();
+			IngameDbMngr.flushObserverCalls();
+			CInterfaceManager::getInstance()->flushObserverCalls();
 			// Be nice to the system
 			nlSleep(100);
 		}
@@ -1405,7 +1406,8 @@ void CFarTP::farTPmainLoop()
 
 		// Update Network.
 		NetMngr.update();
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 
 		// TODO: resend in case the last datagram sent was lost?
 //		// check if we can send another dated block

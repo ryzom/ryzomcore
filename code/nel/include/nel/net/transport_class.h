@@ -75,7 +75,7 @@ public:
 	enum TProp {
 		PropUInt8, PropUInt16, PropUInt32, PropUInt64,
 		PropSInt8, PropSInt16, PropSInt32, PropSInt64,
-		PropBool, PropFloat, PropDouble, PropString, PropDataSetRow, PropSheetId, PropUKN };
+		PropBool, PropFloat, PropDouble, PropString, PropDataSetRow, PropSheetId, PropUCString, PropUKN };
 //		PropBool, PropFloat, PropDouble, PropString, PropDataSetRow, PropEntityId, PropSheetId, PropUKN };
 
 
@@ -160,6 +160,7 @@ public:
 		case PropString: nlassert(sizeof(T) == sizeof (std::string)); break;
 //		case PropEntityId: nlassert(sizeof(T) == sizeof (NLMISC::CEntityId)); break;
 		case PropSheetId: nlassert(sizeof(T) == sizeof (NLMISC::CSheetId)); break;
+		case PropUCString: nlassert(sizeof(T) == sizeof (ucstring)); break;
 		default: nlerror ("property %s have unknown type %d", name.c_str(), type);
 		}
 
@@ -334,7 +335,7 @@ protected:
 
 		T *Value;
 
-		virtual void serialDefaultValue (NLMISC::IStream &f)
+		virtual void serialDefaultValue (NLMISC::IStream &/* f */)
 		{
 			// nothing
 		}

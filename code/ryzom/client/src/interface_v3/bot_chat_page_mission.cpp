@@ -50,7 +50,7 @@ void CBotChatPageMission::init()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	if (im->getDbBranch("SERVER:CHOOSE_MISSIONS"))
-		im->getDbBranch("SERVER:CHOOSE_MISSIONS")->addBranchObserver(&_MissionPagesObs);
+		im->addBranchObserver("SERVER:CHOOSE_MISSIONS", &_MissionPagesObs);
 }
 
 

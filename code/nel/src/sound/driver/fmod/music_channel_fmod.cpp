@@ -249,6 +249,12 @@ void CMusicChannelFMod::stop()
 	_CallBackEnded = false;
 }
 
+void CMusicChannelFMod::reset()
+{
+	// don't care
+	stop();
+}
+
 /** Pause the music previously loaded and played (the Memory is not freed)
  */
 void CMusicChannelFMod::pause()

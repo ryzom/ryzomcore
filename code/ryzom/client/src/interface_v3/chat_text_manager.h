@@ -23,6 +23,9 @@
 
 class CViewBase;
 class ucstring;
+namespace NLMISC{
+	class CCDBNodeLeaf;
+}
 
 /** Class to get chat text parameters, and to build new text lines
   * \author Nicolas Vizerie
@@ -56,9 +59,9 @@ public:
 private:
 	static CChatTextManager *_Instance;
 
-	mutable class CCDBNodeLeaf    *_TextFontSize;
-	mutable CCDBNodeLeaf    *_TextMultilineSpace;
-	mutable CCDBNodeLeaf    *_TextShadowed;
+	mutable NLMISC::CCDBNodeLeaf    *_TextFontSize;
+	mutable NLMISC::CCDBNodeLeaf    *_TextMultilineSpace;
+	mutable NLMISC::CCDBNodeLeaf    *_TextShadowed;
 
 	// ctor, private because of singleton
 	CChatTextManager();

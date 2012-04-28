@@ -679,6 +679,9 @@ public :
 	/// set required skill level
 	inline void setRequiredSkillLevel2( uint16 l ) { _RequiredSkillLevel2 = l; }
 
+	bool getLockedByOwner() const { return _LockedByOwner; }
+	void setLockedByOwner(bool value);
+
 	/// get required stat
 	inline CHARACTERISTICS::TCharacteristics getRequiredCharac() const { return _RequiredCharac; }
 	/// set required stat
@@ -705,6 +708,13 @@ public :
 	const ucstring& getCustomText() const { return _CustomText; }
 	/// set custom string (for scroll-like items)
 	void setCustomText(const ucstring &val);
+
+	uint8 getPetIndex() const { return _PetIndex; }
+	void setPetIndex(uint8 val) { _PetIndex = val; }
+
+	ucstring getCustomName() const { return _CustomName; }
+	void setCustomName(ucstring val) { _CustomName = val; }
+
 
 protected:
 	friend class CFaberPhrase;
@@ -947,6 +957,9 @@ private:
 	std::vector<CTypeSkillMod>	_TypeSkillMods;
 
 	ucstring			_CustomText;
+	bool                _LockedByOwner;
+	uint8               _PetIndex;
+	ucstring            _CustomName;
 };
 
 /**

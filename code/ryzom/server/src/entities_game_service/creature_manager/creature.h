@@ -496,6 +496,8 @@ public:
 	const std::string &getWebPage() const {return _WebPage;}
 	const std::string &getWebPageName() const {return _WebPageName;}
 
+	const uint32 getOrganization() const { return _Organization; }
+
 	const NLMISC::CSheetId &getBotChatOutpost() const {return _BotChatOutpost;}
 
 	const std::vector<NLMISC::CSheetId> &getExplicitActionTradeList() const {return _ExplicitActionTradeList;}
@@ -590,6 +592,7 @@ private:
 	NLMISC::CSmartPtr<CMerchant> 	_Merchant;					// smart pointer on CMerchant class of creature
 
 	uint32							_BotChatProgram;			// Program enabled for bot chat
+	uint32							_Organization;				// Organization for bot
 
 	TDataSetRow						_CharacterLeaderIndex;		// The data set row of the beast's leader character if it's in a pack/train
 	std::string						_WelcomePhrase;				// welcome message id of the bot

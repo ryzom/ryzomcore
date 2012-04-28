@@ -360,7 +360,8 @@ void loginMainLoop()
 			&& LoginSM.getCurrentState() != CLoginStateMachine::st_ingame)
 //	while (loginFinished == false)
 	{
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 
 		// Update the DT T0 and T1 global variables
 		updateClientTime();
@@ -378,7 +379,8 @@ void loginMainLoop()
 		// Interface handling & displaying
 		pIM->updateFrameEvents();
 		pIM->updateFrameViews(NULL);
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 
 
 
@@ -738,8 +740,10 @@ void initLoginScreen()
 	if(!l.empty())
 	{
 		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_LOGIN));
-		if (pGEB != NULL)
+		if (pGEB != NULL && (pGEB->getInputString().empty()))
+		{
 			pGEB->setInputString(l);
+		}
 		pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
 	}
 	else
@@ -808,7 +812,8 @@ bool login()
 		loginIntro();
 
 	pIM->initLogin();
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 
 	bool tmpDI = ClientCfg.DisableDirectInput;
 	ClientCfg.DisableDirectInput = true;
@@ -1922,21 +1927,21 @@ class CAHInitResLod : public IActionHandler
 		// first indicates the preset-able cfg-variable
 		// second indicates if its a double variable (else it's an int)
 		CfgPresetList.clear();
-		CfgPresetList.push_back(pair<string,bool>("LandscapeTileNear",	true));
-		CfgPresetList.push_back(pair<string,bool>("LandscapeThreshold",	true));
-		CfgPresetList.push_back(pair<string,bool>("Vision",				true));
-		CfgPresetList.push_back(pair<string,bool>("MicroVeget",			false));
-		CfgPresetList.push_back(pair<string,bool>("MicroVegetDensity",	true));
+		CfgPresetList.push_back(pair<string,bool>("LandscapeTileNear",		true));
+		CfgPresetList.push_back(pair<string,bool>("LandscapeThreshold",		true));
+		CfgPresetList.push_back(pair<string,bool>("Vision",					true));
+		CfgPresetList.push_back(pair<string,bool>("MicroVeget",				false));
+		CfgPresetList.push_back(pair<string,bool>("MicroVegetDensity",		true));
 		CfgPresetList.push_back(pair<string,bool>("FxNbMaxPoly",			false));
-		CfgPresetList.push_back(pair<string,bool>("Cloud",				false));
+		CfgPresetList.push_back(pair<string,bool>("Cloud",					false));
 		CfgPresetList.push_back(pair<string,bool>("CloudQuality",			true));
 		CfgPresetList.push_back(pair<string,bool>("CloudUpdate",			false));
 		CfgPresetList.push_back(pair<string,bool>("Shadows",				false));
-		CfgPresetList.push_back(pair<string,bool>("SkinNbMaxPoly",		false));
+		CfgPresetList.push_back(pair<string,bool>("SkinNbMaxPoly",			false));
 		CfgPresetList.push_back(pair<string,bool>("NbMaxSkeletonNotCLod",	false));
 		CfgPresetList.push_back(pair<string,bool>("CharacterFarClip",		true));
 
-		CfgPresetList.push_back(pair<string,bool>("Bloom",				false));
+		CfgPresetList.push_back(pair<string,bool>("Bloom",					false));
 		CfgPresetList.push_back(pair<string,bool>("SquareBloom",			false));
 		CfgPresetList.push_back(pair<string,bool>("DensityBloom",			true));
 
@@ -3029,8 +3034,8 @@ void loginIntro()
 
 			const ucstring nmsg("");
 			ProgressBar.newMessage (nmsg);
-
-			CCDBNodeBranch::flushObserversCalls();
+			IngameDbMngr.flushObserverCalls();
+			CInterfaceManager::getInstance()->flushObserverCalls();
 		}
 	}
 	beginLoading(StartBackground);

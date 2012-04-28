@@ -1724,7 +1724,8 @@ void CEditor::waitScenarioScreen()
 			}
 
 		}
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 
 		// check if we can send another dated block
 		if (NetMngr.getCurrentServerTick() != serverTick)
@@ -1769,7 +1770,8 @@ void CEditor::waitScenarioScreen()
 		if (sysInfo) sysInfo->setActive(false);
 
 		getUI().updateFrameViews(NULL);
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 
 		// Movie shooter
 		globalMenuMovieShooter();
@@ -4392,7 +4394,7 @@ bool CEditor::doLuaScript(const char *filename, const char *fileDescText)
 		return false;
 	}
 
-	if( 0 && FINAL_VERSION == 1) // deactivated for the moment because there are lua file that must be loaded from example
+	if( 0 && FINAL_VERSION == 1) // disabled for the moment because there are lua file that must be loaded from example
 	{
 		const static std::string path = "data_common.bnp@";
 		const static std::string::size_type len= path.size();

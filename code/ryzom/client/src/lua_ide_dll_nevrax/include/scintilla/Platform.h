@@ -277,8 +277,8 @@ private:
 	Surface(const Surface &) {}
 	Surface &operator=(const Surface &) { return *this; }
 public:
-	Surface() {};
-	virtual ~Surface() {};
+	Surface() {}
+	virtual ~Surface() {}
 	static Surface *Allocate();
 
 	virtual void Init()=0;

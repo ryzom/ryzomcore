@@ -315,7 +315,8 @@ inline void	waitForNetworkMessage(bool &var)
 		CInputHandlerManager::getInstance()->pumpEventsNoIM();
 		// Update network.
 		NetMngr.update();
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 		// Send dummy info
 		NetMngr.send();
 		// Do not take all the CPU.
@@ -1216,7 +1217,8 @@ void initMainLoop()
 				CInputHandlerManager::getInstance()->pumpEventsNoIM();
 				// Update Network.
 				NetMngr.update();
-				CCDBNodeBranch::flushObserversCalls();
+				IngameDbMngr.flushObserverCalls();
+				CInterfaceManager::getInstance()->flushObserverCalls();
 			}
 
 			// Set the LastGameCycle

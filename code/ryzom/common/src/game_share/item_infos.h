@@ -139,6 +139,7 @@ public:
 	ucstring	CustomText;
 	ucstring	R2ItemDescription;
 	ucstring	R2ItemComment;
+	uint8		PetNumber; // 1 based pet index
 	//@}
 };
 

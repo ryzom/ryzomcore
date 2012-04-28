@@ -22,6 +22,9 @@
 
 // Qt includes
 #include <QtGui/QDockWidget>
+#include <QtGui/QUndoCommand>
+#include <QtGui/QUndoStack>
+
 
 // STL includes
 
@@ -37,7 +40,7 @@ namespace NLGEORGES
 
 using namespace NLGEORGES;
 
-namespace Plugin 
+namespace GeorgesQt 
 {
 
 	class CGeorges;
@@ -54,11 +57,15 @@ namespace Plugin
 		void setModified(bool m) {m_modified = m;}
 
 		CForm* getFormByName(const QString);
-		void addParentForm(CForm *form);
+		void addParentForm(QString parentFormNm);
 
 		void write (  );
 
 		QTabWidget* tabWidget() { return m_ui.treeViewTabWidget; }
+
+		void setUndoStack(QUndoStack *stack) {
+			m_undoStack = stack;
+		}
 
 		QString loadedForm;
 
@@ -75,6 +82,7 @@ namespace Plugin
 		void loadFormIntoDialog(CForm *form = 0);
 		void modifiedFile( );
 		void checkVisibility(bool);
+		void showContextMenu(const QPoint &pos);
 
 	private Q_SLOTS:
 		void doubleClicked ( const QModelIndex & index );
@@ -87,10 +95,15 @@ namespace Plugin
 		UForm    *m_form;
 		CGeorges *m_georges;
 
+		QUndoStack *m_undoStack;
+
+		/// Contains a record of the last directory a sheet file dialog was opened for.
+		QString m_lastSheetDir;
+
 		bool m_modified;
 
 	}; /* CGeorgesTreeViewDialog */
 
-} /* namespace NLQT */
+} /* namespace GeorgesQt */
 
 #endif // GEORGES_TREEVIEWER_DIALOG_H

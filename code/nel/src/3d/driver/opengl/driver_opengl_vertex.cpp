@@ -978,7 +978,7 @@ void		CDriverGL::setupGlArraysStd(CVertexBufferInfo &vb)
 				// Check type
 				nlassert (vb.Type[CVertexBuffer::Normal]==CVertexBuffer::Float3);
 				_DriverGLStates.enableNormalArray(true);
-					nglArrayObjectATI(GL_NORMAL_ARRAY, 3, GL_FLOAT, vb.VertexSize, vb.VertexObjectId, (ptrdiff_t) vb.ValuePtr[CVertexBuffer::Normal]);
+				nglArrayObjectATI(GL_NORMAL_ARRAY, 3, GL_FLOAT, vb.VertexSize, vb.VertexObjectId, (ptrdiff_t) vb.ValuePtr[CVertexBuffer::Normal]);
 			}
 			else
 			{

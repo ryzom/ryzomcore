@@ -93,9 +93,9 @@ protected:
 	static NLMISC::CRGBA BarColorHPNegative;
 
 	// Node user leaf
-	static CCDBNodeLeaf	*_Value;
-	static CCDBNodeLeaf	*_ValueBegin;
-	static CCDBNodeLeaf	*_ValueEnd;
+	static NLMISC::CCDBNodeLeaf	*_Value;
+	static NLMISC::CCDBNodeLeaf	*_ValueBegin;
+	static NLMISC::CCDBNodeLeaf	*_ValueEnd;
 
 	// Special guild
 	bool		_NeedGuildNameId;

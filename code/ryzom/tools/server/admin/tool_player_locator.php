@@ -50,11 +50,11 @@
 
 	$current_refresh_rate = nt_auth_get_session_var('current_refresh_rate');
 
-	if (isset($HTTP_POST_VARS['services_refresh']))
+	if (isset($_POST['services_refresh']))
 	{
-		if ($current_refresh_rate != $HTTP_POST_VARS['services_refresh'])
+		if ($current_refresh_rate != $_POST['services_refresh'])
 		{
-			$current_refresh_rate = $HTTP_POST_VARS['services_refresh'];
+			$current_refresh_rate = $_POST['services_refresh'];
 			nt_auth_set_session_var('current_refresh_rate',$current_refresh_rate);
 		}
 	}

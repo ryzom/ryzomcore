@@ -258,6 +258,9 @@
   <variable entry="UI:SAVE:INSCENE:USER:TITLE"
             type="bool"
             value="false" />
+  <variable entry="UI:SAVE:INSCENE:USER:RPTAGS"
+            type="bool"
+            value="false" />
   <variable entry="UI:SAVE:INSCENE:USER:GUILD_NAME"
             type="bool"
             value="false" />
@@ -289,6 +292,9 @@
             type="bool"
             value="true" />
   <variable entry="UI:SAVE:INSCENE:FRIEND:TITLE"
+            type="bool"
+            value="true" />
+  <variable entry="UI:SAVE:INSCENE:FRIEND:RPTAGS"
             type="bool"
             value="true" />
   <variable entry="UI:SAVE:INSCENE:FRIEND:GUILD_NAME"
@@ -325,6 +331,9 @@
             type="bool"
             value="true" />
   <variable entry="UI:SAVE:INSCENE:ENEMY:TITLE"
+            type="bool"
+            value="true" />
+  <variable entry="UI:SAVE:INSCENE:ENEMY:RPTAGS"
             type="bool"
             value="true" />
   <variable entry="UI:SAVE:INSCENE:ENEMY:GUILD_NAME"
@@ -2797,6 +2806,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:GUILD_LIST:SORT_ORDER"
             type="sint32"
             value="0" />
+  <variable entry="UI:SAVE:CHATLOG_STATE"
+            type="sint32"
+            value="0" />
   <!-- Auto Convert ACT_TSTART end TEND from server to smoothServerTick -->
   <link expr="@SERVER:USER:ACT_TSTART"
         action="set"
@@ -2963,7 +2975,28 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:CHAT:COLORS:TELL"
             type="rgba"
             value="170 170 170 255" />
-  <variable entry="UI:SAVE:CHAT:COLORS:DYN"
+  <variable entry="UI:SAVE:CHAT:COLORS:DYN:0"
+            type="rgba"
+            value="162 255 173 255" />
+  <variable entry="UI:SAVE:CHAT:COLORS:DYN:1"
+            type="rgba"
+            value="162 255 173 255" />
+  <variable entry="UI:SAVE:CHAT:COLORS:DYN:2"
+            type="rgba"
+            value="162 255 173 255" />
+  <variable entry="UI:SAVE:CHAT:COLORS:DYN:3"
+            type="rgba"
+            value="162 255 173 255" />
+  <variable entry="UI:SAVE:CHAT:COLORS:DYN:4"
+            type="rgba"
+            value="162 255 173 255" />
+  <variable entry="UI:SAVE:CHAT:COLORS:DYN:5"
+            type="rgba"
+            value="162 255 173 255" />
+  <variable entry="UI:SAVE:CHAT:COLORS:DYN:6"
+            type="rgba"
+            value="162 255 173 255" />
+  <variable entry="UI:SAVE:CHAT:COLORS:DYN:7"
             type="rgba"
             value="162 255 173 255" />
   <variable entry="UI:SAVE:CHAT:ENTER_DONT_QUIT_CB"
@@ -2975,6 +3008,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB"
              type="bool"
              value="false" />
+  <variable entry="UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB"
+             type="bool"
+             value="true" />
   <!-- ***************************** -->
   <!-- *    SYSTEM INFO COLORS     * -->
   <!-- ***************************** -->
@@ -3045,6 +3081,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:INV_BAG:FILTER_MISSMP"
             type="sint32"
             value="1" />
+  <variable entry="UI:SAVE:INV_BAG:FILTER_TP"
+            type="sint32"
+            value="1" />
   <variable entry="UI:SAVE:INV_PA0:SORT_TYPE"
             type="sint32"
             value="0" />
@@ -3064,6 +3103,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
             type="sint32"
             value="1" />
   <variable entry="UI:SAVE:INV_PA0:FILTER_MISSMP"
+            type="sint32"
+            value="1" />
+  <variable entry="UI:SAVE:INV_PA0:FILTER_TP"
             type="sint32"
             value="1" />
   <variable entry="UI:SAVE:INV_PA1:SORT_TYPE"
@@ -3087,6 +3129,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:INV_PA1:FILTER_MISSMP"
             type="sint32"
             value="1" />
+  <variable entry="UI:SAVE:INV_PA1:FILTER_TP"
+            type="sint32"
+            value="1" />
   <variable entry="UI:SAVE:INV_PA2:SORT_TYPE"
             type="sint32"
             value="0" />
@@ -3108,6 +3153,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:INV_PA2:FILTER_MISSMP"
             type="sint32"
             value="1" />
+  <variable entry="UI:SAVE:INV_PA2:FILTER_TP"
+            type="sint32"
+            value="1" />
   <variable entry="UI:SAVE:INV_PA3:SORT_TYPE"
             type="sint32"
             value="0" />
@@ -3127,6 +3175,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
             type="sint32"
             value="1" />
   <variable entry="UI:SAVE:INV_PA3:FILTER_MISSMP"
+            type="sint32"
+            value="1" />
+  <variable entry="UI:SAVE:INV_PA3:FILTER_TP"
             type="sint32"
             value="1" />
   <variable entry="UI:SAVE:INV_GUILD:SORT_TYPE"
@@ -3151,6 +3202,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:INV_GUILD:FILTER_MISSMP"
             type="sint32"
             value="1" />
+  <variable entry="UI:SAVE:INV_GUILD:FILTER_TP"
+            type="sint32"
+            value="1" />
   <variable entry="UI:SAVE:INV_ROOM:SORT_TYPE"
             type="sint32"
             value="1" />
@@ -3171,6 +3225,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
             type="sint32"
             value="1" />
   <variable entry="UI:SAVE:INV_ROOM:FILTER_MISSMP"
+            type="sint32"
+            value="1" />
+  <variable entry="UI:SAVE:INV_ROOM:FILTER_TP"
             type="sint32"
             value="1" />
   <!-- List Menu 1 -->
@@ -3809,4 +3866,10 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:TEMP:R2_DRAW_ARRAY"
             type="bool"
             value="0" />
+  <variable entry="UI:TEMP:DEFAULT_WEB_RETRY_TIMEOUT"
+            type="sint32"
+            value="2" />
+  <variable entry="UI:SAVE:WEBIG_RETRY_DELAY"
+            type="sint32"
+            value="2" />
 </interface_config>

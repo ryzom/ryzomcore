@@ -1961,7 +1961,6 @@ class CMissionActionRecvMoney : public IMissionAction
 					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_GUILD_RECV_MONEY",params);
 				}
 			}
-
 		}
 	};
 	uint _Amount;

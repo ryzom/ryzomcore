@@ -27,13 +27,14 @@ ADD_SUBDIRECTORY(persistant_data_service)
 ADD_SUBDIRECTORY(session_browser_server)
 ADD_SUBDIRECTORY(shard_unifier_service)
 ADD_SUBDIRECTORY(tick_service)
+ADD_SUBDIRECTORY(patchman_service)
+
 
 # Deprecated, no longer used.
 #ADD_SUBDIRECTORY(ags_test)
 #ADD_SUBDIRECTORY(ai_data_service)
 #ADD_SUBDIRECTORY(entity_view_service)
-#ADD_SUBDIRECTORY(general_utilities_service)
-#ADD_SUBDIRECTORY(patchman_service)
+ADD_SUBDIRECTORY(general_utilities_service)
 
 # Not sure, no longer used maybe?
 #sabrina

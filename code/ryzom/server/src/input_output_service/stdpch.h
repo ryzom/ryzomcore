@@ -25,6 +25,7 @@
 #include <string>
 #include <time.h>
 #include <vector>
+#include <limits>
 #include <stddef.h>
 
 #include "nel/georges/load_form.h"

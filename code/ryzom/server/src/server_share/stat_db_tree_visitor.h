@@ -34,9 +34,9 @@ class CStatDBTableLeaf;
 class CStatDBNodeVisitor
 {
 public:
-	virtual void visitBranch(CStatDBBranch * branch, const std::string & path) {}
-	virtual void visitValueLeaf(CStatDBValueLeaf * valueLeaf, const std::string & path) {}
-	virtual void visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path) {}
+	virtual void visitBranch(CStatDBBranch * /* branch */, const std::string & /* path */) {}
+	virtual void visitValueLeaf(CStatDBValueLeaf * /* valueLeaf */, const std::string & /* path */) {}
+	virtual void visitTableLeaf(CStatDBTableLeaf * /* tableLeaf */, const std::string & /* path */) {}
 
 protected:
 	CStatDBNodeVisitor() {}

@@ -20,6 +20,9 @@
 #include "nel/misc/path.h"
 #include "nel/georges/u_form_elm.h"
 
+#if NLSOUND_SHEET_VERSION_BUILT < 2
+#	include "nel/sound/group_controller_root.h"
+#endif
 
 using namespace std;
 using namespace NLMISC;
@@ -72,6 +75,10 @@ void		CMusicSound::importForm(const std::string& filename, NLGEORGES::UFormElm& 
 	root.getValueByName(_MinimumPlayTime, ".SoundType.MinimumPlayTime");
 	root.getValueByName(_TimeBeforeCanReplay, ".SoundType.TimeBeforeCanReplay");
 
+#if NLSOUND_SHEET_VERSION_BUILT < 2
+	_GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_MUSIC_GROUP_CONTROLLER);
+#endif
+
 }
 
 // ***************************************************************************
@@ -97,6 +104,11 @@ void		CMusicSound::serial(NLMISC::IStream &s)
 	CStringMapper::serialString(s, _FileName);
 	s.serial(_FadeInLength, _FadeOutLength);
 	s.serial(_MinimumPlayTime, _TimeBeforeCanReplay);
+	
+#if NLSOUND_SHEET_VERSION_BUILT < 2
+	if (s.isReading()) _GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_MUSIC_GROUP_CONTROLLER);
+#endif
+	
 }
 
 // ***************************************************************************

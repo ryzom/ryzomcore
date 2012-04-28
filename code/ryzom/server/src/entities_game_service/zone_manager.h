@@ -318,7 +318,7 @@ public:
 	};
 
 	// default constructor
-	CZoneManager() 	: DepositSearchTime(50) {};
+	CZoneManager() 	: DepositSearchTime(50) {}
 
 	~CZoneManager();
 

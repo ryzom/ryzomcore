@@ -42,7 +42,7 @@ typedef uint16 TTeamId;
 /**
  * A damage score table keeps all damages done by a player/team/creature on a player
  *
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005
  */
@@ -193,7 +193,7 @@ private:
  * It permits to find all players wounded by an entity (player/team/creature)
  * ie to find all players on which the entity has a damage score.
  *
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005
  */
@@ -229,7 +229,7 @@ private:
 /**
  * It keeps kills that have been rewarded and which cannot be rewarded again for a lapse of time.
  *
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005
  */
@@ -273,7 +273,7 @@ private:
  * and keeps their damage scores on each attacked player.
  * It also gives faction and HoF points to players.
  *
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005
  */
@@ -342,6 +342,8 @@ private:
 	/// return true if the given action is curative
 	bool isCurativeAction(const TReportAction & action) const;
 
+	bool canPlayerWinPoints(const CCharacter * winnerChar, CCharacter * victimeChar) const;
+
 	/// return true if the given player is in 'faction PvP' (in a faction PvP zone)
 	/// \param faction : if not NULL return the faction of the player in the PvP zone where he is
 	/// \param gainFactionPoints : if not NULL return true if the zone gives faction points or not
@@ -356,6 +358,10 @@ private:
 	/// add/remove faction points to a player
 	/// \return the applied delta (a negative delta may have been modified up to zero to keep faction points positive)
 	sint32 changePlayerFactionPoints(CCharacter * playerChar, PVP_CLAN::TPVPClan faction, sint32 fpDelta);
+
+	/// add/remove pvp points to a player
+	/// \return the applied delta (a negative delta may have been modified up to zero to keep pvp points positive)
+	sint32 changePlayerPvpPoints(CCharacter * playerChar, sint32 fpDelta);
 
 	/// add/remove HoF points to a player and his guild if his SDB PvP path is defined
 	void changePlayerHoFPoints(CCharacter * playerChar, sint32 hofpDelta);
@@ -388,7 +394,7 @@ private:
 /**
  * This is the interface for the character progression in PvP
  *
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005
  */

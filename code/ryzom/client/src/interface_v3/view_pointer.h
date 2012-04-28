@@ -153,6 +153,7 @@ private:
 
 	// Cursor mode
 	bool				_StringMode;
+	bool				_ForceStringMode;
 	CInterfaceGroup		*_StringCursor;
 	CInterfaceGroup		*_StringCursorHardware;
 	ucstring			_ContextString;

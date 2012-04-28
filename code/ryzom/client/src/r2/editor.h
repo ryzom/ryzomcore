@@ -887,7 +887,7 @@ private:
 
 public:
 	static uint		   getMaxNumPlotItems();
-	static CCDBNodeLeaf	   *getPlotItemSheetDBLeaf(uint index);
+	static NLMISC::CCDBNodeLeaf	   *getPlotItemSheetDBLeaf(uint index);
 	static bool				getIsStartingScenario() { return _IsStartingScenario; }
 	bool				isClearingContent() const { return _ClearingContent; }
 
@@ -897,7 +897,7 @@ private:
 	static void		   initDummyPlotItems();
 	void				resetPlotItems();
 	static void		   setReferencePlotItemSheet(uint index, uint32 sheetId);
-	static CCDBNodeLeaf	   *getRefPlotItemSheetDBLeaf(uint index);
+	static NLMISC::CCDBNodeLeaf	   *getRefPlotItemSheetDBLeaf(uint index);
 
 	//////////
 	// MISC //

@@ -488,7 +488,8 @@ void CMacroCmdManager::updateMacroExecution ()
 			pIM->runActionHandler(rC.Name, NULL, rC.Params);
 
 			// Flush interface links (else bug with Macro "Select ShortCutBar/Run Shortcut"
-			CCDBNodeBranch::flushObserversCalls();
+			IngameDbMngr.flushObserverCalls();
+			CInterfaceManager::getInstance()->flushObserverCalls();
 
 			if (bWaitForServer)
 			{

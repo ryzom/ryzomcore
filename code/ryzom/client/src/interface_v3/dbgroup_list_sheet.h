@@ -141,14 +141,14 @@ protected:
 
 
 	// branch of the DB
-	CCDBNodeBranch				*_DbBranch;
+	NLMISC::CCDBNodeBranch				*_DbBranch;
 	std::string					_DbBranchName;
 	// Branch observer
-	class CDBObs : public ICDBNode::IPropertyObserver
+	class CDBObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
 		CDBGroupListSheet		*Owner;
-		virtual void update(ICDBNode* /* node */)	{Owner->_BranchModified= true;}
+		virtual void update(NLMISC::ICDBNode* /* node */)	{Owner->_BranchModified= true;}
 	};
 	friend class CDBObs;
 	CDBObs						_DbBranchObs;
@@ -192,7 +192,7 @@ protected:
 	}
 
 	// For animals only
-	CCDBNodeLeaf				*_AnimalStatus;
+	NLMISC::CCDBNodeLeaf				*_AnimalStatus;
 	sint32						_CacheAnimalStatus;
 
 	// For sectionnable purpose

@@ -101,6 +101,8 @@
 #include "../client_chat_manager.h"		// for emotes
 #include "../entities.h"
 
+#include "../../common/src/game_share/ryzom_database_banks.h"
+
 #include "chat_text_manager.h"
 #include "../npc_icon.h"
 
@@ -251,12 +253,13 @@ int CInterfaceManager::DebugTrackGroupsGetId( CInterfaceGroup *pIG )
 
 // ------------------------------------------------------------------------------------------------
 CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext *textcontext ) :
-_ViewRenderer( driver, textcontext )
+_ViewRenderer( driver, textcontext ),
+NLMISC::CCDBManager( "ROOT", NB_CDB_BANKS )
 {
 	this->driver = driver;
 	this->textcontext = textcontext;
 	_Instance = this;
-	_DbRootNode = new CCDBNodeBranch("ROOT");
+	interfaceLinkUpdater = new CInterfaceLink::CInterfaceLinkUpdater();
 	_ScreenW = _ScreenH = 0;
 	_LastInGameScreenW = _LastInGameScreenH = 0;
 	_Pointer = NULL;
@@ -354,10 +357,11 @@ CInterfaceManager::~CInterfaceManager()
 	_Templates.clear();
 	_Instance = NULL;
 
-	if (_DbRootNode)
+	if (_Database)
 	{
-		delete _DbRootNode;
-		_DbRootNode = NULL;
+		_Database->clear();
+		delete _Database;
+		_Database = NULL;
 	}
 
 	// release the local string mapper
@@ -366,6 +370,8 @@ CInterfaceManager::~CInterfaceManager()
 
 	// release the database observers
 	releaseServerToLocalAutoCopyObservers();
+	delete interfaceLinkUpdater;
+	interfaceLinkUpdater = NULL;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -501,7 +507,7 @@ void CInterfaceManager::uninitLogin()
 	CInterfaceLink::removeAllLinks();
 
 	ICDBNode::CTextId textId("UI");
-	_DbRootNode->removeNode(textId);
+	_Database->removeNode(textId);
 
 	{
 		uninitActions();
@@ -596,7 +602,7 @@ void CInterfaceManager::uninitOutGame()
 
 	disableModalWindow();
 
-	//_DbRootNode->display("");
+	//_Database->display("");
 	CBotChatManager::getInstance()->setCurrPage(NULL);
 
 	CInterfaceItemEdition::getInstance()->setCurrWindow(NULL);
@@ -626,7 +632,7 @@ void CInterfaceManager::uninitOutGame()
 	//nlinfo ("%d seconds for removeAllLinks", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
 	ICDBNode::CTextId textId("UI");
-	_DbRootNode->removeNode(textId);
+	_Database->removeNode(textId);
 	//nlinfo ("%d seconds for removeNode", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 
 	// Init the action manager
@@ -826,6 +832,21 @@ void CInterfaceManager::initInGame()
 	if (gc && gc->isSavedTargetValid())
 	{
 		gc->setTarget(gc->getSavedTarget());
+	}
+
+	CCDBNodeLeaf *node = getDbProp("UI:SAVE:CHATLOG_STATE", false);
+	if (node)
+	{
+		_LogState = (node->getValue32() != 0);
+	}
+
+	if (_LogState)
+	{
+		displaySystemInfo(CI18N::get("uiLogTurnedOn"));
+	}
+	else
+	{
+		displaySystemInfo(CI18N::get("uiLogTurnedOff"));
 	}
 }
 
@@ -1145,7 +1166,7 @@ void CInterfaceManager::uninitInGame1 ()
 
 	// remove DB entry
 	ICDBNode::CTextId textId("UI");
-	_DbRootNode->removeNode(textId);
+	_Database->removeNode(textId);
 
 	// Uninit the action manager
 	{
@@ -1221,7 +1242,8 @@ void CInterfaceManager::updateFrameEvents()
 		CInterfaceAnim *pIA = vTmp[i];
 		pIA->update();
 	}
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::flushObserverCalls();
 	//
 	// Next : Test if we have to remove anims
 	for (i = 0; i < (sint)_ActiveAnims.size(); ++i)
@@ -1234,7 +1256,8 @@ void CInterfaceManager::updateFrameEvents()
 		}
 	}
 	//
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 
 	// Handle waiting texts from server
 	processServerIDString();
@@ -1326,7 +1349,8 @@ void CInterfaceManager::updateFrameEvents()
 	{
 		(*it)->handleEvent(clockTick);
 	}
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 
  	// Update SPhrase manager
  	CSPhraseManager	*pPM= CSPhraseManager::getInstance();
@@ -1971,8 +1995,9 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 		H_AUTO ( RZ_Interface_DrawViews_Setup )
 
 		_ViewRenderer.activateWorldSpaceMatrix (false);
-
-		CCDBNodeBranch::flushObserversCalls();
+		
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 
 		// If an element has captured the keyboard, make sure it is alway visible (all parent windows active)
 		if (_CaptureKeyboard != NULL)
@@ -2044,7 +2069,8 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 			To minimize texture swapping, we first sort per Window, then we sort per layer, then we render per Global Texture.
 			Computed String are rendered in on big drawQuads at last part of each layer
 		*/
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 		//
 		for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 		{
@@ -2094,8 +2120,9 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 
 	{
 		H_AUTO ( RZ_Interface_DrawViews_After )
-
-		CCDBNodeBranch::flushObserversCalls();
+		
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 
 		// draw the special over extend text
 		drawOverExtendViewText();
@@ -2143,7 +2170,8 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 		driver->setMatrixMode2D11();
 
 		// flush obs
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		CInterfaceManager::getInstance()->flushObserverCalls();
 	}
 }
 
@@ -2376,7 +2404,8 @@ void CInterfaceManager::drawContextHelp ()
 			if(newCtrl)
 			{
 				// get the text
-				newCtrl->getContextHelpToolTip(_ContextHelpText);
+				//newCtrl->getContextHelpToolTip(_ContextHelpText);
+				newCtrl->getContextHelp(_ContextHelpText);
 				// UserDefined context help
 				if( !newCtrl->getContextHelpActionHandler().empty() )
 				{
@@ -2710,7 +2739,8 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 				if(_CaptureKeyboard && _CaptureKeyboard->getRootWindow()==tw)
 				{
 					bool result = _CaptureKeyboard->handleEvent(event);
-					CCDBNodeBranch::flushObserversCalls();
+					IngameDbMngr.flushObserverCalls();
+					CInterfaceManager::getInstance()->flushObserverCalls();
 					return result;
 				}
 				else
@@ -2767,7 +2797,8 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 		if (_CaptureKeyboard != NULL && !handled)
 		{
 			bool result = _CaptureKeyboard->handleEvent(event);
-			CCDBNodeBranch::flushObserversCalls();
+			IngameDbMngr.flushObserverCalls();
+			CInterfaceManager::getInstance()->flushObserverCalls();
 			return result;
 		}
 	}
@@ -3027,7 +3058,8 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 		handled|= _MouseOverWindow;
 	}
 
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 	// event handled?
 	return handled;
 }
@@ -3302,13 +3334,13 @@ void CInterfaceManager::updateAllLocalisedElements()
 // ------------------------------------------------------------------------------------------------
 bool CInterfaceManager::addDBObserver (ICDBNode::IPropertyObserver* observer, ICDBNode::CTextId   id)
 {
-	return _DbRootNode->addObserver(observer, id);
+	return _Database->addObserver(observer, id);
 }
 
 // ------------------------------------------------------------------------------------------------
 bool CInterfaceManager::removeDBObserver (ICDBNode::IPropertyObserver* observer, ICDBNode::CTextId  id)
 {
-	return _DbRootNode->removeObserver(observer, id);
+	return _Database->removeObserver(observer, id);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -3406,19 +3438,13 @@ sint32		CInterfaceManager::getDbValue32 (const std::string & name)
 // ------------------------------------------------------------------------------------------------
 CCDBNodeLeaf* CInterfaceManager::getDbProp(const std::string & name, bool bCreate)
 {
-	if (name.empty()) return NULL;
-	CCDBNodeLeaf *pDBNL = NULL;
-	pDBNL = dynamic_cast<CCDBNodeLeaf*>(_DbRootNode->getNode( ICDBNode::CTextId(name), bCreate ));
-	return pDBNL;
+	return getDbLeaf( name, bCreate );
 }
 
 // ------------------------------------------------------------------------------------------------
-CCDBNodeBranch *CInterfaceManager::getDbBranch(const std::string &name)
+void CInterfaceManager::delDbProp(const std::string & name)
 {
-	if (name.empty()) return NULL;
-	CCDBNodeBranch	*nodeBranch;
-	nodeBranch = dynamic_cast<CCDBNodeBranch*>(_DbRootNode->getNode( ICDBNode::CTextId(name), false ));
-	return nodeBranch;
+	delDbNode( name );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -4385,12 +4411,14 @@ void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat
 		}
 	}
 
+	if (mode == CClientConfig::SSysInfoParam::Center || mode == CClientConfig::SSysInfoParam::CenterAround)
+		InSceneBubbleManager.addMessagePopupCenter(str, color);
+
 	// If over popup a string at the bottom of the screen
 	if ((mode == CClientConfig::SSysInfoParam::Over) || (mode == CClientConfig::SSysInfoParam::OverOnly))
 		InSceneBubbleManager.addMessagePopup(str, color);
-	else if (mode == CClientConfig::SSysInfoParam::Center)
-		InSceneBubbleManager.addMessagePopupCenter(str, color);
-	else if (mode == CClientConfig::SSysInfoParam::Around && PeopleInterraction.AroundMe.Window)
+	else if ( (mode == CClientConfig::SSysInfoParam::Around || mode == CClientConfig::SSysInfoParam::CenterAround) 
+		&& PeopleInterraction.AroundMe.Window)
 		PeopleInterraction.ChatInput.AroundMe.displayMessage(str, color, 2);
 }
 
@@ -5643,7 +5671,7 @@ bool	CInterfaceManager::executeLuaScript(const std::string &luaScript, bool smal
 		std::string msg = e.luaWhat();
 		char filename[MAX_PATH];
 		char exceptionName[MAX_PATH];
-		int line;
+		uint32 line;
 		// Hamster: quick fix on AJM code but sscanf is still awfull
 		if (sscanf(msg.c_str(), "%s: %s.lua:%d:",exceptionName, filename, &line) == 3) // NB: test not exact here, but should work in 99,9 % of cases
 		{
@@ -5654,6 +5682,20 @@ bool	CInterfaceManager::executeLuaScript(const std::string &luaScript, bool smal
 		else	// AJM: handle the other 0.1% of cases
 		{
 			// Yoyo: seems that previous test doesn't work.... btw, must still print the message please...
+			std::vector<string> error;
+			splitString(msg.c_str(), ":", error);
+			if (error.size() > 3)
+			{
+				std::vector<string> contextList;
+				explode(luaScript, string("\n"), contextList);
+				fromString(error[2], line);
+				if (line >= 3 && contextList.size() >= line)
+					msg = error[0]+": \n>>> "+contextList[line-3]+"\n>>> "+contextList[line-2]+"\n>>> "+contextList[line-1]+"\nError:"+error[2]+": "+error[3];
+				else if (line >= 2 && contextList.size() >= line)
+					msg = error[0]+": \n>>>"+contextList[line-2]+"\n>>>"+contextList[line-1]+"\nError:"+error[2]+": "+error[3];
+				else if (line >= 1 && contextList.size() >= line)
+					msg = error[0]+": \n>>>"+contextList[line-1]+"\nError:"+error[2]+": "+error[3];
+			}
 			nlwarning(formatLuaErrorNlWarn(msg).c_str());
 			displaySystemInfo(formatLuaErrorSysInfo(msg));
 		}
@@ -5945,7 +5987,7 @@ void CInterfaceManager::createLocalBranch(const std::string &fileName, NLMISC::I
 			//Parse the parser output!!!
 			CCDBNodeBranch *localNode = new CCDBNodeBranch("LOCAL");
 			localNode->init( read.getRootNode (), progressCallBack );
-			_DbRootNode->attachChild(localNode,"LOCAL");
+			_Database->attachChild(localNode,"LOCAL");
 
 			// Create the observers for auto-copy SERVER->LOCAL of inventory
 			ServerToLocalAutoCopyInventory.init("INVENTORY");
@@ -6258,7 +6300,7 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		// Get everything between the two "$"
 		size_t token_start_pos = start_pos + start_token.length();
 		size_t token_end_pos   = end_pos - end_token.length();
-		if (token_start_pos < token_end_pos)
+		if (token_start_pos > token_end_pos)
 		{
 			// Wrong formatting; give up on this one.
 			start_pos = end_pos;
@@ -6489,3 +6531,5 @@ void CInterfaceManager::setTextContext( NL3D::UTextContext *textcontext )
 	this->textcontext = textcontext;
 	_ViewRenderer.setTextContext( textcontext );
 }
+
+

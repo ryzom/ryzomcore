@@ -318,21 +318,53 @@
 
 
 
-<group type="container" id="accept_trade_invitation" w="260" h="512" resizer="false" pop_max_h="512"
- active="false" savable="false" openable="false" opened="true" movable="true"
- on_close_button="proc" on_close_button_params="player_decline_invitation" title_opened="uiTradeInvitation"  >
-
-	<group id="content" child_resize_h="true" child_resize_hmargin="10" >
-		<group id="inside" sizeref="w" posref="TL TL" y="-4" child_resize_h="true" child_resize_hmargin="6">
-			<view type="text_id" id="invite_phrase" posref="MM MM" x="0" y="0" color="255 255 255 255" fontsize="12" shadow="true"
-				multi_line="true" multi_line_space="0" line_maxw="250" />
+<group	type="container"
+		id="accept_trade_invitation" 
+		w="260" 
+		h="512" 
+		resizer="false" 
+		pop_max_h="512"
+		active="false"
+		savable="false"
+		openable="false"
+		opened="true"
+		movable="true"
+		on_close_button="proc"
+		on_close_button_params="player_decline_invitation"
+		title_opened="uiTradeInvitation"  >
+	<group	id="content"
+			child_resize_h="true"
+			child_resize_hmargin="10" >
+		<group	id="inside" 
+				sizeref="w" 
+				posref="TL TL" 
+				y="-4" 
+				child_resize_h="true" 
+				child_resize_hmargin="6">
+			<view	type="text_id" 
+					id="invite_phrase" 
+					posref="MM MM"
+					x="0" 
+					y="0" 
+					color="255 255 255 255" 
+					fontsize="12" 
+					shadow="true"
+					multi_line="true" 
+					multi_line_space="0" 
+					line_maxw="250" />
 		</group>
-		<instance template="button_ok_cancel" posparent="inside" posref="BR TR" x="-4" y="-4"
-					ok_text="uiAccept"	cancel_text="uiDecline"
-					onclick_ok="proc"		onclick_ok_param="player_accept_invitation" 
-					onclick_cancel="proc"	onclick_cancel_param="player_decline_invitation" />
+		<instance template="button_ok_cancel" 
+				posparent="inside"
+				posref="BR TR"
+				x="-4"
+				y="-4"
+				ok_text="uiAccept"
+				cancel_text="uiDecline"
+				onclick_ok="proc"
+				onclick_ok_param="player_accept_invitation" 
+				onclick_cancel="proc"
+				onclick_cancel_param="player_decline_invitation" />
 	</group>
-
 </group>
 
 

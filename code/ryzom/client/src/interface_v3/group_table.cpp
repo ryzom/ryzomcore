@@ -55,6 +55,9 @@ CGroupCell::CGroupCell(const TCtorParam &param)
 	IgnoreMaxWidth = false;
 	IgnoreMinWidth = false;
 	AddChildW = false;
+	_UserTexture = false;
+	_TextureTiled = false;
+	_TextureScaled = false;
 	setEnclosedGroupDefaultParams();
 	addGroup (Group);
 }
@@ -200,20 +203,62 @@ void CGroupCell::draw ()
 	}
 
 	// Draw the background
-	if (BgColor.A != 0)
+	if (_UserTexture || BgColor.A != 0)
 	{
 		CViewRenderer &rVR = pIM->getViewRenderer();
-		CRGBA finalColor;
-		finalColor.modulateFromColor (BgColor, pIM->getGlobalColor());
-
-		// Get the parent table
-		if (getParent ())
+		if (_UserTexture)
 		{
-			CGroupTable *table = static_cast<CGroupTable*> (getParent ());
-			finalColor.A = (uint8) (((uint16) table->CurrentAlpha * (uint16) finalColor.A) >> 8);
+			CRGBA col;
+			if (BgColor.A == 0 )
+				col = CRGBA(255,255,255,255);
+			else
+				col = BgColor;
+				
+			
+			if (_TextureScaled && !_TextureTiled)
+			{
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal,
+										_WReal, _HReal,
+										0, false,
+										_TextureId,
+										col );
+			}
+			else
+			{
+				if (!_TextureTiled)
+				{
+					rVR.draw11RotFlipBitmap (_RenderLayer, _XReal, _YReal,
+											0, false,
+											_TextureId,
+											col);
+				}
+				else
+				{
+					rVR.drawRotFlipBitmapTiled(_RenderLayer, _XReal, _YReal,
+											   _WReal, _HReal,
+												0, false,
+											   _TextureId,
+											   0,
+											   col);
+				}
+			}
+			
 		}
+		else
+		{
+			CRGBA finalColor;
+			finalColor.modulateFromColor (BgColor, pIM->getGlobalColor());
 
-		rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, _WReal, _HReal, 0, false, rVR.getBlankTextureId(), finalColor);
+			// Get the parent table
+			if (getParent ())
+			{
+				CGroupTable *table = static_cast<CGroupTable*> (getParent ());
+				finalColor.A = (uint8) (((uint16) table->CurrentAlpha * (uint16) finalColor.A) >> 8);
+			}
+			
+			//nlinfo("Blank Texture");
+			rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, _WReal, _HReal, 0, false, rVR.getBlankTextureId(), finalColor);
+		}
 	}
 
 	CInterfaceGroup::draw ();
@@ -230,6 +275,40 @@ sint32 CGroupCell::getMinUsedW() const
 {
 	return Group->getMinUsedW();
 }
+
+
+// ----------------------------------------------------------------------------
+void CGroupCell::setTexture(const std::string & TxName)
+{
+	if (TxName.empty() || TxName == "none")
+	{
+		_UserTexture = false;
+		nlinfo("Set no texture");
+	}
+	else
+	{
+		nlinfo("Set texture to cell : %s", TxName.c_str());
+		_UserTexture = true;
+		_TextureId.setTexture (TxName.c_str (), 0, 0, -1, -1, false);
+	}
+}
+
+// ----------------------------------------------------------------------------
+void CGroupCell::setTextureTile(bool tiled)
+{
+	if (tiled)
+		nlinfo("Set texture is Tiled");
+	_TextureTiled = tiled;
+}
+
+// ----------------------------------------------------------------------------
+void CGroupCell::setTextureScale(bool scaled)
+{
+	if (scaled)
+		nlinfo("Set texture is Scaled : %s");
+	_TextureScaled = scaled;
+}
+
 
 // ----------------------------------------------------------------------------
 NLMISC_REGISTER_OBJECT(CViewBase, CGroupTable, std::string, "table");

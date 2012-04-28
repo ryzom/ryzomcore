@@ -33,7 +33,7 @@ class CPageBgFades : public CPageBase
 
 // Construction
 public:
-	CPageBgFades() {};
+	CPageBgFades() {}
 	CPageBgFades(NLGEORGES::CSoundDialog *soundDialog);
 	~CPageBgFades();
 

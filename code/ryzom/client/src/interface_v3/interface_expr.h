@@ -26,8 +26,11 @@
 #include "nel/misc/ucstring.h"
 #include "nel/misc/rgba.h"
 
-
+namespace NLMISC{
 class ICDBNode;
+class CCDBNodeLeaf;
+class CCDBNodeBranch;
+}
 
 
 struct CInterfaceExprUserType;
@@ -166,7 +169,7 @@ public:
 	  *              Node will only be inserted once, so we end up with a set of node (not ordered)
 	  * \param noFctCalls when set to true, the terminal function calls will not be made, so the evaluation is only used to see which database entries the expression depends on.
 	  */
-	static bool eval(const std::string &expr, CInterfaceExprValue &result, std::vector<ICDBNode *> *nodes = NULL, bool noFctCalls = false);
+	static bool eval(const std::string &expr, CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> *nodes = NULL, bool noFctCalls = false);
 
 	/** Build a tree from the given expression so that it can be evaluated quickly.
 	  * This is useful for a fixed expression that must be evaluated often
@@ -193,11 +196,11 @@ private:
 	/** eval the value of a single expression
 	  * \return position to the next valid character
 	  */
-	static const char *evalExpr(const char *expr, CInterfaceExprValue &result, std::vector<ICDBNode *> *nodes, bool noFctCalls);
-	static const char *evalFct(const char *expr,CInterfaceExprValue &result,std::vector<ICDBNode *> *nodes, bool noFctCalls);
-	static const char *evalDBEntry(const char *expr,CInterfaceExprValue &result,std::vector<ICDBNode *> *nodes);
+	static const char *evalExpr(const char *expr, CInterfaceExprValue &result, std::vector<NLMISC::ICDBNode *> *nodes, bool noFctCalls);
+	static const char *evalFct(const char *expr,CInterfaceExprValue &result,std::vector<NLMISC::ICDBNode *> *nodes, bool noFctCalls);
+	static const char *evalDBEntry(const char *expr,CInterfaceExprValue &result,std::vector<NLMISC::ICDBNode *> *nodes);
 public:
-	static const char *unpackDBentry(const char *expr, std::vector<ICDBNode *> *nodes, std::string &dest, bool *hasIndirections = NULL);
+	static const char *unpackDBentry(const char *expr, std::vector<NLMISC::ICDBNode *> *nodes, std::string &dest, bool *hasIndirections = NULL);
 
 	/** Build tree of a single expression
 	  * \return position to the next valid character

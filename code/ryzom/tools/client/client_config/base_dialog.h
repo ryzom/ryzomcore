@@ -34,7 +34,7 @@ class CBaseDialog : public CDialog
 public:
 
 	/// Constructor
-	CBaseDialog (uint id, CWnd* pParent = NULL) : CDialog(id, pParent) {};
+	CBaseDialog (uint id, CWnd* pParent = NULL) : CDialog(id, pParent) {}
 
 	/// On ok
 	virtual void OnOK ();

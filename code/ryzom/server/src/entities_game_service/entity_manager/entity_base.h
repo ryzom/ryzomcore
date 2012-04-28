@@ -140,7 +140,7 @@ public:
 			_ExceptionString = std::string("<CEntityBase> : Invalid stat name ") + var;
 			return _ExceptionString.c_str();
 		}
-		virtual ~EInvalidStat() throw() {};
+		virtual ~EInvalidStat() throw() {}
 	private:
 		mutable std::string _ExceptionString;
 	};
@@ -820,7 +820,7 @@ public:
 	/// Return the damage using current armor, done by an explosion (e.g. forage source explosion)
 	virtual float getActualDamageFromExplosionWithArmor( float dmg ) const =0;
 
-	inline virtual void clearCurrentAction() {};
+	inline virtual void clearCurrentAction() {}
 
 	inline virtual void setCurrentAction(CLIENT_ACTION_TYPE::TClientActionType,NLMISC::TGameCycle) {}
 

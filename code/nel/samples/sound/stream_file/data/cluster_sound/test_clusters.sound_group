@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <ARRAY Name="Items">
+      <STRUCT>
+        <ATOM Name="SoundGroup" Value="A_SOUND_GROUP"/>
+        <ATOM Name="Sound" Value="beep.sound"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="SoundGroup" Value="ANOTHER_GROUP"/>
+        <ATOM Name="Sound" Value="tuut.sound"/>
+      </STRUCT>
+    </ARRAY>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+</FORM>

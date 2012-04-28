@@ -50,9 +50,9 @@ CGroupHTMLMail::~CGroupHTMLMail()
 
 // ***************************************************************************
 
-void CGroupHTMLMail::addHTTPGetParams (string &url)
+void CGroupHTMLMail::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 {
-	ucstring user_name = UserEntity->getDisplayName ();
+	ucstring user_name = UserEntity->getLoginName ();
 	url += ((url.find('?') != string::npos) ? "&" : "?") +
 		string("shard=") + toString(CharacterHomeSessionId) +
 		string("&user_login=") + user_name.toString() +
@@ -62,9 +62,9 @@ void CGroupHTMLMail::addHTTPGetParams (string &url)
 
 // ***************************************************************************
 
-void CGroupHTMLMail::addHTTPPostParams (HTAssocList *formfields)
+void CGroupHTMLMail::addHTTPPostParams (HTAssocList *formfields, bool /*trustedDomain*/)
 {
-	ucstring user_name = UserEntity->getDisplayName ();
+	ucstring user_name = UserEntity->getLoginName ();
 	HTParseFormInput(formfields, ("shard="+toString(CharacterHomeSessionId)).c_str());
 	HTParseFormInput(formfields, ("user_login="+user_name.toString()).c_str());
 	HTParseFormInput(formfields, ("session_cookie="+NetMngr.getLoginCookie().toString()).c_str());
@@ -85,11 +85,12 @@ string	CGroupHTMLMail::home ()
 void CGroupHTMLMail::handle ()
 {
 	// Do nothing if WebServer is not initialized
-	if (!WebServer.empty())
+/*	if (!WebServer.empty())
 	{
 		Home = WebServer+"mailbox.php";
 		CGroupHTML::handle ();
 	}
+*/
 }
 
 // ***************************************************************************

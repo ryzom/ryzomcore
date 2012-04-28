@@ -33,7 +33,7 @@
 #include "group_editbox.h"
 #include "dbview_bar.h"
 #include "skill_manager.h"
-
+#include "game_share/bot_chat_types.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -69,7 +69,9 @@ const std::string	FaberPhraseItemResultGroup= FaberPhraseWindow + ":header_opene
 // ***************************************************************************
 CActionPhraseFaber::CActionPhraseFaber()
 {
-	_InventoryMirror.resize(INVENTORIES::NUM_INVENTORY * MAX_PLAYER_INV_ENTRIES);
+	uint size = MAX_PLAYER_INV_ENTRIES + (MAX_ANIMALINV_ENTRIES * MAX_INVENTORY_ANIMAL) +
+		MAX_GUILDINV_ENTRIES + MAX_ROOMINV_ENTRIES;
+	_InventoryMirror.resize(size);
 	_InventoryObsSetup= false;
 	_ExecuteFromItemPlanBrick= NULL;
 }
@@ -184,16 +186,16 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 	// ensure remove (if setuped before), then add
 	CCDBNodeBranch	*branch;
 	branch= pIM->getDbBranch("LOCAL:INVENTORY:BAG");
-	if(branch) branch->removeBranchObserver(&_DBInventoryObs);
-	if(branch) branch->addBranchObserver(&_DBInventoryObs);
+	if(branch) pIM->removeBranchObserver( "LOCAL:INVENTORY:BAG",&_DBInventoryObs);
+	if(branch) pIM->addBranchObserver( "LOCAL:INVENTORY:BAG",&_DBInventoryObs);
 
 	// and for all pack animals
 	uint	i;
 	for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 	{
 		branch= pIM->getDbBranch(toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i));
-		if(branch) branch->removeBranchObserver(&_DBInventoryObs);
-		if(branch) branch->addBranchObserver(&_DBInventoryObs);
+		if(branch) pIM->removeBranchObserver( toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i).c_str(), &_DBInventoryObs);
+		if(branch) pIM->addBranchObserver( toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i).c_str(), &_DBInventoryObs);
 	}
 
 	// Add observers on animal status, cause inventory may become unavailabe during the process
@@ -275,25 +277,64 @@ void			CActionPhraseFaber::fillFaberPlanSelection(const std::string &brickDB, ui
 }
 
 // ***************************************************************************
-CItemImage		*CActionPhraseFaber::getInvMirrorItemImage(uint slotIndex)
+CItemImage		*CActionPhraseFaber::getInvMirrorItemImage(uint slotIndex, uint& invId, uint& indexInInv)
 {
-	uint		invId= slotIndex/MAX_PLAYER_INV_ENTRIES;
-	uint		indexInInv= slotIndex%MAX_PLAYER_INV_ENTRIES;
+	if (slotIndex < MAX_PLAYER_INV_ENTRIES)
+	{
+		invId = INVENTORIES::bag;
+		indexInInv = slotIndex;
+		return &getInventory().getBagItem(slotIndex);
+	}
+	slotIndex -= MAX_PLAYER_INV_ENTRIES;
 
-	// get the item image from bag, steed, pack animal...
-	if(invId==INVENTORIES::bag && indexInInv<MAX_BAGINV_ENTRIES)
-		return &getInventory().getBagItem(indexInInv);
-	else if(invId>=INVENTORIES::pet_animal && invId<INVENTORIES::pet_animal+MAX_INVENTORY_ANIMAL && indexInInv<MAX_ANIMALINV_ENTRIES)
-		return &getInventory().getPAItem(invId-INVENTORIES::pet_animal, indexInInv);
+	if (slotIndex < (MAX_ANIMALINV_ENTRIES * MAX_INVENTORY_ANIMAL))
+	{
+		uint animal = slotIndex / MAX_ANIMALINV_ENTRIES;
+		uint index = slotIndex % MAX_ANIMALINV_ENTRIES;
+		invId = INVENTORIES::pet_animal + animal;
+		indexInInv = index;
+		return &getInventory().getPAItem(animal, index);
+	}
+	slotIndex -= (MAX_ANIMALINV_ENTRIES * MAX_INVENTORY_ANIMAL);
+
+	if (slotIndex < MAX_GUILDINV_ENTRIES)
+	{
+		if (getInventory().isInventoryAvailable(INVENTORIES::guild))
+		{
+			CInterfaceManager *im = CInterfaceManager::getInstance();
+			CCDBNodeBranch *itemBranch = im->getDbBranch(SERVER_INVENTORY ":GUILD:" + toString(slotIndex));
+			static CItemImage image;
+			image.build(itemBranch);
+			invId = INVENTORIES::guild;
+			indexInInv = slotIndex;
+			return &image;
+		}
+		return NULL;
+	}
+	slotIndex -= MAX_GUILDINV_ENTRIES;
+
+	if (slotIndex < MAX_ROOMINV_ENTRIES)
+	{
+		if (getInventory().isInventoryAvailable(INVENTORIES::player_room))
+		{
+			CInterfaceManager *im = CInterfaceManager::getInstance();
+			CCDBNodeBranch *itemBranch = im->getDbBranch(SERVER_INVENTORY ":ROOM:" + toString(slotIndex));
+			static CItemImage image;
+			image.build(itemBranch);
+			invId = INVENTORIES::player_room;
+			indexInInv = slotIndex;
+			return &image;
+		}
+		return NULL;
+	}
 
 	return NULL;
 }
 
 
 // ***************************************************************************
-bool			CActionPhraseFaber::isMpAvailable(CItemSheet *mpSheet, uint slotIndex) const
+bool			CActionPhraseFaber::isMpAvailable(CItemSheet *mpSheet, uint invId, uint slotIndex) const
 {
-	uint	invId= slotIndex / MAX_PLAYER_INV_ENTRIES;
 	return mpSheet && mpSheet->Family==ITEMFAMILY::RAW_MATERIAL && getInventory().isInventoryAvailable((INVENTORIES::TInventory)invId);
 }
 
@@ -396,14 +437,14 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 		_InventoryMirror[i].reset();
 	}
 
+	uint		invId = 0;
+	uint		indexInInv = 0;
 	// Run all the inventories.
 	for(i=0;i<_InventoryMirror.size();i++)
 	{
-		uint		invId= i/MAX_PLAYER_INV_ENTRIES;
-		uint		indexInInv= i%MAX_PLAYER_INV_ENTRIES;
-		CItemImage	*itemImage= getInvMirrorItemImage(i);
-
-		// item found?
+		CItemImage	*itemImage= getInvMirrorItemImage(i, invId, indexInInv);
+		bool bLockedByOwner = itemImage && itemImage->getLockedByOwner();
+		// item found and not locked?
 		if(itemImage)
 		{
 			// setup the origin
@@ -413,7 +454,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 			// The item must be a mp
 			CSheetId	sheetId= CSheetId(itemImage->getSheetID());
 			CItemSheet	*mpSheet= dynamic_cast<CItemSheet*>(SheetMngr.get(sheetId));
-			if( isMpAvailable(mpSheet, i) )
+			if( isMpAvailable(mpSheet, invId, i) && !bLockedByOwner)
 			{
 				_InventoryMirror[i].Sheet= sheetId;
 				_InventoryMirror[i].Quality= itemImage->getQuality();
@@ -422,6 +463,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 				_InventoryMirror[i].Weight= itemImage->getWeight();
 				// Bkup original quantity from inventory
 				_InventoryMirror[i].OriginalQuantity= _InventoryMirror[i].Quantity;
+				_InventoryMirror[i].LockedByOwner= bLockedByOwner;
 			}
 		}
 	}
@@ -1311,17 +1353,22 @@ void		CActionPhraseFaber::onInventoryChange()
 		return;
 
 	// Run all the Bag
+	uint invId = 0;
+	uint indexInInv = 0;
 	for(i=0;i<_InventoryMirror.size();i++)
 	{
-		CItemImage	*itemImage= getInvMirrorItemImage(i);
+		CItemImage	*itemImage= getInvMirrorItemImage(i, invId, indexInInv);
+
 		if(itemImage)
 		{
 			CSheetId	sheetId= CSheetId(itemImage->getSheetID());
 			CItemSheet	*mpSheet= dynamic_cast<CItemSheet*>(SheetMngr.get(sheetId));
 			CItem		newInvItem;
 
-			// The item must be a mp, and the item must be available
-			if( isMpAvailable(mpSheet, i) )
+			bool bLockedByOwner = itemImage->getLockedByOwner();
+
+			// The item must be a mp, and the item must be available and unlocked
+			if( isMpAvailable(mpSheet, invId, i) && !bLockedByOwner)
 			{
 				newInvItem.Sheet= sheetId;
 				newInvItem.Quality= itemImage->getQuality();
@@ -1329,12 +1376,13 @@ void		CActionPhraseFaber::onInventoryChange()
 				newInvItem.UserColor= itemImage->getUserColor();
 				newInvItem.Weight= itemImage->getWeight();
 				newInvItem.OriginalQuantity= newInvItem.Quantity;
+				newInvItem.LockedByOwner = bLockedByOwner;
 			}
 
-			/* There is 4 cases:
+			/* There is 5 cases:
 				- no changes => no op.
-				- new Mp on a empty or non Mp slot. Easy, just add.
-				- old Mp removed (not same sheetId/quality/userColor)
+				- new/unlocked Mp on a empty or non Mp slot. Easy, just add.
+				- old Mp removed (not same sheetId/quality/userColor/locked)
 				- old Mp with quantity changed to be greater
 				- old Mp with quantity changed to be smaller
 			*/
@@ -1348,8 +1396,8 @@ void		CActionPhraseFaber::onInventoryChange()
 			// If the item was not a mp
 			if(_InventoryMirror[i].Sheet==CSheetId::Unknown)
 			{
-				// if now it is, easy, just add
-				if(newInvItem.Sheet!=CSheetId::Unknown)
+				// if now it is, easy, just add if not locked
+				if(newInvItem.Sheet!=CSheetId::Unknown && !newInvItem.LockedByOwner)
 					curInvItem= newInvItem;
 			}
 			// else must test change or remove
@@ -1358,7 +1406,8 @@ void		CActionPhraseFaber::onInventoryChange()
 				bool	sameMp;
 				sameMp=	curInvItem.Sheet == newInvItem.Sheet &&
 						curInvItem.Quality == newInvItem.Quality &&
-						curInvItem.UserColor == newInvItem.UserColor ;
+						curInvItem.UserColor == newInvItem.UserColor &&
+						curInvItem.LockedByOwner == newInvItem.LockedByOwner;
 
 				// if the Mp was deleted from this slot, delete it from all faber execution
 				if(!sameMp)

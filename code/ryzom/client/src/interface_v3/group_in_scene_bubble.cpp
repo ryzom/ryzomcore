@@ -974,6 +974,132 @@ void CGroupInSceneBubbleManager::dynChatOpen (uint32 nBotUID, uint32 nBotName, c
 	UserEntity->interlocutor( pChar->slot() );
 }
 
+// ***************************************************************************
+
+void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, const vector<string> &strs, const vector<string> &links)
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	// If the character doesn't exist in view field -> do not display the bubble
+
+	CEntityCL *pEntity = EntitiesMngr.getEntityByCompressedIndex(nBotUID);
+	CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(pEntity);
+	if (pChar == NULL)
+	{
+		nlwarning("character probably too far");
+		return;
+	}
+
+	// Look if we get a bubble with this nBotUID ?
+	uint32 pos, j;
+	for (pos = 0; pos < _DynBubbles.size(); ++pos)
+	{
+		if (_DynBubbles[pos].BotUID == nBotUID)
+			break;
+	}
+
+	// If the bubble doesn't exist -> create
+	CGroupInSceneBubble *bubble = NULL;
+	string id;
+	if (pos == _DynBubbles.size())
+	{
+		uint32 i = 0;
+		while (getDynBubble(i) != NULL) i++;
+		id = "in_scene_webig_bubble_" + toString(i);
+		// Create the instance
+		std::vector<std::pair<std::string,std::string> > templateParams;
+		templateParams.push_back (std::pair<std::string,std::string>("id", id));
+
+		CInterfaceGroup *group = pIM->createGroupInstance ("webig_3dbulle_L", "ui:interface", templateParams);
+		if (group == NULL)
+		{
+			nlwarning("cannot create webig_3dbulle_L");
+			return;
+		}
+		// Link to the interface
+		pIM->addWindowToMasterGroup("ui:interface", group);
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		group->setParent(pRoot);
+		if (pRoot)
+			pRoot->addGroup (group);
+		group->setActive(false);
+
+		bubble = dynamic_cast<CGroupInSceneBubble*>(group);
+		if (bubble == NULL)
+		{
+			nlwarning("cannot cast to CGroupInSceneBubble");
+			return;
+		}
+		CDynBubble dynBubble;
+		dynBubble.BotName = 0;
+		dynBubble.BotUID = nBotUID;
+		dynBubble.Bubble = bubble;
+		_DynBubbles.push_back(dynBubble);
+	}
+	else
+	{
+		bubble = _DynBubbles[pos].Bubble;
+		// Remove from group to delete if in the same frame
+		for (j=0; j<_GroupToDelete.size(); j++)
+		if (_GroupToDelete[j] == bubble)
+		{
+			_GroupToDelete.erase(_GroupToDelete.begin()+j);
+			break;
+		}
+	}
+
+	// Update the bubble's texts
+
+	ucstring ucText;
+	ucText.fromUtf8(text);
+	bubble->setText(ucText);
+	id = bubble->getId() + ":header_opened:window:";
+	CViewText *pVT;
+	CCtrlLink *pCL;
+
+	_DynBubbles[pos].DescWaiting = 0;
+
+	for (j = 0; j < 8; ++j)
+	{
+		pVT = dynamic_cast<CViewText*>(bubble->getElement(id+"opt"+toString(j)));
+		if (pVT != NULL)
+		{
+			pVT->setActive(false);
+			pVT->setText(ucstring(""));
+		}
+		pCL = dynamic_cast<CCtrlLink*>(bubble->getElement(id+"optb"+toString(j)));
+		if (pCL != NULL) pCL->setActive(false);
+	}
+
+	for (j = 0; j < strs.size(); ++j)
+	{
+		string fullid = id+"opt"+toString(j);
+		pVT = dynamic_cast<CViewText*>(bubble->getElement(id+"opt"+toString(j)));
+		if (pVT != NULL)
+		{
+			pVT->setActive(true);
+			ucstring optionText;
+			optionText.fromUtf8(strs[j]);
+			pVT->setText(optionText);
+			pCL = dynamic_cast<CCtrlLink*>(bubble->getElement(id+"optb"+toString(j)));
+			if (pCL != NULL)
+			{
+				pCL->setActionOnLeftClick("browse");
+				pCL->setParamsOnLeftClick("name=ui:interface:web_transactions:content:html|show=0|url="+links[j]);
+				//pCL->setActionOnLeftClickParams("name=ui:interface:web_transactions:content:html|url="+links[j]);
+				pCL->setActive(true);
+
+			}
+		}
+	}
+
+	// Link bubble to the character
+	pChar->setBubble(bubble);
+
+	// Make the npc face the character
+	UserEntity->interlocutor( pChar->slot() );
+}
+
+
 uint32 CGroupInSceneBubbleManager::CDynBubble::getOptionStringId(uint option)
 {
 	if (!Bubble) return 0;

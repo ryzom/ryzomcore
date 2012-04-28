@@ -172,7 +172,7 @@ template<class T>
 void			CStaticQuadGrid<T>::build(CQuadGrid<T> &quadGrid)
 {
 	clear();
-	contReset(_Grid);
+	NLMISC::contReset(_Grid);
 
 	// Copy from quadGrid, and init quads
 	_Size= quadGrid.getSize();

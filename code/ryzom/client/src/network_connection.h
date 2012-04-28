@@ -60,7 +60,9 @@ const uint		PropertiesPerEntity = 16;
 const uint		EntitiesPerClient = 256;
 */
 
+namespace NLMISC{
 class CCDBNodeBranch;
+}
 
 namespace CLFECOMMON
 {
@@ -364,7 +366,7 @@ public:
 	/**
 	 * Set database entry point
 	 */
-	void			setDataBase(CCDBNodeBranch *database);
+	void			setDataBase(NLMISC::CCDBNodeBranch *database);
 
 	//@}
 
@@ -669,7 +671,7 @@ protected:
 	CPropertyDecoder			_PropertyDecoder;
 
 	/// The database entry
-	CCDBNodeBranch				*_DataBase;
+	NLMISC::CCDBNodeBranch				*_DataBase;
 
 
 	/// @name Header message decoding

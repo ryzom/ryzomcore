@@ -717,11 +717,11 @@ class CAutoMutex
 	TMutex	&_Mutex;
 
 	// forbeden copy or assignent
-	CAutoMutex(const CAutoMutex &other)
+	CAutoMutex(const CAutoMutex &/* other */)
 	{
 	}
 
-	CAutoMutex &operator = (const CAutoMutex &other)
+	CAutoMutex &operator = (const CAutoMutex &/* other */)
 	{
 		return *this;
 	}

@@ -24,7 +24,7 @@
 #include "interface_manager.h"
 #include "interface_expr_node.h"
 #include "reflect.h"
-#include "../cdb_branch.h"
+#include "nel/misc/cdb_branch.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -130,7 +130,20 @@ static bool affect(const CInterfaceExprValue &value, CInterfaceElement &destElem
 	return true;
 }
 
+CInterfaceLink::CInterfaceLinkUpdater::CInterfaceLinkUpdater()
+{
+	CInterfaceManager::getInstance()->addFlushObserver( this );
+}
 
+CInterfaceLink::CInterfaceLinkUpdater::~CInterfaceLinkUpdater()
+{
+	CInterfaceManager::getInstance()->removeFlushObserver( this );
+}
+
+void CInterfaceLink::CInterfaceLinkUpdater::onObserverCallFlush()
+{
+	CInterfaceLink::updateTrigeredLinks();
+}
 
 /////////////
 // MEMBERS //
@@ -263,7 +276,7 @@ void CInterfaceLink::createObservers(const TNodeVect &nodes)
 		else
 		{
 			CCDBNodeBranch *br = static_cast<CCDBNodeBranch *>(*it);
-			br->addBranchObserver(this);
+			CInterfaceManager::getInstance()->addBranchObserver( br, this );
 		}
 	}
 }
@@ -281,7 +294,7 @@ void CInterfaceLink::removeObservers(const TNodeVect &nodes)
 		else
 		{
 			CCDBNodeBranch *br = static_cast<CCDBNodeBranch *>(*it);
-			br->removeBranchObserver(this);
+			CInterfaceManager::getInstance()->removeBranchObserver( br, this );
 		}
 	}
 }

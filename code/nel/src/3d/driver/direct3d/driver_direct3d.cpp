@@ -1228,7 +1228,7 @@ bool CDriverD3D::init (uint windowIcon, emptyProc exitFunc)
 	ExitFunc = exitFunc;
 
 	createCursors();
-	
+
 	// Register a window class
 	WNDCLASSW		wc;
 

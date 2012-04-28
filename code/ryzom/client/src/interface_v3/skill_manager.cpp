@@ -24,7 +24,7 @@
 #include "game_share/character_title.h"
 #include "game_share/fame.h"
 #include "../sheet_manager.h"
-#include "../cdb_leaf.h"
+#include "nel/misc/cdb_leaf.h"
 #include "action_handler.h"
 #include "sbrick_manager.h"
 #include "dbgroup_combo_box.h"
@@ -158,7 +158,7 @@ void CSkillManager::initInGame()
 	// Get a node used to inform interface that a skill has changed
 	_TrackSkillChange= pIM->getDbProp("UI:VARIABLES:TRACK_SKILL_CHANGE", true);
 	// Add a branch observer on skill value change
-	pIM->getDbBranch("SERVER:CHARACTER_INFO:SKILLS")->addBranchObserver(&_SkillChangeObs);
+	pIM->addBranchObserver( "SERVER:CHARACTER_INFO:SKILLS", &_SkillChangeObs );
 
 }
 
@@ -1042,7 +1042,7 @@ void CSkillManager::setPlayerTitle(const std::string &name)
 // ***************************************************************************
 // ***************************************************************************
 
-#define GROUP_TITLE_COMBO "ui:interface:info_player_skills:content:basics_skills:title:player_title"
+#define GROUP_TITLE_COMBO "ui:interface:info_player_skills:content:webinfos:title:player_title"
 
 // ***************************************************************************
 class CHandlerTitleInit: public IActionHandler

@@ -332,7 +332,7 @@ namespace PATCHMAN
 		CFileReceiverProxy rr(sender);
 		if (ok && !result.empty())
 		{
-			rr.cbFileData(_Parent,fileName,startOffset,NLNET::TBinBuffer((const uint8 *)&result[0],result.size()));
+			rr.cbFileData(_Parent,fileName,startOffset,NLNET::TBinBuffer((const uint8 *)&result[0],(uint32)result.size()));
 		}
 		else
 		{

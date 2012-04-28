@@ -80,6 +80,9 @@ XMLOutGameInterfaceFiles = {
 	"out_v2_keys.xml",
 };
 
+TexturesInterface    = "texture_interfaces_v3";
+TexturesInterfaceDXTC = "texture_interfaces_dxtc";
+
 
 // The ligo primitive class file
 LigoPrimitiveClass = "world_editor_classes.xml";
@@ -352,8 +355,8 @@ SystemInfoColors =
 
 // NEW System Info Categories
 "SYS",	"255 255 255 255 normal",	// Default system messages
-"BC",	"255 255 255 255 center",	// Broadcast messages
-"TAGBC",	"255 255 255 255 center", // Taged broadcast messages : color should remain white as some word are tagged
+"BC",	"255 255 255 255 centeraround",	// Broadcast messages
+"TAGBC",	"255 255 255 255 centeraround", // Taged broadcast messages : color should remain white as some word are tagged
 "XP",	"255 255 64  255 over",		// XP Gain
 "SP",	"255 255 64  255 over",		// SP Gain
 "TTL",	"255 255 64  255 over",		// Title
@@ -441,23 +444,24 @@ R2EDReloadFiles      = {
 XMLInterfaceFiles    = {
 	"config.xml",
 	"widgets.xml",
+	"webig_widgets.xml",
 	"player.xml",
 	"inventory.xml",
 	"interaction.xml",
-	"phrase.xml", 
+	"phrase.xml",
 	"harvest.xml",
 	"macros.xml",
 	"info_player.xml",
 	"outpost.xml",
 	"guild.xml",
 	"taskbar.xml",
-	"game_config.xml", 
+	"game_config.xml",
 	"game_context_menu.xml",
 	"player_trade.xml",
 	"bot_chat_v4.xml",
 	"compass.xml",
 	"map.xml",
-	"hierarchy.xml", 
+	"hierarchy.xml",
 	"reset.xml",
 	"actions.xml",
 	"help.xml",
@@ -556,6 +560,15 @@ HelpPages =
 	"wk=http://forums.ryzom.com/forum/showthread.php?t=29129",
 	"de=http://forums.ryzom.com/forum/showthread.php?t=29131"
 };
+
+WebIgMainDomain      = "atys.ryzom.com";
+
+WebIgTrustedDomains  =
+{
+	"atys.ryzom.com" 
+};
+
+PatchletUrl          = "http://atys.ryzom.com/start/app_patchlet.php?patch=preload";
 
 SelectedSlot = 0;
 

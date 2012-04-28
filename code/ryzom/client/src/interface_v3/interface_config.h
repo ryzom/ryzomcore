@@ -22,7 +22,9 @@
 #include "nel/misc/stream.h"
 
 class CGroupContainer;
+namespace NLMISC{
 class CCDBNodeLeaf;
+}
 
 /**
  * interface config
@@ -111,8 +113,8 @@ public:
 		// ------------------------------
 		void serial (NLMISC::IStream &f);
 		// ------------------------------
-		void setFrom (CCDBNodeLeaf *pNL);
-		void setTo (CCDBNodeLeaf *pNL);
+		void setFrom (NLMISC::CCDBNodeLeaf *pNL);
+		void setTo (NLMISC::CCDBNodeLeaf *pNL);
 	};
 
 	void dataBaseToStream (NLMISC::IStream &f);

@@ -139,6 +139,7 @@ void CPlayerTrade::restoreItem(CDBCtrlSheet *exchangeSlot)
 		im.getBagItem(emptySlot).setWeight((uint32) exchangeSlot->getItemWeight());
 		im.getBagItem(emptySlot).setNameId(exchangeSlot->getItemNameId());
 		im.getBagItem(emptySlot).setInfoVersion(exchangeSlot->getItemInfoVersion());
+		im.getBagItem(emptySlot).setResaleFlag(exchangeSlot->getItemResaleFlag());
 	}
 
 

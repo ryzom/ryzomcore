@@ -35,7 +35,9 @@
 
 
 class CContinent;
+namespace NLMISC{
 class CCDBNodeLeaf;
+}
 class CWorldSheet;
 class CCtrlQuad;
 struct SMap;
@@ -425,8 +427,8 @@ private:
 		// have the texts been received for mission targets ?
 		std::vector<bool>	_MissionTargetTextReceived;
 		// ptr on db leaf for coordinates of special landmarks
-		CCDBNodeLeaf		*_TargetPos;
-		CCDBNodeLeaf		*_HomePos;
+		NLMISC::CCDBNodeLeaf		*_TargetPos;
+		NLMISC::CCDBNodeLeaf		*_HomePos;
 		// Animals State for landMarks
 		std::vector<NLMISC::CSmartPtr<CAnimalPositionState> >	_AnimalPosStates;
 		// Teammate State for landMarks
