@@ -434,7 +434,7 @@ namespace GeorgesQt
 		QPoint globalPos = this->mapToGlobal(pos);
 		
 		// Fisrt we're going to see if we've right clicked on a new item and select it.
-		QModelIndex &index = this->m_ui.treeView->currentIndex();
+		const QModelIndex &index = this->m_ui.treeView->currentIndex();
 
 		if(!index.isValid())
 			return;
