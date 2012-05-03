@@ -101,10 +101,12 @@ namespace GeorgesQt
 	void CGeorgesTreeViewDialog::headerClicked(int section)
 	{
 		if (section == 0)
+        {
 			if (*(m_header->expanded()))
 				m_ui.treeView->expandAll();
 			else
 				m_ui.treeView->collapseAll();
+        }
 	}
 
 	void CGeorgesTreeViewDialog::setForm(const CForm *form) 
@@ -263,12 +265,12 @@ namespace GeorgesQt
 	void CGeorgesTreeViewDialog::write( ) 
 	{
 
-		//COFile file;
-		//std::string s = CPath::lookup(loadedForm.toStdString(), false);
-		//if (file.open (s)) 
-		//{
-		//	try	
-		//	{
+        NLMISC::COFile file;
+        std::string s = NLMISC::CPath::lookup(loadedForm.toStdString(), false);
+        if(file.open (s))
+        {
+            try
+            {
 		//		if (loadedForm.contains(".typ")) 
 		//		{
 		//			//nlassert (Type != NULL);
@@ -281,7 +283,7 @@ namespace GeorgesQt
 		//			//	flushValueChange ();
 		//			//}
 		//			//Type->write (xmlStream.getDocument (), theApp.Georges4CVS);
-		//			//modify (NULL, NULL, false);
+        //			//modify (NULL, NULL, false);
 		//			//flushValueChange ();
 		//			//UpdateAllViews (NULL);
 		//			//return TRUE;
@@ -303,17 +305,17 @@ namespace GeorgesQt
 		//		}
 		//		else 
 		//		{
-		//			nlassert (_form != NULL);
+                    nlassert (m_form != NULL);
 
-		//			// Write the file
+                    // Write the file
 		//			/*if (IsModified ())
 		//			{
 		//			((CForm*)(UForm*)Form)->Header.MinorVersion++;
 		//			}*/
 		//			//((CForm*)(UForm*)Form)->write (xmlStream.getDocument (), lpszPathName, theApp.Georges4CVS);
-		//			_form->write(file, false);
-		//			setWindowTitle(windowTitle().remove("*"));
-		//			_modified = false;
+                    m_form->write(file, false);
+                    setWindowTitle(windowTitle().remove("*"));
+                    m_modified = false;
 		//			//if (strcmp (xmlStream.getErrorString (), "") != 0)
 		//			//{
 		//			//	char message[512];
@@ -327,16 +329,16 @@ namespace GeorgesQt
 		//			// Get the left view
 		//			//CView* pView = getLeftView ();
 		//		}
-		//	}
-		//	catch (Exception &e)
-		//	{
-		//		nlerror("Error while loading file: %s", e.what());
-		//	}
-		//}
-		//else
-		//{ //if (!file.open())
-		//	nlerror("Can't open the file %s for writing.", s.c_str());
-		//}
+            }
+            catch (Exception &e)
+            {
+                nlerror("Error while loading file: %s", e.what());
+            }
+        }
+        else
+        {
+            nlerror("Can't open the file %s for writing.", s.c_str());
+        }
 	}
 
 	void CGeorgesTreeViewDialog::doubleClicked ( const QModelIndex & index ) 

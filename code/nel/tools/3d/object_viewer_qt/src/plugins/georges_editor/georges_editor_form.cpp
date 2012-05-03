@@ -124,6 +124,8 @@ namespace GeorgesQt
 
 	void GeorgesEditorForm::save()
 	{
+        m_lastActiveDock->write();
+        m_saveAction->setEnabled(false);
 
 	}
 
