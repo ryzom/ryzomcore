@@ -61,7 +61,7 @@ namespace NLMISC {
 	{
 	public:
 		/// Constructor. Must gives a blockMemory to ctor. NB: must gives a CBlockMemory<T, false> !!!
-		CSTLBlockAllocator(CBlockMemory<T, false> *bm)
+		CSTLBlockAllocator(CBlockMemory<T, false> * /* bm */)
 		{
 		}
 		/// copy ctor

@@ -70,6 +70,7 @@ CViewPointer::CViewPointer (const TCtorParam &param)
 	_Color = CRGBA(255,255,255,255);
 	_LastHightLight = NULL;
 	_StringMode = false;
+	_ForceStringMode = false;
 	_StringCursor = NULL;
 }
 
@@ -253,6 +254,41 @@ void CViewPointer::draw ()
 		if (drawCustom(pCB)) return;
 		drawCursor(_TxIdDefault, col, 0);
 		return;
+	}
+
+	const vector<CViewBase *> &vUP = pIM->getViewsUnderPointer ();
+
+	for(uint i=0;i<vUP.size();i++)
+	{
+		CViewLink *vLink = dynamic_cast<CViewLink*>(vUP[i]);
+		if (vLink != NULL)
+		{
+			string tooltip;
+			uint8 rot;
+
+			if (vLink->getMouseOverShape(tooltip, rot, col))
+			{
+				setString(ucstring(tooltip));
+				sint32 texId = rVR.getTextureIdFromName ("curs_pick.tga");
+
+				CInterfaceGroup *stringCursor = IsMouseCursorHardware() ? _StringCursorHardware : _StringCursor;
+				if (stringCursor)
+				{
+					stringCursor->setX(_PointerX);
+					stringCursor->setY(_PointerY);
+					stringCursor->updateCoords();
+					stringCursor->draw();
+					// if in hardware mode, force to draw the default cursor no matter what..
+					if (IsMouseCursorHardware())
+						drawCursor(texId, col, 0);
+				}
+				else
+				{
+					drawCursor(texId, col, 0);
+				}
+				return;
+			}
+		}
 	}
 
 	// Draw if capture right
@@ -521,16 +557,50 @@ bool CViewPointer::drawPan(CCtrlBase* pCB, NLMISC::CRGBA col)
 // --------------------------------------------------------------------------------------------------------------------
 bool CViewPointer::drawCustom(CCtrlBase* pCB)
 {
-	std::string texName;
+	string texName;
 	uint8 rot;
 	NLMISC::CRGBA col;
 	if (pCB->getMouseOverShape(texName, rot, col))
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewRenderer &rVR = pIM->getViewRenderer();
-		sint32 texId = rVR.getTextureIdFromName (texName);
-		drawCursor(texId, col, 0);
-		return true;
+		if (texName[0] == '@')
+		{
+			const string &tooltipInfos = texName.substr(1);
+			string tooltip;
+			vector<string> tooltipInfosList;
+			splitString(tooltipInfos, "@", tooltipInfosList);
+			texName = tooltipInfosList[0];
+			tooltip = tooltipInfosList[1];
+			nlinfo(tooltip.c_str());
+			setString(ucstring(tooltip));
+			CInterfaceManager *pIM = CInterfaceManager::getInstance();
+			CViewRenderer &rVR = pIM->getViewRenderer();
+			sint32 texId = rVR.getTextureIdFromName (texName);
+
+			CInterfaceGroup *stringCursor = IsMouseCursorHardware() ? _StringCursorHardware : _StringCursor;
+			if (stringCursor)
+			{
+				stringCursor->setX(_PointerX);
+				stringCursor->setY(_PointerY);
+				stringCursor->updateCoords();
+				stringCursor->draw();
+				// if in hardware mode, force to draw the default cursor no matter what..
+				if (IsMouseCursorHardware())
+					drawCursor(texId, col, 0);
+			}
+			else
+			{
+				drawCursor(texId, col, 0);
+			}
+			return true;
+		}
+		else
+		{
+			CInterfaceManager *pIM = CInterfaceManager::getInstance();
+			CViewRenderer &rVR = pIM->getViewRenderer();
+			sint32 texId = rVR.getTextureIdFromName (texName);
+			drawCursor(texId, col, 0);
+			return true;
+		}
 	}
 	return false;
 }

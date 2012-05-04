@@ -29,6 +29,8 @@ class QWidget;
 
 namespace Plugin
 {
+	class CLogPlugin;
+
 	/**
 	@class CLogSettingsPage
 	*/
@@ -36,7 +38,7 @@ namespace Plugin
 	{
 		Q_OBJECT
 	public:
-		CLogSettingsPage(QObject *parent = 0);
+		CLogSettingsPage(CLogPlugin *logPlugin, QObject *parent = 0);
 		virtual ~CLogSettingsPage() {}
 
 		virtual QString id() const;
@@ -53,6 +55,7 @@ namespace Plugin
 		void readSettings();
 		void writeSettings();
 
+		CLogPlugin *m_logPlugin;
 		QWidget             *m_currentPage;
 		Ui::CLogSettingsPage m_ui;
 

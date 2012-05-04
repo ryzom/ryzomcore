@@ -35,17 +35,17 @@ class IOptionsPage;
 @class CSettingsDialog
 @brief Settings dialog
 */
-class CSettingsDialog: public QDialog
+class SettingsDialog: public QDialog
 {
 	Q_OBJECT
 
 public:
-	CSettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
-					const QString &initialCategory = QString(),
-					const QString &initialPage = QString(),
-					QWidget *parent = 0);
+	SettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
+				   const QString &initialCategory = QString(),
+				   const QString &initialPage = QString(),
+				   QWidget *parent = 0);
 
-	~CSettingsDialog();
+	~SettingsDialog();
 
 	/// Run the dialog and return true if 'Ok' was choosen or 'Apply' was invoked at least once
 	bool execDialog();
@@ -60,14 +60,14 @@ private Q_SLOTS:
 	void apply();
 
 private:
-	QList<IOptionsPage *> _pages;
-	bool _applied;
-	QString _currentCategory;
-	QString _currentPage;
+	QList<IOptionsPage *> m_pages;
+	bool m_applied;
+	QString m_currentCategory;
+	QString m_currentPage;
 
-	ExtensionSystem::IPluginManager *_plugMan;
+	ExtensionSystem::IPluginManager *m_plugMan;
 
-	Ui::CSettingsDialog _ui;
+	Ui::SettingsDialog m_ui;
 }; /* class CSettingsDialog */
 
 } /* namespace Core */

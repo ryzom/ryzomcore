@@ -28,11 +28,6 @@ namespace NLMISC
 class CLibraryContext;
 }
 
-namespace ExtensionSystem
-{
-class IPluginSpec;
-}
-
 namespace Plugin
 {
 
@@ -43,14 +38,7 @@ class SheetBuilderPlugin : public QObject, public ExtensionSystem::IPlugin
 public:
 	bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
 	void extensionsInitialized();
-
 	void setNelContext(NLMISC::INelContext *nelContext);
-
-	QString name() const;
-	QString version() const;
-	QString vendor() const;
-	QString description() const;
-	QStringList dependencies() const;
 
 	void buildSheet(bool clean);
 
@@ -58,10 +46,10 @@ private Q_SLOTS:
 	void execBuilderDialog();
 
 protected:
-	NLMISC::CLibraryContext *_LibContext;
+	NLMISC::CLibraryContext *m_LibContext;
 
 private:
-	ExtensionSystem::IPluginManager *_plugMan;
+	ExtensionSystem::IPluginManager *m_plugMan;
 
 };
 

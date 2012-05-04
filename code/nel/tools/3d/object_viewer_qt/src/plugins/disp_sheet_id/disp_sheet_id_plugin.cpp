@@ -18,7 +18,7 @@
 #include "disp_sheet_id_plugin.h"
 #include "sheet_id_view.h"
 #include "../core/icore.h"
-#include "../core/imenu_manager.h"
+#include "../core/menu_manager.h"
 #include "../core/core_constants.h"
 
 // Qt includes
@@ -37,13 +37,13 @@ using namespace SheetIdViewPlugin;
 bool DispSheetIdPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
 	Q_UNUSED(errorString);
-	_plugMan = pluginManager;
+	m_plugMan = pluginManager;
 	return true;
 }
 
 void DispSheetIdPlugin::extensionsInitialized()
 {
-	Core::IMenuManager *menuManager = Core::ICore::instance()->menuManager();
+	Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
 
 	QMenu *sheetMenu = menuManager->menu(Core::Constants::M_SHEET);
 	QAction *sheetIdViewAction = sheetMenu->addAction(tr("Sheet id view"));
@@ -67,34 +67,7 @@ void DispSheetIdPlugin::setNelContext(NLMISC::INelContext *nelContext)
 	// This only applies to platforms without PIC, e.g. Windows.
 	nlassert(!NLMISC::INelContext::isContextInitialised());
 #endif // NL_OS_WINDOWS
-	_LibContext = new NLMISC::CLibraryContext(*nelContext);
-}
-
-QString DispSheetIdPlugin::name() const
-{
-	return "Display sheet id";
-}
-
-QString DispSheetIdPlugin::version() const
-{
-	return "1.0";
-}
-
-QString DispSheetIdPlugin::vendor() const
-{
-	return "pemeon";
-}
-
-QString DispSheetIdPlugin::description() const
-{
-	return "Display sheet id";
-}
-
-QStringList DispSheetIdPlugin::dependencies() const
-{
-	QStringList list;
-	list.append(Core::Constants::OVQT_CORE_PLUGIN);
-	return list;
+	m_LibContext = new NLMISC::CLibraryContext(*nelContext);
 }
 
 Q_EXPORT_PLUGIN(DispSheetIdPlugin)

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Mode" Type="Type" Filename="pattern_mode.typ" Default="Chained"/>
+  <ELEMENT Name="SoundList" Type="Type" Filename="filename.typ" Array="true"/>
+  <ELEMENT Name="SoundSeq" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="DelaySeq" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Beat" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="XFadeLenght" Type="Type" Filename="int.typ" Default="3"/>
+  <ELEMENT Name="DoFadeIn" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="DoFadeOut" Type="Type" Filename="boolean.typ" Default="true"/>
+  <LOG>Tue Oct 08 14:29:42 2002 (boucher) Dfn Structure = 
+Tue Oct 08 14:35:40 2002 (boucher) Dfn Structure = 
+Thu Oct 10 16:15:18 2002 (boucher) Dfn Structure = 
+Fri Oct 11 10:26:17 2002 (boucher) Dfn Structure = 
+Fri Oct 11 11:14:25 2002 (boucher) Dfn Structure = 
+Fri Oct 11 11:15:41 2002 (boucher) Dfn Structure = 
+Fri Oct 11 16:01:43 2002 (boucher) Dfn Structure = 
+Wed Oct 16 11:36:41 2002 (boucher) Dfn Structure = </LOG>
+</DFN>

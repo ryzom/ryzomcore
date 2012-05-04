@@ -24,6 +24,7 @@
 #include "../nel_patch_lib/rpo.h"
 #include "../../ig_lighter_lib/ig_lighter_lib.h"
 
+#include "nel/misc/path.h"
 #include "nel/3d/scene_group.h"
 #include "nel/3d/scene.h"
 #include "nel/3d/shape_bank.h"
@@ -418,12 +419,21 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 					if (clid.PartA() == NEL_PARTICLE_SYSTEM_CLASS_ID)
 					{
 						// build the shape from the file name
-						std::string objName = CExportNel::getNelObjectName(*pNode); 						
-						if (!objName.empty())
+						// std::string objName = CExportNel::getNelObjectName(*pNode); 						
+						std::string psFilePath;
+						// try to get the complete path	
+						if (!CExportNel::getValueByNameUsingParamBlock2(*pNode, "ps_file_name", (ParamType2) TYPE_STRING, &psFilePath, 0))
+						{
+							// if not found, get from the APP_DATAS
+							psFilePath = CExportNel::getNelObjectName(*pNode);
+							if (!psFilePath.empty())
+								psFilePath = CPath::lookup(psFilePath, false);
+						}
+						if (!psFilePath.empty())
 						{											
 							NL3D::CShapeStream ss;
 							NLMISC::CIFile iF;
-							if (iF.open(objName.c_str()))
+							if (iF.open(psFilePath.c_str()))
 							{
 								try
 								{								

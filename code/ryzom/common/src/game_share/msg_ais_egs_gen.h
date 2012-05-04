@@ -884,6 +884,7 @@ namespace RYMSG
 		std::vector< NLMISC::CSheetId >	_LootList;
 		//
 		NLMISC::CSheetId	_Outpost;
+		uint32				_Organization;
 		//
 		float	_MaxHitRangeForPC;
 		//
@@ -1337,6 +1338,21 @@ namespace RYMSG
 
 
 		}
+
+		//
+		uint32 getOrganization() const 
+		{
+			return _Organization;
+		}
+
+		void setOrganization(uint32 value)
+		{
+			
+			
+				_Organization = value;
+			
+	
+		}
 			//
 		float getMaxHitRangeForPC() const
 		{
@@ -1431,6 +1447,7 @@ namespace RYMSG
 				&& _ContextOptions == other._ContextOptions
 				&& _LootList == other._LootList
 				&& _Outpost == other._Outpost
+				&& _Organization == other._Organization
 				&& _MaxHitRangeForPC == other._MaxHitRangeForPC
 				&& _UserModelId == other._UserModelId
 				&& _CustomLootTableId == other._CustomLootTableId
@@ -1489,6 +1506,7 @@ namespace RYMSG
 			s.serialCont(_ContextOptions);
 			s.serialCont(_LootList);
 			s.serial(_Outpost);
+			s.serial(_Organization);
 			s.serial(_MaxHitRangeForPC);
 			s.serial(_UserModelId);
 			s.serial(_CustomLootTableId);

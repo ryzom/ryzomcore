@@ -48,6 +48,7 @@
 #include "view_bitmap.h"
 #include "action_handler_tools.h"
 #include "../connection.h"
+#include "../client_chat_manager.h"
 
 // Game specific includes
 #include "../motion/user_controls.h"
@@ -98,6 +99,8 @@ extern bool				IsInRingSession;
 
 // Context help
 extern void contextHelp (const std::string &help);
+
+extern CClientChatManager ChatMngr;
 
 void beastOrder (const std::string &orderStr, const std::string &beastIndexStr, bool confirmFree = true);
 
@@ -973,6 +976,9 @@ public:
 		// Create the message for the server to execute a phrase.
 		sendMsgToServer("GUILD:QUIT");
 		CGuildManager::getInstance()->closeAllInterfaces();
+
+		if (PeopleInterraction.TheUserChat.Filter.getTargetGroup() == CChatGroup::guild)
+			ChatMngr.updateChatModeAndButton(CChatGroup::say);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerDoQuitGuild, "do_quit_guild");
@@ -2565,7 +2571,9 @@ class CAHAddShape : public IActionHandler
 						skel.setPos(CVector((float)x, (float)y, (float)z));
 						skel.setRotQuat(dir.getRot());
 					}
-				} else {
+				}
+				else
+				{
 					instance.setScale(instance.getScale()*s);
 					instance.setPos(CVector((float)x, (float)y, (float)z));
 					instance.setRotQuat(dir.getRot());
@@ -3162,7 +3170,6 @@ class CHandlerGameConfigFullscreen : public IActionHandler
 			// hide frequencies combo
 			pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
 			if (pCB) pCB->setActive(false);
-
 		}
 
 		// **** dirt the apply button of the DDX

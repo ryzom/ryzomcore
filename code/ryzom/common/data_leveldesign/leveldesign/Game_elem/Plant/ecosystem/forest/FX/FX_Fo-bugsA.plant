@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.2 $" State="modified">
+  <STRUCT>
+    <ATOM Name="Plant Name" Value="bugs"/>
+    <ATOM Name="Comment" Value="This is an FX"/>
+    <STRUCT Name="3D">
+      <ATOM Name="Bounding Radius" Value="0.5"/>
+      <ATOM Name="LOD 0 min"/>
+      <ATOM Name="Collision Radius" Value="0.5"/>
+      <STRUCT Name="SpringFX">
+        <ATOM Name="FXName" Value="Fo-BugsA.ps"/>
+        <ATOM Name="Mode" Value="UseEndHour"/>
+        <ATOM Name="StartHourMin" Value="8"/>
+        <ATOM Name="StartHourMax" Value="10"/>
+        <ATOM Name="EndHourMin" Value="18"/>
+        <ATOM Name="EndHourMax" Value="20"/>
+      </STRUCT>
+      <STRUCT Name="SummerFX">
+        <ATOM Name="FXName" Value="Fo-BugsA.ps"/>
+        <ATOM Name="Mode" Value="UseEndHour"/>
+        <ATOM Name="StartHourMin" Value="8"/>
+        <ATOM Name="StartHourMax" Value="10"/>
+        <ATOM Name="EndHourMin" Value="18"/>
+        <ATOM Name="EndHourMax" Value="20"/>
+      </STRUCT>
+      <STRUCT Name="AutomnFX">
+        <ATOM Name="FXName" Value="Fo-BugsA.ps"/>
+        <ATOM Name="Mode" Value="UseEndHour"/>
+        <ATOM Name="StartHourMin" Value="8"/>
+        <ATOM Name="StartHourMax" Value="10"/>
+        <ATOM Name="EndHourMin" Value="18"/>
+        <ATOM Name="EndHourMax" Value="20"/>
+      </STRUCT>
+      <STRUCT Name="WinterFX">
+        <ATOM Name="FXName" Value="Fo-BugsA.ps"/>
+        <ATOM Name="Mode" Value="UseEndHour"/>
+        <ATOM Name="StartHourMin" Value="8"/>
+        <ATOM Name="StartHourMax" Value="10"/>
+        <ATOM Name="EndHourMin" Value="18"/>
+        <ATOM Name="EndHourMax" Value="20"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <COMMENTS>Converted from old format</COMMENTS>
+  <LOG>Fri May 17 15:17:45 2002 (corvazier) File converted from old format
+Tue Aug 05 16:50:05 2003 (firroloni) .3D.AutomnFX.FXName = Fo-BugsA.ps
+Tue Aug 05 16:50:05 2003 (firroloni) .3D.Shape = 
+Tue Aug 05 16:50:05 2003 (firroloni) .3D.SpringFX.FXName = Fo-BugsA.ps
+Tue Aug 05 16:50:05 2003 (firroloni) .3D.SummerFX.FXName = Fo-BugsA.ps
+Tue Aug 05 16:50:05 2003 (firroloni) .3D.WinterFX.FXName = Fo-BugsA.ps
+Wed Aug 06 10:22:14 2003 (firroloni) .3D.SpringFX.EndHourMax = 20
+Wed Aug 06 10:22:14 2003 (firroloni) .3D.SpringFX.EndHourMin = 18
+Wed Aug 06 10:22:14 2003 (firroloni) .3D.SpringFX.Mode = UseEndHour
+Wed Aug 06 10:22:14 2003 (firroloni) .3D.SpringFX.StartHourMax = 10
+Wed Aug 06 10:22:14 2003 (firroloni) .3D.SpringFX.StartHourMin = 8
+Wed Aug 06 10:22:14 2003 (firroloni) formName Pasted = </LOG>
+</FORM>

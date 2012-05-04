@@ -97,7 +97,7 @@ public:
 			_AttrbDlg[k]->init();
 		}
 
-		static const char * const operators[] =
+		static const char *const operators[] =
 		{
 			QT_TR_NOOP("Select Arg1"),
 			QT_TR_NOOP("Select Arg2"),

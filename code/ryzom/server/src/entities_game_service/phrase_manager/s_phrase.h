@@ -113,7 +113,7 @@ public:
 	 * set the primary target
 	 * \param entityId id of the primary target
 	 */
-	virtual void setPrimaryTarget( const TDataSetRow &entityRowId ) {};
+	virtual void setPrimaryTarget( const TDataSetRow &/* entityRowId */ ) {}
 
 	/**
 	 * evaluate phrase
@@ -188,9 +188,9 @@ public:
 	/** Return true if the phrase if grammatically valid (otherwise, send a msg to the player actorRowId)
 	 * TODO: anti-hacking
 	 */
-	static bool	validateSabrinaGrammar( const std::vector< const CStaticBrick* >& bricks, TDataSetRow actorRowId ) { return true; }
+	static bool	validateSabrinaGrammar( const std::vector< const CStaticBrick* >& /* bricks */, TDataSetRow /* actorRowId */ ) { return true; }
 
-	virtual void setBrickSheets( const std::vector<NLMISC::CSheetId> & bricks){}
+	virtual void setBrickSheets( const std::vector<NLMISC::CSheetId> & /* bricks */){}
 	virtual void setEnchantMode(bool){}
 
 	inline void cyclic(bool b) { _CyclicPhrase = b; }

@@ -18,33 +18,62 @@
 #define GEORGES_FILESYSTEM_MODEL_H
 
 #include <QtGui/QFileSystemModel>
+#include <QSortFilterProxyModel>
 
-namespace Plugin
+namespace GeorgesQt
 {
 
-class CGeorgesFileSystemModel : public QFileSystemModel
-{
-	QString m_ldPath;
-
-public:
-	CGeorgesFileSystemModel(QString ldPath, QObject *parent = 0);
-	~CGeorgesFileSystemModel();
-
-	int columnCount(const QModelIndex &/*parent*/) const;
-	int rowCount(const QModelIndex &/*parent*/) const;
-
-	QVariant data(const QModelIndex& index, int role) const ;
-
-	bool isCorrectLDPath()
+	class CGeorgesFileSystemModel : public QFileSystemModel
 	{
-		return m_correct;
-	}
-	void checkLDPath();
+		Q_OBJECT
 
-private:
-	bool m_correct;
-};/* class CGeorgesFileSystemModel */
+	public:
+		CGeorgesFileSystemModel(QString ldPath, QObject *parent = 0);
+		~CGeorgesFileSystemModel();
 
-} /* namespace NLQT */
+		int columnCount(const QModelIndex &/*parent*/) const;
+		int rowCount(const QModelIndex &/*parent*/) const;
+
+		QVariant data(const QModelIndex& index, int role) const ;
+
+		bool isCorrectLDPath()
+		{
+			return m_correct;
+		}
+		bool isInitialized()
+		{
+			return m_initialized;
+		}
+		void setInitialized( bool init)
+		{
+			m_initialized = init;
+		}
+		void checkLDPath();
+
+	private:
+		bool m_correct;
+		bool m_initialized;
+		QString m_ldPath;
+
+private Q_SLOTS:
+		void dir(const QString&);
+	};/* class CGeorgesFileSystemModel */
+
+	// A modified QSortFilterProxyModel that always accepts the root nodes in the tree
+	// so filtering is only done on the children.
+	//class CGeorgesFileSystemProxyModel : public QSortFilterProxyModel
+	//{
+	//	Q_OBJECT
+
+	//public:
+	//	CGeorgesFileSystemProxyModel(QObject *parent = 0);
+
+		//QVariant data(const QModelIndex& index, int role) const ;
+
+	//protected:
+	//	bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
+	//};
+
+} /* namespace GeorgesQt */
 
 #endif // GEORGES_FILESYSTEM_MODEL_H

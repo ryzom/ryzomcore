@@ -511,9 +511,9 @@ class CMissionActionRecvItem : public IMissionAction
 	{
 		_SourceLine = line;
 		bool ret = true;
-		if ( script.size() != 2 && script.size() != 3 )
+		if ( script.size() != 2 && script.size() != 3 && script.size() != 4)
 		{
-			MISLOGSYNTAXERROR("<item> [<quantity>] [<quality>][:npc_name][:group]");
+			MISLOGSYNTAXERROR("<item> [<quantity>] [<quality>][:npc_name][:group][:guild]");
 			return false;
 		}
 		vector<string> args;
@@ -569,6 +569,17 @@ class CMissionActionRecvItem : public IMissionAction
 				_Group = true;
 		}
 
+		// We check for the guild option
+		_Guild = false;
+		for (std::vector< std::string >::const_iterator it = script.begin(); it != script.end(); ++it)
+		{
+			if (CMissionParser::getNoBlankString(*it) == "guild")
+			{
+				_Guild = true;
+				break;
+			}
+		}
+
 		
 		if ( _Quantity == 0 )
 		{
@@ -606,7 +617,7 @@ class CMissionActionRecvItem : public IMissionAction
 				}
 			}
 		}
-		else if ( !_Group )
+		else if ( !_Group && !_Guild)
 		{
 			CCharacter * user = PlayerManager.getChar( entities[0] );
 			CTeam * team = TeamManager.getRealTeam(user->getTeamId());
@@ -617,141 +628,245 @@ class CMissionActionRecvItem : public IMissionAction
 			}
 		}
 
-
-		// check free room space in inventory
-		// NB : in case of group, fail happens only if none in the group have enough free space
-		sint16 neededSlotCount = 0;
-		uint32 neededBulk = 0;
-		CSheetId sheet = ( _SheetId != CSheetId::Unknown )?_SheetId:_Item.getSheetId();
-		CGameItemPtr itemTmp = GameItemManager.createItem(sheet, _Quality, true, true);
-		if (itemTmp != NULL)
+		// If the case we want to give the item to the guild
+		if (_Guild)
 		{
-			neededSlotCount = (sint16) ceil( (float)_Quantity / itemTmp->getMaxStackSize() );
-			neededBulk = _Quantity * itemTmp->getStackBulk();
-			itemTmp.deleteItem();
+			if (entities.size() == 0)
+				return;
+
+			CCharacter * user = PlayerManager.getChar( entities[0] );
+			if (!user)
+			{
+				LOGMISSIONACTION("recv_fame : Invalid user");
+				return;
+			}
+
+			CGuild * guild = CGuildManager::getInstance()->getGuildFromId(user->getGuildId());
+			if (!guild)
+			{
+				LOGMISSIONACTION("recv_fame : Invalid guild id '" + NLMISC::toString(user->getGuildId()) + "'");
+				return;
+			}
+
+			SM_STATIC_PARAMS_3(params, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::integer);
+			if ( _SheetId != CSheetId::Unknown )
+			{
+				const CStaticItem * form = CSheets::getForm( _SheetId );
+				if ( !form )
+				{
+					LOGMISSIONACTION("sheetId '" + _SheetId.toString() + "' is unknown");
+					return;
+				}
+				if (form->Family != ITEMFAMILY::MISSION_ITEM)
+					return;
+
+				uint quantity = _Quantity;
+				while (quantity > 0)
+				{
+					CGameItemPtr item = user->createItem(_Quality, quantity, _SheetId);
+					if (item == NULL)
+						break;
+					const uint32 stackSize = item->getStackSize();
+
+					if (!guild->putItem(item))
+					{
+						CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( instance->getTemplateId() );
+						if ( templ )
+						{
+							if ( templ->Tags.FailIfInventoryIsFull )
+							{
+								instance->setProcessingState(CMission::ActionFailed);
+								return;
+							}
+						}
+					}
+					// from here item maybe NULL (because of autostack)
+
+					quantity -= stackSize;
+				}
+				params[2].Int = _Quality;
+			}
+			else
+			{
+				const CStaticItem * form = CSheets::getForm( _Item.getSheetId() );
+				if ( !form )
+				{
+					LOGMISSIONACTION("sheetId '" + _Item.getSheetId().toString() + "' is unknown");
+					return;
+				}
+				uint quantity = _Quantity;
+				while (quantity > 0)
+				{
+					CGameItemPtr item = _Item.createItem(quantity);
+					if (item == NULL)
+						break;
+
+					const uint32 stackSize = item->getStackSize();
+					if (!guild->putItem(item))
+					{
+						CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( instance->getTemplateId() );
+						if ( templ )
+						{
+							if ( templ->Tags.FailIfInventoryIsFull )
+							{
+								instance->setProcessingState(CMission::ActionFailed);
+								return;
+							}
+						}
+					}
+					// from here item maybe NULL (because of autostack)
+
+					quantity -= stackSize;
+				}
+				params[2].Int = _Item.getQuality();
+			}
+
+			params[0].SheetId = _SheetId;
+			params[1].Int = _Quantity;
+
+			for ( uint i = 0; i < entities.size(); i++ )
+			{
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if ( user )
+					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_GUILD_RECV_ITEM", params);
+			}
 		}
 		else
 		{
-			LOGMISSIONACTION("can't get static item from sheet " + sheet.toString());
-			return;
-		}
-		
-		
-		bool fail = true;
-		for ( uint i = 0; i < entities.size(); i++ )
-		{
-			CCharacter * user = PlayerManager.getChar( entities[i] );
-			if ( user )
+			// check free room space in inventory
+			// NB : in case of group, fail happens only if none in the group have enough free space
+			sint16 neededSlotCount = 0;
+			uint32 neededBulk = 0;
+			CSheetId sheet = ( _SheetId != CSheetId::Unknown )?_SheetId:_Item.getSheetId();
+			CGameItemPtr itemTmp = GameItemManager.createItem(sheet, _Quality, true, true);
+			if (itemTmp != NULL)
 			{
-				CInventoryPtr invBag = user->getInventory( INVENTORIES::bag );
-				sint16 freeSlotcount = invBag->getFreeSlotCount();
-				uint32 maxBulk = invBag->getMaxBulk();
-
-				CInventoryPtr invTemp = user->getInventory( INVENTORIES::temporary );
-				if( invTemp )
-				{
-					freeSlotcount -= invTemp->getUsedSlotCount();
-					maxBulk -= invTemp->getInventoryBulk();
-				}
-				
-				if( (neededSlotCount <= freeSlotcount) && ( neededBulk + invBag->getInventoryBulk() <= maxBulk) )
-				{
-					fail = false;
-					break;
-				}
+				neededSlotCount = (sint16) ceil( (float)_Quantity / itemTmp->getMaxStackSize() );
+				neededBulk = _Quantity * itemTmp->getStackBulk();
+				itemTmp.deleteItem();
 			}
-		}
-		if( fail )
-		{
-			CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( instance->getTemplateId() );
-			if ( templ )
+			else
 			{
-				if ( templ->Tags.FailIfInventoryIsFull )
-				{
-					instance->setProcessingState(CMission::ActionFailed);
-					return;
-				}
+				LOGMISSIONACTION("can't get static item from sheet " + sheet.toString());
+				return;
 			}
-		}
 
-		for ( uint i = 0; i < entities.size(); i++ )
-		{
-			CCharacter * user = PlayerManager.getChar( entities[i] );
-			if ( user )
+			bool fail = true;
+			for ( uint i = 0; i < entities.size(); i++ )
 			{
-				SM_STATIC_PARAMS_3(params, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::integer);
-				if ( _SheetId != CSheetId::Unknown )
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if ( user )
 				{
-					const CStaticItem * form = CSheets::getForm( _SheetId );
-					if ( !form )
+					CInventoryPtr invBag = user->getInventory( INVENTORIES::bag );
+					sint16 freeSlotcount = invBag->getFreeSlotCount();
+					uint32 maxBulk = invBag->getMaxBulk();
+
+					CInventoryPtr invTemp = user->getInventory( INVENTORIES::temporary );
+					if( invTemp )
 					{
-						LOGMISSIONACTION("sheetId '" + _SheetId.toString() + "' is unknown");
+						freeSlotcount -= invTemp->getUsedSlotCount();
+						maxBulk -= invTemp->getInventoryBulk();
+					}
+					
+					if( (neededSlotCount <= freeSlotcount) && ( neededBulk + invBag->getInventoryBulk() <= maxBulk) )
+					{
+						fail = false;
+						break;
+					}
+				}
+			}
+			if( fail )
+			{
+				CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( instance->getTemplateId() );
+				if ( templ )
+				{
+					if ( templ->Tags.FailIfInventoryIsFull )
+					{
+						instance->setProcessingState(CMission::ActionFailed);
 						return;
 					}
-					if (form->Family != ITEMFAMILY::MISSION_ITEM && !user->enterTempInventoryMode(TEMP_INV_MODE::MissionReward))
-						continue;
+				}
+			}
 
-					uint quantity = _Quantity;
-					while (quantity > 0)
+			for ( uint i = 0; i < entities.size(); i++ )
+			{
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if ( user )
+				{
+					SM_STATIC_PARAMS_3(params, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::integer);
+					if ( _SheetId != CSheetId::Unknown )
 					{
-						CGameItemPtr item = user->createItem(_Quality, quantity, _SheetId);
-						if (item == NULL)
-							break;
-						const uint32 stackSize = item->getStackSize();
-
-						if( form->Family != ITEMFAMILY::MISSION_ITEM )
+						const CStaticItem * form = CSheets::getForm( _SheetId );
+						if ( !form )
 						{
+							LOGMISSIONACTION("sheetId '" + _SheetId.toString() + "' is unknown");
+							return;
+						}
+						if (form->Family != ITEMFAMILY::MISSION_ITEM && !user->enterTempInventoryMode(TEMP_INV_MODE::MissionReward))
+							continue;
+
+						uint quantity = _Quantity;
+						while (quantity > 0)
+						{
+							CGameItemPtr item = user->createItem(_Quality, quantity, _SheetId);
+							if (item == NULL)
+								break;
+							const uint32 stackSize = item->getStackSize();
+
+							if( form->Family != ITEMFAMILY::MISSION_ITEM )
+							{
+								if (!user->addItemToInventory(INVENTORIES::temporary, item))
+								{
+									item.deleteItem();
+									break;
+								}
+							}
+							else
+							{
+								if (!user->addItemToInventory(INVENTORIES::bag, item))
+								{
+									item.deleteItem();
+									break;
+								}
+							}
+							// from here item maybe NULL (because of autostack)
+
+							quantity -= stackSize;
+						}
+						params[2].Int = _Quality;
+					}
+					else
+					{
+						const CStaticItem * form = CSheets::getForm( _Item.getSheetId() );
+						if ( !form )
+						{
+							LOGMISSIONACTION("sheetId '" + _Item.getSheetId().toString() + "' is unknown");
+							return;
+						}
+						uint quantity = _Quantity;
+						while (quantity > 0)
+						{
+							CGameItemPtr item = _Item.createItem(quantity);
+							if (item == NULL)
+								break;
+
+							const uint32 stackSize = item->getStackSize();
 							if (!user->addItemToInventory(INVENTORIES::temporary, item))
 							{
 								item.deleteItem();
 								break;
 							}
-						}
-						else
-						{
-							if (!user->addItemToInventory(INVENTORIES::bag, item))
-							{
-								item.deleteItem();
-								break;
-							}
-						}
-						// from here item maybe NULL (because of autostack)
+							// from here item maybe NULL (because of autostack)
 
-						quantity -= stackSize;
+							quantity -= stackSize;
+						}
+						params[2].Int = _Item.getQuality();
 					}
-					params[2].Int = _Quality;
+					
+					params[0].SheetId = _SheetId;
+					params[1].Int = _Quantity;
+					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_RECV_ITEM", params);
 				}
-				else
-				{
-					const CStaticItem * form = CSheets::getForm( _Item.getSheetId() );
-					if ( !form )
-					{
-						LOGMISSIONACTION("sheetId '" + _Item.getSheetId().toString() + "' is unknown");
-						return;
-					}
-					uint quantity = _Quantity;
-					while (quantity > 0)
-					{
-						CGameItemPtr item = _Item.createItem(quantity);
-						if (item == NULL)
-							break;
-
-						const uint32 stackSize = item->getStackSize();
-						if (!user->addItemToInventory(INVENTORIES::temporary, item))
-						{
-							item.deleteItem();
-							break;
-						}
-						// from here item maybe NULL (because of autostack)
-
-						quantity -= stackSize;
-					}
-					params[2].Int = _Item.getQuality();
-				}
-				
-				params[0].SheetId = _SheetId;
-				params[1].Int = _Quantity;
-				PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_RECV_ITEM", params);
 			}
 		}
 	};
@@ -760,6 +875,7 @@ class CMissionActionRecvItem : public IMissionAction
 	uint16		 _Quantity;
 	CSheetId	 _SheetId;
 	bool		 _Group;
+	bool		_Guild;
 
 	MISSION_ACTION_GETNEWPTR(CMissionActionRecvItem)
 };
@@ -772,9 +888,9 @@ class CMissionActionRecvNamedItem : public IMissionAction
 	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
 	{
 		_SourceLine = line;
-		if ( script.size() != 2 && script.size() != 3 )
+		if ( script.size() != 2 && script.size() != 3 && script.size() != 4)
 		{
-			MISLOGSYNTAXERROR("<named_item> [<quantity>] [:group]");
+			MISLOGSYNTAXERROR("<named_item> [<quantity>] [:group] [:guild]");
 			return false;
 		}
 		vector<string> args;
@@ -813,6 +929,17 @@ class CMissionActionRecvNamedItem : public IMissionAction
 				_Group = true;
 		}
 
+		// We check for the guild option
+		_Guild = false;
+		for (std::vector< std::string >::const_iterator it = script.begin(); it != script.end(); ++it)
+		{
+			if (CMissionParser::getNoBlankString(*it) == "guild")
+			{
+				_Guild = true;
+				break;
+			}
+		}
+
 		if ( _Quantity == 0 )
 		{
 			MISLOGERROR("quantity = 0");
@@ -848,7 +975,7 @@ class CMissionActionRecvNamedItem : public IMissionAction
 				}
 			}
 		}
-		else if ( !_Group )
+		else if ( !_Group && !_Guild)
 		{
 			CCharacter * user = PlayerManager.getChar( entities[0] );
 			CTeam * team = TeamManager.getRealTeam(user->getTeamId());
@@ -859,41 +986,34 @@ class CMissionActionRecvNamedItem : public IMissionAction
 			}
 		}
 
-		// check free room space in inventory
-		// NB : in case of group, fail happens only if noone in the group have enough free space
-		CGameItemPtr itemTmp = CNamedItems::getInstance().createNamedItem(_NamedItem, _Quantity);
-		if( itemTmp != NULL )
+		// If the case we want to give the item to the guild
+		if (_Guild)
 		{
-			sint16 neededSlotCount = (sint16) ceil( (float)_Quantity / itemTmp->getMaxStackSize() );
-			uint32 neededBulk = _Quantity * itemTmp->getStackBulk();
-			itemTmp.deleteItem();
-			
-			bool fail = true;
-			for ( uint i = 0; i < entities.size(); i++ )
-			{
-				CCharacter * user = PlayerManager.getChar( entities[i] );
-				if ( user )
-				{
-					CInventoryPtr invBag = user->getInventory( INVENTORIES::bag );
-					sint16 freeSlotcount = invBag->getFreeSlotCount();
-					uint32 maxBulk = invBag->getMaxBulk();
+			if (entities.size() == 0)
+				return;
 
-					CInventoryPtr invTemp = user->getInventory( INVENTORIES::temporary );
-					if( invTemp )
-					{
-						freeSlotcount -= invTemp->getUsedSlotCount();
-						maxBulk -= invTemp->getInventoryBulk();
-					}
-					
-					if( (neededSlotCount <= freeSlotcount) && ( neededBulk + invBag->getInventoryBulk() <= maxBulk) )
-					{
-						fail = false;
-						break;
-					}
-				}
-				
+			CCharacter * user = PlayerManager.getChar( entities[0] );
+			if (!user)
+			{
+				LOGMISSIONACTION("recv_fame : Invalid user");
+				return;
 			}
-			if( fail )
+
+			CGuild * guild = CGuildManager::getInstance()->getGuildFromId(user->getGuildId());
+			if (!guild)
+			{
+				LOGMISSIONACTION("recv_fame : Invalid guild id '" + NLMISC::toString(user->getGuildId()) + "'");
+				return;
+			}
+
+			// add the item to inventory
+			CGameItemPtr item = CNamedItems::getInstance().createNamedItem(_NamedItem, _Quantity);
+			if (item == NULL)
+			{
+				LOGMISSIONACTION("named item '" + _NamedItem + "' is unknown");
+				return;
+			}
+			if (!guild->putItem(item))
 			{
 				CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( instance->getTemplateId() );
 				if ( templ )
@@ -905,39 +1025,103 @@ class CMissionActionRecvNamedItem : public IMissionAction
 					}
 				}
 			}
+			else
+			{
+				for ( uint i = 0; i < entities.size(); i++ )
+				{
+					CCharacter * user = PlayerManager.getChar( entities[i] );
+					if ( user )
+					{
+						SM_STATIC_PARAMS_2(params, STRING_MANAGER::dyn_string_id, STRING_MANAGER::integer);
+						params[0].StringId = item->sendNameId(user);
+						params[1].Int = _Quantity;
+						PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_GUILD_RECV_NAMED_ITEM", params);
+					}
+				}
+			}
 		}
 		else
 		{
-			LOGMISSIONACTION("named item '" + _NamedItem + "' is unknown");
-			return;
-		}
-
-		// apply the action to all entities
-		for ( uint i = 0; i < entities.size(); i++ )
-		{
-			CCharacter * user = PlayerManager.getChar( entities[i] );
-			if ( user )
+			// check free room space in inventory
+			// NB : in case of group, fail happens only if noone in the group have enough free space
+			CGameItemPtr itemTmp = CNamedItems::getInstance().createNamedItem(_NamedItem, _Quantity);
+			if( itemTmp != NULL )
 			{
-				if (!user->enterTempInventoryMode(TEMP_INV_MODE::MissionReward))
-					continue;
+				sint16 neededSlotCount = (sint16) ceil( (float)_Quantity / itemTmp->getMaxStackSize() );
+				uint32 neededBulk = _Quantity * itemTmp->getStackBulk();
+				itemTmp.deleteItem();
+				
+				bool fail = true;
+				for ( uint i = 0; i < entities.size(); i++ )
+				{
+					CCharacter * user = PlayerManager.getChar( entities[i] );
+					if ( user )
+					{
+						CInventoryPtr invBag = user->getInventory( INVENTORIES::bag );
+						sint16 freeSlotcount = invBag->getFreeSlotCount();
+						uint32 maxBulk = invBag->getMaxBulk();
 
-				// add the item to inventory
-				CGameItemPtr item = CNamedItems::getInstance().createNamedItem(_NamedItem, _Quantity);
-				if (item == NULL)
-				{
-					LOGMISSIONACTION("named item '" + _NamedItem + "' is unknown");
-					return;
+						CInventoryPtr invTemp = user->getInventory( INVENTORIES::temporary );
+						if( invTemp )
+						{
+							freeSlotcount -= invTemp->getUsedSlotCount();
+							maxBulk -= invTemp->getInventoryBulk();
+						}
+						
+						if( (neededSlotCount <= freeSlotcount) && ( neededBulk + invBag->getInventoryBulk() <= maxBulk) )
+						{
+							fail = false;
+							break;
+						}
+					}
+					
 				}
-				if(!user->addItemToInventory(INVENTORIES::temporary, item))
+				if( fail )
 				{
-					item.deleteItem();
+					CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( instance->getTemplateId() );
+					if ( templ )
+					{
+						if ( templ->Tags.FailIfInventoryIsFull )
+						{
+							instance->setProcessingState(CMission::ActionFailed);
+							return;
+						}
+					}
 				}
-				else
+			}
+			else
+			{
+				LOGMISSIONACTION("named item '" + _NamedItem + "' is unknown");
+				return;
+			}
+
+			// apply the action to all entities
+			for ( uint i = 0; i < entities.size(); i++ )
+			{
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if ( user )
 				{
-					SM_STATIC_PARAMS_2(params, STRING_MANAGER::dyn_string_id, STRING_MANAGER::integer);
-					params[0].StringId = item->sendNameId(user);
-					params[1].Int = _Quantity;
-					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_RECV_NAMED_ITEM", params);
+					if (!user->enterTempInventoryMode(TEMP_INV_MODE::MissionReward))
+						continue;
+
+					// add the item to inventory
+					CGameItemPtr item = CNamedItems::getInstance().createNamedItem(_NamedItem, _Quantity);
+					if (item == NULL)
+					{
+						LOGMISSIONACTION("named item '" + _NamedItem + "' is unknown");
+						return;
+					}
+					if(!user->addItemToInventory(INVENTORIES::temporary, item))
+					{
+						item.deleteItem();
+					}
+					else
+					{
+						SM_STATIC_PARAMS_2(params, STRING_MANAGER::dyn_string_id, STRING_MANAGER::integer);
+						params[0].StringId = item->sendNameId(user);
+						params[1].Int = _Quantity;
+						PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_RECV_NAMED_ITEM", params);
+					}
 				}
 			}
 		}
@@ -945,6 +1129,7 @@ class CMissionActionRecvNamedItem : public IMissionAction
 	std::string	 _NamedItem;
 	uint16		 _Quantity;
 	bool		 _Group;
+	bool		_Guild;
 
 	MISSION_ACTION_GETNEWPTR(CMissionActionRecvNamedItem)
 };
@@ -1043,9 +1228,9 @@ class CMissionActionDestroyItem :
 	{
 		// Parse the line
 		_SourceLine = line;
-		if ( script.size() != 2 && script.size() != 3)
+		if ( script.size() != 2 && script.size() != 3 && script.size() != 4)
 		{
-			MISLOGSYNTAXERROR("<item> [<quantity>] [<quality>]:[npc_name]");
+			MISLOGSYNTAXERROR("<item> [<quantity>] [<quality>]:[npc_name] [:guild]");
 			return false;
 		}
 
@@ -1058,6 +1243,17 @@ class CMissionActionDestroyItem :
 		{
 			if (!CMissionParser::parseBotName(script[2], _Npc, missionData))
 				ret= false;
+		}
+
+		// We check for the guild option
+		_Guild = false;
+		for (std::vector< std::string >::const_iterator it = script.begin(); it != script.end(); ++it)
+		{
+			if (CMissionParser::getNoBlankString(*it) == "guild")
+			{
+				_Guild = true;
+				break;
+			}
 		}
 
 		return ret;
@@ -1074,36 +1270,86 @@ class CMissionActionDestroyItem :
 		instance->getEntities(entities);
 		if ( entities.empty() )
 			return;
-		for ( uint i = 0; i < entities.size(); i++ )
+
+		// If the "guild" parameter is not set, we destroy the items for the users
+		if (!_Guild)
 		{
-			CCharacter * user = PlayerManager.getChar( entities[i] );
-			if ( user )
+
+			for ( uint i = 0; i < entities.size(); i++ )
 			{
-				// Select the items in Bag AND mektoub that match the request
-				vector<CCharacter::CItemSlotId>		itemList;
-				user->selectItems(INVENTORIES::bag, _SheetId, _Quality, &itemList);
-				for(uint pa=0;pa<INVENTORIES::max_pet_animal;pa++)
-					user->selectItems(INVENTORIES::TInventory(INVENTORIES::pet_animal + pa), _SheetId, _Quality, &itemList);
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if ( user )
+				{
+					// Select the items in Bag AND mektoub that match the request
+					vector<CCharacter::CItemSlotId>		itemList;
+					user->selectItems(INVENTORIES::bag, _SheetId, _Quality, &itemList);
+					for(uint pa=0;pa<INVENTORIES::max_pet_animal;pa++)
+						user->selectItems(INVENTORIES::TInventory(INVENTORIES::pet_animal + pa), _SheetId, _Quality, &itemList);
 
-				// Destroy them, up to quantity wanted
-				// NB: don't care if destroying an item owned by a mektoub is strange because mektoub not near!
-				uint	quantityReallyDestroyed;
-				quantityReallyDestroyed= user->destroyItems(itemList, _Quantity);
+					// Destroy them, up to quantity wanted
+					// NB: don't care if destroying an item owned by a mektoub is strange because mektoub not near!
+					uint	quantityReallyDestroyed;
+					quantityReallyDestroyed= user->destroyItems(itemList, _Quantity);
 
-				// Send message
-				SM_STATIC_PARAMS_4(params, STRING_MANAGER::bot, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::integer);
-				TAIAlias	botAlias= _Npc;
-				if(botAlias==CAIAliasTranslator::Invalid)
-					botAlias= instance->getGiver();
-				params[0].setEIdAIAlias(CAIAliasTranslator::getInstance()->getEntityId( botAlias ), botAlias);
-				params[1].SheetId = _SheetId;
-				params[2].Int = quantityReallyDestroyed;
-				params[3].Int = _Quality;
-				PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_DESTROY_ITEM", params);
+					// Send message
+					SM_STATIC_PARAMS_4(params, STRING_MANAGER::bot, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::integer);
+					TAIAlias	botAlias= _Npc;
+					if(botAlias==CAIAliasTranslator::Invalid)
+						botAlias= instance->getGiver();
+					params[0].setEIdAIAlias(CAIAliasTranslator::getInstance()->getEntityId( botAlias ), botAlias);
+					params[1].SheetId = _SheetId;
+					params[2].Int = quantityReallyDestroyed;
+					params[3].Int = _Quality;
+					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_DESTROY_ITEM", params);
+				}
+			}
+
+		}
+		// We destroy the item in the guild
+		else
+		{
+			CCharacter * user = PlayerManager.getChar( entities[0] );
+			if (!user)
+			{
+				LOGMISSIONACTION("recv_fame : Invalid user");
+				return;
+			}
+
+			CGuild * guild = CGuildManager::getInstance()->getGuildFromId(user->getGuildId());
+			if (!guild)
+			{
+				LOGMISSIONACTION("recv_fame : Invalid guild id '" + NLMISC::toString(user->getGuildId()) + "'");
+				return;
+			}
+
+			vector<CGuild::CItemSlotId>		itemList;
+			guild->selectItems(_SheetId, _Quality, &itemList);
+
+			// Destroy them, up to quantity wanted
+			uint	quantityReallyDestroyed;
+			quantityReallyDestroyed = guild->destroyItems(itemList, _Quantity);
+
+			// Send message
+			for ( uint i = 0; i < entities.size(); i++ )
+			{
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if ( user )
+				{
+					SM_STATIC_PARAMS_4(params, STRING_MANAGER::bot, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::integer);
+					TAIAlias	botAlias= _Npc;
+					if(botAlias==CAIAliasTranslator::Invalid)
+						botAlias= instance->getGiver();
+					params[0].setEIdAIAlias(CAIAliasTranslator::getInstance()->getEntityId( botAlias ), botAlias);
+					params[1].SheetId = _SheetId;
+					params[2].Int = quantityReallyDestroyed;
+					params[3].Int = _Quality;
+					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_DESTROY_ITEM", params);
+				}
 			}
 		}
 	};
 	TAIAlias	_Npc;
+	bool		_Guild;
 
 	MISSION_ACTION_GETNEWPTR(CMissionActionDestroyItem)
 };
@@ -1607,9 +1853,9 @@ class CMissionActionRecvMoney : public IMissionAction
 	{
 		bool ret = true;
 		_SourceLine = line;
-		if ( script.size() != 2 )
+		if ( script.size() != 2 && script.size() != 3)
 		{
-			MISLOGSYNTAXERROR("<money> OR <item><quality><factor> *[;<item><quality><factor>]");
+			MISLOGSYNTAXERROR("<money> [: guild] OR <item><quality><factor> *[;<item><quality><factor>]");
 			return false;
 		}
 		
@@ -1637,6 +1883,18 @@ class CMissionActionRecvMoney : public IMissionAction
 					ret = false;
 			}
 		}
+
+		// We check for the guild option
+		_Guild = false;
+		for (std::vector< std::string >::const_iterator it = script.begin(); it != script.end(); ++it)
+		{
+			if (CMissionParser::getNoBlankString(*it) == "guild")
+			{
+				_Guild = true;
+				break;
+			}
+		}
+
 		return ret;
 	}
 
@@ -1647,22 +1905,66 @@ class CMissionActionRecvMoney : public IMissionAction
 
 		std::vector<TDataSetRow> entities;
 		instance->getEntities(entities);
-		uint amount = _Amount / (uint)entities.size();
-		if ( amount == 0 || _Amount % entities.size() )
-			amount++;
-		for ( uint i = 0; i < entities.size(); i++ )
+
+		// If the guild parameter is not set we just divide the money and give it to each entity
+		if (!_Guild)
 		{
-			CCharacter * user = PlayerManager.getChar( entities[i] );
-			if ( user )
+
+			uint amount = _Amount / (uint)entities.size();
+			if ( amount == 0 || _Amount % entities.size() )
+				amount++;
+			for ( uint i = 0; i < entities.size(); i++ )
 			{
-				user->giveMoney( _Amount );
-				SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
-				params[0].Int = _Amount;
-				PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_RECV_MONEY",params);
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if ( user )
+				{
+					user->giveMoney( _Amount );
+					SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
+					params[0].Int = _Amount;
+					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_RECV_MONEY",params);
+				}
+			}
+
+		}
+		// Else we give the money to the guild
+		else
+		{
+			if (entities.size() == 0)
+				return;
+
+			CCharacter * user = PlayerManager.getChar( entities[0] );
+			if (!user)
+			{
+				LOGMISSIONACTION("recv_money : Invalid user");
+				return;
+			}
+
+			CGuild * guild = CGuildManager::getInstance()->getGuildFromId(user->getGuildId());
+			if (guild)
+			{
+				guild->addMoney(_Amount);
+			}
+			else
+			{
+				LOGMISSIONACTION("recv_money : Invalid guild id '" + NLMISC::toString(user->getGuildId()) + "'");
+				return;
+			}
+
+			// tell everyone some money has been given to the guild
+			for ( uint i = 0; i < entities.size(); i++ )
+			{
+				CCharacter * user = PlayerManager.getChar( entities[i] );
+				if ( user )
+				{
+					SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
+					params[0].Int = _Amount;
+					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_GUILD_RECV_MONEY",params);
+				}
 			}
 		}
 	};
 	uint _Amount;
+	bool _Guild;
 
 	MISSION_ACTION_GETNEWPTR(CMissionActionRecvMoney)
 };
@@ -1675,9 +1977,9 @@ class CMissionActionRecvFame : public IMissionAction
 	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
 	{
 		_SourceLine = line;
-		if ( script.size() != 2 )
+		if ( script.size() != 2 && script.size() != 3)
 		{
-			MISLOGSYNTAXERROR("<faction> <value>");
+			MISLOGSYNTAXERROR("<faction> <value> [:guild]");
 			return false;
 		}
 		vector<string> args;
@@ -1700,6 +2002,18 @@ class CMissionActionRecvFame : public IMissionAction
 			MISLOGERROR("fame = 0");
 			return false;
 		}
+
+		// We check for the guild option
+		_Guild = false;
+		for (std::vector< std::string >::const_iterator it = script.begin(); it != script.end(); ++it)
+		{
+			if (CMissionParser::getNoBlankString(*it) == "guild")
+			{
+				_Guild = true;
+				break;
+			}
+		}
+
 		return true;
 		
 	}
@@ -1708,20 +2022,63 @@ class CMissionActionRecvFame : public IMissionAction
 		LOGMISSIONACTION("recv_fame");
 		std::vector<TDataSetRow> entities;
 		instance->getEntities(entities);
-		for ( uint i = 0; i < entities.size(); i++ )
-		{
-			CEntityId eid = TheDataset.getEntityId(entities[i]);
-			CFameInterface::getInstance().addFameIndexed(eid, _Faction, _Value, true);
 
-			// Make the client refresh the icons on mission giver NPCs, at once
-			CCharacter *character = PlayerManager.getChar(entities[i]);
-			if (character)
-				character->sendEventForMissionAvailabilityCheck();
+		// If there is no "guild" parameter we give the fame to every user
+		if (!_Guild)
+		{
+
+			for ( uint i = 0; i < entities.size(); i++ )
+			{
+				CEntityId eid = TheDataset.getEntityId(entities[i]);
+				CFameInterface::getInstance().addFameIndexed(eid, _Faction, _Value, true);
+
+				// Make the client refresh the icons on mission giver NPCs, at once
+				CCharacter *character = PlayerManager.getChar(entities[i]);
+				if (character)
+					character->sendEventForMissionAvailabilityCheck();
+			}
+
+		}
+		// Else we just give it to the guild
+		else
+		{
+
+			if (entities.size() == 0)
+				return;
+
+			CCharacter * user = PlayerManager.getChar( entities[0] );
+			if (!user)
+			{
+				LOGMISSIONACTION("recv_fame : Invalid user");
+				return;
+			}
+
+			CGuild * guild = CGuildManager::getInstance()->getGuildFromId(user->getGuildId());
+			if (guild)
+			{
+				CFameInterface::getInstance().addFameIndexed(guild->getEId(), _Faction, _Value, true);
+			}
+			else
+			{
+				LOGMISSIONACTION("recv_fame : Invalid guild id '" + NLMISC::toString(user->getGuildId()) + "'");
+				return;
+			}
+
+			// tell everyone some money has been given to the guild
+			for ( uint i = 0; i < entities.size(); i++ )
+			{
+				// Make the client refresh the icons on mission giver NPCs, at once
+				CCharacter *character = PlayerManager.getChar(entities[i]);
+				if (character)
+					character->sendEventForMissionAvailabilityCheck();
+			}
+
 		}
 
 	};
 	uint32		_Faction;
 	sint32		_Value;
+	bool		_Guild;
 
 	MISSION_ACTION_GETNEWPTR(CMissionActionRecvFame)
 };
@@ -3695,15 +4052,16 @@ protected:
 
 	TAIAlias	Mission;	
 	TAIAlias	NPCOwner;	// NPC giver the mission have to be attached at spawn time
+	bool		Guild;
 
 protected:
 
 	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
 	{
 		_SourceLine = line;
-		if ( script.size() != 3 )
+		if ( script.size() != 3 && script.size() != 4)
 		{
-			MISLOGSYNTAXERROR("<mission_name> : <giver_name>");
+			MISLOGSYNTAXERROR("<mission_name> : <giver_name> [: guild]");
 			return false;
 		}
 		string name = CMissionParser::getNoBlankString( script[1] );
@@ -3736,6 +4094,17 @@ protected:
 		if (vRet.size() > 0)
 			NPCOwner = vRet[0];
 
+		// We check for the guild option
+		Guild = false;
+		for (std::vector< std::string >::const_iterator it = script.begin(); it != script.end(); ++it)
+		{
+			if (CMissionParser::getNoBlankString(*it) == "guild")
+			{
+				Guild = true;
+				break;
+			}
+		}
+
 		return true;
 	}
 
@@ -3746,13 +4115,13 @@ protected:
 		{
 			CAIAliasTranslator::getInstance()->getNPCNameFromAlias(instance->getGiver(), sDebugBotName);
 			nlassert(instance);
-			CMissionEventAddMission * event = new CMissionEventAddMission( instance->getGiver(), Mission, mainMission );
+			CMissionEventAddMission * event = new CMissionEventAddMission( instance->getGiver(), Mission, mainMission, Guild );
 			eventList.push_back( event );
 		}
 		else
 		{
 			CAIAliasTranslator::getInstance()->getNPCNameFromAlias(NPCOwner, sDebugBotName);
-			CMissionEventAddMission * event = new CMissionEventAddMission( NPCOwner, Mission, mainMission );
+			CMissionEventAddMission * event = new CMissionEventAddMission( NPCOwner, Mission, mainMission, Guild );
 			eventList.push_back( event );
 		}
 		LOGMISSIONACTION("spawn_mission bot:" + sDebugBotName + " newmiss:" + CPrimitivesParser::aliasToString(Mission)

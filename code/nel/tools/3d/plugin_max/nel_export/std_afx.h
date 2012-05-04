@@ -26,16 +26,29 @@
 #include <utilapi.h>
 #include <shlobj.h>
 #undef STRICT
-#include <MaxScrpt/maxscrpt.h>
-#include <MaxScrpt/3dmath.h>
-#include <MaxScrpt/numbers.h>
-#include <MaxScrpt/maxclses.h>
-#include <MaxScrpt/streams.h>
-#include <MaxScrpt/mstime.h>
-#include <MaxScrpt/maxobj.h>
-#include <MaxScrpt/parser.h>
+#include <maxversion.h>
+#if MAX_VERSION_MAJOR >= 14
+#	include <maxscript/maxscript.h>
+#	include <maxscript/foundation/3dmath.h>
+#	include <maxscript/foundation/numbers.h>
+#	include <maxscript/maxwrapper/maxclasses.h>
+#	include <maxscript/foundation/streams.h>
+#	include <maxscript/foundation/mxstime.h>
+#	include <maxscript/maxwrapper/mxsobjects.h>
+#	include <maxscript/compiler/parser.h>
+#   	include <maxscript/macros/define_instantiation_functions.h>
+#else
+#	include <MaxScrpt/maxscrpt.h>
+#	include <MaxScrpt/3dmath.h>
+#	include <MaxScrpt/numbers.h>
+#	include <MaxScrpt/maxclses.h>
+#	include <MaxScrpt/streams.h>
+#	include <MaxScrpt/mstime.h>
+#	include <MaxScrpt/maxobj.h>
+#	include <MaxScrpt/parser.h>
+#	include <MaxScrpt/definsfn.h>
+#endif
 #include <stdmat.h>
-#include <MaxScrpt/definsfn.h>
 #include <animtbl.h>
 #ifdef min
 #undef min

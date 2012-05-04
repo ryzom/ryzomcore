@@ -67,3 +67,15 @@ NLMISC_DYNVARIABLE( uint, NbEnvironmentalEffects, "Number of environmental effec
 	if ( get )
 		*pointer = CEnvironmentalEffectManager::getInstance()->nbEntities();
 }
+
+/// Singleton access
+CEnvironmentalEffectManager *CEnvironmentalEffectManager::getInstance()
+{
+	return (CEnvironmentalEffectManager*)_Instance;
+}
+
+/// Release
+void CEnvironmentalEffectManager::release()
+{
+	delete (CEnvironmentalEffectManager*)_Instance;
+}

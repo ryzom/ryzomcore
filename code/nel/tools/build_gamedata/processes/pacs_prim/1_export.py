@@ -6,7 +6,7 @@
 # 
 # \file 1_export.py
 # \brief Export pacs_prim
-# \date 2010-09-19-14-19-GMT
+# \date 2011-09-28-07-42-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Export pacs_prim
@@ -92,19 +92,10 @@ if MaxAvailable:
 
 
 
-printLog(log, ">>> List pacs_prim <<<")
-outDirPacsPrim =  ExportBuildDirectory + "/" + PacsPrimExportDirectory
-mkPath(log, outDirPacsPrim)
+# Remove bad file from previous script version
 listPath = ExportBuildDirectory + "/" + PacsPrimExportDirectory + "/landscape_col_prim_pacs_list.txt"
 if os.path.isfile(listPath):
 	os.remove(listPath)
-if WantLandscapeColPrimPacsList:
-	exportedPacsPrims = findFiles(log, outDirPacsPrim, "", ".pacs_prim")
-	printLog(log, "WRITE " + listPath)
-	listFile = open(listPath, "w")
-	for exported in exportedPacsPrims:
-		listFile.write(exported + "\n")
-	listFile.close()
 
 
 

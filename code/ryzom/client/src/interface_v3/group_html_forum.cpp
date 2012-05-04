@@ -51,9 +51,9 @@ CGroupHTMLForum::~CGroupHTMLForum()
 
 // ***************************************************************************
 
-void CGroupHTMLForum::addHTTPGetParams (string &url)
+void CGroupHTMLForum::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 {
- 	ucstring user_name = UserEntity->getDisplayName ();
+ 	ucstring user_name = UserEntity->getLoginName ();
 	const SGuild &guild = CGuildManager::getInstance()->getGuild();
 	string	gname = guild.Name.toUtf8();
 
@@ -83,9 +83,9 @@ void CGroupHTMLForum::addHTTPGetParams (string &url)
 
 // ***************************************************************************
 
-void CGroupHTMLForum::addHTTPPostParams (HTAssocList *formfields)
+void CGroupHTMLForum::addHTTPPostParams (HTAssocList *formfields, bool /*trustedDomain*/)
 {
-	ucstring user_name = UserEntity->getDisplayName ();
+	ucstring user_name = UserEntity->getLoginName ();
 	const SGuild &guild = CGuildManager::getInstance()->getGuild();
 	string	gname = guild.Name.toUtf8();
 
@@ -115,12 +115,13 @@ string	CGroupHTMLForum::home ()
 
 void CGroupHTMLForum::handle ()
 {
-	// Do nothing if WebServer is not initialized
+/*	// Do nothing if WebServer is not initialized
 	if (!WebServer.empty())
 	{
 		Home = WebServer+"forum.php";
 		CGroupHTML::handle ();
 	}
+*/
 }
 
 // ***************************************************************************

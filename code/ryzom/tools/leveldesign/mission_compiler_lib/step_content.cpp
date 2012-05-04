@@ -142,6 +142,7 @@ REGISTER_STEP_CONTENT(CActionJumpTo, "jump_to");
 class CActionRecvMoney : public IStepContent
 {
 	string	_Amount;
+	bool	_Guild;
 	
 	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
@@ -152,12 +153,27 @@ public:
 	{
 		IStepContent::init(md, prim);
 		_Amount = md.getProperty(prim, "amount", true, false);
+
+		_Guild = md.getProperty(prim, "guild", false, true) == "true";
+		// Check: if _Guild is true then check if we are in a guild mission
+		if (_Guild && !md.isGuildMission())
+		{
+			string err = toString("primitive(%s): 'guild' option true 1 for non guild mission.", prim->getName().c_str());
+			throw EParseException(prim, err.c_str());
+		}
 	}
 	
 	string genCode(CMissionData &md)
 	{
 		if (!_Amount.empty())
-			return "recv_money : "+_Amount+NL;
+		{
+			string ret;
+			ret = "recv_money : "+_Amount;
+			if (_Guild)
+				ret += ": guild";
+			ret += NL;
+			return ret;
+		}
 		else
 			return string();
 	}
@@ -167,11 +183,78 @@ REGISTER_STEP_CONTENT(CActionRecvMoney, "recv_money");
 
 
 // ---------------------------------------------------------------------------
+class CActionRecvChargePoint : public IStepContent
+{
+	string	_Amount;
+
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	{
+		numEntry = 0;
+	}
+public:
+	void init(CMissionData &md, IPrimitive *prim)
+	{
+		IStepContent::init(md, prim);
+		_Amount = md.getProperty(prim, "charge_points", true, false);
+	}
+
+	string genCode(CMissionData &md)
+	{
+		if (!_Amount.empty())
+		{
+			string ret;
+			ret = "recv_charge_point : "+_Amount;
+			ret += NL;
+			return ret;
+		}
+		else
+			return string();
+	}
+
+};
+REGISTER_STEP_CONTENT(CActionRecvChargePoint, "recv_charge_point");
+
+
+// ---------------------------------------------------------------------------
+class CActionGiveOutpostControl : public IStepContent
+{
+	string	_OutpostName;
+
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	{
+		numEntry = 0;
+	}
+public:
+	void init(CMissionData &md, IPrimitive *prim)
+	{
+		IStepContent::init(md, prim);
+		_OutpostName = md.getProperty(prim, "outpost_name", true, false);
+	}
+
+	string genCode(CMissionData &md)
+	{
+		if (!_OutpostName.empty())
+		{
+			string ret;
+			ret = "give_control : "+_OutpostName;
+			ret += NL;
+			return ret;
+		}
+		else
+			return string();
+	}
+
+};
+REGISTER_STEP_CONTENT(CActionGiveOutpostControl, "give_control");
+
+
+// ---------------------------------------------------------------------------
 class CActionSpawnMission : public IStepContent
 {
 protected:
 	string	_MissionName;
 	string	_GiverName;
+	bool	_Guild;
 private:
 	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
@@ -186,17 +269,29 @@ public:
 		if (_GiverName.empty())
 		{
 			throw EParseException(prim, "giver_name is empty !");
-		}	
+		}
+
+		_Guild = md.getProperty(prim, "guild", false, true) == "true";
+		// Check: if _Guild is true then check if we are in a guild mission
+		if (_Guild && !md.isGuildMission())
+		{
+			string err = toString("primitive(%s): 'guild' option true 1 for non guild mission.", prim->getName().c_str());
+			throw EParseException(prim, err.c_str());
+		}
 	}
 	
 	string genCode(CMissionData &md)
 	{
+		string ret = "";
 		if (!_MissionName.empty())
-			return "spawn_mission : " + _MissionName + " : " + _GiverName + NL;
-		else
-			return string();
+		{
+			ret =  "spawn_mission : " + _MissionName + " : " + _GiverName;
+			if (_Guild)
+				ret += " : guild";
+			ret += NL;
+		}
+		return ret;
 	}
-	
 };
 REGISTER_STEP_CONTENT(CActionSpawnMission, "spawn_mission");
 
@@ -590,6 +685,7 @@ class CActionRecvFame : public IStepContent
 {
 	string	_Faction;
 	string	_Fame;
+	bool	_Guild;
 
 	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
@@ -602,12 +698,27 @@ public:
 
 		_Faction = md.getProperty(prim, "faction", true, false);
 		_Fame = md.getProperty(prim, "value", true, false);
+
+		_Guild = md.getProperty(prim, "guild", false, true) == "true";
+		// Check: if _Guild is true then check if we are in a guild mission
+		if (_Guild && !md.isGuildMission())
+		{
+			string err = toString("primitive(%s): 'guild' option true 1 for non guild mission.", prim->getName().c_str());
+			throw EParseException(prim, err.c_str());
+		}
 	}
 
 	string genCode(CMissionData &md)
 	{
 		if (!_Faction.empty() && !_Fame.empty())
-			return string("recv_fame : ")+_Faction+" "+_Fame+NL;
+		{
+			string ret;
+			ret = "recv_fame : "+_Faction+" "+_Fame;
+			if (_Guild)
+				ret += ": guild";
+			ret += NL;
+			return ret;
+		}
 		else
 			return string();
 	}
@@ -628,6 +739,7 @@ class CActionRecvItem : public IStepContent
 	vector<TItemDesc>	_Items;
 	bool				_QualSpec;
 	bool				_Group;
+	bool				_Guild;
 
 	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
@@ -675,6 +787,13 @@ public:
 		s = md.getProperty(prim, "group", true, false);
 		_Group = (NLMISC::toLower(s) == "true");
 
+		_Guild = md.getProperty(prim, "guild", false, true) == "true";
+		// Check: if _Guild is true then check if we are in a guild mission
+		if (_Guild && !md.isGuildMission())
+		{
+			string err = toString("primitive(%s): 'guild' option true 1 for non guild mission.", prim->getName().c_str());
+			throw EParseException(prim, err.c_str());
+		}
 
 		IStepContent::init(md, prim);
 	}
@@ -693,6 +812,8 @@ public:
 				ret += " : "+_BotGiver;
 			if (_Group)
 				ret += " : group";
+			if (_Guild)
+				ret += ": guild";
 			ret += NL;
 		}
 
@@ -707,6 +828,7 @@ class CActionRecvNamedItem : public IStepContent
 {
 	vector<TItemDesc>	_Items;
 	bool				_Group;
+	bool				_Guild;
 	
 	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
@@ -743,6 +865,14 @@ public:
 		s = md.getProperty(prim, "group", true, false);
 		_Group = (NLMISC::toLower(s) == "true");
 
+		_Guild = md.getProperty(prim, "guild", false, true) == "true";
+		// Check: if _Guild is true then check if we are in a guild mission
+		if (_Guild && !md.isGuildMission())
+		{
+			string err = toString("primitive(%s): 'guild' option true 1 for non guild mission.", prim->getName().c_str());
+			throw EParseException(prim, err.c_str());
+		}
+
 		IStepContent::init(md, prim);
 	}
 	
@@ -756,6 +886,8 @@ public:
 			ret += "recv_named_item : "+item.ItemName+" "+item.ItemQuant;
 			if (_Group)
 				ret += " : group";
+			if (_Guild)
+				ret += ": guild";
 			ret += NL;
 		}
 		
@@ -777,6 +909,7 @@ class CActionDestroyItem : public IStepContent
 
 	string				_BotDestroyer;
 	vector<CItemDesc>	_Items;
+	bool				_Guild;
 	
 	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
 	{
@@ -821,6 +954,14 @@ public:
 				_Items.push_back(item);
 			}
 		}
+
+		_Guild = md.getProperty(prim, "guild", false, true) == "true";
+		// Check: if _Guild is true then check if we are in a guild mission
+		if (_Guild && !md.isGuildMission())
+		{
+			string err = toString("primitive(%s): 'guild' option true 1 for non guild mission.", prim->getName().c_str());
+			throw EParseException(prim, err.c_str());
+		}
 		
 		IStepContent::init(md, prim);
 	}
@@ -839,6 +980,8 @@ public:
 				ret +=" "+item.Desc.ItemQual;
 			if (!_BotDestroyer.empty())
 				ret += " : "+_BotDestroyer;
+			if (_Guild)
+				ret += ": guild";
 			ret += NL;
 		}
 		
@@ -1630,6 +1773,20 @@ void CContentObjective::init(CMissionData &md, IPrimitive *prim)
 	_OverloadPhrase.initPhrase(md, prim, _OverloadObj, numEntry, params);
 	// init the roleplay phrase
 	_RoleplayPhrase.initPhrase(md, prim, _RoleplayObj, numEntry, params);
+
+	// check for the 'nb_guild_members_needed' option and see if it's correct for this mission
+	/*string nbGuildMembersNeeded = md.getProperty(prim, "nb_guild_members_needed", false, true);
+	if (nbGuildMembersNeeded.empty())
+		nbGuildMembersNeeded = "1";
+	if (!fromString(nbGuildMembersNeeded.c_str(), _NbGuildMembersNeeded))
+		_NbGuildMembersNeeded = 1;
+
+	// Check:
+	if (!md.isGuildMission() && _NbGuildMembersNeeded != 1)
+	{
+		string err = toString("primitive(%s): nb_guild_members_needed != 1 for non guild mission.", prim->getName().c_str());
+		throw EParseException(prim, err.c_str());
+	}*/
 }
 
 // ---------------------------------------------------------------------------
@@ -1648,6 +1805,20 @@ string CContentObjective::genCode(CMissionData &md)
 	}
 	return ret;
 }
+
+// ---------------------------------------------------------------------------
+/*std::string CContentObjective::genNbGuildMembersNeededOption(CMissionData &md)
+{
+	string ret = "";
+	// If we are in a guild mission we add the 'nb_guild_members_needed' option to the script
+	if (md.isGuildMission())
+	{
+		ret = ": nb_guild_members_needed ";
+		ret += toString(_NbGuildMembersNeeded);
+	}
+
+	return ret;
+}*/
 
 // ---------------------------------------------------------------------------
 string CContentObjective::genPhrase()
@@ -1949,6 +2120,9 @@ public:
 
 		if (!_Place.empty())
 			ret += " : "+_Place;
+
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;
@@ -2004,6 +2178,8 @@ public:
 		
 		if (!_Phrase.isEmpty())
 			ret += " : "+_Phrase.genScript(md);
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 		
 		return ret;
@@ -2078,6 +2254,8 @@ public:
 		{
 			ret += ": "+_Place;
 		}
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 		
 		return ret;
@@ -2151,6 +2329,8 @@ public:
 			if (i < _Mps.size()-1)
 				ret += "; ";
 		}
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 		
 		return ret;
@@ -2276,6 +2456,8 @@ public:
 			if (i < _Items.size()-1)
 				ret += "; ";
 		}
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 		
 		return ret;
@@ -2349,6 +2531,8 @@ public:
 			if (i < _Items.size()-1)
 				ret += "; ";
 		}
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 		
 		return ret;
@@ -2479,7 +2663,8 @@ public:
 
 		if (!_Place.empty())
 			ret += " : " + _Place;
-
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;
@@ -2564,6 +2749,8 @@ public:
 		{
 			ret += " : "+_Npc;
 		}
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 		
 		return ret;
@@ -2645,6 +2832,8 @@ public:
 		{
 			ret += " : "+_Npc;
 		}
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 		
 		return ret;
@@ -2755,7 +2944,10 @@ public:
 			if (i < _Items.size()-1)
 				ret += "; ";
 		};
-		ret += " : "+_Npc +NL;
+		ret += " : "+_Npc;
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		ret += NL;
 		
 		return ret;
 	}
@@ -2790,7 +2982,10 @@ public:
 		string ret;
 		ret = CContentObjective::genCode(md);
 
-		ret += "give_money : "+_Amount+" : "+_Npc+NL;
+		ret += "give_money : "+_Amount+" : "+_Npc;
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
+		ret += NL;
 
 		return ret;
 	}
@@ -2841,7 +3036,8 @@ public:
 					ret += "; ";
 			}
 		}
-
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;
@@ -2877,7 +3073,8 @@ public:
 
 		if (_SaveAll)
 			ret += " : save_all";
-
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;
@@ -2950,7 +3147,8 @@ public:
 			if (i < _Skills.size()-1)
 				ret += "; ";
 		}
-
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;
@@ -2968,9 +3166,12 @@ class CContentMission: public CContentObjective
 	}
 
 public:
+	CContentMission(): _Prim(0) {}
+
 	void init(CMissionData &md, IPrimitive *prim)
 	{
 		_Missions = md.getPropertyArray(prim, "mission_names", true, false);
+		_Prim = prim;
 
 		CContentObjective::init(md, prim);
 	}
@@ -2987,12 +3188,23 @@ public:
 			ret += _Missions[i];
 			if (i < _Missions.size()-1)
 				ret += "; ";
-		}
 
+			// We check to see if we specified a number after the mission name. If so, we check if it's a guild mission
+			std::size_t pos = _Missions[i].find_first_of(" \t");
+			if (pos != std::string::npos && !md.isGuildMission())
+			{
+				string err = toString("primitive(%s): CContentMission: Number of members needed to complete the mission specified but the mission is not a guild mission.", _Prim->getName().c_str());
+				throw EParseException(_Prim, err.c_str());
+			}
+		}
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;
 	}
+
+	IPrimitive *_Prim;
 };
 REGISTER_STEP_CONTENT(CContentMission, "do_mission");
 
@@ -3026,7 +3238,8 @@ public:
 			if (i < _MsgContent.size()-1)
 				ret += " ";
 		}
-
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;
@@ -3242,7 +3455,8 @@ public:
 
 		ret += "ring_scenario : ";
 		ret += _ScenarioTag;
-
+		// Add the 'nb_guild_members_needed' parameter if needed
+		//ret += CContentObjective::genNbGuildMembersNeededOption(md);
 		ret += NL;
 
 		return ret;

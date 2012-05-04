@@ -136,7 +136,8 @@ bool CServerPatchBridge::initModule(const TParsedCommandLine &initInfo)
 	CFileReceiver::init(this,"*/*");
 
 	// now  that the base classes have been initialised, we can cumulate the module manifests
-	_Manifest= (CFileRepository::buildModuleManifest()+" "+CFileReceiver::getModuleManifest()+" "+_Manifest).strip();
+	_Manifest= (CFileRepository::buildModuleManifest()+" "+CFileReceiver::getModuleManifest()+" "+_Manifest);
+	_Manifest = _Manifest.strip();
 
 	// scan our local file cache to buildup our starting file base
 	setStateVariable("State","Scanning");

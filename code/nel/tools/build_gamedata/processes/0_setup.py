@@ -24,8 +24,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess, distutils.dir_util, argparse
 sys.path.append("../configuration")
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--includeprocess', '-ipc', nargs='+')
+parser.add_argument('--excludeprocess', '-epc', nargs='+')
+args = parser.parse_args()
+
 if os.path.isfile("log.log"):
 	os.remove("log.log")
 log = open("log.log", "w")
@@ -60,20 +66,24 @@ printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 # For each process
 for processName in ProcessToComplete:
-	os.chdir(processName)
-	try:
-		subprocess.call([ "python", "0_setup.py" ])
-	except Exception, e:
-		printLog(log, "<" + processName + "> " + str(e))
-	os.chdir("..")
-	try:
-		processLog = open(processName + "/log.log", "r")
-		processLogData = processLog.read()
-		processLog.close()
-		log.write(processLogData)
-	except Exception, e:
-		printLog(log, "<" + processName + "> " + str(e))
-	# subprocess.call("idle.bat")
+	if ((args.includeprocess == None or processName in args.includeprocess) and (args.excludeprocess == None or not processName in args.excludeprocess)):
+		printLog(log, "PROCESS " + processName)
+		os.chdir(processName)
+		try:
+			subprocess.call([ "python", "0_setup.py" ])
+		except Exception, e:
+			printLog(log, "<" + processName + "> " + str(e))
+		os.chdir("..")
+		try:
+			processLog = open(processName + "/log.log", "r")
+			processLogData = processLog.read()
+			processLog.close()
+			log.write(processLogData)
+		except Exception, e:
+			printLog(log, "<" + processName + "> " + str(e))
+		# subprocess.call("idle.bat")
+	else:
+		printLog(log, "IGNORE PROCESS " + processName)
 printLog(log, "")
 
 log.close()

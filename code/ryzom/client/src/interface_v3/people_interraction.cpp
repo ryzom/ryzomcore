@@ -40,6 +40,7 @@
 #include "../net_manager.h"
 #include "../connection.h"
 #include "group_tab.h"
+#include "guild_manager.h"
 // Game share
 #include "game_share/entity_types.h"
 // NeL
@@ -1418,7 +1419,50 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 	{
 		sint index = FriendList.getIndexFromContactId(contactId);
 		if (index != -1)
-			FriendList.setOnline(index, online);
+		{
+			// Only do work if online status has changed
+			if (FriendList.getOnline(index) != online)
+			{
+				CCDBNodeLeaf* node = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB", false);
+				if (node && node->getValueBool())
+				{
+					// Only show the message if this player is not in my guild (because then the guild manager will show a message)
+					std::vector<SGuildMember> GuildMembers = CGuildManager::getInstance()->getGuildMembers();
+					bool bOnlyFriend = true;
+					ucstring name = toLower(FriendList.getName(index));
+					for (uint i = 0; i < GuildMembers.size(); ++i)
+					{
+						if (toLower(GuildMembers[i].Name) == name)
+						{
+							bOnlyFriend = false;
+							break;
+						}
+					}
+					
+					TCharConnectionState prevState = FriendList.getOnline(index);
+					bool showMsg = bOnlyFriend && (prevState == ccs_offline || online == ccs_offline);
+
+					// Player is not in my guild, and the status change is from offline to online/abroad online or vice versa. 
+					if (showMsg)
+					{
+						ucstring msg = (online != ccs_offline) ? CI18N::get("uiPlayerOnline") : CI18N::get("uiPlayerOffline");
+						strFindReplace(msg, "%s", FriendList.getName(index));
+						string cat = getStringCategory(msg, msg);
+						map<string, CClientConfig::SSysInfoParam>::const_iterator it;
+						NLMISC::CRGBA col = CRGBA::Yellow;
+						it = ClientCfg.SystemInfoParams.find(toLower(cat));
+						if (it != ClientCfg.SystemInfoParams.end())
+						{
+							col = it->second.Color;
+						}
+						bool dummy;
+						PeopleInterraction.ChatInput.AroundMe.displayMessage(msg, col, 2, &dummy);
+					}
+				}
+
+				FriendList.setOnline(index, online);
+			}
+		}
 	}
 	else
 	{
@@ -1988,6 +2032,39 @@ public:
 };
 REGISTER_ACTION_HANDLER( CHandlerDismissMember, "dismiss_member");
 
+//=================================================================================================================
+// Set the leader of the team
+class CHandlerSetTeamLeader : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	{
+		// retrieve the index of the people
+		CPeopleList *list;
+		uint peopleIndex;
+		if (PeopleInterraction.getPeopleFromCurrentMenu(list, peopleIndex))
+		{
+			if (list == &PeopleInterraction.TeamList) // check for good list
+			{
+				/*
+				const string msgName = "TEAM:SET_LEADER";
+				CBitMemStream out;
+				if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
+				{
+					uint8 teamMember = (uint8)(peopleIndex);
+					out.serial(teamMember);
+					NetMngr.push(out);
+					//nlinfo("impulseCallBack : %s %d sent", msgName.c_str(), teamMember);
+				}
+				else
+					nlwarning("command 'set_leader': unknown message named '%s'.", msgName.c_str());
+				*/
+				NLMISC::ICommand::execute("a setTeamLeader " + toString(peopleIndex), g_log);
+			}
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerSetTeamLeader, "set_team_leader");
 
 //=================================================================================================================
 // Set a successor for the team
@@ -2014,7 +2091,7 @@ public:
 					if(GenericMsgHeaderMngr.pushNameToStream(msgName, out))
 					{
 						uint8 teamMember = (uint8) peopleIndex;
-						out.serialEnum(teamMember);
+						out.serial(teamMember);
 						NetMngr.push(out);
 						//nlinfo("impulseCallBack : %s %d sent", msgName.c_str(), teamMember);
 					}
@@ -3235,6 +3312,12 @@ NLMISC_COMMAND(chatLog, "", "")
 
 	if (pIM->getLogState())
 		pIM->displaySystemInfo(CI18N::get("uiLogTurnedOn"));
+
+	CCDBNodeLeaf *node = pIM->getDbProp("UI:SAVE:CHATLOG_STATE", false);
+	if (node)
+	{
+		node->setValue32(pIM->getLogState() ? 1 : 0);
+	}
 
 	return true;
 };

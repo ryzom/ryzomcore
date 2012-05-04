@@ -82,11 +82,11 @@
 
 
 	$current_refresh_rate = nt_auth_get_session_var('current_refresh_rate');
-	if (isset($HTTP_POST_VARS['services_refresh']))
+	if (isset($_POST['services_refresh']))
 	{
-		if ($current_refresh_rate != $HTTP_POST_VARS['services_refresh'])
+		if ($current_refresh_rate != $_POST['services_refresh'])
 		{
-			$current_refresh_rate = $HTTP_POST_VARS['services_refresh'];
+			$current_refresh_rate = $_POST['services_refresh'];
 			nt_auth_set_session_var('current_refresh_rate',$current_refresh_rate);
 		}
 	}
@@ -361,8 +361,8 @@
 							$tpl->assign('tool_graph_variables',	$graph_variables);
 							$tpl->assign('tool_graph_datas',		$graph_datas);
 
-							$tool_variable_selected = $HTTP_GET_VARS['variable'];
-							$tool_service_selected	= $HTTP_GET_VARS['service'];
+							$tool_variable_selected = $_GET['variable'];
+							$tool_service_selected	= $_GET['service'];
 
 							$tpl->assign('tool_graph_variable_selected',	$tool_variable_selected);
 							$tpl->assign('tool_graph_service_selected',		$tool_service_selected);

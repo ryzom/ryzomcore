@@ -815,6 +815,34 @@ void cbClientCombatDodge( NLNET::CMessage& msgin, const std::string &serviceName
 	}
 }
 
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//		CLIENT:LEAGUE
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+//
+void cbClientLeagueJoin( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
+{
+	cbJoinLeague(msgin, serviceName, serviceId);
+}
+
+//
+void cbClientLeagueJoinProposal( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
+{
+	cbJoinLeagueProposal(msgin, serviceName, serviceId);
+}
+
+//
+void cbClientLeagueJoinProposalDecline( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
+{
+	cbJoinLeagueDecline(msgin, serviceName, serviceId);
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //		CLIENT:TEAM
@@ -857,7 +885,8 @@ void cbClientTeamSetSuccessor( NLNET::CMessage& msgin, const std::string &servic
 
 	CEntityId id;
 	uint8 idx;
-	msgin.serial( id,idx );
+	msgin.serial(id);
+	msgin.serial(idx);
 	CCharacter* user = PlayerManager.getChar( id );
 	if ( !user )
 	{
@@ -872,9 +901,17 @@ void cbClientTeamSetSuccessor( NLNET::CMessage& msgin, const std::string &servic
 	}
 	if ( team->getLeader() != id )
 	{
-		nlwarning("<TEAM> user %s is not leader : cant set successor",id.toString().c_str() );
+		nlwarning("<TEAM> user %s is not leader: cant set successor",id.toString().c_str() );
 		return;
 	}
+	if (team->getSuccessor() == id)
+	{
+		nlwarning("<TEAM> user %s already is successor", id.toString().c_str() );
+		return;
+	}
+
+	// increment the target index as the leader is not in its team list
+	++idx;
 	team->setSuccessor( idx );
 
 }
@@ -2370,7 +2407,6 @@ void cbClientWhere( NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 	}\
 }
 
-
 // Send list of connected character name / account to client
 void cbClientWho( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
 {
@@ -2380,6 +2416,11 @@ void cbClientWho( NLNET::CMessage& msgin, const std::string &serviceName, NLNET:
 	std::string opt;
 	msgin.serial( id,opt );
 	const std::vector<CEntityId> * gms = NULL;
+
+	// Make sure opt is not like "A(c)" for "é"
+	ucstring ucopt;
+	ucopt.fromUtf8(opt);
+	opt = ucopt.toString();
 
 	uint nbAnswers = 0;
 
@@ -2420,7 +2461,7 @@ void cbClientWho( NLNET::CMessage& msgin, const std::string &serviceName, NLNET:
 						&& user->getInstanceNumber() == ch->getInstanceNumber())
 					{
 						params[0].setEId( (*it) );
-						CCharacter::sendDynamicSystemMessage( id,"WHO_REGION_LIST",params );
+						CCharacter::sendDynamicSystemMessage( id,"WHO_REGION_LIST", params );
 						nbAnswers++;
 					}
 				}
@@ -2429,7 +2470,7 @@ void cbClientWho( NLNET::CMessage& msgin, const std::string &serviceName, NLNET:
 
 	}
 	// GM who
-	else if ( NLMISC::nlstricmp( opt.c_str() , "GM" ) == 0)
+	else if ( NLMISC::nlstricmp( opt.c_str(), "GM" ) == 0)
 	{
 		TVectorParamCheck params(1);
 		params[0].Type = STRING_MANAGER::player;
@@ -2474,6 +2515,75 @@ void cbClientWho( NLNET::CMessage& msgin, const std::string &serviceName, NLNET:
 					SEND_GM_WHO_ANSWER_INVIS( ":G:","WHO_G_LIST" );
 				}
 			}
+		}
+	}
+	else
+	{
+		TChanID chanID;
+
+		CCharacter * user = PlayerManager.getChar( id );
+		if ( !user )
+		{
+			nlwarning("<WHO>'%s' is invalid", id.toString().c_str() );
+			return;
+		}
+		CPlayer *p = PlayerManager.getPlayer(PlayerManager.getPlayerId(user->getId()));
+		
+		if (NLMISC::nlstricmp( opt.c_str(), "league" ) == 0)
+		{
+			chanID = user->getLeagueId();
+		}
+		else
+		{
+			chanID = DynChatEGS.getChanIDFromName(opt);
+		}
+
+		if (chanID == DYN_CHAT_INVALID_CHAN)
+		{
+			CCharacter::sendDynamicSystemMessage( id, "WHO_CHANNEL_NOT_FOUND" );
+			return;
+		}
+
+		bool havePriv = p->havePriv(":DEV:SGM:GM:");
+		bool hasChannel = false;
+		nbAnswers = 0;
+
+		vector<NLMISC::CEntityId> players;
+		DynChatEGS.getPlayersInChan(chanID, players);
+		ucstring playerNames("");
+		uint32 shardId = CEntityIdTranslator::getInstance()->getEntityShardId(id);
+
+		for (uint i = 0; i < players.size(); i++)
+		{
+			if (players[i] == id)
+				hasChannel = true;
+
+			ucstring name = CEntityIdTranslator::getInstance()->getByEntity(players[i]);
+			if (shardId == CEntityIdTranslator::getInstance()->getEntityShardId(players[i]))
+			{
+				// Same shard, remove shard from name
+				CEntityIdTranslator::removeShardFromName(name);
+			}
+			playerNames += ((i > 0) ? "\n" : "") + name ;
+		}
+
+		if (!hasChannel && !havePriv)
+		{
+			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+			params[0].Literal = opt;
+			CCharacter::sendDynamicSystemMessage( id, "WHO_CHANNEL_NOT_CONNECTED", params );
+
+			return;
+		}
+
+		if (!playerNames.empty())
+		{
+			CCharacter::sendDynamicSystemMessage( id, "WHO_CHANNEL_INTRO" );
+			//playerNames = "Players in channel \"" + opt + "\":" + playerNames;
+			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+			params[0].Literal = playerNames;
+			CCharacter::sendDynamicSystemMessage( id, "LITERAL", params );
+			return;
 		}
 	}
 
@@ -3508,9 +3618,9 @@ TUnifiedCallbackItem CbClientArray[]=
 	{ "CLIENT:DUEL:REFUSE",						cbClientDuelRefuse },
 	{ "CLIENT:DUEL:ABANDON",					cbClientDuelAbandon },
 
-	{ "CLIENT:PVP_CHALLENGE:ASK",				cbClientPVPChallengeAsked },
-	{ "CLIENT:PVP_CHALLENGE:ACCEPT",			cbClientPVPChallengeAccept },
-	{ "CLIENT:PVP_CHALLENGE:REFUSE",			cbClientPVPChallengeRefuse },
+	{ "CLIENT:PVP_CHALLENGE:ASK",				cbClientLeagueJoinProposal },
+	{ "CLIENT:PVP_CHALLENGE:ACCEPT",			cbClientLeagueJoin },
+	{ "CLIENT:PVP_CHALLENGE:REFUSE",			cbClientLeagueJoinProposalDecline },
 	{ "CLIENT:PVP_CHALLENGE:ABANDON",			cbClientPVPChallengeAbandon },
 
 //	{ "CLIENT:PVP_VERSUS:CLAN",					cbClientPvpChooseClan },

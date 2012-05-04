@@ -80,6 +80,12 @@ public:
 	// The cell color
 	NLMISC::CRGBA	BgColor;
 
+	// Texture
+	CViewRenderer::CTextureId	_TextureId;	/// Accelerator
+	bool _UserTexture;
+	bool _TextureTiled;
+	bool _TextureScaled;
+
 	// Alignment
 	TAlign	Align;
 	TVAlign	VAlign;
@@ -90,6 +96,11 @@ public:
 
 	// The cell is nowrap
 	bool	NoWrap;
+
+	void setTexture(const std::string & TxName);
+	void setTextureTile(bool tiled);
+	void setTextureScale(bool scaled);
+
 private:
 	void setEnclosedGroupDefaultParams();
 };

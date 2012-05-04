@@ -243,7 +243,7 @@
         <view type="bitmap"
               id="win_top"
               posref="TL TL"
-              y="-10"
+              y="-15"
               texture="Infos_top.tga"
               global_color="true" />
         <view type="bitmap"
@@ -265,7 +265,7 @@
               id="win_jauge_mid"
               posref="TL ML"
               x="0"
-              y="1"
+              y="-2"
               posparent="win_bot"
               scale="true"
               w="128"
@@ -288,7 +288,7 @@
               id="info0"
               posref="TL TL"
               x="0"
-              y="-3"
+              y="-10"
               fontsize="14"
               shadow="true"
               hardtext=""
@@ -298,7 +298,7 @@
               id="info1"
               posref="TL TL"
               x="0"
-              y="-17"
+              y="-28"
               fontsize="12"
               shadow="true"
               hardtext=""
@@ -308,7 +308,7 @@
               id="info2"
               posref="TL TL"
               x="0"
-              y="-32"
+              y="-40"
               fontsize="10"
               shadow="true"
               hardtext=""
@@ -350,7 +350,59 @@
               y=""
               texture="target_mission.tga"
               global_color="false" />
-        <view type="bitmap"
+       <view type="bitmap"
+            id="rp_logo_1"
+            posref="BR BL"
+            x="4"
+            y="0"
+            slot="false"
+            posparent="info0"
+            color="255 255 255 255"
+            render_layer="1"
+            texture=""
+			w="24"
+            h="24"
+            global_color="false" />
+      <view type="bitmap"
+            id="rp_logo_2"
+            posref="BR BL"
+            x="32"
+            y="0"
+            slot="false"
+            posparent="info0"
+            color="255 255 255 255"
+            render_layer="1"
+            texture=""
+			w="24"
+            h="24"
+            global_color="false" />
+      <view type="bitmap"
+            id="rp_logo_3"
+            posref="TR TL"
+            x="60"
+            y="0"
+            slot="false"
+            posparent="info0"
+            color="255 255 255 255"
+            render_layer="1"
+            texture=""
+			w="24"
+            h="24"
+            global_color="false" />
+      <view type="bitmap"
+            id="rp_logo_4"
+            posref="TR TL"
+            x="88"
+            y="0"
+            slot="false"
+            posparent="info0"
+            color="255 255 255 255"
+            render_layer="1"
+            texture=""
+			w="24"
+            h="24"
+            global_color="false" />
+      <view type="bitmap"
               id="bar0"
               posref="TL TL"
               posparent="win_jauge_top"
@@ -415,14 +467,14 @@
       <ctrl type="sheet"
             id="guild_logo"
             posref="ML MR"
-            x="-8"
+            x="-4"
             slot="false"
             posparent="right"
             nature="guild_flag"
             value="UI:TEMP:GUILD_SHEET"
             dragable="false"
             color="255 255 255 255" />
-      <view type="bitmap"
+	  <view type="bitmap"
             id="npc_mission_logo"
             posref="TL TR"
             x="-8"
@@ -459,7 +511,7 @@
                  child_resize_h="true"
                  child_resize_wmargin="4" >
             <view type="bitmap"
-                  id="pvp_faction_civ_logo"
+                  id="pvp_faction_logo"
                   posref="TL TL"
                   texture="mp_pearl.tga"
                   x="2"
@@ -467,9 +519,10 @@
                   h="24"
                   global_color="false" />
             <view type="bitmap"
-                  id="pvp_faction_cult_logo"
+                  id="pvp_safe_logo"
+                  active="false"
                   posref="TR TL"
-                  posparent="pvp_faction_civ_logo"
+                  posparent="pvp_faction_logo"
                   texture="mp_pearl.tga"
                   x="2"
                   w="24"
@@ -499,7 +552,7 @@
                   x="2"
                   w="24"
                   h="24"
-                  texture="ICO_Multi_Fight.tga"
+                  texture="pvp_duel.tga"
                   global_color="false" />
           </group>
         </group>
@@ -1736,7 +1789,11 @@
     <action id="xp_catalyser_use"
             name="uimXpCatalyserUse"
             handler="xp_catalyser_use" />
-    <separator />
+    <action id="item_text_display"
+            name="uiOpen"
+            handler="item_text_display"
+            params="ui:interface:edit_custom" />
+   <separator />
     <!-- Move to an Animal -->
     <action id="move"
             name="uimMoveTo">
@@ -1781,13 +1838,12 @@
     <action id="infos"
             name="uimBoldInfo"
             handler="open_item_help" />
+    <action id="lockunlock"
+            name="uimLockItem"
+            handler="lock_inv_item" />
     <action id="item_text_edition"
             name="uimItemTextEdit"
             handler="item_text_edition"
-            params="ui:interface:edit_custom" />
-    <action id="item_text_display"
-            name="uimItemTextDisplay"
-            handler="item_text_display"
             params="ui:interface:edit_custom" />
   </group>
   <!-- MAX_INVENTORY_ANIMAL -->
@@ -1802,7 +1858,8 @@
   <!-- item menu when we are in self -->
   <group type="menu"
          id="item_menu_in_self"
-         extends="base_menu">
+         extends="base_menu"
+         on_active="item_menu_base_check" >
     <!--<action id="drop"    name="uimDrop"     handler="proc" params="drop_item_proc"/>-->
     <action id="destroy"
             name="uimDestroy"
@@ -1812,11 +1869,15 @@
             name="uimBoldInfo"
             handler="open_item_help"
             params="" />
+    <action id="lockunlock"
+            name="uimLockItem"
+            handler="lock_inv_item" />
   </group>
   <!-- item menu default -->
   <group type="menu"
          id="item_menu"
-         extends="base_menu">
+         extends="base_menu"
+         on_active="item_menu_base_check" >
     <!--<action id="drop"    name="uimDrop"     handler="proc" params="drop_item_proc"/>-->
     <action id="destroy"
             name="uimDestroy"
@@ -1830,6 +1891,9 @@
             name="uimBoldInfo"
             handler="open_item_help"
             params="" />
+    <action id="lockunlock"
+            name="uimLockItem"
+            handler="lock_inv_item" />
   </group>
   <define id="item_modal_menu"
           value="ui:interface:item_menu" />
@@ -1959,7 +2023,8 @@
             fontsize="10"
             value="#value"
             global_color="false"
-            positive="true" />
+            positive="true"
+            format="true" />
       <view type="text"
             id="bad_price"
             posparent="box1"
@@ -2070,6 +2135,7 @@
             global_color="false" />
     </group>
   </template>
+
   <!-- ********************* -->
   <!-- *   FACTION POINTS  * -->
   <!-- ********************* -->
@@ -6246,6 +6312,8 @@
   <proc id="pinv_item_filter">
     <!-- Reset all filter first -->
     <action handler="set"
+            params="dblink=UI:SAVE:@0:FILTER_TP|value=0" />
+    <action handler="set"
             params="dblink=UI:SAVE:@0:FILTER_MISSMP|value=0" />
     <action handler="set"
             params="dblink=UI:SAVE:@0:FILTER_MP|value=0" />
@@ -6370,6 +6438,7 @@
              filter_tool="UI:SAVE:#inv_type:FILTER_TOOL"
              filter_mp="UI:SAVE:#inv_type:FILTER_MP"
              filter_missmp="UI:SAVE:#inv_type:FILTER_MISSMP"
+             filter_tp="UI:SAVE:#inv_type:FILTER_TP"
              wspace="2"
              hspace="2"
              startitem="0"
@@ -6426,6 +6495,7 @@
              filter_tool="UI:SAVE:#inv_type:FILTER_TOOL"
              filter_mp="UI:SAVE:#inv_type:FILTER_MP"
              filter_missmp="UI:SAVE:#inv_type:FILTER_MISSMP"
+             filter_tp="UI:SAVE:#inv_type:FILTER_TP"
              hspace="2"
              xitem="2"
              yitem="-2"
@@ -6480,8 +6550,17 @@
       <link expr="eq(@UI:SAVE:#inv_type:ICON_LIST, 0)"
             target="bag_list:active,sep2:active" />
       <instance template="tinv_item_list_filter"
-                id="filter_missmp"
+                id="filter_tp"
                 x="-35"
+                y="1"
+                posref="BR BR"
+                inv_type="#inv_type"
+                dblink="UI:SAVE:#inv_type:FILTER_TP"
+                texture="filter_tp.tga"
+                tooltip="uittFilterTP" />
+      <instance template="tinv_item_list_filter"
+                id="filter_missmp"
+                x="-60"
                 y="1"
                 posref="BR BR"
                 inv_type="#inv_type"
@@ -6490,7 +6569,7 @@
                 tooltip="uittFilterMissMP" />
       <instance template="tinv_item_list_filter"
                 id="filter_mp"
-                x="-60"
+                x="-85"
                 y="1"
                 posref="BR BR"
                 inv_type="#inv_type"
@@ -6499,7 +6578,7 @@
                 tooltip="uittFilterMP" />
       <instance template="tinv_item_list_filter"
                 id="filter_tool"
-                x="-85"
+                x="-110"
                 y="1"
                 posref="BR BR"
                 inv_type="#inv_type"
@@ -6508,7 +6587,7 @@
                 tooltip="uittFilterTool" />
       <instance template="tinv_item_list_filter"
                 id="filter_weapon"
-                x="-110"
+                x="-135"
                 y="1"
                 posref="BR BR"
                 inv_type="#inv_type"
@@ -6517,7 +6596,7 @@
                 tooltip="uittFilterWeapon" />
       <instance template="tinv_item_list_filter"
                 id="filter_armor"
-                x="-135"
+                x="-160"
                 y="1"
                 posref="BR BR"
                 inv_type="#inv_type"

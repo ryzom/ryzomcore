@@ -78,17 +78,17 @@ public:
 	virtual void execute();
 	virtual void apply();
 	virtual void stop();
-	virtual void setPrimaryTarget( const TDataSetRow &entityRowId ){ _Targets[0] = entityRowId; };
-	virtual void addTargetEntity( const TDataSetRow &entityRowId ){ _Targets.push_back(entityRowId);};
+	virtual void setPrimaryTarget( const TDataSetRow &entityRowId ){ _Targets[0] = entityRowId; }
+	virtual void addTargetEntity( const TDataSetRow &entityRowId ){ _Targets.push_back(entityRowId);}
 	//@}
 
 	/// \name Unused virtual methods from CSPhrase
 	//@{
 	virtual void setActor( const TDataSetRow & actorRowId ){  }
-	virtual void end(){};	
-	virtual void setPrimaryItem( CGameItemPtr itemPtr ){  };
-	virtual void setSecondaryItem( CGameItemPtr itemPtr ){  };
-	virtual void addConsumableItem( CGameItemPtr itemPtr ){  };
+	virtual void end(){}
+	virtual void setPrimaryItem( CGameItemPtr itemPtr ){  }
+	virtual void setSecondaryItem( CGameItemPtr itemPtr ){  }
+	virtual void addConsumableItem( CGameItemPtr itemPtr ){  }
 	//@}
 
 private:

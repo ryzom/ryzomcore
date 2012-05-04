@@ -153,6 +153,13 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPA
 			if ((int)wParam==VK_SHIFT)
 				_ShiftButton=false;
 
+			// As Print Screen button does not trigger a WM_KEYDOWN msg, simulate it here
+			if ((int)wParam==VK_SNAPSHOT)
+			{
+				if (wParam < KeyCount)
+					server->postEvent (new CEventKeyDown ((NLMISC::TKey)wParam, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), true, this));
+			}
+
 			// Post the message
 			if (wParam < KeyCount)
 				server->postEvent (new CEventKeyUp ((NLMISC::TKey)wParam, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));

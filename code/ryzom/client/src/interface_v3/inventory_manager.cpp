@@ -44,12 +44,14 @@
 #include "../sheet_manager.h"
 #include "game_share/slot_equipment.h"
 #include "game_share/animal_status.h"
+#include "game_share/bot_chat_types.h"
 
 #include "../client_cfg.h"
 
 using namespace std;
 using namespace NLMISC;
 
+extern NLMISC::CLog g_log;
 // Context help
 extern void contextHelp (const std::string &help);
 
@@ -131,6 +133,7 @@ void CItemImage::build(CCDBNodeBranch *branch)
 	Weight = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("WEIGHT"), false));
 	NameId = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("NAMEID"), false));
 	InfoVersion= dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("INFO_VERSION"), false));
+	ResaleFlag = dynamic_cast<CCDBNodeLeaf *>(branch->getNode(ICDBNode::CTextId("RESALE_FLAG"), false));
 
 	// Should always have at least those one:(ie all but Price)
 	nlassert(Sheet && Quality && Quantity && UserColor && Weight && NameId && InfoVersion);
@@ -1998,6 +2001,9 @@ bool SBagOptions::parse(xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 	prop = xmlGetProp (cur, (xmlChar*)"filter_missmp");
 	if (prop) DbFilterMissMP = pIM->getDbProp(prop);
 
+	prop = xmlGetProp (cur, (xmlChar*)"filter_tp");
+	if (prop) DbFilterTP = pIM->getDbProp(prop);
+
 	return true;
 }
 
@@ -2041,6 +2047,13 @@ bool SBagOptions::isSomethingChanged()
 			LastDbFilterMissMP = (DbFilterMissMP->getValue8() != 0);
 		}
 
+	if (DbFilterTP != NULL)
+		if ((DbFilterTP->getValue8() != 0) != LastDbFilterTP)
+		{
+			bRet = true;
+			LastDbFilterTP = (DbFilterTP->getValue8() != 0);
+		}
+
 	return bRet;
 }
 
@@ -2054,25 +2067,33 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 	bool bFilterTool = getFilterTool();
 	bool bFilterMP = getFilterMP();
 	bool bFilterMissMP = getFilterMissMP();
+	bool bFilterTP = getFilterTP();
 
 	const CItemSheet *pIS = pCS->asItemSheet();
 	if (pIS != NULL)
 	{
 		// Armor
-		if ((pIS->Family == ITEMFAMILY::ARMOR) || (pIS->Family == ITEMFAMILY::JEWELRY))
+		if ((pIS->Family == ITEMFAMILY::ARMOR) || 
+			(pIS->Family == ITEMFAMILY::JEWELRY))
 			if (!bFilterArmor) bDisplay = false;
 
 		// Weapon
-		if ((pIS->Family == ITEMFAMILY::SHIELD) || (pIS->Family == ITEMFAMILY::MELEE_WEAPON) ||
-			(pIS->Family == ITEMFAMILY::RANGE_WEAPON) || (pIS->Family == ITEMFAMILY::AMMO) ||
-			(pIS->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) || (pIS->Family == ITEMFAMILY::ITEM_SAP_RECHARGE) ||
+		if ((pIS->Family == ITEMFAMILY::SHIELD) || 
+			(pIS->Family == ITEMFAMILY::MELEE_WEAPON) ||
+			(pIS->Family == ITEMFAMILY::RANGE_WEAPON) || 
+			(pIS->Family == ITEMFAMILY::AMMO) ||
+			(pIS->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) || 
+			(pIS->Family == ITEMFAMILY::ITEM_SAP_RECHARGE) ||
 			(pIS->Family == ITEMFAMILY::BRICK) )
 			if (!bFilterWeapon) bDisplay = false;
 
 		// Tool
-		if ((pIS->Family == ITEMFAMILY::CRAFTING_TOOL) || (pIS->Family == ITEMFAMILY::HARVEST_TOOL) ||
-			(pIS->Family == ITEMFAMILY::TAMING_TOOL) || (pIS->Family == ITEMFAMILY::TRAINING_TOOL) ||
-			(pIS->Family == ITEMFAMILY::BAG) || (pIS->Family == ITEMFAMILY::PET_ANIMAL_TICKET) )
+		if ((pIS->Family == ITEMFAMILY::CRAFTING_TOOL) || 
+			(pIS->Family == ITEMFAMILY::HARVEST_TOOL) ||
+			(pIS->Family == ITEMFAMILY::TAMING_TOOL) || 
+			(pIS->Family == ITEMFAMILY::TRAINING_TOOL) ||
+			(pIS->Family == ITEMFAMILY::BAG) || 
+			(pIS->Family == ITEMFAMILY::PET_ANIMAL_TICKET) )
 			if (!bFilterTool) bDisplay = false;
 
 		// MP
@@ -2081,9 +2102,15 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 
 		// Mission MP
 		if ((pIS->Family == ITEMFAMILY::MISSION_ITEM) ||
+			(pIS->Family == ITEMFAMILY::XP_CATALYSER) ||
+			(pIS->Family == ITEMFAMILY::CONSUMABLE) ||
 			((pIS->Family == ITEMFAMILY::RAW_MATERIAL) && !pIS->canBuildSomeItemPart()))
 			if (!bFilterMissMP) bDisplay = false;
-		
+
+		// Teleporter Pacts
+		if ((pIS->Family == ITEMFAMILY::TELEPORT))
+			if (!bFilterTP) bDisplay = false;
+
 		// Jobs Items
 		if (pIS->Id.toString().substr(0, 6) == "rpjob_")
 			bDisplay = false;
@@ -2776,6 +2803,37 @@ public:
 REGISTER_ACTION_HANDLER( CHandlerInvAutoEquip, "inv_auto_equip" );
 
 
+// **********************************************************************************************************
+class CHandlerLockInvItem : public IActionHandler
+{
+	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	{
+		// get the calling item
+		CDBCtrlSheet *item = CDBCtrlSheet::getCurrSelSheet();
+		if ( ! item)
+		{
+			nlwarning("<CHandlerDestroyItem::execute> no caller sheet found");
+			return;
+		}
+
+		string lock = "1";
+		if (item->getLockedByOwner())
+		{
+			lock = "0";
+		}
+
+		uint32 slot = item->getIndexInDB();
+		uint32 inv = item->getInventoryIndex();
+		INVENTORIES::TInventory inventory = INVENTORIES::UNDEFINED;
+		inventory = (INVENTORIES::TInventory)(inv);
+		if (inventory == INVENTORIES::UNDEFINED)
+		{
+			return;
+		}
+		NLMISC::ICommand::execute("a lockItem " + INVENTORIES::toString(inventory) + " " + toString(slot) + " " + lock, g_log);
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerLockInvItem, "lock_inv_item" );
 
 // ***************************************************************************
 // Inventory Temporary
@@ -2844,11 +2902,11 @@ class CHandlerInvTempAll : public IActionHandler
 
 		nlctassert(MAX_INVENTORY_ANIMAL==4);
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal1))
-			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(2), pInv->getMaxBagBulk(2)));
+			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(1), pInv->getMaxBagBulk(1)));
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal2))
-			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(3), pInv->getMaxBagBulk(3)));
+			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(2), pInv->getMaxBagBulk(2)));
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal3))
-			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(4), pInv->getMaxBagBulk(4)));
+			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(3), pInv->getMaxBagBulk(3)));
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal4))
 			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(4), pInv->getMaxBagBulk(4)));
 

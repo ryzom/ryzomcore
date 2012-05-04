@@ -165,7 +165,7 @@ public:
 
 	virtual void display (const std::string &prefix);
 
-	void removeNode (CTextId& id);
+	void removeNode (const CTextId& id);
 
 	/**
 	* add an observer to a property

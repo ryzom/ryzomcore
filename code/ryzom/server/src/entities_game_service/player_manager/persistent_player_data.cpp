@@ -414,6 +414,10 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	_FactionPoint[i],\
 	PVP_CLAN::TPVPClan k=PVP_CLAN::fromString(key); if ((k>=PVP_CLAN::BeginClans) && (k<=PVP_CLAN::EndClans)) _FactionPoint[k-PVP_CLAN::BeginClans]=val)\
 \
+	PROP(uint32,_PvpPoint)\
+	PROP(uint32,_Organization)\
+	PROP(uint32,_OrganizationStatus)\
+	PROP(uint32,_OrganizationPoints)\
 	PROP2(DeclaredCult,string,PVP_CLAN::toString(_DeclaredCult),_DeclaredCult=PVP_CLAN::fromString(val))\
 	PROP2(DeclaredCiv,string,PVP_CLAN::toString(_DeclaredCiv),_DeclaredCiv=PVP_CLAN::fromString(val))\
 \
@@ -688,6 +692,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	LPROP(bool,IsMounted,if(IsMounted))\
 	PROP(bool,IsTpAllowed)\
 	PROP(TSatiety,Satiety)\
+	PROP2(CustomName, ucstring, CustomName, CustomName = val)\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
@@ -1183,7 +1188,7 @@ static void displayWarning(const std::string& s)
 //-----------------------------------------------------------------------------
 /**
  * This class is used to load old player room inventory, DO NOT BREAK IT!
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005
  */
@@ -1345,6 +1350,7 @@ private:
 	STRUCT_VECT(_TypeSkillMods)\
 	LPROP_VECT(CSheetId, _Enchantment, VECT_LOGIC(_Enchantment) if (_Enchantment[i]!=CSheetId::Unknown))\
 	PROP2(_CustomText,					ucstring,	_CustomText,				_CustomText=val)\
+	PROP(bool, _LockedByOwner)\
 	
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

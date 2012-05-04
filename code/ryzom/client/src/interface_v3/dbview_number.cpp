@@ -21,6 +21,7 @@
 #include "dbview_number.h"
 #include "interface_manager.h"
 #include "game_share/xml_auto_ptr.h"
+#include "nel/misc/common.h"
 
 using namespace std;
 using namespace NL3D;
@@ -79,6 +80,10 @@ bool CDBViewNumber::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	if (ptr) _Positive = convertBool(ptr);
 	else _Positive = false;
 
+	ptr = xmlGetProp (cur, (xmlChar*)"format");
+	if (ptr) _Format = convertBool(ptr);
+	else _Format = false;
+
 	ptr = xmlGetProp (cur, (xmlChar*)"divisor");
 	if (ptr) fromString((const char*)ptr, _Divisor);
 
@@ -106,8 +111,9 @@ void CDBViewNumber::checkCoords()
 	if (_Cache != val)
 	{
 		_Cache= val;
-		if (_Positive) setText(val >= 0 ? ((string)_Prefix)+toString(val)+(string)_Suffix : "?");
-		else setText( ((string)_Prefix)+toString(val)+(string)_Suffix );
+		ucstring value = _Format ? NLMISC::formatThousands(toString(val)) : toString(val);
+		if (_Positive) setText(val >= 0 ? ( ucstring(_Prefix) + value + ucstring(_Suffix) ) : ucstring("?"));
+		else setText( ucstring(_Prefix) + value + ucstring(_Suffix) );
 	}
 }
 

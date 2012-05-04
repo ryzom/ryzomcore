@@ -30,6 +30,7 @@ namespace NLSOUND {
 class ISoundDriver;
 class IBuffer;
 class CSound;
+class CGroupController;
 
 
 /// Sound names hash map
@@ -60,8 +61,9 @@ public:
 		SOUND_COMPLEX,
 		SOUND_BACKGROUND,
 		SOUND_CONTEXT,
-		SOUND_MUSIC,
-		SOUND_STREAM
+		SOUND_MUSIC, // soon to be deprecated hopefully
+		SOUND_STREAM,
+		SOUND_STREAM_FILE
 	};
 
 
@@ -104,6 +106,8 @@ public:
 	/// Return the max distance (if detailed())
 	virtual float		getMaxDistance() const				{ return _MaxDist; }
 
+	inline CGroupController *getGroupController() const { return _GroupController; }
+
 	/// Set looping
 	void				setLooping( bool looping ) { _Looping = looping; }
 
@@ -141,6 +145,9 @@ protected:
 	NLMISC::TStringId	_Name;
 	/// An optional user var controler.
 	NLMISC::TStringId	_UserVarControler;
+
+	/// The group controller, always exists, owned by the audio mixer
+	CGroupController	*_GroupController;
 
 };
 

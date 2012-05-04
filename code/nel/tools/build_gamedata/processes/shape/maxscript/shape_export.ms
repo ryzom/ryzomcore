@@ -253,7 +253,7 @@ fn haveCoarseMesh node =
 	return false
 )
 
-fn runNelMaxExport inputMaxFile = 
+fn runNelMaxExportSub inputMaxFile retryCount = 
 (
 	tagThisFile = false
 	
@@ -420,9 +420,40 @@ fn runNelMaxExport inputMaxFile =
 	(
 		-- Error
 		nlerror("WARNING no shape exported from the file " + inputMaxFile)
+		if tagThisFile then
+		(
+			if retryCount < 2 then
+			(
+				nlerror("INFO retry this file")
+				
+				-- Free memory and file handles
+				gc()
+				heapfree
+				
+				-- Reset 3dsmax
+				resetMAXFile #noprompt
+				
+				if (loadMaxFile inputMaxFile quiet:true) == true then
+				(
+					tagThisFile = runNelMaxExportSub inputMaxFile (retryCount + 1)
+				)
+				else
+				(
+					-- Error
+					nlerror("ERROR exporting 'shape': can't open the file " + inputMaxFile)
+					nlerror("FAIL Mysterious error occured")
+					NelForceQuitRightNow()
+				)
+			)
+		)
 	)
 	
 	return tagThisFile
+)
+
+fn runNelMaxExport inputMaxFile = 
+(
+	return runNelMaxExportSub inputMaxFile 0
 )
 
 
@@ -517,7 +548,9 @@ try
 catch 
 (
 	-- Error
-	nlerror("ERROR fatal error exporting 'shape' in folder %MaxSourceDirectory%")
+	nlerror("ERROR Fatal error exporting 'shape' in folder %MaxSourceDirectory%")
+	nlerror("FAIL Fatal error occured")
+	NelForceQuitRightNow()
 	removeRunningTag = false
 )
 

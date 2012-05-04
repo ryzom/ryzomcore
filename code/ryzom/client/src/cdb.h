@@ -302,10 +302,10 @@ public :
 	virtual CCDBNodeLeaf	*findLeafAtCount( uint& count ) = 0;
 
 	/// Set the atomic branch flag (when all the modified nodes of a branch should be tranmitted at the same time)
-	void					setAtomic( bool atomicBranch ) { _Atomic = atomicBranch; }
+	void					setAtomic( bool atomicBranch ) { _AtomicFlag = atomicBranch; }
 
 	/// Return true if the branch has the atomic flag
-	bool					isAtomic() const { return _Atomic; }
+	bool					isAtomic() const { return _AtomicFlag; }
 
 	// test if the node is a leaf
 	virtual bool			isLeaf() const = 0;
@@ -333,14 +333,14 @@ public :
 protected:
 
 	/// Constructor
-	ICDBNode() : _Atomic(false)
+	ICDBNode() : _AtomicFlag(false)
 	{
 		if (_DBSM == NULL) _DBSM = NLMISC::CStringMapper::createLocalMapper();
 		_Name = NLMISC::CStringMapper::emptyId();
 	}
 
 	/// Constructor
-	ICDBNode (const std::string &name) : _Atomic(false)
+	ICDBNode (const std::string &name) : _AtomicFlag(false)
 	{
 		if (_DBSM == NULL) _DBSM = NLMISC::CStringMapper::createLocalMapper();
 		_Name = _DBSM->localMap(name);
@@ -351,7 +351,7 @@ protected:
 	void _buildFullName(NLMISC::CSString &fullName);
 
 	/// Atomic flag: is the branch an atomic group, or is the leaf a member of an atomic group
-	bool			_Atomic		: 1;
+	bool			_AtomicFlag		: 1;
 
 	/// Name of the node
 	NLMISC::TStringId	_Name;

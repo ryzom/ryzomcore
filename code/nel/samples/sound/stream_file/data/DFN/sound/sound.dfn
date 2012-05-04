@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="SoundType" Type="DfnPointer"/>
+  <ELEMENT Name="Loop" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Gain" Type="Type" Filename="gain.typ" Default="0dB"/>
+  <ELEMENT Name="Transpose" Type="Type" Filename="transposition.typ" Default="0"/>
+  <ELEMENT Name="InternalConeAngle" Type="Type" Filename="angle.typ" Default="360"/>
+  <ELEMENT Name="ExternalConeAngle" Type="Type" Filename="angle.typ" Default="360"/>
+  <ELEMENT Name="ExternalGain" Type="Type" Filename="gain.typ" Default="-100dB"/>
+  <ELEMENT Name="Direction" Type="Dfn" Filename="direction.dfn"/>
+  <ELEMENT Name="AbsolutePosition" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Priority" Type="Type" Filename="priority.typ" Default="Normal"/>
+  <ELEMENT Name="Indoor" Type="Type" Filename="boolean.typ" Default="true"/>
+  <ELEMENT Name="Outdoor" Type="Type" Filename="boolean.typ" Default="true"/>
+  <LOG>Tue Oct 08 12:33:33 2002 (boucher) Dfn Structure = 
+Tue Oct 08 14:35:19 2002 (boucher) Dfn Structure = </LOG>
+</DFN>

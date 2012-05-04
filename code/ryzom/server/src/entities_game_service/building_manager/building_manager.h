@@ -86,7 +86,7 @@ public:
 	void registerPlayer( CCharacter * user );
 	/// get a building destination from its alias.
 	IBuildingPhysical* getBuildingPhysicalsByAlias( TAIAlias Alias );
-	/// get a building destination from its name. WARNING : slow
+	/// get a building destination from its name.
 	IBuildingPhysical* getBuildingPhysicalsByName( const std::string & name );
 	/// remove a player from a room
 	void removePlayerFromRoom( CCharacter * user );
@@ -122,6 +122,7 @@ public:
 	void buildBuildingTradeList(const NLMISC::CEntityId & userId, uint16 session);
 	/// buy a player flat option
 	void buyBuildingOption(const NLMISC::CEntityId & userId, uint8 idx);
+	void buyBuilding(const NLMISC::CEntityId & userId, TAIAlias alias);
 	//@}
 
 private:
@@ -201,8 +202,11 @@ private:
 	typedef CHashMap< TDataSetRow , CTriggerRequest , TDataSetRow::CHashCode > TTriggerRequestCont;
 	TTriggerRequestCont		_TriggerRequests;
 
-	/// physical buildings by name
+	/// physical buildings by Alias
 	std::map<TAIAlias,IBuildingPhysical*> _BuildingPhysicals;
+
+	/// physical buildings by name
+	std::map<std::string,IBuildingPhysical*> _BuildingPhysicalsName;
 
 	/// room instances
 	struct CRoomInstanceEntry

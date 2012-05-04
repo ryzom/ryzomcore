@@ -59,7 +59,7 @@ Q_SIGNALS:
 	void changeActiveNode();
 
 private Q_SLOTS:
-	void clickedItem(const QModelIndex & index);
+	void clickedItem(const QModelIndex &index);
 	void customContextMenu();
 
 	void setActiveNode();

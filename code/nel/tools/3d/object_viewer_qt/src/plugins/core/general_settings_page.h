@@ -37,7 +37,7 @@ class GeneralSettingsPage : public Core::IOptionsPage
 	Q_OBJECT
 
 public:
-	GeneralSettingsPage(QObject *parent = 0);
+	explicit GeneralSettingsPage(QObject *parent = 0);
 	~GeneralSettingsPage();
 
 	QString id() const;
@@ -57,6 +57,8 @@ private Q_SLOTS:
 	void setPluginsPath();
 	void setLevelDesignPath();
 	void setAssetsPath();
+	void setPrimitivesPath();
+	void setLigoConfigFile();
 
 private:
 	void readSettings();

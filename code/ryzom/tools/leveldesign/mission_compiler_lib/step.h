@@ -89,7 +89,7 @@ public:
 	IStep(CMissionData &md, NLLIGO::IPrimitive *prim);
 	virtual ~IStep() {}
 
-	virtual void init(CMissionData &md, NLLIGO::IPrimitive *prim) {};
+	virtual void init(CMissionData &md, NLLIGO::IPrimitive *prim) {}
 
 	
 	/// Get the step name
@@ -192,6 +192,11 @@ protected:
 	std::vector<std::string>	_RoleplayObj;
 	CPhrase						_RoleplayPhrase;
 	bool						_HideObj;
+
+	// Option nb_guild_members_needed, available for each objective
+	/*int _NbGuildMembersNeeded;
+
+	std::string genNbGuildMembersNeededOption(CMissionData &md);*/
 	
 public:
 	void init(CMissionData &md, NLLIGO::IPrimitive *prim);

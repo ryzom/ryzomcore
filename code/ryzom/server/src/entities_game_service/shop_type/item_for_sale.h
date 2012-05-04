@@ -33,7 +33,7 @@ class IItemTrade : public NLMISC::CRefCount
 public:
 
 	// virtual destructor
-	virtual ~IItemTrade() {};
+	virtual ~IItemTrade() {}
 
 	// sheet id
 	virtual NLMISC::CSheetId getSheetId() const = 0;
@@ -202,7 +202,8 @@ public:
 	void setAvailable( bool a );
 
 	// return game cycle left for item in store 
-	NLMISC::TGameCycle getGameCycleLeft() const {	return (NLMISC::TGameCycle) ( (sint32) std::max( (sint32)0, (sint32)( ((sint32) MaxGameCycleSaleStore) - ( ( CTickEventHandler::getGameCycle() - _StartSaleCycle ) + _ItemPtr->getTotalSaleCycle() ) ) ) ); }
+//	NLMISC::TGameCycle getGameCycleLeft() const {	return (NLMISC::TGameCycle) ( (sint32) std::max( (sint32)0, (sint32)( ((sint32) MaxGameCycleSaleStore) - ( ( CTickEventHandler::getGameCycle() - _StartSaleCycle ) + _ItemPtr->getTotalSaleCycle() ) ) ) ); }
+	NLMISC::TGameCycle getGameCycleLeft() const;
 	
 	// get quantity
 	uint32 getQuantity() const { return _Quantity; }

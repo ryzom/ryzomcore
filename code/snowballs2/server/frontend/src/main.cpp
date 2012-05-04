@@ -38,6 +38,10 @@
 #include <map>
 #include <utility>
 
+#ifdef NL_OS_WINDOWS
+#include <Windows.h>
+#endif
+
 using namespace NLMISC;
 using namespace NLNET;
 using namespace std;

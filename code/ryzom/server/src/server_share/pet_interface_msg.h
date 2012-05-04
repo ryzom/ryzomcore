@@ -42,6 +42,7 @@ public:
 	uint16				PetIdx;	// must be returned to EGS with CPetSpawnConfirmationMsg class
 	sint32				Coordinate_X, Coordinate_Y, Coordinate_H; //For NEAR_POINT mode
 	float				Heading; //For NEAR_POINT mode
+	ucstring			CustomName;
 
 	virtual void description ()
 	{
@@ -55,9 +56,10 @@ public:
 		property ("Coordinate_Y", PropSInt32, (sint32)0, Coordinate_Y);
 		property ("Coordinate_H", PropSInt32, (sint32)0, Coordinate_H);
 		property ("Heading", PropFloat, 0.0f, Heading);
+		property ("CustomName", PropUCString, ucstring(""), CustomName);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 		
@@ -91,7 +93,7 @@ public:
 		property ("PetMirrorRow",		PropDataSetRow,	TDataSetRow(), PetMirrorRow);
 		property ("PetIndex", PropUInt16, (uint16)0, PetIdx);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 
@@ -121,7 +123,7 @@ public:
 		property ("Heading", PropFloat, 0.0f, Heading);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------
@@ -149,7 +151,7 @@ public:
 		className ("CPetCommandConfirmationMsg");
 		property ("CommandError", PropUInt16, (uint16)NO_ERROR_COMMAND, CommandError);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------
@@ -169,7 +171,7 @@ public:
 		property ("PetMirrorRow", PropDataSetRow, TDataSetRow(), PetMirrorRow);
 	}
 	
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 #endif //RY_PET_INTERFACE_MESSAGES_H

@@ -36,6 +36,9 @@
 // We're using the NeL Service framework, and layer 5
 #include <nel/net/service.h>
 
+#ifdef NL_OS_WINDOWS
+#include <Windows.h>
+#endif
 
 using namespace std;
 using namespace NLMISC;

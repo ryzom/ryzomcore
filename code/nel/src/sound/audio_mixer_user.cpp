@@ -45,12 +45,15 @@
 #include "nel/sound/context_sound.h"
 #include "nel/sound/music_source.h"
 #include "nel/sound/stream_source.h"
+#include "nel/sound/stream_file_source.h"
 #include "nel/sound/simple_sound.h"
 #include "nel/sound/music_sound.h"
 #include "nel/sound/stream_sound.h"
 #include "nel/sound/sample_bank_manager.h"
 #include "nel/sound/sample_bank.h"
 #include "nel/sound/sound_bank.h"
+#include "nel/sound/group_controller.h"
+#include "nel/sound/containers.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -218,6 +221,7 @@ void CAudioMixerUser::writeProfile(std::string& out)
 */
 	out += "Sound mixer: \n";
 	out += "\tPlaying sources: " + toString (getPlayingSourcesCount()) + " \n";
+	out += "\tPlaying simple sources: " + toString(countPlayingSimpleSources()) + " / " + toString(countSimpleSources()) + " \n";
 	out += "\tAvailable tracks: " + toString (getAvailableTracksCount()) + " \n";
 	out += "\tUsed tracks: " + toString (getUsedTracksCount()) + " \n";
 //	out << "\tMuted sources: " << nb << " \n";
@@ -248,6 +252,16 @@ void CAudioMixerUser::addSourceWaitingForPlay(CSourceCommon *source)
 	_SourceWaitingForPlay.push_back(source);
 }
 
+// ******************************************************************
+
+void CAudioMixerUser::removeSourceWaitingForPlay(CSourceCommon *source)
+{
+	std::list<CSourceCommon *>::iterator it = find(_SourceWaitingForPlay.begin(), _SourceWaitingForPlay.end(), source);
+	if (it != _SourceWaitingForPlay.end())
+	{
+		_SourceWaitingForPlay.erase(it);
+	}
+}
 
 // ******************************************************************
 
@@ -256,8 +270,9 @@ void CAudioMixerUser::reset()
 	_Leaving = true;
 
 	_SourceWaitingForPlay.clear();
-
-	/* TODO: Stop music channels */
+	
+	for (uint i = 0; i < _NbMusicChannelFaders; ++i)
+		_MusicChannelFaders[i].reset();
 
 	// Stop tracks
 	uint i;
@@ -1638,6 +1653,7 @@ void				CAudioMixerUser::update()
 		_MusicChannelFaders[i].update();
 
 	// Check all playing track and stop any terminated buffer.
+	std::list<CSourceCommon *>::size_type nbWaitingSources = _Sources.size();
 	for (i=0; i<_Tracks.size(); ++i)
 	{
 		if (!_Tracks[i]->isPlaying())
@@ -1649,13 +1665,14 @@ void				CAudioMixerUser::update()
 			}
 
 			// try to play any waiting source.
-			if (!_SourceWaitingForPlay.empty())
+			if (!_SourceWaitingForPlay.empty() && nbWaitingSources)
 			{
 				// check if the source still exist before trying to play it
 				if (_Sources.find(_SourceWaitingForPlay.front()) != _Sources.end())
 					_SourceWaitingForPlay.front()->play();
 //				nldebug("Before POP Sources waiting : %u", _SourceWaitingForPlay.size());
 				_SourceWaitingForPlay.pop_front();
+				--nbWaitingSources;
 //				nldebug("After POP Sources waiting : %u", _SourceWaitingForPlay.size());
 			}
 		}
@@ -1689,7 +1706,7 @@ void				CAudioMixerUser::update()
 //							_Tracks[i]->DrvSource->setPos(source->getPos() * (1-css->PosAlpha) + css->Position*(css->PosAlpha));
 							_Tracks[i]->getPhysicalSource()->setPos(source->getPos() * (1-css->PosAlpha) + vpos*(css->PosAlpha));
 							// update the relative gain
-							_Tracks[i]->getPhysicalSource()->setGain(source->getRelativeGain()*source->getGain()*css->Gain);
+							_Tracks[i]->getPhysicalSource()->setGain(source->getFinalGain() * css->Gain);
 #if EAX_AVAILABLE == 1
 							if (_UseEax)
 							{
@@ -1826,10 +1843,14 @@ bool CAudioMixerUser::tryToLoadSampleBank(const std::string &sampleName)
 	}
 }
 
+UGroupController *CAudioMixerUser::getGroupController(const std::string &path)
+{
+	return static_cast<UGroupController *>(_GroupController.getGroupController(path));
+}
 
 // ******************************************************************
 
-USource				*CAudioMixerUser::createSource( TSoundId id, bool spawn, TSpawnEndCallback cb, void *userParam, NL3D::CCluster *cluster, CSoundContext *context )
+USource				*CAudioMixerUser::createSource( TSoundId id, bool spawn, TSpawnEndCallback cb, void *userParam, NL3D::CCluster *cluster, CSoundContext *context, UGroupController *groupController )
 {
 #if NL_PROFILE_MIXER
 	TTicks start = CTime::getPerformanceTime();
@@ -1915,7 +1936,7 @@ retrySound:
 			}
 
 			// Create source
-			CSimpleSource *source = new CSimpleSource( simpleSound, spawn, cb, userParam, cluster);
+			CSimpleSource *source = new CSimpleSource( simpleSound, spawn, cb, userParam, cluster, static_cast<CGroupController *>(groupController));
 
 	//		nldebug("Mixer : source %p created", source);
 
@@ -1939,28 +1960,35 @@ retrySound:
 		{
 			CStreamSound *streamSound = static_cast<CStreamSound *>(id);
 			// This is a stream thingy.
-			ret = new CStreamSource(streamSound, spawn, cb, userParam, cluster);
+			ret = new CStreamSource(streamSound, spawn, cb, userParam, cluster, static_cast<CGroupController *>(groupController));
+		}
+		break;
+	case CSound::SOUND_STREAM_FILE:
+		{
+			CStreamFileSound *streamFileSound = static_cast<CStreamFileSound *>(id);
+			// This is a stream file thingy.
+			ret = new CStreamFileSource(streamFileSound, spawn, cb, userParam, cluster, static_cast<CGroupController *>(groupController));
 		}
 		break;
 	case CSound::SOUND_COMPLEX:
 		{
 			CComplexSound *complexSound = static_cast<CComplexSound *>(id);
 			// This is a pattern sound.
-			ret = new CComplexSource(complexSound, spawn, cb, userParam, cluster);
+			ret = new CComplexSource(complexSound, spawn, cb, userParam, cluster, static_cast<CGroupController *>(groupController));
 		}
 		break;
 	case CSound::SOUND_BACKGROUND:
 		{
 			// This is a background sound.
 			CBackgroundSound *bgSound = static_cast<CBackgroundSound *>(id);
-			ret = new CBackgroundSource(bgSound, spawn, cb, userParam, cluster);
+			ret = new CBackgroundSource(bgSound, spawn, cb, userParam, cluster, static_cast<CGroupController *>(groupController));
 		}
 		break;
 	case CSound::SOUND_MUSIC:
 		{
 			// This is a background music sound
 			CMusicSound *music_sound= static_cast<CMusicSound *>(id);
-			ret = new CMusicSource(music_sound, spawn, cb, userParam, cluster);
+			ret = new CMusicSource(music_sound, spawn, cb, userParam, cluster, static_cast<CGroupController *>(groupController));
 		}
 		break;
 	case CSound::SOUND_CONTEXT:
@@ -1974,7 +2002,7 @@ retrySound:
 			CSound *sound = ctxSound->getContextSound(*context);
 			if (sound != 0)
 			{
-				ret = createSource(sound, spawn, cb, userParam, cluster);
+				ret = createSource(sound, spawn, cb, userParam, cluster, NULL, static_cast<CGroupController *>(groupController));
 				// Set the volume of the source according to the context volume
 				if (ret != 0)
 				{
@@ -2007,9 +2035,9 @@ retrySound:
 
 // ******************************************************************
 
-USource				*CAudioMixerUser::createSource( const NLMISC::TStringId &name, bool spawn, TSpawnEndCallback cb, void *userParam, NL3D::CCluster *cluster, CSoundContext *context)
+USource				*CAudioMixerUser::createSource( const NLMISC::TStringId &name, bool spawn, TSpawnEndCallback cb, void *userParam, NL3D::CCluster *cluster, CSoundContext *context, UGroupController *groupController)
 {
-	return createSource( getSoundId( name ), spawn, cb, userParam, cluster, context);
+	return createSource( getSoundId( name ), spawn, cb, userParam, cluster, context, groupController);
 }
 
 
@@ -2146,6 +2174,32 @@ uint			CAudioMixerUser::getPlayingSourcesCount() const
 {
 	return _PlayingSources;
 }
+
+
+// ******************************************************************
+
+uint			CAudioMixerUser::countPlayingSimpleSources() const
+{
+	uint count = 0;
+	for (TSourceContainer::const_iterator it(_Sources.begin()), end(_Sources.end()); it != end; ++it)
+	{
+		if ((*it)->getType() == CSourceCommon::SOURCE_SIMPLE && (*it)->isPlaying())
+			++count;
+	}
+	return count;
+}
+
+uint			CAudioMixerUser::countSimpleSources() const
+{
+	uint count = 0;
+	for (TSourceContainer::const_iterator it(_Sources.begin()), end(_Sources.end()); it != end; ++it)
+	{
+		if ((*it)->getType() == CSourceCommon::SOURCE_SIMPLE)
+			++count;
+	}
+	return count;
+}
+
 
 // ******************************************************************
 

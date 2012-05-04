@@ -435,7 +435,7 @@ void CObjectViewer::setCurrentObject(const std::string &name)
 	nlinfo("set current entity %s", _CurrentInstance.c_str());
 }
 
-CEntity& CObjectViewer::getEntity(const std::string &name)
+CEntity &CObjectViewer::getEntity(const std::string &name)
 {
 	if ( _Entities.count(name) == 0) nlerror("Entity %s not found", name.c_str());
 	EIT eit = _Entities.find (name);

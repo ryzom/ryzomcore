@@ -45,6 +45,9 @@ public:
 	/// Stop the music previously loaded and played (the Memory is also freed)
 	virtual void stop() =0;
 
+	/// Makes sure any resources are freed, but keeps available for next play call
+	virtual void reset() =0;
+
 	/// Pause the music previously loaded and played (the Memory is not freed)
 	virtual void pause() =0;
 	

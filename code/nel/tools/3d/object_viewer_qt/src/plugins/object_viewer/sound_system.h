@@ -61,13 +61,13 @@ public:
 	}
 
 	/// Sets the path which contains samples
-	void setSamplePath(std::string& path)
+	void setSamplePath(std::string &path)
 	{
 		_SamplePath = NLMISC::CPath::standardizePath(path, true);
 	}
 
 	/// Sets the path which contains packed sheet
-	void setPackedSheetPath(std::string& path)
+	void setPackedSheetPath(std::string &path)
 	{
 		_PackedSheetPath = NLMISC::CPath::standardizePath(path, true);
 	}
@@ -88,13 +88,13 @@ public:
 	NLSOUND::USource *create(const std::string &soundName);
 
 	/// Load the sound animation with the specified name
-	void loadAnimation(std::string& name)
+	void loadAnimation(std::string &name)
 	{
 		_AnimManager->loadAnimation(name);
 	}
 
 	/// Start playing a sound animation.
-	void playAnimation(std::string& name, float lastTime, float curTime, NLSOUND::CSoundContext &context);
+	void playAnimation(std::string &name, float lastTime, float curTime, NLSOUND::CSoundContext &context);
 
 	// Update the sound animations.
 	//static void updateAnimations(float lastTime, float curTime)	{ _AnimManager->update(lastTime, curTime); };

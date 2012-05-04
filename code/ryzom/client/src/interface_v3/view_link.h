@@ -38,8 +38,11 @@ public:
 	// The URI
 	std::string		Link;
 
+	std::string		LinkTitle;
+
 	// Set the main group
 	void	setHTMLView(class CGroupHTML *html);
+	bool	getMouseOverShape(std::string &texName, uint8 &rot, NLMISC::CRGBA &col);
 
 protected:
 

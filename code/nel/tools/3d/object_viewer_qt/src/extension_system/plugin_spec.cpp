@@ -16,12 +16,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// Project includes
 #include "plugin_spec.h"
 #include "iplugin.h"
 #include "iplugin_manager.h"
 
 #include "nel/misc/app_context.h"
+#include "nel/misc/debug.h"
 
+// Qt includes
 #include <QtCore/QList>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
@@ -30,8 +33,17 @@
 
 namespace ExtensionSystem
 {
+const char *const PLUGIN_SPEC_NAME = "name";
+const char *const PLUGIN_SPEC_VENDOR = "vendor";
+const char *const PLUGIN_SPEC_VERSION = "version";
+const char *const PLUGIN_SPEC_LIBRARY_NAME = "library-name";
+const char *const PLUGIN_SPEC_DESCRIPTION = "description";
+const char *const PLUGIN_SPEC_DEPENDENCIES = "dependencies";
+const char *const PLUGIN_SPEC_DEPENDENCY = "dependency";
+const char *const PLUGIN_SPEC_DEPENDENCY_NAME = "plugin-name";
+const char *const PLUGIN_SPEC_DEPENDENCY_VERSION = "version";
 
-CPluginSpec::CPluginSpec()
+PluginSpec::PluginSpec()
 	: m_location(""),
 	  m_filePath(""),
 	  m_fileName(""),
@@ -39,100 +51,210 @@ CPluginSpec::CPluginSpec()
 	  m_version(""),
 	  m_vendor(""),
 	  m_description(""),
+	  m_nameSpecFile(""),
+	  m_suffix(""),
 	  m_state(State::Invalid),
+	  m_enabled(true),
+	  m_enabledStartup(true),
 	  m_hasError(false),
 	  m_errorString(""),
 	  m_plugin(0),
 	  m_pluginManager(0)
 {
+// Compilation mode specific suffixes
+#ifdef NL_OS_WINDOWS
+#	if defined(NL_DEBUG)
+	m_suffix = "_d.dll";
+#	elif defined(NL_RELEASE)
+	m_suffix = "_r.dll";
+#	else
+#		error "Unknown compilation mode, can't build suffix"
+#	endif
+#elif defined (NL_OS_UNIX)
+	m_suffix = ".so";
+#else
+#	error "You must define the lib suffix for your platform"
+#endif
 }
 
-QString CPluginSpec::name() const
+QString PluginSpec::name() const
 {
 	return m_name;
 }
 
-QString CPluginSpec::version() const
+QString PluginSpec::version() const
 {
 	return m_version;
 }
 
-QString CPluginSpec::vendor() const
+QString PluginSpec::vendor() const
 {
 	return m_vendor;
 }
 
-QString CPluginSpec::description() const
+QString PluginSpec::description() const
 {
 	return m_description;
 }
 
-QString CPluginSpec::location() const
+QString PluginSpec::location() const
 {
 	return m_location;
 }
 
-QString CPluginSpec::filePath() const
+QString PluginSpec::filePath() const
 {
 	return m_filePath;
 }
 
-QString CPluginSpec::fileName() const
+QString PluginSpec::fileName() const
 {
 	return m_fileName;
 }
 
-IPlugin* CPluginSpec::plugin() const
+IPlugin *PluginSpec::plugin() const
 {
 	return m_plugin;
 }
 
-int CPluginSpec::getState() const
+int PluginSpec::state() const
 {
 	return m_state;
 }
 
-bool CPluginSpec::hasError() const
+bool PluginSpec::hasError() const
 {
 	return m_hasError;
 }
 
-QString CPluginSpec::errorString() const
+QString PluginSpec::errorString() const
 {
 	return m_errorString;
 }
 
-QList<CPluginSpec *> CPluginSpec::dependencySpecs() const
+QList<PluginSpec *> PluginSpec::dependencySpecs() const
 {
 	return m_dependencySpecs;
 }
 
-bool CPluginSpec::setFileName(const QString &fileName)
+bool PluginSpec::setFileName(const QString &fileName)
 {
-	QFile file(fileName);
+	m_fileName = fileName + m_suffix;
+	m_filePath = m_location + "/" + m_fileName;
+
+	nlinfo(m_filePath.toStdString().c_str());
+	QFile file(m_filePath);
 	if (!file.exists())
-		return reportError(QCoreApplication::translate("CPluginSpec", "File does not exist: %1").arg(file.fileName()));
+		return reportError(QCoreApplication::translate("PluginSpec", "File does not exist: %1").arg(file.fileName()));
 	if (!file.open(QIODevice::ReadOnly))
-		return reportError(QCoreApplication::translate("CPluginSpec", "Could not open file for read: %1").arg(file.fileName()));
+		return reportError(QCoreApplication::translate("PluginSpec", "Could not open file for read: %1").arg(file.fileName()));
+	return true;
+}
+
+bool PluginSpec::setSpecFileName(const QString &specFileName)
+{
+	m_nameSpecFile = specFileName;
+
+	QFile file(specFileName);
+	if (!file.exists())
+		return reportError(QCoreApplication::translate("PluginSpec", "Spec file does not exist: %1").arg(file.fileName()));
 
 	QFileInfo fileInfo(file);
 	m_location = fileInfo.absolutePath();
-	m_filePath = fileInfo.absoluteFilePath();
-	m_fileName = fileInfo.fileName();
+	readSpec();
+	return true;
+}
 
+bool PluginSpec::readSpec()
+{
+	QFile file(m_nameSpecFile);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+		return reportError(QCoreApplication::translate("PluginSpec", "Could not open spec file for read: %1").arg(file.fileName()));
+
+	QXmlStreamReader reader(&file);
+	while (!reader.atEnd())
+	{
+		if (reader.isStartElement())
+			parseSpec(reader);
+		reader.readNext();
+	}
+	if (reader.hasError())
+		return reportError(QCoreApplication::translate("PluginSpec", "Error parsing file %1: %2, at line %3, column %4")
+						   .arg(file.fileName())
+						   .arg(reader.errorString())
+						   .arg(reader.lineNumber())
+						   .arg(reader.columnNumber()));
 	m_state = State::Read;
 	return true;
 }
 
-bool CPluginSpec::loadLibrary()
+void PluginSpec::parseSpec(QXmlStreamReader &reader)
+{
+	QString elemName = reader.name().toString();
+	reader.readNext();
+	if (reader.isCharacters())
+	{
+		QString elemText = reader.text().toString();
+		if (elemName == PLUGIN_SPEC_LIBRARY_NAME)
+			setFileName(elemText);
+		if (elemName == PLUGIN_SPEC_NAME)
+			m_name = elemText;
+		if (elemName == PLUGIN_SPEC_VERSION)
+			m_version = elemText;
+		if (elemName == PLUGIN_SPEC_VENDOR)
+			m_vendor = elemText;
+		if (elemName == PLUGIN_SPEC_DESCRIPTION)
+			m_description = elemText;
+		if (elemName == PLUGIN_SPEC_DEPENDENCIES)
+			parseDependency(reader);
+	}
+}
+
+void PluginSpec::parseDependency(QXmlStreamReader &reader)
+{
+	QString elemName;
+	while (!reader.atEnd() && (elemName != PLUGIN_SPEC_DEPENDENCIES))
+	{
+		reader.readNext();
+		elemName = reader.name().toString();
+		if (reader.isStartElement() && (elemName == PLUGIN_SPEC_DEPENDENCY))
+		{
+			// Read name dependency plugin
+			QString dependencyName = reader.attributes().value(PLUGIN_SPEC_DEPENDENCY_NAME).toString();
+			if (dependencyName.isEmpty())
+			{
+				reader.raiseError(QCoreApplication::translate("CPluginSpec", "'%1' misses attribute '%2'")
+								  .arg(PLUGIN_SPEC_DEPENDENCY)
+								  .arg(PLUGIN_SPEC_DEPENDENCY_NAME));
+				return;
+			}
+			// TODO: Read version dependency plugin
+			QString dependencyVersion = reader.attributes().value(PLUGIN_SPEC_DEPENDENCY_VERSION).toString();
+
+			m_dependencies.push_back(dependencyName);
+		}
+	}
+}
+
+void PluginSpec::setEnabled(bool enabled)
+{
+	m_enabled = enabled;
+}
+
+bool PluginSpec::isEnabled() const
+{
+	return m_enabled;
+}
+
+bool PluginSpec::loadLibrary()
 {
 	if (m_hasError)
 		return false;
-	if (m_state != State::Read)
+	if (m_state != State::Resolved)
 	{
 		if (m_state == State::Loaded)
 			return true;
-		return reportError(QCoreApplication::translate("CPluginSpec", "Loading the library failed because state != Resolved"));
+		return reportError(QCoreApplication::translate("PluginSpec", "Loading the library failed because state != Resolved"));
 	}
 
 	QPluginLoader loader(m_filePath);
@@ -143,38 +265,32 @@ bool CPluginSpec::loadLibrary()
 	if (!pluginObject)
 	{
 		loader.unload();
-		return reportError(QCoreApplication::translate("CPluginSpec", "Plugin is not valid (does not derive from IPlugin)"));
+		return reportError(QCoreApplication::translate("PluginSpec", "Plugin is not valid (does not derive from IPlugin)"));
 	}
 
 	pluginObject->setNelContext(&NLMISC::INelContext::getInstance());
-
-	m_name = pluginObject->name();
-	m_version = pluginObject->version();
-	m_vendor = pluginObject->vendor();
-	m_description = pluginObject->description();
 
 	m_state = State::Loaded;
 	m_plugin = pluginObject;
 	return true;
 }
 
-bool CPluginSpec::resolveDependencies(const QList<CPluginSpec *> &specs)
+bool PluginSpec::resolveDependencies(const QList<PluginSpec *> &specs)
 {
 	if (m_hasError)
 		return false;
-	if (m_state != State::Loaded)
+	if (m_state != State::Read)
 	{
-		m_errorString = QCoreApplication::translate("CPluginSpec", "Resolving dependencies failed because state != Read");
+		m_errorString = QCoreApplication::translate("PluginSpec", "Resolving dependencies failed because state != Read");
 		m_hasError = true;
 		return false;
 	}
-	QList<CPluginSpec *> resolvedDependencies;
-	QStringList dependencies = m_plugin->dependencies();
-	Q_FOREACH(const QString &dependency, dependencies)
+	QList<PluginSpec *> resolvedDependencies;
+	Q_FOREACH(const QString &dependency, m_dependencies)
 	{
-		CPluginSpec *found = 0;
+		PluginSpec *found = 0;
 
-		Q_FOREACH(CPluginSpec *spec, specs)
+		Q_FOREACH(PluginSpec *spec, specs)
 		{
 			if (QString::compare(dependency, spec->name(), Qt::CaseInsensitive) == 0)
 			{
@@ -187,7 +303,7 @@ bool CPluginSpec::resolveDependencies(const QList<CPluginSpec *> &specs)
 			m_hasError = true;
 			if (!m_errorString.isEmpty())
 				m_errorString.append(QLatin1Char('\n'));
-			m_errorString.append(QCoreApplication::translate("CPluginSpec", "Could not resolve dependency '%1'")
+			m_errorString.append(QCoreApplication::translate("PluginSpec", "Could not resolve dependency '%1'")
 								 .arg(dependency));
 			continue;
 		}
@@ -197,34 +313,32 @@ bool CPluginSpec::resolveDependencies(const QList<CPluginSpec *> &specs)
 		return false;
 
 	m_dependencySpecs = resolvedDependencies;
-
 	m_state = State::Resolved;
-
 	return true;
 }
 
-bool CPluginSpec::initializePlugin()
+bool PluginSpec::initializePlugin()
 {
 	if (m_hasError)
 		return false;
-	if (m_state != State::Resolved)
+	if (m_state != State::Loaded)
 	{
 		if (m_state == State::Initialized)
 			return true;
-		return reportError(QCoreApplication::translate("CPluginSpec", "Initializing the plugin failed because state != Resolved)"));
+		return reportError(QCoreApplication::translate("PluginSpec", "Initializing the plugin failed because state != Loaded)"));
 	}
 	if (!m_plugin)
-		return reportError(QCoreApplication::translate("CPluginSpec", "Internal error: have no plugin instance to initialize"));
+		return reportError(QCoreApplication::translate("PluginSpec", "Internal error: have no plugin instance to initialize"));
 
 	QString err;
 	if (!m_plugin->initialize(m_pluginManager, &err))
-		return reportError(QCoreApplication::translate("CPluginSpec", "Plugin initialization failed: %1").arg(err));
+		return reportError(QCoreApplication::translate("PluginSpec", "Plugin initialization failed: %1").arg(err));
 
 	m_state = State::Initialized;
 	return true;
 }
 
-bool CPluginSpec::initializeExtensions()
+bool PluginSpec::initializeExtensions()
 {
 	if (m_hasError)
 		return false;
@@ -232,17 +346,17 @@ bool CPluginSpec::initializeExtensions()
 	{
 		if (m_state == State::Running)
 			return true;
-		return reportError(QCoreApplication::translate("CPluginSpec", "Cannot perform extensionsInitialized because state != Initialized"));
+		return reportError(QCoreApplication::translate("PluginSpec", "Cannot perform extensionsInitialized because state != Initialized"));
 	}
 	if (!m_plugin)
-		return reportError(QCoreApplication::translate("CPluginSpec", "Internal error: have no plugin instance to perform extensionsInitialized"));
+		return reportError(QCoreApplication::translate("PluginSpec", "Internal error: have no plugin instance to perform extensionsInitialized"));
 
 	m_plugin->extensionsInitialized();
 	m_state = State::Running;
 	return true;
 }
 
-void CPluginSpec::stop()
+void PluginSpec::stop()
 {
 	if (!m_plugin)
 		return;
@@ -250,7 +364,7 @@ void CPluginSpec::stop()
 	m_state = State::Stopped;
 }
 
-void CPluginSpec::kill()
+void PluginSpec::kill()
 {
 	if (!m_plugin)
 		return;
@@ -259,7 +373,17 @@ void CPluginSpec::kill()
 	m_state = State::Deleted;
 }
 
-bool CPluginSpec::reportError(const QString &err)
+void PluginSpec::setEnabledStartup(bool enabled)
+{
+	m_enabledStartup = enabled;
+}
+
+bool PluginSpec::isEnabledStartup() const
+{
+	return m_enabledStartup;
+}
+
+bool PluginSpec::reportError(const QString &err)
 {
 	m_errorString = err;
 	m_hasError = true;

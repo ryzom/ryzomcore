@@ -19,17 +19,30 @@
 #include <assert.h>
 
 // Various MAX and MXS includes
-#include <MaxScrpt/MAXScrpt.h>
-#include <MaxScrpt/3dmath.h>
-#include <MaxScrpt/Numbers.h>
-#include <MaxScrpt/MAXclses.h>
-#include <MaxScrpt/Streams.h>
-#include <MaxScrpt/MSTime.h>
-#include <MaxScrpt/MAXObj.h>
-#include <MaxScrpt/Parser.h>
+#include <maxversion.h>
+#if MAX_VERSION_MAJOR >= 14
+#	include <maxscript/maxscript.h>
+#	include <maxscript/foundation/3dmath.h>
+#	include <maxscript/foundation/numbers.h>
+#	include <maxscript/maxwrapper/maxclasses.h>
+#	include <maxscript/foundation/streams.h>
+#	include <maxscript/foundation/mxstime.h>
+#	include <maxscript/maxwrapper/mxsobjects.h>
+#	include <maxscript/compiler/parser.h>
+#	include <maxscript/macros/define_instantiation_functions.h>
+#else
+#	include <MaxScrpt/MAXScrpt.h>
+#	include <MaxScrpt/3dmath.h>
+#	include <MaxScrpt/Numbers.h>
+#	include <MaxScrpt/MAXclses.h>
+#	include <MaxScrpt/Streams.h>
+#	include <MaxScrpt/MSTime.h>
+#	include <MaxScrpt/MAXObj.h>
+#	include <MaxScrpt/Parser.h>
+#	include <MaxScrpt/definsfn.h>
+#endif
 #include <max.h>
 #include <stdmat.h>
-#include <MaxScrpt/definsfn.h>
 
 // Visual
 #include <direct.h>

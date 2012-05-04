@@ -35,33 +35,33 @@ Q_DECLARE_METATYPE(PageData);
 
 namespace Core
 {
-CSettingsDialog::CSettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
-								 const QString &categoryId,
-								 const QString &pageId,
-								 QWidget *parent)
+SettingsDialog::SettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
+							   const QString &categoryId,
+							   const QString &pageId,
+							   QWidget *parent)
 	: QDialog(parent),
-	  _applied(false)
+	  m_applied(false)
 {
-	_ui.setupUi(this);
+	m_ui.setupUi(this);
 
-	_plugMan = pluginManager;
+	m_plugMan = pluginManager;
 
 	QString initialCategory = categoryId;
 	QString initialPage = pageId;
 
-	_ui.buttonBox->button(QDialogButtonBox::Ok)->setDefault(true);
+	m_ui.buttonBox->button(QDialogButtonBox::Ok)->setDefault(true);
 
-	connect(_ui.buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked()), this, SLOT(apply()));
+	connect(m_ui.buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked()), this, SLOT(apply()));
 
-	_ui.splitter->setCollapsible(1, false);
-	_ui.pageTree->header()->setVisible(false);
+	m_ui.splitter->setCollapsible(1, false);
+	m_ui.pageTree->header()->setVisible(false);
 
-	connect(_ui.pageTree, SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)),
+	connect(m_ui.pageTree, SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)),
 			this, SLOT(pageSelected()));
 
 	QMap<QString, QTreeWidgetItem *> categories;
 
-	QList<IOptionsPage *> pages = _plugMan->getObjects<IOptionsPage>();
+	QList<IOptionsPage *> pages = m_plugMan->getObjects<IOptionsPage>();
 
 	int index = 0;
 	Q_FOREACH(IOptionsPage *page, pages)
@@ -82,7 +82,7 @@ CSettingsDialog::CSettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
 		QTreeWidgetItem *treeitem;
 		if (!categories.contains(currentCategory))
 		{
-			treeitem = new QTreeWidgetItem(_ui.pageTree);
+			treeitem = new QTreeWidgetItem(m_ui.pageTree);
 			treeitem->setText(0, trCategories.at(0));
 			treeitem->setData(0, Qt::UserRole, qVariantFromValue(pageData));
 			categories.insert(currentCategory, treeitem);
@@ -108,13 +108,13 @@ CSettingsDialog::CSettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
 
 		categories.value(currentCategory)->addChild(item);
 
-		_pages.append(page);
-		_ui.stackedPages->addWidget(page->createPage(_ui.stackedPages));
+		m_pages.append(page);
+		m_ui.stackedPages->addWidget(page->createPage(m_ui.stackedPages));
 
 		if (page->id() == initialPage && currentCategory == initialCategory)
 		{
-			_ui.stackedPages->setCurrentIndex(_ui.stackedPages->count());
-			_ui.pageTree->setCurrentItem(item);
+			m_ui.stackedPages->setCurrentIndex(m_ui.stackedPages->count());
+			m_ui.pageTree->setCurrentItem(item);
 		}
 
 		index++;
@@ -122,30 +122,30 @@ CSettingsDialog::CSettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
 
 	QList<int> sizes;
 	sizes << 150 << 300;
-	_ui.splitter->setSizes(sizes);
+	m_ui.splitter->setSizes(sizes);
 
-	_ui.splitter->setStretchFactor(_ui.splitter->indexOf(_ui.pageTree), 0);
-	_ui.splitter->setStretchFactor(_ui.splitter->indexOf(_ui.layoutWidget), 1);
+	m_ui.splitter->setStretchFactor(m_ui.splitter->indexOf(m_ui.pageTree), 0);
+	m_ui.splitter->setStretchFactor(m_ui.splitter->indexOf(m_ui.layoutWidget), 1);
 }
 
-CSettingsDialog::~CSettingsDialog()
+SettingsDialog::~SettingsDialog()
 {
 }
 
-void CSettingsDialog::pageSelected()
+void SettingsDialog::pageSelected()
 {
-	QTreeWidgetItem *item = _ui.pageTree->currentItem();
+	QTreeWidgetItem *item = m_ui.pageTree->currentItem();
 	PageData data = item->data(0, Qt::UserRole).value<PageData>();
 	int index = data.index;
-	_currentCategory = data.category;
-	_currentPage = data.id;
-	_ui.stackedPages->setCurrentIndex(index);
+	m_currentCategory = data.category;
+	m_currentPage = data.id;
+	m_ui.stackedPages->setCurrentIndex(index);
 }
 
-void CSettingsDialog::accept()
+void SettingsDialog::accept()
 {
-	_applied = true;
-	Q_FOREACH(IOptionsPage *page, _pages)
+	m_applied = true;
+	Q_FOREACH(IOptionsPage *page, m_pages)
 	{
 		page->apply();
 		page->finish();
@@ -153,28 +153,28 @@ void CSettingsDialog::accept()
 	done(QDialog::Accepted);
 }
 
-void CSettingsDialog::reject()
+void SettingsDialog::reject()
 {
-	Q_FOREACH(IOptionsPage *page, _pages)
+	Q_FOREACH(IOptionsPage *page, m_pages)
 	page->finish();
 	done(QDialog::Rejected);
 }
 
-void CSettingsDialog::apply()
+void SettingsDialog::apply()
 {
-	Q_FOREACH(IOptionsPage *page, _pages)
+	Q_FOREACH(IOptionsPage *page, m_pages)
 	page->apply();
-	_applied = true;
+	m_applied = true;
 }
 
-bool CSettingsDialog::execDialog()
+bool SettingsDialog::execDialog()
 {
-	_applied = false;
+	m_applied = false;
 	exec();
-	return _applied;
+	return m_applied;
 }
 
-void CSettingsDialog::done(int val)
+void SettingsDialog::done(int val)
 {
 	QDialog::done(val);
 }

@@ -41,7 +41,7 @@ namespace GUS
 	class IModuleBuilder: public NLMISC::CRefCount
 	{
 	public:
-		virtual ~IModuleBuilder() {};
+		virtual ~IModuleBuilder() {}
 		virtual const NLMISC::CSString& getName() const=0;
 		virtual const NLMISC::CSString& getArgs() const=0;
 		virtual const NLMISC::CSString& getDescription() const=0;

@@ -28,7 +28,7 @@
 #include "ui_georges_dirtree_form.h"
 #include "georges_filesystem_model.h"
 
-namespace Plugin
+namespace GeorgesQt
 {
 
 class CGeorgesDirTreeDialog: public QDockWidget
@@ -45,6 +45,7 @@ private:
 	Ui::CGeorgesDirTreeDialog m_ui;
 
 	CGeorgesFileSystemModel *m_dirModel;
+	//CGeorgesFileSystemProxyModel *m_proxyModel;
 	QString m_ldPath;
 
 Q_SIGNALS:
@@ -54,9 +55,8 @@ private Q_SLOTS:
 	void fileSelected(QModelIndex index);
 	void changeFile(QString file);
 
-	friend class CMainWindow;
 }; /* CGEorgesDirTreeDialog */
 
-} /* namespace NLQT */
+} /* namespace GeorgesQt */
 
 #endif // GEORGES_DIRTREE_DIALOG_H

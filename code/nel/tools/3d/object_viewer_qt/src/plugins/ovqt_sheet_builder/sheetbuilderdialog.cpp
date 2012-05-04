@@ -195,7 +195,7 @@ void SheetBuilderDialog::buildSheet()
 	for( it1 = IdToForm.begin(); it1 != IdToForm.end(); ++it1 )
 	{
 		string outputLine = " id: " + toString((*it1).first.Id) + " file: " + (*it1).second +"\n";
-		output.serialBuffer((uint8*)(const_cast<char*>(outputLine.data())),(uint)outputLine.size());
+		output.serialBuffer((uint8 *)(const_cast<char *>(outputLine.data())),(uint)outputLine.size());
 	}
 
 	displayInfo (tr("------------- results ----------------"));

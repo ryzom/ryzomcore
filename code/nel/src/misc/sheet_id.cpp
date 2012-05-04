@@ -592,7 +592,7 @@ uint32 CSheetId::typeFromFileExtension(const std::string &fileExtension)
 {
 	if (!_Initialised) init(false);
 
-	unsigned i;
+	uint i;
 	for (i=0;i<_FileExtensions.size();i++)
 		if (toLower(fileExtension)==_FileExtensions[i])
 			return i;

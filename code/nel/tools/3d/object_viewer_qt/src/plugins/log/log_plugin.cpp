@@ -21,7 +21,7 @@
 
 #include "../core/icore.h"
 #include "../core/core_constants.h"
-#include "../core/imenu_manager.h"
+#include "../core/menu_manager.h"
 #include "../../extension_system/iplugin_spec.h"
 
 // Qt includes
@@ -68,7 +68,7 @@ namespace Plugin
 	{
 		Q_UNUSED(errorString);
 		m_plugMan = pluginManager;
-		m_logSettingsPage = new CLogSettingsPage(this);
+		m_logSettingsPage = new CLogSettingsPage(this, this);
 		addAutoReleasedObject(m_logSettingsPage);
 		return true;
 	}
@@ -78,7 +78,7 @@ namespace Plugin
 		setDisplayers();
 
 		Core::ICore *core = Core::ICore::instance();
-		Core::IMenuManager *menuManager = core->menuManager();
+		Core::MenuManager *menuManager = core->menuManager();
 		QMenu *viewMenu = menuManager->menu(Core::Constants::M_VIEW);
 
 		QMainWindow *wnd = Core::ICore::instance()->mainWindow();
@@ -103,7 +103,7 @@ namespace Plugin
 
 	QString CLogPlugin::name() const
 	{
-		return "NeL Log";
+		return "LogPlugin";
 	}
 
 	QString CLogPlugin::version() const

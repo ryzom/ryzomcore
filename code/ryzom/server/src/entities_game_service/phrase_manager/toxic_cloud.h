@@ -36,7 +36,7 @@ class CToxicCloud : public CEnvironmentalEffect
 	NL_INSTANCE_COUNTER_DECL(CToxicCloud);
 public:
 
-	CToxicCloud() {};
+	CToxicCloud() {}
 
 	/// Init
 	inline void		init( const NLMISC::CVector& pos, float radius, sint32 dmgPerHit, NLMISC::TGameCycle updateFrequency, NLMISC::TGameCycle lifetime=ToxicCloudDefaultLifetime) 

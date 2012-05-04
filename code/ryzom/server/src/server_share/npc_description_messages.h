@@ -48,7 +48,8 @@ class CNpcChatProfile
 {
 public:
 	CNpcChatProfile() : /*_guildCreator(false),*/ /*_dynamicMissionGiver(false),*/ _FilterExplicitActionTradeByPlayerRace(false), 
-		_ExplicitActionSPType(EGSPD::CSPType::Unknown), _FilterExplicitActionTradeByBotRace(true){}
+		_ExplicitActionSPType(EGSPD::CSPType::Unknown), _FilterExplicitActionTradeByBotRace(true),
+		_DynamicMissionGiver(false), _Organization(0) {}
 	CNpcChatProfile(const CNpcChatProfile &other0,const CNpcChatProfile &other1);
 	virtual ~CNpcChatProfile() {}
 
@@ -84,6 +85,7 @@ public:
 	const std::string					&getWebPageName() const		{ return _WebPageName; }
 
 	const NLMISC::CSheetId				&getOutpost() const			{ return _Outpost; }
+	uint32								getOrganization() const		{ return _Organization; }
 	
 protected:
 	std::vector< RYMSG::TExplicitSale >	_ExplicitSales;
@@ -125,6 +127,8 @@ protected:
 	std::vector<std::string>		_OptionalProperties;
 	
 	NLMISC::CSheetId				_Outpost;
+
+	uint32							_Organization;
 };
 
 //----------------------------------------------------------------
@@ -143,7 +147,7 @@ struct CCharacterBotChatBeginEnd : public CMirrorTransportClass
 		propertyCont ("botChatEnd",		PropUInt32, BotChatEnd);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id) { }
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) { }
 };
 
 struct CCharacterDynChatBeginEnd : public CMirrorTransportClass
@@ -159,7 +163,7 @@ struct CCharacterDynChatBeginEnd : public CMirrorTransportClass
 		propertyCont ("dnChatEnd",		PropUInt32, DynChatEnd);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id) { }
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) { }
 };
 
 struct CCustomElementId

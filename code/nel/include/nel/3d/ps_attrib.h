@@ -96,7 +96,7 @@ public:
 		try
 		{
 			newStart = new uint8[sizeof(T) * capacity + (1 << snapPower)];
-			T *newTab = (T *) ( (uint) (newStart + (1 << snapPower))  & ~((1 << snapPower) - 1)); // snap to a page
+			T *newTab = (T *) ( (size_t) (newStart + (1 << snapPower))  & ~((1 << snapPower) - 1)); // snap to a page
 
 
 

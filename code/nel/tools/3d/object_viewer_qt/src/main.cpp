@@ -124,6 +124,7 @@ sint main(int argc, char **argv)
 
 		nlinfo("Welcome to NeL Object Viewer Qt!");
 	}
+	QApplication::setGraphicsSystem("raster");
 	QApplication app(argc, argv);
 	QSplashScreen *splash = new QSplashScreen();
 	splash->setPixmap(QPixmap(":/images/nel_ide_load.png"));
@@ -131,7 +132,7 @@ sint main(int argc, char **argv)
 
 	QSettings::setDefaultFormat(QSettings::IniFormat);
 	QSettings *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
-										QLatin1String("RyzomCore"), QLatin1String(appNameC));
+	                                    QLatin1String("RyzomCore"), QLatin1String(appNameC));
 
 	QTranslator translator;
 	QTranslator qtTranslator;
@@ -147,7 +148,7 @@ sint main(int argc, char **argv)
 	NLMISC::CLibrary::addLibPath((qApp->applicationDirPath() + QString("/../PlugIns/nel")).toStdString());
 #endif
 
-	ExtensionSystem::CPluginManager pluginManager;
+	ExtensionSystem::PluginManager pluginManager;
 	pluginManager.setSettings(settings);
 	QStringList pluginPaths;
 #if !defined(NL_OS_MAC)
@@ -161,17 +162,8 @@ sint main(int argc, char **argv)
 
 	splash->hide();
 
-	const QList<ExtensionSystem::IPluginSpec *> plugins = pluginManager.plugins();
-	ExtensionSystem::IPluginSpec *corePlugin = 0;
-	Q_FOREACH(ExtensionSystem::IPluginSpec *spec, plugins)
-	{
-		if (spec->name() == QLatin1String("Core"))
-		{
-			corePlugin = spec;
-			break;
-		}
-	}
-
+	ExtensionSystem::IPluginSpec *corePlugin = pluginManager.pluginByName("Core");
+	
 	if (!corePlugin)
 	{
 		QDir absolutePluginPaths(pluginPaths.join(QLatin1String(",")));
@@ -182,8 +174,8 @@ sint main(int argc, char **argv)
 		QString newPath = QFileDialog::getExistingDirectory(0, QCoreApplication::translate("Application", "Change the plugins path"), QDir::homePath());
 		bool ok;
 		QString text = QInputDialog::getText(0, QCoreApplication::translate("Application", "Enter the plugins path"),
-											 QCoreApplication::translate("Application", "Plugin path:"), QLineEdit::Normal,
-											 newPath, &ok);
+		                                     QCoreApplication::translate("Application", "Plugin path:"), QLineEdit::Normal,
+		                                     newPath, &ok);
 		if (ok && !text.isEmpty())
 			settings->setValue("PluginPath", text);
 		settings->sync();
@@ -202,7 +194,7 @@ sint main(int argc, char **argv)
 
 	if (!errors.isEmpty())
 		QMessageBox::warning(0, QCoreApplication::translate("Application", "Object Viewer Qt - Plugin loader messages"),
-							 errors.join(QString::fromLatin1("\n\n")));
+		                     errors.join(QString::fromLatin1("\n\n")));
 
 	int result = app.exec();
 	return result;

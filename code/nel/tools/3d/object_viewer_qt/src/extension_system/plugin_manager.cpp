@@ -26,20 +26,22 @@
 namespace ExtensionSystem
 {
 
-CPluginManager::CPluginManager(QObject *parent)
+PluginManager::PluginManager(QObject *parent)
 	:IPluginManager(parent),
-	 m_settings(0)
+	 m_settings(0),
+	 m_extension("xml")
 {
 }
 
-CPluginManager::~CPluginManager()
+PluginManager::~PluginManager()
 {
+	writeSettings();
 	stopAll();
 	deleteAll();
 	qDeleteAll(m_pluginSpecs);
 }
 
-void CPluginManager::addObject(QObject *obj)
+void PluginManager::addObject(QObject *obj)
 {
 	QWriteLocker lock(&m_lock);
 	if (obj == 0)
@@ -59,7 +61,7 @@ void CPluginManager::addObject(QObject *obj)
 	Q_EMIT objectAdded(obj);
 }
 
-void CPluginManager::removeObject(QObject *obj)
+void PluginManager::removeObject(QObject *obj)
 {
 	if (obj == 0)
 	{
@@ -79,25 +81,25 @@ void CPluginManager::removeObject(QObject *obj)
 	m_allObjects.removeAll(obj);
 }
 
-QList<QObject *> CPluginManager::allObjects() const
+QList<QObject *> PluginManager::allObjects() const
 {
 	return m_allObjects;
 }
 
-void CPluginManager::loadPlugins()
+void PluginManager::loadPlugins()
 {
-	Q_FOREACH (CPluginSpec *spec, m_pluginSpecs)
-	setPluginState(spec, State::Loaded);
-
-	Q_FOREACH (CPluginSpec *spec, m_pluginSpecs)
+	Q_FOREACH (PluginSpec *spec, m_pluginSpecs)
 	setPluginState(spec, State::Resolved);
 
-	QList<CPluginSpec *> queue = loadQueue();
+	QList<PluginSpec *> queue = loadQueue();
 
-	Q_FOREACH (CPluginSpec *spec, queue)
+	Q_FOREACH (PluginSpec *spec, queue)
+	setPluginState(spec, State::Loaded);
+
+	Q_FOREACH (PluginSpec *spec, queue)
 	setPluginState(spec, State::Initialized);
 
-	QListIterator<CPluginSpec *> it(queue);
+	QListIterator<PluginSpec *> it(queue);
 	it.toBack();
 	while (it.hasPrevious())
 		setPluginState(it.previous(), State::Running);
@@ -105,41 +107,72 @@ void CPluginManager::loadPlugins()
 	Q_EMIT pluginsChanged();
 }
 
-QStringList CPluginManager::getPluginPaths() const
+QStringList PluginManager::getPluginPaths() const
 {
 	return m_pluginPaths;
 }
 
-void CPluginManager::setPluginPaths(const QStringList &paths)
+void PluginManager::setPluginPaths(const QStringList &paths)
 {
 	m_pluginPaths = paths;
 	readPluginPaths();
+	readSettings();
 }
 
-QList<IPluginSpec *> CPluginManager::plugins() const
+QList<IPluginSpec *> PluginManager::plugins() const
 {
 	return m_ipluginSpecs;
 }
 
-void CPluginManager::setSettings(QSettings *settings)
+void PluginManager::setSettings(QSettings *settings)
 {
 	m_settings = settings;
 }
 
-QSettings *CPluginManager::settings() const
+QSettings *PluginManager::settings() const
 {
 	return m_settings;
 }
 
-void CPluginManager::readSettings()
+void PluginManager::readSettings()
 {
+	if (m_settings)
+	{
+		QStringList blackList;
+		m_settings->beginGroup("PluginManager");
+		blackList = m_settings->value("BlackList").toStringList();
+		m_settings->endGroup();
+		Q_FOREACH (PluginSpec *spec, m_pluginSpecs)
+		{
+			QString pluginName = spec->fileName();
+
+			if (blackList.contains(pluginName))
+			{
+				spec->setEnabled(false);
+				spec->setEnabledStartup(false);
+			}
+		}
+	}
 }
 
-void CPluginManager::writeSettings()
+void PluginManager::writeSettings()
 {
+	if (m_settings)
+	{
+		QStringList blackList;
+		Q_FOREACH(PluginSpec *spec, m_pluginSpecs)
+		{
+			if (!spec->isEnabled())
+				blackList.push_back(spec->fileName());
+		}
+		m_settings->beginGroup("PluginManager");
+		m_settings->setValue("BlackList", blackList);
+		m_settings->endGroup();
+		m_settings->sync();
+	}
 }
 
-void CPluginManager::readPluginPaths()
+void PluginManager::readPluginPaths()
 {
 	qDeleteAll(m_pluginSpecs);
 	m_pluginSpecs.clear();
@@ -150,11 +183,7 @@ void CPluginManager::readPluginPaths()
 	while (!searchPaths.isEmpty())
 	{
 		const QDir dir(searchPaths.takeFirst());
-#ifdef Q_OS_WIN
-		const QFileInfoList files = dir.entryInfoList(QStringList() << QString("ovqt_plugin_*.dll"), QDir::Files);
-#else
-		const QFileInfoList files = dir.entryInfoList(QStringList() << QString("libovqt_plugin_*.so"), QDir::Files);
-#endif
+		const QFileInfoList files = dir.entryInfoList(QStringList() << QString("ovqt_plugin_*.%1").arg(m_extension), QDir::Files);
 		Q_FOREACH (const QFileInfo &file, files)
 		pluginsList << file.absoluteFilePath();
 		const QFileInfoList dirs = dir.entryInfoList(QDir::Dirs|QDir::NoDotAndDotDot);
@@ -164,9 +193,9 @@ void CPluginManager::readPluginPaths()
 
 	Q_FOREACH (const QString &pluginFile, pluginsList)
 	{
-		CPluginSpec *spec = new CPluginSpec;
-		spec->setFileName(pluginFile);
+		PluginSpec *spec = new PluginSpec;
 		spec->m_pluginManager = this;
+		spec->setSpecFileName(pluginFile);
 		m_pluginSpecs.append(spec);
 		m_ipluginSpecs.append(spec);
 	}
@@ -174,16 +203,17 @@ void CPluginManager::readPluginPaths()
 	Q_EMIT pluginsChanged();
 }
 
-void CPluginManager::setPluginState(CPluginSpec *spec, int destState)
+void PluginManager::setPluginState(PluginSpec *spec, int destState)
 {
-	if (spec->hasError() || spec->getState() != destState-1)
+	if (spec->hasError() || spec->state() != destState-1)
+		return;
+
+	// plugin in black list
+	if (!spec->isEnabledStartup())
 		return;
 
 	switch (destState)
 	{
-	case State::Loaded:
-		spec->loadLibrary();
-		return;
 	case State::Resolved:
 		spec->resolveDependencies(m_pluginSpecs);
 		return;
@@ -196,18 +226,21 @@ void CPluginManager::setPluginState(CPluginSpec *spec, int destState)
 	default:
 		break;
 	}
-	Q_FOREACH (const CPluginSpec *depSpec, spec->dependencySpecs())
+	Q_FOREACH (const PluginSpec *depSpec, spec->dependencySpecs())
 	{
-		if (depSpec->getState() != destState)
+		if (depSpec->state() != destState)
 		{
 			spec->m_hasError = true;
-			spec->m_errorString = tr("Cannot initializing plugin because dependency failed to load: %1\nReason: %2")
-								  .arg(depSpec->name()).arg(depSpec->errorString());
+			spec->m_errorString = tr("Cannot load plugin because dependency failed to load: %1")
+								  .arg(depSpec->name());
 			return;
 		}
 	}
 	switch (destState)
 	{
+	case State::Loaded:
+		spec->loadLibrary();
+		return;
 	case State::Initialized:
 		spec->initializePlugin();
 		break;
@@ -219,19 +252,19 @@ void CPluginManager::setPluginState(CPluginSpec *spec, int destState)
 	}
 }
 
-QList<CPluginSpec *> CPluginManager::loadQueue()
+QList<PluginSpec *> PluginManager::loadQueue()
 {
-	QList<CPluginSpec *> queue;
-	Q_FOREACH(CPluginSpec *spec, m_pluginSpecs)
+	QList<PluginSpec *> queue;
+	Q_FOREACH(PluginSpec *spec, m_pluginSpecs)
 	{
-		QList<CPluginSpec *> circularityCheckQueue;
+		QList<PluginSpec *> circularityCheckQueue;
 		loadQueue(spec, queue, circularityCheckQueue);
 	}
 	return queue;
 }
 
-bool CPluginManager::loadQueue(CPluginSpec *spec, QList<CPluginSpec *> &queue,
-							   QList<CPluginSpec *> &circularityCheckQueue)
+bool PluginManager::loadQueue(PluginSpec *spec, QList<PluginSpec *> &queue,
+							  QList<PluginSpec *> &circularityCheckQueue)
 {
 	if (queue.contains(spec))
 		return true;
@@ -251,14 +284,14 @@ bool CPluginManager::loadQueue(CPluginSpec *spec, QList<CPluginSpec *> &queue,
 	}
 	circularityCheckQueue.append(spec);
 	// check if we have the dependencies
-	if (spec->getState() == State::Invalid || spec->getState() == State::Read)
+	if (spec->state() == State::Invalid || spec->state() == State::Read)
 	{
 		queue.append(spec);
 		return false;
 	}
 
 	// add dependencies
-	Q_FOREACH (CPluginSpec *depSpec, spec->dependencySpecs())
+	Q_FOREACH (PluginSpec *depSpec, spec->dependencySpecs())
 	{
 		if (!loadQueue(depSpec, queue, circularityCheckQueue))
 		{
@@ -274,17 +307,17 @@ bool CPluginManager::loadQueue(CPluginSpec *spec, QList<CPluginSpec *> &queue,
 	return true;
 }
 
-void CPluginManager::stopAll()
+void PluginManager::stopAll()
 {
-	QList<CPluginSpec *> queue = loadQueue();
-	Q_FOREACH (CPluginSpec *spec, queue)
+	QList<PluginSpec *> queue = loadQueue();
+	Q_FOREACH (PluginSpec *spec, queue)
 	setPluginState(spec, State::Stopped);
 }
 
-void CPluginManager::deleteAll()
+void PluginManager::deleteAll()
 {
-	QList<CPluginSpec *> queue = loadQueue();
-	QListIterator<CPluginSpec *> it(queue);
+	QList<PluginSpec *> queue = loadQueue();
+	QListIterator<PluginSpec *> it(queue);
 	it.toBack();
 	while (it.hasPrevious())
 	{

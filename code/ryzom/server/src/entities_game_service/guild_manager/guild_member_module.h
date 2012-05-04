@@ -99,6 +99,12 @@ public:
 	/// user wanna pick a mission
 	CMissionGuild * pickMission( TAIAlias alias );
 
+	// Function to check if the member can pick a mission. By default only Officer and above can pick a guild mission
+	virtual bool canPickMission(TAIAlias alias)
+	{
+		return false;
+	}
+
 	/// set the version of last sent info of items in guild inventory
 	void setLastSentInfoVersion(uint32 slot, uint8 infoVersion)
 	{

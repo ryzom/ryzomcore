@@ -30,6 +30,7 @@
 
 // Qt includes
 #include <QtCore/QCoreApplication>
+#include <QtGui/QUndoView>
 #include <QtGui/QtGui>
 
 namespace Core
@@ -64,8 +65,7 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 	setMenuBar(m_menuBar);
 #endif
 
-	m_menuManager = new MenuManager(this);
-	m_menuManager->setMenuBar(m_menuBar);
+	m_menuManager = new MenuManager(m_menuBar, this);
 
 	m_tabWidget = new QTabWidget(this);
 	m_tabWidget->setTabPosition(QTabWidget::South);
@@ -106,14 +106,14 @@ bool MainWindow::initialize(QString *errorString)
 void MainWindow::extensionsInitialized()
 {
 	readSettings();
-	connect(m_contextManager, SIGNAL(currentContextChanged(Core::IContext*)),
-			this, SLOT(updateContext(Core::IContext*)));
+	connect(m_contextManager, SIGNAL(currentContextChanged(Core::IContext *)),
+			this, SLOT(updateContext(Core::IContext *)));
 	if (m_contextManager->currentContext() != NULL)
 		updateContext(m_contextManager->currentContext());
 	show();
 }
 
-IMenuManager *MainWindow::menuManager() const
+MenuManager *MainWindow::menuManager() const
 {
 	return m_menuManager;
 }
@@ -128,6 +128,11 @@ QSettings *MainWindow::settings() const
 	return m_settings;
 }
 
+QUndoGroup *MainWindow::undoGroup() const
+{
+	return m_undoGroup;
+}
+
 ExtensionSystem::IPluginManager *MainWindow::pluginManager() const
 {
 	return m_pluginManager;
@@ -135,12 +140,16 @@ ExtensionSystem::IPluginManager *MainWindow::pluginManager() const
 
 void MainWindow::addContextObject(IContext *context)
 {
-	m_undoGroup->addStack(context->undoStack());
+	QUndoStack *stack = context->undoStack();
+	if (stack)
+		m_undoGroup->addStack(stack);
 }
 
 void MainWindow::removeContextObject(IContext *context)
 {
-	m_undoGroup->removeStack(context->undoStack());
+	QUndoStack *stack = context->undoStack();
+	if (stack)
+		m_undoGroup->removeStack(stack);
 }
 
 void MainWindow::open()
@@ -204,7 +213,7 @@ bool MainWindow::showOptionsDialog(const QString &group,
 {
 	if (!parent)
 		parent = this;
-	CSettingsDialog settingsDialog(m_pluginManager, group, page, parent);
+	SettingsDialog settingsDialog(m_pluginManager, group, page, parent);
 	settingsDialog.show();
 	bool ok = settingsDialog.execDialog();
 	if (ok)
@@ -382,8 +391,17 @@ void MainWindow::createMenus()
 	m_fileMenu->addAction(m_exitAction);
 
 	m_editMenu = m_menuBar->addMenu(tr("&Edit"));
-	m_editMenu->addAction(m_undoGroup->createUndoAction(this));
-	m_editMenu->addAction(m_undoGroup->createRedoAction(this));
+	QAction *undoAction = m_undoGroup->createUndoAction(this);
+	menuManager()->registerAction(undoAction, Constants::UNDO);
+	undoAction->setIcon(QIcon(Constants::ICON_UNDO));
+	undoAction->setShortcut(QKeySequence::Undo);
+	QAction *redoAction = m_undoGroup->createRedoAction(this);
+	menuManager()->registerAction(redoAction, Constants::REDO);
+	redoAction->setIcon(QIcon(Constants::ICON_REDO));
+	redoAction->setShortcut(QKeySequence::Redo);
+	m_editMenu->addAction(undoAction);
+	m_editMenu->addAction(redoAction);
+
 	m_editMenu->addSeparator();
 	m_editMenu->addAction(m_cutAction);
 	m_editMenu->addAction(m_copyAction);
@@ -398,6 +416,7 @@ void MainWindow::createMenus()
 
 	m_viewMenu = m_menuBar->addMenu(tr("&View"));
 	m_viewMenu->addAction(m_fullscreenAction);
+	m_viewMenu->addAction(m_dockWidget->toggleViewAction());
 	menuManager()->registerMenu(m_viewMenu, Constants::M_VIEW);
 
 	m_toolsMenu = m_menuBar->addMenu(tr("&Tools"));
@@ -426,7 +445,14 @@ void MainWindow::createStatusBar()
 
 void MainWindow::createDialogs()
 {
-	m_pluginView = new ExtensionSystem::CPluginView(m_pluginManager, this);
+	m_pluginView = new PluginView(m_pluginManager, this);
+
+	// Create undo/redo command list
+	m_dockWidget = new QDockWidget("Command List", this);
+	m_dockWidget->setObjectName(QString::fromUtf8("UndoRedoCommandDockWidget"));
+	QUndoView *undoView = new QUndoView(m_undoGroup, m_dockWidget);
+	m_dockWidget->setWidget(undoView);
+	addDockWidget(Qt::RightDockWidgetArea, m_dockWidget);
 }
 
 void MainWindow::readSettings()

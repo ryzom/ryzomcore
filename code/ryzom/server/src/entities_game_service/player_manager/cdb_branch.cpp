@@ -186,7 +186,7 @@ void	ICDBStructNode::setLabel( const std::string& bankName )
  */
 void	CCDBStructNodeBranch::initDataIndex( TCDBDataIndex& index )
 {
-	if ( _Atomic )
+	if ( _AtomicFlag )
 	{
 		_DataIndex = index;
 		checkIfNotMaxIndex();
@@ -207,7 +207,7 @@ void	CCDBStructNodeBranch::initDataIndex( TCDBDataIndex& index )
  */
 void	CCDBStructNodeBranch::initIdAndCallForEachIndex( CBinId& id, void (*callback)(ICDBStructNode*, void*), void *arg )
 {
-	if ( _Atomic )
+	if ( _AtomicFlag )
 	{
 		callback( this, arg );
 	}
@@ -537,7 +537,7 @@ TCDBDataIndex	CCDBStructNodeBranch::findDataIndex( ICDBStructNode::CTextId& id )
  */
 void			CCDBStructNodeBranch::foreachAtomBranchCall( void (*callback)(void*,TCDBDataIndex), void *arg ) const
 {
-	if ( _Atomic )
+	if ( _AtomicFlag )
 	{
 		callback( arg, _DataIndex );
 	}

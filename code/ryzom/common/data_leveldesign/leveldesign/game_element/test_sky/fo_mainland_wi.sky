@@ -1,0 +1,335 @@
+<?xml version="1.0"?>
+<FORM Revision="" State="modified">
+  <STRUCT>
+    <ARRAY Name="Objects">
+      <STRUCT Name="sky_dome">
+        <STRUCT Name="StdVersion">
+          <ATOM Name="ShapeName" Value="fo_sky_dome"/>
+          <ATOM Name="TransparencyPriority" Value="0"/>
+          <STRUCT Name="ConstantColor0">
+            <ATOM Name="MapName" Value="fo_wi_stars_dome_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor2">
+            <ATOM Name="MapName" Value="fo_wi_stars_dome_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor3">
+            <ATOM Name="MapName" Value="fo_wi_sun_dome_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ColorGradient">
+            <ATOM Name="TargetTextureStage" Value="2"/>
+            <ARRAY Name="WeatherToGradient">
+              <ATOM Value="fo_wi_sky_dome_gradient_fair.tga"/>
+              <ATOM Value="fo_wi_sky_dome_gradient_fair.tga"/>
+              <ATOM Value="fo_wi_sky_dome_gradient_fair.tga"/>
+              <ATOM Value="fo_wi_sky_dome_gradient_clouds.tga"/>
+              <ATOM Value="fo_wi_sky_dome_gradient_clouds.tga"/>
+              <ATOM Value="fo_wi_sky_dome_gradient_storm.tga"/>
+            </ARRAY>
+          </STRUCT>
+          <ATOM Name="RefColor" Value="DiffuseColor"/>
+          <ATOM Name="PannerU0" Value="0.5"/>
+          <ATOM Name="PannerV0" Value="0.5"/>
+          <ATOM Name="PannerU1" Value="0.5"/>
+          <ATOM Name="PannerV1" Value="0.5"/>
+        </STRUCT>
+        <STRUCT Name="FallbackPass0">
+          <ATOM Name="ShapeName" Value="fo_sky_dome_fallbackpass0"/>
+          <ATOM Name="TransparencyPriority" Value="0"/>
+          <STRUCT Name="ConstantColor0">
+            <ATOM Name="MapName" Value="fo_wi_stars_dome_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor1">
+            <ATOM Name="ColorMode" Value="Unused"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor2">
+            <ATOM Name="ColorMode" Value="Unused"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor3">
+            <ATOM Name="ColorMode" Value="Unused"/>
+          </STRUCT>
+          <STRUCT Name="ColorGradient">
+            <ATOM Name="TargetTextureStage" Value="1"/>
+            <ARRAY Name="WeatherToGradient">
+              <ATOM Value="fo_wi_sky_dome_gradient_fair.tga"/>
+              <ATOM Value="fo_wi_sky_dome_gradient_fair.tga"/>
+              <ATOM Value="fo_wi_sky_dome_gradient_fair.tga"/>
+              <ATOM Value="fo_wi_sky_dome_gradient_clouds.tga"/>
+              <ATOM Value="fo_wi_sky_dome_gradient_clouds.tga"/>
+              <ATOM Value="fo_wi_sky_dome_gradient_storm.tga"/>
+            </ARRAY>
+          </STRUCT>
+          <ATOM Name="RefColor" Value="DiffuseColor"/>
+          <ATOM Name="PannerU0" Value="0.5"/>
+          <ATOM Name="PannerV0" Value="0.5"/>
+        </STRUCT>
+      </STRUCT>
+      <STRUCT Name="clouds_dome_altitude">
+        <STRUCT Name="StdVersion">
+          <ATOM Name="ShapeName" Value="fo_clouds_dome_altitude"/>
+          <ATOM Name="TransparencyPriority" Value="2"/>
+          <STRUCT Name="DiffuseColor">
+            <ATOM Name="ColorMode" Value="0"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor0">
+            <ATOM Name="MapName" Value="fo_wi_clouds_dome_altitude_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ColorGradient">
+            <ATOM Name="TargetTextureStage" Value="0"/>
+          </STRUCT>
+          <ATOM Name="RefColor" Value="Constant0"/>
+          <ATOM Name="PannerU0" Value="4"/>
+          <ATOM Name="PannerU1" Value="2"/>
+        </STRUCT>
+        <STRUCT Name="FallbackPass0">
+          <ATOM Name="ShapeName" Value="fo_clouds_dome_altitude_fallbackpass0"/>
+          <ATOM Name="TransparencyPriority" Value="2"/>
+          <STRUCT Name="DiffuseColor">
+            <ATOM Name="ColorMode" Value="0"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor0">
+            <ATOM Name="MapName" Value="fo_wi_clouds_dome_altitude_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ColorGradient">
+            <ATOM Name="TargetTextureStage" Value="0"/>
+          </STRUCT>
+          <ATOM Name="RefColor" Value="Constant0"/>
+          <ATOM Name="PannerU0" Value="4"/>
+          <ATOM Name="PannerU1" Value="2"/>
+        </STRUCT>
+      </STRUCT>
+      <STRUCT Name="clouds_dome_light">
+        <STRUCT Name="StdVersion">
+          <ATOM Name="ShapeName" Value="fo_clouds_dome_light"/>
+          <ATOM Name="TransparencyPriority" Value="1"/>
+          <STRUCT Name="DiffuseColor">
+            <ATOM Name="ColorMode" Value="0"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor0">
+            <ATOM Name="MapName" Value="fo_wi_clouds_dome_light_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor2">
+            <ATOM Name="MapName" Value="fo_wi_clouds_dome_light_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ColorGradient">
+            <ATOM Name="TargetTextureStage" Value="0"/>
+          </STRUCT>
+          <ATOM Name="RefColor" Value="Constant0"/>
+          <ATOM Name="PannerU0" Value="4"/>
+          <ATOM Name="PannerU1" Value="2"/>
+        </STRUCT>
+        <STRUCT Name="FallbackPass0">
+          <ATOM Name="ShapeName" Value="fo_clouds_dome_light_fallbackpass0"/>
+          <ATOM Name="TransparencyPriority" Value="1"/>
+          <STRUCT Name="DiffuseColor">
+            <ATOM Name="ColorMode" Value="0"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor0">
+            <ATOM Name="MapName" Value="fo_wi_clouds_dome_light_appear_fallback.tga"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor2">
+            <ATOM Name="MapName" Value="fo_wi_clouds_dome_light_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ColorGradient">
+            <ATOM Name="TargetTextureStage" Value="0"/>
+          </STRUCT>
+          <ATOM Name="RefColor" Value="Constant0"/>
+          <ATOM Name="PannerU0" Value="4"/>
+          <ATOM Name="PannerU1" Value="2"/>
+        </STRUCT>
+      </STRUCT>
+      <STRUCT Name="clouds_dome_heavy">
+        <STRUCT Name="StdVersion">
+          <ATOM Name="ShapeName" Value="fo_clouds_dome_heavy"/>
+          <ATOM Name="TransparencyPriority" Value="2"/>
+          <STRUCT Name="DiffuseColor">
+            <ATOM Name="MapName" Value="fo_wi_clouds_dome_heavy_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor0">
+            <ATOM Name="MapName" Value="fo_wi_clouds_dome_heavy_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor1">
+            <ATOM Name="MapName" Value="fo_wi_clouds_dome_heavy_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ColorGradient">
+            <ATOM Name="TargetTextureStage" Value="0"/>
+          </STRUCT>
+          <ATOM Name="RefColor" Value="DiffuseColor"/>
+          <ATOM Name="PannerU0" Value="2"/>
+          <ATOM Name="PannerU1" Value="0.1"/>
+          <ATOM Name="PannerU3" Value="4"/>
+        </STRUCT>
+        <STRUCT Name="FallbackPass0">
+          <ATOM Name="ShapeName" Value="fo_clouds_dome_heavy_fallbackpass0"/>
+          <ATOM Name="TransparencyPriority" Value="2"/>
+          <STRUCT Name="DiffuseColor">
+            <ATOM Name="MapName" Value="fo_wi_clouds_dome_heavy_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor0">
+            <ATOM Name="MapName" Value="fo_wi_clouds_dome_heavy_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor1">
+            <ATOM Name="MapName" Value="fo_wi_clouds_dome_heavy_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ColorGradient">
+            <ATOM Name="TargetTextureStage" Value="0"/>
+          </STRUCT>
+          <ATOM Name="RefColor" Value="DiffuseColor"/>
+          <ATOM Name="PannerU0" Value="2"/>
+          <ATOM Name="PannerU1" Value="0.1"/>
+          <ATOM Name="PannerU3" Value="4"/>
+        </STRUCT>
+      </STRUCT>
+      <STRUCT Name="horizom_dome">
+        <STRUCT Name="StdVersion">
+          <ATOM Name="ShapeName" Value="fo_horizon_dome"/>
+          <ATOM Name="TransparencyPriority" Value="2"/>
+          <STRUCT Name="DiffuseColor">
+            <ATOM Name="ColorMode" Value="Unused"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor0">
+            <ATOM Name="ColorMode" Value="FogColor"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor1">
+            <ATOM Name="MapName" Value="fo_wi_fog_color.tga"/>
+            <ATOM Name="ColorMode" Value="FogColor"/>
+          </STRUCT>
+          <ATOM Name="RefColor" Value="None"/>
+          <ATOM Name="PannerU0" Value="0"/>
+          <ATOM Name="OffsetFactorV0" Value="1"/>
+          <ATOM Name="OffsetVBitmap1" Value="fo_wi_fog_dome_appear.tga"/>
+          <ATOM Name="OffsetFactorU1" Value="1"/>
+          <ATOM Name="OffsetFactorV1" Value="2"/>
+        </STRUCT>
+      </STRUCT>
+      <STRUCT Name="sun">
+        <STRUCT Name="StdVersion">
+          <ATOM Name="ShapeName" Value="fo_sky_ps_sun"/>
+          <ATOM Name="TransparencyPriority" Value="2"/>
+          <STRUCT Name="DiffuseColor">
+            <ATOM Name="MapName" Value="fo_wi_sun_ps_appear.tga"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <ATOM Name="RefColor" Value="DiffuseColor"/>
+          <ATOM Name="UserParam0" Value="fo_wi_sun_ps_up0.tga"/>
+          <ATOM Name="UserParam1" Value="fo_wi_sun_ps_up1.tga"/>
+        </STRUCT>
+      </STRUCT>
+      <STRUCT Name="moon01">
+        <STRUCT Name="StdVersion">
+          <ATOM Name="ShapeName" Value="fo_sky_ps_moon01"/>
+          <ATOM Name="TransparencyPriority" Value="0"/>
+          <STRUCT Name="DiffuseColor">
+            <ATOM Name="MapName" Value="fo_wi_moon_ps_appear.tga"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <ATOM Name="RefColor" Value="DiffuseColor"/>
+          <ATOM Name="PannerU0" Value="0"/>
+          <ATOM Name="PannerU1" Value="0"/>
+          <ATOM Name="UserParam0" Value="fo_wi_moon01_ps_up.tga"/>
+          <ATOM Name="UserParam1" Value="fo_wi_moon01_ps_up.tga"/>
+          <ATOM Name="UserParam2" Value="fo_wi_moon01_ps_up.tga"/>
+        </STRUCT>
+      </STRUCT>
+      <STRUCT Name="moon02">
+        <STRUCT Name="StdVersion">
+          <ATOM Name="ShapeName" Value="fo_sky_ps_moon02"/>
+          <ATOM Name="TransparencyPriority" Value="0"/>
+          <STRUCT Name="DiffuseColor">
+            <ATOM Name="MapName" Value="fo_wi_moon_ps_appear.tga"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <ATOM Name="RefColor" Value="DiffuseColor"/>
+          <ATOM Name="PannerU0" Value="0"/>
+          <ATOM Name="PannerU1" Value="0"/>
+          <ATOM Name="UserParam0" Value="fo_wi_moon02_ps_up.tga"/>
+        </STRUCT>
+      </STRUCT>
+      <STRUCT Name="moon03">
+        <STRUCT Name="StdVersion">
+          <ATOM Name="ShapeName" Value="fo_sky_ps_moon03"/>
+          <ATOM Name="TransparencyPriority" Value="0"/>
+          <STRUCT Name="DiffuseColor">
+            <ATOM Name="MapName" Value="fo_wi_moon_ps_appear.tga"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <ATOM Name="RefColor" Value="DiffuseColor"/>
+          <ATOM Name="PannerU0" Value="0"/>
+          <ATOM Name="PannerU1" Value="0"/>
+          <ATOM Name="UserParam0" Value="fo_wi_moon03_ps_up.tga"/>
+          <ATOM Name="UserParam1" Value="fo_wi_moon03_ps_up.tga"/>
+          <ATOM Name="UserParam2" Value="fo_wi_moon03_ps_up.tga"/>
+        </STRUCT>
+      </STRUCT>
+      <STRUCT Name="lightning">
+        <STRUCT Name="StdVersion">
+          <ATOM Name="ShapeName" Value="fo_sky_ps_lighting01"/>
+          <ATOM Name="TransparencyPriority" Value="3"/>
+          <STRUCT Name="DiffuseColor">
+            <ATOM Name="ColorMode" Value="Unused"/>
+          </STRUCT>
+          <STRUCT Name="ParticleEmitters">
+            <ATOM Name="MapName" Value="fo_wi_lightning_ps_appear.tga"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <STRUCT Name="ConstantColor0">
+            <ATOM Name="ColorMode" Value="0"/>
+          </STRUCT>
+          <ATOM Name="RefColor" Value="ParticleEmittersColors"/>
+        </STRUCT>
+        <ATOM Name="VisibleInEnvMap" Value="false"/>
+      </STRUCT>
+      <STRUCT Name="shootingstar">
+        <STRUCT Name="StdVersion">
+          <ATOM Name="ShapeName" Value="fo_sky_ps_shootingstar01"/>
+          <ATOM Name="TransparencyPriority" Value="3"/>
+          <STRUCT Name="DiffuseColor">
+            <ATOM Name="MapName" Value="fo_wi_stars_dome_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="Unused"/>
+          </STRUCT>
+          <STRUCT Name="ParticleEmitters">
+            <ATOM Name="MapName" Value="fo_wi_stars_dome_appear.TGA"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+          <ATOM Name="RefColor" Value="ParticleEmittersColors"/>
+        </STRUCT>
+        <ATOM Name="VisibleInEnvMap" Value="false"/>
+      </STRUCT>
+      <STRUCT>
+        <STRUCT Name="StdVersion">
+          <ATOM Name="ShapeName" Value="fo_sun_flare"/>
+          <ATOM Name="TransparencyPriority" Value="4"/>
+          <STRUCT Name="DiffuseColor">
+            <ATOM Name="MapName" Value="fo_wi_sun_flare_appear.tga"/>
+            <ATOM Name="ColorMode" Value="BitmapColor"/>
+          </STRUCT>
+        </STRUCT>
+      </STRUCT>
+    </ARRAY>
+    <ATOM Name="InstanceGroupName" Value="fo_sky_dome.ig"/>
+    <ATOM Name="AnimationName" Value="fo_sky_dome.anim"/>
+    <ATOM Name="AnimLengthInSeconds" Value="3"/>
+    <ATOM Name="FogColorBitmap" Value="fo_wi_fog_color.tga"/>
+    <ATOM Name="WaterEnvMapAlpha" Value="50"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG></LOG>
+</FORM>

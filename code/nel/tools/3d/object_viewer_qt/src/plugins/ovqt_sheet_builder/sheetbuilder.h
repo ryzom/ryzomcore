@@ -54,7 +54,7 @@ union TFormId
 	}
 };
 
-bool operator<(const TFormId& fid1, const TFormId& fid2)
+bool operator<(const TFormId &fid1, const TFormId &fid2)
 {
 	return fid1.Id<fid2.Id;
 }
@@ -82,7 +82,7 @@ uint32 NbFilesDiscarded = 0;
 void addId( string fileName );
 
 // getFileType
-bool getFileType( string& fileName, string& fileType );
+bool getFileType( string &fileName, string &fileType );
 
 //-----------------------------------------------
 //	getFirstFreeFileTypeId
@@ -107,7 +107,7 @@ sint16 getFirstFreeFileTypeId()
 //	readFormId
 //
 //-----------------------------------------------
-void readFormId( string& outputFileName )
+void readFormId( string &outputFileName )
 {
 	CIFile f;
 	if( f.open( outputFileName ) )
@@ -315,7 +315,7 @@ void addId( string fileName )
 //	getFileType
 //
 //-----------------------------------------------
-bool getFileType( string& fileName, string& fileType )
+bool getFileType( string &fileName, string &fileType )
 {
 	fileType = CFile::getExtension(CFile::getFilename(fileName));
 	return !fileType.empty();

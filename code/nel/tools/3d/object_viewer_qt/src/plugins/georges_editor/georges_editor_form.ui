@@ -13,12 +13,16 @@
   <property name="windowTitle">
    <string>Georges Editor</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
     <string notr="true">QWidget#centralwidget {
 	image: url(:/images/ic_nel_georges_editor.png);
  }</string>
    </property>
+   <layout class="QGridLayout" name="gridLayout"/>
   </widget>
  </widget>
  <resources>

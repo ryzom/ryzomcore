@@ -628,7 +628,7 @@ void CCDBNodeBranch::display (const std::string &prefix)
 	}
 }
 
-void CCDBNodeBranch::removeNode (CTextId& id)
+void CCDBNodeBranch::removeNode (const CTextId& id)
 {
 	// Look for the node
 	CCDBNodeBranch *pNode = dynamic_cast<CCDBNodeBranch*>(getNode(id,false));

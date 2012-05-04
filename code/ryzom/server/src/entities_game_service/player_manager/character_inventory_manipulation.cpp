@@ -2443,7 +2443,7 @@ void CCharacter::sendItemInfos( uint16 slotId )
 		infos.TypeSkillMods = item->getTypeSkillMods();
 		
 		// Special case of web missions items
-		if (item->getStaticForm()->Name == "Web Transaction" || item->getStaticForm()->Family == ITEMFAMILY::SCROLL)
+		if (item->getStaticForm()->Name == "Web Transaction")
 		{
 			string cText = item->getCustomText().toString();
 			string::size_type sPos = cText.find(" ");
@@ -2453,11 +2453,16 @@ void CCharacter::sendItemInfos( uint16 slotId )
 				string cUrl = cText.substr(sPos, ePos-sPos);
 				infos.CustomText = ucstring("@WEBIG "+cUrl);
 			}
-			else
-				infos.CustomText = "";
 		}
 		else
+		{
 			infos.CustomText = item->getCustomText();
+		}
+		
+		if (item->getPetIndex() < MAX_INVENTORY_ANIMAL)
+		{
+			infos.PetNumber = item->getPetIndex() + 1;
+		}
 
 		CMessage msgout( "IMPULSION_ID" );
 		CBitMemStream bms;
@@ -2912,7 +2917,8 @@ void CCharacter::useItem(uint32 slot)
 	{
 		pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegeance = getAllegiance();
 		if ((form->TpType == TELEPORT_TYPES::KAMI) && (allegeance.first == PVP_CLAN::Karavan)
-			|| (form->TpType == TELEPORT_TYPES::KARAVAN) && (allegeance.first == PVP_CLAN::Kami))
+			|| (form->TpType == TELEPORT_TYPES::KARAVAN) && (allegeance.first == PVP_CLAN::Kami)
+			|| getOrganization() == 5 ) //marauder
 		{
 			CCharacter::sendDynamicSystemMessage(_Id, "ALTAR_RESTRICTION");
 			return;

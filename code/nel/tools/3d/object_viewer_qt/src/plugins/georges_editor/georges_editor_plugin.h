@@ -38,7 +38,7 @@ namespace ExtensionSystem
 class IPluginSpec;
 }
 
-namespace Plugin
+namespace GeorgesQt
 {
 class GeorgesEditorForm;
 class GeorgesEditorPlugin : public QObject, public ExtensionSystem::IPlugin
@@ -52,14 +52,7 @@ public:
 	bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
 	void extensionsInitialized();
 	void shutdown();
-
 	void setNelContext(NLMISC::INelContext *nelContext);
-
-	QString name() const;
-	QString version() const;
-	QString vendor() const;
-	QString description() const;
-	QStringList dependencies() const;
 
 	void addAutoReleasedObject(QObject *obj);
 
@@ -100,6 +93,6 @@ public:
 	GeorgesEditorForm *m_georgesEditorForm;
 };
 
-} // namespace Plugin
+} // namespace GeorgesQt
 
 #endif // LANDSCAPE_EDITOR_PLUGIN_H

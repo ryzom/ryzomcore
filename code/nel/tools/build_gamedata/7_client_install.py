@@ -45,45 +45,30 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-# Find tools
-BnpMake = findTool(log, ToolDirectories, BnpMakeTool, ToolSuffix)
-printLog(log, "")
-
-if BnpMake == "":
-	toolLogFail(log, BnpMakeTool, ToolSuffix)
-else:
-	for category in InstallClientData:
-		printLog(log, "CATEGORY " + category["Name"])
-		if (category["UnpackTo"] != None):
-			targetPath = ClientInstallDirectory
-			if (category["UnpackTo"] != ""):
-				targetPath += "/" + category["UnpackTo"]
-			mkPath(log, targetPath)
-			for package in category["Packages"]:
-				printLog(log, "PACKAGE " + package[0])
-				mkPath(log, InstallDirectory + "/" + package[0])
-				copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + package[0], targetPath)
-		else:
-			targetPath = ClientInstallDirectory + "/data"
-			mkPath(log, targetPath)
-			for package in category["Packages"]:
-				printLog(log, "PACKAGE " + package[0])
-				sourcePath = InstallDirectory + "/" + package[0]
-				mkPath(log, sourcePath)
-				targetBnp = targetPath + "/" + package[0] + ".bnp"
-				if (len(package[1]) > 0):
-					targetBnp = targetPath + "/" + package[1][0]
-					printLog(log, "TARGET " + package[1][0])
-				needUpdateBnp = 1
-				if (len(package) > 2):
-					needUpdateBnp = needUpdate(log, sourcePath + "/" + package[2], targetBnp)
-				else:
-					needUpdateBnp = needUpdateDirNoSubdirFile(log, sourcePath, targetBnp)
-				if (needUpdateBnp):
-					printLog(log, "BNP " + targetBnp)
-					subprocess.call([ BnpMake, "/p", sourcePath, targetPath ] + package[1])
-				else:
-					printLog(log, "SKIP " + targetBnp)
+for category in InstallClientData:
+	printLog(log, "CATEGORY " + category["Name"])
+	if (category["UnpackTo"] != None):
+		targetPath = ClientInstallDirectory
+		if (category["UnpackTo"] != ""):
+			targetPath += "/" + category["UnpackTo"]
+		mkPath(log, targetPath)
+		for package in category["Packages"]:
+			printLog(log, "PACKAGE " + package[0])
+			mkPath(log, InstallDirectory + "/" + package[0])
+			copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + package[0], targetPath)
+	else:
+		sourcePath = ClientPatchDirectory + "/bnp"
+		targetPath = ClientInstallDirectory + "/data"
+		mkPath(log, targetPath)
+		for package in category["Packages"]:
+			printLog(log, "PACKAGE " + package[0])
+			sourceBnp = sourcePath + "/" + package[0] + ".bnp"
+			targetBnp = targetPath + "/" + package[0] + ".bnp"
+			if (len(package[1]) > 0):
+				sourceBnp = sourcePath + "/" + package[1][0]
+				targetBnp = targetPath + "/" + package[1][0]
+				printLog(log, "TARGET " + package[1][0])
+			copyFileIfNeeded(log, sourceBnp, targetBnp)
 printLog(log, "")
 
 log.close()

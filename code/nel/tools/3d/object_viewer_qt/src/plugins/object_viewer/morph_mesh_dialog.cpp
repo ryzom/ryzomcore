@@ -91,7 +91,7 @@ QString CMorphMeshDialog::getShapeDescStr(uint shapeIndex, sint numVerts) const
 	}
 	else
 	{
-		QString error = qobject_cast<CMeshWidget*>(QObject::parent())->getShapeErrorString(numVerts);
+		QString error = qobject_cast<CMeshWidget *>(QObject::parent())->getShapeErrorString(numVerts);
 		QString result =  _CM->getShape(shapeIndex).c_str() + QString(" (%1)").arg(error);
 		return result;
 	}
