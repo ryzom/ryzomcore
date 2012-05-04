@@ -23,8 +23,15 @@ function ryzom_authenticate_with_serverkey($cid, $name, $authserver, $authkey) {
 	return true;
 }
 
-function ryzom_authenticate_ingame($cid, $name, $authkey) {
-	return file_get_contents(RYAPI_AUTH_SCRIPT) == '1';
+function ryzom_authenticate_ingame($shardid, $cid, $name, $authkey) {
+	$db = new ServerDatabase(RYAPI_NELDB_HOST, RYAPI_NELDB_LOGIN, RYAPI_NELDB_PASS, RYAPI_NELDB_RING);
+	$uid = intval($cid / 16);
+	$sql = "SELECT cookie FROM ring_users WHERE user_id = $uid";
+	$row = $db->query_single_row($sql);
+
+	$rawkey = $shardid.$name.$cid.'\''.trim($row['cookie']).'\'';
+	$md5rawkey = md5($rawkey);
+	return $authkey == $md5rawkey;
 }
 
 // take the character name and the account password and check if it's valid

@@ -20,30 +20,28 @@ require_once(RYAPI_PATH.'client/config.php');
 
 // Og (non-ryzom.com) method
 function ryzom_authenticate_with_serverkey($cid, $name, $authserver, $authkey) {
-	global $_RYZOM_API_CONFIG;
-	$fn = $_RYZOM_API_CONFIG['auth_script'].'?name='.$name.'&cid='.$cid.'&authkey='.$authkey.'&authserver='.$authserver;
-
-	$res = file_get_contents($fn);
-	return $res == '1';
 }
 
 // Ig method
 function ryzom_authenticate_ingame($cid, $name, $authkey) {
-	global $_RYZOM_API_CONFIG;
-	$fn = $_RYZOM_API_CONFIG['auth_script'].'?name='.$name.'&cid='.$cid.'&authkey='.$authkey.'&ig=1';
+	if (isset($_SESSION['user']))
+		return true;
 
-	$res = file_get_contents($fn);
-	echo $res;
-	return $res == '1';
+	if (ryzom_get_param('user'))
+		return true;
+	
+	return false;
 }
 
 // Session method
 function ryzom_authenticate_with_session($name, $redirect) {
-	global $_RYZOM_API_CONFIG;
-	$fn = $_RYZOM_API_CONFIG['auth_script'].'?name='.$name;
+	if (isset($_SESSION['user']))
+		return true;
 
-	$res = file_get_contents($fn);
-	return $res == '1';
+	if (ryzom_get_param('user'))
+		return true;
+	
+	return false;
 }
 
 ?>

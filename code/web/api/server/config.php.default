@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with ryzom_api.  If not, see <http://www.gnu.org/licenses/>.
  */
+ 
+define('RYAPI_SHARDID', '101');
 define('RYAPI_WEBDB_HOST', 'localhost');
 define('RYAPI_WEBDB_LOGIN', 'localhost');
 define('RYAPI_WEBDB_PASS', 'localhost');

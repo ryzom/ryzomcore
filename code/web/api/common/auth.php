@@ -5,7 +5,8 @@ function ryzom_app_authenticate(&$user, $ask_login=true, $welcome_message='') {
 	$authserver = ryzom_get_param('authserver');
 	$authkey = ryzom_get_param('authkey');
 	$lang = ryzom_get_param('lang');
-
+	$cid = ryzom_get_param('cid', '');
+	$is_ingame = false;
 	// we have to set the $user['lang'] even for anonymous user or we cannot display the test in the right langage
     if($lang == '') {
         $l = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
@@ -14,15 +15,20 @@ function ryzom_app_authenticate(&$user, $ask_login=true, $welcome_message='') {
         else
             $lang = 'en';
 	}
+	$user['message'] = '';
 	$user['lang'] = $lang;
-
-	if (RYZOM_IG || ryzom_get_param('ig')) {
+	$user['ig'] = false;
+	
+	if ((isset($_SERVER['HTTP_USER_AGENT']) && strpos($_SERVER['HTTP_USER_AGENT'], 'Ryzom')) || ryzom_get_param('ig')) {
+		$user['ig'] = true;
 		// Ingame
-		$cid = ryzom_get_param('cid');
-		if (!ryzom_authenticate_ingame($cid, $name, $authkey))
+		$shardid = ryzom_get_param('shardid');
+		if (!ryzom_authenticate_ingame($shardid, $cid, $name, $authkey))
 			return false;
+		$is_ingame = true;
 	} else {
 		// Outgame : Use session
+		$error_message = '';
 		if (!ryzom_authenticate_with_session($name, $cid, $error_message)) {
 			if ($ask_login) {
 				$c = '';
@@ -47,8 +53,12 @@ function ryzom_app_authenticate(&$user, $ask_login=true, $welcome_message='') {
 	// get user informations
 	$user = ryzom_user_get_info($cid);
 	$user['lang'] = $_SESSION['lang'];
-
-	$user['id'] = ryzom_get_user_id($cid, $user['char_name'], $user['creation_date']);
+	if (isset($user['creation_date']))
+		$user['id'] = ryzom_get_user_id($cid, $user['char_name'], $user['creation_date']);
+	if ($is_ingame && $user['last_played_date'] != '0')
+		$user['ig'] = true;
+	else
+		$user['ig'] = false;
 	unset($user['last_played_date']);
 	unset($user['creation_date']);
 	return true;

@@ -17,7 +17,23 @@
  */
 
 function ryzom_user_get_info($cid) { 
-	return Array();
+	if (isset($_SESSION['user']))
+		return $_SESSION['user'];
+	
+	$user = unserialize(base64_decode(ryzom_get_param('user')));
+	$_SESSION['user'] = $user;
+	return $user;
 }
+
+function ryzom_get_user_id($cid, $name, $creation_date) {
+	if (isset($_SESSION['user']))
+		return $_SESSION['user']['id'];
+	
+	$user = unserialize(base64_decode(ryzom_get_param('user')));
+	$_SESSION['user'] = $user;
+
+	return $user['id'];
+}
+
 
 ?>

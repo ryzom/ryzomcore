@@ -29,6 +29,6 @@ else
 // Content
 $c = _t('access', $num_access['num_access']).'<br/>';
 
-echo ryzom_app_render(APP_NAME, $c);
+echo ryzom_app_render(APP_NAME, $c, $user['ig']);
 
 ?>

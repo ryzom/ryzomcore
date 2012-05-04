@@ -33,7 +33,7 @@ class ryLogger {
 	function getLogs() {
 		$ret = '';
 		if ($this->logs && $this->enable)
-			$ret = "<b>Debug</b>\n".implode("\n", $this->logs);
+			$ret = "<b>Debug</b>\n\n".implode("\n", $this->logs);
 		$this->logs = array();
 		return $ret;
 	}

@@ -16,7 +16,7 @@
  * along with ryzom_api.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function ryzom_app_render($title, $content, $bgcolor='', $javascript=array(), $homeLink=false) {
+function ryzom_app_render($title, $content, $ig=false, $bgcolor='', $javascript=array(), $homeLink=false) {
 	$c = '';
 	// Render header
 	$title_prefix = '';
@@ -25,38 +25,35 @@ function ryzom_app_render($title, $content, $bgcolor='', $javascript=array(), $h
 	}
 
 	if (!$bgcolor)
-		$bgcolor = '#000000'.(RYZOM_IG?'00':'');
+		$bgcolor = '#000000'.($ig?'00':'');
 
-	$c .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">'."\n";
-	$c .= '<html>
-	<head>'."\n";
-	$c .= '		<title>'.$title_prefix.(translation_exists($title)?_t($title):$title).'</title>'."\n";
-	$c .= '		<meta HTTP-EQUIV="content-type" CONTENT="text/html; charset=UTF-8" />'."\n";
-
-	if (!RYZOM_IG) {
+	if (!$ig) {
+		$c .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">'."\n";
+		$c .= '<html>
+		<head>'."\n";
+		$c .= '		<title>'.$title_prefix.(translation_exists($title)?_t($title):$title).'</title>'."\n";
+		$c .= '		<meta HTTP-EQUIV="content-type" CONTENT="text/html; charset=UTF-8" />'."\n";
 		$c .= ryzom_render_header();
 		$c .= ryzom_render_header_www();
-	}
+		$events = ON_IPHONE ? 'onorientationchange="updateOrientation();" ' : '';
+		$c .= '	</head>'."\n";
+		$c .= '	<body '.$events.'bgcolor="'.$bgcolor.'">'."\n";
+		// Javascript
+		$js_code = '';
+		foreach ($javascript as $js)
+			$js_code .= '<script type="text/javascript" src="'.$js.'"></script>';
+		$c .= $js_code;
 
-	$events = ON_IPHONE ? 'onorientationchange="updateOrientation();" ' : '';
-
-	$c .= '	</head>'."\n";
-
-	$c .= '	<body '.$events.'bgcolor="'.$bgcolor.'">'."\n";
-
-	// Javascript
-	$js_code = '';
-	foreach ($javascript as $js)
-		$js_code .= '<script type="text/javascript" src="'.$js.'"></script>';
-	$c .= $js_code;
-
-	if (RYZOM_IG)
-		$c .= $content;
-	else{
 		$c .= ryzom_render_www(ryzom_render_window($title, $content, $homeLink));
+		$c .= '</body></html>';
+	} else {
+		$c .= '<html><body>';
+		$c .= $content;
+		$debug = ryLogger::getInstance()->getLogs();
+		if ($debug)
+			$c .= '<table width="100%"><tr bgcolor="#002200"><td>'.$debug.'</td></tr></table>';
+		$c .= '</body></html>';
 	}
-
-	$c .= '</body></html>';
 	return $c;
 }
 
@@ -140,7 +137,7 @@ function ryzom_render_window_begin($title, $homeLink=false) {
 	return '
 		<div class="ryzom-ui ryzom-ui-header">
 			<div class="ryzom-ui-tl"><div class="ryzom-ui-tr">
-				<div class="ryzom-ui-t">'.$title_prefix.(translation_exists($title)?_t($title):$title).$homeLink.'</div>
+				<div class="ryzom-ui-t">'.(translation_exists($title)?_t($title):$title).$homeLink.'</div>
 			</div>
 		</div>
 		<div class="ryzom-ui-l"><div class="ryzom-ui-r"><div class="ryzom-ui-m">

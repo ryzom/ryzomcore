@@ -25,12 +25,6 @@ if (!defined('ON_IPHONE')) {
 	else
 		define('ON_IPHONE', false);
 }
-if (!defined('RYZOM_IG')) {
-	if (isset($_SERVER['HTTP_USER_AGENT']))
-		define('RYZOM_IG', strpos($_SERVER['HTTP_USER_AGENT'], 'Ryzom'));
-	else
-		define('RYZOM_IG', false);
-}
 
 $includes = array('auth', 'config', 'utils', 'user');
 
