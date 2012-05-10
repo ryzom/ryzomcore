@@ -26,7 +26,10 @@
 //
 
 class CInterfaceManager;
-class CEventDescriptor;
+namespace NLGUI
+{
+	class CEventDescriptor;
+}
 class CLuaObject;
 class CGroupMap;
 
@@ -119,7 +122,7 @@ public:
 	  *
 	  * \return true if the event has been handled by the tool
 	  */
-	virtual	bool handleEvent (const CEventDescriptor &eventDesc);
+	virtual	bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
 	//
 	virtual void onFocusGained() {} // the app window gained the focus (there's no 'focus lost' event here because it reset current tool, so 'CTooll::cancel' will be called instead)
 									// IMPORTANT :  Reacting to this should be unnecessary, as lost focus reset the current tool,

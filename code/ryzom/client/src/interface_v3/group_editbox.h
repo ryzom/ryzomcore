@@ -22,8 +22,10 @@
 #include "interface_group.h"
 #include "nel/3d/u_texture.h"
 
-
-class CEventDescriptor;
+namespace NLGUI
+{
+	class CEventDescriptor;
+}
 class CViewText;
 // ----------------------------------------------------------------------------
 class CGroupEditBox : public CInterfaceGroup
@@ -41,7 +43,7 @@ public:
 
 	virtual void draw();
 
-	virtual bool handleEvent (const CEventDescriptor& eventDesc);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
 
 	/// Accessors
 	ucstring getInputString() const { return _InputString; }
@@ -290,8 +292,8 @@ protected:
 private:
 	void setupDisplayText();
 	void makeTopWindow();
-	void handleEventChar(const CEventDescriptorKey &event);
-	void handleEventString(const CEventDescriptorKey &event);
+	void handleEventChar(const NLGUI::CEventDescriptorKey &event);
+	void handleEventString(const NLGUI::CEventDescriptorKey &event);
 	void setup();
 	void triggerOnChangeAH();
 	void appendStringFromClipboard(const ucstring &str);

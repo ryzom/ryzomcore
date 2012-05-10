@@ -399,15 +399,15 @@ void CGroupCompas::draw()
 
 // ***************************************************************************
 
-bool CGroupCompas::handleEvent (const CEventDescriptor &event)
+bool CGroupCompas::handleEvent (const NLGUI::CEventDescriptor &event)
 {
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 		//
 		if ((_RadarView != NULL) && (_RadarRangeView != NULL))
 		{
-			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousewheel)
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 				_RadarPos = pIM->getDbProp("UI:SAVE:RADARZOOM")->getValue32();

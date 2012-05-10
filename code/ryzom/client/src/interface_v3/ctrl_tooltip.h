@@ -22,7 +22,10 @@
 #include "ctrl_base.h"
 #include "nel/3d/u_texture.h"
 
-class CEventDescriptor;
+namespace NLGUI
+{
+	class CEventDescriptor;
+}
 class CInterfaceManager;
 
 /**
@@ -37,7 +40,7 @@ public:
 	/// Constructor
 	CCtrlToolTip(const TCtorParam &param) : CCtrlBase(param) {}
 
-	virtual bool handleEvent (const CEventDescriptor& eventDesc);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
 	virtual void draw();
 	virtual bool		parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 	// Can do nothing with tooltip (but display it :) )

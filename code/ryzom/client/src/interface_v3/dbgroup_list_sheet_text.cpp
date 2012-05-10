@@ -664,12 +664,12 @@ void CDBGroupListSheetText::clearViews ()
 }
 
 // ***************************************************************************
-bool CDBGroupListSheetText::handleEvent (const CEventDescriptor &event)
+bool CDBGroupListSheetText::handleEvent (const NLGUI::CEventDescriptor &event)
 {
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
 		_Scrolling = 0;
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 		if (isIn(eventDesc.getX(), eventDesc.getY()))
 		{
 			// Drag'n'drop from a ctrl sheet that belongs to this list
@@ -687,9 +687,9 @@ bool CDBGroupListSheetText::handleEvent (const CEventDescriptor &event)
 					{
 						pDraggedSheet = _SheetChildren[pos]->Ctrl;
 						pIM->setCapturePointerLeft(pDraggedSheet);
-						CEventDescriptorMouse newEv = eventDesc;
+						NLGUI::CEventDescriptorMouse newEv = eventDesc;
 						// Send this because not send (the captured button has processed the event mouseleftdown)
-						newEv.setEventTypeExtended(CEventDescriptorMouse::mouseleftdown);
+						newEv.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mouseleftdown);
 						pDraggedSheet->handleEvent(newEv);
 					}
 				}
@@ -711,7 +711,7 @@ bool CDBGroupListSheetText::handleEvent (const CEventDescriptor &event)
 				if(swapable())
 				{
 					if (pDraggedSheet != NULL)
-					if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+					if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 					{
 						sint posdst = -1,possrc = -1;
 						const vector<CCtrlBase*> &rV = pIM->getCtrlsUnderPointer();
@@ -733,7 +733,7 @@ bool CDBGroupListSheetText::handleEvent (const CEventDescriptor &event)
 			}
 
 
-			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousewheel)
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
 			{
 				// If scroll ok, and if scroll possible
 				if (_ScrollBar != NULL && _List != NULL && _List->getH()>_List->getMaxH())
@@ -752,10 +752,10 @@ bool CDBGroupListSheetText::handleEvent (const CEventDescriptor &event)
 			}
 		}
 	}
-	else if (event.getType() == CEventDescriptor::system)
+	else if (event.getType() == NLGUI::CEventDescriptor::system)
 	{
-		const CEventDescriptorSystem &systemEvent = (const CEventDescriptorSystem &) event;
-		if (systemEvent.getEventTypeExtended() == CEventDescriptorSystem::clocktick)
+		const NLGUI::CEventDescriptorSystem &systemEvent = (const NLGUI::CEventDescriptorSystem &) event;
+		if (systemEvent.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::clocktick)
 		{
 			if (_Scrolling != 0)
 				if (_ScrollBar != NULL && _List != NULL)

@@ -19,6 +19,9 @@
 #include "nel/misc/events.h"
 #include "nel/gui/event_descriptor.h"
 
+namespace NLGUI
+{
+
 void CEventDescriptorKey::init(const NLMISC::CEventKey &ev)
 {
 	_CtrlState = (ev.Button & NLMISC::ctrlKeyButton) != 0;
@@ -48,5 +51,7 @@ void CEventDescriptorKey::init(const NLMISC::CEventKey &ev)
 	{
 		_KeyEvent = unknown;
 	}
+}
+
 }
 

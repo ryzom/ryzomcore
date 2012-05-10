@@ -338,7 +338,7 @@ public:
 
 
 	/// Handle The Event. return true if the interfaceManager catch it and if must not send to the Game Action Manager
-	bool handleEvent (const CEventDescriptor &eventDesc);
+	bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
 	void runActionHandler (const std::string &AHName, CCtrlBase *pCaller,
 							const std::string &Params=std::string(""));
 	void runActionHandler (IActionHandler *ah, CCtrlBase *pCaller,
@@ -704,7 +704,7 @@ public:
 	}
 
 	// Description of the last key event that called an action handler
-	const CEventDescriptorKey&	getLastEventKeyDesc() const { return _LastEventKeyDesc; }
+	const NLGUI::CEventDescriptorKey&	getLastEventKeyDesc() const { return _LastEventKeyDesc; }
 
 	void	notifyMailAvailable();
 	void	notifyForumUpdated();
@@ -1034,7 +1034,7 @@ private:
 	sint32		_CurrentPlayerCharac[CHARACTERISTICS::NUM_CHARACTERISTICS];
 
 	// Description of the last key event that called an action handler
-	CEventDescriptorKey	_LastEventKeyDesc;
+	NLGUI::CEventDescriptorKey	_LastEventKeyDesc;
 
 	// observers for copying database branch changes
 	CServerToLocalAutoCopy ServerToLocalAutoCopyInventory;

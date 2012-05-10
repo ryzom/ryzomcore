@@ -2590,18 +2590,18 @@ sint32 CDBCtrlSheet::drawNumber(sint32 x, sint32 y, sint32 wSheet, sint32 /* hSh
 }
 
 // ----------------------------------------------------------------------------
-bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
+bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 {
 	if (CCtrlBase::handleEvent(event)) return true;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 
 		// Handle drag'n'drop
 		if (pIM->getCapturePointerLeft() == this)
 		{
-			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown && !_Draging)
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown && !_Draging)
 			{
 				_DragX = eventDesc.getX();
 				_DragY = eventDesc.getY();
@@ -2655,7 +2655,7 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 			if (_Draging)
 			{
 				// If mouse left up, must end the Drag
-				if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+				if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 				{
 					bool handled = false;
 					// get the ctrl under the drop
@@ -2843,7 +2843,7 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 			(eventDesc.getY() <= (_YReal+ _HReal))))
 			return false;
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			if (pIM->getCapturePointerLeft() != this)
@@ -2865,12 +2865,12 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 			return true;
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown)
 		{
 			return true;
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 		{
 			bool	handled= false;
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();

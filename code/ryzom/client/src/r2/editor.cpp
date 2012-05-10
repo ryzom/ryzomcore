@@ -4739,17 +4739,17 @@ void CEditor::autoSave()
 }
 
 // *********************************************************************************************************
-bool CEditor::handleEvent (const CEventDescriptor &eventDesc)
+bool CEditor::handleEvent (const NLGUI::CEventDescriptor &eventDesc)
 {
 	//H_AUTO(R2_CEditor_handleEvent )
 	CHECK_EDITOR
 	if (ConnectionWanted || !_CurrentTool) return false; // TMP special case for connection
-	if (eventDesc.getType() == CEventDescriptor::system)
+	if (eventDesc.getType() == NLGUI::CEventDescriptor::system)
 	{
-		const CEventDescriptorSystem &eds = (const CEventDescriptorSystem &) eventDesc;
-		if (eds.getEventTypeExtended() == CEventDescriptorSystem::setfocus)
+		const NLGUI::CEventDescriptorSystem &eds = (const NLGUI::CEventDescriptorSystem &) eventDesc;
+		if (eds.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::setfocus)
 		{
-			const CEventDescriptorSetFocus &edsf = (const CEventDescriptorSetFocus &) eds;
+			const NLGUI::CEventDescriptorSetFocus &edsf = (const NLGUI::CEventDescriptorSetFocus &) eds;
 			if (edsf.hasFocus() == false)
 			{
 				// cancel current tool

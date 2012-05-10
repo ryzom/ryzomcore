@@ -777,14 +777,14 @@ const std::string	&CGroupTree::getSelectedNodeId() const
 }
 
 // ----------------------------------------------------------------------------
-bool CGroupTree::handleEvent (const CEventDescriptor& event)
+bool CGroupTree::handleEvent (const NLGUI::CEventDescriptor& event)
 {
 	if (!_Active) return false;
 	if (CInterfaceGroup::handleEvent(event)) return true;
 	// The line must be over (pre-selected)
-	if (event.getType() == CEventDescriptor::mouse && _OverLine>=0)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse && _OverLine>=0)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 
 		if (!isIn(eventDesc.getX(),  eventDesc.getY()))
 			return false;
@@ -799,7 +799,7 @@ bool CGroupTree::handleEvent (const CEventDescriptor& event)
 			(x < (_XReal+getHrcIconXEnd(_Lines[_OverLine].Depth + _Lines[_OverLine].getNumAdditionnalBitmap()))))
 			bIcon = true;
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown)
 		{
 			if (bText)
 			{
@@ -807,7 +807,7 @@ bool CGroupTree::handleEvent (const CEventDescriptor& event)
 			}
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
 		{
 			// line selection
 			if (bText)

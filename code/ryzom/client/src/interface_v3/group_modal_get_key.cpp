@@ -68,12 +68,12 @@ void CGroupModalGetKey::setActive (bool state)
 }
 
 // ***************************************************************************
-bool CGroupModalGetKey::handleEvent (const CEventDescriptor &event)
+bool CGroupModalGetKey::handleEvent (const NLGUI::CEventDescriptor &event)
 {
-	if (event.getType() == CEventDescriptor::key)
+	if (event.getType() == NLGUI::CEventDescriptor::key)
 	{
-		CEventDescriptorKey &edk = (CEventDescriptorKey &)event;
-		if (edk.getKeyEventType() == CEventDescriptorKey::keydown)
+		NLGUI::CEventDescriptorKey &edk = (NLGUI::CEventDescriptorKey &)event;
+		if (edk.getKeyEventType() == NLGUI::CEventDescriptorKey::keydown)
 		{
 //			if ((edk.getKey() != KeyCONTROL) && (edk.getKey() != KeyMENU) && (edk.getKey() != KeySHIFT))
 //			{

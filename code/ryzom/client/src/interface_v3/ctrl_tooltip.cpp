@@ -38,7 +38,7 @@ void CCtrlToolTip::draw ()
 }
 
 // ----------------------------------------------------------------------------
-bool CCtrlToolTip::handleEvent (const CEventDescriptor& event)
+bool CCtrlToolTip::handleEvent (const NLGUI::CEventDescriptor& event)
 {
 	if (CCtrlBase::handleEvent(event)) return true;
 	return false;

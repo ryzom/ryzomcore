@@ -119,7 +119,7 @@ public:
 	virtual void updateCoords();
 	virtual	void checkCoords();
 	virtual void draw ();
-	virtual bool handleEvent (const CEventDescriptor &event);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 	virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
 	virtual bool getCtrlsUnder (sint32 x, sint32 y, sint32 clipX, sint32 clipY, sint32 clipW, sint32 clipH, std::vector<CCtrlBase*> &vICL);
 
@@ -234,7 +234,7 @@ private:
 		{
 		public:
 			CPolyButton();
-			virtual bool handleEvent (const CEventDescriptor &event);
+			virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 			virtual void updateCoords();
 			virtual void draw () {}
 			void drawPolyButton();
@@ -258,7 +258,7 @@ private:
 				CContLandMark::TContLMType Type;
 				bool					   HandleEvents;
 			public:
-				virtual bool handleEvent (const CEventDescriptor& event)
+				virtual bool handleEvent (const NLGUI::CEventDescriptor& event)
 				{
 					if (!HandleEvents) return false;
 					return CCtrlButton::handleEvent(event);

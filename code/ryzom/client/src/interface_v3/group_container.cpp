@@ -151,18 +151,18 @@ void CCtrlResizer::draw ()
 }
 
 // ***************************************************************************
-bool CCtrlResizer::handleEvent (const CEventDescriptor &event)
+bool CCtrlResizer::handleEvent (const NLGUI::CEventDescriptor &event)
 {
 	if (CCtrlBase::handleEvent(event)) return true;
 	if (!_Active || !_Parent)
 		return false;
 
-	if (event.getType() == CEventDescriptor::system)
+	if (event.getType() == NLGUI::CEventDescriptor::system)
 	{
-		const CEventDescriptorSystem &eds = (const CEventDescriptorSystem &) event;
-		if (eds.getEventTypeExtended() == CEventDescriptorSystem::setfocus)
+		const NLGUI::CEventDescriptorSystem &eds = (const NLGUI::CEventDescriptorSystem &) event;
+		if (eds.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::setfocus)
 		{
-			const CEventDescriptorSetFocus &edsf = (const CEventDescriptorSetFocus &) eds;
+			const NLGUI::CEventDescriptorSetFocus &edsf = (const NLGUI::CEventDescriptorSetFocus &) eds;
 			if (edsf.hasFocus() == false && _MouseDown)
 			{
 				_MouseDown = false;
@@ -172,15 +172,15 @@ bool CCtrlResizer::handleEvent (const CEventDescriptor &event)
 		}
 	}
 
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 		if ((CInterfaceManager::getInstance()->getCapturePointerLeft() != this) && !isIn(eventDesc.getX(), eventDesc.getY()))
 			return false;
 
 		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(_Parent);
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
 		{
 			// must check that parent isn't closed
 			if (gc)
@@ -200,13 +200,13 @@ bool CCtrlResizer::handleEvent (const CEventDescriptor &event)
 			return true;
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
 			_MouseDown = false;
 			_Parent->invalidateCoords();
 			return true;
 		}
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousemove)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousemove)
 		{
 			if (_MouseDown)
 			{
@@ -560,7 +560,7 @@ void CCtrlMover::draw ()
 }
 
 // ***************************************************************************
-bool CCtrlMover::handleEvent (const CEventDescriptor &event)
+bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 {
 	if (CCtrlBase::handleEvent(event)) return true;
 	if (!_Active)
@@ -568,12 +568,12 @@ bool CCtrlMover::handleEvent (const CEventDescriptor &event)
 
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	if (event.getType() == CEventDescriptor::system)
+	if (event.getType() == NLGUI::CEventDescriptor::system)
 	{
-		const CEventDescriptorSystem &eds = (const CEventDescriptorSystem &) event;
-		if (eds.getEventTypeExtended() == CEventDescriptorSystem::setfocus)
+		const NLGUI::CEventDescriptorSystem &eds = (const NLGUI::CEventDescriptorSystem &) event;
+		if (eds.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::setfocus)
 		{
-			const CEventDescriptorSetFocus &edsf = (const CEventDescriptorSetFocus &) eds;
+			const NLGUI::CEventDescriptorSetFocus &edsf = (const NLGUI::CEventDescriptorSetFocus &) eds;
 			if (edsf.hasFocus() == false && _Moving)
 			{
 				stopMove(pIM);
@@ -582,9 +582,9 @@ bool CCtrlMover::handleEvent (const CEventDescriptor &event)
 		}
 	}
 
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 		// the ctrl must have been captured
 		if (pIM->getCapturePointerLeft() != this)
 			return false;
@@ -599,7 +599,7 @@ bool CCtrlMover::handleEvent (const CEventDescriptor &event)
 			}
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown && _WaitToOpenClose)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown && _WaitToOpenClose)
 		{
 			if (_WaitToOpenClose)
 			{
@@ -657,7 +657,7 @@ bool CCtrlMover::handleEvent (const CEventDescriptor &event)
 
 		if (_CanOpen || gc->isOpenWhenPopup())
 		{
-			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 			{
 				if (!_Parent) return false;
 				gc->setHighLighted(false);
@@ -704,7 +704,7 @@ bool CCtrlMover::handleEvent (const CEventDescriptor &event)
 			if (_CanMove)
 			{
 				// Enter Moving?
-				if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown )
+				if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown )
 				{
 					_MoveStartX= _Parent->getX()-eventDesc.getX();
 					_MoveStartY= _Parent->getY()-eventDesc.getY();
@@ -725,13 +725,13 @@ bool CCtrlMover::handleEvent (const CEventDescriptor &event)
 		else
 		{
 			// Leave Moving?
-			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup )
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup )
 			{
 				stopMove(pIM);
 				return true;
 			}
 			// Move
-			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousemove )
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousemove )
 			{
 				_HasMoved = true;
 				if (gc) gc->touch();
@@ -911,10 +911,10 @@ bool CCtrlMover::handleEvent (const CEventDescriptor &event)
 			}
 		}
 	}
-	if (event.getType() == CEventDescriptor::system)
+	if (event.getType() == NLGUI::CEventDescriptor::system)
 	{
-		const CEventDescriptorSystem &systemEvent = (const CEventDescriptorSystem &) event;
-		if (systemEvent.getEventTypeExtended() == CEventDescriptorSystem::clocktick)
+		const NLGUI::CEventDescriptorSystem &systemEvent = (const NLGUI::CEventDescriptorSystem &) event;
+		if (systemEvent.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::clocktick)
 		{
 			if (_WaitToOpenClose)
 			{
@@ -1046,7 +1046,7 @@ bool CCtrlMover::runTitleActionHandler()
 }
 
 // ***************************************************************************
-void CCtrlMover::setPoped(CGroupContainer *gc, sint32 x, sint32 y, CInterfaceManager *pIM, const CEventDescriptorMouse &eventDesc)
+void CCtrlMover::setPoped(CGroupContainer *gc, sint32 x, sint32 y, CInterfaceManager *pIM, const NLGUI::CEventDescriptorMouse &eventDesc)
 {
 	gc->setHighLighted(false);
 	sint32 deltaX = x - _Parent->getX();
@@ -1088,7 +1088,7 @@ void CCtrlMover::setPoped(CGroupContainer *gc, sint32 x, sint32 y, CInterfaceMan
 }
 
 // ***************************************************************************
-void CCtrlMover::setMovingInParent(CGroupContainer *gc, sint32 /* x */, sint32 y, CInterfaceManager *pIM, const CEventDescriptorMouse &eventDesc)
+void CCtrlMover::setMovingInParent(CGroupContainer *gc, sint32 /* x */, sint32 y, CInterfaceManager *pIM, const NLGUI::CEventDescriptorMouse &eventDesc)
 {
 	if (!gc) return;
 	sint32 deltaY = y - gc->getY();
@@ -2267,7 +2267,7 @@ void CGroupContainer::clearViews()
 }
 
 // ***************************************************************************
-bool CGroupContainer::handleEvent (const CEventDescriptor& event)
+bool CGroupContainer::handleEvent (const NLGUI::CEventDescriptor& event)
 {
 	if (!_Active)
 		return false;
@@ -2282,13 +2282,13 @@ bool CGroupContainer::handleEvent (const CEventDescriptor& event)
 
 	if (!CInterfaceGroup::handleEvent(event))
 	{
-		if (event.getType() == CEventDescriptor::mouse)
+		if (event.getType() == NLGUI::CEventDescriptor::mouse)
 		{
-			const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+			const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 			// MouseWheel mgt
 			if ((_LayerSetup == 0) && (isIn(eventDesc.getX(), eventDesc.getY())))
 			{
-				if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousewheel)
+				if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
 				{
 					if (_ScrollBar != NULL)
 						_ScrollBar->moveTrackY (eventDesc.getWheel()*12);
@@ -3776,21 +3776,21 @@ void CGroupContainer::addModalSon (CGroupContainer *pSon)
 }
 
 // ***************************************************************************
-bool CGroupContainer::checkIfModal(const CEventDescriptor& event)
+bool CGroupContainer::checkIfModal(const NLGUI::CEventDescriptor& event)
 {
 	bool bRet = true;
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
-		if ((eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown) ||
-			(eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown))
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
+		if ((eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown) ||
+			(eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown))
 		{
 			bRet = blinkAllSons();
 		}
 		// Additionaly, if it is a UP, don't blink, but return false if some son active
 		if (bRet && (
-			(eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup) ||
-			(eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup))
+			(eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup) ||
+			(eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup))
 		   )
 		{
 			bRet= !isGrayed();

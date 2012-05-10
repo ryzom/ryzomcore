@@ -31,7 +31,7 @@ public:
 	CInterfaceGroupWheel(const TCtorParam &param);
 	/// Coming from CInterfaceElement
 	virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
-	virtual bool handleEvent (const CEventDescriptor &event);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 private:
 	IActionHandler *_AHWheelUp;
 	CStringShared	_AHWheelUpParams;

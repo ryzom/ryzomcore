@@ -788,12 +788,12 @@ void CCtrlTabButton::setActive(bool state)
 }
 
 // ***************************************************************************
-bool CCtrlTabButton::handleEvent (const CEventDescriptor &event)
+bool CCtrlTabButton::handleEvent (const NLGUI::CEventDescriptor &event)
 {
-	if (event.getType() == CEventDescriptor::system)
+	if (event.getType() == NLGUI::CEventDescriptor::system)
 	{
-		const CEventDescriptorSystem &systemEvent = (const CEventDescriptorSystem &) event;
-		if (systemEvent.getEventTypeExtended() == CEventDescriptorSystem::clocktick)
+		const NLGUI::CEventDescriptorSystem &systemEvent = (const NLGUI::CEventDescriptorSystem &) event;
+		if (systemEvent.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::clocktick)
 		if (_Blinking)
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();

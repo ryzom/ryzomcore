@@ -41,7 +41,7 @@ public:
 
 	virtual void updateCoords();
 	virtual void draw();
-	virtual bool handleEvent (const CEventDescriptor &event);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 
 
 	void	setTarget (CInterfaceGroup *pIG);

@@ -73,7 +73,7 @@ public:
 	virtual void draw ();
 
 	// Events
-	virtual bool handleEvent (const CEventDescriptor& eventDesc);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
 
 	// Browse
 	virtual void browse (const char *url);

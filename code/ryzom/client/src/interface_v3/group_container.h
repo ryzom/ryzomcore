@@ -22,7 +22,10 @@
 #include "interface_group.h"
 #include "nel/misc/smart_ptr.h"
 
+namespace NLGUI
+{
 class CEventDescriptorLocalised;
+}
 class CInterfaceList;
 class CCtrlButton;
 class CCtrlScroll;
@@ -48,7 +51,7 @@ public:
 
 	CCtrlResizer(const TCtorParam &param);
 	virtual void draw ();
-	virtual bool handleEvent (const CEventDescriptor &event);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 	// Add a big delta so when the user is over the Resizer, always take it whatever other controls under
 	virtual uint		getDeltaDepth() const { return 100; }
 
@@ -99,7 +102,7 @@ public:
 	CCtrlMover(const TCtorParam &param, bool canMove, bool canOpen);
 	~CCtrlMover();
 	virtual void draw ();
-	virtual bool handleEvent (const CEventDescriptor &event);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 	bool canMove() { return _CanMove; }
 
 	bool isMoving() const {return _Moving;}
@@ -132,8 +135,8 @@ private:
 	//
 	static COptionsContainerInsertion *getInsertionOptions();
 private:
-	void				setPoped(CGroupContainer *gc, sint32 x, sint32 y, CInterfaceManager *pIM, const CEventDescriptorMouse &eventDesc);
-	void				setMovingInParent(CGroupContainer *gc, sint32 x, sint32 y, CInterfaceManager *pIM, const CEventDescriptorMouse &eventDesc);
+	void				setPoped(CGroupContainer *gc, sint32 x, sint32 y, CInterfaceManager *pIM, const NLGUI::CEventDescriptorMouse &eventDesc);
+	void				setMovingInParent(CGroupContainer *gc, sint32 x, sint32 y, CInterfaceManager *pIM, const NLGUI::CEventDescriptorMouse &eventDesc);
 	void				updateInsertionIndex(const CGroupList *gl, sint32 posY);
 	void				stopMove(CInterfaceManager *pIM);
 	bool				runTitleActionHandler();
@@ -171,7 +174,7 @@ public:
 
 	virtual void clearViews ();
 
-	virtual bool handleEvent (const CEventDescriptor &eventDesc);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
 
 	virtual void launch ();
 
@@ -446,7 +449,7 @@ public:
 
 
 	void setModalParentList (const std::string &name);
-	bool checkIfModal(const CEventDescriptor& event); // Return true if we can handle the event (and prevent from selecting a window)
+	bool checkIfModal(const NLGUI::CEventDescriptor& event); // Return true if we can handle the event (and prevent from selecting a window)
 	bool isGrayed() const;
 	bool blinkAllSons();
 

@@ -121,15 +121,15 @@ void CGroupScrollText::clearViews()
 }
 
 //========================================================================
-bool CGroupScrollText::handleEvent(const CEventDescriptor &event)
+bool CGroupScrollText::handleEvent(const NLGUI::CEventDescriptor &event)
 {
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 		//
 		if (_List && _ScrollBar)
 		{
-			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousewheel)
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
 			{
 				if (isIn(eventDesc.getX(), eventDesc.getY()))
 				{

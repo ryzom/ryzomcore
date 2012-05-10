@@ -2106,14 +2106,14 @@ bool CGroupHTML::parse(xmlNodePtr cur,CInterfaceGroup *parentGroup)
 
 // ***************************************************************************
 
-bool CGroupHTML::handleEvent (const CEventDescriptor& eventDesc)
+bool CGroupHTML::handleEvent (const NLGUI::CEventDescriptor& eventDesc)
 {
 	bool traited = CGroupScrollText::handleEvent (eventDesc);
 
-	if (eventDesc.getType() == CEventDescriptor::system)
+	if (eventDesc.getType() == NLGUI::CEventDescriptor::system)
 	{
-		const CEventDescriptorSystem &systemEvent = (const CEventDescriptorSystem &) eventDesc;
-		if (systemEvent.getEventTypeExtended() == CEventDescriptorSystem::clocktick)
+		const NLGUI::CEventDescriptorSystem &systemEvent = (const NLGUI::CEventDescriptorSystem &) eventDesc;
+		if (systemEvent.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::clocktick)
 		{
 			// Handle now
 			handle ();

@@ -131,7 +131,7 @@ public:
 		_Parent->getCorner(winX, winY, _ParentPosRef);
 		return contains(x - winX, y - winY);
 	}
-	virtual bool		handleEvent (const CEventDescriptor &/* event */)
+	virtual bool		handleEvent (const NLGUI::CEventDescriptor &/* event */)
 	{
 		return false;
 	}

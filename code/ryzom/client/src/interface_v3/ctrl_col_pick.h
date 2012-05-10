@@ -40,7 +40,7 @@ public:
 
 	virtual void updateCoords();
 	virtual void draw();
-	virtual bool handleEvent (const CEventDescriptor &event);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 
 	sint32 getColorR () const { return _ColorSelect.R; }
 	sint32 getColorG () const { return _ColorSelect.G; }

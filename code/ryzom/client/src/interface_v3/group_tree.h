@@ -213,7 +213,7 @@ public:
 
 	virtual void draw();
 
-	virtual bool handleEvent (const CEventDescriptor& eventDesc);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
 
 	void reset();
 

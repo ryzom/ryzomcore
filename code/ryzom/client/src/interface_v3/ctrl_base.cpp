@@ -32,14 +32,14 @@ CCtrlBase::~CCtrlBase()
 }
 
 // ***************************************************************************
-bool CCtrlBase::handleEvent(const CEventDescriptor &event)
+bool CCtrlBase::handleEvent(const NLGUI::CEventDescriptor &event)
 {
-	if (event.getType() == CEventDescriptor::system)
+	if (event.getType() == NLGUI::CEventDescriptor::system)
 	{
-		CEventDescriptorSystem &eds = (CEventDescriptorSystem&)event;
-		if (eds.getEventTypeExtended() == CEventDescriptorSystem::activecalledonparent)
+		NLGUI::CEventDescriptorSystem &eds = (NLGUI::CEventDescriptorSystem&)event;
+		if (eds.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::activecalledonparent)
 		{
-			if (!((CEventDescriptorActiveCalledOnParent &) eds).getActive())
+			if (!((NLGUI::CEventDescriptorActiveCalledOnParent &) eds).getActive())
 			{
 				// the mouse capture should be lost when the ctrl is hidden
 				CInterfaceManager *manager = CInterfaceManager::getInstance();

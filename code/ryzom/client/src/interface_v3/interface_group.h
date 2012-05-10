@@ -76,7 +76,7 @@ public:
 	sint32	getMinUsedW() const;
 
 	/// Coming from CCtrlBase
-	virtual bool handleEvent (const CEventDescriptor &event);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 
 	void executeControl (const std::string &sControlName);
 
@@ -319,7 +319,7 @@ protected:
 	void doUpdateCoords();
 
 	// notify children controls & groups that 'active' has been called on one of their parent
-	void notifyActiveCalled(const CEventDescriptorActiveCalledOnParent &desc);
+	void notifyActiveCalled(const NLGUI::CEventDescriptorActiveCalledOnParent &desc);
 
 protected:
 

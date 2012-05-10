@@ -85,7 +85,7 @@ public:
 
 
 	// from CCtrlBase, no op by default
-	virtual bool		handleEvent (const CEventDescriptor &event);
+	virtual bool		handleEvent (const NLGUI::CEventDescriptor &event);
 
 	// see if this control contains the given point (in parent coords)
 	bool contains(const NLMISC::CVector2f &pos) const;

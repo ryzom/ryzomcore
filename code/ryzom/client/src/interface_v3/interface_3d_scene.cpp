@@ -546,7 +546,7 @@ void CInterface3DScene::draw ()
 }
 
 // ----------------------------------------------------------------------------
-bool CInterface3DScene::handleEvent (const CEventDescriptor &event)
+bool CInterface3DScene::handleEvent (const NLGUI::CEventDescriptor &event)
 {
 	if (!_UserInteraction)
 		return false;
@@ -554,12 +554,12 @@ bool CInterface3DScene::handleEvent (const CEventDescriptor &event)
 	if (!_Active)
 		return false;
 	// if focus is lost then cancel rotation / zoom
-	if (event.getType() == CEventDescriptor::system)
+	if (event.getType() == NLGUI::CEventDescriptor::system)
 	{
-		const CEventDescriptorSystem &eds = (const CEventDescriptorSystem &) event;
-		if (eds.getEventTypeExtended() == CEventDescriptorSystem::setfocus)
+		const NLGUI::CEventDescriptorSystem &eds = (const NLGUI::CEventDescriptorSystem &) event;
+		if (eds.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::setfocus)
 		{
-			const CEventDescriptorSetFocus &edsf = (const CEventDescriptorSetFocus &) eds;
+			const NLGUI::CEventDescriptorSetFocus &edsf = (const NLGUI::CEventDescriptorSetFocus &) eds;
 			if (edsf.hasFocus() == false)
 			{
 				_MouseLDown = false;
@@ -568,9 +568,9 @@ bool CInterface3DScene::handleEvent (const CEventDescriptor &event)
 			}
 		}
 	}
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 		if ((CInterfaceManager::getInstance()->getCapturePointerLeft() != this) &&
 			(CInterfaceManager::getInstance()->getCapturePointerRight() != this) &&
 			(!((eventDesc.getX() >= _XReal) &&
@@ -579,7 +579,7 @@ bool CInterface3DScene::handleEvent (const CEventDescriptor &event)
 			(eventDesc.getY() <= (_YReal+ _HReal)))))
 			return false;
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
 		{
 			_MouseLDown = true;
 			_MouseLDownX = eventDesc.getX();
@@ -588,12 +588,12 @@ bool CInterface3DScene::handleEvent (const CEventDescriptor &event)
 			pIM->setCapturePointerLeft(this); // Because we are not just a control
 			return true;
 		}
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
 			_MouseLDown = false;
 			return true;
 		}
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown)
 		{
 			_MouseRDown = true;
 			_MouseRDownX = eventDesc.getX();
@@ -602,12 +602,12 @@ bool CInterface3DScene::handleEvent (const CEventDescriptor &event)
 			pIM->setCapturePointerRight(this); // Because we are not just a control
 			return true;
 		}
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 		{
 			_MouseRDown = false;
 			return true;
 		}
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousemove)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousemove)
 		{
 			if (_MouseLDown)
 			{

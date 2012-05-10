@@ -47,7 +47,7 @@ public:
 	virtual void checkCoords ();
 	virtual void draw ();
 	virtual void clearViews ();
-	virtual bool handleEvent (const CEventDescriptor &eventDesc);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
 
 	// get the list associated to this group
 	CGroupList	*getList() const { return _List; }

@@ -38,7 +38,7 @@ public:
 	/// Constructor
 	CGroupModalGetKey(const TCtorParam &param);
 
-	virtual bool handleEvent (const CEventDescriptor &event);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 
 	virtual void setActive(bool state);
 

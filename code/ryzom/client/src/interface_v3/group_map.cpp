@@ -171,15 +171,15 @@ CGroupMap::CPolyButton::CPolyButton()
 
 
 //============================================================================================================
-bool CGroupMap::CPolyButton::handleEvent (const CEventDescriptor &event)
+bool CGroupMap::CPolyButton::handleEvent (const NLGUI::CEventDescriptor &event)
 {
 	if (CCtrlBase::handleEvent(event)) return true;
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
 			if (im->getCapturePointerLeft() != this)
 				return false;
@@ -205,7 +205,7 @@ bool CGroupMap::CPolyButton::handleEvent (const CEventDescriptor &event)
 			}
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
 		{
 			if (contains(CVector2f((float)eventDesc.getX(), (float)eventDesc.getY())))
 			{
@@ -1703,7 +1703,7 @@ void CGroupMap::draw()
 }
 
 //============================================================================================================
-bool CGroupMap::handleEvent(const CEventDescriptor &event)
+bool CGroupMap::handleEvent(const NLGUI::CEventDescriptor &event)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	// if R2 editor editor is on, give it a chance to handle the event first
@@ -1712,11 +1712,11 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 		bool handled = false;
 		bool panEnd = false;
 		// handle standard clicks
-		if (event.getType() == CEventDescriptor::mouse)
+		if (event.getType() == NLGUI::CEventDescriptor::mouse)
 		{
-			const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
-			panEnd = eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup && _Panning && _HasMoved;
-			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup && !panEnd)
+			const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
+			panEnd = eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup && _Panning && _HasMoved;
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup && !panEnd)
 			{
 				//if (im->getCapturePointerLeft() == this)
 				// NB : don't test capture of mouse here, because
@@ -1745,7 +1745,7 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 					}
 				}
 			}
-			else if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
+			else if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 			{
 				if (im->getCapturePointerRight() == this)
 				{
@@ -1784,13 +1784,13 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 
 	// left button can be used to 'pan' the map
 	// mouse wheel can be used to zoom in/out
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
 		if (!_Active)
 			return false;
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
 			if (im->getCapturePointerLeft() != this)
 			{
@@ -1801,13 +1801,13 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 			return true;
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown)
 		{
 			im->setCapturePointerRight(this);
 			return true;
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
 		{
 			if (isIn(eventDesc.getX(), eventDesc.getY()))
 			{
@@ -1843,7 +1843,7 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 			}
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousemove)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousemove)
 		{
 			if (im->getCapturePointerLeft() != this || !_Panning)
 				return CInterfaceGroup::handleEvent(event);
@@ -1873,7 +1873,7 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 		}
 
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousewheel && !_Panning)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel && !_Panning)
 		{
 			sint32 wheel = eventDesc.getWheel();
 			float newScale = _UserScale;
@@ -1907,7 +1907,7 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 			return true;
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 		{
 			// convert click pos into map pos
 			if (_MapTexW == 0 || _MapTexH == 0)
@@ -1931,10 +1931,10 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 			}
 		}
 	}
-	if (event.getType() == CEventDescriptor::system)
+	if (event.getType() == NLGUI::CEventDescriptor::system)
 	{
-		CEventDescriptorSystem &es = (CEventDescriptorSystem &) event;
-		if (es.getEventTypeExtended() == CEventDescriptorSystem::activecalledonparent)
+		NLGUI::CEventDescriptorSystem &es = (NLGUI::CEventDescriptorSystem &) event;
+		if (es.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::activecalledonparent)
 		{
 			bool visible = getActive();
 			if (visible)

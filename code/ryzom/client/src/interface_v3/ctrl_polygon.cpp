@@ -278,7 +278,7 @@ void CCtrlPolygon::setAlpha(sint32 a)
 }
 
 // *********************************************************************************
-bool CCtrlPolygon::handleEvent(const CEventDescriptor &/* event */)
+bool CCtrlPolygon::handleEvent(const NLGUI::CEventDescriptor &/* event */)
 {
 	H_AUTO(Rz_CCtrlPolygon_handleEvent)
 	return false;

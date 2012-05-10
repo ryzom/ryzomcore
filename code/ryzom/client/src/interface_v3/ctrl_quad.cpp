@@ -410,7 +410,7 @@ void CCtrlQuad::setCustomUVs(const CUV uvs[4])
 }
 
 // *********************************************************************************
-bool CCtrlQuad::handleEvent(const CEventDescriptor &/* event */)
+bool CCtrlQuad::handleEvent(const NLGUI::CEventDescriptor &/* event */)
 {
 	H_AUTO(Rz_CCtrlQuad_handleEvent)
 	return false;

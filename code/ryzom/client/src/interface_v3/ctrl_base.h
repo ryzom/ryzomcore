@@ -58,7 +58,7 @@ public:
 
 
 	/// Handle all events (implemented by derived classes) (return true to signal event handled)
-	virtual bool		handleEvent (const CEventDescriptor &event);
+	virtual bool		handleEvent (const NLGUI::CEventDescriptor &event);
 
 	virtual CCtrlBase	*getSubCtrl (sint32 /* x */, sint32 /* y */) { return this; }
 

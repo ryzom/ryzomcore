@@ -2249,7 +2249,7 @@ class CAHConfirmTrade : public IActionHandler
 		case 1:		enableResale = true; break;
 		default: // 2: comes only from Enter of Shift+Enter key from an edit box or in the modal window
 			{
-				const CEventDescriptorKey& keyEvent = CInterfaceManager::getInstance()->getLastEventKeyDesc();
+				const NLGUI::CEventDescriptorKey& keyEvent = CInterfaceManager::getInstance()->getLastEventKeyDesc();
 				enableResale = ! keyEvent.getKeyShift();
 			}
 		}

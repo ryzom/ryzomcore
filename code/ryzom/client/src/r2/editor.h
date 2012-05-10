@@ -250,7 +250,7 @@ public:
 	  * Handle an user input event
 	  * \return true if the event was handled by the editor
 	  */
-	bool handleEvent (const CEventDescriptor &eventDesc);
+	bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
 
 	// Handle copy, reaches the editor if no edit box is currently active
 	void copy();

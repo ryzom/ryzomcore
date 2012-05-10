@@ -457,14 +457,14 @@ void CCtrlScroll::draw()
 }
 
 // ------------------------------------------------------------------------------------------------
-bool CCtrlScroll::handleEvent (const CEventDescriptor &event)
+bool CCtrlScroll::handleEvent (const NLGUI::CEventDescriptor &event)
 {
 	if (CCtrlBase::handleEvent(event)) return true;
 	if (!_Active || _Frozen)
 		return false;
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 		if ((CInterfaceManager::getInstance()->getCapturePointerLeft() != this) &&
 			(!((eventDesc.getX() >= _XReal) &&
 			(eventDesc.getX() < (_XReal + _WReal))&&
@@ -472,7 +472,7 @@ bool CCtrlScroll::handleEvent (const CEventDescriptor &event)
 			(eventDesc.getY() <= (_YReal+ _HReal)))))
 			return false;
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
 		{
 			_MouseDown = true;
 			_InitialValue = getValue();
@@ -490,20 +490,20 @@ bool CCtrlScroll::handleEvent (const CEventDescriptor &event)
 			}
 			return true;
 		}
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
 			_MouseDown = false;
 			runAH(_AHOnScrollEnd, _AHOnScrollEndParams.empty() ? _AHOnScrollParams : _AHOnScrollEndParams); // backward compatibility
 			return true;
 		}
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown && _MouseDown && _Cancelable)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown && _MouseDown && _Cancelable)
 		{
 			_MouseDown = false;
 			setValue(_InitialValue);
 			runAH(_AHOnScrollCancel, _AHOnScrollCancelParams); // backward compatibility
 			return true;
 		}
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousemove)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousemove)
 		{
 			if (_MouseDown)
 			{
@@ -514,7 +514,7 @@ bool CCtrlScroll::handleEvent (const CEventDescriptor &event)
 			}
 			return true;
 		}
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousewheel && _Vertical)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel && _Vertical)
 		{
 			moveTrackY (eventDesc.getWheel() * 12);
 			return true;

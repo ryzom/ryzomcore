@@ -163,12 +163,12 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 				// if there was some control capturing the mouse, warn them that they lost the focus
 				if (pIM->getCapturePointerLeft())
 				{
-					pIM->getCapturePointerLeft()->handleEvent(CEventDescriptorSetFocus(pEvent->Get));
+					pIM->getCapturePointerLeft()->handleEvent(NLGUI::CEventDescriptorSetFocus(pEvent->Get));
 				}
 				pIM->setCapturePointerLeft(NULL);
 				if (pIM->getCapturePointerRight())
 				{
-					pIM->getCapturePointerRight()->handleEvent(CEventDescriptorSetFocus(pEvent->Get));
+					pIM->getCapturePointerRight()->handleEvent(NLGUI::CEventDescriptorSetFocus(pEvent->Get));
 				}
 				pIM->setCapturePointerRight(NULL);
 				UserControls.stopFreeLook();
@@ -191,7 +191,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 					&& (ClientCfg.R2EDEnabled || R2::getEditor().getCurrentTool())
 				   )
 			{
-				R2::getEditor().handleEvent(CEventDescriptorSetFocus(pEvent->Get));
+				R2::getEditor().handleEvent(NLGUI::CEventDescriptorSetFocus(pEvent->Get));
 			}
 		}
 
@@ -224,7 +224,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 			 event == EventStringId)
 	{
 		// if not handled, post to Action Manager
-		if( !pIM->handleEvent( CEventDescriptorKey((const CEventKey &) event) ) )
+		if( !pIM->handleEvent( NLGUI::CEventDescriptorKey((const CEventKey &) event) ) )
 		{
 			// See if handled by editor
 			bool handled = false;
@@ -232,7 +232,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 			    && (ClientCfg.R2EDEnabled || R2::getEditor().getCurrentTool())
 			   )
 			{
-				handled = R2::getEditor().handleEvent(CEventDescriptorKey((const CEventKey &) event) );
+				handled = R2::getEditor().handleEvent(NLGUI::CEventDescriptorKey((const CEventKey &) event) );
 			}
 			if (!handled)
 			{
@@ -282,7 +282,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 
 		CViewPointer &rIP = *pIM->getPointer();
 
-		CEventDescriptorMouse eventDesc;
+		NLGUI::CEventDescriptorMouse eventDesc;
 		sint32	x,y;
 		rIP.getPointerDispPos (x, y);
 		eventDesc.setX (x);
@@ -326,12 +326,12 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 				// handle Event
 				if(pEvent->Button & leftButton)
 				{
-					eventDesc.setEventTypeExtended(CEventDescriptorMouse::mouseleftdown);
+					eventDesc.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mouseleftdown);
 					handled|= pIM->handleEvent (eventDesc);
 				}
 				if(pEvent->Button & rightButton)
 				{
-					eventDesc.setEventTypeExtended(CEventDescriptorMouse::mouserightdown);
+					eventDesc.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mouserightdown);
 					handled|= pIM->handleEvent (eventDesc);
 				}
 			}
@@ -350,12 +350,12 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 				// handle Event
 				if(pEvent->Button & leftButton)
 				{
-					eventDesc.setEventTypeExtended(CEventDescriptorMouse::mouseleftup);
+					eventDesc.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mouseleftup);
 					handled|= pIM->handleEvent (eventDesc);
 				}
 				if(pEvent->Button & rightButton)
 				{
-					eventDesc.setEventTypeExtended(CEventDescriptorMouse::mouserightup);
+					eventDesc.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mouserightup);
 					handled|= pIM->handleEvent (eventDesc);
 				}
 			}
@@ -369,12 +369,12 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 				// handle Event
 				if(pEvent->Button & leftButton)
 				{
-					eventDesc.setEventTypeExtended(CEventDescriptorMouse::mouseleftdblclk);
+					eventDesc.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mouseleftdblclk);
 					handled|= pIM->handleEvent (eventDesc);
 				}
 				if(pEvent->Button & rightButton)
 				{
-					eventDesc.setEventTypeExtended(CEventDescriptorMouse::mouserightdblclk);
+					eventDesc.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mouserightdblclk);
 					handled|= pIM->handleEvent (eventDesc);
 				}
 
@@ -395,7 +395,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 				// handle Event now.
 				if (_MouseWheel != 0)
 				{
-					eventDesc.setEventTypeExtended(CEventDescriptorMouse::mousewheel);
+					eventDesc.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mousewheel);
 					eventDesc.setWheel(_MouseWheel);
 					handled|= pIM->handleEvent (eventDesc);
 					_MouseWheel = 0;
@@ -429,7 +429,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 
 
 // ***************************************************************************
-bool		CInputHandlerManager::updateMousePos(NLMISC::CEventMouse &event, CEventDescriptorMouse &eventDesc)
+bool		CInputHandlerManager::updateMousePos(NLMISC::CEventMouse &event, NLGUI::CEventDescriptorMouse &eventDesc)
 {
 	if (!IsMouseFreeLook())
 	{
@@ -461,7 +461,7 @@ bool		CInputHandlerManager::updateMousePos(NLMISC::CEventMouse &event, CEventDes
 			eventDesc.setY (y);
 
 			// handle Event now.
-			eventDesc.setEventTypeExtended(CEventDescriptorMouse::mousemove);
+			eventDesc.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mousemove);
 			return pIM->handleEvent (eventDesc);
 		}
 	}
@@ -470,7 +470,7 @@ bool		CInputHandlerManager::updateMousePos(NLMISC::CEventMouse &event, CEventDes
 
 
 // ***************************************************************************
-void		CInputHandlerManager::CComboKey::init(const CEventDescriptorKey &rDK)
+void		CInputHandlerManager::CComboKey::init(const NLGUI::CEventDescriptorKey &rDK)
 {
 	Key= rDK.getKey();
 	CtrlFlags= 0;
@@ -493,7 +493,7 @@ bool		CInputHandlerManager::CComboKey::operator<(const CComboKey &c) const
 
 
 // ***************************************************************************
-bool CInputHandlerManager::isComboKeyChat(const CEventDescriptorKey &edk) const
+bool CInputHandlerManager::isComboKeyChat(const NLGUI::CEventDescriptorKey &edk) const
 {
 	CComboKey	ckey;
 	ckey.init(edk);

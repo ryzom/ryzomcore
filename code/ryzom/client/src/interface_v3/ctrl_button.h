@@ -22,8 +22,10 @@
 #include "ctrl_base_button.h"
 #include "view_renderer.h"
 
-
-class CEventDescriptor;
+namespace NLGUI
+{
+	class CEventDescriptor;
+}
 class CInterfaceManager;
 
 /**

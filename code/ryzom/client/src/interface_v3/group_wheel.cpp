@@ -43,13 +43,13 @@ bool CInterfaceGroupWheel::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 }
 
 // *****************************************************************************************************************
-bool CInterfaceGroupWheel::handleEvent(const CEventDescriptor &event)
+bool CInterfaceGroupWheel::handleEvent(const NLGUI::CEventDescriptor &event)
 {
 	if (CInterfaceGroup::handleEvent(event)) return true;
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousewheel)
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
 		{
 			CInterfaceManager *im = CInterfaceManager::getInstance();
 			if (eventDesc.getWheel() > 0 && _AHWheelUp)

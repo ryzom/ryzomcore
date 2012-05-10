@@ -107,7 +107,7 @@ public:
 
 	virtual void draw ();
 
-	virtual bool handleEvent (const CEventDescriptor &eventDesc);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
 
 	virtual CInterfaceElement* getElement (const std::string &id);
 
@@ -300,7 +300,7 @@ public:
 
 	void recurseDraw(CGroupSubMenu *pSubMenu);
 
-	virtual bool handleEvent (const CEventDescriptor &eventDesc);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
 
 	virtual CInterfaceElement* getElement (const std::string &id);
 

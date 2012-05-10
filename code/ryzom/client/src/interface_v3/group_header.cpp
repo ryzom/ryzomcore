@@ -255,17 +255,17 @@ public:
 		if (getParent()->getParent() == _Parent->getParentPos()) return NULL; // leftmost header
 		return dynamic_cast<CInterfaceGroup *>(getParent()->getParentPos());
 	}
-	bool handleEvent (const CEventDescriptor &event)
+	bool handleEvent (const NLGUI::CEventDescriptor &event)
 	{
 		CInterfaceManager	*im = CInterfaceManager::getInstance();
 		if (_Parent)
 		{
-			if (event.getType() == CEventDescriptor::system)
+			if (event.getType() == NLGUI::CEventDescriptor::system)
 			{
-				const CEventDescriptorSystem &eds = (const CEventDescriptorSystem &) event;
-				if (eds.getEventTypeExtended() == CEventDescriptorSystem::setfocus)
+				const NLGUI::CEventDescriptorSystem &eds = (const NLGUI::CEventDescriptorSystem &) event;
+				if (eds.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::setfocus)
 				{
-					const CEventDescriptorSetFocus &edsf = (const CEventDescriptorSetFocus &) eds;
+					const NLGUI::CEventDescriptorSetFocus &edsf = (const NLGUI::CEventDescriptorSetFocus &) eds;
 					if (edsf.hasFocus() == false)
 					{
 						release();
@@ -273,10 +273,10 @@ public:
 					}
 				}
 			}
-			if (event.getType() == CEventDescriptor::mouse)
+			if (event.getType() == NLGUI::CEventDescriptor::mouse)
 			{
-				const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
-				if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown)
+				const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
+				if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
 				{
 					if (!this->isIn(eventDesc.getX(), eventDesc.getY())) return false;
 					_TargetGroup = getTargetGroup();
@@ -286,11 +286,11 @@ public:
 					_OffsetX = _TargetGroup->getW() - eventDesc.getX();
 					return true;
 				}
-				if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+				if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 				{
 					release();
 				}
-				if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousemove)
+				if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousemove)
 				{
 					if (_Moving && im->getCapturePointerLeft() == this)
 					{

@@ -21,6 +21,8 @@
 
 #include "nel/misc/types_nl.h"
 
+namespace NLGUI
+{
 
 // ----------------------------------------------------------------------------
 class CEventDescriptor
@@ -246,6 +248,8 @@ public:
 protected:
 	bool _HasFocus;
 };
+
+}
 
 #endif // RZ_EVENT_DESCRIPTOR_H
 

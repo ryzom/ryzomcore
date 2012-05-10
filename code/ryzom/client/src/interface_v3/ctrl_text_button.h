@@ -23,7 +23,10 @@
 #include "view_renderer.h"
 
 
-class CEventDescriptor;
+namespace NLGUI
+{
+	class CEventDescriptor;
+}
 class CInterfaceManager;
 class CViewText;
 

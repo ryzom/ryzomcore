@@ -92,7 +92,7 @@ void CInterfaceGroup::setIdRecurse(const std::string &id)
 
 
 // ------------------------------------------------------------------------------------------------
-void CInterfaceGroup::notifyActiveCalled(const CEventDescriptorActiveCalledOnParent &desc)
+void CInterfaceGroup::notifyActiveCalled(const NLGUI::CEventDescriptorActiveCalledOnParent &desc)
 {
 	// notify children that the 'active' state of this group has changed
 	for(std::vector<CInterfaceGroup*>::iterator it = _ChildrenGroups.begin(); it != _ChildrenGroups.end(); ++it)
@@ -121,7 +121,7 @@ void CInterfaceGroup::setActive(bool state)
 			pIM->runActionHandler (_AHOnDeactive, this, _AHOnDeactiveParams);
 		}
 
-		notifyActiveCalled(CEventDescriptorActiveCalledOnParent(state));
+		notifyActiveCalled(NLGUI::CEventDescriptorActiveCalledOnParent(state));
 	}
 }
 
@@ -685,7 +685,7 @@ bool CInterfaceGroup::isChildGroup(const CInterfaceGroup *group) const
 }
 
 // ------------------------------------------------------------------------------------------------
-bool CInterfaceGroup::handleEvent (const CEventDescriptor &event)
+bool CInterfaceGroup::handleEvent (const NLGUI::CEventDescriptor &event)
 {
 	if (CCtrlBase::handleEvent(event)) return true;
 	if (!_Active)
@@ -693,19 +693,19 @@ bool CInterfaceGroup::handleEvent (const CEventDescriptor &event)
 
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 
-	if (event.getType() == CEventDescriptor::system)
+	if (event.getType() == NLGUI::CEventDescriptor::system)
 	{
-		CEventDescriptorSystem &eds = (CEventDescriptorSystem&)event;
-		if (eds.getEventTypeExtended() == CEventDescriptorSystem::activecalledonparent)
+		NLGUI::CEventDescriptorSystem &eds = (NLGUI::CEventDescriptorSystem&)event;
+		if (eds.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::activecalledonparent)
 		{
 			// notify all childrens
-			notifyActiveCalled((CEventDescriptorActiveCalledOnParent &) eds);
+			notifyActiveCalled((NLGUI::CEventDescriptorActiveCalledOnParent &) eds);
 		}
 	}
 
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 
 		if (!isIn(eventDesc.getX(), eventDesc.getY()))
 			return false;
@@ -733,7 +733,7 @@ bool CInterfaceGroup::handleEvent (const CEventDescriptor &event)
 		}
 
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
 		{
 			if (_AHOnLeftClick != NULL)
 			{
@@ -742,7 +742,7 @@ bool CInterfaceGroup::handleEvent (const CEventDescriptor &event)
 			}
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 		{
 			if (_AHOnRightClick != NULL)
 			{
@@ -750,7 +750,7 @@ bool CInterfaceGroup::handleEvent (const CEventDescriptor &event)
 				return true;
 			}
 		}
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousewheel)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
 		{
 			// handle the Mouse Wheel only if interesting
 			if (_H>_MaxH)

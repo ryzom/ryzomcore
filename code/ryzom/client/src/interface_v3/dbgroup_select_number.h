@@ -51,7 +51,7 @@ public:
 	virtual void checkCoords();
 	virtual void draw ();
 	virtual void clearViews ();
-	virtual bool handleEvent (const CEventDescriptor &eventDesc);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
 
 	// mod interface
 	void	changeValue(sint delta);

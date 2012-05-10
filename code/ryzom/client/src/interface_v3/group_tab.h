@@ -155,7 +155,7 @@ public:
 
 	virtual void setActive(bool state);
 
-	virtual bool handleEvent (const CEventDescriptor &event);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 
 	void setBlink (bool b);
 

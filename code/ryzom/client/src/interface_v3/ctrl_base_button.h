@@ -40,7 +40,7 @@ public:
 	CCtrlBaseButton(const TCtorParam &param);
 
 	virtual bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup);
-	virtual bool handleEvent (const CEventDescriptor& event);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor& event);
 
 	/// \name Misc
 	// @{

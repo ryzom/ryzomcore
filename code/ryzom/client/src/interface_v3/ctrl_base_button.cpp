@@ -199,18 +199,18 @@ void CCtrlBaseButton::setModulateGlobalColorAll(bool state)
 
 
 // ***************************************************************************
-bool CCtrlBaseButton::handleEvent (const CEventDescriptor& event)
+bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 {
 	if (CCtrlBase::handleEvent(event)) return true;
 	if (!_Active || _Frozen)
 		return false;
 
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
 			if (pIM->getCapturePointerLeft() != this)
 				return false;
@@ -223,7 +223,7 @@ bool CCtrlBaseButton::handleEvent (const CEventDescriptor& event)
 			(eventDesc.getY() <= (_YReal+ _HReal))))
 			return false;
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
 		{
 			if (_AHOnLeftDblClick)
 			{
@@ -246,7 +246,7 @@ bool CCtrlBaseButton::handleEvent (const CEventDescriptor& event)
 			return true;
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
 			if (pIM->getCapturePointerLeft() != this)
 				return false;
@@ -299,12 +299,12 @@ bool CCtrlBaseButton::handleEvent (const CEventDescriptor& event)
 			// Always return true on LeftClick.
 			return true;
 		}
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown)
 		{
 			_LastLeftClickButton = NULL;
 			return true;
 		}
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 		{
 			_LastLeftClickButton = NULL;
 			bool	handled= false;
@@ -331,10 +331,10 @@ bool CCtrlBaseButton::handleEvent (const CEventDescriptor& event)
 
 
 	}
-	else if (event.getType() == CEventDescriptor::system)
+	else if (event.getType() == NLGUI::CEventDescriptor::system)
 	{
-		const CEventDescriptorSystem &systemEvent = (const CEventDescriptorSystem &) event;
-		if (systemEvent.getEventTypeExtended() == CEventDescriptorSystem::clocktick)
+		const NLGUI::CEventDescriptorSystem &systemEvent = (const NLGUI::CEventDescriptorSystem &) event;
+		if (systemEvent.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::clocktick)
 		{
 			if (_AHOnClockTick != NULL)
 			{

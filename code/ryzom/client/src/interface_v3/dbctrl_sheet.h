@@ -189,7 +189,7 @@ public:
 	virtual void draw();
 	void drawSheet (sint32 scrX, sint32 scrY, bool draging, bool showSelectionBorder = true);
 
-	virtual bool handleEvent (const CEventDescriptor &event);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 
 	void setActionOnLeftClick (const std::string &ActionHandlerName) { _AHOnLeftClick = getAH(ActionHandlerName, _AHLeftClickParams); }
 	void setActionOnRightClick (const std::string &ActionHandlerName) { _AHOnRightClick = getAH(ActionHandlerName, _AHRightClickParams); }

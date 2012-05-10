@@ -41,7 +41,7 @@ void CInstanceMapDeco::CCtrlButtonEntity::getContextHelp(ucstring &help) const
 }
 
 // *********************************************************************************************************
-bool CInstanceMapDeco::CCtrlButtonEntity::handleEvent(const CEventDescriptor &/* event */)
+bool CInstanceMapDeco::CCtrlButtonEntity::handleEvent(const NLGUI::CEventDescriptor &/* event */)
 {
 	//H_AUTO(R2_CCtrlButtonEntity_handleEvent)
 	return false; // just a display with tooltip capability

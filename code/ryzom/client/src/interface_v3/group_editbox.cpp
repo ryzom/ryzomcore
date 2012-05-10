@@ -551,7 +551,7 @@ void CGroupEditBox::writeString(const ucstring &str, bool replace, bool atEnd)
 }
 
 // ----------------------------------------------------------------------------
-void CGroupEditBox::handleEventChar(const CEventDescriptorKey &rEDK)
+void CGroupEditBox::handleEventChar(const NLGUI::CEventDescriptorKey &rEDK)
 {
 	stopParentBlink();
 	switch(rEDK.getChar())
@@ -711,7 +711,7 @@ void CGroupEditBox::handleEventChar(const CEventDescriptorKey &rEDK)
 }
 
 // ----------------------------------------------------------------------------
-void CGroupEditBox::handleEventString(const CEventDescriptorKey &rEDK)
+void CGroupEditBox::handleEventString(const NLGUI::CEventDescriptorKey &rEDK)
 {
 	appendStringFromClipboard(rEDK.getString());
 }
@@ -827,11 +827,11 @@ void CGroupEditBox::back()
 }
 
 // ----------------------------------------------------------------------------
-bool CGroupEditBox::handleEvent (const CEventDescriptor& event)
+bool CGroupEditBox::handleEvent (const NLGUI::CEventDescriptor& event)
 {
 	if (!_Active || !_ViewText)
 		return false;
-	if (event.getType() == CEventDescriptor::key)
+	if (event.getType() == NLGUI::CEventDescriptor::key)
 	{
 		if (_BypassNextKey)
 		{
@@ -841,18 +841,18 @@ bool CGroupEditBox::handleEvent (const CEventDescriptor& event)
 		///////////////
 		// KEY EVENT //
 		///////////////
-		const CEventDescriptorKey &rEDK = (const CEventDescriptorKey&)event;
+		const NLGUI::CEventDescriptorKey &rEDK = (const NLGUI::CEventDescriptorKey&)event;
 		switch(rEDK.getKeyEventType())
 		{
-			case CEventDescriptorKey::keychar: handleEventChar(rEDK); break;
-			case CEventDescriptorKey::keystring: handleEventString(rEDK); break;
+			case NLGUI::CEventDescriptorKey::keychar: handleEventChar(rEDK); break;
+			case NLGUI::CEventDescriptorKey::keystring: handleEventString(rEDK); break;
 			default: break;
 		}
 		// update the text
 		setInputString(_InputString);
 
 		// if event of type char or string, consider handle all of them
-		if( rEDK.getKeyEventType()==CEventDescriptorKey::keychar || rEDK.getKeyEventType()==CEventDescriptorKey::keystring )
+		if( rEDK.getKeyEventType()==NLGUI::CEventDescriptorKey::keychar || rEDK.getKeyEventType()==NLGUI::CEventDescriptorKey::keystring )
 			return true;
 		// Else filter the EventKeyDown AND EventKeyUp.
 		else
@@ -866,16 +866,16 @@ bool CGroupEditBox::handleEvent (const CEventDescriptor& event)
 		}
 	}
 	else
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
 		/////////////////
 		// MOUSE EVENT //
 		/////////////////
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 		{
 			if (pIM->getCapturePointerRight() == this)
 			{
@@ -901,7 +901,7 @@ bool CGroupEditBox::handleEvent (const CEventDescriptor& event)
 			return false;
 
 		// if click, and not frozen, then get the focus
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown && !_Frozen)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown && !_Frozen)
 		{
 			_SelectingText = true;
 			stopParentBlink();
@@ -920,7 +920,7 @@ bool CGroupEditBox::handleEvent (const CEventDescriptor& event)
 			return true;
 		}
 		// if click, and not frozen, then get the focus
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousemove && !_Frozen && _SelectingText)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousemove && !_Frozen && _SelectingText)
 		{
 			// set the right cursor position
 			uint newCurPos;
@@ -934,7 +934,7 @@ bool CGroupEditBox::handleEvent (const CEventDescriptor& event)
 		}
 
 		// if click, and not frozen, then get the focus
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup && !_Frozen)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup && !_Frozen)
 		{
 			_SelectingText = false;
 			if (_SelectCursorPos == _CursorPos)
@@ -943,7 +943,7 @@ bool CGroupEditBox::handleEvent (const CEventDescriptor& event)
 			return true;
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown)
 		{
 			pIM->setCapturePointerRight(this);
 			return true;
@@ -954,10 +954,10 @@ bool CGroupEditBox::handleEvent (const CEventDescriptor& event)
 		//////////////////
 		// SYSTEM EVENT //
 		//////////////////
-		const CEventDescriptorSystem &eventDesc = (const CEventDescriptorSystem &)event;
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorSystem::activecalledonparent)
+		const NLGUI::CEventDescriptorSystem &eventDesc = (const NLGUI::CEventDescriptorSystem &)event;
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::activecalledonparent)
 		{
-			CEventDescriptorActiveCalledOnParent &activeEvent = (CEventDescriptorActiveCalledOnParent &) eventDesc;
+			NLGUI::CEventDescriptorActiveCalledOnParent &activeEvent = (NLGUI::CEventDescriptorActiveCalledOnParent &) eventDesc;
 			if (activeEvent.getActive() == false && _ResetFocusOnHide)
 			{
 				CInterfaceManager::getInstance()->resetCaptureKeyboard();

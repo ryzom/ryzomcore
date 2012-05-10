@@ -1332,8 +1332,8 @@ void CInterfaceManager::updateFrameEvents()
 	}
 
 	// send clock tick msg to ctrl that are captured
-	CEventDescriptorSystem clockTick;
-	clockTick.setEventTypeExtended(CEventDescriptorSystem::clocktick);
+	NLGUI::CEventDescriptorSystem clockTick;
+	clockTick.setEventTypeExtended(NLGUI::CEventDescriptorSystem::clocktick);
 	if (_CapturePointerLeft)
 	{
 		_CapturePointerLeft->handleEvent(clockTick);
@@ -2671,7 +2671,7 @@ uint CInterfaceManager::getDepth (CCtrlBase *ctrl, CInterfaceGroup *pNewCurrentW
 }
 
 // ------------------------------------------------------------------------------------------------
-bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
+bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 {
 	bool	handled= false;
 
@@ -2680,18 +2680,18 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 		if (_ActiveAnims[i]->isDisableButtons())
 			return false;
 
-	if (event.getType() == CEventDescriptor::key)
+	if (event.getType() == NLGUI::CEventDescriptor::key)
 	{
-		CEventDescriptorKey &eventDesc = (CEventDescriptorKey&)event;
+		NLGUI::CEventDescriptorKey &eventDesc = (NLGUI::CEventDescriptorKey&)event;
 		_LastEventKeyDesc = eventDesc;
 
 		// Any Key event disable the ContextHelp
 		disableContextHelp();
 
 		// Hide menu if the key is pushed
-//		if ((eventDesc.getKeyEventType() == CEventDescriptorKey::keydown) && !_ModalStack.empty() && !eventDesc.getKeyAlt() && !eventDesc.getKeyCtrl() && !eventDesc.getKeyShift())
+//		if ((eventDesc.getKeyEventType() == NLGUI::CEventDescriptorKey::keydown) && !_ModalStack.empty() && !eventDesc.getKeyAlt() && !eventDesc.getKeyCtrl() && !eventDesc.getKeyShift())
 		// Hide menu (or popup menu) is ESCAPE pressed
-		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == KeyESCAPE )
+		if( eventDesc.getKeyEventType() == NLGUI::CEventDescriptorKey::keychar && eventDesc.getChar() == KeyESCAPE )
 		{
 			if(_ModalStack.size() > 0)
 			{
@@ -2702,7 +2702,7 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 		}
 
 		// Manage "quit window" If the Key is ESCAPE, no captureKeyboard
-		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == KeyESCAPE )
+		if( eventDesc.getKeyEventType() == NLGUI::CEventDescriptorKey::keychar && eventDesc.getChar() == KeyESCAPE )
 		{
 			// Get the last escapable active top window. NB: this is ergonomically better.
 			CInterfaceGroup	*win= getLastEscapableTopWindow();
@@ -2729,7 +2729,7 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 		}
 
 		// Manage complex "Enter"
-		if (eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == KeyRETURN)
+		if (eventDesc.getKeyEventType() == NLGUI::CEventDescriptorKey::keychar && eventDesc.getChar() == KeyRETURN)
 		{
 			// If the  top window has Enter AH
 			CInterfaceGroup	*tw= getTopWindow();
@@ -2802,9 +2802,9 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 			return result;
 		}
 	}
-	else if (event.getType() == CEventDescriptor::mouse && _MouseHandlingEnabled )
+	else if (event.getType() == NLGUI::CEventDescriptor::mouse && _MouseHandlingEnabled )
 	{
-		CEventDescriptorMouse &eventDesc = (CEventDescriptorMouse&)event;
+		NLGUI::CEventDescriptorMouse &eventDesc = (NLGUI::CEventDescriptorMouse&)event;
 
 		// First thing to do : Capture handling
 		if (_CapturePointerLeft != NULL)
@@ -2817,7 +2817,7 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 		_WindowUnder = ptr?ptr->getId():"";
 
 		// Any Mouse event but move disable the ContextHelp
-		if(eventDesc.getEventTypeExtended() != CEventDescriptorMouse::mousemove)
+		if(eventDesc.getEventTypeExtended() != NLGUI::CEventDescriptorMouse::mousemove)
 		{
 			disableContextHelp();
 		}
@@ -2844,8 +2844,8 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 				{
 					// If there is a handler on click out launch it
 					if (pNewCurrentWnd != mwi.ModalWindow)
-						if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown ||
-							(eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown))
+						if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown ||
+							(eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown))
 							if (!mwi.ModalHandlerClickOut.empty())
 								runActionHandler(mwi.ModalHandlerClickOut,NULL,mwi.ModalClickOutParams);
 
@@ -2855,8 +2855,8 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 						// NB: don't force handle==true because to quit a modal does not avoid other actions
 
 						// quit if click outside
-						if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown ||
-							(eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown))
+						if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown ||
+							(eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown))
 						{
 							clickedOutModalWindow = dynamic_cast<CGroupModal *>((CInterfaceGroup*)mwi.ModalWindow);
 							// disable the modal
@@ -2885,7 +2885,7 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 		}
 
 		// Manage LeftClick.
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
 		{
 			if ((pNewCurrentWnd != NULL) && (_ModalStack.empty()) && (pNewCurrentWnd->getOverlappable()))
 			{
@@ -2937,7 +2937,7 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 		}
 
 		// Manage RightClick
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown)
 		{
 			if ((pNewCurrentWnd != NULL) && (_ModalStack.empty()) && (pNewCurrentWnd->getOverlappable()))
 			{
@@ -2981,7 +2981,7 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 				handled |= _CapturePointerRight->handleEvent(event);
 			}
 		}
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 		{
 			if (!handled)
 				if (pNewCurrentWnd != NULL)
@@ -3001,7 +3001,7 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 		{
 			if (((pNewCurrentWnd != NULL) && _ModalStack.empty()) || ((!_ModalStack.empty() && _ModalStack.back().ModalWindow == pNewCurrentWnd)))
 			{
-				CEventDescriptorMouse ev2 = eventDesc;
+				NLGUI::CEventDescriptorMouse ev2 = eventDesc;
 				sint32 x= eventDesc.getX(), y = eventDesc.getY();
 				if (pNewCurrentWnd)
 				{
@@ -3011,13 +3011,13 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 				}
 
 				// After handle event of a left click, may set window Top if movable (infos etc...)
-				//if( (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown) && pNewCurrentWnd->isMovable() )
+				//if( (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown) && pNewCurrentWnd->isMovable() )
 				//	setTopWindow(pNewCurrentWnd);
 			}
 		}
 
 		// Put here to let a chance to the window to handle if the capture dont
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
 			if (_CapturePointerLeft != NULL)
 			{
@@ -3039,7 +3039,7 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 			if(mwi.ModalExitClickR)
 			{
 				// quit if click right
-				if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
+				if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 					// disable the modal
 					disableModalWindow();
 			}
@@ -3048,7 +3048,7 @@ bool CInterfaceManager::handleEvent (const CEventDescriptor& event)
 			if(mwi.ModalExitClickL)
 			{
 				// quit if click right
-				if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+				if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 					// disable the modal
 					disableModalWindow();
 			}

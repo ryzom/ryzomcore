@@ -841,16 +841,16 @@ void CGroupParagraph::draw ()
 }
 
 // ----------------------------------------------------------------------------
-bool CGroupParagraph::handleEvent (const CEventDescriptor& event)
+bool CGroupParagraph::handleEvent (const NLGUI::CEventDescriptor& event)
 {
 	if (!_Active)
 		return false;
 
 	bool bReturn = CInterfaceGroup::handleEvent(event);
 
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 
 		_OverElt = -1;
 		if (!isIn(eventDesc.getX(), eventDesc.getY()))

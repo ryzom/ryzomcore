@@ -96,7 +96,7 @@ public:
 	 *	Basics events such as KeyA, KeyB etc.. should be in this config file.
 	 *	Combo Keys like Ctrl+A (select all) should be in this config file too.
 	 */
-	bool	isComboKeyChat(const CEventDescriptorKey &edk) const;
+	bool	isComboKeyChat(const NLGUI::CEventDescriptorKey &edk) const;
 
 
 	/** Pump The Events of The setuped EventServer (ie Driver->EventServer).
@@ -165,7 +165,7 @@ private:
 		{
 			CtrlFlags= 0;
 		}
-		void		init(const CEventDescriptorKey &rDK);
+		void		init(const NLGUI::CEventDescriptorKey &rDK);
 		bool		operator<(const CComboKey &c) const;
 	};
 
@@ -178,7 +178,7 @@ private:
 	void parseKey(xmlNodePtr cur, std::vector<CComboKey> &out);
 
 	// return true if handled
-	bool updateMousePos(NLMISC::CEventMouse &event, CEventDescriptorMouse &eventDesc);
+	bool updateMousePos(NLMISC::CEventMouse &event, NLGUI::CEventDescriptorMouse &eventDesc);
 
 };
 

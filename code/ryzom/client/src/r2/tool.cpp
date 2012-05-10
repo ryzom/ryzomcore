@@ -760,42 +760,42 @@ void CTool::setMouseCursor(const char *cursorTexture)
 }
 
 // ***************************************************************
-bool CTool::handleEvent(const CEventDescriptor &event)
+bool CTool::handleEvent(const NLGUI::CEventDescriptor &event)
 {
 	//H_AUTO(R2_CTool_handleEvent)
 	bool handled = false;
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		CEventDescriptorMouse &eventDesc = (CEventDescriptorMouse&)event;
+		NLGUI::CEventDescriptorMouse &eventDesc = (NLGUI::CEventDescriptorMouse&)event;
 		switch(eventDesc.getEventTypeExtended())
 		{
-			case CEventDescriptorMouse::mousemove:
+			case NLGUI::CEventDescriptorMouse::mousemove:
 				handled = onMouseMove();
 			break;
-			case CEventDescriptorMouse::mouseleftdown:
+			case NLGUI::CEventDescriptorMouse::mouseleftdown:
 				handled = onMouseLeftButtonDown();
 				//if (handled) nlwarning("onMouseLeftButtonDown handled");
 			break;
-			case CEventDescriptorMouse::mouserightdown:
+			case NLGUI::CEventDescriptorMouse::mouserightdown:
 				handled = onMouseRightButtonDown();
 				//if (handled) nlwarning("onMouseRightButtonDown handled");
 			break;
-			case CEventDescriptorMouse::mouseleftup:
+			case NLGUI::CEventDescriptorMouse::mouseleftup:
 				handled = onMouseLeftButtonUp();
 				//if (handled) nlwarning("onMouseLeftButtonUp handled");
 			break;
-			case CEventDescriptorMouse::mouserightup:
+			case NLGUI::CEventDescriptorMouse::mouserightup:
 				handled = onMouseRightButtonUp();
 				//if (handled) nlwarning("onMouseRightButtonUp handled");
 			break;
 		}
 	}
-	if (event.getType() == CEventDescriptor::system)
+	if (event.getType() == NLGUI::CEventDescriptor::system)
 	{
-		const CEventDescriptorSystem &eds = (const CEventDescriptorSystem &) event;
-		if (eds.getEventTypeExtended() == CEventDescriptorSystem::setfocus)
+		const NLGUI::CEventDescriptorSystem &eds = (const NLGUI::CEventDescriptorSystem &) event;
+		if (eds.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::setfocus)
 		{
-			const CEventDescriptorSetFocus &edsf = (const CEventDescriptorSetFocus &) eds;
+			const NLGUI::CEventDescriptorSetFocus &edsf = (const NLGUI::CEventDescriptorSetFocus &) eds;
 			if (edsf.hasFocus() == true)
 			{
 				onFocusGained();

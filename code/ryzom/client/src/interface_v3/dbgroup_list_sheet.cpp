@@ -749,14 +749,14 @@ void CDBGroupListSheet::clearViews ()
 }
 
 // ***************************************************************************
-bool CDBGroupListSheet::handleEvent (const CEventDescriptor &event)
+bool CDBGroupListSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 {
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 		if (isIn(eventDesc.getX(), eventDesc.getY()))
 		{
-			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousewheel)
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
 			{
 				if (_ScrollBar != NULL)
 				{
@@ -765,7 +765,7 @@ bool CDBGroupListSheet::handleEvent (const CEventDescriptor &event)
 					return true;
 				}
 			}
-			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 			{
 				CGroupContainer *pGC = getContainer();
 				if (pGC != NULL) pGC->setHighLighted(false);

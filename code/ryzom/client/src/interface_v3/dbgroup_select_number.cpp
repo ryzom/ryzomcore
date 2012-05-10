@@ -149,14 +149,14 @@ void CDBGroupSelectNumber::clearViews ()
 }
 
 // ***************************************************************************
-bool CDBGroupSelectNumber::handleEvent (const CEventDescriptor &event)
+bool CDBGroupSelectNumber::handleEvent (const NLGUI::CEventDescriptor &event)
 {
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 		if (isIn(eventDesc.getX(), eventDesc.getY()))
 		{
-			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousewheel)
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
 			{
 				changeValue (eventDesc.getWheel());
 				return true;

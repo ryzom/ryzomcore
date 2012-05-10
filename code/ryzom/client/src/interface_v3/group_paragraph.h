@@ -139,7 +139,7 @@ public:
 
 	virtual void draw();
 
-	virtual bool handleEvent (const CEventDescriptor& eventDesc);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
 
 	virtual void clearViews();
 	virtual void clearControls();

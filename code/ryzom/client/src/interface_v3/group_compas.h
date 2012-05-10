@@ -86,7 +86,7 @@ public:
 	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 	virtual void updateCoords();
 	virtual void draw();
-	virtual bool handleEvent (const CEventDescriptor &eventDesc);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
 
 	void setTarget(const CCompassTarget &target);
 	const CCompassTarget &getTarget() const { return _Target; }

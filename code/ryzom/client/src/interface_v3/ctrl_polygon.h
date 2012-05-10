@@ -64,7 +64,7 @@ public:
 	//const NLMISC::CMatrix &getMatrix() const { return _Matrix; }
 	// test if last call to 'setVertices' was for a valid poly (e.g one that doesn't overlapp itself)
 	bool isValid() const { return _Valid; }
-	virtual bool		handleEvent (const CEventDescriptor &event);
+	virtual bool		handleEvent (const NLGUI::CEventDescriptor &event);
 
 	// no capturable by default (just tooltip capability wanted)
 	virtual	bool		isCapturable() const { return false; }

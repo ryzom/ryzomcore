@@ -80,7 +80,7 @@ private:
 		CCtrlButtonEntity(CInstance &instance) : CCtrlButton(TCtorParam()), _Instance(instance) {}
 		// from IDisplayerUIHandle
 		virtual CInstance &getDisplayedInstance() { return _Instance; }
-		virtual bool		handleEvent (const CEventDescriptor &event);
+		virtual bool		handleEvent (const NLGUI::CEventDescriptor &event);
 	private:
 		CInstance			&_Instance;
 	protected:

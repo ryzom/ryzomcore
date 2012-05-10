@@ -933,7 +933,7 @@ void CGroupSubMenu::draw()
 }
 
 // ------------------------------------------------------------------------------------------------
-bool CGroupSubMenu::handleEvent (const CEventDescriptor &event)
+bool CGroupSubMenu::handleEvent (const NLGUI::CEventDescriptor &event)
 {
 	if (!_Active)
 		return false;
@@ -942,9 +942,9 @@ bool CGroupSubMenu::handleEvent (const CEventDescriptor &event)
 	if(_GroupList)
 		textDYPos= -(1+_GroupList->getSpace())/2;
 
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 		_Selected = -1;
 
 		// TODO First check sub menus that can be not in the area of this menu
@@ -976,7 +976,7 @@ bool CGroupSubMenu::handleEvent (const CEventDescriptor &event)
 			}
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
 			// If a line is selected and the line is not grayed
 			if ((_Selected != -1) && (!_Lines[i].ViewText->getGrayed()))
@@ -1004,13 +1004,13 @@ bool CGroupSubMenu::handleEvent (const CEventDescriptor &event)
 			}
 		}
 
-		if (event.getType() == CEventDescriptor::mouse)
+		if (event.getType() == NLGUI::CEventDescriptor::mouse)
 		{
-			const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+			const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 			//
 			if (_GroupList && _ScrollBar)
 			{
-				if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousewheel)
+				if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
 				{
 					if (isIn(eventDesc.getX(), eventDesc.getY()))
 					{
@@ -2082,7 +2082,7 @@ void CGroupMenu::draw ()
 }
 
 // ------------------------------------------------------------------------------------------------
-bool CGroupMenu::handleEvent (const CEventDescriptor &event)
+bool CGroupMenu::handleEvent (const NLGUI::CEventDescriptor &event)
 {
 	if (!_Active)
 		return false;
