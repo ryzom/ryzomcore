@@ -21,7 +21,7 @@
 #include "r2_config.h"
 //
 #include "../interface_v3/interface_manager.h"
-#include "../interface_v3/event_descriptor.h"
+#include "nel/gui/event_descriptor.h"
 #include "../motion/user_controls.h"
 #include "../global.h"
 #include "../entities.h"

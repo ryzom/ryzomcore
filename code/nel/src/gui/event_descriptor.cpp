@@ -16,9 +16,8 @@
 
 
 
-#include "stdpch.h"
-
-#include "event_descriptor.h"
+#include "nel/misc/events.h"
+#include "nel/gui/event_descriptor.h"
 
 void CEventDescriptorKey::init(const NLMISC::CEventKey &ev)
 {

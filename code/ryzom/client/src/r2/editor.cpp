@@ -54,7 +54,7 @@
 #include "../entities.h"
 #include "../events_listener.h"
 #include "../interface_v3/group_list.h"
-#include "../interface_v3/event_descriptor.h"
+#include "nel/gui/event_descriptor.h"
 #include "../interface_v3/group_tree.h"
 #include "../client_cfg.h"
 #include "../interface_v3/lua_ihm.h"

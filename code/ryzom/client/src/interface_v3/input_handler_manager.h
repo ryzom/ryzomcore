@@ -24,7 +24,7 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "event_descriptor.h"
+#include "nel/gui/event_descriptor.h"
 
 
 /**

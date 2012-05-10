@@ -21,7 +21,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "view_base.h"
-#include "event_descriptor.h"
+#include "nel/gui/event_descriptor.h"
 
 class CCtrlBase : public CViewBase
 {
