@@ -1313,7 +1313,7 @@ void CDriverGL::copyFrameBufferToTexture(ITexture *tex,
 	// setup texture mode, after activeTextureARB()
 	CDriverGLStates::TTextureMode textureMode= CDriverGLStates::Texture2D;
 
-#ifdef GL_TEXTURE_RECTANGLE_NV
+#ifndef USE_OPENGLES
 	if(gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
 		textureMode = CDriverGLStates::TextureRect;
 #endif

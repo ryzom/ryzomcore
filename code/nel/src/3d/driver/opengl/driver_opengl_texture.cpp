@@ -1335,7 +1335,7 @@ bool CDriverGL::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 	_DriverGLStates.activeTextureARB (0);
 	CDriverGLStates::TTextureMode textureMode= CDriverGLStates::Texture2D;
 
-#ifdef GL_TEXTURE_RECTANGLE_NV
+#ifndef USE_OPENGLES
 	if(gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
 		textureMode = CDriverGLStates::TextureRect;
 #endif

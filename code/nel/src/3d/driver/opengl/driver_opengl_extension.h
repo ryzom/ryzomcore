@@ -152,11 +152,7 @@ public:
 		EXTTextureFilterAnisotropic = false;
 		EXTTextureFilterAnisotropicMaximum = 1.f;
 		ARBTextureRectangle = false;
-#ifdef USE_OPENGLES
-		ARBTextureNonPowerOfTwo = true;
-#else
 		ARBTextureNonPowerOfTwo = false;
-#endif
 		ARBMultisample = false;
 		NVOcclusionQuery = false;
 		FrameBufferObject = false;

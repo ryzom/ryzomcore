@@ -765,6 +765,7 @@ private:
 	// Off-screen rendering in Dib section
 	HPBUFFERARB					_PBuffer;
 #elif defined(NL_OS_MAC)
+	NSOpenGLContext*			_ctx;
 #elif defined(NL_OS_UNIX)
 	GLXContext					_ctx;
 #endif
@@ -787,7 +788,6 @@ private:
 	friend NSApplicationTerminateReply	applicationShouldTerminate(CDriverGL*);
 
 	NLMISC::CCocoaEventEmitter _EventEmitter;
-	NSOpenGLContext*           _ctx;
 	CocoaOpenGLView*           _glView;
 	NSAutoreleasePool*         _autoreleasePool;
 	uint16                     _backBufferHeight;
