@@ -20,18 +20,6 @@
 #include "nel/misc/types_nl.h"
 #include "nel/3d/vertex_buffer.h"
 
-#ifdef USE_OPENGLES
-#	include <GLES/gl.h>
-#else
-#	ifdef NL_OS_MAC
-#		define GL_GLEXT_LEGACY
-#		include <OpenGL/gl.h>
-#	else
-#		include <GL/gl.h>
-#	endif
-#endif
-
-
 namespace NL3D
 {
 

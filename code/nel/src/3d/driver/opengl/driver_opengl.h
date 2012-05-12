@@ -26,21 +26,10 @@
 #	define H_AUTO_OGL(label)
 #endif
 
-#ifdef NL_OS_WINDOWS
-#	define WIN32_LEAN_AND_MEAN
-#	define NOMINMAX
-#	include <windows.h>
-#	include <GL/gl.h>
-#elif defined(NL_OS_MAC)
-#	define  GL_GLEXT_LEGACY
+#ifdef NL_OS_MAC
 #	import  <Cocoa/Cocoa.h>
-#	include <OpenGL/gl.h>
-#	include "mac/glext.h"
 #	import  "mac/cocoa_opengl_view.h"
 #elif defined (NL_OS_UNIX)
-#	define GLX_GLXEXT_PROTOTYPES
-#	include <GL/gl.h>
-#	include <GL/glx.h>
 #	ifdef XF86VIDMODE
 #		include <X11/extensions/xf86vmode.h>
 #	endif //XF86VIDMODE
@@ -764,21 +753,31 @@ private:
 
 	TCursorMap					_Cursors;
 
+#ifdef USE_OPENGLES
+	EGLDisplay					_EglDisplay;
+	EGLContext					_EglContext;
+	EGLSurface					_EglSurface;
+#elif defined(NL_OS_WINDOWS)
+	HGLRC						_hRC;
+	HDC							_hDC;
+	PIXELFORMATDESCRIPTOR		_pfd;
+
+	// Off-screen rendering in Dib section
+	HPBUFFERARB					_PBuffer;
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+	GLXContext					_ctx;
+#endif
+
 #ifdef NL_OS_WINDOWS
 
 	bool						convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col = NLMISC::CRGBA::White, sint hotSpotX = 0, sint hotSpotY = 0, bool cursor = false);
 
 	friend bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-	HDC							_hDC;
-	PIXELFORMATDESCRIPTOR		_pfd;
-    HGLRC						_hRC;
 	static uint					_Registered;
 	DEVMODE						_OldScreenMode;
 	NLMISC::CEventEmitterMulti	_EventEmitter; // this can contains a win emitter and eventually a direct input emitter
-
-	// Off-screen rendering in Dib section
-	HPBUFFERARB					_PBuffer;
 
 #elif defined(NL_OS_MAC)
 
@@ -804,7 +803,6 @@ private:
 	friend bool GlWndProc(CDriverGL *driver, XEvent &e);
 
 	Display*					_dpy;
-	GLXContext					_ctx;
 	NLMISC::CUnixEventEmitter	_EventEmitter;
 	XVisualInfo*				_visual_info;
 	uint32						_xrandr_version;
@@ -963,6 +961,7 @@ private:
 	bool					_CurrentGlNormalize;
 
 private:
+	bool					createContext();
 	bool					setupDisplay();
 	bool					unInit();
 

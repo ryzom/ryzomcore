@@ -22,24 +22,20 @@
 // by default, we disable the windows menu keys (F10, ALT and ALT+SPACE key doesn't freeze or open the menu)
 #define NL_DISABLE_MENU
 
-#ifdef NL_OS_WINDOWS
-# include <windowsx.h>
-#elif defined(NL_OS_MAC)
+#ifdef NL_OS_MAC
 #	import "mac/cocoa_window_delegate.h"
 #	import "mac/cocoa_application_delegate.h"
 #	import <OpenGL/OpenGL.h>
 #elif defined (NL_OS_UNIX)
-# include <GL/gl.h>
-# include <GL/glx.h>
-# ifdef HAVE_XRANDR
-#  include <X11/extensions/Xrandr.h>
-# endif // HAVE_XRANDR
-# ifdef HAVE_XRENDER
-#  include <X11/extensions/Xrender.h>
-# endif // HAVE_XRENDER
-# include <X11/Xatom.h>
-# define _NET_WM_STATE_REMOVE	0
-# define _NET_WM_STATE_ADD		1
+#	ifdef HAVE_XRANDR
+#		include <X11/extensions/Xrandr.h>
+#	endif // HAVE_XRANDR
+#	ifdef HAVE_XRENDER
+#		include <X11/extensions/Xrender.h>
+#	endif // HAVE_XRENDER
+#	include <X11/Xatom.h>
+#	define _NET_WM_STATE_REMOVE	0
+#	define _NET_WM_STATE_ADD	1
 #endif // NL_OS_UNIX
 
 #include "nel/misc/mouse_device.h"
@@ -111,6 +107,7 @@ bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	H_AUTO_OGL(DriverGL_WndProc)
+
 	// Get the driver pointer..
 	CDriverGL *pDriver=(CDriverGL*)GetWindowLongPtr (hWnd, GWLP_USERDATA);
 	bool trapMessage = false;
@@ -444,6 +441,7 @@ bool CDriverGL::unInit()
 
 #ifdef NL_OS_WINDOWS
 
+#ifndef USE_OPENGLES
 	// Off-screen rendering ?
 	if (_PBuffer)
 	{
@@ -451,6 +449,7 @@ bool CDriverGL::unInit()
 		nwglDestroyPbufferARB(_PBuffer);
 		_PBuffer = NULL;
 	}
+#endif
 
 	if (_Registered && !UnregisterClassW(L"NLClass", GetModuleHandle(NULL)))
 	{
@@ -606,14 +605,15 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 #ifdef NL_OS_WINDOWS
 
 	// Init pointers
+#ifndef USE_OPENGLES
 	_PBuffer = NULL;
 	_hRC = NULL;
 	_hDC = NULL;
+#endif
 
 	// Driver caps.
 	//=============
 	// Retrieve the WGL extensions before init the driver.
-	int						pf;
 
 	// Offscreen mode ?
 	if (_CurrentMode.OffScreen)
@@ -652,7 +652,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			_pfd.cAlphaBits	= 8;
 		}
 		_pfd.iLayerType	  = PFD_MAIN_PLANE;
-		pf=ChoosePixelFormat(tempHDC,&_pfd);
+		int pf=ChoosePixelFormat(tempHDC,&_pfd);
 		if (!pf)
 		{
 			nlwarning ("CDriverGL::setDisplay: ChoosePixelFormat failed");
@@ -695,7 +695,11 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		}
 
 		// Register WGL functions
+#ifdef USE_OPENGLES
+		registerEGlExtensions (_Extensions, tempHDC);
+#else
 		registerWGlExtensions (_Extensions, tempHDC);
+#endif
 
 		HDC hdc = wglGetCurrentDC ();
 
@@ -854,11 +858,19 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		_CurrentMode.Depth = uint8(GetDeviceCaps (_hDC, BITSPIXEL));
 
 		// Destroy the temp gl context
+#ifdef USE_OPENGLES
+		if (!eglDestroyContext(_EglDisplay, _EglContext);)
+		{
+			DWORD error = GetLastError ();
+			nlwarning ("CDriverGL::setDisplay: wglDeleteContext failed: 0x%x", error);
+		}
+#else
 		if (!wglDeleteContext (tempGLRC))
 		{
 			DWORD error = GetLastError ();
 			nlwarning ("CDriverGL::setDisplay: wglDeleteContext failed: 0x%x", error);
 		}
+#endif
 
 		// Destroy the temp windows
 		if (!DestroyWindow (tmpHWND))
@@ -871,9 +883,15 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		{
 			DWORD error = GetLastError ();
 			nlwarning ("CDriverGL::setDisplay: wglMakeCurrent failed: 0x%x", error);
+
+#ifdef USE_OPENGLES
+			eglDestroyContext(_EglDisplay, _EglContext);
+#else
 			wglDeleteContext (_hRC);
 			nwglReleasePbufferDCARB( _PBuffer, _hDC );
 			nwglDestroyPbufferARB( _PBuffer );
+#endif
+
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
 			_win = EmptyWindow;
@@ -898,43 +916,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		// associate OpenGL driver to window
 		SetWindowLongPtr(_win, GWLP_USERDATA, (LONG_PTR)this);
 
-
-		_hDC=GetDC(_win);
-		wglMakeCurrent(_hDC,NULL);
-
-		_CurrentMode.Depth = uint8(GetDeviceCaps(_hDC,BITSPIXEL));
-		// ---
-		memset(&_pfd,0,sizeof(_pfd));
-		_pfd.nSize        = sizeof(_pfd);
-		_pfd.nVersion     = 1;
-		_pfd.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-		_pfd.iPixelType   = PFD_TYPE_RGBA;
-		_pfd.cColorBits   = _CurrentMode.Depth;
-		// Choose best suited Depth Buffer.
-		if(_CurrentMode.Depth <= 16)
-		{
-			_pfd.cDepthBits   = 16;
-		}
-		else
-		{
-			_pfd.cDepthBits = 24;
-			_pfd.cAlphaBits	= 8;
-			_pfd.cStencilBits = 8;
-		}
-		_pfd.iLayerType	  = PFD_MAIN_PLANE;
-		pf=ChoosePixelFormat(_hDC,&_pfd);
-		if (!pf)
-		{
-			return false;
-		}
-
-		if ( !SetPixelFormat(_hDC,pf,&_pfd) )
-		{
-			return false;
-		}
-		_hRC=wglCreateContext(_hDC);
-
-		wglMakeCurrent(_hDC,_hRC);
+		createContext();
 	}
 
 	/// release old emitter
@@ -1615,7 +1597,19 @@ bool CDriverGL::destroyWindow()
 	std::vector<NLMISC::CBitmap> bitmaps;
 	setWindowIcon(bitmaps);
 
-#ifdef NL_OS_WINDOWS
+#ifdef USE_OPENGLES
+
+	if (_EglDisplay && _EglContext)
+	{
+		eglMakeCurrent(_EglDisplay, _EglSurface, _EglSurface, _EglContext);
+
+		if (_DestroyWindow)
+		{
+			eglDestroyContext(_EglDisplay, _EglContext);
+		}
+	}
+
+#elif defined(NL_OS_WINDOWS)
 
 	// Then delete.
 	// wglMakeCurrent(NULL,NULL);
@@ -1633,11 +1627,23 @@ bool CDriverGL::destroyWindow()
 	{
 		ReleaseDC(_win, _hDC);
 		_hDC = NULL;
-
-		// don't destroy window if it hasn't been created by our driver
-		if (_DestroyWindow)
-			DestroyWindow(_win);
 	}
+
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+
+	if (_DestroyWindow && _ctx)
+		glXDestroyContext(_dpy, _ctx);
+
+	_ctx = NULL;
+
+#endif
+
+#ifdef NL_OS_WINDOWS
+
+	// don't destroy window if it hasn't been created by our driver
+	if (_win && _DestroyWindow)
+		DestroyWindow(_win);
 
 #elif defined(NL_OS_MAC)
 
@@ -1654,16 +1660,8 @@ bool CDriverGL::destroyWindow()
 
 	_EventEmitter.closeIM();
 
-	if (_DestroyWindow)
-	{
-		if (_ctx)
-			glXDestroyContext(_dpy, _ctx);
-
-		if (_win)
-			XDestroyWindow(_dpy, _win);
-	}
-
-	_ctx = NULL;
+	if (_DestroyWindow && _win)
+		XDestroyWindow(_dpy, _win);
 
 	// Ungrab the keyboard (probably not necessary);
 //	XUnmapWindow(_dpy, _win);
@@ -2367,6 +2365,150 @@ emptyProc CDriverGL::getWindowProc()
 }
 
 // --------------------------------------------------
+bool CDriverGL::createContext()
+{
+#ifdef USE_OPENGLES
+	uint samples = 0;
+
+	if (_CurrentMode.AntiAlias > -1)
+	{
+		if (_CurrentMode.AntiAlias == 0)
+		{
+			samples = 4;
+		}
+		else
+		{
+			samples = _CurrentMode.AntiAlias;
+		}
+	}
+
+	EGLint attribList[] =
+	{
+		EGL_RED_SIZE,		8,
+		EGL_GREEN_SIZE,		8,
+		EGL_BLUE_SIZE,		8,
+		EGL_ALPHA_SIZE,		8,
+		EGL_DEPTH_SIZE,		16,
+		EGL_STENCIL_SIZE,	8,
+//		EGL_SAMPLE_BUFFERS,	_CurrentMode.AntiAlias > -1 ? 1:0,
+//		EGL_SAMPLES,		samples,
+		EGL_RENDERABLE_TYPE,
+		EGL_OPENGL_ES_BIT,
+		EGL_NONE
+	};
+
+	// Get Display
+	_EglDisplay = EGL_NO_DISPLAY; // eglGetDisplay(_hDC);
+
+	if (_EglDisplay == EGL_NO_DISPLAY)
+	{
+		_EglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+
+		if (_EglDisplay == EGL_NO_DISPLAY)
+		{
+			nlwarning("3D: failed to get display 0x%x", eglGetError());
+			return false;
+		}
+	}
+
+	// Initialize EGL
+	EGLint majorVersion;
+	EGLint minorVersion;
+
+	if (!eglInitialize(_EglDisplay, &majorVersion, &minorVersion))
+	{
+		return EGL_FALSE;
+	}
+
+	const char *extensions = eglQueryString(_EglDisplay, EGL_EXTENSIONS);
+
+
+	// Get configs
+	EGLint numConfigs;
+
+	if (!eglGetConfigs(_EglDisplay, NULL, 0, &numConfigs))
+	{
+		return false;
+	}
+
+	// Choose config
+	EGLConfig config = NULL;
+
+	if (!eglChooseConfig(_EglDisplay, attribList, &config, 1, &numConfigs))
+	{
+		return false;
+	}
+
+	// Create a surface
+	_EglSurface = eglCreateWindowSurface(_EglDisplay, config, (EGLNativeWindowType)_win, NULL);
+
+	if (_EglSurface == EGL_NO_SURFACE)
+	{
+		return false;
+	}
+
+	// Create a GL context
+	EGLint contextAttribs[] =
+	{
+		EGL_CONTEXT_CLIENT_VERSION, 1,
+		EGL_NONE
+	};
+
+	_EglContext = eglCreateContext(_EglDisplay, config, EGL_NO_CONTEXT, contextAttribs);
+
+	if (_EglContext == EGL_NO_CONTEXT)
+	{
+		return false;
+	}   
+
+	// Make the context current
+	if (!eglMakeCurrent(_EglDisplay, _EglSurface, _EglSurface, _EglContext))
+	{
+		return false;
+	}
+#elif defined(NL_OS_WINDOWS)
+	_hDC = GetDC(_win);
+	_CurrentMode.Depth = uint8(GetDeviceCaps(_hDC,BITSPIXEL));
+
+	wglMakeCurrent(_hDC,NULL);
+	// ---
+	memset(&_pfd,0,sizeof(_pfd));
+	_pfd.nSize        = sizeof(_pfd);
+	_pfd.nVersion     = 1;
+	_pfd.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+	_pfd.iPixelType   = PFD_TYPE_RGBA;
+	_pfd.cColorBits   = _CurrentMode.Depth;
+	// Choose best suited Depth Buffer.
+	if(_CurrentMode.Depth <= 16)
+	{
+		_pfd.cDepthBits   = 16;
+	}
+	else
+	{
+		_pfd.cDepthBits = 24;
+		_pfd.cAlphaBits	= 8;
+		_pfd.cStencilBits = 8;
+	}
+	_pfd.iLayerType	  = PFD_MAIN_PLANE;
+	int pf=ChoosePixelFormat(_hDC,&_pfd);
+	if (!pf)
+	{
+		return false;
+	}
+
+	if ( !SetPixelFormat(_hDC,pf,&_pfd) )
+	{
+		return false;
+	}
+	_hRC=wglCreateContext(_hDC);
+
+	wglMakeCurrent(_hDC,_hRC);
+#endif
+
+	return true;
+}
+
+// --------------------------------------------------
 bool CDriverGL::activate()
 {
 	H_AUTO_OGL(CDriverGL_activate);
@@ -2374,7 +2516,20 @@ bool CDriverGL::activate()
 	if (_win == EmptyWindow)
 		return false;
 
-#ifdef NL_OS_WINDOWS
+#ifdef USE_OPENGLES
+
+	EGLContext ctx = eglGetCurrentContext();
+
+	if (ctx != _EglContext)
+	{
+		// Make the context current
+		if (!eglMakeCurrent(_EglDisplay, _EglSurface, _EglSurface, _EglContext))
+		{
+			return false;
+		}
+	}
+
+#elif defined(NL_OS_WINDOWS)
 
 	HGLRC hglrc = wglGetCurrentContext();
 
@@ -2393,7 +2548,7 @@ bool CDriverGL::activate()
 	if (nctx != NULL && nctx != _ctx)
 		glXMakeCurrent(_dpy, _win, _ctx);
 
-#endif // NL_OS_WINDOWS
+#endif // USE_OPENGLES
 
 	return true;
 }

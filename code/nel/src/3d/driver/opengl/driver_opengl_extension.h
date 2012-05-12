@@ -21,31 +21,6 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/string_common.h"
 
-#ifdef NL_OS_WINDOWS
-#	define WIN32_LEAN_AND_MEAN
-#	define NOMINMAX
-#	include <windows.h>
-#	include <GL/gl.h>
-#	include <GL/glext.h>	// Please download it from http://www.opengl.org/registry/
-#elif defined(NL_OS_MAC)
-#	define GL_GLEXT_LEGACY
-#	include <OpenGL/gl.h>
-#	include "mac/glext.h"
-#elif defined (NL_OS_UNIX)
-#	include <GL/gl.h>
-#	include <GL/glext.h>	// Please download it from http://www.opengl.org/registry/
-#	include <GL/glx.h>
-#	include <GL/glxext.h>
-#endif // NL_OS_UNIX
-
-#ifndef GL_GLEXT_VERSION
-#	error "I need a newer <GL/glext.h>. Please download it from http://www.opengl.org/registry/"
-#endif // GL_nGLEXT_VERSION
-
-#if GL_GLEXT_VERSION < 7
-#	error "I need a newer <GL/glext.h>. Please download it from http://www.opengl.org/registry/"
-#endif // GL_nGLEXT_VERSION < 7
-
 #include "driver_opengl_extension_def.h"
 
 namespace	NL3D
@@ -121,6 +96,9 @@ struct	CGlExtensions
 	bool	ARBTextureNonPowerOfTwo;
 	bool	ARBMultisample;
 
+	bool	OESDrawTexture;
+	bool	OESMapBuffer;
+
 public:
 
 	/// \name Disable Hardware feature. False by default. setuped by IDriver
@@ -174,7 +152,11 @@ public:
 		EXTTextureFilterAnisotropic = false;
 		EXTTextureFilterAnisotropicMaximum = 1.f;
 		ARBTextureRectangle = false;
+#ifdef USE_OPENGLES
+		ARBTextureNonPowerOfTwo = true;
+#else
 		ARBTextureNonPowerOfTwo = false;
+#endif
 		ARBMultisample = false;
 		NVOcclusionQuery = false;
 		FrameBufferObject = false;
@@ -183,6 +165,9 @@ public:
 		PackedDepthStencil = false;
 		NVVertexArrayRange2 = false;
 		NVStateVARWithoutFlush = 0;
+
+		OESDrawTexture = false;
+		OESMapBuffer = false;
 
 		/// \name Disable Hardware feature. False by default. setuped by IDriver
 		DisableHardwareVertexProgram= false;
@@ -266,7 +251,10 @@ public:
 
 // ***************************************************************************
 
-#ifdef NL_OS_WINDOWS
+#ifdef USE_OPENGLES
+/// This function will test and register EGL functions before than the gl context is created
+bool registerEGlExtensions(CGlExtensions &ext, EGLDisplay dpy);
+#elif defined(NL_OS_WINDOWS)
 /// This function will test and register WGL functions before than the gl context is created
 bool registerWGlExtensions(CGlExtensions &ext, HDC hDC);
 #elif defined(NL_OS_MAC)
@@ -288,6 +276,48 @@ void registerGlExtensions(CGlExtensions &ext);
 
 	NB: we do it for all (EXT, NV, ARB extension) even it should be useful only for ARB ones.
 */
+
+#ifdef USE_OPENGLES
+
+// OES_mapbuffer.
+//===============
+extern NEL_PFNGLMAPBUFFEROESPROC				nglMapBufferOES;
+extern NEL_PFNGLUNMAPBUFFEROESPROC				nglUnmapBufferOES;
+extern NEL_PFNGLGETBUFFERPOINTERVOESPROC		nglGetBufferPointervOES;
+
+extern NEL_PFNGLBUFFERSUBDATAPROC				nglBufferSubData;
+
+extern PFNGLDRAWTEXFOESPROC						nglDrawTexfOES;
+
+// GL_OES_framebuffer_object
+extern NEL_PFNGLISRENDERBUFFEROESPROC			nglIsRenderbufferOES;
+extern NEL_PFNGLBINDRENDERBUFFEROESPROC			nglBindRenderbufferOES;
+extern NEL_PFNGLDELETERENDERBUFFERSOESPROC		nglDeleteRenderbuffersOES;
+extern NEL_PFNGLGENRENDERBUFFERSOESPROC			nglGenRenderbuffersOES;
+extern NEL_PFNGLRENDERBUFFERSTORAGEOESPROC		nglRenderbufferStorageOES;
+extern NEL_PFNGLGETRENDERBUFFERPARAMETERIVOESPROC	nglGetRenderbufferParameterivOES;
+extern NEL_PFNGLISFRAMEBUFFEROESPROC			nglIsFramebufferOES;
+extern NEL_PFNGLBINDFRAMEBUFFEROESPROC			nglBindFramebufferOES;
+extern NEL_PFNGLDELETEFRAMEBUFFERSOESPROC		nglDeleteFramebuffersOES;
+extern NEL_PFNGLGENFRAMEBUFFERSOESPROC			nglGenFramebuffersOES;
+extern NEL_PFNGLCHECKFRAMEBUFFERSTATUSOESPROC	nglCheckFramebufferStatusOES;
+extern NEL_PFNGLFRAMEBUFFERRENDERBUFFEROESPROC	nglFramebufferRenderbufferOES;
+extern NEL_PFNGLFRAMEBUFFERTEXTURE2DOESPROC		nglFramebufferTexture2DOES;
+extern NEL_PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVOESPROC	nglGetFramebufferAttachmentParameterivOES;
+extern NEL_PFNGLGENERATEMIPMAPOESPROC			nglGenerateMipmapOES;
+
+// GL_OES_texture_cube_map
+extern NEL_PFNGLTEXGENFOESPROC					nglTexGenfOES;
+extern NEL_PFNGLTEXGENFVOESPROC					nglTexGenfvOES;
+extern NEL_PFNGLTEXGENIOESPROC					nglTexGeniOES;
+extern NEL_PFNGLTEXGENIVOESPROC					nglTexGenivOES;
+extern NEL_PFNGLTEXGENXOESPROC					nglTexGenxOES;
+extern NEL_PFNGLTEXGENXVOESPROC					nglTexGenxvOES;
+extern NEL_PFNGLGETTEXGENFVOESPROC				nglGetTexGenfvOES;
+extern NEL_PFNGLGETTEXGENIVOESPROC				nglGetTexGenivOES;
+extern NEL_PFNGLGETTEXGENXVOESPROC				nglGetTexGenxvOES;
+
+#else
 
 // ARB_multitexture
 //=================
@@ -740,5 +770,7 @@ extern NEL_PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC		nglRenderbufferStorageMul
 
 // GL_ARB_multisample
 extern NEL_PFNGLSAMPLECOVERAGEARBPROC			nglSampleCoverageARB;
+
+#endif // USE_OPENGLES
 
 #endif // NL_OPENGL_EXTENSION_H

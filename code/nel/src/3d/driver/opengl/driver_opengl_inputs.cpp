@@ -17,11 +17,7 @@
 #include "stdopengl.h"
 #include "driver_opengl.h"
 
-#ifdef NL_OS_WINDOWS
-# include <windowsx.h>
-#elif defined(NL_OS_MAC)
-#elif defined (NL_OS_UNIX)
-# include <GL/glx.h>
+#ifdef NL_OS_UNIX
 # include <X11/Xatom.h>
 # ifdef HAVE_XRENDER
 #  include <X11/extensions/Xrender.h>
