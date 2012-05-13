@@ -819,33 +819,43 @@ void prelogInit()
 		nmsg = "Creating 3d driver...";
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 
-		bool direct3D = false;
+		UDriver::TDriver driver = UDriver::OpenGl;
 
 #ifdef NL_OS_WINDOWS
+		uint icon = (uint)LoadIcon(HInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
+#else
+		uint icon = 0;
+#endif // NL_OS_WINDOWS
+
 		switch(ClientCfg.Driver3D)
 		{
 			case  CClientConfig::DrvAuto:
+#ifdef NL_OS_WINDOWS
 			{
 				// Fallback to D3D for card other than nVidia
 				std::string deviceName;
 				uint64 drvVersion;
-				CSystemInfo::getVideoInfo(                 deviceName, drvVersion);
+				CSystemInfo::getVideoInfo(deviceName, drvVersion);
 				strlwr(deviceName);
-				direct3D = strstr(deviceName.c_str(), NVIDIA_RECOMMANDED_DRIVERS_STRING_TEST) == NULL;
+				driver = strstr(deviceName.c_str(), NVIDIA_RECOMMANDED_DRIVERS_STRING_TEST) == NULL ? UDriver::Direct3d:UDriver::OpenGl;
 			}
 			break;
-			case CClientConfig::OpenGL:
-				direct3D = false;
-			break;
 			case CClientConfig::Direct3D:
-				direct3D = true;
+				driver = UDriver::Direct3d;
+			break;
+#endif // NL_OS_WINDOWS
+			case CClientConfig::OpenGL:
+				driver = UDriver::OpenGl;
+			break;
+			case CClientConfig::OpenGLES:
+				driver = UDriver::OpenGlEs;
+			break;
+			default:
 			break;
 		}
-		Driver = UDriver::createDriver ((uint)LoadIcon (HInstance, MAKEINTRESOURCE(IDI_MAIN_ICON)), direct3D);
 
-#else // NL_OS_WINDOWS
-		Driver = UDriver::createDriver ();
-#endif // NL_OS_WINDOWS
+		Driver = UDriver::createDriver(icon, driver);
+
 		if(Driver == NULL)
 		{
 			ExitClientError (CI18N::get ("Can_t_load_the_display_driver").toUtf8().c_str ());
@@ -1111,7 +1121,7 @@ void prelogInit()
 		CBloomEffect::getInstance().setDriver(Driver);
 
 		// init bloom effect
-		CBloomEffect::getInstance().init(!direct3D);
+		CBloomEffect::getInstance().init(driver != UDriver::Direct3d);
 
 		nlinfo ("PROFILE: %d seconds for prelogInit", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 
