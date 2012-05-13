@@ -16,6 +16,7 @@ IF(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
 ELSE(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
 
   FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
+      PATH_SUFFIXES mysql
       /usr/include/mysql
       /usr/local/include/mysql
       /opt/local/include/mysql5/mysql
