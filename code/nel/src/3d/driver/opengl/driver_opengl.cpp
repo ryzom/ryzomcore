@@ -90,20 +90,27 @@ const uint32 CDriverGL::ReleaseVersion = 0x11;
 // Number of register to allocate for the EXTVertexShader extension
 const uint CDriverGL::_EVSNumConstant = 97;
 
-#ifdef NL_OS_WINDOWS
-
 #ifdef NL_STATIC
 
-#	pragma comment(lib, "opengl32")
-#	pragma comment(lib, "dinput8")
-#	pragma comment(lib, "dxguid")
+#ifdef USE_OPENGLES
+
+IDriver* createGlEsDriverInstance ()
+{
+	return new CDriverGL;
+}
+
+#else
 
 IDriver* createGlDriverInstance ()
 {
 	return new CDriverGL;
 }
 
+#endif
+
 #else
+
+#ifdef NL_OS_WINDOWS
 
 __declspec(dllexport) IDriver* NL3D_createIDriverInstance ()
 {
@@ -115,18 +122,7 @@ __declspec(dllexport) uint32 NL3D_interfaceVersion ()
 	return IDriver::InterfaceVersion;
 }
 
-#endif
-
 #elif defined (NL_OS_UNIX)
-
-#ifdef NL_STATIC
-
-IDriver* createGlDriverInstance ()
-{
-	return new CDriverGL;
-}
-
-#else
 
 extern "C"
 {
@@ -141,9 +137,9 @@ extern "C"
 	}
 }
 
-#endif
+#endif // NL_OS_WINDOWS
 
-#endif // NL_OS_UNIX
+#endif // NL_STATIC
 
 GLenum CDriverGL::NLCubeFaceToGLCubeFace[6] =
 {
