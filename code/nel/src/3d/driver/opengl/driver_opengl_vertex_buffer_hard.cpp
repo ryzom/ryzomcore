@@ -103,10 +103,10 @@ bool			CVertexArrayRangeNVidia::allocate(uint32 size, CVertexBuffer::TPreferredM
 	H_AUTO_OGL(CVertexArrayRangeNVidia_allocate)
 	nlassert(_VertexArrayPtr==NULL);
 
-#ifdef	NL_OS_WINDOWS
 	// try to allocate AGP or VRAM data.
 	switch(vbType)
 	{
+#ifdef	NL_OS_WINDOWS
 	case CVertexBuffer::AGPPreferred:
 		_VertexArrayPtr= nwglAllocateMemoryNV(size, 0, 0, 0.5f);
 		break;
@@ -116,12 +116,9 @@ bool			CVertexArrayRangeNVidia::allocate(uint32 size, CVertexBuffer::TPreferredM
 		else
 			_VertexArrayPtr= nwglAllocateMemoryNV(size, 0, 0, 0.5f);
 		break;
-	default:
-		break;
-	}
-#elif defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-	switch(vbType)
-	{
+#elif defined(NL_OS_MAC)
+	// TODO: implement for Mac OS X
+#elif defined(NL_OS_UNIX)
 	case CVertexBuffer::AGPPreferred:
 		_VertexArrayPtr= nglXAllocateMemoryNV(size, 0, 0, 0.5f);
 		break;
@@ -131,11 +128,10 @@ bool			CVertexArrayRangeNVidia::allocate(uint32 size, CVertexBuffer::TPreferredM
 		else
 			_VertexArrayPtr= nglXAllocateMemoryNV(size, 0, 0, 0.5f);
 		break;
+#endif	// NL_OS_WINDOWS
 	default:
 		break;
 	}
-#endif	// NL_OS_WINDOWS
-
 
 	// init the allocator.
 	if(_VertexArrayPtr)
@@ -175,7 +171,9 @@ void			CVertexArrayRangeNVidia::free()
 #ifdef	NL_OS_WINDOWS
 		// Free special memory.
 		nwglFreeMemoryNV(_VertexArrayPtr);
-#elif defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+#elif defined(NL_OS_MAC)
+		// TODO: implement for Mac OS X
+#elif defined(NL_OS_UNIX)
 		nglXFreeMemoryNV(_VertexArrayPtr);
 #endif	// NL_OS_WINDOWS
 

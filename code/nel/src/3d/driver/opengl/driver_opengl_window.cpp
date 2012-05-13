@@ -106,7 +106,7 @@ bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	H_AUTO_OGL(DriverGL_WndProc)
+	H_AUTO_OGL(DriverGL_WndProc);
 
 	// Get the driver pointer..
 	CDriverGL *pDriver=(CDriverGL*)GetWindowLongPtr (hWnd, GWLP_USERDATA);
@@ -1567,7 +1567,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 	{
 		nlwarning("3D: Couldn't allocate XClassHint");
 	}
-	
+
 #endif // NL_OS_UNIX
 
 	_win = window;

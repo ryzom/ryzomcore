@@ -705,8 +705,6 @@ void		CDriverGLStates::setTexGenMode (uint stage, GLint mode)
 	}
 }
 
-
-
 // ***************************************************************************
 void			CDriverGLStates::resetTextureMode()
 {

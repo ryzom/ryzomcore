@@ -1521,7 +1521,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	if(ext.NVVertexArrayRange)
 	{
-		GLint	nverts = 10;
+		GLint nverts = 10;
 #ifndef USE_OPENGLES
 		glGetIntegerv((GLenum)GL_MAX_VERTEX_ARRAY_RANGE_ELEMENT_NV, &nverts);
 #endif

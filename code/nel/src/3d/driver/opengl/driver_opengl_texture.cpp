@@ -1613,7 +1613,7 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 // This maps the CMaterial::TTexOperator
 static	const	GLenum	OperatorLUT[9]= { GL_REPLACE, GL_MODULATE, GL_ADD,
 #ifdef USE_OPENGLES
-											GL_ADD_SIGNED, GL_INTERPOLATE, GL_INTERPOLATE, GL_INTERPOLATE, GL_INTERPOLATE
+											GL_ADD_SIGNED, GL_INTERPOLATE, GL_INTERPOLATE, GL_INTERPOLATE, GL_INTERPOLATE, GL_INTERPOLATE
 #else
 											GL_ADD_SIGNED_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_BUMP_ENVMAP_ATI
 #endif
@@ -1986,7 +1986,6 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 	{
 		// Operator.
 		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, OperatorLUT[env.Env.OpRGB] );
-
 		// Arg0.
 		glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_RGB, SourceLUT[env.Env.SrcArg0RGB] );
 		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, OperandLUT[env.Env.OpArg0RGB]);
@@ -2038,7 +2037,6 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 	{
 		// Operator.
 		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, OperatorLUT[env.Env.OpAlpha] );
-
 		// Arg0.
 		glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_ALPHA, SourceLUT[env.Env.SrcArg0Alpha] );
 		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, OperandLUT[env.Env.OpArg0Alpha]);

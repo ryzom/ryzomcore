@@ -1234,54 +1234,54 @@ void			CDriverGL::setupSpecularPass(uint pass)
 
 #ifdef USE_OPENGLES
 #if 0
-		// Ok we can do it in a single pass
+	// Ok we can do it in a single pass
 
-		// Set Stage 1
-		// Special: not the same special env if there is or not texture in stage 0.
-		CTexEnvSpecial		newEnvStage1;
-		if( mat.getTexture(0) == NULL )
-			newEnvStage1= TexEnvSpecialSpecularStage1NoText;
-		else
-			newEnvStage1= TexEnvSpecialSpecularStage1;
-		// Test if same env as prec.
-		if(_CurrentTexEnvSpecial[1] != newEnvStage1)
+	// Set Stage 1
+	// Special: not the same special env if there is or not texture in stage 0.
+	CTexEnvSpecial		newEnvStage1;
+	if( mat.getTexture(0) == NULL )
+		newEnvStage1= TexEnvSpecialSpecularStage1NoText;
+	else
+		newEnvStage1= TexEnvSpecialSpecularStage1;
+	// Test if same env as prec.
+	if(_CurrentTexEnvSpecial[1] != newEnvStage1)
+	{
+		// TexEnv is special.
+		_CurrentTexEnvSpecial[1] = newEnvStage1;
+
+		_DriverGLStates.activeTextureARB(1);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+		// Operator Add (Arg0*Arg2+Arg1)
+		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_ADD);
+		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
+		// Arg0.
+		glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_RGB, GL_TEXTURE);
+		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
+		// Arg2.
+		if( newEnvStage1 == TexEnvSpecialSpecularStage1NoText)
 		{
-			// TexEnv is special.
-			_CurrentTexEnvSpecial[1] = newEnvStage1;
-
-			_DriverGLStates.activeTextureARB(1);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-			// Operator Add (Arg0*Arg2+Arg1)
-			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_ADD);
-			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_ADD);
-			// Arg0.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_RGB, GL_TEXTURE);
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
-			// Arg2.
-			if( newEnvStage1 == TexEnvSpecialSpecularStage1NoText)
-			{
-				glTexEnvi(GL_TEXTURE_ENV, GL_SRC2_RGB, GL_ZERO);
-				glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB, GL_ONE_MINUS_SRC_COLOR);
-			}
-			else
-			{
-				glTexEnvi(GL_TEXTURE_ENV, GL_SRC2_RGB, GL_PREVIOUS);
-				glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB, GL_SRC_ALPHA);
-			}
-			// Arg1.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_RGB, GL_PREVIOUS);
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
-			// Result : Texture*Previous.Alpha+Previous
-			// Setup Alpha Diffuse Copy
-			glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_ALPHA, GL_PRIMARY_COLOR);
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
-			// Arg2.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SRC2_ALPHA, GL_ZERO);
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			// Arg1.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_ALPHA, GL_ZERO );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, GL_SRC_ALPHA);
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC2_RGB, GL_ZERO);
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB, GL_ONE_MINUS_SRC_COLOR);
 		}
+		else
+		{
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC2_RGB, GL_PREVIOUS);
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB, GL_SRC_ALPHA);
+		}
+		// Arg1.
+		glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_RGB, GL_PREVIOUS);
+		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
+		// Result : Texture*Previous.Alpha+Previous
+		// Setup Alpha Diffuse Copy
+		glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_ALPHA, GL_PRIMARY_COLOR);
+		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
+		// Arg2.
+		glTexEnvi(GL_TEXTURE_ENV, GL_SRC2_ALPHA, GL_ZERO);
+		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		// Arg1.
+		glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_ALPHA, GL_ZERO );
+		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, GL_SRC_ALPHA);
+	}
 #endif
 #else
 	/// Support NVidia combine 4 extension to do specular map in a single pass
@@ -1398,7 +1398,8 @@ void			CDriverGL::setupSpecularPass(uint pass)
 		// We have to do it in 2 passes
 		// For Both Pass, setup correct Env.
 		if( pass == 0 )
-		{ // Just display the texture
+		{
+			// Just display the texture
 			_DriverGLStates.enableBlend(false);
 			_DriverGLStates.activeTextureARB(1);
 			_DriverGLStates.setTextureMode(CDriverGLStates::TextureDisabled);
