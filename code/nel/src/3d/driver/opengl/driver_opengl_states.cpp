@@ -22,8 +22,15 @@
 // define it For Debug purpose only. Normal use is to hide this line
 //#define		NL3D_GLSTATE_DISABLE_CACHE
 
-namespace NL3D
-{
+namespace NL3D {
+
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 // ***************************************************************************
 CDriverGLStates::CDriverGLStates()
@@ -1147,6 +1154,8 @@ CDriverGLStates::TCullMode CDriverGLStates::getCullMode() const
 	return _CullMode;
 }
 
-
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D

@@ -30,8 +30,15 @@ using namespace NLMISC;
 
 //#define DEBUG_SETUP_EXT_VERTEX_SHADER
 
-namespace NL3D
-{
+namespace NL3D {
+
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 // ***************************************************************************
 CVertexProgamDrvInfosGL::CVertexProgamDrvInfosGL (CDriverGL *drv, ItVtxPrgDrvInfoPtrList it) : IVertexProgramDrvInfos (drv, it)
@@ -1982,5 +1989,8 @@ bool CDriverGL::supportVertexProgramDoubleSidedColor() const
 	return _Extensions.NVVertexProgram || _Extensions.ARBVertexProgram;
 }
 
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D

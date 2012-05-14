@@ -20,17 +20,21 @@
 #include "nel/misc/types_nl.h"
 
 
-namespace NL3D
-{
+namespace NL3D {
 
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 class	CDriverGL;
 class	IVertexBufferHardGL;
 class   CVertexBufferInfo;
 class	CVertexBufferHardGLMapObjectATI;
 class	CVertexBufferHardARB;
-
-
 
 // ***************************************************************************
 // ***************************************************************************
@@ -573,6 +577,9 @@ public:
 	#endif
 };
 
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D
 
@@ -580,24 +587,3 @@ public:
 #endif // NL_DRIVER_OPENGL_VERTEX_BUFFER_HARD_H
 
 /* End of driver_opengl_vertex_buffer_hard.h */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

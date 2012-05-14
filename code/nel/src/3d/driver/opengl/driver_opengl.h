@@ -76,8 +76,6 @@
 #define	NL3D_DRV_MAX_LIGHTMAP		256
 
 
-void displayGLError(GLenum error);
-
 /*
 #define CHECK_GL_ERROR { \
 	GLenum error = glGetError(); \
@@ -91,16 +89,25 @@ void displayGLError(GLenum error);
 
 #define UNSUPPORTED_INDEX_OFFSET_MSG "Unsupported by driver, check IDriver::supportIndexOffset."
 
-namespace NL3D {
-
 using NLMISC::CMatrix;
 using NLMISC::CVector;
 
+namespace NL3D {
+
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 class	CDriverGL;
 class	IVertexArrayRange;
 class	IVertexBufferHardGL;
 class   COcclusionQueryGL;
+
+void displayGLError(GLenum error);
 
 #ifdef NL_OS_WINDOWS
 
@@ -1509,6 +1516,10 @@ public:
 	// The gl id is auto created here.
 	CVertexProgamDrvInfosGL (CDriverGL *drv, ItVtxPrgDrvInfoPtrList it);
 };
+
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D
 

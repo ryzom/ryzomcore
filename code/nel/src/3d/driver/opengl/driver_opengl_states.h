@@ -20,8 +20,15 @@
 #include "nel/misc/types_nl.h"
 #include "nel/3d/vertex_buffer.h"
 
-namespace NL3D
-{
+namespace NL3D {
+
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 // ***************************************************************************
 /**
@@ -243,6 +250,9 @@ private:
 	bool			_CurLight[MaxLight];
 };
 
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D
 
