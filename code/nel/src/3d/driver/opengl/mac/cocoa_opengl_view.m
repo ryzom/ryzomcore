@@ -19,16 +19,12 @@
 
 #import "cocoa_opengl_view.h"
 
-namespace NL3D 
+static void viewDidResize(NSView* view, CDriverGL* driver)
 {
-	void viewDidResize(NSView* view, CDriverGL* driver)
-	{
-		NSRect rect = [[view superview] frame];
-		driver->_CurrentMode.Height = rect.size.height;
-		driver->_CurrentMode.Width  = rect.size.width;
-	}
+	NSRect rect = [[view superview] frame];
+	driver->_CurrentMode.Height = rect.size.height;
+	driver->_CurrentMode.Width  = rect.size.width;
 }
-
 
 @implementation CocoaOpenGLView
 
@@ -56,7 +52,7 @@ namespace NL3D
 #endif
 }
 
--(void)setDriver:(NL3D::CDriverGL*)driver
+-(void)setDriver:(CDriverGL*)driver
 {
 	_driver = driver;
 }
@@ -68,7 +64,7 @@ namespace NL3D
 	if(!_driver)
 		return;
 
-	NL3D::viewDidResize(self, _driver);
+	viewDidResize(self, _driver);
 }
 
 /******************************************************************************/
