@@ -346,8 +346,11 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 #elif defined(NL_OS_MAC)
 
 	// nothing to do
+	nlunreferenced(windowIcon);
 
 #elif defined (NL_OS_UNIX)
+
+	nlunreferenced(windowIcon);
 
 	_dpy = XOpenDisplay(NULL);
 

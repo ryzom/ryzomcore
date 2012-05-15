@@ -1219,7 +1219,7 @@ IVertexBufferHardGL *CVertexArrayRangeARB::createVBHardGL(uint size, CVertexBuff
 	nglGenBuffersARB(1, &vertexBufferID);
 #endif
 
-	if (glGetError() != GL_NO_ERROR) return false;
+	if (glGetError() != GL_NO_ERROR) return NULL;
 	_Driver->_DriverGLStates.forceBindARBVertexBuffer(vertexBufferID);
 	switch(_VBType)
 	{
@@ -1256,7 +1256,7 @@ IVertexBufferHardGL *CVertexArrayRangeARB::createVBHardGL(uint size, CVertexBuff
 		nglDeleteBuffersARB(1, &vertexBufferID);
 #endif
 
-		return false;
+		return NULL;
 	}
 	CVertexBufferHardARB *newVbHard= new CVertexBufferHardARB(_Driver, vb);
 	newVbHard->initGL(vertexBufferID, this, _VBType);
