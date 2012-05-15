@@ -2528,7 +2528,6 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 					text->setMultiLineSpace(10);
 					text->setColor(CRGBA(250, 30, 30, 255));
 
-
 					std::vector< std::string > errors(5);
 					errors[0] = "id=\"comment-Username\"";
 					errors[1] = "id=\"comment-Password\"";

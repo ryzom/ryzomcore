@@ -27,9 +27,11 @@
 
 #ifdef NL_OS_WINDOWS
 # define NL3D_GL_DLL_NAME "nel_drv_opengl_win"
+# define NL3D_GLES_DLL_NAME "nel_drv_opengles_win"
 # define NL3D_D3D_DLL_NAME "nel_drv_direct3d_win"
 #elif defined (NL_OS_UNIX)
 # define NL3D_GL_DLL_NAME "nel_drv_opengl"
+# define NL3D_GLES_DLL_NAME "nel_drv_opengles"
 #else
 # error "Unknown system"
 #endif
@@ -43,6 +45,7 @@ struct EDru : public NLMISC::Exception
 	EDru(const std::string &reason) : Exception(reason) {}
 };
 
+// OpenGL
 struct EDruOpenglDriverNotFound : public EDru
 {
 	EDruOpenglDriverNotFound() : EDru( NL3D_GL_DLL_NAME " not found" ) {}
@@ -68,7 +71,34 @@ struct EDruOpenglDriverCantCreateDriver : public EDru
 	EDruOpenglDriverCantCreateDriver() : EDru( NL3D_GL_DLL_NAME " can't create driver" ) {}
 };
 
+// OpenGL ES
+struct EDruOpenglEsDriverNotFound : public EDru
+{
+	EDruOpenglEsDriverNotFound() : EDru( NL3D_GLES_DLL_NAME " not found" ) {}
+};
+
+struct EDruOpenglEsDriverCorrupted : public EDru
+{
+	EDruOpenglEsDriverCorrupted() : EDru( "Can't get NL3D_createIDriverInstance from " NL3D_GLES_DLL_NAME " (Bad dll?)" ) {}
+};
+
+struct EDruOpenglEsDriverOldVersion : public EDru
+{
+	EDruOpenglEsDriverOldVersion() : EDru( NL3D_GLES_DLL_NAME " is a too old version. Ask for a more recent file" ) {}
+};
+
+struct EDruOpenglEsDriverUnknownVersion : public EDru
+{
+	EDruOpenglEsDriverUnknownVersion() : EDru( NL3D_GLES_DLL_NAME " is more recent than the application" ) {}
+};
+
+struct EDruOpenglEsDriverCantCreateDriver : public EDru
+{
+	EDruOpenglEsDriverCantCreateDriver() : EDru( NL3D_GLES_DLL_NAME " can't create driver" ) {}
+};
+
 #ifdef NL_OS_WINDOWS
+// Direct3D
 struct EDruDirect3dDriverNotFound : public EDru
 {
 	EDruDirect3dDriverNotFound() : EDru( NL3D_D3D_DLL_NAME " not found" ) {}
@@ -102,6 +132,9 @@ public:
 
 	/// Portable Function which create a GL Driver (using gl dll...).
 	static IDriver		*createGlDriver() throw(EDru);
+
+	/// Portable Function which create a GL ES Driver (using gl dll...).
+	static IDriver		*createGlEsDriver() throw(EDru);
 
 #ifdef NL_OS_WINDOWS
 	/// Windows Function which create a Direct3d Driver.

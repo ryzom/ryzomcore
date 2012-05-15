@@ -32,6 +32,34 @@
 #include <deque>
 #include <limits>
 
+#ifdef NL_OS_WINDOWS
+#	define WIN32_LEAN_AND_MEAN
+#	define NOMINMAX
+#	include <windows.h>
+#	include <windowsx.h>
+#endif
+
+#ifdef USE_OPENGLES
+#	include "GLES/gl.h"
+#	include "GLES/glext.h"
+#	include "EGL/egl.h"
+#	include "EGL/eglext.h"
+#else
+#	ifdef NL_OS_WINDOWS
+#		include <GL/gl.h>
+#		include "GL/wglext.h"
+#	elif defined(NL_OS_MAC)
+#		define GL_GLEXT_LEGACY
+#		include <OpenGL/gl.h>
+#	elif defined (NL_OS_UNIX)
+#		define GLX_GLXEXT_PROTOTYPES
+#		include <GL/gl.h>
+#		include <GL/glx.h>
+#		include "GL/glxext.h"
+#	endif
+#	include "GL/glext.h"
+#endif
+
 #include "nel/misc/common.h"
 #include "nel/misc/debug.h"
 
