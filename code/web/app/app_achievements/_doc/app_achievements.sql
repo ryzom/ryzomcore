@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Erstellungszeit: 17. Mai 2012 um 01:02
+-- Erstellungszeit: 17. Mai 2012 um 01:47
 -- Server Version: 5.1.46
 -- PHP-Version: 5.3.2
 
@@ -185,5 +185,79 @@ CREATE TABLE IF NOT EXISTS `ach_perk_lang` (
 
 --
 -- Daten für Tabelle `ach_perk_lang`
+--
+
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `ach_player_atom`
+--
+
+CREATE TABLE IF NOT EXISTS `ach_player_atom` (
+  `apa_atom` bigint(20) unsigned NOT NULL,
+  `apa_player` bigint(20) unsigned NOT NULL,
+  `apa_date` bigint(20) unsigned NOT NULL,
+  `apa_expire` blob NOT NULL,
+  PRIMARY KEY (`apa_atom`,`apa_player`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+--
+-- Daten für Tabelle `ach_player_atom`
+--
+
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `ach_player_objective`
+--
+
+CREATE TABLE IF NOT EXISTS `ach_player_objective` (
+  `apo_objective` bigint(20) unsigned NOT NULL,
+  `apo_player` bigint(20) unsigned NOT NULL,
+  `apo_date` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`apo_objective`,`apo_player`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+--
+-- Daten für Tabelle `ach_player_objective`
+--
+
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `ach_player_perk`
+--
+
+CREATE TABLE IF NOT EXISTS `ach_player_perk` (
+  `app_perk` bigint(20) unsigned NOT NULL,
+  `app_player` bigint(20) unsigned NOT NULL,
+  `app_date` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`app_perk`,`app_player`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+--
+-- Daten für Tabelle `ach_player_perk`
+--
+
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `ach_player_valuecache`
+--
+
+CREATE TABLE IF NOT EXISTS `ach_player_valuecache` (
+  `apv_name` bigint(20) unsigned NOT NULL,
+  `apv_player` bigint(20) unsigned NOT NULL,
+  `apv_value` varchar(255) COLLATE utf8_bin NOT NULL,
+  `apv_date` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`apv_name`,`apv_player`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+--
+-- Daten für Tabelle `ach_player_valuecache`
 --
 
