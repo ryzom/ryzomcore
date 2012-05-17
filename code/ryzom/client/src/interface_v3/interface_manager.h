@@ -42,6 +42,8 @@
 #include "interface_pointer.h"
 #include "flying_text_manager.h"
 
+#include "nel/gui/input_event_listener.h"
+
 // CLIENT
 #include "../string_manager_client.h"
 #include "yubo_chat.h"
@@ -75,7 +77,7 @@ class CGroupMenu;
  * \author Nevrax France
  * \date 2002
  */
-class CInterfaceManager : public CInterfaceParser, public NLMISC::CCDBManager
+class CInterfaceManager : public CInterfaceParser, public NLMISC::CCDBManager, public NLGUI::IInputEventListener
 {
 public:
 
@@ -339,6 +341,7 @@ public:
 
 	/// Handle The Event. return true if the interfaceManager catch it and if must not send to the Game Action Manager
 	bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
+	bool handleMouseMoveEvent( const NLGUI::CEventDescriptor &eventDesc );
 	void runActionHandler (const std::string &AHName, CCtrlBase *pCaller,
 							const std::string &Params=std::string(""));
 	void runActionHandler (IActionHandler *ah, CCtrlBase *pCaller,

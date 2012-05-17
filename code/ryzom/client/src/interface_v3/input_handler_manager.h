@@ -25,6 +25,7 @@
 #include <map>
 #include <string>
 #include "nel/gui/event_descriptor.h"
+#include "nel/gui/input_handler.h"
 
 
 /**
@@ -37,9 +38,6 @@
  * \author Nevrax France
  * \date 2002
  */
-
-class CInputHandlerBase;
-class CViewText;
 
 
 class CInputHandlerManager : public NLMISC::IEventListener
@@ -133,8 +131,6 @@ private:
 	NLMISC::CEventServer* _EventServer;
 
 	// Mouse Infos
-	NLMISC::TMouseButton	_MouseButtonsReleased;
-	NLMISC::TMouseButton	_MouseButtonsDown;
 	NLMISC::TMouseButton	_MouseButtonsState;
 
 	sint32					_MouseX, _MouseY;
@@ -179,6 +175,8 @@ private:
 
 	// return true if handled
 	bool updateMousePos(NLMISC::CEventMouse &event, NLGUI::CEventDescriptorMouse &eventDesc);
+
+	NLGUI::CInputHandler inputHandler;
 
 };
 

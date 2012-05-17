@@ -1067,6 +1067,13 @@ void prelogInit()
 		if(GenericMat.empty())
 			nlerror("init: Cannot Create the generic material.");
 
+
+		// Create a text context. We need to put the full path because we not already add search path
+//		resetTextContext ("bremenb.ttf", false);
+		resetTextContext ("ryzom.ttf", false);
+
+		CInterfaceManager::create( Driver, TextContext );
+
 		// Yoyo: initialize NOW the InputHandler for Event filtering.
 		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
 		InputHandlerManager->addToServer (&Driver->EventServer);
@@ -1074,12 +1081,6 @@ void prelogInit()
 		std::string filename = CPath::lookup( ClientCfg.XMLInputFile, false );
 		if( !filename.empty() )
 			InputHandlerManager->readInputConfigFile( filename );
-
-		// Create a text context. We need to put the full path because we not already add search path
-//		resetTextContext ("bremenb.ttf", false);
-		resetTextContext ("ryzom.ttf", false);
-
-		CInterfaceManager::create( Driver, TextContext );
 
 		ProgressBar.setFontFactor(0.85f);
 

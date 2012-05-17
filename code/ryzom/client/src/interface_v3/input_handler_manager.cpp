@@ -59,14 +59,14 @@ CInputHandlerManager* CInputHandlerManager::_Instance = NULL;
 CInputHandlerManager::CInputHandlerManager()
 {
 	_EventServer= NULL;
-	_MouseButtonsReleased = noButton;
-	_MouseButtonsDown = noButton;
 	_MouseButtonsState = noButton;
 	_MouseX = _MouseY = _MouseLastX = _MouseLastY = 0;
 	_Focus = true;
 	_MouseWheel = 0;
 	_SkipInterfaceManager=false;
 	_RecoverFocusLost = false;
+
+	inputHandler.setListener( CInterfaceManager::getInstance() );
 }
 
 // ***************************************************************************
@@ -153,24 +153,13 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 		if (!pEvent->Get)
 		{
 			// Deactivate all keys
-			_MouseButtonsDown = noButton;
-			_MouseButtonsReleased = noButton;
 			_MouseButtonsState = noButton;
 			_Focus = false;
 
 			if (!_SkipInterfaceManager)
 			{
 				// if there was some control capturing the mouse, warn them that they lost the focus
-				if (pIM->getCapturePointerLeft())
-				{
-					pIM->getCapturePointerLeft()->handleEvent(NLGUI::CEventDescriptorSetFocus(pEvent->Get));
-				}
-				pIM->setCapturePointerLeft(NULL);
-				if (pIM->getCapturePointerRight())
-				{
-					pIM->getCapturePointerRight()->handleEvent(NLGUI::CEventDescriptorSetFocus(pEvent->Get));
-				}
-				pIM->setCapturePointerRight(NULL);
+				inputHandler.handleSetFocusEvent( event );
 				UserControls.stopFreeLook();
 			}
 			// be nice with other app : let the mouse reappear (useful in direct 3D mode with no hardware cursor)
@@ -214,7 +203,6 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 		return;
 	}
 
-
 	// **** Event Focus
 
 	// **** Event Keyboard
@@ -224,7 +212,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 			 event == EventStringId)
 	{
 		// if not handled, post to Action Manager
-		if( !pIM->handleEvent( NLGUI::CEventDescriptorKey((const CEventKey &) event) ) )
+		if( !inputHandler.handleKeyboardEvent( event ) )
 		{
 			// See if handled by editor
 			bool handled = false;
@@ -283,6 +271,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 		CViewPointer &rIP = *pIM->getPointer();
 
 		NLGUI::CEventDescriptorMouse eventDesc;
+
 		sint32	x,y;
 		rIP.getPointerDispPos (x, y);
 		eventDesc.setX (x);
@@ -313,71 +302,18 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 						handled |= R2::getEditor().handleEvent(eventDesc);
 					}
 				}
-
-				CEventMouseDown *pEvent=(CEventMouseDown*)&event;
-
-				// update states
-				_MouseButtonsDown = (TMouseButton)  (_MouseButtonsDown | pEvent->Button);
-				_MouseButtonsReleased =(TMouseButton) (_MouseButtonsReleased & ~(pEvent->Button));
-				_MouseButtonsState = (TMouseButton)  (_MouseButtonsState | pEvent->Button);
-
-				rIP.setButtonState(_MouseButtonsState);
-
-				// handle Event
-				if(pEvent->Button & leftButton)
-				{
-					eventDesc.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mouseleftdown);
-					handled|= pIM->handleEvent (eventDesc);
-				}
-				if(pEvent->Button & rightButton)
-				{
-					eventDesc.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mouserightdown);
-					handled|= pIM->handleEvent (eventDesc);
-				}
+				handled |= inputHandler.handleMouseButtonDownEvent( event );				
 			}
 			// button up ?
 			else if (event==EventMouseUpId)
 			{
-				CEventMouseUp *pEvent=(CEventMouseUp*)&event;
-
-				// update states
-				_MouseButtonsReleased = (TMouseButton)  (_MouseButtonsReleased | pEvent->Button);
-				_MouseButtonsDown =(TMouseButton) (_MouseButtonsDown & ~(pEvent->Button));
-				_MouseButtonsState = (TMouseButton) (_MouseButtonsState & ~(pEvent->Button));
-
-				rIP.setButtonState(_MouseButtonsState);
-
-				// handle Event
-				if(pEvent->Button & leftButton)
-				{
-					eventDesc.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mouseleftup);
-					handled|= pIM->handleEvent (eventDesc);
-				}
-				if(pEvent->Button & rightButton)
-				{
-					eventDesc.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mouserightup);
-					handled|= pIM->handleEvent (eventDesc);
-				}
+				handled |= inputHandler.handleMouseButtonUpEvent( event );
 			}
 			// db click ?
 			else if (event == EventMouseDblClkId )
 			{
 				// TODO: yoyo make it work if needed (for now, seems preferable to manage in each ActionHandler)
-
-				CEventMouseDblClk* pEvent=(CEventMouseDblClk*)&event;
-
-				// handle Event
-				if(pEvent->Button & leftButton)
-				{
-					eventDesc.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mouseleftdblclk);
-					handled|= pIM->handleEvent (eventDesc);
-				}
-				if(pEvent->Button & rightButton)
-				{
-					eventDesc.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mouserightdblclk);
-					handled|= pIM->handleEvent (eventDesc);
-				}
-
+				handled |= inputHandler.handleMouseDblClickEvent( event );
 			}
 			// mouse move?
 			else if(event == EventMouseMoveId)
@@ -386,20 +322,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 			}
 			else if (event == EventMouseWheelId)
 			{
-				CEventMouseWheel *pEvent=(CEventMouseWheel*)&event;
-				if (pEvent->Direction)
-					_MouseWheel += 1;
-				else
-					_MouseWheel -= 1;
-
-				// handle Event now.
-				if (_MouseWheel != 0)
-				{
-					eventDesc.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mousewheel);
-					eventDesc.setWheel(_MouseWheel);
-					handled|= pIM->handleEvent (eventDesc);
-					_MouseWheel = 0;
-				}
+				handled |= inputHandler.handleMouseWheelEvent( event );
 			}
 		}
 
@@ -432,39 +355,8 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 bool		CInputHandlerManager::updateMousePos(NLMISC::CEventMouse &event, NLGUI::CEventDescriptorMouse &eventDesc)
 {
 	if (!IsMouseFreeLook())
-	{
-		CEventMouseMove* mouseEvent=(CEventMouseMove*)&event;
-		uint32 w, h;
-		CInterfaceManager::getInstance()->getViewRenderer().getScreenSize(w, h);
+		return inputHandler.handleMouseMoveEvent( event );
 
-		// compute new coords
-		_MouseLastX = _MouseX;
-		_MouseLastY = _MouseY;
-		_MouseX = (sint32)(mouseEvent->X*w + 0.5f);
-		_MouseY = (sint32)(mouseEvent->Y*h + 0.5f);
-
-		// Process Move message only if not Null move
-		if(_MouseX!=_MouseLastX || _MouseY!=_MouseLastY)
-		{
-			// Move the pointer
-			//pIM->movePointer (_MouseX-_MouseLastX, _MouseY-_MouseLastY);
-
-			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-
-			pIM->movePointerAbs(_MouseX, _MouseY);
-
-			CViewPointer &rIP = *pIM->getPointer();
-			// get new pointer pos.
-			sint32	x,y;
-			rIP.getPointerDispPos (x, y);
-			eventDesc.setX (x);
-			eventDesc.setY (y);
-
-			// handle Event now.
-			eventDesc.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mousemove);
-			return pIM->handleEvent (eventDesc);
-		}
-	}
 	return false;
 }
 
