@@ -137,7 +137,6 @@ CInterfaceLink::CInterfaceLinkUpdater::CInterfaceLinkUpdater()
 
 CInterfaceLink::CInterfaceLinkUpdater::~CInterfaceLinkUpdater()
 {
-	CInterfaceManager::getInstance()->removeFlushObserver( this );
 }
 
 void CInterfaceLink::CInterfaceLinkUpdater::onObserverCallFlush()

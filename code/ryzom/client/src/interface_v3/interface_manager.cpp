@@ -370,6 +370,8 @@ CInterfaceManager::~CInterfaceManager()
 
 	// release the database observers
 	releaseServerToLocalAutoCopyObservers();
+	
+	removeFlushObserver( interfaceLinkUpdater );
 	delete interfaceLinkUpdater;
 	interfaceLinkUpdater = NULL;
 }
