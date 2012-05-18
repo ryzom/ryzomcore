@@ -5082,7 +5082,7 @@ NLMISC_COMMAND(luaReload, "reload all .lua script files", "")
 	}
 	else
 	{
-		pIM->displaySystemInfo(pIM->formatLuaErrorSysInfo(LUADebugNotEnabledMsg));
+		pIM->displaySystemInfo( LuaHelperStuff::formatLuaErrorSysInfo(LUADebugNotEnabledMsg));
 		return false;
 	}
 }
@@ -5109,7 +5109,7 @@ NLMISC_COMMAND(luaScript, "Execute a lua script", "direct_script_code")
 	}
 	else
 	{
-		pIM->displaySystemInfo(pIM->formatLuaErrorSysInfo(LUADebugNotEnabledMsg));
+		pIM->displaySystemInfo( LuaHelperStuff::formatLuaErrorSysInfo(LUADebugNotEnabledMsg));
 		return false;
 	}
 }
@@ -5130,7 +5130,7 @@ NLMISC_COMMAND(luaInfo, "Dump some information on LUA state", "detaillevel from 
 	}
 	else
 	{
-		pIM->displaySystemInfo(pIM->formatLuaErrorSysInfo(LUADebugNotEnabledMsg));
+		pIM->displaySystemInfo( LuaHelperStuff::formatLuaErrorSysInfo(LUADebugNotEnabledMsg));
 		return false;
 	}
 }
@@ -5142,7 +5142,7 @@ NLMISC_COMMAND(luaObject, "Dump the content of a lua object", "<table name> [max
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	if (!ClientCfg.AllowDebugLua)
 	{
-		pIM->displaySystemInfo(pIM->formatLuaErrorSysInfo(LUADebugNotEnabledMsg));
+		pIM->displaySystemInfo( LuaHelperStuff::formatLuaErrorSysInfo(LUADebugNotEnabledMsg));
 		return false;
 	}
 	CLuaState *luaState = pIM->getLuaState();
@@ -5189,7 +5189,7 @@ NLMISC_COMMAND(luaGC, "Force a garbage collector of lua", "")
 	}
 	else
 	{
-		pIM->displaySystemInfo(pIM->formatLuaErrorSysInfo(LUADebugNotEnabledMsg));
+		pIM->displaySystemInfo( LuaHelperStuff::formatLuaErrorSysInfo(LUADebugNotEnabledMsg));
 		return false;
 	}
 }

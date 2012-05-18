@@ -18,7 +18,7 @@
 
 #include "lua_helper.h"
 #include "nel/misc/file.h"
-#include "interface_manager.h"
+//#include "interface_manager.h"
 #include "../client_cfg.h"
 
 #ifdef LUA_NEVRAX_VERSION
@@ -44,6 +44,28 @@
 
 using namespace std;
 using namespace NLMISC;
+
+namespace LuaHelperStuff
+{
+	void formatLuaStackContext( std::string &stackContext )
+	{
+		stackContext = std::string( "@{FC8A}" ).append( stackContext ).append( "@{FC8F} " );
+	}
+
+	std::string formatLuaErrorSysInfo( const std::string &error )
+	{
+		return std::string( "@{FC8F}" ).append( error );
+	}
+	
+	std::string formatLuaErrorNlWarn( const std::string &error )
+	{
+		// Remove color tags (see formatLuaErrorSC())
+		std::string ret = error;
+		strFindReplace( ret, "@{FC8A}", "" );
+		strFindReplace( ret, "@{FC8F}", "" );
+		return ret;
+	}
+}
 
 // ***************************************************************************
 const char	*CLuaState::_NELSmallScriptTableName= "NELSmallScriptTable";
@@ -706,12 +728,11 @@ void	ELuaWrappedFunctionException::init(CLuaState *ls, const std::string &reason
 {
 	//H_AUTO(Lua_ELuaWrappedFunctionException_init)
 	// Print first Lua Stack Context
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	if(ls)
 	{
 		ls->getStackContext(_Reason, 1);		// 1 because 0 is the current C function => return 1 for script called
 		// enclose with cool colors
-		pIM->formatLuaStackContext(_Reason);
+		LuaHelperStuff::formatLuaStackContext(_Reason);
 	}
 
 	// Append the reason

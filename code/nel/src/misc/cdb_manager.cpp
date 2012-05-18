@@ -54,7 +54,7 @@ namespace NLMISC{
 	}
 
 
-	void CCDBManager::delDbNode( const stlpx_std::string &name )
+	void CCDBManager::delDbNode( const std::string &name )
 	{
 		if( name.empty() )
 			return;

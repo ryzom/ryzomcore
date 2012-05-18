@@ -5747,8 +5747,8 @@ bool	CInterfaceManager::executeLuaScript(const std::string &luaScript, bool smal
 		if (sscanf(msg.c_str(), "%s: %s.lua:%d:",exceptionName, filename, &line) == 3) // NB: test not exact here, but should work in 99,9 % of cases
 		{
 			msg = CLuaIHM::createGotoFileButtonTag(filename, line) + msg;
-			nlwarning(formatLuaErrorNlWarn(msg).c_str());
-			displaySystemInfo(formatLuaErrorSysInfo(msg));
+			nlwarning(LuaHelperStuff::formatLuaErrorNlWarn(msg).c_str());
+			displaySystemInfo(LuaHelperStuff::formatLuaErrorSysInfo(msg));
 		}
 		else	// AJM: handle the other 0.1% of cases
 		{
@@ -5767,8 +5767,8 @@ bool	CInterfaceManager::executeLuaScript(const std::string &luaScript, bool smal
 				else if (line >= 1 && contextList.size() >= line)
 					msg = error[0]+": \n>>>"+contextList[line-1]+"\nError:"+error[2]+": "+error[3];
 			}
-			nlwarning(formatLuaErrorNlWarn(msg).c_str());
-			displaySystemInfo(formatLuaErrorSysInfo(msg));
+			nlwarning(LuaHelperStuff::formatLuaErrorNlWarn(msg).c_str());
+			displaySystemInfo(LuaHelperStuff::formatLuaErrorSysInfo(msg));
 		}
 		return false;
 	}
@@ -5785,7 +5785,7 @@ void	CInterfaceManager::reloadAllLuaFileScripts()
 		// if fail to reload a script, display the error code
 		if(!loadLUA(*it, error))
 		{
-			displaySystemInfo(formatLuaErrorSysInfo(error));
+			displaySystemInfo(LuaHelperStuff::formatLuaErrorSysInfo(error));
 		}
 	}
 }
@@ -5838,24 +5838,10 @@ std::vector<std::string>		CInterfaceManager::getInGameXMLInterfaceFiles()
 }
 
 // ***************************************************************************
-void		CInterfaceManager::formatLuaStackContext(std::string &stackContext)
-{
-	stackContext= string("@{FC8A}") + stackContext + "@{FC8F} ";
-}
-std::string CInterfaceManager::formatLuaErrorNlWarn(const std::string &error)
-{
-	// Remove color tags (see formatLuaErrorSC())
-	std::string		ret= error;
-	strFindReplace(ret, "@{FC8A}", "");
-	strFindReplace(ret, "@{FC8F}", "");
-	return ret;
-}
-
-// ***************************************************************************
 void		CInterfaceManager::dumpLuaString(const std::string &str)
 {
 	nlinfo(str.c_str());
-	displaySystemInfo(formatLuaErrorSysInfo(str));
+	displaySystemInfo(LuaHelperStuff::formatLuaErrorSysInfo(str));
 }
 
 // ***************************************************************************

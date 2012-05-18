@@ -27,8 +27,15 @@ extern "C"
 	#include "lua_loadlib.h"
 }
 
-
 class CLuaState;
+
+namespace LuaHelperStuff
+{
+	void formatLuaStackContext( std::string &stackContext );
+	std::string	formatLuaErrorSysInfo( const std::string &error );
+	std::string formatLuaErrorNlWarn( const std::string &error );
+}
+
 
 // ***************************************************************************
 /** Helper class to see if a stack is restored at its initial size (or with n return results).

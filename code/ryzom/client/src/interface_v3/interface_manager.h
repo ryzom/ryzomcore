@@ -633,11 +633,6 @@ public:
 	class CLuaState		*getLuaState() const {return _LuaState;}
 	/// Reload all LUA scripts inserted through <lua>
 	void	reloadAllLuaFileScripts();
-	/// for Debug: append some color TAG, to have a cool display in SystemInfo
-	std::string	formatLuaErrorSysInfo(const std::string &error) {return std::string("@{FC8F}") + error;}
-	/// for Debug: append/remove some color TAG, to have a cool display in SystemInfo/nlwarning
-	void		formatLuaStackContext(std::string &stackContext);
-	std::string formatLuaErrorNlWarn(const std::string &error);
 	/// For debug: dump in the sysinfo and nlwarning state of lua. detail range from 0 to 2 (clamped).
 	void		dumpLuaState(uint detail);
 	/// For debug: force a garbage collector

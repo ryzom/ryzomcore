@@ -1806,7 +1806,7 @@ void CLuaIHM::rawDebugInfo(const std::string &dbg)
 		}
 		else
 		{
-			NLMISC::InfoLog->displayRawNL(pIM->formatLuaErrorSysInfo(dbg).c_str());
+			NLMISC::InfoLog->displayRawNL(LuaHelperStuff::formatLuaErrorSysInfo(dbg).c_str());
 		}
 		#ifdef LUA_NEVRAX_VERSION
 			if (LuaDebuggerIDE)
@@ -1814,7 +1814,7 @@ void CLuaIHM::rawDebugInfo(const std::string &dbg)
 				LuaDebuggerIDE->debugInfo(dbg.c_str());
 			}
 		#endif
-		pIM->displaySystemInfo(pIM->formatLuaErrorSysInfo(dbg));
+		pIM->displaySystemInfo( LuaHelperStuff::formatLuaErrorSysInfo(dbg));
 	}
 }
 
@@ -3564,10 +3564,9 @@ bool CLuaIHM::executeFunctionOnStack(CLuaState &ls,   int numArgs,   int numRet)
 int CLuaIHM::breakPoint(CLuaState &ls)
 {
 	//H_AUTO(Lua_CLuaIHM_breakPoint)
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	std::string reason;
 	ls.getStackContext(reason,   1);		// 1 because 0 is the current C function => return 1 for script called
-	pIM->formatLuaStackContext(reason);
+	LuaHelperStuff::formatLuaStackContext(reason);
 	NLMISC::InfoLog->displayRawNL(reason.c_str());
 	static volatile bool doAssert = true;
 	if (doAssert) // breakPoint can be discarded in case of looping assert
