@@ -20,8 +20,6 @@
 #include <stdio.h>
 #ifdef NL_OS_WINDOWS
 #	include <conio.h>
-#else
-#	include <curses.h>
 #endif
 
 // NeL includes
