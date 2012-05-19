@@ -620,7 +620,7 @@ void CInstance::CToLua::executeHandler(const CLuaString &name, int numArgs)
 	//
 	static volatile bool dumpStackWanted = false;
 	if (dumpStackWanted) ls.dumpStack();
-	_Class[name].push();
+	_Class[ name.getStr().c_str() ].push();
 	if (ls.isNil(-1)) return; // not handled
 	if (dumpStackWanted) ls.dumpStack();
 	// put method before its args

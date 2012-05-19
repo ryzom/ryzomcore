@@ -76,10 +76,10 @@ void CDisplayerLua::CToLua::executeHandler(const CLuaString &eventName, int numA
 	CLuaStackRestorer lsr(&ls, ls.getTop() - numArgs);
 	//
 	if (!_LuaTable.isValid()) return; // init failed
-	if (_LuaTable[eventName].isNil()) return; // event not handled
+	if (_LuaTable[ eventName.getStr().c_str() ].isNil()) return; // event not handled
 	static volatile bool dumpStackWanted = false;
 	if (dumpStackWanted) ls.dumpStack();
-	_LuaTable[eventName].push();
+	_LuaTable[ eventName.getStr().c_str() ].push();
 	if (dumpStackWanted) ls.dumpStack();
 	// put method before its args
 	ls.insert(- numArgs - 1);

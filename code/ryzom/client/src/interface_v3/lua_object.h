@@ -246,42 +246,41 @@ private:
 class CLuaString
 {
 public:
-	explicit CLuaString(const char *value = "");
-	const char *getPtr() const;
-	void pushOnStack() const;
-	operator const char *() const { return getPtr(); }
+	explicit CLuaString(const char *value = "")
+	{
+		nlassert( value != NULL );
+		_Str = value;
+	}
+	const std::string& getStr() const{ return _Str; }
 private:
-	const char *_Str;
-	mutable const char *_Ptr;
+	std::string _Str;
 	mutable CLuaState::TRefPtr _LuaState;	// ref ptr so that statics get rebuilt on lua restart
 	mutable CLuaObject _InLua;
-	CLuaState       &getLua() const;
-	void build() const;
 };
 
 inline bool operator==(const char* lh, const CLuaString& rh)
 {
-	return std::string(lh) == std::string(rh.getPtr());
+	return std::string(lh) == rh.getStr();
 }
 
 inline bool operator==( const CLuaString& lh, const CLuaString& rh)
 {
-	return std::string(lh.getPtr()) == std::string(rh.getPtr());
+	return lh.getStr() == rh.getStr();
 }
 
 inline bool operator==(const CLuaString& lh, const char* rh)
 {
-	return std::string(rh) == std::string(lh.getPtr());
+	return std::string(rh) == lh.getStr();
 }
 
 inline bool operator==( const CLuaString& lh, const std::string& rh)
 {
-	return std::string(lh.getPtr()) == rh;
+	return lh.getStr() == rh;
 }
 
 inline bool operator==(const std::string& lh, const CLuaString& rh)
 {
-	return lh == std::string(rh.getPtr());
+	return lh == rh.getStr();
 }
 
 class CLuaHashMapTraits
