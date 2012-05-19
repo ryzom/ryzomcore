@@ -29,9 +29,11 @@
 
 #ifdef NL_OS_WINDOWS
 #	define NOMINMAX
-#	include <windows.h>
+#	include <WinSock2.h>
+#	include <Windows.h>
 #endif // NL_OS_WINDOWS
 
+#include <my_global.h>
 #include <mysql.h>
 
 using namespace NLMISC;
