@@ -62,9 +62,8 @@ MACRO(_PCH_GET_COMPILE_FLAGS _out_compile_flags)
 	LIST(APPEND ${_out_compile_flags} ${_directory_definitions})
 	LIST(APPEND ${_out_compile_flags} ${CMAKE_CXX_FLAGS})
 
-	# Format definitions and remove duplicates
+	# Format definitions
 	SEPARATE_ARGUMENTS(${_out_compile_flags})
-	LIST(REMOVE_DUPLICATES ${_out_compile_flags})
 ENDMACRO(_PCH_GET_COMPILE_FLAGS)
 
 MACRO(_PCH_GET_PDB_FILENAME out_filename _target)
@@ -98,9 +97,13 @@ MACRO(_PCH_GET_COMPILE_COMMAND out_command _input _inputcpp _output)
 
 	IF(MSVC)
 		_PCH_GET_PDB_FILENAME(PDB_FILE ${_PCH_current_target})
-		SET(${out_command} ${CMAKE_CXX_COMPILER} ${pchsupport_compiler_cxx_arg1} ${_compile_FLAGS}	/Yc  /Fp\"${_output}\" ${_inputcpp} /c /Fd\"${PDB_FILE}\")
+		SET(${out_command} ${CMAKE_CXX_COMPILER} ${pchsupport_compiler_cxx_arg1} ${_compile_FLAGS} /Yc /Fp\"${_output}\" ${_inputcpp} /c /Fd\"${PDB_FILE}\")
 	ELSE(MSVC)
-		SET(${out_command} ${CMAKE_CXX_COMPILER} ${pchsupport_compiler_cxx_arg1} ${_compile_FLAGS}	-x c++-header -o ${_output} -c ${_input})
+		SET(HEADER_FORMAT "c++-header")
+		IF(APPLE)
+			SET(HEADER_FORMAT "objective-${HEADER_FORMAT}")
+		ENDIF(APPLE)
+		SET(${out_command} ${CMAKE_CXX_COMPILER} ${pchsupport_compiler_cxx_arg1} ${_compile_FLAGS} -x ${HEADER_FORMAT} -o ${_output} -c ${_input})
 	ENDIF(MSVC)
 ENDMACRO(_PCH_GET_COMPILE_COMMAND)
 
