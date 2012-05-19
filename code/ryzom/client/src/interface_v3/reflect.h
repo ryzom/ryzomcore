@@ -26,7 +26,10 @@
 #include <string>
 
 class CReflectable;
-class CLuaState;
+namespace NLGUI
+{
+	class CLuaState;
+}
 struct CClassInfo;
 
 /** A property of a reflectable object

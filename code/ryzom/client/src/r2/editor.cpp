@@ -46,7 +46,8 @@
 
 #include "editor.h"
 //
-#include "../interface_v3/lua_helper.h"
+#include "nel/gui/lua_helper.h"
+using namespace NLGUI;
 #include "../interface_v3/group_tree.h"
 #include "../interface_v3/interface_manager.h"
 #include "../contextual_cursor.h"

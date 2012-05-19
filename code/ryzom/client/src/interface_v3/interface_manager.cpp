@@ -106,7 +106,12 @@
 #include "chat_text_manager.h"
 #include "../npc_icon.h"
 
-#include "lua_helper.h"
+#include "nel/gui/lua_helper.h"
+namespace NLGUI
+{
+	extern void luaDebuggerMainLoop();
+}
+using namespace NLGUI;
 #include "lua_ihm.h"
 
 #include "add_on_manager.h"
@@ -1359,7 +1364,6 @@ void CInterfaceManager::updateFrameEvents()
 	pPM->update();
 
 	// if there's an external lua debugger, update it
-	extern void luaDebuggerMainLoop();
 	luaDebuggerMainLoop();
 
 	// handle gc for lua

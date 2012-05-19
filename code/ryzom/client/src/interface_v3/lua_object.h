@@ -21,7 +21,8 @@
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/rgba.h"
 //
-#include "lua_helper.h"
+#include "nel/gui/lua_helper.h"
+using namespace NLGUI;
 
 
 

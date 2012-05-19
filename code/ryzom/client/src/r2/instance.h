@@ -27,7 +27,10 @@
 #include "lua_event_forwarder.h"
 
 class CEntityCL;
+namespace NLGUI
+{
 class CLuaState;
+}
 
 namespace R2
 {

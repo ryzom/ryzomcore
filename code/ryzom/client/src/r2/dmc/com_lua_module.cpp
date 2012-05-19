@@ -48,7 +48,8 @@
 #include <string>
 
 
-#include "../../interface_v3/lua_helper.h"
+#include "nel/gui/lua_helper.h"
+using namespace NLGUI;
 #include "../../interface_v3/lua_ihm.h"
 
 #include "../../entities.h"

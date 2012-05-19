@@ -105,7 +105,8 @@
 #include "inventory_manager.h"
 #include "task_bar_manager.h"
 #include "../commands.h"
-#include "lua_helper.h"
+#include "nel/gui/lua_helper.h"
+using namespace NLGUI;
 #include "lua_ihm.h"
 #include "../r2/editor.h"
 
@@ -4661,7 +4662,7 @@ void	CInterfaceParser::initLUA()
 
 	// create a new LUA environnement
 	nlassert(_LuaState==NULL);
-	_LuaState= new CLuaState;
+	_LuaState= new CLuaState( ClientCfg.LoadLuaDebugger );
 
 #ifdef LUA_NEVRAX_VERSION
 	extern ILuaIDEInterface *LuaDebuggerIDE;

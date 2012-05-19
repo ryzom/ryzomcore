@@ -18,8 +18,8 @@
 #define NL_LUA_IHM_H
 
 #include "nel/misc/types_nl.h"
-#include "lua_helper.h"
-
+#include "nel/gui/lua_helper.h"
+using namespace NLGUI;
 
 
 namespace NLMISC
