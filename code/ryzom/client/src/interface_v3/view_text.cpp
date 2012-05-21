@@ -28,8 +28,7 @@
 
 #include "nel/misc/xml_auto_ptr.h"
 #include "lua_ihm.h"
-
-#include "lua_ihm.h"
+#include "lua_ihm_ryzom.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -2416,7 +2415,7 @@ void	CViewText::setTextFormatTaged(const ucstring &text)
 
 	// color format is available only if multilined
 	if (!_MultiLine)
-		CLuaIHM::debugInfo(toString("ViewText isn't multilined : uc_hardtext_format will not act as wanted !\n%s", text.toString().c_str()));
+		CLuaIHMRyzom::debugInfo(toString("ViewText isn't multilined : uc_hardtext_format will not act as wanted !\n%s", text.toString().c_str()));
 }
 
 
@@ -2473,7 +2472,7 @@ void CViewText::setSingleLineTextFormatTaged(const ucstring &text)
 
 	// this color format is available only if not multilined
 	if (_MultiLine)
-		CLuaIHM::debugInfo(toString("ViewText is multilined : uc_hardtext_single_line_format will not act as wanted !\n%s", text.toString().c_str()));
+		CLuaIHMRyzom::debugInfo(toString("ViewText is multilined : uc_hardtext_single_line_format will not act as wanted !\n%s", text.toString().c_str()));
 }
 
 

@@ -94,6 +94,7 @@
 #include "connection.h"
 #include "interface_v3/lua_object.h"
 #include "interface_v3/lua_ihm.h"
+#include "interface_v3/lua_ihm_ryzom.h"
 #include "init.h"
 #include "interface_v3/people_interraction.h"
 #include "far_tp.h"
@@ -5157,7 +5158,7 @@ NLMISC_COMMAND(luaObject, "Dump the content of a lua object", "<table name> [max
 	}
 	catch(const ELuaError &e)
 	{
-		CLuaIHM::debugInfo(e.what());
+		CLuaIHMRyzom::debugInfo(e.what());
 		return false;
 	}
 	luaState->pushValue(LUA_GLOBALSINDEX);

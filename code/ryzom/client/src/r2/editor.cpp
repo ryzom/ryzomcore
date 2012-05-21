@@ -59,6 +59,7 @@ using namespace NLGUI;
 #include "../interface_v3/group_tree.h"
 #include "../client_cfg.h"
 #include "../interface_v3/lua_ihm.h"
+#include "../interface_v3/lua_ihm_ryzom.h"
 #include "../interface_v3/lua_object.h"
 #include "../global.h"
 #include "../connection.h"
@@ -3213,7 +3214,7 @@ void CEditor::initObjectProjectionMetatable()
 					ls.push(true);
 					return 1;
 				}
-				CLuaIHM::dumpCallStack();
+				CLuaIHMRyzom::dumpCallStack();
 				// object has been deleted but the script maintains a reference on it
 				throw ELuaWrappedFunctionException(&ls, "Attempt to access an erased object");
 			}
@@ -3230,14 +3231,14 @@ void CEditor::initObjectProjectionMetatable()
 				else
 				{
 					// 'bad index' message already printed by CObject::getValue
-					CLuaIHM::dumpCallStack();
+					CLuaIHMRyzom::dumpCallStack();
 				}
 			}
 
 			if (!ls.isString(2))
 			{
 				nlwarning("String expected when accessing an object property, %s found instead", ls.getTypename(2));
-				CLuaIHM::dumpCallStack(0);
+				CLuaIHMRyzom::dumpCallStack(0);
 				return 0;
 			}
 
@@ -3554,7 +3555,7 @@ void CEditor::initObjectProjectionMetatable()
 							{
 								nlwarning("Duplicated key of type string found while attempting to enumerate an instance content.");
 								nlwarning("key is %s", key.c_str());
-								CLuaIHM::dumpCallStack(1);
+								CLuaIHMRyzom::dumpCallStack(1);
 								CLuaIHM::fails(ls, "Aborting to avoid infinite loop.");
 							}
 							keys.insert(key);
@@ -3623,7 +3624,7 @@ void CEditor::initObjectProjectionMetatable()
 			static volatile bool from = false;
 			if (from)
 			{
-				CLuaIHM::dumpCallStack(0);
+				CLuaIHMRyzom::dumpCallStack(0);
 			}
 			nlassert(ls.getTop() == 2);
 			if (!checkTag(ls)) return false;
@@ -4432,7 +4433,7 @@ bool CEditor::doLuaScript(const char *filename, const char *fileDescText)
 			std::string filename = msg.substr(0, extPos + 4); // extract filename including extension
 			int line;
 			fromString(&*(msg.begin() + extPos + 5), line); // line number follows
-			nlwarning((CLuaIHM::createGotoFileButtonTag(filename.c_str(), line) + e.what()).c_str());
+			nlwarning((CLuaIHMRyzom::createGotoFileButtonTag(filename.c_str(), line) + e.what()).c_str());
 		}
 		else
 		{

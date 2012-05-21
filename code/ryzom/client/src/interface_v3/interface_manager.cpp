@@ -113,6 +113,7 @@ namespace NLGUI
 }
 using namespace NLGUI;
 #include "lua_ihm.h"
+#include "lua_ihm_ryzom.h"
 
 #include "add_on_manager.h"
 
@@ -5750,7 +5751,7 @@ bool	CInterfaceManager::executeLuaScript(const std::string &luaScript, bool smal
 		// Hamster: quick fix on AJM code but sscanf is still awfull
 		if (sscanf(msg.c_str(), "%s: %s.lua:%d:",exceptionName, filename, &line) == 3) // NB: test not exact here, but should work in 99,9 % of cases
 		{
-			msg = CLuaIHM::createGotoFileButtonTag(filename, line) + msg;
+			msg = CLuaIHMRyzom::createGotoFileButtonTag(filename, line) + msg;
 			nlwarning(LuaHelperStuff::formatLuaErrorNlWarn(msg).c_str());
 			displaySystemInfo(LuaHelperStuff::formatLuaErrorSysInfo(msg));
 		}

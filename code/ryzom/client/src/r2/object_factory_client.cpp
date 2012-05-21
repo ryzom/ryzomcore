@@ -19,6 +19,7 @@
 #include "editor.h"
 #include "instance.h"
 #include "../interface_v3/lua_ihm.h"
+#include "../interface_v3/lua_ihm_ryzom.h"
 
 namespace R2
 {
@@ -287,7 +288,7 @@ void CObjectRefIdClient::getNameInParent(std::string &name, sint32 &indexInArray
 	}
 	// TMP TMP
 	nlwarning("=========================================");
-	CLuaIHM::dumpCallStack();
+	CLuaIHMRyzom::dumpCallStack();
 	nlwarning("=========================================");
 	nlwarning("ObservedObject = %s", getValue().c_str());
 	CInstance *obsInstance = getEditor().getInstanceFromId(getValue().c_str());

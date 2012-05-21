@@ -14,13 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdpch.h"
+//#include "stdpch.h"
 #include "lua_object.h"
 #include "lua_ihm.h"
+#include "lua_ihm_ryzom.h"
 #include "nel/gui/lua_helper.h"
 using namespace NLGUI;
 //
-#include "interface_manager.h"
+//#include "interface_manager.h"
 
 ////////////////
 // CLuaObject //
@@ -616,7 +617,7 @@ void CLuaObject::dump(uint maxDepth /*= 20*/, std::set<const void *> *alreadySee
 	}
 	catch(const std::exception &e)
 	{
-		CLuaIHM::dumpCallStack();
+		CLuaIHMRyzom::dumpCallStack();
 		nlwarning(e.what());
 	}
 }

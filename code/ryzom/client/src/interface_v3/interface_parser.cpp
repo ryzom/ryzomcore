@@ -108,6 +108,7 @@
 #include "nel/gui/lua_helper.h"
 using namespace NLGUI;
 #include "lua_ihm.h"
+#include "lua_ihm_ryzom.h"
 #include "../r2/editor.h"
 
 #ifdef LUA_NEVRAX_VERSION
@@ -4671,6 +4672,7 @@ void	CInterfaceParser::initLUA()
 
 	// register LUA methods
 	CLuaIHM::registerAll(*_LuaState);
+	CLuaIHMRyzom::RegisterRyzomFunctions( *_LuaState );
 }
 
 // ***************************************************************************

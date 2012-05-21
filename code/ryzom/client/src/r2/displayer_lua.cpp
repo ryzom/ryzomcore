@@ -17,6 +17,7 @@
 #include "stdpch.h"
 #include "displayer_lua.h"
 #include "../interface_v3/lua_ihm.h"
+#include "../interface_v3/lua_ihm_ryzom.h"
 #include "editor.h"
 
 namespace R2
@@ -45,7 +46,7 @@ bool CDisplayerLua::init(const CLuaObject &parameters)
 	}
 	CLuaState &ls = *parameters.getLuaState();
 	getEditor().getEnv().push(); // this is a method call
-	if (CLuaIHM::executeFunctionOnStack(ls,  1,  1))
+	if (CLuaIHMRyzom::executeFunctionOnStack(ls,  1,  1))
 	{
 		_ToLua._LuaTable.pop(ls);
 	}
@@ -94,7 +95,7 @@ void CDisplayerLua::CToLua::executeHandler(const CLuaString &eventName, int numA
 		getEnclosing()->getDisplayedInstance()->getLuaProjection().push();
 	ls.insert(- numArgs - 1);
 	if (dumpStackWanted) ls.dumpStack();
-	CLuaIHM::executeFunctionOnStack(*_LuaTable.getLuaState(),  numArgs + 2,  0);
+	CLuaIHMRyzom::executeFunctionOnStack(*_LuaTable.getLuaState(),  numArgs + 2,  0);
 	if (dumpStackWanted) ls.dumpStack();
 }
 

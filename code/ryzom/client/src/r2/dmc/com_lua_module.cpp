@@ -37,6 +37,7 @@
 #include "../editor.h"
 #include "../../net_manager.h"
 #include "../../interface_v3/lua_ihm.h"
+#include "../../interface_v3/lua_ihm_ryzom.h"
 
 #include "game_share/object.h"
 #include "../r2_lua.h"
@@ -797,7 +798,7 @@ sint CComLuaModule::luaRequestSetNode(lua_State* state)
 	static volatile bool dumpCallstack = false;
 	if (dumpCallstack)
 	{
-		CLuaIHM::dumpCallStack();
+		CLuaIHMRyzom::dumpCallStack();
 	}
 	return requestSetNode(state, false);
 }
