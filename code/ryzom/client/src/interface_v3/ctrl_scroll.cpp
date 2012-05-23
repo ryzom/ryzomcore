@@ -23,6 +23,7 @@
 #include "group_menu.h"
 
 #include "lua_ihm.h"
+#include "lua_ihm_ryzom.h"
 
 using namespace NLMISC;
 using namespace std;
@@ -916,7 +917,7 @@ int CCtrlScroll::luaEnsureVisible(CLuaState &ls)
 {
 	const char *funcName = "ensureVisible";
 	CLuaIHM::checkArgCount(ls, funcName, 3);
-	CLuaIHM::checkArgTypeUIElement(ls, funcName, 1);
+	CLuaIHMRyzom::checkArgTypeUIElement(ls, funcName, 1);
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
 	THotSpot	hs[2];
@@ -967,7 +968,7 @@ int CCtrlScroll::luaEnsureVisible(CLuaState &ls)
 			}
 		}
 	}
-	ensureVisible(CLuaIHM::getUIOnStack(ls, 1), hs[0], hs[1]);
+	ensureVisible(CLuaIHMRyzom::getUIOnStack(ls, 1), hs[0], hs[1]);
 	return 0;
 }
 

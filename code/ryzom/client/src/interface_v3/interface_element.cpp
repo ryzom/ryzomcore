@@ -26,6 +26,7 @@
 #include "interface_link.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "lua_ihm.h"
+#include "lua_ihm_ryzom.h"
 #include "nel/misc/mem_stream.h"
 //
 
@@ -33,29 +34,6 @@ using namespace std;
 using namespace NLMISC;
 
 CStringMapper *_UIStringMapper = NULL;
-
-// ------------------------------------------------------------------------------------------------
-CReflectableRefPtrTarget::~CReflectableRefPtrTarget()
-{
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CLuaState *lua= pIM->getLuaState();
-	if(!lua) return;
-	CLuaStackChecker lsc(lua);
-	// remove from the lua registry if i'm in
-	lua->pushLightUserData((void *) this);
-	lua->getTable(LUA_REGISTRYINDEX);
-	if (!lua->isNil(-1))
-	{
-		lua->pop();
-		lua->pushLightUserData((void *) this);
-		lua->pushNil();
-		lua->setTable(LUA_REGISTRYINDEX);
-	}
-	else
-	{
-		lua->pop();
-	}
-}
 
 // ------------------------------------------------------------------------------------------------
 CInterfaceElement::~CInterfaceElement()
@@ -1198,7 +1176,7 @@ int CInterfaceElement::luaSetPosRef(CLuaState &ls)
 int CInterfaceElement::luaSetParentPos(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "setParentPos", 1);
-	CInterfaceElement *ie = CLuaIHM::getUIOnStack(ls, 1);
+	CInterfaceElement *ie = CLuaIHMRyzom::getUIOnStack(ls, 1);
 	if(ie)
 	{
 		setParentPos(ie);

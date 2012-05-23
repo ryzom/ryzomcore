@@ -11,6 +11,25 @@ public:
 private:
 	static void createLuaEnumTable(CLuaState &ls, const std::string &str);
 
+	static int luaClientCfgIndex(CLuaState &ls);
+	static int luaClientCfgNewIndex(CLuaState &ls);
+	
+	// Functions for the ui metatable
+	static class CInterfaceElement *getUIRelative(class CInterfaceElement *pIE, const std::string &propName);
+	static int luaUIIndex(CLuaState &ls);
+	static int luaUINewIndex(CLuaState &ls);
+	static int luaUIEq(CLuaState &ls);
+	static int luaUINext(CLuaState &ls);
+	static int luaUIDtor(CLuaState &ls);
+
+	// CInterfaceElement management on stack, stored by a CRefPtr.
+public:
+	static void pushUIOnStack(CLuaState &ls, class CInterfaceElement *pIE);
+	static bool	isUIOnStack(CLuaState &ls, sint index);
+	static CInterfaceElement	*getUIOnStack(CLuaState &ls, sint index);
+	static void	checkArgTypeUIElement(CLuaState &ls, const char *funcName, uint index);
+
+private:
 
 	static int getUI(CLuaState &ls); // params: "ui:interface:...". return: CInterfaceElement*  (nil if error), an additionnal boolean parameter
 	// LUA exported Functions with standard lua (because use ui object, use variable param number, or return dynamic-typed object)
@@ -251,6 +270,8 @@ public:
 	// Requires that 'ClientCfg.LuaDebugInfoGotoButtonEnabled' is set to 1, else
 	// a, empty tag is returned
 	static std::string	createGotoFileButtonTag(const char *fileName, uint line);
+
+	static int	runExprAndPushResult(CLuaState &ls, const std::string &expr);		// Used by runExpr and runFct
 };
 
 #endif

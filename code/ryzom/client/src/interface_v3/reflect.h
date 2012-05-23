@@ -340,10 +340,31 @@ private:
 
 
 
+/** Reflectable refcounted object
+  * NB nico : added this intermediate class so that the binding from lua to the reflection
+  * system that are found in CLuaIHM can be reused for other objects as well
+  * NOTE: The class is named 'CReflectableRefPtrTarget' and not 'CReflectableRefCount'
+  * because the refcount part is only used for ref pointing in the ui
+  */
+class CReflectableRefPtrTarget : public CReflectable, public NLMISC::CRefCount
+{
+public:
+	virtual ~CReflectableRefPtrTarget();
+};
 
 
-
-
+class CReflectableLuaRef
+{
+public:
+	CReflectableLuaRef(CReflectableRefPtrTarget *ptr = NULL) : Ptr(ptr), _ClassInfo(NULL) {}
+	NLMISC::CRefPtr<CReflectableRefPtrTarget> Ptr;
+	const CClassInfo						  &getClassInfo() const;
+	// IMPORTANT : luaStringPtr should have been obtained from lua, see remark in CClassInfo
+	const CReflectedProperty				  *getProp(const char *luaStringPtr) const;
+private:
+	// cache to class definition of the pointee object (once a CReflectableLuaRef created in lua, it remains a *const* pointer)
+	mutable const CClassInfo							  *_ClassInfo;
+};
 
 
 #endif

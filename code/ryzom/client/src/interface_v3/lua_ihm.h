@@ -74,11 +74,6 @@ class CLuaIHM
 public:
 	static void	registerAll(CLuaState &ls);
 
-	// CInterfaceElement management on stack, stored by a CRefPtr.
-	static void pushUIOnStack(CLuaState &ls, class CInterfaceElement *pIE);
-	static bool	isUIOnStack(CLuaState &ls, sint index);
-	static CInterfaceElement	*getUIOnStack(CLuaState &ls, sint index);
-
 	/** CReflectableInterfaceElement management on stack, stored by a CRefPtr.
 	  * May be called as well for ui element, because they derive from CReflectableRefPtrTarget
 	  */
@@ -110,7 +105,6 @@ public:
 	static void	check(CLuaState &ls, bool ok, const std::string &failReason);
 	static void	checkArgType(CLuaState &ls, const char *funcName, uint index, int argType);
 	static void	checkArgTypeRGBA(CLuaState &ls, const char *funcName, uint index);
-	static void	checkArgTypeUIElement(CLuaState &ls, const char *funcName, uint index);
 	static void	checkArgTypeUCString(CLuaState &ls, const char *funcName, uint index);
 	/** throw a lua expection (inside a C function called from lua) with the given reason, and the current call stack
 	  * The various check... function call this function when their test fails
@@ -140,16 +134,6 @@ private:
 	static void	registerIHM(CLuaState &ls);
 	static void createLuaEnumTable(CLuaState &ls, const std::string &str);
 
-	// Functions for the ui metatable
-	static class CInterfaceElement *getUIRelative(class CInterfaceElement *pIE, const std::string &propName);
-	static int luaUIIndex(CLuaState &ls);
-	static int luaUINewIndex(CLuaState &ls);
-	static int luaUIEq(CLuaState &ls);
-	static int luaUINext(CLuaState &ls);
-	static int luaUIDtor(CLuaState &ls);
-	static int luaClientCfgIndex(CLuaState &ls);
-	static int luaClientCfgNewIndex(CLuaState &ls);
-
 	/// \name Exported Functions
 	// @{
 
@@ -169,9 +153,6 @@ private:
 	// Function export tools
 	// Function to forward lua call to C++ to a 'lua method' exported from a reflected object
 	static int luaMethodCall(lua_State *ls);
-
-public:
-	static int	runExprAndPushResult(CLuaState &ls, const std::string &expr);		// Used by runExpr and runFct
 };
 
 

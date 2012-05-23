@@ -45,6 +45,7 @@ using namespace NLGUI;
 #include "character_cl.h"
 #include "r2/editor.h"
 #include "r2/dmc/client_edition_module.h"
+#include "interface_v3/lua_manager.h"
 
 ///////////
 // USING //
@@ -327,7 +328,7 @@ void displayStreamingDebug ()
 		SpfGraph.addOneValue (1000.f*(float)deltaTime);
 
 		// lua memory
-		LuaMemGraph.addOneValue(CInterfaceManager::getInstance()->getLuaState()->getGCCount() / 1024.f);
+		LuaMemGraph.addOneValue(CLuaManager::getInstance().getLuaState()->getGCCount() / 1024.f);
 
 		// Count of waitinf instance
 		CurrentTaskGraph.addOneValue (CAsyncFileManager::getInstance().isTaskRunning()?1.f:0.f);

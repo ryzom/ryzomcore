@@ -113,6 +113,7 @@ using namespace NLGUI;
 
 #include "../session_browser_impl.h"
 #include "../far_tp.h"
+#include "../interface_v3/lua_manager.h"
 
 
 using namespace NLMISC;
@@ -587,7 +588,7 @@ CLuaState &CEditor::getLua()
 {
 	//H_AUTO(R2_CEditor_getLua)
 	CHECK_EDITOR
-	CLuaState *ls = getUI().getLuaState();
+	CLuaState *ls = CLuaManager::getInstance().getLuaState();
 	nlassert(ls);
 	return *ls;
 }
@@ -3953,7 +3954,7 @@ void CEditor::release()
 	}
 
 	// clear the environment
-	if (getUI().getLuaState())
+	if (CLuaManager::getInstance().getLuaState())
 	{
 		getLua().push(R2_LUA_PATH);
 		getLua().pushNil();

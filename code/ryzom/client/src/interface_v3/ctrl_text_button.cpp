@@ -27,6 +27,7 @@
 #include "view_text_id.h"
 #include "group_container.h"
 #include "lua_ihm.h"
+#include "lua_ihm_ryzom.h"
 
 
 // ***************************************************************************
@@ -548,7 +549,7 @@ int CCtrlTextButton::luaGetViewText(CLuaState &ls)
 {
 	const char *funcName = "getViewText";
 	CLuaIHM::checkArgCount(ls, funcName, 0);
-	CLuaIHM::pushUIOnStack(ls, getViewText());
+	CLuaIHMRyzom::pushUIOnStack(ls, getViewText());
 	return 1;
 }
 

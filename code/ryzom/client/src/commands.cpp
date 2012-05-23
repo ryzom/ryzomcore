@@ -99,6 +99,7 @@
 #include "interface_v3/people_interraction.h"
 #include "far_tp.h"
 #include "zone_util.h"
+#include "interface_v3/lua_manager.h"
 
 
 //
@@ -5146,7 +5147,7 @@ NLMISC_COMMAND(luaObject, "Dump the content of a lua object", "<table name> [max
 		pIM->displaySystemInfo( LuaHelperStuff::formatLuaErrorSysInfo(LUADebugNotEnabledMsg));
 		return false;
 	}
-	CLuaState *luaState = pIM->getLuaState();
+	CLuaState *luaState = CLuaManager::getInstance().getLuaState();
 	if (!luaState) return false;
 	CLuaStackChecker lsc(luaState);
 	// get the table

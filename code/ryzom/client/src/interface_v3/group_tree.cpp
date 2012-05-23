@@ -26,6 +26,7 @@
 #include "group_container.h"
 #include "action_handler.h"
 #include "lua_ihm.h"
+#include "lua_ihm_ryzom.h"
 
 #include "nel/misc/i_xml.h"
 #include "nel/misc/i18n.h"
@@ -1490,7 +1491,7 @@ int CGroupTree::SNode::luaGetParentTree(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, "getParentTree", 0);
 	if (ParentTree)
 	{
-		CLuaIHM::pushUIOnStack(ls, ParentTree);
+		CLuaIHMRyzom::pushUIOnStack(ls, ParentTree);
 	}
 	else
 	{

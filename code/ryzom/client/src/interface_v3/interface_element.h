@@ -80,19 +80,6 @@ public:
 };
 
 
-/** Reflectable refcounted object
-  * NB nico : added this intermediate class so that the binding from lua to the reflection
-  * system that are found in CLuaIHM can be reused for other objects as well
-  * NOTE: The class is named 'CReflectableRefPtrTarget' and not 'CReflectableRefCount'
-  * because the refcount part is only used for ref pointing in the ui
-  */
-class CReflectableRefPtrTarget : public CReflectable, public NLMISC::CRefCount
-{
-public:
-	virtual ~CReflectableRefPtrTarget();
-};
-
-
 #define	DECLARE_UI_CLASS(_class_)					\
 	virtual std::string	getClassName() {return #_class_;}		\
 	static	NLMISC::IClassable	*creator() {return new _class_(CViewBase::TCtorParam());}

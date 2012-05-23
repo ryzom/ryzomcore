@@ -90,6 +90,7 @@
 #include "faction_war_manager.h"
 #include "interface_v3/interface_ddx.h"
 #include "bg_downloader_access.h"
+#include "interface_v3/lua_manager.h"
 
 
 ///////////
@@ -633,6 +634,8 @@ void release()
 	CInterfaceExpr::release();
 	CPdrTokenRegistry::releaseInstance();
 	NLNET::IModuleManager::releaseInstance();
+	delete &CLuaManager::getInstance();
+	
 
 
 

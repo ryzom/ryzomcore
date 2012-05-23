@@ -104,6 +104,7 @@
 
 #include "landscape_poly_drawer.h"
 #include "session_browser_impl.h"
+#include "interface_v3/lua_manager.h"
 
 
 // ProgressBar steps in init main loop
@@ -1320,7 +1321,7 @@ void initMainLoop()
 
 
 	// init CSessionBrowserImpl
-	CSessionBrowserImpl::getInstance().init(CInterfaceManager::getInstance()->getLuaState());
+	CSessionBrowserImpl::getInstance().init(CLuaManager::getInstance().getLuaState());
 
 	// active/desactive welcome window
 	initWelcomeWindow();

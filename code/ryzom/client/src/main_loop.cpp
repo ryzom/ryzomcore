@@ -112,6 +112,7 @@
 #include "connection.h"
 #include "landscape_poly_drawer.h"
 #include "interface_v3/lua_ihm.h"
+#include "interface_v3/lua_ihm_ryzom.h"
 #include "far_tp.h"
 #include "session_browser_impl.h"
 #include "bg_downloader_access.h"
@@ -143,6 +144,8 @@
 #include "precipitation.h"
 #include "interface_v3/bot_chat_manager.h"
 #include "string_manager_client.h"
+
+#include "interface_v3/lua_manager.h"
 
 
 ///////////
@@ -1514,7 +1517,7 @@ bool mainLoop()
 			R2::getEditor().waitScenario();
 		}
 
-		CSessionBrowserImpl::getInstance().init(CInterfaceManager::getInstance()->getLuaState());
+		CSessionBrowserImpl::getInstance().init(CLuaManager::getInstance().getLuaState());
 	}
 
 	CInterfaceManager::getInstance()->executeLuaScript("game:onMainLoopBegin()");
@@ -2977,7 +2980,7 @@ bool mainLoop()
 	} // end of main loop
 
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	if (im->getLuaState())
+	if (CLuaManager::getInstance().getLuaState())
 	{
 		CInterfaceManager::getInstance()->executeLuaScript("game:onMainLoopEnd()");
 	}
@@ -3228,11 +3231,10 @@ class CHandlerDebugUiDumpElementUnderMouse : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		if (HighlightedDebugUI == NULL) return;
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CLuaState *lua = pIM->getLuaState();
+		CLuaState *lua = CLuaManager::getInstance().getLuaState();
 		if (!lua) return;
 		CLuaStackRestorer lsr(lua, 0);
-		CLuaIHM::pushUIOnStack(*lua, HighlightedDebugUI);
+		CLuaIHMRyzom::pushUIOnStack(*lua, HighlightedDebugUI);
 		lua->pushValue(LUA_GLOBALSINDEX);
 		CLuaObject env(*lua);
 		env["inspect"].callNoThrow(1, 0);
@@ -3403,9 +3405,9 @@ void displayDebug()
 	line-= 2 * lineStep;
 	// Lua stuffs
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	TextContext->printfAt(0.0f, line, "Lua mem (kb) : %d / %d", pIM->getLuaState()->getGCCount(),  pIM->getLuaState()->getGCThreshold());
+	TextContext->printfAt(0.0f, line, "Lua mem (kb) : %d / %d", CLuaManager::getInstance().getLuaState()->getGCCount(),  CLuaManager::getInstance().getLuaState()->getGCThreshold());
 	line-= lineStep;
-	TextContext->printfAt(0.0f, line, "Lua stack size = %d", pIM->getLuaState()->getTop());
+	TextContext->printfAt(0.0f, line, "Lua stack size = %d", CLuaManager::getInstance().getLuaState()->getTop());
 	line-= lineStep;
 
 #endif

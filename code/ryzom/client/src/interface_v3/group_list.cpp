@@ -26,8 +26,7 @@
 #include "view_text_id.h"
 #include "group_container.h"
 #include "lua_ihm.h"
-
-#include "lua_ihm.h"
+#include "lua_ihm_ryzom.h"
 
 #include "nel/misc/xml_auto_ptr.h"
 
@@ -916,7 +915,7 @@ sint32 CGroupList::getElementIndex(CViewBase* child) const
 int CGroupList::luaGetElementIndex(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "getElementIndex", 1);
-	CViewBase * viewBase = dynamic_cast<CViewBase *>(CLuaIHM::getUIOnStack(ls, 1));
+	CViewBase * viewBase = dynamic_cast<CViewBase *>(CLuaIHMRyzom::getUIOnStack(ls, 1));
 	ls.push((double) getElementIndex(viewBase));
 	return 1;
 }
@@ -968,7 +967,7 @@ void CGroupList::swapChildren(uint index1,   uint index2)
 int	CGroupList::luaUpChild(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "upChild", 1);
-	CViewBase * viewBase = dynamic_cast<CViewBase *>(CLuaIHM::getUIOnStack(ls, 1));
+	CViewBase * viewBase = dynamic_cast<CViewBase *>(CLuaIHMRyzom::getUIOnStack(ls, 1));
 	sint32 indexUpChild = getElementIndex(viewBase);
 	if(indexUpChild > 0)
 	{
@@ -981,7 +980,7 @@ int	CGroupList::luaUpChild(CLuaState &ls)
 int	CGroupList::luaDownChild(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "downChild", 1);
-	CViewBase * viewBase = dynamic_cast<CViewBase *>(CLuaIHM::getUIOnStack(ls, 1));
+	CViewBase * viewBase = dynamic_cast<CViewBase *>(CLuaIHMRyzom::getUIOnStack(ls, 1));
 	sint32 indexDownChild = getElementIndex(viewBase);
 	if(indexDownChild < (sint32) (_Elements.size()-1))
 	{
@@ -1002,7 +1001,7 @@ int	CGroupList::luaGetChild(CLuaState &ls)
 		CLuaIHM::fails(ls, "getChild : trying to access element %d in list '%s', which has %d elements",
 					   index, getId().c_str(), (int) _Elements.size());
 	}
-	CLuaIHM::pushUIOnStack(ls, getChild((uint) index));
+	CLuaIHMRyzom::pushUIOnStack(ls, getChild((uint) index));
 	return 1;
 }
 
@@ -1091,7 +1090,7 @@ int CGroupList::luaAddChild(CLuaState &ls)
 {
 	const char *funcName = "addChild";
 	CLuaIHM::checkArgCount(ls, funcName, 1);
-	CViewBase *vb = dynamic_cast<CViewBase *>(CLuaIHM::getUIOnStack(ls, 1));
+	CViewBase *vb = dynamic_cast<CViewBase *>(CLuaIHMRyzom::getUIOnStack(ls, 1));
 	if (!vb)
 	{
 		CLuaIHM::fails(ls, "%s requires a view, group or control", funcName);
@@ -1109,7 +1108,7 @@ int CGroupList::luaAddChildAtIndex(CLuaState &ls)
 	const char *funcName = "addChildAtIndex";
 	CLuaIHM::checkArgCount(ls, funcName, 2);
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER);
-	CViewBase *vb = dynamic_cast<CViewBase *>(CLuaIHM::getUIOnStack(ls, 1));
+	CViewBase *vb = dynamic_cast<CViewBase *>(CLuaIHMRyzom::getUIOnStack(ls, 1));
 	if (!vb)
 	{
 		CLuaIHM::fails(ls, "%s requires a view, group or control", funcName);
@@ -1126,7 +1125,7 @@ int CGroupList::luaDetachChild(CLuaState &ls)
 {
 	const char *funcName = "detachChild";
 	CLuaIHM::checkArgCount(ls, funcName, 1);
-	CViewBase *vb = dynamic_cast<CViewBase *>(CLuaIHM::getUIOnStack(ls, 1));
+	CViewBase *vb = dynamic_cast<CViewBase *>(CLuaIHMRyzom::getUIOnStack(ls, 1));
 	if (!vb)
 	{
 		nlwarning("%s requires a view, group or control", funcName);
@@ -1143,7 +1142,7 @@ int CGroupList::luaDetachChild(CLuaState &ls)
 int CGroupList::luaDelChild(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "CGroupList::delChild", 1);
-	CViewBase *vb = dynamic_cast<CViewBase *>(CLuaIHM::getUIOnStack(ls, 1));
+	CViewBase *vb = dynamic_cast<CViewBase *>(CLuaIHMRyzom::getUIOnStack(ls, 1));
 	if (vb) delChild(vb);
 	updateCoords();
 	return 0;

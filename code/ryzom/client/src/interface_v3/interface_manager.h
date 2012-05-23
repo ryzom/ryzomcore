@@ -629,8 +629,6 @@ public:
 	// @{
 	/// Execute a lua script (smallScript for speed optimisation, see lua_helper). return false if parse/execute error (warning/sysinfo displayed)
 	bool	executeLuaScript(const std::string &luaScript, bool smallScript= false);
-	/// Get the lua state (NULL if not inited)
-	class CLuaState		*getLuaState() const {return _LuaState;}
 	/// Reload all LUA scripts inserted through <lua>
 	void	reloadAllLuaFileScripts();
 	/// For debug: dump in the sysinfo and nlwarning state of lua. detail range from 0 to 2 (clamped).

@@ -110,6 +110,7 @@ using namespace NLGUI;
 #include "lua_ihm.h"
 #include "lua_ihm_ryzom.h"
 #include "../r2/editor.h"
+#include "lua_manager.h"
 
 #ifdef LUA_NEVRAX_VERSION
 	#include "lua_ide_dll_nevrax/include/lua_ide_dll/ide_interface.h" // external debugger
@@ -496,7 +497,7 @@ CInterfaceParser::~CInterfaceParser()
 {
 //	delete _Pointer;
 	_Pointer = NULL;
-	delete _LuaState;
+	//delete _LuaState;
 	_LuaState = NULL;
 }
 /** Convert a string into a memstream
@@ -4663,7 +4664,9 @@ void	CInterfaceParser::initLUA()
 
 	// create a new LUA environnement
 	nlassert(_LuaState==NULL);
-	_LuaState= new CLuaState( ClientCfg.LoadLuaDebugger );
+	CLuaManager::enableLuaDebugging();
+	CLuaManager::getInstance();
+	_LuaState= CLuaManager::getInstance().getLuaState();
 
 #ifdef LUA_NEVRAX_VERSION
 	extern ILuaIDEInterface *LuaDebuggerIDE;
@@ -4679,8 +4682,8 @@ void	CInterfaceParser::initLUA()
 void	CInterfaceParser::uninitLUA()
 {
 	// Delete all LUA environnement (and hence variables)
-//	delete _LuaState;
-	_LuaState= NULL;
+    // delete _LuaState;
+	// _LuaState= NULL;
 
 	// delete all .lua file loaded
 	_LuaFileScripts.clear();

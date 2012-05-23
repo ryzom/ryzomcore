@@ -25,9 +25,11 @@
 #include "group_editbox.h"
 #include "group_scrolltext.h"
 #include "lua_ihm.h"
+#include "lua_ihm_ryzom.h"
 
 
 #include "nel/misc/stream.h"
+#include "lua_manager.h"
 
 using namespace std;
 using namespace NL3D;
@@ -445,7 +447,7 @@ void CInterfaceGroup::addGroup (CInterfaceGroup *child, sint eltOrder /*= -1*/)
 int CInterfaceGroup::luaAddGroup (CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "CInterfaceGroup::addTab", 1);
-	CInterfaceGroup * group = dynamic_cast<CInterfaceGroup *>(CLuaIHM::getUIOnStack(ls, 1));
+	CInterfaceGroup * group = dynamic_cast<CInterfaceGroup *>(CLuaIHMRyzom::getUIOnStack(ls, 1));
 	if(group)
 	{
 		group->setParent(this);
@@ -616,7 +618,7 @@ bool CInterfaceGroup::delGroup (CInterfaceGroup *child, bool dontDelete /* = fal
 int CInterfaceGroup::luaDelGroup (CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "CInterfaceGroup::delTab", 1);
-	CInterfaceGroup * group = dynamic_cast<CInterfaceGroup *>(CLuaIHM::getUIOnStack(ls, 1));
+	CInterfaceGroup * group = dynamic_cast<CInterfaceGroup *>(CLuaIHMRyzom::getUIOnStack(ls, 1));
 	if(group)
 	{
 		delGroup(group);
@@ -643,7 +645,7 @@ int CInterfaceGroup::luaGetGroup(CLuaState &ls)
 	{
 		CLuaIHM::fails(ls, "getGroup : try to index group %s, but there are only %d son groups", ls.toString(1), (int) _ChildrenGroups.size());
 	}
-	CLuaIHM::pushUIOnStack(ls, _ChildrenGroups[index]);
+	CLuaIHMRyzom::pushUIOnStack(ls, _ChildrenGroups[index]);
 	return 1;
 }
 
@@ -1747,7 +1749,7 @@ void CInterfaceGroup::onFrameUpdateWindowPos(sint dx, sint dy)
 void	CInterfaceGroup::pushLUAEnvTable()
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CLuaState *lua= pIM->getLuaState();
+	CLuaState *lua= CLuaManager::getInstance().getLuaState();
 	nlassert(lua);
 
 	if(!_LUAEnvTableCreated)
@@ -1782,7 +1784,7 @@ void	CInterfaceGroup::deleteLUAEnvTable(bool recurse)
 	if(_LUAEnvTableCreated)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CLuaState *lua= pIM->getLuaState();
+		CLuaState *lua= CLuaManager::getInstance().getLuaState();
 		nlassert(lua);
 
 		// replace simply the table with Nil, letting LUA Garbage collector do the realease stuff
@@ -1866,7 +1868,7 @@ int CInterfaceGroup::luaFind(CLuaState &ls)
 	}
 	else
 	{
-		CLuaIHM::pushUIOnStack(ls, element);
+		CLuaIHMRyzom::pushUIOnStack(ls, element);
 	}
 	return 1;
 }
@@ -1885,7 +1887,7 @@ CInterfaceElement* CInterfaceGroup::findFromShortId(const std::string &id)
 int CInterfaceGroup::luaGetEnclosingContainer(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "CInterfaceGroup::getEnclosingContainer", 0);
-	CLuaIHM::pushUIOnStack(ls, getEnclosingContainer());
+	CLuaIHMRyzom::pushUIOnStack(ls, getEnclosingContainer());
 	return 1;
 }
 

@@ -5887,9 +5887,9 @@ void		CInterfaceManager::getLuaValueInfo(std::string &str, sint index)
 		// If its a Userdata, try to display UI info
 		else if(type==LUA_TUSERDATA)
 		{
-			if(CLuaIHM::isUIOnStack(ls, index))
+			if(CLuaIHMRyzom::isUIOnStack(ls, index))
 			{
-				CInterfaceElement	*ui= CLuaIHM::getUIOnStack(ls, index);
+				CInterfaceElement	*ui= CLuaIHMRyzom::getUIOnStack(ls, index);
 				str+= NLMISC::toString(" (ui=%p)", ui);
 			}
 		}

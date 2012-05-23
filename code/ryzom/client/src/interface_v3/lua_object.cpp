@@ -17,7 +17,7 @@
 //#include "stdpch.h"
 #include "lua_object.h"
 #include "lua_ihm.h"
-#include "lua_ihm_ryzom.h"
+//#include "lua_ihm_ryzom.h"
 #include "nel/gui/lua_helper.h"
 using namespace NLGUI;
 //
@@ -617,7 +617,7 @@ void CLuaObject::dump(uint maxDepth /*= 20*/, std::set<const void *> *alreadySee
 	}
 	catch(const std::exception &e)
 	{
-		CLuaIHMRyzom::dumpCallStack();
+		//CLuaIHMRyzom::dumpCallStack();
 		nlwarning(e.what());
 	}
 }

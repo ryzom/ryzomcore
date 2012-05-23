@@ -15,9 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-
-#include "stdpch.h"
 #include "reflect.h"
 
 // Yoyo: Act like a singleton, else registerClass may crash.
@@ -132,4 +129,63 @@ const CReflectedProperty *CReflectable::getReflectedProperty(const std::string &
 }
 
 
+#include "lua_manager.h"
 
+CReflectableRefPtrTarget::~CReflectableRefPtrTarget()
+{
+	CLuaState *lua= CLuaManager::getInstance().getLuaState();
+	if(!lua)
+		return;
+	CLuaStackChecker lsc(lua);
+	// remove from the lua registry if i'm in
+	lua->pushLightUserData((void *) this);
+	lua->getTable(LUA_REGISTRYINDEX);
+	if (!lua->isNil(-1))
+	{
+		lua->pop();
+		lua->pushLightUserData((void *) this);
+		lua->pushNil();
+		lua->setTable(LUA_REGISTRYINDEX);
+	}
+	else
+	{
+		lua->pop();
+	}
+}
+
+/**
+  * Data structure pushed in lua (a userdata) to access CReflectableRefPtrTarget derived objects
+  * These includes element of the GUI.
+  * if holds a pointer to the reflectable object, and
+  * a cache to its CClassInfo for fast access to exported properties
+  * \see reflect.h
+  */
+
+//
+
+inline const CClassInfo &CReflectableLuaRef::getClassInfo() const
+{
+	nlassert(Ptr); // class info should not be accessed for a null ptr
+	if (_ClassInfo) return *_ClassInfo;
+	_ClassInfo = Ptr->getClassInfo();
+	return *_ClassInfo;
+}
+
+const CReflectedProperty *CReflectableLuaRef::getProp(const char *luaStringPtr) const
+{
+	const CClassInfo &ci = getClassInfo();
+	CClassInfo::TLuaStrToPropMap::const_iterator it = ci.LuaStrToProp.find(luaStringPtr);
+	if (it != ci.LuaStrToProp.end())
+	{
+		return it->second.Prop;
+	}
+	// slowly retrieve property, and store in cache
+	// NB nico : this could also be done at startup...
+	const CReflectedProperty *prop = CReflectSystem::getProperty(ci.ClassName, luaStringPtr, false);
+	if (!prop) return NULL;
+	CLuaIndexedProperty lip;
+	lip.Id = CLuaString(luaStringPtr); // keep a ref on the lua string to ensure that its pointer always remains valid
+	lip.Prop = prop;
+	ci.LuaStrToProp[luaStringPtr] = lip;
+	return prop;
+}

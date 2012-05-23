@@ -45,9 +45,12 @@
 #include "../client_sheets/sphrase_sheet.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "lua_ihm.h"
+#include "lua_ihm_ryzom.h"
 #include "game_share/bot_chat_types.h"
 
 #include "../r2/editor.h"
+
+#include "lua_manager.h"
 
 extern CSheetManager SheetMngr;
 
@@ -101,7 +104,7 @@ ucstring CControlSheetTooltipInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet, 
 
 	// delegate setup of context he help ( & window ) to lua		
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CLuaState *ls= im->getLuaState();
+	CLuaState *ls= CLuaManager::getInstance().getLuaState();
 	{
 		CLuaStackRestorer lsr(ls, 0);
 
@@ -128,7 +131,7 @@ ucstring CControlSheetTooltipInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet, 
 // ***************************************************************************
 int CDBCtrlSheet::luaGetDraggedSheet(CLuaState &ls)
 {
-	CLuaIHM::pushUIOnStack(ls, dynamic_cast<CInterfaceElement *>(_LastDraggedSheet));
+	CLuaIHMRyzom::pushUIOnStack(ls, dynamic_cast<CInterfaceElement *>(_LastDraggedSheet));
 	return 1;
 }
 
@@ -3160,7 +3163,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		{
 			// delegate setup of context he help ( & window ) to lua		
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CLuaState *ls= im->getLuaState();
+			CLuaState *ls= CLuaManager::getInstance().getLuaState();
 			{
 				CLuaStackRestorer lsr(ls, 0);
 				CSPhraseManager	*pPM= CSPhraseManager::getInstance();					
