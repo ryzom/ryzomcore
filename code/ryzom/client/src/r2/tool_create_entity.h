@@ -25,8 +25,10 @@
 #include "displayer_visual_entity.h"
 
 class CEntity;
-class CLuaObject;
-
+namespace NLGUI
+{
+	class CLuaObject;
+}
 
 namespace R2
 {

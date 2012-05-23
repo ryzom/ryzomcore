@@ -22,36 +22,36 @@
 namespace NLGUI
 {
 	class CLuaState;
-}
 
-/// Provides a single global access point to the Lua state, and related stuff. :(
-class CLuaManager
-{
-public:
-	~CLuaManager();
-
-	static CLuaManager& getInstance()
+	/// Provides a single global access point to the Lua state, and related stuff. :(
+	class CLuaManager
 	{
-		if( instance == NULL )
+	public:
+		~CLuaManager();
+
+		static CLuaManager& getInstance()
 		{
-			instance = new CLuaManager();
+			if( instance == NULL )
+			{
+				instance = new CLuaManager();
+			}
+			return *instance;
 		}
-		return *instance;
-	}
 
-	/// Enables attaching the Lua debugger in the CLuaState instance, only matters on startup.
-	static void enableLuaDebugging(){ debugLua = true;	}
+		/// Enables attaching the Lua debugger in the CLuaState instance, only matters on startup.
+		static void enableLuaDebugging(){ debugLua = true;	}
 
-	NLGUI::CLuaState* getLuaState() const{ return luaState; }
+		NLGUI::CLuaState* getLuaState() const{ return luaState; }
 
-private:
-	CLuaManager();
+	private:
+		CLuaManager();
 
-	static CLuaManager *instance;
-	static bool debugLua;
+		static CLuaManager *instance;
+		static bool debugLua;
 
-	NLMISC::CSmartPtr< NLGUI::CLuaState > luaState;
-};
+		NLMISC::CSmartPtr< NLGUI::CLuaState > luaState;
+	};
 
+}
 
 #endif

@@ -25,6 +25,8 @@
 #include "interface_property.h"
 #include "nel/gui/reflect.h"
 
+using namespace NLGUI;
+
 // ----------------------------------------------------------------------------
 class CInterfaceGroup;
 

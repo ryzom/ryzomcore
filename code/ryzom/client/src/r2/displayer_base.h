@@ -21,8 +21,10 @@
 #include "nel/misc/class_registry.h"
 #include "../interface_v3/interface_element.h"
 
-class CLuaObject;
-
+namespace NLGUI
+{
+	class CLuaObject;
+}
 
 namespace R2
 {

@@ -29,8 +29,9 @@ class CInterfaceManager;
 namespace NLGUI
 {
 	class CEventDescriptor;
+	class CLuaObject;
 }
-class CLuaObject;
+
 class CGroupMap;
 
 namespace NLMISC

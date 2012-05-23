@@ -18,17 +18,22 @@
 #include "nel/gui/lua_manager.h"
 #include "nel/gui/lua_helper.h"
 
-bool CLuaManager::debugLua = false;
-CLuaManager* CLuaManager::instance = NULL;
-
-CLuaManager::CLuaManager()
+namespace NLGUI
 {
-	luaState = new NLGUI::CLuaState( debugLua );
-}
 
-CLuaManager::~CLuaManager()
-{
-	luaState = NULL;
-}
+	bool CLuaManager::debugLua = false;
+	CLuaManager* CLuaManager::instance = NULL;
 
+	CLuaManager::CLuaManager()
+	{
+		luaState = new NLGUI::CLuaState( debugLua );
+	}
+
+	CLuaManager::~CLuaManager()
+	{
+		luaState = NULL;
+	}
+
+
+}
 

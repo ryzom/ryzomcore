@@ -22,8 +22,11 @@
 #include "nel/gui/lua_object.h"
 
 class CEntity;
-class CLuaObject;
 
+namespace NLGUI
+{
+	class CLuaObject;
+}
 
 namespace R2
 {

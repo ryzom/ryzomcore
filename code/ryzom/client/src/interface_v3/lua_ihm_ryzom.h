@@ -3,10 +3,12 @@
 
 #include "nel/gui/lua_ihm.h"
 
+using namespace NLGUI;
+
 class CLuaIHMRyzom
 {
 public:
-	static void RegisterRyzomFunctions( NLGUI::CLuaState &ls );
+	static void RegisterRyzomFunctions( CLuaState &ls );
 
 private:
 	static void createLuaEnumTable(CLuaState &ls, const std::string &str);

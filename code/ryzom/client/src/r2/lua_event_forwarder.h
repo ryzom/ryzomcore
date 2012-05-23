@@ -20,8 +20,10 @@
 namespace NLGUI
 {
 	class CLuaState;
+	class CLuaString;
 }
-class CLuaString;
+
+using namespace NLGUI;
 
 namespace R2
 {

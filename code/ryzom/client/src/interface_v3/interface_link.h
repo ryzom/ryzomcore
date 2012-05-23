@@ -22,11 +22,19 @@
 #include "nel/misc/cdb_branch.h"
 #include "nel/misc/cdb_branch_observing_handler.h"
 
+namespace NLGUI
+{
+	class CReflectedProperty;
+}
+
+
 class CInterfaceElement;
-class CReflectedProperty;
 class CInterfaceExprValue;
 class CInterfaceGroup;
 class CInterfaceExprNode;
+
+using namespace NLGUI;
+
 
 /** A link in an interface.
   * A link is an object that can read one or several values from the database, that can evaluate an expression

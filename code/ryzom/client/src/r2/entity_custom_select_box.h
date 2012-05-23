@@ -21,7 +21,12 @@
 #include "nel/gui/lua_object.h"
 #include <map>
 
-class CLuaObject;
+namespace NLGUI
+{
+	class CLuaObject;
+}
+
+using namespace NLGUI;
 
 namespace R2
 {
