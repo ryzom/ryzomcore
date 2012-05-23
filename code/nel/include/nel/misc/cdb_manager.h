@@ -171,6 +171,12 @@ namespace NLMISC{
 
 		 */
 		void resetBank( uint gc, uint bank );
+		
+		/**
+		 @brief Resizes the bank holders. WARNING: Resets data contained.
+		 @param newSize - The new maximum number of banks.
+		 */
+		void resizeBanks( uint newSize );
 	
 	protected:
 		CCDBBankHandler bankHandler;

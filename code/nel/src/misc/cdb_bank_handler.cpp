@@ -91,6 +91,18 @@ _FirstLevelIdBitsByBank( maxbanks )
 			_FirstLevelIdBitsByBank[ bank ] = idb;
 		}
 	}
+
+	void CCDBBankHandler::resize( uint newSize )
+	{
+		reset();
+
+		_CDBBankNames.clear();
+		_CDBBankToUnifiedIndexMapping.clear();
+		_FirstLevelIdBitsByBank.clear();
+
+		_CDBBankToUnifiedIndexMapping.reserve( newSize );
+		_FirstLevelIdBitsByBank.reserve( newSize );
+	}
 }
 
 

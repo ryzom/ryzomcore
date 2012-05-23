@@ -146,4 +146,9 @@ namespace NLMISC{
 		_Database->resetNode( gc, bankHandler.getUIDForBank( bank ) );
 	}
 
+	void CCDBManager::resizeBanks( uint newSize )
+	{
+		bankHandler.resize( newSize );
+	}
+
 }

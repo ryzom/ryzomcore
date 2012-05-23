@@ -113,6 +113,12 @@ public:
 	*/
 	uint getServerToClientUIDMapping( uint bank, uint index ) const{ return _CDBBankToUnifiedIndexMapping[ bank ][ index ]; }
 
+	/**
+	 @brief Resizes the bank holders. WARNING: Resets data contained.
+	 @param newSize - The new maximum number of banks.
+	 */
+	void resize( uint newSize );
+
 private:
 	/// Mapping from server database index to client database index (first-level nodes)
 	std::vector< std::vector< uint > > _CDBBankToUnifiedIndexMapping;
