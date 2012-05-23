@@ -86,7 +86,7 @@ void CBackgroundSoundManager::addSound(const std::string &soundName, uint layerI
 	CAudioMixerUser *mixer = CAudioMixerUser::instance();
 	TSoundData	sd;
 
-	sd.SoundName = CStringMapper::map(soundName);
+	sd.SoundName = /*CStringMapper::map(soundName)*/ NLMISC::CSheetId(soundName);
 	sd.Sound = mixer->getSoundId(sd.SoundName);
 	sd.Source = 0;
 
@@ -133,7 +133,7 @@ void CBackgroundSoundManager::addSound(const std::string &soundName, uint layerI
 	}
 	else
 	{
-		nlwarning ("The sound '%s' can't be loaded", CStringMapper::unmap(sd.SoundName).c_str());
+		nlwarning ("The sound '%s' can't be loaded", sd.SoundName.toString().c_str()/*CStringMapper::unmap(sd.SoundName).c_str()*/);
 	}
 }
 
@@ -465,7 +465,7 @@ void CBackgroundSoundManager::addFxZone(const std::string &fxName, const std::ve
 {
 	TFxZone	fxZone;
 
-	fxZone.FxName = CStringMapper::map(fxName);
+	fxZone.FxName = /*CStringMapper::map(fxName)*/ NLMISC::CSheetId(fxName);
 	fxZone.Points.resize (points.size());
 	for (uint j=0; j<points.size(); j++)
 	{
@@ -893,7 +893,7 @@ void CBackgroundSoundManager::updateBackgroundStatus()
 					if (rootCluster)
 					{
 						// use the cluster system
-						rootCluster->setEnvironmentFx(first->FxName);
+						rootCluster->setEnvironmentFx(first->FxName.toString());
 					}
 					else
 					{
@@ -1437,14 +1437,14 @@ void CBackgroundSoundManager::TSoundData::serial(NLMISC::IStream &s)
 	{
 		CAudioMixerUser *mixer = CAudioMixerUser::instance();
 		s.serial(str);
-		SoundName = NLMISC::CStringMapper::map(str);
+		SoundName = /*NLMISC::CStringMapper::map(str)*/ NLMISC::CSheetId(str);
 		Sound = mixer->getSoundId(SoundName);
 		Source = NULL;
 		Selected = false;
 	}
 	else
 	{
-		s.serial(const_cast<std::string&>(NLMISC::CStringMapper::unmap(SoundName)));
+		s.serial(const_cast<std::string&>(SoundName.toString()/*NLMISC::CStringMapper::unmap(SoundName)*/));
 	}
 	s.serial(MinBox);
 	s.serial(MaxBox);
@@ -1461,11 +1461,11 @@ void CBackgroundSoundManager::TFxZone::serial(NLMISC::IStream &s)
 	if (s.isReading())
 	{
 		s.serial(str);
-		FxName= NLMISC::CStringMapper::map(str);
+		FxName= NLMISC::CSheetId(str);/*NLMISC::CStringMapper::map(str)*/;
 	}
 	else
 	{
-		s.serial(const_cast<std::string&>(NLMISC::CStringMapper::unmap(FxName)));
+		s.serial(const_cast<std::string&>(FxName.toString()/*NLMISC::CStringMapper::unmap(FxName)*/));
 	}
 
 	s.serialCont(Points);

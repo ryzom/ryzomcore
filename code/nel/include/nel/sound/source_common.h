@@ -23,6 +23,7 @@
 #include "nel/3d/cluster.h"
 #include "nel/sound/sound.h"
 #include "nel/sound/group_controller.h"
+#include "nel/misc/sheet_id.h"
 
 namespace NLSOUND {
 
@@ -149,7 +150,7 @@ protected:
 	NL3D::CCluster					*_Cluster;
 
 	/// An optional user var controler.
-	NLMISC::TStringId				_UserVarControler;
+	NLMISC::CSheetId				_UserVarControler;
 
 	/// Group controller for gain
 	CGroupController				*_GroupController;

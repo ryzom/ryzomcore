@@ -254,10 +254,10 @@ void CClusteredSound::update(const CVector &listenerPos, const CVector &/* view 
 	TClusterStatusMap::const_iterator first(_AudibleClusters.begin()), last(_AudibleClusters.end());
 	for (; first != last; ++first )
 	{
-		static NLMISC::TStringId NO_SOUND_GROUP = CStringMapper::emptyId();
+		static NLMISC::CSheetId NO_SOUND_GROUP = /*CStringMapper::emptyId()*/NLMISC::CSheetId::Unknown;
 		const CClusterSoundStatus &css = first->second;
 		CCluster *cluster = first->first;
-		NLMISC::TStringId soundGroup;
+		NLMISC::CSheetId soundGroup;
 
 		soundGroup = cluster->getSoundGroupId();
 
@@ -292,7 +292,7 @@ void CClusteredSound::update(const CVector &listenerPos, const CVector &/* view 
 				TStringStringMap::iterator it2(_SoundGroupToSound.find(soundGroup));
 				if (it2 != _SoundGroupToSound.end())
 				{
-					NLMISC::TStringId soundName = it2->second;
+					NLMISC::CSheetId soundName = it2->second;
 					CClusterSound cs;
 
 //					nldebug("Found the sound [%s] for sound group [%s]", CStringMapper::unmap(soundName).c_str(), CStringMapper::unmap(soundGroup).c_str());

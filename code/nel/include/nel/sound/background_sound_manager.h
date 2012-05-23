@@ -229,7 +229,7 @@ private:
 	struct TSoundData
 	{
 		/// The name of the sound.
-		NLMISC::TStringId	SoundName;
+		NLMISC::CSheetId	SoundName;
 		/// The reference to the sound.
 		CSound				*Sound;
 		/// A source instance of the sound (may be NULL).
@@ -282,7 +282,7 @@ private:
 	struct TFxZone
 	{
 		/// Name of the env fx
-		NLMISC::TStringId				FxName;
+		NLMISC::CSheetId				FxName;
 		/// The vector of points compositing the primitive
 		std::vector<NLMISC::CVector>	Points;
 		/// The min vector of the bounding box
@@ -295,7 +295,7 @@ private:
 	/// Container for the fx primitive.
 	std::vector<TFxZone>		_FxZones;
 	/// Last setted env fx. Used when clustered sound is not active
-	NLMISC::TStringId			_LastEnv;
+	NLMISC::CSheetId			_LastEnv;
 
 	//@}
 };

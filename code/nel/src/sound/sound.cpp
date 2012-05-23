@@ -115,7 +115,7 @@ CSound::CSound() :
 	_Looping(false),
 	_MinDist(1.0f),
 	_MaxDist(1000000.0f),
-	_UserVarControler(CStringMapper::emptyId()),
+	_UserVarControler(NLMISC::CSheetId::Unknown),
 	_GroupController(NULL)
 {
 }
@@ -137,11 +137,11 @@ void	CSound::serial(NLMISC::IStream &s)
 	{
 		std::string name;
 		s.serial(name);
-		_Name = CStringMapper::map(name);
+		_Name = NLMISC::CSheetId(name);//CStringMapper::map(name);
 	}
 	else
 	{
-		std::string name = CStringMapper::unmap(_Name);
+		std::string name = _Name.toString();//CStringMapper::unmap(_Name);
 		s.serial(name);
 	}
 	
@@ -170,7 +170,7 @@ void	CSound::serial(NLMISC::IStream &s)
 void				CSound::importForm(const std::string& filename, NLGEORGES::UFormElm& root)
 {
 	// Name
-	_Name = CStringMapper::map(CFile::getFilenameWithoutExtension(filename));
+	_Name = NLMISC::CSheetId(CFile::getFilenameWithoutExtension(filename));//CStringMapper::map(CFile::getFilenameWithoutExtension(filename));
 
 	// InternalConeAngle
 	uint32 inner;

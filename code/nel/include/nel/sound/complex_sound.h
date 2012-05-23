@@ -52,8 +52,8 @@ public:
 
 	const std::vector<uint32>		&getSoundSeq() const						{ return _SoundSeq;}
 	const std::vector<uint32>		&getDelaySeq() const						{ return _DelaySeq;}
-	NLMISC::TStringId				getSound(uint index) const					{ return !_Sounds.empty() ? _Sounds[index%_Sounds.size()]:0;}
-	const std::vector<NLMISC::TStringId>	&getSounds() const					{ return _Sounds;}
+	NLMISC::CSheetId				getSound(uint index) const					{ return !_Sounds.empty() ? _Sounds[index%_Sounds.size()]:NLMISC::CSheetId::Unknown;}
+	const std::vector<NLMISC::CSheetId>	&getSounds() const					{ return _Sounds;}
 
 	uint32							getFadeLength() const						{ return _XFadeLength;}
 
@@ -87,7 +87,7 @@ private:
 	virtual float					getMaxDistance() const;
 
 	TPATTERN_MODE					_PatternMode;
-	std::vector<NLMISC::TStringId>	_Sounds;
+	std::vector<NLMISC::CSheetId>	_Sounds;
 	float							_TicksPerSeconds;
 	std::vector<uint32>				_SoundSeq;
 	/// Sequence of delay in millisec.

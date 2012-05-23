@@ -133,7 +133,7 @@ class CContextSoundContainer : public IContextSoundContainer
 
 	virtual void		addSound(CSound *sound, const std::string &baseName)
 	{
-		const std::string &patternName = NLMISC::CStringMapper::unmap(sound->getName());
+		const std::string &patternName = sound->getName().toString(); /*NLMISC::CStringMapper::unmap(sound->getName())*/;
 		nlassert(patternName.size() >= baseName.size());
 
 		std::string arg;
@@ -172,7 +172,7 @@ class CContextSoundContainer : public IContextSoundContainer
 
 		if (i != NbJoker)
 			return;
-		nlassertex(i==NbJoker, ("Error while adding sound '%s' into context sound container", NLMISC::CStringMapper::unmap(sound->getName()).c_str()));
+		nlassertex(i==NbJoker, ("Error while adding sound '%s' into context sound container", sound->getName().toString().c_str()/*NLMISC::CStringMapper::unmap(sound->getName()).c_str()*/));
 
 		sint randomValue = 0;
 		if (UseRandom)
@@ -187,7 +187,7 @@ class CContextSoundContainer : public IContextSoundContainer
 				}
 				else if (!arg.empty())
 				{
-					nlassertex (!ok, ("Error while adding sound '%s' into context sound container", NLMISC::CStringMapper::unmap(sound->getName()).c_str()));
+					nlassertex (!ok, ("Error while adding sound '%s' into context sound container", sound->getName().toString().c_str()/*NLMISC::CStringMapper::unmap(sound->getName()).c_str()*/));
 					// end of the argument.
 					NLMISC::fromString(arg, randomValue);
 					arg.clear();
@@ -199,13 +199,13 @@ class CContextSoundContainer : public IContextSoundContainer
 			// read the potential last arg.
 			if (!arg.empty())
 			{
-				nlassertex (!ok, ("Error while adding sound '%s' into context sound container", NLMISC::CStringMapper::unmap(sound->getName()).c_str()));
+				nlassertex (!ok, ("Error while adding sound '%s' into context sound container", sound->getName().toString().c_str()/*NLMISC::CStringMapper::unmap(sound->getName()).c_str()*/));
 				// end of the argument.
 				NLMISC::fromString(arg, randomValue);
 				arg.clear();
 				ok = true;
 			}
-			nlassertex (ok, ("Error while adding sound '%s' into context sound container", NLMISC::CStringMapper::unmap(sound->getName()).c_str()));
+			nlassertex (ok, ("Error while adding sound '%s' into context sound container", sound->getName().toString().c_str()/*NLMISC::CStringMapper::unmap(sound->getName()).c_str()*/));
 
 		}
 		else
@@ -221,9 +221,9 @@ class CContextSoundContainer : public IContextSoundContainer
 		if (!ret.second)
 		{
 			typename THashContextSound::iterator it = _ContextSounds.find(cm);
-			nlassertex(it != _ContextSounds.end(), ("Error wile adding soudn '%s' into context sound container", NLMISC::CStringMapper::unmap(sound->getName()).c_str()));
+			nlassertex(it != _ContextSounds.end(), ("Error wile adding soudn '%s' into context sound container", sound->getName().toString().c_str()/*NLMISC::CStringMapper::unmap(sound->getName()).c_str()*/));
 
-			nlwarning("Sound %s has the same context matcher as the sound %s", NLMISC::CStringMapper::unmap(sound->getName()).c_str(), NLMISC::CStringMapper::unmap(it->second->getName()).c_str());
+			nlwarning("Sound %s has the same context matcher as the sound %s", sound->getName().toString().c_str()/*NLMISC::CStringMapper::unmap(sound->getName()).c_str()*/, it->second->getName().toString().c_str() /*NLMISC::CStringMapper::unmap(it->second->getName()).c_str()*/);
 		}
 	}
 
@@ -249,7 +249,7 @@ class CContextSoundContainer : public IContextSoundContainer
 		typename THashContextSound::const_iterator first(_ContextSounds.begin()), last(_ContextSounds.end());
 		for (; first != last; ++first)
 		{
-			subsounds.push_back(std::make_pair(NLMISC::CStringMapper::unmap(first->second->getName()), first->second));
+			subsounds.push_back(std::make_pair(first->second->getName().toString()/*NLMISC::CStringMapper::unmap(first->second->getName())*/, first->second));
 		}
 	}
 

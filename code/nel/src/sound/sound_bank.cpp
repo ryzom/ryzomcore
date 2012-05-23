@@ -128,7 +128,7 @@ void CSoundBank::addSound(CSound *sound)
 	nlassert(ret.second);
 }
 
-void CSoundBank::removeSound(const NLMISC::TStringId &name)
+void CSoundBank::removeSound(const NLMISC::CSheetId &name)
 {
 	_Sounds.erase(name);
 }
@@ -258,14 +258,16 @@ public:
 void CSoundBank::load(const std::string &packedSheetDir, bool packedSheetUpdate)
 {
 	// this structure is fill by the loadForm() function and will contain all you need
-	std::map<std::string, CSoundSerializer> Container;
+	//std::map<std::string, CSoundSerializer> Container;
+	std::map<NLMISC::CSheetId, CSoundSerializer> Container;
 	nlassert(!_Loaded);
 	// Just call the GEORGE::loadFrom method to read all available sounds
 	::loadForm("sound", packedSheetDir + "sounds.packed_sheets", Container, packedSheetUpdate, false);
 	_Loaded = true;
 
 	// add all the loaded sound in the sound banks
-	std::map<std::string, CSoundSerializer>::iterator first(Container.begin()), last(Container.end());
+	//std::map<std::string, CSoundSerializer>::iterator first(Container.begin()), last(Container.end());
+	std::map<NLMISC::CSheetId, CSoundSerializer>::iterator first(Container.begin()), last(Container.end());
 	for (; first != last; ++first)
 	{
 		if (first->second.Sound != 0)
@@ -328,7 +330,7 @@ bool				CSoundBank::isLoaded()
 /*
  * Return a sound sample corresponding to a name.
  */
-CSound*			CSoundBank::getSound(const NLMISC::TStringId &name)
+CSound*			CSoundBank::getSound(const NLMISC::CSheetId &name)
 {
 	// Find sound
 	TSoundTable::iterator iter = _Sounds.find(name);
@@ -345,7 +347,7 @@ CSound*			CSoundBank::getSound(const NLMISC::TStringId &name)
 /**
  *  Return the names of the sounds
  */
-void				CSoundBank::getNames( std::vector<NLMISC::TStringId> &names )
+void				CSoundBank::getNames( std::vector<NLMISC::CSheetId> &names )
 {
 	TSoundTable::const_iterator iter;
 	for (iter = _Sounds.begin(); iter != _Sounds.end(); ++iter)

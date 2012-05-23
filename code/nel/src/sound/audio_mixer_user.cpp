@@ -23,6 +23,7 @@
 #include "nel/misc/command.h"
 #include "nel/misc/file.h"
 #include "nel/misc/path.h"
+#include "nel/misc/sheet_id.h"
 
 #include "nel/georges/u_form_loader.h"
 #include "nel/georges/u_form_elm.h"
@@ -1157,7 +1158,7 @@ void CAudioMixerUser::CControledSources::serial(NLMISC::IStream &s)
 
 // ******************************************************************
 
-void CAudioMixerUser::setUserVar(NLMISC::TStringId varName, float value)
+void CAudioMixerUser::setUserVar(NLMISC::CSheetId varName, float value)
 {
 	TUserVarControlsContainer::iterator it(_UserVarControls.find(varName));
 	if (it != _UserVarControls.end())
@@ -1190,7 +1191,7 @@ void CAudioMixerUser::setUserVar(NLMISC::TStringId varName, float value)
 
 // ******************************************************************
 
-float CAudioMixerUser::getUserVar(NLMISC::TStringId varName)
+float CAudioMixerUser::getUserVar(NLMISC::CSheetId varName)
 {
 	TUserVarControlsContainer::iterator it(_UserVarControls.find(varName));
 	if (it != _UserVarControls.end())
@@ -1203,7 +1204,7 @@ float CAudioMixerUser::getUserVar(NLMISC::TStringId varName)
 
 // ******************************************************************
 
-void CAudioMixerUser::addUserControledSource(CSourceCommon *source, NLMISC::TStringId varName)
+void CAudioMixerUser::addUserControledSource(CSourceCommon *source, NLMISC::CSheetId varName)
 {
 	TUserVarControlsContainer::iterator it(_UserVarControls.find(varName));
 	if (it != _UserVarControls.end())
@@ -1227,7 +1228,7 @@ void CAudioMixerUser::addUserControledSource(CSourceCommon *source, NLMISC::TStr
 
 // ******************************************************************
 
-void CAudioMixerUser::removeUserControledSource(CSourceCommon *source, NLMISC::TStringId varName)
+void CAudioMixerUser::removeUserControledSource(CSourceCommon *source, NLMISC::CSheetId varName)
 {
 	TUserVarControlsContainer::iterator it(_UserVarControls.find(varName));
 	if (it != _UserVarControls.end())
@@ -1780,7 +1781,7 @@ void				CAudioMixerUser::update()
 
 // ******************************************************************
 
-TSoundId			CAudioMixerUser::getSoundId( const NLMISC::TStringId &name )
+TSoundId			CAudioMixerUser::getSoundId( const NLMISC::CSheetId &name )
 {
 	return _SoundBank->getSound(name);
 }
@@ -2035,7 +2036,7 @@ retrySound:
 
 // ******************************************************************
 
-USource				*CAudioMixerUser::createSource( const NLMISC::TStringId &name, bool spawn, TSpawnEndCallback cb, void *userParam, NL3D::CCluster *cluster, CSoundContext *context, UGroupController *groupController)
+USource				*CAudioMixerUser::createSource( const NLMISC::CSheetId &name, bool spawn, TSpawnEndCallback cb, void *userParam, NL3D::CCluster *cluster, CSoundContext *context, UGroupController *groupController)
 {
 	return createSource( getSoundId( name ), spawn, cb, userParam, cluster, context, groupController);
 }
@@ -2162,7 +2163,7 @@ bool CAudioMixerUser::unloadSampleBank(const std::string &name)
 
 // ******************************************************************
 
-void			CAudioMixerUser::getSoundNames( std::vector<NLMISC::TStringId> &names ) const
+void			CAudioMixerUser::getSoundNames( std::vector<NLMISC::CSheetId> &names ) const
 {
 	_SoundBank->getNames(names);
 }
@@ -2767,7 +2768,7 @@ void CAudioMixerUser::addEnvironment(const std::string &environmentName, const I
 }
 
 /// Set the current reverb environment
-void CAudioMixerUser::setEnvironment(NLMISC::TStringId environmentName, float roomSize)
+void CAudioMixerUser::setEnvironment(NLMISC::CSheetId environmentName, float roomSize)
 {
 	if (_ReverbEffect)
 	{
@@ -2776,7 +2777,7 @@ void CAudioMixerUser::setEnvironment(NLMISC::TStringId environmentName, float ro
 }
 
 /// Get a reverb environment
-const IReverbEffect::CEnvironment &CAudioMixerUser::getEnvironment(NLMISC::TStringId environmentName)
+const IReverbEffect::CEnvironment &CAudioMixerUser::getEnvironment(NLMISC::CSheetId environmentName)
 {
 	TEnvironments::iterator it(_Environments.find(environmentName));
 	if (it == _Environments.end())

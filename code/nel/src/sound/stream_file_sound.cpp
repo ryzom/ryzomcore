@@ -74,9 +74,11 @@ void CStreamFileSound::serial(NLMISC::IStream &s)
 void CStreamFileSound::setMusicFilePath(const std::string &filePath, bool async, bool loop)
 {
 #if !FINAL_VERSION
-	_Name = NLMISC::CStringMapper::map(std::string("<MusicChannel:") + NLMISC::CFile::getFilenameWithoutExtension(filePath) + ">");
+	//_Name = NLMISC::CStringMapper::map(std::string("<MusicChannel:") + NLMISC::CFile::getFilenameWithoutExtension(filePath) + ">");
+	_Name = NLMISC::CSheetId(std::string("<MusicChannel:") + NLMISC::CFile::getFilenameWithoutExtension(filePath) + ">");
 #else
-	_Name = NLMISC::CStringMapper::map("<MusicChannel>");
+	//_Name = NLMISC::CStringMapper::map("<MusicChannel>");
+	_Name = NLMISC::CSheetId("<MusicChannel>");
 #endif
 	_ConeInnerAngle = NLMISC::Pi * 2;
 	_ConeOuterAngle = NLMISC::Pi * 2;

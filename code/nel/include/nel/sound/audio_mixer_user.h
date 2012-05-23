@@ -25,6 +25,7 @@
 #include <nel/misc/time_nl.h>
 #include <nel/misc/stream.h>
 #include <nel/misc/singleton.h>
+#include <nel/misc/sheet_id.h>
 #include <nel/sound/u_audio_mixer.h>
 #include <nel/georges/u_form.h>
 
@@ -92,9 +93,9 @@ public:
 	//@{
 	/// @name IStringMapperProvider implementation
 	/// map a string
-	NLMISC::TStringId map(const std::string &str)			{ return NLMISC::CStringMapper::map(str);}
+	NLMISC::CSheetId map(const std::string &str)			{ return NLMISC::CSheetId(str);/*NLMISC::CStringMapper::map(str);*/}
 	/// unmap a string
-	const std::string &unmap(const NLMISC::TStringId &stringId)		{ return NLMISC::CStringMapper::unmap(stringId);}
+	const std::string &unmap(const NLMISC::CSheetId &stringId)		{ return stringId.toString();/*NLMISC::CStringMapper::unmap(stringId);*/}
 	//@}
 
 
@@ -180,7 +181,7 @@ public:
 	// Load environment sounds ; treeRoot can be null if you don't want an access to the envsounds
 //	virtual	void				loadEnvSounds( const char *filename, UEnvSound **treeRoot=NULL );
 	/// Get a TSoundId from a name (returns NULL if not found)
-	virtual TSoundId			getSoundId( const NLMISC::TStringId &name );
+	virtual TSoundId			getSoundId( const NLMISC::CSheetId &name );
 
 	/// Gets the group controller for the given group tree path with separator '/', if it doesn't exist yet it will be created.
 	/// Examples: "music", "effects", "dialog", "music/background", "music/loading", "music/player", etcetera
@@ -192,7 +193,7 @@ public:
 	 * pass a callback function that will be called (if not NULL) just before deleting the spawned
 	 * source.
 	 */
-	virtual USource				*createSource( const NLMISC::TStringId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL);
+	virtual USource				*createSource( const NLMISC::CSheetId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL);
 	/// Add a logical sound source (by sound id). To remove a source, just delete it. See createSource(const char*)
 	virtual USource				*createSource( TSoundId id, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL);
 	/// Add a source which was created by an EnvSound
@@ -223,7 +224,7 @@ public:
 
 
 	/// Return the names of the sounds (call this method after loadSounds())
-	virtual void				getSoundNames( std::vector<NLMISC::TStringId> &names ) const;
+	virtual void				getSoundNames( std::vector<NLMISC::CSheetId> &names ) const;
 	/// Return the number of mixing tracks (voices)
 	virtual uint				getPolyphony() const { return (uint)_Tracks.size(); }
 	/// Return the number of sources instance.
@@ -320,8 +321,8 @@ public:
 	void						incPlayingSourceMuted()	{ ++_PlayingSourcesMuted; };
 	void						decPlayingSourceMuted()	{ --_PlayingSourcesMuted; };
 
-	void		setUserVar(NLMISC::TStringId varName, float value);
-	float		getUserVar(NLMISC::TStringId varName);
+	void		setUserVar(NLMISC::CSheetId varName, float value);
+	float		getUserVar(NLMISC::CSheetId varName);
 
 	// music
 	virtual bool	playMusic(const std::string &fileName, uint xFadeTime= 0, bool async= true, bool loop=true);
@@ -351,7 +352,7 @@ public:
 	/// Add a reverb environment.
 	void addEnvironment(const std::string &name, const IReverbEffect::CEnvironment &environment);
 	/// Set the current reverb environment.
-	void setEnvironment(NLMISC::TStringId environmentName, float roomSize);
+	void setEnvironment(NLMISC::CSheetId environmentName, float roomSize);
 	/// Set the current reverb environment.
 	inline void setEnvironment(const std::string &environmentName, float roomSize) { setEnvironment(NLMISC::CStringMapper::map(environmentName), roomSize); }
 	/// Get a reverb environment
@@ -409,8 +410,8 @@ public:
 
 	/// Read all user controled var sheets
 	void						initUserVar();
-	void						addUserControledSource(CSourceCommon *source, NLMISC::TStringId varName);
-	void						removeUserControledSource(CSourceCommon *source, NLMISC::TStringId varName);
+	void						addUserControledSource(CSourceCommon *source, NLMISC::CSheetId varName);
+	void						removeUserControledSource(CSourceCommon *source, NLMISC::CSheetId varName);
 
 
 	virtual void startDriverBench();
@@ -440,11 +441,11 @@ private:
 	struct CControledSources
 	{
 		/// The user var name
-		NLMISC::TStringId				Name;
+		NLMISC::CSheetId				Name;
 		/// Witch parameter to control
 		TControledParamId				ParamId;
 		/// The controled sounds names.
-		std::vector<NLMISC::TStringId>	SoundNames;
+		std::vector<NLMISC::CSheetId>	SoundNames;
 		/// Current parameter value
 		float							Value;
 		/// All the sources controled by this variable
@@ -472,7 +473,7 @@ protected:
 	/// Fill a vector of position and mute flag for all playing sound source.
 	virtual void				getPlayingSoundsPos(bool virtualPos, std::vector<std::pair<bool, NLMISC::CVector> > &pos);
 
-	typedef CHashMap<NLMISC::TStringId, CControledSources, NLMISC::CStringIdHashMapTraits>	TUserVarControlsContainer;
+	typedef CHashMap<NLMISC::CSheetId, CControledSources, NLMISC::CStringIdHashMapTraits>	TUserVarControlsContainer;
 	/// Container for all user controler and currently controled playing source
 	TUserVarControlsContainer	_UserVarControls;
 

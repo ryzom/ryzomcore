@@ -51,7 +51,9 @@ CCluster::CCluster ()
 	// map a no fx string
 	_EnvironmentFxId = CStringMapper::map("no fx");
 	// map a no soundgroup string
-	_SoundGroupId = CStringMapper::map("");
+	_SoundGroupId = NLMISC::CSheetId::Unknown; /*CStringMapper::map("")*/;
+	nldebug("SOUNDSHEET: %s", _SoundGroupId.toString().c_str());
+
 
 	// I am a transform cluster
 	CTransform::setIsCluster(true);
@@ -76,18 +78,21 @@ CCluster::~CCluster()
 
 void CCluster::setSoundGroup(const std::string &soundGroup)
 {
-	_SoundGroupId = CStringMapper::map(soundGroup);
+	_SoundGroupId = NLMISC::CSheetId(soundGroup);/*CStringMapper::map(soundGroup);*/
+	nldebug("SOUNDSHEET: %s", _SoundGroupId.toString().c_str());
+
 }
-void CCluster::setSoundGroup(const NLMISC::TStringId &soundGroupId)
+void CCluster::setSoundGroup(const NLMISC::CSheetId &soundGroupId)
 {
 	_SoundGroupId = soundGroupId;
+	nldebug("SOUNDSHEET: %s", _SoundGroupId.toString().c_str());
 }
 const std::string &CCluster::getSoundGroup()
 {
-	return CStringMapper::unmap(_SoundGroupId);
+	return _SoundGroupId.toString();/*CStringMapper::unmap(_SoundGroupId)*/;
 }
 
-NLMISC::TStringId CCluster::getSoundGroupId()
+NLMISC::CSheetId CCluster::getSoundGroupId()
 {
 	return _SoundGroupId;
 }
@@ -304,7 +309,8 @@ void CCluster::serial (NLMISC::IStream&f)
 			std::string envFxName;
 
 			f.serial(soundGroup);
-			_SoundGroupId = CStringMapper::map(soundGroup);
+			_SoundGroupId = NLMISC::CSheetId(soundGroup); /*CStringMapper::map(soundGroup)*/;
+			nldebug("SOUNDSHEET: %s", _SoundGroupId.toString().c_str());
 
 			f.serial(envFxName);
 			if (envFxName == "")
@@ -314,7 +320,7 @@ void CCluster::serial (NLMISC::IStream&f)
 		else
 		{
 			// write the sound group
-			std::string soundGroup = CStringMapper::unmap(_SoundGroupId);
+			std::string soundGroup = _SoundGroupId.toString();/*CStringMapper::unmap(_SoundGroupId)*/;
 			f.serial(soundGroup);
 			// write the env fx name
 			std::string envFxName = CStringMapper::unmap(_EnvironmentFxId);
