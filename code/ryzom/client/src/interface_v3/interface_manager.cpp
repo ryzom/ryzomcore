@@ -112,7 +112,7 @@ namespace NLGUI
 	extern void luaDebuggerMainLoop();
 }
 using namespace NLGUI;
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "lua_ihm_ryzom.h"
 
 #include "add_on_manager.h"

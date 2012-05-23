@@ -23,7 +23,7 @@
 #include "nel/misc/xml_auto_ptr.h"
 #include "../time_client.h"
 
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 
 
 using namespace std;

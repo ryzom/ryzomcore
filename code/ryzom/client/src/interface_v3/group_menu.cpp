@@ -24,7 +24,7 @@
 #include "nel/misc/xml_auto_ptr.h"
 #include "view_bitmap.h"
 #include "action_handler.h" // Just for getAllParams
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "lua_ihm_ryzom.h"
 
 #include "nel/misc/i18n.h"

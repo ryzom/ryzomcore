@@ -23,7 +23,7 @@
 #include "nel/misc/string_mapper.h"
 #include "nel/misc/smart_ptr.h"
 #include "interface_property.h"
-#include "reflect.h"
+#include "nel/gui/reflect.h"
 
 // ----------------------------------------------------------------------------
 class CInterfaceGroup;

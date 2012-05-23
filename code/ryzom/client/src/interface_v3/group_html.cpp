@@ -43,7 +43,7 @@ extern "C"
 #include "view_bitmap.h"
 #include "../actions.h"
 #include "dbgroup_combo_box.h"
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 
 #include "../time_client.h"
 #include "nel/misc/i18n.h"

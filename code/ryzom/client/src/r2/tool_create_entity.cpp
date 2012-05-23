@@ -27,7 +27,7 @@
 #include "../entity_cl.h"
 #include "../player_r2_cl.h"
 #include "../sheet_manager.h"
-#include "../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "nel/misc/cdb_leaf.h"
 #include "../interface_v3/interface_manager.h"
 #include "dmc/palette.h"

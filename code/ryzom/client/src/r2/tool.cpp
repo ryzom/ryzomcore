@@ -30,7 +30,7 @@
 #include "../time_client.h"
 #include "displayer_visual.h"
 #include "../interface_v3/group_map.h"
-#include "../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 //
 #include "nel/pacs/u_global_position.h"
 #include "nel/pacs/u_global_retriever.h"

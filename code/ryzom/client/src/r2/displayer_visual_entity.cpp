@@ -50,7 +50,7 @@
 
 #include "../interface_v3/interface_3d_scene.h"
 #include "../interface_v3/character_3d.h"
-#include "../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "../pacs_client.h"
 #include "../time_client.h"
 //

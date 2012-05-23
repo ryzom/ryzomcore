@@ -35,7 +35,7 @@
 #include "macrocmd_manager.h"
 #include "game_share/rolemaster_flags.h"
 #include "game_share/people.h"
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "../time_client.h"
 
 

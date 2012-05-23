@@ -17,8 +17,8 @@
 
 #include "stdpch.h"
 #include "session_browser_impl.h"
-#include "interface_v3/lua_object.h"
-#include "interface_v3/lua_ihm.h"
+#include "nel/gui/lua_object.h"
+#include "nel/gui/lua_ihm.h"
 #include "connection.h"
 #include "net_manager.h"
 #include "interface_v3/interface_manager.h"

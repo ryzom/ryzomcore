@@ -92,14 +92,14 @@
 #include "weather.h"
 #include "forage_source_cl.h"
 #include "connection.h"
-#include "interface_v3/lua_object.h"
-#include "interface_v3/lua_ihm.h"
+#include "nel/gui/lua_object.h"
+#include "nel/gui/lua_ihm.h"
 #include "interface_v3/lua_ihm_ryzom.h"
 #include "init.h"
 #include "interface_v3/people_interraction.h"
 #include "far_tp.h"
 #include "zone_util.h"
-#include "interface_v3/lua_manager.h"
+#include "nel/gui/lua_manager.h"
 
 
 //

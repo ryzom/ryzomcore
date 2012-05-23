@@ -26,6 +26,7 @@ namespace NLMISC
 {
 	class CPolygon2D;
 	class CVector2f;
+	class CRGBA;
 }
 
 class CReflectable;

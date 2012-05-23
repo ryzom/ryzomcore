@@ -44,13 +44,13 @@
 #include "sphrase_manager.h"
 #include "../client_sheets/sphrase_sheet.h"
 #include "nel/misc/xml_auto_ptr.h"
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "lua_ihm_ryzom.h"
 #include "game_share/bot_chat_types.h"
 
 #include "../r2/editor.h"
 
-#include "lua_manager.h"
+#include "nel/gui/lua_manager.h"
 
 extern CSheetManager SheetMngr;
 

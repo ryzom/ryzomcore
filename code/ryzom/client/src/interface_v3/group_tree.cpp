@@ -25,7 +25,7 @@
 #include "view_text.h"
 #include "group_container.h"
 #include "action_handler.h"
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "lua_ihm_ryzom.h"
 
 #include "nel/misc/i_xml.h"

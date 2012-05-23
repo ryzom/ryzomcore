@@ -16,7 +16,7 @@
 
 #include "stdpch.h"
 #include "displayer_lua.h"
-#include "../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "../interface_v3/lua_ihm_ryzom.h"
 #include "editor.h"
 

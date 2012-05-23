@@ -26,6 +26,10 @@ using namespace NLGUI;
 	#undef assert
 #endif
 
+#ifdef NL_OS_WINDOWS
+#include <Windows.h>
+#endif
+
 // Warning: cannot use namespace std,    when using luabind
 #ifdef NL_OS_WINDOWS
 #  ifndef NL_EXTENDED_FOR_SCOPE
@@ -59,15 +63,17 @@ using namespace NLGUI;
 #endif
 
 
-#include "lua_ihm.h"
-#include "reflect.h"
+#include "nel/gui/lua_ihm.h"
+#include "nel/gui/reflect.h"
 #include "nel/misc/algo.h"
 #include "nel/misc/file.h"
 #include "nel/misc/i18n.h"
 #include "nel/misc/time_nl.h"
-#include "lua_object.h"
+#include "nel/misc/path.h"
+#include "nel/misc/sstring.h"
+#include "nel/gui/lua_object.h"
 #include "nel/misc/polygon.h"
-#include "lua_manager.h"
+#include "nel/gui/lua_manager.h"
 
 
 // ***************************************************************************

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "lua_manager.h"
+#include "nel/gui/lua_manager.h"
 #include "nel/gui/lua_helper.h"
 
 bool CLuaManager::debugLua = false;

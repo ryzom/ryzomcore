@@ -45,7 +45,7 @@ using namespace NLGUI;
 #include "character_cl.h"
 #include "r2/editor.h"
 #include "r2/dmc/client_edition_module.h"
-#include "interface_v3/lua_manager.h"
+#include "nel/gui/lua_manager.h"
 
 ///////////
 // USING //

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "reflect.h"
+#include "nel/gui/reflect.h"
 
 // Yoyo: Act like a singleton, else registerClass may crash.
 CReflectSystem::TClassMap *CReflectSystem::_ClassMap= NULL;
@@ -129,7 +129,7 @@ const CReflectedProperty *CReflectable::getReflectedProperty(const std::string &
 }
 
 
-#include "lua_manager.h"
+#include "nel/gui/lua_manager.h"
 
 CReflectableRefPtrTarget::~CReflectableRefPtrTarget()
 {

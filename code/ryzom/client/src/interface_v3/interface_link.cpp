@@ -23,7 +23,7 @@
 #include "interface_element.h"
 #include "interface_manager.h"
 #include "interface_expr_node.h"
-#include "reflect.h"
+#include "nel/gui/reflect.h"
 #include "nel/misc/cdb_branch.h"
 
 using namespace std;

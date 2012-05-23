@@ -17,7 +17,7 @@
 #ifndef R2_EDITOR_H
 #define R2_EDITOR_H
 
-#include "../interface_v3/lua_object.h"
+#include "nel/gui/lua_object.h"
 #include "instance.h"
 #include "tool.h"
 #include "../decal.h"

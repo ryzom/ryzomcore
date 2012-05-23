@@ -25,7 +25,7 @@
 //
 #include "../entities.h"
 #include "../interface_v3/interface_manager.h"
-#include "../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "../interface_v3/lua_ihm_ryzom.h"
 //
 #include "displayer_visual_entity.h"

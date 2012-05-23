@@ -26,7 +26,7 @@
 #include "view_text.h"
 #include "view_text_id.h"
 #include "group_container.h"
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "lua_ihm_ryzom.h"
 
 

@@ -25,7 +25,7 @@
 #include "../misc.h"
 #include "interface_link.h"
 #include "nel/misc/xml_auto_ptr.h"
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "lua_ihm_ryzom.h"
 #include "nel/misc/mem_stream.h"
 //

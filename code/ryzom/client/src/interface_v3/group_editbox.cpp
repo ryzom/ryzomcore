@@ -28,7 +28,7 @@
 #include "dbctrl_sheet.h"
 #include "group_container.h"
 #include "../time_client.h"
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 
 using namespace std;
 using namespace NLMISC;

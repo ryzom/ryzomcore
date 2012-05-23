@@ -25,7 +25,7 @@
 #include "nel/misc/vector_2f.h"
 //
 #include "../time_client.h"
-#include "../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "../global.h"
 //
 #include "../interface_v3/interface_manager.h"

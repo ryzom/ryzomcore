@@ -18,8 +18,8 @@
 //
 #include "decal_anim.h"
 #include "decal.h"
-#include "interface_v3/lua_ihm.h"
-#include "interface_v3/lua_object.h"
+#include "nel/gui/lua_ihm.h"
+#include "nel/gui/lua_object.h"
 //
 #include "nel/misc/vector_2f.h"
 #include "nel/misc/algo.h"

@@ -15,8 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //#include "stdpch.h"
-#include "lua_object.h"
-#include "lua_ihm.h"
+#include "nel/gui/lua_object.h"
+#include "nel/gui/lua_ihm.h"
 //#include "lua_ihm_ryzom.h"
 #include "nel/gui/lua_helper.h"
 using namespace NLGUI;

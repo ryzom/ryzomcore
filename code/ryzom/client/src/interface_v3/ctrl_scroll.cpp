@@ -22,7 +22,7 @@
 #include "nel/misc/xml_auto_ptr.h"
 #include "group_menu.h"
 
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "lua_ihm_ryzom.h"
 
 using namespace NLMISC;

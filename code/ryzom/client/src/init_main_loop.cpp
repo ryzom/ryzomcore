@@ -104,7 +104,7 @@
 
 #include "landscape_poly_drawer.h"
 #include "session_browser_impl.h"
-#include "interface_v3/lua_manager.h"
+#include "nel/gui/lua_manager.h"
 
 
 // ProgressBar steps in init main loop

@@ -58,16 +58,16 @@ using namespace NLGUI;
 #include "nel/gui/event_descriptor.h"
 #include "../interface_v3/group_tree.h"
 #include "../client_cfg.h"
-#include "../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "../interface_v3/lua_ihm_ryzom.h"
-#include "../interface_v3/lua_object.h"
+#include "nel/gui/lua_object.h"
 #include "../global.h"
 #include "../connection.h"
 #include "../main_loop.h"
 #include "../interface_v3/people_interraction.h"
 #include "../time_client.h"
 #include "../pacs_client.h"
-#include "../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "../actions.h"
 #include "../actions_client.h"
 #include "object_factory_client.h"
@@ -113,7 +113,7 @@ using namespace NLGUI;
 
 #include "../session_browser_impl.h"
 #include "../far_tp.h"
-#include "../interface_v3/lua_manager.h"
+#include "nel/gui/lua_manager.h"
 
 
 using namespace NLMISC;

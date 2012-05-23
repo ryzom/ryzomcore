@@ -21,7 +21,7 @@
 #define CL_REFLECT_H
 
 #include "nel/misc/rgba.h"
-#include "lua_object.h"
+#include "nel/gui/lua_object.h"
 //
 #include <string>
 

@@ -107,10 +107,10 @@
 #include "../commands.h"
 #include "nel/gui/lua_helper.h"
 using namespace NLGUI;
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "lua_ihm_ryzom.h"
 #include "../r2/editor.h"
-#include "lua_manager.h"
+#include "nel/gui/lua_manager.h"
 
 #ifdef LUA_NEVRAX_VERSION
 	#include "lua_ide_dll_nevrax/include/lua_ide_dll/ide_interface.h" // external debugger

@@ -41,10 +41,10 @@
 #include "lua_ihm_ryzom.h"
 #include "interface_manager.h"
 #include "nel/gui/lua_helper.h"
-#include "lua_object.h"
+#include "nel/gui/lua_object.h"
 
-#include "lua_ihm.h"
-#include "reflect.h"
+#include "nel/gui/lua_ihm.h"
+#include "nel/gui/reflect.h"
 #include "action_handler.h"
 #include "action_handler_tools.h"
 #include "interface_manager.h"
@@ -67,7 +67,7 @@
 #include "guild_manager.h"
 #include "../client_cfg.h"
 #include "../sheet_manager.h"
-#include "lua_object.h"
+#include "nel/gui/lua_object.h"
 #include "game_share/emote_list_parser.h"
 #include "game_share/pvp_clan.h"
 #include "../weather.h"
@@ -84,7 +84,7 @@
 #include "../net_manager.h"				// for emotes
 #include "../client_chat_manager.h"		// for emotes
 #include "../login.h"
-#include "lua_object.h"
+#include "nel/gui/lua_object.h"
 #include "../actions.h"
 #include "../bg_downloader_access.h"
 #include "../connection.h"
@@ -100,7 +100,7 @@
 #include "game_share/bg_downloader_msg.h"
 #include "game_share/constants.h"
 #include "game_share/visual_slot_manager.h"
-#include "lua_manager.h"
+#include "nel/gui/lua_manager.h"
 
 #ifdef LUA_NEVRAX_VERSION
 	#include "lua_ide_dll_nevrax/include/lua_ide_dll/ide_interface.h" // external debugger

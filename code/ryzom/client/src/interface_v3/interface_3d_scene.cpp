@@ -32,7 +32,7 @@
 #include "nel/misc/xml_auto_ptr.h"
 #include "action_handler.h"
 
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 
 // ----------------------------------------------------------------------------
 using namespace std;

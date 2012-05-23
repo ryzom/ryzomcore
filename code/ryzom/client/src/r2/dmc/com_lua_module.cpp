@@ -36,7 +36,7 @@
 #include "../object_factory_client.h"
 #include "../editor.h"
 #include "../../net_manager.h"
-#include "../../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "../../interface_v3/lua_ihm_ryzom.h"
 
 #include "game_share/object.h"
@@ -51,7 +51,7 @@
 
 #include "nel/gui/lua_helper.h"
 using namespace NLGUI;
-#include "../../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 
 #include "../../entities.h"
 

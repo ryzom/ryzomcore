@@ -24,12 +24,12 @@
 #include "group_container.h"
 #include "group_editbox.h"
 #include "group_scrolltext.h"
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "lua_ihm_ryzom.h"
 
 
 #include "nel/misc/stream.h"
-#include "lua_manager.h"
+#include "nel/gui/lua_manager.h"
 
 using namespace std;
 using namespace NL3D;

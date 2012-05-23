@@ -18,7 +18,7 @@
 #include "object_factory_client.h"
 #include "editor.h"
 #include "instance.h"
-#include "../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "../interface_v3/lua_ihm_ryzom.h"
 
 namespace R2

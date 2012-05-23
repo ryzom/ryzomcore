@@ -21,7 +21,7 @@
 #include "interface_manager.h"
 #include "group_container.h"
 #include "group_header.h"
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 
 
 using namespace NLMISC;

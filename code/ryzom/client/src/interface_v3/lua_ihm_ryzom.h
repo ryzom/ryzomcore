@@ -1,7 +1,7 @@
 #ifndef LUA_IHM_RYZOM_H
 #define LUA_IHM_RYZOM_H
 
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 
 class CLuaIHMRyzom
 {

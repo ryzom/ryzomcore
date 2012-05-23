@@ -28,7 +28,7 @@
 #include "group_editbox.h"
 #include "view_text_formated.h"
 #include "view_text_id.h"
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 
 #include "group_list.h"
 #include "ctrl_button.h"

@@ -23,7 +23,7 @@
 #include "../time_client.h"
 #include "interface_manager.h"
 
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "lua_ihm_ryzom.h"
 
 

@@ -23,9 +23,9 @@
 #include "interface_manager.h"
 #include "ctrl_button.h"
 #include "action_handler.h"
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 
 using namespace std;
 using namespace NLMISC;

@@ -23,7 +23,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/smart_ptr.h"
 // client
-#include "reflect.h"
+#include "nel/gui/reflect.h"
 #include "ctrl_base.h"
 #include "interface_expr.h"
 #include "action_handler.h"

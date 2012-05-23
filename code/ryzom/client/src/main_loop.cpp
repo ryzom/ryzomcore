@@ -111,7 +111,7 @@
 #include "camera_recorder.h"
 #include "connection.h"
 #include "landscape_poly_drawer.h"
-#include "interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "interface_v3/lua_ihm_ryzom.h"
 #include "far_tp.h"
 #include "session_browser_impl.h"
@@ -145,7 +145,7 @@
 #include "interface_v3/bot_chat_manager.h"
 #include "string_manager_client.h"
 
-#include "interface_v3/lua_manager.h"
+#include "nel/gui/lua_manager.h"
 
 
 ///////////

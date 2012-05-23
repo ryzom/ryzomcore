@@ -19,7 +19,7 @@
 
 #include "tool_choose_pos.h"
 #include "nel/misc/vector.h"
-#include "../interface_v3/lua_object.h"
+#include "nel/gui/lua_object.h"
 
 class CEntity;
 class CLuaObject;

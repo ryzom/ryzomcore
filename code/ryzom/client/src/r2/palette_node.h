@@ -21,7 +21,7 @@
 #if 0
 //#include "interface_user_data.h"
 #include "group_tree.h"
-#include "lua_object.h"
+#include "nel/gui/lua_object.h"
 //
 #include "nel/misc/smart_ptr.h"
 
