@@ -28,9 +28,9 @@
 #ifdef NL_OS_WINDOWS
 # include <WinSock2.h>
 # include <Windows.h>
+typedef unsigned long ulong;
 #endif
 
-#include <my_global.h>
 #include <mysql.h>
 #include <time.h>
 
