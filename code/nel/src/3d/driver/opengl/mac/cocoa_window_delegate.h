@@ -23,6 +23,8 @@ using NL3D::NLDRIVERGLES::CDriverGL;
 #else
 using NL3D::NLDRIVERGL::CDriverGL;
 #endif
+#else
+using NL3D::CDriverGL;
 #endif
 
 @interface CocoaWindowDelegate : NSObject
