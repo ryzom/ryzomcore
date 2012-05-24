@@ -24,7 +24,7 @@
 #include "view_text.h"
 #include "view_bitmap.h"
 #include "ctrl_button.h"
-#include "interface_property.h"
+#include "nel/gui/interface_property.h"
 #include "interface_manager.h"
 #include "action_handler.h"
 

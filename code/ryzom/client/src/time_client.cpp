@@ -27,7 +27,7 @@
 // client.
 #include "time_client.h"
 #include "interface_v3/interface_manager.h"
-#include "interface_v3/interface_property.h"
+#include "nel/gui/interface_property.h"
 #include "client_cfg.h"
 #include "net_manager.h"
 #include "game_share/zc_shard_common.h"

@@ -22,7 +22,7 @@
 #include "dbgroup_list_sheet.h"
 #include "group_container.h"
 #include "ctrl_button.h"
-#include "interface_property.h"
+#include "nel/gui/interface_property.h"
 #include "interface_manager.h"
 #include "action_handler.h"
 #include "../sheet_manager.h"

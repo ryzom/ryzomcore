@@ -19,7 +19,7 @@
 #ifndef RZ_INTERFACE_ANIM_H
 #define RZ_INTERFACE_ANIM_H
 
-#include "interface_property.h"
+#include "nel/gui/interface_property.h"
 #include "interface_group.h"
 #include "interface_link.h"
 

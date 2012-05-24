@@ -19,7 +19,7 @@
 #include "stdpch.h"
 
 #include "interface_group.h"
-#include "interface_property.h"
+#include "nel/gui/interface_property.h"
 #include "interface_manager.h"
 #include "group_container.h"
 #include "../misc.h"
