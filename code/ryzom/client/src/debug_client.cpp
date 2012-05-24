@@ -584,22 +584,22 @@ void displayNetDebug ()
 	TextContext->printfAt(1.f, line, "Local Counter: %d", val);
 	line += lineStep;
 	// Inventory Counter
-	val= pIM->getDbProp("SERVER:INVENTORY:COUNTER")->getValue32();
+	val= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INVENTORY:COUNTER")->getValue32();
 	val&= pIM->getLocalSyncActionCounterMask();
 	TextContext->printfAt(1.f, line, "INVENTORY:COUNTER: %d", val);
 	line += lineStep;
 	// Exchange Counter
-	val= pIM->getDbProp("SERVER:EXCHANGE:COUNTER")->getValue32();
+	val= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:EXCHANGE:COUNTER")->getValue32();
 	val&= pIM->getLocalSyncActionCounterMask();
 	TextContext->printfAt(1.f, line, "EXCHANGE:COUNTER: %d", val);
 	line += lineStep;
 	// Programme Counter
-	val= pIM->getDbProp("SERVER:TARGET:CONTEXT_MENU:COUNTER")->getValue32();
+	val= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TARGET:CONTEXT_MENU:COUNTER")->getValue32();
 	val&= pIM->getLocalSyncActionCounterMask();
 	TextContext->printfAt(1.f, line, "TARGET:CONTEXT_MENU:COUNTER: %d", val);
 	line += lineStep;
 	// User Counter
-	val= pIM->getDbProp("SERVER:USER:COUNTER")->getValue32();
+	val= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:COUNTER")->getValue32();
 	val&= pIM->getLocalSyncActionCounterMask();
 	TextContext->printfAt(1.f, line, "USER:COUNTER: %d", val);
 	line += lineStep;
@@ -608,14 +608,14 @@ void displayNetDebug ()
 	// SPhrase Execution Synchronisation Counter
 	CSPhraseManager		*pPM= CSPhraseManager::getInstance();
 	// Next action
-	uint	srvVal= pIM->getDbProp(PHRASE_DB_COUNTER_NEXT)->getValue32();
+	uint	srvVal= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_COUNTER_NEXT)->getValue32();
 	uint	locVal= pPM->getPhraseNextExecuteCounter() ;
 	srvVal&= PHRASE_EXECUTE_COUNTER_MASK;
 	locVal&= PHRASE_EXECUTE_COUNTER_MASK;
 	TextContext->printfAt(1.f, line, "NextAction  (loc/srv): %d/%d", locVal, srvVal);
 	line += lineStep;
 	// CycleAction
-	srvVal= pIM->getDbProp(PHRASE_DB_COUNTER_CYCLE)->getValue32();
+	srvVal= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_COUNTER_CYCLE)->getValue32();
 	locVal= pPM->getPhraseCycleExecuteCounter();
 	srvVal&= PHRASE_EXECUTE_COUNTER_MASK;
 	locVal&= PHRASE_EXECUTE_COUNTER_MASK;

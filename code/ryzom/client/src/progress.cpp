@@ -395,7 +395,7 @@ void CProgress::internalProgress (float value)
 	// \todo GUIGUI : Remove this when possible.
 	NetMngr.update();
 	IngameDbMngr.flushObserverCalls();
-	CInterfaceManager::getInstance()->flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 	// update system dependent progress bar
 	static uint previousValue = 0;

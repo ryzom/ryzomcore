@@ -531,7 +531,7 @@ void CInterfaceElement::relativeSInt64Read (CInterfaceProperty &rIP, const strin
 		sint32 decal = 0;
 		if (val[0] == ':')
 			decal = 1;
-		if (pIM->getDbProp(val+decal, false) != NULL)
+		if (NLGUI::CDBManager::getInstance()->getDbProp(val+decal, false) != NULL)
 		{
 			rIP.readSInt64 (val+decal, _Id+":"+prop);
 			return;
@@ -544,7 +544,7 @@ void CInterfaceElement::relativeSInt64Read (CInterfaceProperty &rIP, const strin
 			while (pIEL != NULL)
 			{
 				sTmp = pIEL->getId()+":"+string(val+decal);
-				if (CInterfaceManager::getInstance()->getDbProp(sTmp, false) != NULL)
+				if (NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false) != NULL)
 				{
 					rIP.readSInt64 (sTmp.c_str(), _Id+":"+prop);
 					return;
@@ -578,7 +578,7 @@ void CInterfaceElement::relativeSInt32Read (CInterfaceProperty &rIP, const strin
 		sint32 decal = 0;
 		if (val[0] == ':')
 			decal = 1;
-		if (pIM->getDbProp(val+decal, false) != NULL)
+		if (NLGUI::CDBManager::getInstance()->getDbProp(val+decal, false) != NULL)
 		{
 			rIP.readSInt32 (val+decal, _Id+":"+prop);
 			return;
@@ -591,7 +591,7 @@ void CInterfaceElement::relativeSInt32Read (CInterfaceProperty &rIP, const strin
 			while (pIEL != NULL)
 			{
 				sTmp = pIEL->getId()+":"+string(val+decal);
-				if (CInterfaceManager::getInstance()->getDbProp(sTmp, false) != NULL)
+				if (NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false) != NULL)
 				{
 					rIP.readSInt32 (sTmp.c_str(), _Id+":"+prop);
 					return;
@@ -619,7 +619,7 @@ void CInterfaceElement::relativeBoolRead (CInterfaceProperty &rIP, const string 
 		sint32 decal = 0;
 		if (val[0] == ':')
 			decal = 1;
-		if (pIM->getDbProp(val+decal, false) != NULL)
+		if (NLGUI::CDBManager::getInstance()->getDbProp(val+decal, false) != NULL)
 		{
 			rIP.readBool (val+decal, _Id+":"+prop);
 			return;
@@ -632,7 +632,7 @@ void CInterfaceElement::relativeBoolRead (CInterfaceProperty &rIP, const string 
 			while (pIEL != NULL)
 			{
 				sTmp = pIEL->getId()+":"+string(val+decal);
-				if (CInterfaceManager::getInstance()->getDbProp(sTmp, false) != NULL)
+				if (NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false) != NULL)
 				{
 					rIP.readBool (sTmp.c_str(), _Id+":"+prop);
 					return;
@@ -665,7 +665,7 @@ void CInterfaceElement::relativeRGBARead(CInterfaceProperty &rIP,const std::stri
 		sint32 decal = 0;
 		if (val[0] == ':')
 			decal = 1;
-		if (pIM->getDbProp(val+decal, false) != NULL)
+		if (NLGUI::CDBManager::getInstance()->getDbProp(val+decal, false) != NULL)
 		{
 			rIP.readRGBA (val+decal, _Id+":"+prop);
 			return;
@@ -678,7 +678,7 @@ void CInterfaceElement::relativeRGBARead(CInterfaceProperty &rIP,const std::stri
 			while (pIEL != NULL)
 			{
 				sTmp = pIEL->getId()+":"+string(val+decal);
-				if (CInterfaceManager::getInstance()->getDbProp(sTmp, false) != NULL)
+				if (NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false) != NULL)
 				{
 					rIP.readRGBA (sTmp.c_str(), _Id+":"+prop);
 					return;

@@ -82,7 +82,7 @@ void		CGameContextMenu::init(const std::string &srcMenuId)
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	_GroupMenu = dynamic_cast<CGroupMenu*>(pIM->getWindowFromId ("ui:interface:" + menuId + ""));
-	_ContextVal = pIM->getDbProp("SERVER:TARGET:CONTEXT_VAL", false);
+	_ContextVal = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TARGET:CONTEXT_VAL", false);
 
 	if(_GroupMenu == NULL)
 	{
@@ -93,7 +93,7 @@ void		CGameContextMenu::init(const std::string &srcMenuId)
 	_GroupMilkoPad = "ui:interface:milko_pad";
 	if(_GroupMilkoPad != NULL)
 	{
-		_MilkoAttackDisengage = pIM->getDbProp("UI:VARIABLES:MK_ATTACK", false);
+		_MilkoAttackDisengage = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MK_ATTACK", false);
 		_MilkoAttDisBut1 = "ui:interface:milko_pad:content:mode1:mode1_content:milko_actions:action5";
 		_MilkoAttDisBut2 = "ui:interface:milko_pad:content:mode2:action5";
 	}
@@ -109,13 +109,13 @@ void		CGameContextMenu::init(const std::string &srcMenuId)
 	}
 
 	// Some DB links
-	_AvailablePrograms = pIM->getDbProp("LOCAL:TARGET:CONTEXT_MENU:PROGRAMMES");
-	_ServerTeamPresent = pIM->getDbProp(TEAM_DB_PATH ":0:PRESENT", false);
-	_ServerInDuel = pIM->getDbProp("SERVER:USER:IN_DUEL", false);
-	_ServerInPvpChallenge = pIM->getDbProp("SERVER:USER:IN_PVP_CHALLENGE", false);
-	_WebPageTitle = pIM->getDbProp("LOCAL:TARGET:CONTEXT_MENU:WEB_PAGE_TITLE", false);
-	_OutpostSheet = pIM->getDbProp("LOCAL:TARGET:CONTEXT_MENU:OUTPOST", false);
-	_OutpostRightToBannish = pIM->getDbProp("SERVER:CHARACTER_INFO:PVP_OUTPOST:RIGHT_TO_BANISH", false);
+	_AvailablePrograms = NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TARGET:CONTEXT_MENU:PROGRAMMES");
+	_ServerTeamPresent = NLGUI::CDBManager::getInstance()->getDbProp(TEAM_DB_PATH ":0:PRESENT", false);
+	_ServerInDuel = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:IN_DUEL", false);
+	_ServerInPvpChallenge = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:IN_PVP_CHALLENGE", false);
+	_WebPageTitle = NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TARGET:CONTEXT_MENU:WEB_PAGE_TITLE", false);
+	_OutpostSheet = NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TARGET:CONTEXT_MENU:OUTPOST", false);
+	_OutpostRightToBannish = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:PVP_OUTPOST:RIGHT_TO_BANISH", false);
 
 
 	// Some text Menu
@@ -146,14 +146,14 @@ void		CGameContextMenu::init(const std::string &srcMenuId)
 	// Mission DB and Text link
 	for(uint k = 0; k < NUM_MISSION_OPTIONS; ++k)
 	{
-		_MissionOption[k] = pIM->getDbProp(toString("LOCAL:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:TITLE", (int) k), false);
+		_MissionOption[k] = NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:TITLE", (int) k), false);
 		_TextMission[k] = toString(("ui:interface:" + menuId + ":mo%d").c_str(), (int) k);
 	}
 
 	// Mission Ring DB and Text link
 	for(uint k = 0; k < BOTCHATTYPE::MaxR2MissionEntryDatabase; ++k)
 	{
-		_MissionRing[k]= pIM->getDbProp(toString("LOCAL:TARGET:CONTEXT_MENU:MISSION_RING:%d:TITLE", k), false);
+		_MissionRing[k]= NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:TARGET:CONTEXT_MENU:MISSION_RING:%d:TITLE", k), false);
 		_TextMissionRing[k] = toString(("ui:interface:" + menuId + ":mr%d").c_str(), (int) k);
 	}
 
@@ -569,7 +569,7 @@ void		CGameContextMenu::update()
 		if(ok)
 		{
 			CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-			CCDBNodeLeaf		*node= pIM->getDbProp("UI:GCM_BEAST_SELECTED", false);
+			CCDBNodeLeaf		*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:GCM_BEAST_SELECTED", false);
 			// beast_order AH start with 1 (0 for ALL beasts)
 			if(node)
 				node->setValue32(animalIndex+1);
@@ -960,10 +960,10 @@ bool testMenuOptionForPackAnimal( CEntityCL* selectedAnimalInVision, uint index,
 
 	// Get animal status and type
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CCDBNodeLeaf	*node= pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS", index), false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS", index), false);
 	if(!node)	return false;
 	ANIMAL_STATUS::EAnimalStatus	status= (ANIMAL_STATUS::EAnimalStatus)node->getValue32();
-	node= pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:TYPE", index), false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:TYPE", index), false);
 	if(!node)	return false;
 	ANIMAL_TYPE::EAnimalType		anitype= (ANIMAL_TYPE::EAnimalType)node->getValue32();
 

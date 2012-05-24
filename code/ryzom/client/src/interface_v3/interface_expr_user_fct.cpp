@@ -717,8 +717,8 @@ static DECLARE_INTERFACE_USER_FCT(userDBCount)
 	while (!bExit)
 	{
 		sTmp = sFirstPart + NLMISC::toString(i) + sSecondPart;
-		CCDBNodeLeaf *pNL = pIM->getDbProp(sTmp,false);
-		CCDBNodeBranch *pNB = pIM->getDbBranch(sTmp);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(sTmp,false);
+		CCDBNodeBranch *pNB = NLGUI::CDBManager::getInstance()->getDbBranch(sTmp);
 		if (pNL != NULL)
 		{
 			if (pNL->getValue64() == 0)
@@ -1160,7 +1160,7 @@ static DECLARE_INTERFACE_USER_FCT(oldvalue)
 		nlwarning("oldvalue : 1 arg required");
 		return false;
 	}
-	CCDBNodeLeaf *nl = CInterfaceManager::getInstance()->getDbProp(args[0].getString());
+	CCDBNodeLeaf *nl = NLGUI::CDBManager::getInstance()->getDbProp(args[0].getString());
 	if (!nl)
 	{
 		nlwarning("oldvalue : arg 0 required to be an interface leaf");

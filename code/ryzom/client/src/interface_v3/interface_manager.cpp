@@ -259,12 +259,12 @@ int CInterfaceManager::DebugTrackGroupsGetId( CInterfaceGroup *pIG )
 
 // ------------------------------------------------------------------------------------------------
 CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext *textcontext ) :
-_ViewRenderer( driver, textcontext ),
-NLMISC::CCDBManager( "ROOT", NB_CDB_BANKS )
+_ViewRenderer( driver, textcontext )
 {
 	this->driver = driver;
 	this->textcontext = textcontext;
 	_Instance = this;
+	NLGUI::CDBManager::getInstance()->resizeBanks( NB_CDB_BANKS );
 	interfaceLinkUpdater = new CInterfaceLink::CInterfaceLinkUpdater();
 	_ScreenW = _ScreenH = 0;
 	_LastInGameScreenW = _LastInGameScreenH = 0;
@@ -363,13 +363,6 @@ CInterfaceManager::~CInterfaceManager()
 	_Templates.clear();
 	_Instance = NULL;
 
-	if (_Database)
-	{
-		_Database->clear();
-		delete _Database;
-		_Database = NULL;
-	}
-
 	// release the local string mapper
 	delete _UIStringMapper;
 	_UIStringMapper = NULL;
@@ -377,9 +370,11 @@ CInterfaceManager::~CInterfaceManager()
 	// release the database observers
 	releaseServerToLocalAutoCopyObservers();
 	
+	/*
 	removeFlushObserver( interfaceLinkUpdater );
 	delete interfaceLinkUpdater;
 	interfaceLinkUpdater = NULL;
+	*/
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -515,7 +510,7 @@ void CInterfaceManager::uninitLogin()
 	CInterfaceLink::removeAllLinks();
 
 	ICDBNode::CTextId textId("UI");
-	_Database->removeNode(textId);
+	NLGUI::CDBManager::getInstance()->getDB()->removeNode(textId);
 
 	{
 		uninitActions();
@@ -640,7 +635,7 @@ void CInterfaceManager::uninitOutGame()
 	//nlinfo ("%d seconds for removeAllLinks", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
 	ICDBNode::CTextId textId("UI");
-	_Database->removeNode(textId);
+	NLGUI::CDBManager::getInstance()->getDB()->removeNode(textId);
 	//nlinfo ("%d seconds for removeNode", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 
 	// Init the action manager
@@ -800,8 +795,8 @@ void CInterfaceManager::initInGame()
 	activateMasterGroup ("ui:interface", true);
 
 	// Update the time in the ui database
-	_CheckMailNode = getDbProp("UI:VARIABLES:MAIL_WAITING");
-	_CheckForumNode = getDbProp("UI:VARIABLES:FORUM_UPDATED");
+	_CheckMailNode = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MAIL_WAITING");
+	_CheckForumNode = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FORUM_UPDATED");
 
 	// Init the action manager
 	{
@@ -842,7 +837,7 @@ void CInterfaceManager::initInGame()
 		gc->setTarget(gc->getSavedTarget());
 	}
 
-	CCDBNodeLeaf *node = getDbProp("UI:SAVE:CHATLOG_STATE", false);
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHATLOG_STATE", false);
 	if (node)
 	{
 		_LogState = (node->getValue32() != 0);
@@ -1174,7 +1169,7 @@ void CInterfaceManager::uninitInGame1 ()
 
 	// remove DB entry
 	ICDBNode::CTextId textId("UI");
-	_Database->removeNode(textId);
+	NLGUI::CDBManager::getInstance()->getDB()->removeNode(textId);
 
 	// Uninit the action manager
 	{
@@ -1251,7 +1246,7 @@ void CInterfaceManager::updateFrameEvents()
 		pIA->update();
 	}
 	IngameDbMngr.flushObserverCalls();
-	CInterfaceManager::flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 	//
 	// Next : Test if we have to remove anims
 	for (i = 0; i < (sint)_ActiveAnims.size(); ++i)
@@ -1265,7 +1260,7 @@ void CInterfaceManager::updateFrameEvents()
 	}
 	//
 	IngameDbMngr.flushObserverCalls();
-	CInterfaceManager::getInstance()->flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 	// Handle waiting texts from server
 	processServerIDString();
@@ -1358,7 +1353,7 @@ void CInterfaceManager::updateFrameEvents()
 		(*it)->handleEvent(clockTick);
 	}
 	IngameDbMngr.flushObserverCalls();
-	CInterfaceManager::getInstance()->flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
  	// Update SPhrase manager
  	CSPhraseManager	*pPM= CSPhraseManager::getInstance();
@@ -1511,17 +1506,17 @@ void CInterfaceManager::setupOptions()
 bool CInterfaceManager::parseInterface (const std::vector<std::string> &xmlFileNames, bool reload, bool isFilename)
 {
 	// cache some commonly used db nodes
-	_DBB_UI_DUMMY = getDbBranch( "UI:DUMMY" );
-	_DB_UI_DUMMY_QUANTITY = getDbProp( "UI:DUMMY:QUANTITY", true );
-	_DB_UI_DUMMY_QUALITY = getDbProp( "UI:DUMMY:QUALITY", true );
-	_DB_UI_DUMMY_SHEET = getDbProp( "UI:DUMMY:SHEET", true );
-	_DB_UI_DUMMY_NAMEID = getDbProp( "UI:DUMMY:NAMEID", true );
-	_DB_UI_DUMMY_ENCHANT = getDbProp( "UI:DUMMY:ENCHANT", true );
-	_DB_UI_DUMMY_SLOT_TYPE = getDbProp( "UI:DUMMY:SLOT_TYPE", true );
-	_DB_UI_DUMMY_PHRASE = getDbProp( "UI:DUMMY:PHRASE", true );
-	_DB_UI_DUMMY_WORNED = getDbProp( "UI:DUMMY:WORNED", true );
-	_DB_UI_DUMMY_PREREQUISIT_VALID = getDbProp( "UI:DUMMY:PREREQUISIT_VALID", true );
-	_DB_UI_DUMMY_FACTION_TYPE = getDbProp( "UI:DUMMY:FACTION_TYPE", true );
+	_DBB_UI_DUMMY = NLGUI::CDBManager::getInstance()->getDbBranch( "UI:DUMMY" );
+	_DB_UI_DUMMY_QUANTITY = NLGUI::CDBManager::getInstance()->getDbProp( "UI:DUMMY:QUANTITY", true );
+	_DB_UI_DUMMY_QUALITY = NLGUI::CDBManager::getInstance()->getDbProp( "UI:DUMMY:QUALITY", true );
+	_DB_UI_DUMMY_SHEET = NLGUI::CDBManager::getInstance()->getDbProp( "UI:DUMMY:SHEET", true );
+	_DB_UI_DUMMY_NAMEID = NLGUI::CDBManager::getInstance()->getDbProp( "UI:DUMMY:NAMEID", true );
+	_DB_UI_DUMMY_ENCHANT = NLGUI::CDBManager::getInstance()->getDbProp( "UI:DUMMY:ENCHANT", true );
+	_DB_UI_DUMMY_SLOT_TYPE = NLGUI::CDBManager::getInstance()->getDbProp( "UI:DUMMY:SLOT_TYPE", true );
+	_DB_UI_DUMMY_PHRASE = NLGUI::CDBManager::getInstance()->getDbProp( "UI:DUMMY:PHRASE", true );
+	_DB_UI_DUMMY_WORNED = NLGUI::CDBManager::getInstance()->getDbProp( "UI:DUMMY:WORNED", true );
+	_DB_UI_DUMMY_PREREQUISIT_VALID = NLGUI::CDBManager::getInstance()->getDbProp( "UI:DUMMY:PREREQUISIT_VALID", true );
+	_DB_UI_DUMMY_FACTION_TYPE = NLGUI::CDBManager::getInstance()->getDbProp( "UI:DUMMY:FACTION_TYPE", true );
 
 	_DB_UI_DUMMY_QUANTITY->setValue64(0);
 	_DB_UI_DUMMY_QUALITY->setValue64(0);
@@ -1646,10 +1641,10 @@ bool CInterfaceManager::loadConfig (const string &filename)
 
 		// special for in game: backup last mission because of delayed update
 		{
-			CCDBNodeLeaf *pNL = getDbProp("UI:SAVE:MISSION_SELECTED", false);
+			CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:MISSION_SELECTED", false);
 			if (pNL)
 			{
-				CCDBNodeLeaf *pSelectedMissionBackup = getDbProp("UI:VARIABLES:MISSION_SELECTED_PREV_SESSION", true);
+				CCDBNodeLeaf *pSelectedMissionBackup = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MISSION_SELECTED_PREV_SESSION", true);
 				pSelectedMissionBackup->setValue64(pNL->getValue64());
 			}
 		}
@@ -1665,7 +1660,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 		// Load user landmarks
 		ContinentMngr.serialUserLandMarks(f);
 
-		CCDBNodeLeaf *pNL = getDbProp( "SERVER:INTERFACES:NB_BONUS_LANDMARKS" );
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp( "SERVER:INTERFACES:NB_BONUS_LANDMARKS" );
 		if ( pNL )
 		{
 			ICDBNode::CTextId textId;
@@ -1723,7 +1718,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 	_Modes[_CurrentMode].toCurrentDesktop();
 
 	// *** Apply the NPC icon display mode
-	CNPCIconCache::getInstance().init(!ClientCfg.R2EDEnabled && getDbProp("UI:SAVE:INSCENE:FRIEND:MISSION_ICON")->getValueBool());
+	CNPCIconCache::getInstance().init(!ClientCfg.R2EDEnabled && NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:INSCENE:FRIEND:MISSION_ICON")->getValueBool());
 
 	return true;
 }
@@ -2004,7 +1999,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 		_ViewRenderer.activateWorldSpaceMatrix (false);
 		
 		IngameDbMngr.flushObserverCalls();
-		CInterfaceManager::getInstance()->flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 		// If an element has captured the keyboard, make sure it is alway visible (all parent windows active)
 		if (_CaptureKeyboard != NULL)
@@ -2037,25 +2032,25 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 		}
 
 		// Update global color from database
-		_GlobalColor = CRGBA (	(uint8)getDbProp("UI:SAVE:COLOR:R")->getValue32(),
-								(uint8)getDbProp("UI:SAVE:COLOR:G")->getValue32(),
-								(uint8)getDbProp("UI:SAVE:COLOR:B")->getValue32(),
-								(uint8)getDbProp("UI:SAVE:COLOR:A")->getValue32()  );
+		_GlobalColor = CRGBA (	(uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:R")->getValue32(),
+								(uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:G")->getValue32(),
+								(uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:B")->getValue32(),
+								(uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:A")->getValue32()  );
 		_GlobalColorForContent.R = _GlobalColor.R;
 		_GlobalColorForContent.G = _GlobalColor.G;
 		_GlobalColorForContent.B = _GlobalColor.B;
 		_GlobalColorForContent.A = (uint8) (( (uint16) _GlobalColor.A * (uint16) _ContentAlpha) >> 8);
 
 		// Update global alphaS from database
-		_GlobalContentAlpha = (uint8)getDbProp("UI:SAVE:CONTENT_ALPHA")->getValue32();
-		_GlobalContainerAlpha = (uint8)getDbProp("UI:SAVE:CONTAINER_ALPHA")->getValue32();
-		_GlobalRolloverFactorContent = (uint8)getDbProp("UI:SAVE:CONTENT_ROLLOVER_FACTOR")->getValue32();
-		_GlobalRolloverFactorContainer = (uint8)getDbProp("UI:SAVE:CONTAINER_ROLLOVER_FACTOR")->getValue32();
+		_GlobalContentAlpha = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTENT_ALPHA")->getValue32();
+		_GlobalContainerAlpha = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTAINER_ALPHA")->getValue32();
+		_GlobalRolloverFactorContent = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTENT_ROLLOVER_FACTOR")->getValue32();
+		_GlobalRolloverFactorContainer = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTAINER_ROLLOVER_FACTOR")->getValue32();
 
 		// Update Player characteristics (for Item carac requirement Redifying)
 		nlctassert(CHARACTERISTICS::NUM_CHARACTERISTICS==8);
 		for (uint i=0; i<CHARACTERISTICS::NUM_CHARACTERISTICS; ++i)
-			_CurrentPlayerCharac[i]= getDbValue32(toString("SERVER:CHARACTER_INFO:CHARACTERISTICS%d:VALUE", i));
+			_CurrentPlayerCharac[i]= NLGUI::CDBManager::getInstance()->getDbValue32(toString("SERVER:CHARACTER_INFO:CHARACTERISTICS%d:VALUE", i));
 
 //		_CurrentPlayerCharac[CHARACTERISTICS::constitution]= getDbValue32("SERVER:CHARACTER_INFO:CHARACTERISTICS:Constitution");
 //		_CurrentPlayerCharac[CHARACTERISTICS::constitution]= getDbValue32("SERVER:CHARACTER_INFO:CHARACTERISTICS:Constitution");
@@ -2077,7 +2072,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 			Computed String are rendered in on big drawQuads at last part of each layer
 		*/
 		IngameDbMngr.flushObserverCalls();
-		CInterfaceManager::getInstance()->flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 		//
 		for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 		{
@@ -2129,7 +2124,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 		H_AUTO ( RZ_Interface_DrawViews_After )
 		
 		IngameDbMngr.flushObserverCalls();
-		CInterfaceManager::getInstance()->flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 		// draw the special over extend text
 		drawOverExtendViewText();
@@ -2178,7 +2173,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 
 		// flush obs
 		IngameDbMngr.flushObserverCalls();
-		CInterfaceManager::getInstance()->flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 	}
 }
 
@@ -2626,10 +2621,10 @@ void CInterfaceManager::setGlobalColor (NLMISC::CRGBA col)
 {
 	if (!_RProp)
 	{
-		_RProp = getDbProp("UI:SAVE:COLOR:R");
-		_GProp = getDbProp("UI:SAVE:COLOR:G");
-		_BProp = getDbProp("UI:SAVE:COLOR:B");
-		_AProp = getDbProp("UI:SAVE:COLOR:A");
+		_RProp = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:R");
+		_GProp = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:G");
+		_BProp = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:B");
+		_AProp = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:A");
 	}
 	_RProp ->setValue32 (col.R);
 	_GProp ->setValue32 (col.G);
@@ -2766,7 +2761,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 				{
 					bool result = _CaptureKeyboard->handleEvent(event);
 					IngameDbMngr.flushObserverCalls();
-					CInterfaceManager::getInstance()->flushObserverCalls();
+					NLGUI::CDBManager::getInstance()->flushObserverCalls();
 					return result;
 				}
 				else
@@ -2824,7 +2819,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 		{
 			bool result = _CaptureKeyboard->handleEvent(event);
 			IngameDbMngr.flushObserverCalls();
-			CInterfaceManager::getInstance()->flushObserverCalls();
+			NLGUI::CDBManager::getInstance()->flushObserverCalls();
 			return result;
 		}
 	}
@@ -3105,7 +3100,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 	}
 
 	IngameDbMngr.flushObserverCalls();
-	CInterfaceManager::getInstance()->flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 	// event handled?
 	return handled;
 }
@@ -3408,18 +3403,6 @@ void CInterfaceManager::updateAllLocalisedElements()
 }
 
 // ------------------------------------------------------------------------------------------------
-bool CInterfaceManager::addDBObserver (ICDBNode::IPropertyObserver* observer, ICDBNode::CTextId   id)
-{
-	return _Database->addObserver(observer, id);
-}
-
-// ------------------------------------------------------------------------------------------------
-bool CInterfaceManager::removeDBObserver (ICDBNode::IPropertyObserver* observer, ICDBNode::CTextId  id)
-{
-	return _Database->removeObserver(observer, id);
-}
-
-// ------------------------------------------------------------------------------------------------
 void CInterfaceManager::addServerString (const std::string &sTarget, uint32 id, IStringProcess *cb)
 {
 	if (id == 0)
@@ -3499,28 +3482,6 @@ void CInterfaceManager::processServerIDString()
 			delete pISW;
 		}
 	}
-}
-
-// ------------------------------------------------------------------------------------------------
-sint32		CInterfaceManager::getDbValue32 (const std::string & name)
-{
-	CCDBNodeLeaf	*node= getDbProp(name, false);
-	if(node)
-		return node->getValue32();
-	else
-		return 0;
-}
-
-// ------------------------------------------------------------------------------------------------
-CCDBNodeLeaf* CInterfaceManager::getDbProp(const std::string & name, bool bCreate)
-{
-	return getDbLeaf( name, bCreate );
-}
-
-// ------------------------------------------------------------------------------------------------
-void CInterfaceManager::delDbProp(const std::string & name)
-{
-	delDbNode( name );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -4443,9 +4404,9 @@ NLMISC::CRGBA CInterfaceManager::getDebugInfoColor(TSystemInfoMode mode)
 	if (_NeutralColor == NULL) // not initialised ?
 	{
 		#define SYSTEM_INFO_COLOR_DB_PATH "UI:VARIABLES:SYSTEM_INFOS:COLORS"
-		_NeutralColor = getDbProp(SYSTEM_INFO_COLOR_DB_PATH ":NEUTRAL");
-		_WarningColor = getDbProp(SYSTEM_INFO_COLOR_DB_PATH ":WARNING");
-		_ErrorColor = getDbProp(SYSTEM_INFO_COLOR_DB_PATH ":ERROR");
+		_NeutralColor = NLGUI::CDBManager::getInstance()->getDbProp(SYSTEM_INFO_COLOR_DB_PATH ":NEUTRAL");
+		_WarningColor = NLGUI::CDBManager::getInstance()->getDbProp(SYSTEM_INFO_COLOR_DB_PATH ":WARNING");
+		_ErrorColor = NLGUI::CDBManager::getInstance()->getDbProp(SYSTEM_INFO_COLOR_DB_PATH ":ERROR");
 	}
 	NLMISC::CRGBA color;
 	switch(mode)
@@ -5099,7 +5060,7 @@ void CInterfaceManager::removeRefOnGroup (CInterfaceGroup *group)
 uint CInterfaceManager::getUserDblClickDelay()
 {
 	uint nVal = 50;
-	CCDBNodeLeaf *pNL = getDbProp("UI:SAVE:DOUBLE_CLICK_SPEED");
+	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:DOUBLE_CLICK_SPEED");
 	if (pNL != NULL)
 		nVal = pNL->getValue32();
 	uint dbclickDelay = (uint)(DOUBLE_CLICK_MIN + (DOUBLE_CLICK_MAX-DOUBLE_CLICK_MIN) * (float)nVal / 100.0f);
@@ -5725,7 +5686,7 @@ void	CInterfaceManager::connectYuboChat()
 		_YuboChat.connect(string("chat.ryzom.com:")+toString(KlientChatPort), LoginLogin, LoginPassword);
 
 		// Inform the interface that the chat is present
-		getDbProp("UI:VARIABLES:YUBO_CHAT_PRESENT")->setValue32(1);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:YUBO_CHAT_PRESENT")->setValue32(1);
 	}
 }
 
@@ -6049,7 +6010,7 @@ void CInterfaceManager::createLocalBranch(const std::string &fileName, NLMISC::I
 			//Parse the parser output!!!
 			CCDBNodeBranch *localNode = new CCDBNodeBranch("LOCAL");
 			localNode->init( read.getRootNode (), progressCallBack );
-			_Database->attachChild(localNode,"LOCAL");
+			NLGUI::CDBManager::getInstance()->getDB()->attachChild(localNode,"LOCAL");
 
 			// Create the observers for auto-copy SERVER->LOCAL of inventory
 			ServerToLocalAutoCopyInventory.init("INVENTORY");
@@ -6131,21 +6092,21 @@ void CInterfaceManager::CServerToLocalAutoCopy::init(const std::string &dbPath)
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// Get the synchronisation Counter in Server DB
-	_ServerCounter= pIM->getDbProp(string("SERVER:") + dbPath + ":COUNTER", false);
+	_ServerCounter= NLGUI::CDBManager::getInstance()->getDbProp(string("SERVER:") + dbPath + ":COUNTER", false);
 
 	// if found
 	if(_ServerCounter)
 	{
 		// **** Add Observers on all nodes
 		// add the observers when server node change
-		pIM->addDBObserver(&_ServerObserver, string("SERVER:") + dbPath);
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&_ServerObserver, ICDBNode::CTextId( string("SERVER:") + dbPath ) );
 
 		// add the observers when local node change
-		pIM->addDBObserver(&_LocalObserver, string("LOCAL:") + dbPath);
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&_LocalObserver, ICDBNode::CTextId( string("LOCAL:") + dbPath ) );
 
 		// **** Init the Nodes shortcut
 		// Parse all Local Nodes
-		CCDBNodeBranch	*localBranch= pIM->getDbBranch(string("LOCAL:") + dbPath);
+		CCDBNodeBranch	*localBranch= NLGUI::CDBManager::getInstance()->getDbBranch(string("LOCAL:") + dbPath);
 		if(localBranch)
 		{
 			uint	i;
@@ -6169,7 +6130,7 @@ void CInterfaceManager::CServerToLocalAutoCopy::init(const std::string &dbPath)
 				serverLeafStr= "SERVER:" + serverLeafStr;
 
 				// try then to get this server node
-				CCDBNodeLeaf	*serverLeaf= pIM->getDbProp(serverLeafStr, false);
+				CCDBNodeLeaf	*serverLeaf= NLGUI::CDBManager::getInstance()->getDbProp(serverLeafStr, false);
 				if(serverLeaf)
 				{
 					// Both server and local leaves exist, ok, append to _Nodes
@@ -6465,11 +6426,11 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 			if (indexInTeam < PeopleInterraction.TeamList.getNumPeople() )
 			{
 				// Index is the database index (serverIndex() not used for team list)
-				CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp( NLMISC::toString(TEAM_DB_PATH ":%hu:NAME", indexInTeam ), false);
+				CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp( NLMISC::toString(TEAM_DB_PATH ":%hu:NAME", indexInTeam ), false);
 				if (pNL && pNL->getValueBool() )
 				{	
 					// There is a character corresponding to this index
-					pNL = CInterfaceManager::getInstance()->getDbProp( NLMISC::toString( TEAM_DB_PATH ":%hu:UID", indexInTeam ), false );
+					pNL = NLGUI::CDBManager::getInstance()->getDbProp( NLMISC::toString( TEAM_DB_PATH ":%hu:UID", indexInTeam ), false );
 					if (pNL)
 					{
 						CLFECOMMON::TClientDataSetIndex compressedIndex = pNL->getValue32();

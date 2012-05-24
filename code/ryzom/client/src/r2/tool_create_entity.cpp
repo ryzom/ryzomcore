@@ -240,9 +240,9 @@ std::string CToolCreateEntity::cloneEntityIntoScenario(CEntityCL *clonee,
 			const string propNameA = toString("SERVER:Entities:E%d:P%d", clonee->slot(), CLFECOMMON::PROPERTY_VPA);
 			const string propNameB = toString("SERVER:Entities:E%d:P%d", clonee->slot(), CLFECOMMON::PROPERTY_VPB);
 			const string propNameC = toString("SERVER:Entities:E%d:P%d", clonee->slot(), CLFECOMMON::PROPERTY_VPC);
-			CCDBNodeLeaf *leafA = CInterfaceManager::getInstance()->getDbProp(propNameA);
-			CCDBNodeLeaf *leafB = CInterfaceManager::getInstance()->getDbProp(propNameB);
-			CCDBNodeLeaf *leafC = CInterfaceManager::getInstance()->getDbProp(propNameC);
+			CCDBNodeLeaf *leafA = NLGUI::CDBManager::getInstance()->getDbProp(propNameA);
+			CCDBNodeLeaf *leafB = NLGUI::CDBManager::getInstance()->getDbProp(propNameB);
+			CCDBNodeLeaf *leafC = NLGUI::CDBManager::getInstance()->getDbProp(propNameC);
 			if (!leafA)
 			{
 				nlwarning("Can't find DB leaf %s", propNameA.c_str());
@@ -821,7 +821,7 @@ class CAHR2EDToggleDrawArray : public IActionHandler
 		CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton *>(pCaller);
 		if (but)
 		{
-			im->getDbProp("UI:TEMP:R2_DRAW_ARRAY")->setValueBool(but->getPushed());
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:R2_DRAW_ARRAY")->setValueBool(but->getPushed());
 			CToolCreateEntity *tce = dynamic_cast<CToolCreateEntity *>(getEditor().getCurrentTool());
 			if (tce)
 			{

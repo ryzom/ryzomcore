@@ -294,7 +294,7 @@ void CUserControls::update()
 	// update camera collision once per frame
 	View.updateCameraCollision();
 
-	CInterfaceManager::getInstance()->getDbProp("UI:VARIABLES:MK_MOVE")->setValue32(autowalkState());
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MK_MOVE")->setValue32(autowalkState());
 }// update //
 
 

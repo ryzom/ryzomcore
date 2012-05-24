@@ -813,10 +813,10 @@ void getSeedsFromDB(CSeeds &dest)
 	string bs = im->getDefine("money_3");
 	string vbs = im->getDefine("money_4");
 
-	dest = CSeeds(im->getDbProp(ls)->getValue32(),
-				  im->getDbProp(ms)->getValue32(),
-				  im->getDbProp(bs)->getValue32(),
-				  im->getDbProp(vbs)->getValue32());
+	dest = CSeeds(NLGUI::CDBManager::getInstance()->getDbProp(ls)->getValue32(),
+				  NLGUI::CDBManager::getInstance()->getDbProp(ms)->getValue32(),
+				  NLGUI::CDBManager::getInstance()->getDbProp(bs)->getValue32(),
+				  NLGUI::CDBManager::getInstance()->getDbProp(vbs)->getValue32());
 } // getSeedsFromDB //
 
 

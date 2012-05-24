@@ -319,7 +319,7 @@ void CCDBSynchronised::writeInitInProgressIntoUIDB()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if (pIM)
-		pIM->getDbProp("UI:VARIABLES:CDB_INIT_IN_PROGRESS")->setValueBool(_InitInProgress);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CDB_INIT_IN_PROGRESS")->setValueBool(_InitInProgress);
 	else
 		nlwarning("InterfaceManager not created");
 }

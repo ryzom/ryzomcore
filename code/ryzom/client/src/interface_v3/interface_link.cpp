@@ -24,6 +24,7 @@
 #include "interface_manager.h"
 #include "interface_expr_node.h"
 #include "nel/gui/reflect.h"
+#include "nel/gui/db_manager.h"
 #include "nel/misc/cdb_branch.h"
 
 using namespace std;
@@ -132,7 +133,7 @@ static bool affect(const CInterfaceExprValue &value, CInterfaceElement &destElem
 
 CInterfaceLink::CInterfaceLinkUpdater::CInterfaceLinkUpdater()
 {
-	CInterfaceManager::getInstance()->addFlushObserver( this );
+	NLGUI::CDBManager::getInstance()->addFlushObserver( this );
 }
 
 CInterfaceLink::CInterfaceLinkUpdater::~CInterfaceLinkUpdater()
@@ -275,7 +276,7 @@ void CInterfaceLink::createObservers(const TNodeVect &nodes)
 		else
 		{
 			CCDBNodeBranch *br = static_cast<CCDBNodeBranch *>(*it);
-			CInterfaceManager::getInstance()->addBranchObserver( br, this );
+			NLGUI::CDBManager::getInstance()->addBranchObserver( br, this );
 		}
 	}
 }
@@ -293,7 +294,7 @@ void CInterfaceLink::removeObservers(const TNodeVect &nodes)
 		else
 		{
 			CCDBNodeBranch *br = static_cast<CCDBNodeBranch *>(*it);
-			CInterfaceManager::getInstance()->removeBranchObserver( br, this );
+			NLGUI::CDBManager::getInstance()->removeBranchObserver( br, this );
 		}
 	}
 }

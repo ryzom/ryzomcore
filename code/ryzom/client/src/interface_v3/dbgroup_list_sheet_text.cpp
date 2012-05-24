@@ -97,7 +97,7 @@ bool CDBGroupListSheetText::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	if ( prop )
 	{
 		// get a branch in the database.
-		CCDBNodeBranch *branch= pIM->getDbBranch(prop);
+		CCDBNodeBranch *branch= NLGUI::CDBManager::getInstance()->getDbBranch(prop);
 		if(!branch)
 		{
 			nlinfo ("Branch not found in the database %s", (const char*)prop);
@@ -107,7 +107,7 @@ bool CDBGroupListSheetText::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 		_DbBranch= branch;
 		_DbBranchName= (const char*)prop;
 		// add observer
-		pIM->addBranchObserver( branch, &_DbBranchObs );
+		NLGUI::CDBManager::getInstance()->addBranchObserver( branch, &_DbBranchObs );
 	}
 
 	// parse the common ctrl info
@@ -211,7 +211,7 @@ bool CDBGroupListSheetText::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"db_animal_status" );
 	if (prop)
 	{
-		_AnimalStatus= pIM->getDbProp((const char*)prop, false);
+		_AnimalStatus= NLGUI::CDBManager::getInstance()->getDbProp((const char*)prop, false);
 	}
 
 	return true;

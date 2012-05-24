@@ -317,7 +317,7 @@ inline void	waitForNetworkMessage(bool &var)
 		// Update network.
 		NetMngr.update();
 		IngameDbMngr.flushObserverCalls();
-		CInterfaceManager::getInstance()->flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 		// Send dummy info
 		NetMngr.send();
 		// Do not take all the CPU.
@@ -475,9 +475,9 @@ void initMainLoop()
 
 		IngameDbMngr.init(CPath::lookup("database.xml"), ProgressBar);
 		ICDBNode::CTextId textId("SERVER");
-		if( pIM->getDB()->getNode(textId, false) )
-			pIM->getDB()->removeNode(textId);
-		pIM->getDB()->attachChild(IngameDbMngr.getNodePtr(),"SERVER");
+		if( NLGUI::CDBManager::getInstance()->getDB()->getNode(textId, false) )
+			NLGUI::CDBManager::getInstance()->getDB()->removeNode(textId);
+		NLGUI::CDBManager::getInstance()->getDB()->attachChild(IngameDbMngr.getNodePtr(),"SERVER");
 
 		// Set the database
 		NetMngr.setDataBase (IngameDbMngr.getNodePtr());
@@ -497,8 +497,8 @@ void initMainLoop()
 
 		// Add the LOCAL branch
 		ICDBNode::CTextId textId("LOCAL");
-		if( pIM->getDB()->getNode(textId, false) )
-			pIM->getDB()->removeNode(textId);
+		if( NLGUI::CDBManager::getInstance()->getDB()->getNode(textId, false) )
+			NLGUI::CDBManager::getInstance()->getDB()->removeNode(textId);
 		pIM->createLocalBranch(CPath::lookup("local_database.xml"), ProgressBar);
 
 		initLast = initCurrent;
@@ -1219,7 +1219,7 @@ void initMainLoop()
 				// Update Network.
 				NetMngr.update();
 				IngameDbMngr.flushObserverCalls();
-				CInterfaceManager::getInstance()->flushObserverCalls();
+				NLGUI::CDBManager::getInstance()->flushObserverCalls();
 			}
 
 			// Set the LastGameCycle
@@ -1488,7 +1488,7 @@ void initWelcomeWindow()
 	CInterfaceGroup* welcomeWnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:welcome_info"));
 	if(welcomeWnd)
 	{
-		bool welcomeDbProp  = pIM->getDbProp("UI:SAVE:WELCOME")->getValueBool();
+		bool welcomeDbProp  = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:WELCOME")->getValueBool();
 		CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
 		welcomeWnd->setActive((sb.CurrentJoinMode!=CFarTP::LaunchEditor) && welcomeDbProp);
 	}
@@ -1502,7 +1502,7 @@ void initHardwareCursor(bool secondCall)
 	CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
 
 	string nodeName = "UI:SAVE:HARDWARE_CURSOR";
-	CCDBNodeLeaf * node= pIM->getDbProp(nodeName);
+	CCDBNodeLeaf * node= NLGUI::CDBManager::getInstance()->getDbProp(nodeName);
 
 	if(node)
 	{

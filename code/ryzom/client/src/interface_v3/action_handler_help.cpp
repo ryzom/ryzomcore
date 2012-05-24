@@ -182,7 +182,7 @@ void	CInterfaceHelp::initWindows()
 	// add observers for the update of phrase help texts (depends of weight of equipped weapons)
 	for (uint i = 0; i < MAX_HANDINV_ENTRIES; ++i)
 	{
-		CCDBNodeLeaf *pNodeLeaf = pIM->getDbProp(std::string(LOCAL_INVENTORY) + ":HAND:" + toString(i), false);
+		CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp(std::string(LOCAL_INVENTORY) + ":HAND:" + toString(i), false);
 		if(pNodeLeaf)
 		{
 			ICDBNode::CTextId textId;
@@ -205,7 +205,7 @@ void	CInterfaceHelp::release()
 	// add observers for the update of phrase help texts (depends of weight of equipped weapons)
 	for (uint i = 0; i < MAX_HANDINV_ENTRIES; ++i)
 	{
-		CCDBNodeLeaf *pNodeLeaf = pIM->getDbProp(std::string(LOCAL_INVENTORY) + ":HAND:" + toString(i), false);
+		CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp(std::string(LOCAL_INVENTORY) + ":HAND:" + toString(i), false);
 		if(pNodeLeaf)
 		{
 			ICDBNode::CTextId textId;
@@ -1243,7 +1243,7 @@ static void setupSkillToTradeHelp(CSheetHelpSetup &setup)
 //		for (uint job = 0; job < 8; ++job)
 //		{
 //			std::string dbPath = toString("CHARACTER_INFO:CAREER%d:JOB%d:JOB_CAP", (int) career, (int) job);
-//			uint level = (uint) im->getDbProp(dbPath)->getValue32();
+//			uint level = (uint) NLGUI::CDBManager::getInstance()->getDbProp(dbPath)->getValue32();
 //			if (level != 0) // has the player this job ?
 //			{
 //				// check if level in this job is enough to get the skills
@@ -1437,7 +1437,7 @@ void	getMagicProtection(CDBCtrlSheet	*item, ucstring &itemText)
 	{
 		// Mul item quality by a constant
 		uint	maxAbsorb= item->getQuality();
-		CCDBNodeLeaf	*nodeFactor= pIM->getDbProp(pIM->getDefine("player_protect_absorbfactor"), false);
+		CCDBNodeLeaf	*nodeFactor= NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("player_protect_absorbfactor"), false);
 		if(nodeFactor)
 			maxAbsorb= maxAbsorb*nodeFactor->getValue32()/100;
 
@@ -1510,7 +1510,7 @@ void	getWeightText(CDBCtrlSheet *item, const CItemSheet*pIS, ucstring &itemText)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	CCDBNodeLeaf *pWG = pIM->getDbProp(item->getSheet()+":WEIGHT",false);
+	CCDBNodeLeaf *pWG = NLGUI::CDBManager::getInstance()->getDbProp(item->getSheet()+":WEIGHT",false);
 	if(pWG)
 	{
 		// must mul weight by quantity
@@ -2338,7 +2338,7 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 	nlassert(pIS);
 	
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCDBNodeBranch *dbBranch = pIM->getDbBranch( setup.SrcSheet->getSheet() );
+	CCDBNodeBranch *dbBranch = NLGUI::CDBManager::getInstance()->getDbBranch( setup.SrcSheet->getSheet() );
 	
 	
 	CInterfaceElement *elt = setup.HelpWindow->getElement(setup.HelpWindow->getId()+setup.PrefixForExtra+INFO_ITEM_PREVIEW);
@@ -2353,7 +2353,7 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 	}
 
 	static sint32 helpWidth = setup.HelpWindow->getW();
-	bool scene_inactive = ! pIM->getDbProp("UI:SAVE:SHOW_3D_ITEM_PREVIEW")->getValueBool();
+	bool scene_inactive = ! NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_3D_ITEM_PREVIEW")->getValueBool();
 	if (scene_inactive || 
 		(pIS->Family != ITEMFAMILY::ARMOR && 
 		 pIS->Family != ITEMFAMILY::MELEE_WEAPON && 
@@ -2818,20 +2818,20 @@ void fillOutpostBuildingListItem(const std::vector<NLMISC::CSheetId> &mps, IList
 		uint i;
 		for(i=0;i<mps.size();i++)
 		{
-			CCDBNodeLeaf	*node= pIM->getDbProp(toString("%s:%d:SHEET", branchBase.c_str(), i));
+			CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:SHEET", branchBase.c_str(), i));
 			if(node)
 				node->setValue32(mps[i].asInt());
-			node= pIM->getDbProp(toString("%s:%d:QUALITY", branchBase.c_str(), i), false);
+			node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:QUALITY", branchBase.c_str(), i), false);
 			if(node)
 				node->setValue32(qualityLevel);
-			node= pIM->getDbProp(toString("%s:%d:PREREQUISIT_VALID", branchBase.c_str(), i), false);
+			node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:PREREQUISIT_VALID", branchBase.c_str(), i), false);
 			if(node)
 				node->setValue32(1);
 		}
 		// Reset other to 0.
 		for(;;i++)
 		{
-			CCDBNodeLeaf	*node= pIM->getDbProp(toString("%s:%d:SHEET", branchBase.c_str(), i), false);
+			CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:SHEET", branchBase.c_str(), i), false);
 			if(node)
 				node->setValue32(0);
 			else
@@ -2918,7 +2918,7 @@ static bool		getAuraDisabledState(CDBCtrlSheet *cs)
 
 	// Get the DISABLED DBprop
 	string	db= cs->getSheet() + ":DISABLED";
-	CCDBNodeLeaf	*node= pIM->getDbProp(db, false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(db, false);
 	return node && node->getValue32()!=0;
 }
 
@@ -2932,7 +2932,7 @@ static sint		getBonusMalusSpecialTT(CDBCtrlSheet *cs)
 
 	// Get the SPECIAL_TOOLTIP DBprop
 	string	db= cs->getSheet() + ":SPECIAL_TOOLTIP";
-	return pIM->getDbValue32 (db);
+	return NLGUI::CDBManager::getInstance()->getDbValue32 (db);
 }
 
 
@@ -3111,12 +3111,12 @@ void fillSabrinaPhraseListBrick(const CSPhraseCom &phrase, IListSheetBase *listB
 		uint i;
 		for(i=0;i<phrase.Bricks.size();i++)
 		{
-			CCDBNodeLeaf	*node= pIM->getDbProp(toString("%s:%d:SHEET", branchBase.c_str(), i));
+			CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:SHEET", branchBase.c_str(), i));
 			if(node)
 				node->setValue32(phrase.Bricks[i].asInt());
 
 			// For requirements bricks, update the LOCKED state
-			node= pIM->getDbProp(toString("%s:%d:LOCKED", branchBase.c_str(), i));
+			node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:LOCKED", branchBase.c_str(), i));
 			if(node)
 			{
 				if(pBM->isBrickKnown(phrase.Bricks[i]))
@@ -3129,7 +3129,7 @@ void fillSabrinaPhraseListBrick(const CSPhraseCom &phrase, IListSheetBase *listB
 		// Reset other to 0.
 		for(;;i++)
 		{
-			CCDBNodeLeaf	*node= pIM->getDbProp(toString("%s:%d:SHEET", branchBase.c_str(), i), false);
+			CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:SHEET", branchBase.c_str(), i), false);
 			if(node)
 				node->setValue32(0);
 			else
@@ -3469,73 +3469,73 @@ void setConsoModSuccessTooltip( CDBCtrlSheet *cs )
 	if( CSheetId(cs->getSheetId()).toString() == "mod_melee_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModMeleeSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:MELEE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:MELEE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_range_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModRangeSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:RANGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:RANGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_craft_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModCraftSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:CRAFT", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:CRAFT", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_defense_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModDefenseSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:DODGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:DODGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_dodge_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModDodgeSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:DODGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:DODGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_parry_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModParrySuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:PARRY", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:PARRY", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_forage_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModForageSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::common_ecosystem)+":FORAGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::common_ecosystem)+":FORAGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_desert_forage_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModDesertForageSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::desert)+":FORAGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::desert)+":FORAGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_forest_forage_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModForestForageSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::forest)+":FORAGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::forest)+":FORAGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_lacustre_forage_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModLacustreForageSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::lacustre)+":FORAGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::lacustre)+":FORAGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_jungle_forage_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModJungleForageSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::jungle)+":FORAGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::jungle)+":FORAGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_primary_root_forage_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModPrimaryRootForageSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::primary_root)+":FORAGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::primary_root)+":FORAGE", false);
 	}
 
 	if( nodeSM )
@@ -3577,7 +3577,7 @@ public:
 			pIM->setContextHelpText(CI18N::get("uittPvpOutpostInRound"));
 		else if(specialTTId==BONUS_MALUS::DeathPenalty)
 		{
-			CCDBNodeLeaf * node = pIM->getDbProp("SERVER:USER:DEATH_XP_MALUS", false);
+			CCDBNodeLeaf * node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:DEATH_XP_MALUS", false);
 			if( node )
 			{
 				ucstring txt = CI18N::get("uittDeathPenalty");
@@ -3619,7 +3619,7 @@ public:
 		}
 
 		ucstring txt;
-		CCDBNodeLeaf *node = pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:NAME", index));
+		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:NAME", index));
 		if (node && CStringManagerClient::instance()->getDynString(node->getValue32(), txt))
 		{
 			pIM->setContextHelpText(CEntityCL::removeTitleFromName(txt));
@@ -3636,13 +3636,13 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		// Find the mount's db leaf
-		CCDBNodeBranch *animalsNode = safe_cast<CCDBNodeBranch*>(pIM->getDB()->getNode( ICDBNode::CTextId( "SERVER:PACK_ANIMAL" ), false ));
+		CCDBNodeBranch *animalsNode = safe_cast<CCDBNodeBranch*>(NLGUI::CDBManager::getInstance()->getDB()->getNode( ICDBNode::CTextId( "SERVER:PACK_ANIMAL" ), false ));
 		BOMB_IF( ! animalsNode, "! animalsNode", return; );
 		sint32 minTimeRemaining = -1;
 		uint nbAnimals = (uint)animalsNode->getNbNodes();
 		for ( uint i=0; i!=nbAnimals; ++i )
 		{
-			CCDBNodeLeaf	*statusNode = pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d", i) + ":STATUS", false);
+			CCDBNodeLeaf	*statusNode = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d", i) + ":STATUS", false);
 			if (statusNode && ANIMAL_STATUS::isDead((ANIMAL_STATUS::EAnimalStatus)statusNode->getValue32()) )
 			{
 				ICDBNode *beastNode = animalsNode->getNode( i );
@@ -3884,7 +3884,7 @@ public:
 		string	prefix= getParam(Params, "prefix");
 
 		CInterfaceGroup		*wnd= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(wndStr));
-		CCDBNodeLeaf		*node= pIM->getDbProp(dbitem);
+		CCDBNodeLeaf		*node= NLGUI::CDBManager::getInstance()->getDbProp(dbitem);
 
 		// common method for info and botchat
 		if(wnd && node)
@@ -3959,7 +3959,7 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		CCDBNodeLeaf *pVal = pIM->getDbProp("UI:SAVE:MK_MODE", false);
+		CCDBNodeLeaf *pVal = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:MK_MODE", false);
 		if(pVal)
 		{
 			sint32 mode = pVal->getValue32() + 1;

@@ -40,7 +40,7 @@ void CDBGroupListSheetMission::CSheetChildMission::init(CDBGroupListSheetText *p
 	CCDBNodeLeaf *pNL;
 	string sTmp = Ctrl->getSheet()+":PREREQ_STATE";
 	sTmp = "LOCAL:" + sTmp.substr(6,sTmp.size());
-	pNL = pIM->getDbProp(sTmp, false);
+	pNL = NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false);
 	nlassert(pNL != NULL);
 	CurrentPreReqState.link ( sTmp.c_str() );
 

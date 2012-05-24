@@ -209,7 +209,7 @@ void initEula()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if (!ClientCfg.SkipEULA && CFile::fileExists(getLogDirectory() + "show_eula"))
 	{
-		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_EULA);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_EULA);
 
 		// if we display the eula, it means we make a patch so we clean the cache directory
 		// (clear cache after each patch)
@@ -260,7 +260,7 @@ void initCatDisplay()
 		(InfoOnPatch.ReqCat.size() > 0))
 	{
 		createOptionalCatUI();
-		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CATDISP);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CATDISP);
 	}
 	else
 	{
@@ -272,7 +272,7 @@ void initCatDisplay()
 void initReboot()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_REBOOT);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_REBOOT);
 }
 
 
@@ -361,7 +361,7 @@ void loginMainLoop()
 //	while (loginFinished == false)
 	{
 		IngameDbMngr.flushObserverCalls();
-		CInterfaceManager::getInstance()->flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 		// Update the DT T0 and T1 global variables
 		updateClientTime();
@@ -380,7 +380,7 @@ void loginMainLoop()
 		pIM->updateFrameEvents();
 		pIM->updateFrameViews(NULL);
 		IngameDbMngr.flushObserverCalls();
-		CInterfaceManager::getInstance()->flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 
 
@@ -399,7 +399,7 @@ void loginMainLoop()
 		// Display
 		Driver->swapBuffers();
 
-//		sint32 screen = pIM->getDbProp("UI:VARIABLES:SCREEN")->getValue32();
+//		sint32 screen = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->getValue32();
 		if (LoginSM.getCurrentState() == CLoginStateMachine::st_check_patch)
 //		if (screen == UI_VARIABLES_SCREEN_CHECKING) // If we are in checking mode
 		{
@@ -487,7 +487,7 @@ void loginMainLoop()
 						{
 							LoginSM.pushEvent(CLoginStateMachine::ev_patch_needed);
 							//	createOptionalCatUI();
-							//	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CATDISP);
+							//	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CATDISP);
 						}
 						else
 						{
@@ -525,10 +525,10 @@ void loginMainLoop()
 			if (pPM->isScanDataThreadEnded(res))
 			{
 				// if interface consider it was running before
-				if(pIM->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->getValue32()!=0)
+				if(NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->getValue32()!=0)
 				{
 					// no more running
-					pIM->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->setValue32(0);
+					NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->setValue32(0);
 
 					if(res)
 					{
@@ -722,8 +722,8 @@ void initLoginScreen()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CPatchManager *pPM = CPatchManager::getInstance();
-	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
-	pIM->getDbProp("UI:VARIABLES:DISPLAY_ACCOUNT_BUTTONS")->setValue32(ClientCfg.DisplayAccountButtons);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DISPLAY_ACCOUNT_BUTTONS")->setValue32(ClientCfg.DisplayAccountButtons);
 
 	// Active inputs
 	Actions.enable(true);
@@ -813,7 +813,7 @@ bool login()
 
 	pIM->initLogin();
 	IngameDbMngr.flushObserverCalls();
-	CInterfaceManager::getInstance()->flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 	bool tmpDI = ClientCfg.DisableDirectInput;
 	ClientCfg.DisableDirectInput = true;
@@ -828,7 +828,7 @@ bool login()
 
 //	if (ClientCfg.TestBrowser)
 //	{
-//		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
+//		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
 //
 //		// hide 'back to login' button
 //		CInterfaceElement *backToLogin = pIM->getElementFromId(CTRL_BUTTON_BACKTOLOGIN);
@@ -848,8 +848,8 @@ bool login()
 //	}
 //	else
 //	{
-////		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
-////		pIM->getDbProp("UI:VARIABLES:DISPLAY_ACCOUNT_BUTTONS")->setValue32(ClientCfg.DisplayAccountButtons);
+////		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
+////		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DISPLAY_ACCOUNT_BUTTONS")->setValue32(ClientCfg.DisplayAccountButtons);
 //	}
 
 	// Active inputs
@@ -1020,7 +1020,7 @@ void initPatchCheck()
 		CBGDownloaderAccess::getInstance().requestDownloadThreadPriority(BGDownloader::ThreadPriority_Normal, false);
 		CBGDownloaderAccess::getInstance().startTask(taskDesc, getBGDownloaderCommandLine(), true /* showDownloader */);
 	}
-	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
 
 	setPatcherStateText("ui:login:checking", ucstring());
 	setPatcherProgressText("ui:login:checking", ucstring());
@@ -1029,7 +1029,7 @@ void initPatchCheck()
 void initShardDisplay()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_SHARDDISP);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_SHARDDISP);
 
 	CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_SHARD));
 	if (pList == NULL)
@@ -1113,7 +1113,7 @@ void onlogin(bool vanishScreen = true)
 	}
 
 	if(vanishScreen)
-		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(-1);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(-1);
 
 	// Check the login/pass
 
@@ -1138,12 +1138,12 @@ void onlogin(bool vanishScreen = true)
 //				pPM->init(R2PatchURLs, R2BackupPatchURL, R2ServerVersion);
 //
 //				pPM->startCheckThread();
-//				pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
+//				NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
 //			}
 //			else
 //			{
 //				// go directly to web browser
-//				pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
+//				NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
 //
 //				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 //				// start the browser
@@ -1155,7 +1155,7 @@ void onlogin(bool vanishScreen = true)
 		}
 		else
 		{
-//			pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_SHARDDISP);
+//			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_SHARDDISP);
 		}
 
 //		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_SHARD));
@@ -1230,7 +1230,7 @@ void onlogin(bool vanishScreen = true)
 		pIM->messageBoxWithHelp("Error : " + res, "ui:login");
 
 		LoginSM.pushEvent(CLoginStateMachine::ev_bad_login);
-//		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
+//		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
 //
 //		if (LoginLogin.empty())
 //			pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
@@ -1317,7 +1317,7 @@ class CAHLoginTab : public IActionHandler
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		if (pIM->getDbProp("UI:VARIABLES:SCREEN")->getValue32() == UI_VARIABLES_SCREEN_CHECKPASS)
+		if (NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->getValue32() == UI_VARIABLES_SCREEN_CHECKPASS)
 		{
 			CCtrlBase *pCB = pIM->getCaptureKeyboard();
 			if (pCB != NULL)
@@ -1331,7 +1331,7 @@ class CAHLoginTab : public IActionHandler
 				pIM->setCaptureKeyboard(pNewCB);
 			}
 		}
-		else if (pIM->getDbProp("UI:VARIABLES:SCREEN")->getValue32() == UI_VARIABLES_SCREEN_CREATE_ACCOUNT)
+		else if (NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->getValue32() == UI_VARIABLES_SCREEN_CREATE_ACCOUNT)
 		{
 			CCtrlBase *pCB = pIM->getCaptureKeyboard();
 			if (pCB != NULL)
@@ -1466,7 +1466,7 @@ class CAHLoginConnect : public IActionHandler
 //		if (ClientCfg.PatchWanted)
 //		{
 //			pPM->startCheckThread();
-//			pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
+//			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
 //		}
 //		else
 //		{
@@ -1511,7 +1511,7 @@ class CAHLoginConnect2 : public IActionHandler
 //			(Shards[ShardSelected].Version != pPM->getClientVersion()))
 //		{
 //			pPM->startCheckThread();
-//			pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
+//			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
 //		}
 //		else
 //		{
@@ -1571,7 +1571,7 @@ void initPatch()
 		// release lock on bnp, so that they can be written
 		NLMISC::CBigFile::getInstance().removeAll();
 	}
-	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_PATCHING);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_PATCHING);
 
 	CInterfaceElement *closeBtn = pIM->getElementFromId(CTRL_BUTTON_CLOSE_PATCH);
 	if (closeBtn)
@@ -1629,7 +1629,7 @@ class CAHLoginPatch : public IActionHandler
 //		if (ClientCfg.PatchWanted)
 //		{
 //			pPM->startPatchThread(vCategories);
-//			pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_PATCHING);
+//			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_PATCHING);
 //		}
 //		else
 //		{
@@ -1758,7 +1758,7 @@ class CAHAcceptEula : public IActionHandler
 //		{
 //			// open web browser
 //			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//			pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
+//			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
 //
 //			// start the browser
 //			CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
@@ -2122,8 +2122,8 @@ void initDataScan()
 
 	// Start Scanning
 	pPM->startScanDataThread();
-	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_DATASCAN);
-	pIM->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_DATASCAN);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->setValue32(1);
 
 }
 
@@ -2152,7 +2152,7 @@ class CAHOnScanDataClose : public IActionHandler
 		CPatchManager *pPM = CPatchManager::getInstance();
 
 		// if the scan is still running
-		if(pIM->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->getValue32()!=0)
+		if(NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->getValue32()!=0)
 		{
 			// request to stop the thread
 			pPM->askForStopScanDataThread();
@@ -2164,7 +2164,7 @@ class CAHOnScanDataClose : public IActionHandler
 		{
 			LoginSM.pushEvent(CLoginStateMachine::ev_close_data_scan);
 			// Come Back to Login Screen.
-//			pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
+//			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
 //
 //			// Give focus to password if some login entered
 //			string	loginEB;
@@ -2358,7 +2358,7 @@ bool initCreateAccount()
 	}
 
 
-	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CREATE_ACCOUNT);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CREATE_ACCOUNT);
 
 	return true;
 }
@@ -2643,7 +2643,7 @@ class CAHOnBackToLogin: public IActionHandler
 
 //		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 //		// need to reset password and current screen
-//		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
+//		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
 	}
 };
 REGISTER_ACTION_HANDLER (CAHOnBackToLogin, "on_back_to_login");
@@ -3035,7 +3035,7 @@ void loginIntro()
 			const ucstring nmsg("");
 			ProgressBar.newMessage (nmsg);
 			IngameDbMngr.flushObserverCalls();
-			CInterfaceManager::getInstance()->flushObserverCalls();
+			NLGUI::CDBManager::getInstance()->flushObserverCalls();
 		}
 	}
 	beginLoading(StartBackground);

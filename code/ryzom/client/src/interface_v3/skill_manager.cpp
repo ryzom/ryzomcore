@@ -148,17 +148,17 @@ void CSkillManager::initInGame()
 	// get now the nodes on Skill values
 	for(i=0;i<SKILLS::NUM_SKILLS;i++)
 	{
-		_SkillValues[i]= pIM->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:SKILL", i), false);
-		_SkillBaseValues[i]= pIM->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:BaseSKILL", i), false);
+		_SkillValues[i]= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:SKILL", i), false);
+		_SkillBaseValues[i]= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:BaseSKILL", i), false);
 	}
 
 	// compute max child values
 	computeMaxChildValues(); // must be called after setting all _SkillBaseValues
 
 	// Get a node used to inform interface that a skill has changed
-	_TrackSkillChange= pIM->getDbProp("UI:VARIABLES:TRACK_SKILL_CHANGE", true);
+	_TrackSkillChange= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TRACK_SKILL_CHANGE", true);
 	// Add a branch observer on skill value change
-	pIM->addBranchObserver( "SERVER:CHARACTER_INFO:SKILLS", &_SkillChangeObs );
+	NLGUI::CDBManager::getInstance()->addBranchObserver( "SERVER:CHARACTER_INFO:SKILLS", &_SkillChangeObs );
 
 }
 
@@ -779,15 +779,15 @@ void CSkillManager::tryToUnblockTitleFromCiv(bool show_message)
 
 			if (IngameDbMngr.initInProgress())
 			{
-				if (im->getDbProp("UI:SAVE:FAME:CIV_ALLEGIANCE")->getValue32() != civNeeded)
+				if (NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:FAME:CIV_ALLEGIANCE")->getValue32() != civNeeded)
 					_TitlesUnblocked[i].UnblockedCiv = false;
 				continue;
 			}
 			else
 			{
-				CCDBNodeLeaf * civLeaf = im->getDbProp("SERVER:FAME:CIV_ALLEGIANCE");
+				CCDBNodeLeaf * civLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:FAME:CIV_ALLEGIANCE");
 				uint8 civDBValue = civLeaf->getValue8();
-				im->getDbProp("UI:SAVE:FAME:CIV_ALLEGIANCE")->setValue32((uint32)civDBValue);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:FAME:CIV_ALLEGIANCE")->setValue32((uint32)civDBValue);
 
 				if( civDBValue != civNeeded )
 				{
@@ -818,15 +818,15 @@ void CSkillManager::tryToUnblockTitleFromCult(bool show_message)
 
 			if (IngameDbMngr.initInProgress())
 			{
-				if (im->getDbProp("UI:SAVE:FAME:CULT_ALLEGIANCE")->getValue32() != cultNeeded)
+				if (NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:FAME:CULT_ALLEGIANCE")->getValue32() != cultNeeded)
 					_TitlesUnblocked[i].UnblockedCult = false;
 				continue;
 			}
 			else
 			{
-				CCDBNodeLeaf * cultLeaf = im->getDbProp("SERVER:FAME:CULT_ALLEGIANCE");
+				CCDBNodeLeaf * cultLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:FAME:CULT_ALLEGIANCE");
 				uint8 cultDBValue = cultLeaf->getValue8();
-				im->getDbProp("UI:SAVE:FAME:CULT_ALLEGIANCE")->setValue32((uint32)cultDBValue);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:FAME:CULT_ALLEGIANCE")->setValue32((uint32)cultDBValue);
 
 				if( cultDBValue != cultNeeded )
 				{
@@ -943,7 +943,7 @@ void CSkillManager::tryToUnblockTitleFromItems(bool show_message)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	// get inventory in bag
-	CCDBNodeBranch *nb = pIM->getDbBranch(branch);
+	CCDBNodeBranch *nb = NLGUI::CDBManager::getInstance()->getDbBranch(branch);
 	if (!nb)
 		return;
 
@@ -978,7 +978,7 @@ void CSkillManager::tryToUnblockTitleFromItems(bool show_message)
 					sint32 qualityItem = 0;
 
 					// get sheetid
-					CCDBNodeLeaf *node = pIM->getDbProp(branch + ":" + toString(itemSlot) + ":SHEET", false);
+					CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(branch + ":" + toString(itemSlot) + ":SHEET", false);
 					if (node)
 						sheetItem = (uint32)node->getValue32();
 
@@ -987,7 +987,7 @@ void CSkillManager::tryToUnblockTitleFromItems(bool show_message)
 						continue;
 
 					// get quality
-					node = pIM->getDbProp(branch + ":" + toString(itemSlot) + ":QUALITY", false);
+					node = NLGUI::CDBManager::getInstance()->getDbProp(branch + ":" + toString(itemSlot) + ":QUALITY", false);
 					if (node)
 						qualityItem = node->getValue32();
 
@@ -1061,7 +1061,7 @@ public:
 		{
 			if (i == pSM->_CurrentTitle)
 			{
-				pIM->getDbProp("UI:TITLE")->setValue32(j);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TITLE")->setValue32(j);
 				break;
 			}
 			j++;

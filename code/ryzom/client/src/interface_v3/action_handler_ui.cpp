@@ -63,7 +63,7 @@ static bool isContainerAuthorized(CGroupContainer *pGC)
 	// no guild or not in guild hall.
 	if (shortId == "inv_guild")
 	{
-		if (pIM->getDbProp("SERVER:GUILD:NAME") == 0
+		if (NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:NAME") == 0
 			|| !getInventory().isInventoryPresent(INVENTORIES::guild))
 		{
 			return false; // can't open it right now
@@ -447,9 +447,9 @@ class CAHNextSheath : public IActionHandler
 	virtual void execute (CCtrlBase *pCaller, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pNLCurSetWrite = pIM->getDbProp(pIM->getDefine("ui_set_active"));
-		CCDBNodeLeaf *pNLCurSetRead = pIM->getDbProp(pIM->getDefine("set_active"));
-		CCDBNodeLeaf *pNLNbSet = pIM->getDbProp(pIM->getDefine("set_nb"));
+		CCDBNodeLeaf *pNLCurSetWrite = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("ui_set_active"));
+		CCDBNodeLeaf *pNLCurSetRead = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("set_active"));
+		CCDBNodeLeaf *pNLNbSet = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("set_nb"));
 		sint64 nVal = pNLCurSetRead->getValue64() - INVENTORIES::sheath1;
 		sint64 nMax = pNLNbSet->getValue64();
 		nVal++;
@@ -471,9 +471,9 @@ class CAHPreviousSheath : public IActionHandler
 	virtual void execute (CCtrlBase *pCaller, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pNLCurSetWrite = pIM->getDbProp(pIM->getDefine("ui_set_active"));
-		CCDBNodeLeaf *pNLCurSetRead = pIM->getDbProp(pIM->getDefine("set_active"));
-		CCDBNodeLeaf *pNLNbSet = pIM->getDbProp(pIM->getDefine("set_nb"));
+		CCDBNodeLeaf *pNLCurSetWrite = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("ui_set_active"));
+		CCDBNodeLeaf *pNLCurSetRead = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("set_active"));
+		CCDBNodeLeaf *pNLNbSet = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("set_nb"));
 		sint64 nVal = pNLCurSetRead->getValue64() - INVENTORIES::sheath1;
 		sint64 nMax = pNLNbSet->getValue64();
 		if (nVal == 0) nVal = nMax;
@@ -495,8 +495,8 @@ class CAHSetSheath : public IActionHandler
 	virtual void execute (CCtrlBase *pCaller, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pNLCurSetWrite = pIM->getDbProp(pIM->getDefine("ui_set_active"));
-		CCDBNodeLeaf *pNLNbSet = pIM->getDbProp(pIM->getDefine("set_nb"));
+		CCDBNodeLeaf *pNLCurSetWrite = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("ui_set_active"));
+		CCDBNodeLeaf *pNLNbSet = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("set_nb"));
 		sint64 nVal;
 		fromString(Params, nVal);
 		nVal -= INVENTORIES::sheath1;
@@ -671,7 +671,7 @@ class CAHUIDockUndocChat : public IActionHandler
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		// change the DB (if exist)
-		CCDBNodeLeaf *node= pIM->getDbProp(toString("UI:SAVE:ISDETACHED:")+Params, false);
+		CCDBNodeLeaf *node= NLGUI::CDBManager::getInstance()->getDbProp(toString("UI:SAVE:ISDETACHED:")+Params, false);
 		if(node)
 		{
 			// swap

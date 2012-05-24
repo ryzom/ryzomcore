@@ -969,7 +969,7 @@ static sint32 getTargetSlotNr()
 {
 	const char *dbPath = "UI:VARIABLES:TARGET:SLOT";
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CCDBNodeLeaf *node = im->getDbProp(dbPath, false);
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbPath, false);
 	if (!node) return 0;
 	if ((uint8) node->getValue32() == (uint8) CLFECOMMON::INVALID_SLOT)
 	{
@@ -982,7 +982,7 @@ static CEntityCL *getTargetEntity()
 {
 	const char *dbPath = "UI:VARIABLES:TARGET:SLOT";
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CCDBNodeLeaf *node = im->getDbProp(dbPath, false);
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbPath, false);
 	if (!node) return NULL;
 	if ((uint8) node->getValue32() == (uint8) CLFECOMMON::INVALID_SLOT)
 	{
@@ -2224,7 +2224,7 @@ int CLuaIHMRyzom::isPlayerNewbie(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "isPlayerNewbie", 0);
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	ls.push(im->getDbProp("SERVER:USER:IS_NEWBIE")->getValueBool());
+	ls.push(NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:IS_NEWBIE")->getValueBool());
 	return 1;
 }
 
@@ -2754,7 +2754,7 @@ sint32	CLuaIHMRyzom::getDbProp(const std::string &dbProp)
 {
 	//H_AUTO(Lua_CLuaIHM_getDbProp)
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CCDBNodeLeaf	*node= pIM->getDbProp(dbProp,    false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(dbProp,    false);
 	if(node)
 		return node->getValue32();
 	else
@@ -2784,7 +2784,7 @@ void	CLuaIHMRyzom::setDbProp(const std::string &dbProp,    sint32 value)
 
 	// Write to the DB if found
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CCDBNodeLeaf	*node= pIM->getDbProp(dbProp,    false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(dbProp,    false);
 
 	if(node)
 		node->setValue32(value);
@@ -2812,7 +2812,7 @@ void	CLuaIHMRyzom::delDbProp(const string &dbProp)
 
 	// Write to the DB if found
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	pIM->delDbProp(dbProp);
+	NLGUI::CDBManager::getInstance()->delDbProp(dbProp);
 }
 
 void	CLuaIHMRyzom::addDbProp(const std::string &dbProp,    sint32 value)
@@ -2835,7 +2835,7 @@ void	CLuaIHMRyzom::addDbProp(const std::string &dbProp,    sint32 value)
 
 	// Write to the DB if found
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CCDBNodeLeaf	*node= pIM->getDbProp(dbProp, true);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(dbProp, true);
 	if(node)
 		node->setValue32(value);
 }
@@ -3666,21 +3666,21 @@ sint32 CLuaIHMRyzom::getPlayerLevel()
 // ***************************************************************************
 sint64 CLuaIHMRyzom::getPlayerVpa()
 {
-	sint64 prop = CInterfaceManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 	return prop;
 }
 
 // ***************************************************************************
 sint64 CLuaIHMRyzom::getPlayerVpb()
 {
-	sint64 prop = CInterfaceManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
 	return prop;
 }
 
 // ***************************************************************************
 sint64 CLuaIHMRyzom::getPlayerVpc()
 {
-	sint64 prop = CInterfaceManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
 	return prop;
 }
 
@@ -3692,7 +3692,7 @@ sint32 CLuaIHMRyzom::getTargetLevel()
 	if ( target->isPlayer() )
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pDbPlayerLevel = pIM->getDbProp( pIM->getDefine("target_player_level") );
+		CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("target_player_level") );
 		return pDbPlayerLevel ? pDbPlayerLevel->getValue32() : -1;
 	}
 	else
@@ -3722,7 +3722,7 @@ sint64 CLuaIHMRyzom::getTargetVpa()
 	CEntityCL *target = getTargetEntity();
 	if (!target) return 0;
 
-	sint64 prop = CInterfaceManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", getTargetSlotNr())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", getTargetSlotNr())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 
 	return prop;
 }
@@ -3733,7 +3733,7 @@ sint64 CLuaIHMRyzom::getTargetVpb()
 	CEntityCL *target = getTargetEntity();
 	if (!target) return 0;
 
-	sint64 prop = CInterfaceManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", getTargetSlotNr())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", getTargetSlotNr())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
 
 	return prop;
 }
@@ -3744,7 +3744,7 @@ sint64 CLuaIHMRyzom::getTargetVpc()
 	CEntityCL *target = getTargetEntity();
 	if (!target) return 0;
 
-	sint64 prop = CInterfaceManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", getTargetSlotNr())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", getTargetSlotNr())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
 
 	return prop;
 }
@@ -3757,7 +3757,7 @@ sint32 CLuaIHMRyzom::getTargetForceRegion()
 	if ( target->isPlayer() )
 	{			
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pDbPlayerLevel = pIM->getDbProp( pIM->getDefine("target_player_level") );			
+		CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("target_player_level") );			
 		if (!pDbPlayerLevel) return -1;
 		sint nLevel = pDbPlayerLevel->getValue32();
 		if ( nLevel < 250 )
@@ -3785,7 +3785,7 @@ sint32 CLuaIHMRyzom::getTargetLevelForce()
 	if ( target->isPlayer() )
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pDbPlayerLevel = pIM->getDbProp( pIM->getDefine("target_player_level") );
+		CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("target_player_level") );
 		if (!pDbPlayerLevel) return -1;
 		sint nLevel = pDbPlayerLevel->getValue32();
 		if ( nLevel < 250 )

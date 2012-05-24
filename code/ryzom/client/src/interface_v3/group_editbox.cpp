@@ -586,7 +586,7 @@ void CGroupEditBox::handleEventChar(const NLGUI::CEventDescriptorKey &rEDK)
 				_CursorPos = 0;
 				// loose the keyboard focus
 				CInterfaceManager *im = CInterfaceManager::getInstance();
-				if (im->getDbProp("UI:SAVE:CHAT:ENTER_DONT_QUIT_CB")->getValue32() == 0)
+				if (NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:ENTER_DONT_QUIT_CB")->getValue32() == 0)
 				{
 					if(_LooseFocusOnEnter)
 						pIM->setCaptureKeyboard(NULL);

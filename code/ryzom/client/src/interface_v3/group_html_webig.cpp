@@ -93,7 +93,7 @@ void addWebIGParams (string &url, bool trustedDomain)
 			// Target fields
 			const char *dbPath = "UI:VARIABLES:TARGET:SLOT";
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CCDBNodeLeaf *node = im->getDbProp(dbPath, false);
+			CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbPath, false);
 			if (node && (uint8)node->getValue32() != (uint8) CLFECOMMON::INVALID_SLOT)
 			{
 				CEntityCL *target = EntitiesMngr.entity((uint) node->getValue32());
@@ -195,7 +195,7 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			if(pIM)
 			{
-				CCDBNodeLeaf *_CheckMailNode = pIM->getDbProp("UI:VARIABLES:MAIL_WAITING");
+				CCDBNodeLeaf *_CheckMailNode = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MAIL_WAITING");
 				if(_CheckMailNode)
 				{
 					_CheckMailNode->setValue32(nbmail==0?0:1);
@@ -222,7 +222,7 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			if(pIM)
 			{
-				CCDBNodeLeaf *_CheckForumNode = pIM->getDbProp("UI:VARIABLES:FORUM_UPDATED");
+				CCDBNodeLeaf *_CheckForumNode = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FORUM_UPDATED");
 				if(_CheckForumNode)
 				{
 					_CheckForumNode->setValue32(nbforum==0?0:1);

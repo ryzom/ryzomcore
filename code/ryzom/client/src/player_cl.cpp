@@ -844,9 +844,9 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 		sint64 vB, vC;
 		string propName;
 		propName = toString("SERVER:Entities:E%d:P%d", _Slot, CLFECOMMON::PROPERTY_VPB);
-		vB = IM->getDbProp(propName)->getValue64();
+		vB = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
 		propName = toString("SERVER:Entities:E%d:P%d", _Slot, CLFECOMMON::PROPERTY_VPC);
-		vC = IM->getDbProp(propName)->getValue64();
+		vC = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
 		updateVisualPropertyVpb(0, vB);
 		updateVisualPropertyVpc(0, vC);
 
@@ -1015,7 +1015,7 @@ void CPlayerCL::updateVisualPropertyPvpMode(const NLMISC::TGameCycle &gameCycle,
 	if(isTarget())
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pDB= pIM->getDbProp("UI:VARIABLES:USER:TRACK_TARGET_PVP_CHANGE_MODE");
+		CCDBNodeLeaf *pDB= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:TRACK_TARGET_PVP_CHANGE_MODE");
 		if(pDB)
 		{
 			sint32	val= pDB->getValue32();
@@ -1265,7 +1265,7 @@ void CPlayerCL::load()	// virtual
 	if(!_WaitForAppearance)
 	{
 		// Visual properties A
-		sint64 prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+		sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 		updateVisualPropertyVpa(0, prop);	// Vpa udapte vpb and vpc too.
 	}
 }// load //

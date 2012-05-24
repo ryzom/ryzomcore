@@ -430,7 +430,7 @@ class CAHToggleDodgeParry : public IActionHandler
 		ucstring msg;
 		// 0 - dodge mode
 		// 1 - parry mode
-		if (pIM->getDbProp("SERVER:DEFENSE:DEFENSE_MODE")->getValue32() == 0)
+		if (NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DEFENSE:DEFENSE_MODE")->getValue32() == 0)
 		{
 			sendMsgToServer("COMBAT:PARRY");
 			msg = CI18N::get("msgUserModeParry");

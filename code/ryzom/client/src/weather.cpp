@@ -197,8 +197,7 @@ const float WEATHER_BLEND_SPEED = 1.f / 8.f; // number of seconds to blend betwe
 // ***************************************************************************
 static uint16 getServerWeather()
 {
-	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CCDBNodeLeaf *node = im->getDbProp("SERVER:WEATHER:VALUE");
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:WEATHER:VALUE");
 	if (!node) return 0;
 	return (uint16) node->getValue16();
 }
@@ -243,8 +242,7 @@ float getBlendedWeather(uint64 day,
 
 uint8 getSeasonDBValue()
 {
-	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CCDBNodeLeaf *serverSeason = im->getDbProp("SERVER:SEASON:VALUE");
+	CCDBNodeLeaf *serverSeason = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:SEASON:VALUE");
 	return serverSeason ? serverSeason->getValue8() : 0;
 }
 

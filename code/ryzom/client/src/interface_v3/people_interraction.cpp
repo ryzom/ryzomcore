@@ -934,9 +934,9 @@ class CHandlerChatGroupFilter : public IActionHandler
 		}
 
 		// inform DB for write right.
-		pIM->getDbProp("UI:VARIABLES:MAIN_CHAT:WRITE_RIGHT")->setValue32(writeRight);
-		pIM->getDbProp("UI:VARIABLES:MAIN_CHAT:IS_DYN_CHAT")->setValue32(isDynChat);
-		pIM->getDbProp("UI:VARIABLES:MAIN_CHAT:INDEX_DYN_CHAT")->setValue32(dynChatDbIndex);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MAIN_CHAT:WRITE_RIGHT")->setValue32(writeRight);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MAIN_CHAT:IS_DYN_CHAT")->setValue32(isDynChat);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MAIN_CHAT:INDEX_DYN_CHAT")->setValue32(dynChatDbIndex);
 
 
 		// Update Chat Group Window from user chat button
@@ -968,7 +968,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 					case CChatGroup::universe:	pUserBut->setHardText("uiFilterUniverse");	break;
 					case CChatGroup::dyn_chat:
 						uint32 index = PeopleInterraction.TheUserChat.Filter.getTargetDynamicChannelDbIndex();
-						uint32 textId = pIM->getDbProp("SERVER:DYN_CHAT:CHANNEL"+toString(index)+":NAME")->getValue32();
+						uint32 textId = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DYN_CHAT:CHANNEL"+toString(index)+":NAME")->getValue32();
 						ucstring title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 						if (title.empty())
@@ -1326,7 +1326,7 @@ void CPeopleInterraction::addContactInList(uint32 contactId, const ucstring &nam
 	}
 
 	CInterfaceManager* pIM= CInterfaceManager::getInstance();
-	CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
+	CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
 	FriendList.sortEx(order);
 }
 
@@ -1351,7 +1351,7 @@ void CPeopleInterraction::addContactInList(uint32 contactId, uint32 nameID, TCha
 		WaitingContacts.push_back(w);
 
 		CInterfaceManager* pIM= CInterfaceManager::getInstance();
-		CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
+		CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
 		FriendList.sortEx(order);
 	}
 }
@@ -1423,7 +1423,7 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 			// Only do work if online status has changed
 			if (FriendList.getOnline(index) != online)
 			{
-				CCDBNodeLeaf* node = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB", false);
+				CCDBNodeLeaf* node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB", false);
 				if (node && node->getValueBool())
 				{
 					// Only show the message if this player is not in my guild (because then the guild manager will show a message)
@@ -1979,7 +1979,7 @@ class CHandlerTeamTarget : public IActionHandler
 		{
 			// Get the team name id.
 			CLFECOMMON::TClientDataSetIndex	entityId= CLFECOMMON::INVALID_CLIENT_DATASET_INDEX;
-			CCDBNodeLeaf *prop = pIM->getDbProp(toString(TEAM_DB_PATH ":%d:UID", peopleIndex), false);
+			CCDBNodeLeaf *prop = NLGUI::CDBManager::getInstance()->getDbProp(toString(TEAM_DB_PATH ":%d:UID", peopleIndex), false);
 			if (prop)
 				entityId= prop->getValue32();
 
@@ -2082,7 +2082,7 @@ public:
 			{
 				if (ClientCfg.Local)
 				{
-					CInterfaceManager::getInstance()->getDbProp(TEAM_DB_PATH ":SUCCESSOR_INDEX")->setValue32(peopleIndex);
+					NLGUI::CDBManager::getInstance()->getDbProp(TEAM_DB_PATH ":SUCCESSOR_INDEX")->setValue32(peopleIndex);
 				}
 				else
 				{
@@ -2350,8 +2350,8 @@ public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		CInterfaceManager* pIM= CInterfaceManager::getInstance();
-		nlinfo("Load Order : %d", pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
-		CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
+		nlinfo("Load Order : %d", NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
+		CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
 
 		order = (CPeopleList::TSortOrder)(order + 1);
 		if (order == CPeopleList::END_SORT_ORDER)
@@ -2360,7 +2360,7 @@ public:
 		}
 
 		nlinfo("Save Order : %d", order);
-		pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->setValue32((sint32)order);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->setValue32((sint32)order);
 		CPeopleList *pl = PeopleInterraction.getPeopleListFromCurrentMenu();
 		if (pl)
 			pl->sortEx(order);
@@ -2645,8 +2645,8 @@ public:
 			CViewTextMenu *pMenuUniverse	= dynamic_cast<CViewTextMenu*>(pMenu->getElement("ui:interface:user_chat_target_menu:universe"));
 			CViewTextMenu *pMenuTeam	= dynamic_cast<CViewTextMenu*>(pMenu->getElement("ui:interface:user_chat_target_menu:team"));
 			CViewTextMenu *pMenuGuild	= dynamic_cast<CViewTextMenu*>(pMenu->getElement("ui:interface:user_chat_target_menu:guild"));
-			const bool teamActive = pIM->getDbProp("SERVER:GROUP:0:PRESENT")->getValueBool();
-			const bool guildActive = pIM->getDbProp("SERVER:GUILD:NAME")->getValueBool();
+			const bool teamActive = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GROUP:0:PRESENT")->getValueBool();
+			const bool guildActive = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:NAME")->getValueBool();
 			if (pMenuAround)	pMenuAround->setGrayed	(false);
 			if (pMenuRegion)	pMenuRegion->setGrayed	(false);
 			if (pMenuUniverse)	pMenuUniverse->setGrayed	(false);
@@ -2668,7 +2668,7 @@ public:
 				bool active = (textId != 0);
 				if (active)
 				{
-					uint32 canWrite = im->getDbProp("SERVER:DYN_CHAT:CHANNEL"+s+":WRITE_RIGHT")->getValue32();
+					uint32 canWrite = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DYN_CHAT:CHANNEL"+s+":WRITE_RIGHT")->getValue32();
 					if (canWrite != 0)
 					{
 						ucstring title;
@@ -2787,7 +2787,7 @@ class CHandlerLeaveTeamChat : public IActionHandler
 			CInterfaceManager *im = CInterfaceManager::getInstance();
 			if( im )
 			{
-				if( !im->getDbProp("UI:VARIABLES:IS_TEAM_PRESENT")->getValueBool() )
+				if( !NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:IS_TEAM_PRESENT")->getValueBool() )
 				{
 					ChatMngr.updateChatModeAndButton(CChatGroup::say);
 				}
@@ -2893,8 +2893,8 @@ class CHandlerSelectChatSource : public IActionHandler
 			{
 				// This is neither the ChatGroup, nor the UserChat. Should not be here.
 				// Just open the STD chat menu, and quit
-				im->getDbProp("UI:VARIABLES:GC_POPUP")->setValue64(cw->getContainer()->isPopuped() || cw->getContainer()->getLayerSetup() == 0 ? 1 : 0);
-				im->getDbProp("UI:VARIABLES:GC_HAS_HELP")->setValue64(!cw->getContainer()->getHelpPage().empty());
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:GC_POPUP")->setValue64(cw->getContainer()->isPopuped() || cw->getContainer()->getLayerSetup() == 0 ? 1 : 0);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:GC_HAS_HELP")->setValue64(!cw->getContainer()->getHelpPage().empty());
 				CInterfaceManager::getInstance()->enableModalWindow(pCaller, STD_CHAT_SOURCE_MENU);
 				return;
 			}
@@ -2995,8 +2995,8 @@ class CHandlerSelectChatSource : public IActionHandler
 
 
 		// *** active the menu
-		im->getDbProp("UI:VARIABLES:GC_POPUP")->setValue64(cw->getContainer()->isPopuped() || cw->getContainer()->getLayerSetup() == 0 ? 1 : 0);
-		im->getDbProp("UI:VARIABLES:GC_HAS_HELP")->setValue64(!cw->getContainer()->getHelpPage().empty());
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:GC_POPUP")->setValue64(cw->getContainer()->isPopuped() || cw->getContainer()->getLayerSetup() == 0 ? 1 : 0);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:GC_HAS_HELP")->setValue64(!cw->getContainer()->getHelpPage().empty());
 		im->enableModalWindow(pCaller, menu);
 	}
 };
@@ -3313,7 +3313,7 @@ NLMISC_COMMAND(chatLog, "", "")
 	if (pIM->getLogState())
 		pIM->displaySystemInfo(CI18N::get("uiLogTurnedOn"));
 
-	CCDBNodeLeaf *node = pIM->getDbProp("UI:SAVE:CHATLOG_STATE", false);
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHATLOG_STATE", false);
 	if (node)
 	{
 		node->setValue32(pIM->getLogState() ? 1 : 0);

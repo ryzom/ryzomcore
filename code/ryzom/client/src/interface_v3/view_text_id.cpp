@@ -213,7 +213,7 @@ string CViewTextID::getTextIdDbLink() const
 // ***************************************************************************
 void CViewTextID::setTextIdDbLink(const string &link)
 {
-	CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp(link,false);
+	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(link,false);
 	if (pNL == NULL)
 	{
 		nlwarning("cant set textidlink for %s",link.c_str());

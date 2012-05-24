@@ -149,7 +149,7 @@ static bool testMissionOption(sint32 priorityWanted)
 	for(uint k = 0; k < NUM_MISSION_OPTIONS; ++k)
 	{
 		std::string nodeName = toString("LOCAL:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:PRIORITY", (int) k);
-		CCDBNodeLeaf *pNL = pIM->getDbProp(nodeName, false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(nodeName, false);
 		if(pNL)
 		{
 			sint32 priority = pNL->getValue32();
@@ -159,7 +159,7 @@ static bool testMissionOption(sint32 priorityWanted)
 				if(priorityWanted != 2 || textID==0)
 				{
 					nodeName = toString("LOCAL:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:TITLE", (int) k);
-					pNL = pIM->getDbProp(nodeName, false);
+					pNL = NLGUI::CDBManager::getInstance()->getDbProp(nodeName, false);
 					if(pNL && pNL->getValue32())
 					{
 						textID = pNL->getValue32();
@@ -206,7 +206,7 @@ static bool testMissionRing()
 	for(uint i=0;i<BOTCHATTYPE::MaxR2MissionEntryDatabase;i++)
 	{
 		// get the ring mission title textID
-		CCDBNodeLeaf	*pNL = pIM->getDbProp(toString("LOCAL:TARGET:CONTEXT_MENU:MISSION_RING:%d:TITLE", i), false);
+		CCDBNodeLeaf	*pNL = NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:TARGET:CONTEXT_MENU:MISSION_RING:%d:TITLE", i), false);
 		if(pNL && pNL->getValue32())
 		{
 			uint32	textID = pNL->getValue32();
@@ -273,7 +273,7 @@ void checkUnderCursor()
 		entity= EntitiesMngr.getEntityUnderPos(cursX, cursY, ClientCfg.SelectionDist, isPlayerUnderCursor);
 
 		// If the mouse is over the player make the player transparent
-		CCDBNodeLeaf *pNL = IM->getDbProp("UI:SAVE:USER_CHAR_FADE", false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:USER_CHAR_FADE", false);
 		if ((pNL != NULL) && (pNL->getValue32() == 1) && UserEntity->selectable())
 		{
 			// If the nearest entity is the player, hide!
@@ -308,7 +308,7 @@ void checkUnderCursor()
 			float dist = (float)(entity->pos() - UserEntity->pos()).norm()-entity->box().getRadius();
 			// Entity Slot under the cursor.
 			SlotUnderCursor = entity->slot();
-			uint32 availablePrograms = (uint32)IM->getDbProp("LOCAL:TARGET:CONTEXT_MENU:PROGRAMMES")->getValue32();
+			uint32 availablePrograms = (uint32)NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TARGET:CONTEXT_MENU:PROGRAMMES")->getValue32();
 			bool entityAttackable = (availablePrograms&(1<<BOTCHATTYPE::Attackable)) || entity->properties().attackable();
 			if (ClientCfg.R2EDEnabled)
 			{
@@ -427,7 +427,7 @@ void checkUnderCursor()
 							else if(availablePrograms & (1 << BOTCHATTYPE::WebPageFlag))
 							{
 								// get the web page title textID
-								CCDBNodeLeaf	*pNL = IM->getDbProp("LOCAL:TARGET:CONTEXT_MENU:WEB_PAGE_TITLE", false);
+								CCDBNodeLeaf	*pNL = NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TARGET:CONTEXT_MENU:WEB_PAGE_TITLE", false);
 								if(pNL && pNL->getValue32())
 								{
 									uint32	textID = pNL->getValue32();
@@ -446,7 +446,7 @@ void checkUnderCursor()
 							else if(availablePrograms & (1 << BOTCHATTYPE::OutpostFlag))
 							{
 								// get the outpost sheet
-								CCDBNodeLeaf	*pNL = IM->getDbProp("LOCAL:TARGET:CONTEXT_MENU:OUTPOST", false);
+								CCDBNodeLeaf	*pNL = NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TARGET:CONTEXT_MENU:OUTPOST", false);
 								if(pNL && pNL->getValue32())
 								{
 									// get the outpost name
@@ -790,7 +790,7 @@ void contextTalk(bool rightClick, bool dblClick)
 	if(IM == 0)
 		return;
 	// Get Entity Program
-	uint32 availablePrograms = (uint32)IM->getDbProp("LOCAL:TARGET:CONTEXT_MENU:PROGRAMMES")->getValue32();
+	uint32 availablePrograms = (uint32)NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TARGET:CONTEXT_MENU:PROGRAMMES")->getValue32();
 	// Static Mission
 	if(availablePrograms & (1 << BOTCHATTYPE::ChooseMissionFlag))
 		UserEntity->moveTo(SlotUnderCursor, 2.0, CUserEntity::StaticMission);

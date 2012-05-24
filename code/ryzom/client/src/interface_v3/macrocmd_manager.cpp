@@ -232,7 +232,7 @@ void CMacroCmdManager::initInGame()
 	}
 
 	// Do not begin at 0
-	pIM->getDbProp("SERVER:USER:ACT_NUMBER")->setValue64(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:ACT_NUMBER")->setValue64(0);
 
 	// Create the NewKey container. Can edit key, and can assign all actions (not only macroisable ones)
 	NewKey = new CModalContainerEditCmd;
@@ -489,7 +489,7 @@ void CMacroCmdManager::updateMacroExecution ()
 
 			// Flush interface links (else bug with Macro "Select ShortCutBar/Run Shortcut"
 			IngameDbMngr.flushObserverCalls();
-			CInterfaceManager::getInstance()->flushObserverCalls();
+			NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 			if (bWaitForServer)
 			{
@@ -553,7 +553,7 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
-		pMCM->receiveActionEnd((uint8)pIM->getDbProp("SERVER:USER:ACT_NUMBER")->getValue64());
+		pMCM->receiveActionEnd((uint8)NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:ACT_NUMBER")->getValue64());
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerMacroRecActEnd, "macro_receive_action_end");

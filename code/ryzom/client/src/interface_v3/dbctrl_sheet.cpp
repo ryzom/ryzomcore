@@ -266,7 +266,7 @@ int CDBCtrlSheet::luaBuildCrystallizedSpellListBrick(CLuaState &ls)
 	{
 		//if ( ! (pBM->getBrick(itemInfo.Enchantment.Bricks[i])->isCredit() || pBM->getBrick(itemInfo.Enchantment.Bricks[i])->isParameter()))
 		{
-			CCDBNodeLeaf	*node= pIM->getDbProp(toString("UI:VARIABLES:CRYSTALBRICKS:%d:SHEET", currentBrick++));
+			CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("UI:VARIABLES:CRYSTALBRICKS:%d:SHEET", currentBrick++));
 			if(node)
 				node->setValue32(itemInfo.Enchantment.Bricks[i].asInt());
 		}
@@ -276,7 +276,7 @@ int CDBCtrlSheet::luaBuildCrystallizedSpellListBrick(CLuaState &ls)
 	// Reset other to 0.
 	for(;;currentBrick++)
 	{
-		CCDBNodeLeaf	*node= pIM->getDbProp(toString("UI:VARIABLES:CRYSTALBRICKS:%d:SHEET", currentBrick), false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("UI:VARIABLES:CRYSTALBRICKS:%d:SHEET", currentBrick), false);
 		if(node)
 			node->setValue32(0);
 		else
@@ -747,7 +747,7 @@ void CDBCtrlSheet::setupSheetDbLinks ()
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// link to the DBBranch (NB: none for macros)
-	CCDBNodeBranch *dbBranch = pIM->getDbBranch( _DbBranchName );
+	CCDBNodeBranch *dbBranch = NLGUI::CDBManager::getInstance()->getDbBranch( _DbBranchName );
 	//nlassert(dbBranch || _DbBranchName.empty());
 
 	// link if possible with the database, else dummy link to the interface
@@ -2974,11 +2974,11 @@ void CDBCtrlSheet::setCurrSelection(CDBCtrlSheet *selected)
 {
 	_CurrSelection = selected;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->getDbProp("UI:SELECTED_ITEM_SHEET_ID:SHEET")->setValue64(selected ? selected->getSheetId() : 0);
-	im->getDbProp("UI:SELECTED_ITEM_SHEET_ID:QUALITY")->setValue64(selected ? selected->getQuality() : 0);
-	im->getDbProp("UI:SELECTED_ITEM_SHEET_ID:SLOT_TYPE")->setValue64(selected ? selected->getBehaviour() : 0);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_ITEM_SHEET_ID:SHEET")->setValue64(selected ? selected->getSheetId() : 0);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_ITEM_SHEET_ID:QUALITY")->setValue64(selected ? selected->getQuality() : 0);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_ITEM_SHEET_ID:SLOT_TYPE")->setValue64(selected ? selected->getBehaviour() : 0);
 	// set the selection group in the db
-	im->getDbProp("UI:SELECTED_ITEM_SELECTION_GROUP")->setValue64(selected ? selected->getSelectionGroup() : -1);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_ITEM_SELECTION_GROUP")->setValue64(selected ? selected->getSelectionGroup() : -1);
 }
 
 // ***************************************************************************

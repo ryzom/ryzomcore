@@ -51,7 +51,7 @@ uint CChatTextManager::getTextFontSize() const
 	if (!_TextFontSize)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		_TextFontSize = im->getDbProp("UI:SAVE:CHAT:FONT_SIZE", false);
+		_TextFontSize = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:FONT_SIZE", false);
 		if (!_TextFontSize) return 12;
 	}
 	return (uint) _TextFontSize->getValue32();
@@ -63,7 +63,7 @@ uint CChatTextManager::getTextMultiLineSpace() const
 	if (!_TextMultilineSpace)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		_TextMultilineSpace = im->getDbProp("UI:SAVE:CHAT:MULTI_LINE_SPACE", false);
+		_TextMultilineSpace = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:MULTI_LINE_SPACE", false);
 		if (!_TextMultilineSpace) return 1;
 	}
 	return (uint) _TextMultilineSpace->getValue32();
@@ -75,7 +75,7 @@ bool CChatTextManager::isTextShadowed() const
 	if (!_TextShadowed)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		_TextShadowed = im->getDbProp("UI:SAVE:CHAT:SHADOWED_TEXT", false);
+		_TextShadowed = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHADOWED_TEXT", false);
 		if (!_TextShadowed) return false;
 	}
 	return _TextShadowed->getValueBool();
@@ -149,7 +149,7 @@ CViewBase *CChatTextManager::createMsgText(const ucstring &cstMsg, NLMISC::CRGBA
 	vt->setModulateGlobalColor(false);
 
 	ucstring cur_time;
-	static CCDBNodeLeaf* node = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
+	static CCDBNodeLeaf* node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
 	if (node)
 	{
 		if (node->getValueBool())

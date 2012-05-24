@@ -607,7 +607,7 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 					newmsg = newmsg.substr(0, pos + 1) + prefix + newmsg.substr(pos + 1);
 
 					// Add dynchannel number and optionally name before text if user channel
-					CCDBNodeLeaf* node = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB", false);
+					CCDBNodeLeaf* node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB", false);
 					if (node && node->getValueBool())
 					{
 						uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(dynamicChatDbIndex);

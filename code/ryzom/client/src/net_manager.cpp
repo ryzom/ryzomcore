@@ -775,7 +775,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 				PeopleInterraction.ChatInput.DynamicChat[dbIndex].displayMessage(finalString, col, 2, &windowVisible);
 
 				// Add dynchannel info before text so that the chat log will show the correct string.
-				CCDBNodeLeaf* node = pIM->getDbProp("UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB", false);
+				CCDBNodeLeaf* node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB", false);
 				if (pIM->getLogState())
 				{
 					// Add dyn chan number before string
@@ -1185,10 +1185,10 @@ static void setupBotChatBotGift(CInterfaceGroup *botChatGroup)
 {
 	// create dummy item in the db
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->getDbProp("SERVER:INVENTORY:20:0:SHEET")->setValue32(CSheetId("ai_flesh_poisson.item").asInt());
-	im->getDbProp("SERVER:INVENTORY:20:0:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:INVENTORY:20:1:SHEET")->setValue32(CSheetId("fyros_sword_lvl_01_05.item").asInt());
-	im->getDbProp("SERVER:INVENTORY:20:1:QUALITY")->setValue32(2);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INVENTORY:20:0:SHEET")->setValue32(CSheetId("ai_flesh_poisson.item").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INVENTORY:20:0:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INVENTORY:20:1:SHEET")->setValue32(CSheetId("fyros_sword_lvl_01_05.item").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INVENTORY:20:1:QUALITY")->setValue32(2);
 	CBotChat::setBotGift(botChatGroup, ucstring("Thanks to have succeeded the mission"), ucstring("Here's your reward"), ucstring("The bot has taken the object quest from your inventory"));
 }
 */
@@ -1360,9 +1360,9 @@ void impulseBeginCast(NLMISC::CBitMemStream &impulse)
 	impulse.serial(end);
 	if (PermanentlyBanned) return;
 	CInterfaceManager* iMngr = CInterfaceManager::getInstance();
-	iMngr->getDbProp("UI:VARIABLES:SPELL_CAST")->setValue32(1);
-	iMngr->getDbProp("UI:VARIABLES:CAST_BEGIN")->setValue32(begin);
-	iMngr->getDbProp("UI:VARIABLES:CAST_END")->setValue32(end);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SPELL_CAST")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CAST_BEGIN")->setValue32(begin);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CAST_END")->setValue32(end);
 }
 
 
@@ -1836,7 +1836,7 @@ void impulseTeamContactStatus(NLMISC::CBitMemStream &impulse)
 
 	// Resort the contact list if needed
 	CInterfaceManager* pIM= CInterfaceManager::getInstance();
-	CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
+	CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
 
 	if (order == CPeopleList::sort_online)
 	{
@@ -2409,7 +2409,7 @@ void impulseJournalCantAbandon (NLMISC::CBitMemStream &impulse)
 {
 	if (PermanentlyBanned) return;
 	/// reactivate abandon button
-	CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:TEMP:MISSION_ABANDON_BUTTON",false);
+	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION_ABANDON_BUTTON",false);
 	if (pNL != NULL)
 		pNL->setValue64(1);
 }
@@ -2551,7 +2551,7 @@ void impulseGuildOpenGuildWindow(NLMISC::CBitMemStream &impulse)
 void impulseGuildOpenInventory (NLMISC::CBitMemStream &impulse)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->getDbProp("UI:TEMP:INVENTORY_GUILD_OPENED")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:INVENTORY_GUILD_OPENED")->setValue32(1);
 }
 
 //-----------------------------------------------
@@ -2560,7 +2560,7 @@ void impulseGuildOpenInventory (NLMISC::CBitMemStream &impulse)
 void impulseGuildCloseInventory (NLMISC::CBitMemStream &impulse)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->getDbProp("UI:TEMP:INVENTORY_GUILD_OPENED")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:INVENTORY_GUILD_OPENED")->setValue32(0);
 }
 
 //-----------------------------------------------
@@ -3124,7 +3124,7 @@ void impulseItemOpenRoomInventory(NLMISC::CBitMemStream &impulse)
 	if (PermanentlyBanned) return;
 	// This is a message because we may do other things there
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->getDbProp("UI:TEMP:INVENTORY_ROOM_OPENED")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:INVENTORY_ROOM_OPENED")->setValue32(1);
 }
 
 //-----------------------------------------------
@@ -3134,7 +3134,7 @@ void impulseItemCloseRoomInventory(NLMISC::CBitMemStream &impulse)
 	if (PermanentlyBanned) return;
 	// This is a message because we may do other things there
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->getDbProp("UI:TEMP:INVENTORY_ROOM_OPENED")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:INVENTORY_ROOM_OPENED")->setValue32(0);
 
 	// deactivate the pop up window
 	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:inv_room"));
@@ -3198,17 +3198,17 @@ void impulseOutpostDeclareWarAck(NLMISC::CBitMemStream &impulse)
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// ack reception
-	CCDBNodeLeaf	*node= pIM->getDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ACK_RECEIVED");
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ACK_RECEIVED");
 	if(node)
 		node->setValueBool(true);
 	// set result of ACK
-	node= pIM->getDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ACK_OK");
+	node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ACK_OK");
 	if(node)
 		node->setValueBool(canValidate);
-	node= pIM->getDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ACK_TEXTID");
+	node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ACK_TEXTID");
 	if(node)
 		node->setValue32(docTextId);
-	node= pIM->getDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ACK_TIME_RANGE_ATT");
+	node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ACK_TIME_RANGE_ATT");
 	if(node)
 		node->setValue32(timeStartAttack);
 }
@@ -3407,7 +3407,7 @@ void	impulseUserPopup(NLMISC::CBitMemStream &impulse)
 
 	// setup TEMP DB for title
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CCDBNodeLeaf	*node= pIM->getDbProp("UI:TEMP:SERVER_POPUP:TITLE");
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:SERVER_POPUP:TITLE");
 	if(node)		node->setValue32(titleTextId);
 
 	// Open the Popup only when the 2 dyn strings are available
@@ -3862,22 +3862,22 @@ bool CNetManager::update()
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		if (im)
 		{
-			CCDBNodeLeaf *node = im->getDbProp("UI:VARIABLES:PING", false);
+			CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PING", false);
 			if (node)
 				node->setValue32(getPing());
-			node = im->getDbProp("UI:VARIABLES:UPLOAD", false);
+			node = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:UPLOAD", false);
 			if (node)
 				node->setValue32((sint32)(getMeanUpload()*1024.f/8.f));
-			node = im->getDbProp("UI:VARIABLES:DOWNLOAD", false);
+			node = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DOWNLOAD", false);
 			if (node)
 				node->setValue32((sint32)(getMeanDownload()*1024.f/8.f));
-			node = im->getDbProp("UI:VARIABLES:PACKETLOST", false);
+			node = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PACKETLOST", false);
 			if (node)
 				node->setValue32((sint32)getMeanPacketLoss());
-			node = im->getDbProp("UI:VARIABLES:SERVERSTATE", false);
+			node = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SERVERSTATE", false);
 			if (node)
 				node->setValue32((sint32)getConnectionState());
-			node = im->getDbProp("UI:VARIABLES:CONNECTION_QUALITY", false);
+			node = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CONNECTION_QUALITY", false);
 			if (node)
 				node->setValue32((sint32)getConnectionQuality());
 		}

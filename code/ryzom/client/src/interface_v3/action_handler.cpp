@@ -324,8 +324,8 @@ public:
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string dbdst = getParam (Params, "dbdst");
 		string dbsrc = getParam (Params, "dbsrc");
-		CCDBNodeBranch *pNBdst = pIM->getDbBranch(dbdst);
-		CCDBNodeBranch *pNBsrc = pIM->getDbBranch(dbsrc);
+		CCDBNodeBranch *pNBdst = NLGUI::CDBManager::getInstance()->getDbBranch(dbdst);
+		CCDBNodeBranch *pNBsrc = NLGUI::CDBManager::getInstance()->getDbBranch(dbsrc);
 
 		// Branch copy
 
@@ -494,21 +494,21 @@ class CAHActiveMenu : public IActionHandler
 		// update GC_POPUP flag
 		if (gc)
 		{
-			im->getDbProp("UI:VARIABLES:GC_POPUP")->setValue64((gc->isPopuped() || gc->getLayerSetup() == 0) ? 1 : 0);
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:GC_POPUP")->setValue64((gc->isPopuped() || gc->getLayerSetup() == 0) ? 1 : 0);
 		}
 		else
 		{
-			im->getDbProp("UI:VARIABLES:GC_POPUP")->setValue64(0);
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:GC_POPUP")->setValue64(0);
 		}
 
 		// update GC_HAS_HELP flag
 		if(gc && !gc->getHelpPage().empty())
 		{
-			im->getDbProp("UI:VARIABLES:GC_HAS_HELP")->setValue64(1);
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:GC_HAS_HELP")->setValue64(1);
 		}
 		else
 		{
-			im->getDbProp("UI:VARIABLES:GC_HAS_HELP")->setValue64(0);
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:GC_HAS_HELP")->setValue64(0);
 		}
 
 		// open the menu
@@ -691,10 +691,10 @@ public:
 		AlphaChooserTarget = gc;
 		if (!_AlphaObserversAdded)
 		{
-			_UiVariableBGAlpha = im->getDbProp("UI:VARIABLES:ALPHA_BG");
-			_UiVariableContentAlpha = im->getDbProp("UI:VARIABLES:ALPHA_CONTENT");
-			_UiVariableRolloverAlphaBG = im->getDbProp("UI:VARIABLES:ALPHA_ROLLOVER_BG");
-			_UiVariableRolloverAlphaContent = im->getDbProp("UI:VARIABLES:ALPHA_ROLLOVER_CONTENT");
+			_UiVariableBGAlpha = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ALPHA_BG");
+			_UiVariableContentAlpha = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ALPHA_CONTENT");
+			_UiVariableRolloverAlphaBG = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ALPHA_ROLLOVER_BG");
+			_UiVariableRolloverAlphaContent = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ALPHA_ROLLOVER_CONTENT");
 			ICDBNode::CTextId textIdBGAlpha, textIdContentAlpha, textIdRolloverAlphaBG, textIdRolloverAlphaContent;
 			_UiVariableBGAlpha->addObserver(&_BgAlphaObs, textIdBGAlpha);
 			_UiVariableContentAlpha->addObserver(&_ContentAlphaObs, textIdContentAlpha);
@@ -724,7 +724,7 @@ public:
 		OldRolloverAlphaContent = gc->getRolloverAlphaContent();
 		OldUseGlobalAlpha = gc->isUsingGlobalAlpha();
 		// Enable 'use global alpha' button
-		im->getDbProp("UI:VARIABLES:USER_ALPHA")->setValue64(gc->isUsingGlobalAlpha() ? 0 : 1);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER_ALPHA")->setValue64(gc->isUsingGlobalAlpha() ? 0 : 1);
 		// show the modal box
 		im->enableModalWindow(gc, "ui:interface:define_ui_transparency");
 
@@ -785,7 +785,7 @@ class CAHUseGlobalAlphaSettings : public IActionHandler
 		{
 			AlphaChooserTarget->setUseGlobalAlpha(!AlphaChooserTarget->isUsingGlobalAlpha());
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			im->getDbProp("UI:VARIABLES:USER_ALPHA")->setValue64(AlphaChooserTarget->isUsingGlobalAlpha() ? 0 : 1);
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER_ALPHA")->setValue64(AlphaChooserTarget->isUsingGlobalAlpha() ? 0 : 1);
 		}
 	}
 };

@@ -772,7 +772,7 @@ static DECLARE_INTERFACE_USER_FCT(isUserEntityDead)
 
 	// Get the Visual Property for mode
 	string			dbName= toString("SERVER:Entities:E0:P%d", CLFECOMMON::PROPERTY_MODE );
-	CCDBNodeLeaf	*node= pIM->getDbProp(dbName, false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(dbName, false);
 	if(node)
 	{
 		result.setBool( node->getValue64()== MBEHAV::DEATH );

@@ -48,7 +48,7 @@ void CBotChatPageMissionEnd::begin()
 		if ((flags & 1) || ClientCfg.Local) // is reward text needed
 		{
 			rewardText->setActive(true);
-			im->getDbProp(BOT_CHAT_BASE_DB_PATH ":MISSION_END_REWARD")->setValue32(0);
+			NLGUI::CDBManager::getInstance()->getDbProp(BOT_CHAT_BASE_DB_PATH ":MISSION_END_REWARD")->setValue32(0);
 		}
 		else
 		{
@@ -61,7 +61,7 @@ void CBotChatPageMissionEnd::begin()
 		rewardSlots->setActive(((flags & 2) != 0) || ClientCfg.Local);
 	}
 	//
-	im->getDbProp(BOT_CHAT_BASE_DB_PATH ":MISSION_END")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp(BOT_CHAT_BASE_DB_PATH ":MISSION_END")->setValue32(0);
 	//
 	ig->setActive(true);
 

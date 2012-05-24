@@ -68,8 +68,8 @@ const	std::string		PhraseMemoryAltCtrlBase= "ui:interface:gestionsets2:header_cl
 void	debugUpdateActionBar()
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	pIM->getDbProp("SERVER:USER:ACT_TSTART")->setValue64(NetMngr.getCurrentServerTick());
-	pIM->getDbProp("SERVER:USER:ACT_TEND")->setValue64(NetMngr.getCurrentServerTick()+30);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:ACT_TSTART")->setValue64(NetMngr.getCurrentServerTick());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:ACT_TEND")->setValue64(NetMngr.getCurrentServerTick()+30);
 }
 
 
@@ -1363,7 +1363,7 @@ public:
 		fromString(Params, index);
 		// Get the link counter. Used to verify that the client cancel the correct link according to server
 		uint8	counter= 0;
-		CCDBNodeLeaf	*node= pIM->getDbProp(toString("SERVER:EXECUTE_PHRASE:LINK:%d:COUNTER", index), false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:EXECUTE_PHRASE:LINK:%d:COUNTER", index), false);
 		if(node)
 			counter= node->getValue8();
 
@@ -1585,7 +1585,7 @@ public:
 	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CCDBNodeLeaf	*node= pIM->getDbProp("UI:PHRASE:SELECT_MEMORY", false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:PHRASE:SELECT_MEMORY", false);
 		if(node)
 		{
 			sint32 val;
@@ -1720,10 +1720,10 @@ void	phraseBotChatBuyBySheet(NLMISC::CSheetId sheetId, uint16 phraseId)
 			pPM->receiveBotChatConfirmBuy(phraseId, true);
 		// synchronize
 		uint	counter= pIM->getLocalSyncActionCounter();
-		pIM->getDbProp("SERVER:INVENTORY:COUNTER")->setValue32(counter);
-		pIM->getDbProp("SERVER:EXCHANGE:COUNTER")->setValue32(counter);
-		pIM->getDbProp("SERVER:TARGET:CONTEXT_MENU:COUNTER")->setValue32(counter);
-		pIM->getDbProp("SERVER:USER:COUNTER")->setValue32(counter);
+		NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INVENTORY:COUNTER")->setValue32(counter);
+		NLGUI::CDBManager::getInstance()->getDbProp("SERVER:EXCHANGE:COUNTER")->setValue32(counter);
+		NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TARGET:CONTEXT_MENU:COUNTER")->setValue32(counter);
+		NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:COUNTER")->setValue32(counter);
 	}
 }
 

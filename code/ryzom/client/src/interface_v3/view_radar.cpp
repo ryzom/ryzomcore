@@ -124,8 +124,8 @@ void CViewRadar::draw ()
 
 	float	maxSqrRadius= (float)sqr(_WorldSize/2);
 
-	const bool displayMissionSpots = pIM->getDbProp("UI:SAVE:INSCENE:FRIEND:MISSION_ICON")->getValueBool();
-	const bool displayMiniMissionSpots = pIM->getDbProp("UI:SAVE:INSCENE:FRIEND:MINI_MISSION_ICON")->getValueBool();
+	const bool displayMissionSpots = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:INSCENE:FRIEND:MISSION_ICON")->getValueBool();
+	const bool displayMiniMissionSpots = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:INSCENE:FRIEND:MINI_MISSION_ICON")->getValueBool();
 
 	for (sint32 i = 1; i < 256; ++i)
 	{

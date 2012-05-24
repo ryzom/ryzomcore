@@ -44,7 +44,7 @@ void CInterfaceDDX::CParam::DBToWidget()
 	if (Widget == ColorButton)
 	{
 		CRGBA col = CRGBA::White;
-		CCDBNodeLeaf *pNL = pIM->getDbProp(Link,false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
 		if (pNL != NULL)
 		{
 			uint32 intCol = (uint32)pNL->getValue32();
@@ -64,7 +64,7 @@ void CInterfaceDDX::CParam::DBToWidget()
 	else if (Widget == BoolButton)
 	{
 		bool bVal = 0;
-		CCDBNodeLeaf *pNL = pIM->getDbProp(Link,false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
 		if (pNL != NULL)
 		{
 			bVal = pNL->getValue32()==0?false:true;
@@ -78,7 +78,7 @@ void CInterfaceDDX::CParam::DBToWidget()
 	else if (Widget == ScrollBarInt)
 	{
 		sint32 nVal = 0;
-		CCDBNodeLeaf *pNL = pIM->getDbProp(Link,false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
 		if (pNL != NULL)
 		{
 			nVal = pNL->getValue32();
@@ -154,7 +154,7 @@ void CInterfaceDDX::CParam::WidgetToDB()
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(Elt.getPtr());
 		if (pBut != NULL)
 			col = pBut->getColor();
-		CCDBNodeLeaf *pNL = pIM->getDbProp(Link,false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
 		if (pNL != NULL)
 			pNL->setValue32(col.R+(col.G<<8)+(col.B<<16)+(col.A<<24));
 	}
@@ -164,7 +164,7 @@ void CInterfaceDDX::CParam::WidgetToDB()
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(Elt.getPtr());
 		if (pBut != NULL)
 			bVal = pBut->getPushed();
-		CCDBNodeLeaf *pNL = pIM->getDbProp(Link,false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
 		if (pNL != NULL)
 		{
 			pNL->setValue32(bVal?1:0);
@@ -180,7 +180,7 @@ void CInterfaceDDX::CParam::WidgetToDB()
 		CCtrlScroll *pCS = dynamic_cast<CCtrlScroll*>(Elt.getPtr());
 		if (pCS != NULL)
 			nVal = pCS->getValue();
-		CCDBNodeLeaf *pNL = pIM->getDbProp(Link,false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
 		if (pNL != NULL)
 			pNL->setValue32(nVal);
 	}
@@ -251,7 +251,7 @@ void CInterfaceDDX::CParam::backupDB()
 	if (Widget == ColorButton)
 	{
 		CRGBA col = CRGBA::White;
-		CCDBNodeLeaf *pNL = pIM->getDbProp(Link,false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
 		if (pNL != NULL)
 		{
 			uint32 intCol = (uint32)pNL->getValue32();
@@ -261,7 +261,7 @@ void CInterfaceDDX::CParam::backupDB()
 	else if (Widget == ScrollBarInt)
 	{
 		sint32 nVal = 0;
-		CCDBNodeLeaf *pNL = pIM->getDbProp(Link,false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
 		if (pNL != NULL)
 		{
 			nVal = pNL->getValue32();
@@ -305,7 +305,7 @@ void CInterfaceDDX::CParam::restoreDB()
 
 	if (Widget == ColorButton)
 	{
-		CCDBNodeLeaf *pNL = pIM->getDbProp(Link,false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
 		if (pNL != NULL)
 			pNL->setValue32(RTBackupValue);
 	}
@@ -315,7 +315,7 @@ void CInterfaceDDX::CParam::restoreDB()
 	}
 	else if (Widget == ScrollBarInt)
 	{
-		CCDBNodeLeaf *pNL = pIM->getDbProp(Link,false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(Link,false);
 		if (pNL != NULL)
 			pNL->setValue32(RTBackupValue);
 	}
@@ -606,7 +606,7 @@ bool CInterfaceDDX::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 				CXMLAutoPtr ptrPreset((const char*)xmlGetProp (cur, (xmlChar*)"preset"));
 				if(ptrPreset)
 				{
-					p.PresetDB = pIM->getDbProp((const char*)ptrPreset, false);
+					p.PresetDB = NLGUI::CDBManager::getInstance()->getDbProp((const char*)ptrPreset, false);
 					if(p.PresetDB)
 					{
 						// if not exist in the set, add it and register callback
@@ -791,7 +791,7 @@ void CInterfaceDDX::updateRealtime(CCtrlBase *pSB, bool updateOnScrollEnd)
 	}
 
 	IngameDbMngr.flushObserverCalls();
-	CInterfaceManager::getInstance()->flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 	for (i = 0; i < _Parameters.size(); ++i)
 	{

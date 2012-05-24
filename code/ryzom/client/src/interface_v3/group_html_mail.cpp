@@ -76,7 +76,7 @@ void CGroupHTMLMail::addHTTPPostParams (HTAssocList *formfields, bool /*trustedD
 string	CGroupHTMLMail::home ()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->getDbProp("UI:VARIABLES:MAIL_WAITING")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MAIL_WAITING")->setValue32(0);
 	return Home;
 }
 

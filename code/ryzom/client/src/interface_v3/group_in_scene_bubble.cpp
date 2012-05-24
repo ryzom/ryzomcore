@@ -48,7 +48,7 @@ void contextHelp (const std::string &name)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	// User want context help ?
-	if ( (ClientCfg.Local || !IngameDbMngr.initInProgress()) && pIM->getDbProp("UI:SAVE:ENTITY:CONTEXT_HELP")->getValueBool())
+	if ( (ClientCfg.Local || !IngameDbMngr.initInProgress()) && NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:CONTEXT_HELP")->getValueBool())
 	{
 		// Look for the context help
 		uint index = 0;
@@ -519,7 +519,7 @@ void CGroupInSceneBubbleManager::addSkillPopup (uint skillId, sint delta, uint t
 			pViewSkillName->setText (sSkillName);
 
 		// Skill value
-		CCDBNodeLeaf *skillLeaf = pIM->getDbProp("SERVER:CHARACTER_INFO:SKILLS:"+toString(skillId)+":BaseSKILL", false);
+		CCDBNodeLeaf *skillLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SKILLS:"+toString(skillId)+":BaseSKILL", false);
 		if (skillLeaf)
 		{
 			pViewSkillName = dynamic_cast<CViewText*>(group->getView("lvl"));
@@ -831,11 +831,11 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const ucstring &ucsText,
 
 	bool show = false;
 	if (pChar->isUser())
-		show = pIM->getDbProp ("UI:SAVE:INSCENE:USER:MESSAGES")->getValueBool();
+		show = NLGUI::CDBManager::getInstance()->getDbProp ("UI:SAVE:INSCENE:USER:MESSAGES")->getValueBool();
 	else if (pChar->isFriend())
-		show = pIM->getDbProp ("UI:SAVE:INSCENE:FRIEND:MESSAGES")->getValueBool();
+		show = NLGUI::CDBManager::getInstance()->getDbProp ("UI:SAVE:INSCENE:FRIEND:MESSAGES")->getValueBool();
 	else
-		show = pIM->getDbProp ("UI:SAVE:INSCENE:ENEMY:MESSAGES")->getValueBool();
+		show = NLGUI::CDBManager::getInstance()->getDbProp ("UI:SAVE:INSCENE:ENEMY:MESSAGES")->getValueBool();
 
 	if (show)
 	{

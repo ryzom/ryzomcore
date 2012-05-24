@@ -300,9 +300,9 @@ const char *CInterfaceExpr::evalDBEntry(const char *expr, CInterfaceExprValue &r
 	expr = unpackDBentry(expr, nodes, dbEntry);
 	if (!expr) return NULL;
 	// TestYoyo
-	//nlassert(CInterfaceManager::getInstance()->getDbProp(dbEntry, false) || CInterfaceManager::getInstance()->getDbBranch(dbEntry));
+	//nlassert(NLGUI::CDBManager::getInstance()->getDbProp(dbEntry, false) || CInterfaceManager::getInstance()->getDbBranch(dbEntry));
 	// get the db value
-	CCDBNodeLeaf *nl = CInterfaceManager::getInstance()->getDbProp(dbEntry);
+	CCDBNodeLeaf *nl = NLGUI::CDBManager::getInstance()->getDbProp(dbEntry);
 	if (nl)
 	{
 		if (nodes)
@@ -318,7 +318,7 @@ const char *CInterfaceExpr::evalDBEntry(const char *expr, CInterfaceExprValue &r
 	}
 	else
 	{
-		CCDBNodeBranch *nb = CInterfaceManager::getInstance()->getDbBranch(dbEntry);
+		CCDBNodeBranch *nb = NLGUI::CDBManager::getInstance()->getDbBranch(dbEntry);
 		if (nodes && nb)
 		{
 			if (std::find(nodes->begin(), nodes->end(), nb) == nodes->end())
@@ -354,8 +354,8 @@ const char *CInterfaceExpr::buildDBEntryNode(const char *expr, CInterfaceExprNod
 	else
 	{
 		// TestYoyo
-		//nlassert(CInterfaceManager::getInstance()->getDbProp(dbEntry, false) || CInterfaceManager::getInstance()->getDbBranch(dbEntry));
-		CCDBNodeLeaf *nl = CInterfaceManager::getInstance()->getDbProp(dbEntry);
+		//nlassert(NLGUI::CDBManager::getInstance()->getDbProp(dbEntry, false) || CInterfaceManager::getInstance()->getDbBranch(dbEntry));
+		CCDBNodeLeaf *nl = NLGUI::CDBManager::getInstance()->getDbProp(dbEntry);
 		if (nl)
 		{
 			CInterfaceExprNodeDBLeaf *node = new CInterfaceExprNodeDBLeaf;
@@ -365,7 +365,7 @@ const char *CInterfaceExpr::buildDBEntryNode(const char *expr, CInterfaceExprNod
 		}
 		else
 		{
-			CCDBNodeBranch *nb = CInterfaceManager::getInstance()->getDbBranch(dbEntry);
+			CCDBNodeBranch *nb = NLGUI::CDBManager::getInstance()->getDbBranch(dbEntry);
 			if (nb)
 			{
 				CInterfaceExprNodeDBBranch *node = new CInterfaceExprNodeDBBranch;
@@ -418,8 +418,8 @@ const char *CInterfaceExpr::unpackDBentry(const char *expr, std::vector<ICDBNode
 			++ expr;
 			// get the db value at sub entry
 			// TestYoyo
-			//nlassert(CInterfaceManager::getInstance()->getDbProp(subEntry, false) || CInterfaceManager::getInstance()->getDbBranch(subEntry));
-			CCDBNodeLeaf *nl = CInterfaceManager::getInstance()->getDbProp(subEntry);
+			//nlassert(NLGUI::CDBManager::getInstance()->getDbProp(subEntry, false) || CInterfaceManager::getInstance()->getDbBranch(subEntry));
+			CCDBNodeLeaf *nl = NLGUI::CDBManager::getInstance()->getDbProp(subEntry);
 			if (nodes)
 			{
 				if (std::find(nodes->begin(), nodes->end(), nl) == nodes->end())

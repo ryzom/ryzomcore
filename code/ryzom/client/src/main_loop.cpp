@@ -242,7 +242,7 @@ public:
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if(pIM)
 		{
-			CCDBNodeLeaf *pNodeLeaf = pIM->getDbProp("SERVER:DEBUG_INFO:Ping", false);
+			CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DEBUG_INFO:Ping", false);
 			if(pNodeLeaf)
 			{
 				ICDBNode::CTextId textId;
@@ -260,7 +260,7 @@ public:
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if(pIM)
 		{
-			CCDBNodeLeaf *pNodeLeaf = pIM->getDbProp("SERVER:DEBUG_INFO:Ping", false);
+			CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DEBUG_INFO:Ping", false);
 			if(pNodeLeaf)
 			{
 				ICDBNode::CTextId textId;
@@ -1642,7 +1642,7 @@ bool mainLoop()
 
 			// flush observers
 			IngameDbMngr.flushObserverCalls();
-			CInterfaceManager::getInstance()->flushObserverCalls();
+			NLGUI::CDBManager::getInstance()->flushObserverCalls();
 		}
 
 
@@ -1660,7 +1660,7 @@ bool mainLoop()
 			// NetWork Update.
 			NetMngr.update();
 			IngameDbMngr.flushObserverCalls();
-			CInterfaceManager::getInstance()->flushObserverCalls();
+			NLGUI::CDBManager::getInstance()->flushObserverCalls();
 			// lets some CPU.
 			NetMngr.send();
 			nlSleep(100);
@@ -1770,7 +1770,7 @@ bool mainLoop()
 
 			NetMngr.update();
 			IngameDbMngr.flushObserverCalls();
-			CInterfaceManager::getInstance()->flushObserverCalls();
+			NLGUI::CDBManager::getInstance()->flushObserverCalls();
 			bool prevDatabaseInitStatus = IngameDbMngr.initInProgress();
 			IngameDbMngr.setChangesProcessed();
 			bool newDatabaseInitStatus = IngameDbMngr.initInProgress();
@@ -1841,7 +1841,7 @@ bool mainLoop()
 		// update bot chat
 		CBotChatManager::getInstance()->update();
 		IngameDbMngr.flushObserverCalls();
-		CInterfaceManager::getInstance()->flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 		// updateItemEdition
 		CInterfaceItemEdition::getInstance()->update();
@@ -2296,7 +2296,7 @@ bool mainLoop()
 					deltaTime = smoothFPS.getSmoothValue ();
 					if (deltaTime > 0.0)
 					{
-						CCDBNodeLeaf*pNL = pIMinstance->getDbProp("UI:VARIABLES:FPS");
+						CCDBNodeLeaf*pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FPS");
 						pNL->setValue64((sint64)(1.f/deltaTime));
 					}
 				}

@@ -65,7 +65,7 @@ bool CDBGroupListSheetBonusMalus::parse (xmlNodePtr cur, CInterfaceGroup *parent
 	for(;;)
 	{
 		string	db= toString("%s:%d:" DISABLE_LEAF, _DbBranchName.c_str(), i);
-		CCDBNodeLeaf	*node= pIM->getDbProp(db, false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(db, false);
 		if(!node)
 		{
 			break;

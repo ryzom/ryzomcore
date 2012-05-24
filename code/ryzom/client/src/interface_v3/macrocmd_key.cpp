@@ -408,12 +408,12 @@ void CModalContainerEditCmd::create(const std::string &name, bool bDefKey, bool 
 	DbComboDisp2P = prefix + DB_EDITCMD_COMBO_DISPLAY_SECOND_PARAM;
 
 	// Create DB entry
-	pIM->getDbProp(DbComboSelCat);
-	pIM->getDbProp(DbComboSelAct);
-	pIM->getDbProp(DbComboSel1P);
-	pIM->getDbProp(DbComboSel2P);
-	pIM->getDbProp(DbComboDisp1P);
-	pIM->getDbProp(DbComboDisp2P);
+	NLGUI::CDBManager::getInstance()->getDbProp(DbComboSelCat);
+	NLGUI::CDBManager::getInstance()->getDbProp(DbComboSelAct);
+	NLGUI::CDBManager::getInstance()->getDbProp(DbComboSel1P);
+	NLGUI::CDBManager::getInstance()->getDbProp(DbComboSel2P);
+	NLGUI::CDBManager::getInstance()->getDbProp(DbComboDisp1P);
+	NLGUI::CDBManager::getInstance()->getDbProp(DbComboDisp2P);
 
 	vector< pair<string,string> > vArgs;
 	vArgs.push_back(pair<string,string>("id",name));
@@ -497,12 +497,12 @@ void CModalContainerEditCmd::activate()
 	if (pCB != NULL) pCB->resetTexts();
 	// Clean up
 	CurAM = NULL;
-	pIM->getDbProp( DbComboSelCat )->setValue32(-1);
-	pIM->getDbProp( DbComboSelAct )->setValue32(-1);
-	pIM->getDbProp( DbComboSel1P )->setValue32(-1);
-	pIM->getDbProp( DbComboSel2P )->setValue32(-1);
-	pIM->getDbProp( DbComboDisp1P )->setValue32(-1);
-	pIM->getDbProp( DbComboDisp2P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelCat )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelAct )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSel1P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSel2P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp1P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp2P )->setValue32(-1);
 	// reset name of params
 	CViewText *pViewParamName = dynamic_cast<CViewText*>(pIM->getElementFromId(WinName+VIEW_EDITCMD_FIRST_PARAM_NAME));
 	if (pViewParamName != NULL) pViewParamName->setText (string(""));
@@ -583,13 +583,13 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 	pCB->setSelection(catCBIndex);
 	onChangeCategory();
 	IngameDbMngr.flushObserverCalls();
-	CInterfaceManager::getInstance()->flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 	//pIM->runActionHandler("editcmd_change_category",NULL);
 	pCB = dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId(WinName+WIN_EDITCMD_COMBO_ACTION));
 	pCB->setSelection(actCBIndex);
 	onChangeAction();
 	IngameDbMngr.flushObserverCalls();
-	CInterfaceManager::getInstance()->flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 	//pIM->runActionHandler("editcmd_change_action",NULL);
 
 	// Count number of displayed param
@@ -639,8 +639,8 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 		}
 		else if (rP.Type == CBaseAction::CParameter::Constant)
 		{
-			if (noParam == 0)	pIM->getDbProp( DbComboDisp1P )->setValue32(0);
-			else				pIM->getDbProp( DbComboDisp2P )->setValue32(0);
+			if (noParam == 0)	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp1P )->setValue32(0);
+			else				NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp2P )->setValue32(0);
 
 			// Search the param value to get the position in combo box
 			bool bValFound = false;
@@ -664,8 +664,8 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 		}
 		else if ((rP.Type == CBaseAction::CParameter::User) || (rP.Type == CBaseAction::CParameter::UserName))
 		{
-			if (noParam == 0)	pIM->getDbProp( DbComboDisp1P )->setValue32(1);
-			else				pIM->getDbProp( DbComboDisp2P )->setValue32(1);
+			if (noParam == 0)	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp1P )->setValue32(1);
+			else				NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp2P )->setValue32(1);
 
 			string sEditBox;
 			if (noParam == 0)	sEditBox = WinName+WIN_EDITCMD_COMBO_FIRST_PARAM_EDITBOX;
@@ -792,9 +792,9 @@ void CModalContainerEditCmd::invalidCurrentCommand()
 void CModalContainerEditCmd::validCurrentCommand()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	sint32	catIndex= pIM->getDbProp( DbComboSelCat )->getValue32();
+	sint32	catIndex= NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelCat )->getValue32();
 	if(catIndex < 0) return;
-	sint32	actIndex= pIM->getDbProp( DbComboSelAct )->getValue32();
+	sint32	actIndex= NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelAct )->getValue32();
 	if(actIndex < 0) return;
 
 	CActionsManager *pAM;
@@ -829,8 +829,8 @@ void CModalContainerEditCmd::validCurrentCommand()
 			// cannot use index directly because some options may be disabled in current context
 			sint32 paramIndex;
 			const std::vector<CBaseAction::CParameter::CValue> &rVVal = rP.Values;
-			if (noParam == 0)	paramIndex = pIM->getDbProp(DbComboSel1P)->getValue32();
-			else				paramIndex = pIM->getDbProp(DbComboSel2P)->getValue32();
+			if (noParam == 0)	paramIndex = NLGUI::CDBManager::getInstance()->getDbProp(DbComboSel1P)->getValue32();
+			else				paramIndex = NLGUI::CDBManager::getInstance()->getDbProp(DbComboSel2P)->getValue32();
 
 			uint currIndex = 0;
 			for (uint k = 0; k < rVVal.size(); ++k)
@@ -917,14 +917,14 @@ bool CModalContainerEditCmd::isParamValid (sint32 nParamIndex)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	sint32 paramType;
-	if (nParamIndex == 0)	paramType = pIM->getDbProp(DbComboDisp1P)->getValue32();
-	else					paramType = pIM->getDbProp(DbComboDisp2P)->getValue32();
+	if (nParamIndex == 0)	paramType = NLGUI::CDBManager::getInstance()->getDbProp(DbComboDisp1P)->getValue32();
+	else					paramType = NLGUI::CDBManager::getInstance()->getDbProp(DbComboDisp2P)->getValue32();
 
 	if (paramType == 0) // combo box list
 	{
 		sint32 paramListIndex;
-		if (nParamIndex == 0)	paramListIndex = pIM->getDbProp( DbComboSel1P )->getValue32();
-		else					paramListIndex = pIM->getDbProp( DbComboSel2P )->getValue32();
+		if (nParamIndex == 0)	paramListIndex = NLGUI::CDBManager::getInstance()->getDbProp( DbComboSel1P )->getValue32();
+		else					paramListIndex = NLGUI::CDBManager::getInstance()->getDbProp( DbComboSel2P )->getValue32();
 
 		if (paramListIndex < 0)	return false;
 		else					return true;
@@ -949,11 +949,11 @@ void CModalContainerEditCmd::checkCurrentCommandValidity()
 	CInterfaceManager	*pIM = CInterfaceManager::getInstance();
 
 	// Get the category selected
-	sint32	catIndex= pIM->getDbProp( DbComboSelCat )->getValue32();
+	sint32	catIndex= NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelCat )->getValue32();
 	if(catIndex < 0) return;
 
 	// Get the action index selected
-	sint32	actIndex= pIM->getDbProp( DbComboSelAct )->getValue32();
+	sint32	actIndex= NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelAct )->getValue32();
 	if(actIndex < 0) return;
 
 	CActionsManager *pAM;
@@ -1003,7 +1003,7 @@ void CModalContainerEditCmd::onChangeCategory()
 	CInterfaceManager	*pIM = CInterfaceManager::getInstance();
 
 	// Get the category selected
-	sint32	catIndex= pIM->getDbProp( DbComboSelCat )->getValue32();
+	sint32	catIndex= NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelCat )->getValue32();
 	if(catIndex < 0)
 		return;
 
@@ -1033,11 +1033,11 @@ void CModalContainerEditCmd::onChangeCategory()
 	}
 
 	// reset the action and dont display params
-	pIM->getDbProp( DbComboSelAct )->setValue32(-1);
-	pIM->getDbProp( DbComboSel1P )->setValue32(-1);
-	pIM->getDbProp( DbComboSel2P )->setValue32(-1);
-	pIM->getDbProp( DbComboDisp1P )->setValue32(-1);
-	pIM->getDbProp( DbComboDisp2P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelAct )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSel1P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSel2P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp1P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp2P )->setValue32(-1);
 	// reset name of params
 	CViewText *pViewParamName;
 	pViewParamName = dynamic_cast<CViewText*>(pIM->getElementFromId(WinName+VIEW_EDITCMD_FIRST_PARAM_NAME));
@@ -1055,12 +1055,12 @@ void CModalContainerEditCmd::onChangeAction()
 	CInterfaceManager	*pIM = CInterfaceManager::getInstance();
 
 	// Get the category selected
-	sint32	catIndex= pIM->getDbProp( DbComboSelCat )->getValue32();
+	sint32	catIndex= NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelCat )->getValue32();
 	if(catIndex < 0)
 		return;
 
 	// Get the action index selected
-	sint32	actIndex= pIM->getDbProp( DbComboSelAct )->getValue32();
+	sint32	actIndex= NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelAct )->getValue32();
 	if(actIndex < 0)
 		return;
 
@@ -1072,10 +1072,10 @@ void CModalContainerEditCmd::onChangeAction()
 	const vector<CBaseAction> &rVBA = CurAM->getCategories()[catIndex].BaseActions;
 	const vector<CBaseAction::CParameter> &rVParams = rVBA[actIndex].Parameters;
 
-	pIM->getDbProp( DbComboDisp1P )->setValue32(-1);
-	pIM->getDbProp( DbComboDisp2P )->setValue32(-1);
-	pIM->getDbProp( DbComboSel1P )->setValue32(-1);
-	pIM->getDbProp( DbComboSel2P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp1P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp2P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSel1P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSel2P )->setValue32(-1);
 	// reset name of params
 	CViewText *pViewParamName;
 	pViewParamName = dynamic_cast<CViewText*>(pIM->getElementFromId(WinName+VIEW_EDITCMD_FIRST_PARAM_NAME));
@@ -1131,7 +1131,7 @@ void CModalContainerEditCmd::onChangeAction()
 					}
 				}
 			}
-			pIM->getDbProp( sDB )->setValue32(0);
+			NLGUI::CDBManager::getInstance()->getDbProp( sDB )->setValue32(0);
 		}
 		else if ((rP.Type == CBaseAction::CParameter::User) || (rP.Type == CBaseAction::CParameter::UserName))
 		{
@@ -1143,7 +1143,7 @@ void CModalContainerEditCmd::onChangeAction()
 			{
 				pEB->setInputString(ucstring(""));
 			}
-			pIM->getDbProp( sDB )->setValue32(1);
+			NLGUI::CDBManager::getInstance()->getDbProp( sDB )->setValue32(1);
 		}
 		noParam++;
 	}

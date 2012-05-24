@@ -458,7 +458,7 @@ static void sendSwapItemMsg(const CDBCtrlSheet *pCSSrc, const CDBCtrlSheet *pCSD
 		if ((srcInvId == (uint16)INVENTORIES::guild) || (dstInvId == (uint16)INVENTORIES::guild))
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			nGuildSessionCounter = pIM->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
+			nGuildSessionCounter = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
 		}
 		out.serial(nGuildSessionCounter); // always serial to use the fixed-sized msg.xml scheme
 
@@ -496,7 +496,7 @@ static void displayQuantityPopup(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCt
 		pCSSrc->copyAspect(&destSheet);
 
 		// init the editbox ctrl. init cur default to max
-		pIM->getDbProp("UI:VARIABLES:STACK_SELECTED:CUR_QUANTITY")->setValue32(availableStack);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:STACK_SELECTED:CUR_QUANTITY")->setValue32(availableStack);
 		editBox->setInputStringAsInt(availableStack);
 
 		// enable the modal
@@ -592,7 +592,7 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 			PlayerTrade.putItemInExchange(src, dest, quantitySrc);
 
 			// user changed the proposal => reset the local ACCEPTED db
-			pIM->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
+			NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
 
 			// send msg to server
 			sendExchangeAddToServer((uint16)src->getIndexInDB(), (uint8)dest->getIndexInDB(), (uint16)quantitySrc);
@@ -612,7 +612,7 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 		PlayerTrade.restoreItem(exchangeSlot);
 
 		// user changed the proposal => reset the local ACCEPTED db
-		pIM->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
 
 		// send msg to server
 		CBitMemStream out;
@@ -702,7 +702,7 @@ static void validateStackItem(CDBCtrlSheet *pCSSrc, CDBCtrlSheet *pCSDst, sint32
 				PlayerTrade.putItemInExchange(pCSSrc, pCSDst, val);
 
 				// user changed the proposal => reset the local ACCEPTED db
-				pIM->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
+				NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
 
 				// send msg to server
 				sendExchangeAddToServer((uint16)pCSSrc->getIndexInDB(), (uint8)pCSDst->getIndexInDB(), (uint16)val);
@@ -808,7 +808,7 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		// get the value to drop
-		sint32	val= pIM->getDbProp("UI:VARIABLES:STACK_SELECTED:CUR_QUANTITY")->getValue32();
+		sint32	val= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:STACK_SELECTED:CUR_QUANTITY")->getValue32();
 		CDBCtrlSheet *pCSSrc = CurrentStackSrc;
 		CDBCtrlSheet *pCSDst = CurrentStackDst;
 		CurrentStackSrc= NULL;
@@ -1120,7 +1120,7 @@ public:
 	{
 		PlayerTrade.restoreAllItems();
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->getDbProp("LOCAL:EXCHANGE:BEGUN")->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:BEGUN")->setValue32(0);
 
 		if (!ClientCfg.Local)
 		{
@@ -1157,7 +1157,7 @@ public:
 		}
 		// user changed the proposal => reset the local ACCEPTED db
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
 
 		// Send the msg
 		CBitMemStream out;
@@ -1317,10 +1317,10 @@ class CHandlerActiveSheath : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		// Get the user interface value.
-		uint8 activeSheath = (uint8)pIM->getDbProp( pIM->getDefine("ui_set_active") )->getValue32();
+		uint8 activeSheath = (uint8)NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("ui_set_active") )->getValue32();
 
 		// Write to the Local Database.
-		pIM->getDbProp( "LOCAL:INVENTORY:ACTIVE_SHEATH" )->setValue32(activeSheath);
+		NLGUI::CDBManager::getInstance()->getDbProp( "LOCAL:INVENTORY:ACTIVE_SHEATH" )->setValue32(activeSheath);
 
 		// Send to server
 		if(!ClientCfg.Local)
@@ -1355,10 +1355,10 @@ class CHandlerReceiveActiveSheath : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		// Get the user interface value.
-		uint8 activeSheath = (uint8)pIM->getDbProp( "LOCAL:INVENTORY:ACTIVE_SHEATH" )->getValue32();
+		uint8 activeSheath = (uint8)NLGUI::CDBManager::getInstance()->getDbProp( "LOCAL:INVENTORY:ACTIVE_SHEATH" )->getValue32();
 
 		// Write to the Local Database.
-		pIM->getDbProp( pIM->getDefine("ui_set_active") )->setValue32(activeSheath);
+		NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("ui_set_active") )->setValue32(activeSheath);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerReceiveActiveSheath, "receive_active_sheath" );
@@ -1933,7 +1933,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			if(valid)
 			{
 				pEquip->setGrayed(
-					pIM->getDbProp("UI:VARIABLES:ISACTIVE:PHRASE_FABER")->getValueBool() &&
+					NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ISACTIVE:PHRASE_FABER")->getValueBool() &&
 					pIS->Family!=ITEMFAMILY::ARMOR &&
 					pIS->Family!=ITEMFAMILY::JEWELRY
 					);
@@ -1943,8 +1943,8 @@ class CHandlerItemMenuCheck : public IActionHandler
 		//Item Text Edition
 		if (pItemTextEdition != NULL && pItemTextDisplay != NULL)
 		{
-			pItemTextEdition->setGrayed(pIM->getDbProp("UI:VARIABLES:ISACTIVE:PHRASE_EDIT_CUSTOM")->getValueBool());
-			pItemTextDisplay->setGrayed(pIM->getDbProp("UI:VARIABLES:ISACTIVE:PHRASE_EDIT_CUSTOM")->getValueBool());
+			pItemTextEdition->setGrayed(NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ISACTIVE:PHRASE_EDIT_CUSTOM")->getValueBool());
+			pItemTextDisplay->setGrayed(NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ISACTIVE:PHRASE_EDIT_CUSTOM")->getValueBool());
 		}
 
 		if (pCS->getGrayed())

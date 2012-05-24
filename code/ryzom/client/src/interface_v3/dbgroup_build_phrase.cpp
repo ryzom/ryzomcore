@@ -102,13 +102,13 @@ bool		CDBGroupBuildPhrase::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	// Bricks and their Params
 	for(i=0;i<MaxBricks;i++)
 	{
-		pIM->getDbProp(BrickBuildDB + ":MAIN:" + toString(i)+":SHEET");
+		NLGUI::CDBManager::getInstance()->getDbProp(BrickBuildDB + ":MAIN:" + toString(i)+":SHEET");
 		for(uint j=0;j<MaxParam;j++)
-			pIM->getDbProp(BrickBuildDB + ":PARAM:" + toString(i) + ":" + toString(j) + ":SHEET");
+			NLGUI::CDBManager::getInstance()->getDbProp(BrickBuildDB + ":PARAM:" + toString(i) + ":" + toString(j) + ":SHEET");
 	}
 
 	// spellView: to update the icon, use a special phrase manager entry
-	pIM->getDbProp(BrickBuildDB + ":EDITION_PHRASE:PHRASE")->setValue32(CSPhraseManager::EditionSlot);
+	NLGUI::CDBManager::getInstance()->getDbProp(BrickBuildDB + ":EDITION_PHRASE:PHRASE")->setValue32(CSPhraseManager::EditionSlot);
 
 	return true;
 }
@@ -1047,8 +1047,8 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 	pBM->getSabrinaCom().getPhraseCost(phrase.Bricks, totalCost, totalCredit);
 
 	// update database
-	pIM->getDbProp("UI:PHRASE:BUILD:TOTAL_COST")->setValue32(totalCost);
-	pIM->getDbProp("UI:PHRASE:BUILD:TOTAL_CREDIT")->setValue32(totalCredit);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:PHRASE:BUILD:TOTAL_COST")->setValue32(totalCost);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:PHRASE:BUILD:TOTAL_CREDIT")->setValue32(totalCredit);
 
 	// **** Update the Cost of All Root/Mandat/ops/Credits.
 	if(phrase.Bricks.size())
@@ -1133,7 +1133,7 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 			mandatOk= false;
 	}
 	// set DB value accordeing to it.
-	pIM->getDbProp("UI:PHRASE:BUILD:ROOT_EFFECT_VALID")->setValue32(mandatOk);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:PHRASE:BUILD:ROOT_EFFECT_VALID")->setValue32(mandatOk);
 
 	// update valid button
 	if(_ValidateButton)
@@ -1187,7 +1187,7 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 	if(rootBrick && rootBrick->isCombat())
 	{
 		// show the weapon restriction interface
-		pIM->getDbProp("UI:PHRASE:BUILD:RESTRICT_COMBAT:ENABLED")->setValue32(1);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:PHRASE:BUILD:RESTRICT_COMBAT:ENABLED")->setValue32(1);
 
 		// If not already done, retrieve the weapon skills, and fill the sbricks SHEET
 		if(_WeaponSkills.empty())
@@ -1218,7 +1218,7 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 				uint32	viewBrickCombatSheetId= pBM->getVisualBrickForSkill(_WeaponSkills[i]).asInt();
 
 				// And fill in DB
-				pIM->getDbProp(toString("UI:PHRASE:BUILD:RESTRICT_COMBAT:%d:SHEET", i))->setValue32(viewBrickCombatSheetId);
+				NLGUI::CDBManager::getInstance()->getDbProp(toString("UI:PHRASE:BUILD:RESTRICT_COMBAT:%d:SHEET", i))->setValue32(viewBrickCombatSheetId);
 			}
 		}
 
@@ -1226,13 +1226,13 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 		for(uint i=0;i<_WeaponSkills.size();i++)
 		{
 			bool	ok= pPM->skillCompatibleWithCombatPhrase(_WeaponSkills[i], phrase.Bricks);
-			pIM->getDbProp(toString("UI:PHRASE:BUILD:RESTRICT_COMBAT:%d:LOCKED", i))->setValue32(!ok);
+			NLGUI::CDBManager::getInstance()->getDbProp(toString("UI:PHRASE:BUILD:RESTRICT_COMBAT:%d:LOCKED", i))->setValue32(!ok);
 		}
 	}
 	else
 	{
 		// hide the weapon restriction interface
-		pIM->getDbProp("UI:PHRASE:BUILD:RESTRICT_COMBAT:ENABLED")->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:PHRASE:BUILD:RESTRICT_COMBAT:ENABLED")->setValue32(0);
 	}
 
 	// **** Setup the phrase Desc
@@ -1267,7 +1267,7 @@ void			CDBGroupBuildPhrase::resetSelection()
 
 	for(uint i=0;i<MaxSelection;i++)
 	{
-		pIM->getDbProp(BrickSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp(BrickSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(0);
 	}
 }
 
@@ -1280,9 +1280,9 @@ void			CDBGroupBuildPhrase::fillSelection(const std::vector<CSheetId> &bricks)
 	for(uint i=0;i<MaxSelection;i++)
 	{
 		if(i<num)
-			pIM->getDbProp(BrickSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(bricks[i].asInt());
+			NLGUI::CDBManager::getInstance()->getDbProp(BrickSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(bricks[i].asInt());
 		else
-			pIM->getDbProp(BrickSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(0);
+			NLGUI::CDBManager::getInstance()->getDbProp(BrickSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(0);
 	}
 }
 

@@ -279,7 +279,7 @@ void CGroupCompas::draw()
 		case CCompassTarget::Home:
 		{
 			// get pos
-			CCDBNodeLeaf *pos = im->getDbProp(COMPASS_DB_PATH ":HOME_POINT");
+			CCDBNodeLeaf *pos = NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":HOME_POINT");
 			sint32 px = (sint32) (pos->getValue64() >> 32);
 			sint32 py = pos->getValue32();
 			if (px != 0 || py != 0)
@@ -410,7 +410,7 @@ bool CGroupCompas::handleEvent (const NLGUI::CEventDescriptor &event)
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				_RadarPos = pIM->getDbProp("UI:SAVE:RADARZOOM")->getValue32();
+				_RadarPos = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:RADARZOOM")->getValue32();
 				if (eventDesc.getWheel() > 0)
 				{
 					// Zoom out
@@ -422,7 +422,7 @@ bool CGroupCompas::handleEvent (const NLGUI::CEventDescriptor &event)
 					if (_RadarPos < 3) _RadarPos++;
 				}
 
-				pIM->getDbProp("UI:SAVE:RADARZOOM")->setValue32(_RadarPos);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:RADARZOOM")->setValue32(_RadarPos);
 			}
 		}
 	}
@@ -491,7 +491,7 @@ bool CGroupCompas::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	if (ptr) _NewTargetSelectedColor = convertColor(ptr);
 	//
 
-	_DynamicTargetPos = CInterfaceManager::getInstance()->getDbProp(COMPASS_DB_PATH ":TARGET");
+	_DynamicTargetPos = NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":TARGET");
 
 	return true;
 }
@@ -501,8 +501,8 @@ bool	buildCompassTargetFromTeamMember(CCompassTarget &ct, uint teamMemberId)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	CCDBNodeLeaf	*entityNode = pIM->getDbProp(toString(TEAM_DB_PATH ":%d:UID", teamMemberId), false);
-	CCDBNodeLeaf	*nameNode = pIM->getDbProp(toString(TEAM_DB_PATH ":%d:NAME", teamMemberId), false);
+	CCDBNodeLeaf	*entityNode = NLGUI::CDBManager::getInstance()->getDbProp(toString(TEAM_DB_PATH ":%d:UID", teamMemberId), false);
+	CCDBNodeLeaf	*nameNode = NLGUI::CDBManager::getInstance()->getDbProp(toString(TEAM_DB_PATH ":%d:NAME", teamMemberId), false);
 	if (nameNode && nameNode->getValueBool() && entityNode && entityNode->getValue32()!=0 && nameNode)
 	{
 		CSmartPtr<CTeammatePositionState> tracker = new CTeammatePositionState;
@@ -532,7 +532,7 @@ bool	buildCompassTargetFromTeamMember(CCompassTarget &ct, uint teamMemberId)
 	if(animalMemberId<MAX_INVENTORY_ANIMAL+1)
 	{
 		ANIMAL_TYPE::EAnimalType at;
-		at = (ANIMAL_TYPE::EAnimalType)pIM->getDbProp("SERVER:PACK_ANIMAL:BEAST"+toString(animalMemberId-1)+":TYPE")->getValue32();
+		at = (ANIMAL_TYPE::EAnimalType)NLGUI::CDBManager::getInstance()->getDbProp("SERVER:PACK_ANIMAL:BEAST"+toString(animalMemberId-1)+":TYPE")->getValue32();
 		string sPrefix;
 		switch(at)
 		{
@@ -551,7 +551,7 @@ bool	buildCompassTargetFromTeamMember(CCompassTarget &ct, uint teamMemberId)
 		return false;
 
 	// get if present or not
-	CCDBNodeLeaf	*statusNode = pIM->getDbProp(dbBase + ":STATUS", false);
+	CCDBNodeLeaf	*statusNode = NLGUI::CDBManager::getInstance()->getDbProp(dbBase + ":STATUS", false);
 	if (statusNode && ANIMAL_STATUS::isSpawned((ANIMAL_STATUS::EAnimalStatus)statusNode->getValue32()) )
 	{
 		CSmartPtr<CAnimalPositionState> tracker = new CAnimalPositionState;
@@ -665,7 +665,7 @@ void CGroupCompasMenu::setActive (bool state)
 			Targets.push_back(ct);
 			getRootMenu()->addLineAtIndex(lineIndex ++, ct.Name, "set_compas", toString ("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 			// Home
-			CCDBNodeLeaf *pos = im->getDbProp(COMPASS_DB_PATH ":HOME_POINT");
+			CCDBNodeLeaf *pos = NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":HOME_POINT");
 			sint32 px = (sint32) (pos->getValue64() >> 32);
 			sint32 py = pos->getValue32();
 			if (px != 0 || py != 0)
@@ -676,7 +676,7 @@ void CGroupCompasMenu::setActive (bool state)
 				getRootMenu()->addLineAtIndex(lineIndex ++,  ct.Name, "set_compas", toString ("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 			}
 			// Respawn
-			pos = im->getDbProp(COMPASS_DB_PATH ":BIND_POINT");
+			pos = NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":BIND_POINT");
 			px = (sint32) (pos->getValue64() >> 32);
 			py = pos->getValue32();
 			if (px != 0 || py != 0)
@@ -726,14 +726,14 @@ void CGroupCompasMenu::setActive (bool state)
 				{
 					for(uint l = 0; l <MAX_NUM_MISSION_TARGETS; ++l)
 					{
-						CCDBNodeLeaf *textIDLeaf = im->getDbProp(baseDbPath + toString(":%d:TARGET%d:TITLE", (int) k, (int) l), false);
+						CCDBNodeLeaf *textIDLeaf = NLGUI::CDBManager::getInstance()->getDbProp(baseDbPath + toString(":%d:TARGET%d:TITLE", (int) k, (int) l), false);
 						if (textIDLeaf)
 						{
 							ucstring name;
 							if (CStringManagerClient::instance()->getDynString(textIDLeaf->getValue32(), name))
 							{
-								CCDBNodeLeaf *leafPosX= im->getDbProp(baseDbPath +  toString(":%d:TARGET%d:X", (int) k, (int) l), false);
-								CCDBNodeLeaf *leafPosY = im->getDbProp(baseDbPath +  toString(":%d:TARGET%d:Y", (int) k, (int) l), false);
+								CCDBNodeLeaf *leafPosX= NLGUI::CDBManager::getInstance()->getDbProp(baseDbPath +  toString(":%d:TARGET%d:X", (int) k, (int) l), false);
+								CCDBNodeLeaf *leafPosY = NLGUI::CDBManager::getInstance()->getDbProp(baseDbPath +  toString(":%d:TARGET%d:Y", (int) k, (int) l), false);
 								if (leafPosX && leafPosY)
 								{
 									CCompassTarget ct;

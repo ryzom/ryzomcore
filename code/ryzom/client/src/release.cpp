@@ -335,8 +335,8 @@ void	releaseMainLoopReselect()
 	pIM->releaseServerToLocalAutoCopyObservers();
 	// Then remove the SERVER and LOCAL database (NB: "UI" node was removed by uninitIngame1())
 	ICDBNode::CTextId serverId("SERVER"), localId("LOCAL");
-	pIM->getDB()->removeNode(serverId);
-	pIM->getDB()->removeNode(localId);
+	NLGUI::CDBManager::getInstance()->getDB()->removeNode(serverId);
+	NLGUI::CDBManager::getInstance()->getDB()->removeNode(localId);
 	nlassert(IngameDbMngr.getNodePtr()==NULL);	// actually it is the "SERVER" node kept by CRefPtr => should be NULL
 	IngameDbMngr.clear();						// still important for CDBBranch statics data release
 	// NB: "SERVER" and "LOCAL" node will be recreated by initMainLoop
@@ -635,6 +635,7 @@ void release()
 	CPdrTokenRegistry::releaseInstance();
 	NLNET::IModuleManager::releaseInstance();
 	delete &CLuaManager::getInstance();
+	NLGUI::CDBManager::release();
 	
 
 

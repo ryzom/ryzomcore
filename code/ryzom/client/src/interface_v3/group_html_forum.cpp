@@ -107,7 +107,7 @@ void CGroupHTMLForum::addHTTPPostParams (HTAssocList *formfields, bool /*trusted
 string	CGroupHTMLForum::home ()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->getDbProp("UI:VARIABLES:FORUM_UPDATED")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FORUM_UPDATED")->setValue32(0);
 	return Home;
 }
 

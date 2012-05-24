@@ -706,7 +706,7 @@ void CInterfaceConfig::dataBaseToStream (NLMISC::IStream &f)
 
 	// Save branch of the database
 	SDBLeaf leafTmp;
-	CCDBNodeBranch *pDB = pIM->getDbBranch ("UI:SAVE");
+	CCDBNodeBranch *pDB = NLGUI::CDBManager::getInstance()->getDbBranch ("UI:SAVE");
 	if (pDB != NULL)
 	{
 		// Number of leaf to save
@@ -742,7 +742,7 @@ void CInterfaceConfig::streamToDataBase (NLMISC::IStream &f, uint32 uiDbSaveVers
 
 	// Load branch of the database
 	SDBLeaf leafTmp;
-	CCDBNodeBranch *pDB = pIM->getDbBranch ("UI:SAVE");
+	CCDBNodeBranch *pDB = NLGUI::CDBManager::getInstance()->getDbBranch ("UI:SAVE");
 	if (pDB != NULL)
 	{
 		// Number of leaf to save
@@ -776,7 +776,7 @@ void CInterfaceConfig::streamToDataBase (NLMISC::IStream &f, uint32 uiDbSaveVers
 			// if want read the value from file, read it, else keep the default one
 			if(wantRead)
 			{
-				CCDBNodeLeaf *pNL = pIM->getDbProp(leafTmp.Name,false);
+				CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(leafTmp.Name,false);
 				if (pNL != NULL)
 					leafTmp.setTo(pNL);
 			}

@@ -286,7 +286,7 @@ void CClientChatManager::chat( const ucstring& strIn, bool isChatTeam )
 
 	if (isChatTeam)
 	{
-		if (CInterfaceManager::getInstance()->getDbProp("SERVER:GROUP:0:PRESENT")->getValueBool())
+		if (NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GROUP:0:PRESENT")->getValueBool())
 			msgType = "STRING:CHAT_TEAM";
 		else
 			return;		// don't display team chat message if there is no team chat
@@ -1058,8 +1058,8 @@ void	CClientChatManager::initInGame()
 		_DynamicChannelIdLeaf[i]= NULL;
 		_DynamicChannelIdCache[i]= DynamicChannelEmptyId;
 		// get
-		CCDBNodeLeaf	*name= pIM->getDbProp(toString("SERVER:DYN_CHAT:CHANNEL%d:NAME", i), false);
-		CCDBNodeLeaf	*id= pIM->getDbProp(toString("SERVER:DYN_CHAT:CHANNEL%d:ID", i), false);
+		CCDBNodeLeaf	*name= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:DYN_CHAT:CHANNEL%d:NAME", i), false);
+		CCDBNodeLeaf	*id= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:DYN_CHAT:CHANNEL%d:ID", i), false);
 		if(name && id)
 		{
 			_DynamicChannelNameLeaf[i]= name;
@@ -1247,8 +1247,8 @@ void CClientChatManager::updateChatModeAndButton(uint mode, uint32 dynamicChanne
 			CInterfaceGroup *pEditBox = dynamic_cast<CInterfaceGroup*>(pCGW->getContainer()->getGroup("content:ebw"));
 
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			const bool teamActive = pIM->getDbProp("SERVER:GROUP:0:PRESENT")->getValueBool();
-			const bool guildActive = pIM->getDbProp("SERVER:GUILD:NAME")->getValueBool();
+			const bool teamActive = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GROUP:0:PRESENT")->getValueBool();
+			const bool guildActive = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:NAME")->getValueBool();
 
 			if (m == CChatGroup::team && ! teamActive)
 				m = PeopleInterraction.TheUserChat.Filter.getTargetGroup();
@@ -1409,7 +1409,7 @@ class CHandlerSwapChatMode : public IActionHandler
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		bool	updateCapture= getParam(sParams, "update_capture")=="1";
 
-		CCDBNodeLeaf	*node= pIM->getDbProp("UI:SAVE:CHAT:ENTER_DONT_QUIT_CB", false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:ENTER_DONT_QUIT_CB", false);
 		if(node)
 		{
 			// if "chatmode" is active

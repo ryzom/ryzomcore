@@ -38,7 +38,7 @@ void CBotChatPageCreateGuild::begin()
 	CBotChatPage::begin();
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	// clear intro text
-	im->getDbProp(BOT_CHAT_BASE_DB_PATH ":CREATE_GUILD")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp(BOT_CHAT_BASE_DB_PATH ":CREATE_GUILD")->setValue32(0);
 	// show the dialog
 	activateWindow(WIN_BOT_CHAT_PAGE_CREATE_GUILD, true);
 }

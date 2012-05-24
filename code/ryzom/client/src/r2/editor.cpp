@@ -1728,7 +1728,7 @@ void CEditor::waitScenarioScreen()
 
 		}
 		IngameDbMngr.flushObserverCalls();
-		CInterfaceManager::getInstance()->flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 		// check if we can send another dated block
 		if (NetMngr.getCurrentServerTick() != serverTick)
@@ -1774,7 +1774,7 @@ void CEditor::waitScenarioScreen()
 
 		getUI().updateFrameViews(NULL);
 		IngameDbMngr.flushObserverCalls();
-		CInterfaceManager::getInstance()->flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 		// Movie shooter
 		globalMenuMovieShooter();
@@ -2741,14 +2741,14 @@ uint CEditor::getMaxNumPlotItems()
 CCDBNodeLeaf *CEditor::getRefPlotItemSheetDBLeaf(uint index)
 {
 	//H_AUTO(R2_CEditor_getRefPlotItemSheetDBLeaf)
-	return getUI().getDbProp(toString("LOCAL:R2:REFERENCE_PLOT_ITEMS:%d:SHEET", (int) index), false);
+	return NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:R2:REFERENCE_PLOT_ITEMS:%d:SHEET", (int) index), false);
 }
 
 // *********************************************************************************************************
 CCDBNodeLeaf *CEditor::getPlotItemSheetDBLeaf(uint index)
 {
 	//H_AUTO(R2_CEditor_getPlotItemSheetDBLeaf)
-	return getUI().getDbProp(toString("LOCAL:R2:PLOT_ITEMS:%d:SHEET", (int) index), false);
+	return NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:R2:PLOT_ITEMS:%d:SHEET", (int) index), false);
 }
 
 
@@ -2761,7 +2761,7 @@ void CEditor::setReferencePlotItemSheet(uint index, uint32 sheetId)
 	{
 		leaf->setValue32(sheetId);
 	}
-	leaf = getUI().getDbProp(toString("LOCAL:R2:AVAILABLE_PLOT_ITEMS:%d:SHEET", (int) index), false);
+	leaf = NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:R2:AVAILABLE_PLOT_ITEMS:%d:SHEET", (int) index), false);
 	if (leaf)
 	{
 		leaf->setValue32(sheetId);
@@ -4841,24 +4841,24 @@ CEntityCL *CEditor::createEntity(uint slot, const NLMISC::CSheetId &sheetId, con
 	sint64       *prop = 0;
 	CCDBNodeLeaf *node = 0;
 	// Set The property 'CLFECOMMON::PROPERTY_POSITION'.
-	node = im->getDbProp("SERVER:Entities:E" + NLMISC::toString("%d", slot)+":P" + NLMISC::toString("%d", CLFECOMMON::PROPERTY_POSX), false);
+	node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + NLMISC::toString("%d", slot)+":P" + NLMISC::toString("%d", CLFECOMMON::PROPERTY_POSX), false);
 	if(node)
 	{
 		sint64 x = (sint64)(pos.x*1000.0);
 		sint64 y = (sint64)(pos.y*1000.0);
 		sint64 z = (sint64)(pos.z*1000.0);
 		node->setValue64(x);
-		node = im->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_POSY), false);
+		node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_POSY), false);
 		if(node)
 		{
 			node->setValue64(y);
-			node = im->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_POSZ), false);
+			node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_POSZ), false);
 			if(node)
 				node->setValue64(z);
 		}
 	}
 	// Set The property 'PROPERTY_ORIENTATION'.
-	node = im->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_ORIENTATION), false);
+	node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_ORIENTATION), false);
 	if(node)
 	{
 		union
@@ -4870,7 +4870,7 @@ CEntityCL *CEditor::createEntity(uint slot, const NLMISC::CSheetId &sheetId, con
 		node->setValue64(heading64);
 	}
 	// Set Mode
-	node = im->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_MODE), false);
+	node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_MODE), false);
 	if(node)
 	{
 		MBEHAV::EMode m = MBEHAV::NORMAL;
@@ -4915,7 +4915,7 @@ CEntityCL *CEditor::createEntity(uint slot, const NLMISC::CSheetId &sheetId, con
 	}
 
 	// Set the database.
-	im->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->setValue64(*prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->setValue64(*prop);
 
 	// Set Visual Properties
 	SPropVisualB visualB;
@@ -4924,7 +4924,7 @@ CEntityCL *CEditor::createEntity(uint slot, const NLMISC::CSheetId &sheetId, con
 	sint64       *propB = 0;
 	propB = (sint64 *)&visualB;
 	// Set the database.
-	im->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->setValue64(*propB);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->setValue64(*propB);
 
 	// Apply Changes.
 	EntitiesMngr.updateVisualProperty(0, slot, CLFECOMMON::PROPERTY_VPA);
@@ -7191,13 +7191,13 @@ class CAHCreateEntity : public IActionHandler
 				}
 
 				prop = (sint64 *)&vA;
-				im->getDbProp("SERVER:Entities:E"+toString("%d", entity->slot())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->setValue64(*prop);
+				NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", entity->slot())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->setValue64(*prop);
 
 				prop = (sint64 *)&vB;
-				im->getDbProp("SERVER:Entities:E"+toString("%d", entity->slot())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->setValue64(*prop);
+				NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", entity->slot())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->setValue64(*prop);
 
 				prop = (sint64 *)&vC;
-				im->getDbProp("SERVER:Entities:E"+toString("%d", entity->slot())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPC))->setValue64(*prop);
+				NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", entity->slot())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPC))->setValue64(*prop);
 
 				EntitiesMngr.updateVisualProperty(0, entity->slot(), CLFECOMMON::PROPERTY_VPA);
 				EntitiesMngr.updateVisualProperty(0, entity->slot(), CLFECOMMON::PROPERTY_VPB);
@@ -7205,7 +7205,7 @@ class CAHCreateEntity : public IActionHandler
 			}
 		}
 
-		getEditor().setCurrentTool(new CToolCreateEntity(ghostSlot, paletteId, im->getDbProp("UI:TEMP:R2_DRAW_ARRAY")->getValueBool()));
+		getEditor().setCurrentTool(new CToolCreateEntity(ghostSlot, paletteId, NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:R2_DRAW_ARRAY")->getValueBool()));
 	}
 };
 REGISTER_ACTION_HANDLER(CAHCreateEntity, "r2ed_create_entity");
@@ -7624,9 +7624,9 @@ class CAHR2DMGiftValidate : public IActionHandler
 			{
 				uint32 sheetId = 0;
 				uint8  quantity = 0;
-				CCDBNodeLeaf *sheetLeaf = im->getDbProp(toString("LOCAL:R2:DM_GIFT:%d:SHEET", (int) k));
+				CCDBNodeLeaf *sheetLeaf = NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:R2:DM_GIFT:%d:SHEET", (int) k));
 				if (sheetLeaf) sheetId = (uint32) sheetLeaf->getValue32();
-				CCDBNodeLeaf *quantityLeaf = im->getDbProp(toString("LOCAL:R2:DM_GIFT:%d:QUANTITY", (int) k));
+				CCDBNodeLeaf *quantityLeaf = NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:R2:DM_GIFT:%d:QUANTITY", (int) k));
 				if (quantityLeaf) quantity = (uint8) quantityLeaf->getValue8();
 				out.serial(sheetId);
 				out.serial(quantity);

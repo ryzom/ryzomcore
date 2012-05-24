@@ -295,7 +295,7 @@ void CEncyclopediaManager::rebuildAlbumPage(uint32 albumName)
 	pVT->setTextId(pAlbum->Name);
 
 	// Setup brick reward
-	pIM->getDbProp("UI:VARIABLES:ENCY:ALBUMBRICK:SHEET")->setValue32(pAlbum->RewardBrick);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ENCY:ALBUMBRICK:SHEET")->setValue32(pAlbum->RewardBrick);
 	CViewText *pRBVT = dynamic_cast<CViewText*>(pIM->getElementFromId(PAGE_ENCY_ALBUM ":reward:desc"));
 	if (pRBVT != NULL)
 	{
@@ -347,7 +347,7 @@ void CEncyclopediaManager::rebuildThemaPage(uint32 themaName)
 	pVT->setTextId(pThema->RewardText);
 
 	// Setup brick reward
-	pIM->getDbProp("UI:VARIABLES:ENCY:REWARDBRICK:SHEET")->setValue32(pThema->RewardSheet);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ENCY:REWARDBRICK:SHEET")->setValue32(pThema->RewardSheet);
 	CViewText *pRBVT = dynamic_cast<CViewText*>(pIM->getElementFromId(PAGE_ENCY_THEMA ":reward:desc"));
 	nlassert(pRBVT != NULL);
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
@@ -373,14 +373,14 @@ void CEncyclopediaManager::rebuildThemaPage(uint32 themaName)
 
 	// Setup the total number of steps
 	uint32 nNbSteps = pThema->NbTask - 1; // 0th is the rite
-	pIM->getDbProp("UI:VARIABLES:ENCY:STEPS")->setValue32(nNbSteps);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ENCY:STEPS")->setValue32(nNbSteps);
 
 	// Count number of tasks done
 	uint32 nNbTaskDone = 0;
 	for (i = 0; i < pThema->NbTask; ++i)
 		if (pThema->getTaskState((uint8)i) == 2) // 2 == finished
 			++nNbTaskDone;
-	pIM->getDbProp("UI:VARIABLES:ENCY:DONE")->setValue32(nNbTaskDone);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ENCY:DONE")->setValue32(nNbTaskDone);
 
 	// setup rite & tasks
 	for (i = 0; i < pThema->NbTask; ++i)

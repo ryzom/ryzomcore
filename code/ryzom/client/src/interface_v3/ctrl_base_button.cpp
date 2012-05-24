@@ -348,7 +348,7 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 				if (!_LeftLongClickHandled)
 				{
 					uint nVal = 50;
-					CCDBNodeLeaf *pNL = pIM->getDbProp("UI:SAVE:KEY_REPEAT_SPEED");
+					CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:KEY_REPEAT_SPEED");
 					if (pNL != NULL)
 						nVal = pNL->getValue32();
 					uint repeatDelay = (uint)(KEY_REPEAT_MIN + (KEY_REPEAT_MAX-KEY_REPEAT_MIN) * (float)nVal / 100.0f);

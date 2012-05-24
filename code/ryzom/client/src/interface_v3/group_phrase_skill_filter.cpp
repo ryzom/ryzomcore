@@ -91,7 +91,7 @@ bool CGroupPhraseSkillFilter::parse (xmlNodePtr cur, CInterfaceGroup *parentGrou
 		_BrickFamilyObs[k].Owner= this;
 		_BrickFamilyObs[k].BrickFamily= (BRICK_FAMILIES::TBrickFamily)k;
 		sTmp = string(DB_BRICKS)+":"+NLMISC::toString((sint32)k)+":BRICKS";
-		pIM->addDBObserver (&(_BrickFamilyObs[k]), sTmp);
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&(_BrickFamilyObs[k]), ICDBNode::CTextId( sTmp ));
 	}
 
 	_MustRebuild = true;

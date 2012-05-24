@@ -174,7 +174,7 @@ class CPlayerTradeStartHandler : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		if (im->getDbProp("LOCAL:EXCHANGE:BEGUN")->getValue8() != 0)
+		if (NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:BEGUN")->getValue8() != 0)
 		{
 			//PlayerTrade.reset();
 

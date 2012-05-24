@@ -82,11 +82,11 @@ void			CActionPhraseFaber::fillDBWithMP(const std::string &sheetBase, const CIte
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	pIM->getDbProp(sheetBase + ":SHEET")->setValue32(item.Sheet.asInt());
-	pIM->getDbProp(sheetBase + ":QUALITY")->setValue32(item.Quality);
-	pIM->getDbProp(sheetBase + ":QUANTITY")->setValue32(item.Quantity);
-	pIM->getDbProp(sheetBase + ":USER_COLOR")->setValue32(item.UserColor);
-	pIM->getDbProp(sheetBase + ":WEIGHT")->setValue32(item.Weight);
+	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":SHEET")->setValue32(item.Sheet.asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":QUALITY")->setValue32(item.Quality);
+	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":QUANTITY")->setValue32(item.Quantity);
+	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":USER_COLOR")->setValue32(item.UserColor);
+	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":WEIGHT")->setValue32(item.Weight);
 }
 
 
@@ -144,7 +144,7 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 		// Reset All Mps slots.
 		for(uint mpSlot=0;mpSlot<MAX_MP_SLOT;mpSlot++)
 		{
-			CCDBNodeLeaf	*node= pIM->getDbProp(toString("%s:%d:%d:SHEET", MPFaberDB.c_str(), itemReqLine, mpSlot), false);
+			CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:%d:SHEET", MPFaberDB.c_str(), itemReqLine, mpSlot), false);
 			if(node)
 				node->setValue32(0);
 		}
@@ -156,12 +156,12 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 	}
 
 	// Reset the selected plan
-	CCDBNodeLeaf	*node= pIM->getDbProp(FaberPlanDB, false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(FaberPlanDB, false);
 	if(node)
 		node->setValue32(0);
 
 	// Reset the result item
-	node= pIM->getDbProp(ItemResultSheetDB, false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp(ItemResultSheetDB, false);
 	if(node)
 		node->setValue32(0);
 
@@ -185,23 +185,23 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 	// **** setup DB observer!
 	// ensure remove (if setuped before), then add
 	CCDBNodeBranch	*branch;
-	branch= pIM->getDbBranch("LOCAL:INVENTORY:BAG");
-	if(branch) pIM->removeBranchObserver( "LOCAL:INVENTORY:BAG",&_DBInventoryObs);
-	if(branch) pIM->addBranchObserver( "LOCAL:INVENTORY:BAG",&_DBInventoryObs);
+	branch= NLGUI::CDBManager::getInstance()->getDbBranch("LOCAL:INVENTORY:BAG");
+	if(branch) NLGUI::CDBManager::getInstance()->removeBranchObserver( "LOCAL:INVENTORY:BAG",&_DBInventoryObs);
+	if(branch) NLGUI::CDBManager::getInstance()->addBranchObserver( "LOCAL:INVENTORY:BAG",&_DBInventoryObs);
 
 	// and for all pack animals
 	uint	i;
 	for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 	{
-		branch= pIM->getDbBranch(toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i));
-		if(branch) pIM->removeBranchObserver( toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i).c_str(), &_DBInventoryObs);
-		if(branch) pIM->addBranchObserver( toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i).c_str(), &_DBInventoryObs);
+		branch= NLGUI::CDBManager::getInstance()->getDbBranch(toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i));
+		if(branch) NLGUI::CDBManager::getInstance()->removeBranchObserver( toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i).c_str(), &_DBInventoryObs);
+		if(branch) NLGUI::CDBManager::getInstance()->addBranchObserver( toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i).c_str(), &_DBInventoryObs);
 	}
 
 	// Add observers on animal status, cause inventory may become unavailabe during the process
 	for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 	{
-		node= pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS",i), false);
+		node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS",i), false);
 		if(node)
 		{
 			ICDBNode::CTextId textId;
@@ -223,19 +223,19 @@ void			CActionPhraseFaber::onCloseFaberCastWindow()
 
 	// No more need to listen inventory change
 	CCDBNodeBranch	*branch;
-	branch= pIM->getDbBranch("LOCAL:INVENTORY:BAG");
+	branch= NLGUI::CDBManager::getInstance()->getDbBranch("LOCAL:INVENTORY:BAG");
 	if(branch) branch->removeBranchObserver(&_DBInventoryObs);
 	// and for all pack animals
 	for(uint i=0;i<MAX_INVENTORY_ANIMAL;i++)
 	{
-		branch= pIM->getDbBranch(toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i));
+		branch= NLGUI::CDBManager::getInstance()->getDbBranch(toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i));
 		if(branch) branch->removeBranchObserver(&_DBInventoryObs);
 	}
 
 	// remove observers on animal status, cause inventory may become unavailabe during the process
 	for(uint i=0;i<MAX_INVENTORY_ANIMAL;i++)
 	{
-		CCDBNodeLeaf *node= pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS",i), false);
+		CCDBNodeLeaf *node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS",i), false);
 		if(node)
 		{
 			ICDBNode::CTextId textId;
@@ -270,9 +270,9 @@ void			CActionPhraseFaber::fillFaberPlanSelection(const std::string &brickDB, ui
 	for(i=0;i<maxSelection;i++)
 	{
 		if(i<num)
-			pIM->getDbProp(brickDB + ":" + toString(i) + ":SHEET")->setValue32(bricks[i].asInt());
+			NLGUI::CDBManager::getInstance()->getDbProp(brickDB + ":" + toString(i) + ":SHEET")->setValue32(bricks[i].asInt());
 		else
-			pIM->getDbProp(brickDB + ":" + toString(i) + ":SHEET")->setValue32(0);
+			NLGUI::CDBManager::getInstance()->getDbProp(brickDB + ":" + toString(i) + ":SHEET")->setValue32(0);
 	}
 }
 
@@ -302,7 +302,7 @@ CItemImage		*CActionPhraseFaber::getInvMirrorItemImage(uint slotIndex, uint& inv
 		if (getInventory().isInventoryAvailable(INVENTORIES::guild))
 		{
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CCDBNodeBranch *itemBranch = im->getDbBranch(SERVER_INVENTORY ":GUILD:" + toString(slotIndex));
+			CCDBNodeBranch *itemBranch = NLGUI::CDBManager::getInstance()->getDbBranch(SERVER_INVENTORY ":GUILD:" + toString(slotIndex));
 			static CItemImage image;
 			image.build(itemBranch);
 			invId = INVENTORIES::guild;
@@ -318,7 +318,7 @@ CItemImage		*CActionPhraseFaber::getInvMirrorItemImage(uint slotIndex, uint& inv
 		if (getInventory().isInventoryAvailable(INVENTORIES::player_room))
 		{
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CCDBNodeBranch *itemBranch = im->getDbBranch(SERVER_INVENTORY ":ROOM:" + toString(slotIndex));
+			CCDBNodeBranch *itemBranch = NLGUI::CDBManager::getInstance()->getDbBranch(SERVER_INVENTORY ":ROOM:" + toString(slotIndex));
 			static CItemImage image;
 			image.build(itemBranch);
 			invId = INVENTORIES::player_room;
@@ -370,17 +370,17 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 
 
 	// Setup the selected plan
-	CCDBNodeLeaf	*node= pIM->getDbProp(FaberPlanDB, false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(FaberPlanDB, false);
 	if(node)
 		node->setValue32(_ExecuteFromItemPlanBrick->Id.asInt());
 
 	// Setup the result item
-	node= pIM->getDbProp(ItemResultSheetDB, false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp(ItemResultSheetDB, false);
 	if(node)
 		node->setValue32(itemPlanBrick->FaberPlan.ItemBuilt.asInt());
 
 	// Setup the result quantity (for stacked items)
-	node= pIM->getDbProp(ItemResultQuantityDB, false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp(ItemResultQuantityDB, false);
 	if(node)
 		node->setValue32(itemPlanBrick->FaberPlan.NbItemBuilt);
 
@@ -483,7 +483,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 		// Reset All Mps slots.
 		for(uint mpSlot=0;mpSlot<MAX_MP_SLOT;mpSlot++)
 		{
-			CCDBNodeLeaf	*node= pIM->getDbProp(toString("%s:%d:%d:SHEET", MPFaberDB.c_str(), itemReqLine, mpSlot), false);
+			CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:%d:SHEET", MPFaberDB.c_str(), itemReqLine, mpSlot), false);
 			if(node)
 				node->setValue32(0);
 		}
@@ -577,7 +577,7 @@ void			CActionPhraseFaber::resetSelection()
 
 	for(uint i=0;i<MAX_MP_SELECTION_ENTRIES;i++)
 	{
-		pIM->getDbProp(MPSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp(MPSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(0);
 	}
 }
 
@@ -595,7 +595,7 @@ void			CActionPhraseFaber::fillSelection(const std::vector<uint> &mps)
 			fillDBWithMP(MPSelectionDB+ ":" + toString(i), item);
 		}
 		else
-			pIM->getDbProp(MPSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(0);
+			NLGUI::CDBManager::getInstance()->getDbProp(MPSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(0);
 	}
 }
 
@@ -692,9 +692,9 @@ void		CActionPhraseFaber::startMpSelection(uint itemReqLine, uint mpSlot)
 		uint	maxQuantity= getMaxQuantityChange(itemReqLine, mpSlot);
 
 		// set the max quantity as the default quantity to set up.
-		CCDBNodeLeaf	*node= pIM->getDbProp(MPQuantitySelectDb + ":CUR_QUANTITY",  false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(MPQuantitySelectDb + ":CUR_QUANTITY",  false);
 		if(node)	node->setValue32(maxQuantity);
-		node= pIM->getDbProp(MPQuantitySelectDb + ":MAX_QUANTITY",  false);
+		node= NLGUI::CDBManager::getInstance()->getDbProp(MPQuantitySelectDb + ":MAX_QUANTITY",  false);
 		if(node)	node->setValue32(maxQuantity);
 
 		// bkup for validation
@@ -841,7 +841,7 @@ void		CActionPhraseFaber::validateMpSelectQuantity()
 
 	// get the quantity selected
 	uint	quantitySelected= 0;
-	CCDBNodeLeaf	*node= pIM->getDbProp(MPQuantitySelectDb + ":CUR_QUANTITY",  false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(MPQuantitySelectDb + ":CUR_QUANTITY",  false);
 	if(node)	quantitySelected= node->getValue32();
 
 	// maximize (if error)
@@ -1056,10 +1056,10 @@ void		CActionPhraseFaber::updateQuantityView(uint itemReqLine)
 
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	CCDBNodeLeaf	*node= pIM->getDbProp(toString("%s:%d:SELECTED", MPQuantityDb.c_str(), itemReqLine), false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:SELECTED", MPQuantityDb.c_str(), itemReqLine), false);
 	if(node)
 		node->setValue32(getTotalQuantitySetuped(itemReqLine));
-	node= pIM->getDbProp(toString("%s:%d:REQUIRED", MPQuantityDb.c_str(), itemReqLine), false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:REQUIRED", MPQuantityDb.c_str(), itemReqLine), false);
 	if(node)
 		node->setValue32(_MPBuild[itemReqLine].QuantityReq);
 }
@@ -1668,7 +1668,7 @@ void	CActionPhraseFaber::updateItemResult()
 	// **** setup Level
 	if(minLevel==INT_MAX)
 		minLevel= 0;
-	CCDBNodeLeaf	*node= pIM->getDbProp(ItemResultSheetLevel, false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(ItemResultSheetLevel, false);
 	if(node)
 		node->setValue32(minLevel);
 
@@ -1682,7 +1682,7 @@ void	CActionPhraseFaber::updateItemResult()
 		uint		phraseSlot= pPM->getMemorizedPhrase(_ExecuteFromMemoryLine, _ExecuteFromMemoryIndex);
 
 		sint32 craftSuccessModifier = 0;
-		CCDBNodeLeaf	*nodeCSM= pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:CRAFT", false);
+		CCDBNodeLeaf	*nodeCSM= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:CRAFT", false);
 		if(nodeCSM)
 		{
 			craftSuccessModifier = nodeCSM->getValue32();
@@ -1730,7 +1730,7 @@ void	CActionPhraseFaber::updateItemResult()
 			dominanteColor = i;
 		}
 	}
-	node= pIM->getDbProp(ItemResultSheetColor, false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp(ItemResultSheetColor, false);
 	if(node)
 		node->setValue32(dominanteColor);
 
@@ -1815,7 +1815,7 @@ void	CActionPhraseFaber::updateItemResult()
 
 
 	// **** BestStat (for text over)
-	node= pIM->getDbProp(ItemResultSheetStatType, false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp(ItemResultSheetStatType, false);
 	if(node)
 	{
 		float bestStatValue =-1.0f;
@@ -1838,7 +1838,7 @@ void	CActionPhraseFaber::updateItemResult()
 
 
 	// **** ClassType (for text over)
-	node= pIM->getDbProp(ItemResultSheetClassType, false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp(ItemResultSheetClassType, false);
 	if(node)
 	{
 		// Setup DB

@@ -163,7 +163,7 @@ void CGuildManager::sortGuildMembers(TSortOrder order)
 bool CGuildManager::isProxy()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	return pIM->getDbProp("SERVER:GUILD:PROXY")->getValueBool();
+	return NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:PROXY")->getValueBool();
 }
 
 
@@ -249,14 +249,14 @@ ucstring CGuildManager::getGuildName()
 uint64 CGuildManager::getMoney()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	return pIM->getDbProp("SERVER:GUILD:INVENTORY:MONEY")->getValue64();
+	return NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:INVENTORY:MONEY")->getValue64();
 }
 
 // ***************************************************************************
 uint64 CGuildManager::getXP()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	return pIM->getDbProp("SERVER:GUILD:XP")->getValue64();
+	return NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:XP")->getValue64();
 }
 
 // ***************************************************************************
@@ -275,12 +275,12 @@ void CGuildManager::update()
 
 		// Guild stuff
 		uint32 oldName = _Guild.NameID;
-		_Guild.NameID = pIM->getDbProp("SERVER:GUILD:NAME")->getValue32();
+		_Guild.NameID = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:NAME")->getValue32();
 		_Guild.Name = "";
 		_InGuild = (_Guild.NameID != 0);
 		if (!_InGuild)
 			closeAllInterfaces();
-		_Guild.Icon = pIM->getDbProp("SERVER:GUILD:ICON")->getValue64();
+		_Guild.Icon = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:ICON")->getValue64();
 		_Guild.QuitGuildAvailable = true;
 
 		// Guild Members
@@ -292,15 +292,15 @@ void CGuildManager::update()
 			_GuildMembers.clear();
 			for (uint32 i = 0; i < MAX_GUILD_MEMBER; ++i)
 			{
-				sint32 name = pIM->getDbProp("SERVER:GUILD:MEMBERS:"+toString(i)+":NAME")->getValue32();
+				sint32 name = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:MEMBERS:"+toString(i)+":NAME")->getValue32();
 				if (name != 0)
 				{
 					SGuildMember gm;
 					gm.NameID = name;
 					gm.Index = i;
-					gm.Grade = (EGSPD::CGuildGrade::TGuildGrade)(pIM->getDbProp("SERVER:GUILD:MEMBERS:"+toString(i)+":GRADE")->getValue32());
-					gm.Online = (TCharConnectionState)(pIM->getDbProp("SERVER:GUILD:MEMBERS:"+toString(i)+":ONLINE")->getValue32());
-					gm.EnterDate = pIM->getDbProp("SERVER:GUILD:MEMBERS:"+toString(i)+":ENTER_DATE")->getValue32();
+					gm.Grade = (EGSPD::CGuildGrade::TGuildGrade)(NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:MEMBERS:"+toString(i)+":GRADE")->getValue32());
+					gm.Online = (TCharConnectionState)(NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:MEMBERS:"+toString(i)+":ONLINE")->getValue32());
+					gm.EnterDate = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:MEMBERS:"+toString(i)+":ENTER_DATE")->getValue32();
 					_GuildMembers.push_back(gm);
 				}
 			}
@@ -358,7 +358,7 @@ void CGuildManager::update()
 		// If all is valid no more need update and if guild is opened update the interface
 		if (bAllValid)
 		{
-			CCDBNodeLeaf* node = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB", false);
+			CCDBNodeLeaf* node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB", false);
 			if (node && node->getValueBool())
 			{
 				// See if we need to show any online/offline messages
@@ -420,7 +420,7 @@ void CGuildManager::update()
 			}
 
 			// set this value in the database
-			pIM->getDbProp("UI:VARIABLES:USER:GUILD_GRADE")->setValue32(_Grade);
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:GUILD_GRADE")->setValue32(_Grade);
 
 			// update the guild display
 			CGroupContainer *pGuild = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_GUILD));
@@ -511,37 +511,37 @@ NLMISC_COMMAND(testAscensorPage, "Temp : Simulate the server that fills the data
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	uint64 prop;
 	//
-	im->getDbProp("LOCAL:ASCENSOR:0:NAME")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:0:NAME")->setValue32(12);
 	prop = CGuildManager::iconMake(1, 1, false, CRGBA(255, 255, 0), CRGBA(0, 255, 0));
-	im->getDbProp("LOCAL:ASCENSOR:0:ICON")->setValue64(prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:0:ICON")->setValue64(prop);
 	//
-	im->getDbProp("LOCAL:ASCENSOR:1:NAME")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:1:NAME")->setValue32(12);
 	prop = CGuildManager::iconMake(1, 2, false, CRGBA(0, 255, 255), CRGBA(255, 0, 255));
-	im->getDbProp("LOCAL:ASCENSOR:1:ICON")->setValue64(prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:1:ICON")->setValue64(prop);
 	//
-	im->getDbProp("LOCAL:ASCENSOR:2:NAME")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:2:NAME")->setValue32(12);
 	prop = CGuildManager::iconMake(2, 3, false, CRGBA(255, 0, 0), CRGBA(0, 255, 0));
-	im->getDbProp("LOCAL:ASCENSOR:2:ICON")->setValue64(prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:2:ICON")->setValue64(prop);
 	//
-	im->getDbProp("LOCAL:ASCENSOR:3:NAME")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:3:NAME")->setValue32(12);
 	prop = CGuildManager::iconMake(2, 4, false, CRGBA(255, 255, 0), CRGBA(0, 255, 255));
-	im->getDbProp("LOCAL:ASCENSOR:3:ICON")->setValue64(prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:3:ICON")->setValue64(prop);
 	//
-	im->getDbProp("LOCAL:ASCENSOR:4:NAME")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:4:NAME")->setValue32(12);
 	prop = CGuildManager::iconMake(3, 5, false, CRGBA(255, 255, 0), CRGBA(255, 0, 255));
-	im->getDbProp("LOCAL:ASCENSOR:4:ICON")->setValue64(prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:4:ICON")->setValue64(prop);
 	//
-	im->getDbProp("LOCAL:ASCENSOR:5:NAME")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:5:NAME")->setValue32(12);
 	prop = CGuildManager::iconMake(3, 6, false, CRGBA(0, 255, 255), CRGBA(255, 255, 0));
-	im->getDbProp("LOCAL:ASCENSOR:5:ICON")->setValue64(prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:5:ICON")->setValue64(prop);
 	//
-	im->getDbProp("LOCAL:ASCENSOR:6:NAME")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:6:NAME")->setValue32(12);
 	prop = CGuildManager::iconMake(4, 7, false, CRGBA(0, 255, 255), CRGBA(255, 0, 255));
-	im->getDbProp("SERVER:ASCENSOR:6:ICON")->setValue64(prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:ASCENSOR:6:ICON")->setValue64(prop);
 	//
-	im->getDbProp("LOCAL:ASCENSOR:7:NAME")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:7:NAME")->setValue32(12);
 	prop = CGuildManager::iconMake(4, 8, false, CRGBA(255, 0, 255), CRGBA(0, 255, 255));
-	im->getDbProp("LOCAL:ASCENSOR:7:ICON")->setValue64(prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:7:ICON")->setValue64(prop);
 
 	return true;
 }
@@ -593,7 +593,7 @@ void CGuildManager::openGuildWindow()
 //	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 //	// Open the guild window
 //
-//	CCDBNodeLeaf	*node= pIM->getDbProp("CLIENT:GUILD:HAVE_JOINED", false);
+//	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("CLIENT:GUILD:HAVE_JOINED", false);
 //	if(node)
 //		node->setValue64(1);
 //
@@ -672,14 +672,14 @@ void CGuildManager::initDBObservers()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	// add an observer on the whole guild
-	pIM->addBranchObserver( "SERVER:GUILD", &_DBObs );
+	NLGUI::CDBManager::getInstance()->addBranchObserver( "SERVER:GUILD", &_DBObs );
 
 	// add an observer on members only => need to update all
-	pIM->addBranchObserver("SERVER:GUILD:MEMBERS", &_DBObsMembers);
+	NLGUI::CDBManager::getInstance()->addBranchObserver("SERVER:GUILD:MEMBERS", &_DBObsMembers);
 
 	// observer on ascencors
 	Ascensors.setListType(CHugeListObs::Ascensor);
-	pIM->addBranchObserver("SERVER:ASCENSOR", &Ascensors);
+	NLGUI::CDBManager::getInstance()->addBranchObserver("SERVER:ASCENSOR", &Ascensors);
 }
 
 // ***************************************************************************
@@ -711,13 +711,13 @@ bool CDBGroupListAscensor::CSheetChildAscensor::isInvalidated(CDBGroupListSheetT
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 
-		uint32 nameID = pIM->getDbProp("LOCAL:ASCENSOR:" + toString(Index) + ":NAME")->getValue32();
+		uint32 nameID = NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:" + toString(Index) + ":NAME")->getValue32();
 		ucstring name;
 		if (nameID && pSMC->getDynString(nameID, name))
 		{
 			Text->setText(name);
 
-			uint64 icon = pIM->getDbProp("LOCAL:ASCENSOR:" + toString(Index) + ":ICON")->getValue64();
+			uint64 icon = NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:" + toString(Index) + ":ICON")->getValue64();
 
 			// Slot setup
 			if ((icon & UINT64_CONSTANT(0x8000000000000000)) != 0)
@@ -793,7 +793,7 @@ class CAHGuildSheetOpen : public IActionHandler
 		// *** Update Members, if necessary
 		if(updateMembers)
 		{
-			CGuildManager::TSortOrder order = (CGuildManager::TSortOrder)(pIM->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->getValue32());
+			CGuildManager::TSortOrder order = (CGuildManager::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->getValue32());
 			// Sort the members in Guild Manager
 			pGM->sortGuildMembers(order);
 
@@ -1007,7 +1007,7 @@ static void sendMsgSetGrade(EGSPD::CGuildGrade::TGuildGrade Grade)
 		out.serial(u16MemberNb);
 		uint8 u8Grade = Grade;
 		out.serial(u8Grade);
-		uint8 u8Counter = (uint8)pIM->getDbProp("SERVER:GUILD:COUNTER")->getValue8();
+		uint8 u8Counter = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:COUNTER")->getValue8();
 		out.serial(u8Counter);
 		NetMngr.push(out);
 		//nlinfo("impulseCallBack : %s %d %d %d sent", message.c_str(), u16MemberNb, u8Grade, u8Counter);
@@ -1026,7 +1026,7 @@ public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		CInterfaceManager* pIM= CInterfaceManager::getInstance();
-		CGuildManager::TSortOrder order = (CGuildManager::TSortOrder)(pIM->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->getValue32());
+		CGuildManager::TSortOrder order = (CGuildManager::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->getValue32());
 
 		order = (CGuildManager::TSortOrder)(order + 1);
 		if (order == CGuildManager::END_SORT_ORDER)
@@ -1034,7 +1034,7 @@ public:
 			order = CGuildManager::START_SORT_ORDER;
 		}
 
-		pIM->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->setValue32((sint32)order);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->setValue32((sint32)order);
 		pIM->runActionHandler("guild_sheet_open", NULL, toString("update_members=1"));
 	}
 };
@@ -1181,7 +1181,7 @@ class CAHGuildSheetKick : public IActionHandler
 		{
 			uint16 u16MemberNb = (uint16)rGuildMembers[MemberNb].Index;
 			out.serial(u16MemberNb);
-			uint8 u8Counter = (uint8)pIM->getDbProp("SERVER:GUILD:COUNTER")->getValue8();
+			uint8 u8Counter = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:COUNTER")->getValue8();
 			out.serial(u8Counter);
 			NetMngr.push(out);
 			//nlinfo("impulseCallBack : %s %d %d sent", message.c_str(), u16MemberNb, u8Counter);
@@ -1230,8 +1230,8 @@ class CHandlerInvGuildToBag : public IActionHandler
 		if (!pCSDst->isSheetValid()) return;
 		string sTmp = pCSDst->getSheet();
 
-		CCDBNodeLeaf *pNL = pIM->getDbProp(sTmp+":SHEET",false);
-		CCDBNodeLeaf *pNLquantity = pIM->getDbProp(sTmp+":QUANTITY",false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(sTmp+":SHEET",false);
+		CCDBNodeLeaf *pNLquantity = NLGUI::CDBManager::getInstance()->getDbProp(sTmp+":QUANTITY",false);
 		if (pNL == NULL) return;
 		if (pNLquantity == NULL) return;
 
@@ -1272,7 +1272,7 @@ class CHandlerInvGuildToBag : public IActionHandler
 
 		if (!bPlaceFound) return;
 
-		uint16 Session = pIM->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
+		uint16 Session = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
 
 		CBitMemStream out;
 		const string sMsg = "GUILD:GUILD_TO_BAG";
@@ -1307,7 +1307,7 @@ class CHandlerInvBagToGuild : public IActionHandler
 		uint8 BagIndex;
 		fromString(sTmp, BagIndex);
 
-		uint16 Session = pIM->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
+		uint16 Session = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
 
 		CBitMemStream out;
 		const string sMsg = "GUILD:BAG_TO_GUILD";
@@ -1332,8 +1332,8 @@ REGISTER_ACTION_HANDLER (CHandlerInvBagToGuild, "inv_bag_to_guild");
 static void sendMoneyServerMessage(const string &sMsg)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	uint64 nMoney = pIM->getDbProp("UI:VARIABLES:CHOOSE_MONEY")->getValue64();
-	uint16 Session = pIM->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
+	uint64 nMoney = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CHOOSE_MONEY")->getValue64();
+	uint16 Session = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
 	CBitMemStream out;
 	if (!GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 	{

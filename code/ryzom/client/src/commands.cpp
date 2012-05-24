@@ -1175,7 +1175,7 @@ NLMISC_COMMAND(db, "Modify Database","<Property> <Value>")
 		}
 
 		// Set the property.
-		CCDBNodeLeaf	*node= pIM->getDbProp(args[0], false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(args[0], false);
 		if(node)
 			node->setValue64(value);
 		else
@@ -1186,7 +1186,7 @@ NLMISC_COMMAND(db, "Modify Database","<Property> <Value>")
 	}
 	else if (size == 1)
 	{
-		CCDBNodeLeaf	*node= pIM->getDbProp(args[0], false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(args[0], false);
 		if(node)
 		{
 			sint64 prop = node->getValue64();
@@ -1646,7 +1646,7 @@ NLMISC_COMMAND(forgetAll, "forget all bricks", "")
 	for (uint i = 0;i<20;i++)
 	{
 		sprintf(buf,"SERVER:BRICK_FAMILY:%d:BRICKS",i);
-		CCDBNodeLeaf * node= CInterfaceManager::getInstance()->getDbProp(buf);
+		CCDBNodeLeaf * node= NLGUI::CDBManager::getInstance()->getDbProp(buf);
 		node->setValue64(0);
 	}
 	return true;
@@ -2027,24 +2027,24 @@ NLMISC_COMMAND(entity, "Create an entity on the user or just remove it if Form n
 		sint64       *prop = 0;
 		CCDBNodeLeaf *node = 0;
 		// Set The property 'CLFECOMMON::PROPERTY_POSITION'.
-		node = IM->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_POSX), false);
+		node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_POSX), false);
 		if(node)
 		{
 			sint64 x = (sint64)(entityPos.x*1000.0);
 			sint64 y = (sint64)(entityPos.y*1000.0);
 			sint64 z = (sint64)(entityPos.z*1000.0);
 			node->setValue64(x);
-			node = IM->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_POSY), false);
+			node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_POSY), false);
 			if(node)
 			{
 				node->setValue64(y);
-				node = IM->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_POSZ), false);
+				node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_POSZ), false);
 				if(node)
 					node->setValue64(z);
 			}
 		}
 		// Set The property 'PROPERTY_ORIENTATION'.
-		node = IM->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_ORIENTATION), false);
+		node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_ORIENTATION), false);
 		if(node)
 		{
 			float dir = (float)atan2(UserEntity->front().y, UserEntity->front().x);
@@ -2052,7 +2052,7 @@ NLMISC_COMMAND(entity, "Create an entity on the user or just remove it if Form n
 			node->setValue64(*prop);
 		}
 		// Set Mode
-		node = IM->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_MODE), false);
+		node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_MODE), false);
 		if(node)
 		{
 			MBEHAV::EMode m = MBEHAV::NORMAL;
@@ -2075,11 +2075,11 @@ NLMISC_COMMAND(entity, "Create an entity on the user or just remove it if Form n
 			visualC.PropertySubData.BreastSize      = 7;
 			// Set The Database
 			prop = (sint64 *)&visualB;
-			IM->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->setValue64(*prop);
+			NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->setValue64(*prop);
 			prop = (sint64 *)&visualC;
-			IM->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPC))->setValue64(*prop);
+			NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPC))->setValue64(*prop);
 			prop = (sint64 *)&visualA;
-			IM->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->setValue64(*prop);
+			NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->setValue64(*prop);
 			// Apply Changes.
 			EntitiesMngr.updateVisualProperty(0, slot, CLFECOMMON::PROPERTY_VPA);
 		}
@@ -2091,7 +2091,7 @@ NLMISC_COMMAND(entity, "Create an entity on the user or just remove it if Form n
 			barVal+= 32; barVal<<= 7;
 			barVal+= 10; barVal<<= 7;
 			barVal+= 127;
-			IM->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_BARS))->setValue64(barVal);
+			NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_BARS))->setValue64(barVal);
 			EntitiesMngr.updateVisualProperty(0, slot, CLFECOMMON::PROPERTY_BARS);
 			// must also update position, else don't work
 			EntitiesMngr.updateVisualProperty(0, slot, CLFECOMMON::PROPERTY_POSITION);
@@ -2948,9 +2948,9 @@ NLMISC_COMMAND(paintTarget, "Modify the target color",
 	const string propNameA = toString("SERVER:Entities:E%d:P%d", slot, CLFECOMMON::PROPERTY_VPA);
 	const string propNameB = toString("SERVER:Entities:E%d:P%d", slot, CLFECOMMON::PROPERTY_VPB);
 	const string propNameC = toString("SERVER:Entities:E%d:P%d", slot, CLFECOMMON::PROPERTY_VPC);
-	vA.PropertyA = CInterfaceManager::getInstance()->getDbProp(propNameA)->getValue64();
-	vB.PropertyB = CInterfaceManager::getInstance()->getDbProp(propNameB)->getValue64();
-	vC.PropertyC = CInterfaceManager::getInstance()->getDbProp(propNameC)->getValue64();
+	vA.PropertyA = NLGUI::CDBManager::getInstance()->getDbProp(propNameA)->getValue64();
+	vB.PropertyB = NLGUI::CDBManager::getInstance()->getDbProp(propNameB)->getValue64();
+	vC.PropertyC = NLGUI::CDBManager::getInstance()->getDbProp(propNameC)->getValue64();
 
 	// Get the visual item index
 	uint value;
@@ -2964,9 +2964,9 @@ NLMISC_COMMAND(paintTarget, "Modify the target color",
 	vB.PropertySubData.FeetColor = value;
 
 	// Set the database.
-	CInterfaceManager::getInstance()->getDbProp(propNameA)->setValue64((sint64)vA.PropertyA);
-	CInterfaceManager::getInstance()->getDbProp(propNameB)->setValue64((sint64)vB.PropertyB);
-	CInterfaceManager::getInstance()->getDbProp(propNameC)->setValue64((sint64)vC.PropertyC);
+	NLGUI::CDBManager::getInstance()->getDbProp(propNameA)->setValue64((sint64)vA.PropertyA);
+	NLGUI::CDBManager::getInstance()->getDbProp(propNameB)->setValue64((sint64)vB.PropertyB);
+	NLGUI::CDBManager::getInstance()->getDbProp(propNameC)->setValue64((sint64)vC.PropertyC);
 	// Force to update properties.
 	EntitiesMngr.updateVisualProperty(0, slot, CLFECOMMON::PROPERTY_VPA);
 
@@ -3049,9 +3049,9 @@ NLMISC_COMMAND(vP, "Modify the Visual Property",
 	const string propNameA = toString("SERVER:Entities:E%d:P%d", slot, CLFECOMMON::PROPERTY_VPA);
 	const string propNameB = toString("SERVER:Entities:E%d:P%d", slot, CLFECOMMON::PROPERTY_VPB);
 	const string propNameC = toString("SERVER:Entities:E%d:P%d", slot, CLFECOMMON::PROPERTY_VPC);
-	vA.PropertyA = CInterfaceManager::getInstance()->getDbProp(propNameA)->getValue64();
-	vB.PropertyB = CInterfaceManager::getInstance()->getDbProp(propNameB)->getValue64();
-	vC.PropertyC = CInterfaceManager::getInstance()->getDbProp(propNameC)->getValue64();
+	vA.PropertyA = NLGUI::CDBManager::getInstance()->getDbProp(propNameA)->getValue64();
+	vB.PropertyB = NLGUI::CDBManager::getInstance()->getDbProp(propNameB)->getValue64();
+	vC.PropertyC = NLGUI::CDBManager::getInstance()->getDbProp(propNameC)->getValue64();
 	// Get the visual item index
 	uint value;
 	fromString(args[2], value);
@@ -3180,9 +3180,9 @@ NLMISC_COMMAND(vP, "Modify the Visual Property",
 	}
 
 	// Set the database.
-	CInterfaceManager::getInstance()->getDbProp(propNameA)->setValue64((sint64)vA.PropertyA);
-	CInterfaceManager::getInstance()->getDbProp(propNameB)->setValue64((sint64)vB.PropertyB);
-	CInterfaceManager::getInstance()->getDbProp(propNameC)->setValue64((sint64)vC.PropertyC);
+	NLGUI::CDBManager::getInstance()->getDbProp(propNameA)->setValue64((sint64)vA.PropertyA);
+	NLGUI::CDBManager::getInstance()->getDbProp(propNameB)->setValue64((sint64)vB.PropertyB);
+	NLGUI::CDBManager::getInstance()->getDbProp(propNameC)->setValue64((sint64)vC.PropertyC);
 	// Force to update properties.
 	EntitiesMngr.updateVisualProperty(0, slot, CLFECOMMON::PROPERTY_VPA);
 
@@ -3214,7 +3214,7 @@ NLMISC_COMMAND(altLook, "Modify the Alternative Look Property",
 	const string propName = toString("SERVER:Entities:E%d:P%d", slot, CLFECOMMON::PROPERTY_VPA);
 	// Get the old value (not useful since we change the whole property).
 	SAltLookProp altLookProp;
-	altLookProp.Summary = CInterfaceManager::getInstance()->getDbProp(propName)->getValue64();
+	altLookProp.Summary = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
 	uint32 colorTop, colorBot, weaponRightHand, weaponLeftHand, seed, colorHair, hat;
 	fromString(args[1], colorTop);
 	fromString(args[2], colorBot);
@@ -3250,7 +3250,7 @@ NLMISC_COMMAND(altLook, "Modify the Alternative Look Property",
 	}
 
 	// Set the database.
-	CInterfaceManager::getInstance()->getDbProp(propName)->setValue64((sint64)altLookProp.Summary);
+	NLGUI::CDBManager::getInstance()->getDbProp(propName)->setValue64((sint64)altLookProp.Summary);
 	// Force to update properties.
 	EntitiesMngr.updateVisualProperty(0, slot, CLFECOMMON::PROPERTY_VPA);
 
@@ -3385,12 +3385,12 @@ NLMISC_COMMAND(testMount, "Set the entity to mount","<Slot> <Mount>")
 
 	// Set the database.
 	string propName = toString("SERVER:Entities:E%d:P%d", mount, CLFECOMMON::PROPERTY_RIDER_ENTITY_ID);
-	CInterfaceManager::getInstance()->getDbProp(propName)->setValue64(slot);
+	NLGUI::CDBManager::getInstance()->getDbProp(propName)->setValue64(slot);
 	// Force to update properties.
 	EntitiesMngr.updateVisualProperty(0, mount, CLFECOMMON::PROPERTY_RIDER_ENTITY_ID);
 	// Set the database.
 	propName = toString("SERVER:Entities:E%d:P%d", slot, CLFECOMMON::PROPERTY_ENTITY_MOUNTED_ID);
-	CInterfaceManager::getInstance()->getDbProp(propName)->setValue64(mount);
+	NLGUI::CDBManager::getInstance()->getDbProp(propName)->setValue64(mount);
 	// Force to update properties.
 	EntitiesMngr.updateVisualProperty(0, slot, CLFECOMMON::PROPERTY_ENTITY_MOUNTED_ID);
 	return true;
@@ -3416,7 +3416,7 @@ NLMISC_COMMAND(mount, "Set the entity to mount","<Slot> [<Mount>]")
 
 	// Set the database.
 	string propName = toString("SERVER:Entities:E%d:P%d", slot, CLFECOMMON::PROPERTY_ENTITY_MOUNTED_ID);
-	CInterfaceManager::getInstance()->getDbProp(propName)->setValue64(mount);
+	NLGUI::CDBManager::getInstance()->getDbProp(propName)->setValue64(mount);
 	// Force to update properties.
 	EntitiesMngr.updateVisualProperty(0, slot, CLFECOMMON::PROPERTY_ENTITY_MOUNTED_ID);
 
@@ -3444,7 +3444,7 @@ NLMISC_COMMAND(rider, "Set the rider","<Slot> [<rider>]")
 
 	// Set the database.
 	string propName = toString("SERVER:Entities:E%d:P%d", slot, CLFECOMMON::PROPERTY_RIDER_ENTITY_ID);
-	CInterfaceManager::getInstance()->getDbProp(propName)->setValue64(rider);
+	NLGUI::CDBManager::getInstance()->getDbProp(propName)->setValue64(rider);
 	// Force to update properties.
 	EntitiesMngr.updateVisualProperty(0, slot, CLFECOMMON::PROPERTY_RIDER_ENTITY_ID);
 
@@ -3474,7 +3474,7 @@ NLMISC_COMMAND(learnAllBrick, "learn all bricks (only in local mode)", "")
 	uint	i=0;
 	for(;;)
 	{
-		CCDBNodeLeaf * node= pIM->getDbProp(toString("SERVER:BRICK_FAMILY:%d:BRICKS", i), false);
+		CCDBNodeLeaf * node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:BRICK_FAMILY:%d:BRICKS", i), false);
 		if(node)
 			node->setValue64(SINT64_CONSTANT(0xFFFFFFFFFFFFFFFF));
 		else
@@ -3617,7 +3617,7 @@ NLMISC_COMMAND(money, "To earn Money (only in local mode)","<very big seed> [<bi
 	uint64 money;
 	fromString(args[0], money);
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->getDbProp("SERVER:INVENTORY:MONEY")->setValue64(money);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INVENTORY:MONEY")->setValue64(money);
 	return true;
 /*
 	sint32 a = 0;
@@ -3646,10 +3646,10 @@ NLMISC_COMMAND(money, "To earn Money (only in local mode)","<very big seed> [<bi
 	string ms = im->getDefine("money_2");
 	string bs = im->getDefine("money_3");
 	string vbs = im->getDefine("money_4");
-	im->getDbProp(ls + ":QUANTITY")->setValue32(a);
-	im->getDbProp(ms + ":QUANTITY")->setValue32(b);
-	im->getDbProp(bs + ":QUANTITY")->setValue32(c);
-	im->getDbProp(vbs + ":QUANTITY")->setValue32(d);
+	NLGUI::CDBManager::getInstance()->getDbProp(ls + ":QUANTITY")->setValue32(a);
+	NLGUI::CDBManager::getInstance()->getDbProp(ms + ":QUANTITY")->setValue32(b);
+	NLGUI::CDBManager::getInstance()->getDbProp(bs + ":QUANTITY")->setValue32(c);
+	NLGUI::CDBManager::getInstance()->getDbProp(vbs + ":QUANTITY")->setValue32(d);
 	return true;
 */
 }
@@ -3874,7 +3874,7 @@ NLMISC_COMMAND(displayInventoryCounter, "display the Inventory counter to compar
 
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	uint	srvVal= pIM->getDbProp("SERVER:INVENTORY:COUNTER")->getValue32();
+	uint	srvVal= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INVENTORY:COUNTER")->getValue32();
 	uint	locVal= pIM->getLocalSyncActionCounter() ;
 	srvVal&= pIM->getLocalSyncActionCounterMask();
 	locVal&= pIM->getLocalSyncActionCounterMask();
@@ -3893,7 +3893,7 @@ NLMISC_COMMAND(displayActionCounter, "display the action counters", "")
 	CSPhraseManager		*pPM= CSPhraseManager::getInstance();
 
 	// next
-	uint	srvVal= pIM->getDbProp(PHRASE_DB_COUNTER_NEXT)->getValue32();
+	uint	srvVal= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_COUNTER_NEXT)->getValue32();
 	uint	locVal= pPM->getPhraseNextExecuteCounter() ;
 	srvVal&= PHRASE_EXECUTE_COUNTER_MASK;
 	locVal&= PHRASE_EXECUTE_COUNTER_MASK;
@@ -3901,7 +3901,7 @@ NLMISC_COMMAND(displayActionCounter, "display the action counters", "")
 	pIM->displaySystemInfo(ucstring( "NextCounter: " + toString(srvVal) + "/ LocalCounter: " + toString(locVal)) );
 
 	// cycle
-	srvVal= pIM->getDbProp(PHRASE_DB_COUNTER_CYCLE)->getValue32();
+	srvVal= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_COUNTER_CYCLE)->getValue32();
 	locVal= pPM->getPhraseCycleExecuteCounter() ;
 	srvVal&= PHRASE_EXECUTE_COUNTER_MASK;
 	locVal&= PHRASE_EXECUTE_COUNTER_MASK;
@@ -4404,7 +4404,7 @@ NLMISC_COMMAND(getSkillValue, "get a skill value by its name", "skill_name")
 	if (args.size() != 1) return false;
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	uint	skillId= (uint) SKILLS::toSkill(args[0]);
-	CCDBNodeLeaf	*node= pIM->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:SKILL", skillId), false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:SKILL", skillId), false);
 	if(node)
 	{
 		pIM->displaySystemInfo(ucstring(toString(node->getValue32())));
@@ -4418,7 +4418,7 @@ NLMISC_COMMAND(setSkillValue, "set a skill value by its name", "skill_name value
 	if (args.size() != 2) return false;
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	uint	skillId= (uint) SKILLS::toSkill(args[0]);
-	CCDBNodeLeaf	*node= pIM->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:SKILL", skillId), false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:SKILL", skillId), false);
 	if(node)
 	{
 		sint32 value;
@@ -4434,7 +4434,7 @@ NLMISC_COMMAND(getBaseSkillValue, "get a baseskill value by its name", "skill_na
 	if (args.size() != 1) return false;
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	uint	skillId= (uint) SKILLS::toSkill(args[0]);
-	CCDBNodeLeaf	*node= pIM->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:BaseSKILL", skillId), false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:BaseSKILL", skillId), false);
 	if(node)
 	{
 		pIM->displaySystemInfo(ucstring(toString(node->getValue32())));
@@ -4448,7 +4448,7 @@ NLMISC_COMMAND(setBaseSkillValue, "set a baseskill value by its name", "skill_na
 	if (args.size() != 2) return false;
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	uint	skillId= (uint) SKILLS::toSkill(args[0]);
-	CCDBNodeLeaf	*node= pIM->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:BaseSKILL", skillId), false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:BaseSKILL", skillId), false);
 	if(node)
 	{
 		sint32 value;
@@ -4468,10 +4468,10 @@ NLMISC_COMMAND(setAllSkillValue, "set all Skill and baseskill to the given value
 	for(uint i=0;i<SKILLS::NUM_SKILLS;i++)
 	{
 		CCDBNodeLeaf	*node;
-		node= pIM->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:BaseSKILL", i), false);
+		node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:BaseSKILL", i), false);
 		if(node)
 			node->setValue32(value);
-		node= pIM->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:SKILL", i), false);
+		node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:SKILL", i), false);
 		if(node)
 			node->setValue32(value);
 	}
@@ -4597,7 +4597,7 @@ NLMISC_COMMAND(vprop, "Flush the Visual Property (local only). you must write to
 		sint64 val= 0;
 		fromString(args[2], val);
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CCDBNodeLeaf	*node= pIM->getDbProp(toString("SERVER:Entities:E%d:P%d", slot, propId), false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:Entities:E%d:P%d", slot, propId), false);
 		if(node)
 			node->setValue64(val);
 	}
@@ -4765,10 +4765,10 @@ NLMISC_COMMAND(fillAllInfoVersion, "", "<version>")
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	for(i=0;i<CPlayerTrade::NumTradeSlot;i++)
 	{
-		CCDBNodeLeaf	*node= pIM->getDbProp(toString("SERVER:EXCHANGE:GIVE:%d:INFO_VERSION", i), false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:EXCHANGE:GIVE:%d:INFO_VERSION", i), false);
 		if(node)
 			node->setValue32(ver);
-		node= pIM->getDbProp(toString("SERVER:EXCHANGE:RECEIVE:%d:INFO_VERSION", i), false);
+		node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:EXCHANGE:RECEIVE:%d:INFO_VERSION", i), false);
 		if(node)
 			node->setValue32(ver);
 	}
@@ -4796,7 +4796,7 @@ NLMISC_COMMAND(fullFillInventory, "", "dbstring sheetName")
 
 	// read db dest
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CCDBNodeBranch	*nb= pIM->getDbBranch(args[0]);
+	CCDBNodeBranch	*nb= NLGUI::CDBManager::getInstance()->getDbBranch(args[0]);
 	if(!nb)
 		return false;
 
@@ -4804,14 +4804,14 @@ NLMISC_COMMAND(fullFillInventory, "", "dbstring sheetName")
 	for(uint i=0;i<num;i++)
 	{
 		CCDBNodeLeaf	*nl;
-		nl= pIM->getDbProp(args[0]+":"+toString(i)+":SHEET", false);
+		nl= NLGUI::CDBManager::getInstance()->getDbProp(args[0]+":"+toString(i)+":SHEET", false);
 		if(nl)
 		{
 			nl->setValue64(value);
-			nl= pIM->getDbProp(args[0]+":"+toString(i)+":QUALITY", false);
+			nl= NLGUI::CDBManager::getInstance()->getDbProp(args[0]+":"+toString(i)+":QUALITY", false);
 			if(nl)
 				nl->setValue64(i);
-			nl= pIM->getDbProp(args[0]+":"+toString(i)+":PREREQUISIT_VALID", false);
+			nl= NLGUI::CDBManager::getInstance()->getDbProp(args[0]+":"+toString(i)+":PREREQUISIT_VALID", false);
 			if(nl)
 				nl->setValue64(1);
 		}
@@ -4835,7 +4835,7 @@ NLMISC_COMMAND(fillAllItemPreReq, "", "dbstring value")
 	for(;;)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CCDBNodeLeaf	*node= pIM->getDbProp(toString("%s:%d:PREREQUISIT_VALID", dbBase.c_str(), index), false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:PREREQUISIT_VALID", dbBase.c_str(), index), false);
 		if(!node)
 			break;
 		node->setValue32(value);
@@ -5628,13 +5628,13 @@ NLMISC_COMMAND(setMission, "locally set a mission text for test", "<mission inde
 	if (index >= 30) return false;
 	if (index < 15)
 	{
-		im->getDbProp(toString("SERVER:MISSIONS:%d:TITLE", (int) index))->setValue32(strID);
-		im->getDbProp(toString("SERVER:MISSIONS:%d:FINISHED", (int) index))->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:MISSIONS:%d:TITLE", (int) index))->setValue32(strID);
+		NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:MISSIONS:%d:FINISHED", (int) index))->setValue32(0);
 	}
 	else
 	{
-		im->getDbProp(toString("SERVER:GROUP:MISSIONS:%d:TITLE", (int) index - 15))->setValue32(strID);
-		im->getDbProp(toString("SERVER:GROUP:MISSIONS:%d:FINISHED", (int) index - 15))->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:GROUP:MISSIONS:%d:TITLE", (int) index - 15))->setValue32(strID);
+		NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:GROUP:MISSIONS:%d:FINISHED", (int) index - 15))->setValue32(0);
 	}
 	setDynString(strID++, args[1]);
 	return true;
@@ -5647,11 +5647,11 @@ static bool setMissionStep(uint missionIndex, uint stepIndex, uint32 strID)
 	if (stepIndex >= 20) return false;
 	if (missionIndex < 15)
 	{
-		im->getDbProp(toString("SERVER:MISSIONS:%d:GOALS:%d:TEXT", (int) missionIndex, (int) stepIndex))->setValue32(strID);
+		NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:MISSIONS:%d:GOALS:%d:TEXT", (int) missionIndex, (int) stepIndex))->setValue32(strID);
 	}
 	else
 	{
-		im->getDbProp(toString("SERVER:GROUP:MISSIONS:%d:GOALS:%d:TEXT", (int) (missionIndex - 15), (int) stepIndex))->setValue32(strID);
+		NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:GROUP:MISSIONS:%d:GOALS:%d:TEXT", (int) (missionIndex - 15), (int) stepIndex))->setValue32(strID);
 	}
 	return true;
 }
@@ -5696,11 +5696,11 @@ static bool debugSetMissionState(uint index, sint32 /* state */)
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	if (index < 15)
 	{
-		im->getDbProp(toString("SERVER:MISSIONS:%d:TITLE", (int) index))->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:MISSIONS:%d:TITLE", (int) index))->setValue32(0);
 	}
 	else
 	{
-		im->getDbProp(toString("SERVER:GROUP:MISSIONS:%d:TITLE", (int) index - 15))->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:GROUP:MISSIONS:%d:TITLE", (int) index - 15))->setValue32(0);
 	}
 	return true;
 }

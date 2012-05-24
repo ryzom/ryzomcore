@@ -130,7 +130,7 @@ static	bool	playerKnowSkill( SKILLS::ESkills e)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	string sPath = "SERVER:CHARACTER_INFO:SKILLS:" + toStringEnum( e ) + ":SKILL";
-	CCDBNodeLeaf *pNL = pIM->getDbProp(sPath,false);
+	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(sPath,false);
 	if ((pNL != NULL) && (pNL->getValue64() > 0))
 		return true;
 	else
@@ -501,7 +501,7 @@ public:
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		// get flags
 		std::string playerGiftNeededDbPath = toString("LOCAL:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:PLAYER_GIFT_NEEDED", intId);
-		CCDBNodeLeaf *playerGiftNeeded = im->getDbProp(playerGiftNeededDbPath, false);
+		CCDBNodeLeaf *playerGiftNeeded = NLGUI::CDBManager::getInstance()->getDbProp(playerGiftNeededDbPath, false);
 		if (!playerGiftNeeded) return;
 		//
 		//CBotChatManager::getInstance()->setChosenMissionFlags((uint) missionFlags->getValue8());
@@ -528,7 +528,7 @@ public:
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		// if there is only a single page available for missions, go to that page directly
-		CCDBNodeLeaf *progs = im->getDbProp("SERVER:TARGET:PROGRAMMES", false);
+		CCDBNodeLeaf *progs = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TARGET:PROGRAMMES", false);
 		if (!progs)
 		{
 			nlwarning("<CHandlerContextMissions::execute> can't retrieve programs.");
@@ -742,11 +742,11 @@ static void chooseSheath (ITEMFAMILY::EItemFamily eIF, string sAllSkills)
 {
 	// Choose right sheath
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCDBNodeLeaf *pNLwrite = pIM->getDbProp(pIM->getDefine("ui_set_active"));
-	CCDBNodeLeaf *pNLread = pIM->getDbProp(pIM->getDefine("set_nb"));
+	CCDBNodeLeaf *pNLwrite = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("ui_set_active"));
+	CCDBNodeLeaf *pNLread = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("set_nb"));
 	sint32 nNbSheath = (sint32)pNLread->getValue64();
 	if (nNbSheath == 0) return;
-	pNLread = pIM->getDbProp(pIM->getDefine("set_active"));
+	pNLread = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("set_active"));
 	sint32 nActiveSheath = (sint32)pNLread->getValue64();
 	bool bFound = false;
 	for (sint32 i = 0; i < ((nNbSheath/2)+1); ++i)
@@ -763,7 +763,7 @@ static void chooseSheath (ITEMFAMILY::EItemFamily eIF, string sAllSkills)
 
 			string sPath;
 			sPath = pIM->getDefine("set_base") + ":" + NLMISC::toString(nSheathToTest) + ":" + pIM->getDefine("set_r") + ":SHEET";
-			pNLread = pIM->getDbProp(sPath);
+			pNLread = NLGUI::CDBManager::getInstance()->getDbProp(sPath);
 			sint32 sheetid = (sint32)pNLread->getValue64();
 			CItemSheet *pIS = dynamic_cast<CItemSheet *>(SheetMngr.get(CSheetId(sheetid)));
 			if (pIS != NULL)
@@ -1019,8 +1019,8 @@ public:
 		// Look through Database the index of the mount selected
 		for (uint32 i = 0; i < MAX_INVENTORY_ANIMAL; i++)
 		{
-			CCDBNodeLeaf *uidProp = pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:UID", i), false);
-			CCDBNodeLeaf *typeProp = pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:TYPE", i), false);
+			CCDBNodeLeaf *uidProp = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:UID", i), false);
+			CCDBNodeLeaf *typeProp = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:TYPE", i), false);
 			if ((uidProp != NULL) && (uidProp->getValue32() == (sint32)sel->dataSetId()) &&
 				(typeProp != NULL) && (typeProp->getValue32() == ANIMAL_TYPE::Mount))
 			{
@@ -1102,7 +1102,7 @@ public:
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 		// get ID
-		CCDBNodeLeaf *dbMissionId = pIM->getDbProp(toString("LOCAL:TARGET:CONTEXT_MENU:MISSION_RING:%d:ID", idInDb), false);
+		CCDBNodeLeaf *dbMissionId = NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:TARGET:CONTEXT_MENU:MISSION_RING:%d:ID", idInDb), false);
 		if (!dbMissionId)
 			return;
 		uint32	missionId= dbMissionId->getValue32();
@@ -1335,7 +1335,7 @@ class CSelectItemSheet : public IActionHandler
 					{
 						#define SKILL_PATH "SERVER:CHARACTER_INFO:SKILLS:"
 						string path =  toString(SKILL_PATH "%d:SKILL", (int) rs);
-						CCDBNodeLeaf *nl = im->getDbProp(path,false);
+						CCDBNodeLeaf *nl = NLGUI::CDBManager::getInstance()->getDbProp(path,false);
 						if (nl)
 						{
 							if (nl->getValue32() == 0)
@@ -1421,18 +1421,18 @@ class CSetPriceInDB : public IActionHandler
 		{
 			CSeeds money;
 			money.setTotal(price.getInteger());
-			im->getDbProp(ls)->setValue64(money.getLS());
-			im->getDbProp(ms)->setValue64(money.getMS());
-			im->getDbProp(bs)->setValue64(money.getBS());
-			im->getDbProp(vbs)->setValue64(money.getVBS());
+			NLGUI::CDBManager::getInstance()->getDbProp(ls)->setValue64(money.getLS());
+			NLGUI::CDBManager::getInstance()->getDbProp(ms)->setValue64(money.getMS());
+			NLGUI::CDBManager::getInstance()->getDbProp(bs)->setValue64(money.getBS());
+			NLGUI::CDBManager::getInstance()->getDbProp(vbs)->setValue64(money.getVBS());
 		}
 		else
 		{
 			// undefined price
-			im->getDbProp(ls)->setValue64(-1);
-			im->getDbProp(ms)->setValue64(-1);
-			im->getDbProp(bs)->setValue64(-1);
-			im->getDbProp(vbs)->setValue64(-1);
+			NLGUI::CDBManager::getInstance()->getDbProp(ls)->setValue64(-1);
+			NLGUI::CDBManager::getInstance()->getDbProp(ms)->setValue64(-1);
+			NLGUI::CDBManager::getInstance()->getDbProp(bs)->setValue64(-1);
+			NLGUI::CDBManager::getInstance()->getDbProp(vbs)->setValue64(-1);
 		}
 	}
 };
@@ -1553,7 +1553,7 @@ public:
 		CViewTextMenu *pUnseat = dynamic_cast<CViewTextMenu*>(pMenu->getView("unseat"));
 
 		// Get the animal Selected. 0 for Alls, 1,2,3,4,5 for each pack animal
-		CCDBNodeLeaf	*node= pIM->getDbProp("UI:BEAST_SELECTED", false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:BEAST_SELECTED", false);
 		if(!node)	return;
 		sint		selected= node->getValue32();
 
@@ -1566,7 +1566,7 @@ public:
 			{
 				// Get the entity if it is in vision
 				CEntityCL* selectedAnimalInVision = NULL;
-				CCDBNodeLeaf *uidProp = pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:UID", i), false);
+				CCDBNodeLeaf *uidProp = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:UID", i), false);
 				if ( uidProp )
 				{
 					CLFECOMMON::TClientDataSetIndex datasetIndex = uidProp->getValue32();
@@ -1582,7 +1582,7 @@ public:
 		{
 			// Get the entity if it is in vision
 			CEntityCL* selectedAnimalInVision = NULL;
-			CCDBNodeLeaf *uidProp = pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:UID", selected-1), false);
+			CCDBNodeLeaf *uidProp = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:UID", selected-1), false);
 			if ( uidProp )
 			{
 				CLFECOMMON::TClientDataSetIndex datasetIndex = uidProp->getValue32();
@@ -1624,7 +1624,7 @@ class CHandlerAnimalTarget : public IActionHandler
 
 			if(animalIndex>=1 && animalIndex<=MAX_INVENTORY_ANIMAL)
 			{
-				CCDBNodeLeaf *prop = pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:UID", animalIndex-1), false);
+				CCDBNodeLeaf *prop = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:UID", animalIndex-1), false);
 				if(prop)	entityUid= prop->getValue32();
 			}
 
@@ -2022,7 +2022,7 @@ class CActionHandlerSetTargetName : public IActionHandler
 			if (nSlot > -1)
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//				uint32 nDBid = pIM->getDbProp("SERVER:Entities:E"+toString(nSlot)+":P6")->getValue32();
+//				uint32 nDBid = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString(nSlot)+":P6")->getValue32();
 				uint32 nDBid = 0;
 				if (nSlot < sint32(EntitiesMngr.entities().size()) && EntitiesMngr.entities()[nSlot] != NULL)
 				{
@@ -2102,7 +2102,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 		if ( pE->isPlayer() )
 		{
 			// Player => deduce RegionForce & ForceLevel from the database
-			CCDBNodeLeaf *pDbTargetUid = pIM->getDbProp( pIM->getDefine("target_uid") );
+			CCDBNodeLeaf *pDbTargetUid = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("target_uid") );
 			if ( ! pDbTargetUid )
 				return;
 			// Hide the target level if the USER is not in PVP FACTION
@@ -2120,7 +2120,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 
 				return;
 			}
-			CCDBNodeLeaf *pDbPlayerLevel = pIM->getDbProp( pIM->getDefine("target_player_level") );
+			CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("target_player_level") );
 			if ( ! pDbPlayerLevel )
 				return;
 			sint nLevel = pDbPlayerLevel->getValue32();
@@ -2217,7 +2217,7 @@ class CAHUpdateCurrentMode : public IActionHandler
 		string sValue = getParam(Params,"value");
 		string sDBLink = getParam(Params,"dblink");
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pNL = pIM->getDbProp(sDBLink, false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(sDBLink, false);
 		if (pNL == NULL) return;
 
 		CInterfaceExprValue eVal;
@@ -2267,7 +2267,7 @@ class CAHUpdateCurrentMode : public IActionHandler
 			bool bFound = false;
 			while (!bFound)
 			{
-				CCDBNodeLeaf *pIntFlags = pIM->getDbProp("SERVER:INTERFACES:FLAGS", false);
+				CCDBNodeLeaf *pIntFlags = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INTERFACES:FLAGS", false);
 				if (pIntFlags == NULL) return;
 				sint64 nIntFlags = pIntFlags->getValue64();
 
@@ -2634,13 +2634,13 @@ class CAHTargetTeammateShortcut : public IActionHandler
 			return;
 
 		// Index is the database index (serverIndex() not used for team list)
-		CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp( NLMISC::toString( TEAM_DB_PATH ":%hu:NAME", indexInTeam ), false );
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp( NLMISC::toString( TEAM_DB_PATH ":%hu:NAME", indexInTeam ), false );
 		if ( ! pNL )
 			return;
 		if ( pNL->getValueBool() )
 		{
 			// There is a character corresponding to this index
-			pNL = CInterfaceManager::getInstance()->getDbProp( NLMISC::toString( TEAM_DB_PATH ":%hu:UID", indexInTeam ), false );
+			pNL = NLGUI::CDBManager::getInstance()->getDbProp( NLMISC::toString( TEAM_DB_PATH ":%hu:UID", indexInTeam ), false );
 			if ( ! pNL )
 				return;
 			CLFECOMMON::TClientDataSetIndex compressedIndex = pNL->getValue32();
@@ -2740,7 +2740,7 @@ public:
 			const string procNames[MAX_NUM_MODES] = { "tb_setexp", "tb_setinfo", "tb_setlab", "tb_setkeys" };
 			const string dbNames[MAX_NUM_MODES] = { "", "UI:SAVE:CURRENT_INFO_MODE", "UI:SAVE:CURRENT_LAB_MODE", "UI:SAVE:CURRENT_KEY_MODE" };
 			string sValue;
-			CCDBNodeLeaf *pNL = pIM->getDbProp(dbNames[desktop], false);
+			CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(dbNames[desktop], false);
 			if (pNL != NULL)
 				sValue = NLMISC::toString((sint32)pNL->getValue64());
 			vector<string> vecStr;
@@ -2930,9 +2930,9 @@ public:
 				pCB->addText(ucstring(stringModeList[j]));
 		}
 		// -1 is important to indicate we set this value in edit mode
-		pIM->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->setValue32(-1);
-		pIM->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->setValue32(-1);
-		pIM->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->setValue32(nFoundMode);
+		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->setValue32(-1);
+		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->setValue32(-1);
+		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->setValue32(nFoundMode);
 
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
 		if (pBut)
@@ -2965,8 +2965,8 @@ public:
 		else
 			texMode= NormalTextureMode;
 		// -1 is important to indicate we set this value in edit mode
-		pIM->getDbProp( GAME_CONFIG_TEXTURE_MODE_DB )->setValue32(-1);
-		pIM->getDbProp( GAME_CONFIG_TEXTURE_MODE_DB )->setValue32(texMode);
+		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_TEXTURE_MODE_DB )->setValue32(-1);
+		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_TEXTURE_MODE_DB )->setValue32(texMode);
 
 		// **** Init Screen Aspect Ratio
 		// Init the combo box, according to the value
@@ -2977,17 +2977,17 @@ public:
 			BkupScreenAspectRatio= ClientCfg.ScreenAspectRatio;
 
 			// -1 is here to force var change
-			pIM->getDbProp( "UI:TEMP:SCREEN_RATIO_MODE" )->setValue32(-1);
+			NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:SCREEN_RATIO_MODE" )->setValue32(-1);
 
 			// detect with an epsilon to avoid float precision problems
 			if(fabs(ClientCfg.ScreenAspectRatio - 1.33333f)<=0.00001f)
-				pIM->getDbProp( "UI:TEMP:SCREEN_RATIO_MODE" )->setValue32(0);		// 4/3
+				NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:SCREEN_RATIO_MODE" )->setValue32(0);		// 4/3
 			else if(fabs(ClientCfg.ScreenAspectRatio - 1.77777f)<=0.00001f)
-				pIM->getDbProp( "UI:TEMP:SCREEN_RATIO_MODE" )->setValue32(1);		// 16/9
+				NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:SCREEN_RATIO_MODE" )->setValue32(1);		// 16/9
 			else if(ClientCfg.ScreenAspectRatio == 0.f)
-				pIM->getDbProp( "UI:TEMP:SCREEN_RATIO_MODE" )->setValue32(3);		// Auto
+				NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:SCREEN_RATIO_MODE" )->setValue32(3);		// Auto
 			else
-				pIM->getDbProp( "UI:TEMP:SCREEN_RATIO_MODE" )->setValue32(2);		// Custom
+				NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:SCREEN_RATIO_MODE" )->setValue32(2);		// Custom
 		}
 
 		// **** Init Language : look in game_config.lua
@@ -3004,8 +3004,8 @@ class CHandlerGameConfigMode : public IActionHandler
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		sint oldVideoMode= pIM->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->getOldValue32();
-		sint nVideModeNb = pIM->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->getValue32();
+		sint oldVideoMode= NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->getOldValue32();
+		sint nVideModeNb = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->getValue32();
 		if (nVideModeNb == -1) return;
 
 		CDBGroupComboBox *pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
@@ -3053,7 +3053,7 @@ class CHandlerGameConfigMode : public IActionHandler
 			for (j = 0; j < (sint)stringFreqList.size(); j++)
 				pCB->addText(ucstring(stringFreqList[j]) + " Hz");
 		}
-		pIM->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->setValue32(nFoundFreq);
+		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->setValue32(nFoundFreq);
 
 		// **** dirt the apply button of the DDX
 		// don't do it at init!
@@ -3075,8 +3075,8 @@ class CHandlerGameConfigLanguage : public IActionHandler
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		sint old = pIM->getDbProp( GAME_CONFIG_LANGUAGE )->getOldValue32();
-		sint newOne = pIM->getDbProp( GAME_CONFIG_LANGUAGE )->getValue32();
+		sint old = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_LANGUAGE )->getOldValue32();
+		sint newOne = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_LANGUAGE )->getValue32();
 		if ((old != -1) && (newOne != -1))
 		{
 			// Set the new language
@@ -3100,8 +3100,8 @@ class CHandlerGameConfigFreq : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		sint	oldFreq= pIM->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->getOldValue32();
-		sint	newFreq= pIM->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->getValue32();
+		sint	oldFreq= NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->getOldValue32();
+		sint	newFreq= NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->getValue32();
 
 		// dirt the apply button of the DDX.
 		// don't do it at init!
@@ -3123,8 +3123,8 @@ public:
 	virtual void execute(CCtrlBase * /* pCalller */, const string &/* Params */)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		sint	oldTMode= pIM->getDbProp( GAME_CONFIG_TEXTURE_MODE_DB )->getOldValue32();
-		sint	newTMode= pIM->getDbProp( GAME_CONFIG_TEXTURE_MODE_DB )->getValue32();
+		sint	oldTMode= NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_TEXTURE_MODE_DB )->getOldValue32();
+		sint	newTMode= NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_TEXTURE_MODE_DB )->getValue32();
 
 		// dirt the apply button of the DDX
 		// don't do it at init!
@@ -3193,10 +3193,10 @@ class CHandlerGameConfigApply : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		// **** Apply the video mode
-		sint nVideModeNb = pIM->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->getValue32();
+		sint nVideModeNb = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->getValue32();
 		if (nVideModeNb != -1)
 		{
-			sint nVideoFreqNb = pIM->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->getValue32();
+			sint nVideoFreqNb = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->getValue32();
 			if (nVideoFreqNb != -1)
 			{
 				// Get W, H
@@ -3281,7 +3281,7 @@ class CHandlerGameConfigApply : public IActionHandler
 		bool requestReboot = false;
 
 		// **** Apply the texture mode
-		sint nTexMode = pIM->getDbProp( GAME_CONFIG_TEXTURE_MODE_DB )->getValue32();
+		sint nTexMode = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_TEXTURE_MODE_DB )->getValue32();
 		if (nTexMode>=0 && nTexMode<=HighTextureMode)
 		{
 			if ((ClientCfg.DivideTextureSizeBy2 != (nTexMode==LowTextureMode)) ||
@@ -3303,7 +3303,7 @@ class CHandlerGameConfigApply : public IActionHandler
 		// only if not in "work" language mode (else strange requestReboot)
 		if(ClientCfg.LanguageCode!="wk")
 		{
-			sint newOne = pIM->getDbProp( GAME_CONFIG_LANGUAGE )->getValue32();
+			sint newOne = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_LANGUAGE )->getValue32();
 			//string newVal = (newOne==2)?"de":(newOne==1)?"fr":"en";
 			string newVal = convertLanguageIntToLanguageCode(newOne);
 			if (ClientCfg.LanguageCode != newVal)
@@ -3315,7 +3315,7 @@ class CHandlerGameConfigApply : public IActionHandler
 		}
 
 		// Apply the NPC icon display mode
-		CNPCIconCache::getInstance().setEnabled(!ClientCfg.R2EDEnabled && pIM->getDbProp("UI:SAVE:INSCENE:FRIEND:MISSION_ICON")->getValueBool());
+		CNPCIconCache::getInstance().setEnabled(!ClientCfg.R2EDEnabled && NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:INSCENE:FRIEND:MISSION_ICON")->getValueBool());
 
 		// Request a reboot
 		if (requestReboot)
@@ -3358,8 +3358,8 @@ class CHandlerGameConfigChangeScreenRatioMode : public IActionHandler
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 		// get the current mode
-		sint	oldMode= pIM->getDbProp("UI:TEMP:SCREEN_RATIO_MODE")->getOldValue32();
-		sint	mode= pIM->getDbProp("UI:TEMP:SCREEN_RATIO_MODE")->getValue32();
+		sint	oldMode= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:SCREEN_RATIO_MODE")->getOldValue32();
+		sint	mode= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:SCREEN_RATIO_MODE")->getValue32();
 		if(mode<0 || mode>3)
 			return;
 
@@ -3417,7 +3417,7 @@ class CHandlerGameConfigChangeScreenRatioCustom : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		sint	mode= pIM->getDbProp("UI:TEMP:SCREEN_RATIO_MODE")->getValue32();
+		sint	mode= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:SCREEN_RATIO_MODE")->getValue32();
 		if (mode != 2) return;
 		CGroupEditBox	*eb= dynamic_cast<CGroupEditBox*>(pIM->getElementFromDefine("game_config_screen_ratio_eb"));
 		if(eb)
@@ -3457,7 +3457,7 @@ class CHandlerGameMissionAbandon : public IActionHandler
 		uint8 nMissionNb;
 		fromString(Params, nMissionNb);
 
-		CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:TEMP:MISSION_ABANDON_BUTTON",false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION_ABANDON_BUTTON",false);
 		if (pNL != NULL) pNL->setValue64(0);
 
 		sendMsgToServer("JOURNAL:MISSION_ABANDON", nMissionNb);
@@ -3474,7 +3474,7 @@ class CHandlerGameGroupMissionAbandon : public IActionHandler
 		uint8 nMissionNb;
 		fromString(Params, nMissionNb);
 
-		CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:TEMP:MISSION_ABANDON_BUTTON",false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION_ABANDON_BUTTON",false);
 		if (pNL != NULL) pNL->setValue64(0);
 
 		sendMsgToServer("JOURNAL:GROUP_MISSION_ABANDON", nMissionNb);
@@ -3679,10 +3679,10 @@ static	void	fillPlayerBarText(ucstring &str, const string &dbScore, SCORES::TSco
 	sint	val= 0;
 	sint	maxVal= 0;
 	// Get from local database cause written from CBarManager, from a fast impulse
-	node= pIM->getDbProp("UI:VARIABLES:USER:" + dbScore, false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:" + dbScore, false);
 	if(node)	val= node->getValue32();
 	// less accurate/speed Max transferred by DB
-	node= pIM->getDbProp(toString("SERVER:CHARACTER_INFO:SCORES%d:", score), false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SCORES%d:", score), false);
 	if(node)	maxVal= node->getValue32();
 	val= max(val, 0);
 	maxVal= max(maxVal, 0);
@@ -3777,7 +3777,7 @@ public:
 
 		// Get the Max value
 		sint32	maxVal= 0;
-		CCDBNodeLeaf	*node= pIM->getDbProp(dbMax, false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(dbMax, false);
 		if(node)
 			maxVal= node->getValue32();
 
@@ -3804,9 +3804,9 @@ uint32 getMissionTitle(sint32 nSelected)
 	if (nSelected < 0)
 		return 0;
 	else if (nSelected < nNbMission)
-		return pIM->getDbProp("SERVER:MISSIONS:"+toString(nSelected)+":TITLE")->getValue32();
+		return NLGUI::CDBManager::getInstance()->getDbProp("SERVER:MISSIONS:"+toString(nSelected)+":TITLE")->getValue32();
 	else if (nSelected < (nNbMission+nNbGroupMission))
-		return pIM->getDbProp("SERVER:GROUP:MISSIONS:"+toString(nSelected-nNbMission)+":TITLE")->getValue32();
+		return NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GROUP:MISSIONS:"+toString(nSelected-nNbMission)+":TITLE")->getValue32();
 	return 0;
 }
 
@@ -3842,7 +3842,7 @@ public:
 	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		sint32 nSelected = pIM->getDbProp("UI:SAVE:MISSION_SELECTED")->getValue32();
+		sint32 nSelected = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:MISSION_SELECTED")->getValue32();
 
 		sint32 nNbMission, nNbGroupMission;
 		fromString(pIM->getDefine("ipj_nb_mission"), nNbMission);
@@ -3884,7 +3884,7 @@ public:
 				}
 			}
 			// No mission at all found so there is no mission in the journal
-			pIM->getDbProp("UI:SAVE:MISSION_SELECTED")->setValue32(-1);
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:MISSION_SELECTED")->setValue32(-1);
 		}
 	}
 };
@@ -3996,7 +3996,7 @@ public:
 		uint8 nMissionNb;
 		fromString(sParams, nMissionNb);
 
-		CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:TEMP:MISSION_WAKE_BUTTON",false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION_WAKE_BUTTON",false);
 		if (pNL != NULL) pNL->setValue64(0);
 
 		sendMsgToServer("MISSION:WAKE", nMissionNb);
@@ -4014,7 +4014,7 @@ public:
 		uint8 nMissionNb;
 		fromString(sParams, nMissionNb);
 
-		CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:TEMP:MISSION_WAKE_BUTTON",false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION_WAKE_BUTTON",false);
 		if (pNL != NULL) pNL->setValue64(0);
 
 		sendMsgToServer("MISSION:GROUP_WAKE", nMissionNb);

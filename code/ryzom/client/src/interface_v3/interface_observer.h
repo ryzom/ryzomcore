@@ -121,7 +121,7 @@ public:
 		while(dataTok)
 		{
 			std::string data (dataTok);
-			if (iMngr->getDbProp(data,false) == NULL) // Full path provided ? No.
+			if (NLGUI::CDBManager::getInstance()->getDbProp(data,false) == NULL) // Full path provided ? No.
 			{
 				CInterfaceGroup *parent = parentGroup;
 				while (parent != NULL)
@@ -131,19 +131,19 @@ public:
 						sTmp = parent->getId() + data;
 					else
 						sTmp = parent->getId() + ":" + data;
-					if (iMngr->getDbProp(sTmp,false) != NULL)
+					if (NLGUI::CDBManager::getInstance()->getDbProp(sTmp,false) != NULL)
 					{
 						data = sTmp;
 						break;
 					}
 					parent = parent->getParent();
 				}
-				if (iMngr->getDbProp(data,false) == NULL)
+				if (NLGUI::CDBManager::getInstance()->getDbProp(data,false) == NULL)
 				{
 					std::string sTmp = std::string("data (")+std::string(dataTok)+std::string(") in a observer tag do not exist, CREATING!");
 					nlinfo (sTmp.c_str());
 					data = (const char*)dataTok;
-					iMngr->getDbProp (data, true);
+					NLGUI::CDBManager::getInstance()->getDbProp (data, true);
 				}
 			}
 			if ( !obs )
@@ -160,7 +160,7 @@ public:
 					return NULL;
 				}
 			}
-			if ( ! iMngr->addDBObserver(obs,NLMISC::ICDBNode::CTextId (data) ) )
+			if ( ! NLGUI::CDBManager::getInstance()->getDB()->addObserver(obs,NLMISC::ICDBNode::CTextId (data) ) )
 			{
 				return NULL;
 			}

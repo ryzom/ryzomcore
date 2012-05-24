@@ -250,15 +250,15 @@ void initClientTime()
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// get a direct link to the database
-	pIM->getDbProp("UI:VARIABLES:CURRENT_TIME");
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CURRENT_TIME");
 	InterfaceTime->link("UI:VARIABLES:CURRENT_TIME");
-	pIM->getDbProp("UI:VARIABLES:CURRENT_SERVER_TICK");
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CURRENT_SERVER_TICK");
 	InterfaceServerTick->link("UI:VARIABLES:CURRENT_SERVER_TICK");
-	pIM->getDbProp("UI:VARIABLES:CURRENT_SMOOTH_SERVER_TICK");
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CURRENT_SMOOTH_SERVER_TICK");
 	InterfaceSmoothServerTick->link("UI:VARIABLES:CURRENT_SMOOTH_SERVER_TICK");
-	pIM->getDbProp("UI:VARIABLES:CURRENT_DAY");
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CURRENT_DAY");
 	InterfaceDay->link("UI:VARIABLES:CURRENT_DAY");
-	pIM->getDbProp("UI:VARIABLES:DAY_BEFORE_ZC_DISTRIB");
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DAY_BEFORE_ZC_DISTRIB");
 	InterfaceDayBeforeNextZCDistrib->link("UI:VARIABLES:DAY_BEFORE_ZC_DISTRIB");
 }
 

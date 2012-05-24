@@ -43,6 +43,7 @@
 #include "flying_text_manager.h"
 
 #include "nel/gui/input_event_listener.h"
+#include "nel/gui/db_manager.h"
 
 // CLIENT
 #include "../string_manager_client.h"
@@ -77,7 +78,7 @@ class CGroupMenu;
  * \author Nevrax France
  * \date 2002
  */
-class CInterfaceManager : public CInterfaceParser, public NLMISC::CCDBManager, public NLGUI::IInputEventListener
+class CInterfaceManager : public CInterfaceParser, public NLGUI::IInputEventListener
 {
 public:
 
@@ -228,15 +229,6 @@ public:
 	void addServerString (const std::string &sTarget, uint32 id, IStringProcess *cb = NULL);
 	void addServerID (const std::string &sTarget, uint32 id, IStringProcess *cb = NULL);
 	void processServerIDString();
-
-
-	/// Get the root of the database
-	NLMISC::CCDBNodeBranch *getDB() const { return _Database; }
-	// yoyo: should avoid to try creating DbPropr with this system... very dangerous
-	NLMISC::CCDBNodeLeaf* getDbProp (const std::string & name, bool bCreate=true);
-	void delDbProp(const std::string & name);
-	// return the DB as an int32. return 0 if the DB does not exist (never create)
-	sint32			getDbValue32 (const std::string & name);
 
 	/**
 	 * get the window under a spot
@@ -443,33 +435,6 @@ public:
 	// display a system info string
 	void		  displaySystemInfo(const ucstring &str, const std::string &Category = "SYS");
 	NLMISC::CRGBA getSystemInfoColor(const std::string &Category = "SYS");
-	/**
-	 * add an observer to a database entry
-	 * \param observer : pointer on the observer
-	 * \param id :  the text id of the element to observe
-	 * \return true if success
-	 */
-	bool addDBObserver (NLMISC::ICDBNode::IPropertyObserver* observer, NLMISC::ICDBNode::CTextId  id);
-
-	/**
-	 * add an observer to a database entry
-	 * \param observer : pointer on the observer
-	 * \param id :  the text id of the element to observe
-	 * \return true if success
-	 */
-	bool addDBObserver (NLMISC::ICDBNode::IPropertyObserver* observer, const std::string& id)
-	{
-		return addDBObserver(observer, NLMISC::ICDBNode::CTextId(id));
-	}
-
-	/** remove the observer from the dataBase
-	 */
-	bool removeDBObserver (NLMISC::ICDBNode::IPropertyObserver* observer, NLMISC::ICDBNode::CTextId  id);
-	bool removeDBObserver (NLMISC::ICDBNode::IPropertyObserver* observer, const std::string& id)
-	{
-		return removeDBObserver(observer, NLMISC::ICDBNode::CTextId(id));
-	}
-
 	/// \name Global Interface Options
 	// @{
 
@@ -671,7 +636,7 @@ public:
 	float getAlphaRolloverSpeed()
 	{
 		if (!_AlphaRolloverSpeedDB)
-			_AlphaRolloverSpeedDB = getDbProp("UI:SAVE:ALPHA_ROLLOVER_SPEED");
+			_AlphaRolloverSpeedDB = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ALPHA_ROLLOVER_SPEED");
 		float fTmp = ROLLOVER_MIN_DELTA_PER_MS + (ROLLOVER_MAX_DELTA_PER_MS - ROLLOVER_MIN_DELTA_PER_MS) * 0.01f * (100 - _AlphaRolloverSpeedDB->getValue32());
 		return fTmp*fTmp*fTmp;
 	}

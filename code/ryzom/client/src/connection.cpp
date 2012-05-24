@@ -247,7 +247,7 @@ REGISTER_ACTION_HANDLER (CAHOnReloadTestPage, "on_reload_test_page");
 void initWebBrowser()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	//pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
+	//NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
 
 	// start the browser
 	CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
@@ -389,9 +389,9 @@ bool connection (const string &cookie, const string &fsaddr)
 	}*/
 
 	pIM->activateMasterGroup ("ui:outgame", true);
-	pIM->getDbProp ("UI:CURRENT_SCREEN")->setValue32(ClientCfg.Local ? 6 : -1); // TMP TMP
+	NLGUI::CDBManager::getInstance()->getDbProp ("UI:CURRENT_SCREEN")->setValue32(ClientCfg.Local ? 6 : -1); // TMP TMP
 	IngameDbMngr.flushObserverCalls();
-	CInterfaceManager::getInstance()->flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 	// Active inputs
 	Actions.enable(true);
@@ -410,7 +410,7 @@ bool connection (const string &cookie, const string &fsaddr)
 		SetMouseSpeed (ClientCfg.CursorSpeed);
 		SetMouseAcceleration (ClientCfg.CursorAcceleration);
 
-		pIM->getDbProp("UI:SELECTED_SLOT")->setValue32(ClientCfg.SelectedSlot);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_SLOT")->setValue32(ClientCfg.SelectedSlot);
 		PlayerSelectedSlot = ClientCfg.SelectedSlot;
 	}
 
@@ -447,7 +447,7 @@ bool connection (const string &cookie, const string &fsaddr)
 				{
 					if (ClientCfg.SelectCharacter == -1)
 					{
-						pIM->getDbProp ("UI:CURRENT_SCREEN")->setValue32(0); // 0 == select
+						NLGUI::CDBManager::getInstance()->getDbProp ("UI:CURRENT_SCREEN")->setValue32(0); // 0 == select
 					}
 				}
 				InterfaceState = globalMenu();
@@ -553,9 +553,9 @@ bool reconnection()
 	TInterfaceState InterfaceState = GLOBAL_MENU;
 
 	pIM->activateMasterGroup ("ui:outgame", true);
-	pIM->getDbProp ("UI:CURRENT_SCREEN")->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp ("UI:CURRENT_SCREEN")->setValue32(-1);
 	IngameDbMngr.flushObserverCalls();
-	CInterfaceManager::getInstance()->flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 	// Active inputs
 	Actions.enable(true);
@@ -571,7 +571,7 @@ bool reconnection()
 		SetMouseCursor ();
 		SetMouseSpeed (ClientCfg.CursorSpeed);
 		SetMouseAcceleration (ClientCfg.CursorAcceleration);
-		pIM->getDbProp("UI:SELECTED_SLOT")->setValue32(ClientCfg.SelectedSlot);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_SLOT")->setValue32(ClientCfg.SelectedSlot);
 		PlayerSelectedSlot = ClientCfg.SelectedSlot;
 	}
 
@@ -588,7 +588,7 @@ bool reconnection()
 	{
 		if (ClientCfg.SelectCharacter == -1)
 		{
-			pIM->getDbProp ("UI:CURRENT_SCREEN")->setValue32(0); // 0 == select
+			NLGUI::CDBManager::getInstance()->getDbProp ("UI:CURRENT_SCREEN")->setValue32(0); // 0 == select
 		}
 		InterfaceState = globalMenu();
 	}
@@ -972,7 +972,7 @@ TInterfaceState globalMenu()
 	// SKIP INTRO : Write to the database if we have to skip the intro and write we want to skip further intro to client cfg
 	if (ClientCfg.SkipIntro)
 	{
-		CCDBNodeLeaf *pNL = pIM->getDbProp("UI:TEMP:SKIP_INTRO", false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:SKIP_INTRO", false);
 		if (pNL != NULL)
 			pNL->setValue64(1);
 	}
@@ -993,9 +993,9 @@ TInterfaceState globalMenu()
 				pIM->uninitOutGame();
 				pIM->initOutGame();
 				pIM->activateMasterGroup ("ui:outgame", true);
-				pIM->getDbProp ("UI:CURRENT_SCREEN")->setValue32(2); // TMP TMP
+				NLGUI::CDBManager::getInstance()->getDbProp ("UI:CURRENT_SCREEN")->setValue32(2); // TMP TMP
 				IngameDbMngr.flushObserverCalls();
-				CInterfaceManager::getInstance()->flushObserverCalls();
+				NLGUI::CDBManager::getInstance()->flushObserverCalls();
 				pIM->getElementFromId("ui:outgame:charsel")->setActive(false);
 				pIM->getElementFromId("ui:outgame:charsel")->setActive(true);
 				// Active inputs
@@ -1034,7 +1034,7 @@ TInterfaceState globalMenu()
 
 		}
 		IngameDbMngr.flushObserverCalls();
-		CInterfaceManager::getInstance()->flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 		// check if we can send another dated block
 		if (NetMngr.getCurrentServerTick() != serverTick)
@@ -1061,7 +1061,7 @@ TInterfaceState globalMenu()
 		pIM->updateFrameEvents();
 		pIM->updateFrameViews(NULL);
 		IngameDbMngr.flushObserverCalls();
-		CInterfaceManager::getInstance()->flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 		// Movie shooter
 		globalMenuMovieShooter();
@@ -1122,15 +1122,15 @@ TInterfaceState globalMenu()
 					WaitServerAnswer = false;
 					if (ClientCfg.SelectCharacter == -1)
 					{
-						CCDBNodeLeaf *pNL = pIM->getDbProp("UI:SERVER_RECEIVED_CHARS", false);
+						CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SERVER_RECEIVED_CHARS", false);
 						if (pNL != NULL)
 						{
 							pNL->setValue64 (1); // Send impulse to interface observers
 							IngameDbMngr.flushObserverCalls();
-							CInterfaceManager::getInstance()->flushObserverCalls();
+							NLGUI::CDBManager::getInstance()->flushObserverCalls();
 							pNL->setValue64 (0);
 							IngameDbMngr.flushObserverCalls();
-							CInterfaceManager::getInstance()->flushObserverCalls();
+							NLGUI::CDBManager::getInstance()->flushObserverCalls();
 						}
 					}
 					else
@@ -1178,7 +1178,7 @@ TInterfaceState globalMenu()
 				if (ClientCfg.SelectCharacter == -1)
 				{
 					CCDBNodeLeaf *pNL;
-					pNL = pIM->getDbProp(CharNameValidDBLink,false);
+					pNL = NLGUI::CDBManager::getInstance()->getDbProp(CharNameValidDBLink,false);
 					if (pNL != NULL)
 					{
 						if (CharNameValid)
@@ -1187,15 +1187,15 @@ TInterfaceState globalMenu()
 							pNL->setValue64(0);
 					}
 
-					pNL = pIM->getDbProp("UI:SERVER_RECEIVED_VALID", false);
+					pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SERVER_RECEIVED_VALID", false);
 					if (pNL != NULL)
 					{
 						pNL->setValue64 (1); // Send impulse to interface observers
 						IngameDbMngr.flushObserverCalls();
-						CInterfaceManager::getInstance()->flushObserverCalls();
+						NLGUI::CDBManager::getInstance()->flushObserverCalls();
 						pNL->setValue64 (0);
 						IngameDbMngr.flushObserverCalls();
-						CInterfaceManager::getInstance()->flushObserverCalls();
+						NLGUI::CDBManager::getInstance()->flushObserverCalls();
 					}
 				}
 			}
@@ -1222,7 +1222,7 @@ TInterfaceState globalMenu()
 			if (NetMngr.getConnectionState() == CNetManager::Disconnect)
 			{
 				// Display the connection failure screen
-				CCDBNodeLeaf *pNL = pIM->getDbProp("UI:CURRENT_SCREEN", false);
+				CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:CURRENT_SCREEN", false);
 				if (pNL != NULL)
 					pNL->setValue64 (nScreenServerCrashed);
 
@@ -1691,22 +1691,22 @@ public:
 
 			CreateCharMsg.Slot = (uint8)result.getInteger();
 
-			pIM->getDbProp("UI:SELECTED_SLOT")->setValue32(PlayerSelectedSlot);
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_SLOT")->setValue32(PlayerSelectedSlot);
 		}
 
 		// Setup the new career
 		string sCaracBasePath = getParam (Params, "caracs");
-		CreateCharMsg.NbPointFighter	= (uint8)pIM->getDbProp(sCaracBasePath+"FIGHT")->getValue32();
-		CreateCharMsg.NbPointCaster		= (uint8)pIM->getDbProp(sCaracBasePath+"MAGIC")->getValue32();
-		CreateCharMsg.NbPointCrafter	= (uint8)pIM->getDbProp(sCaracBasePath+"CRAFT")->getValue32();
-		CreateCharMsg.NbPointHarvester	= (uint8)pIM->getDbProp(sCaracBasePath+"FORAGE")->getValue32();
+		CreateCharMsg.NbPointFighter	= (uint8)NLGUI::CDBManager::getInstance()->getDbProp(sCaracBasePath+"FIGHT")->getValue32();
+		CreateCharMsg.NbPointCaster		= (uint8)NLGUI::CDBManager::getInstance()->getDbProp(sCaracBasePath+"MAGIC")->getValue32();
+		CreateCharMsg.NbPointCrafter	= (uint8)NLGUI::CDBManager::getInstance()->getDbProp(sCaracBasePath+"CRAFT")->getValue32();
+		CreateCharMsg.NbPointHarvester	= (uint8)NLGUI::CDBManager::getInstance()->getDbProp(sCaracBasePath+"FORAGE")->getValue32();
 
 		// Setup starting point
 		string sLocationPath = getParam(Params, "loc");
 		{
 			CreateCharMsg.StartPoint = RYZOM_STARTING_POINT::borea;
 
-			CCDBNodeLeaf *pNL = pIM->getDbProp (sLocationPath, false);
+			CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp (sLocationPath, false);
 			if (pNL != NULL)
 				CreateCharMsg.StartPoint = (RYZOM_STARTING_POINT::TStartPoint)(pNL->getValue64());
 			else
@@ -1865,7 +1865,7 @@ public:
 		string sDBSlot = getParam(Params, "dbslot");
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		uint8 nSelectedSlot = (uint8)pIM->getDbProp(sDBSlot,false)->getValue32();
+		uint8 nSelectedSlot = (uint8)NLGUI::CDBManager::getInstance()->getDbProp(sDBSlot,false)->getValue32();
 
 		if (nSelectedSlot > CharacterSummaries.size())
 			return;
@@ -1927,7 +1927,7 @@ public:
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if (sName.empty())
 		{
-			pIM->getDbProp(sDBLink,false)->setValue32(0);
+			NLGUI::CDBManager::getInstance()->getDbProp(sDBLink,false)->setValue32(0);
 			return;
 		}
 
@@ -2648,7 +2648,7 @@ class CAHScenarioControl : public IActionHandler
 			{
 				bool team = !(R2::getEditor().isInitialized());
 				if(team)
-					team = (pIM->getDbProp("SERVER:USER:TEAM_MEMBER")->getValue8())!=0;
+					team = (NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:TEAM_MEMBER")->getValue8())!=0;
 				groupTeam->setActive(team);
 			}
 		}
@@ -2921,7 +2921,7 @@ class CAHHideCharsFilters : public IActionHandler
 		result = scenarioWnd->findFromShortId(string("invite_team"));
 		if(result)
 		{
-			bool team = (pIM->getDbProp("SERVER:USER:TEAM_MEMBER")->getValue8())!=0;
+			bool team = (NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:TEAM_MEMBER")->getValue8())!=0;
 			team = (team && !(R2::getEditor().isInitialized()) && lookingForPlayers);
 			result->setActive(team);
 		}
@@ -3223,7 +3223,7 @@ class CAHLoadScenario : public IActionHandler
 
 		if(R2::getEditor().getAccessMode() != R2::CEditor::AccessDM)
 		{
-			bool noob = pIM->getDbProp("SERVER:USER:IS_NEWBIE")->getValueBool();
+			bool noob = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:IS_NEWBIE")->getValueBool();
 			if (FreeTrial && noob && (nevraxScenario != "1" || trialAllowed != "1"))
 			{
 				CViewText* pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:interface:warning_free_trial:text"));
@@ -3319,7 +3319,7 @@ class CAHLoadScenario : public IActionHandler
 						{
 							for (uint i = 0 ; i < 8 ; ++i)
 							{
-								uint32 val = pIM->getDbProp(NLMISC::toString("SERVER:GROUP:%d:NAME",i))->getValue32();
+								uint32 val = NLGUI::CDBManager::getInstance()->getDbProp(NLMISC::toString("SERVER:GROUP:%d:NAME",i))->getValue32();
 								if(val!=0)
 								{
 									STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();

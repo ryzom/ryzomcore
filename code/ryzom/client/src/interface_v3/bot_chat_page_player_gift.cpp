@@ -38,14 +38,14 @@ void CBotChatPagePlayerGift::begin()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	// clear intro text
-	pIM->getDbProp(BOT_CHAT_BASE_DB_PATH ":PLAYER_GIFT")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp(BOT_CHAT_BASE_DB_PATH ":PLAYER_GIFT")->setValue32(0);
 
 	// clear money proposal value
-	CCDBNodeLeaf *moneyProposal = pIM->getDbProp(pIM->getDefine("money_proposal"));
+	CCDBNodeLeaf *moneyProposal = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("money_proposal"));
 	if (moneyProposal) moneyProposal->setValue64(0);
 
 	// clear 'accept' button
-	pIM->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
 
 	// Default is not validated
 	PlayerGiftValidated= false;

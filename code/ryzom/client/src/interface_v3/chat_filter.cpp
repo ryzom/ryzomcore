@@ -374,8 +374,8 @@ void CChatTargetFilter::setTargetGroup(CChatGroup::TGroupType groupType, uint32 
 		// set the color
 		string entry="UI:SAVE:CHAT:COLORS:";
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		const bool teamActive = pIM->getDbProp("SERVER:GROUP:0:NAME")->getValueBool();
-		const bool guildActive = pIM->getDbProp("SERVER:GUILD:NAME")->getValueBool();
+		const bool teamActive = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GROUP:0:NAME")->getValueBool();
+		const bool guildActive = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:NAME")->getValueBool();
 		switch(groupType)
 		{
 			case CChatGroup::dyn_chat: entry+="DYN:" + NLMISC::toString(dynamicChannelDbIndex); break;
@@ -389,7 +389,7 @@ void CChatTargetFilter::setTargetGroup(CChatGroup::TGroupType groupType, uint32 
 				{
 					entry+="UNIVERSE_NEW";
 					if(allowUniverseWarning)
-						pIM->getDbProp("UI:VARIABLES:UNIVERSE_CHANEL_WARNING_WANTED")->setValue64(1);
+						NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:UNIVERSE_CHANEL_WARNING_WANTED")->setValue64(1);
 				}
 				break;
 			case CChatGroup::region:	entry+="REGION";	break;

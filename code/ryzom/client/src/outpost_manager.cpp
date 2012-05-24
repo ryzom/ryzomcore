@@ -46,15 +46,15 @@ void	COutpostManager::startPvpJoinProposal(bool playerGuildInConflict, bool play
 	// setup TEMP DB
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	CCDBNodeLeaf	*node= pIM->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_PLAYER_GUILD_IN_CONFLICT");
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_PLAYER_GUILD_IN_CONFLICT");
 	if(node)	node->setValueBool(playerGuildInConflict);
-	node= pIM->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_PLAYER_GUILD_IS_ATTACKER");
+	node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_PLAYER_GUILD_IS_ATTACKER");
 	if(node)	node->setValueBool(playerGuildIsAttacker);
-	node= pIM->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_ATTACKER");
+	node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_ATTACKER");
 	if(node)	node->setValue32(attackerGuildNameId);
-	node= pIM->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_DEFENDER");
+	node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_DEFENDER");
 	if(node)	node->setValue32(ownerGuildNameId);
-	node= pIM->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_TICK_END");
+	node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_TICK_END");
 	if(node)	node->setValue32(_EndTickForPvpJoinProposal);
 
 	// open Popup

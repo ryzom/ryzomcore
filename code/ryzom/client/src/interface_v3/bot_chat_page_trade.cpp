@@ -159,12 +159,12 @@ CBotChatPageTrade::CBotChatPageTrade()
 void CBotChatPageTrade::init()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	if (im->getDbBranch("SERVER:TRADING"))
+	if (NLGUI::CDBManager::getInstance()->getDbBranch("SERVER:TRADING"))
 	{
-		im->addBranchObserver( "SERVER:TRADING", &_TradePagesObs);
+		NLGUI::CDBManager::getInstance()->addBranchObserver( "SERVER:TRADING", &_TradePagesObs);
 	}
 
-	_FamePriceFactorLeaf = im->getDbProp("SERVER:TRADING:FAME_PRICE_FACTOR");
+	_FamePriceFactorLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:FAME_PRICE_FACTOR");
 }
 
 // *******************************************************************************************
@@ -190,21 +190,21 @@ void CBotChatPageTrade::begin()
 		activateWindow(WIN_BOT_CHAT_PAGE_BUY, true);
 	}
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->getDbProp(BOT_CHAT_BASE_DB_PATH ":TRADE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp(BOT_CHAT_BASE_DB_PATH ":TRADE")->setValue32(0);
 
 	// at each new bot chat trade, we must reset filter for ItemPart and ItemType (NB: server should do the same)
 	resetItemPartAndTypeFilters();
 
 	// reset also the filters at each open if user wants to
-	CCDBNodeLeaf	*dbResetFilterOnOpen= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":RESET_ON_OPEN" , false);
+	CCDBNodeLeaf	*dbResetFilterOnOpen= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":RESET_ON_OPEN" , false);
 	if(dbResetFilterOnOpen && dbResetFilterOnOpen->getValueBool() && (_BuyMean == Money) )
 	{
 		// temporary value for conversions
 		sint32 value;
 
 		// Reset Price
-		CCDBNodeLeaf	*dbPriceMin= pIM->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_PRICE") , false);
-		CCDBNodeLeaf	*dbPriceMax= pIM->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_PRICE") , false);
+		CCDBNodeLeaf	*dbPriceMin= NLGUI::CDBManager::getInstance()->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_PRICE") , false);
+		CCDBNodeLeaf	*dbPriceMax= NLGUI::CDBManager::getInstance()->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_PRICE") , false);
 		if(dbPriceMin)	dbPriceMin->setValue32(0);
 		if(dbPriceMax)
 		{
@@ -213,8 +213,8 @@ void CBotChatPageTrade::begin()
 		}
 
 		// Reset Quality
-		CCDBNodeLeaf	*dbQualityMin= pIM->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_QUALITY") , false);
-		CCDBNodeLeaf	*dbQualityMax= pIM->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_QUALITY") , false);
+		CCDBNodeLeaf	*dbQualityMin= NLGUI::CDBManager::getInstance()->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_QUALITY") , false);
+		CCDBNodeLeaf	*dbQualityMax= NLGUI::CDBManager::getInstance()->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_QUALITY") , false);
 		if(dbQualityMin)	dbQualityMin->setValue32(0);
 		if(dbQualityMax)
 		{
@@ -223,8 +223,8 @@ void CBotChatPageTrade::begin()
 		}
 
 		// Reset Class
-		CCDBNodeLeaf	*dbClassMin= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_CLASS" , false);
-		CCDBNodeLeaf	*dbClassMax= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_CLASS" , false);
+		CCDBNodeLeaf	*dbClassMin= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_CLASS" , false);
+		CCDBNodeLeaf	*dbClassMax= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_CLASS" , false);
 		if(dbClassMin) dbClassMin->setValue32(0);
 		if(dbClassMax) dbClassMax->setValue32(RM_CLASS_TYPE::NumTRMClassType-1);
 
@@ -495,7 +495,7 @@ uint32 CBotChatPageTrade::getUserFactionPoints(PVP_CLAN::TPVPClan clan) const
 
 	uint32 nClan = clan - PVP_CLAN::BeginClans;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCDBNodeLeaf *pLeaf = pIM->getDbProp(toString("LOCAL:USER:FACTION_POINTS_%d:VALUE", nClan), false);
+	CCDBNodeLeaf *pLeaf = NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:USER:FACTION_POINTS_%d:VALUE", nClan), false);
 	if (pLeaf == NULL)
 		return 0;
 
@@ -584,7 +584,7 @@ void CBotChatPageTrade::updateTradeModal()
 			if ((_BuyMean == MoneyGuildXP) || (_BuyMean == GuildMoney) || (_BuyMean == GuildMoneyGuildXP))
 			{
 				uint64 totalPrice = (uint64) priceWithoutFame * (uint64) quantity;
-				im->getDbProp("UI:TEMP:TRADE_ITEM:PRICE")->setValue64(totalPrice);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:PRICE")->setValue64(totalPrice);
 				uint64 totalXP = (uint64) getCurrItemXP() * (uint64) quantity;
 				CGuildManager *pGM = CGuildManager::getInstance();
 
@@ -647,21 +647,21 @@ void CBotChatPageTrade::updateTradeModal()
 			{
 				// basic price
 				uint64 totalPriceWithoutFame = (uint64) priceWithoutFame * (uint64) quantity;
-				im->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE")->setValue64(priceWithoutFame);
-				im->getDbProp("UI:TEMP:TRADE_ITEM:PRICE")->setValue64(totalPriceWithoutFame);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE")->setValue64(priceWithoutFame);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:PRICE")->setValue64(totalPriceWithoutFame);
 				// price with fame
 				uint64 totalPriceWithFame = (uint64) priceWithFame * (uint64) quantity;
-				im->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE_WITH_FAME")->setValue64(priceWithFame);
-				im->getDbProp("UI:TEMP:TRADE_ITEM:PRICE_WITH_FAME")->setValue64(totalPriceWithFame);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE_WITH_FAME")->setValue64(priceWithFame);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:PRICE_WITH_FAME")->setValue64(totalPriceWithFame);
 				// resale price
 				uint64 totalResalePrice = (uint64) resalePrice * (uint64) quantity;
-				im->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE_RESALE")->setValue64(resalePrice);
-				im->getDbProp("UI:TEMP:TRADE_ITEM:PRICE_RESALE")->setValue64(totalResalePrice);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE_RESALE")->setValue64(resalePrice);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:PRICE_RESALE")->setValue64(totalResalePrice);
 				// quantity edit box
-				im->getDbProp("UI:TEMP:TRADE_ITEM:EDIT_QUANTITY")->setValue64(quantity);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:EDIT_QUANTITY")->setValue64(quantity);
 				// Faction Points
-				im->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE_FACTION")->setValue64(fpCost);
-				im->getDbProp("UI:TEMP:TRADE_ITEM:PRICE_FACTION")->setValue64(fpCost*quantity);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE_FACTION")->setValue64(fpCost);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:PRICE_FACTION")->setValue64(fpCost*quantity);
 
 
 				// Special retire Check
@@ -792,15 +792,15 @@ void CBotChatPageTrade::updateTradeModal()
 			else
 			{
 				// set value in database
-				im->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE")->setValue64(-1);
-				im->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE_WITH_FAME")->setValue64(-1);
-				im->getDbProp("UI:TEMP:TRADE_ITEM:PRICE")->setValue64(-1);
-				im->getDbProp("UI:TEMP:TRADE_ITEM:PRICE_WITH_FAME")->setValue64(-1);
-				im->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE_RESALE")->setValue64(-1);
-				im->getDbProp("UI:TEMP:TRADE_ITEM:PRICE_RESALE")->setValue64(-1);
-				im->getDbProp("UI:TEMP:TRADE_ITEM:EDIT_QUANTITY")->setValue64(0);
-				im->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE_FACTION")->setValue64(-1);
-				im->getDbProp("UI:TEMP:TRADE_ITEM:PRICE_FACTION")->setValue64(-1);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE")->setValue64(-1);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE_WITH_FAME")->setValue64(-1);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:PRICE")->setValue64(-1);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:PRICE_WITH_FAME")->setValue64(-1);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE_RESALE")->setValue64(-1);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:PRICE_RESALE")->setValue64(-1);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:EDIT_QUANTITY")->setValue64(0);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE_FACTION")->setValue64(-1);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:PRICE_FACTION")->setValue64(-1);
 				// and update ok/cancel groups
 				if (confirmTradeGroup) confirmTradeGroup->setActive(false);
 				if (confirmResellGroup) confirmResellGroup->setActive(false);
@@ -928,7 +928,7 @@ void CBotChatPageTrade::startBuyDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCall
 	_CurrItemIndex  = sheet->getIndexInDB();
 	_CurrItemCheck.init(_CurrItemSheet);
 	_BuyDlgOn = true;
-	im->getDbProp("UI:TEMP:TRADE_ITEM:IS_SELL_DLG")->setValueBool( false );
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:IS_SELL_DLG")->setValueBool( false );
 	// setup trade mean
 	setupBuyMeanInModal(ig);
 	// Add waiter to refresh items infos
@@ -1027,7 +1027,7 @@ void CBotChatPageTrade::startSellDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCal
 	_CurrItemInventory = sheet->getInventoryIndex();
 	_CurrItemCheck.init(_CurrItemSheet);
 	_SellDlgOn = true;
-	im->getDbProp("UI:TEMP:TRADE_ITEM:IS_SELL_DLG")->setValueBool( true );
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:IS_SELL_DLG")->setValueBool( true );
 	updateTradeModal();
 	setupBuyMeanInModal(ig);
 	// Add waiter to refresh items infos
@@ -1302,7 +1302,7 @@ void CBotChatPageTrade::confirmTrade( bool enableResale )
 							CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(ig->getGroup("header_opened:resell_group:can_resell:choose_resell:edit:eb"));
 							if (eb)
 							{
-								pIM->getDbProp( "UI:SAVE:TRADE_ITEM:RESALE_MARGIN" )->setValue32( eb->getInputStringAsInt() );
+								NLGUI::CDBManager::getInstance()->getDbProp( "UI:SAVE:TRADE_ITEM:RESALE_MARGIN" )->setValue32( eb->getInputStringAsInt() );
 							}
 						}
 					}
@@ -1351,9 +1351,9 @@ sint32 CBotChatPageTrade::getSkillPointUsedForCurrentRoleMaster() const
 {
 	// get the current phrase rolemaster type
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	uint	rmt= pIM->getDbProp("SERVER:BOTCHAT:ROLEMASTER_TYPE")->getValue32();
+	uint	rmt= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:BOTCHAT:ROLEMASTER_TYPE")->getValue32();
 	// get the prop (use local for less lag)
-	CCDBNodeLeaf	*node= pIM->getDbProp(toString("LOCAL:USER:SKILL_POINTS_%d:VALUE", rmt), false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:USER:SKILL_POINTS_%d:VALUE", rmt), false);
 	if(node)
 		return node->getValue32();
 	else
@@ -1366,9 +1366,9 @@ void	CBotChatPageTrade::addSkillPointForCurrentRoleMaster(sint32 addValue) const
 {
 	// get the current phrase rolemaster type
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	uint	rmt= pIM->getDbProp("SERVER:BOTCHAT:ROLEMASTER_TYPE")->getValue32();
+	uint	rmt= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:BOTCHAT:ROLEMASTER_TYPE")->getValue32();
 	// add the local prop !!
-	CCDBNodeLeaf	*node= pIM->getDbProp(toString("LOCAL:USER:SKILL_POINTS_%d:VALUE", rmt), false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:USER:SKILL_POINTS_%d:VALUE", rmt), false);
 	if(node)
 	{
 		node->setValue32(node->getValue32() + addValue);
@@ -1563,7 +1563,7 @@ void	CBotChatPageTrade::setupResellGroup(bool sellMode, uint defaultQuantity, CI
 			CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(chooseResellGroup->getGroup("edit:eb"));
 			if (eb)
 			{
-				sint32	resaleMargin= CInterfaceManager::getInstance()->getDbProp( "UI:SAVE:TRADE_ITEM:RESALE_MARGIN" )->getValue32();
+				sint32	resaleMargin= NLGUI::CDBManager::getInstance()->getDbProp( "UI:SAVE:TRADE_ITEM:RESALE_MARGIN" )->getValue32();
 				clamp(resaleMargin, 0, (sint32)MaxResaleMargin);
 				eb->setInputString( toString( resaleMargin ) );
 				eb->setPositiveIntegerMaxValue(MaxResaleMargin);
@@ -1715,8 +1715,8 @@ void	CBotChatPageTrade::startChangeBuyFilterDialog(const std::string &dbext, con
 	// init min and max edit box
 	CGroupEditBox	*edMin = dynamic_cast<CGroupEditBox *>(ig->getGroup("edit_min:eb"));
 	CGroupEditBox	*edMax = dynamic_cast<CGroupEditBox *>(ig->getGroup("edit_max:eb"));
-	CCDBNodeLeaf	*dbRangeMin= pIM->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_") + _FilterBuyDlgDBExt, false);
-	CCDBNodeLeaf	*dbRangeMax= pIM->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_") + _FilterBuyDlgDBExt, false);
+	CCDBNodeLeaf	*dbRangeMin= NLGUI::CDBManager::getInstance()->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_") + _FilterBuyDlgDBExt, false);
+	CCDBNodeLeaf	*dbRangeMax= NLGUI::CDBManager::getInstance()->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_") + _FilterBuyDlgDBExt, false);
 	sint	rangeMin= 0;
 	sint	rangeMax= 0;
 	if(dbRangeMin)	rangeMin= dbRangeMin->getValue32();
@@ -1745,8 +1745,8 @@ void	CBotChatPageTrade::resetBuyFilterDialog()
 	// reset the edited values
 	CGroupEditBox	*edMin = dynamic_cast<CGroupEditBox *>(ig->getGroup("edit_min:eb"));
 	CGroupEditBox	*edMax = dynamic_cast<CGroupEditBox *>(ig->getGroup("edit_max:eb"));
-	CCDBNodeLeaf	*dbRangeMin= pIM->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_") + _FilterBuyDlgDBExt, false);
-	CCDBNodeLeaf	*dbRangeMax= pIM->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_") + _FilterBuyDlgDBExt, false);
+	CCDBNodeLeaf	*dbRangeMin= NLGUI::CDBManager::getInstance()->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_") + _FilterBuyDlgDBExt, false);
+	CCDBNodeLeaf	*dbRangeMax= NLGUI::CDBManager::getInstance()->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_") + _FilterBuyDlgDBExt, false);
 	sint	rangeMin= 0;
 	sint	rangeMax= _FilterBuyDlgMaxValue;
 	// write result in EditBox, and in db
@@ -1774,8 +1774,8 @@ void	CBotChatPageTrade::confirmChangeBuyFilterDialog()
 	// retrieve the edited values
 	CGroupEditBox	*edMin = dynamic_cast<CGroupEditBox *>(ig->getGroup("edit_min:eb"));
 	CGroupEditBox	*edMax = dynamic_cast<CGroupEditBox *>(ig->getGroup("edit_max:eb"));
-	CCDBNodeLeaf	*dbRangeMin= pIM->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_") + _FilterBuyDlgDBExt, false);
-	CCDBNodeLeaf	*dbRangeMax= pIM->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_") + _FilterBuyDlgDBExt, false);
+	CCDBNodeLeaf	*dbRangeMin= NLGUI::CDBManager::getInstance()->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_") + _FilterBuyDlgDBExt, false);
+	CCDBNodeLeaf	*dbRangeMax= NLGUI::CDBManager::getInstance()->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_") + _FilterBuyDlgDBExt, false);
 	sint	rangeMin= 0;
 	sint	rangeMax= 0;
 	if(edMin)	rangeMin= edMin->getInputStringAsInt();
@@ -1830,7 +1830,7 @@ void		CBotChatPageTrade::confirmChangeBuyFilterMPDialog(uint ft)
 
 	// set ItemPart DB
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CCDBNodeLeaf	*dbItemPart= pIM->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MP_ITEM_PART"), false);
+	CCDBNodeLeaf	*dbItemPart= NLGUI::CDBManager::getInstance()->getDbProp(string(DB_BOT_CHAT_BASE_BUY_FILTER":MP_ITEM_PART"), false);
 	if(dbItemPart)	dbItemPart->setValue32(ft);
 
 	// Then send new filter to Server, and reset item list
@@ -1846,8 +1846,8 @@ void	CBotChatPageTrade::resetItemPartAndTypeFilters()
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	CCDBNodeLeaf	*dbItemPart= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MP_ITEM_PART" , false);
-	CCDBNodeLeaf	*dbItemType= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":ITEM_TYPE" , false);
+	CCDBNodeLeaf	*dbItemPart= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MP_ITEM_PART" , false);
+	CCDBNodeLeaf	*dbItemType= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":ITEM_TYPE" , false);
 
 	if(dbItemPart)	dbItemPart->setValue32(RM_FABER_TYPE::Unknown);
 	if(dbItemType)	dbItemType->setValue32(ITEM_TYPE::UNDEFINED);
@@ -1859,14 +1859,14 @@ void	CBotChatPageTrade::sendCurrentBuyFilterToServer(bool resetBuyList)
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// **** retrieve current DB values
-	CCDBNodeLeaf	*dbQualityMin= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_QUALITY" , false);
-	CCDBNodeLeaf	*dbQualityMax= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_QUALITY" , false);
-	CCDBNodeLeaf	*dbPriceMin= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_PRICE" , false);
-	CCDBNodeLeaf	*dbPriceMax= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_PRICE" , false);
-	CCDBNodeLeaf	*dbClassMin= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_CLASS" , false);
-	CCDBNodeLeaf	*dbClassMax= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_CLASS" , false);
-	CCDBNodeLeaf	*dbItemPart= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MP_ITEM_PART" , false);
-	CCDBNodeLeaf	*dbItemType= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":ITEM_TYPE" , false);
+	CCDBNodeLeaf	*dbQualityMin= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_QUALITY" , false);
+	CCDBNodeLeaf	*dbQualityMax= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_QUALITY" , false);
+	CCDBNodeLeaf	*dbPriceMin= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_PRICE" , false);
+	CCDBNodeLeaf	*dbPriceMax= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_PRICE" , false);
+	CCDBNodeLeaf	*dbClassMin= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_CLASS" , false);
+	CCDBNodeLeaf	*dbClassMax= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_CLASS" , false);
+	CCDBNodeLeaf	*dbItemPart= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MP_ITEM_PART" , false);
+	CCDBNodeLeaf	*dbItemType= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":ITEM_TYPE" , false);
 
 	uint32			qualityMin=0, qualityMax=0;
 	uint32			priceMin=0, priceMax=0;
@@ -2005,10 +2005,10 @@ void		CBotChatPageTrade::startChangeBuyFilterClassDialog()
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// Copy from save to Temp edition
-	CCDBNodeLeaf	*dbClassMin= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_CLASS" , false);
-	CCDBNodeLeaf	*dbClassMax= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_CLASS" , false);
-	CCDBNodeLeaf	*tempClassMin= pIM->getDbProp("UI:VARIABLES:BOTCHAT:TEMP_FILTER_MIN_CLASS");
-	CCDBNodeLeaf	*tempClassMax= pIM->getDbProp("UI:VARIABLES:BOTCHAT:TEMP_FILTER_MAX_CLASS");
+	CCDBNodeLeaf	*dbClassMin= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_CLASS" , false);
+	CCDBNodeLeaf	*dbClassMax= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_CLASS" , false);
+	CCDBNodeLeaf	*tempClassMin= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:BOTCHAT:TEMP_FILTER_MIN_CLASS");
+	CCDBNodeLeaf	*tempClassMax= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:BOTCHAT:TEMP_FILTER_MAX_CLASS");
 	if(dbClassMin) tempClassMin->setValue32(dbClassMin->getValue32());
 	if(dbClassMax) tempClassMax->setValue32(dbClassMax->getValue32());
 
@@ -2027,10 +2027,10 @@ void		CBotChatPageTrade::resetBuyFilterClassDialog()
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// Copy from save to Temp edition
-	CCDBNodeLeaf	*dbClassMin= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_CLASS" , false);
-	CCDBNodeLeaf	*dbClassMax= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_CLASS" , false);
-	CCDBNodeLeaf	*tempClassMin= pIM->getDbProp("UI:VARIABLES:BOTCHAT:TEMP_FILTER_MIN_CLASS");
-	CCDBNodeLeaf	*tempClassMax= pIM->getDbProp("UI:VARIABLES:BOTCHAT:TEMP_FILTER_MAX_CLASS");
+	CCDBNodeLeaf	*dbClassMin= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_CLASS" , false);
+	CCDBNodeLeaf	*dbClassMax= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_CLASS" , false);
+	CCDBNodeLeaf	*tempClassMin= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:BOTCHAT:TEMP_FILTER_MIN_CLASS");
+	CCDBNodeLeaf	*tempClassMax= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:BOTCHAT:TEMP_FILTER_MAX_CLASS");
 	// write in both DB
 	tempClassMin->setValue32(0);
 	tempClassMax->setValue32(RM_CLASS_TYPE::NumTRMClassType-1);
@@ -2050,10 +2050,10 @@ void		CBotChatPageTrade::confirmChangeBuyFilterClassDialog()
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// Copy from temp edit to final
-	CCDBNodeLeaf	*dbClassMin= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_CLASS" , false);
-	CCDBNodeLeaf	*dbClassMax= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_CLASS" , false);
-	CCDBNodeLeaf	*tempClassMin= pIM->getDbProp("UI:VARIABLES:BOTCHAT:TEMP_FILTER_MIN_CLASS");
-	CCDBNodeLeaf	*tempClassMax= pIM->getDbProp("UI:VARIABLES:BOTCHAT:TEMP_FILTER_MAX_CLASS");
+	CCDBNodeLeaf	*dbClassMin= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MIN_CLASS" , false);
+	CCDBNodeLeaf	*dbClassMax= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":MAX_CLASS" , false);
+	CCDBNodeLeaf	*tempClassMin= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:BOTCHAT:TEMP_FILTER_MIN_CLASS");
+	CCDBNodeLeaf	*tempClassMax= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:BOTCHAT:TEMP_FILTER_MAX_CLASS");
 	sint	minClass= tempClassMin->getValue32();
 	sint	maxClass= tempClassMax->getValue32();
 	// min must be => 0 and max must be >= min
@@ -2104,7 +2104,7 @@ void		CBotChatPageTrade::confirmChangeBuyFilterItemTypeDialog(ITEM_TYPE::TItemTy
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// Copy result to final DB
-	CCDBNodeLeaf	*dbItemType= pIM->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":ITEM_TYPE" , false);
+	CCDBNodeLeaf	*dbItemType= NLGUI::CDBManager::getInstance()->getDbProp(DB_BOT_CHAT_BASE_BUY_FILTER":ITEM_TYPE" , false);
 	if(dbItemType) dbItemType->setValue32(itemType);
 
 	// Then send new filter to Server, and reset item list
@@ -2129,7 +2129,7 @@ void		CBotChatPageTrade::startDestroyItemDialog()
 	if(_QuantityCheck)
 		quantity= min(quantity, (uint32)_QuantityCheck);
 	// set view
-	pIM->getDbProp("UI:TEMP:TRADE_ITEM:DESTROY_QUANTITY")->setValue32(quantity);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:DESTROY_QUANTITY")->setValue32(quantity);
 
 	// show the modal
 	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(WIN_BOT_CHAT_DESTROY_ITEM));
@@ -2262,7 +2262,7 @@ class CAHConfirmTrade : public IActionHandler
 		if(canTestConfirmation)
 		{
 			// Building:
-			if(pIM->getDbValue32("SERVER:TRADING:BUILDING_LOSS_WARNING") == 1)
+			if(NLGUI::CDBManager::getInstance()->getDbValue32("SERVER:TRADING:BUILDING_LOSS_WARNING") == 1)
 				mustConfirm= true;
 		}
 
@@ -2492,7 +2492,7 @@ class CAHBotChatRefilItemTypeChoiceList : public IActionHandler
 		nlctassert(ITEM_TYPE::UNDEFINED<=128);
 
 		// get the src bitfield
-		CCDBNodeLeaf	*nodeSrc= pIM->getDbProp(srcDB, false);
+		CCDBNodeLeaf	*nodeSrc= NLGUI::CDBManager::getInstance()->getDbProp(srcDB, false);
 		if(!nodeSrc)
 			return;
 		uint64	bfItemType= nodeSrc->getValue64();
@@ -2502,7 +2502,7 @@ class CAHBotChatRefilItemTypeChoiceList : public IActionHandler
 		{
 			bool present= ((bfItemType>>i)&1)!=0;
 			// get the dest node
-			CCDBNodeLeaf	*nodeDst= pIM->getDbProp(destDB+toString(":%d:SHEET", i+offset), false);
+			CCDBNodeLeaf	*nodeDst= NLGUI::CDBManager::getInstance()->getDbProp(destDB+toString(":%d:SHEET", i+offset), false);
 			if(nodeDst)
 			{
 				if(present)
@@ -2620,59 +2620,59 @@ NLMISC_COMMAND( testColorItems, "Temp : test some items to trade", "" )
 		itemName = args[1];
 	}
 	//
-	im->getDbProp("SERVER:TRADING:0:SHEET")->setValue32(CSheetId(itemName).asInt());
-	im->getDbProp("SERVER:TRADING:0:PRICE")->setValue32(100);
-	im->getDbProp("SERVER:TRADING:0:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:0:SLOT_TYPE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:0:USER_COLOR")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:SHEET")->setValue32(CSheetId(itemName).asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:PRICE")->setValue32(100);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:USER_COLOR")->setValue32(0);
 	//
-	im->getDbProp("SERVER:TRADING:1:SHEET")->setValue32(CSheetId(itemName).asInt());
-	im->getDbProp("SERVER:TRADING:1:PRICE")->setValue32(200);
-	im->getDbProp("SERVER:TRADING:1:QUALITY")->setValue32(25);
-	im->getDbProp("SERVER:TRADING:1:SLOT_TYPE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:1:USER_COLOR")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:SHEET")->setValue32(CSheetId(itemName).asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:PRICE")->setValue32(200);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:QUALITY")->setValue32(25);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:USER_COLOR")->setValue32(1);
 	//
-	im->getDbProp("SERVER:TRADING:2:SHEET")->setValue32(CSheetId(itemName).asInt());
-	im->getDbProp("SERVER:TRADING:2:PRICE")->setValue32(10);
-	im->getDbProp("SERVER:TRADING:2:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:2:SLOT_TYPE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:2:USER_COLOR")->setValue32(2);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:SHEET")->setValue32(CSheetId(itemName).asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:PRICE")->setValue32(10);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:USER_COLOR")->setValue32(2);
 	//
-	im->getDbProp("SERVER:TRADING:3:SHEET")->setValue32(CSheetId(itemName).asInt());
-	im->getDbProp("SERVER:TRADING:3:PRICE")->setValue32(10);
-	im->getDbProp("SERVER:TRADING:3:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:3:SLOT_TYPE")->setValue32(0);//
-	im->getDbProp("SERVER:TRADING:3:USER_COLOR")->setValue32(3);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:SHEET")->setValue32(CSheetId(itemName).asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:PRICE")->setValue32(10);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:SLOT_TYPE")->setValue32(0);//
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:USER_COLOR")->setValue32(3);
 	//
-	im->getDbProp("SERVER:TRADING:4:SHEET")->setValue32(CSheetId(itemName).asInt());
-	im->getDbProp("SERVER:TRADING:4:PRICE")->setValue32(100);
-	im->getDbProp("SERVER:TRADING:4:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:4:SLOT_TYPE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:4:USER_COLOR")->setValue32(4);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:SHEET")->setValue32(CSheetId(itemName).asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:PRICE")->setValue32(100);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:USER_COLOR")->setValue32(4);
 	//
-	im->getDbProp("SERVER:TRADING:5:SHEET")->setValue32(CSheetId(itemName).asInt());
-	im->getDbProp("SERVER:TRADING:5:PRICE")->setValue32(200);
-	im->getDbProp("SERVER:TRADING:5:QUALITY")->setValue32(25);
-	im->getDbProp("SERVER:TRADING:5:SLOT_TYPE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:5:USER_COLOR")->setValue32(5);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:SHEET")->setValue32(CSheetId(itemName).asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:PRICE")->setValue32(200);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:QUALITY")->setValue32(25);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:USER_COLOR")->setValue32(5);
 	//
-	im->getDbProp("SERVER:TRADING:6:SHEET")->setValue32(CSheetId(itemName).asInt());
-	im->getDbProp("SERVER:TRADING:6:PRICE")->setValue32(10);
-	im->getDbProp("SERVER:TRADING:6:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:6:SLOT_TYPE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:6:USER_COLOR")->setValue32(6);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:SHEET")->setValue32(CSheetId(itemName).asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:PRICE")->setValue32(10);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:USER_COLOR")->setValue32(6);
 	//
-	im->getDbProp("SERVER:TRADING:7:SHEET")->setValue32(CSheetId(itemName).asInt());
-	im->getDbProp("SERVER:TRADING:7:PRICE")->setValue32(10);
-	im->getDbProp("SERVER:TRADING:7:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:7:SLOT_TYPE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:7:USER_COLOR")->setValue32(7);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:SHEET")->setValue32(CSheetId(itemName).asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:PRICE")->setValue32(10);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:USER_COLOR")->setValue32(7);
 	//
 	sint32 value;
-	im->getDbProp("SERVER:TRADING:SESSION")->setValue32(CBotChatManager::getInstance()->getSessionID());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:SESSION")->setValue32(CBotChatManager::getInstance()->getSessionID());
 	fromString(args[0], value);
-	im->getDbProp("SERVER:TRADING:PAGE_ID")->setValue32(value);
-	im->getDbProp("SERVER:TRADING:HAS_NEXT")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:PAGE_ID")->setValue32(value);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:HAS_NEXT")->setValue32(1);
 	//
 	return true;
 }
@@ -2683,57 +2683,57 @@ NLMISC_COMMAND( testTradeItems, "Temp : test some items to trade", "" )
 	if (args.size() != 1) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	//
-	//im->getDbProp("SERVER:TRADING:0:SHEET")->setValue32(CSheetId("icfm1bm.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:0:SHEET")->setValue32(CSheetId("guild_main_building.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:0:PRICE")->setValue32(100);
-	im->getDbProp("SERVER:TRADING:0:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:0:SLOT_TYPE")->setValue32(0);
+	//NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:SHEET")->setValue32(CSheetId("icfm1bm.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:SHEET")->setValue32(CSheetId("guild_main_building.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:PRICE")->setValue32(100);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:SLOT_TYPE")->setValue32(0);
 	//
-	//im->getDbProp("SERVER:TRADING:1:SHEET")->setValue32(CSheetId("icfm1bs.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:1:SHEET")->setValue32(CSheetId("guild_rm_craft.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:1:PRICE")->setValue32(200);
-	im->getDbProp("SERVER:TRADING:1:QUALITY")->setValue32(25);
-	im->getDbProp("SERVER:TRADING:1:SLOT_TYPE")->setValue32(0);
+	//NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:SHEET")->setValue32(CSheetId("icfm1bs.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:SHEET")->setValue32(CSheetId("guild_rm_craft.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:PRICE")->setValue32(200);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:QUALITY")->setValue32(25);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:SLOT_TYPE")->setValue32(0);
 	//
-	//im->getDbProp("SERVER:TRADING:2:SHEET")->setValue32(CSheetId("icfm1pd.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:2:SHEET")->setValue32(CSheetId("guild_rm_fight.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:2:PRICE")->setValue32(10);
-	im->getDbProp("SERVER:TRADING:2:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:2:SLOT_TYPE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:2:NAMEID")->setValue32(8);
+	//NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:SHEET")->setValue32(CSheetId("icfm1pd.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:SHEET")->setValue32(CSheetId("guild_rm_fight.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:PRICE")->setValue32(10);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:NAMEID")->setValue32(8);
 	//
-	//im->getDbProp("SERVER:TRADING:3:SHEET")->setValue32(CSheetId("icfr2l.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:3:SHEET")->setValue32(CSheetId("guild_rm_harvest.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:3:PRICE")->setValue32(10);
-	im->getDbProp("SERVER:TRADING:3:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:3:SLOT_TYPE")->setValue32(0);//
+	//NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:SHEET")->setValue32(CSheetId("icfr2l.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:SHEET")->setValue32(CSheetId("guild_rm_harvest.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:PRICE")->setValue32(10);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:SLOT_TYPE")->setValue32(0);//
 	//
-	//im->getDbProp("SERVER:TRADING:4:SHEET")->setValue32(CSheetId("ictr2b.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:4:SHEET")->setValue32(CSheetId("guild_rm_magic.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:4:PRICE")->setValue32(100);
-	im->getDbProp("SERVER:TRADING:4:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:4:SLOT_TYPE")->setValue32(0);
+	//NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:SHEET")->setValue32(CSheetId("ictr2b.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:SHEET")->setValue32(CSheetId("guild_rm_magic.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:PRICE")->setValue32(100);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("SERVER:TRADING:5:SHEET")->setValue32(CSheetId("icfp1pb.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:5:PRICE")->setValue32(200);
-	im->getDbProp("SERVER:TRADING:5:QUALITY")->setValue32(25);
-	im->getDbProp("SERVER:TRADING:5:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:SHEET")->setValue32(CSheetId("icfp1pb.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:PRICE")->setValue32(200);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:QUALITY")->setValue32(25);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("SERVER:TRADING:6:SHEET")->setValue32(CSheetId("icragt.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:6:PRICE")->setValue32(10);
-	im->getDbProp("SERVER:TRADING:6:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:6:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:SHEET")->setValue32(CSheetId("icragt.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:PRICE")->setValue32(10);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("SERVER:TRADING:7:SHEET")->setValue32(CSheetId("icmss.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:7:PRICE")->setValue32(10);
-	im->getDbProp("SERVER:TRADING:7:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:7:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:SHEET")->setValue32(CSheetId("icmss.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:PRICE")->setValue32(10);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:SLOT_TYPE")->setValue32(0);
 	//
 	sint32 value;
-	im->getDbProp("SERVER:TRADING:SESSION")->setValue32(CBotChatManager::getInstance()->getSessionID());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:SESSION")->setValue32(CBotChatManager::getInstance()->getSessionID());
 	fromString(args[0], value);
-	im->getDbProp("SERVER:TRADING:PAGE_ID")->setValue32(value);
-	im->getDbProp("SERVER:TRADING:HAS_NEXT")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:PAGE_ID")->setValue32(value);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:HAS_NEXT")->setValue32(1);
 	//
 	return true;
 }
@@ -2745,68 +2745,68 @@ NLMISC_COMMAND( testTradeItems2, "Temp : test some items to trade (2)", "" )
 	if (args.size() != 1) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	//
-	im->getDbProp("SERVER:TRADING:0:SHEET")->setValue32(CSheetId("icfm1bm.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:0:PRICE")->setValue32(100);
-	im->getDbProp("SERVER:TRADING:0:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:0:SLOT_TYPE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:0:FACTION_TYPE")->setValue32(0);
-//	im->getDbProp("SERVER:TRADING:0:PRICE")->setValue32(130);		// should result to none
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:SHEET")->setValue32(CSheetId("icfm1bm.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:PRICE")->setValue32(100);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:FACTION_TYPE")->setValue32(0);
+//	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:PRICE")->setValue32(130);		// should result to none
 	//
-	im->getDbProp("SERVER:TRADING:1:SHEET")->setValue32(CSheetId("icfm1bs.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:1:PRICE")->setValue32(200);
-	im->getDbProp("SERVER:TRADING:1:QUALITY")->setValue32(25);
-	im->getDbProp("SERVER:TRADING:1:SLOT_TYPE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:1:FACTION_TYPE")->setValue32(PVP_CLAN::Kami);
-//	im->getDbProp("SERVER:TRADING:1:FACTION_POINT_PRICE")->setValue32(0);		// should result to none
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:SHEET")->setValue32(CSheetId("icfm1bs.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:PRICE")->setValue32(200);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:QUALITY")->setValue32(25);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:FACTION_TYPE")->setValue32(PVP_CLAN::Kami);
+//	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:FACTION_POINT_PRICE")->setValue32(0);		// should result to none
 	//
-	im->getDbProp("SERVER:TRADING:2:SHEET")->setValue32(CSheetId("icfm1pd.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:2:PRICE")->setValue32(10);
-	im->getDbProp("SERVER:TRADING:2:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:2:SLOT_TYPE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:2:NAMEID")->setValue32(8);
-	im->getDbProp("SERVER:TRADING:2:FACTION_TYPE")->setValue32(PVP_CLAN::Kami);
-//	im->getDbProp("SERVER:TRADING:2:FACTION_POINT_PRICE")->setValue32(13);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:SHEET")->setValue32(CSheetId("icfm1pd.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:PRICE")->setValue32(10);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:NAMEID")->setValue32(8);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:FACTION_TYPE")->setValue32(PVP_CLAN::Kami);
+//	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:FACTION_POINT_PRICE")->setValue32(13);
 	//
-	im->getDbProp("SERVER:TRADING:3:SHEET")->setValue32(CSheetId("icfr2l.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:3:PRICE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:3:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:3:SLOT_TYPE")->setValue32(0);//
-	im->getDbProp("SERVER:TRADING:3:FACTION_TYPE")->setValue32(PVP_CLAN::Tryker);
-//	im->getDbProp("SERVER:TRADING:3:FACTION_POINT_PRICE")->setValue32(10);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:SHEET")->setValue32(CSheetId("icfr2l.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:PRICE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:SLOT_TYPE")->setValue32(0);//
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:FACTION_TYPE")->setValue32(PVP_CLAN::Tryker);
+//	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:FACTION_POINT_PRICE")->setValue32(10);
 	//
-	im->getDbProp("SERVER:TRADING:4:SHEET")->setValue32(CSheetId("ictr2b.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:4:PRICE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:4:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:4:SLOT_TYPE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:4:FACTION_TYPE")->setValue32(PVP_CLAN::Fyros);
-//	im->getDbProp("SERVER:TRADING:4:FACTION_POINT_PRICE")->setValue32(8);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:SHEET")->setValue32(CSheetId("ictr2b.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:PRICE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:FACTION_TYPE")->setValue32(PVP_CLAN::Fyros);
+//	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:FACTION_POINT_PRICE")->setValue32(8);
 	//
-	im->getDbProp("SERVER:TRADING:5:SHEET")->setValue32(CSheetId("icfp1pb.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:5:PRICE")->setValue32(200);
-	im->getDbProp("SERVER:TRADING:5:QUALITY")->setValue32(25);
-	im->getDbProp("SERVER:TRADING:5:SLOT_TYPE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:5:FACTION_TYPE")->setValue32(PVP_CLAN::Tryker);
-//	im->getDbProp("SERVER:TRADING:5:FACTION_POINT_PRICE")->setValue32(7);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:SHEET")->setValue32(CSheetId("icfp1pb.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:PRICE")->setValue32(200);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:QUALITY")->setValue32(25);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:FACTION_TYPE")->setValue32(PVP_CLAN::Tryker);
+//	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:FACTION_POINT_PRICE")->setValue32(7);
 	//
-	im->getDbProp("SERVER:TRADING:6:SHEET")->setValue32(CSheetId("icragt.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:6:PRICE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:6:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:6:SLOT_TYPE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:6:FACTION_TYPE")->setValue32(PVP_CLAN::Karavan);
-//	im->getDbProp("SERVER:TRADING:6:FACTION_POINT_PRICE")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:SHEET")->setValue32(CSheetId("icragt.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:PRICE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:FACTION_TYPE")->setValue32(PVP_CLAN::Karavan);
+//	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:FACTION_POINT_PRICE")->setValue32(1);
 	//
-	im->getDbProp("SERVER:TRADING:7:SHEET")->setValue32(CSheetId("icmss.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:7:PRICE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:7:QUALITY")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:7:SLOT_TYPE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:7:FACTION_TYPE")->setValue32(PVP_CLAN::Kami);
-//	im->getDbProp("SERVER:TRADING:7:FACTION_POINT_PRICE")->setValue32(1350);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:SHEET")->setValue32(CSheetId("icmss.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:PRICE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:FACTION_TYPE")->setValue32(PVP_CLAN::Kami);
+//	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:FACTION_POINT_PRICE")->setValue32(1350);
 	//
 	sint32 value;
-	im->getDbProp("SERVER:TRADING:SESSION")->setValue32(CBotChatManager::getInstance()->getSessionID());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:SESSION")->setValue32(CBotChatManager::getInstance()->getSessionID());
 	fromString(args[0], value);
-	im->getDbProp("SERVER:TRADING:PAGE_ID")->setValue32(value);
-	im->getDbProp("SERVER:TRADING:HAS_NEXT")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:PAGE_ID")->setValue32(value);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:HAS_NEXT")->setValue32(1);
 	//
 	return true;
 }
@@ -2815,25 +2815,25 @@ NLMISC_COMMAND( testTradeItems3, "Temp : test some items to trade (3)", "" )
 {
 	// items
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->getDbProp("LOCAL:TRADING:0:SHEET")->setValue32(CSheetId("fyros_buckler_lvl_01_05.item").asInt());
-	im->getDbProp("LOCAL:TRADING:0:PRICE")->setValue32(200);
-	im->getDbProp("LOCAL:TRADING:0:QUALITY")->setValue32(25);
-	im->getDbProp("LOCAL:TRADING:0:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:0:SHEET")->setValue32(CSheetId("fyros_buckler_lvl_01_05.item").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:0:PRICE")->setValue32(200);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:0:QUALITY")->setValue32(25);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:0:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("LOCAL:TRADING:1:SHEET")->setValue32(CSheetId("fyros_buckler_lvl_01_05.item").asInt());
-	im->getDbProp("LOCAL:TRADING:1:PRICE")->setValue32(200);
-	im->getDbProp("LOCAL:TRADING:1:QUALITY")->setValue32(25);
-	im->getDbProp("LOCAL:TRADING:1:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:1:SHEET")->setValue32(CSheetId("fyros_buckler_lvl_01_05.item").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:1:PRICE")->setValue32(200);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:1:QUALITY")->setValue32(25);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:1:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("LOCAL:TRADING:2:SHEET")->setValue32(CSheetId("fyros_buckler_lvl_01_05.item").asInt());
-	im->getDbProp("LOCAL:TRADING:2:PRICE")->setValue32(200);
-	im->getDbProp("LOCAL:TRADING:2:QUALITY")->setValue32(25);
-	im->getDbProp("LOCAL:TRADING:2:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:2:SHEET")->setValue32(CSheetId("fyros_buckler_lvl_01_05.item").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:2:PRICE")->setValue32(200);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:2:QUALITY")->setValue32(25);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:2:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("LOCAL:TRADING:3:SHEET")->setValue32(CSheetId("fyros_buckler_lvl_01_05.item").asInt());
-	im->getDbProp("LOCAL:TRADING:3:PRICE")->setValue32(200);
-	im->getDbProp("LOCAL:TRADING:3:QUALITY")->setValue32(25);
-	im->getDbProp("LOCAL:TRADING:3:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:3:SHEET")->setValue32(CSheetId("fyros_buckler_lvl_01_05.item").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:3:PRICE")->setValue32(200);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:3:QUALITY")->setValue32(25);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:3:SLOT_TYPE")->setValue32(0);
 
 	return true;
 }
@@ -2843,21 +2843,21 @@ NLMISC_COMMAND( testTradeItems4, "Temp : test some items to trade (4)", "" )
 	// pacts
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	//
-	im->getDbProp("LOCAL:TRADING:0:SHEET")->setValue32(CSheetId("pacts.death_impact").asInt());
-	im->getDbProp("LOCAL:TRADING:0:QUALITY")->setValue32(0);
-	im->getDbProp("LOCAL:TRADING:0:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:0:SHEET")->setValue32(CSheetId("pacts.death_impact").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:0:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:0:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("LOCAL:TRADING:1:SHEET")->setValue32(CSheetId("kami_pactes.death_impact").asInt());
-	im->getDbProp("LOCAL:TRADING:1:QUALITY")->setValue32(0);
-	im->getDbProp("LOCAL:TRADING:1:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:1:SHEET")->setValue32(CSheetId("kami_pactes.death_impact").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:1:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:1:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("LOCAL:TRADING:2:SHEET")->setValue32(CSheetId("karavan_pactes.death_impact").asInt());
-	im->getDbProp("LOCAL:TRADING:2:QUALITY")->setValue32(0);
-	im->getDbProp("LOCAL:TRADING:2:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:2:SHEET")->setValue32(CSheetId("karavan_pactes.death_impact").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:2:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:2:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("LOCAL:TRADING:3:SHEET")->setValue32(CSheetId("kami_pactes.death_impact").asInt());
-	im->getDbProp("LOCAL:TRADING:3:QUALITY")->setValue32(0);
-	im->getDbProp("LOCAL:TRADING:3:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:3:SHEET")->setValue32(CSheetId("kami_pactes.death_impact").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:3:QUALITY")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TRADING:3:SLOT_TYPE")->setValue32(0);
 	//
 	return true;
 }
@@ -2868,46 +2868,46 @@ NLMISC_COMMAND( testPhrases, "Temp : test some items to trade", "" )
 	if (args.size() != 1) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	//
-	im->getDbProp("SERVER:TRADING:0:SHEET")->setValue32(CSheetId("abfaimhame09.sphrase").asInt());
-	im->getDbProp("SERVER:TRADING:0:PRICE")->setValue32(11);
-	im->getDbProp("SERVER:TRADING:0:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:SHEET")->setValue32(CSheetId("abfaimhame09.sphrase").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:PRICE")->setValue32(11);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("SERVER:TRADING:1:SHEET")->setValue32(CSheetId("abfaimhcme07.sphrase").asInt());
-	im->getDbProp("SERVER:TRADING:1:PRICE")->setValue32(22);
-	im->getDbProp("SERVER:TRADING:1:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:SHEET")->setValue32(CSheetId("abfaimhcme07.sphrase").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:PRICE")->setValue32(22);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("SERVER:TRADING:2:SHEET")->setValue32(CSheetId("abfaimhfme04.sphrase").asInt());
-	im->getDbProp("SERVER:TRADING:2:PRICE")->setValue32(33);
-	im->getDbProp("SERVER:TRADING:2:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:SHEET")->setValue32(CSheetId("abfaimhfme04.sphrase").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:PRICE")->setValue32(33);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("SERVER:TRADING:3:SHEET")->setValue32(CSheetId("abfaimhfme08.sphrase").asInt());
-	im->getDbProp("SERVER:TRADING:3:PRICE")->setValue32(44);
-	im->getDbProp("SERVER:TRADING:3:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:SHEET")->setValue32(CSheetId("abfaimhfme08.sphrase").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:PRICE")->setValue32(44);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("SERVER:TRADING:4:SHEET")->setValue32(CSheetId("abfma05.sphrase").asInt());
-	im->getDbProp("SERVER:TRADING:4:PRICE")->setValue32(55);
-	im->getDbProp("SERVER:TRADING:4:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:SHEET")->setValue32(CSheetId("abfma05.sphrase").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:PRICE")->setValue32(55);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:SLOT_TYPE")->setValue32(0);
 
 	//
-	im->getDbProp("SERVER:TRADING:5:SHEET")->setValue32(CSheetId("abm_mt_ae_acid_00055.sphrase").asInt());
-	im->getDbProp("SERVER:TRADING:5:PRICE")->setValue32(66);
-	im->getDbProp("SERVER:TRADING:5:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:SHEET")->setValue32(CSheetId("abm_mt_ae_acid_00055.sphrase").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:PRICE")->setValue32(66);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("SERVER:TRADING:6:SHEET")->setValue32(CSheetId("abm_mt_heal_00140.sphrase").asInt());
-	im->getDbProp("SERVER:TRADING:6:PRICE")->setValue32(77);
-	im->getDbProp("SERVER:TRADING:6:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:SHEET")->setValue32(CSheetId("abm_mt_heal_00140.sphrase").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:PRICE")->setValue32(77);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("SERVER:TRADING:7:SHEET")->setValue32(CSheetId("abm_mt_cannibalism_00020.sphrase").asInt());
-	im->getDbProp("SERVER:TRADING:7:PRICE")->setValue32(88);
-	im->getDbProp("SERVER:TRADING:7:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:SHEET")->setValue32(CSheetId("abm_mt_cannibalism_00020.sphrase").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:PRICE")->setValue32(88);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:SLOT_TYPE")->setValue32(0);
 	//
 
 	sint32 value;
-	im->getDbProp("SERVER:TRADING:SESSION")->setValue32(CBotChatManager::getInstance()->getSessionID());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:SESSION")->setValue32(CBotChatManager::getInstance()->getSessionID());
 	fromString(args[0], value);
-	im->getDbProp("SERVER:TRADING:PAGE_ID")->setValue32(value);
-	im->getDbProp("SERVER:TRADING:HAS_NEXT")->setValue32(1);
-	im->getDbProp("SERVER:TRADING:ROLEMASTER_FLAGS")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:PAGE_ID")->setValue32(value);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:HAS_NEXT")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:ROLEMASTER_FLAGS")->setValue32(0);
 
 	return true;
 }
@@ -2921,77 +2921,77 @@ NLMISC_COMMAND( testResaleItems, "Temp : test resale", "" )
 	uint	pf= pageId+1;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	//
-	im->getDbProp("SERVER:TRADING:0:SHEET")->setValue32(CSheetId("m0006dxajf01.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:0:PRICE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:0:QUALITY")->setValue32(1);
-	im->getDbProp("SERVER:TRADING:0:SELLER_TYPE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:0:PRICE_RETIRE")->setValue32(111);
-	im->getDbProp("SERVER:TRADING:0:QUANTITY")->setValue32(62);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:SHEET")->setValue32(CSheetId("m0006dxajf01.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:PRICE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:QUALITY")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:SELLER_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:PRICE_RETIRE")->setValue32(111);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:QUANTITY")->setValue32(62);
 	//
-	im->getDbProp("SERVER:TRADING:1:SHEET")->setValue32(CSheetId("icfm1bs.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:1:PRICE")->setValue32(1*pf);
-	im->getDbProp("SERVER:TRADING:1:QUALITY")->setValue32(11);
-	im->getDbProp("SERVER:TRADING:1:SELLER_TYPE")->setValue32(1);
-	im->getDbProp("SERVER:TRADING:1:PRICE_RETIRE")->setValue32(222);
-	im->getDbProp("SERVER:TRADING:1:QUANTITY")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:SHEET")->setValue32(CSheetId("icfm1bs.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:PRICE")->setValue32(1*pf);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:QUALITY")->setValue32(11);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:SELLER_TYPE")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:PRICE_RETIRE")->setValue32(222);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:QUANTITY")->setValue32(1);
 	//
-	im->getDbProp("SERVER:TRADING:2:SHEET")->setValue32(CSheetId("icfm1pd.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:2:PRICE")->setValue32(-1);
-	im->getDbProp("SERVER:TRADING:2:QUALITY")->setValue32(22);
-	im->getDbProp("SERVER:TRADING:2:NAMEID")->setValue32(8);
-	im->getDbProp("SERVER:TRADING:2:SELLER_TYPE")->setValue32(2);
-	im->getDbProp("SERVER:TRADING:2:PRICE_RETIRE")->setValue32(333);
-	im->getDbProp("SERVER:TRADING:2:QUANTITY")->setValue32(1);
-	im->getDbProp("SERVER:TRADING:2:RESALE_TIME_LEFT")->setValue32(10);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:SHEET")->setValue32(CSheetId("icfm1pd.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:PRICE")->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:QUALITY")->setValue32(22);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:NAMEID")->setValue32(8);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:SELLER_TYPE")->setValue32(2);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:PRICE_RETIRE")->setValue32(333);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:QUANTITY")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:RESALE_TIME_LEFT")->setValue32(10);
 	//
-	im->getDbProp("SERVER:TRADING:3:SHEET")->setValue32(CSheetId("icfr2l.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:3:PRICE")->setValue32(3*pf);
-	im->getDbProp("SERVER:TRADING:3:QUALITY")->setValue32(33);
-	im->getDbProp("SERVER:TRADING:3:SELLER_TYPE")->setValue32(3);
-	im->getDbProp("SERVER:TRADING:3:PRICE_RETIRE")->setValue32(444);
-	im->getDbProp("SERVER:TRADING:3:QUANTITY")->setValue32(1);
-	im->getDbProp("SERVER:TRADING:3:RESALE_TIME_LEFT")->setValue32(100);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:SHEET")->setValue32(CSheetId("icfr2l.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:PRICE")->setValue32(3*pf);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:QUALITY")->setValue32(33);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:SELLER_TYPE")->setValue32(3);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:PRICE_RETIRE")->setValue32(444);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:QUANTITY")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:RESALE_TIME_LEFT")->setValue32(100);
 	//
-	im->getDbProp("SERVER:TRADING:4:SHEET")->setValue32(CSheetId("m0006dxajf01.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:4:PRICE")->setValue32(4*pf);
-	im->getDbProp("SERVER:TRADING:4:QUALITY")->setValue32(44);
-	im->getDbProp("SERVER:TRADING:4:SELLER_TYPE")->setValue32(4);
-	im->getDbProp("SERVER:TRADING:4:PRICE_RETIRE")->setValue32(555);
-	im->getDbProp("SERVER:TRADING:4:QUANTITY")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:SHEET")->setValue32(CSheetId("m0006dxajf01.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:PRICE")->setValue32(4*pf);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:QUALITY")->setValue32(44);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:SELLER_TYPE")->setValue32(4);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:PRICE_RETIRE")->setValue32(555);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:QUANTITY")->setValue32(1);
 	//
-	im->getDbProp("SERVER:TRADING:5:SHEET")->setValue32(CSheetId("icfp1pb.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:5:PRICE")->setValue32(5*pf);
-	im->getDbProp("SERVER:TRADING:5:QUALITY")->setValue32(55);
-	im->getDbProp("SERVER:TRADING:5:SELLER_TYPE")->setValue32(5);
-	im->getDbProp("SERVER:TRADING:5:PRICE_RETIRE")->setValue32(666);
-	im->getDbProp("SERVER:TRADING:5:QUANTITY")->setValue32(23);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:SHEET")->setValue32(CSheetId("icfp1pb.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:PRICE")->setValue32(5*pf);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:QUALITY")->setValue32(55);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:SELLER_TYPE")->setValue32(5);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:PRICE_RETIRE")->setValue32(666);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:QUANTITY")->setValue32(23);
 	//
-	im->getDbProp("SERVER:TRADING:6:SHEET")->setValue32(CSheetId("m0119dxajd01.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:6:PRICE")->setValue32(6*pf);
-	im->getDbProp("SERVER:TRADING:6:QUALITY")->setValue32(66);
-	im->getDbProp("SERVER:TRADING:6:SELLER_TYPE")->setValue32(2);
-	im->getDbProp("SERVER:TRADING:6:PRICE_RETIRE")->setValue32(777);
-	im->getDbProp("SERVER:TRADING:6:QUANTITY")->setValue32(19);
-	im->getDbProp("SERVER:TRADING:6:RESALE_TIME_LEFT")->setValue32(48);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:SHEET")->setValue32(CSheetId("m0119dxajd01.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:PRICE")->setValue32(6*pf);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:QUALITY")->setValue32(66);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:SELLER_TYPE")->setValue32(2);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:PRICE_RETIRE")->setValue32(777);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:QUANTITY")->setValue32(19);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:RESALE_TIME_LEFT")->setValue32(48);
 	//
-	im->getDbProp("SERVER:TRADING:7:SHEET")->setValue32(CSheetId("icmss.sitem").asInt());
-	im->getDbProp("SERVER:TRADING:7:PRICE")->setValue32(7*pf);
-	im->getDbProp("SERVER:TRADING:7:QUALITY")->setValue32(77);
-	im->getDbProp("SERVER:TRADING:7:SELLER_TYPE")->setValue32(5);
-	im->getDbProp("SERVER:TRADING:7:PRICE_RETIRE")->setValue32(888);
-	im->getDbProp("SERVER:TRADING:7:QUANTITY")->setValue32(1);
-	im->getDbProp("SERVER:TRADING:7:RESALE_TIME_LEFT")->setValue32(10);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:SHEET")->setValue32(CSheetId("icmss.sitem").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:PRICE")->setValue32(7*pf);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:QUALITY")->setValue32(77);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:SELLER_TYPE")->setValue32(5);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:PRICE_RETIRE")->setValue32(888);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:QUANTITY")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:RESALE_TIME_LEFT")->setValue32(10);
 
 
 	//
-	im->getDbProp("SERVER:TRADING:SESSION")->setValue32(CBotChatManager::getInstance()->getSessionID());
-	im->getDbProp("SERVER:TRADING:PAGE_ID")->setValue32(pageId);
-	im->getDbProp("SERVER:TRADING:HAS_NEXT")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:SESSION")->setValue32(CBotChatManager::getInstance()->getSessionID());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:PAGE_ID")->setValue32(pageId);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:HAS_NEXT")->setValue32(1);
 	//
 
 	// Force for next page
 	IngameDbMngr.flushObserverCalls();
-	CInterfaceManager::getInstance()->flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 	return true;
 }
@@ -3003,14 +3003,14 @@ NLMISC_COMMAND( testClientPhrases, "", "" )
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 
 	sint32 value;
-	im->getDbProp("SERVER:TRADING:SESSION")->setValue32(CBotChatManager::getInstance()->getSessionID());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:SESSION")->setValue32(CBotChatManager::getInstance()->getSessionID());
 	fromString(args[0], value);
-	im->getDbProp("SERVER:TRADING:PAGE_ID")->setValue32(value);
-	im->getDbProp("SERVER:TRADING:HAS_NEXT")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:PAGE_ID")->setValue32(value);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:HAS_NEXT")->setValue32(1);
 	fromString(args[1], value);
-	im->getDbProp("SERVER:TRADING:ROLEMASTER_FLAGS")->setValue32(value);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:ROLEMASTER_FLAGS")->setValue32(value);
 	fromString(args[2], value);
-	im->getDbProp("SERVER:TRADING:ROLEMASTER_RACE")->setValue32(value);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:ROLEMASTER_RACE")->setValue32(value);
 
 	return true;
 }
@@ -3021,46 +3021,46 @@ NLMISC_COMMAND( testOutpostBuildings, "Temp : test some items to trade", "" )
 	if (args.size() != 1) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	//
-	im->getDbProp("SERVER:TRADING:0:SHEET")->setValue32(CSheetId("driller_bountybeaches_kami_u1_100a.outpost_building").asInt());
-	im->getDbProp("SERVER:TRADING:0:PRICE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:0:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:SHEET")->setValue32(CSheetId("driller_bountybeaches_kami_u1_100a.outpost_building").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:PRICE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:0:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("SERVER:TRADING:1:SHEET")->setValue32(CSheetId("driller_citiesofintuition_kami_u2_50a.outpost_building").asInt());
-	im->getDbProp("SERVER:TRADING:1:PRICE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:1:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:SHEET")->setValue32(CSheetId("driller_citiesofintuition_kami_u2_50a.outpost_building").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:PRICE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:1:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("SERVER:TRADING:2:SHEET")->setValue32(CSheetId("driller_couloirbrule_kami_u2_150b.outpost_building").asInt());
-	im->getDbProp("SERVER:TRADING:2:PRICE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:2:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:SHEET")->setValue32(CSheetId("driller_couloirbrule_kami_u2_150b.outpost_building").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:PRICE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:2:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("SERVER:TRADING:3:SHEET")->setValue32(CSheetId("driller_bountybeaches_karavan_u1_100a.outpost_building").asInt());
-	im->getDbProp("SERVER:TRADING:3:PRICE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:3:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:SHEET")->setValue32(CSheetId("driller_bountybeaches_karavan_u1_100a.outpost_building").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:PRICE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:3:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("SERVER:TRADING:4:SHEET")->setValue32(CSheetId("driller_bountybeaches_karavan_u1_150a.outpost_building").asInt());
-	im->getDbProp("SERVER:TRADING:4:PRICE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:4:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:SHEET")->setValue32(CSheetId("driller_bountybeaches_karavan_u1_150a.outpost_building").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:PRICE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:4:SLOT_TYPE")->setValue32(0);
 
 	//
-	im->getDbProp("SERVER:TRADING:5:SHEET")->setValue32(CSheetId("driller_bountybeaches_karavan_u1_200a.outpost_building").asInt());
-	im->getDbProp("SERVER:TRADING:5:PRICE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:5:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:SHEET")->setValue32(CSheetId("driller_bountybeaches_karavan_u1_200a.outpost_building").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:PRICE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:5:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("SERVER:TRADING:6:SHEET")->setValue32(CSheetId("driller_bountybeaches_karavan_u2_100a.outpost_building").asInt());
-	im->getDbProp("SERVER:TRADING:6:PRICE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:6:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:SHEET")->setValue32(CSheetId("driller_bountybeaches_karavan_u2_100a.outpost_building").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:PRICE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:6:SLOT_TYPE")->setValue32(0);
 	//
-	im->getDbProp("SERVER:TRADING:7:SHEET")->setValue32(CSheetId("driller_bountybeaches_karavan_u2_150a.outpost_building").asInt());
-	im->getDbProp("SERVER:TRADING:7:PRICE")->setValue32(0);
-	im->getDbProp("SERVER:TRADING:7:SLOT_TYPE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:SHEET")->setValue32(CSheetId("driller_bountybeaches_karavan_u2_150a.outpost_building").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:PRICE")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:7:SLOT_TYPE")->setValue32(0);
 	//
 
 	sint32 value;
-	im->getDbProp("SERVER:TRADING:SESSION")->setValue32(CBotChatManager::getInstance()->getSessionID());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:SESSION")->setValue32(CBotChatManager::getInstance()->getSessionID());
 	fromString(args[0], value);
-	im->getDbProp("SERVER:TRADING:PAGE_ID")->setValue32(value);
-	im->getDbProp("SERVER:TRADING:HAS_NEXT")->setValue32(1);
-	im->getDbProp("SERVER:TRADING:ROLEMASTER_FLAGS")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:PAGE_ID")->setValue32(value);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:HAS_NEXT")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:ROLEMASTER_FLAGS")->setValue32(0);
 
 	return true;
 }

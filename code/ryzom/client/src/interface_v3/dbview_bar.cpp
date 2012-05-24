@@ -192,21 +192,21 @@ void CDBViewBar::draw ()
 // ----------------------------------------------------------------------------
 void CDBViewBar::setValueDbLink (const std::string &r)
 {
-	CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp(r,false);
+	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(r,false);
 	if (pNL != NULL) _Value.setNodePtr(pNL);
 }
 
 // ----------------------------------------------------------------------------
 void CDBViewBar::setRangeDbLink (const std::string &r)
 {
-	CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp(r,false);
+	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(r,false);
 	if (pNL != NULL) _Range.setNodePtr(pNL);
 }
 
 // ----------------------------------------------------------------------------
 void CDBViewBar::setReferenceDbLink (const std::string &r)
 {
-	CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp(r,false);
+	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(r,false);
 	if (pNL != NULL) _Reference.setNodePtr(pNL);
 }
 
