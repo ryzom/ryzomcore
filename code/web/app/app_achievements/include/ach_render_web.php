@@ -90,4 +90,98 @@
 	function ach_render_tiebar($cult = "neutral", $civ = "neutral") {
 
 	}
+
+	function ach_render_menu(&$menu) {
+		$html = "";
+
+		$sz = $menu->getSize();
+		for($i=0;$i<$sz;$i++) {
+			$curr = $menu->getChild($i);
+			$html .= "<a href='' style='display:block;'></a><div style='display:block;margin-left:50px;'>".ach_render_menu($curr)."</div>";
+		}
+
+		return $html;
+	}
+
+	function ach_render_category(&$cat) {
+		$html = "";
+
+		$tmp = $cat->getDone();
+		$sz = sizeof($tmp);
+		for($i=0;$i<$sz;$i++) {
+			$html .= ach_render_achievement_done($cat->getChild($tmp[$i]));
+		}
+
+		$tmp = $cat->getDone();
+		$sz = sizeof($tmp);
+		for($i=0;$i<$sz;$i++) {
+			$html .= ach_render_achievement_open($cat->getChild($tmp[$i]));
+		}
+
+		return $html;
+	}
+
+	function ach_render_achievement_done(&$ach) {
+
+	}
+
+	function ach_render_achievement_open(&$ach) {
+		$html = "";
+
+		$html .= '<div style="display: block; margin-bottom: 5px;"><table cellpadding="0" cellspacing="0" width="100%">
+					<tbody><tr>
+						<td width="3px"><img src="pic/bar_pending_ul.png"></td>
+						<td style="background-image: url(pic/bar_pending_u.png);"></td>
+						<td width="3px"><img src="pic/bar_pending_ur.png"></td>
+					</tr>
+					<tr>
+						<td style="background-image: url(pic/bar_pending_l.png);"></td>
+						<td>
+							<center><table>
+								<tbody><tr>
+									<td rowspan="2"><img src="pic/icon/13.png"></td>
+									<td height="35px" width="430px"><center><h2 style="margin: 0px;color:#FFFFFF;">'.$ach->getName().'</h2></center></td>
+									<td rowspan="2" style="font-weight: bold; text-align: center; font-size: 14px;color:#FFFFFF;">
+										'.$ach->getValue().'<br><img src="pic/yubo_done.png">
+									</td>
+								</tr>';
+							$html .= ach_render_perk_open($ach->getOpen());
+							$html .= '</tbody></table></center>
+						</td>
+						<td style="background-image: url(pic/bar_pending_r.png);"></td>
+					</tr>
+					<tr>
+						<td><img src="pic/bar_pending_bl.png"></td>
+						<td style="background-image: url(pic/bar_pending_b.png);"></td>
+						<td><img src="pic/bar_pending_br.png"></td>
+					</tr>
+				</tbody></table></div>';
+
+		return $html;
+	}
+
+	function ach_render_perk_open(&$perk_list) {
+		$html = "";
+
+		$perk = $perk_list[0];
+
+		$html .= $perk->getName()."<br>";
+		$html .= ach_render_obj_list($perk->getChildren());
+
+		return $html;
+	}
+
+	function ach_render_perk_done() {
+
+	}
+
+	function ach_render_obj_list(&$obj) {
+		$html = "";
+
+		foreach($obj as $elem) {
+			$html .= "-".$elem->getName()."<br>";
+		}
+
+		return $html;
+	}
 ?>

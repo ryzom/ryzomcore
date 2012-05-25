@@ -47,7 +47,7 @@ function ryzom_app_render($title, $content, $ig=false, $bgcolor='', $javascript=
 		$c .= ryzom_render_www(ryzom_render_window($title, $content, $homeLink));
 		$c .= '</body></html>';
 	} else {
-		$c .= '<html><body>';
+		$c .= '<html><body bgcolor="'.$bgcolor.'">';
 		$c .= $content;
 		$debug = ryLogger::getInstance()->getLogs();
 		if ($debug)
