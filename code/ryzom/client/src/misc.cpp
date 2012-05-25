@@ -976,21 +976,6 @@ std::string getStringCategoryIfAny(const ucstring &src, ucstring &dest)
 }
 
 
-NLMISC::CRGBA stringToRGBA(const char *ptr)
-{
-	if (!ptr) return NLMISC::CRGBA::White;
-	int r = 255, g = 255, b = 255, a = 255;
-	sscanf (ptr, "%d %d %d %d", &r, &g, &b, &a);
-	NLMISC::clamp (r, 0, 255);
-	NLMISC::clamp (g, 0, 255);
-	NLMISC::clamp (b, 0, 255);
-	NLMISC::clamp (a, 0, 255);
-	return CRGBA(r,g,b,a);
-}
-
-
-
-
 // ***************************************************************************
 
 inline bool isSeparator (ucchar c)

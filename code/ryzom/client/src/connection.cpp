@@ -67,7 +67,7 @@
 #include "interface_v3/ctrl_button.h"
 #include "interface_v3/input_handler_manager.h"
 #include "interface_v3/group_editbox.h"
-#include "interface_v3/interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "init_main_loop.h"
 #include "continent_manager.h"
 #include "interface_v3/group_quick_help.h"
@@ -1338,7 +1338,7 @@ void setTarget(CCtrlBase *ctrl, const string &targetName, ucstring &value)
 		CInterfaceExprValue exprValue;
 		exprValue.setUCString(value);
 
-		CInterfaceParser::splitLinkTargets(targetName, ig, targets);
+		CInterfaceLink::splitLinkTargets(targetName, ig, targets);
 		for(uint k = 0; k < targets.size(); ++k)
 		{
 			if (targets[k].Elem) targets[k].affect(exprValue);
@@ -1364,7 +1364,7 @@ void setTarget(CCtrlBase *ctrl, const string &targetName, uint32 value)
 		CInterfaceExprValue exprValue;
 		exprValue.setInteger(value);
 
-		CInterfaceParser::splitLinkTargets(targetName, ig, targets);
+		CInterfaceLink::splitLinkTargets(targetName, ig, targets);
 		for(uint k = 0; k < targets.size(); ++k)
 		{
 			if (targets[k].Elem) targets[k].affect(exprValue);
@@ -1813,7 +1813,7 @@ string getTarget(CCtrlBase * /* ctrl */, const string &targetName)
 {
 	string sTmp = targetName;
 	std::vector<CInterfaceLink::CTargetInfo> targetsVector;
-	CInterfaceParser::splitLinkTargets(sTmp, NULL, targetsVector);
+	CInterfaceLink::splitLinkTargets(sTmp, NULL, targetsVector);
 
 	CInterfaceLink::CTargetInfo &rTI = targetsVector[0];
 
@@ -1835,7 +1835,7 @@ ucstring getUCTarget(CCtrlBase * /* ctrl */, const string &targetName)
 {
 	string sTmp = targetName;
 	std::vector<CInterfaceLink::CTargetInfo> targetsVector;
-	CInterfaceParser::splitLinkTargets(sTmp, NULL, targetsVector);
+	CInterfaceLink::splitLinkTargets(sTmp, NULL, targetsVector);
 
 	CInterfaceLink::CTargetInfo &rTI = targetsVector[0];
 

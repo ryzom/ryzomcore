@@ -166,9 +166,6 @@ std::string getStringCategory(const ucstring &src, ucstring &dest, bool alwaysAd
 // Get the category from the string (src="&SYS&Who are you?" and dest="Who are you?" and return "SYS"), if no category, return ""
 std::string getStringCategoryIfAny(const ucstring &src, ucstring &dest);
 
-NLMISC::CRGBA stringToRGBA(const char *ptr);
-
-
 // Number of shortcut
 #define RYZOM_MAX_SHORTCUT 20
 

@@ -18,7 +18,7 @@
 
 #include "bar_manager.h"
 #include "interface_manager.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "../time_client.h"
 
 

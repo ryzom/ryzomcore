@@ -554,7 +554,7 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 
 	// on a new message, change the Tab color
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CRGBA	newMsgColor= stringToRGBA(pIM->getDefine("chat_group_tab_color_newmsg").c_str());
+	CRGBA	newMsgColor= CRGBA::stringToRGBA(pIM->getDefine("chat_group_tab_color_newmsg").c_str());
 
 	ucstring newmsg = msg;
 	ucstring prefix;

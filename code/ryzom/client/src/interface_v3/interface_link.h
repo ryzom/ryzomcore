@@ -25,13 +25,14 @@
 namespace NLGUI
 {
 	class CReflectedProperty;
+	class CInterfaceExprValue;
+	class CInterfaceExprNode;
 }
 
 
 class CInterfaceElement;
-class CInterfaceExprValue;
 class CInterfaceGroup;
-class CInterfaceExprNode;
+
 
 using namespace NLGUI;
 
@@ -115,6 +116,16 @@ public:
 	static void			setTargetProperty (const std::string & Target, const CInterfaceExprValue &val);
 
 	static bool				isUpdatingAllLinks() { return _UpdateAllLinks; }
+
+	/** From a target name of a link, retrieve the target element and its target target property
+	  * \return true if the target is valid
+	  */
+	static bool splitLinkTarget(const std::string &target, CInterfaceGroup *parentGroup, std::string &propertyName, CInterfaceElement *&targetElm);
+
+	/** From several target names of a link (seprated by ','), retrieve the target elements and their target properties
+	  * \return true if all targets are valid
+	  */
+	static bool splitLinkTargets(const std::string &targets, CInterfaceGroup *parentGroup, std::vector<CInterfaceLink::CTargetInfo> &targetsVect);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 private:
 	friend struct CRemoveTargetPred;

@@ -18,7 +18,7 @@
 
 #include "stdpch.h"
 // Interface
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "interface_manager.h"
 #include "interface_element.h"
 #include "chat_window.h"

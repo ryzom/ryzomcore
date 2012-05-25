@@ -19,7 +19,7 @@
 // ------------------------------------------------------------------------------------------------
 #include "stdpch.h"
 #include "interface_manager.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "group_menu.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "view_bitmap.h"

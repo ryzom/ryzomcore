@@ -25,7 +25,7 @@
 #include "../sheet_manager.h"
 #include "skill_manager.h"
 #include "dbctrl_sheet.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "group_container.h"
 #include "group_editbox.h"
 #include "group_quick_help.h"

@@ -21,7 +21,7 @@
 #include "action_handler.h"
 #include "action_handler_tools.h"
 #include "game_share/outpost.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "group_map.h"
 #include "../sheet_manager.h"
 #include "../net_manager.h"

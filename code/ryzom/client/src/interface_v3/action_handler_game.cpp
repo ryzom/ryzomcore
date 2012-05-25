@@ -35,7 +35,7 @@
 #include "bot_chat_page_ring_sessions.h"
 #include "dbctrl_sheet.h"
 #include "ctrl_sheet_selection.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "group_menu.h"
 #include "group_container.h"
 #include "group_editbox.h"
@@ -3902,7 +3902,7 @@ public:
 		uint entity;
 		fromString(getParam(sParams, "entity"), entity);
 
-		CRGBA color = stringToRGBA(getParam(sParams, "color").c_str());
+		CRGBA color = CRGBA::stringToRGBA(getParam(sParams, "color").c_str());
 		if (entity < 256)
 			EntitiesMngr.entity (entity)->addHPOutput (CI18N::get (text), color);
 	}

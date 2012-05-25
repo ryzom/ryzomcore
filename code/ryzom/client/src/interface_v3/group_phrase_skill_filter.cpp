@@ -20,7 +20,7 @@
 
 #include "group_phrase_skill_filter.h"
 #include "interface_manager.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 
 #include "view_text.h"
 

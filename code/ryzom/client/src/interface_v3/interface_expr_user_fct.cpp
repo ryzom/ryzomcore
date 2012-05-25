@@ -20,7 +20,7 @@
 #include "stdpch.h"
 
 // client
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "ctrl_sheet_selection.h"
 #include "interface_manager.h"
 // game_share
@@ -519,7 +519,7 @@ static DECLARE_INTERFACE_USER_FCT(userFctGetProp)
 
 	string sTmp = args[0].getString();
 	std::vector<CInterfaceLink::CTargetInfo> targetsVector;
-	CInterfaceParser::splitLinkTargets(sTmp, NULL, targetsVector);
+	CInterfaceLink::splitLinkTargets(sTmp, NULL, targetsVector);
 
 	if (targetsVector.empty())
 	{

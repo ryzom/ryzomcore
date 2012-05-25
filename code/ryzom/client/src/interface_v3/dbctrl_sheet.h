@@ -25,7 +25,7 @@
 // client
 #include "nel/gui/reflect.h"
 #include "ctrl_base.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "action_handler.h"
 #include "sphrase_manager.h"
 // game share

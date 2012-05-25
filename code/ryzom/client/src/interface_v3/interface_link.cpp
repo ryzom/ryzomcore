@@ -19,10 +19,10 @@
 
 #include "stdpch.h"
 #include "interface_link.h"
-#include "interface_expr.h"
 #include "interface_element.h"
 #include "interface_manager.h"
-#include "interface_expr_node.h"
+#include "nel/gui/interface_expr.h"
+#include "nel/gui/interface_expr_node.h"
 #include "nel/gui/reflect.h"
 #include "nel/gui/db_manager.h"
 #include "nel/misc/cdb_branch.h"
@@ -444,6 +444,88 @@ void CInterfaceLink::removeAllLinks()
 	nlassert(_LinkList.empty());
 }
 
+// ***************************************************************************
+bool CInterfaceLink::splitLinkTarget(const std::string &target,  CInterfaceGroup *parentGroup, std::string &propertyName, CInterfaceElement *&targetElm)
+{
+	// the last token of the target gives the name of the property
+	std::string::size_type lastPos = target.find_last_of(':');
+	if (lastPos == (target.length() - 1))
+	{
+		// todo hulud interface syntax error
+		nlwarning("The target should at least contains a path and a property as follow 'path:property'");
+		return false;
+	}
+	std::string elmPath;
+	std::string elmProp;
+	CInterfaceElement *elm = NULL;
+	if (parentGroup)
+	{
+		if (lastPos == std::string::npos)
+		{
+			elmProp = target;
+			elm = parentGroup;
+			elmPath = "current";
+		}
+		else
+		{
+			elmProp = target.substr(lastPos + 1);
+			elmPath = parentGroup->getId() + ":" + target.substr(0, lastPos);
+			elm = parentGroup->getElement(elmPath);
+		}
+	}
+	if (!elm)
+	{
+		// try the absolute adress of the element
+		elmPath = target.substr(0, lastPos);
+		elm = CInterfaceManager::getInstance()->getElementFromId(elmPath);
+		elmProp = target.substr(lastPos + 1);
+	}
+
+	if (!elm)
+	{
+		// todo hulud interface syntax error
+		nlwarning("<splitLinkTarget> can't find target link %s", elmPath.c_str());
+		return false;
+	}
+	targetElm = elm;
+	propertyName = elmProp;
+	return true;
+}
+
+
+// ***************************************************************************
+bool CInterfaceLink::splitLinkTargets(const std::string &targets, CInterfaceGroup *parentGroup,std::vector<CInterfaceLink::CTargetInfo> &targetsVect)
+{
+	std::vector<std::string> targetNames;
+	NLMISC::splitString(targets, ",", targetNames);
+	targetsVect.clear();
+	targetsVect.reserve(targetNames.size());
+	bool everythingOk = true;
+	for (uint k = 0; k < targetNames.size(); ++k)
+	{
+		CInterfaceLink::CTargetInfo ti;
+		std::string::size_type startPos = targetNames[k].find_first_not_of(" ");
+		if(startPos == std::string::npos)
+		{
+			// todo hulud interface syntax error
+			nlwarning("<splitLinkTargets> empty target encountered");
+			continue;
+		}
+		std::string::size_type lastPos = targetNames[k].find_last_not_of(" ");
+
+		if (!splitLinkTarget(targetNames[k].substr(startPos, lastPos - startPos+1), parentGroup, ti.PropertyName, ti.Elem))
+		{
+			// todo hulud interface syntax error
+			nlwarning("<splitLinkTargets> Can't get link target");
+			everythingOk = false;
+			continue;
+		}
+		targetsVect.push_back(ti);
+	}
+	return everythingOk;
+}
+
+
 //===========================================================
 void    CInterfaceLink::checkNbRefs()
 {
@@ -470,7 +552,7 @@ void    CInterfaceLink::setTargetProperty (const std::string &Target, const CInt
 	if (pIG != NULL)
 	{
 		std::vector<CTargetInfo> vTargets;
-		CInterfaceParser::splitLinkTargets(Target, pIG, vTargets);
+		splitLinkTargets(Target, pIG, vTargets);
 		if ((vTargets.size() > 0) && (vTargets[0].Elem))
 		{
 			vTargets[0].affect(val);

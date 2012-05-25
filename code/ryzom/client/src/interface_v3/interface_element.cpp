@@ -761,7 +761,7 @@ void		CInterfaceElement::convertHotSpotCouple (const char *ptr, THotSpot &parent
 // ------------------------------------------------------------------------------------------------
 NLMISC::CRGBA CInterfaceElement::convertColor (const char *ptr)
 {
-	return stringToRGBA(ptr);
+	return NLMISC::CRGBA::stringToRGBA(ptr);
 }
 
 // ------------------------------------------------------------------------------------------------

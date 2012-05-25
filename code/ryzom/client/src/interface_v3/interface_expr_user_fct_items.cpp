@@ -20,7 +20,7 @@
 
 // client
 #include "../sheet_manager.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "dbctrl_sheet.h"
 #include "ctrl_sheet_selection.h"
 #include "dbgroup_list_sheet.h"

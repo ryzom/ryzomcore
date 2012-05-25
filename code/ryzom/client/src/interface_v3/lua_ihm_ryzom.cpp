@@ -53,7 +53,7 @@
 #include "game_share/people_pd.h"
 #include "group_tree.h"
 #include "interface_link.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "people_interraction.h"
 #include "nel/misc/algo.h"
 #include "nel/misc/file.h"

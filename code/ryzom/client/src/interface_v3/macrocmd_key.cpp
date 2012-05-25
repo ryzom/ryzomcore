@@ -30,7 +30,7 @@
 #include "dbgroup_combo_box.h"
 #include "group_container.h"
 #include "group_modal_get_key.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 
 // tmp
 #include "../r2/editor.h"

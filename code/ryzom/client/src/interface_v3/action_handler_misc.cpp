@@ -22,7 +22,7 @@
 #include "group_editbox.h"
 #include "people_interraction.h"
 #include "nel/misc/algo.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "interface_link.h"
 #include "../client_chat_manager.h"
 #include "../motion/user_controls.h"
@@ -427,7 +427,7 @@ class CActionHandlerAddLink : public IActionHandler
 		}
 
 		std::vector<CInterfaceLink::CTargetInfo> targetsVect;
-		bool result = CInterfaceParser::splitLinkTargets(targets, parentGroup, targetsVect);
+		bool result = CInterfaceLink::splitLinkTargets(targets, parentGroup, targetsVect);
 		if (!result)
 		{
 			nlwarning("<CActionHandlerAddLink> Couldn't parse all links");

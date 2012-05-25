@@ -21,7 +21,7 @@
 
 #include "interface_anim.h"
 #include "interface_manager.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "action_handler.h"
 #include "../time_client.h"
@@ -75,7 +75,7 @@ bool CInterfaceTrack::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	}
 
 	//
-	if (!CInterfaceParser::splitLinkTargets (ptr, parentGroup, _Targets))
+	if (!CInterfaceLink::splitLinkTargets (ptr, parentGroup, _Targets))
 	{
 		nlwarning ("no target for track");
 		return false;

@@ -214,16 +214,6 @@ public:
 	void				setDefine(const std::string &id, const std::string &value);
 	// @}
 
-	/** From a target name of a link, retrieve the target element and its target target property
-	  * \return true if the target is valid
-	  */
-	static bool splitLinkTarget(const std::string &target, CInterfaceGroup *parentGroup, std::string &propertyName, CInterfaceElement *&targetElm);
-
-	/** From several target names of a link (seprated by ','), retrieve the target elements and their target properties
-	  * \return true if all targets are valid
-	  */
-	static bool splitLinkTargets(const std::string &targets, CInterfaceGroup *parentGroup, std::vector<CInterfaceLink::CTargetInfo> &targetsVect);
-
 	/// \name Dynamic links mgt
 	// @{
 		/** Associate the given dynamic link with an ID

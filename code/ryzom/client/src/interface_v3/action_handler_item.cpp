@@ -25,7 +25,7 @@
 #include "dbctrl_sheet.h"
 #include "dbgroup_list_sheet.h"
 #include "group_editbox.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "player_trade.h"
 #include "../user_entity.h"
 #include "../net_manager.h"

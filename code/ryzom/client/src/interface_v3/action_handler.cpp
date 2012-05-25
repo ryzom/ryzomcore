@@ -21,7 +21,7 @@
 #include "action_handler.h"
 #include "action_handler_misc.h"
 
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "interface_manager.h"
 
 #include "group_container.h"
@@ -298,7 +298,7 @@ public:
 
 				if (ig != NULL)
 				{
-					CInterfaceParser::splitLinkTargets(property, ig, targets);
+					CInterfaceLink::splitLinkTargets(property, ig, targets);
 					for(uint k = 0; k < targets.size(); ++k)
 					{
 						if (targets[k].Elem) targets[k].affect(value);

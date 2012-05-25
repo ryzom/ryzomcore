@@ -326,6 +326,8 @@ public:
 			void buildFromHLS(float h, float l, float s);
 	//@}
 
+	static CRGBA stringToRGBA( const char *ptr );
+
 
 	/// Swap the B and R components, to simulate a CBRGA
 	void	swapBR()

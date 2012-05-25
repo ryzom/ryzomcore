@@ -20,7 +20,7 @@
 // client
 #include "../string_manager_client.h"
 #include "people_interraction.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "interface_manager.h"
 #include "action_handler.h"
 #include "action_handler_misc.h"
@@ -30,7 +30,7 @@
 #include "group_menu.h"
 #include "../client_chat_manager.h"
 #include "../string_manager_client.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "ctrl_button.h"
 #include "ctrl_text_button.h"
 #include "filtered_chat_summary.h"
@@ -1027,7 +1027,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 		CCtrlTabButton	*pTabButton= dynamic_cast<CCtrlTabButton*>(pCaller);
 		if(pTabButton)
 		{
-			CRGBA	stdColor= stringToRGBA(pIM->getDefine("chat_group_tab_color_normal").c_str());
+			CRGBA	stdColor= CRGBA::stringToRGBA(pIM->getDefine("chat_group_tab_color_normal").c_str());
 			pTabButton->setTextColorNormal(stdColor);
 		}
 	}

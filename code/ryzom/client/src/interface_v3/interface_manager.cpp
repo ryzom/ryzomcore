@@ -35,7 +35,7 @@
 #include "../client_cfg.h"
 #include "encyclopedia_manager.h"
 // Expr
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "register_interface_elements.h"
 // Action / Observers
 #include "action_handler.h"
