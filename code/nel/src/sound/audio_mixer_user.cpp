@@ -1895,7 +1895,7 @@ retrySound:
 
 			if (invalid)
 			{
-				nlwarning("The sound %s contain an infinite recursion !", id->getName().toString()/*CStringMapper::unmap(id->getName()).c_str()*/);
+				nlwarning("The sound %s contain an infinite recursion !", id->getName().toString().c_str()/*CStringMapper::unmap(id->getName()).c_str()*/);
 				return NULL;
 			}
 
