@@ -147,8 +147,9 @@ void readFormId( string& outputFileName )
 		// get the file type from form name
 		TFormId fid = (*itIF).first;
 		string fileType;
+		bool fileTypeGet = getFileType((*itIF).second, fileType);
 
-		if((*itIF).second.empty() || (*itIF).second=="." || (*itIF).second==".." || (*itIF).second[0]=='_' || (*itIF).second.find(".#")==0)
+		if((*itIF).second.empty() || (*itIF).second=="." || (*itIF).second==".." || ((*itIF).second[0]=='_' && fileType != "sound") || (*itIF).second.find(".#")==0)
 		{
 			map<TFormId,string>::iterator itErase = itIF;
 			++itIF;
@@ -156,7 +157,7 @@ void readFormId( string& outputFileName )
 		}
 		else
 		{
-			if( getFileType( (*itIF).second, fileType ) )
+			if(fileTypeGet)
 			{	
 				// insert the association (file type/file type id)
 				map<string,uint8>::iterator itFT = FileTypeToId.find(fileType);
@@ -290,7 +291,8 @@ void makeId( list<string>& dirs )
 //-----------------------------------------------
 void addId( string fileName )
 {
-	if(fileName.empty() || fileName=="." || fileName==".." || fileName[0]=='_' || fileName.find(".#")==0)
+	string extStr = CFile::getExtension( fileName );
+	if(fileName.empty() || fileName=="." || fileName==".." || (fileName[0]=='_' && extStr != "sound") || fileName.find(".#")==0)
 	{
 	  //nlinfo("Discarding file '%s'", fileName.c_str());
 	  NbFilesDiscarded++;
@@ -300,7 +302,6 @@ void addId( string fileName )
 	{
 		if( !ExtensionsAllowed.empty() )
 		{
-			string extStr = CFile::getExtension( fileName );
 			if( ExtensionsAllowed.find(extStr) == ExtensionsAllowed.end() )
 			{
 				NbFilesDiscarded++;
