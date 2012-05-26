@@ -115,7 +115,7 @@ CSound::CSound() :
 	_Looping(false),
 	_MinDist(1.0f),
 	_MaxDist(1000000.0f),
-	_UserVarControler(NLMISC::CSheetId::Unknown),
+	_UserVarControler(CStringMapper::emptyId()),
 	_GroupController(NULL)
 {
 }

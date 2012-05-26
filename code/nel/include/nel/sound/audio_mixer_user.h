@@ -93,9 +93,9 @@ public:
 	//@{
 	/// @name IStringMapperProvider implementation
 	/// map a string
-	NLMISC::CSheetId map(const std::string &str)			{ return NLMISC::CSheetId(str);/*NLMISC::CStringMapper::map(str);*/}
+	NLMISC::TStringId map(const std::string &str)			{ return NLMISC::CStringMapper::map(str);}
 	/// unmap a string
-	const std::string &unmap(const NLMISC::CSheetId &stringId)		{ return stringId.toString();/*NLMISC::CStringMapper::unmap(stringId);*/}
+	const std::string &unmap(const NLMISC::TStringId &stringId)		{ return NLMISC::CStringMapper::unmap(stringId);}
 	//@}
 
 
@@ -321,8 +321,8 @@ public:
 	void						incPlayingSourceMuted()	{ ++_PlayingSourcesMuted; };
 	void						decPlayingSourceMuted()	{ --_PlayingSourcesMuted; };
 
-	void		setUserVar(NLMISC::CSheetId varName, float value);
-	float		getUserVar(NLMISC::CSheetId varName);
+	void		setUserVar(NLMISC::TStringId varName, float value);
+	float		getUserVar(NLMISC::TStringId varName);
 
 	// music
 	virtual bool	playMusic(const std::string &fileName, uint xFadeTime= 0, bool async= true, bool loop=true);
@@ -352,7 +352,7 @@ public:
 	/// Add a reverb environment.
 	void addEnvironment(const std::string &name, const IReverbEffect::CEnvironment &environment);
 	/// Set the current reverb environment.
-	void setEnvironment(NLMISC::CSheetId environmentName, float roomSize);
+	void setEnvironment(NLMISC::TStringId environmentName, float roomSize);
 	/// Set the current reverb environment.
 	inline void setEnvironment(const std::string &environmentName, float roomSize) { setEnvironment(NLMISC::CStringMapper::map(environmentName), roomSize); }
 	/// Get a reverb environment
@@ -410,8 +410,8 @@ public:
 
 	/// Read all user controled var sheets
 	void						initUserVar();
-	void						addUserControledSource(CSourceCommon *source, NLMISC::CSheetId varName);
-	void						removeUserControledSource(CSourceCommon *source, NLMISC::CSheetId varName);
+	void						addUserControledSource(CSourceCommon *source, NLMISC::TStringId varName);
+	void						removeUserControledSource(CSourceCommon *source, NLMISC::TStringId varName);
 
 
 	virtual void startDriverBench();
@@ -441,7 +441,7 @@ private:
 	struct CControledSources
 	{
 		/// The user var name
-		NLMISC::CSheetId				Name;
+		NLMISC::TStringId				Name;
 		/// Witch parameter to control
 		TControledParamId				ParamId;
 		/// The controled sounds names.
@@ -473,7 +473,7 @@ protected:
 	/// Fill a vector of position and mute flag for all playing sound source.
 	virtual void				getPlayingSoundsPos(bool virtualPos, std::vector<std::pair<bool, NLMISC::CVector> > &pos);
 
-	typedef CHashMap<NLMISC::CSheetId, CControledSources, NLMISC::CStringIdHashMapTraits>	TUserVarControlsContainer;
+	typedef CHashMap<NLMISC::TStringId, CControledSources, NLMISC::CStringIdHashMapTraits>	TUserVarControlsContainer;
 	/// Container for all user controler and currently controled playing source
 	TUserVarControlsContainer	_UserVarControls;
 

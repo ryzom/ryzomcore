@@ -102,7 +102,7 @@ void					CSourceCommon::play()
 	_Playing = true;
 	_PlayStart = CTime::getLocalTime();
 
-	if (_UserVarControler != NLMISC::CSheetId::Unknown/*CStringMapper::emptyId()*/)
+	if (_UserVarControler != CStringMapper::emptyId())
 		CAudioMixerUser::instance()->addUserControledSource(this, _UserVarControler);
 }
 
@@ -114,7 +114,7 @@ void					CSourceCommon::stop()
 	CAudioMixerUser::instance()->decPlayingSource();
 	_Playing = false;
 
-	if (_UserVarControler != NLMISC::CSheetId::Unknown/*CStringMapper::emptyId()*/)
+	if (_UserVarControler != CStringMapper::emptyId())
 		CAudioMixerUser::instance()->removeUserControledSource(this, _UserVarControler);
 }
 

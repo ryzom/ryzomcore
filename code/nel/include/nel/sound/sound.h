@@ -118,7 +118,7 @@ public:
 
 	virtual void		serial(NLMISC::IStream &s);
 
-	NLMISC::CSheetId	getUserVarControler() { return _UserVarControler; }
+	NLMISC::TStringId	getUserVarControler() { return _UserVarControler; }
 
 	bool				operator<( const CSound& otherSound ) const
 	{
@@ -146,7 +146,7 @@ protected:
 	// Sound name.
 	NLMISC::CSheetId	_Name;
 	/// An optional user var controler.
-	NLMISC::CSheetId	_UserVarControler;
+	NLMISC::TStringId	_UserVarControler;
 
 	/// The group controller, always exists, owned by the audio mixer
 	CGroupController	*_GroupController;

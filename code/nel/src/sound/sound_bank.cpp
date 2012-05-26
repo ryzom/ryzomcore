@@ -152,10 +152,10 @@ public:
 	{}
 
 	// load the values using the george sheet (called by GEORGE::loadForm)
-	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const std::string &name)
+	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &name)
 	{
 		// just call the sound creation method with the xml form.
-		Sound = CSound::createSound(name, form->getRootNode());
+		Sound = CSound::createSound(name.toString(), form->getRootNode());
 
 		// success ?
 //		if (_Sound != 0)

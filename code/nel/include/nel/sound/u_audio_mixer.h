@@ -382,9 +382,9 @@ public:
 	 *	Binding from user var to sound parameter is done in
 	 *	one or more georges sheet .user_var_binding.
 	 */
-	virtual void		setUserVar(NLMISC::CSheetId varName, float value) =0;
+	virtual void		setUserVar(NLMISC::TStringId varName, float value) =0;
 	/// Return the current value of a user var.
-	virtual float		getUserVar(NLMISC::CSheetId varName) =0;
+	virtual float		getUserVar(NLMISC::TStringId varName) =0;
 	//@}
 
 	//@{

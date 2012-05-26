@@ -86,10 +86,10 @@ private:
 
 	typedef CHashSet<class CSimpleSound*, THashPtr<CSimpleSound*> >	TSimpleSoundContainer;
 //	typedef std::hash_map<std::string, TSimpleSoundContainer >				TBufferAssocContainer;
-	typedef CHashMap<NLMISC::CSheetId, TSimpleSoundContainer, NLMISC::CStringIdHashMapTraits>		TBufferAssocContainer;
+	typedef CHashMap<NLMISC::TStringId, TSimpleSoundContainer, NLMISC::CStringIdHashMapTraits>		TBufferAssocContainer;
 	/// Sound names hash map
 //	typedef std::hash_map<std::string, CSound*>								TSoundTable;
-	typedef CHashMap<NLMISC::CSheetId, CSound*, NLMISC::CStringIdHashMapTraits>						TSoundTable;
+	typedef CHashMap<NLMISC::CSheetId, CSound*, NLMISC::CSheetIdHashMapTraits>						TSoundTable;
 
 	/// Assoc from buffer to sound. Used for sound unloading.
 	TBufferAssocContainer		_BufferAssoc;

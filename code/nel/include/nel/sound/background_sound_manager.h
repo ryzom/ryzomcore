@@ -282,7 +282,7 @@ private:
 	struct TFxZone
 	{
 		/// Name of the env fx
-		NLMISC::CSheetId				FxName;
+		NLMISC::TStringId				FxName;
 		/// The vector of points compositing the primitive
 		std::vector<NLMISC::CVector>	Points;
 		/// The min vector of the bounding box
@@ -295,7 +295,7 @@ private:
 	/// Container for the fx primitive.
 	std::vector<TFxZone>		_FxZones;
 	/// Last setted env fx. Used when clustered sound is not active
-	NLMISC::CSheetId			_LastEnv;
+	NLMISC::TStringId			_LastEnv;
 
 	//@}
 };

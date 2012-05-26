@@ -1052,7 +1052,7 @@ public:
 				items->getArrayValue(soundName, i);
 				soundName = soundName.substr(0, soundName.find(".sound"));
 
-				cs.SoundNames.push_back(CStringMapper::map(soundName));
+				cs.SoundNames.push_back(CSheetId(soundName)/*CStringMapper::map(soundName)*/);
 			}
 
 			if (!cs.SoundNames.empty())
@@ -1102,7 +1102,7 @@ void CAudioMixerUser::initUserVar()
 		TUserVarControlsContainer::iterator first(_UserVarControls.begin()), last(_UserVarControls.end());
 		for(;  first != last; ++first)
 		{
-			std::vector<NLMISC::TStringId>::iterator first2(first->second.SoundNames.begin()), last2(first->second.SoundNames.end());
+			std::vector<NLMISC::CSheetId>::iterator first2(first->second.SoundNames.begin()), last2(first->second.SoundNames.end());
 			for (; first2 != last2; ++first2)
 			{
 				CSound *sound = getSoundId(*first2);
@@ -1133,7 +1133,7 @@ void CAudioMixerUser::CControledSources::serial(NLMISC::IStream &s)
 		for (uint i=0; i<size; ++i)
 		{
 			s.serial(soundName);
-			SoundNames.push_back(CStringMapper::map(soundName));
+			SoundNames.push_back(CSheetId(soundName)/*CStringMapper::map(soundName)*/);
 		}
 	}
 	else
@@ -1147,7 +1147,7 @@ void CAudioMixerUser::CControledSources::serial(NLMISC::IStream &s)
 
 		for (uint i=0; i<size; ++i)
 		{
-			soundName = CStringMapper::unmap(SoundNames[i]);
+			soundName = SoundNames[i].toString();/*CStringMapper::unmap(SoundNames[i])*/;
 			s.serial(soundName);
 		}
 	}
@@ -1158,7 +1158,7 @@ void CAudioMixerUser::CControledSources::serial(NLMISC::IStream &s)
 
 // ******************************************************************
 
-void CAudioMixerUser::setUserVar(NLMISC::CSheetId varName, float value)
+void CAudioMixerUser::setUserVar(NLMISC::TStringId varName, float value)
 {
 	TUserVarControlsContainer::iterator it(_UserVarControls.find(varName));
 	if (it != _UserVarControls.end())
@@ -1191,7 +1191,7 @@ void CAudioMixerUser::setUserVar(NLMISC::CSheetId varName, float value)
 
 // ******************************************************************
 
-float CAudioMixerUser::getUserVar(NLMISC::CSheetId varName)
+float CAudioMixerUser::getUserVar(NLMISC::TStringId varName)
 {
 	TUserVarControlsContainer::iterator it(_UserVarControls.find(varName));
 	if (it != _UserVarControls.end())
@@ -1204,7 +1204,7 @@ float CAudioMixerUser::getUserVar(NLMISC::CSheetId varName)
 
 // ******************************************************************
 
-void CAudioMixerUser::addUserControledSource(CSourceCommon *source, NLMISC::CSheetId varName)
+void CAudioMixerUser::addUserControledSource(CSourceCommon *source, NLMISC::TStringId varName)
 {
 	TUserVarControlsContainer::iterator it(_UserVarControls.find(varName));
 	if (it != _UserVarControls.end())
@@ -1228,7 +1228,7 @@ void CAudioMixerUser::addUserControledSource(CSourceCommon *source, NLMISC::CShe
 
 // ******************************************************************
 
-void CAudioMixerUser::removeUserControledSource(CSourceCommon *source, NLMISC::CSheetId varName)
+void CAudioMixerUser::removeUserControledSource(CSourceCommon *source, NLMISC::TStringId varName)
 {
 	TUserVarControlsContainer::iterator it(_UserVarControls.find(varName));
 	if (it != _UserVarControls.end())
@@ -1895,7 +1895,7 @@ retrySound:
 
 			if (invalid)
 			{
-				nlwarning("The sound %s contain an infinite recursion !", CStringMapper::unmap(id->getName()).c_str());
+				nlwarning("The sound %s contain an infinite recursion !", id->getName().toString()/*CStringMapper::unmap(id->getName()).c_str()*/);
 				return NULL;
 			}
 
@@ -2768,7 +2768,7 @@ void CAudioMixerUser::addEnvironment(const std::string &environmentName, const I
 }
 
 /// Set the current reverb environment
-void CAudioMixerUser::setEnvironment(NLMISC::CSheetId environmentName, float roomSize)
+void CAudioMixerUser::setEnvironment(NLMISC::TStringId environmentName, float roomSize)
 {
 	if (_ReverbEffect)
 	{
@@ -2777,7 +2777,7 @@ void CAudioMixerUser::setEnvironment(NLMISC::CSheetId environmentName, float roo
 }
 
 /// Get a reverb environment
-const IReverbEffect::CEnvironment &CAudioMixerUser::getEnvironment(NLMISC::CSheetId environmentName)
+const IReverbEffect::CEnvironment &CAudioMixerUser::getEnvironment(NLMISC::TStringId environmentName)
 {
 	TEnvironments::iterator it(_Environments.find(environmentName));
 	if (it == _Environments.end())

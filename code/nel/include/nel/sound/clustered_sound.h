@@ -249,11 +249,12 @@ private:
 	/// The segment of all the audio path.
 	std::vector<std::pair<NLMISC::CVector, NLMISC::CVector> >	_AudioPath;
 
-	typedef CHashMap<NLMISC::CSheetId, CClusterSound, NLMISC::CStringIdHashMapTraits>	TClusterSoundCont;
+	typedef CHashMap<NLMISC::CSheetId, CClusterSound, NLMISC::CSheetIdHashMapTraits>	TClusterSoundCont;
 	/// The current cluster playing source indexed with sound group id
 	TClusterSoundCont		_Sources;
 
-	typedef CHashMap<NLMISC::CSheetId, NLMISC::CSheetId, NLMISC::CStringIdHashMapTraits> TStringStringMap;
+	//typedef CHashMap<NLMISC::CSheetId, NLMISC::CSheetId, NLMISC::CSheetIdHashMapTraits> TStringStringMap;
+	typedef CHashMap<NLMISC::TStringId, NLMISC::TStringId, NLMISC::CStringIdHashMapTraits> TStringStringMap;
 	/// The sound_group to sound assoc
 	TStringStringMap	_SoundGroupToSound;
 };

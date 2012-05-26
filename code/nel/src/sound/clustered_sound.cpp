@@ -292,7 +292,7 @@ void CClusteredSound::update(const CVector &listenerPos, const CVector &/* view 
 				TStringStringMap::iterator it2(_SoundGroupToSound.find(soundGroup));
 				if (it2 != _SoundGroupToSound.end())
 				{
-					NLMISC::CSheetId soundName = it2->second;
+					NLMISC::TStringId soundName = it2->second;
 					CClusterSound cs;
 
 //					nldebug("Found the sound [%s] for sound group [%s]", CStringMapper::unmap(soundName).c_str(), CStringMapper::unmap(soundGroup).c_str());

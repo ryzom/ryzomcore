@@ -87,7 +87,7 @@ static void initSample()
 	
 	//NLMISC::CHTimer::startBench();
 
-	USource *source = s_AudioMixer->createSource(CStringMapper::map("default_stream"));
+	USource *source = s_AudioMixer->createSource(CSheetId("default_stream")/*CStringMapper::map("default_stream")*/);
 	nlassert(source);
 	s_StreamSource = dynamic_cast<UStreamSource *>(source);
 	nlassert(s_StreamSource);

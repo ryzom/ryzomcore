@@ -150,7 +150,7 @@ protected:
 	NL3D::CCluster					*_Cluster;
 
 	/// An optional user var controler.
-	NLMISC::CSheetId				_UserVarControler;
+	NLMISC::TStringId				_UserVarControler;
 
 	/// Group controller for gain
 	CGroupController				*_GroupController;

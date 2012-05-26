@@ -465,7 +465,7 @@ void CBackgroundSoundManager::addFxZone(const std::string &fxName, const std::ve
 {
 	TFxZone	fxZone;
 
-	fxZone.FxName = /*CStringMapper::map(fxName)*/ NLMISC::CSheetId(fxName);
+	fxZone.FxName = CStringMapper::map(fxName);
 	fxZone.Points.resize (points.size());
 	for (uint j=0; j<points.size(); j++)
 	{
@@ -893,7 +893,7 @@ void CBackgroundSoundManager::updateBackgroundStatus()
 					if (rootCluster)
 					{
 						// use the cluster system
-						rootCluster->setEnvironmentFx(first->FxName.toString());
+						rootCluster->setEnvironmentFx(first->FxName);
 					}
 					else
 					{
@@ -1461,11 +1461,11 @@ void CBackgroundSoundManager::TFxZone::serial(NLMISC::IStream &s)
 	if (s.isReading())
 	{
 		s.serial(str);
-		FxName= NLMISC::CSheetId(str);/*NLMISC::CStringMapper::map(str)*/;
+		FxName= NLMISC::CStringMapper::map(str);
 	}
 	else
 	{
-		s.serial(const_cast<std::string&>(FxName.toString()/*NLMISC::CStringMapper::unmap(FxName)*/));
+		s.serial(const_cast<std::string&>(NLMISC::CStringMapper::unmap(FxName)));
 	}
 
 	s.serialCont(Points);
