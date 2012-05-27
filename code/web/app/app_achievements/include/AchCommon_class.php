@@ -1,6 +1,6 @@
 <?php
 	abstract class RenderNodeIterator {
-		private $nodes = array();
+		protected $nodes = array();
 
 		function getSize() {
 			return sizeof($this->nodes);
@@ -20,8 +20,8 @@
 	}
 
 	abstract class AchList extends RenderNodeIterator {
-		private $child_done = array();
-		private $child_open = array();
+		protected $child_done = array();
+		protected $child_open = array();
 
 		function getDone() {
 			return $this->child_done;

@@ -1,14 +1,17 @@
 <?php
 
+error_reporting(E_ALL ^ E_NOTICE);
+ini_set("display_errors","1");
+
 define('APP_NAME', 'app_achievements');
 
-require_once('../webig/config.php');
-include_once('../webig/lang.php');
+require_once('../config.php');
+include_once('../lang.php');
 include_once('lang.php');
 require_once('conf.php');
 
 // Ask to authenticate user (using ingame or session method) and fill $user with all information
-ryzom_app_authenticate($user, true);
+ryzom_app_authenticate($user, false);
 
 if($user['ig']) {
 	require_once("include/ach_render_ig.php");
@@ -18,13 +21,19 @@ else {
 }
 require_once("include/ach_render_common.php");
 
+require_once("include/AchCommon_class.php");
 require_once("include/AchMenu_class.php");
 require_once("include/AchSummary_class.php");
 require_once("include/AchCategory_class.php");
-require_once("include/AchCommon_class.php");
+
+require_once("include/AchAchievement_class.php");
+require_once("include/AchPerk_class.php");
+require_once("include/AchObjective_class.php");
+
 
 
 // Update user acces on Db
+//$db = ryDB::getInstance(APP_NAME);
 $db = ryDB::getInstance(APP_NAME);
 /*$db->setDbDefs('test', array('id' => SQL_DEF_INT, 'num_access' => SQL_DEF_INT));
 
@@ -37,29 +46,30 @@ else
 // Content
 $c = _t('access', $num_access['num_access']).'<br/>';*/
 
-$c = var_export($user,true);
+#$c = var_export($user,true);
 
-$c .= "<center><table>
+$c = "<center><table>
 	<tr>
-		<td valign='top'>";
+		<td valign='top'><div style='width:220px;font-weight:bold;font-size:14px;'>";
+		$_REQUEST['mid'] = 1;
 		
 		$menu = new AchMenu($_REQUEST['mid'],$user['lang']);
 
 		$c .= ach_render_menu($menu);
 		
-$c .= "</td>
-		<td width='645px'>";
+$c .= "</div></td>
+		<td width='645px' valign='top'>";
 
 /*for($i=0;$i<15;$i++) {
 	$c .= ach_render_box_done("Bejeweled");
 }*/
 
-if($menu->isSelected()) {
-	$cat = new AchCategory($menu->getCat(),$user['lang']);
-}
-else {
-	$cat = new AchSummary(12,$user['lang']);
-}
+#if($menu->isSelected()) {
+	$cat = new AchCategory($menu->getCat(),1,$user['lang']);
+#}
+#else {
+#	$cat = new AchSummary(12,$user['lang']);
+#}
 
 $c .= ach_render_category($cat);
 

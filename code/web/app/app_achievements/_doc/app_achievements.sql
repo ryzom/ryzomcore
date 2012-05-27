@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Erstellungszeit: 25. Mai 2012 um 11:46
+-- Erstellungszeit: 27. Mai 2012 um 21:05
 -- Server Version: 5.1.46
 -- PHP-Version: 5.3.2
 
@@ -32,9 +32,9 @@ CREATE TABLE IF NOT EXISTS `ach_achievement` (
   `aa_tie_race` varchar(64) COLLATE utf8_bin DEFAULT NULL,
   `aa_tie_cult` varchar(64) COLLATE utf8_bin DEFAULT NULL,
   `aa_tie_civ` varchar(64) COLLATE utf8_bin DEFAULT NULL,
-  `aa_image` varchar(255) COLLATE utf8_bin NOT NULL,
+  `aa_image` varchar(64) COLLATE utf8_bin NOT NULL,
   PRIMARY KEY (`aa_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=5 ;
 
 -- --------------------------------------------------------
 
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `ach_atom` (
   `atom_ruleset` blob NOT NULL,
   `atom_primary` tinyint(1) unsigned NOT NULL,
   PRIMARY KEY (`atom_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 
@@ -73,8 +73,10 @@ CREATE TABLE IF NOT EXISTS `ach_atom` (
 CREATE TABLE IF NOT EXISTS `ach_category` (
   `ac_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `ac_parent` bigint(20) unsigned DEFAULT NULL,
+  `ac_order` smallint(5) unsigned NOT NULL,
+  `ac_image` varchar(64) COLLATE utf8_bin NOT NULL,
   PRIMARY KEY (`ac_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=3 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=6 ;
 
 -- --------------------------------------------------------
 
@@ -100,9 +102,9 @@ CREATE TABLE IF NOT EXISTS `ach_objective` (
   `ao_perk` bigint(20) unsigned NOT NULL,
   `ao_condition` enum('all','any','value') COLLATE utf8_bin NOT NULL,
   `ao_value` int(10) unsigned DEFAULT NULL,
-  `ao_display` enum('simple','meta','value') COLLATE utf8_bin NOT NULL DEFAULT 'simple',
+  `ao_display` enum('simple','meta','value','hidden') COLLATE utf8_bin NOT NULL DEFAULT 'hidden',
   PRIMARY KEY (`ao_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=14 ;
 
 -- --------------------------------------------------------
 
@@ -130,7 +132,7 @@ CREATE TABLE IF NOT EXISTS `ach_perk` (
   `ap_value` int(10) unsigned NOT NULL,
   PRIMARY KEY (`ap_id`),
   UNIQUE KEY `ap_parent` (`ap_parent`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=7 ;
 
 -- --------------------------------------------------------
 
@@ -156,7 +158,7 @@ CREATE TABLE IF NOT EXISTS `ach_player_atom` (
   `apa_player` bigint(20) unsigned NOT NULL,
   `apa_date` bigint(20) unsigned NOT NULL,
   `apa_expire` blob NOT NULL,
-  PRIMARY KEY (`apa_atom`,`apa_player`)
+  KEY `apa_atom` (`apa_atom`,`apa_player`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- --------------------------------------------------------
