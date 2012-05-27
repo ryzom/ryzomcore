@@ -64,34 +64,7 @@ namespace GUIEditor
 #endif // NL_OS_WINDOWS
 	m_libContext = new NLMISC::CLibraryContext(*nelContext);
 	}
-	
-	QString GUIEditorPlugin::name() const
-	{
-		return tr("GUIEditor");
-	}
-	
-	QString GUIEditorPlugin::version() const
-	{
-		return "0.0.1";
-	}
-	
-	QString GUIEditorPlugin::vendor() const
-	{
-		return "Ryzom Core";
-	}
-	
-	QString GUIEditorPlugin::description() const
-	{
-		return "GUI Editor ovqt plugin.";
-	}
-	
-	QStringList GUIEditorPlugin::dependencies() const
-	{
-		QStringList list;
-		list.append(Core::Constants::OVQT_CORE_PLUGIN);
-		return list;
-	}
-	
+
 	void GUIEditorPlugin::addAutoReleasedObject(QObject *obj)
 	{
 		m_plugMan->addObject(obj);
