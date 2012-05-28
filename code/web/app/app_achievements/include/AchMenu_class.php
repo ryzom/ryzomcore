@@ -6,6 +6,14 @@
 			global $db;
 
 			$this->open = $open;
+			
+			$tmp = array();
+			$tmp['ac_id'] = 0;
+			$tmp['ac_parent'] = null;
+			$tmp['acl_name'] = get_translation('ach_summary',$lang);
+			$tmp['ac_image'] = "";
+			$tmp['ac_order'] = -1;
+			$this->nodes[] = new AchMenuNode($tmp,$open,$lang);
 
 			$res = $db->sqlQuery("SELECT * FROM ach_category LEFT JOIN (ach_category_lang) ON (acl_lang='".$lang."' AND acl_category=ac_id) WHERE ac_parent IS NULL ORDER by ac_order ASC, acl_name ASC");
 
@@ -15,8 +23,18 @@
 			}
 		}
 
-		function getCat() {
+		function getOpen() {
 			return $this->open;
+		}
+
+		function getOpenCat() {
+			foreach($this->nodes as $elem) {
+				$res = $elem->hasOpenCat();
+				if($res != 0) {
+					return $res;
+				}
+			}
+			return 0;
 		}
 	}
 
@@ -36,7 +54,7 @@
 			$this->name = $data['acl_name'];
 			$this->image = $data['ac_image'];
 			$this->order = $data['ac_order'];
-			$this->open = ($open==$data['ac_id']);
+			$this->open = ($this->id == $open);
 
 			$res = $db->sqlQuery("SELECT * FROM ach_category LEFT JOIN (ach_category_lang) ON (acl_lang='".$lang."' AND acl_category=ac_id) WHERE ac_parent='".$this->id."' ORDER by ac_order ASC, acl_name ASC");
 
@@ -56,6 +74,20 @@
 
 		function getParent() {
 			return $this->parent;
+		}
+
+		function hasOpenCat() {
+			if($this->open) {
+				return $this->id;
+			}
+			
+			foreach($this->nodes as $elem) {
+				$res = $elem->hasOpenCat();
+				if($res != 0) {
+					return $res;
+				}
+			}
+			return 0;
 		}
 
 		function isOpen() {

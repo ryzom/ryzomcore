@@ -50,10 +50,10 @@ $c = _t('access', $num_access['num_access']).'<br/>';*/
 
 $c = "<center><table>
 	<tr>
-		<td valign='top'><div style='width:220px;font-weight:bold;font-size:14px;'>";
-		$_REQUEST['mid'] = 1;
+		<td valign='top'><div style='width:230px;font-weight:bold;font-size:14px;'>";
+		#$_REQUEST['mid'] = 1;
 		
-		$menu = new AchMenu($_REQUEST['mid'],$user['lang']);
+		$menu = new AchMenu($_REQUEST['cat'],$user['lang']);
 
 		$c .= ach_render_menu($menu);
 		
@@ -64,14 +64,20 @@ $c .= "</div></td>
 	$c .= ach_render_box_done("Bejeweled");
 }*/
 
-#if($menu->isSelected()) {
-	$cat = new AchCategory($menu->getCat(),1,$user['lang']);
-#}
-#else {
-#	$cat = new AchSummary(12,$user['lang']);
-#}
+$open = $menu->getOpenCat();
+
+if($open != 0) {
+	$cat = new AchCategory($open,1,$user['lang']);
+}
+else {
+	$cat = new AchSummary($menu,1,8,$user['lang']);
+	$c .= ach_render_summary_header($user['lang']);
+}
 
 $c .= ach_render_category($cat);
+if($open == 0) {
+	$c .= ach_render_summary_footer($user['lang'],$cat,1);
+}
 
 $c .= "</td>
 	</tr>

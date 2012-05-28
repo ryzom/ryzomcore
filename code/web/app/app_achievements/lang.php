@@ -1,13 +1,37 @@
 <?php // %2011-09-28T08:12:16+02:00
+
 $__texts = array (
-  'access' =>
+  'ach_summary' =>
   array (
-    'en' => 'User access this page %s times',
-    'fr' => 'L\'utilisateur a accede a cette page %s fois',
+    'en' => 'Summary',
+    'fr' => '',
+    'de' => '',
+    'ru' => '',
+  ),
+  'ach_summary_header' =>
+  array (
+    'en' => 'Recent Achievements',
+    'fr' => '',
+    'de' => '',
+    'ru' => '',
+  ),
+  'ach_summary_stats' =>
+  array (
+    'en' => 'Statistics',
+    'fr' => '',
+    'de' => '',
+    'ru' => '',
+  ),
+  'ach_summary_stats_total' =>
+  array (
+    'en' => 'Total',
+    'fr' => '',
     'de' => '',
     'ru' => '',
   ),
 );
+
+
 if(isset($ryzom_texts))
   $ryzom_texts = array_merge ($__texts, $ryzom_texts);
 else

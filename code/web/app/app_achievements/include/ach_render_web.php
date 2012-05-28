@@ -25,17 +25,21 @@
 		$sz = $menu->getSize();
 		for($i=0;$i<$sz;$i++) {
 			$curr = $menu->getChild($i);
-			$html .= "<span class='ach_mspan'><a href=''><table class='ach_menu'>
-				<tr>
-					<td><img src='pic/menu/test.png' /></td>
-					<td style='font-size:".(20-$sub)."px;font-weight:bold;";
+			$html .= "<span class='ach_mspan'><a href='?lang=en&cat=".$curr->getID()."'><table class='ach_menu'>
+				<tr>";
+					if($sub == 0) {
+						$html .= "<td><img src='pic/menu/test.png' /></td>";
+					}
+					$html .= "<td style='font-size:".(20-$sub)."px;font-weight:bold;";
 					if($curr->isOpen()) {
 						$html .= "color:orange;";
 					}
 					$html .= "'>".$curr->getName()."</td>
 				</tr>
-			</table></a></span>
-			<div style='display:block;margin-left:25px;'>".ach_render_menu($curr,($sub+4))."</div>";
+			</table></a></span>";
+			if($curr->hasOpenCat() != 0) {
+				$html .= "<div style='display:block;margin-left:25px;'>".ach_render_menu($curr,($sub+4))."</div>";
+			}
 		}
 
 		return $html;
@@ -256,15 +260,18 @@
 		else {
 			$col = "#999999";
 		}
-		$html .= "<div style='color:".$col.";display:block;'>".$obj->getName()."</span><div />";
+		$html .= "<div style='color:".$col.";display:block;'>".$obj->getName()."</div>";
 
-		$val = $obj->getValue();
-		$prog = $obj->getProgress();
+		$html .= ach_render_progressbar($obj->getProgress(),$obj->getValue(),350);
+		
+		return $html;
+	}
 
-		$width = 350;
+	function ach_render_progressbar($prog,$val,$width) {
+		$val = max(1,$val);
 		$left = floor($width*(100*($prog/$val))/100);
 
-		$html .= "
+		$html = "
 		<table width='".$width."px' cellspacing='0' cellpadding='0' style='border:1px solid #FFFFFF;color:#000000;'>
 			<tr>
 				<td bgcolor='#66CC00' width='".$left."px' align='right'>";
@@ -280,6 +287,50 @@
 			</tr>
 		</table>";
 		
+		return $html;
+	}
+
+	function ach_render_summary_header($lang) {
+		return "<div style='display:block;font-weight:bold;font-size:30px;color:#FFFFFF;text-align:center;margin-bottom:10px;'>".get_translation('ach_summary_header',$lang)."</div>";
+	}
+
+	function ach_render_summary_footer($lang,&$summary,$user) {
+		$nodes = $summary->getSummary($lang,$user);
+		$html = "";
+
+		$sum_done = 0;
+		$sum_total = 0;
+
+		$i = 0;
+		foreach($nodes as $elem) {
+			if(($i%3) == 0) {
+				$html .= "<tr>";
+			}
+
+			$html .= "<td width='50%' align='center'>".$elem[0]."<br>".ach_render_progressbar($elem[1],$elem[2],200)."</td>";
+			$sum_done += $elem[1];
+			$sum_total += $elem[2];
+
+			if(($i%3) == 2) {
+				$html .= "</tr>";
+			}
+
+			$i++;
+		}
+
+		if(($i%3) == 2) {
+			$html .= "</tr>";
+		}
+
+		$html = "<p />
+		<div style='display:block;font-weight:bold;font-size:30px;color:#FFFFFF;text-align:center;margin-bottom:10px;'>".get_translation('ach_summary_stats',$lang)."</div>
+		<table>
+			<tr>
+				<td colspan='3' align='center'>".get_translation('ach_summary_stats_total',$lang)."<br>".ach_render_progressbar($sum_done,$sum_total,450)."<br></td>
+			</tr>
+			".$html."
+		</table>";
+
 		return $html;
 	}
 ?>

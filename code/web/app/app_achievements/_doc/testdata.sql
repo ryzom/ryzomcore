@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Erstellungszeit: 27. Mai 2012 um 21:06
+-- Erstellungszeit: 28. Mai 2012 um 21:07
 -- Server Version: 5.1.46
 -- PHP-Version: 5.3.2
 
@@ -51,11 +51,37 @@ INSERT INTO `ach_atom` (`atom_id`, `atom_objective`, `atom_mandatory`, `atom_rul
 --
 
 INSERT INTO `ach_category` (`ac_id`, `ac_parent`, `ac_order`, `ac_image`) VALUES
-(1, NULL, 0, ''),
-(2, NULL, 0, ''),
-(3, 1, 0, ''),
-(4, 1, 0, ''),
-(5, 1, 0, '');
+(1, NULL, 20, ''),
+(2, NULL, 40, ''),
+(3, 1, 2000, ''),
+(4, 1, 2000, ''),
+(5, 1, 2000, ''),
+(6, NULL, 70, ''),
+(7, NULL, 30, ''),
+(8, NULL, 50, ''),
+(9, NULL, 10, ''),
+(10, 1, 2000, ''),
+(11, 1, 2010, ''),
+(12, 8, 5000, ''),
+(13, 8, 5000, ''),
+(14, 8, 5000, ''),
+(15, 8, 5000, ''),
+(16, 6, 7010, ''),
+(17, 6, 7020, ''),
+(18, 6, 7200, ''),
+(19, 7, 3010, ''),
+(20, 7, 3010, ''),
+(21, 7, 3020, ''),
+(22, 7, 3020, ''),
+(23, 7, 3020, ''),
+(24, 7, 3030, ''),
+(25, 7, 3040, ''),
+(26, 7, 3020, ''),
+(27, 6, 7100, ''),
+(28, NULL, 60, ''),
+(29, 28, 6010, ''),
+(30, 28, 6020, ''),
+(31, NULL, 80, '');
 
 --
 -- Daten für Tabelle `ach_category_lang`
@@ -66,7 +92,33 @@ INSERT INTO `ach_category_lang` (`acl_category`, `acl_lang`, `acl_name`) VALUES
 (2, 'en', 'Occupations'),
 (3, 'en', 'Aeden Aqueous'),
 (4, 'en', 'Burning Desert'),
-(5, 'en', 'Witherings');
+(5, 'en', 'Witherings'),
+(6, 'en', 'The Saga of Ryzom'),
+(7, 'en', 'Fame'),
+(8, 'en', 'Skills'),
+(9, 'en', 'General'),
+(10, 'en', 'Verdant Heights'),
+(11, 'en', 'Prime Roots'),
+(12, 'en', 'Craft'),
+(13, 'en', 'Fight'),
+(14, 'en', 'Harvest'),
+(15, 'en', 'Magic'),
+(16, 'en', 'Episode I'),
+(17, 'en', 'Episode II'),
+(18, 'en', 'Legacy'),
+(19, 'en', 'Civilizations'),
+(20, 'en', 'Higher Powers'),
+(21, 'en', 'Aeden Aqueous'),
+(22, 'en', 'Burning Desert'),
+(23, 'en', 'Verdant Heights'),
+(24, 'en', 'The Nexus'),
+(25, 'en', 'Prime Roots'),
+(26, 'en', 'Witherings'),
+(27, 'en', 'Encyclopedia'),
+(28, 'en', 'PvP'),
+(29, 'en', 'Civilizations'),
+(30, 'en', 'Higher Powers'),
+(31, 'en', 'Ryzom Ring');
 
 --
 -- Daten für Tabelle `ach_objective`
