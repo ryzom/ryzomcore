@@ -57,6 +57,7 @@
 		<DYNAMIC_CHILD CLASS_NAME="spire"/>
 		<DYNAMIC_CHILD CLASS_NAME="user_model_list"/>
 		<DYNAMIC_CHILD CLASS_NAME="custom_loot_tables"/>
+		<DYNAMIC_CHILD CLASS_NAME="camera_animations_editor"/>
 	</PRIMITIVE>
 
 	<!-- the alias class, used by all other class that need persistent aliases-->
@@ -250,6 +251,16 @@
 		<DYNAMIC_CHILD CLASS_NAME="step_crash"/>
 		<DYNAMIC_CHILD CLASS_NAME="step_player_reconnect"/>
 		<DYNAMIC_CHILD CLASS_NAME="jump_to"/>
+	</PRIMITIVE>
+	
+	<PRIMITIVE CLASS_NAME="camera_animations_editor" TYPE="node" AUTO_INIT="true" DELETABLE="true" NUMBERIZE="false">
+		<PARAMETER NAME="name" TYPE="string" VISIBLE="true"/>
+		<DYNAMIC_CHILD CLASS_NAME="camera_animation_tree"/>
+	</PRIMITIVE>
+	
+	<PRIMITIVE CLASS_NAME="camera_animation_tree" TYPE="node" AUTO_INIT="true" DELETABLE="true" NUMBERIZE="false">
+		<PARAMETER NAME="name" TYPE="string" VISIBLE="true"/>
+		<DYNAMIC_CHILD CLASS_NAME="camera_animation_tree"/>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="pre_requisite" TYPE="node" AUTO_INIT="true" DELETABLE="false" NUMBERIZE="false">
@@ -688,6 +699,8 @@
 		<DYNAMIC_CHILD CLASS_NAME="recv_named_item"/>
 		<DYNAMIC_CHILD CLASS_NAME="recv_xp"/>
 		<DYNAMIC_CHILD CLASS_NAME="destroy_item"/>
+		<DYNAMIC_CHILD CLASS_NAME="sound_trigger" />
+		<DYNAMIC_CHILD CLASS_NAME="camera_animation" />
 	</PRIMITIVE>
 
 	
@@ -1026,6 +1039,17 @@
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="guild" TYPE="boolean" VISIBLE="true" />
 	</PRIMITIVE>
+	
+	<PRIMITIVE CLASS_NAME="sound_trigger" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
+		<PARAMETER NAME="name" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="sound_name" TYPE="string" VISIBLE="true" />
+		<PARAMETER NAME="sound_position" TYPE="string" VISIBLE="true"/>
+	</PRIMITIVE>
+	
+	<PRIMITIVE CLASS_NAME="camera_animation" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
+		<PARAMETER NAME="name" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="animation_name" TYPE="string" VISIBLE="true" />
+	</PRIMITIVE>
 
 <!-- Fin actions -->
 
@@ -1099,6 +1123,8 @@
 		<DYNAMIC_CHILD CLASS_NAME="recv_named_item"/>
 		<DYNAMIC_CHILD CLASS_NAME="recv_xp"/>
 		<DYNAMIC_CHILD CLASS_NAME="destroy_item"/>
+		<DYNAMIC_CHILD CLASS_NAME="sound_trigger"/>
+		<DYNAMIC_CHILD CLASS_NAME="camera_animation" />
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="kill" TYPE="node" PARENT_CLASS="objective_parent">
