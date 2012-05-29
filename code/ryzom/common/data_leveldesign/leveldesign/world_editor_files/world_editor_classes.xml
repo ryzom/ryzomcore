@@ -275,6 +275,9 @@
 		<PARAMETER NAME="end_look_at_position" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="text" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="duration" TYPE="string" VISIBLE="true"/>
+		
+		<DYNAMIC_CHILD CLASS_NAME="sound_trigger"/>
+		<DYNAMIC_CHILD CLASS_NAME="camera_modifier_shake"/>
 	</PRIMITIVE>
 	
 	<PRIMITIVE CLASS_NAME="camera_animation_go_to" TYPE="node" AUTO_INIT="true" DELETABLE="true" NUMBERIZE="false">
@@ -287,6 +290,9 @@
 		<PARAMETER NAME="text" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="duration" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="end_position" TYPE="string" VISIBLE="true"/>
+		
+		<DYNAMIC_CHILD CLASS_NAME="sound_trigger"/>
+		<DYNAMIC_CHILD CLASS_NAME="camera_modifier_shake"/>
 	</PRIMITIVE>
 	
 	<PRIMITIVE CLASS_NAME="camera_animation_follow_entity" TYPE="node" AUTO_INIT="true" DELETABLE="true" NUMBERIZE="false">
@@ -300,6 +306,9 @@
 		<PARAMETER NAME="duration" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="entity_to_follow" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="distance_to_entity" TYPE="string" VISIBLE="true"/>
+		
+		<DYNAMIC_CHILD CLASS_NAME="sound_trigger"/>
+		<DYNAMIC_CHILD CLASS_NAME="camera_modifier_shake"/>
 	</PRIMITIVE>
 	
 	<PRIMITIVE CLASS_NAME="camera_animation_turn_around" TYPE="node" AUTO_INIT="true" DELETABLE="true" NUMBERIZE="false">
@@ -313,6 +322,14 @@
 		<PARAMETER NAME="duration" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="point_to_turn_around" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="distance_to_point" TYPE="string" VISIBLE="true"/>
+		
+		<DYNAMIC_CHILD CLASS_NAME="sound_trigger"/>
+		<DYNAMIC_CHILD CLASS_NAME="camera_modifier_shake"/>
+	</PRIMITIVE>
+	
+	<PRIMITIVE CLASS_NAME="camera_modifier_shake" TYPE="node" AUTO_INIT="true" DELETABLE="true" NUMBERIZE="false">
+		<PARAMETER NAME="name" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="strength" TYPE="string" VISIBLE="true"/>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="pre_requisite" TYPE="node" AUTO_INIT="true" DELETABLE="false" NUMBERIZE="false">
