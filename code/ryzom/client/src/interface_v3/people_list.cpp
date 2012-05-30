@@ -100,7 +100,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 
 		// Root container
 		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
-		im->addWindowToMasterGroup("ui:interface", gc);
+		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", gc);
 		gc->setParent(pRoot);
 		pRoot->addGroup (gc);
 	}

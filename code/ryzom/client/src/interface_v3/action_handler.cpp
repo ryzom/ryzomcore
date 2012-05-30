@@ -942,10 +942,10 @@ class CAHResetInterface : public IActionHandler
 	{
 		uint32 i;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		const vector<CInterfaceManager::SMasterGroup> &rVMG = pIM->getAllMasterGroup();
+		const vector<CWidgetManager::SMasterGroup> &rVMG = CWidgetManager::getInstance()->getAllMasterGroup();
 		for (uint32 nMasterGroup = 0; nMasterGroup < rVMG.size(); nMasterGroup++)
 		{
-			const CInterfaceManager::SMasterGroup &rMG = rVMG[nMasterGroup];
+			const CWidgetManager::SMasterGroup &rMG = rVMG[nMasterGroup];
 			const vector<CInterfaceGroup*> &rV = rMG.Group->getGroups();
 			// Active all containers (that can be activated)
 			for (i = 0; i < rV.size(); ++i)
@@ -962,7 +962,7 @@ class CAHResetInterface : public IActionHandler
 			}
 
 			pIM->checkCoords();
-			pIM->getMasterGroup((uint8)nMasterGroup).centerAllContainers();
+			CWidgetManager::getInstance()->getMasterGroup((uint8)nMasterGroup).centerAllContainers();
 
 			// Pop in and close all containers
 			for (i = 0; i < rV.size(); ++i)
@@ -980,7 +980,7 @@ class CAHResetInterface : public IActionHandler
 				}
 			}
 
-			pIM->getMasterGroup((uint8)nMasterGroup).deactiveAllContainers();
+			CWidgetManager::getInstance()->getMasterGroup((uint8)nMasterGroup).deactiveAllContainers();
 		}
 	}
 };
@@ -992,11 +992,11 @@ class CAHUnlockAllContainer : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		const vector<CInterfaceManager::SMasterGroup> &rVMG = pIM->getAllMasterGroup();
+		const vector<CWidgetManager::SMasterGroup> &rVMG = CWidgetManager::getInstance()->getAllMasterGroup();
 		for (uint32 nMasterGroup = 0; nMasterGroup < rVMG.size(); nMasterGroup++)
 		{
 //			const CInterfaceManager::SMasterGroup &rMG = rVMG[nMasterGroup];
-			pIM->getMasterGroup((uint8)nMasterGroup).unlockAllContainers();
+			CWidgetManager::getInstance()->getMasterGroup((uint8)nMasterGroup).unlockAllContainers();
 		}
 	}
 };

@@ -741,7 +741,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 			info->setActive(true);
 
 			// Link to the interface
-			pIM->addWindowToMasterGroup("ui:interface", info);
+			CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", info);
 			CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
 			info->setParent(pRoot);
 			if (pRoot)

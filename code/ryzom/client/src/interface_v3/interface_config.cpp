@@ -522,10 +522,10 @@ void CInterfaceConfig::CDesktopImage::fromCurrentDesktop()
 	// Count number of container to save
 	uint32 nCount = 0, nMasterGroup, i, nCount2;
 
-	const vector<CInterfaceManager::SMasterGroup> &rVMG = pIM->getAllMasterGroup();
+	const vector<CWidgetManager::SMasterGroup> &rVMG = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (nMasterGroup = 0; nMasterGroup < rVMG.size(); nMasterGroup++)
 	{
-		const CInterfaceManager::SMasterGroup &rMG = rVMG[nMasterGroup];
+		const CWidgetManager::SMasterGroup &rMG = rVMG[nMasterGroup];
 		const vector<CInterfaceGroup*> &rV = rMG.Group->getGroups();
 		for (i = 0; i < rV.size(); ++i)
 		{
@@ -541,7 +541,7 @@ void CInterfaceConfig::CDesktopImage::fromCurrentDesktop()
 	// retrieve all containers
 	for (nMasterGroup = 0; nMasterGroup < rVMG.size(); nMasterGroup++)
 	{
-		const CInterfaceManager::SMasterGroup &rMG = rVMG[nMasterGroup];
+		const CWidgetManager::SMasterGroup &rMG = rVMG[nMasterGroup];
 		const vector<CInterfaceGroup*> &rV = rMG.Group->getGroups();
 		for (i = 0; i < rV.size(); ++i)
 		{

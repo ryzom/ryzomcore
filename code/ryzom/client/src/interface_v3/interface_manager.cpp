@@ -351,11 +351,6 @@ CInterfaceManager::~CInterfaceManager()
 {
 	reset(); // to flush IDStringWaiters
 
-	//delete the interface group
-	for (uint32 i = 0; i < _MasterGroups.size(); ++i)
-	{
-		delete _MasterGroups[i].Group;
-	}
 	_ParentPositionsMap.clear();
 	_ParentSizesMap.clear();
 	_ParentSizesMaxMap.clear();
@@ -1893,6 +1888,7 @@ bool CInterfaceManager::saveConfig (const string &filename)
 void CInterfaceManager::checkCoords()
 {
 	H_AUTO ( RZ_Interface_validateCoords )
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 
 	uint32 nMasterGroup;
 
@@ -1902,7 +1898,7 @@ void CInterfaceManager::checkCoords()
 		// checkCoords all the windows
 		for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 		{
-			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 			if (rMG.Group->getActive())
 			{
 				for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
@@ -1928,7 +1924,7 @@ void CInterfaceManager::checkCoords()
 		// updateCoords all the needed windows
 		for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 		{
-			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 			if (rMG.Group->getActive())
 			{
 				for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
@@ -2071,12 +2067,13 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 			To minimize texture swapping, we first sort per Window, then we sort per layer, then we render per Global Texture.
 			Computed String are rendered in on big drawQuads at last part of each layer
 		*/
+		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 		IngameDbMngr.flushObserverCalls();
 		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 		//
 		for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 		{
-			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 			if (rMG.Group->getActive())
 			{
 				// Sort world space windows
@@ -2231,10 +2228,11 @@ CCtrlBase* CInterfaceManager::getNewContextHelpCtrl()
 // ----------------------------------------------------------------------------
 CInterfaceGroup	*CInterfaceManager::getWindowForActiveMasterGroup(const std::string &window)
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	// Search for all elements
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		const SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		const CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
 			CInterfaceElement	*pEL= getElementFromId( rMG.Group->getId() + ":" + window);
@@ -3260,6 +3258,7 @@ void CInterfaceManager::getNewWindowCoordToNewScreenSize(sint32 &x, sint32 &y, s
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::moveAllWindowsToNewScreenSize(sint32 newScreenW, sint32 newScreenH, bool fixCurrentUI)
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	// If resolutions correctly setuped, and really different from new setup
 	if( _LastInGameScreenW >0 && _LastInGameScreenH>0 &&
 		newScreenW >0 && newScreenH>0 &&
@@ -3272,7 +3271,7 @@ void CInterfaceManager::moveAllWindowsToNewScreenSize(sint32 newScreenW, sint32 
 			// only for ui:interface (not login, nor outgame)
 			for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 			{
-				SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+				CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 				if(!rMG.Group || rMG.Group->getId()!="ui:interface")
 					continue;
 
@@ -3346,10 +3345,12 @@ void CInterfaceManager::updateAllLocalisedElements()
 	_ViewRenderer.checkNewScreenSize ();
 	_ViewRenderer.getScreenSize (w, h);
 
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
+
 	// Update ui:* (limit the master containers to the height of the screen)
 	for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		rMG.Group->setW (w);
 		rMG.Group->setH (h);
 	}
@@ -3363,7 +3364,7 @@ void CInterfaceManager::updateAllLocalisedElements()
 	// Invalidate coordinates of all Windows of each MasterGroup
 	for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 
 		rMG.Group->invalidateTexts (false);
 		rMG.Group->invalidateCoords ();
@@ -3383,7 +3384,7 @@ void CInterfaceManager::updateAllLocalisedElements()
 	// setup for all
 	for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		bool bActive = rMG.Group->getActive ();
 		rMG.Group->setActive (true);
 		rMG.Group->updateCoords ();
@@ -3396,7 +3397,7 @@ void CInterfaceManager::updateAllLocalisedElements()
 	// Action by default (container opening
 	for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		rMG.Group->launch ();
 	}
 
@@ -3489,9 +3490,10 @@ CInterfaceGroup* CInterfaceManager::getWindowUnder (sint32 x, sint32 y)
 {
 	H_AUTO (RZ_Interface_Window_Under )
 
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
 			for (uint8 nPriority = WIN_PRIORITY_MAX; nPriority > 0; nPriority--)
@@ -3516,9 +3518,10 @@ CInterfaceGroup* CInterfaceManager::getWindowUnder (sint32 x, sint32 y)
 // ------------------------------------------------------------------------------------------------
 CInterfaceGroup* CInterfaceManager::getGroupUnder (sint32 x, sint32 y)
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
 			for (uint8 nPriority = WIN_PRIORITY_MAX; nPriority > 0; nPriority--)
@@ -3550,11 +3553,13 @@ void CInterfaceManager::getViewsUnder (sint32 x, sint32 y, std::vector<CViewBase
 	if(_ViewRenderer.isMinimized())
 		return;
 
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
+
 	uint32 sw, sh;
 	_ViewRenderer.getScreenSize(sw, sh);
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
 			for (uint8 nPriority = WIN_PRIORITY_MAX; nPriority > 0; nPriority--)
@@ -3586,11 +3591,13 @@ void CInterfaceManager::getCtrlsUnder (sint32 x, sint32 y, std::vector<CCtrlBase
 	if(_ViewRenderer.isMinimized())
 		return;
 
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
+
 	uint32 sw, sh;
 	_ViewRenderer.getScreenSize(sw, sh);
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
 			for (uint8 nPriority = WIN_PRIORITY_MAX; nPriority > 0 ; nPriority--)
@@ -3624,11 +3631,13 @@ void CInterfaceManager::getGroupsUnder (sint32 x, sint32 y, std::vector<CInterfa
 	if(_ViewRenderer.isMinimized())
 		return;
 
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
+
 	uint32 sw, sh;
 	_ViewRenderer.getScreenSize(sw, sh);
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
 			for (uint8 nPriority = WIN_PRIORITY_MAX; nPriority > 0 ; nPriority--)
@@ -3660,7 +3669,7 @@ void CInterfaceManager::getGroupsUnder (sint32 x, sint32 y, std::vector<CInterfa
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::activateMasterGroup (const std::string &sMasterGroupName, bool bActive)
 {
-	CInterfaceGroup *pIG = getMasterGroupFromId (sMasterGroupName);
+	CInterfaceGroup *pIG = CWidgetManager::getInstance()->getMasterGroupFromId (sMasterGroupName);
 	if (pIG != NULL)
 	{
 		pIG->setActive(bActive);
@@ -3688,10 +3697,12 @@ CInterfaceElement* CInterfaceManager::getElementFromId (const std::string &sEltI
 	if(sEltId == _CtrlLaunchingModalId)
 		return getCtrlLaunchingModal();
 
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
+
 	// Search for all elements
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		CInterfaceElement *pIEL = rMG.Group->getElement (sEltId);
 		if (pIEL != NULL)
 			return pIEL;
@@ -3735,10 +3746,11 @@ CInterfaceElement* CInterfaceManager::getElementFromId (const std::string &sStar
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::setTopWindow (CInterfaceGroup* win)
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	//find the window in the window list
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
 			rMG.setTopWindow(win);
@@ -3772,9 +3784,10 @@ void CInterfaceManager::setTopWindow (CInterfaceGroup* win)
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::setBackWindow(CInterfaceGroup* win)
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
 			rMG.setBackWindow(win);
@@ -3798,9 +3811,10 @@ void CInterfaceManager::setBackWindow(CInterfaceGroup* win)
 // ------------------------------------------------------------------------------------------------
 CInterfaceGroup		*CInterfaceManager::getTopWindow (uint8 nPriority) const
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		const SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		const CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
 			// return the first.
@@ -3817,9 +3831,10 @@ CInterfaceGroup		*CInterfaceManager::getTopWindow (uint8 nPriority) const
 // ------------------------------------------------------------------------------------------------
 CInterfaceGroup		*CInterfaceManager::getBackWindow (uint8 nPriority) const
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		const SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		const CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
 			// return the first.
@@ -4280,6 +4295,7 @@ void	CInterfaceManager::disableContextHelpForControl(CCtrlBase *pCtrl)
 void CInterfaceManager::makeWindow(CInterfaceGroup *group)
 {
 	if (!group) return;
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	uint32 i = 0;
 	for (i = 0; i < _MasterGroups.size(); ++i)
 	{
@@ -4311,6 +4327,7 @@ void CInterfaceManager::makeWindow(CInterfaceGroup *group)
 void CInterfaceManager::unMakeWindow(CInterfaceGroup *group, bool noWarning)
 {
 	if (!group) return;
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	uint32 i = 0;
 	for (i = 0; i < _MasterGroups.size(); ++i)
 	{
@@ -4478,15 +4495,15 @@ void	CInterfaceManager::launchContextMenuInGame (const std::string &nameOfCM)
 		if (_ModalStack.empty())
 		{
 			// We must be in-game !
-			CInterfaceGroup *pMG = getMasterGroupFromId("ui:interface");
+			CInterfaceGroup *pMG = CWidgetManager::getInstance()->getMasterGroupFromId("ui:interface");
 			// TMP nico : try with login screen:
 			if (!pMG)
 			{
-				pMG = getMasterGroupFromId("ui:login");
+				pMG = CWidgetManager::getInstance()->getMasterGroupFromId("ui:login");
 			}
 			if (!pMG)
 			{
-				pMG = getMasterGroupFromId("ui:outgame");
+				pMG = CWidgetManager::getInstance()->getMasterGroupFromId("ui:outgame");
 			}
 			if ((pMG != NULL) && (pMG->getActive()))
 			{
@@ -4580,10 +4597,12 @@ void	CInterfaceManager::setMode(uint8 newMode)
 	if (newMode == _CurrentMode)
 		return;
 
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
+
 	// Check if we can change vdesk !
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
 			for (uint8 nPriority=0; nPriority < WIN_PRIORITY_MAX; ++nPriority)
@@ -4653,6 +4672,7 @@ struct CDumpedGroup
 // ***************************************************************************
 void CInterfaceManager::dumpUI(bool /* indent */)
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	std::vector<CDumpedGroup> left;
 	left.resize(_MasterGroups.size());
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
@@ -4727,9 +4747,10 @@ void CInterfaceManager::dumpUI(bool /* indent */)
 // ***************************************************************************
 void CInterfaceManager::displayUIViewBBoxs(const std::string &uiFilter)
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		for (uint8 nPriority=0; nPriority < WIN_PRIORITY_MAX; ++nPriority)
 		{
 			list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
@@ -4745,9 +4766,10 @@ void CInterfaceManager::displayUIViewBBoxs(const std::string &uiFilter)
 // ***************************************************************************
 void CInterfaceManager::displayUICtrlBBoxs(const std::string &uiFilter)
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		for (uint8 nPriority=0; nPriority < WIN_PRIORITY_MAX; ++nPriority)
 		{
 			list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
@@ -4763,9 +4785,10 @@ void CInterfaceManager::displayUICtrlBBoxs(const std::string &uiFilter)
 // ***************************************************************************
 void CInterfaceManager::displayUIGroupBBoxs(const std::string &uiFilter)
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		for (uint8 nPriority=0; nPriority < WIN_PRIORITY_MAX; ++nPriority)
 		{
 			list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
@@ -4870,9 +4893,10 @@ bool	CInterfaceManager::saveKeys(const std::string &filename)
 // ***************************************************************************
 CInterfaceGroup		*CInterfaceManager::getLastEscapableTopWindow() const
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		const SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		const CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
 			for (uint8 nPriority = WIN_PRIORITY_MAX; nPriority > 0; nPriority--)
@@ -4894,9 +4918,10 @@ CInterfaceGroup		*CInterfaceManager::getLastEscapableTopWindow() const
 // ***************************************************************************
 void CInterfaceManager::setWindowPriority (CInterfaceGroup *pWin, uint8 nNewPriority)
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
 			if (rMG.isWindowPresent(pWin))
@@ -4944,9 +4969,10 @@ void CInterfaceManager::log(const ucstring &str)
 // ***************************************************************************
 void CInterfaceManager::clearAllEditBox()
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		for (uint8 nPriority=0; nPriority < WIN_PRIORITY_MAX; ++nPriority)
 		{
 			list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
@@ -4964,9 +4990,10 @@ void CInterfaceManager::clearAllEditBox()
 // ***************************************************************************
 void CInterfaceManager::restoreAllContainersBackupPosition()
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		for (uint8 nPriority=0; nPriority < WIN_PRIORITY_MAX; ++nPriority)
 		{
 			list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
@@ -4983,9 +5010,10 @@ void CInterfaceManager::restoreAllContainersBackupPosition()
 // ***************************************************************************
 uint8	CInterfaceManager::getLastTopWindowPriority() const
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		const SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		const CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
 			return rMG.LastTopWindowPriority;
@@ -5078,6 +5106,7 @@ void CInterfaceManager::submitEvent (const std::string &event)
 void CInterfaceManager::visit(CInterfaceElementVisitor *visitor)
 {
 	nlassert(visitor);
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
 		if (_MasterGroups[nMasterGroup].Group)
@@ -5604,9 +5633,10 @@ void	CInterfaceManager::notifyForumUpdated()
 void CInterfaceManager::resetTextIndex()
 {
 	uint32 nMasterGroup;
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 
 		rMG.Group->invalidateTexts (true);
 		for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
@@ -5948,9 +5978,10 @@ void		CInterfaceManager::luaGarbageCollect()
 // ***************************************************************************
 void CInterfaceManager::hideAllWindows()
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
 			for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
@@ -5971,9 +6002,10 @@ void CInterfaceManager::hideAllWindows()
 // ***************************************************************************
 void CInterfaceManager::hideAllNonSavableWindows()
 {
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
 			for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)

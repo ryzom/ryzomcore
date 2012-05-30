@@ -636,6 +636,7 @@ void release()
 	NLNET::IModuleManager::releaseInstance();
 	delete &CLuaManager::getInstance();
 	NLGUI::CDBManager::release();
+	CWidgetManager::release();
 	
 
 

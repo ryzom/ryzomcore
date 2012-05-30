@@ -186,7 +186,7 @@ void	CFlyingTextManager::linkToInterface(CGroupInfo &gi)
 
 	// add to group and window list
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	pIM->addWindowToMasterGroup("ui:interface", gi.GroupInScene);
+	CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", gi.GroupInScene);
 	gi.GroupInScene->setParent(_Root);
 	_Root->addGroup (gi.GroupInScene);
 }

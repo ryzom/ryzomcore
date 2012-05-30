@@ -233,7 +233,7 @@ void CGroupInSceneBubbleManager::init ()
 		if (group)
 		{
 			// Link to the interface
-			pIM->addWindowToMasterGroup("ui:interface", group);
+			CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
 			CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
 			group->setParent(pRoot);
 			if (pRoot)
@@ -538,7 +538,7 @@ void CGroupInSceneBubbleManager::addSkillPopup (uint skillId, sint delta, uint t
 			pViewSkillMax->setText (toString(pSM->getMaxSkillValue((SKILLS::ESkills)skillId)));
 
 		// Link to the interface
-		pIM->addWindowToMasterGroup("ui:interface", group);
+		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
 		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
@@ -587,7 +587,7 @@ void CGroupInSceneBubbleManager::addMessagePopup (const ucstring &message, CRGBA
 		}
 
 		// Link to the interface
-		pIM->addWindowToMasterGroup("ui:interface", group);
+		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
 		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
@@ -636,7 +636,7 @@ void CGroupInSceneBubbleManager::addMessagePopupCenter (const ucstring &message,
 		}
 
 		// Link to the interface
-		pIM->addWindowToMasterGroup("ui:interface", group);
+		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
 		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
@@ -710,7 +710,7 @@ CGroupInSceneBubbleManager::CPopupContext *CGroupInSceneBubbleManager::buildCont
 		}
 
 		// Link to the interface
-		pIM->addWindowToMasterGroup("ui:interface", group);
+		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
 		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
@@ -903,7 +903,7 @@ void CGroupInSceneBubbleManager::dynChatOpen (uint32 nBotUID, uint32 nBotName, c
 			return;
 		}
 		// Link to the interface
-		pIM->addWindowToMasterGroup("ui:interface", group);
+		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
 		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
@@ -1016,7 +1016,7 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 			return;
 		}
 		// Link to the interface
-		pIM->addWindowToMasterGroup("ui:interface", group);
+		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
 		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)

@@ -293,194 +293,6 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// SMasterGroup
-// ----------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------
-void CInterfaceParser::SMasterGroup::addWindow(CInterfaceGroup *pIG, uint8 nPrio)
-{
-	nlassert(nPrio<WIN_PRIORITY_MAX);
-
-	// Priority WIN_PRIORITY_WORLD_SPACE is only for CGroupInScene !
-	// Add this group in another priority list
-	nlassert ((nPrio!=WIN_PRIORITY_MAX) || (dynamic_cast<CGroupInScene*>(pIG)!=NULL));
-
-	for (uint8 i = 0; i < WIN_PRIORITY_MAX; ++i)
-	{
-		list<CInterfaceGroup*>::iterator it = PrioritizedWindows[i].begin();
-		while (it != PrioritizedWindows[i].end())
-		{
-			// If the element already exists in the list return !
-			if (*it == pIG)
-				return;
-			it++;
-		}
-	}
-	PrioritizedWindows[nPrio].push_back(pIG);
-}
-
-// ----------------------------------------------------------------------------
-void CInterfaceParser::SMasterGroup::delWindow(CInterfaceGroup *pIG)
-{
-	for (uint8 i = 0; i < WIN_PRIORITY_MAX; ++i)
-	{
-		list<CInterfaceGroup*>::iterator it = PrioritizedWindows[i].begin();
-		while (it != PrioritizedWindows[i].end())
-		{
-			if ((*it) == pIG)
-			{
-				PrioritizedWindows[i].erase(it);
-				return;
-			}
-			it++;
-		}
-	}
-}
-
-// ----------------------------------------------------------------------------
-CInterfaceGroup* CInterfaceParser::SMasterGroup::getWindowFromId(const std::string &winID)
-{
-	for (uint8 i = 0; i < WIN_PRIORITY_MAX; ++i)
-	{
-		list<CInterfaceGroup*>::iterator it = PrioritizedWindows[i].begin();
-		while (it != PrioritizedWindows[i].end())
-		{
-			if ((*it)->getId() == winID)
-				return *it;
-			it++;
-		}
-	}
-	return NULL;
-}
-
-// ----------------------------------------------------------------------------
-bool CInterfaceParser::SMasterGroup::isWindowPresent(CInterfaceGroup *pIG)
-{
-	for (uint8 i = 0; i < WIN_PRIORITY_MAX; ++i)
-	{
-		list<CInterfaceGroup*>::iterator it = PrioritizedWindows[i].begin();
-		while (it != PrioritizedWindows[i].end())
-		{
-			if ((*it) == pIG)
-				return true;
-			it++;
-		}
-	}
-	return false;
-}
-
-// Set a window top in its priority queue
-// ----------------------------------------------------------------------------
-void CInterfaceParser::SMasterGroup::setTopWindow(CInterfaceGroup *pIG)
-{
-	for (uint8 i = 0; i < WIN_PRIORITY_MAX; ++i)
-	{
-		list<CInterfaceGroup*>::iterator it = PrioritizedWindows[i].begin();
-		while (it != PrioritizedWindows[i].end())
-		{
-			if (*it == pIG)
-			{
-				PrioritizedWindows[i].erase(it);
-				PrioritizedWindows[i].push_back(pIG);
-				LastTopWindowPriority= i;
-				return;
-			}
-			it++;
-		}
-	}
-	// todo hulud interface syntax error
-	nlwarning("window %s do not exist in a priority list", pIG->getId().c_str());
-}
-
-// ----------------------------------------------------------------------------
-void CInterfaceParser::SMasterGroup::setBackWindow(CInterfaceGroup *pIG)
-{
-	for (uint8 i = 0; i < WIN_PRIORITY_MAX; ++i)
-	{
-		list<CInterfaceGroup*>::iterator it = PrioritizedWindows[i].begin();
-		while (it != PrioritizedWindows[i].end())
-		{
-			if (*it == pIG)
-			{
-				PrioritizedWindows[i].erase(it);
-				PrioritizedWindows[i].push_front(pIG);
-				return;
-			}
-			it++;
-		}
-	}
-	// todo hulud interface syntax error
-	nlwarning("window %s do not exist in a priority list", pIG->getId().c_str());
-}
-
-// ----------------------------------------------------------------------------
-void CInterfaceParser::SMasterGroup::deactiveAllContainers()
-{
-	vector<CGroupContainer*> gcs;
-
-	// Make first a list of all window (Warning: all group container are not window!)
-	for (uint8 i = 0; i < WIN_PRIORITY_MAX; ++i)
-	{
-		list<CInterfaceGroup*>::iterator it = PrioritizedWindows[i].begin();
-		while (it != PrioritizedWindows[i].end())
-		{
-			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(*it);
-			if (pGC != NULL)
-				gcs.push_back(pGC);
-			it++;
-		}
-	}
-
-	// Then hide them. Must do this in 2 times, because setActive(false) change PrioritizedWindows,
-	// and hence invalidate its.
-	for (uint32 i = 0; i < gcs.size(); ++i)
-	{
-		gcs[i]->setActive(false);
-	}
-}
-
-// ----------------------------------------------------------------------------
-void CInterfaceParser::SMasterGroup::centerAllContainers()
-{
-	for (uint8 i = 0; i < WIN_PRIORITY_MAX; ++i)
-	{
-		list<CInterfaceGroup*>::iterator it = PrioritizedWindows[i].begin();
-		while (it != PrioritizedWindows[i].end())
-		{
-			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(*it);
-			if ((pGC != NULL) && (pGC->getParent() != NULL))
-			{
-				sint32 wParent = pGC->getParent()->getW(false);
-				sint32 w = pGC->getW(false);
-				pGC->setXAndInvalidateCoords((wParent - w) / 2);
-				sint32 hParent = pGC->getParent()->getH(false);
-				sint32 h = pGC->getH(false);
-				pGC->setYAndInvalidateCoords(h+(hParent - h) / 2);
-			}
-
-			it++;
-		}
-	}
-}
-
-// ----------------------------------------------------------------------------
-void CInterfaceParser::SMasterGroup::unlockAllContainers()
-{
-	for (uint8 i = 0; i < WIN_PRIORITY_MAX; ++i)
-	{
-		list<CInterfaceGroup*>::iterator it = PrioritizedWindows[i].begin();
-		while (it != PrioritizedWindows[i].end())
-		{
-			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(*it);
-			if (pGC != NULL)
-				pGC->setLocked(false);
-
-			it++;
-		}
-	}
-}
-
-// ----------------------------------------------------------------------------
 // CInterfaceParser
 // ----------------------------------------------------------------------------
 
@@ -734,7 +546,7 @@ bool CInterfaceParser::parseXMLDocument(xmlNodePtr root, bool reload)
 {
 	H_AUTO(parseXMLDocument);
 
-	SMasterGroup *curRoot = NULL;
+	CWidgetManager::SMasterGroup *curRoot = NULL;
 	CInterfaceGroup *rootGroup = NULL;
 	//parse templates
 	xmlNodePtr curNode = root->children;
@@ -743,6 +555,8 @@ bool CInterfaceParser::parseXMLDocument(xmlNodePtr root, bool reload)
 	uint actionCategoryCount = CIXml::countChildren(curNode, "action_category");
 	Actions.reserveCategories((uint)Actions.getCategories ().size()+actionCategoryCount);
 	EditActions.reserveCategories(1);
+
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 
 	while (curNode)
 	{
@@ -840,12 +654,12 @@ bool CInterfaceParser::parseXMLDocument(xmlNodePtr root, bool reload)
 			CXMLAutoPtr ptr((const char*)xmlGetProp (root, (xmlChar*)"id"));
 			if (ptr)
 			{
-				rootGroup = getMasterGroupFromId (string("ui:") + (const char*)ptr);
+				rootGroup = CWidgetManager::getInstance()->getMasterGroupFromId (string("ui:") + (const char*)ptr);
 				if (rootGroup == NULL)
 				{
 					rootGroup = (CInterfaceGroup*)(new CRootGroup(CViewBase::TCtorParam()));
 					rootGroup->parse (root, NULL);
-					SMasterGroup mg;
+					CWidgetManager::SMasterGroup mg;
 					mg.Group = rootGroup;
 					_MasterGroups.push_back (mg);
 				}
@@ -982,7 +796,7 @@ bool CInterfaceParser::parseXMLDocument(xmlNodePtr root, bool reload)
 	{
 		H_AUTO(addWindowToMasterGroup)
 
-		SMasterGroup &rMG = _MasterGroups[i];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[i];
 		// insert all modals
 		for (uint32 j = 0; j < rMG.Group->getGroups().size(); ++j)
 		{
@@ -991,7 +805,7 @@ bool CInterfaceParser::parseXMLDocument(xmlNodePtr root, bool reload)
 			if(pIG)
 			{
 				// add to the window list
-				addWindowToMasterGroup(rMG.Group->getId(), pIG);
+				CWidgetManager::getInstance()->addWindowToMasterGroup(rMG.Group->getId(), pIG);
 			}
 		}
 	}
@@ -1979,9 +1793,10 @@ bool CInterfaceParser::parseTreeNode (xmlNodePtr cur, CGroupContainer *parentGro
 	CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"node" ));
 	if (!ptr) return false;
 	CInterfaceElement *pEltFound = NULL;
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (uint32 i = 0; i < _MasterGroups.size(); ++i)
 	{
-		SMasterGroup &rMG = _MasterGroups[i];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[i];
 		for (uint32 j = 0; j < rMG.Group->getGroups().size(); ++j)
 		{
 			CInterfaceGroup *pIG = rMG.Group->getGroups()[j];
@@ -2026,10 +1841,11 @@ bool CInterfaceParser::setupTreeNode (xmlNodePtr cur, CGroupContainer * /* paren
 {
 	CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"node" ));
 	if (!ptr) return false;
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	CInterfaceElement *pEltFound = NULL;
 	for (uint32 i = 0; i < _MasterGroups.size(); ++i)
 	{
-		SMasterGroup &rMG = _MasterGroups[i];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[i];
 		for (uint32 j = 0; j < rMG.Group->getGroups().size(); ++j)
 		{
 			CInterfaceGroup *pIG = rMG.Group->getGroups()[j];
@@ -2119,14 +1935,15 @@ bool CInterfaceParser::setupTreeNode (xmlNodePtr cur, CGroupContainer * /* paren
 }
 
 // ----------------------------------------------------------------------------
-bool CInterfaceParser::setupTree (xmlNodePtr cur, SMasterGroup * /* parentGroup */)
+bool CInterfaceParser::setupTree (xmlNodePtr cur, CWidgetManager::SMasterGroup * /* parentGroup */)
 {
 	CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"node" ));
 	if (!ptr) return false;
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	CInterfaceElement *pEltFound = NULL;
 	for (uint32 i = 0; i < _MasterGroups.size(); ++i)
 	{
-		SMasterGroup &rMG = _MasterGroups[i];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[i];
 		for (uint32 j = 0; j < rMG.Group->getGroups().size(); ++j)
 		{
 			CInterfaceGroup *pIG = rMG.Group->getGroups()[j];
@@ -2186,16 +2003,17 @@ bool CInterfaceParser::setupTree (xmlNodePtr cur, SMasterGroup * /* parentGroup 
 
 
 // ----------------------------------------------------------------------------
-bool CInterfaceParser::parseTree (xmlNodePtr cur, SMasterGroup *parentGroup)
+bool CInterfaceParser::parseTree (xmlNodePtr cur, CWidgetManager::SMasterGroup *parentGroup)
 {
 	H_AUTO(parseTree )
 
 	CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"node" ));
 	if (!ptr) return false;
+	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 	CInterfaceElement *pEltFound = NULL;
 	for (uint32 i = 0; i < _MasterGroups.size(); ++i)
 	{
-		SMasterGroup &rMG = _MasterGroups[i];
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[i];
 		for (uint32 j = 0; j < rMG.Group->getGroups().size(); ++j)
 		{
 			CInterfaceGroup *pIG = rMG.Group->getGroups()[j];
@@ -2239,7 +2057,7 @@ bool CInterfaceParser::parseTree (xmlNodePtr cur, SMasterGroup *parentGroup)
 	}
 
 	// Ok add it.
-	addWindowToMasterGroup(parentGroup->Group->getId(), pIG);
+	CWidgetManager::getInstance()->addWindowToMasterGroup(parentGroup->Group->getId(), pIG);
 
 	CGroupContainer *pIC = dynamic_cast<CGroupContainer*>(pEltFound);
 	if (pIC != NULL)
@@ -2417,7 +2235,7 @@ bool CInterfaceParser::initCoordsAndLuaScript()
 			parentpos = parent->getElement(EltName);
 		//if the element has no parent, check the windows
 		else
-			parentpos = getWindowFromId(EltName);
+			parentpos = CWidgetManager::getInstance()->getWindowFromId(EltName);
 
 		if (parentpos == NULL)
 		{
@@ -2448,7 +2266,7 @@ bool CInterfaceParser::initCoordsAndLuaScript()
 				parentsize = parent->getElement(EltName);
 			//if the element has no parent, check the windows
 			else
-				parentsize = getWindowFromId(EltName);
+				parentsize = CWidgetManager::getInstance()->getWindowFromId(EltName);
 		}
 
 		if (parentsize == NULL)
@@ -2481,7 +2299,7 @@ bool CInterfaceParser::initCoordsAndLuaScript()
 				parentsizemax = parent->getElement(EltName);
 			//if the element has no parent, check the windows
 			else
-				parentsizemax = getWindowFromId(EltName);
+				parentsizemax = CWidgetManager::getInstance()->getWindowFromId(EltName);
 		}
 
 		if (parentsizemax == NULL)
@@ -2534,60 +2352,6 @@ void CInterfaceParser::addParentSizeMaxAssociation (CInterfaceElement *element, 
 void CInterfaceParser::addLuaClassAssociation (CInterfaceGroup *group, const std::string &luaScript)
 {
 	_LuaClassAssociation.insert (std::map<CInterfaceGroup*,std::string>::value_type(group, luaScript));
-}
-
-// ----------------------------------------------------------------------------
-CInterfaceGroup* CInterfaceParser::getMasterGroupFromId (const std::string &MasterGroupName)
-{
-	for (uint32 i = 0; i < _MasterGroups.size(); ++i)
-	{
-		if (_MasterGroups[i].Group->getId() == MasterGroupName)
-			return _MasterGroups[i].Group;
-	}
-	return NULL;
-}
-
-// ----------------------------------------------------------------------------
-CInterfaceGroup* CInterfaceParser::getWindowFromId (const std::string & groupId)
-{
-	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
-	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-		CInterfaceGroup *pIG = rMG.getWindowFromId(groupId);
-		if (pIG != NULL)
-			return pIG;
-	}
-	return NULL;
-}
-
-// ----------------------------------------------------------------------------
-void CInterfaceParser::addWindowToMasterGroup (const std::string &sMasterGroupName, CInterfaceGroup *pIG)
-{
-	// Warning this function is not smart : its a o(n) !
-	if (pIG == NULL) return;
-	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); ++nMasterGroup)
-	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-		if (rMG.Group->getId() == sMasterGroupName)
-		{
-			rMG.addWindow(pIG, pIG->getPriority());
-		}
-	}
-}
-
-// ----------------------------------------------------------------------------
-void CInterfaceParser::removeWindowFromMasterGroup(const std::string &sMasterGroupName,CInterfaceGroup *pIG)
-{
-	// Warning this function is not smart : its a o(n) !
-	if (pIG == NULL) return;
-	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); ++nMasterGroup)
-	{
-		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-		if (rMG.Group->getId() == sMasterGroupName)
-		{
-			rMG.delWindow(pIG);
-		}
-	}
 }
 
 // ***************************************************************************
@@ -3830,38 +3594,7 @@ void CInterfaceParser::removeAllAnims()
 }
 
 // ***************************************************************************
-void unlinkAllContainers (CInterfaceGroup *pIG)
-{
-	const vector<CInterfaceGroup*> &rG = pIG->getGroups();
-	for(uint i = 0; i < rG.size(); ++i)
-		unlinkAllContainers (rG[i]);
 
-	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIG);
-	if (pGC != NULL)
-		pGC->removeAllContainers();
-}
-
-// ***************************************************************************
-void CInterfaceParser::removeAllMasterGroups()
-{
-	uint i;
-
-	NLMISC::TTime initStart;
-	initStart = ryzomGetLocalTime ();
-	for (i = 0; i < _MasterGroups.size(); ++i)
-		unlinkAllContainers (_MasterGroups[i].Group);
-	//nlinfo ("%d seconds for all unlinkAllContainers", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
-
-	initStart = ryzomGetLocalTime ();
-	// Yoyo: important to not Leave NULL in the array, because of CGroupHTML and LibWWW callback
-	// that may call CInterfaceManager::getElementFromId() (and this method hates having NULL in the arrays ^^)
-	while(!_MasterGroups.empty())
-	{
-		delete _MasterGroups.back().Group;
-		_MasterGroups.pop_back();
-	}
-	//nlinfo ("%d seconds for all delete _MasterGroups", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
-}
 
 // ***************************************************************************
 void CInterfaceParser::removeAll()
@@ -3886,7 +3619,7 @@ void CInterfaceParser::removeAll()
 	removeAllAnims();
 	//nlinfo ("%d seconds for removeAllAnims", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
-	removeAllMasterGroups();
+	CWidgetManager::getInstance()->removeAllMasterGroups();
 	//nlinfo ("%d seconds for removeAllMasterGroups", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	_StyleMap.clear();
 	_CtrlSheetSelection.deleteGroups();
@@ -4054,141 +3787,7 @@ bool CInterfaceParser::parseCareerGeneratorParams(xmlNodePtr cur,
 // ***************************************************************************
 bool CInterfaceParser::parseBrickCareerGenerator(xmlNodePtr /* cur */)
 {
-	H_AUTO(parseBrickCareerGenerator)
-
-	// No more CAREER / Bricks!!!
-	// TODO_BRICK: remove this code.
 	return false;
-
-	/*
-	CBrickManager	*pBM= CBrickManager::getInstance();
-
-	CXMLAutoPtr prop;
-
-	string	templateCareer;
-	string	templateJob;
-	string	templateBrick;
-	string	careerWindowBase;
-	string	jobWindowBase;
-	string	brickWindowBase;
-	xmlNodePtr	rootTreeNode;
-	bool		brickTypeFilter;
-	BRICK_TYPE::EBrickType	brickType;
-
-	if(! parseCareerGeneratorParams(cur, templateCareer, templateJob, careerWindowBase, jobWindowBase, rootTreeNode,
-		brickTypeFilter, brickType) )
-		return false;
-
-	if(!brickTypeFilter)
-	{
-		nlwarning("'brick_carrer_generator' must be filtered. 'brick_type' must not be 'none'");
-		return false;
-	}
-
-	// Read Brick specials.
-	prop = xmlGetProp (cur, (xmlChar*)"template_brick");
-	if(prop) templateBrick= (const char*)prop;
-	else
-	{
-		nlwarning("prop 'template_brick' not found");
-		return false;
-	}
-	prop = xmlGetProp (cur, (xmlChar*)"brick_window");
-	if(prop) brickWindowBase= (const char*)prop;
-	else
-	{
-		nlwarning("prop 'brick_window' not found");
-		return false;
-	}
-	// read the XStart for bricks that are in Jobs (not in career).
-	sint32	xstartCareer=0;
-	prop = xmlGetProp (cur, (xmlChar*)"xstart_career");
-	if(prop)	fromString((const char*)prop, xstartCareer);
-	sint32	xstartJob=0;
-	prop = xmlGetProp (cur, (xmlChar*)"xstart_job");
-	if(prop)	fromString((const char*)prop, xstartJob);
-
-
-	// **** Create all existing careers
-	xmlNodePtr nextSibling=cur;
-	for(uint careerId=0;careerId<BRICKS_MAX_CAREER;careerId++)
-	{
-		const CBrickCareer	*career= NULL;
-
-		// get the career for our wanted brick type
-		career= pBM->getCareer(brickType, (ROLES::ERole)careerId );
-
-		// if no filter, then dispplay all careers
-		if(career)
-		{
-			string	carreerWindowId= careerWindowBase + toString(careerId);
-
-			// Ok, create the xml node to instanciate the career
-			xmlNodePtr	node= xmlNewNode(cur->ns, (xmlChar*)"instance" );
-			xmlSetProp(node, (xmlChar*)"template", (xmlChar*)templateCareer.c_str());
-			xmlSetProp(node, (xmlChar*)"careerid", (xmlChar*)toString(careerId).c_str());
-			xmlSetProp(node, (xmlChar*)"id", (xmlChar*)carreerWindowId.c_str());
-
-			// add it before rootContainer => next to nextSibling
-			xmlAddNextSibling (nextSibling, node);
-			nextSibling = nextSibling->next;
-
-			// Create the associated tree node
-			xmlNodePtr	careerTreeNode= xmlNewNode(cur->ns, (xmlChar*)"tree" );
-			xmlSetProp(careerTreeNode, (xmlChar*)"node", (xmlChar*)carreerWindowId.c_str());
-			// link it to the root
-			xmlAddChild(rootTreeNode, careerTreeNode);
-
-			// **** create bricks in the career common Job.
-			string	brickWindowId= brickWindowBase + toString(careerId) + "_c_";
-			createJobBricks(brickType, nextSibling, careerTreeNode, career->Common, templateBrick, brickWindowId, xstartCareer);
-
-
-			// **** create all existing jobs.
-			sint	numJobs;
-
-			// parse jobs of the career
-			numJobs= career->Jobs.size();
-
-			// for all jobs to parse
-			for(sint jobIndex=0;jobIndex<numJobs;jobIndex++)
-			{
-				// get the jobId, ie the index of the job in the database (0 to 7)
-				sint jobId;
-				jobId= JOBS::getJobDBIndex( career->Jobs[jobIndex].Job );
-
-				// if the job exist
-				if(jobId>=0)
-				{
-					string	jobWindowId= jobWindowBase + toString(careerId) + "_" + toString(jobId);
-
-					// create the xml node to instanciate the job
-					xmlNodePtr	node= xmlNewNode(cur->ns, (xmlChar*)"instance" );
-					xmlSetProp(node, (xmlChar*)"template", (xmlChar*)templateJob.c_str());
-					xmlSetProp(node, (xmlChar*)"careerid", (xmlChar*)toString(careerId).c_str());
-					xmlSetProp(node, (xmlChar*)"jobid", (xmlChar*)toString(jobId).c_str());
-					xmlSetProp(node, (xmlChar*)"id", (xmlChar*)jobWindowId.c_str());
-
-					// add it before rootContainer => next to nextSibling
-					xmlAddNextSibling (nextSibling, node);
-					nextSibling = nextSibling->next;
-
-					// Create the associated tree node
-					xmlNodePtr	jobTreeNode= xmlNewNode(cur->ns, (xmlChar*)"tree" );
-					xmlSetProp(jobTreeNode, (xmlChar*)"node", (xmlChar*)jobWindowId.c_str());
-					// link it
-					xmlAddChild(careerTreeNode, jobTreeNode);
-
-					// **** create bricks in the Job.
-					string brickWindowId= brickWindowBase + toString(careerId) + "_" + toString(jobId) + "_";
-					createJobBricks(brickType, nextSibling, jobTreeNode, career->Jobs[jobIndex], templateBrick, brickWindowId, xstartJob);
-
-				}
-			}
-		}
-	}
-
-	return true;*/
 }
 
 
@@ -4196,163 +3795,13 @@ bool CInterfaceParser::parseBrickCareerGenerator(xmlNodePtr /* cur */)
 void	CInterfaceParser::createJobBricks(BRICK_TYPE::EBrickType	brickType, xmlNodePtr &nextSibling, xmlNodePtr parentTreeNode,
 		const CBrickJob &/* job */, const string &/* templateBrick */, const string &/* baseWindowId */, sint32 /* xstart */)
 {
-	// No more CAREER / Bricks!!!
-	// TODO_BRICK: remove this code.
-
-	/*
-	uint	brickWndIndex=0;
-
-	// Must Parse Family and Special ShopKeeper Family too!
-	uint	numFamilyStd= job.Family.size();
-	uint	numFamilyTotal= numFamilyStd + job.SpecialShopkeeperFamily.size();
-
-	// For all the families of brick.
-	for(uint familyId= 0; familyId<numFamilyTotal; familyId++)
-	{
-		const CBrickFamily	&brickFamily= familyId<numFamilyStd?
-			job.Family[familyId] :
-			job.SpecialShopkeeperFamily[familyId-numFamilyStd];
-		// For Magic, must parse all bricks of the family
-		if(brickType== BRICK_TYPE::MAGIC)
-		{
-			for(uint i=0;i<brickFamily.Bricks.size();i++)
-			{
-				string	windowId= baseWindowId + toString(brickWndIndex++);
-
-				// create the xml node to instanciate the brick group
-				xmlNodePtr	node= xmlNewNode(nextSibling->ns, (xmlChar*)"instance" );
-				xmlSetProp(node, (xmlChar*)"template", (xmlChar*)templateBrick.c_str());
-				xmlSetProp(node, (xmlChar*)"root_brick", (xmlChar*)toString(brickFamily.Bricks[i].asInt()).c_str());
-				xmlSetProp(node, (xmlChar*)"id", (xmlChar*)windowId.c_str() );
-				xmlSetProp(node, (xmlChar*)"xstart", (xmlChar*)toString(xstart).c_str() );
-
-				// add it before rootContainer => next to nextSibling
-				xmlAddNextSibling (nextSibling, node);
-				nextSibling = nextSibling->next;
-
-				// Create the associated tree node
-				xmlNodePtr	brickTreeNode= xmlNewNode(nextSibling->ns, (xmlChar*)"tree" );
-				xmlSetProp(brickTreeNode, (xmlChar*)"node", (xmlChar*)windowId.c_str());
-				// link it
-				xmlAddChild(parentTreeNode, brickTreeNode);
-			}
-		}
-		// For Combat-Special, parse only the brickFamily
-		else
-		{
-			string	windowId= baseWindowId + toString(brickWndIndex++);
-
-			// create the xml node to instanciate the brick group
-			xmlNodePtr	node= xmlNewNode(nextSibling->ns, (xmlChar*)"instance" );
-			xmlSetProp(node, (xmlChar*)"template", (xmlChar*)templateBrick.c_str());
-			xmlSetProp(node, (xmlChar*)"brick_family", (xmlChar*)toString(brickFamily.Family).c_str());
-			xmlSetProp(node, (xmlChar*)"id", (xmlChar*)windowId.c_str() );
-			xmlSetProp(node, (xmlChar*)"xstart", (xmlChar*)toString(xstart).c_str() );
-
-			// add it before rootContainer => next to nextSibling
-			xmlAddNextSibling (nextSibling, node);
-			nextSibling = nextSibling->next;
-
-			// Create the associated tree node
-			xmlNodePtr	brickTreeNode= xmlNewNode(nextSibling->ns, (xmlChar*)"tree" );
-			xmlSetProp(brickTreeNode, (xmlChar*)"node", (xmlChar*)windowId.c_str());
-			// link it
-			xmlAddChild(parentTreeNode, brickTreeNode);
-		}
-	}
-	*/
 }
 
 
 // ***************************************************************************
 bool CInterfaceParser::parseBrickSuffixGenerator(xmlNodePtr /* cur */)
 {
-	H_AUTO(parseBrickSuffixGenerator)
-
-	// No more CAREER / Bricks!!!
-	// TODO_BRICK: remove this code.
 	return false;
-
-	/*
-	CBrickManager	*pBM= CBrickManager::getInstance();
-
-	CXMLAutoPtr prop;
-
-	string		templateBrick;
-	string		brickWindowBase;
-	xmlNodePtr	rootTreeNode;
-	BRICK_TYPE::EBrickType	brickType;
-
-
-	// create or search the root container.
-	if(!parseGeneratorRootContainer(cur, rootTreeNode))
-		return false;
-
-
-	// Read Brick specials.
-	prop = xmlGetProp (cur, (xmlChar*)"template_brick");
-	if(prop) templateBrick= (const char*)prop;
-	else
-	{
-		nlwarning("prop 'template_brick' not found");
-		return false;
-	}
-	prop = xmlGetProp (cur, (xmlChar*)"brick_window");
-	if(prop) brickWindowBase= (const char*)prop;
-	else
-	{
-		nlwarning("prop 'brick_window' not found");
-		return false;
-	}
-	// read the XStart for bricks that are in Jobs (not in career).
-	sint32	xstart=0;
-	prop = xmlGetProp (cur, (xmlChar*)"xstart");
-	if(prop)	fromString((const char*)prop, xstart);
-
-	// Read BrickType
-	prop = xmlGetProp (cur, (xmlChar*)"brick_type");
-	if(prop)
-	{
-		brickType= BRICK_TYPE::toBrickType((const char*)prop);
-		if(brickType == BRICK_TYPE::UNKNOWN)
-		{
-			nlwarning("'brick_type' UKNOWN in brick_suffix_generator (NB: none not allowed)");
-			return false;
-		}
-	}
-	else
-	{
-		nlwarning("prop 'brick_type' not found");
-		return false;
-	}
-
-
-	// **** Create All Suffix for the brickType.
-	const std::vector<CBrickFamily>		&bfs= pBM->getBrickSuffixes(brickType);
-	xmlNodePtr nextSibling=cur;
-	for(uint i=0;i<bfs.size();i++)
-	{
-		string	windowId= brickWindowBase + toString(i);
-
-		// create the xml node to instanciate the brick group
-		xmlNodePtr	node= xmlNewNode(nextSibling->ns, (xmlChar*)"instance" );
-		xmlSetProp(node, (xmlChar*)"template", (xmlChar*)templateBrick.c_str());
-		xmlSetProp(node, (xmlChar*)"brick_family", (xmlChar*)toString(bfs[i].Family).c_str());
-		xmlSetProp(node, (xmlChar*)"id", (xmlChar*)windowId.c_str() );
-		xmlSetProp(node, (xmlChar*)"xstart", (xmlChar*)toString(xstart).c_str() );
-
-		// add it before rootContainer => next to nextSibling
-		xmlAddNextSibling (nextSibling, node);
-		nextSibling = nextSibling->next;
-
-		// Create the associated tree node
-		xmlNodePtr	brickTreeNode= xmlNewNode(nextSibling->ns, (xmlChar*)"tree" );
-		xmlSetProp(brickTreeNode, (xmlChar*)"node", (xmlChar*)windowId.c_str());
-		// link it
-		xmlAddChild(rootTreeNode, brickTreeNode);
-	}
-
-	return true;*/
 }
 
 
@@ -4500,53 +3949,6 @@ bool				CInterfaceParser::solveStyle(xmlNodePtr cur)
 }
 
 // ***************************************************************************
-
-class CElementToSort
-{
-public:
-	CInterfaceGroup *pIG;
-	float	Distance;
-	bool operator< (const CElementToSort& other) const
-	{
-		// We want first farest views
-		return Distance > other.Distance;
-	}
-};
-
-void CInterfaceParser::SMasterGroup::sortWorldSpaceGroup ()
-{
-	H_AUTO ( RZ_Interface_sortWorldSpaceGroup )
-
-	static vector<CElementToSort> sortTable;
-	sortTable.clear ();
-
-	// Fill the sort table
-	list<CInterfaceGroup*>::iterator it = PrioritizedWindows[WIN_PRIORITY_WORLD_SPACE].begin();
-	while (it != PrioritizedWindows[WIN_PRIORITY_WORLD_SPACE].end())
-	{
-		sortTable.push_back (CElementToSort ());
-		CElementToSort &elm = sortTable.back();
-		elm.pIG = *it;
-		elm.Distance = (static_cast<CGroupInScene*>(*it))->getDepthForZSort();
-
-		it++;
-	}
-
-	// Sort the table
-	std::sort (sortTable.begin(), sortTable.end());
-
-	// Fill the final table
-	uint i = 0;
-	it = PrioritizedWindows[WIN_PRIORITY_WORLD_SPACE].begin();
-	while (it != PrioritizedWindows[WIN_PRIORITY_WORLD_SPACE].end())
-	{
-		*it = sortTable[i].pIG;
-
-		it++;
-		i++;
-	}
-}
-
 
 #ifdef LUA_NEVRAX_VERSION
 

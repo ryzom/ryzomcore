@@ -81,7 +81,7 @@ void		CGameContextMenu::init(const std::string &srcMenuId)
 	std::string menuId = srcMenuId.empty() ?  std::string("game_context_menu") : srcMenuId;
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	_GroupMenu = dynamic_cast<CGroupMenu*>(pIM->getWindowFromId ("ui:interface:" + menuId + ""));
+	_GroupMenu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getWindowFromId ("ui:interface:" + menuId + ""));
 	_ContextVal = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TARGET:CONTEXT_VAL", false);
 
 	if(_GroupMenu == NULL)

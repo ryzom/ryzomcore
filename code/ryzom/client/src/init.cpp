@@ -69,6 +69,7 @@
 #include "sheet_manager.h"
 
 #include "interface_v3/sbrick_manager.h"
+#include "interface_v3/widget_manager.h"
 //
 #include "gabarit.h"
 #include "hair_set.h"
@@ -1072,6 +1073,8 @@ void prelogInit()
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);
 
+		
+		CWidgetManager::getInstance();
 		CInterfaceManager::create( Driver, TextContext );
 
 		// Yoyo: initialize NOW the InputHandler for Event filtering.

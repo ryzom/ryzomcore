@@ -26,6 +26,7 @@
 #include "nel/misc/smart_ptr.h"
 #include "game_share/brick_types.h"
 #include "nel/gui/lua_helper.h"
+#include "widget_manager.h"
 using namespace NLGUI;
 
 // ***************************************************************************
@@ -39,16 +40,6 @@ class CViewPointer;
 class CInterfaceLink;
 class CBrickJob;
 class CCtrlBase;
-
-// ***************************************************************************
-
-#define WIN_PRIORITY_MAX	8
-#define WIN_PRIORITY_WORLD_SPACE	0
-#define WIN_PRIORITY_LOWEST		1
-#define WIN_PRIORITY_LOW		2
-#define WIN_PRIORITY_NORMAL		3
-#define WIN_PRIORITY_HIGH		4
-#define WIN_PRIORITY_HIGHEST	5
 
 // ***************************************************************************
 /**
@@ -65,34 +56,6 @@ class CInterfaceParser
 public:
 	CInterfaceParser();
 	virtual ~CInterfaceParser();
-
-	struct SMasterGroup
-	{
-		SMasterGroup()
-		{
-			Group= NULL;
-			LastTopWindowPriority= WIN_PRIORITY_NORMAL;
-		}
-
-		CInterfaceGroup *Group;
-		std::list<CInterfaceGroup*> PrioritizedWindows[WIN_PRIORITY_MAX];
-
-		void addWindow(CInterfaceGroup *pIG, uint8 nPrio = WIN_PRIORITY_NORMAL);
-		void delWindow(CInterfaceGroup *pIG);
-		CInterfaceGroup *getWindowFromId(const std::string &winID);
-		bool isWindowPresent(CInterfaceGroup *pIG);
-		// Set a window top in its priority queue
-		void setTopWindow(CInterfaceGroup *pIG);
-		void setBackWindow(CInterfaceGroup *pIG);
-		void deactiveAllContainers();
-		void centerAllContainers();
-		void unlockAllContainers();
-
-		// Sort the world space group
-		void sortWorldSpaceGroup ();
-
-		uint8		LastTopWindowPriority;
-	};
 
 public:
 
@@ -134,7 +97,7 @@ public:
 
 	bool parseTreeNode (xmlNodePtr cur, CGroupContainer *parentGroup);
 
-	bool parseTree (xmlNodePtr cur, SMasterGroup *parentGroup);
+	bool parseTree (xmlNodePtr cur, CWidgetManager::SMasterGroup *parentGroup);
 
 	bool parseDefine(xmlNodePtr cur);
 
@@ -166,7 +129,7 @@ public:
 
 	bool parseLUAScript (xmlNodePtr cur);
 
-	bool setupTree (xmlNodePtr cur, SMasterGroup *parentGroup);
+	bool setupTree (xmlNodePtr cur, CWidgetManager::SMasterGroup *parentGroup);
 	bool setupTreeNode (xmlNodePtr cur, CGroupContainer *parentGroup);
 
 	// Called by each parse in parseXMLDocument
@@ -197,13 +160,6 @@ public:
 	/**
 	 * Accessors
 	 */
-
-	CInterfaceGroup* getMasterGroupFromId (const std::string &MasterGroupName);
-	const std::vector<SMasterGroup> &getAllMasterGroup() { return _MasterGroups; }
-	SMasterGroup& getMasterGroup(uint8 i) { return _MasterGroups[i]; }
-	CInterfaceGroup* getWindowFromId (const std::string & groupId);
-	void addWindowToMasterGroup (const std::string &sMasterGroupName, CInterfaceGroup *pIG);
-	void removeWindowFromMasterGroup (const std::string &sMasterGroupName, CInterfaceGroup *pIG);
 	// access to control sheet selection
 	CCtrlSheetSelection	&getCtrlSheetSelection() { return _CtrlSheetSelection; }
 
@@ -267,7 +223,6 @@ public:
 		void removeAllDefines();
 		void removeAllTemplates();
 		void removeAllAnims();
-		void removeAllMasterGroups();
 		void removeAll();
 	// @}
 
@@ -294,9 +249,6 @@ protected:
 	 */
 
 	CViewPointer *_Pointer;
-
-	// Master groups encapsulate all windows
-	std::vector<SMasterGroup> _MasterGroups;
 
 	// Options description
 	std::map<std::string, NLMISC::CSmartPtr<CInterfaceOptions> > _OptionsMap;

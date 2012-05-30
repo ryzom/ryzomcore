@@ -153,7 +153,7 @@ bool CChatWindow::create(const CChatWindowDesc &desc, const std::string &chatId)
 		// If root container
 		if (desc.FatherContainer == "ui:interface")
 		{
-			im->addWindowToMasterGroup("ui:interface", _Chat);
+			CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", _Chat);
 			_Chat->setParent(pRoot);
 			_Chat->setMovable(true);
 			_Chat->setActive(false);

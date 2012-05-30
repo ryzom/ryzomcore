@@ -1285,7 +1285,7 @@ void impulseBeginTrade(NLMISC::CBitMemStream &impulse)
 {
 	if (PermanentlyBanned) return;
 	//open trade window
-	CInterfaceGroup* win = CInterfaceManager::getInstance()->getWindowFromId("ui:interface:trade");
+	CInterfaceGroup* win = CWidgetManager::getInstance()->getWindowFromId("ui:interface:trade");
 	if (!win)
 	{
 		nlwarning("invalid interface ui:interface:trade");

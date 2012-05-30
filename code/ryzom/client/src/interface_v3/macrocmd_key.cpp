@@ -432,7 +432,7 @@ void CModalContainerEditCmd::create(const std::string &name, bool bDefKey, bool 
 	}
 	WinName = "ui:interface:" + name;
 
-	pIM->addWindowToMasterGroup("ui:interface", Win);
+	CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", Win);
 	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
 	Win->setParent(pRoot);
 	pRoot->addGroup(Win);

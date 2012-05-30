@@ -2554,7 +2554,7 @@ int CLuaIHMRyzom::createRootGroupInstance(CLuaState &ls)
 	{
 		result->setId("ui:interface:"+string(ls.toString(2)));
 		result->updateCoords();
-		im->addWindowToMasterGroup("ui:interface", result);
+		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", result);
 		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
 		result->setParent(pRoot);
 		if (pRoot)

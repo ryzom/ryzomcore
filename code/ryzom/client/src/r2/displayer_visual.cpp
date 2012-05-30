@@ -441,7 +441,7 @@ void CDisplayerVisual::onPostRender()
 					else
 					{
 						// Link to the interface
-						pIM->addWindowToMasterGroup("ui:interface", group);
+						CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
 						CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
 						group->setParent(pRoot);
 						if (pRoot)
