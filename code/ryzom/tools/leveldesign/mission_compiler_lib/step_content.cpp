@@ -3464,3 +3464,75 @@ public:
 };
 REGISTER_STEP_CONTENT(CContentRingScenario, "ring_scenario");
 
+// ---------------------------------------------------------------------------
+class CActionSoundTrigger : public IStepContent
+{
+	string	_SoundName;
+	string	_SoundPos;
+
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	{
+		numEntry = 0;
+	}
+public:
+	void init(CMissionData &md, IPrimitive *prim)
+	{
+		IStepContent::init(md, prim);
+		_SoundName = md.getProperty(prim, "sound_name", true, false);
+		_SoundPos = md.getProperty(prim, "sound_position", true, false);
+
+		// We assert everything is ok
+		if (_SoundPos.empty())
+		{
+			string err = toString("primitive(%s): 'sound_position' must not be empty.", prim->getName().c_str());
+			throw EParseException(prim, err.c_str());
+		}
+		if (_SoundName.empty())
+		{
+			string err = toString("primitive(%s): 'sound_name' must not be empty.", prim->getName().c_str());
+			throw EParseException(prim, err.c_str());
+		}
+	}
+
+	string genCode(CMissionData &md)
+	{
+		string ret;
+		ret = "sound_trigger : "+_SoundName + " : " + _SoundPos + NL;
+		return ret;
+	}
+
+};
+REGISTER_STEP_CONTENT(CActionSoundTrigger, "sound_trigger");
+
+// ---------------------------------------------------------------------------
+class CActionCameraAnimation : public IStepContent
+{
+	string	_Name;
+
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	{
+		numEntry = 0;
+	}
+public:
+	void init(CMissionData &md, IPrimitive *prim)
+	{
+		IStepContent::init(md, prim);
+		_Name = md.getProperty(prim, "animation_name", true, false);
+
+		// We assert everything is ok
+		if (_Name.empty())
+		{
+			string err = toString("primitive(%s): 'animation_name' must not be empty.", prim->getName().c_str());
+			throw EParseException(prim, err.c_str());
+		}
+	}
+
+	string genCode(CMissionData &md)
+	{
+		string ret;
+		ret = "camera_animation : " + _Name + NL;
+		return ret;
+	}
+
+};
+REGISTER_STEP_CONTENT(CActionCameraAnimation, "camera_animation");

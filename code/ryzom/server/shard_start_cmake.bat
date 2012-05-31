@@ -18,7 +18,7 @@ rem wait 2s (yes, i didn't find a better way to wait N seconds)
 ping -n 2 127.0.0.1 > NUL 2>&1
 
 rem  egs
-start %MODE%\ryzom_entities_game_service --writepid
+rem start %MODE%\ryzom_entities_game_service --writepid
 
 rem wait 2s (yes, i didn't find a better way to wait N seconds)
 ping -n 2 127.0.0.1 > NUL 2>&1
