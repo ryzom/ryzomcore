@@ -44,6 +44,7 @@
 #include "client_chat_manager.h"
 #include "bg_downloader_access.h"
 #include "login_progress_post_thread.h"
+#include "interface_v3/action_handler_base.h"
 
 using namespace NLMISC;
 using namespace NLNET;

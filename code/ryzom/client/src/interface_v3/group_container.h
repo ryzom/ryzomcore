@@ -415,33 +415,33 @@ public:
 
 	// to be called by the 'deactive check' handler
 	static  void validateCanDeactivate(bool validate) { _ValidateCanDeactivate = validate; }
-	const	std::string &getAHOnDeactiveCheck() const { return getAHName(_AHOnDeactiveCheck); }
+	const	std::string &getAHOnDeactiveCheck() const { return CAHManager::getInstance()->getAHName(_AHOnDeactiveCheck); }
 	const	std::string &getAHOnDeactiveCheckParams() const { return _AHOnDeactiveCheckParams; }
 	//
-	const	std::string &getAHOnCloseButton() const { return getAHName(_AHOnCloseButton); }
+	const	std::string &getAHOnCloseButton() const { return CAHManager::getInstance()->getAHName(_AHOnCloseButton); }
 	const	std::string &getAHOnCloseButtonParams() const { return _AHOnCloseButtonParams; }
 	//
 	IActionHandler	*getAHOnMovePtr() const { return _AHOnMove; }
-	const	std::string &getAHOnMove() const { return getAHName(_AHOnMove); }
+	const	std::string &getAHOnMove() const { return CAHManager::getInstance()->getAHName(_AHOnMove); }
 	const	std::string &getAHOnMoveParams() const { return _AHOnMoveParams; }
 	//
 	IActionHandler	*getAHOnResizePtr() const { return _AHOnResize; }
-	const	std::string &getAHOnResize() const { return getAHName(_AHOnResize); }
+	const	std::string &getAHOnResize() const { return CAHManager::getInstance()->getAHName(_AHOnResize); }
 	const	std::string &getAHOnResizeParams() const { return _AHOnResizeParams; }
 	//
 	IActionHandler	*getAHOnBeginMovePtr() const { return _AHOnBeginMove; }
-	const	std::string &getAHOnBeginMove() const { return getAHName(_AHOnBeginMove); }
+	const	std::string &getAHOnBeginMove() const { return CAHManager::getInstance()->getAHName(_AHOnBeginMove); }
 	const	std::string &getAHOnBeginMoveParams() const { return _AHOnBeginMoveParams; }
 
 	//
-	void	setOnCloseButtonHandler(const std::string &h) { _AHOnCloseButton = getAH(h,_AHOnCloseButtonParams); }
+	void	setOnCloseButtonHandler(const std::string &h) { _AHOnCloseButton = CAHManager::getInstance()->getAH(h,_AHOnCloseButtonParams); }
 	void	setOnCloseButtonParams(const std::string &p) { _AHOnCloseButtonParams = p; }
 
 
-	std::string getAHOnAlphaSettingsChanged() const { return getAHName(_AHOnAlphaSettingsChanged); }
+	std::string getAHOnAlphaSettingsChanged() const { return CAHManager::getInstance()->getAHName(_AHOnAlphaSettingsChanged); }
 	std::string getAHOnAlphaSettingsChangedParams() const { return _AHOnAlphaSettingsChangedParams; }
 
-	void setAHOnAlphaSettingsChanged(const std::string &h) { _AHOnAlphaSettingsChanged = getAH(h, _AHOnAlphaSettingsChangedParams); }
+	void setAHOnAlphaSettingsChanged(const std::string &h) { _AHOnAlphaSettingsChanged = CAHManager::getInstance()->getAH(h, _AHOnAlphaSettingsChangedParams); }
 	void setAHOnAlphaSettingsChangedParams(const std::string &p) { _AHOnAlphaSettingsChangedParams = p; }
 
 

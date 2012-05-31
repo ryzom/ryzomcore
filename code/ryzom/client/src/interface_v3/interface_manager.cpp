@@ -1410,7 +1410,7 @@ void CInterfaceManager::runActionHandler (const string &ahCmdLine, CCtrlBase *pC
 		ahParams= ahUserParams;
 
 	// Execute the action handler
-	CActionHandlerFactoryManager *pAHFM = CActionHandlerFactoryManager::getInstance();
+	CAHManager *pAHFM = CAHManager::getInstance();
 	map<string, IActionHandler*>::iterator it = pAHFM->FactoryMap.find (ahName);
 	if (it == pAHFM->FactoryMap.end())
 	{
@@ -1442,11 +1442,11 @@ void CInterfaceManager::runActionHandler (IActionHandler *pAH, CCtrlBase *pCalle
 		return;
 	}
 	pAH->execute (pCaller, Params);
-	string AHName = getAHName(pAH);
+	string AHName = CAHManager::getInstance()->getAHName(pAH);
 
 	// Quick Help
 	const string submitQuickHelp = "submit_quick_help";
-	CActionHandlerFactoryManager *pAHFM = CActionHandlerFactoryManager::getInstance();
+	CAHManager *pAHFM = CAHManager::getInstance();
 	map<string, IActionHandler*>::iterator it = pAHFM->FactoryMap.find (AHName);
 	it = pAHFM->FactoryMap.find(submitQuickHelp);
 	if(it == pAHFM->FactoryMap.end())

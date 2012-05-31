@@ -191,19 +191,19 @@ public:
 
 	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 
-	void setActionOnLeftClick (const std::string &ActionHandlerName) { _AHOnLeftClick = getAH(ActionHandlerName, _AHLeftClickParams); }
-	void setActionOnRightClick (const std::string &ActionHandlerName) { _AHOnRightClick = getAH(ActionHandlerName, _AHRightClickParams); }
-	void setActionOnDrop (const std::string &ActionHandlerName) { _AHOnDrop = getAH(ActionHandlerName, _AHDropParams); }
-	void setActionOnCanDrop (const std::string &ActionHandlerName) { _AHOnCanDrop = getAH(ActionHandlerName, _AHCanDropParams); }
+	void setActionOnLeftClick (const std::string &ActionHandlerName) { _AHOnLeftClick = CAHManager::getInstance()->getAH(ActionHandlerName, _AHLeftClickParams); }
+	void setActionOnRightClick (const std::string &ActionHandlerName) { _AHOnRightClick = CAHManager::getInstance()->getAH(ActionHandlerName, _AHRightClickParams); }
+	void setActionOnDrop (const std::string &ActionHandlerName) { _AHOnDrop = CAHManager::getInstance()->getAH(ActionHandlerName, _AHDropParams); }
+	void setActionOnCanDrop (const std::string &ActionHandlerName) { _AHOnCanDrop = CAHManager::getInstance()->getAH(ActionHandlerName, _AHCanDropParams); }
 	void setParamsOnLeftClick (const std::string &ParamsHandlerName) { _AHLeftClickParams = ParamsHandlerName; }
 	void setParamsOnRightClick (const std::string &ParamsHandlerName) { _AHRightClickParams = ParamsHandlerName; }
 	void setParamsOnDrop (const std::string &ParamsHandlerName) { _AHDropParams = ParamsHandlerName; }
 	void setParamsOnCanDrop (const std::string &ParamsHandlerName) { _AHCanDropParams = ParamsHandlerName; }
 
-	const std::string &getActionOnLeftClick () const { return getAHName(_AHOnLeftClick); }
-	const std::string &getActionOnRightClick () const { return getAHName(_AHOnRightClick); }
-	const std::string &getActionOnDrop () const { return getAHName(_AHOnDrop); }
-	const std::string &getActionOnCanDrop () const { return getAHName(_AHOnCanDrop); }
+	const std::string &getActionOnLeftClick () const { return CAHManager::getInstance()->getAHName(_AHOnLeftClick); }
+	const std::string &getActionOnRightClick () const { return CAHManager::getInstance()->getAHName(_AHOnRightClick); }
+	const std::string &getActionOnDrop () const { return CAHManager::getInstance()->getAHName(_AHOnDrop); }
+	const std::string &getActionOnCanDrop () const { return CAHManager::getInstance()->getAHName(_AHOnCanDrop); }
 	const std::string &getParamsOnLeftClick () const { return _AHLeftClickParams; }
 	const std::string &getParamsOnRightClick () const { return _AHRightClickParams; }
 	const std::string &getParamsOnDrop () const { return _AHDropParams; }

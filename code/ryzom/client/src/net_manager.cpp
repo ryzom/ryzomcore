@@ -84,6 +84,7 @@
 #include "game_share/r2_share_itf.h"
 #include "game_share/r2_types.h"
 #include "npc_icon.h"
+#include "interface_v3/action_handler_base.h"
 
 // Std.
 #include <vector>

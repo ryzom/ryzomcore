@@ -149,12 +149,12 @@ bool CCtrlBaseButton::parse (xmlNodePtr cur,CInterfaceGroup * parentGroup)
 
 
 	// *** Read Action handlers
-	parseAH(cur, "onover", "params_over", _AHOnOver, _AHOverParams);
-	parseAH(cur, "onclick_l", "params_l", _AHOnLeftClick, _AHLeftClickParams);
-	parseAH(cur, "ondblclick_l", "params_dblclick_l", _AHOnLeftDblClick, _AHLeftDblClickParams);
-	parseAH(cur, "onclick_r", "params_r", _AHOnRightClick, _AHRightClickParams);
-	parseAH(cur, "onlongclick_l", "params_longclick_l", _AHOnLeftLongClick, _AHLeftLongClickParams);
-	parseAH(cur, "onclock_tick", "params_clock_tick", _AHOnClockTick, _AHClockTickParams);
+	CAHManager::getInstance()->parseAH(cur, "onover", "params_over", _AHOnOver, _AHOverParams);
+	CAHManager::getInstance()->parseAH(cur, "onclick_l", "params_l", _AHOnLeftClick, _AHLeftClickParams);
+	CAHManager::getInstance()->parseAH(cur, "ondblclick_l", "params_dblclick_l", _AHOnLeftDblClick, _AHLeftDblClickParams);
+	CAHManager::getInstance()->parseAH(cur, "onclick_r", "params_r", _AHOnRightClick, _AHRightClickParams);
+	CAHManager::getInstance()->parseAH(cur, "onlongclick_l", "params_longclick_l", _AHOnLeftLongClick, _AHLeftLongClickParams);
+	CAHManager::getInstance()->parseAH(cur, "onclock_tick", "params_clock_tick", _AHOnClockTick, _AHClockTickParams);
 
 	// Context menu association
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_l" );

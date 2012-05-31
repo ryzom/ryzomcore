@@ -37,8 +37,8 @@ CInterfaceGroupWheel::CInterfaceGroupWheel(const TCtorParam &param) : CInterface
 bool CInterfaceGroupWheel::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 {
 	if (!CInterfaceGroup::parse(cur, parentGroup)) return false;
-	parseAH(cur, "on_wheel_up", "on_wheel_up_params", _AHWheelUp, _AHWheelUpParams);
-	parseAH(cur, "on_wheel_down", "on_wheel_down_params", _AHWheelDown, _AHWheelDownParams);
+	CAHManager::getInstance()->parseAH(cur, "on_wheel_up", "on_wheel_up_params", _AHWheelUp, _AHWheelUpParams);
+	CAHManager::getInstance()->parseAH(cur, "on_wheel_down", "on_wheel_down_params", _AHWheelDown, _AHWheelDownParams);
 	return true;
 }
 

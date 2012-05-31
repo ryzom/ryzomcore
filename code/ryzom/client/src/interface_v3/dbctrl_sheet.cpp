@@ -383,13 +383,13 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	if (prop) _Dragable = CInterfaceElement::convertBool(prop);
 
 	// Read Action handlers
-	parseAH(cur, "onclick_l", "params_l", _AHOnLeftClick, _AHLeftClickParams);
-	parseAH(cur, "onclick_r", "params_r", _AHOnRightClick, _AHRightClickParams);
-	parseAH(cur, "oncandrop", "params_candrop", _AHOnCanDrop, _AHCanDropParams);
-	parseAH(cur, "ondrop", "params_drop", _AHOnDrop, _AHDropParams);
-	parseAH(cur, "oncannotdrop", "params_cannotdrop", _AHOnCannotDrop, _AHCannotDropParams);
-	parseAH(cur, "oncandrag", "params_candrag", _AHOnCanDrag, _AHCanDragParams);
-	parseAH(cur, "ondrag", "params_drag", _AHOnDrag, _AHDragParams);
+	CAHManager::getInstance()->parseAH(cur, "onclick_l", "params_l", _AHOnLeftClick, _AHLeftClickParams);
+	CAHManager::getInstance()->parseAH(cur, "onclick_r", "params_r", _AHOnRightClick, _AHRightClickParams);
+	CAHManager::getInstance()->parseAH(cur, "oncandrop", "params_candrop", _AHOnCanDrop, _AHCanDropParams);
+	CAHManager::getInstance()->parseAH(cur, "ondrop", "params_drop", _AHOnDrop, _AHDropParams);
+	CAHManager::getInstance()->parseAH(cur, "oncannotdrop", "params_cannotdrop", _AHOnCannotDrop, _AHCannotDropParams);
+	CAHManager::getInstance()->parseAH(cur, "oncandrag", "params_candrag", _AHOnCanDrag, _AHCanDragParams);
+	CAHManager::getInstance()->parseAH(cur, "ondrag", "params_drag", _AHOnDrag, _AHDragParams);
 
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"selection_group" );
 	if (prop)
@@ -1870,7 +1870,7 @@ void CDBCtrlSheet::draw()
 				string params = string("src=") + pCSSrc->getId();
 				if (!_AHCanDropParams.empty())
 				{
-					if (getAHName(_AHOnCanDrop) == "lua")
+					if ( CAHManager::getInstance()->getAHName(_AHOnCanDrop) == "lua")
 					{
 						params = _AHCanDropParams;
 						strFindReplace(params, "%src", pCSSrc->getId());
@@ -2687,7 +2687,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 							string params = string("src=") + _Id;
 							if (!pCSdest->_AHCanDropParams.empty())
 							{
-								if (getAHName(pCSdest->_AHOnCanDrop) == "lua")
+								if (CAHManager::getInstance()->getAHName(pCSdest->_AHOnCanDrop) == "lua")
 								{
 									params = pCSdest->_AHCanDropParams;
 									strFindReplace(params, "%src", _Id);
@@ -2707,7 +2707,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 								string params = string("src=") + _Id;
 								if (!pCSdest->_AHDropParams.empty())
 								{
-									if (getAHName(pCSdest->_AHOnDrop) == "lua")
+									if (CAHManager::getInstance()->getAHName(pCSdest->_AHOnDrop) == "lua")
 									{
 										params = pCSdest->_AHDropParams;
 										strFindReplace(params, "%src", _Id);
@@ -2752,7 +2752,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 								string params = string("src=") + _Id;
 								if (!pList->getCtrlSheetInfo()._AHCanDropParams.empty())
 								{
-									if (getAHName(pList->getCtrlSheetInfo()._AHOnCanDrop) == "lua")
+									if (CAHManager::getInstance()->getAHName(pList->getCtrlSheetInfo()._AHOnCanDrop) == "lua")
 									{
 										params = pList->getCtrlSheetInfo()._AHCanDropParams;
 										strFindReplace(params, "%src", _Id);
@@ -2772,7 +2772,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 									string params = string("src=") + _Id;
 									if (!pList->getCtrlSheetInfo()._AHDropParams.empty())
 									{
-										if (getAHName(pList->getCtrlSheetInfo()._AHOnDrop) == "lua")
+										if (CAHManager::getInstance()->getAHName(pList->getCtrlSheetInfo()._AHOnDrop) == "lua")
 										{
 											params = pList->getCtrlSheetInfo()._AHDropParams;
 											strFindReplace(params, "%src", _Id);

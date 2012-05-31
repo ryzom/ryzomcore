@@ -292,8 +292,8 @@ bool CInterfaceGroup::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
 		NLMISC::fromString((const char*)ptr, _ResizeFromChildHMargin);
 	}
-	parseAH(cur, "on_active", "on_active_params", _AHOnActive, _AHOnActiveParams);
-	parseAH(cur, "on_deactive", "on_deactive_params", _AHOnDeactive, _AHOnDeactiveParams);
+	CAHManager::getInstance()->parseAH(cur, "on_active", "on_active_params", _AHOnActive, _AHOnActiveParams);
+	CAHManager::getInstance()->parseAH(cur, "on_deactive", "on_deactive_params", _AHOnDeactive, _AHOnDeactiveParams);
 
 	// Read user max size
 	ptr = (char*) xmlGetProp( cur, (xmlChar*)"max_w" );
@@ -327,11 +327,11 @@ bool CInterfaceGroup::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	}
 
 	// left & right clicks
-	parseAH(cur, "group_onclick_r", "group_params_r", _AHOnRightClick, _AHOnRightClickParams);
-	parseAH(cur, "group_onclick_l", "group_params_l", _AHOnLeftClick, _AHOnLeftClickParams);
+	CAHManager::getInstance()->parseAH(cur, "group_onclick_r", "group_params_r", _AHOnRightClick, _AHOnRightClickParams);
+	CAHManager::getInstance()->parseAH(cur, "group_onclick_l", "group_params_l", _AHOnLeftClick, _AHOnLeftClickParams);
 
 	// Each window (modal and groupContainer) can be validated by Enter. if "" => no op.
-	parseAH(cur, "on_enter", "on_enter_params", _AHOnEnter, _AHOnEnterParams);
+	CAHManager::getInstance()->parseAH(cur, "on_enter", "on_enter_params", _AHOnEnter, _AHOnEnterParams);
 
 	ptr = (char*) xmlGetProp( cur, (xmlChar*)"win_priority" );
 	if(ptr) NLMISC::fromString((const char*)ptr, _Priority);
@@ -341,7 +341,7 @@ bool CInterfaceGroup::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 
 	// Each window (modal and groupContainer) can be escaped if "escapable" set
 	// they can add an action handler before the hide
-	parseAH(cur, "on_escape", "on_escape_params", _AHOnEscape, _AHOnEscapeParams);
+	CAHManager::getInstance()->parseAH(cur, "on_escape", "on_escape_params", _AHOnEscape, _AHOnEscapeParams);
 
 
 	// LuaClass script
@@ -1559,13 +1559,13 @@ void CInterfaceGroup::setAlpha (sint32 a)
 // ------------------------------------------------------------------------------------------------
 void	CInterfaceGroup::setLeftClickHandler(const std::string &handler)
 {
-	_AHOnLeftClick = getAH(handler, _AHOnLeftClickParams);
+	_AHOnLeftClick = CAHManager::getInstance()->getAH(handler, _AHOnLeftClickParams);
 }
 
 // ------------------------------------------------------------------------------------------------
 void	CInterfaceGroup::setRightClickHandler(const std::string &handler)
 {
-	_AHOnRightClick = getAH(handler, _AHOnRightClickParams);
+	_AHOnRightClick = CAHManager::getInstance()->getAH(handler, _AHOnRightClickParams);
 }
 
 // ------------------------------------------------------------------------------------------------

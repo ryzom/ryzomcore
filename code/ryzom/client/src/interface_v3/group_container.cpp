@@ -1426,14 +1426,14 @@ bool CGroupContainer::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	if (ptr)
 		fromString((const char*)ptr, _ResizerTopSize);
 
-	parseAH(cur, "on_open", "on_open_params", _AHOnOpen, _AHOnOpenParams);
-	parseAH(cur, "on_close", "on_close_params", _AHOnClose, _AHOnCloseParams);
-	parseAH(cur, "on_close_button", "on_close_button_params", _AHOnCloseButton, _AHOnCloseButtonParams);
-	parseAH(cur, "on_move", "on_move_params", _AHOnMove, _AHOnMoveParams);
-	parseAH(cur, "on_deactive_check", "on_deactive_check_params", _AHOnDeactiveCheck, _AHOnDeactiveCheckParams);
-	parseAH(cur, "on_resize", "on_resize_params", _AHOnResize, _AHOnResizeParams);
-	parseAH(cur, "on_alpha_settings_changed", "on_alpha_settings_changed_params", _AHOnAlphaSettingsChanged, _AHOnAlphaSettingsChangedParams);
-	parseAH(cur, "on_begin_move", "on_begin_move_params", _AHOnBeginMove, _AHOnBeginMoveParams);
+	CAHManager::getInstance()->parseAH(cur, "on_open", "on_open_params", _AHOnOpen, _AHOnOpenParams);
+	CAHManager::getInstance()->parseAH(cur, "on_close", "on_close_params", _AHOnClose, _AHOnCloseParams);
+	CAHManager::getInstance()->parseAH(cur, "on_close_button", "on_close_button_params", _AHOnCloseButton, _AHOnCloseButtonParams);
+	CAHManager::getInstance()->parseAH(cur, "on_move", "on_move_params", _AHOnMove, _AHOnMoveParams);
+	CAHManager::getInstance()->parseAH(cur, "on_deactive_check", "on_deactive_check_params", _AHOnDeactiveCheck, _AHOnDeactiveCheckParams);
+	CAHManager::getInstance()->parseAH(cur, "on_resize", "on_resize_params", _AHOnResize, _AHOnResizeParams);
+	CAHManager::getInstance()->parseAH(cur, "on_alpha_settings_changed", "on_alpha_settings_changed_params", _AHOnAlphaSettingsChanged, _AHOnAlphaSettingsChangedParams);
+	CAHManager::getInstance()->parseAH(cur, "on_begin_move", "on_begin_move_params", _AHOnBeginMove, _AHOnBeginMoveParams);
 
 
 	ptr = xmlGetProp (cur, (xmlChar*)"max_w");

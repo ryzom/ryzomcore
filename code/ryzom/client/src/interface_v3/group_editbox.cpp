@@ -119,7 +119,7 @@ bool CGroupEditBox::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	}
 
 	// NB: use InterfaceGroup "OnEnter" data. Different script params for an historic reason
-	parseAH(cur, "onenter", "params", _AHOnEnter, _AHOnEnterParams);
+	CAHManager::getInstance()->parseAH(cur, "onenter", "params", _AHOnEnter, _AHOnEnterParams);
 
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"onchange" );
 	if (prop) _AHOnChange = (const char *) prop;

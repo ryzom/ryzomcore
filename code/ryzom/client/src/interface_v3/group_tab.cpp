@@ -752,7 +752,7 @@ bool CCtrlTabButton::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	// if left click not setuped, set default
 	_AHOnLeftClick2 = _AHOnLeftClick;
 	string	dummy;
-	_AHOnLeftClick= getAH("tab_select", dummy);
+	_AHOnLeftClick= CAHManager::getInstance()->getAH("tab_select", dummy);
 
 	// read the associated group to show/hide
 	CXMLAutoPtr	prop;

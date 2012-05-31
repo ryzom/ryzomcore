@@ -22,6 +22,7 @@
 // Interface includes
 #include "interface_manager.h"
 #include "action_handler.h"
+#include "action_handler_base.h"
 #include "action_handler_misc.h"
 #include "bot_chat_manager.h"
 #include "bot_chat_page_all.h"

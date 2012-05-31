@@ -114,16 +114,16 @@ public:
 	/// \name Handlers
 	// @{
 	// Event part
-	void setActionOnLeftClick (const std::string &actionHandlerName) { _AHOnLeftClickString = actionHandlerName; _AHOnLeftClick = getAH(actionHandlerName, _AHLeftClickParams); }
+	void setActionOnLeftClick (const std::string &actionHandlerName) { _AHOnLeftClickString = actionHandlerName; _AHOnLeftClick = CAHManager::getInstance()->getAH(actionHandlerName, _AHLeftClickParams); }
 	void setActionOnLeftClickParams(const std::string &params) { _AHOnLeftClickStringParams = params; }
-	void setActionOnRightClick (const std::string &actionHandlerName) { _AHOnRightClick = getAH(actionHandlerName, _AHRightClickParams); }
-	void setActionOnClockTick (const std::string &ahName) { _AHOnClockTick = getAH(ahName, _AHClockTickParams); }
+	void setActionOnRightClick (const std::string &actionHandlerName) { _AHOnRightClick = CAHManager::getInstance()->getAH(actionHandlerName, _AHRightClickParams); }
+	void setActionOnClockTick (const std::string &ahName) { _AHOnClockTick = CAHManager::getInstance()->getAH(ahName, _AHClockTickParams); }
 	void setParamsOnLeftClick (const std::string &paramsHandlerName) { _AHLeftClickParams = paramsHandlerName; }
 	void setParamsOnRightClick (const std::string &paramsHandlerName) { _AHRightClickParams = paramsHandlerName; }
 	void setParamsOnClockTick (const std::string &ahParamsName) { _AHClockTickParams = ahParamsName; }
 
 	// get Event part
-	std::string		_getActionOnLeftClick() const { return getAHName(_AHOnLeftClick); }
+	std::string		_getActionOnLeftClick() const { return CAHManager::getInstance()->getAHName(_AHOnLeftClick); }
 	IActionHandler *getActionOnLeftClick () const { return _AHOnLeftClick; }
 	IActionHandler *getActionOnRightClick () const { return _AHOnRightClick; }
 	IActionHandler *getActionOnClockTick () const { return _AHOnClockTick; }

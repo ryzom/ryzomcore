@@ -1254,11 +1254,11 @@ void CInterfaceElement::serialAH(NLMISC::IStream &f, IActionHandler *&ah)
 	if (f.isReading())
 	{
 		f.serial(ahName);
-		ah = CActionHandlerFactoryManager::getInstance()->getActionHandler(ahName);
+		ah = CAHManager::getInstance()->getActionHandler(ahName);
 	}
 	else
 	{
-		ahName = CActionHandlerFactoryManager::getInstance()->getActionHandlerName(ah);
+		ahName = CAHManager::getInstance()->getActionHandlerName(ah);
 		f.serial(ahName);
 	}
 }

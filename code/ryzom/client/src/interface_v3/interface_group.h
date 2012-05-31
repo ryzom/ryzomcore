@@ -134,13 +134,13 @@ public:
 	// escapable
 	void setEscapable(bool b) { _Escapable= b; }
 	bool getEscapable() const { return _Escapable; }
-	void setAHOnEscape(const std::string &ah) { _AHOnEscape = getAH(ah, _AHOnEscapeParams); }
-	const std::string &getAHOnEscape() const { return getAHName(_AHOnEscape); }
+	void setAHOnEscape(const std::string &ah) { _AHOnEscape = CAHManager::getInstance()->getAH(ah, _AHOnEscapeParams); }
+	const std::string &getAHOnEscape() const { return CAHManager::getInstance()->getAHName(_AHOnEscape); }
 	void setAHOnEscapeParams(const std::string &ah) { _AHOnEscapeParams = ah; }
 	const std::string &getAHOnEscapeParams() const { return _AHOnEscapeParams; }
 	// enterable
-	void setAHOnEnter(const std::string &ah) { _AHOnEnter = getAH(ah, _AHOnEnterParams); }
-	const std::string &getAHOnEnter() const { return getAHName(_AHOnEnter); }
+	void setAHOnEnter(const std::string &ah) { _AHOnEnter = CAHManager::getInstance()->getAH(ah, _AHOnEnterParams); }
+	const std::string &getAHOnEnter() const { return CAHManager::getInstance()->getAHName(_AHOnEnter); }
 	void setAHOnEnterParams(const std::string &ah) { _AHOnEnterParams = ah; }
 	const std::string &getAHOnEnterParams() const { return _AHOnEnterParams; }
 	uint8 getPriority() const { return _Priority; }
@@ -174,18 +174,18 @@ public:
 	void	setRightClickHandler(const std::string &handler);
 	void	setLeftClickHandlerParams(const std::string &params) { _AHOnLeftClickParams = params; }
 	void	setRightClickHandlerParams(const std::string &params) { _AHOnRightClickParams = params; }
-	void	setOnActiveHandler(const std::string &h) { _AHOnActive = getAH(h,_AHOnActiveParams); }
+	void	setOnActiveHandler(const std::string &h) { _AHOnActive = CAHManager::getInstance()->getAH(h,_AHOnActiveParams); }
 	void	setOnActiveParams(const std::string &p) { _AHOnActiveParams = p; }
-	void	setOnDeactiveHandler(const std::string &h) { _AHOnDeactive = getAH(h,_AHOnDeactiveParams); }
+	void	setOnDeactiveHandler(const std::string &h) { _AHOnDeactive = CAHManager::getInstance()->getAH(h,_AHOnDeactiveParams); }
 	void	setOnDeactiveParams(const std::string &p) { _AHOnDeactiveParams = p; }
 
-	const std::string &getLeftClickHandler() const { return getAHName(_AHOnLeftClick); }
+	const std::string &getLeftClickHandler() const { return CAHManager::getInstance()->getAHName(_AHOnLeftClick); }
 	const std::string &getLeftClickHandlerParams() const { return _AHOnLeftClickParams; }
-	const std::string &getRightClickHandler() const { return getAHName(_AHOnRightClick); }
+	const std::string &getRightClickHandler() const { return CAHManager::getInstance()->getAHName(_AHOnRightClick); }
 	const std::string &getRightClickHandlerParams() const { return _AHOnRightClickParams; }
-	const std::string &getOnActiveHandler() const { return getAHName(_AHOnActive); }
+	const std::string &getOnActiveHandler() const { return CAHManager::getInstance()->getAHName(_AHOnActive); }
 	const std::string &getOnActiveParams() const { return _AHOnActiveParams; }
-	const std::string &getOnDeactiveHandler() const { return getAHName(_AHOnDeactive); }
+	const std::string &getOnDeactiveHandler() const { return CAHManager::getInstance()->getAHName(_AHOnDeactive); }
 	const std::string &getOnDeactiveParams() const { return _AHOnDeactiveParams; }
 
 	// find a sub view/ctrl/group in this group from its id

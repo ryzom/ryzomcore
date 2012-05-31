@@ -3173,11 +3173,11 @@ bool CInterfaceParser::parseActionCategory(xmlNodePtr cur)
 		else
 		{
 			// Remove thoses actions from the manager
-			CActionHandlerFactoryManager *pAHFM = CActionHandlerFactoryManager::getInstance();
+			CAHManager *pAHFM = CAHManager::getInstance();
 			uint i;
 			for (i=0; i<category.BaseActions.size(); i++)
 			{
-				CActionHandlerFactoryManager::TFactoryMap::iterator ite = pAHFM->FactoryMap.find (category.BaseActions[i].Name);
+				CAHManager::TFactoryMap::iterator ite = pAHFM->FactoryMap.find (category.BaseActions[i].Name);
 				if (ite != pAHFM->FactoryMap.end())
 				{
 					IActionHandler *ah = ite->second;
