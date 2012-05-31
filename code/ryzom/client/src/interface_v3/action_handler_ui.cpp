@@ -233,9 +233,9 @@ class CAHUIPopupPopin : public IActionHandler
 		}
 		if (!isContainerAuthorized(pGC)) return;
 		if (pGC->isPopuped())
-			pIM->runActionHandler("popin", NULL, Params);
+			CAHManager::getInstance()->runActionHandler("popin", NULL, Params);
 		else
-			pIM->runActionHandler("popup", NULL, Params);
+			CAHManager::getInstance()->runActionHandler("popup", NULL, Params);
 	}
 };
 REGISTER_ACTION_HANDLER( CAHUIPopupPopin, "popup_popin" );
@@ -561,7 +561,7 @@ class CAHTalkUntalk : public IActionHandler
 					double distanceSquare = pow(vect1.x-vect2.x,2) + pow(vect1.y-vect2.y,2);
 					if(distanceSquare <= MaxTalkingDistSquare)
 					{
-						pIM->runActionHandler("context_talk",NULL);
+						CAHManager::getInstance()->runActionHandler("context_talk",NULL);
 					}
 				}
 			}
@@ -593,7 +593,7 @@ class CAHMountUnmount : public IActionHandler
 		else if(UserEntity->isRiding())
 		{
 			// We are currently mounted so unmount
-			pIM->runActionHandler("context_unseat",NULL);
+			CAHManager::getInstance()->runActionHandler("context_unseat",NULL);
 		}
 		// Not in combat mode.
 		else
@@ -607,7 +607,7 @@ class CAHMountUnmount : public IActionHandler
 				if(distanceSquare <= MaxTalkingDistSquare)
 				{
 					// Ok lets mount
-					pIM->runActionHandler("context_mount",NULL);
+					CAHManager::getInstance()->runActionHandler("context_mount",NULL);
 				}
 			}
 		}
@@ -638,7 +638,7 @@ class CAHExchange : public IActionHandler
 		{
 			if (selection && selection->properties().canExchangeItem())
 				if (!UserEntity->isBusy())
-					pIM->runActionHandler("context_exchange",NULL);
+					CAHManager::getInstance()->runActionHandler("context_exchange",NULL);
 		}
 	}
 };

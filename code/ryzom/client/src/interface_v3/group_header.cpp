@@ -338,7 +338,7 @@ public:
 						{
 							ghe->setW(_TargetGroup->getW());
 							ghe->invalidateCoords();
-							im->runActionHandler(ghe->getAHOnResize(), ghe, ghe->getAHOnResizeParams());
+							CAHManager::getInstance()->runActionHandler(ghe->getAHOnResize(), ghe, ghe->getAHOnResizeParams());
 						}
 						return true;
 					}

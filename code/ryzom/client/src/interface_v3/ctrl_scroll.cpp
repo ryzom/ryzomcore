@@ -70,7 +70,7 @@ void CCtrlScroll::runAH(const std::string &name, const std::string &params)
 	if (_CallingAH) return; // avoid infinite loop
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	_CallingAH = true;
-	pIM->runActionHandler(name, this, params);
+	CAHManager::getInstance()->runActionHandler(name, this, params);
 	_CallingAH = false;
 }
 

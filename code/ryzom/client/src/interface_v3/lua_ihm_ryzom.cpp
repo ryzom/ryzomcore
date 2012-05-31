@@ -1179,7 +1179,7 @@ int	CLuaIHMRyzom::runAH(CLuaState &ls)
 		if(!ctrl)
 			throw ELuaIHMException("runAH(): '%s' is not a ctrl",    pIE->getId().c_str());
 	}
-	pIM->runActionHandler(ah,    ctrl,    params);
+	CAHManager::getInstance()->runActionHandler(ah,    ctrl,    params);
 
 	return 0;
 }

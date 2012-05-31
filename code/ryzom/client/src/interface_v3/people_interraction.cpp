@@ -2236,7 +2236,7 @@ public:
 							CGroupEditBox *geb = dynamic_cast<CGroupEditBox *>(gc->getGroup("add_contact_eb:eb"));
 							geb->setInputString(ucstring(""));
 						}
-						pIM->runActionHandler("enter_modal", pCaller, sParams);
+						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, sParams);
 					}
 				}
 			}
@@ -2300,7 +2300,7 @@ public:
 				}
 			}
 		}
-		pIM->runActionHandler("leave_modal", pCaller, "");
+		CAHManager::getInstance()->runActionHandler("leave_modal", pCaller, "");
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerAddContact, "add_contact");
@@ -2745,12 +2745,12 @@ class CHandlerChatTargetSelected : public IActionHandler
 		if (cw == PeopleInterraction.ChatGroup.Window)
 		{
 			PeopleInterraction.TheUserChat.Filter.setTargetGroup(cf.getTargetGroup(), cf.getTargetDynamicChannelDbIndex());
-			CInterfaceManager::getInstance()->runActionHandler("chat_group_filter", NULL, "user");
+			CAHManager::getInstance()->runActionHandler("chat_group_filter", NULL, "user");
 		}
 		if (cw == PeopleInterraction.TheUserChat.Window)
 		{
 			PeopleInterraction.TheUserChat.Filter.setTargetGroup(cf.getTargetGroup(), cf.getTargetDynamicChannelDbIndex());
-			CInterfaceManager::getInstance()->runActionHandler("user_chat_active", NULL, "");
+			CAHManager::getInstance()->runActionHandler("user_chat_active", NULL, "");
 		}
 
 		// The target should be a party chat

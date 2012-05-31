@@ -365,7 +365,7 @@ void CInterfaceLink::update()
 		if(launch)
 		{
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			im->runActionHandler(_ActionHandler, _AHParent, _AHParams);
+			CAHManager::getInstance()->runActionHandler(_ActionHandler, _AHParent, _AHParams);
 			// do not add any code after this line because this can be deleted !!!!
 		}
 	}

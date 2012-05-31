@@ -276,10 +276,6 @@ public:
 	/// Handle The Event. return true if the interfaceManager catch it and if must not send to the Game Action Manager
 	bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
 	bool handleMouseMoveEvent( const NLGUI::CEventDescriptor &eventDesc );
-	void runActionHandler (const std::string &AHName, CCtrlBase *pCaller,
-							const std::string &Params=std::string(""));
-	void runActionHandler (IActionHandler *ah, CCtrlBase *pCaller,
-							const std::string &Params=std::string(""));
 	// execute a procedure. give a list of parameters. NB: the first param is the name of the proc (skipped)...
 	void runProcedure(const std::string &procName, CCtrlBase *pCaller, const std::vector<std::string> &paramList);
 	// replace an action in a procedure (if possible)

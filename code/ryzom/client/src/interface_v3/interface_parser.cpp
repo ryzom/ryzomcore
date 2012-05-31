@@ -2313,7 +2313,7 @@ bool CInterfaceParser::initCoordsAndLuaScript()
 	{
 		// execute the script on this group
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		pIM->runActionHandler("lua", itLua->first, itLua->second);
+		CAHManager::getInstance()->runActionHandler("lua", itLua->first, itLua->second);
 	}
 
 

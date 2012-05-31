@@ -1881,7 +1881,7 @@ void CDBCtrlSheet::draw()
 						params = sTmp + "|" + params;
 					}
 				}
-				pIM->runActionHandler (_AHOnCanDrop, this, params);
+				CAHManager::getInstance()->runActionHandler (_AHOnCanDrop, this, params);
 			}
 		}
 	}
@@ -2633,7 +2633,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 			if (validClic && _AHOnCanDrag != NULL)
 			{
 				_TempCanDrag= true;
-				pIM->runActionHandler (_AHOnCanDrag, this, _AHCanDragParams);
+				CAHManager::getInstance()->runActionHandler (_AHOnCanDrag, this, _AHCanDragParams);
 				validClic= _TempCanDrag;
 			}
 
@@ -2650,7 +2650,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 
 					if (_AHOnDrag != NULL)
 					{
-						pIM->runActionHandler (_AHOnDrag, this, _AHDragParams);
+						CAHManager::getInstance()->runActionHandler (_AHOnDrag, this, _AHDragParams);
 					}
 				}
 			}
@@ -2698,7 +2698,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 									params = sTmp + "|" + params;
 								}
 							}
-							pIM->runActionHandler (pCSdest->_AHOnCanDrop, pCSdest, params);
+							CAHManager::getInstance()->runActionHandler (pCSdest->_AHOnCanDrop, pCSdest, params);
 
 							// Drop only if canDrop.
 							if(pCSdest->_CanDrop)
@@ -2719,7 +2719,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 									}
 								}
 								// call action
-								pIM->runActionHandler (pCSdest->_AHOnDrop, pCSdest, params);
+								CAHManager::getInstance()->runActionHandler (pCSdest->_AHOnDrop, pCSdest, params);
 								handled = true;
 							}
 						}
@@ -2763,7 +2763,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 										params = sTmp + "|" + params;
 									}
 								}
-								pIM->runActionHandler (pList->getCtrlSheetInfo()._AHOnCanDrop, pList, params);
+								CAHManager::getInstance()->runActionHandler (pList->getCtrlSheetInfo()._AHOnCanDrop, pList, params);
 
 								// Drop only if canDrop.
 								if(pList->getCanDrop())
@@ -2784,7 +2784,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 										}
 									}
 									// call action
-									pIM->runActionHandler (pList->getCtrlSheetInfo()._AHOnDrop, pList, params);
+									CAHManager::getInstance()->runActionHandler (pList->getCtrlSheetInfo()._AHOnDrop, pList, params);
 									handled = true;
 								}
 							}
@@ -2799,7 +2799,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 									string sTmp = pTextList->getCtrlSheetInfo()._AHCanDropParams;
 									params = sTmp + "|" + params;
 								}
-								pIM->runActionHandler (pTextList->getCtrlSheetInfo()._AHOnCanDrop, pTextList, params);
+								CAHManager::getInstance()->runActionHandler (pTextList->getCtrlSheetInfo()._AHOnCanDrop, pTextList, params);
 
 								// Drop only if canDrop.
 								if(pTextList->getCanDrop())
@@ -2812,7 +2812,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 										params = sTmp + "|" + params; // must copy 'drop' params at start because it could be the name of a procedure
 									}
 									// call action
-									pIM->runActionHandler (pTextList->getCtrlSheetInfo()._AHOnDrop, pTextList, params);
+									CAHManager::getInstance()->runActionHandler (pTextList->getCtrlSheetInfo()._AHOnDrop, pTextList, params);
 									handled = true;
 								}
 							}
@@ -2822,7 +2822,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 
 					if (!handled && _AHOnCannotDrop != NULL )
 					{
-						pIM->runActionHandler (_AHOnCannotDrop, this, _AHCannotDropParams);
+						CAHManager::getInstance()->runActionHandler (_AHOnCannotDrop, this, _AHCannotDropParams);
 						handled = true;
 					}
 
@@ -2854,7 +2854,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 
 			// RunAction
 			if(_AHOnLeftClick != NULL)
-				pIM->runActionHandler (_AHOnLeftClick, this, _AHLeftClickParams);
+				CAHManager::getInstance()->runActionHandler (_AHOnLeftClick, this, _AHLeftClickParams);
 			// Run Menu (if item is not being dragged)
 			if (!_ListMenuLeft.empty() && _LastDraggedSheet == NULL)
 			{
@@ -2884,7 +2884,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 			if(_AHOnRightClick != NULL)
 			{
 				handled= true;
-				pIM->runActionHandler (_AHOnRightClick, this, _AHRightClickParams);
+				CAHManager::getInstance()->runActionHandler (_AHOnRightClick, this, _AHRightClickParams);
 			}
 			// Run Menu (if item is not being dragged)
 			if (!_ListMenuRight.empty() || !_ListMenuRightEmptySlot.empty())

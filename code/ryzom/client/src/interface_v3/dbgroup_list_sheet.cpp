@@ -730,7 +730,7 @@ void CDBGroupListSheet::draw ()
 						string sTmp = _CtrlInfo._AHCanDropParams;
 						params = sTmp + "|" + params;
 					}
-					pIM->runActionHandler (_CtrlInfo._AHOnCanDrop, this, params);
+					CAHManager::getInstance()->runActionHandler (_CtrlInfo._AHOnCanDrop, this, params);
 				}
 			}
 		}

@@ -1665,13 +1665,13 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 		switch(tpContext)
 		{
 			case R2::TPContext_Mainland:
-				CInterfaceManager::getInstance()->runActionHandler("return_to_mainland", NULL);
+				CAHManager::getInstance()->runActionHandler("return_to_mainland", NULL);
 			break;
 			case R2::TPContext_Edit:
-				CInterfaceManager::getInstance()->runActionHandler("r2ed_stop_test", NULL);
+				CAHManager::getInstance()->runActionHandler("r2ed_stop_test", NULL);
 			break;
 			case R2::TPContext_IslandOwner:
-				CInterfaceManager::getInstance()->runActionHandler("r2_stop_live", NULL);
+				CAHManager::getInstance()->runActionHandler("r2_stop_live", NULL);
 			break;
 			default:
 			break;

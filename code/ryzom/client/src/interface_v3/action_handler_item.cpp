@@ -1498,7 +1498,7 @@ class CHandlerMoveItem : public IActionHandler
 						if (pLS->getSheet(i)->getSheetId() == 0)
 						{
 							// Send swap_item
-							pIM->runActionHandler("swap_item", pLS->getSheet(i), "src="+toString(pCaller->getId()));
+							CAHManager::getInstance()->runActionHandler("swap_item", pLS->getSheet(i), "src="+toString(pCaller->getId()));
 							return;
 						}
 					}
@@ -1563,7 +1563,7 @@ class CHandlerMoveItem : public IActionHandler
 							(pCS->getSheetId() == 0) && pCS->canDropItem(item) && (!pCS->getGrayed()))
 						{
 							// Send swap_item
-							pIM->runActionHandler("swap_item", pCS, "src="+toString(pCaller->getId()));
+							CAHManager::getInstance()->runActionHandler("swap_item", pCS, "src="+toString(pCaller->getId()));
 							return;
 						}
 					}
@@ -1597,7 +1597,7 @@ class CHandlerMoveItem : public IActionHandler
 							if ((pCS->canDropItem(item)) && (!pCS->getGrayed()))
 							{
 								// Send swap_item
-								pIM->runActionHandler("swap_item", pCS, "src="+toString(pCaller->getId()));
+								CAHManager::getInstance()->runActionHandler("swap_item", pCS, "src="+toString(pCaller->getId()));
 								return;
 							}
 						}
@@ -1629,7 +1629,7 @@ class CHandlerDragNDrop : public IActionHandler
 		CDBCtrlSheet *pCSsrc = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(sSrc));
 		CDBCtrlSheet *pCSdst = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(sDst));
 		if ((pCSdst == NULL) || (pCSsrc == NULL) || sAH.empty()) return;
-		pIM->runActionHandler(sAH, pCSdst, "src="+pCSsrc->getId());
+		CAHManager::getInstance()->runActionHandler(sAH, pCSdst, "src="+pCSsrc->getId());
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerDragNDrop, "drag_n_drop" );
@@ -1657,7 +1657,7 @@ class CHandlerItemCristalEnchant : public IActionHandler
 	void execute (CCtrlBase *pCaller, const std::string &sParams)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler("item_cristal_reload", pCaller, sParams);
+		CAHManager::getInstance()->runActionHandler("item_cristal_reload", pCaller, sParams);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerItemCristalEnchant, "item_cristal_enchant" );

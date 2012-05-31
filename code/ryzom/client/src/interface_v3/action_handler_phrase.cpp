@@ -250,7 +250,7 @@ public:
 		{
 			// Act as if the player click on this button
 			CInterfaceManager	*pIM = CInterfaceManager::getInstance();
-			pIM->runActionHandler(button->getActionOnLeftClick(), button, button->getParamsOnLeftClick() );
+			CAHManager::getInstance()->runActionHandler(button->getActionOnLeftClick(), button, button->getParamsOnLeftClick() );
 		}
 	}
 };
@@ -721,7 +721,7 @@ public:
 			string mode = getParam(Params, "mode"); //default mode is copy
 			if (mode == "cut") //need delete src
 			{
-				CInterfaceManager::getInstance()->runActionHandler("forget_phrase_or_macro", ctrl);
+				CAHManager::getInstance()->runActionHandler("forget_phrase_or_macro", ctrl);
 			}
 		}
 	}
@@ -895,7 +895,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 					memorizePhraseOrMacro(dstMemoryIndex, srcIsMacro, srcPhraseId, srcMacroId);
 
 					// forget src (after shorctut change!)
-					pIM->runActionHandler("forget_phrase_or_macro", pCSSrc);
+					CAHManager::getInstance()->runActionHandler("forget_phrase_or_macro", pCSSrc);
 				}
 			}
 		}
@@ -1273,9 +1273,9 @@ public:
 			{
 				// run the standard cast case.
 				if(ctrl->isMacro())
-					pIM->runActionHandler("cast_macro", ctrl);
+					CAHManager::getInstance()->runActionHandler("cast_macro", ctrl);
 				else
-					pIM->runActionHandler("cast_phrase", ctrl);
+					CAHManager::getInstance()->runActionHandler("cast_phrase", ctrl);
 			}
 		}
 	}
@@ -1303,7 +1303,7 @@ public:
 		// if a phrase is on this slot, just cast the phrase
 		if(phraseId)
 		{
-			pIM->runActionHandler("cast_phrase", pCaller, Params);
+			CAHManager::getInstance()->runActionHandler("cast_phrase", pCaller, Params);
 		}
 		// else open the RightMenuEmpty, to have "NewAction"
 		else
@@ -1339,7 +1339,7 @@ public:
 			CDBCtrlSheet	*ctrl= dynamic_cast<CDBCtrlSheet*>(parent->getCtrl("ctrl_phrase"));
 			if(ctrl)
 			{
-				pIM->runActionHandler(ctrl->getActionOnRightClick(), ctrl, ctrl->getParamsOnRightClick());
+				CAHManager::getInstance()->runActionHandler(ctrl->getActionOnRightClick(), ctrl, ctrl->getParamsOnRightClick());
 			}
 		}
 

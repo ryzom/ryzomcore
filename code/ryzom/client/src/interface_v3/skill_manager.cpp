@@ -587,7 +587,7 @@ void CSkillManager::checkTitleUnblocked(CHARACTER_TITLE::ECharacterTitle i, bool
 				string titleStr = CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)i);
 				bool womenTitle = (UserEntity && UserEntity->getGender() == GSGENDER::female);
 				const ucstring newtitle(CStringManagerClient::getTitleLocalizedName(titleStr, womenTitle));
-				pIM->runActionHandler("message_popup", NULL, "text1="+newtitle.toUtf8()+"|text0="+CI18N::get("uiNewTitleBold").toUtf8());
+				CAHManager::getInstance()->runActionHandler("message_popup", NULL, "text1="+newtitle.toUtf8()+"|text0="+CI18N::get("uiNewTitleBold").toUtf8());
 			}
 			else
 			{
@@ -612,7 +612,7 @@ void CSkillManager::checkTitleUnblocked(CHARACTER_TITLE::ECharacterTitle i, bool
 			}
 
 			// Update title combo box
-			pIM->runActionHandler("title_init_combobox", NULL);
+			CAHManager::getInstance()->runActionHandler("title_init_combobox", NULL);
 		}
 	}
 }
@@ -1032,7 +1032,7 @@ void CSkillManager::blockTitleFromServer(CHARACTER_TITLE::ECharacterTitle ct)
 void CSkillManager::setPlayerTitle(const std::string &name)
 {
 	setCurrentTitle(CHARACTER_TITLE::toCharacterTitle(name));
-	CInterfaceManager::getInstance()->runActionHandler("title_init_combobox", NULL);
+	CAHManager::getInstance()->runActionHandler("title_init_combobox", NULL);
 }
 
 
@@ -1051,7 +1051,7 @@ public:
 	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler("title_combobox_button", NULL);
+		CAHManager::getInstance()->runActionHandler("title_combobox_button", NULL);
 
 		// Setup UI:TITLE from current title
 		CSkillManager *pSM = CSkillManager::getInstance();

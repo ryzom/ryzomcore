@@ -141,7 +141,7 @@ void CToolCreateEntity::commit(const NLMISC::CVector &createPosition, float crea
 		// prevent newly created ghost to be removed twice ...
 		removeGhostSlot();
 		// re set this tool to generate a new entity look
-		getUI().runActionHandler("r2ed_create_entity", NULL, "PaletteId=" + _PaletteId);
+		CAHManager::getInstance()->runActionHandler("r2ed_create_entity", NULL, "PaletteId=" + _PaletteId);
 	}
 }
 
@@ -616,7 +616,7 @@ void CToolCreateEntity::updateAfterRender()
 		{
 			commitArray();
 			CTool::TSmartPtr hold(this);
-			getUI().runActionHandler("r2ed_create_entity", NULL, "PaletteId="+_PaletteId);
+			CAHManager::getInstance()->runActionHandler("r2ed_create_entity", NULL, "PaletteId="+_PaletteId);
 			return;
 		}
 		break;
@@ -825,7 +825,7 @@ class CAHR2EDToggleDrawArray : public IActionHandler
 			CToolCreateEntity *tce = dynamic_cast<CToolCreateEntity *>(getEditor().getCurrentTool());
 			if (tce)
 			{
-				im->runActionHandler("r2ed_create_entity", NULL, "PaletteId=" + tce->getPaletteId());
+				CAHManager::getInstance()->runActionHandler("r2ed_create_entity", NULL, "PaletteId=" + tce->getPaletteId());
 			}
 		}
 	}

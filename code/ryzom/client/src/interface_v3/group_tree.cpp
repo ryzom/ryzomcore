@@ -727,7 +727,7 @@ void CGroupTree::selectLine(uint line,  bool runAH /*= true*/)
 	{
 		_CancelNextSelectLine = false;
 		/*
-		pIM->runActionHandler (	_Lines[line].Node->AHName,
+		CAHManager::getInstance()->runActionHandler (	_Lines[line].Node->AHName,
 			this,
 			_Lines[line].Node->AHParams );
 		*/
@@ -736,7 +736,7 @@ void CGroupTree::selectLine(uint line,  bool runAH /*= true*/)
 			_SelectedLine = line;
 			_SelectedNode = _Lines[line].Node;
 		}
-		pIM->runActionHandler (	_Lines[line].Node->AHName,
+		CAHManager::getInstance()->runActionHandler (	_Lines[line].Node->AHName,
 			this,
 			_Lines[line].Node->AHParams );
 		_CancelNextSelectLine = false;
@@ -755,7 +755,7 @@ bool CGroupTree::rightButton(uint line)
 	if (line != (uint) _SelectedLine) selectLine(line,  false);
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->runActionHandler (	_Lines[line].Node->AHNameRight,
+	CAHManager::getInstance()->runActionHandler (	_Lines[line].Node->AHNameRight,
 			this,
 			_Lines[line].Node->AHParamsRight );
 	return true;
@@ -863,7 +863,7 @@ bool CGroupTree::handleEvent (const NLGUI::CEventDescriptor& event)
 					}
 
 					CInterfaceManager *pIM = CInterfaceManager::getInstance();
-					pIM->runActionHandler(changedNode->AHNameClose, this, changedNode->AHParamsClose);
+					CAHManager::getInstance()->runActionHandler(changedNode->AHNameClose, this, changedNode->AHParamsClose);
 				}
 				forceRebuild();
 			}
@@ -1303,7 +1303,7 @@ bool	CGroupTree::selectNodeById(const std::string &nodeId, bool triggerAH)
 			_AvoidSelectNodeByIdIR= true;
 
 			// launch the action handler
-			pIM->runActionHandler (	selNode->AHName,
+			CAHManager::getInstance()->runActionHandler (	selNode->AHName,
 				this,
 				selNode->AHParams );
 		}

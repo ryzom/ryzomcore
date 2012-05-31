@@ -640,7 +640,7 @@ void CDBGroupListSheetText::draw ()
 						string sTmp = _CtrlInfo._AHCanDropParams;
 						params = sTmp + "|" + params;
 					}
-					pIM->runActionHandler (_CtrlInfo._AHOnCanDrop, this, params);
+					CAHManager::getInstance()->runActionHandler (_CtrlInfo._AHOnCanDrop, this, params);
 				}
 			}
 		}
@@ -1138,7 +1138,7 @@ class	CHandlerListSheetTextSelect : public IActionHandler
 		CCtrlButton		*ctrlButton= listSheetTrade->_SheetChildren[selected]->Button;
 
 		// run it, but take the wanted action handler
-		pIM->runActionHandler(
+		CAHManager::getInstance()->runActionHandler(
 			listSheetTrade->_CtrlInfo._AHOnLeftClick, ctrlSheet,
 			listSheetTrade->_CtrlInfo._AHLeftClickParams);
 
@@ -1175,7 +1175,7 @@ class	CHandlerListSheetTextRightClick : public IActionHandler
 		CDBCtrlSheet::setCurrSelSheet(ctrlSheet);
 
 		// run it, but take the wanted action handler
-		pIM->runActionHandler(
+		CAHManager::getInstance()->runActionHandler(
 			listSheetTrade->_CtrlInfo._AHOnRightClick, ctrlSheet,
 			listSheetTrade->_CtrlInfo._AHRightClickParams);
 

@@ -185,7 +185,7 @@ public:
 		{
 			ucstring name = CEntityCL::removeTitleAndShardFromName(selection->getEntityName());
 			if (name.empty()) return;
-			im->runActionHandler("enter_tell", pCaller, "player=" + name.toString());
+			CAHManager::getInstance()->runActionHandler("enter_tell", pCaller, "player=" + name.toString());
 		}
 	}
 protected:
@@ -942,7 +942,7 @@ public:
 	{
 		// directly launch the quit_team AH.
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		pIM->runActionHandler("quit_team",pCaller, sParams);
+		CAHManager::getInstance()->runActionHandler("quit_team",pCaller, sParams);
 	}
 protected:
 };
@@ -1026,7 +1026,7 @@ public:
 				(typeProp != NULL) && (typeProp->getValue32() == ANIMAL_TYPE::Mount))
 			{
 				beastOrder("mount", toString(i+1)); // why +1 ? : dixit sendAnimalCommand in EGS : index 0 = all animals, 1 = animal 0 etc
-				pIM->runActionHandler("animal_target", NULL, toString(i+1));
+				CAHManager::getInstance()->runActionHandler("animal_target", NULL, toString(i+1));
 				UserEntity->moveTo(UserEntity->selection(),2.0,CUserEntity::None);
 			}
 		}
@@ -1181,7 +1181,7 @@ public:
 		if(!FreeTrial)
 		{
 			 CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-			 pIM->runActionHandler("quit_ryzom", NULL);
+			 CAHManager::getInstance()->runActionHandler("quit_ryzom", NULL);
 		}
 	}
 };
@@ -1232,7 +1232,7 @@ public:
 		{
 			// send a message to server, thru cancel cast
 			CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-			pIM->runActionHandler("phrase_cancel_cast", NULL);
+			CAHManager::getInstance()->runActionHandler("phrase_cancel_cast", NULL);
 		}
 		paying_account_request = false;
 		paying_account_already_request = false;
@@ -1260,10 +1260,10 @@ public:
 		else
 		{
 			paying_account_already_request = true;
-			pIM->runActionHandler("quit_ryzom", NULL);
+			CAHManager::getInstance()->runActionHandler("quit_ryzom", NULL);
 		}
 
-		pIM->runActionHandler("leave_modal", NULL);
+		CAHManager::getInstance()->runActionHandler("leave_modal", NULL);
 	}
 };
 REGISTER_ACTION_HANDLER( CAHCloseFreeTrialQuitting, "close_free_trial_game_quitting");
@@ -1509,7 +1509,7 @@ public:
 			string beastIndex;
 			if( CInterfaceExpr::evalAsString(getParam(Params,"beast_index"), beastIndex) )
 			{
-				pIM->runActionHandler("animal_target", NULL, beastIndex);
+				CAHManager::getInstance()->runActionHandler("animal_target", NULL, beastIndex);
 			}
 			// move to the beast
 			UserEntity->moveTo(UserEntity->selection(),3.0,CUserEntity::Mount);
@@ -1889,7 +1889,7 @@ public:
 			pIG->setActive(true);
 
 		// browse the url
-		pIM->runActionHandler("browse", NULL, "name="+helpContainer+":content:html|url="+url);
+		CAHManager::getInstance()->runActionHandler("browse", NULL, "name="+helpContainer+":content:html|url="+url);
     }
 };
 REGISTER_ACTION_HANDLER( CAHLaunchHelp, "launch_help");
@@ -2943,7 +2943,7 @@ public:
 			else
 				pBut->setPushed(true);
 		}
-		pIM->runActionHandler("game_config_change_vid_fullscreen",NULL);
+		CAHManager::getInstance()->runActionHandler("game_config_change_vid_fullscreen",NULL);
 
 		// **** Init Texture Size Modes
 		// init the combo box, according to Texture Installed or not
@@ -3825,13 +3825,13 @@ void runMissionProc(sint32 nSelected)
 	{
 		string sButtonPath = UI_MISSION_LIST ":b_title"+toString(nSelected);
 		CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(sButtonPath));
-		pIM->runActionHandler("proc", pCB, "mission_proc_title|"+toString(nSelected));
+		CAHManager::getInstance()->runActionHandler("proc", pCB, "mission_proc_title|"+toString(nSelected));
 	}
 	else if (nSelected < (nNbMission+nNbGroupMission))
 	{
 		string sButtonPath = UI_MISSION_LIST ":b_group_title"+toString(nSelected-nNbMission);
 		CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(sButtonPath));
-		pIM->runActionHandler("proc", pCB, "group_mission_proc_title|"+toString(nSelected-nNbMission));
+		CAHManager::getInstance()->runActionHandler("proc", pCB, "group_mission_proc_title|"+toString(nSelected-nNbMission));
 	}
 	return;
 }

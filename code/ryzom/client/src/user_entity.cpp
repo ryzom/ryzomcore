@@ -1571,12 +1571,12 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 	// Quartering
 	case CUserEntity::Quarter:
 		if((ent->properties()).harvestable())
-			IM->runActionHandler("context_quartering", 0);
+			CAHManager::getInstance()->runActionHandler("context_quartering", 0);
 		break;
 	// Loot
 	case CUserEntity::Loot:
 		if((ent->properties()).lootable())
-			IM->runActionHandler("context_loot", 0);
+			CAHManager::getInstance()->runActionHandler("context_loot", 0);
 		break;
 	// Pick Up
 	case CUserEntity::PickUp:
@@ -1587,57 +1587,57 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 		break;
 	// Trade Item
 	case CUserEntity::TradeItem:
-		IM->runActionHandler("context_trade_item", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_item", 0);
 		break;
 	// Trade Phrase
 	case CUserEntity::TradePhrase:
-		IM->runActionHandler("context_trade_phrase", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_phrase", 0);
 		break;
 	// Trade Pact
 	case CUserEntity::TradePact:
-		IM->runActionHandler("context_trade_pact", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_pact", 0);
 		break;
 	// Mission
 	case CUserEntity::Mission:
 		{
 			string param = toString("id=%d", _MoveToMissionId);
-			IM->runActionHandler("mission_option", 0, param);
+			CAHManager::getInstance()->runActionHandler("mission_option", 0, param);
 		}
 		break;
 	// Dynamic Mission
 	case CUserEntity::DynamicMission:
-		IM->runActionHandler("context_dynamic_mission", 0);
+		CAHManager::getInstance()->runActionHandler("context_dynamic_mission", 0);
 		break;
 	// Static Mission
 	case CUserEntity::StaticMission:
-		IM->runActionHandler("context_choose_mission", 0);
+		CAHManager::getInstance()->runActionHandler("context_choose_mission", 0);
 		break;
 	// Mission
 	case CUserEntity::MissionRing:
 		{
 			string param = toString("id=%d", _MoveToMissionId);
-			IM->runActionHandler("mission_ring", 0, param);
+			CAHManager::getInstance()->runActionHandler("mission_ring", 0, param);
 		}
 		break;
 	// Create Guild
 	case CUserEntity::CreateGuild:
-		IM->runActionHandler("context_create_guild", 0);
+		CAHManager::getInstance()->runActionHandler("context_create_guild", 0);
 		break;
 	// News
 	case CUserEntity::News:
-		IM->runActionHandler("context_talk", 0);
+		CAHManager::getInstance()->runActionHandler("context_talk", 0);
 		break;
 	// Trade Teleport
 	case CUserEntity::TradeTeleport:
-		IM->runActionHandler("context_trade_teleport", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_teleport", 0);
 		break;
 	// Trade Faction items
 	case CUserEntity::TradeFaction:
-		IM->runActionHandler("context_trade_faction", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_faction", 0);
 		break;
 	// Trade Cosmetic
 	case CUserEntity::TradeCosmetic:
-		IM->runActionHandler("context_trade_cosmetic", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_cosmetic", 0);
 		break;
 	// Talk
 	case CUserEntity::Talk:
@@ -1658,7 +1658,7 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 		}
 	// WebPage
 	case CUserEntity::WebPage:
-		IM->runActionHandler("context_web_page", 0);
+		CAHManager::getInstance()->runActionHandler("context_web_page", 0);
 		break;
 	// Outpost
 	case CUserEntity::Outpost:
@@ -2248,7 +2248,7 @@ void CUserEntity::setDead()	// virtual
 	//CInterfaceManager * pIM = CInterfaceManager::getInstance();
 	if( pIM )
 	{
-		pIM->runActionHandler("set",NULL,"dblink=UI:VARIABLES:DEATH_WARNING_WANTED|value=1");
+		CAHManager::getInstance()->runActionHandler("set",NULL,"dblink=UI:VARIABLES:DEATH_WARNING_WANTED|value=1");
 	}
 }// setDead //
 
@@ -3746,7 +3746,7 @@ void CUserEntity::CSkillPointsObserver::update(ICDBNode* node )
 			spTitle= CI18N::get(toString("uiSkillPointsBold%d",SpType));
 
 			// run the popup
-			pIM->runActionHandler("message_popup", NULL, "text1="+deltaStr+"|text0="+spTitle.toUtf8());
+			CAHManager::getInstance()->runActionHandler("message_popup", NULL, "text1="+deltaStr+"|text0="+spTitle.toUtf8());
 
 			// Context help
 			contextHelp ("skill_point");

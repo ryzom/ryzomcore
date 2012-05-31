@@ -656,7 +656,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 			ucstring name = peopleList->getName(index);
 			if ( ! name.empty())
 			{
-				CInterfaceManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name.toUtf8()+"|ptype="+toString((int)CEntityCL::Player));
+				CAHManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name.toUtf8()+"|ptype="+toString((int)CEntityCL::Player));
 			}
 			return;
 		}
@@ -697,7 +697,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 					}
 				}
 				if(!name.empty())
-					CInterfaceManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name.toUtf8()+"|ptype="+toString((int)selection->Type));
+					CAHManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name.toUtf8()+"|ptype="+toString((int)selection->Type));
 				return;
 			}
 		}
@@ -994,7 +994,7 @@ class CHandlerBrowse : public IActionHandler
 				CInterfaceManager::parseTokens(ucparams);
 				params = ucparams.toUtf8();
 				// go. NB: the action handler himself may translate params from utf8
-				CInterfaceManager::getInstance()->runActionHandler(action, elementGroup, params);
+				CAHManager::getInstance()->runActionHandler(action, elementGroup, params);
 
 				// Next name
 				start = end+2;
@@ -3913,7 +3913,7 @@ void updateStatReport ()
 	if ((ingameTime0 () <= time4StatReport) && (ingameTime1 () > time4StatReport))
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler ("proc", NULL, "proc_stat_report");
+		CAHManager::getInstance()->runActionHandler ("proc", NULL, "proc_stat_report");
 	}
 }
 

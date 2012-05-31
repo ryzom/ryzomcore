@@ -983,7 +983,7 @@ bool CGroupSubMenu::handleEvent (const NLGUI::CEventDescriptor &event)
 			if ((_Selected != -1) && (!_Lines[i].ViewText->getGrayed()))
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				pIM->runActionHandler (	_Lines[_Selected].AHName,
+				CAHManager::getInstance()->runActionHandler (	_Lines[_Selected].AHName,
 										CWidgetManager::getInstance()->getCtrlLaunchingModal(),
 										_Lines[_Selected].AHParams );
 

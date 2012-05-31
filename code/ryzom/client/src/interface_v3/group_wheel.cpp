@@ -54,12 +54,12 @@ bool CInterfaceGroupWheel::handleEvent(const NLGUI::CEventDescriptor &event)
 			CInterfaceManager *im = CInterfaceManager::getInstance();
 			if (eventDesc.getWheel() > 0 && _AHWheelUp)
 			{
-				im->runActionHandler (_AHWheelUp, this, _AHWheelUpParams);
+				CAHManager::getInstance()->runActionHandler (_AHWheelUp, this, _AHWheelUpParams);
 				return true;
 			}
 			else if (_AHWheelDown)
 			{
-				im->runActionHandler (_AHWheelDown, this, _AHWheelDownParams);
+				CAHManager::getInstance()->runActionHandler (_AHWheelDown, this, _AHWheelDownParams);
 				return true;
 			}
 		}

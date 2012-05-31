@@ -133,7 +133,7 @@ void	CGroupTab::addTab(CCtrlTabButton * tabB)
 	if(_HideOutTabs && !_AHOnChange.empty())
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler(_AHOnChange, this, _ParamsOnChange);
+		CAHManager::getInstance()->runActionHandler(_AHOnChange, this, _ParamsOnChange);
 	}
 }
 
@@ -227,7 +227,7 @@ void	CGroupTab::addTab(CCtrlTabButton * tabB, sint index)
 	if(_HideOutTabs && !_AHOnChange.empty())
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler(_AHOnChange, this, _ParamsOnChange);
+		CAHManager::getInstance()->runActionHandler(_AHOnChange, this, _ParamsOnChange);
 	}
 }
 
@@ -247,7 +247,7 @@ int CGroupTab::luaAddTab(CLuaState &ls)
 		if(_HideOutTabs && !_AHOnChange.empty())
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			pIM->runActionHandler(_AHOnChange, this, _ParamsOnChange);
+			CAHManager::getInstance()->runActionHandler(_AHOnChange, this, _ParamsOnChange);
 		}
 	}
 	return 0;
@@ -334,7 +334,7 @@ void	CGroupTab::removeTab(sint index)
 		if(!_AHOnChange.empty())
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			pIM->runActionHandler(_AHOnChange, this, _ParamsOnChange);
+			CAHManager::getInstance()->runActionHandler(_AHOnChange, this, _ParamsOnChange);
 		}
 	}
 }
@@ -505,7 +505,7 @@ void CGroupTab::updateFirstTabButton()
 	if(!_AHOnChange.empty() && ((oldFirstTabIndex!=_FirstTabIndex) || (oldLastTabIndex!=_LastTabIndex)))
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler(_AHOnChange, this, _ParamsOnChange);
+		CAHManager::getInstance()->runActionHandler(_AHOnChange, this, _ParamsOnChange);
 	}
 }
 

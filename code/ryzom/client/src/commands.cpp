@@ -1340,11 +1340,11 @@ NLMISC_COMMAND(ah, "Launch an action handler", "<ActionHandler> <AHparam>")
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if (args.size() == 1)
 	{
-		pIM->runActionHandler(args[0], NULL);
+		CAHManager::getInstance()->runActionHandler(args[0], NULL);
 	}
 	else
 	{
-		pIM->runActionHandler(args[0], NULL, args[1]);
+		CAHManager::getInstance()->runActionHandler(args[0], NULL, args[1]);
 	}
 
 	return true;
@@ -4016,14 +4016,14 @@ NLMISC_COMMAND(browse, "Browse a HTML document with the internal help web browse
 {
 	if (args.size() != 1) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->runActionHandler("browse", NULL, "name=ui:interface:help_browser:content:html|url="+args[0]);
+	CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:help_browser:content:html|url="+args[0]);
 	return true;
 }
 
 NLMISC_COMMAND(openRingWindow, "Browse the main page in the ring web browser.", "")
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->runActionHandler("browse", NULL, "name=ui:interface:r2ed_web_admin:content:admin_web_page|url="+RingMainURL);
+	CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:r2ed_web_admin:content:admin_web_page|url="+RingMainURL);
 	return true;
 }
 
@@ -4031,7 +4031,7 @@ NLMISC_COMMAND(browseRingAdmin, "Browse a HTML document with the ring web browse
 {
 	if (args.size() != 1) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->runActionHandler("browse", NULL, "name=ui:interface:r2ed_web_admin:content:admin_web_page|url="+args[0]);
+	CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:r2ed_web_admin:content:admin_web_page|url="+args[0]);
 	return true;
 }
 
@@ -4129,13 +4129,13 @@ NLMISC_COMMAND(GUKick, "kick a member", "<player name>")
 
 NLMISC_COMMAND(GUAccept, "accept an invitation", "")
 {
-	CInterfaceManager::getInstance()->runActionHandler("accept_guild_invitation",NULL);
+	CAHManager::getInstance()->runActionHandler("accept_guild_invitation",NULL);
 	return true;
 }
 
 NLMISC_COMMAND(GURefuse, "refuse an invitation", "")
 {
-	CInterfaceManager::getInstance()->runActionHandler("refuse_guild_invitation",NULL);
+	CAHManager::getInstance()->runActionHandler("refuse_guild_invitation",NULL);
 	return true;
 }
 
@@ -5296,7 +5296,7 @@ bool CUserCommand::execute(const std::string &/* rawCommandString */, const std:
 		}
 
 		// Run the action handler
-		pIM->runActionHandler (mode->Action, pIM->getOldCaptureKeyboard(), finalArgs);
+		CAHManager::getInstance()->runActionHandler (mode->Action, pIM->getOldCaptureKeyboard(), finalArgs);
 	}
 	else
 	{
@@ -5763,7 +5763,7 @@ NLMISC_COMMAND(em, "emote command", "<emote phrase>")
 			emotePhrase += " ";
 			emotePhrase += args[i];
 		}
-		pIM->runActionHandler("emote", NULL, "nb=0|behav=255|custom_phrase="+emotePhrase);
+		CAHManager::getInstance()->runActionHandler("emote", NULL, "nb=0|behav=255|custom_phrase="+emotePhrase);
 		return true;
 	}
 	return false;

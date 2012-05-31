@@ -100,7 +100,10 @@ public:
 	void parseAH(xmlNodePtr cur, const char *ahId, const char *paramId, IActionHandler *&ahRet, class CStringShared &params);
 	
 	/// Get the AH name from ptr
-	const std::string &getAHName(IActionHandler *pAH) { return getActionHandlerName(pAH); }
+	const std::string &getAHName(IActionHandler *pAH){ return getActionHandlerName(pAH); }
+
+	void runActionHandler(const std::string &AHName, CCtrlBase *pCaller, const std::string &Params=std::string("") );
+	void runActionHandler(IActionHandler *ah, CCtrlBase *pCaller, const std::string &Params=std::string("") );
 
 private:
 	CAHManager(){}

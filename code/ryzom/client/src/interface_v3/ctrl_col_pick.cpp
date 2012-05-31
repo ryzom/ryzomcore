@@ -187,7 +187,7 @@ void CCtrlColPick::selectColor (sint32 x, sint32 y)
 		_ColSelA.setSInt32(_ColorSelect.A);
 
 	if (!_AHOnChange.empty())
-		pIM->runActionHandler(_AHOnChange, this, _AHOnChangeParams);
+		CAHManager::getInstance()->runActionHandler(_AHOnChange, this, _AHOnChangeParams);
 }
 
 // ------------------------------------------------------------------------------------------------

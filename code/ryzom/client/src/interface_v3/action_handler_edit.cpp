@@ -511,7 +511,7 @@ protected:
 			if (!_GroupEdit->getAHOnChange().empty())
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				pIM->runActionHandler(_GroupEdit->getAHOnChange(), _GroupEdit, _GroupEdit->getParamsOnChange());
+				CAHManager::getInstance()->runActionHandler(_GroupEdit->getAHOnChange(), _GroupEdit, _GroupEdit->getParamsOnChange());
 			}
 		}
 		// else cut forwards
@@ -524,7 +524,7 @@ protected:
 			if (!_GroupEdit->getAHOnChange().empty())
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				pIM->runActionHandler(_GroupEdit->getAHOnChange(), _GroupEdit, _GroupEdit->getParamsOnChange());
+				CAHManager::getInstance()->runActionHandler(_GroupEdit->getAHOnChange(), _GroupEdit, _GroupEdit->getParamsOnChange());
 			}
 		}
 		// must stop selection in all case

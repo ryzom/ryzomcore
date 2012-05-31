@@ -224,7 +224,7 @@ void CCtrlButton::draw ()
 	{
 
 		if ((lastOver == false) && (_AHOnOver != NULL))
-			pIM->runActionHandler (_AHOnOver, this, _AHOverParams);
+			CAHManager::getInstance()->runActionHandler (_AHOnOver, this, _AHOverParams);
 
 		// the pointer is over the button
 		color= getCurrentColorOver(globalColor);

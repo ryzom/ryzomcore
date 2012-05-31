@@ -594,7 +594,7 @@ void CGroupEditBox::handleEventChar(const NLGUI::CEventDescriptorKey &rEDK)
 				// stop selection
 				_CurrSelection = NULL;
 				_CursorAtPreviousLineEnd = false;
-				pIM->runActionHandler(_AHOnEnter, this, _AHOnEnterParams);
+				CAHManager::getInstance()->runActionHandler(_AHOnEnter, this, _AHOnEnterParams);
 			}
 			else
 			{
@@ -701,7 +701,7 @@ void CGroupEditBox::handleEventChar(const NLGUI::CEventDescriptorKey &rEDK)
 					}
 					if (rEDK.getChar() == KeyRETURN)
 					{
-						pIM->runActionHandler(_AHOnEnter, this, _AHOnEnterParams);
+						CAHManager::getInstance()->runActionHandler(_AHOnEnter, this, _AHOnEnterParams);
 					}
 				}
 				_CursorAtPreviousLineEnd = false;
@@ -753,7 +753,7 @@ void CGroupEditBox::triggerOnChangeAH()
 	if (!_AHOnChange.empty())
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler(_AHOnChange, this, _ParamsOnChange);
+		CAHManager::getInstance()->runActionHandler(_AHOnChange, this, _ParamsOnChange);
 	}
 }
 
@@ -1291,7 +1291,7 @@ void CGroupEditBox::setCommand(const ucstring &command, bool execute)
 		// stop selection
 		_CurrSelection = NULL;
 		_CursorAtPreviousLineEnd = false;
-		CInterfaceManager::getInstance()->runActionHandler(_AHOnEnter, this, _AHOnEnterParams);
+		CAHManager::getInstance()->runActionHandler(_AHOnEnter, this, _AHOnEnterParams);
 	}
 	else
 	{
@@ -1409,7 +1409,7 @@ void CGroupEditBox::onKeyboardCaptureLost()
 	if (!_AHOnFocusLost.empty())
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->runActionHandler(_AHOnFocusLost, this, _AHOnFocusLostParams);
+		CAHManager::getInstance()->runActionHandler(_AHOnFocusLost, this, _AHOnFocusLostParams);
 	}
 }
 

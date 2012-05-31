@@ -192,7 +192,7 @@ void CGroupSkills::CSkillsObs::update (ICDBNode *node)
 				uint skillId;
 				if (skillParent->getNodeIndex (skill, skillId))
 				{
-					pIM->runActionHandler("skill_popup", NULL, "skillId="+toString(skillId)+"|delta="+toString(leaf->getValue32()-leaf->getOldValue32()));
+					CAHManager::getInstance()->runActionHandler("skill_popup", NULL, "skillId="+toString(skillId)+"|delta="+toString(leaf->getValue32()-leaf->getOldValue32()));
 
 					// Context help
 					contextHelp ("skill");

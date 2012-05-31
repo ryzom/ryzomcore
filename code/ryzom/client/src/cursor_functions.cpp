@@ -890,7 +890,7 @@ void contextWebIG(bool rightClick, bool dblClick)
 	{
 		if (pGC != NULL)
 			pGC->setActive(false);
-		IM->runActionHandler("browse", NULL, "name=ui:interface:webig:content:html|url="+selectedInstanceURL);
+		CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:webig:content:html|url="+selectedInstanceURL);
 	}
 }// contextWebIG //
 

@@ -221,7 +221,7 @@ void initEula()
 	}
 	else
 	{
-		pIM->runActionHandler("accept_eula", NULL);
+		CAHManager::getInstance()->runActionHandler("accept_eula", NULL);
 	}
 }
 
@@ -265,7 +265,7 @@ void initCatDisplay()
 	else
 	{
 		LoginSM.pushEvent(CLoginStateMachine::ev_run_patch);
-//		pIM->runActionHandler("login_patch", NULL);
+//		CAHManager::getInstance()->runActionHandler("login_patch", NULL);
 	}
 }
 
@@ -492,7 +492,7 @@ void loginMainLoop()
 						else
 						{
 							LoginSM.pushEvent(CLoginStateMachine::ev_no_patch);
-							//	pIM->runActionHandler("login_patch", NULL);
+							//	CAHManager::getInstance()->runActionHandler("login_patch", NULL);
 						}
 					}
 					else
@@ -744,11 +744,11 @@ void initLoginScreen()
 		{
 			pGEB->setInputString(l);
 		}
-		pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
+		CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
 	}
 	else
 	{
-		pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
+		CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
 	}
 
 
@@ -766,7 +766,7 @@ void initAutoLogin()
 	CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
 	pGEBLog->setInputString(LoginLogin);
 	pGEBPwd->setInputString(LoginPassword);
-	pIM->runActionHandler("on_login", NULL, "");
+	CAHManager::getInstance()->runActionHandler("on_login", NULL, "");
 
 	if (ClientCfg.R2Mode)
 	{
@@ -793,7 +793,7 @@ void initAutoLogin()
 		else
 		{
 			LoginSM.pushEvent(CLoginStateMachine::ev_login_ok);
-			//		pIM->runActionHandler("login_connect_2", NULL);
+			//		CAHManager::getInstance()->runActionHandler("login_connect_2", NULL);
 		}
 	}
 }
@@ -869,11 +869,11 @@ bool login()
 //		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
 //		if (pGEB != NULL)
 //			pGEB->setInputString(l);
-//		pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
+//		CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
 //	}
 //	else
 //	{
-//		pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
+//		CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
 //	}
 
 	ShardSelected = -1;
@@ -891,7 +891,7 @@ bool login()
 //		CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
 //		pGEBLog->setInputString(LoginLogin);
 //		pGEBPwd->setInputString(LoginPassword);
-//		pIM->runActionHandler("on_login", NULL, "");
+//		CAHManager::getInstance()->runActionHandler("on_login", NULL, "");
 //		// Select good shard
 //		ShardSelected = -1;
 //		for (uint32 i = 0; i < Shards.size(); ++i)
@@ -906,7 +906,7 @@ bool login()
 //		if (ShardSelected == -1)
 //			pIM->messageBox(CI18N::get("uiErrServerLost"), "ui:login");
 //		else
-//			pIM->runActionHandler("login_connect_2", NULL);
+//			CAHManager::getInstance()->runActionHandler("login_connect_2", NULL);
 //	}
 
 	// start the login state machine
@@ -1090,7 +1090,7 @@ void initShardDisplay()
 		CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD ":s0:but"));
 		if (pCB != NULL)
 			pCB->setPushed(true);
-		pIM->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
+		CAHManager::getInstance()->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
 
 	}
 	pList->invalidateCoords();
@@ -1217,7 +1217,7 @@ void onlogin(bool vanishScreen = true)
 //			CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD ":s0:but"));
 //			if (pCB != NULL)
 //				pCB->setPushed(true);
-//			pIM->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
+//			CAHManager::getInstance()->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
 //
 //		}
 //		pList->invalidateCoords();
@@ -1233,9 +1233,9 @@ void onlogin(bool vanishScreen = true)
 //		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
 //
 //		if (LoginLogin.empty())
-//			pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
+//			CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
 //		else
-//			pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
+//			CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
 
 	}
 }
@@ -1470,7 +1470,7 @@ class CAHLoginConnect : public IActionHandler
 //		}
 //		else
 //		{
-//			pIM->runActionHandler("login_patch",NULL);
+//			CAHManager::getInstance()->runActionHandler("login_patch",NULL);
 //		}
 	}
 };
@@ -2173,9 +2173,9 @@ class CAHOnScanDataClose : public IActionHandler
 //				loginEB= pGEB->getInputStringAsStdString();
 //			// if none entered
 //			if (loginEB.empty())
-//				pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
+//				CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
 //			else
-//				pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
+//				CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
 		}
 	}
 };
@@ -2354,7 +2354,7 @@ bool initCreateAccount()
 			rulesGr->setActive(false);
 
 		// must be done after hide rules
-		pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_CREATEACCOUNT_LOGIN "|select_all=false"); 
+		CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_CREATEACCOUNT_LOGIN "|select_all=false"); 
 	}
 
 

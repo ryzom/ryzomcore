@@ -116,11 +116,11 @@ void CInterfaceGroup::setActive(bool state)
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if (_AHOnActive != NULL && state)
 		{
-			pIM->runActionHandler (_AHOnActive, this, _AHOnActiveParams);
+			CAHManager::getInstance()->runActionHandler (_AHOnActive, this, _AHOnActiveParams);
 		}
 		if (_AHOnDeactive != NULL && !state)
 		{
-			pIM->runActionHandler (_AHOnDeactive, this, _AHOnDeactiveParams);
+			CAHManager::getInstance()->runActionHandler (_AHOnDeactive, this, _AHOnDeactiveParams);
 		}
 
 		notifyActiveCalled(NLGUI::CEventDescriptorActiveCalledOnParent(state));
@@ -739,7 +739,7 @@ bool CInterfaceGroup::handleEvent (const NLGUI::CEventDescriptor &event)
 		{
 			if (_AHOnLeftClick != NULL)
 			{
-				im->runActionHandler(_AHOnLeftClick, this, _AHOnLeftClickParams);
+				CAHManager::getInstance()->runActionHandler(_AHOnLeftClick, this, _AHOnLeftClickParams);
 				return true;
 			}
 		}
@@ -748,7 +748,7 @@ bool CInterfaceGroup::handleEvent (const NLGUI::CEventDescriptor &event)
 		{
 			if (_AHOnRightClick != NULL)
 			{
-				im->runActionHandler(_AHOnRightClick, this, _AHOnRightClickParams);
+				CAHManager::getInstance()->runActionHandler(_AHOnRightClick, this, _AHOnRightClickParams);
 				return true;
 			}
 		}
@@ -868,7 +868,7 @@ void CInterfaceGroup::executeLuaScriptOnDraw()
 	if(!_LUAOnDraw.empty())
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		pIM->runActionHandler("lua", this, _LUAOnDraw);
+		CAHManager::getInstance()->runActionHandler("lua", this, _LUAOnDraw);
 	}
 }
 

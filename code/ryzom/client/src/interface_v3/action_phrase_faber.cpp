@@ -1219,7 +1219,7 @@ public:
 		if( button && !button->getFrozen() )
 		{
 			// Act as if the player click on this button
-			pIM->runActionHandler("phrase_faber_validate", button );
+			CAHManager::getInstance()->runActionHandler("phrase_faber_validate", button );
 		}
 	}
 };

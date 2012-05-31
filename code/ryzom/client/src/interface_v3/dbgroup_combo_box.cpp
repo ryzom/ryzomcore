@@ -295,7 +295,7 @@ void		CDBGroupComboBox::setSelection(sint32 val)
 		if (!_CallingOnChangeActionHandler)
 		{
 			_CallingOnChangeActionHandler = true;
-			CInterfaceManager::getInstance()->runActionHandler (_AHOnChange, this, _AHOnChangeParams);
+			CAHManager::getInstance()->runActionHandler (_AHOnChange, this, _AHOnChangeParams);
 			_CallingOnChangeActionHandler = false;
 		}
 	}
@@ -578,7 +578,7 @@ public:
 		// After menu init, Call user activation method
 		if( !pCB->_AHOnSelectStart.empty() )
 		{
-			pIM->runActionHandler(pCB->_AHOnSelectStart, pCB);
+			CAHManager::getInstance()->runActionHandler(pCB->_AHOnSelectStart, pCB);
 		}
 
 		// launch the menu

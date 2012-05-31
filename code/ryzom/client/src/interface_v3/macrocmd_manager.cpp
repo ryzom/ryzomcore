@@ -485,7 +485,7 @@ void CMacroCmdManager::updateMacroExecution ()
 			}
 
 			// Here we have to execute the current command
-			pIM->runActionHandler(rC.Name, NULL, rC.Params);
+			CAHManager::getInstance()->runActionHandler(rC.Name, NULL, rC.Params);
 
 			// Flush interface links (else bug with Macro "Select ShortCutBar/Run Shortcut"
 			IngameDbMngr.flushObserverCalls();
@@ -526,9 +526,9 @@ void CMacroCmdManager::refreshAllKeyDisplays()
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	// Refresh Key Window
-	pIM->runActionHandler("keys_open", NULL);
+	CAHManager::getInstance()->runActionHandler("keys_open", NULL);
 	// Refresh gestion_windows container
-	pIM->runActionHandler("gestion_windows_update_key_binding", NULL);
+	CAHManager::getInstance()->runActionHandler("gestion_windows_update_key_binding", NULL);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -670,9 +670,9 @@ public:
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 
-		pIM->runActionHandler("reset_pushed", NULL, string("dblink=")+GROUP_MACROICONCREATION_BACK);
-		pIM->runActionHandler("reset_pushed", NULL, string("dblink=")+GROUP_MACROICONCREATION_ICON);
-		pIM->runActionHandler("reset_pushed", NULL, string("dblink=")+GROUP_MACROICONCREATION_OVER);
+		CAHManager::getInstance()->runActionHandler("reset_pushed", NULL, string("dblink=")+GROUP_MACROICONCREATION_BACK);
+		CAHManager::getInstance()->runActionHandler("reset_pushed", NULL, string("dblink=")+GROUP_MACROICONCREATION_ICON);
+		CAHManager::getInstance()->runActionHandler("reset_pushed", NULL, string("dblink=")+GROUP_MACROICONCREATION_OVER);
 
 		uint8 back = pMCM->CurrentEditMacro.BitmapBack;
 		if (back != 0xff)
@@ -707,9 +707,9 @@ public:
 				pCS->setMacroText(pEB->getInputStringAsStdString());
 		}
 
-		pIM->runActionHandler("set_macro_back", NULL, string("target=")+CTRL_MACROICONCREATION_ICON+"|value="+toString(back));
-		pIM->runActionHandler("set_macro_icon", NULL, string("target=")+CTRL_MACROICONCREATION_ICON+"|value="+toString(icon));
-		pIM->runActionHandler("set_macro_over", NULL, string("target=")+CTRL_MACROICONCREATION_ICON+"|value="+toString(over));
+		CAHManager::getInstance()->runActionHandler("set_macro_back", NULL, string("target=")+CTRL_MACROICONCREATION_ICON+"|value="+toString(back));
+		CAHManager::getInstance()->runActionHandler("set_macro_icon", NULL, string("target=")+CTRL_MACROICONCREATION_ICON+"|value="+toString(icon));
+		CAHManager::getInstance()->runActionHandler("set_macro_over", NULL, string("target=")+CTRL_MACROICONCREATION_ICON+"|value="+toString(over));
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerMacroIconCreationOpen, "macro_icon_creation_open");
@@ -740,7 +740,7 @@ public:
 		pMCM->CurrentEditMacro.moveUpCommand(nCmdNb);
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager::getInstance()->EditCmd->deactivate();
-		pIM->runActionHandler("new_macro_open",NULL);
+		CAHManager::getInstance()->runActionHandler("new_macro_open",NULL);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerNewMacroCmdMoveUp, "new_macro_cmd_move_up");
@@ -757,7 +757,7 @@ public:
 		pMCM->CurrentEditMacro.moveDownCommand(nCmdNb);
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager::getInstance()->EditCmd->deactivate();
-		pIM->runActionHandler("new_macro_open",NULL);
+		CAHManager::getInstance()->runActionHandler("new_macro_open",NULL);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerNewMacroCmdMoveDown, "new_macro_cmd_move_down");
@@ -790,7 +790,7 @@ public:
 		pMCM->CurrentEditMacro.delCommand(nCmdNb);
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager::getInstance()->EditCmd->deactivate();
-		pIM->runActionHandler("new_macro_open",NULL);
+		CAHManager::getInstance()->runActionHandler("new_macro_open",NULL);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerNewMacroCmdDelete, "new_macro_cmd_delete");
@@ -820,7 +820,7 @@ public:
 	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler("new_macro_enter_name",NULL);
+		CAHManager::getInstance()->runActionHandler("new_macro_enter_name",NULL);
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		pMCM->EditCmd->activate();
 	}
@@ -914,7 +914,7 @@ public:
 		CSPhraseManager	*pPM = CSPhraseManager::getInstance();
 
 		// Validate name
-		pIM->runActionHandler("new_macro_enter_name",NULL);
+		CAHManager::getInstance()->runActionHandler("new_macro_enter_name",NULL);
 
 		// Check if macro has more than one command
 		if (pMCM->CurrentEditMacro.Commands.size() == 0) return;
@@ -939,7 +939,7 @@ public:
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_NEWMACRO));
 		if (pGC != NULL) pGC->setActive (false);
 
-		pIM->runActionHandler("macros_open",NULL);
+		CAHManager::getInstance()->runActionHandler("macros_open",NULL);
 
 		// Refresh key containers
 		pMCM->refreshAllKeyDisplays();
@@ -1060,7 +1060,7 @@ public:
 	{
 		sint nMacNb = getMacroFromId(pCaller->getId());
 
-		CInterfaceManager::getInstance()->runActionHandler(AH_MACRO_EXEC,pCaller,toString(nMacNb));
+		CAHManager::getInstance()->runActionHandler(AH_MACRO_EXEC,pCaller,toString(nMacNb));
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerMacrosExec, "macros_exec");
@@ -1124,7 +1124,7 @@ public:
 		pPM->deleteMacroShortcuts(pMCM->getMacros()[nMacNb].ID);
 		// then delete
 		pMCM->delMacro(nMacNb);
-		pIM->runActionHandler("macros_open",NULL);
+		CAHManager::getInstance()->runActionHandler("macros_open",NULL);
 
 		// Refresh key containers
 		pMCM->refreshAllKeyDisplays();

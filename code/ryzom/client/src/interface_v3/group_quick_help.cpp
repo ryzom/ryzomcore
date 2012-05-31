@@ -326,7 +326,7 @@ void CGroupQuickHelp::activateCurrentStep ()
 
 			// A link to follow ?
 			if (!step.URL.empty())
-				pIM->runActionHandler("browse", NULL, "url="+step.URL);
+				CAHManager::getInstance()->runActionHandler("browse", NULL, "url="+step.URL);
 
 			// Test a skip condition
 			if (!step.Condition.empty() && evalExpression (step.Condition))
@@ -411,7 +411,7 @@ class CHandlerRunQuickHelp : public IActionHandler
 					button->setPushed(true);
 
 					// Run the left click action handler
-					pIM->runActionHandler(button->getActionOnLeftClick(), button, button->getParamsOnLeftClick());
+					CAHManager::getInstance()->runActionHandler(button->getActionOnLeftClick(), button, button->getParamsOnLeftClick());
 				}
 			}
 		}

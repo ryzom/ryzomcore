@@ -365,7 +365,7 @@ void CCtrlTextButton::draw ()
 	if (_Over && (_OverWhenPushed || !(_Pushed || pIM->getCapturePointerLeft() == this)))
 	{
 		if ((lastOver == false) && (_AHOnOver != NULL))
-			pIM->runActionHandler (_AHOnOver, this, _AHOverParams);
+			CAHManager::getInstance()->runActionHandler (_AHOnOver, this, _AHOverParams);
 
 		// the pointer is over the button.
 		color= getCurrentColorOver(globalColor);

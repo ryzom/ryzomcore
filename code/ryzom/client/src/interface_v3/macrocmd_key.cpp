@@ -584,13 +584,13 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 	onChangeCategory();
 	IngameDbMngr.flushObserverCalls();
 	NLGUI::CDBManager::getInstance()->flushObserverCalls();
-	//pIM->runActionHandler("editcmd_change_category",NULL);
+	//CAHManager::getInstance()->runActionHandler("editcmd_change_category",NULL);
 	pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId(WinName+WIN_EDITCMD_COMBO_ACTION));
 	pCB->setSelection(actCBIndex);
 	onChangeAction();
 	IngameDbMngr.flushObserverCalls();
 	NLGUI::CDBManager::getInstance()->flushObserverCalls();
-	//pIM->runActionHandler("editcmd_change_action",NULL);
+	//CAHManager::getInstance()->runActionHandler("editcmd_change_action",NULL);
 
 	// Count number of displayed param
 	uint nbRealParam = 0;
@@ -1310,7 +1310,7 @@ public:
 			{
 				pMCM->CurrentEditMacro.addCommand(pMCM->EditCmd->CurrentEditCmdLine.ActionName.Name.c_str(),pMCM->EditCmd->CurrentEditCmdLine.ActionName.Argu.c_str());
 			}
-			pIM->runActionHandler("new_macro_open", pCaller);
+			CAHManager::getInstance()->runActionHandler("new_macro_open", pCaller);
 			pMCM->EditCmd->deactivate();
 		}
 	}

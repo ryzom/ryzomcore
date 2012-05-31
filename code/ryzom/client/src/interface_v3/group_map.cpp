@@ -3410,11 +3410,11 @@ class CAHWorldMapRightClick : public IActionHandler
 		if (!gm) return;
 		if (!gm->isIsland())
 		{
-			im->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu");
+			CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu");
 		}
 		else
 		{
-			im->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu_island");
+			CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu_island");
 		}
 	}
 };

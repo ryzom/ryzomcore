@@ -59,7 +59,7 @@ void CAction::runAction ()
 	CInterfaceManager *IM = CInterfaceManager::getInstance ();
 	if (IM)
 	{
-		IM->runActionHandler (Name.Name, NULL, Name.Argu);
+		CAHManager::getInstance()->runActionHandler (Name.Name, NULL, Name.Argu);
 	}
 }
 

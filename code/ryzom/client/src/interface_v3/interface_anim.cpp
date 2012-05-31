@@ -642,7 +642,7 @@ void CInterfaceAnim::stop()
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if (!_AHOnFinish.empty())
-		pIM->runActionHandler(_AHOnFinish, _Parent, _AHOnFinishParams);
+		CAHManager::getInstance()->runActionHandler(_AHOnFinish, _Parent, _AHOnFinishParams);
 }
 
 // **************************

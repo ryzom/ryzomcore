@@ -1387,79 +1387,6 @@ CInterfaceOptions *CInterfaceManager::getOptions(const string &name)
 }
 
 // ------------------------------------------------------------------------------------------------
-void CInterfaceManager::runActionHandler (const string &ahCmdLine, CCtrlBase *pCaller, const string &ahUserParams)
-{
-	if (ahCmdLine.empty()) return;
-
-	// Special AH form ("ah:params") ?
-	string::size_type i = ahCmdLine.find(':');
-	string	ahName;
-	string	ahParams;
-	if(i!=string::npos)
-	{
-		ahName= ahCmdLine.substr(0, i);
-		ahParams= ahCmdLine.substr(i+1);
-	}
-	else
-	{
-		ahName= ahCmdLine;
-	}
-
-	// Replace params if defined
-	if(!ahUserParams.empty())
-		ahParams= ahUserParams;
-
-	// Execute the action handler
-	CAHManager *pAHFM = CAHManager::getInstance();
-	map<string, IActionHandler*>::iterator it = pAHFM->FactoryMap.find (ahName);
-	if (it == pAHFM->FactoryMap.end())
-	{
-		nlwarning ("not found action handler : %s",ahName.c_str());
-		return;
-	}
-	IActionHandler *pAH = it->second;
-	pAH->execute (pCaller, ahParams);
-
-	// Quick Help
-	const string submitQuickHelp = "submit_quick_help";
-	it = pAHFM->FactoryMap.find(submitQuickHelp);
-	if(it == pAHFM->FactoryMap.end())
-	{
-		nlwarning ("not found action handler : %s", submitQuickHelp.c_str());
-		return;
-	}
-	pAH = it->second;
-	const std::string event = ahName + ":" + ahParams;
-	pAH->execute(NULL, event);
-}
-
-// ------------------------------------------------------------------------------------------------
-void CInterfaceManager::runActionHandler (IActionHandler *pAH, CCtrlBase *pCaller, const std::string &Params)
-{
-	if (pAH == NULL)
-	{
-		nlwarning ("no action handler");
-		return;
-	}
-	pAH->execute (pCaller, Params);
-	string AHName = CAHManager::getInstance()->getAHName(pAH);
-
-	// Quick Help
-	const string submitQuickHelp = "submit_quick_help";
-	CAHManager *pAHFM = CAHManager::getInstance();
-	map<string, IActionHandler*>::iterator it = pAHFM->FactoryMap.find (AHName);
-	it = pAHFM->FactoryMap.find(submitQuickHelp);
-	if(it == pAHFM->FactoryMap.end())
-	{
-		nlwarning ("not found action handler : %s", submitQuickHelp.c_str());
-		return;
-	}
-	pAH = it->second;
-	const std::string event = AHName + ":" + Params;
-	pAH->execute(NULL, event);
-}
-
-// ------------------------------------------------------------------------------------------------
 void CInterfaceManager::setupOptions()
 {
 	// After parsing options and templates node -> init system options.
@@ -2403,7 +2330,7 @@ void CInterfaceManager::drawContextHelp ()
 				// UserDefined context help
 				if( !newCtrl->getContextHelpActionHandler().empty() )
 				{
-					runActionHandler(newCtrl->getContextHelpActionHandler(), newCtrl, newCtrl->getContextHelpAHParams() );
+					CAHManager::getInstance()->runActionHandler(newCtrl->getContextHelpActionHandler(), newCtrl, newCtrl->getContextHelpAHParams() );
 				}
 
 				// If the text is finally empty (Special AH case), abort
@@ -2726,7 +2653,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 				if( dynamic_cast<CGroupModal*>(win) )
 				{
 					if(!win->getAHOnEscape().empty())
-						runActionHandler(win->getAHOnEscape(), win, win->getAHOnEscapeParams());
+						CAHManager::getInstance()->runActionHandler(win->getAHOnEscape(), win, win->getAHOnEscapeParams());
 					CWidgetManager::getInstance()->popModalWindow();
 					handled= true;
 				}
@@ -2735,7 +2662,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 				else if(!_CaptureKeyboard )
 				{
 					if(!win->getAHOnEscape().empty())
-						runActionHandler(win->getAHOnEscape(), win, win->getAHOnEscapeParams());
+						CAHManager::getInstance()->runActionHandler(win->getAHOnEscape(), win, win->getAHOnEscapeParams());
 					win->setActive(false);
 					handled= true;
 				}
@@ -2760,7 +2687,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 				else
 				{
 					// The window or modal control the OnEnter. Execute, and don't go to the chat.
-					runActionHandler(tw->getAHOnEnter(), tw, tw->getAHOnEnterParams());
+					CAHManager::getInstance()->runActionHandler(tw->getAHOnEnter(), tw, tw->getAHOnEnterParams());
 					handled= true;
 				}
 			}
@@ -2880,7 +2807,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 							if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown ||
 								(eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown))
 								if (!mwi.ModalHandlerClickOut.empty())
-									runActionHandler(mwi.ModalHandlerClickOut,NULL,mwi.ModalClickOutParams);
+									CAHManager::getInstance()->runActionHandler(mwi.ModalHandlerClickOut,NULL,mwi.ModalClickOutParams);
 
 						// If the current window is not the modal and if must quit on click out
 						if(pNewCurrentWnd != mwi.ModalWindow && mwi.ModalExitClickOut)
@@ -2945,7 +2872,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 					notifyElementCaptured(_CapturePointerLeft);
 					if (clickedOutModalWindow && !clickedOutModalWindow->OnPostClickOut.empty())
 					{
-						runActionHandler(clickedOutModalWindow->OnPostClickOut, _CapturePointerLeft, clickedOutModalWindow->OnPostClickOutParams);
+						CAHManager::getInstance()->runActionHandler(clickedOutModalWindow->OnPostClickOut, _CapturePointerLeft, clickedOutModalWindow->OnPostClickOutParams);
 					}
 				}
 				//if found
@@ -2994,7 +2921,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 					notifyElementCaptured(_CapturePointerRight);
 					if (clickedOutModalWindow && !clickedOutModalWindow->OnPostClickOut.empty())
 					{
-						runActionHandler(clickedOutModalWindow->OnPostClickOut, _CapturePointerRight, clickedOutModalWindow->OnPostClickOutParams);
+						CAHManager::getInstance()->runActionHandler(clickedOutModalWindow->OnPostClickOut, _CapturePointerRight, clickedOutModalWindow->OnPostClickOutParams);
 					}
 				}
 				//if found
@@ -3681,7 +3608,7 @@ void CInterfaceManager::setCaptureKeyboard(CCtrlBase *c)
 
 		if (!newEb->getAHOnFocus().empty())
 		{
-			runActionHandler(newEb->getAHOnFocus(), newEb, newEb->getAHOnFocusParams());
+			CAHManager::getInstance()->runActionHandler(newEb->getAHOnFocus(), newEb, newEb->getAHOnFocusParams());
 		}
 
 	}
@@ -3739,7 +3666,7 @@ void CInterfaceManager::runProcedure (const string &procName, CCtrlBase *pCaller
 			action.buildParams(paramList, params);
 			// run
 			//nlwarning("step %d : %s, %s", (int) i, action.Action.c_str(), params.c_str());
-			runActionHandler(action.Action, pCaller, params);
+			CAHManager::getInstance()->runActionHandler(action.Action, pCaller, params);
 		}
 	}
 }
@@ -4715,7 +4642,7 @@ uint CInterfaceManager::getUserDblClickDelay()
 void CInterfaceManager::submitEvent (const std::string &event)
 {
 	// Submit the event to the quick help system
-	runActionHandler("submit_quick_help", NULL, event);
+	CAHManager::getInstance()->runActionHandler("submit_quick_help", NULL, event);
 }
 
 // ***************************************************************************
@@ -4888,7 +4815,7 @@ void CInterfaceManager::displayWebWindow(const string & name, const string & url
 		pIG->center();
 	}
 
-	runActionHandler("browse", NULL, "name="+name+":content:html|url="+url);
+	CAHManager::getInstance()->runActionHandler("browse", NULL, "name="+name+":content:html|url="+url);
 }
 /*
 // ***************************************************************************
@@ -4897,7 +4824,7 @@ class CHandlerDispWebOnQuit : public IActionHandler
 	virtual void execute (CCtrlBase *pCaller, const string &Params)
 	{
 		if (ClientCfg.Local)
-			CInterfaceManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:quit_dialog");
+			CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:quit_dialog");
 		else
 			CInterfaceManager::getInstance()->displayWebWindow("ui:interface:web_on_quit", "http://213.208.119.190/igpoll/poll_form.php");
 	}
@@ -4909,7 +4836,7 @@ class CHandlerExitWebOnQuit : public IActionHandler
 {
 	virtual void execute (CCtrlBase *pCaller, const string &Params)
 	{
-		CInterfaceManager::getInstance()->runActionHandler("quit_ryzom", pCaller);
+		CAHManager::getInstance()->runActionHandler("quit_ryzom", pCaller);
 	}
 };
 REGISTER_ACTION_HANDLER (CHandlerExitWebOnQuit, "exit_web_on_quit");
@@ -5188,7 +5115,6 @@ void CInterfaceManager::updateEmotes()
 // Just call the action handler with good params
 bool CInterfaceManager::CEmoteCmd::execute(const std::string &/* rawCommandString */, const vector<string> &args, CLog &/* log */, bool /* quiet */, bool /* human */)
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	string customPhrase;
 	if( args.size() > 0 )
 	{
@@ -5199,7 +5125,7 @@ bool CInterfaceManager::CEmoteCmd::execute(const std::string &/* rawCommandStrin
 		customPhrase += " ";
 		customPhrase += args[i];
 	}
-	pIM->runActionHandler("emote", NULL, "nb="+toString(EmoteNb)+"|behav="+toString(Behaviour)+"|custom_phrase="+customPhrase);
+	CAHManager::getInstance()->runActionHandler("emote", NULL, "nb="+toString(EmoteNb)+"|behav="+toString(Behaviour)+"|custom_phrase="+customPhrase);
 	return true;
 }
 

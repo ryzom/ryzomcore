@@ -180,7 +180,7 @@ public:
 		sendMsgToServer("OUTPOST:INSERT_SQUAD", getOutpostSheet(), nSquadSlot);
 
 		// Then set the selected squad at this place
-		pIM->runActionHandler("outpost_set_squad", pCaller, sParams);
+		CAHManager::getInstance()->runActionHandler("outpost_set_squad", pCaller, sParams);
 	}
 };
 REGISTER_ACTION_HANDLER(COutpostInsertSquad, "outpost_insert_squad");
@@ -410,7 +410,7 @@ public:
 			node->setValue32(localToGmt(attPeriod));
 
 		// Nead to resend a Declare War Start (because wanted Att Hour changed)
-		pIM->runActionHandler("outpost_declare_war_start", pCaller);
+		CAHManager::getInstance()->runActionHandler("outpost_declare_war_start", pCaller);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHOutpostSelectAttPeriod, "outpost_select_att_period");

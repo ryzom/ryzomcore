@@ -437,7 +437,7 @@ void CGuildManager::update()
 					}
 
 					// Rebuild interface. Rebuild members only if needed
-					pIM->runActionHandler("guild_sheet_open", NULL, toString("update_members=%d", (uint)_NeedUpdateMembers) );
+					CAHManager::getInstance()->runActionHandler("guild_sheet_open", NULL, toString("update_members=%d", (uint)_NeedUpdateMembers) );
 				}
 			}
 
@@ -1035,7 +1035,7 @@ public:
 		}
 
 		NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->setValue32((sint32)order);
-		pIM->runActionHandler("guild_sheet_open", NULL, toString("update_members=1"));
+		CAHManager::getInstance()->runActionHandler("guild_sheet_open", NULL, toString("update_members=1"));
 	}
 };
 REGISTER_ACTION_HANDLER(CAHGuildSheetSortGuildList, "sort_guild_list");

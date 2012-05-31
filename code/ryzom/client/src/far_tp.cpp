@@ -519,7 +519,7 @@ void CLoginStateMachine::run()
 			// Far TP part 1.1: From the ingame main loop, the admin html box gives us an event ev_connect for the destination shard.
 			//   Note: the admin html box is run by CInputHandlerManager::getInstance()->pumpEvents() in the main loop.
 			//   Tip: to see where a co-task is resumed from, just add a breakpoint on the end of CCoTask::resume().
-			CInterfaceManager::getInstance()->runActionHandler("quit_ryzom", NULL, "");
+			CAHManager::getInstance()->runActionHandler("quit_ryzom", NULL, "");
 
 			if (!FarTP.isIngame()) // assumes there is no Far TP starting between char selection and main loop, see below
 			{
@@ -859,8 +859,8 @@ retryJoinEdit:
 		if ( letReturnToCharSelect )
 		{
 //			// Hide all buttons except Quit. If !requestRetToMainland, we will show them back at the end of connectToNewShard().
-//			pIM->runActionHandler( "proc", NULL, "charsel_disable_buttons" );
-//			pIM->runActionHandler( "set", NULL, "target_property=ui:outgame:charsel:quit_but:active|value=1" );
+//			CAHManager::getInstance()->runActionHandler( "proc", NULL, "charsel_disable_buttons" );
+//			CAHManager::getInstance()->runActionHandler( "set", NULL, "target_property=ui:outgame:charsel:quit_but:active|value=1" );
 
 			CInterfaceElement *btnOk = CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel:message_box:ok");
 			if (btnOk)
@@ -926,12 +926,12 @@ retryJoinEdit:
 		else if ( letReturnToCharSelect )
 		{
 			// Show all buttons except 'New character' so that the character can retry entering game or choose another character.
-			pIM->runActionHandler( "proc", NULL, "charsel_enable_buttons" );
-			pIM->runActionHandler( "set", NULL, "target_property=ui:outgame:charsel:create_new_but:active|value=0" );
+			CAHManager::getInstance()->runActionHandler( "proc", NULL, "charsel_enable_buttons" );
+			CAHManager::getInstance()->runActionHandler( "set", NULL, "target_property=ui:outgame:charsel:create_new_but:active|value=0" );
 
 			CInterfaceGroup* charselGroup = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel"));
 			if(charselGroup)
-				pIM->runActionHandler( "proc", charselGroup, "charsel_init_buttons" );
+				CAHManager::getInstance()->runActionHandler( "proc", charselGroup, "charsel_init_buttons" );
 		}
 
 		return false;

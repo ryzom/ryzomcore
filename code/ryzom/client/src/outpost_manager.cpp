@@ -105,7 +105,7 @@ void	COutpostManager::update()
 			CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 			// Force the neutral choose
-			pIM->runActionHandler("outpost_pvp_join", NULL, "neutral");
+			CAHManager::getInstance()->runActionHandler("outpost_pvp_join", NULL, "neutral");
 
 			// close the window
 			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal"));

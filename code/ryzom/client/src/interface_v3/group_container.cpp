@@ -330,7 +330,7 @@ bool CCtrlResizer::handleEvent (const NLGUI::CEventDescriptor &event)
 				if (gc && gc->getAHOnResizePtr() != NULL)
 				{
 					CInterfaceManager *im = CInterfaceManager::getInstance();
-					im->runActionHandler(gc->getAHOnResize(), gc, gc->getAHOnResizeParams());
+					CAHManager::getInstance()->runActionHandler(gc->getAHOnResize(), gc, gc->getAHOnResizeParams());
 				}
 			}
 			return true;
@@ -716,7 +716,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 					if (gc->getAHOnBeginMovePtr())
 					{
 						CInterfaceManager *im = CInterfaceManager::getInstance();
-						im->runActionHandler(gc->getAHOnBeginMove(), gc, gc->getAHOnBeginMoveParams());						
+						CAHManager::getInstance()->runActionHandler(gc->getAHOnBeginMove(), gc, gc->getAHOnBeginMoveParams());						
 					}
 					return true;
 				}
@@ -825,7 +825,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 						// udpate XReal/YReal coords only of the container
 						gc->CInterfaceElement::updateCoords();
 						// execute the AH
-						pIM->runActionHandler(gc->getAHOnMovePtr(), this, gc->getAHOnMoveParams());
+						CAHManager::getInstance()->runActionHandler(gc->getAHOnMovePtr(), this, gc->getAHOnMoveParams());
 					}
 				}
 				else
@@ -1033,13 +1033,13 @@ bool CCtrlMover::runTitleActionHandler()
 	CInterfaceGroup *gr = gc->isOpen() ? gc->getHeaderOpened() : gc->getHeaderClosed();
 	if (gr && !gr->getLeftClickHandler().empty())
 	{
-		im->runActionHandler(gr->getLeftClickHandler(), this, gr->getLeftClickHandlerParams());
+		CAHManager::getInstance()->runActionHandler(gr->getLeftClickHandler(), this, gr->getLeftClickHandlerParams());
 		return true;
 	}
 	// try with the main group
 	if (!gc->getLeftClickHandler().empty())
 	{
-		im->runActionHandler(gc->getLeftClickHandler(), this, gc->getLeftClickHandlerParams());
+		CAHManager::getInstance()->runActionHandler(gc->getLeftClickHandler(), this, gc->getLeftClickHandlerParams());
 			return true;
 	}
 	return false;
@@ -2330,7 +2330,7 @@ void CGroupContainer::open()
 	if (_AHOnOpen != NULL)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->runActionHandler(_AHOnOpen, this, _AHOnOpenParams);
+		CAHManager::getInstance()->runActionHandler(_AHOnOpen, this, _AHOnOpenParams);
 	}
 
 }
@@ -2358,7 +2358,7 @@ void CGroupContainer::close()
 	if (_AHOnClose != NULL)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->runActionHandler(_AHOnClose, this, _AHOnCloseParams);
+		CAHManager::getInstance()->runActionHandler(_AHOnClose, this, _AHOnCloseParams);
 	}
 }
 
@@ -3502,7 +3502,7 @@ public:
 		CGroupContainer::_ValidateCanDeactivate = true;
 		if (!pIC->getAHOnDeactiveCheck().empty())
 		{
-			im->runActionHandler(pIC->getAHOnDeactiveCheck(), pCaller, pIC->getAHOnDeactiveCheckParams());
+			CAHManager::getInstance()->runActionHandler(pIC->getAHOnDeactiveCheck(), pCaller, pIC->getAHOnDeactiveCheckParams());
 		}
 
 		if (CGroupContainer::_ValidateCanDeactivate)
@@ -3510,7 +3510,7 @@ public:
 			// send close button msg
 			if (!pIC->getAHOnCloseButton().empty())
 			{
-				im->runActionHandler(pIC->getAHOnCloseButton(), pCaller, pIC->getAHOnCloseButtonParams());
+				CAHManager::getInstance()->runActionHandler(pIC->getAHOnCloseButton(), pCaller, pIC->getAHOnCloseButtonParams());
 			}
 			CWidgetManager::getInstance()->setBackWindow(pIC);
 			pIC->setActive(false);
@@ -3596,7 +3596,7 @@ class CICHelp : public IActionHandler
 		{
 			CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 			// open the web browser, and point to the page
-			pIM->runActionHandler("launch_help", NULL, "url=" + helpPage);
+			CAHManager::getInstance()->runActionHandler("launch_help", NULL, "url=" + helpPage);
 		}
 	}
 };
@@ -4035,7 +4035,7 @@ void CGroupContainer::triggerAlphaSettingsChangedAH()
 	if (_AHOnAlphaSettingsChanged != NULL)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->runActionHandler(_AHOnAlphaSettingsChanged, this, _AHOnAlphaSettingsChangedParams);
+		CAHManager::getInstance()->runActionHandler(_AHOnAlphaSettingsChanged, this, _AHOnAlphaSettingsChangedParams);
 	}
 }
 

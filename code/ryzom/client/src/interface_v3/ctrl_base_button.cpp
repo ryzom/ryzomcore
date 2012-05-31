@@ -229,7 +229,7 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 			{
 				if ((CCtrlBaseButton *) _LastLeftClickButton == this && (T1 - _LastLeftClickDate) < pIM->getUserDblClickDelay())
 				{
-					pIM->runActionHandler (_AHOnLeftDblClick, this, _AHLeftDblClickParams);
+					CAHManager::getInstance()->runActionHandler (_AHOnLeftDblClick, this, _AHLeftDblClickParams);
 					_LeftDblClickHandled = true;
 					_LastLeftClickButton = NULL;
 					return true;
@@ -279,7 +279,7 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 			{
 				//nlinfo("clicked on %s", _Id.c_str());
 				pIM->submitEvent ("button_click:"+getId());//TEMP
-				pIM->runActionHandler (_AHOnLeftClick, this, _AHLeftClickParams);
+				CAHManager::getInstance()->runActionHandler (_AHOnLeftClick, this, _AHLeftClickParams);
 				//pIM->submitEvent ("button_click:"+getId());
 			}
 			*/
@@ -316,7 +316,7 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 			if(_AHOnRightClick != NULL)
 			{
 				handled= true;
-				pIM->runActionHandler (_AHOnRightClick, this, _AHRightClickParams);
+				CAHManager::getInstance()->runActionHandler (_AHOnRightClick, this, _AHRightClickParams);
 			}
 			if (pIM->getCapturePointerRight() == NULL) return true; // if this become NULL, this ctrl has been deleted
 			// Run Menu
@@ -339,7 +339,7 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 			if (_AHOnClockTick != NULL)
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				pIM->runActionHandler(_AHOnClockTick, this, _AHClockTickParams);
+				CAHManager::getInstance()->runActionHandler(_AHOnClockTick, this, _AHClockTickParams);
 			}
 
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -355,7 +355,7 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 					if ((T1 - _LeftLongClickDate) > repeatDelay)
 					{
 						_LeftLongClickHandled = true;
-						pIM->runActionHandler(_AHOnLeftLongClick, this, _AHLeftLongClickParams);
+						CAHManager::getInstance()->runActionHandler(_AHOnLeftLongClick, this, _AHLeftLongClickParams);
 					}
 				}
 			}
@@ -504,7 +504,7 @@ void CCtrlBaseButton::runLeftClickAction()
 
 		//nlinfo("clicked on %s", _Id.c_str());
 		pIM->submitEvent ("button_click:"+getId());//TEMP
-		pIM->runActionHandler (_AHOnLeftClick, this, _AHLeftClickParams);
+		CAHManager::getInstance()->runActionHandler (_AHOnLeftClick, this, _AHLeftClickParams);
 		//pIM->submitEvent ("button_click:"+getId());
 	}
 }

@@ -202,6 +202,78 @@ void CAHManager::parseAH(xmlNodePtr cur, const char *ahId, const char *paramId, 
 }
 
 // ------------------------------------------------------------------------------------------------
+void CAHManager::runActionHandler (const string &ahCmdLine, CCtrlBase *pCaller, const string &ahUserParams)
+{
+	if (ahCmdLine.empty()) return;
+
+	// Special AH form ("ah:params") ?
+	string::size_type i = ahCmdLine.find(':');
+	string	ahName;
+	string	ahParams;
+	if(i!=string::npos)
+	{
+		ahName= ahCmdLine.substr(0, i);
+		ahParams= ahCmdLine.substr(i+1);
+	}
+	else
+	{
+		ahName= ahCmdLine;
+	}
+
+	// Replace params if defined
+	if(!ahUserParams.empty())
+		ahParams= ahUserParams;
+
+	// Execute the action handler
+	map<string, IActionHandler*>::iterator it = FactoryMap.find (ahName);
+	if (it == FactoryMap.end())
+	{
+		nlwarning ("not found action handler : %s",ahName.c_str());
+		return;
+	}
+	IActionHandler *pAH = it->second;
+	pAH->execute (pCaller, ahParams);
+
+	// Quick Help
+	const string submitQuickHelp = "submit_quick_help";
+	it = FactoryMap.find(submitQuickHelp);
+	if(it == FactoryMap.end())
+	{
+		nlwarning ("not found action handler : %s", submitQuickHelp.c_str());
+		return;
+	}
+	pAH = it->second;
+	const std::string event = ahName + ":" + ahParams;
+	pAH->execute(NULL, event);
+}
+
+// ------------------------------------------------------------------------------------------------
+void CAHManager::runActionHandler (IActionHandler *pAH, CCtrlBase *pCaller, const std::string &Params)
+{
+	if (pAH == NULL)
+	{
+		nlwarning ("no action handler");
+		return;
+	}
+	pAH->execute (pCaller, Params);
+	string AHName = CAHManager::getInstance()->getAHName(pAH);
+
+	// Quick Help
+	const string submitQuickHelp = "submit_quick_help";
+	map<string, IActionHandler*>::iterator it = FactoryMap.find (AHName);
+	it = FactoryMap.find(submitQuickHelp);
+	if(it == FactoryMap.end())
+	{
+		nlwarning ("not found action handler : %s", submitQuickHelp.c_str());
+		return;
+	}
+	pAH = it->second;
+	const std::string event = AHName + ":" + Params;
+	pAH->execute(NULL, event);
+}
+
+
+// ------------------------------------------------------------------------------------------------
 class CAHSet : public IActionHandler
 {
 public:

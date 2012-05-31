@@ -1161,7 +1161,7 @@ TInterfaceState globalMenu()
 						}
 
 						// Auto-selection for fast launching (dev only)
-						pIM->runActionHandler("launch_game", NULL, toString("slot=%d|edit_mode=0", ClientCfg.SelectCharacter));
+						CAHManager::getInstance()->runActionHandler("launch_game", NULL, toString("slot=%d|edit_mode=0", ClientCfg.SelectCharacter));
 					}
 
 				}
@@ -2179,7 +2179,7 @@ public:
 			if (pCB != NULL)
 			{
 				pCB->setPushed(true);
-				pIM->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
+				CAHManager::getInstance()->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
 			}
 		}
 		pList->invalidateCoords();
@@ -2419,7 +2419,7 @@ public:
 				if (pCB != NULL)
 				{
 					pCB->setPushed(true);
-					pIM->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
+					CAHManager::getInstance()->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
 				}
 			}
 		}
@@ -3229,7 +3229,7 @@ class CAHLoadScenario : public IActionHandler
 				CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 				if (pVT != NULL)
 					pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
-				pIM->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
+				CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 
 				return;
 			}
@@ -3310,7 +3310,7 @@ class CAHLoadScenario : public IActionHandler
 							CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 							if (pVT != NULL)
 								pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
-							pIM->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
+							CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 						}
 
 
@@ -3339,7 +3339,7 @@ class CAHLoadScenario : public IActionHandler
 											CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 											if (pVT != NULL)
 												pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
-											pIM->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
+											CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 										}
 									}
 								}

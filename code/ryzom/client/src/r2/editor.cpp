@@ -5281,7 +5281,7 @@ void  CEditor::onTestModeConnected()
 	CHECK_EDITOR
 	// TODO nico : change the name of the function : should rather be 'onAnimationModeConnected'
 	// start as a GM
-	getUI().runActionHandler("r2ed_anim_dm_mode", NULL, "");
+	CAHManager::getInstance()->runActionHandler("r2ed_anim_dm_mode", NULL, "");
 	_DMC->CDynamicMapClient::onTestModeConnected();
 }
 
@@ -7394,7 +7394,7 @@ class CAHInviteCharacter : public IActionHandler
 		CHECK_EDITOR
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler("leave_modal", pCaller, "");
+		CAHManager::getInstance()->runActionHandler("leave_modal", pCaller, "");
 
 		if(pCaller)
 		{
@@ -7429,11 +7429,11 @@ class CAHInviteCharacter : public IActionHandler
 						if (pVT != NULL)
 							pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
 
-						pIM->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
+						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 					}
 					else if(sessionBrowser._LastInvokeResult == 12)
 					{
-						pIM->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_newcomer");
+						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_newcomer");
 					}
 
 					geb->setInputString(ucstring(""));

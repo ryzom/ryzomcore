@@ -1746,12 +1746,12 @@ void CTempInvManager::update()
 	{
 		// If all slots are empty, close the interface
 		pGC->setActive(false);
-		pIM->runActionHandler("phrase_update_all_memory_ctrl_regen_tick_range", NULL);
+		CAHManager::getInstance()->runActionHandler("phrase_update_all_memory_ctrl_regen_tick_range", NULL);
 	}
 	else
 	{
 		pGC->setActive(true);
-		pIM->runActionHandler("phrase_update_all_memory_ctrl_regen_tick_range", NULL);
+		CAHManager::getInstance()->runActionHandler("phrase_update_all_memory_ctrl_regen_tick_range", NULL);
 		// Something arrived, change text
 		switch(_Mode)
 		{
@@ -1884,7 +1884,7 @@ void CTempInvManager::open(TEMP_INV_MODE::TInventoryMode m)
 		};
 
 		pGC->setActive(true);
-		pIM->runActionHandler("phrase_update_all_memory_ctrl_regen_tick_range", NULL);
+		CAHManager::getInstance()->runActionHandler("phrase_update_all_memory_ctrl_regen_tick_range", NULL);
 	}
 }
 
@@ -1906,7 +1906,7 @@ void CTempInvManager::close()
 	if (pIG != NULL)
 	{
 		pIG->setActive(false);
-		pIM->runActionHandler("phrase_update_all_memory_ctrl_regen_tick_range", NULL);
+		CAHManager::getInstance()->runActionHandler("phrase_update_all_memory_ctrl_regen_tick_range", NULL);
 	}
 }
 
@@ -2706,7 +2706,7 @@ class CHandlerInvDropTo : public IActionHandler
 					if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvBag)) ||
 						((pListDstIcon != NULL) && (pListDstIcon->getInvType() == CInventoryManager::InvBag)))
 					{
-						pIM->runActionHandler("proc", pCSSrc, "move_to_bag");
+						CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_bag");
 					}
 					else if (((pListDstText != NULL) && ((pListDstText->getInvType() == CInventoryManager::InvPA0) ||
 														 (pListDstText->getInvType() == CInventoryManager::InvPA1) ||
@@ -2722,18 +2722,18 @@ class CHandlerInvDropTo : public IActionHandler
 						string sTmp;
 						if (pListDstText != NULL) sTmp = toString("%d",pListDstText->getInvType()-CInventoryManager::InvPA0);
 						if (pListDstIcon != NULL) sTmp = toString("%d",pListDstIcon->getInvType()-CInventoryManager::InvPA0);
-						pIM->runActionHandler("proc", pCSSrc, "move_to_pa|"+sTmp);
+						CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_pa|"+sTmp);
 					}
 					else if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvGuild)) ||
 							 ((pListDstIcon != NULL) && (pListDstIcon->getInvType() == CInventoryManager::InvGuild)))
 					{
 						if (strnicmp(pCSSrc->getSheet().c_str(), "LOCAL:INVENTORY:BAG", 19) == 0)
-							pIM->runActionHandler("proc", pCSSrc, "move_to_guild");
+							CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_guild");
 					}
 					else if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvRoom)) ||
 							 ((pListDstIcon != NULL) && (pListDstIcon->getInvType() == CInventoryManager::InvRoom)))
 					{
-						pIM->runActionHandler("proc", pCSSrc, "move_to_room");
+						CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_room");
 					}
 				}
 			}
@@ -2760,7 +2760,7 @@ class CHandlerInvDropTo : public IActionHandler
 			if (i1 != 0) getInventory().equip(sBag + toString(i1-1), invPath2);
 		}
 
-		pIM->runActionHandler("inv_cannot_drop", pCSSrc);
+		CAHManager::getInstance()->runActionHandler("inv_cannot_drop", pCSSrc);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerInvDropTo, "inv_drop" );

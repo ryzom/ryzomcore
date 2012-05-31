@@ -790,7 +790,7 @@ void CGroupInSceneBubbleManager::addContextHelpHTML (const string &url, const st
 		if (context)
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			pIM->runActionHandler("browse", NULL, "name="+context->Group->getId()+":header_opened:window:html|url="+url);
+			CAHManager::getInstance()->runActionHandler("browse", NULL, "name="+context->Group->getId()+":header_opened:window:html|url="+url);
 
 			// Add the URL
 			context->Url = url;
@@ -1277,7 +1277,7 @@ void CGroupInSceneBubbleManager::CDynBubble::skip()
 	if (nNbOptions == 1)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler("dynchat_click_option", Bubble, "0");
+		CAHManager::getInstance()->runActionHandler("dynchat_click_option", Bubble, "0");
 	}
 }
 

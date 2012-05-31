@@ -222,7 +222,7 @@ int CSessionBrowserImpl::luaJoinRingSession(CLuaState &ls)
 		CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 		if (pVT != NULL)
 			pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
-		pIM->runActionHandler("enter_modal", NULL, "group=ui:interface:warning_free_trial");
+		CAHManager::getInstance()->runActionHandler("enter_modal", NULL, "group=ui:interface:warning_free_trial");
 	}
 
 	return 0;
@@ -326,7 +326,7 @@ void CSessionBrowserImpl::on_joinSessionResult(NLNET::TSockId /* from */, uint32
 	if (result == 0)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler("on_connect_to_shard", NULL, string("cookie=")+NetMngr.getLoginCookie().toString()+"|fsAddr="+shardAddr);
+		CAHManager::getInstance()->runActionHandler("on_connect_to_shard", NULL, string("cookie=")+NetMngr.getLoginCookie().toString()+"|fsAddr="+shardAddr);
 	}
 }
 
