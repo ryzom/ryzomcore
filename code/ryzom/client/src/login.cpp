@@ -162,7 +162,7 @@ static void errorMessageBox(const ucstring &msg)
 void createOptionalCatUI()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_CAT));
+	CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CAT));
 	if (pList == NULL)
 	{
 		nlwarning("element "GROUP_LIST_CAT" not found probably bad login_main.xml");
@@ -229,7 +229,7 @@ void initEula()
 static void setDataScanLog(const ucstring &text)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:datascan:content:log_txt:log"));
+	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:datascan:content:log_txt:log"));
 	if (pVT != NULL)
 	{
 		pVT->setText(text);
@@ -240,10 +240,10 @@ static void setDataScanLog(const ucstring &text)
 static void setDataScanState(const ucstring &text, ucstring progress= ucstring())
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:datascan:content:state"));
+	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:datascan:content:state"));
 	if (pVT != NULL) pVT->setText(text);
 
-	pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:datascan:content:progress"));
+	pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:datascan:content:progress"));
 	if (pVT != NULL) pVT->setText(progress);
 }
 
@@ -280,7 +280,7 @@ void initReboot()
 static void setPatcherStateText(const std::string &baseUIPath, const ucstring &str)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(baseUIPath + ":content:state"));
+	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(baseUIPath + ":content:state"));
 	if (pVT != NULL)
 	{
 		pVT->setText(str);
@@ -291,7 +291,7 @@ static void setPatcherStateText(const std::string &baseUIPath, const ucstring &s
 static void setPatcherProgressText(const std::string &baseUIPath, const ucstring &str)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(baseUIPath + ":content:progress"));
+	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(baseUIPath + ":content:progress"));
 	if (pVT != NULL)
 	{
 		pVT->setText(str);
@@ -657,7 +657,7 @@ void loginMainLoop()
 				}
 			}
 
-			CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(VIEW_TOTAL_SIZE_PATCH));
+			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_TOTAL_SIZE_PATCH));
 			ucstring sTmp;
 			sTmp = BGDownloader::getWrittenSize(currentPatchingSize);
 			sTmp += " / " + BGDownloader::getWrittenSize(totalPatchSize);
@@ -672,7 +672,7 @@ void loginMainLoop()
 			uint32 nNonOptSize = 0;
 			TotalPatchSize = 0;
 			vector<sint32> ReqCat;
-			CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_CAT));
+			CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CAT));
 			if (pList != NULL)
 			{
 				for(uint i = 0; i < InfoOnPatch.OptCat.size(); i++)
@@ -709,10 +709,10 @@ void loginMainLoop()
 			TotalPatchSize += nNonOptSize;
 			// Total size of the patches is optional cats + required cat (f(optCat)) + non opt cat
 
-			CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(VIEW_TOTAL_SIZE));
+			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_TOTAL_SIZE));
 			if (pVT != NULL) pVT->setText(BGDownloader::getWrittenSize(TotalPatchSize));
 
-			pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(VIEW_NON_OPTIONAL_SIZE));
+			pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_NON_OPTIONAL_SIZE));
 			if (pVT != NULL) pVT->setText(BGDownloader::getWrittenSize(nNonOptSize));
 		}
 	}
@@ -739,7 +739,7 @@ void initLoginScreen()
 
 	if(!l.empty())
 	{
-		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_LOGIN));
+		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
 		if (pGEB != NULL && (pGEB->getInputString().empty()))
 		{
 			pGEB->setInputString(l);
@@ -752,7 +752,7 @@ void initLoginScreen()
 	}
 
 
-	CCtrlTextButton *pCB = dynamic_cast<CCtrlTextButton*>(pIM->getElementFromId(CTRL_BUTTON_CONNECT));
+	CCtrlTextButton *pCB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId(CTRL_BUTTON_CONNECT));
 	if (pCB != NULL) pCB->setActive(false);
 
 	loginFinished = false;
@@ -762,8 +762,8 @@ void initLoginScreen()
 void initAutoLogin()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupEditBox *pGEBLog = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_LOGIN));
-	CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_PASSWORD));
+	CGroupEditBox *pGEBLog = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
+	CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
 	pGEBLog->setInputString(LoginLogin);
 	pGEBPwd->setInputString(LoginPassword);
 	pIM->runActionHandler("on_login", NULL, "");
@@ -831,17 +831,17 @@ bool login()
 //		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
 //
 //		// hide 'back to login' button
-//		CInterfaceElement *backToLogin = pIM->getElementFromId(CTRL_BUTTON_BACKTOLOGIN);
+//		CInterfaceElement *backToLogin = CWidgetManager::getInstance()->getElementFromId(CTRL_BUTTON_BACKTOLOGIN);
 //		if (backToLogin)
 //			backToLogin->setActive(false);
 //
 //		// show 'reload test page' button
-//		CInterfaceElement *reloadTest = pIM->getElementFromId(CTRL_BUTTON_RELOADTESTPAGE);
+//		CInterfaceElement *reloadTest = CWidgetManager::getInstance()->getElementFromId(CTRL_BUTTON_RELOADTESTPAGE);
 //		if (reloadTest)
 //			reloadTest->setActive(true);
 //
 //		// start the browser
-//		CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
+//		CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
 //
 //		pGH->browse(ClientCfg.TestBrowserUrl.c_str());
 //
@@ -866,7 +866,7 @@ bool login()
 //
 //	if(!l.empty())
 //	{
-//		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_LOGIN));
+//		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
 //		if (pGEB != NULL)
 //			pGEB->setInputString(l);
 //		pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
@@ -877,7 +877,7 @@ bool login()
 //	}
 
 	ShardSelected = -1;
-//	CCtrlTextButton *pCB = dynamic_cast<CCtrlTextButton*>(pIM->getElementFromId(CTRL_BUTTON_CONNECT));
+//	CCtrlTextButton *pCB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId(CTRL_BUTTON_CONNECT));
 //	if (pCB != NULL) pCB->setActive(false);
 //
 //	loginFinished = false;
@@ -887,8 +887,8 @@ bool login()
 //	if (!LoginLogin.empty())
 //	{
 //		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//		CGroupEditBox *pGEBLog = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_LOGIN));
-//		CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_PASSWORD));
+//		CGroupEditBox *pGEBLog = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
+//		CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
 //		pGEBLog->setInputString(LoginLogin);
 //		pGEBPwd->setInputString(LoginPassword);
 //		pIM->runActionHandler("on_login", NULL, "");
@@ -1031,7 +1031,7 @@ void initShardDisplay()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_SHARDDISP);
 
-	CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_SHARD));
+	CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD));
 	if (pList == NULL)
 	{
 		nlwarning("element "GROUP_LIST_SHARD" not found probably bad login_main.xml");
@@ -1087,7 +1087,7 @@ void initShardDisplay()
 	// UI Patch
 	if (!Shards.empty())
 	{
-		CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(pIM->getElementFromId(GROUP_LIST_SHARD ":s0:but"));
+		CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD ":s0:but"));
 		if (pCB != NULL)
 			pCB->setPushed(true);
 		pIM->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
@@ -1147,7 +1147,7 @@ void onlogin(bool vanishScreen = true)
 //
 //				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 //				// start the browser
-//				CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
+//				CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
 //
 //				pGH->browse(RingMainURL.c_str());
 //			}
@@ -1158,7 +1158,7 @@ void onlogin(bool vanishScreen = true)
 //			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_SHARDDISP);
 		}
 
-//		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_SHARD));
+//		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD));
 //		if (pList == NULL)
 //		{
 //			nlwarning("element "GROUP_LIST_SHARD" not found probably bad login_main.xml");
@@ -1214,7 +1214,7 @@ void onlogin(bool vanishScreen = true)
 //		// UI Patch
 //		if (!Shards.empty())
 //		{
-//			CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(pIM->getElementFromId(GROUP_LIST_SHARD ":s0:but"));
+//			CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD ":s0:but"));
 //			if (pCB != NULL)
 //				pCB->setPushed(true);
 //			pIM->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
@@ -1248,8 +1248,8 @@ class CAHOnLogin : public IActionHandler
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		CGroupEditBox *pGEBLog = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_LOGIN));
-		CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_PASSWORD));
+		CGroupEditBox *pGEBLog = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
+		CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
 		if ((pGEBLog == NULL) || (pGEBPwd == NULL))
 		{
 			nlwarning("element "CTRL_EDITBOX_LOGIN" or "CTRL_EDITBOX_PASSWORD" not found probably bad login_main.xml");
@@ -1325,9 +1325,9 @@ class CAHLoginTab : public IActionHandler
 				CCtrlBase *pNewCB;
 				string sID = pCB->getId();
 				if (sID == CTRL_EDITBOX_LOGIN)
-					pNewCB = dynamic_cast<CCtrlBase*>(pIM->getElementFromId(CTRL_EDITBOX_PASSWORD));
+					pNewCB = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
 				else
-					pNewCB = dynamic_cast<CCtrlBase*>(pIM->getElementFromId(CTRL_EDITBOX_LOGIN));
+					pNewCB = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
 				pIM->setCaptureKeyboard(pNewCB);
 			}
 		}
@@ -1339,13 +1339,13 @@ class CAHLoginTab : public IActionHandler
 				CCtrlBase *pNewCB;
 				string sID = pCB->getId();
 				if (sID == CTRL_EDITBOX_CREATEACCOUNT_LOGIN)
-					pNewCB = dynamic_cast<CCtrlBase*>(pIM->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_PASSWORD));
+					pNewCB = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_PASSWORD));
 				else if (sID == CTRL_EDITBOX_CREATEACCOUNT_PASSWORD)
-					pNewCB = dynamic_cast<CCtrlBase*>(pIM->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_CONFIRMPASSWORD));
+					pNewCB = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_CONFIRMPASSWORD));
 				else if (sID == CTRL_EDITBOX_CREATEACCOUNT_CONFIRMPASSWORD)
-					pNewCB = dynamic_cast<CCtrlBase*>(pIM->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_EMAIL));
+					pNewCB = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_EMAIL));
 				else
-					pNewCB = dynamic_cast<CCtrlBase*>(pIM->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_LOGIN));
+					pNewCB = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_LOGIN));
 				pIM->setCaptureKeyboard(pNewCB);
 			}
 		}
@@ -1367,7 +1367,7 @@ class CAHShardSelect : public IActionHandler
 		// Unselect
 		if (ShardSelected != -1)
 		{
-			pCB = dynamic_cast<CCtrlButton*>(pIM->getElementFromId(GROUP_LIST_SHARD ":s"+toString(ShardSelected)+":but"));
+			pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD ":s"+toString(ShardSelected)+":but"));
 			if (pCB != NULL)
 				pCB->setPushed(false);
 		}
@@ -1383,7 +1383,7 @@ class CAHShardSelect : public IActionHandler
 			pCB->setPushed(true);
 		}
 
-		CCtrlTextButton *pCTB = dynamic_cast<CCtrlTextButton*>(pIM->getElementFromId(CTRL_BUTTON_CONNECT));
+		CCtrlTextButton *pCTB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId(CTRL_BUTTON_CONNECT));
 		if (pCTB != NULL)
 			pCTB->setActive(true);
 	}
@@ -1533,7 +1533,7 @@ void initPatch()
 		// Get the list of optional categories to patch
 		vector<string> vCategories;
 
-		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_CAT));
+		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CAT));
 		if (pList == NULL)
 		{
 			nlwarning("element "GROUP_LIST_CAT" not found probably bad login_main.xml");
@@ -1573,7 +1573,7 @@ void initPatch()
 	}
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_PATCHING);
 
-	CInterfaceElement *closeBtn = pIM->getElementFromId(CTRL_BUTTON_CLOSE_PATCH);
+	CInterfaceElement *closeBtn = CWidgetManager::getInstance()->getElementFromId(CTRL_BUTTON_CLOSE_PATCH);
 	if (closeBtn)
 		closeBtn->setActive(false);
 
@@ -1597,7 +1597,7 @@ class CAHLoginPatch : public IActionHandler
 //		// Get the list of optional categories to patch
 //		vector<string> vCategories;
 //
-//		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_CAT));
+//		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CAT));
 //		if (pList == NULL)
 //		{
 //			nlwarning("element "GROUP_LIST_CAT" not found probably bad login_main.xml");
@@ -1666,7 +1666,7 @@ class CAHSetReleaseNote : public IActionHandler
 		string sShard = getParam(sParams, "shard");
 		string sGroupHtml = getParam(sParams, "group");
 
-		CGroupHTML *pQH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(sGroupHtml));
+		CGroupHTML *pQH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(sGroupHtml));
 		if (pQH == NULL)
 			return;
 
@@ -1761,7 +1761,7 @@ class CAHAcceptEula : public IActionHandler
 //			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
 //
 //			// start the browser
-//			CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
+//			CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
 //
 //			pGH->browse(RingMainURL.c_str());
 //		}
@@ -1912,7 +1912,7 @@ class CAHInitResLod : public IActionHandler
 			CurrentMode = 1;
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:checkpass:content:res_value"));
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:res_value"));
 		if (pVT != NULL)
 			pVT->setHardText(StringModeList[CurrentMode]);
 
@@ -1989,7 +1989,7 @@ class CAHInitResLod : public IActionHandler
 			else if (nPreset&8)	CurrentPreset = 3;
 		}
 
-		pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:checkpass:content:lod_value"));
+		pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:lod_value"));
 		if (pVT != NULL)
 			pVT->setHardText(StringPresetList[CurrentPreset]);
 	}
@@ -2005,7 +2005,7 @@ class CAHMoreRes : public IActionHandler
 		if (CurrentMode < ((sint)StringModeList.size()-1))
 			CurrentMode++;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:checkpass:content:res_value"));
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:res_value"));
 		if (pVT != NULL)
 			pVT->setHardText(StringModeList[CurrentMode]);
 	}
@@ -2021,7 +2021,7 @@ class CAHLessRes : public IActionHandler
 		if (CurrentMode > 0)
 			CurrentMode--;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:checkpass:content:res_value"));
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:res_value"));
 		if (pVT != NULL)
 			pVT->setHardText(StringModeList[CurrentMode]);
 	}
@@ -2037,7 +2037,7 @@ class CAHMoreLod : public IActionHandler
 		if (CurrentPreset < ((sint)StringPresetList.size()-1))
 			CurrentPreset++;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:checkpass:content:lod_value"));
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:lod_value"));
 		if (pVT != NULL)
 			pVT->setHardText(StringPresetList[CurrentPreset]);
 	}
@@ -2053,7 +2053,7 @@ class CAHLessLod : public IActionHandler
 		if (CurrentPreset > 0)
 			CurrentPreset--;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:checkpass:content:lod_value"));
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:lod_value"));
 		if (pVT != NULL)
 			pVT->setHardText(StringPresetList[CurrentPreset]);
 	}
@@ -2168,7 +2168,7 @@ class CAHOnScanDataClose : public IActionHandler
 //
 //			// Give focus to password if some login entered
 //			string	loginEB;
-//			CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_LOGIN));
+//			CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
 //			if(pGEB)
 //				loginEB= pGEB->getInputStringAsStdString();
 //			// if none entered
@@ -2234,7 +2234,7 @@ bool initCreateAccount()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	// reset UI
-	CInterfaceGroup *createAccountUI = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:login:create_account"));
+	CInterfaceGroup *createAccountUI = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:login:create_account"));
 	if(createAccountUI)
 	{
 		// show "submit interface", hide "login interface"
@@ -2372,7 +2372,7 @@ class CAHCreateAccountRules : public IActionHandler
 		nlinfo("CAHCreateAccountRules called");
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup *createAccountUI = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:login:create_account"));
+		CInterfaceGroup *createAccountUI = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:login:create_account"));
 		if(createAccountUI)
 		{
 			CInterfaceGroup * rulesGr = dynamic_cast<CInterfaceGroup*>(createAccountUI->findFromShortId("rules_gr"));
@@ -2426,7 +2426,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		CInterfaceGroup *createAccountUI = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:login:create_account"));
+		CInterfaceGroup *createAccountUI = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:login:create_account"));
 		if(createAccountUI)
 		{
 			// recover data from UI
@@ -2589,7 +2589,7 @@ class CAHCreateAccountLogin : public IActionHandler
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		CInterfaceGroup *createAccountUI = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:login:create_account"));
+		CInterfaceGroup *createAccountUI = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:login:create_account"));
 		if(createAccountUI)
 		{
 			CGroupEditBox * eb = dynamic_cast<CGroupEditBox*>(createAccountUI->findFromShortId("eb_login:eb"));

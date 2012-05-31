@@ -926,9 +926,9 @@ class CHandlerSetCompas : public IActionHandler
 		std::string compassID = getParam(sParams, "compass");
 		std::string menuID = getParam(sParams, "menu");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupCompas *gc = dynamic_cast<CGroupCompas *>(im->getElementFromId(compassID));
+		CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId(compassID));
 		if (!gc) return;
-		CGroupCompasMenu *gcm = dynamic_cast<CGroupCompasMenu *>(im->getElementFromId(menuID));
+		CGroupCompasMenu *gcm = dynamic_cast<CGroupCompasMenu *>(CWidgetManager::getInstance()->getElementFromId(menuID));
 		if (!gcm) return;
 		int index;
 		std::string id = getParam(sParams, "id");
@@ -938,7 +938,7 @@ class CHandlerSetCompas : public IActionHandler
 			gc->setTarget(gcm->Targets[index]);
 			gc->setActive(true);
 			gc->blink();
-			im->setTopWindow(gc);
+			CWidgetManager::getInstance()->setTopWindow(gc);
 		}
 	}
 };
@@ -967,13 +967,13 @@ class CHandlerSetTeamCompas : public IActionHandler
 				CCompassTarget	ct;
 				if(buildCompassTargetFromTeamMember(ct, peopleIndex))
 				{
-					CGroupCompas	*gc= dynamic_cast<CGroupCompas*>(pIM->getElementFromId(compassID));
+					CGroupCompas	*gc= dynamic_cast<CGroupCompas*>(CWidgetManager::getInstance()->getElementFromId(compassID));
 					if(gc)
 					{
 						gc->setTarget(ct);
 						gc->setActive(true);
 						gc->blink();
-						pIM->setTopWindow(gc);
+						CWidgetManager::getInstance()->setTopWindow(gc);
 					}
 				}
 			}
@@ -989,7 +989,7 @@ class CHandlerSetCompassNorth : public IActionHandler
 	{
 		std::string compassID = getParam(sParams, "compass");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupCompas *gc = dynamic_cast<CGroupCompas *>(im->getElementFromId(compassID));
+		CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId(compassID));
 		if (!gc) return;
 		gc->setTarget(CCompassTarget());
 	}

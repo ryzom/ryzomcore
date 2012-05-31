@@ -99,13 +99,13 @@ void CActionHandlerShowOne::execute (CCtrlBase * /* pCaller */, const std::strin
 	// hide all window from the list.
 	for(uint i=0;i<wndList.size();i++)
 	{
-		CInterfaceElement	*wnd= mngr->getElementFromId(wndList[i]);
+		CInterfaceElement	*wnd= CWidgetManager::getInstance()->getElementFromId(wndList[i]);
 		if(wnd)
 			wnd->setActive(false);
 	}
 
 	// show the one needed
-	CInterfaceElement	*wnd= mngr->getElementFromId(wndShow);
+	CInterfaceElement	*wnd= CWidgetManager::getInstance()->getElementFromId(wndShow);
 	if(wnd)
 		wnd->setActive(true);
 }
@@ -127,7 +127,7 @@ void CActionHandlerActive::execute (CCtrlBase * /* pCaller */, const std::string
 			return;
 		}
 		CInterfaceManager	*mngr = CInterfaceManager::getInstance();
-		CInterfaceElement	*wnd = mngr->getElementFromId(target);
+		CInterfaceElement	*wnd = CWidgetManager::getInstance()->getElementFromId(target);
 		if(!wnd)
 		{
 			nlwarning("<CActionHandlerActive::execute> Can't get window %s", target.c_str());
@@ -158,7 +158,7 @@ void CActionHandlerSetOpen::execute (CCtrlBase * /* pCaller */, const std::strin
 			return;
 		}
 		CInterfaceManager	*mngr = CInterfaceManager::getInstance();
-		CGroupContainer		*wnd = dynamic_cast<CGroupContainer*>(mngr->getElementFromId(target));
+		CGroupContainer		*wnd = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(target));
 		if(!wnd)
 		{
 			nlwarning("<CActionHandlerActive::execute> Can't get window %s", target.c_str());
@@ -199,7 +199,7 @@ void CActionHandlerHideClose::execute (CCtrlBase * /* pCaller */, const std::str
 	uint i;
 	for(i=0;i<hideList.size();i++)
 	{
-		CInterfaceElement	*wnd= mngr->getElementFromId(hideList[i]);
+		CInterfaceElement	*wnd= CWidgetManager::getInstance()->getElementFromId(hideList[i]);
 		if(wnd)
 			wnd->setActive(false);
 	}
@@ -208,7 +208,7 @@ void CActionHandlerHideClose::execute (CCtrlBase * /* pCaller */, const std::str
 	for(i=0;i<closeList.size();i++)
 	{
 		// get a container if possible
-		CInterfaceElement	*wnd= mngr->getElementFromId(closeList[i]);
+		CInterfaceElement	*wnd= CWidgetManager::getInstance()->getElementFromId(closeList[i]);
 		CGroupContainer		*pIC = dynamic_cast<CGroupContainer*>(wnd);
 		if(pIC)
 			pIC->close();
@@ -236,13 +236,13 @@ void	CActionHandlerEnterModal::execute(CCtrlBase *pCaller, const std::string &pa
 
 	// get the group from param
 	string	groupName= getParam(params, "group");
-	CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(groupName) );
+	CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(groupName) );
 	if(group)
 	{
 		UserControls.stopFreeLook();
 
 		// enable the modal
-		pIM->enableModalWindow(pCaller, group);
+		CWidgetManager::getInstance()->enableModalWindow(pCaller, group);
 	}
 	else
 	{
@@ -257,11 +257,11 @@ void	CActionHandlerPushModal::execute(CCtrlBase *pCaller, const std::string &par
 
 	// get the group from param
 	string	groupName= getParam(params, "group");
-	CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( mngr->getElementFromId(groupName) );
+	CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(groupName) );
 	if(group)
 	{
 		// enable the modal
-		mngr->pushModalWindow(pCaller, group);
+		CWidgetManager::getInstance()->pushModalWindow(pCaller, group);
 	}
 	else
 	{
@@ -276,7 +276,7 @@ void	CActionHandlerLeaveModal::execute(CCtrlBase * /* pCaller */, const std::str
 	CInterfaceManager	*mngr= CInterfaceManager::getInstance();
 
 	// quit the modal
-	mngr->popModalWindow();
+	CWidgetManager::getInstance()->popModalWindow();
 }
 
 

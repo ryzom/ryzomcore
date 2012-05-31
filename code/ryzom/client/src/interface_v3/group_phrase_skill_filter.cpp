@@ -153,7 +153,7 @@ void	CGroupPhraseSkillFilter::rebuild()
 	// get the tree
 	if (_Tree == NULL)
 	{
-		_Tree = dynamic_cast<CGroupTree*>(pIM->getElementFromId(getId(),"sbtree:tree_list"));
+		_Tree = dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(getId(),"sbtree:tree_list"));
 
 		if (_Tree == NULL)
 		{

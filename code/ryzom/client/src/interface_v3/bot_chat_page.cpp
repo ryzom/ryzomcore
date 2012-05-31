@@ -27,7 +27,7 @@
 void CBotChatPage::activateWindow(const char *windowName, bool active)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(im->getElementFromId(windowName));
+	CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(windowName));
 	if (ig)
 	{
 		ig->setActive(active);

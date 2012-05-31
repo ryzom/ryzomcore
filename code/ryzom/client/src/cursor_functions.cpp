@@ -239,7 +239,7 @@ void checkUnderCursor()
 		return;
 
 	// Get the cursor instance
-	CViewPointer *cursor = IM->getPointer();
+	CViewPointer *cursor = CWidgetManager::getInstance()->getPointer();
 	if(cursor == 0)
 		return;
 
@@ -874,8 +874,8 @@ void contextWebPage(bool rightClick, bool dblClick)
 void contextWebIG(bool rightClick, bool dblClick)
 {
 	CInterfaceManager *IM = CInterfaceManager::getInstance();
-	CInterfaceElement *pGC = IM->getElementFromId("ui:interface:bot_chat_object");
-	CInterface3DShape *el= dynamic_cast<CInterface3DShape*>(IM->getElementFromId("ui:interface:bot_chat_object:scene3d:object_1"));
+	CInterfaceElement *pGC = CWidgetManager::getInstance()->getElementFromId("ui:interface:bot_chat_object");
+	CInterface3DShape *el= dynamic_cast<CInterface3DShape*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:bot_chat_object:scene3d:object_1"));
 	if (el != NULL)
 	{
 		el->setName(selectedInstance.getShapeName());

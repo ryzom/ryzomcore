@@ -290,7 +290,7 @@ public:
 				if (ig == NULL)
 				{
 					string elt = property.substr(0,property.rfind(':'));
-					CInterfaceElement *pIE = pIM->getElementFromId(elt);
+					CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(elt);
 					ig = dynamic_cast<CInterfaceGroup*>(pIE);
 					if (ig == NULL && pIE != NULL)
 						ig = pIE->getParent();
@@ -401,7 +401,7 @@ public:
 		sint32 limit;
 		fromString(getParam(Params, "limit"), limit);
 
-		CInterfaceElement *pIE = pIM->getElementFromId (pCaller->getId(), elt);
+		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId (pCaller->getId(), elt);
 		if (pIE == NULL) return;
 
 		sint32 newW = pIE->getW();
@@ -432,9 +432,9 @@ public:
 		string target = getParam (Params, "target");
 		CGroupEditBox *geb;
 		if (pCaller == NULL)
-			geb = dynamic_cast<CGroupEditBox *>(pIM->getElementFromId (target));
+			geb = dynamic_cast<CGroupEditBox *>(CWidgetManager::getInstance()->getElementFromId (target));
 		else
-			geb = dynamic_cast<CGroupEditBox *>(pIM->getElementFromId (pCaller->getId(), target));
+			geb = dynamic_cast<CGroupEditBox *>(CWidgetManager::getInstance()->getElementFromId (pCaller->getId(), target));
 		if (geb == NULL)
 		{
 			nlwarning("<CAHSetKeyboardFocus::execute> Can't get target edit box %s, or bad type", target.c_str());
@@ -514,7 +514,7 @@ class CAHActiveMenu : public IActionHandler
 		// open the menu
 		if (CDBCtrlSheet::getDraggedSheet() == NULL)
 		{
-			CInterfaceManager::getInstance()->enableModalWindow (pCaller, getParam(Params, "menu"));
+			CWidgetManager::getInstance()->enableModalWindow (pCaller, getParam(Params, "menu"));
 		}
 	}
 };
@@ -541,9 +541,9 @@ class CAHSetServerString : public IActionHandler
 			string elt = sTarget.substr(0,sTarget.rfind(':'));
 			CInterfaceElement *pIE;
 			if (pCaller != NULL)
-				pIE = pIM->getElementFromId(pCaller->getId(), elt);
+				pIE = CWidgetManager::getInstance()->getElementFromId(pCaller->getId(), elt);
 			else
-				pIE = pIM->getElementFromId(elt);
+				pIE = CWidgetManager::getInstance()->getElementFromId(elt);
 			if (pIE == NULL) return;
 			sTarget = pIE->getId() + ":" + sTarget.substr(sTarget.rfind(':')+1,sTarget.size());
 		}
@@ -581,9 +581,9 @@ class CAHSetServerID : public IActionHandler
 			string elt = sTarget.substr(0,sTarget.rfind(':'));
 			CInterfaceElement *pIE;
 			if (pCaller != NULL)
-				pIE = pIM->getElementFromId(pCaller->getId(), elt);
+				pIE = CWidgetManager::getInstance()->getElementFromId(pCaller->getId(), elt);
 			else
-				pIE = pIM->getElementFromId(elt);
+				pIE = CWidgetManager::getInstance()->getElementFromId(elt);
 			if (pIE == NULL) return;
 			sTarget = pIE->getId() + ":" + sTarget.substr(sTarget.rfind(':')+1,sTarget.size());
 		}
@@ -626,9 +626,9 @@ class CAHResetCamera : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInterfaceElement *pIE;
 		if (pCaller != NULL)
-			pIE = pIM->getElementFromId(pCaller->getId(), sTarget);
+			pIE = CWidgetManager::getInstance()->getElementFromId(pCaller->getId(), sTarget);
 		else
-			pIE = pIM->getElementFromId(sTarget);
+			pIE = CWidgetManager::getInstance()->getElementFromId(sTarget);
 		CInterface3DCamera *pCam = dynamic_cast<CInterface3DCamera*>(pIE);
 		if (pCam == NULL) return;
 		pCam->reset();
@@ -726,7 +726,7 @@ public:
 		// Enable 'use global alpha' button
 		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER_ALPHA")->setValue64(gc->isUsingGlobalAlpha() ? 0 : 1);
 		// show the modal box
-		im->enableModalWindow(gc, "ui:interface:define_ui_transparency");
+		CWidgetManager::getInstance()->enableModalWindow(gc, "ui:interface:define_ui_transparency");
 
 	}
 
@@ -819,7 +819,7 @@ class CAHSetTransparent : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(Params));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(Params));
 		if (pGC != NULL)
 		{
 			pGC->setUseGlobalAlpha(false);
@@ -844,7 +844,7 @@ class CAHSetAlpha : public IActionHandler
 		uint8 alpha;
 		fromString(getParam (Params, "alpha"), alpha);
 
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(ui));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(ui));
 		if (pGC != NULL)
 		{
 			pGC->setUseGlobalAlpha(false);
@@ -1033,7 +1033,7 @@ class CAHPopup : public IActionHandler
 		sCont = eVal.getString();
 		if (sCont.empty()) return;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(sCont));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(sCont));
 		if (pGC == NULL) return;
 		if (pGC->isPopuped()) return;
 		pGC->setHighLighted(false);

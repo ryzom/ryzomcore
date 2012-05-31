@@ -89,7 +89,7 @@ class CAHUIOpen : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface", Params));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
 		if (pGC == NULL)
 		{
 			nlwarning("%s is not a container", Params.c_str());
@@ -111,7 +111,7 @@ class CAHUIClose : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface", Params));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
 		if (pGC == NULL)
 		{
 			nlwarning("%s is not a container", Params.c_str());
@@ -132,7 +132,7 @@ class CAHUIOpenClose : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface", Params));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
 		if (pGC == NULL)
 		{
 			nlwarning("%s is not a container", Params.c_str());
@@ -154,7 +154,7 @@ class CAHUIPopup : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface", Params));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
 		if (pGC == NULL)
 		{
 			nlwarning("%s is not a container", Params.c_str());
@@ -185,7 +185,7 @@ class CAHUIPopin : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface", Params));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
 		if (pGC == NULL)
 		{
 			nlwarning("%s is not a container", Params.c_str());
@@ -220,7 +220,7 @@ class CAHUIPopupPopin : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface", Params));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
 		if (pGC == NULL)
 		{
 			nlwarning("%s is not a container", Params.c_str());
@@ -256,7 +256,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface", Params));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
 		if (pGC == NULL)
 		{
 			nlwarning("%s is not a container", Params.c_str());
@@ -307,7 +307,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface", Params));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
 		if (pGC == NULL)
 		{
 			nlwarning("%s is not a container", Params.c_str());
@@ -316,7 +316,7 @@ public:
 		if (!isContainerAuthorized(pGC)) return;
 
 		pGC->setActive(true);
-		pIM->setTopWindow(pGC);
+		CWidgetManager::getInstance()->setTopWindow(pGC);
 	}
 };
 REGISTER_ACTION_HANDLER( CAHUIShow, "show" );
@@ -338,7 +338,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface", Params));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
 		if (pGC == NULL)
 		{
 			nlwarning("%s is not a container", Params.c_str());
@@ -388,7 +388,7 @@ class CAHUIShowHide : public IActionHandler
 		}
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface", window));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", window));
 		if (pGC == NULL)
 		{
 			nlwarning("%s is not a container", window.c_str());
@@ -410,7 +410,7 @@ class CAHUIShowHide : public IActionHandler
 			}
 			if(!webapp.empty() && pGC->getActive())
 			{
-				CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId("ui:interface:webig:content:html"));
+				CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:webig:content:html"));
 				if (pGH == NULL)
 				{
 					nlwarning("%s is not a group html", window.c_str());
@@ -533,7 +533,7 @@ class CAHTalkUntalk : public IActionHandler
 					cw->getContainer()->setActive(true);
 					cw->getContainer()->setOpen(true);
 					CInterfaceManager *im = CInterfaceManager::getInstance();
-					im->setTopWindow(cw->getContainer());
+					CWidgetManager::getInstance()->setTopWindow(cw->getContainer());
 					cw->enableBlink(1);
 					im->setCaptureKeyboard(cw->getEditBox());
 					PeopleInterraction.MainChat.Filter.setTargetPlayer(selection->getName());
@@ -654,8 +654,8 @@ class CAHUISetTopWindow : public IActionHandler
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string sWin = getParam(Params,"win");
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(sWin));
-		if (pGC != NULL && isContainerAuthorized(pGC)) pIM->setTopWindow(pGC);
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(sWin));
+		if (pGC != NULL && isContainerAuthorized(pGC)) CWidgetManager::getInstance()->setTopWindow(pGC);
 	}
 };
 REGISTER_ACTION_HANDLER( CAHUISetTopWindow, "set_top_window" );

@@ -18,8 +18,10 @@
 #include "interface_group.h"
 #include "group_container.h"
 #include "group_in_scene.h"
+#include "view_pointer.h"
 
 CWidgetManager* CWidgetManager::instance = NULL;
+std::string CWidgetManager::_CtrlLaunchingModalId= "ctrl_launch_modal";
 
 // ----------------------------------------------------------------------------
 // SMasterGroup
@@ -351,10 +353,356 @@ void CWidgetManager::removeAllMasterGroups()
 
 }
 
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::activateMasterGroup (const std::string &sMasterGroupName, bool bActive)
+{
+	CInterfaceGroup *pIG = CWidgetManager::getInstance()->getMasterGroupFromId (sMasterGroupName);
+	if (pIG != NULL)
+	{
+		pIG->setActive(bActive);
+		pIG->invalidateCoords();
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+CInterfaceGroup* CWidgetManager::getWindow(CInterfaceElement *pIE)
+{
+	CInterfaceGroup *pIG = pIE->getParent();
+	if (pIG == NULL) return NULL;
+	if (pIG->getParent() == NULL) return NULL;
+	while (pIG->getParent()->getParent() != NULL)
+	{
+		pIG = pIG->getParent();
+	}
+	return pIG;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+CInterfaceElement* CWidgetManager::getElementFromId (const std::string &sEltId)
+{
+	// System special
+	if(sEltId == _CtrlLaunchingModalId)
+		return getCtrlLaunchingModal();
+
+	// Search for all elements
+	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+	{
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		CInterfaceElement *pIEL = rMG.Group->getElement (sEltId);
+		if (pIEL != NULL)
+			return pIEL;
+	}
+	return NULL;
+}
+
+// ------------------------------------------------------------------------------------------------
+CInterfaceElement* CWidgetManager::getElementFromId (const std::string &sStart, const std::string &sEltId)
+{
+	CInterfaceElement *pIEL = getElementFromId (sEltId);
+	if (pIEL == NULL)
+	{
+		std::string sZeStart = sStart, sTmp;
+		if (sZeStart[sZeStart.size()-1] == ':')
+			sZeStart = sZeStart.substr(0, sZeStart.size()-1);
+
+		while (sZeStart != "")
+		{
+			if (sEltId[0] == ':')
+				sTmp = sZeStart	+ sEltId;
+			else
+				sTmp = sZeStart	+ ":" + sEltId;
+			pIEL = getElementFromId (sTmp);
+			if (pIEL != NULL)
+				return pIEL;
+			std::string::size_type nextPos = sZeStart.rfind(':');
+			if (nextPos == std::string::npos) break;
+			sZeStart = sZeStart.substr(0, nextPos);
+		}
+	}
+	return pIEL;
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::setTopWindow (CInterfaceGroup* win)
+{
+	//find the window in the window list
+	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+	{
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		if (rMG.Group->getActive())
+			rMG.setTopWindow(win);
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::setBackWindow(CInterfaceGroup* win)
+{
+	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+	{
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		if (rMG.Group->getActive())
+			rMG.setBackWindow(win);
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+CInterfaceGroup* CWidgetManager::getTopWindow (uint8 nPriority) const
+{
+	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+	{
+		const CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		if (rMG.Group->getActive())
+		{
+			// return the first.
+			if(rMG.PrioritizedWindows[nPriority].empty())
+				return NULL;
+			else
+				return rMG.PrioritizedWindows[nPriority].back();
+		}
+	}
+	return NULL;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+CInterfaceGroup* CWidgetManager::getBackWindow (uint8 nPriority) const
+{
+	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+	{
+		const CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		if (rMG.Group->getActive())
+		{
+			// return the first.
+			if(rMG.PrioritizedWindows[nPriority].empty())
+				return NULL;
+			else
+				return rMG.PrioritizedWindows[nPriority].front();
+		}
+	}
+	return NULL;
+}
+
+// ***************************************************************************
+CInterfaceGroup* CWidgetManager::getLastEscapableTopWindow() const
+{
+	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+	{
+		const CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		if (rMG.Group->getActive())
+		{
+			for (uint8 nPriority = WIN_PRIORITY_MAX; nPriority > 0; nPriority--)
+			{
+				const std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority-1];
+				std::list<CInterfaceGroup*>::const_reverse_iterator	it;
+				it= rList.rbegin();
+				for(;it!=rList.rend();it++)
+				{
+					if((*it)->getActive() && (*it)->getEscapable())
+						return *it;
+				}
+			}
+		}
+	}
+	return NULL;
+}
+
+// ***************************************************************************
+void CWidgetManager::setWindowPriority (CInterfaceGroup *pWin, uint8 nNewPriority)
+{
+	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+	{
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		if (rMG.Group->getActive())
+		{
+			if (rMG.isWindowPresent(pWin))
+			{
+				rMG.delWindow(pWin);
+				rMG.addWindow(pWin, nNewPriority);
+			}
+		}
+	}
+}
+
+// ***************************************************************************
+uint8 CWidgetManager::getLastTopWindowPriority() const
+{
+	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+	{
+		const CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		if (rMG.Group->getActive())
+		{
+			return rMG.LastTopWindowPriority;
+		}
+	}
+	return 0;
+}
+
+bool CWidgetManager::hasModal() const
+{
+	if( !_ModalStack.empty() )
+		return true;
+	else
+		return false;
+}
+
+CWidgetManager::SModalWndInfo& CWidgetManager::getModal()
+{
+	return _ModalStack.back();
+}
+
+bool CWidgetManager::isPreviousModal( CInterfaceGroup *wnd ) const
+{
+	std::vector< SModalWndInfo >::size_type s = _ModalStack.size();
+	for( std::vector< SModalWndInfo >::size_type i = 0; i < s; i++ )
+		if( _ModalStack[ i ].ModalWindow == wnd )
+			return true;
+
+	return false;
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::enableModalWindow (CCtrlBase *ctrlLaunchingModal, CInterfaceGroup *pIG)
+{
+	// disable any modal before. release keyboard
+	disableModalWindow();
+	pushModalWindow(ctrlLaunchingModal, pIG);
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::enableModalWindow (CCtrlBase *CtrlLaunchingModal, const std::string &groupName)
+{
+	CInterfaceGroup	*group= dynamic_cast<CGroupModal*>( getElementFromId(groupName) );
+	if(group)
+	{
+		// enable the modal
+		enableModalWindow(CtrlLaunchingModal, group);
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::disableModalWindow ()
+{
+	while (!_ModalStack.empty())
+	{
+		SModalWndInfo winInfo = _ModalStack.back();
+		_ModalStack.pop_back(); // must pop back as early as possible because 'setActive' may trigger another 'popModalWindow', leading to a crash
+		// disable old modal window
+		if(winInfo.ModalWindow)
+		{
+			setBackWindow(winInfo.ModalWindow);
+			winInfo.ModalWindow->setActive(false);
+		}
+	}
+
+	// disable any context help
+	setCurContextHelp( NULL );
+	CWidgetManager::getInstance()->_DeltaTimeStopingContextHelp = 0;
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::pushModalWindow(CCtrlBase *ctrlLaunchingModal, CInterfaceGroup *pIG)
+{
+	// enable the wanted modal
+	if(pIG)
+	{
+		SModalWndInfo mwi;
+		mwi.ModalWindow = pIG;
+		mwi.CtrlLaunchingModal = ctrlLaunchingModal;
+		// setup special group
+		CGroupModal		*groupModal= dynamic_cast<CGroupModal*>(pIG);
+		if(groupModal)
+		{
+			mwi.ModalExitClickOut = groupModal->ExitClickOut;
+			mwi.ModalExitClickL = groupModal->ExitClickL;
+			mwi.ModalExitClickR = groupModal->ExitClickR;
+			mwi.ModalHandlerClickOut = groupModal->OnClickOut;
+			mwi.ModalClickOutParams = groupModal->OnClickOutParams;
+			mwi.ModalExitKeyPushed = groupModal->ExitKeyPushed;
+			// update coords of the modal
+			if(groupModal->SpawnOnMousePos)
+			{
+				groupModal->SpawnMouseX = _Pointer->getX();
+				groupModal->SpawnMouseY = _Pointer->getY();
+			}
+		}
+		else
+		{
+			// default for group not modal. Backward compatibility
+			mwi.ModalExitClickOut = false;
+			mwi.ModalExitClickL = false;
+			mwi.ModalExitClickR = false;
+			mwi.ModalExitKeyPushed = false;
+		}
+
+		_ModalStack.push_back(mwi);
+
+		// update coords and activate the modal
+		mwi.ModalWindow->invalidateCoords();
+		mwi.ModalWindow->setActive(true);
+		setTopWindow(mwi.ModalWindow);
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::pushModalWindow(CCtrlBase *ctrlLaunchingModal, const std::string &groupName)
+{
+	CInterfaceGroup	*group= dynamic_cast<CGroupModal*>( getElementFromId(groupName) );
+	if(group)
+	{
+		// enable the modal
+		enableModalWindow(ctrlLaunchingModal, group);
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::popModalWindow()
+{
+	if (!_ModalStack.empty())
+	{
+		SModalWndInfo winInfo = _ModalStack.back();
+		_ModalStack.pop_back(); // must pop back as early as possible because 'setActive' may trigger another 'popModalWindow', leading to a crash
+		if(winInfo.ModalWindow)
+		{
+			setBackWindow(winInfo.ModalWindow);
+			winInfo.ModalWindow->setActive(false);
+		}
+		if (!_ModalStack.empty())
+		{
+			if(_ModalStack.back().ModalWindow)
+			{
+				_ModalStack.back().ModalWindow->setActive(true);
+				setTopWindow(_ModalStack.back().ModalWindow);
+			}
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::popModalWindowCategory(const std::string &category)
+{
+	for(;;)
+	{
+		if (_ModalStack.empty()) break;
+		if (!_ModalStack.back().ModalWindow) break;
+		CGroupModal *gm = dynamic_cast<CGroupModal *>((CInterfaceGroup*)(_ModalStack.back().ModalWindow));
+		if (gm && gm->Category == category)
+		{
+			_ModalStack.back().ModalWindow->setActive(false);
+			_ModalStack.pop_back();
+		}
+		else
+		{
+			break;
+		}
+	}
+}
 
 
 CWidgetManager::CWidgetManager()
 {
+	_Pointer = NULL;
+	curContextHelp = NULL;
 }
 
 CWidgetManager::~CWidgetManager()
@@ -363,4 +711,7 @@ CWidgetManager::~CWidgetManager()
 	{
 		delete _MasterGroups[i].Group;
 	}
+
+	_Pointer = NULL;
+	curContextHelp = NULL;
 }

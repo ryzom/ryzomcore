@@ -867,8 +867,8 @@ void CGroupSubMenu::checkCoords()
 
 	// if the mouse goes out the window,  unselect all (because handleEvent may not be called)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	sint	xMouse= pIM->getPointer()->getX();
-	sint	yMouse= pIM->getPointer()->getY();
+	sint	xMouse= CWidgetManager::getInstance()->getPointer()->getX();
+	sint	yMouse= CWidgetManager::getInstance()->getPointer()->getY();
 	if (!((xMouse >= _XReal) &&
 		(xMouse < (_XReal + _WReal))&&
 		(yMouse > _YReal) &&
@@ -984,7 +984,7 @@ bool CGroupSubMenu::handleEvent (const NLGUI::CEventDescriptor &event)
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 				pIM->runActionHandler (	_Lines[_Selected].AHName,
-										pIM->getCtrlLaunchingModal(),
+										CWidgetManager::getInstance()->getCtrlLaunchingModal(),
 										_Lines[_Selected].AHParams );
 
 				if (_SubMenus[_Selected] != NULL)
@@ -994,12 +994,12 @@ bool CGroupSubMenu::handleEvent (const NLGUI::CEventDescriptor &event)
 				else
 				{
 					// if the menu hasn't triggered a new modal window,  disable it
-					if (pIM->getModalWindow() == _GroupMenu)
+					if (CWidgetManager::getInstance()->getModalWindow() == _GroupMenu)
 					{
 						if(_GroupMenu && _GroupMenu->getCloseSubMenuUsingPopModal())
-							pIM->popModalWindow();
+							CWidgetManager::getInstance()->popModalWindow();
 						else
-							pIM->disableModalWindow ();
+							CWidgetManager::getInstance()->disableModalWindow ();
 					}
 				}
 			}
@@ -1936,10 +1936,10 @@ bool CGroupMenu::parse (xmlNodePtr in,  CInterfaceGroup *parentGroup)
 	if (prop)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupMenu *gm = dynamic_cast<CGroupMenu *>(im->getElementFromId(prop));
+		CGroupMenu *gm = dynamic_cast<CGroupMenu *>(CWidgetManager::getInstance()->getElementFromId(prop));
 		if (!gm)
 		{
-			gm = dynamic_cast<CGroupMenu *>(im->getElementFromId("ui:interface:" + std::string((const char*)prop)));
+			gm = dynamic_cast<CGroupMenu *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:" + std::string((const char*)prop)));
 		}
 		if (gm)
 		{

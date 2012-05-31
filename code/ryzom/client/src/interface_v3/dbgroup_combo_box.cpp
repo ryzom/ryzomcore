@@ -58,7 +58,7 @@ sint32 CDBGroupComboBox::evalContentWidth() const
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	// get the menu to open.
-	CGroupMenu	*groupMenu= dynamic_cast<CGroupMenu*>(pIM->getElementFromId( loginFinished ? WIN_COMBO_BOX_MEASURE_MENU : WIN_COMBO_BOX_MEASURE_MENU_LOGIN ));
+	CGroupMenu	*groupMenu= dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId( loginFinished ? WIN_COMBO_BOX_MEASURE_MENU : WIN_COMBO_BOX_MEASURE_MENU_LOGIN ));
 	if( !groupMenu )
 	{
 		return 0;
@@ -551,10 +551,10 @@ public:
 			return;
 
 		// get the menu to open.
-		CGroupMenu	*groupMenu= dynamic_cast<CGroupMenu*>(pIM->getElementFromId(loginFinished ? WIN_COMBO_BOX_SELECT_MENU: WIN_COMBO_BOX_SELECT_MENU_LOGIN ));
+		CGroupMenu	*groupMenu= dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId(loginFinished ? WIN_COMBO_BOX_SELECT_MENU: WIN_COMBO_BOX_SELECT_MENU_LOGIN ));
 		if( !groupMenu )
 		{
-			groupMenu= dynamic_cast<CGroupMenu*>(pIM->getElementFromId(WIN_COMBO_BOX_SELECT_MENU_OUTGAME));
+			groupMenu= dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId(WIN_COMBO_BOX_SELECT_MENU_OUTGAME));
 		}
 		if( !groupMenu )
 			return;
@@ -586,12 +586,12 @@ public:
 		if(dynamic_cast<CGroupModal*>(pCB->getRootWindow()))
 		{
 			groupMenu->setCloseSubMenuUsingPopModal(true);
-			pIM->pushModalWindow(pCB, groupMenu);
+			CWidgetManager::getInstance()->pushModalWindow(pCB, groupMenu);
 		}
 		else
 		{
 			groupMenu->setCloseSubMenuUsingPopModal(false);
-			pIM->enableModalWindow (pCB, groupMenu);
+			CWidgetManager::getInstance()->enableModalWindow (pCB, groupMenu);
 		}
 	}
 };
@@ -607,7 +607,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(pIM->getCtrlLaunchingModal());
+		CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCB == NULL) return;
 
 		// set the selection

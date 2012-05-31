@@ -359,7 +359,7 @@ class CHandlerSubmitQuickHelp : public IActionHandler
 {
 	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
 	{
-		CInterfaceElement *element = CInterfaceManager::getInstance()->getElementFromId("ui:interface:quick_help:content:html");
+		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId("ui:interface:quick_help:content:html");
 		if (element)
 		{
 			// Group HTML ?
@@ -370,7 +370,7 @@ class CHandlerSubmitQuickHelp : public IActionHandler
 				groupQH->submitEvent (sParams.c_str());
 			}
 		}
-		element = CInterfaceManager::getInstance()->getElementFromId("ui:interface:help_browser:content:html");
+		element = CWidgetManager::getInstance()->getElementFromId("ui:interface:help_browser:content:html");
 		if (element)
 		{
 			// Group HTML ?
@@ -400,7 +400,7 @@ class CHandlerRunQuickHelp : public IActionHandler
 		if (!buttonId.empty())
 		{
 			// Get the button id
-			CInterfaceElement *element = pIM->getElementFromId(buttonId+":"+sParams);
+			CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId(buttonId+":"+sParams);
 			if (element)
 			{
 				// Button Ctrl ?

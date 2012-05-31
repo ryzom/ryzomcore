@@ -2331,10 +2331,10 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 	if (_Slot == 0)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:interface:player:header_opened:player_title"));
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player:header_opened:player_title"));
 		if (pVT != NULL) pVT->setText(_Title);
 
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:player"));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player"));
 		if (pGC != NULL) pGC->setUCTitle(_EntityName);
 
 		CSkillManager *pSM = CSkillManager::getInstance();

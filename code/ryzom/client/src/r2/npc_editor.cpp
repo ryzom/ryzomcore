@@ -52,7 +52,7 @@ CNPCEditor::~CNPCEditor()
 void CNPCEditor::updateNPCView(uint slot)
 {
 	_NPCWindow = dynamic_cast<CGroupContainer *>(
-		CEditor::getUI().getElementFromId("ui:interface:r2ed_npc"));
+		CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_npc"));
 	if (!_NPCWindow)
 	{
 		nlwarning("<CNPCEditor::updateNPCView> can't retrieve npc window, or bad type");

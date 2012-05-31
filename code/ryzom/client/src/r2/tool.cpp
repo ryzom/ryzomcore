@@ -155,7 +155,7 @@ uint32 CTool::getScreenHeight()
 void CTool::getMousePos(sint32 &x, sint32 &y)
 {
 	//H_AUTO(R2_CTool_getMousePos)
-	CViewPointer *cursor = getUI().getPointer();
+	CViewPointer *cursor = CWidgetManager::getInstance()->getPointer();
 	if(cursor == NULL)
 	{
 		x = y = -1;
@@ -198,7 +198,7 @@ CGroupMap *CTool::getWorldMap()
 	static volatile bool cacheTest = true;
 	if (!mapPtr || !cacheTest)
 	{
-		mapPtr = dynamic_cast<CGroupMap*>(getUI().getElementFromId("ui:interface:map:content:map_content:actual_map"));
+		mapPtr = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
 	}
 	return mapPtr;
 }
@@ -752,7 +752,7 @@ bool CTool::isMouseCaptured()
 void CTool::setMouseCursor(const char *cursorTexture)
 {
 	//H_AUTO(R2_CTool_setMouseCursor)
-	CViewPointer *cursor = getUI().getPointer();
+	CViewPointer *cursor = CWidgetManager::getInstance()->getPointer();
 	if(cursor)
 	{
 		cursor->setCursor(cursorTexture);

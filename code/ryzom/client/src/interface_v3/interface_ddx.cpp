@@ -627,7 +627,7 @@ bool CInterfaceDDX::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 		else if( stricmp((char*)cur->name,"apply") == 0 )
 		{
 			CXMLAutoPtr ptrUI((const char*)xmlGetProp (cur, (xmlChar*)"ui"));
-			_ApplyButton = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(_Parent->getId(),(const char*)ptrUI));
+			_ApplyButton = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(_Parent->getId(),(const char*)ptrUI));
 		}
 
 		cur = cur->next;
@@ -1083,7 +1083,7 @@ public:
 		CDDXManager *pDM = CDDXManager::getInstance();
 		if (pCaller == NULL) return;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCtrlBase *pCB = pIM->getCtrlLaunchingModal();
+		CCtrlBase *pCB = CWidgetManager::getInstance()->getCtrlLaunchingModal();
 		// Search for a ddx in the parents
 		CInterfaceGroup *pIG = pCB->getParent();
 		bool found = false;

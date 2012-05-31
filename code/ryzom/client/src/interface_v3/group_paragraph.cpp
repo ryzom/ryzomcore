@@ -773,10 +773,10 @@ void CGroupParagraph::draw ()
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CViewRenderer &rVR = pIM->getViewRenderer();
 
-		if (pIM->getModalWindow() == NULL)
+		if (CWidgetManager::getInstance()->getModalWindow() == NULL)
 		{
-			sint32 x = pIM->getPointer()->getX();
-			sint32 y = pIM->getPointer()->getY();
+			sint32 x = CWidgetManager::getInstance()->getPointer()->getX();
+			sint32 y = CWidgetManager::getInstance()->getPointer()->getY();
 
 			CInterfaceGroup	*pIG = pIM->getWindowUnder(x,y);
 			CInterfaceGroup	*pParent = this;

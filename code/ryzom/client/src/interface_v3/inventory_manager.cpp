@@ -331,44 +331,44 @@ void CInventoryManager::init()
 	DNDCurrentItem = NULL;
 	DNDFrom = Nowhere;
 	// Initialize interface part
-	UIHands[0] = dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_HAND_RIGHT));
-	UIHands[1] = dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_HAND_LEFT));
+	UIHands[0] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_RIGHT));
+	UIHands[1] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_LEFT));
 
-	UIEquip[SLOT_EQUIPMENT::HEADDRESS]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWEL_HEADDRESS));
-	UIEquip[SLOT_EQUIPMENT::EARL]		= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWEL_EARING_LEFT));
-	UIEquip[SLOT_EQUIPMENT::EARR]		= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWEL_EARING_RIGHT));
-	UIEquip[SLOT_EQUIPMENT::NECKLACE]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWEL_NECK));
-	UIEquip[SLOT_EQUIPMENT::WRISTL]		= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWEL_BRACELET_LEFT));
-	UIEquip[SLOT_EQUIPMENT::WRISTR]		= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWEL_BRACELET_RIGHT));
-	UIEquip[SLOT_EQUIPMENT::FINGERL]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWEL_RING_LEFT));
-	UIEquip[SLOT_EQUIPMENT::FINGERR]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWEL_RING_RIGHT));
-	UIEquip[SLOT_EQUIPMENT::ANKLEL]		= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWEL_ANKLET_LEFT));
-	UIEquip[SLOT_EQUIPMENT::ANKLER]		= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWEL_ANKLET_RIGHT));
+	UIEquip[SLOT_EQUIPMENT::HEADDRESS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWEL_HEADDRESS));
+	UIEquip[SLOT_EQUIPMENT::EARL]		= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWEL_EARING_LEFT));
+	UIEquip[SLOT_EQUIPMENT::EARR]		= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWEL_EARING_RIGHT));
+	UIEquip[SLOT_EQUIPMENT::NECKLACE]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWEL_NECK));
+	UIEquip[SLOT_EQUIPMENT::WRISTL]		= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWEL_BRACELET_LEFT));
+	UIEquip[SLOT_EQUIPMENT::WRISTR]		= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWEL_BRACELET_RIGHT));
+	UIEquip[SLOT_EQUIPMENT::FINGERL]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWEL_RING_LEFT));
+	UIEquip[SLOT_EQUIPMENT::FINGERR]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWEL_RING_RIGHT));
+	UIEquip[SLOT_EQUIPMENT::ANKLEL]		= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWEL_ANKLET_LEFT));
+	UIEquip[SLOT_EQUIPMENT::ANKLER]		= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWEL_ANKLET_RIGHT));
 
-	UIEquip[SLOT_EQUIPMENT::HEAD]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_ARMOR_HEAD));
-	UIEquip[SLOT_EQUIPMENT::CHEST]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_ARMOR_CHEST));
-	UIEquip[SLOT_EQUIPMENT::ARMS]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_ARMOR_ARMS));
-	UIEquip[SLOT_EQUIPMENT::FEET]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_ARMOR_FEET));
-	UIEquip[SLOT_EQUIPMENT::LEGS]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_ARMOR_LEGS));
-	UIEquip[SLOT_EQUIPMENT::HANDS]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_ARMOR_HANDS));
+	UIEquip[SLOT_EQUIPMENT::HEAD]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMOR_HEAD));
+	UIEquip[SLOT_EQUIPMENT::CHEST]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMOR_CHEST));
+	UIEquip[SLOT_EQUIPMENT::ARMS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMOR_ARMS));
+	UIEquip[SLOT_EQUIPMENT::FEET]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMOR_FEET));
+	UIEquip[SLOT_EQUIPMENT::LEGS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMOR_LEGS));
+	UIEquip[SLOT_EQUIPMENT::HANDS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMOR_HANDS));
 
-	UIEquip2[SLOT_EQUIPMENT::HEADDRESS]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWL2_HEADDRESS));
-	UIEquip2[SLOT_EQUIPMENT::EARL]		= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWL2_EARING_LEFT));
-	UIEquip2[SLOT_EQUIPMENT::EARR]		= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWL2_EARING_RIGHT));
-	UIEquip2[SLOT_EQUIPMENT::NECKLACE]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWL2_NECK));
-	UIEquip2[SLOT_EQUIPMENT::WRISTL]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWL2_BRACELET_LEFT));
-	UIEquip2[SLOT_EQUIPMENT::WRISTR]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWL2_BRACELET_RIGHT));
-	UIEquip2[SLOT_EQUIPMENT::FINGERL]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWL2_RING_LEFT));
-	UIEquip2[SLOT_EQUIPMENT::FINGERR]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWL2_RING_RIGHT));
-	UIEquip2[SLOT_EQUIPMENT::ANKLEL]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWL2_ANKLET_LEFT));
-	UIEquip2[SLOT_EQUIPMENT::ANKLER]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_JEWL2_ANKLET_RIGHT));
+	UIEquip2[SLOT_EQUIPMENT::HEADDRESS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_HEADDRESS));
+	UIEquip2[SLOT_EQUIPMENT::EARL]		= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_EARING_LEFT));
+	UIEquip2[SLOT_EQUIPMENT::EARR]		= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_EARING_RIGHT));
+	UIEquip2[SLOT_EQUIPMENT::NECKLACE]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_NECK));
+	UIEquip2[SLOT_EQUIPMENT::WRISTL]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_BRACELET_LEFT));
+	UIEquip2[SLOT_EQUIPMENT::WRISTR]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_BRACELET_RIGHT));
+	UIEquip2[SLOT_EQUIPMENT::FINGERL]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_RING_LEFT));
+	UIEquip2[SLOT_EQUIPMENT::FINGERR]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_RING_RIGHT));
+	UIEquip2[SLOT_EQUIPMENT::ANKLEL]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_ANKLET_LEFT));
+	UIEquip2[SLOT_EQUIPMENT::ANKLER]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_JEWL2_ANKLET_RIGHT));
 
-	UIEquip2[SLOT_EQUIPMENT::HEAD]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_ARMR2_HEAD));
-	UIEquip2[SLOT_EQUIPMENT::CHEST]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_ARMR2_CHEST));
-	UIEquip2[SLOT_EQUIPMENT::ARMS]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_ARMR2_ARMS));
-	UIEquip2[SLOT_EQUIPMENT::FEET]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_ARMR2_FEET));
-	UIEquip2[SLOT_EQUIPMENT::LEGS]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_ARMR2_LEGS));
-	UIEquip2[SLOT_EQUIPMENT::HANDS]	= dynamic_cast<CDBCtrlSheet*>(im->getElementFromId(CTRL_ARMR2_HANDS));
+	UIEquip2[SLOT_EQUIPMENT::HEAD]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMR2_HEAD));
+	UIEquip2[SLOT_EQUIPMENT::CHEST]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMR2_CHEST));
+	UIEquip2[SLOT_EQUIPMENT::ARMS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMR2_ARMS));
+	UIEquip2[SLOT_EQUIPMENT::FEET]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMR2_FEET));
+	UIEquip2[SLOT_EQUIPMENT::LEGS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMR2_LEGS));
+	UIEquip2[SLOT_EQUIPMENT::HANDS]	= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_ARMR2_HANDS));
 
 
 	// Init ItemInfoObservers
@@ -662,7 +662,7 @@ static void grayItem (const std::string &listname, sint32 bagEntryIndex, bool gr
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-	IListSheetBase *pList = dynamic_cast<IListSheetBase*>(pIM->getElementFromId(listname));
+	IListSheetBase *pList = dynamic_cast<IListSheetBase*>(CWidgetManager::getInstance()->getElementFromId(listname));
 
 	if (pList != NULL)
 	{
@@ -787,7 +787,7 @@ void CInventoryManager::equip(const std::string &bagPath, const std::string &inv
 	sint16 oldRightIndexInBag = NLGUI::CDBManager::getInstance()->getDbProp(invPath + ":INDEX_IN_BAG")->getValue16();
 	if (inventory == INVENTORIES::handling && invSlot == 0)
 	{
-		CDBCtrlSheet *pCSLeftHand = dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(CTRL_HAND_LEFT));
+		CDBCtrlSheet *pCSLeftHand = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_LEFT));
 		if (pCSLeftHand == NULL)
 		{
 			return;
@@ -919,7 +919,7 @@ void CInventoryManager::unequip(const std::string &invPath)
 	// Hands management : check if we have to unequip left hand because of incompatibility with right hand item
 	if (inventory == INVENTORIES::handling && invSlot == 0)
 	{
-		CDBCtrlSheet *pCSLeftHand = dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(CTRL_HAND_LEFT));
+		CDBCtrlSheet *pCSLeftHand = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_LEFT));
 		if (pCSLeftHand == NULL)
 		{
 			return;
@@ -1073,8 +1073,8 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 	else return;
 
 	// Set database for wearing the right item
-	CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(sIE));
-	CDBCtrlSheet *pCS2 = dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(sIE2));
+	CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(sIE));
+	CDBCtrlSheet *pCS2 = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(sIE2));
 
 	// Remove Last reference and update database
 	sint16 oldVal = pNL->getOldValue16();
@@ -1105,7 +1105,7 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 	if (sIE == CTRL_HAND_RIGHT)
 	{
 		// if nothing in left hand -> return
-		CDBCtrlSheet *pCSLeftHand = dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(CTRL_HAND_LEFT));
+		CDBCtrlSheet *pCSLeftHand = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_LEFT));
 		if (pCSLeftHand == NULL)
 		{
 			return;
@@ -1184,7 +1184,7 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 	// left hand item is changing
 	if (sIE == CTRL_HAND_LEFT)
 	{
-		CDBCtrlSheet *pCSLeftHand = dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(CTRL_HAND_LEFT));
+		CDBCtrlSheet *pCSLeftHand = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_LEFT));
 		if ( pCSLeftHand )
 		{
 			CViewRenderer &rVR = pIM->getViewRenderer();
@@ -1196,7 +1196,7 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 			{
 				// check if we clear display (have to manage 2 hands weapons for instance)
 				bool clearLeftHandDisplay = true;
-				CDBCtrlSheet * pCSRightHand = dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(CTRL_HAND_RIGHT));
+				CDBCtrlSheet * pCSRightHand = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_RIGHT));
 				if ( pCSRightHand && pCSRightHand->getSheetId() )
 				{
 					CCDBNodeLeaf *pNL3 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":HAND:0:INDEX_IN_BAG", false);
@@ -1272,7 +1272,7 @@ bool CInventoryManager::autoEquip(sint bagEntryIndex, bool allowReplace)
 	uint i;
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	IListSheetBase *pList = dynamic_cast<IListSheetBase*>(pIM->getElementFromId(LIST_BAG_TEXT));
+	IListSheetBase *pList = dynamic_cast<IListSheetBase*>(CWidgetManager::getInstance()->getElementFromId(LIST_BAG_TEXT));
 	CDBCtrlSheet *pCSSrc = NULL;
 
 	if (pList == NULL) return false;
@@ -1705,7 +1705,7 @@ void CTempInvManager::update()
 
 	_Mode = (TEMP_INV_MODE::TInventoryMode)NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:INVENTORY:TEMP:TYPE")->getValue8();
 
-	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_TEMPINV));
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_TEMPINV));
 	if (pGC == NULL)
 		return;
 
@@ -1774,7 +1774,7 @@ void CTempInvManager::updateType()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	_Mode = (TEMP_INV_MODE::TInventoryMode)NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:INVENTORY:TEMP:TYPE")->getValue8();
-	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_TEMPINV));
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_TEMPINV));
 	// Something arrived, change text
 	switch(_Mode)
 	{
@@ -1837,7 +1837,7 @@ void CTempInvManager::updateForageQQ( uint whichOne )
 		ucstring title = CI18N::get( WIN_TEMPINV_TITLE_FORAGING );
 		strFindReplace( title, "%qt", toString( "%.1f", qt ) );
 		strFindReplace( title, "%ql", toString( "%.1f", ql ) );
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_TEMPINV));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_TEMPINV));
 		pGC->setUCTitle( title );
 	}
 
@@ -1849,7 +1849,7 @@ void CTempInvManager::open(TEMP_INV_MODE::TInventoryMode m)
 {
 	_Mode = m;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_TEMPINV));
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_TEMPINV));
 
 	// In Foraging mode, we can call open() on the inventory with the same contents (e.g. when changing Forage action)
 	if ( _Mode != TEMP_INV_MODE::Forage )
@@ -1902,7 +1902,7 @@ void CTempInvManager::close()
 		pNL->setValue32(0);
 	}
 
-	CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(WIN_TEMPINV));
+	CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(WIN_TEMPINV));
 	if (pIG != NULL)
 	{
 		pIG->setActive(false);
@@ -1914,7 +1914,7 @@ void CTempInvManager::close()
 bool CTempInvManager::isOpened()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_TEMPINV));
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_TEMPINV));
 	if (pGC != NULL)
 		return pGC->getActive();
 	return false;
@@ -2313,7 +2313,7 @@ bool CDBGroupListSheetFilterCLMSlot::CSheetChildFilter::isSheetValid(CDBGroupLis
 			Plus the ChildControl must not be locked
 		*/
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CDBCtrlSheet *clmCtrl = dynamic_cast<CDBCtrlSheet*>(pIM->getCtrlLaunchingModal());
+		CDBCtrlSheet *clmCtrl = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (!clmCtrl || !Ctrl) return false;
 		if (clmCtrl->getInventoryIndex() == INVENTORIES::exchange &&
 			Ctrl->getInventoryIndex() == INVENTORIES::exchange)
@@ -2467,7 +2467,7 @@ class CHandlerInvCanDropTo : public IActionHandler
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string	src = getParam(Params, "src");
-		CInterfaceElement *pElt = pIM->getElementFromId(src);
+		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
 		if (pCSSrc == NULL) return; // Cannot do anything if the incoming sheet is not a sheet
 
@@ -2618,14 +2618,14 @@ class CHandlerInvDropTo : public IActionHandler
 		// To prevent other things to happens
 		if (!getInventory().isDragging())
 		{
-			CInterfaceGroup *pIG = pIM->getModalWindow();
+			CInterfaceGroup *pIG = CWidgetManager::getInstance()->getModalWindow();
 			if (pIG == NULL) return;
 			if (pIG->getId() != "ui:interface:bag_choose") return;
 			getInventory().beginDrag(NULL, CInventoryManager::TextList);
 
 			// Special case for choose in bag dialog
 			string	src = getParam(Params, "src");
-			CInterfaceElement *pElt = pIM->getElementFromId(src);
+			CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 			CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
 			CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
 
@@ -2642,7 +2642,7 @@ class CHandlerInvDropTo : public IActionHandler
 		}
 
 		string	src = getParam(Params, "src");
-		CInterfaceElement *pElt = pIM->getElementFromId(src);
+		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if (pCSSrc == NULL) return;
@@ -3309,39 +3309,39 @@ void CInventoryManager::sortBag()
 	CDBGroupIconListBag *pIconList;
 	CDBGroupListSheetBag *pList;
 	
-	pIconList = dynamic_cast<CDBGroupIconListBag*>(pIM->getElementFromId(LIST_BAG_ICONS));
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_BAG_ICONS));
 	if (pIconList != NULL) pIconList->needToSort();
-	pList = dynamic_cast<CDBGroupListSheetBag*>(pIM->getElementFromId(LIST_BAG_TEXT));
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_BAG_TEXT));
 	if (pList != NULL) pList->needToSort();
 
-	pIconList = dynamic_cast<CDBGroupIconListBag*>(pIM->getElementFromId(LIST_ROOM_ICONS));
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_ROOM_ICONS));
 	if (pIconList != NULL) pIconList->needToSort();
-	pList = dynamic_cast<CDBGroupListSheetBag*>(pIM->getElementFromId(LIST_ROOM_TEXT));
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_ROOM_TEXT));
 	if (pList != NULL) pList->needToSort();
 
-	pIconList = dynamic_cast<CDBGroupIconListBag*>(pIM->getElementFromId(LIST_GUILD_ICONS));
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_GUILD_ICONS));
 	if (pIconList != NULL) pIconList->needToSort();
-	pList = dynamic_cast<CDBGroupListSheetBag*>(pIM->getElementFromId(LIST_GUILD_TEXT));
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_GUILD_TEXT));
 	if (pList != NULL) pList->needToSort();
 
-	pIconList = dynamic_cast<CDBGroupIconListBag*>(pIM->getElementFromId(LIST_PA0_ICONS));
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA0_ICONS));
 	if (pIconList != NULL) pIconList->needToSort();
-	pList = dynamic_cast<CDBGroupListSheetBag*>(pIM->getElementFromId(LIST_PA0_TEXT));
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA0_TEXT));
 	if (pList != NULL) pList->needToSort();
 
-	pIconList = dynamic_cast<CDBGroupIconListBag*>(pIM->getElementFromId(LIST_PA1_ICONS));
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA1_ICONS));
 	if (pIconList != NULL) pIconList->needToSort();
-	pList = dynamic_cast<CDBGroupListSheetBag*>(pIM->getElementFromId(LIST_PA1_TEXT));
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA1_TEXT));
 	if (pList != NULL) pList->needToSort();
 
-	pIconList = dynamic_cast<CDBGroupIconListBag*>(pIM->getElementFromId(LIST_PA2_ICONS));
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA2_ICONS));
 	if (pIconList != NULL) pIconList->needToSort();
-	pList = dynamic_cast<CDBGroupListSheetBag*>(pIM->getElementFromId(LIST_PA2_TEXT));
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA2_TEXT));
 	if (pList != NULL) pList->needToSort();
 
-	pIconList = dynamic_cast<CDBGroupIconListBag*>(pIM->getElementFromId(LIST_PA3_ICONS));
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA3_ICONS));
 	if (pIconList != NULL) pIconList->needToSort();
-	pList = dynamic_cast<CDBGroupListSheetBag*>(pIM->getElementFromId(LIST_PA3_TEXT));
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA3_TEXT));
 	if (pList != NULL) pList->needToSort();
 }
 

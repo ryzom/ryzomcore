@@ -92,7 +92,7 @@ bool CChatWindow::create(const CChatWindowDesc &desc, const std::string &chatId)
 	{
 		if (desc.FatherContainer != "ui:interface" )
 		{
-			fatherContainer = dynamic_cast<CGroupContainer *>(im->getElementFromId(desc.FatherContainer));
+			fatherContainer = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(desc.FatherContainer));
 			if (!fatherContainer)
 			{
 				nlwarning("<CChatWindow::create> Can't get father group, or bad type");
@@ -143,7 +143,7 @@ bool CChatWindow::create(const CChatWindowDesc &desc, const std::string &chatId)
 			_EB->setAHOnEnter("chat_box_entry");
 		}
 
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 
 		if (fatherContainer)
 		{
@@ -289,7 +289,7 @@ void CChatWindow::deleteContainer()
 			proprietaryContainer->detachContainer(_Chat); // just detach
 		}
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		pRoot->delGroup (_Chat);
 	}
 	else
@@ -667,7 +667,7 @@ void CChatGroupWindow::displayTellMessage(const ucstring &msg, NLMISC::CRGBA col
 
 	gcChat->requireAttention();
 
-	CInterfaceManager::getInstance()->setTopWindow(gcChat);
+	CWidgetManager::getInstance()->setTopWindow(gcChat);
 
 	// add the text to this window
 	CGroupList *gl = dynamic_cast<CGroupList *>(gcChat->getGroup("text_list"));
@@ -769,7 +769,7 @@ CGroupContainer *CChatGroupWindow::createFreeTeller(const ucstring &winNameIn, c
 		pGC->setSavable(true);
 		pGC->setEscapable(true);
 
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		pRoot->addGroup (pGC);
 		pGC->setParent(pRoot); // must be done before makeWindow
 		pIM->makeWindow(pGC);
@@ -896,7 +896,7 @@ bool CChatGroupWindow::removeFreeTeller(const std::string &containerID)
 	{
 		pIM->removeGroupContainerImage(_FreeTellers[i]->getId(), m);
 	}
-	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 	pIM->unMakeWindow(_FreeTellers[i]);
 	pRoot->delGroup (_FreeTellers[i]);
 	_FreeTellers[i] = NULL;
@@ -1377,7 +1377,7 @@ public:
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		std::string callerId = getParam(sParams, "id");
-		CInterfaceElement *prevCaller = im->getElementFromId(callerId);
+		CInterfaceElement *prevCaller = CWidgetManager::getInstance()->getElementFromId(callerId);
 		ucstring playerName = ::getFreeTellerName(prevCaller);
 		if (!playerName.empty())
 		{

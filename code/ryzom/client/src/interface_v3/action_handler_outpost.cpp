@@ -207,7 +207,7 @@ public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupMap *pMap = dynamic_cast<CGroupMap*>(pIM->getElementFromId(sParams));
+		CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(sParams));
 		if (pMap == NULL)
 			return;
 
@@ -313,7 +313,7 @@ public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupMap *pMap = dynamic_cast<CGroupMap*>(pIM->getElementFromId(sParams));
+		CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(sParams));
 		if (pMap == NULL)
 			return;
 

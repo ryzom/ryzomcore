@@ -1084,7 +1084,7 @@ public:
 		pSM->tryToUnblockTitleFromItems(false);
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId(GROUP_TITLE_COMBO));
+		CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId(GROUP_TITLE_COMBO));
 		if (pCB != NULL)
 		{
 			pCB->resetTexts();
@@ -1116,7 +1116,7 @@ public:
 		uint8 nNewTitle = 0;
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId(GROUP_TITLE_COMBO));
+		CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId(GROUP_TITLE_COMBO));
 		if (pCB == NULL) return;
 		if ((pCB->getSelection() < 0) || (pCB->getSelection() >= (sint32)pSM->_UIUnblockedTitles.size())) return;
 

@@ -182,10 +182,6 @@ void initActions();
 void uninitActions();
 
 // ------------------------------------------------------------------------------------------------
-string	CInterfaceManager::_CtrlLaunchingModalId= "ctrl_launch_modal";
-
-
-// ------------------------------------------------------------------------------------------------
 static const uint DOUBLE_CLICK_MIN = 50;
 static const uint DOUBLE_CLICK_MAX = 750;
 
@@ -268,7 +264,6 @@ _ViewRenderer( driver, textcontext )
 	interfaceLinkUpdater = new CInterfaceLink::CInterfaceLinkUpdater();
 	_ScreenW = _ScreenH = 0;
 	_LastInGameScreenW = _LastInGameScreenH = 0;
-	_Pointer = NULL;
 	_DescTextTarget = NULL;
 	_GlobalColor = CRGBA(255,255,255,255);
 	_GlobalColorForContent = _GlobalColor;
@@ -294,7 +289,7 @@ _ViewRenderer( driver, textcontext )
 	_EmotesInitialized = false;
 
 	// context help
-	_DeltaTimeStopingContextHelp= 0;
+	CWidgetManager::getInstance()->_DeltaTimeStopingContextHelp = 0;
 	_MaxTimeStopingContextHelp= 0.2f;
 	_LastXContextHelp= -10000;
 	_LastYContextHelp= -10000;
@@ -377,7 +372,7 @@ void CInterfaceManager::reset()
 {
 	_ViewRenderer.reset();
 	_CtrlsUnderPointer.clear();
-	_CurCtrlContextHelp = "";
+	CWidgetManager::getInstance()->setCurContextHelp( NULL );
 	_ViewsUnderPointer.clear();
 	_GroupsUnderPointer.clear();
 	_CaptureKeyboard = NULL;
@@ -421,7 +416,7 @@ void CInterfaceManager::resetShardSpecificData()
 	CSPhraseManager	*pPM= CSPhraseManager::getInstance();
 	pPM->setEquipInvalidation(0, 0);
 
-	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(getElementFromId(WIN_TEMPINV));
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_TEMPINV));
 	if (pGC != NULL)
 		pGC->setActive(false);
 }
@@ -484,7 +479,7 @@ void CInterfaceManager::initLogin()
 
 	updateAllLocalisedElements();
 
-	activateMasterGroup ("ui:login", true);
+	CWidgetManager::getInstance()->activateMasterGroup ("ui:login", true);
 
 	{
 		initActions();
@@ -495,12 +490,12 @@ void CInterfaceManager::initLogin()
 void CInterfaceManager::uninitLogin()
 {
 
-	activateMasterGroup ("ui:login", false);
+	CWidgetManager::getInstance()->activateMasterGroup ("ui:login", false);
 
 	removeAll();
 	reset();
 
-	_Pointer = NULL;
+	CWidgetManager::getInstance()->setPointer( NULL );
 
 	CInterfaceLink::removeAllLinks();
 
@@ -574,7 +569,7 @@ void CInterfaceManager::initOutGame()
 
 	updateAllLocalisedElements();
 
-	activateMasterGroup ("ui:outgame", true);
+	CWidgetManager::getInstance()->activateMasterGroup ("ui:outgame", true);
 
 //	if (!ClientCfg.FSHost.empty())
 //	{
@@ -598,7 +593,7 @@ void CInterfaceManager::uninitOutGame()
 	if (ClientCfg.SelectCharacter != -1)
 		return;
 
-	disableModalWindow();
+	CWidgetManager::getInstance()->disableModalWindow();
 
 	//_Database->display("");
 	CBotChatManager::getInstance()->setCurrPage(NULL);
@@ -615,7 +610,7 @@ void CInterfaceManager::uninitOutGame()
 	//nlinfo ("%d seconds for uninitOutGame", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 
 	initStart = ryzomGetLocalTime ();
-	activateMasterGroup ("ui:outgame", false);
+	CWidgetManager::getInstance()->activateMasterGroup ("ui:outgame", false);
 	//nlinfo ("%d seconds for activateMasterGroup", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
 	removeAll();
@@ -624,7 +619,7 @@ void CInterfaceManager::uninitOutGame()
 	reset();
 	//nlinfo ("%d seconds for reset", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	// reset the mouse pointer to avoid invalid pointer access
-	_Pointer = NULL;
+	CWidgetManager::getInstance()->setPointer( NULL );
 	initStart = ryzomGetLocalTime ();
 	CInterfaceLink::removeAllLinks();
 	//nlinfo ("%d seconds for removeAllLinks", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
@@ -787,7 +782,7 @@ void CInterfaceManager::initInGame()
 
 	//CBotChatUI::refreshActiveWindows(); // bot chat windows are saved too..
 
-	activateMasterGroup ("ui:interface", true);
+	CWidgetManager::getInstance()->activateMasterGroup ("ui:interface", true);
 
 	// Update the time in the ui database
 	_CheckMailNode = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MAIL_WAITING");
@@ -826,7 +821,7 @@ void CInterfaceManager::initInGame()
 	nlinfo ("%d seconds for initInGame", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 
 	// reset the compass target
- 	CGroupCompas *gc = dynamic_cast<CGroupCompas *>(getElementFromId("ui:interface:compass"));
+ 	CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
 	if (gc && gc->isSavedTargetValid())
 	{
 		gc->setTarget(gc->getSavedTarget());
@@ -887,7 +882,7 @@ void CInterfaceManager::configureQuitDialogBox()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	string quitDialogMainStr = "ui:interface:quit_dialog";
 	string quitDialogStr = quitDialogMainStr + ":indent_middle";
-	CInterfaceGroup *quitDlg = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(quitDialogStr));
+	CInterfaceGroup *quitDlg = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(quitDialogStr));
 	if (quitDlg)
 	{
 		CInterfaceElement *eltRet, *eltQuit, *eltQuitNow;
@@ -976,7 +971,7 @@ void CInterfaceManager::configureQuitDialogBox()
 	}
 
 	// Make all controls have the same size
-	CInterfaceGroup *quitDlgMain = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(quitDialogMainStr));
+	CInterfaceGroup *quitDlgMain = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(quitDialogMainStr));
 	if ( quitDlgMain )
 	{
 
@@ -1148,10 +1143,10 @@ void CInterfaceManager::uninitInGame1 ()
 	}
 
 	// disable the game_quitting modal window
-	disableModalWindow();
+	CWidgetManager::getInstance()->disableModalWindow();
 
 	// Remove all interface objects (containers, groups, variables, defines, ...)
-	activateMasterGroup ("ui:interface", false);
+	CWidgetManager::getInstance()->activateMasterGroup ("ui:interface", false);
 	removeAll();
 	reset();
 	CInterfaceLink::removeAllLinks();
@@ -1287,7 +1282,7 @@ void CInterfaceManager::updateFrameEvents()
 							CI18N::get (WeatherManager.getCurrWeatherState().LocalizedName);
 
 
-			CViewText *pVT = dynamic_cast<CViewText*>(getElementFromId("ui:interface:map:content:map_content:weather"));
+			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:weather"));
 			if (pVT != NULL)
 				pVT->setText(str);
 
@@ -1311,13 +1306,13 @@ void CInterfaceManager::updateFrameEvents()
 			str += CI18N::get("uiAtysianCycle" + toString(RT.getRyzomCycle()+1) + "Ordinal") + " " + CI18N::get("uiAtysianCycle") + " ";
 			str += toString("%04d", RT.getRyzomYear());
 
-			pVT = dynamic_cast<CViewText*>(getElementFromId("ui:interface:map:content:map_content:time"));
+			pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:time"));
 			if (pVT != NULL)
 				pVT->setText(str);
 
 			str.clear();
 			// Update the clock in the compass if enabled.
-			pVT = dynamic_cast<CViewText*>(getElementFromId("ui:interface:compass:clock:time"));
+			pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass:clock:time"));
 			if (pVT != NULL)
 			{
 				if (pVT->getActive())
@@ -1962,10 +1957,8 @@ void CInterfaceManager::checkCoords()
 			}
 		}
 
-		if (_Pointer != NULL)
-		{
-			_Pointer->updateCoords();
-		}
+		if ( CWidgetManager::getInstance()->getPointer() != NULL)
+			CWidgetManager::getInstance()->getPointer()->updateCoords();
 	}
 
 
@@ -1973,10 +1966,10 @@ void CInterfaceManager::checkCoords()
 	if (bRecomputeCtrlUnderPtr)
 	{
 		H_AUTO ( RZ_Interface_RecomputeCtrlUnderPtr )
-		if (_Pointer)
+		if ( CWidgetManager::getInstance()->getPointer() != NULL )
 		{
-			sint32 mx = _Pointer->getX();
-			sint32 my = _Pointer->getY();
+			sint32 mx = CWidgetManager::getInstance()->getPointer()->getX();
+			sint32 my = CWidgetManager::getInstance()->getPointer()->getY();
 			getViewsUnder (mx, my, _ViewsUnderPointer);
 			getCtrlsUnder (mx, my, _CtrlsUnderPointer);
 			getGroupsUnder (mx, my, _GroupsUnderPointer);
@@ -2130,17 +2123,17 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 		drawContextHelp ();
 
 		// Draw the pointer and DND Item
-		if (_Pointer != NULL)
+		if ( CWidgetManager::getInstance()->getPointer() != NULL)
 		{
 			//_Pointer->updateCoords();
 
-			if (_Pointer->show())
+			if ( CWidgetManager::getInstance()->getPointer()->show())
 			{
 				CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>((CCtrlBase*)_CapturePointerLeft);
 				if ((pCS != NULL) && (pCS->isDraging()))
 				{
-					sint	x= _Pointer->getX() - pCS->getDeltaDragX();
-					sint	y= _Pointer->getY() - pCS->getDeltaDragY();
+					sint	x= CWidgetManager::getInstance()->getPointer()->getX() - pCS->getDeltaDragX();
+					sint	y= CWidgetManager::getInstance()->getPointer()->getY() - pCS->getDeltaDragY();
 					pCS->drawSheet (x, y, false, false);
 
 					// if the control support CopyDrag, and if copy key pressed, display a tiny "+"
@@ -2158,8 +2151,8 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 			// Even if hardware, Force draw if the cursor is a string (ATTACK etc...)
 			/*if (_Pointer->getActive() && (!IsMouseCursorHardware () || _Pointer->getStringMode()) )
  				_Pointer->draw ();*/
-			if (_Pointer->getActive())
- 				_Pointer->draw ();
+			if (CWidgetManager::getInstance()->getPointer()->getActive())
+ 				CWidgetManager::getInstance()->getPointer()->draw ();
 		}
 
 		// flush layers
@@ -2188,9 +2181,9 @@ CCtrlBase* CInterfaceManager::getNewContextHelpCtrl()
 		{
 			if ((pICL->getActive()) && (!pICL->emptyContextHelp()))
 			{
-				if (!_Pointer) return pICL;
+				if (!CWidgetManager::getInstance()->getPointer()) return pICL;
 				sint32 mx, my;
-				_Pointer->getPointerPos(mx, my);
+				CWidgetManager::getInstance()->getPointer()->getPointerPos(mx, my);
 				if (pICL->preciseHitTest(mx, my))
 				{
 					best = pICL;
@@ -2210,9 +2203,9 @@ CCtrlBase* CInterfaceManager::getNewContextHelpCtrl()
 			{
 				if ((pICL->getActive()) && (!pICL->emptyContextHelp()))
 				{
-					if (!_Pointer) return pICL;
+					if (!CWidgetManager::getInstance()->getPointer()) return pICL;
 					sint32 mx, my;
-					_Pointer->getPointerPos(mx, my);
+					CWidgetManager::getInstance()->getPointer()->getPointerPos(mx, my);
 					if (pICL->preciseHitTest(mx, my))
 					{
 						best = pICL;
@@ -2235,7 +2228,7 @@ CInterfaceGroup	*CInterfaceManager::getWindowForActiveMasterGroup(const std::str
 		const CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 		if (rMG.Group->getActive())
 		{
-			CInterfaceElement	*pEL= getElementFromId( rMG.Group->getId() + ":" + window);
+			CInterfaceElement	*pEL= CWidgetManager::getInstance()->getElementFromId( rMG.Group->getId() + ":" + window);
 			if(pEL && pEL->isGroup())
 				return (CInterfaceGroup*)pEL;
 		}
@@ -2248,7 +2241,7 @@ CInterfaceGroup	*CInterfaceManager::getWindowForActiveMasterGroup(const std::str
 // ----------------------------------------------------------------------------
 void CInterfaceManager::updateTooltipCoords()
 {
-	updateTooltipCoords(_CurCtrlContextHelp);
+	updateTooltipCoords( CWidgetManager::getInstance()->getCurContextHelp() );
 }
 
 // ----------------------------------------------------------------------------
@@ -2271,8 +2264,8 @@ void CInterfaceManager::updateTooltipCoords(CCtrlBase *newCtrl)
 			CCtrlBase::TToolTipParentType	parentType= newCtrl->getToolTipParent();
 			CInterfaceGroup	*win= NULL;
 			// adjust to the mouse by default
-			sint32		xParent= _Pointer->getX();
-			sint32		yParent= _Pointer->getY();
+			sint32		xParent= CWidgetManager::getInstance()->getPointer()->getX();
+			sint32		yParent= CWidgetManager::getInstance()->getPointer()->getY();
 			sint32		wParent= 0;
 			sint32		hParent= 0;
 			// adjust to the window
@@ -2281,7 +2274,7 @@ void CInterfaceManager::updateTooltipCoords(CCtrlBase *newCtrl)
 				if(parentType==CCtrlBase::TTWindow)
 					win= newCtrl->getRootWindow();
 				else
-					win= dynamic_cast<CInterfaceGroup*>(getElementFromId(newCtrl->getToolTipSpecialParent()));
+					win= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(newCtrl->getToolTipSpecialParent()));
 				if(win)
 				{
 					xParent = win->getXReal();
@@ -2336,19 +2329,20 @@ void CInterfaceManager::updateTooltipCoords(CCtrlBase *newCtrl)
 // ----------------------------------------------------------------------------
 void CInterfaceManager::drawContextHelp ()
 {
-	if (!_Pointer || !_ContextHelpActive)
+	if (!CWidgetManager::getInstance()->getPointer() || !_ContextHelpActive)
 		return;
 
 
-	sint32 x = _Pointer->getX();
-	sint32 y = _Pointer->getY();
+	sint32 x = CWidgetManager::getInstance()->getPointer()->getX();
+	sint32 y = CWidgetManager::getInstance()->getPointer()->getY();
 
 
 	// ***************
 	// **** try to disable
 	// ***************
 	// test disable first, so can recheck asap if another present. see below
-	if(_CurCtrlContextHelp)
+	CCtrlBase *_CurCtrlContextHelp = CWidgetManager::getInstance()->getCurContextHelp();
+	if( _CurCtrlContextHelp)
 	{
 		if(x!=_LastXContextHelp || y!=_LastYContextHelp)
 		{
@@ -2393,12 +2387,12 @@ void CInterfaceManager::drawContextHelp ()
 		CCtrlBase	*newCtrl= getNewContextHelpCtrl();
 
 		if(x==_LastXContextHelp && y==_LastYContextHelp)
-			_DeltaTimeStopingContextHelp+= DT;
+			CWidgetManager::getInstance()->_DeltaTimeStopingContextHelp+= DT;
 		else
-			_DeltaTimeStopingContextHelp= 0;
+			CWidgetManager::getInstance()->_DeltaTimeStopingContextHelp = 0;
 
 		// If reach the time limit
-		if( _DeltaTimeStopingContextHelp > _MaxTimeStopingContextHelp || (newCtrl && newCtrl->wantInstantContextHelp()))
+		if( CWidgetManager::getInstance()->_DeltaTimeStopingContextHelp > _MaxTimeStopingContextHelp || (newCtrl && newCtrl->wantInstantContextHelp()))
 		{
 			// if present, get the ctx help text.
 			if(newCtrl)
@@ -2419,11 +2413,11 @@ void CInterfaceManager::drawContextHelp ()
 
 			// not present? wait furthermore to move the mouse.
 			if(!newCtrl)
-				_DeltaTimeStopingContextHelp= 0;
+				CWidgetManager::getInstance()->_DeltaTimeStopingContextHelp= 0;
 			else
 			{
 				// enable
-				_CurCtrlContextHelp = newCtrl->getId();
+				CWidgetManager::getInstance()->setCurContextHelp( newCtrl );
 				newCtrl->invalidateCoords();
 			}
 		}
@@ -2443,9 +2437,9 @@ void CInterfaceManager::drawContextHelp ()
 			/** If there's a modal box around, should be sure that the context help doesn't intersect it.
 			  * If this is the case, we just disable it, unless the tooltip was generated by the current modal window
 			  */
-			if (!_ModalStack.empty())
+			if ( CWidgetManager::getInstance()->hasModal() )
 			{
-				CInterfaceGroup *mw = _ModalStack.back().ModalWindow;
+				CInterfaceGroup *mw = CWidgetManager::getInstance()->getModal().ModalWindow;
 				if (mw && mw->isIn(*groupContextHelp))
 				{
 					if (_CurCtrlContextHelp->isSonOf(mw))
@@ -2674,6 +2668,7 @@ uint CInterfaceManager::getDepth (CCtrlBase *ctrl, CInterfaceGroup *pNewCurrentW
 bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 {
 	bool	handled= false;
+	CViewPointer *_Pointer = CWidgetManager::getInstance()->getPointer();
 
 	if( event.getType() == NLGUI::CEventDescriptor::system )
 	{
@@ -2712,11 +2707,11 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 		// Hide menu (or popup menu) is ESCAPE pressed
 		if( eventDesc.getKeyEventType() == NLGUI::CEventDescriptorKey::keychar && eventDesc.getChar() == KeyESCAPE )
 		{
-			if(_ModalStack.size() > 0)
+			if( CWidgetManager::getInstance()->hasModal() )
 			{
-				CModalWndInfo mwi = _ModalStack.back();
+				CWidgetManager::SModalWndInfo mwi = CWidgetManager::getInstance()->getModal();
 				if (mwi.ModalExitKeyPushed)
-					disableModalWindow();
+					CWidgetManager::getInstance()->disableModalWindow();
 			}
 		}
 
@@ -2724,7 +2719,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 		if( eventDesc.getKeyEventType() == NLGUI::CEventDescriptorKey::keychar && eventDesc.getChar() == KeyESCAPE )
 		{
 			// Get the last escapable active top window. NB: this is ergonomically better.
-			CInterfaceGroup	*win= getLastEscapableTopWindow();
+			CInterfaceGroup	*win= CWidgetManager::getInstance()->getLastEscapableTopWindow();
 			if( win )
 			{
 				// If the window is a modal, must pop it.
@@ -2732,7 +2727,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 				{
 					if(!win->getAHOnEscape().empty())
 						runActionHandler(win->getAHOnEscape(), win, win->getAHOnEscapeParams());
-					popModalWindow();
+					CWidgetManager::getInstance()->popModalWindow();
 					handled= true;
 				}
 				// else just disable it.
@@ -2751,7 +2746,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 		if (eventDesc.getKeyEventType() == NLGUI::CEventDescriptorKey::keychar && eventDesc.getChar() == KeyRETURN)
 		{
 			// If the  top window has Enter AH
-			CInterfaceGroup	*tw= getTopWindow();
+			CInterfaceGroup	*tw= CWidgetManager::getInstance()->getTopWindow();
 			if(tw && !tw->getAHOnEnter().empty())
 			{
 				// if the captured keyboard is in this Modal window, then must handle him in priority
@@ -2804,7 +2799,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 					}
 					if (lastContainer)
 					{
-						setTopWindow(lastContainer);
+						CWidgetManager::getInstance()->setTopWindow(lastContainer);
 						lastContainer->enableBlink(1);
 					}
 					handled= true;
@@ -2868,9 +2863,9 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 			NLMISC::CRefPtr<CGroupModal>	clickedOutModalWindow;
 
 			// modal special features
-			if (!_ModalStack.empty())
+			if ( CWidgetManager::getInstance()->hasModal() )
 			{
-				CModalWndInfo mwi = _ModalStack.back();
+				CWidgetManager::SModalWndInfo mwi = CWidgetManager::getInstance()->getModal();
 				if(mwi.ModalWindow)
 				{
 					// If we are not in "click out" mode so we dont handle controls other than those of the modal
@@ -2898,22 +2893,12 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 							{
 								clickedOutModalWindow = dynamic_cast<CGroupModal *>((CInterfaceGroup*)mwi.ModalWindow);
 								// disable the modal
-								popModalWindow();
-								if (!_ModalStack.empty())
+								CWidgetManager::getInstance()->popModalWindow();
+								if ( CWidgetManager::getInstance()->hasModal() )
 								{
 									// don't handle event unless it is a previous modal window
-									uint k = 0;
-									for(k = 0; k < _ModalStack.size(); ++k)
-									{
-										if (_ModalStack[k].ModalWindow == pNewCurrentWnd)
-										{
-											break;
-										}
-									}
-									if (k == _ModalStack.size())
-									{
+									if( !CWidgetManager::getInstance()->isPreviousModal( pNewCurrentWnd ) )
 										pNewCurrentWnd = NULL; // can't handle event before we have left all modal windows
-									}
 								}
 								movePointer (0,0); // Reget controls under pointer
 							}
@@ -2925,16 +2910,16 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 			// Manage LeftClick.
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
 			{
-				if ((pNewCurrentWnd != NULL) && (_ModalStack.empty()) && (pNewCurrentWnd->getOverlappable()))
+				if ((pNewCurrentWnd != NULL) && (!CWidgetManager::getInstance()->hasModal()) && (pNewCurrentWnd->getOverlappable()))
 				{
 					CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pNewCurrentWnd);
 					if (pGC != NULL)
 					{
-						if (!pGC->isGrayed()) setTopWindow(pNewCurrentWnd);
+						if (!pGC->isGrayed()) CWidgetManager::getInstance()->setTopWindow(pNewCurrentWnd);
 					}
 					else
 					{
-						setTopWindow(pNewCurrentWnd);
+						CWidgetManager::getInstance()->setTopWindow(pNewCurrentWnd);
 					}
 				}
 
@@ -2977,16 +2962,16 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 			// Manage RightClick
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown)
 			{
-				if ((pNewCurrentWnd != NULL) && (_ModalStack.empty()) && (pNewCurrentWnd->getOverlappable()))
+				if ((pNewCurrentWnd != NULL) && (!CWidgetManager::getInstance()->hasModal()) && (pNewCurrentWnd->getOverlappable()))
 				{
 					CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pNewCurrentWnd);
 					if (pGC != NULL)
 					{
-						if (!pGC->isGrayed()) setTopWindow(pNewCurrentWnd);
+						if (!pGC->isGrayed()) CWidgetManager::getInstance()->setTopWindow(pNewCurrentWnd);
 					}
 					else
 					{
-						setTopWindow(pNewCurrentWnd);
+						CWidgetManager::getInstance()->setTopWindow(pNewCurrentWnd);
 					}
 				}
 
@@ -3037,7 +3022,8 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 			// window handling. if not handled by a control
 			if (!handled)
 			{
-				if (((pNewCurrentWnd != NULL) && _ModalStack.empty()) || ((!_ModalStack.empty() && _ModalStack.back().ModalWindow == pNewCurrentWnd)))
+				if (((pNewCurrentWnd != NULL) && !CWidgetManager::getInstance()->hasModal()) ||
+					((CWidgetManager::getInstance()->hasModal() && CWidgetManager::getInstance()->getModal().ModalWindow == pNewCurrentWnd)))
 				{
 					NLGUI::CEventDescriptorMouse ev2 = eventDesc;
 					sint32 x= eventDesc.getX(), y = eventDesc.getY();
@@ -3069,17 +3055,17 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 
 
 			// If the current window is the modal, may Modal quit. Do it after standard event handle
-			if(!_ModalStack.empty() && pNewCurrentWnd == _ModalStack.back().ModalWindow)
+			if(CWidgetManager::getInstance()->hasModal() && pNewCurrentWnd == CWidgetManager::getInstance()->getModal().ModalWindow)
 			{
 				// NB: don't force handle==true because to quit a modal does not avoid other actions
-				CModalWndInfo mwi = _ModalStack.back();
+				CWidgetManager::SModalWndInfo mwi = CWidgetManager::getInstance()->getModal();
 				//  and if must quit on click right
 				if(mwi.ModalExitClickR)
 				{
 					// quit if click right
 					if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 						// disable the modal
-						disableModalWindow();
+						CWidgetManager::getInstance()->disableModalWindow();
 				}
 
 				//  and if must quit on click left
@@ -3088,7 +3074,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 					// quit if click right
 					if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 						// disable the modal
-						disableModalWindow();
+						CWidgetManager::getInstance()->disableModalWindow();
 				}
 			}
 
@@ -3111,8 +3097,8 @@ bool CInterfaceManager::handleMouseMoveEvent( const NLGUI::CEventDescriptor &eve
 
 	uint32 screenW, screenH;
 	_ViewRenderer.getScreenSize( screenW, screenH );
-	sint32 oldX = _Pointer->getX();
-	sint32 oldY = _Pointer->getY();
+	sint32 oldX = CWidgetManager::getInstance()->getPointer()->getX();
+	sint32 oldY = CWidgetManager::getInstance()->getPointer()->getY();
 
 	sint32 x = e.getX();
 	sint32 y = e.getY();
@@ -3126,8 +3112,8 @@ bool CInterfaceManager::handleMouseMoveEvent( const NLGUI::CEventDescriptor &eve
 	{
 		movePointerAbs( newX, newY );
 		NLGUI::CEventDescriptorMouse &ve = const_cast< NLGUI::CEventDescriptorMouse& >( e );
-		ve.setX( _Pointer->getX() );
-		ve.setY( _Pointer->getY() );
+		ve.setX( CWidgetManager::getInstance()->getPointer()->getX() );
+		ve.setY( CWidgetManager::getInstance()->getPointer()->getY() );
 	}
 
 	return true;
@@ -3136,7 +3122,8 @@ bool CInterfaceManager::handleMouseMoveEvent( const NLGUI::CEventDescriptor &eve
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::movePointer (sint32 dx, sint32 dy)
 {
-	if (!_Pointer) return;
+	if (!CWidgetManager::getInstance()->getPointer()) return;
+	CViewPointer *_Pointer = CWidgetManager::getInstance()->getPointer();
 	uint32 nScrW, nScrH;
 	sint32 oldpx, oldpy, newpx, newpy, disppx, disppy, olddisppx, olddisppy;
 
@@ -3173,14 +3160,14 @@ void CInterfaceManager::movePointer (sint32 dx, sint32 dy)
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::movePointerAbs(sint32 px, sint32 py)
 {
-	if (!_Pointer) return;
+	if (!CWidgetManager::getInstance()->getPointer()) return;
 	uint32 nScrW, nScrH;
 	_ViewRenderer.getScreenSize (nScrW, nScrH);
 	clamp(px, 0, (sint32) nScrW);
 	clamp(py, 0, (sint32) nScrH);
 	//
-	_Pointer->setPointerPos (px, py);
-	_Pointer->setPointerDispPos (px, py);
+	CWidgetManager::getInstance()->getPointer()->setPointerPos (px, py);
+	CWidgetManager::getInstance()->getPointer()->setPointerDispPos (px, py);
 	//
 	getViewsUnder (px, py, _ViewsUnderPointer);
 	getCtrlsUnder (px, py, _CtrlsUnderPointer);
@@ -3609,7 +3596,7 @@ void CInterfaceManager::getCtrlsUnder (sint32 x, sint32 y, std::vector<CCtrlBase
 					CInterfaceGroup *pIG = *itw;
 
 					// Accecpt if not modal clip
-					if (_ModalStack.empty() || _ModalStack.back().ModalWindow == pIG || _ModalStack.back().ModalExitClickOut)
+					if (!CWidgetManager::getInstance()->hasModal() || CWidgetManager::getInstance()->getModal().ModalWindow == pIG || CWidgetManager::getInstance()->getModal().ModalExitClickOut)
 					if (pIG->getActive() && pIG->getUseCursor())
 					{
 						if (pIG->getCtrlsUnder (x, y, 0, 0, (sint32) sw, (sint32) sh, vICL))
@@ -3649,7 +3636,8 @@ void CInterfaceManager::getGroupsUnder (sint32 x, sint32 y, std::vector<CInterfa
 					CInterfaceGroup *pIG = *itw;
 
 					// Accecpt if not modal clip
-					if (_ModalStack.empty() || _ModalStack.back().ModalWindow == pIG || _ModalStack.back().ModalExitClickOut)
+					if (!CWidgetManager::getInstance()->hasModal() || CWidgetManager::getInstance()->getModal().ModalWindow == pIG ||
+						CWidgetManager::getInstance()->getModal().ModalExitClickOut)
 					if (pIG->getActive() && pIG->getUseCursor())
 					{
 						if (pIG->isIn(x, y))
@@ -3667,322 +3655,9 @@ void CInterfaceManager::getGroupsUnder (sint32 x, sint32 y, std::vector<CInterfa
 
 
 // ------------------------------------------------------------------------------------------------
-void CInterfaceManager::activateMasterGroup (const std::string &sMasterGroupName, bool bActive)
-{
-	CInterfaceGroup *pIG = CWidgetManager::getInstance()->getMasterGroupFromId (sMasterGroupName);
-	if (pIG != NULL)
-	{
-		pIG->setActive(bActive);
-		pIG->invalidateCoords();
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-CInterfaceGroup* CInterfaceManager::getWindow(CInterfaceElement *pIE)
-{
-	CInterfaceGroup *pIG = pIE->getParent();
-	if (pIG == NULL) return NULL;
-	if (pIG->getParent() == NULL) return NULL;
-	while (pIG->getParent()->getParent() != NULL)
-	{
-		pIG = pIG->getParent();
-	}
-	return pIG;
-}
-
-// ------------------------------------------------------------------------------------------------
-CInterfaceElement* CInterfaceManager::getElementFromId (const std::string &sEltId)
-{
-	// System special
-	if(sEltId == _CtrlLaunchingModalId)
-		return getCtrlLaunchingModal();
-
-	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
-
-	// Search for all elements
-	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
-	{
-		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-		CInterfaceElement *pIEL = rMG.Group->getElement (sEltId);
-		if (pIEL != NULL)
-			return pIEL;
-	}
-	return NULL;
-}
-
-// ------------------------------------------------------------------------------------------------
 CInterfaceElement* CInterfaceManager::getElementFromDefine (const std::string &defineId)
 {
-	return getElementFromId(getDefine(defineId));
-}
-
-// ------------------------------------------------------------------------------------------------
-CInterfaceElement* CInterfaceManager::getElementFromId (const std::string &sStart, const std::string &sEltId)
-{
-	CInterfaceElement *pIEL = getElementFromId (sEltId);
-	if (pIEL == NULL)
-	{
-		string sZeStart = sStart, sTmp;
-		if (sZeStart[sZeStart.size()-1] == ':')
-			sZeStart = sZeStart.substr(0, sZeStart.size()-1);
-
-		while (sZeStart != "")
-		{
-			if (sEltId[0] == ':')
-				sTmp = sZeStart	+ sEltId;
-			else
-				sTmp = sZeStart	+ ":" + sEltId;
-			pIEL = getElementFromId (sTmp);
-			if (pIEL != NULL)
-				return pIEL;
-			string::size_type nextPos = sZeStart.rfind(':');
-			if (nextPos == string::npos) break;
-			sZeStart = sZeStart.substr(0, nextPos);
-		}
-	}
-	return pIEL;
-}
-
-// ------------------------------------------------------------------------------------------------
-void CInterfaceManager::setTopWindow (CInterfaceGroup* win)
-{
-	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
-	//find the window in the window list
-	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
-	{
-		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-		if (rMG.Group->getActive())
-		{
-			rMG.setTopWindow(win);
-/*
-			for (list<CInterfaceGroup*>::iterator it = rMG.Windows.begin(); it != rMG.Windows.end() ;it++)
-			{
-				if (win == *it)
-				{
-					CInterfaceGroup* buf = *it;
-
-					CInterfaceGroup* pIGLast = rMG.Windows.back();
-					if (pIGLast != NULL)
-					{
-						CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIGLast);
-						if (pGC != NULL)
-						{
-							pGC->setHighLighted(false,0);
-						}
-					}
-
-					rMG.Windows.erase(it);
-					rMG.Windows.push_back(buf);
-					break;
-				}
-			}
-*/
-		}
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-void CInterfaceManager::setBackWindow(CInterfaceGroup* win)
-{
-	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
-	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
-	{
-		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-		if (rMG.Group->getActive())
-		{
-			rMG.setBackWindow(win);
-/*
-			//find the window in the window list
-			for (list<CInterfaceGroup*>::iterator it = rMG.Windows.begin(); it != rMG.Windows.end() ;it++)
-			{
-				if (win == *it)
-				{
-					CInterfaceGroup* buf = *it;
-					rMG.Windows.erase(it);
-					rMG.Windows.push_front(buf);
-					break;
-				}
-			}
-*/
-		}
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-CInterfaceGroup		*CInterfaceManager::getTopWindow (uint8 nPriority) const
-{
-	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
-	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
-	{
-		const CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-		if (rMG.Group->getActive())
-		{
-			// return the first.
-			if(rMG.PrioritizedWindows[nPriority].empty())
-				return NULL;
-			else
-				return rMG.PrioritizedWindows[nPriority].back();
-		}
-	}
-	return NULL;
-}
-
-
-// ------------------------------------------------------------------------------------------------
-CInterfaceGroup		*CInterfaceManager::getBackWindow (uint8 nPriority) const
-{
-	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
-	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
-	{
-		const CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-		if (rMG.Group->getActive())
-		{
-			// return the first.
-			if(rMG.PrioritizedWindows[nPriority].empty())
-				return NULL;
-			else
-				return rMG.PrioritizedWindows[nPriority].front();
-		}
-	}
-	return NULL;
-}
-
-// ------------------------------------------------------------------------------------------------
-void CInterfaceManager::enableModalWindow (CCtrlBase *ctrlLaunchingModal, CInterfaceGroup *pIG)
-{
-	// disable any modal before. release keyboard
-	disableModalWindow();
-	pushModalWindow(ctrlLaunchingModal, pIG);
-}
-
-// ------------------------------------------------------------------------------------------------
-void CInterfaceManager::enableModalWindow (CCtrlBase *CtrlLaunchingModal, const std::string &groupName)
-{
-	CInterfaceGroup	*group= dynamic_cast<CGroupModal*>( getElementFromId(groupName) );
-	if(group)
-	{
-		// enable the modal
-		enableModalWindow(CtrlLaunchingModal, group);
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-void CInterfaceManager::disableModalWindow ()
-{
-	while (!_ModalStack.empty())
-	{
-		CModalWndInfo winInfo = _ModalStack.back();
-		_ModalStack.pop_back(); // must pop back as early as possible because 'setActive' may trigger another 'popModalWindow', leading to a crash
-		// disable old modal window
-		if(winInfo.ModalWindow)
-		{
-			setBackWindow(winInfo.ModalWindow);
-			winInfo.ModalWindow->setActive(false);
-		}
-	}
-
-	// disable any context help
-	_CurCtrlContextHelp = "";
-	_DeltaTimeStopingContextHelp = 0;
-}
-
-// ------------------------------------------------------------------------------------------------
-void CInterfaceManager::pushModalWindow(CCtrlBase *ctrlLaunchingModal, CInterfaceGroup *pIG)
-{
-	// enable the wanted modal
-	if(pIG)
-	{
-		CModalWndInfo mwi;
-		mwi.ModalWindow = pIG;
-		mwi.CtrlLaunchingModal = ctrlLaunchingModal;
-		// setup special group
-		CGroupModal		*groupModal= dynamic_cast<CGroupModal*>(pIG);
-		if(groupModal)
-		{
-			mwi.ModalExitClickOut = groupModal->ExitClickOut;
-			mwi.ModalExitClickL = groupModal->ExitClickL;
-			mwi.ModalExitClickR = groupModal->ExitClickR;
-			mwi.ModalHandlerClickOut = groupModal->OnClickOut;
-			mwi.ModalClickOutParams = groupModal->OnClickOutParams;
-			mwi.ModalExitKeyPushed = groupModal->ExitKeyPushed;
-			// update coords of the modal
-			if(groupModal->SpawnOnMousePos)
-			{
-				groupModal->SpawnMouseX = _Pointer->getX();
-				groupModal->SpawnMouseY = _Pointer->getY();
-
-			}
-		}
-		else
-		{
-			// default for group not modal. Backward compatibility
-			mwi.ModalExitClickOut = false;
-			mwi.ModalExitClickL = false;
-			mwi.ModalExitClickR = false;
-			mwi.ModalExitKeyPushed = false;
-		}
-
-		_ModalStack.push_back(mwi);
-
-		// update coords and activate the modal
-		mwi.ModalWindow->invalidateCoords();
-		mwi.ModalWindow->setActive(true);
-		setTopWindow(mwi.ModalWindow);
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-void CInterfaceManager::pushModalWindow(CCtrlBase *ctrlLaunchingModal, const std::string &groupName)
-{
-	CInterfaceGroup	*group= dynamic_cast<CGroupModal*>( getElementFromId(groupName) );
-	if(group)
-	{
-		// enable the modal
-		enableModalWindow(ctrlLaunchingModal, group);
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-void CInterfaceManager::popModalWindow()
-{
-	if (!_ModalStack.empty())
-	{
-		CModalWndInfo winInfo = _ModalStack.back();
-		_ModalStack.pop_back(); // must pop back as early as possible because 'setActive' may trigger another 'popModalWindow', leading to a crash
-		if(winInfo.ModalWindow)
-		{
-			setBackWindow(winInfo.ModalWindow);
-			winInfo.ModalWindow->setActive(false);
-		}
-		if (!_ModalStack.empty())
-		{
-			if(_ModalStack.back().ModalWindow)
-			{
-				_ModalStack.back().ModalWindow->setActive(true);
-				setTopWindow(_ModalStack.back().ModalWindow);
-			}
-		}
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-void CInterfaceManager::popModalWindowCategory(const std::string &category)
-{
-	for(;;)
-	{
-		if (_ModalStack.empty()) break;
-		if (!_ModalStack.back().ModalWindow) break;
-		CGroupModal *gm = dynamic_cast<CGroupModal *>((CInterfaceGroup*)(_ModalStack.back().ModalWindow));
-		if (gm && gm->Category == category)
-		{
-			_ModalStack.back().ModalWindow->setActive(false);
-			_ModalStack.pop_back();
-		}
-		else
-		{
-			break;
-		}
-	}
+	return CWidgetManager::getInstance()->getElementFromId(getDefine(defineId));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -4163,14 +3838,14 @@ void CInterfaceManager::stopAnim (const string &animId)
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::messageBoxInternal(const string &msgBoxGroup, const ucstring &text, const string &masterGroup, TCaseMode caseMode)
 {
-	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(getElementFromId(masterGroup+":" + msgBoxGroup));
-	CViewText		*viewText= dynamic_cast<CViewText*>(getElementFromId(masterGroup+":" + msgBoxGroup + ":text"));
+	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":" + msgBoxGroup));
+	CViewText		*viewText= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":" + msgBoxGroup + ":text"));
 
 	if (group && viewText)
 	{
 		viewText->setCaseMode(caseMode);
 		viewText->setText(text);
-		enableModalWindow(NULL, group);
+		CWidgetManager::getInstance()->enableModalWindow(NULL, group);
 		// don't understand why but need to update coords here
 		group->updateCoords();
 		group->updateCoords();
@@ -4196,7 +3871,7 @@ void CInterfaceManager::messageBoxWithHelp(const ucstring &text, const std::stri
 	// clicking 'ok' do not have any consequence, so allow exiting the message box by clicking
 	// outside of it (this behavior is wanted on the login page, to allow to reclick on 'login' without
 	// having to click 'ok' in the message box each time)
-	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(getElementFromId(masterGroup+":" + mbName));
+	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":" + mbName));
 	CGroupModal *gm = dynamic_cast<CGroupModal *>(group);
 	if (gm)
 	{
@@ -4210,9 +3885,9 @@ void CInterfaceManager::messageBoxWithHelp(const ucstring &text, const std::stri
 void	CInterfaceManager::validMessageBox(TValidMessageIcon icon, const ucstring &text, const std::string &ahOnOk,
 	const std::string &paramsOnOk, const std::string &ahOnCancel, const std::string &paramsOnCancel, const string &masterGroup)
 {
-	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(getElementFromId(masterGroup+":valid_message_box"));
-	CViewText		*viewText= dynamic_cast<CViewText*>(getElementFromId(masterGroup+":valid_message_box:text"));
-	CViewBitmap		*viewBitmap= dynamic_cast<CViewBitmap*>(getElementFromId(masterGroup+":valid_message_box:icon_group:icon"));
+	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":valid_message_box"));
+	CViewText		*viewText= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":valid_message_box:text"));
+	CViewBitmap		*viewBitmap= dynamic_cast<CViewBitmap*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":valid_message_box:icon_group:icon"));
 
 	if (group && viewText)
 	{
@@ -4238,7 +3913,7 @@ void	CInterfaceManager::validMessageBox(TValidMessageIcon icon, const ucstring &
 		}
 
 		// Go
-		enableModalWindow(NULL, group);
+		CWidgetManager::getInstance()->enableModalWindow(NULL, group);
 		// don't understand why but need to update coords here
 		group->updateCoords();
 		group->updateCoords();
@@ -4250,12 +3925,12 @@ void	CInterfaceManager::validMessageBox(TValidMessageIcon icon, const ucstring &
 bool	CInterfaceManager::getCurrentValidMessageBoxOnOk(string &ahOnOk, const std::string &masterGroup)
 {
 	// any modal window opened?
-	CInterfaceGroup	*mw= getModalWindow();
+	CInterfaceGroup	*mw= CWidgetManager::getInstance()->getModalWindow();
 	if(!mw)
 		return false;
 
 	// Is this modal window the valid_message_box window?
-	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(getElementFromId(masterGroup+":valid_message_box"));
+	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":valid_message_box"));
 	if(mw==group)
 	{
 		// Ok, get the current procedure OnOk action
@@ -4278,8 +3953,8 @@ void	CInterfaceManager::setContextHelpText(const ucstring &text)
 // ------------------------------------------------------------------------------------------------
 void	CInterfaceManager::disableContextHelp()
 {
-	_CurCtrlContextHelp = "";
-	_DeltaTimeStopingContextHelp = 0;
+	CWidgetManager::getInstance()->setCurContextHelp( NULL );
+	CWidgetManager::getInstance()->_DeltaTimeStopingContextHelp = 0;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -4287,7 +3962,7 @@ void	CInterfaceManager::disableContextHelpForControl(CCtrlBase *pCtrl)
 {
 	if(!pCtrl)
 		return;
-	if(_CurCtrlContextHelp == pCtrl )
+	if( CWidgetManager::getInstance()->getCurContextHelp() == pCtrl )
 		disableContextHelp();
 }
 
@@ -4387,7 +4062,7 @@ void	CInterfaceManager::enableMouseHandling(bool handle)
 	_MouseHandlingEnabled= handle;
 	if(!handle)
 	{
-		if(!_Pointer)
+		if(!CWidgetManager::getInstance()->getPointer())
 			return;
 
 		// If Left captured, reset
@@ -4403,7 +4078,7 @@ void	CInterfaceManager::enableMouseHandling(bool handle)
 		}
 
 		// Avoid any problem with modals
-		disableModalWindow();
+		CWidgetManager::getInstance()->disableModalWindow();
 	}
 }
 
@@ -4492,7 +4167,7 @@ void	CInterfaceManager::launchContextMenuInGame (const std::string &nameOfCM)
 	// Launch the context menu in-game: can't appear while dragging an item
 	if (CDBCtrlSheet::getDraggedSheet() == NULL)
 	{
-		if (_ModalStack.empty())
+		if ( !CWidgetManager::getInstance()->hasModal() )
 		{
 			// We must be in-game !
 			CInterfaceGroup *pMG = CWidgetManager::getInstance()->getMasterGroupFromId("ui:interface");
@@ -4507,11 +4182,11 @@ void	CInterfaceManager::launchContextMenuInGame (const std::string &nameOfCM)
 			}
 			if ((pMG != NULL) && (pMG->getActive()))
 			{
-				CInterfaceElement *pIE = getElementFromId(nameOfCM);
+				CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(nameOfCM);
 				CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(pIE);
 				if (pIG != NULL)
 				{
-					enableModalWindow (NULL, pIG);
+					CWidgetManager::getInstance()->enableModalWindow (NULL, pIG);
 				}
 			}
 		}
@@ -4617,7 +4292,7 @@ void	CInterfaceManager::setMode(uint8 newMode)
 						// if this GC is a Full modal window, or if it is a modal son of another GC,
 						if (pGC->isModal() || pGC->isModalSon())
 						{
-							setTopWindow(pGC);
+							CWidgetManager::getInstance()->setTopWindow(pGC);
 							pGC->enableBlink(2);
 							return;
 						}
@@ -4891,49 +4566,6 @@ bool	CInterfaceManager::saveKeys(const std::string &filename)
 }
 
 // ***************************************************************************
-CInterfaceGroup		*CInterfaceManager::getLastEscapableTopWindow() const
-{
-	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
-	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
-	{
-		const CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-		if (rMG.Group->getActive())
-		{
-			for (uint8 nPriority = WIN_PRIORITY_MAX; nPriority > 0; nPriority--)
-			{
-				const list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority-1];
-				list<CInterfaceGroup*>::const_reverse_iterator	it;
-				it= rList.rbegin();
-				for(;it!=rList.rend();it++)
-				{
-					if((*it)->getActive() && (*it)->getEscapable())
-						return *it;
-				}
-			}
-		}
-	}
-	return NULL;
-}
-
-// ***************************************************************************
-void CInterfaceManager::setWindowPriority (CInterfaceGroup *pWin, uint8 nNewPriority)
-{
-	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
-	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
-	{
-		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-		if (rMG.Group->getActive())
-		{
-			if (rMG.isWindowPresent(pWin))
-			{
-				rMG.delWindow(pWin);
-				rMG.addWindow(pWin, nNewPriority);
-			}
-		}
-	}
-}
-
-// ***************************************************************************
 bool CInterfaceManager::deletePlayerConfig (const std::string &playerFileIdent)
 {
 	string fileName= "save/interface_" + playerFileIdent + ".icfg";
@@ -5008,26 +4640,10 @@ void CInterfaceManager::restoreAllContainersBackupPosition()
 
 
 // ***************************************************************************
-uint8	CInterfaceManager::getLastTopWindowPriority() const
-{
-	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
-	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
-	{
-		const CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-		if (rMG.Group->getActive())
-		{
-			return rMG.LastTopWindowPriority;
-		}
-	}
-	return 0;
-}
-
-
-// ***************************************************************************
 void	CInterfaceManager::removeRefOnCtrl (CCtrlBase *ctrlBase)
 {
-	if (_CurCtrlContextHelp == ctrlBase)
-		_CurCtrlContextHelp = "";
+	if ( CWidgetManager::getInstance()->getCurContextHelp()  == ctrlBase)
+		CWidgetManager::getInstance()->setCurContextHelp( NULL );
 	if (getCapturePointerLeft() == ctrlBase)
 		setCapturePointerLeft(NULL);
 	if (getCapturePointerRight() == ctrlBase)
@@ -5264,7 +4880,7 @@ NLMISC_COMMAND(loadui, "Load an interface file", "<loadui [all]/interface.xml>")
 // ***************************************************************************
 void CInterfaceManager::displayWebWindow(const string & name, const string & url)
 {
-	CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(getElementFromId(name));
+	CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(name));
 	if (pIG != NULL)
 	{
 		pIG->setActive(true);
@@ -5413,7 +5029,7 @@ void CInterfaceManager::initEmotes()
 			if (sName[i] == '|')
 				nbToken++;
 
-		CGroupMenu *pRootMenu = dynamic_cast<CGroupMenu*>(pIM->getElementFromId("ui:interface:user_chat_emote_menu"));
+		CGroupMenu *pRootMenu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:user_chat_emote_menu"));
 		nlassert(pRootMenu);
 
 		CGroupSubMenu *pMenu = pRootMenu->getRootMenu();
@@ -5539,7 +5155,7 @@ void CInterfaceManager::uninitEmotes()
 
 		// get the emotes menu
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupMenu *pRootMenu = dynamic_cast<CGroupMenu*>(pIM->getElementFromId("ui:interface:game_context_menu"));
+		CGroupMenu *pRootMenu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_context_menu"));
 		if( pRootMenu )
 		{
 			CGroupSubMenu *pMenu = pRootMenu->getRootMenu();
@@ -5656,7 +5272,7 @@ void CInterfaceManager::resetTextIndex()
 CInterfaceElement *getInterfaceResource(const std::string &key)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	return pIM->getElementFromId (key);
+	return CWidgetManager::getInstance()->getElementFromId (key);
 }
 
 

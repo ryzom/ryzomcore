@@ -246,7 +246,7 @@ void CInterfaceGroup::setPriority(uint8 nprio)
 {
 	if (nprio != _Priority)
 	{
-		CInterfaceManager::getInstance()->setWindowPriority(this, nprio);
+		CWidgetManager::getInstance()->setWindowPriority(this, nprio);
 	}
 }
 

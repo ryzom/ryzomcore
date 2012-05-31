@@ -181,13 +181,13 @@ void CViewPointer::draw ()
 
 		_StringCursor = pIM->createGroupInstance("string_cursor", "", templateParams);
 		if (_StringCursor)
-			_StringCursor->setParentPos(pIM->getElementFromId("ui:interface"));
+			_StringCursor->setParentPos(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 
 		templateParams.clear();
 		templateParams.push_back (std::pair<std::string,std::string>("id", "string_cursor_hardware"));
 		_StringCursorHardware = pIM->createGroupInstance("string_cursor_hardware", "", templateParams);
 		if (_StringCursorHardware)
-			_StringCursorHardware->setParentPos(pIM->getElementFromId("ui:interface"));
+			_StringCursorHardware->setParentPos(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 	}
 
 	CRGBA col;
@@ -305,7 +305,7 @@ void CViewPointer::draw ()
 
 
 	// is the cursor currently over a modal window ?
-	CInterfaceGroup *currModal = pIM->getModalWindow();
+	CInterfaceGroup *currModal = CWidgetManager::getInstance()->getModalWindow();
 	if (currModal)
 	{
 		sint32 xPos = _XReal + _OffsetX;

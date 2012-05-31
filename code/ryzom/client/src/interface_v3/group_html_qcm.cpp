@@ -56,7 +56,7 @@ void CGroupHTMLQCM::addText (const char * buf, int len)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		pIM->runActionHandler("quit_ryzom", NULL);
-		CInterfaceElement *pIE = pIM->getElementFromId("ui:interface:web_on_quit");
+		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId("ui:interface:web_on_quit");
 		pIE->setActive(false);
 	}
 

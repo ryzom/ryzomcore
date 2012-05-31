@@ -571,10 +571,10 @@ void CGroupTree::draw()
 		bDisplayOver = false;
 	}
 	else
-	if (pIM->getModalWindow() == NULL)
+	if (CWidgetManager::getInstance()->getModalWindow() == NULL)
 	{
-		sint32 x = pIM->getPointer()->getX();
-		sint32 y = pIM->getPointer()->getY();
+		sint32 x = CWidgetManager::getInstance()->getPointer()->getX();
+		sint32 y = CWidgetManager::getInstance()->getPointer()->getY();
 
 		CInterfaceGroup	*pIG = pIM->getWindowUnder(x, y);
 		CInterfaceGroup	*pParent = this;
@@ -1331,7 +1331,7 @@ public:
 	void execute (CCtrlBase * /* pCaller */,  const std::string &sParams)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupTree *pTree = dynamic_cast<CGroupTree*>(pIM->getElementFromId(sParams));
+		CGroupTree *pTree = dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(sParams));
 		if (pTree != NULL)
 			pTree->reset();
 	}

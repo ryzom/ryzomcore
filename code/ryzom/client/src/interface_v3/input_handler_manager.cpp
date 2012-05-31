@@ -258,7 +258,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 		}
 	}
 	// **** Event Mouse
-	else if(pIM->getPointer() && _Focus /* && pIM->isMouseHandlingEnabled() */ &&
+	else if(CWidgetManager::getInstance()->getPointer() && _Focus /* && pIM->isMouseHandlingEnabled() */ &&
 			( event == EventMouseMoveId ||
 			  event == EventMouseDownId ||
 			  event == EventMouseUpId ||
@@ -268,7 +268,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 	{
 
 
-		CViewPointer &rIP = *pIM->getPointer();
+		CViewPointer &rIP = *CWidgetManager::getInstance()->getPointer();
 
 		NLGUI::CEventDescriptorMouse eventDesc;
 

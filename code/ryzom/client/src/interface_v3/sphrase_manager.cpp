@@ -1629,7 +1629,7 @@ float				CSPhraseManager::getPhraseSumBrickProp(const CSPhraseCom &phrase, uint 
 				{
 					CInterfaceManager *im = CInterfaceManager::getInstance();
 					uint32 weight = (uint32) NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:DEFAULT_WEIGHT_HANDS")->getValue32() / 10; // weight must be in dg here
-					CDBCtrlSheet *ctrlSheet = dynamic_cast<CDBCtrlSheet *>(im->getElementFromId("ui:interface:gestionsets:hands:handr"));
+					CDBCtrlSheet *ctrlSheet = dynamic_cast<CDBCtrlSheet *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:gestionsets:hands:handr"));
 					if (ctrlSheet)
 					{
 						const CItemSheet *itemSheet = ctrlSheet->asItemSheet();
@@ -1638,7 +1638,7 @@ float				CSPhraseManager::getPhraseSumBrickProp(const CSPhraseCom &phrase, uint 
 							weight = (uint32) ctrlSheet->getItemWeight();
 						}
 					}
-					ctrlSheet = dynamic_cast<CDBCtrlSheet *>(im->getElementFromId("ui:interface:gestionsets:hands:handl"));
+					ctrlSheet = dynamic_cast<CDBCtrlSheet *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:gestionsets:hands:handl"));
 					if (ctrlSheet)
 					{
 						const CItemSheet *itemSheet = ctrlSheet->asItemSheet();
@@ -1838,12 +1838,12 @@ void	CSPhraseManager::updateExecutionDisplay()
 		displayNext= false;
 
 	// DisplayCycleSelectionOnActionBar
-	CInterfaceElement	*viewCycle= pIM->getElementFromId(PhraseMemoryViewCycleAction);
+	CInterfaceElement	*viewCycle= CWidgetManager::getInstance()->getElementFromId(PhraseMemoryViewCycleAction);
 	if(viewCycle)
 	{
 		CInterfaceElement	*ctrl= NULL;
 		if(displayCycle)
-			ctrl= pIM->getElementFromId(PhraseMemoryViewSlotBase + toString(_CurrentExecuteSlotCycle));
+			ctrl= CWidgetManager::getInstance()->getElementFromId(PhraseMemoryViewSlotBase + toString(_CurrentExecuteSlotCycle));
 		if(displayCycle && ctrl)
 		{
 			viewCycle->setParentPos(ctrl);
@@ -1857,12 +1857,12 @@ void	CSPhraseManager::updateExecutionDisplay()
 	}
 
 	// DisplayNextSelectionOnActionBar
-	CInterfaceElement	*viewNext= pIM->getElementFromId(PhraseMemoryViewNextAction);
+	CInterfaceElement	*viewNext= CWidgetManager::getInstance()->getElementFromId(PhraseMemoryViewNextAction);
 	if(viewNext)
 	{
 		CInterfaceElement	*ctrl= NULL;
 		if(displayNext)
-			ctrl= pIM->getElementFromId(PhraseMemoryViewSlotBase + toString(_CurrentExecuteSlotNext));
+			ctrl= CWidgetManager::getInstance()->getElementFromId(PhraseMemoryViewSlotBase + toString(_CurrentExecuteSlotNext));
 		if(displayNext && ctrl)
 		{
 			viewNext->setParentPos(ctrl);
@@ -3037,13 +3037,13 @@ void	CSPhraseManager::updateAllMemoryCtrlState()
 	for(uint i=0;i<PHRASE_MAX_MEMORY_SLOT;i++)
 	{
 		// Get the ctrl
-		CDBCtrlSheet	*ctrl= dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(PhraseMemoryCtrlBase + toString(i)) );
+		CDBCtrlSheet	*ctrl= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(PhraseMemoryCtrlBase + toString(i)) );
 		if(ctrl)
 		{
 			// update the valid state.
 			updateMemoryCtrlState(i, ctrl, itemSkill);
 		}
-		CDBCtrlSheet	*ctrlAlt= dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(PhraseMemoryAltCtrlBase + toString(i)) );
+		CDBCtrlSheet	*ctrlAlt= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(PhraseMemoryAltCtrlBase + toString(i)) );
 		if(ctrlAlt)
 			updateMemoryCtrlState(i, ctrlAlt, itemSkill);
 	}
@@ -3069,7 +3069,7 @@ CDBCtrlSheet	*CSPhraseManager::getMemorySlotCtrl(uint memorySlot)
 
 	// Get the ctrl
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	return dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(PhraseMemoryCtrlBase + toString(memorySlot)));	
+	return dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(PhraseMemoryCtrlBase + toString(memorySlot)));	
 }
 
 // ***************************************************************************
@@ -3080,7 +3080,7 @@ CDBCtrlSheet	*CSPhraseManager::getMemoryAltSlotCtrl(uint memorySlot)
 
 	// Get the ctrl
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	return dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(PhraseMemoryAltCtrlBase + toString(memorySlot)));	
+	return dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(PhraseMemoryAltCtrlBase + toString(memorySlot)));	
 }
 
 // ***************************************************************************

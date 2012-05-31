@@ -712,7 +712,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 					_MoveDeltaYReal= _Parent->getYReal() - _Parent->getY();
 					_Moving= true;
 					// set the window at top.
-					CInterfaceManager::getInstance()->setTopWindow(_Parent);
+					CWidgetManager::getInstance()->setTopWindow(_Parent);
 					if (gc->getAHOnBeginMovePtr())
 					{
 						CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -2086,7 +2086,7 @@ void CGroupContainer::draw ()
 	{
 		CRGBA c = CRGBA(255,255,255,255);
 		// Display the header in white if we are the last clicked window
-		if (pIM->getTopWindow(pIM->getLastTopWindowPriority()) != this)
+		if (CWidgetManager::getInstance()->getTopWindow(CWidgetManager::getInstance()->getLastTopWindowPriority()) != this)
 		{
 			if (_HeaderColor.getNodePtr() != NULL)
 				c = _HeaderColor.getRGBA();
@@ -2194,7 +2194,7 @@ void CGroupContainer::draw ()
 
 
 	// manage rollover
-	CViewPointer *mousePointer = pIM->getPointer();
+	CViewPointer *mousePointer = CWidgetManager::getInstance()->getPointer();
  	if (mousePointer)
 	{
 		bool dontFade = false;
@@ -3204,9 +3204,9 @@ void CGroupContainer::setActive (bool state)
 	if(state != getActive() && getLayer()==0)
 	{
 		if (state)
-			pIM->setTopWindow(this);
+			CWidgetManager::getInstance()->setTopWindow(this);
 		else
-			pIM->setBackWindow(this);
+			CWidgetManager::getInstance()->setBackWindow(this);
 	}
 	pIM->submitEvent((state?"show:":"hide:")+getId());
 
@@ -3290,7 +3290,7 @@ void CGroupContainer::popupCurrentPos()
 
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	im->makeWindow(this);
-	im->setTopWindow(this);
+	CWidgetManager::getInstance()->setTopWindow(this);
 	im->clearViewUnders();
 	im->clearCtrlsUnders();
 
@@ -3512,7 +3512,7 @@ public:
 			{
 				im->runActionHandler(pIC->getAHOnCloseButton(), pCaller, pIC->getAHOnCloseButtonParams());
 			}
-			CInterfaceManager::getInstance()->setBackWindow(pIC);
+			CWidgetManager::getInstance()->setBackWindow(pIC);
 			pIC->setActive(false);
 		}
 	}
@@ -3641,7 +3641,7 @@ void CGroupContainer::setOpenable(bool openable)
 void CGroupContainer::rollOverAlphaUp()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CViewPointer *vp = im->getPointer();
+	CViewPointer *vp = CWidgetManager::getInstance()->getPointer();
 	float speed = im->getAlphaRolloverSpeed();
 	if (!isIn(vp->getX(), vp->getY()))
 	{
@@ -3741,9 +3741,9 @@ void CGroupContainer::setModalParentList (const std::string &name)
 	// add each of them (if possible)
 	for(uint i=0;i<modalParents.size();i++)
 	{
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(modalParents[i]));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(modalParents[i]));
 		if (pGC == NULL)
-			pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:"+modalParents[i]));
+			pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:"+modalParents[i]));
 		if (pGC == NULL)
 			nlwarning("<setModalParentList> not found %s",modalParents[i].c_str());
 		else
@@ -3944,7 +3944,7 @@ CRGBA	CGroupContainer::getDrawnHeaderColor () const
 	CRGBA c = CRGBA(255,255,255,255);
 
 	// Display the header in white if we are the last clicked window
-	if (pIM->getTopWindow(pIM->getLastTopWindowPriority()) != static_cast<const CInterfaceGroup*>(this))
+	if (CWidgetManager::getInstance()->getTopWindow(CWidgetManager::getInstance()->getLastTopWindowPriority()) != static_cast<const CInterfaceGroup*>(this))
 	{
 		if (_HeaderColor.getNodePtr() != NULL)
 			c = _HeaderColor.getRGBA();
@@ -3974,7 +3974,7 @@ void CGroupContainer::requireAttention()
 		// Window have headers opened => blink it if is not the top window
 		if (isOpen())
 		{
-			if (getId() != CInterfaceManager::getInstance()->getTopWindow()->getId())
+			if (getId() != CWidgetManager::getInstance()->getTopWindow()->getId())
 			{
 				enableBlink(3);
 			}

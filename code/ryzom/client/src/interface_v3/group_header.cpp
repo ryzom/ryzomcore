@@ -418,7 +418,7 @@ bool CGroupHeaderEntry::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 CInterfaceGroup *CGroupHeaderEntry::getTargetColumn() const
 {
 	CInterfaceManager	*im = CInterfaceManager::getInstance();
-	return dynamic_cast<CInterfaceGroup*>(im->getElementFromId(_TargetColumnId));
+	return dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(_TargetColumnId));
 }
 
 // *****************************************************************************************************************

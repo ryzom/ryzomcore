@@ -59,13 +59,13 @@ class CHandlerGuildCreate : public IActionHandler
 		string IconWin = getParam(Params, "icon");
 		string guildDescWin = getParam(Params, "desc");
 
-		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(guildNameWin));
+		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(guildNameWin));
 		if (pGEB == NULL) return;
 
-		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(IconWin));
+		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(IconWin));
 		if (pCS == NULL) return;
 
-		CGroupEditBox *pDesc = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(guildDescWin));
+		CGroupEditBox *pDesc = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(guildDescWin));
 
 		ucstring guildName = pGEB->getInputString();
 

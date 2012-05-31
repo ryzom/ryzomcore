@@ -3318,7 +3318,7 @@ NLMISC_COMMAND(loadIntCfg, "load the interface config file","")
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	im->loadConfig ("save/interface.icfg");
 	// reset the compass target
- 	CGroupCompas *gc = dynamic_cast<CGroupCompas *>(im->getElementFromId("ui:interface:compass"));
+ 	CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
 	if (gc && gc->isSavedTargetValid())
 	{
 		gc->setTarget(gc->getSavedTarget());
@@ -3341,7 +3341,7 @@ NLMISC_COMMAND(harvestDeposit, "harvest a deposit", "")
 		NetMngr.push(out);
 
 		// open the interface
-		// CInterfaceManager::getInstance()->getWindowFromId("ui:interface:harvest")->setActive(true);
+		// CWidgetManager::getInstance()->getWindowFromId("ui:interface:harvest")->setActive(true);
 	}
 	else
 		nlwarning("command : unknown message name : 'HARVEST:DEPOSIT'");
@@ -4960,7 +4960,7 @@ NLMISC_COMMAND(dumpUICoords, "Debug only : dump all coords info of an UI", "uiid
 		return false;
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CInterfaceElement	*el= pIM->getElementFromId(args[0]);
+	CInterfaceElement	*el= CWidgetManager::getInstance()->getElementFromId(args[0]);
 	if(!el)
 	{
 		pIM->displaySystemInfo(toString("dumpUICoords: '%s' does not exist", args[0].c_str()));
@@ -5497,7 +5497,7 @@ NLMISC_COMMAND(clear, "clear content of current char window", "<chat window call
 	CChatWindow *cw;
 	if (args.size() == 1)
 	{
-		cw = getChatWndMgr().getChatWindowFromCaller(dynamic_cast<CCtrlBase *>(im->getElementFromId(args[0])));
+		cw = getChatWndMgr().getChatWindowFromCaller(dynamic_cast<CCtrlBase *>(CWidgetManager::getInstance()->getElementFromId(args[0])));
 	}
 	else
 	{

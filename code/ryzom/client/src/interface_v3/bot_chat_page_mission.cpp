@@ -67,7 +67,7 @@ void CBotChatPageMission::begin()
 	// Select the Mission Aspect according to mission type
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION:MISSION_TYPE")->setValue32(_MType);
 
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId(WIN_BOT_CHAT_PAGE_MISSION));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_PAGE_MISSION));
 	if (gc)
 	{
 		// show the ui
@@ -96,7 +96,7 @@ void CBotChatPageMission::selectMission(CDBCtrlSheet *missionSheet)
 	if (missionSheet->getGrayed()) return;
 	// show the dialog with good infos
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId(WIN_BOT_CHAT_ACCEPT_MISSION));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_ACCEPT_MISSION));
 
 	// copy text id for title
 	{
@@ -123,7 +123,7 @@ void CBotChatPageMission::selectMission(CDBCtrlSheet *missionSheet)
 	}
 	//
 	if (!gc) return;
-	im->setTopWindow(gc);
+	CWidgetManager::getInstance()->setTopWindow(gc);
 	gc->setActive(true);
 	gc->updateCoords();
 	gc->center();

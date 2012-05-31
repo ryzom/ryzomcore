@@ -137,7 +137,7 @@ public:
 	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainerWindows *pGCW = dynamic_cast<CGroupContainerWindows*>(pIM->getElementFromId("ui:interface:windows"));
+		CGroupContainerWindows *pGCW = dynamic_cast<CGroupContainerWindows*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:windows"));
 		if (pGCW == NULL) return;
 		pGCW->setShowDesktops(!pGCW->getShowDesktops());
 	}
@@ -154,7 +154,7 @@ public:
 	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:gestion_windows"));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:gestion_windows"));
 		if (pGC == NULL) return;
 		CActionsManager *pAM = &Actions;
 		const CActionsManager::TActionComboMap &acmap = pAM->getActionComboMap();
@@ -171,7 +171,7 @@ public:
 
 			CActionsManager::TActionComboMap::const_iterator it = acmap.find(CAction::CName("show_hide",sWin.c_str()));
 			string sFullTxt = string("ui:interface:gestion_windows:") + sTxt + ":key";
-			CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(sFullTxt));
+			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(sFullTxt));
 			if (pVT != NULL)
 			{
 				if (it != acmap.end())

@@ -1187,8 +1187,8 @@ void initMainLoop()
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		//CDebugInit dbg;
 		//dbg.init(&Driver->EventServer);
-		CInterfaceManager::getInstance()->activateMasterGroup("ui:login", false);
-		CInterfaceManager::getInstance()->activateMasterGroup("ui:interface", true);
+		CWidgetManager::getInstance()->activateMasterGroup("ui:login", false);
+		CWidgetManager::getInstance()->activateMasterGroup("ui:interface", true);
 
 	}
 
@@ -1485,7 +1485,7 @@ void setLoadingContinent (CContinent *continent)
 void initWelcomeWindow()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CInterfaceGroup* welcomeWnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:welcome_info"));
+	CInterfaceGroup* welcomeWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:welcome_info"));
 	if(welcomeWnd)
 	{
 		bool welcomeDbProp  = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:WELCOME")->getValueBool();
@@ -1518,11 +1518,11 @@ void initHardwareCursor(bool secondCall)
 			// else, only the first time after this patch, open popup to propose hardare cursor mode
 			else
 			{
-				CInterfaceGroup * cursorWnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:hardware_cursor"));
+				CInterfaceGroup * cursorWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:hardware_cursor"));
 				if(cursorWnd)
 				{
 					cursorWnd->setActive((sb.CurrentJoinMode!=CFarTP::LaunchEditor) || secondCall);
-					pIM->setTopWindow(cursorWnd);
+					CWidgetManager::getInstance()->setTopWindow(cursorWnd);
 					cursorWnd->updateCoords();
 					cursorWnd->center();
 				}
@@ -1546,25 +1546,25 @@ void initBloomConfigUI()
 	bool supportBloom = Driver->supportBloomEffect();
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCtrlBaseButton* button = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:bloom:c"));
+	CCtrlBaseButton* button = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:bloom:c"));
 	if(button)
 	{
 		button->setFrozen(!supportBloom);
 	}
 
-	button = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:square_bloom:c"));
+	button = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:square_bloom:c"));
 	if(button)
 	{
 		button->setFrozen(!supportBloom);
 	}
 
-	CCtrlScroll * scroll = dynamic_cast<CCtrlScroll*>(pIM->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:density_bloom:c"));
+	CCtrlScroll * scroll = dynamic_cast<CCtrlScroll*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:density_bloom:c"));
 	if(scroll)
 	{
 		scroll->setFrozen(!supportBloom);
 	}
 
-	CInterfaceGroup* group = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:game_config:content:fx:bloom_gr"));
+	CInterfaceGroup* group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:bloom_gr"));
 
 	if(!supportBloom)
 	{

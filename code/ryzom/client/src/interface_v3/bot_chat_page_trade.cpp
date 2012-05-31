@@ -97,7 +97,7 @@ public:
 	{
 		CSheetHelpSetup helpSetup;
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupContainer *ig = dynamic_cast<CGroupContainer *>(im->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
+		CGroupContainer *ig = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
 		fillHelpSetupInfosForTrade(helpSetup, Sheet, ig);
 		refreshItemHelp(helpSetup);
 	}
@@ -171,7 +171,7 @@ void CBotChatPageTrade::init()
 void	CBotChatPageTrade::invalidateCoords()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId(_BuyOnly ? WIN_BOT_CHAT_PAGE_BUY : WIN_BOT_CHAT_PAGE_TRADE));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(_BuyOnly ? WIN_BOT_CHAT_PAGE_BUY : WIN_BOT_CHAT_PAGE_TRADE));
 	if (!gc) return;
 	// invalidate buy group
 	gc->invalidateCoords();
@@ -241,7 +241,7 @@ void CBotChatPageTrade::begin()
 	_DownloadComplete = false;
 
 	// update interface
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(pIM->getElementFromId(_BuyOnly ? WIN_BOT_CHAT_PAGE_BUY : WIN_BOT_CHAT_PAGE_TRADE));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(_BuyOnly ? WIN_BOT_CHAT_PAGE_BUY : WIN_BOT_CHAT_PAGE_TRADE));
 	if (gc)
 	{
 		// set the title
@@ -323,7 +323,7 @@ uint32 CBotChatPageTrade::getCurrItemQuantity() const
 			itemSheet->Family != ITEMFAMILY::GUILD_OPTION)
 		{
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(im->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
+			CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
 			if (!ig) return std::numeric_limits<uint32>::max();
 			// TODO: edit box in faction points?
 			CGroupEditBox *ed = dynamic_cast<CGroupEditBox *>(ig->getGroup("header_opened:standard_price:quantity:edit:eb"));
@@ -357,7 +357,7 @@ uint32 CBotChatPageTrade::getCurrItemPriceResale() const
 //		const CItemSheet *itemSheet = _CurrItemSheet->asItemSheet();
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		// get the edited resale price
-		CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(pIM->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
+		CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
 		if (!ig) return 0;
 		CGroupEditBox *resaleMarginBox = dynamic_cast<CGroupEditBox *>(ig->getGroup("header_opened:resell_group:can_resell:choose_resell:edit:eb"));
 		if (!resaleMarginBox) return 0;
@@ -506,7 +506,7 @@ uint32 CBotChatPageTrade::getUserFactionPoints(PVP_CLAN::TPVPClan clan) const
 void CBotChatPageTrade::notifyDownloadComplete(bool completed)
 {	
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId(_BuyOnly ? WIN_BOT_CHAT_PAGE_BUY : WIN_BOT_CHAT_PAGE_TRADE));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(_BuyOnly ? WIN_BOT_CHAT_PAGE_BUY : WIN_BOT_CHAT_PAGE_TRADE));
 	if (!gc) return;
 	class CDBListVisitor : public CInterfaceElementVisitor
 	{
@@ -552,7 +552,7 @@ void CBotChatPageTrade::updateTradeModal()
 			}
 			// get pointers on interface elements
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CGroupContainer *ig = dynamic_cast<CGroupContainer *>(im->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
+			CGroupContainer *ig = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
 			CInterfaceGroup *confirmTradeGroup = ig->getGroup("confirm_trade");
 			CCtrlBase *confirmResellGroup = ig->getCtrl("confirm_trade_resell");
 			CInterfaceGroup *cantTradeGroup = ig->getGroup("cant_trade");
@@ -841,7 +841,7 @@ void CBotChatPageTrade::startBuyDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCall
 {
 	if (!sheet) return;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *ig = dynamic_cast<CGroupContainer *>(im->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
+	CGroupContainer *ig = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
 	if (!ig) return;
 
 	// don't know why but in some case, the sheetId is 0
@@ -922,7 +922,7 @@ void CBotChatPageTrade::startBuyDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCall
 	ig->updateCoords();
 	ig->center();
 	ig->setModalParentList(_BuyOnly ? WIN_BOT_CHAT_PAGE_BUY : WIN_BOT_CHAT_PAGE_TRADE);
-	im->setTopWindow(ig);
+	CWidgetManager::getInstance()->setTopWindow(ig);
 	//
 	_CurrItemSheet = sheet;
 	_CurrItemIndex  = sheet->getIndexInDB();
@@ -949,7 +949,7 @@ void CBotChatPageTrade::updateSPhraseBuyDialog()
 
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	CGroupContainer *ig = dynamic_cast<CGroupContainer *>(pIM->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
+	CGroupContainer *ig = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
 	if (!ig) return;
 
 	CSheetHelpSetup helpSetup;
@@ -963,7 +963,7 @@ void CBotChatPageTrade::startSellDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCal
 	nlassert(!_BuyOnly);
 	if (!sheet) return;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *ig = dynamic_cast<CGroupContainer *>(im->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
+	CGroupContainer *ig = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
 	if (!ig) return;
 
 	// If this sheet is grayed cause of an "Animal Inventory unavailable" flag, quit
@@ -1020,7 +1020,7 @@ void CBotChatPageTrade::startSellDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCal
 	ig->updateCoords();
 	ig->center();
 	ig->setModalParentList(WIN_BOT_CHAT_PAGE_TRADE);
-	im->setTopWindow(ig);
+	CWidgetManager::getInstance()->setTopWindow(ig);
 	//
 	_CurrItemSheet = sheet;
 	_CurrItemIndex  = sheet->getIndexInDB();
@@ -1048,7 +1048,7 @@ void CBotChatPageTrade::endTradeModal()
 
 	// hide the dialog
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupContainer *ig = dynamic_cast<CGroupContainer *>(pIM->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
+	CGroupContainer *ig = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
 	if (ig)	ig->setActive(false);
 
 	// Hide any confirmation dialog related to trade (important for building MessageBox confirmation)
@@ -1056,7 +1056,7 @@ void CBotChatPageTrade::endTradeModal()
 	if(pIM->getCurrentValidMessageBoxOnOk(vmbOnOk))
 	{
 		if(vmbOnOk=="confirm_trade")
-			pIM->disableModalWindow();
+			CWidgetManager::getInstance()->disableModalWindow();
 	}
 }
 
@@ -1296,7 +1296,7 @@ void CBotChatPageTrade::confirmTrade( bool enableResale )
 					if ( _ResaleEdit )
 					{
 						CInterfaceManager *pIM = CInterfaceManager::getInstance();
-						CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(pIM->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
+						CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
 						if (ig)
 						{
 							CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(ig->getGroup("header_opened:resell_group:can_resell:choose_resell:edit:eb"));
@@ -1706,7 +1706,7 @@ void	CBotChatPageTrade::startChangeBuyFilterDialog(const std::string &dbext, con
 	_FilterBuyDlgMaxValue= maxValue;
 
 	// change the title
-	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(WIN_BOT_CHAT_CHANGE_BUY_FILTER));
+	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_CHANGE_BUY_FILTER));
 	if(!ig)	return;
 	CViewText	*vtitle= dynamic_cast<CViewText*>(ig->getView("title"));
 	if(vtitle)
@@ -1730,7 +1730,7 @@ void	CBotChatPageTrade::startChangeBuyFilterDialog(const std::string &dbext, con
 	setFocusOnEditBox(ig->getGroup("edit_min:eb"));
 
 	// go
-	pIM->enableModalWindow(NULL, ig);
+	CWidgetManager::getInstance()->enableModalWindow(NULL, ig);
 }
 
 // ***************************************************************************
@@ -1739,7 +1739,7 @@ void	CBotChatPageTrade::resetBuyFilterDialog()
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// get the modal window
-	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(WIN_BOT_CHAT_CHANGE_BUY_FILTER));
+	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_CHANGE_BUY_FILTER));
 	if(!ig)	return;
 
 	// reset the edited values
@@ -1759,7 +1759,7 @@ void	CBotChatPageTrade::resetBuyFilterDialog()
 	sendCurrentBuyFilterToServer(true);
 
 	// and leave modal
-	pIM->disableModalWindow();
+	CWidgetManager::getInstance()->disableModalWindow();
 }
 
 // ***************************************************************************
@@ -1768,7 +1768,7 @@ void	CBotChatPageTrade::confirmChangeBuyFilterDialog()
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// get the modal window
-	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(WIN_BOT_CHAT_CHANGE_BUY_FILTER));
+	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_CHANGE_BUY_FILTER));
 	if(!ig)	return;
 
 	// retrieve the edited values
@@ -1792,7 +1792,7 @@ void	CBotChatPageTrade::confirmChangeBuyFilterDialog()
 	sendCurrentBuyFilterToServer(true);
 
 	// and leave modal
-	pIM->disableModalWindow();
+	CWidgetManager::getInstance()->disableModalWindow();
 }
 
 // ***************************************************************************
@@ -1801,7 +1801,7 @@ void	CBotChatPageTrade::giveFocusToMaxEBChangeBuyFilterDialog()
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// get the modal window
-	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(WIN_BOT_CHAT_CHANGE_BUY_FILTER));
+	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_CHANGE_BUY_FILTER));
 	if(!ig)	return;
 
 	// set focus on max
@@ -1815,11 +1815,11 @@ void		CBotChatPageTrade::startChangeBuyFilterMPDialog()
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// show the modal
-	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(WIN_BOT_CHAT_CHANGE_BUY_FILTER_MP));
+	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_CHANGE_BUY_FILTER_MP));
 	if(!ig)	return;
 
 	// go
-	pIM->enableModalWindow(NULL, ig);
+	CWidgetManager::getInstance()->enableModalWindow(NULL, ig);
 }
 
 
@@ -1837,7 +1837,7 @@ void		CBotChatPageTrade::confirmChangeBuyFilterMPDialog(uint ft)
 	sendCurrentBuyFilterToServer(true);
 
 	// and leave modal
-	pIM->disableModalWindow();
+	CWidgetManager::getInstance()->disableModalWindow();
 }
 
 
@@ -1915,7 +1915,7 @@ void	CBotChatPageTrade::sendCurrentBuyFilterToServer(bool resetBuyList)
 		_TradePagesObs.start();
 
 		// update interface
-		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(pIM->getElementFromId(_BuyOnly ? WIN_BOT_CHAT_PAGE_BUY : WIN_BOT_CHAT_PAGE_TRADE));
+		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(_BuyOnly ? WIN_BOT_CHAT_PAGE_BUY : WIN_BOT_CHAT_PAGE_TRADE));
 		if (gc)
 		{
 			// unselect just buy list (don't need for sell)
@@ -1989,7 +1989,7 @@ void		CBotChatPageTrade::refreshResale()
 		_TradePagesObs.start();
 
 		// update interface
-		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(pIM->getElementFromId(_BuyOnly ? WIN_BOT_CHAT_PAGE_BUY : WIN_BOT_CHAT_PAGE_TRADE));
+		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(_BuyOnly ? WIN_BOT_CHAT_PAGE_BUY : WIN_BOT_CHAT_PAGE_TRADE));
 		if (gc)
 		{
 			// unselect just buy list (don't need for sell)
@@ -2013,11 +2013,11 @@ void		CBotChatPageTrade::startChangeBuyFilterClassDialog()
 	if(dbClassMax) tempClassMax->setValue32(dbClassMax->getValue32());
 
 	// show the modal
-	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(WIN_BOT_CHAT_CHANGE_BUY_FILTER_CLASS));
+	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_CHANGE_BUY_FILTER_CLASS));
 	if(!ig)	return;
 
 	// go
-	pIM->enableModalWindow(NULL, ig);
+	CWidgetManager::getInstance()->enableModalWindow(NULL, ig);
 }
 
 
@@ -2041,7 +2041,7 @@ void		CBotChatPageTrade::resetBuyFilterClassDialog()
 	sendCurrentBuyFilterToServer(true);
 
 	// and leave modal
-	pIM->disableModalWindow();
+	CWidgetManager::getInstance()->disableModalWindow();
 }
 
 // ***************************************************************************
@@ -2066,7 +2066,7 @@ void		CBotChatPageTrade::confirmChangeBuyFilterClassDialog()
 	sendCurrentBuyFilterToServer(true);
 
 	// and leave modal
-	pIM->disableModalWindow();
+	CWidgetManager::getInstance()->disableModalWindow();
 }
 
 
@@ -2091,11 +2091,11 @@ void		CBotChatPageTrade::startChangeBuyFilterItemTypeDialog()
 	// the list of possible item type to select is filled when the DB of bitfield change
 
 	// show the modal
-	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(WIN_BOT_CHAT_CHANGE_BUY_FILTER_ITEM_TYPE));
+	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_CHANGE_BUY_FILTER_ITEM_TYPE));
 	if(!ig)	return;
 
 	// go
-	pIM->enableModalWindow(NULL, ig);
+	CWidgetManager::getInstance()->enableModalWindow(NULL, ig);
 }
 
 // ***************************************************************************
@@ -2111,7 +2111,7 @@ void		CBotChatPageTrade::confirmChangeBuyFilterItemTypeDialog(ITEM_TYPE::TItemTy
 	sendCurrentBuyFilterToServer(true);
 
 	// and leave modal
-	pIM->disableModalWindow();
+	CWidgetManager::getInstance()->disableModalWindow();
 }
 
 // ***************************************************************************
@@ -2132,9 +2132,9 @@ void		CBotChatPageTrade::startDestroyItemDialog()
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:DESTROY_QUANTITY")->setValue32(quantity);
 
 	// show the modal
-	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(WIN_BOT_CHAT_DESTROY_ITEM));
+	CInterfaceGroup		*ig= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_DESTROY_ITEM));
 	if(!ig)	return;
-	pIM->enableModalWindow(NULL, ig);
+	CWidgetManager::getInstance()->enableModalWindow(NULL, ig);
 }
 
 // ***************************************************************************
@@ -2190,7 +2190,7 @@ void		CBotChatPageTrade::confirmDestroyItemDialog()
 	}
 
 	// in all cases, close the modal
-	pIM->disableModalWindow();
+	CWidgetManager::getInstance()->disableModalWindow();
 
 	// if the quantity entered was correct
 	if(quantity!=0 && quantity!=std::numeric_limits<uint32>::max())
@@ -2551,7 +2551,7 @@ class CAHBotChatChangeResaleMargin : public IActionHandler
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(pIM->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
+		CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));
 		if (!ig) return;
 		CGroupEditBox *resaleMarginBox = dynamic_cast<CGroupEditBox *>(ig->getGroup("header_opened:resell_group:can_resell:choose_resell:edit:eb"));
 		if (resaleMarginBox)

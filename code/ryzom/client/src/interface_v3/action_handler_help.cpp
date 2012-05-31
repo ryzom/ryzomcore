@@ -167,7 +167,7 @@ void	CInterfaceHelp::initWindows()
 
 	for(sint i=0;i<maxHelpWindow;i++)
 	{
-		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:sheet_help"+toString(i)));
+		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:sheet_help"+toString(i)));
 		// if the window exist, insert
 		if(group)
 		{
@@ -275,7 +275,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 				if(ok)
 				{
 					// then don't neet to open a new window, but make the older top.
-					pIM->setTopWindow(group);
+					CWidgetManager::getInstance()->setTopWindow(group);
 					return NULL;
 				}
 			}
@@ -356,7 +356,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 
 	// activate it, set top, copy item watched
 	group->setActive(true);
-	pIM->setTopWindow(group);
+	CWidgetManager::getInstance()->setTopWindow(group);
 	_InfoWindows[newIndexWindow].CtrlSheet= elt;
 	// insert in list
 	if(mustAddToActiveWindows)
@@ -914,7 +914,7 @@ class CHandlerBrowse : public IActionHandler
 	void execute (CCtrlBase *pCaller, const std::string &sParams)
 	{
 		string container = getParam (sParams, "name");
-		CInterfaceElement *element = CInterfaceManager::getInstance()->getElementFromId(container);
+		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId(container);
 		CInterfaceGroup *elementGroup = dynamic_cast<CInterfaceGroup*>(element);
 
 		string urls = getParam (sParams, "url");
@@ -1055,7 +1055,7 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string container = getParam (sParams, "name");
-		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(container));
+		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(container));
 		if (groupHtml)
 		{
 			groupHtml->browseUndo();
@@ -1074,7 +1074,7 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string container = getParam (sParams, "name");
-		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(container));
+		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(container));
 		if (groupHtml)
 		{
 			groupHtml->browseRedo();
@@ -1093,7 +1093,7 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string container = getParam (sParams, "name");
-		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(container));
+		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(container));
 		if (groupHtml)
 		{
 			groupHtml->refresh();
@@ -1118,7 +1118,7 @@ class CHandlerHTMLSubmitForm : public IActionHandler
 
 		string submit_button = getParam (sParams, "submit_button");
 
-		CInterfaceElement *element = CInterfaceManager::getInstance()->getElementFromId(container);
+		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId(container);
 		{
 			// Group HTML ?
 			CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(element);
@@ -3883,7 +3883,7 @@ public:
 		string	dbitem= getParam(Params, "dbitem");
 		string	prefix= getParam(Params, "prefix");
 
-		CInterfaceGroup		*wnd= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(wndStr));
+		CInterfaceGroup		*wnd= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(wndStr));
 		CCDBNodeLeaf		*node= NLGUI::CDBManager::getInstance()->getDbProp(dbitem);
 
 		// common method for info and botchat

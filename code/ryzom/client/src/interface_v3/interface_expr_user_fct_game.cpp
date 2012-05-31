@@ -120,7 +120,7 @@ static DECLARE_INTERFACE_USER_FCT(isOpen)
 {
 	if (args.size() != 1) return false;
 	if (!args[0].toString()) return false;
-	CGroupContainer *elm = dynamic_cast<CGroupContainer*>(CInterfaceManager::getInstance()->getElementFromId(args[0].getString()));
+	CGroupContainer *elm = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(args[0].getString()));
 	if (!elm)
 	{
 		nlwarning("<isOpen> : can't find element %s", args[0].getString().c_str());
@@ -733,7 +733,7 @@ static DECLARE_INTERFACE_USER_FCT(isCtrlLaunchModalMacro)
 	}
 
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CDBCtrlSheet	*ctrl= dynamic_cast<CDBCtrlSheet*>(pIM->getCtrlLaunchingModal());
+	CDBCtrlSheet	*ctrl= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 
 	result.setBool( ctrl->isMacro() );
 

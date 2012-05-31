@@ -162,7 +162,7 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	_Ref3DScene = NULL;
 	if (ptr)
 	{
-		CInterfaceElement *pIE = pIM->getElementFromId(this->getId(), ptr);
+		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(this->getId(), ptr);
 		_Ref3DScene = dynamic_cast<CInterface3DScene*>(pIE);
 	}
 	if (_Ref3DScene != NULL)
@@ -705,7 +705,7 @@ void CInterface3DScene::setCurrentCamera (const string &name)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CInterface3DScene *pI3DS = (_Ref3DScene != NULL) ? _Ref3DScene : this;
-	CInterfaceElement *pIE = pIM->getElementFromId(pI3DS->getId(), name);
+	CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(pI3DS->getId(), name);
 	CInterface3DCamera *pI3DCam = dynamic_cast<CInterface3DCamera*>(pIE);
 	if (pI3DCam != NULL)
 	{
@@ -732,7 +732,7 @@ void CInterface3DScene::setCurrentClusterSystem(const string &sCSName)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CInterface3DScene *pI3DS = (_Ref3DScene != NULL) ? _Ref3DScene : this;
-	CInterfaceElement *pIE = pIM->getElementFromId(pI3DS->getId(), sCSName);
+	CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(pI3DS->getId(), sCSName);
 	CInterface3DIG *pI3DIG = dynamic_cast<CInterface3DIG*>(pIE);
 	if (pI3DIG != NULL)
 	{

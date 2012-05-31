@@ -263,10 +263,10 @@ void	launchPhraseComposition(bool creation)
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// Launch the composition window
-	CGroupContainer		*window= dynamic_cast<CGroupContainer*>( pIM->getElementFromId(PhraseComposition) );
+	CGroupContainer		*window= dynamic_cast<CGroupContainer*>( CWidgetManager::getInstance()->getElementFromId(PhraseComposition) );
 	if(window)
 	{
-		CDBGroupBuildPhrase	*buildSentenceTarget= dynamic_cast<CDBGroupBuildPhrase*>( pIM->getElementFromId(PhraseCompositionGroup) );
+		CDBGroupBuildPhrase	*buildSentenceTarget= dynamic_cast<CDBGroupBuildPhrase*>( CWidgetManager::getInstance()->getElementFromId(PhraseCompositionGroup) );
 		// if found
 		if(buildSentenceTarget)
 		{
@@ -371,7 +371,7 @@ public:
 		}
 
 		// And hide the modal
-		pIM->disableModalWindow();
+		CWidgetManager::getInstance()->disableModalWindow();
 	}
 public:
 	enum	TType	{Root, OtherMain, Param, NewOpCredit, FaberPlan};
@@ -418,11 +418,11 @@ public:
 			buildGroup->fillSelectionMain(index);
 
 		// launch the modal
-		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId( CDBGroupBuildPhrase::BrickSelectionModal ) );
+		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId( CDBGroupBuildPhrase::BrickSelectionModal ) );
 		if(group)
 		{
 			// enable the modal
-			pIM->enableModalWindow(pCaller, group);
+			CWidgetManager::getInstance()->enableModalWindow(pCaller, group);
 		}
 	}
 };
@@ -456,11 +456,11 @@ public:
 		buildGroup->fillSelectionParam(index, paramIndex);
 
 		// launch the modal
-		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId( CDBGroupBuildPhrase::BrickSelectionModal ) );
+		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId( CDBGroupBuildPhrase::BrickSelectionModal ) );
 		if(group)
 		{
 			// enable the modal
-			pIM->enableModalWindow(pCaller, group);
+			CWidgetManager::getInstance()->enableModalWindow(pCaller, group);
 		}
 	}
 };
@@ -493,11 +493,11 @@ public:
 			buildGroup->fillSelectionNewCredit();
 
 		// launch the modal
-		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId( CDBGroupBuildPhrase::BrickSelectionModal ) );
+		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId( CDBGroupBuildPhrase::BrickSelectionModal ) );
 		if(group)
 		{
 			// enable the modal
-			pIM->enableModalWindow(pCaller, group);
+			CWidgetManager::getInstance()->enableModalWindow(pCaller, group);
 		}
 	}
 };
@@ -541,11 +541,11 @@ public:
 		CHandlerPhraseValidateBrick::BrickType= CHandlerPhraseValidateBrick::FaberPlan;
 
 		// launch the modal
-		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId( CDBGroupBuildPhrase::BrickSelectionModal ) );
+		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId( CDBGroupBuildPhrase::BrickSelectionModal ) );
 		if(group)
 		{
 			// enable the modal
-			pIM->enableModalWindow(pCaller, group);
+			CWidgetManager::getInstance()->enableModalWindow(pCaller, group);
 		}
 	}
 };
@@ -571,7 +571,7 @@ static void	updateAllSPhraseInfo()
 	// update all info windows
 	CInterfaceHelp::updateWindowSPhraseTexts();
 	// If the composition is opened, refresh
-	CInterfaceGroup			*pIG= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:phrase_composition"));
+	CInterfaceGroup			*pIG= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:phrase_composition"));
 	if(pIG && pIG->getActive())
 	{
 		CDBGroupBuildPhrase		*buildPhrase= dynamic_cast<CDBGroupBuildPhrase*>(pIG->getGroup("header_opened"));
@@ -653,7 +653,7 @@ public:
 		CMacroCmdManager	*pMM = CMacroCmdManager::getInstance();
 
 		string src = getParam(Params, "src");
-		CInterfaceElement *pElt = pIM->getElementFromId(src);
+		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
 		// can be a phrase id (comes from memory), a phraseSheet (comes from progression), or a macro,
@@ -806,7 +806,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 	}
 	else
 	{
-		CInterfaceElement *pElt = pIM->getElementFromId(src);
+		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
 		
 		// type check
@@ -1265,9 +1265,9 @@ public:
 			// get the control
 			CInterfaceElement	*elm;
 			if (shortcut < RYZOM_MAX_SHORTCUT)
-				elm = pIM->getElementFromId(PhraseMemoryCtrlBase + toString(shortcut) );
+				elm = CWidgetManager::getInstance()->getElementFromId(PhraseMemoryCtrlBase + toString(shortcut) );
 			else
-				elm = pIM->getElementFromId(PhraseMemoryAltCtrlBase + toString(shortcut-RYZOM_MAX_SHORTCUT) );
+				elm = CWidgetManager::getInstance()->getElementFromId(PhraseMemoryAltCtrlBase + toString(shortcut-RYZOM_MAX_SHORTCUT) );
 			CDBCtrlSheet		*ctrl= dynamic_cast<CDBCtrlSheet*>(elm);
 			if(ctrl)
 			{
@@ -1314,7 +1314,7 @@ public:
 			{
 				// opens the menu
 				CDBCtrlSheet::setCurrSelSheet(pCSDst);
-				pIM->enableModalWindow (pCSDst, menu);
+				CWidgetManager::getInstance()->enableModalWindow (pCSDst, menu);
 			}
 		}
 	}
@@ -1443,7 +1443,7 @@ public:
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CSPhraseManager *pPM = CSPhraseManager::getInstance();
 		CSBrickManager *pBM = CSBrickManager::getInstance();
-		CInterfaceElement *pCristalizeMenuOption = pIM->getElementFromId(sCristalizePath);
+		CInterfaceElement *pCristalizeMenuOption = CWidgetManager::getInstance()->getElementFromId(sCristalizePath);
 
 		if (pCristalizeMenuOption == NULL) return;
 		// The default is to not display the cristalize menu option
@@ -1452,7 +1452,7 @@ public:
 
 		// Get the interface control sheet
 
-		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(pIM->getCtrlLaunchingModal());
+		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCS == NULL) return;
 		if (!pCS->isSPhraseIdMemory()) return;
 

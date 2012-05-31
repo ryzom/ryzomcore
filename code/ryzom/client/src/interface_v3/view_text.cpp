@@ -615,11 +615,11 @@ void CViewText::draw ()
 			TextContext->resetStringSelection(_Index);
 
 		// if single line clamped, may allow to draw an over
-		if(isSingleLineTextClamped() && _OverExtendViewText && pIM->getPointer())
+		if(isSingleLineTextClamped() && _OverExtendViewText && CWidgetManager::getInstance()->getPointer())
 		{
 			// but must check first if mouse is over
-			sint32 x = pIM->getPointer()->getX();
-			sint32 y = pIM->getPointer()->getY();
+			sint32 x = CWidgetManager::getInstance()->getPointer()->getX();
+			sint32 y = CWidgetManager::getInstance()->getPointer()->getY();
 			bool	mouseIn;
 			// use parent clip or self clip?
 			if(_OverExtendViewTextUseParentRect)

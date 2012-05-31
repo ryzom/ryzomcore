@@ -1310,44 +1310,44 @@ void	updateGameQuitting()
 	// update the window
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	CInterfaceGroup		*group= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:free_trial_game_quitting"));
+	CInterfaceGroup		*group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:free_trial_game_quitting"));
 	if(group)
 	{
 		// if Free trial
 		if(paying_account_request)
 		{
 			// if no current modal window, or if not the quit window
-			if(group != pIM->getModalWindow())
+			if(group != CWidgetManager::getInstance()->getModalWindow())
 			{
 				// disable
-				pIM->disableModalWindow();
-				pIM->enableModalWindow(NULL, group);
+				CWidgetManager::getInstance()->disableModalWindow();
+				CWidgetManager::getInstance()->enableModalWindow(NULL, group);
 			}
 		}
 
 		else
 		{
 			// if the current modal window is the quit window, disable
-			if(group == pIM->getModalWindow())
+			if(group == CWidgetManager::getInstance()->getModalWindow())
 			{
 				// disable
-				pIM->disableModalWindow();
+				CWidgetManager::getInstance()->disableModalWindow();
 			}
 		}
 	}
 
-	group= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:game_quitting"));
+	group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_quitting"));
 	if(group)
 	{
 		// if exit request
 		if(game_exit_request && !paying_account_request)
 		{
 			// if no current modal window, or if not the quit window
-			if(group != pIM->getModalWindow())
+			if(group != CWidgetManager::getInstance()->getModalWindow())
 			{
 				// disable
-				pIM->disableModalWindow();
-				pIM->enableModalWindow(NULL, group);
+				CWidgetManager::getInstance()->disableModalWindow();
+				CWidgetManager::getInstance()->enableModalWindow(NULL, group);
 
 				bool farTPing = FarTP.isFarTPInProgress();
 				// Far TP: skipping not allowed (because we can't duplicate the avatar...), anyway the quit button would quit the game (no far tp)
@@ -1370,10 +1370,10 @@ void	updateGameQuitting()
 		else
 		{
 			// if the current modal window is the quit window, disable
-			if(group == pIM->getModalWindow())
+			if(group == CWidgetManager::getInstance()->getModalWindow())
 			{
 				// disable
-				pIM->disableModalWindow();
+				CWidgetManager::getInstance()->disableModalWindow();
 			}
 		}
 	}
@@ -1738,7 +1738,7 @@ bool mainLoop()
 			if(!pIMinstance->getViewRenderer().isMinimized())
 			{
 				// Get the cursor instance
-				CViewPointer *cursor = pIMinstance->getPointer();
+				CViewPointer *cursor = CWidgetManager::getInstance()->getPointer();
 				if(cursor)
 				{
 					// Get the pointer position (in pixel)
@@ -1778,7 +1778,7 @@ bool mainLoop()
 			{
 				// When database received, activate allegiance buttons (for neutral state) in fame window
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				CInterfaceGroup	*group = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:fame:content:you"));
+				CInterfaceGroup	*group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:fame:content:you"));
 				if (group)
 					group->updateAllLinks();
 				// send a msg to lua for specific ui update
@@ -4552,11 +4552,11 @@ void inGamePatchUncompleteWarning()
 	im->executeLuaScript("bgdownloader:inGamePatchUncompleteWarning()");
 	/*
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId("ui:interface:bg_downloader"));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:bg_downloader"));
 	if (gc)
 	{
 		gc->setActive(true);
-		im->setTopWindow(gc);
+		CWidgetManager::getInstance()->setTopWindow(gc);
 		gc->enableBlink(2);
 	}
 	im->messageBoxWithHelp(CI18N::get("uiBGD_InGamePatchIncomplete"));

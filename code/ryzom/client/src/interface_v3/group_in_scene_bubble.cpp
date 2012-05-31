@@ -61,7 +61,7 @@ void contextHelp (const std::string &name)
 				string target = pIM->getDefine(defineTarget);
 				string url = pIM->getDefine(defineUrl);
 
-				CInterfaceElement *elementTarget = pIM->getElementFromId(target);
+				CInterfaceElement *elementTarget = CWidgetManager::getInstance()->getElementFromId(target);
 				if (elementTarget && elementTarget->getActive())
 				{
 					// Add the context help
@@ -165,7 +165,7 @@ void CGroupInSceneBubbleManager::alignMessagePopup (vector<CPopup> &rList, bool 
 	// First message must be aligned from the screen
 	if (!rList.empty())
 	{
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		if (pRoot)
 		{
 			sint i = (sint)rList.size ()-1;
@@ -234,7 +234,7 @@ void CGroupInSceneBubbleManager::init ()
 		{
 			// Link to the interface
 			CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
-			CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+			CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 			group->setParent(pRoot);
 			if (pRoot)
 				pRoot->addGroup (group);
@@ -359,7 +359,7 @@ void CGroupInSceneBubbleManager::update ()
 			if (!_BubblePopup[i].Target.empty())
 			{
 				// Get the target
-				CInterfaceElement *target = pIM->getElementFromId(_BubblePopup[i].Target);
+				CInterfaceElement *target = CWidgetManager::getInstance()->getElementFromId(_BubblePopup[i].Target);
 				if (target)
 				{
 					// Target is good ?
@@ -539,7 +539,7 @@ void CGroupInSceneBubbleManager::addSkillPopup (uint skillId, sint delta, uint t
 
 		// Link to the interface
 		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
 			pRoot->addGroup (group);
@@ -588,7 +588,7 @@ void CGroupInSceneBubbleManager::addMessagePopup (const ucstring &message, CRGBA
 
 		// Link to the interface
 		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
 			pRoot->addGroup (group);
@@ -637,7 +637,7 @@ void CGroupInSceneBubbleManager::addMessagePopupCenter (const ucstring &message,
 
 		// Link to the interface
 		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
 			pRoot->addGroup (group);
@@ -663,7 +663,7 @@ CGroupInSceneBubbleManager::CPopupContext *CGroupInSceneBubbleManager::buildCont
 
 	string v="m";
 	string h="m";
-	target = CInterfaceManager::getInstance()->getElementFromId(targetName);
+	target = CWidgetManager::getInstance()->getElementFromId(targetName);
 	if (target)
 	{
 		// Find a position
@@ -711,7 +711,7 @@ CGroupInSceneBubbleManager::CPopupContext *CGroupInSceneBubbleManager::buildCont
 
 		// Link to the interface
 		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
 			pRoot->addGroup (group);
@@ -904,7 +904,7 @@ void CGroupInSceneBubbleManager::dynChatOpen (uint32 nBotUID, uint32 nBotName, c
 		}
 		// Link to the interface
 		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
 			pRoot->addGroup (group);
@@ -1017,7 +1017,7 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 		}
 		// Link to the interface
 		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
 			pRoot->addGroup (group);
@@ -1468,7 +1468,7 @@ void CGroupInSceneBubble::setRawText (const ucstring &text)
 {
 	_CanBeShown = !text.empty();
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CInterfaceElement *pVTIE = pIM->getElementFromId(getId()+":header_opened:window:text");
+	CInterfaceElement *pVTIE = CWidgetManager::getInstance()->getElementFromId(getId()+":header_opened:window:text");
 	CViewText *pVT= dynamic_cast<CViewText*>(pVTIE);
 	if (pVT != NULL)
 		pVT->setText(text);
@@ -1479,11 +1479,11 @@ void CGroupInSceneBubble::setRawText (const ucstring &text)
 void CGroupInSceneBubble::displayNextAndSkip(bool show)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CInterfaceElement *pIE = pIM->getElementFromId(getId()+":header_opened:window:but_next");
+	CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(getId()+":header_opened:window:but_next");
 	if (pIE != NULL) pIE->setActive(show);
-	pIE = pIM->getElementFromId(getId()+":header_opened:window:but_skip");
+	pIE = CWidgetManager::getInstance()->getElementFromId(getId()+":header_opened:window:but_skip");
 	if (pIE != NULL) pIE->setActive(show);
-	pIE = pIM->getElementFromId(getId()+":header_opened:window:text");
+	pIE = CWidgetManager::getInstance()->getElementFromId(getId()+":header_opened:window:text");
 	if (pIE != NULL)
 	{
 		if (show)

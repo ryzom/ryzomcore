@@ -124,7 +124,7 @@ void CGroupSkills::rebuild()
 	// **** first time bind?
 	if(!_Tree)
 	{
-		_Tree = dynamic_cast<CGroupTree*>(pIM->getElementFromId(getId(),WIN_TREE_LIST));
+		_Tree = dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(getId(),WIN_TREE_LIST));
 		if (_Tree == NULL)
 		{
 			nlwarning("cant find tree");

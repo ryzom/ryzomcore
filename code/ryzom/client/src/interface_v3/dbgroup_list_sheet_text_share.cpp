@@ -264,7 +264,7 @@ class CHandlerTeamShareChoose : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CBitMemStream out;
 
-		CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(pIM->getElementFromId("ui:interface:team_share:content:ok"));
+		CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:team_share:content:ok"));
 		if (pTB == NULL) return;
 		if (pTB->getActive() == false) return;
 
@@ -317,7 +317,7 @@ class CHandlerTeamShareValid : public IActionHandler
 		CBitMemStream out;
 		string strMsgName = "TEAM:SHARE_VALID";
 
-		CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(pIM->getElementFromId("ui:interface:team_share:content:ok"));
+		CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:team_share:content:ok"));
 		if (pTB != NULL)
 			pTB->setActive(false);
 

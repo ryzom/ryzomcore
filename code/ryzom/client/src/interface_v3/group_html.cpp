@@ -2221,7 +2221,7 @@ void CGroupHTML::doBrowse(const char *url)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-		CGroupTree	*groupTree=dynamic_cast<CGroupTree*>(pIM->getElementFromId(_BrowseTree));
+		CGroupTree	*groupTree=dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(_BrowseTree));
 		if(groupTree)
 		{
 			string	nodeId= selectTreeNodeRecurs(groupTree->getRootNode(), url);
@@ -3634,8 +3634,8 @@ void	CGroupHTML::browseRedo()
 void	CGroupHTML::updateUndoRedoButtons()
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CCtrlBaseButton		*butUndo= dynamic_cast<CCtrlBaseButton *>(pIM->getElementFromId(_BrowseUndoButton));
-	CCtrlBaseButton		*butRedo= dynamic_cast<CCtrlBaseButton *>(pIM->getElementFromId(_BrowseRedoButton));
+	CCtrlBaseButton		*butUndo= dynamic_cast<CCtrlBaseButton *>(CWidgetManager::getInstance()->getElementFromId(_BrowseUndoButton));
+	CCtrlBaseButton		*butRedo= dynamic_cast<CCtrlBaseButton *>(CWidgetManager::getInstance()->getElementFromId(_BrowseRedoButton));
 
 	// gray according to list size
 	if(butUndo)
@@ -3648,7 +3648,7 @@ void	CGroupHTML::updateUndoRedoButtons()
 void	CGroupHTML::updateRefreshButton()
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CCtrlBaseButton		*butRefresh = dynamic_cast<CCtrlBaseButton *>(pIM->getElementFromId(_BrowseRefreshButton));
+	CCtrlBaseButton		*butRefresh = dynamic_cast<CCtrlBaseButton *>(CWidgetManager::getInstance()->getElementFromId(_BrowseRefreshButton));
 
 	bool enabled = !_Browsing && !_Connecting;
 	if(butRefresh)

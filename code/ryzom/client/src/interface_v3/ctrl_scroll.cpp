@@ -167,9 +167,9 @@ bool CCtrlScroll::parse(xmlNodePtr node, CInterfaceGroup * parentGroup)
 	if (prop)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CInterfaceGroup	*group = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(prop));
+		CInterfaceGroup	*group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(prop));
 		if(group == NULL)
-			group = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(this->getId(), prop));
+			group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(this->getId(), prop));
 
 		if(group != NULL)
 			setTarget (group);
@@ -210,7 +210,7 @@ int CCtrlScroll::luaSetTarget(CLuaState &ls)
 	std::string targetId = ls.toString(1);
 
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CInterfaceGroup	*group = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(targetId));
+	CInterfaceGroup	*group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(targetId));
 	if(group != NULL)
 	{
 		setTarget (group);

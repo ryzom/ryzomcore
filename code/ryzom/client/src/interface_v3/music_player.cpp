@@ -81,7 +81,7 @@ void CMusicPlayer::play ()
 
 		/* Show the song title */
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:interface:mp3_player:screen:text"));
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:mp3_player:screen:text"));
 		if (pVT)
 			pVT->setText (_Songs[_CurrentSong].Title);
 	}

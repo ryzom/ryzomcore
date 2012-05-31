@@ -1858,11 +1858,11 @@ void CDBCtrlSheet::draw()
 	if (_AHOnCanDrop != NULL)
 	if ((pIM->getCapturePointerLeft() != NULL) && (pIM->getCapturePointerLeft() != this))
 	{
-		if ((pIM->getPointer()->getX() >= _XReal) &&
-			(pIM->getPointer()->getX() < (_XReal + _WReal))&&
-			(pIM->getPointer()->getY() > _YReal) &&
-			(pIM->getPointer()->getY() <= (_YReal+ _HReal)))
-		if (pIM->getCurrentWindowUnder() == pIM->getWindow(this))
+		if ((CWidgetManager::getInstance()->getPointer()->getX() >= _XReal) &&
+			(CWidgetManager::getInstance()->getPointer()->getX() < (_XReal + _WReal))&&
+			(CWidgetManager::getInstance()->getPointer()->getY() > _YReal) &&
+			(CWidgetManager::getInstance()->getPointer()->getY() <= (_YReal+ _HReal)))
+		if (pIM->getCurrentWindowUnder() == CWidgetManager::getInstance()->getWindow(this))
 		{
 			CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pIM->getCapturePointerLeft());
 			if ((pCSSrc != NULL) && pCSSrc->isDraging())
@@ -2861,7 +2861,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 				if (getSheetId() != 0)
 				{
 					_CurrMenuSheet = this;
-					pIM->enableModalWindow (this, _ListMenuLeft);
+					CWidgetManager::getInstance()->enableModalWindow (this, _ListMenuLeft);
 				}
 			}
 			// Always return true on LeftClick.
@@ -2899,7 +2899,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 						if(!_ListMenuRight.empty())
 						{
 							_CurrMenuSheet = this;
-							pIM->enableModalWindow (this, _ListMenuRight);
+							CWidgetManager::getInstance()->enableModalWindow (this, _ListMenuRight);
 						}
 					}
 					// if sheetId==0, then may open the other menu
@@ -2908,7 +2908,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 						if(!_ListMenuRightEmptySlot.empty())
 						{
 							_CurrMenuSheet = this;
-							pIM->enableModalWindow (this, _ListMenuRightEmptySlot);
+							CWidgetManager::getInstance()->enableModalWindow (this, _ListMenuRightEmptySlot);
 						}
 					}
 				}
@@ -3638,7 +3638,7 @@ void	CDBCtrlSheet::setupInit()
 	{
 		// typically replace "handl" with "handr" or vice versa
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CInterfaceElement	*pElt = pIM->getElementFromId (_Id, _OptString);
+		CInterfaceElement	*pElt = CWidgetManager::getInstance()->getElementFromId (_Id, _OptString);
 		CDBCtrlSheet		*pOtherHand = dynamic_cast<CDBCtrlSheet*>(pElt);
 		if( !pOtherHand  || pOtherHand ->getType() != CCtrlSheetInfo::SheetType_Item )
 		{

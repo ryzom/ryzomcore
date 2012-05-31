@@ -248,8 +248,6 @@ protected:
 	 * Data of initialized interface
 	 */
 
-	CViewPointer *_Pointer;
-
 	// Options description
 	std::map<std::string, NLMISC::CSmartPtr<CInterfaceOptions> > _OptionsMap;
 

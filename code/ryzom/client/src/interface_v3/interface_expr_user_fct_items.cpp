@@ -157,7 +157,7 @@ static DECLARE_INTERFACE_USER_FCT(getSheetFromId)
 {
 	if (args.size() != 1 || !args[0].toString()) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CDBCtrlSheet *sheet = dynamic_cast<CDBCtrlSheet *>(im->getElementFromId(args[0].getString()));
+	CDBCtrlSheet *sheet = dynamic_cast<CDBCtrlSheet *>(CWidgetManager::getInstance()->getElementFromId(args[0].getString()));
 	if (!sheet)
 	{
 		nlwarning("Sheet %s not found", args[0].getString().c_str());

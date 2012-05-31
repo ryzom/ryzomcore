@@ -98,13 +98,13 @@ static void popupLandMarkNameDialog()
 {
 	// pop the rename dialog
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId(WIN_LANDMARK_NAME));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_LANDMARK_NAME));
 	if (!gc) return;
 
 	gc->setActive(true);
 	gc->updateCoords();
 	gc->center();
-	im->setTopWindow(gc);
+	CWidgetManager::getInstance()->setTopWindow(gc);
 	gc->enableBlink(1);
 	
 	CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(gc->getGroup("eb"));
@@ -133,7 +133,7 @@ static void popupLandMarkNameDialog()
 static void closeLandMarkNameDialog()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId(WIN_LANDMARK_NAME));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_LANDMARK_NAME));
 	if (!gc) return;
 	gc->setActive(false);
 }
@@ -721,7 +721,7 @@ bool CGroupMap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		_RespawnSelectedBitmap->setPosRef(Hotspot_MM);
 		addView(_RespawnSelectedBitmap);
 
-		//CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CInterfaceManager::getInstance()->getElementFromId(_RespawnButton));
+		//CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(_RespawnButton));
 		//if (pCB != NULL) pCB->setActive(false);
 	}
 	nlassert(!_FrustumView);
@@ -1578,13 +1578,13 @@ void CGroupMap::draw()
 				_FrustumView->setQuad(fruQuad);
 				_FrustumView->updateCoords();
 				// handle mouse over
-				if (im->getPointer())
+				if (CWidgetManager::getInstance()->getPointer())
 				{
 					sint32 originX, originY;
 					getCorner(originX, originY, getPosRef());
 					CVector delta((float) originX, (float) originY, 0.f);
 					fruTri = CTriangle(fruQuad.V0, fruQuad.V1, fruQuad.V2);
-					CVector mousePos((float) im->getPointer()->getXReal(), (float) im->getPointer()->getYReal(), 0.f);
+					CVector mousePos((float) CWidgetManager::getInstance()->getPointer()->getXReal(), (float) CWidgetManager::getInstance()->getPointer()->getYReal(), 0.f);
 					mousePos -= delta;
 					CVector dummyHit;
 					float deltaBlend = DT / (0.001f * (float) _FrustumViewBlendTimeInMs);
@@ -2396,13 +2396,13 @@ static void hideTeleportButtonsInPopupMenuIfNotEnoughPriv()
 	bool showTeleport = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeEG());
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 
-	CInterfaceElement *ie = im->getElementFromId("ui:interface:map_menu:teleport");
+	CInterfaceElement *ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:map_menu:teleport");
 	if(ie) ie->setActive(showTeleport);
 
-	ie = im->getElementFromId("ui:interface:land_mark_menu:lmteleport");
+	ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:land_mark_menu:lmteleport");
 	if(ie) ie->setActive(showTeleport);
 
-	ie = im->getElementFromId("ui:interface:user_land_mark_menu:lmteleport");
+	ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:user_land_mark_menu:lmteleport");
 	if(ie) ie->setActive(showTeleport);
 }
 
@@ -2878,7 +2878,7 @@ void CGroupMap::targetLandmark(CCtrlButton *lm)
 					{
 						NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_RESPAWN_PT")->setValue32(_RespawnSelected);
 						// Close window containing the map
-						CInterfaceGroup *pGrp = pIM->getWindow(this);
+						CInterfaceGroup *pGrp = CWidgetManager::getInstance()->getWindow(this);
 						if (pGrp != NULL) pGrp->setActive(false);
 					}
 					invalidateCoords();
@@ -2936,13 +2936,13 @@ void CGroupMap::targetLandmark(CCtrlButton *lm)
 	if (found)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupCompas *gc = dynamic_cast<CGroupCompas *>(im->getElementFromId(_CompassId));
+		CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId(_CompassId));
 		if (gc)
 		{
 			gc->setActive(true);
 			gc->setTarget(ct);
 			gc->blink();
-			im->setTopWindow(gc);
+			CWidgetManager::getInstance()->setTopWindow(gc);
 		}
 	}
 }
@@ -3197,7 +3197,7 @@ class CAHValidateUserLandMarkName : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(im->getElementFromId(WIN_LANDMARK_NAME));
+		CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(WIN_LANDMARK_NAME));
 		if (!ig) return;
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(ig->getGroup("eb"));
 		if (!eb) return;
@@ -3241,7 +3241,7 @@ void createUserLandMark(CCtrlBase * /* pCaller */, const string &/* params */)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	// pop the rename dialog
-	LastClickedMap = dynamic_cast<CGroupMap *>(im->getCtrlLaunchingModal());
+	LastClickedMap = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 	if (LastClickedMap->isInDeathMode()) return;
 	if (LastClickedMap->getNumUserLandMarks() >= CContinent::getMaxNbUserLandMarks() )
 	{
@@ -3284,7 +3284,7 @@ class CAHMapZoomIn : public IActionHandler
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupMap *gm = dynamic_cast<CGroupMap *>(im->getElementFromId(map));
+		CGroupMap *gm = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (!gm) return;
 		NLMISC::CVector2f center;
 		gm->windowToMap(center, gm->getWReal() / 2, gm->getHReal() / 2);
@@ -3301,7 +3301,7 @@ class CAHMapZoomOut : public IActionHandler
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupMap *gm = dynamic_cast<CGroupMap *>(im->getElementFromId(map));
+		CGroupMap *gm = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (!gm) return;
 		NLMISC::CVector2f center;
 		gm->windowToMap(center, gm->getWReal() / 2, gm->getHReal() / 2);
@@ -3318,7 +3318,7 @@ class CAHMapCenter : public IActionHandler
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupMap *gm = dynamic_cast<CGroupMap *>(im->getElementFromId(map));
+		CGroupMap *gm = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (!gm) return;
 		gm->centerOnPlayer();
 	}
@@ -3333,7 +3333,7 @@ class CAHMapBack : public IActionHandler
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupMap *pGM = dynamic_cast<CGroupMap *>(im->getElementFromId(map));
+		CGroupMap *pGM = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (pGM == NULL) return;
 		SMap *pMap = pGM->getParentMap(pGM->getCurMap());
 		if (pMap != NULL)
@@ -3350,7 +3350,7 @@ class CAHRespawnMapValid : public IActionHandler
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupMap *gm = dynamic_cast<CGroupMap *>(im->getElementFromId(map));
+		CGroupMap *gm = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (!gm) return;
 		if (gm->getRespawnSelected() == -1) return;
 
@@ -3406,7 +3406,7 @@ class CAHWorldMapRightClick : public IActionHandler
 
 		hideTeleportButtonsInPopupMenuIfNotEnoughPriv();
 
-		CGroupMap *gm = dynamic_cast<CGroupMap *>(im->getElementFromId(map));
+		CGroupMap *gm = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (!gm) return;
 		if (!gm->isIsland())
 		{
@@ -3457,7 +3457,7 @@ class CAHMapTeleport : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupMap   *clickedMap = dynamic_cast<CGroupMap *>(im->getCtrlLaunchingModal());
+		CGroupMap   *clickedMap = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		closeLandMarkNameDialog();
 		NLMISC::CVector2f pos = clickedMap->getRightClickLastPos();
 		clickedMap->mapToWorld(pos, pos);
@@ -3512,7 +3512,7 @@ class CUpdateLandMarksColor : public IActionHandler{public:	virtual void execute
 
 
 	
-	CGroupMap *pGM = dynamic_cast<CGroupMap *>(pIM->getElementFromId("ui:interface:map:content:map_content:actual_map"));		
+	CGroupMap *pGM = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));		
 	if (pGM == NULL) return;		
 	pGM->updateUserLandMarks();	
 
@@ -3555,7 +3555,7 @@ NLMISC_COMMAND( testRespawn, "Debug : test respawn map", "" )
 	rpm.RespawnPoints.push_back(CRespawnPointsMsg::SRespawnPoint(4050*1000,-4200*1000));
 	rpm.RespawnPoints.push_back(CRespawnPointsMsg::SRespawnPoint(4200*1000,-4150*1000));
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupMap *pMap = dynamic_cast<CGroupMap*>(pIM->getElementFromId("ui:interface:respawn_map:content:map_content:actual_map"));
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:respawn_map:content:map_content:actual_map"));
 	if (pMap == NULL)
 	{
 		nlwarning("problem cannot find ui:interface:respawn_map:content:map_content:actual_map");
@@ -3564,7 +3564,7 @@ NLMISC_COMMAND( testRespawn, "Debug : test respawn map", "" )
 	pMap->addRespawnPoints(rpm);
 
 
-	pMap = dynamic_cast<CGroupMap*>(pIM->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
 	if (pMap == NULL)
 	{
 		nlwarning("problem cannot find ui:interface:map:content:map_content:actual_map");
@@ -3584,7 +3584,7 @@ NLMISC_COMMAND( setMap, "Debug : test respawn map", "" )
 	if (args.size() != 1) return false;
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupMap *pMap = dynamic_cast<CGroupMap*>(pIM->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
 	if (pMap != NULL)
 		pMap->setMap(args[0]);
 

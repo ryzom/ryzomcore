@@ -63,7 +63,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	CGroupContainer *fatherContainer = NULL;
 	if (!desc.FatherContainer.empty())
 	{
-		fatherContainer = dynamic_cast<CGroupContainer *>(im->getElementFromId(desc.FatherContainer));
+		fatherContainer = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(desc.FatherContainer));
 		if (!fatherContainer)
 		{
 			nlwarning("<CPeopleList::create> Can't get father group, or bad type");
@@ -99,7 +99,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	{
 
 		// Root container
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", gc);
 		gc->setParent(pRoot);
 		pRoot->addGroup (gc);
@@ -384,7 +384,7 @@ sint CPeopleList::addPeople(const ucstring &name, uint teamMateIndex /*= 0*/)
 		_BaseContainer->attachContainer(gc);
 	}
 
-	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
+	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 	pRoot->addGroup (gc);
 
 	_Peoples.push_back(CPeople());
@@ -416,7 +416,7 @@ void CPeopleList::removePeople(uint index)
 			_BaseContainer->detachContainer(_Peoples[index].Container);
 	}
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
+	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 
 	pRoot->delGroup (_Peoples[index].Container);
 	_Peoples.erase(_Peoples.begin() + index);
@@ -528,7 +528,7 @@ void CPeopleList::displayMessage(uint index, const ucstring &msg, NLMISC::CRGBA 
 
 	gcChat->requireAttention();
 
-	CInterfaceManager::getInstance()->setTopWindow(gcChat);
+	CWidgetManager::getInstance()->setTopWindow(gcChat);
 
 	CGroupList *gl = dynamic_cast<CGroupList *>(gcChat->getGroup("text_list"));
 	if (gl == NULL)
@@ -582,7 +582,7 @@ void CPeopleList::reset()
 		else // detach from root
 		{
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
+			CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 			pRoot->delGroup(_BaseContainer);
 		}
 		_BaseContainer = "";

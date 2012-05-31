@@ -247,42 +247,8 @@ public:
 	 *	NB: "ctrl_launch_modal" is a special Id which return the last ctrl which has launch a modal. NULL if modal closed.
 	 * \param groupId : the Id of the window group
 	 */
-	CInterfaceElement* getElementFromId (const std::string &sEltId);
-	CInterfaceElement* getElementFromId (const std::string &sStart, const std::string &sEltId);
-	void activateMasterGroup (const std::string &sMasterGroupName, bool bActive);
 	/// get an element from a define ID. shortcut for getElementFromId(getDefine(define))
 	CInterfaceElement* getElementFromDefine (const std::string &defineId);
-	/// Get the window from an element (ui:interface:###)
-	CInterfaceGroup* getWindow(CInterfaceElement*);
-	/**
-	 * set the top window
-	 * \param win : pointer to the window to be set on top
-	 */
-	void setTopWindow (CInterfaceGroup *pWin);
-
-	/**
-	 * set the back window
-	 * \param win : pointer to the window to be set on top
-	 */
-	void setBackWindow (CInterfaceGroup *pWin);
-
-	/** get the top window in the first activated masterGroup
-	 */
-	CInterfaceGroup		*getTopWindow (uint8 nPriority = WIN_PRIORITY_NORMAL) const;
-
-	/** get the back window in the first activated masterGroup
-	 */
-	CInterfaceGroup		*getBackWindow (uint8 nPriority = WIN_PRIORITY_NORMAL) const;
-
-	/** get the last escapable top window in the first activated masterGroup
-	 */
-	CInterfaceGroup		*getLastEscapableTopWindow() const;
-
-	void setWindowPriority (CInterfaceGroup *pWin, uint8 nPriority);
-
-	/** return the priority of the Last Window setTopWindow()-ed.
-	 */
-	uint8				getLastTopWindowPriority() const;
 
 	/// Control specific
 
@@ -305,30 +271,6 @@ public:
 	  * NB : the keyboard capture is released on both calls.
 	  * NB : cascaded modal windows are disabled by the call
 	  */
-	void enableModalWindow (CCtrlBase *ctrlLaunchingModal, CInterfaceGroup *pIG);
-	void enableModalWindow (CCtrlBase *ctrlLaunchingModal, const std::string &groupName);
-	// Disable all modals windows
-	void disableModalWindow ();
-
-	/** Push a modal window that becomes the current modal window
-	  */
-	void pushModalWindow(CCtrlBase *ctrlLaunchingModal, CInterfaceGroup *pIG);
-	void pushModalWindow (CCtrlBase *ctrlLaunchingModal, const std::string &groupName);
-	void popModalWindow();
-	// pop all top modal windows with the given category (a string stored in the modal)
-	void popModalWindowCategory(const std::string &category);
-
-	CCtrlBase *getCtrlLaunchingModal ()
-	{
-		if (_ModalStack.empty()) return NULL;
-		return _ModalStack.back().CtrlLaunchingModal;
-	}
-	/// get the currently active modal window, or NULL if none
-	CInterfaceGroup *getModalWindow() const
-	{
-		if (_ModalStack.empty()) return NULL;
-		return _ModalStack.back().ModalWindow;
-	}
 
 
 	/// Handle The Event. return true if the interfaceManager catch it and if must not send to the Game Action Manager
@@ -378,9 +320,6 @@ public:
 	uint8 getGlobalRolloverFactorContent() const { return _GlobalRolloverFactorContent; }
 	uint8 getGlobalRolloverFactorContainer() const { return _GlobalRolloverFactorContainer; }
 
-
-	/// Pointer
-	CViewPointer *getPointer () { return _Pointer; }
 
 	// Relative move of pointer
 	void movePointer (sint32 dx, sint32 dy);
@@ -770,33 +709,6 @@ private:
 		void	buildRecursLocalLeaves(NLMISC::CCDBNodeBranch *branch, std::vector<NLMISC::CCDBNodeLeaf*> &leaves);
 	};
 
-	// Infos about a modal window.
-	class CModalWndInfo
-	{
-	public:
-		// Yoyo: store as CRefPtr in case they are deleted (can happen for instance if menu right click on a guild memeber, and guild members are udpated after)
-		NLMISC::CRefPtr<CInterfaceGroup>		ModalWindow; // the current modal window
-		NLMISC::CRefPtr<CCtrlBase>				CtrlLaunchingModal;
-		bool				ModalClip;
-		bool				ModalExitClickOut;
-		bool				ModalExitClickL;
-		bool				ModalExitClickR;
-		bool				ModalExitKeyPushed;
-		std::string			ModalHandlerClickOut;
-		std::string			ModalClickOutParams;
-	public:
-		CModalWndInfo()
-		{
-			ModalWindow = NULL;
-			CtrlLaunchingModal= NULL;
-			ModalExitClickOut= false;
-			ModalExitClickL= false;
-			ModalExitClickR= false;
-			ModalExitKeyPushed= false;
-		}
-	};
-
-
 	// Database management stuff
 	class CDBLandmarkObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
@@ -883,10 +795,6 @@ private:
 	NLMISC::CRefPtr<CCtrlBase>	_CapturePointerRight;
 	bool		_MouseOverWindow;
 
-	std::vector<CModalWndInfo> _ModalStack;
-	static std::string	_CtrlLaunchingModalId;
-
-
 	// view that should be notified from clock msg
 	std::vector<CCtrlBase*> _ClockMsgTargets;
 
@@ -898,8 +806,7 @@ private:
 
 	// Context Help
 	bool					_ContextHelpActive;
-	CCtrlBasePtr			_CurCtrlContextHelp;
-	float					_DeltaTimeStopingContextHelp;
+	//CCtrlBasePtr			_CurCtrlContextHelp;
 	//Delay before displaying ContextHelp on a ctrl having wantInstantContextHelp set to false (in seconds)
 	float					_MaxTimeStopingContextHelp;
 	sint					_LastXContextHelp;

@@ -87,7 +87,7 @@ void CBotChatPageDynamicMission::begin()
 		}
 	}
 	activateWindow(WIN_BOT_CHAT_PAGE_DYNAMIC_MISSION, true);
-	CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(im->getElementFromId(WIN_BOT_CHAT_PAGE_DYNAMIC_MISSION));
+	CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_PAGE_DYNAMIC_MISSION));
 	if (!ig)
 	{
 		std::fill(_ChoiceCB, _ChoiceCB + DYNAMIC_MISSION_NUM_CHOICES, (CDBGroupComboBox *) NULL);
@@ -122,7 +122,7 @@ void CBotChatPageDynamicMission::end()
 {
 	// if a menu is currently poped, disable it
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->disableModalWindow();
+	CWidgetManager::getInstance()->disableModalWindow();
 	activateWindow(WIN_BOT_CHAT_PAGE_DYNAMIC_MISSION, false);
 }
 

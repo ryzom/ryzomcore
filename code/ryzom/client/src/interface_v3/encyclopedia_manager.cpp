@@ -162,7 +162,7 @@ void CEncyclopediaManager::updateThema(uint32 nAlbumName, const CEncyMsgThema &t
 			_AlbumNameSelected = nAlbumName;
 			_ThemaNameSelected = t.Name;
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			CInterfaceElement *pContainer = dynamic_cast<CInterfaceElement*>(pIM->getElementFromId(CONT_ENCY));
+			CInterfaceElement *pContainer = dynamic_cast<CInterfaceElement*>(CWidgetManager::getInstance()->getElementFromId(CONT_ENCY));
 			if (pContainer != NULL)
 				pContainer->setActive(true);
 		}
@@ -186,7 +186,7 @@ void CEncyclopediaManager::rebuildAlbumList()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 
-	CGroupTree *pTree = dynamic_cast<CGroupTree*>(pIM->getElementFromId(LIST_ENCY_ALBUM));
+	CGroupTree *pTree = dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(LIST_ENCY_ALBUM));
 	nlassert(pTree != NULL);
 
 	CGroupTree::SNode *pRoot = new CGroupTree::SNode;
@@ -281,22 +281,22 @@ void CEncyclopediaManager::rebuildAlbumPage(uint32 albumName)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	// Hide and show good group
-	CInterfaceElement *pIE = pIM->getElementFromId(PAGE_ENCY_ALBUM);
+	CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(PAGE_ENCY_ALBUM);
 	nlassert(pIE != NULL);
 	pIE->setActive(true);
-	pIE = pIM->getElementFromId(PAGE_ENCY_HELP);
+	pIE = CWidgetManager::getInstance()->getElementFromId(PAGE_ENCY_HELP);
 	pIE->setActive(false);
-	pIE = pIM->getElementFromId(PAGE_ENCY_THEMA);
+	pIE = CWidgetManager::getInstance()->getElementFromId(PAGE_ENCY_THEMA);
 	pIE->setActive(false);
 
 	// Setup title
-	CViewTextID *pVT = dynamic_cast<CViewTextID*>(pIM->getElementFromId(PAGE_ENCY_ALBUM ":title"));
+	CViewTextID *pVT = dynamic_cast<CViewTextID*>(CWidgetManager::getInstance()->getElementFromId(PAGE_ENCY_ALBUM ":title"));
 	nlassert(pVT != NULL);
 	pVT->setTextId(pAlbum->Name);
 
 	// Setup brick reward
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ENCY:ALBUMBRICK:SHEET")->setValue32(pAlbum->RewardBrick);
-	CViewText *pRBVT = dynamic_cast<CViewText*>(pIM->getElementFromId(PAGE_ENCY_ALBUM ":reward:desc"));
+	CViewText *pRBVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(PAGE_ENCY_ALBUM ":reward:desc"));
 	if (pRBVT != NULL)
 	{
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
@@ -328,27 +328,27 @@ void CEncyclopediaManager::rebuildThemaPage(uint32 themaName)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	// Hide and show good group
-	CInterfaceElement *pIE = pIM->getElementFromId(PAGE_ENCY_ALBUM);
+	CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(PAGE_ENCY_ALBUM);
 	nlassert(pIE != NULL);
 	pIE->setActive(false);
-	pIE = pIM->getElementFromId(PAGE_ENCY_HELP);
+	pIE = CWidgetManager::getInstance()->getElementFromId(PAGE_ENCY_HELP);
 	pIE->setActive(false);
-	pIE = pIM->getElementFromId(PAGE_ENCY_THEMA);
+	pIE = CWidgetManager::getInstance()->getElementFromId(PAGE_ENCY_THEMA);
 	pIE->setActive(true);
 
 	// Setup title
-	CViewTextID *pVT = dynamic_cast<CViewTextID*>(pIM->getElementFromId(PAGE_ENCY_THEMA ":title"));
+	CViewTextID *pVT = dynamic_cast<CViewTextID*>(CWidgetManager::getInstance()->getElementFromId(PAGE_ENCY_THEMA ":title"));
 	nlassert(pVT != NULL);
 	pVT->setTextId(pThema->Name);
 
 	// Setup rewards
-	pVT = dynamic_cast<CViewTextID*>(pIM->getElementFromId(PAGE_ENCY_THEMA ":reward_text:desc"));
+	pVT = dynamic_cast<CViewTextID*>(CWidgetManager::getInstance()->getElementFromId(PAGE_ENCY_THEMA ":reward_text:desc"));
 	nlassert(pVT != NULL);
 	pVT->setTextId(pThema->RewardText);
 
 	// Setup brick reward
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ENCY:REWARDBRICK:SHEET")->setValue32(pThema->RewardSheet);
-	CViewText *pRBVT = dynamic_cast<CViewText*>(pIM->getElementFromId(PAGE_ENCY_THEMA ":reward:desc"));
+	CViewText *pRBVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(PAGE_ENCY_THEMA ":reward:desc"));
 	nlassert(pRBVT != NULL);
 	STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 	CEntitySheet *pES = SheetMngr.get(CSheetId(pThema->RewardSheet));
@@ -392,7 +392,7 @@ void CEncyclopediaManager::rebuildThemaPage(uint32 themaName)
 			sTmp = PAGE_ENCY_THEMA ":todo:task" + toString(i);
 
 		// setup task description
-		CViewTextID *pText = dynamic_cast<CViewTextID*>(pIM->getElementFromId(sTmp+":desc"));
+		CViewTextID *pText = dynamic_cast<CViewTextID*>(CWidgetManager::getInstance()->getElementFromId(sTmp+":desc"));
 		nlassert(pText != NULL);
 		pText->setTextId(pThema->TaskName[i]);
 
@@ -407,7 +407,7 @@ void CEncyclopediaManager::rebuildThemaPage(uint32 themaName)
 			pText->setAlpha(160);
 
 		// If the task is finished toggle it
-		CViewBitmap *pBitmap = dynamic_cast<CViewBitmap*>(pIM->getElementFromId(sTmp+":done"));
+		CViewBitmap *pBitmap = dynamic_cast<CViewBitmap*>(CWidgetManager::getInstance()->getElementFromId(sTmp+":done"));
 		nlassert(pBitmap != NULL);
 		if (pThema->getTaskState((uint8)i) == 2)
 			pBitmap->setActive(true);

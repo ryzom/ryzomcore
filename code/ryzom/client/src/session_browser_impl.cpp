@@ -219,7 +219,7 @@ int CSessionBrowserImpl::luaJoinRingSession(CLuaState &ls)
 
 	if(sessionBrowser._LastJoinSessionResult == 20)
 	{
-		CViewText* pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:interface:warning_free_trial:text"));
+		CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 		if (pVT != NULL)
 			pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
 		pIM->runActionHandler("enter_modal", NULL, "group=ui:interface:warning_free_trial");

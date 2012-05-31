@@ -58,11 +58,11 @@ void	COutpostManager::startPvpJoinProposal(bool playerGuildInConflict, bool play
 	if(node)	node->setValue32(_EndTickForPvpJoinProposal);
 
 	// open Popup
-	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:join_pvp_outpost_proposal"));
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal"));
 	if (pGC)
 	{
 		pGC->setActive(true);
-		pIM->setTopWindow(pGC);
+		CWidgetManager::getInstance()->setTopWindow(pGC);
 		pGC->updateCoords();
 		pGC->updateCoords();
 		pGC->center();
@@ -108,7 +108,7 @@ void	COutpostManager::update()
 			pIM->runActionHandler("outpost_pvp_join", NULL, "neutral");
 
 			// close the window
-			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:join_pvp_outpost_proposal"));
+			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal"));
 			if (pGC)
 				pGC->setActive(false);
 

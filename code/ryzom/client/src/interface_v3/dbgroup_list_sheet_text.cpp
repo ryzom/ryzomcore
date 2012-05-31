@@ -626,10 +626,10 @@ void CDBGroupListSheetText::draw ()
 		CGroupContainer *pGC = getContainer();
 		if (pIM->getCurrentWindowUnder() == pGC)
 		{
-			if ((pIM->getPointer()->getX() >= _XReal) &&
-				(pIM->getPointer()->getX() < (_XReal + _WReal))&&
-				(pIM->getPointer()->getY() > _YReal) &&
-				(pIM->getPointer()->getY() <= (_YReal+ _HReal)))
+			if ((CWidgetManager::getInstance()->getPointer()->getX() >= _XReal) &&
+				(CWidgetManager::getInstance()->getPointer()->getX() < (_XReal + _WReal))&&
+				(CWidgetManager::getInstance()->getPointer()->getY() > _YReal) &&
+				(CWidgetManager::getInstance()->getPointer()->getY() <= (_YReal+ _HReal)))
 			{
 				CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pIM->getCapturePointerLeft());
 				if ((pCSSrc != NULL) && pCSSrc->isDraging())
@@ -1008,7 +1008,7 @@ void CDBGroupListSheetText::CSheetChild::hide(CDBGroupListSheetText * /* pFather
 // ***************************************************************************
 CGroupContainer *CDBGroupListSheetText::getContainer()
 {
-	return dynamic_cast<CGroupContainer*>(CInterfaceManager::getInstance()->getWindow(this));
+	return dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getWindow(this));
 }
 
 // ***************************************************************************
@@ -1184,7 +1184,7 @@ class	CHandlerListSheetTextRightClick : public IActionHandler
 		{
 			if ( CDBCtrlSheet::getDraggedSheet() == NULL)
 			{
-				pIM->enableModalWindow (ctrlSheet, listSheetTrade->_CtrlInfo._ListMenuRight);
+				CWidgetManager::getInstance()->enableModalWindow (ctrlSheet, listSheetTrade->_CtrlInfo._ListMenuRight);
 			}
 		}
 
@@ -1201,7 +1201,7 @@ class	CHandlerListSheetTextResetSelection : public IActionHandler
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-		CDBGroupListSheetText *listSheetTrade = dynamic_cast<CDBGroupListSheetText*>(pIM->getElementFromId(Params));
+		CDBGroupListSheetText *listSheetTrade = dynamic_cast<CDBGroupListSheetText*>(CWidgetManager::getInstance()->getElementFromId(Params));
 		if (listSheetTrade == NULL)
 			return;
 

@@ -150,7 +150,7 @@ void CUserControls::aiMode()
 			IM->enableMouseHandling(false);
 			EventsListener.enableMouseSmoothing(true);
 			// Get the cursor instance and hide.
-			CViewPointer *cursor = IM->getPointer();
+			CViewPointer *cursor = CWidgetManager::getInstance()->getPointer();
 			if(cursor)
 			{
 				// Freelook mode.

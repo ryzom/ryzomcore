@@ -615,7 +615,7 @@ void CEditor::clearDebugWindow()
 	//H_AUTO(R2_CEditor_clearDebugWindow)
 	CHECK_EDITOR
 	getUI().flushDebugWindow();
-	CGroupList *gl = dynamic_cast<CGroupList *>(getUI().getElementFromId("ui:interface:debug_info:content:cb:text_list"));
+	CGroupList *gl = dynamic_cast<CGroupList *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:debug_info:content:cb:text_list"));
 	if (gl)
 	{
 		gl->deleteAllChildren();
@@ -1648,11 +1648,11 @@ void CEditor::waitScenarioScreen()
 		setMode(GoingToEditionMode);
 	}
 	getUI().hideAllWindows();
-	CInterfaceGroup *waitScreen = dynamic_cast<CInterfaceGroup *>(getUI().getElementFromId("ui:interface:r2ed_connecting"));
+	CInterfaceGroup *waitScreen = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_connecting"));
 	if (waitScreen)
 	{
 		waitScreen->setActive(true);
-		getUI().setTopWindow(waitScreen);
+		CWidgetManager::getInstance()->setTopWindow(waitScreen);
 	}
 	//
 	enum TState { WaitingScenario, WaitingTP, DoExit };
@@ -1669,7 +1669,7 @@ void CEditor::waitScenarioScreen()
 	loadBackgroundBitmap (StartBackground);
 
 	// patch for the 'sys info that pop' prb (cause unknown for now ...)
-	CInterfaceElement *sysInfo = getUI().getElementFromId("ui:interface:system_info");
+	CInterfaceElement *sysInfo = CWidgetManager::getInstance()->getElementFromId("ui:interface:system_info");
 	bool sysInfoActive = false;
 	if (sysInfo) sysInfoActive = sysInfo->getActive();
 
@@ -1718,7 +1718,7 @@ void CEditor::waitScenarioScreen()
 			else
 			{
 				// Display the firewall alert string
-				CViewText *pVT = dynamic_cast<CViewText*>(getUI().getElementFromId("ui:interface:r2ed_connecting:title"));
+				CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_connecting:title"));
 				if (pVT != NULL)
 					pVT->setText(CI18N::get("uiFirewallAlert")+ucstring("..."));
 
@@ -1767,7 +1767,7 @@ void CEditor::waitScenarioScreen()
 
 		if (waitScreen)
 		{
-			getUI().setTopWindow(waitScreen);
+			CWidgetManager::getInstance()->setTopWindow(waitScreen);
 		}
 
 		if (sysInfo) sysInfo->setActive(false);
@@ -1807,7 +1807,7 @@ void CEditor::waitScenarioScreen()
 			if ( firewallTimeout )
 			{
 				// Display the firewall error string instead of the normal failure string
-				CViewText *pVT = dynamic_cast<CViewText*>(getUI().getElementFromId("ui:interface:r2ed_connecting:title"));
+				CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_connecting:title"));
 				if (pVT != NULL)
 				{
 					pVT->setMultiLine( true );
@@ -2350,7 +2350,7 @@ void CEditor::setMode(TMode mode)
 	ContextCur.release();
 	_Mode = mode;
 	loadKeySet(getKeySetPrefix(_Mode));
-	getUI().disableModalWindow();
+	CWidgetManager::getInstance()->disableModalWindow();
 	getUI().setCapturePointerLeft(NULL);
 	getUI().setCapturePointerRight(NULL);
 	getUI().setCaptureKeyboard(NULL);
@@ -2578,7 +2578,7 @@ void CEditor::hideRingWindows()
 	for (uint k = 0; k < sizeofarray(ringWindows); ++k)
 	{
 		std::string id = "ui:interface:" + std::string(ringWindows[k]);
-		CInterfaceElement *grp = getUI().getElementFromId(id);
+		CInterfaceElement *grp = CWidgetManager::getInstance()->getElementFromId(id);
 		if (grp)
 		{
 			grp->setActive(false);
@@ -5191,7 +5191,7 @@ void CEditor::onEditionModeConnected( uint32 userSlotId, uint32 adventureId, COb
 	{
 		setMode(EditionMode);
 	}
-	CInterfaceGroup *currentSessionGroup = dynamic_cast<CInterfaceGroup *>(getUI().getElementFromId("ui:interface:r2ed_current_session"));
+	CInterfaceGroup *currentSessionGroup = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_current_session"));
 	if (currentSessionGroup)
 	{
 		CViewText *text = dynamic_cast<CViewText *>(currentSessionGroup->getView("current_session"));
@@ -5242,7 +5242,7 @@ void CEditor::onAnimationModeConnected(const CClientMessageAdventureUserConnecti
 
 	}
 
-	CInterfaceGroup *currentSessionGroup = dynamic_cast<CInterfaceGroup *>(getUI().getElementFromId("ui:interface:r2ed_current_session"));
+	CInterfaceGroup *currentSessionGroup = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_current_session"));
 	if (currentSessionGroup)
 	{
 		CViewText *text = dynamic_cast<CViewText *>(currentSessionGroup->getView("current_session"));
@@ -6386,7 +6386,7 @@ void CEditor::connexionMsg(const std::string &stringId)
 	// ignore if current ui desktop is not the third
 	if (getUI().getMode() != 3) return;
 	// show the connection window
-	CInterfaceGroup *r2ConnectWindow = dynamic_cast<CInterfaceGroup *>(getUI().getElementFromId("ui:interface:r2ed_connect"));
+	CInterfaceGroup *r2ConnectWindow = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_connect"));
 	if (!r2ConnectWindow) return;
 	if (stringId.empty())
 	{
@@ -7330,9 +7330,9 @@ class CAHOpenScenarioControl : public IActionHandler
 		CInterfaceGroup* wnd = NULL;
 
 		if(!R2::getEditor().isInitialized())
-			wnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:ring_scenario_loading_window"));
+			wnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:ring_scenario_loading_window"));
 		else
-			wnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:r2ed_scenario_control"));
+			wnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_scenario_control"));
 
 		if(wnd)
 		{
@@ -7425,7 +7425,7 @@ class CAHInviteCharacter : public IActionHandler
 
 					if(sessionBrowser._LastInvokeResult == 14)
 					{
-						CViewText* pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:interface:warning_free_trial:text"));
+						CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 						if (pVT != NULL)
 							pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
 

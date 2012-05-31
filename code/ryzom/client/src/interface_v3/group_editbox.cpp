@@ -885,7 +885,7 @@ bool CGroupEditBox::handleEvent (const NLGUI::CEventDescriptor& event)
 					if (CDBCtrlSheet::getDraggedSheet() == NULL)
 					{
 						_MenuFather = this;
-						pIM->enableModalWindow (this, _ListMenuRight);
+						CWidgetManager::getInstance()->enableModalWindow (this, _ListMenuRight);
 						stopParentBlink();
 					}
 				}
@@ -1307,7 +1307,7 @@ void CGroupEditBox::makeTopWindow()
 	CInterfaceGroup *root = getRootWindow();
 	if (root)
 	{
-		im->setTopWindow(root);
+		CWidgetManager::getInstance()->setTopWindow(root);
 	}
 }
 

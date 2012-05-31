@@ -299,17 +299,12 @@ private:
 // ----------------------------------------------------------------------------
 CInterfaceParser::CInterfaceParser()
 {
-	_Pointer= NULL;
-
 	// LUA
 	_LuaState= NULL;
 }
 
 CInterfaceParser::~CInterfaceParser()
 {
-//	delete _Pointer;
-	_Pointer = NULL;
-	//delete _LuaState;
 	_LuaState = NULL;
 }
 /** Convert a string into a memstream
@@ -1745,7 +1740,7 @@ bool CInterfaceParser::parseView(xmlNodePtr cur, CInterfaceGroup * parentGroup, 
 
 	if ( !strcmp(ptr,"pointer"))
 	{
-		_Pointer = dynamic_cast<CViewPointer*>(view);
+		CWidgetManager::getInstance()->setPointer( dynamic_cast<CViewPointer*>(view) );
 	}
 
 	//nlinfo("view type %s mem : %d",ptr,view->getMemory());
@@ -3491,7 +3486,7 @@ CInterfaceElement *CInterfaceParser::createUIElement(const std::string &template
 	}
 
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CInterfaceElement	*pIE= pIM->getElementFromId(parentID);
+	CInterfaceElement	*pIE= CWidgetManager::getInstance()->getElementFromId(parentID);
 	CInterfaceGroup * parentGroup = dynamic_cast<CInterfaceGroup*>(pIE);
 
 	if(!parentGroup)

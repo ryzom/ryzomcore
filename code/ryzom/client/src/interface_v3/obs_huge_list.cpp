@@ -511,12 +511,12 @@ void CHugeListObs::updateUIItemPage(uint index)
 			if (BotChatPageAll->Trade->getBuyOnly())
 			{
 				dbPath = DB_LOCAL_BRANCH_FOR_ITEM_FOR_MONEY ":";
-				listSheet = dynamic_cast<CDBGroupListSheetText *>(im->getElementFromId(UI_LIST_OF_ITEMS_FOR_MONEY_BUY_ONLY));
+				listSheet = dynamic_cast<CDBGroupListSheetText *>(CWidgetManager::getInstance()->getElementFromId(UI_LIST_OF_ITEMS_FOR_MONEY_BUY_ONLY));
 			}
 			else
 			{
 				dbPath = DB_LOCAL_BRANCH_FOR_ITEM_FOR_MONEY ":";
-				listSheet = dynamic_cast<CDBGroupListSheetText *>(im->getElementFromId(UI_LIST_OF_ITEMS_FOR_MONEY));
+				listSheet = dynamic_cast<CDBGroupListSheetText *>(CWidgetManager::getInstance()->getElementFromId(UI_LIST_OF_ITEMS_FOR_MONEY));
 			}
 			if (!listSheet) return;
 			itemListCategoryLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TYPE_OF_ITEMS_TO_BUY", false);
@@ -525,32 +525,32 @@ void CHugeListObs::updateUIItemPage(uint index)
 		case ItemForMissions:
 		{
 			dbPath = DB_LOCAL_BRANCH_FOR_ITEM_FOR_MISSION ":";
-			listSheet = dynamic_cast<CDBGroupListSheetText *>(im->getElementFromId(UI_LIST_OF_ITEMS_FOR_MISSION));
+			listSheet = dynamic_cast<CDBGroupListSheetText *>(CWidgetManager::getInstance()->getElementFromId(UI_LIST_OF_ITEMS_FOR_MISSION));
 			if (!listSheet) return;
 			itemListCategoryLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TYPE_OF_ITEMS_FOR_MISSION", false);
 			if (!itemListCategoryLeaf) return;
 			// display the group for mission items
-			CInterfaceElement *elm = im->getElementFromId(UI_GROUP_OF_ITEMS_FOR_MISSION);
+			CInterfaceElement *elm = CWidgetManager::getInstance()->getElementFromId(UI_GROUP_OF_ITEMS_FOR_MISSION);
 			if (elm) elm->setActive(true);
 		}
 		break;
 		case Ascensor:
 		{
 			dbPath = DB_LOCAL_BRANCH_FOR_ASCENSOR ":";
-			listSheet = dynamic_cast<CDBGroupListSheetText *>(im->getElementFromId(UI_LIST_OF_ITEMS_FOR_ASCENSOR));
+			listSheet = dynamic_cast<CDBGroupListSheetText *>(CWidgetManager::getInstance()->getElementFromId(UI_LIST_OF_ITEMS_FOR_ASCENSOR));
 			if (!listSheet) return;
 			// display the group for mission items
-			CInterfaceElement *elm = im->getElementFromId(UI_GROUP_OF_ITEMS_FOR_ASCENSOR);
+			CInterfaceElement *elm = CWidgetManager::getInstance()->getElementFromId(UI_GROUP_OF_ITEMS_FOR_ASCENSOR);
 			if (elm) elm->setActive(true);
 		}
 		break;
 		case Missions:
 		{
 			dbPath = DB_LOCAL_BRANCH_FOR_MISSIONS ":";
-			listSheet = dynamic_cast<CDBGroupListSheetText *>(im->getElementFromId(UI_LIST_OF_MISSIONS));
+			listSheet = dynamic_cast<CDBGroupListSheetText *>(CWidgetManager::getInstance()->getElementFromId(UI_LIST_OF_MISSIONS));
 			if (!listSheet) return;
 			// display the group for mission items
-			CInterfaceElement *elm = im->getElementFromId(UI_GROUP_OF_MISSIONS);
+			CInterfaceElement *elm = CWidgetManager::getInstance()->getElementFromId(UI_GROUP_OF_MISSIONS);
 			if (elm) elm->setActive(true);
 		}
 		break;

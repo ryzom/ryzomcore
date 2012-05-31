@@ -1019,7 +1019,7 @@ int	CLuaIHMRyzom::getUI(CLuaState &ls)
 
 	// return the element
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CInterfaceElement	*pIE= pIM->getElementFromId(eltStr);
+	CInterfaceElement	*pIE= CWidgetManager::getInstance()->getElementFromId(eltStr);
 	if(!pIE)
 	{
 		ls.pushNil();
@@ -1504,7 +1504,7 @@ int CLuaIHMRyzom::setTopWindow(CLuaState &ls)
 		CLuaIHM::fails(ls, "%s : interface group expected as arg 1", funcName);
 	}
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->setTopWindow(wnd);
+	CWidgetManager::getInstance()->setTopWindow(wnd);
 	return 0;
 }
 
@@ -1739,7 +1739,7 @@ int CLuaIHMRyzom::initEmotesMenu(CLuaState &ls)
 
 	betaTester = pSM->isTitleUnblocked(CHARACTER_TITLE::FBT);
 
-	CGroupMenu *pInitRootMenu = dynamic_cast<CGroupMenu*>(pIM->getElementFromId(emoteMenu));
+	CGroupMenu *pInitRootMenu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId(emoteMenu));
 	pInitRootMenu->reset();
 
 	for (std::list<CEmoteStruct>::const_iterator it = entries.begin(); it != entries.end(); it++)
@@ -1768,7 +1768,7 @@ int CLuaIHMRyzom::initEmotesMenu(CLuaState &ls)
 			if (sName[i] == '|')
 				nbToken++;
 
-		CGroupMenu *pRootMenu = dynamic_cast<CGroupMenu*>(pIM->getElementFromId(emoteMenu));
+		CGroupMenu *pRootMenu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId(emoteMenu));
 		CGroupSubMenu *pMenu = pRootMenu->getRootMenu();
 
 		for (i = 0; i < nbToken; ++i)
@@ -1999,13 +1999,13 @@ int CLuaIHMRyzom::enableModalWindow(CLuaState &ls)
 		if(ctrl)
 		{
 			CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-			CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(modalId) );
+			CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(modalId) );
 			if(group)
 			{
 				UserControls.stopFreeLook();
 
 				// enable the modal
-				pIM->enableModalWindow(ctrl, group);
+				CWidgetManager::getInstance()->enableModalWindow(ctrl, group);
 			}
 			else
 			{
@@ -2024,7 +2024,7 @@ int		CLuaIHMRyzom::disableModalWindow(CLuaState &ls)
 	//H_AUTO(Lua_CLuaIHM_disableModalWindow)
 	CLuaIHM::checkArgCount(ls, "disableModalWindow", 0);
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	pIM->disableModalWindow();
+	CWidgetManager::getInstance()->disableModalWindow();
 	return 0;
 }
 
@@ -2555,7 +2555,7 @@ int CLuaIHMRyzom::createRootGroupInstance(CLuaState &ls)
 		result->setId("ui:interface:"+string(ls.toString(2)));
 		result->updateCoords();
 		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", result);
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		result->setParent(pRoot);
 		if (pRoot)
 			pRoot->addGroup(result);
@@ -3271,7 +3271,7 @@ void	CLuaIHMRyzom::browseNpcWebPage(const std::string &htmlId, const std::string
 {
 	//H_AUTO(Lua_CLuaIHM_browseNpcWebPage)
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CGroupHTML	*groupHtml= dynamic_cast<CGroupHTML*>(pIM->getElementFromId(htmlId));
+	CGroupHTML	*groupHtml= dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(htmlId));
 	if(groupHtml)
 	{
 		// if true, it means that we want to display a web page that use webig auth
@@ -3343,7 +3343,7 @@ void		CLuaIHMRyzom::clearHtmlUndoRedo(const std::string &htmlId)
 {
 	//H_AUTO(Lua_CLuaIHM_clearHtmlUndoRedo)
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CGroupHTML	*groupHtml= dynamic_cast<CGroupHTML*>(pIM->getElementFromId(htmlId));
+	CGroupHTML	*groupHtml= dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(htmlId));
 	if(groupHtml)
 		groupHtml->clearUndoRedo();
 }
@@ -3609,7 +3609,7 @@ void CLuaIHMRyzom::tell(const ucstring &player, const ucstring &msg)
 				if (w->getContainer())
 				{
 					w->getContainer()->setActive(true);
-					im->setTopWindow(w->getContainer());
+					CWidgetManager::getInstance()->setTopWindow(w->getContainer());
 				}
 			}
 		}

@@ -187,7 +187,7 @@ class CAHFreeMouse : public IActionHandler
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		if (im)
 		{
-			CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(im->getElementFromId("ui:interface:game_config"));
+			CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config"));
 			if (ig && ig->getActive())
 			{
 				CInterfaceGroup *igHard = dynamic_cast<CInterfaceGroup *>(ig->getGroup("hard"));

@@ -288,7 +288,7 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 
 			// Run Menu
 			if (!_ListMenuLeft.empty())
-				pIM->enableModalWindow (this, _ListMenuLeft);
+				CWidgetManager::getInstance()->enableModalWindow (this, _ListMenuLeft);
 
 			if (_AHOnLeftDblClick != NULL)
 			{
@@ -323,7 +323,7 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 			if (!_ListMenuRight .empty())
 			{
 				handled= true;
-				pIM->enableModalWindow (this, _ListMenuRight);
+				CWidgetManager::getInstance()->enableModalWindow (this, _ListMenuRight);
 			}
 			// If not handled here, ret to parent
 			return handled;

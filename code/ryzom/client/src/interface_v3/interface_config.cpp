@@ -565,7 +565,7 @@ void CInterfaceConfig::CDesktopImage::fromCurrentDesktop()
 	f.resetPtrTable();
 	f.seek(0, NLMISC::IStream::begin);
 	// Save the Top Window for this config.
-	CInterfaceGroup	*topWindow= pIM->getTopWindow(pIM->getLastTopWindowPriority());
+	CInterfaceGroup	*topWindow= CWidgetManager::getInstance()->getTopWindow(CWidgetManager::getInstance()->getLastTopWindowPriority());
 	string	topWindowName;
 	if (topWindow)
 	{
@@ -595,7 +595,7 @@ void CInterfaceConfig::CDesktopImage::toCurrentDesktop()
 
 	for(uint k = 0; k < GCImages.size(); ++k)
 	{
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(GCImages[k].Id));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(GCImages[k].Id));
 		if (pGC != NULL)
 			GCImages[k].setTo(pGC);
 	}
@@ -617,9 +617,9 @@ void CInterfaceConfig::CDesktopImage::toCurrentDesktop()
 		f.serial(topWindowName);
 		if(!topWindowName.empty())
 		{
-			CInterfaceGroup	*window= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(topWindowName));
+			CInterfaceGroup	*window= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(topWindowName));
 			if(window && window->getActive())
-				pIM->setTopWindow(window);
+				CWidgetManager::getInstance()->setTopWindow(window);
 		}
 	}
 	uint32 numElemWithConfig;
@@ -632,7 +632,7 @@ void CInterfaceConfig::CDesktopImage::toCurrentDesktop()
 		f.serial(chunkSize);
 		uint startPos = f.getPos();
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CInterfaceElement *elem = im->getElementFromId(elemID);
+		CInterfaceElement *elem = CWidgetManager::getInstance()->getElementFromId(elemID);
 		if (!elem)
 		{
 			nlwarning("Element %s not found while loading config, skipping datas", elemID.c_str());

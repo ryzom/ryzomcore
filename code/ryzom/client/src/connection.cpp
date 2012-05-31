@@ -235,7 +235,7 @@ class CAHOnReloadTestPage: public IActionHandler
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		// need to reset password and current screen
-		CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
+		CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
 
 		pGH->browse(ClientCfg.TestBrowserUrl.c_str());
 
@@ -250,7 +250,7 @@ void initWebBrowser()
 	//NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
 
 	// start the browser
-	CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
+	CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
 
 	if (pGH)
 	{
@@ -388,7 +388,7 @@ bool connection (const string &cookie, const string &fsaddr)
 		WaitServerAnswer = true;
 	}*/
 
-	pIM->activateMasterGroup ("ui:outgame", true);
+	CWidgetManager::getInstance()->activateMasterGroup ("ui:outgame", true);
 	NLGUI::CDBManager::getInstance()->getDbProp ("UI:CURRENT_SCREEN")->setValue32(ClientCfg.Local ? 6 : -1); // TMP TMP
 	IngameDbMngr.flushObserverCalls();
 	NLGUI::CDBManager::getInstance()->flushObserverCalls();
@@ -552,7 +552,7 @@ bool reconnection()
 	// Start the finite state machine
 	TInterfaceState InterfaceState = GLOBAL_MENU;
 
-	pIM->activateMasterGroup ("ui:outgame", true);
+	CWidgetManager::getInstance()->activateMasterGroup ("ui:outgame", true);
 	NLGUI::CDBManager::getInstance()->getDbProp ("UI:CURRENT_SCREEN")->setValue32(-1);
 	IngameDbMngr.flushObserverCalls();
 	NLGUI::CDBManager::getInstance()->flushObserverCalls();
@@ -825,7 +825,7 @@ void updateBGDownloaderUI()
 		static NLMISC::CRefPtr<CInterfaceElement> bgDownloaderWindow;
 		if (!bgDownloaderWindow)
 		{
-			bgDownloaderWindow = im->getElementFromId("ui:interface:bg_downloader");
+			bgDownloaderWindow = CWidgetManager::getInstance()->getElementFromId("ui:interface:bg_downloader");
 		}
 		bgWindowVisible = bgDownloaderWindow && bgDownloaderWindow->getActive();
 	}
@@ -992,12 +992,12 @@ TInterfaceState globalMenu()
 			{
 				pIM->uninitOutGame();
 				pIM->initOutGame();
-				pIM->activateMasterGroup ("ui:outgame", true);
+				CWidgetManager::getInstance()->activateMasterGroup ("ui:outgame", true);
 				NLGUI::CDBManager::getInstance()->getDbProp ("UI:CURRENT_SCREEN")->setValue32(2); // TMP TMP
 				IngameDbMngr.flushObserverCalls();
 				NLGUI::CDBManager::getInstance()->flushObserverCalls();
-				pIM->getElementFromId("ui:outgame:charsel")->setActive(false);
-				pIM->getElementFromId("ui:outgame:charsel")->setActive(true);
+				CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel")->setActive(false);
+				CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel")->setActive(true);
 				// Active inputs
 				Actions.enable(true);
 				EditActions.enable(true);
@@ -1024,7 +1024,7 @@ TInterfaceState globalMenu()
 			else
 			{
 				// Display the firewall alert string
-				CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:outgame:connecting:title"));
+				CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:connecting:title"));
 				if (pVT != NULL)
 					pVT->setText(CI18N::get("uiFirewallAlert")+ucstring("..."));
 
@@ -1229,7 +1229,7 @@ TInterfaceState globalMenu()
 				if ( firewallTimeout )
 				{
 					// Display the firewall error string instead of the normal failure string
-					CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:outgame:crashing:title"));
+					CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:crashing:title"));
 					if (pVT != NULL)
 					{
 						pVT->setMultiLine( true );
@@ -1300,7 +1300,7 @@ public:
 		for (i = 0; i < CharacterSummaries.size(); ++i)
 		{
 			CCharacterSummary &rCS = CharacterSummaries[i];
-			CInterfaceElement *pIE = pIM->getElementFromId(sPath+":text"+NLMISC::toString(i));
+			CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(sPath+":text"+NLMISC::toString(i));
 			CViewText *pVT = dynamic_cast<CViewText*>(pIE);
 			if (pVT == NULL) return;
 
@@ -1312,7 +1312,7 @@ public:
 		// 5 slots
 		for (; i < 5; ++i)
 		{
-			CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(sPath+":text"+NLMISC::toString(i)));
+			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(sPath+":text"+NLMISC::toString(i)));
 			if (pVT == NULL) return;
 			pVT->setText(CI18N::get("uiEmptySlot"));
 		}
@@ -1492,7 +1492,7 @@ public:
 	{
 		string sDBLink = getParam(Params, "dblink");
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceElement *pIE = pIM->getElementFromId(pCaller->getId(), sDBLink);
+		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(pCaller->getId(), sDBLink);
 		CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(pIE);
 		if (pIG == NULL) return;
 
@@ -1662,7 +1662,7 @@ public:
 		string sEditBoxPath = getParam (Params, "name");
 		ucstring sFirstName = ucstring("NotSet");
 		ucstring sSurName = ucstring("NotSet");
-		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(sEditBoxPath));
+		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(sEditBoxPath));
 		if (pGEB != NULL)
 			sFirstName = pGEB->getInputString();
 		else
@@ -2118,7 +2118,7 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_MAINLAND));
+		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
 		if (pList == NULL)
 		{
 			nlwarning("element "GROUP_LIST_MAINLAND" not found probably bad outgame.xml");
@@ -2175,7 +2175,7 @@ public:
 				}
 			}
 
-			CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(pIM->getElementFromId(GROUP_LIST_MAINLAND ":"+toString(Mainlands[defaultMainland].Id)+":but"));
+			CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND ":"+toString(Mainlands[defaultMainland].Id)+":but"));
 			if (pCB != NULL)
 			{
 				pCB->setPushed(true);
@@ -2196,7 +2196,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_MAINLAND));
+		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
 		pList->clearGroups();
 	}
 };
@@ -2216,7 +2216,7 @@ class CAHMainlandSelect : public IActionHandler
 		// Unselect
 		if (MainlandSelected.asInt() != 0)
 		{
-			pCB = dynamic_cast<CCtrlButton*>(pIM->getElementFromId(GROUP_LIST_MAINLAND ":"+toString(MainlandSelected)+":but"));
+			pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND ":"+toString(MainlandSelected)+":but"));
 			if (pCB != NULL)
 				pCB->setPushed(false);
 		}
@@ -2311,7 +2311,7 @@ public:
 		PrevLine = NULL;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		List = dynamic_cast<CInterfaceGroup *>(pIM->getElementFromId(GROUP_LIST_KEYSET));
+		List = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
 		if (List == NULL)
 		{
 			nlwarning("element "GROUP_LIST_KEYSET" not found probably bad outgame.xml");
@@ -2437,7 +2437,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_KEYSET));
+		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
 		pList->clearGroups();
 	}
 };
@@ -2476,7 +2476,7 @@ public:
 			}
 		};
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup * list = dynamic_cast<CInterfaceGroup *>(pIM->getElementFromId(GROUP_LIST_KEYSET));
+		CInterfaceGroup * list = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
 		if (list)
 		{
 			CUnpush unpusher;
@@ -2635,7 +2635,7 @@ class CAHScenarioControl : public IActionHandler
 		nlinfo("CAHScenarioControl called");
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:r2ed_scenario_control"));
+		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_scenario_control"));
 		if(!scenarioWnd) return;
 
 		// -------- active some groups in function of Ryzom mode or Edition/Animation mode ----
@@ -2846,7 +2846,7 @@ class CAHScenarioInformation : public IActionHandler
 		nlinfo("CAHScenarioDescription called");
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:r2ed_scenario_control"));
+		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_scenario_control"));
 		if(!scenarioWnd) return;
 
 		CInterfaceElement *result = scenarioWnd->findFromShortId(string("scenario_value_text"));
@@ -2890,7 +2890,7 @@ class CAHHideCharsFilters : public IActionHandler
 		nlinfo("CAHHideCharsFilters called");
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:r2ed_scenario_control"));
+		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_scenario_control"));
 		if(!scenarioWnd) return;
 
 		bool lookingForPlayers = true;
@@ -2937,7 +2937,7 @@ class CAHLoadScenario : public IActionHandler
 		nlinfo("CAHLoadScenario called");
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:r2ed_scenario_control"));
+		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_scenario_control"));
 		if(!scenarioWnd) return;
 
 		CInterfaceElement *result = NULL;
@@ -3226,7 +3226,7 @@ class CAHLoadScenario : public IActionHandler
 			bool noob = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:IS_NEWBIE")->getValueBool();
 			if (FreeTrial && noob && (nevraxScenario != "1" || trialAllowed != "1"))
 			{
-				CViewText* pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:interface:warning_free_trial:text"));
+				CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 				if (pVT != NULL)
 					pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
 				pIM->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
@@ -3307,7 +3307,7 @@ class CAHLoadScenario : public IActionHandler
 
 						if(sessionBrowser._LastInvokeResult == 14)
 						{
-							CViewText* pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:interface:warning_free_trial:text"));
+							CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 							if (pVT != NULL)
 								pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
 							pIM->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
@@ -3336,7 +3336,7 @@ class CAHLoadScenario : public IActionHandler
 
 										if(sessionBrowser._LastInvokeResult == 14)
 										{
-											CViewText* pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:interface:warning_free_trial:text"));
+											CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 											if (pVT != NULL)
 												pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
 											pIM->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
@@ -3406,7 +3406,7 @@ class CAHOpenRingSessions : public IActionHandler
 		if(!R2::getEditor().isInitialized())
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			CInterfaceGroup* ringSessionsWnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:ring_sessions"));
+			CInterfaceGroup* ringSessionsWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:ring_sessions"));
 			if(!ringSessionsWnd) return;
 			ringSessionsWnd->setActive(true);
 		}

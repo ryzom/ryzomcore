@@ -477,7 +477,7 @@ bool CInterfaceLink::splitLinkTarget(const std::string &target,  CInterfaceGroup
 	{
 		// try the absolute adress of the element
 		elmPath = target.substr(0, lastPos);
-		elm = CInterfaceManager::getInstance()->getElementFromId(elmPath);
+		elm = CWidgetManager::getInstance()->getElementFromId(elmPath);
 		elmProp = target.substr(lastPos + 1);
 	}
 
@@ -544,7 +544,7 @@ void    CInterfaceLink::setTargetProperty (const std::string &Target, const CInt
 	// Eval target !
 	string elt = Target.substr(0,Target.rfind(':'));
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CInterfaceElement *pIE = pIM->getElementFromId(elt);
+	CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(elt);
 	CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(pIE);
 	if (pIG == NULL)
 		pIG = pIE->getParent();

@@ -510,7 +510,7 @@ void CUserEntity::updateVisualPropertyName(const NLMISC::TGameCycle &gameCycle, 
 /*	if (oldNameId != _NameId)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceElement *element = pIM->getElementFromId("ui:interface:mailbox:content:html");
+		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId("ui:interface:mailbox:content:html");
 		if (element)
 		{
 			CGroupHTML *html = dynamic_cast<CGroupHTML*>(element);
@@ -2667,7 +2667,7 @@ void CUserEntity::selection(const CLFECOMMON::TCLEntityId &slot)	// virtual
 		if (pPlayer)
 		{
 			/*// Pvp Mode
-			CViewBitmap * tagMode = dynamic_cast<CViewBitmap*>(pIM->getElementFromId("ui:interface:target:pvp_tags:mode"));
+			CViewBitmap * tagMode = dynamic_cast<CViewBitmap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:target:pvp_tags:mode"));
 			if (tagMode)
 			{
 				if (pPlayer->getPvpMode()&PVP_MODE::PvpFaction)
@@ -2679,7 +2679,7 @@ void CUserEntity::selection(const CLFECOMMON::TCLEntityId &slot)	// virtual
 			}
 */
 			/*// Pvp available actions (attack, heal, both)
-			CViewBitmap * tagMode = dynamic_cast<CViewBitmap*>(pIM->getElementFromId("ui:interface:target:pvp_tags:actions"));
+			CViewBitmap * tagMode = dynamic_cast<CViewBitmap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:target:pvp_tags:actions"));
 			if (tagMode)
 			{
 				if (pPlayer->getPvpMode()&PVP_MODE::PvpFaction)

@@ -861,12 +861,12 @@ retryJoinEdit:
 //			pIM->runActionHandler( "proc", NULL, "charsel_disable_buttons" );
 //			pIM->runActionHandler( "set", NULL, "target_property=ui:outgame:charsel:quit_but:active|value=1" );
 
-			CInterfaceElement *btnOk = pIM->getElementFromId("ui:outgame:charsel:message_box:ok");
+			CInterfaceElement *btnOk = CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel:message_box:ok");
 			if (btnOk)
 				btnOk->setActive( ! requestRetToMainland );
 
 			// Hide the black screen i.e. force showing the interface
-			CInterfaceElement *charSelBlackScreen = pIM->getElementFromId("ui:outgame:charsel:black_screen");
+			CInterfaceElement *charSelBlackScreen = CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel:black_screen");
 			if (charSelBlackScreen)
 			{
 				CViewBase *charSelBlackScreenBitmap = dynamic_cast<CViewBase*>(charSelBlackScreen);
@@ -928,7 +928,7 @@ retryJoinEdit:
 			pIM->runActionHandler( "proc", NULL, "charsel_enable_buttons" );
 			pIM->runActionHandler( "set", NULL, "target_property=ui:outgame:charsel:create_new_but:active|value=0" );
 
-			CInterfaceGroup* charselGroup = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:outgame:charsel"));
+			CInterfaceGroup* charselGroup = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel"));
 			if(charselGroup)
 				pIM->runActionHandler( "proc", charselGroup, "charsel_init_buttons" );
 		}
