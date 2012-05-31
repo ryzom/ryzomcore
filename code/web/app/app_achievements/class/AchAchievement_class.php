@@ -8,9 +8,10 @@
 		private $tie_cult;
 		private $image;
 		private $name;
+		private $template;
 
-		function AchAchievement(&$data,$lang,$user) {
-			global $db;
+		function AchAchievement(&$data) {
+			global $DBc,$_USER;
 
 			$this->id = $data['aa_id'];
 			$this->parent = $data['aa_parent'];
@@ -20,16 +21,16 @@
 			$this->tie_cult = $data['aa_tie_cult'];
 			$this->image = $data['aa_image'];
 			$this->name = $data['aal_name'];
-			$this->done = $data[''];
+			$this->template = $data['aal_template'];
 
 			#echo $this->id;
 
-			$res = $db->sqlQuery("SELECT * FROM ach_perk LEFT JOIN (ach_perk_lang) ON (apl_lang='".$lang."' AND apl_perk=ap_id) LEFT JOIN (ach_player_perk) ON (app_perk=ap_id AND app_player='".$user."') WHERE ap_achievement='".$this->id."' AND ap_parent IS NULL");
+			$res = $DBc->sqlQuery("SELECT * FROM ach_perk LEFT JOIN (ach_perk_lang) ON (apl_lang='".$_USER->getLang()."' AND apl_perk=ap_id) LEFT JOIN (ach_player_perk) ON (app_perk=ap_id AND app_player='".$_USER->getID()."') WHERE ap_achievement='".$this->id."' AND ap_parent IS NULL");
 			#MISSING: or parent is done
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
 				#echo "Z";
-				$tmp = new AchPerk($res[$i],$lang,$user);
+				$tmp = new AchPerk($res[$i],$this);
 
 				#echo var_export($tmp,true);
 
@@ -87,6 +88,21 @@
 
 		function getValueOpen() {
 			return $this->nodes[$this->child_open[0]]->getValue();
+		}
+
+		function getTemplate($insert = array()) {
+			if($this->template == null) {
+				return implode(";",$insert);
+			}
+			else {
+				$tmp = $this->template;
+				$match = array();
+				preg_match_all('#\[([0-9]+)\]#', $this->template, $match);
+				foreach($match[0] as $key=>$elem) {
+					$tmp = str_replace("[".$match[1][$key]."]",$insert[$key],$tmp);
+				}
+				return $tmp;
+			}
 		}
 	}
 ?>

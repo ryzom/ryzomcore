@@ -2,24 +2,24 @@
 	class AchMenu extends RenderNodeIterator {
 		var $open;
 
-		function AchMenu($open = false,$lang = 'en') {
-			global $db;
+		function AchMenu($open = false) {
+			global $DBc,$_USER;
 
 			$this->open = $open;
 			
 			$tmp = array();
 			$tmp['ac_id'] = 0;
 			$tmp['ac_parent'] = null;
-			$tmp['acl_name'] = get_translation('ach_summary',$lang);
+			$tmp['acl_name'] = get_translation('ach_summary',$_USER->getLang());
 			$tmp['ac_image'] = "";
 			$tmp['ac_order'] = -1;
 			$this->nodes[] = new AchMenuNode($tmp,$open,$lang);
 
-			$res = $db->sqlQuery("SELECT * FROM ach_category LEFT JOIN (ach_category_lang) ON (acl_lang='".$lang."' AND acl_category=ac_id) WHERE ac_parent IS NULL ORDER by ac_order ASC, acl_name ASC");
+			$res = $DBc->sqlQuery("SELECT * FROM ach_category LEFT JOIN (ach_category_lang) ON (acl_lang='".$_USER->getLang()."' AND acl_category=ac_id) WHERE ac_parent IS NULL ORDER by ac_order ASC, acl_name ASC");
 
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
-				$this->nodes[] = new AchMenuNode($res[$i],$open,$lang);
+				$this->nodes[] = new AchMenuNode($res[$i],$open);
 			}
 		}
 
@@ -46,8 +46,8 @@
 		private $image;
 		private $order;
 
-		function AchMenuNode(&$data,$open,$lang) {
-			global $db;
+		function AchMenuNode(&$data,$open) {
+			global $DBc,$_USER;
 
 			$this->id = $data['ac_id'];
 			$this->parent = $data['ac_parent'];
@@ -56,11 +56,11 @@
 			$this->order = $data['ac_order'];
 			$this->open = ($this->id == $open);
 
-			$res = $db->sqlQuery("SELECT * FROM ach_category LEFT JOIN (ach_category_lang) ON (acl_lang='".$lang."' AND acl_category=ac_id) WHERE ac_parent='".$this->id."' ORDER by ac_order ASC, acl_name ASC");
+			$res = $DBc->sqlQuery("SELECT * FROM ach_category LEFT JOIN (ach_category_lang) ON (acl_lang='".$_USER->getLang()."' AND acl_category=ac_id) WHERE ac_parent='".$this->id."' ORDER by ac_order ASC, acl_name ASC");
 
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
-				$this->nodes[] = new AchMenuNode($res[$i],$open,$lang);
+				$this->nodes[] = new AchMenuNode($res[$i],$open);
 			}
 		}
 

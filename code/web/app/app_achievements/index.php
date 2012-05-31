@@ -13,7 +13,10 @@ require_once('conf.php');
 // Ask to authenticate user (using ingame or session method) and fill $user with all information
 ryzom_app_authenticate($user, false);
 
-if($user['ig']) {
+require_once("class/RyzomUser_class.php");
+$_USER = new RyzomUser($user);
+
+if($_USER->isIG()) {
 	require_once("include/ach_render_ig.php");
 }
 else {
@@ -21,20 +24,21 @@ else {
 }
 require_once("include/ach_render_common.php");
 
-require_once("include/AchCommon_class.php");
-require_once("include/AchMenu_class.php");
-require_once("include/AchSummary_class.php");
-require_once("include/AchCategory_class.php");
+require_once("class/RenderNodeIteraor_abstract.php");
+require_once("class/AchList_abstract.php");
 
-require_once("include/AchAchievement_class.php");
-require_once("include/AchPerk_class.php");
-require_once("include/AchObjective_class.php");
+require_once("class/AchMenu_class.php");
+require_once("class/AchSummary_class.php");
+require_once("class/AchCategory_class.php");
+require_once("class/AchAchievement_class.php");
+require_once("class/AchPerk_class.php");
+require_once("class/AchObjective_class.php");
 
 
 
 // Update user acces on Db
 //$db = ryDB::getInstance(APP_NAME);
-$db = ryDB::getInstance(APP_NAME);
+$DBc = ryDB::getInstance(APP_NAME);
 /*$db->setDbDefs('test', array('id' => SQL_DEF_INT, 'num_access' => SQL_DEF_INT));
 
 $num_access = $db->querySingleAssoc('test', array('id' => $user['id']));
@@ -50,10 +54,13 @@ $c = _t('access', $num_access['num_access']).'<br/>';*/
 
 $c = "<center><table>
 	<tr>
+		<td colspan='2'>".ach_render_yubopoints(1)."</td>
+	</tr>
+	<tr>
 		<td valign='top'><div style='width:230px;font-weight:bold;font-size:14px;'>";
 		#$_REQUEST['mid'] = 1;
 		
-		$menu = new AchMenu($_REQUEST['cat'],$user['lang']);
+		$menu = new AchMenu($_REQUEST['cat']);
 
 		$c .= ach_render_menu($menu);
 		
@@ -67,22 +74,35 @@ $c .= "</div></td>
 $open = $menu->getOpenCat();
 
 if($open != 0) {
-	$cat = new AchCategory($open,1,$user['lang']);
+	if($_REQUEST['cult']) {
+		$cult = mysql_real_escape_string($_REQUEST['cult']);
+	}
+	else {
+		$cult = $_USER->getParam('cult');
+	}
+
+	if($_REQUEST['civ']) {
+		$civ = mysql_real_escape_string($_REQUEST['civ']);
+	}
+	else {
+		$civ = $_USER->getParam('civ');
+	}
+	$cat = new AchCategory($open,$cult,$civ);
 }
 else {
-	$cat = new AchSummary($menu,1,8,$user['lang']);
-	$c .= ach_render_summary_header($user['lang']);
+	$cat = new AchSummary($menu,8);
+	$c .= ach_render_summary_header();
 }
 
 $c .= ach_render_category($cat);
 if($open == 0) {
-	$c .= ach_render_summary_footer($user['lang'],$cat,1);
+	$c .= ach_render_summary_footer($cat,1);
 }
 
 $c .= "</td>
 	</tr>
 </table></center>";
 
-echo ryzom_app_render("achievements", $c, $user['ig']);
+echo ryzom_app_render("achievements", $c, $_USER->isIG());
 
 ?>

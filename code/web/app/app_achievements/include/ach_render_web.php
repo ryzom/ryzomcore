@@ -1,7 +1,21 @@
 <?php
 
-	function ach_render_tiebar($cult = "neutral", $civ = "neutral") {
+	function nf($n) {
+		return number_format($n, 0, '.', ',');
+	}
 
+	function ach_render_tiebar($cult = "neutral", $civ = "neutral") {
+		global $_USER;
+	}
+
+	function ach_render_yubopoints() {
+		global $DBc,$_USER;
+
+		$res = $DBc->sqlQuery("SELECT sum(ap_value) as anz FROM ach_perk,ach_player_perk WHERE ap_id=app_perk AND app_player='".$_USER->getID()."'");
+
+		$html = "<div style='display:block;border-bottom:1px solid #000000;'><img src='pic/yubo_done.png'>&nbsp;<span style='font-size:32px;'>".$res[0]['anz']."</span></div>";
+
+		return $html;
 	}
 
 	function ach_render_menu(&$menu,$sub = 0) {
@@ -160,9 +174,6 @@
 			$perk = $ach->getChild($elem);
 			$html .= "<div style='display:block;'><span style='color:#66CC00;font-weight:bold;'>".$perk->getName()."</span> ( ".date('d.m.Y',$perk->getDone())." ) <img src='pic/yubo_done.png' width='15px' /> ".$perk->getValue()."</div>";
 		}
-		/*if($perk->objDrawable()) {
-			$html .= "<br>".ach_render_obj_list($perk->getChildren());
-		}*/
 
 		return $html;
 	}
@@ -254,13 +265,15 @@
 
 	function ach_render_obj_value(&$obj) {
 		$html = "";
-		if($obj->isdone()) {
-			$col = "#71BE02";
+		if($obj->getName() != null) {
+			if($obj->isdone()) {
+				$col = "#71BE02";
+			}
+			else {
+				$col = "#999999";
+			}
+			$html .= "<div style='color:".$col.";display:block;'>".$obj->getName()."</div>";
 		}
-		else {
-			$col = "#999999";
-		}
-		$html .= "<div style='color:".$col.";display:block;'>".$obj->getName()."</div>";
 
 		$html .= ach_render_progressbar($obj->getProgress(),$obj->getValue(),350);
 		
@@ -276,12 +289,12 @@
 			<tr>
 				<td bgcolor='#66CC00' width='".$left."px' align='right'>";
 				if(($prog/$val) > 0.85) {
-					$html .= "&nbsp;".$prog." / ".$val."&nbsp;";
+					$html .= "&nbsp;".nf($prog)." / ".nf($val)."&nbsp;";
 				}
 				$html .= "</td>
 				<td align='left' style='color:#FFFFFF;'>";
 				if(($prog/$val) <= 0.85) {
-					$html .= "&nbsp;".$prog." / ".$val."&nbsp;";
+					$html .= "&nbsp;".nf($prog)." / ".nf($val)."&nbsp;";
 				}
 				$html .= "</td>
 			</tr>
@@ -290,12 +303,16 @@
 		return $html;
 	}
 
-	function ach_render_summary_header($lang) {
-		return "<div style='display:block;font-weight:bold;font-size:30px;color:#FFFFFF;text-align:center;margin-bottom:10px;'>".get_translation('ach_summary_header',$lang)."</div>";
+	function ach_render_summary_header() {
+		global $_USER;
+		
+		return "<div style='display:block;font-weight:bold;font-size:30px;color:#FFFFFF;text-align:center;margin-bottom:10px;'>".get_translation('ach_summary_header',$_USER->getLang())."</div>";
 	}
 
-	function ach_render_summary_footer($lang,&$summary,$user) {
-		$nodes = $summary->getSummary($lang,$user);
+	function ach_render_summary_footer(&$summary) {
+		global $_USER;
+
+		$nodes = $summary->getSummary();
 		$html = "";
 
 		$sum_done = 0;
@@ -323,10 +340,10 @@
 		}
 
 		$html = "<p />
-		<div style='display:block;font-weight:bold;font-size:30px;color:#FFFFFF;text-align:center;margin-bottom:10px;'>".get_translation('ach_summary_stats',$lang)."</div>
+		<div style='display:block;font-weight:bold;font-size:30px;color:#FFFFFF;text-align:center;margin-bottom:10px;'>".get_translation('ach_summary_stats',$_USER->getLang())."</div>
 		<table>
 			<tr>
-				<td colspan='3' align='center'>".get_translation('ach_summary_stats_total',$lang)."<br>".ach_render_progressbar($sum_done,$sum_total,450)."<br></td>
+				<td colspan='3' align='center'>".get_translation('ach_summary_stats_total',$_USER->getLang())."<br>".ach_render_progressbar($sum_done,$sum_total,450)."<br></td>
 			</tr>
 			".$html."
 		</table>";

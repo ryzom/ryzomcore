@@ -9,8 +9,8 @@
 		private $done;
 		private $progress;
 
-		function AchObjective(&$data,$lang,$user) {
-			global $db;
+		function AchObjective(&$data) {
+			global $DBc,$_USER;
 
 			$this->id = $data['ao_id'];
 			$this->perk = $data['ao_perk'];
@@ -23,7 +23,7 @@
 			$this->progress = $this->value;
 
 			if(!$this->isDone()) {
-				$res = $db->sqlQuery("SELECT count(*) as anz FROM ach_player_atom,ach_atom WHERE apa_atom=atom_id AND atom_objective='".$this->id."' AND apa_player='".$user."'");
+				$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_player_atom,ach_atom WHERE apa_atom=atom_id AND atom_objective='".$this->id."' AND apa_player='".$_USER->getId()."'");
 				$this->progress = $res[0]['anz'];
 			}
 		}

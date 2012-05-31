@@ -7,20 +7,20 @@
 		private $name;
 		private $done;
 
-		function AchPerk(&$data,$lang,$user) {
-			global $db;
+		function AchPerk(&$data,&$parent) {
+			global $DBc,$_USER;
 
 			$this->id = $data['ap_id'];
-			$this->parent = $data['ap_parent'];
+			$this->parent = $parent;
 			$this->achievement = $data['ap_achievement'];
 			$this->value = $data['ap_value'];
 			$this->name = $data['apl_name'];
 			$this->done = $data['app_date'];
 
-			$res = $db->sqlQuery("SELECT * FROM ach_objective LEFT JOIN (ach_objective_lang) ON (aol_lang='".$lang."' AND aol_objective=ao_id) LEFT JOIN (ach_player_objective) ON (apo_objective=ao_id AND apo_player='".$user."') WHERE ao_perk='".$this->id."'");
+			$res = $DBc->sqlQuery("SELECT * FROM ach_objective LEFT JOIN (ach_objective_lang) ON (aol_lang='".$_USER->getLang()."' AND aol_objective=ao_id) LEFT JOIN (ach_player_objective) ON (apo_objective=ao_id AND apo_player='".$_USER->getID()."') WHERE ao_perk='".$this->id."'");
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
-				$this->nodes[] = new AchObjective($res[$i],$lang,$user);
+				$this->nodes[] = new AchObjective($res[$i]);
 			}
 		}
 
@@ -41,7 +41,7 @@
 		}
 
 		function getName() {
-			return $this->name;
+			return $this->parent->getTemplate(explode(";",$this->name));
 		}
 
 		function objDrawable() {
