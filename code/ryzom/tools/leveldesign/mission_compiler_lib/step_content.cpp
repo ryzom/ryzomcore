@@ -3525,6 +3525,8 @@ public:
 			string err = toString("primitive(%s): 'animation_name' must not be empty.", prim->getName().c_str());
 			throw EParseException(prim, err.c_str());
 		}
+		// We add the animation name to the list, so that we can check later if the animation exists
+		md.addCameraAnimationName(_Name);
 	}
 
 	string genCode(CMissionData &md)

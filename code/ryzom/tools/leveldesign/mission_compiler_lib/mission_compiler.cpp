@@ -732,6 +732,30 @@ bool CMissionCompiler::installCompiledMission(NLLIGO::CLigoConfig &ligoConfig, c
 		for (uint i=0; i<_CompiledMission.size(); ++i)
 		{
 			CMissionData &mission = *(_CompiledMission[i]);
+
+			// Before adding the script to the giver npc, we first check if the referenced camera animations exist in the current primitive
+			TLoadedPrimitive &currLoadedPrim = loadedPrimitives[toLower(primFileName)];
+			CPrimitives *currPrimDoc = currLoadedPrim.PrimDoc;
+			CPrimitiveContext::instance().CurrentPrimitive = currPrimDoc;
+
+			std::vector<std::string> cameraAnimationNames = mission.getCameraAnimationNames();
+			for (std::vector<std::string>::iterator it = cameraAnimationNames.begin(); it != cameraAnimationNames.end(); ++it)
+			{
+				std::string animName = *it;
+				TPrimitiveSet camAnims;
+				CPrimitiveSet<TPrimitiveClassAndNamePredicate> filter;
+				TPrimitiveClassAndNamePredicate pred("camera_animation_tree", animName);
+				filter.buildSet(currPrimDoc->RootNode, pred, camAnims);
+				if (camAnims.empty())
+				{
+					// Error, we cannot find the camera animation !
+					string err = toString("Can't find camera animation '%s' in primitive '%s' !", 
+						animName.c_str(),
+						primFileName.c_str());
+					throw EParseException(NULL, err.c_str());
+				}
+			}
+
 			string fileName = mission.getGiverPrimitive();
 			if (fileName.empty())
 			{
@@ -2182,6 +2206,16 @@ bool CMissionData::isThereAJumpTo(const std::string &stepName)
 		return true;
 	else
 		return false;
+}
+
+void CMissionData::addCameraAnimationName( const std::string& name )
+{
+	_CameraAnimations.push_back(name);
+}
+
+std::vector<std::string> CMissionData::getCameraAnimationNames()
+{
+	return _CameraAnimations;
 }
 
 void TCompilerVarName::init(const std::string &defaultName, STRING_MANAGER::TParamType type, CMissionData &md, NLLIGO::IPrimitive *prim, const std::string propName)

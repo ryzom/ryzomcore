@@ -315,6 +315,8 @@ public:
 	std::string getProperty(NLLIGO::IPrimitive *prim, const std::string &propertyName, bool replaceVar, bool canFail);
 	std::vector<std::string> getPropertyArray(NLLIGO::IPrimitive *prim, const std::string &propertyName, bool replaceVar, bool canFail);
 
+	void addCameraAnimationName(const std::string& name);
+	std::vector<std::string> getCameraAnimationNames();
 
 	bool isThereAJumpTo(const std::string &stepName);
 
@@ -406,6 +408,8 @@ private:
 	std::map<std::string, IStep *>		_StepsByNames;
 
 	std::set<TJumpInfo>	_JumpPoints;
+
+	std::vector<std::string>			_CameraAnimations;
 
 };
 
