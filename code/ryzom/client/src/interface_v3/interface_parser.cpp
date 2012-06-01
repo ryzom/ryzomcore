@@ -122,7 +122,7 @@ using namespace NLMISC;
 void badLuaParseMessageBox()
 {
 	NL3D::UDriver::TMessageBoxId	ret =
-		CInterfaceManager::getInstance()->getViewRenderer().getDriver()->systemMessageBox(	"LUA files reading failed!\n"
+		CViewRenderer::getInstance()->getDriver()->systemMessageBox(	"LUA files reading failed!\n"
 																							"Some LUA files are corrupted, moved or may have been removed.\n"
 																							"Ryzom may need to be restarted to run properly.\n"
 																							"Would you like to quit now?",

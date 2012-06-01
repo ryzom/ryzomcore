@@ -204,7 +204,7 @@ void CMacroCmdManager::initInGame()
 {
 	// Get all custom icon bitmaps
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	CInterfaceOptions *pIO = pIM->getOptions("macro_custom_icon");
 	if (pIO != NULL)
 	{

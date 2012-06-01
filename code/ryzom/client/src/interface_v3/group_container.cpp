@@ -61,7 +61,7 @@ bool CGroupContainer::_ValidateCanDeactivate = true;
 #ifdef DRAW_GC_TEST_QUADS
 	static void drawGCTestQuad(sint renderLayer, sint32 xreal, sint32 yreal, sint32 wreal, sint32 hreal, CRGBA color)
 	{
-		CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		if(rVR.isMinimized())
 			return;
 		sint32 x, y, w, h;
@@ -348,7 +348,7 @@ sint32 CCtrlResizer::resizeW (sint32 dx)
 	NLMISC::clamp(clippedNewW, WMin, WMax);
 	// clip by screen
 	uint32 sw, sh;
-	CViewRenderer &vr = CInterfaceManager::getInstance()->getViewRenderer();
+	CViewRenderer &vr = *CViewRenderer::getInstance();
 	vr.getScreenSize(sw, sh);
 	if (_Parent->getPosRef() & Hotspot_xR)
 	{
@@ -405,7 +405,7 @@ sint32 CCtrlResizer::resizeH (sint32 dy)
 
 	// clip by screen
 	uint32 sw, sh;
-	CViewRenderer &vr = CInterfaceManager::getInstance()->getViewRenderer();
+	CViewRenderer &vr = *CViewRenderer::getInstance();
 	vr.getScreenSize(sw, sh);
 	if (_Parent->getPosRef() & Hotspot_Tx)
 	{
@@ -483,7 +483,7 @@ void CCtrlMover::draw ()
 
 	// No Op if window is minimized
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	if(pIM->getViewRenderer().isMinimized())
+	if(CViewRenderer::getInstance()->isMinimized())
 		return;
 
 	// draw insertion position if moving in parent list
@@ -491,14 +491,14 @@ void CCtrlMover::draw ()
 	{
 		COptionsContainerInsertion *options = getInsertionOptions();
 		if (!options) return;
-		CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		sint32 oldSciX, oldSciY, oldSciW, oldSciH;
 		rVR.getClipWindow (oldSciX, oldSciY, oldSciW, oldSciH);
 		uint32 sw, sh;
 		rVR.getScreenSize(sw, sh);
 		rVR.setClipWindow (0, 0, (sint32) sw, (sint32) sh);
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CViewRenderer &vr = im->getViewRenderer();
+		CViewRenderer &vr = *CViewRenderer::getInstance();
 		//
 		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(_Parent);
 		if (!gc) return;
@@ -807,7 +807,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 				{
 					// clip, in real coords space
 					uint32	wScreen, hScreen;
-					pIM->getViewRenderer().getScreenSize(wScreen, hScreen);
+					CViewRenderer::getInstance()->getScreenSize(wScreen, hScreen);
 					x+= _MoveDeltaXReal;
 					y+= _MoveDeltaYReal;
 
@@ -1067,7 +1067,7 @@ void CCtrlMover::setPoped(CGroupContainer *gc, sint32 x, sint32 y, CInterfaceMan
 	sint32 newX = gc->getXReal() + deltaX;
 	sint32 newY = gc->getYReal() + deltaY;
 	uint32	wScreen, hScreen;
-	pIM->getViewRenderer().getScreenSize(wScreen, hScreen);
+	CViewRenderer::getInstance()->getScreenSize(wScreen, hScreen);
 	clamp(newX, 0, (sint32)wScreen - gc->getWReal());
 	clamp(newY, 0, (sint32)hScreen - gc->getHReal());
 	// move window
@@ -1516,7 +1516,7 @@ void CGroupContainer::updateCoords()
 	{
 		// Clip by screen
 		uint32 sw, sh;
-		CViewRenderer &vr = CInterfaceManager::getInstance()->getViewRenderer();
+		CViewRenderer &vr = *CViewRenderer::getInstance();
 		vr.getScreenSize(sw, sh);
 		// ensure the maxH is > minH and < sh  (prioritary > minH, in case of sh<minh)
 		_PopupMaxH= min(_PopupMaxH, (sint32)sh);
@@ -1530,7 +1530,7 @@ void CGroupContainer::updateCoords()
 		clamp(_H, _PopupMinH, _PopupMaxH);
 		// Clip by screen (but minw/minh is prioritary)
 		uint32 sw, sh;
-		CViewRenderer &vr = CInterfaceManager::getInstance()->getViewRenderer();
+		CViewRenderer &vr = *CViewRenderer::getInstance();
 		vr.getScreenSize(sw, sh);
 		if((sint32)sw>_PopupMinW && _W>(sint32)sw)	_W= sw;
 		if((sint32)sh>_PopupMinH && _H>(sint32)sh)	_H= sh;
@@ -1725,7 +1725,7 @@ void CGroupContainer::updateCoords()
 	{
 		// test if must clip
 		uint32	wScreen, hScreen;
-		CInterfaceManager::getInstance()->getViewRenderer().getScreenSize(wScreen, hScreen);
+		CViewRenderer::getInstance()->getScreenSize(wScreen, hScreen);
 		if (_WReal <= (sint32) wScreen && _HReal <= (sint32) hScreen)
 		{
 			sint32 newX = _XReal;
@@ -1849,7 +1849,7 @@ void CGroupContainer::draw ()
 	makeNewClip (oldSciX, oldSciY, oldSciW, oldSciH);
 
 	// Draw the container
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	CRGBA col = pIM->getGlobalColor();
 
 	bool bGrayed = isGrayed();

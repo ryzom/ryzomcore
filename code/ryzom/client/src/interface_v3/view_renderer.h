@@ -26,8 +26,6 @@
 #include "nel/misc/rgba.h"
 #include "nel/misc/uv.h"
 #include "nel/3d/frustum.h"
-#include "../ingame_database_manager.h"
-
 
 // ***************************************************************************
 #define	VR_NUM_LAYER	32
@@ -104,9 +102,12 @@ public:
 		sint32	_TextureId;
 	};
 
-	CViewRenderer( NL3D::UDriver *driver, NL3D::UTextContext *textcontext );
+private:
+	CViewRenderer();
+	~CViewRenderer();
 
-	~CViewRenderer ();
+public:
+	static CViewRenderer* getInstance();
 
 	/// setup the default values for everything
 	void setup();
@@ -121,10 +122,13 @@ public:
 	void reset();
 
 	/// Retrieves the 3d driver we are using
-	NL3D::UDriver* getDriver();
+	static NL3D::UDriver* getDriver();
 
 	/// Sets the current TextContext.
-	void setTextContext( NL3D::UTextContext *textcontext );
+	static void setTextContext( NL3D::UTextContext *textcontext );
+
+	/// Sets the current driver
+	static void setDriver( NL3D::UDriver *driver );
 
 	/*
 	 * setClipWindow : set the current clipping window
@@ -564,8 +568,9 @@ private:
 	bool				_WorldSpaceScale;
 	
 	
-	NL3D::UDriver *driver;
-	NL3D::UTextContext *textcontext;
+	static CViewRenderer *instance;
+	static NL3D::UDriver *driver;
+	static NL3D::UTextContext *textcontext;
 };
 
 

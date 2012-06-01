@@ -257,7 +257,7 @@ float CGroupMap::getActualMaxScale() const
 void CGroupMap::CPolyButton::drawPolyButton()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	float oow, ooh;
 	rVR.getScreenOOSize(oow, ooh);
@@ -1470,7 +1470,7 @@ void CGroupMap::draw()
 	sint32 oldSciX, oldSciY, oldSciW, oldSciH;
 	makeNewClip (oldSciX, oldSciY, oldSciW, oldSciH);
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CViewRenderer &vr = im->getViewRenderer();
+	CViewRenderer &vr = *CViewRenderer::getInstance();
 	uint8 alpha = im->getGlobalColorForContent().A;
 	updateScale();
 

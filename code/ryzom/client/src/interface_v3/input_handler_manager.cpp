@@ -163,13 +163,13 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 				UserControls.stopFreeLook();
 			}
 			// be nice with other app : let the mouse reappear (useful in direct 3D mode with no hardware cursor)
-			CInterfaceManager::getInstance()->getViewRenderer().getDriver()->showCursor(true);
+			CViewRenderer::getInstance()->getDriver()->showCursor(true);
 //			Driver->setSystemArrow();
 		}
 		else
 		{
 			_RecoverFocusLost = true; // force to update mouse pos on next click or move
-			CInterfaceManager::getInstance()->getViewRenderer().getDriver()->showCursor(IsMouseCursorHardware());
+			CViewRenderer::getInstance()->getDriver()->showCursor(IsMouseCursorHardware());
 			_Focus = true;
 		}
 

@@ -120,7 +120,7 @@ void CDBViewBar::setType (TViewBar vb)
 	// Get the Height Size.
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	sint32	wBar;
-	pIM->getViewRenderer().getTextureSizeFromId(_TextureId, wBar, _HBar);
+	CViewRenderer::getInstance()->getTextureSizeFromId(_TextureId, wBar, _HBar);
 }
 
 // ----------------------------------------------------------------------------
@@ -180,7 +180,7 @@ void CDBViewBar::draw ()
 	_Slot.draw();
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	color.A = (uint8)(((sint32)color.A*((sint32)pIM->getGlobalColorForContent().A+1))>>8);
 

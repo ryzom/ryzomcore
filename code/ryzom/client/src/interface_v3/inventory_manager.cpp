@@ -1112,7 +1112,7 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 		}
 
 		// reset display of left hand
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		pCSLeftHand->setTextureNoItem(rVR.getTextureIdFromName("hand_left.tga"));
 		pCSLeftHand->setGrayed(false);
 		pCSLeftHand->setItemSlot(SLOTTYPE::stringToSlotType("LEFT_HAND"));
@@ -1187,7 +1187,7 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 		CDBCtrlSheet *pCSLeftHand = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_LEFT));
 		if ( pCSLeftHand )
 		{
-			CViewRenderer &rVR = pIM->getViewRenderer();
+			CViewRenderer &rVR = *CViewRenderer::getInstance();
 			pCSLeftHand->setActionOnLeftClick("proc");
 			pCSLeftHand->setGrayed(false);
 

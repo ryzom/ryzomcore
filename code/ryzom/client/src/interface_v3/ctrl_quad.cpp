@@ -61,7 +61,7 @@ void CCtrlQuad::draw()
 	H_AUTO(Rz_CCtrlQuad_draw)
 	nlassert(_Parent);
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	CRGBA col;
 	if(getModulateGlobalColor())
@@ -297,7 +297,7 @@ void CCtrlQuad::setTexture(const std::string &texName)
 {
 	H_AUTO(Rz_CCtrlQuad_setTexture)
 //	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//	CViewRenderer &rVR = pIM->getViewRenderer();
+//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	_TextureId.setTexture(texName.c_str());
 }
 
@@ -306,7 +306,7 @@ std::string CCtrlQuad::getTexture() const
 {
 	H_AUTO(Rz_CCtrlQuad_getTexture)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	return rVR.getTextureNameFromId (_TextureId);
 }
 
@@ -357,7 +357,7 @@ void CCtrlQuad::setQuad(const std::string &texName, const NLMISC::CVector &srcPo
 	H_AUTO(Rz_CCtrlQuad_setQuad)
 	NLMISC::CVector pos = srcPos;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	sint32 w, h;
 	rVR.getTextureSizeFromId(rVR.getTextureIdFromName(texName), w, h);
 	if (angle == 0.f)

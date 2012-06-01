@@ -60,7 +60,7 @@ bool CViewRadar::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 
 	// Spot textures
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	
 	// Large missions Icons
 	const char *spotTextureNames[NbRadarSpotIds] = { "texture_std", "texture_missionlist", "texture_missionauto", "texture_missionstep" };
@@ -105,7 +105,7 @@ bool CViewRadar::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 void CViewRadar::draw ()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	CEntityCL *user = EntitiesMngr.entity(0);
 	if (user == NULL) return;

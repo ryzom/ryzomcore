@@ -14,28 +14,26 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-#include "stdpch.h"
-
 #include "view_renderer.h"
 #include "nel/misc/path.h"
 #include "nel/misc/file.h"
 #include "nel/misc/uv.h"
 #include "nel/misc/hierarchical_timer.h"
-#include "interface_manager.h"
 #include "../client_cfg.h"
 
 using namespace NLMISC;
 using namespace std;
 using namespace NL3D;
 
-CViewRenderer::CViewRenderer( NL3D::UDriver *driver, NL3D::UTextContext *textcontext )
-{
-	setup();
+CViewRenderer* CViewRenderer::instance         = NULL;
+NL3D::UDriver* CViewRenderer::driver           = NULL;
+NL3D::UTextContext* CViewRenderer::textcontext = NULL;
 
-	this->driver = driver;
-	this->textcontext = textcontext;
+CViewRenderer::CViewRenderer()
+{
+	nlassert( driver != NULL );
+	nlassert( textcontext != NULL );
+	setup();
 }
 
 CViewRenderer::~CViewRenderer()
@@ -48,6 +46,13 @@ CViewRenderer::~CViewRenderer()
 	}
 }
 
+
+CViewRenderer* CViewRenderer::getInstance()
+{
+	if( instance == NULL )
+		instance = new CViewRenderer;
+	return instance;
+}
 
 /*
  * setClipWindow : set the current clipping window
@@ -203,7 +208,12 @@ NL3D::UDriver* CViewRenderer::getDriver(){
 
 void CViewRenderer::setTextContext(NL3D::UTextContext *textcontext)
 {
-	this->textcontext = textcontext;
+	CViewRenderer::textcontext = textcontext;
+}
+
+void CViewRenderer::setDriver( NL3D::UDriver *driver )
+{
+	CViewRenderer::driver = driver;
 }
 
 // ***************************************************************************
@@ -1732,10 +1742,8 @@ void CViewRenderer::drawCustom (sint32 x, sint32 y, sint32 width, sint32 height,
 
 CViewRenderer::CTextureId::~CTextureId ()
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
 	if (_TextureId>=0)
-		rVR.deleteTexture(_TextureId);
+		CViewRenderer::getInstance()->deleteTexture(_TextureId);
 	_TextureId = -1;
 }
 
@@ -1744,8 +1752,7 @@ CViewRenderer::CTextureId::~CTextureId ()
 bool CViewRenderer::CTextureId::setTexture (const char *textureName, sint32 offsetX, sint32 offsetY, sint32 width, sint32 height,
 											bool uploadDXTC, bool bReleasable)
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	if (_TextureId>=0)
 		rVR.deleteTexture(_TextureId);
 	_TextureId = rVR.getTextureIdFromName(textureName);
@@ -1766,8 +1773,7 @@ void CViewRenderer::CTextureId::serial(NLMISC::IStream &f)
 	}
 	else
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		texName = rVR.getTextureNameFromId(_TextureId);
 		f.serial(texName);
 	}

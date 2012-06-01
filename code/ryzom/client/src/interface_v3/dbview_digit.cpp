@@ -45,7 +45,7 @@ bool CDBViewDigit::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		return false;
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	// link to the db
 	CXMLAutoPtr ptr;
@@ -103,7 +103,7 @@ void CDBViewDigit::updateCoords()
 void CDBViewDigit::draw ()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	sint32	wDigit= rVR.getFigurTextureW();
 	sint32	hDigit= rVR.getFigurTextureH();
 

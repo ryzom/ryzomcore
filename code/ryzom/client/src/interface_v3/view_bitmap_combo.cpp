@@ -276,7 +276,7 @@ void CViewBitmapCombo::draw()
 
 	sint32 mx = 0, my = 0;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	const std::vector<CViewBase *> &rVB = pIM->getViewsUnderPointer();
 	if (!CWidgetManager::getInstance()->getPointer()) return;
 	CWidgetManager::getInstance()->getPointer()->getPointerDispPos(mx, my);
@@ -377,7 +377,7 @@ void CViewBitmapCombo::draw()
 					textId = getTexId(_TexsId, texIndex);
 					color  = getCol(_Col, texIndex);
 				}
-				pIM->getViewRenderer().drawRotFlipBitmap (_RenderLayer, px, py, itemw, itemh, 0, false,
+				CViewRenderer::getInstance()->drawRotFlipBitmap (_RenderLayer, px, py, itemw, itemh, 0, false,
 														 textId,
 														 color);
 			}
@@ -454,7 +454,7 @@ void CViewBitmapCombo::draw()
 		}
 	}
 
-	pIM->getViewRenderer().drawRotFlipBitmap (_RenderLayer, px, py, itemw, itemh, 0, false,
+	CViewRenderer::getInstance()->drawRotFlipBitmap (_RenderLayer, px, py, itemw, itemh, 0, false,
 											  textId,
 											  color);
 }

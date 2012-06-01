@@ -1735,7 +1735,7 @@ bool mainLoop()
 			H_AUTO_USE ( RZ_Client_Main_Loop_Cursor )
 
 			// Change only if screen is not minimized
-			if(!pIMinstance->getViewRenderer().isMinimized())
+			if(!CViewRenderer::getInstance()->isMinimized())
 			{
 				// Get the cursor instance
 				CViewPointer *cursor = CWidgetManager::getInstance()->getPointer();
@@ -1746,7 +1746,7 @@ bool mainLoop()
 					cursor->getPointerPos(x, y);
 
 					uint32 w, h;
-					CViewRenderer &viewRender = pIMinstance->getViewRenderer();
+					CViewRenderer &viewRender = *CViewRenderer::getInstance();
 					viewRender.getScreenSize(w, h);
 
 					if(w)

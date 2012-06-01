@@ -418,7 +418,7 @@ void CViewText::draw ()
 	H_AUTO( RZ_Interface_CViewText_draw  )
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	// *** Out Of Clip?
 	sint32 ClipX, ClipY, ClipW, ClipH;
@@ -1559,7 +1559,7 @@ void CViewText::getCharacterPositionFromIndex(sint index, bool cursorAtPreviousL
 	TextContext->setHotSpot (UTextContext::BottomLeft);
 	TextContext->setShaded (_Shadow);
 	TextContext->setFontSize (_FontSize);
-//	CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	height = getFontHeight();
 	//
 	if (_MultiLine)
@@ -1691,7 +1691,7 @@ void CViewText::getCharacterIndexFromPosition(sint x, sint y, uint &index, bool 
 	TextContext->setShaded (_Shadow);
 	TextContext->setFontSize (_FontSize);
 	 // find the line where the character is
-//	CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	uint      charPos = 0;
 	if (_MultiLine)
 	{

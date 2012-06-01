@@ -80,7 +80,7 @@ bool CViewBitmap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		TxName = strlwr (TxName);
 		setTexture (TxName);
 		//CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		//CViewRenderer &rVR = pIM->getViewRenderer();
+		//CViewRenderer &rVR = *CViewRenderer::getInstance();
 		//_TextureId = rVR.getTextureIdFromName (TxName);
 	}
 
@@ -145,7 +145,7 @@ bool CViewBitmap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 void CViewBitmap::draw ()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	CRGBA col;
 	if(getModulateGlobalColor())
@@ -209,7 +209,7 @@ void CViewBitmap::updateCoords()
 	if (!_Scale)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		sint32 txw, txh;
 		rVR.getTextureSizeFromId (_TextureId, txw, txh);
 		_W = txw;
@@ -222,7 +222,7 @@ void CViewBitmap::updateCoords()
 void CViewBitmap::setTexture(const std::string & TxName)
 {
 //	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//	CViewRenderer &rVR = pIM->getViewRenderer();
+//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	_TextureId.setTexture (TxName.c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
 }
@@ -231,7 +231,7 @@ void CViewBitmap::setTexture(const std::string & TxName)
 std::string CViewBitmap::getTexture () const
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	return rVR.getTextureNameFromId (_TextureId);
 }
 
@@ -239,7 +239,7 @@ std::string CViewBitmap::getTexture () const
 void CViewBitmap::fitTexture()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	sint32 w, h;
 	rVR.getTextureSizeFromId(_TextureId, w, h);
 	setW(w);
@@ -287,7 +287,7 @@ sint32	CViewBitmap::getMaxUsedW() const
 {
 	sint32 txw, txh;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	rVR.getTextureSizeFromId (_TextureId, txw, txh);
 	return txw;
 }

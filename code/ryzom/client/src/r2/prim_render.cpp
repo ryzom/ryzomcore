@@ -157,7 +157,7 @@ void CPrimRender::setLook(const CPrimLook &look)
 	if (!look.EdgeLook.WorldMapTexture.empty())
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CViewRenderer &vr = im->getViewRenderer();
+		CViewRenderer &vr = *CViewRenderer::getInstance();
 		sint32 width, height;
 		sint32 id = vr.getTextureIdFromName(look.EdgeLook.WorldMapTexture);
 		vr.getTextureSizeFromId(id, width, height);

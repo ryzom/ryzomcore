@@ -318,7 +318,7 @@ CCtrlSheetInfo::CCtrlSheetInfo()
 
 void CDBCtrlSheet::release ()
 {
-	NL3D::UDriver *Driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
+	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 	if (Driver)
 		Driver->deleteMaterial(_GuildMat);
 
@@ -367,7 +367,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	{
 		string TxName = (const char *) prop;
 		TxName = strlwr (TxName);
-		CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		_DispNoSheetBmpId = rVR.getTextureIdFromName (TxName);
 	}
 
@@ -558,7 +558,7 @@ CDBCtrlSheet::CDBCtrlSheet(const TCtorParam &param)
 // ----------------------------------------------------------------------------
 CDBCtrlSheet::~CDBCtrlSheet()
 {
-	NL3D::UDriver *Driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
+	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 
 	if (_GuildBack)
 	{
@@ -656,7 +656,7 @@ void CDBCtrlSheet::initSheet(const std::string &dbBranchId, const CCtrlSheetInfo
 
 		// get over for spell
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		_TextureIdOver = pIM->getViewRenderer().getTextureIdFromName ("w_slot_spell_over.tga");
+		_TextureIdOver = CViewRenderer::getInstance()->getTextureIdFromName ("w_slot_spell_over.tga");
 	}
 
 	// Init size.
@@ -682,7 +682,7 @@ void CDBCtrlSheet::initSheetFast( const std::string &dbParentBranchId, int sheet
 
 		// get over for spell
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		_TextureIdOver = pIM->getViewRenderer().getTextureIdFromName ("w_slot_spell_over.tga");
+		_TextureIdOver = CViewRenderer::getInstance()->getTextureIdFromName ("w_slot_spell_over.tga");
 	}
 
 	// Init size.
@@ -944,7 +944,7 @@ uint CDBCtrlSheet::getInventorySlot( const string &dbBranchId )
 void CDBCtrlSheet::initSheetSize()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	// If the user type is auto, then select always item slot.
 	if(_Type==SheetType_Auto)
 	{
@@ -1030,7 +1030,7 @@ void CDBCtrlSheet::updateCoords ()
 void CDBCtrlSheet::updateIconSize()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	if (_DispSheetBmpId != -1)
 	{
 		rVR.getTextureSizeFromId(_DispSheetBmpId, _IconW, _IconH);
@@ -1062,7 +1062,7 @@ void CDBCtrlSheet::setupPact()
 	if (_LastSheetId != sheet || _NeedSetup)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		_LastSheetId = sheet;
 		CSheetId sheetId(sheet);
@@ -1105,7 +1105,7 @@ void CDBCtrlSheet::setupItem ()
 	// If this is the same sheet, need to resetup
 	if (_LastSheetId != sheet || _NeedSetup)
 	{
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		_NeedSetup= false;
 		_LastSheetId = sheet;
@@ -1324,7 +1324,7 @@ void CDBCtrlSheet::setupMission()
 		CMissionIconSheet *pMIS = (CMissionIconSheet*)pES;
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		_DispBackBmpId  = rVR.getTextureIdFromName(pMIS->MainIconBg);
 		_DispSheetBmpId = rVR.getTextureIdFromName(pMIS->MainIconFg);
@@ -1375,7 +1375,7 @@ void CDBCtrlSheet::setupGuildFlag ()
 		sint8 nLastGuildBack =	(sint8)(_MacroID&15);		// 4 bits en pos 0
 		sint8 nLastGuildSymbol = (sint8)((_MacroID>>4)&63);	// 6 bits en pos 4
 
-		NL3D::UDriver *Driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
+		NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 
 		if (_GuildMat.empty())
 		{
@@ -1454,7 +1454,7 @@ void CDBCtrlSheet::setupDisplayAsSBrick(sint32 sheet, sint32 optSheet)
 {
 	// Setup with the param sheet
 	CSBrickManager *pBM = CSBrickManager::getInstance();
-	CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
  	CSBrickSheet *pBR = pBM->getBrick (CSheetId(sheet));
 	CSBrickSheet *pBROpt = pBM->getBrick (CSheetId(optSheet));
@@ -1662,7 +1662,7 @@ void CDBCtrlSheet::setupOutpostBuilding()
 	// If this is the same sheet, need to resetup
 	if (_LastSheetId != sheet || _NeedSetup)
 	{
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		_NeedSetup= false;
 		_LastSheetId = sheet;
@@ -1747,7 +1747,7 @@ void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar
 	// Use the optString for the Macro name
 	_OptString = strlwr(_OptString);
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	_CharBitmaps.clear();
 
@@ -1804,7 +1804,7 @@ void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar
 void CDBCtrlSheet::displayCharBitmaps(sint32 rdrLayer, sint32 x, sint32 y, CRGBA color)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	for (uint i = 0; i < _CharBitmaps.size(); ++i)
 	{
@@ -1820,7 +1820,7 @@ void CDBCtrlSheet::draw()
 	H_AUTO( RZ_Interface_CDBCtrlSheet_draw )
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	CRGBA color = CRGBA(255,255,255,255);
 
 	if (_Type != SheetType_Macro)
@@ -2091,7 +2091,7 @@ static inline CRGBA	fastMulRGB(CRGBA sheetColor, CRGBA iconColor)
 void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelectionBorder /*= true*/)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	// The sheet is the slot-2
 	sint32	wSheet= _WReal-2;
 	sint32	hSheet= _HReal-2;
@@ -2548,7 +2548,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 sint32 CDBCtrlSheet::drawNumber(sint32 x, sint32 y, sint32 wSheet, sint32 /* hSheet */, CRGBA color, sint32 value, bool rightAlign)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	sint32	wDigit= rVR.getFigurTextureW();
 	sint32	hDigit= rVR.getFigurTextureH();
 
@@ -3927,7 +3927,7 @@ void CDBCtrlSheet::setInvertGuildSymbol(bool b)
 void CDBCtrlSheet::setSlot(const std::string &textureName)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	_DispSlotBmpId = rVR.getTextureIdFromName (textureName);
 	rVR.getTextureSizeFromId (_DispSlotBmpId, _W, _H);
 	_DrawSlot = true;
@@ -4262,7 +4262,7 @@ void	CDBCtrlSheet::updateArmourColor(sint8 col)
 	if(_ArmourColorIndex>=0 && _ArmourColorIndex<=7)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CViewRenderer		&rVR= pIM->getViewRenderer();
+		CViewRenderer		&rVR= *CViewRenderer::getInstance();
 
 		// if the BMP have not been correctly setuped
 		if(!_ArmourColorBmpOk)

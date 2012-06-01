@@ -1608,7 +1608,7 @@ int CLuaIHMRyzom::getWindowSize(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls,   "getWindowSize",   0);
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	uint32 w,   h;
-	pIM->getViewRenderer().getScreenSize(w,   h);
+	CViewRenderer::getInstance()->getScreenSize(w,   h);
 	ls.push((double) w);
 	ls.push((double) h);
 	return 2;

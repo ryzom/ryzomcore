@@ -2737,7 +2737,7 @@ CCtrlButton *CGroupHTML::addButton(CCtrlButton::EType type, const std::string &/
 	{
 		// search in the compressed texture
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		sint32 id = rVR.getTextureIdFromName(normal);
 		if(id == -1)
 		{
@@ -2757,7 +2757,7 @@ CCtrlButton *CGroupHTML::addButton(CCtrlButton::EType type, const std::string &/
 	{
 		// search in the compressed texture
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		sint32 id = rVR.getTextureIdFromName(pushed);
 		if(id == -1)
 		{
@@ -3031,7 +3031,7 @@ bool CGroupHTML::lookupLocalFile (string &result, const char *url, bool isUrl)
 	{
 		// Is it a texture in the big texture ?
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		if (pIM->getViewRenderer().getTextureIdFromName (result) >= 0)
+		if (CViewRenderer::getInstance()->getTextureIdFromName (result) >= 0)
 		{
 			return true;
 		}

@@ -227,7 +227,7 @@ void CCtrlScroll::updateCoords()
 		if (_Target->getActive())
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			CViewRenderer &rVR = pIM->getViewRenderer();
+			CViewRenderer &rVR = *CViewRenderer::getInstance();
 			sint32 w, h;
 			rVR.getTextureSizeFromId (_TxIdB, w, h);
 
@@ -410,7 +410,7 @@ void CCtrlScroll::updateCoords()
 void CCtrlScroll::draw()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	CRGBA col = pIM->getGlobalColorForContent();
 
 	if (_Target)
@@ -694,7 +694,7 @@ sint32 CCtrlScroll::moveTrackY (sint32 dy)
 void CCtrlScroll::setTextureBottomOrLeft (const std::string &txName)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	_TxIdB = rVR.getTextureIdFromName(txName);
 }
 
@@ -702,7 +702,7 @@ void CCtrlScroll::setTextureBottomOrLeft (const std::string &txName)
 void CCtrlScroll::setTextureMiddle (const std::string &txName)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	_TxIdM = rVR.getTextureIdFromName(txName);
 }
 
@@ -710,7 +710,7 @@ void CCtrlScroll::setTextureMiddle (const std::string &txName)
 void CCtrlScroll::setTextureTopOrRight (const std::string &txName)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	_TxIdT = rVR.getTextureIdFromName(txName);
 }
 

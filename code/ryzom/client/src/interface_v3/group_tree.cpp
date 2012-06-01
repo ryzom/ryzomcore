@@ -476,7 +476,7 @@ bool CGroupTree::parse (xmlNodePtr cur,  CInterfaceGroup * parentGroup)
 	_RootNode->Opened = true;
 	_ResizeFromChildW = _ResizeFromChildH = true;
 
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	sint32 id = rVR.getTextureIdFromName(_ArboOpenFirst);
 	if (id != -1)
 		rVR.getTextureSizeFromId(id,  _BmpW,  _BmpH);
@@ -522,7 +522,7 @@ void CGroupTree::updateCoords()
 void	CGroupTree::drawSelection(sint x,  sint y,  sint w,  CRGBA col)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	if(!_RectangleOutlineMode)
 	{
@@ -557,7 +557,7 @@ CGroupTree::SNode *CGroupTree::getNodeUnderMouse() const
 void CGroupTree::draw()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//	CViewRenderer &rVR = pIM->getViewRenderer();
+//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	// get the clip area
 	sint32 clipx, clipy, clipw, cliph;

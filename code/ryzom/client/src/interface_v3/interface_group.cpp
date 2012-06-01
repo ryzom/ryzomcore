@@ -787,7 +787,7 @@ void CInterfaceGroup::draw ()
 	makeNewClip (oldSciX, oldSciY, oldSciW, oldSciH);
 
 	// Display sons only if not total clipped
-	CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	if( !rVR.isClipWindowEmpty() )
 	{
 		// Draw all decorative elements
@@ -807,7 +807,7 @@ void CInterfaceGroup::draw ()
 void CInterfaceGroup::drawNoClip()
 {
 	// Display sons only if not total clipped
-	CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	if( !rVR.isClipWindowEmpty() )
 	{
 		// Draw all decorative elements
@@ -1417,7 +1417,7 @@ void CInterfaceGroup::computeCurrentClipContribution(sint32 oldSciX, sint32 oldS
 // ------------------------------------------------------------------------------------------------
 void CInterfaceGroup::makeNewClip (sint32 &oldSciX, sint32 &oldSciY, sint32 &oldSciW, sint32 &oldSciH)
 {
-	CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	rVR.getClipWindow (oldSciX, oldSciY, oldSciW, oldSciH);
 
 	sint32 newSciX, newSciY, newSciW, newSciH;
@@ -1428,7 +1428,7 @@ void CInterfaceGroup::makeNewClip (sint32 &oldSciX, sint32 &oldSciY, sint32 &old
 // ------------------------------------------------------------------------------------------------
 void CInterfaceGroup::getClip(sint32 &x, sint32 &y, sint32 &w, sint32 &h) const
 {
-	CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	uint32 sw, sh;
 	rVR.getScreenSize(sw, sh);
 	sint32 sciX = 0, sciY = 0, sciW = sw, sciH =sh;
@@ -1447,7 +1447,7 @@ void CInterfaceGroup::getClip(sint32 &x, sint32 &y, sint32 &w, sint32 &h) const
 // ------------------------------------------------------------------------------------------------
 void CInterfaceGroup::restoreClip (sint32 oldSciX, sint32 oldSciY, sint32 oldSciW, sint32 oldSciH)
 {
-	CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	rVR.setClipWindow (oldSciX, oldSciY, oldSciW, oldSciH);
 }
 

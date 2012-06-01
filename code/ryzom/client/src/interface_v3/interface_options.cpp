@@ -169,7 +169,7 @@ bool COptionsLayer::parse (xmlNodePtr cur)
 		return false;
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	Tile_Blank = getValSInt32("tile_blank");
 	Tile_M_Header = getValSInt32("tile_m_header");
@@ -267,7 +267,7 @@ bool COptionsContainerInsertion::parse(xmlNodePtr cur)
 		return false;
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	TxId_T_Arrow =  rVR.getTextureIdFromName (getValStr("arrow_top"));
 	TxId_B_Arrow =  rVR.getTextureIdFromName (getValStr("arrow_down"));
 	TxId_L_Arrow =  rVR.getTextureIdFromName (getValStr("arrow_left"));
@@ -355,7 +355,7 @@ bool CMissionIconList::parse(xmlNodePtr cur)
 	bool result = CInterfaceOptions::parse(cur);
 	if (!result) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CViewRenderer &vr = im->getViewRenderer();
+	CViewRenderer &vr = *CViewRenderer::getInstance();
 	for(std::map<std::string, CInterfaceOptionValue>::iterator it = _ParamValue.begin(); it != _ParamValue.end(); ++it)
 	{
 		int index;
@@ -414,7 +414,7 @@ COptionsAnimationSet::~COptionsAnimationSet()
 			BUT this is OK, since the actual animationSet is kept by SmartPtr through UPlayList
 			(see deleteAnimationSet() doc)
 		 */
-		CInterfaceManager::getInstance()->getViewRenderer().getDriver()->deleteAnimationSet(AnimationSet);
+		CViewRenderer::getInstance()->getDriver()->deleteAnimationSet(AnimationSet);
 		AnimationSet= NULL;
 	}
 }
@@ -424,10 +424,10 @@ bool COptionsAnimationSet::parse (xmlNodePtr cur)
 {
 	bool result = CInterfaceOptions::parse(cur);
 	if (!result) return false;
-	nlassert( CInterfaceManager::getInstance()->getViewRenderer().getDriver() );
+	nlassert( CViewRenderer::getInstance()->getDriver() );
 
 	// create the animation set
-	AnimationSet= CInterfaceManager::getInstance()->getViewRenderer().getDriver()->createAnimationSet();
+	AnimationSet= CViewRenderer::getInstance()->getDriver()->createAnimationSet();
 	nlassert(AnimationSet);
 
 	AnimMale.clear();

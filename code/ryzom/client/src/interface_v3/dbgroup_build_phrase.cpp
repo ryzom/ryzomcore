@@ -94,7 +94,7 @@ bool		CDBGroupBuildPhrase::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// Init the disabled texture id
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	_TextureIdSlotDisabled= rVR.getTextureIdFromName ("w_slot_brick_disabled.tga");
 
 	// Create now (before sons ctrl sheet parsing) the variables

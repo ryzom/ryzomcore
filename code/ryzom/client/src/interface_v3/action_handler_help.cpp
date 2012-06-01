@@ -464,7 +464,7 @@ void			CInterfaceHelp::resetWindowPos(sint y)
 	sint	maxHelpWindow= (sint)_InfoWindows.size();
 
 	uint32	w, h;
-	pIM->getViewRenderer().getScreenSize(w,h);
+	CViewRenderer::getInstance()->getScreenSize(w,h);
 
 	// For all windows, reset pos
 	for(uint i=0;i<(uint)maxHelpWindow;i++)
@@ -3978,7 +3978,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		#ifdef NL_OS_WINDOWS
-			NL3D::UDriver *Driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
+			NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 			if (Driver)
 			{
 				HWND wnd = (HWND) Driver->getDisplay();

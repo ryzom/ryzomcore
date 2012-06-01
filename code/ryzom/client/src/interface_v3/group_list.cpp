@@ -566,12 +566,12 @@ void CGroupList::updateCoords()
 void CGroupList::draw ()
 {
 	// TEMP TEMP
-	//CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+	//CViewRenderer &rVR = *CViewRenderer::getInstance();
 	//rVR.drawRotFlipBitmap _RenderLayer,   (_XReal,   _YReal,   _WReal,   _HReal,   0,   false,   rVR.getBlankTextureId(),   CRGBA(0,  255,  0,  255) );
 	if (_Over)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		if (CWidgetManager::getInstance()->getModalWindow() == NULL)
 		{

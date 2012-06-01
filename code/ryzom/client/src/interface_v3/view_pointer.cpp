@@ -170,7 +170,7 @@ void CViewPointer::draw ()
 		return;
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	if (pIM->isInGame())
 	if (!_StringCursor)
@@ -573,7 +573,7 @@ bool CViewPointer::drawCustom(CCtrlBase* pCB)
 			nlinfo(tooltip.c_str());
 			setString(ucstring(tooltip));
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			CViewRenderer &rVR = pIM->getViewRenderer();
+			CViewRenderer &rVR = *CViewRenderer::getInstance();
 			sint32 texId = rVR.getTextureIdFromName (texName);
 
 			CInterfaceGroup *stringCursor = IsMouseCursorHardware() ? _StringCursorHardware : _StringCursor;
@@ -596,7 +596,7 @@ bool CViewPointer::drawCustom(CCtrlBase* pCB)
 		else
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			CViewRenderer &rVR = pIM->getViewRenderer();
+			CViewRenderer &rVR = *CViewRenderer::getInstance();
 			sint32 texId = rVR.getTextureIdFromName (texName);
 			drawCursor(texId, col, 0);
 			return true;
@@ -760,7 +760,7 @@ void CViewPointer::setString (const ucstring &str)
 void CViewPointer::drawCursor(sint32 texId, NLMISC::CRGBA col, uint8 rot)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	sint32 xPos = _XReal + _OffsetX;
 	sint32 yPos = _YReal + _OffsetY;
 	if (!IsMouseCursorHardware())

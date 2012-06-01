@@ -77,7 +77,7 @@ void CViewPolygon::draw()
 	if (_Tris.empty()) return;
 	if (!_Parent) return;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CViewRenderer &vr = im->getViewRenderer();
+	CViewRenderer &vr = *CViewRenderer::getInstance();
 	if (_Touched)
 	{
 		_RealTris.clear();

@@ -244,7 +244,7 @@ void checkUnderCursor()
 		return;
 
 	// No Op if screen minimized
-	if(IM->getViewRenderer().isMinimized())
+	if(CViewRenderer::getInstance()->isMinimized())
 		return;
 
 	// Get the pointer position (in pixel)
@@ -258,7 +258,7 @@ void checkUnderCursor()
 		if(x < 0 || y <0)
 			return;
 		uint32 w, h;
-		CViewRenderer &viewRender = IM->getViewRenderer();
+		CViewRenderer &viewRender = *CViewRenderer::getInstance();
 		viewRender.getScreenSize(w, h);
 		if(x>=(sint32)w || y>=(sint32)h)
 			return;

@@ -125,7 +125,7 @@ bool CDBGroupListSheetText::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	}
 
 	// get item size.
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	sint32	dispSlotBmpId = 0;
 	switch(_CtrlInfo._Type)
 	{

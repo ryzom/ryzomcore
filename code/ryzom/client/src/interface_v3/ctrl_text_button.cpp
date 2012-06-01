@@ -70,7 +70,7 @@ bool CCtrlTextButton::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 {
 	CXMLAutoPtr prop;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	//try to get props that can be inherited from groups
 	//if a property is not defined, try to find it in the parent group.
@@ -273,7 +273,7 @@ void CCtrlTextButton::draw ()
 	CRGBA  color;
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	CRGBA	globalColor= pIM->getGlobalColorForContent();
 
 	// *** Detect Over

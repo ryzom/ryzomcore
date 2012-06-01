@@ -130,7 +130,7 @@ CInterfaceManager &CTool::getUI()
 void CTool::getScreenSize(uint32 &scrW, uint32 &scrH)
 {
 	//H_AUTO(R2_CTool_getScreenSize)
-	getUI().getViewRenderer().getScreenSize(scrW, scrH);
+	CViewRenderer::getInstance()->getScreenSize(scrW, scrH);
 }
 
 // ***************************************************************
@@ -138,7 +138,7 @@ uint32 CTool::getScreenWidth()
 {
 	//H_AUTO(R2_CTool_getScreenWidth)
 	uint32 scrW, scrH;
-	getUI().getViewRenderer().getScreenSize(scrW, scrH);
+	CViewRenderer::getInstance()->getScreenSize(scrW, scrH);
 	return scrW;
 }
 
@@ -147,7 +147,7 @@ uint32 CTool::getScreenHeight()
 {
 	//H_AUTO(R2_CTool_getScreenHeight)
 	uint32 scrW, scrH;
-	getUI().getViewRenderer().getScreenSize(scrW, scrH);
+	CViewRenderer::getInstance()->getScreenSize(scrW, scrH);
 	return scrH;
 }
 

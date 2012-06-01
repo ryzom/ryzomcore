@@ -195,7 +195,7 @@ void CGroupCell::draw ()
 	if (DebugUICell)
 	{
 		// Draw cell
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, _WReal, 1, 0, false, rVR.getBlankTextureId(), CRGBA(0,255,255,255) );
 		rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, 1, _HReal, 0, false, rVR.getBlankTextureId(), CRGBA(0,255,255,255) );
 		rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal+_HReal-1, _WReal, 1, 0, false, rVR.getBlankTextureId(), CRGBA(0,255,255,255) );
@@ -205,7 +205,7 @@ void CGroupCell::draw ()
 	// Draw the background
 	if (_UserTexture || BgColor.A != 0)
 	{
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		if (_UserTexture)
 		{
 			CRGBA col;
@@ -950,7 +950,7 @@ void CGroupTable::draw ()
 			finalColor.A = CurrentAlpha;
 
 			// Draw the top and bottom lines
-			CViewRenderer &rVR = pIM->getViewRenderer();
+			CViewRenderer &rVR = *CViewRenderer::getInstance();
 			rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, _WReal, border, 0, false, rVR.getBlankTextureId(), finalColor);
 			rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal-border+_HReal, _WReal, border, 0, false, rVR.getBlankTextureId(), finalColor);
 

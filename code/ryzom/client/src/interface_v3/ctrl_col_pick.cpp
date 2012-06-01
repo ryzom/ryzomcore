@@ -41,7 +41,7 @@ CCtrlColPick::~CCtrlColPick()
 	if (_Texture>=0)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		rVR.deleteTexture (_Texture);
 	}
 }
@@ -56,7 +56,7 @@ bool CCtrlColPick::parse(xmlNodePtr node, CInterfaceGroup * parentGroup)
 	// Read textures
 	prop = (char*) xmlGetProp( node, (xmlChar*)"texture" );
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	if(prop)
 	{
 		string sTmp = NLMISC::strlwr((const char*)prop);
@@ -84,7 +84,7 @@ bool CCtrlColPick::parse(xmlNodePtr node, CInterfaceGroup * parentGroup)
 void CCtrlColPick::updateCoords()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	sint32 txw, txh;
 	rVR.getTextureSizeFromId (_Texture, txw, txh);
 	_W = txw;
@@ -96,7 +96,7 @@ void CCtrlColPick::updateCoords()
 void CCtrlColPick::draw()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	CRGBA col = CRGBA(255,255,255,(uint8)pIM->getGlobalColor().A);
 
@@ -194,7 +194,7 @@ void CCtrlColPick::selectColor (sint32 x, sint32 y)
 CRGBA CCtrlColPick::getColor (sint32 x, sint32 y)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	if (x < 0) x = 0;
 	if (y < 0) y = 0;

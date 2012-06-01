@@ -56,7 +56,7 @@ bool CDBGroupListSheetBonusMalus::parse (xmlNodePtr cur, CInterfaceGroup *parent
 	if (prop)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		_TextId= rVR.getTextureIdFromName ((const char *)prop);
 	}
 
@@ -86,7 +86,7 @@ void CDBGroupListSheetBonusMalus::draw ()
 	CDBGroupListSheet::draw();
 
 //	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-//	CViewRenderer		&rVR= pIM->getViewRenderer();
+//	CViewRenderer		&rVR= *CViewRenderer::getInstance();
 
 //	sint32	drl= getRenderLayer()+1;
 

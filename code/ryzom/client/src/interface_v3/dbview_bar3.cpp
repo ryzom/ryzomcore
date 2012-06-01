@@ -141,7 +141,7 @@ void CDBViewBar3::updateCoords ()
 
 	// get the height of the texture
 	sint32	dummy;
-	CInterfaceManager::getInstance()->getViewRenderer().getTextureSizeFromId(_TextureId, dummy, _BarH);
+	CViewRenderer::getInstance()->getTextureSizeFromId(_TextureId, dummy, _BarH);
 
 	CViewBitmap::updateCoords();
 }
@@ -162,7 +162,7 @@ void CDBViewBar3::draw ()
 	_Slot.draw();
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	CRGBA gColor = pIM->getGlobalColorForContent();
 
 	if (_Mini)

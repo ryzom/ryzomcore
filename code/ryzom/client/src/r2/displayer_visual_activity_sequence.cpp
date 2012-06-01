@@ -598,7 +598,7 @@ void CDisplayerVisualActivitySequence::onUpdate(CGroupMap &owner)
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_onUpdate)
 	nlassert(_AddedToWorldMap);
 	nlassert(_FootSteps.size() == _WorldMapEdges.size());
-	CViewRenderer &vr = getEditor().getUI().getViewRenderer();
+	CViewRenderer &vr = *CViewRenderer::getInstance();
 	sint32 id = vr.getTextureIdFromName(CV_FootStepMapTexture.get());
 	sint32 width, height;
 	vr.getTextureSizeFromId(id, width, height);

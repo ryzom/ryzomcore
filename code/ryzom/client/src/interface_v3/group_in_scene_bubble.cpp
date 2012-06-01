@@ -667,7 +667,7 @@ CGroupInSceneBubbleManager::CPopupContext *CGroupInSceneBubbleManager::buildCont
 	if (target)
 	{
 		// Find a position
-		NL3D::UDriver *Driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
+		NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 		const uint width = Driver->getWindowWidth();
 		const uint height = Driver->getWindowHeight();
 		h = (target->getXReal() < ((sint)width-target->getXReal()-target->getWReal()))?"l":"r";

@@ -254,11 +254,14 @@ int CInterfaceManager::DebugTrackGroupsGetId( CInterfaceGroup *pIG )
 #endif // AJM_DEBUG_TRACK_INTERFACE_GROUPS
 
 // ------------------------------------------------------------------------------------------------
-CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext *textcontext ) :
-_ViewRenderer( driver, textcontext )
+CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext *textcontext )
 {
 	this->driver = driver;
 	this->textcontext = textcontext;
+	CViewRenderer::setDriver( driver );
+	CViewRenderer::setTextContext( textcontext );
+	CViewRenderer::getInstance();
+
 	_Instance = this;
 	NLGUI::CDBManager::getInstance()->resizeBanks( NB_CDB_BANKS );
 	interfaceLinkUpdater = new CInterfaceLink::CInterfaceLinkUpdater();
@@ -298,8 +301,8 @@ _ViewRenderer( driver, textcontext )
 	// *********************
 
 	// Interface Manager init
-	_ViewRenderer.checkNewScreenSize();
-	_ViewRenderer.init();
+	CViewRenderer::getInstance()->checkNewScreenSize();
+	CViewRenderer::getInstance()->init();
 
 	_CurrentMode = 0;
 
@@ -370,7 +373,7 @@ CInterfaceManager::~CInterfaceManager()
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::reset()
 {
-	_ViewRenderer.reset();
+	CViewRenderer::getInstance()->reset();
 	_CtrlsUnderPointer.clear();
 	CWidgetManager::getInstance()->setCurContextHelp( NULL );
 	_ViewsUnderPointer.clear();
@@ -645,7 +648,7 @@ void CInterfaceManager::uninitOutGame()
 
 void badXMLParseMessageBox()
 {
-	NL3D::UDriver *driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
+	NL3D::UDriver *driver = CViewRenderer::getInstance()->getDriver();
 	NL3D::UDriver::TMessageBoxId	ret = driver->systemMessageBox(	"Interface XML reading failed!\n"
 																		"Some XML files are corrupted and may have been removed.\n"
 																		"Ryzom may need to be restarted to run properly.\n"
@@ -1366,7 +1369,7 @@ void CInterfaceManager::updateFrameViews(NL3D::UCamera camera)
 	H_AUTO ( RZ_Interface_updateFrameViews )
 
 	if (!camera.empty())
-		_ViewRenderer.setWorldSpaceFrustum (camera.getFrustum());
+		CViewRenderer::getInstance()->setWorldSpaceFrustum (camera.getFrustum());
 
 	checkCoords();
 	drawViews(camera);
@@ -1452,7 +1455,7 @@ bool CInterfaceManager::parseInterface (const std::vector<std::string> &xmlFileN
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::loadTextures (const string &textFileName, const string &uvFileName, bool uploadDXTC)
 {
-	_ViewRenderer.loadTextures (textFileName, uvFileName, uploadDXTC);
+	CViewRenderer::getInstance()->loadTextures (textFileName, uvFileName, uploadDXTC);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1473,7 +1476,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 	{
 		uint32	w,h;
 		// NB: even if minimzed, getScreenSize() no more return 0 values (return the last setuped screen size)
-		_ViewRenderer.getScreenSize(w, h);
+		CViewRenderer::getInstance()->getScreenSize(w, h);
 		// Windows are positioned according to resolution, and we must backup W/H for the system that move windows when the resolution change
 		_LastInGameScreenW= w;
 		_LastInGameScreenH= h;
@@ -1912,7 +1915,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 	{
 		H_AUTO ( RZ_Interface_DrawViews_Setup )
 
-		_ViewRenderer.activateWorldSpaceMatrix (false);
+		CViewRenderer::getInstance()->activateWorldSpaceMatrix (false);
 		
 		IngameDbMngr.flushObserverCalls();
 		NLGUI::CDBManager::getInstance()->flushObserverCalls();
@@ -1934,12 +1937,12 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 		}
 		// Check if screen size changed
 		uint32 w, h;
-		_ViewRenderer.checkNewScreenSize ();
-		_ViewRenderer.getScreenSize (w, h);
+		CViewRenderer::getInstance()->checkNewScreenSize ();
+		CViewRenderer::getInstance()->getScreenSize (w, h);
 		if ((w != _ScreenW) || (h != _ScreenH))
 		{
 			// No Op if screen minimized
-			if(w!=0 && h!=0 && !_ViewRenderer.isMinimized())
+			if(w!=0 && h!=0 && !CViewRenderer::getInstance()->isMinimized())
 			{
 				updateAllLocalisedElements ();
 				_ScreenW = w;
@@ -2006,7 +2009,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 						driver->setViewMatrix(CMatrix::Identity);
 						driver->setModelMatrix(CMatrix::Identity);
 						driver->setFrustum(camera.getFrustum());
-						_ViewRenderer.activateWorldSpaceMatrix (true);
+						CViewRenderer::getInstance()->activateWorldSpaceMatrix (true);
 					}
 
 					list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
@@ -2022,7 +2025,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 								// Draw all the elements of this window in the layers in ViewRendered
 								pIG->draw ();
 								// flush the layers
-								_ViewRenderer.flush ();
+								CViewRenderer::getInstance()->flush ();
 							}
 						}
 					}
@@ -2030,7 +2033,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 					if ( (nPriority == WIN_PRIORITY_WORLD_SPACE) && !camera.empty())
 					{
 						driver->setMatrixMode2D11();
-						_ViewRenderer.activateWorldSpaceMatrix (false);
+						CViewRenderer::getInstance()->activateWorldSpaceMatrix (false);
 					}
 				}
 			}
@@ -2066,7 +2069,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 					// if the control support CopyDrag, and if copy key pressed, display a tiny "+"
 					if(pCS->canDragCopy() && testDragCopyKey())
 					{
-						CViewRenderer &rVR = getViewRenderer();
+						CViewRenderer &rVR = *CViewRenderer::getInstance();
 						sint	w= rVR.getSystemTextureW(CViewRenderer::DragCopyTexture);
 						sint	h= rVR.getSystemTextureW(CViewRenderer::DragCopyTexture);
 						rVR.draw11RotFlipBitmap (pCS->getRenderLayer()+1, x-w/2, y-h/2, 0, false,
@@ -2083,7 +2086,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 		}
 
 		// flush layers
-		_ViewRenderer.flush();
+		CViewRenderer::getInstance()->flush();
 
 		// todo hulud remove Return in 2d world
 		driver->setMatrixMode2D11();
@@ -2374,7 +2377,7 @@ void CInterfaceManager::drawContextHelp ()
 						groupContextHelp->executeLuaScriptOnDraw();
 						groupContextHelp->draw ();
 						// flush layers
-						_ViewRenderer.flush();
+						CViewRenderer::getInstance()->flush();
 					}
 				}
 				else
@@ -2382,7 +2385,7 @@ void CInterfaceManager::drawContextHelp ()
 					groupContextHelp->executeLuaScriptOnDraw();
 					groupContextHelp->draw ();
 					// flush layers
-					_ViewRenderer.flush();
+					CViewRenderer::getInstance()->flush();
 				}
 			}
 			else
@@ -2390,7 +2393,7 @@ void CInterfaceManager::drawContextHelp ()
 				groupContextHelp->executeLuaScriptOnDraw();
 				groupContextHelp->draw ();
 				// flush layers
-				_ViewRenderer.flush();
+				CViewRenderer::getInstance()->flush();
 			}
 		}
 	}
@@ -3023,7 +3026,7 @@ bool CInterfaceManager::handleMouseMoveEvent( const NLGUI::CEventDescriptor &eve
 	nlassert( e.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousemove );
 
 	uint32 screenW, screenH;
-	_ViewRenderer.getScreenSize( screenW, screenH );
+	CViewRenderer::getInstance()->getScreenSize( screenW, screenH );
 	sint32 oldX = CWidgetManager::getInstance()->getPointer()->getX();
 	sint32 oldY = CWidgetManager::getInstance()->getPointer()->getY();
 
@@ -3054,7 +3057,7 @@ void CInterfaceManager::movePointer (sint32 dx, sint32 dy)
 	uint32 nScrW, nScrH;
 	sint32 oldpx, oldpy, newpx, newpy, disppx, disppy, olddisppx, olddisppy;
 
-	_ViewRenderer.getScreenSize (nScrW, nScrH);
+	CViewRenderer::getInstance()->getScreenSize (nScrW, nScrH);
 	_Pointer->getPointerPos (oldpx, oldpy);
 
 	olddisppx = oldpx;
@@ -3089,7 +3092,7 @@ void CInterfaceManager::movePointerAbs(sint32 px, sint32 py)
 {
 	if (!CWidgetManager::getInstance()->getPointer()) return;
 	uint32 nScrW, nScrH;
-	_ViewRenderer.getScreenSize (nScrW, nScrH);
+	CViewRenderer::getInstance()->getScreenSize (nScrW, nScrH);
 	clamp(px, 0, (sint32) nScrW);
 	clamp(py, 0, (sint32) nScrH);
 	//
@@ -3256,8 +3259,8 @@ void CInterfaceManager::updateAllLocalisedElements()
 	uint32 nMasterGroup;
 
 	uint32 w, h;
-	_ViewRenderer.checkNewScreenSize ();
-	_ViewRenderer.getScreenSize (w, h);
+	CViewRenderer::getInstance()->checkNewScreenSize ();
+	CViewRenderer::getInstance()->getScreenSize (w, h);
 
 	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 
@@ -3268,7 +3271,7 @@ void CInterfaceManager::updateAllLocalisedElements()
 		rMG.Group->setW (w);
 		rMG.Group->setH (h);
 	}
-	_ViewRenderer.setClipWindow(0, 0, w, h);
+	CViewRenderer::getInstance()->setClipWindow(0, 0, w, h);
 
 	// If all conditions are OK, move windows so they fit correctly with new screen size
 	// Do this work only InGame when Config is loaded
@@ -3464,13 +3467,13 @@ void CInterfaceManager::getViewsUnder (sint32 x, sint32 y, std::vector<CViewBase
 	vVB.clear ();
 
 	// No Op if screen minimized
-	if(_ViewRenderer.isMinimized())
+	if(CViewRenderer::getInstance()->isMinimized())
 		return;
 
 	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 
 	uint32 sw, sh;
-	_ViewRenderer.getScreenSize(sw, sh);
+	CViewRenderer::getInstance()->getScreenSize(sw, sh);
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
 		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
@@ -3502,13 +3505,13 @@ void CInterfaceManager::getCtrlsUnder (sint32 x, sint32 y, std::vector<CCtrlBase
 	vICL.clear ();
 
 	// No Op if screen minimized
-	if(_ViewRenderer.isMinimized())
+	if(CViewRenderer::getInstance()->isMinimized())
 		return;
 
 	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 
 	uint32 sw, sh;
-	_ViewRenderer.getScreenSize(sw, sh);
+	CViewRenderer::getInstance()->getScreenSize(sw, sh);
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
 		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
@@ -3542,13 +3545,13 @@ void CInterfaceManager::getGroupsUnder (sint32 x, sint32 y, std::vector<CInterfa
 	vIGL.clear ();
 
 	// No Op if screen minimized
-	if(_ViewRenderer.isMinimized())
+	if(CViewRenderer::getInstance()->isMinimized())
 		return;
 
 	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 
 	uint32 sw, sh;
-	_ViewRenderer.getScreenSize(sw, sh);
+	CViewRenderer::getInstance()->getScreenSize(sw, sh);
 	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 	{
 		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
@@ -4744,7 +4747,7 @@ void	CInterfaceManager::drawOverExtendViewText()
 				// draw
 				groupOver->draw ();
 				// flush layers
-				_ViewRenderer.flush();
+				CViewRenderer::getInstance()->flush();
 			}
 		}
 
@@ -6126,7 +6129,7 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 void CInterfaceManager::setTextContext( NL3D::UTextContext *textcontext )
 {
 	this->textcontext = textcontext;
-	_ViewRenderer.setTextContext( textcontext );
+	CViewRenderer::getInstance()->setTextContext( textcontext );
 }
 
 

@@ -49,6 +49,8 @@
 #include "../string_manager_client.h"
 #include "yubo_chat.h"
 
+#include "../ingame_database_manager.h"
+
 static const float ROLLOVER_MIN_DELTA_PER_MS = 0.28f;
 static const float ROLLOVER_MAX_DELTA_PER_MS = 0.12f;
 
@@ -302,7 +304,6 @@ public:
 	void drawContextHelp ();
 	//void drawContextMenu ();
 
-	CViewRenderer &getViewRenderer ()  { return _ViewRenderer; }
 	void setGlobalColor (NLMISC::CRGBA col);
 	NLMISC::CRGBA getGlobalColor() { return _GlobalColor; }
 	void setContentAlpha(uint8 alpha);
@@ -821,8 +822,6 @@ private:
 	};
 	std::vector<SIDStringWaiter*> _IDStringWaiters;
 
-	/// Renderer
-	CViewRenderer	_ViewRenderer;
 	uint32			_ScreenW, _ScreenH; // Change res detection
 	NLMISC::CRGBA	_GlobalColor;
 	sint32			_LastInGameScreenW, _LastInGameScreenH; // Resolution used for last InGame interface

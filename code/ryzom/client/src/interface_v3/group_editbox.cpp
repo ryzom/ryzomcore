@@ -109,7 +109,7 @@ bool CGroupEditBox::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		return false;
 	CXMLAutoPtr prop;
 //	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//	CViewRenderer &rVR = pIM->getViewRenderer();
+//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	if (! CInterfaceGroup::parse(cur,parentGroup) )
 	{
@@ -219,7 +219,7 @@ void CGroupEditBox::draw ()
 {
 	//
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	//
 	/*CRGBA col;
 	col.modulateFromColor(CRGBA(64,64,64,255), pIM->getGlobalColorForContent());
@@ -335,7 +335,7 @@ void CGroupEditBox::copy()
 	stopParentBlink();
 
 	// get the selection and copy it
-	if (CInterfaceManager::getInstance()->getViewRenderer().getDriver()->copyTextToClipboard(getSelection()))
+	if (CViewRenderer::getInstance()->getDriver()->copyTextToClipboard(getSelection()))
 		nlinfo ("Chat input was copied in the clipboard");
 }
 
@@ -353,7 +353,7 @@ void CGroupEditBox::paste()
 
 	ucstring sString;
 
-	if (CInterfaceManager::getInstance()->getViewRenderer().getDriver()->pasteTextFromClipboard(sString))
+	if (CViewRenderer::getInstance()->getDriver()->pasteTextFromClipboard(sString))
 	{
 		// append string now
 		appendStringFromClipboard(sString);

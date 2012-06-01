@@ -208,7 +208,7 @@ void CGroupSubMenu::initOptions(CInterfaceGroup *parent)
 	{
 		_SelectionView = new CViewBitmap(CViewBase::TCtorParam());
 //		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//		CViewRenderer &rVR = pIM->getViewRenderer();
+//		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		_SelectionView->setParent (this);
 		_SelectionView->setActive (false);
 		_SelectionView->setTexture ("blank.tga");
@@ -437,7 +437,7 @@ void CGroupSubMenu::updateCoords ()
 		setY(_GroupMenu->SpawnMouseY);
 		CGroupFrame::updateCoords();
 
-		CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		uint32 screenW, screenH;
 		rVR.getScreenSize(screenW, screenH);
 		if ((_XReal+_WReal) > (sint32)screenW)
@@ -458,7 +458,7 @@ void CGroupSubMenu::updateCoords ()
 		CGroupFrame::updateCoords();
 
 		// get screen size
-		CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		uint32 screenW, screenH;
 		rVR.getScreenSize(screenW, screenH);
 
@@ -673,7 +673,7 @@ void CGroupSubMenu::updateCoords ()
 				_SubMenus[RALineNb]->setParentPos (this);
 
 				// According to mouse position, set the sub menu on the left or right, begin at top or bottom
-				CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+				CViewRenderer &rVR = *CViewRenderer::getInstance();
 				uint32 screenW, screenH;
 				rVR.getScreenSize(screenW, screenH);
 				if ((_GroupMenu->SpawnMouseX <= ((sint32)screenW/2)) && (_GroupMenu->SpawnMouseY <= ((sint32)screenH/2)))
@@ -875,7 +875,7 @@ void CGroupSubMenu::checkCoords()
 		(yMouse <= (_YReal+ _HReal))))
 		_Selected= -1;
 
-//	CViewRenderer &rVR = pIM->getViewRenderer();
+//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	// Highlight (background under the selection)
 	if (_Selected != -1)
@@ -2060,7 +2060,7 @@ void CGroupMenu::recurseDraw(CGroupSubMenu *pSubMenu)
 		if (pGSM != NULL)
 		{
 			recurseDraw(pGSM);
-			CInterfaceManager::getInstance()->getViewRenderer().flush();
+			CViewRenderer::getInstance()->flush();
 		}
 	}
 }
@@ -2071,7 +2071,7 @@ void CGroupMenu::draw ()
 	if (!_Active) return;
 
 	// TEMP TEMP
-	//CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+	//CViewRenderer &rVR = *CViewRenderer::getInstance();
 	//rVR.drawRotFlipBitmap _RenderLayer,  (_XReal,  _YReal,  _WReal,  _HReal,  0,  false,  rVR.getBlankTextureId(),  CRGBA(255, 0, 0, 255) );
 
 	_RootMenu->_Active = true;
@@ -2105,7 +2105,7 @@ void CGroupMenu::setActive (bool state)
 {
 	if (SpawnOnMousePos)
 	{
-		CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		uint32 w,h;
 		rVR.getScreenSize(w,h);
 		setW(w);

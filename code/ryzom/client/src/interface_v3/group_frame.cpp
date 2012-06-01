@@ -72,7 +72,7 @@ bool CGroupFrame::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	// Get the borders texture
 	_DispTypeDefined= false;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	ptr = (char*) xmlGetProp( cur, (xmlChar*)"options" );
 	CInterfaceOptions *pIO = NULL;
@@ -160,7 +160,7 @@ void CGroupFrame::draw ()
 	if (_DisplayFrame)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		// get global color
 		CRGBA col;

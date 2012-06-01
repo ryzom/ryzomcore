@@ -520,7 +520,7 @@ CCameraBackup setupCameraForScreenshot(UScene &scene, uint left, uint right, uin
 
 	// Build a viewport
 	CViewport viewport;
-	NL3D::UDriver *Driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
+	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 	viewport.init (0, 0, (float)(right-left)/Driver->getWindowWidth(),(float)(bottom-top)/Driver->getWindowHeight());
 
 	// Activate all this
@@ -553,7 +553,7 @@ void renderSceneScreenShot (uint left, uint right, uint top, uint bottom, uint s
 
 void getBuffer (CBitmap &btm)
 {
-	NL3D::UDriver *Driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
+	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 	//
 	if (ClientCfg.ScreenShotWidth && ClientCfg.ScreenShotHeight)
 	{
@@ -613,7 +613,7 @@ bool screenshotZBuffer(const std::string &filename)
 	std::string ext = filename.substr(pos+1);
 
 	std::vector<float> z;
-	NL3D::UDriver *Driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
+	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 
 	Driver->getZBuffer(z);
 

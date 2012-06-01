@@ -78,7 +78,7 @@ void CGroupInScene::computeWindowPos(sint32 &newX, sint32 &newY, CVector &newPro
 
 	if(getActive())
 	{
-		CViewRenderer &pVR = CInterfaceManager::getInstance()->getViewRenderer();
+		CViewRenderer &pVR = *CViewRenderer::getInstance();
 		nlassert(isValidDouble(Position.x) && isValidDouble(Position.y) && isValidDouble(Position.z));
 		CVector tmp = MainSceneViewMatrix * Position;
 		if (tmp.y>=0.001)
@@ -86,8 +86,8 @@ void CGroupInScene::computeWindowPos(sint32 &newX, sint32 &newY, CVector &newPro
 			tmp = pVR.getFrustum().projectZ (tmp);
 
 			// Get the width and height
-			tmp.x *= (float)CInterfaceManager::getInstance()->getViewRenderer().getDriver()->getWindowWidth();
-			tmp.y *= (float)CInterfaceManager::getInstance()->getViewRenderer().getDriver()->getWindowHeight();
+			tmp.x *= (float)CViewRenderer::getInstance()->getDriver()->getWindowWidth();
+			tmp.y *= (float)CViewRenderer::getInstance()->getDriver()->getWindowHeight();
 
 			// position without offset, in float
 			newProjCenter.x= tmp.x;
@@ -156,7 +156,7 @@ void CGroupInScene::draw()
 
 	if (_ProjCenter.z > NearDrawClip)
 	{
-		CViewRenderer &pVR = CInterfaceManager::getInstance()->getViewRenderer();
+		CViewRenderer &pVR = *CViewRenderer::getInstance();
 
 		// Set the current Z, and projCenter / scale
 		if(_UserScale)

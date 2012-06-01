@@ -24,7 +24,7 @@
 void CSheetSelectionGroup::setTexture(const std::string &texName)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	_TextureIndex = rVR.getTextureIdFromName(texName);
 	rVR.getTextureSizeFromId(_TextureIndex, _TextureWidth, _TextureHeight);
 }

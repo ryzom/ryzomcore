@@ -1001,7 +1001,7 @@ void CInterfaceElement::center()
 {
 	// center the pc
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CViewRenderer &vr = im->getViewRenderer();
+	CViewRenderer &vr = *CViewRenderer::getInstance();
 	uint32 sw, sh;
 	vr.getScreenSize(sw, sh);
 	setX(sw / 2 - getWReal() / 2);
@@ -1025,7 +1025,7 @@ void CInterfaceElement::renderWiredQuads(TRenderWired type, const std::string &u
 			)
 			return;
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CViewRenderer &vr = im->getViewRenderer();
+		CViewRenderer &vr = *CViewRenderer::getInstance();
 		vr.drawWiredQuad(_XReal, _YReal, _WReal, _HReal);
 		drawHotSpot(_PosRef, CRGBA::Red);
 		if (_Parent) _Parent->drawHotSpot(_ParentPosRef, CRGBA::Blue);
@@ -1064,7 +1064,7 @@ void CInterfaceElement::drawHotSpot(THotSpot hs, CRGBA col)
 		px = _XReal + _WReal - radius;
 	}
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CViewRenderer &vr = im->getViewRenderer();
+	CViewRenderer &vr = *CViewRenderer::getInstance();
 	vr.drawFilledQuad(px - radius, py - radius, radius * 2, radius * 2, col);
 
 }

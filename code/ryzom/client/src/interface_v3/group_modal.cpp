@@ -100,7 +100,7 @@ void CGroupModal::updateCoords ()
 	if(SpawnOnMousePos)
 	{
 		// Special for menu for instance: If the size is bigger or equal to the screen, keep 0, because will be clipped just after
-		CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		uint32 w,h;
 		rVR.getScreenSize(w,h);
 		if(_W>=(sint32)w && _H>=(sint32)h)
