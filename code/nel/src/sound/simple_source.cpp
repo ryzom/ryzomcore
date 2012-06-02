@@ -134,6 +134,7 @@ void CSimpleSource::play()
 		|| (_RelativeMode ? getPos().sqrnorm() : (mixer->getListenPosVector() - getPos()).sqrnorm()) > _SimpleSound->getMaxDistance() * _SimpleSound->getMaxDistance())
 	{
 		// The sample buffer is not available, don't play (we don't know the length)
+		_WaitingForPlay = false;
 		if (_Spawn)
 		{
 			if (_SpawnEndCb != 0)
@@ -175,7 +176,14 @@ void CSimpleSource::play()
 		
 		// and play the sound
 		bool play = pSource->play();		
+		
+#ifdef NL_DEBUG
 		nlassert(play);
+#else
+		if (!play)
+			nlwarning("Failed to play physical sound source. This is a serious error");
+#endif
+
 		// nldebug("CSimpleSource %p : REAL play done", (CAudioMixerUser::IMixerEvent*)this);
 	}
 	else

@@ -59,6 +59,7 @@ protected:
 	virtual void calculateFinalGain();
 	virtual void increaseSources();
 	virtual void decreaseSources();
+	static bool isReservedName(const std::string &nodeName);
 
 }; /* class CGroupControllerRoot */
 

@@ -37,14 +37,14 @@ namespace NL3D
 // ***************************************************************************
 
 
-#if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM)
+#if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM) && defined(NL_USE_FASTFLOOR)
 
 /* This floor works only for floor with noise, because floor/ceil are only made on decimal coordinates:
 	sTile =1.25 ....  NB: because of difference of mapping (rare case), we may have sometimes values with
 	precision < 1/4 (eg 1.125). Just use f*256 to compute the floor.
 
   NB: using a fastFloor() (fistp changing the controlfp() is not very a good idea here, because
-  computeNoise() are not "packed", so change on controlFp() would bee to frequent...
+  computeNoise() are not "packed", so change on controlFp() would bee too frequent...
   And also because we need either floor() or ceil() here.
 */
 inline	sint noiseFloor(float f)

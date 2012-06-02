@@ -35,9 +35,9 @@
 
 // Project includes
 
-#define NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER "effects"
-#define NLSOUND_SHEET_V1_DEFAULT_SOUND_MUSIC_GROUP_CONTROLLER "music"
-#define NLSOUND_SHEET_V1_DEFAULT_SOUND_STREAM_GROUP_CONTROLLER "dialog"
+#define NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER "sound:effects:game"
+#define NLSOUND_SHEET_V1_DEFAULT_SOUND_MUSIC_GROUP_CONTROLLER "sound:music:game"
+#define NLSOUND_SHEET_V1_DEFAULT_SOUND_STREAM_GROUP_CONTROLLER "sound:dialog:game"
 
 namespace NLSOUND {
 
@@ -50,13 +50,8 @@ namespace NLSOUND {
 class UGroupController
 {
 public:
-	virtual void setDevGain(float gain) = 0;
-	virtual float getDevGain() = 0;
-
-	virtual void setUserGain(float gain) = 0;
-	virtual float getUserGain() = 0;
-
-	virtual void setGain(float devGain, float userGain) = 0;
+	virtual void setGain(float gain) = 0;
+	virtual float getGain() = 0;
 
 protected:
 	virtual ~UGroupController() { }

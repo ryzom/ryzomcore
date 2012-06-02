@@ -43,7 +43,7 @@ CPSSound::CPSSound() : _Gain(1.f),
 {
 	NL_PS_FUNC(CPSSound_CPSSound)
 	if (CParticleSystem::getSerializeIdentifierFlag()) _Name = std::string("sound");
-	_SoundName = NLMISC::CStringMapper::emptyId();
+	_SoundName = NLMISC::CSheetId::Unknown /*NLMISC::CStringMapper::emptyId()*/;
 }
 
 // ***************************************************************************************************
@@ -265,11 +265,11 @@ void			CPSSound::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	{
 		std::string soundName;
 		f.serial(soundName);
-		_SoundName = NLMISC::CStringMapper::map(soundName);
+		_SoundName = NLMISC::CSheetId(soundName)/*NLMISC::CStringMapper::map(soundName)*/;
 	}
 	else
 	{
-		std::string soundName = NLMISC::CStringMapper::unmap(_SoundName);
+		std::string soundName = _SoundName.toString()/*NLMISC::CStringMapper::unmap(_SoundName)*/;
 		f.serial(soundName);
 	}
 

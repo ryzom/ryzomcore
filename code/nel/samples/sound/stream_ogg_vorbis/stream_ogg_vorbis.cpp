@@ -20,8 +20,6 @@
 #include <stdio.h>
 #ifdef NL_OS_WINDOWS
 #	include <conio.h>
-#else
-#	include <curses.h>
 #endif
 
 // NeL includes
@@ -89,7 +87,7 @@ static void initSample()
 	
 	//NLMISC::CHTimer::startBench();
 
-	USource *source = s_AudioMixer->createSource(CStringMapper::map("default_stream"));
+	USource *source = s_AudioMixer->createSource(CSheetId("default_stream")/*CStringMapper::map("default_stream")*/);
 	nlassert(source);
 	s_StreamSource = dynamic_cast<UStreamSource *>(source);
 	nlassert(s_StreamSource);
@@ -100,7 +98,7 @@ static void initSample()
 	s_StreamSource->setFormat(s_AudioDecoder->getChannels(), s_AudioDecoder->getBitsPerSample(), (uint32)s_AudioDecoder->getSamplesPerSec());
 	//s_StreamSource->setPitch(2.0f);
 
-	s_GroupController = s_AudioMixer->getGroupController("dialog");
+	s_GroupController = s_AudioMixer->getGroupController("sound:dialog");
 }
 
 //CMutex *s_Mutex = NULL;
@@ -154,10 +152,10 @@ static void runSample()
 #endif
 			{
 			case '+':
-				s_GroupController->setUserGain(s_GroupController->getUserGain() + 0.1f);
+				s_GroupController->setGain(s_GroupController->getGain() + 0.1f);
 				break;
 			case '-':
-				s_GroupController->setUserGain(s_GroupController->getUserGain() - 0.1f);
+				s_GroupController->setGain(s_GroupController->getGain() - 0.1f);
 				break;
 			default:
 				return;

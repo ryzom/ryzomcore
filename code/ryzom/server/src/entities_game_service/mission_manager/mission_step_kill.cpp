@@ -119,7 +119,6 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 	}
 	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
 	{
-		nlinfo("Process Event");
 		string webAppUrl;
 		bool ret = true;
 		_User = PlayerManager.getChar(getEntityIdFromRow(userRow));

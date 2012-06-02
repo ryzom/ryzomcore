@@ -162,7 +162,7 @@ public:
 
 
 	/// inherited from IPSSoundServer
-	UPSSoundInstance *createSound(const NLMISC::TStringId &soundName, bool spawned = true)
+	UPSSoundInstance *createSound(const NLMISC::CSheetId &soundName, bool spawned = true)
 	{
 		if (!_AudioMixer)
 			return NULL;

@@ -394,7 +394,7 @@ public:
 	 * If you are using the stream only in output mode, you can use this method as a faster version
 	 * of clear() *if you don't serialize pointers*.
 	 */
-	void			resetBufPos()
+	virtual void		resetBufPos()
 	{
 		// This is ensured in CMemStream::CMemStream() and CMemStream::clear()
 		//if ( (!isReading()) && _Buffer.empty() )
@@ -477,7 +477,7 @@ public:
 	}
 
 	/// See doc in CMemStream::bufferToFill()
-	uint8			*bufferToFill( uint32 msgsize )
+	virtual uint8		*bufferToFill( uint32 msgsize )
 	{
 		_FreeBits = 8;
 		_DbgInfo.clear();
@@ -654,7 +654,7 @@ public:
 	virtual void	serial(ucstring &b);
 
 	virtual void	serial(CBitMemStream &b) { serialMemStream(b); }
-	virtual void	serialMemStream(CBitMemStream &b);
+	virtual void	serialMemStream(CMemStream &b);
 
 
 	//@}

@@ -237,12 +237,15 @@ namespace NLMISC
 		_PImpl = new TCoTaskData(this);
 //		_PImpl->_TaskThreadId = 0;
 //		_PImpl->_ParentThreadId = 0;
+		nlunreferenced(stackSize);
 #else //NL_USE_THREAD_COTASK
 		// allocate platform specific data storage
 		_PImpl = new TCoTaskData;
+		nlunreferenced(stackSize);
 #if defined (NL_OS_WINDOWS)
 		_PImpl->_Fiber = NULL;
 		_PImpl->_ParentFiber = NULL;
+		nlunreferenced(stackSize);
 #elif defined(NL_OS_UNIX)
 		// allocate the stack
 		_PImpl->_Stack = new uint8[stackSize];

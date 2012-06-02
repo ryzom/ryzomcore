@@ -48,12 +48,15 @@ CSourceMusicChannel::CSourceMusicChannel() : m_Source(NULL), m_Gain(1.0f)
 
 CSourceMusicChannel::~CSourceMusicChannel()
 {
+	nlassert(!m_Source);
 	delete m_Source;
 	m_Source = NULL;
 }
 
 bool CSourceMusicChannel::play(const std::string &filepath, bool async, bool loop)
 {
+	// delete previous source if any
+	// note that this waits for the source's thread to finish if the source was still playing
 	if (m_Source)
 		delete m_Source;
 
@@ -71,12 +74,14 @@ bool CSourceMusicChannel::play(const std::string &filepath, bool async, bool loo
 
 void CSourceMusicChannel::stop()
 {
+	// stop but don't delete the source, deleting source may cause waiting for thread
 	if (m_Source)
 		m_Source->stop();
 }
 
 void CSourceMusicChannel::reset()
 {
+	// forces the source to be deleted, happens when audio mixer is reset
 	delete m_Source;
 	m_Source = NULL;
 }
@@ -96,7 +101,16 @@ void CSourceMusicChannel::resume()
 bool CSourceMusicChannel::isEnded()
 {
 	if (m_Source)
-		return m_Source->isEnded();
+	{
+		if (m_Source->isEnded())
+		{
+			// we can delete the source now without worrying about thread wait
+			delete m_Source;
+			m_Source = NULL;
+			return true;
+		}
+		return false;
+	}
 	return true;
 }
 

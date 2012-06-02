@@ -23,6 +23,7 @@
 #include "nel/3d/cluster.h"
 #include "nel/sound/sound.h"
 #include "nel/sound/group_controller.h"
+#include "nel/misc/sheet_id.h"
 
 namespace NLSOUND {
 

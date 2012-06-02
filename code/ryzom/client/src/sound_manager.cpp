@@ -107,9 +107,11 @@ enum TFilterMapping
 //-----------------------------------------------
 CSoundManager::CSoundManager(IProgressCallback * /* progressCallBack */)
 :	_AudioMixer(NULL), 
+	_GroupControllerEffects(NULL),
+	_GroupControllerEffectsGame(NULL),  
 	_EnvSoundRoot(NULL), 
-	_UserEntitySoundLevel(1.0f), 
-	_Sources(NULL)
+	_Sources(NULL), 
+	_UserEntitySoundLevel(1.0f)
 {
 	_EnableBackgroundMusicAtTime= 0;
 	_GameMusicVolume= 1.f;
@@ -139,6 +141,7 @@ CSoundManager::~CSoundManager()
 	NL3D::UParticleSystemSound::setPSSound(NULL);
 
 	_GroupControllerEffects = NULL;
+	_GroupControllerEffectsGame = NULL;
 
 	// free the audio mixer (and delete all sources)
 	delete _AudioMixer;
@@ -407,6 +410,7 @@ void CSoundManager::reset ()
 	NL3D::UParticleSystemSound::setPSSound(NULL);
 
 	_GroupControllerEffects = NULL;
+	_GroupControllerEffectsGame = NULL;
 
 	delete _AudioMixer;
 	_AudioMixer = NULL;
@@ -482,7 +486,8 @@ void CSoundManager::init(IProgressCallback *progressCallBack)
 		new CSoundAnimManager(_AudioMixer);
 
 		// get the controller group for effects
-		_GroupControllerEffects = _AudioMixer->getGroupController("effects");
+		_GroupControllerEffects = _AudioMixer->getGroupController("sound:effects");
+		_GroupControllerEffectsGame = _AudioMixer->getGroupController("sound:effects:game");
 
 		// restore the volume
 		SoundMngr->setSFXVolume(ClientCfg.SoundSFXVolume);
@@ -619,7 +624,7 @@ void CSoundManager::init(IProgressCallback *progressCallBack)
 // add a new source to the world, attached to the specified entity
 // return 0 if creation failed, sound id if creation was successful
 //-----------------------------------------------
-CSoundManager::TSourceId CSoundManager::addSource( const NLMISC::TStringId &soundName, const NLMISC::CVector &position, bool play, bool loop,  const CEntityId &id)
+CSoundManager::TSourceId CSoundManager::addSource( const NLMISC::CSheetId &soundName, const NLMISC::CVector &position, bool play, bool loop,  const CEntityId &id)
 {
 	uint32	retValue = 0;
 
@@ -629,7 +634,7 @@ CSoundManager::TSourceId CSoundManager::addSource( const NLMISC::TStringId &soun
 	// If the source is valid.
 	if(pSource == 0)
 	{
-		nlwarning("Sound '%s' not found !", CStringMapper::unmap(soundName).c_str());
+		nlwarning("Sound '%s' not found !", /*CStringMapper::unmap(soundName).c_str()*/soundName.toString().c_str());
 		return retValue;
 	}
 
@@ -667,7 +672,7 @@ CSoundManager::TSourceId CSoundManager::addSource( const NLMISC::TStringId &soun
 // spawn a new source to the world
 // return false if creation failed, true if creation was successful
 //-----------------------------------------------
-bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, CSoundContext &context)
+bool CSoundManager::spawnSource(const NLMISC::CSheetId &soundName, CSoundContext &context)
 {
 	if (!_PlaySound) return false;
 
@@ -678,7 +683,7 @@ bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, CSoundContex
 	// If the source is valid.
 	if(pSource == 0)
 	{
-		nlwarning("Sound '%s' not found !", soundName);
+		nlwarning("Sound '%s' not found !", soundName.toString().c_str());
 		return false;
 	}
 
@@ -697,7 +702,7 @@ bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, CSoundContex
 // spawn a new source to the world
 // return false if creation failed, true if creation was successful
 //-----------------------------------------------
-bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, const NLMISC::CVector &position)
+bool CSoundManager::spawnSource(const NLMISC::CSheetId &soundName, const NLMISC::CVector &position)
 {
 	if (!_PlaySound) return false;
 
@@ -707,7 +712,7 @@ bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, const NLMISC
 	// If the source is valid.
 	if(pSource == 0)
 	{
-		nlwarning("Sound '%s' not found !", CStringMapper::unmap(soundName).c_str ());
+		nlwarning("Sound '%s' not found !", /*CStringMapper::unmap(soundName).c_str ()*/soundName.toString().c_str());
 		return false;
 	}
 
@@ -742,7 +747,7 @@ nldebug("nb sources = %d", _Sources.size() );
 		{
 			if ( (*it).second == sourceId )
 			{
-				(*it).second = NULL;
+				(*it).second = 0;
 //				itOld = it;
 //				++it;
 
@@ -1543,7 +1548,8 @@ void		CSoundManager::updateVolume()
 		_AudioMixer->setEventMusicVolume(_GameMusicVolume);
 
 		// update sfx volume
-		_GroupControllerEffects->setGain(_FadeSFXVolume, _SFXVolume);
+		_GroupControllerEffects->setGain(_SFXVolume);
+		_GroupControllerEffectsGame->setGain(_FadeSFXVolume);
 	}
 }
 

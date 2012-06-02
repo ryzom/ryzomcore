@@ -90,7 +90,7 @@ void CLog::setPosition (sint line, const char *fileName, const char *funcName)
 		_Mutex.enter();
 		_PosSet++;
 		_FileName = fileName;
-	    _Line = line;
+		_Line = line;
 		_FuncName = funcName;
 	}
 }

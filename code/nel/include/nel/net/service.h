@@ -42,6 +42,20 @@ namespace NLMISC
 	class CWindowDisplayer;
 }
 
+#if defined(NL_OS_WINDOWS) && defined(_WINDOWS)
+#ifndef WINAPI
+#define WINAPI      __stdcall
+#endif
+#ifndef APIENTRY
+#define APIENTRY    WINAPI
+#endif
+
+struct HINSTANCE__;
+typedef struct HINSTANCE__ *HINSTANCE;
+
+typedef char CHAR;
+typedef CHAR *LPSTR;
+#endif
 
 namespace NLNET
 {

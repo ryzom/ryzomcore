@@ -19,6 +19,14 @@
 
 namespace NL3D {
 
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
+
 // ***************************************************************************
 void CDriverGL::setFrustum(float left, float right, float bottom, float top, float znear, float zfar, bool perspective)
 {
@@ -204,5 +212,8 @@ void CDriverGL::doRefreshRenderSetup()
 	_RenderSetupDirty= false;
 }
 
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D

@@ -34,6 +34,8 @@ using namespace std;
 
 #ifdef _MSC_VER
 
+#include <Windows.h>
+
 /** A special stream buffer that output in the 'output debug string' feature of windows.
  */
 class CDebugOutput : public streambuf

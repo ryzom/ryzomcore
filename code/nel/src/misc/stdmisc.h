@@ -55,6 +55,7 @@
 
 #ifdef NL_OS_WINDOWS
 	#define NOMINMAX
+	#include <WinSock2.h>
 	#include <windows.h>
 #endif
 

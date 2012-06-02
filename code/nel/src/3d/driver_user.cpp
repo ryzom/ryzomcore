@@ -69,25 +69,29 @@ UDriver::~UDriver()
 	purgeMemory();
 }
 
-
 // ***************************************************************************
 void					UDriver::setMatrixMode2D11()
 {
 	setMatrixMode2D(CFrustum(0.0f,1.0f,0.0f,1.0f,-1.0f,1.0f,false));
 }
+
 // ***************************************************************************
 void					UDriver::setMatrixMode2D43()
 {
 	setMatrixMode2D(CFrustum(0.0f,4.0f/3.0f,0.0f,1.0f,-1.0f,1.0f,false));
 }
 
-
 // ***************************************************************************
 UDriver					*UDriver::createDriver(uint windowIcon, bool direct3d, emptyProc exitFunc)
 {
-	return new CDriverUser (windowIcon, direct3d, exitFunc);
+	return new CDriverUser (windowIcon, direct3d ? CDriverUser::Direct3d:CDriverUser::OpenGl, exitFunc);
 }
 
+// ***************************************************************************
+UDriver					*UDriver::createDriver(uint windowIcon, TDriver driver, emptyProc exitFunc)
+{
+	return new CDriverUser (windowIcon, (CDriverUser::TDriver)driver, exitFunc);
+}
 
 // ***************************************************************************
 void					UDriver::purgeMemory()
@@ -110,9 +114,8 @@ bool	CDriverUser::_StaticInit= false;
 
 
 // ***************************************************************************
-CDriverUser::CDriverUser (uint windowIcon, bool direct3d, emptyProc exitFunc)
+CDriverUser::CDriverUser (uint windowIcon, TDriver driver, emptyProc exitFunc)
 {
-
 	// The enum of IDriver and UDriver MUST be the same!!!
 	nlassert((uint)IDriver::idCount == (uint)UDriver::idCount);
 	nlassert((uint)IDriver::typeCount == (uint)UDriver::typeCount);
@@ -134,12 +137,15 @@ CDriverUser::CDriverUser (uint windowIcon, bool direct3d, emptyProc exitFunc)
 
 	// Create/Init Driver.
 #if defined(NL_OS_WINDOWS)
-	if (direct3d)
+	if (driver == Direct3d)
 		_Driver= CDRU::createD3DDriver();
 #endif
 
-	if (!_Driver)
+	if (!_Driver && driver == OpenGl)
 		_Driver= CDRU::createGlDriver();
+
+	if (!_Driver && driver == OpenGlEs)
+		_Driver= CDRU::createGlEsDriver();
 
 	nlassert(_Driver);
 	_Driver->init (windowIcon, exitFunc);

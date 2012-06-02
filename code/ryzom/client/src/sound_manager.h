@@ -32,6 +32,7 @@
 // sound
 #include "nel/sound/u_audio_mixer.h"
 #include "nel/sound/u_listener.h"
+#include "nel/misc/sheet_id.h"
 
 extern class CSoundManager *SoundMngr;
 
@@ -88,13 +89,13 @@ public:
 	/// Return the audio mixer instance pointer.
 	NLSOUND::UAudioMixer *getMixer();
 
-	TSourceId	addSource( const NLMISC::TStringId &soundName, const NLMISC::CVector &position, bool play = true , bool loop = false,  const NLMISC::CEntityId &id = NLMISC::CEntityId::Unknown );
+	TSourceId	addSource( const NLMISC::CSheetId &soundName, const NLMISC::CVector &position, bool play = true , bool loop = false,  const NLMISC::CEntityId &id = NLMISC::CEntityId::Unknown );
 
 	/// spawn a new source to the world but sound manager don't keep any link and the sound will be automatically deleted when finnished
-	bool	spawnSource (const NLMISC::TStringId &soundName, NLSOUND::CSoundContext &context);
+	bool	spawnSource (const NLMISC::CSheetId &soundName, NLSOUND::CSoundContext &context);
 
 	/// spawn a new source to the world but sound manager don't keep any link and the sound will be automatically deleted when finnished
-	bool	spawnSource( const NLMISC::TStringId &soundName, const NLMISC::CVector &position );
+	bool	spawnSource( const NLMISC::CSheetId &soundName, const NLMISC::CVector &position );
 
 	/**
 	 * remove a source
@@ -332,8 +333,11 @@ private:
 	/// Pointer on the audio mixer object
 	NLSOUND::UAudioMixer		*_AudioMixer;
 
-	/// The root effects group controller for volume settings
+	/// The root effects group controller for effects volume settings by the user
 	NLSOUND::UGroupController	*_GroupControllerEffects;
+
+	/// The root effects group controller for effects fading by the game
+	NLSOUND::UGroupController	*_GroupControllerEffectsGame;
 
 	/// Pointer on the root of the environmental sounds tree (if any)
 	NLSOUND::UEnvSound			*_EnvSoundRoot;

@@ -419,7 +419,7 @@ CClientConfig::CClientConfig()
 
 	// only force patching under Windows by default
 #ifdef NL_OS_WINDOWS
-	PatchWanted = true;
+	PatchWanted = false;//true;
 #else
 	PatchWanted = false;
 #endif
@@ -841,6 +841,7 @@ void CClientConfig::setValues()
 		if (nlstricmp(varPtr->asString(), "Auto") == 0 || nlstricmp(varPtr->asString(), "0") == 0) ClientCfg.Driver3D = CClientConfig::DrvAuto;
 		else if (nlstricmp(varPtr->asString(), "OpenGL") == 0 || nlstricmp(varPtr->asString(), "1") == 0) ClientCfg.Driver3D = CClientConfig::OpenGL;
 		else if (nlstricmp(varPtr->asString(), "Direct3D") == 0 || nlstricmp(varPtr->asString(), "2") == 0) ClientCfg.Driver3D = CClientConfig::Direct3D;
+		else if (nlstricmp(varPtr->asString(), "OpenGLES") == 0 || nlstricmp(varPtr->asString(), "3") == 0) ClientCfg.Driver3D = CClientConfig::OpenGLES;
 	}
 	else
 		cfgWarning ("Default value used for 'Driver3D' !!!");

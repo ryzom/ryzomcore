@@ -22,8 +22,9 @@
 #include <vector>
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
-#	include <windows.h>
+struct HINSTANCE__;
+typedef struct HINSTANCE__ *HINSTANCE;
+typedef HINSTANCE HMODULE;      /* HMODULEs can be used in place of HINSTANCEs */
 #else
 #	include <dlfcn.h>
 #endif

@@ -20,8 +20,6 @@
 #include <stdio.h>
 #ifdef NL_OS_WINDOWS
 #	include <conio.h>
-#else
-#	include <curses.h>
 #endif
 
 // NeL includes
@@ -99,14 +97,14 @@ static void initSample()
 	
 	//NLMISC::CHTimer::startBench();
 
-	s_Source = s_AudioMixer->createSource(CStringMapper::map("stream_file"));
+	s_Source = s_AudioMixer->createSource(/*CStringMapper::map("stream_file")*/ CSheetId("stream_file"));
 	nlassert(s_Source);
 	s_StreamFileSource = dynamic_cast<CStreamFileSource *>(s_Source);
 	nlassert(s_StreamFileSource);
 	// s_Source->setSourceRelativeMode(true);	
 	// s_Source->setPitch(2.0f);
 
-	s_GroupController = s_AudioMixer->getGroupController("dialog");
+	s_GroupController = s_AudioMixer->getGroupController("sound:dialog");
 }
 
 static void runSample()
@@ -129,10 +127,10 @@ static void runSample()
 #endif
 			{
 			case '+':
-				s_GroupController->setUserGain(s_GroupController->getUserGain() + 0.1f);
+				s_GroupController->setGain(s_GroupController->getGain() + 0.1f);
 				break;
 			case '-':
-				s_GroupController->setUserGain(s_GroupController->getUserGain() - 0.1f);
+				s_GroupController->setGain(s_GroupController->getGain() - 0.1f);
 				break;
 			case 'x':
 				s_Source->stop();
