@@ -262,6 +262,14 @@ void			CPSSound::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	// version 3 : added option to keep original pitch from the .sound
 	sint ver = f.serialVersion(3);
 
+	// FIXME: CPSSound is reserialized from the _ParticleSystemProto
+	// cache when a non-_Shared particle system is instanced, this 
+	// causes unnecessary sheet id lookups from string.
+	// SLN1: Serialize as uint32, but this requires the editor to know
+	// the correct sheet id (and thus requires a built sheet_id.bin).
+	// SLN2: Create a tool that reserializes all ps with sound sheet id 
+	// instead of sheet names, based on a global flag, and serialize
+	// a flag that specifies if the ps is serialized with id or name.
 	_SoundName.serialString(f, "sound");
 
 	sint32 nbSounds;

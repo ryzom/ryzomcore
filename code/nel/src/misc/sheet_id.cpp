@@ -112,7 +112,7 @@ CSheetId::CSheetId( const std::string& sheetName, const std::string &defaultType
 	{
 		std::string withType = sheetName + "." + defaultType;
 		*this = CSheetId(withType);
-		nldebug("SHEETID: Constructing CSheetId from name '%s' without explicit type, defaulting as '%s' to '%s'", sheetName.c_str(), defaultType.c_str(), withType.c_str());
+		// nldebug("SHEETID: Constructing CSheetId from name '%s' without explicit type, defaulting as '%s' to '%s'", sheetName.c_str(), defaultType.c_str(), withType.c_str());
 	}
 	else
 		*this = CSheetId(sheetName);
