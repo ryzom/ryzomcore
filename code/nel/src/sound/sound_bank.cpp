@@ -153,7 +153,7 @@ public:
 	{}
 
 	// load the values using the george sheet (called by GEORGE::loadForm)
-	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &name)
+	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const std::string &name)
 	{
 		// just call the sound creation method with the xml form.
 		Sound = CSound::createSound(name, form->getRootNode());
@@ -259,8 +259,7 @@ public:
 void CSoundBank::load(const std::string &packedSheetDir, bool packedSheetUpdate)
 {
 	// this structure is fill by the loadForm() function and will contain all you need
-	//std::map<std::string, CSoundSerializer> Container;
-	std::map<NLMISC::CSheetId, CSoundSerializer> container;
+	std::map<std::string, CSoundSerializer> container; // load the old way for compatibility
 	nlassert(!_Loaded);
 	// Just call the GEORGE::loadFrom method to read all available sounds
 	::loadForm("sound", packedSheetDir + "sounds.packed_sheets", container, packedSheetUpdate, false);
@@ -269,11 +268,12 @@ void CSoundBank::load(const std::string &packedSheetDir, bool packedSheetUpdate)
 	// get the largest sheet id needed and init the sound bank
 	uint32 maxShortId = 0;
 	{
-		std::map<NLMISC::CSheetId, CSoundSerializer>::iterator first(container.begin()), last(container.end());
+		std::map<std::string, CSoundSerializer>::iterator first(container.begin()), last(container.end());
 		for (; first != last; ++first)
 		{
-			if (first->first.getShortId() > maxShortId)
-				maxShortId = first->first.getShortId();
+			if (first->second.Sound != 0)
+				if (first->second.Sound->getName().getShortId() > maxShortId)
+					maxShortId = first->second.Sound->getName().getShortId();
 		}
 		++maxShortId; // inc for size = last idx + 1
 		if (container.size() == 0)
@@ -290,7 +290,7 @@ void CSoundBank::load(const std::string &packedSheetDir, bool packedSheetUpdate)
 
 	// add all the loaded sound in the sound banks
 	{
-		std::map<NLMISC::CSheetId, CSoundSerializer>::iterator first(container.begin()), last(container.end());
+		std::map<std::string, CSoundSerializer>::iterator first(container.begin()), last(container.end());
 		for (; first != last; ++first)
 		{
 			if (first->second.Sound != 0)

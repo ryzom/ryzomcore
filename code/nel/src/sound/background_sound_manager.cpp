@@ -86,8 +86,7 @@ void CBackgroundSoundManager::addSound(const std::string &soundName, uint layerI
 	CAudioMixerUser *mixer = CAudioMixerUser::instance();
 	TSoundData	sd;
 
-	nlassert(soundName.find(".sound") != std::string::npos);
-	sd.SoundName = NLMISC::CSheetId(soundName);
+	sd.SoundName = NLMISC::CSheetId(soundName, "sound"); // note: loaded from .primitive
 	sd.Sound = mixer->getSoundId(sd.SoundName);
 	sd.Source = 0;
 

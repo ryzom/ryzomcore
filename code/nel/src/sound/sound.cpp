@@ -37,9 +37,8 @@ using namespace NLMISC;
 
 namespace NLSOUND {
 
-CSound *CSound::createSound(const NLMISC::CSheetId &sheetId, NLGEORGES::UFormElm& formRoot)
+CSound *CSound::createSound(const std::string &filename, NLGEORGES::UFormElm& formRoot)
 {
-	std::string filename = sheetId.toString();
 	CSound *ret = NULL;
 	string	soundType;
 
@@ -134,8 +133,9 @@ void	CSound::serial(NLMISC::IStream &s)
 	s.serial(_Direction);
 	s.serial(_Looping);
 	s.serial(_MaxDist);
+
 	_Name.serialString(s, "sound");
-	
+
 	nlassert(CGroupControllerRoot::getInstance()); // not sure
 #if NLSOUND_SHEET_VERSION_BUILT < 2
 	if (s.isReading()) _GroupController = static_cast<CGroupController *>(CAudioMixerUser::instance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER));
