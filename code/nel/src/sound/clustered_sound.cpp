@@ -70,7 +70,7 @@ float EAX_MATERIAL_PARAM[] =
 class CSoundGroupSerializer
 {
 public:
-	std::vector<std::pair<NLMISC::CSheetId, NLMISC::CSheetId> >	_SoundGroupAssoc;
+	std::vector<std::pair<NLMISC::TStringId, NLMISC::CSheetId> >	_SoundGroupAssoc;
 
 	// load the values using the george sheet (called by GEORGE::loadForm)
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const std::string &/* name */)
@@ -95,15 +95,9 @@ public:
 				item->getValueByName(soundGroup, ".SoundGroup");
 				item->getValueByName(sound, ".Sound");
 
-				string::size_type n = sound.rfind(".sound");
+				nlassert(sound.find(".sound") != std::string::npos);
 
-				if (n != string::npos)
-				{
-					// remove the tailing .sound
-					sound = sound.substr(0, n);
-				}
-
-				_SoundGroupAssoc.push_back(make_pair(CSheetId(soundGroup), CSheetId(sound) /*CStringMapper::map(soundGroup), CStringMapper::map(sound)*/));
+				_SoundGroupAssoc.push_back(make_pair(CStringMapper::map(soundGroup), CSheetId(sound)));
 			}
 		}
 		catch(...)
@@ -125,24 +119,18 @@ public:
 		{
 			if (s.isReading())
 			{
-				std::string soundGroup;
-				std::string sound;
+				TStringId soundGroup;
+				CSheetId sound;
 
-				s.serial(soundGroup);
-				s.serial(sound);
+				CStringMapper::serialString(s, soundGroup);
+				sound.serialString(s, "sound");
 
-				_SoundGroupAssoc.push_back(make_pair(CSheetId(soundGroup), CSheetId(sound) /*CStringMapper::map(soundGroup), CStringMapper::map(sound)*/));
+				_SoundGroupAssoc.push_back(make_pair(soundGroup, sound));
 			}
 			else
 			{
-				std::string soundGroup;
-				std::string sound;
-
-				soundGroup = _SoundGroupAssoc[i].first.toString();// CStringMapper::unmap(_SoundGroupAssoc[i].first);
-				sound = _SoundGroupAssoc[i].second.toString(); //CStringMapper::unmap(_SoundGroupAssoc[i].second);
-
-				s.serial(soundGroup);
-				s.serial(sound);
+				CStringMapper::serialString(s, _SoundGroupAssoc[i].first);
+				_SoundGroupAssoc[i].second.serialString(s, "sound");
 			}
 		}
 	}
@@ -254,10 +242,10 @@ void CClusteredSound::update(const CVector &listenerPos, const CVector &/* view 
 	TClusterStatusMap::const_iterator first(_AudibleClusters.begin()), last(_AudibleClusters.end());
 	for (; first != last; ++first )
 	{
-		static NLMISC::CSheetId NO_SOUND_GROUP = /*CStringMapper::emptyId()*/NLMISC::CSheetId::Unknown;
+		static NLMISC::TStringId NO_SOUND_GROUP = CStringMapper::emptyId();
 		const CClusterSoundStatus &css = first->second;
 		CCluster *cluster = first->first;
-		NLMISC::CSheetId soundGroup;
+		NLMISC::TStringId soundGroup;
 
 		soundGroup = cluster->getSoundGroupId();
 
@@ -289,7 +277,7 @@ void CClusteredSound::update(const CVector &listenerPos, const CVector &/* view 
 
 //				nldebug("Searching sound assoc for group [%s]", CStringMapper::unmap(soundGroup).c_str());
 
-				TStringStringMap::iterator it2(_SoundGroupToSound.find(soundGroup));
+				TStringSheetMap::iterator it2(_SoundGroupToSound.find(soundGroup));
 				if (it2 != _SoundGroupToSound.end())
 				{
 					NLMISC::CSheetId soundName = it2->second;

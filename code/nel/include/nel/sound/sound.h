@@ -54,7 +54,7 @@ class CSound
 	friend class CAudioMixerUser;
 public:
 	/// Factory for specialized sound.
-	static CSound *createSound(const std::string &filename, NLGEORGES::UFormElm& formRoot);
+	static CSound *createSound(const NLMISC::CSheetId &sheetId, NLGEORGES::UFormElm& formRoot);
 
 	enum TSOUND_TYPE
 	{

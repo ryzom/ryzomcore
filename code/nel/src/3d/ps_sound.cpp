@@ -261,17 +261,8 @@ void			CPSSound::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	CPSLocatedBindable::serial(f);
 	// version 3 : added option to keep original pitch from the .sound
 	sint ver = f.serialVersion(3);
-	if (f.isReading())
-	{
-		std::string soundName;
-		f.serial(soundName);
-		_SoundName = NLMISC::CSheetId(soundName)/*NLMISC::CStringMapper::map(soundName)*/;
-	}
-	else
-	{
-		std::string soundName = _SoundName.toString()/*NLMISC::CStringMapper::unmap(_SoundName)*/;
-		f.serial(soundName);
-	}
+
+	_SoundName.serialString(f, "sound");
 
 	sint32 nbSounds;
 	bool hasScheme;

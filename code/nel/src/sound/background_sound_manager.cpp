@@ -86,7 +86,8 @@ void CBackgroundSoundManager::addSound(const std::string &soundName, uint layerI
 	CAudioMixerUser *mixer = CAudioMixerUser::instance();
 	TSoundData	sd;
 
-	sd.SoundName = /*CStringMapper::map(soundName)*/ NLMISC::CSheetId(soundName);
+	nlassert(soundName.find(".sound") != std::string::npos);
+	sd.SoundName = NLMISC::CSheetId(soundName);
 	sd.Sound = mixer->getSoundId(sd.SoundName);
 	sd.Source = 0;
 
@@ -1431,20 +1432,14 @@ void CBackgroundSoundManager::TBanksData::serial(NLMISC::IStream &s)
 
 void CBackgroundSoundManager::TSoundData::serial(NLMISC::IStream &s)
 {
-	std::string str;
-
+	//std::string str;
+	SoundName.serialString(s, "sound");
 	if (s.isReading())
 	{
 		CAudioMixerUser *mixer = CAudioMixerUser::instance();
-		s.serial(str);
-		SoundName = /*NLMISC::CStringMapper::map(str)*/ NLMISC::CSheetId(str);
 		Sound = mixer->getSoundId(SoundName);
 		Source = NULL;
 		Selected = false;
-	}
-	else
-	{
-		s.serial(const_cast<std::string&>(SoundName.toString()/*NLMISC::CStringMapper::unmap(SoundName)*/));
 	}
 	s.serial(MinBox);
 	s.serial(MaxBox);

@@ -21,7 +21,6 @@
 #include "nel/misc/string_mapper.h"
 #include "nel/misc/plane.h"
 #include "nel/misc/aabbox.h"
-#include "nel/misc/sheet_id.h"
 
 #include "nel/3d/transform.h"
 
@@ -126,9 +125,9 @@ public:
 	//\name Sound related.
 	//@{
 	void				setSoundGroup(const std::string &soundGroup);
-	void				setSoundGroup(const NLMISC::CSheetId &soundGroupId);
+	void				setSoundGroup(const NLMISC::TStringId &soundGroupId);
 	const std::string	&getSoundGroup();
-	NLMISC::CSheetId	getSoundGroupId();
+	NLMISC::TStringId	getSoundGroupId();
 	void				setEnvironmentFx(const std::string &environmentFx);
 	void				setEnvironmentFx(const NLMISC::TStringId &environmentFxId);
 	const std::string	&getEnvironmentFx();
@@ -189,7 +188,7 @@ private:
 	std::vector<NLMISC::CPlane> _Volume;
 
 	/// Sound group name id
-	NLMISC::CSheetId	_SoundGroupId;
+	NLMISC::TStringId	_SoundGroupId;
 	/// Environement Fx name Id (using CStringMapper)
 	NLMISC::TStringId	_EnvironmentFxId;
 

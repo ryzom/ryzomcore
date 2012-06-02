@@ -37,8 +37,9 @@ using namespace NLMISC;
 
 namespace NLSOUND {
 
-CSound *CSound::createSound(const std::string &filename, NLGEORGES::UFormElm& formRoot)
+CSound *CSound::createSound(const NLMISC::CSheetId &sheetId, NLGEORGES::UFormElm& formRoot)
 {
+	std::string filename = sheetId.toString();
 	CSound *ret = NULL;
 	string	soundType;
 
@@ -170,7 +171,7 @@ void	CSound::serial(NLMISC::IStream &s)
 void				CSound::importForm(const std::string& filename, NLGEORGES::UFormElm& root)
 {
 	// Name
-	_Name = NLMISC::CSheetId(CFile::getFilenameWithoutExtension(filename));//CStringMapper::map(CFile::getFilenameWithoutExtension(filename));
+	_Name = NLMISC::CSheetId(filename);
 
 	// InternalConeAngle
 	uint32 inner;

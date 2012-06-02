@@ -1050,9 +1050,8 @@ public:
 			for (uint i=0; i<size; ++i)
 			{
 				items->getArrayValue(soundName, i);
-				soundName = soundName.substr(0, soundName.find(".sound"));
-
-				cs.SoundNames.push_back(CSheetId(soundName)/*CStringMapper::map(soundName)*/);
+				nlassert(soundName.find(".sound") != std::string::npos);
+				cs.SoundNames.push_back(CSheetId(soundName));
 			}
 
 			if (!cs.SoundNames.empty())
@@ -1133,7 +1132,7 @@ void CAudioMixerUser::CControledSources::serial(NLMISC::IStream &s)
 		for (uint i=0; i<size; ++i)
 		{
 			s.serial(soundName);
-			SoundNames.push_back(CSheetId(soundName)/*CStringMapper::map(soundName)*/);
+			SoundNames.push_back(CSheetId(soundName.find(".sound") == std::string::npos ? (soundName + ".sound") : soundName));
 		}
 	}
 	else
@@ -1147,7 +1146,7 @@ void CAudioMixerUser::CControledSources::serial(NLMISC::IStream &s)
 
 		for (uint i=0; i<size; ++i)
 		{
-			soundName = SoundNames[i].toString();/*CStringMapper::unmap(SoundNames[i])*/;
+			soundName = SoundNames[i].toString();;
 			s.serial(soundName);
 		}
 	}
@@ -2311,7 +2310,6 @@ void			CAudioMixerUser::getLoadedSampleBankInfo(std::vector<std::pair<std::strin
 {
 	_SampleBankManager->getLoadedSampleBankInfo(result);
 }
-
 
 
 void CAudioMixerUser::setListenerPos (const NLMISC::CVector &pos)
