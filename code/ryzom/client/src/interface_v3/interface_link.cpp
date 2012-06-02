@@ -14,13 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
-#include "stdpch.h"
+#include "action_handler.h"
 #include "interface_link.h"
+#include "interface_group.h"
 #include "interface_element.h"
-#include "interface_manager.h"
+#include "widget_manager.h"
 #include "nel/gui/interface_expr.h"
 #include "nel/gui/interface_expr_node.h"
 #include "nel/gui/reflect.h"
@@ -364,7 +362,6 @@ void CInterfaceLink::update()
 		}
 		if(launch)
 		{
-			CInterfaceManager *im = CInterfaceManager::getInstance();
 			CAHManager::getInstance()->runActionHandler(_ActionHandler, _AHParent, _AHParams);
 			// do not add any code after this line because this can be deleted !!!!
 		}
@@ -543,7 +540,6 @@ void    CInterfaceLink::setTargetProperty (const std::string &Target, const CInt
 {
 	// Eval target !
 	string elt = Target.substr(0,Target.rfind(':'));
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(elt);
 	CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(pIE);
 	if (pIG == NULL)

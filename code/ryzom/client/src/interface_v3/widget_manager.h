@@ -28,6 +28,15 @@ class CCtrlBase;
 class CInterfaceGroup;
 class CViewPointer;
 
+class IParser
+{
+public:
+	virtual void addParentPositionAssociation( CInterfaceElement *element, const std::string &parentID ) = 0;
+	virtual void addParentSizeAssociation( CInterfaceElement *element, const std::string &parentID )     = 0;
+	virtual void addParentSizeMaxAssociation( CInterfaceElement *element, const std::string &parentID )  = 0;
+	virtual void addLuaClassAssociation( CInterfaceGroup *group, const std::string &luaScript )          = 0;
+};
+
 /// Manages the GUI widgets
 class CWidgetManager{
 public:
@@ -176,6 +185,8 @@ public:
 
 	CViewPointer* getPointer(){ return _Pointer; }
 	void setPointer( CViewPointer *pointer ){ _Pointer = pointer; }
+
+	static IParser *parser;
 
 private:
 	CWidgetManager();

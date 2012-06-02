@@ -113,7 +113,6 @@ void CInterfaceGroup::setActive(bool state)
 	if(state != getActive())
 	{
 		CCtrlBase::setActive(state);
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if (_AHOnActive != NULL && state)
 		{
 			CAHManager::getInstance()->runActionHandler (_AHOnActive, this, _AHOnActiveParams);
@@ -323,7 +322,7 @@ bool CInterfaceGroup::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 			if (parentGroup)
 				idparent = parentGroup->getId();
 		}
-		CInterfaceManager::getInstance()->addParentSizeMaxAssociation (this, idparent);
+		CWidgetManager::parser->addParentSizeMaxAssociation (this, idparent);
 	}
 
 	// left & right clicks
@@ -346,7 +345,8 @@ bool CInterfaceGroup::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 
 	// LuaClass script
 	ptr = xmlGetProp (cur, (xmlChar*)"lua_class");
-	if(ptr)	CInterfaceManager::getInstance()->addLuaClassAssociation(this, (const char*)ptr);
+	if( ptr )
+		CWidgetManager::parser->addLuaClassAssociation( this, (const char*)ptr );
 
 	return true;
 }
@@ -693,8 +693,6 @@ bool CInterfaceGroup::handleEvent (const NLGUI::CEventDescriptor &event)
 	if (!_Active)
 		return false;
 
-	CInterfaceManager *im = CInterfaceManager::getInstance();
-
 	if (event.getType() == NLGUI::CEventDescriptor::system)
 	{
 		NLGUI::CEventDescriptorSystem &eds = (NLGUI::CEventDescriptorSystem&)event;
@@ -866,10 +864,8 @@ void CInterfaceGroup::executeLuaScriptOnDraw()
 {
 	// If some LUA script attached to me, execute it
 	if(!_LUAOnDraw.empty())
-	{
-		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		CAHManager::getInstance()->runActionHandler("lua", this, _LUAOnDraw);
-	}
+
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1748,7 +1744,6 @@ void CInterfaceGroup::onFrameUpdateWindowPos(sint dx, sint dy)
 // ------------------------------------------------------------------------------------------------
 void	CInterfaceGroup::pushLUAEnvTable()
 {
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CLuaState *lua= CLuaManager::getInstance().getLuaState();
 	nlassert(lua);
 
@@ -1783,7 +1778,6 @@ void	CInterfaceGroup::deleteLUAEnvTable(bool recurse)
 {
 	if(_LUAEnvTableCreated)
 	{
-		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		CLuaState *lua= CLuaManager::getInstance().getLuaState();
 		nlassert(lua);
 

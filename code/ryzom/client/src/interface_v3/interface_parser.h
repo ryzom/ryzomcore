@@ -50,7 +50,7 @@ class CCtrlBase;
  */
 
 // this is the base class for CInterfaceManager
-class CInterfaceParser
+class CInterfaceParser : public IParser
 {
 
 public:

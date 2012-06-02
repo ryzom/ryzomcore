@@ -22,6 +22,7 @@
 
 CWidgetManager* CWidgetManager::instance = NULL;
 std::string CWidgetManager::_CtrlLaunchingModalId= "ctrl_launch_modal";
+IParser* CWidgetManager::parser = NULL;
 
 // ----------------------------------------------------------------------------
 // SMasterGroup

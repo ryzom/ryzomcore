@@ -14,15 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-#include "stdpch.h"
-
 #include "interface_group.h"
 #include "nel/gui/interface_property.h"
-#include "interface_manager.h"
+#include "nel/gui/view_renderer.h"
+#include "widget_manager.h"
+#include "nel/gui/db_manager.h"
 #include "group_container.h"
-#include "../misc.h"
 #include "interface_link.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/lua_ihm.h"
@@ -157,7 +154,7 @@ bool CInterfaceElement::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 				idparent = parentGroup->getId() +":";
 			else
 				idparent = "ui:";
-			CInterfaceManager::getInstance()->addParentPositionAssociation (this, idparent +  string((const char*)ptr));
+			CWidgetManager::parser->addParentPositionAssociation(this, idparent +  string((const char*)ptr));
 		}
 	}
 
@@ -178,7 +175,7 @@ bool CInterfaceElement::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 			if (parentGroup)
 				idparent = parentGroup->getId();
 		}
-		CInterfaceManager::getInstance()->addParentSizeAssociation (this, idparent);
+		CWidgetManager::parser->addParentSizeAssociation( this, idparent );
 	}
 
 	ptr = (char*) xmlGetProp (cur, (xmlChar*)"sizeref");
@@ -527,7 +524,6 @@ void CInterfaceElement::relativeSInt64Read (CInterfaceProperty &rIP, const strin
 			return;
 		}
 
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		sint32 decal = 0;
 		if (val[0] == ':')
 			decal = 1;
@@ -574,7 +570,6 @@ void CInterfaceElement::relativeSInt32Read (CInterfaceProperty &rIP, const strin
 			return;
 		}
 
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		sint32 decal = 0;
 		if (val[0] == ':')
 			decal = 1;
@@ -615,7 +610,6 @@ void CInterfaceElement::relativeBoolRead (CInterfaceProperty &rIP, const string 
 	}
 	else
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		sint32 decal = 0;
 		if (val[0] == ':')
 			decal = 1;
@@ -661,7 +655,6 @@ void CInterfaceElement::relativeRGBARead(CInterfaceProperty &rIP,const std::stri
 			return;
 		}
 
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		sint32 decal = 0;
 		if (val[0] == ':')
 			decal = 1;
@@ -1000,7 +993,6 @@ void CInterfaceElement::copyOptionFrom(const CInterfaceElement &other)
 void CInterfaceElement::center()
 {
 	// center the pc
-	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CViewRenderer &vr = *CViewRenderer::getInstance();
 	uint32 sw, sh;
 	vr.getScreenSize(sw, sh);
@@ -1024,7 +1016,6 @@ void CInterfaceElement::renderWiredQuads(TRenderWired type, const std::string &u
 			_Id.compare(_Id.size()-uiFilter.size(),string::npos,uiFilter)!=0)
 			)
 			return;
-		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CViewRenderer &vr = *CViewRenderer::getInstance();
 		vr.drawWiredQuad(_XReal, _YReal, _WReal, _HReal);
 		drawHotSpot(_PosRef, CRGBA::Red);
@@ -1063,7 +1054,6 @@ void CInterfaceElement::drawHotSpot(THotSpot hs, CRGBA col)
 	{
 		px = _XReal + _WReal - radius;
 	}
-	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CViewRenderer &vr = *CViewRenderer::getInstance();
 	vr.drawFilledQuad(px - radius, py - radius, radius * 2, radius * 2, col);
 

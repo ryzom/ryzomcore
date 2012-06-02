@@ -256,6 +256,7 @@ int CInterfaceManager::DebugTrackGroupsGetId( CInterfaceGroup *pIG )
 // ------------------------------------------------------------------------------------------------
 CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext *textcontext )
 {
+	CWidgetManager::parser = this;
 	this->driver = driver;
 	this->textcontext = textcontext;
 	CViewRenderer::setDriver( driver );
