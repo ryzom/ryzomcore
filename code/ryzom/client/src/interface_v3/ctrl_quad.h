@@ -19,7 +19,7 @@
 #define RZ_CTRL_QUAD_H
 
 #include "ctrl_base.h"
-#include "view_renderer.h"
+#include "nel/gui/view_renderer.h"
 #include "nel/misc/geom_ext.h"
 
 /** Display of an arbitrary textured quad in the UI. The applied texture is filtered.

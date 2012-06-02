@@ -21,7 +21,7 @@
 
 #include "view_base.h"
 #include "nel/3d/u_texture.h"
-#include "view_renderer.h"
+#include "nel/gui/view_renderer.h"
 
 /**
  * class implementing a bitmap view

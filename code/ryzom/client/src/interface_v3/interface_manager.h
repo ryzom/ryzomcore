@@ -32,7 +32,7 @@
 #include "ctrl_base.h"
 #include "ctrl_scroll.h"
 
-#include "view_renderer.h"
+#include "nel/gui/view_renderer.h"
 
 // InterfaceV3
 #include "interface_parser.h"

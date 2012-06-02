@@ -260,6 +260,8 @@ CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext 
 	this->textcontext = textcontext;
 	CViewRenderer::setDriver( driver );
 	CViewRenderer::setTextContext( textcontext );
+	CViewRenderer::hwCursorScale = ClientCfg.HardwareCursorScale;
+	CViewRenderer::hwCursors     = &ClientCfg.HardwareCursors;
 	CViewRenderer::getInstance();
 
 	_Instance = this;

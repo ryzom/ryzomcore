@@ -20,7 +20,7 @@
 #define RZ_CTRL_BUTTON_H
 
 #include "ctrl_base_button.h"
-#include "view_renderer.h"
+#include "nel/gui/view_renderer.h"
 
 namespace NLGUI
 {

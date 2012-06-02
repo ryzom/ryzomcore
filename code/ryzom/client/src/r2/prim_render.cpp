@@ -26,7 +26,7 @@
 #include "../interface_v3/ctrl_quad.h"
 #include "../interface_v3/ctrl_polygon.h"
 #include "../interface_v3/interface_manager.h"
-#include "../interface_v3/view_renderer.h"
+#include "nel/gui/view_renderer.h"
 #include "../interface_v3/group_map.h"
 
 

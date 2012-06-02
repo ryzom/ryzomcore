@@ -22,7 +22,7 @@
 //
 #include "view_pointer.h"
 #include "interface_manager.h"
-#include "view_renderer.h"
+#include "nel/gui/view_renderer.h"
 #include "ctrl_col_pick.h"
 #include "group_paragraph.h"
 #include "group_html.h"

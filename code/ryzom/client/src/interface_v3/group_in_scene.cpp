@@ -23,7 +23,7 @@
 
 #include "group_in_scene.h"
 #include "interface_manager.h"
-#include "view_renderer.h"
+#include "nel/gui/view_renderer.h"
 #include "nel/misc/xml_auto_ptr.h"
 
 using namespace std;

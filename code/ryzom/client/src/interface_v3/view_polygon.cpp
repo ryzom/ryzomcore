@@ -16,7 +16,7 @@
 
 #include "stdpch.h"
 #include "view_polygon.h"
-#include "view_renderer.h"
+#include "nel/gui/view_renderer.h"
 #include "interface_manager.h"
 
 

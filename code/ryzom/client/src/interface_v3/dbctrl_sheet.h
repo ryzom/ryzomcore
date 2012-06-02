@@ -46,7 +46,12 @@ class IListSheetBase;
 class CSBrickSheet;
 class CSPhraseSheet;
 class COutpostBuildingSheet;
-class CViewRenderer;
+
+namespace NLGUI
+{
+	class CViewRenderer;
+}
+
 
 // ***************************************************************************
 /** Common info for CDBCtrlSheet and CDBGroupListSheet

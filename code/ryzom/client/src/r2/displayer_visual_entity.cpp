@@ -54,7 +54,7 @@
 #include "../pacs_client.h"
 #include "../time_client.h"
 //
-#include "../interface_v3/view_renderer.h"
+#include "nel/gui/view_renderer.h"
 //
 #include "../sheet_manager.h"
 
