@@ -100,7 +100,7 @@ USource *OnAddSource( const char *name, float x, float y, float z )
 	/*
 	 * Create a source with sound 'name', and set some of its initial properties, if successful
 	 */
-	USource *source = AudioMixer->createSource(CSheetId(name));
+	USource *source = AudioMixer->createSource(CSheetId(name, "sound"));
 	if ( source != NULL )
 	{
 		source->setPos( CVector(x,y,z) );
@@ -161,8 +161,8 @@ int main()
 	printf( "One is 20 meters ahead, on the right\n" );
 	printf( "The other is 5 meters ahead, on the left\n" );
 	getchar();
-	USource *src1 = OnAddSource( "beep.sound", 1.0f, 20.0f, 0.0f );  // Beep on the right, 20 meters ahead
-	USource *src2 = OnAddSource( "tuut.sound", -2.0f, 5.0f, 0.0f ); // Tuut on the left, 5 meters ahead
+	USource *src1 = OnAddSource( "beep", 1.0f, 20.0f, 0.0f );  // Beep on the right, 20 meters ahead
+	USource *src2 = OnAddSource( "tuut", -2.0f, 5.0f, 0.0f ); // Tuut on the left, 5 meters ahead
 
 	// Second step: we will move the listener ahead
 	printf( "Press ENTER again to start moving the listener\n" );

@@ -134,17 +134,7 @@ void	CSound::serial(NLMISC::IStream &s)
 	s.serial(_Direction);
 	s.serial(_Looping);
 	s.serial(_MaxDist);
-	if (s.isReading())
-	{
-		std::string name;
-		s.serial(name);
-		_Name = NLMISC::CSheetId(name);//CStringMapper::map(name);
-	}
-	else
-	{
-		std::string name = _Name.toString();//CStringMapper::unmap(_Name);
-		s.serial(name);
-	}
+	_Name.serialString(s, "sound");
 	
 	nlassert(CGroupControllerRoot::getInstance()); // not sure
 #if NLSOUND_SHEET_VERSION_BUILT < 2
@@ -171,6 +161,7 @@ void	CSound::serial(NLMISC::IStream &s)
 void				CSound::importForm(const std::string& filename, NLGEORGES::UFormElm& root)
 {
 	// Name
+	nlassert(filename.find(".sound") != std::string::npos);
 	_Name = NLMISC::CSheetId(filename);
 
 	// InternalConeAngle

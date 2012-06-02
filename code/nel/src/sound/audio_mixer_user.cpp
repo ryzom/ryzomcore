@@ -1132,7 +1132,7 @@ void CAudioMixerUser::CControledSources::serial(NLMISC::IStream &s)
 		for (uint i=0; i<size; ++i)
 		{
 			s.serial(soundName);
-			SoundNames.push_back(CSheetId(soundName.find(".sound") == std::string::npos ? (soundName + ".sound") : soundName));
+			SoundNames.push_back(CSheetId(soundName, "sound"));
 		}
 	}
 	else
