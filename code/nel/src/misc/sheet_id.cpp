@@ -40,6 +40,9 @@ vector<std::string> CSheetId::_FileExtensions;
 bool CSheetId::_Initialised=false;
 bool CSheetId::_RemoveUnknownSheet=true;
 bool CSheetId::_DontHaveSheetKnowledge = false;
+std::map<std::string, uint32> CSheetId::_DevTypeNameToId;
+std::vector<std::vector<std::string> > CSheetId::_DevSheetIdToName;
+std::map<std::string, uint32> CSheetId::_DevSheetNameToId;
 
 const CSheetId CSheetId::Unknown(0);
 
@@ -111,7 +114,38 @@ CSheetId::CSheetId( const string& sheetName )
 bool CSheetId::buildSheetId(const std::string& sheetName)
 {
 	nlassert(_Initialised);
-	nlassert(!_DontHaveSheetKnowledge);
+	
+	// When no sheet_id.bin is loaded, use dynamically assigned IDs.
+	if (_DontHaveSheetKnowledge)
+	{
+		std::string sheetNameLc = toLower(sheetName);
+		std::map<std::string, uint32>::iterator it = _DevSheetNameToId.find(sheetNameLc);
+		if (it == _DevSheetNameToId.end())
+		{
+			// Create a new dynamic sheet ID.
+			std::string sheetType = CFile::getExtension(sheetNameLc);
+			std::string sheetName = CFile::getFilenameWithoutExtension(sheetNameLc);
+			std::map<std::string, uint32>::iterator tit = _DevTypeNameToId.find(sheetType);
+			uint32 typeId;
+			if (tit == _DevTypeNameToId.end())
+			{
+				_FileExtensions.push_back(sheetType);
+				_DevSheetIdToName.push_back(std::vector<std::string>());
+				typeId = _FileExtensions.size() - 1;
+				_DevTypeNameToId[sheetType] = typeId;
+			}
+			else
+			{
+				typeId = tit->second;
+			}
+			_DevSheetIdToName[typeId].push_back(sheetName);
+			_Id.IdInfos.Type = typeId;
+			_Id.IdInfos.Id = _DevSheetIdToName[typeId].size() - 1;
+			_DevSheetNameToId[sheetNameLc] = _Id.Id;
+		}
+		_Id.Id = it->second;
+		return true;
+	}
 
 	// try looking up the sheet name in _SheetNameToId
 	CStaticMap<CChar,uint32,CCharComp>::const_iterator itId;
@@ -283,7 +317,10 @@ void CSheetId::init(bool removeUnknownSheet)
 {
 	// allow multiple calls to init in case libraries depending on sheetid call this init from their own
 	if (_Initialised)
+	{
+		nlassert(!_DontHaveSheetKnowledge);
 		return;
+	}
 
 //	CFile::addFileChangeCallback ("sheet_id.bin", cbFileChange);
 
@@ -297,8 +334,23 @@ void CSheetId::init(bool removeUnknownSheet)
 
 void CSheetId::initWithoutSheet()
 {
+	if (_Initialised)
+	{
+		nlassert(_DontHaveSheetKnowledge);
+		return;
+	}
+	
 	_Initialised = true;
 	_DontHaveSheetKnowledge = true;
+	
+	/*_FileExtensions.push_back("unknown");
+	_DevTypeNameToId["unknown"] = 0;
+	_DevSheetIdToName.push_back(std::vector<std::string>());
+	_DevSheetIdToName[0].push_back("unknown");
+	_DevSheetNameToId["unknown.unknown"] = 0;*/
+	
+	CSheetId unknown = CSheetId("unknown.unknown");
+	nlassert(unknown == CSheetId::Unknown);
 }
 
 
@@ -310,6 +362,10 @@ void CSheetId::initWithoutSheet()
 void CSheetId::uninit()
 {
 	delete [] _AllStrings.Ptr;
+	_FileExtensions.clear();
+	_DevTypeNameToId.clear();
+	_DevSheetIdToName.clear();
+	_DevSheetNameToId.clear();
 } // uninit //
 
 //-----------------------------------------------
@@ -343,7 +399,7 @@ CSheetId& CSheetId::operator=( const CSheetId& sheetId )
 //-----------------------------------------------
 CSheetId& CSheetId::operator=( const string& sheetName )
 {
-	nlassert(_Initialised);
+	/*nlassert(_Initialised);
 	nlassert(!_DontHaveSheetKnowledge);
 
 	CStaticMap<CChar,uint32,CCharComp>::const_iterator itId;
@@ -360,6 +416,12 @@ CSheetId& CSheetId::operator=( const string& sheetName )
 		return *this;
 	}
 	*this = Unknown;
+	return *this;*/
+
+	// doesn't make sense to have a copy of the same code here...
+
+	if (!buildSheetId(sheetName))
+		*this = Unknown;
 	return *this;
 
 } // operator= //
@@ -407,6 +469,13 @@ bool CSheetId::operator < (const CSheetId& sheetRef ) const
 string CSheetId::toString(bool ifNotFoundUseNumericId) const
 {
 	if (!_Initialised) init(false);
+	
+	if (_DontHaveSheetKnowledge)
+	{
+		// FIXME: When someone punches in a fake sheet id this will 
+		// fail.
+		return _DevSheetIdToName[_Id.IdInfos.Type][_Id.IdInfos.Id];
+	}
 
 	CStaticMap<uint32,CChar>::const_iterator itStr = _SheetIdToName.find (_Id.Id);
 	if( itStr != _SheetIdToName.end() )
@@ -432,6 +501,8 @@ string CSheetId::toString(bool ifNotFoundUseNumericId) const
 
 void CSheetId::serial(NLMISC::IStream	&f) throw(NLMISC::EStream)
 {
+	nlassert(!_DontHaveSheetKnowledge);
+	
 	f.serial( _Id.Id );
 
 #ifdef NL_DEBUG_SHEET_ID
@@ -443,6 +514,31 @@ void CSheetId::serial(NLMISC::IStream	&f) throw(NLMISC::EStream)
 #endif
 }
 
+void CSheetId::serialString(NLMISC::IStream &f, const std::string &defaultType) throw(NLMISC::EStream)
+{
+	nlassert(_Initialised);
+	
+	if (f.isReading())
+	{
+		std::string sheetName;
+		f.serial(sheetName);
+		if (CFile::getExtension(sheetName) == "" && defaultType != "")
+			sheetName += std::string(".") + defaultType;
+		if (!buildSheetId(sheetName))
+		{
+			if(sheetName.empty())
+				nlwarning("SHEETID: Try to create an CSheetId with empty name. TODO: check why.");
+			else
+				nlwarning("SHEETID: The sheet '%s' is not in sheet_id.bin, setting it to Unknown",sheetName.c_str());
+			*this = Unknown;
+		}
+	}
+	else
+	{
+		std::string sheetName = toString();
+		f.serial(sheetName);
+	}
+}
 
 
 //-----------------------------------------------
