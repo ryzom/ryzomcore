@@ -49,6 +49,7 @@ void Init()
 {
 	try
 	{
+		CSheetId::initWithoutSheet();
 
 		CPath::addSearchPath(NL_SOUND_DATA"/data", true, false);
 

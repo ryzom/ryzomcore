@@ -109,7 +109,11 @@ CSheetId::CSheetId( const string& sheetName )
 CSheetId::CSheetId( const std::string& sheetName, const std::string &defaultType )
 {
 	if (CFile::getExtension(sheetName) == "" && defaultType != "")
-		*this = CSheetId(sheetName + "." + defaultType);
+	{
+		std::string withType = sheetName + "." + defaultType;
+		*this = CSheetId(withType);
+		nldebug("SHEETID: Constructing CSheetId from name '%s' without explicit type, defaulting as '%s' to '%s'", sheetName.c_str(), defaultType.c_str(), withType.c_str());
+	}
 	else
 		*this = CSheetId(sheetName);
 }
@@ -131,6 +135,7 @@ bool CSheetId::buildSheetId(const std::string& sheetName)
 		if (it == _DevSheetNameToId.end())
 		{
 			// Create a new dynamic sheet ID.
+			nldebug("SHEETID: Creating a new dynamic sheet id for '%s'", sheetName.c_str());
 			std::string sheetType = CFile::getExtension(sheetNameLc);
 			std::string sheetName = CFile::getFilenameWithoutExtension(sheetNameLc);
 			std::map<std::string, uint32>::iterator tit = _DevTypeNameToId.find(sheetType);
@@ -149,7 +154,9 @@ bool CSheetId::buildSheetId(const std::string& sheetName)
 			_DevSheetIdToName[typeId].push_back(sheetName);
 			_Id.IdInfos.Type = typeId;
 			_Id.IdInfos.Id = _DevSheetIdToName[typeId].size() - 1;
+			// nldebug("SHEETID: Type %i, id %i, sheetid %i", _Id.IdInfos.Type, _Id.IdInfos.Id, _Id.Id);
 			_DevSheetNameToId[sheetNameLc] = _Id.Id;
+			return true;
 		}
 		_Id.Id = it->second;
 		return true;
@@ -326,7 +333,8 @@ void CSheetId::init(bool removeUnknownSheet)
 	// allow multiple calls to init in case libraries depending on sheetid call this init from their own
 	if (_Initialised)
 	{
-		nlassert(!_DontHaveSheetKnowledge);
+		if (_DontHaveSheetKnowledge)
+			nlinfo("SHEETID: CSheetId is already initialized without sheet_id.bin");
 		return;
 	}
 
@@ -357,8 +365,9 @@ void CSheetId::initWithoutSheet()
 	_DevSheetIdToName[0].push_back("unknown");
 	_DevSheetNameToId["unknown.unknown"] = 0;*/
 	
-	CSheetId unknown = CSheetId("unknown.unknown");
-	nlassert(unknown == CSheetId::Unknown);
+	CSheetId unknownunknown = CSheetId("unknown.unknown");
+	// nldebug("SHEETID: unknown: %i, Unknown: %i", unknownunknown._Id, Unknown._Id);
+	nlassert(unknownunknown == CSheetId::Unknown);
 }
 
 

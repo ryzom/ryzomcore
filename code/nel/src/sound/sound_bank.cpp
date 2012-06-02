@@ -123,7 +123,9 @@ CSoundBank::~CSoundBank()
 
 void CSoundBank::addSound(CSound *sound)
 {
-	nlassert(_Sounds.size() > sound->getName().getShortId());
+	// nlassert(_Sounds.size() > sound->getName().getShortId());
+	if (_Sounds.size() <= sound->getName().getShortId())
+		_Sounds.resize(sound->getName().getShortId() + 1);
 	_Sounds[sound->getName().getShortId()] = sound;
 }
 
@@ -274,9 +276,16 @@ void CSoundBank::load(const std::string &packedSheetDir, bool packedSheetUpdate)
 				maxShortId = first->first.getShortId();
 		}
 		++maxShortId; // inc for size = last idx + 1
-		nlassert(maxShortId < (container.size() * 8)); // ensure no ridiculous sheet id values
-		if (maxShortId > _Sounds.size())
-			_Sounds.resize(maxShortId);
+		if (container.size() == 0)
+		{
+			nlwarning("NLSOUND: No sound sheets have been loaded, missing sound sheet directory or packed sound sheets file");
+		}
+		else
+		{
+			nlassert(maxShortId < (container.size() * 8)); // ensure no ridiculous sheet id values
+			if (maxShortId > _Sounds.size())
+				_Sounds.resize(maxShortId);
+		}
 	}
 
 	// add all the loaded sound in the sound banks
@@ -348,9 +357,15 @@ CSound* CSoundBank::getSound(const NLMISC::CSheetId &sheetId)
 {
 	if (sheetId == NLMISC::CSheetId::Unknown)
 		return NULL;
-	
-	nlassert(sheetId.getShortId() < _Sounds.size());
-	
+
+	// nlassert(sheetId.getShortId() < _Sounds.size());
+	if (sheetId.getShortId() >= _Sounds.size())
+	{
+		std::string sheetName = sheetId.toString();
+		nlwarning("NLSOUND: Sound sheet id '%s' exceeds loaded sound sheets", sheetName.c_str());
+		return NULL;
+	}
+
 	return _Sounds[sheetId.getShortId()];
 }
 

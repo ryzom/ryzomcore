@@ -59,6 +59,7 @@ static void initSample()
 {
 	if (!INelContext::isContextInitialised())
 		new CApplicationContext();
+	CSheetId::initWithoutSheet();
 	CPath::addSearchPath(NL_SOUND_DATA"/database/build/", true, false);
 	
 	printf("Sample demonstrating OGG playback using UStreamSource.");

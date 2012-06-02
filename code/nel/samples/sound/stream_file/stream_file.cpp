@@ -62,6 +62,7 @@ static void initSample()
 {
 	if (!INelContext::isContextInitialised())
 		new CApplicationContext();
+	CSheetId::initWithoutSheet();
 	CPath::addSearchPath(NL_SOUND_DATA"/data", true, false);
 	
 	printf("Sample demonstrating OGG playback using stream file .sound sheets.");
