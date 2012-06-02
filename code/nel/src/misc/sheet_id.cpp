@@ -106,6 +106,14 @@ CSheetId::CSheetId( const string& sheetName )
 
 } // CSheetId //
 
+CSheetId::CSheetId( const std::string& sheetName, const std::string &defaultType )
+{
+	if (CFile::getExtension(sheetName) == "" && defaultType != "")
+		*this = CSheetId(sheetName + "." + defaultType);
+	else
+		*this = CSheetId(sheetName);
+}
+
 
 //-----------------------------------------------
 //	Build
@@ -522,16 +530,7 @@ void CSheetId::serialString(NLMISC::IStream &f, const std::string &defaultType) 
 	{
 		std::string sheetName;
 		f.serial(sheetName);
-		if (CFile::getExtension(sheetName) == "" && defaultType != "")
-			sheetName += std::string(".") + defaultType;
-		if (!buildSheetId(sheetName))
-		{
-			if(sheetName.empty())
-				nlwarning("SHEETID: Try to create an CSheetId with empty name. TODO: check why.");
-			else
-				nlwarning("SHEETID: The sheet '%s' is not in sheet_id.bin, setting it to Unknown",sheetName.c_str());
-			*this = Unknown;
-		}
+		*this = CSheetId(sheetName, defaultType);
 	}
 	else
 	{

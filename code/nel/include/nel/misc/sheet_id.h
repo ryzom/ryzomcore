@@ -60,6 +60,12 @@ public :
 	 */
 	explicit CSheetId( const std::string& sheetName );
 
+	/**
+	 * Constructor, uses defaultType as extension when sheetName
+	 * contains no file extension.
+	 */
+	explicit CSheetId( const std::string& sheetName, const std::string &defaultType );
+
 	// build from a string and returns true if the build succeed
 	bool	 buildSheetId(const std::string& sheetName);
 
