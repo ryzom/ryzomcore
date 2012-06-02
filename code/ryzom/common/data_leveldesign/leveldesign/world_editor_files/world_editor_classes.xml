@@ -315,6 +315,7 @@
 		<PARAMETER NAME="duration" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="point_to_turn_around" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="distance_to_point" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="speed" TYPE="string" VISIBLE="true"/>
 		
 		<DYNAMIC_CHILD CLASS_NAME="sound_trigger"/>
 		<DYNAMIC_CHILD CLASS_NAME="camera_modifier_shake"/>
