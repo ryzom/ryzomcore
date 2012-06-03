@@ -1,5 +1,5 @@
 <?php
-	class AchCategory extends AchList {
+	class AchCategory extends AchList implements Tieable {
 		private $id = false;
 		private $ties_cult;
 		private $ties_civ;

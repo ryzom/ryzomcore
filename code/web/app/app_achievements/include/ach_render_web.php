@@ -233,10 +233,12 @@
 		$perk_list = $ach->getOpen();
 
 		$perk = $ach->getChild($perk_list[0]);
-
-		$html .= "<span style='color:#999999;font-weight:bold;'>".$perk->getName()."</span>";
+		
+		if($perk->getName() != null) {
+			$html .= "<span style='color:#999999;font-weight:bold;display:block;'>".$perk->getName()."</span>";
+		}
 		if($perk->objDrawable()) {
-			$html .= "<br>".ach_render_obj_list($perk->getChildren());
+			$html .= ach_render_obj_list($perk->getChildren());
 		}
 
 		return $html;

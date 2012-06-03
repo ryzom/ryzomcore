@@ -1,5 +1,5 @@
 <?php
-	class AchSummary extends AchList {
+	class AchSummary extends AchList implements Tieable {
 		private $menu;
 		private $stats;
 
@@ -64,6 +64,22 @@
 
 			return array($done,$total);
 
+		}
+
+		function isTiedCult() {
+			return false;
+		}
+
+		function isTiedCiv() {
+			return false;
+		}
+
+		function getCurrentCiv() {
+			return "c_neutral";
+		}
+
+		function getCurrentCult() {
+			return "c_neutral";
 		}
 	}
 ?>

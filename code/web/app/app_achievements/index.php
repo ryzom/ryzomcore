@@ -34,6 +34,7 @@ require_once("include/ach_render_common.php");
 
 require_once("class/RenderNodeIteraor_abstract.php");
 require_once("class/AchList_abstract.php");
+require_once("class/Tieable_inter.php");
 
 require_once("class/AchMenu_class.php");
 require_once("class/AchSummary_class.php");
