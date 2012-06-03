@@ -115,7 +115,7 @@ protected:
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if (pIM)
 		{
-			CCtrlBase *basectrl = pIM->getCaptureKeyboard();
+			CCtrlBase *basectrl = CWidgetManager::getInstance()->getCaptureKeyboard();
 			if (basectrl)
 				_GroupEdit = dynamic_cast<CGroupEditBox*>(basectrl);
 		}

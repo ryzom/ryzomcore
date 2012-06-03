@@ -1211,7 +1211,7 @@ class CHandlerEnterTell : public IActionHandler
 			CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(pGC->getGroup("eb"));
 			if (eb)
 			{
-				im->setCaptureKeyboard(eb);
+				CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 			}
 		}
 	}
@@ -1419,18 +1419,18 @@ class CHandlerSwapChatMode : public IActionHandler
 				node->setValue32(0);
 				// also leave Chat Focus (important if comes from command)
 				if (updateCapture)
-					pIM->setCaptureKeyboard(NULL);
+					CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
 			}
 			else
 			{
 				// enter chat mode (enter dont quit CB)
 				node->setValue32(1);
 				// enter Chat focus if '/c' entered
-				if (updateCapture && !pIM->getCaptureKeyboard())
+				if (updateCapture && !CWidgetManager::getInstance()->getCaptureKeyboard())
 				{
 					// reset to the old captured keyboard (should be the one that have launched the command)
-					if(pIM->getOldCaptureKeyboard())
-						pIM->setCaptureKeyboard(pIM->getOldCaptureKeyboard());
+					if(CWidgetManager::getInstance()->getOldCaptureKeyboard())
+						CWidgetManager::getInstance()->setCaptureKeyboard(CWidgetManager::getInstance()->getOldCaptureKeyboard());
 				}
 			}
 		}

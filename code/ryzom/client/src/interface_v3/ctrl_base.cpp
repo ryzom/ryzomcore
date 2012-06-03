@@ -27,8 +27,7 @@ using namespace NLMISC;
 // ***************************************************************************
 CCtrlBase::~CCtrlBase()
 {
-	CInterfaceManager *manager = CInterfaceManager::getInstance();
-	manager->removeRefOnCtrl (this);
+	CWidgetManager::getInstance()->removeRefOnCtrl (this);
 }
 
 // ***************************************************************************
@@ -43,13 +42,13 @@ bool CCtrlBase::handleEvent(const NLGUI::CEventDescriptor &event)
 			{
 				// the mouse capture should be lost when the ctrl is hidden
 				CInterfaceManager *manager = CInterfaceManager::getInstance();
-				if (manager->getCapturePointerLeft() == this)
+				if (CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 				{
-					manager->setCapturePointerLeft(NULL);
+					CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
 				}
-				if (manager->getCapturePointerRight() == this)
+				if (CWidgetManager::getInstance()->getCapturePointerRight() == this)
 				{
-					manager->setCapturePointerRight(NULL);
+					CWidgetManager::getInstance()->setCapturePointerRight(NULL);
 				}
 				// NB : don't call return here because derived class may be interested
 				// in handling event more speciffically

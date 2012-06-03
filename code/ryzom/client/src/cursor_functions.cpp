@@ -252,7 +252,7 @@ void checkUnderCursor()
 	cursor->getPointerPos(x, y);
 
 	// Over the interface ?
-	if (IM->getWindowUnder(x, y) == NULL)
+	if (CWidgetManager::getInstance()->getWindowUnder(x, y) == NULL)
 	{
 		// Is the pointer in the window ?
 		if(x < 0 || y <0)

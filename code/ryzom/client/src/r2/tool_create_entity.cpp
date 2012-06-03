@@ -93,7 +93,7 @@ void CToolCreateEntity::updateInvalidCursorOnUI()
 {
 	//H_AUTO(R2_CToolCreateEntity_updateInvalidCursorOnUI)
 	// set the default cursor unless the mouse is on the palette
-	const std::vector<CInterfaceGroup *> &groups = getUI().getGroupsUnderPointer();
+	const std::vector<CInterfaceGroup *> &groups = CWidgetManager::getInstance()->getGroupsUnderPointer();
 	for(uint k = 0; k < groups.size(); ++k)
 	{
 		if (groups[k]->getId() == "ui:interface:r2ed_palette") // hardcoded for now ...

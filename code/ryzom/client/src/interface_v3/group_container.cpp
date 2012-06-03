@@ -175,7 +175,7 @@ bool CCtrlResizer::handleEvent (const NLGUI::CEventDescriptor &event)
 	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
 		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
-		if ((CInterfaceManager::getInstance()->getCapturePointerLeft() != this) && !isIn(eventDesc.getX(), eventDesc.getY()))
+		if ((CWidgetManager::getInstance()->getCapturePointerLeft() != this) && !isIn(eventDesc.getX(), eventDesc.getY()))
 			return false;
 
 		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(_Parent);
@@ -586,7 +586,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 	{
 		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 		// the ctrl must have been captured
-		if (pIM->getCapturePointerLeft() != this)
+		if (CWidgetManager::getInstance()->getCapturePointerLeft() != this)
 			return false;
 
 		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(_Parent);
@@ -604,7 +604,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 			if (_WaitToOpenClose)
 			{
 				_WaitToOpenClose = false;
-				pIM->unregisterClockMsgTarget(this);
+				CWidgetManager::getInstance()->unregisterClockMsgTarget(this);
 				// _WaitToOpen can only be set if the container is popable
 				if (gc)
 				{
@@ -642,8 +642,8 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 					}
 					gc->invalidateCoords(2);
 					//
-					pIM->setCapturePointerLeft(NULL);
-					pIM->setCapturePointerRight(NULL);
+					CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
+					CWidgetManager::getInstance()->setCapturePointerRight(NULL);
 				}
 				return true;
 			}
@@ -652,7 +652,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 		if (_WaitToOpenClose)
 		{
 			_WaitToOpenClose = false;
-			pIM->unregisterClockMsgTarget(this);
+			CWidgetManager::getInstance()->unregisterClockMsgTarget(this);
 		}
 
 		if (_CanOpen || gc->isOpenWhenPopup())
@@ -672,7 +672,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 					if (gc->isPopable())
 					{
 						_WaitToOpenClose = true;
-						pIM->registerClockMsgTarget(this);
+						CWidgetManager::getInstance()->registerClockMsgTarget(this);
 						_WaitToOpenCloseDate = T1;
 					}
 					else
@@ -848,14 +848,14 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 							if (_ParentScrollingUp)
 							{
 								_ParentScrollingUp = false;
-								pIM->registerClockMsgTarget(this); // want to now when time pass
+								CWidgetManager::getInstance()->registerClockMsgTarget(this); // want to now when time pass
 							}
 							if (glSciY > gl->getYReal()) // is there need for scroll ?
 							{
 								if (!_ParentScrollingDown)
 								{
 									_ParentScrollingDown = true;
-									pIM->registerClockMsgTarget(this); // want to now when time pass
+									CWidgetManager::getInstance()->registerClockMsgTarget(this); // want to now when time pass
 									_ScrollTime = 0;
 								}
 							}
@@ -864,7 +864,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 								if (_ParentScrollingDown)
 								{
 									_ParentScrollingDown = false;
-									pIM->unregisterClockMsgTarget(this); // want to now when time pass
+									CWidgetManager::getInstance()->unregisterClockMsgTarget(this); // want to now when time pass
 								}
 							}
 							y = _ParentListBottom;
@@ -874,7 +874,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 							if (_ParentScrollingDown)
 							{
 								_ParentScrollingDown = false;
-								pIM->registerClockMsgTarget(this); // want to now when time pass
+								CWidgetManager::getInstance()->registerClockMsgTarget(this); // want to now when time pass
 							}
 							sint32 topY = y + _Parent->getHReal();
 							if (topY > _ParentListTop)
@@ -885,7 +885,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 									if (!_ParentScrollingUp)
 									{
 										_ParentScrollingUp = true;
-										pIM->registerClockMsgTarget(this); // want to now when time pass
+										CWidgetManager::getInstance()->registerClockMsgTarget(this); // want to now when time pass
 										_ScrollTime = 0;
 									}
 								}
@@ -894,7 +894,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 									if (_ParentScrollingUp)
 									{
 										_ParentScrollingDown = false;
-										pIM->unregisterClockMsgTarget(this); // want to now when time pass
+										CWidgetManager::getInstance()->unregisterClockMsgTarget(this); // want to now when time pass
 									}
 								}
 								y = _ParentListTop - _Parent->getHReal();
@@ -924,7 +924,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 					CGroupContainer *gc = dynamic_cast<CGroupContainer *>(_Parent);
 					if (!gc) return false;
 					_WaitToOpenClose = false;
-					pIM->unregisterClockMsgTarget(this);
+					CWidgetManager::getInstance()->unregisterClockMsgTarget(this);
 					// do the open action
 					if (gc->isOpenable() && !gc->isOpenWhenPopup())
 					{
@@ -984,7 +984,7 @@ void CCtrlMover::handleScrolling()
 		else
 		{
 			_ParentScrollingUp = false;
-			im->unregisterClockMsgTarget(this);
+			CWidgetManager::getInstance()->unregisterClockMsgTarget(this);
 			_InsertionIndex = 0;
 		}
 	}
@@ -1018,7 +1018,7 @@ void CCtrlMover::handleScrolling()
 		else
 		{
 			_ParentScrollingDown = false;
-			im->unregisterClockMsgTarget(this);
+			CWidgetManager::getInstance()->unregisterClockMsgTarget(this);
 			_InsertionIndex = gl->getNumChildren();
 		}
 	}
@@ -1083,8 +1083,8 @@ void CCtrlMover::setPoped(CGroupContainer *gc, sint32 x, sint32 y, CInterfaceMan
 	cm->_MoveDeltaXReal= gc->getXReal() - gc->getX();
 	cm->_MoveDeltaYReal= gc->getYReal() - gc->getY();
 	cm->_Moving= true;
-	pIM->setCapturePointerLeft(cm);
-	pIM->setCapturePointerRight(NULL);
+	CWidgetManager::getInstance()->setCapturePointerLeft(cm);
+	CWidgetManager::getInstance()->setCapturePointerRight(NULL);
 }
 
 // ***************************************************************************
@@ -1127,8 +1127,8 @@ void CCtrlMover::setMovingInParent(CGroupContainer *gc, sint32 /* x */, sint32 y
 	_MoveStartY= gc->getY()-eventDesc.getY();
 	_MoveDeltaYReal= gc->getYReal() - gc->getY();
 
-	pIM->setCapturePointerLeft(this);
-	pIM->setCapturePointerRight(NULL);
+	CWidgetManager::getInstance()->setCapturePointerLeft(this);
+	CWidgetManager::getInstance()->setCapturePointerRight(NULL);
 	_Moving = false;
 	_MovingInParentList = true;
 
@@ -1165,7 +1165,7 @@ void CCtrlMover::stopMove(CInterfaceManager *pIM)
 {
 	_ParentScrollingUp = false;
 	_ParentScrollingDown = false;
-	pIM->setCapturePointerLeft(NULL);
+	CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
 	_HasMoved = false;
 	if (_Moving)
 	{
@@ -2200,9 +2200,9 @@ void CGroupContainer::draw ()
 		bool dontFade = false;
 //		bool alphaUp = false;
 		// should not applied if the container is being resized
-		if (pIM->getCapturePointerLeft() != NULL)
+		if (CWidgetManager::getInstance()->getCapturePointerLeft() != NULL)
 		{
-			CInterfaceGroup *ig = pIM->getCapturePointerLeft()->getParent();
+			CInterfaceGroup *ig = CWidgetManager::getInstance()->getCapturePointerLeft()->getParent();
 			while (ig)
 			{
 				if (ig == this)
@@ -2218,10 +2218,10 @@ void CGroupContainer::draw ()
 
 		bool isOver = false;
 
-		if (pIM->getCapturePointerLeft() == NULL)
+		if (CWidgetManager::getInstance()->getCapturePointerLeft() == NULL)
 		if (isIn(mousePointer->getX(), mousePointer->getY()))
 		{
-			CInterfaceGroup *ig = pIM->getCurrentWindowUnder();
+			CInterfaceGroup *ig = CWidgetManager::getInstance()->getCurrentWindowUnder();
 			while (ig)
 			{
 				if (ig == this)
@@ -3291,8 +3291,8 @@ void CGroupContainer::popupCurrentPos()
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	im->makeWindow(this);
 	CWidgetManager::getInstance()->setTopWindow(this);
-	im->clearViewUnders();
-	im->clearCtrlsUnders();
+	CWidgetManager::getInstance()->clearViewUnders();
+	CWidgetManager::getInstance()->clearCtrlsUnders();
 
 	// update coords (put coords in world)
 	setX(getXReal());
@@ -3347,8 +3347,8 @@ void CGroupContainer::popin(sint32 insertPos /* = -1 */, bool putBackInFatherCon
 	_MovingInParentList = false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	im->unMakeWindow(this);
-	im->clearViewUnders();
-	im->clearCtrlsUnders();
+	CWidgetManager::getInstance()->clearViewUnders();
+	CWidgetManager::getInstance()->clearCtrlsUnders();
 	_Parent = NULL;
 	_ParentPos = NULL;
 	std::vector<CGroupContainer *>::iterator it = std::find(_PopedCont.begin(), _PopedCont.end(), this);
@@ -3534,8 +3534,8 @@ public:
 		pIC->popup();
 		//
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->setCapturePointerLeft(NULL);
-		im->setCapturePointerRight(NULL);
+		CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
+		CWidgetManager::getInstance()->setCapturePointerRight(NULL);
 	}
 };
 REGISTER_ACTION_HANDLER (CICPopup, "ic_popup");
@@ -3559,8 +3559,8 @@ public:
 		//
 		pIC->popin();
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->setCapturePointerLeft(NULL);
-		im->setCapturePointerRight(NULL);
+		CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
+		CWidgetManager::getInstance()->setCapturePointerRight(NULL);
 	}
 };
 REGISTER_ACTION_HANDLER (CICPopin, "ic_popin");
@@ -3664,9 +3664,9 @@ void CGroupContainer::forceRolloverAlpha()
 bool CGroupContainer::hasKeyboardFocus() const
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	if (im->getCaptureKeyboard() != NULL)
+	if (CWidgetManager::getInstance()->getCaptureKeyboard() != NULL)
 	{
-		const CGroupEditBox *geb = dynamic_cast<const CGroupEditBox *>(im->getCaptureKeyboard());
+		const CGroupEditBox *geb = dynamic_cast<const CGroupEditBox *>(CWidgetManager::getInstance()->getCaptureKeyboard());
 		if (geb)
 		{
 			const CInterfaceGroup *gr = geb->getParent();

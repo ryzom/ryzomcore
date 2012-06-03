@@ -1664,8 +1664,8 @@ void CEditor::waitScenarioScreen()
 	//
 	ActionsContext.setContext("waiting_network");
 	TGameCycle serverTick = NetMngr.getCurrentServerTick();
-	getUI().setCaptureKeyboard(NULL);
-	getUI().setDefaultCaptureKeyboard(NULL);
+	CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
+	CWidgetManager::getInstance()->setDefaultCaptureKeyboard(NULL);
 	loadBackgroundBitmap (StartBackground);
 
 	// patch for the 'sys info that pop' prb (cause unknown for now ...)
@@ -2351,9 +2351,9 @@ void CEditor::setMode(TMode mode)
 	_Mode = mode;
 	loadKeySet(getKeySetPrefix(_Mode));
 	CWidgetManager::getInstance()->disableModalWindow();
-	getUI().setCapturePointerLeft(NULL);
-	getUI().setCapturePointerRight(NULL);
-	getUI().setCaptureKeyboard(NULL);
+	CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
+	CWidgetManager::getInstance()->setCapturePointerRight(NULL);
+	CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
 	// Season is now unknown, until server force it (in test mode), or first set act set it (in edit mode)
 	_Season = UnknownSeason;
 	//
@@ -7541,7 +7541,7 @@ class CAHR2Undo : public IActionHandler
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		// if an edit box currently has focus, then try undo on it first
-		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(getEditor().getUI().getCaptureKeyboard());
+		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>( CWidgetManager::getInstance()->getCaptureKeyboard());
 		if (eb && eb->undo())
 		{
 			return;
@@ -7570,7 +7570,7 @@ class CAHR2Redo : public IActionHandler
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		// if an edit box currently has focus, then try redo on it first
-		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(getEditor().getUI().getCaptureKeyboard());
+		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(CWidgetManager::getInstance()->getCaptureKeyboard());
 		if (eb && eb->redo())
 		{
 			return;

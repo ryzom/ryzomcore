@@ -186,7 +186,7 @@ sint32 CTool::getMouseY()
 bool CTool::isMouseOnUI()
 {
 	//H_AUTO(R2_CTool_isMouseOnUI)
-	return getUI().getWindowUnder(getMouseX(), getMouseY()) != NULL;
+	return CWidgetManager::getInstance()->getWindowUnder(getMouseX(), getMouseY()) != NULL;
 }
 
 
@@ -207,7 +207,7 @@ CGroupMap *CTool::getWorldMap()
 CGroupMap *CTool::isMouseOnWorldMap()
 {
 	//H_AUTO(R2_CTool_isMouseOnWorldMap)
-	const std::vector<CInterfaceGroup *> &groupsUnder = getUI().getGroupsUnderPointer();
+	const std::vector<CInterfaceGroup *> &groupsUnder = CWidgetManager::getInstance()->getGroupsUnderPointer();
 	if (groupsUnder.empty()) return NULL;
 	for(uint k = 0; k < groupsUnder.size(); ++k)
 	{
@@ -221,7 +221,7 @@ CGroupMap *CTool::isMouseOnWorldMap()
 CGroupContainer *CTool::isMouseOnContainer()
 {
 	//H_AUTO(R2_CTool_isMouseOnContainer)
-	const std::vector<CInterfaceGroup *> &groupsUnder = getUI().getGroupsUnderPointer();
+	const std::vector<CInterfaceGroup *> &groupsUnder = CWidgetManager::getInstance()->getGroupsUnderPointer();
 	if (groupsUnder.empty()) return NULL;
 	for(uint k = 0; k < groupsUnder.size(); ++k)
 	{
@@ -589,7 +589,7 @@ CInstance *CTool::checkInstanceUnderMouse(IDisplayerUIHandle **miniMapHandle /*=
 			IDisplayerUIHandle *bestCandidate = NULL;
 			sint8 bestCandidateLayer = -128;
 			// see if the element is under the mouse
-			const std::vector<CCtrlBase *> &ctrlsUnder = getUI().getCtrlsUnderPointer();
+			const std::vector<CCtrlBase *> &ctrlsUnder = CWidgetManager::getInstance()->getCtrlsUnderPointer();
 			for(sint k = (sint)ctrlsUnder.size() - 1; k >= 0; --k)
 			{
 				IDisplayerUIHandle *handle = dynamic_cast<IDisplayerUIHandle *>(ctrlsUnder[k]);
@@ -637,7 +637,7 @@ CInstance *CTool::checkInstanceUnderMouse(IDisplayerUIHandle **miniMapHandle /*=
 			}
 		}
 	}
-	else if (!IsMouseFreeLook() && !getUI().getCapturePointerLeft() && !getUI().getCapturePointerRight())
+	else if (!IsMouseFreeLook() && !CWidgetManager::getInstance()->getCapturePointerLeft() && !CWidgetManager::getInstance()->getCapturePointerRight())
 	{
 		// Over the screen ?
 		if (isInScreen(x, y))
@@ -719,7 +719,7 @@ void CTool::captureMouse()
 	CGroupMap *gm = isMouseOnWorldMap();
 	if (gm)
 	{
-		getUI().setCapturePointerLeft(gm);
+		CWidgetManager::getInstance()->setCapturePointerLeft(gm);
 	}
 	else
 	{
@@ -734,7 +734,7 @@ void CTool::captureMouse()
 void CTool::releaseMouse()
 {
 	//H_AUTO(R2_CTool_releaseMouse)
-	getUI().setCapturePointerLeft(NULL);
+	CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
 	UserControls.releaseMouse();
 	getUI().enableMouseHandling(true);
 	getUI().setContextHelpActive(true);

@@ -228,7 +228,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 				if(event == EventKeyDownId)
 				{
 					CEventKeyDown* downEvent=(CEventKeyDown*)&event;
-					if (!pIM->getCaptureKeyboard () || !EditActions.keyPushed (*downEvent))
+					if (!CWidgetManager::getInstance()->getCaptureKeyboard () || !EditActions.keyPushed (*downEvent))
 						Actions.keyPushed (*downEvent);
 				}
 				// Event from the Keyboard (UP KEYS)

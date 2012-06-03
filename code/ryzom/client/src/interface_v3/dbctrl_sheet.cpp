@@ -1836,7 +1836,7 @@ void CDBCtrlSheet::draw()
 	// Manage over for brick
 	if( _BrickOverable && (isMacro() || isSBrickOrSPhraseId() || isSPhrase()) )
 	{
-		const vector<CCtrlBase*> &rVB = pIM->getCtrlsUnderPointer ();
+		const vector<CCtrlBase*> &rVB = CWidgetManager::getInstance()->getCtrlsUnderPointer ();
 		uint32 i;
 		for (i = 0; i < rVB.size(); ++i)
 		if (rVB[i] == this)
@@ -1856,15 +1856,15 @@ void CDBCtrlSheet::draw()
 	// Drag'N'Drop : display the selected slot bitmap if this slot accept the currently dragged element
 	_CanDrop = false;
 	if (_AHOnCanDrop != NULL)
-	if ((pIM->getCapturePointerLeft() != NULL) && (pIM->getCapturePointerLeft() != this))
+	if ((CWidgetManager::getInstance()->getCapturePointerLeft() != NULL) && (CWidgetManager::getInstance()->getCapturePointerLeft() != this))
 	{
 		if ((CWidgetManager::getInstance()->getPointer()->getX() >= _XReal) &&
 			(CWidgetManager::getInstance()->getPointer()->getX() < (_XReal + _WReal))&&
 			(CWidgetManager::getInstance()->getPointer()->getY() > _YReal) &&
 			(CWidgetManager::getInstance()->getPointer()->getY() <= (_YReal+ _HReal)))
-		if (pIM->getCurrentWindowUnder() == CWidgetManager::getInstance()->getWindow(this))
+		if (CWidgetManager::getInstance()->getCurrentWindowUnder() == CWidgetManager::getInstance()->getWindow(this))
 		{
-			CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pIM->getCapturePointerLeft());
+			CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCapturePointerLeft());
 			if ((pCSSrc != NULL) && pCSSrc->isDraging())
 			{
 				string params = string("src=") + pCSSrc->getId();
@@ -2602,7 +2602,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 
 		// Handle drag'n'drop
-		if (pIM->getCapturePointerLeft() == this)
+		if (CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 		{
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown && !_Draging)
 			{
@@ -2662,7 +2662,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 				{
 					bool handled = false;
 					// get the ctrl under the drop
-					const vector<CCtrlBase*> &rCUP = pIM->getCtrlsUnderPointer();
+					const vector<CCtrlBase*> &rCUP = CWidgetManager::getInstance()->getCtrlsUnderPointer();
 					CDBCtrlSheet *pCSdest = NULL;
 					for (uint32 i = 0; i < rCUP.size(); ++i)
 					{
@@ -2727,7 +2727,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 					else // If slot not found try to drop on a list
 					{
 						// get the list under the drop
-						const vector<CInterfaceGroup*> &rGUP = pIM->getGroupsUnderPointer();
+						const vector<CInterfaceGroup*> &rGUP = CWidgetManager::getInstance()->getGroupsUnderPointer();
 						CDBGroupListSheet *pList = NULL;
 						CDBGroupListSheetText *pTextList = NULL;
 						for (uint32 i = 0; i < rGUP.size(); ++i)
@@ -2849,7 +2849,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			if (pIM->getCapturePointerLeft() != this)
+			if (CWidgetManager::getInstance()->getCapturePointerLeft() != this)
 				return false;
 
 			// RunAction
@@ -2877,7 +2877,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 		{
 			bool	handled= false;
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			if (pIM->getCapturePointerRight() != this)
+			if (CWidgetManager::getInstance()->getCapturePointerRight() != this)
 				return false;
 
 			// RunAction

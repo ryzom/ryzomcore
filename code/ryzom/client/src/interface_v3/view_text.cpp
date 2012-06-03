@@ -381,7 +381,7 @@ void CViewText::checkCoords ()
 			else
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				CCtrlBase *pCB = pIM->getCapturePointerLeft();
+				CCtrlBase *pCB = CWidgetManager::getInstance()->getCapturePointerLeft();
 				if (pCB != NULL)
 				{
 					CCtrlResizer *pCR = dynamic_cast<CCtrlResizer*>(pCB);
@@ -630,7 +630,7 @@ void CViewText::draw ()
 			if(mouseIn)
 			{
 				// check the window under the mouse is the root window
-				CInterfaceGroup		*pIG = pIM->getWindowUnder(x,y);
+				CInterfaceGroup		*pIG = CWidgetManager::getInstance()->getWindowUnder(x,y);
 				CInterfaceElement	*pParent = this;
 				bool bFound = false;
 				while (pParent != NULL)

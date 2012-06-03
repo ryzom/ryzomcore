@@ -53,9 +53,9 @@ void CGroupModalGetKey::setActive (bool state)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if (state == true)
-		pIM->setCaptureKeyboard (this);
+		CWidgetManager::getInstance()->setCaptureKeyboard (this);
 	else
-		pIM->setCaptureKeyboard (NULL);
+		CWidgetManager::getInstance()->setCaptureKeyboard (NULL);
 
 	CViewText *pVT= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId( VIEW_TEXT_KEY ));
 	if (pVT != NULL) pVT->setText(string(""));

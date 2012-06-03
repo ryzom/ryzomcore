@@ -311,7 +311,7 @@ void CCtrlTextButton::draw ()
 			}
 			else
 			{
-				if ((_Over) && (pIM->getCapturePointerLeft() == this))
+				if ((_Over) && (CWidgetManager::getInstance()->getCapturePointerLeft() == this))
 				{
 					pTxId = _TextureIdPushed;
 					color  = getCurrentColorPushed(globalColor);
@@ -327,7 +327,7 @@ void CCtrlTextButton::draw ()
 		break;
 		case PushButton:
 		{
-			if (_Over && (pIM->getCapturePointerLeft() == this))
+			if (_Over && (CWidgetManager::getInstance()->getCapturePointerLeft() == this))
 			{
 				pTxId = _TextureIdPushed;
 				color  = getCurrentColorPushed(globalColor);
@@ -362,7 +362,7 @@ void CCtrlTextButton::draw ()
 	rVR.drawRotFlipBitmap (	_RenderLayer, x+_BmpLeftW+txw, y, _BmpRightW, txh, 0, false, pTxId[2], color );
 
 	// *** Draw Over
-	if (_Over && (_OverWhenPushed || !(_Pushed || pIM->getCapturePointerLeft() == this)))
+	if (_Over && (_OverWhenPushed || !(_Pushed || CWidgetManager::getInstance()->getCapturePointerLeft() == this)))
 	{
 		if ((lastOver == false) && (_AHOnOver != NULL))
 			CAHManager::getInstance()->runActionHandler (_AHOnOver, this, _AHOverParams);

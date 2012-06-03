@@ -466,7 +466,7 @@ bool CCtrlScroll::handleEvent (const NLGUI::CEventDescriptor &event)
 	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
 		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
-		if ((CInterfaceManager::getInstance()->getCapturePointerLeft() != this) &&
+		if ((CWidgetManager::getInstance()->getCapturePointerLeft() != this) &&
 			(!((eventDesc.getX() >= _XReal) &&
 			(eventDesc.getX() < (_XReal + _WReal))&&
 			(eventDesc.getY() > _YReal) &&

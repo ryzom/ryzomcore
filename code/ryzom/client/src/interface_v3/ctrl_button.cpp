@@ -163,7 +163,7 @@ void CCtrlButton::draw ()
 			}
 			else
 			{
-				if ((_Over) && (pIM->getCapturePointerLeft() == this))
+				if ((_Over) && (CWidgetManager::getInstance()->getCapturePointerLeft() == this))
 				{
 					nTxId = _TextureIdPushed;
 					color  = getCurrentColorPushed(globalColor);
@@ -179,7 +179,7 @@ void CCtrlButton::draw ()
 		break;
 		case PushButton:
 		{
-			if (_Over && (pIM->getCapturePointerLeft() == this))
+			if (_Over && (CWidgetManager::getInstance()->getCapturePointerLeft() == this))
 			{
 				nTxId = _TextureIdPushed;
 				color  = getCurrentColorPushed(globalColor);
@@ -215,7 +215,7 @@ void CCtrlButton::draw ()
 							nTxId,
 							color );
 
-	if ((_OverWhenPushed == false) && (_Pushed == true || (pIM->getCapturePointerLeft() == this)))
+	if ((_OverWhenPushed == false) && (_Pushed == true || (CWidgetManager::getInstance()->getCapturePointerLeft() == this)))
 		return;
 
 

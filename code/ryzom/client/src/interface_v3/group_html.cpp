@@ -1853,7 +1853,7 @@ CGroupHTML::CGroupHTML(const TCtorParam &param)
 	_GroupListAdaptor = NULL;
 
 	// Register
-	CInterfaceManager::getInstance()->registerClockMsgTarget(this);
+	CWidgetManager::getInstance()->registerClockMsgTarget(this);
 
 	// HTML parameters
 	BgColor = CRGBA::Black;
@@ -1935,7 +1935,7 @@ CGroupHTML::~CGroupHTML()
 
 bool CGroupHTML::parse(xmlNodePtr cur,CInterfaceGroup *parentGroup)
 {
-	nlassert(CInterfaceManager::getInstance()->isClockMsgTarget(this));
+	nlassert( CWidgetManager::getInstance()->isClockMsgTarget(this));
 
 
 	if(!CGroupScrollText::parse(cur, parentGroup))
@@ -3492,8 +3492,8 @@ void CGroupHTML::removeContent ()
 	_GroupListAdaptor->clearGroups();
 	_GroupListAdaptor->clearControls();
 	_GroupListAdaptor->clearViews();
-	CInterfaceManager::getInstance()->clearViewUnders();
-	CInterfaceManager::getInstance()->clearCtrlsUnders();
+	CWidgetManager::getInstance()->clearViewUnders();
+	CWidgetManager::getInstance()->clearCtrlsUnders();
 	_Paragraph = NULL;
 
 	// Reset default background color

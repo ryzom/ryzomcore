@@ -169,8 +169,8 @@ class CAHUIPopup : public IActionHandler
 		//
 		pGC->popup();
 		//
-		pIM->setCapturePointerLeft(NULL);
-		pIM->setCapturePointerRight(NULL);
+		CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
+		CWidgetManager::getInstance()->setCapturePointerRight(NULL);
 	}
 };
 REGISTER_ACTION_HANDLER( CAHUIPopup, "popup" );
@@ -204,8 +204,8 @@ class CAHUIPopin : public IActionHandler
 		pGC->setPopupH(pGC->getH());
 		//
 		pGC->popin();
-		pIM->setCapturePointerLeft(NULL);
-		pIM->setCapturePointerRight(NULL);
+		CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
+		CWidgetManager::getInstance()->setCapturePointerRight(NULL);
 	}
 };
 REGISTER_ACTION_HANDLER( CAHUIPopin, "popin" );
@@ -535,7 +535,7 @@ class CAHTalkUntalk : public IActionHandler
 					CInterfaceManager *im = CInterfaceManager::getInstance();
 					CWidgetManager::getInstance()->setTopWindow(cw->getContainer());
 					cw->enableBlink(1);
-					im->setCaptureKeyboard(cw->getEditBox());
+					CWidgetManager::getInstance()->setCaptureKeyboard(cw->getEditBox());
 					PeopleInterraction.MainChat.Filter.setTargetPlayer(selection->getName());
 				}
 			}

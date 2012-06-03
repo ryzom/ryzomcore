@@ -96,9 +96,9 @@ CGroupEditBox::~CGroupEditBox()
 {
 	if (this == _CurrSelection) _CurrSelection = NULL;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	if (im->getCaptureKeyboard() == this || im->getOldCaptureKeyboard() == this)
+	if (CWidgetManager::getInstance()->getCaptureKeyboard() == this || CWidgetManager::getInstance()->getOldCaptureKeyboard() == this)
 	{
-		im->resetCaptureKeyboard();
+		CWidgetManager::getInstance()->resetCaptureKeyboard();
 	}
 }
 
@@ -296,7 +296,7 @@ void CGroupEditBox::draw ()
 	}
 
 	// Display the cursor if needed
-	if (pIM->getCaptureKeyboard () == this)
+	if (CWidgetManager::getInstance()->getCaptureKeyboard () == this)
 	{
 		_BlinkTime += DT;
 		if (_BlinkTime > 0.25f)
@@ -558,7 +558,7 @@ void CGroupEditBox::handleEventChar(const NLGUI::CEventDescriptorKey &rEDK)
 	{
 		case KeyESCAPE:
 			_CurrentHistoricIndex= -1;
-			CInterfaceManager::getInstance()->setCaptureKeyboard(NULL);
+			CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
 			// stop selection
 			_CurrSelection = NULL;
 			_CursorAtPreviousLineEnd = false;
@@ -589,7 +589,7 @@ void CGroupEditBox::handleEventChar(const NLGUI::CEventDescriptorKey &rEDK)
 				if (NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:ENTER_DONT_QUIT_CB")->getValue32() == 0)
 				{
 					if(_LooseFocusOnEnter)
-						pIM->setCaptureKeyboard(NULL);
+						CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
 				}
 				// stop selection
 				_CurrSelection = NULL;
@@ -720,7 +720,7 @@ void CGroupEditBox::handleEventString(const NLGUI::CEventDescriptorKey &rEDK)
 bool CGroupEditBox::undo()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	if (im->getCaptureKeyboard() != this) return false;
+	if (CWidgetManager::getInstance()->getCaptureKeyboard() != this) return false;
 	if (!_CanUndo) return false;
 	_ModifiedInputString = _InputString;
 	setInputString(_StartInputString);
@@ -735,7 +735,7 @@ bool CGroupEditBox::undo()
 bool CGroupEditBox::redo()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	if (im->getCaptureKeyboard() != this) return false;
+	if (CWidgetManager::getInstance()->getCaptureKeyboard() != this) return false;
 	if (!_CanRedo) return false;
 	setInputString(_ModifiedInputString);
 	_CanUndo = true;
@@ -877,9 +877,9 @@ bool CGroupEditBox::handleEvent (const NLGUI::CEventDescriptor& event)
 
 		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 		{
-			if (pIM->getCapturePointerRight() == this)
+			if (CWidgetManager::getInstance()->getCapturePointerRight() == this)
 			{
-				pIM->setCapturePointerRight(NULL);
+				CWidgetManager::getInstance()->setCapturePointerRight(NULL);
 				if (!_ListMenuRight.empty())
 				{
 					if (CDBCtrlSheet::getDraggedSheet() == NULL)
@@ -905,7 +905,7 @@ bool CGroupEditBox::handleEvent (const NLGUI::CEventDescriptor& event)
 		{
 			_SelectingText = true;
 			stopParentBlink();
-			pIM->setCaptureKeyboard (this);
+			CWidgetManager::getInstance()->setCaptureKeyboard (this);
 			// set the right cursor position
 			uint newCurPos;
 			bool cursorAtPreviousLineEnd;
@@ -945,7 +945,7 @@ bool CGroupEditBox::handleEvent (const NLGUI::CEventDescriptor& event)
 
 		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown)
 		{
-			pIM->setCapturePointerRight(this);
+			CWidgetManager::getInstance()->setCapturePointerRight(this);
 			return true;
 		}
 	}
@@ -960,7 +960,7 @@ bool CGroupEditBox::handleEvent (const NLGUI::CEventDescriptor& event)
 			NLGUI::CEventDescriptorActiveCalledOnParent &activeEvent = (NLGUI::CEventDescriptorActiveCalledOnParent &) eventDesc;
 			if (activeEvent.getActive() == false && _ResetFocusOnHide)
 			{
-				CInterfaceManager::getInstance()->resetCaptureKeyboard();
+				CWidgetManager::getInstance()->resetCaptureKeyboard();
 				// If a selection was shown, reset it
 				if (_CurrSelection == this) _CurrSelection = NULL;
 			}
@@ -1243,9 +1243,8 @@ void		CGroupEditBox::setSelectionAll()
 void CGroupEditBox::setActive(bool active)
 {
 	if (!active && _ResetFocusOnHide)
-	{
-		CInterfaceManager::getInstance()->resetCaptureKeyboard();
-	}
+		CWidgetManager::getInstance()->resetCaptureKeyboard();
+
 	CInterfaceGroup::setActive(active);
 }
 
@@ -1295,7 +1294,7 @@ void CGroupEditBox::setCommand(const ucstring &command, bool execute)
 	}
 	else
 	{
-		CInterfaceManager::getInstance()->setCaptureKeyboard (this);
+		CWidgetManager::getInstance()->setCaptureKeyboard (this);
 		_CursorPos = (sint32)_InputString.length();
 	}
 }
@@ -1431,7 +1430,7 @@ void CGroupEditBox::setFocusOnText()
 
 	// else set the focus
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->setCaptureKeyboard (this);
+	CWidgetManager::getInstance()->setCaptureKeyboard (this);
 
 	_CurrSelection = this;
 	_SelectCursorPos= (sint32)_InputString.size();
@@ -1457,8 +1456,8 @@ int CGroupEditBox::luaCancelFocusOnText(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 0);
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	if (pIM->getCaptureKeyboard()==this || pIM->getOldCaptureKeyboard()==this)
-		pIM->resetCaptureKeyboard();
+	if (CWidgetManager::getInstance()->getCaptureKeyboard()==this || CWidgetManager::getInstance()->getOldCaptureKeyboard()==this)
+		CWidgetManager::getInstance()->resetCaptureKeyboard();
 
 	_CurrSelection = NULL;
 	_SelectCursorPos= 0;
@@ -1494,12 +1493,12 @@ void CGroupEditBox::setFrozen (bool state)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		// stop capture and selection
-		pIM->setCaptureKeyboard (NULL);
+		CWidgetManager::getInstance()->setCaptureKeyboard (NULL);
 		if(_CurrSelection==this)	_CurrSelection = NULL;
 		// do not allow to recover focus
-		if (pIM->getOldCaptureKeyboard() == this)
+		if (CWidgetManager::getInstance()->getOldCaptureKeyboard() == this)
 		{
-			pIM->resetCaptureKeyboard();
+			CWidgetManager::getInstance()->resetCaptureKeyboard();
 		}
 	}
 }

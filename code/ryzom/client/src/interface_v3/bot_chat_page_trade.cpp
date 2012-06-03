@@ -1067,7 +1067,7 @@ void CBotChatPageTrade::setFocusOnEditBox(CInterfaceGroup *ebi)
 	CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(ebi);
 	if (eb)
 	{
-		pIM->setCaptureKeyboard(eb);
+		CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 		eb->setSelectionAll();
 	}
 }

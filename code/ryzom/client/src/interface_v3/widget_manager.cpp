@@ -19,6 +19,8 @@
 #include "group_container.h"
 #include "group_in_scene.h"
 #include "view_pointer.h"
+#include "group_editbox.h"
+#include "dbctrl_sheet.h"
 
 CWidgetManager* CWidgetManager::instance = NULL;
 std::string CWidgetManager::_CtrlLaunchingModalId= "ctrl_launch_modal";
@@ -695,6 +697,544 @@ void CWidgetManager::popModalWindowCategory(const std::string &category)
 		else
 		{
 			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+CInterfaceGroup* CWidgetManager::getWindowUnder (sint32 x, sint32 y)
+{
+	H_AUTO (RZ_Interface_Window_Under )
+
+	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+	{
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		if (rMG.Group->getActive())
+		{
+			for (uint8 nPriority = WIN_PRIORITY_MAX; nPriority > 0; nPriority--)
+			{
+				const std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority-1];
+				std::list<CInterfaceGroup*>::const_reverse_iterator itw;
+				for (itw = rList.rbegin(); itw != rList.rend(); itw++)
+				{
+					CInterfaceGroup *pIG = *itw;
+					if (pIG->getActive() && pIG->getUseCursor())
+					{
+						if (pIG->isWindowUnder (x, y))
+							return pIG;
+					}
+				}
+			}
+		}
+	}
+	return NULL;
+}
+
+// ------------------------------------------------------------------------------------------------
+CInterfaceGroup* CWidgetManager::getGroupUnder (sint32 x, sint32 y)
+{
+	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+	{
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		if (rMG.Group->getActive())
+		{
+			for (uint8 nPriority = WIN_PRIORITY_MAX; nPriority > 0; nPriority--)
+			{
+				const std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority-1];
+				std::list<CInterfaceGroup*>::const_reverse_iterator itw;
+				for (itw = rList.rbegin(); itw != rList.rend(); itw++)
+				{
+					CInterfaceGroup *pIG = *itw;
+					if (pIG->getActive() && pIG->getUseCursor())
+					{
+						CInterfaceGroup *pIGunder = pIG->getGroupUnder (x ,y);
+						if (pIGunder != NULL)
+							return pIGunder;
+					}
+				}
+			}
+		}
+	}
+	return NULL;
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::getViewsUnder (sint32 x, sint32 y, std::vector<CViewBase*> &vVB)
+{
+	vVB.clear ();
+
+	// No Op if screen minimized
+	if(CViewRenderer::getInstance()->isMinimized())
+		return;
+
+	uint32 sw, sh;
+	CViewRenderer::getInstance()->getScreenSize(sw, sh);
+	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+	{
+		SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		if (rMG.Group->getActive())
+		{
+			for (uint8 nPriority = WIN_PRIORITY_MAX; nPriority > 0; nPriority--)
+			{
+				const std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority-1];
+				std::list<CInterfaceGroup*>::const_reverse_iterator itw;
+				for (itw = rList.rbegin(); itw != rList.rend(); itw++)
+				{
+					CInterfaceGroup *pIG = *itw;
+
+					// Accecpt if not modal clip
+					if (pIG->getActive() && pIG->getUseCursor())
+					{
+						if (pIG->getViewsUnder (x, y, 0, 0, (sint32) sw, (sint32) sh, vVB))
+							return ;
+					}
+				}
+			}
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::getCtrlsUnder (sint32 x, sint32 y, std::vector<CCtrlBase*> &vICL)
+{
+	vICL.clear ();
+
+	// No Op if screen minimized
+	if(CViewRenderer::getInstance()->isMinimized())
+		return;
+
+	uint32 sw, sh;
+	CViewRenderer::getInstance()->getScreenSize(sw, sh);
+	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+	{
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		if (rMG.Group->getActive())
+		{
+			for (uint8 nPriority = WIN_PRIORITY_MAX; nPriority > 0 ; nPriority--)
+			{
+				const std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority-1];
+				std::list<CInterfaceGroup*>::const_reverse_iterator itw;
+				for (itw = rList.rbegin(); itw != rList.rend(); itw++)
+				{
+					CInterfaceGroup *pIG = *itw;
+
+					// Accecpt if not modal clip
+					if (!CWidgetManager::getInstance()->hasModal() || CWidgetManager::getInstance()->getModal().ModalWindow == pIG || CWidgetManager::getInstance()->getModal().ModalExitClickOut)
+					if (pIG->getActive() && pIG->getUseCursor())
+					{
+						if (pIG->getCtrlsUnder (x, y, 0, 0, (sint32) sw, (sint32) sh, vICL))
+							return;
+					}
+				}
+			}
+		}
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::getGroupsUnder (sint32 x, sint32 y, std::vector<CInterfaceGroup *> &vIGL)
+{
+	vIGL.clear ();
+
+	// No Op if screen minimized
+	if(CViewRenderer::getInstance()->isMinimized())
+		return;
+
+	uint32 sw, sh;
+	CViewRenderer::getInstance()->getScreenSize(sw, sh);
+	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+	{
+		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+		if (rMG.Group->getActive())
+		{
+			for (uint8 nPriority = WIN_PRIORITY_MAX; nPriority > 0 ; nPriority--)
+			{
+				const std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority-1];
+				std::list<CInterfaceGroup*>::const_reverse_iterator itw;
+				for (itw = rList.rbegin(); itw != rList.rend(); itw++)
+				{
+					CInterfaceGroup *pIG = *itw;
+
+					// Accecpt if not modal clip
+					if (!CWidgetManager::getInstance()->hasModal() || CWidgetManager::getInstance()->getModal().ModalWindow == pIG ||
+						CWidgetManager::getInstance()->getModal().ModalExitClickOut)
+					if (pIG->getActive() && pIG->getUseCursor())
+					{
+						if (pIG->isIn(x, y))
+						{
+							vIGL.push_back(pIG);
+							pIG->getGroupsUnder (x, y, 0, 0, (sint32) sw, (sint32) sh, vIGL);
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+// ***************************************************************************
+void CWidgetManager::removeRefOnView( CViewBase *viewBase )
+{
+	uint i;
+	for (i=0; i<_ViewsUnderPointer.size(); i++)
+	{
+		if (_ViewsUnderPointer[i] == viewBase)
+		{
+			_ViewsUnderPointer.erase (_ViewsUnderPointer.begin()+i);
+			i--;
+		}
+	}
+}
+
+// ***************************************************************************
+void CWidgetManager::removeRefOnCtrl(CCtrlBase *ctrlBase)
+{
+	if ( getCurContextHelp()  == ctrlBase)
+		setCurContextHelp( NULL );
+	if (getCapturePointerLeft() == ctrlBase)
+		setCapturePointerLeft(NULL);
+	if (getCapturePointerRight() == ctrlBase)
+		setCapturePointerRight (NULL);
+	if (getCaptureKeyboard() == ctrlBase)
+		setCaptureKeyboard(NULL);
+	if (getOldCaptureKeyboard() == ctrlBase)
+		setOldCaptureKeyboard(NULL);
+	if (getDefaultCaptureKeyboard() == ctrlBase)
+		setDefaultCaptureKeyboard(NULL);
+	uint i;
+	for (i=0; i<_CtrlsUnderPointer.size(); i++)
+	{
+		if (_CtrlsUnderPointer[i] == ctrlBase)
+		{
+			_CtrlsUnderPointer.erase (_CtrlsUnderPointer.begin()+i);
+			i--;
+		}
+	}
+
+	// Unregister from ClockMsgTargets
+	unregisterClockMsgTarget(ctrlBase);
+}
+
+
+// ***************************************************************************
+void CWidgetManager::removeRefOnGroup (CInterfaceGroup *group)
+{
+	uint i;
+	for (i=0; i<_GroupsUnderPointer.size(); i++)
+	{
+		if (_GroupsUnderPointer[i] == group)
+		{
+			_GroupsUnderPointer.erase (_GroupsUnderPointer.begin()+i);
+			i--;
+		}
+	}
+}
+
+
+void CWidgetManager::reset()
+{
+	setCurContextHelp( NULL );
+	
+	_ViewsUnderPointer.clear();
+	_CtrlsUnderPointer.clear();
+	_GroupsUnderPointer.clear();
+
+	_CaptureKeyboard = NULL;
+	_OldCaptureKeyboard = NULL;
+	setCapturePointerLeft(NULL);
+	setCapturePointerRight(NULL);
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::checkCoords()
+{
+	H_AUTO ( RZ_Interface_validateCoords )
+
+	uint32 nMasterGroup;
+
+	{
+		H_AUTO ( RZ_Interface_checkCoords )
+
+		// checkCoords all the windows
+		for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			if (rMG.Group->getActive())
+			{
+				for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
+				{
+					std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
+					std::list<CInterfaceGroup*>::const_iterator itw;
+					for (itw = rList.begin(); itw!= rList.end();)
+					{
+						CInterfaceGroup *pIG = *itw;
+						itw++;	// since checkCoords invalidate the iterator, be sure we move to the next one before
+						if (pIG->getActive())
+							pIG->checkCoords ();
+					}
+				}
+			}
+		}
+	}
+
+	bool bRecomputeCtrlUnderPtr = false;
+	{
+		H_AUTO ( RZ_Interface_updateCoords )
+
+		// updateCoords all the needed windows
+		for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			if (rMG.Group->getActive())
+			{
+				for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
+				{
+					std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
+					std::list<CInterfaceGroup*>::const_iterator itw;
+					for (itw = rList.begin(); itw!= rList.end(); itw++)
+					{
+						CInterfaceGroup *pIG = *itw;
+						bool		updateCoordCalled= false;
+						// updateCoords the window only if the master group is his parent and if need it
+						// do it until updateCoords() no more invalidate coordinates!!
+						while (pIG->getParent()==rMG.Group && (pIG->getInvalidCoords()>0))
+						{
+							bRecomputeCtrlUnderPtr = true;
+							// Update as many pass wanted (3 time for complex resizing, 1 for scroll for example)
+							uint	numPass= pIG->getInvalidCoords();
+							// reset before updateCoords
+							pIG->resetInvalidCoords();
+							for(uint i=0;i<numPass;i++)
+							{
+								pIG->updateCoords ();
+							}
+							updateCoordCalled= true;
+						}
+						// If the group need to update pos each frame (eg: CGroupInScene),
+						// and updateCoords not called
+						if(pIG->getParent()==rMG.Group && !updateCoordCalled && pIG->isNeedFrameUpdatePos())
+						{
+							// This Group will compute the delta to apply.
+							pIG->onFrameUpdateWindowPos(0,0);
+						}
+					}
+				}
+			}
+		}
+
+		if ( CWidgetManager::getInstance()->getPointer() != NULL)
+			CWidgetManager::getInstance()->getPointer()->updateCoords();
+	}
+
+
+
+	if (bRecomputeCtrlUnderPtr)
+	{
+		H_AUTO ( RZ_Interface_RecomputeCtrlUnderPtr )
+		if ( CWidgetManager::getInstance()->getPointer() != NULL )
+		{
+			sint32 mx = _Pointer->getX();
+			sint32 my = _Pointer->getY();
+			getViewsUnder (mx, my, _ViewsUnderPointer);
+			getCtrlsUnder (mx, my, _CtrlsUnderPointer);
+			getGroupsUnder (mx, my, _GroupsUnderPointer);
+			CInterfaceGroup *ptr = getWindowUnder (mx, my);
+			_WindowUnder = ptr;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::movePointer (sint32 dx, sint32 dy)
+{
+	if (!_Pointer)
+		return;
+
+	uint32 nScrW, nScrH;
+	sint32 oldpx, oldpy, newpx, newpy, disppx, disppy, olddisppx, olddisppy;
+
+	CViewRenderer::getInstance()->getScreenSize (nScrW, nScrH);
+	_Pointer->getPointerPos (oldpx, oldpy);
+
+	olddisppx = oldpx;
+	olddisppy = oldpy;
+
+	newpx = oldpx + dx;
+	newpy = oldpy + dy;
+
+	if (newpx < 0) newpx = 0;
+	if (newpy < 0) newpy = 0;
+	if (newpx > (sint32)nScrW) newpx = nScrW;
+	if (newpy > (sint32)nScrH) newpy = nScrH;
+	dx = newpx - oldpx;
+	dy = newpy - oldpy;
+
+	disppx = newpx;
+	disppy = newpy;
+
+	_Pointer->setPointerPos (newpx, newpy);
+	_Pointer->setPointerDispPos (disppx, disppy);
+
+	// must get back coordinates because of snapping
+	sint32 mx = _Pointer->getX();
+	sint32 my = _Pointer->getY();
+	getViewsUnder (mx, my, _ViewsUnderPointer);
+	getCtrlsUnder (mx, my, _CtrlsUnderPointer);
+	getGroupsUnder (mx, my, _GroupsUnderPointer);
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::movePointerAbs(sint32 px, sint32 py)
+{
+	if(!CWidgetManager::getInstance()->getPointer())
+		return;
+
+	uint32 nScrW, nScrH;
+	CViewRenderer::getInstance()->getScreenSize (nScrW, nScrH);
+	NLMISC::clamp(px, 0, (sint32) nScrW);
+	NLMISC::clamp(py, 0, (sint32) nScrH);
+	//
+	_Pointer->setPointerPos (px, py);
+	_Pointer->setPointerDispPos (px, py);
+	//
+	getViewsUnder (px, py, _ViewsUnderPointer);
+	getCtrlsUnder (px, py, _CtrlsUnderPointer);
+	getGroupsUnder (px, py, _GroupsUnderPointer);
+}
+
+// ***************************************************************************
+void CWidgetManager::setCapturePointerLeft(CCtrlBase *c)
+{
+	// additionally, abort any dragging
+	if(CDBCtrlSheet::getDraggedSheet())
+	{
+		CDBCtrlSheet::getDraggedSheet()->abortDraging();
+	}
+	_CapturePointerLeft = c;
+	notifyElementCaptured(c);
+}
+
+// ***************************************************************************
+void CWidgetManager::setCapturePointerRight(CCtrlBase *c)
+{
+	_CapturePointerRight = c;
+	notifyElementCaptured(c);
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::setCaptureKeyboard(CCtrlBase *c)
+{
+	CGroupEditBox	*oldEb= dynamic_cast<CGroupEditBox*>((CCtrlBase*)_CaptureKeyboard);
+	CGroupEditBox	*newEb= dynamic_cast<CGroupEditBox*>(c);
+
+	if (_CaptureKeyboard && _CaptureKeyboard != c)
+	{
+		_CaptureKeyboard->onKeyboardCaptureLost();
+	}
+	// If the old capturedKeyboard is an editBox and allow recoverFocusOnEnter
+	if ( oldEb && oldEb->getRecoverFocusOnEnter() )
+	{
+		_OldCaptureKeyboard = _CaptureKeyboard;
+	}
+	if ( newEb )
+	{
+		CGroupEditBox::disableSelection();
+
+		if (!newEb->getAHOnFocus().empty())
+		{
+			CAHManager::getInstance()->runActionHandler(newEb->getAHOnFocus(), newEb, newEb->getAHOnFocusParams());
+		}
+
+	}
+	_CaptureKeyboard = c;
+	notifyElementCaptured(c);
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::resetCaptureKeyboard()
+{
+	CCtrlBase *captureKeyboard = _CaptureKeyboard;
+	_OldCaptureKeyboard = NULL;
+	_CaptureKeyboard = NULL;
+	if (captureKeyboard)
+	{
+		captureKeyboard->onKeyboardCaptureLost();
+	}
+}
+
+// ***************************************************************************
+void CWidgetManager::registerClockMsgTarget(CCtrlBase *vb)
+{
+	if (!vb) return;
+	if (isClockMsgTarget(vb))
+	{
+		nlwarning("<CInterfaceManager::registerClockMsgTarget> Element %s is already registered", vb->getId().c_str());
+		return;
+	}
+	_ClockMsgTargets.push_back(vb);
+}
+
+// ***************************************************************************
+void CWidgetManager::unregisterClockMsgTarget(CCtrlBase *vb)
+{
+	if (!vb) return;
+	std::vector<CCtrlBase*>::iterator it = std::find(_ClockMsgTargets.begin(), _ClockMsgTargets.end(), vb);
+	if (it != _ClockMsgTargets.end())
+	{
+		_ClockMsgTargets.erase(it);
+	}
+}
+
+// ***************************************************************************
+bool CWidgetManager::isClockMsgTarget(CCtrlBase *vb) const
+{
+	std::vector<CCtrlBase*>::const_iterator it = std::find(_ClockMsgTargets.begin(), _ClockMsgTargets.end(), vb);
+	return it != _ClockMsgTargets.end();
+}
+
+void CWidgetManager::sendClockTickEvent()
+{
+	NLGUI::CEventDescriptorSystem clockTick;
+	clockTick.setEventTypeExtended(NLGUI::CEventDescriptorSystem::clocktick);
+
+	if (_CapturePointerLeft)
+	{
+		_CapturePointerLeft->handleEvent(clockTick);
+	}
+	if (_CapturePointerRight)
+	{
+		_CapturePointerRight->handleEvent(clockTick);
+	}
+
+	// and send clock tick msg to ctrl that are registered
+	std::vector<CCtrlBase*> clockMsgTarget = _ClockMsgTargets;
+	for(std::vector<CCtrlBase*>::iterator it = clockMsgTarget.begin(); it != clockMsgTarget.end(); ++it)
+	{
+		(*it)->handleEvent(clockTick);
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::notifyElementCaptured(CCtrlBase *c)
+{
+	std::set<CCtrlBase *> seen;
+	CCtrlBase *curr = c;
+	while (curr)
+	{
+		seen.insert(curr);
+		curr->elementCaptured(c);
+		curr = curr->getParent();
+	}
+	// also warn the ctrl under the pointer
+	for (uint i = 0; i < (uint) _CtrlsUnderPointer.size(); ++i)
+	{
+		if (!seen.count(_CtrlsUnderPointer[i]))
+		{
+			_CtrlsUnderPointer[i]->elementCaptured(c);
 		}
 	}
 }

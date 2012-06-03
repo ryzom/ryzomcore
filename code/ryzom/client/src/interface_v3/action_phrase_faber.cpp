@@ -708,7 +708,7 @@ void		CActionPhraseFaber::startMpSelection(uint itemReqLine, uint mpSlot)
 			CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(quantityModal->getGroup("eb"));
 			if (eb)
 			{
-				pIM->setCaptureKeyboard(eb);
+				CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 				eb->setInputString(toString(maxQuantity));
 				eb->setSelectionAll();
 			}

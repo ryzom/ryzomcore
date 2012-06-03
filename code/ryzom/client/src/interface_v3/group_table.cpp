@@ -792,7 +792,7 @@ void CGroupTable::checkCoords ()
 			else
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				CCtrlBase *pCB = pIM->getCapturePointerLeft();
+				CCtrlBase *pCB = CWidgetManager::getInstance()->getCapturePointerLeft();
 				if (pCB != NULL)
 				{
 					CCtrlResizer *pCR = dynamic_cast<CCtrlResizer*>(pCB);

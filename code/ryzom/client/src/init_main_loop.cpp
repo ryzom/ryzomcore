@@ -1274,11 +1274,11 @@ void initMainLoop()
 
 	// Set the default edit box for the enter key
 //	if (PeopleInterraction.MainChat.Window)
-//		CInterfaceManager::getInstance()->setCaptureKeyboard(PeopleInterraction.MainChat.Window->getEditBox());
+//		CWidgetManager::getInstance()->setCaptureKeyboard(PeopleInterraction.MainChat.Window->getEditBox());
 	if (PeopleInterraction.ChatGroup.Window)
 	{
 		CGroupEditBox	*eb= dynamic_cast<CGroupEditBox*>(PeopleInterraction.ChatGroup.Window->getEditBox());
-		CInterfaceManager::getInstance()->setCaptureKeyboard(eb);
+		CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 		// For user help, set a default input string.
 		// NB: must do it after interface loadConfig, else it is reseted
 		// NB: it is reseted also on first mode switch
@@ -1286,8 +1286,8 @@ void initMainLoop()
 			eb->setDefaultInputString(CI18N::get("uiDefaultChatInput"));
 	}
 	else
-		CInterfaceManager::getInstance()->setCaptureKeyboard(NULL);
-	CInterfaceManager::getInstance()->setCaptureKeyboard(NULL); // previous set editbox becomes '_OldCaptureKeyboard'
+		CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
+	CWidgetManager::getInstance()->setCaptureKeyboard(NULL); // previous set editbox becomes '_OldCaptureKeyboard'
 
 	// Some init after connection ready sent
 	if(BotChatPageAll && (!ClientCfg.R2EDEnabled))

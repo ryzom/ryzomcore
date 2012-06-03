@@ -212,7 +212,7 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 
 		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
-			if (pIM->getCapturePointerLeft() != this)
+			if (CWidgetManager::getInstance()->getCapturePointerLeft() != this)
 				return false;
 			_LeftLongClickHandled = true;
 		}
@@ -248,7 +248,7 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 
 		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
-			if (pIM->getCapturePointerLeft() != this)
+			if (CWidgetManager::getInstance()->getCapturePointerLeft() != this)
 				return false;
 
 			if (_LeftDblClickHandled)  // no effect on mouse up after double click has been handled
@@ -284,7 +284,7 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 			}
 			*/
 			runLeftClickAction();
-			if (pIM->getCapturePointerLeft() == NULL) return true; // event handler may release cpature from this object (if it is removed for example)
+			if (CWidgetManager::getInstance()->getCapturePointerLeft() == NULL) return true; // event handler may release cpature from this object (if it is removed for example)
 
 			// Run Menu
 			if (!_ListMenuLeft.empty())
@@ -309,7 +309,7 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 			_LastLeftClickButton = NULL;
 			bool	handled= false;
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			if (pIM->getCapturePointerRight() != this)
+			if (CWidgetManager::getInstance()->getCapturePointerRight() != this)
 				return false;
 
 			// RunAction
@@ -318,7 +318,7 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 				handled= true;
 				CAHManager::getInstance()->runActionHandler (_AHOnRightClick, this, _AHRightClickParams);
 			}
-			if (pIM->getCapturePointerRight() == NULL) return true; // if this become NULL, this ctrl has been deleted
+			if (CWidgetManager::getInstance()->getCapturePointerRight() == NULL) return true; // if this become NULL, this ctrl has been deleted
 			// Run Menu
 			if (!_ListMenuRight .empty())
 			{
@@ -343,7 +343,7 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 			}
 
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			if (pIM->getCapturePointerLeft() == this)
+			if (CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 			{
 				if (!_LeftLongClickHandled)
 				{
@@ -452,16 +452,16 @@ void CCtrlBaseButton::updateOver(bool &lastOver)
 		return;
 	}
 
-	if (pIM->getCapturePointerLeft() != NULL)
+	if (CWidgetManager::getInstance()->getCapturePointerLeft() != NULL)
 	{
-		if (pIM->getCapturePointerLeft() != this)
+		if (CWidgetManager::getInstance()->getCapturePointerLeft() != this)
 		{
 			_Over = false;
 		}
 		return;
 	}
 
-	const vector<CCtrlBase*> &rVB = pIM->getCtrlsUnderPointer ();
+	const vector<CCtrlBase*> &rVB = CWidgetManager::getInstance()->getCtrlsUnderPointer ();
 
 	if (!_Frozen)
 	{

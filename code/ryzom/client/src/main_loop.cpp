@@ -1388,7 +1388,7 @@ void setDefaultChatWindow(CChatWindow *defaultChatWindow)
 		if (defaultChatWindow->getContainer())
 		{
 			CInterfaceGroup *ig = defaultChatWindow->getContainer()->getGroup("eb");
-			if (ig) im->setDefaultCaptureKeyboard(ig);
+			if (ig) CWidgetManager::getInstance()->setDefaultCaptureKeyboard(ig);
 		}
 	}
 }
@@ -3010,7 +3010,7 @@ bool mainLoop()
 		Actions.enable(false);
 		EditActions.enable(false);
 
-		CInterfaceManager::getInstance()->setDefaultCaptureKeyboard(NULL);
+		CWidgetManager::getInstance()->setDefaultCaptureKeyboard(NULL);
 
 		// Interface saving
 		CInterfaceManager::getInstance()->uninitInGame0();
@@ -3115,8 +3115,8 @@ void displayDebugUIUnderMouse()
 		line-= 2 * lineStep;
 	}
 	//
-	const vector<CCtrlBase *> &rICL = pIM->getCtrlsUnderPointer ();
-	const vector<CInterfaceGroup *> &rIGL = pIM->getGroupsUnderPointer ();
+	const vector<CCtrlBase *> &rICL = CWidgetManager::getInstance()->getCtrlsUnderPointer ();
+	const vector<CInterfaceGroup *> &rIGL = CWidgetManager::getInstance()->getGroupsUnderPointer ();
 	// If previous highlighted element is found in the list, then keep it, else reset to first element
 	if (std::find(rICL.begin(), rICL.end(), HighlightedDebugUI) == rICL.end() &&
 		std::find(rIGL.begin(), rIGL.end(), HighlightedDebugUI) == rIGL.end())
@@ -3183,8 +3183,8 @@ void displayDebugUIUnderMouse()
 static void getElementsUnderMouse(vector<CInterfaceElement *> &ielem)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	const vector<CCtrlBase *> &rICL = pIM->getCtrlsUnderPointer();
-	const vector<CInterfaceGroup *> &rIGL = pIM->getGroupsUnderPointer();
+	const vector<CCtrlBase *> &rICL = CWidgetManager::getInstance()->getCtrlsUnderPointer();
+	const vector<CInterfaceGroup *> &rIGL = CWidgetManager::getInstance()->getGroupsUnderPointer();
 	ielem.clear();
 	ielem.insert(ielem.end(), rICL.begin(), rICL.end());
 	ielem.insert(ielem.end(), rIGL.begin(), rIGL.end());

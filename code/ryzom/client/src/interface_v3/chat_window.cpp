@@ -315,7 +315,7 @@ bool CChatWindow::rename(const ucstring &newName, bool newNameLocalize)
 void CChatWindow::setKeyboardFocus()
 {
 	if (!_EB || !_Chat) return;
-	CInterfaceManager::getInstance()->setCaptureKeyboard(_EB);
+	CWidgetManager::getInstance()->setCaptureKeyboard(_EB);
 	if (!_Chat->isOpenable() || _Chat->isOpenWhenPopup())
 	{
 		if (_Chat->isPopable() && !_Chat->isPopuped())

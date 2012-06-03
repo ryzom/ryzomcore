@@ -25,6 +25,7 @@
 
 class CInterfaceElement;
 class CCtrlBase;
+class CViewBase;
 class CInterfaceGroup;
 class CViewPointer;
 
@@ -186,6 +187,80 @@ public:
 	CViewPointer* getPointer(){ return _Pointer; }
 	void setPointer( CViewPointer *pointer ){ _Pointer = pointer; }
 
+	/**
+	 * get the window under a spot
+	 * \param : X coord of the spot
+	 * \param : Y coord of the spot
+	 * \return : pointer to the window
+	 */
+	CInterfaceGroup* getWindowUnder (sint32 x, sint32 y);
+	CInterfaceGroup* getCurrentWindowUnder() { return _WindowUnder; }
+	void setCurrentWindowUnder( CInterfaceGroup *group ){ _WindowUnder = group; }
+	CInterfaceGroup* getGroupUnder (sint32 x, sint32 y);
+
+	void getViewsUnder( sint32 x, sint32 y, std::vector< CViewBase* > &vVB );
+	void getCtrlsUnder( sint32 x, sint32 y, std::vector< CCtrlBase* > &vICL );
+	void getGroupsUnder (sint32 x, sint32 y, std::vector< CInterfaceGroup* > &vIGL );
+
+	const std::vector< CViewBase* >& getViewsUnderPointer(){ return _ViewsUnderPointer; }
+	const std::vector< CInterfaceGroup* >& getGroupsUnderPointer() { return _GroupsUnderPointer; }
+	const std::vector< CCtrlBase* >& getCtrlsUnderPointer() { return _CtrlsUnderPointer; }
+	
+	//
+	void clearViewUnders(){ _ViewsUnderPointer.clear(); }
+	void clearGroupsUnders() { _GroupsUnderPointer.clear(); }
+	void clearCtrlsUnders() { _CtrlsUnderPointer.clear(); }
+
+	// Remove all references on a view (called when the ctrl is destroyed)
+	void removeRefOnView( CViewBase *ctrlBase );
+	
+	// Remove all references on a ctrl (called when the ctrl is destroyed)
+	void removeRefOnCtrl (CCtrlBase *ctrlBase);
+
+	// Remove all references on a group (called when the group is destroyed)
+	void removeRefOnGroup (CInterfaceGroup *group);
+
+	void reset();
+
+	void checkCoords();
+	// Relative move of pointer
+	void movePointer (sint32 dx, sint32 dy);
+	// Set absolute coordinates of pointer
+	void movePointerAbs(sint32 px, sint32 py);
+
+	/**
+	 * Capture
+	 */
+	CCtrlBase *getCapturePointerLeft() { return _CapturePointerLeft; }
+	CCtrlBase *getCapturePointerRight() { return _CapturePointerRight; }
+	CCtrlBase *getCaptureKeyboard() { return _CaptureKeyboard; }
+	CCtrlBase *getOldCaptureKeyboard() { return _OldCaptureKeyboard; }
+	CCtrlBase *getDefaultCaptureKeyboard() { return _DefaultCaptureKeyboard; }
+
+	void setCapturePointerLeft(CCtrlBase *c);
+	void setCapturePointerRight(CCtrlBase *c);
+	void setOldCaptureKeyboard(CCtrlBase *c){ _OldCaptureKeyboard = c; }
+	// NB: setCaptureKeyboard(NULL) has not the same effect as resetCaptureKeyboard(). it allows the capture
+	// to come back to the last captured window (resetCaptureKeyboard() not)
+	void setCaptureKeyboard(CCtrlBase *c);
+	/**  Set the default box to use when no keyboard has been previously captured
+	  *  The given dialog should be static
+	  */
+	void setDefaultCaptureKeyboard(CCtrlBase *c){ _DefaultCaptureKeyboard = c; }
+
+	void resetCaptureKeyboard();
+
+	// True if the keyboard is captured
+	bool	isKeyboardCaptured() const {return _CaptureKeyboard!=NULL;}
+
+	// register a view that wants to be notified at each frame (receive the msg 'clocktick')
+	void registerClockMsgTarget(CCtrlBase *vb);
+	void unregisterClockMsgTarget(CCtrlBase *vb);
+	bool isClockMsgTarget(CCtrlBase *vb) const;
+	void sendClockTickEvent();
+
+	void notifyElementCaptured(CCtrlBase *c);
+
 	static IParser *parser;
 
 private:
@@ -198,6 +273,23 @@ private:
 	static std::string _CtrlLaunchingModalId;
 	NLMISC::CRefPtr< CCtrlBase > curContextHelp;
 	CViewPointer *_Pointer;
+
+	NLMISC::CRefPtr< CInterfaceGroup > _WindowUnder;
+
+	// Capture
+	NLMISC::CRefPtr<CCtrlBase>	_CaptureKeyboard;
+	NLMISC::CRefPtr<CCtrlBase>	_OldCaptureKeyboard;
+	NLMISC::CRefPtr<CCtrlBase>	_DefaultCaptureKeyboard;
+	NLMISC::CRefPtr<CCtrlBase>	_CapturePointerLeft;
+	NLMISC::CRefPtr<CCtrlBase>	_CapturePointerRight;
+
+	// What is under pointer
+	std::vector< CViewBase* > _ViewsUnderPointer;
+	std::vector< CCtrlBase* > _CtrlsUnderPointer;
+	std::vector< CInterfaceGroup* > _GroupsUnderPointer;
+
+	// view that should be notified from clock msg
+	std::vector<CCtrlBase*> _ClockMsgTargets;
 };
 
 #endif

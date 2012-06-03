@@ -277,7 +277,7 @@ void CViewBitmapCombo::draw()
 	sint32 mx = 0, my = 0;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
-	const std::vector<CViewBase *> &rVB = pIM->getViewsUnderPointer();
+	const std::vector<CViewBase *> &rVB = CWidgetManager::getInstance()->getViewsUnderPointer();
 	if (!CWidgetManager::getInstance()->getPointer()) return;
 	CWidgetManager::getInstance()->getPointer()->getPointerDispPos(mx, my);
 	bool over = false;

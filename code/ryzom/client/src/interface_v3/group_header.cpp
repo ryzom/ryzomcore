@@ -241,10 +241,10 @@ public:
 	void release()
 	{
 		CInterfaceManager	*im = CInterfaceManager::getInstance();
-		if (im->getCapturePointerLeft() == this)
+		if (CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 		{
 			_Moving = false;
-			im->setCapturePointerLeft(NULL);
+			CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
 		}
 	}
 	virtual uint		getDeltaDepth() const { return 100; }
@@ -281,7 +281,7 @@ public:
 					if (!this->isIn(eventDesc.getX(), eventDesc.getY())) return false;
 					_TargetGroup = getTargetGroup();
 					if (!_TargetGroup) return false;
-					im->setCapturePointerLeft(this);
+					CWidgetManager::getInstance()->setCapturePointerLeft(this);
 					_Moving = true;
 					_OffsetX = _TargetGroup->getW() - eventDesc.getX();
 					return true;
@@ -292,7 +292,7 @@ public:
 				}
 				if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousemove)
 				{
-					if (_Moving && im->getCapturePointerLeft() == this)
+					if (_Moving && CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 					{
 						if (!_TargetGroup)
 						{

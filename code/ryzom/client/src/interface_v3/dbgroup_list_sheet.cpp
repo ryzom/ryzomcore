@@ -711,17 +711,17 @@ void CDBGroupListSheet::draw ()
 
 	_CanDrop = false;
 	if (_CtrlInfo._AHOnCanDrop != NULL)
-	if (pIM->getCapturePointerLeft())
+	if (CWidgetManager::getInstance()->getCapturePointerLeft())
 	{
 		CGroupContainer *pGC = getContainer();
-		if (pIM->getCurrentWindowUnder() == pGC)
+		if (CWidgetManager::getInstance()->getCurrentWindowUnder() == pGC)
 		{
 			if ((CWidgetManager::getInstance()->getPointer()->getX() >= _XReal) &&
 				(CWidgetManager::getInstance()->getPointer()->getX() < (_XReal + _WReal))&&
 				(CWidgetManager::getInstance()->getPointer()->getY() > _YReal) &&
 				(CWidgetManager::getInstance()->getPointer()->getY() <= (_YReal+ _HReal)))
 			{
-				CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pIM->getCapturePointerLeft());
+				CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCapturePointerLeft());
 				if ((pCSSrc != NULL) && pCSSrc->isDraging())
 				{
 					string params = string("src=") + pCSSrc->getId();

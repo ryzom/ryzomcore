@@ -205,9 +205,9 @@ void CViewPointer::draw ()
 		_LastHightLight = NULL;
 	}
 
-	if (pIM->getCapturePointerLeft() != NULL && pIM->isMouseHandlingEnabled())
+	if ( CWidgetManager::getInstance()->getCapturePointerLeft() != NULL && pIM->isMouseHandlingEnabled())
 	{
-		CCtrlMover *pCM = dynamic_cast<CCtrlMover*>(pIM->getCapturePointerLeft());
+		CCtrlMover *pCM = dynamic_cast<CCtrlMover*>( CWidgetManager::getInstance()->getCapturePointerLeft());
 		if ((pCM != NULL) && (pCM->canMove() == true))
 		{
 			CGroupContainer *pGC = dynamic_cast<CGroupContainer *>(pCM->getParent());
@@ -239,11 +239,11 @@ void CViewPointer::draw ()
 		}
 	}
 
-	const vector<CCtrlBase *> &rICL = pIM->getCtrlsUnderPointer ();
+	const vector<CCtrlBase *> &rICL = CWidgetManager::getInstance()->getCtrlsUnderPointer ();
 
 
 	// Draw the captured cursor
-	CCtrlBase *pCB = pIM->getCapturePointerLeft();
+	CCtrlBase *pCB = CWidgetManager::getInstance()->getCapturePointerLeft();
 	if (pCB != NULL)
 	{
 		if (drawResizer(pCB,col)) return;
@@ -256,7 +256,7 @@ void CViewPointer::draw ()
 		return;
 	}
 
-	const vector<CViewBase *> &vUP = pIM->getViewsUnderPointer ();
+	const vector<CViewBase *> &vUP = CWidgetManager::getInstance()->getViewsUnderPointer ();
 
 	for(uint i=0;i<vUP.size();i++)
 	{
@@ -292,7 +292,7 @@ void CViewPointer::draw ()
 	}
 
 	// Draw if capture right
-	pCB = pIM->getCapturePointerRight();
+	pCB = CWidgetManager::getInstance()->getCapturePointerRight();
 	if (pCB != NULL)
 	{
 		// Is it a 3d scene ?
@@ -355,7 +355,7 @@ void CViewPointer::draw ()
 					CGroupContainer *pGC = dynamic_cast<CGroupContainer *>(pCM->getParent());
 					if (pGC != NULL && !pGC->isLocked())
 					{
-						if (pIM->getCapturePointerLeft() != pCM)
+						if (CWidgetManager::getInstance()->getCapturePointerLeft() != pCM)
 							pGC->setHighLighted(true, 128);
 						else
 							pGC->setHighLighted(true, 255);
@@ -373,7 +373,7 @@ void CViewPointer::draw ()
 	{
 		if (rICL.empty())
 		{
-			const vector<CInterfaceGroup *> &rIGL = pIM->getGroupsUnderPointer ();
+			const vector<CInterfaceGroup *> &rIGL = CWidgetManager::getInstance()->getGroupsUnderPointer ();
 			for (uint32 i = 0; i < rIGL.size(); ++i)
 			{
 				CInterfaceGroup *pG = rIGL[i];

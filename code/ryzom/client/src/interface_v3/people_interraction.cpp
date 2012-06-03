@@ -2423,7 +2423,7 @@ public:
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(gc->getGroup("eb"));
 		if (eb)
 		{
-			im->setCaptureKeyboard(eb);
+			CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 			eb->setInputString(ucstring(""));
 		}
 		//

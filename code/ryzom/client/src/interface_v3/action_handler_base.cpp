@@ -97,7 +97,7 @@ public:
 			nlwarning("<CAHSetKeyboardFocus::execute> Can't get target edit box %s, or bad type", target.c_str());
 			return;
 		}
-		pIM->setCaptureKeyboard(geb);
+		CWidgetManager::getInstance()->setCaptureKeyboard(geb);
 		string selectAllStr = getParam (Params, "select_all");
 		bool selectAll = CInterfaceElement::convertBool(selectAllStr.c_str());
 		if (selectAll)
@@ -114,8 +114,7 @@ class CAHResetKeyboardFocus : public IActionHandler
 public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->resetCaptureKeyboard();
+		CWidgetManager::getInstance()->resetCaptureKeyboard();
 	}
 };
 REGISTER_ACTION_HANDLER (CAHResetKeyboardFocus, "reset_keyboard_focus");
@@ -351,7 +350,7 @@ class CAHResetInterface : public IActionHandler
 				}
 			}
 
-			pIM->checkCoords();
+			CWidgetManager::getInstance()->checkCoords();
 			CWidgetManager::getInstance()->getMasterGroup((uint8)nMasterGroup).centerAllContainers();
 
 			// Pop in and close all containers

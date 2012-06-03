@@ -738,7 +738,7 @@ void CGroupParagraph::checkCoords ()
 		if (_LastW != (sint) parentWidth)
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			CCtrlBase *pCB = pIM->getCapturePointerLeft();
+			CCtrlBase *pCB = CWidgetManager::getInstance()->getCapturePointerLeft();
 			if (pCB != NULL)
 			{
 				CCtrlResizer *pCR = dynamic_cast<CCtrlResizer*>(pCB);
@@ -778,7 +778,7 @@ void CGroupParagraph::draw ()
 			sint32 x = CWidgetManager::getInstance()->getPointer()->getX();
 			sint32 y = CWidgetManager::getInstance()->getPointer()->getY();
 
-			CInterfaceGroup	*pIG = pIM->getWindowUnder(x,y);
+			CInterfaceGroup	*pIG = CWidgetManager::getInstance()->getWindowUnder(x,y);
 			CInterfaceGroup	*pParent = this;
 			bool bFound = false;
 			while (pParent != NULL)

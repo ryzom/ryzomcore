@@ -5296,7 +5296,7 @@ bool CUserCommand::execute(const std::string &/* rawCommandString */, const std:
 		}
 
 		// Run the action handler
-		CAHManager::getInstance()->runActionHandler (mode->Action, pIM->getOldCaptureKeyboard(), finalArgs);
+		CAHManager::getInstance()->runActionHandler (mode->Action, CWidgetManager::getInstance()->getOldCaptureKeyboard(), finalArgs);
 	}
 	else
 	{

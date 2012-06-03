@@ -621,17 +621,17 @@ void CDBGroupListSheetText::draw ()
 
 	_CanDrop = false;
 	if (_CtrlInfo._AHOnCanDrop != NULL)
-	if (pIM->getCapturePointerLeft())
+	if (CWidgetManager::getInstance()->getCapturePointerLeft())
 	{
 		CGroupContainer *pGC = getContainer();
-		if (pIM->getCurrentWindowUnder() == pGC)
+		if (CWidgetManager::getInstance()->getCurrentWindowUnder() == pGC)
 		{
 			if ((CWidgetManager::getInstance()->getPointer()->getX() >= _XReal) &&
 				(CWidgetManager::getInstance()->getPointer()->getX() < (_XReal + _WReal))&&
 				(CWidgetManager::getInstance()->getPointer()->getY() > _YReal) &&
 				(CWidgetManager::getInstance()->getPointer()->getY() <= (_YReal+ _HReal)))
 			{
-				CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pIM->getCapturePointerLeft());
+				CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCapturePointerLeft());
 				if ((pCSSrc != NULL) && pCSSrc->isDraging())
 				{
 					string params = string("src=") + pCSSrc->getId();
@@ -674,10 +674,10 @@ bool CDBGroupListSheetText::handleEvent (const NLGUI::CEventDescriptor &event)
 		{
 			// Drag'n'drop from a ctrl sheet that belongs to this list
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			if ((pIM->getCapturePointerLeft() != NULL) && (pIM->getCapturePointerLeft()->getParent() == _List))
+			if ((CWidgetManager::getInstance()->getCapturePointerLeft() != NULL) && (CWidgetManager::getInstance()->getCapturePointerLeft()->getParent() == _List))
 			{
 				CDBCtrlSheet *pDraggedSheet = NULL;
-				CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(pIM->getCapturePointerLeft());
+				CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getCapturePointerLeft());
 				if (pCB != NULL)
 				{
 					// A button has been captured -> Transform the capture to the corresponding ctrlsheet
@@ -686,7 +686,7 @@ bool CDBGroupListSheetText::handleEvent (const NLGUI::CEventDescriptor &event)
 						 _SheetChildren[pos]->Ctrl->isDragable() && (!_SheetChildren[pos]->Ctrl->getGrayed()))
 					{
 						pDraggedSheet = _SheetChildren[pos]->Ctrl;
-						pIM->setCapturePointerLeft(pDraggedSheet);
+						CWidgetManager::getInstance()->setCapturePointerLeft(pDraggedSheet);
 						NLGUI::CEventDescriptorMouse newEv = eventDesc;
 						// Send this because not send (the captured button has processed the event mouseleftdown)
 						newEv.setEventTypeExtended(NLGUI::CEventDescriptorMouse::mouseleftdown);
@@ -695,7 +695,7 @@ bool CDBGroupListSheetText::handleEvent (const NLGUI::CEventDescriptor &event)
 				}
 				else
 				{
-					pDraggedSheet = dynamic_cast<CDBCtrlSheet*>(pIM->getCapturePointerLeft());
+					pDraggedSheet = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCapturePointerLeft());
 					// auto scroll only if swapable
 					if(swapable())
 					{
@@ -714,7 +714,7 @@ bool CDBGroupListSheetText::handleEvent (const NLGUI::CEventDescriptor &event)
 					if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 					{
 						sint posdst = -1,possrc = -1;
-						const vector<CCtrlBase*> &rV = pIM->getCtrlsUnderPointer();
+						const vector<CCtrlBase*> &rV = CWidgetManager::getInstance()->getCtrlsUnderPointer();
 						for (uint i = 0; i < rV.size(); ++i)
 						{
 							CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(rV[i]);
@@ -920,7 +920,7 @@ void CDBGroupListSheetText::setup()
 
 		_SheetChildren[i]->init(this, i);
 	}
-	pIM->registerClockMsgTarget(this);
+	CWidgetManager::getInstance()->registerClockMsgTarget(this);
 }
 
 

@@ -829,7 +829,7 @@ void CCtrlTabButton::setBlink (bool b)
 		{
 			_TextColorNormalBlink = getTextColorNormal();
 			_TextModulateGlobalColorNormalBlink = getTextModulateGlobalColorNormal();
-			pIM->registerClockMsgTarget(this);
+			CWidgetManager::getInstance()->registerClockMsgTarget(this);
 		}
 		_Blinking = true;
 	}
@@ -837,7 +837,7 @@ void CCtrlTabButton::setBlink (bool b)
 	{
 		if (_Blinking)
 		{
-			pIM->unregisterClockMsgTarget(this);
+			CWidgetManager::getInstance()->unregisterClockMsgTarget(this);
 			setTextColorNormal(_TextColorNormalBlink);
 			setTextModulateGlobalColorNormal(_TextModulateGlobalColorNormalBlink);
 		}

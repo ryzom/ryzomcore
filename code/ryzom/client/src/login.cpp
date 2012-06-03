@@ -1319,7 +1319,7 @@ class CAHLoginTab : public IActionHandler
 
 		if (NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->getValue32() == UI_VARIABLES_SCREEN_CHECKPASS)
 		{
-			CCtrlBase *pCB = pIM->getCaptureKeyboard();
+			CCtrlBase *pCB = CWidgetManager::getInstance()->getCaptureKeyboard();
 			if (pCB != NULL)
 			{
 				CCtrlBase *pNewCB;
@@ -1328,12 +1328,12 @@ class CAHLoginTab : public IActionHandler
 					pNewCB = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
 				else
 					pNewCB = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
-				pIM->setCaptureKeyboard(pNewCB);
+				CWidgetManager::getInstance()->setCaptureKeyboard(pNewCB);
 			}
 		}
 		else if (NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->getValue32() == UI_VARIABLES_SCREEN_CREATE_ACCOUNT)
 		{
-			CCtrlBase *pCB = pIM->getCaptureKeyboard();
+			CCtrlBase *pCB = CWidgetManager::getInstance()->getCaptureKeyboard();
 			if (pCB != NULL)
 			{
 				CCtrlBase *pNewCB;
@@ -1346,7 +1346,7 @@ class CAHLoginTab : public IActionHandler
 					pNewCB = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_EMAIL));
 				else
 					pNewCB = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_LOGIN));
-				pIM->setCaptureKeyboard(pNewCB);
+				CWidgetManager::getInstance()->setCaptureKeyboard(pNewCB);
 			}
 		}
 	}

@@ -1050,7 +1050,7 @@ int CLuaIHMRyzom::setCaptureKeyboard(CLuaState &ls)
 		CLuaIHM::fails(ls, "%s waits a ui control as arg 1", funcName);
 	}
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->setCaptureKeyboard(ctrl);
+	CWidgetManager::getInstance()->setCaptureKeyboard(ctrl);
 	return 0;
 }
 
@@ -1061,7 +1061,7 @@ int CLuaIHMRyzom::resetCaptureKeyboard(CLuaState &ls)
 	const char *funcName = "resetCaptureKeyboard";
 	CLuaIHM::checkArgCount(ls, funcName, 0);
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->resetCaptureKeyboard();
+	CWidgetManager::getInstance()->resetCaptureKeyboard();
 	return 0;
 }
 
@@ -2419,7 +2419,7 @@ int CLuaIHMRyzom::getCurrentWindowUnder(CLuaState &ls)
 	//H_AUTO(Lua_CLuaIHM_getCurrentWindowUnder)
 	CLuaStackChecker lsc(&ls,    1);
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CInterfaceElement	*pIE= im->getCurrentWindowUnder();
+	CInterfaceElement	*pIE= CWidgetManager::getInstance()->getCurrentWindowUnder();
 	if(!pIE)
 	{
 		ls.pushNil();

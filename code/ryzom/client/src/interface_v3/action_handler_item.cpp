@@ -126,7 +126,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 						editBoxLarge->setActive(true);
 
 						// Set the Keyboard focus to the editbox (after the enableModalWindow())
-						pIM->setCaptureKeyboard(editBoxLarge);
+						CWidgetManager::getInstance()->setCaptureKeyboard(editBoxLarge);
 						// Select all the text for easier selection
 						editBoxLarge->setSelectionAll();
 					}
@@ -144,7 +144,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 						editBoxShort->setActive(true);
 
 						// Set the Keyboard focus to the editbox (after the enableModalWindow())
-						pIM->setCaptureKeyboard(editBoxShort);
+						CWidgetManager::getInstance()->setCaptureKeyboard(editBoxShort);
 						// Select all the text for easier selection
 						editBoxShort->setSelectionAll();
 					}
@@ -239,7 +239,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 							editBoxLarge->setActive(true);
 
 							// Set the Keyboard focus to the editbox
-							pIM->setCaptureKeyboard(editBoxLarge);
+							CWidgetManager::getInstance()->setCaptureKeyboard(editBoxLarge);
 							// Select all the text for easier selection
 							editBoxLarge->setSelectionAll();
 						}
@@ -258,7 +258,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 							editBoxShort->setActive(true);
 
 							// Set the Keyboard focus to the editbox
-							pIM->setCaptureKeyboard(editBoxShort);
+							CWidgetManager::getInstance()->setCaptureKeyboard(editBoxShort);
 							// Select all the text for easier selection
 							editBoxShort->setSelectionAll();
 						}
@@ -503,7 +503,7 @@ static void displayQuantityPopup(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCt
 		CWidgetManager::getInstance()->enableModalWindow(pCaller, group);
 
 		// Set the Keyboard focus to the editbox (after the enableModalWindow())
-		pIM->setCaptureKeyboard(editBox);
+		CWidgetManager::getInstance()->setCaptureKeyboard(editBox);
 		// Select all the text for easier selection
 		editBox->setSelectionAll();
 	}

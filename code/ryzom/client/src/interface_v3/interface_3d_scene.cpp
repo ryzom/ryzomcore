@@ -571,8 +571,8 @@ bool CInterface3DScene::handleEvent (const NLGUI::CEventDescriptor &event)
 	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
 		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
-		if ((CInterfaceManager::getInstance()->getCapturePointerLeft() != this) &&
-			(CInterfaceManager::getInstance()->getCapturePointerRight() != this) &&
+		if ((CWidgetManager::getInstance()->getCapturePointerLeft() != this) &&
+			(CWidgetManager::getInstance()->getCapturePointerRight() != this) &&
 			(!((eventDesc.getX() >= _XReal) &&
 			(eventDesc.getX() < (_XReal + _WReal))&&
 			(eventDesc.getY() > _YReal) &&
@@ -585,7 +585,7 @@ bool CInterface3DScene::handleEvent (const NLGUI::CEventDescriptor &event)
 			_MouseLDownX = eventDesc.getX();
 			_MouseLDownY = eventDesc.getY();
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			pIM->setCapturePointerLeft(this); // Because we are not just a control
+			CWidgetManager::getInstance()->setCapturePointerLeft(this); // Because we are not just a control
 			return true;
 		}
 		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
@@ -599,7 +599,7 @@ bool CInterface3DScene::handleEvent (const NLGUI::CEventDescriptor &event)
 			_MouseRDownX = eventDesc.getX();
 			_MouseRDownY = eventDesc.getY();
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			pIM->setCapturePointerRight(this); // Because we are not just a control
+			CWidgetManager::getInstance()->setCapturePointerRight(this); // Because we are not just a control
 			return true;
 		}
 		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)

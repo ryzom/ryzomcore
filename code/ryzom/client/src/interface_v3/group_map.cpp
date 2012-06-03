@@ -126,7 +126,7 @@ static void popupLandMarkNameDialog()
 		eb->setInputString(ucstring());
 	}
 
-	im->setCaptureKeyboard(eb);
+	CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 	eb->setSelectionAll();
 }
 
@@ -181,7 +181,7 @@ bool CGroupMap::CPolyButton::handleEvent (const NLGUI::CEventDescriptor &event)
 
 		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
-			if (im->getCapturePointerLeft() != this)
+			if (CWidgetManager::getInstance()->getCapturePointerLeft() != this)
 				return false;
 
 			// Set the map !!!
@@ -198,7 +198,7 @@ bool CGroupMap::CPolyButton::handleEvent (const NLGUI::CEventDescriptor &event)
 					}
 				}
 
-				im->setCapturePointerLeft(NULL);
+				CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
 				if (bFound)
 					Map->setMap(Map->getCurMap()->Children[i].Name);
 				return true;
@@ -209,7 +209,7 @@ bool CGroupMap::CPolyButton::handleEvent (const NLGUI::CEventDescriptor &event)
 		{
 			if (contains(CVector2f((float)eventDesc.getX(), (float)eventDesc.getY())))
 			{
-				im->setCapturePointerLeft(this);
+				CWidgetManager::getInstance()->setCapturePointerLeft(this);
 				return true;
 			}
 		}
@@ -263,7 +263,7 @@ void CGroupMap::CPolyButton::drawPolyButton()
 	rVR.getScreenOOSize(oow, ooh);
 
 	bool bOver = false;
-	const std::vector<CCtrlBase*> &rCUP = pIM->getCtrlsUnderPointer();
+	const std::vector<CCtrlBase*> &rCUP = CWidgetManager::getInstance()->getCtrlsUnderPointer();
 	for (uint32 i = 0; i < rCUP.size(); ++i)
 		if (rCUP[i] == this)
 		{
@@ -1718,7 +1718,7 @@ bool CGroupMap::handleEvent(const NLGUI::CEventDescriptor &event)
 			panEnd = eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup && _Panning && _HasMoved;
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup && !panEnd)
 			{
-				//if (im->getCapturePointerLeft() == this)
+				//if (CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 				// NB : don't test capture of mouse here, because
 				// some R2 tool may begin outside of this window
 				// example : clicking in the palette window and doing a drag-and-drop to the
@@ -1736,7 +1736,7 @@ bool CGroupMap::handleEvent(const NLGUI::CEventDescriptor &event)
 					{
 						if (!R2::getEditor().getCurrentTool()->getPreviousToolClickEndFlag())
 						{
-							if (im->getCapturePointerLeft() == this)
+							if (CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 							{
 								// unselected unless tool has been changed before last mouse left up (happens when one's finish a route using double click -> should not unselect then)
 								R2::getEditor().setSelectedInstance(NULL);
@@ -1747,7 +1747,7 @@ bool CGroupMap::handleEvent(const NLGUI::CEventDescriptor &event)
 			}
 			else if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 			{
-				if (im->getCapturePointerRight() == this)
+				if (CWidgetManager::getInstance()->getCapturePointerRight() == this)
 				{
 					if (isIn(eventDesc.getX(), eventDesc.getY()))
 					{
@@ -1792,7 +1792,7 @@ bool CGroupMap::handleEvent(const NLGUI::CEventDescriptor &event)
 
 		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
-			if (im->getCapturePointerLeft() != this)
+			if (CWidgetManager::getInstance()->getCapturePointerLeft() != this)
 			{
 				return false;
 			}
@@ -1803,7 +1803,7 @@ bool CGroupMap::handleEvent(const NLGUI::CEventDescriptor &event)
 
 		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown)
 		{
-			im->setCapturePointerRight(this);
+			CWidgetManager::getInstance()->setCapturePointerRight(this);
 			return true;
 		}
 
@@ -1811,7 +1811,7 @@ bool CGroupMap::handleEvent(const NLGUI::CEventDescriptor &event)
 		{
 			if (isIn(eventDesc.getX(), eventDesc.getY()))
 			{
-				im->setCapturePointerLeft(this);
+				CWidgetManager::getInstance()->setCapturePointerLeft(this);
 				_StartXForPaning = eventDesc.getX();
 				_StartYForPaning = eventDesc.getY();
 				_StartWorldOffsetForPaning = _WorldOffset;
@@ -1845,7 +1845,7 @@ bool CGroupMap::handleEvent(const NLGUI::CEventDescriptor &event)
 
 		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousemove)
 		{
-			if (im->getCapturePointerLeft() != this || !_Panning)
+			if (CWidgetManager::getInstance()->getCapturePointerLeft() != this || !_Panning)
 				return CInterfaceGroup::handleEvent(event);
 
 			if (_MapTexW != 0 && _MapTexH != 0)

@@ -578,7 +578,7 @@ void CGroupList::draw ()
 			sint32 x = CWidgetManager::getInstance()->getPointer()->getX();
 			sint32 y = CWidgetManager::getInstance()->getPointer()->getY();
 
-			CInterfaceGroup	*pIG = pIM->getWindowUnder(x,  y);
+			CInterfaceGroup	*pIG = CWidgetManager::getInstance()->getWindowUnder(x,  y);
 			CInterfaceGroup	*pParent = this;
 			bool bFound = false;
 			while (pParent != NULL)

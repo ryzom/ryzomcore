@@ -233,18 +233,6 @@ public:
 	void processServerIDString();
 
 	/**
-	 * get the window under a spot
-	 * \param : X coord of the spot
-	 * \param : Y coord of the spot
-	 * \return : pointer to the window
-	 */
-	CInterfaceGroup* getWindowUnder (sint32 x, sint32 y);
-	CInterfaceGroup* getCurrentWindowUnder() { return _WindowUnder; }
-	CInterfaceGroup* getGroupUnder (sint32 x, sint32 y);
-	void getViewsUnder (sint32 x, sint32 y, std::vector<CViewBase*> &vVB);
-	void getCtrlsUnder (sint32 x, sint32 y, std::vector<CCtrlBase*> &vICL);
-	void getGroupsUnder (sint32 x, sint32 y, std::vector<CInterfaceGroup*> &vIGL);
-	/**
 	 * get a window from its  Id of its group.
 	 *	NB: "ctrl_launch_modal" is a special Id which return the last ctrl which has launch a modal. NULL if modal closed.
 	 * \param groupId : the Id of the window group
@@ -298,7 +286,6 @@ public:
 	/**
 	 * Draw views
 	 */
-	void checkCoords();
 	void drawViews (NL3D::UCamera camera);
 	void drawAutoAdd ();
 	void drawContextHelp ();
@@ -316,49 +303,6 @@ public:
 	uint8 getGlobalContainerAlpha() const { return _GlobalContainerAlpha; }
 	uint8 getGlobalRolloverFactorContent() const { return _GlobalRolloverFactorContent; }
 	uint8 getGlobalRolloverFactorContainer() const { return _GlobalRolloverFactorContainer; }
-
-
-	// Relative move of pointer
-	void movePointer (sint32 dx, sint32 dy);
-	// Set absolute coordinates of pointer
-	void movePointerAbs(sint32 px, sint32 py);
-	const std::vector<CViewBase*> &getViewsUnderPointer () { return _ViewsUnderPointer; }
-	const std::vector<CInterfaceGroup *> &getGroupsUnderPointer () { return _GroupsUnderPointer; }
-	const std::vector<CCtrlBase*> &getCtrlsUnderPointer () { return _CtrlsUnderPointer; }
-	//
-	void  clearGroupsUnders() { _GroupsUnderPointer.clear(); }
-	void  clearViewUnders() { _ViewsUnderPointer.clear(); }
-	void  clearCtrlsUnders() { _CtrlsUnderPointer.clear(); }
-
-	// Remove all references on a view (called when the ctrl is destroyed)
-	void	removeRefOnView (CViewBase *ctrlBase);
-
-	// Remove all references on a ctrl (called when the ctrl is destroyed)
-	void	removeRefOnCtrl (CCtrlBase *ctrlBase);
-
-	// Remove all references on a group (called when the group is destroyed)
-	void	removeRefOnGroup (CInterfaceGroup *group);
-
-	/**
-	 * Capture
-	 */
-	CCtrlBase *getCapturePointerLeft() { return _CapturePointerLeft; }
-	CCtrlBase *getCapturePointerRight() { return _CapturePointerRight; }
-	CCtrlBase *getCaptureKeyboard() { return _CaptureKeyboard; }
-	CCtrlBase *getOldCaptureKeyboard() { return _OldCaptureKeyboard; }
-	CCtrlBase *getDefaultCaptureKeyboard() { return _DefaultCaptureKeyboard; }
-
-	void setCapturePointerLeft(CCtrlBase *c);
-	void setCapturePointerRight(CCtrlBase *c);
-	void setOldCaptureKeyboard(CCtrlBase *c) { _OldCaptureKeyboard = c; }
-	// NB: setCaptureKeyboard(NULL) has not the same effect as resetCaptureKeyboard(). it allows the capture
-	// to come back to the last captured window (resetCaptureKeyboard() not)
-	void setCaptureKeyboard(CCtrlBase *c);
-	void resetCaptureKeyboard();
-	/**  Set the default box to use when no keyboard has been previously captured
-	  *  The given dialog should be static
-	  */
-	void setDefaultCaptureKeyboard(CCtrlBase *c) { _DefaultCaptureKeyboard = c; }
 
 	/// Update all the elements
 	void updateAllLocalisedElements ();
@@ -452,18 +396,11 @@ public:
 	void    unMakeWindow(CInterfaceGroup *group, bool noWarning=false);
 
 
-	// True if the keyboard is captured
-	bool	isKeyboardCaptured() const {return _CaptureKeyboard!=NULL;}
 	bool	isMouseOverWindow() const {return  _MouseOverWindow;}
 
 	// Enable mouse Events to interface. if false, release Captures.
 	void	enableMouseHandling(bool handle);
 	bool    isMouseHandlingEnabled() const { return _MouseHandlingEnabled; }
-
-	// register a view that wants to be notified at each frame (receive the msg 'clocktick')
-	void	registerClockMsgTarget(CCtrlBase *vb);
-	void	unregisterClockMsgTarget(CCtrlBase *vb);
-	bool	isClockMsgTarget(CCtrlBase *vb) const;
 
 	// Modes
 	void	setMode(uint8 newMode);
@@ -784,22 +721,7 @@ private:
 
 	NLMISC::CCDBNodeLeaf	   *_DescTextTarget;
 
-	// Capture
-	NLMISC::CRefPtr<CCtrlBase>	_CaptureKeyboard;
-	NLMISC::CRefPtr<CCtrlBase>	_OldCaptureKeyboard;
-	NLMISC::CRefPtr<CCtrlBase>	_DefaultCaptureKeyboard;
-	NLMISC::CRefPtr<CCtrlBase>	_CapturePointerLeft;
-	NLMISC::CRefPtr<CCtrlBase>	_CapturePointerRight;
 	bool		_MouseOverWindow;
-
-	// view that should be notified from clock msg
-	std::vector<CCtrlBase*> _ClockMsgTargets;
-
-	// What is under pointer
-	std::vector<CViewBase*>		_ViewsUnderPointer;
-	std::vector<CCtrlBase*>		_CtrlsUnderPointer;
-	std::vector<CInterfaceGroup *>	_GroupsUnderPointer;
-
 
 	// Context Help
 	bool					_ContextHelpActive;
@@ -829,12 +751,8 @@ private:
 	// List of active Anims
 	std::vector<CInterfaceAnim*> _ActiveAnims;
 
-	CInterfaceGroupPtr _WindowUnder;
-
 	bool isControlInWindow (CCtrlBase *ctrl, CInterfaceGroup *pNewCurrentWnd);
 	uint getDepth (CCtrlBase *ctrl, CInterfaceGroup *pNewCurrentWnd);
-
-	void notifyElementCaptured(CCtrlBase *c);
 
 	// System Options
 	CInterfaceOptionValue	_SystemOptions[NumSystemOptions];

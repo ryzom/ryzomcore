@@ -23,8 +23,7 @@
 
 CViewBase::~CViewBase()
 {
-	CInterfaceManager *manager = CInterfaceManager::getInstance();
-	manager->removeRefOnView (this);
+	CWidgetManager::getInstance()->removeRefOnView (this);
 }
 
 // ***************************************************************************
