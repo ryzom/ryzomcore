@@ -82,13 +82,13 @@ float ISource::computeManualRolloff(double alpha, float sqrdist, float distMin, 
 	}
 	else
 	{
-		double dist = (double)sqrt(sqrdist);
 		if (alpha < 0.0f)
 		{
+			double dist = (double)sqrt(sqrdist);
 			// inverse distance rolloff
 			float rolloff = distMin / dist;
 			if (alpha <= -1.0f) return rolloff;
-			
+
 			double mb = mbMin * (dist - distMin) / (distMax - distMin);
 			float mbrolloff = (float)pow(10.0, (double)mb / 2000.0);
 			return ((1.0 + alpha) * mbrolloff - alpha * rolloff);
@@ -100,6 +100,7 @@ float ISource::computeManualRolloff(double alpha, float sqrdist, float distMin, 
 				// full attenuation
 				return 0.0f;
 			}
+			double dist = (double)sqrt(sqrdist);
 			if (alpha == 0.0f)
 			{
 				// linearly descending volume on a dB scale
@@ -111,7 +112,7 @@ float ISource::computeManualRolloff(double alpha, float sqrdist, float distMin, 
 				// linear distance rolloff
 				float rolloff = (distMax - dist) / (distMax - distMin);
 				if (alpha >= 1.0f) return rolloff;
-			
+
 				double mb = mbMin * (dist - distMin) / (distMax - distMin);
 				float mbrolloff = (float)pow(10.0, (double)mb / 2000.0);
 				return ((1.0 - alpha) * mbrolloff + alpha * rolloff);
