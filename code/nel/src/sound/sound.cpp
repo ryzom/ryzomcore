@@ -136,15 +136,15 @@ void	CSound::serial(NLMISC::IStream &s)
 
 	_Name.serialString(s, "sound");
 
-	nlassert(CGroupControllerRoot::getInstance()); // not sure
+	nlassert(CGroupControllerRoot::isInitialized()); // not sure
 #if NLSOUND_SHEET_VERSION_BUILT < 2
-	if (s.isReading()) _GroupController = static_cast<CGroupController *>(CAudioMixerUser::instance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER));
+	if (s.isReading()) _GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER);
 #else
 	if (s.isReading())
 	{
 		std::string groupControllerPath;
 		s.serial(groupControllerPath);
-		_GroupController = static_cast<CGroupController *>(CAudioMixerUser::instance()->getGroupController(groupControllerPath));
+		_GroupController = CGroupControllerRoot::getInstance()->getGroupController(groupControllerPath);
 	}
 	else
 	{
@@ -245,7 +245,7 @@ void				CSound::importForm(const std::string& filename, NLGEORGES::UFormElm& roo
 		_Priority = MidPri;
 	}
 
-	nlassert(CGroupControllerRoot::getInstance()); // not sure
+	nlassert(CGroupControllerRoot::isInitialized()); // not sure
 #if NLSOUND_SHEET_VERSION_BUILT < 2
 	_GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER);
 #else

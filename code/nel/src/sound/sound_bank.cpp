@@ -124,6 +124,7 @@ CSoundBank::~CSoundBank()
 void CSoundBank::addSound(CSound *sound)
 {
 	// nlassert(_Sounds.size() > sound->getName().getShortId());
+	// nldebug("SOUNDBANK: Add %s", sound->getName().toString().c_str());
 	if (_Sounds.size() <= sound->getName().getShortId())
 		_Sounds.resize(sound->getName().getShortId() + 1);
 	_Sounds[sound->getName().getShortId()] = sound;

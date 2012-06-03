@@ -468,7 +468,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 			nlwarning("AM: OptionSoftwareBuffer not available, forceSoftwareBuffer = false");
 			forceSoftware = false; // not really needed, but set anyway in case this is still used later in this function
 		}
-		if (manualRolloff && !_SoundDriver->getOption(ISoundDriver::OptionLocalBufferCopy))
+		if (manualRolloff && !_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
 		{
 			nlwarning("AM: OptionManualRolloff not available, manualRolloff = false");
 			manualRolloff = false; // not really needed, but set anyway in case this is still used later in this function
@@ -971,10 +971,14 @@ void CAudioMixerUser::buildSampleBankList()
 /// Build the sound bank packed sheets file from georges sound sheet files with .sound extension in the search path, and return the path to the written file.
 std::string UAudioMixer::buildSoundBank(const std::string &packedSheetDir)
 {
+	CGroupControllerRoot *tempRoot = NULL;
+	if (!CGroupControllerRoot::isInitialized())
+		tempRoot = new CGroupControllerRoot();
 	std::string dir = CPath::standardizePath(packedSheetDir, true);
 	CSoundBank *soundBank = new CSoundBank();
 	soundBank->load(dir, true);
 	delete soundBank;
+	delete tempRoot;
 	return dir + "sounds.packed_sheets";
 }
 
