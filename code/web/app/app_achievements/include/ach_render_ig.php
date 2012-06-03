@@ -1,6 +1,93 @@
 <?php
+	function ach_render_tiebar($cult = "c_neutral", $civ = "c_neutral",&$cat) {
+		global $_USER;
 
-	function ach_render_tiebar($cult = "neutral", $civ = "neutral") {
+		$html = "<style>
+			.o {
+				color:orange;
+			}
+		</style>
+
+		<div style='display:block;text-align:center;'><form method='post' action='?cat=".$cat->getID()."' id='cc_form'>
+			<table>
+				<tr>";
+				if($cat->isTiedCult()) {
+					$html.= "<td>
+						<select name='cult' onchange='document.getElementById(\"cc_form\").submit();'>
+							<option value='c_neutral'"; if($cult == "c_neutral") { $html.= " selected='selected'"; } $html .= ">".get_translation('ach_c_neutral',$_USER->getLang())."</option>
+							<option value='c_kami'"; if($cult == "c_kami") { $html.= " selected='selected'"; } $html .= ">Kami</option>
+							<option value='c_karavan'"; if($cult == "c_karavan") { $html.= " selected='selected'"; } $html .= ">Karavan</option>
+						</select>
+					</td>";
+				}
+				if($cat->isTiedCiv()) {
+					$html.= "<td>
+						<select name='civ' onchange='document.getElementById(\"cc_form\").submit();'>
+							<option value='c_neutral'"; if($civ == "c_neutral") { $html.= " selected='selected'"; } $html .= ">".get_translation('ach_c_neutral',$_USER->getLang())."</option>
+							<option value='c_fyros'"; if($civ == "c_fyros") { $html.= " selected='selected'"; } $html .= ">Fyros</option>
+							<option value='c_matis'"; if($civ == "c_matis") { $html.= " selected='selected'"; } $html .= ">Matis</option>
+							<option value='c_tryker'"; if($civ == "c_tryker") { $html.= " selected='selected'"; } $html .= ">Tryker</option>
+							<option value='c_zorai'"; if($civ == "c_zorai") { $html.= " selected='selected'"; } $html .= ">Zorai</option>
+						</select>
+					</td>";
+				}
+				$html.= "</tr>
+			</table>
+		</form></div>
+		
+		<div style='display:block;font-weight:bold;font-size:20px;color:#FFFFFF;text-align:center;margin-bottom:5px;'>";
+
+		#ERROR: big flaw in logics if only one tie applies
+
+		if($cat->isTiedCult() && !$cat->isTiedCiv() && $cult == "c_neutral") { // neutral / xx
+			#While being of neutral allegiance with the higher powers
+			$html .= get_translation('ach_allegiance_neutral_cult',$_USER->getLang(),array("<span class='o'>".get_translation('ach_c_neutral',$_USER->getLang())."</span>"));
+		}
+		elseif($cat->isTiedCiv() && !$cat->isTiedCult() && $civ == "c_neutral") { // xx / neutral
+			#While being of neutral allegiance with the homin civilizations
+			$html .= get_translation('ach_allegiance_neutral_civ',$_USER->getLang(),array("<span class='o'>".get_translation('ach_c_neutral',$_USER->getLang())."</span>"));
+		}
+		elseif($cat->isTiedCiv() && $cat->isTiedCult() && $cult == "c_neutral" && $civ == "c_neutral") { // neutral / neutral
+			#While being of neutral allegiance
+			$html .= get_translation('ach_allegiance_neutral',$_USER->getLang(),array("<span class='o'>".get_translation('ach_c_neutral',$_USER->getLang())."</span>"));
+		}
+		else { //other
+			#While being aligned with the
+			$html .= get_translation('ach_allegiance_start',$_USER->getLang());
+			if($cat->isTiedCult() && $cult != "c_neutral") {
+				#CULT
+				$html .= "<span class='o'>".ach_translate_cc($cult)."</span>";
+				if($cat->isTiedCiv() && $civ != "c_neutral") {
+					#and the CIV
+					$html .= get_translation('ach_allegiance_and',$_USER->getLang())." <span class='o'>".ach_translate_cc($civ)."</span>";
+				}
+			}
+			elseif($cat->isTiedCiv() && $civ != "c_neutral") {
+				#CIV
+				$html .= "<span class='o'>".ach_translate_cc($civ)."</span>";
+			}
+		}
+		#, accomplish the following achievements:
+		$html .= get_translation('ach_allegiance_end',$_USER->getLang())."</div>";
+
+		return $html;
+	}
+
+	function ach_render_yubopoints() {
+		global $DBc,$_USER;
+
+		$res = $DBc->sqlQuery("SELECT sum(ap_value) as anz FROM ach_perk,ach_player_perk WHERE ap_id=app_perk AND app_player='".$_USER->getID()."'");
+
+		$html = "<div style='display:block;border-bottom:1px solid #000000;'><span style='font-size:32px;'>".$_USER->getName()."&nbsp;<img src='pic/yubo_done.png'>&nbsp;".$res[0]['anz']."</span></div>";
+
+		return $html;
+	}
+
+	function ach_render_facebook() {
+
+	}
+
+	function ach_render_twitter() {
 
 	}
 
@@ -25,17 +112,21 @@
 		$sz = $menu->getSize();
 		for($i=0;$i<$sz;$i++) {
 			$curr = $menu->getChild($i);
-			$html .= "<span class='ach_mspan'><a href=''><table class='ach_menu'>
-				<tr>
-					<td><img src='pic/menu/test.png' /></td>
-					<td style='font-size:".(20-$sub)."px;font-weight:bold;";
+			$html .= "<span class='ach_mspan'><a href='?lang=en&cat=".$curr->getID()."'><table class='ach_menu'>
+				<tr>";
+					if($sub == 0) {
+						$html .= "<td><img src='pic/menu/test.png' /></td>";
+					}
+					$html .= "<td style='font-size:".(20-$sub)."px;font-weight:bold;";
 					if($curr->isOpen()) {
 						$html .= "color:orange;";
 					}
 					$html .= "'>".$curr->getName()."</td>
 				</tr>
-			</table></a></span>
-			<div style='display:block;margin-left:25px;'>".ach_render_menu($curr,($sub+4))."</div>";
+			</table></a></span>";
+			if($curr->hasOpenCat() != 0) {
+				$html .= "<div style='display:block;margin-left:25px;'>".ach_render_menu($curr,($sub+4))."</div>";
+			}
 		}
 
 		return $html;
@@ -43,6 +134,10 @@
 
 	function ach_render_category(&$cat) {
 		$html = "";
+
+		if($cat->isTiedCult() || $cat->isTiedCiv()) {
+			$html .= ach_render_tiebar($cat->getCurrentCult(),$cat->getCurrentCiv(),$cat);
+		}
 
 		$tmp = $cat->getDone();
 		$sz = sizeof($tmp);
@@ -156,9 +251,6 @@
 			$perk = $ach->getChild($elem);
 			$html .= "<div style='display:block;'><span style='color:#66CC00;font-weight:bold;'>".$perk->getName()."</span> ( ".date('d.m.Y',$perk->getDone())." ) <img src='pic/yubo_done.png' width='15px' /> ".$perk->getValue()."</div>";
 		}
-		/*if($perk->objDrawable()) {
-			$html .= "<br>".ach_render_obj_list($perk->getChildren());
-		}*/
 
 		return $html;
 	}
@@ -250,36 +342,89 @@
 
 	function ach_render_obj_value(&$obj) {
 		$html = "";
-		if($obj->isdone()) {
-			$col = "#71BE02";
+		if($obj->getName() != null) {
+			if($obj->isdone()) {
+				$col = "#71BE02";
+			}
+			else {
+				$col = "#999999";
+			}
+			$html .= "<div style='color:".$col.";display:block;'>".$obj->getName()."</div>";
 		}
-		else {
-			$col = "#999999";
-		}
-		$html .= "<div style='color:".$col.";display:block;'>".$obj->getName()."</span><div />";
 
-		$val = $obj->getValue();
-		$prog = $obj->getProgress();
+		$html .= ach_render_progressbar($obj->getProgress(),$obj->getValue(),350);
+		
+		return $html;
+	}
 
-		$width = 350;
+	function ach_render_progressbar($prog,$val,$width) {
+		$val = max(1,$val);
 		$left = floor($width*(100*($prog/$val))/100);
 
-		$html .= "
+		$html = "
 		<table width='".$width."px' cellspacing='0' cellpadding='0' style='border:1px solid #FFFFFF;color:#000000;'>
 			<tr>
 				<td bgcolor='#66CC00' width='".$left."px' align='right'>";
 				if(($prog/$val) > 0.85) {
-					$html .= "&nbsp;".$prog." / ".$val."&nbsp;";
+					$html .= "&nbsp;".nf($prog)." / ".nf($val)."&nbsp;";
 				}
 				$html .= "</td>
 				<td align='left' style='color:#FFFFFF;'>";
 				if(($prog/$val) <= 0.85) {
-					$html .= "&nbsp;".$prog." / ".$val."&nbsp;";
+					$html .= "&nbsp;".nf($prog)." / ".nf($val)."&nbsp;";
 				}
 				$html .= "</td>
 			</tr>
 		</table>";
 		
+		return $html;
+	}
+
+	function ach_render_summary_header() {
+		global $_USER;
+		
+		return "<div style='display:block;font-weight:bold;font-size:30px;color:#FFFFFF;text-align:center;margin-bottom:10px;'>".get_translation('ach_summary_header',$_USER->getLang())."</div>";
+	}
+
+	function ach_render_summary_footer(&$summary) {
+		global $_USER;
+
+		$nodes = $summary->getSummary();
+		$html = "";
+
+		$sum_done = 0;
+		$sum_total = 0;
+
+		$i = 0;
+		foreach($nodes as $elem) {
+			if(($i%3) == 0) {
+				$html .= "<tr>";
+			}
+
+			$html .= "<td width='50%' align='center'>".$elem[0]."<br>".ach_render_progressbar($elem[1],$elem[2],200)."</td>";
+			$sum_done += $elem[1];
+			$sum_total += $elem[2];
+
+			if(($i%3) == 2) {
+				$html .= "</tr>";
+			}
+
+			$i++;
+		}
+
+		if(($i%3) == 2) {
+			$html .= "</tr>";
+		}
+
+		$html = "<p />
+		<div style='display:block;font-weight:bold;font-size:30px;color:#FFFFFF;text-align:center;margin-bottom:10px;'>".get_translation('ach_summary_stats',$_USER->getLang())."</div>
+		<table>
+			<tr>
+				<td colspan='3' align='center'>".get_translation('ach_summary_stats_total',$_USER->getLang())."<br>".ach_render_progressbar($sum_done,$sum_total,450)."<br></td>
+			</tr>
+			".$html."
+		</table>";
+
 		return $html;
 	}
 ?>

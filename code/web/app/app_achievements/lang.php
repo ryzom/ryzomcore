@@ -36,6 +36,20 @@ $__texts = array (
     'de' => '',
     'ru' => '',
   ),
+  'ach_allegiance_neutral_cult' =>
+  array (
+    'en' => 'While being of %s allegiance with the higher powers',
+    'fr' => '',
+    'de' => '',
+    'ru' => '',
+  ),
+  'ach_allegiance_neutral_civ' =>
+  array (
+    'en' => 'While being of %s allegiance with the homin civilizations',
+    'fr' => '',
+    'de' => '',
+    'ru' => '',
+  ),
   'ach_allegiance_neutral' =>
   array (
     'en' => 'While being of %s allegiance',

@@ -1,25 +1,5 @@
 <?php
-
-	function nf($n) {
-		return number_format($n, 0, '.', ',');
-	}
-
-	function ach_translate_cc($cc = 'c_neutral') {
-		global $_USER;
-
-		$t = array();
-		$t['c_matis'] = 'Matis';
-		$t['c_tryker'] = 'Tryker';
-		$t['c_fyros'] = 'Fyros';
-		$t['c_zorai'] = 'Zorai';
-		$t['c_kami'] = 'Kami';
-		$t['c_karavan'] = 'Karavan';
-		$t['c_neutral'] = get_translation('ach_c_neutral',$_USER->getLang());
-
-		return $t[$cc];
-	}
-
-	function ach_render_tiebar($cult = "c_neutral", $civ = "c_neutral",$cat) {
+	function ach_render_tiebar($cult = "c_neutral", $civ = "c_neutral",&$cat) {
 		global $_USER;
 
 		$html = "<style>
@@ -28,17 +8,20 @@
 			}
 		</style>
 
-		<div style='display:block;text-align:center;'><form method='post' action='?cat=".$cat."' id='cc_form'>
+		<div style='display:block;text-align:center;'><form method='post' action='?cat=".$cat->getID()."' id='cc_form'>
 			<table>
-				<tr>
-					<td>
+				<tr>";
+				if($cat->isTiedCult()) {
+					$html.= "<td>
 						<select name='cult' onchange='document.getElementById(\"cc_form\").submit();'>
 							<option value='c_neutral'"; if($cult == "c_neutral") { $html.= " selected='selected'"; } $html .= ">".get_translation('ach_c_neutral',$_USER->getLang())."</option>
 							<option value='c_kami'"; if($cult == "c_kami") { $html.= " selected='selected'"; } $html .= ">Kami</option>
 							<option value='c_karavan'"; if($cult == "c_karavan") { $html.= " selected='selected'"; } $html .= ">Karavan</option>
 						</select>
-					</td>
-					<td>
+					</td>";
+				}
+				if($cat->isTiedCiv()) {
+					$html.= "<td>
 						<select name='civ' onchange='document.getElementById(\"cc_form\").submit();'>
 							<option value='c_neutral'"; if($civ == "c_neutral") { $html.= " selected='selected'"; } $html .= ">".get_translation('ach_c_neutral',$_USER->getLang())."</option>
 							<option value='c_fyros'"; if($civ == "c_fyros") { $html.= " selected='selected'"; } $html .= ">Fyros</option>
@@ -46,34 +29,45 @@
 							<option value='c_tryker'"; if($civ == "c_tryker") { $html.= " selected='selected'"; } $html .= ">Tryker</option>
 							<option value='c_zorai'"; if($civ == "c_zorai") { $html.= " selected='selected'"; } $html .= ">Zorai</option>
 						</select>
-					</td>
-				</tr>
+					</td>";
+				}
+				$html.= "</tr>
 			</table>
 		</form></div>
 		
 		<div style='display:block;font-weight:bold;font-size:20px;color:#FFFFFF;text-align:center;margin-bottom:5px;'>";
-		
-		if($cult == "c_neutral" && $civ == "c_neutral") {
-			#$html .= "While being of <span class='o'>neutral</span> allegiance";
+
+		#ERROR: big flaw in logics if only one tie applies
+
+		if($cat->isTiedCult() && !$cat->isTiedCiv() && $cult == "c_neutral") { // neutral / xx
+			#While being of neutral allegiance with the higher powers
+			$html .= get_translation('ach_allegiance_neutral_cult',$_USER->getLang(),array("<span class='o'>".get_translation('ach_c_neutral',$_USER->getLang())."</span>"));
+		}
+		elseif($cat->isTiedCiv() && !$cat->isTiedCult() && $civ == "c_neutral") { // xx / neutral
+			#While being of neutral allegiance with the homin civilizations
+			$html .= get_translation('ach_allegiance_neutral_civ',$_USER->getLang(),array("<span class='o'>".get_translation('ach_c_neutral',$_USER->getLang())."</span>"));
+		}
+		elseif($cat->isTiedCiv() && $cat->isTiedCult() && $cult == "c_neutral" && $civ == "c_neutral") { // neutral / neutral
+			#While being of neutral allegiance
 			$html .= get_translation('ach_allegiance_neutral',$_USER->getLang(),array("<span class='o'>".get_translation('ach_c_neutral',$_USER->getLang())."</span>"));
 		}
-		else {
-			#$html .= "While being aligned with the <span class='o'>";
+		else { //other
+			#While being aligned with the
 			$html .= get_translation('ach_allegiance_start',$_USER->getLang());
-			if($cult != "c_neutral") {
-				#$html .= $cult;
+			if($cat->isTiedCult() && $cult != "c_neutral") {
+				#CULT
 				$html .= "<span class='o'>".ach_translate_cc($cult)."</span>";
-				if($civ != "c_neutral") {
-					#$html .= "</span> and the <span class='o'>".$civ;
+				if($cat->isTiedCiv() && $civ != "c_neutral") {
+					#and the CIV
 					$html .= get_translation('ach_allegiance_and',$_USER->getLang())." <span class='o'>".ach_translate_cc($civ)."</span>";
 				}
 			}
-			else {
-				#$html .= $civ;
-				$html .= " <span class='o'>".ach_translate_cc($cult)."</span>";
+			elseif($cat->isTiedCiv() && $civ != "c_neutral") {
+				#CIV
+				$html .= "<span class='o'>".ach_translate_cc($civ)."</span>";
 			}
 		}
-		#$html .= "</span>, accomplish the following achievements:</div>";
+		#, accomplish the following achievements:
 		$html .= get_translation('ach_allegiance_end',$_USER->getLang())."</div>";
 
 		return $html;
@@ -87,6 +81,14 @@
 		$html = "<div style='display:block;border-bottom:1px solid #000000;'><span style='font-size:32px;'>".$_USER->getName()."&nbsp;<img src='pic/yubo_done.png'>&nbsp;".$res[0]['anz']."</span></div>";
 
 		return $html;
+	}
+
+	function ach_render_facebook() {
+
+	}
+
+	function ach_render_twitter() {
+
 	}
 
 	function ach_render_menu(&$menu,$sub = 0) {
@@ -134,7 +136,7 @@
 		$html = "";
 
 		if($cat->isTiedCult() || $cat->isTiedCiv()) {
-			$html .= ach_render_tiebar($cat->getCurrentCult(),$cat->getCurrentCiv(),$cat->getID());
+			$html .= ach_render_tiebar($cat->getCurrentCult(),$cat->getCurrentCiv(),$cat);
 		}
 
 		$tmp = $cat->getDone();
