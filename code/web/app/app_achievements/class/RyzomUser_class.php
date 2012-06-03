@@ -21,5 +21,21 @@
 		function getParam($p) {
 			return $this->data[$p];
 		}
+
+		function getRace() {
+			return $this->data['race'];
+		}
+
+		function getCiv() {
+			return $this->data['civilization'];
+		}
+
+		function getCult() {
+			return $this->data['cult'];
+		}
+
+		function getName() {
+			return $this->data['name'];
+		}
 	}
 ?>

@@ -4,8 +4,79 @@
 		return number_format($n, 0, '.', ',');
 	}
 
-	function ach_render_tiebar($cult = "neutral", $civ = "neutral") {
+	function ach_translate_cc($cc = 'c_neutral') {
 		global $_USER;
+
+		$t = array();
+		$t['c_matis'] = 'Matis';
+		$t['c_tryker'] = 'Tryker';
+		$t['c_fyros'] = 'Fyros';
+		$t['c_zorai'] = 'Zorai';
+		$t['c_kami'] = 'Kami';
+		$t['c_karavan'] = 'Karavan';
+		$t['c_neutral'] = get_translation('ach_c_neutral',$_USER->getLang());
+
+		return $t[$cc];
+	}
+
+	function ach_render_tiebar($cult = "c_neutral", $civ = "c_neutral",$cat) {
+		global $_USER;
+
+		$html = "<style>
+			.o {
+				color:orange;
+			}
+		</style>
+
+		<div style='display:block;text-align:center;'><form method='post' action='?cat=".$cat."' id='cc_form'>
+			<table>
+				<tr>
+					<td>
+						<select name='cult' onchange='document.getElementById(\"cc_form\").submit();'>
+							<option value='c_neutral'"; if($cult == "c_neutral") { $html.= " selected='selected'"; } $html .= ">".get_translation('ach_c_neutral',$_USER->getLang())."</option>
+							<option value='c_kami'"; if($cult == "c_kami") { $html.= " selected='selected'"; } $html .= ">Kami</option>
+							<option value='c_karavan'"; if($cult == "c_karavan") { $html.= " selected='selected'"; } $html .= ">Karavan</option>
+						</select>
+					</td>
+					<td>
+						<select name='civ' onchange='document.getElementById(\"cc_form\").submit();'>
+							<option value='c_neutral'"; if($civ == "c_neutral") { $html.= " selected='selected'"; } $html .= ">".get_translation('ach_c_neutral',$_USER->getLang())."</option>
+							<option value='c_fyros'"; if($civ == "c_fyros") { $html.= " selected='selected'"; } $html .= ">Fyros</option>
+							<option value='c_matis'"; if($civ == "c_matis") { $html.= " selected='selected'"; } $html .= ">Matis</option>
+							<option value='c_tryker'"; if($civ == "c_tryker") { $html.= " selected='selected'"; } $html .= ">Tryker</option>
+							<option value='c_zorai'"; if($civ == "c_zorai") { $html.= " selected='selected'"; } $html .= ">Zorai</option>
+						</select>
+					</td>
+				</tr>
+			</table>
+		</form></div>
+		
+		<div style='display:block;font-weight:bold;font-size:20px;color:#FFFFFF;text-align:center;margin-bottom:5px;'>";
+		
+		if($cult == "c_neutral" && $civ == "c_neutral") {
+			#$html .= "While being of <span class='o'>neutral</span> allegiance";
+			$html .= get_translation('ach_allegiance_neutral',$_USER->getLang(),array("<span class='o'>".get_translation('ach_c_neutral',$_USER->getLang())."</span>"));
+		}
+		else {
+			#$html .= "While being aligned with the <span class='o'>";
+			$html .= get_translation('ach_allegiance_start',$_USER->getLang());
+			if($cult != "c_neutral") {
+				#$html .= $cult;
+				$html .= "<span class='o'>".ach_translate_cc($cult)."</span>";
+				if($civ != "c_neutral") {
+					#$html .= "</span> and the <span class='o'>".$civ;
+					$html .= get_translation('ach_allegiance_and',$_USER->getLang())." <span class='o'>".ach_translate_cc($civ)."</span>";
+				}
+			}
+			else {
+				#$html .= $civ;
+				$html .= " <span class='o'>".ach_translate_cc($cult)."</span>";
+			}
+		}
+		#$html .= "</span>, accomplish the following achievements:</div>";
+		$html .= get_translation('ach_allegiance_end',$_USER->getLang())."</div>";
+
+		return $html;
 	}
 
 	function ach_render_yubopoints() {
@@ -13,7 +84,7 @@
 
 		$res = $DBc->sqlQuery("SELECT sum(ap_value) as anz FROM ach_perk,ach_player_perk WHERE ap_id=app_perk AND app_player='".$_USER->getID()."'");
 
-		$html = "<div style='display:block;border-bottom:1px solid #000000;'><img src='pic/yubo_done.png'>&nbsp;<span style='font-size:32px;'>".$res[0]['anz']."</span></div>";
+		$html = "<div style='display:block;border-bottom:1px solid #000000;'><span style='font-size:32px;'>".$_USER->getName()."&nbsp;<img src='pic/yubo_done.png'>&nbsp;".$res[0]['anz']."</span></div>";
 
 		return $html;
 	}
@@ -61,6 +132,10 @@
 
 	function ach_render_category(&$cat) {
 		$html = "";
+
+		if($cat->isTiedCult() || $cat->isTiedCiv()) {
+			$html .= ach_render_tiebar($cat->getCurrentCult(),$cat->getCurrentCiv(),$cat->getID());
+		}
 
 		$tmp = $cat->getDone();
 		$sz = sizeof($tmp);

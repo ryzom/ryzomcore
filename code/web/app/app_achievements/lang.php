@@ -1,4 +1,4 @@
-<?php // %2011-09-28T08:12:16+02:00
+<?php
 
 $__texts = array (
   'ach_summary' =>
@@ -25,6 +25,41 @@ $__texts = array (
   'ach_summary_stats_total' =>
   array (
     'en' => 'Total',
+    'fr' => '',
+    'de' => '',
+    'ru' => '',
+  ),
+  'ach_c_neutral' =>
+  array (
+    'en' => 'neutral',
+    'fr' => '',
+    'de' => '',
+    'ru' => '',
+  ),
+  'ach_allegiance_neutral' =>
+  array (
+    'en' => 'While being of %s allegiance',
+    'fr' => '',
+    'de' => '',
+    'ru' => '',
+  ),
+  'ach_allegiance_start' =>
+  array (
+    'en' => 'While being aligned with the ',
+    'fr' => '',
+    'de' => '',
+    'ru' => '',
+  ),
+  'ach_allegiance_and' =>
+  array (
+    'en' => ' and the ',
+    'fr' => '',
+    'de' => '',
+    'ru' => '',
+  ),
+  'ach_allegiance_end' =>
+  array (
+    'en' => ', accomplish the following achievements:',
     'fr' => '',
     'de' => '',
     'ru' => '',

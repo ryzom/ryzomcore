@@ -13,6 +13,14 @@ require_once('conf.php');
 // Ask to authenticate user (using ingame or session method) and fill $user with all information
 ryzom_app_authenticate($user, false);
 
+$user = array();
+$user['id'] = 1;
+$user['lang'] = 'en';
+$user['name'] = 'Talvela';
+$user['race'] = "r_matis";
+$user['civilization'] = "c_neutral";
+$user['cult'] = "c_neutral";
+
 require_once("class/RyzomUser_class.php");
 $_USER = new RyzomUser($user);
 
@@ -74,20 +82,7 @@ $c .= "</div></td>
 $open = $menu->getOpenCat();
 
 if($open != 0) {
-	if($_REQUEST['cult']) {
-		$cult = mysql_real_escape_string($_REQUEST['cult']);
-	}
-	else {
-		$cult = $_USER->getParam('cult');
-	}
-
-	if($_REQUEST['civ']) {
-		$civ = mysql_real_escape_string($_REQUEST['civ']);
-	}
-	else {
-		$civ = $_USER->getParam('civ');
-	}
-	$cat = new AchCategory($open,$cult,$civ);
+	$cat = new AchCategory($open,$_REQUEST['cult'],$_REQUEST['civ']);
 }
 else {
 	$cat = new AchSummary($menu,8);
