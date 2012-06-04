@@ -3,7 +3,7 @@
 REM This script will start all the services with good parameters
 
 REM set MODE=Debug
-set MODE=..\..\build\bin\Release
+set MODE=..\..\build\bin\Debug
 
 rem AS
 start %MODE%\ryzom_admin_service.exe --fulladminname=admin_executor_service --shortadminname=AES

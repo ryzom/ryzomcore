@@ -60,6 +60,12 @@ public :
 	 */
 	explicit CSheetId( const std::string& sheetName );
 
+	/**
+	 * Constructor, uses defaultType as extension when sheetName
+	 * contains no file extension.
+	 */
+	explicit CSheetId( const std::string& sheetName, const std::string &defaultType );
+
 	// build from a string and returns true if the build succeed
 	bool	 buildSheetId(const std::string& sheetName);
 
@@ -141,6 +147,7 @@ public :
 	 *	Serial
 	 */
 	void serial(NLMISC::IStream	&f) throw(NLMISC::EStream);
+	void serialString(NLMISC::IStream &f, const std::string &defaultType = "") throw(NLMISC::EStream);
 
 	/**
 	 *  Display the list of valid sheet ids with their associated file names
@@ -221,7 +228,16 @@ private :
 	static void loadSheetAlias ();
 	static void cbFileChange (const std::string &filename);
 
+	/**
+	 * When initialized without sheet_id.bin, the sheet id are assigned 
+	 * dynamically. Separate maps are used, because in sheet_id.bin 
+	 * mode it uses static maps optimized during load.
+	 */
 	static bool _DontHaveSheetKnowledge;
+	static std::map<std::string, uint32> _DevTypeNameToId;
+	/// outer vector is type, inner vector is sheet id
+	static std::vector<std::vector<std::string> > _DevSheetIdToName;
+	static std::map<std::string, uint32> _DevSheetNameToId;
 };
 
 

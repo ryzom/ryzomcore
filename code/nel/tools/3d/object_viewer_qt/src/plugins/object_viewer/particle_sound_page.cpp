@@ -86,7 +86,7 @@ void CSoundPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBindab
 	_ui.pitchWidget->setWorkspaceNode(_Node);
 	_ui.pitchWidget->updateUi();
 
-	_ui.soundNameLineEdit->setText(QString(NLMISC::CStringMapper::unmap(_Sound->getSoundName()).c_str()));
+	_ui.soundNameLineEdit->setText(QString(_Sound->getSoundName().toString().c_str()));
 
 	_ui.spawnCheckBox->setChecked(_Sound->getSpawn());
 	_ui.muteCheckBox->setChecked(_Sound->getMute());
@@ -95,7 +95,7 @@ void CSoundPage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBindab
 
 void CSoundPage::browse()
 {
-	std::vector<NLMISC::TStringId> names;
+	std::vector<NLMISC::CSheetId> names;
 
 
 	NLSOUND::UAudioMixer *audioMixer = Modules::sound().getAudioMixer();
@@ -108,7 +108,7 @@ void CSoundPage::browse()
 	QStringList items;
 	items << tr("");
 	for(size_t i = 0; i < names.size(); ++i)
-		items << QString(names[i]->c_str());
+		items << QString(names[i].toString().c_str());
 
 	bool ok;
 	QString item = QInputDialog::getItem(this, tr("Select your sound"),
@@ -162,7 +162,7 @@ void CSoundPage::setKeepPitch(bool state)
 
 void CSoundPage::setSoundName(const QString &text)
 {
-	_Sound->setSoundName(NLMISC::CStringMapper::map(text.toStdString()));
+	_Sound->setSoundName(NLMISC::CSheetId(text.toStdString()));
 }
 
 void CSoundPage::setEmissionPercent(float value)

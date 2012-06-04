@@ -1266,6 +1266,19 @@ void postlogInit()
 		CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
 
 		{
+			H_AUTO(InitRZShIdI)
+
+			nmsg = "Initializing sheets...";
+			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
+
+			// Initialize Sheet IDs.
+			CSheetId::init (ClientCfg.UpdatePackedSheet);
+
+			initLast = initCurrent;
+			initCurrent = ryzomGetLocalTime();
+		}
+
+		{
 			H_AUTO(InitRZSound)
 
 			// Init the sound manager
@@ -1275,12 +1288,13 @@ void postlogInit()
 			{
 				// tmp fix : it seems that, at this point, if the bg downloader window has focus and
 				// not the Ryzom one, then sound init fails
-				#ifdef NL_OS_WINDOWS
+				/*#ifdef NL_OS_WINDOWS
 					HWND hWnd = Driver->getDisplay ();
 					nlassert (hWnd);
 					ShowWindow(hWnd, SW_RESTORE);
 					SetForegroundWindow(hWnd);
-				#endif
+				#endif*/
+				// bg downloader not used anymore anyways
 				SoundMngr = new CSoundManager(&ProgressBar);
 				try
 				{
@@ -1323,13 +1337,7 @@ void postlogInit()
 		}
 
 		{
-			H_AUTO(InitRZShIdI)
-
-			nmsg = "Initializing sheets...";
-			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
-
-			// Initialize Sheet IDs.
-			CSheetId::init (ClientCfg.UpdatePackedSheet);
+			H_AUTO(InitRZSheetL)
 
 			// load packed sheets
 			nmsg = "Loading sheets...";
