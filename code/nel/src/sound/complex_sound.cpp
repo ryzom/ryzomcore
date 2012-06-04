@@ -237,7 +237,7 @@ void	CComplexSound::serial(NLMISC::IStream &s)
 		{
 			std::string name;
 			s.serial(name);
-			_Sounds.push_back(/*CStringMapper::map(name)*/NLMISC::CSheetId(name));
+			_Sounds.push_back(NLMISC::CSheetId(name, "sound"));
 		}
 	}
 	else
@@ -246,7 +246,7 @@ void	CComplexSound::serial(NLMISC::IStream &s)
 		s.serial(nb);
 		for (uint i=0; i<nb; ++i)
 		{
-			std::string name = /*CStringMapper::unmap(_Sounds[i])*/_Sounds[i].toString();
+			std::string name = _Sounds[i].toString();
 			s.serial(name);
 		}
 	}
@@ -301,8 +301,8 @@ void	CComplexSound::importForm(const std::string& filename, NLGEORGES::UFormElm&
 			string soundname;
 			if (psoundsArray->getArrayValue(soundname, i))
 			{
-				soundname = CFile::getFilenameWithoutExtension(soundname);
-				_Sounds.push_back(NLMISC::CSheetId(soundname)/*CStringMapper::map(soundname)*/);
+				nlassert(soundname.find(".sound") != std::string::npos);
+				_Sounds.push_back(NLMISC::CSheetId(soundname));
 			}
 		}
 	}

@@ -190,7 +190,7 @@ void CSoundAnimation::load()
 					throw NLMISC::Exception("Invalid sound animation marker");
 				}
 
-				marker->addSound(NLMISC::CSheetId(string(name))/*CStringMapper::map(string(name))*/);
+				marker->addSound(NLMISC::CSheetId(string(name), "sound"));
 
 				xmlFree ((void*)name);
 

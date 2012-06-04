@@ -69,17 +69,7 @@ public:
 
 		void serial(NLMISC::IStream &s)
 		{
-			std::string soundName;
-			if (s.isReading())
-			{
-				s.serial(soundName);
-				SoundName = NLMISC::CSheetId(soundName);/*NLMISC::CStringMapper::map(soundName)*/;
-			}
-			else
-			{
-				soundName = SoundName.toString();/* NLMISC::CStringMapper::unmap(SoundName)*/;
-				s.serial(soundName);
-			}
+			SoundName.serialString(s, "sound");
 			s.serial(Filter);
 		}
 	};

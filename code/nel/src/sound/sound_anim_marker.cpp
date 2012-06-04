@@ -41,7 +41,7 @@ void CSoundAnimMarker::play(UAudioMixer* mixer, NL3D::CCluster *cluster, CSoundC
 
 	for (; first != last; ++first)
 	{
-		USource* source = mixer->createSource(NLMISC::CSheetId(*first), true, NULL, NULL, cluster, &context);
+		USource* source = mixer->createSource((*first), true, NULL, NULL, cluster, &context);
 		if (source != NULL)
 		{
 			source->setRelativeGain(context.RelativeGain);

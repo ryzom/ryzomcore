@@ -19,6 +19,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/string_mapper.h"
+#include "nel/misc/sheet_id.h"
 #include <vector>
 #include <map>
 
@@ -249,14 +250,13 @@ private:
 	/// The segment of all the audio path.
 	std::vector<std::pair<NLMISC::CVector, NLMISC::CVector> >	_AudioPath;
 
-	typedef CHashMap<NLMISC::CSheetId, CClusterSound, NLMISC::CSheetIdHashMapTraits>	TClusterSoundCont;
+	typedef CHashMap<NLMISC::TStringId, CClusterSound, NLMISC::CStringIdHashMapTraits>	TClusterSoundCont;
 	/// The current cluster playing source indexed with sound group id
 	TClusterSoundCont		_Sources;
 
-	typedef CHashMap<NLMISC::CSheetId, NLMISC::CSheetId, NLMISC::CSheetIdHashMapTraits> TStringStringMap;
-	//typedef CHashMap<NLMISC::TStringId, NLMISC::TStringId, NLMISC::CStringIdHashMapTraits> TStringStringMap;
+	typedef CHashMap<NLMISC::TStringId, NLMISC::CSheetId, NLMISC::CStringIdHashMapTraits> TStringSheetMap;
 	/// The sound_group to sound assoc
-	TStringStringMap	_SoundGroupToSound;
+	TStringSheetMap	_SoundGroupToSound;
 };
 
 } // NLSOUND

@@ -68,16 +68,16 @@ public:
 	bool				isLoaded();
 
 	/// Return a sound corresponding to a name.
-	CSound				*getSound(const NLMISC::CSheetId &name);
+	CSound				*getSound(const NLMISC::CSheetId &sheetId);
 
 	/// Return the names of the sounds
-	void				getNames( std::vector<NLMISC::CSheetId> &names );
+	void				getNames( std::vector<NLMISC::CSheetId> &sheetIds );
 
 	/// Return the number of sounds in this bank.
 	uint				countSounds();
 
 	void				addSound(CSound *sound);
-	void				removeSound(const NLMISC::CSheetId &name);
+	void				removeSound(const NLMISC::CSheetId &sheetId);
 
 
 private:
@@ -89,7 +89,8 @@ private:
 	typedef CHashMap<NLMISC::TStringId, TSimpleSoundContainer, NLMISC::CStringIdHashMapTraits>		TBufferAssocContainer;
 	/// Sound names hash map
 //	typedef std::hash_map<std::string, CSound*>								TSoundTable;
-	typedef CHashMap<NLMISC::CSheetId, CSound*, NLMISC::CSheetIdHashMapTraits>						TSoundTable;
+//	typedef CHashMap<NLMISC::CSheetId, CSound*, NLMISC::CSheetIdHashMapTraits>						TSoundTable;
+	typedef std::vector<CSound *> TSoundTable; // list the sheets by shortId of the sheetId
 
 	/// Assoc from buffer to sound. Used for sound unloading.
 	TBufferAssocContainer		_BufferAssoc;

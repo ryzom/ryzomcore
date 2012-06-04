@@ -84,7 +84,8 @@ void CBackgroundSound::importForm(const std::string& filename, NLGEORGES::UFormE
 					// Read the sound name.
 					std::string soundName;
 					psoundItem->getValueByName(soundName, "Sound");
-					sound.SoundName = NLMISC::CSheetId(CFile::getFilenameWithoutExtension(soundName));/*CStringMapper::map(CFile::getFilenameWithoutExtension(soundName))*/;
+					nlassert(soundName.find(".sound") != std::string::npos);
+					sound.SoundName = NLMISC::CSheetId(soundName);
 
 
 					// Read the environnement flag.

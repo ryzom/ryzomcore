@@ -468,7 +468,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 			nlwarning("AM: OptionSoftwareBuffer not available, forceSoftwareBuffer = false");
 			forceSoftware = false; // not really needed, but set anyway in case this is still used later in this function
 		}
-		if (manualRolloff && !_SoundDriver->getOption(ISoundDriver::OptionLocalBufferCopy))
+		if (manualRolloff && !_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
 		{
 			nlwarning("AM: OptionManualRolloff not available, manualRolloff = false");
 			manualRolloff = false; // not really needed, but set anyway in case this is still used later in this function
@@ -971,10 +971,14 @@ void CAudioMixerUser::buildSampleBankList()
 /// Build the sound bank packed sheets file from georges sound sheet files with .sound extension in the search path, and return the path to the written file.
 std::string UAudioMixer::buildSoundBank(const std::string &packedSheetDir)
 {
+	CGroupControllerRoot *tempRoot = NULL;
+	if (!CGroupControllerRoot::isInitialized())
+		tempRoot = new CGroupControllerRoot();
 	std::string dir = CPath::standardizePath(packedSheetDir, true);
 	CSoundBank *soundBank = new CSoundBank();
 	soundBank->load(dir, true);
 	delete soundBank;
+	delete tempRoot;
 	return dir + "sounds.packed_sheets";
 }
 
@@ -1050,9 +1054,8 @@ public:
 			for (uint i=0; i<size; ++i)
 			{
 				items->getArrayValue(soundName, i);
-				soundName = soundName.substr(0, soundName.find(".sound"));
-
-				cs.SoundNames.push_back(CSheetId(soundName)/*CStringMapper::map(soundName)*/);
+				nlassert(soundName.find(".sound") != std::string::npos);
+				cs.SoundNames.push_back(CSheetId(soundName));
 			}
 
 			if (!cs.SoundNames.empty())
@@ -1133,7 +1136,7 @@ void CAudioMixerUser::CControledSources::serial(NLMISC::IStream &s)
 		for (uint i=0; i<size; ++i)
 		{
 			s.serial(soundName);
-			SoundNames.push_back(CSheetId(soundName)/*CStringMapper::map(soundName)*/);
+			SoundNames.push_back(CSheetId(soundName, "sound"));
 		}
 	}
 	else
@@ -1147,7 +1150,7 @@ void CAudioMixerUser::CControledSources::serial(NLMISC::IStream &s)
 
 		for (uint i=0; i<size; ++i)
 		{
-			soundName = SoundNames[i].toString();/*CStringMapper::unmap(SoundNames[i])*/;
+			soundName = SoundNames[i].toString();;
 			s.serial(soundName);
 		}
 	}
@@ -2311,7 +2314,6 @@ void			CAudioMixerUser::getLoadedSampleBankInfo(std::vector<std::pair<std::strin
 {
 	_SampleBankManager->getLoadedSampleBankInfo(result);
 }
-
 
 
 void CAudioMixerUser::setListenerPos (const NLMISC::CVector &pos)

@@ -419,7 +419,7 @@ CClientConfig::CClientConfig()
 
 	// only force patching under Windows by default
 #ifdef NL_OS_WINDOWS
-	PatchWanted = false;//true;
+	PatchWanted = true;
 #else
 	PatchWanted = false;
 #endif
