@@ -20,6 +20,8 @@
 	require_once("class/DataSourceHandler_class.php");
 	require_once("class/DataSource_abstract.php");
 
+	require_once("class/Atom_class.php");
+
 	//create datasource handler
 	$_DATA = new DataSourceHandler();
 	foreach($CONF['data_source'] as $elem) { //populate
@@ -42,35 +44,7 @@
 		#MISSING: evaluate perk
 	}
 
-	#WORKPAD:####
-
-	Trigger:
-		by value
-		(by event)
-
-	Sources:
-		XML
-		valuecache
-		(Achievement Service)
-			(Mirror Service)
-
 	
-	VALUE dappers = c_money
-	if(dappers >= 5000) {
-		GRANT
-	}
-	
-	VALUE tmp = c_fame[scorchers]
-	if(tmp == 0) {
-		DENY:3600
-	}
-
-	EVENT:player_death
-	ON player_death {
-		UNLOCK
-	}
-
-	#############
 
 
 
