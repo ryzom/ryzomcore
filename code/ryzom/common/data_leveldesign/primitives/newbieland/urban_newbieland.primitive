@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <PRIMITIVES VERSION="1">
   <ROOT_PRIMITIVE TYPE="CPrimNode">
-    <ALIAS LAST_GENERATED="1269"/>
+    <ALIAS LAST_GENERATED="1256"/>
     <CHILD TYPE="CPrimZone">
       <PROPERTY TYPE="string">
         <NAME>class</NAME>
@@ -126,10 +126,6 @@
                 <STRING>#mission tags and pre-requisites</STRING>
                 <STRING>replayable</STRING>
                 <STRING>solo</STRING>
-                <STRING>mission_category : Killing</STRING>
-                <STRING>player_replay_timer : 10</STRING>
-                <STRING>global_replay_timer : 10</STRING>
-                <STRING>mission_icon : tets</STRING>
                 <STRING></STRING>
                 <STRING>#Variables declaration</STRING>
                 <STRING>decl : bot : giver</STRING>
@@ -142,163 +138,12 @@
                 <STRING>mission_title : WELCOME_RYZOM_CORE_TITLE</STRING>
                 <STRING>mission_desc : WELCOME_RYZOM_CORE_DESC</STRING>
                 <STRING># step_4</STRING>
-                <STRING>kill_fauna : chdfa1 1</STRING>
+                <STRING>kill_fauna : chdfa1 3</STRING>
                 <STRING>recv_money : 10000</STRING>
                 <STRING></STRING>
               </PROPERTY>
               <CHILD TYPE="CPrimAlias">
                 <ALIAS VALUE="1256"/>
-                <PROPERTY TYPE="string">
-                  <NAME>class</NAME>
-                  <STRING>alias</STRING>
-                </PROPERTY>
-                <PROPERTY TYPE="string">
-                  <NAME>name</NAME>
-                  <STRING>alias</STRING>
-                </PROPERTY>
-              </CHILD>
-            </CHILD>
-            <CHILD TYPE="CPrimNode">
-              <PROPERTY TYPE="string">
-                <NAME>class</NAME>
-                <STRING>mission</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>name</NAME>
-                <STRING>HUNTING_GROUNDS</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string_array">
-                <NAME>script</NAME>
-                <STRING># script generated from 'urban_newbieland.primitive'</STRING>
-                <STRING></STRING>
-                <STRING>#mission tags and pre-requisites</STRING>
-                <STRING>replayable</STRING>
-                <STRING>guild</STRING>
-                <STRING>mission_category : Killing</STRING>
-                <STRING>player_replay_timer : 10</STRING>
-                <STRING>global_replay_timer : 10</STRING>
-                <STRING>mission_icon : test</STRING>
-                <STRING></STRING>
-                <STRING>#Variables declaration</STRING>
-                <STRING>decl : bot : giver</STRING>
-                <STRING>decl : bot : player</STRING>
-                <STRING>decl : bot : chiang_the_strong</STRING>
-                <STRING></STRING>
-                <STRING>#pre-requisites</STRING>
-                <STRING>req_guild</STRING>
-                <STRING>req_grade : Leader</STRING>
-                <STRING></STRING>
-                <STRING>#script</STRING>
-                <STRING>mission_title : WELCOME_RYZOM_CORE_DESC</STRING>
-                <STRING>mission_desc : WELCOME_RYZOM_CORE_TITLE</STRING>
-                <STRING># step_4</STRING>
-                <STRING>spawn_mission : WELCOME_RYZOM_CORE : chiang_the_strong : guild</STRING>
-                <STRING>set_obj : MIS_DO_MISSION</STRING>
-                <STRING>mission : WELCOME_RYZOM_CORE 2</STRING>
-                <STRING>kill_fauna : chdfa1 2</STRING>
-                <STRING>recv_money : 100000</STRING>
-                <STRING>recv_money : 20: guild</STRING>
-                <STRING></STRING>
-              </PROPERTY>
-              <CHILD TYPE="CPrimAlias">
-                <ALIAS VALUE="1262"/>
-                <PROPERTY TYPE="string">
-                  <NAME>class</NAME>
-                  <STRING>alias</STRING>
-                </PROPERTY>
-                <PROPERTY TYPE="string">
-                  <NAME>name</NAME>
-                  <STRING>alias</STRING>
-                </PROPERTY>
-              </CHILD>
-            </CHILD>
-            <CHILD TYPE="CPrimNode">
-              <PROPERTY TYPE="string">
-                <NAME>class</NAME>
-                <STRING>mission</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>name</NAME>
-                <STRING>GUILD_MISSION</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string_array">
-                <NAME>script</NAME>
-                <STRING># script generated from 'guild_missions.primitive'</STRING>
-                <STRING></STRING>
-                <STRING>#mission tags and pre-requisites</STRING>
-                <STRING>replayable</STRING>
-                <STRING>guild</STRING>
-                <STRING>mission_category : Killing</STRING>
-                <STRING></STRING>
-                <STRING>#Variables declaration</STRING>
-                <STRING>decl : bot : giver</STRING>
-                <STRING>decl : bot : player</STRING>
-                <STRING>decl : bot : chiang_the_strong</STRING>
-                <STRING></STRING>
-                <STRING>#pre-requisites</STRING>
-                <STRING>req_guild</STRING>
-                <STRING>req_grade : Leader</STRING>
-                <STRING></STRING>
-                <STRING>#script</STRING>
-                <STRING>mission_title : GUILD_MISSION_TITLE</STRING>
-                <STRING>mission_desc : GUILD_MISSION_DESC</STRING>
-                <STRING># step</STRING>
-                <STRING>spawn_mission : SOLO_GUILD_MISSION : chiang_the_strong : guild</STRING>
-                <STRING>set_obj : MIS_DO_MISSION</STRING>
-                <STRING>mission : SOLO_GUILD_MISSION 2</STRING>
-                <STRING>kill_fauna : chdfa1 2</STRING>
-                <STRING>recv_money : 100: guild</STRING>
-                <STRING>recv_money : 50</STRING>
-                <STRING></STRING>
-              </PROPERTY>
-              <CHILD TYPE="CPrimAlias">
-                <ALIAS VALUE="1268"/>
-                <PROPERTY TYPE="string">
-                  <NAME>class</NAME>
-                  <STRING>alias</STRING>
-                </PROPERTY>
-                <PROPERTY TYPE="string">
-                  <NAME>name</NAME>
-                  <STRING>alias</STRING>
-                </PROPERTY>
-              </CHILD>
-            </CHILD>
-            <CHILD TYPE="CPrimNode">
-              <PROPERTY TYPE="string">
-                <NAME>class</NAME>
-                <STRING>mission</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>name</NAME>
-                <STRING>SOLO_GUILD_MISSION</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string_array">
-                <NAME>script</NAME>
-                <STRING># script generated from 'guild_missions.primitive'</STRING>
-                <STRING></STRING>
-                <STRING>#mission tags and pre-requisites</STRING>
-                <STRING>replayable</STRING>
-                <STRING>solo</STRING>
-                <STRING>mission_category : Killing</STRING>
-                <STRING>not_proposed</STRING>
-                <STRING></STRING>
-                <STRING>#Variables declaration</STRING>
-                <STRING>decl : bot : giver</STRING>
-                <STRING>decl : bot : player</STRING>
-                <STRING>decl : bot : chiang_the_strong</STRING>
-                <STRING></STRING>
-                <STRING>#pre-requisites</STRING>
-                <STRING></STRING>
-                <STRING>#script</STRING>
-                <STRING>mission_title : SOLO_GUILD_MISSION_TITLE</STRING>
-                <STRING>mission_desc : SOLO_GUILD_MISSION_DESC</STRING>
-                <STRING># step</STRING>
-                <STRING>kill_fauna : chdfa1 1</STRING>
-                <STRING>recv_money : 20</STRING>
-                <STRING></STRING>
-              </PROPERTY>
-              <CHILD TYPE="CPrimAlias">
-                <ALIAS VALUE="1269"/>
                 <PROPERTY TYPE="string">
                   <NAME>class</NAME>
                   <STRING>alias</STRING>
@@ -472,46 +317,6 @@
               </PROPERTY>
             </CHILD>
           </CHILD>
-          <CHILD TYPE="CPrimPoint">
-            <PT X="10213.500977" Y="-11784.600586" Z="0.000000"/>
-            <PROPERTY TYPE="string_array">
-              <NAME>chat_parameters</NAME>
-              <STRING>shop:guild_creator</STRING>
-              <STRING>menu: MENU_WHOAMI WHOAMI_GUILD_CLERK</STRING>
-            </PROPERTY>
-            <PROPERTY TYPE="string">
-              <NAME>class</NAME>
-              <STRING>npc_bot</STRING>
-            </PROPERTY>
-            <PROPERTY TYPE="string_array">
-              <NAME>equipment</NAME>
-              <STRING>CU: 4</STRING>
-              <STRING>CL: 4</STRING>
-            </PROPERTY>
-            <PROPERTY TYPE="string">
-              <NAME>is_stuck</NAME>
-              <STRING>true</STRING>
-            </PROPERTY>
-            <PROPERTY TYPE="string">
-              <NAME>name</NAME>
-              <STRING>creator</STRING>
-            </PROPERTY>
-            <PROPERTY TYPE="string">
-              <NAME>sheet_client</NAME>
-              <STRING>fyhc3old</STRING>
-            </PROPERTY>
-            <CHILD TYPE="CPrimAlias">
-              <ALIAS VALUE="1257"/>
-              <PROPERTY TYPE="string">
-                <NAME>class</NAME>
-                <STRING>alias</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>name</NAME>
-                <STRING>alias</STRING>
-              </PROPERTY>
-            </CHILD>
-          </CHILD>
         </CHILD>
         <CHILD TYPE="CPrimNode">
           <PROPERTY TYPE="string">
@@ -591,8 +396,19 @@
             <ANGLE VALUE="3.504839"/>
             <PROPERTY TYPE="string_array">
               <NAME>chat_parameters</NAME>
-              <STRING>shop:guild_creator</STRING>
-              <STRING>menu: MENU_WHOAMI WHOAMI_GUILD_CLERK</STRING>
+              <STRING>shop : NEWBIELAND_LARMOR_ALL</STRING>
+              <STRING>item : icmalb.sitem 10</STRING>
+              <STRING>item : icmalb.sitem 20</STRING>
+              <STRING>item : icmalb.sitem 50</STRING>
+              <STRING>item : icfalb.sitem 10</STRING>
+              <STRING>item : icfalb.sitem 20</STRING>
+              <STRING>item : icfalb.sitem 50</STRING>
+              <STRING>item : ictalb.sitem 10</STRING>
+              <STRING>item : ictalb.sitem 20</STRING>
+              <STRING>item : ictalb.sitem 50</STRING>
+              <STRING>item : iczalb.sitem 10</STRING>
+              <STRING>item : iczalb.sitem 20</STRING>
+              <STRING>item : iczalb.sitem 50</STRING>
             </PROPERTY>
             <PROPERTY TYPE="string">
               <NAME>class</NAME>
@@ -628,119 +444,6 @@
           </CHILD>
         </CHILD>
       </CHILD>
-      <CHILD TYPE="CPrimNode">
-        <PROPERTY TYPE="string">
-          <NAME>class</NAME>
-          <STRING>npc_folder</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>name</NAME>
-          <STRING>Guild creator</STRING>
-        </PROPERTY>
-        <CHILD TYPE="CPrimAlias">
-          <ALIAS VALUE="1264"/>
-          <PROPERTY TYPE="string">
-            <NAME>class</NAME>
-            <STRING>alias</STRING>
-          </PROPERTY>
-          <PROPERTY TYPE="string">
-            <NAME>name</NAME>
-            <STRING>alias</STRING>
-          </PROPERTY>
-        </CHILD>
-        <CHILD TYPE="CPrimZone">
-          <PROPERTY TYPE="string">
-            <NAME>class</NAME>
-            <STRING>npc_zone</STRING>
-          </PROPERTY>
-          <PROPERTY TYPE="string">
-            <NAME>name</NAME>
-            <STRING>Npc Zone</STRING>
-          </PROPERTY>
-          <CHILD TYPE="CPrimAlias">
-            <ALIAS VALUE="1265"/>
-            <PROPERTY TYPE="string">
-              <NAME>class</NAME>
-              <STRING>alias</STRING>
-            </PROPERTY>
-            <PROPERTY TYPE="string">
-              <NAME>name</NAME>
-              <STRING>alias</STRING>
-            </PROPERTY>
-          </CHILD>
-          <CHILD TYPE="CPrimNode">
-            <PROPERTY TYPE="string">
-              <NAME>bot_sheet_client</NAME>
-              <STRING>maha2</STRING>
-            </PROPERTY>
-            <PROPERTY TYPE="string">
-              <NAME>class</NAME>
-              <STRING>npc_group</STRING>
-            </PROPERTY>
-            <PROPERTY TYPE="string">
-              <NAME>name</NAME>
-              <STRING>Group</STRING>
-            </PROPERTY>
-            <CHILD TYPE="CPrimNode">
-              <PROPERTY TYPE="string">
-                <NAME>class</NAME>
-                <STRING>npc_group_parameters</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>name</NAME>
-                <STRING>parameters</STRING>
-              </PROPERTY>
-            </CHILD>
-            <CHILD TYPE="CPrimAlias">
-              <ALIAS VALUE="1266"/>
-              <PROPERTY TYPE="string">
-                <NAME>class</NAME>
-                <STRING>alias</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>name</NAME>
-                <STRING>alias</STRING>
-              </PROPERTY>
-            </CHILD>
-            <CHILD TYPE="CPrimPoint">
-              <PT X="10315.800781" Y="-11736.200195" Z="0.000000"/>
-              <PROPERTY TYPE="string_array">
-                <NAME>chat_parameters</NAME>
-                <STRING>shop:guild_creator</STRING>
-                <STRING>menu: MENU_WHOAMI WHOAMI_GUILD_CLERK</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>class</NAME>
-                <STRING>npc_bot</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string_array">
-                <NAME>equipment</NAME>
-                <STRING>CU: 4</STRING>
-                <STRING>CL: 4</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>name</NAME>
-                <STRING>guild_creator</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>sheet_client</NAME>
-                <STRING>fyhc3old</STRING>
-              </PROPERTY>
-              <CHILD TYPE="CPrimAlias">
-                <ALIAS VALUE="1267"/>
-                <PROPERTY TYPE="string">
-                  <NAME>class</NAME>
-                  <STRING>alias</STRING>
-                </PROPERTY>
-                <PROPERTY TYPE="string">
-                  <NAME>name</NAME>
-                  <STRING>alias</STRING>
-                </PROPERTY>
-              </CHILD>
-            </CHILD>
-          </CHILD>
-        </CHILD>
-      </CHILD>
     </CHILD>
     <CHILD TYPE="CPrimNode">
       <PROPERTY TYPE="string">
@@ -753,36 +456,12 @@
       </PROPERTY>
       <CHILD TYPE="CPrimNode">
         <PROPERTY TYPE="string">
-          <NAME>audience</NAME>
-          <STRING>solo</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>auto_remove_from_journal</NAME>
-          <STRING>false</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>automatic</NAME>
-          <STRING>false</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
           <NAME>class</NAME>
           <STRING>mission_tree</STRING>
         </PROPERTY>
         <PROPERTY TYPE="string">
-          <NAME>fail_if_inventory_is_full</NAME>
-          <STRING>false</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
           <NAME>giver_primitive</NAME>
           <STRING>urban_newbieland.primitive</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>global_replay_timer</NAME>
-          <STRING>10</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>mission_category</NAME>
-          <STRING>Killing</STRING>
         </PROPERTY>
         <PROPERTY TYPE="string_array">
           <NAME>mission_description</NAME>
@@ -792,17 +471,9 @@
           <NAME>mission_giver</NAME>
           <STRING>$givervar@fullname$</STRING>
         </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>mission_icon</NAME>
-          <STRING>tets</STRING>
-        </PROPERTY>
         <PROPERTY TYPE="string_array">
           <NAME>mission_title</NAME>
           <STRING>WELCOME_RYZOM_CORE_TITLE</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>mono_instance</NAME>
-          <STRING>false</STRING>
         </PROPERTY>
         <PROPERTY TYPE="string">
           <NAME>name</NAME>
@@ -813,32 +484,8 @@
           <STRING>false</STRING>
         </PROPERTY>
         <PROPERTY TYPE="string">
-          <NAME>non_abandonnable</NAME>
-          <STRING>false</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>not_in_journal</NAME>
-          <STRING>false</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>not_proposed</NAME>
-          <STRING>false</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string_array">
-          <NAME>phrase_auto_menu</NAME>
-          <STRING>TEST</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>player_replay_timer</NAME>
-          <STRING>10</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
           <NAME>replayable</NAME>
           <STRING>true</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>run_only_once</NAME>
-          <STRING>false</STRING>
         </PROPERTY>
         <CHILD TYPE="CPrimNode">
           <PROPERTY TYPE="string">
@@ -924,7 +571,7 @@
               </PROPERTY>
               <PROPERTY TYPE="string_array">
                 <NAME>fauna/quantity</NAME>
-                <STRING>chdfa1 1</STRING>
+                <STRING>chdfa1 3</STRING>
               </PROPERTY>
             </CHILD>
           </CHILD>
@@ -945,263 +592,6 @@
               <PROPERTY TYPE="string">
                 <NAME>class</NAME>
                 <STRING>recv_money</STRING>
-              </PROPERTY>
-            </CHILD>
-          </CHILD>
-        </CHILD>
-      </CHILD>
-      <CHILD TYPE="CPrimNode">
-        <PROPERTY TYPE="string">
-          <NAME>audience</NAME>
-          <STRING>guild</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>auto_remove_from_journal</NAME>
-          <STRING>false</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>automatic</NAME>
-          <STRING>false</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>class</NAME>
-          <STRING>mission_tree</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>fail_if_inventory_is_full</NAME>
-          <STRING>false</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>giver_primitive</NAME>
-          <STRING>urban_newbieland.primitive</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>global_replay_timer</NAME>
-          <STRING>10</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>mission_category</NAME>
-          <STRING>Killing</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string_array">
-          <NAME>mission_description</NAME>
-          <STRING>WELCOME_RYZOM_CORE_TITLE</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>mission_giver</NAME>
-          <STRING>$givervar@fullname$</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>mission_icon</NAME>
-          <STRING>test</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string_array">
-          <NAME>mission_title</NAME>
-          <STRING>WELCOME_RYZOM_CORE_DESC</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>mono_instance</NAME>
-          <STRING>false</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>name</NAME>
-          <STRING>HUNTING_GROUNDS</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>need_validation</NAME>
-          <STRING>false</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>non_abandonnable</NAME>
-          <STRING>false</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>not_in_journal</NAME>
-          <STRING>false</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>not_proposed</NAME>
-          <STRING>false</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string_array">
-          <NAME>phrase_auto_menu</NAME>
-          <STRING>TEST</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>player_replay_timer</NAME>
-          <STRING>10</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>replayable</NAME>
-          <STRING>true</STRING>
-        </PROPERTY>
-        <PROPERTY TYPE="string">
-          <NAME>run_only_once</NAME>
-          <STRING>false</STRING>
-        </PROPERTY>
-        <CHILD TYPE="CPrimNode">
-          <PROPERTY TYPE="string">
-            <NAME>class</NAME>
-            <STRING>variables</STRING>
-          </PROPERTY>
-          <PROPERTY TYPE="string">
-            <NAME>name</NAME>
-            <STRING>variables</STRING>
-          </PROPERTY>
-          <CHILD TYPE="CPrimNode">
-            <PROPERTY TYPE="string">
-              <NAME>class</NAME>
-              <STRING>var_npc</STRING>
-            </PROPERTY>
-            <PROPERTY TYPE="string">
-              <NAME>npc_function</NAME>
-              <STRING>fct_ranger_leader</STRING>
-            </PROPERTY>
-            <PROPERTY TYPE="string">
-              <NAME>npc_name</NAME>
-              <STRING>chiang_the_strong</STRING>
-            </PROPERTY>
-            <PROPERTY TYPE="string">
-              <NAME>var_name</NAME>
-              <STRING>givervar</STRING>
-            </PROPERTY>
-          </CHILD>
-        </CHILD>
-        <CHILD TYPE="CPrimNode">
-          <PROPERTY TYPE="string">
-            <NAME>class</NAME>
-            <STRING>pre_requisite</STRING>
-          </PROPERTY>
-          <PROPERTY TYPE="string">
-            <NAME>name</NAME>
-            <STRING>pre_requisite</STRING>
-          </PROPERTY>
-          <PROPERTY TYPE="string">
-            <NAME>require_guild_grade</NAME>
-            <STRING>Leader</STRING>
-          </PROPERTY>
-          <PROPERTY TYPE="string">
-            <NAME>require_guild_membership</NAME>
-            <STRING>true</STRING>
-          </PROPERTY>
-        </CHILD>
-        <CHILD TYPE="CPrimAlias">
-          <ALIAS VALUE="1258"/>
-          <PROPERTY TYPE="string">
-            <NAME>class</NAME>
-            <STRING>alias</STRING>
-          </PROPERTY>
-          <PROPERTY TYPE="string">
-            <NAME>name</NAME>
-            <STRING>alias</STRING>
-          </PROPERTY>
-        </CHILD>
-        <CHILD TYPE="CPrimNode">
-          <PROPERTY TYPE="string">
-            <NAME>class</NAME>
-            <STRING>step</STRING>
-          </PROPERTY>
-          <PROPERTY TYPE="string">
-            <NAME>name</NAME>
-            <STRING>step_4</STRING>
-          </PROPERTY>
-          <CHILD TYPE="CPrimNode">
-            <PROPERTY TYPE="string">
-              <NAME>class</NAME>
-              <STRING>actions</STRING>
-            </PROPERTY>
-            <PROPERTY TYPE="string">
-              <NAME>name</NAME>
-              <STRING>pre_actions</STRING>
-            </PROPERTY>
-            <CHILD TYPE="CPrimNode">
-              <PROPERTY TYPE="string">
-                <NAME>class</NAME>
-                <STRING>spawn_mission</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>giver_name</NAME>
-                <STRING>chiang_the_strong</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>guild</NAME>
-                <STRING>true</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>mission_name</NAME>
-                <STRING>WELCOME_RYZOM_CORE</STRING>
-              </PROPERTY>
-            </CHILD>
-          </CHILD>
-          <CHILD TYPE="CPrimNode">
-            <PROPERTY TYPE="string">
-              <NAME>class</NAME>
-              <STRING>mission_objectives</STRING>
-            </PROPERTY>
-            <PROPERTY TYPE="string">
-              <NAME>name</NAME>
-              <STRING>objectives</STRING>
-            </PROPERTY>
-            <CHILD TYPE="CPrimNode">
-              <PROPERTY TYPE="string">
-                <NAME>class</NAME>
-                <STRING>do_mission</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string_array">
-                <NAME>mission_names</NAME>
-                <STRING>WELCOME_RYZOM_CORE 2</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string_array">
-                <NAME>overload_objective</NAME>
-                <STRING>MIS_DO_MISSION</STRING>
-              </PROPERTY>
-            </CHILD>
-            <CHILD TYPE="CPrimNode">
-              <PROPERTY TYPE="string">
-                <NAME>class</NAME>
-                <STRING>kill</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string_array">
-                <NAME>fauna/quantity</NAME>
-                <STRING>chdfa1 2</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>name</NAME>
-                <STRING>kill chdfa1 2</STRING>
-              </PROPERTY>
-            </CHILD>
-          </CHILD>
-          <CHILD TYPE="CPrimNode">
-            <PROPERTY TYPE="string">
-              <NAME>class</NAME>
-              <STRING>actions</STRING>
-            </PROPERTY>
-            <PROPERTY TYPE="string">
-              <NAME>name</NAME>
-              <STRING>post_actions</STRING>
-            </PROPERTY>
-            <CHILD TYPE="CPrimNode">
-              <PROPERTY TYPE="string">
-                <NAME>amount</NAME>
-                <STRING>100000</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>class</NAME>
-                <STRING>recv_money</STRING>
-              </PROPERTY>
-            </CHILD>
-            <CHILD TYPE="CPrimNode">
-              <PROPERTY TYPE="string">
-                <NAME>amount</NAME>
-                <STRING>20</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>class</NAME>
-                <STRING>recv_money</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>guild</NAME>
-                <STRING>true</STRING>
               </PROPERTY>
             </CHILD>
           </CHILD>
