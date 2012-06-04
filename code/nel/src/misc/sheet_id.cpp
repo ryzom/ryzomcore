@@ -141,7 +141,7 @@ bool CSheetId::buildSheetId(const std::string& sheetName)
 		if (it == _DevSheetNameToId.end())
 		{
 			// Create a new dynamic sheet ID.
-			nldebug("SHEETID: Creating a dynamic sheet id for '%s'", sheetName.c_str());
+			// nldebug("SHEETID: Creating a dynamic sheet id for '%s'", sheetName.c_str());
 			std::string sheetType = CFile::getExtension(sheetNameLc);
 			std::string sheetName = CFile::getFilenameWithoutExtension(sheetNameLc);
 			std::map<std::string, uint32>::iterator tit = _DevTypeNameToId.find(sheetType);
@@ -207,7 +207,7 @@ bool CSheetId::buildSheetId(const std::string& sheetName)
 		if (it == _DevSheetNameToId.end())
 		{
 			uint32 typeId = typeFromFileExtension("sound");
-			nldebug("SHEETID: Creating a temporary sheet id for '%s'", sheetName.c_str());
+			// nldebug("SHEETID: Creating a temporary sheet id for '%s'", sheetName.c_str());
 			_DevSheetIdToName[0].push_back(sheetName);
 			_Id.IdInfos.Type = typeId;
 			_Id.IdInfos.Id = _DevSheetIdToName[0].size() - 1;
@@ -395,14 +395,8 @@ void CSheetId::initWithoutSheet()
 	_Initialised = true;
 	_DontHaveSheetKnowledge = true;
 	
-	/*_FileExtensions.push_back("unknown");
-	_DevTypeNameToId["unknown"] = 0;
-	_DevSheetIdToName.push_back(std::vector<std::string>());
-	_DevSheetIdToName[0].push_back("unknown");
-	_DevSheetNameToId["unknown.unknown"] = 0;*/
-	
+	// Initialize id 0,0 as unknown.unknown
 	CSheetId unknownunknown = CSheetId("unknown.unknown");
-	// nldebug("SHEETID: unknown: %i, Unknown: %i", unknownunknown._Id, Unknown._Id);
 	nlassert(unknownunknown == CSheetId::Unknown);
 }
 
@@ -452,26 +446,6 @@ CSheetId& CSheetId::operator=( const CSheetId& sheetId )
 //-----------------------------------------------
 CSheetId& CSheetId::operator=( const string& sheetName )
 {
-	/*nlassert(_Initialised);
-	nlassert(!_DontHaveSheetKnowledge);
-
-	CStaticMap<CChar,uint32,CCharComp>::const_iterator itId;
-	CChar c;
-	c.Ptr = new char [sheetName.size()+1];
-	strcpy(c.Ptr, sheetName.c_str());
-	toLower(c.Ptr);
-
-	itId = _SheetNameToId.find (c);
-	delete [] c.Ptr;
-	if( itId != _SheetNameToId.end() )
-	{
-		_Id.Id = (*itId).second;
-		return *this;
-	}
-	*this = Unknown;
-	return *this;*/
-
-	// doesn't make sense to have a copy of the same code here...
 
 	if (!buildSheetId(sheetName))
 		*this = Unknown;
