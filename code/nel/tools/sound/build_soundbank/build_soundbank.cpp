@@ -78,7 +78,7 @@ int main(int nNbArg, char **ppArgs)
 	CPath::addSearchPath(dfnDir, true, false);
 	
 	// init sheet_id.bin
-	NLMISC::CSheetId::init(false);
+	NLMISC::CSheetId::initWithoutSheet();
 
 	// build the sound bank
 	UAudioMixer::buildSoundBank(exportDir);
