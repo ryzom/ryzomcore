@@ -452,7 +452,7 @@ void CCharacterCL::releaseInSceneInterfaces()
 {
 	if (_InSceneUserInterface)
 	{
-		CInterfaceManager::getInstance()->unMakeWindow(_InSceneUserInterface);
+		CWidgetManager::getInstance()->unMakeWindow(_InSceneUserInterface);
 		if (_InSceneUserInterface->getParent())
 		{
 			_InSceneUserInterface->getParent()->delGroup(_InSceneUserInterface);

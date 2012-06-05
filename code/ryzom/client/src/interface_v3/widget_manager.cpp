@@ -1238,6 +1238,76 @@ void CWidgetManager::notifyElementCaptured(CCtrlBase *c)
 	}
 }
 
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::makeWindow(CInterfaceGroup *group)
+{
+	if(!group)
+		return;
+
+	uint32 i = 0;
+	for (i = 0; i < _MasterGroups.size(); ++i)
+	{
+		if (_MasterGroups[i].Group == group->getParent())
+				break;
+	}
+
+	if (i == _MasterGroups.size())
+	{
+		std::string stmp = std::string("not found master group for window: ")+group->getId();
+		nlwarning (stmp.c_str());
+		return;
+	}
+	else
+	{
+		// check if group hasn't been inserted twice.
+		if (_MasterGroups[i].isWindowPresent(group))
+		{
+			nlwarning("Window inserted twice");
+		}
+		else
+		{
+			_MasterGroups[i].addWindow(group,group->getPriority());
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::unMakeWindow(CInterfaceGroup *group, bool noWarning)
+{
+	if (!group)
+		return;
+
+	uint32 i = 0;
+	for (i = 0; i < _MasterGroups.size(); ++i)
+	{
+		if (_MasterGroups[i].Group == group->getParent())
+				break;
+	}
+
+	if (i == _MasterGroups.size())
+	{
+		if (!noWarning)
+		{
+			std::string stmp = std::string("not found master group for window: ")+group->getId();
+			nlwarning (stmp.c_str());
+		}
+		return;
+	}
+	else
+	{
+		// check if group hasn't been inserted twice.
+		if (!_MasterGroups[i].isWindowPresent(group))
+		{
+			if (!noWarning)
+				nlwarning("Window not inserted in master group");
+		}
+		else
+		{
+			_MasterGroups[i].delWindow(group);
+		}
+	}
+}
+
 
 CWidgetManager::CWidgetManager()
 {

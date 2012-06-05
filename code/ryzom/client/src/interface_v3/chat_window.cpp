@@ -294,7 +294,7 @@ void CChatWindow::deleteContainer()
 	}
 	else
 	{
-		CInterfaceManager::getInstance()->unMakeWindow(_Chat);
+		CWidgetManager::getInstance()->unMakeWindow(_Chat);
 		if (_Chat->getParent())
 		{
 			_Chat->getParent()->delGroup(_Chat);
@@ -772,7 +772,7 @@ CGroupContainer *CChatGroupWindow::createFreeTeller(const ucstring &winNameIn, c
 		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		pRoot->addGroup (pGC);
 		pGC->setParent(pRoot); // must be done before makeWindow
-		pIM->makeWindow(pGC);
+		CWidgetManager::getInstance()->makeWindow(pGC);
 		pGC->open();
 		pGC->updateCoords();
 		pGC->center();
@@ -897,7 +897,7 @@ bool CChatGroupWindow::removeFreeTeller(const std::string &containerID)
 		pIM->removeGroupContainerImage(_FreeTellers[i]->getId(), m);
 	}
 	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
-	pIM->unMakeWindow(_FreeTellers[i]);
+	CWidgetManager::getInstance()->unMakeWindow(_FreeTellers[i]);
 	pRoot->delGroup (_FreeTellers[i]);
 	_FreeTellers[i] = NULL;
 	_FreeTellers.erase(_FreeTellers.begin()+i);

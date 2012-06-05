@@ -65,7 +65,7 @@ CDisplayerVisual::~CDisplayerVisual()
 {
 	if (_IconInScene)
 	{
-		getEditor().getUI().unMakeWindow(_IconInScene);
+		CWidgetManager::getInstance()->unMakeWindow(_IconInScene);
 		if (_IconInScene->getParent())
 		{
 			_IconInScene->getParent()->delGroup(_IconInScene);

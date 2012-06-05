@@ -3289,7 +3289,7 @@ void CGroupContainer::popupCurrentPos()
 	_ParentPos = parent;
 
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->makeWindow(this);
+	CWidgetManager::getInstance()->makeWindow(this);
 	CWidgetManager::getInstance()->setTopWindow(this);
 	CWidgetManager::getInstance()->clearViewUnders();
 	CWidgetManager::getInstance()->clearCtrlsUnders();
@@ -3346,7 +3346,7 @@ void CGroupContainer::popin(sint32 insertPos /* = -1 */, bool putBackInFatherCon
 
 	_MovingInParentList = false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->unMakeWindow(this);
+	CWidgetManager::getInstance()->unMakeWindow(this);
 	CWidgetManager::getInstance()->clearViewUnders();
 	CWidgetManager::getInstance()->clearCtrlsUnders();
 	_Parent = NULL;

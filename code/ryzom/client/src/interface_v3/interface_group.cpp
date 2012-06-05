@@ -14,22 +14,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-#include "stdpch.h"
+#include "nel/misc/xml_auto_ptr.h"
+#include "nel/misc/stream.h"
+#include "nel/gui/lua_manager.h"
+#include "nel/gui/lua_ihm.h"
+#include "nel/gui/view_renderer.h"
 
 #include "interface_group.h"
-#include "interface_manager.h"
-#include "nel/misc/xml_auto_ptr.h"
+#include "interface_link.h"
+#include "view_text.h"
+#include "ctrl_scroll.h"
+#include "widget_manager.h"
 #include "group_container.h"
 #include "group_editbox.h"
 #include "group_scrolltext.h"
-#include "nel/gui/lua_ihm.h"
 #include "lua_ihm_ryzom.h"
-
-
-#include "nel/misc/stream.h"
-#include "nel/gui/lua_manager.h"
 
 using namespace std;
 using namespace NL3D;
@@ -1112,7 +1111,7 @@ bool CInterfaceGroup::delElement (const std::string &id, bool noWarning)
 		{
 			// If this is a root window
 			if (pIG->getRootWindow () == pIG)
-				CInterfaceManager::getInstance()->unMakeWindow(pIG, noWarning);
+				CWidgetManager::getInstance()->unMakeWindow(pIG, noWarning);
 			delGroup (pIG, false);
 			return true;
 		}
@@ -1129,7 +1128,7 @@ bool CInterfaceGroup::delElement (CInterfaceElement *pIE, bool noWarning)
 		CInterfaceGroup		*pIG= static_cast<CInterfaceGroup*>(pIE);
 		// unmake window if it is
 		if (pIG->getRootWindow () == pIG)
-			CInterfaceManager::getInstance()->unMakeWindow(pIG, noWarning);
+			CWidgetManager::getInstance()->unMakeWindow(pIG, noWarning);
 		return delGroup(pIG);
 	}
 	else if(pIE->isCtrl())

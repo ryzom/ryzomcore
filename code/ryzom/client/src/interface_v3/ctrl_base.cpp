@@ -15,12 +15,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-#include "stdpch.h"
-
-#include "ctrl_base.h"
 #include "nel/misc/xml_auto_ptr.h"
-#include "interface_manager.h"
+#include "ctrl_base.h"
+#include "interface_group.h"
+#include "widget_manager.h"
 
 using namespace NLMISC;
 
@@ -41,7 +39,6 @@ bool CCtrlBase::handleEvent(const NLGUI::CEventDescriptor &event)
 			if (!((NLGUI::CEventDescriptorActiveCalledOnParent &) eds).getActive())
 			{
 				// the mouse capture should be lost when the ctrl is hidden
-				CInterfaceManager *manager = CInterfaceManager::getInstance();
 				if (CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 				{
 					CWidgetManager::getInstance()->setCapturePointerLeft(NULL);

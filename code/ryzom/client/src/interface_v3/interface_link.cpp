@@ -14,16 +14,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "action_handler.h"
-#include "interface_link.h"
-#include "interface_group.h"
-#include "interface_element.h"
-#include "widget_manager.h"
 #include "nel/gui/interface_expr.h"
 #include "nel/gui/interface_expr_node.h"
 #include "nel/gui/reflect.h"
 #include "nel/gui/db_manager.h"
 #include "nel/misc/cdb_branch.h"
+#include "action_handler.h"
+#include "interface_link.h"
+#include "interface_element.h"
+#include "interface_group.h"
+#include "widget_manager.h"
 
 using namespace std;
 using namespace NLMISC;

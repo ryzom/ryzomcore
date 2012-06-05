@@ -388,14 +388,6 @@ public:
 
 	void	setContextHelpActive(bool active);
 
-
-	// Add a group into the windows list of its master goup
-	void	makeWindow(CInterfaceGroup *group);
-
-	// Remove a group from the windows list of its master group
-	void    unMakeWindow(CInterfaceGroup *group, bool noWarning=false);
-
-
 	bool	isMouseOverWindow() const {return  _MouseOverWindow;}
 
 	// Enable mouse Events to interface. if false, release Captures.

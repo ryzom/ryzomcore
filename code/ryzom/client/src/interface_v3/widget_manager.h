@@ -261,6 +261,12 @@ public:
 
 	void notifyElementCaptured(CCtrlBase *c);
 
+	// Add a group into the windows list of its master goup
+	void	makeWindow( CInterfaceGroup *group );
+
+	// Remove a group from the windows list of its master group
+	void    unMakeWindow( CInterfaceGroup *group, bool noWarning = false );
+
 	static IParser *parser;
 
 private:

@@ -124,7 +124,7 @@ bool CGroupInSceneBubbleManager::checkTimeOut(vector<CPopup> &rList)
 		// Time out ?
 		if (rList[i].timeOut ())
 		{
-			pIM->unMakeWindow(rList[i].Group);
+			CWidgetManager::getInstance()->unMakeWindow(rList[i].Group);
 			if (rList[i].Group->getParent())
 				rList[i].Group->getParent()->delGroup(rList[i].Group);
 			else
@@ -155,7 +155,7 @@ void CGroupInSceneBubbleManager::alignMessagePopup (vector<CPopup> &rList, bool 
 	{
 		CPopup popup = rList.front();
 		rList.erase (rList.begin());
-		pIM->unMakeWindow(popup.Group);
+		CWidgetManager::getInstance()->unMakeWindow(popup.Group);
 		if (popup.Group->getParent())
 			popup.Group->getParent()->delGroup(popup.Group);
 		else
@@ -264,7 +264,7 @@ void CGroupInSceneBubbleManager::release ()
 	for (i=0; i<_Bubbles.size(); i++)
 	if (_Bubbles[i])
 	{
-		pIM->unMakeWindow(_Bubbles[i]);
+		CWidgetManager::getInstance()->unMakeWindow(_Bubbles[i]);
 		if (_Bubbles[i]->getParent())
 		{
 			_Bubbles[i]->getParent()->delGroup(_Bubbles[i]);
@@ -279,7 +279,7 @@ void CGroupInSceneBubbleManager::release ()
 	// Remove messages
 	for (i=0; i<_MessagePopup.size(); i++)
 	{
-		pIM->unMakeWindow(_MessagePopup[i].Group);
+		CWidgetManager::getInstance()->unMakeWindow(_MessagePopup[i].Group);
 		if (_MessagePopup[i].Group->getParent())
 			_MessagePopup[i].Group->getParent()->delGroup(_MessagePopup[i].Group);
 		else
@@ -290,7 +290,7 @@ void CGroupInSceneBubbleManager::release ()
 	// Remove messages
 	for (i=0; i<_MessagePopupCentered.size(); i++)
 	{
-		pIM->unMakeWindow(_MessagePopupCentered[i].Group);
+		CWidgetManager::getInstance()->unMakeWindow(_MessagePopupCentered[i].Group);
 		if (_MessagePopupCentered[i].Group->getParent())
 			_MessagePopupCentered[i].Group->getParent()->delGroup(_MessagePopupCentered[i].Group);
 		else
@@ -301,7 +301,7 @@ void CGroupInSceneBubbleManager::release ()
 	// Remove messages
 	for (i=0; i<_BubblePopup.size(); i++)
 	{
-		pIM->unMakeWindow(_BubblePopup[i].Group);
+		CWidgetManager::getInstance()->unMakeWindow(_BubblePopup[i].Group);
 		if (_BubblePopup[i].Group->getParent())
 			_BubblePopup[i].Group->getParent()->delGroup(_BubblePopup[i].Group);
 		else
@@ -344,7 +344,7 @@ void CGroupInSceneBubbleManager::update ()
 		// Time out ?
 		if (_BubblePopup[i].timeOut ())
 		{
-			pIM->unMakeWindow(_BubblePopup[i].Group);
+			CWidgetManager::getInstance()->unMakeWindow(_BubblePopup[i].Group);
 			if (_BubblePopup[i].Group->getParent())
 				_BubblePopup[i].Group->getParent()->delGroup(_BubblePopup[i].Group);
 			else
@@ -369,7 +369,7 @@ void CGroupInSceneBubbleManager::update ()
 						(target->getWReal() != _BubblePopup[i].TargetW) ||
 						(target->getHReal() != _BubblePopup[i].TargetH))
 					{
-						pIM->unMakeWindow(_BubblePopup[i].Group);
+						CWidgetManager::getInstance()->unMakeWindow(_BubblePopup[i].Group);
 						if (_BubblePopup[i].Group->getParent())
 							_BubblePopup[i].Group->getParent()->delGroup(_BubblePopup[i].Group);
 						else
@@ -397,7 +397,7 @@ void CGroupInSceneBubbleManager::update ()
 		{
 			if (_BubblePopup[j].Group == _GroupToDelete[i])
 			{
-				pIM->unMakeWindow(_BubblePopup[j].Group);
+				CWidgetManager::getInstance()->unMakeWindow(_BubblePopup[j].Group);
 				if (_BubblePopup[j].Group->getParent())
 					_BubblePopup[j].Group->getParent()->delGroup(_BubblePopup[j].Group);
 				else
@@ -420,7 +420,7 @@ void CGroupInSceneBubbleManager::update ()
 				if (pChar != NULL)
 					pChar->setBubble(NULL);
 
-				pIM->unMakeWindow(_DynBubbles[j].Bubble);
+				CWidgetManager::getInstance()->unMakeWindow(_DynBubbles[j].Bubble);
 				if (_DynBubbles[j].Bubble->getParent())
 					_DynBubbles[j].Bubble->getParent()->delGroup(_DynBubbles[j].Bubble);
 				else
