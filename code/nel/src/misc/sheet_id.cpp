@@ -157,13 +157,18 @@ bool CSheetId::buildSheetId(const std::string& sheetName)
 				_DevSheetIdToName.push_back(std::vector<std::string>());
 				typeId = _FileExtensions.size() - 1;
 				_DevTypeNameToId[sheetType] = typeId;
+				std::string unknownNewType = std::string("unknown." + sheetType);
+				_DevSheetIdToName[typeId].push_back(unknownNewType);
+				_Id.IdInfos.Type = typeId;
+				_Id.IdInfos.Id = _DevSheetIdToName[typeId].size() - 1;
+				_DevSheetNameToId[unknownNewType] = _Id.Id;
 			}
 			else
 			{
 				typeId = tit->second;
+				_Id.IdInfos.Type = typeId;
 			}
-			_DevSheetIdToName[typeId].push_back(sheetName);
-			_Id.IdInfos.Type = typeId;
+			_DevSheetIdToName[typeId].push_back(sheetNameLc);
 			_Id.IdInfos.Id = _DevSheetIdToName[typeId].size() - 1;
 			// nldebug("SHEETID: Type %i, id %i, sheetid %i", _Id.IdInfos.Type, _Id.IdInfos.Id, _Id.Id);
 			_DevSheetNameToId[sheetNameLc] = _Id.Id;
@@ -381,9 +386,16 @@ void CSheetId::init(bool removeUnknownSheet)
 	if (typeFromFileExtension("sound") == std::numeric_limits<uint32>::max())
 	{
 		nlwarning("SHEETID: Loading without known sound sheet id, please update sheet_id.bin with .sound sheets");
+		uint32 typeId = ((1 << (NL_SHEET_ID_TYPE_BITS)) - 1);
 		nlassert(_FileExtensions.size() == 1 << (NL_SHEET_ID_TYPE_BITS));
 		_FileExtensions[((1 << (NL_SHEET_ID_TYPE_BITS)) - 1)] == "sound";
 		_DevSheetIdToName.push_back(std::vector<std::string>());
+		_DevSheetIdToName[0].push_back("unknown.sound");
+		TSheetId id;
+		id.IdInfos.Type = typeId;
+		id.IdInfos.Id = _DevSheetIdToName[0].size() - 1;
+		nlassert(id.IdInfos.Id == 0);
+		_DevSheetNameToId["unknown.sound"] = id.Id;
 		a_NoSoundSheetId = true;
 	}
 #endif
