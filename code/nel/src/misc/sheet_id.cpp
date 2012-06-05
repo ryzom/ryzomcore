@@ -114,14 +114,19 @@ CSheetId::CSheetId( const string& sheetName )
 
 CSheetId::CSheetId( const std::string& sheetName, const std::string &defaultType )
 {
-	if (CFile::getExtension(sheetName) == "" && defaultType != "")
+	// Don't use this function without defaultType, use the one above.
+	nlassert(defaultType.size() != 0);
+	
+	if (sheetName.rfind('.') == std::string::npos)
 	{
 		std::string withType = sheetName + "." + defaultType;
 		*this = CSheetId(withType);
 		// nldebug("SHEETID: Constructing CSheetId from name '%s' without explicit type, defaulting as '%s' to '%s'", sheetName.c_str(), defaultType.c_str(), withType.c_str());
 	}
 	else
+	{
 		*this = CSheetId(sheetName);
+	}
 }
 
 
