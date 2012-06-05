@@ -722,7 +722,7 @@ void CDBGroupListSheet::draw ()
 				(CWidgetManager::getInstance()->getPointer()->getY() <= (_YReal+ _HReal)))
 			{
 				CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCapturePointerLeft());
-				if ((pCSSrc != NULL) && pCSSrc->isDraging())
+				if ((pCSSrc != NULL) && pCSSrc->isDragged())
 				{
 					string params = string("src=") + pCSSrc->getId();
 					if (!_CtrlInfo._AHCanDropParams.empty())

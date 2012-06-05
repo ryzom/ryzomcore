@@ -909,7 +909,7 @@ class CIsPlayerItem : public IActionHandler
 public:
 	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
 	{
-		CDBCtrlSheet *cs = CDBCtrlSheet::getDraggedSheet();
+		CDBCtrlSheet *cs = dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() );
 		if (cs)
 		{
 			CDBCtrlSheet *pCSDst =    dynamic_cast<CDBCtrlSheet*>(pCaller);

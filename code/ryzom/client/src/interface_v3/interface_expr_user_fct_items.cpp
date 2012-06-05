@@ -134,7 +134,7 @@ REGISTER_INTERFACE_USER_FCT("getSelectedItemPrice", getSelectedItemPrice)
 /////////////////////////////////////////////////
 static DECLARE_INTERFACE_USER_FCT(getDraggedSheet)
 {
-	result.setUserType(new CDBCtrlSheetPtrUserType(CDBCtrlSheet::getDraggedSheet()));
+	result.setUserType(new CDBCtrlSheetPtrUserType( dynamic_cast< CDBCtrlSheet* >( CDBCtrlSheet::getDraggedSheet() ) ));
 	return true;
 }
 REGISTER_INTERFACE_USER_FCT("getDraggedSheet", getDraggedSheet)

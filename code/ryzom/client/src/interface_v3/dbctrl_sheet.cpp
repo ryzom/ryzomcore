@@ -62,7 +62,6 @@ using namespace STRING_MANAGER;
 NLMISC::CSmartPtr<CSPhraseComAdpater> CDBCtrlSheet::_PhraseAdapter;
 
 CDBCtrlSheet *CDBCtrlSheet::_CurrSelection = NULL;
-CDBCtrlSheet *CDBCtrlSheet::_LastDraggedSheet = NULL;
 CDBCtrlSheet *CDBCtrlSheet::_CurrMenuSheet = NULL;
 UMaterial CDBCtrlSheet::_GuildMat;
 
@@ -131,7 +130,7 @@ ucstring CControlSheetTooltipInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet, 
 // ***************************************************************************
 int CDBCtrlSheet::luaGetDraggedSheet(CLuaState &ls)
 {
-	CLuaIHMRyzom::pushUIOnStack(ls, dynamic_cast<CInterfaceElement *>(_LastDraggedSheet));
+	CLuaIHMRyzom::pushUIOnStack(ls, dynamic_cast<CInterfaceElement *>( dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) ));
 	return 1;
 }
 
@@ -293,7 +292,6 @@ CCtrlSheetInfo::CCtrlSheetInfo()
 {
 	_Type = CCtrlSheetInfo::SheetType_Item;
 	_DispNoSheetBmpId = -1;
-	_Dragable = false;
 	_InterfaceColor= true;
 	_SheetSelectionGroup = -1;
 	_UseQuality = true;
@@ -378,9 +376,6 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"use_slot_type_db_entry" );
 	if (prop)
 		_HasTradeSlotType= CInterfaceElement::convertBool(prop);
-
-	prop = (char*) xmlGetProp( cur, (xmlChar*)"dragable" );
-	if (prop) _Dragable = CInterfaceElement::convertBool(prop);
 
 	// Read Action handlers
 	CAHManager::getInstance()->parseAH(cur, "onclick_l", "params_l", _AHOnLeftClick, _AHLeftClickParams);
@@ -502,8 +497,8 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 NLMISC_REGISTER_OBJECT(CViewBase, CDBCtrlSheet, std::string, "sheet");
 
 // ----------------------------------------------------------------------------
-CDBCtrlSheet::CDBCtrlSheet(const TCtorParam &param)
-:	CCtrlBase(param)
+CDBCtrlSheet::CDBCtrlSheet(const TCtorParam &param) :
+CCtrlDraggable(param)
 {
 	_LastSheetId = 0;
 	_DispSlotBmpId= -1;
@@ -511,7 +506,6 @@ CDBCtrlSheet::CDBCtrlSheet(const TCtorParam &param)
 	_DispSheetBmpId = -1;
 	_DispOverBmpId = -1;
 	_DispOver2BmpId= -1;
-	_Draging = false;
 	_CanDrop = false;
 	_Stackable= 1;
 	_DispQuality= -1;
@@ -575,7 +569,8 @@ CDBCtrlSheet::~CDBCtrlSheet()
 
 	// ensure erase static
 	if(this==_CurrMenuSheet)		_CurrMenuSheet = NULL;
-	if(this==_LastDraggedSheet)		_LastDraggedSheet = NULL;
+	if(this == dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) )
+		setDraggedSheet( NULL );
 	if(this==_CurrSelection)		_CurrSelection = NULL;
 }
 
@@ -594,6 +589,12 @@ bool CDBCtrlSheet::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	// parse the common ctrl info
 	if(!parseCtrlInfo(cur, parentGroup))
 		return false;
+
+	prop = (char*) xmlGetProp( cur, (xmlChar*)"dragable" );
+	if( prop != NULL )
+		setDraggable( CInterfaceElement::convertBool(prop) );
+	else
+		setDraggable( false );
 
 	if (_Type != SheetType_Macro)
 	{
@@ -1865,7 +1866,7 @@ void CDBCtrlSheet::draw()
 		if (CWidgetManager::getInstance()->getCurrentWindowUnder() == CWidgetManager::getInstance()->getWindow(this))
 		{
 			CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCapturePointerLeft());
-			if ((pCSSrc != NULL) && pCSSrc->isDraging())
+			if ((pCSSrc != NULL) && pCSSrc->isDragged())
 			{
 				string params = string("src=") + pCSSrc->getId();
 				if (!_AHCanDropParams.empty())
@@ -1886,7 +1887,7 @@ void CDBCtrlSheet::draw()
 		}
 	}
 
-	drawSheet (_XReal+1, _YReal+1, _Draging);
+	drawSheet (_XReal+1, _YReal+1, isDragged() );
 
 	// Draw the selection after the sheet. Important for spells because selection border is same size as spell square
 	if (_CanDrop)
@@ -2512,7 +2513,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 
 	if (showSelectionBorder)
 	{
-		if (!_Draging || (_Draging && _DuplicateOnDrag))
+		if (!isDragged() || (isDragged() && _DuplicateOnDrag))
 		{
 			// draw selection border if this sheet is selected
 			if (_SheetSelectionGroup != -1) // is this sheet selectable ?
@@ -2604,7 +2605,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 		// Handle drag'n'drop
 		if (CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 		{
-			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown && !_Draging)
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown && !isDragged())
 			{
 				_DragX = eventDesc.getX();
 				_DragY = eventDesc.getY();
@@ -2616,17 +2617,17 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 				// Cannot drag if grayed (LOCKED or LATENT)!. Still can drag a shortcut
 				if (asItemSheet() && asItemSheet()->Stackable > 1 && _UseQuantity)
 				{
-					validClic = _Dragable && !_Draging && (getQuantity() > 0);
+					validClic = isDraggable() && !isDragged() && (getQuantity() > 0);
 					validClic = validClic && (!getItemWeared());
 				}
 				else
 				{
-					validClic = _Dragable && !_Draging && ((!getItemWeared()&&!getGrayed()) || isShortCut());
+					validClic = isDraggable() && !isDragged() && ((!getItemWeared()&&!getGrayed()) || isShortCut());
 				}
 			}
 			if (_Type == SheetType_Macro)
 			{
-				validClic = _Dragable;
+				validClic = isDraggable();
 			}
 
 			// posssibly check AH to see if really can draging
@@ -2645,8 +2646,8 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 					_DeltaDragY= _DragY-(_YReal+1);
 					if (_DeltaDragX > _WReal) _DeltaDragX = _WReal;
 					if (_DeltaDragY > _HReal) _DeltaDragY = _HReal;
-					_Draging = true;
-					_LastDraggedSheet = this;
+					setDragged( true );
+					setDraggedSheet( this );
 
 					if (_AHOnDrag != NULL)
 					{
@@ -2655,7 +2656,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 				}
 			}
 
-			if (_Draging)
+			if (isDragged())
 			{
 				// If mouse left up, must end the Drag
 				if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
@@ -2827,8 +2828,8 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 					}
 
 					// In all case, quit
-					_Draging = false;
-					_LastDraggedSheet = NULL;
+					setDragged( false );
+					setDraggedSheet( NULL );
 					// In call case, end of drag => consider handled to not call another action
 					return true;
 				}
@@ -2836,7 +2837,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 		}
 
 		// If we are dragging, no more event on us
-		if(_Draging)
+		if(isDragged())
 			return false; // true;
 
 		// Mouse events that must be done over the control
@@ -2856,7 +2857,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 			if(_AHOnLeftClick != NULL)
 				CAHManager::getInstance()->runActionHandler (_AHOnLeftClick, this, _AHLeftClickParams);
 			// Run Menu (if item is not being dragged)
-			if (!_ListMenuLeft.empty() && _LastDraggedSheet == NULL)
+			if (!_ListMenuLeft.empty() && dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) == NULL)
 			{
 				if (getSheetId() != 0)
 				{
@@ -2891,7 +2892,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 			{
 				handled= true;
 				// There must be no dragged sheet
-				if(_LastDraggedSheet == NULL)
+				if( dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) == NULL)
 				{
 					// if a macro, don't test if Sheet==0
 					if ( isMacro() || getSheetId() != 0)
@@ -2973,7 +2974,6 @@ void	CDBCtrlSheet::swapSheet(CDBCtrlSheet *other)
 void CDBCtrlSheet::setCurrSelection(CDBCtrlSheet *selected)
 {
 	_CurrSelection = selected;
-	CInterfaceManager *im = CInterfaceManager::getInstance();
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_ITEM_SHEET_ID:SHEET")->setValue64(selected ? selected->getSheetId() : 0);
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_ITEM_SHEET_ID:QUALITY")->setValue64(selected ? selected->getQuality() : 0);
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_ITEM_SHEET_ID:SLOT_TYPE")->setValue64(selected ? selected->getBehaviour() : 0);
@@ -4244,13 +4244,6 @@ ucstring CDBCtrlSheet::getItemActualName() const
 		}
 		return ret;
 	}
-}
-
-// ***************************************************************************
-void	CDBCtrlSheet::abortDraging()
-{
-	_Draging = false;
-	_LastDraggedSheet = NULL;
 }
 
 // ***************************************************************************

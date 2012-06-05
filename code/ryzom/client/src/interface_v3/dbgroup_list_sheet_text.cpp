@@ -632,7 +632,7 @@ void CDBGroupListSheetText::draw ()
 				(CWidgetManager::getInstance()->getPointer()->getY() <= (_YReal+ _HReal)))
 			{
 				CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCapturePointerLeft());
-				if ((pCSSrc != NULL) && pCSSrc->isDraging())
+				if ((pCSSrc != NULL) && pCSSrc->isDragged())
 				{
 					string params = string("src=") + pCSSrc->getId();
 					if (!_CtrlInfo._AHCanDropParams.empty())
@@ -683,7 +683,7 @@ bool CDBGroupListSheetText::handleEvent (const NLGUI::CEventDescriptor &event)
 					// A button has been captured -> Transform the capture to the corresponding ctrlsheet
 					sint pos = getIndexOf(pCB);
 					if ((pos >= 0) &&
-						 _SheetChildren[pos]->Ctrl->isDragable() && (!_SheetChildren[pos]->Ctrl->getGrayed()))
+						_SheetChildren[pos]->Ctrl->isDraggable() && (!_SheetChildren[pos]->Ctrl->getGrayed()))
 					{
 						pDraggedSheet = _SheetChildren[pos]->Ctrl;
 						CWidgetManager::getInstance()->setCapturePointerLeft(pDraggedSheet);

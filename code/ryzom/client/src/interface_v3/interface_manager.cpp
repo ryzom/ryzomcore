@@ -1941,7 +1941,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 			if ( CWidgetManager::getInstance()->getPointer()->show())
 			{
 				CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>( CWidgetManager::getInstance()->getCapturePointerLeft() );
-				if ((pCS != NULL) && (pCS->isDraging()))
+				if ((pCS != NULL) && (pCS->isDragged()))
 				{
 					sint	x= CWidgetManager::getInstance()->getPointer()->getX() - pCS->getDeltaDragX();
 					sint	y= CWidgetManager::getInstance()->getPointer()->getY() - pCS->getDeltaDragY();

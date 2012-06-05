@@ -20,7 +20,7 @@
 #include "group_in_scene.h"
 #include "view_pointer.h"
 #include "group_editbox.h"
-#include "dbctrl_sheet.h"
+#include "ctrl_draggable.h"
 
 CWidgetManager* CWidgetManager::instance = NULL;
 std::string CWidgetManager::_CtrlLaunchingModalId= "ctrl_launch_modal";
@@ -1110,10 +1110,9 @@ void CWidgetManager::movePointerAbs(sint32 px, sint32 py)
 void CWidgetManager::setCapturePointerLeft(CCtrlBase *c)
 {
 	// additionally, abort any dragging
-	if(CDBCtrlSheet::getDraggedSheet())
-	{
-		CDBCtrlSheet::getDraggedSheet()->abortDraging();
-	}
+	if( CCtrlDraggable::getDraggedSheet() != NULL )
+		CCtrlDraggable::getDraggedSheet()->abortDragging();
+
 	_CapturePointerLeft = c;
 	notifyElementCaptured(c);
 }
