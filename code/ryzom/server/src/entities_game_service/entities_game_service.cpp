@@ -21,6 +21,10 @@
 /////////////
 // INCLUDE //
 /////////////
+///////////// 
+
+#include "camera_animation_manager/camera_animation_manager.h"
+
 // misc
 #include "nel/misc/bit_mem_stream.h"
 #include "nel/misc/path.h"
@@ -1519,6 +1523,8 @@ nlassert(nodeLeaf->getType() == ICDBStructNode::TEXT);
 	if (!packingSheets) CNamedItems::getInstance();
 
 	if (!packingSheets) CBuildingManager::init();
+	// Init camera animations
+	if (!packingSheets) CCameraAnimationManager::init();
 	if (!packingSheets) CMissionManager::init();
 
 	if (!packingSheets) CMissionQueueManager::getInstance()->init();
