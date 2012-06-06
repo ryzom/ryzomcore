@@ -22,9 +22,9 @@
 
 #include "interface_group.h"
 #include "interface_link.h"
-#include "ctrl_scroll.h"
 #include "widget_manager.h"
-#include "group_container.h"
+
+#include "ctrl_scroll.h"
 #include "group_editbox.h"
 #include "group_scrolltext.h"
 #include "lua_ihm_ryzom.h"
@@ -1539,15 +1539,17 @@ void	CInterfaceGroup::setRightClickHandler(const std::string &handler)
 }
 
 // ------------------------------------------------------------------------------------------------
-CGroupContainer *CInterfaceGroup::getEnclosingContainer()
+CInterfaceGroup* CInterfaceGroup::getEnclosingContainer()
 {
 	CInterfaceGroup *ig = this;
 	do
 	{
-		if (ig->isGroupContainer()) return static_cast<CGroupContainer *>(ig);
+		if( ig->isGroupContainer() )
+			return ig;
 		ig = ig->getParent();
 	}
-	while(ig);
+	while( ig != NULL );
+
 	return NULL;
 }
 

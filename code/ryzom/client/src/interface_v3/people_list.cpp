@@ -572,7 +572,7 @@ void CPeopleList::reset()
 		removeAllPeoples();
 		_BaseContainer->setContent(NULL);
 
-		CGroupContainer *father = dynamic_cast<CGroupContainer *>(_BaseContainer->getParent()->getEnclosingContainer());
+		CGroupContainer *father = static_cast<CGroupContainer *>(_BaseContainer->getParent()->getEnclosingContainer());
 		if (father)
 		{
 			father->delGroup(_BaseContainer);
@@ -894,7 +894,8 @@ class CHandlerContactEntry : public IActionHandler
 		// Well, we could have used CChatWindow class to handle this, but CPeopleList was written earlier, so for now
 		// it is simpler to keep it as it and to just use this action handler to manage user input.
 		if (!pCaller || !pCaller->getParent()) return;
-		CGroupContainer *gc = pCaller->getParent()->getEnclosingContainer();
+		CGroupContainer *gc = static_cast< CGroupContainer* >( pCaller->getParent()->getEnclosingContainer() );
+		
 		// title gives the name of the player
 		ucstring playerName = gc->getUCTitle();
 

@@ -1071,7 +1071,8 @@ void CGroupEditBox::updateCoords()
 
 	if (_BackupFatherContainerPos)
 	{
-		CGroupContainer *gc = getEnclosingContainer();
+		CGroupContainer *gc = static_cast< CGroupContainer* >( getEnclosingContainer() );
+	
 		if (gc && !gc->getTouchFlag(true))
 		{
 

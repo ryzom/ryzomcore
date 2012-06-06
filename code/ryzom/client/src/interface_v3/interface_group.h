@@ -22,8 +22,6 @@
 #include "ctrl_base.h"
 #include "action_handler.h"
 
-class CGroupContainer;
-
 // ----------------------------------------------------------------------------
 class CInterfaceGroup : public CCtrlBase
 {
@@ -251,7 +249,7 @@ public:
 	// quick way to know if the group is a CGroupContainer
 	bool isGroupContainer() const { return _IsGroupContainer; }
 
-	CGroupContainer *getEnclosingContainer();
+	CInterfaceGroup* getEnclosingContainer();
 
 	sint getInsertionOrder(CViewBase *vb) const;
 

@@ -2189,7 +2189,8 @@ class CHandlerTellContact : public IActionHandler
 		if (!pCaller) return;
 		CInterfaceGroup *ig = pCaller->getParent();
 		if (!ig) return;
-		CGroupContainer *gc = ig->getEnclosingContainer();
+		CGroupContainer *gc = static_cast< CGroupContainer* >( ig->getEnclosingContainer() );
+
 		if (!gc) return;
 		CPeopleList *list;
 		uint peopleIndex;

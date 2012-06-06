@@ -1319,7 +1319,8 @@ public:
 		}
 		// Clear input string
 		pEB->setInputString (ucstring(""));
-		CGroupContainer *gc = pEB->getEnclosingContainer();
+		CGroupContainer *gc = static_cast< CGroupContainer* >( pEB->getEnclosingContainer() );
+
 		if (gc)
 		{
 			// Restore position of enclosing container if it hasn't been moved/scaled/poped by the user

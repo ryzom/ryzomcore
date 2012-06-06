@@ -858,7 +858,8 @@ void CGroupMap::updateCoords()
 {
 	updateSelectionAxisSize();
 	//
-	CGroupContainer *enclosingContainer = getEnclosingContainer();
+	CGroupContainer *enclosingContainer = static_cast< CGroupContainer* >( getEnclosingContainer() );
+
 	if (!enclosingContainer || !enclosingContainer->getActive()) return;
 	// update position of landmarks
 	updateScale();
