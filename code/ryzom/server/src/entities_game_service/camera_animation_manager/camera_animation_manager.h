@@ -17,6 +17,9 @@
 #ifndef RY_CAMERAANIMATIONMANAGER_H
 #define RY_CAMERAANIMATIONMANAGER_H
 
+#include "nel/ligo/primitive.h"
+#include <string>
+
 /************************************************************************/
 /* Class that manages the camera animations. (singleton).
  * It's responsible of :
@@ -42,6 +45,10 @@ private:
 	CCameraAnimationManager();
 	// Destructor
 	~CCameraAnimationManager();
+
+	// Function that parses the camera animations
+	bool parseCameraAnimations(const NLLIGO::IPrimitive* prim, const std::string& filename);
+
 	// Instance of the manager
 	static CCameraAnimationManager* _Instance;
 };

@@ -1876,6 +1876,8 @@ void CPlayerService::release()
 	CActionDistanceChecker::release();
 	if (!packingSheets) CMissionManager::release();
 
+	if (!packingSheets) CCameraAnimationManager::release();
+
 	CEffectManager::release();
 	if (!packingSheets) CZoneManager::getInstance().release();
 
