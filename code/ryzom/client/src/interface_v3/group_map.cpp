@@ -2165,7 +2165,7 @@ void CGroupMap::setMap(SMap *map)
 		_MapMaterial.setTexture(1, NULL);
 
 	// disable the map_back button for islands (islands can't be seen on the world map)
-	CGroupContainer *gc = getParentContainer();
+	CInterfaceGroup *gc = getParentContainer();
 	if (gc)
 	{
 		CCtrlBase *mapBack = gc->getCtrl("map_back");

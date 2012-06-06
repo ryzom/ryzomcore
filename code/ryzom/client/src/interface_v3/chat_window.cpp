@@ -1340,9 +1340,9 @@ static ucstring getFreeTellerName(CInterfaceElement *pCaller)
 	if (!pCaller) return ucstring();
 	CChatGroupWindow *cgw = PeopleInterraction.getChatGroupWindow();
 	if (!cgw) return ucstring();
-	CGroupContainer *freeTeller = pCaller->getParentContainer();
+	CInterfaceGroup *freeTeller = pCaller->getParentContainer();
 	if (!freeTeller) return ucstring();
-	return cgw->getFreeTellerName(freeTeller->getId());
+	return cgw->getFreeTellerName( freeTeller->getId() );
 }
 
 // ***************************************************************************************
@@ -1394,10 +1394,10 @@ public:
 			}
 			if (pCaller)
 			{
-				CGroupContainer *win = prevCaller->getParentContainer();
+				CInterfaceGroup *win = prevCaller->getParentContainer();
 				if (win)
 				{
-					win->setActive(false);
+					static_cast< CGroupContainer* >( win )->setActive(false);
 				}
 			}
 		}

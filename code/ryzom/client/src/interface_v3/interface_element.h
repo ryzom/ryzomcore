@@ -28,11 +28,6 @@
 
 using namespace NLGUI;
 
-// ----------------------------------------------------------------------------
-class CInterfaceGroup;
-
-// ----------------------------------------------------------------------------
-
 class CInterfaceLink;
 class CInterfaceElement;
 class CInterfaceGroup;
@@ -147,7 +142,7 @@ public:
 	CInterfaceElement* getMasterGroup() const;
 
 	// get a possible group container
-	CGroupContainer *getParentContainer();
+	CInterfaceGroup* getParentContainer();
 
 	bool getActive() const { return _Active; }
 

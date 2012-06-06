@@ -225,8 +225,9 @@ CGroupContainer *CTool::isMouseOnContainer()
 	if (groupsUnder.empty()) return NULL;
 	for(uint k = 0; k < groupsUnder.size(); ++k)
 	{
-		CGroupContainer *gc = groupsUnder[k]->getParentContainer();
-		if (gc) return gc;
+		CInterfaceGroup* gc = groupsUnder[k]->getParentContainer();
+		if (gc)
+			return static_cast< CGroupContainer* >( gc );
 	}
 	return NULL;
 }

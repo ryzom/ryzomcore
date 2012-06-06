@@ -19,7 +19,6 @@
 #include "nel/gui/view_renderer.h"
 #include "widget_manager.h"
 #include "nel/gui/db_manager.h"
-#include "group_container.h"
 #include "interface_link.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/lua_ihm.h"
@@ -852,13 +851,15 @@ CInterfaceElement* CInterfaceElement::getMasterGroup() const
 }
 
 // ------------------------------------------------------------------------------------------------
-CGroupContainer *CInterfaceElement::getParentContainer()
+CInterfaceGroup* CInterfaceElement::getParentContainer()
 {
 	CInterfaceElement *parent = this;
 	while (parent)
 	{
-		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(parent);
-		if (gc) return gc;
+		CInterfaceGroup *gc = dynamic_cast< CInterfaceGroup* >( parent );
+		if( ( gc != NULL ) && gc->isGroupContainer() )
+			return gc;
+
 		parent = parent->getParent();
 	}
 	return NULL;
