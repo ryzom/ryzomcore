@@ -26,7 +26,6 @@ namespace NLGUI
 {
 	class CEventDescriptor;
 }
-class CInterfaceManager;
 
 /**
  * \author Matthieu 'Mr TRAP' Besson

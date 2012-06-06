@@ -22,7 +22,6 @@
 
 #include "interface_group.h"
 #include "interface_link.h"
-#include "view_text.h"
 #include "ctrl_scroll.h"
 #include "widget_manager.h"
 #include "group_container.h"
@@ -1008,29 +1007,6 @@ void CInterfaceGroup::evalChildrenBBox(bool resizeFromChildW, bool resizeFromChi
 }
 
 // ------------------------------------------------------------------------------------------------
-void CInterfaceGroup::invalidateTexts (bool resetTextIndex)
-{
-	vector<CInterfaceGroup*>::const_iterator itg;
-	for (itg = _ChildrenGroups.begin() ; itg != _ChildrenGroups.end(); itg++)
-	{
-		CInterfaceGroup *pIG = *itg;
-		pIG->invalidateTexts(resetTextIndex);
-	}
-
-	for (vector<CViewBase*>::const_iterator itv = _Views.begin() ; itv != _Views.end(); itv++)
-	{
-		CViewBase *pVB = *itv;
-		CViewText *pVT = dynamic_cast<CViewText*>(pVB);
-		if (pVT != NULL)
-		{
-			if (resetTextIndex)
-				pVT->resetTextIndex();
-			pVT->updateTextContext ();
-		}
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
 CInterfaceElement* CInterfaceGroup::getElement (const std::string &id)
 {
 	if (_Id == id)
@@ -1715,6 +1691,19 @@ void CInterfaceGroup::visit(CInterfaceElementVisitor *visitor)
 	visitor->visitGroup(this);
 	CInterfaceElement::visit(visitor);
 }
+
+// ------------------------------------------------------------------------------------------------
+void CInterfaceGroup::visitGroupAndChildren( CInterfaceElementVisitor *visitor )
+{
+	nlassert( visitor != 0 );
+	for( uint i = 0; i < _ChildrenGroups.size(); i++ )
+	{
+		_ChildrenGroups[ i ]->visitGroupAndChildren( visitor );
+	}
+
+	visitor->visitGroup( this );
+}
+
 
 // ------------------------------------------------------------------------------------------------
 

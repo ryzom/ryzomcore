@@ -109,7 +109,6 @@ public:
 	 */
 	virtual void checkCoords();
 	virtual void updateCoords();
-	void invalidateTexts (bool resetTextIndex); // Needed for static text to be reconstructed on screen size change
 
 	/// remove all views
 	virtual void clearViews();
@@ -272,7 +271,10 @@ public:
 	virtual void	dumpSize(uint depth = 0) const;
 
 	// From CInterfaceElement
-	virtual void	visit(CInterfaceElementVisitor *visitor);
+	virtual void visit(CInterfaceElementVisitor *visitor);
+
+	/// Visits only this group's sub-groups and then the group itself
+	virtual void visitGroupAndChildren( CInterfaceElementVisitor *visitor );
 
 	// Check cursor
 	void	setUseCursor(bool use);

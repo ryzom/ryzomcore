@@ -15,9 +15,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-#include "stdpch.h"
+/*
+#include "stdpch.h"*/
 #include "interface_manager.h"
+#include "widget_manager.h"
 #include "ctrl_scroll.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "group_menu.h"
@@ -68,7 +69,6 @@ void CCtrlScroll::runAH(const std::string &name, const std::string &params)
 {
 	if (name.empty()) return;
 	if (_CallingAH) return; // avoid infinite loop
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	_CallingAH = true;
 	CAHManager::getInstance()->runActionHandler(name, this, params);
 	_CallingAH = false;
@@ -166,7 +166,6 @@ bool CCtrlScroll::parse(xmlNodePtr node, CInterfaceGroup * parentGroup)
 	prop = (char*) xmlGetProp( node, (xmlChar*)"target" );
 	if (prop)
 	{
-		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		CInterfaceGroup	*group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(prop));
 		if(group == NULL)
 			group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(this->getId(), prop));
@@ -209,7 +208,6 @@ int CCtrlScroll::luaSetTarget(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 	std::string targetId = ls.toString(1);
 
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CInterfaceGroup	*group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(targetId));
 	if(group != NULL)
 	{
@@ -226,7 +224,6 @@ void CCtrlScroll::updateCoords()
 		// update only if visible
 		if (_Target->getActive())
 		{
-			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			CViewRenderer &rVR = *CViewRenderer::getInstance();
 			sint32 w, h;
 			rVR.getTextureSizeFromId (_TxIdB, w, h);
@@ -409,9 +406,8 @@ void CCtrlScroll::updateCoords()
 // ------------------------------------------------------------------------------------------------
 void CCtrlScroll::draw()
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
-	CRGBA col = pIM->getGlobalColorForContent();
+	CRGBA col = CInterfaceManager::getInstance()->getGlobalColorForContent();
 
 	if (_Target)
 	{
@@ -693,7 +689,6 @@ sint32 CCtrlScroll::moveTrackY (sint32 dy)
 // ------------------------------------------------------------------------------------------------
 void CCtrlScroll::setTextureBottomOrLeft (const std::string &txName)
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	_TxIdB = rVR.getTextureIdFromName(txName);
 }
@@ -701,7 +696,6 @@ void CCtrlScroll::setTextureBottomOrLeft (const std::string &txName)
 // ------------------------------------------------------------------------------------------------
 void CCtrlScroll::setTextureMiddle (const std::string &txName)
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	_TxIdM = rVR.getTextureIdFromName(txName);
 }
@@ -709,7 +703,6 @@ void CCtrlScroll::setTextureMiddle (const std::string &txName)
 // ------------------------------------------------------------------------------------------------
 void CCtrlScroll::setTextureTopOrRight (const std::string &txName)
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	_TxIdT = rVR.getTextureIdFromName(txName);
 }

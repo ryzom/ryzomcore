@@ -3083,6 +3083,33 @@ void CInterfaceManager::moveAllWindowsToNewScreenSize(sint32 newScreenW, sint32 
 	}
 }
 
+class InvalidateTextVisitor : public CInterfaceElementVisitor
+{
+public:
+	InvalidateTextVisitor( bool reset )
+	{
+		this->reset = reset;
+	}
+
+	void visitGroup( CInterfaceGroup *group )
+	{
+		const std::vector< CViewBase* > &vs = group->getViews();
+		for( std::vector< CViewBase* >::const_iterator itr = vs.begin(); itr != vs.end(); ++itr )
+		{
+			CViewText *vt = dynamic_cast< CViewText* >( *itr );
+			if( vt != NULL )
+			{
+				if( reset )
+					vt->resetTextIndex();
+				vt->updateTextContext();
+			}
+		}
+	}
+
+private:
+	bool reset;
+};
+
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::updateAllLocalisedElements()
 {
@@ -3114,7 +3141,9 @@ void CInterfaceManager::updateAllLocalisedElements()
 	{
 		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 
-		rMG.Group->invalidateTexts (false);
+		InvalidateTextVisitor inv( false );
+
+		rMG.Group->visitGroupAndChildren( &inv );
 		rMG.Group->invalidateCoords ();
 		for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 		{
@@ -3123,7 +3152,7 @@ void CInterfaceManager::updateAllLocalisedElements()
 			for (itw = rList.begin(); itw != rList.end(); itw++)
 			{
 				CInterfaceGroup *pIG = *itw;
-				pIG->invalidateTexts (false);
+				pIG->visitGroupAndChildren( &inv );
 				pIG->invalidateCoords ();
 			}
 		}
@@ -4592,7 +4621,8 @@ void CInterfaceManager::resetTextIndex()
 	{
 		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 
-		rMG.Group->invalidateTexts (true);
+		InvalidateTextVisitor inv( true );
+		rMG.Group->visitGroupAndChildren( &inv );
 		for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 		{
 			list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
@@ -4600,7 +4630,7 @@ void CInterfaceManager::resetTextIndex()
 			for (itw = rList.begin(); itw != rList.end(); itw++)
 			{
 				CInterfaceGroup *pIG = *itw;
-				pIG->invalidateTexts (true);
+				pIG->visitGroupAndChildren( &inv );
 			}
 		}
 	}
