@@ -19,6 +19,7 @@
 
 #include "nel/ligo/primitive.h"
 #include <string>
+#include "camera_animation_manager/camera_animation_step_factory.h"
 
 /************************************************************************/
 /* Class that manages the camera animations. (singleton).
@@ -51,6 +52,37 @@ private:
 
 	/// Instance of the manager
 	static CCameraAnimationManager* _Instance;
+
+	/// Class that contains information about an animation
+	class TCameraAnimInfo
+	{
+	public:
+		TCameraAnimInfo()
+		{
+			Name = "";
+		}
+
+		void release()
+		{
+			// We delete the camera animation steps
+			for (std::vector<ICameraAnimationStep*>::iterator it = Steps.begin(); it != Steps.end(); ++it)
+			{
+				ICameraAnimationStep* step = *it;
+				delete step;
+			}
+			Steps.clear();
+
+			Name = "";
+		}
+
+		std::string Name;
+		std::vector<ICameraAnimationStep*> Steps;
+	};
+
+	typedef std::map<std::string, TCameraAnimInfo> TCameraAnimationContainer;
+
+	/// Variable that contains the animations
+	TCameraAnimationContainer Animations;
 };
 
 

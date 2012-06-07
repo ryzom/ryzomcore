@@ -65,6 +65,12 @@ CCameraAnimationManager::CCameraAnimationManager()
 CCameraAnimationManager::~CCameraAnimationManager()
 {
 	// Delete the list of animations
+	TCameraAnimationContainer::iterator first = Animations.begin();
+	for (; first != Animations.end(); ++first)
+	{
+		first->second.release();
+	}
+	Animations.clear();
 }
 
 bool CCameraAnimationManager::parseCameraAnimations(const IPrimitive* prim, const std::string& filename)
@@ -78,6 +84,9 @@ bool CCameraAnimationManager::parseCameraAnimations(const IPrimitive* prim, cons
 		prim->getPropertyByName("name", value);
 
 		string animName = value;
+
+		TCameraAnimInfo animInfo;
+		animInfo.Name = animName;
 
 		// We now parse the instructions which are children of the camera animation
 		for (uint i = 0; i < prim->getNumChildren(); i++)
@@ -97,11 +106,12 @@ bool CCameraAnimationManager::parseCameraAnimations(const IPrimitive* prim, cons
 			// We add the instruction to the list
 			if (step)
 			{
-
+				animInfo.Steps.push_back(step);
 			}
 		}
 
-		// We add the camera animation to the list
+		// We add the camera animation to the container
+		Animations[animName] = animInfo;
 		
 		return true;
 	}
