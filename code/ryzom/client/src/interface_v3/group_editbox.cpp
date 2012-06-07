@@ -40,7 +40,6 @@ using namespace NL3D;
 /////////////
 
 sint32         CGroupEditBox::_SelectCursorPos = 0;
-CGroupEditBox *CGroupEditBox::_CurrSelection = NULL;
 CGroupEditBox *CGroupEditBox::_MenuFather = NULL;
 
 
@@ -48,7 +47,7 @@ CGroupEditBox *CGroupEditBox::_MenuFather = NULL;
 NLMISC_REGISTER_OBJECT(CViewBase, CGroupEditBox, std::string, "edit_box");
 
 CGroupEditBox::CGroupEditBox(const TCtorParam &param) :
-								CInterfaceGroup(param),
+								CGroupEditBoxBase(param),
 								_BlinkTime(0.f),
 								_CursorPos(0),
 								_MaxNumChar(std::numeric_limits<uint32>::max()),
@@ -68,7 +67,6 @@ CGroupEditBox::CGroupEditBox(const TCtorParam &param) :
 								_BlinkState(false),
 								_CursorAtPreviousLineEnd(false),
 								_LooseFocusOnEnter(true),
-								_RecoverFocusOnEnter(true),
 								_ResetFocusOnHide(false),
 								_BackupFatherContainerPos(false),
 								_WantReturn(false),

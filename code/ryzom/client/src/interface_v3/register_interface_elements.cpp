@@ -37,6 +37,7 @@
 #include "ctrl_draggable.h"
 #include "dbctrl_sheet.h"
 #include "dbgroup_list_sheet.h"
+#include "group_editbox_base.h"
 #include "group_editbox.h"
 #include "group_tree.h"
 #include "nel/gui/reflect.h"
@@ -84,7 +85,8 @@ void registerInterfaceElements()
 	REGISTER_REFLECTABLE_CLASS(CGroupContainer, CInterfaceGroup);
 	REGISTER_REFLECTABLE_CLASS(CDBGroupSelectNumber, CInterfaceGroup);
 	REGISTER_REFLECTABLE_CLASS(IListSheetBase, CInterfaceGroup);
-	REGISTER_REFLECTABLE_CLASS(CGroupEditBox, CInterfaceGroup);
+	REGISTER_REFLECTABLE_CLASS(CGroupEditBoxBase, CInterfaceGroup);
+	REGISTER_REFLECTABLE_CLASS(CGroupEditBox, CGroupEditBoxBase);
 	REGISTER_REFLECTABLE_CLASS(CGroupTree, CInterfaceGroup);
 	REGISTER_REFLECTABLE_CLASS(CDBGroupComboBox, CInterfaceGroup);
 	REGISTER_REFLECTABLE_CLASS(CCtrlScrollBase, CCtrlBase);

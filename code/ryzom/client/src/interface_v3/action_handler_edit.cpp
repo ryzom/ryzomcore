@@ -145,7 +145,7 @@ protected:
 		if (_GroupEdit)
 		{
 			// If selection active
-			CGroupEditBox *currSelection = CGroupEditBox::getCurrSelection();
+			CGroupEditBox *currSelection = dynamic_cast< CGroupEditBox* >( CGroupEditBox::getCurrSelection() );
 			if (currSelection != NULL)
 			{
 				if (currSelection != _GroupEdit)

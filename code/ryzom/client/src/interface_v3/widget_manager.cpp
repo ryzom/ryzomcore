@@ -19,7 +19,8 @@
 #include "group_container.h"
 #include "group_in_scene.h"
 #include "view_pointer.h"
-#include "group_editbox.h"
+
+#include "group_editbox_base.h"
 #include "ctrl_draggable.h"
 
 CWidgetManager* CWidgetManager::instance = NULL;
@@ -1127,8 +1128,8 @@ void CWidgetManager::setCapturePointerRight(CCtrlBase *c)
 // ------------------------------------------------------------------------------------------------
 void CWidgetManager::setCaptureKeyboard(CCtrlBase *c)
 {
-	CGroupEditBox	*oldEb= dynamic_cast<CGroupEditBox*>((CCtrlBase*)_CaptureKeyboard);
-	CGroupEditBox	*newEb= dynamic_cast<CGroupEditBox*>(c);
+	CGroupEditBoxBase *oldEb= dynamic_cast<CGroupEditBoxBase*>((CCtrlBase*)_CaptureKeyboard);
+	CGroupEditBoxBase *newEb= dynamic_cast<CGroupEditBoxBase*>(c);
 
 	if (_CaptureKeyboard && _CaptureKeyboard != c)
 	{
@@ -1141,7 +1142,7 @@ void CWidgetManager::setCaptureKeyboard(CCtrlBase *c)
 	}
 	if ( newEb )
 	{
-		CGroupEditBox::disableSelection();
+		CGroupEditBoxBase::disableSelection();
 
 		if (!newEb->getAHOnFocus().empty())
 		{

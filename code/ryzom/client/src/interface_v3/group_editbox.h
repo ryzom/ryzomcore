@@ -20,6 +20,7 @@
 #define RZ_CTRL_EDITBOX_H
 
 #include "interface_group.h"
+#include "group_editbox_base.h"
 #include "nel/3d/u_texture.h"
 
 namespace NLGUI
@@ -27,12 +28,14 @@ namespace NLGUI
 	class CEventDescriptor;
 }
 class CViewText;
+
 // ----------------------------------------------------------------------------
-class CGroupEditBox : public CInterfaceGroup
+class CGroupEditBox : public CGroupEditBoxBase
 {
 public:
 	enum TEntryType { Text, Integer, PositiveInteger, Float, PositiveFloat, Alpha, AlphaNum, AlphaNumSpace, Password, Filename, PlayerName }; // the type of entry this edit bot can deal with
 public:
+	DECLARE_UI_CLASS( CGroupEditBox )
 	/// Constructor
 	CGroupEditBox(const TCtorParam &param);
 	/// Dtor
@@ -71,8 +74,6 @@ public:
 
 	/// force the selection of all the text
 	void		setSelectionAll();
-	// disable any current selection
-	static void	disableSelection() { _CurrSelection = NULL; }
 
 	virtual void checkCoords();
 	virtual void updateCoords();
@@ -98,10 +99,6 @@ public:
 	// Get / set current selection position
 	static sint32	getSelectCursorPos () {return _SelectCursorPos;}
 	static void		setSelectCursorPos (sint32 pos) {_SelectCursorPos=pos;}
-
-	// Get / set current selection
-	static CGroupEditBox	*getCurrSelection () {return _CurrSelection;}
-	static void		setCurrSelection (CGroupEditBox *selection) {_CurrSelection=selection;}
 
 	// Get the view text
 	const CViewText	*getViewText () const {return _ViewText;}
@@ -141,9 +138,6 @@ public:
 
 	// True if the editBox loose the focus on enter
 	bool		getLooseFocusOnEnter() const {return _LooseFocusOnEnter;}
-	// True if the editBox can recover the focus on enter. if not, it does not erase OldCapturedKeyboard when loose focus
-	bool		getRecoverFocusOnEnter() const {return _RecoverFocusOnEnter;}
-	void		setRecoverFocusOnEnter(bool state) {_RecoverFocusOnEnter= state;}
 	//
 	virtual void    clearAllEditBox();
 	// From CInterfaceElement
@@ -161,10 +155,6 @@ public:
 	// from CCtrlBase
 	virtual void onKeyboardCaptureLost();
 
-	std::string getAHOnFocus() { return _AHOnFocus; }
-	std::string getAHOnFocusParams() { return _AHOnFocusParams; }
-
-
 	// set the input string as "default". will be reseted at first click (used for user information)
 	void	setDefaultInputString(const ucstring &str);
 
@@ -180,14 +170,13 @@ public:
 	int luaSetupDisplayText(CLuaState &ls);
 	int luaSetFocusOnText(CLuaState &ls);
 	int luaCancelFocusOnText(CLuaState &ls);
-	REFLECT_EXPORT_START(CGroupEditBox, CInterfaceGroup)
+	REFLECT_EXPORT_START(CGroupEditBox, CGroupEditBoxBase)
 		REFLECT_LUA_METHOD("setupDisplayText", luaSetupDisplayText);
 		REFLECT_LUA_METHOD("setSelectionAll", luaSetSelectionAll);
 		REFLECT_LUA_METHOD("setFocusOnText", luaSetFocusOnText);
 		REFLECT_LUA_METHOD("cancelFocusOnText", luaCancelFocusOnText);
 		REFLECT_STRING("input_string", getInputStringAsStdString, setInputStringAsStdString);
 		REFLECT_UCSTRING("uc_input_string", getInputString, setInputString);
-		REFLECT_BOOL("enter_recover_focus", getRecoverFocusOnEnter, setRecoverFocusOnEnter);
 	REFLECT_EXPORT_END
 
 	/** Restore the original value of the edit box.
@@ -220,7 +209,6 @@ protected:
 
 	// Text selection
 	static sint32	      _SelectCursorPos;
-	static CGroupEditBox *_CurrSelection; // the edit box for which the selection is currently active, or NULL if there's none
 	bool	_SelectingText;
 	NLMISC::CRGBA	_TextSelectColor;
 	NLMISC::CRGBA	_BackSelectColor;
@@ -249,10 +237,6 @@ protected:
 
 	std::string _AHOnFocusLost;
 	std::string _AHOnFocusLostParams;
-	std::string _AHOnFocus;
-	std::string _AHOnFocusParams;
-
-
 
 	// entry type
 	TEntryType _EntryType;
@@ -263,7 +247,6 @@ protected:
 	bool	_BlinkState                : 1;
 	bool	_CursorAtPreviousLineEnd   : 1; // force the cursor to be displayed at the end of the previous line end (if END has beeen pressed while in a string split accross 2 lines)
 	bool	_LooseFocusOnEnter         : 1;
-	bool	_RecoverFocusOnEnter       : 1;
 	bool    _ResetFocusOnHide          : 1;
 	bool	_BackupFatherContainerPos  : 1; // Backup father container position when characters are typed.
 	                                        // If the edit box is at the bottom of the screen and if it expands on y
