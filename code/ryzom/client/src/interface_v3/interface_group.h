@@ -248,6 +248,7 @@ public:
 
 	// quick way to know if the group is a CGroupContainer
 	bool isGroupContainer() const { return _IsGroupContainer; }
+	bool isGroupScrollText() const{ return _IsGroupScrollText; }
 
 	CInterfaceGroup* getEnclosingContainer();
 
@@ -345,6 +346,7 @@ protected:
 	bool	_Escapable			: 1;
 	bool	_UseCursor			: 1;
 	bool	_IsGroupContainer	: 1;	// faster than a virual call
+	bool	_IsGroupScrollText  : 1;
 	bool	_NeedFrameUpdatePos	: 1;	// typically For CGroupInScene
 	sint32	_ResizeFromChildWMargin;
 	sint32	_ResizeFromChildHMargin;

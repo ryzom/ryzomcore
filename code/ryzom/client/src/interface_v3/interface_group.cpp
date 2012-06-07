@@ -23,10 +23,7 @@
 #include "interface_group.h"
 #include "interface_link.h"
 #include "widget_manager.h"
-
 #include "ctrl_scroll_base.h"
-#include "group_editbox.h"
-#include "group_scrolltext.h"
 #include "lua_ihm_ryzom.h"
 
 using namespace std;
@@ -57,6 +54,7 @@ CInterfaceGroup::CInterfaceGroup(const TCtorParam &param) : CCtrlBase(param)
 	_Priority= WIN_PRIORITY_NORMAL;
 	_UseCursor = true;
 	_IsGroupContainer = false;
+	_IsGroupScrollText = false;
 	_AHOnActive = NULL;
 	_AHOnDeactive = NULL;
 	_AHOnLeftClick = NULL;
@@ -973,7 +971,7 @@ void CInterfaceGroup::evalChildrenBBox(bool resizeFromChildW, bool resizeFromChi
 			// If it is a group, minimize with MaxHReal / MaxWReal
 			const CInterfaceGroup	*sonGroup= dynamic_cast<const CInterfaceGroup*>(pIE);
 			// \todo yoyo: do not know why but don't work if this==scroll_text
-			if(sonGroup && !dynamic_cast<const CGroupScrollText*>(this))
+			if(sonGroup && !isGroupScrollText())
 			{
 				sint32	oldSciX= -16384;
 				sint32	oldSciY= -16384;

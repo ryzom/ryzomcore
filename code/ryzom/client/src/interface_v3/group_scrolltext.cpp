@@ -43,8 +43,9 @@ CGroupScrollText::CGroupScrollText(const TCtorParam &param) :
 										_InvertScrollBar(true),
 										_ListHeight(0),
 										_StartHeight(0),
-										_EllapsedTime(0)
+										_EllapsedTime(0)										
 {
+	_IsGroupScrollText = true;
 }
 
 //========================================================================
