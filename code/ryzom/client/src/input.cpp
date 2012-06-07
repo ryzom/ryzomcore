@@ -124,7 +124,7 @@ bool	InitMouseWithCursor (bool hardware)
 				{
 					Driver->showCursor(true);
 
-					CViewPointer *pointer = CWidgetManager::getInstance()->getPointer();
+					CViewPointer *pointer = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 					if (pointer)
 					{
 						float x = (float)pointer->getX()/(float)Driver->getWindowWidth();
@@ -145,7 +145,7 @@ bool	InitMouseWithCursor (bool hardware)
 				else
 				{
 					CInterfaceManager *pIm = CInterfaceManager::getInstance();
-					CViewPointer *vp = CWidgetManager::getInstance()->getPointer();
+					CViewPointer *vp = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 					Driver->showCursor(false);
 					SetMousePosFirstTime = false;
 					if (vp)
@@ -247,7 +247,7 @@ void	SetMouseFreeLook ()
 			CInterfaceManager *im = CInterfaceManager::getInstance();
 			if (im)
 			{
-				CViewPointer *pointer = CWidgetManager::getInstance()->getPointer();
+				CViewPointer *pointer = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 				if (pointer)
 					pointer->show (false);
 			}
@@ -281,7 +281,7 @@ void	SetMouseCursor (bool updatePos)
 		if (instance)
 		{
 			// Get the cursor instance
-			CViewPointer *cursor = CWidgetManager::getInstance()->getPointer();
+			CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 			if (cursor)
 			{
 				sint32 ix, iy;
@@ -319,7 +319,7 @@ void	SetMouseCursor (bool updatePos)
 		if (instance)
 		{
 			// Get the cursor instance
-			CViewPointer *cursor = CWidgetManager::getInstance()->getPointer();
+			CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 			if (cursor)
 			{
 				cursor->setPointerPos(ix, iy);
@@ -342,7 +342,7 @@ void	SetMouseCursor (bool updatePos)
 			CInterfaceManager *im = CInterfaceManager::getInstance();
 			if (im)
 			{
-				CViewPointer *pointer = CWidgetManager::getInstance()->getPointer();
+				CViewPointer *pointer = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 				if (pointer)
 					pointer->show (true);
 			}

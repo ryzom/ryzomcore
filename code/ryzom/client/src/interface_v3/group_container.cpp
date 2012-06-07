@@ -2194,7 +2194,7 @@ void CGroupContainer::draw ()
 
 
 	// manage rollover
-	CViewPointer *mousePointer = CWidgetManager::getInstance()->getPointer();
+	CViewPointer *mousePointer = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
  	if (mousePointer)
 	{
 		bool dontFade = false;
@@ -3641,7 +3641,7 @@ void CGroupContainer::setOpenable(bool openable)
 void CGroupContainer::rollOverAlphaUp()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CViewPointer *vp = CWidgetManager::getInstance()->getPointer();
+	CViewPointer *vp = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 	float speed = im->getAlphaRolloverSpeed();
 	if (!isIn(vp->getX(), vp->getY()))
 	{

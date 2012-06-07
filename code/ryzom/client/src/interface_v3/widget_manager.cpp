@@ -18,7 +18,7 @@
 #include "interface_group.h"
 #include "group_container.h"
 #include "group_in_scene.h"
-#include "view_pointer.h"
+#include "view_pointer_base.h"
 
 #include "group_editbox_base.h"
 #include "ctrl_draggable.h"

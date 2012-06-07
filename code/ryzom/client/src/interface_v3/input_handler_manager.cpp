@@ -268,7 +268,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 	{
 
 
-		CViewPointer &rIP = *CWidgetManager::getInstance()->getPointer();
+		CViewPointer &rIP = *static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 
 		NLGUI::CEventDescriptorMouse eventDesc;
 

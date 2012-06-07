@@ -16,10 +16,7 @@
 
 
 
-#include "stdpch.h"
-
 #include "../input.h"
-//
 #include "view_pointer.h"
 #include "interface_manager.h"
 #include "nel/gui/view_renderer.h"
@@ -45,12 +42,9 @@ NLMISC_REGISTER_OBJECT(CViewBase, CViewPointer, std::string, "pointer");
 
 // --------------------------------------------------------------------------------------------------------------------
 CViewPointer::CViewPointer (const TCtorParam &param)
-	: CViewBase(param),
+	: CViewPointerBase(param),
 	_Buttons(NLMISC::noButton)
 {
-	_PointerX = _PointerY = _PointerOldX = _PointerOldY = _PointerDownX = _PointerDownY = 0;
-	_PointerDown = false;
-	_PointerVisible = true;
 	_TxIdDefault = -2;
 	_TxIdMoveWindow = -2;
 	_TxIdResizeBRTL = -2;
@@ -608,111 +602,6 @@ bool CViewPointer::drawCustom(CCtrlBase* pCB)
 
 // +++ SET +++
 
-// --------------------------------------------------------------------------------------------------------------------
-void CViewPointer::setPointerPos (sint32 x, sint32 y)
-{
-	if (_PointerDown)
-	{
-		if (!_PointerDrag)
-		{
-			if (((_PointerX - _PointerDownX) != 0) ||
-				((_PointerY - _PointerDownY) != 0))
-			{
-				_PointerDrag = true;
-			}
-		}
-	}
-
-	_PointerOldX = getX();
-	_PointerOldY = getY();
-
-	_PointerX = x;
-	_PointerY = y;
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-void CViewPointer::setPointerDispPos (sint32 x, sint32 y)
-{
-	setX (x);
-	setY (y);
-	updateCoords ();
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-void CViewPointer::resetPointerPos ()
-{
-	_PointerOldX = _PointerX;
-	_PointerOldY = _PointerY;
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-void CViewPointer::setPointerDown (bool pd)
-{
-	_PointerDown = pd;
-
-	if (_PointerDown == true)
-	{
-		_PointerDownX = _PointerX;
-		_PointerDownY = _PointerY;
-	}
-
-	if (_PointerDown == false)
-		_PointerDrag = false;
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-void CViewPointer::setPointerDownString (const std::string &s)
-{
-	_PointerDownString = s;
-}
-
-// +++ GET +++
-
-// --------------------------------------------------------------------------------------------------------------------
-void CViewPointer::getPointerPos (sint32 &x, sint32 &y)
-{
-	x = _PointerX;
-	y = _PointerY;
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-void CViewPointer::getPointerDispPos (sint32 &x, sint32 &y)
-{
-	x = getX();
-	y = getY();
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-void CViewPointer::getPointerOldPos (sint32 &x, sint32 &y)
-{
-	x = _PointerOldX;
-	y = _PointerOldY;
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-void CViewPointer::getPointerDownPos (sint32 &x, sint32 &y)
-{
-	x = _PointerDownX;
-	y = _PointerDownY;
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-bool CViewPointer::getPointerDown ()
-{
-	return _PointerDown;
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-bool CViewPointer::getPointerDrag ()
-{
-	return _PointerDrag;
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-std::string CViewPointer::getPointerDownString ()
-{
-	return _PointerDownString;
-}
 
 // --------------------------------------------------------------------------------------------------------------------
 void CViewPointer::setStringMode (bool stringCursor)

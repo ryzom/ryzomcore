@@ -507,7 +507,7 @@ void CUserControls::freeLook(bool fullMode)
 		// disable interface mouse handling.
 		IM->enableMouseHandling(false);
 		// Get the cursor instance
-		CViewPointer *cursor = CWidgetManager::getInstance()->getPointer();
+		CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 		if(cursor)
 		{
 			// Hide the Cursor.
@@ -590,7 +590,7 @@ void CUserControls::cameraLook(bool fullMode)
 		// disable interface mouse handling.
 		IM->enableMouseHandling(false);
 		// Get the cursor instance
-		CViewPointer *cursor = CWidgetManager::getInstance()->getPointer();
+		CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 		if(cursor)
 		{
 			// Hide the Cursor.

@@ -361,7 +361,7 @@ void CViewBitmapCombo::draw()
 					&& my <  py + (sint32) itemh)
 				{
 					overItem = true;
-					if (CWidgetManager::getInstance()->getPointer()->getButtonState() & NLMISC::leftButton)
+					if ( static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() )->getButtonState() & NLMISC::leftButton)
 					{
 						textId = getTexId(_TexsPushedId, texIndex);
 						color  = getCol(_ColPushed, texIndex);
@@ -416,7 +416,7 @@ void CViewBitmapCombo::draw()
 	//
 	if (_CD.Unrolled.getBool())
 	{
-		if (overItem && CWidgetManager::getInstance()->getPointer()->getButtonState() & NLMISC::leftButton)
+		if (overItem && static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() )->getButtonState() & NLMISC::leftButton)
 		{
 			textId = getTexId(_TexsId, selectedTexIndex);
 			color  = getCol(_Col, selectedTexIndex);
@@ -436,7 +436,7 @@ void CViewBitmapCombo::draw()
 			&& my <  py + (sint32) itemh
 		   )
 		{
-			if (CWidgetManager::getInstance()->getPointer()->getButtonState() & NLMISC::leftButton)
+			if ( static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() )->getButtonState() & NLMISC::leftButton)
 			{
 				textId = getTexId(_TexsPushedId, selectedTexIndex);
 				color  = getCol(_ColPushed, selectedTexIndex);

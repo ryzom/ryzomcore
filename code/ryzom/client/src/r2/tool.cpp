@@ -155,7 +155,7 @@ uint32 CTool::getScreenHeight()
 void CTool::getMousePos(sint32 &x, sint32 &y)
 {
 	//H_AUTO(R2_CTool_getMousePos)
-	CViewPointer *cursor = CWidgetManager::getInstance()->getPointer();
+	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 	if(cursor == NULL)
 	{
 		x = y = -1;
@@ -753,7 +753,7 @@ bool CTool::isMouseCaptured()
 void CTool::setMouseCursor(const char *cursorTexture)
 {
 	//H_AUTO(R2_CTool_setMouseCursor)
-	CViewPointer *cursor = CWidgetManager::getInstance()->getPointer();
+	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 	if(cursor)
 	{
 		cursor->setCursor(cursorTexture);

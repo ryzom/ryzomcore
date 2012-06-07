@@ -2481,7 +2481,7 @@ uint CInterfaceManager::getDepth (CCtrlBase *ctrl, CInterfaceGroup *pNewCurrentW
 bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 {
 	bool	handled= false;
-	CViewPointer *_Pointer = CWidgetManager::getInstance()->getPointer();
+	CViewPointer *_Pointer = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 
 	if( event.getType() == NLGUI::CEventDescriptor::system )
 	{

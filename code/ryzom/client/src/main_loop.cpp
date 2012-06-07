@@ -1738,7 +1738,7 @@ bool mainLoop()
 			if(!CViewRenderer::getInstance()->isMinimized())
 			{
 				// Get the cursor instance
-				CViewPointer *cursor = CWidgetManager::getInstance()->getPointer();
+				CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 				if(cursor)
 				{
 					// Get the pointer position (in pixel)

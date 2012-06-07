@@ -27,7 +27,7 @@ class CInterfaceElement;
 class CCtrlBase;
 class CViewBase;
 class CInterfaceGroup;
-class CViewPointer;
+class CViewPointerBase;
 
 class IParser
 {
@@ -184,8 +184,8 @@ public:
 
 	float _DeltaTimeStopingContextHelp;
 
-	CViewPointer* getPointer(){ return _Pointer; }
-	void setPointer( CViewPointer *pointer ){ _Pointer = pointer; }
+	CViewPointerBase* getPointer(){ return _Pointer; }
+	void setPointer( CViewPointerBase *pointer ){ _Pointer = pointer; }
 
 	/**
 	 * get the window under a spot
@@ -278,7 +278,7 @@ private:
 	std::vector< SModalWndInfo > _ModalStack;
 	static std::string _CtrlLaunchingModalId;
 	NLMISC::CRefPtr< CCtrlBase > curContextHelp;
-	CViewPointer *_Pointer;
+	CViewPointerBase *_Pointer;
 
 	NLMISC::CRefPtr< CInterfaceGroup > _WindowUnder;
 

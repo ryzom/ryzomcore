@@ -239,7 +239,7 @@ void checkUnderCursor()
 		return;
 
 	// Get the cursor instance
-	CViewPointer *cursor = CWidgetManager::getInstance()->getPointer();
+	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 	if(cursor == 0)
 		return;
 

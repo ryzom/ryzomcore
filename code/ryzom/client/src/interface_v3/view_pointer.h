@@ -21,7 +21,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/events.h"
-#include "view_base.h"
+#include "view_pointer_base.h"
 
 class CGroupContainer;
 class CCtrlBase;
@@ -33,34 +33,15 @@ class CCtrlBase;
  * \date 2002
  */
 
-class CViewPointer : public CViewBase
+class CViewPointer : public CViewPointerBase
 {
 	friend void	SetMouseFreeLook ();
 	friend void	SetMouseCursor (bool updateMousePos);
 public:
+	DECLARE_UI_CLASS( CViewPointerBase )
 	CViewPointer (const TCtorParam &param);
 	bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup);
 	void draw ();
-
-	// Set the pointer position.
-	void setPointerPos (sint32 x, sint32 y);
-	void setPointerDispPos (sint32 x, sint32 y);
-
-	void resetPointerPos ();
-	void setPointerDown (bool pd);
-	void setPointerDownString (const std::string &s);
-
-	void getPointerPos (sint32 &x, sint32 &y);
-	void getPointerDispPos (sint32 &x, sint32 &y);
-
-	void getPointerOldPos (sint32 &x, sint32 &y);
-	void getPointerDownPos (sint32 &x, sint32 &y);
-	bool getPointerDown ();
-	std::string getPointerDownString ();
-	bool getPointerDrag ();
-
-	/// Is the pointer visible ?
-	bool show() const {return _PointerVisible;}
 
 	// Set cursor mode
 	void setStringMode (bool stringCursor);
@@ -134,18 +115,6 @@ private:
 
 	sint32		_OffsetX;
 	sint32		_OffsetY;
-
-	// (x,y) is from the TopLeft corner of the window
-	sint32		_PointerX;				// Current pointer position (raw, before snapping)
-	sint32		_PointerY;
-	sint32		_PointerOldX;			// Previous frame pointer position
-	sint32		_PointerOldY;
-	bool		_PointerDown;			// Is the pointer down ?
-	sint32		_PointerDownX;			// Pointer down position
-	sint32		_PointerDownY;
-	std::string	_PointerDownString;		// What is under the pointer at the down position
-	bool		_PointerDrag;			// Is the pointer down and we have moved ?
-	bool		_PointerVisible;		// Is the pointer visible or hidden ?
 
 	NLMISC::TMouseButton _Buttons;
 
