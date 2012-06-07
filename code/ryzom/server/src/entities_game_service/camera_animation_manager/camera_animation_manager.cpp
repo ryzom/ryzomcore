@@ -20,6 +20,7 @@
 #include "camera_animation_manager/camera_animation_manager.h"
 #include "primitives_parser.h"
 #include "nel/ligo/primitive.h"
+#include "camera_animation_manager/camera_animation_step_factory.h"
 
 using namespace std;
 using namespace NLMISC;

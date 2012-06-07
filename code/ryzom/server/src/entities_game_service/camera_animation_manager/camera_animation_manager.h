@@ -41,15 +41,15 @@ public:
 	static void release();
 
 private:
-	// Constructor
+	/// Constructor
 	CCameraAnimationManager();
-	// Destructor
+	/// Destructor
 	~CCameraAnimationManager();
 
-	// Function that parses the camera animations
+	/// Function that parses the camera animations
 	bool parseCameraAnimations(const NLLIGO::IPrimitive* prim, const std::string& filename);
 
-	// Instance of the manager
+	/// Instance of the manager
 	static CCameraAnimationManager* _Instance;
 };
 
