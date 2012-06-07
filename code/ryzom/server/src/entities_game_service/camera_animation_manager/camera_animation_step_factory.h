@@ -44,7 +44,7 @@ class ICameraAnimationStepFactory
 {
 public:
 	/// Function that will instanciate the correct camera animation step
-	static ICameraAnimationStep* parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename, const std::string& name);	
+	static ICameraAnimationStep* parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename, const std::string& stepType);	
 protected:
 
 	/// Functions used to be able to create the camera animation steps

@@ -86,8 +86,19 @@ bool CCameraAnimationManager::parseCameraAnimations(const IPrimitive* prim, cons
 			prim->getChild(child, 1);
 
 			// We tell the factory to load the instructions in function of the type of instruction we have
+			string stepType;
+			if (!prim->getPropertyByName("class", stepType))
+			{
+				nlwarning("<CCameraAnimationManager parseCameraAnimations> Error while getting the class of a camera animation step in primitive number '%s'", filename.c_str());
+				continue;
+			}
 
+			ICameraAnimationStep* step = ICameraAnimationStepFactory::parseStep(child, filename, stepType);
 			// We add the instruction to the list
+			if (step)
+			{
+
+			}
 		}
 
 		// We add the camera animation to the list

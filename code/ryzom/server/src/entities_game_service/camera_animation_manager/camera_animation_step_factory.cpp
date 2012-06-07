@@ -19,12 +19,12 @@
 
 std::vector<std::pair<std::string, ICameraAnimationStepFactory*> >* ICameraAnimationStepFactory::Entries;
 
-ICameraAnimationStep* ICameraAnimationStepFactory::parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename, const std::string& name)
+ICameraAnimationStep* ICameraAnimationStepFactory::parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename, const std::string& stepType)
 {
 	// We search the correct step type in our entries
 	for (uint i = 0; i < Entries->size(); i++)
 	{
-		if (name == (*Entries)[i].first)
+		if (stepType == (*Entries)[i].first)
 		{
 			ICameraAnimationStep * ret = (*Entries)[i].second->instanciate();
 			if (!ret)
