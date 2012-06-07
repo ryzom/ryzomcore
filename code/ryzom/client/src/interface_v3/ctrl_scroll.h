@@ -20,7 +20,7 @@
 #define RZ_CTRL_SCROLL_H
 
 #include "nel/misc/types_nl.h"
-#include "ctrl_base.h"
+#include "ctrl_scroll_base.h"
 
 /**
  * Class handling scollbar function
@@ -28,11 +28,11 @@
  * \author Nevrax France
  * \date 2002
  */
-class CCtrlScroll : public CCtrlBase, public NLMISC::ICDBNode::IPropertyObserver
+class CCtrlScroll : public CCtrlScrollBase, public NLMISC::ICDBNode::IPropertyObserver
 {
 
 public:
-
+	DECLARE_UI_CLASS( CCtrlScroll )
 	CCtrlScroll(const TCtorParam &param);
 	~CCtrlScroll();
 
@@ -43,9 +43,7 @@ public:
 	virtual void draw();
 	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 
-
 	void	setTarget (CInterfaceGroup *pIG);
-	CInterfaceGroup *getTarget () { return _Target; }
 	// Return the delta value the track has moved
 	sint32	moveTrackX (sint32 dx);
 	sint32	moveTrackY (sint32 dy);
@@ -97,7 +95,7 @@ public:
 	void			setMax(sint32 max) {_Max = max;}
 	sint32			getMax() const {return _Max;}
 
-	REFLECT_EXPORT_START(CCtrlScroll, CCtrlBase)
+	REFLECT_EXPORT_START(CCtrlScroll, CCtrlScrollBase)
 		REFLECT_LUA_METHOD("setTarget", luaSetTarget)
 		REFLECT_LUA_METHOD("ensureVisible", luaEnsureVisible);
 		REFLECT_SINT32("value", getValue, setValue);
@@ -158,8 +156,6 @@ protected:
 	sint32 _LastTargetWReal;
 	sint32 _LastTargetMaxWReal;
 	sint32 _LastTargetOfsX;
-
-	CInterfaceGroup *_Target; // If NULL the scroller is a value scroller
 
 	bool	_Vertical   : 1; // true if vertical track bar
 	bool	_IsDBLink   : 1;

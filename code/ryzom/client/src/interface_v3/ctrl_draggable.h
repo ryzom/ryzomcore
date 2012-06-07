@@ -6,6 +6,8 @@
 class CCtrlDraggable : public CCtrlBase
 {
 public:
+	DECLARE_UI_CLASS( CCtrlDraggable )
+
 	CCtrlDraggable( const TCtorParam &param );
 	virtual ~CCtrlDraggable(){};
 
@@ -21,6 +23,8 @@ public:
 		_LastDraggedSheet = NULL;
 	}
 
+	// Necessary because of reflection, no other purpose
+	void draw(){}
 
 	REFLECT_EXPORT_START(CCtrlDraggable, CCtrlBase)
 		REFLECT_BOOL("dragable", isDraggable, setDraggable);

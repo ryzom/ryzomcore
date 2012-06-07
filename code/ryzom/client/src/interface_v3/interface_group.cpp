@@ -24,7 +24,7 @@
 #include "interface_link.h"
 #include "widget_manager.h"
 
-#include "ctrl_scroll.h"
+#include "ctrl_scroll_base.h"
 #include "group_editbox.h"
 #include "group_scrolltext.h"
 #include "lua_ihm_ryzom.h"
@@ -203,7 +203,7 @@ bool CInterfaceGroup::moveSBTrackY (CInterfaceGroup *target, sint32 dy)
 	for (itc = _Controls.begin(); itc !=  _Controls.end(); itc++)
 	{
 		CCtrlBase *pCB = *itc;
-		CCtrlScroll *pSB = dynamic_cast<CCtrlScroll*>(pCB);
+		CCtrlScrollBase *pSB = dynamic_cast<CCtrlScrollBase*>(pCB);
 		if (pSB != NULL)
 		{
 			if (pSB->getTarget() == target)
@@ -224,7 +224,7 @@ bool CInterfaceGroup::moveSBTargetY(CInterfaceGroup *target,sint32 dy)
 	for (itc = _Controls.begin(); itc !=  _Controls.end(); itc++)
 	{
 		CCtrlBase *pCB = *itc;
-		CCtrlScroll *pSB = dynamic_cast<CCtrlScroll*>(pCB);
+		CCtrlScrollBase *pSB = dynamic_cast<CCtrlScrollBase*>(pCB);
 		if (pSB != NULL)
 		{
 			if (pSB->getTarget() == target)

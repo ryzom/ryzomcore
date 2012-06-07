@@ -34,6 +34,7 @@
 #include "ctrl_button.h"
 #include "ctrl_text_button.h"
 #include "ctrl_col_pick.h"
+#include "ctrl_draggable.h"
 #include "dbctrl_sheet.h"
 #include "dbgroup_list_sheet.h"
 #include "group_editbox.h"
@@ -42,9 +43,9 @@
 #include "dbview_bar.h"
 #include "dbview_bar3.h"
 #include "group_list.h"
+#include "ctrl_scroll_base.h"
 #include "ctrl_scroll.h"
 #include "dbgroup_combo_box.h"
-#include "ctrl_scroll.h"
 #include "group_tab.h"
 #include "group_html.h"
 #include "group_header.h"
@@ -75,7 +76,8 @@ void registerInterfaceElements()
 	REGISTER_REFLECTABLE_CLASS(CCtrlButton, CCtrlBaseButton);
 	REGISTER_REFLECTABLE_CLASS(CCtrlTextButton, CCtrlBaseButton);
 	REGISTER_REFLECTABLE_CLASS(CCtrlColPick, CCtrlBase);
-	REGISTER_REFLECTABLE_CLASS(CDBCtrlSheet, CCtrlBase);
+	REGISTER_REFLECTABLE_CLASS(CCtrlDraggable, CCtrlBase);
+	REGISTER_REFLECTABLE_CLASS(CDBCtrlSheet, CCtrlDraggable);
 	REGISTER_REFLECTABLE_CLASS(CInterfaceGroup, CCtrlBase);
 	REGISTER_REFLECTABLE_CLASS(CGroupFrame, CInterfaceGroup);
 	REGISTER_REFLECTABLE_CLASS(CGroupModal, CGroupFrame);
@@ -84,8 +86,9 @@ void registerInterfaceElements()
 	REGISTER_REFLECTABLE_CLASS(IListSheetBase, CInterfaceGroup);
 	REGISTER_REFLECTABLE_CLASS(CGroupEditBox, CInterfaceGroup);
 	REGISTER_REFLECTABLE_CLASS(CGroupTree, CInterfaceGroup);
-	REGISTER_REFLECTABLE_CLASS(CDBGroupComboBox, CInterfaceGroup)
-	REGISTER_REFLECTABLE_CLASS(CCtrlScroll, CCtrlBase);
+	REGISTER_REFLECTABLE_CLASS(CDBGroupComboBox, CInterfaceGroup);
+	REGISTER_REFLECTABLE_CLASS(CCtrlScrollBase, CCtrlBase);
+	REGISTER_REFLECTABLE_CLASS(CCtrlScroll, CCtrlScrollBase);
 	REGISTER_REFLECTABLE_CLASS(CGroupMenu, CGroupModal)
 	REGISTER_REFLECTABLE_CLASS(CGroupSubMenu, CGroupFrame)
 	REGISTER_REFLECTABLE_CLASS(CGroupTab, CInterfaceGroup)

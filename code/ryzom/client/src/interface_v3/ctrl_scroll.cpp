@@ -15,8 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-/*
-#include "stdpch.h"*/
 #include "interface_manager.h"
 #include "widget_manager.h"
 #include "ctrl_scroll.h"
@@ -33,7 +31,7 @@ NLMISC_REGISTER_OBJECT(CViewBase, CCtrlScroll, std::string, "scroll");
 
 // ------------------------------------------------------------------------------------------------
 CCtrlScroll::CCtrlScroll(const TCtorParam &param)
-:	CCtrlBase(param)
+:	CCtrlScrollBase(param)
 {
 	_Vertical = true;
 	_Aligned = 1;
