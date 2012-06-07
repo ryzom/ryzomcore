@@ -16,8 +16,6 @@
 
 
 
-#include "stdpch.h"
-
 #include "group_modal.h"
 #include "interface_manager.h"
 #include "interface_element.h"

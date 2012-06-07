@@ -55,6 +55,7 @@ CInterfaceGroup::CInterfaceGroup(const TCtorParam &param) : CCtrlBase(param)
 	_UseCursor = true;
 	_IsGroupContainer = false;
 	_IsGroupScrollText = false;
+	_IsGroupInScene = false;
 	_AHOnActive = NULL;
 	_AHOnDeactive = NULL;
 	_AHOnLeftClick = NULL;
@@ -63,6 +64,7 @@ CInterfaceGroup::CInterfaceGroup(const TCtorParam &param) : CCtrlBase(param)
 	_AHOnEscape = NULL;
 	_NeedFrameUpdatePos= false;
 	_LUAEnvTableCreated= false;
+	_DepthForZSort= 0.f;
 
 #ifdef AJM_DEBUG_TRACK_INTERFACE_GROUPS
 	CInterfaceManager::getInstance()->DebugTrackGroupsCreated( this );

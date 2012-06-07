@@ -17,9 +17,10 @@
 #include "widget_manager.h"
 #include "interface_group.h"
 #include "group_container.h"
-#include "group_in_scene.h"
-#include "view_pointer_base.h"
+#include "group_modal.h"
 
+#include "nel/gui/view_renderer.h"
+#include "view_pointer_base.h"
 #include "group_editbox_base.h"
 #include "ctrl_draggable.h"
 
@@ -38,7 +39,7 @@ void CWidgetManager::SMasterGroup::addWindow(CInterfaceGroup *pIG, uint8 nPrio)
 
 	// Priority WIN_PRIORITY_WORLD_SPACE is only for CGroupInScene !
 	// Add this group in another priority list
-	nlassert ((nPrio!=WIN_PRIORITY_MAX) || (dynamic_cast<CGroupInScene*>(pIG)!=NULL));
+	nlassert ((nPrio!=WIN_PRIORITY_MAX) || pIG->isGroupInScene() );
 
 	for (uint8 i = 0; i < WIN_PRIORITY_MAX; ++i)
 	{
@@ -239,7 +240,7 @@ void CWidgetManager::SMasterGroup::sortWorldSpaceGroup ()
 		sortTable.push_back (CElementToSort ());
 		CElementToSort &elm = sortTable.back();
 		elm.pIG = *it;
-		elm.Distance = (static_cast<CGroupInScene*>(*it))->getDepthForZSort();
+		elm.Distance = (*it)->getDepthForZSort();
 
 		it++;
 	}

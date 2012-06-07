@@ -59,7 +59,7 @@ CGroupInScene::CGroupInScene(const TCtorParam &param)
 	Position= CVector::Null;
 
 	_ProjCenter= CVector::Null;
-	_DepthForZSort= 0.f;
+	_IsGroupInScene = true;
 }
 
 // ***************************************************************************

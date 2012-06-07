@@ -249,6 +249,7 @@ public:
 	// quick way to know if the group is a CGroupContainer
 	bool isGroupContainer() const { return _IsGroupContainer; }
 	bool isGroupScrollText() const{ return _IsGroupScrollText; }
+	bool isGroupInScene() const{ return _IsGroupInScene; }
 
 	CInterfaceGroup* getEnclosingContainer();
 
@@ -305,6 +306,9 @@ public:
 	virtual CInterfaceElement *clone();
 	virtual void serial(NLMISC::IStream &f);
 
+	// Return the current Depth, with no ZBias applied.
+	float getDepthForZSort() const { return _DepthForZSort; }
+
 protected:
 
 	void makeNewClip (sint32 &oldClipX, sint32 &oldClipY, sint32 &oldClipW, sint32 &oldClipH);
@@ -347,10 +351,14 @@ protected:
 	bool	_UseCursor			: 1;
 	bool	_IsGroupContainer	: 1;	// faster than a virual call
 	bool	_IsGroupScrollText  : 1;
+	bool    _IsGroupInScene     : 1;
 	bool	_NeedFrameUpdatePos	: 1;	// typically For CGroupInScene
 	sint32	_ResizeFromChildWMargin;
 	sint32	_ResizeFromChildHMargin;
 	sint32  _GroupSizeRef;
+
+	// Projected Depth with no ZBias applied
+	float				_DepthForZSort;
 
 	// handler for activation
 	IActionHandler	*_AHOnActive;
