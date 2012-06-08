@@ -20,9 +20,9 @@
 
 #include "interface_manager.h"
 #include "interface_ddx.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "ctrl_button.h"
-#include "group_modal.h"
+#include "nel/gui/group_modal.h"
 #include "../client_cfg.h"
 
 #include "nel/misc/xml_auto_ptr.h"

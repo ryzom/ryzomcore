@@ -22,7 +22,7 @@
 #include "interface_manager.h"
 #include "../sheet_manager.h"
 #include "inventory_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../client_cfg.h"
 #include "ctrl_base_button.h"
 #include "group_container.h"

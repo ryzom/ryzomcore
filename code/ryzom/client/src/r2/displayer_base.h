@@ -19,7 +19,7 @@
 
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/class_registry.h"
-#include "../interface_v3/interface_element.h"
+#include "nel/gui/interface_element.h"
 
 namespace NLGUI
 {

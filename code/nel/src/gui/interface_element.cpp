@@ -14,15 +14,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "nel/gui/interface_property.h"
 #include "nel/gui/view_renderer.h"
-#include "widget_manager.h"
+#include "nel/gui/widget_manager.h"
 #include "nel/gui/db_manager.h"
-#include "interface_link.h"
+#include "nel/gui/interface_link.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/lua_ihm.h"
-#include "lua_ihm_ryzom.h"
+#include "nel/gui/lua_ihm.h"
 #include "nel/misc/mem_stream.h"
 //
 
@@ -1167,7 +1167,7 @@ int CInterfaceElement::luaSetPosRef(CLuaState &ls)
 int CInterfaceElement::luaSetParentPos(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "setParentPos", 1);
-	CInterfaceElement *ie = CLuaIHMRyzom::getUIOnStack(ls, 1);
+	CInterfaceElement *ie = CLuaIHM::getUIOnStack(ls, 1);
 	if(ie)
 	{
 		setParentPos(ie);

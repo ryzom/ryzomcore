@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "view_base.h"
-#include "interface_group.h"
-#include "widget_manager.h"
+#include "nel/gui/view_base.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/widget_manager.h"
 
 CViewBase::~CViewBase()
 {

@@ -19,7 +19,7 @@
 #ifndef RZ_CTRL_TOOLTIP_H
 #define RZ_CTRL_TOOLTIP_H
 
-#include "ctrl_base.h"
+#include "nel/gui/ctrl_base.h"
 #include "nel/3d/u_texture.h"
 
 namespace NLGUI

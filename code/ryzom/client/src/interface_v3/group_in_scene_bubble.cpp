@@ -21,7 +21,7 @@
 #include "interface_manager.h"
 #include "skill_manager.h"
 #include "../character_cl.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../entities.h"
 #include "group_paragraph.h" // For CCtrlLink
 #include "../net_manager.h"

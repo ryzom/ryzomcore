@@ -19,7 +19,7 @@
 
 #include "stdpch.h"
 
-#include "interface_options.h"
+#include "nel/gui/interface_options.h"
 #include "interface_manager.h"
 #include "group_menu.h"
 #include "nel/misc/xml_auto_ptr.h"

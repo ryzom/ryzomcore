@@ -23,7 +23,7 @@
 #include "macrocmd_key.h"
 
 #include "interface_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "dbctrl_sheet.h"
 #include "ctrl_button.h"
 #include "group_editbox.h"

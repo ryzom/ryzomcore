@@ -20,7 +20,7 @@
 
 #include "group_career.h"
 #include "interface_manager.h"
-#include "interface_element.h"
+#include "nel/gui/interface_element.h"
 
 //#include "game_share/jobs.h"
 #include "nel/misc/xml_auto_ptr.h"

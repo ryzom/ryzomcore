@@ -23,7 +23,7 @@
 #include "group_compas.h"
 #include "interface_3d_scene.h"
 #include "../entities.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "group_map.h"
 #include "../continent.h"
 #include "../continent_manager.h"

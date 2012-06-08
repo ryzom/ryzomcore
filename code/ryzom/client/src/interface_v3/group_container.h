@@ -19,8 +19,8 @@
 #ifndef RZ_GROUP_CONTAINER_H
 #define RZ_GROUP_CONTAINER_H
 
-#include "interface_group.h"
-#include "group_container_base.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/group_container_base.h"
 #include "nel/misc/smart_ptr.h"
 
 namespace NLGUI

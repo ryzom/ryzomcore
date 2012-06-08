@@ -20,11 +20,11 @@
 
 #include "group_tree.h"
 #include "interface_manager.h"
-#include "interface_element.h"
+#include "nel/gui/interface_element.h"
 #include "view_bitmap.h"
 #include "view_text.h"
 #include "group_container.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "nel/gui/lua_ihm.h"
 #include "lua_ihm_ryzom.h"
 
@@ -1491,7 +1491,7 @@ int CGroupTree::SNode::luaGetParentTree(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, "getParentTree", 0);
 	if (ParentTree)
 	{
-		CLuaIHMRyzom::pushUIOnStack(ls, ParentTree);
+		CLuaIHM::pushUIOnStack(ls, ParentTree);
 	}
 	else
 	{

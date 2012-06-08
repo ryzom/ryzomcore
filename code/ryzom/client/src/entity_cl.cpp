@@ -52,7 +52,7 @@
 #include "debug_client.h"
 #include "misc.h"
 #include "client_cfg.h"
-#include "interface_v3/action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/group_container.h"
 #include "interface_v3/guild_manager.h"

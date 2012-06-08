@@ -91,7 +91,7 @@
 #include "misc.h"
 #include "interface_v3/people_interraction.h"
 #include "debug_client.h"
-#include "interface_v3/action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "interface_v3/action_handler_misc.h"
 #include "interface_v3/action_handler_item.h"
 #include "fx_manager.h"
@@ -3234,7 +3234,7 @@ class CHandlerDebugUiDumpElementUnderMouse : public IActionHandler
 		CLuaState *lua = CLuaManager::getInstance().getLuaState();
 		if (!lua) return;
 		CLuaStackRestorer lsr(lua, 0);
-		CLuaIHMRyzom::pushUIOnStack(*lua, HighlightedDebugUI);
+		CLuaIHM::pushUIOnStack(*lua, HighlightedDebugUI);
 		lua->pushValue(LUA_GLOBALSINDEX);
 		CLuaObject env(*lua);
 		env["inspect"].callNoThrow(1, 0);

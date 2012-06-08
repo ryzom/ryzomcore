@@ -14,14 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "action_handler.h"
-//#include "group_container.h"
-#include "group_container_base.h"
+#include "nel/gui/action_handler.h"
+#include "nel/gui/group_container_base.h"
 #include "nel/gui/interface_property.h"
 #include "nel/gui/interface_expr.h"
 #include "nel/gui/db_manager.h"
-#include "interface_link.h"
-#include "widget_manager.h"
+#include "nel/gui/interface_link.h"
+#include "nel/gui/widget_manager.h"
 
 using namespace std;
 using namespace NLMISC;

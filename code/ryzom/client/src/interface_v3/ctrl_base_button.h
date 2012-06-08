@@ -19,8 +19,8 @@
 #ifndef NL_CTRL_BASE_BUTTON_H
 #define NL_CTRL_BASE_BUTTON_H
 
-#include "ctrl_base.h"
-#include "action_handler.h"
+#include "nel/gui/ctrl_base.h"
+#include "nel/gui/action_handler.h"
 
 
 // ***************************************************************************

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "group_container_base.h"
+#include "nel/gui/group_container_base.h"
 
 CGroupContainerBase::CGroupContainerBase( const CViewBase::TCtorParam &param ) :
 CInterfaceGroup( param )

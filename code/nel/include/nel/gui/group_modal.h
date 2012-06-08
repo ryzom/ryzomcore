@@ -20,7 +20,7 @@
 #define NL_GROUP_MODAL_H
 
 #include "nel/misc/types_nl.h"
-#include "group_frame.h"
+#include "nel/gui/group_frame.h"
 
 
 // ***************************************************************************

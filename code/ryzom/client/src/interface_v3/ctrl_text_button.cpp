@@ -549,7 +549,7 @@ int CCtrlTextButton::luaGetViewText(CLuaState &ls)
 {
 	const char *funcName = "getViewText";
 	CLuaIHM::checkArgCount(ls, funcName, 0);
-	CLuaIHMRyzom::pushUIOnStack(ls, getViewText());
+	CLuaIHM::pushUIOnStack(ls, getViewText());
 	return 1;
 }
 

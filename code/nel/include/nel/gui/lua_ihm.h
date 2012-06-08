@@ -19,6 +19,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/gui/lua_helper.h"
+#include "nel/gui/interface_element.h"
 
 #define IHM_LUA_METATABLE		"__ui_metatable"
 #define IHM_LUA_ENVTABLE		"__ui_envtable"
@@ -122,13 +123,28 @@ namespace NLGUI
 		// push a reflected property on the stack
 		// NB : no check is done that 'property' is part of the class info of 'reflectedObject'
 		static void luaValueFromReflectedProperty(CLuaState &ls, CReflectable &reflectedObject, const CReflectedProperty &property);
-
-
-
+		
 	private:
+		// Functions for the ui metatable
+		static class CInterfaceElement* getUIRelative( CInterfaceElement *pIE, const std::string &propName );
+		static int luaUIIndex( CLuaState &ls );
+		static int luaUINewIndex( CLuaState &ls );
+		static int luaUIEq( CLuaState &ls );
+		static int luaUINext( CLuaState &ls );
+		static int luaUIDtor( CLuaState &ls );
+
+
 		static void	registerBasics(CLuaState &ls);
 		static void	registerIHM(CLuaState &ls);
 		static void createLuaEnumTable(CLuaState &ls, const std::string &str);
+
+	public:
+		static void pushUIOnStack(CLuaState &ls, CInterfaceElement *pIE);
+		static bool	isUIOnStack(CLuaState &ls, sint index);
+		static CInterfaceElement	*getUIOnStack(CLuaState &ls, sint index);
+		static void	checkArgTypeUIElement(CLuaState &ls, const char *funcName, uint index);
+
+	private:
 
 		//////////////////////////////////////////// Exported functions //////////////////////////////////////////////////////
 

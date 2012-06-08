@@ -22,7 +22,7 @@
 using namespace std;
 using namespace NLMISC;
 
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../motion/user_controls.h"
 #include "../view.h"
 #include "../misc.h"

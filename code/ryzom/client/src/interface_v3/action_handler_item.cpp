@@ -19,7 +19,7 @@
 #include "stdpch.h"
 
 #include "action_handler_item.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "interface_manager.h"
 #include "../sheet_manager.h"
 #include "dbctrl_sheet.h"

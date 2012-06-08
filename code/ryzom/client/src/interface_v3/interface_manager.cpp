@@ -38,7 +38,7 @@
 #include "nel/gui/interface_expr.h"
 #include "register_interface_elements.h"
 // Action / Observers
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "interface_observer.h"
 #include "interface_anim.h"
 #include "interface_ddx.h"
@@ -60,7 +60,7 @@
 #include "group_list.h"
 #include "group_menu.h"
 #include "group_container.h"
-#include "group_modal.h"
+#include "nel/gui/group_modal.h"
 #include "group_editbox.h"
 #include "group_in_scene_bubble.h"
 #include "group_skills.h"
@@ -4815,9 +4815,9 @@ void		CInterfaceManager::getLuaValueInfo(std::string &str, sint index)
 		// If its a Userdata, try to display UI info
 		else if(type==LUA_TUSERDATA)
 		{
-			if(CLuaIHMRyzom::isUIOnStack(ls, index))
+			if(CLuaIHM::isUIOnStack(ls, index))
 			{
-				CInterfaceElement	*ui= CLuaIHMRyzom::getUIOnStack(ls, index);
+				CInterfaceElement	*ui= CLuaIHM::getUIOnStack(ls, index);
 				str+= NLMISC::toString(" (ui=%p)", ui);
 			}
 		}

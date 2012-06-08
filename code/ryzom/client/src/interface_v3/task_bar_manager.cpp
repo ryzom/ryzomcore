@@ -24,7 +24,7 @@
 #include "macrocmd_manager.h"
 #include "dbgroup_list_sheet.h"
 
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "group_container.h"
 #include "../actions_client.h"
 #include "ctrl_button.h"

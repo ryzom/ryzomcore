@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "group_frame.h"
-#include "widget_manager.h"
-#include "interface_options.h"
-#include "interface_element.h"
+#include "nel/gui/group_frame.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/interface_options.h"
+#include "nel/gui/interface_element.h"
 #include "nel/gui/view_renderer.h"
 #include "nel/misc/xml_auto_ptr.h"
 

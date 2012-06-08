@@ -19,7 +19,7 @@
 #ifndef RZ_INTERFACE_SCENE_3D_H
 #define RZ_INTERFACE_SCENE_3D_H
 
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "nel/3d/u_point_light.h"
 #include "nel/3d/u_particle_system_instance.h"
 

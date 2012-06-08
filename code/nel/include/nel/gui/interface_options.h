@@ -19,12 +19,13 @@
 #ifndef RZ_INTERFACE_LAYER_H
 #define RZ_INTERFACE_LAYER_H
 
+#include "nel/misc/debug.h"
 #include "nel/misc/smart_ptr.h"
-
+#include "nel/misc/rgba.h"
 
 namespace NL3D
 {
-class UAnimationSet;
+	class UAnimationSet;
 }
 
 

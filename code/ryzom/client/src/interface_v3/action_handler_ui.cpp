@@ -22,7 +22,7 @@
 // Interface
 #include "interface_manager.h"
 #include "bot_chat_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "group_container.h"
 #include "macrocmd_manager.h"
 #include "chat_window.h"

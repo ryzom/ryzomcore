@@ -22,7 +22,7 @@
 #include "nel/misc/types_nl.h"
 #include "main_loop.h"
 #include "interface_v3/ctrl_text_button.h"
-#include "interface_v3/interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "interface_v3/interface_pointer.h"
 #include "game_share/bot_chat_types.h"
 

@@ -21,7 +21,7 @@
 
 #include "interface_manager.h"
 #include "../string_manager_client.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "view_text.h"
 #include "dbctrl_sheet.h"
 #include "group_container.h"

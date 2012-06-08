@@ -20,8 +20,8 @@
 #define RZ_INTERFACE_ANIM_H
 
 #include "nel/gui/interface_property.h"
-#include "interface_group.h"
-#include "interface_link.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/interface_link.h"
 
 #include "nel/3d/u_track.h"
 

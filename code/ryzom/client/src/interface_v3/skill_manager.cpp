@@ -25,7 +25,7 @@
 #include "game_share/fame.h"
 #include "../sheet_manager.h"
 #include "nel/misc/cdb_leaf.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "sbrick_manager.h"
 #include "dbgroup_combo_box.h"
 #include "view_bitmap.h"

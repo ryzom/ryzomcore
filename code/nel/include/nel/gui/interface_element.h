@@ -22,6 +22,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/string_mapper.h"
 #include "nel/misc/smart_ptr.h"
+#include "nel/misc/vector.h"
 #include "nel/gui/interface_property.h"
 #include "nel/gui/reflect.h"
 #include "nel/gui/interface_common.h"

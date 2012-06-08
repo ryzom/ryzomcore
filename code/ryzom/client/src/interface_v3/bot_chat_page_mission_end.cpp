@@ -20,7 +20,7 @@
 #include "stdpch.h"
 #include "bot_chat_page_mission_end.h"
 #include "interface_manager.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "bot_chat_manager.h"
 #include "interface_manager.h"
 #include "../client_cfg.h"

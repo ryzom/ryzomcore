@@ -17,7 +17,7 @@
 #ifndef CTRL_SCROLL_BASE_H
 #define CTRL_SCROLL_BASE_H
 
-#include "ctrl_base.h"
+#include "nel/gui/ctrl_base.h"
 
 class CInterfaceGroup;
 

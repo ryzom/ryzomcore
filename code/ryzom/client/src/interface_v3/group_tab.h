@@ -20,7 +20,7 @@
 #define NL_GROUP_TAB_H
 
 #include "nel/misc/types_nl.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "ctrl_text_button.h"
 
 

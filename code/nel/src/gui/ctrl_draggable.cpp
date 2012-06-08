@@ -1,4 +1,4 @@
-#include "ctrl_draggable.h"
+#include "nel/gui/ctrl_draggable.h"
 
 CCtrlDraggable* CCtrlDraggable::_LastDraggedSheet = NULL;
 

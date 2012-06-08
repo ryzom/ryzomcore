@@ -19,8 +19,8 @@
 #ifndef NL_INTERFACE_GROUP_H
 #define NL_INTERFACE_GROUP_H
 
-#include "ctrl_base.h"
-#include "action_handler.h"
+#include "nel/gui/ctrl_base.h"
+#include "nel/gui/action_handler.h"
 
 // ----------------------------------------------------------------------------
 class CInterfaceGroup : public CCtrlBase

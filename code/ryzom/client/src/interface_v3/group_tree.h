@@ -20,7 +20,7 @@
 #define NL_GROUP_TREE_H
 
 #include "nel/misc/types_nl.h"
-#include "group_frame.h"
+#include "nel/gui/group_frame.h"
 #include "nel/misc/smart_ptr.h"
 
 class CViewBitmap;

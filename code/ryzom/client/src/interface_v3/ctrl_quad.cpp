@@ -16,7 +16,7 @@
 
 #include "stdpch.h"
 #include "ctrl_quad.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "interface_manager.h"
 
 using namespace NLMISC;

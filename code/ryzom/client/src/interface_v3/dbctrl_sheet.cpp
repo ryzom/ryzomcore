@@ -30,7 +30,7 @@
 #include "game_share/inventories.h"
 #include "list_sheet_base.h"
 #include "../string_manager_client.h"
-#include "interface_options.h"
+#include "nel/gui/interface_options.h"
 #include "inventory_manager.h"
 #include "skill_manager.h"
 #include "../user_entity.h"
@@ -130,7 +130,7 @@ ucstring CControlSheetTooltipInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet, 
 // ***************************************************************************
 int CDBCtrlSheet::luaGetDraggedSheet(CLuaState &ls)
 {
-	CLuaIHMRyzom::pushUIOnStack(ls, dynamic_cast<CInterfaceElement *>( dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) ));
+	CLuaIHM::pushUIOnStack(ls, dynamic_cast<CInterfaceElement *>( dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) ));
 	return 1;
 }
 

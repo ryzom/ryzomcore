@@ -19,7 +19,7 @@
 #ifndef RZ_GROUP_CONTAINER_H
 #define RZ_GROUP_CONTAINER_H
 
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 
 
 

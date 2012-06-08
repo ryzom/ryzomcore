@@ -55,7 +55,7 @@
 
 #include "interface_v3/view_bitmap.h"
 
-#include "interface_v3/interface_link.h"
+#include "nel/gui/interface_link.h"
 #include "cursor_functions.h"
 #include "pacs_client.h"
 #include "ig_client.h"

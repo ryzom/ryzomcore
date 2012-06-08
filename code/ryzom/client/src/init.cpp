@@ -69,7 +69,7 @@
 #include "sheet_manager.h"
 
 #include "interface_v3/sbrick_manager.h"
-#include "interface_v3/widget_manager.h"
+#include "nel/gui/widget_manager.h"
 //
 #include "gabarit.h"
 #include "hair_set.h"

@@ -20,7 +20,7 @@
 #define RZ_CTRL_SCROLL_H
 
 #include "nel/misc/types_nl.h"
-#include "ctrl_scroll_base.h"
+#include "nel/gui/ctrl_scroll_base.h"
 
 /**
  * Class handling scollbar function

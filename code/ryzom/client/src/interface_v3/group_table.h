@@ -20,7 +20,7 @@
 #define NL_GROUP_TABLE_H
 
 #include "nel/misc/types_nl.h"
-#include "group_frame.h"
+#include "nel/gui/group_frame.h"
 #include "view_text.h"
 #include "view_link.h"
 #include "ctrl_button.h"

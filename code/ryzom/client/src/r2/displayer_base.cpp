@@ -21,7 +21,7 @@
 #include "game_share/object.h"
 //
 #include "nel/gui/lua_ihm.h"
-#include "../interface_v3/interface_element.h"
+#include "nel/gui/interface_element.h"
 
 namespace R2
 {

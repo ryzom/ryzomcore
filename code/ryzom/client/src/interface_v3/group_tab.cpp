@@ -235,7 +235,7 @@ void	CGroupTab::addTab(CCtrlTabButton * tabB, sint index)
 int CGroupTab::luaAddTab(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "CGroupTab::addTab", 1);
-	CCtrlTabButton *tabB = dynamic_cast<CCtrlTabButton *>(CLuaIHMRyzom::getUIOnStack(ls, 1));
+	CCtrlTabButton *tabB = dynamic_cast<CCtrlTabButton *>(CLuaIHM::getUIOnStack(ls, 1));
 	if (tabB)
 	{
 		// don't use addTab to avoid selection of new tab
@@ -260,7 +260,7 @@ int CGroupTab::luaAddTabWithOrder(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 2);
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER);
 
-	CCtrlTabButton *tabB = dynamic_cast<CCtrlTabButton *>(CLuaIHMRyzom::getUIOnStack(ls, 1));
+	CCtrlTabButton *tabB = dynamic_cast<CCtrlTabButton *>(CLuaIHM::getUIOnStack(ls, 1));
 	if (tabB)
 	{
 		// don't use addTab to avoid selection of new tab
@@ -395,7 +395,7 @@ int	CGroupTab::luaGetTabButton(CLuaState &ls)
 	CCtrlTabButton* tab = getTabButton((uint) ls.toNumber(1));
 	if(tab != NULL)
 	{
-		CLuaIHMRyzom::pushUIOnStack(ls, tab);
+		CLuaIHM::pushUIOnStack(ls, tab);
 		return 1;
 	}
 	return 0;
@@ -726,7 +726,7 @@ int	CGroupTab::luaGetGroup(CLuaState &ls)
 	CInterfaceGroup* group = getGroup((uint) ls.toNumber(1));
 	if(group != NULL)
 	{
-		CLuaIHMRyzom::pushUIOnStack(ls, group);
+		CLuaIHM::pushUIOnStack(ls, group);
 		return 1;
 	}
 	return 0;

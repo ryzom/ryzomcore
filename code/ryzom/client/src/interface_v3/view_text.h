@@ -19,7 +19,7 @@
 #ifndef NL_VIEW_TEXT_H
 #define NL_VIEW_TEXT_H
 
-#include "view_base.h"
+#include "nel/gui/view_base.h"
 #include "../misc.h"
 #include "nel/3d/u_text_context.h"
 

@@ -1,4 +1,4 @@
-#include "view_pointer_base.h"
+#include "nel/gui/view_pointer_base.h"
 
 CViewPointerBase::CViewPointerBase( const CViewBase::TCtorParam &param ) :
 CViewBase( param )

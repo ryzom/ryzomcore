@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "ctrl_scroll_base.h"
+#include "nel/gui/ctrl_scroll_base.h"
 
 CCtrlScrollBase::CCtrlScrollBase( const TCtorParam &param ) :
 CCtrlBase( param )

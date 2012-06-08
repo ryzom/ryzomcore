@@ -38,7 +38,7 @@
 #include "sphrase_manager.h"
 
 // For handlers
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "dbctrl_sheet.h"
 
 #include "../sheet_manager.h"

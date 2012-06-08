@@ -20,7 +20,7 @@
 #include "nel/misc/command.h"
 #include "nel/misc/file.h"
 #include "nel/3d/u_camera.h"
-#include "interface_v3/action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "client_cfg.h"
 #include "view.h"
 //

@@ -19,8 +19,8 @@
 #ifndef RZ_CTRL_EDITBOX_H
 #define RZ_CTRL_EDITBOX_H
 
-#include "interface_group.h"
-#include "group_editbox_base.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/group_editbox_base.h"
 #include "nel/3d/u_texture.h"
 
 namespace NLGUI

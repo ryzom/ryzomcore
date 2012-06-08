@@ -20,7 +20,7 @@
 #define RZ_CTRL_BASE_H
 
 #include "nel/misc/types_nl.h"
-#include "view_base.h"
+#include "nel/gui/view_base.h"
 #include "nel/gui/event_descriptor.h"
 
 class CCtrlBase : public CViewBase

@@ -21,7 +21,7 @@
 
 // Interface includes
 #include "interface_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "action_handler_base.h"
 #include "action_handler_misc.h"
 #include "bot_chat_manager.h"
@@ -61,7 +61,7 @@
 #include "../game_context_menu.h"
 #include "../sound_manager.h"
 #include "../far_tp.h"
-#include "interface_link.h"
+#include "nel/gui/interface_link.h"
 #include "../npc_icon.h"
 
 // Game Share

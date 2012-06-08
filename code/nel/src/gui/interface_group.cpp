@@ -14,17 +14,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "libxml/globals.h"
+#include "nel/misc/debug.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/misc/stream.h"
 #include "nel/gui/lua_manager.h"
 #include "nel/gui/lua_ihm.h"
 #include "nel/gui/view_renderer.h"
-
-#include "interface_group.h"
-#include "interface_link.h"
-#include "widget_manager.h"
-#include "ctrl_scroll_base.h"
-#include "lua_ihm_ryzom.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/interface_link.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/ctrl_scroll_base.h"
+#include "nel/gui/lua_ihm.h"
 
 using namespace std;
 using namespace NL3D;
@@ -444,7 +445,7 @@ void CInterfaceGroup::addGroup (CInterfaceGroup *child, sint eltOrder /*= -1*/)
 int CInterfaceGroup::luaAddGroup (CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "CInterfaceGroup::addTab", 1);
-	CInterfaceGroup * group = dynamic_cast<CInterfaceGroup *>(CLuaIHMRyzom::getUIOnStack(ls, 1));
+	CInterfaceGroup * group = dynamic_cast<CInterfaceGroup *>(CLuaIHM::getUIOnStack(ls, 1));
 	if(group)
 	{
 		group->setParent(this);
@@ -615,7 +616,7 @@ bool CInterfaceGroup::delGroup (CInterfaceGroup *child, bool dontDelete /* = fal
 int CInterfaceGroup::luaDelGroup (CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "CInterfaceGroup::delTab", 1);
-	CInterfaceGroup * group = dynamic_cast<CInterfaceGroup *>(CLuaIHMRyzom::getUIOnStack(ls, 1));
+	CInterfaceGroup * group = dynamic_cast<CInterfaceGroup *>(CLuaIHM::getUIOnStack(ls, 1));
 	if(group)
 	{
 		delGroup(group);
@@ -642,7 +643,7 @@ int CInterfaceGroup::luaGetGroup(CLuaState &ls)
 	{
 		CLuaIHM::fails(ls, "getGroup : try to index group %s, but there are only %d son groups", ls.toString(1), (int) _ChildrenGroups.size());
 	}
-	CLuaIHMRyzom::pushUIOnStack(ls, _ChildrenGroups[index]);
+	CLuaIHM::pushUIOnStack(ls, _ChildrenGroups[index]);
 	return 1;
 }
 
@@ -1851,7 +1852,7 @@ int CInterfaceGroup::luaFind(CLuaState &ls)
 	}
 	else
 	{
-		CLuaIHMRyzom::pushUIOnStack(ls, element);
+		CLuaIHM::pushUIOnStack(ls, element);
 	}
 	return 1;
 }
@@ -1870,7 +1871,7 @@ CInterfaceElement* CInterfaceGroup::findFromShortId(const std::string &id)
 int CInterfaceGroup::luaGetEnclosingContainer(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "CInterfaceGroup::getEnclosingContainer", 0);
-	CLuaIHMRyzom::pushUIOnStack(ls, getEnclosingContainer());
+	CLuaIHM::pushUIOnStack(ls, getEnclosingContainer());
 	return 1;
 }
 

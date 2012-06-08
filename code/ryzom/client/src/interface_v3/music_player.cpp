@@ -19,7 +19,7 @@
 #include "stdpch.h"
 
 #include "music_player.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../input.h"
 #include "../sound_manager.h"
 #include "interface_manager.h"

@@ -19,8 +19,8 @@
 #ifndef RZ_GROUP_MENU_H
 #define RZ_GROUP_MENU_H
 
-#include "interface_group.h"
-#include "group_modal.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/group_modal.h"
 #include "view_text.h"
 
 #include "ctrl_text_button.h"

@@ -1,7 +1,7 @@
 #ifndef VIEW_POINTER_BASE_H
 #define VIEW_POINTER_BASE_H
 
-#include "view_base.h"
+#include "nel/gui/view_base.h"
 
 class CViewPointerBase : public CViewBase
 {

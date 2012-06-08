@@ -27,10 +27,10 @@
 //
 #include "bot_chat_page_trade.h"
 #include "interface_manager.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "inventory_manager.h"
 #include "../net_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "bot_chat_page_all.h"
 #include "bot_chat_manager.h"
 #include "dbctrl_sheet.h"

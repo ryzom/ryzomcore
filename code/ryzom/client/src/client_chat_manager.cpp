@@ -28,7 +28,7 @@
 #include "interface_v3/people_interraction.h"
 #include "string_manager_client.h"
 #include "entity_cl.h"
-#include "interface_v3/action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "entities.h"
 #include "interface_v3/group_editbox.h"
 #include "permanent_ban.h"

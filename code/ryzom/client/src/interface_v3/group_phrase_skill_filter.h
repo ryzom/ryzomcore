@@ -22,7 +22,7 @@
 #include "nel/misc/types_nl.h"
 #include "game_share/brick_families.h"
 #include "game_share/skills.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "group_tree.h"
 
 

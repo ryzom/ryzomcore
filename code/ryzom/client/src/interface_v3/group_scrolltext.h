@@ -21,7 +21,7 @@
 #define CL_GROUP_SCROLLTEXT_H
 
 #include "nel/misc/types_nl.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 
 class CGroupList;
 class CCtrlScroll;

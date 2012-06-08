@@ -45,7 +45,7 @@
 #include <vector>
 // Client
 #include "connection.h"
-#include "interface_v3/action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "sound_manager.h"
 #include "input.h"
 #include "login.h"

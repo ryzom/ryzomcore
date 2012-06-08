@@ -23,7 +23,7 @@
 #include "people_interraction.h"
 #include "nel/misc/algo.h"
 #include "nel/gui/interface_expr.h"
-#include "interface_link.h"
+#include "nel/gui/interface_link.h"
 #include "../client_chat_manager.h"
 #include "../motion/user_controls.h"
 #include "../entity_cl.h"

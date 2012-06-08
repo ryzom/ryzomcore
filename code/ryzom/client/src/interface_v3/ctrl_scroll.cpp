@@ -16,7 +16,7 @@
 
 
 #include "interface_manager.h"
-#include "widget_manager.h"
+#include "nel/gui/widget_manager.h"
 #include "ctrl_scroll.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "group_menu.h"
@@ -908,7 +908,7 @@ int CCtrlScroll::luaEnsureVisible(CLuaState &ls)
 {
 	const char *funcName = "ensureVisible";
 	CLuaIHM::checkArgCount(ls, funcName, 3);
-	CLuaIHMRyzom::checkArgTypeUIElement(ls, funcName, 1);
+	CLuaIHM::checkArgTypeUIElement(ls, funcName, 1);
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
 	THotSpot	hs[2];
@@ -959,7 +959,7 @@ int CCtrlScroll::luaEnsureVisible(CLuaState &ls)
 			}
 		}
 	}
-	ensureVisible(CLuaIHMRyzom::getUIOnStack(ls, 1), hs[0], hs[1]);
+	ensureVisible(CLuaIHM::getUIOnStack(ls, 1), hs[0], hs[1]);
 	return 0;
 }
 

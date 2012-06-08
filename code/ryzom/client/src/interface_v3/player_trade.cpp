@@ -22,7 +22,7 @@
 #include "interface_manager.h"
 #include "dbctrl_sheet.h"
 #include "dbgroup_list_sheet.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "inventory_manager.h"
 //
 #include "game_share/inventories.h"

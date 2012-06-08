@@ -21,7 +21,7 @@
 #define NL_VIEW_BITMAP_COMBO_H
 
 #include "nel/misc/cdb.h"
-#include "view_base.h"
+#include "nel/gui/view_base.h"
 #include "nel/3d/u_texture.h"
 #include <string>
 #include <vector>

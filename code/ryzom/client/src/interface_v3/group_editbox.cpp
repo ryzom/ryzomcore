@@ -24,7 +24,7 @@
 #include "nel/misc/command.h"
 #include "view_text.h"
 #include "nel/misc/xml_auto_ptr.h"
-#include "interface_options.h"
+#include "nel/gui/interface_options.h"
 #include "dbctrl_sheet.h"
 #include "group_container.h"
 #include "../time_client.h"

@@ -20,7 +20,7 @@
 #define NL_LIST_SHEET_BASE_H
 
 #include "nel/misc/types_nl.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 
 
 class	CDBCtrlSheet;

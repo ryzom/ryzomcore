@@ -24,9 +24,9 @@
 #include "nel/misc/smart_ptr.h"
 // client
 #include "nel/gui/reflect.h"
-#include "ctrl_draggable.h"
+#include "nel/gui/ctrl_draggable.h"
 #include "nel/gui/interface_expr.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "sphrase_manager.h"
 // game share
 #include "game_share/brick_types.h"

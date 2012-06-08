@@ -1,7 +1,7 @@
 #ifndef CTRL_DRAGGABLE_H
 #define CTRL_DRAGGABLE_H
 
-#include "ctrl_base.h"
+#include "nel/gui/ctrl_base.h"
 
 class CCtrlDraggable : public CCtrlBase
 {

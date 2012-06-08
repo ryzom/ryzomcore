@@ -21,10 +21,10 @@
 
 #include "group_container.h"
 #include "interface_manager.h"
-#include "interface_options.h"
+#include "nel/gui/interface_options.h"
 #include "interface_options_ryzom.h"
 #include "nel/misc/xml_auto_ptr.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../time_client.h"
 #include "group_editbox.h"
 #include "view_text_formated.h"

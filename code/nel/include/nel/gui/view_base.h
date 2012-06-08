@@ -21,7 +21,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/factory.h"
-#include "interface_element.h"
+#include "nel/gui/interface_element.h"
 
 class CViewBase : public CInterfaceElement
 {

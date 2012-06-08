@@ -19,11 +19,12 @@
 #include "nel/gui/reflect.h"
 #include "nel/gui/db_manager.h"
 #include "nel/misc/cdb_branch.h"
-#include "action_handler.h"
-#include "interface_link.h"
-#include "interface_element.h"
-#include "interface_group.h"
-#include "widget_manager.h"
+#include "nel/gui/action_handler.h"
+#include "nel/gui/interface_link.h"
+#include "nel/gui/interface_element.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/misc/algo.h"
 
 using namespace std;
 using namespace NLMISC;

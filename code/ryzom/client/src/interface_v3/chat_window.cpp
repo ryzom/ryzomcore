@@ -34,7 +34,7 @@
 #include "group_editbox.h"
 #include "group_tab.h"
 #include "interface_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../client_chat_manager.h"
 //
 #include "../session_browser_impl.h"

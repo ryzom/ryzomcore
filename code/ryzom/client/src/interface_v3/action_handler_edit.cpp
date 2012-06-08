@@ -22,7 +22,7 @@
 using namespace std;
 using namespace NLMISC;
 
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "group_editbox.h"
 #include "interface_manager.h"
 #include "../client_chat_manager.h"

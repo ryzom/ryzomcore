@@ -22,7 +22,7 @@
 #include "people_interraction.h"
 #include "nel/gui/interface_expr.h"
 #include "interface_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "action_handler_misc.h"
 #include "chat_window.h"
 #include "../entity_animation_manager.h"

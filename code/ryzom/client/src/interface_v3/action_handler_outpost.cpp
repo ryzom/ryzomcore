@@ -18,7 +18,7 @@
 
 // Interface includes
 #include "interface_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "action_handler_tools.h"
 #include "game_share/outpost.h"
 #include "nel/gui/interface_expr.h"

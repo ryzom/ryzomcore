@@ -20,7 +20,7 @@
 #define RZ_CTRL_COL_PICK_H
 
 #include "nel/misc/types_nl.h"
-#include "ctrl_base.h"
+#include "nel/gui/ctrl_base.h"
 
 /**
  * Class handling a Color Picker

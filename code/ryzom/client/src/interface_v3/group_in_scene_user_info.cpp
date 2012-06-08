@@ -20,7 +20,7 @@
 #include "interface_manager.h"
 #include "view_bitmap.h"
 #include "group_in_scene_user_info.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../entities.h"
 #include "../user_entity.h"
 #include "../forage_source_cl.h"

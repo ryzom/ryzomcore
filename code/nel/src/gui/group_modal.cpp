@@ -16,8 +16,8 @@
 
 
 
-#include "group_modal.h"
-#include "interface_element.h"
+#include "nel/gui/group_modal.h"
+#include "nel/gui/interface_element.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/view_renderer.h"
 

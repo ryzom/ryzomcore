@@ -23,7 +23,7 @@
 #include "group_menu.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "view_bitmap.h"
-#include "action_handler.h" // Just for getAllParams
+#include "nel/gui/action_handler.h" // Just for getAllParams
 #include "nel/gui/lua_ihm.h"
 #include "lua_ihm_ryzom.h"
 
@@ -1693,7 +1693,7 @@ int CGroupSubMenu::luaGetSubMenu(CLuaState &ls)
 	const char *funcName = "getSubMenu";
 	CLuaIHM::checkArgCount(ls, funcName, 1);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-	CLuaIHMRyzom::pushUIOnStack(ls, getSubMenu((uint) ls.toNumber(1)));
+	CLuaIHM::pushUIOnStack(ls, getSubMenu((uint) ls.toNumber(1)));
 	return 1;
 }
 
@@ -1704,7 +1704,7 @@ int CGroupSubMenu::luaAddSubMenu(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 1);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
 	setSubMenu((uint) ls.toNumber(1), new CGroupSubMenu(CViewText::TCtorParam()));
-	CLuaIHMRyzom::pushUIOnStack(ls, getSubMenu((uint) ls.toNumber(1)));
+	CLuaIHM::pushUIOnStack(ls, getSubMenu((uint) ls.toNumber(1)));
 	return 1;
 }
 
@@ -1804,11 +1804,11 @@ int CGroupSubMenu::luaSetUserGroupRight(CLuaState &ls)
 	const char *funcName = "setUserGroupRight";
 	CLuaIHM::checkArgCount(ls, funcName, 2);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-	if (!(CLuaIHMRyzom::isUIOnStack(ls, 2) || ls.isNil(2)))
+	if (!(CLuaIHM::isUIOnStack(ls, 2) || ls.isNil(2)))
 	{
 		CLuaIHM::fails(ls, "%s :  Group required as argument 2", funcName);
 	}
-	CInterfaceElement *el = CLuaIHMRyzom::getUIOnStack(ls, 2);
+	CInterfaceElement *el = CLuaIHM::getUIOnStack(ls, 2);
 	CInterfaceGroup *group = dynamic_cast<CInterfaceGroup *>(el);
 	if (el && !group)
 	{
@@ -1824,11 +1824,11 @@ int CGroupSubMenu::luaSetUserGroupLeft(CLuaState &ls)
 	const char *funcName = "setUserGroupLeft";
 	CLuaIHM::checkArgCount(ls, funcName, 2);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-	if (!(CLuaIHMRyzom::isUIOnStack(ls, 2) || ls.isNil(2)))
+	if (!(CLuaIHM::isUIOnStack(ls, 2) || ls.isNil(2)))
 	{
 		CLuaIHM::fails(ls, "%s :  Group required as argument 2", funcName);
 	}
-	CInterfaceElement *el = CLuaIHMRyzom::getUIOnStack(ls, 2);
+	CInterfaceElement *el = CLuaIHM::getUIOnStack(ls, 2);
 	CInterfaceGroup *group = dynamic_cast<CInterfaceGroup *>(el);
 	if (el && !group)
 	{
@@ -1845,7 +1845,7 @@ int CGroupSubMenu::luaGetUserGroupRight(CLuaState &ls)
 	const char *funcName = "getUserGroupRight";
 	CLuaIHM::checkArgCount(ls, funcName, 1);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-	CLuaIHMRyzom::pushUIOnStack(ls, getUserGroupRight((uint) ls.toNumber(1)));
+	CLuaIHM::pushUIOnStack(ls, getUserGroupRight((uint) ls.toNumber(1)));
 	return 1;
 }
 
@@ -1859,7 +1859,7 @@ int CGroupSubMenu::luaGetUserGroupLeft(CLuaState &ls)
 	CInterfaceElement *pIE = getUserGroupLeft((uint) ls.toNumber(1));
 	if (pIE)
 	{
-		CLuaIHMRyzom::pushUIOnStack(ls, pIE);
+		CLuaIHM::pushUIOnStack(ls, pIE);
 		return 1;
 	}
 	else return 0;
@@ -2282,7 +2282,7 @@ void CGroupMenu::setUserGroupLeft(uint line, CInterfaceGroup *gr, bool ownerShip
 int CGroupMenu::luaGetRootMenu(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "getRootMenu", 0);
-	CLuaIHMRyzom::pushUIOnStack(ls, getRootMenu());
+	CLuaIHM::pushUIOnStack(ls, getRootMenu());
 	return 1;
 }
 

@@ -16,6 +16,7 @@
 
 
 #include "nel/gui/lua_helper.h"
+#include "nel/gui/interface_group.h"
 
 #include <algorithm>
 
@@ -258,6 +259,402 @@ namespace NLGUI
 
 namespace NLGUI
 {
+	static CLuaString lstr_Env("Env");
+	static CLuaString lstr_isNil("isNil");
+
+	// ***************************************************************************
+	int CLuaIHM::luaUIIndex(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_luaUIIndex)
+		nlassert(ls.getTop()==2);
+		// get the userdata and key
+		CReflectableLuaRef *pRefElm = (CReflectableLuaRef *) ls.toUserData(1);
+
+		const char *propName = ls.toString(2);
+		CReflectableRefPtrTarget	*pRPT= (CReflectableRefPtrTarget*)(pRefElm->Ptr);
+		// ** try to get the Env Table (interface group only)
+		if(propName==lstr_isNil)
+		{
+			ls.push(pRPT==NULL);
+			return 1;
+		}
+
+		// Check the object is not NULL or freed
+		if(pRPT==NULL)
+		{
+			return 0;
+		}
+
+		// ** try to get the Env Table (interface group only)
+		if(propName==lstr_Env)
+		{
+			// Env can be bound to a CInterfaceGroup only
+			CInterfaceGroup		*group= dynamic_cast<CInterfaceGroup*>(pRPT);
+			if(group==NULL)
+			{
+				ls.pushNil();
+				return 1;
+			}
+			else
+			{
+				group->pushLUAEnvTable();
+				return 1;
+			}
+		}
+
+		// ** try to get the property
+		const CReflectedProperty *prop = pRefElm->getProp(propName);
+		if (prop)
+		{
+			CLuaIHM::luaValueFromReflectedProperty(ls, *pRPT, *prop);
+			return 1;
+		}
+
+		// ** try to get a UI relative
+		CInterfaceElement	*uiRelative= getUIRelative(dynamic_cast<CInterfaceElement *>(pRPT),    propName);
+		if(uiRelative)
+		{
+			// push the UI onto the stack
+			pushUIOnStack(ls,    uiRelative);
+			return 1;
+		}
+
+
+		// Fail to find any Attributes or elements
+		// Yoyo: don't write any message or warning because this may be a feature (if user want to test that something exit in the ui)
+		ls.pushNil();
+		return 1;
+	}
+
+	// ***************************************************************************
+	int CLuaIHM::luaUINewIndex(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_luaUINewIndex)
+		nlassert(ls.getTop()==3);
+		// get the userdata and key
+		CReflectableLuaRef	*pRefElm = (CReflectableLuaRef *) ls.toUserData(1);
+		nlassert(pRefElm);
+		CReflectableRefPtrTarget	*pRPT= (CReflectableRefPtrTarget*)(pRefElm->Ptr);
+		// Check the UI is not NULL or freed
+		if(pRPT == NULL)
+		{
+			return 0;
+		}
+
+		const char *propName = ls.toString(2);
+		// ** try to set the Env Table (interface group only)
+		if(propName == lstr_Env)
+		{
+			CInterfaceElement *pIE = dynamic_cast<CInterfaceElement *>(pRPT);
+			std::string name ;
+			if (pIE)
+			{
+				name = pIE->getId();
+			}
+			else
+			{
+				name = "<reflectable element>";
+			}
+			// Exception!!! not allowed
+			throw ELuaIHMException("You cannot change the Env Table of '%s'",    name.c_str());
+		}
+
+
+		// ** try to set the property
+		const CReflectedProperty *prop = pRefElm->getProp(propName);
+		if (prop)
+		{
+			CLuaIHM::luaValueToReflectedProperty(ls, 3, *pRPT, *prop);
+			return 0;
+		}
+
+		CInterfaceElement	*pIE = dynamic_cast<CInterfaceElement *>(pRPT);
+		// ** try to get another UI (child or parent)
+		CInterfaceElement	*uiRelative= getUIRelative(pIE,    propName);
+		if(uiRelative)
+		{
+			// Exception!!! not allowed
+			throw ELuaIHMException("You cannot write into the UI '%s' of '%s'",    propName,    pIE->getId().c_str());
+		}
+
+		// ** Prop Not Found
+		throw ELuaIHMException("Property '%s' not found in '%s' of type %s",    propName,    pIE ? pIE->getId().c_str() : "<reflectable element>", typeid(*pRPT).name());
+
+		// Fail to find any Attributes or elements
+		return 0;
+	}
+
+	// ***************************************************************************
+	int CLuaIHM::luaUIEq(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_luaUIEq)
+		nlassert(ls.getTop() == 2);
+		// read lhs & rhs
+		// get the userdata and key
+		CReflectableLuaRef	*lhs = (CReflectableLuaRef *) ls.toUserData(1);
+		CReflectableLuaRef	*rhs = (CReflectableLuaRef *) ls.toUserData(2);
+		nlassert(lhs);
+		nlassert(rhs);
+		ls.push(lhs->Ptr == rhs->Ptr);
+		return 1;
+	}
+
+
+	// ***************************************************************************
+	int CLuaIHM::luaUIDtor(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_luaUIDtor)
+		nlassert(ls.getTop()==1);
+		// get the userdata
+		CReflectableLuaRef	*pRefElm = (CReflectableLuaRef *) ls.toUserData(1);
+		nlassert(pRefElm);
+
+		// call dtor
+		pRefElm->~CReflectableLuaRef();
+
+		return 0;
+	}
+
+	// ***************************************************************************
+	int CLuaIHM::luaUINext(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_luaUINext)
+		// Code below allow enumeration of properties of a reflectable object
+		// From lua standpoint, the object is seen as a table with (key, value) pairs
+		// If object is a CInterfaceGroup, iteration is also done on sons (groups, controls & view).
+
+		if (ls.getTop() != 2)
+		{
+			CLuaIHM::fails(ls, "__next metamethod require 2 arguments (table & key)");
+		}
+		CLuaIHM::check(ls, CLuaIHM::isReflectableOnStack(ls, 1), "__next :  require ui element as first arg");
+		CReflectableRefPtrTarget *reflectedObject = CLuaIHM::getReflectableOnStack(ls, 1);
+		// To traverse all properties / field of the object, we must be able to determine the next key from a previous key
+		// (keys are ordered)
+		// We use the 'TValueType' enum to know which kind of property we are traversing, and an index in this group of properties
+		// The key which uniquely identify an element / property in the reflectable object
+		struct CKey
+		{
+			enum TValueType
+			{
+				VTGroup = 0, // children groups    (If the object is a CInterfaceGroup)
+				VTView,      // children views	   (If the object is a CInterfaceView)
+				VTCtrl, 	 // children controls  (If the object is a CInterfaceCtrl)
+				VTProp       // List of exported proeprties (For all relfectable objects)
+			};
+			TValueType		  ValueType;
+			sint			  Index;
+			const CClassInfo  *ClassInfo; // if ValueType is "VTProp" -> give the class for which property are currently enumerated
+			//
+			static int tostring(CLuaState &ls) // '__print' metamathod
+			{
+				CLuaIHM::checkArgCount(ls, "reflected object metatable:__print", 1);
+				CKey key;
+				key.pop(ls);
+				switch(key.ValueType)
+				{
+					case VTGroup: ls.push(toString("_Group %d", key.Index)); break;
+					case VTView:  ls.push(toString("_View %d", key.Index)); break;
+					case VTCtrl:  ls.push(toString("_Ctrl %d", key.Index)); break;
+					case VTProp:  ls.push(key.ClassInfo->Properties[key.Index].Name); break;
+				}
+				return 1;
+			}
+			// push the key on the lua stack
+			void push(CLuaState &ls)
+			{
+				void *ud = ls.newUserData(sizeof(*this));
+				*(CKey *) ud = *this;
+				getMetaTable(ls).push();
+				ls.setMetaTable(-2);
+			}
+			// pop the key from the lua stack
+			void pop(CLuaState &ls)
+			{
+				CLuaStackChecker lsc(&ls, -1);
+				if (!ls.isUserData(-1))
+				{
+					CLuaIHM::fails(ls, "Can't pop object, not a user data");
+				}
+				// check that metatable is good (it is share between all keys)
+				ls.getMetaTable(-1);
+				getMetaTable(ls).push();
+				if (!ls.rawEqual(-1, -2))
+				{
+					CLuaIHM::fails(ls, "Bad metatable for reflectable object key");
+				}
+				ls.pop(2);
+				// retrieve key
+				*this = *(CKey *) ls.toUserData(-1);
+				ls.pop();
+			}
+			// get the metatable for a CKey
+			CLuaObject &getMetaTable(CLuaState &ls)
+			{
+				static CLuaObject metatable;
+				if (!metatable.isValid())
+				{
+					// first build
+					CLuaStackChecker lsc(&ls);
+					ls.newTable();
+					ls.push("__tostring");
+					ls.push(CKey::tostring);
+					ls.setTable(-3);
+					metatable.pop(ls);
+				}
+				return metatable;
+			}
+		};
+		// Pop the current key to continue enumeration
+		CKey key;
+		if (ls.isNil(2))
+		{
+			// no key -> start of table
+			key.ValueType = CKey::VTGroup;
+			key.Index = -1;
+		}
+		else
+		{
+			key.pop(ls);
+		}
+		//
+		CInterfaceGroup *group = dynamic_cast<CInterfaceGroup *>(reflectedObject);
+		bool enumerate = true;
+		while (enumerate)
+		{
+			switch(key.ValueType)
+			{
+				case CKey::VTGroup:
+					if (!group || (key.Index + 1) == (sint) group->getGroups().size())
+					{
+						key.Index     = -1;
+						key.ValueType = CKey::VTView; // continue enumeration with views
+					}
+					else
+					{
+						++ key.Index;
+						key.push(ls);
+						pushUIOnStack(ls, group->getGroups()[key.Index]);
+						return 2;
+					}
+				break;
+				case CKey::VTView:
+					if (!group || (key.Index + 1) == (sint) group->getViews().size())
+					{
+						key.Index     = -1;
+						key.ValueType = CKey::VTCtrl; // continue enumeration with controls
+					}
+					else
+					{
+						++ key.Index;
+						key.push(ls);
+						pushUIOnStack(ls, group->getViews()[key.Index]);
+						return 2;
+					}
+				break;
+				case CKey::VTCtrl:
+					if (!group || (key.Index + 1) == (sint) group->getControls().size())
+					{
+						key.Index     = -1;
+						key.ValueType = CKey::VTProp; // continue enumeration with properties
+						key.ClassInfo = reflectedObject->getClassInfo();
+					}
+					else
+					{
+						++ key.Index;
+						key.push(ls);
+						pushUIOnStack(ls, group->getControls()[key.Index]);
+						return 2;
+					}
+				break;
+				case CKey::VTProp:
+					if (!key.ClassInfo)
+					{
+						enumerate = false;
+						break;
+					}
+					if ((sint) key.ClassInfo->Properties.size() == (key.Index + 1))
+					{
+						key.ClassInfo = key.ClassInfo->ParentClass; // continue enumeration in parent class
+						key.Index = -1;
+					}
+					else
+					{
+						++ key.Index;
+						key.push(ls);
+						CLuaIHM::luaValueFromReflectedProperty(ls, *reflectedObject, key.ClassInfo->Properties[key.Index]);
+						return 2;
+					}
+				break;
+				default:
+					nlassert(0);
+				break;
+			}
+		}
+		ls.pushNil();
+		return 0;
+	}
+
+	// ***************************************************************************
+	void CLuaIHM::pushUIOnStack(CLuaState &ls, CInterfaceElement *pIE)
+	{
+		//H_AUTO(Lua_CLuaIHM_pushUIOnStack)
+		CLuaIHM::pushReflectableOnStack(ls,    pIE);
+	}
+
+	// ***************************************************************************
+	bool CLuaIHM::isUIOnStack(CLuaState &ls,    sint index)
+	{
+		//H_AUTO(Lua_CLuaIHM_isUIOnStack)
+		return getUIOnStack(ls,    index) != NULL;
+	}
+
+	// ***************************************************************************
+	CInterfaceElement *CLuaIHM::getUIOnStack(CLuaState &ls,    sint index)
+	{
+		//H_AUTO(Lua_CLuaIHM_getUIOnStack)
+		return dynamic_cast<CInterfaceElement *>(CLuaIHM::getReflectableOnStack(ls,    index));
+	}
+
+	// ***************************************************************************
+	void CLuaIHM::checkArgTypeUIElement(CLuaState &ls, const char *funcName, uint index)
+	{
+		//H_AUTO(Lua_CLuaIHM_checkArgTypeUIElement)
+		nlassert(index > 0);
+		if (ls.getTop() < (int) index)
+		{
+			CLuaIHM::fails(ls, "%s : argument %d of expected type ui element was not defined",   funcName,   index);
+		}
+		if (!isUIOnStack(ls, index))
+		{
+			CLuaIHM::fails(ls, "%s : argument %d of expected type ui element has bad type : %s",   funcName,   index, ls.getTypename(ls.type(index)),   ls.type(index));
+		}
+	}
+
+
+	// ***************************************************************************
+	CInterfaceElement *CLuaIHM::getUIRelative(CInterfaceElement *pIE,    const std::string &propName)
+	{
+		//H_AUTO(Lua_CLuaIHM_getUIRelative)
+		if (pIE == NULL) return NULL;
+		// If the prop is "parent",    then return the parent of the ui
+		if(propName=="parent")
+		{
+			return pIE->getParent();
+		}
+		// else try to get a child (if group/exist)
+		else
+		{
+			CInterfaceGroup		*group= dynamic_cast<CInterfaceGroup*>(pIE);
+			if(group)
+			{
+				return group->getElement(group->getId()+":"+propName);
+			}
+		}
+
+		return NULL;
+	}
+
 
 	// ***************************************************************************
 	void	CLuaIHM::registerBasics(CLuaState &ls)
@@ -420,9 +817,6 @@ namespace NLGUI
 		}
 	}
 
-	static CLuaString lstr_Env("Env");
-	static CLuaString lstr_isNil("isNil");
-
 	// ***************************************************************************
 	void CLuaIHM::luaValueToReflectedProperty(CLuaState &ls, int stackIndex, CReflectable &target, const CReflectedProperty &property) throw(ELuaIHMException)
 	{
@@ -542,6 +936,38 @@ namespace NLGUI
 		// *** Register a Table for ui env.
 		ls.push(IHM_LUA_ENVTABLE);			// "__ui_envtable"
 		ls.newTable();						// "__ui_envtable"  {}
+		ls.setTable(LUA_REGISTRYINDEX);
+
+
+		// *** Register the MetaTable for UI userdata
+		ls.push(IHM_LUA_METATABLE);			// "__ui_metatable"
+		ls.newTable();						// "__ui_metatable"  {}
+		// set the '__index' method
+		ls.push("__index");
+		ls.push(luaUIIndex);
+		nlassert(ls.isCFunction());
+		ls.setTable(-3);					// "__ui_metatable"  {"__index"= CFunc_luaUIIndex}
+		// set the '__newindex' method
+		ls.push("__newindex");
+		ls.push(luaUINewIndex);
+		nlassert(ls.isCFunction());
+		ls.setTable(-3);
+		// set the '__newindex' method
+		ls.push("__gc");
+		ls.push(luaUIDtor);
+		nlassert(ls.isCFunction());
+		ls.setTable(-3);
+		// set the '__eq' method
+		ls.push("__eq");
+		ls.push(luaUIEq);
+		nlassert(ls.isCFunction());
+		ls.setTable(-3);
+		// set the custom '__next' method
+		ls.push("__next");
+		ls.push(luaUINext);
+		nlassert(ls.isCFunction());
+		ls.setTable(-3);
+		// set registry
 		ls.setTable(LUA_REGISTRYINDEX);
 
 

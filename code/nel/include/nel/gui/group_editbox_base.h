@@ -18,7 +18,7 @@
 #ifndef GROUP_EDITBOX_BASE_H
 #define GROUP_EDITBOX_BASE_H
 
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 
 class CGroupEditBoxBase : public CInterfaceGroup
 {

@@ -21,7 +21,7 @@
 
 #include "nel/misc/types_nl.h"
 
-#include "view_base.h"
+#include "nel/gui/view_base.h"
 
 
 // ***************************************************************************

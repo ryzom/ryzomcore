@@ -19,7 +19,7 @@
 #ifndef RY_VIEW_RADAR_H
 #define RY_VIEW_RADAR_H
 
-#include "view_base.h"
+#include "nel/gui/view_base.h"
 #include "nel/3d/u_texture.h"
 #include "nel/gui/view_renderer.h"
 

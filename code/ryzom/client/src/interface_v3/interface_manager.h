@@ -23,13 +23,13 @@
 #include "nel/misc/cdb_manager.h"
 #include "nel/3d/u_texture.h"
 #include "nel/3d/u_text_context.h"
-#include "interface_group.h"
-#include "interface_link.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/interface_link.h"
 #include "group_list.h"
-#include "view_base.h"
+#include "nel/gui/view_base.h"
 #include "view_pointer.h"
 
-#include "ctrl_base.h"
+#include "nel/gui/ctrl_base.h"
 #include "ctrl_scroll.h"
 
 #include "nel/gui/view_renderer.h"
@@ -37,7 +37,7 @@
 // InterfaceV3
 #include "interface_parser.h"
 #include "ctrl_sheet_selection.h"
-#include "interface_options.h"
+#include "nel/gui/interface_options.h"
 #include "interface_config.h"
 #include "interface_pointer.h"
 #include "flying_text_manager.h"

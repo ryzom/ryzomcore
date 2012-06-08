@@ -25,7 +25,7 @@
 #include "view_text.h"
 #include "ctrl_scroll.h"
 #include "ctrl_button.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 
 #include "../time_client.h"
 #include "nel/misc/i18n.h"

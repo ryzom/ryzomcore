@@ -24,7 +24,7 @@
 #include "ctrl_button.h"
 #include "nel/gui/interface_property.h"
 #include "interface_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../sheet_manager.h"
 #include "game_share/animal_status.h"
 

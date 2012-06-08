@@ -23,7 +23,7 @@
 #include "interface_manager.h"
 #include "nel/gui/interface_expr.h"
 #include "nel/misc/xml_auto_ptr.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../time_client.h"
 
 // ----------------------------------------------------------------------------

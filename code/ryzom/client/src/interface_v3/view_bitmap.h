@@ -19,7 +19,7 @@
 #ifndef NL_VIEW_BITMAP_H
 #define NL_VIEW_BITMAP_H
 
-#include "view_base.h"
+#include "nel/gui/view_base.h"
 #include "nel/3d/u_texture.h"
 #include "nel/gui/view_renderer.h"
 

@@ -19,7 +19,7 @@
 #include "stdpch.h"
 #include "bot_chat_page.h"
 #include "interface_manager.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "../user_entity.h"
 
 

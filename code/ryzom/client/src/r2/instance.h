@@ -23,7 +23,7 @@
 //
 #include "game_share/object.h"
 #include "displayer_base.h"
-#include "../interface_v3/interface_element.h"
+#include "nel/gui/interface_element.h"
 #include "lua_event_forwarder.h"
 
 class CEntityCL;

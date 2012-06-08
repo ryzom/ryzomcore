@@ -24,7 +24,7 @@
 #include <curl/curl.h>
 
 #include "nel/misc/types_nl.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "group_scrolltext.h"
 #include "group_tree.h"
 #include "ctrl_button.h"

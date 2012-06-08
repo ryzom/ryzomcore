@@ -20,7 +20,7 @@
 
 #include "group_table.h"
 #include "interface_manager.h"
-#include "interface_element.h"
+#include "nel/gui/interface_element.h"
 #include "../client_chat_manager.h"
 #include "view_bitmap.h"
 #include "view_text_id.h"

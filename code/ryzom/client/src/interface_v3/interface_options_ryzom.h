@@ -18,7 +18,7 @@
 #ifndef IF_OPTIONS_RZ
 #define IP_OPTIONS_RZ
 
-#include "interface_options.h"
+#include "nel/gui/interface_options.h"
 
 // ***************************************************************************
 class COptionsLayer : public CInterfaceOptions

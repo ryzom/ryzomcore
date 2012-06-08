@@ -21,7 +21,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/events.h"
-#include "view_pointer_base.h"
+#include "nel/gui/view_pointer_base.h"
 
 class CGroupContainer;
 class CCtrlBase;

@@ -22,11 +22,11 @@
 #include "nel/misc/types_nl.h"
 #include "nel/3d/u_texture.h"
 #include "ctrl_sheet_selection.h"
-#include "interface_link.h"
+#include "nel/gui/interface_link.h"
 #include "nel/misc/smart_ptr.h"
 #include "game_share/brick_types.h"
 #include "nel/gui/lua_helper.h"
-#include "widget_manager.h"
+#include "nel/gui/widget_manager.h"
 using namespace NLGUI;
 
 // ***************************************************************************

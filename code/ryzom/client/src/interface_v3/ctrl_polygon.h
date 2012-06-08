@@ -18,7 +18,7 @@
 #ifndef RZ_CTRL_POLYGON_H
 #define RZ_CTRL_POLYGON_H
 
-#include "ctrl_base.h"
+#include "nel/gui/ctrl_base.h"
 #include "nel/gui/view_renderer.h"
 #include "nel/misc/geom_ext.h"
 #include "nel/misc/polygon.h"

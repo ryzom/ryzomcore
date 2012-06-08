@@ -18,7 +18,7 @@
 #ifndef RZ_VIEW_POLYGON_H
 #define RZ_VIEW_POLYGON_H
 
-#include "view_base.h"
+#include "nel/gui/view_base.h"
 #include "nel/gui/view_renderer.h"
 //
 #include "nel/misc/geom_ext.h"

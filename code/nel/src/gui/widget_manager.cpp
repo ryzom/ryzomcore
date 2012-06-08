@@ -16,14 +16,14 @@
 
 #include "nel/gui/db_manager.h"
 #include "nel/gui/view_renderer.h"
-#include "widget_manager.h"
-#include "view_pointer_base.h"
-#include "ctrl_draggable.h"
-#include "interface_group.h"
-#include "group_container_base.h"
-#include "group_modal.h"
-#include "group_editbox_base.h"
-#include "interface_options.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/view_pointer_base.h"
+#include "nel/gui/ctrl_draggable.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/group_container_base.h"
+#include "nel/gui/group_modal.h"
+#include "nel/gui/group_editbox_base.h"
+#include "nel/gui/interface_options.h"
 
 
 CWidgetManager* CWidgetManager::instance = NULL;

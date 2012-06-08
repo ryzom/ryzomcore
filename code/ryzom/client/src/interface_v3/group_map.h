@@ -25,7 +25,7 @@
 
 #include "../client_sheets/world_sheet.h"
 
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "ctrl_button.h"
 #include "view_bitmap.h"
 #include "view_text.h"

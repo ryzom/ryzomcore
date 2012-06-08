@@ -31,7 +31,7 @@
 
 #include "interface_parser.h"
 #include "interface_observer.h"
-#include "interface_options.h"
+#include "nel/gui/interface_options.h"
 #include "interface_options_ryzom.h"
 #include "interface_anim.h"
 #include "interface_3d_scene.h"
@@ -61,9 +61,9 @@
 // DBCtrl
 #include "dbctrl_sheet.h"
 // Group
-#include "group_frame.h"
+#include "nel/gui/group_frame.h"
 #include "group_career.h"
-#include "group_modal.h"
+#include "nel/gui/group_modal.h"
 #include "group_modal_get_key.h"
 #include "group_list.h"
 #include "group_tree.h"
@@ -99,7 +99,7 @@
 #include "dbgroup_list_sheet_bonus_malus.h"
 #include "dbgroup_list_sheet_icon_phrase.h"
 // Misc.
-#include "interface_link.h"
+#include "nel/gui/interface_link.h"
 #include "interface_ddx.h"
 #include "../actions.h"
 #include "macrocmd_manager.h"

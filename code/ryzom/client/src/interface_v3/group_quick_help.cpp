@@ -26,7 +26,7 @@
 #include "group_paragraph.h"
 #include "../libwww.h"
 #include "interface_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "nel/misc/xml_auto_ptr.h"
 
 #include "../client_cfg.h"

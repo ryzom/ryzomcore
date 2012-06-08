@@ -14,11 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+#include "libxml/globals.h"
+#include "nel/misc/debug.h"
 #include "nel/misc/xml_auto_ptr.h"
-#include "ctrl_base.h"
-#include "interface_group.h"
-#include "widget_manager.h"
+#include "nel/gui/ctrl_base.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/misc/i18n.h"
 
 using namespace NLMISC;
 

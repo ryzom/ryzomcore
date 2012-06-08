@@ -1,4 +1,4 @@
-#include "group_editbox_base.h"
+#include "nel/gui/group_editbox_base.h"
 
 CGroupEditBoxBase *CGroupEditBoxBase::_CurrSelection = NULL;
 
