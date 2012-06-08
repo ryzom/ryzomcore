@@ -73,6 +73,7 @@ public:
 	}
 }; // This class must not be registered because it a base class
 
+/////////////////////////////////////////////////////////////////////////////
 /// Static camera animation step (that does not have specific variables)
 class CCameraAnimationStepStatic : public CCameraAnimationStepBasic
 {
@@ -88,3 +89,39 @@ public:
 	}
 };
 CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepStatic, "camera_animation_static");
+
+/////////////////////////////////////////////////////////////////////////////
+/// Static camera animation step (that does not have specific variables)
+class CCameraAnimationStepGoTo: public CCameraAnimationStepBasic
+{
+protected:
+	std::string EndPos;
+
+public:
+	CCameraAnimationStepGoTo()
+	{
+		EndPos = "";
+	}
+
+	bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
+	{
+		if (!CCameraAnimationStepBasic::parseStep(prim, filename))
+		{
+			nlwarning("<CCameraAnimationStepGoTo parseStep> impossible to parse the basic part of the step in primitive : %s", filename.c_str());
+			return false;
+		}
+
+		std::string value;
+
+		// We get the look at position
+		if (!prim->getPropertyByName("end_position", value))
+		{
+			nlwarning("<CCameraAnimationStepGoTo parseStep> impossible to get the end_position property of the basic step in primitive : %s", filename.c_str());
+			return false;
+		}
+		LookAtPos = value;
+
+		return true;
+	}
+};
+CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepGoTo, "camera_animation_go_to");
