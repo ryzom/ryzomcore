@@ -54,7 +54,7 @@ protected:
 };
 
 // Define used to register the different types of camera animation steps
-#define MISSION_REGISTER_ACTION(_class_,_name_) \
+#define CAMERA_ANIMATION_REGISTR_STEP(_class_,_name_) \
 class _class_##CameraAnimationStepFactory : public ICameraAnimationStepFactory \
 {\
 public:\
@@ -73,6 +73,6 @@ public:\
 	return new _class_;\
 } \
 };\
-	static _class_##ActionFactory* _class_##ActionFactoryInstance = new _class_##ActionFactory;
+	static _class_##CameraAnimationStepFactory* _class_##CameraAnimationStepFactoryInstance = new _class_##CameraAnimationStepFactory;
 
 #endif /* RY_CAMERAANIMATIONSTEPFACTORY_H */
