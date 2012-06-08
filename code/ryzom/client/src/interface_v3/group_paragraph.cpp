@@ -823,12 +823,12 @@ void CGroupParagraph::draw ()
 			CRGBA col = _OverColor;
 			if(getModulateGlobalColor())
 			{
-				col.modulateFromColor (_OverColor, pIM->getGlobalColorForContent());
+				col.modulateFromColor (_OverColor, CWidgetManager::getInstance()->getGlobalColorForContent());
 			}
 			else
 			{
 				col= _OverColor;
-				col.A = (uint8)(((sint32)col.A*((sint32)pIM->getGlobalColorForContent().A+1))>>8);
+				col.A = (uint8)(((sint32)col.A*((sint32)CWidgetManager::getInstance()->getGlobalColorForContent().A+1))>>8);
 			}
 			rVR.drawRotFlipBitmap (_RenderLayer, pVB->getXReal(), pVB->getYReal(),
 									pVB->getWReal(), pVB->getHReal(), 0, false, rVR.getBlankTextureId(),

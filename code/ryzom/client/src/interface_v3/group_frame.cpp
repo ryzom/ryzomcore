@@ -14,13 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-#include "stdpch.h"
-
 #include "group_frame.h"
-#include "interface_manager.h"
+#include "widget_manager.h"
+#include "interface_options.h"
 #include "interface_element.h"
+#include "nel/gui/view_renderer.h"
 #include "nel/misc/xml_auto_ptr.h"
 
 using namespace std;
@@ -71,14 +69,13 @@ bool CGroupFrame::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 
 	// Get the borders texture
 	_DispTypeDefined= false;
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	ptr = (char*) xmlGetProp( cur, (xmlChar*)"options" );
 	CInterfaceOptions *pIO = NULL;
 
 	if (ptr)
-		pIO = pIM->getOptions(ptr);
+		pIO = CWidgetManager::getInstance()->getOptions(ptr);
 
 	// The first type in display type struct is the default display type
 	if (_DispTypes.size() == 0)
@@ -159,13 +156,12 @@ void CGroupFrame::draw ()
 {
 	if (_DisplayFrame)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		// get global color
 		CRGBA col;
 		if(getModulateGlobalColor())
-			col.modulateFromColor (_Color, pIM->getGlobalColor());
+			col.modulateFromColor( _Color, CWidgetManager::getInstance()->getGlobalColor() );
 		else
 			col= _Color;
 

@@ -75,7 +75,7 @@ void CViewTextMenu::setChecked(bool c)
 {
 	if (_CheckBox)
 	{
-		CInterfaceOptions *pIO = CInterfaceManager::getInstance()->getOptions("menu_checkbox");
+		CInterfaceOptions *pIO = CWidgetManager::getInstance()->getOptions("menu_checkbox");
 		if (!pIO) return;
 		_CheckBox->setTexture(pIO->getValStr(c ? "checked_bitmap" : "unchecked_bitmap"));
 	}
@@ -380,7 +380,7 @@ CViewBitmap *CGroupSubMenu::createCheckBox(bool checked)
 	pVB->setParentPos (_GroupList);
 	pVB->setParentPosRef (Hotspot_BR);
 	pVB->setPosRef (Hotspot_BL);
-	CInterfaceOptions *pIO = CInterfaceManager::getInstance()->getOptions("menu_checkbox");
+	CInterfaceOptions *pIO = CWidgetManager::getInstance()->getOptions("menu_checkbox");
 	if (pIO)
 	{
 		pVB->setTexture(pIO->getValStr(checked ? "checked_bitmap" : "unchecked_bitmap"));

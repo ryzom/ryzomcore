@@ -630,7 +630,7 @@ bool CCharacter3D::init (UScene *pScene)
 
 	// ANIMATIONS
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	COptionsAnimationSet	*pOAS= dynamic_cast<COptionsAnimationSet*>(pIM->getOptions("character_animations"));
+	COptionsAnimationSet	*pOAS= dynamic_cast<COptionsAnimationSet*>(CWidgetManager::getInstance()->getOptions("character_animations"));
 	if(!pOAS || !pOAS->AnimationSet)
 	{
 		nlwarning("Not found <options> 'character_animations', or not of type 'animation_set'");

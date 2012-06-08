@@ -29,6 +29,8 @@
 #include "../actions_client.h"
 #include "ctrl_button.h"
 
+#include "interface_options_ryzom.h"
+
 using namespace std;
 using namespace NLMISC;
 
@@ -160,7 +162,7 @@ public:
 		const CActionsManager::TActionComboMap &acmap = pAM->getActionComboMap();
 
 
-		COptionsList *pOL = dynamic_cast<COptionsList*>(pIM->getOptions("gestion_windows_key_binding"));
+		COptionsList *pOL = dynamic_cast<COptionsList*>(CWidgetManager::getInstance()->getOptions("gestion_windows_key_binding"));
 		if (pOL == NULL) return;
 
 		for (uint i = 0; i < pOL->getNumParams(); ++i)

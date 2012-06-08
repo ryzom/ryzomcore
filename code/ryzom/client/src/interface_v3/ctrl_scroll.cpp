@@ -405,7 +405,7 @@ void CCtrlScroll::updateCoords()
 void CCtrlScroll::draw()
 {
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
-	CRGBA col = CInterfaceManager::getInstance()->getGlobalColorForContent();
+	CRGBA col = CWidgetManager::getInstance()->getGlobalColorForContent();
 
 	if (_Target)
 	{

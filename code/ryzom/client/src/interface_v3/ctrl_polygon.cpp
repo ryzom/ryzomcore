@@ -250,12 +250,12 @@ void CCtrlPolygon::draw()
 	CRGBA col;
 	if(getModulateGlobalColor())
 	{
-		col.modulateFromColor (_Color, im->getGlobalColorForContent());
+		col.modulateFromColor (_Color, CWidgetManager::getInstance()->getGlobalColorForContent());
 	}
 	else
 	{
 		col= _Color;
-		col.A = (uint8)(((sint32)col.A*((sint32)im->getGlobalColorForContent().A+1))>>8);
+		col.A = (uint8)(((sint32)col.A*((sint32)CWidgetManager::getInstance()->getGlobalColorForContent().A+1))>>8);
 	}
 	vr.drawUnclippedTriangles(_RenderLayer, _RealTris, col);
 }

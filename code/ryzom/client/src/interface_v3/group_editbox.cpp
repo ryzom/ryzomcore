@@ -249,7 +249,7 @@ void CGroupEditBox::draw ()
 	{
 		sint32	blankTextId= rVR.getBlankTextureId();
 		CRGBA	col= _BackSelectColor;
-		col.A= pIM->getGlobalColorForContent().A;
+		col.A= CWidgetManager::getInstance()->getGlobalColorForContent().A;
 		sint32	minPos= min(_CursorPos, _SelectCursorPos) + (sint32)_Prompt.length();
 		sint32	maxPos= max(_CursorPos, _SelectCursorPos) + (sint32)_Prompt.length();
 
@@ -1124,7 +1124,7 @@ void CGroupEditBox::setup()
 		_ViewTextDeltaX= 0;
 
 	// read options
-	CInterfaceOptions *pIO = CInterfaceManager::getInstance()->getOptions("text_selection");
+	CInterfaceOptions *pIO = CWidgetManager::getInstance()->getOptions("text_selection");
 	if (pIO != NULL)
 	{
 		_BackSelectColor= pIO->getValColor("back_select_color");

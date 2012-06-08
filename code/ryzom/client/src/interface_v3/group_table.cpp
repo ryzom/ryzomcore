@@ -247,7 +247,7 @@ void CGroupCell::draw ()
 		else
 		{
 			CRGBA finalColor;
-			finalColor.modulateFromColor (BgColor, pIM->getGlobalColor());
+			finalColor.modulateFromColor (BgColor, CWidgetManager::getInstance()->getGlobalColor());
 
 			// Get the parent table
 			if (getParent ())
@@ -946,7 +946,7 @@ void CGroupTable::draw ()
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			CRGBA finalColor;
-			finalColor.modulateFromColor (BgColor, pIM->getGlobalColor());
+			finalColor.modulateFromColor (BgColor, CWidgetManager::getInstance()->getGlobalColor());
 			finalColor.A = CurrentAlpha;
 
 			// Draw the top and bottom lines

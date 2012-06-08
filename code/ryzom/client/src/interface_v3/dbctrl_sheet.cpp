@@ -1852,7 +1852,7 @@ void CDBCtrlSheet::draw()
 
 	// Display slot
 	if (_DrawSlot)
-		rVR.draw11RotFlipBitmap (_RenderLayer, _XReal, _YReal, 0, false, _DispSlotBmpId, pIM->getGlobalColorForContent());
+		rVR.draw11RotFlipBitmap (_RenderLayer, _XReal, _YReal, 0, false, _DispSlotBmpId, CWidgetManager::getInstance()->getGlobalColorForContent());
 
 	// Drag'N'Drop : display the selected slot bitmap if this slot accept the currently dragged element
 	_CanDrop = false;
@@ -1893,7 +1893,7 @@ void CDBCtrlSheet::draw()
 	if (_CanDrop)
 	{
 		// decal layer because must drawn after Items/Brick in DXTC
-		rVR.draw11RotFlipBitmap (_RenderLayer+1, _XReal, _YReal, 0, false, _DispSelSlotId, pIM->getGlobalColorForContent());
+		rVR.draw11RotFlipBitmap (_RenderLayer+1, _XReal, _YReal, 0, false, _DispSelSlotId, CWidgetManager::getInstance()->getGlobalColorForContent());
 	}
 
 	if (_RegenTickRange.EndTick != _RegenTickRange.StartTick)
@@ -2099,13 +2099,13 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 
 	// the sheet color is modulated by GlobalAlpha, but not by global RGB
 	CRGBA	curSheetColor= _SheetColor;
-	curSheetColor.A= ( (pIM->getGlobalColorForContent().A+1) * _SheetColor.A )>>8;
+	curSheetColor.A= ( (CWidgetManager::getInstance()->getGlobalColorForContent().A+1) * _SheetColor.A )>>8;
 	// The "disp with no sheet" case is a bit different
 	CRGBA	curNoSheetColor;
 	if(_InterfaceColor)
-		curNoSheetColor= pIM->getGlobalColorForContent();
+		curNoSheetColor= CWidgetManager::getInstance()->getGlobalColorForContent();
 	else
-		curNoSheetColor= CRGBA(255,255,255, pIM->getGlobalColorForContent().A);
+		curNoSheetColor= CRGBA(255,255,255, CWidgetManager::getInstance()->getGlobalColorForContent().A);
 
 	// The gray color
 	CRGBA	grayColor= pIM->getSystemOption(CInterfaceManager::OptionCtrlSheetGrayColor).getValColor();
@@ -2117,12 +2117,12 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 	{
 		// do not modulate color for redifyed color
 		numberColor= redifyColor;
-		numberColor.A= (uint8)(((uint32)redifyColor.A * (pIM->getGlobalColorForContent().A+1))>>8);
+		numberColor.A= (uint8)(((uint32)redifyColor.A * (CWidgetManager::getInstance()->getGlobalColorForContent().A+1))>>8);
 	}
 	else if(_Grayed)
-		numberColor.modulateFromColor(grayColor, pIM->getGlobalColorForContent());
+		numberColor.modulateFromColor(grayColor, CWidgetManager::getInstance()->getGlobalColorForContent());
 	else
-		numberColor= pIM->getGlobalColorForContent();
+		numberColor= CWidgetManager::getInstance()->getGlobalColorForContent();
 
 	// Different draws according to Sheet Type.
 	switch (_ActualType)
@@ -2534,7 +2534,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 						CRGBA color = ssg->getColor();
 						if (ssg->isGlobalColorEnabled())
 						{
-							color.modulateFromColor(color, pIM->getGlobalColorForContent());
+							color.modulateFromColor(color, CWidgetManager::getInstance()->getGlobalColorForContent());
 						}
 						// decal layer because must drawn after Items/Brick in DXTC
 						rVR.draw11RotFlipBitmap (_RenderLayer+1, middleX - (tw >> 1), middleY - (th >> 1), 0, false, ssg->getTextureIndex(), color);

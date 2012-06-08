@@ -271,9 +271,6 @@ CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext 
 	_ScreenW = _ScreenH = 0;
 	_LastInGameScreenW = _LastInGameScreenH = 0;
 	_DescTextTarget = NULL;
-	_GlobalColor = CRGBA(255,255,255,255);
-	_GlobalColorForContent = _GlobalColor;
-	_ContentAlpha = 255;
 	_ContainerAlpha = 255;
 	_GlobalContentAlpha = 255;
 	_GlobalContainerAlpha = 255;
@@ -284,10 +281,7 @@ CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext 
 	_ConfigLoaded = false;
 	_LogState = false;
 	_KeysLoaded = false;
-	_RProp = NULL;
-	_GProp = NULL;
-	_BProp = NULL;
-	_AProp = NULL;
+	CWidgetManager::getInstance()->resetColorProps();
 	_AlphaRolloverSpeedDB = NULL;
 	_NeutralColor = NULL;
 	_WarningColor = NULL;
@@ -388,10 +382,6 @@ void CInterfaceManager::reset()
 	_NeutralColor			= NULL;
 	_WarningColor			= NULL;
 	_ErrorColor				= NULL;
-	_RProp					= NULL;
-	_GProp					= NULL;
-	_BProp					= NULL;
-	_AProp					= NULL;
 	_AlphaRolloverSpeedDB	= NULL;
 }
 
@@ -1197,10 +1187,7 @@ void CInterfaceManager::uninitInGame1 ()
 	_WarningColor = NULL;
 	_ErrorColor = NULL;
 	_AlphaRolloverSpeedDB = NULL;
-	_RProp = NULL;
-	_GProp = NULL;
-	_BProp = NULL;
-	_AProp = NULL;
+	CWidgetManager::getInstance()->resetColorProps();
 
 #ifdef AJM_DEBUG_TRACK_INTERFACE_GROUPS
 	CInterfaceManager::getInstance()->DebugTrackGroupsDump();
@@ -1361,20 +1348,10 @@ void CInterfaceManager::updateFrameViews(NL3D::UCamera camera)
 }
 
 // ------------------------------------------------------------------------------------------------
-CInterfaceOptions *CInterfaceManager::getOptions(const string &name)
-{
-	map<string, NLMISC::CSmartPtr<CInterfaceOptions> >::iterator it = _OptionsMap.find(name);
-	if (it == _OptionsMap.end())
-		return NULL;
-	else
-		return it->second;
-}
-
-// ------------------------------------------------------------------------------------------------
 void CInterfaceManager::setupOptions()
 {
 	// After parsing options and templates node -> init system options.
-	CInterfaceOptions	*opt= getOptions("system");
+	CInterfaceOptions	*opt= CWidgetManager::getInstance()->getOptions("system");
 	if(opt)
 	{
 		// List here all Special options
@@ -1832,14 +1809,18 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 		}
 
 		// Update global color from database
-		_GlobalColor = CRGBA (	(uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:R")->getValue32(),
+		CWidgetManager::getInstance()->setGlobalColor( CRGBA (	(uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:R")->getValue32(),
 								(uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:G")->getValue32(),
 								(uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:B")->getValue32(),
-								(uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:A")->getValue32()  );
-		_GlobalColorForContent.R = _GlobalColor.R;
-		_GlobalColorForContent.G = _GlobalColor.G;
-		_GlobalColorForContent.B = _GlobalColor.B;
-		_GlobalColorForContent.A = (uint8) (( (uint16) _GlobalColor.A * (uint16) _ContentAlpha) >> 8);
+								(uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:A")->getValue32() ) );
+
+		CRGBA c = CWidgetManager::getInstance()->getGlobalColorForContent();
+		CRGBA gc = CWidgetManager::getInstance()->getGlobalColor();
+		c.R = gc.R;
+		c.G = gc.G;
+		c.B = gc.B;
+		c.A = (uint8) (( (uint16) c.A * (uint16) CWidgetManager::getInstance()->getContentAlpha() ) >> 8);
+		CWidgetManager::getInstance()->setGlobalColorForContent( c );
 
 		// Update global alphaS from database
 		_GlobalContentAlpha = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTENT_ALPHA")->getValue32();
@@ -2419,28 +2400,6 @@ uint CInterfaceManager::adjustTooltipPosition(CCtrlBase *newCtrl,
 	groupContextHelp->updateCoords ();
 
 	return clampCount;
-}
-
-// ------------------------------------------------------------------------------------------------
-void CInterfaceManager::setGlobalColor (NLMISC::CRGBA col)
-{
-	if (!_RProp)
-	{
-		_RProp = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:R");
-		_GProp = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:G");
-		_BProp = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:B");
-		_AProp = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:A");
-	}
-	_RProp ->setValue32 (col.R);
-	_GProp ->setValue32 (col.G);
-	_BProp ->setValue32 (col.B);
-	_AProp ->setValue32 (col.A);
-
-	_GlobalColor = col;
-
-	// set the global color for content (the same with modulated alpha)
-	_GlobalColorForContent = _GlobalColor;
-	_GlobalColorForContent.A = (uint8) (( (uint16) _GlobalColorForContent.A * (uint16) _ContentAlpha) >> 8);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -3671,19 +3630,13 @@ void	CInterfaceManager::launchContextMenuInGame (const std::string &nameOfCM)
 }
 
 // ***************************************************************************
-void CInterfaceManager::setContentAlpha(uint8 alpha)
-{
-	_ContentAlpha = alpha;
-	// update alpha of global color
-	_GlobalColorForContent.A = alpha;/*(uint8) (( (uint16) _GlobalColor.A * (uint16) _ContentAlpha) >> 8);*/
-}
-
-// ***************************************************************************
 void CInterfaceManager::setContainerAlpha(uint8 alpha)
 {
 	_ContainerAlpha = alpha;
 	// update alpha of global color
-	_GlobalColor.A = alpha;/*(uint8) (( (uint16) _GlobalColor.A * (uint16) _ContainerAlpha) >> 8);	*/
+	CRGBA c = CWidgetManager::getInstance()->getGlobalColor();
+	c.A = alpha;/*(uint8) (( (uint16) _GlobalColor.A * (uint16) _ContainerAlpha) >> 8);	*/
+	CWidgetManager::getInstance()->setGlobalColor( c );
 }
 
 

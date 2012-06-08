@@ -291,13 +291,9 @@ public:
 	void drawContextHelp ();
 	//void drawContextMenu ();
 
-	void setGlobalColor (NLMISC::CRGBA col);
-	NLMISC::CRGBA getGlobalColor() { return _GlobalColor; }
-	void setContentAlpha(uint8 alpha);
-	uint8 getContentAlpha() const { return _ContentAlpha; }
 	void setContainerAlpha(uint8 alpha);
 	uint8 getContainerAlpha() const { return _ContainerAlpha; }
-	NLMISC::CRGBA getGlobalColorForContent() { return _GlobalColorForContent; }
+
 	//	these values are updated from the DB
 	uint8 getGlobalContentAlpha() const { return _GlobalContentAlpha; }
 	uint8 getGlobalContainerAlpha() const { return _GlobalContainerAlpha; }
@@ -317,9 +313,6 @@ public:
 	NLMISC::CRGBA getSystemInfoColor(const std::string &Category = "SYS");
 	/// \name Global Interface Options
 	// @{
-
-	/// Get options by name
-	CInterfaceOptions		*getOptions (const std::string &optName);
 
 	// List of system options
 	enum	TSystemOption
@@ -696,9 +689,7 @@ private:
 	uint8			_LocalSyncActionCounterMask;
 
 
-	uint8 _ContentAlpha;
 	uint8 _ContainerAlpha;
-	NLMISC::CRGBA _GlobalColorForContent;
 	//
 	uint8 _GlobalContentAlpha;
 	uint8 _GlobalContainerAlpha;
@@ -737,7 +728,6 @@ private:
 	std::vector<SIDStringWaiter*> _IDStringWaiters;
 
 	uint32			_ScreenW, _ScreenH; // Change res detection
-	NLMISC::CRGBA	_GlobalColor;
 	sint32			_LastInGameScreenW, _LastInGameScreenH; // Resolution used for last InGame interface
 
 	// List of active Anims
@@ -775,10 +765,6 @@ private:
 	NLMISC::CCDBNodeLeaf *_NeutralColor;
 	NLMISC::CCDBNodeLeaf *_WarningColor;
 	NLMISC::CCDBNodeLeaf *_ErrorColor;
-	NLMISC::CCDBNodeLeaf *_RProp;
-	NLMISC::CCDBNodeLeaf *_GProp;
-	NLMISC::CCDBNodeLeaf *_BProp;
-	NLMISC::CCDBNodeLeaf *_AProp;
 	NLMISC::CCDBNodeLeaf *_AlphaRolloverSpeedDB;
 
 	// The next ViewText to draw for Over

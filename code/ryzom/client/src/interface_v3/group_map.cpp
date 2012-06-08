@@ -1472,7 +1472,7 @@ void CGroupMap::draw()
 	makeNewClip (oldSciX, oldSciY, oldSciW, oldSciH);
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CViewRenderer &vr = *CViewRenderer::getInstance();
-	uint8 alpha = im->getGlobalColorForContent().A;
+	uint8 alpha = CWidgetManager::getInstance()->getGlobalColorForContent().A;
 	updateScale();
 
 	// No Op if screen minimized

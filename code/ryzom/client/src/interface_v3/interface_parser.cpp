@@ -32,6 +32,7 @@
 #include "interface_parser.h"
 #include "interface_observer.h"
 #include "interface_options.h"
+#include "interface_options_ryzom.h"
 #include "interface_anim.h"
 #include "interface_3d_scene.h"
 // View
@@ -1353,6 +1354,8 @@ bool CInterfaceParser::parseOptions (xmlNodePtr cur, CInterfaceGroup * /* parent
 		options = new CInterfaceOptions;
 	}
 
+	CWidgetManager *wm = CWidgetManager::getInstance();
+
 	// get the name
 	ptr = (char*) xmlGetProp( cur, (xmlChar*)"name" );
 	if (!ptr)
@@ -1368,17 +1371,17 @@ bool CInterfaceParser::parseOptions (xmlNodePtr cur, CInterfaceGroup * /* parent
 	if (ptr)
 	{
 		string optionsParentName = ptr;
-		std::map<std::string, NLMISC::CSmartPtr<CInterfaceOptions> >::iterator it= _OptionsMap.find(optionsParentName);
-		if(it!=_OptionsMap.end())
-			options->copyBasicMap(*it->second);
+		CInterfaceOptions *io = wm->getOptions( optionsParentName );
+		if( io != NULL )
+			options->copyBasicMap( *io );
 	}
 
 	// parse parameters
 	if (options->parse (cur))
 	{
 		// Remove old one
-		_OptionsMap.erase(optionsName);
-		_OptionsMap.insert(map<string,CInterfaceOptions*>::value_type(optionsName,options));
+		wm->removeOptions( optionsName );
+		wm->addOptions( optionsName, options );
 	}
 	else
 	{
@@ -3550,12 +3553,6 @@ void CInterfaceParser::removeAllLinks()
 }
 
 // ***************************************************************************
-void CInterfaceParser::removeAllOptions()
-{
-	_OptionsMap.clear(); // options are holded by smart pointers ..
-}
-
-// ***************************************************************************
 void CInterfaceParser::removeAllProcedures()
 {
 	_ProcedureMap.clear();
@@ -3599,7 +3596,7 @@ void CInterfaceParser::removeAll()
 	removeAllLinks();
 	//nlinfo ("%d seconds for removeAllLinks", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
-	removeAllOptions();
+	CWidgetManager::getInstance()->removeAllOptions();
 	//nlinfo ("%d seconds for removeAllOptions", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
 	removeAllProcedures();

@@ -182,7 +182,7 @@ void CDBViewBar::draw ()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
-	color.A = (uint8)(((sint32)color.A*((sint32)pIM->getGlobalColorForContent().A+1))>>8);
+	color.A = (uint8)(((sint32)color.A*((sint32)CWidgetManager::getInstance()->getGlobalColorForContent().A+1))>>8);
 
 	// compute the DeltaY: mean of dif.
 	sint32	deltaY= (_H-_HBar)/2;

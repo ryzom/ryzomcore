@@ -660,12 +660,12 @@ void CGroupTree::draw()
 				CRGBA col = _OverColor;
 				if(getModulateGlobalColor())
 				{
-					col.modulateFromColor (_OverColor,  pIM->getGlobalColorForContent());
+					col.modulateFromColor (_OverColor,  CWidgetManager::getInstance()->getGlobalColorForContent());
 				}
 				else
 				{
 					col= _OverColor;
-					col.A = (uint8)(((sint32)col.A*((sint32)pIM->getGlobalColorForContent().A+1))>>8);
+					col.A = (uint8)(((sint32)col.A*((sint32)CWidgetManager::getInstance()->getGlobalColorForContent().A+1))>>8);
 				}
 
 				drawSelection( getHrcIconXEnd(_Lines[_OverLine].Depth + _Lines[_OverLine].getNumAdditionnalBitmap()),  ((sint)_Lines.size()-_OverLine-1)*_BmpH,
@@ -680,7 +680,7 @@ void CGroupTree::draw()
 				{
 					// simulate alpha blend of the selection bitmap
 					CRGBA	sel= _SelectedColor;
-					sel.A= (uint8)((sel.A*((sint32)pIM->getGlobalColorForContent().A+1))>>8);
+					sel.A= (uint8)((sel.A*((sint32)CWidgetManager::getInstance()->getGlobalColorForContent().A+1))>>8);
 					col.blendFromuiRGBOnly(col,  sel,  sel.A);
 				}
 
@@ -696,12 +696,12 @@ void CGroupTree::draw()
 		CRGBA col = _SelectedColor;
 		if(getModulateGlobalColor())
 		{
-			col.modulateFromColor (_SelectedColor,  pIM->getGlobalColorForContent());
+			col.modulateFromColor (_SelectedColor,  CWidgetManager::getInstance()->getGlobalColorForContent());
 		}
 		else
 		{
 			col= _SelectedColor;
-			col.A = (uint8)(((sint32)col.A*((sint32)pIM->getGlobalColorForContent().A+1))>>8);
+			col.A = (uint8)(((sint32)col.A*((sint32)CWidgetManager::getInstance()->getGlobalColorForContent().A+1))>>8);
 		}
 
 		drawSelection( getHrcIconXEnd(_Lines[_SelectedLine].Depth + _Lines[_SelectedLine].getNumAdditionnalBitmap()),  ((sint)_Lines.size()-_SelectedLine-1)*_BmpH,

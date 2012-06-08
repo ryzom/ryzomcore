@@ -218,7 +218,6 @@ public:
 	/// \name Clearing mgt
 	// @{
 		void removeAllLinks();
-		void removeAllOptions();
 		void removeAllProcedures();
 		void removeAllDefines();
 		void removeAllTemplates();
@@ -247,9 +246,6 @@ protected:
 	/**
 	 * Data of initialized interface
 	 */
-
-	// Options description
-	std::map<std::string, NLMISC::CSmartPtr<CInterfaceOptions> > _OptionsMap;
 
 	/// Define Variable list
 	typedef	std::map<std::string, std::string>		TVarMap;

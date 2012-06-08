@@ -274,7 +274,7 @@ void CCtrlTextButton::draw ()
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
-	CRGBA	globalColor= pIM->getGlobalColorForContent();
+	CRGBA	globalColor= CWidgetManager::getInstance()->getGlobalColorForContent();
 
 	// *** Detect Over
 	bool	lastOver = false;

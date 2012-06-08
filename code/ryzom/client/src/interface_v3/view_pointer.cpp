@@ -186,7 +186,7 @@ void CViewPointer::draw ()
 
 	CRGBA col;
 	if(getModulateGlobalColor())
-		col.modulateFromColor (_Color, pIM->getGlobalColor());
+		col.modulateFromColor (_Color, CWidgetManager::getInstance()->getGlobalColor());
 	else
 		col= _Color;
 

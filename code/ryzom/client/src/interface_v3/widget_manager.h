@@ -28,6 +28,12 @@ class CCtrlBase;
 class CViewBase;
 class CInterfaceGroup;
 class CViewPointerBase;
+class CInterfaceOptions;
+
+namespace NLMISC
+{
+	class CCDBNodeLeaf;
+}
 
 class IParser
 {
@@ -267,6 +273,22 @@ public:
 	// Remove a group from the windows list of its master group
 	void    unMakeWindow( CInterfaceGroup *group, bool noWarning = false );
 
+	void setGlobalColor( NLMISC::CRGBA col );
+	NLMISC::CRGBA getGlobalColor() const{ return _GlobalColor; }
+
+	void setContentAlpha( uint8 alpha );
+	uint8 getContentAlpha() const{ return _ContentAlpha; }
+
+	NLMISC::CRGBA getGlobalColorForContent() const { return _GlobalColorForContent; }
+	void setGlobalColorForContent( NLMISC::CRGBA col ){ _GlobalColorForContent = col; }
+	void resetColorProps();
+
+	/// Get options by name
+	CInterfaceOptions* getOptions( const std::string &optName );
+	void addOptions( std::string name, CInterfaceOptions *options );
+	void removeOptions( std::string name );
+	void removeAllOptions();
+
 	static IParser *parser;
 
 private:
@@ -279,6 +301,9 @@ private:
 	static std::string _CtrlLaunchingModalId;
 	NLMISC::CRefPtr< CCtrlBase > curContextHelp;
 	CViewPointerBase *_Pointer;
+
+	// Options description
+	std::map< std::string, NLMISC::CSmartPtr< CInterfaceOptions > > _OptionsMap;
 
 	NLMISC::CRefPtr< CInterfaceGroup > _WindowUnder;
 
@@ -296,6 +321,15 @@ private:
 
 	// view that should be notified from clock msg
 	std::vector<CCtrlBase*> _ClockMsgTargets;
+
+	NLMISC::CRGBA _GlobalColor;
+	NLMISC::CRGBA _GlobalColorForContent;
+	uint8 _ContentAlpha;
+
+	NLMISC::CCDBNodeLeaf *_RProp;
+	NLMISC::CCDBNodeLeaf *_GProp;
+	NLMISC::CCDBNodeLeaf *_BProp;
+	NLMISC::CCDBNodeLeaf *_AProp;
 };
 
 #endif

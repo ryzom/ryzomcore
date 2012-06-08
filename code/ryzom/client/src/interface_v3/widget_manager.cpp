@@ -16,13 +16,16 @@
 
 #include "widget_manager.h"
 #include "interface_group.h"
-#include "group_container.h"
 #include "group_modal.h"
 
+#include "group_container.h"
+
+#include "nel/gui/db_manager.h"
 #include "nel/gui/view_renderer.h"
 #include "view_pointer_base.h"
 #include "group_editbox_base.h"
 #include "ctrl_draggable.h"
+#include "interface_options.h"
 
 CWidgetManager* CWidgetManager::instance = NULL;
 std::string CWidgetManager::_CtrlLaunchingModalId= "ctrl_launch_modal";
@@ -948,6 +951,8 @@ void CWidgetManager::reset()
 	_OldCaptureKeyboard = NULL;
 	setCapturePointerLeft(NULL);
 	setCapturePointerRight(NULL);
+	
+	resetColorProps();
 }
 
 
@@ -1310,11 +1315,79 @@ void CWidgetManager::unMakeWindow(CInterfaceGroup *group, bool noWarning)
 	}
 }
 
+// ------------------------------------------------------------------------------------------------
+void CWidgetManager::setGlobalColor (NLMISC::CRGBA col)
+{
+	if (!_RProp)
+	{
+		_RProp = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:R");
+		_GProp = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:G");
+		_BProp = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:B");
+		_AProp = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:A");
+	}
+	_RProp ->setValue32 (col.R);
+	_GProp ->setValue32 (col.G);
+	_BProp ->setValue32 (col.B);
+	_AProp ->setValue32 (col.A);
+
+	_GlobalColor = col;
+
+	// set the global color for content (the same with modulated alpha)
+	_GlobalColorForContent = _GlobalColor;
+	_GlobalColorForContent.A = (uint8) (( (uint16) _GlobalColorForContent.A * (uint16) _ContentAlpha) >> 8);
+}
+
+// ***************************************************************************
+void CWidgetManager::setContentAlpha(uint8 alpha)
+{
+	_ContentAlpha = alpha;
+	// update alpha of global color
+	_GlobalColorForContent.A = alpha;/*(uint8) (( (uint16) _GlobalColor.A * (uint16) _ContentAlpha) >> 8);*/
+}
+
+void CWidgetManager::resetColorProps()
+{
+	_RProp = NULL;
+	_GProp = NULL;
+	_BProp = NULL;
+	_AProp = NULL;
+}
+
+// ------------------------------------------------------------------------------------------------
+CInterfaceOptions* CWidgetManager::getOptions( const std::string &name )
+{
+	std::map< std::string, NLMISC::CSmartPtr< CInterfaceOptions > >::iterator it = _OptionsMap.find( name );
+	if( it == _OptionsMap.end() )
+		return NULL;
+	else
+		return it->second;
+}
+
+void CWidgetManager::addOptions( std::string name, CInterfaceOptions *options )
+{
+	_OptionsMap.insert( std::map< std::string, CInterfaceOptions* >::value_type( name, options ) );
+}
+
+void CWidgetManager::removeOptions( std::string name )
+{
+	_OptionsMap.erase( name );
+}
+
+void CWidgetManager::removeAllOptions()
+{
+	_OptionsMap.clear();
+}
 
 CWidgetManager::CWidgetManager()
 {
 	_Pointer = NULL;
 	curContextHelp = NULL;
+
+	resetColorProps();
+
+	_GlobalColor = NLMISC::CRGBA(255,255,255,255);
+	_GlobalColorForContent = _GlobalColor;
+	_ContentAlpha = 255;
 }
 
 CWidgetManager::~CWidgetManager()

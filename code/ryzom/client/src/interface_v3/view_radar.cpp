@@ -153,9 +153,9 @@ void CViewRadar::draw ()
 		CRGBA col = entity->getColor();
 
 		if(getModulateGlobalColor())
-			col.modulateFromColor (col, pIM->getGlobalColorForContent());
+			col.modulateFromColor (col, CWidgetManager::getInstance()->getGlobalColorForContent());
 		else
-			col.A = (uint8)(((sint32)col.A*((sint32)pIM->getGlobalColorForContent().A+1))>>8);
+			col.A = (uint8)(((sint32)col.A*((sint32)CWidgetManager::getInstance()->getGlobalColorForContent().A+1))>>8);
 
 		// Select the icon to display and draw it
 		uint spotId = CNPCIconCache::getInstance().getNPCIcon(entity).getSpotId();

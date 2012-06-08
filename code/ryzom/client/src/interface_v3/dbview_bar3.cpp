@@ -163,7 +163,7 @@ void CDBViewBar3::draw ()
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
-	CRGBA gColor = pIM->getGlobalColorForContent();
+	CRGBA gColor = CWidgetManager::getInstance()->getGlobalColorForContent();
 
 	if (_Mini)
 	{

@@ -66,12 +66,12 @@ void CCtrlQuad::draw()
 	CRGBA col;
 	if(getModulateGlobalColor())
 	{
-		col.modulateFromColor (_Color, pIM->getGlobalColorForContent());
+		col.modulateFromColor (_Color, CWidgetManager::getInstance()->getGlobalColorForContent());
 	}
 	else
 	{
 		col= _Color;
-		col.A = (uint8)(((sint32)col.A*((sint32)pIM->getGlobalColorForContent().A+1))>>8);
+		col.A = (uint8)(((sint32)col.A*((sint32)CWidgetManager::getInstance()->getGlobalColorForContent().A+1))>>8);
 	}
 
 	/*if (_InheritGCAlpha)

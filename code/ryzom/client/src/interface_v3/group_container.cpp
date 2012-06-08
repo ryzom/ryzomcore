@@ -22,6 +22,7 @@
 #include "group_container.h"
 #include "interface_manager.h"
 #include "interface_options.h"
+#include "interface_options_ryzom.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "action_handler.h"
 #include "../time_client.h"
@@ -469,7 +470,7 @@ COptionsContainerInsertion *CCtrlMover::getInsertionOptions()
 	static	NLMISC::CRefPtr<COptionsContainerInsertion> insertionOptions;
 	if (insertionOptions) return insertionOptions;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	insertionOptions = (COptionsContainerInsertion *) im->getOptions("container_insertion_opt");
+	insertionOptions = (COptionsContainerInsertion *) CWidgetManager::getInstance()->getOptions("container_insertion_opt");
 	return insertionOptions;
 }
 
@@ -1798,8 +1799,8 @@ void CGroupContainer::draw ()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	float speed = pIM->getAlphaRolloverSpeed();
 
-	CRGBA oldGlobalColor = pIM->getGlobalColor();
-	CRGBA oldGColForGrayed = pIM->getGlobalColor();
+	CRGBA oldGlobalColor = CWidgetManager::getInstance()->getGlobalColor();
+	CRGBA oldGColForGrayed = CWidgetManager::getInstance()->getGlobalColor();
 	if (_Blinking)
 	{
 		const uint blinkDuration = 300;
@@ -1815,7 +1816,7 @@ void CGroupContainer::draw ()
 			if (abs(newCol.R - oldGlobalColor.R) < 64) newCol.R = 192;
 			if (abs(newCol.G - oldGlobalColor.G) < 64) newCol.G = 192;
 			if (abs(newCol.B - oldGlobalColor.B) < 64) newCol.B = 192;
-			pIM->setGlobalColor(newCol);
+			CWidgetManager::getInstance()->setGlobalColor(newCol);
 			_BlinkState = true;
 		}
 		else
@@ -1850,7 +1851,7 @@ void CGroupContainer::draw ()
 
 	// Draw the container
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
-	CRGBA col = pIM->getGlobalColor();
+	CRGBA col = CWidgetManager::getInstance()->getGlobalColor();
 
 	bool bGrayed = isGrayed();
 	if (bGrayed)
@@ -1858,7 +1859,7 @@ void CGroupContainer::draw ()
 		col.R = col.R / 2;
 		col.G = col.G / 2;
 		col.B = col.B / 2;
-		pIM->setGlobalColor(col);
+		CWidgetManager::getInstance()->setGlobalColor(col);
 		oldGlobalColor.R = oldGlobalColor.R / 2;
 		oldGlobalColor.G = oldGlobalColor.G / 2;
 		oldGlobalColor.B = oldGlobalColor.B / 2;
@@ -2078,7 +2079,7 @@ void CGroupContainer::draw ()
 
 	if (_Blinking)
 	{
-		pIM->setGlobalColor(oldGlobalColor);
+		CWidgetManager::getInstance()->setGlobalColor(oldGlobalColor);
 	}
 
 	// Top window : title is highlighted
@@ -2117,7 +2118,7 @@ void CGroupContainer::draw ()
 
 	// Render inside window
 
-	uint8 oldAlphaContent = pIM->getContentAlpha();
+	uint8 oldAlphaContent = CWidgetManager::getInstance()->getContentAlpha();
 	uint8 oldAlphaContainer = _CurrentContainerAlpha;
 	if (parentGC)
 	{
@@ -2131,7 +2132,7 @@ void CGroupContainer::draw ()
 		_CurrentContainerAlpha = _UseGlobalAlpha ? pIM->getGlobalContainerAlpha() : _ContainerAlpha;
 	}
 	// set content alpha multiplied by rollover alpha
-	pIM->setContentAlpha((uint8) (((uint16) _CurrentContentAlpha * (uint16) _ICurrentRolloverAlphaContent) >> 8));
+	CWidgetManager::getInstance()->setContentAlpha((uint8) (((uint16) _CurrentContentAlpha * (uint16) _ICurrentRolloverAlphaContent) >> 8));
 	// set content alpha multiplied by rollover alpha
 	_CurrentContainerAlpha = (uint8) (((uint16) _CurrentContainerAlpha * (uint16) _ICurrentRolloverAlphaContainer) >> 8);
 
@@ -2189,7 +2190,7 @@ void CGroupContainer::draw ()
 	}
 
 
-	pIM->setContentAlpha(oldAlphaContent);
+	CWidgetManager::getInstance()->setContentAlpha(oldAlphaContent);
 	_CurrentContainerAlpha = oldAlphaContainer;
 
 
@@ -2252,7 +2253,7 @@ void CGroupContainer::draw ()
 
 	if (bGrayed)
 	{
-		pIM->setGlobalColor(oldGColForGrayed);
+		CWidgetManager::getInstance()->setGlobalColor(oldGColForGrayed);
 	}
 
 
@@ -3084,7 +3085,7 @@ COptionsLayer *CGroupContainer::getContainerOptions(sint32 ls)
 		sLayerName = &sTmp;
 	}
 
-	COptionsLayer *pLayer = (COptionsLayer*)CInterfaceManager::getInstance()->getOptions(*sLayerName);
+	COptionsLayer *pLayer = (COptionsLayer*)CWidgetManager::getInstance()->getOptions(*sLayerName);
 	nlassert(pLayer != NULL);
 	return pLayer;
 }
@@ -3445,7 +3446,7 @@ COptionsContainerMove *CGroupContainer::getMoveOptions()
 	static		NLMISC::CRefPtr<COptionsContainerMove>     moveOptions;
 	if (moveOptions) return moveOptions;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	moveOptions = (COptionsContainerMove *) im->getOptions("container_move_opt");
+	moveOptions = (COptionsContainerMove *) CWidgetManager::getInstance()->getOptions("container_move_opt");
 	return moveOptions;
 }
 

@@ -24,6 +24,7 @@
 #include "game_share/slot_types.h"
 #include "nel/3d/u_skeleton.h"
 #include "interface_options.h"
+#include "interface_options_ryzom.h"
 #include "interface_element.h"
 
 

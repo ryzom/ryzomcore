@@ -390,7 +390,7 @@ static DECLARE_INTERFACE_USER_FCT(getClientActionTypeColor)
 
 	// To Color
 	// Get the action_bar_color options
-	CInterfaceOptions	*options= CInterfaceManager::getInstance()->getOptions("action_bar_color");
+	CInterfaceOptions	*options= CWidgetManager::getInstance()->getOptions("action_bar_color");
 	if(options)
 	{
 		const CInterfaceOptionValue	&optVal= options->getValue(CLIENT_ACTION_TYPE::toString(actType));

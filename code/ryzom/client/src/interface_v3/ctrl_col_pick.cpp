@@ -98,7 +98,7 @@ void CCtrlColPick::draw()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
-	CRGBA col = CRGBA(255,255,255,(uint8)pIM->getGlobalColor().A);
+	CRGBA col = CRGBA(255,255,255,(uint8)CWidgetManager::getInstance()->getGlobalColor().A);
 
 	rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal,
 							_WReal, _HReal,

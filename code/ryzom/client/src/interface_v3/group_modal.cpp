@@ -17,9 +17,9 @@
 
 
 #include "group_modal.h"
-#include "interface_manager.h"
 #include "interface_element.h"
 #include "nel/misc/xml_auto_ptr.h"
+#include "nel/gui/view_renderer.h"
 
 using namespace std;
 

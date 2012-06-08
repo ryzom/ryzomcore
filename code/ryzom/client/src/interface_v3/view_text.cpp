@@ -442,7 +442,7 @@ void CViewText::draw ()
 	CRGBA col, shcol;
 	if(getModulateGlobalColor())
 	{
-		CRGBA gcfc = pIM->getGlobalColorForContent();
+		CRGBA gcfc = CWidgetManager::getInstance()->getGlobalColorForContent();
 		col.modulateFromColor (_Color, gcfc);
 		shcol.modulateFromColor (_ShadowColor, gcfc);
 	}
@@ -450,8 +450,8 @@ void CViewText::draw ()
 	{
 		col = _Color;
 		shcol = _ShadowColor;
-		col.A = (uint8)(((sint)col.A*((sint)pIM->getGlobalColorForContent().A+1))>>8);
-		shcol.A = (uint8)(((sint)shcol.A*((sint)pIM->getGlobalColorForContent().A+1))>>8);
+		col.A = (uint8)(((sint)col.A*((sint)CWidgetManager::getInstance()->getGlobalColorForContent().A+1))>>8);
+		shcol.A = (uint8)(((sint)shcol.A*((sint)CWidgetManager::getInstance()->getGlobalColorForContent().A+1))>>8);
 	}
 
 
