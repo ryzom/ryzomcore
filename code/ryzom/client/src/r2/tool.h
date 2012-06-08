@@ -26,6 +26,8 @@
 //
 
 class CInterfaceManager;
+class CGroupContainer;
+
 namespace NLGUI
 {
 	class CEventDescriptor;

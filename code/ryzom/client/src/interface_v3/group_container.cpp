@@ -1195,7 +1195,7 @@ NLMISC_REGISTER_OBJECT(CViewBase, CGroupContainer, std::string, "container");
 
 // ***************************************************************************
 CGroupContainer::CGroupContainer(const TCtorParam &param)
-: CInterfaceGroup(param)
+: CGroupContainerBase(param)
 {
 	// faster than a virual call
 	_IsGroupContainer = true;

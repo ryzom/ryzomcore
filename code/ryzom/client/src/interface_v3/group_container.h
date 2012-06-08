@@ -20,12 +20,14 @@
 #define RZ_GROUP_CONTAINER_H
 
 #include "interface_group.h"
+#include "group_container_base.h"
 #include "nel/misc/smart_ptr.h"
 
 namespace NLGUI
 {
-class CEventDescriptorLocalised;
+	class CEventDescriptorLocalised;
 }
+
 class CInterfaceList;
 class CCtrlButton;
 class CCtrlScroll;
@@ -152,7 +154,7 @@ private:
  * \author Nevrax France
  * \date 2002
  */
-class CGroupContainer : public CInterfaceGroup
+class CGroupContainer : public CGroupContainerBase
 {
 public:
 	enum { NumResizers = 8 };
@@ -267,7 +269,7 @@ public:
 	int luaBlink(CLuaState &ls);
 	int luaSetHeaderColor(CLuaState &ls);
 
-	REFLECT_EXPORT_START(CGroupContainer, CInterfaceGroup)
+	REFLECT_EXPORT_START(CGroupContainer, CGroupContainerBase)
 		REFLECT_LUA_METHOD("blink", luaBlink);
 		REFLECT_LUA_METHOD("setHeaderColor", luaSetHeaderColor);
 		REFLECT_STRING("title", getTitle, setTitle);

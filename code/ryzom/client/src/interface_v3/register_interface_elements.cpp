@@ -28,6 +28,7 @@
 #include "ctrl_base.h"
 #include "interface_group.h"
 #include "group_frame.h"
+#include "group_container_base.h"
 #include "group_container.h"
 #include "group_list.h"
 #include "dbgroup_select_number.h"
@@ -82,7 +83,8 @@ void registerInterfaceElements()
 	REGISTER_REFLECTABLE_CLASS(CInterfaceGroup, CCtrlBase);
 	REGISTER_REFLECTABLE_CLASS(CGroupFrame, CInterfaceGroup);
 	REGISTER_REFLECTABLE_CLASS(CGroupModal, CGroupFrame);
-	REGISTER_REFLECTABLE_CLASS(CGroupContainer, CInterfaceGroup);
+	REGISTER_REFLECTABLE_CLASS(CGroupContainerBase, CInterfaceGroup);
+	REGISTER_REFLECTABLE_CLASS(CGroupContainer, CGroupContainerBase);
 	REGISTER_REFLECTABLE_CLASS(CDBGroupSelectNumber, CInterfaceGroup);
 	REGISTER_REFLECTABLE_CLASS(IListSheetBase, CInterfaceGroup);
 	REGISTER_REFLECTABLE_CLASS(CGroupEditBoxBase, CInterfaceGroup);

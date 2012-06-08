@@ -14,18 +14,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "widget_manager.h"
-#include "interface_group.h"
-#include "group_modal.h"
-
-#include "group_container.h"
-
 #include "nel/gui/db_manager.h"
 #include "nel/gui/view_renderer.h"
+#include "widget_manager.h"
 #include "view_pointer_base.h"
-#include "group_editbox_base.h"
 #include "ctrl_draggable.h"
+#include "interface_group.h"
+#include "group_container_base.h"
+#include "group_modal.h"
+#include "group_editbox_base.h"
 #include "interface_options.h"
+
 
 CWidgetManager* CWidgetManager::instance = NULL;
 std::string CWidgetManager::_CtrlLaunchingModalId= "ctrl_launch_modal";
@@ -155,7 +154,7 @@ void CWidgetManager::SMasterGroup::setBackWindow(CInterfaceGroup *pIG)
 // ----------------------------------------------------------------------------
 void CWidgetManager::SMasterGroup::deactiveAllContainers()
 {
-	std::vector<CGroupContainer*> gcs;
+	std::vector<CGroupContainerBase*> gcs;
 
 	// Make first a list of all window (Warning: all group container are not window!)
 	for (uint8 i = 0; i < WIN_PRIORITY_MAX; ++i)
@@ -163,7 +162,7 @@ void CWidgetManager::SMasterGroup::deactiveAllContainers()
 		std::list<CInterfaceGroup*>::iterator it = PrioritizedWindows[i].begin();
 		while (it != PrioritizedWindows[i].end())
 		{
-			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(*it);
+			CGroupContainerBase *pGC = dynamic_cast<CGroupContainerBase*>(*it);
 			if (pGC != NULL)
 				gcs.push_back(pGC);
 			it++;
@@ -186,7 +185,7 @@ void CWidgetManager::SMasterGroup::centerAllContainers()
 		std::list<CInterfaceGroup*>::iterator it = PrioritizedWindows[i].begin();
 		while (it != PrioritizedWindows[i].end())
 		{
-			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(*it);
+			CGroupContainerBase *pGC = dynamic_cast<CGroupContainerBase*>(*it);
 			if ((pGC != NULL) && (pGC->getParent() != NULL))
 			{
 				sint32 wParent = pGC->getParent()->getW(false);
@@ -210,7 +209,7 @@ void CWidgetManager::SMasterGroup::unlockAllContainers()
 		std::list<CInterfaceGroup*>::iterator it = PrioritizedWindows[i].begin();
 		while (it != PrioritizedWindows[i].end())
 		{
-			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(*it);
+			CGroupContainerBase *pGC = dynamic_cast<CGroupContainerBase*>(*it);
 			if (pGC != NULL)
 				pGC->setLocked(false);
 
@@ -338,7 +337,7 @@ void unlinkAllContainers (CInterfaceGroup *pIG)
 	for(uint i = 0; i < rG.size(); ++i)
 		unlinkAllContainers (rG[i]);
 
-	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIG);
+	CGroupContainerBase *pGC = dynamic_cast<CGroupContainerBase*>(pIG);
 	if (pGC != NULL)
 		pGC->removeAllContainers();
 }

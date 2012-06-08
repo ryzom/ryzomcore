@@ -33,7 +33,6 @@ class CInterfaceElement;
 class CInterfaceGroup;
 class CViewBase;
 class CCtrlBase;
-class CGroupContainer;
 class IActionHandler;
 
 /**

@@ -33,6 +33,7 @@ class	CCtrlButton;
 class	CCtrlScroll;
 class	CHandlerListSheetTradeSelect;
 class	CHandlerListSheetTradeRightClick;
+class CGroupContainer;
 
 // ***************************************************************************
 /**
