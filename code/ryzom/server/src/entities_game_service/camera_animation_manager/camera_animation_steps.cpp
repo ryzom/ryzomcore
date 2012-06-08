@@ -91,7 +91,8 @@ public:
 CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepStatic, "camera_animation_static");
 
 /////////////////////////////////////////////////////////////////////////////
-/// Static camera animation step (that does not have specific variables)
+/// Go to camera animation step
+/// - end_position
 class CCameraAnimationStepGoTo: public CCameraAnimationStepBasic
 {
 protected:
@@ -113,15 +114,67 @@ public:
 
 		std::string value;
 
-		// We get the look at position
+		// We get the end position
 		if (!prim->getPropertyByName("end_position", value))
 		{
 			nlwarning("<CCameraAnimationStepGoTo parseStep> impossible to get the end_position property of the basic step in primitive : %s", filename.c_str());
 			return false;
 		}
-		LookAtPos = value;
+		EndPos = value;
 
 		return true;
 	}
 };
 CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepGoTo, "camera_animation_go_to");
+
+/////////////////////////////////////////////////////////////////////////////
+/// Follow entity camera animation step
+/// - entity_to_follow
+/// - distance_to_entity
+class CCameraAnimationStepFollowEntity: public CCameraAnimationStepBasic
+{
+protected:
+	std::string EntityToFollow;
+	float DistanceToEntity;
+
+public:
+	CCameraAnimationStepFollowEntity()
+	{
+		EntityToFollow = "";
+		DistanceToEntity = 0.f;
+	}
+
+	bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
+	{
+		if (!CCameraAnimationStepBasic::parseStep(prim, filename))
+		{
+			nlwarning("<CCameraAnimationStepFollowEntity parseStep> impossible to parse the basic part of the step in primitive : %s", filename.c_str());
+			return false;
+		}
+
+		std::string value;
+
+		// We get the entity to follow
+		if (!prim->getPropertyByName("entity_to_follow", value))
+		{
+			nlwarning("<CCameraAnimationStepFollowEntity parseStep> impossible to get the entity_to_follow property of the basic step in primitive : %s", filename.c_str());
+			return false;
+		}
+		EntityToFollow = value;
+
+		// We get the distance to the entity
+		if (!prim->getPropertyByName("distance_to_entity", value))
+		{
+			nlwarning("<CCameraAnimationStepFollowEntity parseStep> impossible to get the distance_to_entity property of the basic step in primitive : %s", filename.c_str());
+			return false;
+		}
+		if (!NLMISC::fromString(value, DistanceToEntity))
+		{
+			nlwarning("<CCameraAnimationStepFollowEntity parseStep> impossible to convert the string : %s, in float in the follow entity step in primitive : %s", value.c_str(), filename.c_str());
+			return false;
+		}
+
+		return true;
+	}
+};
+CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepFollowEntity, "camera_animation_follow_entity");
