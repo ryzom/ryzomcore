@@ -15,7 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "action_handler.h"
-#include "group_container.h"
+//#include "group_container.h"
+#include "group_container_base.h"
+#include "nel/gui/interface_property.h"
 #include "nel/gui/interface_expr.h"
 #include "nel/gui/db_manager.h"
 #include "interface_link.h"
@@ -481,7 +483,7 @@ REGISTER_ACTION_HANDLER (CAHResizeW, "resize_w");
 ////////////////////////////////
 
 // the container whose alpha is being edited
-static CGroupContainer *AlphaChooserTarget = NULL;
+static CGroupContainerBase *AlphaChooserTarget = NULL;
 static bool  OldUseGlobalAlpha;
 static uint8 OldContentAlpha;
 static uint8 OldBgAlpha;
@@ -518,11 +520,11 @@ class CAHChooseUIAlpha : public IActionHandler
 public:
 	virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
 	{
-		CGroupContainer *gc = NULL;
+		CGroupContainerBase *gc = NULL;
 		CCtrlBase *cb = pCaller;
 		while (cb)
 		{
-			gc = dynamic_cast<CGroupContainer *>(cb);
+			gc = dynamic_cast<CGroupContainerBase*>(cb);
 			if (gc) break;
 			cb = cb->getParent();
 		}
@@ -635,11 +637,11 @@ class CAHLockUnlock : public IActionHandler
 {
 	virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
 	{
-		CGroupContainer *gc = NULL;
+		CGroupContainerBase *gc = NULL;
 		CCtrlBase *cb = pCaller;
 		while (cb)
 		{
-			gc = dynamic_cast<CGroupContainer *>(cb);
+			gc = dynamic_cast< CGroupContainerBase* >(cb);
 			if (gc) break;
 			cb = cb->getParent();
 		}
@@ -655,7 +657,7 @@ class CAHSetTransparent : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
 	{
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(Params));
+		CGroupContainerBase *pGC = dynamic_cast< CGroupContainerBase* >(CWidgetManager::getInstance()->getElementFromId(Params));
 		if (pGC != NULL)
 		{
 			pGC->setUseGlobalAlpha(false);
@@ -678,7 +680,7 @@ class CAHSetAlpha : public IActionHandler
 		uint8 alpha;
 		fromString(getParam (Params, "alpha"), alpha);
 
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(ui));
+		CGroupContainerBase *pGC = dynamic_cast<CGroupContainerBase*>(CWidgetManager::getInstance()->getElementFromId(ui));
 		if (pGC != NULL)
 		{
 			pGC->setUseGlobalAlpha(false);

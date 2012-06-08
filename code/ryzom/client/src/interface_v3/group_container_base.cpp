@@ -20,6 +20,12 @@
 CGroupContainerBase::CGroupContainerBase( const CViewBase::TCtorParam &param ) :
 CInterfaceGroup( param )
 {
+	_ContentAlpha = 255;
+	_ContainerAlpha = 255;
+	_RolloverAlphaContainer = 0;
+	_RolloverAlphaContent = 0;
+	_Locked = false;
+	_UseGlobalAlpha = true;
 }
 
 CGroupContainerBase::~CGroupContainerBase()
@@ -40,4 +46,47 @@ void CGroupContainerBase::setLocked( bool locked )
 	nlassert( false );
 }
 
+
+// ***************************************************************************
+void CGroupContainerBase::triggerAlphaSettingsChangedAH()
+{
+	if (_AHOnAlphaSettingsChanged != NULL)
+		CAHManager::getInstance()->runActionHandler(_AHOnAlphaSettingsChanged, this, _AHOnAlphaSettingsChangedParams);
+}
+
+
+// ***************************************************************************
+void CGroupContainerBase::setUseGlobalAlpha(bool use)
+{
+	_UseGlobalAlpha = use;
+	triggerAlphaSettingsChangedAH();
+}
+
+// ***************************************************************************
+void CGroupContainerBase::setContainerAlpha(uint8 alpha)
+{
+	_ContainerAlpha = alpha;
+	triggerAlphaSettingsChangedAH();
+}
+
+// ***************************************************************************
+void CGroupContainerBase::setContentAlpha(uint8 alpha)
+{
+	_ContentAlpha = alpha;
+	triggerAlphaSettingsChangedAH();
+}
+
+// ***************************************************************************
+void CGroupContainerBase::setRolloverAlphaContent(uint8 alpha)
+{
+	_RolloverAlphaContent = alpha;
+	triggerAlphaSettingsChangedAH();
+}
+
+// ***************************************************************************
+void CGroupContainerBase::setRolloverAlphaContainer(uint8 alpha)
+{
+	_RolloverAlphaContainer = alpha;
+	triggerAlphaSettingsChangedAH();
+}
 

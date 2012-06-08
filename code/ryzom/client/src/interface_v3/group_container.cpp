@@ -1200,10 +1200,6 @@ CGroupContainer::CGroupContainer(const TCtorParam &param)
 	// faster than a virual call
 	_IsGroupContainer = true;
 
-	_ContentAlpha = 255;
-	_ContainerAlpha = 255;
-	_RolloverAlphaContainer = 0;
-	_RolloverAlphaContent = 0;
 	_CurrentContainerAlpha = 255;
 	_CurrentContentAlpha = 255;
 	_CurrentRolloverAlphaContainer = 0.f;
@@ -1250,7 +1246,6 @@ CGroupContainer::CGroupContainer(const TCtorParam &param)
 	_OpenAtStart		= false;
 	_OpenedBeforePopup	= false;
 
-	_Locked				= false;
 	_Lockable			= true;
 
 	_EnabledResizer			= true;
@@ -1265,7 +1260,6 @@ CGroupContainer::CGroupContainer(const TCtorParam &param)
 	_MovingInParentList		= false;
 	_ActiveSavable			= true;
 	_Savable                = true;
-	_UseGlobalAlpha			= true;
 	_TitleClass				= TitleText;
 	_TouchFlag				= false;
 	_PositionBackuped       = false;
@@ -4025,55 +4019,6 @@ void CGroupContainer::setContentYOffset(sint32 value)
 	}
 	_ContentYOffset = (sint8) value;
 	invalidateCoords();
-}
-
-
-
-
-// ***************************************************************************
-void CGroupContainer::triggerAlphaSettingsChangedAH()
-{
-	if (_AHOnAlphaSettingsChanged != NULL)
-	{
-		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CAHManager::getInstance()->runActionHandler(_AHOnAlphaSettingsChanged, this, _AHOnAlphaSettingsChangedParams);
-	}
-}
-
-
-// ***************************************************************************
-void CGroupContainer::setUseGlobalAlpha(bool use)
-{
-	_UseGlobalAlpha = use;
-	triggerAlphaSettingsChangedAH();
-}
-
-// ***************************************************************************
-void CGroupContainer::setContainerAlpha(uint8 alpha)
-{
-	_ContainerAlpha = alpha;
-	triggerAlphaSettingsChangedAH();
-}
-
-// ***************************************************************************
-void CGroupContainer::setContentAlpha(uint8 alpha)
-{
-	_ContentAlpha = alpha;
-	triggerAlphaSettingsChangedAH();
-}
-
-// ***************************************************************************
-void CGroupContainer::setRolloverAlphaContent(uint8 alpha)
-{
-	_RolloverAlphaContent = alpha;
-	triggerAlphaSettingsChangedAH();
-}
-
-// ***************************************************************************
-void CGroupContainer::setRolloverAlphaContainer(uint8 alpha)
-{
-	_RolloverAlphaContainer = alpha;
-	triggerAlphaSettingsChangedAH();
 }
 
 
