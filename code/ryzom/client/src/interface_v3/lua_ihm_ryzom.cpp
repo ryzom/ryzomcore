@@ -362,55 +362,33 @@ void CLuaIHMRyzom::RegisterRyzomFunctions( NLGUI::CLuaState &ls )
 	globals.setNil("__cfmt"); // remove temp metatable
 
 	ls.registerFunc( "getUI", getUI );
-	ls.registerFunc("setOnDraw",    setOnDraw);
-	ls.registerFunc("setCaptureKeyboard", setCaptureKeyboard);
-	ls.registerFunc("resetCaptureKeyboard", resetCaptureKeyboard);
 	ls.registerFunc("validMessageBox",    validMessageBox);
-	ls.registerFunc("setTopWindow", setTopWindow);
-	ls.registerFunc("concatUCString", concatUCString);
-	ls.registerFunc("concatString", concatString);
-	ls.registerFunc("tableToString", tableToString);
-	ls.registerFunc("addOnDbChange",    addOnDbChange);
-	ls.registerFunc("removeOnDbChange",    removeOnDbChange);
 	ls.registerFunc("getUICaller",    getUICaller);
-	ls.registerFunc("getCurrentWindowUnder", getCurrentWindowUnder);
 	ls.registerFunc("getUI",    getUI);
 	ls.registerFunc("getIndexInDB", getIndexInDB);
-	ls.registerFunc("getUIId",    getUIId);
 	ls.registerFunc("createGroupInstance", createGroupInstance);
 	ls.registerFunc("createRootGroupInstance", createRootGroupInstance);
 	ls.registerFunc("createUIElement", createUIElement);
 	ls.registerFunc("launchContextMenuInGame",    launchContextMenuInGame);
 	ls.registerFunc("parseInterfaceFromString",    parseInterfaceFromString);
 	ls.registerFunc("updateAllLocalisedElements",    updateAllLocalisedElements);
-	ls.registerFunc("runAH",    runAH);
-	ls.registerFunc("runExpr",    runExpr);
-	ls.registerFunc("runFct",    runFct);
-	ls.registerFunc("runCommand",    runCommand);
 	ls.registerFunc("formatUI",    formatUI);
 	ls.registerFunc("formatDB",    formatDB);
-	ls.registerFunc("deleteUI",    deleteUI);
-	ls.registerFunc("deleteReflectable",    deleteReflectable);
 	ls.registerFunc("dumpUI",    dumpUI);
 	ls.registerFunc("setKeyboardContext",    setKeyboardContext);
 	ls.registerFunc("breakPoint",    breakPoint);
-	ls.registerFunc("getWindowSize",    getWindowSize);
 	ls.registerFunc("setTextFormatTaged",    setTextFormatTaged);
 	ls.registerFunc("initEmotesMenu", initEmotesMenu);
-	ls.registerFunc("isUCString", isUCString);
 	ls.registerFunc("hideAllWindows", hideAllWindows);
 	ls.registerFunc("hideAllNonSavableWindows", hideAllNonSavableWindows);
 	ls.registerFunc("getDesktopIndex", getDesktopIndex);
 	ls.registerFunc("setLuaBreakPoint", setLuaBreakPoint);
 	ls.registerFunc("getMainPageURL", getMainPageURL);
 	ls.registerFunc("getCharSlot", getCharSlot);
-	ls.registerFunc("getPathContent", getPathContent);
 	ls.registerFunc("getServerSeason", getServerSeason);
 	ls.registerFunc("computeCurrSeason", computeCurrSeason);
 	ls.registerFunc("getAutoSeason", getAutoSeason);
-	ls.registerFunc("getTextureSize", getTextureSize);
 	ls.registerFunc("enableModalWindow", enableModalWindow);
-	ls.registerFunc("disableModalWindow", disableModalWindow);
 	ls.registerFunc("getPlayerPos", getPlayerPos);
 	ls.registerFunc("getPlayerFront", getPlayerFront);
 	ls.registerFunc("getPlayerDirection", getPlayerDirection);
@@ -497,7 +475,6 @@ void CLuaIHMRyzom::RegisterRyzomFunctions( NLGUI::CLuaState &ls )
 		LUABIND_FUNC(getFirstTribeFameIndex),
 		LUABIND_FUNC(getNbTribeFameIndex),
 		LUABIND_FUNC(getClientCfg),
-		LUABIND_FUNC(fileExists),
 		LUABIND_FUNC(sendMsgToServer),
 		LUABIND_FUNC(sendMsgToServerPvpTag),
 		LUABIND_FUNC(isGuildQuitAvailable),
@@ -611,260 +588,6 @@ int	CLuaIHMRyzom::getUI(CLuaState &ls)
 	return 1;
 }
 
-// ***************************************************************************
-int CLuaIHMRyzom::setCaptureKeyboard(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_setCaptureKeyboard)
-	const char *funcName = "setCaptureKeyboard";
-	CLuaIHM::checkArgCount(ls, funcName, 1);
-	CLuaIHM::checkArgTypeUIElement(ls, funcName, 1);
-	CCtrlBase *ctrl = dynamic_cast<CCtrlBase *>( CLuaIHM::getUIOnStack(ls, 1));
-	if (!ctrl)
-	{
-		CLuaIHM::fails(ls, "%s waits a ui control as arg 1", funcName);
-	}
-	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CWidgetManager::getInstance()->setCaptureKeyboard(ctrl);
-	return 0;
-}
-
-// ***************************************************************************
-int CLuaIHMRyzom::resetCaptureKeyboard(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_resetCaptureKeyboard)
-	const char *funcName = "resetCaptureKeyboard";
-	CLuaIHM::checkArgCount(ls, funcName, 0);
-	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CWidgetManager::getInstance()->resetCaptureKeyboard();
-	return 0;
-}
-
-// ***************************************************************************
-int	CLuaIHMRyzom::setOnDraw(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_setOnDraw)
-	CLuaStackChecker lsc(&ls,    0);
-
-	// params: CInterfaceGroup*,    "script".
-	// return: none
-	CLuaIHM::checkArgCount(ls,    "setOnDraw",    2);
-	CLuaIHM::check(ls,   CLuaIHM::isUIOnStack(ls,    1),    "setOnDraw() requires a UI object in param 1");
-	CLuaIHM::check(ls,   ls.isString(2),    "setOnDraw() requires a string in param 2");
-
-	// retrieve args
-	CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
-	std::string			script;
-	ls.toString(2,    script);
-
-	// must be a group
-	CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIE);
-	if(!group)
-		throw ELuaIHMException("setOnDraw(): '%s' is not a group",    pIE->getId().c_str());
-	// Set the script to be executed at each draw
-	group->setLuaScriptOnDraw(script);
-
-	return 0;
-}
-
-// ***************************************************************************
-int	CLuaIHMRyzom::addOnDbChange(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_addOnDbChange)
-	CLuaStackChecker lsc(&ls,    0);
-
-	// params: CInterfaceGroup*,    "dblist",    "script".
-	// return: none
-	CLuaIHM::checkArgCount(ls,    "addOnDbChange",    3);
-	CLuaIHM::check(ls,   CLuaIHM::isUIOnStack(ls,    1),    "addOnDbChange() requires a UI object in param 1");
-	CLuaIHM::check(ls,   ls.isString(2),    "addOnDbChange() requires a string in param 2");
-	CLuaIHM::check(ls,   ls.isString(3),    "addOnDbChange() requires a string in param 3");
-
-	// retrieve args
-	CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
-	std::string			dbList,    script;
-	ls.toString(2,    dbList);
-	ls.toString(3,    script);
-
-	// must be a group
-	CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIE);
-	if(!group)
-		throw ELuaIHMException("addOnDbChange(): '%s' is not a group",    pIE->getId().c_str());
-	// Set the script to be executed when the given DB change
-	group->addLuaScriptOnDBChange(dbList,    script);
-
-	return 0;
-}
-
-
-// ***************************************************************************
-int	CLuaIHMRyzom::removeOnDbChange(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_removeOnDbChange)
-	CLuaStackChecker lsc(&ls,    0);
-
-	// params: CInterfaceGroup*,    "dbList"
-	// return: none
-	CLuaIHM::checkArgCount(ls,    "removeOnDbChange",    2);
-	CLuaIHM::check(ls,   CLuaIHM::isUIOnStack(ls,    1),    "removeOnDbChange() requires a UI object in param 1");
-	CLuaIHM::check(ls,   ls.isString(2),    "removeOnDbChange() requires a string in param 2");
-
-	// retrieve args
-	CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
-	std::string			dbList;
-	ls.toString(2,    dbList);
-
-	// must be a group
-	CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIE);
-	if(!group)
-		throw ELuaIHMException("removeOnDbChange(): '%s' is not a group",    pIE->getId().c_str());
-	// Remove the script to be executed when the given DB change
-	group->removeLuaScriptOnDBChange(dbList);
-
-	return 0;
-}
-
-
-// ***************************************************************************
-int	CLuaIHMRyzom::runAH(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_runAH)
-	CLuaStackChecker lsc(&ls,    0);
-
-	// params: CInterfaceElement *,    "ah",    "params".
-	// return: none
-	CLuaIHM::checkArgCount(ls,    "runAH",    3);
-	CLuaIHM::check(ls,   CLuaIHM::isUIOnStack(ls,    1) || ls.isNil(1),    "runAH() requires a UI object in param 1 (or Nil)");
-	CLuaIHM::check(ls,   ls.isString(2),    "runAH() requires a string in param 2");
-	CLuaIHM::check(ls,   ls.isString(3),    "runAH() requires a string in param 3");
-
-	// retrieve args
-	CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
-	std::string			ah,    params;
-	ls.toString(2,    ah);
-	ls.toString(3,    params);
-
-	// run AH
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	// The element must be ctrl (or NULL)
-	CCtrlBase	*ctrl= NULL;
-	if(pIE)
-	{
-		ctrl= dynamic_cast<CCtrlBase*>(pIE);
-		if(!ctrl)
-			throw ELuaIHMException("runAH(): '%s' is not a ctrl",    pIE->getId().c_str());
-	}
-	CAHManager::getInstance()->runActionHandler(ah,    ctrl,    params);
-
-	return 0;
-}
-
-// ***************************************************************************
-int	CLuaIHMRyzom::runExpr(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_runExpr)
-	CLuaStackChecker lsc(&ls,    1);
-
-	// params: "expr".
-	// return: any of: nil,   bool,   string,   number,    RGBA,    UCString
-	CLuaIHM::checkArgCount(ls,    "runExpr",    1);
-	CLuaIHM::check(ls,   ls.isString(1),    "runExpr() requires a string in param 1");
-
-	// retrieve args
-	std::string expr;
-	ls.toString(1,    expr);
-
-	// run expression and push result
-	return runExprAndPushResult(ls,    expr);
-}
-
-// ***************************************************************************
-int		CLuaIHMRyzom::runFct(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_runFct)
-	CLuaStackChecker lsc(&ls,    1);
-
-	// params: "expr",    param1,    param2...
-	// return: any of: nil,   bool,   string,   number,    RGBA,    UCString
-	CLuaIHM::checkArgMin(ls,    "runFct",    1);
-	CLuaIHM::check(ls,   ls.isString(1),    "runExpr() requires a string in param 1");
-
-	// retrieve fct
-	std::string expr;
-	ls.toString(1,    expr);
-	expr+= "(";
-
-	// retrieve params
-	uint	top= ls.getTop();
-	for(uint i=2;i<=top;i++)
-	{
-		if(i>2)
-			expr+= ",   ";
-
-		// If it is a number
-		if(ls.type(i)==LUA_TNUMBER)
-		{
-			std::string	paramValue;
-			ls.toString(i,    paramValue);		// nb: transformed to a string in the stack
-			expr+= paramValue;
-		}
-		// else suppose a string
-		else
-		{
-			// must enclose with "'"
-			std::string	paramValue;
-			ls.toString(i,    paramValue);
-			expr+= std::string("'") + paramValue + std::string("'") ;
-		}
-	}
-
-	// end fct call
-	expr+= ")";
-
-
-	// run expression and push result
-	return runExprAndPushResult(ls,    expr);
-}
-
-// ***************************************************************************
-int CLuaIHMRyzom::runCommand(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_runCommand)
-	CLuaStackChecker lsc(&ls,    1);
-	if (ls.empty())
-	{
-		nlwarning("'runCommand' : Command name expected");
-		ls.push(false);
-		return 1;
-	}
-	const char *commandName = ls.toString(1);
-	if (!commandName)
-	{
-		nlwarning("'runCommand' : Bad command name");
-		ls.push(false);
-		return 1;
-	}
-	if (!NLMISC::ICommand::LocalCommands || !NLMISC::ICommand::LocalCommands->count(ls.toString(1)))
-	{
-		nlwarning("'runCommand' : Command %s not found",    ls.toString(1));
-		ls.push(false);
-		return 1;
-	}
-	std::string rawCommandString = ls.toString(1);
-	NLMISC::ICommand *command = (*NLMISC::ICommand::LocalCommands)[ls.toString(1)];
-	nlassert(command);
-	std::vector<std::string> args(ls.getTop() - 1);
-	for(uint k = 2; k <= (uint) ls.getTop(); ++k)
-	{
-		if (ls.toString(k))
-		{
-			args[k - 2] = ls.toString(k);
-			rawCommandString += " " + std::string(ls.toString(k));
-		}
-	}
-
-	ls.push(command->execute(rawCommandString,   args,    g_log,    false,    true));
-	return 1;
-}
 
 // ***************************************************************************
 int		CLuaIHMRyzom::formatUI(CLuaState &ls)
@@ -940,74 +663,6 @@ int		CLuaIHMRyzom::formatDB(CLuaState &ls)
 }
 
 // ***************************************************************************
-int	CLuaIHMRyzom::deleteUI(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_deleteUI)
-	CLuaStackChecker lsc(&ls,    0);
-
-	// params: CInterfaceElement *
-	// return: none
-	CLuaIHM::checkArgCount(ls,    "deleteUI",    1);
-	CLuaIHM::check(ls,   CLuaIHM::isUIOnStack(ls,    1),    "deleteUI() requires a UI object in param 1");
-
-	// retrieve args
-	CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
-	if(!pIE)
-		return 0;
-
-	// has a parent?
-	CInterfaceGroup	*parent= pIE->getParent();
-	if(parent)
-	{
-		// correctly remove from parent
-		parent->delElement(pIE);
-	}
-	else
-	{
-		// just delete
-		delete pIE;
-	}
-
-	return 0;
-}
-
-// ***************************************************************************
-int CLuaIHMRyzom::deleteReflectable(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_deleteReflectable)
-	CLuaStackChecker lsc(&ls,    0);
-
-	// params: CInterfaceElement *
-	// return: none
-	CLuaIHM::checkArgCount(ls,    "deleteReflectable",    1);
-	CLuaIHM::check(ls,   CLuaIHM::isReflectableOnStack(ls,    1),    "deleteReflectable() requires a reflectable C++ object in param 1");
-
-	// retrieve args
-	CReflectableRefPtrTarget	*pRPT= CLuaIHM::getReflectableOnStack(ls,    1);
-	if(!pRPT)
-		return 0;
-
-
-	CInterfaceElement *pIE = dynamic_cast<CInterfaceElement *>(pRPT);
-
-	if (pIE)
-	{
-		// has a parent?
-		CInterfaceGroup	*parent= pIE->getParent();
-		if(parent)
-		{
-			// correctly remove from parent
-			parent->delElement(pIE);
-		}
-	}
-
-	// just delete
-	delete pIE;
-
-	return 0;
-}
-
-// ***************************************************************************
 int	CLuaIHMRyzom::dumpUI(CLuaState &ls)
 {
 	//H_AUTO(Lua_CLuaIHM_dumpUI)
@@ -1067,97 +722,6 @@ int CLuaIHMRyzom::validMessageBox(CLuaState &ls)
 }
 
 // ***************************************************************************
-int CLuaIHMRyzom::setTopWindow(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_setTopWindow)
-	const char *funcName = "setTopWindow";
-	CLuaIHM::checkArgCount(ls, funcName, 1);
-	CInterfaceGroup *wnd = dynamic_cast<CInterfaceGroup *>( CLuaIHM::getUIOnStack(ls, 1));
-	if (!wnd)
-	{
-		CLuaIHM::fails(ls, "%s : interface group expected as arg 1", funcName);
-	}
-	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CWidgetManager::getInstance()->setTopWindow(wnd);
-	return 0;
-}
-
-// ***************************************************************************
-int CLuaIHMRyzom::concatUCString(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_concatUCString)
-	const char *funcName = "concatUCString";
-	ucstring result;
-	for (uint k = 1; k <= (uint) ls.getTop(); ++k)
-	{
-		//nlwarning("arg %d = %s", k, ls.getTypename(ls.type(k)));
-		ucstring part;
-		if (ls.isString(k))
-		{
-			part.fromUtf8(ls.toString(k));
-		}
-		else
-		{
-			CLuaIHM::checkArgTypeUCString(ls, funcName, k);
-			nlverify(CLuaIHM::getUCStringOnStack(ls, k, part));
-		}
-		result += part;
-	}
-	CLuaIHM::push(ls, result);
-	return 1;
-}
-
-// ***************************************************************************
-int CLuaIHMRyzom::concatString(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_concatUCString)
-	const char *funcName = "concatString";
-	std::string result;
-	uint stackSize = ls.getTop();
-	for (uint k = 1; k <= stackSize; ++k)
-	{
-		CLuaIHM::checkArgType(ls, funcName, k, LUA_TSTRING);
-		result += ls.toString(k);
-	}
-	ls.push(result);
-	return 1;
-}
-
-// ***************************************************************************
-int CLuaIHMRyzom::tableToString(CLuaState &ls)
-{
-	const char *funcName = "tableToString";
-	CLuaIHM::checkArgCount(ls, funcName, 1);
-	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TTABLE);
-	uint length = 0;
-	// compute size
-	ls.pushNil();
-	while (ls.next(-2))
-	{
-		ls.toString(-1);
-		length += (uint)ls.strlen(-1);
-		ls.pop(2);
-	}
-	std::string result;
-	result.resize(length);
-	char *dest = &result[0];
-	// concatenate
-	ls.pushNil();
-	while (ls.next(-2))
-	{
-		uint length = (uint)ls.strlen(-1);
-		if (length)
-		{
-			memcpy(dest, ls.toString(-1), length);
-		}
-		dest += length;
-		ls.pop(2);
-	}
-	ls.push(result);
-	return 1;
-}
-
-// ***************************************************************************
 int CLuaIHMRyzom::breakPoint(CLuaState &ls)
 {
 	//H_AUTO(Lua_CLuaIHM_breakPoint)
@@ -1171,21 +735,6 @@ int CLuaIHMRyzom::breakPoint(CLuaState &ls)
 		NLMISC_BREAKPOINT;
 	}
 	return 0;
-}
-
-
-
-// ***************************************************************************
-int CLuaIHMRyzom::getWindowSize(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_getWindowSize)
-	CLuaIHM::checkArgCount(ls,   "getWindowSize",   0);
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	uint32 w,   h;
-	CViewRenderer::getInstance()->getScreenSize(w,   h);
-	ls.push((double) w);
-	ls.push((double) h);
-	return 2;
 }
 
 
@@ -1413,16 +962,6 @@ int CLuaIHMRyzom::initEmotesMenu(CLuaState &ls)
 }
 
 // ***************************************************************************
-int CLuaIHMRyzom::isUCString(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_isUCString)
-	const char *funcName = "isUCString";
-	CLuaIHM::checkArgCount(ls, funcName, 1);
-	ls.push(CLuaIHM::isUCStringOnStack(ls, 1));
-	return 1;
-}
-
-// ***************************************************************************
 int CLuaIHMRyzom::hideAllWindows(CLuaState &/* ls */)
 {
 	//H_AUTO(Lua_CLuaIHM_hideAllWindows)
@@ -1486,25 +1025,6 @@ int	CLuaIHMRyzom::getCharSlot(CLuaState &ls)
 	return 1;
 }
 
-
-int CLuaIHMRyzom::getPathContent(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_getPathContent)
-	const char *funcName = "getPathContent";
-	CLuaIHM::checkArgCount(ls, funcName, 1);
-	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
-	std::vector<std::string> files;
-	NLMISC::CPath::getPathContent(ls.toString(1), false, false, true, files);
-	ls.newTable();
-	for(uint k = 0; k < files.size(); ++k)
-	{
-		ls.push((double) k);
-		ls.push(files[k]);
-		ls.setTable(-3);
-	}
-	return 1;
-}
-
 int CLuaIHMRyzom::getServerSeason(CLuaState &ls)
 {
 	//H_AUTO(Lua_CLuaIHM_getServerSeason)
@@ -1532,27 +1052,6 @@ int CLuaIHMRyzom::getAutoSeason(CLuaState &ls)
 	ls.push((double) (StartupSeason + 1));
 	return 1;
 }
-
-
-
-int CLuaIHMRyzom::getTextureSize(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_getTextureSize)
-	const char *funcName = "getTextureSize";
-	CLuaIHM::checkArgCount(ls, funcName, 1);
-	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
-	std::string textureName = ls.toString(1);
-
-	CBitmap bitmap;
-	CIFile fs(CPath::lookup(textureName).c_str());
-	bitmap.load(fs);
-
-	ls.push((double) bitmap.getWidth());
-	ls.push((double) bitmap.getHeight());
-
-	return 2;
-}
-
 
 int CLuaIHMRyzom::enableModalWindow(CLuaState &ls)
 {
@@ -1589,16 +1088,6 @@ int CLuaIHMRyzom::enableModalWindow(CLuaState &ls)
 		}
 	}
 
-	return 0;
-}
-
-// ***************************************************************************
-int		CLuaIHMRyzom::disableModalWindow(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_disableModalWindow)
-	CLuaIHM::checkArgCount(ls, "disableModalWindow", 0);
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CWidgetManager::getInstance()->disableModalWindow();
 	return 0;
 }
 
@@ -1985,47 +1474,6 @@ int	CLuaIHMRyzom::getUICaller(CLuaState &ls)
 	{
 		CLuaIHM::pushUIOnStack(ls,    pIE);
 	}
-	return 1;
-}
-
-int CLuaIHMRyzom::getCurrentWindowUnder(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_getCurrentWindowUnder)
-	CLuaStackChecker lsc(&ls,    1);
-	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CInterfaceElement	*pIE= CWidgetManager::getInstance()->getCurrentWindowUnder();
-	if(!pIE)
-	{
-		ls.pushNil();
-		debugInfo(toString("getCurrentWindowUnder(): No UICaller found. return Nil"));
-	}
-	else
-	{
-		CLuaIHM::pushUIOnStack(ls,    pIE);
-	}
-	return 1;
-}
-
-// ***************************************************************************
-int	CLuaIHMRyzom::getUIId(CLuaState &ls)
-{
-	//H_AUTO(Lua_CLuaIHM_getUIId)
-	CLuaStackChecker lsc(&ls,    1);
-
-	// params: CInterfaceElement*
-	// return: "ui:interface:...". (empty if error)
-	CLuaIHM::checkArgCount(ls,    "getUIId",    1);
-	CLuaIHM::check(ls,   CLuaIHM::isUIOnStack(ls,   1),    "getUIId() requires a UI object in param 1");
-
-	// retrieve args
-	CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
-
-	// convert to id
-	if(pIE)
-		ls.push(pIE->getId());
-	else
-		ls.push("");
-
 	return 1;
 }
 
@@ -3010,13 +2458,6 @@ string CLuaIHMRyzom::getClientCfg(const string &varName)
 }
 
 // ***************************************************************************
-bool CLuaIHMRyzom::fileExists(const string &fileName)
-{
-	//H_AUTO(Lua_CLuaIHM_fileExists)
-	return CPath::exists(fileName);
-}
-
-// ***************************************************************************
 void CLuaIHMRyzom::sendMsgToServer(const std::string &sMsg)
 {
 	//H_AUTO(Lua_CLuaIHM_sendMsgToServer)
@@ -3438,74 +2879,4 @@ std::string	CLuaIHMRyzom::createGotoFileButtonTag(const char *fileName, uint lin
 	return "";
 }
 
-// ***************************************************************************
-int	CLuaIHMRyzom::runExprAndPushResult(CLuaState &ls,    const std::string &expr)
-{
-	//H_AUTO(Lua_CLuaIHM_runExprAndPushResult)
-	// Execute expression
-	CInterfaceExprValue value;
-	if (CInterfaceExpr::eval(expr,    value,    NULL))
-	{
-		switch(value.getType())
-		{
-		case CInterfaceExprValue::Boolean:
-			ls.push(value.getBool());
-			break;
-		case CInterfaceExprValue::Integer:
-			ls.push((double)value.getInteger());
-			break;
-		case CInterfaceExprValue::Double:
-			ls.push(value.getDouble());
-			break;
-		case CInterfaceExprValue::String:
-			{
-				ucstring	ucstr= value.getUCString();
-				// Yoyo: dynamically decide whether must return a string or a ucstring
-				bool	mustUseUCString= false;
-				for (uint i = 0; i < ucstr.size (); i++)
-				{
-					if (ucstr[i] > 255)
-					{
-						mustUseUCString= true;
-						break;
-					}
-				}
-				// push a ucstring?
-				if(mustUseUCString)
-				{
-#if LUABIND_VERSION > 600
-					luabind::detail::push(ls.getStatePointer(), ucstr);
-#else
-					luabind::object obj(ls.getStatePointer(), ucstr);
-					obj.pushvalue();
-#endif
-				}
-				else
-				{
-					ls.push(ucstr.toString());
-				}
-				break;
-			}
-		case CInterfaceExprValue::RGBA:
-			{
-				CRGBA color = value.getRGBA();
-#if LUABIND_VERSION > 600
-				luabind::detail::push(ls.getStatePointer(), color);
-#else
-				luabind::object obj(ls.getStatePointer(), color);
-				obj.pushvalue();
-#endif
-				break;
-			}
-			break;
-		case CInterfaceExprValue::UserType: // Yoyo: don't care UserType...
-		default:
-			ls.pushNil();
-			break;
-		}
-	}
-	else
-		ls.pushNil();
 
-	return 1;
-}

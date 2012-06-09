@@ -23,13 +23,7 @@ private:
 
 	static int getUI(CLuaState &ls); // params: "ui:interface:...". return: CInterfaceElement*  (nil if error), an additionnal boolean parameter
 	// LUA exported Functions with standard lua (because use ui object, use variable param number, or return dynamic-typed object)
-	static int  setCaptureKeyboard(CLuaState &ls);
-	static int  resetCaptureKeyboard(CLuaState &ls);
-	static int	setOnDraw(CLuaState &ls);		// params: CInterfaceGroup*, "script". return: none
-	static int	addOnDbChange(CLuaState &ls);	// params: CInterfaceGroup*, "dblist", "script". return: none
-	static int	removeOnDbChange(CLuaState &ls);// params: CInterfaceGroup*. return: none
 	static int	getUICaller(CLuaState &ls);		// params: none. return: CInterfaceElement*  (nil if error)
-	static int	getCurrentWindowUnder(CLuaState &ls);		// params: none. return: CInterfaceElement*  (nil if none)
 													//		   can specify verbose display when the element is note found (default is true)
 	static int  createGroupInstance(CLuaState &ls); // params : param 1 = template name,
 													// param 2 = id of parent where the instance will be inserted
@@ -49,27 +43,16 @@ private:
 												// param 3 = table with all strings and urls
 												// {"main text"="http:///", "text option 1"="http:///", "text option 2"="http:///") etc...
 	static int	getIndexInDB(CLuaState &ls);	// params: CDBCtrlSheet*.... return: index, or 0 if error
-	static int	getUIId(CLuaState &ls);			// params: CInterfaceElement*. return: ui id (empty if error)
-	static int	runAH(CLuaState &ls);			// params: CInterfaceElement *, "ah", "params". return: none
-	static int	runExpr(CLuaState &ls);			// params: "expr". return: any of: nil,bool,string,number, RGBA, UCString
-	static int	runFct(CLuaState &ls);			// params: "expr", param1, param2.... return: any of: nil,bool,string,number, RGBA, UCString
-	static int  runCommand(CLuaState &ls);      // params: "command name", param1, param2 ... return true or false
 	static int	formatUI(CLuaState &ls);		// params: "expr", param1, param2.... return: string with # and % parsed
 	static int	formatDB(CLuaState &ls);		// params: param1, param2.... return: string with @ and , added
 	static int	launchContextMenuInGame(CLuaState &ls); // params : menu name
 	static int  parseInterfaceFromString(CLuaState &ls); // params : intreface script
 	static int  updateAllLocalisedElements(CLuaState &ls);
 	static int  breakPoint(CLuaState &ls);
-	static int  getWindowSize(CLuaState &ls);
 	static int  i18n(CLuaState &ls);			// retrieve an unicode string from CI18N
 	static int	setTextFormatTaged(CLuaState &ls);	// set a text that may contains Tag Format infos
 	static int	validMessageBox(CLuaState &ls);	// ok/cancel type message box (can't get it to work through luabind)
-	static int	concatUCString(CLuaState &ls); // workaround for + operator that don't work in luabind for ucstrings ...
-	static int	concatString(CLuaState &ls); // speedup concatenation of several strings
-	static int	tableToString(CLuaState &ls); // concat element of a table to build a string
-	static int	setTopWindow(CLuaState &ls); // set the top window
 	static int  initEmotesMenu(CLuaState &ls);
-	static int  isUCString(CLuaState &ls);
 	static int  hideAllWindows(CLuaState &ls);
 	static int  hideAllNonSavableWindows(CLuaState &ls);
 	static int  getDesktopIndex(CLuaState &ls);
@@ -81,7 +64,6 @@ private:
 	static int	getWeatherValue(CLuaState &ls); // get current real weather value (blend between server driven value & predicted value). Manual weather value is ignored
 	static int	disableContextHelpForControl(CLuaState &ls);	// params: CCtrlBase*. return: none
 	static int  disableContextHelp(CLuaState &ls);
-	static int	getPathContent(CLuaState &ls);
 	static int  getServerSeason(CLuaState &ls); // get the last season sent by the server
 												// 0->auto, computed locally from the current day (or not received from server yet)
 												// 1->server force spring
@@ -92,9 +74,7 @@ private:
 	static int	getAutoSeason(CLuaState &ls); // compute automatic season that would be at this time (1->spring, etc .)
 
 
-	static int  getTextureSize(CLuaState &ls);
 	static int	enableModalWindow(CLuaState &ls);
-	static int	disableModalWindow(CLuaState &ls);
 	static int	getPlayerPos(CLuaState &ls);
 	static int	getPlayerFront(CLuaState &ls);
 	static int	getPlayerDirection(CLuaState &ls);
@@ -120,8 +100,6 @@ private:
 	static int  getSlotDataSetId(CLuaState &ls);
 
 	// LUA functions exported for Dev only (debug)
-	static int	deleteUI(CLuaState &ls);		// params: CInterfaceElement*.... return: none
-	static int	deleteReflectable(CLuaState &ls);		// params: CInterfaceElement*.... return: none
 	static int	dumpUI(CLuaState &ls);			// params: CInterfaceElement*.... return: none
 	static int	setKeyboardContext(CLuaState &ls);
 
@@ -206,7 +184,6 @@ private:
 	static sint32 getFirstTribeFameIndex(); // fame index of the 1st tribe
 	static sint32 getNbTribeFameIndex(); // number of tribe fame index (which are contiguous)
 	static std::string getClientCfg(const std::string &varName);
-	static bool	fileExists(const std::string &fileName);
 	static void	sendMsgToServer(const std::string &msgName);
 	static void	sendMsgToServerPvpTag(bool pvpTag);
 	static bool	isGuildQuitAvailable();
@@ -260,8 +237,6 @@ public:
 	// Requires that 'ClientCfg.LuaDebugInfoGotoButtonEnabled' is set to 1, else
 	// a, empty tag is returned
 	static std::string	createGotoFileButtonTag(const char *fileName, uint line);
-
-	static int	runExprAndPushResult(CLuaState &ls, const std::string &expr);		// Used by runExpr and runFct
 };
 
 #endif

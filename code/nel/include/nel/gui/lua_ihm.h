@@ -159,6 +159,31 @@ namespace NLGUI
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		static int luaMethodCall(lua_State *ls);
+		
+		static int	setOnDraw(CLuaState &ls);		// params: CInterfaceGroup*, "script". return: none
+		static int	addOnDbChange(CLuaState &ls);	// params: CInterfaceGroup*, "dblist", "script". return: none
+		static int	removeOnDbChange(CLuaState &ls);// params: CInterfaceGroup*. return: none
+		static int  setCaptureKeyboard(CLuaState &ls);
+		static int  resetCaptureKeyboard(CLuaState &ls);
+		static int	getUIId(CLuaState &ls);			// params: CInterfaceElement*. return: ui id (empty if error)
+		static int	runAH(CLuaState &ls);			// params: CInterfaceElement *, "ah", "params". return: none
+		static int  getWindowSize(CLuaState &ls);
+		static int	setTopWindow(CLuaState &ls); // set the top window
+		static int  getTextureSize(CLuaState &ls);
+		static int	disableModalWindow(CLuaState &ls);
+		static int	deleteUI(CLuaState &ls);		// params: CInterfaceElement*.... return: none
+		static int	deleteReflectable(CLuaState &ls);		// params: CInterfaceElement*.... return: none
+		static int	getCurrentWindowUnder(CLuaState &ls);		// params: none. return: CInterfaceElement*  (nil if none)
+		static bool	fileExists(const std::string &fileName);
+		static int	runExprAndPushResult(CLuaState &ls, const std::string &expr);		// Used by runExpr and runFct
+		static int	runExpr(CLuaState &ls);			// params: "expr". return: any of: nil,bool,string,number, RGBA, UCString
+		static int	runFct(CLuaState &ls);			// params: "expr", param1, param2.... return: any of: nil,bool,string,number, RGBA, UCString
+		static int  runCommand(CLuaState &ls);      // params: "command name", param1, param2 ... return true or false
+		static int  isUCString(CLuaState &ls);
+		static int	concatUCString(CLuaState &ls); // workaround for + operator that don't work in luabind for ucstrings ...
+		static int	concatString(CLuaState &ls); // speedup concatenation of several strings
+		static int	tableToString(CLuaState &ls); // concat element of a table to build a string
+		static int	getPathContent(CLuaState &ls);
 	};
 
 }

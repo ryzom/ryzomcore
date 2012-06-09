@@ -71,10 +71,15 @@
 #include "nel/misc/time_nl.h"
 #include "nel/misc/path.h"
 #include "nel/misc/sstring.h"
+#include "nel/misc/command.h"
 #include "nel/gui/lua_object.h"
 #include "nel/misc/polygon.h"
 #include "nel/gui/lua_manager.h"
-
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/action_handler.h"
+#include "nel/gui/view_renderer.h"
+#include "nel/gui/interface_expr.h"
+#include "nel/misc/debug.h"
 
 // ***************************************************************************
 /*
@@ -757,6 +762,614 @@ namespace NLGUI
 		return numResults;
 	}
 
+
+
+	// ***************************************************************************
+	int	CLuaIHM::setOnDraw(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_setOnDraw)
+		CLuaStackChecker lsc(&ls,    0);
+
+		// params: CInterfaceGroup*,    "script".
+		// return: none
+		CLuaIHM::checkArgCount(ls,    "setOnDraw",    2);
+		CLuaIHM::check(ls,   CLuaIHM::isUIOnStack(ls,    1),    "setOnDraw() requires a UI object in param 1");
+		CLuaIHM::check(ls,   ls.isString(2),    "setOnDraw() requires a string in param 2");
+
+		// retrieve args
+		CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
+		std::string			script;
+		ls.toString(2,    script);
+
+		// must be a group
+		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIE);
+		if(!group)
+			throw ELuaIHMException("setOnDraw(): '%s' is not a group",    pIE->getId().c_str());
+		// Set the script to be executed at each draw
+		group->setLuaScriptOnDraw(script);
+
+		return 0;
+	}
+
+	// ***************************************************************************
+	int	CLuaIHM::addOnDbChange(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_addOnDbChange)
+		CLuaStackChecker lsc(&ls,    0);
+
+		// params: CInterfaceGroup*,    "dblist",    "script".
+		// return: none
+		CLuaIHM::checkArgCount(ls,    "addOnDbChange",    3);
+		CLuaIHM::check(ls,   CLuaIHM::isUIOnStack(ls,    1),    "addOnDbChange() requires a UI object in param 1");
+		CLuaIHM::check(ls,   ls.isString(2),    "addOnDbChange() requires a string in param 2");
+		CLuaIHM::check(ls,   ls.isString(3),    "addOnDbChange() requires a string in param 3");
+
+		// retrieve args
+		CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
+		std::string			dbList,    script;
+		ls.toString(2,    dbList);
+		ls.toString(3,    script);
+
+		// must be a group
+		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIE);
+		if(!group)
+			throw ELuaIHMException("addOnDbChange(): '%s' is not a group",    pIE->getId().c_str());
+		// Set the script to be executed when the given DB change
+		group->addLuaScriptOnDBChange(dbList,    script);
+
+		return 0;
+	}
+
+
+	// ***************************************************************************
+	int	CLuaIHM::removeOnDbChange(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_removeOnDbChange)
+		CLuaStackChecker lsc(&ls,    0);
+
+		// params: CInterfaceGroup*,    "dbList"
+		// return: none
+		CLuaIHM::checkArgCount(ls,    "removeOnDbChange",    2);
+		CLuaIHM::check(ls,   CLuaIHM::isUIOnStack(ls,    1),    "removeOnDbChange() requires a UI object in param 1");
+		CLuaIHM::check(ls,   ls.isString(2),    "removeOnDbChange() requires a string in param 2");
+
+		// retrieve args
+		CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
+		std::string			dbList;
+		ls.toString(2,    dbList);
+
+		// must be a group
+		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIE);
+		if(!group)
+			throw ELuaIHMException("removeOnDbChange(): '%s' is not a group",    pIE->getId().c_str());
+		// Remove the script to be executed when the given DB change
+		group->removeLuaScriptOnDBChange(dbList);
+
+		return 0;
+	}
+
+
+
+	// ***************************************************************************
+	int CLuaIHM::setCaptureKeyboard(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_setCaptureKeyboard)
+		const char *funcName = "setCaptureKeyboard";
+		CLuaIHM::checkArgCount(ls, funcName, 1);
+		CLuaIHM::checkArgTypeUIElement(ls, funcName, 1);
+		CCtrlBase *ctrl = dynamic_cast<CCtrlBase *>( CLuaIHM::getUIOnStack(ls, 1));
+		if (!ctrl)
+		{
+			CLuaIHM::fails(ls, "%s waits a ui control as arg 1", funcName);
+		}
+		CWidgetManager::getInstance()->setCaptureKeyboard(ctrl);
+		return 0;
+	}
+
+	// ***************************************************************************
+	int CLuaIHM::resetCaptureKeyboard(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_resetCaptureKeyboard)
+		const char *funcName = "resetCaptureKeyboard";
+		CLuaIHM::checkArgCount(ls, funcName, 0);
+		CWidgetManager::getInstance()->resetCaptureKeyboard();
+		return 0;
+	}
+
+	// ***************************************************************************
+	int	CLuaIHM::getUIId(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_getUIId)
+		CLuaStackChecker lsc(&ls,    1);
+
+		// params: CInterfaceElement*
+		// return: "ui:interface:...". (empty if error)
+		CLuaIHM::checkArgCount(ls,    "getUIId",    1);
+		CLuaIHM::check(ls,   CLuaIHM::isUIOnStack(ls,   1),    "getUIId() requires a UI object in param 1");
+
+		// retrieve args
+		CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
+
+		// convert to id
+		if(pIE)
+			ls.push(pIE->getId());
+		else
+			ls.push("");
+
+		return 1;
+	}
+
+
+
+	// ***************************************************************************
+	int	CLuaIHM::runAH(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_runAH)
+		CLuaStackChecker lsc(&ls,    0);
+
+		// params: CInterfaceElement *,    "ah",    "params".
+		// return: none
+		CLuaIHM::checkArgCount(ls,    "runAH",    3);
+		CLuaIHM::check(ls,   CLuaIHM::isUIOnStack(ls,    1) || ls.isNil(1),    "runAH() requires a UI object in param 1 (or Nil)");
+		CLuaIHM::check(ls,   ls.isString(2),    "runAH() requires a string in param 2");
+		CLuaIHM::check(ls,   ls.isString(3),    "runAH() requires a string in param 3");
+
+		// retrieve args
+		CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
+		std::string			ah,    params;
+		ls.toString(2,    ah);
+		ls.toString(3,    params);
+
+		// run AH
+		// The element must be ctrl (or NULL)
+		CCtrlBase	*ctrl= NULL;
+		if(pIE)
+		{
+			ctrl= dynamic_cast<CCtrlBase*>(pIE);
+			if(!ctrl)
+				throw ELuaIHMException("runAH(): '%s' is not a ctrl",    pIE->getId().c_str());
+		}
+		CAHManager::getInstance()->runActionHandler(ah,    ctrl,    params);
+
+		return 0;
+	}
+
+	// ***************************************************************************
+	int CLuaIHM::getWindowSize(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_getWindowSize)
+		CLuaIHM::checkArgCount(ls,   "getWindowSize",   0);
+		uint32 w,   h;
+		CViewRenderer::getInstance()->getScreenSize(w,   h);
+		ls.push((double) w);
+		ls.push((double) h);
+		return 2;
+	}
+
+	// ***************************************************************************
+	int CLuaIHM::setTopWindow(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_setTopWindow)
+		const char *funcName = "setTopWindow";
+		CLuaIHM::checkArgCount(ls, funcName, 1);
+		CInterfaceGroup *wnd = dynamic_cast<CInterfaceGroup *>( CLuaIHM::getUIOnStack(ls, 1));
+		if (!wnd)
+		{
+			CLuaIHM::fails(ls, "%s : interface group expected as arg 1", funcName);
+		}
+		CWidgetManager::getInstance()->setTopWindow(wnd);
+		return 0;
+	}
+
+	int CLuaIHM::getTextureSize(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_getTextureSize)
+		const char *funcName = "getTextureSize";
+		CLuaIHM::checkArgCount(ls, funcName, 1);
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		std::string textureName = ls.toString(1);
+
+		CBitmap bitmap;
+		CIFile fs(CPath::lookup(textureName).c_str());
+		bitmap.load(fs);
+
+		ls.push((double) bitmap.getWidth());
+		ls.push((double) bitmap.getHeight());
+
+		return 2;
+	}
+
+
+
+	// ***************************************************************************
+	int	CLuaIHM::disableModalWindow(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_disableModalWindow)
+		CLuaIHM::checkArgCount(ls, "disableModalWindow", 0);
+		CWidgetManager::getInstance()->disableModalWindow();
+		return 0;
+	}
+
+	// ***************************************************************************
+	int	CLuaIHM::deleteUI(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_deleteUI)
+		CLuaStackChecker lsc(&ls,    0);
+
+		// params: CInterfaceElement *
+		// return: none
+		CLuaIHM::checkArgCount(ls,    "deleteUI",    1);
+		CLuaIHM::check(ls,   CLuaIHM::isUIOnStack(ls,    1),    "deleteUI() requires a UI object in param 1");
+
+		// retrieve args
+		CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
+		if(!pIE)
+			return 0;
+
+		// has a parent?
+		CInterfaceGroup	*parent= pIE->getParent();
+		if(parent)
+		{
+			// correctly remove from parent
+			parent->delElement(pIE);
+		}
+		else
+		{
+			// just delete
+			delete pIE;
+		}
+
+		return 0;
+	}
+
+	// ***************************************************************************
+	int CLuaIHM::deleteReflectable(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_deleteReflectable)
+		CLuaStackChecker lsc(&ls,    0);
+
+		// params: CInterfaceElement *
+		// return: none
+		CLuaIHM::checkArgCount(ls,    "deleteReflectable",    1);
+		CLuaIHM::check(ls,   CLuaIHM::isReflectableOnStack(ls,    1),    "deleteReflectable() requires a reflectable C++ object in param 1");
+
+		// retrieve args
+		CReflectableRefPtrTarget	*pRPT= CLuaIHM::getReflectableOnStack(ls,    1);
+		if(!pRPT)
+			return 0;
+
+
+		CInterfaceElement *pIE = dynamic_cast<CInterfaceElement *>(pRPT);
+
+		if (pIE)
+		{
+			// has a parent?
+			CInterfaceGroup	*parent= pIE->getParent();
+			if(parent)
+			{
+				// correctly remove from parent
+				parent->delElement(pIE);
+			}
+		}
+
+		// just delete
+		delete pIE;
+
+		return 0;
+	}
+
+
+	int CLuaIHM::getCurrentWindowUnder(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_getCurrentWindowUnder)
+		CLuaStackChecker lsc(&ls,    1);
+		CInterfaceElement	*pIE= CWidgetManager::getInstance()->getCurrentWindowUnder();
+		if(!pIE)
+		{
+			ls.pushNil();
+			nlerror("getCurrentWindowUnder(): No UICaller found. return Nil");
+		}
+		else
+		{
+			CLuaIHM::pushUIOnStack(ls,    pIE);
+		}
+		return 1;
+	}
+
+	// ***************************************************************************
+	bool CLuaIHM::fileExists(const std::string &fileName)
+	{
+		//H_AUTO(Lua_CLuaIHM_fileExists)
+		return CPath::exists(fileName);
+	}
+
+	// ***************************************************************************
+	int	CLuaIHM::runExprAndPushResult(CLuaState &ls,    const std::string &expr)
+	{
+		//H_AUTO(Lua_CLuaIHM_runExprAndPushResult)
+		// Execute expression
+		CInterfaceExprValue value;
+		if (CInterfaceExpr::eval(expr,    value,    NULL))
+		{
+			switch(value.getType())
+			{
+			case CInterfaceExprValue::Boolean:
+				ls.push(value.getBool());
+				break;
+			case CInterfaceExprValue::Integer:
+				ls.push((double)value.getInteger());
+				break;
+			case CInterfaceExprValue::Double:
+				ls.push(value.getDouble());
+				break;
+			case CInterfaceExprValue::String:
+				{
+					ucstring	ucstr= value.getUCString();
+					// Yoyo: dynamically decide whether must return a string or a ucstring
+					bool	mustUseUCString= false;
+					for (uint i = 0; i < ucstr.size (); i++)
+					{
+						if (ucstr[i] > 255)
+						{
+							mustUseUCString= true;
+							break;
+						}
+					}
+					// push a ucstring?
+					if(mustUseUCString)
+					{
+	#if LUABIND_VERSION > 600
+						luabind::detail::push(ls.getStatePointer(), ucstr);
+	#else
+						luabind::object obj(ls.getStatePointer(), ucstr);
+						obj.pushvalue();
+	#endif
+					}
+					else
+					{
+						ls.push(ucstr.toString());
+					}
+					break;
+				}
+			case CInterfaceExprValue::RGBA:
+				{
+					CRGBA color = value.getRGBA();
+	#if LUABIND_VERSION > 600
+					luabind::detail::push(ls.getStatePointer(), color);
+	#else
+					luabind::object obj(ls.getStatePointer(), color);
+					obj.pushvalue();
+	#endif
+					break;
+				}
+				break;
+			case CInterfaceExprValue::UserType: // Yoyo: don't care UserType...
+			default:
+				ls.pushNil();
+				break;
+			}
+		}
+		else
+			ls.pushNil();
+
+		return 1;
+	}
+
+	// ***************************************************************************
+	int	CLuaIHM::runExpr(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_runExpr)
+		CLuaStackChecker lsc(&ls,    1);
+
+		// params: "expr".
+		// return: any of: nil,   bool,   string,   number,    RGBA,    UCString
+		CLuaIHM::checkArgCount(ls,    "runExpr",    1);
+		CLuaIHM::check(ls,   ls.isString(1),    "runExpr() requires a string in param 1");
+
+		// retrieve args
+		std::string expr;
+		ls.toString(1,    expr);
+
+		// run expression and push result
+		return runExprAndPushResult(ls,    expr);
+	}
+
+	// ***************************************************************************
+	int CLuaIHM::runFct(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_runFct)
+		CLuaStackChecker lsc(&ls,    1);
+
+		// params: "expr",    param1,    param2...
+		// return: any of: nil,   bool,   string,   number,    RGBA,    UCString
+		CLuaIHM::checkArgMin(ls,    "runFct",    1);
+		CLuaIHM::check(ls,   ls.isString(1),    "runExpr() requires a string in param 1");
+
+		// retrieve fct
+		std::string expr;
+		ls.toString(1,    expr);
+		expr+= "(";
+
+		// retrieve params
+		uint	top= ls.getTop();
+		for(uint i=2;i<=top;i++)
+		{
+			if(i>2)
+				expr+= ",   ";
+
+			// If it is a number
+			if(ls.type(i)==LUA_TNUMBER)
+			{
+				std::string	paramValue;
+				ls.toString(i,    paramValue);		// nb: transformed to a string in the stack
+				expr+= paramValue;
+			}
+			// else suppose a string
+			else
+			{
+				// must enclose with "'"
+				std::string	paramValue;
+				ls.toString(i,    paramValue);
+				expr+= std::string("'") + paramValue + std::string("'") ;
+			}
+		}
+
+		// end fct call
+		expr+= ")";
+
+
+		// run expression and push result
+		return runExprAndPushResult(ls,    expr);
+	}
+
+	// ***************************************************************************
+	int CLuaIHM::runCommand(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_runCommand)
+		CLuaStackChecker lsc(&ls,    1);
+		if (ls.empty())
+		{
+			nlwarning("'runCommand' : Command name expected");
+			ls.push(false);
+			return 1;
+		}
+		const char *commandName = ls.toString(1);
+		if (!commandName)
+		{
+			nlwarning("'runCommand' : Bad command name");
+			ls.push(false);
+			return 1;
+		}
+		if (!NLMISC::ICommand::LocalCommands || !NLMISC::ICommand::LocalCommands->count(ls.toString(1)))
+		{
+			nlwarning("'runCommand' : Command %s not found",    ls.toString(1));
+			ls.push(false);
+			return 1;
+		}
+		std::string rawCommandString = ls.toString(1);
+		NLMISC::ICommand *command = (*NLMISC::ICommand::LocalCommands)[ls.toString(1)];
+		nlassert(command);
+		std::vector<std::string> args(ls.getTop() - 1);
+		for(uint k = 2; k <= (uint) ls.getTop(); ++k)
+		{
+			if (ls.toString(k))
+			{
+				args[k - 2] = ls.toString(k);
+				rawCommandString += " " + std::string(ls.toString(k));
+			}
+		}
+
+		ls.push(command->execute(rawCommandString,   args,    NLMISC::ErrorLog(),    false,    true));
+		return 1;
+	}
+
+	// ***************************************************************************
+	int CLuaIHM::isUCString(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_isUCString)
+		const char *funcName = "isUCString";
+		CLuaIHM::checkArgCount(ls, funcName, 1);
+		ls.push(CLuaIHM::isUCStringOnStack(ls, 1));
+		return 1;
+	}
+
+	// ***************************************************************************
+	int CLuaIHM::concatUCString(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_concatUCString)
+		const char *funcName = "concatUCString";
+		ucstring result;
+		for (uint k = 1; k <= (uint) ls.getTop(); ++k)
+		{
+			//nlwarning("arg %d = %s", k, ls.getTypename(ls.type(k)));
+			ucstring part;
+			if (ls.isString(k))
+			{
+				part.fromUtf8(ls.toString(k));
+			}
+			else
+			{
+				CLuaIHM::checkArgTypeUCString(ls, funcName, k);
+				nlverify(CLuaIHM::getUCStringOnStack(ls, k, part));
+			}
+			result += part;
+		}
+		CLuaIHM::push(ls, result);
+		return 1;
+	}
+
+	// ***************************************************************************
+	int CLuaIHM::concatString(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_concatUCString)
+		const char *funcName = "concatString";
+		std::string result;
+		uint stackSize = ls.getTop();
+		for (uint k = 1; k <= stackSize; ++k)
+		{
+			CLuaIHM::checkArgType(ls, funcName, k, LUA_TSTRING);
+			result += ls.toString(k);
+		}
+		ls.push(result);
+		return 1;
+	}
+
+	// ***************************************************************************
+	int CLuaIHM::tableToString(CLuaState &ls)
+	{
+		const char *funcName = "tableToString";
+		CLuaIHM::checkArgCount(ls, funcName, 1);
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TTABLE);
+		uint length = 0;
+		// compute size
+		ls.pushNil();
+		while (ls.next(-2))
+		{
+			ls.toString(-1);
+			length += (uint)ls.strlen(-1);
+			ls.pop(2);
+		}
+		std::string result;
+		result.resize(length);
+		char *dest = &result[0];
+		// concatenate
+		ls.pushNil();
+		while (ls.next(-2))
+		{
+			uint length = (uint)ls.strlen(-1);
+			if (length)
+			{
+				memcpy(dest, ls.toString(-1), length);
+			}
+			dest += length;
+			ls.pop(2);
+		}
+		ls.push(result);
+		return 1;
+	}
+
+
+	int CLuaIHM::getPathContent(CLuaState &ls)
+	{
+		//H_AUTO(Lua_CLuaIHM_getPathContent)
+		const char *funcName = "getPathContent";
+		CLuaIHM::checkArgCount(ls, funcName, 1);
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		std::vector<std::string> files;
+		NLMISC::CPath::getPathContent(ls.toString(1), false, false, true, files);
+		ls.newTable();
+		for(uint k = 0; k < files.size(); ++k)
+		{
+			ls.push((double) k);
+			ls.push(files[k]);
+			ls.setTable(-3);
+		}
+		return 1;
+	}
+
+
+
+
 	// ***************************************************************************
 	void CLuaIHM::luaValueFromReflectedProperty(CLuaState &ls, CReflectable &reflectedObject, const CReflectedProperty &property)
 	{
@@ -972,6 +1585,28 @@ namespace NLGUI
 
 
 		// *** Register Functions
+		ls.registerFunc("setOnDraw",    setOnDraw);
+		ls.registerFunc("setCaptureKeyboard", setCaptureKeyboard);
+		ls.registerFunc("resetCaptureKeyboard", resetCaptureKeyboard);
+		ls.registerFunc("setTopWindow", setTopWindow);
+		ls.registerFunc("addOnDbChange",    addOnDbChange);
+		ls.registerFunc("removeOnDbChange",    removeOnDbChange);
+		ls.registerFunc("getUIId",    getUIId);
+		ls.registerFunc("runAH",    runAH);
+		ls.registerFunc("deleteUI",    deleteUI);
+		ls.registerFunc("deleteReflectable",    deleteReflectable);
+		ls.registerFunc("getWindowSize",    getWindowSize);
+		ls.registerFunc("getTextureSize", getTextureSize);
+		ls.registerFunc("disableModalWindow", disableModalWindow);
+		ls.registerFunc("isUCString", isUCString);
+		ls.registerFunc("concatUCString", concatUCString);
+		ls.registerFunc("concatString", concatString);
+		ls.registerFunc("tableToString", tableToString);
+		ls.registerFunc("getCurrentWindowUnder", getCurrentWindowUnder);
+		ls.registerFunc("runExpr",    runExpr);
+		ls.registerFunc("runFct",    runFct);
+		ls.registerFunc("runCommand",    runCommand);
+		ls.registerFunc("getPathContent", getPathContent);
 		
 		// Through LUABind API
 		lua_State	*L= ls.getStatePointer();
@@ -990,7 +1625,8 @@ namespace NLGUI
 		#endif
 
 			luabind::def("fileLookup",    CMiscFunctions::fileLookup),
-			luabind::def("shellExecute",  CMiscFunctions::shellExecute)
+			luabind::def("shellExecute",  CMiscFunctions::shellExecute),
+			LUABIND_FUNC(fileExists)
 		];
 
 		// inside i18n table
