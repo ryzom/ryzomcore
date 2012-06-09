@@ -18,7 +18,6 @@
 #include "camera_animation_manager/camera_animation_step_factory.h"
 
 /// Basic camera animation step that has generic values
-/// - name
 /// - look_at_position
 /// - text
 /// - duration
@@ -245,3 +244,39 @@ public:
 	}
 };
 CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepTurnAround, "camera_animation_turn_around");
+
+/////////////////////////////////////////////////////////////////////////////
+/// Animation step that returns to the starting position. It directly inherits from the interface because it
+/// does not need all the parameters of a basic step
+/// - duration
+class CCameraAnimationStepReturn : public ICameraAnimationStep
+{
+protected:
+	float Duration;
+
+public:
+	CCameraAnimationStepReturn()
+	{
+		Duration = 0.f;
+	}
+
+	virtual bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
+	{
+		std::string value;
+
+		// We get the duration
+		if (!prim->getPropertyByName("duration", value))
+		{
+			nlwarning("<CCameraAnimationStepReturn parseStep> impossible to get the duration property of the basic step in primitive : %s", filename.c_str());
+			return false;
+		}
+		if (!NLMISC::fromString(value, Duration))
+		{
+			nlwarning("<CCameraAnimationStepReturn parseStep> impossible to convert the string : %s, in float in the basic step in primitive : %s", value.c_str(), filename.c_str());
+			return false;
+		}
+
+		return true;
+	}
+};
+CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepReturn, "camera_animation_return");
