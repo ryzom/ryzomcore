@@ -178,3 +178,70 @@ public:
 	}
 };
 CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepFollowEntity, "camera_animation_follow_entity");
+
+/////////////////////////////////////////////////////////////////////////////
+/// Turn around camera animation step
+/// - point_to_turn_around
+/// - distance_to_point
+/// - speed
+class CCameraAnimationStepTurnAround: public CCameraAnimationStepBasic
+{
+protected:
+	std::string PointToTurnAround;
+	float DistanceToPoint;
+	float Speed;
+
+public:
+	CCameraAnimationStepTurnAround()
+	{
+		PointToTurnAround = "";
+		DistanceToPoint = 0.f;
+		Speed = 0.f;
+	}
+
+	bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
+	{
+		if (!CCameraAnimationStepBasic::parseStep(prim, filename))
+		{
+			nlwarning("<CCameraAnimationStepTurnAround parseStep> impossible to parse the basic part of the step in primitive : %s", filename.c_str());
+			return false;
+		}
+
+		std::string value;
+
+		// We get the point to turn around
+		if (!prim->getPropertyByName("point_to_turn_around", value))
+		{
+			nlwarning("<CCameraAnimationStepTurnAround parseStep> impossible to get the point_to_turn_around property of the basic step in primitive : %s", filename.c_str());
+			return false;
+		}
+		PointToTurnAround = value;
+
+		// We get the distance to the point
+		if (!prim->getPropertyByName("distance_to_point", value))
+		{
+			nlwarning("<CCameraAnimationStepTurnAround parseStep> impossible to get the distance_to_point property of the basic step in primitive : %s", filename.c_str());
+			return false;
+		}
+		if (!NLMISC::fromString(value, DistanceToPoint))
+		{
+			nlwarning("<CCameraAnimationStepTurnAround parseStep> impossible to convert the string : %s, in float in the follow entity step in primitive : %s", value.c_str(), filename.c_str());
+			return false;
+		}
+
+		// We get the speed
+		if (!prim->getPropertyByName("speed", value))
+		{
+			nlwarning("<CCameraAnimationStepTurnAround parseStep> impossible to get the speed property of the basic step in primitive : %s", filename.c_str());
+			return false;
+		}
+		if (!NLMISC::fromString(value, Speed))
+		{
+			nlwarning("<CCameraAnimationStepTurnAround parseStep> impossible to convert the string : %s, in float in the follow entity step in primitive : %s", value.c_str(), filename.c_str());
+			return false;
+		}
+
+		return true;
+	}
+};
+CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepTurnAround, "camera_animation_turn_around");
