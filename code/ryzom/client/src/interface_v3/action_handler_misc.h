@@ -23,7 +23,10 @@
 #include "nel/gui/action_handler.h"
 #include "interface_manager.h"
 
-class CInterfaceGroup;
+namespace NLGUI
+{
+	class CInterfaceGroup;
+}
 
 
 // ***************************************************************************

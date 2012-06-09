@@ -22,7 +22,11 @@
 
 
 class CDBCtrlSheet;
-class IActionHandler;
+
+namespace NLGUI
+{
+	class IActionHandler;
+}
 
 /** Infos about a selection group
   */

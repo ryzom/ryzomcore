@@ -24,7 +24,11 @@
 #include "nel/gui/view_pointer_base.h"
 
 class CGroupContainer;
-class CCtrlBase;
+
+namespace NLGUI
+{
+	class CCtrlBase;
+}
 
 /**
  * class describing the pointer

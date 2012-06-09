@@ -23,59 +23,63 @@
 #include "nel/misc/factory.h"
 #include "nel/gui/interface_element.h"
 
-class CViewBase : public CInterfaceElement
+namespace NLGUI
 {
-public:
 
-	// for factory construction
-	struct TCtorParam
-	{};
-
-	/// Constructor
-	CViewBase(const TCtorParam &/* param */) : CInterfaceElement()
+	class CViewBase : public CInterfaceElement
 	{
-	}
+	public:
 
-	/// Destructor
-	virtual ~CViewBase();
+		// for factory construction
+		struct TCtorParam
+		{};
 
-	// Returns 'true' if that element can be downcasted to a view
-	virtual bool isView() const { return true; }
+		/// Constructor
+		CViewBase(const TCtorParam &/* param */) : CInterfaceElement()
+		{
+		}
 
-	/// Draw the view from XReal, YReal, WReal, HReal (implemented by derived classes)
-	/// this coordinates are relative to the screen bottom left and begins the bottom left of the view
-	virtual void draw () = 0;
+		/// Destructor
+		virtual ~CViewBase();
 
-	virtual void updateCoords() { CInterfaceElement::updateCoords(); }
+		// Returns 'true' if that element can be downcasted to a view
+		virtual bool isView() const { return true; }
 
-	/// Debug
-	virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
+		/// Draw the view from XReal, YReal, WReal, HReal (implemented by derived classes)
+		/// this coordinates are relative to the screen bottom left and begins the bottom left of the view
+		virtual void draw () = 0;
 
-	/// Reflection
-	virtual sint32 getAlpha() const  { return -1; }	// Not obliged to implement this
-	virtual void setAlpha (sint32 /* a */) {}				// Not obliged to implement this
+		virtual void updateCoords() { CInterfaceElement::updateCoords(); }
+
+		/// Debug
+		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
+
+		/// Reflection
+		virtual sint32 getAlpha() const  { return -1; }	// Not obliged to implement this
+		virtual void setAlpha (sint32 /* a */) {}				// Not obliged to implement this
 
 
-	void    copyOptionFrom(const CViewBase &other)
-	{
-		CInterfaceElement::copyOptionFrom(other);
-	}
+		void    copyOptionFrom(const CViewBase &other)
+		{
+			CInterfaceElement::copyOptionFrom(other);
+		}
 
 
-	REFLECT_EXPORT_START(CViewBase, CInterfaceElement)
-		REFLECT_SINT32 ("alpha", getAlpha, setAlpha);
-	REFLECT_EXPORT_END
+		REFLECT_EXPORT_START(CViewBase, CInterfaceElement)
+			REFLECT_SINT32 ("alpha", getAlpha, setAlpha);
+		REFLECT_EXPORT_END
 
-	virtual void	dumpSize(uint depth = 0) const;
+		virtual void	dumpSize(uint depth = 0) const;
 
-	// from CInterfaceElement
-	virtual void visit(CInterfaceElementVisitor *visitor);
+		// from CInterfaceElement
+		virtual void visit(CInterfaceElementVisitor *visitor);
 
-	// special for mouse over : return true and fill the name of the cursor to display
-	virtual bool getMouseOverShape(std::string &/* texName */, uint8 &/* rot */, NLMISC::CRGBA &/* col */) { return false; }
+		// special for mouse over : return true and fill the name of the cursor to display
+		virtual bool getMouseOverShape(std::string &/* texName */, uint8 &/* rot */, NLMISC::CRGBA &/* col */) { return false; }
 
-};
+	};
 
+}
 
 #endif // RZ_VIEW_BASE_H
 

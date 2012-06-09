@@ -33,6 +33,8 @@ using namespace NL3D;
 #include "../user_entity.h"
 #include "../connection.h"
 
+using namespace NLGUI;
+
 ////////////
 // GLOBAL //
 ////////////

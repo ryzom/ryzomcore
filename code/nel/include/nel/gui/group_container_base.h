@@ -20,75 +20,82 @@
 
 #include "nel/gui/interface_group.h"
 
-
-class CGroupContainerBase : public CInterfaceGroup
+namespace NLGUI
 {
-public:
-	DECLARE_UI_CLASS( CGroupContainerBase )
 
-	CGroupContainerBase( const TCtorParam &param );
-	virtual ~CGroupContainerBase();
+	class CGroupContainerBase : public CInterfaceGroup
+	{
+	public:
+		DECLARE_UI_CLASS( CGroupContainerBase )
 
-	virtual void removeAllContainers();
-	virtual void setLocked( bool locked );
-	bool isLocked() const { return _Locked; }
+		CGroupContainerBase( const TCtorParam &param );
+		virtual ~CGroupContainerBase();
 
-	uint8  getContainerAlpha() const { return _ContainerAlpha; }
-	uint8  getContentAlpha() const { return _ContentAlpha; }
-	uint8  getRolloverAlphaContent() const { return _RolloverAlphaContent; }
-	uint8  getRolloverAlphaContainer() const { return _RolloverAlphaContainer; }
+		virtual void removeAllContainers();
+		virtual void setLocked( bool locked );
+		bool isLocked() const { return _Locked; }
 
-	void setContainerAlpha( uint8 alpha );
-	void setContentAlpha( uint8 alpha );
-	void setRolloverAlphaContent( uint8 alpha );
-	void setRolloverAlphaContainer( uint8 alpha );
+		uint8  getContainerAlpha() const { return _ContainerAlpha; }
+		uint8  getContentAlpha() const { return _ContentAlpha; }
+		uint8  getRolloverAlphaContent() const { return _RolloverAlphaContent; }
+		uint8  getRolloverAlphaContainer() const { return _RolloverAlphaContainer; }
 
-	// for export
-	sint32  getContainerAlphaAsSInt32() const{ return (sint32)_ContainerAlpha; }
-	sint32  getContentAlphaAsSInt32() const{ return (sint32)_ContentAlpha; }
-	sint32  getRolloverAlphaContentAsSInt32() const{ return (sint32)_RolloverAlphaContent; }
-	sint32  getRolloverAlphaContainerAsSInt32() const{ return (sint32)_RolloverAlphaContainer; }
+		void setContainerAlpha( uint8 alpha );
+		void setContentAlpha( uint8 alpha );
+		void setRolloverAlphaContent( uint8 alpha );
+		void setRolloverAlphaContainer( uint8 alpha );
 
-	// sin32 versions for export
-	void setContainerAlpha( sint32 alpha ){ setContainerAlpha((uint8) alpha); }
-	void setContentAlpha( sint32 alpha ){ setContentAlpha((uint8) alpha); }
-	void setRolloverAlphaContent( sint32 alpha ){ setRolloverAlphaContent((uint8) alpha); }
-	void setRolloverAlphaContainer( sint32 alpha ){ setRolloverAlphaContainer((uint8) alpha); }
+		// for export
+		sint32  getContainerAlphaAsSInt32() const{ return (sint32)_ContainerAlpha; }
+		sint32  getContentAlphaAsSInt32() const{ return (sint32)_ContentAlpha; }
+		sint32  getRolloverAlphaContentAsSInt32() const{ return (sint32)_RolloverAlphaContent; }
+		sint32  getRolloverAlphaContainerAsSInt32() const{ return (sint32)_RolloverAlphaContainer; }
 
-	void setUseGlobalAlpha( bool use );
-	bool isUsingGlobalAlpha() const{ return _UseGlobalAlpha; }
+		// sin32 versions for export
+		void setContainerAlpha( sint32 alpha ){ setContainerAlpha((uint8) alpha); }
+		void setContentAlpha( sint32 alpha ){ setContentAlpha((uint8) alpha); }
+		void setRolloverAlphaContent( sint32 alpha ){ setRolloverAlphaContent((uint8) alpha); }
+		void setRolloverAlphaContainer( sint32 alpha ){ setRolloverAlphaContainer((uint8) alpha); }
 
-	std::string getAHOnAlphaSettingsChanged() const{ return CAHManager::getInstance()->getAHName( _AHOnAlphaSettingsChanged ); }
-	std::string getAHOnAlphaSettingsChangedParams() const{ return _AHOnAlphaSettingsChangedParams; }
+		void setUseGlobalAlpha( bool use );
+		bool isUsingGlobalAlpha() const{ return _UseGlobalAlpha; }
 
-	void setAHOnAlphaSettingsChanged( const std::string &h ){ _AHOnAlphaSettingsChanged = CAHManager::getInstance()->getAH( h, _AHOnAlphaSettingsChangedParams ); }
-	void setAHOnAlphaSettingsChangedParams( const std::string &p ){ _AHOnAlphaSettingsChangedParams = p; }
+		std::string getAHOnAlphaSettingsChanged() const{ return CAHManager::getInstance()->getAHName( _AHOnAlphaSettingsChanged ); }
+		std::string getAHOnAlphaSettingsChangedParams() const{ return _AHOnAlphaSettingsChangedParams; }
 
-	REFLECT_EXPORT_START( CGroupContainerBase, CInterfaceGroup )
-		REFLECT_SINT32("container_alpha", getContainerAlphaAsSInt32, setContainerAlpha);
-		REFLECT_SINT32("content_alpha", getContentAlphaAsSInt32, setContentAlpha);
-		REFLECT_SINT32("rollover_content_alpha", getRolloverAlphaContentAsSInt32, setRolloverAlphaContent);
-		REFLECT_SINT32("rollover_container_alpha", getRolloverAlphaContainerAsSInt32, setRolloverAlphaContainer);
-		REFLECT_BOOL("use_global_alpha_settings", isUsingGlobalAlpha, setUseGlobalAlpha);
-		REFLECT_STRING("on_alpha_settings_changed", getAHOnAlphaSettingsChanged, setAHOnAlphaSettingsChanged);
-		REFLECT_STRING("on_alpha_settings_changed_aparams", getAHOnAlphaSettingsChangedParams, setAHOnAlphaSettingsChangedParams);
-	REFLECT_EXPORT_END
+		void setAHOnAlphaSettingsChanged( const std::string &h ){ _AHOnAlphaSettingsChanged = CAHManager::getInstance()->getAH( h, _AHOnAlphaSettingsChangedParams ); }
+		void setAHOnAlphaSettingsChangedParams( const std::string &p ){ _AHOnAlphaSettingsChangedParams = p; }
 
-protected:
-	void triggerAlphaSettingsChangedAH();
+		REFLECT_EXPORT_START( CGroupContainerBase, CInterfaceGroup )
+			REFLECT_SINT32("container_alpha", getContainerAlphaAsSInt32, setContainerAlpha);
+			REFLECT_SINT32("content_alpha", getContentAlphaAsSInt32, setContentAlpha);
+			REFLECT_SINT32("rollover_content_alpha", getRolloverAlphaContentAsSInt32, setRolloverAlphaContent);
+			REFLECT_SINT32("rollover_container_alpha", getRolloverAlphaContainerAsSInt32, setRolloverAlphaContainer);
+			REFLECT_BOOL("use_global_alpha_settings", isUsingGlobalAlpha, setUseGlobalAlpha);
+			REFLECT_STRING("on_alpha_settings_changed", getAHOnAlphaSettingsChanged, setAHOnAlphaSettingsChanged);
+			REFLECT_STRING("on_alpha_settings_changed_aparams", getAHOnAlphaSettingsChangedParams, setAHOnAlphaSettingsChangedParams);
+		REFLECT_EXPORT_END
 
-	uint8 _ContainerAlpha;
-	uint8 _ContentAlpha;
-	uint8 _RolloverAlphaContainer; // Alpha for the window when mouse not over it
-	uint8 _RolloverAlphaContent;   // Alpha for the content when mouse not over it
-	bool _Locked : 1; // Is the container locked (ie override movable, openable ...)
-	bool _UseGlobalAlpha : 1;
+	protected:
+		void triggerAlphaSettingsChangedAH();
 
-	IActionHandler *_AHOnAlphaSettingsChanged;
-	CStringShared  _AHOnAlphaSettingsChangedParams;
+		uint8 _ContainerAlpha;
+		uint8 _ContentAlpha;
+		uint8 _RolloverAlphaContainer; // Alpha for the window when mouse not over it
+		uint8 _RolloverAlphaContent;   // Alpha for the content when mouse not over it
+		bool _Locked : 1; // Is the container locked (ie override movable, openable ...)
+		bool _UseGlobalAlpha : 1;
 
-private:
+		IActionHandler *_AHOnAlphaSettingsChanged;
+		CStringShared  _AHOnAlphaSettingsChangedParams;
 
-};
+	private:
+
+	};
+
+
+
+}
+
 
 #endif

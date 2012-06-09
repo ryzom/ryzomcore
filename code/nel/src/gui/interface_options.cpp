@@ -23,103 +23,106 @@
 using namespace std;
 using namespace NLMISC;
 
-// ***************************************************************************
-const CInterfaceOptionValue	CInterfaceOptionValue::NullValue;
-
-// ***************************************************************************
-void		CInterfaceOptionValue::init(const std::string &str)
+namespace NLGUI
 {
-	_Str= str;
-	fromString(str, _Int);
-	fromString(str, _Float);
-	_Color= CInterfaceElement::convertColor (str.c_str());
-	_Boolean= CInterfaceElement::convertBool(str.c_str());
-}
 
+	const CInterfaceOptionValue	CInterfaceOptionValue::NullValue;
 
-// ----------------------------------------------------------------------------
-// CInterfaceOptions
-// ----------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------
-CInterfaceOptions::CInterfaceOptions()
-{
-}
-
-// ----------------------------------------------------------------------------
-CInterfaceOptions::~CInterfaceOptions()
-{
-}
-
-// ----------------------------------------------------------------------------
-bool CInterfaceOptions::parse (xmlNodePtr cur)
-{
-	cur = cur->children;
-	bool ok = true;
-	while (cur)
+	// ***************************************************************************
+	void		CInterfaceOptionValue::init(const std::string &str)
 	{
-		if ( !stricmp((char*)cur->name,"param") )
-		{
-			CXMLAutoPtr ptr, val;
-			ptr = xmlGetProp (cur, (xmlChar*)"name");
-			val = xmlGetProp (cur, (xmlChar*)"value");
-			if (!ptr || !val)
-			{
-				nlinfo("param with no name or no value");
-				ok = false;
-			}
-			else
-			{
-				string name = NLMISC::toLower(string((const char*)ptr));
-				string value = (string((const char*)val));
-				_ParamValue[name].init(value);
-			}
-		}
-		cur = cur->next;
+		_Str= str;
+		fromString(str, _Int);
+		fromString(str, _Float);
+		_Color= CInterfaceElement::convertColor (str.c_str());
+		_Boolean= CInterfaceElement::convertBool(str.c_str());
 	}
-	return ok;
-}
 
-// ***************************************************************************
-void	CInterfaceOptions::copyBasicMap(const CInterfaceOptions &other)
-{
-	_ParamValue= other._ParamValue;
-}
 
-// ***************************************************************************
-const CInterfaceOptionValue	 &CInterfaceOptions::getValue(const string &sParamName) const
-{
-	string sLwrParamName = strlwr (sParamName);
-	std::map<std::string, CInterfaceOptionValue>::const_iterator it = _ParamValue.find (sLwrParamName);
-	if (it != _ParamValue.end())
-		return it->second;
-	else
-		return CInterfaceOptionValue::NullValue;
-}
+	// ----------------------------------------------------------------------------
+	// CInterfaceOptions
+	// ----------------------------------------------------------------------------
 
-// ***************************************************************************
-const std::string		&CInterfaceOptions::getValStr(const std::string &sParamName) const
-{
-	return getValue(sParamName).getValStr();
-}
-// ***************************************************************************
-sint32					CInterfaceOptions::getValSInt32(const std::string &sParamName) const
-{
-	return getValue(sParamName).getValSInt32();
-}
-// ***************************************************************************
-float					CInterfaceOptions::getValFloat(const std::string &sParamName) const
-{
-	return getValue(sParamName).getValFloat();
-}
-// ***************************************************************************
-NLMISC::CRGBA			CInterfaceOptions::getValColor(const std::string &sParamName) const
-{
-	return getValue(sParamName).getValColor();
-}
-// ***************************************************************************
-bool					CInterfaceOptions::getValBool(const std::string &sParamName) const
-{
-	return getValue(sParamName).getValBool();
-}
+	// ----------------------------------------------------------------------------
+	CInterfaceOptions::CInterfaceOptions()
+	{
+	}
 
+	// ----------------------------------------------------------------------------
+	CInterfaceOptions::~CInterfaceOptions()
+	{
+	}
+
+	// ----------------------------------------------------------------------------
+	bool CInterfaceOptions::parse (xmlNodePtr cur)
+	{
+		cur = cur->children;
+		bool ok = true;
+		while (cur)
+		{
+			if ( !stricmp((char*)cur->name,"param") )
+			{
+				CXMLAutoPtr ptr, val;
+				ptr = xmlGetProp (cur, (xmlChar*)"name");
+				val = xmlGetProp (cur, (xmlChar*)"value");
+				if (!ptr || !val)
+				{
+					nlinfo("param with no name or no value");
+					ok = false;
+				}
+				else
+				{
+					string name = NLMISC::toLower(string((const char*)ptr));
+					string value = (string((const char*)val));
+					_ParamValue[name].init(value);
+				}
+			}
+			cur = cur->next;
+		}
+		return ok;
+	}
+
+	// ***************************************************************************
+	void	CInterfaceOptions::copyBasicMap(const CInterfaceOptions &other)
+	{
+		_ParamValue= other._ParamValue;
+	}
+
+	// ***************************************************************************
+	const CInterfaceOptionValue	 &CInterfaceOptions::getValue(const string &sParamName) const
+	{
+		string sLwrParamName = strlwr (sParamName);
+		std::map<std::string, CInterfaceOptionValue>::const_iterator it = _ParamValue.find (sLwrParamName);
+		if (it != _ParamValue.end())
+			return it->second;
+		else
+			return CInterfaceOptionValue::NullValue;
+	}
+
+	// ***************************************************************************
+	const std::string		&CInterfaceOptions::getValStr(const std::string &sParamName) const
+	{
+		return getValue(sParamName).getValStr();
+	}
+	// ***************************************************************************
+	sint32					CInterfaceOptions::getValSInt32(const std::string &sParamName) const
+	{
+		return getValue(sParamName).getValSInt32();
+	}
+	// ***************************************************************************
+	float					CInterfaceOptions::getValFloat(const std::string &sParamName) const
+	{
+		return getValue(sParamName).getValFloat();
+	}
+	// ***************************************************************************
+	NLMISC::CRGBA			CInterfaceOptions::getValColor(const std::string &sParamName) const
+	{
+		return getValue(sParamName).getValColor();
+	}
+	// ***************************************************************************
+	bool					CInterfaceOptions::getValBool(const std::string &sParamName) const
+	{
+		return getValue(sParamName).getValBool();
+	}
+
+}

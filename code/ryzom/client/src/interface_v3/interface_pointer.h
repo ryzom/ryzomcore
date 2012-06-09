@@ -21,7 +21,16 @@
 
 #include "nel/misc/resource_ptr.h"
 
-class CInterfaceElement *getInterfaceResource(const std::string &key);
+namespace NLGUI
+{
+	class CInterfaceElement;
+	class CCtrlBase;
+	class CInterfaceGroup;
+}
+
+using namespace NLGUI;
+
+CInterfaceElement *getInterfaceResource(const std::string &key);
 
 /** Interface element ptr
  *  This pointer uses the NLMISC::CResourcePtr
@@ -47,13 +56,12 @@ public:
 };
 
 // Some pointers
-typedef CInterfacePtr<class CInterfaceElement>::TInterfacePtr	CInterfaceElementPtr;
-typedef CInterfacePtr<class CInterfaceGroup>::TInterfacePtr		CInterfaceGroupPtr;
+typedef CInterfacePtr<CInterfaceElement>::TInterfacePtr	CInterfaceElementPtr;
+typedef CInterfacePtr<CInterfaceGroup>::TInterfacePtr		CInterfaceGroupPtr;
 typedef CInterfacePtr<class CCtrlTextButton>::TInterfacePtr		CCtrlTextButtonPtr;
 typedef CInterfacePtr<class CViewText>::TInterfacePtr			CViewTextPtr;
 typedef CInterfacePtr<class CViewTextMenu>::TInterfacePtr		CViewTextMenuPtr;
-typedef CInterfacePtr<class CViewTextMenu>::TInterfacePtr		CViewTextMenuPtr;
-typedef CInterfacePtr<class CCtrlBase>::TInterfacePtr			CCtrlBasePtr;
+typedef CInterfacePtr<CCtrlBase>::TInterfacePtr			CCtrlBasePtr;
 typedef CInterfacePtr<class CCtrlBaseButton>::TInterfacePtr		CCtrlBaseButtonPtr;
 typedef CInterfacePtr<class CGroupContainer>::TInterfacePtr		CGroupContainerPtr;
 

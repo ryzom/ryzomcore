@@ -18,27 +18,32 @@
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
 
-CViewBase::~CViewBase()
+namespace NLGUI
 {
-	CWidgetManager::getInstance()->removeRefOnView (this);
-}
 
-// ***************************************************************************
-void CViewBase::dumpSize(uint depth /*=0*/) const
-{
-	std::string result;
-	result.resize(depth * 4, ' ');
-	std::string::size_type pos = _Id.find_last_of(':');
-	std::string shortID = pos == std::string::npos ? _Id : _Id.substr(pos);
-	result += NLMISC::toString("id=%s, w=%d, h=%d, x=%d, y=%d, wreal=%d, hreal=%d, xreal=%d, yreal=%d", shortID.c_str(), (int) _W, (int) _H, (int) _X, (int) _Y, (int) _WReal, (int) _HReal, (int) _XReal, (int) _YReal);
-	nlinfo(result.c_str());
-}
+	CViewBase::~CViewBase()
+	{
+		CWidgetManager::getInstance()->removeRefOnView (this);
+	}
 
-// ***************************************************************************
-void CViewBase::visit(CInterfaceElementVisitor *visitor)
-{
-	nlassert(visitor);
-	visitor->visitView(this);
-	CInterfaceElement::visit(visitor);
+	// ***************************************************************************
+	void CViewBase::dumpSize(uint depth /*=0*/) const
+	{
+		std::string result;
+		result.resize(depth * 4, ' ');
+		std::string::size_type pos = _Id.find_last_of(':');
+		std::string shortID = pos == std::string::npos ? _Id : _Id.substr(pos);
+		result += NLMISC::toString("id=%s, w=%d, h=%d, x=%d, y=%d, wreal=%d, hreal=%d, xreal=%d, yreal=%d", shortID.c_str(), (int) _W, (int) _H, (int) _X, (int) _Y, (int) _WReal, (int) _HReal, (int) _XReal, (int) _YReal);
+		nlinfo(result.c_str());
+	}
+
+	// ***************************************************************************
+	void CViewBase::visit(CInterfaceElementVisitor *visitor)
+	{
+		nlassert(visitor);
+		visitor->visitView(this);
+		CInterfaceElement::visit(visitor);
+	}
+
 }
 

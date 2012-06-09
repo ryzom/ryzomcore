@@ -29,6 +29,7 @@
 
 using namespace NLMISC;
 using namespace NL3D;
+using namespace NLGUI;
 
 // TODO nico : that stuff was coded in a hurry, but could be good to add it to NL3D with a better packaging later...
 

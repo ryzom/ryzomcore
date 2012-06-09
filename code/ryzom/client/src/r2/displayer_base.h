@@ -38,7 +38,7 @@ class CObjectTable;
   * - one for the ui (displaying instance in the object tree for example)
   * - one for the property sheet of the instance
   */
-class CDisplayerBase : public NLMISC::IClassable, public CReflectableRefPtrTarget
+class CDisplayerBase : public NLMISC::IClassable, public NLGUI::CReflectableRefPtrTarget
 {
 public:
 	typedef NLMISC::CSmartPtr<CDisplayerBase> TSmartPtr;

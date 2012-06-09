@@ -24,10 +24,15 @@
 
 #include "game_share/chat_group.h"
 
+
+namespace NLGUI
+{
+	class CCtrlBase;
+}
+
 class CChatWindow;
 class CGroupContainer;
 class CGroupEditBox;
-class CCtrlBase;
 class CViewText;
 
 /** Interface to react to a chat box entry
@@ -240,7 +245,7 @@ public:
 	// Remove a chat window by its pointer
 	void		 removeChatWindow(CChatWindow *cw);
 	/// from a ctrl of a chat box that triggered a menu, or an event, retrieve the associated chat box
-	CChatWindow *getChatWindowFromCaller(CCtrlBase *caller);
+	CChatWindow *getChatWindowFromCaller(NLGUI::CCtrlBase *caller);
 	// Singleton pattern applied to the chat window manager
 	static CChatWindowManager &getInstance();
 	// try to rename a window

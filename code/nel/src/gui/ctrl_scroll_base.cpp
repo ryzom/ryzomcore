@@ -16,51 +16,57 @@
 
 #include "nel/gui/ctrl_scroll_base.h"
 
-CCtrlScrollBase::CCtrlScrollBase( const TCtorParam &param ) :
-CCtrlBase( param )
+namespace NLGUI
 {
-	_Target = NULL;
+
+	CCtrlScrollBase::CCtrlScrollBase( const TCtorParam &param ) :
+	CCtrlBase( param )
+	{
+		_Target = NULL;
+	}
+
+	CCtrlScrollBase::~CCtrlScrollBase()
+	{
+	}
+
+	void CCtrlScrollBase::setTarget( CInterfaceGroup *pIG )
+	{
+		// Necessary because it's supposed to be an abstract class,
+		// however reflection requires the class to be instantiated.
+		nlassert( false );
+	}
+
+	sint32 CCtrlScrollBase::moveTrackX( sint32 dx )
+	{
+		// Necessary because it's supposed to be an abstract class,
+		// however reflection requires the class to be instantiated.
+		nlassert( false );
+
+		return 0;
+	}
+
+	sint32 CCtrlScrollBase::moveTrackY( sint32 dy )
+	{
+		// Necessary because it's supposed to be an abstract class,
+		// however reflection requires the class to be instantiated.
+		nlassert( false );
+
+		return 0;
+	}
+
+	void CCtrlScrollBase::moveTargetX( sint32 dx )
+	{
+		// Necessary because it's supposed to be an abstract class,
+		// however reflection requires the class to be instantiated.
+		nlassert( false );
+	}
+
+	void CCtrlScrollBase::moveTargetY( sint32 dy )
+	{
+		// Necessary because it's supposed to be an abstract class,
+		// however reflection requires the class to be instantiated.
+		nlassert( false );
+	}
+
 }
 
-CCtrlScrollBase::~CCtrlScrollBase()
-{
-}
-
-void CCtrlScrollBase::setTarget( CInterfaceGroup *pIG )
-{
-	// Necessary because it's supposed to be an abstract class,
-	// however reflection requires the class to be instantiated.
-	nlassert( false );
-}
-
-sint32 CCtrlScrollBase::moveTrackX( sint32 dx )
-{
-	// Necessary because it's supposed to be an abstract class,
-	// however reflection requires the class to be instantiated.
-	nlassert( false );
-
-	return 0;
-}
-
-sint32 CCtrlScrollBase::moveTrackY( sint32 dy )
-{
-	// Necessary because it's supposed to be an abstract class,
-	// however reflection requires the class to be instantiated.
-	nlassert( false );
-
-	return 0;
-}
-
-void CCtrlScrollBase::moveTargetX( sint32 dx )
-{
-	// Necessary because it's supposed to be an abstract class,
-	// however reflection requires the class to be instantiated.
-	nlassert( false );
-}
-
-void CCtrlScrollBase::moveTargetY( sint32 dy )
-{
-	// Necessary because it's supposed to be an abstract class,
-	// however reflection requires the class to be instantiated.
-	nlassert( false );
-}

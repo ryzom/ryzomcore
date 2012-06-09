@@ -28,70 +28,73 @@ namespace NL3D
 	class UAnimationSet;
 }
 
-
-// ***************************************************************************
-class CInterfaceOptionValue
+namespace NLGUI
 {
-public:
-	CInterfaceOptionValue()
+
+	// ***************************************************************************
+	class CInterfaceOptionValue
 	{
-		_Color= NLMISC::CRGBA::White;
-		_Int= 0;
-		_Float= 0;
-		_Boolean= false;
-	}
+	public:
+		CInterfaceOptionValue()
+		{
+			_Color= NLMISC::CRGBA::White;
+			_Int= 0;
+			_Float= 0;
+			_Boolean= false;
+		}
 
-	const std::string		&getValStr	() const {return _Str;}
-	sint32					getValSInt32() const {return _Int;}
-	float					getValFloat	() const {return _Float;}
-	NLMISC::CRGBA			getValColor	() const {return _Color;}
-	bool					getValBool	() const {return _Boolean;}
+		const std::string		&getValStr	() const {return _Str;}
+		sint32					getValSInt32() const {return _Int;}
+		float					getValFloat	() const {return _Float;}
+		NLMISC::CRGBA			getValColor	() const {return _Color;}
+		bool					getValBool	() const {return _Boolean;}
 
-	void					init(const std::string &str);
+		void					init(const std::string &str);
 
-	// returned when InterfaceOptions param not found
-	static const CInterfaceOptionValue	NullValue;
+		// returned when InterfaceOptions param not found
+		static const CInterfaceOptionValue	NullValue;
 
-private:
+	private:
 
-	std::string		_Str;
-	NLMISC::CRGBA	_Color;
-	sint32			_Int;
-	float			_Float;
-	bool			_Boolean;
-};
+		std::string		_Str;
+		NLMISC::CRGBA	_Color;
+		sint32			_Int;
+		float			_Float;
+		bool			_Boolean;
+	};
 
 
-// ***************************************************************************
-class CInterfaceOptions : public NLMISC::CRefCount
-{
+	// ***************************************************************************
+	class CInterfaceOptions : public NLMISC::CRefCount
+	{
 
-public:
+	public:
 
-	CInterfaceOptions();
-	virtual ~CInterfaceOptions();
+		CInterfaceOptions();
+		virtual ~CInterfaceOptions();
 
-	virtual bool parse (xmlNodePtr cur);
+		virtual bool parse (xmlNodePtr cur);
 
-	// return NullValue if param not found
-	const CInterfaceOptionValue		&getValue(const std::string &sParamName) const;
+		// return NullValue if param not found
+		const CInterfaceOptionValue		&getValue(const std::string &sParamName) const;
 
-	// shortcuts to getValue(paramName).getValXXX()
-	const std::string		&getValStr		(const std::string &sParamName) const;
-	sint32					getValSInt32	(const std::string &sParamName) const;
-	float					getValFloat		(const std::string &sParamName) const;
-	NLMISC::CRGBA			getValColor		(const std::string &sParamName) const;
-	bool					getValBool		(const std::string &sParamName) const;
+		// shortcuts to getValue(paramName).getValXXX()
+		const std::string		&getValStr		(const std::string &sParamName) const;
+		sint32					getValSInt32	(const std::string &sParamName) const;
+		float					getValFloat		(const std::string &sParamName) const;
+		NLMISC::CRGBA			getValColor		(const std::string &sParamName) const;
+		bool					getValBool		(const std::string &sParamName) const;
 
-	// copy basic map only from other CInterfaceOptions (non virtual method)
-	void	copyBasicMap(const CInterfaceOptions &other);
+		// copy basic map only from other CInterfaceOptions (non virtual method)
+		void	copyBasicMap(const CInterfaceOptions &other);
 
-protected:
+	protected:
 
-	std::map<std::string, CInterfaceOptionValue> _ParamValue;
+		std::map<std::string, CInterfaceOptionValue> _ParamValue;
 
-};
+	};
 
+}
 
 #endif // NL_INTERFACE_LAYER_H
 

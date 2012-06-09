@@ -29,17 +29,20 @@
 #include "nel/gui/widget_manager.h"
 using namespace NLGUI;
 
-// ***************************************************************************
-class CInterfaceElement;
-class CInterfaceGroup;
+namespace NLGUI
+{
+	class CInterfaceElement;
+	class CInterfaceGroup;
+	class CInterfaceOptions;
+	class CInterfaceLink;
+	class CCtrlBase;
+}
+
 class CGroupContainer;
 class CGroupList;
-class CInterfaceOptions;
 class CInterfaceAnim;
 class CViewPointer;
-class CInterfaceLink;
 class CBrickJob;
-class CCtrlBase;
 
 // ***************************************************************************
 /**

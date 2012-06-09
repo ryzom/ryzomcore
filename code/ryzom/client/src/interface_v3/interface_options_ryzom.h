@@ -20,6 +20,8 @@
 
 #include "nel/gui/interface_options.h"
 
+using namespace NLGUI;
+
 // ***************************************************************************
 class COptionsLayer : public CInterfaceOptions
 {

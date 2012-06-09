@@ -22,48 +22,51 @@
 #include "nel/misc/types_nl.h"
 #include "nel/gui/group_frame.h"
 
-
-// ***************************************************************************
-/**
- * A group with special modal options
- * \author Lionel Berenguier
- * \author Nevrax France
- * \date 2002
- */
-class CGroupModal : public CGroupFrame
+namespace NLGUI
 {
-public:
-	bool		SpawnOnMousePos		: 1;
-	bool		ExitClickOut		: 1;
-	bool		ExitClickL			: 1;
-	bool		ExitClickR			: 1;
-	bool		ForceInsideScreen	: 1;
-	bool		ExitKeyPushed		: 1;
-	sint32		SpawnMouseX, SpawnMouseY;
-	std::string Category;
 
-	std::string OnClickOut;				// Launched when clicking out of the window, and BEFORE a new control has been cpatured
-	std::string OnClickOutParams;
-	std::string OnPostClickOut;			// Launched when clicking out of the window, and AFTER a new control has been captured
-	std::string OnPostClickOutParams;
-public:
+	// ***************************************************************************
+	/**
+	 * A group with special modal options
+	 * \author Lionel Berenguier
+	 * \author Nevrax France
+	 * \date 2002
+	 */
+	class CGroupModal : public CGroupFrame
+	{
+	public:
+		bool		SpawnOnMousePos		: 1;
+		bool		ExitClickOut		: 1;
+		bool		ExitClickL			: 1;
+		bool		ExitClickR			: 1;
+		bool		ForceInsideScreen	: 1;
+		bool		ExitKeyPushed		: 1;
+		sint32		SpawnMouseX, SpawnMouseY;
+		std::string Category;
 
-	/// Constructor
-	CGroupModal(const TCtorParam &param);
+		std::string OnClickOut;				// Launched when clicking out of the window, and BEFORE a new control has been cpatured
+		std::string OnClickOutParams;
+		std::string OnPostClickOut;			// Launched when clicking out of the window, and AFTER a new control has been captured
+		std::string OnPostClickOutParams;
+	public:
 
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
-	virtual void updateCoords ();
-	void setBaseX(sint32 x) { _MouseDeltaX = x;}
-	void setBaseY(sint32 y) { _MouseDeltaY = y;}
+		/// Constructor
+		CGroupModal(const TCtorParam &param);
 
-	REFLECT_EXPORT_START(CGroupModal, CGroupFrame)
-	REFLECT_EXPORT_END
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+		virtual void updateCoords ();
+		void setBaseX(sint32 x) { _MouseDeltaX = x;}
+		void setBaseY(sint32 y) { _MouseDeltaY = y;}
 
-// ******************
-protected:
-	sint32		_MouseDeltaX, _MouseDeltaY;
-};
+		REFLECT_EXPORT_START(CGroupModal, CGroupFrame)
+		REFLECT_EXPORT_END
 
+	// ******************
+	protected:
+		sint32		_MouseDeltaX, _MouseDeltaY;
+	};
+
+}
 
 #endif // NL_GROUP_MODAL_H
 

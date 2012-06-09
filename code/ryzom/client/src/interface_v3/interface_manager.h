@@ -69,8 +69,12 @@ extern bool g_hidden;
 
 // #define AJM_DEBUG_TRACK_INTERFACE_GROUPS
 
+namespace NLGUI
+{
+	class CInterfaceOptions;
+}
+
 class CGroupContainer;
-class CInterfaceOptions;
 class CInterfaceAnim;
 class CGroupMenu;
 

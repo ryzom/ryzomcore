@@ -107,10 +107,6 @@
 #include "../npc_icon.h"
 
 #include "nel/gui/lua_helper.h"
-namespace NLGUI
-{
-	extern void luaDebuggerMainLoop();
-}
 using namespace NLGUI;
 #include "nel/gui/lua_ihm.h"
 #include "lua_ihm_ryzom.h"
@@ -128,9 +124,14 @@ using namespace NLGUI;
 
 using namespace NLMISC;
 
+namespace NLGUI
+{
+	extern void luaDebuggerMainLoop();
+	extern NLMISC::CStringMapper *_UIStringMapper;
+}
+
 extern CClientChatManager   ChatMngr;
 extern CContinentManager ContinentMngr;
-extern CStringMapper *_UIStringMapper;
 extern bool IsInRingSession;
 extern CEventsListener EventsListener;
 
