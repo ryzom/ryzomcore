@@ -467,7 +467,7 @@ void WorldEditorScene::updatePickSelectionPoints(const QPointF &point)
 
 void WorldEditorScene::checkUndo()
 {
-	if (m_editedSelectedItems)
+	if (m_editedSelectedItems && (!isEnabledEditPoints()))
 	{
 		switch (m_mode)
 		{
