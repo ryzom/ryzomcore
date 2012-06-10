@@ -54,6 +54,9 @@ public Q_SLOTS:
 	/// Update of selections
 	void updateSelection(Node *node);
 
+	void propertyChanged(QtProperty *property);
+	void resetProperty(QtProperty *property);
+
 private:
 	QtProperty *addBoolProperty(const NLLIGO::IProperty *property,
 								const NLLIGO::CPrimitiveClass::CParameter &parameter,
@@ -71,7 +74,10 @@ private:
 											const NLLIGO::CPrimitiveClass::CParameter &parameter,
 											const NLLIGO::IPrimitive *primitive);
 
-	QtVariantPropertyManager *m_variantManager;
+	void blockSignalsOfProperties(bool block);
+
+	QtBoolPropertyManager *m_boolManager;
+	QtStringPropertyManager *m_stringManager;
 	QtEnumPropertyManager *m_enumManager;
 	QtGroupPropertyManager *m_groupManager;
 	QtTextPropertyManager *m_stringArrayManager;

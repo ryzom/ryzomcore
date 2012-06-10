@@ -37,22 +37,32 @@ PropertyEditorWidget::PropertyEditorWidget(QWidget *parent)
 {
 	m_ui.setupUi(this);
 
-	m_variantManager = new QtVariantPropertyManager(this);
+	m_stringManager = new QtStringPropertyManager(this);
+	m_boolManager = new QtBoolPropertyManager(this);
 	m_enumManager = new QtEnumPropertyManager(this);
 	m_stringArrayManager = new QtTextPropertyManager(this);
 
-	connect(m_variantManager, SIGNAL(valueChanged(QtProperty *, const QVariant &)),
-			this, SLOT(valueChanged(QtProperty *, const QVariant &)));
-
-	QtVariantEditorFactory *variantFactory = new QtVariantEditorFactory(this);
+	QtLineEditFactory *lineEditFactory = new QtLineEditFactory(this);
+	QtCheckBoxFactory *boolFactory = new QtCheckBoxFactory(this);
 	QtEnumEditorFactory *enumFactory = new QtEnumEditorFactory(this);
 	QtTextEditorFactory *textFactory = new QtTextEditorFactory(this);
 
-	m_ui.treePropertyBrowser->setFactoryForManager(m_variantManager, variantFactory);
+	m_ui.treePropertyBrowser->setFactoryForManager(m_stringManager, lineEditFactory);
+	m_ui.treePropertyBrowser->setFactoryForManager(m_boolManager, boolFactory);
 	m_ui.treePropertyBrowser->setFactoryForManager(m_enumManager, enumFactory);
 	m_ui.treePropertyBrowser->setFactoryForManager(m_stringArrayManager, textFactory);
 
 	m_groupManager = new QtGroupPropertyManager(this);
+
+	connect(m_stringManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(propertyChanged(QtProperty *)));
+	connect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(propertyChanged(QtProperty *)));
+	connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(propertyChanged(QtProperty *)));
+	connect(m_stringArrayManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(propertyChanged(QtProperty *)));
+
+	connect(m_boolManager, SIGNAL(resetProperty(QtProperty *)), this, SLOT(resetProperty(QtProperty *)));
+	connect(m_stringManager, SIGNAL(resetProperty(QtProperty *)), this, SLOT(resetProperty(QtProperty *)));
+	connect(m_enumManager, SIGNAL(resetProperty(QtProperty *)), this, SLOT(resetProperty(QtProperty *)));
+	connect(m_stringArrayManager, SIGNAL(resetProperty(QtProperty *)), this, SLOT(resetProperty(QtProperty *)));
 }
 
 PropertyEditorWidget::~PropertyEditorWidget()
@@ -70,6 +80,8 @@ void PropertyEditorWidget::updateSelection(Node *node)
 
 	if ((node == 0) || (node->type() != Node::PrimitiveNodeType))
 		return;
+
+	blockSignalsOfProperties(true);
 
 	// The parameter list
 	std::list<NLLIGO::CPrimitiveClass::CParameter> parameterList;
@@ -149,7 +161,6 @@ void PropertyEditorWidget::updateSelection(Node *node)
 		else if (parameter.Type == NLLIGO::CPrimitiveClass::CParameter::ConstStringArray)
 			prop = addConstStringArrayProperty(ligoProperty, parameter, primitive);
 		else
-			// hmn?
 			prop = addBoolProperty(ligoProperty, parameter, primitive);
 
 		// Default value ?
@@ -166,6 +177,18 @@ void PropertyEditorWidget::updateSelection(Node *node)
 
 		ite++;
 	}
+
+	blockSignalsOfProperties(false);
+}
+
+void PropertyEditorWidget::propertyChanged(QtProperty *property)
+{
+	nlinfo(QString("property %1 changed").arg(property->propertyName()).toStdString().c_str());
+}
+
+void PropertyEditorWidget::resetProperty(QtProperty *property)
+{
+	nlinfo(QString("property %1 reset").arg(property->propertyName()).toStdString().c_str());
 }
 
 QtProperty *PropertyEditorWidget::addBoolProperty(const NLLIGO::IProperty *property,
@@ -175,11 +198,11 @@ QtProperty *PropertyEditorWidget::addBoolProperty(const NLLIGO::IProperty *prope
 	std::string value;
 	std::string name = parameter.Name.c_str();
 	primitive->getPropertyByName(name.c_str(), value);
-	QtVariantProperty *prop = m_variantManager->addProperty(QVariant::Bool, name.c_str());
+	QtProperty *prop = m_boolManager->addProperty(name.c_str());
 	// if (Default)
 	{
 		//DialogProperties->setDefaultValue (this, value);
-		prop->setValue(bool((value=="true")?1:0));
+		m_boolManager->setValue(prop, bool((value=="true")?1:0));
 	}
 	return prop;
 }
@@ -242,7 +265,7 @@ QtProperty *PropertyEditorWidget::addConstStringProperty(const NLLIGO::IProperty
 
 	if (listEnums.isEmpty())
 	{
-		listEnums << tr("WRN: Check leveldesign!");
+		listEnums << QString(value.c_str()) + tr(" (WRN: Check leveldesign!)");
 		m_enumManager->setEnumNames(prop, listEnums);
 		m_enumManager->setValue(prop, 0);
 		prop->setEnabled(false);
@@ -273,8 +296,8 @@ QtProperty *PropertyEditorWidget::addStringProperty(const NLLIGO::IProperty *pro
 	std::string value;
 	std::string name = parameter.Name.c_str();
 	primitive->getPropertyByName(name.c_str(), value);
-	QtVariantProperty *prop = m_variantManager->addProperty(QVariant::String, parameter.Name.c_str());
-	prop->setValue(QString(value.c_str()));
+	QtProperty *prop = m_stringManager->addProperty(parameter.Name.c_str());
+	m_stringManager->setValue(prop, QString(value.c_str()));
 	return prop;
 }
 
@@ -320,10 +343,17 @@ QtProperty *PropertyEditorWidget::addConstStringArrayProperty(const NLLIGO::IPro
 		const NLLIGO::IPrimitive *primitive)
 {
 	std::string name = parameter.Name.c_str();
-	QtVariantProperty *prop = m_variantManager->addProperty(QVariant::String, parameter.Name.c_str());
-	prop->setValue("TODO: ConstStringArray");
+	QtProperty *prop = m_stringManager->addProperty(parameter.Name.c_str());
+	m_stringManager->setValue(prop, "TODO: ConstStringArray");
 	prop->setEnabled(false);
 	return prop;
 }
 
+void PropertyEditorWidget::blockSignalsOfProperties(bool block)
+{
+	m_stringManager->blockSignals(block);
+	m_boolManager->blockSignals(block);
+	m_enumManager->blockSignals(block);
+	m_stringArrayManager->blockSignals(block);
+}
 } /* namespace WorldEditor */
