@@ -264,6 +264,10 @@ QtBoolEdit::QtBoolEdit(QWidget *parent) :
     m_defaultButton(new QToolButton(this)),
     m_textVisible(true)
 {
+    m_defaultButton->setIcon(QIcon(":/trolltech/qtpropertybrowser/images/resetproperty.png"));
+    m_defaultButton->setMaximumWidth(16);
+    m_defaultButton->setEnabled(false);
+
     QHBoxLayout *lt = new QHBoxLayout;
     if (QApplication::layoutDirection() == Qt::LeftToRight)
         lt->setContentsMargins(4, 0, 0, 0);
@@ -271,9 +275,11 @@ QtBoolEdit::QtBoolEdit(QWidget *parent) :
         lt->setContentsMargins(0, 0, 4, 0);
     lt->addWidget(m_checkBox);
     lt->addWidget(m_defaultButton);
-    m_defaultButton->setEnabled(false);
     setLayout(lt);
+    
     connect(m_checkBox, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
+    connect(m_defaultButton, SIGNAL(clicked()), this, SIGNAL(resetProperty()));
+
     setFocusProxy(m_checkBox);
     m_checkBox->setText(QString());
 }
@@ -295,6 +301,11 @@ Qt::CheckState QtBoolEdit::checkState() const
 void QtBoolEdit::setCheckState(Qt::CheckState state)
 {
     m_checkBox->setCheckState(state);
+}
+
+void QtBoolEdit::setStateResetButton(bool enabled)
+{
+    m_defaultButton->setEnabled(enabled);
 }
 
 bool QtBoolEdit::isChecked() const

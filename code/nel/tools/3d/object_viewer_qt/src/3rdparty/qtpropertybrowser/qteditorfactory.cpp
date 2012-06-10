@@ -659,6 +659,7 @@ class QtCheckBoxFactoryPrivate : public EditorFactoryPrivate<QtBoolEdit>
 public:
     void slotPropertyChanged(QtProperty *property, bool value);
     void slotSetValue(bool value);
+    void slotReset();
 };
 
 void QtCheckBoxFactoryPrivate::slotPropertyChanged(QtProperty *property, bool value)
@@ -669,6 +670,7 @@ void QtCheckBoxFactoryPrivate::slotPropertyChanged(QtProperty *property, bool va
     QListIterator<QtBoolEdit *> itEditor(m_createdEditors[property]);
     while (itEditor.hasNext()) {
         QtBoolEdit *editor = itEditor.next();
+        editor->setStateResetButton(property->isModified());
         editor->blockCheckBoxSignals(true);
         editor->setChecked(value);
         editor->blockCheckBoxSignals(false);
@@ -687,6 +689,22 @@ void QtCheckBoxFactoryPrivate::slotSetValue(bool value)
             if (!manager)
                 return;
             manager->setValue(property, value);
+            return;
+        }
+}
+
+void QtCheckBoxFactoryPrivate::slotReset()
+{
+    QObject *object = q_ptr->sender();
+
+    const QMap<QtBoolEdit *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
+    for (QMap<QtBoolEdit *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend;  ++itEditor)
+        if (itEditor.key() == object) {
+            QtProperty *property = itEditor.value();
+            QtBoolPropertyManager *manager = q_ptr->propertyManager(property);
+            if (!manager)
+                return;
+            manager->setResetProperty(property);
             return;
         }
 }
@@ -740,8 +758,10 @@ QWidget *QtCheckBoxFactory::createEditor(QtBoolPropertyManager *manager, QtPrope
         QWidget *parent)
 {
     QtBoolEdit *editor = d_ptr->createEditor(property, parent);
+    editor->setStateResetButton(property->isModified());
     editor->setChecked(manager->value(property));
 
+    connect(editor, SIGNAL(resetProperty()), this, SLOT(slotReset()));
     connect(editor, SIGNAL(toggled(bool)), this, SLOT(slotSetValue(bool)));
     connect(editor, SIGNAL(destroyed(QObject *)),
                 this, SLOT(slotEditorDestroyed(QObject *)));
@@ -2645,10 +2665,15 @@ QtTextEditWidget::QtTextEditWidget(QWidget *parent) :
 
     m_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Ignored);
     m_button->setFixedWidth(20);
-    setFocusProxy(m_button);
-    setFocusPolicy(m_button->focusPolicy());
     m_button->setText(tr("..."));
     m_button->installEventFilter(this);
+
+    setFocusProxy(m_button);
+    setFocusPolicy(m_button->focusPolicy());
+	
+    m_defaultButton->setIcon(QIcon(":/trolltech/qtpropertybrowser/images/resetproperty.png"));
+    m_defaultButton->setMaximumWidth(16);
+    
     connect(m_button, SIGNAL(clicked()), this, SLOT(buttonClicked()));
     lt->addWidget(m_button);
     lt->addWidget(m_defaultButton);

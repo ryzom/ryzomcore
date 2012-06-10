@@ -155,6 +155,7 @@ public:
 
     Qt::CheckState checkState() const;
     void setCheckState(Qt::CheckState state);
+    void setStateResetButton(bool enabled);
 
     bool isChecked() const;
     void setChecked(bool c);
@@ -163,6 +164,7 @@ public:
 
 Q_SIGNALS:
     void toggled(bool);
+    void resetProperty();
 
 protected:
     void mousePressEvent(QMouseEvent * event);
