@@ -132,12 +132,12 @@ void PropertyEditorWidget::updateSelection(Node *node)
 	groupNode = m_groupManager->addProperty(QString("%1(%2)").arg(node->data(Qt::DisplayRole).toString()).arg(primClass->Name.c_str()));
 	m_ui.treePropertyBrowser->addProperty(groupNode);
 
-	ite = parameterList.begin ();
-	while (ite != parameterList.end ())
+	ite = parameterList.begin();
+	while (ite != parameterList.end())
 	{
 		NLLIGO::CPrimitiveClass::CParameter &parameter = (*ite);
 		QtProperty *prop;
-		NLLIGO::IProperty *ligoProperty;
+		NLLIGO::IProperty *ligoProperty = 0;
 		primitive->getPropertyByName(parameter.Name.c_str(), ligoProperty);
 
 		if (parameter.Type == NLLIGO::CPrimitiveClass::CParameter::ConstString)
@@ -188,50 +188,81 @@ QtProperty *PropertyEditorWidget::addConstStringProperty(const NLLIGO::IProperty
 		const NLLIGO::CPrimitiveClass::CParameter &parameter,
 		const NLLIGO::IPrimitive *primitive)
 {
-	std::string context("default");
+	// TODO: get context value from dialog
+	std::string context("jungle");
+	std::string defaultContext("default");
 
 	std::string value;
 	std::string name = parameter.Name.c_str();
+
+	// Get current value
 	primitive->getPropertyByName(name.c_str(), value);
+
+	// Create qt property
 	QtProperty *prop = m_enumManager->addProperty(parameter.Name.c_str());
 
-	std::map<std::string, NLLIGO::CPrimitiveClass::CParameter::CConstStringValue>::const_iterator ite = parameter.ComboValues.find(context.c_str());
+	std::vector<std::string> listContext;
+	
+	if (context != defaultContext)
+		listContext.push_back(context);
+	listContext.push_back(defaultContext);
 
-	// TODO
-	//if (ite != parameter.ComboValues.end())
+	QStringList listEnums;
+
+	// Correct fill properties with *both* contexts if the current context is not default and is valid.
+	for (size_t j = 0; j < listContext.size(); j++)
 	{
-		std::vector<std::string> pathList;
-		{
-			ite->second.appendFilePath(pathList);
+		std::map<std::string, NLLIGO::CPrimitiveClass::CParameter::CConstStringValue>::const_iterator ite = parameter.ComboValues.find(listContext[j].c_str());
 
-			/*std::vector<const NLLIGO::IPrimitive*> relativePrimPaths;
+		if (ite != parameter.ComboValues.end())
+		{
+			std::vector<std::string> pathList;
 			{
-				std::vector<const NLLIGO::IPrimitive*> startPrimPath;
-				for (uint locIndex = 0; locIndex<_PropDlgLocators.size(); locIndex++)
-					startPrimPath.push_back(_PropDlgLocators[locIndex].Primitive);
+				ite->second.appendFilePath(pathList);
 
-				ite->second.getPrimitivesForPrimPath(relativePrimPaths, startPrimPath);
+				// TODO: what is it?
+				/*std::vector<const NLLIGO::IPrimitive*> relativePrimPaths;
+				{
+					std::vector<const NLLIGO::IPrimitive*> startPrimPath;
+					for (uint locIndex = 0; locIndex<_PropDlgLocators.size(); locIndex++)
+						startPrimPath.push_back(_PropDlgLocators[locIndex].Primitive);
+
+					ite->second.getPrimitivesForPrimPath(relativePrimPaths, startPrimPath);
+				}
+				ite->second.appendPrimPath(pathList, relativePrimPaths);*/
 			}
-			ite->second.appendPrimPath(pathList, relativePrimPaths);*/
-		}
 
-		if (parameter.SortEntries)
-			std::sort(pathList.begin(), pathList.end());
+			if (parameter.SortEntries)
+				std::sort(pathList.begin(), pathList.end());
 
-		int currentValue = 0;
-		QStringList listEnums;
-		for (size_t i = 0; i < pathList.size(); ++i)
-		{
-			listEnums.append(pathList[i].c_str());
-			if (value == pathList[i])
-				currentValue = i;
-		}
-		if (!pathList.empty())
-		{
-			m_enumManager->setEnumNames(prop, listEnums);
-			m_enumManager->setValue(prop, currentValue);
+			for (size_t i = 0; i < pathList.size(); ++i)
+				listEnums.append(pathList[i].c_str());
 		}
 	}
+
+	if (listEnums.isEmpty())
+	{
+		listEnums << tr("WRN: Check leveldesign!");
+		m_enumManager->setEnumNames(prop, listEnums);
+		m_enumManager->setValue(prop, 0);
+		prop->setEnabled(false);
+	}
+	else
+	{
+		// Fill qt property
+		m_enumManager->setEnumNames(prop, listEnums);
+
+		// Find index of current value
+		for (int i = 0; i < listEnums.size(); i++)
+		{
+			if (value == listEnums[i].toStdString())
+			{
+				m_enumManager->setValue(prop, i);
+				break;
+			}
+		}
+	}
+
 	return prop;
 }
 
@@ -263,11 +294,7 @@ QtProperty *PropertyEditorWidget::addStringArrayProperty(const NLLIGO::IProperty
 		if (propStringArray)
 		{
 			const std::vector<std::string> &vectString = propStringArray->StringArray;
-			if (vectString.empty())
-			{
-				//m_stringArrayManager->setValue(prop, "StringArray");
-			}
-			else
+			if (!vectString.empty())
 			{
 				std::string temp;
 				for (size_t i = 0; i < vectString.size(); i++)
@@ -294,7 +321,8 @@ QtProperty *PropertyEditorWidget::addConstStringArrayProperty(const NLLIGO::IPro
 {
 	std::string name = parameter.Name.c_str();
 	QtVariantProperty *prop = m_variantManager->addProperty(QVariant::String, parameter.Name.c_str());
-	prop->setValue("ConstStringArray");
+	prop->setValue("TODO: ConstStringArray");
+	prop->setEnabled(false);
 	return prop;
 }
 
