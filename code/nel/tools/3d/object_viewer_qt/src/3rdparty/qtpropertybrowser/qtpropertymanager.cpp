@@ -1588,11 +1588,6 @@ void QtBoolPropertyManager::setValue(QtProperty *property, bool val)
                 property, val);
 }
 
-void QtBoolPropertyManager::setResetProperty(QtProperty *property)
-{
-     emit resetProperty(property);
-}
-
 /*!
     \reimp
 */

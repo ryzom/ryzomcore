@@ -704,7 +704,7 @@ void QtCheckBoxFactoryPrivate::slotReset()
             QtBoolPropertyManager *manager = q_ptr->propertyManager(property);
             if (!manager)
                 return;
-            manager->setResetProperty(property);
+            manager->emitResetProperty(property);
             return;
         }
 }
@@ -2638,12 +2638,14 @@ public:
 
 public Q_SLOTS:
     void setValue(const QString &value);
+    void setStateResetButton(bool enabled);
 
 private Q_SLOTS:
     void buttonClicked();
 
 Q_SIGNALS:
     void valueChanged(const QString &value);
+    void resetProperty();
 
 private:
     QLineEdit *m_lineEdit;
@@ -2675,6 +2677,7 @@ QtTextEditWidget::QtTextEditWidget(QWidget *parent) :
     m_defaultButton->setMaximumWidth(16);
     
     connect(m_button, SIGNAL(clicked()), this, SLOT(buttonClicked()));
+    connect(m_defaultButton, SIGNAL(clicked()), this, SIGNAL(resetProperty()));
     lt->addWidget(m_button);
     lt->addWidget(m_defaultButton);
     m_defaultButton->setEnabled(false);
@@ -2684,6 +2687,11 @@ void QtTextEditWidget::setValue(const QString &value)
 {
     if (m_lineEdit->text() != value)
         m_lineEdit->setText(value);
+}
+
+void QtTextEditWidget::setStateResetButton(bool enabled)
+{
+    m_defaultButton->setEnabled(enabled);
 }
 
 void QtTextEditWidget::buttonClicked()
@@ -2761,6 +2769,7 @@ public:
 
     void slotPropertyChanged(QtProperty *property, const QString &value);
     void slotSetValue(const QString &value);
+    void slotResetProperty();
 };
 
 void QtTextEditorFactoryPrivate::slotPropertyChanged(QtProperty *property,
@@ -2772,7 +2781,11 @@ void QtTextEditorFactoryPrivate::slotPropertyChanged(QtProperty *property,
     QListIterator<QtTextEditWidget *> itEditor(it.value());
 
     while (itEditor.hasNext())
-        itEditor.next()->setValue(value);
+    {
+        QtTextEditWidget *editor = itEditor.next();
+        editor->setValue(value);
+        editor->setStateResetButton(property->isModified());
+    }
 }
 
 void QtTextEditorFactoryPrivate::slotSetValue(const QString &value)
@@ -2789,6 +2802,22 @@ void QtTextEditorFactoryPrivate::slotSetValue(const QString &value)
             return;
         }
 }
+
+void QtTextEditorFactoryPrivate::slotResetProperty()
+{
+    QObject *object = q_ptr->sender();
+    const EditorToPropertyMap::ConstIterator ecend = m_editorToProperty.constEnd();
+    for (EditorToPropertyMap::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend; ++itEditor)
+        if (itEditor.key() == object) {
+            QtProperty *property = itEditor.value();
+            QtTextPropertyManager *manager = q_ptr->propertyManager(property);
+            if (!manager)
+                return;
+            manager->emitResetProperty(property);
+            return;
+        }
+}
+
 /*!
     \class QtTextEditFactory
 
@@ -2841,8 +2870,10 @@ QWidget *QtTextEditorFactory::createEditor(QtTextPropertyManager *manager,
     QtTextEditWidget *editor = d_ptr->createEditor(property, parent);
 
     editor->setValue(manager->value(property));
-	
-	connect(editor, SIGNAL(valueChanged(QString)), this, SLOT(slotSetValue(QString)));
+    editor->setStateResetButton(property->isModified());
+
+    connect(editor, SIGNAL(resetProperty()), this, SLOT(slotResetProperty()));
+    connect(editor, SIGNAL(valueChanged(QString)), this, SLOT(slotSetValue(QString)));
     connect(editor, SIGNAL(destroyed(QObject *)), this, SLOT(slotEditorDestroyed(QObject *)));
     return editor;
 }

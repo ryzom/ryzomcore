@@ -160,11 +160,9 @@ public:
 
 public Q_SLOTS:
     void setValue(QtProperty *property, bool val);
-    void setResetProperty(QtProperty *property);
 
 Q_SIGNALS:
     void valueChanged(QtProperty *property, bool val);
-    void resetProperty(QtProperty *property);
 
 protected:
     QString valueText(const QtProperty *property) const;
