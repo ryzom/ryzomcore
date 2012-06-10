@@ -659,7 +659,7 @@ class QtCheckBoxFactoryPrivate : public EditorFactoryPrivate<QtBoolEdit>
 public:
     void slotPropertyChanged(QtProperty *property, bool value);
     void slotSetValue(bool value);
-    void slotReset();
+    void slotResetProperty();
 };
 
 void QtCheckBoxFactoryPrivate::slotPropertyChanged(QtProperty *property, bool value)
@@ -693,7 +693,7 @@ void QtCheckBoxFactoryPrivate::slotSetValue(bool value)
         }
 }
 
-void QtCheckBoxFactoryPrivate::slotReset()
+void QtCheckBoxFactoryPrivate::slotResetProperty()
 {
     QObject *object = q_ptr->sender();
 
@@ -761,7 +761,7 @@ QWidget *QtCheckBoxFactory::createEditor(QtBoolPropertyManager *manager, QtPrope
     editor->setStateResetButton(property->isModified());
     editor->setChecked(manager->value(property));
 
-    connect(editor, SIGNAL(resetProperty()), this, SLOT(slotReset()));
+    connect(editor, SIGNAL(resetProperty()), this, SLOT(slotResetProperty()));
     connect(editor, SIGNAL(toggled(bool)), this, SLOT(slotSetValue(bool)));
     connect(editor, SIGNAL(destroyed(QObject *)),
                 this, SLOT(slotEditorDestroyed(QObject *)));
@@ -1880,9 +1880,87 @@ void QtCharEditorFactory::disconnectPropertyManager(QtCharPropertyManager *manag
                 this, SLOT(slotPropertyChanged(QtProperty *, const QChar &)));
 }
 
+
+class QtEnumEditWidget : public QWidget {
+    Q_OBJECT
+
+public:
+    QtEnumEditWidget(QWidget *parent);
+
+    bool blockComboBoxSignals(bool block);
+    void addItems(const QStringList &texts);
+    void clearComboBox();
+    void setItemIcon(int index, const QIcon &icon);
+
+public Q_SLOTS:
+    void setValue(int value);
+    void setStateResetButton(bool enabled);
+
+Q_SIGNALS:
+    void valueChanged(int value);
+    void resetProperty();
+
+private:
+    QComboBox *m_comboBox;
+    QToolButton *m_defaultButton;
+};
+
+QtEnumEditWidget::QtEnumEditWidget(QWidget *parent) :
+    QWidget(parent),
+    m_comboBox(new QComboBox),
+    m_defaultButton(new QToolButton)
+{
+	m_comboBox->view()->setTextElideMode(Qt::ElideRight);
+
+    QHBoxLayout *lt = new QHBoxLayout(this);
+    lt->setContentsMargins(0, 0, 0, 0);
+    lt->setSpacing(0);
+    lt->addWidget(m_comboBox);
+
+    m_defaultButton->setIcon(QIcon(":/trolltech/qtpropertybrowser/images/resetproperty.png"));
+    m_defaultButton->setMaximumWidth(16);
+
+    connect(m_comboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(valueChanged(int)));
+    connect(m_defaultButton, SIGNAL(clicked()), this, SIGNAL(resetProperty()));
+    lt->addWidget(m_defaultButton);
+    m_defaultButton->setEnabled(false);
+    setFocusProxy(m_comboBox);
+}
+
+void QtEnumEditWidget::setValue(int value)
+{
+    if (m_comboBox->currentIndex() != value)
+        m_comboBox->setCurrentIndex(value);
+}
+
+void QtEnumEditWidget::setStateResetButton(bool enabled)
+{
+    m_defaultButton->setEnabled(enabled);
+}
+
+bool QtEnumEditWidget::blockComboBoxSignals(bool block)
+{
+    return m_comboBox->blockSignals(block);
+}
+
+void QtEnumEditWidget::addItems(const QStringList &texts)
+{
+    m_comboBox->addItems(texts);
+}
+
+void QtEnumEditWidget::clearComboBox()
+{
+    m_comboBox->clear();
+}
+
+void QtEnumEditWidget::setItemIcon(int index, const QIcon &icon)
+{
+    m_comboBox->setItemIcon(index, icon);
+}
+
 // QtEnumEditorFactory
 
-class QtEnumEditorFactoryPrivate : public EditorFactoryPrivate<QComboBox>
+class QtEnumEditorFactoryPrivate : public EditorFactoryPrivate<QtEnumEditWidget>
 {
     QtEnumEditorFactory *q_ptr;
     Q_DECLARE_PUBLIC(QtEnumEditorFactory)
@@ -1892,19 +1970,36 @@ public:
     void slotEnumNamesChanged(QtProperty *property, const QStringList &);
     void slotEnumIconsChanged(QtProperty *property, const QMap<int, QIcon> &);
     void slotSetValue(int value);
+    void slotResetProperty();
 };
+
+void QtEnumEditorFactoryPrivate::slotResetProperty()
+{
+    QObject *object = q_ptr->sender();
+    const EditorToPropertyMap::ConstIterator ecend = m_editorToProperty.constEnd();
+    for (EditorToPropertyMap::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend; ++itEditor)
+        if (itEditor.key() == object) {
+            QtProperty *property = itEditor.value();
+            QtEnumPropertyManager *manager = q_ptr->propertyManager(property);
+            if (!manager)
+                return;
+            manager->emitResetProperty(property);
+            return;
+        }
+}
 
 void QtEnumEditorFactoryPrivate::slotPropertyChanged(QtProperty *property, int value)
 {
     if (!m_createdEditors.contains(property))
         return;
 
-    QListIterator<QComboBox *> itEditor(m_createdEditors[property]);
+    QListIterator<QtEnumEditWidget *> itEditor(m_createdEditors[property]);
     while (itEditor.hasNext()) {
-        QComboBox *editor = itEditor.next();
-        editor->blockSignals(true);
-        editor->setCurrentIndex(value);
-        editor->blockSignals(false);
+        QtEnumEditWidget *editor = itEditor.next();
+        editor->setStateResetButton(property->isModified());
+        editor->blockComboBoxSignals(true);
+        editor->setValue(value);
+        editor->blockComboBoxSignals(false);
     }
 }
 
@@ -1920,17 +2015,17 @@ void QtEnumEditorFactoryPrivate::slotEnumNamesChanged(QtProperty *property,
 
     QMap<int, QIcon> enumIcons = manager->enumIcons(property);
 
-    QListIterator<QComboBox *> itEditor(m_createdEditors[property]);
+    QListIterator<QtEnumEditWidget *> itEditor(m_createdEditors[property]);
     while (itEditor.hasNext()) {
-        QComboBox *editor = itEditor.next();
-        editor->blockSignals(true);
-        editor->clear();
+        QtEnumEditWidget *editor = itEditor.next();
+        editor->blockComboBoxSignals(true);
+        editor->clearComboBox();
         editor->addItems(enumNames);
         const int nameCount = enumNames.count();
         for (int i = 0; i < nameCount; i++)
             editor->setItemIcon(i, enumIcons.value(i));
-        editor->setCurrentIndex(manager->value(property));
-        editor->blockSignals(false);
+        editor->setValue(manager->value(property));
+        editor->blockComboBoxSignals(false);
     }
 }
 
@@ -1945,23 +2040,23 @@ void QtEnumEditorFactoryPrivate::slotEnumIconsChanged(QtProperty *property,
         return;
 
     const QStringList enumNames = manager->enumNames(property);
-    QListIterator<QComboBox *> itEditor(m_createdEditors[property]);
+    QListIterator<QtEnumEditWidget *> itEditor(m_createdEditors[property]);
     while (itEditor.hasNext()) {
-        QComboBox *editor = itEditor.next();
-        editor->blockSignals(true);
+        QtEnumEditWidget *editor = itEditor.next();
+        editor->blockComboBoxSignals(true);
         const int nameCount = enumNames.count();
         for (int i = 0; i < nameCount; i++)
             editor->setItemIcon(i, enumIcons.value(i));
-        editor->setCurrentIndex(manager->value(property));
-        editor->blockSignals(false);
+        editor->setValue(manager->value(property));
+        editor->blockComboBoxSignals(false);
     }
 }
 
 void QtEnumEditorFactoryPrivate::slotSetValue(int value)
 {
     QObject *object = q_ptr->sender();
-    const  QMap<QComboBox *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
-    for (QMap<QComboBox *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend; ++itEditor)
+    const  QMap<QtEnumEditWidget *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
+    for (QMap<QtEnumEditWidget *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend; ++itEditor)
         if (itEditor.key() == object) {
             QtProperty *property = itEditor.value();
             QtEnumPropertyManager *manager = q_ptr->propertyManager(property);
@@ -2022,18 +2117,19 @@ void QtEnumEditorFactory::connectPropertyManager(QtEnumPropertyManager *manager)
 QWidget *QtEnumEditorFactory::createEditor(QtEnumPropertyManager *manager, QtProperty *property,
         QWidget *parent)
 {
-    QComboBox *editor = d_ptr->createEditor(property, parent);
+    QtEnumEditWidget *editor = d_ptr->createEditor(property, parent);
     editor->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
-    editor->view()->setTextElideMode(Qt::ElideRight);
     QStringList enumNames = manager->enumNames(property);
     editor->addItems(enumNames);
     QMap<int, QIcon> enumIcons = manager->enumIcons(property);
     const int enumNamesCount = enumNames.count();
     for (int i = 0; i < enumNamesCount; i++)
         editor->setItemIcon(i, enumIcons.value(i));
-    editor->setCurrentIndex(manager->value(property));
+    editor->setValue(manager->value(property));
+    editor->setStateResetButton(property->isModified());
 
-    connect(editor, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSetValue(int)));
+    connect(editor, SIGNAL(resetProperty()), this, SLOT(slotResetProperty()));
+    connect(editor, SIGNAL(valueChanged(int)), this, SLOT(slotSetValue(int)));
     connect(editor, SIGNAL(destroyed(QObject *)),
                 this, SLOT(slotEditorDestroyed(QObject *)));
     return editor;

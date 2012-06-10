@@ -186,7 +186,7 @@ private:
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, bool))
     Q_PRIVATE_SLOT(d_func(), void slotSetValue(bool))
     Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
-    Q_PRIVATE_SLOT(d_func(), void slotReset())
+    Q_PRIVATE_SLOT(d_func(), void slotResetProperty())
 };
 
 class QtDoubleSpinBoxFactoryPrivate;
@@ -374,6 +374,7 @@ private:
                         const QMap<int, QIcon> &))
     Q_PRIVATE_SLOT(d_func(), void slotSetValue(int))
     Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
+    Q_PRIVATE_SLOT(d_func(), void slotResetProperty())
 };
 
 class QtCursorEditorFactoryPrivate;
