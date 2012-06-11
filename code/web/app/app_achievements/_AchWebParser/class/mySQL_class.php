@@ -19,7 +19,7 @@
 		function mySQL($err=false) {
 			$this->DBstats = array();
 			$this->DBc = false;
-			if($err === "DIE" || $err === "PRINT" || $err === "ALERT" || $err === "HIDE") {
+			if($err === "DIE" || $err === "PRINT" || $err === "ALERT" || $err === "HIDE" || $err === "LOG") {
 				$this->DBerror = $err;
 			}
 			else {
@@ -31,13 +31,16 @@
 
 		function connect($ip,$user,$pass,$db=false) {
 			$this->DBc = mysql_pconnect($ip,$user,$pass) or $this->error(mysql_error());
-			if($db) {
+			if($this->DBc && $db) {
 				$this->database($db);
 			}
 			$this->resetStats();
 		}
 
 		function database($db) {
+			if(!$this->DBc) {
+				return false;
+			}
 			mysql_select_db($db,$this->DBc) or $this->error(mysql_error());
 		}
 
@@ -54,6 +57,9 @@
 			#if($this->cached !== false)  {
 				#$this->unlinkSql($this->cached);
 			#}
+			if(!$this->DBc) {
+				return false;
+			}
 
 			if($buffer === false && $handling !== "PLAIN") {
 				$res = mysql_unbuffered_query($query,$this->DBc) or $this->error(mysql_error(),$query);
@@ -141,6 +147,9 @@
 					break;
 				case 'ALERT':
 					echo "<script language='javascript'>\n<!--\nalert(\"database error:\\n".mysql_real_escape_string($error)."\");\n// -->\n</script>";
+					break;
+				case 'LOG':
+					logf("MySQL ERROR: ".$error);
 					break;
 				default:
 					flush();

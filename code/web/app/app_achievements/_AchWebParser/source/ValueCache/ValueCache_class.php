@@ -1,26 +1,19 @@
 <?php
 	class ValueCache extends DataSource {
 		function ValueCache() {
-			$this->types[] = "c_cache";
-
-			$this->write = true;
+			parent::__construct();
 		}
 		
-		function getData($type,$ident,$field) {
+		function getData($ident,$field,$type) {
+			$res = $DBc->sendSQL("SELECT apv_value,apv_date FROM ach_player_valuecache WHERE apv_name='".$DBc->mre($field)."' AND apv_player='".$DBc->mre($ident)."'","ARRAY");
 
+			return array($res[0]['apv_value'],$res[0]['apv_date']);
 		}
 
-		function writeData($type,$ident,$field = array(),$value = array()) {
+		function writeData($ident,$field,$data,$type) {
 			global $DBc;
 
-			if($type == "c_cache") {
-				$DBc->sendSQL("INSERT INTO ach_player_valuecache () VALUES () ON DUPLICATE KEY UPDATE ");
-
-				return true;
-			}
-			else {
-				return false;
-			}
+			$DBc->sendSQL("INSERT INTO ach_player_valuecache (apv_name,apv_player,apv_value,apv_date) VALUES ('".$DBc->mre($field)."','".$DBc->mre($ident)."','".$DBc->mre($data)."','".time()."') ON DUPLICATE KEY UPDATE apv_value='".$DBc->mre($data)."', apv_date='".time()."'","NONE");
 		}
 	}
 ?>
