@@ -32,12 +32,23 @@ ICameraAnimationStep* ICameraAnimationStepFactory::parseStep(const NLLIGO::IPrim
 				nlerror("BUG IN CAMERA ANIMATION STEP FACTORY : BAD INIT CODE");
 				return NULL;
 			}
+			// We parse the step
 			if (!ret->parseStep(prim, filename))
 			{
 				nlerror("building camera animation step failed");
 				delete ret;
 				return NULL;
 			}
+
+			// We look for children (modifiers or sound triggers)
+			for (uint i = 0; i < prim->getNumChildren(); i++)
+			{
+				const NLLIGO::IPrimitive* child;
+				prim->getChild(child, i);
+
+
+			}
+
 			return ret;
 		}
 	}
