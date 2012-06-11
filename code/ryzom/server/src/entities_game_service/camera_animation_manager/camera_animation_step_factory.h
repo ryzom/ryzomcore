@@ -19,6 +19,9 @@
 
 #include "nel/ligo/primitive.h"
 #include <string>
+#include <vector>
+
+#include "camera_animation_manager/camera_animation_modifier_factory.h"
 
 /************************************************************************/
 /* Interface for camera animation steps.
@@ -31,6 +34,12 @@ class ICameraAnimationStep
 public:
 	/// This function is called when it's time to parse the primitive to load the camera animation step
 	virtual bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename) = 0;
+	// Function that adds a camera animation modifier to this step
+	void addModifier(ICameraAnimationModifier* modifier);
+
+protected:
+	// The list of modifiers
+	std::vector<ICameraAnimationModifier*> Modifiers;
 };
 
 /************************************************************************/
@@ -44,13 +53,16 @@ class ICameraAnimationStepFactory
 {
 public:
 	/// Function that will instanciate the correct camera animation step
-	static ICameraAnimationStep* parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename, const std::string& stepType);	
+	static ICameraAnimationStep* parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename, const std::string& stepType);
 protected:
 
 	/// Functions used to be able to create the camera animation steps
 	static void init();
 	virtual ICameraAnimationStep * instanciate() = 0;
 	static std::vector<std::pair<std::string, ICameraAnimationStepFactory*> >* Entries;
+
+	// The list of modifiers
+	std::vector<ICameraAnimationModifier*> Modifiers;
 };
 
 // Define used to register the different types of camera animation steps

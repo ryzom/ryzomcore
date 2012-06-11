@@ -46,7 +46,20 @@ ICameraAnimationStep* ICameraAnimationStepFactory::parseStep(const NLLIGO::IPrim
 				const NLLIGO::IPrimitive* child;
 				prim->getChild(child, i);
 
+				// We tell the factory to load the modifier in function of its type
+				std::string modifierType;
+				if (!child->getPropertyByName("class", modifierType))
+				{
+					nlwarning("<ICameraAnimationStepFactory parseStep> Error while getting the class of a camera animation modifier in primitive number '%s'", filename.c_str());
+					continue;
+				}
 
+				ICameraAnimationModifier* modifier = ICameraAnimationModifierFactory::parseModifier(child, filename, modifierType);
+				// We add the modifier to the list
+				if (modifier)
+				{
+					ret->addModifier(modifier);
+				}
 			}
 
 			return ret;
@@ -59,4 +72,9 @@ void ICameraAnimationStepFactory::init()
 {
 	if (!Entries)
 		Entries = new std::vector<std::pair<std::string, ICameraAnimationStepFactory*> >;
+}
+
+void ICameraAnimationStep::addModifier(ICameraAnimationModifier* modifier)
+{
+	Modifiers.push_back(modifier);
 }
