@@ -36,7 +36,7 @@ public:
 		std::string value;
 
 		// We get the strength
-		if (!prim->getPropertyByName("duration", value))
+		if (!prim->getPropertyByName("strength", value))
 		{
 			nlwarning("<CCameraAnimationModifierShake parseModifier> impossible to get the strength property of the basic modifier in primitive : %s", filename.c_str());
 			return false;
@@ -51,3 +51,44 @@ public:
 	}
 };
 CAMERA_ANIMATION_REGISTR_MODIFIER(CCameraAnimationModifierShake, "camera_modifier_shake");
+
+/////////////////////////////////////////////////////////////////////////////
+/// This animation modifier plays a sound. The parameters are
+/// - sound_name
+/// - sound_position
+class CCameraAnimationModifierSoundTrigger : public ICameraAnimationModifier
+{
+protected:
+	std::string SoundName;
+	std::string SoundPos;
+
+public:
+	CCameraAnimationModifierSoundTrigger()
+	{
+		SoundName = "";
+		SoundPos = "";
+	}
+
+	virtual bool parseModifier(const NLLIGO::IPrimitive* prim, const std::string& filename)
+	{
+		std::string value;
+
+		// We get the sound name
+		if (!prim->getPropertyByName("sound_name", value))
+		{
+			nlwarning("<CCameraAnimationModifierSoundTrigger parseModifier> impossible to get the sound_name property of the basic modifier in primitive : %s", filename.c_str());
+			return false;
+		}
+		SoundName = value;
+		// We get the sound position
+		if (!prim->getPropertyByName("sound_position", value))
+		{
+			nlwarning("<CCameraAnimationModifierSoundTrigger parseModifier> impossible to get the sound_position property of the basic modifier in primitive : %s", filename.c_str());
+			return false;
+		}
+		SoundPos = value;
+
+		return true;
+	}
+};
+CAMERA_ANIMATION_REGISTR_MODIFIER(CCameraAnimationModifierSoundTrigger, "sound_trigger");
