@@ -78,7 +78,7 @@ bool CCameraAnimationManager::parseCameraAnimations(const IPrimitive* prim, cons
 	string value;
 
 	// if the node is a camera animation parse it
-	if (prim->getPropertyByName("class", value) && !nlstricmp(value.c_str(), "camera_animation_tree") )
+	if (prim->getPropertyByName("class", value) && !nlstricmp(value.c_str(), "camera_animation_tree"))
 	{
 		// We get the name of the mission
 		prim->getPropertyByName("name", value);
@@ -115,5 +115,16 @@ bool CCameraAnimationManager::parseCameraAnimations(const IPrimitive* prim, cons
 		
 		return true;
 	}
-	return false;
+	else
+	{
+		// lookup recursively in the children
+		bool ok = true;
+		for (uint i = 0; i < prim->getNumChildren(); ++i)
+		{
+			const IPrimitive *child;
+			if (!prim->getChild(child,i) || !parseCameraAnimations(child, filename))
+				ok = false;
+		}
+		return ok;
+	}
 }
