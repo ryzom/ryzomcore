@@ -30,7 +30,7 @@
 
 				$tmp = $this->menu->getChildren();
 				foreach($tmp as $elem) {
-					if($elem->getID() == 0) {
+					if($elem->getID() == 0 || $elem->inDev()) {
 						continue; // skip summary page
 					}
 					$res = $this->sumStats($elem);
@@ -52,7 +52,7 @@
 			$res = $DBc->sqlQuery("SELECT count(ap_id) as anz FROM ach_perk,ach_achievement,ach_player_perk WHERE aa_category='".$node->getID()."' AND ap_achievement=aa_id AND app_player='".$_USER->getID()."' AND app_perk=ap_id");
 			$done += $res[0]["anz"];
 
-			$res = $DBc->sqlQuery("SELECT count(ap_id) as anz FROM ach_perk,ach_achievement WHERE aa_category='".$node->getID()."' AND ap_achievement=aa_id");
+			$res = $DBc->sqlQuery("SELECT count(ap_id) as anz FROM ach_perk,ach_achievement WHERE aa_category='".$node->getID()."' AND ap_achievement=aa_id AND aa_dev='0' AND ap_dev='0'");
 			$total += $res[0]["anz"];
 			
 			$tmp = $node->getChildren();

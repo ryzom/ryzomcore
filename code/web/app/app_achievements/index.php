@@ -63,7 +63,7 @@ $c = _t('access', $num_access['num_access']).'<br/>';*/
 
 $c = "<center><table>
 	<tr>
-		<td colspan='2'>".ach_render_yubopoints(1)."</td>
+		<td colspan='2' align='left'>".ach_render_yubopoints(1)."</td>
 	</tr>
 	<tr>
 		<td valign='top'><div style='width:230px;font-weight:bold;font-size:14px;'>";

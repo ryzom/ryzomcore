@@ -55,6 +55,7 @@
 			$this->image = $data['ac_image'];
 			$this->order = $data['ac_order'];
 			$this->open = ($this->id == $open);
+			$this->dev = $data['ac_dev'];
 
 			$res = $DBc->sqlQuery("SELECT * FROM ach_category LEFT JOIN (ach_category_lang) ON (acl_lang='".$_USER->getLang()."' AND acl_category=ac_id) WHERE ac_parent='".$this->id."' ORDER by ac_order ASC, acl_name ASC");
 
@@ -100,6 +101,10 @@
 
 		function getOrder() {
 			return $this->order;
+		}
+
+		function inDev() {
+			return ($this->dev == 1);
 		}
 	}
 ?>

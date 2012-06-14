@@ -6,6 +6,7 @@
 		private $value;
 		private $name;
 		private $done;
+		private $dev;
 
 		function AchPerk(&$data,&$parent) {
 			global $DBc,$_USER;
@@ -16,6 +17,7 @@
 			$this->value = $data['ap_value'];
 			$this->name = $data['apl_name'];
 			$this->done = $data['app_date'];
+			$this->dev = $data['ap_dev'];
 
 			$res = $DBc->sqlQuery("SELECT * FROM ach_objective LEFT JOIN (ach_objective_lang) ON (aol_lang='".$_USER->getLang()."' AND aol_objective=ao_id) LEFT JOIN (ach_player_objective) ON (apo_objective=ao_id AND apo_player='".$_USER->getID()."') WHERE ao_perk='".$this->id."'");
 			$sz = sizeof($res);
@@ -59,6 +61,10 @@
 
 		function getDone() {
 			return $this->done;
+		}
+
+		function inDev() {
+			return ($this->dev == 1);
 		}
 	}
 ?>

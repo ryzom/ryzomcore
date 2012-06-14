@@ -3,6 +3,8 @@
 		private $id = false;
 		private $ties_cult;
 		private $ties_civ;
+		private $ties_cult_dev;
+		private $ties_civ_dev;
 		private $cult;
 		private $civ;
 
@@ -39,11 +41,17 @@
 				$this->nodes[] = $tmp;
 			}
 
-			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_cult IS NOT NULL AND aa_category='".$this->id."'");
+			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_cult IS NOT NULL AND aa_category='".$this->id."' AND aa_dev='0'");
 			$this->ties_cult = $res[0]['anz'];
 
-			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_civ IS NOT NULL AND aa_category='".$this->id."'");
+			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_civ IS NOT NULL AND aa_category='".$this->id."' AND aa_dev='0'");
 			$this->ties_civ = $res[0]['anz'];
+
+			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_cult IS NOT NULL AND aa_category='".$this->id."'");
+			$this->ties_cult_dev = $res[0]['anz'];
+
+			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_civ IS NOT NULL AND aa_category='".$this->id."'");
+			$this->ties_civ_dev = $res[0]['anz'];
 		}
 
 		function getID() {
@@ -56,6 +64,14 @@
 
 		function isTiedCiv() {
 			return ($this->ties_civ > 0);
+		}
+
+		function isTiedCultDev() {
+			return ($this->ties_cult_dev > 0);
+		}
+
+		function isTiedCivDev() {
+			return ($this->ties_civ_dev > 0);
 		}
 
 		function getCurrentCiv() {

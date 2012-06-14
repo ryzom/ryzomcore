@@ -112,6 +112,9 @@
 		$sz = $menu->getSize();
 		for($i=0;$i<$sz;$i++) {
 			$curr = $menu->getChild($i);
+			if($curr->inDev()) {
+				continue;
+			}
 			$html .= "<span class='ach_mspan'><a href='?lang=en&cat=".$curr->getID()."'><table class='ach_menu'>
 				<tr>";
 					if($sub == 0) {
@@ -143,6 +146,9 @@
 		$sz = sizeof($tmp);
 		for($i=0;$i<$sz;$i++) {
 			#echo "A";
+			if($cat->getChild($tmp[$i])->inDev()) {
+				continue;
+			}
 			$html .= ach_render_achievement_done($cat->getChild($tmp[$i]));
 		}
 
@@ -150,6 +156,9 @@
 		$sz = sizeof($tmp);
 		for($i=0;$i<$sz;$i++) {
 			#echo "B";
+			if($cat->getChild($tmp[$i])->inDev()) {
+				continue;
+			}
 			$html .= ach_render_achievement_open($cat->getChild($tmp[$i]));
 		}
 
@@ -234,9 +243,15 @@
 
 		$perk = $ach->getChild($perk_list[0]);
 
-		$html .= "<span style='color:#999999;font-weight:bold;'>".$perk->getName()."</span>";
+		if($perk->inDev()) {
+			return $html;
+		}
+		
+		if($perk->getName() != null) {
+			$html .= "<span style='color:#999999;font-weight:bold;display:block;'>".$perk->getName()."</span>";
+		}
 		if($perk->objDrawable()) {
-			$html .= "<br>".ach_render_obj_list($perk->getChildren());
+			$html .= ach_render_obj_list($perk->getChildren());
 		}
 
 		return $html;
@@ -249,6 +264,9 @@
 
 		foreach($perk_list as $elem) {
 			$perk = $ach->getChild($elem);
+			if($perk->inDev()) {
+				continue;
+			}
 			$html .= "<div style='display:block;'><span style='color:#66CC00;font-weight:bold;'>".$perk->getName()."</span> ( ".date('d.m.Y',$perk->getDone())." ) <img src='pic/yubo_done.png' width='15px' /> ".$perk->getValue()."</div>";
 		}
 

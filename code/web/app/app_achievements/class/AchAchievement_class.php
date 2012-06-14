@@ -9,6 +9,7 @@
 		private $image;
 		private $name;
 		private $template;
+		private $dev;
 
 		function AchAchievement(&$data) {
 			global $DBc,$_USER;
@@ -22,6 +23,7 @@
 			$this->image = $data['aa_image'];
 			$this->name = $data['aal_name'];
 			$this->template = $data['aal_template'];
+			$this->dev = $data['aa_dev'];
 
 			#echo $this->id;
 
@@ -103,6 +105,10 @@
 				}
 				return $tmp;
 			}
+		}
+
+		function inDev() {
+			return ($this->dev == 1);
 		}
 	}
 ?>
