@@ -130,6 +130,9 @@ Implementation of all mission instructions
 	-set_guild_civ		: set civilization of guild of character made the mission
 	-set_guild_cult		: set cult of guild of characters made the mission
 	-if_no_trial		: jump to an instruction if character made the mission are not a trial account
+	
+	-sound_trigger		: play a sound
+	-camera_animation	: play a camera animation
 
 
 
@@ -5394,3 +5397,34 @@ class CMissionActionHandleRelease : public IMissionAction
 };
 MISSION_REGISTER_ACTION(CMissionActionHandleRelease, "handle_release");
 */
+
+/// user receive money
+// ----------------------------------------------------------------------------
+class CMissionActionCameraAnimation : public IMissionAction
+{
+	bool buildAction( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	{
+		bool ret = true;
+		_SourceLine = line;
+		if (script.size() != 2)
+		{
+			MISLOGSYNTAXERROR("<animation_name>");
+			return false;
+		}
+
+		_AnimationName = script[1];
+
+		return ret;
+	}
+
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	{
+		LOGMISSIONACTION("camera_animation");
+		
+		// We tell the client to play the animation by sending him the animation steps
+	};
+	std::string _AnimationName;
+
+	MISSION_ACTION_GETNEWPTR(CMissionActionCameraAnimation)
+};
+MISSION_REGISTER_ACTION(CMissionActionCameraAnimation, "camera_animation");
