@@ -5398,7 +5398,7 @@ class CMissionActionHandleRelease : public IMissionAction
 MISSION_REGISTER_ACTION(CMissionActionHandleRelease, "handle_release");
 */
 
-/// user receive money
+/// camera animation
 // ----------------------------------------------------------------------------
 class CMissionActionCameraAnimation : public IMissionAction
 {
@@ -5428,3 +5428,39 @@ class CMissionActionCameraAnimation : public IMissionAction
 	MISSION_ACTION_GETNEWPTR(CMissionActionCameraAnimation)
 };
 MISSION_REGISTER_ACTION(CMissionActionCameraAnimation, "camera_animation");
+
+/// sound trigger
+// ----------------------------------------------------------------------------
+class CMissionActionSoundTrigger : public IMissionAction
+{
+	bool buildAction( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	{
+		bool ret = true;
+		_SourceLine = line;
+		if (script.size() != 3)
+		{
+			MISLOGSYNTAXERROR("<sound_name> : <sound_position>");
+			return false;
+		}
+
+		_SoundName = script[1];
+		if (script.size() >= 3)
+			_SoundPosition = script[2];
+		else
+			_SoundPosition = "";
+
+		return ret;
+	}
+
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	{
+		LOGMISSIONACTION("sound_trigger");
+
+		// We tell the client to play the sound
+	};
+	std::string _SoundName;
+	std::string _SoundPosition;
+
+	MISSION_ACTION_GETNEWPTR(CMissionActionSoundTrigger)
+};
+MISSION_REGISTER_ACTION(CMissionActionSoundTrigger, "sound_trigger");
