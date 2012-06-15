@@ -25,9 +25,13 @@ extern "C"
 #include "WWWInit.h"
 }
 
+namespace NLGUI
+{
+	class CCtrlBaseButton;
+}
+
 class CGroupList;
 class CCtrlScroll;
-class CCtrlBaseButton;
 
 // ***************************************************************************
 

@@ -23,9 +23,13 @@
 #include "nel/misc/types_nl.h"
 #include "nel/gui/interface_group.h"
 
+namespace NLGUI
+{
+	class CCtrlBaseButton;
+}
+
 class CGroupList;
 class CCtrlScroll;
-class CCtrlBaseButton;
 
 // Can be used to build a chat window or anything that displays sequences of strings
 /**

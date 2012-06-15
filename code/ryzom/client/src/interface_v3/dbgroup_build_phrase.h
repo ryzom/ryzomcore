@@ -26,9 +26,14 @@
 #include "game_share/skills.h"
 
 
+namespace NLGUI
+{
+	class CCtrlBaseButton;
+}
+
+
 // ***************************************************************************
 class	CDBCtrlSheet;
-class	CCtrlBaseButton;
 class	CSBrickSheet;
 class	CViewBitmap;
 class	CViewText;

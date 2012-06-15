@@ -23,11 +23,15 @@
 #include "nel/gui/interface_group.h"
 
 
+namespace NLGUI
+{
+	class CCtrlBaseButton;
+}
+
 
 // ***************************************************************************
 class	CViewBitmap;
 class	CViewText;
-class	CCtrlBaseButton;
 
 
 // ***************************************************************************

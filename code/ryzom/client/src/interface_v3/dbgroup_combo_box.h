@@ -22,11 +22,13 @@
 #include "nel/misc/types_nl.h"
 #include "nel/gui/interface_group.h"
 
-
+namespace NLGUI
+{
+	class CCtrlBaseButton;
+}
 
 // ***************************************************************************
 class	CViewText;
-class	CCtrlBaseButton;
 class	CGroupMenu;
 
 // ***************************************************************************

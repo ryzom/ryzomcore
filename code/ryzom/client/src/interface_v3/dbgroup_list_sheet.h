@@ -23,9 +23,12 @@
 #include "list_sheet_base.h"
 #include "dbctrl_sheet.h"
 
+namespace NLGUI
+{
+	class CCtrlBaseButton;
+}
 
 // ***************************************************************************
-class	CCtrlBaseButton;
 class	CCtrlScroll;
 class CGroupContainer;
 
