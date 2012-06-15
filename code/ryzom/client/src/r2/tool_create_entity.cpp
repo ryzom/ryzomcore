@@ -36,7 +36,7 @@
 #include "verbose_clock.h"
 #include "entity_sorter.h"
 //
-#include "../interface_v3/ctrl_base_button.h"
+#include "nel/gui/ctrl_base_button.h"
 //
 #include "game_share/player_visual_properties.h"
 #include "game_share/visual_slot_manager.h"

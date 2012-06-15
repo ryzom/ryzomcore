@@ -275,8 +275,14 @@ namespace NLGUI
 		const std::string event = AHName + ":" + Params;
 		pAH->execute(NULL, event);
 	}
+	
+	void CAHManager::submitEvent( const std::string &evt )
+	{
+		// Submit the event to the quick help system
+		runActionHandler( "submit_quick_help", NULL, evt );
+	}
 
-
+	
 	// ------------------------------------------------------------------------------------------------
 	class CAHSet : public IActionHandler
 	{

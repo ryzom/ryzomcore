@@ -32,7 +32,7 @@ using namespace NLMISC;
 #include "../entities.h"
 #include "interface_manager.h"
 #include "action_handler_tools.h"
-#include "ctrl_base_button.h"
+#include "nel/gui/ctrl_base_button.h"
 
 ////////////
 // GLOBAL //

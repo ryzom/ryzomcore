@@ -108,6 +108,9 @@ namespace NLGUI
 		void runActionHandler(const std::string &AHName, CCtrlBase *pCaller, const std::string &Params=std::string("") );
 		void runActionHandler(IActionHandler *ah, CCtrlBase *pCaller, const std::string &Params=std::string("") );
 
+		// Submit a generic event
+		void submitEvent( const std::string &evt );
+
 	private:
 		CAHManager(){}
 		static CAHManager *_GlobalInstance;

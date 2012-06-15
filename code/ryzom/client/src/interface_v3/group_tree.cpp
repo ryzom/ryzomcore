@@ -566,7 +566,7 @@ void CGroupTree::draw()
 	// change the over
 	bool bDisplayOver = true;
 
-	if (!pIM->isMouseHandlingEnabled())
+	if (!CWidgetManager::getInstance()->isMouseHandlingEnabled())
 	{
 		bDisplayOver = false;
 	}

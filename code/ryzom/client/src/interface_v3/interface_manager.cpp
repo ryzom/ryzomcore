@@ -182,10 +182,6 @@ CChatDisplayer * ChatDisplayer = NULL;
 void initActions();
 void uninitActions();
 
-// ------------------------------------------------------------------------------------------------
-static const uint DOUBLE_CLICK_MIN = 50;
-static const uint DOUBLE_CLICK_MAX = 750;
-
 ///\todo nico: remove this dummy displayer
 NLMISC::CLog	g_log;
 
@@ -278,7 +274,6 @@ CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext 
 	_GlobalRolloverFactorContent = 255;
 	_GlobalRolloverFactorContainer = 255;
 	_MouseOverWindow= false;
-	_MouseHandlingEnabled= true;
 	_ConfigLoaded = false;
 	_LogState = false;
 	_KeysLoaded = false;
@@ -2610,7 +2605,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 		eventDesc.setX( _Pointer->getX() );
 		eventDesc.setY( _Pointer->getY() );
 
-		if( _MouseHandlingEnabled )
+		if( CWidgetManager::getInstance()->isMouseHandlingEnabled() )
 		{
 			// First thing to do : Capture handling
 			if ( CWidgetManager::getInstance()->getCapturePointerLeft() != NULL)
@@ -3493,32 +3488,6 @@ void	CInterfaceManager::disableContextHelpForControl(CCtrlBase *pCtrl)
 		disableContextHelp();
 }
 
-// ***************************************************************************
-void	CInterfaceManager::enableMouseHandling(bool handle)
-{
-	_MouseHandlingEnabled= handle;
-	if(!handle)
-	{
-		if(!CWidgetManager::getInstance()->getPointer())
-			return;
-
-		// If Left captured, reset
-		if( CWidgetManager::getInstance()->getCapturePointerLeft() )
-		{
-			CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
-		}
-
-		// Same for Right
-		if( CWidgetManager::getInstance()->getCapturePointerRight() )
-		{
-			CWidgetManager::getInstance()->setCapturePointerRight(NULL);
-		}
-
-		// Avoid any problem with modals
-		CWidgetManager::getInstance()->disableModalWindow();
-	}
-}
-
 
 // ***************************************************************************
 void CInterfaceManager::displayDebugInfo(const ucstring &str, TSystemInfoMode mode /*=InfoMsg*/)
@@ -4037,26 +4006,6 @@ void CInterfaceManager::restoreAllContainersBackupPosition()
 			}
 		}
 	}
-}
-
-
-// ***************************************************************************
-
-uint CInterfaceManager::getUserDblClickDelay()
-{
-	uint nVal = 50;
-	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:DOUBLE_CLICK_SPEED");
-	if (pNL != NULL)
-		nVal = pNL->getValue32();
-	uint dbclickDelay = (uint)(DOUBLE_CLICK_MIN + (DOUBLE_CLICK_MAX-DOUBLE_CLICK_MIN) * (float)nVal / 100.0f);
-	return dbclickDelay;
-}
-
-// ***************************************************************************
-void CInterfaceManager::submitEvent (const std::string &event)
-{
-	// Submit the event to the quick help system
-	CAHManager::getInstance()->runActionHandler("submit_quick_help", NULL, event);
 }
 
 // ***************************************************************************

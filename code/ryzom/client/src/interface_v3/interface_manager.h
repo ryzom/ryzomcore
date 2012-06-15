@@ -387,10 +387,6 @@ public:
 
 	bool	isMouseOverWindow() const {return  _MouseOverWindow;}
 
-	// Enable mouse Events to interface. if false, release Captures.
-	void	enableMouseHandling(bool handle);
-	bool    isMouseHandlingEnabled() const { return _MouseHandlingEnabled; }
-
 	// Modes
 	void	setMode(uint8 newMode);
 	uint8	getMode() const { return _CurrentMode; }
@@ -413,12 +409,6 @@ public:
 	void	displayUIViewBBoxs(const std::string &uiFilter);
 	void	displayUICtrlBBoxs(const std::string &uiFilter);
 	void	displayUIGroupBBoxs(const std::string &uiFilter);
-
-	// Get the User DblClick Delay (according to save...), in milisecond
-	uint	getUserDblClickDelay();
-
-	// Submit a generic event
-	void	submitEvent (const std::string &event);
 
 	// visit all elements of the interface manager
 	void	visit(CInterfaceElementVisitor *visitor);
@@ -742,9 +732,6 @@ private:
 
 	// System Options
 	CInterfaceOptionValue	_SystemOptions[NumSystemOptions];
-
-	bool			_MouseHandlingEnabled;
-
 
 	// Modes
 	CInterfaceConfig::CDesktopImage	_Modes[MAX_NUM_MODES];

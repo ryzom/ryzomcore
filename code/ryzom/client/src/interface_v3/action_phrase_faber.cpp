@@ -24,7 +24,7 @@
 #include "inventory_manager.h"
 #include "nel/gui/action_handler.h"
 #include "../client_cfg.h"
-#include "ctrl_base_button.h"
+#include "nel/gui/ctrl_base_button.h"
 #include "group_container.h"
 #include "../string_manager_client.h"
 #include "../net_manager.h"

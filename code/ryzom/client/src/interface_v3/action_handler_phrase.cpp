@@ -1152,7 +1152,7 @@ public:
 			// ****  Cyclic Cast? (dblclick)
 			bool	cyclic;
 			// Manage "DblHit"
-			uint dbclickDelay = pIM->getUserDblClickDelay();
+			uint dbclickDelay = CWidgetManager::getInstance()->getUserDblClickDelay();
 			// if success to "dblclick"
 			if(LastIndex==(sint)memoryIndex && T1<=LastHitTime+dbclickDelay )
 				cyclic= true;

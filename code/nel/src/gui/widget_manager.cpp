@@ -25,6 +25,12 @@
 #include "nel/gui/group_editbox_base.h"
 #include "nel/gui/interface_options.h"
 
+namespace
+{
+	const uint DOUBLE_CLICK_MIN = 50;
+	const uint DOUBLE_CLICK_MAX = 750;
+}
+
 namespace NLGUI
 {
 
@@ -1378,6 +1384,43 @@ namespace NLGUI
 	{
 		_OptionsMap.clear();
 	}
+	
+	
+	// ***************************************************************************
+	void CWidgetManager::enableMouseHandling( bool handle )
+	{
+		_MouseHandlingEnabled = handle;
+		if(!handle)
+		{
+			if(!getPointer())
+				return;
+			
+			// If Left captured, reset
+			if( getCapturePointerLeft() )
+				setCapturePointerLeft( NULL );
+
+			// Same for Right
+			if( getCapturePointerRight() )
+				setCapturePointerRight( NULL );
+			
+			// Avoid any problem with modals
+			disableModalWindow();
+		}
+	}
+	
+	// ***************************************************************************
+	uint CWidgetManager::getUserDblClickDelay()
+	{
+		uint nVal = 50;
+		NLMISC::CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:DOUBLE_CLICK_SPEED");
+		if( pNL != NULL )
+			nVal = pNL->getValue32();
+		
+		uint dbclickDelay = (uint)(DOUBLE_CLICK_MIN + (DOUBLE_CLICK_MAX-DOUBLE_CLICK_MIN) * (float)nVal / 100.0f);
+		return dbclickDelay;
+	}
+
+
 
 	CWidgetManager::CWidgetManager()
 	{
@@ -1389,6 +1432,8 @@ namespace NLGUI
 		_GlobalColor = NLMISC::CRGBA(255,255,255,255);
 		_GlobalColorForContent = _GlobalColor;
 		_ContentAlpha = 255;
+
+		_MouseHandlingEnabled = true;
 	}
 
 	CWidgetManager::~CWidgetManager()

@@ -919,7 +919,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 		{
 			if (_WaitToOpenClose)
 			{
-				uint dbclickDelay = pIM->getUserDblClickDelay();
+				uint dbclickDelay = CWidgetManager::getInstance()->getUserDblClickDelay();
 				if ((T1 - _WaitToOpenCloseDate) > dbclickDelay)
 				{
 					CGroupContainer *gc = dynamic_cast<CGroupContainer *>(_Parent);
@@ -3203,7 +3203,7 @@ void CGroupContainer::setActive (bool state)
 		else
 			CWidgetManager::getInstance()->setBackWindow(this);
 	}
-	pIM->submitEvent((state?"show:":"hide:")+getId());
+	CAHManager::getInstance()->submitEvent((state?"show:":"hide:")+getId());
 
 	CInterfaceGroup::setActive(state);
 }

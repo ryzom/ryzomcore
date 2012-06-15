@@ -798,7 +798,7 @@ bool CCtrlTabButton::handleEvent (const NLGUI::CEventDescriptor &event)
 		if (_Blinking)
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			uint dbclickDelay = pIM->getUserDblClickDelay();
+			uint dbclickDelay = CWidgetManager::getInstance()->getUserDblClickDelay();
 			if ((T1 - _BlinkDate) > dbclickDelay)
 			{
 				if (_BlinkState)

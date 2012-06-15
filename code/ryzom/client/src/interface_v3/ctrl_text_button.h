@@ -19,7 +19,7 @@
 #ifndef NL_CTRL_TEXT_BUTTON_H
 #define NL_CTRL_TEXT_BUTTON_H
 
-#include "ctrl_base_button.h"
+#include "nel/gui/ctrl_base_button.h"
 #include "nel/gui/view_renderer.h"
 
 

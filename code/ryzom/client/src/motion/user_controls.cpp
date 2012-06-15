@@ -505,7 +505,7 @@ void CUserControls::freeLook(bool fullMode)
 
 		// FREE LOOK : Hide the cursor
 		// disable interface mouse handling.
-		IM->enableMouseHandling(false);
+		CWidgetManager::getInstance()->enableMouseHandling(false);
 		// Get the cursor instance
 		CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 		if(cursor)
@@ -588,7 +588,7 @@ void CUserControls::cameraLook(bool fullMode)
 
 		// CAMERA LOOK : Hide the cursor
 		// disable interface mouse handling.
-		IM->enableMouseHandling(false);
+		CWidgetManager::getInstance()->enableMouseHandling(false);
 		// Get the cursor instance
 		CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 		if(cursor)
@@ -747,7 +747,7 @@ void CUserControls::commonMove()
 	}
 	if( EventsListener.isMouseButtonReleased (leftButton) )
 	{
-		if(T1 <= _LeftClickEnd+IM->getUserDblClickDelay())
+		if(T1 <= _LeftClickEnd + CWidgetManager::getInstance()->getUserDblClickDelay())
 		{
 			dblClickLeft = true;
 		}
@@ -762,7 +762,7 @@ void CUserControls::commonMove()
 	}
 	if( EventsListener.isMouseButtonReleased (rightButton) )
 	{
-		if(T1 <= _RightClickEnd+IM->getUserDblClickDelay())
+		if(T1 <= _RightClickEnd + CWidgetManager::getInstance()->getUserDblClickDelay())
 		{
 			dblClickRight = true;
 		}
@@ -814,7 +814,7 @@ void CUserControls::commonMove()
 
 
 				// Give back the mouse handling to the interface.
-				IM->enableMouseHandling(true);
+				CWidgetManager::getInstance()->enableMouseHandling(true);
 				EventsListener.enableMouseSmoothing(false);
 			}
 
@@ -831,7 +831,7 @@ void CUserControls::commonMove()
 				}
 
 				// Give back the mouse handling to the interface.
-				IM->enableMouseHandling(true);
+				CWidgetManager::getInstance()->enableMouseHandling(true);
 				EventsListener.enableMouseSmoothing(false);
 			}
 
@@ -1313,7 +1313,7 @@ void CUserControls::stopFreeLook()
 	// Cursor mode
 	SetMouseCursor ();
 	// Give back the mouse handling to the interface.
-	CInterfaceManager::getInstance()->enableMouseHandling(true);
+	CWidgetManager::getInstance()->enableMouseHandling(true);
 }
 
 

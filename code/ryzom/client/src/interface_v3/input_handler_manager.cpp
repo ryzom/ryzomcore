@@ -258,7 +258,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 		}
 	}
 	// **** Event Mouse
-	else if(CWidgetManager::getInstance()->getPointer() && _Focus /* && pIM->isMouseHandlingEnabled() */ &&
+	else if(CWidgetManager::getInstance()->getPointer() && _Focus /* && CWidgetManager::getInstance()->isMouseHandlingEnabled() */ &&
 			( event == EventMouseMoveId ||
 			  event == EventMouseDownId ||
 			  event == EventMouseUpId ||
@@ -282,7 +282,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 		// button down ?
 		static volatile bool doTest = false;
 
-		if (!doTest || (doTest && pIM->isMouseHandlingEnabled()))
+		if (!doTest || (doTest && CWidgetManager::getInstance()->isMouseHandlingEnabled()))
 		{
 			if (event==EventMouseDownId)
 			{

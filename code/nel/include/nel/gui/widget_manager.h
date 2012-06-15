@@ -291,7 +291,14 @@ namespace NLGUI
 		void addOptions( std::string name, CInterfaceOptions *options );
 		void removeOptions( std::string name );
 		void removeAllOptions();
-
+		
+		// Enable mouse Events to interface. if false, release Captures.
+		void enableMouseHandling( bool handle );
+		bool isMouseHandlingEnabled() const{ return _MouseHandlingEnabled; }
+		
+		// Get the User DblClick Delay (according to save...), in milisecond
+		uint getUserDblClickDelay();
+		
 		static IParser *parser;
 
 	private:
@@ -333,6 +340,8 @@ namespace NLGUI
 		NLMISC::CCDBNodeLeaf *_GProp;
 		NLMISC::CCDBNodeLeaf *_BProp;
 		NLMISC::CCDBNodeLeaf *_AProp;
+
+		bool _MouseHandlingEnabled;
 	};
 
 }

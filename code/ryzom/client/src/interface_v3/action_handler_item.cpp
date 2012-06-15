@@ -40,7 +40,7 @@
 #include "macrocmd_manager.h"
 #include "inventory_manager.h"
 
-#include "ctrl_base_button.h"
+#include "nel/gui/ctrl_base_button.h"
 #include "../connection.h"
 #include "view_bitmap.h"
 

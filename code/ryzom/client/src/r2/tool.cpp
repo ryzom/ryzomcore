@@ -93,7 +93,7 @@ bool CTool::checkDoubleClick()
 {
 	//H_AUTO(R2_CTool_checkDoubleClick)
 	if (_DoubleClickStartTime == -1) return false;
-	if (T0 - _DoubleClickStartTime >= getUI().getUserDblClickDelay()) return false;
+	if (T0 - _DoubleClickStartTime >= CWidgetManager::getInstance()->getUserDblClickDelay()) return false;
 	sint32 mx, my;
 	getMousePos(mx, my);
 	const sint32 moveThrehsold = 2;
@@ -725,7 +725,7 @@ void CTool::captureMouse()
 	else
 	{
 		UserControls.captureMouse();
-		getUI().enableMouseHandling(false);
+		CWidgetManager::getInstance()->enableMouseHandling(false);
 	}
 	getUI().setContextHelpActive(false);
 	_MouseCaptured = true;
@@ -737,7 +737,7 @@ void CTool::releaseMouse()
 	//H_AUTO(R2_CTool_releaseMouse)
 	CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
 	UserControls.releaseMouse();
-	getUI().enableMouseHandling(true);
+	CWidgetManager::getInstance()->enableMouseHandling(true);
 	getUI().setContextHelpActive(true);
 	_MouseCaptured = false;
 }

@@ -88,7 +88,7 @@
 #include "actions_client.h"
 #include "attack_list.h"
 #include "interface_v3/player_trade.h"
-#include "interface_v3/ctrl_base_button.h"
+#include "nel/gui/ctrl_base_button.h"
 #include "weather.h"
 #include "forage_source_cl.h"
 #include "connection.h"

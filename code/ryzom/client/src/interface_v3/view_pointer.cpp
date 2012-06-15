@@ -199,7 +199,7 @@ void CViewPointer::draw ()
 		_LastHightLight = NULL;
 	}
 
-	if ( CWidgetManager::getInstance()->getCapturePointerLeft() != NULL && pIM->isMouseHandlingEnabled())
+	if ( CWidgetManager::getInstance()->getCapturePointerLeft() != NULL && CWidgetManager::getInstance()->isMouseHandlingEnabled())
 	{
 		CCtrlMover *pCM = dynamic_cast<CCtrlMover*>( CWidgetManager::getInstance()->getCapturePointerLeft());
 		if ((pCM != NULL) && (pCM->canMove() == true))
@@ -308,7 +308,7 @@ void CViewPointer::draw ()
 	}
 
 	// Draw the cursor type that are under the pointer
-	if (pIM->isMouseHandlingEnabled())
+	if (CWidgetManager::getInstance()->isMouseHandlingEnabled())
 	{
 		// Sorts the controls according to their depth, to approximate as best the CapturePointerLeft algo.
 		// Especially important so that Resizers controls get the precedence over the move control (else could randomly bug like in chat group)
@@ -363,7 +363,7 @@ void CViewPointer::draw ()
 		}
 	}
 
-	if (pIM->isMouseHandlingEnabled())
+	if (CWidgetManager::getInstance()->isMouseHandlingEnabled())
 	{
 		if (rICL.empty())
 		{
@@ -381,7 +381,7 @@ void CViewPointer::draw ()
 		}
 	}
 
-	if (_StringMode && pIM->isMouseHandlingEnabled())
+	if (_StringMode && CWidgetManager::getInstance()->isMouseHandlingEnabled())
 	{
 		CInterfaceGroup *stringCursor = IsMouseCursorHardware() ? _StringCursorHardware : _StringCursor;
 		if (stringCursor)

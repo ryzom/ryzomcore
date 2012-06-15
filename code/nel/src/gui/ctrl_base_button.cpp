@@ -15,15 +15,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-#include "stdpch.h"
-
-#include "ctrl_base_button.h"
-#include "interface_manager.h"
+#include "nel/gui/ctrl_base_button.h"
 #include "nel/misc/xml_auto_ptr.h"
-#include "../time_client.h"
-
+#include "nel/gui/interface_group.h"
 #include "nel/gui/lua_ihm.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/db_manager.h"
 
 
 using namespace std;
@@ -205,9 +202,10 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 	if (!_Active || _Frozen)
 		return false;
 
+	sint64 T1 = NLMISC::CTime::getLocalTime();
+
 	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 
 		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
@@ -227,7 +225,7 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 		{
 			if (_AHOnLeftDblClick)
 			{
-				if ((CCtrlBaseButton *) _LastLeftClickButton == this && (T1 - _LastLeftClickDate) < pIM->getUserDblClickDelay())
+				if ((CCtrlBaseButton *) _LastLeftClickButton == this && (T1 - _LastLeftClickDate) < CWidgetManager::getInstance()->getUserDblClickDelay())
 				{
 					CAHManager::getInstance()->runActionHandler (_AHOnLeftDblClick, this, _AHLeftDblClickParams);
 					_LeftDblClickHandled = true;
@@ -308,7 +306,6 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 		{
 			_LastLeftClickButton = NULL;
 			bool	handled= false;
-			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			if (CWidgetManager::getInstance()->getCapturePointerRight() != this)
 				return false;
 
@@ -338,11 +335,9 @@ bool CCtrlBaseButton::handleEvent (const NLGUI::CEventDescriptor& event)
 		{
 			if (_AHOnClockTick != NULL)
 			{
-				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 				CAHManager::getInstance()->runActionHandler(_AHOnClockTick, this, _AHClockTickParams);
 			}
 
-			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			if (CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 			{
 				if (!_LeftLongClickHandled)
@@ -445,8 +440,7 @@ void CCtrlBaseButton::unselect()
 // ***************************************************************************
 void CCtrlBaseButton::updateOver(bool &lastOver)
 {
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	if (!pIM->isMouseHandlingEnabled())
+	if (!CWidgetManager::getInstance()->isMouseHandlingEnabled())
 	{
 		_Over = false;
 		return;
@@ -500,10 +494,9 @@ void CCtrlBaseButton::runLeftClickAction()
 {
 	if(_AHOnLeftClick != NULL)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		//nlinfo("clicked on %s", _Id.c_str());
-		pIM->submitEvent ("button_click:"+getId());//TEMP
+		CAHManager::getInstance()->submitEvent( "button_click:" + getId() );
 		CAHManager::getInstance()->runActionHandler (_AHOnLeftClick, this, _AHLeftClickParams);
 		//pIM->submitEvent ("button_click:"+getId());
 	}
