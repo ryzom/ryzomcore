@@ -37,9 +37,13 @@ extern "C"
 #include "WWWInit.h"
 }
 
+namespace NLGUI
+{
+	class CCtrlButton;
+}
+
 class CGroupList;
 class CCtrlScroll;
-class CCtrlButton;
 class CDBGroupComboBox;
 class CGroupParagraph;
 

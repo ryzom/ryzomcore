@@ -27,9 +27,13 @@
 #include "dbctrl_sheet.h"
 #include "view_text.h"
 
+namespace NLGUI
+{
+	class CCtrlButton;
+}
+
 
 // ***************************************************************************
-class	CCtrlButton;
 class	CCtrlScroll;
 class	CHandlerListSheetTradeSelect;
 class	CHandlerListSheetTradeRightClick;

@@ -26,10 +26,10 @@
 namespace NLGUI
 {
 	class CEventDescriptorLocalised;
+	class CCtrlButton;
 }
 
 class CInterfaceList;
-class CCtrlButton;
 class CCtrlScroll;
 class CViewText;
 class COptionsContainerInsertion;

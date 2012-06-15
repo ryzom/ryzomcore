@@ -25,77 +25,77 @@
 namespace NLGUI
 {
 	class CEventDescriptor;
-}
 
-/**
- * <Class description>
- * \author Nicolas Brigand
- * \author Nevrax France
- * \date 2002
- */
-class CCtrlButton : public CCtrlBaseButton
-{
-public:
-
-	/// Constructor
-	CCtrlButton(const TCtorParam &param) : CCtrlBaseButton(param)
+	/**
+	 * <Class description>
+	 * \author Nicolas Brigand
+	 * \author Nevrax France
+	 * \date 2002
+	 */
+	class CCtrlButton : public CCtrlBaseButton
 	{
-		_Scale = false;
-		_Align = 0;
-	}
+	public:
 
-	// Init part
-	virtual bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup);
+		/// Constructor
+		CCtrlButton(const TCtorParam &param) : CCtrlBaseButton(param)
+		{
+			_Scale = false;
+			_Align = 0;
+		}
 
-	virtual void updateCoords();
+		// Init part
+		virtual bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup);
 
-	virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
+		virtual void updateCoords();
 
-	virtual bool getMouseOverShape(std::string &/* texName */, uint8 &/* rot */, NLMISC::CRGBA &/* col */);
+		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 
-	// Display part
-	virtual void draw();
+		virtual bool getMouseOverShape(std::string &/* texName */, uint8 &/* rot */, NLMISC::CRGBA &/* col */);
 
-	void setTexture (const std::string&name);
-	void setTexturePushed (const std::string&name);
-	void setTextureOver (const std::string&name);
+		// Display part
+		virtual void draw();
 
-	void fitTexture();
+		void setTexture (const std::string&name);
+		void setTexturePushed (const std::string&name);
+		void setTextureOver (const std::string&name);
 
-	std::string getTexture () const;
-	std::string getTexturePushed () const;
-	std::string getTextureOver() const;
+		void fitTexture();
 
-	bool isTextureValid() const { return _TextureIdNormal != -1; }
+		std::string getTexture () const;
+		std::string getTexturePushed () const;
+		std::string getTextureOver() const;
 
-	// test if the texture must scale
-	bool  getScale() const { return _Scale; }
-	void  setScale(bool scale) { _Scale = scale; }
+		bool isTextureValid() const { return _TextureIdNormal != -1; }
+
+		// test if the texture must scale
+		bool  getScale() const { return _Scale; }
+		void  setScale(bool scale) { _Scale = scale; }
 
 
-	/// \from CInterfaceElement
-	sint32	getMaxUsedW() const;
-	sint32	getMinUsedW() const;
+		/// \from CInterfaceElement
+		sint32	getMaxUsedW() const;
+		sint32	getMinUsedW() const;
 
-	REFLECT_EXPORT_START(CCtrlButton, CCtrlBaseButton)
-		REFLECT_STRING("texture", getTexture, setTexture);
-		REFLECT_STRING("texture_pushed", getTexturePushed, setTexturePushed);
-		REFLECT_STRING("texture_over", getTextureOver, setTextureOver);
-		REFLECT_BOOL("scale", getScale, setScale);
-	REFLECT_EXPORT_END
+		REFLECT_EXPORT_START(CCtrlButton, CCtrlBaseButton)
+			REFLECT_STRING("texture", getTexture, setTexture);
+			REFLECT_STRING("texture_pushed", getTexturePushed, setTexturePushed);
+			REFLECT_STRING("texture_over", getTextureOver, setTextureOver);
+			REFLECT_BOOL("scale", getScale, setScale);
+		REFLECT_EXPORT_END
 
-protected:
+	protected:
 
-	CViewRenderer::CTextureId	_TextureIdNormal;
-	CViewRenderer::CTextureId	_TextureIdPushed;
-	CViewRenderer::CTextureId	_TextureIdOver;
+		CViewRenderer::CTextureId	_TextureIdNormal;
+		CViewRenderer::CTextureId	_TextureIdPushed;
+		CViewRenderer::CTextureId	_TextureIdOver;
 
-private:
+	private:
 
-	bool	_Scale;
-	sint32	_Align;		/// 1st bit - Left/Right (0/1) 2nd bit - Bottom/Top (0/1)
-};
+		bool	_Scale;
+		sint32	_Align;		/// 1st bit - Left/Right (0/1) 2nd bit - Bottom/Top (0/1)
+	};
 
+}
 
 #endif // RZ_CTRL_BUTTON_H
 
