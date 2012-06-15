@@ -27,7 +27,7 @@
 #include "nel/gui/action_handler.h"
 #include "group_container.h"
 #include "../actions_client.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 
 #include "interface_options_ryzom.h"
 

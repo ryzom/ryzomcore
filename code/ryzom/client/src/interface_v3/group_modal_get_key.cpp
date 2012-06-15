@@ -20,7 +20,7 @@
 
 #include "group_modal_get_key.h"
 #include "interface_manager.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 
 #include "nel/misc/events.h"
 

@@ -24,7 +24,7 @@
 #include "group_list.h"
 #include "view_text.h"
 #include "ctrl_scroll.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 #include "nel/gui/action_handler.h"
 
 #include "../time_client.h"

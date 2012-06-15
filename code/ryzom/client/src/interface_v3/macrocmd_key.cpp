@@ -24,7 +24,7 @@
 
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 #include "group_editbox.h"
 #include "group_list.h"
 #include "dbgroup_combo_box.h"

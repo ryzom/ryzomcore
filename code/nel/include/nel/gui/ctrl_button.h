@@ -26,7 +26,6 @@ namespace NLGUI
 {
 	class CEventDescriptor;
 }
-class CInterfaceManager;
 
 /**
  * <Class description>

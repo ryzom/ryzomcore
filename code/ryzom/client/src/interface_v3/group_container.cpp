@@ -32,7 +32,7 @@
 #include "nel/gui/lua_ihm.h"
 
 #include "group_list.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 #include "ctrl_scroll.h"
 #include "view_text.h"
 #include "view_bitmap.h"

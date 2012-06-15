@@ -17,7 +17,7 @@
 
 #include "action_handler_misc.h"
 #include "interface_manager.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 #include "group_container.h"
 #include "group_editbox.h"
 #include "people_interraction.h"

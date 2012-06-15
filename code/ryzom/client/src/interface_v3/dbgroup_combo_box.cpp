@@ -21,7 +21,7 @@
 #include "group_menu.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "interface_manager.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 #include "nel/gui/action_handler.h"
 #include "nel/gui/lua_ihm.h"
 

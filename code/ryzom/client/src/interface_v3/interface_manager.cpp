@@ -52,7 +52,7 @@
 #include "view_text.h"
 // Ctrl
 #include "ctrl_scroll.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 #include "ctrl_text_button.h"
 // DBCtrl
 #include "dbctrl_sheet.h"

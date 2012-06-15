@@ -53,7 +53,7 @@
 #include "dbview_digit.h"
 // Ctrl
 #include "ctrl_scroll.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 #include "ctrl_col_pick.h"
 #include "ctrl_tooltip.h"
 #include "ctrl_text_button.h"

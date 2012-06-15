@@ -34,7 +34,7 @@
 #include "group_container.h"
 #include "sphrase_manager.h"
 #include "sbrick_manager.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 #include "../user_entity.h"
 #include "skill_manager.h"
 #include "inventory_manager.h"

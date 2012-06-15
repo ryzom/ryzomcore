@@ -22,7 +22,7 @@
 #include "interface_manager.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "../sheet_manager.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 #include "view_text.h"
 #include "nel/gui/action_handler.h"
 #include "../time_client.h"

@@ -16,12 +16,11 @@
 
 
 
-// ----------------------------------------------------------------------------
-#include "stdpch.h"
 
-#include "ctrl_button.h"
-#include "interface_manager.h"
+#include "nel/gui/ctrl_button.h"
 #include "nel/misc/xml_auto_ptr.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/interface_group.h"
 
 // ----------------------------------------------------------------------------
 using namespace std;
@@ -106,7 +105,6 @@ void CCtrlButton::draw ()
 	sint32 nTxId = -1;
 	CRGBA  color;
 
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	CRGBA  globalColor= CWidgetManager::getInstance()->getGlobalColorForContent();
 
@@ -248,7 +246,6 @@ void CCtrlButton::updateCoords()
 {
 	if (!_Scale)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		sint32 txw, txh;
 		rVR.getTextureSizeFromId (_TextureIdNormal, txw, txh);
@@ -285,7 +282,6 @@ void CCtrlButton::setTextureOver(const std::string&name)
 // ----------------------------------------------------------------------------
 std::string CCtrlButton::getTexture() const
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	return rVR.getTextureNameFromId(_TextureIdNormal);
 }
@@ -293,7 +289,6 @@ std::string CCtrlButton::getTexture() const
 // ----------------------------------------------------------------------------
 std::string CCtrlButton::getTexturePushed() const
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	return rVR.getTextureNameFromId(_TextureIdPushed);
 }
@@ -301,7 +296,6 @@ std::string CCtrlButton::getTexturePushed() const
 // ----------------------------------------------------------------------------
 std::string CCtrlButton::getTextureOver() const
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	return rVR.getTextureNameFromId(_TextureIdOver);
 }
@@ -310,7 +304,6 @@ std::string CCtrlButton::getTextureOver() const
 sint32	CCtrlButton::getMaxUsedW() const
 {
 	sint32 txw, txh;
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	rVR.getTextureSizeFromId (_TextureIdNormal, txw, txh);
 	return txw;
@@ -325,7 +318,6 @@ sint32	CCtrlButton::getMinUsedW() const
 // ***************************************************************************
 void CCtrlButton::fitTexture()
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	sint32 w, h;
 	rVR.getTextureSizeFromId(_TextureIdNormal, w, h);

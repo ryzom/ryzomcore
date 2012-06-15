@@ -83,7 +83,7 @@
 
 // Game Config
 #include "dbgroup_combo_box.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 #include "../global.h"
 
 using namespace std;

@@ -27,7 +27,7 @@
 #include "nel/gui/interface_group.h"
 #include "group_scrolltext.h"
 #include "group_tree.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 #include "group_table.h"
 
 typedef std::map<std::string, std::string>	TStyle;

@@ -21,7 +21,7 @@
 #include "interface_manager.h"
 #include "interface_ddx.h"
 #include "nel/gui/action_handler.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 #include "nel/gui/group_modal.h"
 #include "../client_cfg.h"
 

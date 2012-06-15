@@ -24,7 +24,7 @@
 #include "../continent.h"
 #include "../zone_util.h"
 #include "../user_entity.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 #include "group_editbox.h"
 #include "../string_manager_client.h"
 #include "group_container.h"

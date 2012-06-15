@@ -23,7 +23,7 @@
 #include "dbgroup_select_number.h"
 #include "view_text.h"
 #include "view_bitmap.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 #include "nel/gui/interface_property.h"
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
