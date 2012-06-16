@@ -20,38 +20,42 @@
 
 #include "nel/gui/view_base.h"
 #include "nel/gui/view_renderer.h"
-//
 #include "nel/misc/geom_ext.h"
 #include "nel/misc/polygon.h"
 
-/** Display of an arbitrary polygon in the ui.
-  * polygon is clipped & batched
-  *
-  * \author Nicolas Vizerie
-  * \author Nevrax France
-  * \date 1/2006
-  */
-class CViewPolygon : public CViewBase
+namespace NLGUI
 {
-public:
-	CViewPolygon();
-	virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
-	virtual void updateCoords();
-	virtual void draw();
-	void	setVertices(const std::vector<NLMISC::CVector> &vertices);
-	// color
-	void			setColorRGBA(NLMISC::CRGBA col) { _Color = col; }
-	NLMISC::CRGBA	getColorRGBA() const { return _Color; }
-	// from CViewBase
-	virtual sint32 getAlpha() const { return (sint32) _Color.A; }
-	virtual void setAlpha (sint32 a);
-private:
-	NLMISC::CPolygon _Poly;
-	bool _Touched;
-	NLMISC::CRGBA				   _Color;
-	std::vector<NLMISC::CTriangle> _Tris;
-	std::vector<NLMISC::CTriangle> _RealTris; // clipped tris in screen coordinates
-};
+
+	/** Display of an arbitrary polygon in the ui.
+	  * polygon is clipped & batched
+	  *
+	  * \author Nicolas Vizerie
+	  * \author Nevrax France
+	  * \date 1/2006
+	  */
+	class CViewPolygon : public CViewBase
+	{
+	public:
+		CViewPolygon();
+		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
+		virtual void updateCoords();
+		virtual void draw();
+		void	setVertices(const std::vector<NLMISC::CVector> &vertices);
+		// color
+		void			setColorRGBA(NLMISC::CRGBA col) { _Color = col; }
+		NLMISC::CRGBA	getColorRGBA() const { return _Color; }
+		// from CViewBase
+		virtual sint32 getAlpha() const { return (sint32) _Color.A; }
+		virtual void setAlpha (sint32 a);
+	private:
+		NLMISC::CPolygon _Poly;
+		bool _Touched;
+		NLMISC::CRGBA				   _Color;
+		std::vector<NLMISC::CTriangle> _Tris;
+		std::vector<NLMISC::CTriangle> _RealTris; // clipped tris in screen coordinates
+	};
+
+}
 
 #endif
 
