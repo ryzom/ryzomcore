@@ -24,7 +24,7 @@
 //
 #include "../interface_v3/view_bitmap.h"
 #include "nel/gui/ctrl_quad.h"
-#include "../interface_v3/ctrl_polygon.h"
+#include "nel/gui/ctrl_polygon.h"
 #include "../interface_v3/interface_manager.h"
 #include "nel/gui/view_renderer.h"
 #include "../interface_v3/group_map.h"

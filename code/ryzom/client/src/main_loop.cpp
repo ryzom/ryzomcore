@@ -125,7 +125,7 @@
 #include "nel/misc/check_fpu.h"
 
 // TMP TMP
-#include "interface_v3/ctrl_polygon.h"
+#include "nel/gui/ctrl_polygon.h"
 // TMP TMP
 #include "game_share/scenario_entry_points.h"
 #include "nel/3d/driver.h"
