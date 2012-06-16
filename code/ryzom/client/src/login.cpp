@@ -60,6 +60,8 @@
 #include "game_share/crypt.h"
 #include "game_share/bg_downloader_msg.h"
 
+#include "misc.h"
+
 void ConnectToShard();
 
 // ***************************************************************************

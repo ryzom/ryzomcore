@@ -81,6 +81,8 @@
 #include "bg_downloader_access.h"
 #include "main_loop.h"
 
+#include "misc.h"
+
 
 ////////////////
 // Namespaces //

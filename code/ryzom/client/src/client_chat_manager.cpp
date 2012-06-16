@@ -42,6 +42,8 @@
 #include "game_share/chat_group.h"
 #include "interface_v3/skill_manager.h"
 
+#include "misc.h"
+
 using namespace std;
 using namespace NLMISC;
 

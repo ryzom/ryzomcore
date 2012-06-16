@@ -48,6 +48,8 @@
 
 #include "../client_cfg.h"
 
+#include "../misc.h"
+
 using namespace std;
 using namespace NLMISC;
 

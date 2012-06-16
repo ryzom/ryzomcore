@@ -14,21 +14,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-#include "stdpch.h"
-
 #include "nel/misc/bit_mem_stream.h"
 #include "nel/misc/i18n.h"
 
 #include "view_text.h"
 #include "interface_manager.h"
+#include "nel/gui/view_renderer.h"
+#include "nel/gui/widget_manager.h"
 #include "group_container.h" // CCtrlResizer
 #include "nel/gui/ctrl_tooltip.h"
 
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/lua_ihm.h"
-#include "lua_ihm_ryzom.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -2415,7 +2412,7 @@ void	CViewText::setTextFormatTaged(const ucstring &text)
 
 	// color format is available only if multilined
 	if (!_MultiLine)
-		CLuaIHMRyzom::debugInfo(toString("ViewText isn't multilined : uc_hardtext_format will not act as wanted !\n%s", text.toString().c_str()));
+		nlwarning( toString("ViewText isn't multilined : uc_hardtext_format will not act as wanted !\n%s", text.toString().c_str()).c_str() );
 }
 
 
@@ -2472,7 +2469,7 @@ void CViewText::setSingleLineTextFormatTaged(const ucstring &text)
 
 	// this color format is available only if not multilined
 	if (_MultiLine)
-		CLuaIHMRyzom::debugInfo(toString("ViewText is multilined : uc_hardtext_single_line_format will not act as wanted !\n%s", text.toString().c_str()));
+		nlwarning( toString("ViewText is multilined : uc_hardtext_single_line_format will not act as wanted !\n%s", text.toString().c_str()).c_str() );
 }
 
 

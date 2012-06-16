@@ -44,6 +44,8 @@
 #include "chat_window.h"
 #include "people_interraction.h"
 
+#include "../misc.h"
+
 using namespace std;
 using namespace NLMISC;
 

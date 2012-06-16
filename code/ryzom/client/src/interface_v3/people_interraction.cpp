@@ -50,6 +50,8 @@
 
 #include <string>
 
+#include "../misc.h"
+
 using namespace NLMISC;
 using namespace std;
 

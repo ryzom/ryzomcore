@@ -20,7 +20,7 @@
 #define NL_VIEW_TEXT_H
 
 #include "nel/gui/view_base.h"
-#include "../misc.h"
+#include "nel/gui/string_case.h"
 #include "nel/3d/u_text_context.h"
 
 namespace NLGUI
@@ -407,10 +407,6 @@ private:
 	bool			isFormatTagChange(uint textIndex, uint ctIndex) const;
 	void			getFormatTagChange(uint textIndex, uint &ctIndex, CFormatInfo &wordFormat) const;
 };
-
-// change case of a string
-void setCase (ucstring &str, TCaseMode mode);
-
 
 #endif // NL_VIEW_TEXT_H
 
