@@ -35,7 +35,7 @@
 #include "dbgroup_select_number.h"
 #include "nel/gui/ctrl_button.h"
 #include "ctrl_text_button.h"
-#include "ctrl_col_pick.h"
+#include "nel/gui/ctrl_col_pick.h"
 #include "nel/gui/ctrl_draggable.h"
 #include "dbctrl_sheet.h"
 #include "dbgroup_list_sheet.h"

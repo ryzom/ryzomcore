@@ -54,7 +54,7 @@
 // Ctrl
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/ctrl_button.h"
-#include "ctrl_col_pick.h"
+#include "nel/gui/ctrl_col_pick.h"
 #include "ctrl_tooltip.h"
 #include "ctrl_text_button.h"
 #include "group_paragraph.h" // For CCtrlLink
