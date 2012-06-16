@@ -107,6 +107,7 @@ CCtrlResizer::CCtrlResizer(const TCtorParam &param)
 	_MouseDown = false;
 	_XBias = 0;
 	_YBias = 0;
+	resizer = true;
 }
 
 

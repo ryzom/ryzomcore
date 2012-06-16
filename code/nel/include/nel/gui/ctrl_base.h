@@ -50,6 +50,7 @@ namespace NLGUI
 			// see interface.txt for meaning of auto
 			_ToolTipParentPosRef= Hotspot_TTAuto;
 			_ToolTipPosRef= Hotspot_TTAuto;
+			resizer = false;
 		}
 
 		/// Destructor
@@ -125,6 +126,8 @@ namespace NLGUI
 		// true if this ctrl is capturable (true by default, false for tooltip)
 		virtual	bool		isCapturable() const {return true;}
 
+		bool isResizer() const{ return resizer; }
+
 		// from CInterfaceElement
 		virtual void		visit(CInterfaceElementVisitor *visitor);
 
@@ -158,6 +161,7 @@ namespace NLGUI
 		THotSpot			_ToolTipPosRefAlt       : 6;
 	protected:
 		void convertTooltipHotSpot(const char *prop, THotSpot &parentHS, THotSpot &childHS);
+		bool resizer;
 	};
 
 }

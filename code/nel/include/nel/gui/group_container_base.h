@@ -76,6 +76,8 @@ namespace NLGUI
 			REFLECT_STRING("on_alpha_settings_changed_aparams", getAHOnAlphaSettingsChangedParams, setAHOnAlphaSettingsChangedParams);
 		REFLECT_EXPORT_END
 
+			virtual bool isMoving() const{ return false; }
+
 	protected:
 		void triggerAlphaSettingsChangedAH();
 

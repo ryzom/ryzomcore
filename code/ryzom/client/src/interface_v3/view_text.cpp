@@ -21,9 +21,8 @@
 #include "interface_manager.h"
 #include "nel/gui/view_renderer.h"
 #include "nel/gui/widget_manager.h"
-#include "group_container.h" // CCtrlResizer
+#include "nel/gui/group_container_base.h"
 #include "nel/gui/ctrl_tooltip.h"
-
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/lua_ihm.h"
 
@@ -381,8 +380,7 @@ void CViewText::checkCoords ()
 				CCtrlBase *pCB = CWidgetManager::getInstance()->getCapturePointerLeft();
 				if (pCB != NULL)
 				{
-					CCtrlResizer *pCR = dynamic_cast<CCtrlResizer*>(pCB);
-					if (pCR != NULL)
+					if( pCB->isResizer() )
 					{
 						// We are resizing !!!!
 					}
@@ -644,7 +642,7 @@ void CViewText::draw ()
 				if(bFound)
 				{
 					// last check: the window must not be currently moved
-					CGroupContainer *gc= dynamic_cast<CGroupContainer*>(pIG);
+					CGroupContainerBase *gc= dynamic_cast<CGroupContainerBase*>(pIG);
 					if(!gc || !gc->isMoving())
 					{
 						CRGBA	col= pIM->getSystemOption(CInterfaceManager::OptionViewTextOverBackColor).getValColor();
