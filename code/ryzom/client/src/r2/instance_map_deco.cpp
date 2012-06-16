@@ -20,7 +20,7 @@
 #include "r2_config.h"
 #include "tool.h"
 //
-#include "../interface_v3/ctrl_quad.h"
+#include "nel/gui/ctrl_quad.h"
 #include "../interface_v3/group_container.h"
 //
 #include "nel/misc/i18n.h"

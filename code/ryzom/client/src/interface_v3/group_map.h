@@ -35,11 +35,18 @@
 
 
 class CContinent;
-namespace NLMISC{
-class CCDBNodeLeaf;
+
+namespace NLMISC
+{
+	class CCDBNodeLeaf;
 }
+
+namespace NLGUI
+{
+	class CCtrlQuad;
+}
+
 class CWorldSheet;
-class CCtrlQuad;
 struct SMap;
 
 namespace NL3D

@@ -23,7 +23,7 @@
 #include "nel/misc/time_nl.h"
 //
 #include "../interface_v3/view_bitmap.h"
-#include "../interface_v3/ctrl_quad.h"
+#include "nel/gui/ctrl_quad.h"
 #include "../interface_v3/ctrl_polygon.h"
 #include "../interface_v3/interface_manager.h"
 #include "nel/gui/view_renderer.h"

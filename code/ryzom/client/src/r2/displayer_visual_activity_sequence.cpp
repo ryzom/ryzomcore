@@ -19,7 +19,7 @@
 #include "displayer_visual_group.h"
 #include "r2_config.h"
 //
-#include "../interface_v3/ctrl_quad.h"
+#include "nel/gui/ctrl_quad.h"
 #include "../interface_v3/interface_manager.h"
 #include "nel/gui/view_renderer.h"
 

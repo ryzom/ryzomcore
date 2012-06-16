@@ -36,7 +36,7 @@
 #include "people_interraction.h" // for MaxNumPeopleInTeam
 #include "../sheet_manager.h" // for MaxNumPeopleInTeam
 #include "../global.h"
-#include "ctrl_quad.h"
+#include "nel/gui/ctrl_quad.h"
 //
 #include "nel/misc/xml_auto_ptr.h"
 #include "game_share/mission_desc.h"
