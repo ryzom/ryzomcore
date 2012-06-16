@@ -40,10 +40,10 @@ extern "C"
 namespace NLGUI
 {
 	class CCtrlButton;
+	class CCtrlScroll;
 }
 
 class CGroupList;
-class CCtrlScroll;
 class CDBGroupComboBox;
 class CGroupParagraph;
 

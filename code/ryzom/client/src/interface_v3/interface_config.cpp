@@ -21,7 +21,7 @@
 #include "interface_config.h"
 #include "interface_manager.h"
 #include "group_container.h"
-#include "ctrl_scroll.h"
+#include "nel/gui/ctrl_scroll.h"
 
 using namespace NLMISC;
 using namespace std;

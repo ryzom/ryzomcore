@@ -30,11 +30,11 @@
 namespace NLGUI
 {
 	class CCtrlButton;
+	class CCtrlScroll;
 }
 
 
 // ***************************************************************************
-class	CCtrlScroll;
 class	CHandlerListSheetTradeSelect;
 class	CHandlerListSheetTradeRightClick;
 class CGroupContainer;

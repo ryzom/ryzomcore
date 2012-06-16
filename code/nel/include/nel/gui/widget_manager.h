@@ -20,6 +20,9 @@
 
 #include <string>
 #include <vector>
+#include <list>
+#include "nel/misc/smart_ptr.h"
+#include "nel/misc/rgba.h"
 #include "nel/misc/types_nl.h"
 #include "nel/gui/interface_common.h"
 

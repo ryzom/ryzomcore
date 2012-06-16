@@ -22,9 +22,12 @@
 #include "nel/misc/types_nl.h"
 #include "nel/gui/interface_group.h"
 
+namespace NLGUI
+{
+	class CCtrlScroll;
+}
 
 class	CDBCtrlSheet;
-class	CCtrlScroll;
 
 // ***************************************************************************
 /**

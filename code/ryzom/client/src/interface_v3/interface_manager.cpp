@@ -51,7 +51,7 @@
 #include "view_bitmap_combo.h"
 #include "view_text.h"
 // Ctrl
-#include "ctrl_scroll.h"
+#include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/ctrl_button.h"
 #include "ctrl_text_button.h"
 // DBCtrl

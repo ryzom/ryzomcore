@@ -21,14 +21,18 @@
 
 #include "nel/gui/interface_group.h"
 #include "nel/gui/group_modal.h"
+#include "nel/gui/group_submenu_base.h"
 #include "view_text.h"
-
 #include "ctrl_text_button.h"
+
+namespace NLGUI
+{
+	class CCtrlScroll;
+}
 
 class CViewBitmap;
 class CGroupMenu;
 class CGroupList;
-class CCtrlScroll;
 
 
 /**
@@ -92,7 +96,7 @@ private:
  * \date 2002
  */
 
-class CGroupSubMenu : public CGroupFrame
+class CGroupSubMenu : public CGroupSubMenuBase
 {
 public:
 
@@ -198,7 +202,7 @@ public:
 	int luaReset(CLuaState &ls);
 	int luaSetMaxVisibleLine(CLuaState &ls);
 	//
-	REFLECT_EXPORT_START(CGroupSubMenu, CGroupFrame)
+	REFLECT_EXPORT_START(CGroupSubMenu, CGroupSubMenuBase)
 		REFLECT_LUA_METHOD("getNumLine", luaGetNumLine);
 		REFLECT_LUA_METHOD("getLineId", luaGetLineId); // return the id of a line from its index
 		REFLECT_LUA_METHOD("getLineFromId", luaGetLineFromId); // return -1 if line with id is not found

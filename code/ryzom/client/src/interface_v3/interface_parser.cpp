@@ -52,7 +52,7 @@
 #include "dbview_quantity.h"
 #include "dbview_digit.h"
 // Ctrl
-#include "ctrl_scroll.h"
+#include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/ctrl_button.h"
 #include "ctrl_col_pick.h"
 #include "ctrl_tooltip.h"

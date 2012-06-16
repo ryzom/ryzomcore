@@ -30,7 +30,7 @@
 #include "view_pointer.h"
 
 #include "nel/gui/ctrl_base.h"
-#include "ctrl_scroll.h"
+#include "nel/gui/ctrl_scroll.h"
 
 #include "nel/gui/view_renderer.h"
 

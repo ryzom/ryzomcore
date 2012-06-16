@@ -112,7 +112,7 @@ void CViewTextMenu::setAlpha (sint32 a)
 
 // ------------------------------------------------------------------------------------------------
 CGroupSubMenu::CGroupSubMenu(const TCtorParam &param)
-: CGroupFrame(param)
+: CGroupSubMenuBase(param)
 {
 	_SelectionView = NULL;
 	_GroupList = NULL;
