@@ -23,7 +23,11 @@
 #include "../misc.h"
 #include "nel/3d/u_text_context.h"
 
-class CCtrlToolTip;
+namespace NLGUI
+{
+	class CCtrlToolTip;
+}
+
 
 /**
  * class implementing a text view

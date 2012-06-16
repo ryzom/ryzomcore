@@ -55,7 +55,7 @@
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/ctrl_col_pick.h"
-#include "ctrl_tooltip.h"
+#include "nel/gui/ctrl_tooltip.h"
 #include "ctrl_text_button.h"
 #include "group_paragraph.h" // For CCtrlLink
 // DBCtrl

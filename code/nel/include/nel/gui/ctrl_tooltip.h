@@ -25,31 +25,34 @@
 namespace NLGUI
 {
 	class CEventDescriptor;
+
+
+	/**
+	 * \author Matthieu 'Mr TRAP' Besson
+	 * \author Nevrax France
+	 * \date 2003
+	 */
+	class CCtrlToolTip : public CCtrlBase
+	{
+	public:
+		DECLARE_UI_CLASS(CCtrlToolTip)
+		/// Constructor
+		CCtrlToolTip(const TCtorParam &param) : CCtrlBase(param) {}
+
+		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
+		virtual void draw();
+		virtual bool		parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+		// Can do nothing with tooltip (but display it :) )
+		virtual	bool		isCapturable() const {return false;}
+		virtual void        serial(NLMISC::IStream &f);
+	public:
+
+	};
+
+
 }
-
-/**
- * \author Matthieu 'Mr TRAP' Besson
- * \author Nevrax France
- * \date 2003
- */
-class CCtrlToolTip : public CCtrlBase
-{
-public:
-	DECLARE_UI_CLASS(CCtrlToolTip)
-	/// Constructor
-	CCtrlToolTip(const TCtorParam &param) : CCtrlBase(param) {}
-
-	virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
-	virtual void draw();
-	virtual bool		parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
-	// Can do nothing with tooltip (but display it :) )
-	virtual	bool		isCapturable() const {return false;}
-	virtual void        serial(NLMISC::IStream &f);
-public:
-
-};
-
 
 #endif // RZ_CTRL_TOOLTIP_H
 
 /* End of ctrl_tooltip.h */
+

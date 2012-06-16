@@ -24,7 +24,7 @@
 #include "view_text.h"
 #include "interface_manager.h"
 #include "group_container.h" // CCtrlResizer
-#include "ctrl_tooltip.h"
+#include "nel/gui/ctrl_tooltip.h"
 
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/lua_ihm.h"

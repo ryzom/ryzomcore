@@ -17,7 +17,7 @@
 
 
 // ----------------------------------------------------------------------------
-#include "ctrl_tooltip.h"
+#include "nel/gui/ctrl_tooltip.h"
 #include "nel/misc/xml_auto_ptr.h"
 
 // ----------------------------------------------------------------------------
@@ -29,27 +29,33 @@ NLMISC_REGISTER_OBJECT(CViewBase, CCtrlToolTip, std::string, "tooltip");
 
 REGISTER_UI_CLASS(CCtrlToolTip)
 
-// ----------------------------------------------------------------------------
-void CCtrlToolTip::draw ()
+namespace NLGUI
 {
+
+	// ----------------------------------------------------------------------------
+	void CCtrlToolTip::draw ()
+	{
+	}
+
+	// ----------------------------------------------------------------------------
+	bool CCtrlToolTip::handleEvent (const NLGUI::CEventDescriptor& event)
+	{
+		if (CCtrlBase::handleEvent(event)) return true;
+		return false;
+	}
+
+	// ----------------------------------------------------------------------------
+	bool CCtrlToolTip::parse(xmlNodePtr cur, CInterfaceGroup *parentGroup)
+	{
+		if (!CCtrlBase::parse(cur, parentGroup)) return false;
+		return true;
+	}
+
+	// ----------------------------------------------------------------------------
+	void CCtrlToolTip::serial(NLMISC::IStream &f)
+	{
+		CCtrlBase::serial(f);
+	}
+
 }
 
-// ----------------------------------------------------------------------------
-bool CCtrlToolTip::handleEvent (const NLGUI::CEventDescriptor& event)
-{
-	if (CCtrlBase::handleEvent(event)) return true;
-	return false;
-}
-
-// ----------------------------------------------------------------------------
-bool CCtrlToolTip::parse(xmlNodePtr cur, CInterfaceGroup *parentGroup)
-{
-	if (!CCtrlBase::parse(cur, parentGroup)) return false;
-	return true;
-}
-
-// ----------------------------------------------------------------------------
-void CCtrlToolTip::serial(NLMISC::IStream &f)
-{
-	CCtrlBase::serial(f);
-}
