@@ -34,7 +34,7 @@
 #include "group_list.h"
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/ctrl_scroll.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 #include "view_bitmap.h"
 #include "../time_client.h"
 

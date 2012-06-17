@@ -23,8 +23,12 @@
 #include "nel/gui/group_frame.h"
 #include "nel/misc/smart_ptr.h"
 
+namespace NLGUI
+{
+	class CViewText;
+}
+
 class CViewBitmap;
-class CViewText;
 
 // ----------------------------------------------------------------------------
 class CGroupTree : public CInterfaceGroup

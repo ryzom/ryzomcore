@@ -23,7 +23,7 @@
 #include "ctrl_text_button.h"
 #include "interface_manager.h"
 #include "nel/misc/xml_auto_ptr.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 #include "view_text_id.h"
 #include "group_container.h"
 #include "nel/gui/lua_ihm.h"

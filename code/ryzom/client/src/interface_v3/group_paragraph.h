@@ -21,7 +21,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/gui/group_frame.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 #include "view_link.h"
 #include "nel/gui/ctrl_button.h"
 

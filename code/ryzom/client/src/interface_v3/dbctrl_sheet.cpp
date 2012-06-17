@@ -20,7 +20,7 @@
 
 #include "dbctrl_sheet.h"
 #include "interface_manager.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 #include "../sheet_manager.h"
 #include "../client_sheets/entity_sheet.h"
 #include "../client_sheets/pact_sheet.h"

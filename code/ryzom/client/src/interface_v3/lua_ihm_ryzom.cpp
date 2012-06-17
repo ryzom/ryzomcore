@@ -49,7 +49,7 @@
 #include "action_handler_tools.h"
 #include "interface_manager.h"
 #include "nel/gui/interface_group.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 #include "game_share/people_pd.h"
 #include "group_tree.h"
 #include "nel/gui/interface_link.h"

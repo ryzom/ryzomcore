@@ -20,7 +20,7 @@
 #define NL_VIEW_TEXT_ID_H
 
 #include "nel/misc/types_nl.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 
 namespace NLMISC{
 class CCDBNodeLeaf;

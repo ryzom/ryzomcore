@@ -22,7 +22,7 @@
 #include "interface_manager.h"
 #include "nel/gui/interface_expr.h"
 
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 
 #include "game_share/skills.h"
 #include "game_share/brick_families.h"

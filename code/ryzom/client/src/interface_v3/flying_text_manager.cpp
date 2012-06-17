@@ -20,7 +20,7 @@
 #include "flying_text_manager.h"
 #include "interface_manager.h"
 #include "group_in_scene.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 
 
 using namespace std;

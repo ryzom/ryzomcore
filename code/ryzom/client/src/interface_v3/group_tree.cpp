@@ -22,7 +22,7 @@
 #include "interface_manager.h"
 #include "nel/gui/interface_element.h"
 #include "view_bitmap.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 #include "group_container.h"
 #include "nel/gui/action_handler.h"
 #include "nel/gui/lua_ihm.h"

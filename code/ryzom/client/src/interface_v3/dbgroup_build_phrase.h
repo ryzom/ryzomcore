@@ -29,6 +29,7 @@
 namespace NLGUI
 {
 	class CCtrlBaseButton;
+	class CViewText;
 }
 
 
@@ -36,7 +37,6 @@ namespace NLGUI
 class	CDBCtrlSheet;
 class	CSBrickSheet;
 class	CViewBitmap;
-class	CViewText;
 class	CGroupEditBox;
 
 

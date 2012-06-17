@@ -19,7 +19,7 @@
 #ifndef VIEW_TEXT_FORMATED_H
 #define VIEW_TEXT_FORMATED_H
 
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 
 /** The same as a view text id, but with some display option
   * The input is a formated string, every character is copied, but subsitution is done for each character preceded by $

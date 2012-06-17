@@ -19,7 +19,7 @@
 #ifndef NL_VIEW_LINK_H
 #define NL_VIEW_LINK_H
 
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 
 /**
  * class implementing a link view

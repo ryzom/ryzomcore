@@ -27,6 +27,7 @@ namespace NLGUI
 	class CCtrlBase;
 	class CCtrlBaseButton;
 	class CInterfaceGroup;
+	class CViewText;
 }
 
 using namespace NLGUI;
@@ -60,7 +61,7 @@ public:
 typedef CInterfacePtr<CInterfaceElement>::TInterfacePtr	CInterfaceElementPtr;
 typedef CInterfacePtr<CInterfaceGroup>::TInterfacePtr		CInterfaceGroupPtr;
 typedef CInterfacePtr<class CCtrlTextButton>::TInterfacePtr		CCtrlTextButtonPtr;
-typedef CInterfacePtr<class CViewText>::TInterfacePtr			CViewTextPtr;
+typedef CInterfacePtr<CViewText>::TInterfacePtr			CViewTextPtr;
 typedef CInterfacePtr<class CViewTextMenu>::TInterfacePtr		CViewTextMenuPtr;
 typedef CInterfacePtr<CCtrlBase>::TInterfacePtr			CCtrlBasePtr;
 typedef CInterfacePtr<CCtrlBaseButton>::TInterfacePtr		CCtrlBaseButtonPtr;

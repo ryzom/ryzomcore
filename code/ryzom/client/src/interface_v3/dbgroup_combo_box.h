@@ -25,10 +25,10 @@
 namespace NLGUI
 {
 	class CCtrlBaseButton;
+	class CViewText;
 }
 
 // ***************************************************************************
-class	CViewText;
 class	CGroupMenu;
 
 // ***************************************************************************

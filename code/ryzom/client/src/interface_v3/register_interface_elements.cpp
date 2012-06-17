@@ -20,7 +20,7 @@
 #include "nel/gui/interface_element.h"
 #include "interface_3d_scene.h"
 #include "nel/gui/view_base.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 #include "view_text_id.h"
 #include "view_bitmap.h"
 #include "view_radar.h"

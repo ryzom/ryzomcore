@@ -24,7 +24,7 @@
 
 
 ///\todo nico : do the real display when item icons are available
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 
 /**
  * class used to display mps for faber interface

@@ -49,7 +49,7 @@
 //#include "view_bitmap_progress.h"
 #include "view_bitmap_faber_mp.h"
 #include "view_bitmap_combo.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 // Ctrl
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/ctrl_button.h"

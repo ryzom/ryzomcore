@@ -19,7 +19,7 @@
 #include "stdpch.h"
 // client
 #include "chat_text_manager.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 #include "interface_manager.h"
 
 using namespace std;

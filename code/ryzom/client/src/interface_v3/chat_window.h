@@ -28,12 +28,12 @@
 namespace NLGUI
 {
 	class CCtrlBase;
+	class CViewText;
 }
 
 class CChatWindow;
 class CGroupContainer;
 class CGroupEditBox;
-class CViewText;
 
 /** Interface to react to a chat box entry
   * Derivers should define the msgEntered member function to handle entry event.

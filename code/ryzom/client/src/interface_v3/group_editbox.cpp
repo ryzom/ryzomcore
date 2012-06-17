@@ -22,7 +22,7 @@
 #include "interface_manager.h"
 #include "input_handler_manager.h"
 #include "nel/misc/command.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/interface_options.h"
 #include "dbctrl_sheet.h"

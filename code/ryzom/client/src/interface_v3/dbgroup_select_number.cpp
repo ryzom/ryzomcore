@@ -21,7 +21,7 @@
 
 
 #include "dbgroup_select_number.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 #include "view_bitmap.h"
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/interface_property.h"

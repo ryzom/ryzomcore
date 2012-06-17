@@ -26,10 +26,9 @@
 namespace NLGUI
 {
 	class CEventDescriptor;
+	class CViewText;
 }
 class CInterfaceManager;
-class CViewText;
-
 
 // ***************************************************************************
 /**

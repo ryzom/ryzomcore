@@ -26,8 +26,8 @@
 namespace NLGUI
 {
 	class CEventDescriptor;
+	class CViewText;
 }
-class CViewText;
 
 // ----------------------------------------------------------------------------
 class CGroupEditBox : public CGroupEditBoxBase
