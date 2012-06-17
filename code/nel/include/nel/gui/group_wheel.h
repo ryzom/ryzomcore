@@ -21,22 +21,25 @@
 
 #include "nel/gui/interface_group.h"
 
-
-
-// Special group to handle the mouse wheel message
-class CInterfaceGroupWheel : public CInterfaceGroup
+namespace NLGUI
 {
-public:
-	/// Constructor
-	CInterfaceGroupWheel(const TCtorParam &param);
-	/// Coming from CInterfaceElement
-	virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
-	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
-private:
-	IActionHandler *_AHWheelUp;
-	CStringShared	_AHWheelUpParams;
-	IActionHandler *_AHWheelDown;
-	CStringShared	_AHWheelDownParams;
-};
+
+	// Special group to handle the mouse wheel message
+	class CInterfaceGroupWheel : public CInterfaceGroup
+	{
+	public:
+		/// Constructor
+		CInterfaceGroupWheel(const TCtorParam &param);
+		/// Coming from CInterfaceElement
+		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
+		virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
+	private:
+		IActionHandler *_AHWheelUp;
+		CStringShared	_AHWheelUpParams;
+		IActionHandler *_AHWheelDown;
+		CStringShared	_AHWheelDownParams;
+	};
+
+}
 
 #endif
