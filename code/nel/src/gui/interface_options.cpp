@@ -17,7 +17,6 @@
 
 
 #include "nel/gui/interface_element.h"
-#include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/interface_options.h"
 
 using namespace std;

@@ -73,7 +73,7 @@ void contextHelp (const std::string &name)
 						completeURL += "_" + ClientCfg.getHtmlLanguageCode() + ".html";
 						// Add bubble
 						InSceneBubbleManager.addContextHelpHTML(completeURL, target,
-							pIM->getSystemOption(CInterfaceManager::OptionTimeoutContextHtml).getValSInt32());
+							CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutContextHtml).getValSInt32());
 					}
 
 					// Found one help
@@ -565,7 +565,7 @@ void CGroupInSceneBubbleManager::addMessagePopup (const ucstring &message, CRGBA
 
 	// default timeout?
 	if(time==0)
-		time=pIM->getSystemOption(CInterfaceManager::OptionTimeoutMessages).getValSInt32();
+		time=CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutMessages).getValSInt32();
 
 	// Create a skill popup
 	string id = "message_popup_"+toString(_PopupCount++);
@@ -614,7 +614,7 @@ void CGroupInSceneBubbleManager::addMessagePopupCenter (const ucstring &message,
 
 	// default timeout?
 	if(time==0)
-		time= pIM->getSystemOption(CInterfaceManager::OptionTimeoutMessages).getValSInt32();
+		time= CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutMessages).getValSInt32();
 
 	// Create a skill popup
 	string id = "message_popup_"+toString(_PopupCount++);
@@ -825,7 +825,7 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const ucstring &ucsText,
 
 	CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(EntitiesMngr.getEntityByCompressedIndex(nUID));
 	if (pChar == NULL || nUID==CLFECOMMON::INVALID_CLIENT_DATASET_INDEX) return;
-	if (bubbleTimer == 0) bubbleTimer = pIM->getSystemOption(CInterfaceManager::OptionTimeoutBubbles).getValSInt32();
+	if (bubbleTimer == 0) bubbleTimer = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutBubbles).getValSInt32();
 
 	// Output the message in a bubble
 
@@ -1575,7 +1575,7 @@ class CHandlerCharacterBubble : public IActionHandler
 		string sTime = getParam (sParams, "time");
 		uint duration;
 		if (sTime.empty())
-			duration = pIM->getSystemOption(CInterfaceManager::OptionTimeoutBubbles).getValSInt32();
+			duration = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutBubbles).getValSInt32();
 		else
 			fromString(sTime, duration);
 
@@ -1602,7 +1602,7 @@ class CHandlerSkillPopup : public IActionHandler
 		string sTime = getParam (sParams, "time");
 		uint duration;
 		if (sTime.empty())
-			duration = pIM->getSystemOption(CInterfaceManager::OptionTimeoutMessages).getValSInt32();
+			duration = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutMessages).getValSInt32();
 		else
 			fromString(sTime, duration);
 
@@ -1626,7 +1626,7 @@ class CHandlerMessagePopup : public IActionHandler
 		string sTime = getParam (sParams, "time");
 		uint duration;
 		if (sTime.empty())
-			duration = pIM->getSystemOption(CInterfaceManager::OptionTimeoutMessages).getValSInt32();
+			duration = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutMessages).getValSInt32();
 		else
 			fromString(sTime, duration);
 
@@ -1651,7 +1651,7 @@ class CHandlerContextHelp : public IActionHandler
 		if (itext.empty())
 			itext = CI18N::get(text);
 
-		InSceneBubbleManager.addContextHelp (itext, targetName, pIM->getSystemOption(CInterfaceManager::OptionTimeoutContext).getValSInt32());
+		InSceneBubbleManager.addContextHelp (itext, targetName, CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutContext).getValSInt32());
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerContextHelp, "context_help");

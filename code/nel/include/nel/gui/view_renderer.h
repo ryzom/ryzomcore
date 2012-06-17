@@ -578,6 +578,8 @@ namespace NLGUI
 		static NL3D::UTextContext *textcontext;
 
 	public:
+		static NL3D::UTextContext* getTextContext(){ return textcontext; }
+
 		static std::set< std::string > *hwCursors;
 		static float hwCursorScale;
 

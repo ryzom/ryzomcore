@@ -89,34 +89,34 @@ void CDBGroupListSheetMission::CSheetChildMission::updateViewText(CDBGroupListSh
 	if (CachePreReqState == MISSION_DESC::PreReqFail)
 	{
 		// If mission prerequesits failed for miscellaneaous reasons : COLOR RED
-		CRGBA color = pIM->getSystemOption(CInterfaceManager::OptionCtrlSheetRedifyColor).getValColor();
+		CRGBA color = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlSheetRedifyColor).getValColor();
 
 		Ctrl->setGrayed(true);
 		Ctrl->setSheetColor(color);
 
-		color = pIM->getSystemOption(CInterfaceManager::OptionCtrlTextRedifyColor).getValColor();
+		color = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlTextRedifyColor).getValColor();
 		Text->setColor(color);
 	}
 	else if (CachePreReqState == MISSION_DESC::PreReqFailAlreadyDone)
 	{
 		// If mission prerequesits failed because mission is already done : COLOR GREEN
-		CRGBA color = pIM->getSystemOption(CInterfaceManager::OptionCtrlSheetGreenifyColor).getValColor();
+		CRGBA color = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlSheetGreenifyColor).getValColor();
 
 		Ctrl->setGrayed(true);
 		Ctrl->setSheetColor(color);
 
-		color = pIM->getSystemOption(CInterfaceManager::OptionCtrlTextGreenifyColor).getValColor();
+		color = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlTextGreenifyColor).getValColor();
 		Text->setColor(color);
 	}
 	else if (CachePreReqState == MISSION_DESC::PreReqFailRunning)
 	{
 		// If mission prerequesits failed because the mission is in progress : COLOR GRAY
-		CRGBA color = pIM->getSystemOption(CInterfaceManager::OptionCtrlSheetGrayColor).getValColor();
+		CRGBA color = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlSheetGrayColor).getValColor();
 
 		Ctrl->setGrayed(true);
 		Ctrl->setSheetColor(color);
 
-		color = pIM->getSystemOption(CInterfaceManager::OptionCtrlTextGrayColor).getValColor();
+		color = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlTextGrayColor).getValColor();
 		Text->setColor(color);
 	}
 	else

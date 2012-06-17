@@ -18,13 +18,13 @@
 #include "nel/misc/i18n.h"
 
 #include "view_text.h"
-#include "interface_manager.h"
 #include "nel/gui/view_renderer.h"
 #include "nel/gui/widget_manager.h"
 #include "nel/gui/group_container_base.h"
 #include "nel/gui/ctrl_tooltip.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/lua_ihm.h"
+#include "nel/gui/view_pointer_base.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -51,7 +51,8 @@ void CViewText::setupDefault ()
 	_ParentPosRef = Hotspot_BL;
 	_PosRef = Hotspot_BL;
 
-	_FontSize = 12+CInterfaceManager::getInstance()->getSystemOption(CInterfaceManager::OptionAddCoefFont).getValSInt32();
+	_FontSize = 12 +
+		CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
 	_Color = CRGBA(255,255,255,255);
 	_Shadow = false;
 	_ShadowColor = CRGBA(0,0,0,255);
@@ -109,7 +110,7 @@ CViewText::	CViewText (const std::string& id, const std::string Text, sint FontS
 	_Id = id;
 	setupDefault ();
 
-	_FontSize = FontSize+CInterfaceManager::getInstance()->getSystemOption(CInterfaceManager::OptionAddCoefFont).getValSInt32();
+	_FontSize = FontSize + CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
 	_Color = Color;
 	_Shadow = Shadow;
 	setText(Text);
@@ -120,7 +121,7 @@ CViewText::	CViewText (const std::string& id, const std::string Text, sint FontS
 CViewText::~CViewText()
 {
 	if (_Index != 0xFFFFFFFF)
-		CInterfaceManager::getInstance()->getTextContext()->erase (_Index);
+		CViewRenderer::getTextContext()->erase (_Index);
 	clearLines();
 
 	if (!_Setuped)
@@ -134,7 +135,7 @@ CViewText::~CViewText()
 CViewText &CViewText::operator=(const CViewText &vt)
 {
 	if (_Index != 0xFFFFFFFF)
-		CInterfaceManager::getInstance()->getTextContext()->erase (_Index);
+		CViewRenderer::getTextContext()->erase (_Index);
 
 	// Create database entries
 	_Active = vt._Active;
@@ -187,11 +188,11 @@ void CViewText::parseTextOptions (xmlNodePtr cur)
 		_ModulateGlobalColor= convertBool(prop);
 
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"fontsize" );
-	_FontSize = 12+CInterfaceManager::getInstance()->getSystemOption(CInterfaceManager::OptionAddCoefFont).getValSInt32();
+	_FontSize = 12 + CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
 	if (prop)
 	{
 		fromString((const char*)prop, _FontSize);
-		_FontSize += CInterfaceManager::getInstance()->getSystemOption(CInterfaceManager::OptionAddCoefFont).getValSInt32();
+		_FontSize += CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
 	}
 
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"shadow" );
@@ -376,7 +377,6 @@ void CViewText::checkCoords ()
 			}
 			else
 			{
-				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 				CCtrlBase *pCB = CWidgetManager::getInstance()->getCapturePointerLeft();
 				if (pCB != NULL)
 				{
@@ -412,7 +412,6 @@ void CViewText::draw ()
 {
 	H_AUTO( RZ_Interface_CViewText_draw  )
 
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	// *** Out Of Clip?
@@ -430,7 +429,7 @@ void CViewText::draw ()
 		return;
 	rVR.getScreenOOSize (oow, ooh);
 
-	NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
+	NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
 
 
 	// *** get current color
@@ -455,7 +454,7 @@ void CViewText::draw ()
 	{
 		if (_Lines.size() == 0) return;
 
-		NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
 
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
@@ -645,8 +644,8 @@ void CViewText::draw ()
 					CGroupContainerBase *gc= dynamic_cast<CGroupContainerBase*>(pIG);
 					if(!gc || !gc->isMoving())
 					{
-						CRGBA	col= pIM->getSystemOption(CInterfaceManager::OptionViewTextOverBackColor).getValColor();
-						pIM->setOverExtendViewText(this, col);
+						CRGBA col= CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionViewTextOverBackColor).getValColor();
+						CWidgetManager::getInstance()->setOverExtendViewText(this, col);
 					}
 				}
 			}
@@ -716,7 +715,7 @@ void CViewText::setText(const ucstring & text)
 // ***************************************************************************
 void CViewText::setFontSize (sint nFontSize)
 {
-	_FontSize = nFontSize+CInterfaceManager::getInstance()->getSystemOption(CInterfaceManager::OptionAddCoefFont).getValSInt32();
+	_FontSize = nFontSize + CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
 	computeFontSize ();
 	invalidateContent();
 }
@@ -724,7 +723,7 @@ void CViewText::setFontSize (sint nFontSize)
 // ***************************************************************************
 sint CViewText::getFontSize() const
 {
-	return _FontSize - CInterfaceManager::getInstance()->getSystemOption(CInterfaceManager::OptionAddCoefFont).getValSInt32();
+	return _FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
 }
 
 // ***************************************************************************
@@ -862,7 +861,7 @@ void CViewText::updateTextContextMultiLine(uint nMaxWidth)
 			rWidthCurrentLine= max(rWidthCurrentLine, (float)wordFormat.TabX*_FontWidth);
 		}
 
-		NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
 
 		// Parse the letter
 		{
@@ -1040,7 +1039,7 @@ void CViewText::updateTextContextMultiLineJustified(uint nMaxWidth, bool expandS
 			// Get the word value.
 			wordValue = _Text.substr(spaceEnd, wordEnd - spaceEnd);
 			// compute width of word
-			si = CInterfaceManager::getInstance()->getTextContext()->getStringInfo(wordValue);
+			si = CViewRenderer::getTextContext()->getStringInfo(wordValue);
 
 			// compute size of spaces/Tab + word
 			newLineWidth = lineWidth + numSpaces * _SpaceWidth;
@@ -1119,7 +1118,7 @@ void CViewText::updateTextContextMultiLineJustified(uint nMaxWidth, bool expandS
 					for(currChar = 0; currChar < wordValue.length(); ++currChar)
 					{
 						oneChar = wordValue[currChar];
-						si = CInterfaceManager::getInstance()->getTextContext()->getStringInfo(oneChar);
+						si = CViewRenderer::getTextContext()->getStringInfo(oneChar);
 						if ((uint) (px + si.StringWidth) > nMaxWidth) break;
 						px += si.StringWidth;
 					}
@@ -1238,7 +1237,7 @@ void CViewText::updateTextContextMultiLineJustified(uint nMaxWidth, bool expandS
 // ***************************************************************************
 void CViewText::updateTextContext ()
 {
-	NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
+	NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
 
 	TextContext->setHotSpot (UTextContext::BottomLeft);
 	TextContext->setShaded (_Shadow);
@@ -1413,7 +1412,7 @@ void CViewText::updateCoords()
 		{
 			CInterfaceGroup *parent = _Parent;
 			// avoid resizing parents to compute the limiter
-			while (parent && (parent->getResizeFromChildW() || dynamic_cast<CGroupList *>(parent)))
+			while (parent && (parent->getResizeFromChildW() || parent->isGroupList() ))
 			{
 				// NB nico : the dynamic_cast for CGroupList is bad!!
 				// can't avoid it for now, because, CGroupList implicitly does a "resize from child" in its update coords
@@ -1550,7 +1549,7 @@ void        CViewText::setColorRGBA(NLMISC::CRGBA col)
 void CViewText::getCharacterPositionFromIndex(sint index, bool cursorAtPreviousLineEnd, sint &x, sint &y, sint &height) const
 {
 	NLMISC::clamp(index, 0, (sint) _Text.length());
-	NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
+	NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
 	TextContext->setHotSpot (UTextContext::BottomLeft);
 	TextContext->setShaded (_Shadow);
 	TextContext->setFontSize (_FontSize);
@@ -1662,7 +1661,7 @@ static uint getCharacterIndex(const ucstring &textValue, float x)
 	{
 		// get character width
 		singleChar[0] = textValue[i];
-		si = CInterfaceManager::getInstance()->getTextContext()->getStringInfo(singleChar);
+		si = CViewRenderer::getTextContext()->getStringInfo(singleChar);
 		px += si.StringWidth;
 		 // the character is at the i - 1 position
 		if (px > x)
@@ -1679,7 +1678,7 @@ static uint getCharacterIndex(const ucstring &textValue, float x)
 // ***************************************************************************
 void CViewText::getCharacterIndexFromPosition(sint x, sint y, uint &index, bool &cursorAtPreviousLineEnd) const
 {
-	NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
+	NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
 
 	// setup the text context
 	TextContext->setHotSpot (UTextContext::BottomLeft);
@@ -1819,7 +1818,7 @@ void CViewText::setStringSelectionSkipingSpace(uint stringId, const ucstring &te
 			quadSize--;
 	}
 	// select what quad to skip
-	CInterfaceManager::getInstance()->getTextContext()->setStringSelection(stringId, quadStart, quadSize);
+	CViewRenderer::getTextContext()->setStringSelection(stringId, quadStart, quadSize);
 }
 
 // ***************************************************************************
@@ -1911,7 +1910,7 @@ void CViewText::CLine::clear()
 	for(uint k = 0; k < _Words.size(); ++k)
 	{
 		if (_Words[k].Index != 0xffffffff)
-			CInterfaceManager::getInstance()->getTextContext()->erase(_Words[k].Index);
+			CViewRenderer::getTextContext()->erase(_Words[k].Index);
 	}
 	_Words.clear();
 	_NumChars = 0;
@@ -1932,7 +1931,7 @@ void CViewText::CWord::build(const ucstring &text, uint numSpaces/*=0*/)
 {
 	Text = text;
 	NumSpaces = numSpaces;
-	NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
+	NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
 	Index = TextContext->textPush(text);
 	Info = TextContext->getStringInfo(Index);
 }
@@ -1955,7 +1954,7 @@ sint32 CViewText::getMaxUsedW() const
 	static const ucstring lineFeedStr("\n");
 	float maxWidth = 0;
 
-	NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
+	NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
 	TextContext->setHotSpot (UTextContext::BottomLeft);
 	TextContext->setShaded (_Shadow);
 	TextContext->setFontSize (_FontSize);
@@ -2039,7 +2038,7 @@ sint32 CViewText::getMinUsedW() const
 	// If we can't clip the words, return the size of the largest word
 	else if ((_TextMode == DontClipWord) || (_TextMode == Justified))
 	{
-		NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
 		TextContext->setFontSize (_FontSize);
@@ -2090,7 +2089,7 @@ void CViewText::onInvalidateContent()
 // ***************************************************************************
 void CViewText::computeFontSize ()
 {
-	NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
+	NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
 	TextContext->setHotSpot (UTextContext::BottomLeft);
 	TextContext->setShaded (_Shadow);
 	TextContext->setFontSize (_FontSize);
@@ -2444,7 +2443,7 @@ void CViewText::setSingleLineTextFormatTaged(const ucstring &text)
 	}
 
 	// convert in ULetterColors
-	NL3D::UTextContext *TextContext = CInterfaceManager::getInstance()->getTextContext();
+	NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
 	ULetterColors * letterColors = TextContext->createLetterColors();
 	for(uint i=0; i<tempLetterColors.size(); i++)
 	{

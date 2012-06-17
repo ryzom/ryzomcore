@@ -53,6 +53,7 @@ CGroupList::CGroupList(const TCtorParam &param)
 	_Over = false;
 	_OverColor = CRGBA(255,  255,  255,  32);
 	_OverElt = -1;
+	_IsGroupList = true;
 }
 
 // ----------------------------------------------------------------------------

@@ -685,7 +685,7 @@ void CGroupTree::draw()
 				}
 
 				// will be drawn over all the interface
-				pIM->setOverExtendViewText(viewTextExtend,  col);
+				CWidgetManager::getInstance()->setOverExtendViewText(viewTextExtend,  col);
 			}
 		}
 	}

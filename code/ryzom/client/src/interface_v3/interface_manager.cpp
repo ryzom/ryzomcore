@@ -1343,36 +1343,17 @@ void CInterfaceManager::updateFrameViews(NL3D::UCamera camera)
 
 }
 
-// ------------------------------------------------------------------------------------------------
 void CInterfaceManager::setupOptions()
 {
-	// After parsing options and templates node -> init system options.
-	CInterfaceOptions	*opt= CWidgetManager::getInstance()->getOptions("system");
-	if(opt)
-	{
-		// List here all Special options
-		_SystemOptions[OptionCtrlSheetGrayColor]= opt->getValue("ctrl_sheet_gray_color");
-		_SystemOptions[OptionCtrlTextGrayColor]= opt->getValue("ctrl_text_gray_color");
-		_SystemOptions[OptionCtrlSheetRedifyColor]= opt->getValue("ctrl_sheet_redify_color");
-		_SystemOptions[OptionCtrlTextRedifyColor]= opt->getValue("ctrl_text_redify_color");
-		_SystemOptions[OptionCtrlSheetGreenifyColor]= opt->getValue("ctrl_sheet_greenify_color");
-		_SystemOptions[OptionCtrlTextGreenifyColor]= opt->getValue("ctrl_text_greenify_color");
-		_SystemOptions[OptionViewTextOverBackColor]= opt->getValue("text_over_back_color");
-		_SystemOptions[OptionFont]= opt->getValue("font");
-		_SystemOptions[OptionAddCoefFont]= opt->getValue("add_coef_font");
-		_SystemOptions[OptionMulCoefAnim]= opt->getValue("mul_coef_anim");
-		_SystemOptions[OptionTimeoutBubbles]= opt->getValue("bubbles_timeout");
-		_SystemOptions[OptionTimeoutMessages]= opt->getValue("messages_timeout");
-		_SystemOptions[OptionTimeoutContext]= opt->getValue("context_timeout");
-		_SystemOptions[OptionTimeoutContextHtml]= opt->getValue("context_html_timeout");
-	}
-
+	CWidgetManager *wm = CWidgetManager::getInstance();
+	wm->setupOptions();
+	
 	// Try to change font if any
-	string sFont = _SystemOptions[OptionFont].getValStr();
+	string sFont = wm->getSystemOption( CWidgetManager::OptionFont ).getValStr();
+	
 	extern void resetTextContext( const char*, bool );
 	if ((!sFont.empty()) && (driver != NULL))
 		resetTextContext(sFont.c_str(), true);
-
 	// Continue to parse the rest of the interface
 }
 
@@ -4030,20 +4011,13 @@ void CInterfaceManager::incLocalSyncActionCounter()
 
 
 // ***************************************************************************
-void	CInterfaceManager::setOverExtendViewText(CViewText *vt, CRGBA backGround)
-{
-	_OverExtendViewText= vt;
-	_OverExtendViewTextBackColor= backGround;
-}
-
-// ***************************************************************************
 void	CInterfaceManager::drawOverExtendViewText()
 {
 //	CViewRenderer	&rVR= getViewRenderer();
 
-	if(_OverExtendViewText)
+	if( CWidgetManager::getInstance()->getOverExtendViewText() )
 	{
-		CViewText	*vtSrc= safe_cast<CViewText*>((CInterfaceElement*)_OverExtendViewText);
+		CViewText	*vtSrc= safe_cast<CViewText*>( CWidgetManager::getInstance()->getOverExtendViewText() );
 
 		CInterfaceGroup *groupOver = getWindowForActiveMasterGroup("over_extend_view_text");
 		if(groupOver)
@@ -4065,7 +4039,7 @@ void	CInterfaceManager::drawOverExtendViewText()
 				CViewBitmap	*pBack= dynamic_cast<CViewBitmap*>(groupOver->getView("midback"));
 				CViewBitmap	*pOutline= dynamic_cast<CViewBitmap*>(groupOver->getView("midoutline"));
 				if(pBack)
-					pBack->setColor(_OverExtendViewTextBackColor);
+					pBack->setColor( CWidgetManager::getInstance()->getOverExtendViewTextBackColor() );
 				if(pOutline)
 				{
 					pOutline->setColor(vtSrc->getColor());
@@ -4112,7 +4086,7 @@ void	CInterfaceManager::drawOverExtendViewText()
 		}
 
 		// Reset the ptr so at next frame, won't be rendered (but if reset)
-		_OverExtendViewText= NULL;
+		CWidgetManager::getInstance()->setOverExtendViewText( NULL, CWidgetManager::getInstance()->getOverExtendViewTextBackColor() );
 	}
 }
 

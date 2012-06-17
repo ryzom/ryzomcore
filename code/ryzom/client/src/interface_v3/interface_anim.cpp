@@ -123,7 +123,7 @@ bool CInterfaceTrack::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 			{
 				double dTime;
 				fromString(k.Time, dTime);
-				k.Time = toString(dTime * CInterfaceManager::getInstance()->getSystemOption(CInterfaceManager::OptionMulCoefAnim).getValFloat());
+				k.Time = toString(dTime * CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionMulCoefAnim).getValFloat());
 			}
 
 			// Depending on the type of the track read extra values
@@ -193,7 +193,7 @@ bool CInterfaceTrack::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 
 			float fAnimTime;
 			fromString((const char*)time, fAnimTime);
-			TAnimationTime animTime = fAnimTime * CInterfaceManager::getInstance()->getSystemOption(CInterfaceManager::OptionMulCoefAnim).getValFloat();
+			TAnimationTime animTime = fAnimTime * CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionMulCoefAnim).getValFloat();
 			double animValue;
 			fromString(value, animValue);
 
@@ -544,7 +544,7 @@ bool CInterfaceAnim::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	fromString((const char*)ptr, _Duration);
 	if (_Duration == 0)
 		_Duration = 1.0;
-	_Duration *= CInterfaceManager::getInstance()->getSystemOption(CInterfaceManager::OptionMulCoefAnim).getValFloat();
+	_Duration *= CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionMulCoefAnim).getValFloat();
 
 	ptr = xmlGetProp (cur, (xmlChar*)"disable_buttons");
 	if (ptr)

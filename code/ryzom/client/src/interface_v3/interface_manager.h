@@ -315,39 +315,8 @@ public:
 	// display a system info string
 	void		  displaySystemInfo(const ucstring &str, const std::string &Category = "SYS");
 	NLMISC::CRGBA getSystemInfoColor(const std::string &Category = "SYS");
-	/// \name Global Interface Options
-	// @{
 
-	// List of system options
-	enum	TSystemOption
-	{
-		OptionCtrlSheetGrayColor=0,
-		OptionCtrlTextGrayColor,
-		OptionCtrlSheetRedifyColor,
-		OptionCtrlTextRedifyColor,
-		OptionCtrlSheetGreenifyColor,
-		OptionCtrlTextGreenifyColor,
-		OptionViewTextOverBackColor,
-		OptionFont,
-		OptionAddCoefFont,
-		OptionMulCoefAnim,
-		OptionTimeoutBubbles,
-		OptionTimeoutMessages,
-		OptionTimeoutContext,
-		OptionTimeoutContextHtml,
-
-		NumSystemOptions,
-	};
-
-	virtual void setupOptions();
-
-	/** Get a system option by its enum (faster than getOptions() and getVal())
-	 *	NB: array updated after each parseInterface()
-	 */
-	const CInterfaceOptionValue	&getSystemOption(TSystemOption o) const {return _SystemOptions[o];}
-
-	// @}
-
+	void setupOptions();
 
 	/** Open a MessageBox. this is a simple ModalWindow with a Ok button
 	 *	ui:interface:message_box must be defined in xml, with a "text" ViewText son
@@ -492,9 +461,6 @@ public:
 		float fTmp = ROLLOVER_MIN_DELTA_PER_MS + (ROLLOVER_MAX_DELTA_PER_MS - ROLLOVER_MIN_DELTA_PER_MS) * 0.01f * (100 - _AlphaRolloverSpeedDB->getValue32());
 		return fTmp*fTmp*fTmp;
 	}
-
-	// For single lined ViewText that are clipped: on over of viewText too big, the text is drawn on top. A CRefPtr is kept
-	void	setOverExtendViewText(CViewText *vt, NLMISC::CRGBA backGround);
 
 	// Item Carac Test, get the value
 	bool	isItemCaracRequirementMet(CHARACTERISTICS::TCharacteristics type, sint32 value)
@@ -730,9 +696,6 @@ private:
 	bool isControlInWindow (CCtrlBase *ctrl, CInterfaceGroup *pNewCurrentWnd);
 	uint getDepth (CCtrlBase *ctrl, CInterfaceGroup *pNewCurrentWnd);
 
-	// System Options
-	CInterfaceOptionValue	_SystemOptions[NumSystemOptions];
-
 	// Modes
 	CInterfaceConfig::CDesktopImage	_Modes[MAX_NUM_MODES];
 	uint8				_CurrentMode;
@@ -758,9 +721,6 @@ private:
 	NLMISC::CCDBNodeLeaf *_ErrorColor;
 	NLMISC::CCDBNodeLeaf *_AlphaRolloverSpeedDB;
 
-	// The next ViewText to draw for Over
-	NLMISC::CRefPtr<CInterfaceElement>	_OverExtendViewText;
-	NLMISC::CRGBA						_OverExtendViewTextBackColor;
 	void			drawOverExtendViewText();
 
 	CInterfaceGroup	*getWindowForActiveMasterGroup(const std::string &windowName);

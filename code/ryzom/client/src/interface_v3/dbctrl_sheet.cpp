@@ -2108,8 +2108,8 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 		curNoSheetColor= CRGBA(255,255,255, CWidgetManager::getInstance()->getGlobalColorForContent().A);
 
 	// The gray color
-	CRGBA	grayColor= pIM->getSystemOption(CInterfaceManager::OptionCtrlSheetGrayColor).getValColor();
-	CRGBA	redifyColor= pIM->getSystemOption(CInterfaceManager::OptionCtrlSheetRedifyColor).getValColor();
+	CRGBA	grayColor= CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlSheetGrayColor).getValColor();
+	CRGBA	redifyColor= CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlSheetRedifyColor).getValColor();
 
 	// The color of the number.
 	CRGBA	numberColor;

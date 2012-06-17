@@ -25,6 +25,7 @@
 #include "nel/misc/rgba.h"
 #include "nel/misc/types_nl.h"
 #include "nel/gui/interface_common.h"
+#include "nel/gui/interface_options.h"
 
 namespace NLMISC
 {
@@ -302,6 +303,45 @@ namespace NLGUI
 		// Get the User DblClick Delay (according to save...), in milisecond
 		uint getUserDblClickDelay();
 		
+		/// \name Global Interface Options
+		// @{
+		
+		// List of system options
+		enum TSystemOption{
+			OptionCtrlSheetGrayColor=0,
+			OptionCtrlTextGrayColor,
+			OptionCtrlSheetRedifyColor,
+			OptionCtrlTextRedifyColor,
+			OptionCtrlSheetGreenifyColor,
+			OptionCtrlTextGreenifyColor,
+			OptionViewTextOverBackColor,
+			OptionFont,
+			OptionAddCoefFont,
+			OptionMulCoefAnim,
+			OptionTimeoutBubbles,
+			OptionTimeoutMessages,
+			OptionTimeoutContext,
+			OptionTimeoutContextHtml,
+			NumSystemOptions
+		};
+		
+		void setupOptions();
+		/** Get a system option by its enum (faster than getOptions() and getVal())
+		 *  NB: array updated after each parseInterface()
+		 */
+		const CInterfaceOptionValue	&getSystemOption( TSystemOption o ) const{ return _SystemOptions[ o ]; }
+		
+		// @}
+
+		CInterfaceElement* getOverExtendViewText(){ return _OverExtendViewText; }
+		NLMISC::CRGBA& getOverExtendViewTextBackColor(){ return _OverExtendViewTextBackColor; }
+
+		// For single lined ViewText that are clipped: on over of viewText too big, the text is drawn on top. A CRefPtr is kept
+		void setOverExtendViewText( CInterfaceElement *vt, NLMISC::CRGBA backGround ){
+			_OverExtendViewText = vt;
+			_OverExtendViewTextBackColor = backGround;
+		}
+		
 		static IParser *parser;
 
 	private:
@@ -345,6 +385,13 @@ namespace NLGUI
 		NLMISC::CCDBNodeLeaf *_AProp;
 
 		bool _MouseHandlingEnabled;
+		
+		// System Options
+		CInterfaceOptionValue _SystemOptions[ NumSystemOptions ];
+		
+		// The next ViewText to draw for Over
+		NLMISC::CRefPtr< CInterfaceElement > _OverExtendViewText;
+		NLMISC::CRGBA _OverExtendViewTextBackColor;
 	};
 
 }

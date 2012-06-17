@@ -60,6 +60,7 @@ namespace NLGUI
 		_IsGroupContainer = false;
 		_IsGroupScrollText = false;
 		_IsGroupInScene = false;
+		_IsGroupList = false;
 		_AHOnActive = NULL;
 		_AHOnDeactive = NULL;
 		_AHOnLeftClick = NULL;

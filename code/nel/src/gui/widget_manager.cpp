@@ -1419,8 +1419,32 @@ namespace NLGUI
 		uint dbclickDelay = (uint)(DOUBLE_CLICK_MIN + (DOUBLE_CLICK_MAX-DOUBLE_CLICK_MIN) * (float)nVal / 100.0f);
 		return dbclickDelay;
 	}
-
-
+	
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::setupOptions()
+	{
+		// After parsing options and templates node -> init system options.
+		CInterfaceOptions *opt = getOptions( "system" );
+		if( opt != NULL )
+		{
+			// List here all Special options
+			_SystemOptions[OptionCtrlSheetGrayColor]= opt->getValue("ctrl_sheet_gray_color");
+			_SystemOptions[OptionCtrlTextGrayColor]= opt->getValue("ctrl_text_gray_color");
+			_SystemOptions[OptionCtrlSheetRedifyColor]= opt->getValue("ctrl_sheet_redify_color");
+			_SystemOptions[OptionCtrlTextRedifyColor]= opt->getValue("ctrl_text_redify_color");
+			_SystemOptions[OptionCtrlSheetGreenifyColor]= opt->getValue("ctrl_sheet_greenify_color");
+			_SystemOptions[OptionCtrlTextGreenifyColor]= opt->getValue("ctrl_text_greenify_color");
+			_SystemOptions[OptionViewTextOverBackColor]= opt->getValue("text_over_back_color");
+			_SystemOptions[OptionFont]= opt->getValue("font");
+			_SystemOptions[OptionAddCoefFont]= opt->getValue("add_coef_font");
+			_SystemOptions[OptionMulCoefAnim]= opt->getValue("mul_coef_anim");
+			_SystemOptions[OptionTimeoutBubbles]= opt->getValue("bubbles_timeout");
+			_SystemOptions[OptionTimeoutMessages]= opt->getValue("messages_timeout");
+			_SystemOptions[OptionTimeoutContext]= opt->getValue("context_timeout");
+			_SystemOptions[OptionTimeoutContextHtml]= opt->getValue("context_html_timeout");
+		}
+		
+	}
 
 	CWidgetManager::CWidgetManager()
 	{

@@ -22,6 +22,8 @@
 #include "nel/misc/debug.h"
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/rgba.h"
+#include "libxml/globals.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 namespace NL3D
 {

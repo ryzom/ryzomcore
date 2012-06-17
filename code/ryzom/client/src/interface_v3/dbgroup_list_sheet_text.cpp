@@ -506,8 +506,8 @@ void CDBGroupListSheetText::checkCoords ()
 		{
 			// The gray color
 			CRGBA	normalColor= _TextTemplate.getColor();
-			CRGBA	grayColor= pIM->getSystemOption(CInterfaceManager::OptionCtrlSheetGrayColor).getValColor();
-			CRGBA	redifyColor= pIM->getSystemOption(CInterfaceManager::OptionCtrlTextRedifyColor).getValColor();
+			CRGBA	grayColor= CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlSheetGrayColor).getValColor();
+			CRGBA	redifyColor= CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlTextRedifyColor).getValColor();
 			grayColor.modulateFromColor(grayColor, normalColor);
 			redifyColor.modulateFromColor(redifyColor, normalColor);
 

@@ -97,14 +97,14 @@ void addKeyLine (CGroupList *pParent, const ucstring &keyName, const ucstring &s
 	if (pViewKeyName != NULL)
 	{
 		pViewKeyName->setText (keyName);
-		pViewKeyName->setColor(grayed?pIM->getSystemOption(CInterfaceManager::OptionCtrlTextGrayColor).getValColor():CRGBA::White);
+		pViewKeyName->setColor(grayed?CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlTextGrayColor).getValColor():CRGBA::White);
 	}
 
 	CViewText *pViewShortcutName = dynamic_cast<CViewText*>(pKeysLine->getView(TEMPLATE_KEYS_SHORTCUT_NAME));
 	if (pViewShortcutName != NULL)
 	{
 		pViewShortcutName->setText (shortcutName);
-		pViewShortcutName->setColor(grayed?pIM->getSystemOption(CInterfaceManager::OptionCtrlTextGrayColor).getValColor():CRGBA::White);
+		pViewShortcutName->setColor(grayed?CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlTextGrayColor).getValColor():CRGBA::White);
 	}
 
 	pKeysLine->setParent (pParent);
