@@ -74,13 +74,19 @@
 		$DBc->sendSQL("DELETE FROM ach_player_valuecache WHERE NOT EXISTS (SELECT * FROM ach_monitor_character WHERE amc_character='apv_player')","NONE");
 	}
 
-	#MISSING: fetch candidates
+	// fetch candidates
 	if($MODE == "SINGLE") {
 		$chars = array();
 		$chars[] = array('amc_character',$CID);
 	}
 	else {
-		$chars = array();
+		#$chars = array();
+
+		$DBc->sendSQL("UPDATE ach_monitor_character SET amc_working='0' WHERE amc_last_import<'".(time()-60*60)."'"); // unlock if something went wrong
+
+		$DBc->sendSQL("UPDATE ach_monitor_character SET amc_working='".$RID."' WHERE amc_last_login>amc_last_import AND amc_working='0'","NONE");
+		
+		$chars = $DBc->sendSQL("SELECT amc_character FROM ach_monitor_character WHERE amc_working='".$RID."'","ARRAY");
 	}
 
 
@@ -105,13 +111,15 @@
 		$atom_list = array();
 
 		foreach($chars as $elem) {
+			$_DATA->freeData($elem['amc_character']);
+
 			#STEP 1: evaluate atoms
 
 			//get unfinished perks which have no parent or complete parent
 			$res = $DBc->sendSQL("SELECT ap_id FROM ach_perk WHERE (ap_parent IS NULL OR EXISTS (SELECT * FROM ach_player_perk WHERE app_player='".$elem['amc_character']."' AND app_perk=ap_parent)) AND (NOT EXISTS (SELECT * FROM ach_player_perk WHERE app_player='".$elem['amc_character']."' AND app_perk=ap_id))","ARRAY");
 			foreach($res as $perk) {
 				//get unfinished atoms belonging to unfinished objectives
-				$res = $DBc->sendSQL("","ARRAY");
+				$res = $DBc->sendSQL("SELECT ach_atom.* FROM ach_atom,ach_objective WHERE ao_perk='".$perk['ap_id']."' AND ao_id=atom_objective AND NOT EXISTS (SELECT * FROM ach_player_objective WHERE apo_player='".$elem['amc_character']."' AND apo_objective=ao_id)","ARRAY");
 				foreach($res2 as $atom) {
 					if(!isset($atom_list[$atom['atom_id']])) { // only load if not already cached
 						$atom_list[$atom['atom_id']] = new Atom($atom);
@@ -120,6 +128,10 @@
 					$atom_list[$atom['atom_id']]->evalRuleset($elem['amc_character']);
 				}
 			}
+
+			$_DATA->freeData($elem['amc_character']);
+
+			$DBc->sendSQL("UPDATE ach_monitor_character SET amc_last_import='".time()."', amc_working='0' WHERE amc_character='".$elem['amc_character']."' AND amc_working='".$RID."'","NONE");
 
 			#STEP 2: detect obj/perk progression
 			//obj
@@ -166,10 +178,6 @@
 		sleep($CONF['sleep_time']);
 	}
 
-	if($logfile) {
-		$logfile->write();
-	}
-
 	//self call if cron mode is on
 	if($MODE == "CRON" && $CONF['enable_selfcall'] == true) {
 		$DBc->sendSQL("UPDATE ach_monitor_state SET ams_end='".time()."' WHERE ams_id='".$RID."'","NONE");
@@ -186,6 +194,10 @@
 			fwrite($fp, $out);
 			fclose($fp);
 		}
+	}
+
+	if($logfile) {
+		$logfile->write();
 	}
 
 	exit(0);

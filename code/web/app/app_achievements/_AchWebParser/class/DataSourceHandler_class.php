@@ -17,39 +17,55 @@
 			}
 		}
 
-		function getData($ident,$field) {
-			$type = false;
-			$tmp = $this->getDataSource($field,$type);
-			if($tmp == false) {
-				return false;
+		function freeData($ident) {
+			foreach($source as $elem) {
+				$elem->freeData($ident);
 			}
-			return $tmp->getData($field,$ident,$type);
 		}
 
-		function writeData($ident,$field,$data) {
-			$type = false;
-			$tmp = $this->getDataSource($field,$type);
-			if($tmp == false) {
+		function getData($ident,$query) { // SELECT ? FROM c_items WHERE q>='300'
+			$matches = array();
+			preg_match("#SELECT (\?|\*) FROM ([^ ]+) WHERE ([.]*)#", $query, $matches);
+
+			$mode = $matches[1];
+			$type = $matches[2];
+			$cond = $matches[3];
+
+			$tmp = $this->getDataSource($type);
+			if($tmp == false) { // no datasource available for this ident
 				return false;
 			}
-			return $tmp->writeData($field,$ident,$data,$type);
+
+			return $tmp->getData($ident,$type,$mode,$cond);
+		}
+
+		function writeData($ident,$query) { // INSERT INTO c_cache () VALUES ()
+			$matches = array();
+			preg_match("#INSERT INTO ([^ ]+) \(([^\)]*)\) VALUES \(([^\)]*)\)#", $query, $matches);
+
+			$type = $matches[1];
+			$keys = $matches[2];
+			$data = $matches[3];
+
+			$tmp = $this->getDataSource($type);
+			if($tmp == false) { // no datasource available for this ident
+				return false;
+			}
+
+			if(!$tmp->isWriteable()) { // can't write here
+				return false;
+			}
+
+			return $tmp->writeData($ident,$type,$keys,$data);
 		}
 
 
-		private function getDataSource(&$field,&$type) {
-			$type = $field;
-			//allow wildcard datafields
-			$tmp = explode(":",$field);
-			if(sizeof($tmp) > 1) {
-				$field = $tmp[1];
-				$type = $tmp[0]."*";
-			}
-
-			if(!$this->alloc[$type]) {
+		private function getDataSource(&$ident) {
+			if(!$this->alloc[$ident]) {
 				return false; //unknown type
 			}
 
-			return $this->source[$this->alloc[$type]];
+			return $this->source[$this->alloc[$ident]];
 		}
 	}
 ?>
