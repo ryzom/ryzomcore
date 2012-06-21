@@ -19,6 +19,7 @@
 #define GROUP_CONTAINER_BASE_H
 
 #include "nel/gui/interface_group.h"
+#include "nel/misc/rgba.h"
 
 namespace NLGUI
 {
@@ -76,7 +77,10 @@ namespace NLGUI
 			REFLECT_STRING("on_alpha_settings_changed_aparams", getAHOnAlphaSettingsChangedParams, setAHOnAlphaSettingsChangedParams);
 		REFLECT_EXPORT_END
 
-			virtual bool isMoving() const{ return false; }
+		virtual bool isMoving() const{ return false; }
+
+		// Get the header color draw. NB: depends if grayed, and if active.
+		virtual NLMISC::CRGBA getDrawnHeaderColor () const{ return NLMISC::CRGBA(); };
 
 	protected:
 		void triggerAlphaSettingsChangedAH();

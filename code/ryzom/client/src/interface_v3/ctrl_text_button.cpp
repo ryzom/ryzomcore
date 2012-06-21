@@ -14,23 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
-
-#include "stdpch.h"
-
 #include "ctrl_text_button.h"
-#include "interface_manager.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/view_text.h"
 #include "nel/gui/view_text_id.h"
-#include "group_container.h"
+#include "nel/gui/group_container_base.h"
 #include "nel/gui/lua_ihm.h"
-#include "lua_ihm_ryzom.h"
+#include "nel/gui/widget_manager.h"
 
-
-// ***************************************************************************
 using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
@@ -69,7 +60,6 @@ CCtrlTextButton::CCtrlTextButton(const TCtorParam &param)
 bool CCtrlTextButton::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 {
 	CXMLAutoPtr prop;
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	//try to get props that can be inherited from groups
@@ -272,7 +262,6 @@ void CCtrlTextButton::draw ()
 	CViewRenderer::CTextureId *pTxId = NULL;
 	CRGBA  color;
 
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	CRGBA	globalColor= CWidgetManager::getInstance()->getGlobalColorForContent();
 
@@ -392,7 +381,7 @@ void CCtrlTextButton::draw ()
 		CInterfaceGroup		*pIG= getRootWindow();
 		if(pIG->isGroupContainer())
 		{
-			CGroupContainer		*pGC= static_cast<CGroupContainer*>(pIG);
+			CGroupContainerBase *pGC = static_cast<CGroupContainerBase*>(pIG);
 			viewTextColor= pGC->getDrawnHeaderColor();
 		}
 	}
