@@ -39,6 +39,7 @@
 #include "register_interface_elements.h"
 // Action / Observers
 #include "nel/gui/action_handler.h"
+#include "action_handler_misc.h"
 #include "interface_observer.h"
 #include "interface_anim.h"
 #include "interface_ddx.h"
@@ -51,6 +52,7 @@
 #include "view_bitmap_combo.h"
 #include "nel/gui/view_text.h"
 #include "nel/gui/view_text_id.h"
+#include "view_text_formated.h"
 // Ctrl
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/ctrl_button.h"
@@ -265,9 +267,127 @@ class CStringManagerTextProvider : public CViewTextID::IViewTextProvider
 	}
 };
 
+class CRyzomTextFormatter : public CViewTextFormated::IViewTextFormatter
+{
+public:
+	ucstring formatString( const ucstring &inputString, const ucstring &paramString )
+	{
+		ucstring formatedResult;
+
+		// Apply the format
+		for(ucstring::const_iterator it = inputString.begin(); it != inputString.end();)
+		{
+			if (*it == '$')
+			{
+				++it;
+				if (it == inputString.end())
+					break;
+
+				switch(*it)
+				{
+				case 't': // add text ID
+					formatedResult += paramString;
+					break;
+				
+				case 'P':
+				case 'p':  // add player name
+					if (ClientCfg.Local)
+					{
+						formatedResult += ucstring("player");
+					}
+					else
+					{
+						if(UserEntity)
+						{
+							ucstring name = UserEntity->getEntityName();
+							if (*it == 'P') setCase(name, CaseUpper);
+							formatedResult += name;
+						}
+					}
+					break;
+					//
+				case 's':
+				case 'b': // add bot name
+					{
+						ucstring botName;
+						bool womanTitle = false;
+						if (ClientCfg.Local)
+						{
+							botName = ucstring("NPC");
+						}
+						else
+						{
+							CLFECOMMON::TCLEntityId trader = CLFECOMMON::INVALID_SLOT;
+							if(UserEntity)
+								trader = UserEntity->trader();
+							if (trader != CLFECOMMON::INVALID_SLOT)
+							{
+								CEntityCL *entity = EntitiesMngr.entity(trader);
+								if (entity != NULL)
+								{
+									uint32 nDBid = entity->getNameId();
+									if (nDBid != 0)
+									{
+										STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
+										pSMC->getString(nDBid, botName);
+									}
+									else
+									{
+										botName = entity->getDisplayName();
+									}
+									CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(entity);
+									if (pChar != NULL)
+										womanTitle = pChar->getGender() == GSGENDER::female;
+								}
+							}
+						}
+						// get the title translated
+						ucstring sTitleTranslated = botName;
+						CStringPostProcessRemoveName spprn;
+						spprn.Woman = womanTitle;
+						spprn.cbIDStringReceived(sTitleTranslated);
+
+						botName = CEntityCL::removeTitleAndShardFromName(botName);
+
+						// short name (with no title such as 'guard', 'merchant' ...)
+						if (*it == 's')
+						{
+							// But if there is no name, display only the title
+							if (botName.empty())
+								botName = sTitleTranslated;
+						}
+						else
+						{
+							// Else we want the title !
+							if (!botName.empty())
+								botName += " ";
+							botName += sTitleTranslated;
+						}
+
+						formatedResult += botName;
+					}
+					break;
+					default:
+						formatedResult += (ucchar) '$';
+					break;
+				}
+				++it;
+			}
+			else
+			{
+				formatedResult += (ucchar) *it;
+				++it;
+			}
+		}
+
+		return formatedResult;
+	}
+};
+
 namespace
 {
 	CStringManagerTextProvider SMTextProvider;
+	CRyzomTextFormatter RyzomTextFormatter;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -282,7 +402,7 @@ CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext 
 	CViewRenderer::hwCursors     = &ClientCfg.HardwareCursors;
 	CViewRenderer::getInstance();
 	CViewTextID::setTextProvider( &SMTextProvider );
-	
+	CViewTextFormated::setFormatter( &RyzomTextFormatter );
 
 	_Instance = this;
 	NLGUI::CDBManager::getInstance()->resizeBanks( NB_CDB_BANKS );
@@ -363,6 +483,7 @@ CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext 
 CInterfaceManager::~CInterfaceManager()
 {
 	CViewTextID::setTextProvider( NULL );
+	CViewTextFormated::setFormatter( NULL );
 	reset(); // to flush IDStringWaiters
 
 	_ParentPositionsMap.clear();

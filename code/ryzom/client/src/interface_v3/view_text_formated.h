@@ -32,6 +32,14 @@
 class CViewTextFormated : public  CViewText
 {
 public:
+
+	class IViewTextFormatter
+	{
+	public:
+		virtual ~IViewTextFormatter(){}
+		virtual ucstring formatString( const ucstring &inputString, const ucstring &paramString ) = 0;
+	};
+
 	CViewTextFormated (const TCtorParam &param) : CViewText(param)
 	{}
 	virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
@@ -40,8 +48,12 @@ public:
 	void setFormatString(const ucstring &format);
 
 	static ucstring formatString(const ucstring &inputString, const ucstring &paramString);
+
+	static void setFormatter( IViewTextFormatter *formatter ){ textFormatter = formatter; }
+
 private:
 	ucstring	_FormatString;
+	static IViewTextFormatter *textFormatter;
 };
 
 
