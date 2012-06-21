@@ -26,7 +26,7 @@
 #include "nel/gui/action_handler.h"
 #include "group_container.h"
 #include "dbctrl_sheet.h"
-#include "view_text_id.h"
+#include "nel/gui/view_text_id.h"
 #include "../net_manager.h"
 
 using namespace std;

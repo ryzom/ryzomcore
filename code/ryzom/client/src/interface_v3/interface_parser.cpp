@@ -41,7 +41,7 @@
 #include "view_bitmap_combo.h"
 #include "nel/gui/view_text.h"
 #include "view_text_formated.h"
-#include "view_text_id.h"
+#include "nel/gui/view_text_id.h"
 #include "view_text_id_formated.h"
 #include "view_radar.h"
 #include "view_pointer.h"

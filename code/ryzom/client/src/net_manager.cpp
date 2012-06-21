@@ -57,7 +57,7 @@
 #include "interface_v3/people_interraction.h"
 #include "interface_v3/bot_chat_manager.h"
 #include "interface_v3/bot_chat_page_all.h"
-#include "interface_v3/view_text_id.h"
+#include "nel/gui/view_text_id.h"
 #include "interface_v3/ctrl_text_button.h"
 #include "interface_v3/input_handler_manager.h"
 #include "interface_v3/guild_manager.h"

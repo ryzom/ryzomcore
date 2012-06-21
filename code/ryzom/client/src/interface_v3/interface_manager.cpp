@@ -50,7 +50,7 @@
 #include "view_bitmap_faber_mp.h"
 #include "view_bitmap_combo.h"
 #include "nel/gui/view_text.h"
-#include "view_text_id.h"
+#include "nel/gui/view_text_id.h"
 // Ctrl
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/ctrl_button.h"

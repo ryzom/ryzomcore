@@ -29,7 +29,7 @@
 #include "group_container.h"
 #include "group_editbox.h"
 #include "group_quick_help.h"
-#include "view_text_id.h"
+#include "nel/gui/view_text_id.h"
 #include "../user_entity.h"
 #include "../entities.h"
 #include "dbgroup_combo_box.h"

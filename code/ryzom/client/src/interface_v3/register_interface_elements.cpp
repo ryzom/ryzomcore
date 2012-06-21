@@ -21,7 +21,7 @@
 #include "interface_3d_scene.h"
 #include "nel/gui/view_base.h"
 #include "nel/gui/view_text.h"
-#include "view_text_id.h"
+#include "nel/gui/view_text_id.h"
 #include "view_bitmap.h"
 #include "view_radar.h"
 #include "nel/gui/group_submenu_base.h"

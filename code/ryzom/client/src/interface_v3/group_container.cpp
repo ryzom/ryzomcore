@@ -28,7 +28,7 @@
 #include "../time_client.h"
 #include "group_editbox.h"
 #include "view_text_formated.h"
-#include "view_text_id.h"
+#include "nel/gui/view_text_id.h"
 #include "nel/gui/lua_ihm.h"
 
 #include "group_list.h"
