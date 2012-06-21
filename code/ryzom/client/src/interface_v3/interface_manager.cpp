@@ -52,7 +52,7 @@
 #include "view_bitmap_combo.h"
 #include "nel/gui/view_text.h"
 #include "nel/gui/view_text_id.h"
-#include "view_text_formated.h"
+#include "nel/gui/view_text_formated.h"
 // Ctrl
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/ctrl_button.h"

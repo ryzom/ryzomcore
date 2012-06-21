@@ -18,7 +18,7 @@
 
 #include "stdpch.h"
 #include "view_text_id_formated.h"
-#include "view_text_formated.h"
+#include "nel/gui/view_text_formated.h"
 #include "../string_manager_client.h"
 #include "../user_entity.h"
 #include "../entities.h"
