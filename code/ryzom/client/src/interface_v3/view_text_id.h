@@ -23,7 +23,7 @@
 #include "nel/gui/view_text.h"
 
 namespace NLMISC{
-class CCDBNodeLeaf;
+	class CCDBNodeLeaf;
 }
 
 // ***************************************************************************
@@ -45,6 +45,15 @@ public:
 class CViewTextID : public CViewText
 {
 public:
+	
+	/// Interface for classes that can provide text to CViewTextId
+	class IViewTextProvider
+	{
+	public:
+		virtual ~IViewTextProvider(){}
+		virtual bool getString( uint32 stringId, ucstring &result ) = 0;
+		virtual bool getDynString( uint32 dynStringId, ucstring &result ) = 0;
+	};
 
 	CViewTextID(const TCtorParam &param) : CViewText(param)
 	{
@@ -109,6 +118,8 @@ public:
 		REFLECT_STRING("textid_dblink", getTextIdDbLink, setTextIdDbLink);
 	REFLECT_EXPORT_END
 
+	static void setTextProvider( IViewTextProvider *provider ){ textProvider = provider; }
+
 protected:
 
 	bool					_IsDBLink;
@@ -129,6 +140,9 @@ protected:
 	#if defined(NL_DEBUG)
 	std::string				_DBPath;
 	#endif
+
+private:
+	static IViewTextProvider *textProvider;
 
 };
 

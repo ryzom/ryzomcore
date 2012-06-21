@@ -14,23 +14,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
-#include "stdpch.h"
-
-#include "interface_manager.h"
-#include "../string_manager_client.h"
+#include "nel/gui/db_manager.h"
 #include "view_text_id.h"
 #include "nel/misc/xml_auto_ptr.h"
-#include "../client_cfg.h"
 #include "nel/misc/algo.h"
 
 using namespace std;
-using namespace STRING_MANAGER;
 using NLMISC::CCDBNodeLeaf;
 
 NLMISC_REGISTER_OBJECT(CViewBase, CViewTextID, std::string, "text_id");
+
+CViewTextID::IViewTextProvider* CViewTextID::textProvider = NULL;
 
 // ***************************************************************************
 CViewTextID::CViewTextID(const std::string& id,const std::string &/* idDBPath */, sint FontSize /*=12*/,NLMISC::CRGBA Color /*=NLMISC::CRGBA(255,255,255)*/,bool Shadow /*=false*/)
@@ -116,13 +110,15 @@ void CViewTextID::checkCoords()
 	{
 		// String result
 		ucstring result;
-		CStringManagerClient *pSMC = CStringManagerClient::instance();
 
-		// Get the string
-		if (_DynamicString)
-			_Initialized = pSMC->getDynString (_TextId, result);
-		else
-			_Initialized = pSMC->getString (_TextId, result);
+		if( textProvider != NULL )
+		{
+			// Get the string
+			if( _DynamicString )
+				_Initialized = textProvider->getDynString( _TextId, result );
+			else
+				_Initialized = textProvider->getString( _TextId, result );
+		}
 
 		// Remove all {break}
 		for(;;)

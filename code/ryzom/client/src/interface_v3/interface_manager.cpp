@@ -50,6 +50,7 @@
 #include "view_bitmap_faber_mp.h"
 #include "view_bitmap_combo.h"
 #include "nel/gui/view_text.h"
+#include "view_text_id.h"
 // Ctrl
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/ctrl_button.h"
@@ -250,6 +251,25 @@ int CInterfaceManager::DebugTrackGroupsGetId( CInterfaceGroup *pIG )
 
 #endif // AJM_DEBUG_TRACK_INTERFACE_GROUPS
 
+
+class CStringManagerTextProvider : public CViewTextID::IViewTextProvider
+{
+	bool getString( uint32 stringId, ucstring &result )
+	{
+		return STRING_MANAGER::CStringManagerClient::instance()->getString( stringId, result );
+	}
+
+	bool getDynString( uint32 dynStringId, ucstring &result )
+	{
+		return STRING_MANAGER::CStringManagerClient::instance()->getDynString( dynStringId, result );
+	}
+};
+
+namespace
+{
+	CStringManagerTextProvider SMTextProvider;
+}
+
 // ------------------------------------------------------------------------------------------------
 CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext *textcontext )
 {
@@ -261,6 +281,8 @@ CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext 
 	CViewRenderer::hwCursorScale = ClientCfg.HardwareCursorScale;
 	CViewRenderer::hwCursors     = &ClientCfg.HardwareCursors;
 	CViewRenderer::getInstance();
+	CViewTextID::setTextProvider( &SMTextProvider );
+	
 
 	_Instance = this;
 	NLGUI::CDBManager::getInstance()->resizeBanks( NB_CDB_BANKS );
@@ -340,6 +362,7 @@ CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext 
 // ------------------------------------------------------------------------------------------------
 CInterfaceManager::~CInterfaceManager()
 {
+	CViewTextID::setTextProvider( NULL );
 	reset(); // to flush IDStringWaiters
 
 	_ParentPositionsMap.clear();
