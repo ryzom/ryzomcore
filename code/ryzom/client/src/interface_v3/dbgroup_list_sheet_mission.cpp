@@ -19,7 +19,7 @@
 #include "game_share/mission_desc.h"
 
 #include "dbgroup_list_sheet_mission.h"
-#include "view_text_id_formated.h"
+#include "nel/gui/view_text_id_formated.h"
 #include "nel/misc/cdb_leaf.h"
 #include "interface_manager.h"
 

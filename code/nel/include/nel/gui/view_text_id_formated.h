@@ -29,22 +29,23 @@
   * $b -> expand the current bot name ( bot with which the player is talking)
   * $s -> expand the current short bot name (with no specification/title in it)
   */
-class CViewTextIDFormated : public  CViewTextID
+
+namespace NLGUI
 {
-public:
-	CViewTextIDFormated(const TCtorParam &param) : CViewTextID(param)
-	{}
-	virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
-	virtual void checkCoords();
-	const  ucstring &getFormatString() const { return _FormatString; }
-	void setFormatString(const ucstring &format);
-private:
-	ucstring	_FormatString;
-};
 
+	class CViewTextIDFormated : public  CViewTextID
+	{
+	public:
+		CViewTextIDFormated(const TCtorParam &param) : CViewTextID(param)
+		{}
+		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
+		virtual void checkCoords();
+		const  ucstring &getFormatString() const { return _FormatString; }
+		void setFormatString(const ucstring &format);
+	private:
+		ucstring	_FormatString;
+	};
 
-
-
-
+}
 
 #endif
