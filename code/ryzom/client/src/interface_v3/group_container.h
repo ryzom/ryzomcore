@@ -31,7 +31,6 @@ namespace NLGUI
 	class CViewText;
 }
 
-class CInterfaceList;
 class COptionsContainerInsertion;
 class COptionsContainerMove;
 class CGroupContainer;
@@ -366,9 +365,6 @@ public:
 
 	sint32 getRefW() const { return _RefW; }
 
-	uint8  getCurrentContainerAlpha() const { return _CurrentContainerAlpha; }
-	uint8  getCurrentContentAlpha() const { return _CurrentContentAlpha; }
-
 	/** Increase the rollover alpha for the current frame.
 	  * Example of use : an edit box that has focus in a group container
 	  */
@@ -463,8 +459,6 @@ public:
 	sint32				getTitleDeltaMaxW() const { return _TitleDeltaMaxW; }
 
 protected:
-	uint8				_CurrentContainerAlpha;
-	uint8				_CurrentContentAlpha;
 	uint8				_ICurrentRolloverAlphaContainer;
 	uint8				_HighLightedAlpha;
 	float				_CurrentRolloverAlphaContainer;

@@ -16,16 +16,11 @@
 
 
 
-// ----------------------------------------------------------------------------
-
-#include "stdpch.h"
-
 #include "view_bitmap.h"
-#include "interface_manager.h"
 #include "nel/misc/xml_auto_ptr.h"
-#include "group_container.h"
-
-// ----------------------------------------------------------------------------
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/group_container_base.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -144,7 +139,6 @@ bool CViewBitmap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 // ----------------------------------------------------------------------------
 void CViewBitmap::draw ()
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	CRGBA col;
@@ -166,7 +160,7 @@ void CViewBitmap::draw ()
 		{
 			if (gr->isGroupContainer())
 			{
-				CGroupContainer *gc = static_cast<CGroupContainer *>(gr);
+				CGroupContainerBase *gc = static_cast<CGroupContainerBase*>(gr);
 				col.A = (uint8)(((sint32)col.A*((sint32)gc->getCurrentContainerAlpha()+1))>>8);
 				break;
 			}
@@ -208,7 +202,6 @@ void CViewBitmap::updateCoords()
 {
 	if (!_Scale)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		sint32 txw, txh;
 		rVR.getTextureSizeFromId (_TextureId, txw, txh);
@@ -230,7 +223,6 @@ void CViewBitmap::setTexture(const std::string & TxName)
 // ----------------------------------------------------------------------------
 std::string CViewBitmap::getTexture () const
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	return rVR.getTextureNameFromId (_TextureId);
 }
@@ -238,7 +230,6 @@ std::string CViewBitmap::getTexture () const
 // ***************************************************************************
 void CViewBitmap::fitTexture()
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	sint32 w, h;
 	rVR.getTextureSizeFromId(_TextureId, w, h);
@@ -286,7 +277,6 @@ NLMISC::CRGBA CViewBitmap::getColorRGBA() const
 sint32	CViewBitmap::getMaxUsedW() const
 {
 	sint32 txw, txh;
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	rVR.getTextureSizeFromId (_TextureId, txw, txh);
 	return txw;

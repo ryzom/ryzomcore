@@ -23,6 +23,8 @@ namespace NLGUI
 	CGroupContainerBase::CGroupContainerBase( const CViewBase::TCtorParam &param ) :
 	CInterfaceGroup( param )
 	{
+		_CurrentContainerAlpha = 255;
+		_CurrentContentAlpha = 255;
 		_ContentAlpha = 255;
 		_ContainerAlpha = 255;
 		_RolloverAlphaContainer = 0;

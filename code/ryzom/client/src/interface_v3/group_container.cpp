@@ -1201,8 +1201,6 @@ CGroupContainer::CGroupContainer(const TCtorParam &param)
 	// faster than a virual call
 	_IsGroupContainer = true;
 
-	_CurrentContainerAlpha = 255;
-	_CurrentContentAlpha = 255;
 	_CurrentRolloverAlphaContainer = 0.f;
 	_CurrentRolloverAlphaContent = 0.f;
 

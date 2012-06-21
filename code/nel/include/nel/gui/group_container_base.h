@@ -81,10 +81,15 @@ namespace NLGUI
 
 		// Get the header color draw. NB: depends if grayed, and if active.
 		virtual NLMISC::CRGBA getDrawnHeaderColor () const{ return NLMISC::CRGBA(); };
+		
+		uint8 getCurrentContainerAlpha() const{ return _CurrentContainerAlpha; }
+		uint8 getCurrentContentAlpha() const{ return _CurrentContentAlpha; }
 
 	protected:
 		void triggerAlphaSettingsChangedAH();
-
+		
+		uint8 _CurrentContainerAlpha;
+		uint8 _CurrentContentAlpha;
 		uint8 _ContainerAlpha;
 		uint8 _ContentAlpha;
 		uint8 _RolloverAlphaContainer; // Alpha for the window when mouse not over it

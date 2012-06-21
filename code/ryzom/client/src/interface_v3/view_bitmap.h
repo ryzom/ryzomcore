@@ -133,7 +133,6 @@ protected:
 	sint32	_TxtWidth;			// Width of the single texture
 	sint32	_TxtHeight;			// Height of the single texture
 
-	friend class CInterfaceList;
 };
 
 
