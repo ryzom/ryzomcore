@@ -15,11 +15,15 @@
 
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
-				$tmp = new AchAchievement($res[$i]);
+				$tmp = $this->makeChild($res[$i]);
 
 				$this->child_done[] = sizeof($this->nodes);
 				$this->nodes[] = $tmp;
 			}
+		}
+
+		private function makeChild(&$a) {
+			return new AchAchievement($a);
 		}
 
 		function getSummary() {

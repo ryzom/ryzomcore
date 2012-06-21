@@ -1,4 +1,46 @@
 <?php
+	function ach_render() {
+		global $user;
+
+		$c = "<table>
+			<tr>
+				<td>".ach_render_yubopoints($user['id'])."</td>
+			</tr>
+		</table>
+			
+		<table>
+			<tr>
+				<td width='230px'>";
+				
+					$menu = new AchMenu($_REQUEST['cat']);
+
+					$c .= ach_render_menu($menu);
+				
+				$c .= "</td>
+				<td width='455px'>";
+
+					$open = $menu->getOpenCat();
+
+					if($open != 0) {
+						$cat = new AchCategory($open,$_REQUEST['cult'],$_REQUEST['civ']);
+					}
+					else {
+						$cat = new AchSummary($menu,8);
+						$c .= ach_render_summary_header();
+					}
+
+					$c .= ach_render_category($cat);
+					if($open == 0) {
+						$c .= ach_render_summary_footer($cat);
+					}
+
+				$c .= "</td>
+					</tr>
+				</table>";
+
+		return $c;
+	}
+
 	function ach_render_tiebar($cult = "c_neutral", $civ = "c_neutral",&$cat) {
 		global $_USER;
 
@@ -36,8 +78,6 @@
 		</form></div>
 		
 		<div style='display:block;font-weight:bold;font-size:20px;color:#FFFFFF;text-align:center;margin-bottom:5px;'>";
-
-		#ERROR: big flaw in logics if only one tie applies
 
 		if($cat->isTiedCult() && !$cat->isTiedCiv() && $cult == "c_neutral") { // neutral / xx
 			#While being of neutral allegiance with the higher powers
@@ -78,7 +118,7 @@
 
 		$res = $DBc->sqlQuery("SELECT sum(ap_value) as anz FROM ach_perk,ach_player_perk WHERE ap_id=app_perk AND app_player='".$_USER->getID()."'");
 
-		$html = "<div style='display:block;border-bottom:1px solid #000000;'><span style='font-size:32px;'>".$_USER->getName()."&nbsp;<img src='pic/yubo_done.png'>&nbsp;".$res[0]['anz']."</span></div>";
+		$html = "<font size='32px'>".$_USER->getName()."&nbsp;<img src='http://www.3025-game.de/special/app_achievements/pic/yubo_done.png'>&nbsp;".$res[0]['anz']."</font>";
 
 		return $html;
 	}
@@ -92,50 +132,45 @@
 	}
 
 	function ach_render_menu(&$menu,$sub = 0) {
-		$html = "<style>
-				.ach_menu {
-					display:block;
-					padding:2px;
-					border:1px solid #000000;
-					margin-bottom:2px;
-					color:#FFFFFF;
-				}
-				.ach_menu:hover {
-					color:orange;
-				}
-
-				.ach_mspan a {
-					text-decoration:none;
-				}
-				</style>";
-
+		$html = "";
+		if($sub == 0) {
+			$html = "<table cellpadding='2px'>";
+		}
 		$sz = $menu->getSize();
 		for($i=0;$i<$sz;$i++) {
 			$curr = $menu->getChild($i);
 			if($curr->inDev()) {
 				continue;
 			}
-			$html .= "<span class='ach_mspan'><a href='?lang=en&cat=".$curr->getID()."'><table class='ach_menu'>
-				<tr>";
+			$html .= "<tr><td></td><td bgcolor='#000000'></td></tr>
+				<tr><td>";
 					if($sub == 0) {
-						$html .= "<td><img src='pic/menu/test.png' /></td>";
+						$html .= "<img src='http://www.3025-game.de/special/app_achievements/pic/menu/ig_".$curr->getImage()."' />";
 					}
-					$html .= "<td style='font-size:".(20-$sub)."px;font-weight:bold;";
+					else {
+						$html .= "<img src='http://www.3025-game.de/special/app_achievements/pic/menu_space.png' />";
+					}
+					$html .= "</td><td><a href='?lang=en&cat=".$curr->getID()."'><font size='".(16-$sub)."px'";
 					if($curr->isOpen()) {
-						$html .= "color:orange;";
+						$html .= " color='orange'";
 					}
-					$html .= "'>".$curr->getName()."</td>
-				</tr>
-			</table></a></span>";
+					$html .= "><b>".$curr->getName()."</b></font></a></td>
+				</tr>";
+
 			if($curr->hasOpenCat() != 0) {
-				$html .= "<div style='display:block;margin-left:25px;'>".ach_render_menu($curr,($sub+4))."</div>";
+				$html .= ach_render_menu($curr,($sub+4));
 			}
+		}
+		
+		if($sub == 0) {
+			$html .= "<tr><td></td><td bgcolor='#000000'></td></tr></table>";
 		}
 
 		return $html;
 	}
 
 	function ach_render_category(&$cat) {
+		#return "";
 		$html = "";
 
 		if($cat->isTiedCult() || $cat->isTiedCiv()) {
@@ -166,9 +201,25 @@
 	}
 
 	function ach_render_achievement_done(&$ach) {
-		$html = "";
+		$html = "
+		<table>
+			<tr>
+				<td  width='450px' bgcolor='#D2CBDC88'>
+					<table width='450px' cellpadding='3px'>
+						<tr>
+							<td width='70px'><img src='http://www.3025-game.de/special/app_achievements/pic/icon/".$ach->getImage()."'></td>
+							<td><center><font size='22px'><b>".$ach->getName()."</b></font></center>
+								<table>".ach_render_perk_done($ach)."</table>
+							</td>
+							<td width='35px'><font size='24px' color='#000000'>".$ach->getValueDone()."</font><br><img src='http://www.3025-game.de/special/app_achievements/pic/yubo_done.png'></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr><td>&nbsp;</td></tr>
+		</table>";
 
-		$html .= '<div style="display: block; margin-bottom: 5px;"><table cellpadding="0" cellspacing="0" width="100%">
+		/*$html .= '<div style="display: block; margin-bottom: 5px;"><table cellpadding="0" cellspacing="0" width="100%">
 					<tbody><tr>
 						<td width="3px"><img src="pic/bar_done_ul.png"></td>
 						<td style="background-image: url(pic/bar_done_u.png);"></td>
@@ -179,7 +230,7 @@
 						<td style="background-image: url(pic/bar_done_bg.png);">
 							<center><table width="100%" cellspacing="0" cellpadding="0">
 								<tbody><tr>
-									<td rowspan="2" valign="top"><img src="pic/icon/test.png"></td>
+									<td rowspan="2" valign="top"><img src="pic/icon/'.$ach->getImage().'"></td>
 									<td width="100%"><center><span style="font-weight:bold;font-size:24px;color:#000000;">'.$ach->getName().'</span></center></td>
 									<td rowspan="2" valign="top" style="font-weight: bold; text-align: center; font-size: 30px;color:#000000;padding-right:10px;">
 										'.$ach->getValueDone().'<br><img src="pic/yubo_done.png">
@@ -195,7 +246,7 @@
 						<td style="background-image: url(pic/bar_done_b.png);"></td>
 						<td><img src="pic/bar_done_br.png"></td>
 					</tr>
-				</tbody></table></div>';
+				</tbody></table></div>';*/
 
 		return $html;
 	}
@@ -203,7 +254,25 @@
 	function ach_render_achievement_open(&$ach) {
 		$html = "";
 
-		$html .= '<div style="display: block; margin-bottom: 5px;"><table cellpadding="0" cellspacing="0" width="100%">
+		$html = "
+		<table>
+			<tr>
+				<td  width='450px' bgcolor='#D2CBDC33'>
+					<table width='450px' cellpadding='3px'>
+						<tr>
+							<td width='70px'><img src='http://www.3025-game.de/special/app_achievements/pic/icon/".$ach->getImage()."'></td>
+							<td><center><font size='22px'><b>".$ach->getName()."</b></font></center>
+								<table>".ach_render_perk_open($ach)."</table>
+							</td>
+							<td width='35px'><font size='22px' color='#000000'>".$ach->getValueOpen()."</font><br><img src='http://www.3025-game.de/special/app_achievements/pic/yubo_pending.png'></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr><td>&nbsp;</td></tr>
+		</table>";
+
+		/*$html .= '<div style="display: block; margin-bottom: 5px;"><table cellpadding="0" cellspacing="0" width="100%">
 					<tbody><tr>
 						<td width="3px"><img src="pic/bar_pending_ul.png"></td>
 						<td style="background-image: url(pic/bar_pending_u.png);"></td>
@@ -214,7 +283,7 @@
 						<td>
 							<center><table width="100%" cellspacing="0" cellpadding="0">
 								<tbody><tr>
-									<td rowspan="2" valign="top"><img src="pic/icon/test.png"></td>
+									<td rowspan="2" valign="top"><img src="pic/icon/'.$ach->getImage().'"></td>
 									<td width="100%"><center><span style="font-weight:bold;font-size:24px;color:#FFFFFF;">'.$ach->getName().'</span></center></td>
 									<td rowspan="2" valign="top" style="font-weight: bold; text-align: center; font-size: 30px;color:#FFFFFF;padding-right:10px;">
 										'.$ach->getValueOpen().'<br><img src="pic/yubo_pending.png">
@@ -230,7 +299,7 @@
 						<td style="background-image: url(pic/bar_pending_b.png);"></td>
 						<td><img src="pic/bar_pending_br.png"></td>
 					</tr>
-				</tbody></table></div>';
+				</tbody></table></div>';*/
 
 		return $html;
 	}
@@ -248,10 +317,10 @@
 		}
 		
 		if($perk->getName() != null) {
-			$html .= "<span style='color:#999999;font-weight:bold;display:block;'>".$perk->getName()."</span>";
+			$html .= "<tr><td><font color='#999999' size='12px'><b>".$perk->getName()."</b></font></td></tr><tr><td>&nbsp;</td></tr>";
 		}
 		if($perk->objDrawable()) {
-			$html .= ach_render_obj_list($perk->getChildren());
+			$html .= "<tr><td>".ach_render_obj_list($perk->getChildren())."</td></tr>";
 		}
 
 		return $html;
@@ -267,14 +336,14 @@
 			if($perk->inDev()) {
 				continue;
 			}
-			$html .= "<div style='display:block;'><span style='color:#66CC00;font-weight:bold;'>".$perk->getName()."</span> ( ".date('d.m.Y',$perk->getDone())." ) <img src='pic/yubo_done.png' width='15px' /> ".$perk->getValue()."</div>";
+			$html .= "<tr><td><font color='#66CC00'><b>".$perk->getName()."</b></font> ( ".date('d.m.Y',$perk->getDone())." ) <img src='http://www.3025-game.de/special/app_achievements/pic/yubo_done_small.png' /> ".$perk->getValue()."</td></tr>";
 		}
 
 		return $html;
 	}
 
 	function ach_render_obj_list(&$obj) {
-		$html = "<center><table width='90%'>";
+		$html = "<table width='90%'>";
 
 		$i = 0;
 		$skip = false;
@@ -320,7 +389,7 @@
 			$html .= "</tr>";
 		}
 
-		$html .= "</table></center>";
+		$html .= "</table>";
 
 		return $html;
 	}
@@ -328,13 +397,13 @@
 	function ach_render_obj_simple(&$obj) {
 		$html = "";
 		if($obj->isdone()) {
-			$html .= "<img src='pic/check.png' height='10px' />&nbsp;<span style='color:#71BE02;'>";
+			$html .= "<img src='http://www.3025-game.de/special/app_achievements/pic/check.png' height='10px' />&nbsp;<font color='#71BE02;'>";
 		}
 		else {
-			$html .= "<img src='pic/pending.png' height='10px' />&nbsp;<span style='color:#999999;'>";
+			$html .= "<img src='http://www.3025-game.de/special/app_achievements/pic/pending.png' height='10px' />&nbsp;<font color='#999999;'>";
 		}
 		
-		$html .= $obj->getName()."</span>";
+		$html .= $obj->getName()."</font>";
 
 		return $html;
 	}
@@ -352,8 +421,8 @@
 
 		return "<table cellspacing='0' cellpadding='0'>
 				<tr>
-					<td><img src='pic/icon/".$grey."test.png' width='20px' /></td>
-					<td valign='middle'><span style='color:".$col.";'>&nbsp;".$obj->getName()."</span></td>
+					<td><img src='http://www.3025-game.de/special/app_achievements/pic/icon/".$grey."small/test.png' /></td>
+					<td><font color='".$col."'>&nbsp;".$obj->getName()."</font></td>
 				</tr>
 			</table>";
 	}
@@ -367,10 +436,10 @@
 			else {
 				$col = "#999999";
 			}
-			$html .= "<div style='color:".$col.";display:block;'>".$obj->getName()."</div>";
+			$html .= "<font color='".$col."'>".$obj->getName()."</font>";
 		}
 
-		$html .= ach_render_progressbar($obj->getProgress(),$obj->getValue(),350);
+		$html .= ach_render_progressbar($obj->getProgress(),$obj->getValue(),250);
 		
 		return $html;
 	}
@@ -378,20 +447,26 @@
 	function ach_render_progressbar($prog,$val,$width) {
 		$val = max(1,$val);
 		$left = floor($width*(100*($prog/$val))/100);
+		$left = max(1,$left);
 
-		$html = "
-		<table width='".$width."px' cellspacing='0' cellpadding='0' style='border:1px solid #FFFFFF;color:#000000;'>
+		$html = "<table width='".($width+12)."px'>
 			<tr>
-				<td bgcolor='#66CC00' width='".$left."px' align='right'>";
+				<td width='10px'></td>
+				<td><table cellpadding='1px' width='".($width+2)."px'><tr><td bgcolor='#FFFFFF'>
+		<table width='".$width."px' cellspacing='0' cellpadding='0'>
+			<tr>
+				<td bgcolor='#66CC00' width='".$left."px'><font color='#000000'>";
 				if(($prog/$val) > 0.85) {
 					$html .= "&nbsp;".nf($prog)." / ".nf($val)."&nbsp;";
 				}
-				$html .= "</td>
-				<td align='left' style='color:#FFFFFF;'>";
+				$html .= "</font></td>
+				<td align='left' bgcolor='#00000066'><font color='#FFFFFF'>";
 				if(($prog/$val) <= 0.85) {
 					$html .= "&nbsp;".nf($prog)." / ".nf($val)."&nbsp;";
 				}
-				$html .= "</td>
+				$html .= "</font></td>
+			</tr>
+		</table></td></tr></table></td>
 			</tr>
 		</table>";
 		
@@ -400,8 +475,8 @@
 
 	function ach_render_summary_header() {
 		global $_USER;
-		
-		return "<div style='display:block;font-weight:bold;font-size:30px;color:#FFFFFF;text-align:center;margin-bottom:10px;'>".get_translation('ach_summary_header',$_USER->getLang())."</div>";
+
+		return "<font size='30px' color='#FFFFFF'>".get_translation('ach_summary_header',$_USER->getLang())."</font>";
 	}
 
 	function ach_render_summary_footer(&$summary) {
@@ -415,32 +490,34 @@
 
 		$i = 0;
 		foreach($nodes as $elem) {
-			if(($i%3) == 0) {
+			if(($i%2) == 0) {
 				$html .= "<tr>";
 			}
 
-			$html .= "<td width='50%' align='center'>".$elem[0]."<br>".ach_render_progressbar($elem[1],$elem[2],200)."</td>";
+			$html .= "<td width='225px'>".$elem[0]."<br>".ach_render_progressbar($elem[1],$elem[2],150)."</td>";
 			$sum_done += $elem[1];
 			$sum_total += $elem[2];
 
-			if(($i%3) == 2) {
+			if(($i%2) == 2) {
 				$html .= "</tr>";
 			}
 
 			$i++;
 		}
 
-		if(($i%3) == 2) {
+		if(($i%2) == 2) {
 			$html .= "</tr>";
 		}
 
 		$html = "<p />
-		<div style='display:block;font-weight:bold;font-size:30px;color:#FFFFFF;text-align:center;margin-bottom:10px;'>".get_translation('ach_summary_stats',$_USER->getLang())."</div>
-		<table>
+		<font size='30px' color='#FFFFFF'>".get_translation('ach_summary_stats',$_USER->getLang())."</font>
+		<table width='450px'>
 			<tr>
-				<td colspan='3' align='center'>".get_translation('ach_summary_stats_total',$_USER->getLang())."<br>".ach_render_progressbar($sum_done,$sum_total,450)."<br></td>
+				<td width='450px'>".get_translation('ach_summary_stats_total',$_USER->getLang())."<br>".ach_render_progressbar($sum_done,$sum_total,350)."<br></td>
 			</tr>
-			".$html."
+			<tr>
+				<td width='450px'><table width='450px'>".$html."</table></td>
+			</tr>
 		</table>";
 
 		return $html;

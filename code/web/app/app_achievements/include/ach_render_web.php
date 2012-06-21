@@ -1,4 +1,48 @@
 <?php
+	function ach_render() {
+		global $user;
+
+		$c = "<center><table>
+			<tr>
+				<td colspan='2' align='left'>".ach_render_yubopoints($user['id'])."</td>
+			</tr>
+			<tr>
+				<td valign='top'><div style='width:230px;font-weight:bold;font-size:14px;'>";
+				#$_REQUEST['mid'] = 1;
+				
+				$menu = new AchMenu($_REQUEST['cat']);
+
+				$c .= ach_render_menu($menu);
+				
+		$c .= "</div></td>
+				<td width='645px' valign='top'>";
+
+		/*for($i=0;$i<15;$i++) {
+			$c .= ach_render_box_done("Bejeweled");
+		}*/
+
+		$open = $menu->getOpenCat();
+
+		if($open != 0) {
+			$cat = new AchCategory($open,$_REQUEST['cult'],$_REQUEST['civ']);
+		}
+		else {
+			$cat = new AchSummary($menu,8);
+			$c .= ach_render_summary_header();
+		}
+
+		$c .= ach_render_category($cat);
+		if($open == 0) {
+			$c .= ach_render_summary_footer($cat);
+		}
+
+		$c .= "</td>
+			</tr>
+		</table></center>";
+
+		return $c;
+	}
+
 	function ach_render_tiebar($cult = "c_neutral", $civ = "c_neutral",&$cat) {
 		global $_USER;
 
@@ -36,8 +80,6 @@
 		</form></div>
 		
 		<div style='display:block;font-weight:bold;font-size:20px;color:#FFFFFF;text-align:center;margin-bottom:5px;'>";
-
-		#ERROR: big flaw in logics if only one tie applies
 
 		if($cat->isTiedCult() && !$cat->isTiedCiv() && $cult == "c_neutral") { // neutral / xx
 			#While being of neutral allegiance with the higher powers
@@ -118,7 +160,7 @@
 			$html .= "<span class='ach_mspan'><a href='?lang=en&cat=".$curr->getID()."'><table class='ach_menu'>
 				<tr>";
 					if($sub == 0) {
-						$html .= "<td><img src='pic/menu/test.png' /></td>";
+						$html .= "<td><img src='pic/menu/".$curr->getImage()."' /></td>";
 					}
 					$html .= "<td style='font-size:".(20-$sub)."px;font-weight:bold;";
 					if($curr->isOpen()) {
@@ -179,7 +221,7 @@
 						<td style="background-image: url(pic/bar_done_bg.png);">
 							<center><table width="100%" cellspacing="0" cellpadding="0">
 								<tbody><tr>
-									<td rowspan="2" valign="top"><img src="pic/icon/test.png"></td>
+									<td rowspan="2" valign="top"><img src="pic/icon/'.$ach->getImage().'"></td>
 									<td width="100%"><center><span style="font-weight:bold;font-size:24px;color:#000000;">'.$ach->getName().'</span></center></td>
 									<td rowspan="2" valign="top" style="font-weight: bold; text-align: center; font-size: 30px;color:#000000;padding-right:10px;">
 										'.$ach->getValueDone().'<br><img src="pic/yubo_done.png">
@@ -214,7 +256,7 @@
 						<td>
 							<center><table width="100%" cellspacing="0" cellpadding="0">
 								<tbody><tr>
-									<td rowspan="2" valign="top"><img src="pic/icon/test.png"></td>
+									<td rowspan="2" valign="top"><img src="pic/icon/'.$ach->getImage().'"></td>
 									<td width="100%"><center><span style="font-weight:bold;font-size:24px;color:#FFFFFF;">'.$ach->getName().'</span></center></td>
 									<td rowspan="2" valign="top" style="font-weight: bold; text-align: center; font-size: 30px;color:#FFFFFF;padding-right:10px;">
 										'.$ach->getValueOpen().'<br><img src="pic/yubo_pending.png">

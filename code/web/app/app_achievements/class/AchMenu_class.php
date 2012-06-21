@@ -11,15 +11,15 @@
 			$tmp['ac_id'] = 0;
 			$tmp['ac_parent'] = null;
 			$tmp['acl_name'] = get_translation('ach_summary',$_USER->getLang());
-			$tmp['ac_image'] = "";
+			$tmp['ac_image'] = "test.png";
 			$tmp['ac_order'] = -1;
-			$this->nodes[] = new AchMenuNode($tmp,$open,$lang);
+			$this->nodes[] = new AchMenuNode($tmp,$open);
 
 			$res = $DBc->sqlQuery("SELECT * FROM ach_category LEFT JOIN (ach_category_lang) ON (acl_lang='".$_USER->getLang()."' AND acl_category=ac_id) WHERE ac_parent IS NULL ORDER by ac_order ASC, acl_name ASC");
 
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
-				$this->nodes[] = new AchMenuNode($res[$i],$open);
+				$this->nodes[] = $this->makeChild($res[$i],$open);
 			}
 		}
 
@@ -35,6 +35,10 @@
 				}
 			}
 			return 0;
+		}
+
+		private function makeChild(&$a,$b) {
+			return new AchMenuNode($a,$b);
 		}
 	}
 
@@ -61,8 +65,12 @@
 
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
-				$this->nodes[] = new AchMenuNode($res[$i],$open);
+				$this->nodes[] = $this->makeChild($res[$i],$open);
 			}
+		}
+
+		private function makeChild(&$a,$b) {
+			return new AchMenuNode($a,$b);
 		}
 
 		function getID() {

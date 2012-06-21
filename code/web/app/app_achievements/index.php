@@ -5,8 +5,8 @@ ini_set("display_errors","1");
 
 define('APP_NAME', 'app_achievements');
 
-require_once('../config.php');
-include_once('../lang.php');
+require_once('../webig/config.php');
+include_once('../webig/lang.php');
 include_once('lang.php');
 require_once('conf.php');
 
@@ -20,6 +20,7 @@ $user['name'] = 'Talvela';
 $user['race'] = "r_matis";
 $user['civilization'] = "c_neutral";
 $user['cult'] = "c_neutral";
+$user['ig'] = ($_REQUEST['ig']==1);
 
 require_once("class/RyzomUser_class.php");
 $_USER = new RyzomUser($user);
@@ -47,7 +48,7 @@ require_once("class/AchObjective_class.php");
 
 // Update user acces on Db
 //$db = ryDB::getInstance(APP_NAME);
-$DBc = ryDB::getInstance(APP_NAME);
+$DBc = ryDB::getInstance("ahufler");
 /*$db->setDbDefs('test', array('id' => SQL_DEF_INT, 'num_access' => SQL_DEF_INT));
 
 $num_access = $db->querySingleAssoc('test', array('id' => $user['id']));
@@ -61,44 +62,8 @@ $c = _t('access', $num_access['num_access']).'<br/>';*/
 
 #$c = var_export($user,true);
 
-$c = "<center><table>
-	<tr>
-		<td colspan='2' align='left'>".ach_render_yubopoints(1)."</td>
-	</tr>
-	<tr>
-		<td valign='top'><div style='width:230px;font-weight:bold;font-size:14px;'>";
-		#$_REQUEST['mid'] = 1;
-		
-		$menu = new AchMenu($_REQUEST['cat']);
 
-		$c .= ach_render_menu($menu);
-		
-$c .= "</div></td>
-		<td width='645px' valign='top'>";
 
-/*for($i=0;$i<15;$i++) {
-	$c .= ach_render_box_done("Bejeweled");
-}*/
-
-$open = $menu->getOpenCat();
-
-if($open != 0) {
-	$cat = new AchCategory($open,$_REQUEST['cult'],$_REQUEST['civ']);
-}
-else {
-	$cat = new AchSummary($menu,8);
-	$c .= ach_render_summary_header();
-}
-
-$c .= ach_render_category($cat);
-if($open == 0) {
-	$c .= ach_render_summary_footer($cat,1);
-}
-
-$c .= "</td>
-	</tr>
-</table></center>";
-
-echo ryzom_app_render("achievements", $c, $_USER->isIG());
+echo ryzom_app_render("achievements", ach_render(), $_USER->isIG());
 
 ?>

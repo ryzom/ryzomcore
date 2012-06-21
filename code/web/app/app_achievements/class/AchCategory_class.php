@@ -29,7 +29,7 @@
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
 				#echo "Y";
-				$tmp = new AchAchievement($res[$i]);
+				$tmp = $this->makeChild($res[$i]);
 				#echo var_export($tmp,true);
 				if($tmp->hasOpen()) {
 					$this->child_open[] = sizeof($this->nodes);
@@ -52,6 +52,10 @@
 
 			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_civ IS NOT NULL AND aa_category='".$this->id."'");
 			$this->ties_civ_dev = $res[0]['anz'];
+		}
+
+		private function makeChild(&$a) {
+			return new AchAchievement($a);
 		}
 
 		function getID() {
