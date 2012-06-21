@@ -144,6 +144,8 @@ namespace NLGUI
 		std::string				_DBPath;
 		#endif
 
+		static IViewTextProvider* getTextProvider(){ return textProvider; }
+
 	private:
 		static IViewTextProvider *textProvider;
 

@@ -16,19 +16,9 @@
 
 
 
-#include "stdpch.h"
 #include "view_text_id_formated.h"
 #include "nel/gui/view_text_formated.h"
-#include "../string_manager_client.h"
-#include "../user_entity.h"
-#include "../entities.h"
 #include "nel/misc/xml_auto_ptr.h"
-
-using namespace STRING_MANAGER;
-
-////////////
-// EXTERN //
-////////////
 
 NLMISC_REGISTER_OBJECT(CViewBase, CViewTextIDFormated, std::string, "text_id_formated");
 
@@ -57,18 +47,18 @@ void CViewTextIDFormated::checkCoords()
 	{
 		ucstring result, formatedResult;
 		bool bValid;
-		#if defined(NL_DEBUG)
-		if (ClientCfg.Local)
+
+		if( CViewTextID::getTextProvider() == NULL )
 		{
-			if (!_DBPath.empty()) result = ucstring(_DBPath);
-			else result = ucstring("Text ID = " + NLMISC::toString(_TextId));
+			if(!_DBPath.empty())
+				result = ucstring(_DBPath);
+			else
+				result = ucstring("Text ID = " + NLMISC::toString(_TextId));
 			bValid = true;
 		}
 		else
-		#endif
 		{
-			CStringManagerClient *pSMC = CStringManagerClient::instance();
-			bValid = pSMC->getDynString (_TextId, result);
+			bValid = CViewTextID::getTextProvider()->getDynString (_TextId, result);
 		}
 		formatedResult = CViewTextFormated::formatString(_FormatString, result);
 		//
