@@ -17,4 +17,13 @@
 
 		return $t[$cc];
 	}
+
+	function ach_render_forbidden($ig) {
+		if($ig) {
+			return "This app is NOT available INGAME!";
+		}
+		else {
+			return "This app is NOT available from the WEB!";
+		}
+	}
 ?>

@@ -49,21 +49,19 @@ require_once("class/AchObjective_class.php");
 // Update user acces on Db
 //$db = ryDB::getInstance(APP_NAME);
 $DBc = ryDB::getInstance("ahufler");
-/*$db->setDbDefs('test', array('id' => SQL_DEF_INT, 'num_access' => SQL_DEF_INT));
-
-$num_access = $db->querySingleAssoc('test', array('id' => $user['id']));
-if ($num_access)
-	$db->update('test', array('num_access' => ++$num_access['num_access']), array('id' => $user['id']));
-else
-	$db->insert('test', array('num_access' => $num_access['num_access']=1, 'id' => $user['id']));
-
-// Content
-$c = _t('access', $num_access['num_access']).'<br/>';*/
-
-#$c = var_export($user,true);
 
 
+if(!$_USER->isIG && $_CONF['enable_webig'] == false) {
+	$c = ach_render_forbidden(false);
+}
+elseif($_USER->isIG && $_CONF['enable_offgame'] == false) {
+	$c = ach_render_forbidden(true);
+}
+else {
+	$c = ach_render();
+}
 
-echo ryzom_app_render("achievements", ach_render(), $_USER->isIG());
+
+echo ryzom_app_render("achievements", $c, $_USER->isIG());
 
 ?>

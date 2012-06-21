@@ -19,7 +19,7 @@
 			$this->done = $data['app_date'];
 			$this->dev = $data['ap_dev'];
 
-			$res = $DBc->sqlQuery("SELECT * FROM ach_objective LEFT JOIN (ach_objective_lang) ON (aol_lang='".$_USER->getLang()."' AND aol_objective=ao_id) LEFT JOIN (ach_player_objective) ON (apo_objective=ao_id AND apo_player='".$_USER->getID()."') WHERE ao_perk='".$this->id."'");
+			$res = $DBc->sqlQuery("SELECT * FROM ach_objective LEFT JOIN (ach_objective_lang) ON (aol_lang='".$_USER->getLang()."' AND aol_objective=ao_id) LEFT JOIN (ach_player_objective) ON (apo_objective=ao_id AND apo_player='".$_USER->getID()."') LEFT JOIN (ach_achievement) ON (aa_id=ao_metalink) WHERE ao_perk='".$this->id."'");
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
 				$this->nodes[] = $this->makeChild($res[$i]);

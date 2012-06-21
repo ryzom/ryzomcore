@@ -44,7 +44,7 @@
 	}
 
 	function ach_render_tiebar($cult = "c_neutral", $civ = "c_neutral",&$cat) {
-		global $_USER;
+		global $_USER,$_CONF;
 
 		$html = "<style>
 			.o {
@@ -116,11 +116,11 @@
 	}
 
 	function ach_render_yubopoints() {
-		global $DBc,$_USER;
+		global $DBc,$_USER,$_CONF;
 
 		$res = $DBc->sqlQuery("SELECT sum(ap_value) as anz FROM ach_perk,ach_player_perk WHERE ap_id=app_perk AND app_player='".$_USER->getID()."'");
 
-		$html = "<div style='display:block;border-bottom:1px solid #000000;'><span style='font-size:32px;'>".$_USER->getName()."&nbsp;<img src='pic/yubo_done.png'>&nbsp;".$res[0]['anz']."</span></div>";
+		$html = "<div style='display:block;border-bottom:1px solid #000000;'><span style='font-size:32px;'>".$_USER->getName()."&nbsp;<img src='".$_CONF['image_url']."pic/yubo_done.png'>&nbsp;".$res[0]['anz']."</span></div>";
 
 		return $html;
 	}
@@ -134,6 +134,8 @@
 	}
 
 	function ach_render_menu(&$menu,$sub = 0) {
+		global $_CONF;
+
 		$html = "<style>
 				.ach_menu {
 					display:block;
@@ -160,7 +162,7 @@
 			$html .= "<span class='ach_mspan'><a href='?lang=en&cat=".$curr->getID()."'><table class='ach_menu'>
 				<tr>";
 					if($sub == 0) {
-						$html .= "<td><img src='pic/menu/".$curr->getImage()."' /></td>";
+						$html .= "<td><img src='".$_CONF['image_url']."pic/menu/".$curr->getImage()."' /></td>";
 					}
 					$html .= "<td style='font-size:".(20-$sub)."px;font-weight:bold;";
 					if($curr->isOpen()) {
@@ -208,34 +210,34 @@
 	}
 
 	function ach_render_achievement_done(&$ach) {
-		$html = "";
+		global $_CONF;
 
-		$html .= '<div style="display: block; margin-bottom: 5px;"><table cellpadding="0" cellspacing="0" width="100%">
+		$html = '<div style="display: block; margin-bottom: 5px;"><table cellpadding="0" cellspacing="0" width="100%">
 					<tbody><tr>
-						<td width="3px"><img src="pic/bar_done_ul.png"></td>
-						<td style="background-image: url(pic/bar_done_u.png);"></td>
-						<td width="3px"><img src="pic/bar_done_ur.png"></td>
+						<td width="3px"><img src="'.$_CONF['image_url'].'pic/bar_done_ul.png"></td>
+						<td style="background-image: url('.$_CONF['image_url'].'pic/bar_done_u.png);"></td>
+						<td width="3px"><img src="'.$_CONF['image_url'].'pic/bar_done_ur.png"></td>
 					</tr>
 					<tr>
-						<td style="background-image: url(pic/bar_done_l.png);"></td>
-						<td style="background-image: url(pic/bar_done_bg.png);">
+						<td style="background-image: url('.$_CONF['image_url'].'pic/bar_done_l.png);"></td>
+						<td style="background-image: url('.$_CONF['image_url'].'pic/bar_done_bg.png);">
 							<center><table width="100%" cellspacing="0" cellpadding="0">
 								<tbody><tr>
-									<td rowspan="2" valign="top"><img src="pic/icon/'.$ach->getImage().'"></td>
+									<td rowspan="2" valign="top"><img src="'.$_CONF['image_url'].'pic/icon/'.$ach->getImage().'"></td>
 									<td width="100%"><center><span style="font-weight:bold;font-size:24px;color:#000000;">'.$ach->getName().'</span></center></td>
 									<td rowspan="2" valign="top" style="font-weight: bold; text-align: center; font-size: 30px;color:#000000;padding-right:10px;">
-										'.$ach->getValueDone().'<br><img src="pic/yubo_done.png">
+										'.$ach->getValueDone().'<br><img src="'.$_CONF['image_url'].'pic/yubo_done.png">
 									</td>
 								</tr><tr><td align="center" valign="top">';
 							$html .= ach_render_perk_done($ach);
 							$html .= '</td></tr></tbody></table></center>
 						</td>
-						<td style="background-image: url(pic/bar_done_r.png);"></td>
+						<td style="background-image: url('.$_CONF['image_url'].'pic/bar_done_r.png);"></td>
 					</tr>
 					<tr>
-						<td><img src="pic/bar_done_bl.png"></td>
-						<td style="background-image: url(pic/bar_done_b.png);"></td>
-						<td><img src="pic/bar_done_br.png"></td>
+						<td><img src="'.$_CONF['image_url'].'pic/bar_done_bl.png"></td>
+						<td style="background-image: url('.$_CONF['image_url'].'pic/bar_done_b.png);"></td>
+						<td><img src="'.$_CONF['image_url'].'pic/bar_done_br.png"></td>
 					</tr>
 				</tbody></table></div>';
 
@@ -243,34 +245,34 @@
 	}
 
 	function ach_render_achievement_open(&$ach) {
-		$html = "";
+		global $_CONF;
 
-		$html .= '<div style="display: block; margin-bottom: 5px;"><table cellpadding="0" cellspacing="0" width="100%">
+		$html = '<div style="display: block; margin-bottom: 5px;"><table cellpadding="0" cellspacing="0" width="100%">
 					<tbody><tr>
-						<td width="3px"><img src="pic/bar_pending_ul.png"></td>
-						<td style="background-image: url(pic/bar_pending_u.png);"></td>
-						<td width="3px"><img src="pic/bar_pending_ur.png"></td>
+						<td width="3px"><img src="'.$_CONF['image_url'].'pic/bar_pending_ul.png"></td>
+						<td style="background-image: url('.$_CONF['image_url'].'pic/bar_pending_u.png);"></td>
+						<td width="3px"><img src="'.$_CONF['image_url'].'pic/bar_pending_ur.png"></td>
 					</tr>
 					<tr>
-						<td style="background-image: url(pic/bar_pending_l.png);"></td>
+						<td style="background-image: url('.$_CONF['image_url'].'pic/bar_pending_l.png);"></td>
 						<td>
 							<center><table width="100%" cellspacing="0" cellpadding="0">
 								<tbody><tr>
-									<td rowspan="2" valign="top"><img src="pic/icon/'.$ach->getImage().'"></td>
+									<td rowspan="2" valign="top"><img src="'.$_CONF['image_url'].'pic/icon/grey/'.$ach->getImage().'"></td>
 									<td width="100%"><center><span style="font-weight:bold;font-size:24px;color:#FFFFFF;">'.$ach->getName().'</span></center></td>
 									<td rowspan="2" valign="top" style="font-weight: bold; text-align: center; font-size: 30px;color:#FFFFFF;padding-right:10px;">
-										'.$ach->getValueOpen().'<br><img src="pic/yubo_pending.png">
+										'.$ach->getValueOpen().'<br><img src="'.$_CONF['image_url'].'pic/yubo_pending.png">
 									</td>
 								</tr><tr><td align="center" valign="top">';
 							$html .= ach_render_perk_open($ach);
 							$html .= '</td></tr></tbody></table></center>
 						</td>
-						<td style="background-image: url(pic/bar_pending_r.png);"></td>
+						<td style="background-image: url('.$_CONF['image_url'].'pic/bar_pending_r.png);"></td>
 					</tr>
 					<tr>
-						<td><img src="pic/bar_pending_bl.png"></td>
-						<td style="background-image: url(pic/bar_pending_b.png);"></td>
-						<td><img src="pic/bar_pending_br.png"></td>
+						<td><img src="'.$_CONF['image_url'].'pic/bar_pending_bl.png"></td>
+						<td style="background-image: url('.$_CONF['image_url'].'pic/bar_pending_b.png);"></td>
+						<td><img src="'.$_CONF['image_url'].'pic/bar_pending_br.png"></td>
 					</tr>
 				</tbody></table></div>';
 
@@ -300,6 +302,7 @@
 	}
 
 	function ach_render_perk_done(&$ach) {
+		global $_CONF;
 		$html = "";
 
 		$perk_list = $ach->getDone();
@@ -309,7 +312,7 @@
 			if($perk->inDev()) {
 				continue;
 			}
-			$html .= "<div style='display:block;'><span style='color:#66CC00;font-weight:bold;'>".$perk->getName()."</span> ( ".date('d.m.Y',$perk->getDone())." ) <img src='pic/yubo_done.png' width='15px' /> ".$perk->getValue()."</div>";
+			$html .= "<div style='display:block;'><span style='color:#66CC00;font-weight:bold;'>".$perk->getName()."</span> ( ".date('d.m.Y',$perk->getDone())." ) <img src='".$_CONF['image_url']."pic/yubo_done.png' width='15px' /> ".$perk->getValue()."</div>";
 		}
 
 		return $html;
@@ -368,12 +371,13 @@
 	}
 
 	function ach_render_obj_simple(&$obj) {
+		global $_CONF;
 		$html = "";
 		if($obj->isdone()) {
-			$html .= "<img src='pic/check.png' height='10px' />&nbsp;<span style='color:#71BE02;'>";
+			$html .= "<img src='".$_CONF['image_url']."pic/check.png' height='10px' />&nbsp;<span style='color:#71BE02;'>";
 		}
 		else {
-			$html .= "<img src='pic/pending.png' height='10px' />&nbsp;<span style='color:#999999;'>";
+			$html .= "<img src='".$_CONF['image_url']."pic/pending.png' height='10px' />&nbsp;<span style='color:#999999;'>";
 		}
 		
 		$html .= $obj->getName()."</span>";
@@ -382,6 +386,7 @@
 	}
 
 	function ach_render_obj_meta(&$obj) {
+		global $_CONF;
 		$html = "";
 		if($obj->isdone()) {
 			$col = "#71BE02";
@@ -394,7 +399,7 @@
 
 		return "<table cellspacing='0' cellpadding='0'>
 				<tr>
-					<td><img src='pic/icon/".$grey."test.png' width='20px' /></td>
+					<td><img src='".$_CONF['image_url']."pic/icon/".$grey.$obj->getMetaImage()."' width='20px' /></td>
 					<td valign='middle'><span style='color:".$col.";'>&nbsp;".$obj->getName()."</span></td>
 				</tr>
 			</table>";
