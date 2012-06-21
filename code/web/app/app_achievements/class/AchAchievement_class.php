@@ -32,7 +32,8 @@
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
 				#echo "Z";
-				$tmp = $this->makeChild($res[$i],$this);
+				$res[$i]['this'] = $this;
+				$tmp = $this->makeChild($res[$i]);
 
 				#echo var_export($tmp,true);
 
@@ -52,8 +53,8 @@
 			#echo "X-".$this->hasOpen();
 		}
 
-		private function makeChild(&$a,$b) {
-			return new AchPerk($a,$b);
+		function makeChild(&$a) {
+			return new AchPerk($a);
 		}
 
 		function getID() {

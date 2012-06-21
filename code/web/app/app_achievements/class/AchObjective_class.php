@@ -1,5 +1,5 @@
 <?php
-	class AchObjective implements Parentum {
+	class AchObjective {
 		private $id;
 		private $perk;
 		private $condition;

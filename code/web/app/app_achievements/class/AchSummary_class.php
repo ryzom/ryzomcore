@@ -22,7 +22,7 @@
 			}
 		}
 
-		private function makeChild(&$a) {
+		function makeChild(&$a) {
 			return new AchAchievement($a);
 		}
 

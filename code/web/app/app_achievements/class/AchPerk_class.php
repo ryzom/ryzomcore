@@ -8,11 +8,11 @@
 		private $done;
 		private $dev;
 
-		function AchPerk(&$data,&$parent) {
+		function AchPerk(&$data) {
 			global $DBc,$_USER;
 
 			$this->id = $data['ap_id'];
-			$this->parent = $parent;
+			$this->parent = $data['this'];
 			$this->achievement = $data['ap_achievement'];
 			$this->value = $data['ap_value'];
 			$this->name = $data['apl_name'];
@@ -26,7 +26,7 @@
 			}
 		}
 
-		private function makeChild(&$a) {
+		function makeChild(&$a) {
 			return new AchObjective($a);
 		}
 

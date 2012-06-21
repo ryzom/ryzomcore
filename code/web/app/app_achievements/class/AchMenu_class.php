@@ -19,7 +19,8 @@
 
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
-				$this->nodes[] = $this->makeChild($res[$i],$open);
+				$res[$i]['open'] = $open;
+				$this->nodes[] = $this->makeChild($res[$i]);
 			}
 		}
 
@@ -37,8 +38,8 @@
 			return 0;
 		}
 
-		private function makeChild(&$a,$b) {
-			return new AchMenuNode($a,$b);
+		function makeChild(&$a) {
+			return new AchMenuNode($a);
 		}
 	}
 
@@ -50,7 +51,7 @@
 		private $image;
 		private $order;
 
-		function AchMenuNode(&$data,$open) {
+		function AchMenuNode(&$data) {
 			global $DBc,$_USER;
 
 			$this->id = $data['ac_id'];
@@ -58,19 +59,20 @@
 			$this->name = $data['acl_name'];
 			$this->image = $data['ac_image'];
 			$this->order = $data['ac_order'];
-			$this->open = ($this->id == $open);
+			$this->open = ($this->id == $data['open']);
 			$this->dev = $data['ac_dev'];
 
 			$res = $DBc->sqlQuery("SELECT * FROM ach_category LEFT JOIN (ach_category_lang) ON (acl_lang='".$_USER->getLang()."' AND acl_category=ac_id) WHERE ac_parent='".$this->id."' ORDER by ac_order ASC, acl_name ASC");
 
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
-				$this->nodes[] = $this->makeChild($res[$i],$open);
+				$res[$i]['open'] = $open;
+				$this->nodes[] = $this->makeChild($res[$i]);
 			}
 		}
 
-		private function makeChild(&$a,$b) {
-			return new AchMenuNode($a,$b);
+		function makeChild(&$a) {
+			return new AchMenuNode($a);
 		}
 
 		function getID() {
