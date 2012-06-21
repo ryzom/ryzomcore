@@ -41,7 +41,7 @@
 #include "../string_manager_client.h"
 #include "group_container.h"
 #include "dbgroup_list_sheet_text.h"
-#include "ctrl_text_button.h"
+#include "nel/gui/ctrl_text_button.h"
 #include "../client_cfg.h"
 #include "../init_main_loop.h"
 #include "guild_manager.h"

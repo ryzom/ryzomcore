@@ -56,7 +56,7 @@
 // Ctrl
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/ctrl_button.h"
-#include "ctrl_text_button.h"
+#include "nel/gui/ctrl_text_button.h"
 // DBCtrl
 #include "dbctrl_sheet.h"
 // Group

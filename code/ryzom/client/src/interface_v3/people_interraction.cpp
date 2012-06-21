@@ -32,7 +32,7 @@
 #include "../string_manager_client.h"
 #include "nel/gui/interface_expr.h"
 #include "nel/gui/ctrl_button.h"
-#include "ctrl_text_button.h"
+#include "nel/gui/ctrl_text_button.h"
 #include "filtered_chat_summary.h"
 #include "input_handler_manager.h"
 #include "../user_entity.h"

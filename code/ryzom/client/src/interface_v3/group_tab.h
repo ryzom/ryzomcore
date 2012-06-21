@@ -21,7 +21,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/gui/interface_group.h"
-#include "ctrl_text_button.h"
+#include "nel/gui/ctrl_text_button.h"
 
 
 // ***************************************************************************

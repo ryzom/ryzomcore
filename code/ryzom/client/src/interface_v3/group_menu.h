@@ -23,7 +23,7 @@
 #include "nel/gui/group_modal.h"
 #include "nel/gui/group_submenu_base.h"
 #include "nel/gui/view_text.h"
-#include "ctrl_text_button.h"
+#include "nel/gui/ctrl_text_button.h"
 
 namespace NLGUI
 {

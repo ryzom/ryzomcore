@@ -24,7 +24,7 @@
 // Client.
 #include "game_context_menu.h"
 #include "interface_v3/interface_manager.h"
-#include "interface_v3/ctrl_text_button.h"
+#include "nel/gui/ctrl_text_button.h"
 #include "interface_v3/group_menu.h"
 #include "entities.h"
 #include "interface_v3/bot_chat_manager.h"
