@@ -85,6 +85,8 @@ namespace NLGUI
 		uint8 getCurrentContainerAlpha() const{ return _CurrentContainerAlpha; }
 		uint8 getCurrentContentAlpha() const{ return _CurrentContentAlpha; }
 
+		virtual bool isGrayed() const{ return false; }
+
 	protected:
 		void triggerAlphaSettingsChangedAH();
 		

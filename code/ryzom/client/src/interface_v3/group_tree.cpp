@@ -16,22 +16,19 @@
 
 
 
-#include "stdpch.h"
-
 #include "group_tree.h"
-#include "interface_manager.h"
 #include "nel/gui/interface_element.h"
 #include "nel/gui/view_bitmap.h"
 #include "nel/gui/view_text.h"
-#include "group_container.h"
+#include "nel/gui/group_container_base.h"
 #include "nel/gui/action_handler.h"
 #include "nel/gui/lua_ihm.h"
-#include "lua_ihm_ryzom.h"
-
 #include "nel/misc/i_xml.h"
 #include "nel/misc/i18n.h"
-
 #include "nel/misc/xml_auto_ptr.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/view_renderer.h"
+#include "nel/gui/view_pointer_base.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -400,7 +397,6 @@ CGroupTree::~CGroupTree()
 // ----------------------------------------------------------------------------
 bool CGroupTree::parse (xmlNodePtr cur,  CInterfaceGroup * parentGroup)
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if (!CInterfaceGroup::parse(cur,  parentGroup))
 		return false;
 
@@ -521,7 +517,6 @@ void CGroupTree::updateCoords()
 // ----------------------------------------------------------------------------
 void	CGroupTree::drawSelection(sint x,  sint y,  sint w,  CRGBA col)
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	if(!_RectangleOutlineMode)
@@ -556,9 +551,6 @@ CGroupTree::SNode *CGroupTree::getNodeUnderMouse() const
 // ----------------------------------------------------------------------------
 void CGroupTree::draw()
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//	CViewRenderer &rVR = *CViewRenderer::getInstance();
-
 	// get the clip area
 	sint32 clipx, clipy, clipw, cliph;
 	getClip(clipx, clipy, clipw, cliph);
@@ -622,13 +614,13 @@ void CGroupTree::draw()
 	{
 		// Find the first container
 		CInterfaceGroup *pIG = _Parent;
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIG);
+		CGroupContainerBase *pGC = dynamic_cast<CGroupContainerBase*>(pIG);
 		while (pIG != NULL)
 		{
 			pIG = pIG->getParent();
 			if (pIG == NULL) break;
-			if (dynamic_cast<CGroupContainer*>(pIG) != NULL)
-				pGC = dynamic_cast<CGroupContainer*>(pIG);
+			if (dynamic_cast<CGroupContainerBase*>(pIG) != NULL)
+				pGC = dynamic_cast<CGroupContainerBase*>(pIG);
 		}
 
 		// avoid if window grayed
@@ -717,7 +709,6 @@ void CGroupTree::selectLine(uint line,  bool runAH /*= true*/)
 	if(line>=_Lines.size())
 		return;
 
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if (!_Lines[line].Node)
 	{
 		// just deleted : must wait next draw to know the new line under mouse
@@ -754,7 +745,6 @@ bool CGroupTree::rightButton(uint line)
 
 	if (line != (uint) _SelectedLine) selectLine(line,  false);
 
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CAHManager::getInstance()->runActionHandler (	_Lines[line].Node->AHNameRight,
 			this,
 			_Lines[line].Node->AHParamsRight );
@@ -862,7 +852,6 @@ bool CGroupTree::handleEvent (const NLGUI::CEventDescriptor& event)
 						}
 					}
 
-					CInterfaceManager *pIM = CInterfaceManager::getInstance();
 					CAHManager::getInstance()->runActionHandler(changedNode->AHNameClose, this, changedNode->AHParamsClose);
 				}
 				forceRebuild();
@@ -1276,7 +1265,6 @@ CGroupTree::SNode *CGroupTree::selectNodeByIdRecurse(SNode *pNode,  const std::s
 // ***************************************************************************
 bool	CGroupTree::selectNodeById(const std::string &nodeId, bool triggerAH)
 {
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	SNode		*selNode= NULL;
 
 	// Avoid infinite recurs
@@ -1330,7 +1318,6 @@ class CHandlerTreeReset : public IActionHandler
 public:
 	void execute (CCtrlBase * /* pCaller */,  const std::string &sParams)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupTree *pTree = dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(sParams));
 		if (pTree != NULL)
 			pTree->reset();
