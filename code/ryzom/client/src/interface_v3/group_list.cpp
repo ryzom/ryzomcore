@@ -14,26 +14,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-#include "stdpch.h"
-
 #include "group_list.h"
-#include "interface_manager.h"
 #include "nel/gui/interface_element.h"
-#include "../client_chat_manager.h"
 #include "nel/gui/view_bitmap.h"
 #include "nel/gui/view_text_id.h"
-#include "group_container.h"
+#include "nel/gui/group_container_base.h"
 #include "nel/gui/lua_ihm.h"
-#include "lua_ihm_ryzom.h"
-
 #include "nel/misc/xml_auto_ptr.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/view_pointer_base.h"
 
 using namespace std;
 using namespace NLMISC;
-
-extern CClientChatManager ChatMngr;
 
 NLMISC_REGISTER_OBJECT(CViewBase, CGroupList, std::string, "list");
 
@@ -571,7 +563,6 @@ void CGroupList::draw ()
 	//rVR.drawRotFlipBitmap _RenderLayer,   (_XReal,   _YReal,   _WReal,   _HReal,   0,   false,   rVR.getBlankTextureId(),   CRGBA(0,  255,  0,  255) );
 	if (_Over)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		if (CWidgetManager::getInstance()->getModalWindow() == NULL)
@@ -622,13 +613,13 @@ void CGroupList::draw ()
 		{
 			// Find the first container
 			CInterfaceGroup *pIG = _Parent;
-			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIG);
+			CGroupContainerBase *pGC = dynamic_cast<CGroupContainerBase*>(pIG);
 			while (pIG != NULL)
 			{
 				pIG = pIG->_Parent;
 				if (pIG == NULL) break;
-				if (dynamic_cast<CGroupContainer*>(pIG) != NULL)
-					pGC = dynamic_cast<CGroupContainer*>(pIG);
+				if (dynamic_cast<CGroupContainerBase*>(pIG) != NULL)
+					pGC = dynamic_cast<CGroupContainerBase*>(pIG);
 			}
 
 			bool bDisplayOverSelection = true;
