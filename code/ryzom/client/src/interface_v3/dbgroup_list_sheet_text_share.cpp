@@ -21,7 +21,7 @@
 #include "../client_sheets/sbrick_sheet.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "interface_manager.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "nel/gui/ctrl_text_button.h"
 #include "../net_manager.h"
 #include "../client_sheets/item_sheet.h"

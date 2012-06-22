@@ -30,13 +30,13 @@ namespace NLGUI
 {
 	class CCtrlBaseButton;
 	class CViewText;
+	class CViewBitmap;
 }
 
 
 // ***************************************************************************
 class	CDBCtrlSheet;
 class	CSBrickSheet;
-class	CViewBitmap;
 class	CGroupEditBox;
 
 

@@ -26,9 +26,8 @@
 namespace NLGUI
 {
 	class CViewText;
+	class CViewBitmap;
 }
-
-class CViewBitmap;
 
 // ----------------------------------------------------------------------------
 class CGroupTree : public CInterfaceGroup

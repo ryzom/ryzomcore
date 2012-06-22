@@ -24,7 +24,7 @@
 #include "nel/gui/interface_expr.h"
 
 #include "nel/gui/view_text.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "dbview_number.h"
 #include "dbview_bar.h"
 

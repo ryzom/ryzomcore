@@ -42,7 +42,7 @@
 
 #include "nel/gui/ctrl_base_button.h"
 #include "../connection.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 
 extern CSheetManager SheetMngr;
 extern NLMISC::CLog	g_log;

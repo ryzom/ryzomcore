@@ -22,7 +22,7 @@
 #include "nel/gui/interface_expr.h"
 #include "group_menu.h"
 #include "nel/misc/xml_auto_ptr.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "nel/gui/action_handler.h" // Just for getAllParams
 #include "nel/gui/lua_ihm.h"
 #include "lua_ihm_ryzom.h"

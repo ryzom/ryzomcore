@@ -28,9 +28,9 @@
 namespace NLGUI
 {
 	class CCtrlScroll;
+	class CViewBitmap;
 }
 
-class CViewBitmap;
 class CGroupMenu;
 class CGroupList;
 

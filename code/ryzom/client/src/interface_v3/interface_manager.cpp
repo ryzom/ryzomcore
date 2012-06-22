@@ -46,7 +46,7 @@
 #include "action_handler_help.h"
 #include "action_handler_item.h"
 // View
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 //#include "view_bitmap_progress.h"
 #include "view_bitmap_faber_mp.h"
 #include "view_bitmap_combo.h"

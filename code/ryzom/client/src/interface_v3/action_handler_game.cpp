@@ -46,7 +46,7 @@
 #include "interface_ddx.h"
 #include "group_tree.h"
 #include "group_map.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "action_handler_tools.h"
 #include "../connection.h"
 #include "../client_chat_manager.h"

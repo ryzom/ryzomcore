@@ -20,7 +20,7 @@
 #include "people_list.h"
 #include "group_container.h"
 #include "group_list.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
 #include "group_editbox.h"

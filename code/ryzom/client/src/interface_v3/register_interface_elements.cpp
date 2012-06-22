@@ -22,7 +22,7 @@
 #include "nel/gui/view_base.h"
 #include "nel/gui/view_text.h"
 #include "nel/gui/view_text_id.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "view_radar.h"
 #include "nel/gui/group_submenu_base.h"
 #include "group_menu.h"

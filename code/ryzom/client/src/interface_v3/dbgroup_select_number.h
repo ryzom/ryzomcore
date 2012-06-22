@@ -27,11 +27,9 @@ namespace NLGUI
 {
 	class CCtrlBaseButton;
 	class CViewText;
+	class CViewBitmap;
 }
 
-
-// ***************************************************************************
-class	CViewBitmap;
 
 
 // ***************************************************************************

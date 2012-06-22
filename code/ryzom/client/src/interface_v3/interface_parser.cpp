@@ -36,7 +36,7 @@
 #include "interface_anim.h"
 #include "interface_3d_scene.h"
 // View
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "view_bitmap_faber_mp.h"
 #include "view_bitmap_combo.h"
 #include "nel/gui/view_text.h"

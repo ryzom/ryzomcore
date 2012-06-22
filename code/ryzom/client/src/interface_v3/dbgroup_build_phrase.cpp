@@ -22,7 +22,7 @@
 #include "sphrase_manager.h"
 #include "interface_manager.h"
 #include "dbctrl_sheet.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "nel/gui/ctrl_button.h"
 #include "group_editbox.h"
 #include "../client_cfg.h"

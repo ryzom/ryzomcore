@@ -22,7 +22,7 @@
 #include "nel/misc/vector_2f.h"
 #include "nel/misc/time_nl.h"
 //
-#include "../interface_v3/view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "nel/gui/ctrl_quad.h"
 #include "nel/gui/ctrl_polygon.h"
 #include "../interface_v3/interface_manager.h"

@@ -47,7 +47,7 @@
 #include "guild_manager.h"
 #include "../sheet_manager.h"
 #include "../user_entity.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "nel/misc/common.h"
 
 using namespace std::rel_ops;

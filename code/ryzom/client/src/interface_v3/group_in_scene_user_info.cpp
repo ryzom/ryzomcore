@@ -18,7 +18,7 @@
 
 #include "stdpch.h"
 #include "interface_manager.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "group_in_scene_user_info.h"
 #include "nel/gui/action_handler.h"
 #include "../entities.h"

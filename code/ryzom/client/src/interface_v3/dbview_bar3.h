@@ -20,7 +20,7 @@
 #define RZ_DBVIEW_BAR3_H
 
 #include "nel/misc/types_nl.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 
 /**
  * class implementing a 3 Bar widget

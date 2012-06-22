@@ -53,7 +53,7 @@
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/people_interraction.h"
 
-#include "interface_v3/view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 
 #include "nel/gui/interface_link.h"
 #include "cursor_functions.h"

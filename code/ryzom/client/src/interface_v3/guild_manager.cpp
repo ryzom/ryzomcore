@@ -33,7 +33,7 @@
 #include "../connection.h"
 #include "../entity_cl.h"
 #include "../user_entity.h" // UserEntity
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "../sheet_manager.h"
 #include "../net_manager.h"
 #include "../client_sheets/building_sheet.h"

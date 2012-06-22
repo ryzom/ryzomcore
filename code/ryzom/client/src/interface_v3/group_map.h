@@ -27,7 +27,7 @@
 
 #include "nel/gui/interface_group.h"
 #include "nel/gui/ctrl_button.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "nel/gui/view_text.h"
 #include "animal_position_state.h"
 #include "../continent.h"

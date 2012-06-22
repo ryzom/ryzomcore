@@ -20,7 +20,7 @@
 #define RZ_DBVIEW_BAR_H
 
 #include "nel/misc/types_nl.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 
 /**
  * class implementing a bitmap used as the front texture of a progress bar

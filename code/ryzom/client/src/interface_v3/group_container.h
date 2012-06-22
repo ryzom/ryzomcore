@@ -29,13 +29,13 @@ namespace NLGUI
 	class CCtrlButton;
 	class CCtrlScroll;
 	class CViewText;
+	class CViewBitmap;
 }
 
 class COptionsContainerInsertion;
 class COptionsContainerMove;
 class CGroupContainer;
 class CInterfaceManager;
-class CViewBitmap;
 class COptionsLayer;
 class CGroupList;
 

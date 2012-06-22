@@ -28,7 +28,7 @@
 #include "nel/gui/action_handler.h"
 #include "sbrick_manager.h"
 #include "dbgroup_combo_box.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "../net_manager.h"
 #include "sbrick_manager.h"
 #include "../user_entity.h"

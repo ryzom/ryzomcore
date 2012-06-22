@@ -24,10 +24,10 @@
 namespace NLGUI
 {
 	class CCtrlQuad;
+	class CViewBitmap;
 }
 
 class CGroupMap;
-class CViewBitmap;
 
 namespace R2
 {
