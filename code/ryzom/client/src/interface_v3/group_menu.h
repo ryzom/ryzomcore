@@ -29,10 +29,10 @@ namespace NLGUI
 {
 	class CCtrlScroll;
 	class CViewBitmap;
+	class CGroupList;
 }
 
 class CGroupMenu;
-class CGroupList;
 
 
 /**

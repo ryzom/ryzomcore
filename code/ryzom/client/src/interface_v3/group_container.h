@@ -30,6 +30,7 @@ namespace NLGUI
 	class CCtrlScroll;
 	class CViewText;
 	class CViewBitmap;
+	class CGroupList;
 }
 
 class COptionsContainerInsertion;
@@ -37,7 +38,6 @@ class COptionsContainerMove;
 class CGroupContainer;
 class CInterfaceManager;
 class COptionsLayer;
-class CGroupList;
 
 // ***************************************************************************
 /**

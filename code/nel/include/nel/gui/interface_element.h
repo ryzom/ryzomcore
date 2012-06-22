@@ -27,12 +27,11 @@
 #include "nel/gui/reflect.h"
 #include "nel/gui/interface_common.h"
 
-class CGroupList;
 class CGroupParagraph;
 
 namespace NLGUI
 {
-
+	class CGroupList;
 	class CInterfaceLink;
 	class CInterfaceElement;
 	class CInterfaceGroup;
@@ -496,7 +495,7 @@ namespace NLGUI
 		NLMISC::CRefPtr<CInterfaceElement>	_ParentSize;	// RefPtr in case of group destroyed in a parent group with posref on it
 
 		// Friend Class
-		friend class ::CGroupList;
+		friend class CGroupList;
 		friend class ::CGroupParagraph;
 
 		// True if must modulate the global color with the view

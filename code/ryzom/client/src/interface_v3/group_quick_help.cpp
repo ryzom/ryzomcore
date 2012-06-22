@@ -22,7 +22,7 @@
 #include "stdpch.h"
 
 #include "group_quick_help.h"
-#include "group_list.h"
+#include "nel/gui/group_list.h"
 #include "group_paragraph.h"
 #include "../libwww.h"
 #include "interface_manager.h"

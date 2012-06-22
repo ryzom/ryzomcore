@@ -41,9 +41,9 @@ namespace NLGUI
 {
 	class CCtrlButton;
 	class CCtrlScroll;
+	class CGroupList;
 }
 
-class CGroupList;
 class CDBGroupComboBox;
 class CGroupParagraph;
 

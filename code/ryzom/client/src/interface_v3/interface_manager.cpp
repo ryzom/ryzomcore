@@ -60,7 +60,7 @@
 // DBCtrl
 #include "dbctrl_sheet.h"
 // Group
-#include "group_list.h"
+#include "nel/gui/group_list.h"
 #include "group_menu.h"
 #include "group_container.h"
 #include "nel/gui/group_modal.h"

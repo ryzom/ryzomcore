@@ -54,7 +54,7 @@ using namespace NLGUI;
 #include "../cursor_functions.h"
 #include "../entities.h"
 #include "../events_listener.h"
-#include "../interface_v3/group_list.h"
+#include "nel/gui/group_list.h"
 #include "nel/gui/event_descriptor.h"
 #include "nel/gui/group_tree.h"
 #include "../client_cfg.h"

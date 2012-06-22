@@ -65,7 +65,7 @@
 #include "group_career.h"
 #include "nel/gui/group_modal.h"
 #include "group_modal_get_key.h"
-#include "group_list.h"
+#include "nel/gui/group_list.h"
 #include "nel/gui/group_tree.h"
 #include "group_menu.h"
 #include "group_container.h"

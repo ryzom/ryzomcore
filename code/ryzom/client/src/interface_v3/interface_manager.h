@@ -25,7 +25,7 @@
 #include "nel/3d/u_text_context.h"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/interface_link.h"
-#include "group_list.h"
+#include "nel/gui/group_list.h"
 #include "nel/gui/view_base.h"
 #include "view_pointer.h"
 

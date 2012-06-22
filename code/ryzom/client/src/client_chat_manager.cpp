@@ -23,7 +23,7 @@
 
 #include "client_chat_manager.h"
 #include "net_manager.h"
-#include "interface_v3/group_list.h"
+#include "nel/gui/group_list.h"
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/people_interraction.h"
 #include "string_manager_client.h"

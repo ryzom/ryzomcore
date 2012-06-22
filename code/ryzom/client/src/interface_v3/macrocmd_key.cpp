@@ -26,7 +26,7 @@
 #include "nel/gui/action_handler.h"
 #include "nel/gui/ctrl_button.h"
 #include "group_editbox.h"
-#include "group_list.h"
+#include "nel/gui/group_list.h"
 #include "dbgroup_combo_box.h"
 #include "group_container.h"
 #include "group_modal_get_key.h"

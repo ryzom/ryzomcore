@@ -36,10 +36,10 @@ namespace NLGUI
 	class CInterfaceOptions;
 	class CInterfaceLink;
 	class CCtrlBase;
+	class CGroupList;
 }
 
 class CGroupContainer;
-class CGroupList;
 class CInterfaceAnim;
 class CViewPointer;
 class CBrickJob;

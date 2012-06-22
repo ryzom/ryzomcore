@@ -31,7 +31,7 @@
 #include "nel/gui/view_text_id.h"
 #include "nel/gui/lua_ihm.h"
 
-#include "group_list.h"
+#include "nel/gui/group_list.h"
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/view_text.h"

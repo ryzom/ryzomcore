@@ -18,7 +18,7 @@
 #define CL_GROUP_HEADER_H
 
 
-#include "group_list.h"
+#include "nel/gui/group_list.h"
 
 
 class CGroupHeaderEntry;

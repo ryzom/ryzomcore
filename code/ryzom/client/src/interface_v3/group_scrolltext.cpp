@@ -21,7 +21,7 @@
 
 #include "stdpch.h"
 #include "group_scrolltext.h"
-#include "group_list.h"
+#include "nel/gui/group_list.h"
 #include "nel/gui/view_text.h"
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/ctrl_button.h"

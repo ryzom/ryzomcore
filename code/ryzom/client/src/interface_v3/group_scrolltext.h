@@ -27,9 +27,8 @@ namespace NLGUI
 {
 	class CCtrlBaseButton;
 	class CCtrlScroll;
+	class CGroupList;
 }
-
-class CGroupList;
 
 // Can be used to build a chat window or anything that displays sequences of strings
 /**

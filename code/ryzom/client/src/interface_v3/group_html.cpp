@@ -29,7 +29,7 @@ extern "C"
 #include "../libwww.h"
 
 #include "group_html.h"
-#include "group_list.h"
+#include "nel/gui/group_list.h"
 #include "group_container.h"
 #include "view_link.h"
 #include "nel/gui/ctrl_scroll.h"
