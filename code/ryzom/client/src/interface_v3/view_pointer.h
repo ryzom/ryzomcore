@@ -63,11 +63,6 @@ public:
 	}
 	// TEMP PATCH
 
-	/// set button state
-	void setButtonState(NLMISC::TMouseButton state) { _Buttons = state; }
-	/// get buttons state
-	NLMISC::TMouseButton getButtonState() const { return _Buttons; }
-
 private:
 
 	/// Show or hide the pointer. Please, use SetMouseMode (bool freelook) instead.
@@ -119,8 +114,6 @@ private:
 
 	sint32		_OffsetX;
 	sint32		_OffsetY;
-
-	NLMISC::TMouseButton _Buttons;
 
 	CGroupContainer *_LastHightLight;
 

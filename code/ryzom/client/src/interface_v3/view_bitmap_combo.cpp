@@ -14,13 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-#include "stdpch.h"
-
 #include "view_bitmap_combo.h"
-#include "interface_manager.h"
 #include "nel/misc/xml_auto_ptr.h"
+#include "nel/gui/db_manager.h"
+#include "nel/gui/view_renderer.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/view_pointer_base.h"
+#include "nel/gui/interface_group.h"
 
 using namespace NLMISC;
 
@@ -275,7 +275,6 @@ void CViewBitmapCombo::draw()
 	if (numRow == 0 || numCol == 0) return;
 
 	sint32 mx = 0, my = 0;
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	const std::vector<CViewBase *> &rVB = CWidgetManager::getInstance()->getViewsUnderPointer();
 	if (!CWidgetManager::getInstance()->getPointer()) return;
@@ -361,7 +360,7 @@ void CViewBitmapCombo::draw()
 					&& my <  py + (sint32) itemh)
 				{
 					overItem = true;
-					if ( static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() )->getButtonState() & NLMISC::leftButton)
+					if ( CWidgetManager::getInstance()->getPointer()->getButtonState() & NLMISC::leftButton)
 					{
 						textId = getTexId(_TexsPushedId, texIndex);
 						color  = getCol(_ColPushed, texIndex);
@@ -416,7 +415,7 @@ void CViewBitmapCombo::draw()
 	//
 	if (_CD.Unrolled.getBool())
 	{
-		if (overItem && static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() )->getButtonState() & NLMISC::leftButton)
+		if (overItem && CWidgetManager::getInstance()->getPointer()->getButtonState() & NLMISC::leftButton)
 		{
 			textId = getTexId(_TexsId, selectedTexIndex);
 			color  = getCol(_Col, selectedTexIndex);
@@ -436,7 +435,7 @@ void CViewBitmapCombo::draw()
 			&& my <  py + (sint32) itemh
 		   )
 		{
-			if ( static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() )->getButtonState() & NLMISC::leftButton)
+			if ( CWidgetManager::getInstance()->getPointer()->getButtonState() & NLMISC::leftButton)
 			{
 				textId = getTexId(_TexsPushedId, selectedTexIndex);
 				color  = getCol(_ColPushed, selectedTexIndex);

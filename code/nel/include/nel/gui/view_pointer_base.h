@@ -18,6 +18,7 @@
 #ifndef VIEW_POINTER_BASE_H
 #define VIEW_POINTER_BASE_H
 
+#include "nel/misc/events.h"
 #include "nel/gui/view_base.h"
 
 namespace NLGUI
@@ -52,6 +53,11 @@ namespace NLGUI
 		bool show() const {return _PointerVisible;}
 
 		void draw(){}
+		
+		/// set button state
+		void setButtonState(NLMISC::TMouseButton state) { _Buttons = state; }
+		/// get buttons state
+		NLMISC::TMouseButton getButtonState() const { return _Buttons; }
 
 	protected:
 		// (x,y) is from the TopLeft corner of the window
@@ -65,6 +71,8 @@ namespace NLGUI
 		std::string	_PointerDownString;		// What is under the pointer at the down position
 		bool		_PointerDrag;			// Is the pointer down and we have moved ?
 		bool		_PointerVisible;		// Is the pointer visible or hidden ?
+
+		NLMISC::TMouseButton _Buttons;
 
 	private:
 

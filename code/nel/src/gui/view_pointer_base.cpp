@@ -21,7 +21,8 @@ namespace NLGUI
 {
 
 	CViewPointerBase::CViewPointerBase( const CViewBase::TCtorParam &param ) :
-	CViewBase( param )
+	CViewBase( param ),
+	_Buttons( NLMISC::noButton )
 	{
 		_PointerX = _PointerY = _PointerOldX = _PointerOldY = _PointerDownX = _PointerDownY = 0;
 		_PointerDown = false;

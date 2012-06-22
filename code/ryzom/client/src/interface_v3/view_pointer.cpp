@@ -42,8 +42,7 @@ NLMISC_REGISTER_OBJECT(CViewBase, CViewPointer, std::string, "pointer");
 
 // --------------------------------------------------------------------------------------------------------------------
 CViewPointer::CViewPointer (const TCtorParam &param)
-	: CViewPointerBase(param),
-	_Buttons(NLMISC::noButton)
+	: CViewPointerBase(param)
 {
 	_TxIdDefault = -2;
 	_TxIdMoveWindow = -2;
