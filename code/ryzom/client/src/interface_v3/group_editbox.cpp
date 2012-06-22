@@ -14,21 +14,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-#include "stdpch.h"
-
 #include "group_editbox.h"
-#include "interface_manager.h"
-#include "input_handler_manager.h"
 #include "nel/misc/command.h"
 #include "nel/gui/view_text.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/interface_options.h"
-#include "dbctrl_sheet.h"
-#include "group_container.h"
-#include "../time_client.h"
+#include "nel/gui/ctrl_draggable.h"
+#include "nel/gui/group_container_base.h"
 #include "nel/gui/lua_ihm.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/view_renderer.h"
+#include "nel/gui/db_manager.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -41,6 +37,7 @@ using namespace NL3D;
 
 sint32         CGroupEditBox::_SelectCursorPos = 0;
 CGroupEditBox *CGroupEditBox::_MenuFather = NULL;
+CGroupEditBox::IComboKeyHandler* CGroupEditBox::comboKeyHandler = NULL;
 
 
 // ----------------------------------------------------------------------------
@@ -93,7 +90,6 @@ CGroupEditBox::CGroupEditBox(const TCtorParam &param) :
 CGroupEditBox::~CGroupEditBox()
 {
 	if (this == _CurrSelection) _CurrSelection = NULL;
-	CInterfaceManager *im = CInterfaceManager::getInstance();
 	if (CWidgetManager::getInstance()->getCaptureKeyboard() == this || CWidgetManager::getInstance()->getOldCaptureKeyboard() == this)
 	{
 		CWidgetManager::getInstance()->resetCaptureKeyboard();
@@ -106,8 +102,6 @@ bool CGroupEditBox::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	if(!CInterfaceGroup::parse(cur, parentGroup))
 		return false;
 	CXMLAutoPtr prop;
-//	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	if (! CInterfaceGroup::parse(cur,parentGroup) )
 	{
@@ -216,7 +210,6 @@ bool CGroupEditBox::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 void CGroupEditBox::draw ()
 {
 	//
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	//
 	/*CRGBA col;
@@ -296,7 +289,7 @@ void CGroupEditBox::draw ()
 	// Display the cursor if needed
 	if (CWidgetManager::getInstance()->getCaptureKeyboard () == this)
 	{
-		_BlinkTime += DT;
+		_BlinkTime += 0.0025f;
 		if (_BlinkTime > 0.25f)
 		{
 			_BlinkTime = fmodf(_BlinkTime, 0.25f);
@@ -566,7 +559,6 @@ void CGroupEditBox::handleEventChar(const NLGUI::CEventDescriptorKey &rEDK)
 		break;
 		// OTHER
 		default:
-			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			if ((rEDK.getChar() == KeyRETURN) && !_WantReturn)
 			{
 				// update historic.
@@ -583,7 +575,6 @@ void CGroupEditBox::handleEventChar(const NLGUI::CEventDescriptorKey &rEDK)
 
 				_CursorPos = 0;
 				// loose the keyboard focus
-				CInterfaceManager *im = CInterfaceManager::getInstance();
 				if (NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:ENTER_DONT_QUIT_CB")->getValue32() == 0)
 				{
 					if(_LooseFocusOnEnter)
@@ -717,7 +708,6 @@ void CGroupEditBox::handleEventString(const NLGUI::CEventDescriptorKey &rEDK)
 // ----------------------------------------------------------------------------
 bool CGroupEditBox::undo()
 {
-	CInterfaceManager *im = CInterfaceManager::getInstance();
 	if (CWidgetManager::getInstance()->getCaptureKeyboard() != this) return false;
 	if (!_CanUndo) return false;
 	_ModifiedInputString = _InputString;
@@ -732,7 +722,6 @@ bool CGroupEditBox::undo()
 // ----------------------------------------------------------------------------
 bool CGroupEditBox::redo()
 {
-	CInterfaceManager *im = CInterfaceManager::getInstance();
 	if (CWidgetManager::getInstance()->getCaptureKeyboard() != this) return false;
 	if (!_CanRedo) return false;
 	setInputString(_ModifiedInputString);
@@ -748,11 +737,10 @@ void CGroupEditBox::triggerOnChangeAH()
 {
 	_CanUndo = true;
 	_CanRedo = false;
+	
 	if (!_AHOnChange.empty())
-	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CAHManager::getInstance()->runActionHandler(_AHOnChange, this, _ParamsOnChange);
-	}
+
 }
 
 // ----------------------------------------------------------------------------
@@ -856,8 +844,7 @@ bool CGroupEditBox::handleEvent (const NLGUI::CEventDescriptor& event)
 		else
 		{
 			// Look into the input handler Manager if the key combo has to be considered as handled
-			CInputHandlerManager	*pIH= CInputHandlerManager::getInstance();
-			if( pIH->isComboKeyChat(rEDK) )
+			if( ( CGroupEditBox::comboKeyHandler != NULL ) && comboKeyHandler->isComboKeyChat(rEDK) )
 				return true;
 			else
 				return false;
@@ -871,8 +858,6 @@ bool CGroupEditBox::handleEvent (const NLGUI::CEventDescriptor& event)
 		/////////////////
 		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-
 		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 		{
 			if (CWidgetManager::getInstance()->getCapturePointerRight() == this)
@@ -880,7 +865,7 @@ bool CGroupEditBox::handleEvent (const NLGUI::CEventDescriptor& event)
 				CWidgetManager::getInstance()->setCapturePointerRight(NULL);
 				if (!_ListMenuRight.empty())
 				{
-					if (CDBCtrlSheet::getDraggedSheet() == NULL)
+					if (CCtrlDraggable::getDraggedSheet() == NULL)
 					{
 						_MenuFather = this;
 						CWidgetManager::getInstance()->enableModalWindow (this, _ListMenuRight);
@@ -1069,7 +1054,7 @@ void CGroupEditBox::updateCoords()
 
 	if (_BackupFatherContainerPos)
 	{
-		CGroupContainer *gc = static_cast< CGroupContainer* >( getEnclosingContainer() );
+		CGroupContainerBase *gc = static_cast< CGroupContainerBase* >( getEnclosingContainer() );
 	
 		if (gc && !gc->getTouchFlag(true))
 		{
@@ -1301,12 +1286,9 @@ void CGroupEditBox::setCommand(const ucstring &command, bool execute)
 // ***************************************************************************
 void CGroupEditBox::makeTopWindow()
 {
-	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CInterfaceGroup *root = getRootWindow();
-	if (root)
-	{
+	if(root)
 		CWidgetManager::getInstance()->setTopWindow(root);
-	}
 }
 
 // ***************************************************************************
@@ -1405,10 +1387,8 @@ void CGroupEditBox::elementCaptured(CCtrlBase *capturedElement)
 void CGroupEditBox::onKeyboardCaptureLost()
 {
 	if (!_AHOnFocusLost.empty())
-	{
-		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CAHManager::getInstance()->runActionHandler(_AHOnFocusLost, this, _AHOnFocusLostParams);
-	}
+
 }
 
 // ***************************************************************************
@@ -1428,7 +1408,6 @@ void CGroupEditBox::setFocusOnText()
 		return;
 
 	// else set the focus
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CWidgetManager::getInstance()->setCaptureKeyboard (this);
 
 	_CurrSelection = this;
@@ -1454,7 +1433,6 @@ int CGroupEditBox::luaCancelFocusOnText(CLuaState &ls)
 	const char *funcName = "cancelFocusOnText";
 	CLuaIHM::checkArgCount(ls, funcName, 0);
 
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if (CWidgetManager::getInstance()->getCaptureKeyboard()==this || CWidgetManager::getInstance()->getOldCaptureKeyboard()==this)
 		CWidgetManager::getInstance()->resetCaptureKeyboard();
 
@@ -1490,7 +1468,6 @@ void CGroupEditBox::setFrozen (bool state)
 	// if frozen, loose the focus
 	if(_Frozen)
 	{
-		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		// stop capture and selection
 		CWidgetManager::getInstance()->setCaptureKeyboard (NULL);
 		if(_CurrSelection==this)	_CurrSelection = NULL;

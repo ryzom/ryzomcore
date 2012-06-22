@@ -67,11 +67,13 @@ CInputHandlerManager::CInputHandlerManager()
 	_RecoverFocusLost = false;
 
 	inputHandler.setListener( CInterfaceManager::getInstance() );
+	CGroupEditBox::setComboKeyHandler( this );
 }
 
 // ***************************************************************************
 CInputHandlerManager::~CInputHandlerManager()
 {
+	CGroupEditBox::setComboKeyHandler( NULL );
 }
 
 // ********************************************************************************************

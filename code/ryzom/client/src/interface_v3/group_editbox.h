@@ -33,8 +33,16 @@ namespace NLGUI
 class CGroupEditBox : public CGroupEditBoxBase
 {
 public:
+
+	class IComboKeyHandler
+	{
+	public:
+		virtual ~IComboKeyHandler(){}
+		virtual bool isComboKeyChat( const NLGUI::CEventDescriptorKey &edk ) const = 0;
+	};
+
 	enum TEntryType { Text, Integer, PositiveInteger, Float, PositiveFloat, Alpha, AlphaNum, AlphaNumSpace, Password, Filename, PlayerName }; // the type of entry this edit bot can deal with
-public:
+
 	DECLARE_UI_CLASS( CGroupEditBox )
 	/// Constructor
 	CGroupEditBox(const TCtorParam &param);
@@ -341,6 +349,12 @@ private:
 		}
 		return false;
 	}
+
+	static IComboKeyHandler *comboKeyHandler;
+
+public:
+	static void setComboKeyHandler( IComboKeyHandler *handler ){ comboKeyHandler = handler; }
+
 };
 
 

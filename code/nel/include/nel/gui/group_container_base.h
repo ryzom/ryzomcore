@@ -86,6 +86,9 @@ namespace NLGUI
 		uint8 getCurrentContentAlpha() const{ return _CurrentContentAlpha; }
 
 		virtual bool isGrayed() const{ return false; }
+		virtual bool getTouchFlag(bool clearFlag) const{ return false; }
+		virtual void backupPosition(){}
+		virtual void restorePosition(){}
 
 	protected:
 		void triggerAlphaSettingsChangedAH();
