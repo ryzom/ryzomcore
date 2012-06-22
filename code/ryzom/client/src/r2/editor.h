@@ -41,8 +41,11 @@
 
 
 
+namespace NLGUI
+{
+	class CGroupTree;
+}
 
-class CGroupTree;
 class CEntityCL;
 
 namespace NL3D

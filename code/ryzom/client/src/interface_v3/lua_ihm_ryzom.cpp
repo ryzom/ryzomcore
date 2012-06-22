@@ -51,7 +51,7 @@
 #include "nel/gui/interface_group.h"
 #include "nel/gui/view_text.h"
 #include "game_share/people_pd.h"
-#include "group_tree.h"
+#include "nel/gui/group_tree.h"
 #include "nel/gui/interface_link.h"
 #include "nel/gui/interface_expr.h"
 #include "people_interraction.h"

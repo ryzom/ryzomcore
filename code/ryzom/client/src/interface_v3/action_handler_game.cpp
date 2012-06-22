@@ -44,7 +44,7 @@
 #include "guild_manager.h"
 #include "../net_manager.h"
 #include "interface_ddx.h"
-#include "group_tree.h"
+#include "nel/gui/group_tree.h"
 #include "group_map.h"
 #include "nel/gui/view_bitmap.h"
 #include "action_handler_tools.h"

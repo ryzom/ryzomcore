@@ -19,7 +19,7 @@
 #include "stdpch.h"
 #include "encyclopedia_manager.h"
 #include "interface_manager.h"
-#include "group_tree.h"
+#include "nel/gui/group_tree.h"
 #include "nel/gui/view_text_id.h"
 #include "nel/gui/view_bitmap.h"
 #include "action_handler_misc.h"

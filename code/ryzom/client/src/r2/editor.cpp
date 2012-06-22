@@ -48,7 +48,7 @@
 //
 #include "nel/gui/lua_helper.h"
 using namespace NLGUI;
-#include "../interface_v3/group_tree.h"
+#include "nel/gui/group_tree.h"
 #include "../interface_v3/interface_manager.h"
 #include "../contextual_cursor.h"
 #include "../cursor_functions.h"
@@ -56,7 +56,7 @@ using namespace NLGUI;
 #include "../events_listener.h"
 #include "../interface_v3/group_list.h"
 #include "nel/gui/event_descriptor.h"
-#include "../interface_v3/group_tree.h"
+#include "nel/gui/group_tree.h"
 #include "../client_cfg.h"
 #include "nel/gui/lua_ihm.h"
 #include "../interface_v3/lua_ihm_ryzom.h"

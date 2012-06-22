@@ -41,7 +41,7 @@
 #include "dbgroup_list_sheet.h"
 #include "nel/gui/group_editbox_base.h"
 #include "group_editbox.h"
-#include "group_tree.h"
+#include "nel/gui/group_tree.h"
 #include "nel/gui/reflect.h"
 #include "dbview_bar.h"
 #include "dbview_bar3.h"
