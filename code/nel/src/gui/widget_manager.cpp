@@ -29,6 +29,8 @@ namespace
 {
 	const uint DOUBLE_CLICK_MIN = 50;
 	const uint DOUBLE_CLICK_MAX = 750;
+	const float ROLLOVER_MIN_DELTA_PER_MS = 0.28f;
+	const float ROLLOVER_MAX_DELTA_PER_MS = 0.12f;
 }
 
 namespace NLGUI
@@ -960,6 +962,8 @@ namespace NLGUI
 		setCapturePointerRight(NULL);
 		
 		resetColorProps();
+
+		_AlphaRolloverSpeedDB = NULL;
 	}
 
 
@@ -1445,6 +1449,37 @@ namespace NLGUI
 		}
 		
 	}
+	
+	// Get the alpha roll over speed
+	float CWidgetManager::getAlphaRolloverSpeed()
+	{
+		if( _AlphaRolloverSpeedDB == NULL )
+			_AlphaRolloverSpeedDB = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ALPHA_ROLLOVER_SPEED");
+		float fTmp = ROLLOVER_MIN_DELTA_PER_MS + (ROLLOVER_MAX_DELTA_PER_MS - ROLLOVER_MIN_DELTA_PER_MS) * 0.01f * (100 - _AlphaRolloverSpeedDB->getValue32());
+		return fTmp*fTmp*fTmp;
+	}
+
+	void CWidgetManager::resetAlphaRolloverSpeed()
+	{
+		_AlphaRolloverSpeedDB = NULL;
+	}
+	
+	void CWidgetManager::setContainerAlpha(uint8 alpha)
+	{
+		_ContainerAlpha = alpha;
+		// update alpha of global color
+		NLMISC::CRGBA c = getGlobalColor();
+		c.A = alpha;/*(uint8) (( (uint16) _GlobalColor.A * (uint16) _ContainerAlpha) >> 8);	*/
+		setGlobalColor( c );
+	}
+
+	void CWidgetManager::updateGlobalAlphas()
+	{
+		_GlobalContentAlpha = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTENT_ALPHA")->getValue32();
+		_GlobalContainerAlpha = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTAINER_ALPHA")->getValue32();
+		_GlobalRolloverFactorContent = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTENT_ROLLOVER_FACTOR")->getValue32();
+		_GlobalRolloverFactorContainer = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTAINER_ROLLOVER_FACTOR")->getValue32();
+	}
 
 	CWidgetManager::CWidgetManager()
 	{
@@ -1456,6 +1491,12 @@ namespace NLGUI
 		_GlobalColor = NLMISC::CRGBA(255,255,255,255);
 		_GlobalColorForContent = _GlobalColor;
 		_ContentAlpha = 255;
+		_ContainerAlpha = 255;
+		_GlobalContentAlpha = 255;
+		_GlobalContainerAlpha = 255;
+		_GlobalRolloverFactorContent = 255;
+		_GlobalRolloverFactorContainer = 255;
+		_AlphaRolloverSpeedDB = NULL;
 
 		_MouseHandlingEnabled = true;
 	}

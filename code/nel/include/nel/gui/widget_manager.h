@@ -55,6 +55,21 @@ namespace NLGUI
 	class CWidgetManager{
 	public:
 
+		struct SInterfaceTimes
+		{
+		public:
+			sint64 lastFrameMs;
+			sint64 thisFrameMs;
+			sint64 frameDiffMs;
+
+			SInterfaceTimes()
+			{
+				lastFrameMs = 0;
+				thisFrameMs = 0;
+				frameDiffMs = 0;
+			}
+		};
+
 		// Master groups encapsulate all windows
 		struct SMasterGroup
 		{
@@ -341,6 +356,21 @@ namespace NLGUI
 			_OverExtendViewText = vt;
 			_OverExtendViewTextBackColor = backGround;
 		}
+
+		float getAlphaRolloverSpeed();
+		void resetAlphaRolloverSpeed();
+
+		void setContainerAlpha( uint8 alpha );
+		uint8 getContainerAlpha() const { return _ContainerAlpha; }
+		uint8 getGlobalContentAlpha() const { return _GlobalContentAlpha; }
+		uint8 getGlobalContainerAlpha() const { return _GlobalContainerAlpha; }
+		uint8 getGlobalRolloverFactorContent() const { return _GlobalRolloverFactorContent; }
+		uint8 getGlobalRolloverFactorContainer() const { return _GlobalRolloverFactorContainer; }
+
+		void updateGlobalAlphas();
+
+		const SInterfaceTimes& getInterfaceTimes() const{ return interfaceTimes; }
+		void updateInterfaceTimes( const SInterfaceTimes &times ){ interfaceTimes = times; }
 		
 		static IParser *parser;
 
@@ -383,6 +413,13 @@ namespace NLGUI
 		NLMISC::CCDBNodeLeaf *_GProp;
 		NLMISC::CCDBNodeLeaf *_BProp;
 		NLMISC::CCDBNodeLeaf *_AProp;
+		NLMISC::CCDBNodeLeaf *_AlphaRolloverSpeedDB;
+		
+		uint8 _ContainerAlpha;
+		uint8 _GlobalContentAlpha;
+		uint8 _GlobalContainerAlpha;
+		uint8 _GlobalRolloverFactorContent;
+		uint8 _GlobalRolloverFactorContainer;
 
 		bool _MouseHandlingEnabled;
 		
@@ -392,6 +429,8 @@ namespace NLGUI
 		// The next ViewText to draw for Over
 		NLMISC::CRefPtr< CInterfaceElement > _OverExtendViewText;
 		NLMISC::CRGBA _OverExtendViewTextBackColor;
+
+		SInterfaceTimes interfaceTimes;
 	};
 
 }

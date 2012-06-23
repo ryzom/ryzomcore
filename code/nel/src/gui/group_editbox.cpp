@@ -293,7 +293,9 @@ namespace NLGUI
 		// Display the cursor if needed
 		if (CWidgetManager::getInstance()->getCaptureKeyboard () == this)
 		{
-			_BlinkTime += 0.0025f;
+			const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
+
+			_BlinkTime += ( static_cast< float >( times.frameDiffMs ) / 1000.0f );
 			if (_BlinkTime > 0.25f)
 			{
 				_BlinkTime = fmodf(_BlinkTime, 0.25f);

@@ -37,7 +37,6 @@ namespace NLGUI
 }
 
 class CGroupContainer;
-class CInterfaceManager;
 
 // ***************************************************************************
 /**
@@ -136,10 +135,10 @@ private:
 	//
 	static COptionsContainerInsertion *getInsertionOptions();
 private:
-	void				setPoped(CGroupContainer *gc, sint32 x, sint32 y, CInterfaceManager *pIM, const NLGUI::CEventDescriptorMouse &eventDesc);
-	void				setMovingInParent(CGroupContainer *gc, sint32 x, sint32 y, CInterfaceManager *pIM, const NLGUI::CEventDescriptorMouse &eventDesc);
+	void				setPoped(CGroupContainer *gc, sint32 x, sint32 y, const NLGUI::CEventDescriptorMouse &eventDesc);
+	void				setMovingInParent(CGroupContainer *gc, sint32 x, sint32 y, const NLGUI::CEventDescriptorMouse &eventDesc);
 	void				updateInsertionIndex(const CGroupList *gl, sint32 posY);
-	void				stopMove(CInterfaceManager *pIM);
+	void				stopMove();
 	bool				runTitleActionHandler();
 	void				handleScrolling();
 

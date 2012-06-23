@@ -51,9 +51,6 @@
 
 #include "../ingame_database_manager.h"
 
-static const float ROLLOVER_MIN_DELTA_PER_MS = 0.28f;
-static const float ROLLOVER_MAX_DELTA_PER_MS = 0.12f;
-
 //the network database node
 extern CCDBSynchronised IngameDbMngr;
 
@@ -295,15 +292,6 @@ public:
 	void drawContextHelp ();
 	//void drawContextMenu ();
 
-	void setContainerAlpha(uint8 alpha);
-	uint8 getContainerAlpha() const { return _ContainerAlpha; }
-
-	//	these values are updated from the DB
-	uint8 getGlobalContentAlpha() const { return _GlobalContentAlpha; }
-	uint8 getGlobalContainerAlpha() const { return _GlobalContainerAlpha; }
-	uint8 getGlobalRolloverFactorContent() const { return _GlobalRolloverFactorContent; }
-	uint8 getGlobalRolloverFactorContainer() const { return _GlobalRolloverFactorContainer; }
-
 	/// Update all the elements
 	void updateAllLocalisedElements ();
 
@@ -452,15 +440,6 @@ public:
 
 	// @}
 
-
-	// Get the alpha roll over speed
-	float getAlphaRolloverSpeed()
-	{
-		if (!_AlphaRolloverSpeedDB)
-			_AlphaRolloverSpeedDB = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ALPHA_ROLLOVER_SPEED");
-		float fTmp = ROLLOVER_MIN_DELTA_PER_MS + (ROLLOVER_MAX_DELTA_PER_MS - ROLLOVER_MIN_DELTA_PER_MS) * 0.01f * (100 - _AlphaRolloverSpeedDB->getValue32());
-		return fTmp*fTmp*fTmp;
-	}
 
 	// Item Carac Test, get the value
 	bool	isItemCaracRequirementMet(CHARACTERISTICS::TCharacteristics type, sint32 value)
@@ -649,13 +628,6 @@ private:
 	uint8			_LocalSyncActionCounterMask;
 
 
-	uint8 _ContainerAlpha;
-	//
-	uint8 _GlobalContentAlpha;
-	uint8 _GlobalContainerAlpha;
-	uint8 _GlobalRolloverFactorContent;
-	uint8 _GlobalRolloverFactorContainer;
-
 	/// Constructor
 	CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext *textcontext );
 
@@ -719,7 +691,6 @@ private:
 	NLMISC::CCDBNodeLeaf *_NeutralColor;
 	NLMISC::CCDBNodeLeaf *_WarningColor;
 	NLMISC::CCDBNodeLeaf *_ErrorColor;
-	NLMISC::CCDBNodeLeaf *_AlphaRolloverSpeedDB;
 
 	void			drawOverExtendViewText();
 

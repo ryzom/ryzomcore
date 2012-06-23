@@ -410,17 +410,11 @@ CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext 
 	_ScreenW = _ScreenH = 0;
 	_LastInGameScreenW = _LastInGameScreenH = 0;
 	_DescTextTarget = NULL;
-	_ContainerAlpha = 255;
-	_GlobalContentAlpha = 255;
-	_GlobalContainerAlpha = 255;
-	_GlobalRolloverFactorContent = 255;
-	_GlobalRolloverFactorContainer = 255;
 	_MouseOverWindow= false;
 	_ConfigLoaded = false;
 	_LogState = false;
 	_KeysLoaded = false;
 	CWidgetManager::getInstance()->resetColorProps();
-	_AlphaRolloverSpeedDB = NULL;
 	_NeutralColor = NULL;
 	_WarningColor = NULL;
 	_ErrorColor = NULL;
@@ -522,7 +516,7 @@ void CInterfaceManager::reset()
 	_NeutralColor			= NULL;
 	_WarningColor			= NULL;
 	_ErrorColor				= NULL;
-	_AlphaRolloverSpeedDB	= NULL;
+	
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1326,7 +1320,7 @@ void CInterfaceManager::uninitInGame1 ()
 	_NeutralColor = NULL;
 	_WarningColor = NULL;
 	_ErrorColor = NULL;
-	_AlphaRolloverSpeedDB = NULL;
+	CWidgetManager::getInstance()->resetAlphaRolloverSpeed();
 	CWidgetManager::getInstance()->resetColorProps();
 
 #ifdef AJM_DEBUG_TRACK_INTERFACE_GROUPS
@@ -1942,12 +1936,10 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 		c.B = gc.B;
 		c.A = (uint8) (( (uint16) c.A * (uint16) CWidgetManager::getInstance()->getContentAlpha() ) >> 8);
 		CWidgetManager::getInstance()->setGlobalColorForContent( c );
-
+		
 		// Update global alphaS from database
-		_GlobalContentAlpha = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTENT_ALPHA")->getValue32();
-		_GlobalContainerAlpha = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTAINER_ALPHA")->getValue32();
-		_GlobalRolloverFactorContent = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTENT_ROLLOVER_FACTOR")->getValue32();
-		_GlobalRolloverFactorContainer = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTAINER_ROLLOVER_FACTOR")->getValue32();
+		CWidgetManager::getInstance()->updateGlobalAlphas();
+
 
 		// Update Player characteristics (for Item carac requirement Redifying)
 		nlctassert(CHARACTERISTICS::NUM_CHARACTERISTICS==8);
@@ -3722,16 +3714,6 @@ void	CInterfaceManager::launchContextMenuInGame (const std::string &nameOfCM)
 			}
 		}
 	}
-}
-
-// ***************************************************************************
-void CInterfaceManager::setContainerAlpha(uint8 alpha)
-{
-	_ContainerAlpha = alpha;
-	// update alpha of global color
-	CRGBA c = CWidgetManager::getInstance()->getGlobalColor();
-	c.A = alpha;/*(uint8) (( (uint16) _GlobalColor.A * (uint16) _ContainerAlpha) >> 8);	*/
-	CWidgetManager::getInstance()->setGlobalColor( c );
 }
 
 

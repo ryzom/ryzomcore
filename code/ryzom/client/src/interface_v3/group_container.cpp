@@ -14,28 +14,22 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-// ***************************************************************************
-#include "stdpch.h"
-
 #include "group_container.h"
-#include "interface_manager.h"
 #include "nel/gui/interface_options.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/action_handler.h"
-#include "../time_client.h"
 #include "nel/gui/group_editbox.h"
 #include "nel/gui/view_text_formated.h"
 #include "nel/gui/view_text_id.h"
 #include "nel/gui/lua_ihm.h"
-
 #include "nel/gui/group_list.h"
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/view_text.h"
 #include "nel/gui/view_bitmap.h"
-#include "../time_client.h"
+#include "nel/gui/view_renderer.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/view_pointer_base.h"
 
 
 // ***************************************************************************
@@ -330,7 +324,6 @@ bool CCtrlResizer::handleEvent (const NLGUI::CEventDescriptor &event)
 				// call resize handler of parent container if any
 				if (gc && gc->getAHOnResizePtr() != NULL)
 				{
-					CInterfaceManager *im = CInterfaceManager::getInstance();
 					CAHManager::getInstance()->runActionHandler(gc->getAHOnResize(), gc, gc->getAHOnResizeParams());
 				}
 			}
@@ -469,7 +462,6 @@ COptionsContainerInsertion *CCtrlMover::getInsertionOptions()
 {
 	static	NLMISC::CRefPtr<COptionsContainerInsertion> insertionOptions;
 	if (insertionOptions) return insertionOptions;
-	CInterfaceManager *im = CInterfaceManager::getInstance();
 	insertionOptions = (COptionsContainerInsertion *) CWidgetManager::getInstance()->getOptions("container_insertion_opt");
 	return insertionOptions;
 }
@@ -483,7 +475,6 @@ void CCtrlMover::draw ()
 	#endif
 
 	// No Op if window is minimized
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	if(CViewRenderer::getInstance()->isMinimized())
 		return;
 
@@ -498,7 +489,6 @@ void CCtrlMover::draw ()
 		uint32 sw, sh;
 		rVR.getScreenSize(sw, sh);
 		rVR.setClipWindow (0, 0, (sint32) sw, (sint32) sh);
-		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CViewRenderer &vr = *CViewRenderer::getInstance();
 		//
 		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(_Parent);
@@ -567,7 +557,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 	if (!_Active)
 		return false;
 
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
+	const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
 
 	if (event.getType() == NLGUI::CEventDescriptor::system)
 	{
@@ -577,7 +567,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 			const NLGUI::CEventDescriptorSetFocus &edsf = (const NLGUI::CEventDescriptorSetFocus &) eds;
 			if (edsf.hasFocus() == false && _Moving)
 			{
-				stopMove(pIM);
+				stopMove();
 				return true;
 			}
 		}
@@ -664,7 +654,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 				gc->setHighLighted(false);
 				if (_HasMoved || _MovingInParentList)
 				{
-					stopMove(pIM);
+					stopMove();
 					return true;
 				}
 				if (isIn(eventDesc.getX(), eventDesc.getY()))
@@ -674,7 +664,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 					{
 						_WaitToOpenClose = true;
 						CWidgetManager::getInstance()->registerClockMsgTarget(this);
-						_WaitToOpenCloseDate = T1;
+						_WaitToOpenCloseDate = times.thisFrameMs;
 					}
 					else
 					{
@@ -716,7 +706,6 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 					CWidgetManager::getInstance()->setTopWindow(_Parent);
 					if (gc->getAHOnBeginMovePtr())
 					{
-						CInterfaceManager *im = CInterfaceManager::getInstance();
 						CAHManager::getInstance()->runActionHandler(gc->getAHOnBeginMove(), gc, gc->getAHOnBeginMoveParams());						
 					}
 					return true;
@@ -728,7 +717,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 			// Leave Moving?
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup )
 			{
-				stopMove(pIM);
+				stopMove();
 				return true;
 			}
 			// Move
@@ -753,7 +742,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 								CGroupList *parentList = dynamic_cast<CGroupList *>(gc->getParent());
 								if (!parentList) return false;
 								if (parentList->getNbElement() == 1) return false;
-								setMovingInParent(gc, x, y, pIM, eventDesc);
+								setMovingInParent(gc, x, y, eventDesc);
 								updateInsertionIndex(parentList, eventDesc.getY());
 								return true;
 							}
@@ -765,7 +754,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 							{
 								if (abs(x - _Parent->getX()) > DELTA_BEFORE_POPUP || abs(y - _Parent->getY()) > DELTA_BEFORE_POPUP)
 								{
-									setPoped(gc, x, y, pIM, eventDesc);
+									setPoped(gc, x, y, eventDesc);
 									return true;
 								}
 							}
@@ -777,7 +766,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 									CGroupList *parentList = dynamic_cast<CGroupList *>(gc->getParent());
 									if (!parentList) return false;
 									if (parentList->getNbElement() == 1) return false;
-									setMovingInParent(gc, x, y, pIM, eventDesc);
+									setMovingInParent(gc, x, y, eventDesc);
 									updateInsertionIndex(parentList, eventDesc.getY());
 									return true;
 								}
@@ -785,7 +774,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 								//if (_Parent->getX() - x > DELTA_BEFORE_POPUP || x - (_Parent->getX() + _Parent->getWReal()) > DELTA_BEFORE_POPUP)
 								if (abs(x - _Parent->getX()) > DELTA_BEFORE_POPUP)
 								{
-									setPoped(gc, x, y, pIM, eventDesc);
+									setPoped(gc, x, y, eventDesc);
 									return true;
 								}
 							}
@@ -920,7 +909,7 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 			if (_WaitToOpenClose)
 			{
 				uint dbclickDelay = CWidgetManager::getInstance()->getUserDblClickDelay();
-				if ((T1 - _WaitToOpenCloseDate) > dbclickDelay)
+				if ((times.thisFrameMs - _WaitToOpenCloseDate) > dbclickDelay)
 				{
 					CGroupContainer *gc = dynamic_cast<CGroupContainer *>(_Parent);
 					if (!gc) return false;
@@ -951,18 +940,20 @@ bool CCtrlMover::handleEvent (const NLGUI::CEventDescriptor &event)
 void CCtrlMover::handleScrolling()
 {
 	const uint pixPerMS = 7; // the number of millisecond to move of one pixel in the parent scrollbar
-	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(_Parent);
 	if (!gc) return;
 	CGroupList *gl = gc->getPreviousParentList();
 	if (!gl) return;
+	
+	const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
+
 	if (_ParentScrollingUp)
 	{
 		sint32 topPosY = gl->getChild(0)->getYReal();
 		// check if we are really at the end of the list, if this is not the case, we should perform scroll on parent container with a scroll bar
 		if (gc->getYReal() < topPosY)
 		{
-			_ScrollTime += DT64;
+			_ScrollTime += times.frameDiffMs;
 			sint32 deltaY = (sint32) (_ScrollTime / pixPerMS);
 			if (deltaY != 0)
 			{
@@ -996,7 +987,7 @@ void CCtrlMover::handleScrolling()
 		sint32 bottomPosY = gl->getChild(gl->getNumChildren() - 1)->getYReal() - gl->getChild(gl->getNumChildren() - 1)->getHReal();
 		if (gc->getYReal() -  gc->getHReal() > bottomPosY)
 		{
-			_ScrollTime += DT64;
+			_ScrollTime += times.frameDiffMs;
 			sint32 deltaY = - (sint32) (_ScrollTime / pixPerMS);
 			if (deltaY != 0)
 			{
@@ -1030,7 +1021,6 @@ bool CCtrlMover::runTitleActionHandler()
 {
 	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(_Parent);
 	if (!gc) return false;
-	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CInterfaceGroup *gr = gc->isOpen() ? gc->getHeaderOpened() : gc->getHeaderClosed();
 	if (gr && !gr->getLeftClickHandler().empty())
 	{
@@ -1047,7 +1037,7 @@ bool CCtrlMover::runTitleActionHandler()
 }
 
 // ***************************************************************************
-void CCtrlMover::setPoped(CGroupContainer *gc, sint32 x, sint32 y, CInterfaceManager *pIM, const NLGUI::CEventDescriptorMouse &eventDesc)
+void CCtrlMover::setPoped(CGroupContainer *gc, sint32 x, sint32 y, const NLGUI::CEventDescriptorMouse &eventDesc)
 {
 	gc->setHighLighted(false);
 	sint32 deltaX = x - _Parent->getX();
@@ -1089,7 +1079,7 @@ void CCtrlMover::setPoped(CGroupContainer *gc, sint32 x, sint32 y, CInterfaceMan
 }
 
 // ***************************************************************************
-void CCtrlMover::setMovingInParent(CGroupContainer *gc, sint32 /* x */, sint32 y, CInterfaceManager *pIM, const NLGUI::CEventDescriptorMouse &eventDesc)
+void CCtrlMover::setMovingInParent(CGroupContainer *gc, sint32 /* x */, sint32 y, const NLGUI::CEventDescriptorMouse &eventDesc)
 {
 	if (!gc) return;
 	sint32 deltaY = y - gc->getY();
@@ -1134,7 +1124,6 @@ void CCtrlMover::setMovingInParent(CGroupContainer *gc, sint32 /* x */, sint32 y
 	_MovingInParentList = true;
 
 	// register to get time events
-//	CInterfaceManager *im = CInterfaceManager::getInstance();
 }
 
 // ***************************************************************************
@@ -1162,7 +1151,7 @@ void CCtrlMover::updateInsertionIndex(const CGroupList *gl, sint32 posY)
 }
 
 // ***************************************************************************
-void CCtrlMover::stopMove(CInterfaceManager *pIM)
+void CCtrlMover::stopMove()
 {
 	_ParentScrollingUp = false;
 	_ParentScrollingDown = false;
@@ -1788,8 +1777,8 @@ void CGroupContainer::draw ()
 
 	if (_LayerSetup == -1) return;
 
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	float speed = pIM->getAlphaRolloverSpeed();
+	float speed = CWidgetManager::getInstance()->getAlphaRolloverSpeed();
+	const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
 
 	CRGBA oldGlobalColor = CWidgetManager::getInstance()->getGlobalColor();
 	CRGBA oldGColForGrayed = CWidgetManager::getInstance()->getGlobalColor();
@@ -1826,7 +1815,7 @@ void CGroupContainer::draw ()
 			}
 			_BlinkState = false;
 		}
-		_BlinkDT += std::min((uint) DT64, blinkDuration);
+		_BlinkDT += std::min((uint) times.frameDiffMs, blinkDuration);
 	}
 
 	CGroupContainer *parentGC = NULL;
@@ -1870,7 +1859,7 @@ void CGroupContainer::draw ()
 	}
 	else
 	{
-		_CurrentContainerAlpha = _UseGlobalAlpha ? pIM->getGlobalContainerAlpha() : _ContainerAlpha;
+		_CurrentContainerAlpha = _UseGlobalAlpha ? CWidgetManager::getInstance()->getGlobalContainerAlpha() : _ContainerAlpha;
 	}
 	// modulate by container alpha color
 	col.A = (uint8) (((uint16) _CurrentContainerAlpha * (uint16) col.A) >> 8);
@@ -1883,9 +1872,9 @@ void CGroupContainer::draw ()
 	}
 	else
 	{
-		uint8 rolloverFactorContent = _UseGlobalAlpha ? (255 - pIM->getGlobalRolloverFactorContent()) : _RolloverAlphaContent;
+		uint8 rolloverFactorContent = _UseGlobalAlpha ? (255 - CWidgetManager::getInstance()->getGlobalRolloverFactorContent()) : _RolloverAlphaContent;
 		_ICurrentRolloverAlphaContent = (uint8) (255 - rolloverFactorContent + rolloverFactorContent * _CurrentRolloverAlphaContent);
-		uint8 rolloverFactorContainer = _UseGlobalAlpha ? (255 - pIM->getGlobalRolloverFactorContainer()) : _RolloverAlphaContainer;
+		uint8 rolloverFactorContainer = _UseGlobalAlpha ? (255 - CWidgetManager::getInstance()->getGlobalRolloverFactorContainer()) : _RolloverAlphaContainer;
 		_ICurrentRolloverAlphaContainer = (uint8) (255 - rolloverFactorContainer + rolloverFactorContainer * _CurrentRolloverAlphaContainer);
 	}
 	// Modulate alpha by rollover alpha
@@ -2120,8 +2109,8 @@ void CGroupContainer::draw ()
 	}
 	else
 	{
-		_CurrentContentAlpha = _UseGlobalAlpha ? pIM->getGlobalContentAlpha() : _ContentAlpha;
-		_CurrentContainerAlpha = _UseGlobalAlpha ? pIM->getGlobalContainerAlpha() : _ContainerAlpha;
+		_CurrentContentAlpha = _UseGlobalAlpha ? CWidgetManager::getInstance()->getGlobalContentAlpha() : _ContentAlpha;
+		_CurrentContainerAlpha = _UseGlobalAlpha ? CWidgetManager::getInstance()->getGlobalContainerAlpha() : _ContainerAlpha;
 	}
 	// set content alpha multiplied by rollover alpha
 	CWidgetManager::getInstance()->setContentAlpha((uint8) (((uint16) _CurrentContentAlpha * (uint16) _ICurrentRolloverAlphaContent) >> 8));
@@ -2187,7 +2176,7 @@ void CGroupContainer::draw ()
 
 
 	// manage rollover
-	CViewPointer *mousePointer = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
+	CViewPointerBase *mousePointer = CWidgetManager::getInstance()->getPointer();
  	if (mousePointer)
 	{
 		bool dontFade = false;
@@ -2227,18 +2216,18 @@ void CGroupContainer::draw ()
 		}
 		if (dontFade || isOver)
 		{
-			_CurrentRolloverAlphaContent += (float) (speed * DT64);
+			_CurrentRolloverAlphaContent += (float) (speed * times.frameDiffMs);
 			_CurrentRolloverAlphaContent = std::min(1.f, _CurrentRolloverAlphaContent);
 
-			_CurrentRolloverAlphaContainer += (float) (speed * DT64);
+			_CurrentRolloverAlphaContainer += (float) (speed * times.frameDiffMs);
 			_CurrentRolloverAlphaContainer = std::min(1.f, _CurrentRolloverAlphaContainer);
 		}
 		else
 		{
-			_CurrentRolloverAlphaContent -= (float) (speed * DT64);
+			_CurrentRolloverAlphaContent -= (float) (speed * times.frameDiffMs);
 			_CurrentRolloverAlphaContent = std::max(0.f, _CurrentRolloverAlphaContent);
 
-			_CurrentRolloverAlphaContainer -= (float) (speed * DT64);
+			_CurrentRolloverAlphaContainer -= (float) (speed * times.frameDiffMs);
 			_CurrentRolloverAlphaContainer = std::max(0.f, _CurrentRolloverAlphaContainer);
 		}
 	}
@@ -2322,7 +2311,6 @@ void CGroupContainer::open()
 	// call action handler if any
 	if (_AHOnOpen != NULL)
 	{
-		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CAHManager::getInstance()->runActionHandler(_AHOnOpen, this, _AHOnOpenParams);
 	}
 
@@ -2350,7 +2338,6 @@ void CGroupContainer::close()
 	// call action handler if any
 	if (_AHOnClose != NULL)
 	{
-		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CAHManager::getInstance()->runActionHandler(_AHOnClose, this, _AHOnCloseParams);
 	}
 }
@@ -3193,7 +3180,6 @@ void	CGroupContainer::launch ()
 // ***************************************************************************
 void CGroupContainer::setActive (bool state)
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if(state != getActive() && getLayer()==0)
 	{
 		if (state)
@@ -3281,7 +3267,6 @@ void CGroupContainer::popupCurrentPos()
 	_Parent = parent;
 	_ParentPos = parent;
 
-	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CWidgetManager::getInstance()->makeWindow(this);
 	CWidgetManager::getInstance()->setTopWindow(this);
 	CWidgetManager::getInstance()->clearViewUnders();
@@ -3338,7 +3323,6 @@ void CGroupContainer::popin(sint32 insertPos /* = -1 */, bool putBackInFatherCon
 	_List->setOfsY(0);
 
 	_MovingInParentList = false;
-	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CWidgetManager::getInstance()->unMakeWindow(this);
 	CWidgetManager::getInstance()->clearViewUnders();
 	CWidgetManager::getInstance()->clearCtrlsUnders();
@@ -3437,7 +3421,6 @@ COptionsContainerMove *CGroupContainer::getMoveOptions()
 {
 	static		NLMISC::CRefPtr<COptionsContainerMove>     moveOptions;
 	if (moveOptions) return moveOptions;
-	CInterfaceManager *im = CInterfaceManager::getInstance();
 	moveOptions = (COptionsContainerMove *) CWidgetManager::getInstance()->getOptions("container_move_opt");
 	return moveOptions;
 }
@@ -3489,8 +3472,6 @@ public:
 		if (pIC == NULL) return;
 		if (pIC->isLocked()) return;
 
-		CInterfaceManager *im = CInterfaceManager::getInstance();
-
 		// check if the window can be really closed
 		CGroupContainer::_ValidateCanDeactivate = true;
 		if (!pIC->getAHOnDeactiveCheck().empty())
@@ -3526,7 +3507,7 @@ public:
 		//
 		pIC->popup();
 		//
-		CInterfaceManager *im = CInterfaceManager::getInstance();
+
 		CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
 		CWidgetManager::getInstance()->setCapturePointerRight(NULL);
 	}
@@ -3551,7 +3532,7 @@ public:
 		pIC->setPopupH(pIC->getH());
 		//
 		pIC->popin();
-		CInterfaceManager *im = CInterfaceManager::getInstance();
+
 		CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
 		CWidgetManager::getInstance()->setCapturePointerRight(NULL);
 	}
@@ -3587,7 +3568,7 @@ class CICHelp : public IActionHandler
 		const std::string	&helpPage= pIC->getHelpPage();
 		if(!helpPage.empty())
 		{
-			CInterfaceManager	*pIM= CInterfaceManager::getInstance();
+
 			// open the web browser, and point to the page
 			CAHManager::getInstance()->runActionHandler("launch_help", NULL, "url=" + helpPage);
 		}
@@ -3633,15 +3614,17 @@ void CGroupContainer::setOpenable(bool openable)
 // ***************************************************************************
 void CGroupContainer::rollOverAlphaUp()
 {
-	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CViewPointer *vp = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
-	float speed = im->getAlphaRolloverSpeed();
+
+	CViewPointerBase *vp = CWidgetManager::getInstance()->getPointer();
+	float speed = CWidgetManager::getInstance()->getAlphaRolloverSpeed();
 	if (!isIn(vp->getX(), vp->getY()))
 	{
-		_CurrentRolloverAlphaContainer += (float) (speed * DT64);
+		const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
+
+		_CurrentRolloverAlphaContainer += (float) (speed * times.frameDiffMs);
 		_CurrentRolloverAlphaContainer = std::min(1.f, _CurrentRolloverAlphaContainer);
 
-		_CurrentRolloverAlphaContent += (float) (speed * DT64);
+		_CurrentRolloverAlphaContent += (float) (speed * times.frameDiffMs);
 		_CurrentRolloverAlphaContent = std::min(1.f, _CurrentRolloverAlphaContent);
 	}
 }
@@ -3656,7 +3639,7 @@ void CGroupContainer::forceRolloverAlpha()
 // ***************************************************************************
 bool CGroupContainer::hasKeyboardFocus() const
 {
-	CInterfaceManager *im = CInterfaceManager::getInstance();
+
 	if (CWidgetManager::getInstance()->getCaptureKeyboard() != NULL)
 	{
 		const CGroupEditBox *geb = dynamic_cast<const CGroupEditBox *>(CWidgetManager::getInstance()->getCaptureKeyboard());
@@ -3725,7 +3708,6 @@ void			CGroupContainer::setTitleColorAsString(const std::string &col)
 // ***************************************************************************
 void CGroupContainer::setModalParentList (const std::string &name)
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	_ModalParentNames = name;
 
 	// can have multiple parent
@@ -3933,7 +3915,6 @@ int CGroupContainer::luaSetHeaderColor(CLuaState &ls)
 // ***************************************************************************
 CRGBA	CGroupContainer::getDrawnHeaderColor () const
 {
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CRGBA c = CRGBA(255,255,255,255);
 
 	// Display the header in white if we are the last clicked window
