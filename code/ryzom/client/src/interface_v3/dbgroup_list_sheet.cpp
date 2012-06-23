@@ -20,7 +20,7 @@
 
 
 #include "dbgroup_list_sheet.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/interface_property.h"
 #include "interface_manager.h"

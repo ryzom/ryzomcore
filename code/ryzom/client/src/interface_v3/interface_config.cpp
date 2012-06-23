@@ -20,7 +20,7 @@
 
 #include "interface_config.h"
 #include "interface_manager.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "nel/gui/ctrl_scroll.h"
 
 using namespace NLMISC;

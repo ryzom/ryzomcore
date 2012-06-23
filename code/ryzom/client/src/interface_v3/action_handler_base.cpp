@@ -20,12 +20,12 @@
 #include "nel/gui/interface_expr.h"
 #include "interface_manager.h"
 
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "nel/gui/group_editbox.h"
 #include "dbctrl_sheet.h"
 #include "interface_3d_scene.h"
 #include "character_3d.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "people_interraction.h"
 
 #include "../r2/editor.h"

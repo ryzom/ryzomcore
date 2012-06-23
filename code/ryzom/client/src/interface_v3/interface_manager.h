@@ -69,9 +69,9 @@ extern bool g_hidden;
 namespace NLGUI
 {
 	class CInterfaceOptions;
+	class CGroupContainer;
 }
 
-class CGroupContainer;
 class CInterfaceAnim;
 class CGroupMenu;
 

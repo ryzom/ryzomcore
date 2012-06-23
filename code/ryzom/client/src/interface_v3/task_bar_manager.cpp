@@ -25,7 +25,7 @@
 #include "dbgroup_list_sheet.h"
 
 #include "nel/gui/action_handler.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "../actions_client.h"
 #include "nel/gui/ctrl_button.h"
 

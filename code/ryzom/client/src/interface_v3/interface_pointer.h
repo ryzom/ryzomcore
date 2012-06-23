@@ -29,6 +29,7 @@ namespace NLGUI
 	class CInterfaceGroup;
 	class CViewText;
 	class CCtrlTextButton;
+	class CGroupContainer;
 }
 
 using namespace NLGUI;
@@ -66,7 +67,7 @@ typedef CInterfacePtr<CViewText>::TInterfacePtr			CViewTextPtr;
 typedef CInterfacePtr<class CViewTextMenu>::TInterfacePtr		CViewTextMenuPtr;
 typedef CInterfacePtr<CCtrlBase>::TInterfacePtr			CCtrlBasePtr;
 typedef CInterfacePtr<CCtrlBaseButton>::TInterfacePtr		CCtrlBaseButtonPtr;
-typedef CInterfacePtr<class CGroupContainer>::TInterfacePtr		CGroupContainerPtr;
+typedef CInterfacePtr<CGroupContainer>::TInterfacePtr		CGroupContainerPtr;
 
 #endif // NL_INTERFACE_POINTER_H
 

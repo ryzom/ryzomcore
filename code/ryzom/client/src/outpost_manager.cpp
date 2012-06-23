@@ -20,7 +20,7 @@
 #include "outpost_manager.h"
 #include "net_manager.h"
 #include "interface_v3/interface_manager.h"
-#include "interface_v3/group_container.h"
+#include "nel/gui/group_container.h"
 #include "nel/misc/bit_mem_stream.h"
 #include "game_share/generic_xml_msg_mngr.h"
 

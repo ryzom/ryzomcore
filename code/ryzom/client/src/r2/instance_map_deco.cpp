@@ -21,7 +21,7 @@
 #include "tool.h"
 //
 #include "nel/gui/ctrl_quad.h"
-#include "../interface_v3/group_container.h"
+#include "nel/gui/group_container.h"
 //
 #include "nel/misc/i18n.h"
 //

@@ -21,7 +21,7 @@
 #include "../interface_v3/character_3d.h"
 #include "editor.h"
 #include "../interface_v3/interface_manager.h"
-#include "../interface_v3/group_container.h"
+#include "nel/gui/group_container.h"
 #include "displayer_visual_entity.h"
 #include "../interface_v3/dbgroup_combo_box.h"
 

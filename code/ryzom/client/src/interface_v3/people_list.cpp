@@ -18,7 +18,7 @@
 
 #include "stdpch.h"
 #include "people_list.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "nel/gui/group_list.h"
 #include "nel/gui/view_bitmap.h"
 #include "interface_manager.h"

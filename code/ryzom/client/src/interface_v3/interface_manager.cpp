@@ -62,7 +62,7 @@
 // Group
 #include "nel/gui/group_list.h"
 #include "group_menu.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "nel/gui/group_modal.h"
 #include "nel/gui/group_editbox.h"
 #include "group_in_scene_bubble.h"

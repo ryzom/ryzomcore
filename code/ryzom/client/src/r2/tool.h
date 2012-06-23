@@ -26,12 +26,12 @@
 //
 
 class CInterfaceManager;
-class CGroupContainer;
 
 namespace NLGUI
 {
 	class CEventDescriptor;
 	class CLuaObject;
+	class CGroupContainer;
 }
 
 class CGroupMap;

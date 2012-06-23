@@ -27,7 +27,7 @@
 //
 #include "nel/misc/xml_auto_ptr.h"
 //
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "interface_3d_scene.h"
 //
 #include "../r2/editor.h"

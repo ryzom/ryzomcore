@@ -22,7 +22,7 @@
 #include "interface_manager.h"
 #include "nel/gui/interface_element.h"
 #include "chat_window.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 // client
 #include "../client_chat_manager.h"
 #include "../sheet_manager.h"

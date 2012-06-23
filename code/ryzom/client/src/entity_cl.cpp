@@ -54,7 +54,7 @@
 #include "client_cfg.h"
 #include "nel/gui/action_handler.h"
 #include "interface_v3/interface_manager.h"
-#include "interface_v3/group_container.h"
+#include "nel/gui/group_container.h"
 #include "interface_v3/guild_manager.h"
 #include "interface_v3/skill_manager.h"
 #include "user_entity.h"

@@ -23,11 +23,10 @@
 #include "nel/misc/events.h"
 #include "nel/gui/view_pointer_base.h"
 
-class CGroupContainer;
-
 namespace NLGUI
 {
 	class CCtrlBase;
+	class CGroupContainer;
 }
 
 /**

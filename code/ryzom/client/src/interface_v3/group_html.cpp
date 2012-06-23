@@ -30,7 +30,7 @@ extern "C"
 
 #include "group_html.h"
 #include "nel/gui/group_list.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "view_link.h"
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/ctrl_button.h"

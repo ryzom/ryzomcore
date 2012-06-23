@@ -23,7 +23,7 @@
 #include "interface_manager.h"
 #include "bot_chat_page_trade.h"
 #include "bot_chat_page_all.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "group_menu.h"
 #include "nel/misc/cdb_leaf.h"
 #include "nel/misc/cdb_branch.h"

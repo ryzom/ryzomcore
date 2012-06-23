@@ -31,10 +31,10 @@ namespace NLGUI
 	class CViewText;
 	class CGroupList;
 	class CGroupEditBox;
+	class CGroupContainer;
 }
 
 class CChatWindow;
-class CGroupContainer;
 
 /** Interface to react to a chat box entry
   * Derivers should define the msgEntered member function to handle entry event.
@@ -120,7 +120,7 @@ public:
 	/** Get the container associated with this chat window
 	  * NB : you should not change the name of the window ! Use rename instead
 	  */
-	CGroupContainer     *getContainer() const { return _Chat; }
+	NLGUI::CGroupContainer     *getContainer() const { return _Chat; }
 	//
 	NLGUI::CGroupEditBox       *getEditBox() const;
 	/** try to rename the chat window
@@ -162,7 +162,7 @@ protected:
 	~CChatWindow();
 protected:
 	IChatWindowListener *_Listener;
-	NLMISC::CRefPtr<CGroupContainer> _Chat;
+	NLMISC::CRefPtr<NLGUI::CGroupContainer> _Chat;
 	NLGUI::CGroupEditBox		*_EB;
 	bool 				 _ParentBlink;
 	static CChatWindow  *_ChatWindowLaunchingCommand;
@@ -191,7 +191,7 @@ public:
 	void setTabIndex(sint32 n);
 
 	// Free Teller
-	CGroupContainer *createFreeTeller(const ucstring &winName, const std::string &winColor="");
+	NLGUI::CGroupContainer *createFreeTeller(const ucstring &winName, const std::string &winColor="");
 	void setActiveFreeTeller(const ucstring &winName, bool bActive=true);
 	ucstring getFreeTellerName(const std::string &containerID);
 	bool removeFreeTeller(const std::string &containerID); // Return true if free teller found
@@ -205,10 +205,10 @@ public:
 protected:
 	friend class CChatWindowManager;
 
-	std::vector<CGroupContainer*>	_FreeTellers;
+	std::vector<NLGUI::CGroupContainer*>	_FreeTellers;
 
 	void	getAssociatedSubWindow(CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, NLGUI::CGroupList *&gl, class CCtrlTabButton *&tab);
-	void    updateFreeTellerHeader(CGroupContainer &ft);
+	void    updateFreeTellerHeader(NLGUI::CGroupContainer &ft);
 
 private:
 	/** Get a valid string to use like ui id

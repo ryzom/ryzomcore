@@ -27,10 +27,8 @@ namespace NLGUI
 {
 	class CCtrlBaseButton;
 	class CCtrlScroll;
+	class CGroupContainer;
 }
-
-// ***************************************************************************
-class CGroupContainer;
 
 // ***************************************************************************
 /**

@@ -31,7 +31,7 @@
 #include "interface_manager.h"
 #include "dbctrl_sheet.h"
 #include "dbgroup_build_phrase.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "sphrase_manager.h"
 #include "sbrick_manager.h"
 #include "nel/gui/ctrl_button.h"

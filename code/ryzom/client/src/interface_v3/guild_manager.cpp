@@ -24,7 +24,7 @@
 #include "nel/gui/action_handler.h"
 #include "nel/gui/view_text.h"
 #include "dbctrl_sheet.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "group_menu.h"
 #include "group_html.h"
 #include "../init_main_loop.h"

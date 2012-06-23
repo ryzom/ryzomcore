@@ -68,7 +68,7 @@
 #include "nel/gui/group_list.h"
 #include "nel/gui/group_tree.h"
 #include "group_menu.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "group_scrolltext.h"
 #include "nel/gui/group_editbox.h"
 #include "group_skills.h"

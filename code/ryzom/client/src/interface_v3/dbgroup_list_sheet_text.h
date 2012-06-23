@@ -31,13 +31,13 @@ namespace NLGUI
 {
 	class CCtrlButton;
 	class CCtrlScroll;
+	class CGroupContainer;
 }
 
 
 // ***************************************************************************
 class	CHandlerListSheetTradeSelect;
 class	CHandlerListSheetTradeRightClick;
-class CGroupContainer;
 
 // ***************************************************************************
 /**

@@ -30,7 +30,7 @@
 #include "nel/gui/interface_group.h"
 #include "nel/gui/group_frame.h"
 #include "nel/gui/group_container_base.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "nel/gui/group_list.h"
 #include "dbgroup_select_number.h"
 #include "nel/gui/ctrl_button.h"

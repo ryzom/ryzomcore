@@ -28,7 +28,7 @@
 #include "net_manager.h"
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/interface_3d_scene.h"
-#include "interface_v3/group_container.h"
+#include "nel/gui/group_container.h"
 #include "sheet_manager.h"
 #include "interface_v3/inventory_manager.h"
 #include "interface_v3/guild_manager.h"

@@ -19,7 +19,7 @@
 #include "stdpch.h"
 //
 #include "interface_manager.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "group_header.h"
 #include "nel/gui/lua_ihm.h"
 

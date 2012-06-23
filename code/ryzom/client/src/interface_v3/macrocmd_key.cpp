@@ -28,7 +28,7 @@
 #include "nel/gui/group_editbox.h"
 #include "nel/gui/group_list.h"
 #include "dbgroup_combo_box.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "group_modal_get_key.h"
 #include "nel/gui/interface_expr.h"
 

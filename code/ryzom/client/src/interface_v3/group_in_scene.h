@@ -21,7 +21,7 @@
 #define CL_GROUP_IN_SCENE_HELP_H
 
 #include "nel/misc/types_nl.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "group_menu.h"
 
 

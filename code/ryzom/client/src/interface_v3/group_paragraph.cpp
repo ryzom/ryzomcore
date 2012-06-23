@@ -25,7 +25,7 @@
 #include "../client_chat_manager.h"
 #include "nel/gui/view_bitmap.h"
 #include "nel/gui/view_text_id.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 
 #include "nel/misc/i_xml.h"
 #include "nel/misc/i18n.h"

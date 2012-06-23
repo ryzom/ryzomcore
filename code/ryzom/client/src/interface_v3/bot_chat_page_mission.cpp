@@ -24,7 +24,7 @@
 #include "bot_chat_page_all.h"
 #include "dbgroup_list_sheet_trade.h"
 #include "nel/gui/action_handler.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "dbctrl_sheet.h"
 #include "nel/gui/view_text_id.h"
 #include "../net_manager.h"

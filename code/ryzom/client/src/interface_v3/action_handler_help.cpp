@@ -26,7 +26,7 @@
 #include "skill_manager.h"
 #include "dbctrl_sheet.h"
 #include "nel/gui/interface_expr.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "nel/gui/group_editbox.h"
 #include "group_quick_help.h"
 #include "nel/gui/view_text_id.h"

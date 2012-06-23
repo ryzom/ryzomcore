@@ -18,7 +18,7 @@
 
 #include "stdpch.h"
 #include "dbgroup_list_sheet_text.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "interface_manager.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "../sheet_manager.h"

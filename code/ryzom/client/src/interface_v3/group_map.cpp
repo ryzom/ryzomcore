@@ -27,7 +27,7 @@
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/group_editbox.h"
 #include "../string_manager_client.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "nel/gui/action_handler.h"
 #include "../dummy_progress.h"
 #include "group_compas.h"

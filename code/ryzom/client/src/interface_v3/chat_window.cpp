@@ -30,7 +30,7 @@
 #include "people_interraction.h"
 #include "../connection.h"
 //
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "nel/gui/group_editbox.h"
 #include "group_tab.h"
 #include "interface_manager.h"
