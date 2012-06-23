@@ -14,21 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
-
-
-#include "stdpch.h"
 #include "group_scrolltext.h"
 #include "nel/gui/group_list.h"
 #include "nel/gui/view_text.h"
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/action_handler.h"
-
-#include "../time_client.h"
 #include "nel/misc/i18n.h"
+#include "nel/gui/widget_manager.h"
 
 NLMISC_REGISTER_OBJECT(CViewBase, CGroupScrollText, std::string, "scroll_text");
 
@@ -204,13 +197,15 @@ class CSTUp : public IActionHandler
 public:
 	virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
 	{
+		const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
+
 		CGroupScrollText *pST = dynamic_cast<CGroupScrollText*>(pCaller->getParent());
 		if (pST == NULL) return;
 		if (pST->getList() == NULL) return;
 		// get the font height from the text template of the list
 		const CViewText *vt = pST->getList()->getTextTemplatePtr();
 		if (!vt) return;
-		pST->_EllapsedTime += DT64;
+		pST->_EllapsedTime += times.frameDiffMs;
 //		pST->setH(std::min((sint32) pST->getMaxHeight(), (sint32) (pST->_StartHeight + pST->_EllapsedTime / 9)));
 		pST->setH((sint32) (pST->_StartHeight + pST->_EllapsedTime / 9));
 		pST->invalidateCoords();
@@ -224,13 +219,15 @@ class CSTDown : public IActionHandler
 public:
 	virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
 	{
+		const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
+
 		CGroupScrollText *pST = dynamic_cast<CGroupScrollText*>(pCaller->getParent());
 		if (pST == NULL) return;
 		if (pST->getList() == NULL) return;
 		// get the font height from the text template of the list
 		const CViewText *vt = pST->getList()->getTextTemplatePtr();
 		if (!vt) return;
-		pST->_EllapsedTime += DT64;
+		pST->_EllapsedTime += times.frameDiffMs;
 //		pST->setH(std::max((sint32) pST->getMinHeight(), (sint32) (pST->_StartHeight - pST->_EllapsedTime / 9)));
 		pST->setH((sint32) (pST->_StartHeight - pST->_EllapsedTime / 9));
 		pST->invalidateCoords();
