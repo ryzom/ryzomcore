@@ -67,7 +67,7 @@
 #include "group_modal_get_key.h"
 #include "nel/gui/group_list.h"
 #include "nel/gui/group_tree.h"
-#include "group_menu.h"
+#include "nel/gui/group_menu.h"
 #include "nel/gui/group_container.h"
 #include "nel/gui/group_scrolltext.h"
 #include "nel/gui/group_editbox.h"

@@ -61,7 +61,7 @@
 #include "dbctrl_sheet.h"
 // Group
 #include "nel/gui/group_list.h"
-#include "group_menu.h"
+#include "nel/gui/group_menu.h"
 #include "nel/gui/group_container.h"
 #include "nel/gui/group_modal.h"
 #include "nel/gui/group_editbox.h"

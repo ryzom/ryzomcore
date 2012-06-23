@@ -70,10 +70,10 @@ namespace NLGUI
 {
 	class CInterfaceOptions;
 	class CGroupContainer;
+	class CGroupMenu;
 }
 
 class CInterfaceAnim;
-class CGroupMenu;
 
 /**
  * class managing the interface

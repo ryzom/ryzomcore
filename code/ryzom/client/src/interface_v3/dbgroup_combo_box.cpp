@@ -18,7 +18,7 @@
 
 #include "stdpch.h"
 #include "dbgroup_combo_box.h"
-#include "group_menu.h"
+#include "nel/gui/group_menu.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "interface_manager.h"
 #include "nel/gui/ctrl_button.h"

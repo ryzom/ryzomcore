@@ -25,7 +25,7 @@
 #include "nel/gui/view_bitmap.h"
 #include "view_radar.h"
 #include "nel/gui/group_submenu_base.h"
-#include "group_menu.h"
+#include "nel/gui/group_menu.h"
 #include "nel/gui/ctrl_base.h"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/group_frame.h"

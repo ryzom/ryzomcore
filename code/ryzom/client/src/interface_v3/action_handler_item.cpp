@@ -29,7 +29,7 @@
 #include "player_trade.h"
 #include "../user_entity.h"
 #include "../net_manager.h"
-#include "group_menu.h"
+#include "nel/gui/group_menu.h"
 #include "../global.h"
 #include "group_html.h"
 

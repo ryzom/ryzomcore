@@ -26,10 +26,9 @@ namespace NLGUI
 {
 	class CCtrlBaseButton;
 	class CViewText;
+	class CGroupMenu;
 }
 
-// ***************************************************************************
-class	CGroupMenu;
 
 // ***************************************************************************
 #define	WIN_COMBO_BOX_SELECT_MENU	"ui:interface:combo_box_select_menu"

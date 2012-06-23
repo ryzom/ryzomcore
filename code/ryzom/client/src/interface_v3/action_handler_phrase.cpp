@@ -45,7 +45,7 @@
 #include "../net_manager.h"
 #include "../entities.h"
 #include "macrocmd_manager.h"
-#include "group_menu.h"
+#include "nel/gui/group_menu.h"
 #include "nel/gui/group_tree.h"
 
 extern CSheetManager SheetMngr;

@@ -22,7 +22,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/gui/group_container.h"
-#include "group_menu.h"
+#include "nel/gui/group_menu.h"
 
 
 /**

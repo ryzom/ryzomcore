@@ -25,7 +25,7 @@
 #include "nel/gui/view_text.h"
 #include "dbctrl_sheet.h"
 #include "nel/gui/group_container.h"
-#include "group_menu.h"
+#include "nel/gui/group_menu.h"
 #include "group_html.h"
 #include "../init_main_loop.h"
 #include "inventory_manager.h"

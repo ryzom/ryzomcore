@@ -28,10 +28,14 @@
 
 
 // ***************************************************************************
-class CGroupMenu;
-class CViewTextMenu;
+namespace NLGUI
+{
+	class CGroupMenu;
+	class CViewTextMenu;
+}
+
 namespace NLMISC{
-class CCDBNodeLeaf;
+	class CCDBNodeLeaf;
 }
 
 // ***************************************************************************

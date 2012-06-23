@@ -37,7 +37,7 @@
 #include "dbctrl_sheet.h"
 #include "ctrl_sheet_selection.h"
 #include "nel/gui/interface_expr.h"
-#include "group_menu.h"
+#include "nel/gui/group_menu.h"
 #include "nel/gui/group_container.h"
 #include "nel/gui/group_editbox.h"
 #include "inventory_manager.h"
