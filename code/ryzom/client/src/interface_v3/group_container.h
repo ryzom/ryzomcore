@@ -31,13 +31,13 @@ namespace NLGUI
 	class CViewText;
 	class CViewBitmap;
 	class CGroupList;
+	class COptionsContainerInsertion;
+	class COptionsContainerMove;
+	class COptionsLayer;
 }
 
-class COptionsContainerInsertion;
-class COptionsContainerMove;
 class CGroupContainer;
 class CInterfaceManager;
-class COptionsLayer;
 
 // ***************************************************************************
 /**

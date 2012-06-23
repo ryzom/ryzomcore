@@ -22,7 +22,6 @@
 #include "group_container.h"
 #include "interface_manager.h"
 #include "nel/gui/interface_options.h"
-#include "interface_options_ryzom.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/action_handler.h"
 #include "../time_client.h"
