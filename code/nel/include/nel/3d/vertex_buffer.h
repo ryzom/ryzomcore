@@ -1223,7 +1223,7 @@ inline void CVertexBuffer::lock (CVertexBufferRead &accessor, uint first, uint l
 
 // --------------------------------------------------
 
-inline void CVertexBuffer::unlock (uint first, uint end)
+inline void CVertexBuffer::unlock (uint /* first */, uint /* end */)
 {
 	nlassertex (_LockCounter!=0, ("Vertex buffer not locked"));
 	nlassert (_LockedBuffer || (!isResident() && _NonResidentVertices.empty()));

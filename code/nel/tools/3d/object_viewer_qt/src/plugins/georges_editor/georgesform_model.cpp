@@ -40,16 +40,16 @@
 
 using namespace NLGEORGES;
 
-namespace Plugin 
+namespace GeorgesQt 
 {
 
 	CGeorgesFormModel::CGeorgesFormModel(UFormElm *rootElm, QMap< QString, QStringList> deps,
 		QString comment, QStringList parents, bool *expanded, QObject *parent) : QAbstractItemModel(parent) 
 	{
-		QList<QVariant> rootData;
-		rootData << "Value" << "Data" << "Extra";// << "Type";
+		
+		m_rootData << "Value" << "Data" << "Extra";// << "Type";
 		m_rootElm = rootElm;
-		m_rootItem = new CFormItem(m_rootElm, rootData);
+		m_rootItem = new CFormItem(m_rootElm, m_rootData);
 		m_dependencies = deps;
 		m_comments = comment;
 		m_parents = parents;
@@ -669,6 +669,27 @@ namespace Plugin
 		Q_EMIT layoutAboutToBeChanged();
 		Q_EMIT layoutChanged();
 	}
-} /* namespace Plugin */
+
+	void CGeorgesFormModel::addParentForm(QString parentForm)
+	{
+		beginResetModel();
+		m_parents.push_back(parentForm);
+		delete m_rootItem;
+		m_rootItem = new CFormItem(m_rootElm, m_rootData);
+		setupModelData();
+		endResetModel();
+	}
+
+	void CGeorgesFormModel::removeParentForm(QString parentForm)
+	{
+		beginResetModel();
+		m_parents.removeOne(parentForm);
+
+		delete m_rootItem;
+		m_rootItem = new CFormItem(m_rootElm, m_rootData);
+		setupModelData();
+		endResetModel();
+	}
+} /* namespace GeorgesQt */
 
 /* end of file */

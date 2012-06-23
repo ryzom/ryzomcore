@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Name" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="ShortName" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="FadeIn" Type="Type" Filename="int.typ" Default="10000"/>
+  <ELEMENT Name="FadeOut" Type="Type" Filename="int.typ" Default="10000"/>
+  <ELEMENT Name="InitialState" Type="Type" Filename="boolean.typ" Default="false"/>
+  <LOG>Thu Jan 02 14:38:32 2003 (boucher) Dfn Structure = </LOG>
+</DFN>

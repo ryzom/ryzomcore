@@ -75,10 +75,10 @@ public:
 
 	///\unused basic methods from CSPhrase
 	//@{
-	virtual void setPrimaryItem( CGameItemPtr itemPtr ){};
-	virtual void setSecondaryItem( CGameItemPtr itemPtr ){};
-	virtual void addConsumableItem( CGameItemPtr itemPtr ){};
-	virtual void setPrimaryTarget( const TDataSetRow& ) {};
+	virtual void setPrimaryItem( CGameItemPtr itemPtr ){}
+	virtual void setSecondaryItem( CGameItemPtr itemPtr ){}
+	virtual void addConsumableItem( CGameItemPtr itemPtr ){}
+	virtual void setPrimaryTarget( const TDataSetRow& ) {}
 	//@}
 
 	// Craft methodes

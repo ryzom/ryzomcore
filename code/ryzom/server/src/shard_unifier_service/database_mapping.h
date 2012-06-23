@@ -111,9 +111,9 @@ namespace RSMGR
 		CKnownUserPtr()
 			: _FileName(NULL),
 			_LineNum(0),
-			_Ptr(NULL),
 			_NextPtr(NULL),
-			_PrevPtr(NULL)
+			_PrevPtr(NULL),
+			_Ptr(NULL)
 		{
 		}
 
@@ -1091,9 +1091,9 @@ namespace RSMGR
 		CGuildInvitePtr()
 			: _FileName(NULL),
 			_LineNum(0),
-			_Ptr(NULL),
 			_NextPtr(NULL),
-			_PrevPtr(NULL)
+			_PrevPtr(NULL),
+			_Ptr(NULL)
 		{
 		}
 
@@ -1231,9 +1231,9 @@ namespace RSMGR
 		CPlayerRatingPtr()
 			: _FileName(NULL),
 			_LineNum(0),
-			_Ptr(NULL),
 			_NextPtr(NULL),
-			_PrevPtr(NULL)
+			_PrevPtr(NULL),
+			_Ptr(NULL)
 		{
 		}
 
@@ -1371,9 +1371,9 @@ namespace RSMGR
 		CJournalEntryPtr()
 			: _FileName(NULL),
 			_LineNum(0),
-			_Ptr(NULL),
 			_NextPtr(NULL),
-			_PrevPtr(NULL)
+			_PrevPtr(NULL),
+			_Ptr(NULL)
 		{
 		}
 

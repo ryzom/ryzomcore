@@ -39,6 +39,7 @@ class CStatsScanCharacter;
 class ICharFilter: public NLMISC::CRefCount
 {
 public:
+	virtual ~ICharFilter() {}
 	virtual std::string toString() const=0;
 	virtual bool evaluate(const CStatsScanCharacter* c)=0;
 };
@@ -51,6 +52,7 @@ public:
 class ICharFilterBuilder: public NLMISC::CRefCount
 {
 public:
+	virtual ~ICharFilterBuilder() {}
 	virtual const char* getName()=0;
 	virtual const char* getDescription()=0;
 	virtual ICharFilter* build(const std::string& rawArgs)=0;

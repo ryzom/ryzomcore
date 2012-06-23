@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<SOUNDANIMATION>
+  <MARKER time="0.233333">
+    <SOUND name="beet"/>
+  </MARKER>
+  <MARKER time="0.533333">
+    <SOUND name="tuut"/>
+  </MARKER>
+</SOUNDANIMATION>

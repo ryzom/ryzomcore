@@ -413,6 +413,13 @@ bool CSourceFMod::getSourceRelativeMode() const
 // ******************************************************************
 void CSourceFMod::setMinMaxDistances( float mindist, float maxdist, bool /* deferred */ )
 {
+	static float maxSqrt = sqrt(std::numeric_limits<float>::max());
+	if (maxdist >= maxSqrt)
+	{
+		nlwarning("SOUND_DEV (FMod): Ridiculously high max distance set on source");
+		maxdist = maxSqrt;
+	}
+	
 	_MinDist= mindist;
 	_MaxDist= maxdist;
 	if(_FModChannel!=-1)

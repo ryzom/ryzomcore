@@ -60,7 +60,7 @@ namespace NL3D
 	{
 		GET_INLINE float get() const { return float(rand() * (1 / double(RAND_MAX))); } // this may be optimized with a table...
 		void  advance() {}
-		void  advance(uint quantity) {}
+		void  advance(uint /* quantity */) {}
 	};
 
 	/// this iterator just return the same value
@@ -69,7 +69,7 @@ namespace NL3D
 		float Value;
 		GET_INLINE float get() const { return Value; }
 		void  advance() {}
-		void  advance(uint quantity) {}
+		void  advance(uint /* quantity */) {}
 	};
 
 	/// iterator that use dist to compute the value

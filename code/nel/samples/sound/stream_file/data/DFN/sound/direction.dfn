@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Version="0.1" State="modified">
+  <ELEMENT Name="X" Type="Type" Filename="float.typ" Default="0.0"/>
+  <ELEMENT Name="Y" Type="Type" Filename="float.typ" Default="1.0"/>
+  <ELEMENT Name="Z" Type="Type" Filename="float.typ" Default="0.0"/>
+</DFN>

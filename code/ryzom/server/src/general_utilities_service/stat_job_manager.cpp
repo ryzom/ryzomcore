@@ -131,7 +131,7 @@ void CJobManager::serviceUpdate()
 uint32 CJobManager::addJob(NLMISC::CSmartPtr<CJobManager::IJob> job)
 {
 	nlassert(job!=NULL);
-	uint32 id= _Jobs.size();
+	uint32 id= (uint32)_Jobs.size();
 	_UnfinishedJobs.push_back(id);
 	_Jobs.push_back(job);
 	return id;

@@ -36,8 +36,8 @@ public:
 	void outputString (const char *message);
 
 	// From CDialog
-	void	OnOK () {};
-	void	OnCancel ();
+	void	OnOK () {}
+	void	OnCancel ()
 
 // Dialog Data
 	//{{AFX_DATA(COutputConsoleDlg)

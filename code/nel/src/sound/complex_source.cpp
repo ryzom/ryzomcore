@@ -25,8 +25,8 @@ using namespace NLMISC;
 namespace NLSOUND
 {
 
-CComplexSource::CComplexSource	(CComplexSound *soundPattern, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster)
-:	CSourceCommon(soundPattern, spawn, cb, cbUserParam, cluster),
+CComplexSource::CComplexSource	(CComplexSound *soundPattern, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster, CGroupController *groupController)
+:	CSourceCommon(soundPattern, spawn, cb, cbUserParam, cluster, groupController),
 	_Source1(NULL),
 	_Source2(NULL)
 {
@@ -117,7 +117,7 @@ void CComplexSource::playStuf()
 				else
 					_FadeLength = 0;
 
-				_Source2 = mixer->createSource(sound, false, 0, 0, _Cluster);
+				_Source2 = mixer->createSource(sound, false, 0, 0, _Cluster, NULL, _GroupController);
 				if (_Source2 == NULL)
 					return;
 				_Source2->setPriority(_Priority);
@@ -155,7 +155,7 @@ void CComplexSource::playStuf()
 				{
 					CSound *sound = mixer->getSoundId(_PatternSound->getSound(soundSeq[_SoundSeqIndex++]));
 
-					_Source1 = mixer->createSource(sound, false, 0, 0, _Cluster);
+					_Source1 = mixer->createSource(sound, false, 0, 0, _Cluster, NULL, _GroupController);
 					if (_Source1 == NULL)
 						return;
 					_Source1->setPriority(_Priority);
@@ -202,7 +202,7 @@ void CComplexSource::playStuf()
 					CSound *sound = mixer->getSoundId(*first);
 					if (sound != NULL)
 					{
-						USource *source = mixer->createSource(sound, false, 0, 0, _Cluster);
+						USource *source = mixer->createSource(sound, false, 0, 0, _Cluster, NULL, _GroupController);
 						if (source != NULL)
 						{
 							source->setPriority(_Priority);
@@ -512,7 +512,7 @@ void CComplexSource::onUpdate()
 
 				// determine the XFade length (if next sound is too short.
 				_FadeLength = minof<uint32>(uint32(_PatternSound->getFadeLength()/_TickPerSecond), (sound2->getDuration()) / 2, (_Source1->getSound()->getDuration())/2);
-				_Source2 = mixer->createSource(sound2, false, 0, 0, _Cluster);
+				_Source2 = mixer->createSource(sound2, false, 0, 0, _Cluster, NULL, _GroupController);
 				if (_Source2)
 				{
 					_Source2->setPriority(_Priority);
@@ -641,7 +641,7 @@ void CComplexSource::onEvent()
 
 				CSound *sound = mixer->getSoundId(_PatternSound->getSound(soundSeq[_SoundSeqIndex++]));
 
-				_Source1 = mixer->createSource(sound, false, 0, 0, _Cluster);
+				_Source1 = mixer->createSource(sound, false, 0, 0, _Cluster, NULL, _GroupController);
 				if (_Source1 == NULL)
 				{
 					stop();

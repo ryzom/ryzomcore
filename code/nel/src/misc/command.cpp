@@ -650,6 +650,9 @@ ICommand *CCommandRegistry::getCommand(const std::string &commandName)
 
 NLMISC_CATEGORISED_COMMAND(nel,help,"display help on a specific variable/commands or on all variables and commands", "[<variable>|<command>]")
 {
+	nlunreferenced(rawCommandString);
+	nlunreferenced(quiet);
+	nlunreferenced(human);
 //	nlassert (_Commands != NULL);
 
 	// make sure we have a valid number of parameters

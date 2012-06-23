@@ -36,7 +36,7 @@ class CPageSimple : public CPageBase
 
 // Construction
 public:
-	CPageSimple() {};
+	CPageSimple() {}
 	CPageSimple(NLGEORGES::CSoundDialog *soundDialog);
 	~CPageSimple();
 

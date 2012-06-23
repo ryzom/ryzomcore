@@ -46,7 +46,7 @@ class CPageBgFlags : public CPageBase
 
 // Construction
 public:
-	CPageBgFlags() {};
+	CPageBgFlags() {}
 	CPageBgFlags(NLGEORGES::CSoundDialog *soundDialog);
 	~CPageBgFlags();
 

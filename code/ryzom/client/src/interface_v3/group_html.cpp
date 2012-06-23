@@ -580,7 +580,7 @@ void CGroupHTML::addLink (uint element_number, uint /* attribute_number */, HTCh
 					// in ah: command we don't respect the uri standard so the HTAnchor_address doesn't work correctly
 					_Link.push_back (suri);
 				}
-				else if (_TrustedDomain && suri[0] == '#')
+				else if (_TrustedDomain && suri.find('#') == 0)
 				{
 					// Direct url (hack for lua beginElement)
 					_Link.push_back (suri.substr(1));

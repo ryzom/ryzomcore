@@ -14,32 +14,30 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "../stdopengl.h"
 #include "../driver_opengl.h"
 
 #import "cocoa_window_delegate.h"
 
-namespace NL3D 
+static void windowDidMove(NSWindow* window, CDriverGL* driver)
 {
-	void windowDidMove(NSWindow* window, NL3D::CDriverGL* driver)
-	{
-		// get the rect (position, size) of the screen with menu bar
-		NSRect screenRect = [[[NSScreen screens] objectAtIndex:0] frame];
+	// get the rect (position, size) of the screen with menu bar
+	NSRect screenRect = [[[NSScreen screens] objectAtIndex:0] frame];
 
-		// get the rect (position, size) of the window
-		NSRect windowRect = [window frame];
+	// get the rect (position, size) of the window
+	NSRect windowRect = [window frame];
 
-		// set x in driver
-		driver->_WindowX = windowRect.origin.x;
+	// set x in driver
+	driver->_WindowX = windowRect.origin.x;
 
-		// map y from cocoa to NeL coordinates before setting in driver
-		driver->_WindowY = 
-			screenRect.size.height - windowRect.size.height - windowRect.origin.y;
-	}
+	// map y from cocoa to NeL coordinates before setting in driver
+	driver->_WindowY = 
+		screenRect.size.height - windowRect.size.height - windowRect.origin.y;
 }
 
 @implementation CocoaWindowDelegate
 
--(id)initWithDriver:(NL3D::CDriverGL*)driver 
+-(id)initWithDriver:(CDriverGL*)driver 
 {
 	if((self = [super init])) 
 	{
@@ -55,7 +53,7 @@ namespace NL3D
 	if(!_driver)
 		return;
 
-	NL3D::windowDidMove([notification  object], _driver);
+	windowDidMove([notification  object], _driver);
 }
 
 @end

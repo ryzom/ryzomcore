@@ -33,7 +33,7 @@ class IItemTrade : public NLMISC::CRefCount
 public:
 
 	// virtual destructor
-	virtual ~IItemTrade() {};
+	virtual ~IItemTrade() {}
 
 	// sheet id
 	virtual NLMISC::CSheetId getSheetId() const = 0;

@@ -89,7 +89,7 @@ public:
 	IStep(CMissionData &md, NLLIGO::IPrimitive *prim);
 	virtual ~IStep() {}
 
-	virtual void init(CMissionData &md, NLLIGO::IPrimitive *prim) {};
+	virtual void init(CMissionData &md, NLLIGO::IPrimitive *prim) {}
 
 	
 	/// Get the step name

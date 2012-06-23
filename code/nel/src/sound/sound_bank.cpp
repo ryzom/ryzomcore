@@ -23,6 +23,7 @@
 #include "nel/sound/background_sound.h"
 #include "nel/sound/music_sound.h"
 #include "nel/sound/stream_sound.h"
+#include "nel/sound/stream_file_sound.h"
 
 #include "nel/georges/u_form_loader.h"
 #include "nel/georges/u_form_elm.h"
@@ -193,6 +194,9 @@ public:
 				break;
 			case CSound::SOUND_STREAM:
 				Sound = new CStreamSound();
+				break;
+			case CSound::SOUND_STREAM_FILE:
+				Sound = new CStreamFileSound();
 				break;
 			default:
 				Sound = 0;

@@ -149,7 +149,7 @@ public:
 	}
 
 	// callback called when the effect is actually removed. Does nothing by default
-	virtual void removed(){};
+	virtual void removed(){}
 
 	///\name read accessors
 	//@{

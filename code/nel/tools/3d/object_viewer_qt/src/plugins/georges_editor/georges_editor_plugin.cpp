@@ -27,7 +27,7 @@
 // Qt includes
 #include <QtCore/QObject>
 
-namespace Plugin
+namespace GeorgesQt
 {
 
 GeorgesEditorPlugin::~GeorgesEditorPlugin()
@@ -97,4 +97,4 @@ QWidget *GeorgesEditorContext::widget()
 
 }
 
-Q_EXPORT_PLUGIN(Plugin::GeorgesEditorPlugin)
+Q_EXPORT_PLUGIN(GeorgesQt::GeorgesEditorPlugin)

@@ -56,6 +56,8 @@ public:
 		QuitTeam,
 	};
 
+	virtual ~IPVP() {}
+
 	/// get PVP mode to send to the client
 	virtual PVP_MODE::TPVPMode getPVPMode() const = 0;
 

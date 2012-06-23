@@ -29,7 +29,9 @@
 
 #ifdef NL_OS_WINDOWS
 #	define NOMINMAX
-#	include <windows.h>
+#	include <WinSock2.h>
+#	include <Windows.h>
+typedef unsigned long ulong;
 #endif // NL_OS_WINDOWS
 
 #include <mysql.h>

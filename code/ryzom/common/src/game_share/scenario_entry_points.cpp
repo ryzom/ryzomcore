@@ -19,6 +19,7 @@
 //-----------------------------------------------------------------------------
 
 #include "stdpch.h"
+#include "utils.h"
 
 #include "nel/misc/file.h"
 #include "nel/misc/command.h"

@@ -26,8 +26,8 @@ namespace NLSOUND {
 
 
 // ***************************************************************************
-CMusicSource::CMusicSource(CMusicSound *musicSound, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster)
-	:	CSourceCommon(musicSound, spawn, cb, cbUserParam, cluster)
+CMusicSource::CMusicSource(CMusicSound *musicSound, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster, CGroupController *groupController)
+	:	CSourceCommon(musicSound, spawn, cb, cbUserParam, cluster, groupController)
 {
 	_MusicSound= musicSound;
 }

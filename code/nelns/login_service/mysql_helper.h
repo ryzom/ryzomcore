@@ -70,7 +70,7 @@ public:
 
 private:
 	//we don't want user to do a copy
-	CMysqlResult(const CMysqlResult &mysqlResult){};
+	CMysqlResult(const CMysqlResult &mysqlResult){}
 	MYSQL_RES *Result;
 };
 

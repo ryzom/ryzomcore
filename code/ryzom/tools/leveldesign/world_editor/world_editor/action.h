@@ -32,7 +32,7 @@ class IAction
 public:
 
 	// Virtual destructor
-	virtual ~IAction () {};
+	virtual ~IAction () {}
 
 	// Do / undo
 	virtual void undo () = 0;

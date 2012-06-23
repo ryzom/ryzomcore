@@ -20,23 +20,6 @@
 
 #include "nel/misc/types_nl.h"
 
-#ifdef USE_OPENGLES
-#	include <GLES/gl.h>
-#	include <GLES/glext.h>
-#else
-#	ifdef NL_OS_MAC
-#		define GL_GLEXT_LEGACY
-#		include <OpenGL/gl.h>
-#		include "mac/glext.h"
-#	else
-#		include <GL/gl.h>
-#		include <GL/glext.h>
-#		if defined(NL_OS_WINDOWS)
-#			include <GL/wglext.h>
-#		endif
-#	endif
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -79,7 +62,8 @@ typedef void (APIENTRY * NEL_PFNGLTEXGENXVOESPROC) (GLenum coord, GLenum pname, 
 typedef void (APIENTRY * NEL_PFNGLGETTEXGENFVOESPROC) (GLenum coord, GLenum pname, GLfloat *params);
 typedef void (APIENTRY * NEL_PFNGLGETTEXGENIVOESPROC) (GLenum coord, GLenum pname, GLint *params);
 typedef void (APIENTRY * NEL_PFNGLGETTEXGENXVOESPROC) (GLenum coord, GLenum pname, GLfixed *params);
-#endif
+
+#else
 
 // ***************************************************************************
 // ***************************************************************************
@@ -455,6 +439,8 @@ typedef void (APIENTRY * NEL_PFNGLXFREEMEMORYNVPROC) (void *pointer);
 #endif // NL_GLX_NV_vertex_array_range
 
 #endif // NL_OS_MAC
+
+#endif // USE_OPENGLES
 
 #ifdef __cplusplus
 }

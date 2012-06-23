@@ -3731,7 +3731,7 @@ void CBitmap::blend(CBitmap &Bm0, CBitmap &Bm1, uint16 factor, bool inputBitmapI
 	{
 		// On a P4 2GHz, with a 256x256 texture, I got the following results :
 		// without mmx : 5.2 ms
-        // with mmx    : 1.7 ms
+		// with mmx    : 1.7 ms
 		// I'm sure this can be further optimized..
 
 		uint numPixLeft = numPix & 1; // process 2 pixels at once, so special case for odd number

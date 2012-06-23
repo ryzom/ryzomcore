@@ -48,6 +48,8 @@ public:
 		/// Intel/DVI ADPCM format, only available for 1 channel at 16 bits per sample, encoded at 4 bits per sample.
 		/// This is only implemented in the DSound and XAudio2 driver.
 		FormatDviAdpcm = 11, 
+		/// No format set. Used when a TBufferFormat value has not been set to any value yet.
+		FormatNotSet = (~0),
 	};
 	/// The storage mode of this buffer. Also controls the X-RAM extension of OpenAL.
 	enum TStorageMode

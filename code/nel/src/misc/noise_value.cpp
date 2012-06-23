@@ -18,7 +18,7 @@
 
 #include "nel/misc/noise_value.h"
 #include "nel/misc/fast_floor.h"
-#include "nel/misc/random.h"
+
 
 
 namespace NLMISC
@@ -45,8 +45,7 @@ public:
 	CRandomGrid3D()
 	{
 		//seed
-		CRandom Random;
-		Random.srand(0);
+		srand(0);
 
 		// init the grid
 		for(uint z=0; z<NL3D_NOISE_GRID_SIZE; z++)
@@ -57,7 +56,7 @@ public:
 				{
 					uint	id= x + (y<<NL3D_NOISE_GRID_SIZE_SHIFT) + (z<<(NL3D_NOISE_GRID_SIZE_SHIFT*2));
 					// take higher bits of rand gives better result.
-					uint	v= Random.rand() >> 5;
+					uint	v= rand() >> 5;
 					_Texture3d[id]= v&255;
 				}
 			}
@@ -81,9 +80,9 @@ public:
 		// init LevelPhases.
 		for(i=0; i<NL3D_NOISE_LEVEL; i++)
 		{
-			_LevelPhase[i].x= Random.frand(NL3D_NOISE_GRID_SIZE);
-			_LevelPhase[i].y= Random.frand(NL3D_NOISE_GRID_SIZE);
-			_LevelPhase[i].z= Random.frand(NL3D_NOISE_GRID_SIZE);
+			_LevelPhase[i].x= frand(NL3D_NOISE_GRID_SIZE);
+			_LevelPhase[i].y= frand(NL3D_NOISE_GRID_SIZE);
+			_LevelPhase[i].z= frand(NL3D_NOISE_GRID_SIZE);
 		}
 		// not for level 0.
 		_LevelPhase[0]= CVector::Null;

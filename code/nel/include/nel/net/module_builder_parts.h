@@ -188,8 +188,8 @@ namespace NLNET
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
-		bool				fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)	{return false;}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
+		bool				fwdOnProcessModuleMessage(NLNET::IModuleProxy * /* sender */, const NLNET::CMessage &/* message */)	{return false;}
 
 		// check module up
 		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)
