@@ -69,7 +69,7 @@
 #include "nel/gui/group_tree.h"
 #include "group_menu.h"
 #include "nel/gui/group_container.h"
-#include "group_scrolltext.h"
+#include "nel/gui/group_scrolltext.h"
 #include "nel/gui/group_editbox.h"
 #include "group_skills.h"
 #include "group_html_forum.h"
