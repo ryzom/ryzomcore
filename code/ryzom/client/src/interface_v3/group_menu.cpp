@@ -14,31 +14,32 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-// ------------------------------------------------------------------------------------------------
-#include "stdpch.h"
-#include "interface_manager.h"
+#include "nel/gui/interface_options.h"
 #include "nel/gui/interface_expr.h"
 #include "group_menu.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/view_bitmap.h"
 #include "nel/gui/action_handler.h" // Just for getAllParams
 #include "nel/gui/lua_ihm.h"
-#include "lua_ihm_ryzom.h"
-
 #include "nel/misc/i18n.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/group_list.h"
+#include "nel/gui/ctrl_scroll.h"
+#include "nel/gui/view_pointer_base.h"
+
 
 using namespace NLMISC;
 using namespace std;
 
 
-static const std::string ID_MENU_CHECKBOX  = "menu_cb";
-static const std::string ID_MENU_SEPARATOR = "menu_separator";
-static const std::string ID_MENU_SUBMENU = "menu_sb";
-
-static const uint MENU_WIDGET_X = 2;
-static const uint LEFT_MENU_WIDGET_X = 4;
+namespace
+{
+	const std::string ID_MENU_CHECKBOX  = "menu_cb";
+	const std::string ID_MENU_SEPARATOR = "menu_separator";
+	const std::string ID_MENU_SUBMENU = "menu_sb";
+	const uint MENU_WIDGET_X = 2;
+	const uint LEFT_MENU_WIDGET_X = 4;
+}
 
 // ------------------------------------------------------------------------------------------------
 // CGroupSubMenu
@@ -235,7 +236,6 @@ void CGroupSubMenu::initOptions(CInterfaceGroup *parent)
 bool CGroupSubMenu::parse (xmlNodePtr cur,  CInterfaceGroup *parent)
 {
 	initOptions(parent);
-	CInterfaceManager *im = CInterfaceManager::getInstance();
 	// the children
 	while (cur)
 	{
@@ -341,7 +341,7 @@ bool CGroupSubMenu::parse (xmlNodePtr cur,  CInterfaceGroup *parent)
 				}
 
 				string completeId = _Parent->getId() + ":" + _Lines[_Lines.size()-1].Id;
-				CInterfaceGroup *pUGLeft = im->createGroupInstance((const char*)usergroup, completeId, vparams);
+				CInterfaceGroup *pUGLeft = CWidgetManager::parser->createGroupInstance((const char*)usergroup, completeId, vparams);
 				if (pUGLeft)
 					setUserGroupLeft((uint)_Lines.size()-1, pUGLeft, true);
 			}
@@ -356,7 +356,7 @@ bool CGroupSubMenu::parse (xmlNodePtr cur,  CInterfaceGroup *parent)
 				}
 
 				string completeId = _Parent->getId() + ":" + _Lines[_Lines.size()-1].Id;
-				CInterfaceGroup *pUG = im->createGroupInstance((const char*)usergroup, completeId, vparams);
+				CInterfaceGroup *pUG = CWidgetManager::parser->createGroupInstance((const char*)usergroup, completeId, vparams);
 				if (pUG)
 					setUserGroupRight((uint)_Lines.size()-1, pUG, true);
 			}
@@ -866,7 +866,6 @@ void CGroupSubMenu::checkCoords()
 	if (_GroupMenu == NULL) return;
 
 	// if the mouse goes out the window,  unselect all (because handleEvent may not be called)
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	sint	xMouse= CWidgetManager::getInstance()->getPointer()->getX();
 	sint	yMouse= CWidgetManager::getInstance()->getPointer()->getY();
 	if (!((xMouse >= _XReal) &&
@@ -982,7 +981,7 @@ bool CGroupSubMenu::handleEvent (const NLGUI::CEventDescriptor &event)
 			// If a line is selected and the line is not grayed
 			if ((_Selected != -1) && (!_Lines[i].ViewText->getGrayed()))
 			{
-				CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
 				CAHManager::getInstance()->runActionHandler (	_Lines[_Selected].AHName,
 										CWidgetManager::getInstance()->getCtrlLaunchingModal(),
 										_Lines[_Selected].AHParams );
@@ -1135,15 +1134,15 @@ void CGroupSubMenu::addSeparatorAtIndex(uint index, const std::string &id)
 		nlwarning("Bad index");
 		return;
 	}
-	CInterfaceManager *im = CInterfaceManager::getInstance();
+
 		// create the real separator. It may be larger than the group list, this is why we create a separate group
-	CInterfaceGroup *separator = im->createGroupInstance("menu_separator", "", NULL, 0);
+	CInterfaceGroup *separator = CWidgetManager::parser->createGroupInstance("menu_separator", "", NULL, 0);
 	if (!separator) return;
 	separator->setId(ID_MENU_SEPARATOR);
 	addGroup(separator);
 	separator->setParent(this);
 	// create place holder group
-	CInterfaceGroup *ph = im->createGroupInstance("menu_separator_empty", "", NULL, 0);
+	CInterfaceGroup *ph = CWidgetManager::parser->createGroupInstance("menu_separator_empty", "", NULL, 0);
 	if (!ph)
 	{
 		delGroup(separator);
@@ -1935,7 +1934,7 @@ bool CGroupMenu::parse (xmlNodePtr in,  CInterfaceGroup *parentGroup)
 	CGroupSubMenu *gmExtended = NULL;
 	if (prop)
 	{
-		CInterfaceManager *im = CInterfaceManager::getInstance();
+
 		CGroupMenu *gm = dynamic_cast<CGroupMenu *>(CWidgetManager::getInstance()->getElementFromId(prop));
 		if (!gm)
 		{
