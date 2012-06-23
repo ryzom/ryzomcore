@@ -63,7 +63,7 @@
 #include "init_main_loop.h"
 #include "sheet_manager.h"
 #include "sound_manager.h"
-#include "interface_v3/group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "debug_client.h"
 #include "user_entity.h"
 #include "time_client.h"

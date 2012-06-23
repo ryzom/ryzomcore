@@ -31,14 +31,13 @@ namespace NLGUI
 	class CCtrlBaseButton;
 	class CViewText;
 	class CViewBitmap;
+	class CGroupEditBox;
 }
 
 
 // ***************************************************************************
 class	CDBCtrlSheet;
 class	CSBrickSheet;
-class	CGroupEditBox;
-
 
 // ***************************************************************************
 /**

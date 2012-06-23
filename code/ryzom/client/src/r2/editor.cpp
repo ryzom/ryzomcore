@@ -81,7 +81,7 @@ using namespace NLGUI;
 #include "../interface_v3/input_handler_manager.h"
 #include "../connection.h"
 #include "../init_main_loop.h"
-#include "../interface_v3/group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "../landscape_poly_drawer.h"
 #include "../input.h"
 #include "../motion/user_controls.h"

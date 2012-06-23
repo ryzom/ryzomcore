@@ -34,7 +34,7 @@
 #include "bot_chat_page_all.h"
 #include "bot_chat_manager.h"
 #include "dbctrl_sheet.h"
-#include "group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "group_tab.h"
 #include "group_container.h"
 #include "action_handler_help.h"

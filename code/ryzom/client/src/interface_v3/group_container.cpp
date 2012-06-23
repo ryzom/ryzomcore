@@ -26,7 +26,7 @@
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/action_handler.h"
 #include "../time_client.h"
-#include "group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "nel/gui/view_text_formated.h"
 #include "nel/gui/view_text_id.h"
 #include "nel/gui/lua_ihm.h"

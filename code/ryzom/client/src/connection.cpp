@@ -66,7 +66,7 @@
 #include "interface_v3/character_3d.h"
 #include "nel/gui/ctrl_button.h"
 #include "interface_v3/input_handler_manager.h"
-#include "interface_v3/group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "nel/gui/interface_expr.h"
 #include "init_main_loop.h"
 #include "continent_manager.h"

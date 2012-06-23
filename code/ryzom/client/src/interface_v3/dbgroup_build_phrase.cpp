@@ -24,7 +24,7 @@
 #include "dbctrl_sheet.h"
 #include "nel/gui/view_bitmap.h"
 #include "nel/gui/ctrl_button.h"
-#include "group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "../client_cfg.h"
 #include "nel/gui/view_text.h"
 #include "skill_manager.h"

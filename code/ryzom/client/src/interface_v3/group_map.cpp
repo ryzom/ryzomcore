@@ -25,7 +25,7 @@
 #include "../zone_util.h"
 #include "../user_entity.h"
 #include "nel/gui/ctrl_button.h"
-#include "group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "../string_manager_client.h"
 #include "group_container.h"
 #include "nel/gui/action_handler.h"

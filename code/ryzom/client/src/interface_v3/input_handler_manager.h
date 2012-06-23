@@ -26,7 +26,7 @@
 #include <string>
 #include "nel/gui/event_descriptor.h"
 #include "nel/gui/input_handler.h"
-#include "group_editbox.h"
+#include "nel/gui/group_editbox.h"
 
 
 /**

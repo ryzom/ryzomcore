@@ -23,7 +23,7 @@
 #include "nel/gui/view_bitmap.h"
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
-#include "group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "../client_chat_manager.h"
 #include "chat_text_manager.h"
 #include "people_interraction.h"

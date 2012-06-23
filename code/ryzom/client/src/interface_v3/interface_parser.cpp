@@ -70,7 +70,7 @@
 #include "group_menu.h"
 #include "group_container.h"
 #include "group_scrolltext.h"
-#include "group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "group_skills.h"
 #include "group_html_forum.h"
 #include "group_html_mail.h"

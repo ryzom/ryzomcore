@@ -27,7 +27,7 @@
 #include "dbctrl_sheet.h"
 #include "nel/gui/interface_expr.h"
 #include "group_container.h"
-#include "group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "group_quick_help.h"
 #include "nel/gui/view_text_id.h"
 #include "../user_entity.h"

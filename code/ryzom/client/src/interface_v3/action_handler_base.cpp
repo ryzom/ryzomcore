@@ -21,7 +21,7 @@
 #include "interface_manager.h"
 
 #include "group_container.h"
-#include "group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "dbctrl_sheet.h"
 #include "interface_3d_scene.h"
 #include "character_3d.h"

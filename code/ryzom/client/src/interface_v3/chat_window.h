@@ -30,11 +30,11 @@ namespace NLGUI
 	class CCtrlBase;
 	class CViewText;
 	class CGroupList;
+	class CGroupEditBox;
 }
 
 class CChatWindow;
 class CGroupContainer;
-class CGroupEditBox;
 
 /** Interface to react to a chat box entry
   * Derivers should define the msgEntered member function to handle entry event.
@@ -122,7 +122,7 @@ public:
 	  */
 	CGroupContainer     *getContainer() const { return _Chat; }
 	//
-	CGroupEditBox       *getEditBox() const;
+	NLGUI::CGroupEditBox       *getEditBox() const;
 	/** try to rename the chat window
 	  * \return true if success
 	  */
@@ -163,7 +163,7 @@ protected:
 protected:
 	IChatWindowListener *_Listener;
 	NLMISC::CRefPtr<CGroupContainer> _Chat;
-	CGroupEditBox		*_EB;
+	NLGUI::CGroupEditBox		*_EB;
 	bool 				 _ParentBlink;
 	static CChatWindow  *_ChatWindowLaunchingCommand;
 	std::vector<IObserver *> _Observers;

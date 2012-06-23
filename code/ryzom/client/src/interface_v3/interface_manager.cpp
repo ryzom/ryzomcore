@@ -64,7 +64,7 @@
 #include "group_menu.h"
 #include "group_container.h"
 #include "nel/gui/group_modal.h"
-#include "group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "group_in_scene_bubble.h"
 #include "group_skills.h"
 #include "group_compas.h"

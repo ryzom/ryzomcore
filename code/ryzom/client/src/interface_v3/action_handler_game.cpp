@@ -39,7 +39,7 @@
 #include "nel/gui/interface_expr.h"
 #include "group_menu.h"
 #include "group_container.h"
-#include "group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "inventory_manager.h"
 #include "guild_manager.h"
 #include "../net_manager.h"

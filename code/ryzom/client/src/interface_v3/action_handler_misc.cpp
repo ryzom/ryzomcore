@@ -19,7 +19,7 @@
 #include "interface_manager.h"
 #include "nel/gui/ctrl_button.h"
 #include "group_container.h"
-#include "group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "people_interraction.h"
 #include "nel/misc/algo.h"
 #include "nel/gui/interface_expr.h"

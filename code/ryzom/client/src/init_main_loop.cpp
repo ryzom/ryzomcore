@@ -71,7 +71,7 @@
 #include "continent_manager.h"
 #include "continent.h"
 #include "sky_render.h"
-#include "interface_v3/group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "interface_v3/inventory_manager.h"
 #include "interface_v3/bot_chat_page_all.h"
 #include "main_loop.h"

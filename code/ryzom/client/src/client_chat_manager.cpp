@@ -30,7 +30,7 @@
 #include "entity_cl.h"
 #include "nel/gui/action_handler.h"
 #include "entities.h"
-#include "interface_v3/group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "permanent_ban.h"
 #include "global.h"
 #include "nel/gui/ctrl_text_button.h"

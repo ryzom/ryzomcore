@@ -76,7 +76,7 @@
 #include "../motion/user_controls.h"
 #include "group_html_cs.h"
 #include "bonus_malus.h"
-#include "group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "../entities.h"
 #include "../sheet_manager.h"				// for emotes
 #include "../global.h"						// for emotes

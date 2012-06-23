@@ -22,7 +22,7 @@
 #include "guild_manager.h"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/action_handler.h"
-#include "group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "dbctrl_sheet.h"
 #include "bot_chat_manager.h"
 #include "bot_chat_page_all.h"

@@ -26,7 +26,7 @@
 #include "action_handler_misc.h"
 #include "chat_window.h"
 #include "../entity_animation_manager.h"
-#include "group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "group_menu.h"
 #include "../client_chat_manager.h"
 #include "../string_manager_client.h"

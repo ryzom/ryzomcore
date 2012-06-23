@@ -27,7 +27,7 @@
 #include "macrocmd_manager.h"
 #include "chat_window.h"
 #include "people_interraction.h"
-#include "group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "group_html.h"
 #include "inventory_manager.h"
 
