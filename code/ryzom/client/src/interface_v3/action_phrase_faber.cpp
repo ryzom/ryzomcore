@@ -31,7 +31,7 @@
 #include "sbrick_manager.h"
 #include "sphrase_manager.h"
 #include "nel/gui/group_editbox.h"
-#include "dbview_bar.h"
+#include "nel/gui/dbview_bar.h"
 #include "skill_manager.h"
 #include "game_share/bot_chat_types.h"
 

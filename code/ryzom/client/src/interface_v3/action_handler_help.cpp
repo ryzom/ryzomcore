@@ -33,7 +33,7 @@
 #include "../user_entity.h"
 #include "../entities.h"
 #include "dbgroup_combo_box.h"
-#include "dbview_bar.h"
+#include "nel/gui/dbview_bar.h"
 #include "../debug_client.h"
 #include "interface_3d_scene.h"
 #include "character_3d.h"
