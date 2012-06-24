@@ -14,18 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-#include "stdpch.h"
-
 #include "group_tab.h"
 #include "nel/misc/xml_auto_ptr.h"
-#include "../time_client.h"
-#include "interface_manager.h"
-
 #include "nel/gui/lua_ihm.h"
-#include "lua_ihm_ryzom.h"
-
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/view_text.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -131,10 +125,8 @@ void	CGroupTab::addTab(CCtrlTabButton * tabB)
 	selectFromCtrl(tabB);
 
 	if(_HideOutTabs && !_AHOnChange.empty())
-	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CAHManager::getInstance()->runActionHandler(_AHOnChange, this, _ParamsOnChange);
-	}
+
 }
 
 // ***************************************************************************
@@ -225,10 +217,8 @@ void	CGroupTab::addTab(CCtrlTabButton * tabB, sint index)
 	updateCoords();
 
 	if(_HideOutTabs && !_AHOnChange.empty())
-	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CAHManager::getInstance()->runActionHandler(_AHOnChange, this, _ParamsOnChange);
-	}
+
 }
 
 // ***************************************************************************
@@ -245,10 +235,8 @@ int CGroupTab::luaAddTab(CLuaState &ls)
 		updateCoords();
 
 		if(_HideOutTabs && !_AHOnChange.empty())
-		{
-			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			CAHManager::getInstance()->runActionHandler(_AHOnChange, this, _ParamsOnChange);
-		}
+
 	}
 	return 0;
 }
@@ -332,10 +320,7 @@ void	CGroupTab::removeTab(sint index)
 		select(_FirstTabIndex);
 
 		if(!_AHOnChange.empty())
-		{
-			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			CAHManager::getInstance()->runActionHandler(_AHOnChange, this, _ParamsOnChange);
-		}
 	}
 }
 
@@ -503,10 +488,8 @@ void CGroupTab::updateFirstTabButton()
 	}
 
 	if(!_AHOnChange.empty() && ((oldFirstTabIndex!=_FirstTabIndex) || (oldLastTabIndex!=_LastTabIndex)))
-	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CAHManager::getInstance()->runActionHandler(_AHOnChange, this, _ParamsOnChange);
-	}
+
 }
 
 // ***************************************************************************
@@ -797,9 +780,10 @@ bool CCtrlTabButton::handleEvent (const NLGUI::CEventDescriptor &event)
 		if (systemEvent.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::clocktick)
 		if (_Blinking)
 		{
-			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			uint dbclickDelay = CWidgetManager::getInstance()->getUserDblClickDelay();
-			if ((T1 - _BlinkDate) > dbclickDelay)
+			const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
+
+			if (( times.thisFrameMs - _BlinkDate) > dbclickDelay)
 			{
 				if (_BlinkState)
 				{
@@ -812,7 +796,7 @@ bool CCtrlTabButton::handleEvent (const NLGUI::CEventDescriptor &event)
 					setTextModulateGlobalColorNormal(_TextModulateGlobalColorNormalBlink);
 				}
 				_BlinkState = !_BlinkState;
-				_BlinkDate = T1;
+				_BlinkDate = times.thisFrameMs;
 			}
 		}
 	}
@@ -822,7 +806,6 @@ bool CCtrlTabButton::handleEvent (const NLGUI::CEventDescriptor &event)
 // ***************************************************************************
 void CCtrlTabButton::setBlink (bool b)
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if (b)
 	{
 		if (!_Blinking)
