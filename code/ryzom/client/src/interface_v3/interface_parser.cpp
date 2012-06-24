@@ -47,7 +47,7 @@
 #include "view_pointer.h"
 // DBView (View linked to the database)
 #include "nel/gui/dbview_bar.h"
-#include "dbview_bar3.h"
+#include "nel/gui/dbview_bar3.h"
 #include "dbview_number.h"
 #include "dbview_quantity.h"
 #include "dbview_digit.h"

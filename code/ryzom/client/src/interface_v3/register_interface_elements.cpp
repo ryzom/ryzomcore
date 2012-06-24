@@ -44,7 +44,7 @@
 #include "nel/gui/group_tree.h"
 #include "nel/gui/reflect.h"
 #include "nel/gui/dbview_bar.h"
-#include "dbview_bar3.h"
+#include "nel/gui/dbview_bar3.h"
 #include "nel/gui/ctrl_scroll_base.h"
 #include "nel/gui/ctrl_scroll.h"
 #include "dbgroup_combo_box.h"
