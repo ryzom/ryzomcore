@@ -15,13 +15,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-#include "stdpch.h"
-//
-#include "interface_manager.h"
 #include "nel/gui/group_container.h"
 #include "group_header.h"
 #include "nel/gui/lua_ihm.h"
+#include "nel/gui/widget_manager.h"
 
 
 using namespace NLMISC;
@@ -240,7 +237,6 @@ public:
 	{}
 	void release()
 	{
-		CInterfaceManager	*im = CInterfaceManager::getInstance();
 		if (CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 		{
 			_Moving = false;
@@ -257,7 +253,6 @@ public:
 	}
 	bool handleEvent (const NLGUI::CEventDescriptor &event)
 	{
-		CInterfaceManager	*im = CInterfaceManager::getInstance();
 		if (_Parent)
 		{
 			if (event.getType() == NLGUI::CEventDescriptor::system)
@@ -417,7 +412,6 @@ bool CGroupHeaderEntry::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 // *****************************************************************************************************************
 CInterfaceGroup *CGroupHeaderEntry::getTargetColumn() const
 {
-	CInterfaceManager	*im = CInterfaceManager::getInstance();
 	return dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(_TargetColumnId));
 }
 
