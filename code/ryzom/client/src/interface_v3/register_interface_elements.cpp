@@ -50,7 +50,7 @@
 #include "dbgroup_combo_box.h"
 #include "nel/gui/group_tab.h"
 #include "group_html.h"
-#include "group_header.h"
+#include "nel/gui/group_header.h"
 #include "sphrase_manager.h"
 //
 #include "../r2/displayer_visual.h"
