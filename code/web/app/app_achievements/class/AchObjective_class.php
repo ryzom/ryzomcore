@@ -1,5 +1,5 @@
 <?php
-	class AchObjective {
+	class AchObjective extends Parentum {
 		private $id;
 		private $perk;
 		private $condition;
@@ -25,9 +25,13 @@
 			$this->progress = $this->value;
 
 			if(!$this->isDone()) {
-				$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_player_atom,ach_atom WHERE apa_atom=atom_id AND atom_objective='".$this->id."' AND apa_player='".$_USER->getId()."'");
+				$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_player_atom,ach_atom WHERE apa_atom=atom_id AND atom_objective='".$this->id."' AND apa_player='".$_USER->getID()."'");
 				$this->progress = $res[0]['anz'];
 			}
+		}
+
+		protected function makeChild(&$a) {
+			return null;
 		}
 
 		function getMetaImage() {

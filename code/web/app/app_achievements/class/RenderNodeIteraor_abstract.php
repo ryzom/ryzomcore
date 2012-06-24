@@ -1,5 +1,5 @@
 <?php
-	abstract class RenderNodeIterator implements Parentum {
+	abstract class RenderNodeIterator extends Parentum {
 		protected $nodes = array();
 
 		function getSize() {

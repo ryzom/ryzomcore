@@ -53,7 +53,7 @@
 			#echo "X-".$this->hasOpen();
 		}
 
-		function makeChild(&$a) {
+		protected function makeChild(&$a) {
 			return new AchPerk($a);
 		}
 

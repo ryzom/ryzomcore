@@ -54,7 +54,7 @@
 			$this->ties_civ_dev = $res[0]['anz'];
 		}
 
-		function makeChild(&$a) {
+		protected function makeChild(&$a) {
 			return new AchAchievement($a);
 		}
 

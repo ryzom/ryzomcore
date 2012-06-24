@@ -22,7 +22,7 @@
 			}
 		}
 
-		function makeChild(&$a) {
+		protected function makeChild(&$a) {
 			return new AchAchievement($a);
 		}
 

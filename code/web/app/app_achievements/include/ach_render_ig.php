@@ -138,8 +138,11 @@
 			if($curr->inDev()) {
 				continue;
 			}
-			$html .= "<tr><td></td><td bgcolor='#000000'></td></tr>
-				<tr><td>";
+			if($sub == 0) {
+				$html .= "<tr><td></td><td bgcolor='#000000'></td></tr>";
+			}
+
+			$html .= "<tr><td>";
 					if($sub == 0) {
 						$html .= "<img src='".$_CONF['image_url']."pic/menu/ig_".$curr->getImage()."' />";
 					}
