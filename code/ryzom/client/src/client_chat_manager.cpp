@@ -34,7 +34,7 @@
 #include "permanent_ban.h"
 #include "global.h"
 #include "nel/gui/ctrl_text_button.h"
-#include "interface_v3/group_tab.h"
+#include "nel/gui/group_tab.h"
 #include "string_manager_client.h"
 
 #include "game_share/generic_xml_msg_mngr.h"

@@ -39,7 +39,7 @@
 #include "../entities.h"
 #include "../net_manager.h"
 #include "../connection.h"
-#include "group_tab.h"
+#include "nel/gui/group_tab.h"
 #include "guild_manager.h"
 // Game share
 #include "game_share/entity_types.h"

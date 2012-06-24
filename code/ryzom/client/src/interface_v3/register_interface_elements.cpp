@@ -48,7 +48,7 @@
 #include "nel/gui/ctrl_scroll_base.h"
 #include "nel/gui/ctrl_scroll.h"
 #include "dbgroup_combo_box.h"
-#include "group_tab.h"
+#include "nel/gui/group_tab.h"
 #include "group_html.h"
 #include "group_header.h"
 #include "sphrase_manager.h"

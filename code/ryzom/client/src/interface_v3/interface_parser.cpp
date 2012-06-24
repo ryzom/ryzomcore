@@ -82,7 +82,7 @@
 #include "group_in_scene_user_info.h"
 #include "group_in_scene_bubble.h"
 #include "group_phrase_skill_filter.h"
-#include "group_tab.h"
+#include "nel/gui/group_tab.h"
 #include "group_table.h"
 // DBGroup
 #include "dbgroup_select_number.h"

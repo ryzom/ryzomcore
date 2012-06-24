@@ -32,7 +32,7 @@
 //
 #include "nel/gui/group_container.h"
 #include "nel/gui/group_editbox.h"
-#include "group_tab.h"
+#include "nel/gui/group_tab.h"
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
 #include "../client_chat_manager.h"

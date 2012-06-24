@@ -32,6 +32,7 @@ namespace NLGUI
 	class CGroupList;
 	class CGroupEditBox;
 	class CGroupContainer;
+	class CCtrlTabButton;
 }
 
 class CChatWindow;
@@ -207,7 +208,7 @@ protected:
 
 	std::vector<NLGUI::CGroupContainer*>	_FreeTellers;
 
-	void	getAssociatedSubWindow(CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, NLGUI::CGroupList *&gl, class CCtrlTabButton *&tab);
+	void	getAssociatedSubWindow(CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, NLGUI::CGroupList *&gl, NLGUI::CCtrlTabButton *&tab);
 	void    updateFreeTellerHeader(NLGUI::CGroupContainer &ft);
 
 private:
