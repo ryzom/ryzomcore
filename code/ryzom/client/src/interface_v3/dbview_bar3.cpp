@@ -15,13 +15,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-// ----------------------------------------------------------------------------
-#include "stdpch.h"
-
 #include "dbview_bar3.h"
-#include "interface_manager.h"
 #include "nel/misc/xml_auto_ptr.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/db_manager.h"
+#include "nel/gui/interface_group.h"
 
 using namespace std;
 using namespace NL3D;
@@ -161,7 +159,6 @@ void CDBViewBar3::draw ()
 {
 	_Slot.draw();
 
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	CRGBA gColor = CWidgetManager::getInstance()->getGlobalColorForContent();
 
