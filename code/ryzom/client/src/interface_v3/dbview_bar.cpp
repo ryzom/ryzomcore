@@ -15,14 +15,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-// ----------------------------------------------------------------------------
-#include "stdpch.h"
-
 #include "dbview_bar.h"
-#include "interface_manager.h"
 #include "nel/misc/xml_auto_ptr.h"
-
+#include "nel/gui/interface_group.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/db_manager.h"
 
 using namespace std;
 using namespace NL3D;
@@ -118,7 +115,6 @@ void CDBViewBar::setType (TViewBar vb)
 	}
 
 	// Get the Height Size.
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	sint32	wBar;
 	CViewRenderer::getInstance()->getTextureSizeFromId(_TextureId, wBar, _HBar);
 }
@@ -179,7 +175,6 @@ void CDBViewBar::draw ()
 
 	_Slot.draw();
 
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	color.A = (uint8)(((sint32)color.A*((sint32)CWidgetManager::getInstance()->getGlobalColorForContent().A+1))>>8);
