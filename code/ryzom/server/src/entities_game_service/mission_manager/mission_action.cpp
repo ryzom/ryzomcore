@@ -5449,6 +5449,13 @@ class CMissionActionSoundTrigger : public IMissionAction
 		else
 			_SoundPosition = "";
 
+		_SoundId = NLMISC::CSheetId(_SoundName);
+		if (_SoundId == NLMISC::CSheetId::Unknown)
+		{
+			MISLOGSYNTAXERROR("sound_trigger action: sheetid not found");
+			return false;
+		}
+
 		return ret;
 	}
 
@@ -5460,6 +5467,7 @@ class CMissionActionSoundTrigger : public IMissionAction
 	};
 	std::string _SoundName;
 	std::string _SoundPosition;
+	NLMISC::CSheetId _SoundId;
 
 	MISSION_ACTION_GETNEWPTR(CMissionActionSoundTrigger)
 };

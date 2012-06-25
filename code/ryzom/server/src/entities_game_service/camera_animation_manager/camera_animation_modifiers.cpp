@@ -17,6 +17,8 @@
 
 #include "camera_animation_manager/camera_animation_modifier_factory.h"
 
+#include "nel/misc/sheet_id.h"
+
 /////////////////////////////////////////////////////////////////////////////
 /// This animation modifier shakes the camera. The parameter is
 /// - strength
@@ -61,12 +63,14 @@ class CCameraAnimationModifierSoundTrigger : public ICameraAnimationModifier
 protected:
 	std::string SoundName;
 	std::string SoundPos;
+	NLMISC::CSheetId SoundId;
 
 public:
 	CCameraAnimationModifierSoundTrigger()
 	{
 		SoundName = "";
 		SoundPos = "";
+		SoundId = NLMISC::CSheetId::Unknown;
 	}
 
 	virtual bool parseModifier(const NLLIGO::IPrimitive* prim, const std::string& filename)
@@ -80,6 +84,12 @@ public:
 			return false;
 		}
 		SoundName = value;
+		SoundId = NLMISC::CSheetId(SoundName);
+		if (SoundId == NLMISC::CSheetId::Unknown)
+		{
+			nlwarning("<CCameraAnimationModifierSoundTrigger parseModifier> sheetid not found for sound name %s in the basic modifier in primitive : %s", SoundName.c_str(), filename.c_str());
+			return false;
+		}
 		// We get the sound position
 		if (!prim->getPropertyByName("sound_position", value))
 		{
