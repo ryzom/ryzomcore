@@ -1,19 +1,21 @@
 <?php
 	class AchObjective extends Parentum {
-		private $id;
-		private $perk;
-		private $condition;
-		private $value;
-		private $name;
-		private $display;
-		private $done;
-		private $progress;
-		private $meta_image;
+		use Node;
 
-		function AchObjective(&$data) {
+		protected $perk;
+		protected $condition;
+		protected $value;
+		protected $name;
+		protected $display;
+		protected $done;
+		protected $progress;
+		protected $meta_image;
+
+		function AchObjective($data,$parent) {
 			global $DBc,$_USER;
-
-			$this->id = $data['ao_id'];
+			
+			$this->setParent($parent);
+			$this->setID($data['ao_id']);
 			$this->perk = $data['ao_perk'];
 			$this->condition = $data['ao_condition'];
 			$this->value = $data['ao_value'];
@@ -30,16 +32,12 @@
 			}
 		}
 
-		protected function makeChild(&$a) {
+		protected function makeChild($a) {
 			return null;
 		}
 
 		function getMetaImage() {
 			return $this->meta_image;
-		}
-
-		function getID() {
-			return $this->id;
 		}
 
 		function getPerk() {

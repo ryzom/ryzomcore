@@ -134,8 +134,6 @@
 	}
 
 	function ach_render_menu(&$menu,$sub = 0) {
-		global $_CONF;
-
 		$html = "<style>
 				.ach_menu {
 					display:block;
@@ -153,9 +151,18 @@
 				}
 				</style>";
 
-		$sz = $menu->getSize();
-		for($i=0;$i<$sz;$i++) {
-			$curr = $menu->getChild($i);
+		return $html.ach_render_mnode($menu,$sub);
+	}
+
+	function ach_render_mnode(&$menu,$sub) {
+		global $_CONF;
+		
+		$iter = $menu->getIterator();
+		while($iter->hasNext()) {
+			$curr = $iter->getNext();
+		#$sz = $menu->getSize();
+		#for($i=0;$i<$sz;$i++) {
+		#	$curr = $menu->getChild($i);
 			if($curr->inDev()) {
 				continue;
 			}
@@ -172,7 +179,7 @@
 				</tr>
 			</table></a></span>";
 			if($curr->hasOpenCat() != 0) {
-				$html .= "<div style='display:block;margin-left:25px;'>".ach_render_menu($curr,($sub+4))."</div>";
+				$html .= "<div style='display:block;margin-left:25px;'>".ach_render_mnode($curr,($sub+4))."</div>";
 			}
 		}
 
@@ -186,24 +193,28 @@
 			$html .= ach_render_tiebar($cat->getCurrentCult(),$cat->getCurrentCiv(),$cat);
 		}
 
-		$tmp = $cat->getDone();
-		$sz = sizeof($tmp);
-		for($i=0;$i<$sz;$i++) {
+		$iter = $cat->getDone();
+		while($iter->hasNext()) {
+			$curr = $cat->findNodeIdx($iter->getNext());
+		#$sz = sizeof($tmp);
+		#for($i=0;$i<$sz;$i++) {
 			#echo "A";
-			if($cat->getChild($tmp[$i])->inDev()) {
+			if($curr->inDev()) {
 				continue;
 			}
-			$html .= ach_render_achievement_done($cat->getChild($tmp[$i]));
+			$html .= ach_render_achievement_done($curr);
 		}
 
-		$tmp = $cat->getOpen();
-		$sz = sizeof($tmp);
-		for($i=0;$i<$sz;$i++) {
+		$iter = $cat->getOpen();
+		while($iter->hasNext()) {
+			$curr = $cat->findNodeIdx($iter->getNext());
+		#$sz = sizeof($tmp);
+		#for($i=0;$i<$sz;$i++) {
 			#echo "B";
-			if($cat->getChild($tmp[$i])->inDev()) {
+			if($curr->inDev()) {
 				continue;
 			}
-			$html .= ach_render_achievement_open($cat->getChild($tmp[$i]));
+			$html .= ach_render_achievement_open($curr));
 		}
 
 		return $html;
@@ -284,8 +295,9 @@
 		$html = "";
 
 		$perk_list = $ach->getOpen();
+		$perk = $ach->findNodeIdx($perk_list->getNext());
 
-		$perk = $ach->getChild($perk_list[0]);
+		#$perk = $ach->getChild($perk_list[0]);
 
 		if($perk->inDev()) {
 			return $html;
@@ -295,7 +307,7 @@
 			$html .= "<span style='color:#999999;font-weight:bold;display:block;'>".$perk->getName()."</span>";
 		}
 		if($perk->objDrawable()) {
-			$html .= ach_render_obj_list($perk->getChildren());
+			$html .= ach_render_obj_list($perk->getIterator());
 		}
 
 		return $html;
@@ -306,9 +318,10 @@
 		$html = "";
 
 		$perk_list = $ach->getDone();
-
-		foreach($perk_list as $elem) {
-			$perk = $ach->getChild($elem);
+		while($perk_list->hasNext()) {
+			$perk = $this->findNodeIdx($perk_list->getNext());
+		#foreach($perk_list as $elem) {
+			#$perk = $ach->getChild($elem);
 			if($perk->inDev()) {
 				continue;
 			}
@@ -323,8 +336,10 @@
 
 		$i = 0;
 		$skip = false;
-
-		foreach($obj as $elem) {
+		
+		while($obj->hasNext()) {
+		#foreach($obj as $elem) {
+			$elem = $obj->getNext();
 			if(($i%2) == 0) {
 				$html .= "<tr>";
 			}

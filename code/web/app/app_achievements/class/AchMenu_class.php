@@ -1,5 +1,5 @@
 <?php
-	class AchMenu extends RenderNodeIterator {
+	class AchMenu extends Parentum {
 		/*---------------------------
 			This class is the dispatcher for actual MenuNodes.
 			Since every MenuNode will only keep a list of it's children,
@@ -20,7 +20,7 @@
 			$tmp['ac_image'] = "test.png";
 			$tmp['ac_order'] = -1;
 			$tmp['open'] = $open;
-			$this->nodes[] = new AchMenuNode($tmp);
+			$this->nodes[] = new AchMenuNode($tmp,$this);
 
 			$res = $DBc->sqlQuery("SELECT * FROM ach_category LEFT JOIN (ach_category_lang) ON (acl_lang='".$_USER->getLang()."' AND acl_category=ac_id) WHERE ac_parent IS NULL ORDER by ac_order ASC, acl_name ASC");
 
@@ -45,8 +45,8 @@
 			return 0;
 		}
 
-		protected function makeChild(&$a) {
-			return new AchMenuNode($a);
+		protected function makeChild($a) {
+			return new AchMenuNode($a,$this);
 		}
 	}
 ?>

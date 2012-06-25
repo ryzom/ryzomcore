@@ -1,6 +1,7 @@
 <?php
-	class AchMenuNode extends RenderNodeIterator {
-		protected $id;
+	class AchMenuNode extends Parentum {
+		use Node;
+
 		protected $parent_id;
 		protected $name;
 		protected $open;
@@ -8,10 +9,11 @@
 		protected $order;
 		protected $dev;
 
-		function AchMenuNode(&$data) {
+		function AchMenuNode($data,$parent) {
 			global $DBc,$_USER;
 
-			$this->id = $data['ac_id'];
+			$this->setParent($parent);
+			$this->setID($data['ac_id']);
 			$this->parent_id = $data['ac_parent'];
 			$this->name = $data['acl_name'];
 			$this->image = $data['ac_image'];
@@ -28,12 +30,8 @@
 			}
 		}
 
-		protected function makeChild(&$a) {
-			return new AchMenuNode($a);
-		}
-
-		function getID() {
-			return $this->id;
+		protected function makeChild($a) {
+			return new AchMenuNode($a,$this);
 		}
 
 		function getName() {

@@ -1,12 +1,12 @@
 <?php
 	class AchCategory extends AchList implements Tieable {
-		private $id = false;
-		private $ties_cult;
-		private $ties_civ;
-		private $ties_cult_dev;
-		private $ties_civ_dev;
-		private $cult;
-		private $civ;
+		protected $id;
+		protected $ties_cult;
+		protected $ties_civ;
+		protected $ties_cult_dev;
+		protected $ties_civ_dev;
+		protected $cult;
+		protected $civ;
 
 		function AchCategory($id,$cult = null,$civ = null) {
 			global $DBc,$_USER;
@@ -28,17 +28,14 @@
 
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
-				#echo "Y";
 				$tmp = $this->makeChild($res[$i]);
-				#echo var_export($tmp,true);
+				
 				if($tmp->hasOpen()) {
-					$this->child_open[] = sizeof($this->nodes);
+					$this->addOpen($tmp);
 				}
 				if($tmp->hasDone()) {
-					$this->child_done[] = sizeof($this->nodes);
+					$this->addDone($tmp);
 				}
-
-				$this->nodes[] = $tmp;
 			}
 
 			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_cult IS NOT NULL AND aa_category='".$this->id."' AND aa_dev='0'");
@@ -54,8 +51,8 @@
 			$this->ties_civ_dev = $res[0]['anz'];
 		}
 
-		protected function makeChild(&$a) {
-			return new AchAchievement($a);
+		protected function makeChild($a) {
+			return new AchAchievement($a,$this);
 		}
 
 		function getID() {

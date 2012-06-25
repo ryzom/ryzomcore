@@ -1,21 +1,23 @@
 <?php
 	class AchAchievement extends AchList {
-		private $id;
-		private $parent;
-		private $category;
-		private $tie_race;
-		private $tie_civ;
-		private $tie_cult;
-		private $image;
-		private $name;
-		private $template;
-		private $dev;
+		use Node;
 
-		function AchAchievement(&$data) {
+		protected $parent_id;
+		protected $category;
+		protected $tie_race;
+		protected $tie_civ;
+		protected $tie_cult;
+		protected $image;
+		protected $name;
+		protected $template;
+		protected $dev;
+
+		function AchAchievement($data,$parent) {
 			global $DBc,$_USER;
-
-			$this->id = $data['aa_id'];
-			$this->parent = $data['aa_parent'];
+			
+			$this->setParent($parent);
+			$this->setID($data['aa_id']);
+			$this->parent_id = $data['aa_parent'];
 			$this->category = $data['aa_category'];
 			$this->tie_race = $data['aa_tie_race'];
 			$this->tie_civ = $data['aa_tie_civ'];
@@ -25,44 +27,27 @@
 			$this->template = $data['aal_template'];
 			$this->dev = $data['aa_dev'];
 
-			#echo $this->id;
-
 			$res = $DBc->sqlQuery("SELECT * FROM ach_perk LEFT JOIN (ach_perk_lang) ON (apl_lang='".$_USER->getLang()."' AND apl_perk=ap_id) LEFT JOIN (ach_player_perk) ON (app_perk=ap_id AND app_player='".$_USER->getID()."') WHERE ap_achievement='".$this->id."' AND ap_parent IS NULL");
 			#MISSING: or parent is done
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
-				#echo "Z";
-				$res[$i]['this'] = $this;
 				$tmp = $this->makeChild($res[$i]);
 
-				#echo var_export($tmp,true);
-
-				
-				
 				if($tmp->isDone()) {
-					$this->child_done[] = sizeof($this->nodes);
+					$this->addDone($tmp);
 				}
 				else {
-					$this->child_open[] = sizeof($this->nodes);
+					$this->addOpen($tmp);
 				}
-				$this->nodes[] = $tmp;
-				#MISSING: divide into groups -> open/done
 			}
-
-			#echo var_export($this->child_open,true);
-			#echo "X-".$this->hasOpen();
 		}
 
-		protected function makeChild(&$a) {
-			return new AchPerk($a);
+		protected function makeChild($a) {
+			return new AchPerk($a,$this);
 		}
 
-		function getID() {
-			return $this->id;
-		}
-
-		function getParent() {
-			return $this->parent;
+		function getParentID() {
+			return $this->parent_id;
 		}
 
 		function getTieRace() {
@@ -87,14 +72,21 @@
 
 		function getValueDone() {
 			$val = 0;
-			foreach($this->child_done as $elem) {
-				$val += $this->nodes[$elem]->getValue();
+			$iter = $this->getDone();
+			while($iter->hasNext()) {
+				$curr = $this->findNodeIdx($iter->getNext());
+				$val += $curr->getValue();
 			}
 			return $val;
 		}
 
 		function getValueOpen() {
-			return $this->nodes[$this->child_open[0]]->getValue();
+			$iter = $this->getDone();
+			if($iter->hasNext()) {
+				$curr = $this->findNodeIdx($iter->getNext());
+				return $curr->getValue();
+			}
+			return 0;
 		}
 
 		function getTemplate($insert = array()) {

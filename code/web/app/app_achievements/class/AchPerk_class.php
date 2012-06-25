@@ -1,18 +1,18 @@
 <?php
-	class AchPerk extends RenderNodeIterator {
-		private $id;
-		private $parent;
-		private $achievement;
-		private $value;
-		private $name;
-		private $done;
-		private $dev;
+	class AchPerk extends Parentum {
+		use Node;
 
-		function AchPerk(&$data) {
+		protected $achievement;
+		protected $value;
+		protected $name;
+		protected $done;
+		protected $dev;
+
+		function AchPerk($data,$parent) {
 			global $DBc,$_USER;
-
-			$this->id = $data['ap_id'];
-			$this->parent = $data['this'];
+			
+			$this->setParent($parent);
+			$this->setID($data['ap_id']);
 			$this->achievement = $data['ap_achievement'];
 			$this->value = $data['ap_value'];
 			$this->name = $data['apl_name'];
@@ -22,20 +22,12 @@
 			$res = $DBc->sqlQuery("SELECT * FROM ach_objective LEFT JOIN (ach_objective_lang) ON (aol_lang='".$_USER->getLang()."' AND aol_objective=ao_id) LEFT JOIN (ach_player_objective) ON (apo_objective=ao_id AND apo_player='".$_USER->getID()."') LEFT JOIN (ach_achievement) ON (aa_id=ao_metalink) WHERE ao_perk='".$this->id."'");
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
-				$this->nodes[] = $this->makeChild($res[$i]);
+				$this->addChild($this->makeChild($res[$i]));
 			}
 		}
 
-		protected function makeChild(&$a) {
-			return new AchObjective($a);
-		}
-
-		function getID() {
-			return $this->id;
-		}
-
-		function getParent() {
-			return $this->parent;
+		protected function makeChild($a) {
+			return new AchObjective($a,$this);
 		}
 
 		function getAchievement() {
@@ -51,11 +43,14 @@
 		}
 
 		function objDrawable() {
-			foreach($this->nodes as $elem) {
-				if($elem->getDisplay() != "hidden") {
+			$iter = $this->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				if($curr->getDisplay() != "hidden") {
 					return true;
 				}
 			}
+
 			return false;
 		}
 

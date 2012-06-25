@@ -132,9 +132,13 @@
 		if($sub == 0) {
 			$html = "<table cellpadding='2px'>";
 		}
-		$sz = $menu->getSize();
-		for($i=0;$i<$sz;$i++) {
-			$curr = $menu->getChild($i);
+
+		$iter = $menu->getIterator();
+		while($iter->hasNext()) {
+			$curr = $iter->getNext();
+		#$sz = $menu->getSize();
+		#for($i=0;$i<$sz;$i++) {
+			#$curr = $menu->getChild($i);
 			if($curr->inDev()) {
 				continue;
 			}
@@ -176,24 +180,28 @@
 			$html .= ach_render_tiebar($cat->getCurrentCult(),$cat->getCurrentCiv(),$cat);
 		}
 
-		$tmp = $cat->getDone();
-		$sz = sizeof($tmp);
-		for($i=0;$i<$sz;$i++) {
+		$iter = $cat->getDone();
+		while($iter->hasNext()) {
+			$curr = $cat->findNodeIdx($iter->getNext());
+		#$sz = sizeof($tmp);
+		#for($i=0;$i<$sz;$i++) {
 			#echo "A";
-			if($cat->getChild($tmp[$i])->inDev()) {
+			if($curr->inDev()) {
 				continue;
 			}
-			$html .= ach_render_achievement_done($cat->getChild($tmp[$i]));
+			$html .= ach_render_achievement_done($curr);
 		}
 
-		$tmp = $cat->getOpen();
-		$sz = sizeof($tmp);
-		for($i=0;$i<$sz;$i++) {
+		$iter = $cat->getOpen();
+		while($iter->hasNext()) {
+			$curr = $cat->findNodeIdx($iter->getNext());
+		#$sz = sizeof($tmp);
+		#for($i=0;$i<$sz;$i++) {
 			#echo "B";
-			if($cat->getChild($tmp[$i])->inDev()) {
+			if($curr->inDev()) {
 				continue;
 			}
-			$html .= ach_render_achievement_open($cat->getChild($tmp[$i]));
+			$html .= ach_render_achievement_open($curr));
 		}
 
 		return $html;
@@ -251,8 +259,7 @@
 		$html = "";
 
 		$perk_list = $ach->getOpen();
-
-		$perk = $ach->getChild($perk_list[0]);
+		$perk = $ach->findNodeIdx($perk_list->getNext());
 
 		if($perk->inDev()) {
 			return $html;
@@ -273,9 +280,11 @@
 		$html = "";
 
 		$perk_list = $ach->getDone();
+		while($perk_list->hasNext()) {
+			$perk = $this->findNodeIdx($perk_list->getNext());
 
-		foreach($perk_list as $elem) {
-			$perk = $ach->getChild($elem);
+		#foreach($perk_list as $elem) {
+			#$perk = $ach->getChild($elem);
 			if($perk->inDev()) {
 				continue;
 			}
@@ -291,7 +300,9 @@
 		$i = 0;
 		$skip = false;
 
-		foreach($obj as $elem) {
+		while($obj->hasNext()) {
+		#foreach($obj as $elem) {
+			$elem = $obj->getNext();
 			if(($i%2) == 0) {
 				$html .= "<tr>";
 			}

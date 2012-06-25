@@ -15,15 +15,12 @@
 
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
-				$tmp = $this->makeChild($res[$i]);
-
-				$this->child_done[] = sizeof($this->nodes);
-				$this->nodes[] = $tmp;
+				$this->addDone($this->makeChild($res[$i]));
 			}
 		}
 
-		protected function makeChild(&$a) {
-			return new AchAchievement($a);
+		protected function makeChild($a) {
+			return new AchAchievement($a,$this);
 		}
 
 		function getSummary() {
@@ -32,13 +29,15 @@
 				//and also sum up how many have been completed
 				$this->stats = array(); // [][name,done,total]
 
-				$tmp = $this->menu->getChildren();
-				foreach($tmp as $elem) {
-					if($elem->getID() == 0 || $elem->inDev()) {
+				$iter = $this->menu->getIterator();
+				while($iter->hasNext()) {
+					$curr = $iter->getNext();
+
+					if($curr->getID() == 0 || $curr->inDev()) {
 						continue; // skip summary page
 					}
-					$res = $this->sumStats($elem);
-					$this->stats[] = array($elem->getName(),$res[0],$res[1]);
+					$res = $this->sumStats($curr);
+					$this->stats[] = array($curr->getName(),$res[0],$res[1]);
 				}
 			}
 
@@ -59,8 +58,10 @@
 			$res = $DBc->sqlQuery("SELECT count(ap_id) as anz FROM ach_perk,ach_achievement WHERE aa_category='".$node->getID()."' AND ap_achievement=aa_id AND aa_dev='0' AND ap_dev='0'");
 			$total += $res[0]["anz"];
 			
-			$tmp = $node->getChildren();
-			foreach($tmp as $elem) {
+			$iter = $node->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+
 				$res = $this->sumStats($elem);
 				$done += $res[0];
 				$total += $res[1];
