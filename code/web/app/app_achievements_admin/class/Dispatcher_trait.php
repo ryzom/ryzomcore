@@ -6,7 +6,7 @@
 			$this->nodes[] = $n;
 		}
 
-		function removeNode($id) {
+		function removeNode($id) {#NAMENSKONFLIKT!!
 			$res = $this->getNode($id);
 			if($res != null) {
 				$res->delete_me();

@@ -1,5 +1,6 @@
 <?php
-	class AdmMenu extends AchMenu implements AdmDispatcher {
+	class AdmMenu extends AchMenu {
+		use Dispatcher;
 		
 		function AdmMenu($open) {
 			parent::__construct($open);
