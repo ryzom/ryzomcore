@@ -3,11 +3,12 @@
 		die(-1);
 	}
 
-	$achConf = array();
+	$_CONF = array();
 
-	$achConf['summary_size'] = 12;
-	$achConf['default_lang'] = 'en';
-	$achConf['enable_webig'] = true;
-	$achConf['enable_offgame'] = true;
-	$achConf['use_cache'] = false;
+	$_CONF['app_achievements_path'] = "../app_achievements/";
+	$_CONF['image_url'] = "http://www.3025-game.de/special/app_achievements/";
+	$_CONF['enable_webig'] = true;
+	$_CONF['enable_offgame'] = true;
+	$_CONF['enable_CSR'] = true;
+	$_CONF['enable_ADM'] = true;
 ?>
