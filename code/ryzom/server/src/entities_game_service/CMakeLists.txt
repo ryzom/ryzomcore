@@ -9,6 +9,7 @@ FILE(GLOB SRC_ENTITY_STRUCTURE			entity_structure/*.h entity_structure/*.cpp)
 FILE(GLOB SRC_GAME_ITEM_MANAGER			game_item_manager/*.h game_item_manager/*.cpp)
 FILE(GLOB SRC_GUILD_MANAGER				guild_manager/*.h guild_manager/*.cpp)
 FILE(GLOB SRC_MISSION_MANAGER			mission_manager/*.h mission_manager/*.cpp)
+FILE(GLOB SRC_CAMERA_ANIMATIONS			camera_animation_manager/*.h camera_animation_manager/*.cpp)
 FILE(GLOB SRC_MODULES					modules/*.h modules/*.cpp)
 FILE(GLOB SRC_OUTPOST_MANAGER			outpost_manager/*.h outpost_manager/*.cpp)
 FILE(GLOB SRC_PHRASE_MANAGER			phrase_manager/*.h phrase_manager/*.cpp)
@@ -55,6 +56,7 @@ SOURCE_GROUP("Entity Structure" FILES ${SRC_ENTITY_STRUCTURE})
 SOURCE_GROUP("Game Item Manager" FILES ${SRC_GAME_ITEM_MANAGER})
 SOURCE_GROUP("Guild Manager" FILES ${SRC_GUILD_MANAGER})
 SOURCE_GROUP("Mission Manager" FILES ${SRC_MISSION_MANAGER})
+SOURCE_GROUP("Camera Animation Manager" FILES ${SRC_CAMERA_ANIMATIONS})
 SOURCE_GROUP("Modules" FILES ${SRC_MODULES})
 SOURCE_GROUP("Outpost Manager" FILES ${SRC_OUTPOST_MANAGER})
 SOURCE_GROUP("Phrase Manager" FILES ${SRC_PHRASE_MANAGER})
@@ -71,6 +73,7 @@ ADD_EXECUTABLE(ryzom_entities_game_service WIN32
 	${SRC_BACKWARD_COMPATIBILITY}
 	${SRC_BUILDING_MANAGER}
 	${SRC_CHARACTER_STRUCTURE}
+	${SRC_CAMERA_ANIMATIONS}
 	${SRC_CREATURE_MANAGER}
 	${SRC_EGS_SHEETS}
 	${SRC_ENTITY_MANAGER}
