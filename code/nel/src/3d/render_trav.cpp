@@ -69,6 +69,7 @@ CRenderTrav::CRenderTrav()
 	_CurrentPassOpaque = true;
 
 	_CacheLightContribution= NULL;
+	_LastLocalAttenuation= false;
 
 	// Default light Setup.
 	LightingSystemEnabled= false;
