@@ -50,7 +50,7 @@
 #include "nel/gui/dbview_bar3.h"
 #include "dbview_number.h"
 #include "dbview_quantity.h"
-#include "dbview_digit.h"
+#include "nel/gui/dbview_digit.h"
 // Ctrl
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/ctrl_button.h"

@@ -15,47 +15,48 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 #ifndef NL_DBVIEW_DIGIT_H
 #define NL_DBVIEW_DIGIT_H
 
 #include "nel/misc/types_nl.h"
-
 #include "nel/gui/view_base.h"
 
-
-// ***************************************************************************
-/**
- * A number displayed with special bitmaps
- * \author Lionel Berenguier
- * \author Nevrax France
- * \date 2002
- */
-class CDBViewDigit : public CViewBase
+namespace NLGUI
 {
-public:
 
-	/// Constructor
-	CDBViewDigit(const TCtorParam &param);
+	// ***************************************************************************
+	/**
+	 * A number displayed with special bitmaps
+	 * \author Lionel Berenguier
+	 * \author Nevrax France
+	 * \date 2002
+	 */
+	class CDBViewDigit : public CViewBase
+	{
+	public:
 
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
-	virtual void draw ();
-	virtual void updateCoords();
+		/// Constructor
+		CDBViewDigit(const TCtorParam &param);
 
-protected:
-	CInterfaceProperty		_Number;
-	sint32					_Cache;
-	sint32					_NumDigit;
-	NLMISC::CRGBA			_Color;
-	// space between each digit
-	sint32					_WSpace;
-	// The texture digit for the current number
-	sint32					_DigitId[10];
-	uint					_DivBase;
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
+		virtual void draw ();
+		virtual void updateCoords();
+
+	protected:
+		CInterfaceProperty		_Number;
+		sint32					_Cache;
+		sint32					_NumDigit;
+		NLMISC::CRGBA			_Color;
+		// space between each digit
+		sint32					_WSpace;
+		// The texture digit for the current number
+		sint32					_DigitId[10];
+		uint					_DivBase;
 
 
-};
+	};
 
+}
 
 #endif // NL_DBVIEW_DIGIT_H
 
