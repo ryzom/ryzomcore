@@ -15,24 +15,22 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-#include "stdpch.h"
 #include "dbgroup_combo_box.h"
 #include "nel/gui/group_menu.h"
 #include "nel/misc/xml_auto_ptr.h"
-#include "interface_manager.h"
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/action_handler.h"
 #include "nel/gui/lua_ihm.h"
-
-#include "nel/gui/lua_ihm.h"
+#include "nel/gui/widget_manager.h"
 
 using namespace std;
 using namespace NLMISC;
 
 NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupComboBox, std::string, "combo_box");
 
-extern bool loginFinished;
+std::string CDBGroupComboBox::measureMenu;
+std::string CDBGroupComboBox::selectMenu;
+std::string CDBGroupComboBox::selectMenuOut;
 
 // ***************************************************************************
 CDBGroupComboBox::CDBGroupComboBox(const TCtorParam &param)
@@ -56,9 +54,8 @@ CDBGroupComboBox::~CDBGroupComboBox()
 // ***************************************************************************
 sint32 CDBGroupComboBox::evalContentWidth() const
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	// get the menu to open.
-	CGroupMenu	*groupMenu= dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId( loginFinished ? WIN_COMBO_BOX_MEASURE_MENU : WIN_COMBO_BOX_MEASURE_MENU_LOGIN ));
+	CGroupMenu	*groupMenu= dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId( CDBGroupComboBox::measureMenu ));
 	if( !groupMenu )
 	{
 		return 0;
@@ -543,7 +540,6 @@ class	CHandlerComboBoxSelectStart : public IActionHandler
 public:
 	virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
 	{
-		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(pCaller->getParent());
 		if (pCB == NULL) return;
 		// if no choice, return.
@@ -551,10 +547,10 @@ public:
 			return;
 
 		// get the menu to open.
-		CGroupMenu	*groupMenu= dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId(loginFinished ? WIN_COMBO_BOX_SELECT_MENU: WIN_COMBO_BOX_SELECT_MENU_LOGIN ));
+		CGroupMenu	*groupMenu= dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId( CDBGroupComboBox::selectMenu ));
 		if( !groupMenu )
 		{
-			groupMenu= dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId(WIN_COMBO_BOX_SELECT_MENU_OUTGAME));
+			groupMenu= dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId( CDBGroupComboBox::selectMenuOut ));
 		}
 		if( !groupMenu )
 			return;
@@ -606,7 +602,6 @@ class	CHandlerComboBoxSelectEnd : public IActionHandler
 public:
 	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
 	{
-		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCB == NULL) return;
 

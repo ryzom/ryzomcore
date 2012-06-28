@@ -31,17 +31,6 @@ namespace NLGUI
 
 
 // ***************************************************************************
-#define	WIN_COMBO_BOX_SELECT_MENU	"ui:interface:combo_box_select_menu"
-#define	WIN_COMBO_BOX_MEASURE_MENU	"ui:interface:combo_box_measure_menu"
-
-#define	WIN_COMBO_BOX_SELECT_MENU_OUTGAME	"ui:outgame:combo_box_select_menu"
-
-#define	WIN_COMBO_BOX_SELECT_MENU_LOGIN	"ui:login:combo_box_select_menu"
-#define	WIN_COMBO_BOX_MEASURE_MENU_LOGIN	"ui:login:combo_box_measure_menu"
-
-
-
-// ***************************************************************************
 /**
  * Widget: ComboBox of text
  * \author Lionel Berenguier
@@ -155,12 +144,16 @@ protected:
 
 
 private:
-
 	void setup();
 	void dirt();
 public:
 	// private : fill a menu with current content
 	void fillMenu(CGroupMenu *groupMenu) const;
+
+
+	static std::string measureMenu;
+	static std::string selectMenu;
+	static std::string selectMenuOut;
 };
 
 

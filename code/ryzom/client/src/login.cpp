@@ -40,6 +40,7 @@
 #include "nel/gui/view_text.h"
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/ctrl_text_button.h"
+#include "interface_v3/dbgroup_combo_box.h"
 #include "sound_manager.h"
 #include "far_tp.h"
 
@@ -142,6 +143,33 @@ CPatchManager::SPatchInfo InfoOnPatch;
 uint32 TotalPatchSize;
 
 CLoginStateMachine LoginSM;
+
+// ***************************************************************************
+#define	WIN_COMBO_BOX_SELECT_MENU	"ui:interface:combo_box_select_menu"
+#define	WIN_COMBO_BOX_MEASURE_MENU	"ui:interface:combo_box_measure_menu"
+#define	WIN_COMBO_BOX_SELECT_MENU_OUTGAME	"ui:outgame:combo_box_select_menu"
+#define	WIN_COMBO_BOX_SELECT_MENU_LOGIN	"ui:login:combo_box_select_menu"
+#define	WIN_COMBO_BOX_MEASURE_MENU_LOGIN	"ui:login:combo_box_measure_menu"
+
+bool isLoginFinished()
+{
+	return loginFinished;
+}
+
+void setLoginFinished( bool f )
+{
+	loginFinished = f;
+	if( loginFinished )
+	{
+		CDBGroupComboBox::measureMenu.assign( WIN_COMBO_BOX_MEASURE_MENU );
+		CDBGroupComboBox::selectMenu.assign( WIN_COMBO_BOX_SELECT_MENU );
+	}
+	else
+	{
+		CDBGroupComboBox::measureMenu.assign( WIN_COMBO_BOX_MEASURE_MENU_LOGIN );
+		CDBGroupComboBox::selectMenu.assign( WIN_COMBO_BOX_SELECT_MENU_LOGIN );
+	}
+}
 
 
 // ***************************************************************************
@@ -349,6 +377,7 @@ static void updatePatchingInfoText(const std::string &baseUIPath)
 // Main loop of the login step
 void loginMainLoop()
 {
+	CDBGroupComboBox::selectMenuOut.assign( WIN_COMBO_BOX_SELECT_MENU_OUTGAME );
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CPatchManager *pPM = CPatchManager::getInstance();
 
@@ -757,7 +786,7 @@ void initLoginScreen()
 	CCtrlTextButton *pCB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId(CTRL_BUTTON_CONNECT));
 	if (pCB != NULL) pCB->setActive(false);
 
-	loginFinished = false;
+	setLoginFinished( false );
 	loginOK = false;
 }
 
@@ -882,6 +911,7 @@ bool login()
 //	CCtrlTextButton *pCB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId(CTRL_BUTTON_CONNECT));
 //	if (pCB != NULL) pCB->setActive(false);
 //
+//  setLoginFinished( false );
 //	loginFinished = false;
 //	loginOK = false;
 
@@ -1280,7 +1310,7 @@ class CAHOnGameConfiguration : public IActionHandler
 		{
 			// launch the ryzom configurator
 			launchProgram(Configurator, "");
-			loginFinished = true;
+			setLoginFinished( true );
 			loginOK = false;
 
 			LoginSM.pushEvent(CLoginStateMachine::ev_quit);
@@ -1301,7 +1331,7 @@ class CAHLoginQuit : public IActionHandler
 	{
 		nlinfo("CAHLoginQuit called");
 
-		loginFinished = true;
+		setLoginFinished( true );
 		loginOK = false;
 
 		LoginSM.pushEvent(CLoginStateMachine::ev_quit);
@@ -1400,7 +1430,7 @@ void ConnectToShard()
 	if (ClientCfg.R2Mode)
 	{
 		// r2 mode
-		loginFinished = true;
+		setLoginFinished( true );
 		loginOK = true;
 
 		LoginSM.pushEvent(CLoginStateMachine::ev_enter_game);
@@ -1414,7 +1444,7 @@ void ConnectToShard()
 
 		if(res.empty())
 		{
-			loginFinished = true;
+			setLoginFinished( true );
 			loginOK = true;
 
 			LoginSM.pushEvent(CLoginStateMachine::ev_enter_game);
@@ -2625,7 +2655,7 @@ class CAHOnConnectToShard: public IActionHandler
 				Cookie[i] = '|';
 		}
 
-		loginFinished = true;
+		setLoginFinished( true );
 		loginOK = true;
 
 		LoginSM.pushEvent(CLoginStateMachine::ev_connect);
@@ -2639,7 +2669,7 @@ class CAHOnBackToLogin: public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		loginFinished = false;
+		setLoginFinished( false );
 		loginOK = false;
 		LoginSM.pushEvent(CLoginStateMachine::ev_relog);
 

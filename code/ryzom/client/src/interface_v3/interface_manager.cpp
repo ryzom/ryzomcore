@@ -174,6 +174,7 @@ using namespace NLNET;
 // ------------------------------------------------------------------------------------------------
 
 extern bool loginFinished;
+void setLoginFinished( bool f );
 // Edit actions
 CActionsManager EditActions;
 
@@ -788,7 +789,7 @@ void badXMLParseMessageBox()
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::initInGame()
 {
-	loginFinished = true;
+	setLoginFinished( true );
 	_LogState = false;
 
 	// Whole initInGame profile

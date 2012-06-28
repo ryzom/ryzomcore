@@ -1351,6 +1351,7 @@ void CFarTP::onDssDown(bool forceReturn)
 }
 
 extern bool loginFinished;
+void setLoginFinished( bool f );
 extern bool loginOK;
 
 void CFarTP::joinSessionResult(uint32 /* userId */, TSessionId /* sessionId */, uint32 /* result */, const std::string &/* shardAddr */, const std::string &/* participantStatus */)
@@ -1365,7 +1366,7 @@ void CFarTP::joinSessionResult(uint32 /* userId */, TSessionId /* sessionId */, 
 //
 //		FSAddr = shardAddr;
 //
-//		loginFinished = true;
+//		setLoginFinished( true );
 //		loginOK = true;
 //
 //		LoginSM.pushEvent(CLoginStateMachine::ev_connect);
