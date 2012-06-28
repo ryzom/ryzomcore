@@ -28,7 +28,8 @@ namespace NLSOUND
 CComplexSource::CComplexSource	(CComplexSound *soundPattern, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster, CGroupController *groupController)
 :	CSourceCommon(soundPattern, spawn, cb, cbUserParam, cluster, groupController),
 	_Source1(NULL),
-	_Source2(NULL)
+	_Source2(NULL),
+	_Muted(false)
 {
 	nlassert(soundPattern->getSoundType() == CSound::SOUND_COMPLEX);
 	_PatternSound = static_cast<CComplexSound*>(soundPattern);
