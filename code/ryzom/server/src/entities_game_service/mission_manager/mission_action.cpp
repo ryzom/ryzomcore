@@ -5443,13 +5443,13 @@ class CMissionActionSoundTrigger : public IMissionAction
 			return false;
 		}
 
-		_SoundName = script[1];
+		std::string SoundName = script[1];
 		if (script.size() >= 3)
 			_SoundPosition = script[2];
 		else
 			_SoundPosition = "";
 
-		_SoundId = NLMISC::CSheetId(_SoundName);
+		_SoundId = NLMISC::CSheetId(SoundName);
 		if (_SoundId == NLMISC::CSheetId::Unknown)
 		{
 			MISLOGSYNTAXERROR("sound_trigger action: sheetid not found");
@@ -5465,7 +5465,6 @@ class CMissionActionSoundTrigger : public IMissionAction
 
 		// We tell the client to play the sound
 	};
-	std::string _SoundName;
 	std::string _SoundPosition;
 	NLMISC::CSheetId _SoundId;
 

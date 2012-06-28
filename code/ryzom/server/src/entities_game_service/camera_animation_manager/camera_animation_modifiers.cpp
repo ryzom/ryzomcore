@@ -61,14 +61,12 @@ CAMERA_ANIMATION_REGISTR_MODIFIER(CCameraAnimationModifierShake, "camera_modifie
 class CCameraAnimationModifierSoundTrigger : public ICameraAnimationModifier
 {
 protected:
-	std::string SoundName;
 	std::string SoundPos;
 	NLMISC::CSheetId SoundId;
 
 public:
 	CCameraAnimationModifierSoundTrigger()
 	{
-		SoundName = "";
 		SoundPos = "";
 		SoundId = NLMISC::CSheetId::Unknown;
 	}
@@ -83,11 +81,10 @@ public:
 			nlwarning("<CCameraAnimationModifierSoundTrigger parseModifier> impossible to get the sound_name property of the basic modifier in primitive : %s", filename.c_str());
 			return false;
 		}
-		SoundName = value;
-		SoundId = NLMISC::CSheetId(SoundName);
+		SoundId = NLMISC::CSheetId(value);
 		if (SoundId == NLMISC::CSheetId::Unknown)
 		{
-			nlwarning("<CCameraAnimationModifierSoundTrigger parseModifier> sheetid not found for sound name %s in the basic modifier in primitive : %s", SoundName.c_str(), filename.c_str());
+			nlwarning("<CCameraAnimationModifierSoundTrigger parseModifier> sheetid not found for sound name %s in the basic modifier in primitive : %s", value.c_str(), filename.c_str());
 			return false;
 		}
 		// We get the sound position
