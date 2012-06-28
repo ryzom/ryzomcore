@@ -49,7 +49,7 @@
 #include "nel/gui/dbview_bar.h"
 #include "nel/gui/dbview_bar3.h"
 #include "nel/gui/dbview_number.h"
-#include "dbview_quantity.h"
+#include "nel/gui/dbview_quantity.h"
 #include "nel/gui/dbview_digit.h"
 // Ctrl
 #include "nel/gui/ctrl_scroll.h"
@@ -1405,106 +1405,10 @@ bool CInterfaceParser::parseGroup (xmlNodePtr cur, CInterfaceGroup * parentGroup
 		{
 			group = dynamic_cast<CInterfaceGroup*>(NLMISC_GET_FACTORY(CViewBase, std::string).createObject("interface_group", CViewBase::TCtorParam()));
 		}
-//		if (stricmp(ptr, "list") == 0)
-//			group = new CGroupList;
-//		else if (stricmp(ptr, "container") == 0)
-//			group = new CGroupContainer;
-//		else if (stricmp(ptr, "frame") == 0)
-//			group = new CGroupFrame;
-//		else if (stricmp(ptr, "modal") == 0)
-//			group = new CGroupModal;
-//		else if (stricmp(ptr, "modal_get_key") == 0)
-//			group = new CGroupModalGetKey;
-//		else if (stricmp(ptr, "menu") == 0)
-//			group = new CGroupMenu;
-//		else if (stricmp(ptr, "select_number") == 0)
-//			group = new CDBGroupSelectNumber;
-//		else if (stricmp(ptr, "tree") == 0)
-//			group = new CGroupTree;
-//		else if (stricmp(ptr, "list_sheet") == 0)
-//			group = new CDBGroupListSheet;
-//		else if (stricmp(ptr, "scroll_text") == 0)
-//			group = new CGroupScrollText;
-//		else if (stricmp(ptr, "html") == 0)
-//			group = new CGroupHTML;
-//		else if (stricmp(ptr, "html_input_offset") == 0)
-//			group = new CGroupHTMLInputOffset;
-//		else if (stricmp(ptr, "forum_html") == 0)
-//			group = new CGroupHTMLForum;
-//		else if (stricmp(ptr, "mail_html") == 0)
-//			group = new CGroupHTMLMail;
-//		else if (stricmp(ptr, "qcm_html") == 0)
-//			group = new CGroupHTMLQCM;
-//		else if (stricmp(ptr, "quick_help") == 0)
-//			group = new CGroupQuickHelp;
-//		else if (stricmp(ptr, "cs_html") == 0)
-//			group = new CGroupHTMLCS;
-//		else if (stricmp(ptr, "compas") == 0)
-//			group = new CGroupCompas;
-//		else if (stricmp(ptr, "menu_compas") == 0)
-//			group = new CGroupCompasMenu;
-//		else if (stricmp(ptr, "in_scene") == 0)
-//			group = new CGroupInScene;
-//		else if (stricmp(ptr, "in_scene_user_info") == 0)
-//			group = new CGroupInSceneUserInfo;
-//		else if (stricmp(ptr, "in_scene_bubble") == 0)
-//			group = new CGroupInSceneBubble;
-//		else if (stricmp(ptr, "edit_box") == 0)
-//			group = new CGroupEditBox;
-//		else if (stricmp(ptr, "career") == 0)
-//			group = new CGroupCareer;
-//		else if (stricmp(ptr, "job") == 0)
-//			group = new CGroupJob;
-//		else if (stricmp(ptr, "skills_displayer") == 0)
-//			group = new CGroupSkills;
-//		else if (stricmp(ptr, "combo_box") == 0)
-//			group = new CDBGroupComboBox;
-//		else if (stricmp(ptr, "list_sheet_text") == 0)
-//			group = new CDBGroupListSheetText;
-//		else if (stricmp(ptr, "list_sheet_trade") == 0)
-//			group = new CDBGroupListSheetTrade;
-//		else if (stricmp(ptr, "list_sheet_mission") == 0)
-//			group = new CDBGroupListSheetMission;
-//		else if (stricmp(ptr, "list_sheet_guild") == 0)
-//			group = new CDBGroupListAscensor;
-//		else if (stricmp(ptr, "list_sheet_bag") == 0)
-//			group = new CDBGroupListSheetBag;
-//		else if (stricmp(ptr, "list_icon_bag") == 0)
-//			group = new CDBGroupIconListBag;
-//		else if (stricmp(ptr, "list_sheet_filter_clm_slot") == 0)
-//			group = new CDBGroupListSheetFilterCLMSlot;
-//		else if (stricmp(ptr, "list_sheet_filter_exchangeable") == 0)
-//			group = new CDBGroupListSheetFilterExchangeable;
-//		else if (stricmp(ptr, "build_phrase") == 0)
-//			group = new CDBGroupBuildPhrase;
-//		else if (stricmp(ptr, "list_sheet_phraseid") == 0)
-//			group = new CDBGroupListSheetTextPhraseId;
-//		else if (stricmp(ptr, "list_sheet_compo_brick") == 0)
-//			group = new CDBGroupListSheetTextBrickComposition;
-//		else if (stricmp(ptr, "list_sheet_share") == 0)
-//			group = new CDBGroupListSheetTextShare;
-//		else if (stricmp(ptr, "map") == 0)
-//			group = new CGroupMap;
-//		else if (stricmp(ptr, "container_windows") == 0)
-//			group = new CGroupContainerWindows;
-//		else if (stricmp(ptr, "phrase_skill_filter") == 0)
-//			group = new CGroupPhraseSkillFilter;
-//		else if (stricmp(ptr, "list_sheet_bonus_malus") == 0)
-//			group = new CDBGroupListSheetBonusMalus;
-//		else if (stricmp(ptr, "tab") == 0)
-//			group = new CGroupTab;
-//		else if (stricmp(ptr, "list_sheet_text_phrase") == 0)
-//			group = new CDBGroupListSheetTextPhrase;
-//		else if (stricmp(ptr, "list_sheet_icon_phrase") == 0)
-//			group = new CDBGroupListSheetIconPhrase;
-//		else if (stricmp(ptr, "table") == 0)
-//			group = new CGroupTable;
-//		else
-//			group = new CInterfaceGroup;
+
 	}
 	else
 		group = dynamic_cast<CInterfaceGroup*>(NLMISC_GET_FACTORY(CViewBase, std::string).createObject("interface_group", CViewBase::TCtorParam()));
-//		group = new CInterfaceGroup;
 
 	// parse the group attributes
 	if (!group->parse(cur,parentGroup))
@@ -1608,40 +1512,6 @@ bool CInterfaceParser::parseControl (xmlNodePtr cur, CInterfaceGroup * parentGro
 
 	ctrl = dynamic_cast<CCtrlBase*>(NLMISC_GET_FACTORY(CViewBase, std::string).createObject(string((const char*)ptr), CViewBase::TCtorParam()));
 
-//	if (!strcmp(ptr,"button"))
-//	{
-//		ctrl = new CCtrlButton;
-//	}
-//	else if (stricmp(ptr, "scroll") == 0)
-//	{
-//		ctrl = new CCtrlScroll;
-//	}
-//	else if (stricmp(ptr, "colpick") == 0)
-//	{
-//		ctrl = new CCtrlColPick;
-//	}
-//	else if (stricmp(ptr, "tooltip") == 0)
-//	{
-//		ctrl = new CCtrlToolTip;
-//	}
-	// DB CTRL
-//	else if ( !strcmp(ptr,"sheet"))
-//	{
-//		ctrl = new CDBCtrlSheet;
-//	}
-//	else if ( !strcmp(ptr,"text_button"))
-//	{
-//		ctrl = new CCtrlTextButton;
-//	}
-//	else if ( !strcmp(ptr,"button_link"))
-//	{
-//		ctrl = new CCtrlLink;
-//	}
-//	else if ( !strcmp(ptr,"tab_button"))
-//	{
-//		ctrl = new CCtrlTabButton;
-//	}
-
 	if (ctrl)
 	{
 		if (!ctrl->parse(cur,parentGroup))
@@ -1684,62 +1554,6 @@ bool CInterfaceParser::parseView(xmlNodePtr cur, CInterfaceGroup * parentGroup, 
 	}
 
 	view = NLMISC_GET_FACTORY(CViewBase, std::string).createObject(string((const char*)ptr), CViewBase::TCtorParam());
-//	if ( !strcmp(ptr,"text"))
-//	{
-//		view = new CViewText;
-//	}
-//	else if ( !strcmp(ptr,"text_formated"))
-//	{
-//		view = new CViewTextFormated;
-//	}
-//	else if ( !strcmp(ptr,"text_id"))
-//	{
-//		view = new CViewTextID;
-//	}
-//	else if ( !strcmp(ptr,"text_id_formated"))
-//	{
-//		view = new CViewTextIDFormated;
-//	}
-//	else if ( !strcmp(ptr,"text_number"))
-//	{
-//		view = new CDBViewNumber;
-//	}
-//	else if ( !strcmp(ptr,"text_quantity"))
-//	{
-//		view = new CDBViewQuantity;
-//	}
-//	else if ( !strcmp(ptr,"digit"))
-//	{
-//		view = new CDBViewDigit;
-//	}
-//	else if ( !strcmp(ptr,"bitmap"))
-//	{
-//		view = new CViewBitmap;
-//	}
-//	else if ( !strcmp(ptr,"bar"))
-//	{
-//		view = new CDBViewBar;
-//	}
-//	else if ( !strcmp(ptr,"bar3"))
-//	{
-//		view = new CDBViewBar3;
-//	}
-//	else if ( !strcmp(ptr,"bitmap_faber_mp"))
-//	{
-//		view = new CViewBitmapFaberMp;
-//	}
-//	else if (!strcmp(ptr, "bitmap_combo"))
-//	{
-//		view = new CViewBitmapCombo;
-//	}
-//	else if (!strcmp(ptr, "radar"))
-//	{
-//		view = new CViewRadar;
-//	}
-//	else if ( !strcmp(ptr,"pointer"))
-//	{
-//		view = _Pointer = new CViewPointer;
-//	}
 
 	if ( !strcmp(ptr,"pointer"))
 	{

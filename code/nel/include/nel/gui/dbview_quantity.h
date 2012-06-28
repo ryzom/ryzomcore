@@ -20,38 +20,40 @@
 #define NL_DBVIEW_QUANTITY_H
 
 #include "nel/misc/types_nl.h"
-
 #include "nel/gui/view_text.h"
 
-
-// ***************************************************************************
-/**
- * Display a text in the form of val / max or "empty"
- * \author Lionel Berenguier
- * \author Nevrax France
- * \date 2002
- */
-class CDBViewQuantity : public CViewText
+namespace NLGUI
 {
-public:
 
-	/// Constructor
-	CDBViewQuantity(const TCtorParam &param);
+	// ***************************************************************************
+	/**
+	 * Display a text in the form of val / max or "empty"
+	 * \author Lionel Berenguier
+	 * \author Nevrax France
+	 * \date 2002
+	 */
+	class CDBViewQuantity : public CViewText
+	{
+	public:
 
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
-	virtual void draw ();
+		/// Constructor
+		CDBViewQuantity(const TCtorParam &param);
+
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
+		virtual void draw ();
 
 
-protected:
-	CInterfaceProperty		_Number;
-	CInterfaceProperty		_NumberMax;
-	sint32					_Cache;
-	sint32					_CacheMax;
-	ucstring			_EmptyText;
+	protected:
+		CInterfaceProperty		_Number;
+		CInterfaceProperty		_NumberMax;
+		sint32					_Cache;
+		sint32					_CacheMax;
+		ucstring			_EmptyText;
 
-	void	buildTextFromCache();
-};
+		void	buildTextFromCache();
+	};
 
+}
 
 #endif // NL_DBVIEW_QUANTITY_H
 
