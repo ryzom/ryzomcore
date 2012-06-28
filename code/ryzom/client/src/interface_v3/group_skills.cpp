@@ -25,7 +25,7 @@
 
 #include "nel/gui/view_text.h"
 #include "nel/gui/view_bitmap.h"
-#include "dbview_number.h"
+#include "nel/gui/dbview_number.h"
 #include "nel/gui/dbview_bar.h"
 
 #include "game_share/skills.h"
