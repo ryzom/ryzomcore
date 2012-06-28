@@ -124,5 +124,9 @@ namespace NLGUI
 		CViewText::draw();
 	}
 
+	void CDBViewNumber::forceLink()
+	{
+	}
+
 }
 

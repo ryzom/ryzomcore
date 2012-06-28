@@ -17,9 +17,9 @@
 
 #include "nel/gui/dbview_bar3.h"
 #include "nel/misc/xml_auto_ptr.h"
+#include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
 #include "nel/gui/db_manager.h"
-#include "nel/gui/interface_group.h"
 
 using namespace std;
 using namespace NL3D;
@@ -27,7 +27,6 @@ using namespace NLMISC;
 
 namespace NLGUI
 {
-
 	NLMISC_REGISTER_OBJECT(CViewBase, CDBViewBar3, std::string, "bar3");
 
 	// ----------------------------------------------------------------------------
@@ -234,6 +233,10 @@ namespace NLGUI
 				rVR.drawRotFlipBitmap (_RenderLayer, _XReal+2, _YReal+i*7+4, _WReal, _BarH, 0, false, _TextureId, color);
 			}
 		}
+	}
+
+	void CDBViewBar3::forceLink()
+	{
 	}
 }
 

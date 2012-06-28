@@ -85,7 +85,7 @@
 #include "nel/gui/group_tab.h"
 #include "group_table.h"
 // DBGroup
-#include "dbgroup_select_number.h"
+#include "nel/gui/dbgroup_select_number.h"
 #include "dbgroup_list_sheet.h"
 #include "dbgroup_combo_box.h"
 #include "dbgroup_list_sheet_trade.h"

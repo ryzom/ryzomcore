@@ -70,6 +70,8 @@ namespace NLGUI
 			REFLECT_SINT32 ("range3", getRange2, setRange2);
 		REFLECT_EXPORT_END
 
+		static void forceLink();
+
 	protected:
 
 		CViewBitmap _Slot;

@@ -25,17 +25,26 @@
 #include "nel/gui/group_editbox_base.h"
 #include "nel/gui/interface_options.h"
 
+namespace NLGUI
+{
+	void LinkHack();
+}
+
 namespace
 {
 	const uint DOUBLE_CLICK_MIN = 50;
 	const uint DOUBLE_CLICK_MAX = 750;
 	const float ROLLOVER_MIN_DELTA_PER_MS = 0.28f;
 	const float ROLLOVER_MAX_DELTA_PER_MS = 0.12f;
+
+	void Hack()
+	{
+		NLGUI::LinkHack();
+	}
 }
 
 namespace NLGUI
 {
-
 	CWidgetManager* CWidgetManager::instance = NULL;
 	std::string CWidgetManager::_CtrlLaunchingModalId= "ctrl_launch_modal";
 	IParser* CWidgetManager::parser = NULL;
