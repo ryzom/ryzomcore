@@ -42,9 +42,9 @@ namespace NLGUI
 	class CCtrlButton;
 	class CCtrlScroll;
 	class CGroupList;
+	class CDBGroupComboBox;
 }
 
-class CDBGroupComboBox;
 class CGroupParagraph;
 
 // HTML group

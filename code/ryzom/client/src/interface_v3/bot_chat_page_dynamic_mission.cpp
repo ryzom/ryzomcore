@@ -22,7 +22,7 @@
 #include "nel/gui/interface_group.h"
 #include "../string_manager_client.h"
 #include "nel/gui/action_handler.h"
-#include "dbgroup_combo_box.h"
+#include "nel/gui/dbgroup_combo_box.h"
 #include "bot_chat_page_all.h"
 #include "bot_chat_manager.h"
 #include "../client_cfg.h"

@@ -42,6 +42,8 @@ namespace NLGUI
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
 		virtual void draw ();
 
+		static void forceLink();
+
 
 	protected:
 		CInterfaceProperty		_Number;

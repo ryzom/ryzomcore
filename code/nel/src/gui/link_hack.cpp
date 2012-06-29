@@ -1,5 +1,6 @@
 #include "nel/gui/dbview_bar3.h"
 #include "nel/gui/dbview_number.h"
+#include "nel/gui/dbview_quantity.h"
 
 namespace NLGUI
 {
@@ -8,5 +9,6 @@ namespace NLGUI
 	{
 		CDBViewBar3::forceLink();
 		CDBViewNumber::forceLink();
+		CDBViewQuantity::forceLink();
 	}
 }

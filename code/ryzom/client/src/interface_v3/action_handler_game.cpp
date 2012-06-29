@@ -82,7 +82,7 @@
 #include "game_share/scores.h"
 
 // Game Config
-#include "dbgroup_combo_box.h"
+#include "nel/gui/dbgroup_combo_box.h"
 #include "nel/gui/ctrl_button.h"
 #include "../global.h"
 

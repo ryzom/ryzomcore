@@ -27,7 +27,7 @@
 #include "nel/misc/cdb_leaf.h"
 #include "nel/gui/action_handler.h"
 #include "sbrick_manager.h"
-#include "dbgroup_combo_box.h"
+#include "nel/gui/dbgroup_combo_box.h"
 #include "nel/gui/view_bitmap.h"
 #include "../net_manager.h"
 #include "sbrick_manager.h"

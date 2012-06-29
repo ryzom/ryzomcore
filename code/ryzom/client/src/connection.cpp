@@ -71,7 +71,7 @@
 #include "init_main_loop.h"
 #include "continent_manager.h"
 #include "interface_v3/group_quick_help.h"
-#include "interface_v3/dbgroup_combo_box.h"
+#include "nel/gui/dbgroup_combo_box.h"
 
 #include "r2/dmc/client_edition_module.h"
 #include "r2/editor.h"

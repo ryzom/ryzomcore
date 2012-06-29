@@ -32,7 +32,7 @@
 #include "nel/gui/view_text_id.h"
 #include "../user_entity.h"
 #include "../entities.h"
-#include "dbgroup_combo_box.h"
+#include "nel/gui/dbgroup_combo_box.h"
 #include "nel/gui/dbview_bar.h"
 #include "../debug_client.h"
 #include "interface_3d_scene.h"

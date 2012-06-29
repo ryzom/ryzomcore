@@ -42,7 +42,7 @@ extern "C"
 #include "interface_manager.h"
 #include "nel/gui/view_bitmap.h"
 #include "../actions.h"
-#include "dbgroup_combo_box.h"
+#include "nel/gui/dbgroup_combo_box.h"
 #include "nel/gui/lua_ihm.h"
 
 #include "../time_client.h"

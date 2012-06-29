@@ -111,4 +111,8 @@ namespace NLGUI
 			setText(toString((const char*)buf));
 		}
 	}
+
+	void CDBViewQuantity::forceLink()
+	{
+	}
 }

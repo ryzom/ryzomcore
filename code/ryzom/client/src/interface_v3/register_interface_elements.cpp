@@ -47,7 +47,7 @@
 #include "nel/gui/dbview_bar3.h"
 #include "nel/gui/ctrl_scroll_base.h"
 #include "nel/gui/ctrl_scroll.h"
-#include "dbgroup_combo_box.h"
+#include "nel/gui/dbgroup_combo_box.h"
 #include "nel/gui/group_tab.h"
 #include "group_html.h"
 #include "nel/gui/group_header.h"

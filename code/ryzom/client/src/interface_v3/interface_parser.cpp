@@ -87,7 +87,7 @@
 // DBGroup
 #include "nel/gui/dbgroup_select_number.h"
 #include "dbgroup_list_sheet.h"
-#include "dbgroup_combo_box.h"
+#include "nel/gui/dbgroup_combo_box.h"
 #include "dbgroup_list_sheet_trade.h"
 #include "dbgroup_list_sheet_mission.h"
 #include "guild_manager.h" // for CDBGroupListAscensor

@@ -40,7 +40,7 @@
 #include "nel/gui/view_text.h"
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/ctrl_text_button.h"
-#include "interface_v3/dbgroup_combo_box.h"
+#include "nel/gui/dbgroup_combo_box.h"
 #include "sound_manager.h"
 #include "far_tp.h"
 

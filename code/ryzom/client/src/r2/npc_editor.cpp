@@ -23,7 +23,7 @@
 #include "../interface_v3/interface_manager.h"
 #include "nel/gui/group_container.h"
 #include "displayer_visual_entity.h"
-#include "../interface_v3/dbgroup_combo_box.h"
+#include "nel/gui/dbgroup_combo_box.h"
 
 #include "../sheet_manager.h"
 
