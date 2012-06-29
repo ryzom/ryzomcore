@@ -15,27 +15,21 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-#include "stdpch.h"
-
 #include "group_table.h"
-#include "interface_manager.h"
+#include "nel/gui/widget_manager.h"
 #include "nel/gui/interface_element.h"
-#include "../client_chat_manager.h"
 #include "nel/gui/view_bitmap.h"
 #include "nel/gui/view_text_id.h"
 #include "nel/gui/group_container.h"
-
 #include "nel/misc/i_xml.h"
 #include "nel/misc/i18n.h"
-
 #include "nel/misc/xml_auto_ptr.h"
 
 using namespace std;
 using namespace NLMISC;
 
-extern CClientChatManager ChatMngr;
-extern bool DebugUICell;
+
+bool CGroupCell::DebugUICell = false;
 
 // ----------------------------------------------------------------------------
 CGroupCell::CGroupCell(const TCtorParam &param)
@@ -91,7 +85,7 @@ bool CGroupCell::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup, uint colum
 	Group->setId(parentGroup->getId() + Group->getId());
 	setEnclosedGroupDefaultParams();
 	// parse the children
-	bool ok = CInterfaceManager::getInstance()->parseGroupChildren(cur, Group, false);
+	bool ok = CWidgetManager::parser->parseGroupChildren(cur, Group, false);
 	if (!ok) return false;
 	// align
 	ptr = (char*) xmlGetProp( cur, (xmlChar*)"align" );
@@ -191,8 +185,7 @@ bool CGroupCell::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup, uint colum
 // ----------------------------------------------------------------------------
 void CGroupCell::draw ()
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	if (DebugUICell)
+	if ( CGroupCell::DebugUICell )
 	{
 		// Draw cell
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
@@ -791,7 +784,7 @@ void CGroupTable::checkCoords ()
 			}
 			else
 			{
-				CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
 				CCtrlBase *pCB = CWidgetManager::getInstance()->getCapturePointerLeft();
 				if (pCB != NULL)
 				{
@@ -944,7 +937,6 @@ void CGroupTable::draw ()
 		sint32 border = Border + CellSpacing + CellPadding;
 		if (border)
 		{
-			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			CRGBA finalColor;
 			finalColor.modulateFromColor (BgColor, CWidgetManager::getInstance()->getGlobalColor());
 			finalColor.A = CurrentAlpha;

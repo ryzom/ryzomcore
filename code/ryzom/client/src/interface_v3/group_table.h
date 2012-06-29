@@ -22,7 +22,6 @@
 #include "nel/misc/types_nl.h"
 #include "nel/gui/group_frame.h"
 #include "nel/gui/view_text.h"
-#include "view_link.h"
 #include "nel/gui/ctrl_button.h"
 
 /**
@@ -101,8 +100,12 @@ public:
 	void setTextureTile(bool tiled);
 	void setTextureScale(bool scaled);
 
+	static void setDebugUICell( bool d ){ DebugUICell = d; }
+	static bool getDebugUICell(){ return DebugUICell; }
+
 private:
 	void setEnclosedGroupDefaultParams();
+	static bool DebugUICell;
 };
 
 /**

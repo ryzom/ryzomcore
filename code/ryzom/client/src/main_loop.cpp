@@ -146,6 +146,7 @@
 #include "string_manager_client.h"
 
 #include "nel/gui/lua_manager.h"
+#include "interface_v3/group_table.h"
 
 
 ///////////
@@ -317,7 +318,6 @@ uint32				OldWidth;		// Last Width of the window.
 uint32				OldHeight;		// Last Height of the window.
 
 bool				ShowInterface = true;	// Do the Chat OSD have to be displayed.
-bool				DebugUICell = false;
 bool				DebugUIView = false;
 bool				DebugUICtrl = false;
 bool				DebugUIGroup = false;
@@ -4394,7 +4394,8 @@ NLMISC_COMMAND(debugUI, "Debug the ui : show/hide quads of bboxs and hotspots", 
 		else
 			fromString(args[0], on);
 	}
-	DebugUICell = on;
+	
+	CGroupCell::setDebugUICell( on );
 	DebugUIView = on;
 	DebugUICtrl = on;
 	DebugUIGroup = on;
@@ -4426,7 +4427,7 @@ NLMISC_COMMAND(debugUIGroup, "Debug the ui : show/hide quads of bboxs and hotspo
 // show hide the debuging of cells
 NLMISC_COMMAND(debugUICell, "Debug the ui : show/hide quads of bboxs for cells", "")
 {
-	DebugUICell = !DebugUICell;
+	CGroupCell::setDebugUICell( !CGroupCell::getDebugUICell() )
 	return true;
 }
 
