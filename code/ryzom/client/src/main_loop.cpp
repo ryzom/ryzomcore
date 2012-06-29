@@ -146,7 +146,7 @@
 #include "string_manager_client.h"
 
 #include "nel/gui/lua_manager.h"
-#include "interface_v3/group_table.h"
+#include "nel/gui/group_table.h"
 
 
 ///////////
@@ -4427,7 +4427,7 @@ NLMISC_COMMAND(debugUIGroup, "Debug the ui : show/hide quads of bboxs and hotspo
 // show hide the debuging of cells
 NLMISC_COMMAND(debugUICell, "Debug the ui : show/hide quads of bboxs for cells", "")
 {
-	CGroupCell::setDebugUICell( !CGroupCell::getDebugUICell() )
+	CGroupCell::setDebugUICell( !CGroupCell::getDebugUICell() );
 	return true;
 }
 
