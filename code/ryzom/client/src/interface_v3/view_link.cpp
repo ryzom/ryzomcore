@@ -14,13 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-#include "stdpch.h"
-
 #include "nel/misc/bit_mem_stream.h"
 #include "nel/misc/i18n.h"
-
 #include "view_link.h"
 
 using namespace std;
@@ -61,4 +56,5 @@ bool CViewLink::getMouseOverShape(string &texName, uint8 &rot, CRGBA &col)
 
 
 // ***************************************************************************
+
 

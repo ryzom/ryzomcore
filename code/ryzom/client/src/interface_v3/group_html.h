@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #ifndef CL_GROUP_HTML_H
 #define CL_GROUP_HTML_H
 
@@ -47,6 +44,7 @@ namespace NLGUI
 
 class CGroupParagraph;
 
+
 // HTML group
 /**
  * Widget to have a resizable scrolltext and its scrollbar
@@ -66,7 +64,20 @@ public:
 	friend void TextEndUnparsedElement(HText *me, const char *buffer, int length);
 	friend int requestTerminater (HTRequest * request, HTResponse * response, void * param, int status);
 
+	struct SWebOptions
+	{
+	public:
+		std::string appName;
+		std::string appVersion;
+		std::string languageCode;
+		std::vector< std::string > trustedDomains;
 
+		SWebOptions()
+		{
+		}
+	};
+
+	static SWebOptions options;
 
 	// Constructor
 	CGroupHTML(const TCtorParam &param);
@@ -643,6 +654,5 @@ public:
 	CGroupHTMLInputOffset(const TCtorParam &param);
 	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 };
-
 
 #endif

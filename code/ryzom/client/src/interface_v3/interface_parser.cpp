@@ -3432,6 +3432,43 @@ void CInterfaceParser::removeAll()
 }
 
 
+// ------------------------------------------------------------------------------------------------
+uint CInterfaceParser::getProcedureNumActions(const std::string &procName) const
+{
+	CstItProcedureMap	it= _ProcedureMap.find(procName);
+	if(it!=_ProcedureMap.end())
+	{
+		const CProcedure	&proc= it->second;
+		return (uint)proc.Actions.size();
+	}
+	else
+		return 0;
+}
+
+// ------------------------------------------------------------------------------------------------
+bool CInterfaceParser::getProcedureAction(const std::string &procName, uint actionIndex, std::string &ah, std::string &params) const
+{
+	CstItProcedureMap	it= _ProcedureMap.find(procName);
+	if(it!=_ProcedureMap.end())
+	{
+		const CProcedure	&proc= it->second;
+		if(actionIndex<proc.Actions.size())
+		{
+			const CAction		&action= proc.Actions[actionIndex];
+			// if not a variable parametrized Params
+			if(action.ParamBlocks.size()==1 && action.ParamBlocks[0].NumParam==-1)
+			{
+				ah= action.Action;
+				params= action.ParamBlocks[0].String;
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+
 // ***************************************************************************
 bool	CInterfaceParser::parseGeneratorRootContainer(xmlNodePtr cur, xmlNodePtr	&rootTreeNode)
 {

@@ -238,7 +238,7 @@ protected:
 	struct CElementInfo
 	{
 		uint				Order; // Used to sort the window by their insertion order.
-		                           // This is used to put back a window at the right place if it was turned into a popup.
+								   // This is used to put back a window at the right place if it was turned into a popup.
 		CViewBase			*Element;
 		bool				EltDeleteOnRemove;
 	};
@@ -291,7 +291,6 @@ private:
 	// void setHSParent(CViewBase *view, EAlign addElt, EAlign align, uint space);
 
 };
-
 
 #endif // NL_GROUP_PARAGRAPH_H
 

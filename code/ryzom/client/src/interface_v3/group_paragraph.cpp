@@ -15,27 +15,20 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-#include "stdpch.h"
-
 #include "group_paragraph.h"
 #include "group_html.h"
-#include "interface_manager.h"
+#include "nel/gui/widget_manager.h"
 #include "nel/gui/interface_element.h"
-#include "../client_chat_manager.h"
+#include "nel/gui/view_pointer_base.h"
 #include "nel/gui/view_bitmap.h"
 #include "nel/gui/view_text_id.h"
 #include "nel/gui/group_container.h"
-
 #include "nel/misc/i_xml.h"
 #include "nel/misc/i18n.h"
-
 #include "nel/misc/xml_auto_ptr.h"
 
 using namespace std;
 using namespace NLMISC;
-
-extern CClientChatManager ChatMngr;
 
 NLMISC_REGISTER_OBJECT(CViewBase, CCtrlLink, std::string, "button_link");
 
@@ -737,7 +730,6 @@ void CGroupParagraph::checkCoords ()
 		sint parentWidth = std::min(_Parent->getMaxWReal(), _Parent->getWReal());
 		if (_LastW != (sint) parentWidth)
 		{
-			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			CCtrlBase *pCB = CWidgetManager::getInstance()->getCapturePointerLeft();
 			if (pCB != NULL)
 			{
@@ -770,7 +762,6 @@ void CGroupParagraph::draw ()
 	//rVR.drawRotFlipBitmap _RenderLayer, (_XReal, _YReal, _WReal, _HReal, 0, false, rVR.getBlankTextureId(), CRGBA(0,255,0,255) );
 	if (_Over)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		if (CWidgetManager::getInstance()->getModalWindow() == NULL)
@@ -1229,3 +1220,4 @@ sint32 CGroupParagraph::getMinUsedW() const
 	}
 	return minWidth;
 }
+

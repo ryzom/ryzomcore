@@ -228,6 +228,12 @@ public:
 		void removeAll();
 	// @}
 
+	// get info on procedure. return 0 if procedure not found
+	uint getProcedureNumActions( const std::string &procName ) const;
+
+	// return false if procedure not found, or if bad action index. return false if has some param variable (@0...)
+	bool getProcedureAction( const std::string &procName, uint actionIndex, std::string &ah, std::string &params ) const;
+
 protected:
 
 	/**

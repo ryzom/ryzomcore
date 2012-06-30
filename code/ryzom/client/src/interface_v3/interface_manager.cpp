@@ -21,6 +21,8 @@
 // Memory
 #include <memory>
 
+#include "game_share/ryzom_version.h"
+
 #include "nel/misc/i_xml.h"
 #include "nel/misc/o_xml.h"
 #include "nel/misc/algo.h"
@@ -68,6 +70,7 @@
 #include "group_in_scene_bubble.h"
 #include "group_skills.h"
 #include "group_compas.h"
+#include "group_html.h"
 
 // Misc
 #include "../input.h"
@@ -404,6 +407,10 @@ CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext 
 	CViewRenderer::getInstance();
 	CViewTextID::setTextProvider( &SMTextProvider );
 	CViewTextFormated::setFormatter( &RyzomTextFormatter );
+	CGroupHTML::options.trustedDomains = ClientCfg.WebIgTrustedDomains;
+	CGroupHTML::options.languageCode = ClientCfg.getHtmlLanguageCode();
+	CGroupHTML::options.appName = "Ryzom";
+	CGroupHTML::options.appVersion = RYZOM_VERSION;
 
 	_Instance = this;
 	NLGUI::CDBManager::getInstance()->resizeBanks( NB_CDB_BANKS );
@@ -3401,42 +3408,6 @@ void CInterfaceManager::setProcedureAction(const std::string &procName, uint act
 			action.ParamBlocks[0].String= params;
 		}
 	}
-}
-
-// ------------------------------------------------------------------------------------------------
-uint CInterfaceManager::getProcedureNumActions(const std::string &procName) const
-{
-	CstItProcedureMap	it= _ProcedureMap.find(procName);
-	if(it!=_ProcedureMap.end())
-	{
-		const CProcedure	&proc= it->second;
-		return (uint)proc.Actions.size();
-	}
-	else
-		return 0;
-}
-
-// ------------------------------------------------------------------------------------------------
-bool CInterfaceManager::getProcedureAction(const std::string &procName, uint actionIndex, std::string &ah, std::string &params) const
-{
-	CstItProcedureMap	it= _ProcedureMap.find(procName);
-	if(it!=_ProcedureMap.end())
-	{
-		const CProcedure	&proc= it->second;
-		if(actionIndex<proc.Actions.size())
-		{
-			const CAction		&action= proc.Actions[actionIndex];
-			// if not a variable parametrized Params
-			if(action.ParamBlocks.size()==1 && action.ParamBlocks[0].NumParam==-1)
-			{
-				ah= action.Action;
-				params= action.ParamBlocks[0].String;
-				return true;
-			}
-		}
-	}
-
-	return false;
 }
 
 // ------------------------------------------------------------------------------------------------

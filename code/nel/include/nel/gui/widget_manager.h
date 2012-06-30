@@ -52,6 +52,8 @@ namespace NLGUI
 		virtual CInterfaceGroup* createGroupInstance( const std::string &templateName, const std::string &parentID, const std::pair< std::string, std::string > *templateParams, uint numParams, bool updateLinks = true ) = 0;
 		virtual CInterfaceGroup* createGroupInstance( const std::string &templateName, const std::string &parentID, std::vector< std::pair< std::string, std::string > > &templateParams, bool updateLinks = true ) = 0;
 		virtual bool parseGroupChildren( xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload ) = 0;
+		virtual uint getProcedureNumActions( const std::string &procName ) const = 0;
+		virtual bool getProcedureAction( const std::string &procName, uint actionIndex, std::string &ah, std::string &params ) const = 0;
 	};
 
 	/// Manages the GUI widgets

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdpch.h"
-
 //#include <crtdbg.h>
 
 // LibWWW
@@ -27,25 +25,21 @@ extern "C"
 }
 
 #include "../libwww.h"
-
 #include "group_html.h"
 #include "nel/gui/group_list.h"
 #include "nel/gui/group_container.h"
 #include "view_link.h"
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/ctrl_button.h"
-#include "dbctrl_sheet.h"
 #include "nel/gui/ctrl_text_button.h"
 #include "nel/gui/action_handler.h"
 #include "group_paragraph.h"
 #include "nel/gui/group_editbox.h"
-#include "interface_manager.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/lua_manager.h"
 #include "nel/gui/view_bitmap.h"
-#include "../actions.h"
 #include "nel/gui/dbgroup_combo_box.h"
 #include "nel/gui/lua_ihm.h"
-
-#include "../time_client.h"
 #include "nel/misc/i18n.h"
 #include "nel/misc/md5.h"
 #include "nel/3d/texture_file.h"
@@ -62,14 +56,15 @@ using namespace NLMISC;
 //#define LOG_DL 1
 
 CGroupHTML *CGroupHTML::_ConnectingLock = NULL;
-extern CActionsContext ActionsContext;
+CGroupHTML::SWebOptions CGroupHTML::options;
+
 
 // Check if domain is on TrustedDomain
 bool CGroupHTML::isTrustedDomain(const string &domain)
 {
 	vector<string>::iterator it;
-	it = find (ClientCfg.WebIgTrustedDomains.begin(), ClientCfg.WebIgTrustedDomains.end(), domain);
-	return it != ClientCfg.WebIgTrustedDomains.end();
+	it = find ( options.trustedDomains.begin(), options.trustedDomains.end(), domain);
+	return it != options.trustedDomains.end();
 }
 
 void CGroupHTML::setImage(CViewBase * view, const string &file)
@@ -361,8 +356,7 @@ void CGroupHTML::checkDownloads()
 								CFile::moveFile(file.c_str(), (file+".tmp").c_str());
 								if (lookupLocalFile (finalUrl, file.c_str(), false))
 								{
-									CInterfaceManager *pIM = CInterfaceManager::getInstance();
-									pIM->executeLuaScript(it->luaScript, true);
+									CLuaManager::getInstance().executeLuaScript( it->luaScript, true );
 								}
 							}
 						}
@@ -899,33 +893,8 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 			if (present[MY_HTML_A_CLASS] && value[MY_HTML_A_CLASS])
 				_LinkClass.push_back(value[MY_HTML_A_CLASS]);
 
-			// Quick help
-			if (_TrustedDomain && present[MY_HTML_A_Z_ACTION_SHORTCUT] && value[MY_HTML_A_Z_ACTION_SHORTCUT])
-			{
-				// Get the action category
-				string category;
-				if (present[MY_HTML_A_Z_ACTION_CATEGORY] && value[MY_HTML_A_Z_ACTION_CATEGORY])
-					category = value[MY_HTML_A_Z_ACTION_CATEGORY];
-
-				// Get the action params
-				string params;
-				if (present[MY_HTML_A_Z_ACTION_PARAMS] && value[MY_HTML_A_Z_ACTION_PARAMS])
-					params = value[MY_HTML_A_Z_ACTION_PARAMS];
-
-				// Get the action descriptor
-				CActionsManager *actionManager = ActionsContext.getActionsManager (category);
-				if (actionManager)
-				{
-					const CActionsManager::TActionComboMap &actionCombo = actionManager->getActionComboMap ();
-					CActionsManager::TActionComboMap::const_iterator ite = actionCombo.find (CAction::CName (value[MY_HTML_A_Z_ACTION_SHORTCUT], params.c_str()));
-					if (ite != actionCombo.end())
-					{
-						addString (ite->second.toUCString());
-					}
-				}
-			}
-
 			break;
+
 		case HTML_DIV:
 		{
 			if (present[MY_HTML_DIV_NAME] && value[MY_HTML_DIV_NAME])
@@ -972,8 +941,7 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 					else
 						parentId = _Paragraph->getId();
 
-					CInterfaceManager *im = CInterfaceManager::getInstance();
-					CInterfaceGroup *inst = im->createGroupInstance(templateName, parentId+":"+id, tmplParams);
+					CInterfaceGroup *inst = CWidgetManager::parser->createGroupInstance(templateName, parentId+":"+id, tmplParams);
 					if (inst)
 					{
 						inst->setId(parentId+":"+id);
@@ -1272,7 +1240,6 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 							paragraphChange ();
 						}
 
-						CInterfaceManager *im = CInterfaceManager::getInstance();
 						typedef pair<string, string> TTmplParam;
 						vector<TTmplParam> tmplParams;
 						tmplParams.push_back(TTmplParam("id", name));
@@ -1282,7 +1249,7 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 						tmplParams.push_back(TTmplParam("active", "true"));
 						if (!minWidth.empty())
 							tmplParams.push_back(TTmplParam("wmin", minWidth));
-						CInterfaceGroup *buttonGroup = im->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
+						CInterfaceGroup *buttonGroup = CWidgetManager::parser->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
 						if (buttonGroup)
 						{
 
@@ -1776,8 +1743,7 @@ void CGroupHTML::endElement (uint element_number)
 					{
 						if (addBnpDownload(_ObjectData, _ObjectAction, _ObjectScript, _ObjectMD5Sum))
 						{
-							CInterfaceManager *pIM = CInterfaceManager::getInstance();
-							pIM->executeLuaScript("\nlocal __ALLREADYDL__=true\n"+_ObjectScript, true);
+							CLuaManager::getInstance().executeLuaScript("\nlocal __ALLREADYDL__=true\n"+_ObjectScript, true);
 						}
 						_ObjectScript = "";
 					}
@@ -1811,9 +1777,8 @@ void CGroupHTML::endUnparsedElement(const char *buffer, int length)
 		{
 			_ParsingLua = false;
 			// execute the embeded lua script
-			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			_LuaScript = "\nlocal __CURRENT_WINDOW__=\""+this->_Id+"\" \n"+_LuaScript;
-			pIM->executeLuaScript(_LuaScript, true);
+			CLuaManager::getInstance().executeLuaScript(_LuaScript, true);
 		}
 	}
 }
@@ -1924,8 +1889,8 @@ CGroupHTML::~CGroupHTML()
 	// stop browsing
 	stopBrowse (); // NB : we don't call updateRefreshButton here, because :
 				   // 1) it is useless,
-	               // 2) it crashed before when it called getElementFromId (that didn't work when a master group was being removed...). Btw it should work now
-	               //     this is why the call to 'updateRefreshButton' has been removed from stopBrowse
+				   // 2) it crashed before when it called getElementFromId (that didn't work when a master group was being removed...). Btw it should work now
+				   //     this is why the call to 'updateRefreshButton' has been removed from stopBrowse
 
 	clearContext();
 	delete _LibWWW;
@@ -2219,8 +2184,6 @@ void CGroupHTML::doBrowse(const char *url)
 	// if a BrowseTree is bound to us, try to select the node that opens this URL (auto-locate)
 	if(!_BrowseTree.empty())
 	{
-		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-
 		CGroupTree	*groupTree=dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(_BrowseTree));
 		if(groupTree)
 		{
@@ -2315,7 +2278,7 @@ bool CGroupHTML::translateChar(ucchar &output, ucchar input, ucchar lastCharPara
 			if (lastChar == 0)
 				lastChar = getLastChar();
 			keep = ((lastChar != (ucchar)' ') &&
-				    (lastChar != 0)) || getPRE() || (_CurrentViewImage && (lastChar == 0));
+					(lastChar != 0)) || getPRE() || (_CurrentViewImage && (lastChar == 0));
 			if(!getPRE())
 				input = ' ';
 		}
@@ -2327,8 +2290,8 @@ bool CGroupHTML::translateChar(ucchar &output, ucchar input, ucchar lastCharPara
 			if (lastChar == 0)
 				lastChar = getLastChar();
 			keep = ((lastChar != (ucchar)' ') &&
-				    (lastChar != (ucchar)'\n') &&
-				    (lastChar != 0)) || getPRE() || (_CurrentViewImage && (lastChar == 0));
+					(lastChar != (ucchar)'\n') &&
+					(lastChar != 0)) || getPRE() || (_CurrentViewImage && (lastChar == 0));
 		}
 		break;
 	case 0xd:
@@ -2444,14 +2407,13 @@ void CGroupHTML::addString(const ucstring &str)
 				// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
 				string param = "name=" + this->_Id + "|url=" + getLink();
 
-				CInterfaceManager *im = CInterfaceManager::getInstance();
 				typedef pair<string, string> TTmplParam;
 				vector<TTmplParam> tmplParams;
 				tmplParams.push_back(TTmplParam("id", ""));
 				tmplParams.push_back(TTmplParam("onclick", "browse"));
 				tmplParams.push_back(TTmplParam("onclick_param", param));
 				tmplParams.push_back(TTmplParam("active", "true"));
-				CInterfaceGroup *buttonGroup = im->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
+				CInterfaceGroup *buttonGroup = CWidgetManager::parser->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
 				if (buttonGroup)
 				{
 
@@ -2632,8 +2594,6 @@ CInterfaceGroup *CGroupHTML::addTextArea(const std::string &templateName, const 
 	// No more text in this text view
 	_CurrentViewLink = NULL;
 
-	CInterfaceManager *im = CInterfaceManager::getInstance();
-	if (im)
 	{
 		// Not added ?
 		std::vector<std::pair<std::string,std::string> > templateParams;
@@ -2645,7 +2605,7 @@ CInterfaceGroup *CGroupHTML::addTextArea(const std::string &templateName, const 
 		templateParams.push_back (std::pair<std::string,std::string> ("want_return", multiLine?"true":"false"));
 		templateParams.push_back (std::pair<std::string,std::string> ("enter_recover_focus", "false"));
 		templateParams.push_back (std::pair<std::string,std::string> ("max_num_chars", "1024"));
-		CInterfaceGroup *textArea = im->createGroupInstance (templateName.c_str(),
+		CInterfaceGroup *textArea = CWidgetManager::parser->createGroupInstance (templateName.c_str(),
 			getParagraph()->getId(), templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 
 		// Group created ?
@@ -2679,13 +2639,11 @@ CDBGroupComboBox *CGroupHTML::addComboBox(const std::string &templateName, const
 	}
 
 
-	CInterfaceManager *im = CInterfaceManager::getInstance();
-	if (im)
 	{
 		// Not added ?
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string> ("id", name));
-		CInterfaceGroup *group = im->createGroupInstance (templateName.c_str(),
+		CInterfaceGroup *group = CWidgetManager::parser->createGroupInstance (templateName.c_str(),
 			getParagraph()->getId(), templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 
 		// Group created ?
@@ -2736,7 +2694,6 @@ CCtrlButton *CGroupHTML::addButton(CCtrlButton::EType type, const std::string &/
 	if(!CPath::exists(normal))
 	{
 		// search in the compressed texture
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		sint32 id = rVR.getTextureIdFromName(normal);
 		if(id == -1)
@@ -2756,7 +2713,6 @@ CCtrlButton *CGroupHTML::addButton(CCtrlButton::EType type, const std::string &/
 	if(!CPath::exists(pushed))
 	{
 		// search in the compressed texture
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		sint32 id = rVR.getTextureIdFromName(pushed);
 		if(id == -1)
@@ -3030,7 +2986,6 @@ bool CGroupHTML::lookupLocalFile (string &result, const char *url, bool isUrl)
 	else
 	{
 		// Is it a texture in the big texture ?
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if (CViewRenderer::getInstance()->getTextureIdFromName (result) >= 0)
 		{
 			return true;
@@ -3115,19 +3070,19 @@ static int timer_called = 0;
 
 static int
 timer_callback(HTTimer *   const timer     ,
-               void *      const user_data ,
-               HTEventType const event     )
+			   void *      const user_data ,
+			   HTEventType const event     )
 {
 /*----------------------------------------------------------------------------
   A handy timer callback which cancels the running event loop.
 -----------------------------------------------------------------------------*/
-    nlassert(event == HTEvent_TIMEOUT);
-    timer_called = 1;
-    HTEventList_stopLoop();
+	nlassert(event == HTEvent_TIMEOUT);
+	timer_called = 1;
+	HTEventList_stopLoop();
 
-    /* XXX - The meaning of this return value is undocumented, but close
-    ** inspection of libwww's source suggests that we want to return HT_OK. */
-    return HT_OK;
+	/* XXX - The meaning of this return value is undocumented, but close
+	** inspection of libwww's source suggests that we want to return HT_OK. */
+	return HT_OK;
 }
 
 static void handleLibwwwEvents()
@@ -3135,9 +3090,9 @@ static void handleLibwwwEvents()
   HTTimer *timer;
   timer_called = 0;
   timer = HTTimer_new(NULL, &timer_callback, NULL,
-		      1, YES, NO);
+			  1, YES, NO);
   if (!timer_called)
-    HTEventList_newLoop();
+	HTEventList_newLoop();
   HTTimer_delete(timer);
 }
 
@@ -3147,12 +3102,14 @@ void CGroupHTML::handle ()
 {
 	H_AUTO(RZ_Interface_Html_handle)
 
+	const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
+
 	if (_Connecting)
 	{
 		nlassert (_ConnectingLock == this);
 
 		// Check timeout if needed
-		if (_TimeoutValue != 0 && _ConnectingTimeout <= TimeInSec)
+		if (_TimeoutValue != 0 && _ConnectingTimeout <= ( times.thisFrameMs / 1000.0f ) )
 		{
 			browseError(("Connection timeout : "+_URL).c_str());
 		}
@@ -3184,7 +3141,7 @@ void CGroupHTML::handle ()
 				nlassert (_ConnectingLock == NULL);
 				_ConnectingLock = this;
 				_Connecting = true;
-				_ConnectingTimeout = TimeInSec + _TimeoutValue;
+				_ConnectingTimeout = ( times.thisFrameMs / 1000.0f ) + _TimeoutValue;
 
 
 				CButtonFreezer freezer;
@@ -3238,7 +3195,7 @@ void CGroupHTML::handle ()
 					// add supported language header
 					HTList *langs = HTList_new();
 					// set the language code used by the client
-					HTLanguage_add(langs, ClientCfg.getHtmlLanguageCode().c_str(), 1.0);
+					HTLanguage_add(langs, options.languageCode.c_str(), 1.0);
 					HTRequest_setLanguage (_LibWWW->Request, langs, 1);
 
 					// get_document(_LibWWW->Request, _LibWWW->Anchor);
@@ -3343,7 +3300,7 @@ void CGroupHTML::handle ()
 				nlassert (_ConnectingLock == NULL);
 				_ConnectingLock = this;
 				_Connecting = true;
-				_ConnectingTimeout = TimeInSec + _TimeoutValue;
+				_ConnectingTimeout = ( times.thisFrameMs / 1000.0f ) + _TimeoutValue;
 
 				CButtonFreezer freezer;
 				this->visit(&freezer);
@@ -3534,8 +3491,6 @@ const std::string &CGroupHTML::selectTreeNodeRecurs(CGroupTree::SNode *node, con
 // ***************************************************************************
 bool	CGroupHTML::actionLaunchUrlRecurs(const std::string &ah, const std::string &params, const std::string &url)
 {
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-
 	// check if this action match
 	if( (ah=="launch_help" || ah=="browse") && IActionHandler::getParam (params, "url") == url)
 	{
@@ -3546,11 +3501,11 @@ bool	CGroupHTML::actionLaunchUrlRecurs(const std::string &ah, const std::string 
 	{
 		const std::string &procName= params;
 		// look into this proc
-		uint	numActions= pIM->getProcedureNumActions(procName);
+		uint	numActions= CWidgetManager::parser->getProcedureNumActions(procName);
 		for(uint i=0;i<numActions;i++)
 		{
 			string	procAh, procParams;
-			if(pIM->getProcedureAction(procName, i, procAh, procParams))
+			if( CWidgetManager::parser->getProcedureAction(procName, i, procAh, procParams))
 			{
 				// recurs proc if needed!
 				if (actionLaunchUrlRecurs(procAh, procParams, url))
@@ -3633,7 +3588,6 @@ void	CGroupHTML::browseRedo()
 // ***************************************************************************
 void	CGroupHTML::updateUndoRedoButtons()
 {
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CCtrlBaseButton		*butUndo= dynamic_cast<CCtrlBaseButton *>(CWidgetManager::getInstance()->getElementFromId(_BrowseUndoButton));
 	CCtrlBaseButton		*butRedo= dynamic_cast<CCtrlBaseButton *>(CWidgetManager::getInstance()->getElementFromId(_BrowseRedoButton));
 
@@ -3647,7 +3601,6 @@ void	CGroupHTML::updateUndoRedoButtons()
 // ***************************************************************************
 void	CGroupHTML::updateRefreshButton()
 {
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CCtrlBaseButton		*butRefresh = dynamic_cast<CCtrlBaseButton *>(CWidgetManager::getInstance()->getElementFromId(_BrowseRefreshButton));
 
 	bool enabled = !_Browsing && !_Connecting;
@@ -3957,3 +3910,5 @@ ucstring CGroupHTML::decodeHTMLEntities(const ucstring &str)
 
 	return result;
 }
+
+

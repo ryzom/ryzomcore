@@ -34,6 +34,22 @@ namespace NLGUI
 		luaState = NULL;
 	}
 
+	bool CLuaManager::executeLuaScript( const std::string &luaScript, bool smallScript )
+	{
+		try
+		{
+			if( smallScript )
+				luaState->executeSmallScript( luaScript );
+			else
+				luaState->executeScript( luaScript );
+		}
+		catch( const ELuaError &e )
+		{
+			nlwarning( e.luaWhat().c_str() );
+			return false;
+		}
 
+		return true;
+	}
 }
 

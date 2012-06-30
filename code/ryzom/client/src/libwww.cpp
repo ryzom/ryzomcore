@@ -15,9 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-#include "stdpch.h"
-
 // LibWWW
 extern "C"
 {
@@ -27,8 +24,6 @@ extern "C"
 }
 
 #include "interface_v3/group_html.h"
-#include "game_share/ryzom_version.h"
-
 #include "interface_v3/libwww_nel_stream.h"
 
 using namespace NLMISC;
@@ -45,7 +40,7 @@ std::string HTTPCurrentDomain;	// The current domain that will be used to get wh
 // The HText structure for libwww
 struct _HText
 {
-    CGroupHTML		*Parent;
+	CGroupHTML		*Parent;
 };
 
 // ***************************************************************************
@@ -273,7 +268,7 @@ HText * TextNew (HTRequest *		request,
 {
 	HText *text = new HText;
 	text->Parent = (CGroupHTML *) HTRequest_context(request);
-    return text;
+	return text;
 }
 
 // ***************************************************************************
@@ -281,7 +276,7 @@ HText * TextNew (HTRequest *		request,
 BOOL TextDelete (HText * me)
 {
 	delete me;
-    return YES;
+	return YES;
 }
 
 // ***************************************************************************
@@ -437,7 +432,7 @@ int requestTerminater (HTRequest * request, HTResponse * /* response */,
 			gh->requestTerminated(request);
 		}
 	}
-    return HT_OK;
+	return HT_OK;
 }
 
 
@@ -486,7 +481,7 @@ HTAssocList *sendCookie (HTRequest * /* request */, void * /* param */)
 
 HTAnchor * TextFindAnchor (HText * /* me */, int /* index */)
 {
-    return NULL;
+	return NULL;
 }
 
 int HTMIME_location_custom (HTRequest * request, HTResponse * response, char * token, char * value)
@@ -544,7 +539,7 @@ void initLibWWW()
 	static bool initialized = false;
 	if (!initialized)
 	{
-        //HTProfile_newNoCacheClient("Ryzom", "1.1");
+		//HTProfile_newNoCacheClient("Ryzom", "1.1");
 
 		/* Need our own trace and print functions */
 		HTPrint_setCallback(NelPrinter);
@@ -552,8 +547,8 @@ void initLibWWW()
 
 		/* Initiate libwww */
 
-		HTLib_setAppName("Ryzom");
-		HTLib_setAppVersion(RYZOM_VERSION);
+		HTLib_setAppName( CGroupHTML::options.appName.c_str() );
+		HTLib_setAppVersion( CGroupHTML::options.appVersion.c_str() );
 
 		/* Set up TCP as transport */
 		VerifyLibWWW("HTTransport_add", HTTransport_add("buffered_tcp", HT_TP_SINGLE, HTReader_new, HTBufferWriter_new));
@@ -563,7 +558,7 @@ void initLibWWW()
 
 		/* Set up HTTP as protocol */
 		VerifyLibWWW("HTProtocol_add", HTProtocol_add("http", "buffered_tcp", 80, NO, HTLoadHTTP, NULL));
-	    VerifyLibWWW("HTProtocol_add", HTProtocol_add("file", 	"local", 	0, 	YES, 	HTLoadNeLFile, 	NULL));
+		VerifyLibWWW("HTProtocol_add", HTProtocol_add("file", 	"local", 	0, 	YES, 	HTLoadNeLFile, 	NULL));
 		//VerifyLibWWW("HTProtocol_add", HTProtocol_add("file", 	"local", 	0, 	YES, 	HTLoadFile, 	NULL));
 		// HTProtocol_add("cache", 	"local", 	0, 	NO, 	HTLoadCache, 	NULL);
 
@@ -657,8 +652,8 @@ void initLibWWW()
 		/* Set up default event loop */
 		HTEventInit();
 
-	    /* Add our own request terminate handler */
-	    HTNet_addAfter(requestTerminater, NULL, 0, HT_ALL, HT_FILTER_LAST);
+		/* Add our own request terminate handler */
+		HTNet_addAfter(requestTerminater, NULL, 0, HT_ALL, HT_FILTER_LAST);
 
 		/* Setup cookies */
 		HTCookie_init();
@@ -670,7 +665,7 @@ void initLibWWW()
 		/* Go into the event loop... */
 		// HTEventList_newLoop();
 
-	    // App_delete(app);
+		// App_delete(app);
 
 		HTBind_add("htm",	"text/html",			NULL,		"8bit",		NULL,	1.0);	/* HTML			*/
 		HTBind_add("html",	"text/html",			NULL,		"8bit",		NULL,	1.0);	/* HTML			*/

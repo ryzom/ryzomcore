@@ -21,6 +21,8 @@
 
 #include "nel/gui/view_text.h"
 
+class CGroupHTML;
+
 /**
  * class implementing a link view
  * \author Cyril 'Hulud' Corvazier
@@ -41,7 +43,7 @@ public:
 	std::string		LinkTitle;
 
 	// Set the main group
-	void	setHTMLView(class CGroupHTML *html);
+	void	setHTMLView( CGroupHTML *html);
 	bool	getMouseOverShape(std::string &texName, uint8 &rot, NLMISC::CRGBA &col);
 
 protected:
@@ -49,7 +51,6 @@ protected:
 	// The main HTML group
 	CGroupHTML		*HTML;
 };
-
 
 #endif // NL_VIEW_LINK_H
 

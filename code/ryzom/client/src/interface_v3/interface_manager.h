@@ -271,10 +271,6 @@ public:
 	void runProcedure(const std::string &procName, CCtrlBase *pCaller, const std::vector<std::string> &paramList);
 	// replace an action in a procedure (if possible)
 	void setProcedureAction(const std::string &procName, uint actionIndex, const std::string &ah, const std::string &params);
-	// get info on procedure. return 0 if procedure not found
-	uint getProcedureNumActions(const std::string &procName) const;
-	// return false if procedure not found, or if bad action index. return false if has some param variable (@0...)
-	bool getProcedureAction(const std::string &procName, uint actionIndex, std::string &ah, std::string &params) const;
 	// Execute a anim
 	void startAnim(const std::string &animId);
 	void stopAnim(const std::string &animId);

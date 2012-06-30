@@ -28,7 +28,7 @@
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
 #include "nel/misc/xml_auto_ptr.h"
-
+#include "../actions.h"
 #include "../client_cfg.h"
 
 using namespace std;
@@ -213,6 +213,8 @@ void CGroupQuickHelp::setGroupTextSize (CInterfaceGroup *group, bool selected)
 
 // ***************************************************************************
 
+extern CActionsContext ActionsContext;
+
 void CGroupQuickHelp::beginElement (uint element_number, const BOOL *present, const char **value)
 {
 	CGroupHTML::beginElement (element_number, present, value);
@@ -220,6 +222,34 @@ void CGroupQuickHelp::beginElement (uint element_number, const BOOL *present, co
 	// Paragraph ?
 	switch(element_number)
 	{
+	case HTML_A:
+			// Quick help
+			if (_TrustedDomain && present[MY_HTML_A_Z_ACTION_SHORTCUT] && value[MY_HTML_A_Z_ACTION_SHORTCUT])
+			{
+				// Get the action category
+				string category;
+				if (present[MY_HTML_A_Z_ACTION_CATEGORY] && value[MY_HTML_A_Z_ACTION_CATEGORY])
+					category = value[MY_HTML_A_Z_ACTION_CATEGORY];
+
+				// Get the action params
+				string params;
+				if (present[MY_HTML_A_Z_ACTION_PARAMS] && value[MY_HTML_A_Z_ACTION_PARAMS])
+					params = value[MY_HTML_A_Z_ACTION_PARAMS];
+
+				// Get the action descriptor
+				CActionsManager *actionManager = ActionsContext.getActionsManager (category);
+				if (actionManager)
+				{
+					const CActionsManager::TActionComboMap &actionCombo = actionManager->getActionComboMap ();
+					CActionsManager::TActionComboMap::const_iterator ite = actionCombo.find (CAction::CName (value[MY_HTML_A_Z_ACTION_SHORTCUT], params.c_str()));
+					if (ite != actionCombo.end())
+					{
+						addString (ite->second.toUCString());
+					}
+				}
+			}
+			break;
+
 	case HTML_P:
 		// Get the action name
 		if (present[MY_HTML_P_QUICK_HELP_EVENTS])
