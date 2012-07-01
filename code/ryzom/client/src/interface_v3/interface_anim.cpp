@@ -14,17 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-// ----------------------------------------------------------------------------
-#include "stdpch.h"
-
 #include "interface_anim.h"
-#include "interface_manager.h"
+#include "nel/gui/widget_manager.h"
 #include "nel/gui/interface_expr.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/action_handler.h"
-#include "../time_client.h"
 
 // ----------------------------------------------------------------------------
 using namespace std;
@@ -591,11 +585,13 @@ void CInterfaceAnim::update()
 	if ((_Duration == 0) || (_Finished))
 		return;
 
+	const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
+
 	// Delta time limiter
-	if (DT > 0.1)
+	if ( ( times.frameDiffMs / 1000.0f )  > 0.1)
 		_CurrentTime += 0.1;
 	else
-		_CurrentTime += DT;
+		_CurrentTime += ( times.frameDiffMs / 1000.0f );
 
 	// Stop the anim if we have to
 	if (_AnimHasToBeStopped)
@@ -640,37 +636,8 @@ void CInterfaceAnim::stop()
 {
 	_Finished = true;
 
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if (!_AHOnFinish.empty())
 		CAHManager::getInstance()->runActionHandler(_AHOnFinish, _Parent, _AHOnFinishParams);
 }
 
-// **************************
-// Action handlers associated
-// **************************
 
-// ***************************************************************************
-class CAHAnimStart : public IActionHandler
-{
-public:
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
-	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		string sAnim = getParam(Params, "anim");
-		pIM->startAnim(sAnim);
-	}
-};
-REGISTER_ACTION_HANDLER (CAHAnimStart, "anim_start");
-
-// ***************************************************************************
-class CAHAnimStop : public IActionHandler
-{
-public:
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
-	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		string sAnim = getParam(Params, "anim");
-		pIM->stopAnim(sAnim);
-	}
-};
-REGISTER_ACTION_HANDLER (CAHAnimStop, "anim_stop");

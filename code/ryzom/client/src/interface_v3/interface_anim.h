@@ -22,7 +22,6 @@
 #include "nel/gui/interface_property.h"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/interface_link.h"
-
 #include "nel/3d/u_track.h"
 
 /**

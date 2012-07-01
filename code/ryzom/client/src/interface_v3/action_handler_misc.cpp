@@ -924,6 +924,31 @@ bool CStringPostProcessNPCRemoveTitle::cbIDStringReceived(ucstring &inOut)
 
 
 
+// ***************************************************************************
+class CAHAnimStart : public IActionHandler
+{
+public:
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		string sAnim = getParam(Params, "anim");
+		pIM->startAnim(sAnim);
+	}
+};
+REGISTER_ACTION_HANDLER (CAHAnimStart, "anim_start");
+
+// ***************************************************************************
+class CAHAnimStop : public IActionHandler
+{
+public:
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		string sAnim = getParam(Params, "anim");
+		pIM->stopAnim(sAnim);
+	}
+};
+REGISTER_ACTION_HANDLER (CAHAnimStop, "anim_stop");
 
 
 
