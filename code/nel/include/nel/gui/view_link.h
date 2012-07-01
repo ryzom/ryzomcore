@@ -21,36 +21,41 @@
 
 #include "nel/gui/view_text.h"
 
-class CGroupHTML;
-
-/**
- * class implementing a link view
- * \author Cyril 'Hulud' Corvazier
- * \author Nicolas Vizerie
- * \author Nevrax France
- * \date 2003
- */
-class CViewLink : public CViewText
+namespace NLGUI
 {
-public:
 
-	// Default constructor
-	CViewLink (const TCtorParam &param);
+	class CGroupHTML;
 
-	// The URI
-	std::string		Link;
+	/**
+	 * class implementing a link view
+	 * \author Cyril 'Hulud' Corvazier
+	 * \author Nicolas Vizerie
+	 * \author Nevrax France
+	 * \date 2003
+	 */
+	class CViewLink : public CViewText
+	{
+	public:
 
-	std::string		LinkTitle;
+		// Default constructor
+		CViewLink (const TCtorParam &param);
 
-	// Set the main group
-	void	setHTMLView( CGroupHTML *html);
-	bool	getMouseOverShape(std::string &texName, uint8 &rot, NLMISC::CRGBA &col);
+		// The URI
+		std::string		Link;
 
-protected:
+		std::string		LinkTitle;
 
-	// The main HTML group
-	CGroupHTML		*HTML;
-};
+		// Set the main group
+		void	setHTMLView( CGroupHTML *html);
+		bool	getMouseOverShape(std::string &texName, uint8 &rot, NLMISC::CRGBA &col);
+
+	protected:
+
+		// The main HTML group
+		CGroupHTML		*HTML;
+	};
+
+}
 
 #endif // NL_VIEW_LINK_H
 

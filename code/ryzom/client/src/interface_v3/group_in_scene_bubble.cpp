@@ -23,7 +23,7 @@
 #include "../character_cl.h"
 #include "nel/gui/action_handler.h"
 #include "../entities.h"
-#include "group_paragraph.h" // For CCtrlLink
+#include "nel/gui/group_paragraph.h" // For CCtrlLink
 #include "../net_manager.h"
 #include "../string_manager_client.h"
 #include "../login.h"

@@ -31,7 +31,7 @@
 #include "../net_manager.h"
 #include "nel/gui/group_menu.h"
 #include "../global.h"
-#include "group_html.h"
+#include "nel/gui/group_html.h"
 
 //
 #include "game_share/inventories.h"

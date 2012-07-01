@@ -23,8 +23,8 @@
 
 #include "group_quick_help.h"
 #include "nel/gui/group_list.h"
-#include "group_paragraph.h"
-#include "../libwww.h"
+#include "nel/gui/group_paragraph.h"
+#include "nel/gui/libwww.h"
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
 #include "nel/misc/xml_auto_ptr.h"

@@ -57,7 +57,7 @@
 #include "nel/gui/ctrl_col_pick.h"
 #include "nel/gui/ctrl_tooltip.h"
 #include "nel/gui/ctrl_text_button.h"
-#include "group_paragraph.h" // For CCtrlLink
+#include "nel/gui/group_paragraph.h" // For CCtrlLink
 // DBCtrl
 #include "dbctrl_sheet.h"
 // Group

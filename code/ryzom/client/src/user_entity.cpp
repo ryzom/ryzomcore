@@ -55,7 +55,7 @@
 #include "main_loop.h"
 #include "interface_v3/group_in_scene_bubble.h"
 #include "interface_v3/inventory_manager.h"
-#include "interface_v3/group_html.h"
+#include "nel/gui/group_html.h"
 #include "interface_v3/people_interraction.h"
 #include "init_main_loop.h"
 #include "view.h"

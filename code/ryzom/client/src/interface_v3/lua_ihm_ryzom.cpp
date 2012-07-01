@@ -60,7 +60,7 @@
 #include "nel/misc/i18n.h"
 #include "nel/misc/time_nl.h"
 #include "skill_manager.h"
-#include "group_html.h"
+#include "nel/gui/group_html.h"
 #include "../net_manager.h"
 #include "../user_entity.h"
 #include "sphrase_manager.h"

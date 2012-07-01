@@ -27,8 +27,6 @@
 #include "nel/gui/reflect.h"
 #include "nel/gui/interface_common.h"
 
-class CGroupParagraph;
-
 namespace NLGUI
 {
 	class CGroupList;
@@ -38,6 +36,7 @@ namespace NLGUI
 	class CViewBase;
 	class CCtrlBase;
 	class IActionHandler;
+	class CGroupParagraph;
 
 	/**
 	 * A visitor to walk a tree of interface elements and apply a teartment on them.
@@ -496,7 +495,7 @@ namespace NLGUI
 
 		// Friend Class
 		friend class CGroupList;
-		friend class ::CGroupParagraph;
+		friend class CGroupParagraph;
 
 		// True if must modulate the global color with the view
 		bool		_ModulateGlobalColor;

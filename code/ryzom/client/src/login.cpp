@@ -49,7 +49,7 @@
 #include "client_cfg.h"
 #include "global.h"
 #include "input.h"
-#include "libwww.h"
+#include "nel/gui/libwww.h"
 #include "http_client.h"
 #include "http_client_curl.h"
 #include "login_progress_post_thread.h"

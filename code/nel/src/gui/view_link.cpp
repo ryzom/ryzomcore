@@ -16,45 +16,48 @@
 
 #include "nel/misc/bit_mem_stream.h"
 #include "nel/misc/i18n.h"
-#include "view_link.h"
+#include "nel/gui/view_link.h"
 
 using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
 
-// ***************************************************************************
-
-CViewLink::CViewLink (const TCtorParam &param)
-: CViewText(param)
+namespace NLGUI
 {
-	HTML = NULL;
-}
 
-// ***************************************************************************
+	// ***************************************************************************
 
-void CViewLink::setHTMLView(CGroupHTML *html)
-{
-	HTML = html;
-}
-
-// ***************************************************************************
-bool CViewLink::getMouseOverShape(string &texName, uint8 &rot, CRGBA &col)
-{
-	if (HTML != NULL)
+	CViewLink::CViewLink (const TCtorParam &param)
+	: CViewText(param)
 	{
-		if (!LinkTitle.empty())
-		{
-			texName = LinkTitle;
-			rot= 0;
-			col = CRGBA::White;
-			return true;
-		}
+		HTML = NULL;
 	}
-	
-	return false;
+
+	// ***************************************************************************
+
+	void CViewLink::setHTMLView(CGroupHTML *html)
+	{
+		HTML = html;
+	}
+
+	// ***************************************************************************
+	bool CViewLink::getMouseOverShape(string &texName, uint8 &rot, CRGBA &col)
+	{
+		if (HTML != NULL)
+		{
+			if (!LinkTitle.empty())
+			{
+				texName = LinkTitle;
+				rot= 0;
+				col = CRGBA::White;
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+
+	// ***************************************************************************
 }
-
-
-// ***************************************************************************
-
 

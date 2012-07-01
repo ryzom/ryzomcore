@@ -21,8 +21,8 @@
 #include "interface_manager.h"
 #include "nel/gui/view_renderer.h"
 #include "nel/gui/ctrl_col_pick.h"
-#include "group_paragraph.h"
-#include "group_html.h"
+#include "nel/gui/group_paragraph.h"
+#include "nel/gui/group_html.h"
 #include "group_map.h"
 //
 #include "nel/misc/xml_auto_ptr.h"

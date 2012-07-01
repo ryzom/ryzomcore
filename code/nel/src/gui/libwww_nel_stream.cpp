@@ -31,7 +31,7 @@ extern "C"
 #include "HTMulti.h"
 #include "HTNetMan.h"
 #include "HTChannl.h"
-#include "libwww_nel_stream.h"		/* Implemented here */
+#include "nel/gui/libwww_nel_stream.h"		/* Implemented here */
 }
 
 using namespace std;

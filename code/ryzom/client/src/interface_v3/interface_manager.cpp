@@ -70,7 +70,7 @@
 #include "group_in_scene_bubble.h"
 #include "group_skills.h"
 #include "group_compas.h"
-#include "group_html.h"
+#include "nel/gui/group_html.h"
 
 // Misc
 #include "../input.h"

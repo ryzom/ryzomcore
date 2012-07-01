@@ -49,7 +49,7 @@
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/dbgroup_combo_box.h"
 #include "nel/gui/group_tab.h"
-#include "group_html.h"
+#include "nel/gui/group_html.h"
 #include "nel/gui/group_header.h"
 #include "sphrase_manager.h"
 //
