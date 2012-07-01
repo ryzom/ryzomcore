@@ -17,6 +17,8 @@
 			for($i=0;$i<$sz;$i++) {
 				$this->addDone($this->makeChild($res[$i]));
 			}
+
+			#echo var_export($this->child_done,true);
 		}
 
 		protected function makeChild($a) {
@@ -31,11 +33,15 @@
 
 				$iter = $this->menu->getIterator();
 				while($iter->hasNext()) {
+					#echo "1";
 					$curr = $iter->getNext();
+					
 
 					if($curr->getID() == 0 || $curr->inDev()) {
 						continue; // skip summary page
 					}
+					#echo $curr->getID().",";
+					#echo var_export($curr,true);
 					$res = $this->sumStats($curr);
 					$this->stats[] = array($curr->getName(),$res[0],$res[1]);
 				}
@@ -46,6 +52,10 @@
 
 		private function sumStats(&$node) {
 			global $DBc,$_USER;
+
+			#return array(0,0);
+
+			#echo ">".gettype($node)."<";
 
 			$done = 0;
 			$total = 0;
@@ -62,7 +72,7 @@
 			while($iter->hasNext()) {
 				$curr = $iter->getNext();
 
-				$res = $this->sumStats($elem);
+				$res = $this->sumStats($curr);
 				$done += $res[0];
 				$total += $res[1];
 			}

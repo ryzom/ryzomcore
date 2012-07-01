@@ -21,6 +21,7 @@ $user['race'] = "r_matis";
 $user['civilization'] = "c_neutral";
 $user['cult'] = "c_neutral";
 $user['ig'] = ($_REQUEST['ig']==1);
+#$user['ig'] = true;
 
 require_once("class/RyzomUser_class.php");
 $_USER = new RyzomUser($user);
@@ -33,6 +34,7 @@ else {
 }
 require_once("include/ach_render_common.php");
 
+require_once("class/AVLTree_class.php");
 require_once("class/Parentum_abstract.php");
 require_once("class/AchList_abstract.php");
 require_once("class/Tieable_inter.php");
@@ -50,8 +52,8 @@ require_once("class/AchObjective_class.php");
 
 
 // Update user acces on Db
-//$db = ryDB::getInstance(APP_NAME);
-$DBc = ryDB::getInstance("ahufler");
+$DBc = ryDB::getInstance(APP_NAME);
+#$DBc = ryDB::getInstance("ahufler");
 
 
 if(!$_USER->isIG && $_CONF['enable_webig'] == false) {

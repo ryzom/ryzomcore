@@ -182,7 +182,7 @@
 
 		$iter = $cat->getDone();
 		while($iter->hasNext()) {
-			$curr = $cat->findNodeIdx($iter->getNext());
+			$curr = $cat->getChildByIdx($iter->getNext());
 		#$sz = sizeof($tmp);
 		#for($i=0;$i<$sz;$i++) {
 			#echo "A";
@@ -194,14 +194,14 @@
 
 		$iter = $cat->getOpen();
 		while($iter->hasNext()) {
-			$curr = $cat->findNodeIdx($iter->getNext());
+			$curr = $cat->getChildByIdx($iter->getNext());
 		#$sz = sizeof($tmp);
 		#for($i=0;$i<$sz;$i++) {
 			#echo "B";
 			if($curr->inDev()) {
 				continue;
 			}
-			$html .= ach_render_achievement_open($curr));
+			$html .= ach_render_achievement_open($curr);
 		}
 
 		return $html;
@@ -259,7 +259,7 @@
 		$html = "";
 
 		$perk_list = $ach->getOpen();
-		$perk = $ach->findNodeIdx($perk_list->getNext());
+		$perk = $ach->getChildByIdx($perk_list->getNext());
 
 		if($perk->inDev()) {
 			return $html;
@@ -269,7 +269,7 @@
 			$html .= "<tr><td><font color='#999999' size='12px'><b>".$perk->getName()."</b></font></td></tr><tr><td>&nbsp;</td></tr>";
 		}
 		if($perk->objDrawable()) {
-			$html .= "<tr><td>".ach_render_obj_list($perk->getChildren())."</td></tr>";
+			$html .= "<tr><td>".ach_render_obj_list($perk->getIterator())."</td></tr>";
 		}
 
 		return $html;
@@ -281,7 +281,7 @@
 
 		$perk_list = $ach->getDone();
 		while($perk_list->hasNext()) {
-			$perk = $this->findNodeIdx($perk_list->getNext());
+			$perk = $ach->getChildByIdx($perk_list->getNext());
 
 		#foreach($perk_list as $elem) {
 			#$perk = $ach->getChild($elem);
@@ -294,7 +294,7 @@
 		return $html;
 	}
 
-	function ach_render_obj_list(&$obj) {
+	function ach_render_obj_list($obj) {
 		$html = "<table width='90%'>";
 
 		$i = 0;

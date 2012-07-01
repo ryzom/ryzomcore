@@ -1,5 +1,6 @@
 <?php
 	trait Node {
+		protected $idx;
 		protected $id;
 		protected $parent;
 
@@ -7,15 +8,23 @@
 			return $this->id;
 		}
 
+		final function getIdx() {
+			return $this->idx;
+		}
+
 		final function getParent() {
 			return $this->parent;
 		}
 
-		final protected function setID($id) {
+		final function setIdx($i) {
+			$this->idx = $i;
+		}
+
+		final function setID($id) {
 			$this->id = $id;
 		}
 
-		final protected function setParent($p) {
+		final function setParent($p) {
 			$this->parent = $p;
 		}
 	}

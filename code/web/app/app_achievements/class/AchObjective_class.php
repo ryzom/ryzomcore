@@ -60,6 +60,10 @@
 			return $this->name;
 		}
 
+		function getDisplayName() {
+			return $this->parent->fillTemplate(explode(";",$this->name));
+		}
+
 		function getDisplay() {
 			return $this->display;
 		}

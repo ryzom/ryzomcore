@@ -1,6 +1,6 @@
 <?php
 	class AchAchievement extends AchList {
-		use Node;
+		use Node,InDev;
 
 		protected $parent_id;
 		protected $category;
@@ -10,7 +10,6 @@
 		protected $image;
 		protected $name;
 		protected $template;
-		protected $dev;
 
 		function AchAchievement($data,$parent) {
 			global $DBc,$_USER;
@@ -74,22 +73,22 @@
 			$val = 0;
 			$iter = $this->getDone();
 			while($iter->hasNext()) {
-				$curr = $this->findNodeIdx($iter->getNext());
+				$curr = $this->getChildByIdx($iter->getNext());
 				$val += $curr->getValue();
 			}
 			return $val;
 		}
 
 		function getValueOpen() {
-			$iter = $this->getDone();
+			$iter = $this->getOpen();
 			if($iter->hasNext()) {
-				$curr = $this->findNodeIdx($iter->getNext());
+				$curr = $this->getChildByIdx($iter->getNext());
 				return $curr->getValue();
 			}
 			return 0;
 		}
 
-		function getTemplate($insert = array()) {
+		function fillTemplate($insert = array()) {
 			if($this->template == null) {
 				return implode(";",$insert);
 			}
@@ -103,9 +102,14 @@
 				return $tmp;
 			}
 		}
-
-		function inDev() {
-			return ($this->dev == 1);
+		
+		function getTemplate() {
+			return $this->template;
 		}
+
+		function getCategory() {
+			return $this->category;
+		}
+		
 	}
 ?>
