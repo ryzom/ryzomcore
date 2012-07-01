@@ -38,9 +38,9 @@ namespace NLGUI
 	class CCtrlBase;
 	class CGroupList;
 	class CGroupContainer;
+	class CInterfaceAnim;
 }
 
-class CInterfaceAnim;
 class CViewPointer;
 class CBrickJob;
 

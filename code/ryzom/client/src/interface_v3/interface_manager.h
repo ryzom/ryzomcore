@@ -71,9 +71,8 @@ namespace NLGUI
 	class CInterfaceOptions;
 	class CGroupContainer;
 	class CGroupMenu;
+	class CInterfaceAnim;
 }
-
-class CInterfaceAnim;
 
 /**
  * class managing the interface

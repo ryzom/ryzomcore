@@ -43,7 +43,7 @@
 #include "nel/gui/action_handler.h"
 #include "action_handler_misc.h"
 #include "interface_observer.h"
-#include "interface_anim.h"
+#include "nel/gui/interface_anim.h"
 #include "interface_ddx.h"
 #include "action_handler_help.h"
 #include "action_handler_item.h"

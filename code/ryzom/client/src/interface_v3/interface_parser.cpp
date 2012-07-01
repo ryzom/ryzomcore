@@ -33,7 +33,7 @@
 #include "interface_observer.h"
 #include "nel/gui/interface_options.h"
 #include "interface_options_ryzom.h"
-#include "interface_anim.h"
+#include "nel/gui/interface_anim.h"
 #include "interface_3d_scene.h"
 // View
 #include "nel/gui/view_bitmap.h"
