@@ -1,8 +1,16 @@
 <?php
 	class AVLTree {
+		/*---------------------------
+			AVL trees are balanced B-Trees. Please refer to http://en.wikipedia.org/wiki/AVL_tree
+
+			This implementation allows the functions insert, find and remove. Please
+			note, that remove does not rebalance the tree, since node removal is
+			quite rare in this project.
+		---------------------------*/
+
 		private $root;
 		private $debug;
-
+		
 		function AVLTree($log = false) {
 			$this->root = null;
 			$this->debug = $log;

@@ -1,5 +1,11 @@
 <?php
 	trait Node {
+		/*---------------------------
+			This trait provides basic functionality common to nodes.
+
+			Every node has an id, and InDeX and a parent.
+		---------------------------*/
+
 		protected $idx;
 		protected $id;
 		protected $parent;

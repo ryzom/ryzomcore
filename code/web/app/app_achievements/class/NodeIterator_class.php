@@ -1,5 +1,16 @@
 <?php
 	class NodeIterator {
+		/*---------------------------
+			The NodeIterator can be used just like a foreach() loop to iterate
+			arrays.
+
+			Sample:
+			$iter = new NodeIterator(array());
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				// ...
+			}
+		---------------------------*/
 		private $nodes;
 		private $curr;
 

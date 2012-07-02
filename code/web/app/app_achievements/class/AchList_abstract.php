@@ -1,5 +1,11 @@
 <?php
 	abstract class AchList extends Parentum {
+		/*---------------------------
+			This class organizes nodes to distinguish between "open" and "done" nodes.
+
+			child_open and child_done refer to the index set in Parentum::nodes[]
+		---------------------------*/
+
 		protected $child_done = array();
 		protected $child_open = array();
 
@@ -43,11 +49,7 @@
 
 		final function removeChildDone($idx) {
 			echo "try removing done child: ".$idx;
-			#$res = array_search($idx,$this->child_done);
-			#if($res != false) {
-			#	unset($this->child_done[$res]);
-			#	echo " ... done<br>";
-			#}
+			
 			foreach($this->child_done as $key=>$elem) {
 				if($elem == $idx) {
 					unset($this->child_done[$key]);
@@ -74,12 +76,7 @@
 
 		final function removeChildOpen($idx) {
 			echo "try removing open child: ".$idx;
-			
-			#$res = array_search($idx,$this->child_open);
-			#if($res != false) {
-			#	unset($this->child_open[$res]);
-			#	echo " ... done<br>";
-			#}
+
 			foreach($this->child_open as $key=>$elem) {
 				if($elem == $idx) {
 					unset($this->child_open[$key]);
@@ -89,26 +86,8 @@
 			}
 			echo var_export($this->child_open,true);
 		}
-
-		/*final function unsetOpen($idx) {
-			foreach($this->child_open as $key=>$elem) {
-				if($elem == $idx) {
-					unset($this->child_open[$key]);
-					break;
-				}
-			}
-		}
-
-		final function unsetDone($idx) {
-			foreach($this->child_done as $key=>$elem) {
-				if($elem == $idx) {
-					unset($this->child_done[$key]);
-					break;
-				}
-			}
-		}*/
 		
-		#OVERRIDE Parentum::removeChild()
+		#@OVERRIDE Parentum::removeChild()
 		function removeChild($id) {
 			$n = parent::removeChild($id);
 			if($n != false && $n != null) {

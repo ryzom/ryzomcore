@@ -42,10 +42,6 @@
 			return $tmp;
 		}
 
-		#function drawTree() {
-		#	$this->avl->inorder();
-		#}
-
 		function removeChild($id) {
 			if($this->isEmpty()) {
 				return null;

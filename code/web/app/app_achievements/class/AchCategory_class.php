@@ -11,6 +11,9 @@
 		function AchCategory($id,$cult = null,$civ = null) {
 			global $DBc,$_USER;
 
+			$civ = mysql_real_escape_string($civ);
+			$cult = mysql_real_escape_string($cult);
+
 			if($cult == null) {
 				$cult = $_USER->getCult();
 			}
@@ -24,7 +27,8 @@
 
 			$this->id = mysql_real_escape_string($id);
 
-			$res = $DBc->sqlQuery("SELECT * FROM ach_achievement LEFT JOIN (ach_achievement_lang) ON (aal_lang='".$_USER->getLang()."' AND aal_achievement=aa_id) WHERE aa_category='".$this->id."' AND (aa_parent IS NULL OR NOT EXISTS (SELECT * FROM ach_perk WHERE ap_achievement=aa_id AND NOT EXISTS (SELECT * FROM ach_player_perk WHERE app_player='".$_USER->getID()."' AND app_perk=ap_id))) AND (aa_tie_race IS NULL OR aa_tie_race='".$_USER->getRace()."') AND (aa_tie_cult IS NULL OR aa_tie_cult='".mysql_real_escape_string($cult)."') AND (aa_tie_civ IS NULL OR aa_tie_civ='".mysql_real_escape_string($civ)."') ORDER by aal_name ASC");
+			$res = $DBc->sqlQuery("SELECT * FROM ach_achievement LEFT JOIN (ach_achievement_lang) ON (aal_lang='".$_USER->getLang()."' AND aal_achievement=aa_id) WHERE aa_category='".$this->id."' AND (aa_parent IS NULL OR NOT EXISTS (SELECT * FROM ach_perk WHERE ap_achievement=aa_id AND NOT EXISTS (SELECT * FROM ach_player_perk WHERE app_player='".$_USER->getID()."' AND app_perk=ap_id))) AND (aa_tie_race IS NULL OR aa_tie_race LIKE '".$_USER->getRace()."') AND (aa_tie_cult IS NULL OR aa_tie_cult LIKE '".$cult."') AND (aa_tie_civ IS NULL OR aa_tie_civ LIKE '".$civ."') ORDER by aal_name ASC");
+			#parent!!!!
 
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
