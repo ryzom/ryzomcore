@@ -17,21 +17,25 @@
 #import <Cocoa/Cocoa.h>
 #include "AvailabilityMacros.h"
 
-namespace NL3D 
-{
-	class CDriverGL;
-	void windowDidMove(NSWindow*, NL3D::CDriverGL*);
-}
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+using NL3D::NLDRIVERGLES::CDriverGL;
+#else
+using NL3D::NLDRIVERGL::CDriverGL;
+#endif
+#else
+using NL3D::CDriverGL;
+#endif
 
 @interface CocoaWindowDelegate : NSObject
 #if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
 <NSWindowDelegate>
 #endif
 {
-	NL3D::CDriverGL* _driver;
+	CDriverGL* _driver;
 }
 
-- (id)initWithDriver:(NL3D::CDriverGL*)driver;
+- (id)initWithDriver:(CDriverGL*)driver;
 - (void)windowDidMove:(NSNotification*)notification;
 
 @end

@@ -30,6 +30,8 @@
 #include <nel/sound/sound_animation.h>
 #include <nel/3d/u_particle_system_sound.h>
 #include <nel/misc/path.h>
+#include <nel/misc/sheet_id.h>
+
 
 // Qt includes
 #include <QtCore/QSettings>
@@ -67,6 +69,9 @@ void CSoundSystem::init()
 {
 	//H_AUTO2
 	nldebug("CSoundSystem::init");
+	
+	// require sheet id without sheet id bin
+	NLMISC::CSheetId::initWithoutSheet();
 
 	// create audiomixer
 	_AudioMixer = NULL;
@@ -153,9 +158,10 @@ void CSoundSystem::play(const std::string &soundName)
 {
 	if (_AudioMixer)
 	{
-		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CStringMapper::map(soundName), true);
+		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CSheetId(soundName, "sound"), true);
 		if (src)
 		{
+			// FIXME: Use relative positioning, and set pos to 0,0,0
 			src->setLooping(false);
 			const NLMISC::CVector &pos = _AudioMixer->getListener()->getPos();
 			src->setPos(pos);
@@ -172,9 +178,10 @@ NLSOUND::USource *CSoundSystem::create(const std::string &soundName)
 {
 	if (_AudioMixer)
 	{
-		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CStringMapper::map(soundName), false);
+		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CSheetId(soundName, "sound"), false);
 		if (src)
 		{
+			// FIXME: Use relative positioning, and set pos to 0,0,0
 			src->setLooping(false);
 			const NLMISC::CVector &pos = _AudioMixer->getListener()->getPos();
 			src->setPos(pos);

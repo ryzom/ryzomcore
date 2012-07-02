@@ -86,7 +86,7 @@ void CBackgroundSoundManager::addSound(const std::string &soundName, uint layerI
 	CAudioMixerUser *mixer = CAudioMixerUser::instance();
 	TSoundData	sd;
 
-	sd.SoundName = CStringMapper::map(soundName);
+	sd.SoundName = NLMISC::CSheetId(soundName, "sound"); // note: loaded from .primitive
 	sd.Sound = mixer->getSoundId(sd.SoundName);
 	sd.Source = 0;
 
@@ -133,7 +133,7 @@ void CBackgroundSoundManager::addSound(const std::string &soundName, uint layerI
 	}
 	else
 	{
-		nlwarning ("The sound '%s' can't be loaded", CStringMapper::unmap(sd.SoundName).c_str());
+		nlwarning ("The sound '%s' can't be loaded", sd.SoundName.toString().c_str()/*CStringMapper::unmap(sd.SoundName).c_str()*/);
 	}
 }
 
@@ -1431,20 +1431,14 @@ void CBackgroundSoundManager::TBanksData::serial(NLMISC::IStream &s)
 
 void CBackgroundSoundManager::TSoundData::serial(NLMISC::IStream &s)
 {
-	std::string str;
-
+	//std::string str;
+	SoundName.serialString(s, "sound");
 	if (s.isReading())
 	{
 		CAudioMixerUser *mixer = CAudioMixerUser::instance();
-		s.serial(str);
-		SoundName = NLMISC::CStringMapper::map(str);
 		Sound = mixer->getSoundId(SoundName);
 		Source = NULL;
 		Selected = false;
-	}
-	else
-	{
-		s.serial(const_cast<std::string&>(NLMISC::CStringMapper::unmap(SoundName)));
 	}
 	s.serial(MinBox);
 	s.serial(MaxBox);

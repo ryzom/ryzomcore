@@ -83,7 +83,7 @@ CFileContainer::~CFileContainer()
 {
 	if( _AllFileNames )
 	{
-		delete _AllFileNames;
+		delete[] _AllFileNames;
 		_AllFileNames = NULL;
 	}
 }

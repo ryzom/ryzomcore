@@ -512,7 +512,8 @@ void		CVisualCollisionMesh::receiveShadowMap(const NLMISC::CMatrix &instanceMatr
 				}
 
 				// if triangle not clipped, add the triangle
-				if( (triFlag & NL3D_VCM_SHADOW_NUM_CLIP_PLANE_MASK)==0 )
+				// if( (triFlag & NL3D_VCM_SHADOW_NUM_CLIP_PLANE_MASK)==0 )
+				if (triFlag == 0) // previous line not useful due to init
 				{
 					// Add the 3 index to the index buffer.
 					ibPtr[currentTriIdx++]= (uint16) triId[0];
