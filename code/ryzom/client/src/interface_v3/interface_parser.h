@@ -39,9 +39,9 @@ namespace NLGUI
 	class CGroupList;
 	class CGroupContainer;
 	class CInterfaceAnim;
+	class CViewPointer;
 }
 
-class CViewPointer;
 class CBrickJob;
 
 // ***************************************************************************

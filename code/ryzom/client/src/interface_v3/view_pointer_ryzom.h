@@ -2,7 +2,7 @@
 #define VIEW_POINTER_RYZOM_H
 
 
-#include "view_pointer.h"
+#include "nel/gui/view_pointer.h"
 
 class CViewPointerRyzom : public CViewPointer
 {

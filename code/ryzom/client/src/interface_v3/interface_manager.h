@@ -27,7 +27,7 @@
 #include "nel/gui/interface_link.h"
 #include "nel/gui/group_list.h"
 #include "nel/gui/view_base.h"
-#include "view_pointer.h"
+#include "nel/gui/view_pointer.h"
 
 #include "nel/gui/ctrl_base.h"
 #include "nel/gui/ctrl_scroll.h"

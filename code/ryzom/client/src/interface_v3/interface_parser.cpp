@@ -44,7 +44,7 @@
 #include "nel/gui/view_text_id.h"
 #include "nel/gui/view_text_id_formated.h"
 #include "view_radar.h"
-#include "view_pointer.h"
+#include "nel/gui/view_pointer.h"
 // DBView (View linked to the database)
 #include "nel/gui/dbview_bar.h"
 #include "nel/gui/dbview_bar3.h"
