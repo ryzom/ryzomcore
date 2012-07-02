@@ -381,6 +381,14 @@ void updateClientTime()
 	if(NetMngr.isReplayStarting())
 		NetMngr.startReplay();
 #endif
+
+	CWidgetManager::SInterfaceTimes times;
+	times.lastFrameMs = T0;
+	times.thisFrameMs = T1;
+	times.frameDiffMs = DT64;
+
+	CWidgetManager::getInstance()->updateInterfaceTimes( times );
+
 }// updateClientTime //
 
 

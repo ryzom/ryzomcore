@@ -18,9 +18,9 @@
 
 #include "stdpch.h"
 #include "interface_manager.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "group_in_scene_user_info.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../entities.h"
 #include "../user_entity.h"
 #include "../forage_source_cl.h"
@@ -741,8 +741,8 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 			info->setActive(true);
 
 			// Link to the interface
-			pIM->addWindowToMasterGroup("ui:interface", info);
-			CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+			CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", info);
+			CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 			info->setParent(pRoot);
 			if (pRoot)
 				pRoot->addGroup (info);
@@ -1156,7 +1156,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::newGroupInScene(const std::string 
 	{
 		// NB : only use the fast version during edition because duplication of CCDBCtrlSheet not implemented now, but we don't
 		// use it for the edition !!!!
-		CInterfaceElement *prototype = im->getElementFromId("ui:interface:" + templateName + "_proto");
+		CInterfaceElement *prototype = CWidgetManager::getInstance()->getElementFromId("ui:interface:" + templateName + "_proto");
 		if (prototype && dynamic_cast<CInterfaceGroup *>(prototype))
 		{
 			extern bool NoOpForCCtrlSheetInfo_Serial; // CCDBCtrlSheet::serial not implemented, but prevent an assert in its serial because

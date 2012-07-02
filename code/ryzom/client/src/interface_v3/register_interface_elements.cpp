@@ -17,37 +17,40 @@
 
 
 #include "stdpch.h"
-#include "interface_element.h"
+#include "nel/gui/interface_element.h"
 #include "interface_3d_scene.h"
-#include "view_base.h"
-#include "view_text.h"
-#include "view_text_id.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_base.h"
+#include "nel/gui/view_text.h"
+#include "nel/gui/view_text_id.h"
+#include "nel/gui/view_bitmap.h"
 #include "view_radar.h"
-#include "group_menu.h"
-#include "ctrl_base.h"
-#include "interface_group.h"
-#include "group_frame.h"
-#include "group_container.h"
-#include "group_list.h"
-#include "dbgroup_select_number.h"
-#include "ctrl_button.h"
-#include "ctrl_text_button.h"
-#include "ctrl_col_pick.h"
+#include "nel/gui/group_submenu_base.h"
+#include "nel/gui/group_menu.h"
+#include "nel/gui/ctrl_base.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/group_frame.h"
+#include "nel/gui/group_container_base.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/group_list.h"
+#include "nel/gui/dbgroup_select_number.h"
+#include "nel/gui/ctrl_button.h"
+#include "nel/gui/ctrl_text_button.h"
+#include "nel/gui/ctrl_col_pick.h"
+#include "nel/gui/ctrl_draggable.h"
 #include "dbctrl_sheet.h"
 #include "dbgroup_list_sheet.h"
-#include "group_editbox.h"
-#include "group_tree.h"
+#include "nel/gui/group_editbox_base.h"
+#include "nel/gui/group_editbox.h"
+#include "nel/gui/group_tree.h"
 #include "nel/gui/reflect.h"
-#include "dbview_bar.h"
-#include "dbview_bar3.h"
-#include "group_list.h"
-#include "ctrl_scroll.h"
-#include "dbgroup_combo_box.h"
-#include "ctrl_scroll.h"
-#include "group_tab.h"
-#include "group_html.h"
-#include "group_header.h"
+#include "nel/gui/dbview_bar.h"
+#include "nel/gui/dbview_bar3.h"
+#include "nel/gui/ctrl_scroll_base.h"
+#include "nel/gui/ctrl_scroll.h"
+#include "nel/gui/dbgroup_combo_box.h"
+#include "nel/gui/group_tab.h"
+#include "nel/gui/group_html.h"
+#include "nel/gui/group_header.h"
 #include "sphrase_manager.h"
 //
 #include "../r2/displayer_visual.h"
@@ -57,10 +60,14 @@
 #include "../r2/tool.h"
 #include "../r2/tool_pick.h"
 
+#include "view_pointer_ryzom.h"
+
 
 
 void registerInterfaceElements()
 {
+	CViewPointerRyzom::forceLinking();
+
 	REGISTER_REFLECTABLE_CLASS(CInterfaceElement, CReflectable);
 	REGISTER_REFLECTABLE_CLASS(CViewBase, CInterfaceElement);
 	REGISTER_REFLECTABLE_CLASS(CViewText, CViewBase);
@@ -75,19 +82,24 @@ void registerInterfaceElements()
 	REGISTER_REFLECTABLE_CLASS(CCtrlButton, CCtrlBaseButton);
 	REGISTER_REFLECTABLE_CLASS(CCtrlTextButton, CCtrlBaseButton);
 	REGISTER_REFLECTABLE_CLASS(CCtrlColPick, CCtrlBase);
-	REGISTER_REFLECTABLE_CLASS(CDBCtrlSheet, CCtrlBase);
+	REGISTER_REFLECTABLE_CLASS(CCtrlDraggable, CCtrlBase);
+	REGISTER_REFLECTABLE_CLASS(CDBCtrlSheet, CCtrlDraggable);
 	REGISTER_REFLECTABLE_CLASS(CInterfaceGroup, CCtrlBase);
 	REGISTER_REFLECTABLE_CLASS(CGroupFrame, CInterfaceGroup);
 	REGISTER_REFLECTABLE_CLASS(CGroupModal, CGroupFrame);
-	REGISTER_REFLECTABLE_CLASS(CGroupContainer, CInterfaceGroup);
+	REGISTER_REFLECTABLE_CLASS(CGroupContainerBase, CInterfaceGroup);
+	REGISTER_REFLECTABLE_CLASS(CGroupContainer, CGroupContainerBase);
 	REGISTER_REFLECTABLE_CLASS(CDBGroupSelectNumber, CInterfaceGroup);
 	REGISTER_REFLECTABLE_CLASS(IListSheetBase, CInterfaceGroup);
-	REGISTER_REFLECTABLE_CLASS(CGroupEditBox, CInterfaceGroup);
+	REGISTER_REFLECTABLE_CLASS(CGroupEditBoxBase, CInterfaceGroup);
+	REGISTER_REFLECTABLE_CLASS(CGroupEditBox, CGroupEditBoxBase);
 	REGISTER_REFLECTABLE_CLASS(CGroupTree, CInterfaceGroup);
-	REGISTER_REFLECTABLE_CLASS(CDBGroupComboBox, CInterfaceGroup)
-	REGISTER_REFLECTABLE_CLASS(CCtrlScroll, CCtrlBase);
+	REGISTER_REFLECTABLE_CLASS(CDBGroupComboBox, CInterfaceGroup);
+	REGISTER_REFLECTABLE_CLASS(CCtrlScrollBase, CCtrlBase);
+	REGISTER_REFLECTABLE_CLASS(CCtrlScroll, CCtrlScrollBase);
 	REGISTER_REFLECTABLE_CLASS(CGroupMenu, CGroupModal)
-	REGISTER_REFLECTABLE_CLASS(CGroupSubMenu, CGroupFrame)
+	REGISTER_REFLECTABLE_CLASS(CGroupSubMenuBase, CGroupFrame)
+	REGISTER_REFLECTABLE_CLASS(CGroupSubMenu, CGroupSubMenuBase)
 	REGISTER_REFLECTABLE_CLASS(CGroupTab, CInterfaceGroup)
 	REGISTER_REFLECTABLE_CLASS(CGroupScrollText, CInterfaceGroup)
 	REGISTER_REFLECTABLE_CLASS(CGroupHTML, CGroupScrollText)

@@ -20,6 +20,7 @@
 #define RZ_EVENT_DESCRIPTOR_H
 
 #include "nel/misc/types_nl.h"
+#include "nel/misc/events.h"
 
 namespace NLGUI
 {

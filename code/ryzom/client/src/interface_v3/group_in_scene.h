@@ -21,8 +21,8 @@
 #define CL_GROUP_IN_SCENE_HELP_H
 
 #include "nel/misc/types_nl.h"
-#include "group_container.h"
-#include "group_menu.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/group_menu.h"
 
 
 /**
@@ -66,9 +66,6 @@ public:
 	sint32 getOffsetY() const { return _OffsetY; }
 	void setOffsetY(sint32 dmh) { _OffsetY = dmh; }
 
-	// Return the current Depth, with no ZBias applied.
-	float getDepthForZSort() const { return _DepthForZSort; }
-
 	// set/return the ZBias for this group in scene (default 0)
 	void	setZBias(float zbias) {_ZBias= zbias;}
 	float	getZBias() const {return _ZBias;}
@@ -79,9 +76,6 @@ protected:
 
 	// Projected Position memorized. x/y is in window coordinate, while z in is world/camera coordinate
 	NLMISC::CVector		_ProjCenter;
-
-	// Projected Depth with no ZBias applied
-	float				_DepthForZSort;
 
 	// Offset
 	sint32				_OffsetX, _OffsetY;

@@ -21,19 +21,19 @@
 
 #include "interface_manager.h"
 #include "../string_manager_client.h"
-#include "action_handler.h"
-#include "view_text.h"
+#include "nel/gui/action_handler.h"
+#include "nel/gui/view_text.h"
 #include "dbctrl_sheet.h"
-#include "group_container.h"
-#include "group_menu.h"
-#include "group_html.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/group_menu.h"
+#include "nel/gui/group_html.h"
 #include "../init_main_loop.h"
 #include "inventory_manager.h"
 
 #include "../connection.h"
 #include "../entity_cl.h"
 #include "../user_entity.h" // UserEntity
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "../sheet_manager.h"
 #include "../net_manager.h"
 #include "../client_sheets/building_sheet.h"
@@ -43,6 +43,8 @@
 #include "../r2/editor.h"
 #include "chat_window.h"
 #include "people_interraction.h"
+
+#include "../misc.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -325,12 +327,12 @@ void CGuildManager::update()
 				// Open the guild info if we are not in the init phase
 				if (!IngameDbMngr.initInProgress())
 				{
-					pElt = pIM->getElementFromId(WIN_GUILD);
+					pElt = CWidgetManager::getInstance()->getElementFromId(WIN_GUILD);
 					if (pElt != NULL)
 						pElt->setActive(true);
 				}
 				// Browse the forum
-				pElt = pIM->getElementFromId(WIN_GUILD_FORUM":content:html");
+				pElt = CWidgetManager::getInstance()->getElementFromId(WIN_GUILD_FORUM":content:html");
 				if (pElt != NULL)
 				{
 					CGroupHTML *html = dynamic_cast<CGroupHTML*>(pElt);
@@ -423,21 +425,21 @@ void CGuildManager::update()
 			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:GUILD_GRADE")->setValue32(_Grade);
 
 			// update the guild display
-			CGroupContainer *pGuild = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_GUILD));
+			CGroupContainer *pGuild = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_GUILD));
 			if (pGuild != NULL)
 			{
 				// if the guild window is visible
 				if (pGuild->isOpen() && pGuild->getActive())
 				{
 					// Close the modal window if the member list will change
-					if(pIM->getModalWindow()!=NULL && _NeedUpdateMembers)
+					if(CWidgetManager::getInstance()->getModalWindow()!=NULL && _NeedUpdateMembers)
 					{
-						if (pIM->getModalWindow()->getId() == MENU_GUILD_MEMBER )
-							pIM->disableModalWindow();
+						if (CWidgetManager::getInstance()->getModalWindow()->getId() == MENU_GUILD_MEMBER )
+							CWidgetManager::getInstance()->disableModalWindow();
 					}
 
 					// Rebuild interface. Rebuild members only if needed
-					pIM->runActionHandler("guild_sheet_open", NULL, toString("update_members=%d", (uint)_NeedUpdateMembers) );
+					CAHManager::getInstance()->runActionHandler("guild_sheet_open", NULL, toString("update_members=%d", (uint)_NeedUpdateMembers) );
 				}
 			}
 
@@ -456,15 +458,15 @@ void CGuildManager::update()
 		if (bAllValid)
 		{
 			_JoinPropUpdate = false;
-			CGroupContainer *pJoinProp = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_JOIN_PROPOSAL));
+			CGroupContainer *pJoinProp = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_JOIN_PROPOSAL));
 			if (pJoinProp != NULL)
 			{
-				CViewText *pJoinPropPhraseView = dynamic_cast<CViewText*>(pIM->getElementFromId(VIEW_JOIN_PROPOSAL_PHRASE));
+				CViewText *pJoinPropPhraseView = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_JOIN_PROPOSAL_PHRASE));
 				if (pJoinPropPhraseView != NULL)
 					pJoinPropPhraseView->setText(_JoinPropPhrase);
 
 				pJoinProp->setActive(true);
-				pIM->setTopWindow(pJoinProp);
+				CWidgetManager::getInstance()->setTopWindow(pJoinProp);
 				pJoinProp->updateCoords();
 				pJoinProp->center();
 				pJoinProp->enableBlink(2);
@@ -498,10 +500,10 @@ void CGuildManager::launchAscensor()
 
 	// Start Ascensor Interface
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupContainer *pAC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_ASCENSOR));
+	CGroupContainer *pAC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_ASCENSOR));
 	if (pAC == NULL) return;
 	pAC->setActive(true);
-	pIM->setTopWindow(pAC);
+	CWidgetManager::getInstance()->setTopWindow(pAC);
 }
 
 // TEMP TEMP TEMP
@@ -550,7 +552,7 @@ NLMISC_COMMAND(testAscensorPage, "Temp : Simulate the server that fills the data
 void CGuildManager::quitAscensor()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupContainer *pAC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_ASCENSOR));
+	CGroupContainer *pAC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_ASCENSOR));
 	if (pAC == NULL) return;
 	pAC->setActive(false);
 }
@@ -566,7 +568,7 @@ void CGuildManager::launchJoinProposal(uint32 phraseID)
 void CGuildManager::quitJoinProposal()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupContainer *pJoinProp = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_JOIN_PROPOSAL));
+	CGroupContainer *pJoinProp = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_JOIN_PROPOSAL));
 	if (pJoinProp != NULL)
 		pJoinProp->setActive(false);
 }
@@ -575,13 +577,13 @@ void CGuildManager::quitJoinProposal()
 void CGuildManager::closeAllInterfaces()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupContainer *pGuild = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_GUILD));
+	CGroupContainer *pGuild = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_GUILD));
 	if (pGuild != NULL)
 		pGuild->setActive(false);
-	CGroupContainer *pGuildForum = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_GUILD_FORUM));
+	CGroupContainer *pGuildForum = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_GUILD_FORUM));
 	if (pGuildForum != NULL)
 		pGuildForum->setActive(false);
-	CGroupContainer *pGuildChat = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_GUILD_CHAT));
+	CGroupContainer *pGuildChat = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_GUILD_CHAT));
 	if (pGuildChat != NULL)
 		pGuildChat->setActive(false);
 }
@@ -598,13 +600,13 @@ void CGuildManager::openGuildWindow()
 //		node->setValue64(1);
 //
 //	CInterfaceElement *pElt;
-//	pElt = pIM->getElementFromId(WIN_GUILD);
+//	pElt = CWidgetManager::getInstance()->getElementFromId(WIN_GUILD);
 //	if (pElt != NULL)
 //	{
 //		pElt->setActive(true);
 //	}
 //	// Browse the forum
-//	pElt = pIM->getElementFromId(WIN_GUILD_FORUM":content:html");
+//	pElt = CWidgetManager::getInstance()->getElementFromId(WIN_GUILD_FORUM":content:html");
 //	if (pElt != NULL)
 //	{
 //		CGroupHTML *html = dynamic_cast<CGroupHTML*>(pElt);
@@ -785,7 +787,7 @@ class CAHGuildSheetOpen : public IActionHandler
 		const SGuild &rGuild = pGM->getGuild();
 
 		// Freeze / unfreeze quit button
-		CCtrlBaseButton *control = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(VIEW_TEXT_GUILD_QUIT));
+		CCtrlBaseButton *control = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(VIEW_TEXT_GUILD_QUIT));
 		if (control)
 			control->setFrozen (!rGuild.QuitGuildAvailable || pGM->isProxy());
 
@@ -799,12 +801,12 @@ class CAHGuildSheetOpen : public IActionHandler
 
 			// update member count view
 			const vector<SGuildMember> &rGuildMembers = pGM->getGuildMembers();
-			CViewText	*pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(VIEW_TEXT_GUILD_MEMBER_COUNT));
+			CViewText	*pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_TEXT_GUILD_MEMBER_COUNT));
 			if (pVT)
  				pVT->setText(toString(rGuildMembers.size()));
 
 			// rebuild guild member list
-			CGroupList *pParent = dynamic_cast<CGroupList*>(pIM->getElementFromId(LIST_GUILD_MEMBERS));
+			CGroupList *pParent = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId(LIST_GUILD_MEMBERS));
 			if (pParent == NULL) return;
 			pParent->clearGroups();
 			pParent->setDynamicDisplaySize(false);
@@ -892,19 +894,19 @@ static void setRights(bool lead, bool hioff, bool offi, bool recr, bool bear, bo
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewTextMenu *pVTM;
-	pVTM = dynamic_cast<CViewTextMenu*>(pIM->getElementFromId(string(MENU_GUILD_MEMBER":lead")));
+	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":lead")));
 	if (pVTM != NULL) pVTM->setGrayed(!lead);
-	pVTM = dynamic_cast<CViewTextMenu*>(pIM->getElementFromId(string(MENU_GUILD_MEMBER":hiof")));
+	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":hiof")));
 	if (pVTM != NULL) pVTM->setGrayed(!hioff);
-	pVTM = dynamic_cast<CViewTextMenu*>(pIM->getElementFromId(string(MENU_GUILD_MEMBER":offi")));
+	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":offi")));
 	if (pVTM != NULL) pVTM->setGrayed(!offi);
-	pVTM = dynamic_cast<CViewTextMenu*>(pIM->getElementFromId(string(MENU_GUILD_MEMBER":recr")));
+	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":recr")));
 	if (pVTM != NULL) pVTM->setGrayed(!recr);
-	pVTM = dynamic_cast<CViewTextMenu*>(pIM->getElementFromId(string(MENU_GUILD_MEMBER":bear")));
+	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":bear")));
 	if (pVTM != NULL) pVTM->setGrayed(!bear);
-	pVTM = dynamic_cast<CViewTextMenu*>(pIM->getElementFromId(string(MENU_GUILD_MEMBER":memb")));
+	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":memb")));
 	if (pVTM != NULL) pVTM->setGrayed(!memb);
-	pVTM = dynamic_cast<CViewTextMenu*>(pIM->getElementFromId(string(MENU_GUILD_MEMBER":kick")));
+	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":kick")));
 	if (pVTM != NULL) pVTM->setGrayed(!kick);
 }
 
@@ -918,11 +920,11 @@ class CAHGuildSheetMenuOpen : public IActionHandler
 		const vector<SGuildMember> &rGuildMembers = pGM->getGuildMembers();
 
 		// *** Check and retrieve the current member index (index in the member list)
-		CCtrlBase	*ctrlLaunchingModal= pIM->getCtrlLaunchingModal();
+		CCtrlBase	*ctrlLaunchingModal= CWidgetManager::getInstance()->getCtrlLaunchingModal();
 		if (pCaller == NULL || ctrlLaunchingModal == NULL)
 		{
 			// Error -> Close
-			pIM->disableModalWindow();
+			CWidgetManager::getInstance()->disableModalWindow();
 			return;
 		}
 		string sId = ctrlLaunchingModal->getId();
@@ -932,7 +934,7 @@ class CAHGuildSheetMenuOpen : public IActionHandler
 		if ((nLineNb < 0) || (nLineNb >= (sint32)rGuildMembers.size()))
 		{
 			// Error -> Close
-			pIM->disableModalWindow();
+			CWidgetManager::getInstance()->disableModalWindow();
 			return;
 		}
 		MemberIndexSelected= nLineNb;
@@ -942,7 +944,7 @@ class CAHGuildSheetMenuOpen : public IActionHandler
 		if(MemberNameSelected.empty())
 		{
 			// Error -> Close
-			pIM->disableModalWindow();
+			CWidgetManager::getInstance()->disableModalWindow();
 			return;
 		}
 
@@ -1035,7 +1037,7 @@ public:
 		}
 
 		NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->setValue32((sint32)order);
-		pIM->runActionHandler("guild_sheet_open", NULL, toString("update_members=1"));
+		CAHManager::getInstance()->runActionHandler("guild_sheet_open", NULL, toString("update_members=1"));
 	}
 };
 REGISTER_ACTION_HANDLER(CAHGuildSheetSortGuildList, "sort_guild_list");
@@ -1052,7 +1054,7 @@ public:
 		CGuildManager *pGM = CGuildManager::getInstance();
 		const vector<SGuildMember> &rGuildMembers = pGM->getGuildMembers();
 		// *** Check and retrieve the current member index (index in the member list)
-		CCtrlBase	*ctrlLaunchingModal= pIM->getCtrlLaunchingModal();
+		CCtrlBase	*ctrlLaunchingModal= CWidgetManager::getInstance()->getCtrlLaunchingModal();
 		if (pCaller == NULL)
 		{
 			// Error -> Close
@@ -1355,7 +1357,7 @@ class CHandlerGuildInvGetMoney : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		sendMoneyServerMessage("GUILD:TAKE_MONEY");
-		CInterfaceManager::getInstance()->popModalWindow();
+		CWidgetManager::getInstance()->popModalWindow();
 	}
 };
 REGISTER_ACTION_HANDLER (CHandlerGuildInvGetMoney, "guild_inv_get_money");
@@ -1367,7 +1369,7 @@ class CHandlerGuildInvPutMoney : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		sendMoneyServerMessage("GUILD:PUT_MONEY");
-		CInterfaceManager::getInstance()->popModalWindow();
+		CWidgetManager::getInstance()->popModalWindow();
 	}
 };
 REGISTER_ACTION_HANDLER (CHandlerGuildInvPutMoney, "guild_inv_put_money");

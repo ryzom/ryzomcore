@@ -139,6 +139,9 @@ public:
 	enum TStencilOp { keep = 0, zero, replace, incr, decr, invert };
 	enum TStencilFunc { never = 0, less, lessequal, equal, notequal, greaterequal, greater, always};
 
+	// Existing drivers
+	enum TDriver { Direct3d = 0, OpenGl, OpenGlEs };
+
 public:
 	/// The EventServer of this driver. Init after setDisplay()!!
 	NLMISC::CEventServer			EventServer;
@@ -844,6 +847,7 @@ public:
 	 *	This is the static function which build a UDriver, the root for all 3D functions.
 	 */
 	static	UDriver			*createDriver(uint windowIcon = 0, bool direct3d = false, emptyProc exitFunc = 0);
+	static	UDriver			*createDriver(uint windowIcon, TDriver driver, emptyProc exitFunc = 0);
 
 	/**
 	 *	Purge static memory

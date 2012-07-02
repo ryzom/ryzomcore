@@ -185,24 +185,6 @@ enum TFilter3d
 	RYZOM_MAX_FILTER_3D,
 };
 
-
-
-enum TCaseMode
-{
-	CaseNormal = 0,					// Nothing done
-	CaseLower,						// All letters in lowercase
-	CaseUpper,						// All letters in uppercase
-	CaseFirstStringLetterUp,		// The first letter of the string is uppercase, the others are lowercase
-	CaseFirstSentenceLetterUp,		// The first letter of the string and each sentences are uppercase, the others are lowercase. Sentences are seprated with '.'.
-	CaseFirstWordLetterUp,			// The first letter of each word is uppercase, the others are lowercase
-	CaseCount
-};
-
-
-// ***************************************************************************
-// change the case mode of a string
-void setCase (ucstring &str, TCaseMode mode);
-
 // compare 2 ucstring s0 and s1, without regard to case. give start and size for sequence p0
 sint ucstrnicmp(const ucstring &s0, uint p0, uint n0, const ucstring &s1);
 

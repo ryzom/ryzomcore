@@ -43,6 +43,8 @@ namespace NLGUI
 
 		NLGUI::CLuaState* getLuaState() const{ return luaState; }
 
+		bool executeLuaScript( const std::string &luaScript, bool smallScript = false );
+
 	private:
 		CLuaManager();
 

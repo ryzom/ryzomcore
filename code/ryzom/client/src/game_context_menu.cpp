@@ -24,8 +24,8 @@
 // Client.
 #include "game_context_menu.h"
 #include "interface_v3/interface_manager.h"
-#include "interface_v3/ctrl_text_button.h"
-#include "interface_v3/group_menu.h"
+#include "nel/gui/ctrl_text_button.h"
+#include "nel/gui/group_menu.h"
 #include "entities.h"
 #include "interface_v3/bot_chat_manager.h"
 #include "interface_v3/guild_manager.h"
@@ -81,7 +81,7 @@ void		CGameContextMenu::init(const std::string &srcMenuId)
 	std::string menuId = srcMenuId.empty() ?  std::string("game_context_menu") : srcMenuId;
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	_GroupMenu = dynamic_cast<CGroupMenu*>(pIM->getWindowFromId ("ui:interface:" + menuId + ""));
+	_GroupMenu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getWindowFromId ("ui:interface:" + menuId + ""));
 	_ContextVal = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TARGET:CONTEXT_VAL", false);
 
 	if(_GroupMenu == NULL)

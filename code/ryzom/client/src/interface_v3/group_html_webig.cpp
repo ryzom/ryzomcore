@@ -38,7 +38,7 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string container = getParam (sParams, "name");
-		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(container));
+		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(container));
 		if (groupHtml)
 		{
 			groupHtml->browse(groupHtml->Home.c_str());
@@ -199,7 +199,7 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 				if(_CheckMailNode)
 				{
 					_CheckMailNode->setValue32(nbmail==0?0:1);
-					CInterfaceElement *elm = pIM->getElementFromId("ui:interface:compass:mail:mail_nb");
+					CInterfaceElement *elm = CWidgetManager::getInstance()->getElementFromId("ui:interface:compass:mail:mail_nb");
 					if (elm)
 					{
 						CViewText *vt = dynamic_cast<CViewText*>(elm);
@@ -226,7 +226,7 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 				if(_CheckForumNode)
 				{
 					_CheckForumNode->setValue32(nbforum==0?0:1);
-					CInterfaceElement *elm = pIM->getElementFromId("ui:interface:compass:forum:forum_nb");
+					CInterfaceElement *elm = CWidgetManager::getInstance()->getElementFromId("ui:interface:compass:forum:forum_nb");
 					if (elm)
 					{
 						CViewText *vt = dynamic_cast<CViewText*>(elm);

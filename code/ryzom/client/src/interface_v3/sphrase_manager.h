@@ -26,7 +26,7 @@
 #include "brick_learned_callback.h"
 #include "skill_change_callback.h"
 #include "trade_common.h"
-#include "interface_element.h"
+#include "nel/gui/interface_element.h"
 #include "../time_client.h"
 
 

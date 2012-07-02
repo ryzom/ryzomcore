@@ -132,7 +132,7 @@ public :
 				entity->updateMissionTarget();
 
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CGroupCompas *gc = dynamic_cast<CGroupCompas *>(im->getElementFromId("ui:interface:compass"));
+			CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
 			// if new target title is not NULL, then show the compass and make it blink to indicate new location
 			// please note that the first time the player login, a target has not been saved in his config file, so
 			// we permit the first (and only one) mission that is received to become the new compass direction (chiang the strong ...)
@@ -159,7 +159,7 @@ public :
 			if (leaf->getOldValue32() != 0)
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				CGroupCompas *pGC = dynamic_cast<CGroupCompas*>(pIM->getElementFromId("ui:interface:compass"));
+				CGroupCompas *pGC = dynamic_cast<CGroupCompas*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
 				if (pGC == NULL)
 				{
 					nlwarning("Can't retrieve compass group");
@@ -198,7 +198,7 @@ public :
 //					{
 //						_AlreadyReceived.insert(name);
 						CInterfaceManager *im = CInterfaceManager::getInstance();
-						CGroupCompas *gc = dynamic_cast<CGroupCompas *>(im->getElementFromId("ui:interface:compass"));
+						CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
 						if (!gc)
 						{
 							nlwarning("Can't retrieve compass group");
@@ -223,7 +223,7 @@ public :
 									gc->setTarget(ct);
 									gc->blink();
 									gc->enableBlink(2);
-									im->setTopWindow(gc);
+									CWidgetManager::getInstance()->setTopWindow(gc);
 								}
 							}
 						}

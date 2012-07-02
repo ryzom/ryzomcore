@@ -32,7 +32,7 @@
 #include "nel/misc/polygon.h"
 //
 // tmp tmp
-#include "../interface_v3/ctrl_quad.h"
+#include "nel/gui/ctrl_quad.h"
 
 
 using namespace NLMISC;

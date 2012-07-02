@@ -19,7 +19,7 @@
 #include "stdpch.h"
 #include "bot_chat_page_news.h"
 #include "interface_manager.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 
 static const char *WIN_BOT_CHAT_PAGE_NEWS = "ui:interface:bot_chat_news";
 

@@ -22,7 +22,7 @@
 #include "interface_manager.h"
 #include "nel/gui/interface_expr.h"
 
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 
 #include "game_share/skills.h"
 #include "game_share/brick_families.h"
@@ -153,7 +153,7 @@ void	CGroupPhraseSkillFilter::rebuild()
 	// get the tree
 	if (_Tree == NULL)
 	{
-		_Tree = dynamic_cast<CGroupTree*>(pIM->getElementFromId(getId(),"sbtree:tree_list"));
+		_Tree = dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(getId(),"sbtree:tree_list"));
 
 		if (_Tree == NULL)
 		{

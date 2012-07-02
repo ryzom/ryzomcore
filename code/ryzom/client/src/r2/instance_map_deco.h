@@ -21,9 +21,13 @@
 #include "../interface_v3/group_map.h"
 #include "displayer_visual.h"
 
+namespace NLGUI
+{
+	class CCtrlQuad;
+	class CViewBitmap;
+}
+
 class CGroupMap;
-class CCtrlQuad;
-class CViewBitmap;
 
 namespace R2
 {

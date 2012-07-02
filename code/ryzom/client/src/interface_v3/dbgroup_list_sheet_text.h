@@ -25,12 +25,17 @@
 #include "nel/misc/types_nl.h"
 #include "list_sheet_base.h"
 #include "dbctrl_sheet.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
+
+namespace NLGUI
+{
+	class CCtrlButton;
+	class CCtrlScroll;
+	class CGroupContainer;
+}
 
 
 // ***************************************************************************
-class	CCtrlButton;
-class	CCtrlScroll;
 class	CHandlerListSheetTradeSelect;
 class	CHandlerListSheetTradeRightClick;
 

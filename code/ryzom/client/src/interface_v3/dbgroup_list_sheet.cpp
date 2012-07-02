@@ -20,11 +20,11 @@
 
 
 #include "dbgroup_list_sheet.h"
-#include "group_container.h"
-#include "ctrl_button.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/ctrl_button.h"
 #include "nel/gui/interface_property.h"
 #include "interface_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../sheet_manager.h"
 #include "game_share/animal_status.h"
 
@@ -141,7 +141,7 @@ bool CDBGroupListSheet::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	}
 
 	// get item size.
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	sint32	dispSlotBmpId = 0;
 	switch(_CtrlInfo._Type)
 	{
@@ -252,7 +252,7 @@ sint CDBGroupListSheet::getCurScrollValue()
 // ***************************************************************************
 CGroupContainer *CDBGroupListSheet::getContainer()
 {
-	return dynamic_cast<CGroupContainer*>(CInterfaceManager::getInstance()->getWindow(this));
+	return dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getWindow(this));
 /*	CGroupContainer *pGC = NULL;
 	CInterfaceGroup *pParent = getParent();
 	while (pParent != NULL)
@@ -326,7 +326,7 @@ void CDBGroupListSheet::updateCoords ()
 		if (_DisplayEmptySlot)
 		{
 			// increment num sheet if the empty slot is to be displayed
-			CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CInterfaceManager::getInstance()->getCtrlLaunchingModal());
+			CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 			if (pCS != NULL && pCS->isSheetValid()) ++numValidSheets;
 		}
 		_ColumnMax = (uint) (ceil(sqrtf((float) numValidSheets)));
@@ -388,7 +388,7 @@ void CDBGroupListSheet::updateCoords ()
 		if ( (_DisplayEmptySlot) && (i == 0) )
 		{
 			_SheetChildren[i]->Valid= true;
-			CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CInterfaceManager::getInstance()->getCtrlLaunchingModal());
+			CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 			if (pCS != NULL)
 			{
 				ctrl->setTextureNoItem (pCS->getTextureNoItem());
@@ -711,18 +711,18 @@ void CDBGroupListSheet::draw ()
 
 	_CanDrop = false;
 	if (_CtrlInfo._AHOnCanDrop != NULL)
-	if (pIM->getCapturePointerLeft())
+	if (CWidgetManager::getInstance()->getCapturePointerLeft())
 	{
 		CGroupContainer *pGC = getContainer();
-		if (pIM->getCurrentWindowUnder() == pGC)
+		if (CWidgetManager::getInstance()->getCurrentWindowUnder() == pGC)
 		{
-			if ((pIM->getPointer()->getX() >= _XReal) &&
-				(pIM->getPointer()->getX() < (_XReal + _WReal))&&
-				(pIM->getPointer()->getY() > _YReal) &&
-				(pIM->getPointer()->getY() <= (_YReal+ _HReal)))
+			if ((CWidgetManager::getInstance()->getPointer()->getX() >= _XReal) &&
+				(CWidgetManager::getInstance()->getPointer()->getX() < (_XReal + _WReal))&&
+				(CWidgetManager::getInstance()->getPointer()->getY() > _YReal) &&
+				(CWidgetManager::getInstance()->getPointer()->getY() <= (_YReal+ _HReal)))
 			{
-				CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pIM->getCapturePointerLeft());
-				if ((pCSSrc != NULL) && pCSSrc->isDraging())
+				CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCapturePointerLeft());
+				if ((pCSSrc != NULL) && pCSSrc->isDragged())
 				{
 					string params = string("src=") + pCSSrc->getId();
 					if (!_CtrlInfo._AHCanDropParams.empty())
@@ -730,7 +730,7 @@ void CDBGroupListSheet::draw ()
 						string sTmp = _CtrlInfo._AHCanDropParams;
 						params = sTmp + "|" + params;
 					}
-					pIM->runActionHandler (_CtrlInfo._AHOnCanDrop, this, params);
+					CAHManager::getInstance()->runActionHandler (_CtrlInfo._AHOnCanDrop, this, params);
 				}
 			}
 		}
@@ -942,7 +942,7 @@ sint32 CDBGroupListSheet::getNbElt () const
 		// special display empty slot
 		if ( (_DisplayEmptySlot) && (i == 0) )
 		{
-			CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CInterfaceManager::getInstance()->getCtrlLaunchingModal());
+			CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 			if (pCS != NULL)
 			{
 				ctrl->setTextureNoItem (pCS->getTextureNoItem());

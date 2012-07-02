@@ -25,21 +25,28 @@
 
 #include "../client_sheets/world_sheet.h"
 
-#include "interface_group.h"
-#include "ctrl_button.h"
-#include "view_bitmap.h"
-#include "view_text.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/ctrl_button.h"
+#include "nel/gui/view_bitmap.h"
+#include "nel/gui/view_text.h"
 #include "animal_position_state.h"
 #include "../continent.h"
 //
 
 
 class CContinent;
-namespace NLMISC{
-class CCDBNodeLeaf;
+
+namespace NLMISC
+{
+	class CCDBNodeLeaf;
 }
+
+namespace NLGUI
+{
+	class CCtrlQuad;
+}
+
 class CWorldSheet;
-class CCtrlQuad;
 struct SMap;
 
 namespace NL3D

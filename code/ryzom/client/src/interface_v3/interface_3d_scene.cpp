@@ -30,7 +30,7 @@
 #include "nel/3d/u_animation_set.h"
 
 #include "nel/misc/xml_auto_ptr.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 
 #include "nel/gui/lua_ihm.h"
 
@@ -78,7 +78,7 @@ CInterface3DScene::~CInterface3DScene()
 	for (i = 0; i < _FXs.size(); ++i)
 		delete _FXs[i];
 
-	NL3D::UDriver *Driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
+	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 	if (_Scene != NULL)
 		Driver->deleteScene (_Scene);
 
@@ -162,7 +162,7 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	_Ref3DScene = NULL;
 	if (ptr)
 	{
-		CInterfaceElement *pIE = pIM->getElementFromId(this->getId(), ptr);
+		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(this->getId(), ptr);
 		_Ref3DScene = dynamic_cast<CInterface3DScene*>(pIE);
 	}
 	if (_Ref3DScene != NULL)
@@ -172,7 +172,7 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 		return true;
 	}
 
-	NL3D::UDriver *Driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
+	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 	nlassert ( Driver != NULL);
 
 	_Scene = Driver->createScene(true);
@@ -299,7 +299,7 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 			if (!animName.empty())
 			{
 				if (_AutoAnimSet == NULL)
-					_AutoAnimSet = CInterfaceManager::getInstance()->getViewRenderer().getDriver()->createAnimationSet();
+					_AutoAnimSet = CViewRenderer::getInstance()->getDriver()->createAnimationSet();
 				uint id = _AutoAnimSet->addAnimation (ptr, animName.c_str ());
 				if (id == UAnimationSet::NotFound)
 				{
@@ -378,14 +378,14 @@ void CInterface3DScene::draw ()
 {
 	H_AUTO( RZ_Interface_CInterface3DScene_draw  )
 
-	NL3D::UDriver *Driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
+	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 
 	if ( Driver == NULL)
 		return;
 
 	// No Op if screen minimized
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	if(rVR.isMinimized())
 		return;
 
@@ -438,7 +438,7 @@ void CInterface3DScene::draw ()
 	float vpW = (float) clipw / iavoid0(wsw);
 	float vpH = (float) cliph / iavoid0(wsh);
 	newVP.init(vpX, vpY, vpW, vpH);
-	NL3D::CFrustum  oldFrustum = CInterfaceManager::getInstance()->getViewRenderer().getDriver()->getFrustum();
+	NL3D::CFrustum  oldFrustum = CViewRenderer::getInstance()->getDriver()->getFrustum();
 	NL3D::CFrustum  newFrustum;
 	newFrustum.initPerspective (pI3DCam->getFOV() * (float) (NLMISC::Pi / 180), (float) _WReal / iavoid0(_HReal), 0.1f, 100.f);
 
@@ -540,7 +540,7 @@ void CInterface3DScene::draw ()
 	Driver->setFrustum(oldFrustum);
 
 	// Restaure render states
-	pIM->getViewRenderer().setRenderStates();
+	CViewRenderer::getInstance()->setRenderStates();
 
 	restoreClip (oldSciX, oldSciY, oldSciW, oldSciH);
 }
@@ -571,8 +571,8 @@ bool CInterface3DScene::handleEvent (const NLGUI::CEventDescriptor &event)
 	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
 		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
-		if ((CInterfaceManager::getInstance()->getCapturePointerLeft() != this) &&
-			(CInterfaceManager::getInstance()->getCapturePointerRight() != this) &&
+		if ((CWidgetManager::getInstance()->getCapturePointerLeft() != this) &&
+			(CWidgetManager::getInstance()->getCapturePointerRight() != this) &&
 			(!((eventDesc.getX() >= _XReal) &&
 			(eventDesc.getX() < (_XReal + _WReal))&&
 			(eventDesc.getY() > _YReal) &&
@@ -585,7 +585,7 @@ bool CInterface3DScene::handleEvent (const NLGUI::CEventDescriptor &event)
 			_MouseLDownX = eventDesc.getX();
 			_MouseLDownY = eventDesc.getY();
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			pIM->setCapturePointerLeft(this); // Because we are not just a control
+			CWidgetManager::getInstance()->setCapturePointerLeft(this); // Because we are not just a control
 			return true;
 		}
 		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
@@ -599,7 +599,7 @@ bool CInterface3DScene::handleEvent (const NLGUI::CEventDescriptor &event)
 			_MouseRDownX = eventDesc.getX();
 			_MouseRDownY = eventDesc.getY();
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			pIM->setCapturePointerRight(this); // Because we are not just a control
+			CWidgetManager::getInstance()->setCapturePointerRight(this); // Because we are not just a control
 			return true;
 		}
 		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
@@ -705,7 +705,7 @@ void CInterface3DScene::setCurrentCamera (const string &name)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CInterface3DScene *pI3DS = (_Ref3DScene != NULL) ? _Ref3DScene : this;
-	CInterfaceElement *pIE = pIM->getElementFromId(pI3DS->getId(), name);
+	CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(pI3DS->getId(), name);
 	CInterface3DCamera *pI3DCam = dynamic_cast<CInterface3DCamera*>(pIE);
 	if (pI3DCam != NULL)
 	{
@@ -732,7 +732,7 @@ void CInterface3DScene::setCurrentClusterSystem(const string &sCSName)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CInterface3DScene *pI3DS = (_Ref3DScene != NULL) ? _Ref3DScene : this;
-	CInterfaceElement *pIE = pIM->getElementFromId(pI3DS->getId(), sCSName);
+	CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(pI3DS->getId(), sCSName);
 	CInterface3DIG *pI3DIG = dynamic_cast<CInterface3DIG*>(pIE);
 	if (pI3DIG != NULL)
 	{
@@ -1097,7 +1097,7 @@ bool CInterface3DIG::parse (xmlNodePtr cur, CInterface3DScene *parentGroup)
 	setRotX (_Rot.x);
 	setRotY (_Rot.y);
 	setRotZ (_Rot.z);
-	_IG->addToScene (*parentGroup->getScene(), CInterfaceManager::getInstance()->getViewRenderer().getDriver() );
+	_IG->addToScene (*parentGroup->getScene(), CViewRenderer::getInstance()->getDriver() );
 	parentGroup->getScene()->setToGlobalInstanceGroup (_IG);
 
 	return true;
@@ -1218,7 +1218,7 @@ void CInterface3DIG::setName (const std::string &ht)
 		_IG = UInstanceGroup::createInstanceGroup(_Name);
 		if (_IG == NULL) return;
 		_IG->setPos (_Pos);
-		_IG->addToScene (*pI3DS->getScene(), CInterfaceManager::getInstance()->getViewRenderer().getDriver() );
+		_IG->addToScene (*pI3DS->getScene(), CViewRenderer::getInstance()->getDriver() );
 		pI3DS->getScene()->setToGlobalInstanceGroup (_IG);
 	}
 }

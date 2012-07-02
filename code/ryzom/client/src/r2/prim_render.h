@@ -27,10 +27,10 @@
 namespace NLGUI
 {
 	class CLuaObject;
+	class CCtrlPolygon;
 }
 
 class CEntityCL;
-class CCtrlPolygon;
 
 namespace R2
 {

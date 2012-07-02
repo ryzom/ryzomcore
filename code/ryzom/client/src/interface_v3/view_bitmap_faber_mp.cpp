@@ -119,7 +119,7 @@ void CViewBitmapFaberMp::draw ()
 */
 
 	//get the item
-	CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	uint32 sheet = (uint32)_SheetId.getSInt64();
 	CSheetId sheetId(sheet);

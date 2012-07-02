@@ -20,8 +20,8 @@
 #define NL_GROUP_SKILLS_H
 
 #include "nel/misc/types_nl.h"
-#include "interface_group.h"
-#include "group_tree.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/group_tree.h"
 
 // ***************************************************************************
 /** A Group that display all skills by category in a job

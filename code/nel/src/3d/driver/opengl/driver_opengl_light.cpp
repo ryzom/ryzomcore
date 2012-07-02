@@ -19,9 +19,15 @@
 #include "driver_opengl.h"
 #include "nel/3d/light.h"
 
-namespace NL3D
-{
+namespace NL3D {
 
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 // ***************************************************************************
 uint	CDriverGL::getMaxLight () const
@@ -357,5 +363,8 @@ void			CDriverGL::setupLightMapDynamicLighting(bool enable)
 	refreshRenderSetup();
 }
 
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D

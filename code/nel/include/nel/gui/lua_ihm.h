@@ -19,6 +19,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/gui/lua_helper.h"
+#include "nel/gui/interface_element.h"
 
 #define IHM_LUA_METATABLE		"__ui_metatable"
 #define IHM_LUA_ENVTABLE		"__ui_envtable"
@@ -122,13 +123,28 @@ namespace NLGUI
 		// push a reflected property on the stack
 		// NB : no check is done that 'property' is part of the class info of 'reflectedObject'
 		static void luaValueFromReflectedProperty(CLuaState &ls, CReflectable &reflectedObject, const CReflectedProperty &property);
-
-
-
+		
 	private:
+		// Functions for the ui metatable
+		static class CInterfaceElement* getUIRelative( CInterfaceElement *pIE, const std::string &propName );
+		static int luaUIIndex( CLuaState &ls );
+		static int luaUINewIndex( CLuaState &ls );
+		static int luaUIEq( CLuaState &ls );
+		static int luaUINext( CLuaState &ls );
+		static int luaUIDtor( CLuaState &ls );
+
+
 		static void	registerBasics(CLuaState &ls);
 		static void	registerIHM(CLuaState &ls);
 		static void createLuaEnumTable(CLuaState &ls, const std::string &str);
+
+	public:
+		static void pushUIOnStack(CLuaState &ls, CInterfaceElement *pIE);
+		static bool	isUIOnStack(CLuaState &ls, sint index);
+		static CInterfaceElement	*getUIOnStack(CLuaState &ls, sint index);
+		static void	checkArgTypeUIElement(CLuaState &ls, const char *funcName, uint index);
+
+	private:
 
 		//////////////////////////////////////////// Exported functions //////////////////////////////////////////////////////
 
@@ -143,6 +159,31 @@ namespace NLGUI
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		static int luaMethodCall(lua_State *ls);
+		
+		static int	setOnDraw(CLuaState &ls);		// params: CInterfaceGroup*, "script". return: none
+		static int	addOnDbChange(CLuaState &ls);	// params: CInterfaceGroup*, "dblist", "script". return: none
+		static int	removeOnDbChange(CLuaState &ls);// params: CInterfaceGroup*. return: none
+		static int  setCaptureKeyboard(CLuaState &ls);
+		static int  resetCaptureKeyboard(CLuaState &ls);
+		static int	getUIId(CLuaState &ls);			// params: CInterfaceElement*. return: ui id (empty if error)
+		static int	runAH(CLuaState &ls);			// params: CInterfaceElement *, "ah", "params". return: none
+		static int  getWindowSize(CLuaState &ls);
+		static int	setTopWindow(CLuaState &ls); // set the top window
+		static int  getTextureSize(CLuaState &ls);
+		static int	disableModalWindow(CLuaState &ls);
+		static int	deleteUI(CLuaState &ls);		// params: CInterfaceElement*.... return: none
+		static int	deleteReflectable(CLuaState &ls);		// params: CInterfaceElement*.... return: none
+		static int	getCurrentWindowUnder(CLuaState &ls);		// params: none. return: CInterfaceElement*  (nil if none)
+		static bool	fileExists(const std::string &fileName);
+		static int	runExprAndPushResult(CLuaState &ls, const std::string &expr);		// Used by runExpr and runFct
+		static int	runExpr(CLuaState &ls);			// params: "expr". return: any of: nil,bool,string,number, RGBA, UCString
+		static int	runFct(CLuaState &ls);			// params: "expr", param1, param2.... return: any of: nil,bool,string,number, RGBA, UCString
+		static int  runCommand(CLuaState &ls);      // params: "command name", param1, param2 ... return true or false
+		static int  isUCString(CLuaState &ls);
+		static int	concatUCString(CLuaState &ls); // workaround for + operator that don't work in luabind for ucstrings ...
+		static int	concatString(CLuaState &ls); // speedup concatenation of several strings
+		static int	tableToString(CLuaState &ls); // concat element of a table to build a string
+		static int	getPathContent(CLuaState &ls);
 	};
 
 }

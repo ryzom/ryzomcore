@@ -91,7 +91,7 @@
 #include "misc.h"
 #include "interface_v3/people_interraction.h"
 #include "debug_client.h"
-#include "interface_v3/action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "interface_v3/action_handler_misc.h"
 #include "interface_v3/action_handler_item.h"
 #include "fx_manager.h"
@@ -125,7 +125,7 @@
 #include "nel/misc/check_fpu.h"
 
 // TMP TMP
-#include "interface_v3/ctrl_polygon.h"
+#include "nel/gui/ctrl_polygon.h"
 // TMP TMP
 #include "game_share/scenario_entry_points.h"
 #include "nel/3d/driver.h"
@@ -146,6 +146,7 @@
 #include "string_manager_client.h"
 
 #include "nel/gui/lua_manager.h"
+#include "nel/gui/group_table.h"
 
 
 ///////////
@@ -317,7 +318,6 @@ uint32				OldWidth;		// Last Width of the window.
 uint32				OldHeight;		// Last Height of the window.
 
 bool				ShowInterface = true;	// Do the Chat OSD have to be displayed.
-bool				DebugUICell = false;
 bool				DebugUIView = false;
 bool				DebugUICtrl = false;
 bool				DebugUIGroup = false;
@@ -1310,44 +1310,44 @@ void	updateGameQuitting()
 	// update the window
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	CInterfaceGroup		*group= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:free_trial_game_quitting"));
+	CInterfaceGroup		*group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:free_trial_game_quitting"));
 	if(group)
 	{
 		// if Free trial
 		if(paying_account_request)
 		{
 			// if no current modal window, or if not the quit window
-			if(group != pIM->getModalWindow())
+			if(group != CWidgetManager::getInstance()->getModalWindow())
 			{
 				// disable
-				pIM->disableModalWindow();
-				pIM->enableModalWindow(NULL, group);
+				CWidgetManager::getInstance()->disableModalWindow();
+				CWidgetManager::getInstance()->enableModalWindow(NULL, group);
 			}
 		}
 
 		else
 		{
 			// if the current modal window is the quit window, disable
-			if(group == pIM->getModalWindow())
+			if(group == CWidgetManager::getInstance()->getModalWindow())
 			{
 				// disable
-				pIM->disableModalWindow();
+				CWidgetManager::getInstance()->disableModalWindow();
 			}
 		}
 	}
 
-	group= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:game_quitting"));
+	group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_quitting"));
 	if(group)
 	{
 		// if exit request
 		if(game_exit_request && !paying_account_request)
 		{
 			// if no current modal window, or if not the quit window
-			if(group != pIM->getModalWindow())
+			if(group != CWidgetManager::getInstance()->getModalWindow())
 			{
 				// disable
-				pIM->disableModalWindow();
-				pIM->enableModalWindow(NULL, group);
+				CWidgetManager::getInstance()->disableModalWindow();
+				CWidgetManager::getInstance()->enableModalWindow(NULL, group);
 
 				bool farTPing = FarTP.isFarTPInProgress();
 				// Far TP: skipping not allowed (because we can't duplicate the avatar...), anyway the quit button would quit the game (no far tp)
@@ -1370,10 +1370,10 @@ void	updateGameQuitting()
 		else
 		{
 			// if the current modal window is the quit window, disable
-			if(group == pIM->getModalWindow())
+			if(group == CWidgetManager::getInstance()->getModalWindow())
 			{
 				// disable
-				pIM->disableModalWindow();
+				CWidgetManager::getInstance()->disableModalWindow();
 			}
 		}
 	}
@@ -1388,7 +1388,7 @@ void setDefaultChatWindow(CChatWindow *defaultChatWindow)
 		if (defaultChatWindow->getContainer())
 		{
 			CInterfaceGroup *ig = defaultChatWindow->getContainer()->getGroup("eb");
-			if (ig) im->setDefaultCaptureKeyboard(ig);
+			if (ig) CWidgetManager::getInstance()->setDefaultCaptureKeyboard(ig);
 		}
 	}
 }
@@ -1735,10 +1735,10 @@ bool mainLoop()
 			H_AUTO_USE ( RZ_Client_Main_Loop_Cursor )
 
 			// Change only if screen is not minimized
-			if(!pIMinstance->getViewRenderer().isMinimized())
+			if(!CViewRenderer::getInstance()->isMinimized())
 			{
 				// Get the cursor instance
-				CViewPointer *cursor = pIMinstance->getPointer();
+				CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 				if(cursor)
 				{
 					// Get the pointer position (in pixel)
@@ -1746,7 +1746,7 @@ bool mainLoop()
 					cursor->getPointerPos(x, y);
 
 					uint32 w, h;
-					CViewRenderer &viewRender = pIMinstance->getViewRenderer();
+					CViewRenderer &viewRender = *CViewRenderer::getInstance();
 					viewRender.getScreenSize(w, h);
 
 					if(w)
@@ -1778,7 +1778,7 @@ bool mainLoop()
 			{
 				// When database received, activate allegiance buttons (for neutral state) in fame window
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				CInterfaceGroup	*group = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:fame:content:you"));
+				CInterfaceGroup	*group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:fame:content:you"));
 				if (group)
 					group->updateAllLinks();
 				// send a msg to lua for specific ui update
@@ -3010,7 +3010,7 @@ bool mainLoop()
 		Actions.enable(false);
 		EditActions.enable(false);
 
-		CInterfaceManager::getInstance()->setDefaultCaptureKeyboard(NULL);
+		CWidgetManager::getInstance()->setDefaultCaptureKeyboard(NULL);
 
 		// Interface saving
 		CInterfaceManager::getInstance()->uninitInGame0();
@@ -3115,8 +3115,8 @@ void displayDebugUIUnderMouse()
 		line-= 2 * lineStep;
 	}
 	//
-	const vector<CCtrlBase *> &rICL = pIM->getCtrlsUnderPointer ();
-	const vector<CInterfaceGroup *> &rIGL = pIM->getGroupsUnderPointer ();
+	const vector<CCtrlBase *> &rICL = CWidgetManager::getInstance()->getCtrlsUnderPointer ();
+	const vector<CInterfaceGroup *> &rIGL = CWidgetManager::getInstance()->getGroupsUnderPointer ();
 	// If previous highlighted element is found in the list, then keep it, else reset to first element
 	if (std::find(rICL.begin(), rICL.end(), HighlightedDebugUI) == rICL.end() &&
 		std::find(rIGL.begin(), rIGL.end(), HighlightedDebugUI) == rIGL.end())
@@ -3183,8 +3183,8 @@ void displayDebugUIUnderMouse()
 static void getElementsUnderMouse(vector<CInterfaceElement *> &ielem)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	const vector<CCtrlBase *> &rICL = pIM->getCtrlsUnderPointer();
-	const vector<CInterfaceGroup *> &rIGL = pIM->getGroupsUnderPointer();
+	const vector<CCtrlBase *> &rICL = CWidgetManager::getInstance()->getCtrlsUnderPointer();
+	const vector<CInterfaceGroup *> &rIGL = CWidgetManager::getInstance()->getGroupsUnderPointer();
 	ielem.clear();
 	ielem.insert(ielem.end(), rICL.begin(), rICL.end());
 	ielem.insert(ielem.end(), rIGL.begin(), rIGL.end());
@@ -3234,7 +3234,7 @@ class CHandlerDebugUiDumpElementUnderMouse : public IActionHandler
 		CLuaState *lua = CLuaManager::getInstance().getLuaState();
 		if (!lua) return;
 		CLuaStackRestorer lsr(lua, 0);
-		CLuaIHMRyzom::pushUIOnStack(*lua, HighlightedDebugUI);
+		CLuaIHM::pushUIOnStack(*lua, HighlightedDebugUI);
 		lua->pushValue(LUA_GLOBALSINDEX);
 		CLuaObject env(*lua);
 		env["inspect"].callNoThrow(1, 0);
@@ -4394,7 +4394,8 @@ NLMISC_COMMAND(debugUI, "Debug the ui : show/hide quads of bboxs and hotspots", 
 		else
 			fromString(args[0], on);
 	}
-	DebugUICell = on;
+	
+	CGroupCell::setDebugUICell( on );
 	DebugUIView = on;
 	DebugUICtrl = on;
 	DebugUIGroup = on;
@@ -4426,7 +4427,7 @@ NLMISC_COMMAND(debugUIGroup, "Debug the ui : show/hide quads of bboxs and hotspo
 // show hide the debuging of cells
 NLMISC_COMMAND(debugUICell, "Debug the ui : show/hide quads of bboxs for cells", "")
 {
-	DebugUICell = !DebugUICell;
+	CGroupCell::setDebugUICell( !CGroupCell::getDebugUICell() );
 	return true;
 }
 
@@ -4552,11 +4553,11 @@ void inGamePatchUncompleteWarning()
 	im->executeLuaScript("bgdownloader:inGamePatchUncompleteWarning()");
 	/*
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId("ui:interface:bg_downloader"));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:bg_downloader"));
 	if (gc)
 	{
 		gc->setActive(true);
-		im->setTopWindow(gc);
+		CWidgetManager::getInstance()->setTopWindow(gc);
 		gc->enableBlink(2);
 	}
 	im->messageBoxWithHelp(CI18N::get("uiBGD_InGamePatchIncomplete"));

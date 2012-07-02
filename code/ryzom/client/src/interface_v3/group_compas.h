@@ -22,8 +22,8 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/vector_2f.h"
-#include "group_container.h"
-#include "group_menu.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/group_menu.h"
 #include "animal_position_state.h"
 
 class CViewRadar;

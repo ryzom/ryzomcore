@@ -242,9 +242,9 @@ void	releaseMainLoopReselect()
 	EditActions.releaseAllKeyNoRunning();
 	Actions.releaseAllKeyNoRunning();
 	pIM->removeAllTemplates();
-	pIM->setCaptureKeyboard(NULL);
-	pIM->setCapturePointerLeft(NULL);
-	pIM->setCapturePointerRight(NULL);
+	CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
+	CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
+	CWidgetManager::getInstance()->setCapturePointerRight(NULL);
 
 	// Yoyo: Don't release attack list manager, because I think it only owns static data (and 3D data created from Driver, not Scenes)
 	// Note that in initMainLoop(), CAttackListManager::getInstance().init() will do nothing (since already created and not released here)
@@ -636,6 +636,7 @@ void release()
 	NLNET::IModuleManager::releaseInstance();
 	delete &CLuaManager::getInstance();
 	NLGUI::CDBManager::release();
+	CWidgetManager::release();
 	
 
 

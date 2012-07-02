@@ -19,7 +19,7 @@
 
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/class_registry.h"
-#include "../interface_v3/interface_element.h"
+#include "nel/gui/interface_element.h"
 
 namespace NLGUI
 {
@@ -38,7 +38,7 @@ class CObjectTable;
   * - one for the ui (displaying instance in the object tree for example)
   * - one for the property sheet of the instance
   */
-class CDisplayerBase : public NLMISC::IClassable, public CReflectableRefPtrTarget
+class CDisplayerBase : public NLMISC::IClassable, public NLGUI::CReflectableRefPtrTarget
 {
 public:
 	typedef NLMISC::CSmartPtr<CDisplayerBase> TSmartPtr;

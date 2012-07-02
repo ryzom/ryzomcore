@@ -22,7 +22,11 @@
 
 class CBotChatPage;
 class CPrerequisitInfos;
-class CInterfaceGroup;
+
+namespace NLGUI
+{
+	class CInterfaceGroup;
+}
 
 class	IMissionPrereqInfosWaiter
 {

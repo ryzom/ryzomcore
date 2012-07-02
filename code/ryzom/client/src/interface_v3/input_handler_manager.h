@@ -26,6 +26,7 @@
 #include <string>
 #include "nel/gui/event_descriptor.h"
 #include "nel/gui/input_handler.h"
+#include "nel/gui/group_editbox.h"
 
 
 /**
@@ -40,7 +41,7 @@
  */
 
 
-class CInputHandlerManager : public NLMISC::IEventListener
+class CInputHandlerManager : public NLMISC::IEventListener, public CGroupEditBox::IComboKeyHandler
 {
 public:
 	/// The EventServer Filled with Filtered Messages the InterfaceManager didn't cactch

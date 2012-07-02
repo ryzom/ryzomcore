@@ -63,7 +63,7 @@
 #include "init_main_loop.h"
 #include "sheet_manager.h"
 #include "sound_manager.h"
-#include "interface_v3/group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "debug_client.h"
 #include "user_entity.h"
 #include "time_client.h"
@@ -88,7 +88,7 @@
 #include "actions_client.h"
 #include "attack_list.h"
 #include "interface_v3/player_trade.h"
-#include "interface_v3/ctrl_base_button.h"
+#include "nel/gui/ctrl_base_button.h"
 #include "weather.h"
 #include "forage_source_cl.h"
 #include "connection.h"
@@ -1340,11 +1340,11 @@ NLMISC_COMMAND(ah, "Launch an action handler", "<ActionHandler> <AHparam>")
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if (args.size() == 1)
 	{
-		pIM->runActionHandler(args[0], NULL);
+		CAHManager::getInstance()->runActionHandler(args[0], NULL);
 	}
 	else
 	{
-		pIM->runActionHandler(args[0], NULL, args[1]);
+		CAHManager::getInstance()->runActionHandler(args[0], NULL, args[1]);
 	}
 
 	return true;
@@ -3318,7 +3318,7 @@ NLMISC_COMMAND(loadIntCfg, "load the interface config file","")
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	im->loadConfig ("save/interface.icfg");
 	// reset the compass target
- 	CGroupCompas *gc = dynamic_cast<CGroupCompas *>(im->getElementFromId("ui:interface:compass"));
+ 	CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
 	if (gc && gc->isSavedTargetValid())
 	{
 		gc->setTarget(gc->getSavedTarget());
@@ -3341,7 +3341,7 @@ NLMISC_COMMAND(harvestDeposit, "harvest a deposit", "")
 		NetMngr.push(out);
 
 		// open the interface
-		// CInterfaceManager::getInstance()->getWindowFromId("ui:interface:harvest")->setActive(true);
+		// CWidgetManager::getInstance()->getWindowFromId("ui:interface:harvest")->setActive(true);
 	}
 	else
 		nlwarning("command : unknown message name : 'HARVEST:DEPOSIT'");
@@ -4016,14 +4016,14 @@ NLMISC_COMMAND(browse, "Browse a HTML document with the internal help web browse
 {
 	if (args.size() != 1) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->runActionHandler("browse", NULL, "name=ui:interface:help_browser:content:html|url="+args[0]);
+	CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:help_browser:content:html|url="+args[0]);
 	return true;
 }
 
 NLMISC_COMMAND(openRingWindow, "Browse the main page in the ring web browser.", "")
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->runActionHandler("browse", NULL, "name=ui:interface:r2ed_web_admin:content:admin_web_page|url="+RingMainURL);
+	CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:r2ed_web_admin:content:admin_web_page|url="+RingMainURL);
 	return true;
 }
 
@@ -4031,7 +4031,7 @@ NLMISC_COMMAND(browseRingAdmin, "Browse a HTML document with the ring web browse
 {
 	if (args.size() != 1) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->runActionHandler("browse", NULL, "name=ui:interface:r2ed_web_admin:content:admin_web_page|url="+args[0]);
+	CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:r2ed_web_admin:content:admin_web_page|url="+args[0]);
 	return true;
 }
 
@@ -4129,13 +4129,13 @@ NLMISC_COMMAND(GUKick, "kick a member", "<player name>")
 
 NLMISC_COMMAND(GUAccept, "accept an invitation", "")
 {
-	CInterfaceManager::getInstance()->runActionHandler("accept_guild_invitation",NULL);
+	CAHManager::getInstance()->runActionHandler("accept_guild_invitation",NULL);
 	return true;
 }
 
 NLMISC_COMMAND(GURefuse, "refuse an invitation", "")
 {
-	CInterfaceManager::getInstance()->runActionHandler("refuse_guild_invitation",NULL);
+	CAHManager::getInstance()->runActionHandler("refuse_guild_invitation",NULL);
 	return true;
 }
 
@@ -4960,7 +4960,7 @@ NLMISC_COMMAND(dumpUICoords, "Debug only : dump all coords info of an UI", "uiid
 		return false;
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CInterfaceElement	*el= pIM->getElementFromId(args[0]);
+	CInterfaceElement	*el= CWidgetManager::getInstance()->getElementFromId(args[0]);
 	if(!el)
 	{
 		pIM->displaySystemInfo(toString("dumpUICoords: '%s' does not exist", args[0].c_str()));
@@ -5057,14 +5057,14 @@ NLMISC_COMMAND(reloadFogMaps, "Force to reload all the fog maps", "<>")
 NLMISC_COMMAND(dumpSounds, "Dump names of all loaded sound", "<>")
 {
 	if (!args.empty()) return false;
-	std::vector<NLMISC::TStringId> sounds;
+	std::vector<NLMISC::CSheetId> sounds;
 	extern CSoundManager	*SoundMngr;
 	if (!SoundMngr) return false;
 	if (!SoundMngr->getMixer()) return false;
 	SoundMngr->getMixer()->getSoundNames(sounds);
 	for(uint k = 0; k < sounds.size(); ++k)
 	{
-		nlinfo(NLMISC::CStringMapper::unmap(sounds[k]).c_str());
+		nlinfo(sounds[k].toString()/*NLMISC::CStringMapper::unmap(sounds[k])*/.c_str());
 	}
 	return true;
 }
@@ -5296,7 +5296,7 @@ bool CUserCommand::execute(const std::string &/* rawCommandString */, const std:
 		}
 
 		// Run the action handler
-		pIM->runActionHandler (mode->Action, pIM->getOldCaptureKeyboard(), finalArgs);
+		CAHManager::getInstance()->runActionHandler (mode->Action, CWidgetManager::getInstance()->getOldCaptureKeyboard(), finalArgs);
 	}
 	else
 	{
@@ -5497,7 +5497,7 @@ NLMISC_COMMAND(clear, "clear content of current char window", "<chat window call
 	CChatWindow *cw;
 	if (args.size() == 1)
 	{
-		cw = getChatWndMgr().getChatWindowFromCaller(dynamic_cast<CCtrlBase *>(im->getElementFromId(args[0])));
+		cw = getChatWndMgr().getChatWindowFromCaller(dynamic_cast<CCtrlBase *>(CWidgetManager::getInstance()->getElementFromId(args[0])));
 	}
 	else
 	{
@@ -5763,7 +5763,7 @@ NLMISC_COMMAND(em, "emote command", "<emote phrase>")
 			emotePhrase += " ";
 			emotePhrase += args[i];
 		}
-		pIM->runActionHandler("emote", NULL, "nb=0|behav=255|custom_phrase="+emotePhrase);
+		CAHManager::getInstance()->runActionHandler("emote", NULL, "nb=0|behav=255|custom_phrase="+emotePhrase);
 		return true;
 	}
 	return false;

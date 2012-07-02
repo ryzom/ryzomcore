@@ -28,7 +28,7 @@
 #include "net_manager.h"
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/interface_3d_scene.h"
-#include "interface_v3/group_container.h"
+#include "nel/gui/group_container.h"
 #include "sheet_manager.h"
 #include "interface_v3/inventory_manager.h"
 #include "interface_v3/guild_manager.h"
@@ -239,12 +239,12 @@ void checkUnderCursor()
 		return;
 
 	// Get the cursor instance
-	CViewPointer *cursor = IM->getPointer();
+	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 	if(cursor == 0)
 		return;
 
 	// No Op if screen minimized
-	if(IM->getViewRenderer().isMinimized())
+	if(CViewRenderer::getInstance()->isMinimized())
 		return;
 
 	// Get the pointer position (in pixel)
@@ -252,13 +252,13 @@ void checkUnderCursor()
 	cursor->getPointerPos(x, y);
 
 	// Over the interface ?
-	if (IM->getWindowUnder(x, y) == NULL)
+	if (CWidgetManager::getInstance()->getWindowUnder(x, y) == NULL)
 	{
 		// Is the pointer in the window ?
 		if(x < 0 || y <0)
 			return;
 		uint32 w, h;
-		CViewRenderer &viewRender = IM->getViewRenderer();
+		CViewRenderer &viewRender = *CViewRenderer::getInstance();
 		viewRender.getScreenSize(w, h);
 		if(x>=(sint32)w || y>=(sint32)h)
 			return;
@@ -874,8 +874,8 @@ void contextWebPage(bool rightClick, bool dblClick)
 void contextWebIG(bool rightClick, bool dblClick)
 {
 	CInterfaceManager *IM = CInterfaceManager::getInstance();
-	CInterfaceElement *pGC = IM->getElementFromId("ui:interface:bot_chat_object");
-	CInterface3DShape *el= dynamic_cast<CInterface3DShape*>(IM->getElementFromId("ui:interface:bot_chat_object:scene3d:object_1"));
+	CInterfaceElement *pGC = CWidgetManager::getInstance()->getElementFromId("ui:interface:bot_chat_object");
+	CInterface3DShape *el= dynamic_cast<CInterface3DShape*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:bot_chat_object:scene3d:object_1"));
 	if (el != NULL)
 	{
 		el->setName(selectedInstance.getShapeName());
@@ -890,7 +890,7 @@ void contextWebIG(bool rightClick, bool dblClick)
 	{
 		if (pGC != NULL)
 			pGC->setActive(false);
-		IM->runActionHandler("browse", NULL, "name=ui:interface:webig:content:html|url="+selectedInstanceURL);
+		CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:webig:content:html|url="+selectedInstanceURL);
 	}
 }// contextWebIG //
 

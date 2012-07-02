@@ -17,6 +17,17 @@
 #ifndef INTERFACE_COMMON_H
 #define INTERFACE_COMMON_H
 
+enum WindowsPriority
+{
+	WIN_PRIORITY_WORLD_SPACE  = 0,
+	WIN_PRIORITY_LOWEST       = 1,
+	WIN_PRIORITY_LOW          = 2,
+	WIN_PRIORITY_NORMAL       = 3,
+	WIN_PRIORITY_HIGH         = 4,
+	WIN_PRIORITY_HIGHEST      = 5,
+	WIN_PRIORITY_MAX          = 8
+};
+
 enum THotSpot
 {
 	Hotspot_BL = 36,	// 100100,

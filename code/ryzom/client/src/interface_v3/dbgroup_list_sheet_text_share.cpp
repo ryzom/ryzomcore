@@ -21,8 +21,8 @@
 #include "../client_sheets/sbrick_sheet.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "interface_manager.h"
-#include "view_bitmap.h"
-#include "ctrl_text_button.h"
+#include "nel/gui/view_bitmap.h"
+#include "nel/gui/ctrl_text_button.h"
 #include "../net_manager.h"
 #include "../client_sheets/item_sheet.h"
 
@@ -264,7 +264,7 @@ class CHandlerTeamShareChoose : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CBitMemStream out;
 
-		CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(pIM->getElementFromId("ui:interface:team_share:content:ok"));
+		CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:team_share:content:ok"));
 		if (pTB == NULL) return;
 		if (pTB->getActive() == false) return;
 
@@ -317,7 +317,7 @@ class CHandlerTeamShareValid : public IActionHandler
 		CBitMemStream out;
 		string strMsgName = "TEAM:SHARE_VALID";
 
-		CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(pIM->getElementFromId("ui:interface:team_share:content:ok"));
+		CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:team_share:content:ok"));
 		if (pTB != NULL)
 			pTB->setActive(false);
 

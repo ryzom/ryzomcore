@@ -22,11 +22,11 @@
 #include "sphrase_manager.h"
 #include "interface_manager.h"
 #include "dbctrl_sheet.h"
-#include "view_bitmap.h"
-#include "ctrl_button.h"
-#include "group_editbox.h"
+#include "nel/gui/view_bitmap.h"
+#include "nel/gui/ctrl_button.h"
+#include "nel/gui/group_editbox.h"
 #include "../client_cfg.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 #include "skill_manager.h"
 #include "../string_manager_client.h"
 
@@ -94,7 +94,7 @@ bool		CDBGroupBuildPhrase::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// Init the disabled texture id
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	_TextureIdSlotDisabled= rVR.getTextureIdFromName ("w_slot_brick_disabled.tga");
 
 	// Create now (before sons ctrl sheet parsing) the variables

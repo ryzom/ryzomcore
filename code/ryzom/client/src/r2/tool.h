@@ -21,15 +21,17 @@
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/array_2d.h"
 //
-#include "../interface_v3/interface_element.h"
+#include "nel/gui/interface_element.h"
 #include "game_share/scenario_entry_points.h"
 //
 
 class CInterfaceManager;
+
 namespace NLGUI
 {
 	class CEventDescriptor;
 	class CLuaObject;
+	class CGroupContainer;
 }
 
 class CGroupMap;

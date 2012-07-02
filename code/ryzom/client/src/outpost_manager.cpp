@@ -20,7 +20,7 @@
 #include "outpost_manager.h"
 #include "net_manager.h"
 #include "interface_v3/interface_manager.h"
-#include "interface_v3/group_container.h"
+#include "nel/gui/group_container.h"
 #include "nel/misc/bit_mem_stream.h"
 #include "game_share/generic_xml_msg_mngr.h"
 
@@ -58,11 +58,11 @@ void	COutpostManager::startPvpJoinProposal(bool playerGuildInConflict, bool play
 	if(node)	node->setValue32(_EndTickForPvpJoinProposal);
 
 	// open Popup
-	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:join_pvp_outpost_proposal"));
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal"));
 	if (pGC)
 	{
 		pGC->setActive(true);
-		pIM->setTopWindow(pGC);
+		CWidgetManager::getInstance()->setTopWindow(pGC);
 		pGC->updateCoords();
 		pGC->updateCoords();
 		pGC->center();
@@ -105,10 +105,10 @@ void	COutpostManager::update()
 			CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 			// Force the neutral choose
-			pIM->runActionHandler("outpost_pvp_join", NULL, "neutral");
+			CAHManager::getInstance()->runActionHandler("outpost_pvp_join", NULL, "neutral");
 
 			// close the window
-			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:join_pvp_outpost_proposal"));
+			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal"));
 			if (pGC)
 				pGC->setActive(false);
 

@@ -21,7 +21,8 @@
 
 // Interface includes
 #include "interface_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
+#include "action_handler_base.h"
 #include "action_handler_misc.h"
 #include "bot_chat_manager.h"
 #include "bot_chat_page_all.h"
@@ -36,16 +37,16 @@
 #include "dbctrl_sheet.h"
 #include "ctrl_sheet_selection.h"
 #include "nel/gui/interface_expr.h"
-#include "group_menu.h"
-#include "group_container.h"
-#include "group_editbox.h"
+#include "nel/gui/group_menu.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/group_editbox.h"
 #include "inventory_manager.h"
 #include "guild_manager.h"
 #include "../net_manager.h"
 #include "interface_ddx.h"
-#include "group_tree.h"
+#include "nel/gui/group_tree.h"
 #include "group_map.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "action_handler_tools.h"
 #include "../connection.h"
 #include "../client_chat_manager.h"
@@ -60,7 +61,7 @@
 #include "../game_context_menu.h"
 #include "../sound_manager.h"
 #include "../far_tp.h"
-#include "interface_link.h"
+#include "nel/gui/interface_link.h"
 #include "../npc_icon.h"
 
 // Game Share
@@ -81,8 +82,8 @@
 #include "game_share/scores.h"
 
 // Game Config
-#include "dbgroup_combo_box.h"
-#include "ctrl_button.h"
+#include "nel/gui/dbgroup_combo_box.h"
+#include "nel/gui/ctrl_button.h"
 #include "../global.h"
 
 using namespace std;
@@ -184,7 +185,7 @@ public:
 		{
 			ucstring name = CEntityCL::removeTitleAndShardFromName(selection->getEntityName());
 			if (name.empty()) return;
-			im->runActionHandler("enter_tell", pCaller, "player=" + name.toString());
+			CAHManager::getInstance()->runActionHandler("enter_tell", pCaller, "player=" + name.toString());
 		}
 	}
 protected:
@@ -227,7 +228,7 @@ class CHandlerContextRingSessions : public IActionHandler
 		// when player go away)
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceElement *pIE = pIM->getElementFromId("ui:interface:ring_sessions");
+		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId("ui:interface:ring_sessions");
 
 		// check if selection is a Ring terminal
 		CEntityCL * selection = EntitiesMngr.entity(UserEntity->selection());
@@ -941,7 +942,7 @@ public:
 	{
 		// directly launch the quit_team AH.
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		pIM->runActionHandler("quit_team",pCaller, sParams);
+		CAHManager::getInstance()->runActionHandler("quit_team",pCaller, sParams);
 	}
 protected:
 };
@@ -1025,7 +1026,7 @@ public:
 				(typeProp != NULL) && (typeProp->getValue32() == ANIMAL_TYPE::Mount))
 			{
 				beastOrder("mount", toString(i+1)); // why +1 ? : dixit sendAnimalCommand in EGS : index 0 = all animals, 1 = animal 0 etc
-				pIM->runActionHandler("animal_target", NULL, toString(i+1));
+				CAHManager::getInstance()->runActionHandler("animal_target", NULL, toString(i+1));
 				UserEntity->moveTo(UserEntity->selection(),2.0,CUserEntity::None);
 			}
 		}
@@ -1180,7 +1181,7 @@ public:
 		if(!FreeTrial)
 		{
 			 CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-			 pIM->runActionHandler("quit_ryzom", NULL);
+			 CAHManager::getInstance()->runActionHandler("quit_ryzom", NULL);
 		}
 	}
 };
@@ -1231,7 +1232,7 @@ public:
 		{
 			// send a message to server, thru cancel cast
 			CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-			pIM->runActionHandler("phrase_cancel_cast", NULL);
+			CAHManager::getInstance()->runActionHandler("phrase_cancel_cast", NULL);
 		}
 		paying_account_request = false;
 		paying_account_already_request = false;
@@ -1259,10 +1260,10 @@ public:
 		else
 		{
 			paying_account_already_request = true;
-			pIM->runActionHandler("quit_ryzom", NULL);
+			CAHManager::getInstance()->runActionHandler("quit_ryzom", NULL);
 		}
 
-		pIM->runActionHandler("leave_modal", NULL);
+		CAHManager::getInstance()->runActionHandler("leave_modal", NULL);
 	}
 };
 REGISTER_ACTION_HANDLER( CAHCloseFreeTrialQuitting, "close_free_trial_game_quitting");
@@ -1383,11 +1384,11 @@ void CSelectItemSheet::showItemFlags(CInterfaceManager *im,bool canUse,bool canB
 	if (!im) return;
 	CInterfaceGroup *gr;
 	#define BOT_CHAT_TRADE_PATH "ui:interface:bot_chat_trade:header_opened:trade_content:"
-	gr = dynamic_cast<CInterfaceGroup *>( im->getElementFromId(BOT_CHAT_TRADE_PATH "cant_use_item"));
+	gr = dynamic_cast<CInterfaceGroup *>( CWidgetManager::getInstance()->getElementFromId(BOT_CHAT_TRADE_PATH "cant_use_item"));
 	if (gr) gr->setActive(!canUse);
-	gr = dynamic_cast<CInterfaceGroup *>(im->getElementFromId(BOT_CHAT_TRADE_PATH "cant_use_built_item"));
+	gr = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(BOT_CHAT_TRADE_PATH "cant_use_built_item"));
 	if (gr) gr->setActive(!canUseBuiltItem);
-	gr = dynamic_cast<CInterfaceGroup *>(im->getElementFromId(BOT_CHAT_TRADE_PATH "cant_build_item"));
+	gr = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(BOT_CHAT_TRADE_PATH "cant_build_item"));
 	if (gr) gr->setActive(!canBuild);
 }
 
@@ -1508,7 +1509,7 @@ public:
 			string beastIndex;
 			if( CInterfaceExpr::evalAsString(getParam(Params,"beast_index"), beastIndex) )
 			{
-				pIM->runActionHandler("animal_target", NULL, beastIndex);
+				CAHManager::getInstance()->runActionHandler("animal_target", NULL, beastIndex);
 			}
 			// move to the beast
 			UserEntity->moveTo(UserEntity->selection(),3.0,CUserEntity::Mount);
@@ -1671,7 +1672,7 @@ class CHandlerAnimalOpenInventory : public IActionHandler
 			if(animalIndex>=1 && animalIndex<=MAX_INVENTORY_ANIMAL)
 			{
 				// show/hide the inventory
-				CInterfaceElement	*group= pIM->getElementFromId(toString("ui:interface:inv_pa%d", animalIndex-1) );
+				CInterfaceElement	*group= CWidgetManager::getInstance()->getElementFromId(toString("ui:interface:inv_pa%d", animalIndex-1) );
 
 				if(group) group->setActive(!group->getActive());
 			}
@@ -1687,7 +1688,7 @@ REGISTER_ACTION_HANDLER( CHandlerAnimalOpenInventory, "animal_open_inventory" );
 static void closeGroup(const string &groupName)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup *>(pIM->getElementFromId(groupName));
+	CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(groupName));
 	if (pIG == NULL) return;
 	pIG->setActive(false);
 }
@@ -1883,12 +1884,12 @@ public:
 			helpContainer = "ui:interface:help_browser";
 
 		// open the help browser
-		CInterfaceElement	*pIG= pIM->getElementFromId(helpContainer);
+		CInterfaceElement	*pIG= CWidgetManager::getInstance()->getElementFromId(helpContainer);
 		if(pIG)
 			pIG->setActive(true);
 
 		// browse the url
-		pIM->runActionHandler("browse", NULL, "name="+helpContainer+":content:html|url="+url);
+		CAHManager::getInstance()->runActionHandler("browse", NULL, "name="+helpContainer+":content:html|url="+url);
     }
 };
 REGISTER_ACTION_HANDLER( CAHLaunchHelp, "launch_help");
@@ -1907,9 +1908,9 @@ static bool findInterfacePath(string &sPath, CCtrlBase *pCaller)
 		string elt = sPath.substr(0,sPath.rfind(':'));
 		CInterfaceElement *pIE;
 		if (pCaller != NULL)
-			pIE = pIM->getElementFromId(pCaller->getId(), elt);
+			pIE = CWidgetManager::getInstance()->getElementFromId(pCaller->getId(), elt);
 		else
-			pIE = pIM->getElementFromId(elt);
+			pIE = CWidgetManager::getInstance()->getElementFromId(elt);
 		if (pIE == NULL) return false;
 		sPath = pIE->getId() + ":" + sPath.substr(sPath.rfind(':')+1,sPath.size());
 	}
@@ -2071,17 +2072,17 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 		// Access UI elements
 		if (sSlot.empty()) return;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewBitmap *pVBR = dynamic_cast<CViewBitmap*>(pIM->getElementFromId(sTargetRegion));
+		CViewBitmap *pVBR = dynamic_cast<CViewBitmap*>(CWidgetManager::getInstance()->getElementFromId(sTargetRegion));
 		if (pVBR == NULL)
 			return;
-		CViewBitmap *pVBL = dynamic_cast<CViewBitmap*>(pIM->getElementFromId(sTargetLevel));
+		CViewBitmap *pVBL = dynamic_cast<CViewBitmap*>(CWidgetManager::getInstance()->getElementFromId(sTargetLevel));
 		if (pVBL == NULL)
 			return;
 		CInterfaceExprValue evValue;
 		if (!CInterfaceExpr::eval(sSlot, evValue, NULL))
 			return;
 		sint32 nSlot = (sint32)evValue.getInteger();
-		CCtrlBase *pTooltip = dynamic_cast<CCtrlBase*>(pIM->getElementFromId("ui:interface:target:header_opened:force"));
+		CCtrlBase *pTooltip = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:target:header_opened:force"));
 
 		// Access target entity
 		CEntityCL *pE = NULL;
@@ -2167,7 +2168,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 		pVBL->setTexture(sTexture);
 
 		// Set tooltip
-		CCtrlBase *tooltip = dynamic_cast<CCtrlBase*>(pIM->getElementFromId("ui:interface:target:header_opened:force"));
+		CCtrlBase *tooltip = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:target:header_opened:force"));
 		if (tooltip)
 		{
 			ucstring str;
@@ -2750,13 +2751,13 @@ public:
 		}*/
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:gestion_windows"));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:gestion_windows"));
 		if (pGC == NULL)
 		{
 			nlwarning("gestion_windows not found as a container");
 			return;
 		}
-		CInterfaceElement *pIE = pIM->getElementFromId("ui:interface:gestion_windows:close");
+		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId("ui:interface:gestion_windows:close");
 		if (pIE != NULL) pIE->setActive(false);
 
 		CActionsManager *pAM = &Actions;
@@ -2783,7 +2784,7 @@ public:
 				// Show the container
 				pGC->setActive(true);
 				// Yoyo: important to setTopWindow ONLY if needed, else save of the TopWindow doesn't work when you switch it.
-				pIM->setTopWindow(pGC);
+				CWidgetManager::getInstance()->setTopWindow(pGC);
 			}
 		}
 	}
@@ -2837,7 +2838,7 @@ class CHandlerCloseAllLabosBut : public IActionHandler
 			// if not the excluded one
 			if( Params != laboWindows[i] )
 			{
-				CInterfaceElement	*pElt= pIM->getElementFromId(laboWindows[i]);
+				CInterfaceElement	*pElt= CWidgetManager::getInstance()->getElementFromId(laboWindows[i]);
 				if(pElt)
 					pElt->setActive(false);
 			}
@@ -2866,12 +2867,12 @@ class CHandlerToggleInventory : public IActionHandler
 
 		// For all labos
 		bool state = false;
-		CInterfaceElement	*pElt= pIM->getElementFromId(inventoryWindows[0]);
+		CInterfaceElement	*pElt= CWidgetManager::getInstance()->getElementFromId(inventoryWindows[0]);
 		if (pElt)
 			state = !pElt->getActive();
 		for(uint i=0;i<numWins;i++)
 		{
-			pElt= pIM->getElementFromId(inventoryWindows[i]);
+			pElt= CWidgetManager::getInstance()->getElementFromId(inventoryWindows[i]);
 			if(pElt)
 				pElt->setActive(state);
 		}
@@ -2922,7 +2923,7 @@ public:
 
 		// Initialize interface combo box
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CDBGroupComboBox *pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
+		CDBGroupComboBox *pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
 		if( pCB )
 		{
 			pCB->resetTexts();
@@ -2934,7 +2935,7 @@ public:
 		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->setValue32(-1);
 		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->setValue32(nFoundMode);
 
-		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
+		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
 		if (pBut)
 		{
 			if (ClientCfg.Windowed)
@@ -2942,11 +2943,11 @@ public:
 			else
 				pBut->setPushed(true);
 		}
-		pIM->runActionHandler("game_config_change_vid_fullscreen",NULL);
+		CAHManager::getInstance()->runActionHandler("game_config_change_vid_fullscreen",NULL);
 
 		// **** Init Texture Size Modes
 		// init the combo box, according to Texture Installed or not
-		pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_TEXTURE_MODE_COMBO ));
+		pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_TEXTURE_MODE_COMBO ));
 		if( pCB )
 		{
 			pCB->resetTexts();
@@ -3008,7 +3009,7 @@ class CHandlerGameConfigMode : public IActionHandler
 		sint nVideModeNb = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->getValue32();
 		if (nVideModeNb == -1) return;
 
-		CDBGroupComboBox *pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
+		CDBGroupComboBox *pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
 		if( pCB == NULL ) return;
 
 		// Get W, H
@@ -3046,7 +3047,7 @@ class CHandlerGameConfigMode : public IActionHandler
 		}
 		if (nFoundFreq == -1) nFoundFreq = 0;
 		// Initialize interface combo box
-		pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
+		pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
 		if( pCB )
 		{
 			pCB->resetTexts();
@@ -3147,28 +3148,28 @@ class CHandlerGameConfigFullscreen : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		bool bFullscreen = false;
 		{
-			CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
+			CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
 			if (pBut) bFullscreen = pBut->getPushed();
 		}
 		CDBGroupComboBox *pCB;
 		if (bFullscreen)
 		{
 			// show modes combo
-			pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
+			pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
 			if (pCB) pCB->setActive(true);
 
 			// show frequencies combo
-			pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
+			pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
 			if (pCB) pCB->setActive(true);
 		}
 		else
 		{
 			// hide modes combo
-			pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
+			pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
 			if (pCB) pCB->setActive(false);
 
 			// hide frequencies combo
-			pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
+			pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
 			if (pCB) pCB->setActive(false);
 		}
 
@@ -3202,7 +3203,7 @@ class CHandlerGameConfigApply : public IActionHandler
 				// Get W, H
 				sint w = 1024, h = 768;
 				{
-					CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
+					CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
 					if( pCB != NULL )
 					{
 						string vidModeStr = pCB->getText(nVideModeNb).toString();
@@ -3216,7 +3217,7 @@ class CHandlerGameConfigApply : public IActionHandler
 				// Get Frequency
 				sint freq = 60;
 				{
-					CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
+					CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
 					if( pCB != NULL )
 					{
 						string vidFreqStr = pCB->getText(nVideoFreqNb).toString();
@@ -3227,7 +3228,7 @@ class CHandlerGameConfigApply : public IActionHandler
 				// Get Fullscreen
 				bool bFullscreen = false;
 				{
-					CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
+					CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
 					if (pBut != NULL)
 						bFullscreen = pBut->getPushed();
 				}
@@ -3823,14 +3824,14 @@ void runMissionProc(sint32 nSelected)
 	else if (nSelected < nNbMission)
 	{
 		string sButtonPath = UI_MISSION_LIST ":b_title"+toString(nSelected);
-		CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(pIM->getElementFromId(sButtonPath));
-		pIM->runActionHandler("proc", pCB, "mission_proc_title|"+toString(nSelected));
+		CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(sButtonPath));
+		CAHManager::getInstance()->runActionHandler("proc", pCB, "mission_proc_title|"+toString(nSelected));
 	}
 	else if (nSelected < (nNbMission+nNbGroupMission))
 	{
 		string sButtonPath = UI_MISSION_LIST ":b_group_title"+toString(nSelected-nNbMission);
-		CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(pIM->getElementFromId(sButtonPath));
-		pIM->runActionHandler("proc", pCB, "group_mission_proc_title|"+toString(nSelected-nNbMission));
+		CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(sButtonPath));
+		CAHManager::getInstance()->runActionHandler("proc", pCB, "group_mission_proc_title|"+toString(nSelected-nNbMission));
 	}
 	return;
 }
@@ -3964,7 +3965,7 @@ public:
 	{
 		// hide interface
 		CInterfaceManager* pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup *pIG = (CInterfaceGroup*)pIM->getElementFromId ("ui:interface:enter_crzone_proposal");
+		CInterfaceGroup *pIG = (CInterfaceGroup*)CWidgetManager::getInstance()->getElementFromId ("ui:interface:enter_crzone_proposal");
 		if(pIG)
 			pIG->setActive(false);
 

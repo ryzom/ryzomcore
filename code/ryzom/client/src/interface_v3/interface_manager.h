@@ -23,21 +23,21 @@
 #include "nel/misc/cdb_manager.h"
 #include "nel/3d/u_texture.h"
 #include "nel/3d/u_text_context.h"
-#include "interface_group.h"
-#include "interface_link.h"
-#include "group_list.h"
-#include "view_base.h"
-#include "view_pointer.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/interface_link.h"
+#include "nel/gui/group_list.h"
+#include "nel/gui/view_base.h"
+#include "nel/gui/view_pointer.h"
 
-#include "ctrl_base.h"
-#include "ctrl_scroll.h"
+#include "nel/gui/ctrl_base.h"
+#include "nel/gui/ctrl_scroll.h"
 
-#include "view_renderer.h"
+#include "nel/gui/view_renderer.h"
 
 // InterfaceV3
 #include "interface_parser.h"
 #include "ctrl_sheet_selection.h"
-#include "interface_options.h"
+#include "nel/gui/interface_options.h"
 #include "interface_config.h"
 #include "interface_pointer.h"
 #include "flying_text_manager.h"
@@ -49,8 +49,7 @@
 #include "../string_manager_client.h"
 #include "yubo_chat.h"
 
-static const float ROLLOVER_MIN_DELTA_PER_MS = 0.28f;
-static const float ROLLOVER_MAX_DELTA_PER_MS = 0.12f;
+#include "../ingame_database_manager.h"
 
 //the network database node
 extern CCDBSynchronised IngameDbMngr;
@@ -67,10 +66,13 @@ extern bool g_hidden;
 
 // #define AJM_DEBUG_TRACK_INTERFACE_GROUPS
 
-class CGroupContainer;
-class CInterfaceOptions;
-class CInterfaceAnim;
-class CGroupMenu;
+namespace NLGUI
+{
+	class CInterfaceOptions;
+	class CGroupContainer;
+	class CGroupMenu;
+	class CInterfaceAnim;
+}
 
 /**
  * class managing the interface
@@ -141,6 +143,7 @@ public:
 	// release all of the global db autocopy observers
 	void releaseServerToLocalAutoCopyObservers();
 
+	void setInGame( bool i );
 	bool isInGame() const { return _InGame; }
 
 	/// initialize the whole login interface
@@ -231,58 +234,12 @@ public:
 	void processServerIDString();
 
 	/**
-	 * get the window under a spot
-	 * \param : X coord of the spot
-	 * \param : Y coord of the spot
-	 * \return : pointer to the window
-	 */
-	CInterfaceGroup* getWindowUnder (sint32 x, sint32 y);
-	CInterfaceGroup* getCurrentWindowUnder() { return _WindowUnder; }
-	CInterfaceGroup* getGroupUnder (sint32 x, sint32 y);
-	void getViewsUnder (sint32 x, sint32 y, std::vector<CViewBase*> &vVB);
-	void getCtrlsUnder (sint32 x, sint32 y, std::vector<CCtrlBase*> &vICL);
-	void getGroupsUnder (sint32 x, sint32 y, std::vector<CInterfaceGroup*> &vIGL);
-	/**
 	 * get a window from its  Id of its group.
 	 *	NB: "ctrl_launch_modal" is a special Id which return the last ctrl which has launch a modal. NULL if modal closed.
 	 * \param groupId : the Id of the window group
 	 */
-	CInterfaceElement* getElementFromId (const std::string &sEltId);
-	CInterfaceElement* getElementFromId (const std::string &sStart, const std::string &sEltId);
-	void activateMasterGroup (const std::string &sMasterGroupName, bool bActive);
 	/// get an element from a define ID. shortcut for getElementFromId(getDefine(define))
 	CInterfaceElement* getElementFromDefine (const std::string &defineId);
-	/// Get the window from an element (ui:interface:###)
-	CInterfaceGroup* getWindow(CInterfaceElement*);
-	/**
-	 * set the top window
-	 * \param win : pointer to the window to be set on top
-	 */
-	void setTopWindow (CInterfaceGroup *pWin);
-
-	/**
-	 * set the back window
-	 * \param win : pointer to the window to be set on top
-	 */
-	void setBackWindow (CInterfaceGroup *pWin);
-
-	/** get the top window in the first activated masterGroup
-	 */
-	CInterfaceGroup		*getTopWindow (uint8 nPriority = WIN_PRIORITY_NORMAL) const;
-
-	/** get the back window in the first activated masterGroup
-	 */
-	CInterfaceGroup		*getBackWindow (uint8 nPriority = WIN_PRIORITY_NORMAL) const;
-
-	/** get the last escapable top window in the first activated masterGroup
-	 */
-	CInterfaceGroup		*getLastEscapableTopWindow() const;
-
-	void setWindowPriority (CInterfaceGroup *pWin, uint8 nPriority);
-
-	/** return the priority of the Last Window setTopWindow()-ed.
-	 */
-	uint8				getLastTopWindowPriority() const;
 
 	/// Control specific
 
@@ -305,47 +262,15 @@ public:
 	  * NB : the keyboard capture is released on both calls.
 	  * NB : cascaded modal windows are disabled by the call
 	  */
-	void enableModalWindow (CCtrlBase *ctrlLaunchingModal, CInterfaceGroup *pIG);
-	void enableModalWindow (CCtrlBase *ctrlLaunchingModal, const std::string &groupName);
-	// Disable all modals windows
-	void disableModalWindow ();
-
-	/** Push a modal window that becomes the current modal window
-	  */
-	void pushModalWindow(CCtrlBase *ctrlLaunchingModal, CInterfaceGroup *pIG);
-	void pushModalWindow (CCtrlBase *ctrlLaunchingModal, const std::string &groupName);
-	void popModalWindow();
-	// pop all top modal windows with the given category (a string stored in the modal)
-	void popModalWindowCategory(const std::string &category);
-
-	CCtrlBase *getCtrlLaunchingModal ()
-	{
-		if (_ModalStack.empty()) return NULL;
-		return _ModalStack.back().CtrlLaunchingModal;
-	}
-	/// get the currently active modal window, or NULL if none
-	CInterfaceGroup *getModalWindow() const
-	{
-		if (_ModalStack.empty()) return NULL;
-		return _ModalStack.back().ModalWindow;
-	}
 
 
 	/// Handle The Event. return true if the interfaceManager catch it and if must not send to the Game Action Manager
 	bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
 	bool handleMouseMoveEvent( const NLGUI::CEventDescriptor &eventDesc );
-	void runActionHandler (const std::string &AHName, CCtrlBase *pCaller,
-							const std::string &Params=std::string(""));
-	void runActionHandler (IActionHandler *ah, CCtrlBase *pCaller,
-							const std::string &Params=std::string(""));
 	// execute a procedure. give a list of parameters. NB: the first param is the name of the proc (skipped)...
 	void runProcedure(const std::string &procName, CCtrlBase *pCaller, const std::vector<std::string> &paramList);
 	// replace an action in a procedure (if possible)
 	void setProcedureAction(const std::string &procName, uint actionIndex, const std::string &ah, const std::string &params);
-	// get info on procedure. return 0 if procedure not found
-	uint getProcedureNumActions(const std::string &procName) const;
-	// return false if procedure not found, or if bad action index. return false if has some param variable (@0...)
-	bool getProcedureAction(const std::string &procName, uint actionIndex, std::string &ah, std::string &params) const;
 	// Execute a anim
 	void startAnim(const std::string &animId);
 	void stopAnim(const std::string &animId);
@@ -358,71 +283,10 @@ public:
 	/**
 	 * Draw views
 	 */
-	void checkCoords();
 	void drawViews (NL3D::UCamera camera);
 	void drawAutoAdd ();
 	void drawContextHelp ();
 	//void drawContextMenu ();
-
-	CViewRenderer &getViewRenderer ()  { return _ViewRenderer; }
-	void setGlobalColor (NLMISC::CRGBA col);
-	NLMISC::CRGBA getGlobalColor() { return _GlobalColor; }
-	void setContentAlpha(uint8 alpha);
-	uint8 getContentAlpha() const { return _ContentAlpha; }
-	void setContainerAlpha(uint8 alpha);
-	uint8 getContainerAlpha() const { return _ContainerAlpha; }
-	NLMISC::CRGBA getGlobalColorForContent() { return _GlobalColorForContent; }
-	//	these values are updated from the DB
-	uint8 getGlobalContentAlpha() const { return _GlobalContentAlpha; }
-	uint8 getGlobalContainerAlpha() const { return _GlobalContainerAlpha; }
-	uint8 getGlobalRolloverFactorContent() const { return _GlobalRolloverFactorContent; }
-	uint8 getGlobalRolloverFactorContainer() const { return _GlobalRolloverFactorContainer; }
-
-
-	/// Pointer
-	CViewPointer *getPointer () { return _Pointer; }
-
-	// Relative move of pointer
-	void movePointer (sint32 dx, sint32 dy);
-	// Set absolute coordinates of pointer
-	void movePointerAbs(sint32 px, sint32 py);
-	const std::vector<CViewBase*> &getViewsUnderPointer () { return _ViewsUnderPointer; }
-	const std::vector<CInterfaceGroup *> &getGroupsUnderPointer () { return _GroupsUnderPointer; }
-	const std::vector<CCtrlBase*> &getCtrlsUnderPointer () { return _CtrlsUnderPointer; }
-	//
-	void  clearGroupsUnders() { _GroupsUnderPointer.clear(); }
-	void  clearViewUnders() { _ViewsUnderPointer.clear(); }
-	void  clearCtrlsUnders() { _CtrlsUnderPointer.clear(); }
-
-	// Remove all references on a view (called when the ctrl is destroyed)
-	void	removeRefOnView (CViewBase *ctrlBase);
-
-	// Remove all references on a ctrl (called when the ctrl is destroyed)
-	void	removeRefOnCtrl (CCtrlBase *ctrlBase);
-
-	// Remove all references on a group (called when the group is destroyed)
-	void	removeRefOnGroup (CInterfaceGroup *group);
-
-	/**
-	 * Capture
-	 */
-	CCtrlBase *getCapturePointerLeft() { return _CapturePointerLeft; }
-	CCtrlBase *getCapturePointerRight() { return _CapturePointerRight; }
-	CCtrlBase *getCaptureKeyboard() { return _CaptureKeyboard; }
-	CCtrlBase *getOldCaptureKeyboard() { return _OldCaptureKeyboard; }
-	CCtrlBase *getDefaultCaptureKeyboard() { return _DefaultCaptureKeyboard; }
-
-	void setCapturePointerLeft(CCtrlBase *c);
-	void setCapturePointerRight(CCtrlBase *c);
-	void setOldCaptureKeyboard(CCtrlBase *c) { _OldCaptureKeyboard = c; }
-	// NB: setCaptureKeyboard(NULL) has not the same effect as resetCaptureKeyboard(). it allows the capture
-	// to come back to the last captured window (resetCaptureKeyboard() not)
-	void setCaptureKeyboard(CCtrlBase *c);
-	void resetCaptureKeyboard();
-	/**  Set the default box to use when no keyboard has been previously captured
-	  *  The given dialog should be static
-	  */
-	void setDefaultCaptureKeyboard(CCtrlBase *c) { _DefaultCaptureKeyboard = c; }
 
 	/// Update all the elements
 	void updateAllLocalisedElements ();
@@ -435,42 +299,8 @@ public:
 	// display a system info string
 	void		  displaySystemInfo(const ucstring &str, const std::string &Category = "SYS");
 	NLMISC::CRGBA getSystemInfoColor(const std::string &Category = "SYS");
-	/// \name Global Interface Options
-	// @{
 
-	/// Get options by name
-	CInterfaceOptions		*getOptions (const std::string &optName);
-
-	// List of system options
-	enum	TSystemOption
-	{
-		OptionCtrlSheetGrayColor=0,
-		OptionCtrlTextGrayColor,
-		OptionCtrlSheetRedifyColor,
-		OptionCtrlTextRedifyColor,
-		OptionCtrlSheetGreenifyColor,
-		OptionCtrlTextGreenifyColor,
-		OptionViewTextOverBackColor,
-		OptionFont,
-		OptionAddCoefFont,
-		OptionMulCoefAnim,
-		OptionTimeoutBubbles,
-		OptionTimeoutMessages,
-		OptionTimeoutContext,
-		OptionTimeoutContextHtml,
-
-		NumSystemOptions,
-	};
-
-	virtual void setupOptions();
-
-	/** Get a system option by its enum (faster than getOptions() and getVal())
-	 *	NB: array updated after each parseInterface()
-	 */
-	const CInterfaceOptionValue	&getSystemOption(TSystemOption o) const {return _SystemOptions[o];}
-
-	// @}
-
+	void setupOptions();
 
 	/** Open a MessageBox. this is a simple ModalWindow with a Ok button
 	 *	ui:interface:message_box must be defined in xml, with a "text" ViewText son
@@ -508,26 +338,7 @@ public:
 
 	void	setContextHelpActive(bool active);
 
-
-	// Add a group into the windows list of its master goup
-	void	makeWindow(CInterfaceGroup *group);
-
-	// Remove a group from the windows list of its master group
-	void    unMakeWindow(CInterfaceGroup *group, bool noWarning=false);
-
-
-	// True if the keyboard is captured
-	bool	isKeyboardCaptured() const {return _CaptureKeyboard!=NULL;}
 	bool	isMouseOverWindow() const {return  _MouseOverWindow;}
-
-	// Enable mouse Events to interface. if false, release Captures.
-	void	enableMouseHandling(bool handle);
-	bool    isMouseHandlingEnabled() const { return _MouseHandlingEnabled; }
-
-	// register a view that wants to be notified at each frame (receive the msg 'clocktick')
-	void	registerClockMsgTarget(CCtrlBase *vb);
-	void	unregisterClockMsgTarget(CCtrlBase *vb);
-	bool	isClockMsgTarget(CCtrlBase *vb) const;
 
 	// Modes
 	void	setMode(uint8 newMode);
@@ -551,12 +362,6 @@ public:
 	void	displayUIViewBBoxs(const std::string &uiFilter);
 	void	displayUICtrlBBoxs(const std::string &uiFilter);
 	void	displayUIGroupBBoxs(const std::string &uiFilter);
-
-	// Get the User DblClick Delay (according to save...), in milisecond
-	uint	getUserDblClickDelay();
-
-	// Submit a generic event
-	void	submitEvent (const std::string &event);
 
 	// visit all elements of the interface manager
 	void	visit(CInterfaceElementVisitor *visitor);
@@ -631,18 +436,6 @@ public:
 
 	// @}
 
-
-	// Get the alpha roll over speed
-	float getAlphaRolloverSpeed()
-	{
-		if (!_AlphaRolloverSpeedDB)
-			_AlphaRolloverSpeedDB = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ALPHA_ROLLOVER_SPEED");
-		float fTmp = ROLLOVER_MIN_DELTA_PER_MS + (ROLLOVER_MAX_DELTA_PER_MS - ROLLOVER_MIN_DELTA_PER_MS) * 0.01f * (100 - _AlphaRolloverSpeedDB->getValue32());
-		return fTmp*fTmp*fTmp;
-	}
-
-	// For single lined ViewText that are clipped: on over of viewText too big, the text is drawn on top. A CRefPtr is kept
-	void	setOverExtendViewText(CViewText *vt, NLMISC::CRGBA backGround);
 
 	// Item Carac Test, get the value
 	bool	isItemCaracRequirementMet(CHARACTERISTICS::TCharacteristics type, sint32 value)
@@ -770,33 +563,6 @@ private:
 		void	buildRecursLocalLeaves(NLMISC::CCDBNodeBranch *branch, std::vector<NLMISC::CCDBNodeLeaf*> &leaves);
 	};
 
-	// Infos about a modal window.
-	class CModalWndInfo
-	{
-	public:
-		// Yoyo: store as CRefPtr in case they are deleted (can happen for instance if menu right click on a guild memeber, and guild members are udpated after)
-		NLMISC::CRefPtr<CInterfaceGroup>		ModalWindow; // the current modal window
-		NLMISC::CRefPtr<CCtrlBase>				CtrlLaunchingModal;
-		bool				ModalClip;
-		bool				ModalExitClickOut;
-		bool				ModalExitClickL;
-		bool				ModalExitClickR;
-		bool				ModalExitKeyPushed;
-		std::string			ModalHandlerClickOut;
-		std::string			ModalClickOutParams;
-	public:
-		CModalWndInfo()
-		{
-			ModalWindow = NULL;
-			CtrlLaunchingModal= NULL;
-			ModalExitClickOut= false;
-			ModalExitClickL= false;
-			ModalExitClickR= false;
-			ModalExitKeyPushed= false;
-		}
-	};
-
-
 	// Database management stuff
 	class CDBLandmarkObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
@@ -858,15 +624,6 @@ private:
 	uint8			_LocalSyncActionCounterMask;
 
 
-	uint8 _ContentAlpha;
-	uint8 _ContainerAlpha;
-	NLMISC::CRGBA _GlobalColorForContent;
-	//
-	uint8 _GlobalContentAlpha;
-	uint8 _GlobalContainerAlpha;
-	uint8 _GlobalRolloverFactorContent;
-	uint8 _GlobalRolloverFactorContainer;
-
 	/// Constructor
 	CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext *textcontext );
 
@@ -875,31 +632,11 @@ private:
 
 	NLMISC::CCDBNodeLeaf	   *_DescTextTarget;
 
-	// Capture
-	NLMISC::CRefPtr<CCtrlBase>	_CaptureKeyboard;
-	NLMISC::CRefPtr<CCtrlBase>	_OldCaptureKeyboard;
-	NLMISC::CRefPtr<CCtrlBase>	_DefaultCaptureKeyboard;
-	NLMISC::CRefPtr<CCtrlBase>	_CapturePointerLeft;
-	NLMISC::CRefPtr<CCtrlBase>	_CapturePointerRight;
 	bool		_MouseOverWindow;
-
-	std::vector<CModalWndInfo> _ModalStack;
-	static std::string	_CtrlLaunchingModalId;
-
-
-	// view that should be notified from clock msg
-	std::vector<CCtrlBase*> _ClockMsgTargets;
-
-	// What is under pointer
-	std::vector<CViewBase*>		_ViewsUnderPointer;
-	std::vector<CCtrlBase*>		_CtrlsUnderPointer;
-	std::vector<CInterfaceGroup *>	_GroupsUnderPointer;
-
 
 	// Context Help
 	bool					_ContextHelpActive;
-	CCtrlBasePtr			_CurCtrlContextHelp;
-	float					_DeltaTimeStopingContextHelp;
+	//CCtrlBasePtr			_CurCtrlContextHelp;
 	//Delay before displaying ContextHelp on a ctrl having wantInstantContextHelp set to false (in seconds)
 	float					_MaxTimeStopingContextHelp;
 	sint					_LastXContextHelp;
@@ -918,27 +655,14 @@ private:
 	};
 	std::vector<SIDStringWaiter*> _IDStringWaiters;
 
-	/// Renderer
-	CViewRenderer	_ViewRenderer;
 	uint32			_ScreenW, _ScreenH; // Change res detection
-	NLMISC::CRGBA	_GlobalColor;
 	sint32			_LastInGameScreenW, _LastInGameScreenH; // Resolution used for last InGame interface
 
 	// List of active Anims
 	std::vector<CInterfaceAnim*> _ActiveAnims;
 
-	CInterfaceGroupPtr _WindowUnder;
-
 	bool isControlInWindow (CCtrlBase *ctrl, CInterfaceGroup *pNewCurrentWnd);
 	uint getDepth (CCtrlBase *ctrl, CInterfaceGroup *pNewCurrentWnd);
-
-	void notifyElementCaptured(CCtrlBase *c);
-
-	// System Options
-	CInterfaceOptionValue	_SystemOptions[NumSystemOptions];
-
-	bool			_MouseHandlingEnabled;
-
 
 	// Modes
 	CInterfaceConfig::CDesktopImage	_Modes[MAX_NUM_MODES];
@@ -963,15 +687,7 @@ private:
 	NLMISC::CCDBNodeLeaf *_NeutralColor;
 	NLMISC::CCDBNodeLeaf *_WarningColor;
 	NLMISC::CCDBNodeLeaf *_ErrorColor;
-	NLMISC::CCDBNodeLeaf *_RProp;
-	NLMISC::CCDBNodeLeaf *_GProp;
-	NLMISC::CCDBNodeLeaf *_BProp;
-	NLMISC::CCDBNodeLeaf *_AProp;
-	NLMISC::CCDBNodeLeaf *_AlphaRolloverSpeedDB;
 
-	// The next ViewText to draw for Over
-	NLMISC::CRefPtr<CInterfaceElement>	_OverExtendViewText;
-	NLMISC::CRGBA						_OverExtendViewTextBackColor;
 	void			drawOverExtendViewText();
 
 	CInterfaceGroup	*getWindowForActiveMasterGroup(const std::string &windowName);

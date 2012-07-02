@@ -23,10 +23,14 @@
 #include "dbgroup_list_sheet_text.h"
 #include "game_share/bot_chat_types.h"
 
+namespace NLGUI
+{
+	class CCtrlButton;
+	class CCtrlScroll;
+}
+
 
 // ***************************************************************************
-class	CCtrlButton;
-class	CCtrlScroll;
 class	CHandlerListSheetTradeSelect;
 class	CHandlerListSheetTradeRightClick;
 

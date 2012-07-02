@@ -20,7 +20,7 @@
 #include "stdpch.h"
 #include "bot_chat_page_mission_end.h"
 #include "interface_manager.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "bot_chat_manager.h"
 #include "interface_manager.h"
 #include "../client_cfg.h"
@@ -40,7 +40,7 @@ void CBotChatPageMissionEnd::begin()
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	uint flags = CBotChatManager::getInstance().getChosenMissionFlags();
 	// reward text
-	CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(im->getElementFromId(WIN_BOT_CHAT_PAGE_MISSION_END));
+	CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_PAGE_MISSION_END));
 	if (!ig) return;
 	CInterfaceGroup *rewardText = ig->getGroup("reward_text");
 	if (rewardText)

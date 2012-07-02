@@ -36,7 +36,7 @@
 #include "verbose_clock.h"
 #include "entity_sorter.h"
 //
-#include "../interface_v3/ctrl_base_button.h"
+#include "nel/gui/ctrl_base_button.h"
 //
 #include "game_share/player_visual_properties.h"
 #include "game_share/visual_slot_manager.h"
@@ -93,7 +93,7 @@ void CToolCreateEntity::updateInvalidCursorOnUI()
 {
 	//H_AUTO(R2_CToolCreateEntity_updateInvalidCursorOnUI)
 	// set the default cursor unless the mouse is on the palette
-	const std::vector<CInterfaceGroup *> &groups = getUI().getGroupsUnderPointer();
+	const std::vector<CInterfaceGroup *> &groups = CWidgetManager::getInstance()->getGroupsUnderPointer();
 	for(uint k = 0; k < groups.size(); ++k)
 	{
 		if (groups[k]->getId() == "ui:interface:r2ed_palette") // hardcoded for now ...
@@ -141,7 +141,7 @@ void CToolCreateEntity::commit(const NLMISC::CVector &createPosition, float crea
 		// prevent newly created ghost to be removed twice ...
 		removeGhostSlot();
 		// re set this tool to generate a new entity look
-		getUI().runActionHandler("r2ed_create_entity", NULL, "PaletteId=" + _PaletteId);
+		CAHManager::getInstance()->runActionHandler("r2ed_create_entity", NULL, "PaletteId=" + _PaletteId);
 	}
 }
 
@@ -616,7 +616,7 @@ void CToolCreateEntity::updateAfterRender()
 		{
 			commitArray();
 			CTool::TSmartPtr hold(this);
-			getUI().runActionHandler("r2ed_create_entity", NULL, "PaletteId="+_PaletteId);
+			CAHManager::getInstance()->runActionHandler("r2ed_create_entity", NULL, "PaletteId="+_PaletteId);
 			return;
 		}
 		break;
@@ -825,7 +825,7 @@ class CAHR2EDToggleDrawArray : public IActionHandler
 			CToolCreateEntity *tce = dynamic_cast<CToolCreateEntity *>(getEditor().getCurrentTool());
 			if (tce)
 			{
-				im->runActionHandler("r2ed_create_entity", NULL, "PaletteId=" + tce->getPaletteId());
+				CAHManager::getInstance()->runActionHandler("r2ed_create_entity", NULL, "PaletteId=" + tce->getPaletteId());
 			}
 		}
 	}

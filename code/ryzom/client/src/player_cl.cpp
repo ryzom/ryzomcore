@@ -683,7 +683,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 		// display the new title in player interface
 		if (_Slot == 0)
 		{
-			CViewText *pVT = dynamic_cast<CViewText*>(IM->getElementFromId("ui:interface:player:header_opened:player_title"));
+			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player:header_opened:player_title"));
 			if (pVT != NULL) pVT->setText(_Title);
 		}
 

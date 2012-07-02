@@ -26,8 +26,11 @@
 #include "nel/net/module_common.h"
 #include "game_share/utils.h"
 #ifdef NL_OS_WINDOWS
-# include <windows.h>
+# include <WinSock2.h>
+# include <Windows.h>
+typedef unsigned long ulong;
 #endif
+
 #include <mysql.h>
 #include <time.h>
 

@@ -23,24 +23,26 @@
 
 #include "client_chat_manager.h"
 #include "net_manager.h"
-#include "interface_v3/group_list.h"
+#include "nel/gui/group_list.h"
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/people_interraction.h"
 #include "string_manager_client.h"
 #include "entity_cl.h"
-#include "interface_v3/action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "entities.h"
-#include "interface_v3/group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "permanent_ban.h"
 #include "global.h"
-#include "interface_v3/ctrl_text_button.h"
-#include "interface_v3/group_tab.h"
+#include "nel/gui/ctrl_text_button.h"
+#include "nel/gui/group_tab.h"
 #include "string_manager_client.h"
 
 #include "game_share/generic_xml_msg_mngr.h"
 #include "game_share/msg_client_server.h"
 #include "game_share/chat_group.h"
 #include "interface_v3/skill_manager.h"
+
+#include "misc.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -1211,7 +1213,7 @@ class CHandlerEnterTell : public IActionHandler
 			CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(pGC->getGroup("eb"));
 			if (eb)
 			{
-				im->setCaptureKeyboard(eb);
+				CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 			}
 		}
 	}
@@ -1419,18 +1421,18 @@ class CHandlerSwapChatMode : public IActionHandler
 				node->setValue32(0);
 				// also leave Chat Focus (important if comes from command)
 				if (updateCapture)
-					pIM->setCaptureKeyboard(NULL);
+					CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
 			}
 			else
 			{
 				// enter chat mode (enter dont quit CB)
 				node->setValue32(1);
 				// enter Chat focus if '/c' entered
-				if (updateCapture && !pIM->getCaptureKeyboard())
+				if (updateCapture && !CWidgetManager::getInstance()->getCaptureKeyboard())
 				{
 					// reset to the old captured keyboard (should be the one that have launched the command)
-					if(pIM->getOldCaptureKeyboard())
-						pIM->setCaptureKeyboard(pIM->getOldCaptureKeyboard());
+					if(CWidgetManager::getInstance()->getOldCaptureKeyboard())
+						CWidgetManager::getInstance()->setCaptureKeyboard(CWidgetManager::getInstance()->getOldCaptureKeyboard());
 				}
 			}
 		}

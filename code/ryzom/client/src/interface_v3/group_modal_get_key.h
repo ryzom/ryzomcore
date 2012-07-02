@@ -21,7 +21,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "../actions.h" // CLIENT
-#include "group_modal.h"
+#include "nel/gui/group_modal.h"
 
 
 // ***************************************************************************

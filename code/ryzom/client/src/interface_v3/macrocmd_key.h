@@ -21,7 +21,10 @@
 
 #include "../actions_client.h"
 
-class CGroupContainer;
+namespace NLGUI
+{
+	class CGroupContainer;
+}
 
 // ***************************************************************************
 #define WIN_EDITCMD_TITLE_NEW_KEY			"uiNewKey"
@@ -47,7 +50,7 @@ public:
 	void checkCurrentCommandValidity();
 
 public:
-	CGroupContainer *Win;
+	NLGUI::CGroupContainer *Win;
 	std::string WinName;
 	bool CanDefineKey;
 

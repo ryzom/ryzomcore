@@ -133,27 +133,18 @@ void	CSound::serial(NLMISC::IStream &s)
 	s.serial(_Direction);
 	s.serial(_Looping);
 	s.serial(_MaxDist);
-	if (s.isReading())
-	{
-		std::string name;
-		s.serial(name);
-		_Name = CStringMapper::map(name);
-	}
-	else
-	{
-		std::string name = CStringMapper::unmap(_Name);
-		s.serial(name);
-	}
-	
-	nlassert(CGroupControllerRoot::getInstance()); // not sure
+
+	_Name.serialString(s, "sound");
+
+	nlassert(CGroupControllerRoot::isInitialized()); // not sure
 #if NLSOUND_SHEET_VERSION_BUILT < 2
-	if (s.isReading()) _GroupController = static_cast<CGroupController *>(CAudioMixerUser::instance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER));
+	if (s.isReading()) _GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER);
 #else
 	if (s.isReading())
 	{
 		std::string groupControllerPath;
 		s.serial(groupControllerPath);
-		_GroupController = static_cast<CGroupController *>(CAudioMixerUser::instance()->getGroupController(groupControllerPath));
+		_GroupController = CGroupControllerRoot::getInstance()->getGroupController(groupControllerPath);
 	}
 	else
 	{
@@ -170,7 +161,8 @@ void	CSound::serial(NLMISC::IStream &s)
 void				CSound::importForm(const std::string& filename, NLGEORGES::UFormElm& root)
 {
 	// Name
-	_Name = CStringMapper::map(CFile::getFilenameWithoutExtension(filename));
+	nlassert(filename.find(".sound") != std::string::npos);
+	_Name = NLMISC::CSheetId(filename);
 
 	// InternalConeAngle
 	uint32 inner;
@@ -253,7 +245,7 @@ void				CSound::importForm(const std::string& filename, NLGEORGES::UFormElm& roo
 		_Priority = MidPri;
 	}
 
-	nlassert(CGroupControllerRoot::getInstance()); // not sure
+	nlassert(CGroupControllerRoot::isInitialized()); // not sure
 #if NLSOUND_SHEET_VERSION_BUILT < 2
 	_GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER);
 #else

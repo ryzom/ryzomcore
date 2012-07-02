@@ -18,7 +18,7 @@
 
 // Interface includes
 #include "interface_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "action_handler_tools.h"
 #include "game_share/outpost.h"
 #include "nel/gui/interface_expr.h"
@@ -180,7 +180,7 @@ public:
 		sendMsgToServer("OUTPOST:INSERT_SQUAD", getOutpostSheet(), nSquadSlot);
 
 		// Then set the selected squad at this place
-		pIM->runActionHandler("outpost_set_squad", pCaller, sParams);
+		CAHManager::getInstance()->runActionHandler("outpost_set_squad", pCaller, sParams);
 	}
 };
 REGISTER_ACTION_HANDLER(COutpostInsertSquad, "outpost_insert_squad");
@@ -207,7 +207,7 @@ public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupMap *pMap = dynamic_cast<CGroupMap*>(pIM->getElementFromId(sParams));
+		CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(sParams));
 		if (pMap == NULL)
 			return;
 
@@ -313,7 +313,7 @@ public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupMap *pMap = dynamic_cast<CGroupMap*>(pIM->getElementFromId(sParams));
+		CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(sParams));
 		if (pMap == NULL)
 			return;
 
@@ -410,7 +410,7 @@ public:
 			node->setValue32(localToGmt(attPeriod));
 
 		// Nead to resend a Declare War Start (because wanted Att Hour changed)
-		pIM->runActionHandler("outpost_declare_war_start", pCaller);
+		CAHManager::getInstance()->runActionHandler("outpost_declare_war_start", pCaller);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHOutpostSelectAttPeriod, "outpost_select_att_period");

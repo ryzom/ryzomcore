@@ -22,7 +22,7 @@
 #include "interface_manager.h"
 #include "dbctrl_sheet.h"
 #include "dbgroup_list_sheet.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "inventory_manager.h"
 //
 #include "game_share/inventories.h"
@@ -152,7 +152,7 @@ void CPlayerTrade::restoreItem(CDBCtrlSheet *exchangeSlot)
 CDBCtrlSheet *CPlayerTrade::getExchangeItem(uint index)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	return dynamic_cast<CDBCtrlSheet *>(im->getElementFromId(NLMISC::toString("ui:interface:player_trade:header_opened:give:given_items:slot%d", (int) index)));
+	return dynamic_cast<CDBCtrlSheet *>(CWidgetManager::getInstance()->getElementFromId(NLMISC::toString("ui:interface:player_trade:header_opened:give:given_items:slot%d", (int) index)));
 }
 
 
@@ -225,7 +225,7 @@ class CPlayerTradeLeftClickOnSlotHandler : public IActionHandler
 			}
 		}
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->pushModalWindow(pCaller, "ui:interface:exchange_choose_in_bag");
+		CWidgetManager::getInstance()->pushModalWindow(pCaller, "ui:interface:exchange_choose_in_bag");
 	}
 };
 REGISTER_ACTION_HANDLER(CPlayerTradeLeftClickOnSlotHandler, "exchange_left_click_on_slot");

@@ -67,11 +67,13 @@ CInputHandlerManager::CInputHandlerManager()
 	_RecoverFocusLost = false;
 
 	inputHandler.setListener( CInterfaceManager::getInstance() );
+	CGroupEditBox::setComboKeyHandler( this );
 }
 
 // ***************************************************************************
 CInputHandlerManager::~CInputHandlerManager()
 {
+	CGroupEditBox::setComboKeyHandler( NULL );
 }
 
 // ********************************************************************************************
@@ -163,13 +165,13 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 				UserControls.stopFreeLook();
 			}
 			// be nice with other app : let the mouse reappear (useful in direct 3D mode with no hardware cursor)
-			CInterfaceManager::getInstance()->getViewRenderer().getDriver()->showCursor(true);
+			CViewRenderer::getInstance()->getDriver()->showCursor(true);
 //			Driver->setSystemArrow();
 		}
 		else
 		{
 			_RecoverFocusLost = true; // force to update mouse pos on next click or move
-			CInterfaceManager::getInstance()->getViewRenderer().getDriver()->showCursor(IsMouseCursorHardware());
+			CViewRenderer::getInstance()->getDriver()->showCursor(IsMouseCursorHardware());
 			_Focus = true;
 		}
 
@@ -228,7 +230,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 				if(event == EventKeyDownId)
 				{
 					CEventKeyDown* downEvent=(CEventKeyDown*)&event;
-					if (!pIM->getCaptureKeyboard () || !EditActions.keyPushed (*downEvent))
+					if (!CWidgetManager::getInstance()->getCaptureKeyboard () || !EditActions.keyPushed (*downEvent))
 						Actions.keyPushed (*downEvent);
 				}
 				// Event from the Keyboard (UP KEYS)
@@ -258,7 +260,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 		}
 	}
 	// **** Event Mouse
-	else if(pIM->getPointer() && _Focus /* && pIM->isMouseHandlingEnabled() */ &&
+	else if(CWidgetManager::getInstance()->getPointer() && _Focus /* && CWidgetManager::getInstance()->isMouseHandlingEnabled() */ &&
 			( event == EventMouseMoveId ||
 			  event == EventMouseDownId ||
 			  event == EventMouseUpId ||
@@ -268,7 +270,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 	{
 
 
-		CViewPointer &rIP = *pIM->getPointer();
+		CViewPointer &rIP = *static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 
 		NLGUI::CEventDescriptorMouse eventDesc;
 
@@ -282,7 +284,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 		// button down ?
 		static volatile bool doTest = false;
 
-		if (!doTest || (doTest && pIM->isMouseHandlingEnabled()))
+		if (!doTest || (doTest && CWidgetManager::getInstance()->isMouseHandlingEnabled()))
 		{
 			if (event==EventMouseDownId)
 			{

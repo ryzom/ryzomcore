@@ -2022,7 +2022,7 @@ Arguments: s(parameterName) ->
 @param[in] parameterName is a the id of the parameter to remove
 
 @code
-()removeProfileParameter("running"); // retire le paramètre "running" ou "running:<*>" du groupe
+()removeProfileParameter("running"); // remove "running" or "running:<*>" parameter from group
 @endcode
 
 */
@@ -2048,7 +2048,7 @@ Arguments: s(parameterName) ->
 @param[in] parameterName is a the id of the parameter to add
 
 @code
-()addProfileParameter("running"); // équivalent à un parameter "running" dans la primitive du groupe
+()addProfileParameter("running"); // equivalent to "running" parameter in group primitive
 @endcode
 
 */
@@ -2077,7 +2077,7 @@ Arguments: s(parameterName),s(parameterContent) ->
 @param[in] parameterContent is the value of the parameter
 
 @code
-()addPersistentProfileParameter("foo", "bar"); // équivalent à un parameter "foo:bar" dans la primitive du groupe
+()addPersistentProfileParameter("foo", "bar"); // equivalent to "foo:bar" parameter in group primitive
 @endcode
 
 */
@@ -2108,7 +2108,7 @@ Arguments: s(parameterName),f(parameterContent) ->
 @param[in] parameterContent is the value of the parameter
 
 @code
-()addPersistentProfileParameter("foo", 0.5); // équivalent à un parameter "foo:0.5" dans la primitive du groupe
+()addPersistentProfileParameter("foo", 0.5); // equivalent to "foo:0.5" parameter in group primitive
 @endcode
 
 */
@@ -2137,7 +2137,7 @@ Arguments: s(parameterName) ->
 @param[in] parameterName is a the id of the parameter to remove
 
 @code
-()removeProfileParameter("running"); // retire le paramètre "running" ou "running:<*>" du groupe
+()removeProfileParameter("running"); // remove "running" or "running:<*>" parameters from group
 @endcode
 
 */

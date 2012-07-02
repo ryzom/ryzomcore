@@ -23,10 +23,10 @@
 #include "interface_manager.h"
 #include "nel/gui/interface_expr.h"
 
-#include "view_text.h"
-#include "view_bitmap.h"
-#include "dbview_number.h"
-#include "dbview_bar.h"
+#include "nel/gui/view_text.h"
+#include "nel/gui/view_bitmap.h"
+#include "nel/gui/dbview_number.h"
+#include "nel/gui/dbview_bar.h"
 
 #include "game_share/skills.h"
 #include "nel/misc/xml_auto_ptr.h"
@@ -124,7 +124,7 @@ void CGroupSkills::rebuild()
 	// **** first time bind?
 	if(!_Tree)
 	{
-		_Tree = dynamic_cast<CGroupTree*>(pIM->getElementFromId(getId(),WIN_TREE_LIST));
+		_Tree = dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(getId(),WIN_TREE_LIST));
 		if (_Tree == NULL)
 		{
 			nlwarning("cant find tree");
@@ -192,7 +192,7 @@ void CGroupSkills::CSkillsObs::update (ICDBNode *node)
 				uint skillId;
 				if (skillParent->getNodeIndex (skill, skillId))
 				{
-					pIM->runActionHandler("skill_popup", NULL, "skillId="+toString(skillId)+"|delta="+toString(leaf->getValue32()-leaf->getOldValue32()));
+					CAHManager::getInstance()->runActionHandler("skill_popup", NULL, "skillId="+toString(skillId)+"|delta="+toString(leaf->getValue32()-leaf->getOldValue32()));
 
 					// Context help
 					contextHelp ("skill");

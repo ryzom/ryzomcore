@@ -39,7 +39,7 @@
 #include "game_share/combat_flying_text.h"
 #include "game_share/shard_names.h"
 // Client.
-#include "interface_v3/group_list.h"
+#include "nel/gui/group_list.h"
 #include "interface_v3/interface_manager.h"
 #include "net_manager.h"
 #include "client_cfg.h"
@@ -57,8 +57,8 @@
 #include "interface_v3/people_interraction.h"
 #include "interface_v3/bot_chat_manager.h"
 #include "interface_v3/bot_chat_page_all.h"
-#include "interface_v3/view_text_id.h"
-#include "interface_v3/ctrl_text_button.h"
+#include "nel/gui/view_text_id.h"
+#include "nel/gui/ctrl_text_button.h"
 #include "interface_v3/input_handler_manager.h"
 #include "interface_v3/guild_manager.h"
 #include "interface_v3/skill_manager.h"
@@ -84,6 +84,7 @@
 #include "game_share/r2_share_itf.h"
 #include "game_share/r2_types.h"
 #include "npc_icon.h"
+#include "interface_v3/action_handler_base.h"
 
 // Std.
 #include <vector>
@@ -1073,7 +1074,7 @@ void setFakeNews ()
 			iname += table[i];
 			iname += "_friendly_main";
 
-			CInterfaceGroup *inter = CInterfaceManager::getInstance()->getWindowFromId(iname);
+			CInterfaceGroup *inter = CWidgetManager::getInstance()->getWindowFromId(iname);
 			if (inter == NULL)
 			{
 				nlwarning ("cant find interface 's%'", iname.c_str());
@@ -1098,7 +1099,7 @@ void setFakeNews ()
 			iname += table[i];
 			iname += "_neutral_main";
 
-			CInterfaceGroup *inter = CInterfaceManager::getInstance()->getWindowFromId(iname);
+			CInterfaceGroup *inter = CWidgetManager::getInstance()->getWindowFromId(iname);
 			if (inter == NULL)
 			{
 				nlwarning ("cant find interface 's%'", iname.c_str());
@@ -1119,7 +1120,7 @@ void setFakeNews ()
 			iname += table[i];
 			iname += "_more_news";
 
-			CInterfaceGroup *inter = CInterfaceManager::getInstance()->getWindowFromId(iname);
+			CInterfaceGroup *inter = CWidgetManager::getInstance()->getWindowFromId(iname);
 			if (inter == NULL)
 			{
 				nlwarning ("cant find interface 's%'", iname.c_str());
@@ -1230,7 +1231,7 @@ void impulseBotChatSetInterface(NLMISC::CBitMemStream &impulse)
 */
 		// TEMP FOR THE DEMO, DON'T USE THE NETWORK NEW BUT SELECT A NEWS HERE
 /*
-		CInterfaceGroup *inter = CInterfaceManager::getInstance()->getWindowFromId("ui:interface:bot_chat_intro");
+		CInterfaceGroup *inter = CWidgetManager::getInstance()->getWindowFromId("ui:interface:bot_chat_intro");
 		nlassert (inter != NULL);
 		inter->setActive(true);
 
@@ -1254,7 +1255,7 @@ void impulseBotChatSetInterface(NLMISC::CBitMemStream &impulse)
 	}
 	else
 	{
-		CInterfaceGroup *inter = CInterfaceManager::getInstance()->getWindowFromId(interfaceName);
+		CInterfaceGroup *inter = CWidgetManager::getInstance()->getWindowFromId(interfaceName);
 		if (inter == NULL)
 		{
 			nlwarning ("Can't find interface name '%s' %d", interfaceName.c_str(), interfaceId);
@@ -1285,7 +1286,7 @@ void impulseBeginTrade(NLMISC::CBitMemStream &impulse)
 {
 	if (PermanentlyBanned) return;
 	//open trade window
-	CInterfaceGroup* win = CInterfaceManager::getInstance()->getWindowFromId("ui:interface:trade");
+	CInterfaceGroup* win = CWidgetManager::getInstance()->getWindowFromId("ui:interface:trade");
 	if (!win)
 	{
 		nlwarning("invalid interface ui:interface:trade");
@@ -1664,13 +1665,13 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 		switch(tpContext)
 		{
 			case R2::TPContext_Mainland:
-				CInterfaceManager::getInstance()->runActionHandler("return_to_mainland", NULL);
+				CAHManager::getInstance()->runActionHandler("return_to_mainland", NULL);
 			break;
 			case R2::TPContext_Edit:
-				CInterfaceManager::getInstance()->runActionHandler("r2ed_stop_test", NULL);
+				CAHManager::getInstance()->runActionHandler("r2ed_stop_test", NULL);
 			break;
 			case R2::TPContext_IslandOwner:
-				CInterfaceManager::getInstance()->runActionHandler("r2_stop_live", NULL);
+				CAHManager::getInstance()->runActionHandler("r2_stop_live", NULL);
 			break;
 			default:
 			break;
@@ -1715,10 +1716,10 @@ void impulseTeamShareOpen(NLMISC::CBitMemStream &impulse)
 {
 	if (PermanentlyBanned) return;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *gc = dynamic_cast<CGroupContainer*>( im->getElementFromId("ui:interface:team_share"));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer*>( CWidgetManager::getInstance()->getElementFromId("ui:interface:team_share"));
 	if (!gc) return;
 	gc->setActive(true);
-	im->setTopWindow(gc);
+	CWidgetManager::getInstance()->setTopWindow(gc);
 	gc->updateCoords();
 	gc->center();
 }// impulseTeamShareOpen //
@@ -1734,7 +1735,7 @@ void impulseTeamShareInvalid(NLMISC::CBitMemStream &impulse)
 {
 	if (PermanentlyBanned) return;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(pIM->getElementFromId("ui:interface:team_share:content:ok"));
+	CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:team_share:content:ok"));
 	if (pTB != NULL)
 		pTB->setActive(true);
 }// impulseTeamShareInvalid //
@@ -1748,10 +1749,10 @@ void impulseTeamShareClose(NLMISC::CBitMemStream &impulse)
 	if (PermanentlyBanned) return;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CGroupContainer
-	*pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:team_share"));
+	*pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:team_share"));
 	if (pGC != NULL)
 		pGC->setActive(false);
-	CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(pIM->getElementFromId("ui:interface:team_share:content:ok"));
+	CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:team_share:content:ok"));
 	if (pTB != NULL)
 		pTB->setActive(true);
 }// impulseTeamShareClose //
@@ -1932,13 +1933,13 @@ void impulseGuildJoinProposal(NLMISC::CBitMemStream &impulse)
 	CGuildManager::getInstance()->launchJoinProposal(phraseID);
 	/*//activate the pop up window
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>( im->getElementFromId("ui:interface:join_guild_proposal"));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>( CWidgetManager::getInstance()->getElementFromId("ui:interface:join_guild_proposal"));
 	if (!gc) return;
 	CViewText *vt = dynamic_cast<CViewText*>(gc->getView("invitor_name"));
 	if (vt == NULL) return;
 	vt->setText(invitor);
 	gc->setActive(true);
-	im->setTopWindow(gc);
+	CWidgetManager::getInstance()->setTopWindow(gc);
 	gc->updateCoords();
 	gc->center();
 	gc->enableBlink(2);*/
@@ -1975,13 +1976,13 @@ void impulseEnterCrZoneProposal(NLMISC::CBitMemStream &impulse)
 
 	//activate the pop up window
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>( im->getElementFromId("ui:interface:enter_crzone_proposal"));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>( CWidgetManager::getInstance()->getElementFromId("ui:interface:enter_crzone_proposal"));
 	if (!gc) return;
 	CViewTextID *vti = dynamic_cast<CViewTextID *>(gc->getView("phrase"));
 	if (!vti) return;
 	vti->setTextId(phraseID);
 	gc->setActive(true);
-	im->setTopWindow(gc);
+	CWidgetManager::getInstance()->setTopWindow(gc);
 	gc->updateCoords();
 	gc->center();
 	gc->enableBlink(2);
@@ -1995,7 +1996,7 @@ void impulseCloseEnterCrZoneProposal(NLMISC::CBitMemStream &impulse)
 {
 	// hide interface
 	CInterfaceManager* pIM = CInterfaceManager::getInstance();
-	CInterfaceGroup *pIG = (CInterfaceGroup*)pIM->getElementFromId ("ui:interface:enter_crzone_proposal");
+	CInterfaceGroup *pIG = (CInterfaceGroup*)CWidgetManager::getInstance()->getElementFromId ("ui:interface:enter_crzone_proposal");
 	if(pIG)
 		pIG->setActive(false);
 }// impulseCloseEnterCrZoneProposal //
@@ -2012,14 +2013,14 @@ void impulseExchangeInvitation(NLMISC::CBitMemStream &impulse)
 	CInterfaceManager* iMngr = CInterfaceManager::getInstance();
 
 	// show the modal window that allow the player to accept / decline the invitation
-	CGroupContainer *wnd = dynamic_cast<CGroupContainer *>(iMngr->getElementFromId(PLAYER_EXCHANGE_INVITATION_DIALOG));
+	CGroupContainer *wnd = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(PLAYER_EXCHANGE_INVITATION_DIALOG));
 	if (wnd)
 	{
 		wnd->setActive(true);
 		wnd->updateCoords();
 		wnd->center();
 		wnd->enableBlink(2);
-		iMngr->setTopWindow(wnd);
+		CWidgetManager::getInstance()->setTopWindow(wnd);
 	}
 
 	CViewTextID *vti = dynamic_cast<CViewTextID *>(wnd->getView("invite_phrase"));
@@ -2038,7 +2039,7 @@ void impulseExchangeCloseInvitation(NLMISC::CBitMemStream &impulse)
 	if (PermanentlyBanned) return;
 	CInterfaceManager* iMngr = CInterfaceManager::getInstance();
 	// hide the modal window that allow the player to accept / decline the invitation
-	CInterfaceGroup *wnd = dynamic_cast<CInterfaceGroup *>(iMngr->getElementFromId(PLAYER_EXCHANGE_INVITATION_DIALOG));
+	CInterfaceGroup *wnd = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(PLAYER_EXCHANGE_INVITATION_DIALOG));
 	if (wnd) wnd->setActive(false);
 }
 
@@ -2310,7 +2311,7 @@ void impulseBotChatForceEnd(NLMISC::CBitMemStream &impulse)
 CGroupContainer *getMissionCompletedContainer()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CInterfaceElement *pIE = pIM->getElementFromId(MC_M_CONTAINER);
+	CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(MC_M_CONTAINER);
 	CGroupContainer *pGCM = dynamic_cast<CGroupContainer*>(pIE);
 	if (pGCM == NULL) return NULL;
 
@@ -2899,7 +2900,7 @@ void impulseDeathRespawnPoint (NLMISC::CBitMemStream &impulse)
 	impulse.serial(msg);
 	if (PermanentlyBanned) return;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupMap *pMap = dynamic_cast<CGroupMap*>(pIM->getElementFromId("ui:interface:respawn_map:content:map_content:actual_map"));
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:respawn_map:content:map_content:actual_map"));
 	if (pMap == NULL)
 	{
 		nlwarning("problem cannot find ui:interface:respawn_map:content:map_content:actual_map");
@@ -2908,7 +2909,7 @@ void impulseDeathRespawnPoint (NLMISC::CBitMemStream &impulse)
 	pMap->addRespawnPoints(msg);
 
 
-	pMap = dynamic_cast<CGroupMap*>(pIM->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
 	if (pMap == NULL)
 	{
 		nlwarning("problem cannot find ui:interface:map:content:map_content:actual_map");
@@ -2938,13 +2939,13 @@ void impulseDuelInvitation(NLMISC::CBitMemStream &impulse)
 
 	//activate the pop up window
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:join_duel_proposal"));
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_duel_proposal"));
 	if (pGC == NULL) return;
 	CViewTextID *pVTID = dynamic_cast<CViewTextID *>(pGC->getView("invitor_name"));
 	if (pVTID == NULL) return;
 	pVTID->setTextId(textID);
 	pGC->setActive(true);
-	pIM->setTopWindow(pGC);
+	CWidgetManager::getInstance()->setTopWindow(pGC);
 	pGC->updateCoords();
 	pGC->center();
 	pGC->enableBlink(2);
@@ -2961,7 +2962,7 @@ void impulseDuelCancelInvitation(NLMISC::CBitMemStream &impulse)
 
 	//activate the pop up window
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:join_duel_proposal"));
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_duel_proposal"));
 	if (pGC == NULL) return;
 	pGC->setActive(false);
 
@@ -2981,13 +2982,13 @@ void impulsePVPChallengeInvitation(NLMISC::CBitMemStream &impulse)
 
 	//activate the pop up window
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:join_pvp_challenge_proposal"));
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_challenge_proposal"));
 	if (pGC == NULL) return;
 	CViewTextID *pVTID = dynamic_cast<CViewTextID *>(pGC->getView("invitor_name"));
 	if (pVTID == NULL) return;
 	pVTID->setTextId(textID);
 	pGC->setActive(true);
-	pIM->setTopWindow(pGC);
+	CWidgetManager::getInstance()->setTopWindow(pGC);
 	pGC->updateCoords();
 	pGC->center();
 	pGC->enableBlink(2);
@@ -3003,7 +3004,7 @@ void impulsePVPChallengeCancelInvitation(NLMISC::CBitMemStream &impulse)
 
 	//activate the pop up window
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:join_pvp_challenge_proposal"));
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_challenge_proposal"));
 	if (pGC == NULL) return;
 	pGC->setActive(false);
 
@@ -3075,16 +3076,16 @@ void impulsePVPChooseClan(NLMISC::CBitMemStream &impulse)
 
 	//activate the pop up window
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:join_pvp_clan_proposal"));
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_clan_proposal"));
 	if (pGC == NULL) return;
 	pGC->setActive(true);
 
-	CCtrlTextButton * butClan1 = dynamic_cast<CCtrlTextButton*>(pIM->getElementFromId("ui:interface:join_pvp_clan_proposal:content:clan1"));
+	CCtrlTextButton * butClan1 = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_clan_proposal:content:clan1"));
 	if( butClan1 == NULL )
 		return;
 	butClan1->setText( ucstring(EGSPD::CPeople::toString( clan1 )) );
 
-	CCtrlTextButton * butClan2 = dynamic_cast<CCtrlTextButton*>(pIM->getElementFromId("ui:interface:join_pvp_clan_proposal:content:clan2"));
+	CCtrlTextButton * butClan2 = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_clan_proposal:content:clan2"));
 	if( butClan2 == NULL )
 		return;
 	butClan2->setText( ucstring(EGSPD::CPeople::toString( clan2 )) );
@@ -3137,7 +3138,7 @@ void impulseItemCloseRoomInventory(NLMISC::CBitMemStream &impulse)
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:INVENTORY_ROOM_OPENED")->setValue32(0);
 
 	// deactivate the pop up window
-	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:inv_room"));
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:inv_room"));
 	if (pGC == NULL) return;
 	pGC->setActive(false);
 }
@@ -3297,16 +3298,16 @@ private:
 			string group = titleStr.toString();
 			// <missing:XXX>
 			group = group.substr(9, group.size()-10);
-			groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId("ui:interface:"+group+":content:html"));
+			groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:"+group+":content:html"));
 			if (!groupHtml)
 			{
-				groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId("ui:interface:webig:content:html"));
+				groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:webig:content:html"));
 				group = "webig";
 			}
 
 			if (groupHtml)
 			{
-				CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:"+group));
+				CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:"+group));
 				if (pGC)
 				{
 					if (contentStr.empty())
@@ -3320,14 +3321,14 @@ private:
 						string url = contentStr.toString();
 						addWebIGParams(url, true);
 						groupHtml->browse(url.c_str());
-						pIM->setTopWindow(pGC);
+						CWidgetManager::getInstance()->setTopWindow(pGC);
 					}
 				}
 			}
 		}
 		else
 		{
-			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:server_message_box"));
+			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:server_message_box"));
 			if (pGC)
 			{
 				// show the window with correct width
@@ -3335,12 +3336,12 @@ private:
 				pGC->setActive(true);
 
 				// must set the text by hand
-				CViewText	*vt= dynamic_cast<CViewText*>(pIM->getElementFromId(pIM->getDefine("server_message_box_content_view_text")));
+				CViewText	*vt= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("server_message_box_content_view_text")));
 				if(vt)
 					vt->setTextFormatTaged(contentStr);
 
 				// open
-				pIM->setTopWindow(pGC);
+				CWidgetManager::getInstance()->setTopWindow(pGC);
 				pGC->invalidateCoords();
 				// Yoyo: because of buggued group container, I found that 6 times is a good number....
 				for(uint i=0;i<6;i++)

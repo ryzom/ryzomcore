@@ -20,7 +20,7 @@
 #define NL_INTERFACE_DDX_H
 
 #include "nel/misc/types_nl.h"
-#include "interface_element.h"
+#include "nel/gui/interface_element.h"
 #include "interface_pointer.h"
 
 // Values for float (scrollbar float) must not exceed 200,00 this is due to storing on

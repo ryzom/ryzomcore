@@ -65,7 +65,7 @@ CDisplayerVisual::~CDisplayerVisual()
 {
 	if (_IconInScene)
 	{
-		getEditor().getUI().unMakeWindow(_IconInScene);
+		CWidgetManager::getInstance()->unMakeWindow(_IconInScene);
 		if (_IconInScene->getParent())
 		{
 			_IconInScene->getParent()->delGroup(_IconInScene);
@@ -441,8 +441,8 @@ void CDisplayerVisual::onPostRender()
 					else
 					{
 						// Link to the interface
-						pIM->addWindowToMasterGroup("ui:interface", group);
-						CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+						CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
+						CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 						group->setParent(pRoot);
 						if (pRoot)
 							pRoot->addGroup (group);

@@ -26,8 +26,8 @@
 #include "nel/3d/texture_user.h"
 #include "nel/3d/packed_world.h"
 //
-#include "../interface_v3/view_renderer.h"
-#include "../interface_v3/interface_element.h"
+#include "nel/gui/view_renderer.h"
+#include "nel/gui/interface_element.h"
 
 namespace NL3D
 {

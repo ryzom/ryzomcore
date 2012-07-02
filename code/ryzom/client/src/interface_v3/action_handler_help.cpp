@@ -19,21 +19,21 @@
 #include "stdpch.h"
 
 
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "interface_manager.h"
 #include "bot_chat_manager.h"
 #include "../sheet_manager.h"
 #include "skill_manager.h"
 #include "dbctrl_sheet.h"
 #include "nel/gui/interface_expr.h"
-#include "group_container.h"
-#include "group_editbox.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/group_editbox.h"
 #include "group_quick_help.h"
-#include "view_text_id.h"
+#include "nel/gui/view_text_id.h"
 #include "../user_entity.h"
 #include "../entities.h"
-#include "dbgroup_combo_box.h"
-#include "dbview_bar.h"
+#include "nel/gui/dbgroup_combo_box.h"
+#include "nel/gui/dbview_bar.h"
 #include "../debug_client.h"
 #include "interface_3d_scene.h"
 #include "character_3d.h"
@@ -167,7 +167,7 @@ void	CInterfaceHelp::initWindows()
 
 	for(sint i=0;i<maxHelpWindow;i++)
 	{
-		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:sheet_help"+toString(i)));
+		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:sheet_help"+toString(i)));
 		// if the window exist, insert
 		if(group)
 		{
@@ -275,7 +275,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 				if(ok)
 				{
 					// then don't neet to open a new window, but make the older top.
-					pIM->setTopWindow(group);
+					CWidgetManager::getInstance()->setTopWindow(group);
 					return NULL;
 				}
 			}
@@ -356,7 +356,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 
 	// activate it, set top, copy item watched
 	group->setActive(true);
-	pIM->setTopWindow(group);
+	CWidgetManager::getInstance()->setTopWindow(group);
 	_InfoWindows[newIndexWindow].CtrlSheet= elt;
 	// insert in list
 	if(mustAddToActiveWindows)
@@ -464,7 +464,7 @@ void			CInterfaceHelp::resetWindowPos(sint y)
 	sint	maxHelpWindow= (sint)_InfoWindows.size();
 
 	uint32	w, h;
-	pIM->getViewRenderer().getScreenSize(w,h);
+	CViewRenderer::getInstance()->getScreenSize(w,h);
 
 	// For all windows, reset pos
 	for(uint i=0;i<(uint)maxHelpWindow;i++)
@@ -656,7 +656,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 			ucstring name = peopleList->getName(index);
 			if ( ! name.empty())
 			{
-				CInterfaceManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name.toUtf8()+"|ptype="+toString((int)CEntityCL::Player));
+				CAHManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name.toUtf8()+"|ptype="+toString((int)CEntityCL::Player));
 			}
 			return;
 		}
@@ -697,7 +697,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 					}
 				}
 				if(!name.empty())
-					CInterfaceManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name.toUtf8()+"|ptype="+toString((int)selection->Type));
+					CAHManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name.toUtf8()+"|ptype="+toString((int)selection->Type));
 				return;
 			}
 		}
@@ -914,7 +914,7 @@ class CHandlerBrowse : public IActionHandler
 	void execute (CCtrlBase *pCaller, const std::string &sParams)
 	{
 		string container = getParam (sParams, "name");
-		CInterfaceElement *element = CInterfaceManager::getInstance()->getElementFromId(container);
+		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId(container);
 		CInterfaceGroup *elementGroup = dynamic_cast<CInterfaceGroup*>(element);
 
 		string urls = getParam (sParams, "url");
@@ -994,7 +994,7 @@ class CHandlerBrowse : public IActionHandler
 				CInterfaceManager::parseTokens(ucparams);
 				params = ucparams.toUtf8();
 				// go. NB: the action handler himself may translate params from utf8
-				CInterfaceManager::getInstance()->runActionHandler(action, elementGroup, params);
+				CAHManager::getInstance()->runActionHandler(action, elementGroup, params);
 
 				// Next name
 				start = end+2;
@@ -1055,7 +1055,7 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string container = getParam (sParams, "name");
-		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(container));
+		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(container));
 		if (groupHtml)
 		{
 			groupHtml->browseUndo();
@@ -1074,7 +1074,7 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string container = getParam (sParams, "name");
-		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(container));
+		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(container));
 		if (groupHtml)
 		{
 			groupHtml->browseRedo();
@@ -1093,7 +1093,7 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string container = getParam (sParams, "name");
-		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(container));
+		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(container));
 		if (groupHtml)
 		{
 			groupHtml->refresh();
@@ -1118,7 +1118,7 @@ class CHandlerHTMLSubmitForm : public IActionHandler
 
 		string submit_button = getParam (sParams, "submit_button");
 
-		CInterfaceElement *element = CInterfaceManager::getInstance()->getElementFromId(container);
+		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId(container);
 		{
 			// Group HTML ?
 			CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(element);
@@ -3883,7 +3883,7 @@ public:
 		string	dbitem= getParam(Params, "dbitem");
 		string	prefix= getParam(Params, "prefix");
 
-		CInterfaceGroup		*wnd= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(wndStr));
+		CInterfaceGroup		*wnd= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(wndStr));
 		CCDBNodeLeaf		*node= NLGUI::CDBManager::getInstance()->getDbProp(dbitem);
 
 		// common method for info and botchat
@@ -3913,7 +3913,7 @@ void updateStatReport ()
 	if ((ingameTime0 () <= time4StatReport) && (ingameTime1 () > time4StatReport))
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler ("proc", NULL, "proc_stat_report");
+		CAHManager::getInstance()->runActionHandler ("proc", NULL, "proc_stat_report");
 	}
 }
 
@@ -3978,7 +3978,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		#ifdef NL_OS_WINDOWS
-			NL3D::UDriver *Driver = CInterfaceManager::getInstance()->getViewRenderer().getDriver();
+			NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 			if (Driver)
 			{
 				HWND wnd = (HWND) Driver->getDisplay();

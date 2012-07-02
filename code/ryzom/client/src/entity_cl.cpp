@@ -52,9 +52,9 @@
 #include "debug_client.h"
 #include "misc.h"
 #include "client_cfg.h"
-#include "interface_v3/action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "interface_v3/interface_manager.h"
-#include "interface_v3/group_container.h"
+#include "nel/gui/group_container.h"
 #include "interface_v3/guild_manager.h"
 #include "interface_v3/skill_manager.h"
 #include "user_entity.h"
@@ -2331,10 +2331,10 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 	if (_Slot == 0)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:interface:player:header_opened:player_title"));
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player:header_opened:player_title"));
 		if (pVT != NULL) pVT->setText(_Title);
 
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:player"));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player"));
 		if (pGC != NULL) pGC->setUCTitle(_EntityName);
 
 		CSkillManager *pSM = CSkillManager::getInstance();

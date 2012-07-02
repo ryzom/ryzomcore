@@ -30,11 +30,11 @@
 #include "people_interraction.h"
 #include "../connection.h"
 //
-#include "group_container.h"
-#include "group_editbox.h"
-#include "group_tab.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/group_editbox.h"
+#include "nel/gui/group_tab.h"
 #include "interface_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../client_chat_manager.h"
 //
 #include "../session_browser_impl.h"
@@ -92,7 +92,7 @@ bool CChatWindow::create(const CChatWindowDesc &desc, const std::string &chatId)
 	{
 		if (desc.FatherContainer != "ui:interface" )
 		{
-			fatherContainer = dynamic_cast<CGroupContainer *>(im->getElementFromId(desc.FatherContainer));
+			fatherContainer = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(desc.FatherContainer));
 			if (!fatherContainer)
 			{
 				nlwarning("<CChatWindow::create> Can't get father group, or bad type");
@@ -143,7 +143,7 @@ bool CChatWindow::create(const CChatWindowDesc &desc, const std::string &chatId)
 			_EB->setAHOnEnter("chat_box_entry");
 		}
 
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 
 		if (fatherContainer)
 		{
@@ -153,7 +153,7 @@ bool CChatWindow::create(const CChatWindowDesc &desc, const std::string &chatId)
 		// If root container
 		if (desc.FatherContainer == "ui:interface")
 		{
-			im->addWindowToMasterGroup("ui:interface", _Chat);
+			CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", _Chat);
 			_Chat->setParent(pRoot);
 			_Chat->setMovable(true);
 			_Chat->setActive(false);
@@ -289,12 +289,12 @@ void CChatWindow::deleteContainer()
 			proprietaryContainer->detachContainer(_Chat); // just detach
 		}
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		pRoot->delGroup (_Chat);
 	}
 	else
 	{
-		CInterfaceManager::getInstance()->unMakeWindow(_Chat);
+		CWidgetManager::getInstance()->unMakeWindow(_Chat);
 		if (_Chat->getParent())
 		{
 			_Chat->getParent()->delGroup(_Chat);
@@ -315,7 +315,7 @@ bool CChatWindow::rename(const ucstring &newName, bool newNameLocalize)
 void CChatWindow::setKeyboardFocus()
 {
 	if (!_EB || !_Chat) return;
-	CInterfaceManager::getInstance()->setCaptureKeyboard(_EB);
+	CWidgetManager::getInstance()->setCaptureKeyboard(_EB);
 	if (!_Chat->isOpenable() || _Chat->isOpenWhenPopup())
 	{
 		if (_Chat->isPopable() && !_Chat->isPopuped())
@@ -667,7 +667,7 @@ void CChatGroupWindow::displayTellMessage(const ucstring &msg, NLMISC::CRGBA col
 
 	gcChat->requireAttention();
 
-	CInterfaceManager::getInstance()->setTopWindow(gcChat);
+	CWidgetManager::getInstance()->setTopWindow(gcChat);
 
 	// add the text to this window
 	CGroupList *gl = dynamic_cast<CGroupList *>(gcChat->getGroup("text_list"));
@@ -769,10 +769,10 @@ CGroupContainer *CChatGroupWindow::createFreeTeller(const ucstring &winNameIn, c
 		pGC->setSavable(true);
 		pGC->setEscapable(true);
 
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		pRoot->addGroup (pGC);
 		pGC->setParent(pRoot); // must be done before makeWindow
-		pIM->makeWindow(pGC);
+		CWidgetManager::getInstance()->makeWindow(pGC);
 		pGC->open();
 		pGC->updateCoords();
 		pGC->center();
@@ -896,8 +896,8 @@ bool CChatGroupWindow::removeFreeTeller(const std::string &containerID)
 	{
 		pIM->removeGroupContainerImage(_FreeTellers[i]->getId(), m);
 	}
-	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
-	pIM->unMakeWindow(_FreeTellers[i]);
+	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
+	CWidgetManager::getInstance()->unMakeWindow(_FreeTellers[i]);
 	pRoot->delGroup (_FreeTellers[i]);
 	_FreeTellers[i] = NULL;
 	_FreeTellers.erase(_FreeTellers.begin()+i);
@@ -1319,7 +1319,8 @@ public:
 		}
 		// Clear input string
 		pEB->setInputString (ucstring(""));
-		CGroupContainer *gc = pEB->getEnclosingContainer();
+		CGroupContainer *gc = static_cast< CGroupContainer* >( pEB->getEnclosingContainer() );
+
 		if (gc)
 		{
 			// Restore position of enclosing container if it hasn't been moved/scaled/poped by the user
@@ -1339,9 +1340,9 @@ static ucstring getFreeTellerName(CInterfaceElement *pCaller)
 	if (!pCaller) return ucstring();
 	CChatGroupWindow *cgw = PeopleInterraction.getChatGroupWindow();
 	if (!cgw) return ucstring();
-	CGroupContainer *freeTeller = pCaller->getParentContainer();
+	CInterfaceGroup *freeTeller = pCaller->getParentContainer();
 	if (!freeTeller) return ucstring();
-	return cgw->getFreeTellerName(freeTeller->getId());
+	return cgw->getFreeTellerName( freeTeller->getId() );
 }
 
 // ***************************************************************************************
@@ -1377,7 +1378,7 @@ public:
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		std::string callerId = getParam(sParams, "id");
-		CInterfaceElement *prevCaller = im->getElementFromId(callerId);
+		CInterfaceElement *prevCaller = CWidgetManager::getInstance()->getElementFromId(callerId);
 		ucstring playerName = ::getFreeTellerName(prevCaller);
 		if (!playerName.empty())
 		{
@@ -1393,10 +1394,10 @@ public:
 			}
 			if (pCaller)
 			{
-				CGroupContainer *win = prevCaller->getParentContainer();
+				CInterfaceGroup *win = prevCaller->getParentContainer();
 				if (win)
 				{
-					win->setActive(false);
+					static_cast< CGroupContainer* >( win )->setActive(false);
 				}
 			}
 		}

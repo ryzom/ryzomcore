@@ -19,14 +19,14 @@
 #include "stdpch.h"
 #include "bot_chat_page_mission.h"
 #include "interface_manager.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "bot_chat_manager.h"
 #include "bot_chat_page_all.h"
 #include "dbgroup_list_sheet_trade.h"
-#include "action_handler.h"
-#include "group_container.h"
+#include "nel/gui/action_handler.h"
+#include "nel/gui/group_container.h"
 #include "dbctrl_sheet.h"
-#include "view_text_id.h"
+#include "nel/gui/view_text_id.h"
 #include "../net_manager.h"
 
 using namespace std;
@@ -67,7 +67,7 @@ void CBotChatPageMission::begin()
 	// Select the Mission Aspect according to mission type
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION:MISSION_TYPE")->setValue32(_MType);
 
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId(WIN_BOT_CHAT_PAGE_MISSION));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_PAGE_MISSION));
 	if (gc)
 	{
 		// show the ui
@@ -96,7 +96,7 @@ void CBotChatPageMission::selectMission(CDBCtrlSheet *missionSheet)
 	if (missionSheet->getGrayed()) return;
 	// show the dialog with good infos
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId(WIN_BOT_CHAT_ACCEPT_MISSION));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_ACCEPT_MISSION));
 
 	// copy text id for title
 	{
@@ -123,7 +123,7 @@ void CBotChatPageMission::selectMission(CDBCtrlSheet *missionSheet)
 	}
 	//
 	if (!gc) return;
-	im->setTopWindow(gc);
+	CWidgetManager::getInstance()->setTopWindow(gc);
 	gc->setActive(true);
 	gc->updateCoords();
 	gc->center();
