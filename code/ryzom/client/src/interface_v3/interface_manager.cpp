@@ -443,7 +443,7 @@ CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext 
 
 	_CurrentMode = 0;
 
-	_InGame = false;
+	setInGame( false );
 
 	_LocalSyncActionCounter= 0;
 	// 4Bits counter.
@@ -535,6 +535,12 @@ void CInterfaceManager::releaseServerToLocalAutoCopyObservers()
 	ServerToLocalAutoCopyExchange.release();
 	ServerToLocalAutoCopyContextMenu.release();
 	ServerToLocalAutoCopySkillPoints.release();
+}
+
+void CInterfaceManager::setInGame( bool i )
+{
+	_InGame = i;
+	CWidgetManager::getInstance()->setIngame( i );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -925,7 +931,7 @@ void CInterfaceManager::initInGame()
 
 		initActions();
 	}
-	_InGame = true;
+	setInGame( true );
 
 	// Init bubble manager
 	InSceneBubbleManager.init();
@@ -1324,7 +1330,7 @@ void CInterfaceManager::uninitInGame1 ()
 	// Close LUA Scripting
 	uninitLUA();
 
-	_InGame = false;
+	setInGame( false );
 	_NeutralColor = NULL;
 	_WarningColor = NULL;
 	_ErrorColor = NULL;

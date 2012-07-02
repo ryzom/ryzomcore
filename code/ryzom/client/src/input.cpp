@@ -96,6 +96,7 @@ bool	InitMouseWithCursor (bool hardware)
 
 	// Get the new mouse state
 	MouseHardware = hardware;
+	CViewPointer::setHWMouse( hardware );
 
 	// Reinit ?
 	if (MouseDevice == NULL)

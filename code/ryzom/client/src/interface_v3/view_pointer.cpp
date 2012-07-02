@@ -15,30 +15,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-#include "../input.h"
 #include "view_pointer.h"
-#include "interface_manager.h"
+#include "nel/gui/widget_manager.h"
 #include "nel/gui/view_renderer.h"
-#include "nel/gui/ctrl_col_pick.h"
 #include "nel/gui/group_paragraph.h"
-#include "nel/gui/group_html.h"
-#include "group_map.h"
-//
 #include "nel/misc/xml_auto_ptr.h"
-//
 #include "nel/gui/group_container.h"
-#include "interface_3d_scene.h"
-//
-#include "../r2/editor.h"
-
-
-
 
 using namespace std;
 using namespace NLMISC;
 
-NLMISC_REGISTER_OBJECT(CViewBase, CViewPointer, std::string, "pointer");
+NLMISC_REGISTER_OBJECT(CViewBase, CViewPointer, std::string, "generic_pointer");
+
+bool CViewPointer::hwMouse = true;
 
 // --------------------------------------------------------------------------------------------------------------------
 CViewPointer::CViewPointer (const TCtorParam &param)
@@ -125,16 +114,13 @@ bool CViewPointer::parse (xmlNodePtr cur,CInterfaceGroup * parentGroup)
 	if (prop) _TxCanPan = (const char *) prop;
 	_TxCanPan = NLMISC::strlwr (_TxCanPan);
 
-	if (ClientCfg.R2EDEnabled)
-	{
-		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_pan_r2");
-		if (prop) _TxPanR2 = (const char *) prop;
-		_TxPanR2 = NLMISC::strlwr (_TxPanR2);
+	prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_pan_r2");
+	if (prop) _TxPanR2 = (const char *) prop;
+	_TxPanR2 = NLMISC::strlwr (_TxPanR2);
 
-		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_can_pan_r2");
-		if (prop) _TxCanPanR2 = (const char *) prop;
-		_TxCanPanR2 = NLMISC::strlwr (_TxCanPanR2);
-	}
+	prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_can_pan_r2");
+	if (prop) _TxCanPanR2 = (const char *) prop;
+	_TxCanPanR2 = NLMISC::strlwr (_TxCanPanR2);
 
 	prop = (char*) xmlGetProp (cur, (xmlChar*)"color");
 	if (prop) _Color = convertColor(prop);
@@ -162,23 +148,22 @@ void CViewPointer::draw ()
 	if(!_PointerVisible)
 		return;
 
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
-	if (pIM->isInGame())
+	if ( CWidgetManager::getInstance()->isIngame() )
 	if (!_StringCursor)
 	{
 		// Create the string cursor instance
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string>("id", "string_cursor"));
 
-		_StringCursor = pIM->createGroupInstance("string_cursor", "", templateParams);
+		_StringCursor = CWidgetManager::parser->createGroupInstance("string_cursor", "", templateParams);
 		if (_StringCursor)
 			_StringCursor->setParentPos(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 
 		templateParams.clear();
 		templateParams.push_back (std::pair<std::string,std::string>("id", "string_cursor_hardware"));
-		_StringCursorHardware = pIM->createGroupInstance("string_cursor_hardware", "", templateParams);
+		_StringCursorHardware = CWidgetManager::parser->createGroupInstance("string_cursor_hardware", "", templateParams);
 		if (_StringCursorHardware)
 			_StringCursorHardware->setParentPos(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 	}
@@ -225,11 +210,9 @@ void CViewPointer::draw ()
 		_TxIdColPick	= rVR.getTextureIdFromName (_TxColPick);
 		_TxIdPan		= rVR.getTextureIdFromName (_TxPan);
 		_TxIdCanPan		= rVR.getTextureIdFromName (_TxCanPan);
-		if (ClientCfg.R2EDEnabled)
-		{
-			_TxIdPanR2		= rVR.getTextureIdFromName (_TxPanR2);
-			_TxIdCanPanR2	= rVR.getTextureIdFromName (_TxCanPanR2);
-		}
+		_TxIdPanR2		= rVR.getTextureIdFromName (_TxPanR2);
+		_TxIdCanPanR2	= rVR.getTextureIdFromName (_TxCanPanR2);
+
 	}
 
 	const vector<CCtrlBase *> &rICL = CWidgetManager::getInstance()->getCtrlsUnderPointer ();
@@ -240,7 +223,6 @@ void CViewPointer::draw ()
 	if (pCB != NULL)
 	{
 		if (drawResizer(pCB,col)) return;
-		//if (drawMover(pCB,col)) return;
 		if (drawColorPicker(pCB,col)) return;
 		if (drawRotate(pCB,col)) return;
 		if (drawPan(pCB,col)) return;
@@ -264,7 +246,7 @@ void CViewPointer::draw ()
 				setString(ucstring(tooltip));
 				sint32 texId = rVR.getTextureIdFromName ("curs_pick.tga");
 
-				CInterfaceGroup *stringCursor = IsMouseCursorHardware() ? _StringCursorHardware : _StringCursor;
+				CInterfaceGroup *stringCursor = hwMouse ? _StringCursorHardware : _StringCursor;
 				if (stringCursor)
 				{
 					stringCursor->setX(_PointerX);
@@ -272,7 +254,7 @@ void CViewPointer::draw ()
 					stringCursor->updateCoords();
 					stringCursor->draw();
 					// if in hardware mode, force to draw the default cursor no matter what..
-					if (IsMouseCursorHardware())
+					if ( hwMouse )
 						drawCursor(texId, col, 0);
 				}
 				else
@@ -357,8 +339,6 @@ void CViewPointer::draw ()
 					}
 				}
 			}
-
-			//if (drawMover(pCB,col)) return;
 		}
 	}
 
@@ -382,7 +362,7 @@ void CViewPointer::draw ()
 
 	if (_StringMode && CWidgetManager::getInstance()->isMouseHandlingEnabled())
 	{
-		CInterfaceGroup *stringCursor = IsMouseCursorHardware() ? _StringCursorHardware : _StringCursor;
+		CInterfaceGroup *stringCursor = hwMouse ? _StringCursorHardware : _StringCursor;
 		if (stringCursor)
 		{
 			stringCursor->setX(_PointerX);
@@ -390,7 +370,7 @@ void CViewPointer::draw ()
 			stringCursor->updateCoords();
 			stringCursor->draw();
 			// if in hardware mode, force to draw the default cursor no matter what..
-			if (IsMouseCursorHardware())
+			if ( hwMouse )
 			{
 				drawCursor(_TxIdDefault, col, 0);
 			}
@@ -401,150 +381,6 @@ void CViewPointer::draw ()
 		// Draw the default cursor
 		drawCursor(_TxIdDefault, col, 0);
 	}
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-bool CViewPointer::drawResizer(CCtrlBase* pCB, CRGBA col)
-{
-	CCtrlResizer *pCR = dynamic_cast<CCtrlResizer*>(pCB);
-	if (pCR != NULL)
-	{
-		CGroupContainer *parent = dynamic_cast<CGroupContainer *>(pCR->getParent());
-		if (parent && !parent->isLocked())
-		{
-			sint32 texID= -1;
-			switch(pCR->getRealResizerPos())
-			{
-				case Hotspot_BR:
-				case Hotspot_TL:
-					texID = _TxIdResizeBRTL;
-				break;
-				case Hotspot_BL:
-				case Hotspot_TR:
-					texID = _TxIdResizeBLTR;
-				break;
-				case Hotspot_MR:
-				case Hotspot_ML:
-					texID = _TxIdResizeLR;
-				break;
-				case Hotspot_TM:
-				case Hotspot_BM:
-					texID = _TxIdResizeTB;
-				break;
-				default:
-					return false;
-				break;
-			}
-			drawCursor(texID, col, false);
-			return true;
-		}
-	}
-	return false;
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-bool CViewPointer::drawMover(CCtrlBase* pCB, CRGBA col)
-{
-	CCtrlMover *pCM = dynamic_cast<CCtrlMover*>(pCB);
-	if ((pCM != NULL) && (pCM->canMove() == true))
-	{
-		drawCursor(_TxIdMoveWindow, col, 0);
-		return true;
-	}
-	return false;
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-bool CViewPointer::drawRotate (CCtrlBase* pCB, CRGBA col)
-{
-	CInterface3DScene *pI3DS = dynamic_cast<CInterface3DScene *>(pCB);
-	if (pI3DS != NULL)
-	{
-		drawCursor(_TxIdRotate, col, 0);
-		return true;
-	}
-	return false;
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-bool CViewPointer::drawScale (CCtrlBase* pCB, CRGBA col)
-{
-	CInterface3DScene *pI3DS = dynamic_cast<CInterface3DScene *>(pCB);
-	if (pI3DS != NULL)
-	{
-		drawCursor(_TxIdScale, col, 0);
-		return true;
-	}
-	return false;
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-bool CViewPointer::drawColorPicker (CCtrlBase* pCB, CRGBA col)
-{
-	CCtrlColPick *pCCP = dynamic_cast<CCtrlColPick*>(pCB);
-	if (pCCP != NULL)
-	{
-		drawCursor(_TxIdColPick, col, 0);
-		return true;
-	}
-	return false;
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-bool CViewPointer::drawLink (CCtrlBase* pCB, CRGBA col)
-{
-	CCtrlLink *pCCP = dynamic_cast<CCtrlLink*>(pCB);
-	if (pCCP != NULL)
-	{
-		drawCursor(_TxIdColPick, col, 0);
-		return true;
-	}
-	return false;
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-bool CViewPointer::drawBrowse (CCtrlBase* pCB, CRGBA col)
-{
-	CGroupHTML *pCGH = dynamic_cast<CGroupHTML *>(pCB);
-	if (pCGH != NULL)
-	{
-		if (pCGH->isBrowsing())
-		{
-			static uint8 rot =0;
-			drawCursor(_TxIdRotate, col, rot>>3);
-			rot = (rot+1) & 0x1f;
-			return true;
-		}
-	}
-	return false;
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-bool CViewPointer::drawPan(CCtrlBase* pCB, NLMISC::CRGBA col)
-{
-	CGroupMap *gm = dynamic_cast<CGroupMap *>(pCB);
-	if (gm)
-	{
-		sint32 texId;
-		if (ClientCfg.R2EDEnabled && R2::getEditor().getCurrentTool())
-		{
-			/** If cursor is set to anything other than the default cursor, use that cursor (because action can be performed on the map
-			  * by the current tool
-			  */
-			if (_TxDefault == "curs_default.tga")
-			{
-				texId = gm->isPanning() ? _TxIdPanR2 : _TxIdCanPanR2;
-			}
-			else return false;
-		}
-		else
-		{
-			texId = gm->isPanning() ? _TxIdPan : _TxIdCanPan;
-		}
-		drawCursor(texId, col, 0);
-		return true;
-	}
-	return false;
 }
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -565,11 +401,10 @@ bool CViewPointer::drawCustom(CCtrlBase* pCB)
 			tooltip = tooltipInfosList[1];
 			nlinfo(tooltip.c_str());
 			setString(ucstring(tooltip));
-			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			CViewRenderer &rVR = *CViewRenderer::getInstance();
 			sint32 texId = rVR.getTextureIdFromName (texName);
 
-			CInterfaceGroup *stringCursor = IsMouseCursorHardware() ? _StringCursorHardware : _StringCursor;
+			CInterfaceGroup *stringCursor = hwMouse ? _StringCursorHardware : _StringCursor;
 			if (stringCursor)
 			{
 				stringCursor->setX(_PointerX);
@@ -577,7 +412,7 @@ bool CViewPointer::drawCustom(CCtrlBase* pCB)
 				stringCursor->updateCoords();
 				stringCursor->draw();
 				// if in hardware mode, force to draw the default cursor no matter what..
-				if (IsMouseCursorHardware())
+				if ( hwMouse )
 					drawCursor(texId, col, 0);
 			}
 			else
@@ -588,7 +423,6 @@ bool CViewPointer::drawCustom(CCtrlBase* pCB)
 		}
 		else
 		{
-			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			CViewRenderer &rVR = *CViewRenderer::getInstance();
 			sint32 texId = rVR.getTextureIdFromName (texName);
 			drawCursor(texId, col, 0);
@@ -647,11 +481,10 @@ void CViewPointer::setString (const ucstring &str)
 // --------------------------------------------------------------------------------------------------------------------
 void CViewPointer::drawCursor(sint32 texId, NLMISC::CRGBA col, uint8 rot)
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	sint32 xPos = _XReal + _OffsetX;
 	sint32 yPos = _YReal + _OffsetY;
-	if (!IsMouseCursorHardware())
+	if ( !hwMouse )
 	{
 		rVR.draw11RotFlipBitmap (_RenderLayer, xPos, yPos, rot, false, texId, col);
 	}

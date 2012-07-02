@@ -376,6 +376,9 @@ namespace NLGUI
 
 		const SInterfaceTimes& getInterfaceTimes() const{ return interfaceTimes; }
 		void updateInterfaceTimes( const SInterfaceTimes &times ){ interfaceTimes = times; }
+
+		void setIngame( bool i ){ inGame = i; }
+		bool isIngame() const{ return inGame; }
 		
 		static IParser *parser;
 
@@ -436,6 +439,8 @@ namespace NLGUI
 		NLMISC::CRGBA _OverExtendViewTextBackColor;
 
 		SInterfaceTimes interfaceTimes;
+
+		bool inGame;
 	};
 
 }

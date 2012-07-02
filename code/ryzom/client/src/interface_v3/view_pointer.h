@@ -38,13 +38,15 @@ namespace NLGUI
 
 class CViewPointer : public CViewPointerBase
 {
-	friend void	SetMouseFreeLook ();
-	friend void	SetMouseCursor (bool updateMousePos);
+
 public:
-	DECLARE_UI_CLASS( CViewPointerBase )
-	CViewPointer (const TCtorParam &param);
+	DECLARE_UI_CLASS( CViewPointer )
+	
+	CViewPointer( const TCtorParam &param );
+	virtual ~CViewPointer(){}
+
 	bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup);
-	void draw ();
+	void draw();
 
 	// Set cursor mode
 	void setStringMode (bool stringCursor);
@@ -53,7 +55,6 @@ public:
 	// Set cursor string
 	void setString (const ucstring &str);
 
-public:
 	// TEMP PATCH
 	void setCursor (const std::string &name)
 	{
@@ -62,23 +63,24 @@ public:
 	}
 	// TEMP PATCH
 
-private:
-
 	/// Show or hide the pointer. Please, use SetMouseMode (bool freelook) instead.
 	void show(bool s) {_PointerVisible = s;}
 
-	/// Drawing helpers
-	bool drawResizer	(CCtrlBase* pCB, NLMISC::CRGBA col);
-	bool drawMover		(CCtrlBase* pCB, NLMISC::CRGBA col);
-	bool drawRotate		(CCtrlBase* pCB, NLMISC::CRGBA col);
-	bool drawScale		(CCtrlBase* pCB, NLMISC::CRGBA col);
-	bool drawColorPicker (CCtrlBase* pCB, NLMISC::CRGBA col);
-	bool drawLink		(CCtrlBase* pCB, NLMISC::CRGBA col);
-	bool drawBrowse		(CCtrlBase* pCB, NLMISC::CRGBA col);
-	bool drawPan		(CCtrlBase* pCB, NLMISC::CRGBA col);
-	bool drawCustom		(CCtrlBase* pCB);
+	static void setHWMouse( bool hw ){ hwMouse = hw; }
 
 private:
+
+	/// Drawing helpers
+	virtual bool drawResizer(CCtrlBase* pCB, NLMISC::CRGBA col){ return false; }
+	virtual bool drawRotate(CCtrlBase* pCB, NLMISC::CRGBA col){ return false; }
+	virtual bool drawScale(CCtrlBase* pCB, NLMISC::CRGBA col){ return false; }
+	virtual bool drawColorPicker(CCtrlBase* pCB, NLMISC::CRGBA col){ return false; }
+	virtual bool drawLink(CCtrlBase* pCB, NLMISC::CRGBA col){ return false; }
+	virtual bool drawBrowse(CCtrlBase* pCB, NLMISC::CRGBA col){ return false; }
+	virtual bool drawPan(CCtrlBase* pCB, NLMISC::CRGBA col){ return false; }
+	virtual bool drawCustom(CCtrlBase* pCB);
+
+protected:
 
 	// Look of the cursor in different situation
 	std::string	_TxDefault;
@@ -123,11 +125,14 @@ private:
 	CInterfaceGroup		*_StringCursorHardware;
 	ucstring			_ContextString;
 
-private:
 	// draw current cursor with the given texture, or, if in hardware mode, change the hardware cursor shape
 	void drawCursor(sint32 texId, NLMISC::CRGBA col, uint8 rot);
+
+private:
 	// set the string into frame for software or hardware version
 	void setString (const ucstring &str, CInterfaceGroup *target);
+
+	static bool hwMouse;
 
 };
 

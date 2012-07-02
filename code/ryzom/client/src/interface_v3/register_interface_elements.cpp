@@ -60,10 +60,14 @@
 #include "../r2/tool.h"
 #include "../r2/tool_pick.h"
 
+#include "view_pointer_ryzom.h"
+
 
 
 void registerInterfaceElements()
 {
+	CViewPointerRyzom::forceLinking();
+
 	REGISTER_REFLECTABLE_CLASS(CInterfaceElement, CReflectable);
 	REGISTER_REFLECTABLE_CLASS(CViewBase, CInterfaceElement);
 	REGISTER_REFLECTABLE_CLASS(CViewText, CViewBase);

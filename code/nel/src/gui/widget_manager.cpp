@@ -1508,6 +1508,7 @@ namespace NLGUI
 		_AlphaRolloverSpeedDB = NULL;
 
 		_MouseHandlingEnabled = true;
+		inGame = false;
 	}
 
 	CWidgetManager::~CWidgetManager()

@@ -143,6 +143,7 @@ public:
 	// release all of the global db autocopy observers
 	void releaseServerToLocalAutoCopyObservers();
 
+	void setInGame( bool i );
 	bool isInGame() const { return _InGame; }
 
 	/// initialize the whole login interface
