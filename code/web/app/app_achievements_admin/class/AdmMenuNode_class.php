@@ -3,6 +3,7 @@
 		private $ach_count;
 	
 		function AdmMenuNode($data,$parent) {
+			$this->init();
 			parent::__construct($data,$parent);
 
 			global $DBc;
@@ -32,18 +33,21 @@
 		}
 
 		function getNode($id) { // try to find the child node that has the given ID. Return null on failure.
-			if($id == $this->getID()) { // found!
-				return $this;
+			$res = $this->getChildByID($id);
+			if($res != null) {
+				return $res;
 			}
-			else {
-				foreach($this->nodes as $elem) { // check children
-					$tmp = $elem->getNode($id);
-					if($tmp != null) {
-						return $tmp;
-					}
+
+			$iter = $this->getIterator();
+			while($iter->hasNext()) { // check children
+				$curr = $iter->getNext();
+				$tmp = $curr->getNode($id);
+				if($tmp != null) {
+					return $tmp;
 				}
-				return null;
 			}
+
+			return null;
 		}
 
 		function delete_me() { // remove this node
@@ -57,18 +61,18 @@
 			// call delete function for all children
 			foreach($this->nodes as $elem) {
 				$elem->delete_me();
-				$this->unsetChild($elem->getID());
+				$this->removeChild($elem->getID());
 			}
 		}
 
-		function unsetChild($id) { // remove child with given ID from nodes list; unset should destruct.
+		/*function unsetChild($id) { // remove child with given ID from nodes list; unset should destruct.
 			foreach($this->nodes as $key=>$elem) {
 				if($elem->getID() == $id) {
 					unset($this->nodes[$key]);
 					return null;
 				}
 			}
-		}
+		}*/
 
 		function insertChild(&$n) { // insert a new child
 			// insert command to create database entry
@@ -76,7 +80,7 @@
 
 			// set the new child's parent and add it to the node list
 			$n->setParent($this);
-			$this->nodes[] = $n;
+			$this->addChild($n);
 		}
 
 		function update() {
@@ -151,9 +155,6 @@
 			}
 		}
 
-		function setParent(&$p) {
-			$this->parent = $p;
-		}
 
 		function setParentID($p) {
 			if($p == null || strtolower($p) == "null") {
@@ -164,9 +165,6 @@
 			}
 		}
 
-		function setID($id) {
-			$this->id = $id;
-		}
 
 		function getNextOrder() {
 			if($this->isEmpty()) {

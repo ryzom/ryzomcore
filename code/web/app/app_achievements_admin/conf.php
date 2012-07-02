@@ -11,4 +11,9 @@
 	$_CONF['enable_offgame'] = true;
 	$_CONF['enable_CSR'] = true;
 	$_CONF['enable_ADM'] = true;
+
+	$_CONF['char_mysql_server'] = "localhost";
+	$_CONF['char_mysql_user'] = "root";
+	$_CONF['char_mysql_pass'] = "";
+	$_CONF['char_mysql_database'] = "app_achievements";
 ?>

@@ -1,11 +1,14 @@
 <?php
 	class AdmMenu extends AchMenu {
-		use Dispatcher;
+		use AdmDispatcher;
 		
 		function AdmMenu($open) {
+			$this->init();
 			parent::__construct($open);
 
-			unset($this->nodes[0]); // unset the auto-generated "summary" node
+			#$this->drawTree();
+
+			#$this->removeChild(0); // unset the auto-generated "summary" node
 		}
 
 		protected function makeChild($d) { // override child generator to use admin classes
@@ -16,7 +19,7 @@
 			$res = $this->getNode($id);
 			if($res != null) {
 				$res->delete_me();
-				$this->unsetChild($id);
+				$this->removeChild($id);
 			}
 		}
 
@@ -31,7 +34,7 @@
 			else {
 				$n->setParent($this);
 				$n->insert();
-				$this->nodes[] = $n;
+				$this->addChild($n);
 			}
 		}
 
@@ -61,8 +64,17 @@
 		}
 
 		function getNode($id) { // try to find the MenuNode that has the given ID. Return null on failure.
-			foreach($this->nodes as $elem) {
-				$tmp = $elem->getNode($id);
+			#echo "<br>getNode(".$id.")";
+			$res = $this->getChildByID($id);
+			if($res != null) {
+				return $res;
+			}
+
+			$iter = $this->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				#echo $curr->getID();
+				$tmp = $curr->getNode($id);
 				if($tmp != null) {
 					return $tmp;
 				}
@@ -77,20 +89,22 @@
 			}
 
 			$val = array();
-			foreach($this->nodes as $elem) {
-				$val[] = $elem->getOrder();
+			$iter = $this->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				$val[] = $curr->getOrder();
 			}
 
 			return (max($val)+1);
 		}
 
-		function unsetChild($id) { // remove child with given ID from nodes list; unset should destruct it.
+		/*function unsetChild($id) { // remove child with given ID from nodes list; unset should destruct it.
 			foreach($this->nodes as $key=>$elem) {
 				if($elem->getID() == $id) {
 					unset($this->nodes[$key]);
 					return null;
 				}
 			}
-		}
+		}*/
 	}
 ?>

@@ -1,12 +1,12 @@
 <?php
 	class AdmAtom implements ADM {
+		use Node;
 
-		protected $id;
 		protected $objective;
 		protected $mandatory;
 		protected $ruleset;
 		protected $ruleset_parsed;
-		protected $parent;
+		protected $parent_id;
 		
 		function AdmAtom($data,$parent) {
 			$this->parent = $parent;
@@ -25,11 +25,11 @@
 		}
 
 		function update() {
-			$DBc->sqlQuery("UPDATE ach_atom SET atom_mandatory='".."',atom_ruleset='".."',atom_ruleset_parsed='".."' WHERE atom_id='".$this->id."'");
+			#$DBc->sqlQuery("UPDATE ach_atom SET atom_mandatory='".."',atom_ruleset='".."',atom_ruleset_parsed='".."' WHERE atom_id='".$this->id."'");
 		}
 
 		function insert() {
-			$DBc->sqlQuery("INSERT INTO ach_atom (atom_objective,atom_mandatory,atom_ruleset,atom_ruleset_parsed) VALUES ('".."','".."','".."','".."')");
+			#$DBc->sqlQuery("INSERT INTO ach_atom (atom_objective,atom_mandatory,atom_ruleset,atom_ruleset_parsed) VALUES ('".."','".."','".."','".."')");
 			$id = mysql_insert_id();
 			$this->setID($id);
 		}
@@ -61,6 +61,10 @@
 		}
 
 		private function parse() {
+
+		}
+
+		function setInDev($tf) {
 
 		}
 	}

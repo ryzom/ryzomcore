@@ -1,44 +1,20 @@
 <?php
-	class AdmAchievement extends AchAchievement implements ADM, AdmDispatcher {
+	class AdmAchievement extends AchAchievement implements ADM {
+		use AdmDispatcher;
 		
 		function AdmAchievement($data,$parent) {
+			$this->init();
 			parent::__construct($data,$parent);
 		}
 
-		protected function makeChild(&$d) {
+		protected function makeChild($d) {
 			return new AdmPerk($d,$this);
 		}
-
-		function insertNode(&$n) { // add a Perk
+		
+		#@overrides AdmDispatcher::insertNode()
+		function insertNode($n) {
 			$n->insert();
-			$this->nodes[] = $n;
-		}
-
-		function removeNode($id) { // remove a Perk
-			$res = $this->getNode($id);
-			if($res != null) {
-				$res->delete_me();
-				$this->unsetChild($id);
-			}
-		}
-
-		function updateNode($id,$data) { // update a Perk
-			$res = $this->getNode($id);
-			if($res != null) {
-				#MISSING: set new data
-				#
-				$res->update();
-			}
-		}
-
-		function getNode($id) { // find a Perk
-			foreach($this->nodes as $elem) {
-				if($elem->getID == $id) {
-					return $elem;
-				}
-			}
-
-			return null;
+			$this->addOpen($n);
 		}
 
 		function delete_me() {
@@ -47,56 +23,36 @@
 			$DBc->sqlQuery("DELETE FROM ach_achievement WHERE aa_id='".$this->getID()."'");
 			$DBc->sqlQuery("DELETE FROM ach_player_achievement WHERE apa_id='".$this->getID()."'");
 			$DBc->sqlQuery("DELETE FROM ach_achievement_lang WHERE NOT EXISTS (SELECT * FROM ach_achievement WHERE aa_id=aal_achievement)");
-
-			foreach($this->nodes as $elem) {
-				$elem->delete_me();
-				$this->unsetChild($elem->getID());
+			
+			$iter = $this->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				$curr->delete_me();
+				$this->removeChild($curr->getID());
 			}
 		}
 
 		function update() {
 			global $DBc;
 
-			$DBc->sqlQuery("UPDATE ach_achievement SET aa_parent='".$this->getParent())."',aa_tie_race='".mysql_real_escape_string($this->getTieRace())."',aa_tie_cult='".mysql_real_escape_string($this->getTieCult())."',aa_tie_civ='".mysql_real_escape_string($this->getTieCiv())."',aa_image='".mysql_real_escape_string($this->getImage())."',aa_dev='".$this->getDev()."' WHERE aa_id='".$this->geID()."'");
+			$DBc->sqlQuery("UPDATE ach_achievement SET aa_category='".$this->getCategory()."',aa_parent=NULL,aa_tie_race=".mkn($this->getTieRace()).",aa_tie_cult=".mkn($this->getTieCult()).",aa_tie_civ=".mkn($this->getTieCiv()).",aa_image='".mysql_real_escape_string($this->getImage())."',aa_dev='".$this->getDev()."' WHERE aa_id='".$this->getID()."'");
 
 			#MISSING: update lang entry
+			$DBc->sqlQuery("INSERT INTO ach_achievement_lang (aal_achievement,aal_lang,aal_name,aal_template) VALUES ('".$this->getID()."','en','".mysql_real_escape_string($this->getName())."',".mkn($this->getTemplate()).") ON DUPLICATE KEY UPDATE aal_name='".mysql_real_escape_string($this->getName())."',aal_template=".mkn($this->getTemplate())."");
 		}
 
 		function insert() {
+			global $DBc;
 
+			$this->dev = 1;
+
+			$DBc->sqlQuery("INSERT INTO ach_achievement (aa_category,aa_parent,aa_tie_race,aa_tie_cult,aa_tie_civ,aa_image,aa_dev) VALUES ('".$this->getCategory()."',NULL,".mkn($this->getTieRace()).",".mkn($this->getTieCult()).",".mkn($this->getTieCiv()).",'".mysql_real_escape_string($this->getImage())."','1')");
+			$id = mysql_insert_id();
+			$this->setID($id);
+
+			$DBc->sqlQuery("INSERT INTO ach_achievement_lang (aal_achievement,aal_lang,aal_name,aal_template) VALUES ('".$this->getID()."','en','".mysql_real_escape_string($this->getName())."',".mkn($this->getTemplate()).")");
 		}
 
-		function unsetChild($id) { // remove child with given ID from nodes list; unset should destruct it.
-			foreach($this->nodes as $key=>$elem) {
-				if($elem->getID() == $id) {
-					unset($this->nodes[$key]);
-					return null;
-				}
-			}
-		}
-
-		function setInDev($tf) {
-			if($tf == true) {
-				$this->setDev(1);
-			}
-			else {
-				$this->setDev(0);
-			}
-
-			$this->update();
-		}
-
-		function setDev($d) {
-			$this->dev = $d;
-		}
-
-		function setID($id) {
-			$this->id = $id;
-		}
-
-		function setParent($p) {
-			$this->parent = $p
-		}
 
 		function setCategory($c) {
 			$this->category = $c;
@@ -122,7 +78,7 @@
 			$this->name = $n;
 		}
 
-		function setTemplate($i) {
+		function setTemplate($t) {
 			$this->template = $t;
 		}
 	}

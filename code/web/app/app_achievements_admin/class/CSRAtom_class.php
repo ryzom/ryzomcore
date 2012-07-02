@@ -1,9 +1,10 @@
 <?php
 	class CSRAtom implements CSR {
-		private $id;
+		use Node;
 
-		function CSRAtom(&$data) {
+		function CSRAtom($data,$parent) {
 			$this->id = $data['atom_id'];
+			$this->parent = $parent;
 		}
 
 		function grant($pid) {

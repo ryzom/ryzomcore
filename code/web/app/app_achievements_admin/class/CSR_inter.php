@@ -1,7 +1,9 @@
 <?php
 	interface CSR {
-		function grant($player_id);
+		function grant($player);
 
-		function deny($player_id);
+		function deny($player);
+
+		function getID();
 	}
 ?>

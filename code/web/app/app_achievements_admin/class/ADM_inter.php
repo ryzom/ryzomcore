@@ -10,8 +10,6 @@
 
 		function insert();
 
-		function setInDev($true_false);
-
 		function getID(); // needed to identify a node
 	}
 ?>
