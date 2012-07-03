@@ -5464,6 +5464,15 @@ class CMissionActionSoundTrigger : public IMissionAction
 		LOGMISSIONACTION("sound_trigger");
 
 		// We tell the client to play the sound
+		std::vector<TDataSetRow> entities;
+		instance->getEntities(entities);
+		// For all entities that do this mission
+		for (uint i = 0; i < entities.size(); i++)
+		{
+			// We send the message
+			CEntityId eid = TheDataset.getEntityId(entities[i]);
+			PlayerManager.sendImpulseToClient(eid, "SOUND_TRIGGER:PLAY", _SoundId, _SoundPosition);
+		}
 	};
 	std::string _SoundPosition;
 	NLMISC::CSheetId _SoundId;
