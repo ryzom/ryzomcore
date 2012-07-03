@@ -128,3 +128,8 @@ bool CCameraAnimationManager::parseCameraAnimations(const IPrimitive* prim, cons
 		return ok;
 	}
 }
+
+void CCameraAnimationManager::sendAnimation(const NLMISC::CEntityId& eid, const std::string& _AnimationName)
+{
+	
+}

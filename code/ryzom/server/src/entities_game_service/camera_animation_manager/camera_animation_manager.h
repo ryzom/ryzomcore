@@ -20,6 +20,7 @@
 #include "nel/ligo/primitive.h"
 #include <string>
 #include "camera_animation_manager/camera_animation_step_factory.h"
+#include "nel/misc/entity_id.h"
 
 /************************************************************************/
 /* Class that manages the camera animations. (singleton).
@@ -40,6 +41,9 @@ public:
 	static void init();
 	/// Releases the animations
 	static void release();
+
+	/// Function that sends all the instructions of a camera animation to the specified entity
+	void sendAnimation(const NLMISC::CEntityId& eid, const std::string& _AnimationName);
 
 private:
 	/// Constructor

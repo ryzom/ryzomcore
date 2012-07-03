@@ -56,6 +56,7 @@
 #include "shop_type/named_items.h"
 #include "server_share/log_item_gen.h"
 #include "server_share/log_character_gen.h"
+#include "camera_animation_manager/camera_animation_manager.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -5422,6 +5423,16 @@ class CMissionActionCameraAnimation : public IMissionAction
 		LOGMISSIONACTION("camera_animation");
 		
 		// We tell the client to play the animation by sending him the animation steps
+		std::vector<TDataSetRow> entities;
+		instance->getEntities(entities);
+		// For all entities that do this mission
+		for (uint i = 0; i < entities.size(); i++)
+		{
+			// We send the message
+			CEntityId eid = TheDataset.getEntityId(entities[i]);
+
+			CCameraAnimationManager::getInstance()->sendAnimation(eid, _AnimationName);
+		}
 	};
 	std::string _AnimationName;
 
