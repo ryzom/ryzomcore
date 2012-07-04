@@ -70,6 +70,11 @@ public:
 
 		return true;
 	}
+
+	virtual float getDuration() const
+	{
+		return Duration;
+	}
 }; // This class must not be registered because it a base class
 
 /////////////////////////////////////////////////////////////////////////////
@@ -277,6 +282,11 @@ public:
 		}
 
 		return true;
+	}
+
+	virtual float getDuration() const
+	{
+		return Duration;
 	}
 };
 CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepReturn, "camera_animation_return");

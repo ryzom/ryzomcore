@@ -34,8 +34,11 @@ class ICameraAnimationStep
 public:
 	/// This function is called when it's time to parse the primitive to load the camera animation step
 	virtual bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename) = 0;
-	// Function that adds a camera animation modifier to this step
+	/// Function that adds a camera animation modifier to this step
 	void addModifier(ICameraAnimationModifier* modifier);
+
+	/// Function that returns the duration of the step (in seconds)
+	virtual float getDuration() const = 0;
 
 protected:
 	// The list of modifiers
