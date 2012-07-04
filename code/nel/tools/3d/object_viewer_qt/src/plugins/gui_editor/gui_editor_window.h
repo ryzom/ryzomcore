@@ -18,11 +18,13 @@
 #define GUI_EDITOR_WINDOW_H
 
 #include "ui_gui_editor_window.h"
-
 #include <QtGui/QUndoStack>
 
 namespace GUIEditor
 {
+
+	class CWidgetProperties;
+
 	class GUIEditorWindow: public QMainWindow
 	{
 		Q_OBJECT
@@ -50,6 +52,7 @@ private:
 		QUndoStack *m_undoStack;
 
 		Ui::GUIEditorWindow m_ui;
+		CWidgetProperties *widgetProps;
 	};
 
 }

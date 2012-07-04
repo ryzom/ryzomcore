@@ -9,8 +9,8 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
-SET(OVQT_PLUGIN_GUI_EDITOR_HDR gui_editor_plugin.h gui_editor_window.h gui_editor_context.h )
-SET(OVQT_PLUGIN_GUI_EDITOR_UIS	gui_editor_window.ui )
+SET(OVQT_PLUGIN_GUI_EDITOR_HDR gui_editor_plugin.h gui_editor_window.h gui_editor_context.h widget_properties.h )
+SET(OVQT_PLUGIN_GUI_EDITOR_UIS	gui_editor_window.ui widget_properties.ui )
 
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)

@@ -19,11 +19,15 @@
 
 #include "../core/icore.h"
 #include "../core/core_constants.h"
+#include "../core/core.h"
+#include "../core/menu_manager.h"
 
 #include <nel/misc/debug.h>
 
 #include <QtCore/QSettings>
 #include <QtGui/QFileDialog>
+
+#include "widget_properties.h"
 
 namespace GUIEditor
 {
@@ -34,6 +38,7 @@ namespace GUIEditor
 	{
 		m_ui.setupUi(this);
 		m_undoStack = new QUndoStack(this);
+		widgetProps = new CWidgetProperties;
 		createMenus();
 		readSettings();
 	}
@@ -41,6 +46,8 @@ namespace GUIEditor
 	GUIEditorWindow::~GUIEditorWindow()
 	{
 		writeSettings();
+		delete widgetProps;
+		widgetProps = NULL;
 	}
 	
 	QUndoStack *GUIEditorWindow::undoStack() const
@@ -66,6 +73,14 @@ namespace GUIEditor
 	
 	void GUIEditorWindow::createMenus()
 	{
+		Core::MenuManager *mm = Core::ICore::instance()->menuManager();
+		QMenu *menu = mm->menu( Core::Constants::M_TOOLS );
+		if( menu != NULL )
+		{
+			QAction *a = new QAction( "Widget Properties", this );
+			connect( a, SIGNAL( triggered( bool ) ), widgetProps, SLOT( show() ) );
+			menu->addAction( a );
+		}
 	}
 	
 	void GUIEditorWindow::readSettings()
