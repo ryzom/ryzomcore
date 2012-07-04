@@ -129,7 +129,31 @@ bool CCameraAnimationManager::parseCameraAnimations(const IPrimitive* prim, cons
 	}
 }
 
-void CCameraAnimationManager::sendAnimation(const NLMISC::CEntityId& eid, const std::string& _AnimationName)
+void CCameraAnimationManager::sendAnimation(const NLMISC::CEntityId& eid, const std::string& animationName)
 {
-	
+	// We search for the correct camera animation
+	TCameraAnimationContainer::iterator it;
+	for (it = Animations.begin(); it != Animations.end(); ++it)
+	{
+		if (it->first == animationName)
+		{
+			it->second.sendAnimationSteps(eid);
+			break;
+		}
+	}
+}
+
+void CCameraAnimationManager::TCameraAnimInfo::sendAnimationSteps(const NLMISC::CEntityId& eid)
+{
+	// We first send the first step
+	sendAnimationStep(eid, 0);
+	// Now we send the other steps after the duration
+
+}
+
+void CCameraAnimationManager::TCameraAnimInfo::sendAnimationStep(const NLMISC::CEntityId& eid, int currentStep)
+{
+	// We can send the current step
+
+
 }

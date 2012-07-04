@@ -43,7 +43,7 @@ public:
 	static void release();
 
 	/// Function that sends all the instructions of a camera animation to the specified entity
-	void sendAnimation(const NLMISC::CEntityId& eid, const std::string& _AnimationName);
+	void sendAnimation(const NLMISC::CEntityId& eid, const std::string& animationName);
 
 private:
 	/// Constructor
@@ -65,7 +65,7 @@ private:
 		{
 			Name = "";
 		}
-
+		/// Function called to release the animations
 		void release()
 		{
 			// We delete the camera animation steps
@@ -78,9 +78,35 @@ private:
 
 			Name = "";
 		}
+		/// Function called to send the camera animation instruction specified by the current step to the client
+		void sendAnimationStep(const NLMISC::CEntityId& eid, int currentStep);
+		/// Function called to send all the camera animation instructions to the client
+		void sendAnimationSteps(const NLMISC::CEntityId& eid);
 
 		std::string Name;
 		std::vector<ICameraAnimationStep*> Steps;
+
+	private:
+		class TCameraAnimTimerEvent: public CTimerEvent
+		{
+		public:
+			TCameraAnimTimerEvent(TCameraAnimInfo* info, int nextStep, const NLMISC::CEntityId& eid): _Eid(eid)
+			{
+				_Infos = info;
+				_Next = nextStep;
+			}
+			// Callback called when the timer finished
+			void timerCallback(CTimer* owner)
+			{
+				// We tell the camera anim info to send the current step
+				_Infos->sendAnimationStep(_Eid, _Next);
+			}
+
+		private:
+			TCameraAnimInfo* _Infos;
+			int _Next;
+			const NLMISC::CEntityId& _Eid;
+		};
 	};
 
 	typedef std::map<std::string, TCameraAnimInfo> TCameraAnimationContainer;
