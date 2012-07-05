@@ -71,6 +71,11 @@ public:
 		return true;
 	}
 
+	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
+	{
+
+	}
+
 	virtual float getDuration() const
 	{
 		return Duration;
@@ -82,7 +87,7 @@ public:
 class CCameraAnimationStepStatic : public CCameraAnimationStepBasic
 {
 public:
-	bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
+	virtual bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
 	{
 		if (!CCameraAnimationStepBasic::parseStep(prim, filename))
 		{
@@ -90,6 +95,11 @@ public:
 			return false;
 		}
 		return true;
+	}
+
+	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
+	{
+		CCameraAnimationStepBasic::sendAnimationStep(bms);
 	}
 };
 CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepStatic, "camera_animation_static");
@@ -108,7 +118,7 @@ public:
 		EndPos = "";
 	}
 
-	bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
+	virtual bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
 	{
 		if (!CCameraAnimationStepBasic::parseStep(prim, filename))
 		{
@@ -127,6 +137,11 @@ public:
 		EndPos = value;
 
 		return true;
+	}
+
+	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
+	{
+		CCameraAnimationStepBasic::sendAnimationStep(bms);
 	}
 };
 CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepGoTo, "camera_animation_go_to");
@@ -148,7 +163,7 @@ public:
 		DistanceToEntity = 0.f;
 	}
 
-	bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
+	virtual bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
 	{
 		if (!CCameraAnimationStepBasic::parseStep(prim, filename))
 		{
@@ -180,6 +195,11 @@ public:
 
 		return true;
 	}
+
+	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
+	{
+		CCameraAnimationStepBasic::sendAnimationStep(bms);
+	}
 };
 CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepFollowEntity, "camera_animation_follow_entity");
 
@@ -203,7 +223,7 @@ public:
 		Speed = 0.f;
 	}
 
-	bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
+	virtual bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
 	{
 		if (!CCameraAnimationStepBasic::parseStep(prim, filename))
 		{
@@ -247,6 +267,11 @@ public:
 
 		return true;
 	}
+
+	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
+	{
+		CCameraAnimationStepBasic::sendAnimationStep(bms);
+	}
 };
 CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepTurnAround, "camera_animation_turn_around");
 
@@ -282,6 +307,11 @@ public:
 		}
 
 		return true;
+	}
+
+	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
+	{
+
 	}
 
 	virtual float getDuration() const

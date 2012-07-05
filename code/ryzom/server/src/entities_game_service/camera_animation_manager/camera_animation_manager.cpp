@@ -21,6 +21,7 @@
 #include "primitives_parser.h"
 #include "nel/ligo/primitive.h"
 #include "camera_animation_manager/camera_animation_step_factory.h"
+#include "player_manager/player_manager.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -159,7 +160,17 @@ bool CCameraAnimationManager::TCameraAnimInfo::sendAnimationStep(const NLMISC::C
 	ICameraAnimationStep* step = Steps[currentStep];
 
 	// We send the animation step to the client
-	step->sendAnimationStep(eid);
+	NLNET::CMessage msgout("IMPULSION_ID");
+	msgout.serial(const_cast<NLMISC::CEntityId&>(eid));
+	NLMISC::CBitMemStream bms;
+	GenericMsgManager.pushNameToStream("CAMERA_ANIMATION:STEP", bms);
+
+	// We tell the step to fill the message
+	step->sendAnimationStep(Name, bms);
+
+	// We add the buffer to the message
+	msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
+	NLNET::CUnifiedNetwork::getInstance()->send(NLNET::TServiceId(eid.getDynamicId()), msgout);
 
 	return true;
 }

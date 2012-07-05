@@ -79,7 +79,18 @@ void ICameraAnimationStep::addModifier(ICameraAnimationModifier* modifier)
 	Modifiers.push_back(modifier);
 }
 
-void ICameraAnimationStep::sendAnimationStep(const NLMISC::CEntityId& eid)
+void ICameraAnimationStep::sendAnimationStep(const std::string& name, NLMISC::CBitMemStream& bms)
 {
-	throw std::exception("The method or operation is not implemented.");
+	// We first add the name of the step
+	bms.serial(const_cast<std::string&>(name));
+
+	// We ask the step to add its information to the message
+	sendAnimationStep(bms);
+
+	// We finally send the modifiers instructions
+	std::vector<ICameraAnimationModifier*>::iterator it;
+	for (it = Modifiers.begin(); it != Modifiers.end(); ++it)
+	{
+		//TODO
+	}
 }

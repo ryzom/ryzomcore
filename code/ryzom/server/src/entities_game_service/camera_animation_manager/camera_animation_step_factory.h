@@ -41,7 +41,11 @@ public:
 	virtual float getDuration() const = 0;
 
 	/// Function that sends the animation step the to client
-	void sendAnimationStep(const NLMISC::CEntityId& eid);
+	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms) = 0;
+
+	/// Function that send all information about a step to the client (this includes modifiers)
+	void sendAnimationStep(const std::string& name, NLMISC::CBitMemStream& bms);
+
 protected:
 	// The list of modifiers
 	std::vector<ICameraAnimationModifier*> Modifiers;
