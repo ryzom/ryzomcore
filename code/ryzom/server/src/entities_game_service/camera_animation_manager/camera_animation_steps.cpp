@@ -205,6 +205,9 @@ public:
 	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
 	{
 		CCameraAnimationStepBasic::sendAnimationStep(bms);
+
+		bms.serial(const_cast<TPositionOrEntity&>(EntityToFollow));
+		bms.serial(const_cast<float&>(DistanceToEntity));
 	}
 };
 CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepFollowEntity, "camera_animation_follow_entity");
