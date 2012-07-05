@@ -40,6 +40,8 @@ public:
 	/// Function that returns the duration of the step (in seconds)
 	virtual float getDuration() const = 0;
 
+	/// Function that sends the animation step the to client
+	void sendAnimationStep(const NLMISC::CEntityId& eid);
 protected:
 	// The list of modifiers
 	std::vector<ICameraAnimationModifier*> Modifiers;

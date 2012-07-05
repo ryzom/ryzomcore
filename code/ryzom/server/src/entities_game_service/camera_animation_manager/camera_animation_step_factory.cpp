@@ -78,3 +78,8 @@ void ICameraAnimationStep::addModifier(ICameraAnimationModifier* modifier)
 {
 	Modifiers.push_back(modifier);
 }
+
+void ICameraAnimationStep::sendAnimationStep(const NLMISC::CEntityId& eid)
+{
+	throw std::exception("The method or operation is not implemented.");
+}

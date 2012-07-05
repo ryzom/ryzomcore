@@ -145,15 +145,38 @@ void CCameraAnimationManager::sendAnimation(const NLMISC::CEntityId& eid, const 
 
 void CCameraAnimationManager::TCameraAnimInfo::sendAnimationSteps(const NLMISC::CEntityId& eid)
 {
-	// We first send the first step
-	sendAnimationStep(eid, 0);
-	// Now we send the other steps after the duration
-
+	// We first send the first step, and then the others
+	sendAnimationStepsFrom(eid, 0);
 }
 
-void CCameraAnimationManager::TCameraAnimInfo::sendAnimationStep(const NLMISC::CEntityId& eid, int currentStep)
+bool CCameraAnimationManager::TCameraAnimInfo::sendAnimationStep(const NLMISC::CEntityId& eid, int currentStep)
 {
 	// We can send the current step
+	// We first check if the step exists
+	if (currentStep < 0 || currentStep >= Steps.size())
+		return false;
 
+	ICameraAnimationStep* step = Steps[currentStep];
 
+	// We send the animation step to the client
+	step->sendAnimationStep(eid);
+
+	return true;
+}
+
+void CCameraAnimationManager::TCameraAnimInfo::sendAnimationStepsFrom(const NLMISC::CEntityId& eid, int firstStep, TCameraAnimTimerEvent* event)
+{
+	// We send the current step
+	if (sendAnimationStep(eid, firstStep))
+	{
+		if (event == 0)
+			event = new TCameraAnimTimerEvent(this, firstStep + 1, eid);
+		else
+			event->nextStep();
+
+		// Now we send the other steps after the duration
+		//_Timer->reset();
+		NLMISC::TGameCycle duration = (NLMISC::TGameCycle)(Steps[firstStep]->getDuration() / CTickEventHandler::getGameTimeStep());
+		_Timer->setRemaining(duration, event);
+	}
 }

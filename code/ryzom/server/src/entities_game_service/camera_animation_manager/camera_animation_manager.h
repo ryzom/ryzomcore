@@ -21,6 +21,7 @@
 #include <string>
 #include "camera_animation_manager/camera_animation_step_factory.h"
 #include "nel/misc/entity_id.h"
+#include "game_share/timer.h"
 
 /************************************************************************/
 /* Class that manages the camera animations. (singleton).
@@ -60,10 +61,14 @@ private:
 	/// Class that contains information about an animation
 	class TCameraAnimInfo
 	{
+	private:
+		class TCameraAnimTimerEvent;
+
 	public:
 		TCameraAnimInfo()
 		{
 			Name = "";
+			_Timer = new CTimer();
 		}
 		/// Function called to release the animations
 		void release()
@@ -77,16 +82,25 @@ private:
 			Steps.clear();
 
 			Name = "";
+
+			delete _Timer;
 		}
+
 		/// Function called to send the camera animation instruction specified by the current step to the client
-		void sendAnimationStep(const NLMISC::CEntityId& eid, int currentStep);
+		/// The function returns false if the animation step does not exist
+		bool sendAnimationStep(const NLMISC::CEntityId& eid, int currentStep);
 		/// Function called to send all the camera animation instructions to the client
 		void sendAnimationSteps(const NLMISC::CEntityId& eid);
+		/// Function that sends the animation steps from the specified one to the last one
+		void sendAnimationStepsFrom(const NLMISC::CEntityId& eid, int firstStep, TCameraAnimTimerEvent* event = 0);
+
 
 		std::string Name;
 		std::vector<ICameraAnimationStep*> Steps;
 
 	private:
+		CTimer* _Timer;
+
 		class TCameraAnimTimerEvent: public CTimerEvent
 		{
 		public:
@@ -98,8 +112,13 @@ private:
 			// Callback called when the timer finished
 			void timerCallback(CTimer* owner)
 			{
-				// We tell the camera anim info to send the current step
-				_Infos->sendAnimationStep(_Eid, _Next);
+				// We tell the camera anim info to send the current step and the next ones
+				_Infos->sendAnimationStepsFrom(_Eid, _Next, this);
+			}
+
+			void nextStep()
+			{
+				_Next++;
 			}
 
 		private:
