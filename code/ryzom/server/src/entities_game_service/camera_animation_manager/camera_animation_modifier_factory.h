@@ -33,9 +33,14 @@ public:
 	/// This function is called when it's time to parse the primitive to load the camera animation modifier
 	virtual bool parseModifier(const NLLIGO::IPrimitive* prim, const std::string& filename) = 0;
 
+	/// Function called to send the modifier to the client
+	virtual void sendCameraModifier(NLMISC::CBitMemStream& bms) = 0;
 
 	/// Function to get the name of the modifier
 	virtual std::string getModifierName() const = 0;
+
+	/// Function called to send the modifier to the client (including its name)
+	void sendCameraFullModifier(NLMISC::CBitMemStream& bms);
 };
 
 /************************************************************************/

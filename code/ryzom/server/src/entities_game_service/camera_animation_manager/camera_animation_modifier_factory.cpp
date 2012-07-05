@@ -50,3 +50,13 @@ void ICameraAnimationModifierFactory::init()
 	if (!Entries)
 		Entries = new std::vector<std::pair<std::string, ICameraAnimationModifierFactory*> >;
 }
+
+void ICameraAnimationModifier::sendCameraFullModifier(NLMISC::CBitMemStream& bms)
+{
+	// We first add the name of the modifier
+	std::string name = getModifierName();
+	bms.serial(const_cast<std::string&>(name));
+
+	// We ask the modifier to add its information to the message
+	sendCameraModifier(bms);
+}

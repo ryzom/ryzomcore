@@ -53,6 +53,11 @@ public:
 		return true;
 	}
 
+	virtual void sendCameraModifier(NLMISC::CBitMemStream& bms)
+	{
+
+	}
+
 	CAMERA_ANIMATION_MODIFIER_NAME("camera_modifier_shake");
 };
 CAMERA_ANIMATION_REGISTER_MODIFIER(CCameraAnimationModifierShake, "camera_modifier_shake");
@@ -99,6 +104,11 @@ public:
 		SoundPos = value;
 
 		return true;
+	}
+
+	virtual void sendCameraModifier(NLMISC::CBitMemStream& bms)
+	{
+
 	}
 
 	CAMERA_ANIMATION_MODIFIER_NAME("sound_trigger");

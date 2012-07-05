@@ -89,9 +89,16 @@ void ICameraAnimationStep::sendAnimationFullStep(NLMISC::CBitMemStream& bms)
 	sendAnimationStep(bms);
 
 	// We finally send the modifiers instructions
+	// We add a header to tell the number of modifiers
+	uint8 nbModifiers = (uint8)Modifiers.size();
+	bms.serial(const_cast<uint8&>(nbModifiers));
+
+	// We loop through the modifiers to add them
 	std::vector<ICameraAnimationModifier*>::iterator it;
 	for (it = Modifiers.begin(); it != Modifiers.end(); ++it)
 	{
-		//TODO
+		ICameraAnimationModifier* modifier = *it;
+
+		modifier->sendCameraFullModifier(bms);
 	}
 }
