@@ -324,7 +324,7 @@ public:
 
 	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
 	{
-
+		bms.serial(const_cast<float&>(Duration));
 	}
 
 	virtual float getDuration() const
