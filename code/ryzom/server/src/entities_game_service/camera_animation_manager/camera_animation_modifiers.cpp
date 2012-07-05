@@ -55,7 +55,7 @@ public:
 
 	virtual void sendCameraModifier(NLMISC::CBitMemStream& bms)
 	{
-
+		bms.serial(const_cast<float&>(Strength));
 	}
 
 	CAMERA_ANIMATION_MODIFIER_NAME("camera_modifier_shake");
