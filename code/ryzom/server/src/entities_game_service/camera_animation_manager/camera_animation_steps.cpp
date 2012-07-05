@@ -280,6 +280,10 @@ public:
 	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
 	{
 		CCameraAnimationStepBasic::sendAnimationStep(bms);
+
+		bms.serial(const_cast<TPositionOrEntity&>(PointToTurnAround));
+		bms.serial(const_cast<float&>(DistanceToPoint));
+		bms.serial(const_cast<float&>(Speed));
 	}
 };
 CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepTurnAround, "camera_animation_turn_around");
