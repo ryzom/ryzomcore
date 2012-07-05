@@ -16,8 +16,8 @@
 // 
 
 #include "camera_animation_manager/camera_animation_step_factory.h"
+#include "camera_animation_manager/position_or_entity_type.h"
 
-typedef std::string TPositionOrEntity;
 
 /// Basic camera animation step that has generic values
 /// - look_at_position

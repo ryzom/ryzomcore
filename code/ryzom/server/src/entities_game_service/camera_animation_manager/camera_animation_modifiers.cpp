@@ -16,6 +16,7 @@
 // 
 
 #include "camera_animation_manager/camera_animation_modifier_factory.h"
+#include "camera_animation_manager/position_or_entity_type.h"
 
 #include "nel/misc/sheet_id.h"
 
@@ -63,7 +64,7 @@ CAMERA_ANIMATION_REGISTER_MODIFIER(CCameraAnimationModifierShake, "camera_modifi
 class CCameraAnimationModifierSoundTrigger : public ICameraAnimationModifier
 {
 protected:
-	std::string SoundPos;
+	TPositionOrEntity SoundPos;
 	NLMISC::CSheetId SoundId;
 
 public:

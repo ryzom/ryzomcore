@@ -57,6 +57,7 @@
 #include "server_share/log_item_gen.h"
 #include "server_share/log_character_gen.h"
 #include "camera_animation_manager/camera_animation_manager.h"
+#include "camera_animation_manager/position_or_entity_type.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -5485,7 +5486,7 @@ class CMissionActionSoundTrigger : public IMissionAction
 			PlayerManager.sendImpulseToClient(eid, "SOUND_TRIGGER:PLAY", _SoundId, _SoundPosition);
 		}
 	};
-	std::string _SoundPosition;
+	TPositionOrEntity _SoundPosition;
 	NLMISC::CSheetId _SoundId;
 
 	MISSION_ACTION_GETNEWPTR(CMissionActionSoundTrigger)
