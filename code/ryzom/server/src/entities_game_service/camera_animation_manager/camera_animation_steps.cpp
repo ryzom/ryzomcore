@@ -146,6 +146,8 @@ public:
 	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
 	{
 		CCameraAnimationStepBasic::sendAnimationStep(bms);
+
+		bms.serial(const_cast<TPositionOrEntity&>(EndPos));
 	}
 };
 CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepGoTo, "camera_animation_go_to");
