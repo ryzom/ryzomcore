@@ -108,7 +108,8 @@ public:
 
 	virtual void sendCameraModifier(NLMISC::CBitMemStream& bms)
 	{
-
+		bms.serial(const_cast<TPositionOrEntity&>(SoundPos));
+		bms.serial(const_cast<NLMISC::CSheetId&>(SoundId));
 	}
 
 	CAMERA_ANIMATION_MODIFIER_NAME("sound_trigger");
