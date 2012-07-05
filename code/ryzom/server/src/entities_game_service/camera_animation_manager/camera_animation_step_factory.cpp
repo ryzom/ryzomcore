@@ -79,10 +79,10 @@ void ICameraAnimationStep::addModifier(ICameraAnimationModifier* modifier)
 	Modifiers.push_back(modifier);
 }
 
-void ICameraAnimationStep::sendAnimationStep(const std::string& name, NLMISC::CBitMemStream& bms)
+void ICameraAnimationStep::sendAnimationFullStep(NLMISC::CBitMemStream& bms)
 {
 	// We first add the name of the step
-	bms.serial(const_cast<std::string&>(name));
+	bms.serial(const_cast<std::string&>(getStepName()));
 
 	// We ask the step to add its information to the message
 	sendAnimationStep(bms);

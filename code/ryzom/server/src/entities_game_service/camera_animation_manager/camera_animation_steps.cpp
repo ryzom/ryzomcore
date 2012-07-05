@@ -84,7 +84,7 @@ public:
 	{
 		return Duration;
 	}
-}; // This class must not be registered because it a base class
+}; // This class must not be registered because it's a base class
 
 /////////////////////////////////////////////////////////////////////////////
 /// Static camera animation step (that does not have specific variables)
@@ -105,8 +105,10 @@ public:
 	{
 		CCameraAnimationStepBasic::sendAnimationStep(bms);
 	}
+
+	CAMERA_ANIMATION_STEP_NAME("camera_animation_static");
 };
-CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepStatic, "camera_animation_static");
+CAMERA_ANIMATION_REGISTER_STEP(CCameraAnimationStepStatic, "camera_animation_static");
 
 /////////////////////////////////////////////////////////////////////////////
 /// Go to camera animation step
@@ -149,8 +151,10 @@ public:
 
 		bms.serial(const_cast<TPositionOrEntity&>(EndPos));
 	}
+
+	CAMERA_ANIMATION_STEP_NAME("camera_animation_go_to");
 };
-CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepGoTo, "camera_animation_go_to");
+CAMERA_ANIMATION_REGISTER_STEP(CCameraAnimationStepGoTo, "camera_animation_go_to");
 
 /////////////////////////////////////////////////////////////////////////////
 /// Follow entity camera animation step
@@ -209,8 +213,10 @@ public:
 		bms.serial(const_cast<TPositionOrEntity&>(EntityToFollow));
 		bms.serial(const_cast<float&>(DistanceToEntity));
 	}
+
+	CAMERA_ANIMATION_STEP_NAME("camera_animation_follow_entity");
 };
-CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepFollowEntity, "camera_animation_follow_entity");
+CAMERA_ANIMATION_REGISTER_STEP(CCameraAnimationStepFollowEntity, "camera_animation_follow_entity");
 
 /////////////////////////////////////////////////////////////////////////////
 /// Turn around camera animation step
@@ -285,8 +291,10 @@ public:
 		bms.serial(const_cast<float&>(DistanceToPoint));
 		bms.serial(const_cast<float&>(Speed));
 	}
+
+	CAMERA_ANIMATION_STEP_NAME("camera_animation_turn_around");
 };
-CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepTurnAround, "camera_animation_turn_around");
+CAMERA_ANIMATION_REGISTER_STEP(CCameraAnimationStepTurnAround, "camera_animation_turn_around");
 
 /////////////////////////////////////////////////////////////////////////////
 /// Animation step that returns to the starting position. It directly inherits from the interface because it
@@ -331,5 +339,7 @@ public:
 	{
 		return Duration;
 	}
+
+	CAMERA_ANIMATION_STEP_NAME("camera_animation_return");
 };
-CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepReturn, "camera_animation_return");
+CAMERA_ANIMATION_REGISTER_STEP(CCameraAnimationStepReturn, "camera_animation_return");

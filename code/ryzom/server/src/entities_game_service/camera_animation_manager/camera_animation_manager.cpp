@@ -146,7 +146,10 @@ void CCameraAnimationManager::sendAnimation(const NLMISC::CEntityId& eid, const 
 
 void CCameraAnimationManager::TCameraAnimInfo::sendAnimationSteps(const NLMISC::CEntityId& eid)
 {
-	// We first send the first step, and then the others
+	// We first send an impulse to the client to tell him an animation will start (this way he can remember its current position)
+	PlayerManager.sendImpulseToClient(eid, "CAMERA_ANIMATION:PLAY", Name);
+
+	// We send the first step, and then the others
 	sendAnimationStepsFrom(eid, 0);
 }
 
@@ -166,7 +169,7 @@ bool CCameraAnimationManager::TCameraAnimInfo::sendAnimationStep(const NLMISC::C
 	GenericMsgManager.pushNameToStream("CAMERA_ANIMATION:STEP", bms);
 
 	// We tell the step to fill the message
-	step->sendAnimationStep(Name, bms);
+	step->sendAnimationFullStep(bms);
 
 	// We add the buffer to the message
 	msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());

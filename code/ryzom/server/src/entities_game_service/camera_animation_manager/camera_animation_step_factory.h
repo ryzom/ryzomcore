@@ -39,12 +39,14 @@ public:
 
 	/// Function that returns the duration of the step (in seconds)
 	virtual float getDuration() const = 0;
+	/// Function that returns the name of the step
+	virtual std::string getStepName() const = 0;
 
 	/// Function that sends the animation step the to client
 	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms) = 0;
 
 	/// Function that send all information about a step to the client (this includes modifiers)
-	void sendAnimationStep(const std::string& name, NLMISC::CBitMemStream& bms);
+	void sendAnimationFullStep(NLMISC::CBitMemStream& bms);
 
 protected:
 	// The list of modifiers
@@ -75,7 +77,7 @@ protected:
 };
 
 // Define used to register the different types of camera animation steps
-#define CAMERA_ANIMATION_REGISTR_STEP(_class_,_name_) \
+#define CAMERA_ANIMATION_REGISTER_STEP(_class_,_name_) \
 class _class_##CameraAnimationStepFactory : public ICameraAnimationStepFactory \
 {\
 public:\
@@ -95,5 +97,11 @@ public:\
 } \
 };\
 	static _class_##CameraAnimationStepFactory* _class_##CameraAnimationStepFactoryInstance = new _class_##CameraAnimationStepFactory;
+
+#define CAMERA_ANIMATION_STEP_NAME(name) \
+std::string getStepName() const \
+{ \
+	return name; \
+}
 
 #endif /* RY_CAMERAANIMATIONSTEPFACTORY_H */
