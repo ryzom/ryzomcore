@@ -15,65 +15,28 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "widget_properties.h"
-#include <map>
-#include <vector>
-
-namespace
-{
-	struct SPropEntry
-	{
-		std::string propName;
-		std::string propType;
-		std::string propDefault;
-
-		static SPropEntry create( const char *propname, const char *proptype, const char *propdefault )
-		{
-			SPropEntry entry;
-			entry.propName = propname;
-			entry.propType = proptype;
-			entry.propDefault = propdefault;
-			return entry;
-		}
-	};
-
-	std::map< std::string, std::vector< SPropEntry > >  props;
-}
 
 namespace GUIEditor{
-	
 	CWidgetProperties::CWidgetProperties( QWidget *parent ) :
 	QWidget( parent )
 	{
 		setupUi( this );
-
-		widgetList->addItem( QString( "InterfaceElement" ) );
-		widgetList->addItem( QString( "CtrlBase" ) );
-
-		props[ "InterfaceElement" ] = std::vector< SPropEntry >();
-		props[ "CtrlBase" ] = std::vector< SPropEntry >();
-
-		std::map< std::string, std::vector< SPropEntry > >::iterator itr =
-			props.find( "InterfaceElement" );
-		if( itr != props.end() )
-		{
-			itr->second.push_back( SPropEntry::create( "id", "string", "ie" ) );
-			itr->second.push_back( SPropEntry::create( "active", "bool", "false" ) );
-		}
-
-		itr = props.find( "CtrlBase" );
-		if( itr != props.end() )
-		{
-			itr->second.push_back( SPropEntry::create( "on_tooltip", "string", "tooltip" ) );
-			itr->second.push_back( SPropEntry::create( "on_tooltip_params", "string", "params" ) );
-		}
-
 		connect( closeButton, SIGNAL( clicked(bool) ), this, SLOT( hide() ) );
-		connect( widgetList, SIGNAL( currentRowChanged( int ) ), this, SLOT( onListSelectionChanged( int ) ) );
-
 	}
 
 	CWidgetProperties::~CWidgetProperties()
 	{
+	}
+
+	void CWidgetProperties::setupWidgetInfo( std::map< std::string, SWidgetInfo > *info )
+	{
+		widgetInfo = info;
+		for( std::map< std::string, SWidgetInfo >::iterator itr = info->begin(); itr != info->end(); ++itr ){
+			widgetList->addItem( itr->first.c_str() );
+		}
+
+		onListSelectionChanged( 0 );
+		connect( widgetList, SIGNAL( currentRowChanged( int ) ), this, SLOT( onListSelectionChanged( int ) ) );
 	}
 
 	void CWidgetProperties::onListSelectionChanged( int i )
@@ -87,15 +50,15 @@ namespace GUIEditor{
 
 	void CWidgetProperties::setPropsOf( const char *name )
 	{
-		std::map< std::string, std::vector< SPropEntry > >::iterator itr =
-			props.find( name );
+		std::map< std::string, SWidgetInfo >::iterator itr =
+			widgetInfo->find( name );
 
-		if( itr == props.end() )
+		if( itr == widgetInfo->end() )
 			return;
 
 		widgetPropTree->clear();
 
-		std::vector< SPropEntry > &v = itr->second;
+		std::vector< SPropEntry > &v = itr->second.props;
 		for( std::vector< SPropEntry >::iterator itr2 = v.begin(); itr2 != v.end(); ++itr2 )
 		{
 			SPropEntry e = *itr2;

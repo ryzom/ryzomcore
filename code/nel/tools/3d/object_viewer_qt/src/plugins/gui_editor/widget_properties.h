@@ -19,9 +19,40 @@
 #define WIDGETPROPS_H
 
 #include "ui_widget_properties.h"
+#include <map>
+#include <vector>
+#include <string>
 
 namespace GUIEditor
 {
+	struct SPropEntry
+	{
+		std::string propName;
+		std::string propType;
+		std::string propDefault;
+		
+		static SPropEntry create( const char *propname, const char *proptype, const char *propdefault )
+		{
+			SPropEntry entry;
+			entry.propName = propname;
+			entry.propType = proptype;
+			entry.propDefault = propdefault;
+			return entry;
+		}
+	};
+
+	struct SWidgetInfo
+	{
+		std::string name;
+		std::string GUIName;
+		std::string description;
+		bool isAbstract;
+		std::string icon;
+
+		std::vector< SPropEntry > props;
+	};
+
+
 	class CWidgetProperties : public QWidget, public Ui::WidgetProperties
 	{
 		Q_OBJECT
@@ -29,12 +60,14 @@ namespace GUIEditor
 	public:
 		CWidgetProperties( QWidget *parent = NULL );
 		~CWidgetProperties();
+		void setupWidgetInfo( std::map< std::string, SWidgetInfo > *info );
 
 	private Q_SLOTS:
 		void onListSelectionChanged( int i );
 
 	private:
 		void setPropsOf( const char *name );
+		std::map< std::string, SWidgetInfo > *widgetInfo;
 	};
 }
 

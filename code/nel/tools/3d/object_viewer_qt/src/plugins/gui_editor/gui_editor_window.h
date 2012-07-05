@@ -19,6 +19,8 @@
 
 #include "ui_gui_editor_window.h"
 #include <QtGui/QUndoStack>
+#include <QXmlStreamReader>
+#include <QFile>
 
 namespace GUIEditor
 {
@@ -48,6 +50,12 @@ private:
 		void readSettings();
 
 		void writeSettings();
+
+		void parseGUIWidgets();
+		void parseGUIWidget( const QString &file );
+		void parseGUIWidgetXML( QFile &file );
+		QString parseGUIWidgetHeader( QXmlStreamReader &reader );
+		void parseGUIWidgetProperties( QXmlStreamReader &reader, const QString &widgetName );
 
 		QUndoStack *m_undoStack;
 
