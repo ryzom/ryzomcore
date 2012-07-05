@@ -28,6 +28,7 @@
 #include <QtGui/QFileDialog>
 
 #include "widget_properties.h"
+#include "widget_properties_parser.h"
 
 namespace GUIEditor
 {
@@ -42,7 +43,11 @@ namespace GUIEditor
 		widgetProps = new CWidgetProperties;
 		createMenus();
 		readSettings();
-		parseGUIWidgets();
+
+		CWidgetPropParser parser;
+
+		parser.setWidgetPropMap( &widgetInfo );
+		parser.parseGUIWidgets();
 		widgetProps->setupWidgetInfo( &widgetInfo );
 	}
 	
@@ -100,182 +105,4 @@ namespace GUIEditor
 		settings->endGroup();
 		settings->sync();
 	}
-
-	void GUIEditorWindow::parseGUIWidgets()
-	{
-		QDir d( "widgets" );
-		if( !d.exists() )
-		{
-			nlwarning( "GUI widgets directory doesn't exist!" );
-			return;
-		}
-
-		QStringList nameFilters;
-		nameFilters.push_back( "*.xml" );
-
-		QStringList files = d.entryList( nameFilters, QDir::Files );
-		if( files.empty() )
-		{
-			nlwarning( "GUI widgets directory has no files!" );
-			return;
-		}
-
-		QStringListIterator itr( files );
-		while( itr.hasNext() )
-			parseGUIWidget( "widgets/" + itr.next() );
-	}
-
-	void GUIEditorWindow::parseGUIWidget( const QString &file )
-	{
-		QFile f( file );
-		if( f.open( QIODevice::ReadOnly ) )
-		{
-			parseGUIWidgetXML( f );
-			f.close();
-		}
-		else
-			nlwarning( QString( "File %1 cannot be opened!" ).arg( file ).toStdString().c_str() );
-	}
-
-	void GUIEditorWindow::parseGUIWidgetXML( QFile &file )
-	{
-		QXmlStreamReader reader;
-		reader.setDevice( &file );
-
-		reader.readNext();
-		if( reader.atEnd() )
-			return;
-
-		while( !reader.atEnd() && !( reader.isStartElement() && ( reader.name() == "widget" ) ) )
-			reader.readNext();
-		if( reader.atEnd() )
-			return;
-
-		while( !reader.atEnd() && !( reader.isStartElement() && ( reader.name() == "header" ) ) )
-			reader.readNext();
-		if( reader.atEnd() )
-			return;
-
-		QString name = parseGUIWidgetHeader( reader );
-		if( name.isEmpty() )
-		{
-			nlwarning( "malformed XML." );
-			return;
-		}
-
-		while( !reader.atEnd() && !( reader.isStartElement() && ( reader.name() == "properties" ) ) )
-			reader.readNext();
-		if( reader.atEnd() )
-			return;
-
-		parseGUIWidgetProperties( reader, name );
-	}
-
-	QString GUIEditorWindow::parseGUIWidgetHeader( QXmlStreamReader &reader )
-	{
-		reader.readNext();
-		if( reader.atEnd() )
-			return QString( "" );
-
-		SWidgetInfo info;
-
-		while( !reader.atEnd() && !( reader.isEndElement() && ( reader.name() == "header" ) ) )
-		{
-			if( reader.isStartElement() )
-			{
-				QString key = reader.name().toString();
-				QString value = reader.readElementText( QXmlStreamReader::ErrorOnUnexpectedElement );
-
-				if( !reader.hasError() )
-				{
-					if( key == "name" )
-						info.name = value.toStdString();
-					else
-					if( key == "guiname" )
-						info.GUIName = value.toStdString();
-					else
-					if( key == "description" )
-						info.description = value.toStdString();
-					else
-					if( key == "icon" )
-						info.icon == value.toStdString();
-					else
-					if( key == "abstract" )
-					{
-						info.isAbstract = false;
-						if( value == "true" )
-							info.isAbstract = true;
-					}
-					else
-						nlwarning( "Malformed XML." );
-				}
-			}
-			
-			reader.readNext();
-		}
-		if( reader.atEnd() )
-			return QString( "" );
-		if( info.name.empty() )
-			return QString( "" );
-
-		widgetInfo[ info.name.c_str() ] = info;
-		return QString( info.name.c_str() );
-	}
-
-	void GUIEditorWindow::parseGUIWidgetProperties( QXmlStreamReader &reader, const QString &widgetName )
-	{
-		reader.readNext();
-		if( reader.atEnd() )
-			return;
-
-		std::map< std::string, SWidgetInfo >::iterator itr =
-			widgetInfo.find( widgetName.toStdString() );
-		if( itr == widgetInfo.end() )
-			return;
-
-		std::vector< SPropEntry > &v = itr->second.props;
-
-		while( !reader.atEnd() && !( reader.isEndElement() && ( reader.name() == "properties" ) ) )
-		{
-			if( reader.isStartElement() && reader.name() == "property" )
-			{
-				SPropEntry prop;
-				reader.readNext();
-
-				while( !reader.atEnd() && !( reader.isEndElement() && ( reader.name() == "property" ) ) )
-				{
-					if( reader.isStartElement() )
-					{
-						QString key = reader.name().toString();
-						QString value = reader.readElementText( QXmlStreamReader::ErrorOnUnexpectedElement );
-
-						if( !reader.hasError() )
-						{
-							if( key == "name" )
-								prop.propName = value.toStdString();
-							else
-							if( key == "type" )
-								prop.propType = value.toStdString();
-							else
-							if( key == "default" )
-								prop.propDefault = value.toStdString();
-							else
-								nlwarning( QString( "Unknown tag %1 within a property" ).arg( key ).toStdString().c_str() );
-
-						}
-						else
-							nlwarning( "Malformed XML." );
-					}
-					
-					reader.readNext();
-				}
-				if( reader.atEnd() )
-					return;
-				
-				v.push_back( prop );
-			}
-
-			reader.readNext();
-		}
-	}	
 }

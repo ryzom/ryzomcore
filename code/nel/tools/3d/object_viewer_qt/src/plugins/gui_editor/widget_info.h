@@ -15,32 +15,39 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef WIDGETPROPS_H
-#define WIDGETPROPS_H
+#ifndef WIDGET_INFO_H
+#define WIDGET_INFO_H
 
-#include "ui_widget_properties.h"
-#include "widget_info.h"
-#include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace GUIEditor
 {
-	class CWidgetProperties : public QWidget, public Ui::WidgetProperties
+	struct SPropEntry
 	{
-		Q_OBJECT
+		std::string propName;
+		std::string propType;
+		std::string propDefault;
+		
+		static SPropEntry create( const char *propname, const char *proptype, const char *propdefault )
+		{
+			SPropEntry entry;
+			entry.propName = propname;
+			entry.propType = proptype;
+			entry.propDefault = propdefault;
+			return entry;
+		}
+	};
 
-	public:
-		CWidgetProperties( QWidget *parent = NULL );
-		~CWidgetProperties();
-		void setupWidgetInfo( std::map< std::string, SWidgetInfo > *info );
+	struct SWidgetInfo
+	{
+		std::string name;
+		std::string GUIName;
+		std::string description;
+		bool isAbstract;
+		std::string icon;
 
-	private Q_SLOTS:
-		void onListSelectionChanged( int i );
-
-	private:
-		void setPropsOf( const char *name );
-		std::map< std::string, SWidgetInfo > *widgetInfo;
+		std::vector< SPropEntry > props;
 	};
 }
 

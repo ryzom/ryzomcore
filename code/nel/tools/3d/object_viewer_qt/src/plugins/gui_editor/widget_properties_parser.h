@@ -15,31 +15,33 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef WIDGETPROPS_H
-#define WIDGETPROPS_H
+#ifndef WIDGET_PROP_PARSER
+#define WIDGET_PROP_PARSER
 
-#include "ui_widget_properties.h"
 #include "widget_info.h"
 #include <map>
-#include <vector>
-#include <string>
+#include <QString>
+#include <QFile>
+#include <QXmlStreamReader>
 
 namespace GUIEditor
 {
-	class CWidgetProperties : public QWidget, public Ui::WidgetProperties
+	/// Parser for the widget properties XML files
+	class CWidgetPropParser
 	{
-		Q_OBJECT
-
 	public:
-		CWidgetProperties( QWidget *parent = NULL );
-		~CWidgetProperties();
-		void setupWidgetInfo( std::map< std::string, SWidgetInfo > *info );
+		CWidgetPropParser(){}
+		~CWidgetPropParser(){}
 
-	private Q_SLOTS:
-		void onListSelectionChanged( int i );
+		void setWidgetPropMap( std::map< std::string, SWidgetInfo > *info ){ widgetInfo = info; }
+		void parseGUIWidgets();
 
 	private:
-		void setPropsOf( const char *name );
+		void parseGUIWidget( const QString &file );
+		void parseGUIWidgetXML( QFile &file );
+		QString parseGUIWidgetHeader( QXmlStreamReader &reader );
+		void parseGUIWidgetProperties( QXmlStreamReader &reader, const QString &widgetName );
+		
 		std::map< std::string, SWidgetInfo > *widgetInfo;
 	};
 }

@@ -21,6 +21,7 @@
 #include <QtGui/QUndoStack>
 #include <QXmlStreamReader>
 #include <QFile>
+#include "widget_info.h"
 
 namespace GUIEditor
 {
