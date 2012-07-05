@@ -17,6 +17,8 @@
 
 #include "camera_animation_manager/camera_animation_step_factory.h"
 
+typedef std::string TPositionOrEntity;
+
 /// Basic camera animation step that has generic values
 /// - look_at_position
 /// - text
@@ -24,7 +26,7 @@
 class CCameraAnimationStepBasic : public ICameraAnimationStep
 {
 protected:
-	std::string LookAtPos;
+	TPositionOrEntity LookAtPos;
 	std::string Text;
 	float Duration;
 
@@ -73,7 +75,9 @@ public:
 
 	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
 	{
-
+		bms.serial(const_cast<TPositionOrEntity&>(LookAtPos));
+		bms.serial(const_cast<std::string&>(Text));
+		bms.serial(const_cast<float&>(Duration));
 	}
 
 	virtual float getDuration() const
@@ -110,7 +114,7 @@ CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepStatic, "camera_animation_stat
 class CCameraAnimationStepGoTo: public CCameraAnimationStepBasic
 {
 protected:
-	std::string EndPos;
+	TPositionOrEntity EndPos;
 
 public:
 	CCameraAnimationStepGoTo()
@@ -153,7 +157,7 @@ CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepGoTo, "camera_animation_go_to"
 class CCameraAnimationStepFollowEntity: public CCameraAnimationStepBasic
 {
 protected:
-	std::string EntityToFollow;
+	TPositionOrEntity EntityToFollow;
 	float DistanceToEntity;
 
 public:
@@ -211,7 +215,7 @@ CAMERA_ANIMATION_REGISTR_STEP(CCameraAnimationStepFollowEntity, "camera_animatio
 class CCameraAnimationStepTurnAround: public CCameraAnimationStepBasic
 {
 protected:
-	std::string PointToTurnAround;
+	TPositionOrEntity PointToTurnAround;
 	float DistanceToPoint;
 	float Speed;
 
