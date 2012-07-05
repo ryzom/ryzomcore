@@ -147,7 +147,7 @@ void CCameraAnimationManager::sendAnimation(const NLMISC::CEntityId& eid, const 
 void CCameraAnimationManager::TCameraAnimInfo::sendAnimationSteps(const NLMISC::CEntityId& eid)
 {
 	// We first send an impulse to the client to tell him an animation will start (this way he can remember its current position)
-	PlayerManager.sendImpulseToClient(eid, "CAMERA_ANIMATION:PLAY", Name);
+	PlayerManager.sendImpulseToClient(eid, "CAMERA_ANIMATION:PLAY");
 
 	// We send the first step, and then the others
 	sendAnimationStepsFrom(eid, 0);
@@ -192,5 +192,10 @@ void CCameraAnimationManager::TCameraAnimInfo::sendAnimationStepsFrom(const NLMI
 		//_Timer->reset();
 		NLMISC::TGameCycle duration = (NLMISC::TGameCycle)(Steps[firstStep]->getDuration() / CTickEventHandler::getGameTimeStep());
 		_Timer->setRemaining(duration, event);
+	}
+	else
+	{
+		// There was no other step, so we send an impulse to tell the client it's finished
+		PlayerManager.sendImpulseToClient(eid, "CAMERA_ANIMATION:FINISHED");
 	}
 }
