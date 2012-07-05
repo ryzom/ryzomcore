@@ -32,6 +32,10 @@ class ICameraAnimationModifier
 public:
 	/// This function is called when it's time to parse the primitive to load the camera animation modifier
 	virtual bool parseModifier(const NLLIGO::IPrimitive* prim, const std::string& filename) = 0;
+
+
+	/// Function to get the name of the modifier
+	virtual std::string getModifierName() const = 0;
 };
 
 /************************************************************************/
@@ -55,7 +59,7 @@ protected:
 };
 
 // Define used to register the different types of camera animation modifiers
-#define CAMERA_ANIMATION_REGISTR_MODIFIER(_class_,_name_) \
+#define CAMERA_ANIMATION_REGISTER_MODIFIER(_class_,_name_) \
 class _class_##CameraAnimationModifierFactory : public ICameraAnimationModifierFactory \
 {\
 public:\
@@ -75,5 +79,11 @@ public:\
 } \
 };\
 	static _class_##CameraAnimationModifierFactory* _class_##CameraAnimationModifierFactoryInstance = new _class_##CameraAnimationModifierFactory;
+
+#define CAMERA_ANIMATION_MODIFIER_NAME(name) \
+	std::string getModifierName() const \
+{ \
+	return name; \
+}
 
 #endif /* RY_CAMERAANIMATIONMODIFIERFACTORY_H */

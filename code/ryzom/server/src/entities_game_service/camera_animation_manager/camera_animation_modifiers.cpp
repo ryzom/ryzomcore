@@ -51,8 +51,10 @@ public:
 
 		return true;
 	}
+
+	CAMERA_ANIMATION_MODIFIER_NAME("camera_modifier_shake");
 };
-CAMERA_ANIMATION_REGISTR_MODIFIER(CCameraAnimationModifierShake, "camera_modifier_shake");
+CAMERA_ANIMATION_REGISTER_MODIFIER(CCameraAnimationModifierShake, "camera_modifier_shake");
 
 /////////////////////////////////////////////////////////////////////////////
 /// This animation modifier plays a sound. The parameters are
@@ -97,5 +99,7 @@ public:
 
 		return true;
 	}
+
+	CAMERA_ANIMATION_MODIFIER_NAME("sound_trigger");
 };
-CAMERA_ANIMATION_REGISTR_MODIFIER(CCameraAnimationModifierSoundTrigger, "sound_trigger");
+CAMERA_ANIMATION_REGISTER_MODIFIER(CCameraAnimationModifierSoundTrigger, "sound_trigger");
