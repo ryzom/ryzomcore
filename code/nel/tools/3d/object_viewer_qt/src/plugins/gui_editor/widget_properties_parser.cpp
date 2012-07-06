@@ -47,6 +47,8 @@ namespace GUIEditor
 		while( itr.hasNext() )
 			parseGUIWidget( "widgets/" + itr.next() );
 
+		resolveInheritance();
+
 		widgetInfo = NULL;
 	}
 
@@ -118,6 +120,9 @@ namespace GUIEditor
 					else
 					if( key == "guiname" )
 						info.GUIName = value.toStdString();
+					else
+					if( key == "ancestor" )
+						info.ancestor = value.toStdString();
 					else
 					if( key == "description" )
 						info.description = value.toStdString();
@@ -202,7 +207,66 @@ namespace GUIEditor
 
 			reader.readNext();
 		}
-	}	
+	}
+
+	bool propCompare( const SPropEntry &left, const SPropEntry &right )
+	{
+		return left.propName < right.propName;
+	}
+
+	void CWidgetPropParser::resolveInheritance()
+	{
+		for( std::map< std::string, SWidgetInfo >::iterator itr = widgetInfo->begin(); itr != widgetInfo->end(); ++itr )
+		{
+			resolveInheritanceFor( itr->first );
+			std::sort( itr->second.props.begin(), itr->second.props.end(), propCompare );
+		}
+		
+	}
+
+	void CWidgetPropParser::resolveInheritanceFor( const std::string name )
+	{
+		if( name.empty() )
+			return;
+
+		std::map< std::string, SWidgetInfo >::iterator itr =
+			widgetInfo->find( name );
+		if( itr == widgetInfo->end() )
+			return;
+
+		SWidgetInfo *info = &(itr->second);
+		if( info->resolved )
+			return;
+
+		if( info->ancestor.empty() )
+			return;
+
+		std::vector< SPropEntry > &props = info->props;
+
+		std::map< std::string, SWidgetInfo >::iterator itr2 =
+			widgetInfo->find( info->ancestor );
+		if( itr2 == widgetInfo->end() )
+			return;
+		SWidgetInfo *info2 = &(itr2->second);
+
+		do
+		{
+			for( std::vector< SPropEntry >::iterator propItr = info2->props.begin(); propItr != info2->props.end(); ++propItr )
+				props.push_back( *propItr );
+
+			if( !info2->resolved && !info2->ancestor.empty() )
+			{
+				itr2 = widgetInfo->find( info2->ancestor );
+				if( itr2 != widgetInfo->end() )
+					info2 = &(itr2->second);
+				else
+					info2 = NULL;				
+			}
+		}
+		while( ( info2 != NULL ) && !info2->resolved && !info2->ancestor.empty() );
+
+		info->resolved = true;
+	}
 }
 
 

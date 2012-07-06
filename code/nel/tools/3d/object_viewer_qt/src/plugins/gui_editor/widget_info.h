@@ -43,11 +43,19 @@ namespace GUIEditor
 	{
 		std::string name;
 		std::string GUIName;
+		std::string ancestor;
 		std::string description;
 		bool isAbstract;
 		std::string icon;
+		bool resolved;
 
 		std::vector< SPropEntry > props;
+
+		SWidgetInfo()
+		{
+			resolved = false;
+			isAbstract = true;
+		}
 	};
 }
 

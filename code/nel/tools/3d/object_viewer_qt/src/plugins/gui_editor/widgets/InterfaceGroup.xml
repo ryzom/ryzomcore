@@ -1,20 +1,20 @@
 <widget>
     <header>
-        <name>CtrlBase</name>
-        <guiname>cb</guiname>
-        <ancestor>InterfaceElement</ancestor>
+        <name>InterfaceGroup</name>
+        <guiname>ig</guiname>
+        <ancestor>CtrlBase</ancestor>
         <description></description>
-        <abstract>true</abstract>
+        <abstract>false</abstract>
         <icon></icon>
     </header>
     <properties>
         <property>
-            <name>on_tooltip</name>
+            <name>on_enter</name>
             <type>string</type>
             <default>handler</default>
         </property>
         <property>
-            <name>on_tooltip_params</name>
+            <name>on_enter_params</name>
             <type>string</type>
             <default>params</default>
         </property>

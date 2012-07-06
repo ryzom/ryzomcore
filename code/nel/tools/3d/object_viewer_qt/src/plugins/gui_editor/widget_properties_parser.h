@@ -41,6 +41,8 @@ namespace GUIEditor
 		void parseGUIWidgetXML( QFile &file );
 		QString parseGUIWidgetHeader( QXmlStreamReader &reader );
 		void parseGUIWidgetProperties( QXmlStreamReader &reader, const QString &widgetName );
+		void resolveInheritance();
+		void resolveInheritanceFor( const std::string name );
 		
 		std::map< std::string, SWidgetInfo > *widgetInfo;
 	};
