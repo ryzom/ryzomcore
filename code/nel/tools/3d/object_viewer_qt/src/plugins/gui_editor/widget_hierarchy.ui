@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>WidgetHierarchyTree</class>
+ <widget class="QWidget" name="WidgetHierarchyTree">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>497</width>
+    <height>434</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Widget Hieararchy</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTreeWidget" name="widgetHT">
+     <column>
+      <property name="text">
+       <string>Widgets</string>
+      </property>
+     </column>
+     <item>
+      <property name="text">
+       <string>root</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>container1</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>group1</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>group3</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>group4</string>
+         </property>
+         <item>
+          <property name="text">
+           <string>button1</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>button2</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>text1</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>bitmap1</string>
+          </property>
+         </item>
+        </item>
+       </item>
+       <item>
+        <property name="text">
+         <string>group2</string>
+        </property>
+       </item>
+      </item>
+      <item>
+       <property name="text">
+        <string>container2</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>container3</string>
+       </property>
+      </item>
+     </item>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

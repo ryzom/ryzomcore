@@ -27,6 +27,8 @@ namespace GUIEditor
 {
 
 	class CWidgetProperties;
+	class LinkEditor;
+	class ProcEditor;
 
 	class GUIEditorWindow: public QMainWindow
 	{
@@ -62,6 +64,8 @@ private:
 
 		Ui::GUIEditorWindow m_ui;
 		CWidgetProperties *widgetProps;
+		LinkEditor *linkEditor;
+		ProcEditor *procEditor;
 	};
 
 }

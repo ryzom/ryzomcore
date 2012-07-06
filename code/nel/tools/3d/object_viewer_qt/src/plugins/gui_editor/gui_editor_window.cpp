@@ -26,9 +26,13 @@
 
 #include <QtCore/QSettings>
 #include <QtGui/QFileDialog>
+#include <QDockWidget>
 
 #include "widget_properties.h"
 #include "widget_properties_parser.h"
+#include "widget_hierarchy.h"
+#include "link_editor.h"
+#include "proc_editor.h"
 
 namespace GUIEditor
 {
@@ -41,6 +45,8 @@ namespace GUIEditor
 		m_ui.setupUi(this);
 		m_undoStack = new QUndoStack(this);
 		widgetProps = new CWidgetProperties;
+		linkEditor  = new LinkEditor;
+		procEditor  = new ProcEditor;
 		createMenus();
 		readSettings();
 
@@ -49,13 +55,26 @@ namespace GUIEditor
 		parser.setWidgetPropMap( &widgetInfo );
 		parser.parseGUIWidgets();
 		widgetProps->setupWidgetInfo( &widgetInfo );
+
+		QDockWidget *dock = new QDockWidget( "Widget Hierarchy", this );
+		dock->setAllowedAreas( Qt::LeftDockWidgetArea );
+		WidgetHierarchy *ha = new WidgetHierarchy;
+		dock->setWidget( ha );
+		addDockWidget( Qt::LeftDockWidgetArea, dock );
 	}
 	
 	GUIEditorWindow::~GUIEditorWindow()
 	{
 		writeSettings();
+
 		delete widgetProps;
 		widgetProps = NULL;
+
+		delete linkEditor;
+		linkEditor = NULL;
+
+		delete procEditor;
+		procEditor = NULL;
 	}
 	
 	QUndoStack *GUIEditorWindow::undoStack() const
@@ -87,6 +106,14 @@ namespace GUIEditor
 		{
 			QAction *a = new QAction( "Widget Properties", this );
 			connect( a, SIGNAL( triggered( bool ) ), widgetProps, SLOT( show() ) );
+			menu->addAction( a );
+
+			a = new QAction( "Link Editor", this );
+			connect( a, SIGNAL( triggered( bool ) ), linkEditor, SLOT( show() ) );
+			menu->addAction( a );
+
+			a = new QAction( "Proc Editor", this );
+			connect( a, SIGNAL( triggered( bool ) ), procEditor, SLOT( show() ) );
 			menu->addAction( a );
 		}
 	}
