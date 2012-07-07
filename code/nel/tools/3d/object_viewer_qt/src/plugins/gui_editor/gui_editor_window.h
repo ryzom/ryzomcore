@@ -22,6 +22,7 @@
 #include <QXmlStreamReader>
 #include <QFile>
 #include "widget_info.h"
+#include "property_browser_ctrl.h"
 
 namespace GUIEditor
 {
@@ -66,6 +67,8 @@ private:
 		CWidgetProperties *widgetProps;
 		LinkEditor *linkEditor;
 		ProcEditor *procEditor;
+		
+		CPropBrowserCtrl browserCtrl;
 	};
 
 }

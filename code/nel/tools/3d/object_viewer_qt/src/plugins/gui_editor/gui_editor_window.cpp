@@ -27,6 +27,7 @@
 #include <QtCore/QSettings>
 #include <QtGui/QFileDialog>
 #include <QDockWidget>
+#include "../../3rdparty/qtpropertybrowser/QtTreePropertyBrowser"
 
 #include "widget_properties.h"
 #include "widget_properties_parser.h"
@@ -61,6 +62,15 @@ namespace GUIEditor
 		WidgetHierarchy *ha = new WidgetHierarchy;
 		dock->setWidget( ha );
 		addDockWidget( Qt::LeftDockWidgetArea, dock );
+
+		dock = new QDockWidget( "Widget Properties", this );
+		dock->setAllowedAreas( Qt::RightDockWidgetArea );
+		QtTreePropertyBrowser *tb = new QtTreePropertyBrowser;
+		browserCtrl.setBrowser( tb );
+		browserCtrl.setup();
+		dock->setWidget( tb );
+		addDockWidget( Qt::RightDockWidgetArea, dock );
+
 	}
 	
 	GUIEditorWindow::~GUIEditorWindow()
