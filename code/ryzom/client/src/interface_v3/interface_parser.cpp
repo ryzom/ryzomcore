@@ -14,104 +14,32 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-// ----------------------------------------------------------------------------
-
-#include "stdpch.h"
-
+#include "interface_parser.h"
 #include "nel/misc/i_xml.h"
 #include "nel/misc/file.h"
 #include "nel/misc/algo.h"
 #include "nel/misc/mem_stream.h"
 #include "nel/misc/factory.h"
 #include "nel/misc/big_file.h"
-
 #include "nel/misc/xml_auto_ptr.h"
-
-#include "interface_parser.h"
-#include "interface_observer.h"
 #include "nel/gui/interface_options.h"
-#include "interface_options_ryzom.h"
 #include "nel/gui/interface_anim.h"
-#include "interface_3d_scene.h"
-// View
-#include "nel/gui/view_bitmap.h"
-#include "view_bitmap_faber_mp.h"
-#include "nel/gui/view_bitmap_combo.h"
-#include "nel/gui/view_text.h"
-#include "nel/gui/view_text_formated.h"
-#include "nel/gui/view_text_id.h"
-#include "nel/gui/view_text_id_formated.h"
-#include "view_radar.h"
+#include "nel/gui/interface_expr.h"
 #include "nel/gui/view_pointer.h"
-// DBView (View linked to the database)
-#include "nel/gui/dbview_bar.h"
-#include "nel/gui/dbview_bar3.h"
-#include "nel/gui/dbview_number.h"
-#include "nel/gui/dbview_quantity.h"
-#include "nel/gui/dbview_digit.h"
-// Ctrl
-#include "nel/gui/ctrl_scroll.h"
-#include "nel/gui/ctrl_button.h"
-#include "nel/gui/ctrl_col_pick.h"
-#include "nel/gui/ctrl_tooltip.h"
-#include "nel/gui/ctrl_text_button.h"
-#include "nel/gui/group_paragraph.h" // For CCtrlLink
-// DBCtrl
-#include "dbctrl_sheet.h"
-// Group
-#include "nel/gui/group_frame.h"
-#include "group_career.h"
 #include "nel/gui/group_modal.h"
-#include "group_modal_get_key.h"
 #include "nel/gui/group_list.h"
-#include "nel/gui/group_tree.h"
-#include "nel/gui/group_menu.h"
 #include "nel/gui/group_container.h"
-#include "nel/gui/group_scrolltext.h"
-#include "nel/gui/group_editbox.h"
-#include "group_skills.h"
-#include "group_html_forum.h"
-#include "group_html_mail.h"
-#include "group_html_qcm.h"
-#include "group_html_cs.h"
-#include "group_quick_help.h"
-#include "group_compas.h"
-#include "group_map.h"
-#include "group_in_scene_user_info.h"
-#include "group_in_scene_bubble.h"
-#include "group_phrase_skill_filter.h"
-#include "nel/gui/group_tab.h"
-#include "nel/gui/group_table.h"
-// DBGroup
-#include "nel/gui/dbgroup_select_number.h"
-#include "dbgroup_list_sheet.h"
-#include "nel/gui/dbgroup_combo_box.h"
-#include "dbgroup_list_sheet_trade.h"
-#include "dbgroup_list_sheet_mission.h"
-#include "guild_manager.h" // for CDBGroupListAscensor
-#include "dbgroup_build_phrase.h"
-#include "dbgroup_list_sheet_text_phrase.h"
-#include "dbgroup_list_sheet_text_phrase_id.h"
-#include "dbgroup_list_sheet_text_brick_composition.h"
-#include "dbgroup_list_sheet_text_share.h"
-#include "dbgroup_list_sheet_bonus_malus.h"
-#include "dbgroup_list_sheet_icon_phrase.h"
-// Misc.
 #include "nel/gui/interface_link.h"
-#include "interface_ddx.h"
-#include "../actions.h"
-#include "macrocmd_manager.h"
-#include "inventory_manager.h"
-#include "task_bar_manager.h"
-#include "../commands.h"
 #include "nel/gui/lua_helper.h"
-using namespace NLGUI;
 #include "nel/gui/lua_ihm.h"
-#include "lua_ihm_ryzom.h"
-#include "../r2/editor.h"
 #include "nel/gui/lua_manager.h"
+
+#include "interface_options_ryzom.h"
+#include "interface_3d_scene.h"
+#include "lua_ihm_ryzom.h"
+#include "interface_ddx.h"
+#include "macrocmd_manager.h"
+#include "../commands.h"
 
 #ifdef LUA_NEVRAX_VERSION
 	#include "lua_ide_dll_nevrax/include/lua_ide_dll/ide_interface.h" // external debugger
@@ -119,24 +47,7 @@ using namespace NLGUI;
 const uint32 UI_CACHE_SERIAL_CHECK = (uint32) 'IUG_';
 
 using namespace NLMISC;
-
-void badLuaParseMessageBox()
-{
-	NL3D::UDriver::TMessageBoxId	ret =
-		CViewRenderer::getInstance()->getDriver()->systemMessageBox(	"LUA files reading failed!\n"
-																							"Some LUA files are corrupted, moved or may have been removed.\n"
-																							"Ryzom may need to be restarted to run properly.\n"
-																							"Would you like to quit now?",
-																							"LUA reading failed!",
-																							NL3D::UDriver::yesNoType,
-																							NL3D::UDriver::exclamationIcon);
-	if (ret == NL3D::UDriver::yesId)
-	{
-		extern void quitCrashReport ();
-		quitCrashReport ();
-		exit (EXIT_FAILURE);
-	}
-}
+using namespace NLGUI;
 
 void saveXMLTree(COFile &f, xmlNodePtr node)
 {
@@ -418,7 +329,7 @@ bool CInterfaceParser::parseInterface (const std::vector<std::string> & strings,
 			xmlNodePtr cur = NULL;
 			bool saveParseResult = false;
 			bool readFromUncompressedXML = true;
-			if (isFilename && ClientCfg.CacheUIParsing)
+			if( false /* isFilename && ClientCfg.CacheUIParsing */ )
 			{
 				saveParseResult = true;
 				std::string archive = CPath::lookup(nextFileName + "_compressed", false, false);
@@ -699,12 +610,6 @@ bool CInterfaceParser::parseXMLDocument(xmlNodePtr root, bool reload)
 				// todo hulud interface syntax error
 				nlwarning ("could not parse vector");
 		}
-		else if ( !strcmp((char*)root->name,"observer") )
-		{
-			if (!parseObserver(root,rootGroup))
-				// todo hulud interface syntax error
-				nlwarning ("could not parse observer");
-		}
 		else if ( !strcmp((char*)root->name,"link") )
 		{
 			if (!parseLink(root,rootGroup))
@@ -779,8 +684,8 @@ bool CInterfaceParser::parseXMLDocument(xmlNodePtr root, bool reload)
 		{
 			if(!parseLUAScript(root))
 			{
-				badLuaParseMessageBox();
 				nlwarning ("could not parse 'lua'");
+				exit( EXIT_FAILURE );
 			}
 		}
 
@@ -1186,14 +1091,6 @@ bool CInterfaceParser::parseVector(xmlNodePtr cur)
 }
 
 // ----------------------------------------------------------------------------
-bool CInterfaceParser::parseObserver (xmlNodePtr cur, CInterfaceGroup *parentGroup)
-{
-	H_AUTO(parseObserver )
-
-	return IInterfaceObserverFactory::create(cur,parentGroup)!= NULL;
-}
-
-// ----------------------------------------------------------------------------
 bool CInterfaceParser::parseLink(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 {
 	H_AUTO(parseLink)
@@ -1481,8 +1378,6 @@ bool CInterfaceParser::parseGroupChildren(xmlNodePtr cur, CInterfaceGroup * pare
 			ok = ok && parseInstance(cur);
 		else if ( !strcmp((char*)cur->name,"vector") )
 			ok = ok && parseVector(cur);
-		else if ( !strcmp((char*)cur->name,"observer") )
-			ok = ok && parseObserver(cur,parentGroup);
 		else if ( !strcmp((char*)cur->name,"link") )
 			ok = ok && parseLink(cur,parentGroup);
 		else if ( !strcmp((char*)cur->name,"scene3d") )
@@ -2129,7 +2024,6 @@ bool CInterfaceParser::initCoordsAndLuaScript()
 	for (map<CInterfaceGroup*,string>::const_iterator itLua = _LuaClassAssociation.begin(); itLua != _LuaClassAssociation.end(); itLua++)
 	{
 		// execute the script on this group
-		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		CAHManager::getInstance()->runActionHandler("lua", itLua->first, itLua->second);
 	}
 
@@ -2572,147 +2466,6 @@ xmlNodePtr CInterfaceParser::searchTreeNodeInHierarchy(xmlNodePtr root, const ch
 	// not found
 	return NULL;
 }
-
-
-// ***************************************************************************
-bool CInterfaceParser::parseCareerGenerator(xmlNodePtr /* cur */)
-{
-	H_AUTO(parseCareerGenerator)
-
-	// No more CAREER / Bricks!!!
-	// TODO_BRICK: remove this code.
-	return false;
-
-	/*
-	CBrickManager	*pBM= CBrickManager::getInstance();
-
-	CXMLAutoPtr prop;
-
-	string	templateCareer;
-	string	templateJob;
-	string	careerWindow;
-	string	jobWindow;
-	string	knownWindow;
-	xmlNodePtr	rootTreeNode;
-	bool		brickTypeFilter;
-	BRICK_TYPE::EBrickType	brickType;
-
-	if(! parseCareerGeneratorParams(cur, templateCareer, templateJob, careerWindow, jobWindow, rootTreeNode,
-		brickTypeFilter, brickType) )
-		return false;
-
-
-	// knownWindow (optional)
-	prop = xmlGetProp (cur, (xmlChar*)"known_window");
-	if(prop) knownWindow= (const char*)prop;
-
-
-	// **** Create all existing careers
-	xmlNodePtr nextSibling=cur;
-	for(uint careerId=0;careerId<BRICKS_MAX_CAREER;careerId++)
-	{
-		const CBrickCareer	*career= NULL;
-
-		// get the career for our wanted brick type
-		if(brickTypeFilter)
-			career= pBM->getCareer(brickType, (ROLES::ERole)careerId );
-
-		// if no filter, then dispplay all careers
-		if(career || !brickTypeFilter)
-		{
-			// Ok, create the xml node to instanciate the career
-			xmlNodePtr	node= xmlNewNode(cur->ns, (xmlChar*)"instance" );
-			xmlSetProp(node, (xmlChar*)"template", (xmlChar*)templateCareer.c_str());
-			xmlSetProp(node, (xmlChar*)"careerid", (xmlChar*)toString(careerId).c_str());
-
-			// add it before rootContainer => next to nextSibling
-			xmlAddNextSibling (nextSibling, node);
-			nextSibling = nextSibling->next;
-
-			// Create the associated tree node
-			xmlNodePtr	careerTreeNode= xmlNewNode(cur->ns, (xmlChar*)"tree" );
-			string	windowId= careerWindow + toString(careerId);
-			xmlSetProp(careerTreeNode, (xmlChar*)"node", (xmlChar*)windowId.c_str());
-			// link it to the root
-			xmlAddChild(rootTreeNode, careerTreeNode);
-
-
-			// Create the associated tree node for the known sentence if needed
-			if(!knownWindow.empty())
-			{
-				xmlNodePtr	knownTreeNode= xmlNewNode(cur->ns, (xmlChar*)"tree" );
-				windowId= knownWindow + toString(careerId);
-				xmlSetProp(knownTreeNode, (xmlChar*)"node", (xmlChar*)windowId.c_str());
-				// link it to the career
-				xmlAddChild(careerTreeNode, knownTreeNode);
-			}
-
-
-			// **** create all existing jobs.
-			sint	numJobs;
-
-			// parse all jobs if not brick type filter
-			if(!brickTypeFilter)
-				numJobs= BRICKS_MAX_JOB_PER_CAREER;
-			else
-				numJobs= career->Jobs.size();
-
-			// for all jobs to parse
-			for(sint jobIndex=0;jobIndex<numJobs;jobIndex++)
-			{
-				// get the jobId, ie the index of the job in the database (0 to 7)
-				sint jobId;
-
-				// if no brick filter, just get the jobIndex
-				if(!brickTypeFilter)
-				{
-					jobId= jobIndex;
-					// still verify the job is defined
-					if( JOBS::getJobForRace((ROLES::ERole)careerId, (EGSPD::CPeople::TPeople)jobId )==JOBS::Unknown )
-						// skip job
-						continue;
-				}
-				else
-					jobId= JOBS::getJobDBIndex( career->Jobs[jobIndex].Job );
-
-				// if the job exist
-				if(jobId>=0)
-				{
-					// create the xml node to instanciate the job
-					xmlNodePtr	node= xmlNewNode(cur->ns, (xmlChar*)"instance" );
-					xmlSetProp(node, (xmlChar*)"template", (xmlChar*)templateJob.c_str());
-					xmlSetProp(node, (xmlChar*)"careerid", (xmlChar*)toString(careerId).c_str());
-					xmlSetProp(node, (xmlChar*)"jobid", (xmlChar*)toString(jobId).c_str());
-
-					// add it before rootContainer => next to nextSibling
-					xmlAddNextSibling (nextSibling, node);
-					nextSibling = nextSibling->next;
-
-					// Create the associated tree node
-					xmlNodePtr	jobTreeNode= xmlNewNode(cur->ns, (xmlChar*)"tree" );
-					windowId= jobWindow + toString(careerId) + "_" + toString(jobId);
-					xmlSetProp(jobTreeNode, (xmlChar*)"node", (xmlChar*)windowId.c_str());
-					// link it
-					xmlAddChild(careerTreeNode, jobTreeNode);
-
-
-					// Create the associated tree node for the known sentence if needed
-					if(!knownWindow.empty())
-					{
-						xmlNodePtr	knownTreeNode= xmlNewNode(cur->ns, (xmlChar*)"tree" );
-						windowId= knownWindow + toString(careerId) + "_" + toString(jobId);
-						xmlSetProp(knownTreeNode, (xmlChar*)"node", (xmlChar*)windowId.c_str());
-						// link it to the job
-						xmlAddChild(jobTreeNode, knownTreeNode);
-					}
-				}
-			}
-		}
-	}
-
-	return true;*/
-}
-
 
 //==================================================================
 bool CInterfaceParser::parseAnim(xmlNodePtr cur, CInterfaceGroup * parentGroup)
@@ -3302,7 +3055,6 @@ CInterfaceElement *CInterfaceParser::createUIElement(const std::string &template
 		return NULL;
 	}
 
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CInterfaceElement	*pIE= CWidgetManager::getInstance()->getElementFromId(parentID);
 	CInterfaceGroup * parentGroup = dynamic_cast<CInterfaceGroup*>(pIE);
 
@@ -3405,28 +3157,13 @@ void CInterfaceParser::removeAllAnims()
 // ***************************************************************************
 void CInterfaceParser::removeAll()
 {
-	NLMISC::TTime initStart;
-	initStart = ryzomGetLocalTime ();
 	removeAllLinks();
-	//nlinfo ("%d seconds for removeAllLinks", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
-	initStart = ryzomGetLocalTime ();
 	CWidgetManager::getInstance()->removeAllOptions();
-	//nlinfo ("%d seconds for removeAllOptions", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
-	initStart = ryzomGetLocalTime ();
 	removeAllProcedures();
-	//nlinfo ("%d seconds for removeAllProcedures", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
-	initStart = ryzomGetLocalTime ();
 	removeAllDefines();
-	//nlinfo ("%d seconds for removeAllDefines", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
-	initStart = ryzomGetLocalTime ();
 	removeAllTemplates();
-	//nlinfo ("%d seconds for removeAllTemplates", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
-	initStart = ryzomGetLocalTime ();
 	removeAllAnims();
-	//nlinfo ("%d seconds for removeAllAnims", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
-	initStart = ryzomGetLocalTime ();
 	CWidgetManager::getInstance()->removeAllMasterGroups();
-	//nlinfo ("%d seconds for removeAllMasterGroups", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	_StyleMap.clear();
 	_CtrlSheetSelection.deleteGroups();
 }
@@ -3631,13 +3368,6 @@ bool CInterfaceParser::parseCareerGeneratorParams(xmlNodePtr cur,
 bool CInterfaceParser::parseBrickCareerGenerator(xmlNodePtr /* cur */)
 {
 	return false;
-}
-
-
-// ***************************************************************************
-void	CInterfaceParser::createJobBricks(BRICK_TYPE::EBrickType	brickType, xmlNodePtr &nextSibling, xmlNodePtr parentTreeNode,
-		const CBrickJob &/* job */, const string &/* templateBrick */, const string &/* baseWindowId */, sint32 /* xstart */)
-{
 }
 
 

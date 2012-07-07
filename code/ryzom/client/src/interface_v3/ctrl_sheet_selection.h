@@ -19,10 +19,6 @@
 #ifndef CL_SHEET_CTRL_SELECTION_H
 #define CL_SHEET_CTRL_SELECTION_H
 
-
-
-class CDBCtrlSheet;
-
 namespace NLGUI
 {
 	class IActionHandler;

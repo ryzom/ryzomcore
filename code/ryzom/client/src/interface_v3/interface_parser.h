@@ -27,7 +27,6 @@
 #include "game_share/brick_types.h"
 #include "nel/gui/lua_helper.h"
 #include "nel/gui/widget_manager.h"
-using namespace NLGUI;
 
 namespace NLGUI
 {
@@ -42,7 +41,7 @@ namespace NLGUI
 	class CViewPointer;
 }
 
-class CBrickJob;
+using namespace NLGUI;
 
 // ***************************************************************************
 /**
@@ -73,65 +72,32 @@ public:
 	bool parseInterface (const std::vector<std::string> &xmlFileNames, bool reload, bool isFilename = true, bool checkInData = false);
 
 	bool parseXMLDocument (xmlNodePtr root, bool reload);
-
 	bool parseTemplateNode (xmlNodePtr node,xmlNodePtr instance,xmlNodePtr templ);
-
 	bool parseInstance(xmlNodePtr cur);
-
-	// bool parseDynamicList (xmlNodePtr cur, CInterfaceGroup * parentGroup);
-
 	bool parseVector (xmlNodePtr cur);
-
-	bool parseObserver (xmlNodePtr cur, CInterfaceGroup * parentGroup);
-
 	bool parseVariable (xmlNodePtr cur, CInterfaceGroup * parentGroup);
-
 	bool parseOptions (xmlNodePtr cur, CInterfaceGroup * parentGroup);
-
 	bool parseGroup (xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload);
-
 	bool parseGroupChildren(xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload);
-
 	bool parseControl (xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload);
-
 	bool parseLink (xmlNodePtr cur, CInterfaceGroup * parentGroup);
-
 	bool parseView (xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload);
-
 	bool parseTreeNode (xmlNodePtr cur, CGroupContainer *parentGroup);
-
 	bool parseTree (xmlNodePtr cur, CWidgetManager::SMasterGroup *parentGroup);
-
 	bool parseDefine(xmlNodePtr cur);
-
 	bool parseProcedure(xmlNodePtr cur, bool reload);
-
 	bool parseSheetSelection(xmlNodePtr cur);
-
-	bool parseCareerGenerator(xmlNodePtr cur);
-
 	bool parseAnim(xmlNodePtr cur, CInterfaceGroup * parentGroup);
-
 	bool parseScene3D (xmlNodePtr cur, CInterfaceGroup * parentGroup);
-
 	bool parseActionCategory (xmlNodePtr cur);
-
 	bool parseKey(xmlNodePtr cur);
-
 	bool parseMacro(xmlNodePtr cur);
-
 	bool parseCommand(xmlNodePtr cur);
-
 	bool parseBrickCareerGenerator(xmlNodePtr cur);
-
 	bool parseBrickSuffixGenerator(xmlNodePtr cur);
-
 	bool parseStyle(xmlNodePtr cur);
-
 	bool parseDDX (xmlNodePtr cur, CInterfaceGroup * parentGroup);
-
 	bool parseLUAScript (xmlNodePtr cur);
-
 	bool setupTree (xmlNodePtr cur, CWidgetManager::SMasterGroup *parentGroup);
 	bool setupTreeNode (xmlNodePtr cur, CGroupContainer *parentGroup);
 
@@ -352,9 +318,6 @@ protected:
 		bool		&brickTypeFilter,
 		BRICK_TYPE::EBrickType	&brickType
 		);
-
-	void	createJobBricks(BRICK_TYPE::EBrickType	brickType, xmlNodePtr &nextSibling, xmlNodePtr parentTreeNode,
-		const CBrickJob &job, const std::string &templateBrick, const std::string &baseWindowId, sint32 xstart);
 
 	bool	parseGeneratorRootContainer(xmlNodePtr cur, xmlNodePtr	&rootTreeNode);
 
