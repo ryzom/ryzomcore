@@ -34,7 +34,6 @@
 #include "nel/gui/lua_ihm.h"
 #include "nel/gui/lua_manager.h"
 
-#include "interface_options_ryzom.h"
 #include "interface_3d_scene.h"
 #include "lua_ihm_ryzom.h"
 #include "interface_ddx.h"
@@ -1207,28 +1206,18 @@ bool CInterfaceParser::parseOptions (xmlNodePtr cur, CInterfaceGroup * /* parent
 	H_AUTO(parseOptions )
 
 	// build the options from type
-	CInterfaceOptions *options;
+	CInterfaceOptions *options = NULL;
 	CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"type" ));
 	if (ptr)
 	{
-		if (nlstricmp(ptr.getDatas(), "layer") == 0)
-			options = new COptionsLayer;
-		else if (nlstricmp(ptr.getDatas(), "container_insertion_opt") == 0)
-			options = new COptionsContainerInsertion;
-		else if (nlstricmp(ptr.getDatas(), "container_move_opt") == 0)
-			options = new COptionsContainerMove;
-		else if (nlstricmp(ptr.getDatas(), "list") == 0)
-			options = new COptionsList;
-		else if (nlstricmp(ptr.getDatas(), "mission_icons") == 0)
-			options = new CMissionIconList;
-		else if (nlstricmp(ptr.getDatas(), "animation_set") == 0)
-			options = new COptionsAnimationSet;
-		else
-			options = new CInterfaceOptions;
+		options = NLMISC_GET_FACTORY( CInterfaceOptions, std::string ).createObject( std::string( (const char*)ptr ), CInterfaceOptions::TCtorParam() );
+
+		if( options == NULL )
+			options = new CInterfaceOptions( CInterfaceOptions::TCtorParam() );
 	}
 	else
 	{
-		options = new CInterfaceOptions;
+		options = new CInterfaceOptions( CInterfaceOptions::TCtorParam() );
 	}
 
 	CWidgetManager *wm = CWidgetManager::getInstance();
@@ -1277,7 +1266,7 @@ bool CInterfaceParser::parseGroup (xmlNodePtr cur, CInterfaceGroup * parentGroup
 	CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"type" ));
 	if (ptr)
 	{
-		group = dynamic_cast<CInterfaceGroup*>(NLMISC_GET_FACTORY(CViewBase, std::string).createObject(string((const char*)ptr), CViewBase::TCtorParam()));
+		group = dynamic_cast<CInterfaceGroup*>( NLMISC_GET_FACTORY(CViewBase, std::string).createObject(string((const char*)ptr), CViewBase::TCtorParam()) );
 		if (group == NULL)
 		{
 			group = dynamic_cast<CInterfaceGroup*>(NLMISC_GET_FACTORY(CViewBase, std::string).createObject("interface_group", CViewBase::TCtorParam()));

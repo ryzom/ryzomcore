@@ -72,7 +72,12 @@ namespace NLGUI
 
 	public:
 
-		CInterfaceOptions();
+		// for factory construction
+		struct TCtorParam
+		{
+		};
+
+		CInterfaceOptions( const TCtorParam &/* param */ );
 		virtual ~CInterfaceOptions();
 
 		virtual bool parse (xmlNodePtr cur);
@@ -103,7 +108,7 @@ namespace NLGUI
 	{
 
 	public:
-		COptionsLayer();
+		COptionsLayer( const TCtorParam &/* param */ );
 		~COptionsLayer();
 		virtual bool parse (xmlNodePtr cur);
 
@@ -159,7 +164,7 @@ namespace NLGUI
 	class COptionsContainerInsertion : public CInterfaceOptions
 	{
 	public:
-		COptionsContainerInsertion();
+		COptionsContainerInsertion( const TCtorParam &/* param */ );
 		virtual bool parse (xmlNodePtr cur);
 
 		sint32 TxId_R_Arrow;
@@ -173,7 +178,7 @@ namespace NLGUI
 	class COptionsContainerMove : public CInterfaceOptions
 	{
 	public:
-		COptionsContainerMove();
+		COptionsContainerMove( const TCtorParam &/* param */ );
 		virtual bool parse (xmlNodePtr cur);
 
 		sint32 TrackW;
@@ -193,7 +198,7 @@ namespace NLGUI
 	class COptionsList : public CInterfaceOptions
 	{
 	public:
-		COptionsList();
+		COptionsList( const TCtorParam &/* param */ );
 		virtual bool parse (xmlNodePtr cur);
 
 		uint	getNumParams() const {return _NumParams;}
