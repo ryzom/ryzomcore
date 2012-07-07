@@ -36,7 +36,7 @@
 
 // InterfaceV3
 #include "interface_parser.h"
-#include "ctrl_sheet_selection.h"
+#include "nel/gui/ctrl_sheet_selection.h"
 #include "nel/gui/interface_options.h"
 #include "interface_config.h"
 #include "interface_pointer.h"

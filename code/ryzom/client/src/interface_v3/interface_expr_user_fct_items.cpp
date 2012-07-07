@@ -22,7 +22,7 @@
 #include "../sheet_manager.h"
 #include "nel/gui/interface_expr.h"
 #include "dbctrl_sheet.h"
-#include "ctrl_sheet_selection.h"
+#include "nel/gui/ctrl_sheet_selection.h"
 #include "dbgroup_list_sheet.h"
 #include "interface_manager.h"
 #include "sbrick_manager.h"

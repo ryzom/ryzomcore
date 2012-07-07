@@ -35,7 +35,7 @@
 #include "bot_chat_page_dynamic_mission.h"
 #include "bot_chat_page_ring_sessions.h"
 #include "dbctrl_sheet.h"
-#include "ctrl_sheet_selection.h"
+#include "nel/gui/ctrl_sheet_selection.h"
 #include "nel/gui/interface_expr.h"
 #include "nel/gui/group_menu.h"
 #include "nel/gui/group_container.h"

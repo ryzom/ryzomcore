@@ -642,13 +642,6 @@ bool CInterfaceParser::parseXMLDocument(xmlNodePtr root, bool reload)
 				// todo hulud interface syntax error
 				nlwarning ("could not parse sheet selection");
 		}
-		// Special Magic/Combat auto-generation
-		else if ( !strcmp((char*)root->name,"career_generator") )
-		{
-			if (!parseCareerGenerator(root))
-				// todo hulud interface syntax error
-				nlwarning ("could not parse 'career_generator'");
-		}
 		else if ( !strcmp((char*)root->name,"anim") )
 		{
 			if (!parseAnim(root,rootGroup))

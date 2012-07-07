@@ -21,7 +21,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/3d/u_texture.h"
-#include "ctrl_sheet_selection.h"
+#include "nel/gui/ctrl_sheet_selection.h"
 #include "nel/gui/interface_link.h"
 #include "nel/misc/smart_ptr.h"
 #include "game_share/brick_types.h"
