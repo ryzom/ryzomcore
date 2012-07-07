@@ -24,7 +24,6 @@
 #include "nel/gui/ctrl_sheet_selection.h"
 #include "nel/gui/interface_link.h"
 #include "nel/misc/smart_ptr.h"
-#include "game_share/brick_types.h"
 #include "nel/gui/lua_helper.h"
 #include "nel/gui/widget_manager.h"
 
@@ -93,8 +92,6 @@ public:
 	bool parseKey(xmlNodePtr cur);
 	bool parseMacro(xmlNodePtr cur);
 	bool parseCommand(xmlNodePtr cur);
-	bool parseBrickCareerGenerator(xmlNodePtr cur);
-	bool parseBrickSuffixGenerator(xmlNodePtr cur);
 	bool parseStyle(xmlNodePtr cur);
 	bool parseDDX (xmlNodePtr cur, CInterfaceGroup * parentGroup);
 	bool parseLUAScript (xmlNodePtr cur);
@@ -306,21 +303,6 @@ protected:
 	// Map of styles.
 	typedef	std::map<std::string, CStyle>			TStyleMap;
 	TStyleMap										_StyleMap;
-
-protected:
-
-	bool	parseCareerGeneratorParams(xmlNodePtr cur,
-		std::string	&templateCareer,
-		std::string	&templateJob,
-		std::string	&careerWindow,
-		std::string	&jobWindow,
-		xmlNodePtr	&rootTreeNode,
-		bool		&brickTypeFilter,
-		BRICK_TYPE::EBrickType	&brickType
-		);
-
-	bool	parseGeneratorRootContainer(xmlNodePtr cur, xmlNodePtr	&rootTreeNode);
-
 
 protected:
 	// LUA
