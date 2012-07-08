@@ -1,7 +1,5 @@
 <?php
 	class AchObjective extends Parentum {
-		use Node;
-
 		protected $perk;
 		protected $condition;
 		protected $value;
@@ -13,6 +11,8 @@
 
 		function AchObjective($data,$parent) {
 			global $DBc,$_USER;
+
+			parent::__construct();
 			
 			$this->setParent($parent);
 			$this->setID($data['ao_id']);
@@ -31,7 +31,8 @@
 				$this->progress = $res[0]['anz'];
 			}
 		}
-
+		
+		#@override: Parentum::makeChild()
 		protected function makeChild($a) {
 			return null;
 		}

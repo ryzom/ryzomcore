@@ -24,7 +24,7 @@
 		$open = $menu->getOpenCat();
 
 		if($open != 0) {
-			$cat = new AchCategory($open,$_REQUEST['cult'],$_REQUEST['civ']);
+			$cat = new AchCategory($open,'matis',$_REQUEST['cult'],$_REQUEST['civ']);
 		}
 		else {
 			$cat = new AchSummary($menu,8);
@@ -160,6 +160,7 @@
 		$iter = $menu->getIterator();
 		while($iter->hasNext()) {
 			$curr = $iter->getNext();
+			#$curr = $curr->data;
 		#$sz = $menu->getSize();
 		#for($i=0;$i<$sz;$i++) {
 		#	$curr = $menu->getChild($i);
@@ -195,7 +196,7 @@
 
 		$iter = $cat->getDone();
 		while($iter->hasNext()) {
-			$curr = $cat->getChildByIdx($iter->getNext());
+			$curr = $iter->getNext();
 		#$sz = sizeof($tmp);
 		#for($i=0;$i<$sz;$i++) {
 			#echo "A";
@@ -207,7 +208,7 @@
 
 		$iter = $cat->getOpen();
 		while($iter->hasNext()) {
-			$curr = $cat->getChildByIdx($iter->getNext());
+			$curr = $iter->getNext();
 		#$sz = sizeof($tmp);
 		#for($i=0;$i<$sz;$i++) {
 			#echo "B";
@@ -295,7 +296,7 @@
 		$html = "";
 
 		$perk_list = $ach->getOpen();
-		$perk = $ach->getChildByIdx($perk_list->getNext());
+		$perk = $perk_list->getNext();
 
 		#$perk = $ach->getChild($perk_list[0]);
 
@@ -319,7 +320,7 @@
 
 		$perk_list = $ach->getDone();
 		while($perk_list->hasNext()) {
-			$perk = $ach->getChildByIdx($perk_list->getNext());
+			$perk = $perk_list->getNext();
 		#foreach($perk_list as $elem) {
 			#$perk = $ach->getChild($elem);
 			if($perk->inDev()) {

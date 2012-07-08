@@ -1,6 +1,5 @@
 <?php
-	class CSRAtom implements CSR {
-		use Node;
+	class CSRAtom extends Node implements CSR {
 
 		function CSRAtom($data,$parent) {
 			$this->id = $data['atom_id'];

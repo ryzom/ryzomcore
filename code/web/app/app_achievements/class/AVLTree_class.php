@@ -193,7 +193,7 @@
 				return $r;
 			}
 			
-			$p = $r->getLeft();
+			$p = $r;
 			while($p->getLeft() != null) {
 				$p = $p->getLeft();
 			}

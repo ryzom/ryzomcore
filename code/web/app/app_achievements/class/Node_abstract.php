@@ -1,29 +1,24 @@
 <?php
-	trait Node {
+	abstract class Node {
 		/*---------------------------
-			This trait provides basic functionality common to nodes.
+			This class provides basic functionality common to nodes.
 
-			Every node has an id, and InDeX and a parent.
+			Every node has an id and a parent.
 		---------------------------*/
 
-		protected $idx;
 		protected $id;
 		protected $parent;
+
+		function Node() {
+
+		}
 
 		final function getID() {
 			return $this->id;
 		}
 
-		final function getIdx() {
-			return $this->idx;
-		}
-
 		final function getParent() {
 			return $this->parent;
-		}
-
-		final function setIdx($i) {
-			$this->idx = $i;
 		}
 
 		final function setID($id) {

@@ -3,7 +3,6 @@
 		use AdmDispatcher;
 		
 		function AdmMenu($open) {
-			$this->init();
 			parent::__construct($open);
 
 			#$this->drawTree();
@@ -65,7 +64,7 @@
 
 		function getNode($id) { // try to find the MenuNode that has the given ID. Return null on failure.
 			#echo "<br>getNode(".$id.")";
-			$res = $this->getChildByID($id);
+			$res = $this->getChildDataByID($id);
 			if($res != null) {
 				return $res;
 			}

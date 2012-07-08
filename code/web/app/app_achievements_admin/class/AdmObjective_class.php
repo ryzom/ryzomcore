@@ -3,7 +3,6 @@
 		use AdmDispatcher;
 		
 		function AdmObjective($data,$parent) {
-			$this->init();
 			parent::__construct($data,$parent);
 
 			global $DBc;
@@ -11,7 +10,7 @@
 			$res = $DBc->sqlQuery("SELECT atom_id FROM ach_atom WHERE atom_objective='".$this->getID()."'");
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
-				$this->nodes[] = $this->makeChild($res[$i]);
+				$this->addChild($this->makeChild($res[$i]));
 			}
 		}
 

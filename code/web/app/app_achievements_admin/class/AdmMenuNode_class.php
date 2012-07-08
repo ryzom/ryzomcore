@@ -3,7 +3,6 @@
 		private $ach_count;
 	
 		function AdmMenuNode($data,$parent) {
-			$this->init();
 			parent::__construct($data,$parent);
 
 			global $DBc;
@@ -33,7 +32,7 @@
 		}
 
 		function getNode($id) { // try to find the child node that has the given ID. Return null on failure.
-			$res = $this->getChildByID($id);
+			$res = $this->getChildDataByID($id);
 			if($res != null) {
 				return $res;
 			}
@@ -65,15 +64,6 @@
 			}
 		}
 
-		/*function unsetChild($id) { // remove child with given ID from nodes list; unset should destruct.
-			foreach($this->nodes as $key=>$elem) {
-				if($elem->getID() == $id) {
-					unset($this->nodes[$key]);
-					return null;
-				}
-			}
-		}*/
-
 		function insertChild(&$n) { // insert a new child
 			// insert command to create database entry
 			$n->insert();
@@ -103,21 +93,6 @@
 			#MISSING: insert lang entry
 			$DBc->sqlQuery("INSERT INTO ach_category_lang (acl_category,acl_lang,acl_name) VALUES ('".$this->getID()."','".$_USER->getLang()."','".mysql_real_escape_string($this->getName())."')");
 			
-		}
-
-		function setInDev($tf) {
-			if($tf == true) {
-				$this->setDev(1);
-			}
-			else {
-				$this->setDev(0);
-			}
-
-			$this->update();
-		}
-
-		private function setDev($d) {
-			$this->dev = $d;
 		}
 
 		private function setOrder($o) {

@@ -3,7 +3,6 @@
 		use AdmDispatcher;
 		
 		function AdmAchievement($data,$parent) {
-			$this->init();
 			parent::__construct($data,$parent);
 		}
 

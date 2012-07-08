@@ -5,7 +5,6 @@
 		#private $nodes;
 		
 		function CSRObjective($data,$parent) {
-			$this->init();
 			parent::__construct($data,$parent);
 
 			global $DBc;

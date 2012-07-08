@@ -1,6 +1,6 @@
 <?php
 	class AchPerk extends Parentum {
-		use Node,InDev;
+		use InDev;
 
 		protected $achievement;
 		protected $value;
@@ -11,6 +11,8 @@
 
 		function AchPerk($data,$parent) {
 			global $DBc,$_USER;
+
+			parent::__construct();
 			
 			$this->setParent($parent);
 			$this->setID($data['ap_id']);
@@ -28,7 +30,8 @@
 				$this->addChild($this->makeChild($res[$i]));
 			}
 		}
-
+		
+		#@override Parentum::makeChild()
 		protected function makeChild($a) {
 			return new AchObjective($a,$this);
 		}

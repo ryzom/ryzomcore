@@ -13,7 +13,7 @@
 				//get child with the next level id and dispatch
 				$tmp = explode(";",$path);
 
-				$c = $this->getChildByID($tmp[1]);
+				$c = $this->getChildDataByID($tmp[1]);
 				#echo "...".$tmp[1];
 				if($c != null) { // check if it's really own child
 					unset($tmp[0]);
@@ -37,7 +37,7 @@
 
 				if($tmp[0] == $this->getID()) { // it's my id!
 
-					$c = $this->getChildByID($tmp[1]);
+					$c = $this->getChildDataByID($tmp[1]);
 					if($c != null) { // check if it's really own child
 						unset($tmp[0]);
 						$c->denyNode(implode(";",$tmp),$player);

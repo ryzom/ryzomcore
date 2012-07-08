@@ -2,9 +2,8 @@
 	class CSRCategory extends AchCategory implements CSR {
 		use CSRDispatcher;
 		
-		function CSRCategory($id,$cult = null,$civ = null) {
-			$this->init();
-			parent::__construct($id,$cult,$civ);
+		function CSRCategory($id,$race,$cult = null,$civ = null) {
+			parent::__construct($id,$race,$cult,$civ);
 		}
 
 		protected function makeChild($d) {
@@ -16,7 +15,7 @@
 		}
 
 		function deny($id) {
-			return false; // category can't grant!
+			return false; // category can't deny!
 		}
 
 		/*function setAchOpen($idx,$state) {

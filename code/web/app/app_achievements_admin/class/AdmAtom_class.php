@@ -1,7 +1,5 @@
 <?php
-	class AdmAtom implements ADM {
-		use Node;
-
+	class AdmAtom extends Node implements ADM {
 		protected $objective;
 		protected $mandatory;
 		protected $ruleset;

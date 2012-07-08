@@ -15,7 +15,7 @@
 
 		$res = $DBc->sqlQuery("SELECT sum(ap_value) as anz FROM ach_perk,ach_player_perk WHERE ap_id=app_perk AND app_player='".$_USER->getID()."'");
 
-		$html = "<div style='display:block;border-bottom:1px solid #000000;'><span style='font-size:32px;'>".$_USER->getName()."&nbsp;<img src='".$_CONF['image_url']."pic/yubo_done.png'>&nbsp;".$res[0]['anz']."</span></div>";
+		$html = "<div style='display:block;border-bottom:1px solid #000000;'><span style='font-size:32px;'>".$_USER->getName()."&nbsp;<img src='".$_CONF['image_url']."pic/yubo_done.png'>&nbsp;".max(0,$res[0]['anz'])."</span></div>";
 
 		return $html;
 	}
@@ -132,9 +132,9 @@
 		}
 
 		$iter = $cat->getDone();
-		echo "<br>done: ".var_export($iter,true)."<br>";
+
 		while($iter->hasNext()) {
-			$curr = $cat->getChildByIdx($iter->getNext());
+			$curr = $iter->getNext();
 			
 		#$sz = sizeof($tmp);
 		#for($i=0;$i<$sz;$i++) {
@@ -146,11 +146,10 @@
 		}
 
 		$iter = $cat->getOpen();
-		echo "<br>open: ".var_export($iter,true)."<br>";
+
 		while($iter->hasNext()) {
-			$tmp = $iter->getNext();
-			$curr = $cat->getChildByIdx($tmp);
-			echo "<b>".$tmp."-".$curr->getIdx()."</b><br>";
+			$curr = $iter->getNext();
+
 		#$sz = sizeof($tmp);
 		#for($i=0;$i<$sz;$i++) {
 			#echo "B";
@@ -238,10 +237,8 @@
 		$html = "";
 
 		$perk_list = $ach->getOpen();
-		$perk = $ach->getChildByIdx($perk_list->getNext());
+		$perk = $perk_list->getNext();
 		
-		echo "<b>".$ach->getIdx()."</b>";
-		echo "<br>".var_export($perk_list,true)."<br>";
 
 		#$perk = $ach->getChild($perk_list[0]);
 
@@ -274,7 +271,7 @@
 
 		$perk_list = $ach->getDone();
 		while($perk_list->hasNext()) {
-			$perk = $ach->getChildByIdx($perk_list->getNext());
+			$perk = $perk_list->getNext();
 		#foreach($perk_list as $elem) {
 			#$perk = $ach->getChild($elem);
 			if($perk->inDev()) {

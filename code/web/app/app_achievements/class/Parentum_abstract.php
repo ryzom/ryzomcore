@@ -1,5 +1,5 @@
 <?php
-	abstract class Parentum {
+	abstract class Parentum extends Node {
 		/*---------------------------
 			This class allows external access to the child-node list.
 			Use the NodeIterator to iterate through the list since
@@ -9,80 +9,41 @@
 			functions removeChild() and findChild(). init() must be called
 			before adding any nodes!
 		---------------------------*/
-		protected $nodes = array();
-		protected $avl = null;
+		protected $nodes;
 
-		protected function init() {
-			#echo "init()";
-			$this->nodes = array();
-			$this->avl = new AVLTree();
+		function Parentum() {
+			parent::__construct();
+			$this->nodes = new DLL(); // Doubly Linked List
 		}
 
 		abstract protected function makeChild($args); // overwriteable child generator; allows to define child type (eg.: admin classes that inherit from base class)
 
-		final function getSize() {
-			return sizeof($this->nodes);
+		function isEmpty() {
+			return $this->nodes->isEmpty();
 		}
 
-		final function isEmpty() {
-			return (sizeof($this->nodes) == 0);
-		}
-
-		final function getIterator() {
-			return new NodeIterator($this->nodes);
-		}
-
-		final function addChild($n) {
-			$tmp = sizeof($this->nodes);
-			$n->setIdx($tmp);
-			$this->nodes[] = $n;
-			if($this->avl != null) {
-				$this->avl->insert($n);
-			}
-			return $tmp;
+		function addChild($data) {
+			$this->nodes->addNode($data);
 		}
 
 		function removeChild($id) {
-			if($this->isEmpty()) {
-				return null;
+			$this->nodes->removeNode($id);
+		}
+
+		function getChildByID($id) {
+			return $this->nodes->findNode($id);
+		}
+
+		function getChildDataByID($id) {
+			$tmp = $this->getChildByID($id);
+			if($tmp != null) {
+				return $tmp->data;
 			}
-
-			if($this->avl == null) {
-				return false;
-			}
-			$n = $this->avl->remove($id);
-
-			#echo var_export($n,true);
-			if($n != null) {
-				if($n->getIdx() != null) {
-					unset($this->nodes[$n->getIdx()]);
-				}
-
-				return $n;
-			}
-
 			return null;
 		}
 
-		final function getChildByID($id) {
-			if($this->isEmpty()) {
-				return null;
-			}
-
-			if($this->avl == null) {
-				return false;
-			}
-
-			#$this->avl->inorder();
-
-			return $this->avl->find($id);
-		}
-
-		final function getChildByIdx($idx) {
-			if($this->isEmpty()) {
-				return null;
-			}
-			return $this->nodes[$idx];
+		function getIterator() {
+			return $this->nodes->getIterator();
 		}
 	}
 ?>

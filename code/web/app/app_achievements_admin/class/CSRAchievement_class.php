@@ -3,7 +3,6 @@
 		use CSRDispatcher;
 		
 		function CSRAchievement($data,$parent) {
-			$this->init();
 			parent::__construct($data,$parent);
 		}
 
@@ -16,10 +15,10 @@
 			while($iter->hasNext()) {
 				$curr = $iter->getNext();
 				$curr->grant($pid);
-				$this->setChildDone($curr->getIdx());
+				$this->setChildDone($curr->getID());
 			}
 
-			$this->parent->setChildDone($this->idx);
+			$this->parent->setChildDone($this->id);
 		}
 
 		function deny($pid) {
@@ -27,34 +26,34 @@
 			while($iter->hasNext()) {
 				$curr = $iter->getNext();
 				$curr->deny($pid);
-				$this->setChildOpen($curr->getIdx());
+				$this->setChildOpen($curr->getID());
 			}
 
-			$this->parent->setChildOpen($this->idx);
+			$this->parent->setChildOpen($this->id);
 		}
 
-		function setPerkDone($idx) {
+		function setPerkDone($id) {
 			echo "perk<br>";
-			$this->setChildDone($idx);
+			$this->setChildDone($id);
 
 			echo "ach<br>";
 
-			$this->parent->addChildDone($this->idx);
+			$this->parent->addChildDone($this->id);
 			
 			if(!$this->hasOpen()) {
-				$this->parent->removeChildOpen($this->idx);
+				$this->parent->removeChildOpen($this->id);
 			}
 		}
 
-		function setPerkOpen($idx) {
+		function setPerkOpen($id) {
 			echo "perk<br>";
-			$this->setChildOpen($idx);
+			$this->setChildOpen($id);
 			echo "ach<br>";
 
-			$this->parent->addChildOpen($this->idx);
+			$this->parent->addChildOpen($this->id);
 			
 			if(!$this->hasDone()) {
-				$this->parent->removeChildDone($this->idx);
+				$this->parent->removeChildDone($this->id);
 			}
 		}
 	}

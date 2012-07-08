@@ -174,7 +174,7 @@
 
 		$iter = $cat->getOpen();
 		while($iter->hasNext()) {
-			$curr = $cat->getChildByIdx($iter->getNext());
+			$curr = $iter->getNext();
 		#$sz = sizeof($tmp);
 		#for($i=0;$i<$sz;$i++) {
 			#echo "B";
@@ -333,7 +333,7 @@
 														<option value='null' selected='selected'>[set as main perk]</option>";
 														$iter = $ach->getOpen();
 														while($iter->hasNext()) {
-															$curr = $ach->getChildByIdx($iter->getNext());
+															$curr = $iter->getNext();
 															$html .= "<option value='".$curr->getID()."'>".$curr->getName()."</option>";
 														}
 
@@ -416,7 +416,7 @@
 		$perk_list = $ach->getOpen();
 		while($perk_list->hasNext()) {
 
-			$perk = $ach->getChildByIdx($perk_list->getNext());
+			$perk = $perk_list->getNext();
 
 			#$perk = $ach->getChild($perk_list[0]);
 
@@ -466,7 +466,7 @@
 												$par = $perk->getParent();
 												$iter = $par->getOpen();
 												while($iter->hasNext()) {
-													$curr = $par->getChildByIdx($iter->getNext());
+													$curr = $iter->getNext();
 													$html .= "<option value='".$curr->getID()."'>".$curr->getName()."</option>";
 												}
 
@@ -555,7 +555,7 @@
 
 		$perk_list = $ach->getDone();
 		while($perk_list->hasNext()) {
-			$perk = $ach->getChildByIdx($perk_list->getNext());
+			$perk = $perk_list->getNext();
 		#foreach($perk_list as $elem) {
 			#$perk = $ach->getChild($elem);
 			if($perk->inDev()) {
@@ -588,7 +588,7 @@
 					#if(($i%2) == 1) {
 					#	$html .= "</tr><tr>";
 					#}
-					$html .= "<td><center>".ach_render_obj_value($elem)."</center></td>";
+					$html .= "<td>".ach_render_obj_value($elem)."</td>";
 					#$i++;
 					break;
 				case "simple":
@@ -601,7 +601,7 @@
 					#if(($i%2) == 1) {
 					#	$html .= "</tr><tr>";
 					#}
-					$html .= "<td><center>".ach_render_obj_hidden($elem)."</center></td>";
+					$html .= "<td>".ach_render_obj_hidden($elem)."</td>";
 					#$i++;
 					break;
 			}

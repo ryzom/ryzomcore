@@ -2,9 +2,8 @@
 	class AdmCategory extends AchCategory {
 		use AdmDispatcher;
 		
-		function AdmCategory($id,$cult = null,$civ = null) {
-			$this->init();
-			parent::__construct($id,$cult,$civ);
+		function AdmCategory($id,$race,$cult = null,$civ = null) {
+			parent::__construct($id,$race,$cult,$civ);
 		}
 
 		protected function makeChild($d) {

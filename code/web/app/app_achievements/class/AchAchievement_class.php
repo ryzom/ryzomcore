@@ -1,6 +1,6 @@
 <?php
 	class AchAchievement extends AchList {
-		use Node,InDev;
+		use InDev;
 
 		protected $parent_id;
 		protected $category;
@@ -13,6 +13,8 @@
 
 		function AchAchievement($data,$parent) {
 			global $DBc,$_USER;
+
+			parent::__construct();
 			
 			$this->setParent($parent);
 			$this->setID($data['aa_id']);
@@ -27,7 +29,7 @@
 			$this->dev = $data['aa_dev'];
 
 			$res = $DBc->sqlQuery("SELECT * FROM ach_perk LEFT JOIN (ach_perk_lang) ON (apl_lang='".$_USER->getLang()."' AND apl_perk=ap_id) LEFT JOIN (ach_player_perk) ON (app_perk=ap_id AND app_player='".$_USER->getID()."') WHERE ap_achievement='".$this->id."' AND ap_parent IS NULL");
-			#MISSING: or parent is done
+			
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
 				$tmp = $this->makeChild($res[$i]);
@@ -43,6 +45,15 @@
 
 		protected function makeChild($a) {
 			return new AchPerk($a,$this);
+		}
+
+		function unlockedByParent() {
+			if($this->parent_id != null) {
+				$tmp = $this->parent->getChildByID($this->parent_id);
+				return ($tmp->hasOpen() == false);
+			}
+
+			return true;
 		}
 
 		function getParentID() {
@@ -73,7 +84,7 @@
 			$val = 0;
 			$iter = $this->getDone();
 			while($iter->hasNext()) {
-				$curr = $this->getChildByIdx($iter->getNext());
+				$curr = $iter->getNext();
 				$val += $curr->getValue();
 			}
 			return $val;
@@ -82,7 +93,7 @@
 		function getValueOpen() {
 			$iter = $this->getOpen();
 			if($iter->hasNext()) {
-				$curr = $this->getChildByIdx($iter->getNext());
+				$curr = $iter->getNext();
 				return $curr->getValue();
 			}
 			return 0;

@@ -36,12 +36,13 @@ require_once("class/mySQL_class.php");
 #require_once("include/ach_render_csr.php");
 require_once($_CONF['app_achievements_path']."include/ach_render_common.php");
 
+require_once($_CONF['app_achievements_path']."class/DLL_class.php");
+require_once($_CONF['app_achievements_path']."class/Node_abstract.php");
 require_once($_CONF['app_achievements_path']."class/AVLTree_class.php");
 require_once($_CONF['app_achievements_path']."class/Parentum_abstract.php");
 require_once($_CONF['app_achievements_path']."class/AchList_abstract.php");
 require_once($_CONF['app_achievements_path']."class/Tieable_inter.php");
 require_once($_CONF['app_achievements_path']."class/NodeIterator_class.php");
-require_once($_CONF['app_achievements_path']."class/Node_trait.php");
 require_once($_CONF['app_achievements_path']."class/InDev_trait.php");
 
 require_once($_CONF['app_achievements_path']."class/AchMenu_class.php");
@@ -208,10 +209,10 @@ $c .= "</div></td>
 			$open = $menu->getOpenCat();
 
 			if($open != 0) {
-				$cat = new AdmCategory($open,$_REQUEST['cult'],$_REQUEST['civ']);
+				$cat = new AdmCategory($open,'',$_REQUEST['cult'],$_REQUEST['civ']);
 
 				if($_REQUEST['act'] == "ach_move") {
-					$ach = $cat->getChildByID($_REQUEST['id']);
+					$ach = $cat->getChildDataByID($_REQUEST['id']);
 					if($ach != null) {
 						$ach->setCategory($_REQUEST['new_cat']);
 						$ach->update();
@@ -240,7 +241,7 @@ $c .= "</div></td>
 				}
 
 				if($_REQUEST['act'] == "ach_update") {
-					$ach = $cat->getChildByID($_REQUEST['id']);
+					$ach = $cat->getChildDataByID($_REQUEST['id']);
 					
 					if($ach != null) {
 						$ach->setName($_REQUEST['aal_name']);
@@ -254,7 +255,7 @@ $c .= "</div></td>
 				}
 
 				if($_REQUEST['act'] == "perk_insert") {
-					$ach = $cat->getChildByID($_REQUEST['id']);
+					$ach = $cat->getChildDataByID($_REQUEST['id']);
 					if($ach != null) {
 						$perk = new AdmPerk(array(),$ach);
 						$perk->setAchievement($ach->getID());

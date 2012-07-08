@@ -6,6 +6,8 @@
 		function AchSummary(&$menu,$size = 10) {
 			global $DBc,$_USER;
 
+			parent::__construct();
+
 			$this->menu = $menu;
 
 			//read all recent perks of user
@@ -20,7 +22,8 @@
 
 			#echo var_export($this->child_done,true);
 		}
-
+		
+		#@override: Parentum::makeChild()
 		protected function makeChild($a) {
 			return new AchAchievement($a,$this);
 		}

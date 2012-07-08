@@ -1,18 +1,27 @@
 <?php
 	class AchCategory extends AchList implements Tieable {
-		protected $id;
+		#protected $id;
 		protected $ties_cult;
 		protected $ties_civ;
+		protected $ties_race;
+		protected $ties_race_dev;
 		protected $ties_cult_dev;
 		protected $ties_civ_dev;
 		protected $cult;
 		protected $civ;
 
-		function AchCategory($id,$cult = null,$civ = null) {
+		function AchCategory($id,$race = null,$cult = null,$civ = null) {
 			global $DBc,$_USER;
+
+			parent::__construct();
 
 			$civ = mysql_real_escape_string($civ);
 			$cult = mysql_real_escape_string($cult);
+			$race = mysql_real_escape_string($race);
+
+			if($race == null) {
+				$race = $_USER->getRace();
+			}
 
 			if($cult == null) {
 				$cult = $_USER->getCult();
@@ -27,26 +36,32 @@
 
 			$this->id = mysql_real_escape_string($id);
 
-			$res = $DBc->sqlQuery("SELECT * FROM ach_achievement LEFT JOIN (ach_achievement_lang) ON (aal_lang='".$_USER->getLang()."' AND aal_achievement=aa_id) WHERE aa_category='".$this->id."' AND (aa_parent IS NULL OR NOT EXISTS (SELECT * FROM ach_perk WHERE ap_achievement=aa_id AND NOT EXISTS (SELECT * FROM ach_player_perk WHERE app_player='".$_USER->getID()."' AND app_perk=ap_id))) AND (aa_tie_race IS NULL OR aa_tie_race LIKE '".$_USER->getRace()."') AND (aa_tie_cult IS NULL OR aa_tie_cult LIKE '".$cult."') AND (aa_tie_civ IS NULL OR aa_tie_civ LIKE '".$civ."') ORDER by aal_name ASC");
-			#parent!!!!
+			$res = $DBc->sqlQuery("SELECT * FROM ach_achievement LEFT JOIN (ach_achievement_lang) ON (aal_lang='".$_USER->getLang()."' AND aal_achievement=aa_id) WHERE aa_category='".$this->id."' AND (aa_parent IS NULL OR NOT EXISTS (SELECT * FROM ach_perk WHERE ap_achievement=aa_id AND NOT EXISTS (SELECT * FROM ach_player_perk WHERE app_player='".$_USER->getID()."' AND app_perk=ap_id))) AND (aa_tie_race IS NULL OR aa_tie_race LIKE '".$race."') AND (aa_tie_cult IS NULL OR aa_tie_cult LIKE '".$cult."') AND (aa_tie_civ IS NULL OR aa_tie_civ LIKE '".$civ."') ORDER by aal_name ASC");
 
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
 				$tmp = $this->makeChild($res[$i]);
 				
 				if($tmp->hasOpen()) {
-					$this->addOpen($tmp);
+					$this->addOpen($tmp); #AchList::addOpen()
 				}
 				if($tmp->hasDone()) {
-					$this->addDone($tmp);
+					$this->addDone($tmp); #AchList::addDone()
 				}
 			}
-
+			
+			//load counts for tie determination
 			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_cult IS NOT NULL AND aa_category='".$this->id."' AND aa_dev='0'");
 			$this->ties_cult = $res[0]['anz'];
 
 			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_civ IS NOT NULL AND aa_category='".$this->id."' AND aa_dev='0'");
 			$this->ties_civ = $res[0]['anz'];
+
+			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_race IS NOT NULL AND aa_category='".$this->id."' AND aa_dev='0'");
+			$this->ties_race = $res[0]['anz'];
+
+			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_race IS NOT NULL AND aa_category='".$this->id."'");
+			$this->ties_race_dev = $res[0]['anz'];
 
 			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_cult IS NOT NULL AND aa_category='".$this->id."'");
 			$this->ties_cult_dev = $res[0]['anz'];
@@ -54,14 +69,15 @@
 			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_civ IS NOT NULL AND aa_category='".$this->id."'");
 			$this->ties_civ_dev = $res[0]['anz'];
 		}
-
+		
+		#@override Parentum::makeChild()
 		protected function makeChild($a) {
 			return new AchAchievement($a,$this);
 		}
 
-		function getID() {
-			return $this->id;
-		}
+		#function getID() {
+		#	return $this->id;
+		#}
 
 		function isTiedCult() {
 			return ($this->ties_cult > 0);

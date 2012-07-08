@@ -44,7 +44,7 @@
 		</div>";
 
 		if($_REQUEST['ac_id'] > 0 && $_REQUEST['confirm'] == "delete") {
-			$curr = $menu->getNode($_REQUEST['ac_id']);
+			$curr = $menu->getChildDataByID($_REQUEST['ac_id']);
 			$html .= "<div style='display:block;'>
 			<fieldset>
 				<legend>Are you sure you want to delete this category?</legend>";

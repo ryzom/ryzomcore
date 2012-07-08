@@ -23,7 +23,7 @@
 		}
 
 		function removeNode($id) {
-			$res = $this->getChildByID($id);
+			$res = $this->getChildDataByID($id);
 			if($res != null) {
 				$res->delete_me();
 				$this->removeChild($id);
@@ -31,7 +31,7 @@
 		}
 
 		function updateNode($id) { // PROBABLY USELESS!
-			$res = $this->getChildByID($id);
+			$res = $this->getChildDataByID($id);
 			if($res != null) {
 				$res->update();
 			}
@@ -53,7 +53,7 @@
 			$tmp = explode(";",$pid);
 			if($tmp[0] == $this->getID()) {
 				if(sizeof($tmp) > 1) {
-					$c = $this->getChildByID($tmp[1]);
+					$c = $this->getChildDataByID($tmp[1]);
 					if($c != null) {
 						unset($tmp[0]);
 						return $c->getElementByPath(implode(";",$tmp));

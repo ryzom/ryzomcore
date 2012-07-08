@@ -6,7 +6,6 @@
 		protected $condition_value;
 
 		function AdmPerk($data,$parent) {
-			$this->init();
 			parent::__construct($data,$parent);
 
 			$this->condition = $data["ap_condition"];

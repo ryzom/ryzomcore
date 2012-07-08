@@ -1,16 +1,17 @@
 <?php
 	class AchMenuNode extends Parentum {
-		use Node;
+		use InDev;
 
 		protected $parent_id;
 		protected $name;
 		protected $open;
 		protected $image;
 		protected $order;
-		protected $dev;
 
 		function AchMenuNode($data,$parent) {
 			global $DBc,$_USER;
+
+			parent::__construct();
 
 			$this->setParent($parent);
 			$this->setID($data['ac_id']);
@@ -26,10 +27,11 @@
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
 				$res[$i]['open'] = $data['open'];
-				$this->nodes[] = $this->makeChild($res[$i]);
+				$this->addChild($this->makeChild($res[$i]));
 			}
 		}
-
+		
+		#@override Parentum::makeChild()
 		protected function makeChild($a) {
 			return new AchMenuNode($a,$this);
 		}
@@ -47,8 +49,10 @@
 				return $this->id;
 			}
 			
-			foreach($this->nodes as $elem) {
-				$res = $elem->hasOpenCat();
+			$iter = $this->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				$res = $curr->hasOpenCat();
 				if($res != 0) {
 					return $res;
 				}
@@ -66,14 +70,6 @@
 
 		function getOrder() {
 			return $this->order;
-		}
-
-		function inDev() { // check if dev flag is set
-			return ($this->dev == 1);
-		}
-
-		function getDev() {
-			return $this->dev;
 		}
 	}
 ?>
