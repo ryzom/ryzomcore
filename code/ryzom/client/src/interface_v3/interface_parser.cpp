@@ -34,9 +34,6 @@
 #include "nel/gui/lua_ihm.h"
 #include "nel/gui/lua_manager.h"
 
-#include "lua_ihm_ryzom.h"
-
-
 #ifdef LUA_NEVRAX_VERSION
 	#include "lua_ide_dll_nevrax/include/lua_ide_dll/ide_interface.h" // external debugger
 #endif
@@ -2856,7 +2853,6 @@ void	CInterfaceParser::initLUA()
 
 	// register LUA methods
 	CLuaIHM::registerAll(*_LuaState);
-	CLuaIHMRyzom::RegisterRyzomFunctions( *_LuaState );
 }
 
 // ***************************************************************************

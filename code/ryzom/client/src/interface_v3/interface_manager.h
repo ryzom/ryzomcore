@@ -146,6 +146,8 @@ public:
 	void setInGame( bool i );
 	bool isInGame() const { return _InGame; }
 
+	void initLUA();
+
 	/// initialize the whole login interface
 	void initLogin();
 

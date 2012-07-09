@@ -344,8 +344,8 @@ protected:
 	// ----------------------------------------------------------------------------------
 	// LUA Interface State. NB: The LUA environnement is not shared between Login/OutGame/InGame
 	NLMISC::CSmartPtr<CLuaState> _LuaState;
-	void				initLUA();
-	void				uninitLUA();
+	virtual void initLUA();
+	void uninitLUA();
 	// List of script loaded (for reloadLua command)
 	std::set<std::string>	_LuaFileScripts;
 	// Load A .lua. false if parse error. string 'error' contains the eventual error desc (but warning still displayed)

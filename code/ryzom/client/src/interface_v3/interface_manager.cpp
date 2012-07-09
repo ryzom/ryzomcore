@@ -585,6 +585,19 @@ void CInterfaceManager::destroy ()
 	_Instance = NULL;
 }
 
+void CInterfaceManager::initLUA()
+{
+	if( _LuaState != NULL )
+		return;
+
+	CInterfaceParser::initLUA();
+
+	if( _LuaState == NULL )
+		return;
+
+	CLuaIHMRyzom::RegisterRyzomFunctions( *_LuaState );
+}
+
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::initLogin()
 {
