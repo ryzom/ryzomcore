@@ -55,6 +55,40 @@ class CInterfaceParser : public IParser
 {
 
 public:
+	
+	class IParserModule
+	{
+	public:
+		enum ParsingStage
+		{
+			None			= 0,
+			Unresolved		= 1,
+			Resolved		= 2,
+			GroupChildren	= 4
+		};
+
+		IParserModule(){
+			parser = NULL;
+			parsingStage = None;
+		}
+		virtual ~IParserModule(){}
+
+		bool canParseInStage( ParsingStage stage )
+		{
+			if( ( parsingStage & static_cast< uint >( stage ) ) != 0 )
+				return true;
+			else
+				return false;
+		}
+
+		virtual bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup ) = 0;
+		void setParser( CInterfaceParser *p ){ parser = p; }
+	
+	protected:
+		CInterfaceParser *parser;
+		uint parsingStage;
+	};
+
 	CInterfaceParser();
 	virtual ~CInterfaceParser();
 
@@ -87,16 +121,14 @@ public:
 	bool parseProcedure(xmlNodePtr cur, bool reload);
 	bool parseSheetSelection(xmlNodePtr cur);
 	bool parseAnim(xmlNodePtr cur, CInterfaceGroup * parentGroup);
-	bool parseScene3D (xmlNodePtr cur, CInterfaceGroup * parentGroup);
-	bool parseActionCategory (xmlNodePtr cur);
-	bool parseKey(xmlNodePtr cur);
-	bool parseMacro(xmlNodePtr cur);
-	bool parseCommand(xmlNodePtr cur);
 	bool parseStyle(xmlNodePtr cur);
-	bool parseDDX (xmlNodePtr cur, CInterfaceGroup * parentGroup);
 	bool parseLUAScript (xmlNodePtr cur);
 	bool setupTree (xmlNodePtr cur, CWidgetManager::SMasterGroup *parentGroup);
 	bool setupTreeNode (xmlNodePtr cur, CGroupContainer *parentGroup);
+	
+	void addModule( std::string name, IParserModule *module );
+	IParserModule* getModuleFor( std::string name ) const;
+	void removeAllModules();
 
 	// Called by each parse in parseXMLDocument
 	bool solveDefine(xmlNodePtr cur);
@@ -196,6 +228,8 @@ public:
 
 	// return false if procedure not found, or if bad action index. return false if has some param variable (@0...)
 	bool getProcedureAction( const std::string &procName, uint actionIndex, std::string &ah, std::string &params ) const;
+
+	void setCacheUIParsing( bool b ){ cacheUIParsing = b; }
 
 protected:
 
@@ -305,6 +339,7 @@ protected:
 	TStyleMap										_StyleMap;
 
 protected:
+	std::map< std::string, IParserModule* > moduleMap;
 	// LUA
 	// ----------------------------------------------------------------------------------
 	// LUA Interface State. NB: The LUA environnement is not shared between Login/OutGame/InGame
@@ -315,6 +350,7 @@ protected:
 	std::set<std::string>	_LuaFileScripts;
 	// Load A .lua. false if parse error. string 'error' contains the eventual error desc (but warning still displayed)
 	bool				loadLUA(const std::string &luaFile, std::string &error);
+	bool cacheUIParsing;
 };
 
 #endif // RZ_INTERFACE_PARSER_H

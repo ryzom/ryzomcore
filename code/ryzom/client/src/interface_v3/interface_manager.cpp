@@ -128,6 +128,8 @@ using namespace NLGUI;
 
 #include "../bg_downloader_access.h"
 
+#include "parser_modules.h"
+
 using namespace NLMISC;
 
 namespace NLGUI
@@ -397,6 +399,15 @@ namespace
 // ------------------------------------------------------------------------------------------------
 CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext *textcontext )
 {
+	addModule( "scene3d", new CIF3DSceneParser() );
+	addModule( "ddx", new CIFDDXParser() );
+	addModule( "action_category", new CActionCategoryParser() );
+	addModule( "command", new CCommandParser() );
+	addModule( "key", new CKeyParser() );
+	addModule( "macro", new CMacroParser() );
+
+	setCacheUIParsing( ClientCfg.CacheUIParsing );
+
 	CWidgetManager::parser = this;
 	this->driver = driver;
 	this->textcontext = textcontext;
