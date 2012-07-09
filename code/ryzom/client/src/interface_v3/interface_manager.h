@@ -35,7 +35,7 @@
 #include "nel/gui/view_renderer.h"
 
 // InterfaceV3
-#include "interface_parser.h"
+#include "nel/gui/interface_parser.h"
 #include "nel/gui/ctrl_sheet_selection.h"
 #include "nel/gui/interface_options.h"
 #include "interface_config.h"
@@ -80,7 +80,7 @@ namespace NLGUI
  * \author Nevrax France
  * \date 2002
  */
-class CInterfaceManager : public CInterfaceParser, public NLGUI::IInputEventListener
+class CInterfaceManager : public NLGUI::CInterfaceParser, public NLGUI::IInputEventListener
 {
 public:
 

@@ -18,7 +18,9 @@
 #ifndef PARSER_MODULES_H
 #define PARSER_MODULES_H
 
-#include "interface_parser.h"
+#include "nel/gui/interface_parser.h"
+
+using namespace NLGUI;
 
 class CIF3DSceneParser : public CInterfaceParser::IParserModule
 {

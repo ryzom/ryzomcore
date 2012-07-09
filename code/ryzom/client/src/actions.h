@@ -308,8 +308,6 @@ struct CTKeyHashMapTraits
  */
 class CActionsManager
 {
-	friend class CInterfaceParser;
-
 public:
 
 	/// Typedef to use the map easily.
