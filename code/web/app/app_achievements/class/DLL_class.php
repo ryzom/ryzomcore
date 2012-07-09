@@ -61,6 +61,10 @@
 						$tmp->setChild($n);
 					}
 				}
+				else {
+					$this->addNode($data);
+					return null;
+				}
 			}
 
 			if($this->first == null) {

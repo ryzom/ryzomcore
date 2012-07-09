@@ -71,7 +71,7 @@ require_once("class/CSRPerk_class.php");
 require_once("class/CSRObjective_class.php");
 require_once("class/CSRAtom_class.php");
 
-$DBc = ryDB::getInstance("app_achievements");
+$DBc = ryDB::getInstance("app_achievements_test");
 #$DBc = ryDB::getInstance("ahufler");
 
 function mkn($x) {
@@ -120,6 +120,7 @@ $c = "<script type='text/javascript'>
 			<ul>
 				<li><a href='?mode=menu'>menu settings</a></li>
 				<li><a href='?mode=ach'>achievement settings</a></li>
+				<li><a href='?mode=atom'>trigger settings</a></li>
 			</ul><p />";
 		}
 		if($_ADMIN->isCSR()) {
@@ -134,6 +135,51 @@ $c = "<script type='text/javascript'>
 		
 $c .= "</div></td>
 		<td valign='top'>";
+
+		if($_REQUEST['mode'] == "atom" && $_ADMIN->isAdmin()) {
+			$c .= "<h1>Tigger Settings</h1>";
+
+			$user = array();
+			$user['id'] = 0;
+			$user['lang'] = 'en';
+			$user['name'] = 'Talvela';
+			$user['race'] = "r_matis";
+			$user['civilization'] = "c_neutral";
+			$user['cult'] = "c_neutral";
+
+			$_USER = new RyzomUser($user);
+
+			//menu
+			require_once("include/adm_render_atom.php");
+			$menu = new AdmMenu($_REQUEST['cat']);
+
+			$c .= "<center><table>
+			<tr>
+				<td valign='top'><div style='width:230px;font-weight:bold;font-size:14px;'>";
+			
+
+			$c .= adm_render_menu($menu);
+				
+			$c .= "</div></td>
+					<td width='645px' valign='top'>";
+			
+			$open = $menu->getOpenCat();
+
+			if($open != 0) {
+				$cat = new AdmCategory($open,'%','%','%');
+
+				$c .= atom_render_category($cat);
+			}
+
+			#a:p:o:a
+
+			
+
+			$c .= "</td>
+				</tr>
+			</table></center>";
+
+		}
 
 		if($_REQUEST['mode'] == "menu" && $_ADMIN->isAdmin()) {
 			$c .= "<h1>Menu Settings</h1>";
@@ -209,7 +255,7 @@ $c .= "</div></td>
 			$open = $menu->getOpenCat();
 
 			if($open != 0) {
-				$cat = new AdmCategory($open,'',$_REQUEST['cult'],$_REQUEST['civ']);
+				$cat = new AdmCategory($open,$_REQUEST['race'],$_REQUEST['cult'],$_REQUEST['civ']);
 
 				if($_REQUEST['act'] == "ach_move") {
 					$ach = $cat->getChildDataByID($_REQUEST['id']);
@@ -236,6 +282,8 @@ $c .= "</div></td>
 					$perk->setName($_REQUEST['apl_name']);
 					$perk->setTemplate($_REQUEST['apl_name']);
 					$perk->setValue($_REQUEST['ap_value']);
+					$perk->setCondition($_REQUEST['ap_condition']);
+					$perk->setConditionValue($_REQUEST['ap_condition_value']);
 
 					$ach->insertNode($perk);
 				}
@@ -260,13 +308,16 @@ $c .= "</div></td>
 						$perk = new AdmPerk(array(),$ach);
 						$perk->setAchievement($ach->getID());
 						$perk->setName($_REQUEST['apl_name']);
-						$perk->setTemplate($_REQUEST['apl_name']);
+						$perk->setTemplate($_REQUEST['apl_template']);
 						$perk->setValue($_REQUEST['ap_value']);
 						#MISSING: parent
-						#$perk->setCondition($_REQUEST['ap_condition']);
-						#$perk->setConditionValue($_REQUEST['ap_condition_value']);
+						$perk->setParentID($_REQUEST['ap_parent']);
+						$perk->setCondition($_REQUEST['ap_condition']);
+						$perk->setConditionValue($_REQUEST['ap_condition_value']);
 
 						$ach->insertNode($perk);
+						$ach->orderPerks();
+						$perk->update();
 					}
 				}
 
@@ -277,9 +328,12 @@ $c .= "</div></td>
 						$perk->setName($_REQUEST['apl_name']);
 						$perk->setTemplate($_REQUEST['apl_template']);
 						$perk->setValue($_REQUEST['ap_value']);
-						#$perk->setParentID($_REQUEST['ap_parent']);
+						$perk->setParentID($_REQUEST['ap_parent']);
 						$perk->setCondition($_REQUEST['ap_condition']);
 						$perk->setConditionValue($_REQUEST['ap_condition_value']);
+
+						$ach = $perk->getParent();
+						$ach->orderPerks();
 
 						$perk->update();
 					}
@@ -295,6 +349,7 @@ $c .= "</div></td>
 						$obj->setValue($_REQUEST['ao_value']);
 						$obj->setDisplay($_REQUEST['ao_display']);
 						$obj->setMetalink($_REQUEST['ao_metalink']);
+						$obj->setPerk($perk->getID());
 
 						$perk->insertNode($obj);
 					}
@@ -366,7 +421,7 @@ $c .= "</div></td>
 				$open = $menu->getOpenCat();
 
 				if($open != 0) {
-					$cat = new CSRCategory($open,$_REQUEST['cult'],$_REQUEST['civ']);
+					$cat = new CSRCategory($open,null,$_REQUEST['cult'],$_REQUEST['civ']);
 
 					if($_REQUEST['grant'] != "") {
 						$cat->grantNode($_REQUEST['grant'],$_USER->getID());

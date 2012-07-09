@@ -59,11 +59,72 @@
 		}
 
 		private function parse() {
+			/*VALUE _money AS $money {
+				CACHE blach AS $test
 
-		}
+				if($money >= 10000 && $test == 0) {
+					GRANT
+					FINAL
+				}
+				else {
+					CACHE blach SET $money
+				}
+			}
 
-		function setInDev($tf) {
+			$res = $this->ruleset;
+			
+			#VALUE ([^ ]+) AS ([^ ]+) {#
+			$match = array();
+			preg_match_all("#VALUE ([^ ]+) AS ([^ ]+) {#",$this->ruleset,$match);
+			foreach($match[0] as $key=>$elem) {
+				$func = "_".md5(microtime());
 
+				$tmp = '$this->registerValue("'.$match[1][$key].'","'.$func.'");
+
+				function '.$func.'('.$match[2][$key].',$_P,$_CB) {
+					$_IDENT = "'.$match[1][$key].'";';
+
+				//replace
+				$res = str_replace($elem,$tmp,$res);
+			}
+
+			#ENTITY ([^ ]+) AS ([^ ]+) {#
+			$match = array();
+			preg_match_all("#ENTITY ([^ ]+) AS ([^ ]+) {#",$this->ruleset,$match);
+			foreach($match[0] as $key=>$elem) {
+				$func = "_".md5(microtime());
+
+				$tmp = '$this->registerEntity("'.$match[1][$key].'","'.$func.'");
+
+				function '.$func.'('.$match[2][$key].',$_P,$_CB) {
+					$_IDENT = "'.$match[1][$key].'";';
+
+				//replace
+				$res = str_replace($elem,$tmp,$res);
+			}
+
+			#EVENT ([^ ]+) AS ([^ ]+) {#
+			$match = array();
+			preg_match_all("#EVENT ([^ ]+) AS ([^ ]+) {#",$this->ruleset,$match);
+			foreach($match[0] as $key=>$elem) {
+				$func = "_".md5(microtime());
+
+				$tmp = '$this->registerEvent("'.$match[1][$key].'","'.$func.'");
+
+				function '.$func.'('.$match[2][$key].',$_P,$_CB) {
+					$_IDENT = "'.$match[1][$key].'";';
+
+				//replace
+				$res = str_replace($elem,$tmp,$res);
+			}
+
+			#CACHE ([^ ]+) AS ([^ ]+)#
+
+			#GRANT#
+
+			#FINAL#
+
+			#CACHE ([^ ]+) SET ([^ ]+)#*/
 		}
 	}
 ?>

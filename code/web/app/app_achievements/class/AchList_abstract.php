@@ -34,14 +34,14 @@
 			return ($this->child_done->getSize() != 0);
 		}
 
-		final function addOpen($data) {
-			$this->child_open->addNode($data);
-			$this->addChild($data); #Parentum::addChild()
+		final function addOpen($data,$b = null) {
+			$this->child_open->addNode($data,$b);
+			$this->addChild($data,$b); #Parentum::addChild()
 		}
 
-		final function addDone($data) {
-			$this->child_done->addNode($data);
-			$this->addChild($data); #Parentum::addChild()
+		final function addDone($data,$b = null) {
+			$this->child_done->addNode($data,$b);
+			$this->addChild($data,$b); #Parentum::addChild()
 		}
 
 		final function setChildDone($id) {

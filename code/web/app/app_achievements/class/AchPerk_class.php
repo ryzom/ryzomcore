@@ -1,6 +1,29 @@
 <?php
 	class AchPerk extends Parentum {
-		use InDev;
+		protected $dev;
+
+		function inDev() {
+			return ($this->dev == 1);
+		}
+
+		function getDev() {
+			return $this->dev;
+		}
+
+		function setInDev($tf) {
+			if($tf == true) {
+				$this->setDev(1);
+			}
+			else {
+				$this->setDev(0);
+			}
+
+			$this->update();
+		}
+
+		function setDev($d) {
+			$this->dev = $d;
+		}
 
 		protected $achievement;
 		protected $value;
@@ -93,13 +116,6 @@
 
 		function getParentID() {
 			return $this->parent_id;
-		}
-
-		function setParentID($p) {
-			if($this->parent_id != null) {
-				
-			}
-			$this->parent_id = $p;
 		}
 	}
 ?>

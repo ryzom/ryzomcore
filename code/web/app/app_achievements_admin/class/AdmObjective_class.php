@@ -35,7 +35,7 @@
 		function update() {
 			global $DBc;
 
-			$DBc->sqlQuery("UPDATE ach_objective SET ao_condition='".mysql_real_escape_string($this->getCondition())."',ao_value=".mre($this->getValue()).",ao_display='".mysql_real_escape_string($this->getDisplay())."',ao_metalink=".mkn($this->getMetalink())." WHERE ao_id='".$this->getID()."'");
+			$DBc->sqlQuery("UPDATE ach_objective SET ao_condition='".mysql_real_escape_string($this->getCondition())."',ao_value=".mkn($this->getValue()).",ao_display='".mysql_real_escape_string($this->getDisplay())."',ao_metalink=".mkn($this->getMetaImage())." WHERE ao_id='".$this->getID()."'");
 
 			$DBc->sqlQuery("INSERT INTO ach_objective_lang (aol_objective,aol_lang,aol_name) VALUES ('".$this->getID()."','en','".mysql_real_escape_string($this->getName())."') ON DUPLICATE KEY UPDATE aol_name='".mysql_real_escape_string($this->getName())."'");
 		}
@@ -43,15 +43,35 @@
 		function insert() {
 			global $DBc;
 
-			$DBc->sqlQuery("INSERT INTO ach_objective (ao_perk,ao_condition,ao_value,ao_display,ao_metalink) VALUES ('".$this->getPerk()."','".mysql_real_escape_string($this->getCondition())."',".mre($this->getValue()).",'".mysql_real_escape_string($this->getDisplay())."',".mkn($this->getMetalink()).")");
+			$DBc->sqlQuery("INSERT INTO ach_objective (ao_perk,ao_condition,ao_value,ao_display,ao_metalink) VALUES ('".$this->getPerk()."','".mysql_real_escape_string($this->getCondition())."',".mkn($this->getValue()).",'".mysql_real_escape_string($this->getDisplay())."',".mkn($this->getMetaImage()).")");
 			$id = mysql_insert_id();
 			$this->setID($id);
 
-			$DBc->sqlQuery("INSERT INTO ach_objective_lang (aol_objective,aol_lang,aopl_name) VALUES ('".$this->getID()."','en','".mysql_real_escape_string($this->getName())."')");
+			$DBc->sqlQuery("INSERT INTO ach_objective_lang (aol_objective,aol_lang,aol_name) VALUES ('".$this->getID()."','en','".mysql_real_escape_string($this->getName())."')");
 		}
 
 		function setCondition($c) {
 			$this->condition = $c;
+		}
+
+		function setDisplay($d) {
+			$this->display = $d;
+		}
+
+		function setName($n) {
+			$this->name = $n;
+		}
+
+		function setValue($v) {
+			$this->value = $v;
+		}
+
+		function setMetalink($m) {
+			$this->meta_image = $m;
+		}
+
+		function setPerk($p) {
+			$this->perk = $p;
 		}
 	}
 ?>

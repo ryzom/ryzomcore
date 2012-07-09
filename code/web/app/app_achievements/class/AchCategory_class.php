@@ -15,9 +15,9 @@
 
 			parent::__construct();
 
-			$civ = mysql_real_escape_string($civ);
-			$cult = mysql_real_escape_string($cult);
-			$race = mysql_real_escape_string($race);
+			$civ = $DBc->sqlEscape($civ);
+			$cult = $DBc->sqlEscape($cult);
+			$race = $DBc->sqlEscape($race);
 
 			if($race == null) {
 				$race = $_USER->getRace();
@@ -34,7 +34,7 @@
 			$this->cult = $cult;
 			$this->civ = $civ;
 
-			$this->id = mysql_real_escape_string($id);
+			$this->id = $DBc->sqlEscape($id);
 
 			$res = $DBc->sqlQuery("SELECT * FROM ach_achievement LEFT JOIN (ach_achievement_lang) ON (aal_lang='".$_USER->getLang()."' AND aal_achievement=aa_id) WHERE aa_category='".$this->id."' AND (aa_parent IS NULL OR NOT EXISTS (SELECT * FROM ach_perk WHERE ap_achievement=aa_id AND NOT EXISTS (SELECT * FROM ach_player_perk WHERE app_player='".$_USER->getID()."' AND app_perk=ap_id))) AND (aa_tie_race IS NULL OR aa_tie_race LIKE '".$race."') AND (aa_tie_cult IS NULL OR aa_tie_cult LIKE '".$cult."') AND (aa_tie_civ IS NULL OR aa_tie_civ LIKE '".$civ."') ORDER by aal_name ASC");
 

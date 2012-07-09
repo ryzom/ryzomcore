@@ -24,7 +24,7 @@
 		$open = $menu->getOpenCat();
 
 		if($open != 0) {
-			$cat = new AchCategory($open,'matis',$_REQUEST['cult'],$_REQUEST['civ']);
+			$cat = new AchCategory($open,null,$_REQUEST['cult'],$_REQUEST['civ']);
 		}
 		else {
 			$cat = new AchSummary($menu,8);
@@ -305,7 +305,7 @@
 		}
 		
 		if($perk->getName() != null) {
-			$html .= "<span style='color:#999999;font-weight:bold;display:block;'>".$perk->getName()."</span>";
+			$html .= "<span style='color:#999999;font-weight:bold;display:block;'>".$perk->getDisplayName()."</span>";
 		}
 		if($perk->objDrawable()) {
 			$html .= ach_render_obj_list($perk->getIterator());
@@ -326,7 +326,7 @@
 			if($perk->inDev()) {
 				continue;
 			}
-			$html .= "<div style='display:block;'><span style='color:#66CC00;font-weight:bold;'>".$perk->getName()."</span> ( ".date('d.m.Y',$perk->getDone())." ) <img src='".$_CONF['image_url']."pic/yubo_done.png' width='15px' /> ".$perk->getValue()."</div>";
+			$html .= "<div style='display:block;'><span style='color:#66CC00;font-weight:bold;'>".$perk->getDisplayName()."</span> ( ".date('d.m.Y',$perk->getDone())." ) <img src='".$_CONF['image_url']."pic/yubo_done.png' width='15px' /> ".$perk->getValue()."</div>";
 		}
 
 		return $html;
@@ -396,7 +396,7 @@
 			$html .= "<img src='".$_CONF['image_url']."pic/pending.png' height='10px' />&nbsp;<span style='color:#999999;'>";
 		}
 		
-		$html .= $obj->getName()."</span>";
+		$html .= $obj->getDisplayName()."</span>";
 
 		return $html;
 	}
@@ -416,7 +416,7 @@
 		return "<table cellspacing='0' cellpadding='0'>
 				<tr>
 					<td><img src='".$_CONF['image_url']."pic/icon/".$grey.$obj->getMetaImage()."' width='20px' /></td>
-					<td valign='middle'><span style='color:".$col.";'>&nbsp;".$obj->getName()."</span></td>
+					<td valign='middle'><span style='color:".$col.";'>&nbsp;".$obj->getDisplayName()."</span></td>
 				</tr>
 			</table>";
 	}
@@ -430,7 +430,7 @@
 			else {
 				$col = "#999999";
 			}
-			$html .= "<div style='color:".$col.";display:block;'>".$obj->getName()."</div>";
+			$html .= "<div style='color:".$col.";display:block;'>".$obj->getDisplayName()."</div>";
 		}
 
 		$html .= ach_render_progressbar($obj->getProgress(),$obj->getValue(),350);

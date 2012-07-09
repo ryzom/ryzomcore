@@ -266,7 +266,7 @@
 		}
 		
 		if($perk->getName() != null) {
-			$html .= "<tr><td><font color='#999999' size='12px'><b>".$perk->getName()."</b></font></td></tr><tr><td>&nbsp;</td></tr>";
+			$html .= "<tr><td><font color='#999999' size='12px'><b>".$perk->getDisplayName()."</b></font></td></tr><tr><td>&nbsp;</td></tr>";
 		}
 		if($perk->objDrawable()) {
 			$html .= "<tr><td>".ach_render_obj_list($perk->getIterator())."</td></tr>";
@@ -288,7 +288,7 @@
 			if($perk->inDev()) {
 				continue;
 			}
-			$html .= "<tr><td><font color='#66CC00'><b>".$perk->getName()."</b></font> ( ".date('d.m.Y',$perk->getDone())." ) <img src='".$_CONF['image_url']."pic/yubo_done_small.png' /> ".$perk->getValue()."</td></tr>";
+			$html .= "<tr><td><font color='#66CC00'><b>".$perk->getDisplayName()."</b></font> ( ".date('d.m.Y',$perk->getDone())." ) <img src='".$_CONF['image_url']."pic/yubo_done_small.png' /> ".$perk->getValue()."</td></tr>";
 		}
 
 		return $html;
@@ -359,7 +359,7 @@
 			$html .= "<img src='".$_CONF['image_url']."pic/pending.png' height='10px' />&nbsp;<font color='#999999;'>";
 		}
 		
-		$html .= $obj->getName()."</font>";
+		$html .= $obj->getDisplayName()."</font>";
 
 		return $html;
 	}
@@ -379,7 +379,7 @@
 		return "<table cellspacing='0' cellpadding='0'>
 				<tr>
 					<td><img src='".$_CONF['image_url']."pic/icon/".$grey."small/".$obj->getMetaImage()."' /></td>
-					<td><font color='".$col."'>&nbsp;".$obj->getName()."</font></td>
+					<td><font color='".$col."'>&nbsp;".$obj->getDisplayName()."</font></td>
 				</tr>
 			</table>";
 	}
@@ -393,7 +393,7 @@
 			else {
 				$col = "#999999";
 			}
-			$html .= "<font color='".$col."'>".$obj->getName()."</font>";
+			$html .= "<font color='".$col."'>".$obj->getDisplayName()."</font>";
 		}
 
 		$html .= ach_render_progressbar($obj->getProgress(),$obj->getValue(),250);

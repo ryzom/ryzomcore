@@ -80,5 +80,15 @@
 		function setTemplate($t) {
 			$this->template = $t;
 		}
+
+		function orderPerks() {
+			$iter = $this->getIterator();
+			$i = 0;
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+
+				$curr->setPorder($i);
+			}
+		}
 	}
 ?>

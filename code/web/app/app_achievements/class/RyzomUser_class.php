@@ -7,7 +7,7 @@
 		}
 
 		function getID() {
-			return $this->data["id"];
+			return $this->data["cid"];
 		}
 
 		function getLang() {

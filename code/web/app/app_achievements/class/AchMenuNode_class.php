@@ -1,6 +1,29 @@
 <?php
 	class AchMenuNode extends Parentum {
-		use InDev;
+		protected $dev;
+
+		function inDev() {
+			return ($this->dev == 1);
+		}
+
+		function getDev() {
+			return $this->dev;
+		}
+
+		function setInDev($tf) {
+			if($tf == true) {
+				$this->setDev(1);
+			}
+			else {
+				$this->setDev(0);
+			}
+
+			$this->update();
+		}
+
+		function setDev($d) {
+			$this->dev = $d;
+		}
 
 		protected $parent_id;
 		protected $name;

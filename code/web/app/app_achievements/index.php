@@ -13,8 +13,11 @@ require_once('conf.php');
 // Ask to authenticate user (using ingame or session method) and fill $user with all information
 ryzom_app_authenticate($user, false);
 
+#$user['id'] = $user['char_id'];
+#$user['name'] = $user['char_name'];
+
 $user = array();
-$user['id'] = 1;
+$user['id'] = 16;
 $user['lang'] = 'en';
 $user['name'] = 'Talvela';
 $user['race'] = "r_matis";
@@ -35,7 +38,7 @@ else {
 require_once("include/ach_render_common.php");
 
 require_once("class/DLL_class.php");
-require_once("class/InDev_trait.php");
+#require_once("class/InDev_trait.php");
 require_once("class/Node_abstract.php");
 require_once("class/AVLTree_class.php");
 require_once("class/Parentum_abstract.php");
@@ -55,6 +58,7 @@ require_once("class/AchObjective_class.php");
 
 
 // Update user acces on Db
+#$DBc = ryDB::getInstance(APP_NAME."_test");
 $DBc = ryDB::getInstance(APP_NAME);
 #$DBc = ryDB::getInstance("ahufler");
 

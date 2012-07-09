@@ -22,8 +22,8 @@
 			return $this->nodes->isEmpty();
 		}
 
-		function addChild($data) {
-			$this->nodes->addNode($data);
+		function addChild($data,$b = null) {
+			$this->nodes->addNode($data,$b);
 		}
 
 		function removeChild($id) {
