@@ -112,7 +112,7 @@
 
 		$res = $DBc->sqlQuery("SELECT sum(ap_value) as anz FROM ach_perk,ach_player_perk WHERE ap_id=app_perk AND app_player='".$_USER->getID()."'");
 
-		$html = "<font size='32px'>".$_USER->getName()."&nbsp;<img src='".$_CONF['image_url']."pic/yubo_done.png'>&nbsp;".$res[0]['anz']."</font>";
+		$html = "<font size='32px'>".$_USER->getName()."&nbsp;<img src='".$_CONF['image_url']."pic/yubo_done.png'>&nbsp;".max(0,$res[0]['anz'])."</font>";
 
 		return $html;
 	}
@@ -182,7 +182,7 @@
 
 		$iter = $cat->getDone();
 		while($iter->hasNext()) {
-			$curr = $cat->getChildByIdx($iter->getNext());
+			$curr = $iter->getNext();
 		#$sz = sizeof($tmp);
 		#for($i=0;$i<$sz;$i++) {
 			#echo "A";
@@ -194,7 +194,7 @@
 
 		$iter = $cat->getOpen();
 		while($iter->hasNext()) {
-			$curr = $cat->getChildByIdx($iter->getNext());
+			$curr = $iter->getNext();
 		#$sz = sizeof($tmp);
 		#for($i=0;$i<$sz;$i++) {
 			#echo "B";
@@ -259,7 +259,7 @@
 		$html = "";
 
 		$perk_list = $ach->getOpen();
-		$perk = $ach->getChildByIdx($perk_list->getNext());
+		$perk = $perk_list->getNext();
 
 		if($perk->inDev()) {
 			return $html;
@@ -281,7 +281,7 @@
 
 		$perk_list = $ach->getDone();
 		while($perk_list->hasNext()) {
-			$perk = $ach->getChildByIdx($perk_list->getNext());
+			$perk = $perk_list->getNext();
 
 		#foreach($perk_list as $elem) {
 			#$perk = $ach->getChild($elem);
