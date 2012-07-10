@@ -286,11 +286,6 @@ public:
 	 * Draw views
 	 */
 	void drawViews (NL3D::UCamera camera);
-	void drawAutoAdd ();
-	//void drawContextMenu ();
-
-	/// Update all the elements
-	void updateAllLocalisedElements ();
 
 	// display a debug info
 	void		  displayDebugInfo(const ucstring &str, TSystemInfoMode mode = InfoMsg);
@@ -591,6 +586,8 @@ public:
 	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_PREREQUISIT_VALID;
 	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_FACTION_TYPE;
 
+	void updateDesktops( uint32 newScreenW, uint32 newScreenH );
+
 private:
 
 	NLMISC::CCDBNodeLeaf *_CheckMailNode;
@@ -695,10 +692,6 @@ private:
 	CServerToLocalAutoCopy ServerToLocalAutoCopyContextMenu;
 	CServerToLocalAutoCopy ServerToLocalAutoCopySkillPoints;
 	CServerToLocalAutoCopy ServerToLocalAutoCopyDMGift;
-
-	// move windows according to new screen size
-	void moveAllWindowsToNewScreenSize(sint32 newScreenW, sint32 newScreenH, bool fixCurrentUI);
-	void getNewWindowCoordToNewScreenSize(sint32 &x, sint32 &y, sint32 w, sint32 h, sint32 newW, sint32 newH) const;
 
 	// Pop a new message box. If the message box was found, returns a pointer on it
 	void messageBoxInternal(const std::string &msgBoxGroup, const ucstring &text, const std::string &masterGroup, TCaseMode caseMode);

@@ -2231,7 +2231,7 @@ void CEditor::loadStandardUI()
 	ClientCfg.R2EDEnabled = false;
 	loadUIConfig("");
 	ClientCfg.R2EDEnabled = true;
-	getUI().updateAllLocalisedElements();
+	CWidgetManager::getInstance()->updateAllLocalisedElements();
 }
 
 // *********************************************************************************************************
@@ -2708,7 +2708,7 @@ void CEditor::init(TMode initialMode, TAccessMode accessMode)
 
 	{
 		CVerboseClock clock("Update of localized elements");
-		getUI().updateAllLocalisedElements();
+		CWidgetManager::getInstance()->updateAllLocalisedElements();
 	}
 
 }

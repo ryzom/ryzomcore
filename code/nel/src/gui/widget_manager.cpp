@@ -26,6 +26,7 @@
 #include "nel/gui/interface_options.h"
 #include "nel/gui/view_text.h"
 #include "nel/gui/view_bitmap.h"
+#include "nel/gui/group_container.h"
 
 namespace NLGUI
 {
@@ -1629,6 +1630,377 @@ namespace NLGUI
 		}
 		_ContextHelpActive = active;
 	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::getNewWindowCoordToNewScreenSize( sint32 &x, sint32 &y, sint32 w, sint32 h,
+														sint32 newScreenW, sint32 newScreenH) const
+	{
+		// NB: x is relative to Left of the window (and Left of screen)
+		// NB: y is relative to Top of the window  (but Bottom of screen)
+
+		/*
+			The goal here is to move the window so it fit the new resolution
+			But we don't want to change its size (because somes windows just can't)
+			We also cannot use specific code according to each window because user may completly modify his interface
+			So the strategy is to dectect on which "side" (or center) the window is the best sticked,
+			and then just move the window according to this position
+		*/
+
+		// *** First detect from which screen position the window is the more sticked (borders or center)
+		// In X: best hotspot is left, middle or right?
+		sint32	posXToLeft= x;
+		sint32	posXToMiddle= x+w/2-screenW/2;
+		sint32	posXToRight= screenW-(x+w);
+		sint32	bestXHotSpot= Hotspot_xL;
+		sint32	bestXPosVal= posXToLeft;
+		if(abs(posXToMiddle) < bestXPosVal)
+		{
+			bestXHotSpot= Hotspot_xM;
+			bestXPosVal= abs(posXToMiddle);
+		}
+		if(posXToRight < bestXPosVal)
+		{
+			bestXHotSpot= Hotspot_xR;
+			bestXPosVal= posXToRight;
+		}
+
+		// Same In Y: best hotspot is bottom, middle or top?
+		// remember here that y is the top of window (relative to bottom of screen)
+		sint32	posYToBottom= y-h;
+		sint32	posYToMiddle= y-h/2-screenH/2;
+		sint32	posYToTop= screenH-y;
+		sint32	bestYHotSpot= Hotspot_Bx;
+		sint32	bestYPosVal= posYToBottom;
+		const	sint32	middleYWeight= 6;		// Avoid default Mission/Team/Map/ContactList positions to be considered as "middle"
+		if(abs(posYToMiddle)*middleYWeight < bestYPosVal)
+		{
+			bestYHotSpot= Hotspot_Mx;
+			bestYPosVal= abs(posYToMiddle)*middleYWeight;
+		}
+		if(posYToTop < bestYPosVal)
+		{
+			bestYHotSpot= Hotspot_Tx;
+			bestYPosVal= posYToTop;
+		}
+
+		// *** According to best matching hotspot, and new screen resolution, move the window
+		// x
+		if(bestXHotSpot==Hotspot_xL)
+			x= x;
+		else if(bestXHotSpot==Hotspot_xM)
+			x= newScreenW/2 + posXToMiddle - w/2;
+		else if(bestXHotSpot==Hotspot_xR)
+			x= newScreenW - posXToRight - w;
+		// y
+		if(bestYHotSpot==Hotspot_Bx)
+			y= y;
+		else if(bestYHotSpot==Hotspot_Mx)
+			y= newScreenH/2 + posYToMiddle + h/2;
+		else if(bestYHotSpot==Hotspot_Tx)
+			y= newScreenH - posYToTop;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::moveAllWindowsToNewScreenSize(sint32 newScreenW, sint32 newScreenH, bool fixCurrentUI)
+	{
+		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
+		// If resolutions correctly setuped, and really different from new setup
+		if( screenW >0 && screenH>0 &&
+			newScreenW >0 && newScreenH>0 &&
+			( screenW != newScreenW || screenH != newScreenH)
+			)
+		{
+			// *** Do it for the Active Desktop (if wanted)
+			if(fixCurrentUI)
+			{
+				// only for ui:interface (not login, nor outgame)
+				for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+				{
+					CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+					if(!rMG.Group || rMG.Group->getId()!="ui:interface")
+						continue;
+
+					// For all priorities, but the worldspace one
+					for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
+					{
+						if(nPriority==WIN_PRIORITY_WORLD_SPACE)
+							continue;
+
+						// For All windows (only layer 0 group container)
+						std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
+						std::list<CInterfaceGroup*>::const_iterator itw;
+						for (itw = rList.begin(); itw != rList.end(); itw++)
+						{
+							CInterfaceGroup *pIG = *itw;
+							if(!pIG->isGroupContainer())
+								continue;
+							CGroupContainer	*gc= dynamic_cast<CGroupContainer*>(pIG);
+							if(gc->getLayerSetup()!=0)
+								continue;
+							// should all be BL / TL
+							if(gc->getParentPosRef()!=Hotspot_BL || gc->getPosRef()!=Hotspot_TL)
+								continue;
+
+							// Get current window coordinates
+							sint32	x= pIG->getX();				// x is relative to Left of the window
+							sint32	y= pIG->getY();				// y is relative to Top of the window
+							sint32	w= pIG->getW(false);		// the window may be hid, still get the correct(or estimated) W
+							sint32	h= pIG->getH(false);		// the window may be hid, still get the correct(or estimated) H
+
+							// Compute the new coordinate
+							CWidgetManager::getInstance()->getNewWindowCoordToNewScreenSize(x, y, w, h, newScreenW, newScreenH);
+
+							// Change
+							pIG->setX(x);
+							pIG->setY(y);
+						}
+					}
+				}
+			}
+
+			std::vector< INewScreenSizeHandler* >::iterator itr;
+			for( itr = newScreenSizeHandlers.begin(); itr != newScreenSizeHandlers.end(); ++itr )
+			{
+				INewScreenSizeHandler *handler = *itr;
+				handler->process( newScreenW, newScreenH );
+			}
+		}
+
+		// Now those are the last screen coordinates used for window position correction
+		if(newScreenW >0 && newScreenH>0)
+		{
+			screenW = newScreenW;
+			screenH = newScreenH;
+		}
+	}
+
+	class InvalidateTextVisitor : public CInterfaceElementVisitor
+	{
+	public:
+		InvalidateTextVisitor( bool reset )
+		{
+			this->reset = reset;
+		}
+
+		void visitGroup( CInterfaceGroup *group )
+		{
+			const std::vector< CViewBase* > &vs = group->getViews();
+			for( std::vector< CViewBase* >::const_iterator itr = vs.begin(); itr != vs.end(); ++itr )
+			{
+				CViewText *vt = dynamic_cast< CViewText* >( *itr );
+				if( vt != NULL )
+				{
+					if( reset )
+						vt->resetTextIndex();
+					vt->updateTextContext();
+				}
+			}
+		}
+
+	private:
+		bool reset;
+	};
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::updateAllLocalisedElements()
+	{
+
+		uint32 nMasterGroup;
+
+		uint32 w, h;
+		CViewRenderer::getInstance()->checkNewScreenSize ();
+		CViewRenderer::getInstance()->getScreenSize (w, h);
+
+		// Update ui:* (limit the master containers to the height of the screen)
+		for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			rMG.Group->setW (w);
+			rMG.Group->setH (h);
+		}
+		CViewRenderer::getInstance()->setClipWindow(0, 0, w, h);
+
+		// If all conditions are OK, move windows so they fit correctly with new screen size
+		// Do this work only InGame when Config is loaded
+		moveAllWindowsToNewScreenSize(w,h,true);
+
+		// Invalidate coordinates of all Windows of each MasterGroup
+		for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+
+			InvalidateTextVisitor inv( false );
+
+			rMG.Group->visitGroupAndChildren( &inv );
+			rMG.Group->invalidateCoords ();
+			for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
+			{
+				std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
+				std::list<CInterfaceGroup*>::const_iterator itw;
+				for (itw = rList.begin(); itw != rList.end(); itw++)
+				{
+					CInterfaceGroup *pIG = *itw;
+					pIG->visitGroupAndChildren( &inv );
+					pIG->invalidateCoords ();
+				}
+			}
+		}
+
+		// setup for all
+		for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			bool bActive = rMG.Group->getActive ();
+			rMG.Group->setActive (true);
+			rMG.Group->updateCoords ();
+			rMG.Group->setActive (bActive);
+		}
+
+		// update coords one
+		checkCoords();
+
+		// Action by default (container opening
+		for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			rMG.Group->launch ();
+		}
+
+	}
+
+	void CWidgetManager::drawViews( NL3D::UCamera camera )
+	{
+		CViewRenderer::getInstance()->activateWorldSpaceMatrix (false);
+		NL3D::UDriver *driver = CViewRenderer::getInstance()->getDriver();
+
+		// If an element has captured the keyboard, make sure it is alway visible (all parent windows active)
+		if( getCaptureKeyboard() != NULL)
+		{
+			CCtrlBase *cb = getCaptureKeyboard();
+			do
+			{
+				if (!cb->getActive())
+				{
+					setCaptureKeyboard(NULL);
+					break;
+				}
+				cb = cb->getParent();
+			}
+			while (cb);
+		}
+		// Check if screen size changed
+		uint32 w, h;
+		CViewRenderer::getInstance()->checkNewScreenSize ();
+		CViewRenderer::getInstance()->getScreenSize (w, h);
+		if ((w != screenW) || (h != screenH))
+		{
+			// No Op if screen minimized
+			if(w!=0 && h!=0 && !CViewRenderer::getInstance()->isMinimized())
+			{
+				updateAllLocalisedElements ();
+				setScreenWH( w, h );
+			}
+		}
+
+		// Update global color from database
+		setGlobalColor( NLMISC::CRGBA (	(uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:R")->getValue32(),
+								(uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:G")->getValue32(),
+								(uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:B")->getValue32(),
+								(uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:A")->getValue32() ) );
+
+		NLMISC::CRGBA c  = getGlobalColorForContent();
+		NLMISC::CRGBA gc = getGlobalColor();
+		c.R = gc.R;
+		c.G = gc.G;
+		c.B = gc.B;
+		c.A = (uint8) (( (uint16) c.A * (uint16) getContentAlpha() ) >> 8);
+		setGlobalColorForContent( c );
+		
+		// Update global alphaS from database
+		updateGlobalAlphas();
+
+		/*  Draw all the windows
+			To minimize texture swapping, we first sort per Window, then we sort per layer, then we render per Global Texture.
+			Computed String are rendered in on big drawQuads at last part of each layer
+		*/
+		CDBManager::getInstance()->flushObserverCalls();
+		
+		for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			if (rMG.Group->getActive())
+			{
+				// Sort world space windows
+				rMG.sortWorldSpaceGroup ();
+
+				for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; ++nPriority)
+				{
+					if ( (nPriority == WIN_PRIORITY_WORLD_SPACE) && !camera.empty())
+					{
+						driver->setViewMatrix( NL3D::CMatrix::Identity);
+						driver->setModelMatrix( NL3D::CMatrix::Identity);
+						driver->setFrustum(camera.getFrustum());
+						CViewRenderer::getInstance()->activateWorldSpaceMatrix (true);
+					}
+
+					std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
+					std::list<CInterfaceGroup*>::const_iterator itw;
+
+					for (itw = rList.begin(); itw != rList.end(); itw++)
+					{
+						CInterfaceGroup *pIG = *itw;
+						if( pIG ) // TODO: debug null pointer in PrioritizedWindows list
+						{
+							if (pIG->getActive())
+							{
+								// Draw all the elements of this window in the layers in ViewRendered
+								pIG->draw ();
+								// flush the layers
+								CViewRenderer::getInstance()->flush ();
+							}
+						}
+					}
+
+					if ( (nPriority == WIN_PRIORITY_WORLD_SPACE) && !camera.empty())
+					{
+						driver->setMatrixMode2D11();
+						CViewRenderer::getInstance()->activateWorldSpaceMatrix (false);
+					}
+				}
+			}
+		}
+
+		CDBManager::getInstance()->flushObserverCalls();
+
+		// draw the special over extend text
+		drawOverExtendViewText();
+
+		// draw the context help
+		drawContextHelp ();
+
+		std::vector< IOnWidgetsDrawnHandler* >::iterator itr;
+		for( itr = onWidgetsDrawnHandlers.begin(); itr != onWidgetsDrawnHandlers.end(); ++itr )
+		{
+			IOnWidgetsDrawnHandler *handler = *itr;
+			handler->process();
+		}
+
+		// Draw the pointer and DND Item
+		if( getPointer() != NULL)
+		{
+			if ( getPointer()->getActive())
+				getPointer()->draw ();
+		}
+
+		// flush layers
+		CViewRenderer::getInstance()->flush();
+
+		// todo hulud remove Return in 2d world
+		driver->setMatrixMode2D11();
+
+		CDBManager::getInstance()->flushObserverCalls();
+	}
 	
 	// ------------------------------------------------------------------------------------------------
 	void CWidgetManager::movePointer (sint32 dx, sint32 dy)
@@ -2045,6 +2417,50 @@ namespace NLGUI
 		_GlobalRolloverFactorContainer = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTAINER_ROLLOVER_FACTOR")->getValue32();
 	}
 
+	void CWidgetManager::registerNewScreenSizeHandler( INewScreenSizeHandler *handler )
+	{
+		std::vector< INewScreenSizeHandler* >::iterator itr =
+			std::find( newScreenSizeHandlers.begin(), newScreenSizeHandlers.end(), handler );
+
+		if( itr != newScreenSizeHandlers.end() )
+			return;
+
+		newScreenSizeHandlers.push_back( handler );
+	}
+
+	void CWidgetManager::removeNewScreenSizeHandler( INewScreenSizeHandler *handler )
+	{
+		std::vector< INewScreenSizeHandler* >::iterator itr =
+			std::find( newScreenSizeHandlers.begin(), newScreenSizeHandlers.end(), handler );
+
+		if( itr == newScreenSizeHandlers.end() )
+			return;
+
+		newScreenSizeHandlers.erase( itr );
+	}
+
+	void CWidgetManager::registerOnWidgetsDrawnHandler( IOnWidgetsDrawnHandler* handler )
+	{
+		std::vector< IOnWidgetsDrawnHandler* >::iterator itr =
+			std::find( onWidgetsDrawnHandlers.begin(), onWidgetsDrawnHandlers.end(), handler );
+
+		if( itr != onWidgetsDrawnHandlers.end() )
+			return;
+
+		onWidgetsDrawnHandlers.push_back( handler );
+	}
+
+	void CWidgetManager::removeOnWidgetsDrawnHandler( IOnWidgetsDrawnHandler* handler )
+	{
+		std::vector< IOnWidgetsDrawnHandler* >::iterator itr =
+			std::find( onWidgetsDrawnHandlers.begin(), onWidgetsDrawnHandlers.end(), handler );
+
+		if( itr == onWidgetsDrawnHandlers.end() )
+			return;
+
+		onWidgetsDrawnHandlers.erase( itr );
+	}
+
 	CWidgetManager::CWidgetManager()
 	{
 		_Pointer = NULL;
@@ -2069,6 +2485,8 @@ namespace NLGUI
 
 		_MouseHandlingEnabled = true;
 		inGame = false;
+
+		setScreenWH( 0, 0 );
 	}
 
 	CWidgetManager::~CWidgetManager()

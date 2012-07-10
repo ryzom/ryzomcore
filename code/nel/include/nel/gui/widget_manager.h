@@ -26,6 +26,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/gui/interface_common.h"
 #include "nel/gui/interface_options.h"
+#include "nel/3d/u_camera.h"
 
 namespace NLMISC
 {
@@ -58,7 +59,22 @@ namespace NLGUI
 
 	/// Manages the GUI widgets
 	class CWidgetManager{
+
 	public:
+
+		class INewScreenSizeHandler
+		{
+		public:
+			virtual ~INewScreenSizeHandler(){}
+			virtual void process( uint32 w, uint32 h ) = 0;
+		};
+
+		class IOnWidgetsDrawnHandler
+		{
+		public:
+			virtual ~IOnWidgetsDrawnHandler(){};
+			virtual void process() = 0;
+		};
 
 		struct SInterfaceTimes
 		{
@@ -290,6 +306,16 @@ namespace NLGUI
 		void drawContextHelp();
 		
 		void setContextHelpActive(bool active);
+		
+		void getNewWindowCoordToNewScreenSize( sint32 &x, sint32 &y, sint32 w, sint32 h,
+												sint32 newW, sint32 newH) const;
+		
+		// move windows according to new screen size
+		void moveAllWindowsToNewScreenSize(sint32 newScreenW, sint32 newScreenH, bool fixCurrentUI );
+		
+		void updateAllLocalisedElements();
+
+		void drawViews( NL3D::UCamera camera );
 
 		// Relative move of pointer
 		void movePointer (sint32 dx, sint32 dy);
@@ -414,7 +440,15 @@ namespace NLGUI
 
 		void setIngame( bool i ){ inGame = i; }
 		bool isIngame() const{ return inGame; }
-		
+
+		void setScreenWH( uint32 w, uint32 h ){ screenW = w; screenH = h; }
+
+		void registerNewScreenSizeHandler( INewScreenSizeHandler *handler );
+		void removeNewScreenSizeHandler( INewScreenSizeHandler *handler );
+
+		void registerOnWidgetsDrawnHandler( IOnWidgetsDrawnHandler* handler );
+		void removeOnWidgetsDrawnHandler( IOnWidgetsDrawnHandler *handler );
+				
 		static IParser *parser;
 
 	private:
@@ -479,6 +513,12 @@ namespace NLGUI
 		bool _ContextHelpActive;
 
 		bool inGame;
+
+		uint32 screenH;
+		uint32 screenW;
+
+		std::vector< INewScreenSizeHandler* > newScreenSizeHandlers;
+		std::vector< IOnWidgetsDrawnHandler* > onWidgetsDrawnHandlers;
 	};
 
 }

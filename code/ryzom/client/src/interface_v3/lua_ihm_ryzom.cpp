@@ -1693,7 +1693,7 @@ int CLuaIHMRyzom::updateAllLocalisedElements(CLuaState &ls)
 	CLuaStackChecker lsc(&ls);
 	CLuaIHM::checkArgCount(ls,    "updateAllLocalisedElements",    0);
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	pIM->updateAllLocalisedElements();
+	CWidgetManager::getInstance()->updateAllLocalisedElements();
 	//
 	TTime endTime = CTime::getLocalTime();
 	if (ClientCfg.R2EDVerboseParseTime)
