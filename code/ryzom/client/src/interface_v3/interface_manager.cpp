@@ -439,11 +439,6 @@ CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext 
 	_ErrorColor = NULL;
 	_EmotesInitialized = false;
 
-	// context help
-	CWidgetManager::getInstance()->_DeltaTimeStopingContextHelp = 0;
-	_MaxTimeStopingContextHelp= 0.2f;
-	_LastXContextHelp= -10000;
-	_LastYContextHelp= -10000;
 
 	// Global initialization
 	// *********************
@@ -468,8 +463,6 @@ CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext 
 	_CheckMailNode = NULL;
 	_CheckForumNode = NULL;
 	_UpdateWeatherTime = 0;
-
-	_ContextHelpActive = true;
 
 	_DBB_UI_DUMMY = NULL;
 	_DB_UI_DUMMY_QUANTITY = NULL;
@@ -2060,10 +2053,10 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 		// draw the special over extend text
-		drawOverExtendViewText();
+		CWidgetManager::getInstance()->drawOverExtendViewText();
 
 		// draw the context help
-		drawContextHelp ();
+		CWidgetManager::getInstance()->drawContextHelp ();
 
 		// Draw the pointer and DND Item
 		if ( CWidgetManager::getInstance()->getPointer() != NULL)
@@ -2110,448 +2103,6 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 	}
 }
 
-
-// ----------------------------------------------------------------------------
-CCtrlBase* CInterfaceManager::getNewContextHelpCtrl()
-{
-	// get the top most ctrl under us
-	CCtrlBase *best = NULL;
-	sint8 bestRenderLayer = -128;
-	const std::vector< CCtrlBase* >& _CtrlsUnderPointer = CWidgetManager::getInstance()->getCtrlsUnderPointer();
-	for (sint i = (sint32)_CtrlsUnderPointer.size()-1; i>=0; i--)
-	{
-		CCtrlBase	*pICL = _CtrlsUnderPointer[i];
-		if (pICL->getRenderLayer() > bestRenderLayer)
-		{
-			if ((pICL->getActive()) && (!pICL->emptyContextHelp()))
-			{
-				if (!CWidgetManager::getInstance()->getPointer()) return pICL;
-				sint32 mx, my;
-				CWidgetManager::getInstance()->getPointer()->getPointerPos(mx, my);
-				if (pICL->preciseHitTest(mx, my))
-				{
-					best = pICL;
-					bestRenderLayer	= pICL->getRenderLayer();
-				}
-			}
-		}
-	}
-	if (!best)
-	{
-		// if a control was not found, try with the groups
-		sint8 bestRenderLayer = -128;
-		const std::vector< CInterfaceGroup* >& _GroupsUnderPointer = CWidgetManager::getInstance()->getGroupsUnderPointer();
-		for (sint i = (sint32)_GroupsUnderPointer.size()-1; i>=0; i--)
-		{
-			CCtrlBase	*pICL = _GroupsUnderPointer[i];
-			if (pICL->getRenderLayer() > bestRenderLayer)
-			{
-				if ((pICL->getActive()) && (!pICL->emptyContextHelp()))
-				{
-					if (!CWidgetManager::getInstance()->getPointer()) return pICL;
-					sint32 mx, my;
-					CWidgetManager::getInstance()->getPointer()->getPointerPos(mx, my);
-					if (pICL->preciseHitTest(mx, my))
-					{
-						best = pICL;
-						bestRenderLayer	= pICL->getRenderLayer();
-					}
-				}
-			}
-		}
-	}
-	return best;
-}
-
-// ----------------------------------------------------------------------------
-CInterfaceGroup	*CInterfaceManager::getWindowForActiveMasterGroup(const std::string &window)
-{
-	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
-	// Search for all elements
-	for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
-	{
-		const CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-		if (rMG.Group->getActive())
-		{
-			CInterfaceElement	*pEL= CWidgetManager::getInstance()->getElementFromId( rMG.Group->getId() + ":" + window);
-			if(pEL && pEL->isGroup())
-				return (CInterfaceGroup*)pEL;
-		}
-	}
-
-	return NULL;
-}
-
-
-// ----------------------------------------------------------------------------
-void CInterfaceManager::updateTooltipCoords()
-{
-	updateTooltipCoords( CWidgetManager::getInstance()->getCurContextHelp() );
-}
-
-// ----------------------------------------------------------------------------
-void CInterfaceManager::updateTooltipCoords(CCtrlBase *newCtrl)
-{
-	if (!newCtrl) return;
-	if (!newCtrl->getInvalidCoords()) return;
-	CInterfaceGroup *groupContextHelp = getWindowForActiveMasterGroup(newCtrl->getContextHelpWindowName());
-	if(groupContextHelp)
-	{
-		CViewText *pTxt = (CViewText*)groupContextHelp->getView("text");
-		if (pTxt != NULL)
-		{
-			pTxt->setTextFormatTaged(_ContextHelpText);
-			// update only to get correct W/H
-			groupContextHelp->updateCoords ();
-
-
-			// **** Compute parent coordinates
-			CCtrlBase::TToolTipParentType	parentType= newCtrl->getToolTipParent();
-			CInterfaceGroup	*win= NULL;
-			// adjust to the mouse by default
-			sint32		xParent= CWidgetManager::getInstance()->getPointer()->getX();
-			sint32		yParent= CWidgetManager::getInstance()->getPointer()->getY();
-			sint32		wParent= 0;
-			sint32		hParent= 0;
-			// adjust to the window
-			if(parentType==CCtrlBase::TTWindow || parentType==CCtrlBase::TTSpecialWindow)
-			{
-				if(parentType==CCtrlBase::TTWindow)
-					win= newCtrl->getRootWindow();
-				else
-					win= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(newCtrl->getToolTipSpecialParent()));
-				if(win)
-				{
-					xParent = win->getXReal();
-					yParent = win->getYReal();
-					wParent = win->getWReal();
-					hParent = win->getHReal();
-				}
-				// Bug...: leave default to pointer
-			}
-			// adjust to the ctrl
-			else if (parentType==CCtrlBase::TTCtrl)
-			{
-				xParent = newCtrl->getXReal();
-				yParent = newCtrl->getYReal();
-				wParent = newCtrl->getWReal();
-				hParent = newCtrl->getHReal();
-				// Additionaly, must clip this ctrl with its parent
-				// (else animals are buggy for instance)
-				CInterfaceGroup	*parent= newCtrl->getParent();
-				if(parent)
-				{
-					sint32	xClip,yClip,wClip,hClip;
-					parent->getClip(xClip,yClip,wClip,hClip);
-					// clip bottom left
-					xParent= max(xParent, xClip);
-					yParent= max(yParent, yClip);
-					// clip top right
-					sint32	xrParent= min(xParent+ wParent, xClip+wClip);
-					sint32	ytParent= min(yParent+ hParent, yClip+hClip);
-					wParent= max((sint32)0, xrParent-xParent);
-					hParent= max((sint32)0, ytParent-yParent);
-				}
-			}
-
-
-			// **** resolve auto posref
-			uint clampCount = adjustTooltipPosition(newCtrl, win, newCtrl->getToolTipParentPosRef(), newCtrl->getToolTipPosRef(), xParent, yParent, wParent, hParent);
-			if (clampCount != 0)
-			{
-				// try to fallback on alternate tooltip posref
-				uint altClampCount = adjustTooltipPosition(newCtrl, win, newCtrl->getToolTipParentPosRefAlt(), newCtrl->getToolTipPosRefAlt(), xParent, yParent, wParent, hParent);
-				if (altClampCount > clampCount)
-				{
-					// worst ? resume to first posref
-					adjustTooltipPosition(newCtrl, win, newCtrl->getToolTipParentPosRef(), newCtrl->getToolTipPosRef(), xParent, yParent, wParent, hParent);
-				}
-			}
-		}
-	}
-}
-
-// ----------------------------------------------------------------------------
-void CInterfaceManager::drawContextHelp ()
-{
-	if (!CWidgetManager::getInstance()->getPointer() || !_ContextHelpActive)
-		return;
-
-
-	sint32 x = CWidgetManager::getInstance()->getPointer()->getX();
-	sint32 y = CWidgetManager::getInstance()->getPointer()->getY();
-
-
-	// ***************
-	// **** try to disable
-	// ***************
-	// test disable first, so can recheck asap if another present. see below
-	CCtrlBase *_CurCtrlContextHelp = CWidgetManager::getInstance()->getCurContextHelp();
-	if( _CurCtrlContextHelp)
-	{
-		if(x!=_LastXContextHelp || y!=_LastYContextHelp)
-		{
-			// May change of ctrl!! => disable context help
-			CCtrlBase	*newCtrl= getNewContextHelpCtrl();
-			if(newCtrl!=_CurCtrlContextHelp)
-			{
-				// disable
-				disableContextHelp();
-			}
-		}
-
-		// Check if _CurCtrlContextHelp  is visible
-		if (_CurCtrlContextHelp == NULL)
-		{
-			disableContextHelp();
-		}
-		else
-		{
-			bool bVisible = true;
-			if (_CurCtrlContextHelp->getActive() == false)
-				bVisible = false;
-			CInterfaceGroup *pParent = _CurCtrlContextHelp->getParent();
-			while (pParent != NULL)
-			{
-				if (pParent->getActive() == false)
-					bVisible = false;
-				pParent = pParent->getParent();
-			}
-			if (!bVisible)
-				disableContextHelp();
-		}
-	}
-
-
-	// ***************
-	// **** try to acquire
-	// ***************
-	if(!_CurCtrlContextHelp)
-	{
-		// get the ctrl of interset
-		CCtrlBase	*newCtrl= getNewContextHelpCtrl();
-
-		if(x==_LastXContextHelp && y==_LastYContextHelp)
-			CWidgetManager::getInstance()->_DeltaTimeStopingContextHelp+= DT;
-		else
-			CWidgetManager::getInstance()->_DeltaTimeStopingContextHelp = 0;
-
-		// If reach the time limit
-		if( CWidgetManager::getInstance()->_DeltaTimeStopingContextHelp > _MaxTimeStopingContextHelp || (newCtrl && newCtrl->wantInstantContextHelp()))
-		{
-			// if present, get the ctx help text.
-			if(newCtrl)
-			{
-				// get the text
-				//newCtrl->getContextHelpToolTip(_ContextHelpText);
-				newCtrl->getContextHelp(_ContextHelpText);
-				// UserDefined context help
-				if( !newCtrl->getContextHelpActionHandler().empty() )
-				{
-					CAHManager::getInstance()->runActionHandler(newCtrl->getContextHelpActionHandler(), newCtrl, newCtrl->getContextHelpAHParams() );
-				}
-
-				// If the text is finally empty (Special AH case), abort
-				if(_ContextHelpText.empty())
-					newCtrl= NULL;
-			}
-
-			// not present? wait furthermore to move the mouse.
-			if(!newCtrl)
-				CWidgetManager::getInstance()->_DeltaTimeStopingContextHelp= 0;
-			else
-			{
-				// enable
-				CWidgetManager::getInstance()->setCurContextHelp( newCtrl );
-				newCtrl->invalidateCoords();
-			}
-		}
-	}
-
-	updateTooltipCoords(_CurCtrlContextHelp);
-
-
-	// ***************
-	// **** display
-	// ***************
-	if(_CurCtrlContextHelp)
-	{
-		CInterfaceGroup *groupContextHelp = getWindowForActiveMasterGroup(_CurCtrlContextHelp->getContextHelpWindowName());
-		if(groupContextHelp)
-		{
-			/** If there's a modal box around, should be sure that the context help doesn't intersect it.
-			  * If this is the case, we just disable it, unless the tooltip was generated by the current modal window
-			  */
-			if ( CWidgetManager::getInstance()->hasModal() )
-			{
-				CInterfaceGroup *mw = CWidgetManager::getInstance()->getModal().ModalWindow;
-				if (mw && mw->isIn(*groupContextHelp))
-				{
-					if (_CurCtrlContextHelp->isSonOf(mw))
-					{
-						groupContextHelp->executeLuaScriptOnDraw();
-						groupContextHelp->draw ();
-						// flush layers
-						CViewRenderer::getInstance()->flush();
-					}
-				}
-				else
-				{
-					groupContextHelp->executeLuaScriptOnDraw();
-					groupContextHelp->draw ();
-					// flush layers
-					CViewRenderer::getInstance()->flush();
-				}
-			}
-			else
-			{
-				groupContextHelp->executeLuaScriptOnDraw();
-				groupContextHelp->draw ();
-				// flush layers
-				CViewRenderer::getInstance()->flush();
-			}
-		}
-	}
-
-	// Bkup movement
-	_LastXContextHelp= x;
-	_LastYContextHelp= y;
-}
-
-void CInterfaceManager::setContextHelpActive(bool active)
-{
-	if (!active)
-	{
-		disableContextHelp();
-	}
-	_ContextHelpActive = active;
-}
-
-
-uint CInterfaceManager::adjustTooltipPosition(CCtrlBase *newCtrl,
-											  CInterfaceGroup *win,
-											  THotSpot ttParentRef,
-											  THotSpot ttPosRef,
-											  sint32 xParent,
-											  sint32 yParent,
-											  sint32 wParent,
-											  sint32 hParent
-											 )
-{
-	CCtrlBase::TToolTipParentType	parentType= newCtrl->getToolTipParent();
-	CInterfaceGroup *groupContextHelp = getWindowForActiveMasterGroup(newCtrl->getContextHelpWindowName());
-	if(ttPosRef==Hotspot_TTAuto || ttParentRef==Hotspot_TTAuto)
-	{
-		// NB: keep the special window if type is specialwindow (defined above)
-		if(!win)
-			win= newCtrl->getRootWindow();
-		sint32	xWin= 0;
-		sint32	yWin= 0;
-		sint32	wWin= 0;
-		sint32	hWin= 0;
-		if(win)
-		{
-			xWin = win->getXReal();
-			yWin = win->getYReal();
-			wWin = win->getWReal();
-			hWin = win->getHReal();
-		}
-		// for Window, display top or bottom according to window pos/size
-		if(parentType==CCtrlBase::TTWindow || parentType==CCtrlBase::TTSpecialWindow)
-		{
-			sint32	top= (sint32)_ScreenH - (yWin+hWin);
-			sint32	bottom= yWin;
-			if(top>bottom)
-			{
-				ttParentRef= Hotspot_TL;
-				ttPosRef= Hotspot_BL;
-			}
-			else
-			{
-				ttParentRef= Hotspot_BL;
-				ttPosRef= Hotspot_TL;
-			}
-		}
-		// for Ctrl, display top, left or right according to window pos/size
-		else if(parentType==CCtrlBase::TTCtrl)
-		{
-			sint32	right= (sint32)_ScreenW - (xWin+wWin);
-			sint32	left= xWin;
-			if(right>left)
-			{
-				ttParentRef= Hotspot_TR;
-				ttPosRef= Hotspot_BL;
-			}
-			else
-			{
-				ttParentRef= Hotspot_TL;
-				ttPosRef= Hotspot_BR;
-			}
-		}
-		else
-		{
-			// default (mouse)
-			ttParentRef= Hotspot_BL;
-			ttPosRef= Hotspot_BL;
-		}
-	}
-
-	// **** compute coordinates of the tooltip
-	sint32 x= xParent;
-	sint32 y= yParent;
-	if (ttParentRef & Hotspot_Mx)
-		y += hParent/2;
-	if (ttParentRef & Hotspot_Tx)
-		y += hParent;
-	if (ttParentRef & Hotspot_xM)
-		x += wParent/2;
-	if (ttParentRef & Hotspot_xR)
-		x += wParent;
-
-	// adjust according to self posref
-	if (ttPosRef & Hotspot_Mx)
-		y -= groupContextHelp->getHReal()/2;
-	if (ttPosRef & Hotspot_Tx)
-		y -= groupContextHelp->getHReal();
-	if (ttPosRef & Hotspot_xM)
-		x -= groupContextHelp->getWReal()/2;
-	if (ttPosRef & Hotspot_xR)
-		x -= groupContextHelp->getWReal();
-
-
-	// **** clamp to screen coords, and set
-	uint clampCount = 0;
-
-	if ((x+groupContextHelp->getW()) > groupContextHelp->getParent()->getWReal())
-	{
-		++ clampCount;
-		x = groupContextHelp->getParent()->getWReal() - groupContextHelp->getW();
-	}
-	if (x < 0)
-	{
-		x = 0;
-		++ clampCount;
-	}
-	if ((y+groupContextHelp->getH()) > groupContextHelp->getParent()->getHReal())
-	{
-		y = groupContextHelp->getParent()->getHReal() - groupContextHelp->getH();
-		++ clampCount;
-	}
-	if (y < 0)
-	{
-		y = 0;
-		++ clampCount;
-	}
-
-	// update coords 3 times is required
-	groupContextHelp->setX (x);
-	groupContextHelp->setY (y);
-	groupContextHelp->updateCoords ();
-	groupContextHelp->updateCoords ();
-	groupContextHelp->updateCoords ();
-
-	return clampCount;
-}
 
 // ------------------------------------------------------------------------------------------------
 bool CInterfaceManager::isControlInWindow (CCtrlBase *ctrl, CInterfaceGroup *pNewCurrentWnd)
@@ -2623,7 +2174,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 		_LastEventKeyDesc = eventDesc;
 
 		// Any Key event disable the ContextHelp
-		disableContextHelp();
+		CWidgetManager::getInstance()->disableContextHelp();
 
 		// Hide menu if the key is pushed
 //		if ((eventDesc.getKeyEventType() == NLGUI::CEventDescriptorKey::keydown) && !_ModalStack.empty() && !eventDesc.getKeyAlt() && !eventDesc.getKeyCtrl() && !eventDesc.getKeyShift())
@@ -2776,7 +2327,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 			// Any Mouse event but move disable the ContextHelp
 			if(eventDesc.getEventTypeExtended() != NLGUI::CEventDescriptorMouse::mousemove)
 			{
-				disableContextHelp();
+				CWidgetManager::getInstance()->disableContextHelp();
 			}
 
 			// get the group under the mouse
@@ -3584,30 +3135,6 @@ bool	CInterfaceManager::getCurrentValidMessageBoxOnOk(string &ahOnOk, const std:
 }
 
 
-// ------------------------------------------------------------------------------------------------
-void	CInterfaceManager::setContextHelpText(const ucstring &text)
-{
-	_ContextHelpText = text;
-}
-
-
-// ------------------------------------------------------------------------------------------------
-void	CInterfaceManager::disableContextHelp()
-{
-	CWidgetManager::getInstance()->setCurContextHelp( NULL );
-	CWidgetManager::getInstance()->_DeltaTimeStopingContextHelp = 0;
-}
-
-// ------------------------------------------------------------------------------------------------
-void	CInterfaceManager::disableContextHelpForControl(CCtrlBase *pCtrl)
-{
-	if(!pCtrl)
-		return;
-	if( CWidgetManager::getInstance()->getCurContextHelp() == pCtrl )
-		disableContextHelp();
-}
-
-
 // ***************************************************************************
 void CInterfaceManager::displayDebugInfo(const ucstring &str, TSystemInfoMode mode /*=InfoMsg*/)
 {
@@ -3690,7 +3217,7 @@ CRGBA CInterfaceManager::getSystemInfoColor(const std::string &cat)
 void	CInterfaceManager::launchContextMenuInGame (const std::string &nameOfCM)
 {
 	// Launch the context menu in-game: can't appear while dragging an item
-	if (CDBCtrlSheet::getDraggedSheet() == NULL)
+	if (CCtrlDraggable::getDraggedSheet() == NULL)
 	{
 		if ( !CWidgetManager::getInstance()->hasModal() )
 		{
@@ -4137,86 +3664,6 @@ void CInterfaceManager::incLocalSyncActionCounter()
 	_LocalSyncActionCounter++;
 }
 
-
-// ***************************************************************************
-void	CInterfaceManager::drawOverExtendViewText()
-{
-//	CViewRenderer	&rVR= getViewRenderer();
-
-	if( CWidgetManager::getInstance()->getOverExtendViewText() )
-	{
-		CViewText	*vtSrc= safe_cast<CViewText*>( CWidgetManager::getInstance()->getOverExtendViewText() );
-
-		CInterfaceGroup *groupOver = getWindowForActiveMasterGroup("over_extend_view_text");
-		if(groupOver)
-		{
-			CViewText *vtDst = dynamic_cast<CViewText*>(groupOver->getView("text"));
-			if (vtDst != NULL)
-			{
-				// Copy all aspects to the view
-				vtDst->setText (vtSrc->getText());
-				vtDst->setFontSize (vtSrc->getFontSize());
-				vtDst->setColor (vtSrc->getColor());
-				vtDst->setModulateGlobalColor(vtSrc->getModulateGlobalColor());
-				vtDst->setShadow(vtSrc->getShadow());
-				vtDst->setShadowColor(vtSrc->getShadowColor());
-				vtDst->setCaseMode(vtSrc->getCaseMode());
-				vtDst->setUnderlined(vtSrc->getUnderlined());
-
-				// setup background
-				CViewBitmap	*pBack= dynamic_cast<CViewBitmap*>(groupOver->getView("midback"));
-				CViewBitmap	*pOutline= dynamic_cast<CViewBitmap*>(groupOver->getView("midoutline"));
-				if(pBack)
-					pBack->setColor( CWidgetManager::getInstance()->getOverExtendViewTextBackColor() );
-				if(pOutline)
-				{
-					pOutline->setColor(vtSrc->getColor());
-					pOutline->setModulateGlobalColor(vtSrc->getModulateGlobalColor());
-				}
-
-				// the group is the position of the overed text, but apply the delta of borders (vtDst X/Y)
-				sint32 x = vtSrc->getXReal() - vtDst->getX();
-				sint32 y = vtSrc->getYReal() - vtDst->getY();
-
-				// update one time only to get correct W/H
-				groupOver->updateCoords ();
-
-				if(!vtSrc->isClampRight())
-				{
-					// clamped from the left part
-					x += vtSrc->getWReal() - vtDst->getWReal();
-				}
-
-				// clamp to screen coords, and set
-				if ((x+groupOver->getW()) > groupOver->getParent()->getWReal())
-					x = groupOver->getParent()->getWReal() - groupOver->getW();
-				if (x < 0)
-					x = 0;
-				if ((y+groupOver->getH()) > groupOver->getParent()->getHReal())
-					y = groupOver->getParent()->getHReal() - groupOver->getH();
-				if (y < 0)
-					y = 0;
-
-				// set pos
-				groupOver->setX (x);
-				groupOver->setY (y);
-
-				// update coords 3 times is required
-				groupOver->updateCoords ();
-				groupOver->updateCoords ();
-				groupOver->updateCoords ();
-
-				// draw
-				groupOver->draw ();
-				// flush layers
-				CViewRenderer::getInstance()->flush();
-			}
-		}
-
-		// Reset the ptr so at next frame, won't be rendered (but if reset)
-		CWidgetManager::getInstance()->setOverExtendViewText( NULL, CWidgetManager::getInstance()->getOverExtendViewTextBackColor() );
-	}
-}
 
 
 #if !FINAL_VERSION

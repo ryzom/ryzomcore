@@ -2426,10 +2426,8 @@ class CHandlerBotChatTTItemType : public IActionHandler
 public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
-		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-
 		// \todo yoyo: for now disable tooltip
-		pIM->setContextHelpText(ucstring());
+		CWidgetManager::getInstance()->setContextHelpText(ucstring());
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerBotChatTTItemType, "botchat_tt_item_type");

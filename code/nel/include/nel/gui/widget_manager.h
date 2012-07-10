@@ -216,6 +216,9 @@ namespace NLGUI
 		CCtrlBase* getCurContextHelp(){ return curContextHelp; }
 
 		float _DeltaTimeStopingContextHelp;
+		float _MaxTimeStopingContextHelp;
+		sint _LastXContextHelp;
+		sint _LastYContextHelp;
 
 		CViewPointerBase* getPointer(){ return _Pointer; }
 		void setPointer( CViewPointerBase *pointer ){ _Pointer = pointer; }
@@ -256,6 +259,38 @@ namespace NLGUI
 		void reset();
 
 		void checkCoords();
+		
+		CInterfaceGroup* getWindowForActiveMasterGroup( const std::string &windowName );
+		
+		void drawOverExtendViewText();
+
+		// Internal : adjust a tooltip with respect to its parent. Returns the number of coordinate that were clamped
+		// against the screen border
+		uint adjustTooltipPosition( CCtrlBase *newCtrl, CInterfaceGroup *win, THotSpot ttParentRef,
+									THotSpot ttPosRef, sint32 xParent, sint32 yParent,
+									sint32 wParent, sint32 hParent );
+		
+		void updateTooltipCoords();
+		
+		// Update tooltip coordinate if they need to be (getInvalidCoords() returns a value != 0)
+		void updateTooltipCoords(CCtrlBase *newCtrl);
+		
+		/// for ContextHelp action handler only: set the result name
+		void setContextHelpText( const ucstring &text ){ _ContextHelpText = text; }
+		ucstring& getContextHelpText(){ return _ContextHelpText; }
+		
+		/// force disable the context help
+		void disableContextHelp();
+		
+		/// force disable the context help, if it is issued from the given control
+		void disableContextHelpForControl(CCtrlBase *pCtrl);
+		
+		CCtrlBase* getNewContextHelpCtrl();
+
+		void drawContextHelp();
+		
+		void setContextHelpActive(bool active);
+
 		// Relative move of pointer
 		void movePointer (sint32 dx, sint32 dy);
 		// Set absolute coordinates of pointer
@@ -284,7 +319,7 @@ namespace NLGUI
 		void resetCaptureKeyboard();
 
 		// True if the keyboard is captured
-		bool	isKeyboardCaptured() const {return _CaptureKeyboard!=NULL;}
+		bool isKeyboardCaptured() const {return _CaptureKeyboard!=NULL;}
 
 		// register a view that wants to be notified at each frame (receive the msg 'clocktick')
 		void registerClockMsgTarget(CCtrlBase *vb);
@@ -295,10 +330,10 @@ namespace NLGUI
 		void notifyElementCaptured(CCtrlBase *c);
 
 		// Add a group into the windows list of its master goup
-		void	makeWindow( CInterfaceGroup *group );
+		void makeWindow( CInterfaceGroup *group );
 
 		// Remove a group from the windows list of its master group
-		void    unMakeWindow( CInterfaceGroup *group, bool noWarning = false );
+		void unMakeWindow( CInterfaceGroup *group, bool noWarning = false );
 
 		void setGlobalColor( NLMISC::CRGBA col );
 		NLMISC::CRGBA getGlobalColor() const{ return _GlobalColor; }
@@ -439,6 +474,9 @@ namespace NLGUI
 		NLMISC::CRGBA _OverExtendViewTextBackColor;
 
 		SInterfaceTimes interfaceTimes;
+
+		ucstring _ContextHelpText;
+		bool _ContextHelpActive;
 
 		bool inGame;
 	};

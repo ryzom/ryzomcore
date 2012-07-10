@@ -287,7 +287,6 @@ public:
 	 */
 	void drawViews (NL3D::UCamera camera);
 	void drawAutoAdd ();
-	void drawContextHelp ();
 	//void drawContextMenu ();
 
 	/// Update all the elements
@@ -330,15 +329,6 @@ public:
 	 *	One can use it to know if it match its system and so if it needs to be closed (with disableModalWindow())
 	 */
 	bool	getCurrentValidMessageBoxOnOk(std::string &ahOnOk, const std::string &masterGroup="ui:interface");
-
-	/// force disable the context help
-	void	disableContextHelp();
-	/// force disable the context help, if it is issued from the given control
-	void	disableContextHelpForControl(CCtrlBase *pCtrl);
-	/// for ContextHelp action handler only: set the result name
-	void	setContextHelpText(const ucstring &text);
-
-	void	setContextHelpActive(bool active);
 
 	bool	isMouseOverWindow() const {return  _MouseOverWindow;}
 
@@ -464,8 +454,6 @@ public:
 
 	void	notifyMailAvailable();
 	void	notifyForumUpdated();
-
-	void updateTooltipCoords();
 
 	/** Returns a human readable timestamp with the given format.
 	 */
@@ -636,16 +624,6 @@ private:
 
 	bool		_MouseOverWindow;
 
-	// Context Help
-	bool					_ContextHelpActive;
-	//CCtrlBasePtr			_CurCtrlContextHelp;
-	//Delay before displaying ContextHelp on a ctrl having wantInstantContextHelp set to false (in seconds)
-	float					_MaxTimeStopingContextHelp;
-	sint					_LastXContextHelp;
-	sint					_LastYContextHelp;
-	ucstring				_ContextHelpText;
-	CCtrlBase				*getNewContextHelpCtrl();
-
 	/// Current waiting id and string from server
 	struct SIDStringWaiter
 	{
@@ -690,10 +668,6 @@ private:
 	NLMISC::CCDBNodeLeaf *_WarningColor;
 	NLMISC::CCDBNodeLeaf *_ErrorColor;
 
-	void			drawOverExtendViewText();
-
-	CInterfaceGroup	*getWindowForActiveMasterGroup(const std::string &windowName);
-
 	CDBLandmarkObs _LandmarkObs;
 
 	/// \name LUA
@@ -728,21 +702,6 @@ private:
 
 	// Pop a new message box. If the message box was found, returns a pointer on it
 	void messageBoxInternal(const std::string &msgBoxGroup, const ucstring &text, const std::string &masterGroup, TCaseMode caseMode);
-
-	// Internal : adjust a tooltip with respect to its parent. Returns the number of coordinate that were clamped
-	// against the screen border
-	uint adjustTooltipPosition(CCtrlBase *newCtrl,
-							   CInterfaceGroup *win,
-							   THotSpot ttParentRef,
-							   THotSpot ttPosRef,
-							   sint32 xParent,
-							   sint32 yParent,
-							   sint32 wParent,
-							   sint32 hParent
-							  );
-
-	// Update tooltip coordinate if they need to be (getInvalidCoords() returns a value != 0)
-	void updateTooltipCoords(CCtrlBase *newCtrl);
 
 	NL3D::UDriver *driver;
 	NL3D::UTextContext *textcontext;

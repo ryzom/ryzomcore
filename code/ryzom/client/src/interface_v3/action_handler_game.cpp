@@ -3705,7 +3705,7 @@ public:
 		ucstring	str;
 		fillPlayerBarText(str, "HP", SCORES::hit_points, "uittPlayerLifeFormat");
 
-		pIM->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTLife, "player_tt_life");
@@ -3722,7 +3722,7 @@ public:
 		ucstring	str;
 		fillPlayerBarText(str, "STA", SCORES::stamina, "uittPlayerStaminaFormat");
 
-		pIM->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTStamina, "player_tt_stamina");
@@ -3739,7 +3739,7 @@ public:
 		ucstring	str;
 		fillPlayerBarText(str, "SAP", SCORES::sap, "uittPlayerSapFormat");
 
-		pIM->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTSap, "player_tt_sap");
@@ -3756,7 +3756,7 @@ public:
 		ucstring	str;
 		fillPlayerBarText(str, "FOCUS", SCORES::focus, "uittPlayerFocusFormat");
 
-		pIM->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTFocus, "player_tt_focus");
@@ -3786,7 +3786,7 @@ public:
 		ucstring	str= CI18N::get("uittBulkFormat");
 		strFindReplace(str, "%v", toString(val) );
 		strFindReplace(str, "%m", toString(maxVal) );
-		pIM->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerGetTTBulk, "get_tt_bulk");

@@ -1255,8 +1255,7 @@ int CLuaIHMRyzom::disableContextHelp(CLuaState &ls)
 	//H_AUTO(Lua_CLuaIHM_disableContextHelp)
 	CLuaStackChecker lsc(&ls,    0);
 	CLuaIHM::checkArgCount(ls,    "disableContextHelp",    0);
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	pIM->disableContextHelp();
+	CWidgetManager::getInstance()->disableContextHelp();
 	return 0;
 }
 
@@ -1275,8 +1274,7 @@ int			CLuaIHMRyzom::disableContextHelpForControl(CLuaState &ls)
 	CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
 
 	// go
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	pIM->disableContextHelpForControl(dynamic_cast<CCtrlBase*>(pIE));
+	CWidgetManager::getInstance()->disableContextHelpForControl(dynamic_cast<CCtrlBase*>(pIE));
 
 	return 0;
 }
@@ -1971,9 +1969,7 @@ std::string	CLuaIHMRyzom::getDefine(const std::string &def)
 // ***************************************************************************
 void		CLuaIHMRyzom::setContextHelpText(const ucstring &text)
 {
-	//H_AUTO(Lua_CLuaIHM_setContextHelpText)
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	pIM->setContextHelpText(text);
+	CWidgetManager::getInstance()->setContextHelpText(text);
 }
 
 // ***************************************************************************
@@ -2645,7 +2641,7 @@ bool CLuaIHMRyzom::isRingAccessPointInReach()
 // ***************************************************************************
 void CLuaIHMRyzom::updateTooltipCoords()
 {
-	CInterfaceManager::getInstance()->updateTooltipCoords();
+	CWidgetManager::getInstance()->updateTooltipCoords();
 }
 
 // ***************************************************************************

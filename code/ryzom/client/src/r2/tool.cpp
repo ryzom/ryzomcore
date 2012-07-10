@@ -727,7 +727,7 @@ void CTool::captureMouse()
 		UserControls.captureMouse();
 		CWidgetManager::getInstance()->enableMouseHandling(false);
 	}
-	getUI().setContextHelpActive(false);
+	CWidgetManager::getInstance()->setContextHelpActive(false);
 	_MouseCaptured = true;
 }
 
@@ -738,7 +738,7 @@ void CTool::releaseMouse()
 	CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
 	UserControls.releaseMouse();
 	CWidgetManager::getInstance()->enableMouseHandling(true);
-	getUI().setContextHelpActive(true);
+	CWidgetManager::getInstance()->setContextHelpActive(true);
 	_MouseCaptured = false;
 }
 

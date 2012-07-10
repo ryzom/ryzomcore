@@ -3546,7 +3546,7 @@ void setConsoModSuccessTooltip( CDBCtrlSheet *cs )
 			strFindReplace(ustr, "%modifier", "@{0F0F}"+toString(nodeSM->getValue32())+"@{FFFF}");
 
 		// replace the context help that is required.
-		pIM->setContextHelpText(ustr);
+		CWidgetManager::getInstance()->setContextHelpText(ustr);
 	}
 }
 
@@ -3568,13 +3568,13 @@ public:
 		// special tooltip? (pvp outpost and xp catalyzer)
 		sint	specialTTId= getBonusMalusSpecialTT(cs);
 		if(specialTTId==BONUS_MALUS::XpCatalyser)
-			pIM->setContextHelpText(CI18N::get("uittXpBonus"));
+			CWidgetManager::getInstance()->setContextHelpText(CI18N::get("uittXpBonus"));
 		else if(specialTTId==BONUS_MALUS::OutpostPVPOn)
-			pIM->setContextHelpText(CI18N::get("uittPvpOutpostOn"));
+			CWidgetManager::getInstance()->setContextHelpText(CI18N::get("uittPvpOutpostOn"));
 		else if(specialTTId==BONUS_MALUS::OutpostPVPOutOfZone)
-			pIM->setContextHelpText(CI18N::get("uittPvpOutpostOutOfZone"));
+			CWidgetManager::getInstance()->setContextHelpText(CI18N::get("uittPvpOutpostOutOfZone"));
 		else if(specialTTId==BONUS_MALUS::OutpostPVPInRound)
-			pIM->setContextHelpText(CI18N::get("uittPvpOutpostInRound"));
+			CWidgetManager::getInstance()->setContextHelpText(CI18N::get("uittPvpOutpostInRound"));
 		else if(specialTTId==BONUS_MALUS::DeathPenalty)
 		{
 			CCDBNodeLeaf * node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:DEATH_XP_MALUS", false);
@@ -3582,7 +3582,7 @@ public:
 			{
 				ucstring txt = CI18N::get("uittDeathPenalty");
 				strFindReplace(txt, "%dp", toString((100*node->getValue16())/254));
-				pIM->setContextHelpText(txt);
+				CWidgetManager::getInstance()->setContextHelpText(txt);
 			}
 		}
 		// if disabled.
@@ -3595,7 +3595,7 @@ public:
 			str+= CI18N::get("uittAuraDisabled");
 
 			// and replace the context help that is required.
-			pIM->setContextHelpText(str);
+			CWidgetManager::getInstance()->setContextHelpText(str);
 		}
 		// else keep the default one
 	}
@@ -3622,7 +3622,7 @@ public:
 		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:NAME", index));
 		if (node && CStringManagerClient::instance()->getDynString(node->getValue32(), txt))
 		{
-			pIM->setContextHelpText(CEntityCL::removeTitleFromName(txt));
+			CWidgetManager::getInstance()->setContextHelpText(CEntityCL::removeTitleFromName(txt));
 		}
 	}
 };
@@ -3668,7 +3668,7 @@ public:
 		str += toString(minTimeRemaining);
 
 		// replace the context help that is required.
-		pIM->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerAnimalDeadPopupTooltip, "animal_dead_popup_tooltip");
