@@ -562,7 +562,6 @@ void CInterfaceManager::reset()
 	CViewRenderer::getInstance()->reset();
 	CWidgetManager::getInstance()->reset();
 
-	_ActiveAnims.clear();
 	for (uint32 i = 0; i < _IDStringWaiters.size(); ++i)
 		delete _IDStringWaiters[i];
 	_IDStringWaiters.clear();
@@ -1424,25 +1423,13 @@ void CInterfaceManager::updateFrameEvents()
 	// Handle anims done in 2 times because some AH can add or remove anims
 	// First ensure we are working on a safe vector and update all anims
 	sint i;
-	vector<CInterfaceAnim*> vTmp = _ActiveAnims;
-	for (i = 0; i < (sint)vTmp.size(); ++i)
-	{
-		CInterfaceAnim *pIA = vTmp[i];
-		pIA->update();
-	}
+	CWidgetManager::getInstance()->updateAnims();
+
 	IngameDbMngr.flushObserverCalls();
 	NLGUI::CDBManager::getInstance()->flushObserverCalls();
-	//
-	// Next : Test if we have to remove anims
-	for (i = 0; i < (sint)_ActiveAnims.size(); ++i)
-	{
-		CInterfaceAnim *pIA = _ActiveAnims[i];
-		if (pIA->isFinished())
-		{
-			_ActiveAnims.erase (_ActiveAnims.begin()+i);
-			--i;
-		}
-	}
+
+	CWidgetManager::getInstance()->removeFinishedAnims();
+
 	//
 	IngameDbMngr.flushObserverCalls();
 	NLGUI::CDBManager::getInstance()->flushObserverCalls();
@@ -1978,11 +1965,6 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 // ------------------------------------------------------------------------------------------------
 bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 {
-	// Check if we can receive events (no anims!)
-	for (uint i = 0; i < _ActiveAnims.size(); ++i)
-		if (_ActiveAnims[i]->isDisableButtons())
-			return false;
-
 	bool handled = false;
 
 	handled = CWidgetManager::getInstance()->handleEvent( event );
@@ -2142,12 +2124,6 @@ void CInterfaceManager::processServerIDString()
 }
 
 // ------------------------------------------------------------------------------------------------
-CInterfaceElement* CInterfaceManager::getElementFromDefine (const std::string &defineId)
-{
-	return CWidgetManager::getInstance()->getElementFromId(getDefine(defineId));
-}
-
-// ------------------------------------------------------------------------------------------------
 void CInterfaceManager::runProcedure (const string &procName, CCtrlBase *pCaller,
 									  const vector<string> &paramList)
 {
@@ -2208,42 +2184,6 @@ void CInterfaceManager::setProcedureAction(const std::string &procName, uint act
 		}
 	}
 }
-
-// ------------------------------------------------------------------------------------------------
-void CInterfaceManager::startAnim (const string &animId)
-{
-	TAnimMap::iterator it = _AnimMap.find(animId);
-	if (it == _AnimMap.end())
-	{
-		nlwarning ("anim %s not found", animId.c_str());
-		return;
-	}
-	CInterfaceAnim *pIT = it->second;
-	stopAnim (animId);
-	pIT->start();
-	_ActiveAnims.push_back (pIT);
-}
-
-// ------------------------------------------------------------------------------------------------
-void CInterfaceManager::stopAnim (const string &animId)
-{
-	TAnimMap::iterator it = _AnimMap.find(animId);
-	if (it == _AnimMap.end())
-	{
-		nlwarning ("anim %s not found", animId.c_str());
-		return;
-	}
-	CInterfaceAnim *pIT = it->second;
-	for (uint i = 0; i < _ActiveAnims.size(); ++i)
-		if (_ActiveAnims[i] == pIT)
-		{
-			_ActiveAnims.erase (_ActiveAnims.begin()+i);
-			if (!pIT->isFinished())
-				pIT->stop();
-			return;
-		}
-}
-
 
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::messageBoxInternal(const string &msgBoxGroup, const ucstring &text, const string &masterGroup, TCaseMode caseMode)
@@ -3627,58 +3567,6 @@ void		CInterfaceManager::luaGarbageCollect()
 	dumpLuaString("Collecting Garbaged LUA variables");
 	_LuaState->setGCThreshold(0);
 	dumpLuaString(NLMISC::toString("Memory Used : %d Kb", _LuaState->getGCCount()));
-}
-
-// ***************************************************************************
-void CInterfaceManager::hideAllWindows()
-{
-	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
-	for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
-	{
-		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-		if (rMG.Group->getActive())
-		{
-			for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
-			{
-				list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
-				list<CInterfaceGroup*>::const_iterator itw;
-				for (itw = rList.begin(); itw!= rList.end();)
-				{
-					CInterfaceGroup *pIG = *itw;
-					itw++;	// since setActive invalidate the iterator, be sure we move to the next one before
-					pIG->setActive(false);
-				}
-			}
-		}
-	}
-}
-
-// ***************************************************************************
-void CInterfaceManager::hideAllNonSavableWindows()
-{
-	std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
-	for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
-	{
-		CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-		if (rMG.Group->getActive())
-		{
-			for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
-			{
-				list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
-				list<CInterfaceGroup*>::const_iterator itw;
-				for (itw = rList.begin(); itw!= rList.end();)
-				{
-					CInterfaceGroup *pIG = *itw;
-					CGroupContainer *cont = dynamic_cast<CGroupContainer *>(pIG);
-					itw++;	// since setActive invalidate the iterator, be sure we move to the next one before
-					if (!cont || !cont->isSavable())
-					{
-						pIG->setActive(false);
-					}
-				}
-			}
-		}
-	}
 }
 
 // ------------------------------------------------------------------------------------------------

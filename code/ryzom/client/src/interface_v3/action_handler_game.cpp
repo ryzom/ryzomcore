@@ -2971,7 +2971,7 @@ public:
 
 		// **** Init Screen Aspect Ratio
 		// Init the combo box, according to the value
-		pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromDefine( "game_config_screen_ratio_cb" ));
+		pCB= dynamic_cast<CDBGroupComboBox*>( CWidgetManager::getInstance()->getElementFromDefine( "game_config_screen_ratio_cb" ));
 		if(pCB)
 		{
 			// Bkup for cancel
@@ -3376,7 +3376,7 @@ class CHandlerGameConfigChangeScreenRatioMode : public IActionHandler
 			ClientCfg.writeDouble("ScreenAspectRatio", ClientCfg.ScreenAspectRatio);
 
 			// set content, and freeze the edit box
-			CGroupEditBox	*eb= dynamic_cast<CGroupEditBox*>(pIM->getElementFromDefine("game_config_screen_ratio_eb"));
+			CGroupEditBox	*eb= dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromDefine("game_config_screen_ratio_eb"));
 			if(eb)
 			{
 				eb->setFrozen(true);
@@ -3387,7 +3387,7 @@ class CHandlerGameConfigChangeScreenRatioMode : public IActionHandler
 		else
 		{
 			// just unfreeze the edit box, and set correct value
-			CGroupEditBox	*eb= dynamic_cast<CGroupEditBox*>(pIM->getElementFromDefine("game_config_screen_ratio_eb"));
+			CGroupEditBox	*eb= dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromDefine("game_config_screen_ratio_eb"));
 			if(eb)
 			{
 				eb->setFrozen(false);
@@ -3420,7 +3420,7 @@ class CHandlerGameConfigChangeScreenRatioCustom : public IActionHandler
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		sint	mode= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:SCREEN_RATIO_MODE")->getValue32();
 		if (mode != 2) return;
-		CGroupEditBox	*eb= dynamic_cast<CGroupEditBox*>(pIM->getElementFromDefine("game_config_screen_ratio_eb"));
+		CGroupEditBox	*eb= dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromDefine("game_config_screen_ratio_eb"));
 		if(eb)
 		{
 			// validate the value

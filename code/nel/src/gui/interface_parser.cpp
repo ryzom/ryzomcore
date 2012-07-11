@@ -2652,6 +2652,18 @@ namespace NLGUI
 		return false;
 	}
 
+	CInterfaceAnim* CInterfaceParser::getAnim( const std::string &name) const
+	{
+		TAnimMap::const_iterator it = _AnimMap.find( name );
+		if( it == _AnimMap.end() )
+		{
+			nlwarning( "anim %s not found", name.c_str() );
+			return NULL;
+		}
+		else
+			return it->second;
+	}
+
 	// ***************************************************************************
 	bool CInterfaceParser::parseStyle(xmlNodePtr cur)
 	{

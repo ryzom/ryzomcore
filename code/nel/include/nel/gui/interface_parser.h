@@ -160,7 +160,7 @@ namespace NLGUI
 
 		/// \name Parameter variable
 		// @{
-		const std::string	&getDefine(const std::string &id) const;
+		const std::string&  getDefine(const std::string &id) const;
 		bool				isDefineExist(const std::string &id) const;
 		void				setDefine(const std::string &id, const std::string &value);
 		// @}
@@ -227,6 +227,8 @@ namespace NLGUI
 		bool getProcedureAction( const std::string &procName, uint actionIndex, std::string &ah, std::string &params ) const;
 
 		void setCacheUIParsing( bool b ){ cacheUIParsing = b; }
+
+		CInterfaceAnim* getAnim( const std::string &name ) const;
 
 	protected:
 

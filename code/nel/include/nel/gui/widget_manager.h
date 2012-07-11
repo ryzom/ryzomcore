@@ -43,6 +43,7 @@ namespace NLGUI
 	class CInterfaceGroup;
 	class CViewPointerBase;
 	class CInterfaceOptions;
+	class CInterfaceAnim;
 
 	class IParser
 	{
@@ -56,6 +57,8 @@ namespace NLGUI
 		virtual bool parseGroupChildren( xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload ) = 0;
 		virtual uint getProcedureNumActions( const std::string &procName ) const = 0;
 		virtual bool getProcedureAction( const std::string &procName, uint actionIndex, std::string &ah, std::string &params ) const = 0;
+		virtual const std::string&  getDefine(const std::string &id) const = 0;
+		virtual CInterfaceAnim* getAnim( const std::string &name ) const = 0;
 	};
 
 	/// Manages the GUI widgets
@@ -164,6 +167,14 @@ namespace NLGUI
 		CInterfaceElement* getElementFromId( const std::string &sEltId );
 		CInterfaceElement* getElementFromId( const std::string &sStart, const std::string &sEltId );
 
+		/**
+		 * get a window from its  Id of its group.
+		 *	NB: "ctrl_launch_modal" is a special Id which return the last ctrl which has launch a modal. NULL if modal closed.
+		 * \param groupId : the Id of the window group
+		 */
+		/// get an element from a define ID. shortcut for getElementFromId(getDefine(define))
+		CInterfaceElement* getElementFromDefine( const std::string &defineId );
+
 		/// Get the window from an element (ui:interface:###)
 		CInterfaceGroup* getWindow(CInterfaceElement*);
 
@@ -216,6 +227,9 @@ namespace NLGUI
 		void popModalWindow();
 		// pop all top modal windows with the given category (a string stored in the modal)
 		void popModalWindowCategory(const std::string &category);
+		
+		void hideAllWindows();
+		void hideAllNonSavableWindows();
 
 		CCtrlBase *getCtrlLaunchingModal ()
 		{
@@ -455,6 +469,11 @@ namespace NLGUI
 
 		void registerOnWidgetsDrawnHandler( IOnWidgetsDrawnHandler* handler );
 		void removeOnWidgetsDrawnHandler( IOnWidgetsDrawnHandler *handler );
+		
+		void startAnim( const std::string &animId );
+		void stopAnim( const std::string &animId );
+		void updateAnims();
+		void removeFinishedAnims();
 				
 		static IParser *parser;
 
@@ -525,6 +544,8 @@ namespace NLGUI
 
 		uint32 screenH;
 		uint32 screenW;
+		
+		std::vector< CInterfaceAnim* > activeAnims;
 
 		std::vector< INewScreenSizeHandler* > newScreenSizeHandlers;
 		std::vector< IOnWidgetsDrawnHandler* > onWidgetsDrawnHandlers;

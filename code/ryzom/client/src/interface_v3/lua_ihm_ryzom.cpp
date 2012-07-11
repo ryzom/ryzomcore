@@ -965,7 +965,7 @@ int CLuaIHMRyzom::initEmotesMenu(CLuaState &ls)
 int CLuaIHMRyzom::hideAllWindows(CLuaState &/* ls */)
 {
 	//H_AUTO(Lua_CLuaIHM_hideAllWindows)
-	CInterfaceManager::getInstance()->hideAllWindows();
+	CWidgetManager::getInstance()->hideAllWindows();
 	return 0;
 }
 
@@ -973,7 +973,7 @@ int CLuaIHMRyzom::hideAllWindows(CLuaState &/* ls */)
 int CLuaIHMRyzom::hideAllNonSavableWindows(CLuaState &/* ls */)
 {
 	//H_AUTO(Lua_CLuaIHM_hideAllNonSavableWindows)
-	CInterfaceManager::getInstance()->hideAllNonSavableWindows();
+	CWidgetManager::getInstance()->hideAllNonSavableWindows();
 	return 0;
 }
 

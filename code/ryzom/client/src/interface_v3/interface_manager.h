@@ -235,14 +235,6 @@ public:
 	void addServerID (const std::string &sTarget, uint32 id, IStringProcess *cb = NULL);
 	void processServerIDString();
 
-	/**
-	 * get a window from its  Id of its group.
-	 *	NB: "ctrl_launch_modal" is a special Id which return the last ctrl which has launch a modal. NULL if modal closed.
-	 * \param groupId : the Id of the window group
-	 */
-	/// get an element from a define ID. shortcut for getElementFromId(getDefine(define))
-	CInterfaceElement* getElementFromDefine (const std::string &defineId);
-
 	/// Control specific
 
 	/// Enable/Disable window movement
@@ -273,10 +265,6 @@ public:
 	void runProcedure(const std::string &procName, CCtrlBase *pCaller, const std::vector<std::string> &paramList);
 	// replace an action in a procedure (if possible)
 	void setProcedureAction(const std::string &procName, uint actionIndex, const std::string &ah, const std::string &params);
-	// Execute a anim
-	void startAnim(const std::string &animId);
-	void stopAnim(const std::string &animId);
-
 
 	// InGame ContextMenu
 	void launchContextMenuInGame (const std::string &nameOfCM);
@@ -394,10 +382,6 @@ public:
 
 	// Get the list of InGame XML Interface files, with any AddOn ones
 	static std::vector<std::string>		getInGameXMLInterfaceFiles();
-
-	// hide all the windows
-	void		hideAllWindows();
-	void		hideAllNonSavableWindows();
 
 	/// \name Action Counter sync
 	// @{
@@ -630,9 +614,6 @@ private:
 
 	uint32			_ScreenW, _ScreenH; // Change res detection
 	sint32			_LastInGameScreenW, _LastInGameScreenH; // Resolution used for last InGame interface
-
-	// List of active Anims
-	std::vector<CInterfaceAnim*> _ActiveAnims;
 
 	// Modes
 	CInterfaceConfig::CDesktopImage	_Modes[MAX_NUM_MODES];

@@ -1647,7 +1647,7 @@ void CEditor::waitScenarioScreen()
 	{
 		setMode(GoingToEditionMode);
 	}
-	getUI().hideAllWindows();
+	CWidgetManager::getInstance()->hideAllWindows();
 	CInterfaceGroup *waitScreen = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_connecting"));
 	if (waitScreen)
 	{
@@ -3942,7 +3942,7 @@ void CEditor::release()
 		saveCurrentKeySet();
 		saveUIConfig();
 	}
-	getUI().hideAllWindows(); // make sure all action handlers are called while the r2 lua environment is still active
+	CWidgetManager::getInstance()->hideAllWindows(); // make sure all action handlers are called while the r2 lua environment is still active
 	clearContent();
 	_EntityCustomSelectBoxMap.clear();
 

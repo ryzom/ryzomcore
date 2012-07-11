@@ -27,6 +27,7 @@
 #include "nel/gui/view_text.h"
 #include "nel/gui/view_bitmap.h"
 #include "nel/gui/group_container.h"
+#include "nel/gui/interface_anim.h"
 #include "nel/misc/events.h"
 
 namespace NLGUI
@@ -454,6 +455,12 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	CInterfaceElement* CWidgetManager::getElementFromDefine( const std::string &defineId )
+	{
+		return getElementFromId( parser->getDefine( defineId ) );
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	void CWidgetManager::setTopWindow (CInterfaceGroup* win)
 	{
 		//find the window in the window list
@@ -728,6 +735,56 @@ namespace NLGUI
 		}
 	}
 
+	// ***************************************************************************
+	void CWidgetManager::hideAllWindows()
+	{
+		for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			if (rMG.Group->getActive())
+			{
+				for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
+				{
+					std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
+					std::list<CInterfaceGroup*>::const_iterator itw;
+					for (itw = rList.begin(); itw!= rList.end();)
+					{
+						CInterfaceGroup *pIG = *itw;
+						itw++;	// since setActive invalidate the iterator, be sure we move to the next one before
+						pIG->setActive(false);
+					}
+				}
+			}
+		}
+	}
+
+	// ***************************************************************************
+	void CWidgetManager::hideAllNonSavableWindows()
+	{
+		for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			if (rMG.Group->getActive())
+			{
+				for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
+				{
+					std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
+					std::list<CInterfaceGroup*>::const_iterator itw;
+					for (itw = rList.begin(); itw!= rList.end();)
+					{
+						CInterfaceGroup *pIG = *itw;
+						CGroupContainer *cont = dynamic_cast<CGroupContainer *>(pIG);
+						itw++;	// since setActive invalidate the iterator, be sure we move to the next one before
+						if (!cont || !cont->isSavable())
+						{
+							pIG->setActive(false);
+						}
+					}
+				}
+			}
+		}
+	}
+
 	// ------------------------------------------------------------------------------------------------
 	CInterfaceGroup* CWidgetManager::getWindowUnder (sint32 x, sint32 y)
 	{
@@ -977,6 +1034,8 @@ namespace NLGUI
 		resetColorProps();
 
 		_AlphaRolloverSpeedDB = NULL;
+
+		activeAnims.clear();
 	}
 
 
@@ -2005,6 +2064,11 @@ namespace NLGUI
 
 	bool CWidgetManager::handleEvent( const CEventDescriptor &evnt )
 	{
+		// Check if we can receive events (no anims!)
+		for( uint32 i = 0; i < activeAnims.size(); ++i )
+			if( activeAnims[i]->isDisableButtons() )
+				return false;
+
 		if( evnt.getType() == CEventDescriptor::system )
 		{
 			const CEventDescriptorSystem &systemEvent = reinterpret_cast< const CEventDescriptorSystem& >( evnt );
@@ -2914,6 +2978,54 @@ namespace NLGUI
 			return;
 
 		onWidgetsDrawnHandlers.erase( itr );
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::startAnim( const std::string &animId )
+	{
+		CInterfaceAnim *pIT = parser->getAnim( animId );
+		if( pIT == NULL )
+			return;
+
+		stopAnim( animId );
+		pIT->start();
+		activeAnims.push_back( pIT );
+	}
+
+	void CWidgetManager::removeFinishedAnims()
+	{
+		sint32 i = 0;
+		for( i = 0; i < (sint32)activeAnims.size(); ++i )
+		{
+			CInterfaceAnim *pIA = activeAnims[i];
+			if (pIA->isFinished())
+			{
+				activeAnims.erase( activeAnims.begin() + i );
+				--i;
+			}
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::stopAnim( const std::string &animId )
+	{
+		CInterfaceAnim *pIT = parser->getAnim( animId );
+
+		for( uint i = 0; i < activeAnims.size(); ++i )
+			if( activeAnims[ i ] == pIT )
+			{
+				activeAnims.erase( activeAnims.begin() + i );
+				if( !pIT->isFinished() )
+					pIT->stop();
+				return;
+			}
+	}
+
+	void CWidgetManager::updateAnims()
+	{
+		std::vector< CInterfaceAnim* >::iterator itr;
+		for( itr = activeAnims.begin(); itr != activeAnims.end(); ++itr )
+			(*itr)->update();
 	}
 
 	CWidgetManager::CWidgetManager()
