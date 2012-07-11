@@ -26,6 +26,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/gui/interface_common.h"
 #include "nel/gui/interface_options.h"
+#include "nel/gui/event_descriptor.h"
 #include "nel/3d/u_camera.h"
 
 namespace NLMISC
@@ -317,6 +318,10 @@ namespace NLGUI
 
 		void drawViews( NL3D::UCamera camera );
 
+		bool handleEvent( const CEventDescriptor &eventDesc );
+		
+		bool handleMouseMoveEvent( const CEventDescriptor &eventDesc );
+
 		// Relative move of pointer
 		void movePointer (sint32 dx, sint32 dy);
 		// Set absolute coordinates of pointer
@@ -380,6 +385,8 @@ namespace NLGUI
 		// Enable mouse Events to interface. if false, release Captures.
 		void enableMouseHandling( bool handle );
 		bool isMouseHandlingEnabled() const{ return _MouseHandlingEnabled; }
+		bool isMouseOverWindow() const{ return _MouseOverWindow; }
+		void setMouseOverWindow( bool b ){ _MouseOverWindow = b; }
 		
 		// Get the User DblClick Delay (according to save...), in milisecond
 		uint getUserDblClickDelay();
@@ -513,6 +520,8 @@ namespace NLGUI
 		bool _ContextHelpActive;
 
 		bool inGame;
+		
+		bool _MouseOverWindow;
 
 		uint32 screenH;
 		uint32 screenW;

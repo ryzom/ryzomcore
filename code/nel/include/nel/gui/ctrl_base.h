@@ -147,6 +147,9 @@ namespace NLGUI
 		virtual bool getMouseOverShape(std::string &/* texName */, uint8 &/* rot */, NLMISC::CRGBA &/* col */) { return false; }
 
 		virtual void serial(NLMISC::IStream &f);
+
+		uint32 getDepth( CInterfaceGroup *group );
+
 	protected:
 		// This is the ContextHelp filled by default in parse()
 		ucstring			_ContextHelp;

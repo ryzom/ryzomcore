@@ -223,5 +223,22 @@ namespace NLGUI
 		return "context_help";
 	}
 
+	uint32 CCtrlBase::getDepth( CInterfaceGroup *group )
+	{
+		uint32 depth = 1;
+		CInterfaceGroup *parent = getParent();
+
+		while( parent != NULL )
+		{
+			if ( parent == group )
+				break;
+			else
+				parent = parent->getParent();
+			depth++;
+		}
+		// The Resizer Ctrls take the precedence over Sons controls.
+		return depth + getDeltaDepth();
+	}
+
 }
 

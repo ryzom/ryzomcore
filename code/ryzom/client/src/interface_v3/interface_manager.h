@@ -268,7 +268,7 @@ public:
 
 	/// Handle The Event. return true if the interfaceManager catch it and if must not send to the Game Action Manager
 	bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
-	bool handleMouseMoveEvent( const NLGUI::CEventDescriptor &eventDesc );
+
 	// execute a procedure. give a list of parameters. NB: the first param is the name of the proc (skipped)...
 	void runProcedure(const std::string &procName, CCtrlBase *pCaller, const std::vector<std::string> &paramList);
 	// replace an action in a procedure (if possible)
@@ -324,8 +324,6 @@ public:
 	 *	One can use it to know if it match its system and so if it needs to be closed (with disableModalWindow())
 	 */
 	bool	getCurrentValidMessageBoxOnOk(std::string &ahOnOk, const std::string &masterGroup="ui:interface");
-
-	bool	isMouseOverWindow() const {return  _MouseOverWindow;}
 
 	// Modes
 	void	setMode(uint8 newMode);
@@ -619,8 +617,6 @@ private:
 
 	NLMISC::CCDBNodeLeaf	   *_DescTextTarget;
 
-	bool		_MouseOverWindow;
-
 	/// Current waiting id and string from server
 	struct SIDStringWaiter
 	{
@@ -637,9 +633,6 @@ private:
 
 	// List of active Anims
 	std::vector<CInterfaceAnim*> _ActiveAnims;
-
-	bool isControlInWindow (CCtrlBase *ctrl, CInterfaceGroup *pNewCurrentWnd);
-	uint getDepth (CCtrlBase *ctrl, CInterfaceGroup *pNewCurrentWnd);
 
 	// Modes
 	CInterfaceConfig::CDesktopImage	_Modes[MAX_NUM_MODES];

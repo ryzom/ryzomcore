@@ -1257,6 +1257,19 @@ namespace NLGUI
 		}
 	}
 
+	
+	bool CInterfaceElement::isInGroup( CInterfaceGroup *group )
+	{
+		CInterfaceGroup *parent = getParent();
+		while( parent != NULL )
+		{
+			if( parent == group )
+				return true;
+			else
+				parent = parent->getParent();
+		}
+		return false;
+	}
 
 }
 
