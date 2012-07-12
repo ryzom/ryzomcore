@@ -1080,7 +1080,7 @@ public:
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 		// start the npc web page
-		pIM->executeLuaScript("game:startNpcWebPage()", true);
+		CLuaManager::getInstance().executeLuaScript("game:startNpcWebPage()", true);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerContextWebPage, "context_web_page");

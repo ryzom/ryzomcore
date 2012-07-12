@@ -7646,8 +7646,7 @@ class CAHR2FreezeUnfreezeBotObjects : public IActionHandler
 {
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
-		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->executeLuaScript("r2:freezeUnfreezeBotObjects()");
+		CLuaManager::getInstance().executeLuaScript("r2:freezeUnfreezeBotObjects()");
 	}
 };
 REGISTER_ACTION_HANDLER(CAHR2FreezeUnfreezeBotObjects, "r2ed_freeze_unfreeze_botobjects");

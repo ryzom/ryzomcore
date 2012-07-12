@@ -114,7 +114,7 @@ void CToolCreateEntity::commit(const NLMISC::CVector &createPosition, float crea
 		if (!getEditor().verifyRoomLeft(0, 1))
 		{
 
-			getUI().executeLuaScript("r2:checkStaticQuota(1)");
+			CLuaManager::getInstance().executeLuaScript("r2:checkStaticQuota(1)");
 			return;
 		}
 		setContextHelp(CI18N::get("uiR2EDDrawArrayContextHelp"));

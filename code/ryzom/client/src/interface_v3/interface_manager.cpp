@@ -622,15 +622,15 @@ void CInterfaceManager::destroy ()
 
 void CInterfaceManager::initLUA()
 {
-	if( _LuaState != NULL )
+	if( isLuaInitialized() )
 		return;
 
 	CInterfaceParser::initLUA();
 
-	if( _LuaState == NULL )
+	if( !isLuaInitialized() )
 		return;
 
-	CLuaIHMRyzom::RegisterRyzomFunctions( *_LuaState );
+	CLuaIHMRyzom::RegisterRyzomFunctions( *( CLuaManager::getInstance().getLuaState() ) );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1518,7 +1518,7 @@ void CInterfaceManager::updateFrameEvents()
 	luaDebuggerMainLoop();
 
 	// handle gc for lua
-	if (_LuaState) _LuaState->handleGC();
+	CLuaManager::getInstance().getLuaState()->handleGC();
 
 	CBGDownloaderAccess::getInstance().update();
 
@@ -3252,72 +3252,6 @@ void	CInterfaceManager::connectYuboChat()
 }
 
 // ***************************************************************************
-bool	CInterfaceManager::executeLuaScript(const std::string &luaScript, bool smallScript)
-{
-	H_AUTO ( RZ_Interface_executeLuaScript )
-
-	nlassert(_LuaState);
-	try
-	{
-		if(smallScript)
-			_LuaState->executeSmallScript(luaScript);
-		else
-			_LuaState->executeScript(luaScript);
-	}
-	catch(const ELuaError &e)
-	{
-		std::string msg = e.luaWhat();
-		char filename[MAX_PATH];
-		char exceptionName[MAX_PATH];
-		uint32 line;
-		// Hamster: quick fix on AJM code but sscanf is still awfull
-		if (sscanf(msg.c_str(), "%s: %s.lua:%d:",exceptionName, filename, &line) == 3) // NB: test not exact here, but should work in 99,9 % of cases
-		{
-			msg = CLuaIHMRyzom::createGotoFileButtonTag(filename, line) + msg;
-			nlwarning(LuaHelperStuff::formatLuaErrorNlWarn(msg).c_str());
-			displaySystemInfo(LuaHelperStuff::formatLuaErrorSysInfo(msg));
-		}
-		else	// AJM: handle the other 0.1% of cases
-		{
-			// Yoyo: seems that previous test doesn't work.... btw, must still print the message please...
-			std::vector<string> error;
-			splitString(msg.c_str(), ":", error);
-			if (error.size() > 3)
-			{
-				std::vector<string> contextList;
-				explode(luaScript, string("\n"), contextList);
-				fromString(error[2], line);
-				if (line >= 3 && contextList.size() >= line)
-					msg = error[0]+": \n>>> "+contextList[line-3]+"\n>>> "+contextList[line-2]+"\n>>> "+contextList[line-1]+"\nError:"+error[2]+": "+error[3];
-				else if (line >= 2 && contextList.size() >= line)
-					msg = error[0]+": \n>>>"+contextList[line-2]+"\n>>>"+contextList[line-1]+"\nError:"+error[2]+": "+error[3];
-				else if (line >= 1 && contextList.size() >= line)
-					msg = error[0]+": \n>>>"+contextList[line-1]+"\nError:"+error[2]+": "+error[3];
-			}
-			nlwarning(LuaHelperStuff::formatLuaErrorNlWarn(msg).c_str());
-			displaySystemInfo(LuaHelperStuff::formatLuaErrorSysInfo(msg));
-		}
-		return false;
-	}
-	return true;
-}
-
-// ***************************************************************************
-void	CInterfaceManager::reloadAllLuaFileScripts()
-{
-	std::set<std::string>::const_iterator	it= _LuaFileScripts.begin();
-	for(;it!=_LuaFileScripts.end();it++)
-	{
-		string	error;
-		// if fail to reload a script, display the error code
-		if(!loadLUA(*it, error))
-		{
-			displaySystemInfo(LuaHelperStuff::formatLuaErrorSysInfo(error));
-		}
-	}
-}
-
-// ***************************************************************************
 std::vector<std::string>		CInterfaceManager::getInGameXMLInterfaceFiles()
 {
 	// Original Files
@@ -3374,8 +3308,7 @@ void		CInterfaceManager::dumpLuaString(const std::string &str)
 // ***************************************************************************
 void		CInterfaceManager::getLuaValueInfo(std::string &str, sint index)
 {
-	nlassert(_LuaState);
-	CLuaState	&ls= *_LuaState;
+	CLuaState	&ls= *( CLuaManager::getInstance().getLuaState() );
 
 	sint	type= ls.type(index);
 	if(type==LUA_TNIL)
@@ -3421,8 +3354,7 @@ void		CInterfaceManager::getLuaValueInfo(std::string &str, sint index)
 // ***************************************************************************
 void		CInterfaceManager::dumpLuaKeyValueInfo(uint recursTableLevel, uint tabLevel)
 {
-	nlassert(_LuaState);
-	CLuaState	&ls= *_LuaState;
+	CLuaState	&ls= *( CLuaManager::getInstance().getLuaState() );
 	CLuaStackChecker lsc(&ls);
 
 	// Dump Key Str
@@ -3458,11 +3390,7 @@ void		CInterfaceManager::dumpLuaKeyValueInfo(uint recursTableLevel, uint tabLeve
 // ***************************************************************************
 void		CInterfaceManager::dumpLuaState(uint detail)
 {
-	if(!_LuaState)
-	{
-		dumpLuaString("LUA State not created");
-		return;
-	}
+	CLuaState *_LuaState = CLuaManager::getInstance().getLuaState();
 
 	// clamp detailed info to 2 (display at max content of eaxh Env of each group)
 	clamp(detail, 0U, 2U);
@@ -3494,16 +3422,6 @@ void		CInterfaceManager::dumpLuaState(uint detail)
 
 		dumpLuaString(NLMISC::toString("Number of EnvTable for ui groups: %d", count));
 	}
-}
-
-// ***************************************************************************
-void		CInterfaceManager::luaGarbageCollect()
-{
-	if(!_LuaState)
-		return;
-	dumpLuaString("Collecting Garbaged LUA variables");
-	_LuaState->setGCThreshold(0);
-	dumpLuaString(NLMISC::toString("Memory Used : %d Kb", _LuaState->getGCCount()));
 }
 
 // ------------------------------------------------------------------------------------------------

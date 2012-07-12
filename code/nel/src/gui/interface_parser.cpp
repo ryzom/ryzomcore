@@ -198,14 +198,12 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	CInterfaceParser::CInterfaceParser()
 	{
-		// LUA
-		_LuaState= NULL;
+		luaInitialized = false;
 		cacheUIParsing = false;
 	}
 
 	CInterfaceParser::~CInterfaceParser()
 	{
-		_LuaState = NULL;
 		removeAllModules();
 	}
 	/** Convert a string into a memstream
@@ -2674,15 +2672,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void	CInterfaceParser::initLUA()
 	{
-		// do nothing if LUA environment already exists
-		if( _LuaState != NULL )
-			return;
-
-		// create a new LUA environnement
-		nlassert(_LuaState==NULL);
 		CLuaManager::enableLuaDebugging();
-		CLuaManager::getInstance();
-		_LuaState= CLuaManager::getInstance().getLuaState();
 
 	#ifdef LUA_NEVRAX_VERSION
 		extern ILuaIDEInterface *LuaDebuggerIDE;
@@ -2690,18 +2680,16 @@ namespace NLGUI
 	#endif
 
 		// register LUA methods
-		CLuaIHM::registerAll(*_LuaState);
+		CLuaIHM::registerAll( *( CLuaManager::getInstance().getLuaState() ) );
+		luaInitialized = true;
 	}
 
 	// ***************************************************************************
 	void	CInterfaceParser::uninitLUA()
 	{
-		// Delete all LUA environnement (and hence variables)
-		// delete _LuaState;
-		// _LuaState= NULL;
-
-		// delete all .lua file loaded
 		_LuaFileScripts.clear();
+		CLuaManager::getInstance().ResetLuaState();
+		luaInitialized = false;
 	}
 
 	// ***************************************************************************
@@ -2740,10 +2728,9 @@ namespace NLGUI
 		}
 
 		// Parse script
-		nlassert(_LuaState);
 		try
 		{
-			_LuaState->executeFile(pathName);
+			CLuaManager::getInstance().getLuaState()->executeFile(pathName);
 		}
 		catch(const ELuaError &e)
 		{
@@ -2755,5 +2742,18 @@ namespace NLGUI
 		return true;
 	}
 
+	void CInterfaceParser::reloadAllLuaFileScripts()
+	{
+		std::set< std::string >::const_iterator	it;
+		for( it = _LuaFileScripts.begin(); it != _LuaFileScripts.end(); ++it )
+		{
+			std::string error;
+			// if fail to reload a script, display the error code
+			if( !loadLUA( *it, error ) )
+			{
+				nlwarning( LuaHelperStuff::formatLuaErrorSysInfo( error ).c_str() );
+			}
+		}
+	}
 }
 

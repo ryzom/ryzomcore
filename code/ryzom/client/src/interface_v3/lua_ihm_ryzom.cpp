@@ -133,7 +133,7 @@ public:
 
 		// execute a small script. NB: use a small script here because
 		// most often action handlers are called from xml files => lot of redundant script
-		pIM->executeLuaScript(sParams,   true);
+		CLuaManager::getInstance().executeLuaScript(sParams,   true);
 
 		// pop UI caller
 		if(pCaller)
@@ -179,7 +179,7 @@ static DECLARE_INTERFACE_USER_FCT(lua)
 	// assign return value in retId.
 	script= retId + "= " + script;
 	// execute a small script here,   because most often exprs are called from xml files => lot of redundant script
-	pIM->executeLuaScript(script,   true);
+	CLuaManager::getInstance().executeLuaScript(script,   true);
 
 
 	// *** retrieve and convert return value

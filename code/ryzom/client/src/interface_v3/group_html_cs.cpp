@@ -127,7 +127,7 @@ void CGroupHTMLCS::getParameters (std::vector<CParameter> &parameters, bool enco
 	{
 		webIgReady = true;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->executeLuaScript("game:onWebIgReady()");
+		CLuaManager::getInstance().executeLuaScript("game:onWebIgReady()");
 	}
 
 	// For each line

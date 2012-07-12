@@ -1422,7 +1422,7 @@ public:
 			CInterfaceManager *im = CInterfaceManager::getInstance();
 			im->displaySystemInfo(ucstring("@{6F6F}") +  playerName +ucstring(" @{FFFF}") + CI18N::get("uiRingInvitationSent"), "BC");
 			// force a refresh of the ui
-			im->executeLuaScript("CharTracking:forceRefresh()");
+			CLuaManager::getInstance().executeLuaScript("CharTracking:forceRefresh()");
 		}
 	}
 };

@@ -299,17 +299,23 @@ namespace NLGUI
 
 	protected:
 		std::map< std::string, IParserModule* > moduleMap;
-		// LUA
-		// ----------------------------------------------------------------------------------
-		// LUA Interface State. NB: The LUA environnement is not shared between Login/OutGame/InGame
-		NLMISC::CSmartPtr<CLuaState> _LuaState;
-		virtual void initLUA();
-		void uninitLUA();
+
 		// List of script loaded (for reloadLua command)
 		std::set<std::string>	_LuaFileScripts;
-		// Load A .lua. false if parse error. string 'error' contains the eventual error desc (but warning still displayed)
-		bool				loadLUA(const std::string &luaFile, std::string &error);
+
 		bool cacheUIParsing;
+		bool luaInitialized;
+
+	public:
+		void initLUA();
+		void uninitLUA();
+		bool isLuaInitialized() const{ return luaInitialized; }
+
+		/// Load A .lua. false if parse error. string 'error' contains the eventual error desc (but warning still displayed)
+		bool loadLUA( const std::string &luaFile, std::string &error );
+
+		/// Reload all LUA scripts inserted through <lua>
+		void reloadAllLuaFileScripts();
 	};
 
 }

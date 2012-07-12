@@ -838,7 +838,7 @@ void updateBGDownloaderUI()
 		{
 			if (LuaBGDSuccessFlag)
 			{
-				LuaBGDSuccessFlag = im->executeLuaScript("bgdownloader:setPatchSuccess()");
+				LuaBGDSuccessFlag = CLuaManager::getInstance().executeLuaScript("bgdownloader:setPatchSuccess()");
 			}
 		}
 		else
@@ -858,19 +858,19 @@ void updateBGDownloaderUI()
 					}
 					if (LuaBGDSuccessFlag && bgWindowVisible)
 					{
-						LuaBGDSuccessFlag = im->executeLuaScript(toString("bgdownloader:setPatchProgress(%f)", progress));
+						LuaBGDSuccessFlag = CLuaManager::getInstance().executeLuaScript(toString("bgdownloader:setPatchProgress(%f)", progress));
 					}
 					// display current priority of the downloader
 					if (LuaBGDSuccessFlag && bgWindowVisible)
 					{
-						LuaBGDSuccessFlag = im->executeLuaScript("bgdownloader:displayPriority()");
+						LuaBGDSuccessFlag = CLuaManager::getInstance().executeLuaScript("bgdownloader:displayPriority()");
 					}
 				}
 				break;
 				case BGDownloader::TaskResult_Success:
 					if (LuaBGDSuccessFlag && bgWindowVisible)
 					{
-						LuaBGDSuccessFlag = im->executeLuaScript("bgdownloader:setPatchSuccess()");
+						LuaBGDSuccessFlag = CLuaManager::getInstance().executeLuaScript("bgdownloader:setPatchSuccess()");
 					}
 					// task finished
 					AvailablePatchs = 0;
@@ -887,7 +887,7 @@ void updateBGDownloaderUI()
 					// error case
 					if (LuaBGDSuccessFlag && bgWindowVisible)
 					{
-						LuaBGDSuccessFlag = im->executeLuaScript("bgdownloader:setPatchError()");
+						LuaBGDSuccessFlag = CLuaManager::getInstance().executeLuaScript("bgdownloader:setPatchError()");
 					}
 				break;
 			}
@@ -900,12 +900,12 @@ void updateBGDownloaderUI()
 			if (isBGDownloadEnabled())
 			{
 				// no necessary patch for now
-				LuaBGDSuccessFlag = im->executeLuaScript("bgdownloader:setNoNecessaryPatch()");
+				LuaBGDSuccessFlag = CLuaManager::getInstance().executeLuaScript("bgdownloader:setNoNecessaryPatch()");
 			}
 			else
 			{
 				// no download ui
-				LuaBGDSuccessFlag = im->executeLuaScript("bgdownloader:setNoDownloader()");
+				LuaBGDSuccessFlag = CLuaManager::getInstance().executeLuaScript("bgdownloader:setNoDownloader()");
 			}
 		}
 	}

@@ -1520,7 +1520,7 @@ bool mainLoop()
 		CSessionBrowserImpl::getInstance().init(CLuaManager::getInstance().getLuaState());
 	}
 
-	CInterfaceManager::getInstance()->executeLuaScript("game:onMainLoopBegin()");
+	CLuaManager::getInstance().executeLuaScript("game:onMainLoopBegin()");
 
 
 	if (StartInitTime != 0)
@@ -1782,7 +1782,7 @@ bool mainLoop()
 				if (group)
 					group->updateAllLinks();
 				// send a msg to lua for specific ui update
-				pIM->executeLuaScript("game:onInGameDbInitialized()");
+				CLuaManager::getInstance().executeLuaScript("game:onInGameDbInitialized()");
 			}
 		}
 
@@ -2896,7 +2896,7 @@ bool mainLoop()
 		// This code must remain at the very end of the main loop.
 		if(LoginSM.getCurrentState() == CLoginStateMachine::st_enter_far_tp_main_loop)
 		{
-			CInterfaceManager::getInstance()->executeLuaScript("game:onFarTpStart()");
+			CLuaManager::getInstance().executeLuaScript("game:onFarTpStart()");
 			// Will loop the network until the end of the relogging process
 			FarTP.farTPmainLoop();
 
@@ -2974,7 +2974,7 @@ bool mainLoop()
 			lastConnectionState = CNetworkConnection::Connected;
 			connectionState = NetMngr.getConnectionState();
 
-			CInterfaceManager::getInstance()->executeLuaScript("game:onFarTpEnd()");
+			CLuaManager::getInstance().executeLuaScript("game:onFarTpEnd()");
 		}
 
 	} // end of main loop
@@ -2982,7 +2982,7 @@ bool mainLoop()
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	if (CLuaManager::getInstance().getLuaState())
 	{
-		CInterfaceManager::getInstance()->executeLuaScript("game:onMainLoopEnd()");
+		CLuaManager::getInstance().executeLuaScript("game:onMainLoopEnd()");
 	}
 
 	// Stop Running Profiles (kick result)
@@ -4550,7 +4550,7 @@ void	displayDebugClusters()
 void inGamePatchUncompleteWarning()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->executeLuaScript("bgdownloader:inGamePatchUncompleteWarning()");
+	CLuaManager::getInstance().executeLuaScript("bgdownloader:inGamePatchUncompleteWarning()");
 	/*
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:bg_downloader"));

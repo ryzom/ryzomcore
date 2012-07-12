@@ -31,6 +31,7 @@ namespace NLGUI
 
 	CLuaManager::~CLuaManager()
 	{
+		delete luaState;
 		luaState = NULL;
 	}
 
@@ -50,6 +51,19 @@ namespace NLGUI
 		}
 
 		return true;
+	}
+
+	void CLuaManager::ResetLuaState()
+	{
+		delete luaState;
+		luaState = new CLuaState( debugLua );
+	}
+
+	void CLuaManager::forceGarbageCollect()
+	{
+		nlinfo("Collecting Garbaged LUA variables");
+		luaState->setGCThreshold( 0 );
+		nlinfo( NLMISC::toString( "Memory Used : %d Kb", luaState->getGCCount() ).c_str() );
 	}
 }
 

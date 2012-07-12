@@ -51,6 +51,8 @@
 
 #include "../ingame_database_manager.h"
 
+#include "nel/gui/lua_manager.h"
+
 //the network database node
 extern CCDBSynchronised IngameDbMngr;
 
@@ -365,14 +367,8 @@ public:
 
 	/// \name LUA
 	// @{
-	/// Execute a lua script (smallScript for speed optimisation, see lua_helper). return false if parse/execute error (warning/sysinfo displayed)
-	bool	executeLuaScript(const std::string &luaScript, bool smallScript= false);
-	/// Reload all LUA scripts inserted through <lua>
-	void	reloadAllLuaFileScripts();
 	/// For debug: dump in the sysinfo and nlwarning state of lua. detail range from 0 to 2 (clamped).
-	void		dumpLuaState(uint detail);
-	/// For debug: force a garbage collector
-	void		luaGarbageCollect();
+	void dumpLuaState(uint detail);
 	// @}
 
 	// Get the list of InGame XML Interface files, with any AddOn ones
