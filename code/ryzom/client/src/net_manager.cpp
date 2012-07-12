@@ -87,6 +87,7 @@
 
 // Std.
 #include <vector>
+#include "game_share/position_or_entity_type.h"
 
 
 #define OLD_STRING_SYSTEM
@@ -3558,7 +3559,11 @@ void impulseSetNpcIconTimer(NLMISC::CBitMemStream &impulse)
 
 void impulsePlaySoundTrigger(NLMISC::CBitMemStream& impulse)
 {
-
+	NLMISC::CSheetId SoundId;
+	TPositionOrEntity SoundPosition;
+	
+	impulse.serial(SoundId);
+	impulse.serial(SoundPosition);
 }
 
 void impulseCameraAnimationPlay(NLMISC::CBitMemStream& impulse)
