@@ -447,9 +447,9 @@ class CAHNextSheath : public IActionHandler
 	virtual void execute (CCtrlBase *pCaller, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pNLCurSetWrite = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("ui_set_active"));
-		CCDBNodeLeaf *pNLCurSetRead = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("set_active"));
-		CCDBNodeLeaf *pNLNbSet = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("set_nb"));
+		CCDBNodeLeaf *pNLCurSetWrite = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getParser()->getDefine("ui_set_active"));
+		CCDBNodeLeaf *pNLCurSetRead = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getParser()->getDefine("set_active"));
+		CCDBNodeLeaf *pNLNbSet = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getParser()->getDefine("set_nb"));
 		sint64 nVal = pNLCurSetRead->getValue64() - INVENTORIES::sheath1;
 		sint64 nMax = pNLNbSet->getValue64();
 		nVal++;
@@ -471,9 +471,9 @@ class CAHPreviousSheath : public IActionHandler
 	virtual void execute (CCtrlBase *pCaller, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pNLCurSetWrite = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("ui_set_active"));
-		CCDBNodeLeaf *pNLCurSetRead = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("set_active"));
-		CCDBNodeLeaf *pNLNbSet = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("set_nb"));
+		CCDBNodeLeaf *pNLCurSetWrite = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getParser()->getDefine("ui_set_active"));
+		CCDBNodeLeaf *pNLCurSetRead = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getParser()->getDefine("set_active"));
+		CCDBNodeLeaf *pNLNbSet = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getParser()->getDefine("set_nb"));
 		sint64 nVal = pNLCurSetRead->getValue64() - INVENTORIES::sheath1;
 		sint64 nMax = pNLNbSet->getValue64();
 		if (nVal == 0) nVal = nMax;
@@ -495,8 +495,8 @@ class CAHSetSheath : public IActionHandler
 	virtual void execute (CCtrlBase *pCaller, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pNLCurSetWrite = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("ui_set_active"));
-		CCDBNodeLeaf *pNLNbSet = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("set_nb"));
+		CCDBNodeLeaf *pNLCurSetWrite = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getParser()->getDefine("ui_set_active"));
+		CCDBNodeLeaf *pNLNbSet = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getParser()->getDefine("set_nb"));
 		sint64 nVal;
 		fromString(Params, nVal);
 		nVal -= INVENTORIES::sheath1;

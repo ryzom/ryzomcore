@@ -764,10 +764,10 @@ void CInterfaceConfig::streamToDataBase (NLMISC::IStream &f, uint32 uiDbSaveVers
 					defVerId[i]='_';
 			}
 			// check if exist
-			if(pIM->isDefineExist(defVerId))
+			if(pIM->getParser()->isDefineExist(defVerId))
 			{
 				uint32	dbVer;
-				fromString(pIM->getDefine(defVerId), dbVer);
+				fromString(pIM->getParser()->getDefine(defVerId), dbVer);
 				// if the version in the file is older than the version this db want, abort read
 				if(uiDbSaveVersion<dbVer)
 					wantRead= false;

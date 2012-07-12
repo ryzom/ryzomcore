@@ -108,7 +108,7 @@ static CInterfaceGroup *parseCommandTag(ucstring &line)
 		make_pair(string("ah"), params[2]),
 		make_pair(string("ah_params"), params[3])
 	};
-	return CInterfaceManager::getInstance()->createGroupInstance(params[0], "", uiTemplateParams, 4);
+	return CInterfaceManager::getInstance()->getParser()->createGroupInstance(params[0], "", uiTemplateParams, 4);
 }
 
 static CInterfaceGroup *buildLineWithCommand(CInterfaceGroup *commandGroup, CViewText *text)

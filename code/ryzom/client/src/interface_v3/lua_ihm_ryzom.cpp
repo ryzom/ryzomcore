@@ -607,7 +607,7 @@ int		CLuaIHMRyzom::formatUI(CLuaState &ls)
 	// *** format with %
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	std::string	newPropVal,    defError;
-	if(!pIM->solveDefine(propVal,    newPropVal,    defError))
+	if(!pIM->getParser()->solveDefine(propVal,    newPropVal,    defError))
 	{
 		throw ELuaIHMException("formatUI(): Can't find define: '%s'",    defError.c_str());
 	}
@@ -1526,7 +1526,7 @@ int CLuaIHMRyzom::createGroupInstance(CLuaState &ls)
 		templateParams.push_back(std::pair<std::string, std::string>(it.nextKey().toString(), it.nextValue().toString())); // strange compilation bug here when I use std::make_pair ... :(
 	}
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CInterfaceGroup *result = im->createGroupInstance(ls.toString(1), ls.toString(2), templateParams);
+	CInterfaceGroup *result = im->getParser()->createGroupInstance(ls.toString(1), ls.toString(2), templateParams);
 	if (!result)
 	{
 		ls.pushNil();
@@ -1565,7 +1565,7 @@ int CLuaIHMRyzom::createRootGroupInstance(CLuaState &ls)
 		templateParams.push_back(std::pair<std::string, std::string>(it.nextKey().toString(), it.nextValue().toString())); // strange compilation bug here when I use std::make_pair ... :(
 	}
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CInterfaceGroup *result = im->createGroupInstance(ls.toString(1), "ui:interface:"+string(ls.toString(2)), templateParams);
+	CInterfaceGroup *result = im->getParser()->createGroupInstance(ls.toString(1), "ui:interface:"+string(ls.toString(2)), templateParams);
 	if (!result)
 	{
 		ls.pushNil();
@@ -1612,7 +1612,7 @@ int CLuaIHMRyzom::createUIElement(CLuaState &ls)
 		templateParams.push_back(std::pair<std::string, std::string>(it.nextKey().toString(), it.nextValue().toString())); // strange compilation bug here when I use std::make_pair ... :(
 	}
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CInterfaceElement *result = im->createUIElement(ls.toString(1), ls.toString(2), templateParams);
+	CInterfaceElement *result = im->getParser()->createUIElement(ls.toString(1), ls.toString(2), templateParams);
 	if (!result)
 	{
 		ls.pushNil();
@@ -1961,9 +1961,9 @@ std::string	CLuaIHMRyzom::getDefine(const std::string &def)
 {
 	//H_AUTO(Lua_CLuaIHM_getDefine)
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	if(ClientCfg.DisplayLuaDebugInfo && !pIM->isDefineExist(def))
+	if(ClientCfg.DisplayLuaDebugInfo && !pIM->getParser()->isDefineExist(def))
 		debugInfo(toString("getDefine(): '%s' not found",    def.c_str()));
-	return pIM->getDefine(def);
+	return pIM->getParser()->getDefine(def);
 }
 
 // ***************************************************************************
@@ -2703,7 +2703,7 @@ sint32 CLuaIHMRyzom::getTargetLevel()
 	if ( target->isPlayer() )
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("target_player_level") );
+		CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getParser()->getDefine("target_player_level") );
 		return pDbPlayerLevel ? pDbPlayerLevel->getValue32() : -1;
 	}
 	else
@@ -2768,7 +2768,7 @@ sint32 CLuaIHMRyzom::getTargetForceRegion()
 	if ( target->isPlayer() )
 	{			
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("target_player_level") );			
+		CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getParser()->getDefine("target_player_level") );			
 		if (!pDbPlayerLevel) return -1;
 		sint nLevel = pDbPlayerLevel->getValue32();
 		if ( nLevel < 250 )
@@ -2796,7 +2796,7 @@ sint32 CLuaIHMRyzom::getTargetLevelForce()
 	if ( target->isPlayer() )
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("target_player_level") );
+		CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getParser()->getDefine("target_player_level") );
 		if (!pDbPlayerLevel) return -1;
 		sint nLevel = pDbPlayerLevel->getValue32();
 		if ( nLevel < 250 )

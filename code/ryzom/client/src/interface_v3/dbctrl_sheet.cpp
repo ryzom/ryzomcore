@@ -389,7 +389,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"selection_group" );
 	if (prop)
 	{
-		const CCtrlSheetSelection &css = CInterfaceManager::getInstance()->getCtrlSheetSelection();
+		const CCtrlSheetSelection &css = CInterfaceManager::getInstance()->getParser()->getCtrlSheetSelection();
 		_SheetSelectionGroup = css.getGroupIndex((const char *) prop);
 		if (_SheetSelectionGroup == -1)
 		{
@@ -2518,7 +2518,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 			// draw selection border if this sheet is selected
 			if (_SheetSelectionGroup != -1) // is this sheet selectable ?
 			{   // yes, check if it is selected
-				const CCtrlSheetSelection &css = pIM->getCtrlSheetSelection();
+				const CCtrlSheetSelection &css = pIM->getParser()->getCtrlSheetSelection();
 				const CSheetSelectionGroup *ssg = css.getGroup(_SheetSelectionGroup);
 				if (ssg)
 				{
@@ -2985,7 +2985,7 @@ void CDBCtrlSheet::setCurrSelection(CDBCtrlSheet *selected)
 const std::string &CDBCtrlSheet::getSelectionGroupAsString() const
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	const CCtrlSheetSelection &css = im->getCtrlSheetSelection();
+	const CCtrlSheetSelection &css = im->getParser()->getCtrlSheetSelection();
 	const CSheetSelectionGroup *csg = css.getGroup(_SheetSelectionGroup);
 	static const string emptyStr;
 	return csg ? csg->getName() : emptyStr;
@@ -4176,7 +4176,7 @@ void CDBCtrlSheet::initArmourColors()
 	{
 		_ArmourColor[col] = CRGBA::White;
 		std::string defineName= "armour_color_" + toString(col);
-		std::string	colVal= pIM->getDefine(defineName);
+		std::string	colVal= pIM->getParser()->getDefine(defineName);
 		if(!colVal.empty())
 			_ArmourColor[col] = convertColor(colVal.c_str());
 	}

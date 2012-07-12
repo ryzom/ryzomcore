@@ -41,7 +41,7 @@ void CBotChatPagePlayerGift::begin()
 	NLGUI::CDBManager::getInstance()->getDbProp(BOT_CHAT_BASE_DB_PATH ":PLAYER_GIFT")->setValue32(0);
 
 	// clear money proposal value
-	CCDBNodeLeaf *moneyProposal = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("money_proposal"));
+	CCDBNodeLeaf *moneyProposal = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getParser()->getDefine("money_proposal"));
 	if (moneyProposal) moneyProposal->setValue64(0);
 
 	// clear 'accept' button

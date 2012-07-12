@@ -541,11 +541,11 @@ static DECLARE_INTERFACE_USER_FCT(isRoomLeftFor)
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	// see if there is room in the bags
 	// get the number of bags
-	std::string nbBagPath = im->getDefine("bag_nb");
+	std::string nbBagPath = im->getParser()->getDefine("bag_nb");
 	CCDBNodeLeaf *prop = NLGUI::CDBManager::getInstance()->getDbProp(nbBagPath);
 	if (!prop) return false;
 	uint nbItemInBags = 8 * (uint) prop->getValue32(); // there are 8 item per bag
-	std::string bagsPath = im->getDefine("bag");
+	std::string bagsPath = im->getParser()->getDefine("bag");
 	if (bagsPath.empty()) return false;
 	uint k = 0;
 	for(k = 0; k < nbItemInBags; ++k)
@@ -581,7 +581,7 @@ static DECLARE_INTERFACE_USER_FCT(isRoomLeftFor)
 
 	for(k = 0; k < numArmorSlots; ++k)
 	{
-		std::string dbPath = im->getDefine(armourInfos[k].DefineName);
+		std::string dbPath = im->getParser()->getDefine(armourInfos[k].DefineName);
 		if (dbPath.empty()) return false;
 		CCDBNodeLeaf *armorProp = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + ":SHEET");
 		if (!armorProp) return false;
@@ -609,7 +609,7 @@ static DECLARE_INTERFACE_USER_FCT(getSelectionGroupNameFromId)
 	if (args.size() != 1) return false;
 	if (!args[0].toInteger()) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CCtrlSheetSelection &css = im->getCtrlSheetSelection();
+	CCtrlSheetSelection &css = im->getParser()->getCtrlSheetSelection();
 	CSheetSelectionGroup *csg = css.getGroup((uint) args[0].getInteger());
 	if (csg) result.setString(csg->getName());
 	else result.setString("");
@@ -625,7 +625,7 @@ static DECLARE_INTERFACE_USER_FCT(getSelectionGroupIdFromName)
 	if (args.size() != 1) return false;
 	if (!args[0].toString()) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CCtrlSheetSelection &css = im->getCtrlSheetSelection();
+	CCtrlSheetSelection &css = im->getParser()->getCtrlSheetSelection();
 	result.setInteger(css.getGroupIndex(args[0].getString().c_str()));
 	return true;
 }

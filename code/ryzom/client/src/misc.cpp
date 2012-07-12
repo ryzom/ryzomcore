@@ -808,10 +808,10 @@ void getSeedsFromDB(CSeeds &dest)
 	CInterfaceManager *im =CInterfaceManager::getInstance();
 	nlctassert(sizeof(CSeeds::TUInt) == 4); // excpect that the number of each seed type is encoded on 32 bits
 											// if this assert at compile, change the following code
-	string ls = im->getDefine("money_1");
-	string ms = im->getDefine("money_2");
-	string bs = im->getDefine("money_3");
-	string vbs = im->getDefine("money_4");
+	string ls = im->getParser()->getDefine("money_1");
+	string ms = im->getParser()->getDefine("money_2");
+	string bs = im->getParser()->getDefine("money_3");
+	string vbs = im->getParser()->getDefine("money_4");
 
 	dest = CSeeds(NLGUI::CDBManager::getInstance()->getDbProp(ls)->getValue32(),
 				  NLGUI::CDBManager::getInstance()->getDbProp(ms)->getValue32(),

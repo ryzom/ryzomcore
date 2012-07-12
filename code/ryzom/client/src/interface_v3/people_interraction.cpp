@@ -1029,7 +1029,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 		CCtrlTabButton	*pTabButton= dynamic_cast<CCtrlTabButton*>(pCaller);
 		if(pTabButton)
 		{
-			CRGBA	stdColor= CRGBA::stringToRGBA(pIM->getDefine("chat_group_tab_color_normal").c_str());
+			CRGBA	stdColor= CRGBA::stringToRGBA(pIM->getParser()->getDefine("chat_group_tab_color_normal").c_str());
 			pTabButton->setTextColorNormal(stdColor);
 		}
 	}
@@ -2815,7 +2815,7 @@ static CInterfaceGroup *createMenuCheckBox(const std::string &onclickL, const st
 	params[1].second = paramsL;
 
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CInterfaceGroup *ig = im->createGroupInstance("menu_checkbox", "", params, sizeof(params) / sizeof(params[0]));
+	CInterfaceGroup *ig = im->getParser()->createGroupInstance("menu_checkbox", "", params, sizeof(params) / sizeof(params[0]));
 	if (!ig) return NULL;
 	CCtrlBaseButton *cb = dynamic_cast<CCtrlBaseButton *>(ig->getCtrl("b"));
 	if (!cb) return NULL;

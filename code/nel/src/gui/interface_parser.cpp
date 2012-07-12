@@ -200,11 +200,18 @@ namespace NLGUI
 	{
 		luaInitialized = false;
 		cacheUIParsing = false;
+		setupCallback = NULL;
 	}
 
 	CInterfaceParser::~CInterfaceParser()
 	{
+		_ParentPositionsMap.clear();
+		_ParentSizesMap.clear();
+		_ParentSizesMaxMap.clear();
+		_LuaClassAssociation.clear();
+		_Templates.clear();
 		removeAllModules();
+		setupCallback = NULL;
 	}
 	/** Convert a string into a memstream
 	  */
@@ -1804,6 +1811,12 @@ namespace NLGUI
 		_ProcedureMap[procId]= newProc;
 
 		return true;
+	}
+
+	void CInterfaceParser::setupOptions()
+	{
+		if( setupCallback != NULL )
+			setupCallback->setupOptions();
 	}
 
 	// ----------------------------------------------------------------------------

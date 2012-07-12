@@ -674,10 +674,10 @@ void CHugeListObs::updateUIItemPage(uint index)
 				// If price of current selected item has changed, repercute it
 				if (sheet == CDBCtrlSheet::getCurrSelection())
 				{
-					string ls = im->getDefine("item_price_1");
-					string ms = im->getDefine("item_price_2");
-					string bs = im->getDefine("item_price_3");
-					string vbs = im->getDefine("item_price_4");
+					string ls = im->getParser()->getDefine("item_price_1");
+					string ms = im->getParser()->getDefine("item_price_2");
+					string bs = im->getParser()->getDefine("item_price_3");
+					string vbs = im->getParser()->getDefine("item_price_4");
 					setPriceInDB(currItem.Price, ls, ms, bs, vbs);
 				}
 			}

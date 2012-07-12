@@ -967,9 +967,9 @@ TInterfaceState globalMenu()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	sint32 nScreenConnecting, nScreenIntro, nScreenServerCrashed;
-	fromString(pIM->getDefine("screen_connecting"), nScreenConnecting);
-	fromString(pIM->getDefine("screen_intro"), nScreenIntro);
-	fromString(pIM->getDefine("screen_crashing"), nScreenServerCrashed);
+	fromString(pIM->getParser()->getDefine("screen_connecting"), nScreenConnecting);
+	fromString(pIM->getParser()->getDefine("screen_intro"), nScreenIntro);
+	fromString(pIM->getParser()->getDefine("screen_crashing"), nScreenServerCrashed);
 
 	// SKIP INTRO : Write to the database if we have to skip the intro and write we want to skip further intro to client cfg
 	if (ClientCfg.SkipIntro)
@@ -1004,7 +1004,7 @@ TInterfaceState globalMenu()
 				Actions.enable(true);
 				EditActions.enable(true);
 				LuaBGDSuccessFlag = true;
-				pIM->reloadAllLuaFileScripts();
+				pIM->getParser()->reloadAllLuaFileScripts();
 			}
 		#endif
 
@@ -2136,7 +2136,7 @@ public:
 			if (i>0)
 				params.push_back(pair<string,string>("posref", "BL TL"));
 
-			CInterfaceGroup *pNewLine =pIM->createGroupInstance("t_mainland", GROUP_LIST_MAINLAND, params);
+			CInterfaceGroup *pNewLine =pIM->getParser()->createGroupInstance("t_mainland", GROUP_LIST_MAINLAND, params);
 			if (pNewLine != NULL)
 			{
 				CViewBase *pVBon = pNewLine->getView("online");
@@ -2261,7 +2261,7 @@ public:
 		}
 		First = false;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		return pIM->createGroupInstance(templateName, GROUP_LIST_KEYSET, params);
+		return pIM->getParser()->createGroupInstance(templateName, GROUP_LIST_KEYSET, params);
 	}
 
 	void addGroupInList(CInterfaceGroup *pNewLine)
@@ -2722,7 +2722,7 @@ class CAHScenarioControl : public IActionHandler
 					params.push_back(pair<string,string>("id", toString(Mainlands[i].Id)));
 					params.push_back(pair<string,string>("w", "1024"));
 					params.push_back(pair<string,string>("tooltip", "uiRingFilterShard"));
-					CInterfaceGroup *toggleGr =pIM->createGroupInstance("label_toggle_button", shardList->getId(), params);
+					CInterfaceGroup *toggleGr =pIM->getParser()->createGroupInstance("label_toggle_button", shardList->getId(), params);
 					shardList->addChild(toggleGr);
 					// set unicode name
 					CViewText *shardName = dynamic_cast<CViewText *>(toggleGr->getView("button_text"));

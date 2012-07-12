@@ -56,10 +56,10 @@ void contextHelp (const std::string &name)
 		{
 			string defineTarget = name+"_"+toString(index)+"_target";
 			string defineUrl = name+"_"+toString(index)+"_url";
-			if (pIM->isDefineExist(defineTarget) && pIM->isDefineExist(defineUrl))
+			if (pIM->getParser()->isDefineExist(defineTarget) && pIM->getParser()->isDefineExist(defineUrl))
 			{
-				string target = pIM->getDefine(defineTarget);
-				string url = pIM->getDefine(defineUrl);
+				string target = pIM->getParser()->getDefine(defineTarget);
+				string url = pIM->getParser()->getDefine(defineUrl);
 
 				CInterfaceElement *elementTarget = CWidgetManager::getInstance()->getElementFromId(target);
 				if (elementTarget && elementTarget->getActive())
@@ -176,12 +176,12 @@ void CGroupInSceneBubbleManager::alignMessagePopup (vector<CPopup> &rList, bool 
 			sint32 offsetY;
 			if (bCenter)
 			{
-				fromString(pIM->getDefine("popup_pos_y_center"), offsetY);
+				fromString(pIM->getParser()->getDefine("popup_pos_y_center"), offsetY);
 				offsetY = pRoot->getHReal() - offsetY;
 				offsetY -= rList[i].Group->getH();
 			}
 			else
-				fromString(pIM->getDefine("popup_pos_y"), offsetY);
+				fromString(pIM->getParser()->getDefine("popup_pos_y"), offsetY);
 
 			rList[i].Group->setY(offsetY);
 			rList[i].Group->invalidateCoords();
@@ -228,7 +228,7 @@ void CGroupInSceneBubbleManager::init ()
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
-		CInterfaceGroup *group = pIM->createGroupInstance ("3dbulle_L",
+		CInterfaceGroup *group = pIM->getParser()->createGroupInstance ("3dbulle_L",
 			"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 		if (group)
 		{
@@ -508,7 +508,7 @@ void CGroupInSceneBubbleManager::addSkillPopup (uint skillId, sint delta, uint t
 	templateParams.push_back (std::pair<std::string,std::string>("skillid", toString(skillId)));
 	templateParams.push_back (std::pair<std::string,std::string>("delta", toString(delta)));
 
-	CInterfaceGroup *group = pIM->createGroupInstance ("skill_popup",
+	CInterfaceGroup *group = pIM->getParser()->createGroupInstance ("skill_popup",
 		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
@@ -574,7 +574,7 @@ void CGroupInSceneBubbleManager::addMessagePopup (const ucstring &message, CRGBA
 	std::vector<std::pair<std::string,std::string> > templateParams;
 	templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
-	CInterfaceGroup *group = pIM->createGroupInstance ("message_popup",
+	CInterfaceGroup *group = pIM->getParser()->createGroupInstance ("message_popup",
 		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
@@ -623,7 +623,7 @@ void CGroupInSceneBubbleManager::addMessagePopupCenter (const ucstring &message,
 	std::vector<std::pair<std::string,std::string> > templateParams;
 	templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
-	CInterfaceGroup *group = pIM->createGroupInstance ("message_popup_center",
+	CInterfaceGroup *group = pIM->getParser()->createGroupInstance ("message_popup_center",
 		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
@@ -695,7 +695,7 @@ CGroupInSceneBubbleManager::CPopupContext *CGroupInSceneBubbleManager::buildCont
 	std::vector<std::pair<std::string,std::string> > templateParams;
 	templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
-	CInterfaceGroup *group = pIM->createGroupInstance (templateName+v+h,
+	CInterfaceGroup *group = pIM->getParser()->createGroupInstance (templateName+v+h,
 		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
@@ -896,7 +896,7 @@ void CGroupInSceneBubbleManager::dynChatOpen (uint32 nBotUID, uint32 nBotName, c
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
-		CInterfaceGroup *group = pIM->createGroupInstance ("dyn_3dbulle_L", "ui:interface", templateParams);
+		CInterfaceGroup *group = pIM->getParser()->createGroupInstance ("dyn_3dbulle_L", "ui:interface", templateParams);
 		if (group == NULL)
 		{
 			nlwarning("cannot create dyn_3dbulle_L");
@@ -1009,7 +1009,7 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
-		CInterfaceGroup *group = pIM->createGroupInstance ("webig_3dbulle_L", "ui:interface", templateParams);
+		CInterfaceGroup *group = pIM->getParser()->createGroupInstance ("webig_3dbulle_L", "ui:interface", templateParams);
 		if (group == NULL)
 		{
 			nlwarning("cannot create webig_3dbulle_L");

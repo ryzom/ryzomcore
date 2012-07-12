@@ -210,7 +210,7 @@ void createOptionalCatUI()
 		if (i>0)
 			params.push_back(pair<string,string>("posref", "BL TL"));
 
-		CInterfaceGroup *pNewLine = pIM->createGroupInstance("t_cat", GROUP_LIST_CAT, params);
+		CInterfaceGroup *pNewLine = pIM->getParser()->createGroupInstance("t_cat", GROUP_LIST_CAT, params);
 		if (pNewLine != NULL)
 		{
 			CViewText *pVT = dynamic_cast<CViewText*>(pNewLine->getView("name"));
@@ -1086,7 +1086,7 @@ void initShardDisplay()
 		if (i>0)
 			params.push_back(pair<string,string>("posref", "BL TL"));
 
-		CInterfaceGroup *pNewLine =pIM->createGroupInstance("t_shard", GROUP_LIST_SHARD, params);
+		CInterfaceGroup *pNewLine =pIM->getParser()->createGroupInstance("t_shard", GROUP_LIST_SHARD, params);
 		if (pNewLine != NULL)
 		{
 			CViewText *pVT = dynamic_cast<CViewText*>(pNewLine->getView("name"));

@@ -226,7 +226,7 @@ void		CDBGroupBuildPhrase::setupBuildSentence()
 	if(_GroupValid)
 	{
 		sint	rootTextMaxw;
-		fromString(pIM->getDefine("phrase_build_root_info_maxw"), rootTextMaxw);
+		fromString(pIM->getParser()->getDefine("phrase_build_root_info_maxw"), rootTextMaxw);
 		_MainWords[0].InfoView->setLineMaxW(rootTextMaxw);
 	}
 
@@ -1194,8 +1194,8 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 		{
 			// get define, and verify data
 			uint	numWeaponSkill;
-			fromString(pIM->getDefine("phrase_max_restrict_combat"), numWeaponSkill);
-			string	strWeaponSkill= pIM->getDefine("phrase_def_skill_restrict_combat");
+			fromString(pIM->getParser()->getDefine("phrase_max_restrict_combat"), numWeaponSkill);
+			string	strWeaponSkill= pIM->getParser()->getDefine("phrase_def_skill_restrict_combat");
 			vector<string>	weaponSkillList;
 			splitString(strWeaponSkill, " ", weaponSkillList);
 			nlassert(weaponSkillList.size()==numWeaponSkill);

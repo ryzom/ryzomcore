@@ -82,7 +82,7 @@ namespace NLGUI
  * \author Nevrax France
  * \date 2002
  */
-class CInterfaceManager : public NLGUI::CInterfaceParser, public NLGUI::IInputEventListener
+class CInterfaceManager : public NLGUI::CInterfaceParser::ISetupOptionCallbackClass, public NLGUI::IInputEventListener
 {
 public:
 
@@ -658,7 +658,10 @@ private:
 	NL3D::UDriver *driver;
 	NL3D::UTextContext *textcontext;
 	CInterfaceLink::CInterfaceLinkUpdater *interfaceLinkUpdater;
+	NLGUI::CInterfaceParser *parser;
 
+public:
+	NLGUI::CInterfaceParser* getParser() const{ return parser; }
 };
 
 #endif // NL_INTERFACE_MANAGER_H

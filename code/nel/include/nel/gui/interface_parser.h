@@ -87,6 +87,12 @@ namespace NLGUI
 			uint parsingStage;
 		};
 
+		class ISetupOptionCallbackClass
+		{
+		public:
+			virtual void setupOptions() = 0;
+		};
+
 		CInterfaceParser();
 		virtual ~CInterfaceParser();
 
@@ -136,7 +142,7 @@ namespace NLGUI
 		bool solveDefine(const std::string &propVal, std::string &newPropVal, std::string &defError);
 
 		// Called after template & options parsing
-		virtual void setupOptions() { }
+		void setupOptions();
 
 		/**
 		 * Initializer
@@ -305,6 +311,7 @@ namespace NLGUI
 
 		bool cacheUIParsing;
 		bool luaInitialized;
+		ISetupOptionCallbackClass *setupCallback;
 
 	public:
 		void initLUA();
@@ -316,6 +323,8 @@ namespace NLGUI
 
 		/// Reload all LUA scripts inserted through <lua>
 		void reloadAllLuaFileScripts();
+
+		void setSetupOptionsCallback( ISetupOptionCallbackClass *cb ){ setupCallback = cb; }
 	};
 
 }

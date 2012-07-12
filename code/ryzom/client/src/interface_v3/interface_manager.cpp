@@ -436,18 +436,20 @@ namespace
 // ------------------------------------------------------------------------------------------------
 CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext *textcontext )
 {
-	addModule( "scene3d", new CIF3DSceneParser() );
-	addModule( "ddx", new CIFDDXParser() );
-	addModule( "action_category", new CActionCategoryParser() );
-	addModule( "command", new CCommandParser() );
-	addModule( "key", new CKeyParser() );
-	addModule( "macro", new CMacroParser() );
+	parser = new CInterfaceParser();
+	parser->setSetupOptionsCallback( this );
+	parser->addModule( "scene3d", new CIF3DSceneParser() );
+	parser->addModule( "ddx", new CIFDDXParser() );
+	parser->addModule( "action_category", new CActionCategoryParser() );
+	parser->addModule( "command", new CCommandParser() );
+	parser->addModule( "key", new CKeyParser() );
+	parser->addModule( "macro", new CMacroParser() );
 	CWidgetManager::getInstance()->registerNewScreenSizeHandler( new CDesktopUpdater() );
 	CWidgetManager::getInstance()->registerOnWidgetsDrawnHandler( new CDrawDraggedSheet() );
 
-	setCacheUIParsing( ClientCfg.CacheUIParsing );
+	parser->setCacheUIParsing( ClientCfg.CacheUIParsing );
 
-	CWidgetManager::parser = this;
+	CWidgetManager::parser = parser;
 	this->driver = driver;
 	this->textcontext = textcontext;
 	CViewRenderer::setDriver( driver );
@@ -535,13 +537,6 @@ CInterfaceManager::~CInterfaceManager()
 	CViewTextFormated::setFormatter( NULL );
 	reset(); // to flush IDStringWaiters
 
-	_ParentPositionsMap.clear();
-	_ParentSizesMap.clear();
-	_ParentSizesMaxMap.clear();
-	_LuaClassAssociation.clear();
-	_Templates.clear();
-	_Instance = NULL;
-
 	// release the local string mapper
 	delete _UIStringMapper;
 	_UIStringMapper = NULL;
@@ -554,6 +549,9 @@ CInterfaceManager::~CInterfaceManager()
 	delete interfaceLinkUpdater;
 	interfaceLinkUpdater = NULL;
 	*/
+	_Instance = NULL;
+	delete parser;
+	parser = NULL;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -622,12 +620,12 @@ void CInterfaceManager::destroy ()
 
 void CInterfaceManager::initLUA()
 {
-	if( isLuaInitialized() )
+	if( parser->isLuaInitialized() )
 		return;
 
-	CInterfaceParser::initLUA();
+	parser->initLUA();
 
-	if( !isLuaInitialized() )
+	if( !parser->isLuaInitialized() )
 		return;
 
 	CLuaIHMRyzom::RegisterRyzomFunctions( *( CLuaManager::getInstance().getLuaState() ) );
@@ -689,7 +687,7 @@ void CInterfaceManager::uninitLogin()
 
 	CWidgetManager::getInstance()->activateMasterGroup ("ui:login", false);
 
-	removeAll();
+	parser->removeAll();
 	reset();
 
 	CWidgetManager::getInstance()->setPointer( NULL );
@@ -704,7 +702,7 @@ void CInterfaceManager::uninitLogin()
 	}
 
 	// Close LUA Scripting
-	uninitLUA();
+	parser->uninitLUA();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -810,7 +808,7 @@ void CInterfaceManager::uninitOutGame()
 	CWidgetManager::getInstance()->activateMasterGroup ("ui:outgame", false);
 	//nlinfo ("%d seconds for activateMasterGroup", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
-	removeAll();
+	parser->removeAll();
 	//nlinfo ("%d seconds for removeAll", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
 	reset();
@@ -834,7 +832,7 @@ void CInterfaceManager::uninitOutGame()
 	}
 
 	// Close LUA Scripting
-	uninitLUA();
+	parser->uninitLUA();
 
 	//NLMEMORY::CheckHeap (true);
 }
@@ -1087,7 +1085,7 @@ void CInterfaceManager::configureQuitDialogBox()
 		eltQuit = quitDlg->getElement(quitDialogStr+":ryzom");
 		eltQuitNow = quitDlg->getElement(quitDialogStr+":ryzom_now");
 		sint buttonDeltaY;
-		fromString(getDefine("quit_button_delta_y"), buttonDeltaY);
+		fromString( parser->getDefine("quit_button_delta_y"), buttonDeltaY);
 		extern R2::TUserRole UserRoleInSession;
 
 		bool sessionOwner = (R2::getEditor().getMode() != R2::CEditor::NotInitialized && R2::getEditor().getDMC().getEditionModule().isSessionOwner());
@@ -1344,7 +1342,7 @@ void CInterfaceManager::uninitInGame1 ()
 
 	// Remove all interface objects (containers, groups, variables, defines, ...)
 	CWidgetManager::getInstance()->activateMasterGroup ("ui:interface", false);
-	removeAll();
+	parser->removeAll();
 	reset();
 	CInterfaceLink::removeAllLinks();
 
@@ -1387,7 +1385,7 @@ void CInterfaceManager::uninitInGame1 ()
 	CGuildManager::release();
 
 	// Close LUA Scripting
-	uninitLUA();
+	parser->uninitLUA();
 
 	setInGame( false );
 	_NeutralColor = NULL;
@@ -1582,7 +1580,7 @@ bool CInterfaceManager::parseInterface (const std::vector<std::string> &xmlFileN
 	_DB_UI_DUMMY_PREREQUISIT_VALID->setValueBool(true);
 	_DB_UI_DUMMY_FACTION_TYPE->setValue64(0);
 
-	return CInterfaceParser::parseInterface (xmlFileNames, reload, isFilename);
+	return parser->parseInterface (xmlFileNames, reload, isFilename);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1902,7 +1900,7 @@ bool CInterfaceManager::saveConfig (const string &filename)
 
 		// write UI_DB_SAVE_VERSION
 		uint32	uiDbSaveVersion;
-		fromString(getDefine("UI_DB_SAVE_VERSION"), uiDbSaveVersion);
+		fromString( parser->getDefine("UI_DB_SAVE_VERSION"), uiDbSaveVersion);
 		f.serial(uiDbSaveVersion);
 
 		// write database
@@ -2222,7 +2220,7 @@ bool	CInterfaceManager::getCurrentValidMessageBoxOnOk(string &ahOnOk, const std:
 	{
 		// Ok, get the current procedure OnOk action
 		string	dummyParams;
-		if(getProcedureAction("proc_valid_message_box_ok", 1, ahOnOk, dummyParams))
+		if( parser->getProcedureAction("proc_valid_message_box_ok", 1, ahOnOk, dummyParams))
 			return true;
 	}
 

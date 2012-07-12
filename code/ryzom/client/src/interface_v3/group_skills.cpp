@@ -373,7 +373,7 @@ void CGroupSkills::createAllTreeNodes()
 				// create the template
 				tempVec[0].first="id"; tempVec[0].second= pNode->Id;
 				tempVec[1].first="skillid"; tempVec[1].second= NLMISC::toString(i);
-				CInterfaceGroup	*pIG = pIM->createGroupInstance(_TemplateSkill, getId() + ":" + WIN_TREE_LIST, tempVec);
+				CInterfaceGroup	*pIG = pIM->getParser()->createGroupInstance(_TemplateSkill, getId() + ":" + WIN_TREE_LIST, tempVec);
 				if (pIG == NULL)
 					nlwarning("error");
 				// Set Skill Name
