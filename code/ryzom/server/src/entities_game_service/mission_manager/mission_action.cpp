@@ -57,7 +57,8 @@
 #include "server_share/log_item_gen.h"
 #include "server_share/log_character_gen.h"
 #include "camera_animation_manager/camera_animation_manager.h"
-#include "camera_animation_manager/position_or_entity_type.h"
+#include "game_share/position_or_entity_type.h"
+
 
 using namespace std;
 using namespace NLMISC;

@@ -16,7 +16,7 @@
 // 
 
 #include "camera_animation_manager/camera_animation_modifier_factory.h"
-#include "camera_animation_manager/position_or_entity_type.h"
+#include "game_share/position_or_entity_type.h"
 
 #include "nel/misc/sheet_id.h"
 

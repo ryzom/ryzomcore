@@ -3556,6 +3556,26 @@ void impulseSetNpcIconTimer(NLMISC::CBitMemStream &impulse)
 	CNPCIconCache::getInstance().setMissionGiverTimer(delay);
 }
 
+void impulsePlaySoundTrigger(NLMISC::CBitMemStream& impulse)
+{
+
+}
+
+void impulseCameraAnimationPlay(NLMISC::CBitMemStream& impulse)
+{
+
+}
+
+void impulseCameraAnimationStep(NLMISC::CBitMemStream& impulse)
+{
+
+}
+
+void impulseCameraAnimationFinished(NLMISC::CBitMemStream& impulse)
+{
+
+}
+
 //-----------------------------------------------
 // initializeNetwork :
 //-----------------------------------------------
@@ -3705,6 +3725,12 @@ void initializeNetwork()
 	GenericMsgHeaderMngr.setCallback( "NPC_ICON:SET_DESC",			impulseSetNpcIconDesc );
 	GenericMsgHeaderMngr.setCallback( "NPC_ICON:SVR_EVENT_MIS_AVL",	impulseServerEventForMissionAvailability );
 	GenericMsgHeaderMngr.setCallback( "NPC_ICON:SET_TIMER",			impulseSetNpcIconTimer );
+
+	GenericMsgHeaderMngr.setCallback( "SOUND_TRIGGER:PLAY",			impulsePlaySoundTrigger );
+
+	GenericMsgHeaderMngr.setCallback( "CAMERA_ANIMATION:PLAY",		impulseCameraAnimationPlay );
+	GenericMsgHeaderMngr.setCallback( "CAMERA_ANIMATION:STEP",		impulseCameraAnimationStep );
+	GenericMsgHeaderMngr.setCallback( "CAMERA_ANIMATION:FINISHED",	impulseCameraAnimationFinished );
 }
 
 
