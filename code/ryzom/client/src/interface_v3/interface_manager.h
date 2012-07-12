@@ -119,14 +119,7 @@ public:
 public:
 
 	/// Singleton method : Get the unique interface loader instance
-	static CInterfaceManager* getInstance()
-	{
-		nlassert( _Instance != NULL );
-		return _Instance;
-	}
-
-	/// Create singleton
-	static void create(  NL3D::UDriver *driver, NL3D::UTextContext *textcontext  );
+	static CInterfaceManager* getInstance();
 
 	/// Destroy singleton
 	static void destroy ();
@@ -428,12 +421,6 @@ public:
 	 */
 	static bool parseTokens(ucstring& ucstr);
 
-	/// Sets the current TextContext.
-	void setTextContext( NL3D::UTextContext *textcontext );
-
-	/// Retrueves the current TextContext
-	inline NL3D::UTextContext* getTextContext() const{ return textcontext; };
-
 // ------------------------------------------------------------------------------------------------
 private:
 
@@ -582,7 +569,7 @@ private:
 
 
 	/// Constructor
-	CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext *textcontext );
+	CInterfaceManager();
 
 	///the singleton's instance
 	static CInterfaceManager* _Instance;
@@ -655,8 +642,6 @@ private:
 	// Pop a new message box. If the message box was found, returns a pointer on it
 	void messageBoxInternal(const std::string &msgBoxGroup, const ucstring &text, const std::string &masterGroup, TCaseMode caseMode);
 
-	NL3D::UDriver *driver;
-	NL3D::UTextContext *textcontext;
 	CInterfaceLink::CInterfaceLinkUpdater *interfaceLinkUpdater;
 	NLGUI::CInterfaceParser *parser;
 

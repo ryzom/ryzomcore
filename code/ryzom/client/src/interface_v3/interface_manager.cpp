@@ -130,6 +130,8 @@ using namespace NLGUI;
 
 #include "parser_modules.h"
 
+#include "../global.h"
+
 using namespace NLMISC;
 
 namespace NLGUI
@@ -433,8 +435,15 @@ namespace
 	CRyzomTextFormatter RyzomTextFormatter;
 }
 
+CInterfaceManager* CInterfaceManager::getInstance()
+{
+	if( _Instance == NULL )
+		_Instance = new CInterfaceManager();
+	return _Instance;
+}
+
 // ------------------------------------------------------------------------------------------------
-CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext *textcontext )
+CInterfaceManager::CInterfaceManager()
 {
 	parser = new CInterfaceParser();
 	parser->setSetupOptionsCallback( this );
@@ -450,10 +459,8 @@ CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext 
 	parser->setCacheUIParsing( ClientCfg.CacheUIParsing );
 
 	CWidgetManager::parser = parser;
-	this->driver = driver;
-	this->textcontext = textcontext;
-	CViewRenderer::setDriver( driver );
-	CViewRenderer::setTextContext( textcontext );
+	CViewRenderer::setDriver( Driver );
+	CViewRenderer::setTextContext( TextContext );
 	CViewRenderer::hwCursorScale = ClientCfg.HardwareCursorScale;
 	CViewRenderer::hwCursors     = &ClientCfg.HardwareCursors;
 	CViewRenderer::getInstance();
@@ -464,7 +471,6 @@ CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext 
 	CGroupHTML::options.appName = "Ryzom";
 	CGroupHTML::options.appVersion = RYZOM_VERSION;
 
-	_Instance = this;
 	NLGUI::CDBManager::getInstance()->resizeBanks( NB_CDB_BANKS );
 	interfaceLinkUpdater = new CInterfaceLink::CInterfaceLinkUpdater();
 	_ScreenW = _ScreenH = 0;
@@ -527,7 +533,7 @@ CInterfaceManager::CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext 
 	_DebugTrackGroupCreateCount = 0;
 	_DebugTrackGroupDestroyCount = 0;
 #endif // AJM_DEBUG_TRACK_INTERFACE_GROUPS
-	textcontext = NULL;
+
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -604,12 +610,6 @@ void CInterfaceManager::resetShardSpecificData()
 }
 
 // ------------------------------------------------------------------------------------------------
-
-void CInterfaceManager::create( NL3D::UDriver *driver, NL3D::UTextContext *textcontext )
-{
-	nlassert( _Instance == NULL );
-	new CInterfaceManager( driver, textcontext );
-}
 
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::destroy ()
@@ -1535,7 +1535,7 @@ void CInterfaceManager::updateFrameViews(NL3D::UCamera camera)
 	drawViews(camera);
 
 	// The interface manager may change usual Global setup. reset them.
-	textcontext->setShadeColor(CRGBA::Black);
+	CViewRenderer::getTextContext()->setShadeColor(CRGBA::Black);
 
 }
 
@@ -1547,8 +1547,7 @@ void CInterfaceManager::setupOptions()
 	// Try to change font if any
 	string sFont = wm->getSystemOption( CWidgetManager::OptionFont ).getValStr();
 	
-	extern void resetTextContext( const char*, bool );
-	if ((!sFont.empty()) && (driver != NULL))
+	if ((!sFont.empty()) && (Driver != NULL))
 		resetTextContext(sFont.c_str(), true);
 	// Continue to parse the rest of the interface
 }
@@ -3138,9 +3137,9 @@ bool CInterfaceManager::CEmoteCmd::execute(const std::string &/* rawCommandStrin
 bool	CInterfaceManager::testDragCopyKey()
 {
 	// hardcoded for now
-	return driver->AsyncListener.isKeyDown(KeyCONTROL) ||
-		driver->AsyncListener.isKeyDown(KeyLCONTROL) ||
-		driver->AsyncListener.isKeyDown(KeyRCONTROL);
+	return Driver->AsyncListener.isKeyDown(KeyCONTROL) ||
+		Driver->AsyncListener.isKeyDown(KeyLCONTROL) ||
+		Driver->AsyncListener.isKeyDown(KeyRCONTROL);
 }
 
 // ***************************************************************************
@@ -3974,12 +3973,6 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 
 	ucstr = str;
 	return true;;
-}
-
-void CInterfaceManager::setTextContext( NL3D::UTextContext *textcontext )
-{
-	this->textcontext = textcontext;
-	CViewRenderer::getInstance()->setTextContext( textcontext );
 }
 
 
