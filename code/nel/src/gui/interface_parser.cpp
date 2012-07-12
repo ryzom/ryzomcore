@@ -1772,7 +1772,7 @@ namespace NLGUI
 				CXMLAutoPtr name((const char*) xmlGetProp (cur, (xmlChar*)"handler"));
 				CXMLAutoPtr params((const char*) xmlGetProp (cur, (xmlChar*)"params"));
 				CXMLAutoPtr cond((const char*) xmlGetProp (cur, (xmlChar*)"cond"));
-				CAction	action;
+				CProcAction	action;
 				if(!name)
 				{
 					// todo hulud interface syntax error
@@ -2084,153 +2084,6 @@ namespace NLGUI
 		}
 
 		return true;
-	}
-
-
-	// ***************************************************************************
-	// CInterfaceParser::CAction
-	// ***************************************************************************
-
-	#define	PROC_PARAM_IDENT	'@'
-
-	// ***************************************************************************
-	void CInterfaceParser::CAction::buildParamBlock(const std::string &params)
-	{
-		buildBlocks (params, ParamBlocks);
-	}
-
-	void CInterfaceParser::CAction::buildParams(const std::vector<string> &paramList, std::string &params) const
-	{
-		eval (paramList, ParamBlocks, params);
-	}
-
-	void CInterfaceParser::CAction::buildCondBlock(const std::string &params)
-	{
-		buildBlocks (params, CondBlocks);
-	}
-
-	void CInterfaceParser::CAction::buildCond(const std::vector<string> &paramList, std::string &params) const
-	{
-		eval (paramList, CondBlocks, params);
-	}
-
-	// ***************************************************************************
-	void		CInterfaceParser::CAction::buildBlocks (const std::string &in, std::vector<CParamBlock> &out)
-	{
-		out.clear();
-
-		if(in.empty())
-			return;
-
-		string	lastString;
-		string::size_type	curPos= 0;
-		string::size_type	lastPos= 0;
-
-		//if it has some @ then solve proc value
-		while( (curPos=in.find(PROC_PARAM_IDENT, curPos)) != string::npos)
-		{
-			// If it is end of line
-			if(curPos==in.size()-1)
-			{
-				// then skip
-				curPos= in.size();
-			}
-			else
-			{
-				// Skip all @
-				uint countNbIdent = 0;
-				while (curPos<in.size() && in[curPos]==PROC_PARAM_IDENT)
-				{
-					curPos++;
-					countNbIdent++;
-				}
-
-				// get the id pos
-				uint countNbDigit = 0;
-				uint startIdPos= (uint)curPos;
-				while (curPos<in.size() && in[curPos]>='0' && in[curPos]<='9')
-				{
-					curPos++;
-					countNbDigit++;
-				}
-
-				if (curPos == startIdPos)
-				{
-					// No digit so it is a normal db entry
-					lastString+= in.substr (lastPos, curPos-(countNbIdent-1)-lastPos);
-					// all @ are skipped
-				}
-				else
-				{
-					// There is some digit it is an argument
-
-					// copy the last not param sub string.
-					sint nbToCopy = (sint)(curPos-countNbIdent-countNbDigit-lastPos);
-					if (nbToCopy > 0)
-						lastString += in.substr(lastPos, nbToCopy);
-
-					// if not empty, add to the param block
-					if (!lastString.empty())
-					{
-						CParamBlock pb;
-						pb.String = lastString;
-						out.push_back(pb);
-						// clear it
-						lastString.clear();
-					}
-
-					// get the param id
-					sint paramId;
-					fromString(in.substr(startIdPos, curPos-startIdPos), paramId);
-					// Add it to the param block
-					CParamBlock	 pb;
-					pb.NumParam = paramId;
-					out.push_back(pb);
-				}
-
-				// valid pos is current pos
-				lastPos= curPos;
-			}
-		}
-		// concat last part
-		lastString+= in.substr(lastPos, in.size()-lastPos);
-		if(!lastString.empty())
-		{
-			CParamBlock pb;
-			pb.String = lastString;
-			out.push_back(pb);
-		}
-	}
-
-	// ***************************************************************************
-	//void		CInterfaceParser::CAction::buildParams(const std::vector<string> &paramList, std::string &params) const
-	void CInterfaceParser::CAction::eval (const std::vector<string> &inArgs, const std::vector<CParamBlock> &inBlocks, std::string &out)
-	{
-		// clear the ret string
-		out.clear();
-
-		// for all block
-		for (uint i=0; i < inBlocks.size(); i++)
-		{
-			const CParamBlock &pb = inBlocks[i];
-			// if the block is a raw string
-			if (pb.NumParam < 0)
-			{
-				// concat with the block
-				out += pb.String;
-			}
-			// else get from paramList
-			else
-			{
-				// add 1, because paramList[0] is the name of the procedure
-				sint idInList = pb.NumParam+1;
-				// if param exist
-				if (idInList < (sint)inArgs.size())
-					// concat with the params
-					out += inArgs[idInList];
-				// else skip (should fail)
-			}
-		}
 	}
 
 	// ***************************************************************************
@@ -2638,7 +2491,7 @@ namespace NLGUI
 			const CProcedure	&proc= it->second;
 			if(actionIndex<proc.Actions.size())
 			{
-				const CAction		&action= proc.Actions[actionIndex];
+				const CProcAction &action= proc.Actions[actionIndex];
 				// if not a variable parametrized Params
 				if(action.ParamBlocks.size()==1 && action.ParamBlocks[0].NumParam==-1)
 				{
@@ -2662,6 +2515,15 @@ namespace NLGUI
 		}
 		else
 			return it->second;
+	}
+
+	CProcedure* CInterfaceParser::getProc( const std::string &name )
+	{
+		TProcedureMap::iterator itr = _ProcedureMap.find( name );
+		if( itr == _ProcedureMap.end() )
+			return NULL;
+
+		return &itr->second;
 	}
 
 	// ***************************************************************************

@@ -1857,7 +1857,7 @@ public:
 		if (ClientCfg.Light)
 		{
 			vector<string> v;
-			CInterfaceManager::getInstance()->runProcedure ("proc_reset_interface", NULL, v);
+			CWidgetManager::getInstance()->runProcedure ("proc_reset_interface", NULL, v);
 
 			//CInterfaceManager::getInstance()->launchContextMenuInGame("ui:interface:game_context_menu");
 		}
@@ -2747,7 +2747,7 @@ public:
 			vector<string> vecStr;
 			vecStr.push_back(procNames[desktop]);
 			vecStr.push_back(sValue);
-			pIM->runProcedure(procNames[desktop], NULL, vecStr);
+			CWidgetManager::getInstance()->runProcedure(procNames[desktop], NULL, vecStr);
 		}*/
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -2773,11 +2773,10 @@ public:
 			{
 				_FirstTime = false;
 
-				CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 				vector<string> vecStr;
 				vecStr.push_back("tb_setdesktop");
 				vecStr.push_back(Params);
-				pIM->runProcedure("tb_setdesktop", NULL, vecStr);
+				CWidgetManager::getInstance()->runProcedure("tb_setdesktop", NULL, vecStr);
 			}
 			else // Not the first time
 			{

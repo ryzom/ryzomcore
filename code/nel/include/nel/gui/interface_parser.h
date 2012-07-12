@@ -25,6 +25,7 @@
 #include "nel/gui/interface_link.h"
 #include "nel/misc/smart_ptr.h"
 #include "nel/gui/lua_helper.h"
+#include "nel/gui/proc.h"
 #include "nel/gui/widget_manager.h"
 
 namespace NLGUI
@@ -230,6 +231,8 @@ namespace NLGUI
 
 		CInterfaceAnim* getAnim( const std::string &name ) const;
 
+		CProcedure* getProc( const std::string &name );
+
 	protected:
 
 		/**
@@ -260,49 +263,6 @@ namespace NLGUI
 
 		bool	validDefineChar(char c) const;
 
-		/// Procedure def
-		class	CParamBlock
-		{
-		public:
-			// -1 if not a param id, but a string
-			sint32		NumParam;
-			std::string		String;
-
-			CParamBlock()
-			{
-				NumParam= -1;
-			}
-		};
-		class	CAction
-		{
-		public:
-			// a condition to launch this action handler (is an expression)
-			std::vector<CParamBlock>	CondBlocks;
-
-			// the action handler (may be proc!!)
-			std::string					Action;
-			// A list of string/or param number => to build the final params at execution
-			std::vector<CParamBlock>	ParamBlocks;
-
-			// build a paramBlock from a string
-			void		buildParamBlock (const std::string &params);
-			// from ParamBlock, and a paramList (skip the 0th), build params.
-			void		buildParams (const std::vector<std::string> &paramList, std::string &params) const;
-
-			void		buildCondBlock (const std::string &params);
-
-			void		buildCond (const std::vector<std::string> &paramList, std::string &cond) const;
-
-			static void buildBlocks (const std::string &in, std::vector<CParamBlock> &out);
-			static void eval (const std::vector<std::string> &inArgs, const std::vector<CParamBlock> &inBlocks, std::string &out);
-
-		};
-		class	CProcedure
-		{
-		public:
-			// List of the actions
-			std::vector<CAction>	Actions;
-		};
 		class	CStyleProperty
 		{
 		public:

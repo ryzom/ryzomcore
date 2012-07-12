@@ -28,6 +28,8 @@
 #include "nel/gui/view_bitmap.h"
 #include "nel/gui/group_container.h"
 #include "nel/gui/interface_anim.h"
+#include "nel/gui/proc.h"
+#include "nel/gui/interface_expr.h"
 #include "nel/misc/events.h"
 
 namespace NLGUI
@@ -2211,6 +2213,8 @@ namespace NLGUI
 				CDBManager::getInstance()->flushObserverCalls();
 				return result;
 			}
+
+			lastKeyEvent = eventDesc;
 		}
 
 		//////////////////////////////////////////////// Keyboard handling ends here ////////////////////////////////////
@@ -3027,6 +3031,66 @@ namespace NLGUI
 		for( itr = activeAnims.begin(); itr != activeAnims.end(); ++itr )
 			(*itr)->update();
 	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::runProcedure( const std::string &procName, CCtrlBase *pCaller,
+		const std::vector< std::string> &paramList )
+	{
+		CProcedure *procp = parser->getProc( procName );
+		if( procp == NULL )
+			return;
+
+		CProcedure &proc = *procp;
+
+		// Run all actions
+		for( uint i = 0; i < proc.Actions.size(); i++ )
+		{
+			const CProcAction &action = proc.Actions[i];
+			// test if the condition for the action is valid
+			if( action.CondBlocks.size() > 0 )
+			{
+				CInterfaceExprValue result;
+				result.setBool( false );
+				std::string cond;
+				action.buildCond( paramList, cond );
+				CInterfaceExpr::eval( cond, result, NULL );
+
+				if( result.toBool() )
+					if( !result.getBool() )
+						continue;
+			}
+			// build the params sting
+			std::string params;
+			action.buildParams( paramList, params );
+			// run
+			//nlwarning("step %d : %s, %s", (int) i, action.Action.c_str(), params.c_str());
+			CAHManager::getInstance()->runActionHandler( action.Action, pCaller, params );
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::setProcedureAction( const std::string &procName, uint actionIndex,
+		const std::string &ah, const std::string &params )
+	{
+		CProcedure *procp = parser->getProc( procName );
+		if( procp == NULL )
+			return;
+
+		CProcedure &proc = *procp;
+
+		// set wanted action
+		if( actionIndex<proc.Actions.size() )
+		{
+			CProcAction &action = proc.Actions[ actionIndex ];
+			action.Action = ah;
+			action.ParamBlocks.clear();
+			action.ParamBlocks.resize( 1 );
+			action.ParamBlocks[ 0 ].String = params;
+		}
+	}
+
+
 
 	CWidgetManager::CWidgetManager()
 	{

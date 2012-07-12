@@ -44,6 +44,7 @@ namespace NLGUI
 	class CViewPointerBase;
 	class CInterfaceOptions;
 	class CInterfaceAnim;
+	class CProcedure;
 
 	class IParser
 	{
@@ -59,6 +60,7 @@ namespace NLGUI
 		virtual bool getProcedureAction( const std::string &procName, uint actionIndex, std::string &ah, std::string &params ) const = 0;
 		virtual const std::string&  getDefine(const std::string &id) const = 0;
 		virtual CInterfaceAnim* getAnim( const std::string &name ) const = 0;
+		virtual CProcedure* getProc( const std::string &name ) = 0;
 	};
 
 	/// Manages the GUI widgets
@@ -332,7 +334,7 @@ namespace NLGUI
 
 		void drawViews( NL3D::UCamera camera );
 
-		bool handleEvent( const CEventDescriptor &eventDesc );
+		bool handleEvent( const CEventDescriptor &evnt );
 		
 		bool handleMouseMoveEvent( const CEventDescriptor &eventDesc );
 
@@ -474,6 +476,13 @@ namespace NLGUI
 		void stopAnim( const std::string &animId );
 		void updateAnims();
 		void removeFinishedAnims();
+		
+		// execute a procedure. give a list of parameters. NB: the first param is the name of the proc (skipped)...
+		void runProcedure( const std::string &procName, CCtrlBase *pCaller, const std::vector< std::string > &paramList );
+		// replace an action in a procedure (if possible)
+		void setProcedureAction( const std::string &procName, uint actionIndex, const std::string &ah, const std::string &params );
+
+		const CEventDescriptorKey& getLastKeyEvent() const{ return lastKeyEvent; }
 				
 		static IParser *parser;
 
@@ -541,6 +550,8 @@ namespace NLGUI
 		bool inGame;
 		
 		bool _MouseOverWindow;
+
+		CEventDescriptorKey lastKeyEvent;
 
 		uint32 screenH;
 		uint32 screenW;

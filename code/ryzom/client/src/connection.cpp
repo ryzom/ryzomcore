@@ -2059,7 +2059,7 @@ public:
 		{
 			vector<string> p;
 			p.push_back(sProc);
-			pIM->runProcedure(sProc, pCaller, p);
+			CWidgetManager::getInstance()->runProcedure(sProc, pCaller, p);
 
 			CInterfaceExprValue result;
 			if (CInterfaceExpr::eval(sCond, result))

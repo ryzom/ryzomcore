@@ -1422,7 +1422,6 @@ void CInterfaceManager::updateFrameEvents()
 
 	// Handle anims done in 2 times because some AH can add or remove anims
 	// First ensure we are working on a safe vector and update all anims
-	sint i;
 	CWidgetManager::getInstance()->updateAnims();
 
 	IngameDbMngr.flushObserverCalls();
@@ -1599,11 +1598,11 @@ bool CInterfaceManager::loadConfig (const string &filename)
 	vector<string> v;
 	if (ClientCfg.R2EDEnabled)
 	{
-		runProcedure ("proc_reset_r2ed_interface", NULL, v);
+		CWidgetManager::getInstance()->runProcedure ("proc_reset_r2ed_interface", NULL, v);
 	}
 	else
 	{
-		runProcedure ("proc_reset_interface", NULL, v);
+		CWidgetManager::getInstance()->runProcedure ("proc_reset_interface", NULL, v);
 	}
 
 	// By default, consider the reset interface has been set with the current resolution
@@ -1754,7 +1753,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 		vector<string> v;
 		if (!ClientCfg.R2EDEnabled)
 		{
-			runProcedure ("proc_reset_interface", NULL, v);
+			CWidgetManager::getInstance()->runProcedure ("proc_reset_interface", NULL, v);
 		}
 		return false;
 	}
@@ -2124,68 +2123,6 @@ void CInterfaceManager::processServerIDString()
 }
 
 // ------------------------------------------------------------------------------------------------
-void CInterfaceManager::runProcedure (const string &procName, CCtrlBase *pCaller,
-									  const vector<string> &paramList)
-{
-	CstItProcedureMap	it= _ProcedureMap.find(procName);
-	if(it!=_ProcedureMap.end())
-	{
-		// TMP TMP
-		/*std::string params;
-		for(uint k = 0; k < paramList.size(); ++k)
-		{
-			params += paramList[k] + " ";
-		}
-
-		nlinfo("runProcedure : %s : %s",procName.c_str(), params.c_str());*/
-		const CProcedure	&proc= it->second;
-		// Run all actions
-		for(uint i=0;i<proc.Actions.size();i++)
-		{
-			const CAction		&action= proc.Actions[i];
-			// test if the condition for the action is valid
-			if (action.CondBlocks.size() > 0)
-			{
-				CInterfaceExprValue result;
-				result.setBool(false);
-				string cond;
-				action.buildCond(paramList, cond);
-				CInterfaceExpr::eval(cond, result, NULL);
-				if (result.toBool())
-				{
-					if (!result.getBool()) continue;
-				}
-			}
-			// build the params sting
-			string params;
-			action.buildParams(paramList, params);
-			// run
-			//nlwarning("step %d : %s, %s", (int) i, action.Action.c_str(), params.c_str());
-			CAHManager::getInstance()->runActionHandler(action.Action, pCaller, params);
-		}
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-void CInterfaceManager::setProcedureAction(const std::string &procName, uint actionIndex, const std::string &ah, const std::string &params)
-{
-	ItProcedureMap	it= _ProcedureMap.find(procName);
-	if(it!=_ProcedureMap.end())
-	{
-		CProcedure	&proc= it->second;
-		// set wanted action
-		if(actionIndex<proc.Actions.size())
-		{
-			CAction		&action= proc.Actions[actionIndex];
-			action.Action= ah;
-			action.ParamBlocks.clear();
-			action.ParamBlocks.resize(1);
-			action.ParamBlocks[0].String= params;
-		}
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
 void CInterfaceManager::messageBoxInternal(const string &msgBoxGroup, const ucstring &text, const string &masterGroup, TCaseMode caseMode)
 {
 	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":" + msgBoxGroup));
@@ -2215,7 +2152,7 @@ void CInterfaceManager::messageBoxWithHelp(const ucstring &text, const std::stri
 										   TCaseMode caseMode)
 {
 	// replace the procedure "proc_valid_message_box_ok" action
-	setProcedureAction("proc_message_box_with_help_ok", 1, ahOnOk, paramsOnOk);
+	CWidgetManager::getInstance()->setProcedureAction("proc_message_box_with_help_ok", 1, ahOnOk, paramsOnOk);
 	const char *mbName = "message_box_with_help";
 	// if no action handler is wanted, then assume that
 	// clicking 'ok' do not have any consequence, so allow exiting the message box by clicking
@@ -2242,9 +2179,9 @@ void	CInterfaceManager::validMessageBox(TValidMessageIcon icon, const ucstring &
 	if (group && viewText)
 	{
 		// replace the procedure "proc_valid_message_box_ok" action
-		setProcedureAction("proc_valid_message_box_ok", 1, ahOnOk, paramsOnOk);
+		CWidgetManager::getInstance()->setProcedureAction("proc_valid_message_box_ok", 1, ahOnOk, paramsOnOk);
 		// replace the procedure "proc_valid_message_box_cancel" action
-		setProcedureAction("proc_valid_message_box_cancel", 1, ahOnCancel, paramsOnCancel);
+		CWidgetManager::getInstance()->setProcedureAction("proc_valid_message_box_cancel", 1, ahOnCancel, paramsOnCancel);
 
 		// set text and icon
 		viewText->setText(text);

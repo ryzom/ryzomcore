@@ -288,8 +288,6 @@ class CActionHandlerProc : public IActionHandler
 public:
 	virtual void execute (CCtrlBase *pCaller, const std::string &params)
 	{
-		CInterfaceManager	*mngr= CInterfaceManager::getInstance();
-
 		// split the parameters
 		vector<string>		paramList;
 		splitString(params, "|", paramList);
@@ -297,7 +295,7 @@ public:
 			return;
 
 		// execute the procedure
-		mngr->runProcedure(paramList[0], pCaller, paramList);
+		CWidgetManager::getInstance()->runProcedure(paramList[0], pCaller, paramList);
 	}
 };
 REGISTER_ACTION_HANDLER (CActionHandlerProc, "proc");

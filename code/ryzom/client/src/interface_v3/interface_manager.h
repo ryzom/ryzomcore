@@ -261,11 +261,6 @@ public:
 	/// Handle The Event. return true if the interfaceManager catch it and if must not send to the Game Action Manager
 	bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
 
-	// execute a procedure. give a list of parameters. NB: the first param is the name of the proc (skipped)...
-	void runProcedure(const std::string &procName, CCtrlBase *pCaller, const std::vector<std::string> &paramList);
-	// replace an action in a procedure (if possible)
-	void setProcedureAction(const std::string &procName, uint actionIndex, const std::string &ah, const std::string &params);
-
 	// InGame ContextMenu
 	void launchContextMenuInGame (const std::string &nameOfCM);
 
@@ -425,9 +420,6 @@ public:
 		else
 			return 0;
 	}
-
-	// Description of the last key event that called an action handler
-	const NLGUI::CEventDescriptorKey&	getLastEventKeyDesc() const { return _LastEventKeyDesc; }
 
 	void	notifyMailAvailable();
 	void	notifyForumUpdated();
@@ -656,9 +648,6 @@ private:
 
 	// Item Carac requirement
 	sint32		_CurrentPlayerCharac[CHARACTERISTICS::NUM_CHARACTERISTICS];
-
-	// Description of the last key event that called an action handler
-	NLGUI::CEventDescriptorKey	_LastEventKeyDesc;
 
 	// observers for copying database branch changes
 	CServerToLocalAutoCopy ServerToLocalAutoCopyInventory;
