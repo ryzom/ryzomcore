@@ -401,7 +401,7 @@ void CCDBNodeBranch::readAndMapDelta( TGameCycle gc, CBitMemStream& s, uint bank
 	}
 
 	// Display the Name if we are in verbose mode
-	if ( VerboseDatabase )
+	if ( verboseDatabase )
 	{
 		string displayStr = string("Reading: ") +  *(_Nodes[idx]->getName());
 		//CInterfaceManager::getInstance()->getChatOutput()->addTextChild( ucstring( displayStr ),CRGBA(255,255,255,255));
@@ -423,13 +423,13 @@ void CCDBNodeBranch::readDelta( TGameCycle gc, CBitMemStream & f )
 	{
 		// Read the atom bitfield
 		uint nbAtomElements = countLeaves();
-		if(VerboseDatabase)
+		if(verboseDatabase)
 			nlinfo( "CDB/ATOM: %u leaves", nbAtomElements );
 		CBitSet bitfield( nbAtomElements );
 		f.readBits( bitfield );
 		if ( ! bitfield.getVector().empty() )
 		{
-			if(VerboseDatabase)
+			if(verboseDatabase)
 			{
 				nldebug( "CDB/ATOM: Bitfield: %s LastBits:", bitfield.toString().c_str() );
 				f.displayLastBits( bitfield.size() );
@@ -442,7 +442,7 @@ void CCDBNodeBranch::readDelta( TGameCycle gc, CBitMemStream & f )
 		{
 			if ( bitfield[i] )
 			{
-				if(VerboseDatabase)
+				if(verboseDatabase)
 				{
 					nldebug( "CDB/ATOM: Reading prop[%u] of atom", i );
 				}
@@ -468,7 +468,7 @@ void CCDBNodeBranch::readDelta( TGameCycle gc, CBitMemStream & f )
 		}
 
 		// Display the Name if we are in verbose mode
-		if ( VerboseDatabase )
+		if ( verboseDatabase )
 		{
 			string displayStr = string("Reading: ") +  *(_Nodes[idx]->getName());
 			//CInterfaceManager::getInstance()->getChatOutput()->addTextChild( ucstring( displayStr ),CRGBA(255,255,255,255));

@@ -985,8 +985,10 @@ NLMISC_COMMAND(verboseDatabase, "Enable/Disable the log for the database", "")
 	if(args.size() != 0)
 		return false;
 
-	VerboseDatabase = !VerboseDatabase;
-	if(VerboseDatabase)
+	bool v = NLMISC::ICDBNode::isDatabaseVerbose();
+	NLMISC::ICDBNode::setVerboseDatabase( !v );
+
+	if( !v )
 		nlinfo("Enable VerboseDatabase");
 	else
 		nlinfo("Disable VerboseDatabase");
