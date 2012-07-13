@@ -208,7 +208,7 @@ void CBotChatPageTrade::begin()
 		if(dbPriceMin)	dbPriceMin->setValue32(0);
 		if(dbPriceMax)
 		{
-			fromString(pIM->getParser()->getDefine("bot_chat_filter_max_price"), value);
+			fromString(CWidgetManager::getInstance()->getParser()->getDefine("bot_chat_filter_max_price"), value);
 			dbPriceMax->setValue32(value);
 		}
 
@@ -218,7 +218,7 @@ void CBotChatPageTrade::begin()
 		if(dbQualityMin)	dbQualityMin->setValue32(0);
 		if(dbQualityMax)
 		{
-			fromString(pIM->getParser()->getDefine("bot_chat_filter_max_quality"), value);
+			fromString(CWidgetManager::getInstance()->getParser()->getDefine("bot_chat_filter_max_quality"), value);
 			dbQualityMax->setValue32(value);
 		}
 
@@ -1688,7 +1688,7 @@ void	CBotChatPageTrade::setupFactionPointPrice(bool /* sellMode */, uint default
 		// setup icon according to pvp clan
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		factionName = NLMISC::toLower(factionName);
-		string	factionIcon= pIM->getParser()->getDefine(toString("faction_icon_%s", factionName.c_str()));
+		string	factionIcon= CWidgetManager::getInstance()->getParser()->getDefine(toString("faction_icon_%s", factionName.c_str()));
 		CViewBitmap		*vBmp= dynamic_cast<CViewBitmap*>(fpGroup->getView("unit_price:item_price:icone"));
 		if(vBmp)	vBmp->setTexture(factionIcon);
 		vBmp= dynamic_cast<CViewBitmap*>(fpGroup->getView("total_price:item_price:icone"));
@@ -2079,7 +2079,7 @@ std::string	CBotChatPageTrade::getItemSheetNameForItemType(ITEM_TYPE::TItemType 
 	itemTypeDef+= ITEM_TYPE::toString(it);
 
 	// return empty string if not found
-	return pIM->getParser()->getDefine(itemTypeDef);
+	return CWidgetManager::getInstance()->getParser()->getDefine(itemTypeDef);
 }
 
 

@@ -156,7 +156,7 @@ namespace NLGUI
 					idparent = parentGroup->getId() +":";
 				else
 					idparent = "ui:";
-				CWidgetManager::parser->addParentPositionAssociation(this, idparent +  string((const char*)ptr));
+				CWidgetManager::getInstance()->getParser()->addParentPositionAssociation(this, idparent +  string((const char*)ptr));
 			}
 		}
 
@@ -177,7 +177,7 @@ namespace NLGUI
 				if (parentGroup)
 					idparent = parentGroup->getId();
 			}
-			CWidgetManager::parser->addParentSizeAssociation( this, idparent );
+			CWidgetManager::getInstance()->getParser()->addParentSizeAssociation( this, idparent );
 		}
 
 		ptr = (char*) xmlGetProp (cur, (xmlChar*)"sizeref");

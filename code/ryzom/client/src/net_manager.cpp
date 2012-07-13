@@ -3335,7 +3335,7 @@ private:
 				pGC->setActive(true);
 
 				// must set the text by hand
-				CViewText	*vt= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(pIM->getParser()->getDefine("server_message_box_content_view_text")));
+				CViewText	*vt= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("server_message_box_content_view_text")));
 				if(vt)
 					vt->setTextFormatTaged(contentStr);
 

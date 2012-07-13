@@ -119,7 +119,7 @@ bool CChatWindow::create(const CChatWindowDesc &desc, const std::string &chatId)
 	params.insert(params.end(), desc.ChatTemplateParams.begin(), desc.ChatTemplateParams.end());
 
 	// create a chat container from the template
-	CInterfaceGroup *chatGroup = im->getParser()->createGroupInstance(chatTemplate, "ui:interface", params);
+	CInterfaceGroup *chatGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(chatTemplate, "ui:interface", params);
 	if (chatGroup)
 	{
 		_Chat = dynamic_cast<CGroupContainer *>(chatGroup);
@@ -554,7 +554,7 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 
 	// on a new message, change the Tab color
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CRGBA	newMsgColor= CRGBA::stringToRGBA(pIM->getParser()->getDefine("chat_group_tab_color_newmsg").c_str());
+	CRGBA	newMsgColor= CRGBA::stringToRGBA(CWidgetManager::getInstance()->getParser()->getDefine("chat_group_tab_color_newmsg").c_str());
 
 	ucstring newmsg = msg;
 	ucstring prefix;
@@ -754,7 +754,7 @@ CGroupContainer *CChatGroupWindow::createFreeTeller(const ucstring &winNameIn, c
 		std::string templateName = "contact_chat_friend";
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup *pIG = pIM->getParser()->createGroupInstance(templateName, "ui:interface", properties);
+		CInterfaceGroup *pIG = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, "ui:interface", properties);
 		if (!pIG) return NULL;
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer *>(pIG);
 		if (!pGC)

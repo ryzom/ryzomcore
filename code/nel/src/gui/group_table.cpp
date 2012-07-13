@@ -87,7 +87,7 @@ namespace NLGUI
 		Group->setId(parentGroup->getId() + Group->getId());
 		setEnclosedGroupDefaultParams();
 		// parse the children
-		bool ok = CWidgetManager::parser->parseGroupChildren(cur, Group, false);
+		bool ok = CWidgetManager::getInstance()->getParser()->parseGroupChildren(cur, Group, false);
 		if (!ok) return false;
 		// align
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"align" );

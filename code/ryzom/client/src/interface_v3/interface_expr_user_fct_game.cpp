@@ -988,7 +988,7 @@ static DECLARE_INTERFACE_USER_FCT(getBotChatBuyFilterMPIcon)
 	}
 
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	result.setString(pIM->getParser()->getDefine( RM_FABER_TYPE::toIconDefineString(RM_FABER_TYPE::TRMFType(args[0].getInteger())) ));
+	result.setString(CWidgetManager::getInstance()->getParser()->getDefine( RM_FABER_TYPE::toIconDefineString(RM_FABER_TYPE::TRMFType(args[0].getInteger())) ));
 
 	return true;
 }

@@ -743,11 +743,11 @@ static void chooseSheath (ITEMFAMILY::EItemFamily eIF, string sAllSkills)
 {
 	// Choose right sheath
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCDBNodeLeaf *pNLwrite = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getParser()->getDefine("ui_set_active"));
-	CCDBNodeLeaf *pNLread = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getParser()->getDefine("set_nb"));
+	CCDBNodeLeaf *pNLwrite = NLGUI::CDBManager::getInstance()->getDbProp(CWidgetManager::getInstance()->getParser()->getDefine("ui_set_active"));
+	CCDBNodeLeaf *pNLread = NLGUI::CDBManager::getInstance()->getDbProp(CWidgetManager::getInstance()->getParser()->getDefine("set_nb"));
 	sint32 nNbSheath = (sint32)pNLread->getValue64();
 	if (nNbSheath == 0) return;
-	pNLread = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getParser()->getDefine("set_active"));
+	pNLread = NLGUI::CDBManager::getInstance()->getDbProp(CWidgetManager::getInstance()->getParser()->getDefine("set_active"));
 	sint32 nActiveSheath = (sint32)pNLread->getValue64();
 	bool bFound = false;
 	for (sint32 i = 0; i < ((nNbSheath/2)+1); ++i)
@@ -763,7 +763,7 @@ static void chooseSheath (ITEMFAMILY::EItemFamily eIF, string sAllSkills)
 			while (nSheathToTest >= (INVENTORIES::sheath+nNbSheath)) nSheathToTest -= nNbSheath;
 
 			string sPath;
-			sPath = pIM->getParser()->getDefine("set_base") + ":" + NLMISC::toString(nSheathToTest) + ":" + pIM->getParser()->getDefine("set_r") + ":SHEET";
+			sPath = CWidgetManager::getInstance()->getParser()->getDefine("set_base") + ":" + NLMISC::toString(nSheathToTest) + ":" + CWidgetManager::getInstance()->getParser()->getDefine("set_r") + ":SHEET";
 			pNLread = NLGUI::CDBManager::getInstance()->getDbProp(sPath);
 			sint32 sheetid = (sint32)pNLread->getValue64();
 			CItemSheet *pIS = dynamic_cast<CItemSheet *>(SheetMngr.get(CSheetId(sheetid)));
@@ -1305,7 +1305,7 @@ class CSelectItemSheet : public IActionHandler
 		if (!ctrlSheet) return;
 		sint selectionGroup = ctrlSheet->getSelectionGroup();
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		const CCtrlSheetSelection &css = im->getParser()->getCtrlSheetSelection();
+		const CCtrlSheetSelection &css = CWidgetManager::getInstance()->getParser()->getCtrlSheetSelection();
 		const CSheetSelectionGroup *csg = css.getGroup(selectionGroup);
 		if (csg && csg->isActive())
 		{
@@ -2103,7 +2103,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 		if ( pE->isPlayer() )
 		{
 			// Player => deduce RegionForce & ForceLevel from the database
-			CCDBNodeLeaf *pDbTargetUid = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getParser()->getDefine("target_uid") );
+			CCDBNodeLeaf *pDbTargetUid = NLGUI::CDBManager::getInstance()->getDbProp( CWidgetManager::getInstance()->getParser()->getDefine("target_uid") );
 			if ( ! pDbTargetUid )
 				return;
 			// Hide the target level if the USER is not in PVP FACTION
@@ -2121,7 +2121,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 
 				return;
 			}
-			CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getParser()->getDefine("target_player_level") );
+			CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( CWidgetManager::getInstance()->getParser()->getDefine("target_player_level") );
 			if ( ! pDbPlayerLevel )
 				return;
 			sint nLevel = pDbPlayerLevel->getValue32();
@@ -2158,13 +2158,13 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 		// Set color
 		if (nForceRegion > 6) nForceRegion = 6;
 		if (nForceRegion < 1) nForceRegion = 1;
-		CRGBA col = CInterfaceElement::convertColor(pIM->getParser()->getDefine("region_force_"+toString(nForceRegion)).c_str());
+		CRGBA col = CInterfaceElement::convertColor(CWidgetManager::getInstance()->getParser()->getDefine("region_force_"+toString(nForceRegion)).c_str());
 		pVBR->setColor(col);
 
 		// Set texture
 		if (nLevelForce > 8) nLevelForce = 8;
 		if (nLevelForce < 1) nLevelForce = 1;
-		string sTexture = pIM->getParser()->getDefine("force_level_"+toString(nLevelForce));
+		string sTexture = CWidgetManager::getInstance()->getParser()->getDefine("force_level_"+toString(nLevelForce));
 		pVBL->setTexture(sTexture);
 
 		// Set tooltip
@@ -2227,12 +2227,12 @@ class CAHUpdateCurrentMode : public IActionHandler
 		sint32 nNewMode = (sint32)eVal.getInteger();
 
 		sint32 nModeMinInf, nModeMaxInf, nModeMinLab, nModeMaxLab, nModeMinKey, nModeMaxKey;
-		fromString(pIM->getParser()->getDefine("mode_min_info"), nModeMinInf);
-		fromString(pIM->getParser()->getDefine("mode_max_info"), nModeMaxInf);
-		fromString(pIM->getParser()->getDefine("mode_min_lab"), nModeMinLab);
-		fromString(pIM->getParser()->getDefine("mode_max_lab"), nModeMaxLab);
-		fromString(pIM->getParser()->getDefine("mode_min_keys"), nModeMinKey);
-		fromString(pIM->getParser()->getDefine("mode_max_keys"), nModeMaxKey);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_min_info"), nModeMinInf);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_max_info"), nModeMaxInf);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_min_lab"), nModeMinLab);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_max_lab"), nModeMaxLab);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_min_keys"), nModeMinKey);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_max_keys"), nModeMaxKey);
 
 		sint32 nMode = 0;
 		if ((nNewMode >= nModeMinInf) && (nNewMode <= nModeMaxInf))
@@ -2275,14 +2275,14 @@ class CAHUpdateCurrentMode : public IActionHandler
 				sint32 tmpMode;
 
 				// Is NewMode entry active ?
-				fromString(pIM->getParser()->getDefine("mode_magic"), tmpMode);
+				fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_magic"), tmpMode);
 				if (nNewMode == tmpMode)
 					if ((nIntFlags & (1<<INTERFACE_FLAGS::Magic)) != 0)
 						bFound = true;
 
 				if (!bFound)
 				{
-					fromString(pIM->getParser()->getDefine("mode_combat"), tmpMode);
+					fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_combat"), tmpMode);
 					if (nNewMode == tmpMode)
 						if ((nIntFlags & (1<<INTERFACE_FLAGS::Combat)) != 0)
 							bFound = true;
@@ -2290,7 +2290,7 @@ class CAHUpdateCurrentMode : public IActionHandler
 
 				if (!bFound)
 				{
-					fromString(pIM->getParser()->getDefine("mode_faber_create"), tmpMode);
+					fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_faber_create"), tmpMode);
 					if (nNewMode == tmpMode)
 						if ((nIntFlags & (1<<INTERFACE_FLAGS::FaberCreate)) != 0)
 							bFound = true;
@@ -2298,7 +2298,7 @@ class CAHUpdateCurrentMode : public IActionHandler
 
 				if (!bFound)
 				{
-					fromString(pIM->getParser()->getDefine("mode_faber_repair"), tmpMode);
+					fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_faber_repair"), tmpMode);
 					if (nNewMode == tmpMode)
 						if ((nIntFlags & (1<<INTERFACE_FLAGS::FaberRepair)) != 0)
 							bFound = true;
@@ -2306,7 +2306,7 @@ class CAHUpdateCurrentMode : public IActionHandler
 
 				if (!bFound)
 				{
-					fromString(pIM->getParser()->getDefine("mode_faber_refine"), tmpMode);
+					fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_faber_refine"), tmpMode);
 					if (nNewMode == tmpMode)
 						if ((nIntFlags & (1<<INTERFACE_FLAGS::FaberRefine)) != 0)
 							bFound = true;
@@ -2314,7 +2314,7 @@ class CAHUpdateCurrentMode : public IActionHandler
 
 				if (!bFound)
 				{
-					fromString(pIM->getParser()->getDefine("mode_commerce"), tmpMode);
+					fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_commerce"), tmpMode);
 					if (nNewMode == tmpMode)
 						if ((nIntFlags & (1<<INTERFACE_FLAGS::Commerce)) != 0)
 							bFound = true;
@@ -2322,14 +2322,14 @@ class CAHUpdateCurrentMode : public IActionHandler
 
 				if (!bFound)
 				{
-					fromString(pIM->getParser()->getDefine("mode_macros"), tmpMode);
+					fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_macros"), tmpMode);
 					if (nNewMode == tmpMode)
 						bFound = true; // Not in DB !!!
 				}
 
 				if (!bFound)
 				{
-					fromString(pIM->getParser()->getDefine("mode_special_labo"), tmpMode);
+					fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_special_labo"), tmpMode);
 					if (nNewMode == tmpMode)
 						if ((nIntFlags & (1<<INTERFACE_FLAGS::Special)) != 0)
 							bFound = true;
@@ -3798,8 +3798,8 @@ uint32 getMissionTitle(sint32 nSelected)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	sint32 nNbMission, nNbGroupMission;
-	fromString(pIM->getParser()->getDefine("ipj_nb_mission"), nNbMission);
-	fromString(pIM->getParser()->getDefine("ipj_nb_group_mission"), nNbGroupMission);
+	fromString(CWidgetManager::getInstance()->getParser()->getDefine("ipj_nb_mission"), nNbMission);
+	fromString(CWidgetManager::getInstance()->getParser()->getDefine("ipj_nb_group_mission"), nNbGroupMission);
 
 	if (nSelected < 0)
 		return 0;
@@ -3815,8 +3815,8 @@ void runMissionProc(sint32 nSelected)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	sint32 nNbMission, nNbGroupMission;
-	fromString(pIM->getParser()->getDefine("ipj_nb_mission"), nNbMission);
-	fromString(pIM->getParser()->getDefine("ipj_nb_group_mission"), nNbGroupMission);
+	fromString(CWidgetManager::getInstance()->getParser()->getDefine("ipj_nb_mission"), nNbMission);
+	fromString(CWidgetManager::getInstance()->getParser()->getDefine("ipj_nb_group_mission"), nNbGroupMission);
 
 	if (nSelected < 0)
 		return;
@@ -3845,8 +3845,8 @@ public:
 		sint32 nSelected = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:MISSION_SELECTED")->getValue32();
 
 		sint32 nNbMission, nNbGroupMission;
-		fromString(pIM->getParser()->getDefine("ipj_nb_mission"), nNbMission);
-		fromString(pIM->getParser()->getDefine("ipj_nb_group_mission"), nNbGroupMission);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("ipj_nb_mission"), nNbMission);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("ipj_nb_group_mission"), nNbGroupMission);
 
 		// If no mission selected or title selected becomes invalid -> search a new title to select
 		if ((nSelected == -1) || (getMissionTitle(nSelected) == 0))

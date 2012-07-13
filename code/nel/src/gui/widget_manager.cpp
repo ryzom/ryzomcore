@@ -54,8 +54,6 @@ namespace NLGUI
 {
 	CWidgetManager* CWidgetManager::instance = NULL;
 	std::string CWidgetManager::_CtrlLaunchingModalId= "ctrl_launch_modal";
-	IParser* CWidgetManager::parser = NULL;
-
 	// ----------------------------------------------------------------------------
 	// SMasterGroup
 	// ----------------------------------------------------------------------------
@@ -3094,6 +3092,8 @@ namespace NLGUI
 
 	CWidgetManager::CWidgetManager()
 	{
+		parser = IParser::createParser();
+
 		_Pointer = NULL;
 		curContextHelp = NULL;
 		_ContextHelpActive = true;

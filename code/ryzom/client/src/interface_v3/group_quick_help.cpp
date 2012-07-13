@@ -426,7 +426,7 @@ class CHandlerRunQuickHelp : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		// Get the quick help radio buttons base id
-		string buttonId = pIM->getParser()->getDefine("quick_help_buttons");
+		string buttonId = CWidgetManager::getInstance()->getParser()->getDefine("quick_help_buttons");
 		if (!buttonId.empty())
 		{
 			// Get the button id

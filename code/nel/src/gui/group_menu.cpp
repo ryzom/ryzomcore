@@ -344,7 +344,7 @@ namespace NLGUI
 					}
 
 					string completeId = _Parent->getId() + ":" + _Lines[_Lines.size()-1].Id;
-					CInterfaceGroup *pUGLeft = CWidgetManager::parser->createGroupInstance((const char*)usergroup, completeId, vparams);
+					CInterfaceGroup *pUGLeft = CWidgetManager::getInstance()->getParser()->createGroupInstance((const char*)usergroup, completeId, vparams);
 					if (pUGLeft)
 						setUserGroupLeft((uint)_Lines.size()-1, pUGLeft, true);
 				}
@@ -359,7 +359,7 @@ namespace NLGUI
 					}
 
 					string completeId = _Parent->getId() + ":" + _Lines[_Lines.size()-1].Id;
-					CInterfaceGroup *pUG = CWidgetManager::parser->createGroupInstance((const char*)usergroup, completeId, vparams);
+					CInterfaceGroup *pUG = CWidgetManager::getInstance()->getParser()->createGroupInstance((const char*)usergroup, completeId, vparams);
 					if (pUG)
 						setUserGroupRight((uint)_Lines.size()-1, pUG, true);
 				}
@@ -1139,13 +1139,13 @@ namespace NLGUI
 		}
 
 			// create the real separator. It may be larger than the group list, this is why we create a separate group
-		CInterfaceGroup *separator = CWidgetManager::parser->createGroupInstance("menu_separator", "", NULL, 0);
+		CInterfaceGroup *separator = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_separator", "", NULL, 0);
 		if (!separator) return;
 		separator->setId(ID_MENU_SEPARATOR);
 		addGroup(separator);
 		separator->setParent(this);
 		// create place holder group
-		CInterfaceGroup *ph = CWidgetManager::parser->createGroupInstance("menu_separator_empty", "", NULL, 0);
+		CInterfaceGroup *ph = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_separator_empty", "", NULL, 0);
 		if (!ph)
 		{
 			delGroup(separator);

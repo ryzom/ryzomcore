@@ -817,7 +817,7 @@ class CAHGuildSheetOpen : public IActionHandler
 				vector< pair<string, string> > vParams;
 				vParams.push_back(vector< pair<string, string> >::value_type("id", templateId));
 				CInterfaceGroup *pLine = NULL;
-				pLine = pIM->getParser()->createGroupInstance (TEMPLATE_GUILD_MEMBER, LIST_GUILD_MEMBERS, vParams);
+				pLine = CWidgetManager::getInstance()->getParser()->createGroupInstance (TEMPLATE_GUILD_MEMBER, LIST_GUILD_MEMBERS, vParams);
 				if (pLine == NULL) continue;
 
 				// Set name

@@ -428,7 +428,7 @@ void CDisplayerVisual::onPostRender()
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 				const char *iconTemplateName = "r2ed_bad_pos_icon";
 				// if the in scene 'stop' window wasn't created, then create it now
-				CInterfaceGroup *group = pIM->getParser()->createGroupInstance (iconTemplateName , "ui:interface", NULL, 0);
+				CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance (iconTemplateName , "ui:interface", NULL, 0);
 				if (group)
 				{
 					_IconInScene = dynamic_cast<CGroupInScene *>(group);

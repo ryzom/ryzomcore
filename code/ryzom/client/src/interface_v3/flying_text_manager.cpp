@@ -64,7 +64,7 @@ void	CFlyingTextManager::initInGame()
 		string id = "in_scene_flying_text_"+toString (i);
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
-		CInterfaceGroup *groupInfo = pIM->getParser()->createGroupInstance ("in_scene_flying_text",
+		CInterfaceGroup *groupInfo = CWidgetManager::getInstance()->getParser()->createGroupInstance ("in_scene_flying_text",
 			"ui:interface", templateParams);
 		// if ok
 		if(groupInfo)
@@ -92,7 +92,7 @@ void	CFlyingTextManager::initInGame()
 	}
 
 	// misc
-	fromString(pIM->getParser()->getDefine("in_scene_flying_char_offsetx"), _CharacterWindowOffsetX);
+	fromString(CWidgetManager::getInstance()->getParser()->getDefine("in_scene_flying_char_offsetx"), _CharacterWindowOffsetX);
 }
 
 // ***************************************************************************

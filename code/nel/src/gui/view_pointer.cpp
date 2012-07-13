@@ -161,13 +161,13 @@ namespace NLGUI
 			std::vector<std::pair<std::string,std::string> > templateParams;
 			templateParams.push_back (std::pair<std::string,std::string>("id", "string_cursor"));
 
-			_StringCursor = CWidgetManager::parser->createGroupInstance("string_cursor", "", templateParams);
+			_StringCursor = CWidgetManager::getInstance()->getParser()->createGroupInstance("string_cursor", "", templateParams);
 			if (_StringCursor)
 				_StringCursor->setParentPos(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 
 			templateParams.clear();
 			templateParams.push_back (std::pair<std::string,std::string>("id", "string_cursor_hardware"));
-			_StringCursorHardware = CWidgetManager::parser->createGroupInstance("string_cursor_hardware", "", templateParams);
+			_StringCursorHardware = CWidgetManager::getInstance()->getParser()->createGroupInstance("string_cursor_hardware", "", templateParams);
 			if (_StringCursorHardware)
 				_StringCursorHardware->setParentPos(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		}

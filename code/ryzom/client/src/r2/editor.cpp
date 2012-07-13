@@ -2733,7 +2733,7 @@ uint CEditor::getMaxNumPlotItems()
 {
 	//H_AUTO(R2_CEditor_getMaxNumPlotItems)
 	uint ret;
-	fromString(getUI().getParser()->getDefine("r2ed_max_num_plot_item_sheets"), ret);
+	fromString( CWidgetManager::getInstance()->getParser()->getDefine("r2ed_max_num_plot_item_sheets"), ret);
 	return ret;
 }
 

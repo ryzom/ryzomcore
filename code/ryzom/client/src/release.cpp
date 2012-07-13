@@ -241,7 +241,7 @@ void	releaseMainLoopReselect()
 	ActionsContext.removeAllCombos();
 	EditActions.releaseAllKeyNoRunning();
 	Actions.releaseAllKeyNoRunning();
-	pIM->getParser()->removeAllTemplates();
+	CWidgetManager::getInstance()->getParser()->removeAllTemplates();
 	CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
 	CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
 	CWidgetManager::getInstance()->setCapturePointerRight(NULL);

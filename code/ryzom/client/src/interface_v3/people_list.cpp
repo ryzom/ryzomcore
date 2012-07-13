@@ -86,7 +86,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	{
 		baseId = fatherContainer->getId() + ":list";
 	}
-	CInterfaceGroup *mainIg = im->getParser()->createGroupInstance(desc.BaseContainerTemplateName, baseId, baseContainerParams);
+	CInterfaceGroup *mainIg = CWidgetManager::getInstance()->getParser()->createGroupInstance(desc.BaseContainerTemplateName, baseId, baseContainerParams);
 	// must attach group to hierarchy before we can use it
 	CGroupContainer *gc = dynamic_cast<CGroupContainer  *>(mainIg);
 	if (!gc) return false;
@@ -361,7 +361,7 @@ sint CPeopleList::addPeople(const ucstring &name, uint teamMateIndex /*= 0*/)
 	}
 
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CInterfaceGroup *group = im->getParser()->createGroupInstance(templateName, "ui:interface", properties, false);
+	CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, "ui:interface", properties, false);
 	if (!group) return -1;
 	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(group);
 	if (!gc)

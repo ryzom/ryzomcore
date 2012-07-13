@@ -324,7 +324,7 @@ namespace NLGUI
 				if (parentGroup)
 					idparent = parentGroup->getId();
 			}
-			CWidgetManager::parser->addParentSizeMaxAssociation (this, idparent);
+			CWidgetManager::getInstance()->getParser()->addParentSizeMaxAssociation (this, idparent);
 		}
 
 		// left & right clicks
@@ -348,7 +348,7 @@ namespace NLGUI
 		// LuaClass script
 		ptr = xmlGetProp (cur, (xmlChar*)"lua_class");
 		if( ptr )
-			CWidgetManager::parser->addLuaClassAssociation( this, (const char*)ptr );
+			CWidgetManager::getInstance()->getParser()->addLuaClassAssociation( this, (const char*)ptr );
 
 		return true;
 	}

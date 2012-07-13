@@ -643,10 +643,6 @@ private:
 	void messageBoxInternal(const std::string &msgBoxGroup, const ucstring &text, const std::string &masterGroup, TCaseMode caseMode);
 
 	CInterfaceLink::CInterfaceLinkUpdater *interfaceLinkUpdater;
-	NLGUI::CInterfaceParser *parser;
-
-public:
-	NLGUI::CInterfaceParser* getParser() const{ return parser; }
 };
 
 #endif // NL_INTERFACE_MANAGER_H

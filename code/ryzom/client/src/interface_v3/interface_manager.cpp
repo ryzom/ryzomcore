@@ -445,7 +445,11 @@ CInterfaceManager* CInterfaceManager::getInstance()
 // ------------------------------------------------------------------------------------------------
 CInterfaceManager::CInterfaceManager()
 {
-	parser = new CInterfaceParser();
+	CWidgetManager::getInstance()->registerNewScreenSizeHandler( new CDesktopUpdater() );
+	CWidgetManager::getInstance()->registerOnWidgetsDrawnHandler( new CDrawDraggedSheet() );
+
+	CInterfaceParser *parser = dynamic_cast< CInterfaceParser* >( CWidgetManager::getInstance()->getParser() );
+
 	parser->setSetupOptionsCallback( this );
 	parser->addModule( "scene3d", new CIF3DSceneParser() );
 	parser->addModule( "ddx", new CIFDDXParser() );
@@ -453,12 +457,8 @@ CInterfaceManager::CInterfaceManager()
 	parser->addModule( "command", new CCommandParser() );
 	parser->addModule( "key", new CKeyParser() );
 	parser->addModule( "macro", new CMacroParser() );
-	CWidgetManager::getInstance()->registerNewScreenSizeHandler( new CDesktopUpdater() );
-	CWidgetManager::getInstance()->registerOnWidgetsDrawnHandler( new CDrawDraggedSheet() );
-
 	parser->setCacheUIParsing( ClientCfg.CacheUIParsing );
 
-	CWidgetManager::parser = parser;
 	CViewRenderer::setDriver( Driver );
 	CViewRenderer::setTextContext( TextContext );
 	CViewRenderer::hwCursorScale = ClientCfg.HardwareCursorScale;
@@ -556,8 +556,6 @@ CInterfaceManager::~CInterfaceManager()
 	interfaceLinkUpdater = NULL;
 	*/
 	_Instance = NULL;
-	delete parser;
-	parser = NULL;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -620,6 +618,7 @@ void CInterfaceManager::destroy ()
 
 void CInterfaceManager::initLUA()
 {
+	CInterfaceParser *parser = dynamic_cast< CInterfaceParser* >( CWidgetManager::getInstance()->getParser() );
 	if( parser->isLuaInitialized() )
 		return;
 
@@ -684,6 +683,7 @@ void CInterfaceManager::initLogin()
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::uninitLogin()
 {
+	CInterfaceParser *parser = dynamic_cast< CInterfaceParser* >( CWidgetManager::getInstance()->getParser() );
 
 	CWidgetManager::getInstance()->activateMasterGroup ("ui:login", false);
 
@@ -806,6 +806,8 @@ void CInterfaceManager::uninitOutGame()
 
 	initStart = ryzomGetLocalTime ();
 	CWidgetManager::getInstance()->activateMasterGroup ("ui:outgame", false);
+	
+	CInterfaceParser *parser = dynamic_cast< CInterfaceParser* >( CWidgetManager::getInstance()->getParser() );
 	//nlinfo ("%d seconds for activateMasterGroup", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
 	parser->removeAll();
@@ -1085,7 +1087,7 @@ void CInterfaceManager::configureQuitDialogBox()
 		eltQuit = quitDlg->getElement(quitDialogStr+":ryzom");
 		eltQuitNow = quitDlg->getElement(quitDialogStr+":ryzom_now");
 		sint buttonDeltaY;
-		fromString( parser->getDefine("quit_button_delta_y"), buttonDeltaY);
+		fromString( CWidgetManager::getInstance()->getParser()->getDefine("quit_button_delta_y"), buttonDeltaY);
 		extern R2::TUserRole UserRoleInSession;
 
 		bool sessionOwner = (R2::getEditor().getMode() != R2::CEditor::NotInitialized && R2::getEditor().getDMC().getEditionModule().isSessionOwner());
@@ -1342,6 +1344,9 @@ void CInterfaceManager::uninitInGame1 ()
 
 	// Remove all interface objects (containers, groups, variables, defines, ...)
 	CWidgetManager::getInstance()->activateMasterGroup ("ui:interface", false);
+
+	CInterfaceParser *parser = dynamic_cast< CInterfaceParser* >( CWidgetManager::getInstance()->getParser() );
+
 	parser->removeAll();
 	reset();
 	CInterfaceLink::removeAllLinks();
@@ -1579,7 +1584,7 @@ bool CInterfaceManager::parseInterface (const std::vector<std::string> &xmlFileN
 	_DB_UI_DUMMY_PREREQUISIT_VALID->setValueBool(true);
 	_DB_UI_DUMMY_FACTION_TYPE->setValue64(0);
 
-	return parser->parseInterface (xmlFileNames, reload, isFilename);
+	return CWidgetManager::getInstance()->getParser()->parseInterface (xmlFileNames, reload, isFilename);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1899,7 +1904,7 @@ bool CInterfaceManager::saveConfig (const string &filename)
 
 		// write UI_DB_SAVE_VERSION
 		uint32	uiDbSaveVersion;
-		fromString( parser->getDefine("UI_DB_SAVE_VERSION"), uiDbSaveVersion);
+		fromString( CWidgetManager::getInstance()->getParser()->getDefine("UI_DB_SAVE_VERSION"), uiDbSaveVersion);
 		f.serial(uiDbSaveVersion);
 
 		// write database
@@ -2219,7 +2224,7 @@ bool	CInterfaceManager::getCurrentValidMessageBoxOnOk(string &ahOnOk, const std:
 	{
 		// Ok, get the current procedure OnOk action
 		string	dummyParams;
-		if( parser->getProcedureAction("proc_valid_message_box_ok", 1, ahOnOk, dummyParams))
+		if( CWidgetManager::getInstance()->getParser()->getProcedureAction("proc_valid_message_box_ok", 1, ahOnOk, dummyParams))
 			return true;
 	}
 

@@ -434,7 +434,7 @@ class CActionHandlerAddLink : public IActionHandler
 		CInterfaceLink *il = new CInterfaceLink;
 		il->init(targetsVect, expr, ah, ahparam, ahcond, parentGroup);
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->getParser()->addLink(il, id);
+		CWidgetManager::getInstance()->getParser()->addLink(il, id);
 		il->update();
 	}
 };
@@ -453,7 +453,7 @@ class CActionHandlerRemoveLink : public IActionHandler
 			return;
 		}
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->getParser()->removeLink(id);
+		CWidgetManager::getInstance()->getParser()->removeLink(id);
 	}
 };
 REGISTER_ACTION_HANDLER (CActionHandlerRemoveLink, "remove_link");
@@ -489,7 +489,7 @@ CInterfaceGroup *createMenuColorWidget(const string &colDbEntry,
 		make_pair(string("tooltip"), toolTipTextID),
 		make_pair(string("ccd_title"), ccdTitle),
 	};
-	return im->getParser()->createGroupInstance("menu_color_widget", "", params, 3);
+	return CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_color_widget", "", params, 3);
 }
 
 // ***************************************************************************

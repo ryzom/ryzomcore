@@ -802,7 +802,7 @@ void addCommandLine (CGroupList *pParent, uint cmdNb, const ucstring &cmdName)
 
 	vector< pair<string, string> > vParams;
 	vParams.push_back(pair<string,string>("id", "c"+toString(cmdNb)));
-	CInterfaceGroup *pNewCmd = pIM->getParser()->createGroupInstance(TEMPLATE_NEWMACRO_COMMAND, pParent->getId(), vParams);
+	CInterfaceGroup *pNewCmd = CWidgetManager::getInstance()->getParser()->createGroupInstance(TEMPLATE_NEWMACRO_COMMAND, pParent->getId(), vParams);
 	if (pNewCmd == NULL) return;
 
 	CViewText *pVT = dynamic_cast<CViewText*>(pNewCmd->getView(TEMPLATE_NEWMACRO_COMMAND_TEXT));
@@ -969,7 +969,7 @@ void addMacroLine (CGroupList *pParent, uint macNb, const CMacroCmd &macro)
 
 	vector< pair<string, string> > vParams;
 	vParams.push_back(pair<string,string>("id", "m"+toString(macNb)));
-	CInterfaceGroup *pNewMacro = pIM->getParser()->createGroupInstance(TEMPLATE_MACRO_ELT, pParent->getId(), vParams);
+	CInterfaceGroup *pNewMacro = CWidgetManager::getInstance()->getParser()->createGroupInstance(TEMPLATE_MACRO_ELT, pParent->getId(), vParams);
 	if (pNewMacro == NULL) return;
 
 	CViewText *pVT = dynamic_cast<CViewText*>(pNewMacro->getView(TEMPLATE_MACRO_ELT_TEXT));

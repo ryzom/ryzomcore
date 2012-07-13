@@ -282,10 +282,10 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 
 			// Some constants
 			sint barHeight, barSpace, textH;
-			fromString(pIM->getParser()->getDefine("in_scene_user_info_bar_h"), barHeight);
-			fromString(pIM->getParser()->getDefine("in_scene_user_info_bar_space"), barSpace);
-			fromString(pIM->getParser()->getDefine("in_scene_user_info_text_h"), textH);
-			fromString(pIM->getParser()->getDefine("in_scene_user_bar_length"), CGroupInSceneUserInfo::_BatLength);
+			fromString(CWidgetManager::getInstance()->getParser()->getDefine("in_scene_user_info_bar_h"), barHeight);
+			fromString(CWidgetManager::getInstance()->getParser()->getDefine("in_scene_user_info_bar_space"), barSpace);
+			fromString(CWidgetManager::getInstance()->getParser()->getDefine("in_scene_user_info_text_h"), textH);
+			fromString(CWidgetManager::getInstance()->getParser()->getDefine("in_scene_user_bar_length"), CGroupInSceneUserInfo::_BatLength);
 
 			// Build the bars
 			uint barCount = 0;
@@ -1175,7 +1175,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::newGroupInScene(const std::string 
 	{
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
-		groupInfo = CInterfaceManager::getInstance()->getParser()->createGroupInstance ( templateName,
+		groupInfo = CWidgetManager::getInstance()->getParser()->createGroupInstance ( templateName,
 			"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	}
 

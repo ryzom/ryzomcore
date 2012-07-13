@@ -160,7 +160,7 @@ void	CInterfaceHelp::initWindows()
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	sint maxHelpWindow;
-	fromString(pIM->getParser()->getDefine("MAX_HELP_WINDOW"), maxHelpWindow);
+	fromString(CWidgetManager::getInstance()->getParser()->getDefine("MAX_HELP_WINDOW"), maxHelpWindow);
 
 	// Allow Max 256. More may be a script error...
 	clamp(maxHelpWindow, 0, 256);
@@ -1437,7 +1437,7 @@ void	getMagicProtection(CDBCtrlSheet	*item, ucstring &itemText)
 	{
 		// Mul item quality by a constant
 		uint	maxAbsorb= item->getQuality();
-		CCDBNodeLeaf	*nodeFactor= NLGUI::CDBManager::getInstance()->getDbProp(pIM->getParser()->getDefine("player_protect_absorbfactor"), false);
+		CCDBNodeLeaf	*nodeFactor= NLGUI::CDBManager::getInstance()->getDbProp(CWidgetManager::getInstance()->getParser()->getDefine("player_protect_absorbfactor"), false);
 		if(nodeFactor)
 			maxAbsorb= maxAbsorb*nodeFactor->getValue32()/100;
 
@@ -3783,7 +3783,7 @@ static	void	onMpChangeItemPart(CInterfaceGroup *wnd, uint32 itemSheetId, const s
 	if(viewBmp)
 	{
 		// texture name in config.xml
-		viewBmp->setTexture(pIM->getParser()->getDefine( RM_FABER_TYPE::toIconDefineString(faberType) ));
+		viewBmp->setTexture(CWidgetManager::getInstance()->getParser()->getDefine( RM_FABER_TYPE::toIconDefineString(faberType) ));
 	}
 
 

@@ -48,7 +48,6 @@ namespace NLGUI
 	 * \date 2002
 	 */
 
-	// this is the base class for CInterfaceManager
 	class CInterfaceParser : public IParser
 	{
 
@@ -168,8 +167,8 @@ namespace NLGUI
 		/// \name Parameter variable
 		// @{
 		const std::string&  getDefine(const std::string &id) const;
-		bool				isDefineExist(const std::string &id) const;
-		void				setDefine(const std::string &id, const std::string &value);
+		bool isDefineExist(const std::string &id) const;
+		void setDefine(const std::string &id, const std::string &value);
 		// @}
 
 		/// \name Dynamic links mgt

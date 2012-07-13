@@ -28,6 +28,7 @@
 #include "nel/gui/interface_options.h"
 #include "nel/gui/event_descriptor.h"
 #include "nel/3d/u_camera.h"
+#include "nel/gui/parser.h"
 
 namespace NLMISC
 {
@@ -45,23 +46,6 @@ namespace NLGUI
 	class CInterfaceOptions;
 	class CInterfaceAnim;
 	class CProcedure;
-
-	class IParser
-	{
-	public:
-		virtual void addParentPositionAssociation( CInterfaceElement *element, const std::string &parentID ) = 0;
-		virtual void addParentSizeAssociation( CInterfaceElement *element, const std::string &parentID )     = 0;
-		virtual void addParentSizeMaxAssociation( CInterfaceElement *element, const std::string &parentID )  = 0;
-		virtual void addLuaClassAssociation( CInterfaceGroup *group, const std::string &luaScript )          = 0;
-		virtual CInterfaceGroup* createGroupInstance( const std::string &templateName, const std::string &parentID, const std::pair< std::string, std::string > *templateParams, uint numParams, bool updateLinks = true ) = 0;
-		virtual CInterfaceGroup* createGroupInstance( const std::string &templateName, const std::string &parentID, std::vector< std::pair< std::string, std::string > > &templateParams, bool updateLinks = true ) = 0;
-		virtual bool parseGroupChildren( xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload ) = 0;
-		virtual uint getProcedureNumActions( const std::string &procName ) const = 0;
-		virtual bool getProcedureAction( const std::string &procName, uint actionIndex, std::string &ah, std::string &params ) const = 0;
-		virtual const std::string&  getDefine(const std::string &id) const = 0;
-		virtual CInterfaceAnim* getAnim( const std::string &name ) const = 0;
-		virtual CProcedure* getProc( const std::string &name ) = 0;
-	};
 
 	/// Manages the GUI widgets
 	class CWidgetManager{
@@ -483,12 +467,14 @@ namespace NLGUI
 		void setProcedureAction( const std::string &procName, uint actionIndex, const std::string &ah, const std::string &params );
 
 		const CEventDescriptorKey& getLastKeyEvent() const{ return lastKeyEvent; }
-				
-		static IParser *parser;
 
+		IParser* getParser() const{ return parser; }
+				
 	private:
 		CWidgetManager();
 		~CWidgetManager();
+
+		IParser *parser;
 
 		static CWidgetManager *instance;
 		std::vector< SMasterGroup > _MasterGroups;

@@ -5079,7 +5079,7 @@ NLMISC_COMMAND(luaReload, "reload all .lua script files", "")
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	if(ClientCfg.AllowDebugLua)
 	{
-		pIM->getParser()->reloadAllLuaFileScripts();
+		CWidgetManager::getInstance()->getParser()->reloadAllLuaFileScripts();
 		return true;
 	}
 	else
