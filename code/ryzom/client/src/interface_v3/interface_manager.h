@@ -35,8 +35,8 @@
 #include "nel/gui/view_renderer.h"
 
 // InterfaceV3
-#include "interface_parser.h"
-#include "ctrl_sheet_selection.h"
+#include "nel/gui/interface_parser.h"
+#include "nel/gui/ctrl_sheet_selection.h"
 #include "nel/gui/interface_options.h"
 #include "interface_config.h"
 #include "interface_pointer.h"
@@ -50,6 +50,8 @@
 #include "yubo_chat.h"
 
 #include "../ingame_database_manager.h"
+
+#include "nel/gui/lua_manager.h"
 
 //the network database node
 extern CCDBSynchronised IngameDbMngr;
@@ -80,7 +82,7 @@ namespace NLGUI
  * \author Nevrax France
  * \date 2002
  */
-class CInterfaceManager : public CInterfaceParser, public NLGUI::IInputEventListener
+class CInterfaceManager : public NLGUI::CInterfaceParser::ISetupOptionCallbackClass, public NLGUI::IInputEventListener
 {
 public:
 
@@ -117,14 +119,7 @@ public:
 public:
 
 	/// Singleton method : Get the unique interface loader instance
-	static CInterfaceManager* getInstance()
-	{
-		nlassert( _Instance != NULL );
-		return _Instance;
-	}
-
-	/// Create singleton
-	static void create(  NL3D::UDriver *driver, NL3D::UTextContext *textcontext  );
+	static CInterfaceManager* getInstance();
 
 	/// Destroy singleton
 	static void destroy ();
@@ -145,6 +140,8 @@ public:
 
 	void setInGame( bool i );
 	bool isInGame() const { return _InGame; }
+
+	void initLUA();
 
 	/// initialize the whole login interface
 	void initLogin();
@@ -233,14 +230,6 @@ public:
 	void addServerID (const std::string &sTarget, uint32 id, IStringProcess *cb = NULL);
 	void processServerIDString();
 
-	/**
-	 * get a window from its  Id of its group.
-	 *	NB: "ctrl_launch_modal" is a special Id which return the last ctrl which has launch a modal. NULL if modal closed.
-	 * \param groupId : the Id of the window group
-	 */
-	/// get an element from a define ID. shortcut for getElementFromId(getDefine(define))
-	CInterfaceElement* getElementFromDefine (const std::string &defineId);
-
 	/// Control specific
 
 	/// Enable/Disable window movement
@@ -266,15 +255,6 @@ public:
 
 	/// Handle The Event. return true if the interfaceManager catch it and if must not send to the Game Action Manager
 	bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
-	bool handleMouseMoveEvent( const NLGUI::CEventDescriptor &eventDesc );
-	// execute a procedure. give a list of parameters. NB: the first param is the name of the proc (skipped)...
-	void runProcedure(const std::string &procName, CCtrlBase *pCaller, const std::vector<std::string> &paramList);
-	// replace an action in a procedure (if possible)
-	void setProcedureAction(const std::string &procName, uint actionIndex, const std::string &ah, const std::string &params);
-	// Execute a anim
-	void startAnim(const std::string &animId);
-	void stopAnim(const std::string &animId);
-
 
 	// InGame ContextMenu
 	void launchContextMenuInGame (const std::string &nameOfCM);
@@ -284,12 +264,6 @@ public:
 	 * Draw views
 	 */
 	void drawViews (NL3D::UCamera camera);
-	void drawAutoAdd ();
-	void drawContextHelp ();
-	//void drawContextMenu ();
-
-	/// Update all the elements
-	void updateAllLocalisedElements ();
 
 	// display a debug info
 	void		  displayDebugInfo(const ucstring &str, TSystemInfoMode mode = InfoMsg);
@@ -328,17 +302,6 @@ public:
 	 *	One can use it to know if it match its system and so if it needs to be closed (with disableModalWindow())
 	 */
 	bool	getCurrentValidMessageBoxOnOk(std::string &ahOnOk, const std::string &masterGroup="ui:interface");
-
-	/// force disable the context help
-	void	disableContextHelp();
-	/// force disable the context help, if it is issued from the given control
-	void	disableContextHelpForControl(CCtrlBase *pCtrl);
-	/// for ContextHelp action handler only: set the result name
-	void	setContextHelpText(const ucstring &text);
-
-	void	setContextHelpActive(bool active);
-
-	bool	isMouseOverWindow() const {return  _MouseOverWindow;}
 
 	// Modes
 	void	setMode(uint8 newMode);
@@ -397,22 +360,12 @@ public:
 
 	/// \name LUA
 	// @{
-	/// Execute a lua script (smallScript for speed optimisation, see lua_helper). return false if parse/execute error (warning/sysinfo displayed)
-	bool	executeLuaScript(const std::string &luaScript, bool smallScript= false);
-	/// Reload all LUA scripts inserted through <lua>
-	void	reloadAllLuaFileScripts();
 	/// For debug: dump in the sysinfo and nlwarning state of lua. detail range from 0 to 2 (clamped).
-	void		dumpLuaState(uint detail);
-	/// For debug: force a garbage collector
-	void		luaGarbageCollect();
+	void dumpLuaState(uint detail);
 	// @}
 
 	// Get the list of InGame XML Interface files, with any AddOn ones
 	static std::vector<std::string>		getInGameXMLInterfaceFiles();
-
-	// hide all the windows
-	void		hideAllWindows();
-	void		hideAllNonSavableWindows();
 
 	/// \name Action Counter sync
 	// @{
@@ -457,13 +410,8 @@ public:
 			return 0;
 	}
 
-	// Description of the last key event that called an action handler
-	const NLGUI::CEventDescriptorKey&	getLastEventKeyDesc() const { return _LastEventKeyDesc; }
-
 	void	notifyMailAvailable();
 	void	notifyForumUpdated();
-
-	void updateTooltipCoords();
 
 	/** Returns a human readable timestamp with the given format.
 	 */
@@ -472,12 +420,6 @@ public:
 	/** Parses any tokens in the ucstring like $t$ or $g()$
 	 */
 	static bool parseTokens(ucstring& ucstr);
-
-	/// Sets the current TextContext.
-	void setTextContext( NL3D::UTextContext *textcontext );
-
-	/// Retrueves the current TextContext
-	inline NL3D::UTextContext* getTextContext() const{ return textcontext; };
 
 // ------------------------------------------------------------------------------------------------
 private:
@@ -601,6 +543,8 @@ public:
 	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_PREREQUISIT_VALID;
 	NLMISC::CCDBNodeLeaf *_DB_UI_DUMMY_FACTION_TYPE;
 
+	void updateDesktops( uint32 newScreenW, uint32 newScreenH );
+
 private:
 
 	NLMISC::CCDBNodeLeaf *_CheckMailNode;
@@ -625,24 +569,12 @@ private:
 
 
 	/// Constructor
-	CInterfaceManager( NL3D::UDriver *driver, NL3D::UTextContext *textcontext );
+	CInterfaceManager();
 
 	///the singleton's instance
 	static CInterfaceManager* _Instance;
 
 	NLMISC::CCDBNodeLeaf	   *_DescTextTarget;
-
-	bool		_MouseOverWindow;
-
-	// Context Help
-	bool					_ContextHelpActive;
-	//CCtrlBasePtr			_CurCtrlContextHelp;
-	//Delay before displaying ContextHelp on a ctrl having wantInstantContextHelp set to false (in seconds)
-	float					_MaxTimeStopingContextHelp;
-	sint					_LastXContextHelp;
-	sint					_LastYContextHelp;
-	ucstring				_ContextHelpText;
-	CCtrlBase				*getNewContextHelpCtrl();
 
 	/// Current waiting id and string from server
 	struct SIDStringWaiter
@@ -657,12 +589,6 @@ private:
 
 	uint32			_ScreenW, _ScreenH; // Change res detection
 	sint32			_LastInGameScreenW, _LastInGameScreenH; // Resolution used for last InGame interface
-
-	// List of active Anims
-	std::vector<CInterfaceAnim*> _ActiveAnims;
-
-	bool isControlInWindow (CCtrlBase *ctrl, CInterfaceGroup *pNewCurrentWnd);
-	uint getDepth (CCtrlBase *ctrl, CInterfaceGroup *pNewCurrentWnd);
 
 	// Modes
 	CInterfaceConfig::CDesktopImage	_Modes[MAX_NUM_MODES];
@@ -688,10 +614,6 @@ private:
 	NLMISC::CCDBNodeLeaf *_WarningColor;
 	NLMISC::CCDBNodeLeaf *_ErrorColor;
 
-	void			drawOverExtendViewText();
-
-	CInterfaceGroup	*getWindowForActiveMasterGroup(const std::string &windowName);
-
 	CDBLandmarkObs _LandmarkObs;
 
 	/// \name LUA
@@ -710,9 +632,6 @@ private:
 	// Item Carac requirement
 	sint32		_CurrentPlayerCharac[CHARACTERISTICS::NUM_CHARACTERISTICS];
 
-	// Description of the last key event that called an action handler
-	NLGUI::CEventDescriptorKey	_LastEventKeyDesc;
-
 	// observers for copying database branch changes
 	CServerToLocalAutoCopy ServerToLocalAutoCopyInventory;
 	CServerToLocalAutoCopy ServerToLocalAutoCopyExchange;
@@ -720,32 +639,10 @@ private:
 	CServerToLocalAutoCopy ServerToLocalAutoCopySkillPoints;
 	CServerToLocalAutoCopy ServerToLocalAutoCopyDMGift;
 
-	// move windows according to new screen size
-	void moveAllWindowsToNewScreenSize(sint32 newScreenW, sint32 newScreenH, bool fixCurrentUI);
-	void getNewWindowCoordToNewScreenSize(sint32 &x, sint32 &y, sint32 w, sint32 h, sint32 newW, sint32 newH) const;
-
 	// Pop a new message box. If the message box was found, returns a pointer on it
 	void messageBoxInternal(const std::string &msgBoxGroup, const ucstring &text, const std::string &masterGroup, TCaseMode caseMode);
 
-	// Internal : adjust a tooltip with respect to its parent. Returns the number of coordinate that were clamped
-	// against the screen border
-	uint adjustTooltipPosition(CCtrlBase *newCtrl,
-							   CInterfaceGroup *win,
-							   THotSpot ttParentRef,
-							   THotSpot ttPosRef,
-							   sint32 xParent,
-							   sint32 yParent,
-							   sint32 wParent,
-							   sint32 hParent
-							  );
-
-	// Update tooltip coordinate if they need to be (getInvalidCoords() returns a value != 0)
-	void updateTooltipCoords(CCtrlBase *newCtrl);
-
-	NL3D::UDriver *driver;
-	NL3D::UTextContext *textcontext;
 	CInterfaceLink::CInterfaceLinkUpdater *interfaceLinkUpdater;
-
 };
 
 #endif // NL_INTERFACE_MANAGER_H

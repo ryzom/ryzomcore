@@ -26,6 +26,9 @@
 #include "nel/misc/types_nl.h"
 #include "nel/gui/interface_common.h"
 #include "nel/gui/interface_options.h"
+#include "nel/gui/event_descriptor.h"
+#include "nel/3d/u_camera.h"
+#include "nel/gui/parser.h"
 
 namespace NLMISC
 {
@@ -41,24 +44,27 @@ namespace NLGUI
 	class CInterfaceGroup;
 	class CViewPointerBase;
 	class CInterfaceOptions;
-
-	class IParser
-	{
-	public:
-		virtual void addParentPositionAssociation( CInterfaceElement *element, const std::string &parentID ) = 0;
-		virtual void addParentSizeAssociation( CInterfaceElement *element, const std::string &parentID )     = 0;
-		virtual void addParentSizeMaxAssociation( CInterfaceElement *element, const std::string &parentID )  = 0;
-		virtual void addLuaClassAssociation( CInterfaceGroup *group, const std::string &luaScript )          = 0;
-		virtual CInterfaceGroup* createGroupInstance( const std::string &templateName, const std::string &parentID, const std::pair< std::string, std::string > *templateParams, uint numParams, bool updateLinks = true ) = 0;
-		virtual CInterfaceGroup* createGroupInstance( const std::string &templateName, const std::string &parentID, std::vector< std::pair< std::string, std::string > > &templateParams, bool updateLinks = true ) = 0;
-		virtual bool parseGroupChildren( xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload ) = 0;
-		virtual uint getProcedureNumActions( const std::string &procName ) const = 0;
-		virtual bool getProcedureAction( const std::string &procName, uint actionIndex, std::string &ah, std::string &params ) const = 0;
-	};
+	class CInterfaceAnim;
+	class CProcedure;
 
 	/// Manages the GUI widgets
 	class CWidgetManager{
+
 	public:
+
+		class INewScreenSizeHandler
+		{
+		public:
+			virtual ~INewScreenSizeHandler(){}
+			virtual void process( uint32 w, uint32 h ) = 0;
+		};
+
+		class IOnWidgetsDrawnHandler
+		{
+		public:
+			virtual ~IOnWidgetsDrawnHandler(){};
+			virtual void process() = 0;
+		};
 
 		struct SInterfaceTimes
 		{
@@ -147,6 +153,14 @@ namespace NLGUI
 		CInterfaceElement* getElementFromId( const std::string &sEltId );
 		CInterfaceElement* getElementFromId( const std::string &sStart, const std::string &sEltId );
 
+		/**
+		 * get a window from its  Id of its group.
+		 *	NB: "ctrl_launch_modal" is a special Id which return the last ctrl which has launch a modal. NULL if modal closed.
+		 * \param groupId : the Id of the window group
+		 */
+		/// get an element from a define ID. shortcut for getElementFromId(getDefine(define))
+		CInterfaceElement* getElementFromDefine( const std::string &defineId );
+
 		/// Get the window from an element (ui:interface:###)
 		CInterfaceGroup* getWindow(CInterfaceElement*);
 
@@ -199,6 +213,9 @@ namespace NLGUI
 		void popModalWindow();
 		// pop all top modal windows with the given category (a string stored in the modal)
 		void popModalWindowCategory(const std::string &category);
+		
+		void hideAllWindows();
+		void hideAllNonSavableWindows();
 
 		CCtrlBase *getCtrlLaunchingModal ()
 		{
@@ -216,6 +233,9 @@ namespace NLGUI
 		CCtrlBase* getCurContextHelp(){ return curContextHelp; }
 
 		float _DeltaTimeStopingContextHelp;
+		float _MaxTimeStopingContextHelp;
+		sint _LastXContextHelp;
+		sint _LastYContextHelp;
 
 		CViewPointerBase* getPointer(){ return _Pointer; }
 		void setPointer( CViewPointerBase *pointer ){ _Pointer = pointer; }
@@ -256,6 +276,52 @@ namespace NLGUI
 		void reset();
 
 		void checkCoords();
+		
+		CInterfaceGroup* getWindowForActiveMasterGroup( const std::string &windowName );
+		
+		void drawOverExtendViewText();
+
+		// Internal : adjust a tooltip with respect to its parent. Returns the number of coordinate that were clamped
+		// against the screen border
+		uint adjustTooltipPosition( CCtrlBase *newCtrl, CInterfaceGroup *win, THotSpot ttParentRef,
+									THotSpot ttPosRef, sint32 xParent, sint32 yParent,
+									sint32 wParent, sint32 hParent );
+		
+		void updateTooltipCoords();
+		
+		// Update tooltip coordinate if they need to be (getInvalidCoords() returns a value != 0)
+		void updateTooltipCoords(CCtrlBase *newCtrl);
+		
+		/// for ContextHelp action handler only: set the result name
+		void setContextHelpText( const ucstring &text ){ _ContextHelpText = text; }
+		ucstring& getContextHelpText(){ return _ContextHelpText; }
+		
+		/// force disable the context help
+		void disableContextHelp();
+		
+		/// force disable the context help, if it is issued from the given control
+		void disableContextHelpForControl(CCtrlBase *pCtrl);
+		
+		CCtrlBase* getNewContextHelpCtrl();
+
+		void drawContextHelp();
+		
+		void setContextHelpActive(bool active);
+		
+		void getNewWindowCoordToNewScreenSize( sint32 &x, sint32 &y, sint32 w, sint32 h,
+												sint32 newW, sint32 newH) const;
+		
+		// move windows according to new screen size
+		void moveAllWindowsToNewScreenSize(sint32 newScreenW, sint32 newScreenH, bool fixCurrentUI );
+		
+		void updateAllLocalisedElements();
+
+		void drawViews( NL3D::UCamera camera );
+
+		bool handleEvent( const CEventDescriptor &evnt );
+		
+		bool handleMouseMoveEvent( const CEventDescriptor &eventDesc );
+
 		// Relative move of pointer
 		void movePointer (sint32 dx, sint32 dy);
 		// Set absolute coordinates of pointer
@@ -284,7 +350,7 @@ namespace NLGUI
 		void resetCaptureKeyboard();
 
 		// True if the keyboard is captured
-		bool	isKeyboardCaptured() const {return _CaptureKeyboard!=NULL;}
+		bool isKeyboardCaptured() const {return _CaptureKeyboard!=NULL;}
 
 		// register a view that wants to be notified at each frame (receive the msg 'clocktick')
 		void registerClockMsgTarget(CCtrlBase *vb);
@@ -295,10 +361,10 @@ namespace NLGUI
 		void notifyElementCaptured(CCtrlBase *c);
 
 		// Add a group into the windows list of its master goup
-		void	makeWindow( CInterfaceGroup *group );
+		void makeWindow( CInterfaceGroup *group );
 
 		// Remove a group from the windows list of its master group
-		void    unMakeWindow( CInterfaceGroup *group, bool noWarning = false );
+		void unMakeWindow( CInterfaceGroup *group, bool noWarning = false );
 
 		void setGlobalColor( NLMISC::CRGBA col );
 		NLMISC::CRGBA getGlobalColor() const{ return _GlobalColor; }
@@ -319,6 +385,8 @@ namespace NLGUI
 		// Enable mouse Events to interface. if false, release Captures.
 		void enableMouseHandling( bool handle );
 		bool isMouseHandlingEnabled() const{ return _MouseHandlingEnabled; }
+		bool isMouseOverWindow() const{ return _MouseOverWindow; }
+		void setMouseOverWindow( bool b ){ _MouseOverWindow = b; }
 		
 		// Get the User DblClick Delay (according to save...), in milisecond
 		uint getUserDblClickDelay();
@@ -379,12 +447,34 @@ namespace NLGUI
 
 		void setIngame( bool i ){ inGame = i; }
 		bool isIngame() const{ return inGame; }
-		
-		static IParser *parser;
 
+		void setScreenWH( uint32 w, uint32 h ){ screenW = w; screenH = h; }
+
+		void registerNewScreenSizeHandler( INewScreenSizeHandler *handler );
+		void removeNewScreenSizeHandler( INewScreenSizeHandler *handler );
+
+		void registerOnWidgetsDrawnHandler( IOnWidgetsDrawnHandler* handler );
+		void removeOnWidgetsDrawnHandler( IOnWidgetsDrawnHandler *handler );
+		
+		void startAnim( const std::string &animId );
+		void stopAnim( const std::string &animId );
+		void updateAnims();
+		void removeFinishedAnims();
+		
+		// execute a procedure. give a list of parameters. NB: the first param is the name of the proc (skipped)...
+		void runProcedure( const std::string &procName, CCtrlBase *pCaller, const std::vector< std::string > &paramList );
+		// replace an action in a procedure (if possible)
+		void setProcedureAction( const std::string &procName, uint actionIndex, const std::string &ah, const std::string &params );
+
+		const CEventDescriptorKey& getLastKeyEvent() const{ return lastKeyEvent; }
+
+		IParser* getParser() const{ return parser; }
+				
 	private:
 		CWidgetManager();
 		~CWidgetManager();
+
+		IParser *parser;
 
 		static CWidgetManager *instance;
 		std::vector< SMasterGroup > _MasterGroups;
@@ -440,7 +530,22 @@ namespace NLGUI
 
 		SInterfaceTimes interfaceTimes;
 
+		ucstring _ContextHelpText;
+		bool _ContextHelpActive;
+
 		bool inGame;
+		
+		bool _MouseOverWindow;
+
+		CEventDescriptorKey lastKeyEvent;
+
+		uint32 screenH;
+		uint32 screenW;
+		
+		std::vector< CInterfaceAnim* > activeAnims;
+
+		std::vector< INewScreenSizeHandler* > newScreenSizeHandlers;
+		std::vector< IOnWidgetsDrawnHandler* > onWidgetsDrawnHandlers;
 	};
 
 }

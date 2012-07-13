@@ -456,6 +456,8 @@ namespace NLGUI
 			return "";
 		}
 
+		bool isInGroup( CInterfaceGroup *group );
+
 	protected:
 
 		///the parent

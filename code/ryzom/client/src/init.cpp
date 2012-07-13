@@ -1084,8 +1084,7 @@ void prelogInit()
 		resetTextContext ("ryzom.ttf", false);
 
 		
-		CWidgetManager::getInstance();
-		CInterfaceManager::create( Driver, TextContext );
+		CInterfaceManager::getInstance();
 
 		// Yoyo: initialize NOW the InputHandler for Event filtering.
 		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();

@@ -133,7 +133,7 @@ public:
 
 		// execute a small script. NB: use a small script here because
 		// most often action handlers are called from xml files => lot of redundant script
-		pIM->executeLuaScript(sParams,   true);
+		CLuaManager::getInstance().executeLuaScript(sParams,   true);
 
 		// pop UI caller
 		if(pCaller)
@@ -179,7 +179,7 @@ static DECLARE_INTERFACE_USER_FCT(lua)
 	// assign return value in retId.
 	script= retId + "= " + script;
 	// execute a small script here,   because most often exprs are called from xml files => lot of redundant script
-	pIM->executeLuaScript(script,   true);
+	CLuaManager::getInstance().executeLuaScript(script,   true);
 
 
 	// *** retrieve and convert return value
@@ -607,7 +607,7 @@ int		CLuaIHMRyzom::formatUI(CLuaState &ls)
 	// *** format with %
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	std::string	newPropVal,    defError;
-	if(!pIM->solveDefine(propVal,    newPropVal,    defError))
+	if( !CWidgetManager::getInstance()->getParser()->solveDefine(propVal,    newPropVal,    defError))
 	{
 		throw ELuaIHMException("formatUI(): Can't find define: '%s'",    defError.c_str());
 	}
@@ -965,7 +965,7 @@ int CLuaIHMRyzom::initEmotesMenu(CLuaState &ls)
 int CLuaIHMRyzom::hideAllWindows(CLuaState &/* ls */)
 {
 	//H_AUTO(Lua_CLuaIHM_hideAllWindows)
-	CInterfaceManager::getInstance()->hideAllWindows();
+	CWidgetManager::getInstance()->hideAllWindows();
 	return 0;
 }
 
@@ -973,7 +973,7 @@ int CLuaIHMRyzom::hideAllWindows(CLuaState &/* ls */)
 int CLuaIHMRyzom::hideAllNonSavableWindows(CLuaState &/* ls */)
 {
 	//H_AUTO(Lua_CLuaIHM_hideAllNonSavableWindows)
-	CInterfaceManager::getInstance()->hideAllNonSavableWindows();
+	CWidgetManager::getInstance()->hideAllNonSavableWindows();
 	return 0;
 }
 
@@ -1255,8 +1255,7 @@ int CLuaIHMRyzom::disableContextHelp(CLuaState &ls)
 	//H_AUTO(Lua_CLuaIHM_disableContextHelp)
 	CLuaStackChecker lsc(&ls,    0);
 	CLuaIHM::checkArgCount(ls,    "disableContextHelp",    0);
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	pIM->disableContextHelp();
+	CWidgetManager::getInstance()->disableContextHelp();
 	return 0;
 }
 
@@ -1275,8 +1274,7 @@ int			CLuaIHMRyzom::disableContextHelpForControl(CLuaState &ls)
 	CInterfaceElement	*pIE= CLuaIHM::getUIOnStack(ls,    1);
 
 	// go
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	pIM->disableContextHelpForControl(dynamic_cast<CCtrlBase*>(pIE));
+	CWidgetManager::getInstance()->disableContextHelpForControl(dynamic_cast<CCtrlBase*>(pIE));
 
 	return 0;
 }
@@ -1528,7 +1526,7 @@ int CLuaIHMRyzom::createGroupInstance(CLuaState &ls)
 		templateParams.push_back(std::pair<std::string, std::string>(it.nextKey().toString(), it.nextValue().toString())); // strange compilation bug here when I use std::make_pair ... :(
 	}
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CInterfaceGroup *result = im->createGroupInstance(ls.toString(1), ls.toString(2), templateParams);
+	CInterfaceGroup *result = CWidgetManager::getInstance()->getParser()->createGroupInstance(ls.toString(1), ls.toString(2), templateParams);
 	if (!result)
 	{
 		ls.pushNil();
@@ -1567,7 +1565,7 @@ int CLuaIHMRyzom::createRootGroupInstance(CLuaState &ls)
 		templateParams.push_back(std::pair<std::string, std::string>(it.nextKey().toString(), it.nextValue().toString())); // strange compilation bug here when I use std::make_pair ... :(
 	}
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CInterfaceGroup *result = im->createGroupInstance(ls.toString(1), "ui:interface:"+string(ls.toString(2)), templateParams);
+	CInterfaceGroup *result = CWidgetManager::getInstance()->getParser()->createGroupInstance(ls.toString(1), "ui:interface:"+string(ls.toString(2)), templateParams);
 	if (!result)
 	{
 		ls.pushNil();
@@ -1614,7 +1612,7 @@ int CLuaIHMRyzom::createUIElement(CLuaState &ls)
 		templateParams.push_back(std::pair<std::string, std::string>(it.nextKey().toString(), it.nextValue().toString())); // strange compilation bug here when I use std::make_pair ... :(
 	}
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CInterfaceElement *result = im->createUIElement(ls.toString(1), ls.toString(2), templateParams);
+	CInterfaceElement *result = CWidgetManager::getInstance()->getParser()->createUIElement(ls.toString(1), ls.toString(2), templateParams);
 	if (!result)
 	{
 		ls.pushNil();
@@ -1695,7 +1693,7 @@ int CLuaIHMRyzom::updateAllLocalisedElements(CLuaState &ls)
 	CLuaStackChecker lsc(&ls);
 	CLuaIHM::checkArgCount(ls,    "updateAllLocalisedElements",    0);
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	pIM->updateAllLocalisedElements();
+	CWidgetManager::getInstance()->updateAllLocalisedElements();
 	//
 	TTime endTime = CTime::getLocalTime();
 	if (ClientCfg.R2EDVerboseParseTime)
@@ -1963,17 +1961,15 @@ std::string	CLuaIHMRyzom::getDefine(const std::string &def)
 {
 	//H_AUTO(Lua_CLuaIHM_getDefine)
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	if(ClientCfg.DisplayLuaDebugInfo && !pIM->isDefineExist(def))
+	if(ClientCfg.DisplayLuaDebugInfo && !CWidgetManager::getInstance()->getParser()->isDefineExist(def))
 		debugInfo(toString("getDefine(): '%s' not found",    def.c_str()));
-	return pIM->getDefine(def);
+	return CWidgetManager::getInstance()->getParser()->getDefine(def);
 }
 
 // ***************************************************************************
 void		CLuaIHMRyzom::setContextHelpText(const ucstring &text)
 {
-	//H_AUTO(Lua_CLuaIHM_setContextHelpText)
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	pIM->setContextHelpText(text);
+	CWidgetManager::getInstance()->setContextHelpText(text);
 }
 
 // ***************************************************************************
@@ -2645,7 +2641,7 @@ bool CLuaIHMRyzom::isRingAccessPointInReach()
 // ***************************************************************************
 void CLuaIHMRyzom::updateTooltipCoords()
 {
-	CInterfaceManager::getInstance()->updateTooltipCoords();
+	CWidgetManager::getInstance()->updateTooltipCoords();
 }
 
 // ***************************************************************************
@@ -2707,7 +2703,7 @@ sint32 CLuaIHMRyzom::getTargetLevel()
 	if ( target->isPlayer() )
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("target_player_level") );
+		CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( CWidgetManager::getInstance()->getParser()->getDefine("target_player_level") );
 		return pDbPlayerLevel ? pDbPlayerLevel->getValue32() : -1;
 	}
 	else
@@ -2772,7 +2768,7 @@ sint32 CLuaIHMRyzom::getTargetForceRegion()
 	if ( target->isPlayer() )
 	{			
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("target_player_level") );			
+		CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( CWidgetManager::getInstance()->getParser()->getDefine("target_player_level") );			
 		if (!pDbPlayerLevel) return -1;
 		sint nLevel = pDbPlayerLevel->getValue32();
 		if ( nLevel < 250 )
@@ -2800,7 +2796,7 @@ sint32 CLuaIHMRyzom::getTargetLevelForce()
 	if ( target->isPlayer() )
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("target_player_level") );
+		CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( CWidgetManager::getInstance()->getParser()->getDefine("target_player_level") );
 		if (!pDbPlayerLevel) return -1;
 		sint nLevel = pDbPlayerLevel->getValue32();
 		if ( nLevel < 250 )

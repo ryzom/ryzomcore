@@ -288,8 +288,6 @@ class CActionHandlerProc : public IActionHandler
 public:
 	virtual void execute (CCtrlBase *pCaller, const std::string &params)
 	{
-		CInterfaceManager	*mngr= CInterfaceManager::getInstance();
-
 		// split the parameters
 		vector<string>		paramList;
 		splitString(params, "|", paramList);
@@ -297,7 +295,7 @@ public:
 			return;
 
 		// execute the procedure
-		mngr->runProcedure(paramList[0], pCaller, paramList);
+		CWidgetManager::getInstance()->runProcedure(paramList[0], pCaller, paramList);
 	}
 };
 REGISTER_ACTION_HANDLER (CActionHandlerProc, "proc");
@@ -436,7 +434,7 @@ class CActionHandlerAddLink : public IActionHandler
 		CInterfaceLink *il = new CInterfaceLink;
 		il->init(targetsVect, expr, ah, ahparam, ahcond, parentGroup);
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->addLink(il, id);
+		CWidgetManager::getInstance()->getParser()->addLink(il, id);
 		il->update();
 	}
 };
@@ -455,7 +453,7 @@ class CActionHandlerRemoveLink : public IActionHandler
 			return;
 		}
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->removeLink(id);
+		CWidgetManager::getInstance()->getParser()->removeLink(id);
 	}
 };
 REGISTER_ACTION_HANDLER (CActionHandlerRemoveLink, "remove_link");
@@ -491,7 +489,7 @@ CInterfaceGroup *createMenuColorWidget(const string &colDbEntry,
 		make_pair(string("tooltip"), toolTipTextID),
 		make_pair(string("ccd_title"), ccdTitle),
 	};
-	return im->createGroupInstance("menu_color_widget", "", params, 3);
+	return CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_color_widget", "", params, 3);
 }
 
 // ***************************************************************************
@@ -930,9 +928,8 @@ class CAHAnimStart : public IActionHandler
 public:
 	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string sAnim = getParam(Params, "anim");
-		pIM->startAnim(sAnim);
+		CWidgetManager::getInstance()->startAnim(sAnim);
 	}
 };
 REGISTER_ACTION_HANDLER (CAHAnimStart, "anim_start");
@@ -943,9 +940,8 @@ class CAHAnimStop : public IActionHandler
 public:
 	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string sAnim = getParam(Params, "anim");
-		pIM->stopAnim(sAnim);
+		CWidgetManager::getInstance()->stopAnim(sAnim);
 	}
 };
 REGISTER_ACTION_HANDLER (CAHAnimStop, "anim_stop");

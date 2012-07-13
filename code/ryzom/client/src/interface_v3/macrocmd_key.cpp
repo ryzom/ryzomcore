@@ -89,7 +89,7 @@ void addKeyLine (CGroupList *pParent, const ucstring &keyName, const ucstring &s
 	vParams.push_back(make_pair(string("id"), templateId));
 	vParams.push_back(make_pair(string("lineid"), toString(lineId)));
 	CInterfaceGroup *pKeysLine = NULL;
-	pKeysLine = pIM->createGroupInstance (TEMPLATE_KEYS_GROUP, pParent->getId(), vParams);
+	pKeysLine = CWidgetManager::getInstance()->getParser()->createGroupInstance (TEMPLATE_KEYS_GROUP, pParent->getId(), vParams);
 	if (pKeysLine == NULL) return;
 
 	// Put name
@@ -424,7 +424,7 @@ void CModalContainerEditCmd::create(const std::string &name, bool bDefKey, bool 
 	vArgs.push_back(pair<string,string>("db_disp_1p",DbComboDisp1P));
 	vArgs.push_back(pair<string,string>("db_disp_2p",DbComboDisp2P));
 
-	Win = dynamic_cast<CGroupContainer*>(pIM->createGroupInstance(TEMPLATE_EDITCMD, "ui:interface", vArgs));
+	Win = dynamic_cast<CGroupContainer*>( CWidgetManager::getInstance()->getParser()->createGroupInstance(TEMPLATE_EDITCMD, "ui:interface", vArgs));
 	if (Win == NULL)
 	{
 		nlwarning ("cannot create %s", name.c_str());

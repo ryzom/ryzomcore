@@ -5079,7 +5079,7 @@ NLMISC_COMMAND(luaReload, "reload all .lua script files", "")
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	if(ClientCfg.AllowDebugLua)
 	{
-		pIM->reloadAllLuaFileScripts();
+		CWidgetManager::getInstance()->getParser()->reloadAllLuaFileScripts();
 		return true;
 	}
 	else
@@ -5105,7 +5105,7 @@ NLMISC_COMMAND(luaScript, "Execute a lua script", "direct_script_code")
 		}
 
 		// not smallScript because suppose var can change a lot
-		pIM->executeLuaScript(script, false);
+		CLuaManager::getInstance().executeLuaScript(script, false);
 
 		return true;
 	}
@@ -5186,7 +5186,7 @@ NLMISC_COMMAND(luaGC, "Force a garbage collector of lua", "")
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	if(ClientCfg.AllowDebugLua)
 	{
-		pIM->luaGarbageCollect();
+		CLuaManager::getInstance().forceGarbageCollect();
 		return true;
 	}
 	else

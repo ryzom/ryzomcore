@@ -1245,7 +1245,7 @@ void CFarTP::sendReady()
 			{
 				// Remove all existing keys and load them back, and load new interface config
 				pIM->loadKeys();
-				pIM->hideAllWindows();
+				CWidgetManager::getInstance()->hideAllWindows();
 				pIM->loadInterfaceConfig();
 			}
 			else

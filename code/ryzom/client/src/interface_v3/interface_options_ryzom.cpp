@@ -38,6 +38,7 @@ using namespace NLMISC;
 
 extern CEntityAnimationManager *EAM;
 
+NLMISC_REGISTER_OBJECT(CInterfaceOptions, CMissionIconList, std::string, "mission_icons");
 
 // ***************************************************************************
 bool CMissionIconList::parse(xmlNodePtr cur)
@@ -90,7 +91,9 @@ bool CMissionIconList::parse(xmlNodePtr cur)
 
 
 // ***************************************************************************
-COptionsAnimationSet::COptionsAnimationSet()
+NLMISC_REGISTER_OBJECT(CInterfaceOptions, COptionsAnimationSet, std::string, "animation_set");
+COptionsAnimationSet::COptionsAnimationSet( const TCtorParam &param ) :
+CInterfaceOptions( param )
 {
 	AnimationSet= NULL;
 }

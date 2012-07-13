@@ -30,8 +30,8 @@
 ///////////
 // CLASS //
 class CCombo;
-class CAction;
 class CActionsManager;
+class CAction;
 
 /**
  * The goal of CCombo is to gather together Inputs that will validate an Action.
@@ -308,8 +308,6 @@ struct CTKeyHashMapTraits
  */
 class CActionsManager
 {
-	friend class CInterfaceParser;
-
 public:
 
 	/// Typedef to use the map easily.

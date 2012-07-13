@@ -300,6 +300,7 @@ void releaseClientTime()
 // updateClientTime :
 //
 //-----------------------------------------------
+CWidgetManager::SInterfaceTimes times;
 
 void updateClientTime()
 {
@@ -382,7 +383,6 @@ void updateClientTime()
 		NetMngr.startReplay();
 #endif
 
-	CWidgetManager::SInterfaceTimes times;
 	times.lastFrameMs = T0;
 	times.thisFrameMs = T1;
 	times.frameDiffMs = DT64;

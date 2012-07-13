@@ -524,7 +524,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 					if(mpBuild.RequirementType==CMPBuild::ItemPartReq)
 					{
 						// texture name in config.xml
-						viewBmp->setTexture(pIM->getDefine( RM_FABER_TYPE::toIconDefineString(mpBuild.FaberTypeRequired) ));
+						viewBmp->setTexture(CWidgetManager::getInstance()->getParser()->getDefine( RM_FABER_TYPE::toIconDefineString(mpBuild.FaberTypeRequired) ));
 					}
 					else if(mpBuild.RequirementType==CMPBuild::SpecificItemReq)
 					{

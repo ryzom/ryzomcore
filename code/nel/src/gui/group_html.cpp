@@ -950,7 +950,7 @@ namespace NLGUI
 						else
 							parentId = _Paragraph->getId();
 
-						CInterfaceGroup *inst = CWidgetManager::parser->createGroupInstance(templateName, parentId+":"+id, tmplParams);
+						CInterfaceGroup *inst = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, parentId+":"+id, tmplParams);
 						if (inst)
 						{
 							inst->setId(parentId+":"+id);
@@ -1258,7 +1258,7 @@ namespace NLGUI
 							tmplParams.push_back(TTmplParam("active", "true"));
 							if (!minWidth.empty())
 								tmplParams.push_back(TTmplParam("wmin", minWidth));
-							CInterfaceGroup *buttonGroup = CWidgetManager::parser->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
+							CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
 							if (buttonGroup)
 							{
 
@@ -2422,7 +2422,7 @@ namespace NLGUI
 					tmplParams.push_back(TTmplParam("onclick", "browse"));
 					tmplParams.push_back(TTmplParam("onclick_param", param));
 					tmplParams.push_back(TTmplParam("active", "true"));
-					CInterfaceGroup *buttonGroup = CWidgetManager::parser->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
+					CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
 					if (buttonGroup)
 					{
 
@@ -2614,7 +2614,7 @@ namespace NLGUI
 			templateParams.push_back (std::pair<std::string,std::string> ("want_return", multiLine?"true":"false"));
 			templateParams.push_back (std::pair<std::string,std::string> ("enter_recover_focus", "false"));
 			templateParams.push_back (std::pair<std::string,std::string> ("max_num_chars", "1024"));
-			CInterfaceGroup *textArea = CWidgetManager::parser->createGroupInstance (templateName.c_str(),
+			CInterfaceGroup *textArea = CWidgetManager::getInstance()->getParser()->createGroupInstance (templateName.c_str(),
 				getParagraph()->getId(), templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 
 			// Group created ?
@@ -2652,7 +2652,7 @@ namespace NLGUI
 			// Not added ?
 			std::vector<std::pair<std::string,std::string> > templateParams;
 			templateParams.push_back (std::pair<std::string,std::string> ("id", name));
-			CInterfaceGroup *group = CWidgetManager::parser->createGroupInstance (templateName.c_str(),
+			CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance (templateName.c_str(),
 				getParagraph()->getId(), templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 
 			// Group created ?
@@ -3510,11 +3510,11 @@ namespace NLGUI
 		{
 			const std::string &procName= params;
 			// look into this proc
-			uint	numActions= CWidgetManager::parser->getProcedureNumActions(procName);
+			uint	numActions= CWidgetManager::getInstance()->getParser()->getProcedureNumActions(procName);
 			for(uint i=0;i<numActions;i++)
 			{
 				string	procAh, procParams;
-				if( CWidgetManager::parser->getProcedureAction(procName, i, procAh, procParams))
+				if( CWidgetManager::getInstance()->getParser()->getProcedureAction(procName, i, procAh, procParams))
 				{
 					// recurs proc if needed!
 					if (actionLaunchUrlRecurs(procAh, procParams, url))

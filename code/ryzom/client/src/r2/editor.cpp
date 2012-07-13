@@ -1647,7 +1647,7 @@ void CEditor::waitScenarioScreen()
 	{
 		setMode(GoingToEditionMode);
 	}
-	getUI().hideAllWindows();
+	CWidgetManager::getInstance()->hideAllWindows();
 	CInterfaceGroup *waitScreen = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_connecting"));
 	if (waitScreen)
 	{
@@ -2231,7 +2231,7 @@ void CEditor::loadStandardUI()
 	ClientCfg.R2EDEnabled = false;
 	loadUIConfig("");
 	ClientCfg.R2EDEnabled = true;
-	getUI().updateAllLocalisedElements();
+	CWidgetManager::getInstance()->updateAllLocalisedElements();
 }
 
 // *********************************************************************************************************
@@ -2708,7 +2708,7 @@ void CEditor::init(TMode initialMode, TAccessMode accessMode)
 
 	{
 		CVerboseClock clock("Update of localized elements");
-		getUI().updateAllLocalisedElements();
+		CWidgetManager::getInstance()->updateAllLocalisedElements();
 	}
 
 }
@@ -2733,7 +2733,7 @@ uint CEditor::getMaxNumPlotItems()
 {
 	//H_AUTO(R2_CEditor_getMaxNumPlotItems)
 	uint ret;
-	fromString(getUI().getDefine("r2ed_max_num_plot_item_sheets"), ret);
+	fromString( CWidgetManager::getInstance()->getParser()->getDefine("r2ed_max_num_plot_item_sheets"), ret);
 	return ret;
 }
 
@@ -3942,7 +3942,7 @@ void CEditor::release()
 		saveCurrentKeySet();
 		saveUIConfig();
 	}
-	getUI().hideAllWindows(); // make sure all action handlers are called while the r2 lua environment is still active
+	CWidgetManager::getInstance()->hideAllWindows(); // make sure all action handlers are called while the r2 lua environment is still active
 	clearContent();
 	_EntityCustomSelectBoxMap.clear();
 
@@ -7646,8 +7646,7 @@ class CAHR2FreezeUnfreezeBotObjects : public IActionHandler
 {
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
-		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->executeLuaScript("r2:freezeUnfreezeBotObjects()");
+		CLuaManager::getInstance().executeLuaScript("r2:freezeUnfreezeBotObjects()");
 	}
 };
 REGISTER_ACTION_HANDLER(CAHR2FreezeUnfreezeBotObjects, "r2ed_freeze_unfreeze_botobjects");

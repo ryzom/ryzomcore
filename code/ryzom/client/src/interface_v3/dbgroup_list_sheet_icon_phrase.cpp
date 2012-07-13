@@ -110,7 +110,7 @@ CInterfaceGroup		*CDBGroupListSheetIconPhrase::createSectionGroup(const std::str
 	tempVec[0].first="id"; tempVec[0].second= igName;
 
 	// make parent to me
-	CInterfaceGroup	*pIG = pIM->createGroupInstance(LSP_SECTION_TEMPLATE, getId(), tempVec);
+	CInterfaceGroup	*pIG = CWidgetManager::getInstance()->getParser()->createGroupInstance(LSP_SECTION_TEMPLATE, getId(), tempVec);
 	pIG->setParent (this);
 	addGroup (pIG);
 

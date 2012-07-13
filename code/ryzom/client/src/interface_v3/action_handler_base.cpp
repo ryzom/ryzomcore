@@ -315,11 +315,10 @@ class CAHMilkoMenuDoResetInterface : public IActionHandler
 
 		// run procedure
 		vector<string> v;
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if (mode == "R2TestMode")
-			pIM->runProcedure ("proc_reset_r2ed_interface", NULL, v);
+			CWidgetManager::getInstance()->runProcedure ("proc_reset_r2ed_interface", NULL, v);
 		else
-			pIM->runProcedure("proc_reset_interface", NULL, v);
+			CWidgetManager::getInstance()->runProcedure("proc_reset_interface", NULL, v);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHMilkoMenuDoResetInterface, "milko_menu_do_reset_interface");

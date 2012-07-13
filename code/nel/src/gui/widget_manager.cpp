@@ -17,13 +17,20 @@
 #include "nel/gui/db_manager.h"
 #include "nel/gui/view_renderer.h"
 #include "nel/gui/widget_manager.h"
-#include "nel/gui/view_pointer_base.h"
+#include "nel/gui/view_pointer.h"
 #include "nel/gui/ctrl_draggable.h"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/group_container_base.h"
 #include "nel/gui/group_modal.h"
 #include "nel/gui/group_editbox_base.h"
 #include "nel/gui/interface_options.h"
+#include "nel/gui/view_text.h"
+#include "nel/gui/view_bitmap.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/interface_anim.h"
+#include "nel/gui/proc.h"
+#include "nel/gui/interface_expr.h"
+#include "nel/misc/events.h"
 
 namespace NLGUI
 {
@@ -39,7 +46,7 @@ namespace
 
 	void Hack()
 	{
-		NLGUI::LinkHack();
+		LinkHack();
 	}
 }
 
@@ -47,8 +54,6 @@ namespace NLGUI
 {
 	CWidgetManager* CWidgetManager::instance = NULL;
 	std::string CWidgetManager::_CtrlLaunchingModalId= "ctrl_launch_modal";
-	IParser* CWidgetManager::parser = NULL;
-
 	// ----------------------------------------------------------------------------
 	// SMasterGroup
 	// ----------------------------------------------------------------------------
@@ -382,7 +387,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	void CWidgetManager::activateMasterGroup (const std::string &sMasterGroupName, bool bActive)
 	{
-		CInterfaceGroup *pIG = CWidgetManager::getInstance()->getMasterGroupFromId (sMasterGroupName);
+		CInterfaceGroup *pIG = getMasterGroupFromId (sMasterGroupName);
 		if (pIG != NULL)
 		{
 			pIG->setActive(bActive);
@@ -447,6 +452,12 @@ namespace NLGUI
 			}
 		}
 		return pIEL;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	CInterfaceElement* CWidgetManager::getElementFromDefine( const std::string &defineId )
+	{
+		return getElementFromId( parser->getDefine( defineId ) );
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -623,7 +634,7 @@ namespace NLGUI
 
 		// disable any context help
 		setCurContextHelp( NULL );
-		CWidgetManager::getInstance()->_DeltaTimeStopingContextHelp = 0;
+		_DeltaTimeStopingContextHelp = 0;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -720,6 +731,56 @@ namespace NLGUI
 			else
 			{
 				break;
+			}
+		}
+	}
+
+	// ***************************************************************************
+	void CWidgetManager::hideAllWindows()
+	{
+		for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			if (rMG.Group->getActive())
+			{
+				for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
+				{
+					std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
+					std::list<CInterfaceGroup*>::const_iterator itw;
+					for (itw = rList.begin(); itw!= rList.end();)
+					{
+						CInterfaceGroup *pIG = *itw;
+						itw++;	// since setActive invalidate the iterator, be sure we move to the next one before
+						pIG->setActive(false);
+					}
+				}
+			}
+		}
+	}
+
+	// ***************************************************************************
+	void CWidgetManager::hideAllNonSavableWindows()
+	{
+		for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			if (rMG.Group->getActive())
+			{
+				for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
+				{
+					std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
+					std::list<CInterfaceGroup*>::const_iterator itw;
+					for (itw = rList.begin(); itw!= rList.end();)
+					{
+						CInterfaceGroup *pIG = *itw;
+						CGroupContainer *cont = dynamic_cast<CGroupContainer *>(pIG);
+						itw++;	// since setActive invalidate the iterator, be sure we move to the next one before
+						if (!cont || !cont->isSavable())
+						{
+							pIG->setActive(false);
+						}
+					}
+				}
 			}
 		}
 	}
@@ -842,7 +903,7 @@ namespace NLGUI
 						CInterfaceGroup *pIG = *itw;
 
 						// Accecpt if not modal clip
-						if (!CWidgetManager::getInstance()->hasModal() || CWidgetManager::getInstance()->getModal().ModalWindow == pIG || CWidgetManager::getInstance()->getModal().ModalExitClickOut)
+						if (!hasModal() || getModal().ModalWindow == pIG || getModal().ModalExitClickOut)
 						if (pIG->getActive() && pIG->getUseCursor())
 						{
 							if (pIG->getCtrlsUnder (x, y, 0, 0, (sint32) sw, (sint32) sh, vICL))
@@ -880,8 +941,8 @@ namespace NLGUI
 						CInterfaceGroup *pIG = *itw;
 
 						// Accecpt if not modal clip
-						if (!CWidgetManager::getInstance()->hasModal() || CWidgetManager::getInstance()->getModal().ModalWindow == pIG ||
-							CWidgetManager::getInstance()->getModal().ModalExitClickOut)
+						if (!hasModal() || getModal().ModalWindow == pIG ||
+							getModal().ModalExitClickOut)
 						if (pIG->getActive() && pIG->getUseCursor())
 						{
 							if (pIG->isIn(x, y))
@@ -973,6 +1034,8 @@ namespace NLGUI
 		resetColorProps();
 
 		_AlphaRolloverSpeedDB = NULL;
+
+		activeAnims.clear();
 	}
 
 
@@ -1053,8 +1116,8 @@ namespace NLGUI
 				}
 			}
 
-			if ( CWidgetManager::getInstance()->getPointer() != NULL)
-				CWidgetManager::getInstance()->getPointer()->updateCoords();
+			if ( getPointer() != NULL)
+				getPointer()->updateCoords();
 		}
 
 
@@ -1062,7 +1125,7 @@ namespace NLGUI
 		if (bRecomputeCtrlUnderPtr)
 		{
 			H_AUTO ( RZ_Interface_RecomputeCtrlUnderPtr )
-			if ( CWidgetManager::getInstance()->getPointer() != NULL )
+			if ( getPointer() != NULL )
 			{
 				sint32 mx = _Pointer->getX();
 				sint32 my = _Pointer->getY();
@@ -1075,6 +1138,1391 @@ namespace NLGUI
 		}
 	}
 
+
+	// ----------------------------------------------------------------------------
+	CInterfaceGroup* CWidgetManager::getWindowForActiveMasterGroup( const std::string &window )
+	{
+		// Search for all elements
+		for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			const SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			if (rMG.Group->getActive())
+			{
+				CInterfaceElement	*pEL= getElementFromId( rMG.Group->getId() + ":" + window);
+				if(pEL && pEL->isGroup())
+					return (CInterfaceGroup*)pEL;
+			}
+		}
+
+		return NULL;
+	}
+
+
+	// ***************************************************************************
+	void CWidgetManager::drawOverExtendViewText()
+	{
+		if( getOverExtendViewText() )
+		{
+			CViewText	*vtSrc= dynamic_cast<CViewText*>( getOverExtendViewText() );
+
+			CInterfaceGroup *groupOver = getWindowForActiveMasterGroup("over_extend_view_text");
+			if(groupOver)
+			{
+				CViewText *vtDst = dynamic_cast<CViewText*>(groupOver->getView("text"));
+				if (vtDst != NULL)
+				{
+					// Copy all aspects to the view
+					vtDst->setText (vtSrc->getText());
+					vtDst->setFontSize (vtSrc->getFontSize());
+					vtDst->setColor (vtSrc->getColor());
+					vtDst->setModulateGlobalColor(vtSrc->getModulateGlobalColor());
+					vtDst->setShadow(vtSrc->getShadow());
+					vtDst->setShadowColor(vtSrc->getShadowColor());
+					vtDst->setCaseMode(vtSrc->getCaseMode());
+					vtDst->setUnderlined(vtSrc->getUnderlined());
+
+					// setup background
+					CViewBitmap	*pBack= dynamic_cast<CViewBitmap*>(groupOver->getView("midback"));
+					CViewBitmap	*pOutline= dynamic_cast<CViewBitmap*>(groupOver->getView("midoutline"));
+					if(pBack)
+						pBack->setColor( getOverExtendViewTextBackColor() );
+					if(pOutline)
+					{
+						pOutline->setColor(vtSrc->getColor());
+						pOutline->setModulateGlobalColor(vtSrc->getModulateGlobalColor());
+					}
+
+					// the group is the position of the overed text, but apply the delta of borders (vtDst X/Y)
+					sint32 x = vtSrc->getXReal() - vtDst->getX();
+					sint32 y = vtSrc->getYReal() - vtDst->getY();
+
+					// update one time only to get correct W/H
+					groupOver->updateCoords ();
+
+					if(!vtSrc->isClampRight())
+					{
+						// clamped from the left part
+						x += vtSrc->getWReal() - vtDst->getWReal();
+					}
+
+					// clamp to screen coords, and set
+					if ((x+groupOver->getW()) > groupOver->getParent()->getWReal())
+						x = groupOver->getParent()->getWReal() - groupOver->getW();
+					if (x < 0)
+						x = 0;
+					if ((y+groupOver->getH()) > groupOver->getParent()->getHReal())
+						y = groupOver->getParent()->getHReal() - groupOver->getH();
+					if (y < 0)
+						y = 0;
+
+					// set pos
+					groupOver->setX (x);
+					groupOver->setY (y);
+
+					// update coords 3 times is required
+					groupOver->updateCoords ();
+					groupOver->updateCoords ();
+					groupOver->updateCoords ();
+
+					// draw
+					groupOver->draw ();
+					// flush layers
+					CViewRenderer::getInstance()->flush();
+				}
+			}
+
+			// Reset the ptr so at next frame, won't be rendered (but if reset)
+			setOverExtendViewText( NULL, getOverExtendViewTextBackColor() );
+		}
+	}
+
+
+	uint CWidgetManager::adjustTooltipPosition( CCtrlBase *newCtrl, CInterfaceGroup *win, THotSpot ttParentRef,
+												THotSpot ttPosRef, sint32 xParent, sint32 yParent,
+												sint32 wParent, sint32 hParent )
+	{
+		CCtrlBase::TToolTipParentType	parentType= newCtrl->getToolTipParent();
+		CInterfaceGroup *groupContextHelp = 
+			getWindowForActiveMasterGroup(newCtrl->getContextHelpWindowName());
+
+		uint32 _ScreenH, _ScreenW;
+		CViewRenderer::getInstance()->getScreenSize( _ScreenH, _ScreenW );
+
+		if(ttPosRef==Hotspot_TTAuto || ttParentRef==Hotspot_TTAuto)
+		{
+			// NB: keep the special window if type is specialwindow (defined above)
+			if(!win)
+				win= newCtrl->getRootWindow();
+			sint32	xWin= 0;
+			sint32	yWin= 0;
+			sint32	wWin= 0;
+			sint32	hWin= 0;
+			if(win)
+			{
+				xWin = win->getXReal();
+				yWin = win->getYReal();
+				wWin = win->getWReal();
+				hWin = win->getHReal();
+			}
+			// for Window, display top or bottom according to window pos/size
+			if(parentType==CCtrlBase::TTWindow || parentType==CCtrlBase::TTSpecialWindow)
+			{
+				sint32	top= (sint32)_ScreenH - (yWin+hWin);
+				sint32	bottom= yWin;
+				if(top>bottom)
+				{
+					ttParentRef= Hotspot_TL;
+					ttPosRef= Hotspot_BL;
+				}
+				else
+				{
+					ttParentRef= Hotspot_BL;
+					ttPosRef= Hotspot_TL;
+				}
+			}
+			// for Ctrl, display top, left or right according to window pos/size
+			else if(parentType==CCtrlBase::TTCtrl)
+			{
+				sint32	right= (sint32)_ScreenW - (xWin+wWin);
+				sint32	left= xWin;
+				if(right>left)
+				{
+					ttParentRef= Hotspot_TR;
+					ttPosRef= Hotspot_BL;
+				}
+				else
+				{
+					ttParentRef= Hotspot_TL;
+					ttPosRef= Hotspot_BR;
+				}
+			}
+			else
+			{
+				// default (mouse)
+				ttParentRef= Hotspot_BL;
+				ttPosRef= Hotspot_BL;
+			}
+		}
+
+		// **** compute coordinates of the tooltip
+		sint32 x= xParent;
+		sint32 y= yParent;
+		if (ttParentRef & Hotspot_Mx)
+			y += hParent/2;
+		if (ttParentRef & Hotspot_Tx)
+			y += hParent;
+		if (ttParentRef & Hotspot_xM)
+			x += wParent/2;
+		if (ttParentRef & Hotspot_xR)
+			x += wParent;
+
+		// adjust according to self posref
+		if (ttPosRef & Hotspot_Mx)
+			y -= groupContextHelp->getHReal()/2;
+		if (ttPosRef & Hotspot_Tx)
+			y -= groupContextHelp->getHReal();
+		if (ttPosRef & Hotspot_xM)
+			x -= groupContextHelp->getWReal()/2;
+		if (ttPosRef & Hotspot_xR)
+			x -= groupContextHelp->getWReal();
+
+
+		// **** clamp to screen coords, and set
+		uint clampCount = 0;
+
+		if ((x+groupContextHelp->getW()) > groupContextHelp->getParent()->getWReal())
+		{
+			++ clampCount;
+			x = groupContextHelp->getParent()->getWReal() - groupContextHelp->getW();
+		}
+		if (x < 0)
+		{
+			x = 0;
+			++ clampCount;
+		}
+		if ((y+groupContextHelp->getH()) > groupContextHelp->getParent()->getHReal())
+		{
+			y = groupContextHelp->getParent()->getHReal() - groupContextHelp->getH();
+			++ clampCount;
+		}
+		if (y < 0)
+		{
+			y = 0;
+			++ clampCount;
+		}
+
+		// update coords 3 times is required
+		groupContextHelp->setX (x);
+		groupContextHelp->setY (y);
+		groupContextHelp->updateCoords ();
+		groupContextHelp->updateCoords ();
+		groupContextHelp->updateCoords ();
+
+		return clampCount;
+	}
+
+	// ----------------------------------------------------------------------------
+	void CWidgetManager::updateTooltipCoords()
+	{
+		updateTooltipCoords( getCurContextHelp() );
+	}
+
+	void CWidgetManager::updateTooltipCoords( CCtrlBase *newCtrl )
+	{
+		if (!newCtrl) return;
+		if (!newCtrl->getInvalidCoords()) return;
+		
+		CInterfaceGroup *groupContextHelp =
+			getWindowForActiveMasterGroup(newCtrl->getContextHelpWindowName());
+
+		if(groupContextHelp)
+		{
+			CViewText *pTxt = (CViewText*)groupContextHelp->getView("text");
+			if (pTxt != NULL)
+			{
+				pTxt->setTextFormatTaged(_ContextHelpText);
+				// update only to get correct W/H
+				groupContextHelp->updateCoords ();
+
+
+				// **** Compute parent coordinates
+				CCtrlBase::TToolTipParentType	parentType= newCtrl->getToolTipParent();
+				CInterfaceGroup	*win= NULL;
+				// adjust to the mouse by default
+				sint32		xParent= getPointer()->getX();
+				sint32		yParent= getPointer()->getY();
+				sint32		wParent= 0;
+				sint32		hParent= 0;
+				// adjust to the window
+				if(parentType==CCtrlBase::TTWindow || parentType==CCtrlBase::TTSpecialWindow)
+				{
+					if(parentType==CCtrlBase::TTWindow)
+						win= newCtrl->getRootWindow();
+					else
+						win =
+						dynamic_cast<CInterfaceGroup*>( getElementFromId(newCtrl->getToolTipSpecialParent()));
+
+					if(win)
+					{
+						xParent = win->getXReal();
+						yParent = win->getYReal();
+						wParent = win->getWReal();
+						hParent = win->getHReal();
+					}
+					// Bug...: leave default to pointer
+				}
+				// adjust to the ctrl
+				else if (parentType==CCtrlBase::TTCtrl)
+				{
+					xParent = newCtrl->getXReal();
+					yParent = newCtrl->getYReal();
+					wParent = newCtrl->getWReal();
+					hParent = newCtrl->getHReal();
+					// Additionaly, must clip this ctrl with its parent
+					// (else animals are buggy for instance)
+					CInterfaceGroup	*parent= newCtrl->getParent();
+					if(parent)
+					{
+						sint32	xClip,yClip,wClip,hClip;
+						parent->getClip(xClip,yClip,wClip,hClip);
+						// clip bottom left
+						xParent= std::max(xParent, xClip);
+						yParent= std::max(yParent, yClip);
+						// clip top right
+						sint32	xrParent= std::min(xParent+ wParent, xClip+wClip);
+						sint32	ytParent= std::min(yParent+ hParent, yClip+hClip);
+						wParent= std::max((sint32)0, xrParent-xParent);
+						hParent= std::max((sint32)0, ytParent-yParent);
+					}
+				}
+
+
+				// **** resolve auto posref
+				uint clampCount = 
+					adjustTooltipPosition( newCtrl, win, newCtrl->getToolTipParentPosRef(),
+										newCtrl->getToolTipPosRef(), xParent, yParent,
+										wParent, hParent);
+
+				if (clampCount != 0)
+				{
+					// try to fallback on alternate tooltip posref
+					uint altClampCount = 
+						adjustTooltipPosition( newCtrl, win, newCtrl->getToolTipParentPosRefAlt(),
+												newCtrl->getToolTipPosRefAlt(), xParent, yParent,
+												wParent, hParent);
+
+					if (altClampCount > clampCount)
+					{
+						// worst ? resume to first posref
+						adjustTooltipPosition( newCtrl, win, newCtrl->getToolTipParentPosRef(),
+												newCtrl->getToolTipPosRef(), xParent, yParent,
+												wParent, hParent);
+					}
+				}
+			}
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::disableContextHelp()
+	{
+		setCurContextHelp( NULL );
+		_DeltaTimeStopingContextHelp = 0;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::disableContextHelpForControl( CCtrlBase *pCtrl )
+	{
+		if( pCtrl == NULL )
+			return;
+
+		if( getCurContextHelp() == pCtrl )
+			disableContextHelp();
+	}
+
+	// ----------------------------------------------------------------------------
+	CCtrlBase* CWidgetManager::getNewContextHelpCtrl()
+	{
+		// get the top most ctrl under us
+		CCtrlBase *best = NULL;
+		sint8 bestRenderLayer = -128;
+
+		for (sint i = (sint32)_CtrlsUnderPointer.size()-1; i>=0; i--)
+		{
+			CCtrlBase	*pICL = _CtrlsUnderPointer[i];
+			if (pICL->getRenderLayer() > bestRenderLayer)
+			{
+				if ((pICL->getActive()) && (!pICL->emptyContextHelp()))
+				{
+					if (!getPointer()) return pICL;
+					sint32 mx, my;
+					getPointer()->getPointerPos(mx, my);
+					if (pICL->preciseHitTest(mx, my))
+					{
+						best = pICL;
+						bestRenderLayer	= pICL->getRenderLayer();
+					}
+				}
+			}
+		}
+		if (!best)
+		{
+			// if a control was not found, try with the groups
+			sint8 bestRenderLayer = -128;
+
+			for (sint i = (sint32)_GroupsUnderPointer.size()-1; i>=0; i--)
+			{
+				CCtrlBase	*pICL = _GroupsUnderPointer[i];
+				if (pICL->getRenderLayer() > bestRenderLayer)
+				{
+					if ((pICL->getActive()) && (!pICL->emptyContextHelp()))
+					{
+						if (!getPointer()) return pICL;
+						sint32 mx, my;
+						getPointer()->getPointerPos(mx, my);
+						if (pICL->preciseHitTest(mx, my))
+						{
+							best = pICL;
+							bestRenderLayer	= pICL->getRenderLayer();
+						}
+					}
+				}
+			}
+		}
+		return best;
+	}
+
+	// ----------------------------------------------------------------------------
+	void CWidgetManager::drawContextHelp ()
+	{
+		if (!getPointer() || !_ContextHelpActive)
+			return;
+
+
+		sint32 x = getPointer()->getX();
+		sint32 y = getPointer()->getY();
+
+
+		// ***************
+		// **** try to disable
+		// ***************
+		// test disable first, so can recheck asap if another present. see below
+		CCtrlBase *_CurCtrlContextHelp = getCurContextHelp();
+		if( _CurCtrlContextHelp)
+		{
+			if(x!=_LastXContextHelp || y!=_LastYContextHelp)
+			{
+				// May change of ctrl!! => disable context help
+				CCtrlBase	*newCtrl= getNewContextHelpCtrl();
+				if(newCtrl!=_CurCtrlContextHelp)
+				{
+					// disable
+					disableContextHelp();
+				}
+			}
+
+			// Check if _CurCtrlContextHelp  is visible
+			if (_CurCtrlContextHelp == NULL)
+			{
+				disableContextHelp();
+			}
+			else
+			{
+				bool bVisible = true;
+				if (_CurCtrlContextHelp->getActive() == false)
+					bVisible = false;
+				CInterfaceGroup *pParent = _CurCtrlContextHelp->getParent();
+				while (pParent != NULL)
+				{
+					if (pParent->getActive() == false)
+						bVisible = false;
+					pParent = pParent->getParent();
+				}
+				if (!bVisible)
+					disableContextHelp();
+			}
+		}
+
+
+		// ***************
+		// **** try to acquire
+		// ***************
+		if(!_CurCtrlContextHelp)
+		{
+			// get the ctrl of interset
+			CCtrlBase	*newCtrl= getNewContextHelpCtrl();
+
+			if(x==_LastXContextHelp && y==_LastYContextHelp)
+				_DeltaTimeStopingContextHelp += ( interfaceTimes.frameDiffMs / 1000.0f );
+			else
+				_DeltaTimeStopingContextHelp = 0;
+
+			// If reach the time limit
+			if( ( _DeltaTimeStopingContextHelp > _MaxTimeStopingContextHelp )
+				|| (newCtrl && newCtrl->wantInstantContextHelp()))
+			{
+				// if present, get the ctx help text.
+				if(newCtrl)
+				{
+					// get the text
+					//newCtrl->getContextHelpToolTip(_ContextHelpText);
+					newCtrl->getContextHelp( getContextHelpText() );
+					// UserDefined context help
+					if( !newCtrl->getContextHelpActionHandler().empty() )
+					{
+						CAHManager::getInstance()->runActionHandler(newCtrl->getContextHelpActionHandler(), newCtrl, newCtrl->getContextHelpAHParams() );
+					}
+
+					// If the text is finally empty (Special AH case), abort
+					if( getContextHelpText().empty() )
+						newCtrl= NULL;
+				}
+
+				// not present? wait furthermore to move the mouse.
+				if(!newCtrl)
+					_DeltaTimeStopingContextHelp= 0;
+				else
+				{
+					// enable
+					setCurContextHelp( newCtrl );
+					newCtrl->invalidateCoords();
+				}
+			}
+		}
+
+		updateTooltipCoords(_CurCtrlContextHelp);
+
+
+		// ***************
+		// **** display
+		// ***************
+		if(_CurCtrlContextHelp)
+		{
+			CInterfaceGroup *groupContextHelp =
+				getWindowForActiveMasterGroup(_CurCtrlContextHelp->getContextHelpWindowName());
+
+			if(groupContextHelp)
+			{
+				/** If there's a modal box around, should be sure that the context help doesn't intersect it.
+				  * If this is the case, we just disable it, unless the tooltip was generated by the current modal window
+				  */
+				if ( hasModal() )
+				{
+					CInterfaceGroup *mw = getModal().ModalWindow;
+					if (mw && mw->isIn(*groupContextHelp))
+					{
+						if (_CurCtrlContextHelp->isSonOf(mw))
+						{
+							groupContextHelp->executeLuaScriptOnDraw();
+							groupContextHelp->draw ();
+							// flush layers
+							CViewRenderer::getInstance()->flush();
+						}
+					}
+					else
+					{
+						groupContextHelp->executeLuaScriptOnDraw();
+						groupContextHelp->draw ();
+						// flush layers
+						CViewRenderer::getInstance()->flush();
+					}
+				}
+				else
+				{
+					groupContextHelp->executeLuaScriptOnDraw();
+					groupContextHelp->draw ();
+					// flush layers
+					CViewRenderer::getInstance()->flush();
+				}
+			}
+		}
+
+		// Bkup movement
+		_LastXContextHelp= x;
+		_LastYContextHelp= y;
+	}
+
+	void CWidgetManager::setContextHelpActive(bool active)
+	{
+		if (!active)
+		{
+			disableContextHelp();
+		}
+		_ContextHelpActive = active;
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::getNewWindowCoordToNewScreenSize( sint32 &x, sint32 &y, sint32 w, sint32 h,
+														sint32 newScreenW, sint32 newScreenH) const
+	{
+		// NB: x is relative to Left of the window (and Left of screen)
+		// NB: y is relative to Top of the window  (but Bottom of screen)
+
+		/*
+			The goal here is to move the window so it fit the new resolution
+			But we don't want to change its size (because somes windows just can't)
+			We also cannot use specific code according to each window because user may completly modify his interface
+			So the strategy is to dectect on which "side" (or center) the window is the best sticked,
+			and then just move the window according to this position
+		*/
+
+		// *** First detect from which screen position the window is the more sticked (borders or center)
+		// In X: best hotspot is left, middle or right?
+		sint32	posXToLeft= x;
+		sint32	posXToMiddle= x+w/2-screenW/2;
+		sint32	posXToRight= screenW-(x+w);
+		sint32	bestXHotSpot= Hotspot_xL;
+		sint32	bestXPosVal= posXToLeft;
+		if(abs(posXToMiddle) < bestXPosVal)
+		{
+			bestXHotSpot= Hotspot_xM;
+			bestXPosVal= abs(posXToMiddle);
+		}
+		if(posXToRight < bestXPosVal)
+		{
+			bestXHotSpot= Hotspot_xR;
+			bestXPosVal= posXToRight;
+		}
+
+		// Same In Y: best hotspot is bottom, middle or top?
+		// remember here that y is the top of window (relative to bottom of screen)
+		sint32	posYToBottom= y-h;
+		sint32	posYToMiddle= y-h/2-screenH/2;
+		sint32	posYToTop= screenH-y;
+		sint32	bestYHotSpot= Hotspot_Bx;
+		sint32	bestYPosVal= posYToBottom;
+		const	sint32	middleYWeight= 6;		// Avoid default Mission/Team/Map/ContactList positions to be considered as "middle"
+		if(abs(posYToMiddle)*middleYWeight < bestYPosVal)
+		{
+			bestYHotSpot= Hotspot_Mx;
+			bestYPosVal= abs(posYToMiddle)*middleYWeight;
+		}
+		if(posYToTop < bestYPosVal)
+		{
+			bestYHotSpot= Hotspot_Tx;
+			bestYPosVal= posYToTop;
+		}
+
+		// *** According to best matching hotspot, and new screen resolution, move the window
+		// x
+		if(bestXHotSpot==Hotspot_xL)
+			x= x;
+		else if(bestXHotSpot==Hotspot_xM)
+			x= newScreenW/2 + posXToMiddle - w/2;
+		else if(bestXHotSpot==Hotspot_xR)
+			x= newScreenW - posXToRight - w;
+		// y
+		if(bestYHotSpot==Hotspot_Bx)
+			y= y;
+		else if(bestYHotSpot==Hotspot_Mx)
+			y= newScreenH/2 + posYToMiddle + h/2;
+		else if(bestYHotSpot==Hotspot_Tx)
+			y= newScreenH - posYToTop;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::moveAllWindowsToNewScreenSize(sint32 newScreenW, sint32 newScreenH, bool fixCurrentUI)
+	{
+		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = getAllMasterGroup();
+		// If resolutions correctly setuped, and really different from new setup
+		if( screenW >0 && screenH>0 &&
+			newScreenW >0 && newScreenH>0 &&
+			( screenW != newScreenW || screenH != newScreenH)
+			)
+		{
+			// *** Do it for the Active Desktop (if wanted)
+			if(fixCurrentUI)
+			{
+				// only for ui:interface (not login, nor outgame)
+				for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+				{
+					CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+					if(!rMG.Group || rMG.Group->getId()!="ui:interface")
+						continue;
+
+					// For all priorities, but the worldspace one
+					for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
+					{
+						if(nPriority==WIN_PRIORITY_WORLD_SPACE)
+							continue;
+
+						// For All windows (only layer 0 group container)
+						std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
+						std::list<CInterfaceGroup*>::const_iterator itw;
+						for (itw = rList.begin(); itw != rList.end(); itw++)
+						{
+							CInterfaceGroup *pIG = *itw;
+							if(!pIG->isGroupContainer())
+								continue;
+							CGroupContainer	*gc= dynamic_cast<CGroupContainer*>(pIG);
+							if(gc->getLayerSetup()!=0)
+								continue;
+							// should all be BL / TL
+							if(gc->getParentPosRef()!=Hotspot_BL || gc->getPosRef()!=Hotspot_TL)
+								continue;
+
+							// Get current window coordinates
+							sint32	x= pIG->getX();				// x is relative to Left of the window
+							sint32	y= pIG->getY();				// y is relative to Top of the window
+							sint32	w= pIG->getW(false);		// the window may be hid, still get the correct(or estimated) W
+							sint32	h= pIG->getH(false);		// the window may be hid, still get the correct(or estimated) H
+
+							// Compute the new coordinate
+							getNewWindowCoordToNewScreenSize(x, y, w, h, newScreenW, newScreenH);
+
+							// Change
+							pIG->setX(x);
+							pIG->setY(y);
+						}
+					}
+				}
+			}
+
+			std::vector< INewScreenSizeHandler* >::iterator itr;
+			for( itr = newScreenSizeHandlers.begin(); itr != newScreenSizeHandlers.end(); ++itr )
+			{
+				INewScreenSizeHandler *handler = *itr;
+				handler->process( newScreenW, newScreenH );
+			}
+		}
+
+		// Now those are the last screen coordinates used for window position correction
+		if(newScreenW >0 && newScreenH>0)
+		{
+			screenW = newScreenW;
+			screenH = newScreenH;
+		}
+	}
+
+	class InvalidateTextVisitor : public CInterfaceElementVisitor
+	{
+	public:
+		InvalidateTextVisitor( bool reset )
+		{
+			this->reset = reset;
+		}
+
+		void visitGroup( CInterfaceGroup *group )
+		{
+			const std::vector< CViewBase* > &vs = group->getViews();
+			for( std::vector< CViewBase* >::const_iterator itr = vs.begin(); itr != vs.end(); ++itr )
+			{
+				CViewText *vt = dynamic_cast< CViewText* >( *itr );
+				if( vt != NULL )
+				{
+					if( reset )
+						vt->resetTextIndex();
+					vt->updateTextContext();
+				}
+			}
+		}
+
+	private:
+		bool reset;
+	};
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::updateAllLocalisedElements()
+	{
+
+		uint32 nMasterGroup;
+
+		uint32 w, h;
+		CViewRenderer::getInstance()->checkNewScreenSize ();
+		CViewRenderer::getInstance()->getScreenSize (w, h);
+
+		// Update ui:* (limit the master containers to the height of the screen)
+		for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			rMG.Group->setW (w);
+			rMG.Group->setH (h);
+		}
+		CViewRenderer::getInstance()->setClipWindow(0, 0, w, h);
+
+		// If all conditions are OK, move windows so they fit correctly with new screen size
+		// Do this work only InGame when Config is loaded
+		moveAllWindowsToNewScreenSize(w,h,true);
+
+		// Invalidate coordinates of all Windows of each MasterGroup
+		for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+
+			InvalidateTextVisitor inv( false );
+
+			rMG.Group->visitGroupAndChildren( &inv );
+			rMG.Group->invalidateCoords ();
+			for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
+			{
+				std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
+				std::list<CInterfaceGroup*>::const_iterator itw;
+				for (itw = rList.begin(); itw != rList.end(); itw++)
+				{
+					CInterfaceGroup *pIG = *itw;
+					pIG->visitGroupAndChildren( &inv );
+					pIG->invalidateCoords ();
+				}
+			}
+		}
+
+		// setup for all
+		for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			bool bActive = rMG.Group->getActive ();
+			rMG.Group->setActive (true);
+			rMG.Group->updateCoords ();
+			rMG.Group->setActive (bActive);
+		}
+
+		// update coords one
+		checkCoords();
+
+		// Action by default (container opening
+		for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			rMG.Group->launch ();
+		}
+
+	}
+
+	void CWidgetManager::drawViews( NL3D::UCamera camera )
+	{
+		CViewRenderer::getInstance()->activateWorldSpaceMatrix (false);
+		NL3D::UDriver *driver = CViewRenderer::getInstance()->getDriver();
+
+		// If an element has captured the keyboard, make sure it is alway visible (all parent windows active)
+		if( getCaptureKeyboard() != NULL)
+		{
+			CCtrlBase *cb = getCaptureKeyboard();
+			do
+			{
+				if (!cb->getActive())
+				{
+					setCaptureKeyboard(NULL);
+					break;
+				}
+				cb = cb->getParent();
+			}
+			while (cb);
+		}
+		// Check if screen size changed
+		uint32 w, h;
+		CViewRenderer::getInstance()->checkNewScreenSize ();
+		CViewRenderer::getInstance()->getScreenSize (w, h);
+		if ((w != screenW) || (h != screenH))
+		{
+			// No Op if screen minimized
+			if(w!=0 && h!=0 && !CViewRenderer::getInstance()->isMinimized())
+			{
+				updateAllLocalisedElements ();
+				setScreenWH( w, h );
+			}
+		}
+
+		// Update global color from database
+		setGlobalColor( NLMISC::CRGBA (	(uint8)CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:R")->getValue32(),
+								(uint8)CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:G")->getValue32(),
+								(uint8)CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:B")->getValue32(),
+								(uint8)CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:A")->getValue32() ) );
+
+		NLMISC::CRGBA c  = getGlobalColorForContent();
+		NLMISC::CRGBA gc = getGlobalColor();
+		c.R = gc.R;
+		c.G = gc.G;
+		c.B = gc.B;
+		c.A = (uint8) (( (uint16) c.A * (uint16) getContentAlpha() ) >> 8);
+		setGlobalColorForContent( c );
+		
+		// Update global alphaS from database
+		updateGlobalAlphas();
+
+		/*  Draw all the windows
+			To minimize texture swapping, we first sort per Window, then we sort per layer, then we render per Global Texture.
+			Computed String are rendered in on big drawQuads at last part of each layer
+		*/
+		CDBManager::getInstance()->flushObserverCalls();
+		
+		for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
+		{
+			CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
+			if (rMG.Group->getActive())
+			{
+				// Sort world space windows
+				rMG.sortWorldSpaceGroup ();
+
+				for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; ++nPriority)
+				{
+					if ( (nPriority == WIN_PRIORITY_WORLD_SPACE) && !camera.empty())
+					{
+						driver->setViewMatrix( NL3D::CMatrix::Identity);
+						driver->setModelMatrix( NL3D::CMatrix::Identity);
+						driver->setFrustum(camera.getFrustum());
+						CViewRenderer::getInstance()->activateWorldSpaceMatrix (true);
+					}
+
+					std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
+					std::list<CInterfaceGroup*>::const_iterator itw;
+
+					for (itw = rList.begin(); itw != rList.end(); itw++)
+					{
+						CInterfaceGroup *pIG = *itw;
+						if( pIG ) // TODO: debug null pointer in PrioritizedWindows list
+						{
+							if (pIG->getActive())
+							{
+								// Draw all the elements of this window in the layers in ViewRendered
+								pIG->draw ();
+								// flush the layers
+								CViewRenderer::getInstance()->flush ();
+							}
+						}
+					}
+
+					if ( (nPriority == WIN_PRIORITY_WORLD_SPACE) && !camera.empty())
+					{
+						driver->setMatrixMode2D11();
+						CViewRenderer::getInstance()->activateWorldSpaceMatrix (false);
+					}
+				}
+			}
+		}
+
+		CDBManager::getInstance()->flushObserverCalls();
+
+		// draw the special over extend text
+		drawOverExtendViewText();
+
+		// draw the context help
+		drawContextHelp ();
+
+		std::vector< IOnWidgetsDrawnHandler* >::iterator itr;
+		for( itr = onWidgetsDrawnHandlers.begin(); itr != onWidgetsDrawnHandlers.end(); ++itr )
+		{
+			IOnWidgetsDrawnHandler *handler = *itr;
+			handler->process();
+		}
+
+		// Draw the pointer and DND Item
+		if( getPointer() != NULL)
+		{
+			if ( getPointer()->getActive())
+				getPointer()->draw ();
+		}
+
+		// flush layers
+		CViewRenderer::getInstance()->flush();
+
+		// todo hulud remove Return in 2d world
+		driver->setMatrixMode2D11();
+
+		CDBManager::getInstance()->flushObserverCalls();
+	}
+
+	bool CWidgetManager::handleEvent( const CEventDescriptor &evnt )
+	{
+		// Check if we can receive events (no anims!)
+		for( uint32 i = 0; i < activeAnims.size(); ++i )
+			if( activeAnims[i]->isDisableButtons() )
+				return false;
+
+		if( evnt.getType() == CEventDescriptor::system )
+		{
+			const CEventDescriptorSystem &systemEvent = reinterpret_cast< const CEventDescriptorSystem& >( evnt );
+			if( systemEvent.getEventTypeExtended() == CEventDescriptorSystem::setfocus )
+			{
+				if( getCapturePointerLeft() != NULL )
+				{
+					getCapturePointerLeft()->handleEvent( evnt );
+					setCapturePointerLeft( NULL );
+				}
+
+				if( getCapturePointerRight() != NULL )
+				{
+					getCapturePointerRight()->handleEvent( evnt );
+					setCapturePointerRight( NULL );
+				}
+			}
+		}
+
+		bool handled = false;
+
+		CViewPointer *_Pointer = static_cast< CViewPointer* >( getPointer() );
+
+		if (evnt.getType() == CEventDescriptor::key)
+		{
+			CEventDescriptorKey &eventDesc = (CEventDescriptorKey&)evnt;
+			//_LastEventKeyDesc = eventDesc;
+
+			// Any Key event disable the ContextHelp
+			disableContextHelp();
+
+			// Hide menu if the key is pushed
+	//		if ((eventDesc.getKeyEventType() == CEventDescriptorKey::keydown) && !_ModalStack.empty() && !eventDesc.getKeyAlt() && !eventDesc.getKeyCtrl() && !eventDesc.getKeyShift())
+			// Hide menu (or popup menu) is ESCAPE pressed
+			if( eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == NLMISC::KeyESCAPE )
+			{
+				if( hasModal() )
+				{
+					SModalWndInfo mwi = getModal();
+					if (mwi.ModalExitKeyPushed)
+						disableModalWindow();
+				}
+			}
+
+			// Manage "quit window" If the Key is ESCAPE, no captureKeyboard
+			if( eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == NLMISC::KeyESCAPE )
+			{
+				// Get the last escapable active top window. NB: this is ergonomically better.
+				CInterfaceGroup	*win= getLastEscapableTopWindow();
+				if( win )
+				{
+					// If the window is a modal, must pop it.
+					if( dynamic_cast<CGroupModal*>(win) )
+					{
+						if(!win->getAHOnEscape().empty())
+							CAHManager::getInstance()->runActionHandler(win->getAHOnEscape(), win, win->getAHOnEscapeParams());
+						popModalWindow();
+						handled= true;
+					}
+					// else just disable it.
+					// Special case: leave the escape Key to the CaptureKeyboard .
+					else if( !getCaptureKeyboard() )
+					{
+						if(!win->getAHOnEscape().empty())
+							CAHManager::getInstance()->runActionHandler(win->getAHOnEscape(), win, win->getAHOnEscapeParams());
+						win->setActive(false);
+						handled= true;
+					}
+				}
+			}
+
+			// Manage complex "Enter"
+			if (eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == NLMISC::KeyRETURN)
+			{
+				// If the  top window has Enter AH
+				CInterfaceGroup	*tw= getTopWindow();
+				if(tw && !tw->getAHOnEnter().empty())
+				{
+					// if the captured keyboard is in this Modal window, then must handle him in priority
+					if( getCaptureKeyboard() && getCaptureKeyboard()->getRootWindow()==tw)
+					{
+						bool result = getCaptureKeyboard()->handleEvent(evnt);
+						CDBManager::getInstance()->flushObserverCalls();
+						return result;
+					}
+					else
+					{
+						// The window or modal control the OnEnter. Execute, and don't go to the chat.
+						CAHManager::getInstance()->runActionHandler(tw->getAHOnEnter(), tw, tw->getAHOnEnterParams());
+						handled= true;
+					}
+				}
+
+				// else the 'return' key bring back to the last edit box (if possible)
+				CCtrlBase *oldCapture = getOldCaptureKeyboard() ? getOldCaptureKeyboard() : getDefaultCaptureKeyboard();
+				if ( getCaptureKeyboard() == NULL && oldCapture && !handled)
+				{
+					/* If the editbox does not want to recover focus, then abort. This possibility is normaly avoided
+						through setCaptureKeyboard() which already test getRecoverFocusOnEnter(), but it is still possible
+						for the default capture (main chat) or the old captured window to not want to recover
+						(temporary Read Only chat for instance)
+					*/
+					if(!dynamic_cast<CGroupEditBoxBase*>(oldCapture) ||
+						dynamic_cast<CGroupEditBoxBase*>(oldCapture)->getRecoverFocusOnEnter())
+					{
+						setCaptureKeyboard( oldCapture );
+						notifyElementCaptured(getCaptureKeyboard() );
+						// make sure all parent windows are active
+						CCtrlBase *cb = getCaptureKeyboard();
+						CGroupContainer *lastContainer = NULL;
+						for(;;)
+						{
+							CGroupContainer *gc = dynamic_cast<CGroupContainer *>(cb);
+							if (gc) lastContainer = gc;
+							cb->forceOpen();
+							if (cb->getParent())
+							{
+								cb = cb->getParent();
+							}
+							else
+							{
+								cb->invalidateCoords();
+								break;
+							}
+						}
+						if (lastContainer)
+						{
+							setTopWindow(lastContainer);
+							lastContainer->enableBlink(1);
+						}
+						handled= true;
+					}
+				}
+			}
+
+			// General case: handle it in the Captured keyboard
+			if ( getCaptureKeyboard() != NULL && !handled)
+			{
+				bool result = getCaptureKeyboard()->handleEvent(evnt);
+				CDBManager::getInstance()->flushObserverCalls();
+				return result;
+			}
+
+			lastKeyEvent = eventDesc;
+		}
+
+		//////////////////////////////////////////////// Keyboard handling ends here ////////////////////////////////////
+
+		else if (evnt.getType() == CEventDescriptor::mouse )
+		{
+			CEventDescriptorMouse &eventDesc = (CEventDescriptorMouse&)evnt;
+
+			if( eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown )
+				_Pointer->setButtonState( static_cast< NLMISC::TMouseButton >( _Pointer->getButtonState() | NLMISC::leftButton ) );
+			else
+			if( eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown )
+				_Pointer->setButtonState( static_cast< NLMISC::TMouseButton >( _Pointer->getButtonState() | NLMISC::rightButton ) );
+			else
+			if( eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup )
+				_Pointer->setButtonState( static_cast< NLMISC::TMouseButton >( _Pointer->getButtonState() & ~NLMISC::leftButton ) );
+			if( eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup )
+				_Pointer->setButtonState( static_cast< NLMISC::TMouseButton >( _Pointer->getButtonState() & ~NLMISC::rightButton ) );
+
+			if( eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousemove )
+				handleMouseMoveEvent( eventDesc );
+
+			eventDesc.setX( _Pointer->getX() );
+			eventDesc.setY( _Pointer->getY() );
+
+			if( isMouseHandlingEnabled() )
+			{
+				// First thing to do : Capture handling
+				if ( getCapturePointerLeft() != NULL)
+					handled|= getCapturePointerLeft()->handleEvent(evnt);
+
+				if ( getCapturePointerRight() != NULL &&
+					getCapturePointerLeft() != getCapturePointerRight() )
+					handled|= getCapturePointerRight()->handleEvent(evnt);
+
+				CInterfaceGroup *ptr = getWindowUnder (eventDesc.getX(), eventDesc.getY());
+				setCurrentWindowUnder( ptr );
+
+				// Any Mouse event but move disable the ContextHelp
+				if(eventDesc.getEventTypeExtended() != CEventDescriptorMouse::mousemove)
+				{
+					disableContextHelp();
+				}
+
+				// get the group under the mouse
+				CInterfaceGroup *pNewCurrentWnd = getCurrentWindowUnder();
+				setMouseOverWindow( pNewCurrentWnd != NULL );
+
+
+				NLMISC::CRefPtr<CGroupModal>	clickedOutModalWindow;
+
+				// modal special features
+				if ( hasModal() )
+				{
+					CWidgetManager::SModalWndInfo mwi = getModal();
+					if(mwi.ModalWindow)
+					{
+						// If we are not in "click out" mode so we dont handle controls other than those of the modal
+						if (pNewCurrentWnd != mwi.ModalWindow && !mwi.ModalExitClickOut)
+						{
+							pNewCurrentWnd = NULL;
+						}
+						else
+						{
+							// If there is a handler on click out launch it
+							if (pNewCurrentWnd != mwi.ModalWindow)
+								if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown ||
+									(eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown))
+									if (!mwi.ModalHandlerClickOut.empty())
+										CAHManager::getInstance()->runActionHandler(mwi.ModalHandlerClickOut,NULL,mwi.ModalClickOutParams);
+
+							// If the current window is not the modal and if must quit on click out
+							if(pNewCurrentWnd != mwi.ModalWindow && mwi.ModalExitClickOut)
+							{
+								// NB: don't force handle==true because to quit a modal does not avoid other actions
+
+								// quit if click outside
+								if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown ||
+									(eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown))
+								{
+									clickedOutModalWindow = dynamic_cast<CGroupModal *>((CInterfaceGroup*)mwi.ModalWindow);
+									// disable the modal
+									popModalWindow();
+									if ( hasModal() )
+									{
+										// don't handle event unless it is a previous modal window
+										if( !isPreviousModal( pNewCurrentWnd ) )
+											pNewCurrentWnd = NULL; // can't handle event before we have left all modal windows
+									}
+									movePointer (0,0); // Reget controls under pointer
+								}
+							}
+						}
+					}
+				}
+
+				// Manage LeftClick.
+				if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown)
+				{
+					if ((pNewCurrentWnd != NULL) && (!hasModal()) && (pNewCurrentWnd->getOverlappable()))
+					{
+						CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pNewCurrentWnd);
+						if (pGC != NULL)
+						{
+							if (!pGC->isGrayed()) setTopWindow(pNewCurrentWnd);
+						}
+						else
+						{
+							setTopWindow(pNewCurrentWnd);
+						}
+					}
+
+					// must not capture a new element if a sheet is currentlty being dragged.
+					// This may happen when alt-tab has been used => the sheet is dragged but the left button is up
+					if (!CCtrlDraggable::getDraggedSheet())
+					{
+						// Take the top most control.
+						uint nMaxDepth = 0;
+						const std::vector< CCtrlBase* >& _CtrlsUnderPointer = getCtrlsUnderPointer();
+						for (sint32 i = (sint32)_CtrlsUnderPointer.size()-1; i >= 0; i--)
+						{
+							CCtrlBase	*ctrl= _CtrlsUnderPointer[i];
+							if (ctrl && ctrl->isCapturable() && ctrl->isInGroup( pNewCurrentWnd ) )
+							{
+								uint d = ctrl->getDepth( pNewCurrentWnd );
+								if (d > nMaxDepth)
+								{
+									nMaxDepth = d;
+									setCapturePointerLeft( ctrl );
+								}
+							}
+						}
+						notifyElementCaptured( getCapturePointerLeft() );
+						if (clickedOutModalWindow && !clickedOutModalWindow->OnPostClickOut.empty())
+						{
+							CAHManager::getInstance()->runActionHandler(clickedOutModalWindow->OnPostClickOut, getCapturePointerLeft(), clickedOutModalWindow->OnPostClickOutParams);
+						}
+					}
+					//if found
+					if ( getCapturePointerLeft() != NULL)
+					{
+						// consider clicking on a control implies handling of the event.
+						handled= true;
+
+						// handle the capture
+						getCapturePointerLeft()->handleEvent(evnt);
+					}
+				}
+
+				// Manage RightClick
+				if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown)
+				{
+					if ((pNewCurrentWnd != NULL) && (!hasModal()) && (pNewCurrentWnd->getOverlappable()))
+					{
+						CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pNewCurrentWnd);
+						if (pGC != NULL)
+						{
+							if (!pGC->isGrayed()) setTopWindow(pNewCurrentWnd);
+						}
+						else
+						{
+							setTopWindow(pNewCurrentWnd);
+						}
+					}
+
+					// Take the top most control.
+					{
+						uint nMaxDepth = 0;
+						const std::vector< CCtrlBase* >& _CtrlsUnderPointer = getCtrlsUnderPointer();
+						for (sint32 i = (sint32)_CtrlsUnderPointer.size()-1; i >= 0; i--)
+						{
+							CCtrlBase	*ctrl= _CtrlsUnderPointer[i];
+							if (ctrl && ctrl->isCapturable() && ctrl->isInGroup( pNewCurrentWnd ) )
+							{
+								uint d = ctrl->getDepth( pNewCurrentWnd );
+								if (d > nMaxDepth)
+								{
+									nMaxDepth = d;
+									setCapturePointerRight( ctrl );
+								}
+							}
+						}
+						notifyElementCaptured( getCapturePointerRight() );
+						if (clickedOutModalWindow && !clickedOutModalWindow->OnPostClickOut.empty())
+						{
+							CAHManager::getInstance()->runActionHandler(clickedOutModalWindow->OnPostClickOut, getCapturePointerRight(), clickedOutModalWindow->OnPostClickOutParams);
+						}
+					}
+					//if found
+					if ( getCapturePointerRight() != NULL)
+					{
+						// handle the capture
+						handled |= getCapturePointerRight()->handleEvent(evnt);
+					}
+				}
+
+
+				if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
+				{			
+					if (!handled)
+						if (pNewCurrentWnd != NULL)
+							pNewCurrentWnd->handleEvent(evnt);
+					if ( getCapturePointerRight() != NULL)
+					{
+						setCapturePointerRight(NULL);
+						handled= true;
+					}
+				}
+
+				// window handling. if not handled by a control
+				if (!handled)
+				{
+					if (((pNewCurrentWnd != NULL) && !hasModal()) ||
+						((hasModal() && getModal().ModalWindow == pNewCurrentWnd)))
+					{
+						CEventDescriptorMouse ev2 = eventDesc;
+						sint32 x= eventDesc.getX(), y = eventDesc.getY();
+						if (pNewCurrentWnd)
+						{
+							pNewCurrentWnd->absoluteToRelative (x, y);
+							ev2.setX (x); ev2.setY (y);
+							handled|= pNewCurrentWnd->handleEvent (ev2);
+						}
+
+						// After handle event of a left click, may set window Top if movable (infos etc...)
+						//if( (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown) && pNewCurrentWnd->isMovable() )
+						//	setTopWindow(pNewCurrentWnd);
+					}
+				}
+
+				// Put here to let a chance to the window to handle if the capture dont
+				if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+				{
+					if ( getCapturePointerLeft() != NULL)
+					{
+						setCapturePointerLeft(NULL);
+						handled = true;
+					}
+				}
+
+
+				// If the current window is the modal, may Modal quit. Do it after standard event handle
+				if(hasModal() && pNewCurrentWnd == getModal().ModalWindow)
+				{
+					// NB: don't force handle==true because to quit a modal does not avoid other actions
+					CWidgetManager::SModalWndInfo mwi = getModal();
+					//  and if must quit on click right
+					if(mwi.ModalExitClickR)
+					{
+						// quit if click right
+						if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
+							// disable the modal
+							disableModalWindow();
+					}
+
+					//  and if must quit on click left
+					if(mwi.ModalExitClickL)
+					{
+						// quit if click right
+						if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+							// disable the modal
+							disableModalWindow();
+					}
+				}
+
+				// If the mouse is over a window, always consider the event is taken (avoid click behind)
+				handled|= isMouseOverWindow();
+			}
+		}
+
+		CDBManager::getInstance()->flushObserverCalls();
+
+		return handled;
+	}
+
+
+	bool CWidgetManager::handleMouseMoveEvent( const CEventDescriptor &eventDesc )
+	{
+		if( eventDesc.getType() != CEventDescriptor::mouse )
+			return false;
+
+		const CEventDescriptorMouse &e = static_cast< const CEventDescriptorMouse& >( eventDesc );	
+
+		if( e.getEventTypeExtended() != CEventDescriptorMouse::mousemove )
+			return false;
+
+		uint32 screenW, screenH;
+		CViewRenderer::getInstance()->getScreenSize( screenW, screenH );
+		sint32 oldX = getPointer()->getX();
+		sint32 oldY = getPointer()->getY();
+
+		sint32 x = e.getX();
+		sint32 y = e.getY();
+
+		// These are floats packed in the sint32 from the NEL events that provide them as float
+		// see comment in CInputHandler::handleMouseMoveEvent
+		sint32 newX = static_cast< sint32 >( std::floor( *reinterpret_cast< float* >( &x ) * screenW + 0.5f ) );
+		sint32 newY = static_cast< sint32 >( std::floor( *reinterpret_cast< float* >( &y ) * screenH + 0.5f ) );
+
+		if( ( oldX != newX ) || ( oldY != newY ) )
+		{
+			movePointerAbs( newX, newY );
+			CEventDescriptorMouse &ve = const_cast< CEventDescriptorMouse& >( e );
+			ve.setX( getPointer()->getX() );
+			ve.setY( getPointer()->getY() );
+		}
+
+		return true;
+	}
+	
 	// ------------------------------------------------------------------------------------------------
 	void CWidgetManager::movePointer (sint32 dx, sint32 dy)
 	{
@@ -1117,7 +2565,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	void CWidgetManager::movePointerAbs(sint32 px, sint32 py)
 	{
-		if(!CWidgetManager::getInstance()->getPointer())
+		if(!getPointer())
 			return;
 
 		uint32 nScrW, nScrH;
@@ -1224,8 +2672,8 @@ namespace NLGUI
 
 	void CWidgetManager::sendClockTickEvent()
 	{
-		NLGUI::CEventDescriptorSystem clockTick;
-		clockTick.setEventTypeExtended(NLGUI::CEventDescriptorSystem::clocktick);
+		CEventDescriptorSystem clockTick;
+		clockTick.setEventTypeExtended(CEventDescriptorSystem::clocktick);
 
 		if (_CapturePointerLeft)
 		{
@@ -1340,10 +2788,10 @@ namespace NLGUI
 	{
 		if (!_RProp)
 		{
-			_RProp = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:R");
-			_GProp = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:G");
-			_BProp = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:B");
-			_AProp = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:A");
+			_RProp = CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:R");
+			_GProp = CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:G");
+			_BProp = CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:B");
+			_AProp = CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:A");
 		}
 		_RProp ->setValue32 (col.R);
 		_GProp ->setValue32 (col.G);
@@ -1425,7 +2873,7 @@ namespace NLGUI
 	uint CWidgetManager::getUserDblClickDelay()
 	{
 		uint nVal = 50;
-		NLMISC::CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:DOUBLE_CLICK_SPEED");
+		NLMISC::CCDBNodeLeaf *pNL = CDBManager::getInstance()->getDbProp("UI:SAVE:DOUBLE_CLICK_SPEED");
 		if( pNL != NULL )
 			nVal = pNL->getValue32();
 		
@@ -1463,7 +2911,7 @@ namespace NLGUI
 	float CWidgetManager::getAlphaRolloverSpeed()
 	{
 		if( _AlphaRolloverSpeedDB == NULL )
-			_AlphaRolloverSpeedDB = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ALPHA_ROLLOVER_SPEED");
+			_AlphaRolloverSpeedDB = CDBManager::getInstance()->getDbProp("UI:SAVE:ALPHA_ROLLOVER_SPEED");
 		float fTmp = ROLLOVER_MIN_DELTA_PER_MS + (ROLLOVER_MAX_DELTA_PER_MS - ROLLOVER_MIN_DELTA_PER_MS) * 0.01f * (100 - _AlphaRolloverSpeedDB->getValue32());
 		return fTmp*fTmp*fTmp;
 	}
@@ -1484,16 +2932,175 @@ namespace NLGUI
 
 	void CWidgetManager::updateGlobalAlphas()
 	{
-		_GlobalContentAlpha = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTENT_ALPHA")->getValue32();
-		_GlobalContainerAlpha = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTAINER_ALPHA")->getValue32();
-		_GlobalRolloverFactorContent = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTENT_ROLLOVER_FACTOR")->getValue32();
-		_GlobalRolloverFactorContainer = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTAINER_ROLLOVER_FACTOR")->getValue32();
+		_GlobalContentAlpha = (uint8)CDBManager::getInstance()->getDbProp("UI:SAVE:CONTENT_ALPHA")->getValue32();
+		_GlobalContainerAlpha = (uint8)CDBManager::getInstance()->getDbProp("UI:SAVE:CONTAINER_ALPHA")->getValue32();
+		_GlobalRolloverFactorContent = (uint8)CDBManager::getInstance()->getDbProp("UI:SAVE:CONTENT_ROLLOVER_FACTOR")->getValue32();
+		_GlobalRolloverFactorContainer = (uint8)CDBManager::getInstance()->getDbProp("UI:SAVE:CONTAINER_ROLLOVER_FACTOR")->getValue32();
 	}
+
+	void CWidgetManager::registerNewScreenSizeHandler( INewScreenSizeHandler *handler )
+	{
+		std::vector< INewScreenSizeHandler* >::iterator itr =
+			std::find( newScreenSizeHandlers.begin(), newScreenSizeHandlers.end(), handler );
+
+		if( itr != newScreenSizeHandlers.end() )
+			return;
+
+		newScreenSizeHandlers.push_back( handler );
+	}
+
+	void CWidgetManager::removeNewScreenSizeHandler( INewScreenSizeHandler *handler )
+	{
+		std::vector< INewScreenSizeHandler* >::iterator itr =
+			std::find( newScreenSizeHandlers.begin(), newScreenSizeHandlers.end(), handler );
+
+		if( itr == newScreenSizeHandlers.end() )
+			return;
+
+		newScreenSizeHandlers.erase( itr );
+	}
+
+	void CWidgetManager::registerOnWidgetsDrawnHandler( IOnWidgetsDrawnHandler* handler )
+	{
+		std::vector< IOnWidgetsDrawnHandler* >::iterator itr =
+			std::find( onWidgetsDrawnHandlers.begin(), onWidgetsDrawnHandlers.end(), handler );
+
+		if( itr != onWidgetsDrawnHandlers.end() )
+			return;
+
+		onWidgetsDrawnHandlers.push_back( handler );
+	}
+
+	void CWidgetManager::removeOnWidgetsDrawnHandler( IOnWidgetsDrawnHandler* handler )
+	{
+		std::vector< IOnWidgetsDrawnHandler* >::iterator itr =
+			std::find( onWidgetsDrawnHandlers.begin(), onWidgetsDrawnHandlers.end(), handler );
+
+		if( itr == onWidgetsDrawnHandlers.end() )
+			return;
+
+		onWidgetsDrawnHandlers.erase( itr );
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::startAnim( const std::string &animId )
+	{
+		CInterfaceAnim *pIT = parser->getAnim( animId );
+		if( pIT == NULL )
+			return;
+
+		stopAnim( animId );
+		pIT->start();
+		activeAnims.push_back( pIT );
+	}
+
+	void CWidgetManager::removeFinishedAnims()
+	{
+		sint32 i = 0;
+		for( i = 0; i < (sint32)activeAnims.size(); ++i )
+		{
+			CInterfaceAnim *pIA = activeAnims[i];
+			if (pIA->isFinished())
+			{
+				activeAnims.erase( activeAnims.begin() + i );
+				--i;
+			}
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::stopAnim( const std::string &animId )
+	{
+		CInterfaceAnim *pIT = parser->getAnim( animId );
+
+		for( uint i = 0; i < activeAnims.size(); ++i )
+			if( activeAnims[ i ] == pIT )
+			{
+				activeAnims.erase( activeAnims.begin() + i );
+				if( !pIT->isFinished() )
+					pIT->stop();
+				return;
+			}
+	}
+
+	void CWidgetManager::updateAnims()
+	{
+		std::vector< CInterfaceAnim* >::iterator itr;
+		for( itr = activeAnims.begin(); itr != activeAnims.end(); ++itr )
+			(*itr)->update();
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::runProcedure( const std::string &procName, CCtrlBase *pCaller,
+		const std::vector< std::string> &paramList )
+	{
+		CProcedure *procp = parser->getProc( procName );
+		if( procp == NULL )
+			return;
+
+		CProcedure &proc = *procp;
+
+		// Run all actions
+		for( uint i = 0; i < proc.Actions.size(); i++ )
+		{
+			const CProcAction &action = proc.Actions[i];
+			// test if the condition for the action is valid
+			if( action.CondBlocks.size() > 0 )
+			{
+				CInterfaceExprValue result;
+				result.setBool( false );
+				std::string cond;
+				action.buildCond( paramList, cond );
+				CInterfaceExpr::eval( cond, result, NULL );
+
+				if( result.toBool() )
+					if( !result.getBool() )
+						continue;
+			}
+			// build the params sting
+			std::string params;
+			action.buildParams( paramList, params );
+			// run
+			//nlwarning("step %d : %s, %s", (int) i, action.Action.c_str(), params.c_str());
+			CAHManager::getInstance()->runActionHandler( action.Action, pCaller, params );
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::setProcedureAction( const std::string &procName, uint actionIndex,
+		const std::string &ah, const std::string &params )
+	{
+		CProcedure *procp = parser->getProc( procName );
+		if( procp == NULL )
+			return;
+
+		CProcedure &proc = *procp;
+
+		// set wanted action
+		if( actionIndex<proc.Actions.size() )
+		{
+			CProcAction &action = proc.Actions[ actionIndex ];
+			action.Action = ah;
+			action.ParamBlocks.clear();
+			action.ParamBlocks.resize( 1 );
+			action.ParamBlocks[ 0 ].String = params;
+		}
+	}
+
+
 
 	CWidgetManager::CWidgetManager()
 	{
+		parser = IParser::createParser();
+
 		_Pointer = NULL;
 		curContextHelp = NULL;
+		_ContextHelpActive = true;
+		_DeltaTimeStopingContextHelp = 0;
+		_MaxTimeStopingContextHelp= 0.2f;
+		_LastXContextHelp= -10000;
+		_LastYContextHelp= -10000;
 
 		resetColorProps();
 
@@ -1508,7 +3115,10 @@ namespace NLGUI
 		_AlphaRolloverSpeedDB = NULL;
 
 		_MouseHandlingEnabled = true;
+		_MouseOverWindow = false;
 		inGame = false;
+
+		setScreenWH( 0, 0 );
 	}
 
 	CWidgetManager::~CWidgetManager()

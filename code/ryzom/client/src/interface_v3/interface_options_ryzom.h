@@ -26,6 +26,8 @@ using namespace NLGUI;
 class CMissionIconList : public CInterfaceOptions
 {
 public:
+	CMissionIconList( const TCtorParam &param ) : CInterfaceOptions( param ){}
+	~CMissionIconList(){}
 	virtual bool parse (xmlNodePtr cur);
 	sint32 getBackTexID(uint index) const { return index >= IconBackTexID.size() ? -1 : IconBackTexID[index]; }
 	sint32 getTexID(uint index) const { return index >= IconTexID.size() ? -1 : IconTexID[index]; }
@@ -40,7 +42,7 @@ private:
 class COptionsAnimationSet : public CInterfaceOptions
 {
 public:
-	COptionsAnimationSet();
+	COptionsAnimationSet( const TCtorParam &/* param */ );
 	// see code for important release note
 	virtual ~COptionsAnimationSet();
 	virtual bool parse (xmlNodePtr cur);

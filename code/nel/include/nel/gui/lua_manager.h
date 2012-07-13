@@ -45,13 +45,17 @@ namespace NLGUI
 
 		bool executeLuaScript( const std::string &luaScript, bool smallScript = false );
 
+		void ResetLuaState();
+
+		void forceGarbageCollect();
+
 	private:
 		CLuaManager();
 
 		static CLuaManager *instance;
 		static bool debugLua;
 
-		NLMISC::CSmartPtr< NLGUI::CLuaState > luaState;
+		NLGUI::CLuaState *luaState;
 	};
 
 }

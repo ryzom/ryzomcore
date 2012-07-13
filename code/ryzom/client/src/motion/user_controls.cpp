@@ -1183,8 +1183,7 @@ string CUserControls::modeStr() const
 void CUserControls::execActionCursorPos(bool rightClick, bool dblClick)
 {
 	// Check there is no interface under the cursor.
-	CInterfaceManager *IM = CInterfaceManager::getInstance();
-	if(IM->isMouseOverWindow())
+	if( CWidgetManager::getInstance()->isMouseOverWindow())
 		return;
 	// Update the cursor.
 	ContextCur.check();

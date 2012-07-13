@@ -893,7 +893,7 @@ void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const u
 	// for now, '&' are removed by server so use another format	until a special msg is made
 	if (strFindReplace(finalString, ucstring("<R2_INVITE>"), ucstring()))
 	{
-		CInterfaceManager::getInstance()->executeLuaScript("RingAccessPoint:forceRefresh()");
+		CLuaManager::getInstance().executeLuaScript("RingAccessPoint:forceRefresh()");
 	}
 
 
@@ -1704,8 +1704,7 @@ void impulseTeamInvitation(NLMISC::CBitMemStream &impulse)
 	impulse.serial(textID);
 	if (PermanentlyBanned) return;
 
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->executeLuaScript("game:onTeamInvation("+toString(textID)+")", 0);
+	CLuaManager::getInstance().executeLuaScript("game:onTeamInvation("+toString(textID)+")", 0);
 }// impulseTeamInvitation //
 
 //-----------------------------------------------
@@ -3336,7 +3335,7 @@ private:
 				pGC->setActive(true);
 
 				// must set the text by hand
-				CViewText	*vt= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("server_message_box_content_view_text")));
+				CViewText	*vt= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("server_message_box_content_view_text")));
 				if(vt)
 					vt->setTextFormatTaged(contentStr);
 

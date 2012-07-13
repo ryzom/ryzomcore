@@ -1662,7 +1662,7 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 		break;
 	// Outpost
 	case CUserEntity::Outpost:
-		IM->executeLuaScript("game:outpostBCOpenStateWindow()", 0);
+		CLuaManager::getInstance().executeLuaScript("game:outpostBCOpenStateWindow()", 0);
 		break;
 	// BuildTotem
 	case CUserEntity::BuildTotem:

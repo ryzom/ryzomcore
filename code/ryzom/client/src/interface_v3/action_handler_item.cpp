@@ -109,11 +109,11 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 			// get the dialog stack
 			CInterfaceGroup* group = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(WindowName) );
 
-			CInterfaceGroup* editShort = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_short")) );
-			CGroupEditBox* editBoxShort = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_box_short")) );
-			CInterfaceGroup* editLarge = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_large")) );
-			CGroupEditBox* editBoxLarge = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_box_large")) );
-			CViewText* display = dynamic_cast<CViewText*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_display")) );
+			CInterfaceGroup* editShort = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_short")) );
+			CGroupEditBox* editBoxShort = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_box_short")) );
+			CInterfaceGroup* editLarge = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_large")) );
+			CGroupEditBox* editBoxLarge = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_box_large")) );
+			CViewText* display = dynamic_cast<CViewText*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_display")) );
 			if (group && editShort && editBoxShort && editLarge && editBoxLarge && display)
 			{
 				CClientItemInfo const& itemInfo = getInventory().getItemInfo( ItemSlotId );
@@ -199,14 +199,14 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 			// get the dialog stack
 			CGroupContainer* group = dynamic_cast<CGroupContainer*>( CWidgetManager::getInstance()->getElementFromId(WindowName) );
 
-			CInterfaceGroup* editShort = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_short")) );
-			CGroupEditBox* editBoxShort = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_box_short")) );
-			CInterfaceGroup* editLarge = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_large")) );
-			CGroupEditBox* editBoxLarge = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_box_large")) );
-			CViewText* display = dynamic_cast<CViewText*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_display")) );
-			CInterfaceGroup* editButtons = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_buttons")) );
-			CCtrlBaseButton* closeButton = dynamic_cast<CCtrlBaseButton*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_close_button")) );
-			CViewBitmap* background = dynamic_cast<CViewBitmap*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_background")) );
+			CInterfaceGroup* editShort = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_short")) );
+			CGroupEditBox* editBoxShort = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_box_short")) );
+			CInterfaceGroup* editLarge = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_large")) );
+			CGroupEditBox* editBoxLarge = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_box_large")) );
+			CViewText* display = dynamic_cast<CViewText*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_display")) );
+			CInterfaceGroup* editButtons = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_buttons")) );
+			CCtrlBaseButton* closeButton = dynamic_cast<CCtrlBaseButton*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_close_button")) );
+			CViewBitmap* background = dynamic_cast<CViewBitmap*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_background")) );
 			if (group && editShort && editBoxShort && editLarge && editBoxLarge && display && editButtons && closeButton && background)
 			{
 
@@ -336,14 +336,14 @@ void CInterfaceItemEdition::CItemEditionWindow::end()
 		// get the dialog stack
 		CInterfaceGroup* group = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(windowName) );
 
-		CInterfaceGroup* editShort = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_short")) );
-		CGroupEditBox* editBoxShort = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_box_short")) );
-		CInterfaceGroup* editLarge = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_large")) );
-		CGroupEditBox* editBoxLarge = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_box_large")) );
-		CViewText* display = dynamic_cast<CViewText*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_display")) );
-		CInterfaceGroup* editButtons = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_buttons")) );
-		CCtrlBaseButton* closeButton = dynamic_cast<CCtrlBaseButton*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_close_button")) );
-		CViewBitmap* background = dynamic_cast<CViewBitmap*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_background")) );
+		CInterfaceGroup* editShort = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_short")) );
+		CGroupEditBox* editBoxShort = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_box_short")) );
+		CInterfaceGroup* editLarge = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_large")) );
+		CGroupEditBox* editBoxLarge = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_box_large")) );
+		CViewText* display = dynamic_cast<CViewText*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_display")) );
+		CInterfaceGroup* editButtons = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_buttons")) );
+		CCtrlBaseButton* closeButton = dynamic_cast<CCtrlBaseButton*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_close_button")) );
+		CViewBitmap* background = dynamic_cast<CViewBitmap*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_background")) );
 		if (group && editShort && editBoxShort && editLarge && editBoxLarge && display && editButtons && closeButton && background)
 		{
 			// disable the window
@@ -375,14 +375,14 @@ void CInterfaceItemEdition::CItemEditionWindow::validate()
 		// get the dialog stack
 		CInterfaceGroup* group = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(windowName) );
 
-		CInterfaceGroup* editShort = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_short")) );
-		CGroupEditBox* editBoxShort = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_box_short")) );
-		CInterfaceGroup* editLarge = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_large")) );
-		CGroupEditBox* editBoxLarge = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_box_large")) );
-		CViewText* display = dynamic_cast<CViewText*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_display")) );
-		CInterfaceGroup* editButtons = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_edit_buttons")) );
-		CCtrlBaseButton* closeButton = dynamic_cast<CCtrlBaseButton*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_close_button")) );
-		CViewBitmap* background = dynamic_cast<CViewBitmap*>( CWidgetManager::getInstance()->getElementFromId(pIM->getDefine("edit_custom_background")) );
+		CInterfaceGroup* editShort = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_short")) );
+		CGroupEditBox* editBoxShort = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_box_short")) );
+		CInterfaceGroup* editLarge = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_large")) );
+		CGroupEditBox* editBoxLarge = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_box_large")) );
+		CViewText* display = dynamic_cast<CViewText*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_display")) );
+		CInterfaceGroup* editButtons = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_buttons")) );
+		CCtrlBaseButton* closeButton = dynamic_cast<CCtrlBaseButton*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_close_button")) );
+		CViewBitmap* background = dynamic_cast<CViewBitmap*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_background")) );
 		if (group && editShort && editBoxShort && editLarge && editBoxLarge && display && editButtons && closeButton && background)
 		{
 			bool textValid = editShort->getActive();
@@ -1317,7 +1317,7 @@ class CHandlerActiveSheath : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		// Get the user interface value.
-		uint8 activeSheath = (uint8)NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("ui_set_active") )->getValue32();
+		uint8 activeSheath = (uint8)NLGUI::CDBManager::getInstance()->getDbProp( CWidgetManager::getInstance()->getParser()->getDefine("ui_set_active") )->getValue32();
 
 		// Write to the Local Database.
 		NLGUI::CDBManager::getInstance()->getDbProp( "LOCAL:INVENTORY:ACTIVE_SHEATH" )->setValue32(activeSheath);
@@ -1358,7 +1358,7 @@ class CHandlerReceiveActiveSheath : public IActionHandler
 		uint8 activeSheath = (uint8)NLGUI::CDBManager::getInstance()->getDbProp( "LOCAL:INVENTORY:ACTIVE_SHEATH" )->getValue32();
 
 		// Write to the Local Database.
-		NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("ui_set_active") )->setValue32(activeSheath);
+		NLGUI::CDBManager::getInstance()->getDbProp( CWidgetManager::getInstance()->getParser()->getDefine("ui_set_active") )->setValue32(activeSheath);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerReceiveActiveSheath, "receive_active_sheath" );

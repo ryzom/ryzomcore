@@ -35,7 +35,7 @@
 #include "bot_chat_page_dynamic_mission.h"
 #include "bot_chat_page_ring_sessions.h"
 #include "dbctrl_sheet.h"
-#include "ctrl_sheet_selection.h"
+#include "nel/gui/ctrl_sheet_selection.h"
 #include "nel/gui/interface_expr.h"
 #include "nel/gui/group_menu.h"
 #include "nel/gui/group_container.h"
@@ -743,11 +743,11 @@ static void chooseSheath (ITEMFAMILY::EItemFamily eIF, string sAllSkills)
 {
 	// Choose right sheath
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCDBNodeLeaf *pNLwrite = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("ui_set_active"));
-	CCDBNodeLeaf *pNLread = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("set_nb"));
+	CCDBNodeLeaf *pNLwrite = NLGUI::CDBManager::getInstance()->getDbProp(CWidgetManager::getInstance()->getParser()->getDefine("ui_set_active"));
+	CCDBNodeLeaf *pNLread = NLGUI::CDBManager::getInstance()->getDbProp(CWidgetManager::getInstance()->getParser()->getDefine("set_nb"));
 	sint32 nNbSheath = (sint32)pNLread->getValue64();
 	if (nNbSheath == 0) return;
-	pNLread = NLGUI::CDBManager::getInstance()->getDbProp(pIM->getDefine("set_active"));
+	pNLread = NLGUI::CDBManager::getInstance()->getDbProp(CWidgetManager::getInstance()->getParser()->getDefine("set_active"));
 	sint32 nActiveSheath = (sint32)pNLread->getValue64();
 	bool bFound = false;
 	for (sint32 i = 0; i < ((nNbSheath/2)+1); ++i)
@@ -763,7 +763,7 @@ static void chooseSheath (ITEMFAMILY::EItemFamily eIF, string sAllSkills)
 			while (nSheathToTest >= (INVENTORIES::sheath+nNbSheath)) nSheathToTest -= nNbSheath;
 
 			string sPath;
-			sPath = pIM->getDefine("set_base") + ":" + NLMISC::toString(nSheathToTest) + ":" + pIM->getDefine("set_r") + ":SHEET";
+			sPath = CWidgetManager::getInstance()->getParser()->getDefine("set_base") + ":" + NLMISC::toString(nSheathToTest) + ":" + CWidgetManager::getInstance()->getParser()->getDefine("set_r") + ":SHEET";
 			pNLread = NLGUI::CDBManager::getInstance()->getDbProp(sPath);
 			sint32 sheetid = (sint32)pNLread->getValue64();
 			CItemSheet *pIS = dynamic_cast<CItemSheet *>(SheetMngr.get(CSheetId(sheetid)));
@@ -1080,7 +1080,7 @@ public:
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 		// start the npc web page
-		pIM->executeLuaScript("game:startNpcWebPage()", true);
+		CLuaManager::getInstance().executeLuaScript("game:startNpcWebPage()", true);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerContextWebPage, "context_web_page");
@@ -1305,7 +1305,7 @@ class CSelectItemSheet : public IActionHandler
 		if (!ctrlSheet) return;
 		sint selectionGroup = ctrlSheet->getSelectionGroup();
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		const CCtrlSheetSelection &css = im->getCtrlSheetSelection();
+		const CCtrlSheetSelection &css = CWidgetManager::getInstance()->getParser()->getCtrlSheetSelection();
 		const CSheetSelectionGroup *csg = css.getGroup(selectionGroup);
 		if (csg && csg->isActive())
 		{
@@ -1857,7 +1857,7 @@ public:
 		if (ClientCfg.Light)
 		{
 			vector<string> v;
-			CInterfaceManager::getInstance()->runProcedure ("proc_reset_interface", NULL, v);
+			CWidgetManager::getInstance()->runProcedure ("proc_reset_interface", NULL, v);
 
 			//CInterfaceManager::getInstance()->launchContextMenuInGame("ui:interface:game_context_menu");
 		}
@@ -2103,7 +2103,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 		if ( pE->isPlayer() )
 		{
 			// Player => deduce RegionForce & ForceLevel from the database
-			CCDBNodeLeaf *pDbTargetUid = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("target_uid") );
+			CCDBNodeLeaf *pDbTargetUid = NLGUI::CDBManager::getInstance()->getDbProp( CWidgetManager::getInstance()->getParser()->getDefine("target_uid") );
 			if ( ! pDbTargetUid )
 				return;
 			// Hide the target level if the USER is not in PVP FACTION
@@ -2121,7 +2121,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 
 				return;
 			}
-			CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( pIM->getDefine("target_player_level") );
+			CCDBNodeLeaf *pDbPlayerLevel = NLGUI::CDBManager::getInstance()->getDbProp( CWidgetManager::getInstance()->getParser()->getDefine("target_player_level") );
 			if ( ! pDbPlayerLevel )
 				return;
 			sint nLevel = pDbPlayerLevel->getValue32();
@@ -2158,13 +2158,13 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 		// Set color
 		if (nForceRegion > 6) nForceRegion = 6;
 		if (nForceRegion < 1) nForceRegion = 1;
-		CRGBA col = CInterfaceElement::convertColor(pIM->getDefine("region_force_"+toString(nForceRegion)).c_str());
+		CRGBA col = CInterfaceElement::convertColor(CWidgetManager::getInstance()->getParser()->getDefine("region_force_"+toString(nForceRegion)).c_str());
 		pVBR->setColor(col);
 
 		// Set texture
 		if (nLevelForce > 8) nLevelForce = 8;
 		if (nLevelForce < 1) nLevelForce = 1;
-		string sTexture = pIM->getDefine("force_level_"+toString(nLevelForce));
+		string sTexture = CWidgetManager::getInstance()->getParser()->getDefine("force_level_"+toString(nLevelForce));
 		pVBL->setTexture(sTexture);
 
 		// Set tooltip
@@ -2227,12 +2227,12 @@ class CAHUpdateCurrentMode : public IActionHandler
 		sint32 nNewMode = (sint32)eVal.getInteger();
 
 		sint32 nModeMinInf, nModeMaxInf, nModeMinLab, nModeMaxLab, nModeMinKey, nModeMaxKey;
-		fromString(pIM->getDefine("mode_min_info"), nModeMinInf);
-		fromString(pIM->getDefine("mode_max_info"), nModeMaxInf);
-		fromString(pIM->getDefine("mode_min_lab"), nModeMinLab);
-		fromString(pIM->getDefine("mode_max_lab"), nModeMaxLab);
-		fromString(pIM->getDefine("mode_min_keys"), nModeMinKey);
-		fromString(pIM->getDefine("mode_max_keys"), nModeMaxKey);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_min_info"), nModeMinInf);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_max_info"), nModeMaxInf);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_min_lab"), nModeMinLab);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_max_lab"), nModeMaxLab);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_min_keys"), nModeMinKey);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_max_keys"), nModeMaxKey);
 
 		sint32 nMode = 0;
 		if ((nNewMode >= nModeMinInf) && (nNewMode <= nModeMaxInf))
@@ -2275,14 +2275,14 @@ class CAHUpdateCurrentMode : public IActionHandler
 				sint32 tmpMode;
 
 				// Is NewMode entry active ?
-				fromString(pIM->getDefine("mode_magic"), tmpMode);
+				fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_magic"), tmpMode);
 				if (nNewMode == tmpMode)
 					if ((nIntFlags & (1<<INTERFACE_FLAGS::Magic)) != 0)
 						bFound = true;
 
 				if (!bFound)
 				{
-					fromString(pIM->getDefine("mode_combat"), tmpMode);
+					fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_combat"), tmpMode);
 					if (nNewMode == tmpMode)
 						if ((nIntFlags & (1<<INTERFACE_FLAGS::Combat)) != 0)
 							bFound = true;
@@ -2290,7 +2290,7 @@ class CAHUpdateCurrentMode : public IActionHandler
 
 				if (!bFound)
 				{
-					fromString(pIM->getDefine("mode_faber_create"), tmpMode);
+					fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_faber_create"), tmpMode);
 					if (nNewMode == tmpMode)
 						if ((nIntFlags & (1<<INTERFACE_FLAGS::FaberCreate)) != 0)
 							bFound = true;
@@ -2298,7 +2298,7 @@ class CAHUpdateCurrentMode : public IActionHandler
 
 				if (!bFound)
 				{
-					fromString(pIM->getDefine("mode_faber_repair"), tmpMode);
+					fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_faber_repair"), tmpMode);
 					if (nNewMode == tmpMode)
 						if ((nIntFlags & (1<<INTERFACE_FLAGS::FaberRepair)) != 0)
 							bFound = true;
@@ -2306,7 +2306,7 @@ class CAHUpdateCurrentMode : public IActionHandler
 
 				if (!bFound)
 				{
-					fromString(pIM->getDefine("mode_faber_refine"), tmpMode);
+					fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_faber_refine"), tmpMode);
 					if (nNewMode == tmpMode)
 						if ((nIntFlags & (1<<INTERFACE_FLAGS::FaberRefine)) != 0)
 							bFound = true;
@@ -2314,7 +2314,7 @@ class CAHUpdateCurrentMode : public IActionHandler
 
 				if (!bFound)
 				{
-					fromString(pIM->getDefine("mode_commerce"), tmpMode);
+					fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_commerce"), tmpMode);
 					if (nNewMode == tmpMode)
 						if ((nIntFlags & (1<<INTERFACE_FLAGS::Commerce)) != 0)
 							bFound = true;
@@ -2322,14 +2322,14 @@ class CAHUpdateCurrentMode : public IActionHandler
 
 				if (!bFound)
 				{
-					fromString(pIM->getDefine("mode_macros"), tmpMode);
+					fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_macros"), tmpMode);
 					if (nNewMode == tmpMode)
 						bFound = true; // Not in DB !!!
 				}
 
 				if (!bFound)
 				{
-					fromString(pIM->getDefine("mode_special_labo"), tmpMode);
+					fromString(CWidgetManager::getInstance()->getParser()->getDefine("mode_special_labo"), tmpMode);
 					if (nNewMode == tmpMode)
 						if ((nIntFlags & (1<<INTERFACE_FLAGS::Special)) != 0)
 							bFound = true;
@@ -2747,7 +2747,7 @@ public:
 			vector<string> vecStr;
 			vecStr.push_back(procNames[desktop]);
 			vecStr.push_back(sValue);
-			pIM->runProcedure(procNames[desktop], NULL, vecStr);
+			CWidgetManager::getInstance()->runProcedure(procNames[desktop], NULL, vecStr);
 		}*/
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -2773,11 +2773,10 @@ public:
 			{
 				_FirstTime = false;
 
-				CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 				vector<string> vecStr;
 				vecStr.push_back("tb_setdesktop");
 				vecStr.push_back(Params);
-				pIM->runProcedure("tb_setdesktop", NULL, vecStr);
+				CWidgetManager::getInstance()->runProcedure("tb_setdesktop", NULL, vecStr);
 			}
 			else // Not the first time
 			{
@@ -2971,7 +2970,7 @@ public:
 
 		// **** Init Screen Aspect Ratio
 		// Init the combo box, according to the value
-		pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromDefine( "game_config_screen_ratio_cb" ));
+		pCB= dynamic_cast<CDBGroupComboBox*>( CWidgetManager::getInstance()->getElementFromDefine( "game_config_screen_ratio_cb" ));
 		if(pCB)
 		{
 			// Bkup for cancel
@@ -3376,7 +3375,7 @@ class CHandlerGameConfigChangeScreenRatioMode : public IActionHandler
 			ClientCfg.writeDouble("ScreenAspectRatio", ClientCfg.ScreenAspectRatio);
 
 			// set content, and freeze the edit box
-			CGroupEditBox	*eb= dynamic_cast<CGroupEditBox*>(pIM->getElementFromDefine("game_config_screen_ratio_eb"));
+			CGroupEditBox	*eb= dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromDefine("game_config_screen_ratio_eb"));
 			if(eb)
 			{
 				eb->setFrozen(true);
@@ -3387,7 +3386,7 @@ class CHandlerGameConfigChangeScreenRatioMode : public IActionHandler
 		else
 		{
 			// just unfreeze the edit box, and set correct value
-			CGroupEditBox	*eb= dynamic_cast<CGroupEditBox*>(pIM->getElementFromDefine("game_config_screen_ratio_eb"));
+			CGroupEditBox	*eb= dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromDefine("game_config_screen_ratio_eb"));
 			if(eb)
 			{
 				eb->setFrozen(false);
@@ -3420,7 +3419,7 @@ class CHandlerGameConfigChangeScreenRatioCustom : public IActionHandler
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		sint	mode= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:SCREEN_RATIO_MODE")->getValue32();
 		if (mode != 2) return;
-		CGroupEditBox	*eb= dynamic_cast<CGroupEditBox*>(pIM->getElementFromDefine("game_config_screen_ratio_eb"));
+		CGroupEditBox	*eb= dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromDefine("game_config_screen_ratio_eb"));
 		if(eb)
 		{
 			// validate the value
@@ -3705,7 +3704,7 @@ public:
 		ucstring	str;
 		fillPlayerBarText(str, "HP", SCORES::hit_points, "uittPlayerLifeFormat");
 
-		pIM->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTLife, "player_tt_life");
@@ -3722,7 +3721,7 @@ public:
 		ucstring	str;
 		fillPlayerBarText(str, "STA", SCORES::stamina, "uittPlayerStaminaFormat");
 
-		pIM->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTStamina, "player_tt_stamina");
@@ -3739,7 +3738,7 @@ public:
 		ucstring	str;
 		fillPlayerBarText(str, "SAP", SCORES::sap, "uittPlayerSapFormat");
 
-		pIM->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTSap, "player_tt_sap");
@@ -3756,7 +3755,7 @@ public:
 		ucstring	str;
 		fillPlayerBarText(str, "FOCUS", SCORES::focus, "uittPlayerFocusFormat");
 
-		pIM->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerTTFocus, "player_tt_focus");
@@ -3786,7 +3785,7 @@ public:
 		ucstring	str= CI18N::get("uittBulkFormat");
 		strFindReplace(str, "%v", toString(val) );
 		strFindReplace(str, "%m", toString(maxVal) );
-		pIM->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerGetTTBulk, "get_tt_bulk");
@@ -3799,8 +3798,8 @@ uint32 getMissionTitle(sint32 nSelected)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	sint32 nNbMission, nNbGroupMission;
-	fromString(pIM->getDefine("ipj_nb_mission"), nNbMission);
-	fromString(pIM->getDefine("ipj_nb_group_mission"), nNbGroupMission);
+	fromString(CWidgetManager::getInstance()->getParser()->getDefine("ipj_nb_mission"), nNbMission);
+	fromString(CWidgetManager::getInstance()->getParser()->getDefine("ipj_nb_group_mission"), nNbGroupMission);
 
 	if (nSelected < 0)
 		return 0;
@@ -3816,8 +3815,8 @@ void runMissionProc(sint32 nSelected)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	sint32 nNbMission, nNbGroupMission;
-	fromString(pIM->getDefine("ipj_nb_mission"), nNbMission);
-	fromString(pIM->getDefine("ipj_nb_group_mission"), nNbGroupMission);
+	fromString(CWidgetManager::getInstance()->getParser()->getDefine("ipj_nb_mission"), nNbMission);
+	fromString(CWidgetManager::getInstance()->getParser()->getDefine("ipj_nb_group_mission"), nNbGroupMission);
 
 	if (nSelected < 0)
 		return;
@@ -3846,8 +3845,8 @@ public:
 		sint32 nSelected = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:MISSION_SELECTED")->getValue32();
 
 		sint32 nNbMission, nNbGroupMission;
-		fromString(pIM->getDefine("ipj_nb_mission"), nNbMission);
-		fromString(pIM->getDefine("ipj_nb_group_mission"), nNbGroupMission);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("ipj_nb_mission"), nNbMission);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("ipj_nb_group_mission"), nNbGroupMission);
 
 		// If no mission selected or title selected becomes invalid -> search a new title to select
 		if ((nSelected == -1) || (getMissionTitle(nSelected) == 0))

@@ -19,6 +19,8 @@
 #include "nel/gui/interface_element.h"
 #include "nel/gui/interface_options.h"
 #include "nel/gui/view_renderer.h"
+#include "nel/misc/factory.h"
+#include <string>
 
 using namespace std;
 using namespace NLMISC;
@@ -44,7 +46,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 
 	// ----------------------------------------------------------------------------
-	CInterfaceOptions::CInterfaceOptions()
+	CInterfaceOptions::CInterfaceOptions( const TCtorParam &/* param */ )
 	{
 	}
 
@@ -132,7 +134,9 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 
 	// ----------------------------------------------------------------------------
-	COptionsLayer::COptionsLayer()
+	NLMISC_REGISTER_OBJECT(CInterfaceOptions, COptionsLayer, std::string, "layer");
+	COptionsLayer::COptionsLayer( const TCtorParam &param ) :
+	CInterfaceOptions( param )
 	{
 		TxId_TL = TxId_T = TxId_TR = TxId_L = TxId_R = TxId_Blank = TxId_BL = TxId_B = -2;
 		TxId_BR = TxId_BL_Open = TxId_B_Open = TxId_BR_Open = TxId_EL_Open = TxId_EM_Open = TxId_ER_Open =-2;
@@ -237,7 +241,9 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
-	COptionsContainerInsertion::COptionsContainerInsertion()
+	NLMISC_REGISTER_OBJECT(CInterfaceOptions, COptionsContainerInsertion, std::string, "container_insertion_opt");
+	COptionsContainerInsertion::COptionsContainerInsertion( const TCtorParam &param ) :
+	CInterfaceOptions( param )
 	{
 		TxId_R_Arrow = -2;
 		TxId_L_Arrow = -2;
@@ -264,7 +270,9 @@ namespace NLGUI
 
 
 	// ***************************************************************************
-	COptionsContainerMove::COptionsContainerMove()
+	NLMISC_REGISTER_OBJECT(CInterfaceOptions, COptionsContainerMove, std::string, "container_move_opt");
+	COptionsContainerMove::COptionsContainerMove( const TCtorParam &param ) :
+	CInterfaceOptions( param )
 	{
 		TrackW = -8;
 		TrackH = 22;
@@ -289,7 +297,9 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	COptionsList::COptionsList()
+	NLMISC_REGISTER_OBJECT(CInterfaceOptions, COptionsList, std::string, "list");
+	COptionsList::COptionsList( const TCtorParam &param ) :
+	CInterfaceOptions( param )
 	{
 		_NumParams= 0;
 	}

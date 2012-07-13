@@ -1652,7 +1652,7 @@ public:
 		else
 			strFindReplace(str, "%comp", CI18N::get("uittPhraseCombatRestrictOK"));
 
-		pIM->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerCombatRestrictTooltip, "phrase_combat_restrict_tooltip");
