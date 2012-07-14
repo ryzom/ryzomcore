@@ -35,12 +35,6 @@ class CCDBNodeLeaf;
 class CCDBNodeBranch;
 class CCDBBankHandler;
 
-///global bool, must be set to true if we want to display database modification. See displayDBModifs in commands.cpp
-extern bool VerboseDatabase;
-
-
-
-
 /**
  * Interface to manage a database node, can contain a unique property or a set of property
  * \author Stephane Coutelas
@@ -330,6 +324,9 @@ public :
 	/// release string mapper
 	static void releaseStringMapper();
 
+	static bool isDatabaseVerbose(){ return verboseDatabase; }
+	static void setVerboseDatabase( bool b ){ verboseDatabase = b; }
+
 protected:
 
 	/// Constructor
@@ -358,6 +355,8 @@ protected:
 	//std::string _NameDbg;
 
 	static CStringMapper *_DBSM;
+
+	static bool verboseDatabase;
 
 };
 

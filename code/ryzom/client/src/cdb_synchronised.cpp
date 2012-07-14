@@ -49,8 +49,6 @@
 using namespace NLMISC;
 using namespace std;
 
-
-bool NLMISC::VerboseDatabase = false;
 uint32 NbDatabaseChanges = 0;
 
 
@@ -191,7 +189,7 @@ void CCDBSynchronised::readDelta( NLMISC::TGameCycle gc, CBitMemStream& s, uint 
 	uint16 propertyCount = 0;
 	s.serial( propertyCount );
 
-	if ( VerboseDatabase )
+	if ( NLMISC::ICDBNode::isDatabaseVerbose() )
 		nlinfo( "CDB: Reading delta (%hu changes)", propertyCount );
 	NbDatabaseChanges += propertyCount;
 

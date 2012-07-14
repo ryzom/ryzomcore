@@ -163,7 +163,7 @@ void CCDBNodeLeaf::readDelta(TGameCycle gc, CBitMemStream & f )
 				_Property |= ~mask;
 			}
 		}
-		if ( VerboseDatabase )
+		if ( verboseDatabase )
 		{
 			nlinfo( "CDB: Read value (%u bits) %"NL_I64"d", bits, _Property );
 		}

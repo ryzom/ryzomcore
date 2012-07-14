@@ -31,6 +31,7 @@ using namespace std;
 namespace NLMISC{
 
 CStringMapper *ICDBNode::_DBSM = NULL;
+bool ICDBNode::verboseDatabase = false;
 
 
 std::string ICDBNode::getFullName()
