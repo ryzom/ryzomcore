@@ -30,6 +30,7 @@
 #include "nel/gui/interface_anim.h"
 #include "nel/gui/proc.h"
 #include "nel/gui/interface_expr.h"
+#include "nel/gui/reflect_register.h"
 #include "nel/misc/events.h"
 
 namespace NLGUI
@@ -3092,6 +3093,8 @@ namespace NLGUI
 
 	CWidgetManager::CWidgetManager()
 	{
+		CReflectableRegister::registerClasses();
+
 		parser = IParser::createParser();
 
 		_Pointer = NULL;
