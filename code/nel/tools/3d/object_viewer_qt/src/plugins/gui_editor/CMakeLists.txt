@@ -50,7 +50,18 @@ ADD_LIBRARY(ovqt_plugin_gui_editor MODULE ${SRC}
             ${OVQT_PLUGIN_GUI_EDITOR_RC_SRCS}
             )
 
-TARGET_LINK_LIBRARIES(ovqt_plugin_gui_editor ovqt_plugin_core nelmisc nel3d ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY} qt_property_browser)
+TARGET_LINK_LIBRARIES(
+						ovqt_plugin_gui_editor
+						ovqt_plugin_core
+						nelmisc
+						nel3d
+						nelgui
+						${QT_LIBRARIES}
+						${QT_QTOPENGL_LIBRARY}
+						qt_property_browser
+						${LUA_LIBRARIES}
+						${LUABIND_LIBRARIES}
+						)
 
 NL_DEFAULT_PROPS(ovqt_plugin_gui_editor "NeL, Tools, 3D: Object Viewer Qt Plugin: GUI Editor")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_gui_editor)

@@ -47,6 +47,7 @@ public Q_SLOTS:
 		void open();
 
 private Q_SLOTS:
+		void parse();
 
 private:
 		void createMenus();

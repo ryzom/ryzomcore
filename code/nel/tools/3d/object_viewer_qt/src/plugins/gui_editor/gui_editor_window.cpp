@@ -35,11 +35,16 @@
 #include "link_editor.h"
 #include "proc_editor.h"
 
+#include "nel/gui/interface_group.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/gui/view_renderer.h"
+
 namespace GUIEditor
 {
 	QString _lastDir;
 	std::map< std::string, SWidgetInfo > widgetInfo;
-	
+	std::set< std::string > hwCurs;
+
 	GUIEditorWindow::GUIEditorWindow(QWidget *parent) :
 	QMainWindow(parent)
 	{
@@ -70,7 +75,22 @@ namespace GUIEditor
 		browserCtrl.setup();
 		dock->setWidget( tb );
 		addDockWidget( Qt::RightDockWidgetArea, dock );
-
+		
+		CWidgetManager::getInstance();
+		NLMISC::CPath::addSearchPath( "z:/ryzom/data", true, false, NULL );
+		NLMISC::CPath::remapExtension ("dds", "tga", true);
+		NLMISC::CPath::remapExtension ("dds", "png", true);
+		NLMISC::CPath::remapExtension ("png", "tga", true);
+		
+		NLGUI::_UIStringMapper =
+			NLMISC::CStringMapper::createLocalMapper();
+		
+		NL3D::UDriver *driver = NL3D::UDriver::createDriver();
+		CViewRenderer::setDriver( driver );
+		CViewRenderer::setTextContext( driver->createTextContext( NLMISC::CPath::lookup( "ryzom.ttf" ) ) );
+		hwCurs.insert( "curs_default.tga" );
+		CViewRenderer::hwCursors = &hwCurs;
+		CViewRenderer::getInstance();
 	}
 	
 	GUIEditorWindow::~GUIEditorWindow()
@@ -85,6 +105,8 @@ namespace GUIEditor
 
 		delete procEditor;
 		procEditor = NULL;
+
+		CWidgetManager::release();
 	}
 	
 	QUndoStack *GUIEditorWindow::undoStack() const
@@ -107,6 +129,25 @@ namespace GUIEditor
 		}
 		setCursor(Qt::ArrowCursor);
 	}
+
+
+	void GUIEditorWindow::parse()
+	{
+		std::vector< std::string > files;
+		files.push_back( "login_config.xml" );
+		files.push_back( "login_widgets.xml" );
+		files.push_back( "login_main.xml" );
+		files.push_back( "login_keys.xml" );
+		
+		CViewRenderer::getInstance()->loadTextures( 
+			"texture_interfaces_v3_login.tga",
+			"texture_interfaces_v3_login.txt",
+			false );
+		
+		setCursor( Qt::WaitCursor );
+		CWidgetManager::getInstance()->getParser()->parseInterface( files, false );
+		setCursor( Qt::ArrowCursor );
+	}
 	
 	void GUIEditorWindow::createMenus()
 	{
@@ -124,6 +165,10 @@ namespace GUIEditor
 
 			a = new QAction( "Proc Editor", this );
 			connect( a, SIGNAL( triggered( bool ) ), procEditor, SLOT( show() ) );
+			menu->addAction( a );
+			
+			a = new QAction( "parse", this );
+			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( parse() ) );
 			menu->addAction( a );
 		}
 	}
