@@ -580,6 +580,7 @@ namespace NLGUI
 	public:
 		static NL3D::UTextContext* getTextContext(){ return textcontext; }
 
+		/// Set of hw cursor images
 		static std::set< std::string > *hwCursors;
 		static float hwCursorScale;
 

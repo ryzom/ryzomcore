@@ -47,11 +47,16 @@ namespace NLGUI
 	class CInterfaceAnim;
 	class CProcedure;
 
-	/// Manages the GUI widgets
+	/**
+	 GUI Widget Manager
+
+	 Manages the GUI widgets, asks them to draw themselves, etc.
+	 */
 	class CWidgetManager{
 
 	public:
 
+		/// Interface for event handlers that can be called when the screen is resized.
 		class INewScreenSizeHandler
 		{
 		public:
@@ -59,6 +64,7 @@ namespace NLGUI
 			virtual void process( uint32 w, uint32 h ) = 0;
 		};
 
+		/// Interface for event handlers that can be called when the widgets finished drawing.
 		class IOnWidgetsDrawnHandler
 		{
 		public:
@@ -66,11 +72,15 @@ namespace NLGUI
 			virtual void process() = 0;
 		};
 
+		/// Frame render times
 		struct SInterfaceTimes
 		{
 		public:
+			/// Time when the last frame was rendered in ms.
 			sint64 lastFrameMs;
+			/// Time when the current frame was rendered in ms.
 			sint64 thisFrameMs;
+			/// Difference between the two times in ms.
 			sint64 frameDiffMs;
 
 			SInterfaceTimes()

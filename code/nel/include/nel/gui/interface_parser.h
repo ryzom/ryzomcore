@@ -53,15 +53,21 @@ namespace NLGUI
 
 	public:
 		
+		/// Interface for parser modules
+		/// Such modules can be plugged into CInterfaceParser, and
+		/// the modules then can parse GUI XMLs for widget classes that are not
+		/// generic enough to be in the GUI library.
 		class IParserModule
 		{
 		public:
+
+			/// Various parsing stages
 			enum ParsingStage
 			{
-				None			= 0,
-				Unresolved		= 1,
-				Resolved		= 2,
-				GroupChildren	= 4
+				None			= 0,  /// module cannot parse in any stage.
+				Unresolved		= 1,  /// module can parse in the first stage when styles, templates, etc have not been resolved yet
+				Resolved		= 2,  /// module can parse after resolving styles and templates
+				GroupChildren	= 4   /// module can parse when parsing the group children
 			};
 
 			IParserModule(){
@@ -86,6 +92,7 @@ namespace NLGUI
 			uint parsingStage;
 		};
 
+		/// Interface for event handlers which can be called when setting up the options.
 		class ISetupOptionCallbackClass
 		{
 		public:
