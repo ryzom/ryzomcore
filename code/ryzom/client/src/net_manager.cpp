@@ -3564,6 +3564,8 @@ void impulsePlaySoundTrigger(NLMISC::CBitMemStream& impulse)
 	
 	impulse.serial(SoundId);
 	impulse.serial(SoundPosition);
+
+	SoundMngr->spawnSource(SoundId, SoundPosition);
 }
 
 void impulseCameraAnimationPlay(NLMISC::CBitMemStream& impulse)

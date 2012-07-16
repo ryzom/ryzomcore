@@ -17,6 +17,99 @@
 #ifndef RY_POSITIONORENTITYTYPE_H
 #define RY_POSITIONORENTITYTYPE_H
 
-typedef std::string TPositionOrEntity;
+#include "nel/misc/entity_id.h"
+#include "nel/misc/vector.h"
+
+//////////////////////////////////////////////////////////////////////////
+/************************************************************************/
+/* Class that can contain either an entity id or a position             */
+/************************************************************************/ 
+class TPositionOrEntity
+{
+public:
+	TPositionOrEntity()
+	{
+		_isPosition = -1;
+	}
+
+	TPositionOrEntity(const NLMISC::CVector& position)
+	{
+		_isPosition = 1;
+		Position = position;
+	}
+
+	TPositionOrEntity(const NLMISC::CEntityId& eid)
+	{
+		_isPosition = 0;
+		EntityId = eid;
+	}
+
+	TPositionOrEntity(const TPositionOrEntity& c)
+	{
+		_isPosition = c._isPosition;
+		if (c.isPosition())
+			Position = c.getPosition();
+		else
+			EntityId = c.getEntityId();
+	}
+
+	TPositionOrEntity& operator=(const TPositionOrEntity& c)
+	{
+		_isPosition = c._isPosition;
+		if (c.isPosition())
+			Position = c.getPosition();
+		else if (c.isEntityId())
+			EntityId = c.getEntityId();
+
+		return *this;
+	}
+
+	void setPosition(const NLMISC::CVector& position)
+	{
+		_isPosition = 1;
+		Position = position;
+	}
+
+	void setEntityId(const NLMISC::CEntityId& eid)
+	{
+		_isPosition = 0;
+		EntityId = eid;
+	}
+
+	bool isPosition() const
+	{
+		return _isPosition == 1;
+	}
+
+	bool isEntityId() const
+	{
+		return _isPosition == 0;
+	}
+
+	NLMISC::CVector getPosition() const
+	{
+		if (!isPosition())
+			return NLMISC::CVector();
+		return Position;
+	}
+
+	NLMISC::CEntityId getEntityId() const
+	{
+		if (!isEntityId())
+			return NLMISC::CEntityId();
+		return EntityId;
+	}
+
+	bool isValid() const
+	{
+		return isPosition() || isEntityId();
+	}
+
+private:
+	char _isPosition;
+	NLMISC::CVector	Position;
+	NLMISC::CEntityId EntityId;
+};
+
 
 #endif /* RY_POSITIONORENTITYTYPE_H */
