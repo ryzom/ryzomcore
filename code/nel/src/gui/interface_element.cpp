@@ -32,8 +32,6 @@ using namespace NLMISC;
 namespace NLGUI
 {
 
-	CStringMapper *_UIStringMapper = NULL;
-
 	// ------------------------------------------------------------------------------------------------
 	CInterfaceElement::~CInterfaceElement()
 	{
@@ -1271,6 +1269,19 @@ namespace NLGUI
 		return false;
 	}
 
+	CStringMapper* CStringShared::_UIStringMapper = NULL;
+
+
+	void CStringShared::createStringMapper()
+	{
+		if( _UIStringMapper == NULL )
+			_UIStringMapper = CStringMapper::createLocalMapper();
+	}
+
+	void CStringShared::deleteStringMapper()
+	{
+		delete _UIStringMapper;
+	}
 }
 
 
