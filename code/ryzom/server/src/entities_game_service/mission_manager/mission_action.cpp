@@ -58,6 +58,7 @@
 #include "server_share/log_character_gen.h"
 #include "camera_animation_manager/camera_animation_manager.h"
 #include "game_share/position_or_entity_type.h"
+#include "camera_animation_manager/position_or_entity_type_helper.h"
 
 
 using namespace std;
@@ -5458,9 +5459,9 @@ class CMissionActionSoundTrigger : public IMissionAction
 
 		std::string SoundName = script[1];
 		if (script.size() >= 3)
-			_SoundPosition = script[2];
+			_SoundPosition = CPositionOrEntityHelper::fromString(script[2]);
 		else
-			_SoundPosition = "";
+			_SoundPosition = CPositionOrEntityHelper::Invalid;
 
 		_SoundId = NLMISC::CSheetId(SoundName);
 		if (_SoundId == NLMISC::CSheetId::Unknown)

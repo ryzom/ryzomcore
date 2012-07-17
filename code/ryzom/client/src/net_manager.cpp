@@ -88,6 +88,8 @@
 // Std.
 #include <vector>
 #include "game_share/position_or_entity_type.h"
+#include "nel/misc/vector.h"
+#include "nel/misc/entity_id.h"
 
 
 #define OLD_STRING_SYSTEM
@@ -3565,7 +3567,22 @@ void impulsePlaySoundTrigger(NLMISC::CBitMemStream& impulse)
 	impulse.serial(SoundId);
 	impulse.serial(SoundPosition);
 
-	SoundMngr->spawnSource(SoundId, SoundPosition);
+	if (!SoundPosition.isValid())
+	{
+		nlwarning("<impulsePlaySoundTrigger> invalid SoundPosition");
+		return;
+	}
+	if (SoundPosition.isPosition())
+		SoundMngr->spawnSource(SoundId, SoundPosition.getPosition());
+	else
+	{
+		NLMISC::CVector pos;
+		NLMISC::CEntityId eid = SoundPosition.getEntityId();
+
+		
+
+		SoundMngr->spawnSource(SoundId, pos);
+	}
 }
 
 void impulseCameraAnimationPlay(NLMISC::CBitMemStream& impulse)

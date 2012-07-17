@@ -19,6 +19,7 @@
 
 #include "nel/misc/entity_id.h"
 #include "nel/misc/vector.h"
+#include "nel/misc/stream.h"
 
 //////////////////////////////////////////////////////////////////////////
 /************************************************************************/
@@ -64,6 +65,17 @@ public:
 		return *this;
 	}
 
+	bool operator==(const TPositionOrEntity& c)
+	{
+		if (_isPosition != c._isPosition)
+			return false;
+		if (isPosition())
+			return Position == c.getPosition();
+		else if (isEntityId())
+			return EntityId == c.getEntityId();
+		return true;
+	}
+
 	void setPosition(const NLMISC::CVector& position)
 	{
 		_isPosition = 1;
@@ -103,6 +115,15 @@ public:
 	bool isValid() const
 	{
 		return isPosition() || isEntityId();
+	}
+
+	void serial(NLMISC::IStream &f)
+	{
+		f.serial(_isPosition);
+		if (isPosition())
+			f.serial(Position);
+		else if (isEntityId())
+			f.serial(EntityId);
 	}
 
 private:

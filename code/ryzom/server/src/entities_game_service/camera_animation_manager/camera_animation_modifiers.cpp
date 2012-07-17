@@ -19,6 +19,7 @@
 #include "game_share/position_or_entity_type.h"
 
 #include "nel/misc/sheet_id.h"
+#include "position_or_entity_type_helper.h"
 
 /////////////////////////////////////////////////////////////////////////////
 /// This animation modifier shakes the camera. The parameter is
@@ -75,7 +76,7 @@ protected:
 public:
 	CCameraAnimationModifierSoundTrigger()
 	{
-		SoundPos = "";
+		SoundPos = CPositionOrEntityHelper::Invalid;
 		SoundId = NLMISC::CSheetId::Unknown;
 	}
 
@@ -101,7 +102,12 @@ public:
 			nlwarning("<CCameraAnimationModifierSoundTrigger parseModifier> impossible to get the sound_position property of the basic modifier in primitive : %s", filename.c_str());
 			return false;
 		}
-		SoundPos = value;
+		SoundPos = CPositionOrEntityHelper::fromString(value);
+		if (SoundPos == CPositionOrEntityHelper::Invalid)
+		{
+			nlwarning("<CCameraAnimationModifierSoundTrigger parseModifier> invalid soundpos in primitive : %s", filename.c_str());
+			return false;
+		}
 
 		return true;
 	}

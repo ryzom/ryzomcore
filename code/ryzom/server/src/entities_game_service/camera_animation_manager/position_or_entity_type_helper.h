@@ -33,74 +33,12 @@ class CPositionOrEntityHelper
 {
 public:
 	
-	TPositionOrEntity fromString(const std::string& s)
-	{
-		std::string str = s;
-		CMissionParser::removeBlanks(str);
+	/************************************************************************/
+	/* Creates a PositionOrEntity instance from a string                    */
+	/************************************************************************/
+	static TPositionOrEntity fromString(const std::string& s);
 
-		std::vector<std::string> res;
-		NLMISC::splitString(str, ";", res);
-		// If we don't have 3 components, it's an entityid
-		if (res.size() != 3)
-		{
-			std::vector<TAIAlias> res;
-			CAIAliasTranslator::getInstance()->getNPCAliasesFromName(str, res);
-			if (res.size() != 1)
-			{
-				nlerror("TPositionOrentityHelper : no alias for entity name %s", str);
-				return TPositionOrEntity();
-			}
-			TAIAlias alias = res[0];
-			if (alias == CAIAliasTranslator::Invalid)
-			{
-				nlerror("TPositionOrentityHelper : invalid alias for entity name %s", str);
-				return TPositionOrEntity();
-			}
-			NLMISC::CEntityId eid = CAIAliasTranslator::getInstance()->getEntityId(alias);
-			if (eid == NLMISC::CEntityId::Unknown)
-			{
-				nlerror("TPositionOrentityHelper : invalid entity id from alias %d", alias);
-				return TPositionOrEntity();
-			}
-
-			return TPositionOrEntity(eid);
-		}
-		else
-		{
-			// It's a position
-			std::string xStr = res[0];
-			std::string yStr = res[1];
-			std::string zStr = res[2];
-
-			CMissionParser::removeBlanks(xStr);
-			CMissionParser::removeBlanks(yStr);
-			CMissionParser::removeBlanks(zStr);
-
-			float x = 0.f;
-			float y = 0.f;
-			float z = 0.f;
-
-			if (!NLMISC::fromString(xStr, x))
-			{
-				nlerror("TPositionOrentityHelper : invalid x component from string %s", xStr);
-				return TPositionOrEntity();
-			}
-			if (!NLMISC::fromString(yStr, y))
-			{
-				nlerror("TPositionOrentityHelper : invalid y component from string %s", yStr);
-				return TPositionOrEntity();
-			}
-			if (!NLMISC::fromString(yStr, x))
-			{
-				nlerror("TPositionOrentityHelper : invalid z component from string %s", zStr);
-				return TPositionOrEntity();
-			}
-
-			return TPositionOrEntity(NLMISC::CVector(x, y, z));
-		}
-
-		return TPositionOrEntity();
-	}
+	static const TPositionOrEntity Invalid;
 
 };
 
