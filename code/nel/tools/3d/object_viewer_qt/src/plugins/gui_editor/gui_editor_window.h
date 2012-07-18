@@ -30,6 +30,7 @@ namespace GUIEditor
 	class CWidgetProperties;
 	class LinkEditor;
 	class ProcEditor;
+	class ProjectWindow;
 
 	class GUIEditorWindow: public QMainWindow
 	{
@@ -55,20 +56,16 @@ private:
 
 		void writeSettings();
 
-		void parseGUIWidgets();
-		void parseGUIWidget( const QString &file );
-		void parseGUIWidgetXML( QFile &file );
-		QString parseGUIWidgetHeader( QXmlStreamReader &reader );
-		void parseGUIWidgetProperties( QXmlStreamReader &reader, const QString &widgetName );
-
 		QUndoStack *m_undoStack;
 
 		Ui::GUIEditorWindow m_ui;
 		CWidgetProperties *widgetProps;
 		LinkEditor *linkEditor;
 		ProcEditor *procEditor;
-		
+		ProjectWindow *projectWindow;
+
 		CPropBrowserCtrl browserCtrl;
+		QString currentProject;
 	};
 
 }

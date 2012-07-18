@@ -19,6 +19,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_HDR
 	link_editor.h
 	proc_editor.h
 	property_browser_ctrl.h
+	project_window.h
 	)
 	
 SET(OVQT_PLUGIN_GUI_EDITOR_UIS
@@ -28,6 +29,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_UIS
 	action_editor.ui
 	link_editor.ui
 	proc_editor.ui
+	project_window.ui
 	)
 
 SET(QT_USE_QTGUI TRUE)
@@ -61,6 +63,8 @@ TARGET_LINK_LIBRARIES(
 						qt_property_browser
 						${LUA_LIBRARIES}
 						${LUABIND_LIBRARIES}
+						${CURL_LIBRARIES}
+						${LIBWWW_LIBRARIES}
 						)
 
 NL_DEFAULT_PROPS(ovqt_plugin_gui_editor "NeL, Tools, 3D: Object Viewer Qt Plugin: GUI Editor")

@@ -1,0 +1,11 @@
+<project>
+    <header>
+        <name>login</name>
+    </header>
+    <files>
+        <file>login_config.xml</file>
+        <file>login_keys.xml</file>
+        <file>login_main.xml</file>
+        <file>login_widgets.xml</file>
+    </files>
+</project>

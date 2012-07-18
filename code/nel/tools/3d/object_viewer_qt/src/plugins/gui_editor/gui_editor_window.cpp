@@ -27,6 +27,7 @@
 #include <QtCore/QSettings>
 #include <QtGui/QFileDialog>
 #include <QDockWidget>
+#include <QMessageBox>
 #include "../../3rdparty/qtpropertybrowser/QtTreePropertyBrowser"
 
 #include "widget_properties.h"
@@ -34,6 +35,8 @@
 #include "widget_hierarchy.h"
 #include "link_editor.h"
 #include "proc_editor.h"
+#include "project_file_parser.h"
+#include "project_window.h"
 
 namespace GUIEditor
 {
@@ -44,10 +47,11 @@ namespace GUIEditor
 	QMainWindow(parent)
 	{
 		m_ui.setupUi(this);
-		m_undoStack = new QUndoStack(this);
-		widgetProps = new CWidgetProperties;
-		linkEditor  = new LinkEditor;
-		procEditor  = new ProcEditor;
+		m_undoStack   = new QUndoStack(this);
+		widgetProps   = new CWidgetProperties;
+		linkEditor    = new LinkEditor;
+		procEditor    = new ProcEditor;
+		projectWindow = new ProjectWindow();
 		createMenus();
 		readSettings();
 
@@ -84,6 +88,9 @@ namespace GUIEditor
 
 		delete procEditor;
 		procEditor = NULL;
+
+		delete projectWindow;
+		projectWindow = NULL;
 	}
 	
 	QUndoStack *GUIEditorWindow::undoStack() const
@@ -93,18 +100,43 @@ namespace GUIEditor
 	
 	void GUIEditorWindow::open()
 	{
-		QStringList fileNames = QFileDialog::getOpenFileNames(this,
-											tr("Open GUI XML files"),
+		QString fileName = QFileDialog::getOpenFileName( this,
+											tr( "Open GUI XML files" ),
 											_lastDir,
-											tr("All XML files (*.xml)"));
+											tr( "All XML files (*.xml)" ) );
 		
-		setCursor(Qt::WaitCursor);
-		if(!fileNames.isEmpty())
+		setCursor( Qt::WaitCursor );
+		if( !fileName.isEmpty() )
 		{
-			QStringList list = fileNames;
-			_lastDir = QFileInfo(list.front()).absolutePath();
+			_lastDir = QFileInfo( fileName ).absolutePath();
 		}
-		setCursor(Qt::ArrowCursor);
+		else
+		{
+			QMessageBox::critical( this,
+				tr( "Error opening project file" ),
+				tr( "Cannot open the specified project file!" ) );
+
+			setCursor( Qt::ArrowCursor );
+			return;
+		}
+
+		CProjectFileParser parser;
+		if( !parser.parseProjectFile( fileName.toStdString() ) )
+		{
+			QMessageBox::critical( this,
+				tr( "Error parsing project file" ),
+				tr( "There was an error while parsing the project file. Not a project file?" ) );
+			setCursor( Qt::ArrowCursor );
+			return;
+		}
+
+		std::vector< std::string > fileNames;
+
+		parser.getProjectFileNames( fileNames );
+		currentProject = parser.getProjectName().c_str();
+		projectWindow->setupFileList( fileNames );
+
+		setCursor( Qt::ArrowCursor );
 	}
 
 
@@ -124,6 +156,10 @@ namespace GUIEditor
 
 			a = new QAction( "Proc Editor", this );
 			connect( a, SIGNAL( triggered( bool ) ), procEditor, SLOT( show() ) );
+			menu->addAction( a );
+
+			a = new QAction( "Project Window", this );
+			connect( a, SIGNAL( triggered( bool ) ), projectWindow, SLOT( show() ) );
 			menu->addAction( a );
 		}
 	}
