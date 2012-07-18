@@ -62,13 +62,13 @@ namespace GUIEditor
 		widgetProps->setupWidgetInfo( &widgetInfo );
 
 		QDockWidget *dock = new QDockWidget( "Widget Hierarchy", this );
-		dock->setAllowedAreas( Qt::LeftDockWidgetArea );
+		dock->setAllowedAreas( Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea );
 		WidgetHierarchy *ha = new WidgetHierarchy;
 		dock->setWidget( ha );
 		addDockWidget( Qt::LeftDockWidgetArea, dock );
 
 		dock = new QDockWidget( "Widget Properties", this );
-		dock->setAllowedAreas( Qt::RightDockWidgetArea );
+		dock->setAllowedAreas(  Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea );
 		QtTreePropertyBrowser *tb = new QtTreePropertyBrowser;
 		browserCtrl.setBrowser( tb );
 		browserCtrl.setup();
