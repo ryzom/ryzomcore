@@ -36,6 +36,7 @@ namespace NLGUI
 	{
 	public:
 
+		/// Interface for classes which can format the text for this view.
 		class IViewTextFormatter
 		{
 		public:

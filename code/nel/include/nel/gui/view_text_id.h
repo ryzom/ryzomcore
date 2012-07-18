@@ -49,7 +49,7 @@ namespace NLGUI
 	{
 	public:
 		
-		/// Interface for classes that can provide text to CViewTextId
+		/// Interface for classes which can provide text to CViewTextId
 		class IViewTextProvider
 		{
 		public:

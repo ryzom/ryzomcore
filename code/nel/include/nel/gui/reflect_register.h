@@ -20,6 +20,7 @@
 
 namespace NLGUI
 {
+	/// Helper class to register reflectable classes
 	class CReflectableRegister
 	{
 	public:

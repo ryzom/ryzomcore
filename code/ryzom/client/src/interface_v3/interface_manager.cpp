@@ -137,7 +137,6 @@ using namespace NLMISC;
 namespace NLGUI
 {
 	extern void luaDebuggerMainLoop();
-	extern NLMISC::CStringMapper *_UIStringMapper;
 }
 
 extern CClientChatManager   ChatMngr;
@@ -543,10 +542,6 @@ CInterfaceManager::~CInterfaceManager()
 	CViewTextFormated::setFormatter( NULL );
 	reset(); // to flush IDStringWaiters
 
-	// release the local string mapper
-	delete _UIStringMapper;
-	_UIStringMapper = NULL;
-
 	// release the database observers
 	releaseServerToLocalAutoCopyObservers();
 	
@@ -636,10 +631,6 @@ void CInterfaceManager::initLogin()
 	// Init LUA Scripting
 	initLUA();
 
-	// Create String mapper
-	if (_UIStringMapper == NULL)
-		_UIStringMapper = CStringMapper::createLocalMapper();
-
 	// Clear the action manager
 	Actions.clear();
 	EditActions.clear();
@@ -708,10 +699,6 @@ void CInterfaceManager::uninitLogin()
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::initOutGame()
 {
-	// create String mapper
-	if (_UIStringMapper == NULL)
-		_UIStringMapper = CStringMapper::createLocalMapper();
-
 	// Clear the action manager
 	Actions.clear();
 	EditActions.clear();
@@ -870,10 +857,6 @@ void CInterfaceManager::initInGame()
 
 	// Init LUA Scripting
 	initLUA();
-
-	// create the _UIStringMapper
-	if (_UIStringMapper == NULL)
-		_UIStringMapper = CStringMapper::createLocalMapper();
 
 	// Clear the action manager
 	Actions.clear();

@@ -31,6 +31,7 @@ namespace NLGUI
 	class CCtrlSheetSelection;
 	class CInterfaceLink;
 
+	/// Interface for the GUI XML parser class.
 	class IParser
 	{
 	public:

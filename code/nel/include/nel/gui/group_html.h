@@ -63,12 +63,17 @@ namespace NLGUI
 		friend void TextEndUnparsedElement(HText *me, const char *buffer, int length);
 		friend int requestTerminater (HTRequest * request, HTResponse * response, void * param, int status);
 
+		/// Web browser options for CGroupHTML
 		struct SWebOptions
 		{
 		public:
+			/// Id of the browser ( e.g.: Chrome, Firefox, Ryzom )
 			std::string appName;
+			/// Version of the browser
 			std::string appVersion;
+			/// Language code of the browser( e.g.: en, hu )
 			std::string languageCode;
+			/// List of domains the widget can consider secure.
 			std::vector< std::string > trustedDomains;
 
 			SWebOptions()

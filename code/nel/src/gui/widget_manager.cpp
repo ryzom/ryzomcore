@@ -3093,6 +3093,8 @@ namespace NLGUI
 
 	CWidgetManager::CWidgetManager()
 	{
+		CStringShared::createStringMapper();
+
 		CReflectableRegister::registerClasses();
 
 		parser = IParser::createParser();
@@ -3133,6 +3135,8 @@ namespace NLGUI
 
 		_Pointer = NULL;
 		curContextHelp = NULL;
+
+		CStringShared::deleteStringMapper();
 	}
 
 }

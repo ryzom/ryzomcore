@@ -521,7 +521,6 @@ namespace NLGUI
 		TLinkVect *_Links; // links, or NULL if no link
 	};
 
-	extern NLMISC::CStringMapper *_UIStringMapper;
 	/**
 	 * class to compress string usage in the interface
 	 * \author Matthieu 'Trap' Besson
@@ -586,9 +585,13 @@ namespace NLGUI
 			}
 		}
 
+		static void createStringMapper();
+		static void deleteStringMapper();
+
 	private:
 
 		NLMISC::TStringId	_Id;
+		static NLMISC::CStringMapper *_UIStringMapper;
 	};
 
 	inline bool operator==(const CStringShared &lhs, const CStringShared &rhs) { return lhs.getStringId() == rhs.getStringId(); }

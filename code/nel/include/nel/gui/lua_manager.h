@@ -23,7 +23,11 @@ namespace NLGUI
 {
 	class CLuaState;
 
-	/// Provides a single global access point to the Lua state, and related stuff. :(
+	/**
+	 Lua Manager
+
+	 Provides a single global access point to the Lua state, and related stuff. :(
+	 */
 	class CLuaManager
 	{
 	public:
@@ -41,12 +45,20 @@ namespace NLGUI
 		/// Enables attaching the Lua debugger in the CLuaState instance, only matters on startup.
 		static void enableLuaDebugging(){ debugLua = true;	}
 
+		/// Returns the Lua state.
 		NLGUI::CLuaState* getLuaState() const{ return luaState; }
 
+		/**
+		 Executes a Lua script
+		 @param luaScript   -  the script we want to execute ( the actual script, not the filename! )
+		 @param smallScript -  true if the script is very small, so it can be cached for the possible next execution.
+		 */
 		bool executeLuaScript( const std::string &luaScript, bool smallScript = false );
 
+		/// Resets the Lua state, that is deallocates it and allocates a new one.
 		void ResetLuaState();
 
+		/// Forces the Garbage Collector to run.
 		void forceGarbageCollect();
 
 	private:
