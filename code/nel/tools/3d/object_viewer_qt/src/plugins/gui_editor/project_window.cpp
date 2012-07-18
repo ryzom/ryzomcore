@@ -16,6 +16,8 @@
 
 
 #include "project_window.h"
+#include <QInputDialog>
+#include <QMessageBox>
 
 namespace GUIEditor
 {
@@ -25,6 +27,9 @@ namespace GUIEditor
 		setupUi( this );
 		connect( okButton, SIGNAL( clicked(bool) ), this, SLOT( hide() ) );
 		connect( cancelButton, SIGNAL( clicked(bool) ), this, SLOT( hide() ) );
+
+		connect( addButton, SIGNAL( clicked(bool) ), this, SLOT( onAddButtonClicked() ) );
+		connect( removeButton, SIGNAL( clicked(bool) ), this, SLOT( onRemoveButtonClicked() ) );
 	}
 
 	ProjectWindow::~ProjectWindow()
@@ -42,6 +47,44 @@ namespace GUIEditor
 			fileList->addItem( s.c_str() );
 		}
 		fileList->sortItems();
+	}
+
+	void ProjectWindow::onAddButtonClicked()
+	{
+		bool ok;
+		QString newFile = QInputDialog::getText( this,
+												tr( "Adding file to project" ),
+												tr( "Which file do you want to add?" ),
+												QLineEdit::Normal,
+												QString(),
+												&ok );
+
+		if( ok )
+		{
+			fileList->addItem( newFile );
+			fileList->sortItems();
+		}
+	}
+
+	void ProjectWindow::onRemoveButtonClicked()
+	{
+		if( fileList->count() == 0 )
+			return;
+
+		QMessageBox::StandardButton reply;
+		QString text;
+		if( fileList->currentRow() >= 0 )
+			text = fileList->item( fileList->currentRow() )->text();
+
+		reply = QMessageBox::question( this,
+									tr( "Removing file from project" ),
+									tr( "Are you sure you want to remove '%1' from the project?" ).arg( text ),
+									QMessageBox::Yes | QMessageBox::Cancel );
+		
+		QListWidgetItem *item;
+		if( reply == QMessageBox::Yes )
+			item = fileList->takeItem( fileList->currentRow() );
+		delete item;
 	}
 }
 

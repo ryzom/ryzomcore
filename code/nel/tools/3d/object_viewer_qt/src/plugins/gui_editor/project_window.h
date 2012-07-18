@@ -33,7 +33,12 @@ namespace GUIEditor
 
 		void setupFileList( const std::vector< std::string > &fileNames );
 
+	private Q_SLOTS:
+		void onAddButtonClicked();
+		void onRemoveButtonClicked();
+
 	private:
+
 	};
 }
 
