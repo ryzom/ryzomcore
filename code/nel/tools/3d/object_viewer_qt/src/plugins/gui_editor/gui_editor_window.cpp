@@ -146,21 +146,23 @@ namespace GUIEditor
 		QMenu *menu = mm->menu( Core::Constants::M_TOOLS );
 		if( menu != NULL )
 		{
+			QMenu *m = menu->addMenu( "GUI Editor" );
+
 			QAction *a = new QAction( "Widget Properties", this );
 			connect( a, SIGNAL( triggered( bool ) ), widgetProps, SLOT( show() ) );
-			menu->addAction( a );
+			m->addAction( a );
 
 			a = new QAction( "Link Editor", this );
 			connect( a, SIGNAL( triggered( bool ) ), linkEditor, SLOT( show() ) );
-			menu->addAction( a );
+			m->addAction( a );
 
 			a = new QAction( "Proc Editor", this );
 			connect( a, SIGNAL( triggered( bool ) ), procEditor, SLOT( show() ) );
-			menu->addAction( a );
+			m->addAction( a );
 
 			a = new QAction( "Project Window", this );
 			connect( a, SIGNAL( triggered( bool ) ), projectWindow, SLOT( show() ) );
-			menu->addAction( a );
+			m->addAction( a );
 		}
 	}
 	
