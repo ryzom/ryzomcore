@@ -66,6 +66,7 @@ namespace NLGUI
 		virtual CCtrlSheetSelection	&getCtrlSheetSelection() = 0;
 		virtual bool addLink( CInterfaceLink *link, const std::string &id ) = 0;
 		virtual bool removeLink( const std::string &id ) = 0;
+		virtual void removeAll() = 0;
 	};
 }
 

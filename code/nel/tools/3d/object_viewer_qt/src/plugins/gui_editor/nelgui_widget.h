@@ -19,6 +19,7 @@
 #define NELGUI_WIDGET_H
 
 #include "nel3d_widget.h"
+#include "project_files.h"
 
 namespace GUIEditor
 {
@@ -31,6 +32,9 @@ namespace GUIEditor
 		~NelGUIWidget();
 
 		void init();
+		bool parse( SProjectFiles &files );
+		void draw();
+
 	};
 }
 

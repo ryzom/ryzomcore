@@ -735,12 +735,14 @@ namespace NLGUI
 	/*
 	 * loadTextures
 	 */
-	void CViewRenderer::loadTextures (const std::string &textureFileName, const std::string &uvFileName, bool uploadDXTC)
+	bool CViewRenderer::loadTextures (const std::string &textureFileName, const std::string &uvFileName, bool uploadDXTC)
 	{
 		SGlobalTexture gt;
 		// Load texture file
 		string filename = CPath::lookup (textureFileName, false);
-		if (filename == "") return;
+		if (filename == "")
+			return false;
+
 		CIFile ifTmp;
 		if (ifTmp.open(filename))
 			CBitmap::loadSize (ifTmp, gt.Width, gt.Height);
@@ -757,8 +759,10 @@ namespace NLGUI
 		// Load uv file
 		CIFile iFile;
 		filename = CPath::lookup (uvFileName, false);
-		if (filename == "") return;
-		if (!iFile.open(filename)) return;
+		if (filename == "")
+			return false;
+		if (!iFile.open(filename))
+			return false;
 
 		_GlobalTextures.push_back (gt);
 
@@ -824,6 +828,8 @@ namespace NLGUI
 		initIndexesToTextureIds ();
 		initSystemTextures();
 		initTypo();
+
+		return true;
 	}
 
 

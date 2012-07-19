@@ -234,7 +234,7 @@ namespace NLGUI
 		 * loadTextures : load all textures associated with the interface
 		 *				this function add a globaltexture to the vector of global textures
 		 */
-		void loadTextures (const std::string &textureFileName, const std::string &uvFileName, bool uploadDXTC);
+		bool loadTextures (const std::string &textureFileName, const std::string &uvFileName, bool uploadDXTC);
 
 		/*
 		 *	createTexture : create a texture for the interface, possibly from an externally created texture

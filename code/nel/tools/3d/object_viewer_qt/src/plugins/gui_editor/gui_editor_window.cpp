@@ -142,6 +142,8 @@ namespace GUIEditor
 		parser.getProjectFiles( projectFiles );
 		currentProject = parser.getProjectName().c_str();
 		projectWindow->setupFiles( projectFiles );
+		viewPort->parse( projectFiles );
+		viewPort->draw();
 
 		setCursor( Qt::ArrowCursor );
 	}
