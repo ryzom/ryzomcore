@@ -31,6 +31,7 @@ namespace GUIEditor
 	class LinkEditor;
 	class ProcEditor;
 	class ProjectWindow;
+	class NelGUIWidget;
 
 	class GUIEditorWindow: public QMainWindow
 	{
@@ -63,6 +64,7 @@ private:
 		LinkEditor *linkEditor;
 		ProcEditor *procEditor;
 		ProjectWindow *projectWindow;
+		NelGUIWidget *viewPort;
 
 		CPropBrowserCtrl browserCtrl;
 		QString currentProject;

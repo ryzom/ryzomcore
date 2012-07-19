@@ -126,6 +126,9 @@ namespace NLGUI
 		/// Delete all textures and the like and reset the view renderer
 		void reset();
 
+		/// Release the resources of CViewRenderer, and delete the Singleton
+		static void release();
+
 		/// Retrieves the 3d driver we are using
 		static NL3D::UDriver* getDriver();
 

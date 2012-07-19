@@ -184,6 +184,18 @@ namespace NLGUI
 		_Material.setTexture(3, NULL);
 		_Material.setZBias(0);
 	}
+
+	void CViewRenderer::release()
+	{
+		if( instance != NULL )
+		{
+			instance->reset();
+			delete instance;
+			instance = NULL;
+		}
+	}
+
+
 	/*
 	 *	reset: reset the whole view renderer
 	 */

@@ -37,6 +37,7 @@
 #include "proc_editor.h"
 #include "project_file_parser.h"
 #include "project_window.h"
+#include "nelgui_widget.h"
 
 namespace GUIEditor
 {
@@ -51,7 +52,10 @@ namespace GUIEditor
 		widgetProps   = new CWidgetProperties;
 		linkEditor    = new LinkEditor;
 		procEditor    = new ProcEditor;
-		projectWindow = new ProjectWindow();
+		projectWindow = new ProjectWindow;
+		viewPort      = new NelGUIWidget;
+		setCentralWidget( viewPort );
+
 		createMenus();
 		readSettings();
 
@@ -74,6 +78,8 @@ namespace GUIEditor
 		browserCtrl.setup();
 		dock->setWidget( tb );
 		addDockWidget( Qt::RightDockWidgetArea, dock );
+
+		viewPort->init();
 	}
 	
 	GUIEditorWindow::~GUIEditorWindow()
@@ -91,6 +97,9 @@ namespace GUIEditor
 
 		delete projectWindow;
 		projectWindow = NULL;
+
+		delete viewPort;
+		viewPort = NULL;
 	}
 	
 	QUndoStack *GUIEditorWindow::undoStack() const
@@ -162,6 +171,10 @@ namespace GUIEditor
 
 			a = new QAction( "Project Window", this );
 			connect( a, SIGNAL( triggered( bool ) ), projectWindow, SLOT( show() ) );
+			m->addAction( a );
+
+			a = new QAction( "Clear Viewport", this );
+			connect( a, SIGNAL( triggered( bool ) ), viewPort, SLOT( clear() ) );
 			m->addAction( a );
 		}
 	}

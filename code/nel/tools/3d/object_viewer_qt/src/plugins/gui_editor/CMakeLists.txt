@@ -20,6 +20,8 @@ SET(OVQT_PLUGIN_GUI_EDITOR_HDR
 	proc_editor.h
 	property_browser_ctrl.h
 	project_window.h
+	nel3d_widget.h
+	nelgui_widget.h
 	)
 	
 SET(OVQT_PLUGIN_GUI_EDITOR_UIS
