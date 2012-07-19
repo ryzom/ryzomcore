@@ -22,6 +22,7 @@
 #include <string>
 #include <QFile>
 #include <QXmlStreamReader>
+#include "project_files.h"
 
 namespace GUIEditor
 {
@@ -34,14 +35,15 @@ namespace GUIEditor
 		
 		bool parseProjectFile( std::string &name );
 		const std::string& getProjectName() const{ return projectName; }
-		void getProjectFileNames( std::vector< std::string > &names ) const;
+		void getProjectFiles( SProjectFiles &projectFiles ) const;
 
 	private:
 		bool parseXMLFile( QFile &f );
 		bool parseHeader( QXmlStreamReader &reader );
-		bool parseFiles( QXmlStreamReader &reader );
+		bool parseGUIFiles( QXmlStreamReader &reader );
+		bool parseMapFiles( QXmlStreamReader &reader );
 
-		std::vector< std::string > fileNames;
+		SProjectFiles files;
 		std::string projectName;
 	};
 }

@@ -44,10 +44,12 @@ namespace GUIEditor
 		return true;
 	}
 
-	void CProjectFileParser::getProjectFileNames( std::vector< std::string > &names ) const
+	void CProjectFileParser::getProjectFiles( SProjectFiles &projectFiles ) const
 	{
-		names.resize( fileNames.size() );
-		std::copy( fileNames.begin(), fileNames.end(), names.begin() );
+		projectFiles.guiFiles.resize( files.guiFiles.size() );
+		projectFiles.mapFiles.resize( files.mapFiles.size() );
+		std::copy( files.guiFiles.begin(), files.guiFiles.end(), projectFiles.guiFiles.begin() );
+		std::copy( files.mapFiles.begin(), files.mapFiles.end(), projectFiles.mapFiles.begin() );
 	}
 
 	bool CProjectFileParser::parseXMLFile(QFile &f)
@@ -72,7 +74,10 @@ namespace GUIEditor
 		if( !parseHeader( reader ) )
 			return false;
 
-		if( !parseFiles( reader ) )
+		if( !parseGUIFiles( reader ) )
+			return false;
+
+		if( !parseMapFiles( reader ) )
 			return false;
 		
 		return true;
@@ -98,25 +103,57 @@ namespace GUIEditor
 		return true;
 	}
 
-	bool CProjectFileParser::parseFiles( QXmlStreamReader &reader )
+	bool CProjectFileParser::parseGUIFiles( QXmlStreamReader &reader )
 	{
-		while( !reader.atEnd() && !( reader.isStartElement() && reader.name() == "files" ) )
+		while( !reader.atEnd() && !( reader.isStartElement() && reader.name() == "guifiles" ) )
 			reader.readNext();
 		if( reader.atEnd() )
 			return false;
 
-		while( !reader.atEnd() && !( reader.isEndElement() && ( reader.name() == "files" ) ) )
+		while( !reader.atEnd() && !( reader.isEndElement() && ( reader.name() == "guifiles" ) ) )
 		{
 			if( reader.isStartElement() && ( reader.name() == "file" ) )
 			{
 				QString fileName = reader.readElementText( QXmlStreamReader::ErrorOnUnexpectedElement );
-				if( !fileName.isEmpty() )
-					fileNames.push_back( fileName.toStdString() );
+				if( fileName.isEmpty() )
+					return false;
+				files.guiFiles.push_back( fileName.toStdString() );
+
 			}
 
 			reader.readNext();
 		}
-		if( fileNames.empty() )
+		reader.readNext();
+		if( reader.atEnd() )
+			return false;
+
+		if( files.guiFiles.empty() )
+			return false;
+
+		return true;
+	}
+
+	bool CProjectFileParser::parseMapFiles( QXmlStreamReader &reader )
+	{
+		while( !reader.atEnd() && !( reader.isStartElement() && reader.name() == "mapfiles" ) )
+			reader.readNext();
+		if( reader.atEnd() )
+			return false;
+
+		while( !reader.atEnd() && !( reader.isEndElement() && ( reader.name() == "mapfiles" ) ) )
+		{
+			if( reader.isStartElement() && ( reader.name() == "file" ) )
+			{
+				QString fileName = reader.readElementText( QXmlStreamReader::ErrorOnUnexpectedElement );
+				if( fileName.isEmpty() )
+					return false;
+				files.mapFiles.push_back( fileName.toStdString() );
+
+			}
+
+			reader.readNext();
+		}
+		if( files.mapFiles.empty() )
 			return false;
 
 		return true;

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>379</width>
-    <height>335</height>
+    <width>451</width>
+    <height>320</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,23 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" rowspan="2" colspan="2">
-    <widget class="QListWidget" name="fileList"/>
+    <widget class="QTreeWidget" name="fileTree">
+     <column>
+      <property name="text">
+       <string>Files</string>
+      </property>
+     </column>
+     <item>
+      <property name="text">
+       <string>GUI XML files</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Texture map files</string>
+      </property>
+     </item>
+    </widget>
    </item>
    <item row="0" column="2">
     <layout class="QVBoxLayout" name="verticalLayout">

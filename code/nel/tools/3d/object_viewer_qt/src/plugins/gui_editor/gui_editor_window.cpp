@@ -138,12 +138,10 @@ namespace GUIEditor
 			setCursor( Qt::ArrowCursor );
 			return;
 		}
-
-		std::vector< std::string > fileNames;
-
-		parser.getProjectFileNames( fileNames );
+		SProjectFiles projectFiles;
+		parser.getProjectFiles( projectFiles );
 		currentProject = parser.getProjectName().c_str();
-		projectWindow->setupFileList( fileNames );
+		projectWindow->setupFiles( projectFiles );
 
 		setCursor( Qt::ArrowCursor );
 	}

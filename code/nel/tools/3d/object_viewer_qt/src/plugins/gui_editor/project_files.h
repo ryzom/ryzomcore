@@ -15,38 +15,22 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "nelgui_widget.h"
-#include "nel/misc/path.h"
-#include "nel/gui/view_renderer.h"
-#include <set>
+#ifndef PROJECT_FILES_H
+#define PROJECT_FILES_H
+
+#include <vector>
 #include <string>
 
 namespace GUIEditor
 {
-	std::set< std::string > hwCursors;
-
-	NelGUIWidget::NelGUIWidget( QWidget *parent ) :
-	Nel3DWidget( parent )
+	struct SProjectFiles
 	{
-	}
-
-	NelGUIWidget::~NelGUIWidget()
-	{
-		NLGUI::CViewRenderer::release();
-		
-	}
-
-	void NelGUIWidget::init()
-	{
-		NLMISC::CPath::addSearchPath( "fonts" );
-
-		Nel3DWidget::init();
-		createTextContext( "Ryzom.ttf" );
-
-		NLGUI::CViewRenderer::setDriver( getDriver() );
-		NLGUI::CViewRenderer::setTextContext( getTextContext() );
-		NLGUI::CViewRenderer::hwCursors = &hwCursors;
-		NLGUI::CViewRenderer::getInstance()->init();
-	}
+	public:
+		std::vector< std::string > guiFiles;
+		std::vector< std::string > mapFiles;
+	};
 }
+
+#endif
+
 

@@ -21,6 +21,7 @@
 #include <vector>
 #include <string>
 #include "ui_project_window.h"
+#include "project_files.h"
 
 namespace GUIEditor
 {
@@ -31,7 +32,7 @@ namespace GUIEditor
 		ProjectWindow( QWidget *parent = NULL );
 		~ProjectWindow();
 
-		void setupFileList( const std::vector< std::string > &fileNames );
+		void setupFiles( SProjectFiles &projectFiles );
 
 	private Q_SLOTS:
 		void onAddButtonClicked();

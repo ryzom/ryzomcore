@@ -36,21 +36,57 @@ namespace GUIEditor
 	{
 	}
 
-	void ProjectWindow::setupFileList( const std::vector< std::string > &fileNames )
+	void ProjectWindow::setupFiles( SProjectFiles &projectFiles )
 	{
-		fileList->clear();
-
-		std::vector< std::string >::const_iterator itr;
-		for( itr = fileNames.begin(); itr != fileNames.end(); ++itr )
+		QTreeWidgetItem *topItem = fileTree->topLevelItem( 0 );
+		if( topItem != NULL )
 		{
-			const std::string &s = *itr;
-			fileList->addItem( s.c_str() );
+			QList< QTreeWidgetItem* > childList = topItem->takeChildren();
+			QListIterator< QTreeWidgetItem* > it( childList );
+			while( it.hasNext() )
+				delete it.next();
+			childList.clear();
+
+			std::vector< std::string >::iterator itr;
+			for( itr = projectFiles.guiFiles.begin(); itr != projectFiles.guiFiles.end(); ++itr )
+			{
+				QTreeWidgetItem *item = new QTreeWidgetItem( topItem );
+				item->setText( 0, itr->c_str() );
+			}
 		}
-		fileList->sortItems();
+
+		topItem = fileTree->topLevelItem( 1 );
+		if( topItem != NULL )
+		{
+			QList< QTreeWidgetItem* > childList = topItem->takeChildren();
+			QListIterator< QTreeWidgetItem* > it( childList );
+			while( it.hasNext() )
+				delete it.next();
+			childList.clear();
+
+			std::vector< std::string >::iterator itr;
+			for( itr = projectFiles.mapFiles.begin(); itr != projectFiles.mapFiles.end(); ++itr )
+			{
+				QTreeWidgetItem *item = new QTreeWidgetItem( topItem );
+				item->setText( 0, itr->c_str() );
+			}
+		}
 	}
 
 	void ProjectWindow::onAddButtonClicked()
 	{
+		if( fileTree->currentItem() == NULL )
+			return;
+
+		QTreeWidgetItem *item = fileTree->currentItem();
+		QTreeWidgetItem *parent = item->parent();
+
+		while( parent != NULL )
+		{
+			item = parent;
+			parent = parent->parent();
+		}
+
 		bool ok;
 		QString newFile = QInputDialog::getText( this,
 												tr( "Adding file to project" ),
@@ -61,30 +97,33 @@ namespace GUIEditor
 
 		if( ok )
 		{
-			fileList->addItem( newFile );
-			fileList->sortItems();
+			QTreeWidgetItem *newItem = new QTreeWidgetItem( item );
+			newItem->setText( 0, newFile );
 		}
 	}
 
 	void ProjectWindow::onRemoveButtonClicked()
 	{
-		if( fileList->count() == 0 )
+		if( fileTree->currentItem() == NULL )
+			return;
+
+		if( ( fileTree->topLevelItem( 0 )->childCount() == 0 ) || ( fileTree->topLevelItem( 1 )->childCount() == 0 ) )
+			return;
+		// Can't delete top-level item
+		if( fileTree->currentItem()->parent() == NULL )
 			return;
 
 		QMessageBox::StandardButton reply;
-		QString text;
-		if( fileList->currentRow() >= 0 )
-			text = fileList->item( fileList->currentRow() )->text();
+		QString text = fileTree->currentItem()->text( 0 );
 
 		reply = QMessageBox::question( this,
 									tr( "Removing file from project" ),
 									tr( "Are you sure you want to remove '%1' from the project?" ).arg( text ),
 									QMessageBox::Yes | QMessageBox::Cancel );
 		
-		QListWidgetItem *item;
 		if( reply == QMessageBox::Yes )
-			item = fileList->takeItem( fileList->currentRow() );
-		delete item;
+			fileTree->currentItem()->parent()->removeChild( fileTree->currentItem() );
+
 	}
 }
 
