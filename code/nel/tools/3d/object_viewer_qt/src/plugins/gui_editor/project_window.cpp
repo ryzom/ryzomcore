@@ -107,8 +107,6 @@ namespace GUIEditor
 		if( fileTree->currentItem() == NULL )
 			return;
 
-		if( ( fileTree->topLevelItem( 0 )->childCount() == 0 ) || ( fileTree->topLevelItem( 1 )->childCount() == 0 ) )
-			return;
 		// Can't delete top-level item
 		if( fileTree->currentItem()->parent() == NULL )
 			return;
