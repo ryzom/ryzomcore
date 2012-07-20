@@ -29,6 +29,11 @@ namespace GUIEditor
 	{
 		driver = NULL;
 		textContext = NULL;
+
+		// Need to set this attribute with a NULL paintengine returned to Qt
+		// so that we can render the widget normally ourselves, without the image
+		// disappearing when a widget is resized or shown on top of us
+		setAttribute( Qt::WA_PaintOnScreen, true );
 	}
 
 	Nel3DWidget::~Nel3DWidget()

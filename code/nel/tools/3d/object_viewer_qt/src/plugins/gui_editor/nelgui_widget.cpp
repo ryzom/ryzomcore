@@ -96,5 +96,10 @@ namespace GUIEditor
 		CWidgetManager::getInstance()->drawViews( 0 );
 		getDriver()->swapBuffers();
 	}
+
+	void NelGUIWidget::paintEvent( QPaintEvent *evnt )
+	{
+		draw();
+	}
 }
 

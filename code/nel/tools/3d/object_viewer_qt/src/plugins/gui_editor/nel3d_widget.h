@@ -43,6 +43,12 @@ namespace GUIEditor
 		NL3D::UDriver* getDriver() const{ return driver; }
 		NL3D::UTextContext* getTextContext() const{ return textContext; }
 
+
+		// Need to return NULL paintengine to Qt so that we can
+		// render the widget normally ourselves, without the image
+		// disappearing when a widget is resized or shown on top of us
+		QPaintEngine* paintEngine() const{ return NULL; }
+
 	public Q_SLOTS:
 		void clear();
 

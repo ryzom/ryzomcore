@@ -35,6 +35,9 @@ namespace GUIEditor
 		bool parse( SProjectFiles &files );
 		void draw();
 
+	protected:
+		void paintEvent( QPaintEvent *evnt );
+
 	};
 }
 
