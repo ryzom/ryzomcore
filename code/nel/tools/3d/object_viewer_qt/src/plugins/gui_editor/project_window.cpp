@@ -25,7 +25,9 @@ namespace GUIEditor
 	QWidget( parent )
 	{
 		setupUi( this );
-		connect( okButton, SIGNAL( clicked(bool) ), this, SLOT( hide() ) );
+		filesChanged = false;
+
+		connect( okButton, SIGNAL( clicked(bool) ), this, SLOT( onOKButtonClicked() ) );
 		connect( cancelButton, SIGNAL( clicked(bool) ), this, SLOT( hide() ) );
 
 		connect( addButton, SIGNAL( clicked(bool) ), this, SLOT( onAddButtonClicked() ) );
@@ -73,6 +75,35 @@ namespace GUIEditor
 		}
 	}
 
+	void ProjectWindow::updateFiles( SProjectFiles &projectFiles )
+	{
+		projectFiles.clear();
+		
+		QTreeWidgetItem *topItem;
+		
+		topItem = fileTree->topLevelItem( 0 );
+		if( topItem != NULL )
+		{
+			int c = topItem->childCount();
+			for( int i = 0; i < c; i++ )
+			{
+				QTreeWidgetItem *item = topItem->child( i );
+				projectFiles.guiFiles.push_back( item->text( 0 ).toStdString() );
+			}
+		}
+
+		topItem = fileTree->topLevelItem( 1 );
+		if( topItem != NULL )
+		{
+			int c = topItem->childCount();
+			for( int i = 0; i < c; i++ )
+			{
+				QTreeWidgetItem *item = topItem->child( i );
+				projectFiles.mapFiles.push_back( item->text( 0 ).toStdString() );
+			}
+		}
+	}
+
 	void ProjectWindow::onAddButtonClicked()
 	{
 		if( fileTree->currentItem() == NULL )
@@ -99,6 +130,7 @@ namespace GUIEditor
 		{
 			QTreeWidgetItem *newItem = new QTreeWidgetItem( item );
 			newItem->setText( 0, newFile );
+			filesChanged = true;
 		}
 	}
 
@@ -120,8 +152,22 @@ namespace GUIEditor
 									QMessageBox::Yes | QMessageBox::Cancel );
 		
 		if( reply == QMessageBox::Yes )
+		{
 			fileTree->currentItem()->parent()->removeChild( fileTree->currentItem() );
+			filesChanged = true;
+		}
 
+	}
+
+	void ProjectWindow::onOKButtonClicked()
+	{
+		hide();
+
+		if( filesChanged )
+		{
+			filesChanged = false;
+			Q_EMIT projectFilesChanged();
+		}
 	}
 }
 

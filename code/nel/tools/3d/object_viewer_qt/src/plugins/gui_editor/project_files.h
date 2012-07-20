@@ -28,6 +28,12 @@ namespace GUIEditor
 	public:
 		std::vector< std::string > guiFiles;
 		std::vector< std::string > mapFiles;
+
+		void clear()
+		{
+			guiFiles.clear();
+			mapFiles.clear();
+		}
 	};
 }
 

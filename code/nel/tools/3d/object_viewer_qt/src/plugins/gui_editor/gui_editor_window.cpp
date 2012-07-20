@@ -43,6 +43,7 @@ namespace GUIEditor
 {
 	QString _lastDir;
 	std::map< std::string, SWidgetInfo > widgetInfo;
+	SProjectFiles projectFiles;
 
 	GUIEditorWindow::GUIEditorWindow(QWidget *parent) :
 	QMainWindow(parent)
@@ -53,6 +54,7 @@ namespace GUIEditor
 		linkEditor    = new LinkEditor;
 		procEditor    = new ProcEditor;
 		projectWindow = new ProjectWindow;
+		connect( projectWindow, SIGNAL( projectFilesChanged() ), this, SLOT( onProjectFilesChanged() ) );
 		viewPort      = new NelGUIWidget;
 		setCentralWidget( viewPort );
 
@@ -138,12 +140,35 @@ namespace GUIEditor
 			setCursor( Qt::ArrowCursor );
 			return;
 		}
-		SProjectFiles projectFiles;
+		projectFiles.clear();
 		parser.getProjectFiles( projectFiles );
 		currentProject = parser.getProjectName().c_str();
 		projectWindow->setupFiles( projectFiles );
-		viewPort->parse( projectFiles );
-		viewPort->draw();
+		if( viewPort->parse( projectFiles ) )
+			viewPort->draw();
+		else
+		{
+			QMessageBox::critical( this,
+				tr( "Error parsing GUI XML files" ),
+				tr( "There was an error while parsing the GUI XML files. See the log file for details." ) );
+		}
+
+		setCursor( Qt::ArrowCursor );
+	}
+
+	void GUIEditorWindow::onProjectFilesChanged()
+	{
+		setCursor( Qt::WaitCursor );
+
+		projectWindow->updateFiles( projectFiles );
+		if( !viewPort->parse( projectFiles ) )
+		{
+			QMessageBox::critical( this,
+				tr( "Error parsing GUI XML files" ),
+				tr( "There was an error while parsing the GUI XML files. See the log file for details." ) );
+		}
+		else
+			viewPort->draw();
 
 		setCursor( Qt::ArrowCursor );
 	}

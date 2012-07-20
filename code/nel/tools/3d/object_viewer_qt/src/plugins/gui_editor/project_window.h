@@ -33,13 +33,18 @@ namespace GUIEditor
 		~ProjectWindow();
 
 		void setupFiles( SProjectFiles &projectFiles );
+		void updateFiles( SProjectFiles &projectFiles );
+
+	Q_SIGNALS:
+		void projectFilesChanged();
 
 	private Q_SLOTS:
 		void onAddButtonClicked();
 		void onRemoveButtonClicked();
+		void onOKButtonClicked();
 
 	private:
-
+		bool filesChanged;
 	};
 }
 
