@@ -69,16 +69,16 @@ namespace GUIEditor
 
 		QDockWidget *dock = new QDockWidget( "Widget Hierarchy", this );
 		dock->setAllowedAreas( Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea );
-		WidgetHierarchy *ha = new WidgetHierarchy;
-		dock->setWidget( ha );
+		hierarchyView = new WidgetHierarchy;
+		dock->setWidget( hierarchyView );
 		addDockWidget( Qt::LeftDockWidgetArea, dock );
 
 		dock = new QDockWidget( "Widget Properties", this );
 		dock->setAllowedAreas(  Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea );
-		QtTreePropertyBrowser *tb = new QtTreePropertyBrowser;
-		browserCtrl.setBrowser( tb );
+		QtTreePropertyBrowser *propBrowser = new QtTreePropertyBrowser;
+		browserCtrl.setBrowser( propBrowser );
 		browserCtrl.setup();
-		dock->setWidget( tb );
+		dock->setWidget( propBrowser );
 		addDockWidget( Qt::RightDockWidgetArea, dock );
 
 		viewPort->init();
@@ -102,6 +102,10 @@ namespace GUIEditor
 
 		delete viewPort;
 		viewPort = NULL;
+
+		// no deletion needed for these, since dockwidget owns them
+		hierarchyView = NULL;
+		propBrowser   = NULL;
 	}
 	
 	QUndoStack *GUIEditorWindow::undoStack() const
@@ -145,7 +149,10 @@ namespace GUIEditor
 		currentProject = projectFiles.projectName.c_str();
 		projectWindow->setupFiles( projectFiles );
 		if( viewPort->parse( projectFiles ) )
-			viewPort->draw();
+		{
+			hierarchyView->buildHierarchy( projectFiles.masterGroup );
+			viewPort->draw();			
+		}
 		else
 		{
 			QMessageBox::critical( this,
@@ -168,7 +175,10 @@ namespace GUIEditor
 				tr( "There was an error while parsing the GUI XML files. See the log file for details." ) );
 		}
 		else
+		{
+			hierarchyView->buildHierarchy( projectFiles.masterGroup );
 			viewPort->draw();
+		}
 
 		setCursor( Qt::ArrowCursor );
 	}

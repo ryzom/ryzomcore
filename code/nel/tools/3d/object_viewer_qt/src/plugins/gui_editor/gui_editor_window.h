@@ -24,10 +24,13 @@
 #include "widget_info.h"
 #include "property_browser_ctrl.h"
 
+class QtTreePropertyBrowser;
+
 namespace GUIEditor
 {
 
 	class CWidgetProperties;
+	class WidgetHierarchy;
 	class LinkEditor;
 	class ProcEditor;
 	class ProjectWindow;
@@ -62,6 +65,8 @@ private:
 
 		Ui::GUIEditorWindow m_ui;
 		CWidgetProperties *widgetProps;
+		WidgetHierarchy *hierarchyView;
+		QtTreePropertyBrowser *propBrowser;
 		LinkEditor *linkEditor;
 		ProcEditor *procEditor;
 		ProjectWindow *projectWindow;

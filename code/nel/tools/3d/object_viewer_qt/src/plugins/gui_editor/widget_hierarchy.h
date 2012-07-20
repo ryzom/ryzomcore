@@ -19,6 +19,13 @@
 
 #include "ui_widget_hierarchy.h"
 
+namespace NLGUI
+{
+	class CInterfaceGroup;
+}
+
+class QTreeWidgetItem;
+
 namespace GUIEditor
 {
 	class WidgetHierarchy : public QWidget, public Ui::WidgetHierarchyTree
@@ -28,6 +35,11 @@ namespace GUIEditor
 		WidgetHierarchy( QWidget *parent = NULL );
 		~WidgetHierarchy();
 
+		void clearHierarchy();
+		void buildHierarchy( std::string &masterGroup );
+		
+	private:
+		void buildHierarchy( QTreeWidgetItem *parent, NLGUI::CInterfaceGroup *group );
 	};
 }
 

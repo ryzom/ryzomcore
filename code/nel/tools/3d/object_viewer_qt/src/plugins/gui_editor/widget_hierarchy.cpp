@@ -16,6 +16,8 @@
 
 
 #include "widget_hierarchy.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/widget_manager.h"
 
 namespace GUIEditor
 {
@@ -27,5 +29,58 @@ namespace GUIEditor
 
 	WidgetHierarchy::~WidgetHierarchy()
 	{
+	}
+
+	void WidgetHierarchy::clearHierarchy()
+	{
+		widgetHT->clear();
+	}
+
+	void WidgetHierarchy::buildHierarchy( std::string &masterGroup )
+	{
+		clearHierarchy();
+
+		CInterfaceGroup *mg = CWidgetManager::getInstance()->getMasterGroupFromId( masterGroup );
+		if( mg != NULL )
+		{
+			QTreeWidgetItem *item = new QTreeWidgetItem( NULL );
+			item->setText( 0, "root" );
+			widgetHT->addTopLevelItem( item );
+
+			buildHierarchy( item, mg );
+		}
+	}
+
+	void WidgetHierarchy::buildHierarchy( QTreeWidgetItem *parent, CInterfaceGroup *group )
+	{
+		// First add ourselves
+		QTreeWidgetItem *item = new QTreeWidgetItem( parent );
+		item->setText( 0, group->getId().c_str() );
+
+		// Then add recursively our subgroups
+		const std::vector< CInterfaceGroup* > &groups = group->getGroups();
+		std::vector< CInterfaceGroup* >::const_iterator gitr;
+		for( gitr = groups.begin(); gitr != groups.end(); ++gitr )
+		{
+			buildHierarchy( item, *gitr );
+		}
+
+		// Add our controls
+		const std::vector< CCtrlBase* > &controls = group->getControls();
+		std::vector< CCtrlBase* >::const_iterator citr;
+		for( citr = controls.begin(); citr != controls.end(); ++citr )
+		{
+			QTreeWidgetItem *subItem = new QTreeWidgetItem( item );
+			subItem->setText( 0, (*citr)->getId().c_str() );
+		}
+
+		// Add our views
+		const std::vector< CViewBase* > &views = group->getViews();
+		std::vector< CViewBase* >::const_iterator vitr;
+		for( vitr = views.begin(); vitr != views.end(); ++vitr )
+		{
+			QTreeWidgetItem *subItem = new QTreeWidgetItem( item );
+			subItem->setText( 0, (*vitr)->getId().c_str() );
+		}
 	}
 }
