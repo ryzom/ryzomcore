@@ -50,6 +50,9 @@ namespace GUIEditor
 		projectFiles.mapFiles.resize( files.mapFiles.size() );
 		std::copy( files.guiFiles.begin(), files.guiFiles.end(), projectFiles.guiFiles.begin() );
 		std::copy( files.mapFiles.begin(), files.mapFiles.end(), projectFiles.mapFiles.begin() );
+		projectFiles.projectName = files.projectName;
+		projectFiles.masterGroup = files.masterGroup;
+		projectFiles.activeGroup = files.activeGroup;
 	}
 
 	bool CProjectFileParser::parseXMLFile(QFile &f)
@@ -85,18 +88,37 @@ namespace GUIEditor
 
 	bool CProjectFileParser::parseHeader( QXmlStreamReader &reader )
 	{
-		while( !reader.atEnd() && !( reader.isStartElement() && ( reader.name() == "name" ) ) )
-			reader.readNext();
-		if( reader.atEnd() )
-			return false;
+		while( !reader.atEnd() && !( reader.isEndElement() && ( reader.name() == "header" ) ) )
+		{
+			if( reader.isStartElement() )
+			{
+				if( reader.name() == "name" )
+				{
+					QString name = reader.readElementText( QXmlStreamReader::ErrorOnUnexpectedElement );
+					if( name.isEmpty() )
+						return false;
+					files.projectName = name.toStdString();
+				}
+				else
+				if( reader.name() == "mastergroup" )
+				{
+					QString mg = reader.readElementText( QXmlStreamReader::ErrorOnUnexpectedElement );
+					if( mg.isEmpty() )
+						return false;
+					files.masterGroup = mg.toStdString();
+				}
+				else
+				if( reader.name() == "activegroup" )
+				{
+					QString ag = reader.readElementText( QXmlStreamReader::ErrorOnUnexpectedElement );
+					if( ag.isEmpty() )
+						return false;
+					files.activeGroup = ag.toStdString();
+				}
+			}
 
-		QString name = reader.readElementText( QXmlStreamReader::ErrorOnUnexpectedElement );
-		if( name.isEmpty() )
-			return false;
-		projectName = name.toStdString();
-
-		while( !reader.atEnd() && !( reader.isEndElement() ) && ( reader.name() == "header" ) )
 			reader.readNext();
+		}
 		if( reader.atEnd() )
 			return false;
 

@@ -26,13 +26,24 @@ namespace GUIEditor
 	struct SProjectFiles
 	{
 	public:
+		std::string projectName;
+		std::string masterGroup;
+		std::string activeGroup;
 		std::vector< std::string > guiFiles;
 		std::vector< std::string > mapFiles;
 
-		void clear()
+		void clearFiles()
 		{
 			guiFiles.clear();
 			mapFiles.clear();
+		}
+
+		void clearAll()
+		{
+			clearFiles();
+			projectName = "";
+			masterGroup = "";
+			activeGroup = "";
 		}
 	};
 }

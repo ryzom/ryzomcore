@@ -77,7 +77,7 @@ namespace GUIEditor
 
 	void ProjectWindow::updateFiles( SProjectFiles &projectFiles )
 	{
-		projectFiles.clear();
+		projectFiles.clearFiles();
 		
 		QTreeWidgetItem *topItem;
 		

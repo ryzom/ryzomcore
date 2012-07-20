@@ -34,7 +34,6 @@ namespace GUIEditor
 		~CProjectFileParser();
 		
 		bool parseProjectFile( std::string &name );
-		const std::string& getProjectName() const{ return projectName; }
 		void getProjectFiles( SProjectFiles &projectFiles ) const;
 
 	private:
@@ -44,7 +43,6 @@ namespace GUIEditor
 		bool parseMapFiles( QXmlStreamReader &reader );
 
 		SProjectFiles files;
-		std::string projectName;
 	};
 }
 

@@ -80,6 +80,12 @@ namespace GUIEditor
 			return false;
 
 		CWidgetManager::getInstance()->updateAllLocalisedElements();
+		CWidgetManager::getInstance()->activateMasterGroup( files.masterGroup, true );
+		
+		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( files.activeGroup );
+		if( e != NULL )
+			e->setActive( true );
+
 		return true;
 	}
 

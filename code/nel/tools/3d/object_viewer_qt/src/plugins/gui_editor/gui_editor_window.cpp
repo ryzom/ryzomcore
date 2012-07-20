@@ -140,9 +140,9 @@ namespace GUIEditor
 			setCursor( Qt::ArrowCursor );
 			return;
 		}
-		projectFiles.clear();
+		projectFiles.clearAll();
 		parser.getProjectFiles( projectFiles );
-		currentProject = parser.getProjectName().c_str();
+		currentProject = projectFiles.projectName.c_str();
 		projectWindow->setupFiles( projectFiles );
 		if( viewPort->parse( projectFiles ) )
 			viewPort->draw();
