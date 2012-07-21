@@ -66,6 +66,7 @@ namespace NLGUI
 		void show(bool s) {_PointerVisible = s;}
 
 		static void setHWMouse( bool hw ){ hwMouse = hw; }
+		static void forceLink();
 
 	private:
 

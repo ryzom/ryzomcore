@@ -437,6 +437,15 @@ namespace NLGUI
 		NLMISC::CHTimer::display(&log, CHTimer::TotalTime);
 		*/
 
+		if( ok )
+		{
+			if( CWidgetManager::getInstance()->getPointer() == NULL )
+			{
+				CViewPointer *pointer = dynamic_cast< CViewPointer* >( NLMISC_GET_FACTORY(CViewBase, std::string).createObject( "generic_pointer", CViewBase::TCtorParam() ) );
+				CWidgetManager::getInstance()->setPointer( pointer );
+			}
+		}
+
 
 		return ok;
 	}

@@ -2492,6 +2492,9 @@ namespace NLGUI
 
 	bool CWidgetManager::handleMouseMoveEvent( const CEventDescriptor &eventDesc )
 	{
+		if( getPointer() == NULL )
+			return false;
+
 		if( eventDesc.getType() != CEventDescriptor::mouse )
 			return false;
 

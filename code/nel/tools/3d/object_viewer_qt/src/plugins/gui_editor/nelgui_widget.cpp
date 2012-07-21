@@ -24,6 +24,7 @@
 #include "nel/misc/i18n.h"
 #include <set>
 #include <string>
+#include <QTimerEvent>
 
 namespace GUIEditor
 {
@@ -32,10 +33,16 @@ namespace GUIEditor
 	NelGUIWidget::NelGUIWidget( QWidget *parent ) :
 	Nel3DWidget( parent )
 	{
+		timerID = 0;
+		guiLoaded = false;
 	}
 
 	NelGUIWidget::~NelGUIWidget()
 	{
+		guiLoaded = false;
+		if( timerID != 0 )
+			killTimer( timerID );
+
 		NLGUI::CViewRenderer::release();
 		NLMISC::CI18N::setNoResolution( false );
 		
@@ -59,6 +66,7 @@ namespace GUIEditor
 
 	bool NelGUIWidget::parse( SProjectFiles &files )
 	{
+		guiLoaded = false;
 		CWidgetManager::getInstance()->reset();
 		IParser *parser = CWidgetManager::getInstance()->getParser();
 		parser->removeAll();
@@ -89,6 +97,9 @@ namespace GUIEditor
 		if( e != NULL )
 			e->setActive( true );
 
+		timerID = startTimer( 200 );
+		guiLoaded = true;
+
 		return true;
 	}
 
@@ -102,7 +113,31 @@ namespace GUIEditor
 
 	void NelGUIWidget::paintEvent( QPaintEvent *evnt )
 	{
-		draw();
+		//draw();
+	}
+
+	void NelGUIWidget::timerEvent( QTimerEvent *evnt )
+	{
+		if( evnt->timerId() == timerID )
+		{
+			if( guiLoaded )
+			{
+				getDriver()->EventServer.pump();
+				draw();
+			}
+		}
+	}
+
+	void NelGUIWidget::showEvent( QShowEvent *evnt )
+	{
+		if( timerID == 0 )
+			timerID = startTimer( 200 );
+	}
+
+	void NelGUIWidget::hideEvent( QHideEvent *evnt )
+	{
+		if( timerID != 0 )
+			killTimer( timerID );
 	}
 }
 

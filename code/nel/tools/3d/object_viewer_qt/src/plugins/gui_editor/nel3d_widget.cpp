@@ -21,10 +21,13 @@
 #include "nel/3d/driver_user.h"
 #include "nel/misc/rgba.h"
 #include "nel/misc/path.h"
+#include "nel/misc/event_listener.h"
+#include "nel/gui/event_listener.h"
 
 #ifdef NL_OS_WINDOWS
 #include <Windows.h>
 #endif
+
 
 
 namespace GUIEditor
@@ -39,6 +42,7 @@ namespace GUIEditor
 		// so that we can render the widget normally ourselves, without the image
 		// disappearing when a widget is resized or shown on top of us
 		setAttribute( Qt::WA_PaintOnScreen, true );
+		eventListener = NULL;
 	}
 
 	Nel3DWidget::~Nel3DWidget()
@@ -55,6 +59,7 @@ namespace GUIEditor
 			delete driver;
 			driver = NULL;
 		}
+		delete eventListener;
 	}
 
 	void Nel3DWidget::init()
@@ -64,6 +69,8 @@ namespace GUIEditor
 		driver = NL3D::UDriver::createDriver( 0, false, 0 );
 		driver->setMatrixMode2D11();
 		driver->setDisplay( winId(), NL3D::UDriver::CMode( width(), height(), 32, true ) );
+		eventListener = new NLGUI::CEventListener();
+		eventListener->addToServer( &driver->EventServer );
 	}
 
 	void Nel3DWidget::createTextContext( std::string fontFile )

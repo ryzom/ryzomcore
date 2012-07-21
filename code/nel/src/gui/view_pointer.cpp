@@ -60,6 +60,10 @@ namespace NLGUI
 		_StringCursor = NULL;
 	}
 
+	void CViewPointer::forceLink()
+	{
+	}
+
 
 	// +++ VIEW SPECIFIC +++
 

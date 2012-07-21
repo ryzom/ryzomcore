@@ -29,6 +29,7 @@
 #include "nel/gui/event_descriptor.h"
 #include "nel/3d/u_camera.h"
 #include "nel/gui/parser.h"
+#include "nel/gui/input_event_listener.h"
 
 namespace NLMISC
 {
@@ -52,7 +53,7 @@ namespace NLGUI
 
 	 Manages the GUI widgets, asks them to draw themselves, etc.
 	 */
-	class CWidgetManager{
+	class CWidgetManager : public IInputEventListener{
 
 	public:
 
