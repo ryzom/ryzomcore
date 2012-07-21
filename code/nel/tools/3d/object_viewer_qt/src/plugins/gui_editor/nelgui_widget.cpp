@@ -21,6 +21,7 @@
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
 #include "nel/misc/path.h"
+#include "nel/misc/i18n.h"
 #include <set>
 #include <string>
 
@@ -36,11 +37,13 @@ namespace GUIEditor
 	NelGUIWidget::~NelGUIWidget()
 	{
 		NLGUI::CViewRenderer::release();
+		NLMISC::CI18N::setNoResolution( false );
 		
 	}
 
 	void NelGUIWidget::init()
 	{
+		NLMISC::CI18N::setNoResolution( true );
 		NLMISC::CPath::remapExtension( "dds", "tga", true );
 		NLMISC::CPath::remapExtension( "dds", "png", true );
 		NLMISC::CPath::remapExtension( "png", "tga", true );
