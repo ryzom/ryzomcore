@@ -40,6 +40,9 @@ namespace GUIEditor
 		
 	private:
 		void buildHierarchy( QTreeWidgetItem *parent, NLGUI::CInterfaceGroup *group );
+
+	private Q_SLOTS:
+		void onItemDblClicked( QTreeWidgetItem *item );
 	};
 }
 

@@ -19,12 +19,53 @@
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
 
+namespace
+{
+	std::string makeNodeName( const std::string &name )
+	{
+		std::string s = name;
+		if( s.empty() )
+			return s;
+
+		std::string::size_type i = s.find_last_of( ":" );
+		if( i == std::string::npos )
+			return s;
+
+		if( i == ( s.size() - 1 ) )
+			return s;
+
+		s = name.substr( i + 1, s.size() - 1 );
+		return s;
+	}
+
+	std::string& makeFullName( QTreeWidgetItem *item, std::string &name )
+	{
+		if( item == NULL )
+			return name;
+		QString s;
+
+		s = item->text( 0 );
+		item = item->parent();
+
+		while( item != NULL )
+		{
+			s.prepend( item->text( 0 ) + ":" );
+			item = item->parent();
+		}
+
+		name = s.toStdString();
+		return name;
+	}
+}
+
 namespace GUIEditor
 {
 	WidgetHierarchy::WidgetHierarchy( QWidget *parent ) :
 	QWidget( parent )
 	{
 		setupUi( this );
+		connect( widgetHT, SIGNAL( itemDoubleClicked( QTreeWidgetItem*, int ) ),
+			this, SLOT( onItemDblClicked( QTreeWidgetItem* ) ) );
 	}
 
 	WidgetHierarchy::~WidgetHierarchy()
@@ -44,7 +85,7 @@ namespace GUIEditor
 		if( mg != NULL )
 		{
 			QTreeWidgetItem *item = new QTreeWidgetItem( NULL );
-			item->setText( 0, "root" );
+			item->setText( 0, "ui" );
 			widgetHT->addTopLevelItem( item );
 
 			buildHierarchy( item, mg );
@@ -55,7 +96,7 @@ namespace GUIEditor
 	{
 		// First add ourselves
 		QTreeWidgetItem *item = new QTreeWidgetItem( parent );
-		item->setText( 0, group->getId().c_str() );
+		item->setText( 0, makeNodeName( group->getId() ).c_str() );
 
 		// Then add recursively our subgroups
 		const std::vector< CInterfaceGroup* > &groups = group->getGroups();
@@ -71,7 +112,7 @@ namespace GUIEditor
 		for( citr = controls.begin(); citr != controls.end(); ++citr )
 		{
 			QTreeWidgetItem *subItem = new QTreeWidgetItem( item );
-			subItem->setText( 0, (*citr)->getId().c_str() );
+			subItem->setText( 0, makeNodeName( (*citr)->getId() ).c_str() );
 		}
 
 		// Add our views
@@ -80,7 +121,23 @@ namespace GUIEditor
 		for( vitr = views.begin(); vitr != views.end(); ++vitr )
 		{
 			QTreeWidgetItem *subItem = new QTreeWidgetItem( item );
-			subItem->setText( 0, (*vitr)->getId().c_str() );
+			subItem->setText( 0, makeNodeName( (*vitr)->getId() ).c_str() );
 		}
+	}
+
+	void WidgetHierarchy::onItemDblClicked( QTreeWidgetItem *item )
+	{
+		CWidgetManager *mg = CWidgetManager::getInstance();
+
+		if( item->parent() == NULL )
+			return;
+		
+		std::string name = item->text( 0 ).toStdString();
+		CInterfaceElement *e = mg->getElementFromId( makeFullName( item, name ) );
+		if( e != NULL )
+		{
+			
+		}
+
 	}
 }
