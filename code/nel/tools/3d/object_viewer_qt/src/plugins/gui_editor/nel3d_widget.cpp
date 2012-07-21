@@ -18,8 +18,13 @@
 #include "nel3d_widget.h"
 #include "nel/3d/u_driver.h"
 #include "nel/3d/text_context.h"
+#include "nel/3d/driver_user.h"
 #include "nel/misc/rgba.h"
 #include "nel/misc/path.h"
+
+#ifdef NL_OS_WINDOWS
+#include <Windows.h>
+#endif
 
 
 namespace GUIEditor
@@ -94,6 +99,69 @@ namespace GUIEditor
 		driver->clearBuffers( NLMISC::CRGBA::Black );
 		driver->swapBuffers();
 	}
+
+
+#if defined ( NL_OS_WINDOWS )
+
+	typedef bool ( *winProc )( NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
+
+	bool Nel3DWidget::winEvent( MSG *message, long *result )
+	{
+		if( driver != NULL ) 
+		{
+			NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
+			if( iDriver != NULL )
+			{
+				winProc proc = (winProc)iDriver->getWindowProc();
+				return proc( iDriver, message->hwnd, message->message, message->wParam, message->lParam );
+			}
+		}
+
+		return false;
+	}
+
+#elif defined( NL_OS_MAC )
+
+	typedef bool ( *cocoaProc )( NL3D::IDriver *, const void *e );
+
+	bool Nel3DWidget::macEvent( EventHandlerCallRef caller, EventRef event )
+	{
+		if( caller )
+			nlerror( "You are using QtCarbon! Only QtCocoa supported, please upgrade Qt" );
+
+		if( driver != NULL )
+		{
+			NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
+			if( iDriver != NULL )
+			{
+				cocoaProc proc = ( cocoaProc )iDriver->getWindowProc();
+				return proc( iDriver, event );
+			}
+		}
+
+		return false;
+	}
+
+#elif defined( NL_OS_UNIX )
+
+	typedef bool ( *x11Proc )( NL3D::IDriver *drv, XEvent *e );
+
+	bool Nel3DWidget::x11Event( XEvent *event )
+	{
+		if( driver != NULL )
+		{
+			NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
+			if( driver != NULL )
+			{
+				x11Proc proc = ( x11Proc )iDriver->getWindowProc();
+				return proc( iDriver, event );
+			}
+		}
+
+		return false;
+	}
+#endif 
+
 }
 
 

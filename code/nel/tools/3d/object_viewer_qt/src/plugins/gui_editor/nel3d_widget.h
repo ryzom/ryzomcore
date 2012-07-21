@@ -19,6 +19,7 @@
 #define NEL3D_WIDGET_H
 
 #include <QWidget>
+#include "nel/misc/types_nl.h"
 #include <string>
 
 namespace NL3D
@@ -51,6 +52,16 @@ namespace GUIEditor
 
 	public Q_SLOTS:
 		void clear();
+
+	protected:
+
+#if defined(NL_OS_WINDOWS)
+	virtual bool winEvent( MSG *message, long *result );
+#elif defined(NL_OS_MAC)
+	virtual bool macEvent( EventHandlerCallRef caller, EventRef event );
+#elif defined(NL_OS_UNIX)
+	virtual bool x11Event( XEvent *event );
+#endif
 
 	private:
 		NL3D::UDriver *driver;
