@@ -43,6 +43,9 @@ namespace GUIEditor
 
 	private Q_SLOTS:
 		void onItemDblClicked( QTreeWidgetItem *item );
+
+	private:
+		std::string currentSelection;
 	};
 }
 

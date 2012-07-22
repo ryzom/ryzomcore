@@ -3093,6 +3093,22 @@ namespace NLGUI
 	}
 
 
+	void CWidgetManager::setCurrentEditorSelection( const std::string &name )
+	{
+		CInterfaceElement *e = getElementFromId( name );
+		if( e != NULL )
+		{
+			if( !currentEditorSelection.empty() )
+			{
+				CInterfaceElement *prev = getElementFromId( currentEditorSelection );
+				if( prev != NULL )
+					prev->setEditorSelected( false );
+			}
+			e->setEditorSelected( true );
+			currentEditorSelection = name;
+		}
+	}
+
 
 	CWidgetManager::CWidgetManager()
 	{
@@ -3127,6 +3143,8 @@ namespace NLGUI
 		inGame = false;
 
 		setScreenWH( 0, 0 );
+
+		currentEditorSelection = "";
 	}
 
 	CWidgetManager::~CWidgetManager()

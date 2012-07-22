@@ -354,10 +354,14 @@ namespace NLGUI
 		rVR.drawRotFlipBitmap (	_RenderLayer, x+_BmpLeftW, y, txw, txh, 0, false, pTxId[1], color );
 		rVR.drawRotFlipBitmap (	_RenderLayer, x+_BmpLeftW+txw, y, _BmpRightW, txh, 0, false, pTxId[2], color );
 
+		CCtrlBase *capturePointerLeft = CWidgetManager::getInstance()->getCapturePointerLeft();
+
 		// *** Draw Over
-		if ( !editorMode && _Over && (_OverWhenPushed || !(_Pushed || CWidgetManager::getInstance()->getCapturePointerLeft() == this)))
+		if( editorSelected ||
+		    ( !editorMode && _Over && (_OverWhenPushed || !(_Pushed ||  capturePointerLeft == this ) ) ) 
+		)
 		{
-			if ((lastOver == false) && (_AHOnOver != NULL))
+			if( !editorMode && (lastOver == false) && (_AHOnOver != NULL) )
 				CAHManager::getInstance()->runActionHandler (_AHOnOver, this, _AHOverParams);
 
 			// the pointer is over the button.
@@ -390,7 +394,7 @@ namespace NLGUI
 			}
 		}
 		// Setup ViewText color
-		if ( pTxId==_TextureIdNormal )
+		if ( pTxId==_TextureIdNormal || editorMode )
 		{
 			if(_TextHeaderColor)	viewTextColor.A=  _TextColorNormal.A;
 			else					viewTextColor= _TextColorNormal;

@@ -218,10 +218,10 @@ namespace NLGUI
 
 
 
-		if ( _Over && !editorMode )
+		if ( ( _Over && !editorMode ) || editorSelected )
 		{
 
-			if ((lastOver == false) && (_AHOnOver != NULL))
+			if( !editorMode && (lastOver == false) && (_AHOnOver != NULL))
 				CAHManager::getInstance()->runActionHandler (_AHOnOver, this, _AHOverParams);
 
 			// the pointer is over the button

@@ -480,6 +480,8 @@ namespace NLGUI
 		const CEventDescriptorKey& getLastKeyEvent() const{ return lastKeyEvent; }
 
 		IParser* getParser() const{ return parser; }
+
+		void setCurrentEditorSelection( const std::string &name );
 				
 	private:
 		CWidgetManager();
@@ -557,6 +559,8 @@ namespace NLGUI
 
 		std::vector< INewScreenSizeHandler* > newScreenSizeHandlers;
 		std::vector< IOnWidgetsDrawnHandler* > onWidgetsDrawnHandlers;
+
+		std::string currentEditorSelection;
 	};
 
 }

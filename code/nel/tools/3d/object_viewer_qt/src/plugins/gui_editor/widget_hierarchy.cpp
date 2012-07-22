@@ -127,17 +127,9 @@ namespace GUIEditor
 
 	void WidgetHierarchy::onItemDblClicked( QTreeWidgetItem *item )
 	{
-		CWidgetManager *mg = CWidgetManager::getInstance();
-
 		if( item->parent() == NULL )
 			return;
 		
-		std::string name = item->text( 0 ).toStdString();
-		CInterfaceElement *e = mg->getElementFromId( makeFullName( item, name ) );
-		if( e != NULL )
-		{
-			
-		}
-
+		CWidgetManager::getInstance()->setCurrentEditorSelection( makeFullName( item, item->text( 0 ).toStdString() ) );
 	}
 }
