@@ -61,11 +61,14 @@ namespace NLGUI
 		/// Forces the Garbage Collector to run.
 		void forceGarbageCollect();
 
+		static void setEditorMode( bool b ){ editorMode = b; }
+
 	private:
 		CLuaManager();
 
 		static CLuaManager *instance;
 		static bool debugLua;
+		static bool editorMode;
 
 		NLGUI::CLuaState *luaState;
 	};

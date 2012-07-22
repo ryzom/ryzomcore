@@ -72,7 +72,13 @@ namespace NLGUI
 		IActionHandler *getActionHandler(const std::string &name) const
 		{
 			TFactoryMap::const_iterator it = FactoryMap.find(name);
-			return it != FactoryMap.end() ? it->second : NULL;
+			if( it == FactoryMap.end() )
+			{
+				nlwarning( "Couldn't find action handler %s", name.c_str() );
+				return NULL;
+			}
+			else
+				return it->second;
 		}
 
 		/// Return the name of the action handler given its pointer
@@ -110,10 +116,12 @@ namespace NLGUI
 
 		// Submit a generic event
 		void submitEvent( const std::string &evt );
+		static void setEditorMode( bool b ){ editorMode = b; }
 
 	private:
 		CAHManager(){}
 		static CAHManager *_GlobalInstance;
+		static bool editorMode;
 
 	};
 

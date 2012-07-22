@@ -30,6 +30,7 @@ namespace NLGUI
 
 	// ------------------------------------------------------------------------------------------------
 	CAHManager	*CAHManager::_GlobalInstance = NULL;
+	bool CAHManager::editorMode = false;
 	// ------------------------------------------------------------------------------------------------
 
 	// ------------------------------------------------------------------------------------------------
@@ -210,6 +211,9 @@ namespace NLGUI
 	{
 		if (ahCmdLine.empty()) return;
 
+		if( editorMode )
+			return;
+
 		// Special AH form ("ah:params") ?
 		string::size_type i = ahCmdLine.find(':');
 		string	ahName;
@@ -259,6 +263,10 @@ namespace NLGUI
 			nlwarning ("no action handler");
 			return;
 		}
+
+		if( editorMode )
+			return;
+
 		pAH->execute (pCaller, Params);
 		string AHName = CAHManager::getInstance()->getAHName(pAH);
 

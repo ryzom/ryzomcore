@@ -20,6 +20,8 @@
 #include "nel/gui/view_renderer.h"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
+#include "nel/gui/action_handler.h"
+#include "nel/gui/lua_manager.h"
 #include "nel/misc/path.h"
 #include "nel/misc/i18n.h"
 #include <set>
@@ -57,6 +59,9 @@ namespace GUIEditor
 
 		Nel3DWidget::init();
 		createTextContext( "Ryzom.ttf" );
+
+		NLGUI::CAHManager::setEditorMode( true );
+		NLGUI::CLuaManager::setEditorMode( true );
 
 		NLGUI::CViewRenderer::setDriver( getDriver() );
 		NLGUI::CViewRenderer::setTextContext( getTextContext() );

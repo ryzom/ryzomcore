@@ -22,6 +22,7 @@ namespace NLGUI
 {
 
 	bool CLuaManager::debugLua = false;
+	bool CLuaManager::editorMode = false;
 	CLuaManager* CLuaManager::instance = NULL;
 
 	CLuaManager::CLuaManager()
@@ -37,6 +38,9 @@ namespace NLGUI
 
 	bool CLuaManager::executeLuaScript( const std::string &luaScript, bool smallScript )
 	{
+		if( editorMode )
+			return true;
+
 		try
 		{
 			if( smallScript )
