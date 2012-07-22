@@ -105,6 +105,8 @@ namespace NLGUI
 			_RenderLayer= 0;
 
 			_AvoidResizeParent= false;
+
+			editorSelected = false;
 		}
 
 		// dtor
@@ -458,7 +460,16 @@ namespace NLGUI
 
 		bool isInGroup( CInterfaceGroup *group );
 
+		static void setEditorMode( bool b ){ editorMode = b; }
+
+		void setEditorSelected( bool b ){ editorSelected = b; }
+		bool isEditorSelected() const{ return editorSelected; }
+
 	protected:
+
+		bool editorSelected;
+
+		static bool editorMode;
 
 		///the parent
 		CInterfaceGroup* _Parent;

@@ -135,7 +135,7 @@ namespace NLGUI
 		{
 			case ToggleButton:
 			{
-				if (_Pushed)
+				if (_Pushed && !editorMode )
 				{
 					nTxId = _TextureIdPushed;
 					color  = getCurrentColorPushed(globalColor);
@@ -161,7 +161,7 @@ namespace NLGUI
 				}
 				else
 				{
-					if ((_Over) && (CWidgetManager::getInstance()->getCapturePointerLeft() == this))
+					if ( (_Over) && (CWidgetManager::getInstance()->getCapturePointerLeft() == this) && !editorMode )
 					{
 						nTxId = _TextureIdPushed;
 						color  = getCurrentColorPushed(globalColor);
@@ -177,7 +177,7 @@ namespace NLGUI
 			break;
 			case PushButton:
 			{
-				if (_Over && (CWidgetManager::getInstance()->getCapturePointerLeft() == this))
+				if ( _Over && (CWidgetManager::getInstance()->getCapturePointerLeft() == this) && !editorMode )
 				{
 					nTxId = _TextureIdPushed;
 					color  = getCurrentColorPushed(globalColor);
@@ -218,7 +218,7 @@ namespace NLGUI
 
 
 
-		if (_Over)
+		if ( _Over && !editorMode )
 		{
 
 			if ((lastOver == false) && (_AHOnOver != NULL))

@@ -62,6 +62,7 @@ namespace GUIEditor
 
 		NLGUI::CAHManager::setEditorMode( true );
 		NLGUI::CLuaManager::setEditorMode( true );
+		NLGUI::CInterfaceElement::setEditorMode( true );
 
 		NLGUI::CViewRenderer::setDriver( getDriver() );
 		NLGUI::CViewRenderer::setTextContext( getTextContext() );

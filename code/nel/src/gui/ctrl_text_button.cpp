@@ -278,7 +278,7 @@ namespace NLGUI
 		{
 			case ToggleButton:
 			{
-				if (_Pushed)
+				if (_Pushed && !editorMode )
 				{
 					pTxId = _TextureIdPushed;
 					color  = getCurrentColorPushed(globalColor);
@@ -304,7 +304,7 @@ namespace NLGUI
 				}
 				else
 				{
-					if ((_Over) && (CWidgetManager::getInstance()->getCapturePointerLeft() == this))
+					if ((_Over) && (CWidgetManager::getInstance()->getCapturePointerLeft() == this) && !editorMode )
 					{
 						pTxId = _TextureIdPushed;
 						color  = getCurrentColorPushed(globalColor);
@@ -320,7 +320,7 @@ namespace NLGUI
 			break;
 			case PushButton:
 			{
-				if (_Over && (CWidgetManager::getInstance()->getCapturePointerLeft() == this))
+				if (_Over && (CWidgetManager::getInstance()->getCapturePointerLeft() == this) && !editorMode )
 				{
 					pTxId = _TextureIdPushed;
 					color  = getCurrentColorPushed(globalColor);
@@ -355,7 +355,7 @@ namespace NLGUI
 		rVR.drawRotFlipBitmap (	_RenderLayer, x+_BmpLeftW+txw, y, _BmpRightW, txh, 0, false, pTxId[2], color );
 
 		// *** Draw Over
-		if (_Over && (_OverWhenPushed || !(_Pushed || CWidgetManager::getInstance()->getCapturePointerLeft() == this)))
+		if ( !editorMode && _Over && (_OverWhenPushed || !(_Pushed || CWidgetManager::getInstance()->getCapturePointerLeft() == this)))
 		{
 			if ((lastOver == false) && (_AHOnOver != NULL))
 				CAHManager::getInstance()->runActionHandler (_AHOnOver, this, _AHOverParams);

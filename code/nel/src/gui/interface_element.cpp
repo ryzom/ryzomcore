@@ -31,6 +31,7 @@ using namespace NLMISC;
 
 namespace NLGUI
 {
+	bool CInterfaceElement::editorMode = false;
 
 	// ------------------------------------------------------------------------------------------------
 	CInterfaceElement::~CInterfaceElement()
