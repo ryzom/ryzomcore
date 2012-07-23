@@ -84,7 +84,8 @@ void CBackgroundSound::importForm(const std::string& filename, NLGEORGES::UFormE
 					// Read the sound name.
 					std::string soundName;
 					psoundItem->getValueByName(soundName, "Sound");
-					sound.SoundName = CStringMapper::map(CFile::getFilenameWithoutExtension(soundName));
+					nlassert(soundName.find(".sound") != std::string::npos);
+					sound.SoundName = NLMISC::CSheetId(soundName);
 
 
 					// Read the environnement flag.
@@ -133,7 +134,7 @@ void CBackgroundSound::getSubSoundList(std::vector<std::pair<std::string, CSound
 	for (; first != last; ++first)
 	{
 		CSound *sound = mixer->getSoundId(first->SoundName);
-		subsounds.push_back(make_pair(CStringMapper::unmap(first->SoundName), sound));
+		subsounds.push_back(make_pair(first->SoundName.toString()/*CStringMapper::unmap(first->SoundName)*/, sound));
 	}
 }
 

@@ -22,8 +22,15 @@
 // define it For Debug purpose only. Normal use is to hide this line
 //#define		NL3D_GLSTATE_DISABLE_CACHE
 
-namespace NL3D
-{
+namespace NL3D {
+
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 // ***************************************************************************
 CDriverGLStates::CDriverGLStates()
@@ -642,6 +649,8 @@ void		CDriverGLStates::setTexGenMode (uint stage, GLint mode)
 	{
 		_TexGenMode[stage] = mode;
 
+		if (!_TextureCubeMapSupported) return;
+
 		if(mode==0)
 		{
 #ifdef USE_OPENGLES
@@ -655,15 +664,31 @@ void		CDriverGLStates::setTexGenMode (uint stage, GLint mode)
 		}
 		else
 		{
+#ifdef USE_OPENGLES
+//			nglTexGeniOES(GL_TEXTURE_GEN_STR_OES, GL_TEXTURE_GEN_MODE_OES, mode);
+#else
 			glTexGeni( GL_S, GL_TEXTURE_GEN_MODE, mode);
 			glTexGeni( GL_T, GL_TEXTURE_GEN_MODE, mode);
 			glTexGeni( GL_R, GL_TEXTURE_GEN_MODE, mode);
+#endif
+
 			/* Object or Eye Space ? => enable W generation. VERY IMPORTANT because
 				was a bug with VegetableRender and ShadowRender:
 					- Vegetable use the TexCoord1.w in his VertexProgram
 					- Shadow Render don't use any TexCoord in VB (since projected)
 					=> TexCoord1.w dirty!!
 			*/
+#ifdef USE_OPENGLES
+//			if(mode==GL_OBJECT_LINEAR || mode==GL_EYE_LINEAR)
+//			{
+				nglTexGeniOES(GL_TEXTURE_GEN_STR_OES, GL_TEXTURE_GEN_MODE_OES, mode);
+				glEnable(GL_TEXTURE_GEN_STR_OES);
+//			}
+//			else
+//			{
+//				glDisable(GL_TEXTURE_GEN_STR_OES);
+//			}
+#else
 			if(mode==GL_OBJECT_LINEAR || mode==GL_EYE_LINEAR)
 			{
 				glTexGeni( GL_Q, GL_TEXTURE_GEN_MODE, mode);
@@ -673,6 +698,7 @@ void		CDriverGLStates::setTexGenMode (uint stage, GLint mode)
 			{
 				glDisable( GL_TEXTURE_GEN_Q );
 			}
+#endif
 
 			// Enable All.
 #ifdef USE_OPENGLES
@@ -685,8 +711,6 @@ void		CDriverGLStates::setTexGenMode (uint stage, GLint mode)
 		}
 	}
 }
-
-
 
 // ***************************************************************************
 void			CDriverGLStates::resetTextureMode()
@@ -994,6 +1018,7 @@ void CDriverGLStates::enableVertexAttribArrayARB(uint glIndex,bool enable)
 void CDriverGLStates::enableVertexAttribArrayForEXTVertexShader(uint glIndex, bool enable, uint *variants)
 {
 	H_AUTO_OGL(CDriverGLStates_enableVertexAttribArrayForEXTVertexShader)
+
 	if(_VertexAttribArrayEnabled[glIndex] != enable)
 	{
 		switch(glIndex)
@@ -1002,10 +1027,12 @@ void CDriverGLStates::enableVertexAttribArrayForEXTVertexShader(uint glIndex, bo
 				enableVertexArray(enable);
 			break;
 			case 1: // skin weight
+#ifndef USE_OPENGLES
 				if(enable)
 					nglEnableVariantClientStateEXT(variants[CDriverGL::EVSSkinWeightVariant]);
 				else
 					nglDisableVariantClientStateEXT(variants[CDriverGL::EVSSkinWeightVariant]);
+#endif
 			break;
 			case 2: // normal
 				enableNormalArray(enable);
@@ -1014,22 +1041,28 @@ void CDriverGLStates::enableVertexAttribArrayForEXTVertexShader(uint glIndex, bo
 				enableColorArray(enable);
 			break;
 			case 4: // secondary color
+#ifndef USE_OPENGLES
 				if(enable)
 					nglEnableVariantClientStateEXT(variants[CDriverGL::EVSSecondaryColorVariant]);
 				else
 					nglDisableVariantClientStateEXT(variants[CDriverGL::EVSSecondaryColorVariant]);
+#endif
 			break;
 			case 5: // fog coordinate
+#ifndef USE_OPENGLES
 				if(enable)
 					nglEnableVariantClientStateEXT(variants[CDriverGL::EVSFogCoordsVariant]);
 				else
 					nglDisableVariantClientStateEXT(variants[CDriverGL::EVSFogCoordsVariant]);
+#endif
 			break;
 			case 6: // palette skin
+#ifndef USE_OPENGLES
 				if(enable)
 					nglEnableVariantClientStateEXT(variants[CDriverGL::EVSPaletteSkinVariant]);
 				else
 					nglDisableVariantClientStateEXT(variants[CDriverGL::EVSPaletteSkinVariant]);
+#endif
 			break;
 			case 7: // empty
 				nlstop;
@@ -1051,8 +1084,6 @@ void CDriverGLStates::enableVertexAttribArrayForEXTVertexShader(uint glIndex, bo
 		}
 		_VertexAttribArrayEnabled[glIndex]= enable;
 	}
-
-
 }
 
 
@@ -1123,6 +1154,8 @@ CDriverGLStates::TCullMode CDriverGLStates::getCullMode() const
 	return _CullMode;
 }
 
-
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D

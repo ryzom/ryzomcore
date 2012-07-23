@@ -73,7 +73,7 @@ void CSoundAnimation::save()
 {
 	// File stream
 	COFile file;
-	vector<NLMISC::TStringId>	sounds;
+	vector<NLMISC::CSheetId>	sounds;
 
 	// Open the file
 	if (!file.open(_Filename.c_str()))
@@ -108,11 +108,11 @@ void CSoundAnimation::save()
 
 			marker->getSounds(sounds);
 
-			vector<NLMISC::TStringId>::iterator iter2;
+			vector<NLMISC::CSheetId>::iterator iter2;
 			for (iter2 = sounds.begin(); iter2 != sounds.end(); iter2++)
 			{
 				xmlNodePtr soundNode = xmlNewChild ( markerNode, NULL, (const xmlChar*)"SOUND", NULL );
-				xmlSetProp (soundNode, (const xmlChar*)"name", (const xmlChar*) CStringMapper::unmap(*iter2).c_str());
+				xmlSetProp (soundNode, (const xmlChar*)"name", (const xmlChar*)iter2->toString().c_str() /*CStringMapper::unmap(*iter2).c_str()*/);
 			}
 
 			sounds.clear();
@@ -190,7 +190,7 @@ void CSoundAnimation::load()
 					throw NLMISC::Exception("Invalid sound animation marker");
 				}
 
-				marker->addSound(CStringMapper::map(string(name)));
+				marker->addSound(NLMISC::CSheetId(string(name), "sound"));
 
 				xmlFree ((void*)name);
 

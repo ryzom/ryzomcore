@@ -32,7 +32,7 @@ IF(WITH_RYZOM_CLIENT)
       SET(CURL_LIBRARIES ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES})
     ENDIF(OPENSSL_FOUND)
 
-    # CURL Macports version depends on libidn and libintl too
+    # CURL Macports version depends on libidn, libintl and libiconv too
     IF(APPLE)
       FIND_LIBRARY(IDN_LIBRARY idn)
       FIND_LIBRARY(INTL_LIBRARY intl)

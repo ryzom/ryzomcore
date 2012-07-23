@@ -25,6 +25,7 @@
 #include <nel/misc/time_nl.h>
 #include <nel/misc/stream.h>
 #include <nel/misc/singleton.h>
+#include <nel/misc/sheet_id.h>
 #include <nel/sound/u_audio_mixer.h>
 #include <nel/georges/u_form.h>
 
@@ -180,7 +181,7 @@ public:
 	// Load environment sounds ; treeRoot can be null if you don't want an access to the envsounds
 //	virtual	void				loadEnvSounds( const char *filename, UEnvSound **treeRoot=NULL );
 	/// Get a TSoundId from a name (returns NULL if not found)
-	virtual TSoundId			getSoundId( const NLMISC::TStringId &name );
+	virtual TSoundId			getSoundId( const NLMISC::CSheetId &name );
 
 	/// Gets the group controller for the given group tree path with separator '/', if it doesn't exist yet it will be created.
 	/// Examples: "music", "effects", "dialog", "music/background", "music/loading", "music/player", etcetera
@@ -192,7 +193,7 @@ public:
 	 * pass a callback function that will be called (if not NULL) just before deleting the spawned
 	 * source.
 	 */
-	virtual USource				*createSource( const NLMISC::TStringId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL);
+	virtual USource				*createSource( const NLMISC::CSheetId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL);
 	/// Add a logical sound source (by sound id). To remove a source, just delete it. See createSource(const char*)
 	virtual USource				*createSource( TSoundId id, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL);
 	/// Add a source which was created by an EnvSound
@@ -223,7 +224,7 @@ public:
 
 
 	/// Return the names of the sounds (call this method after loadSounds())
-	virtual void				getSoundNames( std::vector<NLMISC::TStringId> &names ) const;
+	virtual void				getSoundNames( std::vector<NLMISC::CSheetId> &names ) const;
 	/// Return the number of mixing tracks (voices)
 	virtual uint				getPolyphony() const { return (uint)_Tracks.size(); }
 	/// Return the number of sources instance.
@@ -444,7 +445,7 @@ private:
 		/// Witch parameter to control
 		TControledParamId				ParamId;
 		/// The controled sounds names.
-		std::vector<NLMISC::TStringId>	SoundNames;
+		std::vector<NLMISC::CSheetId>	SoundNames;
 		/// Current parameter value
 		float							Value;
 		/// All the sources controled by this variable
