@@ -3577,7 +3577,7 @@ void impulsePlaySoundTrigger(NLMISC::CBitMemStream& impulse)
 	else
 	{
 		NLMISC::CVector pos;
-		NLMISC::CEntityId eid = SoundPosition.getEntityId();
+		TDataSetIndex compressedIndex = SoundPosition.getEntityId();
 
 		
 

@@ -39,7 +39,7 @@ public:
 		Position = position;
 	}
 
-	TPositionOrEntity(const NLMISC::CEntityId& eid)
+	TPositionOrEntity(const TDataSetIndex& eid)
 	{
 		_isPosition = 0;
 		EntityId = eid;
@@ -82,7 +82,7 @@ public:
 		Position = position;
 	}
 
-	void setEntityId(const NLMISC::CEntityId& eid)
+	void setEntityId(const TDataSetIndex& eid)
 	{
 		_isPosition = 0;
 		EntityId = eid;
@@ -105,10 +105,10 @@ public:
 		return Position;
 	}
 
-	NLMISC::CEntityId getEntityId() const
+	TDataSetIndex getEntityId() const
 	{
 		if (!isEntityId())
-			return NLMISC::CEntityId();
+			return TDataSetIndex();
 		return EntityId;
 	}
 
@@ -129,7 +129,7 @@ public:
 private:
 	char _isPosition;
 	NLMISC::CVector	Position;
-	NLMISC::CEntityId EntityId;
+	TDataSetIndex EntityId;
 };
 
 

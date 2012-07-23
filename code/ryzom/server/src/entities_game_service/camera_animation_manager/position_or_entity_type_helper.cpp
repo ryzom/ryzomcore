@@ -16,6 +16,10 @@
 // 
 
 #include "camera_animation_manager/position_or_entity_type_helper.h"
+#include "monitor_service/mirrors.h"
+#include "game_share/mirror.h"
+#include "game_share/mirrored_data_set.h"
+#include "game_share/base_types.h"
 
 const TPositionOrEntity CPositionOrEntityHelper::Invalid = TPositionOrEntity();
 
@@ -26,7 +30,7 @@ TPositionOrEntity CPositionOrEntityHelper::fromString(const std::string& s)
 
 	std::vector<std::string> res;
 	NLMISC::splitString(str, ";", res);
-	// If we don't have 3 components, it's an entityid
+	// If we don't have 3 components, it's an entity
 	if (res.size() != 3)
 	{
 		std::vector<TAIAlias> res;
@@ -48,8 +52,9 @@ TPositionOrEntity CPositionOrEntityHelper::fromString(const std::string& s)
 			nlerror("TPositionOrentityHelper : invalid entity id from alias %d", alias);
 			return TPositionOrEntity();
 		}
+		TDataSetIndex compressedId = TheDataset.getDataSetRow(eid).getCompressedIndex();
 
-		return TPositionOrEntity(eid);
+		return TPositionOrEntity(compressedId);
 	}
 	else
 	{
