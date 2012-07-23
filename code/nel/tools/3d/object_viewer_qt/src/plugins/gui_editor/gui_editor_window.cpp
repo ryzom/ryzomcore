@@ -34,7 +34,7 @@
 #include "widget_properties_parser.h"
 #include "widget_hierarchy.h"
 #include "link_editor.h"
-#include "proc_editor.h"
+#include "proc_list.h"
 #include "project_file_parser.h"
 #include "project_window.h"
 #include "nelgui_widget.h"
@@ -52,7 +52,7 @@ namespace GUIEditor
 		m_undoStack   = new QUndoStack(this);
 		widgetProps   = new CWidgetProperties;
 		linkEditor    = new LinkEditor;
-		procEditor    = new ProcEditor;
+		procList      = new ProcList;
 		projectWindow = new ProjectWindow;
 		connect( projectWindow, SIGNAL( projectFilesChanged() ), this, SLOT( onProjectFilesChanged() ) );
 		viewPort      = new NelGUIWidget;
@@ -94,8 +94,8 @@ namespace GUIEditor
 		delete linkEditor;
 		linkEditor = NULL;
 
-		delete procEditor;
-		procEditor = NULL;
+		delete procList;
+		procList = NULL;
 
 		delete projectWindow;
 		projectWindow = NULL;
@@ -200,8 +200,8 @@ namespace GUIEditor
 			connect( a, SIGNAL( triggered( bool ) ), linkEditor, SLOT( show() ) );
 			m->addAction( a );
 
-			a = new QAction( "Proc Editor", this );
-			connect( a, SIGNAL( triggered( bool ) ), procEditor, SLOT( show() ) );
+			a = new QAction( "Procedure Editor", this );
+			connect( a, SIGNAL( triggered( bool ) ), procList, SLOT( show() ) );
 			m->addAction( a );
 
 			a = new QAction( "Project Window", this );

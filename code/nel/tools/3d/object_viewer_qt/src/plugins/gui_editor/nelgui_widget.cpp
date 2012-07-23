@@ -119,7 +119,8 @@ namespace GUIEditor
 
 	void NelGUIWidget::paintEvent( QPaintEvent *evnt )
 	{
-		//draw();
+		if( !guiLoaded )
+			clear();
 	}
 
 	void NelGUIWidget::timerEvent( QTimerEvent *evnt )
