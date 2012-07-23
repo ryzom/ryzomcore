@@ -90,6 +90,7 @@
 #include "game_share/position_or_entity_type.h"
 #include "nel/misc/vector.h"
 #include "nel/misc/entity_id.h"
+#include "entity_cl.h"
 
 
 #define OLD_STRING_SYSTEM
@@ -3576,12 +3577,20 @@ void impulsePlaySoundTrigger(NLMISC::CBitMemStream& impulse)
 		SoundMngr->spawnSource(SoundId, SoundPosition.getPosition());
 	else
 	{
-		NLMISC::CVector pos;
+		NLMISC::CVectorD pos;
 		TDataSetIndex compressedIndex = SoundPosition.getEntityId();
 
-		
-
-		SoundMngr->spawnSource(SoundId, pos);
+		CEntityCL *entity = EntitiesMngr.getEntityByCompressedIndex(compressedIndex);
+		if (!entity)
+		{
+			nlwarning("<impulsePlaySoundTrigger> invalid entity with compressed id %d", compressedIndex);
+			return;
+		}
+		else
+		{
+			pos = entity->pos();
+			SoundMngr->spawnSource(SoundId, pos);
+		}
 	}
 }
 
