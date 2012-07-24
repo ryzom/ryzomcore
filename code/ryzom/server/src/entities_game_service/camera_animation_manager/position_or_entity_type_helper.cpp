@@ -41,13 +41,13 @@ TPositionOrEntity CPositionOrEntityHelper::fromString(const std::string& s)
 		CAIAliasTranslator::getInstance()->getNPCAliasesFromName(str, res);
 		if (res.size() != 1)
 		{
-			nlerror("TPositionOrentityHelper : no alias for entity name %s", str);
+			nlerror("TPositionOrentityHelper : no alias for entity name %s", str.c_str());
 			return TPositionOrEntity();
 		}
 		TAIAlias alias = res[0];
 		if (alias == CAIAliasTranslator::Invalid)
 		{
-			nlerror("TPositionOrentityHelper : invalid alias for entity name %s", str);
+			nlerror("TPositionOrentityHelper : invalid alias for entity name %s", str.c_str());
 			return TPositionOrEntity();
 		}
 		NLMISC::CEntityId eid = CAIAliasTranslator::getInstance()->getEntityId(alias);
@@ -77,17 +77,17 @@ TPositionOrEntity CPositionOrEntityHelper::fromString(const std::string& s)
 
 		if (!NLMISC::fromString(xStr, x))
 		{
-			nlerror("TPositionOrentityHelper : invalid x component from string %s", xStr);
+			nlerror("TPositionOrentityHelper : invalid x component from string %s", xStr.c_str());
 			return TPositionOrEntity();
 		}
 		if (!NLMISC::fromString(yStr, y))
 		{
-			nlerror("TPositionOrentityHelper : invalid y component from string %s", yStr);
+			nlerror("TPositionOrentityHelper : invalid y component from string %s", yStr.c_str());
 			return TPositionOrEntity();
 		}
 		if (!NLMISC::fromString(yStr, x))
 		{
-			nlerror("TPositionOrentityHelper : invalid z component from string %s", zStr);
+			nlerror("TPositionOrentityHelper : invalid z component from string %s", zStr.c_str());
 			return TPositionOrEntity();
 		}
 
