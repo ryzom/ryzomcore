@@ -17,6 +17,10 @@
 
 #include "proc_list.h"
 #include "proc_editor.h"
+#include <QMessageBox>
+#include <QInputDialog>
+#include "nel/gui/interface_group.h"
+#include "nel/gui/widget_manager.h"
 
 namespace GUIEditor
 {
@@ -29,6 +33,8 @@ namespace GUIEditor
 		connect( okButton, SIGNAL( clicked( bool ) ), this, SLOT( onOkButtonClicked() ) );
 		connect( cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( hide() ) );
 		connect( editButton, SIGNAL( clicked( bool ) ), this, SLOT( onEditButtonClicked() ) );
+		connect( addButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddButtonClicked() ) );
+		connect( removeButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveButtonClicked() ) );
 	}
 
 	ProcList::~ProcList()
@@ -38,7 +44,7 @@ namespace GUIEditor
 
 	void ProcList::onGUILoaded()
 	{
-
+		setupProcList();
 	}
 
 	void ProcList::onOkButtonClicked()
@@ -48,7 +54,68 @@ namespace GUIEditor
 
 	void ProcList::onEditButtonClicked()
 	{
+		IParser *parser = CWidgetManager::getInstance()->getParser();
+		QListWidgetItem *item = procList->item( procList->currentRow() );
+		if( item == NULL )
+			return;
+
+		CProcedure *proc = parser->getProc( item->text().toStdString() );
+		if( proc == NULL )
+			return;
+
+		procEditor->setCurrentProc( item->text() );
 		procEditor->show();
+	}
+
+	void ProcList::onAddButtonClicked()
+	{
+		bool ok;
+		QString newProc =
+			QInputDialog::getText( this,
+								tr( "Adding a new procedure" ),
+								tr( "Please specify the name of the new procedure" ),
+								QLineEdit::Normal,
+								QString(),
+								&ok );
+		if( ok )
+		{
+			IParser *parser = CWidgetManager::getInstance()->getParser();
+			if( !parser->addProc( newProc.toStdString() ) )
+			{
+				QMessageBox::critical( this,
+									tr( "Cannot add new procedure" ),
+									tr( "There was an error adding the new procedure" ) );
+			}
+			procList->addItem( newProc );
+			procList->sortItems();
+		}
+	}
+
+	void ProcList::onRemoveButtonClicked()
+	{
+		IParser *parser = CWidgetManager::getInstance()->getParser();
+		QListWidgetItem *item = procList->item( procList->currentRow() );
+		if( item == NULL )
+			return;
+		
+		if( !parser->removeProc( item->text().toStdString() ) )
+			return;
+		item = procList->takeItem( procList->currentRow() );
+		delete item;
+	}
+
+	void ProcList::setupProcList()
+	{
+		procList->clear();
+
+		const TProcedureMap& procMap =
+			CWidgetManager::getInstance()->getParser()->getProcMap();
+
+		TProcedureMap::const_iterator itr;
+		for( itr = procMap.begin(); itr != procMap.end(); ++itr )
+		{
+			procList->addItem( itr->first.c_str() );
+		}
 	}
 }
 

@@ -21,13 +21,13 @@
 #include <string>
 #include <vector>
 #include "nel/misc/types_nl.h"
+#include "nel/gui/proc.h"
 
 namespace NLGUI
 {
 	class CInterfaceElement;
 	class CInterfaceGroup;
 	class CInterfaceAnim;
-	class CProcedure;
 	class CCtrlSheetSelection;
 	class CInterfaceLink;
 
@@ -52,6 +52,7 @@ namespace NLGUI
         virtual const std::string&  getDefine(const std::string &id) const = 0;
         virtual CInterfaceAnim* getAnim( const std::string &name ) const = 0;
         virtual CProcedure* getProc( const std::string &name ) = 0;
+		virtual const TProcedureMap& getProcMap() const = 0;
 		virtual bool parseInterface( const std::vector< std::string > &xmlFileNames, bool reload, bool isFilename = true, bool checkInData = false ) = 0;
 		virtual void initLUA() = 0;
 		virtual void uninitLUA() = 0;
@@ -67,6 +68,9 @@ namespace NLGUI
 		virtual bool addLink( CInterfaceLink *link, const std::string &id ) = 0;
 		virtual bool removeLink( const std::string &id ) = 0;
 		virtual void removeAll() = 0;
+		virtual bool hasProc( const std::string &name ) const = 0;
+		virtual bool addProc( const std::string &name ) = 0;
+		virtual bool removeProc( const std::string &name ) = 0;
 	};
 }
 

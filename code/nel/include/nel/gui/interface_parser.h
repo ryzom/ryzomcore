@@ -233,6 +233,15 @@ namespace NLGUI
 			void removeAll();
 		// @}
 
+	protected:
+		/// Procedure list
+		typedef	TProcedureMap::iterator			ItProcedureMap;
+		typedef	TProcedureMap::const_iterator	CstItProcedureMap;
+		TProcedureMap							_ProcedureMap;
+
+	public:
+
+
 		// get info on procedure. return 0 if procedure not found
 		uint getProcedureNumActions( const std::string &procName ) const;
 
@@ -244,6 +253,8 @@ namespace NLGUI
 		CInterfaceAnim* getAnim( const std::string &name ) const;
 
 		CProcedure* getProc( const std::string &name );
+
+		const TProcedureMap& getProcMap() const{ return _ProcedureMap; }
 
 	protected:
 
@@ -288,12 +299,6 @@ namespace NLGUI
 		};
 
 
-		/// Procedure list
-		typedef	std::map<std::string,CProcedure>		TProcedureMap;
-		typedef	TProcedureMap::iterator			ItProcedureMap;
-		typedef	TProcedureMap::const_iterator	CstItProcedureMap;
-		TProcedureMap							_ProcedureMap;
-
 		// mgt of sheet selections (inventory, buy, sell..)
 		CCtrlSheetSelection		  _CtrlSheetSelection;
 
@@ -331,6 +336,10 @@ namespace NLGUI
 		void reloadAllLuaFileScripts();
 
 		void setSetupOptionsCallback( ISetupOptionCallbackClass *cb ){ setupCallback = cb; }
+
+		bool hasProc( const std::string &name ) const;
+		bool addProc( const std::string &name );
+		bool removeProc( const std::string &name );
 	};
 
 }

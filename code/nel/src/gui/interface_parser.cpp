@@ -2777,5 +2777,36 @@ namespace NLGUI
 			}
 		}
 	}
+
+	bool CInterfaceParser::hasProc( const std::string &name ) const
+	{
+		TProcedureMap::const_iterator itr 
+			= _ProcedureMap.find( name );
+		if( itr != _ProcedureMap.end() )
+			return true;
+		else
+			return false;
+	}
+
+	bool CInterfaceParser::addProc( const std::string &name )
+	{
+		if( hasProc( name ) )
+			return false;
+
+		_ProcedureMap[ name ] = CProcedure();
+
+		return true;
+	}
+
+	bool CInterfaceParser::removeProc( const std::string &name )
+	{
+		TProcedureMap::iterator itr =
+			_ProcedureMap.find( name );
+		if( itr == _ProcedureMap.end() )
+			return false;
+
+		_ProcedureMap.erase( itr );
+		return true;
+	}
 }
 

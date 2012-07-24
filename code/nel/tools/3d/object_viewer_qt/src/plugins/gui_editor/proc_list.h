@@ -37,8 +37,11 @@ namespace GUIEditor
 	private Q_SLOTS:
 		void onOkButtonClicked();
 		void onEditButtonClicked();
+		void onAddButtonClicked();
+		void onRemoveButtonClicked();
 
 	private:
+		void setupProcList();
 		ProcEditor *procEditor;
 	};
 }

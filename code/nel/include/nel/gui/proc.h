@@ -21,6 +21,7 @@
 #include "nel/misc/types_nl.h"
 #include <string>
 #include <vector>
+#include <map>
 
 namespace NLGUI
 {
@@ -65,12 +66,46 @@ namespace NLGUI
 	};
 
 
+	class CActionNameIs
+	{
+	public:
+		CActionNameIs( const std::string &n )
+		{
+			name = n;
+		}
+
+		bool operator()( const CProcAction &action )
+		{
+			if( action.Action == name )
+				return true;
+			else
+				return false;
+		}
+
+	private:
+		std::string name;
+	};
+
+
 	class CProcedure
 	{
 	public:
 		// List of the actions
 		std::vector< CProcAction > Actions;
+
+		bool hasAction( const std::string &name ) const
+		{
+			std::vector< CProcAction >::const_iterator itr
+				= std::find_if( Actions.begin(), Actions.end(), CActionNameIs( name ) );
+			if( itr != Actions.end() )
+				return true;
+			else
+				return false;
+		}
+
 	};
+	
+	typedef	std::map< std::string, CProcedure > TProcedureMap;
 }
 
 #endif

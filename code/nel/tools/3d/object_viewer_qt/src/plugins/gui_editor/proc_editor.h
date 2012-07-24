@@ -31,8 +31,11 @@ namespace GUIEditor
 		ProcEditor( QWidget *parent = NULL );
 		~ProcEditor();
 
+		void setCurrentProc( const QString &name );
+
 	private:
 		ActionEditor *actionEditor;
+		QString currentProc;
 	};
 }
 

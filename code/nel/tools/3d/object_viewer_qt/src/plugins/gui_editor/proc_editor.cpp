@@ -17,7 +17,8 @@
 
 #include "proc_editor.h"
 #include "action_editor.h"
-
+#include "nel/gui/interface_group.h"
+#include "nel/gui/widget_manager.h"
 
 namespace GUIEditor
 {
@@ -28,12 +29,28 @@ namespace GUIEditor
 		connect( okButton, SIGNAL( clicked( bool ) ), this, SLOT( hide() ) );
 		connect( cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( hide() ) );
 		connect( editButton, SIGNAL( clicked( bool ) ), actionEditor, SLOT( show() ) );
-
 	}
 
 	ProcEditor::~ProcEditor()
 	{
 		delete actionEditor;
 		actionEditor = NULL;
+	}
+
+	void ProcEditor::setCurrentProc( const QString &name )
+	{
+		actionList->clear();
+
+		currentProc = name;
+		IParser *parser = CWidgetManager::getInstance()->getParser();
+		CProcedure *proc = parser->getProc( name.toStdString() );
+		
+		std::vector< CProcAction >::const_iterator itr;
+		for( itr = proc->Actions.begin(); itr != proc->Actions.end(); ++itr )
+		{
+			actionList->addItem( itr->Action.c_str() );
+		}
+
+		setWindowTitle( QString( "Procedure Editor - %1" ).arg( currentProc ) );
 	}
 }
