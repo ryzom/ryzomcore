@@ -18,7 +18,7 @@
 #define RY_POSITIONORENTITYTYPEHELPER_H
 
 
-#include "game_share\position_or_entity_type.h"
+#include "game_share/position_or_entity_type.h"
 
 
 
