@@ -19,7 +19,7 @@
 #include "game_share/position_or_entity_type.h"
 
 #include "nel/misc/sheet_id.h"
-#include "position_or_entity_type_helper.h"
+#include "camera_animation_manager/position_or_entity_type_helper.h"
 
 /////////////////////////////////////////////////////////////////////////////
 /// This animation modifier shakes the camera. The parameter is
