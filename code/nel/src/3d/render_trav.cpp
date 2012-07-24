@@ -69,7 +69,6 @@ CRenderTrav::CRenderTrav()
 	_CurrentPassOpaque = true;
 
 	_CacheLightContribution= NULL;
-	_LastLocalAttenuation= false;
 
 	// Default light Setup.
 	LightingSystemEnabled= false;
@@ -624,7 +623,7 @@ void		CRenderTrav::changeLightSetup(CLightContribution	*lightContribution, bool 
 	uint		i;
 
 	// if same lightContribution, no-op.
-	if(_CacheLightContribution == lightContribution &&  _LastLocalAttenuation == useLocalAttenuation)
+	if (_CacheLightContribution == lightContribution && (lightContribution == NULL || _LastLocalAttenuation == useLocalAttenuation))
 		return;
 	// else, must setup the lights into driver.
 	else
