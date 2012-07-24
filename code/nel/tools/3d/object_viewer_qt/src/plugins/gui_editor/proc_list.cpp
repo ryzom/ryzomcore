@@ -97,6 +97,15 @@ namespace GUIEditor
 		QListWidgetItem *item = procList->item( procList->currentRow() );
 		if( item == NULL )
 			return;
+
+		QMessageBox::StandardButton button =
+			QMessageBox::question( this, 
+								tr( "Removing a procedure" ),
+								tr( "Are you sure you want to remove '%1'" ).arg( item->text() ),
+								QMessageBox::Yes | QMessageBox::Cancel );
+
+		if( button != QMessageBox::Yes )
+			return;
 		
 		if( !parser->removeProc( item->text().toStdString() ) )
 			return;

@@ -17,6 +17,8 @@
 
 #include "proc_editor.h"
 #include "action_editor.h"
+#include <QMessageBox>
+#include <QInputDialog>
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
 
@@ -28,7 +30,11 @@ namespace GUIEditor
 		actionEditor = new ActionEditor;
 		connect( okButton, SIGNAL( clicked( bool ) ), this, SLOT( hide() ) );
 		connect( cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( hide() ) );
-		connect( editButton, SIGNAL( clicked( bool ) ), actionEditor, SLOT( show() ) );
+		connect( editButton, SIGNAL( clicked( bool ) ), this, SLOT( onEditButtonClicked() ) );
+		connect( addButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddButtonClicked() ) );
+		connect( removeButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveButtonClicked() ) );
+		connect( upButton, SIGNAL( clicked( bool ) ), this, SLOT( onUpButtonClicked() ) );
+		connect( downButton, SIGNAL( clicked( bool ) ), this, SLOT( onDownButtonClicked() ) );
 	}
 
 	ProcEditor::~ProcEditor()
@@ -52,5 +58,137 @@ namespace GUIEditor
 		}
 
 		setWindowTitle( QString( "Procedure Editor - %1" ).arg( currentProc ) );
+	}
+
+	void ProcEditor::onEditButtonClicked()
+	{
+		actionEditor->show();
+	}
+
+	void ProcEditor::onAddButtonClicked()
+	{
+		bool ok;
+		QString name =
+			QInputDialog::getText( this,
+							tr( "Adding new Action" ),
+							tr( "Please specify the name of the new action handler" ),
+							QLineEdit::Normal,
+							QString(),
+							&ok );
+
+		if( ok )
+		{
+			CProcedure *proc =
+				CWidgetManager::getInstance()->getParser()->getProc( currentProc.toStdString() );
+			if( proc != NULL )
+			{
+				proc->addAction( name.toStdString() );
+				actionList->addItem( name );
+			}
+			else
+				nlinfo( "Cannot find procedure %s", currentProc.toStdString().c_str() );
+		}
+	}
+
+	void ProcEditor::onRemoveButtonClicked()
+	{
+		QListWidgetItem *item = actionList->item( actionList->currentRow() );
+		if( item == NULL )
+			return;
+
+		QMessageBox::StandardButton button =
+			QMessageBox::question( this, 
+								tr( "Removing an Action" ),
+								tr( "Are you sure you want to remove '%1'" ).arg( item->text() ),
+								QMessageBox::Yes | QMessageBox::Cancel );
+
+		if( button != QMessageBox::Yes )
+			return;
+
+		CProcedure *proc = 
+			CWidgetManager::getInstance()->getParser()->getProc( currentProc.toStdString() );
+
+		if( proc != NULL )
+		{
+			if( !proc->removeAction( static_cast< uint32 >( actionList->currentRow() ) ) )
+				nlinfo( "Action #%d not found in procedure %s.", actionList->currentRow(), currentProc.toStdString().c_str() );
+			item = actionList->takeItem( actionList->currentRow() );
+			delete item;
+		}
+		else
+			nlinfo( "Cannot find procedure %s", currentProc.toStdString().c_str() );
+	}
+
+	void ProcEditor::onUpButtonClicked()
+	{
+		int row = actionList->currentRow();
+		if( row == 0 )
+			return;
+		QListWidgetItem *item = actionList->item( row );
+		if( item == NULL )
+			return;
+
+		QListWidgetItem *prevItem = actionList->item( row - 1 );
+		if( prevItem == NULL )
+			return;
+
+		CProcedure *proc = CWidgetManager::getInstance()->getParser()->getProc( currentProc.toStdString() );
+		if( proc == NULL )
+			return;
+
+		if( !proc->swap( row - 1, row ) )
+			return;
+
+		swapListItems( row - 1, row );
+		actionList->setCurrentRow( row - 1 );
+	}
+
+	void ProcEditor::onDownButtonClicked()
+	{
+		int row = actionList->currentRow();
+		if( row == ( actionList->count() - 1 ) )
+			return;
+		QListWidgetItem *item = actionList->item( row );
+		if( item == NULL )
+			return;
+		QListWidgetItem *nextItem = actionList->item( row + 1 );
+		if( nextItem == NULL )
+			return;
+
+		CProcedure *proc = CWidgetManager::getInstance()->getParser()->getProc( currentProc.toStdString() );
+		if( proc == NULL )
+			return;
+
+		if( !proc->swap( row, row + 1 ) )
+			return;
+
+		swapListItems( row, row + 1 );
+		actionList->setCurrentRow( row + 1 );
+	}
+
+	void ProcEditor::swapListItems( int row1, int row2 )
+	{
+		if( row1 == row2 )
+			return;
+		if( row1 >= actionList->count() )
+			return;
+		if( row2 >= actionList->count() )
+			return;
+
+		if( row1 > row2 ){
+			std::swap( row1, row2 );
+		}
+
+		QListWidgetItem *item1 = actionList->item( row1 );
+		if( item1 == NULL )
+			return;
+		QListWidgetItem *item2 = actionList->item( row2 );
+		if( item2 == NULL )
+			return;
+
+		actionList->takeItem( row1 );
+		actionList->takeItem( row2 - 1 );
+		actionList->insertItem( row1, item2 );
+		actionList->insertItem( row2, item1 );
 	}
 }

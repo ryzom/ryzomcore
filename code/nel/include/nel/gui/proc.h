@@ -103,6 +103,40 @@ namespace NLGUI
 				return false;
 		}
 
+		bool swap( uint32 i1, uint32 i2 )
+		{
+			if( i1 == i2 )
+				return false;
+			if( i1 >= Actions.size() )
+				return false;
+			if( i2 >= Actions.size() )
+				return false;
+
+			CProcAction a = Actions[ i1 ];
+			Actions[ i1 ] = Actions[ i2 ];
+			Actions[ i2 ] = a;
+
+			return true;
+		}
+
+		bool addAction( const std::string &name )
+		{
+			Actions.push_back( CProcAction() );
+			Actions.back().Action = name;
+
+			return true;
+		}
+
+		bool removeAction( uint32 i )
+		{
+			if( i >= Actions.size() )
+				return false;
+			std::vector< CProcAction >::iterator itr = Actions.begin() + i;
+			Actions.erase( itr );
+
+			return true;
+		}
+
 	};
 	
 	typedef	std::map< std::string, CProcedure > TProcedureMap;

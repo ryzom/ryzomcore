@@ -33,7 +33,16 @@ namespace GUIEditor
 
 		void setCurrentProc( const QString &name );
 
+	private Q_SLOTS:
+		void onEditButtonClicked();
+		void onAddButtonClicked();
+		void onRemoveButtonClicked();
+		void onUpButtonClicked();
+		void onDownButtonClicked();
+
 	private:
+		void swapListItems( int row1, int row2 );
+
 		ActionEditor *actionEditor;
 		QString currentProc;
 	};
