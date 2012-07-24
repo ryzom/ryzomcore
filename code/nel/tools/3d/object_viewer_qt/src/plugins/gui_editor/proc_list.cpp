@@ -15,40 +15,40 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef NELGUI_WIDGET_H
-#define NELGUI_WIDGET_H
-
-#include "nel3d_widget.h"
-#include "project_files.h"
+#include "proc_list.h"
+#include "proc_editor.h"
 
 namespace GUIEditor
 {
-	/// Qt viewport for the Nel GUI library
-	class NelGUIWidget : public Nel3DWidget
+	ProcList::ProcList( QWidget *parent ) :
+	QWidget( parent )
 	{
-		Q_OBJECT
-	public:
-		NelGUIWidget( QWidget *parent = NULL );
-		~NelGUIWidget();
+		setupUi( this );
+		procEditor = new ProcEditor;
 
-		void init();
-		bool parse( SProjectFiles &files );
-		void draw();
+		connect( okButton, SIGNAL( clicked( bool ) ), this, SLOT( onOkButtonClicked() ) );
+		connect( cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( hide() ) );
+		connect( editButton, SIGNAL( clicked( bool ) ), this, SLOT( onEditButtonClicked() ) );
+	}
 
-Q_SIGNALS:
-		void guiLoadComplete();
+	ProcList::~ProcList()
+	{
+		delete procEditor;
+	}
 
-	protected:
-		void paintEvent( QPaintEvent *evnt );
-		void timerEvent( QTimerEvent *evnt );
-		void showEvent( QShowEvent *evnt );
-		void hideEvent( QHideEvent *evnt );
+	void ProcList::onGUILoaded()
+	{
 
+	}
 
-	private:
-		int timerID;
-		bool guiLoaded;
-	};
+	void ProcList::onOkButtonClicked()
+	{
+		hide();
+	}
+
+	void ProcList::onEditButtonClicked()
+	{
+		procEditor->show();
+	}
 }
 
-#endif

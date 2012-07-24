@@ -125,6 +125,13 @@ namespace GUIEditor
 		}
 	}
 
+	void WidgetHierarchy::onGUILoaded()
+	{
+		if( masterGroup.empty() )
+			return;
+		buildHierarchy( masterGroup );
+	}
+
 	void WidgetHierarchy::onItemDblClicked( QTreeWidgetItem *item )
 	{
 		if( item->parent() == NULL )

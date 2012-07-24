@@ -82,6 +82,9 @@ namespace GUIEditor
 		addDockWidget( Qt::RightDockWidgetArea, dock );
 
 		viewPort->init();
+
+		connect( viewPort, SIGNAL( guiLoadComplete() ), hierarchyView, SLOT( onGUILoaded() ) );
+		connect( viewPort, SIGNAL( guiLoadComplete() ), procList, SLOT( onGUILoaded() ) );
 	}
 	
 	GUIEditorWindow::~GUIEditorWindow()
@@ -151,7 +154,6 @@ namespace GUIEditor
 		if( viewPort->parse( projectFiles ) )
 		{
 			hierarchyView->buildHierarchy( projectFiles.masterGroup );
-			viewPort->draw();			
 		}
 		else
 		{
@@ -173,11 +175,6 @@ namespace GUIEditor
 			QMessageBox::critical( this,
 				tr( "Error parsing GUI XML files" ),
 				tr( "There was an error while parsing the GUI XML files. See the log file for details." ) );
-		}
-		else
-		{
-			hierarchyView->buildHierarchy( projectFiles.masterGroup );
-			viewPort->draw();
 		}
 
 		setCursor( Qt::ArrowCursor );

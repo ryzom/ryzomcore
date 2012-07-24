@@ -35,17 +35,23 @@ namespace GUIEditor
 		WidgetHierarchy( QWidget *parent = NULL );
 		~WidgetHierarchy();
 
+		void setMasterGroup( const std::string &name ){ masterGroup = name; }
+
 		void clearHierarchy();
 		void buildHierarchy( std::string &masterGroup );
-		
+
 	private:
 		void buildHierarchy( QTreeWidgetItem *parent, NLGUI::CInterfaceGroup *group );
+
+	public Q_SLOTS:
+		void onGUILoaded();
 
 	private Q_SLOTS:
 		void onItemDblClicked( QTreeWidgetItem *item );
 
 	private:
 		std::string currentSelection;
+		std::string masterGroup;
 	};
 }
 

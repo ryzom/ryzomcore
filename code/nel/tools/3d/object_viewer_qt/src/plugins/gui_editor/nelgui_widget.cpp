@@ -105,6 +105,7 @@ namespace GUIEditor
 
 		timerID = startTimer( 200 );
 		guiLoaded = true;
+		Q_EMIT guiLoadComplete();
 
 		return true;
 	}

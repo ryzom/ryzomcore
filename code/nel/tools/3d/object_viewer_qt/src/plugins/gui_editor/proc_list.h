@@ -15,40 +15,34 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef NELGUI_WIDGET_H
-#define NELGUI_WIDGET_H
+#ifndef PROC_LIST_H
+#define PROC_LIST_H
 
-#include "nel3d_widget.h"
-#include "project_files.h"
+#include "ui_proc_list.h"
 
 namespace GUIEditor
 {
-	/// Qt viewport for the Nel GUI library
-	class NelGUIWidget : public Nel3DWidget
+	class ProcEditor;
+
+	class ProcList : public QWidget, public Ui::ProcList
 	{
 		Q_OBJECT
 	public:
-		NelGUIWidget( QWidget *parent = NULL );
-		~NelGUIWidget();
+		ProcList( QWidget *parent = NULL );
+		~ProcList();
 
-		void init();
-		bool parse( SProjectFiles &files );
-		void draw();
+	public Q_SLOTS:
+		void onGUILoaded();
 
-Q_SIGNALS:
-		void guiLoadComplete();
-
-	protected:
-		void paintEvent( QPaintEvent *evnt );
-		void timerEvent( QTimerEvent *evnt );
-		void showEvent( QShowEvent *evnt );
-		void hideEvent( QHideEvent *evnt );
-
+	private Q_SLOTS:
+		void onOkButtonClicked();
+		void onEditButtonClicked();
 
 	private:
-		int timerID;
-		bool guiLoaded;
+		ProcEditor *procEditor;
 	};
 }
 
 #endif
+
+
