@@ -62,6 +62,17 @@ namespace GUIEditor
 
 	void ProcEditor::onEditButtonClicked()
 	{
+		int row = actionList->currentRow();
+		QListWidgetItem *item = actionList->item( row );
+		if( item == NULL )
+			return;
+
+		CProcedure *proc =
+			CWidgetManager::getInstance()->getParser()->getProc( currentProc.toStdString() );
+		if( proc == NULL )
+			return;
+
+		actionEditor->setCurrentAction( &( proc->Actions[ row ] )  );
 		actionEditor->show();
 	}
 

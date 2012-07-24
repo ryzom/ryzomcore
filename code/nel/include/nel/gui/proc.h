@@ -47,6 +47,9 @@ namespace NLGUI
 
 		// the action handler (may be proc!!)
 		std::string Action;
+		std::string Parameters;
+		std::string Conditions;
+
 		// A list of string/or param number => to build the final params at execution
 		std::vector< CParamBlock > ParamBlocks;
 

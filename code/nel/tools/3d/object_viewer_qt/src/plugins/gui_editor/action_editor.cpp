@@ -16,17 +16,34 @@
 
 
 #include "action_editor.h"
+#include "nel/gui/proc.h"
 
 namespace GUIEditor
 {
 	ActionEditor::ActionEditor( QWidget *parent )
 	{
 		setupUi( this );
-		connect( okButton, SIGNAL( clicked( bool ) ), this, SLOT( hide() ) );
+		connect( okButton, SIGNAL( clicked( bool ) ), this, SLOT( onOkButtonClicked() ) );
 		connect( cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( hide() ) );
 	}
 
 	ActionEditor::~ActionEditor()
 	{
+	}
+
+	void ActionEditor::setCurrentAction( NLGUI::CProcAction *action )
+	{
+		currentAction = action;
+		handlerEdit->setText( currentAction->Action.c_str() );
+		handlerEdit->setEnabled( false );
+		paramsEdit->setText( currentAction->Parameters.c_str() );
+		condEdit->setText( currentAction->Conditions.c_str() );
+	}
+
+	void ActionEditor::onOkButtonClicked()
+	{
+		currentAction->Parameters = paramsEdit->text().toStdString();
+		currentAction->Conditions = condEdit->text().toStdString();
+		hide();
 	}
 }

@@ -19,6 +19,11 @@
 
 #include "ui_action_editor.h"
 
+namespace NLGUI
+{
+	class CProcAction;
+}
+
 namespace GUIEditor
 {
 	class ActionEditor : public QWidget, public Ui::ActionEditor
@@ -27,6 +32,13 @@ namespace GUIEditor
 	public:
 		ActionEditor( QWidget *parent = NULL );
 		~ActionEditor();
+		void setCurrentAction( NLGUI::CProcAction *action );
+
+	private Q_SLOTS:
+		void onOkButtonClicked();
+
+	private:
+		NLGUI::CProcAction *currentAction;
 	};
 }
 

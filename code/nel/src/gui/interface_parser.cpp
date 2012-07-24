@@ -1796,9 +1796,15 @@ namespace NLGUI
 				else
 					action.Action= (const char*)name;
 				if(params)
+				{
+					action.Parameters = (const char*)params;
 					action.buildParamBlock((const char*)params);
+				}
 				if(cond)
+				{
+					action.Conditions = (const char*)cond;
 					action.buildCondBlock ((const char*)cond);
+				}
 				newProc.Actions.push_back(action);
 			}
 			else if (!strcmp((char*)cur->name,"instance"))
