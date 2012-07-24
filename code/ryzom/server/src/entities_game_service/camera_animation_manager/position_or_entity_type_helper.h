@@ -17,12 +17,9 @@
 #ifndef RY_POSITIONORENTITYTYPEHELPER_H
 #define RY_POSITIONORENTITYTYPEHELPER_H
 
-//#include "pd_support_service\stat_character.h"
-#include "mission_manager\ai_alias_translator.h"
-#include "nel\misc\entity_id.h"
+
 #include "game_share\position_or_entity_type.h"
-#include "mission_manager\mission_parser.h"
-#include "nel\misc\string_mapper.h"
+
 
 
 //////////////////////////////////////////////////////////////////////////
