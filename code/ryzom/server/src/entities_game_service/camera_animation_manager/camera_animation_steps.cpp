@@ -27,14 +27,14 @@
 class CCameraAnimationStepBasic : public ICameraAnimationStep
 {
 protected:
-	TPositionOrEntity LookAtPos;
+	std::string LookAtPos;
 	std::string Text;
 	float Duration;
 
 public:
 	CCameraAnimationStepBasic()
 	{
-		LookAtPos = CPositionOrEntityHelper::Invalid;
+		LookAtPos = "";
 		Text = "";
 		Duration = 0.f;
 	}
@@ -49,12 +49,7 @@ public:
 			nlwarning("<CCameraAnimationStepBasic parseStep> impossible to get the look_at_position property of the basic step in primitive : %s", filename.c_str());
 			return false;
 		}
-		LookAtPos = CPositionOrEntityHelper::fromString(value);
-		if (LookAtPos == CPositionOrEntityHelper::Invalid)
-		{
-			nlwarning("<CCameraAnimationStepBasic parseStep> invalid lookatpos in primitive : %s", filename.c_str());
-			return false;
-		}
+		LookAtPos = value;
 
 		// We get the text
 		if (!prim->getPropertyByName("text", value))
@@ -81,7 +76,13 @@ public:
 
 	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
 	{
-		bms.serial(const_cast<TPositionOrEntity&>(LookAtPos));
+		TPositionOrEntity pos = CPositionOrEntityHelper::fromString(LookAtPos);
+		if (pos == CPositionOrEntityHelper::Invalid)
+		{
+			nlerror("<CCameraAnimationStepBasic parseStep> invalid lookatpos %s", LookAtPos.c_str());
+		}
+
+		bms.serial(const_cast<TPositionOrEntity&>(pos));
 		bms.serial(const_cast<std::string&>(Text));
 		bms.serial(const_cast<float&>(Duration));
 	}
@@ -122,12 +123,12 @@ CAMERA_ANIMATION_REGISTER_STEP(CCameraAnimationStepStatic, "camera_animation_sta
 class CCameraAnimationStepGoTo: public CCameraAnimationStepBasic
 {
 protected:
-	TPositionOrEntity EndPos;
+	std::string EndPos;
 
 public:
 	CCameraAnimationStepGoTo()
 	{
-		EndPos = CPositionOrEntityHelper::Invalid;
+		EndPos = "";
 	}
 
 	virtual bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
@@ -146,12 +147,7 @@ public:
 			nlwarning("<CCameraAnimationStepGoTo parseStep> impossible to get the end_position property of the basic step in primitive : %s", filename.c_str());
 			return false;
 		}
-		EndPos = CPositionOrEntityHelper::fromString(value);
-		if (EndPos == CPositionOrEntityHelper::Invalid)
-		{
-			nlwarning("<CCameraAnimationStepGoTo parseStep> invalid endpos in primitive : %s", filename.c_str());
-			return false;
-		}
+		EndPos = value;
 
 		return true;
 	}
@@ -160,7 +156,13 @@ public:
 	{
 		CCameraAnimationStepBasic::sendAnimationStep(bms);
 
-		bms.serial(const_cast<TPositionOrEntity&>(EndPos));
+		TPositionOrEntity pos = CPositionOrEntityHelper::fromString(EndPos);
+		if (pos == CPositionOrEntityHelper::Invalid)
+		{
+			nlerror("<CCameraAnimationStepGoTo parseStep> invalid endpos %s", EndPos.c_str());
+		}
+
+		bms.serial(const_cast<TPositionOrEntity&>(pos));
 	}
 
 	CAMERA_ANIMATION_STEP_NAME("camera_animation_go_to");
@@ -174,13 +176,13 @@ CAMERA_ANIMATION_REGISTER_STEP(CCameraAnimationStepGoTo, "camera_animation_go_to
 class CCameraAnimationStepFollowEntity: public CCameraAnimationStepBasic
 {
 protected:
-	TPositionOrEntity EntityToFollow;
+	std::string EntityToFollow;
 	float DistanceToEntity;
 
 public:
 	CCameraAnimationStepFollowEntity()
 	{
-		EntityToFollow = CPositionOrEntityHelper::Invalid;
+		EntityToFollow = "";
 		DistanceToEntity = 0.f;
 	}
 
@@ -200,12 +202,7 @@ public:
 			nlwarning("<CCameraAnimationStepFollowEntity parseStep> impossible to get the entity_to_follow property of the basic step in primitive : %s", filename.c_str());
 			return false;
 		}
-		EntityToFollow = CPositionOrEntityHelper::fromString(value);
-		if (EntityToFollow == CPositionOrEntityHelper::Invalid)
-		{
-			nlwarning("<CCameraAnimationStepFollowEntity parseStep> invalid entitytofollow in primitive : %s", filename.c_str());
-			return false;
-		}
+		EntityToFollow = value;
 
 		// We get the distance to the entity
 		if (!prim->getPropertyByName("distance_to_entity", value))
@@ -226,7 +223,13 @@ public:
 	{
 		CCameraAnimationStepBasic::sendAnimationStep(bms);
 
-		bms.serial(const_cast<TPositionOrEntity&>(EntityToFollow));
+		TPositionOrEntity pos = CPositionOrEntityHelper::fromString(EntityToFollow);
+		if (pos == CPositionOrEntityHelper::Invalid)
+		{
+			nlerror("<CCameraAnimationStepFollowEntity parseStep> invalid entitytofollow %s", EntityToFollow.c_str());
+		}
+
+		bms.serial(const_cast<TPositionOrEntity&>(pos));
 		bms.serial(const_cast<float&>(DistanceToEntity));
 	}
 
@@ -242,14 +245,14 @@ CAMERA_ANIMATION_REGISTER_STEP(CCameraAnimationStepFollowEntity, "camera_animati
 class CCameraAnimationStepTurnAround: public CCameraAnimationStepBasic
 {
 protected:
-	TPositionOrEntity PointToTurnAround;
+	std::string PointToTurnAround;
 	float DistanceToPoint;
 	float Speed;
 
 public:
 	CCameraAnimationStepTurnAround()
 	{
-		PointToTurnAround = CPositionOrEntityHelper::Invalid;
+		PointToTurnAround = "";
 		DistanceToPoint = 0.f;
 		Speed = 0.f;
 	}
@@ -270,12 +273,7 @@ public:
 			nlwarning("<CCameraAnimationStepTurnAround parseStep> impossible to get the point_to_turn_around property of the basic step in primitive : %s", filename.c_str());
 			return false;
 		}
-		PointToTurnAround = CPositionOrEntityHelper::fromString(value);
-		if (PointToTurnAround == CPositionOrEntityHelper::Invalid)
-		{
-			nlwarning("<CCameraAnimationStepTurnAround parseStep> invalidpointtoturnaround in primitive : %s", filename.c_str());
-			return false;
-		}
+		PointToTurnAround = value;
 
 		// We get the distance to the point
 		if (!prim->getPropertyByName("distance_to_point", value))
@@ -308,7 +306,13 @@ public:
 	{
 		CCameraAnimationStepBasic::sendAnimationStep(bms);
 
-		bms.serial(const_cast<TPositionOrEntity&>(PointToTurnAround));
+		TPositionOrEntity pos = CPositionOrEntityHelper::fromString(PointToTurnAround);
+		if (pos == CPositionOrEntityHelper::Invalid)
+		{
+			nlerror("<CCameraAnimationStepTurnAround parseStep> invalidpointtoturnaround %s", PointToTurnAround.c_str());
+		}
+
+		bms.serial(const_cast<TPositionOrEntity&>(pos));
 		bms.serial(const_cast<float&>(DistanceToPoint));
 		bms.serial(const_cast<float&>(Speed));
 	}

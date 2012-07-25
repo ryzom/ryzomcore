@@ -70,13 +70,13 @@ CAMERA_ANIMATION_REGISTER_MODIFIER(CCameraAnimationModifierShake, "camera_modifi
 class CCameraAnimationModifierSoundTrigger : public ICameraAnimationModifier
 {
 protected:
-	TPositionOrEntity SoundPos;
+	std::string SoundPos;
 	NLMISC::CSheetId SoundId;
 
 public:
 	CCameraAnimationModifierSoundTrigger()
 	{
-		SoundPos = CPositionOrEntityHelper::Invalid;
+		SoundPos = "";
 		SoundId = NLMISC::CSheetId::Unknown;
 	}
 
@@ -102,19 +102,21 @@ public:
 			nlwarning("<CCameraAnimationModifierSoundTrigger parseModifier> impossible to get the sound_position property of the basic modifier in primitive : %s", filename.c_str());
 			return false;
 		}
-		SoundPos = CPositionOrEntityHelper::fromString(value);
-		if (SoundPos == CPositionOrEntityHelper::Invalid)
-		{
-			nlwarning("<CCameraAnimationModifierSoundTrigger parseModifier> invalid soundpos in primitive : %s", filename.c_str());
-			return false;
-		}
+		SoundPos = value;
+		
 
 		return true;
 	}
 
 	virtual void sendCameraModifier(NLMISC::CBitMemStream& bms)
 	{
-		bms.serial(const_cast<TPositionOrEntity&>(SoundPos));
+		TPositionOrEntity pos = CPositionOrEntityHelper::fromString(SoundPos);
+		if (pos == CPositionOrEntityHelper::Invalid)
+		{
+			nlerror("<CCameraAnimationModifierSoundTrigger parseModifier> invalid soundpos %s", SoundPos.c_str());
+		}
+
+		bms.serial(const_cast<TPositionOrEntity&>(pos));
 		bms.serial(const_cast<NLMISC::CSheetId&>(SoundId));
 	}
 

@@ -5459,9 +5459,9 @@ class CMissionActionSoundTrigger : public IMissionAction
 
 		std::string SoundName = script[1];
 		if (script.size() >= 3)
-			_SoundPosition = CPositionOrEntityHelper::fromString(script[2]);
+			_SoundPosition = script[2];
 		else
-			_SoundPosition = CPositionOrEntityHelper::Invalid;
+			_SoundPosition = "";
 
 		_SoundId = NLMISC::CSheetId(SoundName);
 		if (_SoundId == NLMISC::CSheetId::Unknown)
@@ -5480,15 +5480,23 @@ class CMissionActionSoundTrigger : public IMissionAction
 		// We tell the client to play the sound
 		std::vector<TDataSetRow> entities;
 		instance->getEntities(entities);
+
+		// We get the position or entity
+		TPositionOrEntity pos = CPositionOrEntityHelper::fromString(_SoundPosition);
+		if (pos == CPositionOrEntityHelper::Invalid)
+		{
+			nlerror("<sound_trigger mission_action launch> invalid position or entity from %s", _SoundPosition.c_str());
+		}
+
 		// For all entities that do this mission
 		for (uint i = 0; i < entities.size(); i++)
 		{
 			// We send the message
 			CEntityId eid = TheDataset.getEntityId(entities[i]);
-			PlayerManager.sendImpulseToClient(eid, "SOUND_TRIGGER:PLAY", _SoundId, _SoundPosition);
+			PlayerManager.sendImpulseToClient(eid, "SOUND_TRIGGER:PLAY", _SoundId, pos);
 		}
 	};
-	TPositionOrEntity _SoundPosition;
+	std::string _SoundPosition;
 	NLMISC::CSheetId _SoundId;
 
 	MISSION_ACTION_GETNEWPTR(CMissionActionSoundTrigger)

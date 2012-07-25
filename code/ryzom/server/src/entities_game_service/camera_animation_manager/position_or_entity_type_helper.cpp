@@ -29,6 +29,12 @@ const TPositionOrEntity CPositionOrEntityHelper::Invalid = TPositionOrEntity();
 
 TPositionOrEntity CPositionOrEntityHelper::fromString(const std::string& s)
 {
+	if (s.empty())
+	{
+		nlerror("TPositionOrentityHelper : empty position or entity given to parse");
+		return TPositionOrEntity();
+	}
+
 	std::string str = s;
 	CMissionParser::removeBlanks(str);
 
