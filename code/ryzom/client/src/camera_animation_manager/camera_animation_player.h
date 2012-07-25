@@ -20,6 +20,7 @@
 
 #include <string>
 #include "nel\misc\bit_mem_stream.h"
+#include "camera_animation_manager/camera_animation_step_player_factory.h"
 
 
 /************************************************************************/
@@ -59,14 +60,22 @@ public:
 	/// Loads and play the specified step
 	void playStep(const std::string& stepName, NLMISC::CBitMemStream& impulse);
 
+	/// Checks if an animation is being played
+	bool isPlaying();
+
 private:
 	/// Constructor
 	CCameraAnimationPlayer();
 	/// Destructor
 	~CCameraAnimationPlayer();
-	
+
 	/// Instance of the manager
 	static CCameraAnimationPlayer* _Instance;
+
+
+	bool _IsPlaying;
+
+	std::vector<ICameraAnimationStepPlayer*> _Steps;
 };
 
 

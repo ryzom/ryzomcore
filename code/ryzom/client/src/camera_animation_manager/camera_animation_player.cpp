@@ -17,6 +17,7 @@
 
 
 #include "camera_animation_manager/camera_animation_player.h"
+#include "camera_animation_manager/camera_animation_step_player_factory.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -28,25 +29,59 @@ CCameraAnimationPlayer* CCameraAnimationPlayer::_Instance = NULL;
 
 CCameraAnimationPlayer::CCameraAnimationPlayer()
 {
-	
+	_IsPlaying = false;
 }
 
 CCameraAnimationPlayer::~CCameraAnimationPlayer()
 {
-	
+	stop();
 }
 
 void CCameraAnimationPlayer::start()
 {
+	if (isPlaying())
+		stop();
 
+	_IsPlaying = true;
 }
 
 void CCameraAnimationPlayer::stop()
 {
+	_IsPlaying = false;
 
+	// We release the steps and modifiers
+	for (std::vector<ICameraAnimationStepPlayer*>::iterator it = _Steps.begin(); it != _Steps.end(); ++it)
+	{
+		ICameraAnimationStepPlayer* step = *it;
+		delete step;
+	}
+	_Steps.clear();
 }
 
-void CCameraAnimationPlayer::playStep( const std::string& stepName, NLMISC::CBitMemStream& impulse )
+void CCameraAnimationPlayer::playStep(const std::string& stepName, NLMISC::CBitMemStream& impulse)
 {
-	
+	// We check if we are playing an animation
+	if (!isPlaying())
+	{
+		nlwarning("CameraAnimationPlayer: animation not playing, cannot play step %s", stepName.c_str());
+		return;
+	}
+
+	// We initialize the step with the factory
+	ICameraAnimationStepPlayer* step = ICameraAnimationStepPlayerFactory::initStep(stepName, impulse);
+	if (step == NULL)
+	{
+		nlwarning("CameraAnimationPlayer: cannot create step player %s", stepName.c_str());
+		return;
+	}
+	// We add the step to our list
+	_Steps.push_back(step);
+
+	// We start playing the step
+	step->playStep();
+}
+
+bool CCameraAnimationPlayer::isPlaying()
+{
+	return _IsPlaying;
 }
