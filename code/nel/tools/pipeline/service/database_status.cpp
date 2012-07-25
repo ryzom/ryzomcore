@@ -444,6 +444,19 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 		if (g_IsExiting)
 			return;
 	}
+
+	// REMOVE .STATUS METADATA OF REMOVED FILES -->
+	// Not sure if this is a good location for this code, but works.
+
+	// Removes .status metadata of files that no longer exists whenever the update of a directory is requested.
+	// This sanely allows the service to know if someone deleted and then re-added the same file inbetween failed builds.
+	// The FirstSeen field will be more recent than the timestamp of the last successful build start time.
+	// Sanely get the process build start time by creating a dummy file at the beginning of the build and using that timestamp.
+	// This file also unrelatedly can let us know if the service crashed or was killed during a build.
+
+	// ... TODO ...
+
+	// <-- END REMOVE
 }
 
 } /* anonymous namespace */
