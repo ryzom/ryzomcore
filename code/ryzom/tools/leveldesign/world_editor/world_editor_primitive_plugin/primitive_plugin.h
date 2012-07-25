@@ -72,7 +72,7 @@ private:
 
 		void	serial (NLMISC::IStream &s);
 
-		static uint getVersion ()
+		static uint getVersion ();
 
 		void removed() {}
 	};
