@@ -32,10 +32,10 @@ TPositionOrEntity CPositionOrEntityHelper::fromString(const std::string& s)
 	std::string str = s;
 	CMissionParser::removeBlanks(str);
 
-	std::vector<std::string> res;
-	NLMISC::splitString(str, ";", res);
+	std::vector<std::string> resS;
+	NLMISC::splitString(str, ";", resS);
 	// If we don't have 3 components, it's an entity
-	if (res.size() != 3)
+	if (resS.size() != 3)
 	{
 		std::vector<TAIAlias> res;
 		CAIAliasTranslator::getInstance()->getNPCAliasesFromName(str, res);
@@ -63,9 +63,9 @@ TPositionOrEntity CPositionOrEntityHelper::fromString(const std::string& s)
 	else
 	{
 		// It's a position
-		std::string xStr = res[0];
-		std::string yStr = res[1];
-		std::string zStr = res[2];
+		std::string xStr = resS[0];
+		std::string yStr = resS[1];
+		std::string zStr = resS[2];
 
 		CMissionParser::removeBlanks(xStr);
 		CMissionParser::removeBlanks(yStr);

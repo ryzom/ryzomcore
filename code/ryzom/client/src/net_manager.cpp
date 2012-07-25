@@ -91,6 +91,7 @@
 #include "nel/misc/vector.h"
 #include "nel/misc/entity_id.h"
 #include "entity_cl.h"
+#include "camera_animation_manager/camera_animation_player.h"
 
 
 #define OLD_STRING_SYSTEM
@@ -3596,17 +3597,25 @@ void impulsePlaySoundTrigger(NLMISC::CBitMemStream& impulse)
 
 void impulseCameraAnimationPlay(NLMISC::CBitMemStream& impulse)
 {
-
+	// We start playing an animation
+	CCameraAnimationPlayer::getInstance()->start();
 }
 
 void impulseCameraAnimationStep(NLMISC::CBitMemStream& impulse)
 {
+	// We got a new step
+	// We first get its name
+	std::string stepName = "";
+	impulse.serial(stepName);
 
+	// We tell the camera animation player to load and play this instruction
+	CCameraAnimationPlayer::getInstance()->playStep(stepName, impulse);
 }
 
 void impulseCameraAnimationFinished(NLMISC::CBitMemStream& impulse)
 {
-
+	// We stop an animation
+	CCameraAnimationPlayer::getInstance()->stop();
 }
 
 //-----------------------------------------------

@@ -10,6 +10,7 @@ ADD_SUBDIRECTORY(seven_zip)
 FILE(GLOB CFG ../*.cfg ../*.cfg.in)
 FILE(GLOB SRC *.cpp *.h motion/*.cpp motion/*.h client.rc)
 FILE(GLOB SRC_INTERFACE interface_v3/*.h interface_v3/*.cpp)
+FILE(GLOB SRC_CAMERA_ANIMATION_MANAGER camera_animation_manager/*.h camera_animation_manager/*.cpp)
 FILE(GLOB SRC_MODE motion/modes/*.cpp motion/modes/*.h)
 FILE(GLOB SRC_R2 r2/*.h r2/*.cpp r2/dmc/*.h r2/dmc/*.cpp)
 
@@ -37,6 +38,7 @@ LIST(REMOVE_ITEM SRC_INTERFACE
 SOURCE_GROUP("" FILES ${SRC})
 SOURCE_GROUP("cfg" FILES ${CFG})
 SOURCE_GROUP("interface_v3" FILES ${SRC_INTERFACE})
+SOURCE_GROUP("Camera animation manager" FILES ${SRC_CAMERA_ANIMATION_MANAGER})
 SOURCE_GROUP("mode" FILES ${SRC_MODE})
 SOURCE_GROUP("r2" FILES ${SRC_R2})
 
@@ -60,7 +62,7 @@ if(APPLE)
   SET(MAC_RESOURCES_DIR ${CMAKE_SOURCE_DIR}/ryzom/client/macosx)
 ENDIF(APPLE)
 
-ADD_EXECUTABLE(ryzom_client WIN32 MACOSX_BUNDLE ${SRC} ${SRC_INTERFACE} ${SRC_MODE} ${SRC_R2})
+ADD_EXECUTABLE(ryzom_client WIN32 MACOSX_BUNDLE ${SRC} ${SRC_INTERFACE} ${SRC_CAMERA_ANIMATION_MANAGER} ${SRC_MODE} ${SRC_R2})
 
 IF(APPLE)
   SET_TARGET_PROPERTIES(ryzom_client PROPERTIES OUTPUT_NAME ${MACOSX_BUNDLE_BUNDLE_NAME})
