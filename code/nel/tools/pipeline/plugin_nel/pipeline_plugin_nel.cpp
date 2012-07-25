@@ -29,6 +29,9 @@
 #include "pipeline_plugin_nel.h"
 
 // STL includes
+#ifdef NL_OS_WINDOWS
+#	include <windows.h>
+#endif
 
 // NeL includes
 #include "nel/misc/dynloadlib.h"
