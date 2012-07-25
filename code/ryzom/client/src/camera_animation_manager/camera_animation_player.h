@@ -24,9 +24,7 @@
 
 /************************************************************************/
 /* Class that manages the camera animations. (singleton).
- * It's responsible of :
- * - Parsing camera animations in primitives
- * - Sending a specified animation to the client
+ * It's responsible of playing camera animations
  * 
  * \author Fabien Henon
  * \date 2012
