@@ -18,12 +18,12 @@
 
 
 #include "camera_animation_manager/position_or_entity_type_helper.h"
-#include "monitor_service/mirrors.h"
 #include "game_share/mirror.h"
 #include "game_share/mirrored_data_set.h"
 #include "game_share/base_types.h"
 #include "mission_manager/ai_alias_translator.h"
 #include "mission_manager/mission_parser.h"
+#include "egs_mirror.h"
 
 const TPositionOrEntity CPositionOrEntityHelper::Invalid = TPositionOrEntity();
 
