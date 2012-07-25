@@ -9,8 +9,8 @@
 	define('NELTOOL_DBNAME','nel_tool');
 
 	// site paths definitions
-	define('NELTOOL_SITEBASE','http://open.ryzom.com/');
-	define('NELTOOL_SYSTEMBASE','/home/nevrax/hg/code/ryzom/tools/server/admin/');
+	define('NELTOOL_SITEBASE','.');
+	define('NELTOOL_SYSTEMBASE','D:\\Programmation\\Personal projects\\ryzom\\ryzom\\code\\ryzom\\tools\\server\\admin\\'/*'/home/nevrax/hg/code/ryzom/tools/server/admin/'*/);
 	define('NELTOOL_LOGBASE', NELTOOL_SYSTEMBASE .'/logs/');
 	define('NELTOOL_IMGBASE', NELTOOL_SYSTEMBASE .'/imgs/');
 

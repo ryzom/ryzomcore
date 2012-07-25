@@ -47,7 +47,7 @@ std::map<std::string, uint32> CSheetId::_DevSheetNameToId;
 #define NL_TEMP_YUBO_NO_SOUND_SHEET_ID
 
 #ifdef NL_TEMP_YUBO_NO_SOUND_SHEET_ID
-namespace { bool a_NoSoundSheetId = false; }
+namespace { bool a_NoSoundSheetId = false; const uint32 a_NoSoundSheetType = 80; }
 #endif
 
 const CSheetId CSheetId::Unknown(0);
@@ -110,18 +110,25 @@ CSheetId::CSheetId( const string& sheetName )
 		*this = Unknown;
 	}
 
+	// nldebug("LIST_SHEET_ID: %s (%s)", toString().c_str(), sheetName.c_str());
+
 } // CSheetId //
 
 CSheetId::CSheetId( const std::string& sheetName, const std::string &defaultType )
 {
-	if (CFile::getExtension(sheetName) == "" && defaultType != "")
+	// Don't use this function without defaultType, use the one above.
+	nlassert(defaultType.size() != 0);
+	
+	if (sheetName.rfind('.') == std::string::npos)
 	{
 		std::string withType = sheetName + "." + defaultType;
 		*this = CSheetId(withType);
 		// nldebug("SHEETID: Constructing CSheetId from name '%s' without explicit type, defaulting as '%s' to '%s'", sheetName.c_str(), defaultType.c_str(), withType.c_str());
 	}
 	else
+	{
 		*this = CSheetId(sheetName);
+	}
 }
 
 
@@ -152,13 +159,18 @@ bool CSheetId::buildSheetId(const std::string& sheetName)
 				_DevSheetIdToName.push_back(std::vector<std::string>());
 				typeId = _FileExtensions.size() - 1;
 				_DevTypeNameToId[sheetType] = typeId;
+				std::string unknownNewType = std::string("unknown." + sheetType);
+				_DevSheetIdToName[typeId].push_back(unknownNewType);
+				_Id.IdInfos.Type = typeId;
+				_Id.IdInfos.Id = _DevSheetIdToName[typeId].size() - 1;
+				_DevSheetNameToId[unknownNewType] = _Id.Id;
 			}
 			else
 			{
 				typeId = tit->second;
+				_Id.IdInfos.Type = typeId;
 			}
-			_DevSheetIdToName[typeId].push_back(sheetName);
-			_Id.IdInfos.Type = typeId;
+			_DevSheetIdToName[typeId].push_back(sheetNameLc);
 			_Id.IdInfos.Id = _DevSheetIdToName[typeId].size() - 1;
 			// nldebug("SHEETID: Type %i, id %i, sheetid %i", _Id.IdInfos.Type, _Id.IdInfos.Id, _Id.Id);
 			_DevSheetNameToId[sheetNameLc] = _Id.Id;
@@ -206,10 +218,9 @@ bool CSheetId::buildSheetId(const std::string& sheetName)
 		std::map<std::string, uint32>::iterator it = _DevSheetNameToId.find(sheetNameLc);
 		if (it == _DevSheetNameToId.end())
 		{
-			uint32 typeId = ((1 << (NL_SHEET_ID_TYPE_BITS)) - 1);
 			// nldebug("SHEETID: Creating a temporary sheet id for '%s'", sheetName.c_str());
 			_DevSheetIdToName[0].push_back(sheetName);
-			_Id.IdInfos.Type = typeId;
+			_Id.IdInfos.Type = a_NoSoundSheetType;
 			_Id.IdInfos.Id = _DevSheetIdToName[0].size() - 1;
 			_DevSheetNameToId[sheetNameLc] = _Id.Id;
 			return true;
@@ -377,8 +388,15 @@ void CSheetId::init(bool removeUnknownSheet)
 	{
 		nlwarning("SHEETID: Loading without known sound sheet id, please update sheet_id.bin with .sound sheets");
 		nlassert(_FileExtensions.size() == 1 << (NL_SHEET_ID_TYPE_BITS));
-		_FileExtensions[((1 << (NL_SHEET_ID_TYPE_BITS)) - 1)] == "sound";
+		nlassert(_FileExtensions[a_NoSoundSheetType].empty());
+		_FileExtensions[a_NoSoundSheetType] == "sound";
 		_DevSheetIdToName.push_back(std::vector<std::string>());
+		_DevSheetIdToName[0].push_back("unknown.sound");
+		TSheetId id;
+		id.IdInfos.Type = a_NoSoundSheetType;
+		id.IdInfos.Id = _DevSheetIdToName[0].size() - 1;
+		nlassert(id.IdInfos.Id == 0);
+		_DevSheetNameToId["unknown.sound"] = id.Id;
 		a_NoSoundSheetId = true;
 	}
 #endif
@@ -450,6 +468,9 @@ CSheetId& CSheetId::operator=( const string& sheetName )
 
 	if (!buildSheetId(sheetName))
 		*this = Unknown;
+
+	// nldebug("LIST_SHEET_ID: %s (%s)", toString().c_str(), sheetName.c_str());
+
 	return *this;
 
 } // operator= //
@@ -513,7 +534,7 @@ string CSheetId::toString(bool ifNotFoundUseNumericId) const
 	else
 	{
 #ifdef NL_TEMP_YUBO_NO_SOUND_SHEET_ID
-		if (a_NoSoundSheetId && _Id.IdInfos.Type == ((1 << (NL_SHEET_ID_TYPE_BITS)) - 1))
+		if (a_NoSoundSheetId && _Id.IdInfos.Type == a_NoSoundSheetType)
 		{
 			return _DevSheetIdToName[0][_Id.IdInfos.Id];
 		}

@@ -159,7 +159,7 @@ END_MESSAGE_MAP()
 void CEditPSSound::OnBrowseSound() 
 {
 //	CPickSound::TNameVect names;
-	vector<NLMISC::TStringId>	names;
+	vector<NLMISC::CSheetId> names;
 	
 
 	NLSOUND::UAudioMixer *audioMixer = CSoundSystem::getAudioMixer();
@@ -172,7 +172,7 @@ void CEditPSSound::OnBrowseSound()
 
 	if (ps.DoModal() == IDOK)
 	{
-		m_SoundName = NLMISC::CStringMapper::unmap(ps.getName()).c_str();
+		m_SoundName = ps.getName().toString().c_str();
 		_Sound->setSoundName(ps.getName());
 		updateModifiedFlag();
 		UpdateData(FALSE);
@@ -184,7 +184,7 @@ BOOL CEditPSSound::OnInitDialog()
 	CDialog::OnInitDialog();
 	
 	nlassert(_Sound);
-	m_SoundName = NLMISC::CStringMapper::unmap(_Sound->getSoundName()).c_str();
+	m_SoundName = _Sound->getSoundName().toString().c_str();
 	
 	UpdateData(FALSE);
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -195,7 +195,7 @@ void CEditPSSound::OnChangeSoundName()
 {
 	nlassert(_Sound);
 	UpdateData();
-	_Sound->setSoundName( NLMISC::CStringMapper::map((LPCTSTR) m_SoundName) );	
+	_Sound->setSoundName(NLMISC::CSheetId((LPCTSTR)m_SoundName, "sound"));	
 	 updateModifiedFlag();
 }
 
@@ -209,7 +209,7 @@ void CEditPSSound::OnSpawn()
 // play the currently selected sound
 void CEditPSSound::OnPlaySound() 
 {
-	CSoundSystem::play(std::string((LPCTSTR) m_SoundName));
+	CSoundSystem::play(std::string((LPCTSTR)m_SoundName));
 }
 
 void CEditPSSound::OnMute() 

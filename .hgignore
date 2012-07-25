@@ -156,6 +156,11 @@ code/build/*
 build/*
 install/*
 
+code/build_nFV/*
+code/build/*
+externals/*
+*/test_mfc/*
+
 # Linux nel compile
 code/nel/build/nel-config
 code/nel/config.status

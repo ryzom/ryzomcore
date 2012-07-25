@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <PRIMITIVES VERSION="1">
   <ROOT_PRIMITIVE TYPE="CPrimNode">
-    <ALIAS LAST_GENERATED="1269"/>
+    <ALIAS LAST_GENERATED="1271"/>
     <CHILD TYPE="CPrimZone">
       <PROPERTY TYPE="string">
         <NAME>class</NAME>
@@ -117,108 +117,6 @@
               </PROPERTY>
               <PROPERTY TYPE="string">
                 <NAME>name</NAME>
-                <STRING>WELCOME_RYZOM_CORE</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string_array">
-                <NAME>script</NAME>
-                <STRING># script generated from 'urban_newbieland.primitive'</STRING>
-                <STRING></STRING>
-                <STRING>#mission tags and pre-requisites</STRING>
-                <STRING>replayable</STRING>
-                <STRING>solo</STRING>
-                <STRING>mission_category : Killing</STRING>
-                <STRING>player_replay_timer : 10</STRING>
-                <STRING>global_replay_timer : 10</STRING>
-                <STRING>mission_icon : tets</STRING>
-                <STRING></STRING>
-                <STRING>#Variables declaration</STRING>
-                <STRING>decl : bot : giver</STRING>
-                <STRING>decl : bot : player</STRING>
-                <STRING>decl : bot : chiang_the_strong</STRING>
-                <STRING></STRING>
-                <STRING>#pre-requisites</STRING>
-                <STRING></STRING>
-                <STRING>#script</STRING>
-                <STRING>mission_title : WELCOME_RYZOM_CORE_TITLE</STRING>
-                <STRING>mission_desc : WELCOME_RYZOM_CORE_DESC</STRING>
-                <STRING># step_4</STRING>
-                <STRING>kill_fauna : chdfa1 1</STRING>
-                <STRING>recv_money : 10000</STRING>
-                <STRING></STRING>
-              </PROPERTY>
-              <CHILD TYPE="CPrimAlias">
-                <ALIAS VALUE="1256"/>
-                <PROPERTY TYPE="string">
-                  <NAME>class</NAME>
-                  <STRING>alias</STRING>
-                </PROPERTY>
-                <PROPERTY TYPE="string">
-                  <NAME>name</NAME>
-                  <STRING>alias</STRING>
-                </PROPERTY>
-              </CHILD>
-            </CHILD>
-            <CHILD TYPE="CPrimNode">
-              <PROPERTY TYPE="string">
-                <NAME>class</NAME>
-                <STRING>mission</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>name</NAME>
-                <STRING>HUNTING_GROUNDS</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string_array">
-                <NAME>script</NAME>
-                <STRING># script generated from 'urban_newbieland.primitive'</STRING>
-                <STRING></STRING>
-                <STRING>#mission tags and pre-requisites</STRING>
-                <STRING>replayable</STRING>
-                <STRING>guild</STRING>
-                <STRING>mission_category : Killing</STRING>
-                <STRING>player_replay_timer : 10</STRING>
-                <STRING>global_replay_timer : 10</STRING>
-                <STRING>mission_icon : test</STRING>
-                <STRING></STRING>
-                <STRING>#Variables declaration</STRING>
-                <STRING>decl : bot : giver</STRING>
-                <STRING>decl : bot : player</STRING>
-                <STRING>decl : bot : chiang_the_strong</STRING>
-                <STRING></STRING>
-                <STRING>#pre-requisites</STRING>
-                <STRING>req_guild</STRING>
-                <STRING>req_grade : Leader</STRING>
-                <STRING></STRING>
-                <STRING>#script</STRING>
-                <STRING>mission_title : WELCOME_RYZOM_CORE_DESC</STRING>
-                <STRING>mission_desc : WELCOME_RYZOM_CORE_TITLE</STRING>
-                <STRING># step_4</STRING>
-                <STRING>spawn_mission : WELCOME_RYZOM_CORE : chiang_the_strong : guild</STRING>
-                <STRING>set_obj : MIS_DO_MISSION</STRING>
-                <STRING>mission : WELCOME_RYZOM_CORE 2</STRING>
-                <STRING>kill_fauna : chdfa1 2</STRING>
-                <STRING>recv_money : 100000</STRING>
-                <STRING>recv_money : 20: guild</STRING>
-                <STRING></STRING>
-              </PROPERTY>
-              <CHILD TYPE="CPrimAlias">
-                <ALIAS VALUE="1262"/>
-                <PROPERTY TYPE="string">
-                  <NAME>class</NAME>
-                  <STRING>alias</STRING>
-                </PROPERTY>
-                <PROPERTY TYPE="string">
-                  <NAME>name</NAME>
-                  <STRING>alias</STRING>
-                </PROPERTY>
-              </CHILD>
-            </CHILD>
-            <CHILD TYPE="CPrimNode">
-              <PROPERTY TYPE="string">
-                <NAME>class</NAME>
-                <STRING>mission</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>name</NAME>
                 <STRING>GUILD_MISSION</STRING>
               </PROPERTY>
               <PROPERTY TYPE="string_array">
@@ -299,6 +197,158 @@
               </PROPERTY>
               <CHILD TYPE="CPrimAlias">
                 <ALIAS VALUE="1269"/>
+                <PROPERTY TYPE="string">
+                  <NAME>class</NAME>
+                  <STRING>alias</STRING>
+                </PROPERTY>
+                <PROPERTY TYPE="string">
+                  <NAME>name</NAME>
+                  <STRING>alias</STRING>
+                </PROPERTY>
+              </CHILD>
+            </CHILD>
+            <CHILD TYPE="CPrimNode">
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>mission</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>WELCOME_RYZOM_CORE</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string_array">
+                <NAME>script</NAME>
+                <STRING># script generated from 'urban_newbieland.primitive'</STRING>
+                <STRING></STRING>
+                <STRING>#mission tags and pre-requisites</STRING>
+                <STRING>replayable</STRING>
+                <STRING>solo</STRING>
+                <STRING>mission_category : Killing</STRING>
+                <STRING>player_replay_timer : 10</STRING>
+                <STRING>global_replay_timer : 10</STRING>
+                <STRING>mission_icon : tets</STRING>
+                <STRING></STRING>
+                <STRING>#Variables declaration</STRING>
+                <STRING>decl : bot : giver</STRING>
+                <STRING>decl : bot : player</STRING>
+                <STRING>decl : bot : chiang_the_strong</STRING>
+                <STRING></STRING>
+                <STRING>#pre-requisites</STRING>
+                <STRING></STRING>
+                <STRING>#script</STRING>
+                <STRING>mission_title : WELCOME_RYZOM_CORE_TITLE</STRING>
+                <STRING>mission_desc : WELCOME_RYZOM_CORE_DESC_BLAH</STRING>
+                <STRING># step_4</STRING>
+                <STRING>camera_animation : MY_CAMERA_ANIMATION</STRING>
+                <STRING>sound_trigger : my_sound_name : here</STRING>
+                <STRING>kill_fauna : chdfa1 1</STRING>
+                <STRING>recv_money : 10000</STRING>
+                <STRING>sound_trigger : sfsd : sdfsdf</STRING>
+                <STRING></STRING>
+              </PROPERTY>
+              <CHILD TYPE="CPrimAlias">
+                <ALIAS VALUE="1256"/>
+                <PROPERTY TYPE="string">
+                  <NAME>class</NAME>
+                  <STRING>alias</STRING>
+                </PROPERTY>
+                <PROPERTY TYPE="string">
+                  <NAME>name</NAME>
+                  <STRING>alias</STRING>
+                </PROPERTY>
+              </CHILD>
+            </CHILD>
+            <CHILD TYPE="CPrimNode">
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>mission</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>HUNTING_GROUNDS</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string_array">
+                <NAME>script</NAME>
+                <STRING># script generated from 'urban_newbieland.primitive'</STRING>
+                <STRING></STRING>
+                <STRING>#mission tags and pre-requisites</STRING>
+                <STRING>replayable</STRING>
+                <STRING>guild</STRING>
+                <STRING>mission_category : Killing</STRING>
+                <STRING>player_replay_timer : 10</STRING>
+                <STRING>global_replay_timer : 10</STRING>
+                <STRING>mission_icon : test</STRING>
+                <STRING></STRING>
+                <STRING>#Variables declaration</STRING>
+                <STRING>decl : bot : giver</STRING>
+                <STRING>decl : bot : player</STRING>
+                <STRING>decl : bot : chiang_the_strong</STRING>
+                <STRING></STRING>
+                <STRING>#pre-requisites</STRING>
+                <STRING>req_guild</STRING>
+                <STRING>req_grade : Leader</STRING>
+                <STRING></STRING>
+                <STRING>#script</STRING>
+                <STRING>mission_title : WELCOME_RYZOM_CORE_DESC</STRING>
+                <STRING>mission_desc : WELCOME_RYZOM_CORE_TITLE</STRING>
+                <STRING># step_4</STRING>
+                <STRING>kill_fauna : chdfa1 2</STRING>
+                <STRING>recv_money : 100000</STRING>
+                <STRING>recv_money : 20: guild</STRING>
+                <STRING></STRING>
+              </PROPERTY>
+              <CHILD TYPE="CPrimAlias">
+                <ALIAS VALUE="1262"/>
+                <PROPERTY TYPE="string">
+                  <NAME>class</NAME>
+                  <STRING>alias</STRING>
+                </PROPERTY>
+                <PROPERTY TYPE="string">
+                  <NAME>name</NAME>
+                  <STRING>alias</STRING>
+                </PROPERTY>
+              </CHILD>
+            </CHILD>
+            <CHILD TYPE="CPrimNode">
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>mission</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>NEW</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string_array">
+                <NAME>script</NAME>
+                <STRING># script generated from 'urban_newbieland.primitive'</STRING>
+                <STRING></STRING>
+                <STRING>#mission tags and pre-requisites</STRING>
+                <STRING>replayable</STRING>
+                <STRING>solo</STRING>
+                <STRING>mission_category : Kiling</STRING>
+                <STRING>player_replay_timer : 10</STRING>
+                <STRING>global_replay_timer : 1</STRING>
+                <STRING>need_validation</STRING>
+                <STRING></STRING>
+                <STRING>#Variables declaration</STRING>
+                <STRING>decl : bot : giver</STRING>
+                <STRING>decl : bot : player</STRING>
+                <STRING>decl : bot : chiang_the_strong</STRING>
+                <STRING></STRING>
+                <STRING>#pre-requisites</STRING>
+                <STRING></STRING>
+                <STRING>#script</STRING>
+                <STRING>mission_title : dddd</STRING>
+                <STRING>mission_desc : gg</STRING>
+                <STRING># step_4</STRING>
+                <STRING>sound_trigger : sound : here</STRING>
+                <STRING>camera_animation : MY_CAMERA_ANIMATION</STRING>
+                <STRING>kill_fauna : chdfa1 2</STRING>
+                <STRING>recv_money : 10000</STRING>
+                <STRING></STRING>
+              </PROPERTY>
+              <CHILD TYPE="CPrimAlias">
+                <ALIAS VALUE="1271"/>
                 <PROPERTY TYPE="string">
                   <NAME>class</NAME>
                   <STRING>alias</STRING>
@@ -786,7 +836,7 @@
         </PROPERTY>
         <PROPERTY TYPE="string_array">
           <NAME>mission_description</NAME>
-          <STRING>WELCOME_RYZOM_CORE_DESC</STRING>
+          <STRING>WELCOME_RYZOM_CORE_DESC_BLAH</STRING>
         </PROPERTY>
         <PROPERTY TYPE="string">
           <NAME>mission_giver</NAME>
@@ -907,6 +957,38 @@
               <NAME>name</NAME>
               <STRING>pre_actions</STRING>
             </PROPERTY>
+            <CHILD TYPE="CPrimNode">
+              <PROPERTY TYPE="string">
+                <NAME>animation_name</NAME>
+                <STRING>MY_CAMERA_ANIMATION</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>camera_animation</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>camera animation</STRING>
+              </PROPERTY>
+            </CHILD>
+            <CHILD TYPE="CPrimNode">
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>sound_trigger</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>sound_trigger_autre</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>sound_name</NAME>
+                <STRING>my_sound_name</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>sound_position</NAME>
+                <STRING>here</STRING>
+              </PROPERTY>
+            </CHILD>
           </CHILD>
           <CHILD TYPE="CPrimNode">
             <PROPERTY TYPE="string">
@@ -945,6 +1027,24 @@
               <PROPERTY TYPE="string">
                 <NAME>class</NAME>
                 <STRING>recv_money</STRING>
+              </PROPERTY>
+            </CHILD>
+            <CHILD TYPE="CPrimNode">
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>sound_trigger</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>sound_trigger_2</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>sound_name</NAME>
+                <STRING>sfsd</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>sound_position</NAME>
+                <STRING>sdfsdf</STRING>
               </PROPERTY>
             </CHILD>
           </CHILD>
@@ -1114,24 +1214,6 @@
               <NAME>name</NAME>
               <STRING>pre_actions</STRING>
             </PROPERTY>
-            <CHILD TYPE="CPrimNode">
-              <PROPERTY TYPE="string">
-                <NAME>class</NAME>
-                <STRING>spawn_mission</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>giver_name</NAME>
-                <STRING>chiang_the_strong</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>guild</NAME>
-                <STRING>true</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string">
-                <NAME>mission_name</NAME>
-                <STRING>WELCOME_RYZOM_CORE</STRING>
-              </PROPERTY>
-            </CHILD>
           </CHILD>
           <CHILD TYPE="CPrimNode">
             <PROPERTY TYPE="string">
@@ -1142,20 +1224,6 @@
               <NAME>name</NAME>
               <STRING>objectives</STRING>
             </PROPERTY>
-            <CHILD TYPE="CPrimNode">
-              <PROPERTY TYPE="string">
-                <NAME>class</NAME>
-                <STRING>do_mission</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string_array">
-                <NAME>mission_names</NAME>
-                <STRING>WELCOME_RYZOM_CORE 2</STRING>
-              </PROPERTY>
-              <PROPERTY TYPE="string_array">
-                <NAME>overload_objective</NAME>
-                <STRING>MIS_DO_MISSION</STRING>
-              </PROPERTY>
-            </CHILD>
             <CHILD TYPE="CPrimNode">
               <PROPERTY TYPE="string">
                 <NAME>class</NAME>
@@ -1205,6 +1273,379 @@
               </PROPERTY>
             </CHILD>
           </CHILD>
+        </CHILD>
+      </CHILD>
+      <CHILD TYPE="CPrimNode">
+        <PROPERTY TYPE="string">
+          <NAME>audience</NAME>
+          <STRING>solo</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>mission_tree</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>giver_primitive</NAME>
+          <STRING>urban_newbieland.primitive</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>global_replay_timer</NAME>
+          <STRING>1</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>mission_category</NAME>
+          <STRING>Kiling</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string_array">
+          <NAME>mission_description</NAME>
+          <STRING>gg</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>mission_giver</NAME>
+          <STRING>$givervar@fullname$</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string_array">
+          <NAME>mission_title</NAME>
+          <STRING>dddd</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>NEW</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>player_replay_timer</NAME>
+          <STRING>10</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>replayable</NAME>
+          <STRING>true</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimNode">
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>variables</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>variables</STRING>
+          </PROPERTY>
+          <CHILD TYPE="CPrimNode">
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>var_npc</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>givervar = chiang_the_strong (fct_ranger_leader)</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>npc_function</NAME>
+              <STRING>fct_ranger_leader</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>npc_name</NAME>
+              <STRING>chiang_the_strong</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>var_name</NAME>
+              <STRING>givervar</STRING>
+            </PROPERTY>
+          </CHILD>
+        </CHILD>
+        <CHILD TYPE="CPrimNode">
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>pre_requisite</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>pre_requisite</STRING>
+          </PROPERTY>
+        </CHILD>
+        <CHILD TYPE="CPrimAlias">
+          <ALIAS VALUE="1270"/>
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>alias</STRING>
+          </PROPERTY>
+        </CHILD>
+        <CHILD TYPE="CPrimNode">
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>step</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>step_4</STRING>
+          </PROPERTY>
+          <CHILD TYPE="CPrimNode">
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>actions</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>pre_actions</STRING>
+            </PROPERTY>
+            <CHILD TYPE="CPrimNode">
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>sound_trigger</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>sound_trigger</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>sound_name</NAME>
+                <STRING>sound</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>sound_position</NAME>
+                <STRING>here</STRING>
+              </PROPERTY>
+            </CHILD>
+            <CHILD TYPE="CPrimNode">
+              <PROPERTY TYPE="string">
+                <NAME>animation_name</NAME>
+                <STRING>MY_CAMERA_ANIMATION</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>camera_animation</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>name</NAME>
+                <STRING>MY_CAMERA_ANIMATION</STRING>
+              </PROPERTY>
+            </CHILD>
+          </CHILD>
+          <CHILD TYPE="CPrimNode">
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>mission_objectives</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>objectives</STRING>
+            </PROPERTY>
+            <CHILD TYPE="CPrimNode">
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>kill</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string_array">
+                <NAME>fauna/quantity</NAME>
+                <STRING>chdfa1 2</STRING>
+              </PROPERTY>
+            </CHILD>
+          </CHILD>
+          <CHILD TYPE="CPrimNode">
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>actions</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>post_actions</STRING>
+            </PROPERTY>
+            <CHILD TYPE="CPrimNode">
+              <PROPERTY TYPE="string">
+                <NAME>amount</NAME>
+                <STRING>10000</STRING>
+              </PROPERTY>
+              <PROPERTY TYPE="string">
+                <NAME>class</NAME>
+                <STRING>recv_money</STRING>
+              </PROPERTY>
+            </CHILD>
+          </CHILD>
+        </CHILD>
+      </CHILD>
+    </CHILD>
+    <CHILD TYPE="CPrimNode">
+      <PROPERTY TYPE="string">
+        <NAME>class</NAME>
+        <STRING>camera_animations_editor</STRING>
+      </PROPERTY>
+      <PROPERTY TYPE="string">
+        <NAME>name</NAME>
+        <STRING>camera_animations_editor_3</STRING>
+      </PROPERTY>
+      <CHILD TYPE="CPrimNode">
+        <PROPERTY TYPE="string">
+          <NAME>class</NAME>
+          <STRING>camera_animation_tree</STRING>
+        </PROPERTY>
+        <PROPERTY TYPE="string">
+          <NAME>name</NAME>
+          <STRING>MY_CAMERA_ANIMATION</STRING>
+        </PROPERTY>
+        <CHILD TYPE="CPrimNode">
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>camera_animation_go_to</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>duration</NAME>
+            <STRING>3</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>end_position</NAME>
+            <STRING>here or there</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>look_at_position</NAME>
+            <STRING>i look there</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>go to npc in 3 sec</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>text</NAME>
+            <STRING>First step</STRING>
+          </PROPERTY>
+        </CHILD>
+        <CHILD TYPE="CPrimNode">
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>camera_animation_static</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>duration</NAME>
+            <STRING>2</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>look_at_position</NAME>
+            <STRING>hhmmm there</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>stay here for 2 sec with shake effect</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>text</NAME>
+            <STRING>2nd step</STRING>
+          </PROPERTY>
+          <CHILD TYPE="CPrimNode">
+            <PROPERTY TYPE="string">
+              <NAME>class</NAME>
+              <STRING>camera_modifier_shake</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>name</NAME>
+              <STRING>shake</STRING>
+            </PROPERTY>
+            <PROPERTY TYPE="string">
+              <NAME>strength</NAME>
+              <STRING>10000</STRING>
+            </PROPERTY>
+          </CHILD>
+        </CHILD>
+        <CHILD TYPE="CPrimNode">
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>camera_animation_static</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>duration</NAME>
+            <STRING>2</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>look_at_position</NAME>
+            <STRING>eheh here now</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>move look at position for 2 sec</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>text</NAME>
+            <STRING>3rd step</STRING>
+          </PROPERTY>
+        </CHILD>
+        <CHILD TYPE="CPrimNode">
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>camera_animation_follow_entity</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>distance_to_entity</NAME>
+            <STRING>50</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>duration</NAME>
+            <STRING>10</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>entity_to_follow</NAME>
+            <STRING>a man</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>look_at_position</NAME>
+            <STRING>i look at him</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>follow entity for 10 sec</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>text</NAME>
+            <STRING>4th step</STRING>
+          </PROPERTY>
+        </CHILD>
+        <CHILD TYPE="CPrimNode">
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>camera_animation_turn_around</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>distance_to_point</NAME>
+            <STRING>10</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>duration</NAME>
+            <STRING>2</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>look_at_position</NAME>
+            <STRING>i don't know</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>turn around</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>point_to_turn_around</NAME>
+            <STRING>this point</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>speed</NAME>
+            <STRING>23</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>text</NAME>
+            <STRING>5th step</STRING>
+          </PROPERTY>
+        </CHILD>
+        <CHILD TYPE="CPrimNode">
+          <PROPERTY TYPE="string">
+            <NAME>class</NAME>
+            <STRING>camera_animation_return</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>duration</NAME>
+            <STRING>2</STRING>
+          </PROPERTY>
+          <PROPERTY TYPE="string">
+            <NAME>name</NAME>
+            <STRING>go back in 2sec</STRING>
+          </PROPERTY>
         </CHILD>
       </CHILD>
     </CHILD>
