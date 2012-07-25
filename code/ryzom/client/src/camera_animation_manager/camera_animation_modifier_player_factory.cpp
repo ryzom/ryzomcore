@@ -15,27 +15,27 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
 
-#include "camera_animation_manager/camera_animation_step_player_factory.h"
+#include "camera_animation_manager/camera_animation_modifier_player_factory.h"
 
-std::vector<std::pair<std::string, ICameraAnimationStepPlayerFactory*> >* ICameraAnimationStepPlayerFactory::Entries;
+std::vector<std::pair<std::string, ICameraAnimationModifierPlayerFactory*> >* ICameraAnimationModifierPlayerFactory::Entries;
 
-ICameraAnimationStepPlayer* ICameraAnimationStepPlayerFactory::initStep(const std::string& name, NLMISC::CBitMemStream& impulse)
+ICameraAnimationModifierPlayer* ICameraAnimationModifierPlayerFactory::initModifier(const std::string& name, NLMISC::CBitMemStream& impulse)
 {
-	// We search the correct step type in our entries
+	// We search the correct modifier type in our entries
 	for (uint i = 0; i < Entries->size(); i++)
 	{
 		if (name == (*Entries)[i].first)
 		{
-			ICameraAnimationStepPlayer* ret = (*Entries)[i].second->instanciate();
+			ICameraAnimationModifierPlayer* ret = (*Entries)[i].second->instanciate();
 			if (!ret)
 			{
-				nlwarning("BUG IN CAMERA ANIMATION STEP PLAYER FACTORY : BAD INIT CODE %s", name.c_str());
+				nlwarning("BUG IN CAMERA ANIMATION MODIFIER PLAYER FACTORY : BAD INIT CODE %s", name.c_str());
 				return NULL;
 			}
-			// We init the step
-			if (!ret->initStep(impulse))
+			// We init the modifier
+			if (!ret->initModifier(impulse))
 			{
-				nlwarning("building camera animation step player failed %s", name.c_str());
+				nlwarning("building camera animation modifier player failed %s", name.c_str());
 				delete ret;
 				return NULL;
 			}
@@ -46,9 +46,9 @@ ICameraAnimationStepPlayer* ICameraAnimationStepPlayerFactory::initStep(const st
 	return NULL;
 }
 
-void ICameraAnimationStepPlayerFactory::init()
+void ICameraAnimationModifierPlayerFactory::init()
 {
 	if (!Entries)
-		Entries = new std::vector<std::pair<std::string, ICameraAnimationStepPlayerFactory*> >;
+		Entries = new std::vector<std::pair<std::string, ICameraAnimationModifierPlayerFactory*> >;
 }
 
