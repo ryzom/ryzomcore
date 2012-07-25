@@ -348,7 +348,10 @@ namespace NLGUI
 		bool removeProc( const std::string &name );
 
 		const std::map< uint32, SLinkData >& getLinkMap() const{ return links; }
-		void addLinkData( const SLinkData &linkData );
+		uint32 addLinkData( SLinkData &linkData );
+		void removeLinkData( uint32 id );
+		bool getLinkData( uint32 id, SLinkData &linkData );
+		void updateLinkData( uint32 id, const SLinkData &linkData );
 
 		void setEditorMode( bool b ){ editorMode = b; }
 	};

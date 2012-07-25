@@ -17,6 +17,8 @@
 
 #include "link_list.h"
 #include "link_editor.h"
+#include <QMessageBox>
+#include <QInputDialog>
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
 #include "nel/gui/link_data.h"
@@ -33,7 +35,12 @@ namespace GUIEditor
 		linkEditor = new LinkEditor();
 
 		connect( okButton, SIGNAL( clicked( bool ) ), this, SLOT( hide() ) );
+		connect( addButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddButtonClicked() ) );
+		connect( removeButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveButtonClicked() ) );
 		connect( editButton, SIGNAL( clicked( bool ) ), this, SLOT( onEditButtonClicked() ) );
+
+		connect( linkTree, SIGNAL( itemDoubleClicked( QTreeWidgetItem*, int ) ),
+			this, SLOT( onItemDblClicked( QTreeWidgetItem* ) ) );
 	}
 
 	LinkList::~LinkList()
@@ -59,6 +66,63 @@ namespace GUIEditor
 		linkTree->sortByColumn( 0 );
 	}
 
+	void LinkList::onAddButtonClicked()
+	{
+		bool ok;
+		QString parent =
+			QInputDialog::getText( this, 
+								tr( "Adding a new link" ),
+								tr( "Please specify the parent group's full id" ),
+								QLineEdit::Normal,
+								QString(),
+								&ok );
+		if( ok )
+		{
+			if( CWidgetManager::getInstance()->getElementFromId( parent.toStdString() ) == NULL )
+			{
+				QMessageBox::critical( this,
+									tr( "Parent group doesn't exist" ),
+									tr( "The specified parent group '%1' doesn't exist!" ).arg( parent ) );
+				return;
+			}
+			SLinkData data;
+			data.parent = parent.toStdString();
+			
+			uint32 id = CWidgetManager::getInstance()->getParser()->addLinkData( data );
+
+			QTreeWidgetItem *item = new QTreeWidgetItem( linkTree );
+			item->setText( 0, parent );
+			item->setData( 3, Qt::UserRole, id );
+			linkTree->addTopLevelItem( item );
+		}
+	}
+
+	void LinkList::onRemoveButtonClicked()
+	{
+		QTreeWidgetItem *item =
+			linkTree->currentItem();
+		if( item == NULL )
+			return;
+
+		bool ok;
+		uint32 id = item->data( 3, Qt::UserRole ).toUInt( &ok );
+		if( !ok )
+			return;
+
+		QMessageBox::StandardButton reply =
+			QMessageBox::question( this,
+								tr( "Removing a link" ),
+								tr( "Are you sure you want to remove this link?" ),
+								QMessageBox::Yes | QMessageBox::Cancel );
+		
+		if( reply != QMessageBox::Yes )
+			return;
+		
+		CWidgetManager::getInstance()->getParser()->removeLinkData( id );
+		linkTree->takeTopLevelItem( linkTree->indexOfTopLevelItem( item ) );
+		delete item;
+	}
+
 	void LinkList::onEditButtonClicked()
 	{
 
@@ -67,6 +131,17 @@ namespace GUIEditor
 		if( item == NULL )
 			return;
 
+		bool ok;
+		uint32 id = item->data( 3, Qt::UserRole ).toUInt( &ok );
+		if( !ok )
+			return;
+
+		linkEditor->setLinkId( id );
+		linkEditor->show();
+	}
+
+	void LinkList::onItemDblClicked( QTreeWidgetItem *item )
+	{
 		bool ok;
 		uint32 id = item->data( 3, Qt::UserRole ).toUInt( &ok );
 		if( !ok )

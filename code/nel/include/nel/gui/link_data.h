@@ -17,6 +17,7 @@
 #ifndef LINKDATA_H
 #define LINKDATA_H
 
+#include "nel/misc/types_nl.h"
 #include <string>
 
 namespace NLGUI
@@ -25,6 +26,7 @@ namespace NLGUI
 	struct SLinkData
 	{
 	public:
+		uint32 id;
 		std::string parent;
 		std::string expr;
 		std::string target;

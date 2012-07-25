@@ -994,7 +994,7 @@ namespace NLGUI
 
 		ptr = (char*) xmlGetProp (cur, (xmlChar*)"target");
 		std::string target = ptr;
-		if (ptr)
+		if( ( ptr != NULL ) && !editorMode )
 		{
 			CInterfaceLink::splitLinkTargets(std::string((const char*)ptr), parentGroup, targets);
 		}
@@ -1010,10 +1010,12 @@ namespace NLGUI
 		if (ptr) cond = (const char *) ptr;
 
 		// create the link
-		CInterfaceLink *il = new CInterfaceLink;
-		il->init(targets, expr, action, params, cond, parentGroup); // init will add 'il' in the list of link present in 'elm'
-
-		if( editorMode )
+		if( !editorMode )
+		{
+			CInterfaceLink *il = new CInterfaceLink;
+			il->init(targets, expr, action, params, cond, parentGroup); // init will add 'il' in the list of link present in 'elm'
+		}
+		else
 		{
 			SLinkData linkData;
 			linkData.parent = parentGroup->getId();
@@ -2459,6 +2461,8 @@ namespace NLGUI
 	void CInterfaceParser::removeAllLinks()
 	{
 		_LinkMap.clear();
+		links.clear();
+		linkId = 0;
 	}
 
 	// ***************************************************************************
@@ -2832,9 +2836,42 @@ namespace NLGUI
 		return true;
 	}
 
-	void CInterfaceParser::addLinkData( const SLinkData &linkData )
+	uint32 CInterfaceParser::addLinkData( SLinkData &linkData )
 	{
-		links[ ++linkId ] = linkData;
+		linkData.id = ++linkId;
+		links[ linkData.id ] = linkData;
+		return linkId;
+	}
+
+	void CInterfaceParser::removeLinkData( uint32 id )
+	{
+		std::map< uint32, SLinkData >::iterator itr =
+			links.find( id );
+		if( itr == links.end() )
+			return;
+
+		links.erase( itr );
+	}
+
+	bool CInterfaceParser::getLinkData( uint32 id, SLinkData &linkData )
+	{
+		std::map< uint32, SLinkData >::iterator itr =
+			links.find( id );
+		if( itr == links.end() )
+			return false;
+
+		linkData = itr->second;
+
+		return true;
+	}
+
+	void CInterfaceParser::updateLinkData( uint32 id, const SLinkData &linkData )
+	{
+		std::map< uint32, SLinkData >::iterator itr =
+			links.find( id );
+		if( itr == links.end() )
+			return;
+		itr->second = linkData;
 	}
 }
 

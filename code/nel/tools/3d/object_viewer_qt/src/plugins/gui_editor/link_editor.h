@@ -32,6 +32,9 @@ namespace GUIEditor
 		void setup();
 		void setLinkId( uint32 linkId );
 
+	private Q_SLOTS:
+		void onOKButtonClicked();
+
 	private:
 		uint32 currentLinkId;
 	};

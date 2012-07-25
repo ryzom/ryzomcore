@@ -35,7 +35,10 @@ namespace GUIEditor
 		void onGUILoaded();
 
 	private Q_SLOTS:
+		void onAddButtonClicked();
+		void onRemoveButtonClicked();
 		void onEditButtonClicked();
+		void onItemDblClicked( QTreeWidgetItem *item );
 
 	private:
 		LinkEditor *linkEditor;

@@ -26,7 +26,7 @@ namespace GUIEditor
 	{
 		setupUi( this );
 		setup();
-		connect( okButton, SIGNAL( clicked( bool ) ), this, SLOT( hide() ) );
+		connect( okButton, SIGNAL( clicked( bool ) ), this, SLOT( onOKButtonClicked() ) );
 		connect( cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( hide() ) );
 	}
 
@@ -37,15 +37,10 @@ namespace GUIEditor
 	void LinkEditor::setup()
 	{
 		expressionEdit->clear();
-		groupCB->setCheckable( true );
-		groupCB->setChecked( false );
-		groupCB->setDisabled( true );
-		ahCB->setCheckable( true );
-		ahCB->setChecked( false );
-		ahCB->setDisabled( true );
+		targetEdit->clear();
 		ahEdit->clear();
 		ahParamEdit->clear();
-		ahParamEdit->setDisabled( true );
+		condEdit->clear();
 	}
 
 	void LinkEditor::setLinkId( uint32 linkId )
@@ -53,30 +48,34 @@ namespace GUIEditor
 		setup();
 		currentLinkId = linkId;
 
-		const std::map< uint32, SLinkData > &linkMap =
-			CWidgetManager::getInstance()->getParser()->getLinkMap();
+		IParser *parser = CWidgetManager::getInstance()->getParser();
+		SLinkData data;
 
-		std::map< uint32, SLinkData >::const_iterator itr =
-			linkMap.find( currentLinkId );
-
-		if( itr == linkMap.end() )
+		if( !parser->getLinkData( currentLinkId, data ) )
 			return;
-		SLinkData data = itr->second;
 
 		expressionEdit->setPlainText( data.expr.c_str() );
-		if( !data.target.empty() )
-		{
-			groupCB->setEnabled( true );
-			groupCB->setChecked( true );
-			ahEdit->setText( data.target.c_str() );
-		}
-		else
-		{
-			ahCB->setEnabled( true );
-			ahCB->setChecked( true );
-			ahEdit->setText( data.action.c_str() );
-			ahParamEdit->setEnabled( true );
-			ahParamEdit->setText( data.params.c_str() );
-		}
+		targetEdit->setText( data.target.c_str() );
+		ahEdit->setText( data.action.c_str() );
+		ahParamEdit->setText( data.params.c_str() );
+		condEdit->setText( data.cond.c_str() );
+	}
+
+	void LinkEditor::onOKButtonClicked()
+	{
+		IParser *parser = CWidgetManager::getInstance()->getParser();
+		SLinkData data;
+
+		if( !parser->getLinkData( currentLinkId, data ) )
+			return;
+
+		data.expr = expressionEdit->toPlainText().toStdString();		
+		data.target = targetEdit->text().toStdString();
+		data.action = ahEdit->text().toStdString();
+		data.params = ahParamEdit->text().toStdString();
+		data.cond   = condEdit->text().toStdString();
+		parser->updateLinkData( data.id, data );
+
+		hide();
 	}
 }
