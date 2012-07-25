@@ -3,7 +3,7 @@
 REM This script will start all the services with good parameters
 
 REM set MODE=Debug
-set MODE=..\..\build\bin\Debug
+set MODE=..\..\build\bin\Release
 
 rem AS
 start %MODE%\ryzom_admin_service.exe --fulladminname=admin_executor_service --shortadminname=AES
@@ -18,7 +18,7 @@ rem wait 2s (yes, i didn't find a better way to wait N seconds)
 ping -n 2 127.0.0.1 > NUL 2>&1
 
 rem  egs
-rem start %MODE%\ryzom_entities_game_service --writepid
+start %MODE%\ryzom_entities_game_service --writepid
 
 rem wait 2s (yes, i didn't find a better way to wait N seconds)
 ping -n 2 127.0.0.1 > NUL 2>&1
