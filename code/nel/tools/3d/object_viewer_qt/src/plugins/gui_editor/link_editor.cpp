@@ -76,6 +76,8 @@ namespace GUIEditor
 		data.cond   = condEdit->text().toStdString();
 		parser->updateLinkData( data.id, data );
 
+		Q_EMIT okClicked();
+
 		hide();
 	}
 }

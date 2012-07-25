@@ -39,6 +39,7 @@ namespace GUIEditor
 		void onRemoveButtonClicked();
 		void onEditButtonClicked();
 		void onItemDblClicked( QTreeWidgetItem *item );
+		void onEditorFinished();
 
 	private:
 		LinkEditor *linkEditor;

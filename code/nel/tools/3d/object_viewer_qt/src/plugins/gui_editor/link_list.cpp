@@ -41,6 +41,8 @@ namespace GUIEditor
 
 		connect( linkTree, SIGNAL( itemDoubleClicked( QTreeWidgetItem*, int ) ),
 			this, SLOT( onItemDblClicked( QTreeWidgetItem* ) ) );
+
+		connect( linkEditor, SIGNAL( okClicked() ), this, SLOT( onEditorFinished() ) );
 	}
 
 	LinkList::~LinkList()
@@ -50,6 +52,8 @@ namespace GUIEditor
 
 	void LinkList::onGUILoaded()
 	{
+		linkTree->clear();
+
 		const std::map< uint32, SLinkData > &linkMap =
 			CWidgetManager::getInstance()->getParser()->getLinkMap();
 		
@@ -125,7 +129,6 @@ namespace GUIEditor
 
 	void LinkList::onEditButtonClicked()
 	{
-
 		QTreeWidgetItem *item =
 			linkTree->currentItem();
 		if( item == NULL )
@@ -149,6 +152,26 @@ namespace GUIEditor
 
 		linkEditor->setLinkId( id );
 		linkEditor->show();
+	}
+
+	void LinkList::onEditorFinished()
+	{
+		QTreeWidgetItem *item =
+			linkTree->currentItem();
+		if( item == NULL )
+			return;
+
+		bool ok;
+		uint32 id = item->data( 3, Qt::UserRole ).toUInt( &ok );
+		if( !ok )
+			return;
+
+		SLinkData data;
+		if( !CWidgetManager::getInstance()->getParser()->getLinkData( id, data ) )
+			return;
+		
+		item->setText( 1, data.target.c_str() );
+		item->setText( 2, data.action.c_str() );
 	}
 }
 
