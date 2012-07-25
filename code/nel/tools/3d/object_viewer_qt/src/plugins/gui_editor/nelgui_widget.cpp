@@ -68,6 +68,8 @@ namespace GUIEditor
 		NLGUI::CViewRenderer::setTextContext( getTextContext() );
 		NLGUI::CViewRenderer::hwCursors = &hwCursors;
 		NLGUI::CViewRenderer::getInstance()->init();
+
+		CWidgetManager::getInstance()->getParser()->setEditorMode( true );
 	}
 
 	bool NelGUIWidget::parse( SProjectFiles &files )

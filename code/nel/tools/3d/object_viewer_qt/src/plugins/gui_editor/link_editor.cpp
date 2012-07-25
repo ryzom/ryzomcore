@@ -16,6 +16,8 @@
 
 
 #include "link_editor.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/widget_manager.h"
 
 namespace GUIEditor
 {
@@ -23,11 +25,58 @@ namespace GUIEditor
 	QWidget( parent )
 	{
 		setupUi( this );
+		setup();
 		connect( okButton, SIGNAL( clicked( bool ) ), this, SLOT( hide() ) );
 		connect( cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( hide() ) );
 	}
 
 	LinkEditor::~LinkEditor()
 	{
+	}
+
+	void LinkEditor::setup()
+	{
+		expressionEdit->clear();
+		groupCB->setCheckable( true );
+		groupCB->setChecked( false );
+		groupCB->setDisabled( true );
+		ahCB->setCheckable( true );
+		ahCB->setChecked( false );
+		ahCB->setDisabled( true );
+		ahEdit->clear();
+		ahParamEdit->clear();
+		ahParamEdit->setDisabled( true );
+	}
+
+	void LinkEditor::setLinkId( uint32 linkId )
+	{
+		setup();
+		currentLinkId = linkId;
+
+		const std::map< uint32, SLinkData > &linkMap =
+			CWidgetManager::getInstance()->getParser()->getLinkMap();
+
+		std::map< uint32, SLinkData >::const_iterator itr =
+			linkMap.find( currentLinkId );
+
+		if( itr == linkMap.end() )
+			return;
+		SLinkData data = itr->second;
+
+		expressionEdit->setPlainText( data.expr.c_str() );
+		if( !data.target.empty() )
+		{
+			groupCB->setEnabled( true );
+			groupCB->setChecked( true );
+			ahEdit->setText( data.target.c_str() );
+		}
+		else
+		{
+			ahCB->setEnabled( true );
+			ahCB->setChecked( true );
+			ahEdit->setText( data.action.c_str() );
+			ahParamEdit->setEnabled( true );
+			ahParamEdit->setText( data.params.c_str() );
+		}
 	}
 }

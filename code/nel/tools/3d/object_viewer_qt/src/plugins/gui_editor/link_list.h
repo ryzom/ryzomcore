@@ -15,25 +15,30 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef LINK_EDITOR_H
-#define LINK_EDITOR_H
+#ifndef LINK_LIST_H
+#define LINK_LIST_H
 
-#include "ui_link_editor.h"
-#include "nel/misc/types_nl.h"
+#include "ui_link_list.h"
 
 namespace GUIEditor
 {
-	class LinkEditor : public QWidget, public Ui::LinkEditor
+	class LinkEditor;
+
+	class LinkList : public QWidget, public Ui::LinkList
 	{
 		Q_OBJECT
 	public:
-		LinkEditor( QWidget *parent = NULL );
-		~LinkEditor();
-		void setup();
-		void setLinkId( uint32 linkId );
+		LinkList( QWidget *parent = NULL );
+		~LinkList();
+
+	public Q_SLOTS:
+		void onGUILoaded();
+
+	private Q_SLOTS:
+		void onEditButtonClicked();
 
 	private:
-		uint32 currentLinkId;
+		LinkEditor *linkEditor;
 	};
 }
 

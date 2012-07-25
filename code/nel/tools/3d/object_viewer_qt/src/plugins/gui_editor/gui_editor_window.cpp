@@ -33,7 +33,7 @@
 #include "widget_properties.h"
 #include "widget_properties_parser.h"
 #include "widget_hierarchy.h"
-#include "link_editor.h"
+#include "link_list.h"
 #include "proc_list.h"
 #include "project_file_parser.h"
 #include "project_window.h"
@@ -51,7 +51,7 @@ namespace GUIEditor
 		m_ui.setupUi(this);
 		m_undoStack   = new QUndoStack(this);
 		widgetProps   = new CWidgetProperties;
-		linkEditor    = new LinkEditor;
+		linkList      = new LinkList;
 		procList      = new ProcList;
 		projectWindow = new ProjectWindow;
 		connect( projectWindow, SIGNAL( projectFilesChanged() ), this, SLOT( onProjectFilesChanged() ) );
@@ -85,6 +85,7 @@ namespace GUIEditor
 
 		connect( viewPort, SIGNAL( guiLoadComplete() ), hierarchyView, SLOT( onGUILoaded() ) );
 		connect( viewPort, SIGNAL( guiLoadComplete() ), procList, SLOT( onGUILoaded() ) );
+		connect( viewPort, SIGNAL( guiLoadComplete() ), linkList, SLOT( onGUILoaded() ) );
 	}
 	
 	GUIEditorWindow::~GUIEditorWindow()
@@ -94,8 +95,8 @@ namespace GUIEditor
 		delete widgetProps;
 		widgetProps = NULL;
 
-		delete linkEditor;
-		linkEditor = NULL;
+		delete linkList;
+		linkList = NULL;
 
 		delete procList;
 		procList = NULL;
@@ -194,7 +195,7 @@ namespace GUIEditor
 			m->addAction( a );
 
 			a = new QAction( "Link Editor", this );
-			connect( a, SIGNAL( triggered( bool ) ), linkEditor, SLOT( show() ) );
+			connect( a, SIGNAL( triggered( bool ) ), linkList, SLOT( show() ) );
 			m->addAction( a );
 
 			a = new QAction( "Procedure Editor", this );
@@ -203,10 +204,6 @@ namespace GUIEditor
 
 			a = new QAction( "Project Window", this );
 			connect( a, SIGNAL( triggered( bool ) ), projectWindow, SLOT( show() ) );
-			m->addAction( a );
-
-			a = new QAction( "Clear Viewport", this );
-			connect( a, SIGNAL( triggered( bool ) ), viewPort, SLOT( clear() ) );
 			m->addAction( a );
 		}
 	}

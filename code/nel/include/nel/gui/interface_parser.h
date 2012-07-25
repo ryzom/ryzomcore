@@ -27,6 +27,7 @@
 #include "nel/gui/lua_helper.h"
 #include "nel/gui/proc.h"
 #include "nel/gui/widget_manager.h"
+#include "nel/gui/link_data.h"
 
 namespace NLGUI
 {
@@ -324,6 +325,11 @@ namespace NLGUI
 		bool luaInitialized;
 		ISetupOptionCallbackClass *setupCallback;
 
+		uint32 linkId;
+		std::map< uint32, SLinkData > links;
+
+		bool editorMode;
+
 	public:
 		void initLUA();
 		void uninitLUA();
@@ -340,6 +346,11 @@ namespace NLGUI
 		bool hasProc( const std::string &name ) const;
 		bool addProc( const std::string &name );
 		bool removeProc( const std::string &name );
+
+		const std::map< uint32, SLinkData >& getLinkMap() const{ return links; }
+		void addLinkData( const SLinkData &linkData );
+
+		void setEditorMode( bool b ){ editorMode = b; }
 	};
 
 }

@@ -200,6 +200,8 @@ namespace NLGUI
 	{
 		luaInitialized = false;
 		cacheUIParsing = false;
+		linkId = 0;
+		editorMode = false;
 		setupCallback = NULL;
 	}
 
@@ -991,6 +993,7 @@ namespace NLGUI
 		std::vector<CInterfaceLink::CTargetInfo> targets;
 
 		ptr = (char*) xmlGetProp (cur, (xmlChar*)"target");
+		std::string target = ptr;
 		if (ptr)
 		{
 			CInterfaceLink::splitLinkTargets(std::string((const char*)ptr), parentGroup, targets);
@@ -1009,6 +1012,20 @@ namespace NLGUI
 		// create the link
 		CInterfaceLink *il = new CInterfaceLink;
 		il->init(targets, expr, action, params, cond, parentGroup); // init will add 'il' in the list of link present in 'elm'
+
+		if( editorMode )
+		{
+			SLinkData linkData;
+			linkData.parent = parentGroup->getId();
+			linkData.expr   = expr;
+			linkData.target = target;
+			linkData.action = action;
+			linkData.cond   = cond;
+			linkData.params = params;
+
+			addLinkData( linkData );
+		}
+
 		return true;
 	}
 
@@ -2813,6 +2830,11 @@ namespace NLGUI
 
 		_ProcedureMap.erase( itr );
 		return true;
+	}
+
+	void CInterfaceParser::addLinkData( const SLinkData &linkData )
+	{
+		links[ ++linkId ] = linkData;
 	}
 }
 

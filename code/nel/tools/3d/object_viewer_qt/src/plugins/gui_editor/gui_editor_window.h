@@ -31,7 +31,7 @@ namespace GUIEditor
 
 	class CWidgetProperties;
 	class WidgetHierarchy;
-	class LinkEditor;
+	class LinkList;
 	class ProcList;
 	class ProjectWindow;
 	class NelGUIWidget;
@@ -67,7 +67,7 @@ private:
 		CWidgetProperties *widgetProps;
 		WidgetHierarchy *hierarchyView;
 		QtTreePropertyBrowser *propBrowser;
-		LinkEditor *linkEditor;
+		LinkList *linkList;
 		ProcList *procList;
 		ProjectWindow *projectWindow;
 		NelGUIWidget *viewPort;

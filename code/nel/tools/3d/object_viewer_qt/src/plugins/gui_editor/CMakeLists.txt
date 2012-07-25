@@ -15,6 +15,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_HDR
 	gui_editor_context.h
 	widget_properties.h
 	widget_hierarchy.h
+	link_list.h
 	link_editor.h
 	proc_list.h
 	proc_editor.h
@@ -29,6 +30,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_UIS
 	gui_editor_window.ui
 	widget_properties.ui
 	widget_hierarchy.ui
+	link_list.ui
 	link_editor.ui
 	proc_list.ui
 	proc_editor.ui

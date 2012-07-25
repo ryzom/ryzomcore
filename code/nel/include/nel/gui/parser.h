@@ -22,6 +22,7 @@
 #include <vector>
 #include "nel/misc/types_nl.h"
 #include "nel/gui/proc.h"
+#include "nel/gui/link_data.h"
 
 namespace NLGUI
 {
@@ -71,6 +72,9 @@ namespace NLGUI
 		virtual bool hasProc( const std::string &name ) const = 0;
 		virtual bool addProc( const std::string &name ) = 0;
 		virtual bool removeProc( const std::string &name ) = 0;
+		virtual void setEditorMode( bool b ) = 0;
+		virtual const std::map< uint32, SLinkData >& getLinkMap() const = 0;
+		virtual void addLinkData( const SLinkData &linkData ) = 0;
 	};
 }
 
