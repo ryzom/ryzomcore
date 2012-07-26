@@ -164,11 +164,18 @@ void CFileError::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 void CFileStatus::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 {
 	uint version = stream.serialVersion(2);
+	// if (version >= 3) stream.serial(LastRemoved); else LastRemoved = 0;
 	stream.serial(FirstSeen);
 	stream.serial(LastChangedReference);
-	if (version >= 2) stream.serial(LastFileSizeReference);
+	if (version >= 2) stream.serial(LastFileSizeReference); else LastFileSizeReference = 0;
 	stream.serial(LastUpdate);
 	stream.serial(CRC32);
+}
+
+void CFileRemoved::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
+{
+	uint version = stream.serialVersion(1);
+	stream.serial(Lost);
 }
 
 CDatabaseStatus::CDatabaseStatus()
@@ -201,6 +208,7 @@ bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &
 	}
 	else
 	{
+		// fileStatus.LastRemoved = 0;
 		fileStatus.FirstSeen = 0;
 		fileStatus.LastChangedReference = 0;
 		fileStatus.LastFileSizeReference = ~0;
@@ -213,11 +221,14 @@ bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &
 
 bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStatusMap, const std::vector<std::string> &paths)
 {
+	nlassert(false); // i don't think this is used? (yet?) (maybe for slave?)
+	// probably just some ghost code spooking around.
+
 	for (std::vector<std::string>::const_iterator it = paths.begin(), end = paths.end(); it != end; ++it)
 	{
 		
 	}
-	return false;
+	return false; // it fails of course
 }
 
 namespace {
@@ -242,7 +253,8 @@ public:
 			uint32 fmdt = CFile::getFileModificationDate(FilePath);
 			std::string statusPath = getStatusFilePath(FilePath); // g_WorkspaceDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(FilePath) + ".status";
 			StatusMutex->lock_shared();
-			if (CFile::fileExists(statusPath))
+			bool statusFileExists = CFile::fileExists(statusPath);
+			if (statusFileExists)
 			{
 				CIFile ifs(statusPath, false);
 				fs.serial(ifs);
@@ -291,12 +303,27 @@ public:
 					fs.LastFileSizeReference = fisz;
 				}
 				
+				std::string removePath = getMetaFilePath(FilePath, PIPELINE_DATABASE_REMOVE_SUFFIX);
+
 				StatusMutex->lock();
 				{
 					COFile ofs(statusPath, false, false, true);
 					fs.serial(ofs);
 					ofs.flush();
 					ofs.close();
+				}
+				{
+					// Important that we remove the remove after creating the status in case the service is killed inbetween.
+					if (CFile::fileExists(removePath))
+					{
+						nlwarning("File '%s' was removed before, and now it exists again!", FilePath.c_str());
+						CFile::deleteFile(removePath);
+						nlinfo("Deleted '%s'", removePath.c_str());
+						if (statusFileExists)
+						{
+							nlwarning("The remove file was not deleted last time the status file was created, this is either a bug, a sign of data corruption or it means the service was killed inbetween!");
+						}
+					}
 				}
 				StatusMutex->unlock();
 			}
@@ -437,7 +464,7 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 	
 	for (std::vector<std::string>::iterator it = dirContents.begin(), end = dirContents.end(); it != end; ++it)
 	{
-		const std::string subPath = *it;
+		const std::string &subPath = *it;
 		
 		updatePathStatus(ds, updater, subPath, recurse, false);
 		
@@ -454,7 +481,56 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 	// Sanely get the process build start time by creating a dummy file at the beginning of the build and using that timestamp.
 	// This file also unrelatedly can let us know if the service crashed or was killed during a build.
 
-	// ... TODO ...
+	// Note that we won't notice when a directory is deleted, this is also not necessary because we never work recursively in the service.
+	// Any recursive lookups are done in specific unsafe build tools that are tagged as unsafe and not monitored by the pipeline.
+	
+	std::string dirPathMeta = getMetaFilePath(dirPath, "");
+	// nldebug("META DIR: %s", dirPathMeta.c_str());
+	std::vector<std::string> dirContentsMeta;
+
+	CPath::getPathContent(dirPathMeta, false, false, true, dirContentsMeta);
+
+	// This code is not guaranteed to work reliably.
+	for (std::vector<std::string>::iterator it = dirContentsMeta.begin(), end = dirContentsMeta.end(); it != end; ++it)
+	{
+		const std::string &subPath = *it;
+		
+		std::string::size_type statusPos = subPath.find(PIPELINE_DATABASE_STATUS_SUFFIX);
+
+		if (statusPos != std::string::npos)
+		{
+			std::string subPathFilename = CFile::getFilename(subPath.substr(0, statusPos));
+			std::string subPathOrig = dirPath + subPathFilename;
+			if (std::find(dirContents.begin(), dirContents.end(), subPathOrig) == dirContents.end())
+			{
+				// File no longer exists, warn the user.
+				nlwarning("The file '%s' no longer exists!", subPathOrig.c_str());
+				
+				// Create the removed tag.
+				std::string removedTagFile = dirPathMeta + subPathFilename + PIPELINE_DATABASE_REMOVE_SUFFIX;
+				uint32 time = CTime::getSecondsSince1970();
+				CFileRemoved removed;
+				removed.Lost = time; // Yes you're wasting time, you wouldn't have to delete anything if you did your work properly in the first place! :)
+				COFile of(removedTagFile, false, false, true);
+				removed.serial(of);
+				of.flush();
+				of.close();
+				nldebug("Created '%s'", removedTagFile.c_str());
+				
+				// Delete the status.
+				NLMISC::CFile::deleteFile(subPath);
+				nlinfo("Removed '%s'", subPath.c_str());
+			}
+		}
+		/*else
+		{
+			// TEMP
+			// nldebug("Invalid file %s", subPath.c_str());
+		}*/
+		
+		if (g_IsExiting)
+			return;
+	}
 
 	// <-- END REMOVE
 }

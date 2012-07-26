@@ -55,6 +55,7 @@ namespace PIPELINE {
 #define PIPELINE_DATABASE_STATUS_SUFFIX ".status"
 #define PIPELINE_DATABASE_ERRORS_SUFFIX ".errors"
 #define PIPELINE_DATABASE_DEPEND_SUFFIX ".depend"
+#define PIPELINE_DATABASE_REMOVE_SUFFIX ".remove"
 
 #define PIPELINE_DATABASE_META_SUFFIX ".meta"
 
@@ -81,11 +82,20 @@ typedef std::vector<CFileError> CFileErrors;
 struct CFileStatus
 {
 public:
-	uint32 FirstSeen;
+	// uint32 LastRemoved; // The last time this file was removed, purely informational (at the moment) because we can detect past removal and re-addition by comparing FirstSeen with our reference build time as well.
+	uint32 FirstSeen; // The time when this status file was first created (if the file was removed before this means the time when the file returned).
 	uint32 LastChangedReference; // The modification date value read when the CRC32 was calculated.
 	uint32 LastFileSizeReference; // The filesize when the CRC32 was calculated.
 	uint32 LastUpdate; // The start time when the CRC32 was calculated.
 	uint32 CRC32;
+
+	void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
+};
+
+struct CFileRemoved
+{
+public:
+	uint32 Lost; // The time when it was noticed the file was removed.
 
 	void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
 };
