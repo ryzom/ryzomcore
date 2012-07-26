@@ -18,8 +18,8 @@
 #ifndef WIDGET_INFO_H
 #define WIDGET_INFO_H
 
-#include <string>
 #include <vector>
+#include <string>
 
 namespace GUIEditor
 {
@@ -28,7 +28,7 @@ namespace GUIEditor
 		std::string propName;
 		std::string propType;
 		std::string propDefault;
-		
+
 		static SPropEntry create( const char *propname, const char *proptype, const char *propdefault )
 		{
 			SPropEntry entry;

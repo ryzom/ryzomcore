@@ -235,6 +235,25 @@ namespace NLGUI
 	}
 
 
+	std::string CInterfaceElement::getProperty( const std::string &name ) const
+	{
+		if( name == "id" )
+		{
+			return getId();
+		}
+		else
+		if( name == "active" )
+		{
+			if( getActive() )
+				return "true";
+			else
+				return "false";
+		}
+
+		return "";
+	}
+
+
 	// ------------------------------------------------------------------------------------------------
 	void CInterfaceElement::setSizeRef(const std::string &sizeref)
 	{

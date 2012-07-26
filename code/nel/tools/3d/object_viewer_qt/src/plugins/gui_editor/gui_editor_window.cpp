@@ -75,9 +75,10 @@ namespace GUIEditor
 
 		dock = new QDockWidget( "Widget Properties", this );
 		dock->setAllowedAreas(  Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea );
+
 		QtTreePropertyBrowser *propBrowser = new QtTreePropertyBrowser;
+		browserCtrl.setupWidgetInfo( widgetInfo );
 		browserCtrl.setBrowser( propBrowser );
-		browserCtrl.setup();
 		dock->setWidget( propBrowser );
 		addDockWidget( Qt::RightDockWidgetArea, dock );
 
@@ -86,6 +87,8 @@ namespace GUIEditor
 		connect( viewPort, SIGNAL( guiLoadComplete() ), hierarchyView, SLOT( onGUILoaded() ) );
 		connect( viewPort, SIGNAL( guiLoadComplete() ), procList, SLOT( onGUILoaded() ) );
 		connect( viewPort, SIGNAL( guiLoadComplete() ), linkList, SLOT( onGUILoaded() ) );
+		connect( hierarchyView, SIGNAL( selectionChanged( std::string& ) ),
+			&browserCtrl, SLOT( onSelectionChanged( std::string& ) ) );
 	}
 	
 	GUIEditorWindow::~GUIEditorWindow()

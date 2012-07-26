@@ -52,6 +52,9 @@ namespace GUIEditor
 	private:
 		std::string currentSelection;
 		std::string masterGroup;
+
+	Q_SIGNALS:
+		void selectionChanged( std::string &id );
 	};
 }
 

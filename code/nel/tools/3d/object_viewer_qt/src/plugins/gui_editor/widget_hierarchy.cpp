@@ -137,6 +137,9 @@ namespace GUIEditor
 		if( item->parent() == NULL )
 			return;
 		
-		CWidgetManager::getInstance()->setCurrentEditorSelection( makeFullName( item, item->text( 0 ).toStdString() ) );
+		std::string selection = makeFullName( item, item->text( 0 ).toStdString() );
+		CWidgetManager::getInstance()->setCurrentEditorSelection( selection );
+		
+		Q_EMIT selectionChanged( selection );
 	}
 }

@@ -145,6 +145,21 @@ namespace NLGUI
 		return true;
 	}
 
+	std::string CCtrlBase::getProperty( const std::string &name ) const
+	{
+		if( name == "on_tooltip" )
+		{
+			return _OnContextHelp.toString();
+		}
+		else
+		if( name == "on_tooltip_params" )
+		{
+			return _OnContextHelpParams.toString();
+		}
+
+		return CInterfaceElement::getProperty( name );
+	}
+
 	// ***************************************************************************
 	void CCtrlBase::convertTooltipHotSpot(const char *prop, THotSpot &parentHS, THotSpot &childHS)
 	{

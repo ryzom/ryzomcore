@@ -353,6 +353,21 @@ namespace NLGUI
 		return true;
 	}
 
+	std::string CInterfaceGroup::getProperty( const std::string &name ) const
+	{
+		if( name == "on_enter" )
+		{
+			return getAHOnEnter();
+		}
+		else
+		if( name == "on_enter_params" )
+		{
+			return getAHOnEnterParams();
+		}
+
+		return CCtrlBase::getProperty( name );
+	}
+
 
 	// ------------------------------------------------------------------------------------------------
 	void CInterfaceGroup::parseMaxSizeRef(const char *ptr)

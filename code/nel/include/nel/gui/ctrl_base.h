@@ -57,7 +57,9 @@ namespace NLGUI
 		virtual ~CCtrlBase();
 
 		// special parse
-		virtual bool		parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+		virtual bool parse(xmlNodePtr cur, CInterfaceGroup *parentGroup);
+
+		std::string getProperty( const std::string &name ) const;
 
 
 		/// Handle all events (implemented by derived classes) (return true to signal event handled)

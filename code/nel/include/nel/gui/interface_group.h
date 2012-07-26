@@ -41,6 +41,8 @@ namespace NLGUI
 		/// Coming from CInterfaceElement
 		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
 
+		std::string getProperty( const std::string &name ) const;
+
 		virtual uint32 getMemory ();
 
 		virtual CInterfaceElement* getElement (const std::string &id);

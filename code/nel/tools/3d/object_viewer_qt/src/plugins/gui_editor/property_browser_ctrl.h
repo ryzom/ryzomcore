@@ -19,9 +19,17 @@
 #define PROP_BROWSER_CTRL
 
 #include <QObject>
+#include <string>
+#include <map>
+#include "widget_info.h"
 
 class QtTreePropertyBrowser;
 class QtVariantPropertyManager;
+
+namespace NLGUI
+{
+	class CInterfaceElement;
+}
 
 namespace GUIEditor
 {
@@ -36,11 +44,18 @@ namespace GUIEditor
 		CPropBrowserCtrl();
 		~CPropBrowserCtrl();
 		void setBrowser( QtTreePropertyBrowser *b );
-		void setup();
+		void setupWidgetInfo( const std::map< std::string, SWidgetInfo > &info );
+
+	public Q_SLOTS:
+		void onSelectionChanged( std::string &id );
 
 	private:
+		void setupProperties( const std::string &type, const NLGUI::CInterfaceElement *element );
+		void setupProperty( const SPropEntry &prop, const NLGUI::CInterfaceElement *element );
+
 		QtTreePropertyBrowser *browser;
 		QtVariantPropertyManager *propertyMgr;
+		std::map< std::string, SWidgetInfo > widgetInfo;
 	};
 
 }

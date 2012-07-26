@@ -18,6 +18,9 @@
 #include "property_browser_ctrl.h"
 #include "../../3rdparty/qtpropertybrowser/QtVariantPropertyManager"
 #include "../../3rdparty/qtpropertybrowser/QtTreePropertyBrowser"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/widget_manager.h"
+#include <typeinfo>
 
 namespace GUIEditor
 {
@@ -39,27 +42,74 @@ namespace GUIEditor
 		browser = b;
 	}
 
-	void CPropBrowserCtrl::setup()
+	void CPropBrowserCtrl::setupWidgetInfo( const std::map< std::string, SWidgetInfo > &info )
+	{
+		widgetInfo.clear();
+
+		std::map< std::string, SWidgetInfo >::const_iterator itr;
+		for( itr = info.begin(); itr != info.end(); ++itr )
+		{
+			const SWidgetInfo &w = itr->second;
+			widgetInfo[ w.GUIName ] = w;
+		}
+	}
+
+	void CPropBrowserCtrl::onSelectionChanged( std::string &id )
 	{
 		if( browser == NULL )
 			return;
+		browser->clear();
 
-		QtVariantProperty *p;
+		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( id );
+		if( e == NULL )
+			return;
+
+		std::string n;
+		n = typeid( *e ).name();
+		std::string::size_type i = n.find_last_of( ':' );
+		if( i != std::string::npos )
+			n = n.substr( i + 1, n.size() - 1 );
+
+		setupProperties( n, e );
+	}
+
+	void CPropBrowserCtrl::setupProperties( const std::string &type, const CInterfaceElement *element )
+	{
+		std::map< std::string, SWidgetInfo >::iterator itr = widgetInfo.find( type );
+		if( itr == widgetInfo.end() )
+			return;
+		SWidgetInfo &w = itr->second;
+
+		std::vector< SPropEntry >::const_iterator pItr;
+		for( pItr = w.props.begin(); pItr != w.props.end(); ++pItr )
+		{
+			const SPropEntry &prop = *pItr;
+			setupProperty( prop, element );
+		}
+	}
+
+	void CPropBrowserCtrl::setupProperty( const SPropEntry &prop, const CInterfaceElement *element )
+	{
+		QtVariantProperty *p = NULL;
 		
-		p = propertyMgr->addProperty( QVariant::String, "Id" );
-		p->setValue( "ExampleId" );
-		browser->addProperty( p );
+		if( prop.propType == "string" )
+		{
+			p = propertyMgr->addProperty( QVariant::String, prop.propName.c_str() );
+			p->setValue( element->getProperty( prop.propName ).c_str() );
+		}
+		else
+		if( prop.propType == "bool" )
+		{
+			p = propertyMgr->addProperty( QVariant::Bool, prop.propName.c_str() );
+			bool value = false;
+			if( element->getProperty( prop.propName ) == "true" )
+				value = true;
 
-		p = propertyMgr->addProperty( QVariant::Bool, "Active" );
-		p->setValue( true );
-		browser->addProperty( p );
+			p->setValue( value );
+		}
+		if( p == NULL )
+			return;
 
-		p = propertyMgr->addProperty( QVariant::String, "on_enter" );
-		p->setValue( "on_enter_handler" );
-		browser->addProperty( p );
-
-		p = propertyMgr->addProperty( QVariant::String, "on_enter_params" );
-		p->setValue( "someparams" );
 		browser->addProperty( p );
 	}
 }
