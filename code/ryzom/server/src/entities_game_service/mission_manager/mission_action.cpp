@@ -5417,6 +5417,7 @@ class CMissionActionCameraAnimation : public IMissionAction
 		}
 
 		_AnimationName = script[1];
+		CMissionParser::removeBlanks(_AnimationName);
 
 		return ret;
 	}
@@ -5458,6 +5459,7 @@ class CMissionActionSoundTrigger : public IMissionAction
 		}
 
 		std::string SoundName = script[1];
+		CMissionParser::removeBlanks(SoundName);
 		if (script.size() >= 3)
 			_SoundPosition = script[2];
 		else
