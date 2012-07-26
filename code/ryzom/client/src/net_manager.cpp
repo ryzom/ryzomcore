@@ -3768,7 +3768,7 @@ void initializeNetwork()
 	GenericMsgHeaderMngr.setCallback( "NPC_ICON:SVR_EVENT_MIS_AVL",	impulseServerEventForMissionAvailability );
 	GenericMsgHeaderMngr.setCallback( "NPC_ICON:SET_TIMER",			impulseSetNpcIconTimer );
 
-	GenericMsgHeaderMngr.setCallback( "SOUND_TRIGGER:PLAY",			impulsePlaySoundTrigger );
+	GenericMsgHeaderMngr.setCallback( "SOUND_TRIGGER",			impulsePlaySoundTrigger );
 
 	GenericMsgHeaderMngr.setCallback( "CAMERA_ANIMATION:PLAY",		impulseCameraAnimationPlay );
 	GenericMsgHeaderMngr.setCallback( "CAMERA_ANIMATION:STEP",		impulseCameraAnimationStep );

@@ -5495,7 +5495,7 @@ class CMissionActionSoundTrigger : public IMissionAction
 		{
 			// We send the message
 			CEntityId eid = TheDataset.getEntityId(entities[i]);
-			PlayerManager.sendImpulseToClient(eid, "SOUND_TRIGGER:PLAY", _SoundId, pos);
+			PlayerManager.sendImpulseToClient(eid, "SOUND_TRIGGER", _SoundId, pos);
 		}
 	};
 	std::string _SoundPosition;

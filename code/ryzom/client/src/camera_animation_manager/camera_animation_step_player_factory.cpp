@@ -21,6 +21,9 @@ std::vector<std::pair<std::string, ICameraAnimationStepPlayerFactory*> >* ICamer
 
 ICameraAnimationStepPlayer* ICameraAnimationStepPlayerFactory::initStep(const std::string& name, NLMISC::CBitMemStream& impulse)
 {
+	if (!Entries)
+		return NULL;
+
 	// We search the correct step type in our entries
 	for (uint i = 0; i < Entries->size(); i++)
 	{
