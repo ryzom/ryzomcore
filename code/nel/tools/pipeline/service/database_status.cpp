@@ -57,7 +57,7 @@ bool isInRootDirectoryFast(std::string &rootDirectoryName, std::string &rootDire
 	{
 		rootDirectoryName = rootDirectories.asString(i);
 		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(rootDirectoryName);
-		rootDirectoryPath = CPath::standardizePath(dir.asString(), true);
+		rootDirectoryPath = standardizePath(dir.asString(), true);
 		if (path.find(rootDirectoryPath) == 0) return true;
 	}
 	return false;
@@ -68,13 +68,13 @@ bool isInSheetsDirectoryFast(std::string &sheetDirectoryName, std::string &sheet
 	{
 		sheetDirectoryName = "WorkspaceDfnDirectory";
 		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(sheetDirectoryName);
-		sheetDirectoryPath = CPath::standardizePath(dir.asString(), true);
+		sheetDirectoryPath = standardizePath(dir.asString(), true);
 		if (path.find(sheetDirectoryPath) == 0) return true;
 	}
 	{
 		sheetDirectoryName = "WorkspaceSheetDirectory";
 		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(sheetDirectoryName);
-		sheetDirectoryPath = CPath::standardizePath(dir.asString(), true);
+		sheetDirectoryPath = standardizePath(dir.asString(), true);
 		if (path.find(sheetDirectoryPath) == 0) return true;
 	}
 	return false;
@@ -108,7 +108,7 @@ std::string dropWorkspaceDirectoryFast(const std::string &path)
 
 std::string getMetaFilePath(const std::string &path, const std::string &dotSuffix)
 {
-	std::string stdPath = CPath::standardizePath(path, false);
+	std::string stdPath = standardizePath(path, false);
 	if (isInWorkspaceDirectoryFast(stdPath))
 	{
 		// TODO_TEST
@@ -197,6 +197,8 @@ bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &
 	m_StatusMutex.lock_shared();
 	if (CFile::fileExists(statusPath))
 	{
+		nlassert(!CFile::isDirectory(filePath));
+		
 		CIFile ifs(statusPath, false);
 		fileStatus.serial(ifs);
 		ifs.close();
@@ -221,7 +223,9 @@ bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &
 
 bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStatusMap, std::map<std::string, CFileRemove> &fileRemoveMap, const std::vector<std::string> &paths)
 {
-	nlassert(false); // i don't think this is used? (yet?) (maybe for slave?)
+	// ARE THE PATHS UNMACRO'D OR NOT???
+
+	// nlassert(false); // i don't think this is used? (yet?) (maybe for slave?)
 	// probably just some ghost code spooking around.
 
 	// this code shall be used by the slave to get all the infos
@@ -229,9 +233,101 @@ bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStat
 
 	for (std::vector<std::string>::const_iterator it = paths.begin(), end = paths.end(); it != end; ++it)
 	{
+		std::string path = *it; // assume already unmacro'd!
 		
+		if (CFile::isExists(path))
+		{
+			if (CFile::isDirectory(path)) // perhaps it is possible to check only on / assuming it's properly formatted!!
+			{
+				nlassert(path.find_last_of('/') == path.size() - 1); // ensure sanity
+
+				// std::string dirPath = standardizePath(path, true);
+				std::string &dirPath = path;
+				std::vector<std::string> dirContents;
+
+				CPath::getPathContent(dirPath, false, true, true, dirContents);
+				
+				for (std::vector<std::string>::iterator it = dirContents.begin(), end = dirContents.end(); it != end; ++it)
+				{
+					const std::string &subPath = *it;
+					
+					CFileStatus fs;
+					if (!getFileStatus(fs, subPath))
+						return false; // bad status, data corruption // TODO_PROCESS_ERROR
+					fileStatusMap[subPath] = fs; // i'll assume macropath might be easiest
+					
+					// TODO_PROCESS_ERROR_EXIT
+					if (g_IsExiting)
+						return false;
+				}
+
+				std::string dirPathMeta = getMetaFilePath(dirPath, "");
+				std::vector<std::string> dirContentsMeta;
+
+				CPath::getPathContent(dirPathMeta, false, false, true, dirContentsMeta);
+
+				for (std::vector<std::string>::iterator it = dirContentsMeta.begin(), end = dirContentsMeta.end(); it != end; ++it)
+				{
+					const std::string &subPath = *it;
+					
+					std::string::size_type removePos = subPath.find(PIPELINE_DATABASE_REMOVE_SUFFIX);
+
+					if (removePos != std::string::npos)
+					{
+						std::string subPathFilename = CFile::getFilename(subPath.substr(0, removePos));
+						std::string subPathOrig = dirPath + subPathFilename;
+						
+						nldebug("Found remove meta for file '%s'!", subPathOrig.c_str());
+						// Read the removed tag.
+						std::string removedTagFile = dirPathMeta + subPathFilename + PIPELINE_DATABASE_REMOVE_SUFFIX;
+						CFileRemove fr;
+						CIFile ifr(removedTagFile, false);
+						fr.serial(ifr);
+						ifr.close();
+
+						fileRemoveMap[subPathOrig] = fr;
+					}
+					
+					// TODO_PROCESS_ERROR_EXIT
+					if (g_IsExiting)
+						return false;
+				}
+			}
+			else
+			{
+				CFileStatus fs;
+				if (!getFileStatus(fs, path))
+					return false; // bad status, data corruption // TODO_PROCESS_ERROR
+				fileStatusMap[path] = fs; // i'll assume macropath might be easiest
+			}
+		}
+		else
+		{
+			// TODO_PROCESS_WARNING
+			nlwarning("Requesting status on file or directory '%s' that does not exist!", path.c_str());
+			CFileRemove fr;
+			std::string removedTagFile = getMetaFilePath(path, PIPELINE_DATABASE_REMOVE_SUFFIX);
+			if (CFile::isExists(removedTagFile))
+			{
+				// file existed before
+				CIFile ifr(removedTagFile, false);
+				fr.serial(ifr);
+				ifr.close();
+			}
+			else
+			{
+				// file never existed or is directory
+				fr.Lost = 0;
+			}
+			fileRemoveMap[path] = fr;
+		}
+		// TODO_PROCESS_ERROR_EXIT
+		if (g_IsExiting)
+			return false;
 	}
-	return false; // it fails of course
+	
+	// no issues occured apparently
+	return true;
 }
 
 namespace {
@@ -436,6 +532,11 @@ public:
 void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater, const std::string &dir, bool recurse);
 void updatePathStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater, const std::string &subPath, bool recurse, bool recurseOnce)
 {
+	if (!CFile::isExists(subPath))
+	{
+		nlwarning("Updating status on path '%s' that does not exist!", subPath.c_str());
+		return;
+	}
 	if (CFile::isDirectory(subPath)) // if the file is a directory!
 	{
 		if (recurse || recurseOnce)
@@ -460,7 +561,7 @@ void updatePathStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater, cons
 
 void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater, const std::string &dir, bool recurse)
 {
-	std::string dirPath = CPath::standardizePath(dir, true);
+	std::string dirPath = standardizePath(dir, true);
 	std::vector<std::string> dirContents;
 
 	CPath::getPathContent(dirPath, false, true, true, dirContents);
@@ -554,7 +655,7 @@ void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback)
 	{
 		std::string rootDirectoryName = rootDirectories.asString(i);
 		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(rootDirectoryName);
-		std::string rootDirectoryPath = CPath::standardizePath(dir.asString(), true);
+		std::string rootDirectoryPath = standardizePath(dir.asString(), true);
 		paths.push_back(rootDirectoryPath);
 	}
 	updateDatabaseStatus(callback, paths, false, true);

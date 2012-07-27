@@ -76,11 +76,11 @@ bool CPipelineProject::getValue(std::string &result, const std::string &name)
 	std::string typComment = valueElm->getType()->getComment();
 	if (typComment == "PIPELINE_PATH")
 	{
-		parsed = NLMISC::CPath::standardizePath(parsed, false);
+		parsed = standardizePath(parsed, false);
 	}
 	else if (typComment == "PIPELINE_PATH_ENDSLASH")
 	{
-		parsed = NLMISC::CPath::standardizePath(parsed, true);
+		parsed = standardizePath(parsed, true);
 	}
 	result = parsed;
 	return true;
@@ -123,11 +123,11 @@ bool CPipelineProject::getValues(std::vector<std::string> &resultAppend, const s
 		std::string typComment = valueElm->getType()->getComment();
 		if (typComment == "PIPELINE_PATH")
 		{
-			parsed = NLMISC::CPath::standardizePath(parsed, false);
+			parsed = standardizePath(parsed, false);
 		}
 		else if (typComment == "PIPELINE_PATH_ENDSLASH")
 		{
-			parsed = NLMISC::CPath::standardizePath(parsed, true);
+			parsed = standardizePath(parsed, true);
 		}
 		resultAppend.push_back(parsed);
 	}

@@ -69,6 +69,9 @@ std::string unMacroPath(const std::string &path);
 /// Macros a path, and standardizes it in advance.
 std::string macroPath(const std::string &path);
 
+/// Based on CPath::standardizePath, but strips double slashes as well
+std::string standardizePath(const std::string &path, bool addFinalSlash);
+
 bool tryRunnableTask(const std::string &stateName, NLMISC::IRunnable *task);
 void endedRunnableTask();
 

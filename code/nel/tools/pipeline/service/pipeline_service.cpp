@@ -87,17 +87,17 @@ std::string unMacroPath(const std::string &path)
 	{
 		std::string rootDirectoryName = rootDirectories.asString(i);
 		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(rootDirectoryName);
-		std::string rootDirectoryPath = CPath::standardizePath(dir.asString(), true);
+		std::string rootDirectoryPath = standardizePath(dir.asString(), true);
 		std::string macroName = "[$" + rootDirectoryName + "]";
 		strFindReplace(result, macroName, rootDirectoryPath);
 	}
 
-	return CPath::standardizePath(result, false);
+	return standardizePath(result, false);
 }
 
 std::string macroPath(const std::string &path)
 {
-	std::string result = CPath::standardizePath(path, false);
+	std::string result = standardizePath(path, false);
 
 	strFindReplace(result, g_WorkDir, PIPELINE_MACRO_WORKSPACE_DIRECTORY "/");
 	
@@ -106,7 +106,7 @@ std::string macroPath(const std::string &path)
 	{
 		std::string rootDirectoryName = rootDirectories.asString(i);
 		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(rootDirectoryName);
-		std::string rootDirectoryPath = CPath::standardizePath(dir.asString(), true);
+		std::string rootDirectoryPath = standardizePath(dir.asString(), true);
 		std::string macroName = "[$" + rootDirectoryName + "]";
 		strFindReplace(result, rootDirectoryPath,  macroName);
 	}
@@ -115,6 +115,48 @@ std::string macroPath(const std::string &path)
 		nlerror("Invalid macro path %s", result.c_str());
 
 	return result;
+}
+
+std::string standardizePath(const std::string &path, bool addFinalSlash)
+{
+	// check empty path
+	if (path.empty())
+		return "";
+
+	std::string newPath;
+	newPath.resize(path.size() + 1);
+
+	std::string::size_type j = 0;
+	for (std::string::size_type i = 0; i < path.size(); ++i)
+	{
+		if (path[i] == '\\' || path[i] == '/')
+		{
+			if (j <= 1 && path[i] == '\\')
+			{
+				// for windows network
+				newPath[j] = '\\';
+				++j;
+			}
+			else if (j == 0 || newPath[j - 1] != '/')
+			{
+				newPath[j] = '/';
+				++j;
+			}
+		}
+		else
+		{
+			newPath[j] = path[i];
+			++j;
+		}
+	}
+	newPath[j] = 0;
+	newPath.resize(j);
+
+	// add terminal slash
+	if (addFinalSlash && newPath[path.size()-1] != '/')
+		newPath += '/';
+
+	return newPath;
 }
 
 extern void module_pipeline_master_forceLink();
@@ -354,9 +396,9 @@ namespace {
 
 void initSheets()
 {
-	std::string dfnDirectory = CPath::standardizePath(IService::getInstance()->ConfigFile.getVar("WorkspaceDfnDirectory").asString(), true);
+	std::string dfnDirectory = standardizePath(IService::getInstance()->ConfigFile.getVar("WorkspaceDfnDirectory").asString(), true);
 	IService::getInstance()->ConfigFile.getVar("WorkspaceDfnDirectory").setAsString(dfnDirectory);
-	std::string sheetDirectory = CPath::standardizePath(IService::getInstance()->ConfigFile.getVar("WorkspaceSheetDirectory").asString(), true);
+	std::string sheetDirectory = standardizePath(IService::getInstance()->ConfigFile.getVar("WorkspaceSheetDirectory").asString(), true);
 	IService::getInstance()->ConfigFile.getVar("WorkspaceSheetDirectory").setAsString(sheetDirectory);
 	
 	if (!CFile::isDirectory(dfnDirectory)) nlerror("'WorkspaceDfnDirectory' does not exist! (%s)", dfnDirectory.c_str());
@@ -372,7 +414,7 @@ void initSheets()
 	{
 		std::string rootName = georgesDirectories.asString(i);
 		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(rootName);
-		std::string dirName = CPath::standardizePath(dir.asString(), true);
+		std::string dirName = standardizePath(dir.asString(), true);
 		if (!CFile::isDirectory(dirName)) nlerror("'%s' does not exist! (%s)", rootName.c_str(), dirName.c_str());
 		CPath::addSearchPath(dirName, true, false);
 	}
@@ -508,10 +550,10 @@ public:
 
 		s_InfoFlags->addFlag("INIT");
 
-		//g_DatabaseDirectory = CPath::standardizePath(ConfigFile.getVar("DatabaseDirectory").asString(), true);
+		//g_DatabaseDirectory = standardizePath(ConfigFile.getVar("DatabaseDirectory").asString(), true);
 		//if (!CFile::isDirectory(g_DatabaseDirectory)) nlwarning("'DatabaseDirectory' does not exist! (%s)", g_DatabaseDirectory.c_str());
 		//ConfigFile.getVar("DatabaseDirectory").setAsString(g_DatabaseDirectory);
-		g_WorkDir = CPath::standardizePath(ConfigFile.getVar("WorkspaceDirectory").asString(), true);
+		g_WorkDir = standardizePath(ConfigFile.getVar("WorkspaceDirectory").asString(), true);
 		if (!CFile::isDirectory(g_WorkDir)) nlerror("'WorkspaceDirectory' does not exist! (%s)", g_WorkDir.c_str());
 		ConfigFile.getVar("WorkspaceDirectory").setAsString(g_WorkDir);
 
@@ -521,7 +563,7 @@ public:
 		{
 			std::string rootName = rootDirectories.asString(i);
 			CConfigFile::CVar &dir = ConfigFile.getVar(rootName);
-			std::string dirName = CPath::standardizePath(dir.asString(), true);
+			std::string dirName = standardizePath(dir.asString(), true);
 			if (!CFile::isDirectory(dirName)) nlerror("'%s' does not exist! (%s)", rootName.c_str(), dirName.c_str());
 			dir.setAsString(dirName);
 		}
