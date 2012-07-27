@@ -2017,6 +2017,16 @@ namespace NLGUI
 		_LuaClassAssociation.insert (std::map<CInterfaceGroup*,std::string>::value_type(group, luaScript));
 	}
 
+	std::string CInterfaceParser::getLuaClassAssociation( CInterfaceGroup *group ) const
+	{
+		std::map< CInterfaceGroup*, std::string >::const_iterator itr =
+			_LuaClassAssociation.find( group );
+		if( itr == _LuaClassAssociation.end() )
+			return "";
+		else
+			return itr->second;
+	}
+
 	// ***************************************************************************
 	const std::string	&CInterfaceParser::getDefine(const std::string &id) const
 	{

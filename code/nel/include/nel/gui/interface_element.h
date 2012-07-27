@@ -341,6 +341,7 @@ namespace NLGUI
 		// set sizeref as a string, like "wh", "wh5" ....
 		void setSizeRef(const std::string &sizeref);
 		std::string getSizeRefAsString() const;
+		std::string getSizeRefAsString(  const sint32 &sizeRef, const sint32 &sizeDivW, const sint32 &sizeDivH  ) const;
 
 		// export some properties
 		REFLECT_EXPORT_START(CInterfaceElement, CReflectable)

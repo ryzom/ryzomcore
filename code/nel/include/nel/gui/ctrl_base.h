@@ -30,7 +30,7 @@ namespace NLGUI
 	public:
 
 		// Tooltip mode
-		enum	TToolTipParentType
+		enum TToolTipParentType
 		{
 			TTMouse= 0,		// The tooltip is displayed relatively to the mouse when it appears
 			TTCtrl= 1,		// The tooltip is displayed relatively to the ctrl it comes from when it apeears
@@ -55,6 +55,8 @@ namespace NLGUI
 
 		/// Destructor
 		virtual ~CCtrlBase();
+
+		static std::string tooltipParentToString( TToolTipParentType type );
 
 		// special parse
 		virtual bool parse(xmlNodePtr cur, CInterfaceGroup *parentGroup);

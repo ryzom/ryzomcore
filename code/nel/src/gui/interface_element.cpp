@@ -261,7 +261,7 @@ namespace NLGUI
 		else
 		if( name == "sizeref" )
 		{
-			return getSizeRefAsString();
+			return getSizeRefAsString( _SizeRef, _SizeDivW, _SizeDivH );
 		}
 		if( name == "posparent" )
 		{
@@ -301,19 +301,24 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	std::string CInterfaceElement::getSizeRefAsString() const
 	{
+		return getSizeRefAsString( _SizeRef, _SizeDivW, _SizeDivH );
+	}
+
+	std::string CInterfaceElement::getSizeRefAsString( const sint32 &sizeRef, const sint32 &sizeDivW, sint32 const &sizeDivH ) const
+	{
 		std::string s;
-		if( ( _SizeRef & 1 ) != 0 )
+		if( ( sizeRef & 1 ) != 0 )
 		{
 			s += "w";
-			if( _SizeDivW < 10 )
-				s += toString( _SizeDivW );
+			if( sizeDivW < 10 )
+				s += toString( sizeDivW );
 		}
 
 		if( ( _SizeRef & 2 ) != 0 )
 		{
 			s += "h";
-			if( _SizeDivH < 10 )
-				s += toString( _SizeDivH );
+			if( sizeDivH < 10 )
+				s += toString( sizeDivH );
 		}
 
 		return s;

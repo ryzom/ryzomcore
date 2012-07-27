@@ -168,6 +168,7 @@ namespace NLGUI
 
 		/// LUA Class Association builder :  associate a lua script to a group (called for each group after every document parsed)
 		void addLuaClassAssociation(CInterfaceGroup *group, const std::string &luaScript);
+		std::string getLuaClassAssociation( CInterfaceGroup *group ) const;
 
 		/**
 		 * Accessors

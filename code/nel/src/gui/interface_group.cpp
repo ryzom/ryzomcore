@@ -355,6 +355,96 @@ namespace NLGUI
 
 	std::string CInterfaceGroup::getProperty( const std::string &name ) const
 	{
+		if( name == "overlappable" )
+		{
+			return NLMISC::toString( _Overlappable );
+		}
+		else
+		if( name == "escapable" )
+		{
+			return NLMISC::toString( _Escapable );
+		}
+		else
+		if( name == "child_resize_w" )
+		{
+			return NLMISC::toString( _ResizeFromChildW );
+		}
+		else
+		if( name == "child_resize_h" )
+		{
+			return NLMISC::toString( _ResizeFromChildH );
+		}
+		else
+		if( name == "child_resize_wmargin" )
+		{
+			return NLMISC::toString( _ResizeFromChildWMargin );
+		}
+		else
+		if( name == "child_resize_hmargin" )
+		{
+			return NLMISC::toString( _ResizeFromChildHMargin );
+		}
+		else
+		if( name == "on_active" )
+		{
+			return getOnActiveHandler();
+		}
+		else
+		if( name == "on_active_params" )
+		{
+			return getOnActiveParams();
+		}
+		else
+		if( name == "on_deactive" )
+		{
+			return getOnDeactiveHandler();
+		}
+		else
+		if( name == "on_deactive_params" )
+		{
+			return getOnDeactiveParams();
+		}
+		else
+		if( name == "max_w" )
+		{
+			return NLMISC::toString( _MaxW );
+		}
+		else
+		if( name == "max_h" )
+		{
+			return NLMISC::toString( _MaxH );
+		}
+		else
+		if( name == "max_sizeref" )
+		{
+			return getSizeRefAsString( _GroupSizeRef, _SizeDivW, _SizeDivH );
+		}
+		else
+		if( name == "max_sizeparent" )
+		{
+			return CWidgetManager::getInstance()->getParser()->getParentSizeMaxAssociation( (CInterfaceElement*)this );
+		}
+		else
+		if( name == "group_onclick_r" )
+		{
+			return getRightClickHandler();
+		}
+		else
+		if( name == "group_params_r" )
+		{
+			return getRightClickHandlerParams();
+		}
+		else
+		if( name == "group_onclick_l" )
+		{
+			return getLeftClickHandler();
+		}
+		else
+		if( name == "group_params_l" )
+		{
+			return getLeftClickHandlerParams();
+		}
+		else
 		if( name == "on_enter" )
 		{
 			return getAHOnEnter();
@@ -364,8 +454,33 @@ namespace NLGUI
 		{
 			return getAHOnEnterParams();
 		}
-
-		return CCtrlBase::getProperty( name );
+		else
+		if( name == "win_priority" )
+		{
+			return NLMISC::toString( _Priority );
+		}
+		else
+		if( name == "use_cursor" )
+		{
+			return NLMISC::toString( _UseCursor );
+		}
+		else
+		if( name == "on_escape" )
+		{
+			return getAHOnEscape();
+		}
+		else
+		if( name == "on_escape_params" )
+		{
+			return getAHOnEscapeParams();
+		}
+		else
+		if( name == "lua_class" )
+		{
+			return CWidgetManager::getInstance()->getParser()->getLuaClassAssociation( (CInterfaceGroup*)this );
+		}
+		else
+			return CCtrlBase::getProperty( name );
 	}
 
 

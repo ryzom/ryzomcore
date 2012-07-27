@@ -48,6 +48,7 @@ namespace NLGUI
 		virtual std::string getParentPosAssociation( CInterfaceElement *element ) const = 0;
 		virtual std::string getParentSizeAssociation( CInterfaceElement *element ) const = 0;
 		virtual std::string getParentSizeMaxAssociation( CInterfaceElement *element ) const = 0;
+		virtual std::string getLuaClassAssociation( CInterfaceGroup *group ) const = 0;
         virtual CInterfaceGroup* createGroupInstance( const std::string &templateName, const std::string &parentID, const std::pair< std::string, std::string > *templateParams, uint numParams, bool updateLinks = true ) = 0;
         virtual CInterfaceGroup* createGroupInstance( const std::string &templateName, const std::string &parentID, std::vector< std::pair< std::string, std::string > > &templateParams, bool updateLinks = true ) = 0;
         virtual bool parseGroupChildren( xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload ) = 0;
