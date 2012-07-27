@@ -136,7 +136,7 @@ void updateSmoothedTime();
 
 inline NLMISC::TTime ryzomGetLocalTime()
 {
-	return NLMISC::CTime::getLocalTimeHR();
+	return NLMISC::CTime::getLocalTime();
 }
 
 inline NLMISC::TTicks ryzomGetPerformanceTime()
