@@ -172,7 +172,7 @@ void CFileStatus::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 	stream.serial(CRC32);
 }
 
-void CFileRemoved::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
+void CFileRemove::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 {
 	uint version = stream.serialVersion(1);
 	stream.serial(Lost);
@@ -219,10 +219,13 @@ bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &
 	return seemsValid;
 }
 
-bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStatusMap, const std::vector<std::string> &paths)
+bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStatusMap, std::map<std::string, CFileRemove> &fileRemoveMap, const std::vector<std::string> &paths)
 {
 	nlassert(false); // i don't think this is used? (yet?) (maybe for slave?)
 	// probably just some ghost code spooking around.
+
+	// this code shall be used by the slave to get all the infos
+	// in the slave it will compare the returned data for example with the last successful build time and return added/changed/removed to the plugin
 
 	for (std::vector<std::string>::const_iterator it = paths.begin(), end = paths.end(); it != end; ++it)
 	{
@@ -509,7 +512,7 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 				// Create the removed tag.
 				std::string removedTagFile = dirPathMeta + subPathFilename + PIPELINE_DATABASE_REMOVE_SUFFIX;
 				uint32 time = CTime::getSecondsSince1970();
-				CFileRemoved removed;
+				CFileRemove removed;
 				removed.Lost = time; // Yes you're wasting time, you wouldn't have to delete anything if you did your work properly in the first place! :)
 				COFile of(removedTagFile, false, false, true);
 				removed.serial(of);
