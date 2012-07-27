@@ -242,8 +242,27 @@ TTime CTime::getLocalTime ()
 	//else
 	//{
 		// This is not affected by system time changes. But it cycles every 49 days.
-		return timeGetTime();
+		// return timeGetTime(); // Only this was left active before it was commented.
 	//}
+
+	/* 
+	 * The above is no longer relevant.
+	 */
+	
+	if (a_HaveQueryPerformance)
+	{
+		// On a (fast) 15MHz timer this rolls over after 7000 days.
+		// If my calculations are right.
+		LARGE_INTEGER counter;
+		QueryPerformanceCounter(&counter);
+		counter.QuadPart *= (LONGLONG)1000L;
+		counter.QuadPart /= a_QueryPerformanceFrequency.QuadPart;
+	}
+	else
+	{
+		// Use default reliable low resolution timer.
+		return getLocalTime();
+	}
 
 #elif defined (NL_OS_UNIX)
 
@@ -298,30 +317,6 @@ TTime CTime::getLocalTime ()
 		nlerror ("Can't get time of day");
 	return (TTime)tv.tv_sec * (TTime)1000 + (TTime)tv.tv_usec / (TTime)1000;
 
-#endif
-}
-
-/// Same as above but prefer high resolution timer
-TTime CTime::getLocalTimeHR()
-{
-#ifdef NL_OS_WINDOWS
-	if (a_HaveQueryPerformance)
-	{
-		// On a (fast) 15MHz timer this rolls over after 7000 days.
-		// If my calculations are right.
-		LARGE_INTEGER counter;
-		QueryPerformanceCounter(&counter);
-		counter.QuadPart *= (LONGLONG)1000L;
-		counter.QuadPart /= a_QueryPerformanceFrequency.QuadPart;
-	}
-	else
-	{
-		// Use default reliable low resolution timer.
-		return getLocalTime();
-	}
-#else
-	// Other OS always use the best available high resolution timer.
-	return getLocalTime();
 #endif
 }
 
