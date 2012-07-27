@@ -86,7 +86,13 @@ public:
 	 * time that is the same on all computers.
 	 * \warning On Win32, the value is on 32 bits only. It wraps around to 0 every about 49.71 days.
 	 */
-	static TTime	getLocalTime ();
+	static TTime	getLocalTime();
+
+	/** Same as getLocalTime, but prefers high resolution timers.
+	 * Must call probe once in the beginning of the application before using, 
+	 * to ensure the correct settings are applied.
+	 */
+	static TTime	getLocalTimeHR();
 
 	/** Return the time in processor ticks. Use it for profile purpose.
 	 * If the performance time is not supported on this hardware, it returns 0.

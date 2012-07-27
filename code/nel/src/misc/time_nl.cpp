@@ -37,6 +37,12 @@
 namespace NLMISC
 {
 
+namespace {
+#ifdef NL_OS_WINDOWS
+bool a_HaveQueryPerformance = false;
+#endif
+}
+
 void CTime::probeTimerInfo(CTime::CTimerInfo &result)
 {
 	breakable
@@ -65,6 +71,7 @@ void CTime::probeTimerInfo(CTime::CTimerInfo &result)
 			result.IsHighPrecisionAvailable = false;
 			result.HighPrecisionResolution = 1000;
 		}
+		a_HaveQueryPerformance = result.IsHighPrecisionAvailable;
 		if (!result.IsHighPrecisionAvailable)
 		{
 			lowResTime = timeGetTime();
@@ -292,6 +299,43 @@ TTime CTime::getLocalTime ()
 #endif
 }
 
+#ifdef NL_OS_WINDOWS
+namespace {
+struct CQPFProvider
+{
+	CQPFProvider()
+	{
+		QueryPerformanceFrequency(&Frequency);
+	}
+	LARGE_INTEGER Frequency;
+};
+CQPFProvider s_QPFProvider;
+}
+#endif
+
+/// Same as above but prefer high resolution timer
+TTime CTime::getLocalTimeHR()
+{
+#ifdef NL_OS_WINDOWS
+	if (a_HaveQueryPerformance)
+	{
+		// On a (fast) 15MHz timer this rolls over after 7000 days.
+		// If my calculations are right.
+		LARGE_INTEGER counter;
+		QueryPerformanceCounter(&counter);
+		counter.QuadPart *= 1000;
+		counter.QuadPart /= s_QPFProvider.Frequency.QuadPart;
+	}
+	else
+	{
+		// Use default reliable low resolution timer.
+		return getLocalTime();
+	}
+#else
+	// Other OS always use the best available high resolution timer.
+	return getLocalTime();
+#endif
+}
 
 /* Return the time in processor ticks. Use it for profile purpose.
  * If the performance time is not supported on this hardware, it returns 0.
