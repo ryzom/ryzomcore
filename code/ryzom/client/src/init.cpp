@@ -686,8 +686,11 @@ void prelogInit()
 #ifdef NL_OS_WINDOWS
 		_control87 (_EM_INVALID|_EM_DENORMAL/*|_EM_ZERODIVIDE|_EM_OVERFLOW*/|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
 #endif // NL_OS_WINDOWS
-
-		setCPUMask();
+		
+		CTime::CTimerInfo timerInfo;
+		NLMISC::CTime::probeTimerInfo(timerInfo);
+		if (timerInfo.RequiresSingleCore) // TODO: Also have a FV configuration value to force single core.
+			setCPUMask();
 
 		FPU_CHECKER_ONCE
 
