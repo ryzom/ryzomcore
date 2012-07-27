@@ -121,6 +121,7 @@ namespace NLGUI
 		// help to serialize an action handler
 		static void serialAH(NLMISC::IStream &f, IActionHandler *&ah);
 
+		static std::string stripId( const std::string &fullId );
 
 		/// Parse the element and initalize it
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
@@ -288,6 +289,7 @@ namespace NLGUI
 								const std::string &defVal);
 
 		// Parse tools
+		static  std::string     HotSpotToString( THotSpot spot );
 		static	THotSpot		convertHotSpot (const char *ptr);		//
 		static	void			convertHotSpotCouple (const char *ptr, THotSpot &parentPosRef, THotSpot &posRef);
 		static	NLMISC::CRGBA	convertColor (const char *ptr);

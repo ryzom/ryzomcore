@@ -91,25 +91,34 @@ namespace GUIEditor
 	void CPropBrowserCtrl::setupProperty( const SPropEntry &prop, const CInterfaceElement *element )
 	{
 		QtVariantProperty *p = NULL;
+		QVariant v;
 		
 		if( prop.propType == "string" )
 		{
 			p = propertyMgr->addProperty( QVariant::String, prop.propName.c_str() );
-			p->setValue( element->getProperty( prop.propName ).c_str() );
+			v = element->getProperty( prop.propName ).c_str();
 		}
 		else
 		if( prop.propType == "bool" )
 		{
 			p = propertyMgr->addProperty( QVariant::Bool, prop.propName.c_str() );
 			bool value = false;
-			if( element->getProperty( prop.propName ) == "true" )
-				value = true;
-
-			p->setValue( value );
+			NLMISC::fromString( element->getProperty( prop.propName ), value );
+			v = value;
 		}
+		else
+		if( prop.propType == "int" )
+		{
+			p = propertyMgr->addProperty( QVariant::Int, prop.propName.c_str() );
+			sint32 value = 0;
+			NLMISC::fromString( element->getProperty( prop.propName ), value );
+			v = value;
+		}
+
 		if( p == NULL )
 			return;
 
+		p->setValue( v );
 		browser->addProperty( p );
 	}
 }

@@ -1969,16 +1969,46 @@ namespace NLGUI
 		_ParentPositionsMap.insert (std::map<CInterfaceElement*,std::string>::value_type(element, parent));
 	}
 
+	std::string CInterfaceParser::getParentPosAssociation( CInterfaceElement *element ) const
+	{
+		std::map< CInterfaceElement*, std::string >::const_iterator itr =
+			_ParentPositionsMap.find( element );
+		if( itr == _ParentPositionsMap.end() )
+			return "parent";
+		else
+			return CInterfaceElement::stripId( itr->second );
+	}
+
 	// ----------------------------------------------------------------------------
 	void CInterfaceParser::addParentSizeAssociation(CInterfaceElement* element, const std::string& parent)
 	{
 		_ParentSizesMap.insert (std::map<CInterfaceElement*,std::string>::value_type(element, parent));
 	}
 
+	std::string CInterfaceParser::getParentSizeAssociation( CInterfaceElement *element ) const
+	{
+		std::map< CInterfaceElement*, std::string >::const_iterator itr =
+			_ParentSizesMap.find( element );
+		if( itr == _ParentSizesMap.end() )
+			return "parent";
+		else
+			return CInterfaceElement::stripId( itr->second );
+	}
+
 	// ----------------------------------------------------------------------------
 	void CInterfaceParser::addParentSizeMaxAssociation (CInterfaceElement *element, const std::string &parent)
 	{
 		_ParentSizesMaxMap.insert (std::map<CInterfaceElement*,std::string>::value_type(element, parent));
+	}
+
+	std::string CInterfaceParser::getParentSizeMaxAssociation( CInterfaceElement *element ) const
+	{
+		std::map< CInterfaceElement*, std::string >::const_iterator itr =
+			_ParentSizesMap.find( element );
+		if( itr == _ParentSizesMap.end() )
+			return "parent";
+		else
+			return CInterfaceElement::stripId( itr->second );
 	}
 
 	// ----------------------------------------------------------------------------

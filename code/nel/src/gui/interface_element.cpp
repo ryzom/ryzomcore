@@ -73,6 +73,15 @@ namespace NLGUI
 		return _Id;
 	}
 
+	std::string CInterfaceElement::stripId( const std::string &fullId )
+	{
+		std::string id = fullId;
+		std::string::size_type i = id.find_last_of( ':' );
+		if( i != std::string::npos )
+			id = id.substr( i + 1, id.size() - 1 );
+		return id;
+	}
+
 	// ------------------------------------------------------------------------------------------------
 	bool CInterfaceElement::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
@@ -186,35 +195,6 @@ namespace NLGUI
 		if (ptr)
 		{
 			parseSizeRef(ptr.getDatas());
-			sint32 nWhat = 0;
-			const char *seekPtr = ptr.getDatas();
-			while (*seekPtr != 0)
-			{
-				if ((*seekPtr=='w')||(*seekPtr=='W'))
-				{
-					_SizeRef |= 1;
-					nWhat = 1;
-				}
-
-				if ((*seekPtr=='h')||(*seekPtr=='H'))
-				{
-					_SizeRef |= 2;
-					nWhat = 2;
-				}
-
-				if ((*seekPtr>='1')&&(*seekPtr<='9'))
-				{
-					if (nWhat != 0)
-					{
-						if (nWhat == 1)
-							_SizeDivW = *seekPtr-'0';
-						if (nWhat == 2)
-							_SizeDivH = *seekPtr-'0';
-					}
-				}
-
-				++seekPtr;
-			}
 		}
 
 	//	snapSize();
@@ -249,6 +229,64 @@ namespace NLGUI
 			else
 				return "false";
 		}
+		else
+		if( name == "x" )
+		{
+			return NLMISC::toString( getX() );
+		}
+		else
+		if( name == "y" )
+		{
+			return NLMISC::toString( getY() );
+		}
+		else
+		if( name == "w" )
+		{
+			return NLMISC::toString( getW() );
+		}
+		else
+		if( name == "h" )
+		{
+			return NLMISC::toString( getH() );
+		}
+		else
+		if( name == "posref" )
+		{
+			std::string posref;
+			posref = HotSpotToString( getParentPosRef() );
+			posref += " ";
+			posref += HotSpotToString( getPosRef() );
+			return posref;
+		}
+		else
+		if( name == "sizeref" )
+		{
+			return getSizeRefAsString();
+		}
+		if( name == "posparent" )
+		{
+			return CWidgetManager::getInstance()->getParser()->getParentPosAssociation( (CInterfaceElement*)this );
+		}
+		else
+		if( name == "sizeparent" )
+		{
+			return CWidgetManager::getInstance()->getParser()->getParentSizeAssociation( (CInterfaceElement*)this );
+		}
+		else
+		if( name == "global_color" )
+		{
+			return toString( _ModulateGlobalColor );
+		}
+		else
+		if( name == "render_layer" )
+		{
+			return toString( _RenderLayer );
+		}
+		else
+		if( name == "avoid_resize_parent" )
+		{
+			return toString( _AvoidResizeParent );
+		}
 
 		return "";
 	}
@@ -263,7 +301,22 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	std::string CInterfaceElement::getSizeRefAsString() const
 	{
-		return "IMPLEMENT ME!";
+		std::string s;
+		if( ( _SizeRef & 1 ) != 0 )
+		{
+			s += "w";
+			if( _SizeDivW < 10 )
+				s += toString( _SizeDivW );
+		}
+
+		if( ( _SizeRef & 2 ) != 0 )
+		{
+			s += "h";
+			if( _SizeDivH < 10 )
+				s += toString( _SizeDivH );
+		}
+
+		return s;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -704,6 +757,49 @@ namespace NLGUI
 		}
 	}
 
+	std::string CInterfaceElement::HotSpotToString( THotSpot spot )
+	{
+		switch( spot )
+		{
+		case Hotspot_TL:
+			return "TL";
+			break;
+
+		case Hotspot_TM:
+			return "TM";
+			break;
+
+		case Hotspot_TR:
+			return "TR";
+			break;
+
+		case Hotspot_ML:
+			return "ML";
+			break;
+
+		case Hotspot_MM:
+			return "MM";
+			break;
+
+		case Hotspot_MR:
+			return "MR";
+			break;
+
+		case Hotspot_BL:
+			return "BL";
+			break;
+
+		case Hotspot_BM:
+			return "BM";
+			break;
+
+		case Hotspot_BR:
+			return "BR";
+			break;
+		}
+
+		return "";
+	}
 
 	// ------------------------------------------------------------------------------------------------
 	THotSpot CInterfaceElement::convertHotSpot (const char *ptr)

@@ -160,8 +160,11 @@ namespace NLGUI
 		/// Association builders : associate an element of the interface with the string ID of
 		/// another element used as reference for position values
 		void addParentPositionAssociation (CInterfaceElement *element, const std::string &parentID);
+		std::string getParentPosAssociation( CInterfaceElement *element ) const;
 		void addParentSizeAssociation (CInterfaceElement *element, const std::string &parentID);
+		std::string getParentSizeAssociation( CInterfaceElement *element ) const;
 		void addParentSizeMaxAssociation (CInterfaceElement *element, const std::string &parentID);
+		std::string getParentSizeMaxAssociation( CInterfaceElement *element ) const;
 
 		/// LUA Class Association builder :  associate a lua script to a group (called for each group after every document parsed)
 		void addLuaClassAssociation(CInterfaceGroup *group, const std::string &luaScript);
