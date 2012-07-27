@@ -40,7 +40,7 @@
 #include "nel/sound/driver/sound_driver.h"
 #include "nel/sound/driver/source.h"
 #include "nel/sound/driver/listener.h"
-#include "sound/driver/dsound/source_dsound.h"
+// #include "sound/driver/dsound/source_dsound.h"
 
 #include "nel/sound/u_audio_mixer.h"
 #include "nel/sound/u_listener.h"
@@ -49,7 +49,7 @@
 class NLSOUND::IBuffer;
 class NLSOUND::IListener;
 class NLSOUND::USource;
-class NLSOUND::CSourceDSound;
+// class NLSOUND::CSourceDSound;
 class NLSOUND::CSound;
 
 
