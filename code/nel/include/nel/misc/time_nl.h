@@ -84,7 +84,7 @@ public:
 	 * the value can jump backwards if the system time is changed by a user or a NTP time sync process.
 	 * The value is different on 2 different computers; use the CUniTime class to get a universal
 	 * time that is the same on all computers.
-	 * \warning On Win32, the value is on 32 bits only. It wraps around to 0 every about 49.71 days.
+	 * \warning On Win32, the value is on 32 bits only, and uses the low-res timer. It wraps around to 0 every about 49.71 days.
 	 */
 	static TTime	getLocalTime();
 

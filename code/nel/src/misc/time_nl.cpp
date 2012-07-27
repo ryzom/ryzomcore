@@ -40,6 +40,7 @@ namespace NLMISC
 namespace {
 #ifdef NL_OS_WINDOWS
 bool a_HaveQueryPerformance = false;
+LARGE_INTEGER a_QueryPerformanceFrequency;
 #endif
 }
 
@@ -72,6 +73,7 @@ void CTime::probeTimerInfo(CTime::CTimerInfo &result)
 			result.HighPrecisionResolution = 1000;
 		}
 		a_HaveQueryPerformance = result.IsHighPrecisionAvailable;
+		a_QueryPerformanceFrequency.QuadPart = winPerfFreq.QuadPart;
 		if (!result.IsHighPrecisionAvailable)
 		{
 			lowResTime = timeGetTime();
@@ -299,20 +301,6 @@ TTime CTime::getLocalTime ()
 #endif
 }
 
-#ifdef NL_OS_WINDOWS
-namespace {
-struct CQPFProvider
-{
-	CQPFProvider()
-	{
-		QueryPerformanceFrequency(&Frequency);
-	}
-	LARGE_INTEGER Frequency;
-};
-CQPFProvider s_QPFProvider;
-}
-#endif
-
 /// Same as above but prefer high resolution timer
 TTime CTime::getLocalTimeHR()
 {
@@ -323,8 +311,8 @@ TTime CTime::getLocalTimeHR()
 		// If my calculations are right.
 		LARGE_INTEGER counter;
 		QueryPerformanceCounter(&counter);
-		counter.QuadPart *= 1000;
-		counter.QuadPart /= s_QPFProvider.Frequency.QuadPart;
+		counter.QuadPart *= (LONGLONG)1000L;
+		counter.QuadPart /= a_QueryPerformanceFrequency.QuadPart;
 	}
 	else
 	{
