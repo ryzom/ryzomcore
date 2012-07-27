@@ -245,7 +245,7 @@ bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStat
 				std::string &dirPath = path;
 				std::vector<std::string> dirContents;
 
-				CPath::getPathContent(dirPath, false, true, true, dirContents);
+				CPath::getPathContent(dirPath, false, false, true, dirContents); // get only files, no dirs
 				
 				for (std::vector<std::string>::iterator it = dirContents.begin(), end = dirContents.end(); it != end; ++it)
 				{
@@ -253,7 +253,11 @@ bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStat
 					
 					CFileStatus fs;
 					if (!getFileStatus(fs, subPath))
-						return false; // bad status, data corruption // TODO_PROCESS_ERROR
+					{
+						// bad status, data corruption // TODO_PROCESS_ERROR
+						nlwarning("Invalid status for '%s'!", subPath.c_str());
+						return false; 
+					}
 					fileStatusMap[subPath] = fs; // i'll assume macropath might be easiest
 					
 					// TODO_PROCESS_ERROR_EXIT
@@ -297,7 +301,11 @@ bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStat
 			{
 				CFileStatus fs;
 				if (!getFileStatus(fs, path))
-					return false; // bad status, data corruption // TODO_PROCESS_ERROR
+				{
+					// bad status, data corruption // TODO_PROCESS_ERROR
+					nlwarning("Invalid status for '%s'!", path.c_str());
+					return false; 
+				}
 				fileStatusMap[path] = fs; // i'll assume macropath might be easiest
 			}
 		}

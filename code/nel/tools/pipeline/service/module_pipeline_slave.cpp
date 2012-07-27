@@ -40,6 +40,7 @@
 #include "../plugin_library/process_info.h"
 #include "pipeline_workspace.h"
 #include "pipeline_process_impl.h"
+#include "database_status.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -221,13 +222,17 @@ public:
 protected:
 	NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CModulePipelineSlave, CModuleBase)
 		NLMISC_COMMAND_HANDLER_ADD(CModulePipelineSlave, testUpdateDatabaseStatus, "Test master request for database status update on dependencies", "<projectName> <processName>")
+		NLMISC_COMMAND_HANDLER_ADD(CModulePipelineSlave, testGetFileStatus, "Test reading of file status from slave on dependencies", "<projectName> <processName>")
 	NLMISC_COMMAND_HANDLER_TABLE_END
 
 	NLMISC_CLASS_COMMAND_DECL(testUpdateDatabaseStatus);
+	NLMISC_CLASS_COMMAND_DECL(testGetFileStatus);
 
 }; /* class CModulePipelineSlave */
 
 //return PIPELINE::tryRunnableTask(stateName, task);
+
+///////////////////////////////////////////////////////////////////////
 
 namespace {
 
@@ -314,6 +319,108 @@ NLMISC_CLASS_COMMAND_IMPL(CModulePipelineSlave, testUpdateDatabaseStatus)
 	{ log.displayNL("BUSY"); delete runnableCommand; return false; }
 	return true;
 }
+
+///////////////////////////////////////////////////////////////////////
+
+namespace {
+
+class CTestGetFileStatusCommand : public NLMISC::IRunnable
+{
+public:
+	NLMISC::CLog *Log;
+	std::string Project;
+	std::string Process;
+	CModulePipelineSlave *Slave;
+
+	virtual void getName(std::string &result) const 
+	{ result = "CTestGetFileStatusCommand"; }
+
+	virtual void run()
+	{
+		// Slave->m_TestCommand = true;
+
+		// std::string tempDirectory = PIPELINE::IPipelineProcess::getInstance()->getTempDirectory();
+		std::vector<PIPELINE::CProcessPluginInfo> plugins;
+		PIPELINE::g_PipelineWorkspace->getProcessPlugins(plugins, Process);
+		PIPELINE::CPipelineProject *project = PIPELINE::g_PipelineWorkspace->getProject(Project);
+		
+		std::vector<std::string> dependPaths;
+
+		if (project)
+		{
+			std::vector<std::string> result;
+			PIPELINE::IPipelineProcess *pipelineProcess = new PIPELINE::CPipelineProcessImpl(project);
+			for (std::vector<PIPELINE::CProcessPluginInfo>::iterator plugin_it = plugins.begin(), plugin_end = plugins.end(); plugin_it != plugin_end; ++plugin_it)
+			{
+				switch (plugin_it->InfoType)
+				{
+				case PIPELINE::PLUGIN_REGISTERED_CLASS:
+					{
+						PIPELINE::IProcessInfo *processInfo = static_cast<PIPELINE::IProcessInfo *>(NLMISC::CClassRegistry::create(plugin_it->Info));
+						processInfo->setPipelineProcess(pipelineProcess);
+						processInfo->getDependentDirectories(result);
+						for (std::vector<std::string>::iterator it = result.begin(), end = result.end(); it != end; ++it)
+							dependPaths.push_back(*it);
+						result.clear();
+						processInfo->getDependentFiles(result);
+						for (std::vector<std::string>::iterator it = result.begin(), end = result.end(); it != end; ++it)
+							dependPaths.push_back(*it);
+						result.clear();
+					}
+					break;
+				default:
+					nlwarning("Not implemented");
+					break;
+				}
+			}
+		}
+		else
+		{
+			Log->displayNL("Project '%s' does not exist", Project.c_str());
+		}
+
+		// Slave->m_Master->getFileStatusByVector(Slave);
+		std::map<std::string, CFileStatus> fileStatusMap;
+		std::map<std::string, CFileRemove> fileRemoveMap;
+		if (g_DatabaseStatus->getFileStatus(fileStatusMap, fileRemoveMap, dependPaths))
+			Log->displayNL("File status completed successfully");
+		else
+			Log->displayNL("File status failed");
+		Log->displayNL("Found %i file statuses, %i removes", fileStatusMap.size(), fileRemoveMap.size());
+		
+		delete this;
+
+		endedRunnableTask();
+	}
+};
+
+} /* anonymous namespace */
+
+NLMISC_CLASS_COMMAND_IMPL(CModulePipelineSlave, testGetFileStatus)
+{
+	// EXAMPLE USAGE: slave.testGetFileStatus common_interface Interface
+
+	if (args.size() != 2) return false;
+	
+	PIPELINE::CPipelineProject *project = PIPELINE::g_PipelineWorkspace->getProject(args[0]);
+	if (!project)
+	{ 
+		log.displayNL("Project '%s' does not exist", args[0].c_str());
+		return false;
+	}
+	
+	CTestGetFileStatusCommand *runnableCommand = new CTestGetFileStatusCommand();
+	runnableCommand->Log = &log;
+	runnableCommand->Project = args[0];
+	runnableCommand->Process = args[1];
+	runnableCommand->Slave = this;
+	
+	if (!tryRunnableTask("SLAVE_TEST_GET_F_STATUS", runnableCommand))
+	{ log.displayNL("BUSY"); delete runnableCommand; return false; }
+	return true;
+}
+
+///////////////////////////////////////////////////////////////////////
 
 void module_pipeline_slave_forceLink() { }
 NLNET_REGISTER_MODULE_FACTORY(CModulePipelineSlave, "ModulePipelineSlave");
