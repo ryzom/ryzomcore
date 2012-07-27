@@ -48,6 +48,19 @@ typedef sint64 TTicks;
 class CTime
 {
 public:
+	struct CTimerInfo
+	{
+		/// Returns if there is a high precision timer that can be used.
+		bool IsHighPrecisionAvailable;
+		/// If a CPU specific timer is used and the values are not consistent accross threads.
+		bool RequiresSingleCore;
+		/// The resolution of the high resolution timer.
+		TTicks HighPrecisionResolution;
+	};
+
+	/** Get advanced information on the used timers.
+	 */
+	static void probeTimerInfo(CTimerInfo &result);
 
 	/** Return the number of second since midnight (00:00:00), January 1, 1970,
 	 * coordinated universal time, according to the system clock.

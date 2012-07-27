@@ -32,8 +32,144 @@
 #include "nel/misc/time_nl.h"
 #include "nel/misc/sstring.h"
 
+#include <nel/misc/thread.h>
+
 namespace NLMISC
 {
+
+void CTime::probeTimerInfo(CTime::CTimerInfo &result)
+{
+	breakable
+	{
+	#ifdef NL_OS_WINDOWS
+		LARGE_INTEGER winPerfFreq;
+		LARGE_INTEGER winPerfCount;
+		DWORD lowResTime;
+		if (!QueryPerformanceFrequency(&winPerfFreq))
+		{
+			nldebug("Cannot query performance frequency");
+			result.IsHighPrecisionAvailable = false;
+		}
+		else
+		{
+			result.HighPrecisionResolution = winPerfFreq.QuadPart;
+		}
+		if (winPerfFreq.QuadPart == 1000)
+		{
+			nldebug("Higher precision timer not available, OS defaulted to GetTickCount");
+			result.IsHighPrecisionAvailable = false;
+		}
+		if (!QueryPerformanceCounter(&winPerfCount))
+		{
+			nldebug("Cannot query performance counter");
+			result.IsHighPrecisionAvailable = false;
+			result.HighPrecisionResolution = 1000;
+		}
+		if (!result.IsHighPrecisionAvailable)
+		{
+			lowResTime = timeGetTime();
+		}
+	#else
+		// nldebug("Probe of timer info not implemented");
+		result.IsHighPrecisionAvailable = false;
+		result.RequiresSingleCore = true;
+		break;
+	#endif
+
+		uint64 cpuMask = IProcess::getCurrentProcess()->getCPUMask();
+		uint64 threadMask = IThread::getCurrentThread()->getCPUMask();
+		
+	#ifdef NL_OS_WINDOWS
+		
+	#else
+		TTicks timerFrequency = 0;
+	#endif
+
+		uint identical = 0; // Identical stamps may indicate the os handling backwards glitches.
+		uint backwards = 0; // Happens when the timers are not always in sync and the implementation is faulty.
+		uint regular = 0; // How many times the number advanced normally.
+		uint skipping = 0; // Does not really mean anything necessarily.
+		uint frequencybug = 0; // Should never happen.
+		// uint badcore = 0; // Affinity does not work.
+
+		// Cycle 32 times trough all cores, and verify if the timing remains consistent.
+		for (uint i = 32; i; --i)
+		{
+			uint64 currentBit = 1;
+			for (uint j = 64; j; --j)
+			{
+				if (cpuMask & currentBit)
+				{
+					IThread::getCurrentThread()->setCPUMask(currentBit);
+#ifdef NL_OS_WINDOWS
+					// Make sure the thread is rescheduled.
+					SwitchToThread();
+					Sleep(0);
+					// Verify the core
+					/* Can only verify on 2003, Vista and higher.
+					if (1 << GetCurrentProcessorNumber() != currentBit)
+						++badcore;
+					*/
+					// Check if the timer is still sane.
+					if (result.IsHighPrecisionAvailable)
+					{
+						LARGE_INTEGER winPerfFreqN;
+						LARGE_INTEGER winPerfCountN;
+						QueryPerformanceFrequency(&winPerfFreqN);
+						if (winPerfFreqN.QuadPart != winPerfFreq.QuadPart)
+							++frequencybug;
+						QueryPerformanceCounter(&winPerfCountN);
+						if (winPerfCountN.QuadPart == winPerfCount.QuadPart)
+							++identical;
+						if (winPerfCountN.QuadPart < winPerfCount.QuadPart || winPerfCountN.QuadPart - winPerfCount.QuadPart < 0)
+							++backwards;
+						if (winPerfCountN.QuadPart - winPerfCount.QuadPart > winPerfFreq.QuadPart / 20) // 50ms skipping check
+							++skipping;
+						else if (winPerfCountN.QuadPart > winPerfCount.QuadPart)
+							++regular;
+						winPerfCount.QuadPart = winPerfCountN.QuadPart;
+					}
+					else
+					{
+						DWORD lowResTimeN;
+						lowResTimeN = timeGetTime();
+						if (lowResTimeN == lowResTime)
+							++identical;
+						if (lowResTimeN < lowResTime || lowResTimeN - lowResTime < 0)
+							++backwards;
+						if (lowResTimeN - lowResTime > 50)
+							++skipping;
+						else if (lowResTimeN > lowResTime)
+							++regular;
+						lowResTime = lowResTimeN;
+					}
+#endif
+				}
+				currentBit <<= 1;
+			}
+		}
+
+		IThread::getCurrentThread()->setCPUMask(threadMask);
+
+		nldebug("Timer resolution: %i Hz", (int)(result.HighPrecisionResolution));
+		nldebug("Time identical: %i, backwards: %i, regular: %i, skipping: %i, frequency bug: %i", identical, backwards, regular, skipping, frequencybug);
+		if (identical > regular)
+			nlwarning("The system timer is of relatively low resolution, you may experience issues");
+		if (backwards > 0 || frequencybug > 0)
+		{
+			nlwarning("The current system timer is not reliable across multiple cpu cores");
+			result.RequiresSingleCore = true;
+		}
+		else result.RequiresSingleCore = false;
+
+		if (result.HighPrecisionResolution == 14318180)
+			nldebug("Detected known HPET era timer frequency");
+		if (result.HighPrecisionResolution == 3579545)
+			nldebug("Detected known AHCI era timer frequency");
+		if (result.HighPrecisionResolution == 1193182)
+			nldebug("Detected known i8253/i8254 era timer frequency");
+	}
+}
 
 /* Return the number of second since midnight (00:00:00), January 1, 1970,
  * coordinated universal time, according to the system clock.
