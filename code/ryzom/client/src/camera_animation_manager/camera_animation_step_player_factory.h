@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include "nel\misc\bit_mem_stream.h"
+#include "camera_animation_manager\camera_animation_modifier_player_factory.h"
 
 /************************************************************************/
 /* Interface for camera animation steps.
@@ -29,13 +30,23 @@
 class ICameraAnimationStepPlayer
 {
 public:
+	virtual ~ICameraAnimationStepPlayer();
+
 	/// This function is called when it's time to init the step from an impulse
 	virtual bool initStep(NLMISC::CBitMemStream& impulse) = 0;
 
 	/// Function that plays the step
 	virtual void playStep() = 0;
 
+	/// Function that adds a camera animation modifier to this step
+	void addModifier(ICameraAnimationModifierPlayer* modifier);
+
+	// Plays the step and its modifiers
+	void playStepAndModifiers();
+
 protected:
+	// The list of modifiers
+	std::vector<ICameraAnimationModifierPlayer*> Modifiers;
 };
 
 /************************************************************************/

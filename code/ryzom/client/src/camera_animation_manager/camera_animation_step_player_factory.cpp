@@ -43,6 +43,27 @@ ICameraAnimationStepPlayer* ICameraAnimationStepPlayerFactory::initStep(const st
 				return NULL;
 			}
 
+			// We look for children (modifiers or sound triggers)
+			uint8 nbModifiers = 0;
+			impulse.serial(nbModifiers);
+			for (uint8 i = 0; i < nbModifiers; i++)
+			{
+				// We get the modifier name
+				std::string modifierName = "";
+				impulse.serial(modifierName);
+
+				ICameraAnimationModifierPlayer* modifier = ICameraAnimationModifierPlayerFactory::initModifier(modifierName, impulse);
+				// We add the modifier to the list
+				if (modifier)
+				{
+					ret->addModifier(modifier);
+				}
+				else
+				{
+					nlwarning("impossible to init the modifier named %s in step named %s", modifierName.c_str(), name.c_str());
+				}
+			}
+
 			return ret;
 		}
 	}
@@ -55,3 +76,33 @@ void ICameraAnimationStepPlayerFactory::init()
 		Entries = new std::vector<std::pair<std::string, ICameraAnimationStepPlayerFactory*> >;
 }
 
+ICameraAnimationStepPlayer::~ICameraAnimationStepPlayer()
+{
+	// We release all the modifiers
+	for (std::vector<ICameraAnimationModifierPlayer*>::iterator it = Modifiers.begin(); it != Modifiers.end(); ++it)
+	{
+		ICameraAnimationModifierPlayer* modifier = *it;
+		delete modifier;
+	}
+	Modifiers.clear();
+}
+
+void ICameraAnimationStepPlayer::addModifier(ICameraAnimationModifierPlayer* modifier)
+{
+	Modifiers.push_back(modifier);
+}
+
+void ICameraAnimationStepPlayer::playStepAndModifiers()
+{
+	// Play the step
+	playStep();
+
+	// Play the modifiers
+	for (std::vector<ICameraAnimationModifierPlayer*>::iterator it = Modifiers.begin(); it != Modifiers.end(); ++it)
+	{
+		ICameraAnimationModifierPlayer* modifier = *it;
+		
+		// We play the modifier
+		modifier->playModifier();
+	}
+}

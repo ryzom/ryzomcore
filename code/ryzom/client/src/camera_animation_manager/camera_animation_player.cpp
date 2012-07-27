@@ -78,7 +78,7 @@ void CCameraAnimationPlayer::playStep(const std::string& stepName, NLMISC::CBitM
 	_Steps.push_back(step);
 
 	// We start playing the step
-	step->playStep();
+	step->playStepAndModifiers();
 }
 
 bool CCameraAnimationPlayer::isPlaying()

@@ -71,9 +71,6 @@ protected:
 	static void init();
 	virtual ICameraAnimationStep * instanciate() = 0;
 	static std::vector<std::pair<std::string, ICameraAnimationStepFactory*> >* Entries;
-
-	// The list of modifiers
-	std::vector<ICameraAnimationModifier*> Modifiers;
 };
 
 // Define used to register the different types of camera animation steps

@@ -21,6 +21,9 @@ std::vector<std::pair<std::string, ICameraAnimationModifierPlayerFactory*> >* IC
 
 ICameraAnimationModifierPlayer* ICameraAnimationModifierPlayerFactory::initModifier(const std::string& name, NLMISC::CBitMemStream& impulse)
 {
+	if (!Entries)
+		return NULL;
+
 	// We search the correct modifier type in our entries
 	for (uint i = 0; i < Entries->size(); i++)
 	{
