@@ -41,6 +41,8 @@ namespace NLGUI
 		/// Constructor
 		CCtrlBaseButton(const TCtorParam &param);
 
+		std::string getProperty( const std::string &name ) const;
+
 		virtual bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup);
 		virtual bool handleEvent (const NLGUI::CEventDescriptor& event);
 
@@ -48,6 +50,7 @@ namespace NLGUI
 		// @{
 		void	setType (EType t) { _Type = t; }
 		EType	getType() { return _Type; }
+		std::string getTypeString() const;
 
 		void	setClickWhenPushed(bool click) { _ClickWhenPushed = click; }
 		bool	getClickWhenPushed() const { return _ClickWhenPushed; }
@@ -125,10 +128,17 @@ namespace NLGUI
 		void setParamsOnClockTick (const std::string &ahParamsName) { _AHClockTickParams = ahParamsName; }
 
 		// get Event part
-		std::string		_getActionOnLeftClick() const { return CAHManager::getInstance()->getAHName(_AHOnLeftClick); }
+		std::string _getActionOnOver() const{ return CAHManager::getInstance()->getAHName( _AHOnOver ); }
+		std::string _getActionOnLeftClick() const { return CAHManager::getInstance()->getAHName( _AHOnLeftClick ); }
+		std::string _getActionOnLeftLongClick() const { return CAHManager::getInstance()->getAHName( _AHOnLeftLongClick ); }
+		std::string _getActionOnDblLeftClick() const { return CAHManager::getInstance()->getAHName( _AHOnLeftDblClick ); }
+		std::string _getActionOnRightClick() const { return CAHManager::getInstance()->getAHName( _AHOnRightClick ); }
+		std::string _getActionOnClockTick() const { return CAHManager::getInstance()->getAHName( _AHOnClockTick ); }
+		
 		IActionHandler *getActionOnLeftClick () const { return _AHOnLeftClick; }
 		IActionHandler *getActionOnRightClick () const { return _AHOnRightClick; }
 		IActionHandler *getActionOnClockTick () const { return _AHOnClockTick; }
+		std::string         _getParamsOnOver() const{ return _AHOverParams.toString(); }
 		std::string			_getParamsOnLeftClick () const { return _AHLeftClickParams.toString(); }
 		const std::string	&getParamsOnLeftClick () const { return _AHLeftClickParams; }
 		const std::string	&getParamsOnRightClick () const { return _AHRightClickParams; }

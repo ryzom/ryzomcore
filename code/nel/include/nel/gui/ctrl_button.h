@@ -43,6 +43,8 @@ namespace NLGUI
 			_Align = 0;
 		}
 
+		std::string getProperty( const std::string &name ) const;
+
 		// Init part
 		virtual bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup);
 

@@ -28,6 +28,10 @@ NLMISC_REGISTER_OBJECT(CViewBase, CCtrlButton, std::string, "button");
 
 namespace NLGUI
 {
+	std::string CCtrlButton::getProperty( const std::string &name ) const
+	{
+		return CCtrlBaseButton::getProperty( name );
+	}
 
 	// ----------------------------------------------------------------------------
 	bool CCtrlButton::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)

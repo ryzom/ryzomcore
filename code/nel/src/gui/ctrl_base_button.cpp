@@ -62,6 +62,148 @@ namespace NLGUI
 		_AHOnLeftDblClick = NULL;
 	}
 
+	std::string CCtrlBaseButton::getProperty( const std::string &name ) const
+	{
+		if( name == "button_type" )
+		{
+			return getTypeString();
+		}
+		else
+		if( name == "pushed" )
+		{
+			return toString( _Pushed );
+		}
+		else
+		if( name == "over_when_pushed" )
+		{
+			return toString( _OverWhenPushed );
+		}
+		else
+		if( name == "clicked_when_pushed" )
+		{
+			return toString( _ClickWhenPushed );
+		}
+		else
+		if( name == "color" )
+		{
+			return getColorAsString();
+		}
+		else
+		if( name == "col_pushed" )
+		{
+			return getColorPushedAsString();
+		}
+		else
+		if( name == "col_over" )
+		{
+			return getColorOverAsString();
+		}
+		else
+		if( name == "global_color_normal" )
+		{
+			return toString( _ModulateGlobalColorNormal );
+		}
+		else
+		if( name == "global_color_pushed" )
+		{
+			return toString( _ModulateGlobalColorPushed );
+		}
+		else
+		if( name == "global_color_over" )
+		{
+			return toString( _ModulateGlobalColorOver );
+		}
+		else
+		if( name == "onover" )
+		{
+			return _getActionOnOver();
+		}
+		else
+		if( name == "params_over" )
+		{
+			return _getParamsOnOver();
+		}
+		else
+		if( name == "onclick_l" )
+		{
+			return _getActionOnLeftClick();
+		}
+		else
+		if( name == "params_l" )
+		{
+			return _getParamsOnLeftClick();
+		}
+		else
+		if( name == "ondblclick_l" )
+		{
+			return _getActionOnDblLeftClick();
+		}
+		else
+		if( name == "params_dblclick_l" )
+		{
+			return _AHLeftDblClickParams.toString();
+		}
+		else
+		if( name == "onlongclick_l" )
+		{
+			return _getActionOnLeftLongClick();
+		}
+		else
+		if( name == "params_longclick_l" )
+		{
+			return _AHLeftLongClickParams.toString();
+		}
+		else
+		if( name == "onclick_r" )
+		{
+			return _getActionOnRightClick();
+		}
+		else
+		if( name == "params_r" )
+		{
+			return _AHRightClickParams.toString();
+		}
+		else
+		if( name == "onclock_tick" )
+		{
+			return _getActionOnClockTick();
+		}
+		else
+		if( name == "params_clock_tick" )
+		{
+			return _AHClockTickParams.toString();
+		}
+		else
+		if( name == "menu_l" )
+		{
+			return _ListMenuLeft.toString();
+		}
+		else
+		if( name == "menu_r" )
+		{
+			return _ListMenuRight.toString();
+		}
+		else
+		if( name == "menu_b" )
+		{
+			if( _ListMenuLeft.toString() == _ListMenuRight.toString() )
+				return _ListMenuLeft.toString();
+			else
+				return "";
+		}
+		else
+		if( name == "frozen" )
+		{
+			return toString( _Frozen );
+		}
+		else
+		if( name == "frozen_half_tone" )
+		{
+			return toString( _FrozenHalfTone );
+		}
+		else
+			return CCtrlBase::getProperty( name );
+	}
 
 
 	// ***************************************************************************
@@ -366,6 +508,26 @@ namespace NLGUI
 			}
 		}
 		return false;
+	}
+
+	std::string CCtrlBaseButton::getTypeString() const
+	{
+		switch( _Type )
+		{
+		case PushButton:
+			return "push_button";
+			break;
+
+		case ToggleButton:
+			return "toggle_button";
+			break;
+
+		case RadioButton:
+			return "radio_button";
+			break;
+
+		}
+		return "";
 	}
 
 	// ***************************************************************************
