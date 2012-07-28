@@ -868,6 +868,13 @@ bool CDriverD3D::uploadTextureInternal (ITexture& tex, CRect& rect, uint8 destMi
 										D3DFORMAT destFormat, D3DFORMAT srcFormat)
 {
 	H_AUTO_D3D(CDriverD3D_uploadTextureInternal)
+
+	if (rect.Width == 0 || rect.Height == 0)
+	{
+		nlwarning("Rectangle width or height cannot be 0");
+		return false;
+	}
+
 	// The D3D texture
 	CTextureDrvInfosD3D*	d3dtext = getTextureD3D(tex);
 
