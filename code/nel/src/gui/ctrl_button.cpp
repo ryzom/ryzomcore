@@ -30,7 +30,41 @@ namespace NLGUI
 {
 	std::string CCtrlButton::getProperty( const std::string &name ) const
 	{
-		return CCtrlBaseButton::getProperty( name );
+		if( name == "tx_normal" )
+		{
+			return CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdNormal );
+		}
+		else
+		if( name == "tx_pushed" )
+		{
+			return CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdPushed );
+		}
+		else
+		if( name == "tx_over" )
+		{
+			return CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdOver );
+		}
+		else
+		if( name == "scale" )
+		{
+			return toString( _Scale );
+		}
+		else
+		if( name == "align" )
+		{
+			std::string align;
+			if( ( _Align & 1 ) != 0 )
+				align = "r";
+			else
+				align = "l";
+			if( ( _Align & 2 ) != 0 )
+				align += "t";
+			else
+				align += "b";
+			return align;
+		}
+		else
+			return CCtrlBaseButton::getProperty( name );
 	}
 
 	// ----------------------------------------------------------------------------
