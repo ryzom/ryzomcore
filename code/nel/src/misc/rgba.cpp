@@ -743,6 +743,19 @@ CRGBA CRGBA::stringToRGBA( const char *ptr )
 	return CRGBA( r,g,b,a );
 }
 
+std::string CRGBA::toString() const
+{
+	std::string s;
+	s =  NLMISC::toString( R );
+	s += " ";
+	s += NLMISC::toString( G );
+	s += " ";
+	s += NLMISC::toString( B );
+	s += " ";
+	s += NLMISC::toString( A );
+	return s;
+}
+
 
 // ***************************************************************************
 // ***************************************************************************

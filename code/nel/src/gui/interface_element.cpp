@@ -219,7 +219,7 @@ namespace NLGUI
 	{
 		if( name == "id" )
 		{
-			return getId();
+			return stripId( getId() );
 		}
 		else
 		if( name == "active" )

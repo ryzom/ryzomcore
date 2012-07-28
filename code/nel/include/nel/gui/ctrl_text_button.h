@@ -42,6 +42,8 @@ namespace NLGUI
 		/// Constructor
 		CCtrlTextButton(const TCtorParam &param);
 
+		std::string getProperty( const std::string &name ) const;
+
 		// Init part
 		virtual bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup);
 

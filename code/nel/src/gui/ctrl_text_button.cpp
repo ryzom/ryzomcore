@@ -60,6 +60,130 @@ namespace NLGUI
 		_ForceTextOver = false;
 	}
 
+	std::string CCtrlTextButton::getProperty( const std::string &name ) const
+	{
+		if( name == "tx_normal" )
+		{
+			std::string tex;
+			tex = CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdNormal[ 0 ] );
+			std::string::size_type i = tex.rfind( "_l.tga" );
+			if( i != std::string::npos )
+				tex = tex.substr( 0, i );
+			return tex;
+		}
+		else
+		if( name == "tx_pushed" )
+		{
+			std::string tex;
+			tex = CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdPushed[ 0 ] );
+			std::string::size_type i = tex.rfind( "_l.tga" );
+			if( i != std::string::npos )
+				tex = tex.substr( 0, i );
+			return tex;
+		}
+		else
+		if( name == "tx_over" )
+		{
+			std::string tex;
+			tex = CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdOver[ 0 ] );
+			std::string::size_type i = tex.rfind( "_l.tga" );
+			if( i != std::string::npos )
+				tex = tex.substr( 0, i );
+			return tex;
+		}
+		else
+		if( name == "wmargin" )
+		{
+			return toString( _WMargin );
+		}
+		else
+		if( name == "wmin" )
+		{
+			return toString( _WMin );
+		}
+		else
+		if( name == "text_y" )
+		{
+			return toString( _TextY );
+		}
+		else
+		if( name == "text_x" )
+		{
+			return toString( _TextX );
+		}
+		else
+		if( name == "text_underlined" )
+		{
+			return toString( _ViewText->getUnderlined() );
+		}
+		else
+		if( name == "text_posref" )
+		{
+			std::string pr;
+			pr = CInterfaceElement::HotSpotToString( _TextParentPosRef );
+			pr += " ";
+			pr += CInterfaceElement::HotSpotToString( _TextPosRef );
+			return pr;
+		}
+		else
+		if( name == "text_color_normal" )
+		{
+			return toString( _TextColorNormal );
+		}
+		else
+		if( name == "text_color_pushed" )
+		{
+			return toString( _TextColorPushed );
+		}
+		else
+		if( name == "text_color_over" )
+		{
+			return toString( _TextColorOver );
+		}
+		else
+		if( name == "text_shadow_color_normal" )
+		{
+			return toString( _TextShadowColorNormal );
+		}
+		else
+		if( name == "text_shadow_color_pushed" )
+		{
+			return toString( _TextShadowColorPushed );
+		}
+		else
+		if( name == "text_shadow_color_over" )
+		{
+			return toString( _TextShadowColorOver );
+		}
+		else
+		if( name == "text_global_color_normal" )
+		{
+			return toString( _TextModulateGlobalColorNormal );
+		}
+		else
+		if( name == "text_global_color_pushed" )
+		{
+			return toString( _TextModulateGlobalColorPushed );
+		}
+		else
+		if( name == "text_global_color_over" )
+		{
+			return toString( _TextModulateGlobalColorOver );
+		}
+		else
+		if( name == "force_text_over" )
+		{
+			return toString( _ForceTextOver );
+		}
+		else
+		if( name == "text_header_color" )
+		{
+			return toString( _TextHeaderColor );
+		}
+		else
+			return CCtrlBaseButton::getProperty( name );
+	}
+
 	// ***************************************************************************
 	bool CCtrlTextButton::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
