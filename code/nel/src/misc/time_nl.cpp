@@ -365,11 +365,12 @@ TTime CTime::getLocalTime ()
 		QueryPerformanceCounter(&counter);
 		counter.QuadPart *= (LONGLONG)1000L;
 		counter.QuadPart /= a_QueryPerformanceFrequency.QuadPart;
+		return counter.QuadPart;
 	}
 	else
 	{
 		// Use default reliable low resolution timer.
-		return getLocalTime();
+		return timeGetTime();
 	}
 
 #elif defined (NL_OS_UNIX)
