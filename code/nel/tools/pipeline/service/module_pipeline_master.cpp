@@ -60,6 +60,7 @@ namespace PIPELINE {
 #define PIPELINE_INFO_SLAVE_REJECTED "#M_SLAVE_REJECT"
 #define PIPELINE_INFO_SLAVE_CRASHED "#M_SLAVE_CRASH"
 #define PIPELINE_INFO_SLAVE_NOT_READY "#M_SLAVE_NOT_R"
+#define PIPELINE_INFO_SLAVE_CB_GONE "#M_SLAVE_CB_GONE"
 
 /**
  * \brief CModulePipelineMaster
@@ -463,7 +464,13 @@ public:
 		virtual void run() // this is sanely run from the update thread
 		{
 			CSlave *slave = Master->m_Slaves[m_SlaveProxy];
-			if (slave == NULL) { nlwarning("Slave disconnected before callback could be delivered"); return; }
+			if (slave == NULL) 
+			{
+				nlwarning("Slave disconnected before callback could be delivered");
+				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_MASTER_UPDATE_DATABASE_FOR_SLAVE);
+				CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_CB_GONE);
+				return;
+			}
 
 			slave->Proxy.masterUpdatedDatabaseStatus(Master);
 			CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_MASTER_UPDATE_DATABASE_FOR_SLAVE);
