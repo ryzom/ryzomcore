@@ -354,6 +354,9 @@ public:
 	
 	virtual void updateDatabaseStatusByVector(NLNET::IModuleProxy *sender)
 	{
+		// FIXME: THIS MUST BE DONE ON A SEPERATE THREAD, IT HANGS WHILE ITERATING
+		// SWAP THE VECTOR CONTAINERS
+
 		//m_SlavesMutex.lock();
 		CSlave *slave = m_Slaves[sender];
 		if (slave == NULL) { nlerror("Received 'updateDatabaseStatusByVector' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }

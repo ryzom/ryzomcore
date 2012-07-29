@@ -69,8 +69,10 @@ struct CFileError
 {
 public:
 	uint32 Time; // The time when this error occured.
+	// TFileState Level; // Success, Warning, Error, Removal
 	std::string Project;
 	std::string Process;
+	// std::string Plugin;
 	std::string Message;
 
 	void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
