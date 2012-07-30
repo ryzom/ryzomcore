@@ -448,11 +448,11 @@ public:
 
 IRunnable *CDatabaseStatus::updateFileStatus(const TFileStatusCallback &callback, const std::string &filePath)
 {
-	if (!g_IsMaster)
+	/*if (!g_IsMaster)
 	{
 		nlerror("Not master, not allowed.");
 		return NULL;
-	}
+	}*/
 
 	CUpdateFileStatus *ufs = new CUpdateFileStatus();
 	ufs->StatusMutex = &m_StatusMutex;
@@ -569,6 +569,11 @@ void updatePathStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater, cons
 
 void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater, const std::string &dir, bool recurse)
 {
+	if (!g_IsMaster)
+	{
+		nlerror("Not master, not allowed.");
+	}
+
 	std::string dirPath = standardizePath(dir, true);
 	std::vector<std::string> dirContents;
 
@@ -651,10 +656,10 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 
 void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback)
 {
-	if (!g_IsMaster)
+	/*if (!g_IsMaster)
 	{
 		nlerror("Not master, not allowed.");
-	}
+	}*/
 
 	std::vector<std::string> paths;
 	//paths.push_back(g_DatabaseDirectory);
@@ -671,10 +676,10 @@ void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback)
 
 void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback, const std::vector<std::string> &paths, bool wait, bool recurse)
 {
-	if (!g_IsMaster)
+	/*if (!g_IsMaster)
 	{
 		nlerror("Not master, not allowed.");
-	}
+	}*/
 
 	CDatabaseStatusUpdater *updater = new CDatabaseStatusUpdater();
 	updater->Callback = callback;
