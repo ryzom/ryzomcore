@@ -46,16 +46,6 @@ using namespace NLMISC;
 
 namespace PIPELINE {
 
-namespace {
-
-/// Create status file path
-std::string getStatusFilePath(const std::string &path)
-{
-	return CWorkspaceStorage::getMetaFilePath(path, PIPELINE_DATABASE_STATUS_SUFFIX);
-}
-
-} /* anonymous namespace */
-
 CDatabaseStatus::CDatabaseStatus()
 {
 	//CFile::createDirectoryTree(g_WorkspaceDirectory + PIPELINE_DATABASE_STATUS_SUBDIR);
@@ -71,7 +61,7 @@ bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &
 {
 	bool seemsValid = false;
 	std::string stdPath = unMacroPath(filePath);
-	std::string statusPath = getStatusFilePath(filePath);
+	std::string statusPath = CMetadataStorage::getStatusPath(filePath);
 	m_StatusMutex.lock_shared();
 	if (CMetadataStorage::readStatus(fileStatus, statusPath))
 	{
@@ -222,7 +212,7 @@ public:
 			bool firstSeen = false;
 			uint32 time = CTime::getSecondsSince1970();
 			uint32 fmdt = CFile::getFileModificationDate(FilePath);
-			std::string statusPath = getStatusFilePath(FilePath); // g_WorkspaceDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(FilePath) + ".status";
+			std::string statusPath = CMetadataStorage::getStatusPath(FilePath); // g_WorkspaceDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(FilePath) + ".status";
 			StatusMutex->lock_shared();
 			bool statusFileExists = CMetadataStorage::readStatus(fs, statusPath);
 			if (!statusFileExists)
@@ -490,7 +480,7 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 				nldebug("Created '%s'", removedTagFile.c_str());
 				
 				// Delete the status.
-				NLMISC::CFile::deleteFile(subPath);
+				CMetadataStorage::eraseStatus(subPath);
 				nlinfo("Removed '%s'", subPath.c_str());
 			}
 		}

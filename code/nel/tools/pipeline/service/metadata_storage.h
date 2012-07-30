@@ -130,9 +130,14 @@ class CMetadataStorage
 public:
 
 	/// Note: Use the functions provided by CDatabaseStatus for manipulating status files.
+	static std::string getStatusPath(const std::string &file);
 	static bool readStatus(CFileStatus &status, const std::string &path);
 	static void writeStatus(const CFileStatus &status, const std::string &path);
 	static void eraseStatus(const std::string &path);
+
+	static bool readRemove(CFileRemove &remove, const std::string & path);
+	static void createRemove(const CFileRemove &remove, const std::string &path); // Remove cannot be modified after creation, only erased.
+	static void eraseRemove(const std::string &path);
 
 }; /* class CMetadataStorage */
 
