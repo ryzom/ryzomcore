@@ -64,6 +64,14 @@ std::string getMetaFilePath(const std::string &path, const std::string &dotSuffi
 // Status is generated CRC32 for reference.
 // Errors are errors caused by using this file as an input or output file.
 
+enum TFileState
+{
+	Unknown = 0,
+	Success = 1,
+	Warning = 2,
+	Error = 3,
+	Removal = 4,
+};
 
 struct CFileError
 {
@@ -99,6 +107,21 @@ struct CFileRemove
 public:
 	uint32 Lost; // The time when it was noticed the file was removed.
 
+	void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
+};
+
+struct CProjectOutput
+{
+	std::vector<std::string> FilePaths;
+	struct CFileOutput
+	{
+		uint32 CRC32;
+		TFileState Level;
+
+		void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
+	};
+	std::vector<CFileOutput> FileOutputs;
+	
 	void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
 };
 

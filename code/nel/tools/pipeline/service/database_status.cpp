@@ -178,6 +178,20 @@ void CFileRemove::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 	stream.serial(Lost);
 }
 
+void CProjectOutput::CFileOutput::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
+{
+	uint version = stream.serialVersion(1);
+	stream.serial(CRC32);
+	stream.serial((uint8 &)Level); // test this :o)
+}
+
+void CProjectOutput::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
+{
+	uint version = stream.serialVersion(1);
+	stream.serialCont(FilePaths);
+	stream.serialCont(FileOutputs);
+}
+
 CDatabaseStatus::CDatabaseStatus()
 {
 	//CFile::createDirectoryTree(g_WorkspaceDirectory + PIPELINE_DATABASE_STATUS_SUBDIR);
