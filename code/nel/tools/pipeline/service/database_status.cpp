@@ -48,107 +48,10 @@ namespace PIPELINE {
 
 namespace {
 
-/// Input must be normalized path
-bool isInRootDirectoryFast(std::string &rootDirectoryName, std::string &rootDirectoryPath, const std::string &path)
-{
-	//return path.find(g_DatabaseDirectory) == 0;
-	CConfigFile::CVar &rootDirectories = NLNET::IService::getInstance()->ConfigFile.getVar("RootDirectories");
-	for (uint i = 0; i < rootDirectories.size(); ++i)
-	{
-		rootDirectoryName = rootDirectories.asString(i);
-		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(rootDirectoryName);
-		rootDirectoryPath = standardizePath(dir.asString(), true);
-		if (path.find(rootDirectoryPath) == 0) return true;
-	}
-	return false;
-}
-
-bool isInSheetsDirectoryFast(std::string &sheetDirectoryName, std::string &sheetDirectoryPath, const std::string &path)
-{
-	{
-		sheetDirectoryName = "WorkspaceDfnDirectory";
-		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(sheetDirectoryName);
-		sheetDirectoryPath = standardizePath(dir.asString(), true);
-		if (path.find(sheetDirectoryPath) == 0) return true;
-	}
-	{
-		sheetDirectoryName = "WorkspaceSheetDirectory";
-		CConfigFile::CVar &dir = NLNET::IService::getInstance()->ConfigFile.getVar(sheetDirectoryName);
-		sheetDirectoryPath = standardizePath(dir.asString(), true);
-		if (path.find(sheetDirectoryPath) == 0) return true;
-	}
-	return false;
-}
-
-/// Input must be normalized path
-bool isInWorkspaceDirectoryFast(const std::string &path)
-{
-	return path.find(g_WorkDir) == 0;
-}
-
-/// Input must be normalized path in database directory
-std::string dropRootDirectoryFast(const std::string &path, const std::string &rootDirectoryPath)
-{
-	return path.substr(rootDirectoryPath.length());
-}
-
-/// Input must be normalized path in sheets directory
-std::string dropSheetDirectoryFast(const std::string &path, const std::string &sheetDirectoryPath)
-{
-	return path.substr(sheetDirectoryPath.length());
-}
-
-/// Input must be normalized path in pipeline directory
-std::string dropWorkspaceDirectoryFast(const std::string &path)
-{
-	return path.substr(g_WorkDir.length());
-}
-
-} /* anonymous namespace */
-
-std::string getMetaFilePath(const std::string &path, const std::string &dotSuffix)
-{
-	std::string stdPath = standardizePath(path, false);
-	if (isInWorkspaceDirectoryFast(stdPath))
-	{
-		// TODO_TEST
-		std::string relPath = dropWorkspaceDirectoryFast(stdPath);
-		std::string::size_type slashPos = relPath.find_first_of('/');
-		std::string proProName = relPath.substr(0, slashPos);
-		std::string subPath = relPath.substr(slashPos);
-		return g_WorkDir + proProName + PIPELINE_DATABASE_META_SUFFIX + subPath + dotSuffix;
-	}
-	else
-	{
-		std::string rootDirectoryName;
-		std::string rootDirectoryPath;
-		if (isInSheetsDirectoryFast(rootDirectoryName, rootDirectoryPath, stdPath))
-		{
-			std::string relPath = dropSheetDirectoryFast(stdPath, rootDirectoryPath);
-			return g_WorkDir + PIPELINE_DIRECTORY_PREFIX_SHEET + NLMISC::toLower(rootDirectoryName) + PIPELINE_DATABASE_META_SUFFIX + "/" + relPath + dotSuffix;
-		}
-		else
-		{
-			if (isInRootDirectoryFast(rootDirectoryName, rootDirectoryPath, stdPath))
-			{
-				std::string relPath = dropRootDirectoryFast(stdPath, rootDirectoryPath);
-				return g_WorkDir + PIPELINE_DIRECTORY_PREFIX_ROOT + NLMISC::toLower(rootDirectoryName) + PIPELINE_DATABASE_META_SUFFIX + "/" + relPath + dotSuffix;
-			}
-			else
-			{
-				nlerror("Path is not in database or pipeline (%s)", path.c_str());
-				return path + dotSuffix;
-			}
-		}
-	}
-}
-
-namespace {
-
 /// Create status file path
 std::string getStatusFilePath(const std::string &path)
 {
-	return getMetaFilePath(path, PIPELINE_DATABASE_STATUS_SUFFIX);
+	return CWorkspaceStorage::getMetaFilePath(path, PIPELINE_DATABASE_STATUS_SUFFIX);
 }
 
 } /* anonymous namespace */
@@ -279,7 +182,7 @@ bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStat
 						return false;
 				}
 
-				std::string dirPathMeta = getMetaFilePath(dirPath, "");
+				std::string dirPathMeta = CWorkspaceStorage::getMetaFilePath(dirPath, "");
 				std::vector<std::string> dirContentsMeta;
 
 				CPath::getPathContent(dirPathMeta, false, false, true, dirContentsMeta);
@@ -328,7 +231,7 @@ bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStat
 			// TODO_PROCESS_WARNING
 			nlwarning("Requesting status on file or directory '%s' that does not exist!", path.c_str());
 			CFileRemove fr;
-			std::string removedTagFile = getMetaFilePath(path, PIPELINE_DATABASE_REMOVE_SUFFIX);
+			std::string removedTagFile = CWorkspaceStorage::getMetaFilePath(path, PIPELINE_DATABASE_REMOVE_SUFFIX);
 			if (CFile::isExists(removedTagFile))
 			{
 				// file existed before
@@ -424,7 +327,7 @@ public:
 					fs.LastFileSizeReference = fisz;
 				}
 				
-				std::string removePath = getMetaFilePath(FilePath, PIPELINE_DATABASE_REMOVE_SUFFIX);
+				std::string removePath = CWorkspaceStorage::getMetaFilePath(FilePath, PIPELINE_DATABASE_REMOVE_SUFFIX);
 
 				StatusMutex->lock();
 				{
@@ -615,7 +518,7 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 	// Note that we won't notice when a directory is deleted, this is also not necessary because we never work recursively in the service.
 	// Any recursive lookups are done in specific unsafe build tools that are tagged as unsafe and not monitored by the pipeline.
 	
-	std::string dirPathMeta = getMetaFilePath(dirPath, "");
+	std::string dirPathMeta = CWorkspaceStorage::getMetaFilePath(dirPath, "");
 	// nldebug("META DIR: %s", dirPathMeta.c_str());
 	std::vector<std::string> dirContentsMeta;
 

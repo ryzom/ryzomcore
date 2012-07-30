@@ -41,6 +41,7 @@
 
 // Project includes
 #include "callback.h"
+#include "metadata_storage.h"
 
 namespace NLMISC {
 	class IRunnable;
@@ -51,15 +52,6 @@ namespace PIPELINE {
 //#define PIPELINE_DATABASE_STATUS_SUBDIR "database.status/"
 //#define PIPELINE_DATABASE_ERRORS_SUBDIR "database.errors/"
 //#define PIPELINE_DATABASE_DEPEND_SUBDIR "database.depend/"
-
-#define PIPELINE_DATABASE_STATUS_SUFFIX ".status"
-#define PIPELINE_DATABASE_ERRORS_SUFFIX ".errors"
-#define PIPELINE_DATABASE_DEPEND_SUFFIX ".depend"
-#define PIPELINE_DATABASE_REMOVE_SUFFIX ".remove"
-
-#define PIPELINE_DATABASE_META_SUFFIX ".meta"
-
-std::string getMetaFilePath(const std::string &path, const std::string &dotSuffix);
 
 // Status is generated CRC32 for reference.
 // Errors are errors caused by using this file as an input or output file.
