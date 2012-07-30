@@ -56,45 +56,6 @@ std::string getStatusFilePath(const std::string &path)
 
 } /* anonymous namespace */
 
-void CFileError::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
-{
-	uint version = stream.serialVersion(1);
-	stream.serial(Project);
-	stream.serial(Process);
-	stream.serial(Message);
-}
-
-void CFileStatus::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
-{
-	uint version = stream.serialVersion(2);
-	// if (version >= 3) stream.serial(LastRemoved); else LastRemoved = 0;
-	stream.serial(FirstSeen);
-	stream.serial(LastChangedReference);
-	if (version >= 2) stream.serial(LastFileSizeReference); else LastFileSizeReference = 0;
-	stream.serial(LastUpdate);
-	stream.serial(CRC32);
-}
-
-void CFileRemove::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
-{
-	uint version = stream.serialVersion(1);
-	stream.serial(Lost);
-}
-
-void CProjectOutput::CFileOutput::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
-{
-	uint version = stream.serialVersion(1);
-	stream.serial(CRC32);
-	stream.serial((uint8 &)Level); // test this :o)
-}
-
-void CProjectOutput::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
-{
-	uint version = stream.serialVersion(1);
-	stream.serialCont(FilePaths);
-	stream.serialCont(FileOutputs);
-}
-
 CDatabaseStatus::CDatabaseStatus()
 {
 	//CFile::createDirectoryTree(g_WorkspaceDirectory + PIPELINE_DATABASE_STATUS_SUBDIR);
@@ -112,27 +73,13 @@ bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &
 	std::string stdPath = unMacroPath(filePath);
 	std::string statusPath = getStatusFilePath(filePath);
 	m_StatusMutex.lock_shared();
-	if (CFile::fileExists(statusPath))
+	if (CMetadataStorage::readStatus(fileStatus, statusPath))
 	{
-		nlassert(!CFile::isDirectory(filePath));
-		
-		CIFile ifs(statusPath, false);
-		fileStatus.serial(ifs);
-		ifs.close();
 		uint32 fmdt = CFile::getFileModificationDate(stdPath);
 		uint32 fisz = CFile::getFileSize(stdPath);
 		seemsValid =
 			((fmdt == fileStatus.LastChangedReference)
 			&& (fisz == fileStatus.LastFileSizeReference));
-	}
-	else
-	{
-		// fileStatus.LastRemoved = 0;
-		fileStatus.FirstSeen = 0;
-		fileStatus.LastChangedReference = 0;
-		fileStatus.LastFileSizeReference = ~0;
-		fileStatus.LastUpdate = 0;
-		fileStatus.CRC32 = 0;
 	}
 	m_StatusMutex.unlock_shared();
 	return seemsValid;
@@ -277,14 +224,8 @@ public:
 			uint32 fmdt = CFile::getFileModificationDate(FilePath);
 			std::string statusPath = getStatusFilePath(FilePath); // g_WorkspaceDirectory + PIPELINE_DATABASE_STATUS_SUBDIR + dropDatabaseDirectory(FilePath) + ".status";
 			StatusMutex->lock_shared();
-			bool statusFileExists = CFile::fileExists(statusPath);
-			if (statusFileExists)
-			{
-				CIFile ifs(statusPath, false);
-				fs.serial(ifs);
-				ifs.close();
-			}
-			else
+			bool statusFileExists = CMetadataStorage::readStatus(fs, statusPath);
+			if (!statusFileExists)
 			{
 				firstSeen = true;
 				fs.LastChangedReference = 0;
@@ -331,10 +272,7 @@ public:
 
 				StatusMutex->lock();
 				{
-					COFile ofs(statusPath, false, false, true);
-					fs.serial(ofs);
-					ofs.flush();
-					ofs.close();
+					CMetadataStorage::writeStatus(fs, statusPath);
 				}
 				{
 					// Important that we remove the remove after creating the status in case the service is killed inbetween.

@@ -32,6 +32,9 @@
 
 // NeL includes
 // #include <nel/misc/debug.h>
+#include <nel/misc/file.h>
+#include <nel/misc/path.h>
+#include <nel/misc/stream.h>
 
 // Project includes
 
@@ -40,14 +43,77 @@ using namespace std;
 
 namespace PIPELINE {
 
-CMetadataStorage::CMetadataStorage()
+void CFileError::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 {
-	
+	uint version = stream.serialVersion(1);
+	stream.serial(Project);
+	stream.serial(Process);
+	stream.serial(Message);
 }
 
-CMetadataStorage::~CMetadataStorage()
+void CFileStatus::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 {
-	
+	uint version = stream.serialVersion(2);
+	// if (version >= 3) stream.serial(LastRemoved); else LastRemoved = 0;
+	stream.serial(FirstSeen);
+	stream.serial(LastChangedReference);
+	if (version >= 2) stream.serial(LastFileSizeReference); else LastFileSizeReference = 0;
+	stream.serial(LastUpdate);
+	stream.serial(CRC32);
+}
+
+void CFileRemove::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
+{
+	uint version = stream.serialVersion(1);
+	stream.serial(Lost);
+}
+
+void CProjectOutput::CFileOutput::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
+{
+	uint version = stream.serialVersion(1);
+	stream.serial(CRC32);
+	stream.serial((uint8 &)Level); // test this :o)
+}
+
+void CProjectOutput::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
+{
+	uint version = stream.serialVersion(1);
+	stream.serialCont(FilePaths);
+	stream.serialCont(FileOutputs);
+}
+
+bool CMetadataStorage::readStatus(CFileStatus &status, const std::string &path)
+{
+	if (!NLMISC::CFile::fileExists(path))
+	{
+		status.FirstSeen = 0;
+		status.LastChangedReference = 0;
+		status.LastFileSizeReference = ~0;
+		status.LastUpdate = 0;
+		status.CRC32 = 0;
+		return false;
+	}
+
+	nlassert(!NLMISC::CFile::isDirectory(path));
+
+	NLMISC::CIFile is(path, false);
+	status.serial(is);
+	is.close();
+
+	return true;
+}
+
+void CMetadataStorage::writeStatus(const CFileStatus &status, const std::string &path)
+{
+	NLMISC::COFile os(path, false, false, true);
+	const_cast<CFileStatus &>(status).serial(os);
+	os.flush();
+	os.close();
+}
+
+void CMetadataStorage::eraseStatus(const std::string &path)
+{
+	NLMISC::CFile::deleteFile(path);
 }
 
 } /* namespace PIPELINE */

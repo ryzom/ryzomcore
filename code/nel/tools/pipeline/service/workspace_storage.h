@@ -49,7 +49,9 @@ namespace PIPELINE {
 class CWorkspaceStorage
 {
 public:
+	/// Get the path for a metadata file, based on a filepath it represents, and the suffix of it's contents
 	static std::string getMetaFilePath(const std::string &path, const std::string &dotSuffix);
+
 }; /* class CWorkspaceStorage */
 
 } /* namespace PIPELINE */
