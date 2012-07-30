@@ -1074,6 +1074,39 @@ namespace NLGUI
 		CInterfaceGroup::draw ();
 	}
 
+	std::string CGroupTable::getProperties( const std::string &name ) const
+	{
+		if( name == "border" )
+		{
+			return toString( Border );
+		}
+		else
+		if( name == "cellpadding" )
+		{
+			return toString( CellPadding );
+		}
+		else
+		if( name == "cellspacing" )
+		{
+			return toString( CellSpacing );
+		}
+		else
+		if( name == "bgcolor" )
+		{
+			return toString( BgColor );
+		}
+		else
+		if( name == "width" )
+		{
+			if( ForceWidthMin != 0 )
+				return toString( ForceWidthMin );
+			else
+				return toString( TableRatio * 100.0f );
+		}
+		else
+			return CInterfaceGroup::getProperty( name );
+	}
+
 	// ------------------------------------------------------------------------------------------------
 	bool CGroupTable::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{

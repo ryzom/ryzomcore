@@ -146,6 +146,8 @@ namespace NLGUI
 
 		bool    ContinuousUpdate;
 
+		std::string getProperties( const std::string &name ) const;
+
 	protected:
 
 		/// \from CInterfaceElement
