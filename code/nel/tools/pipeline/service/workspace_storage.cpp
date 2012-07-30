@@ -139,6 +139,12 @@ std::string CWorkspaceStorage::getMetaFilePath(const std::string &path, const st
 	}
 }
 
+std::string CWorkspaceStorage::getMetaDirectoryPath(const std::string &path)
+{
+	// Not very sane, but works.
+	return standardizePath(CWorkspaceStorage::getMetaFilePath(path, ""), true);
+}
+
 } /* namespace PIPELINE */
 
 /* end of file */

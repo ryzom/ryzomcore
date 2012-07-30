@@ -119,7 +119,7 @@ bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStat
 						return false;
 				}
 
-				std::string dirPathMeta = CWorkspaceStorage::getMetaFilePath(dirPath, "");
+				std::string dirPathMeta = CWorkspaceStorage::getMetaDirectoryPath(dirPath);
 				std::vector<std::string> dirContentsMeta;
 
 				CPath::getPathContent(dirPathMeta, false, false, true, dirContentsMeta);
@@ -446,7 +446,7 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 	// Note that we won't notice when a directory is deleted, this is also not necessary because we never work recursively in the service.
 	// Any recursive lookups are done in specific unsafe build tools that are tagged as unsafe and not monitored by the pipeline.
 	
-	std::string dirPathMeta = CWorkspaceStorage::getMetaFilePath(dirPath, "");
+	std::string dirPathMeta = CWorkspaceStorage::getMetaDirectoryPath(dirPath);
 	// nldebug("META DIR: %s", dirPathMeta.c_str());
 	std::vector<std::string> dirContentsMeta;
 

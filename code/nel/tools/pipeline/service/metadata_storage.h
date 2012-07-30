@@ -135,6 +135,7 @@ public:
 	static void writeStatus(const CFileStatus &status, const std::string &path);
 	static void eraseStatus(const std::string &path);
 
+	static std::string getRemovePath(const std::string &file);
 	static bool readRemove(CFileRemove &remove, const std::string & path);
 	static void createRemove(const CFileRemove &remove, const std::string &path); // Remove cannot be modified after creation, only erased.
 	static void eraseRemove(const std::string &path);
