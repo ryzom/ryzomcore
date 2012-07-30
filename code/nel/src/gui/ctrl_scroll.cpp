@@ -85,6 +85,139 @@ namespace NLGUI
 		}
 	}
 
+	std::string CCtrlScroll::getProperty( const std::string &name ) const
+	{
+
+		if( name == "tx_bottomleft" )
+		{
+			return getTextureBottomOrLeft();
+		}
+		else
+		if( name == "tx_middle" )
+		{
+			return getTextureMiddle();
+		}
+		else
+		if( name == "tx_topright" )
+		{
+			return getTextureTopOrRight();
+		}
+		else
+		if( name == "vertical" )
+		{
+			return toString( _Vertical );
+		}
+		else
+		if( name == "align" )
+		{
+			switch( _Aligned )
+			{
+			case 0:
+				return "T";
+				break;
+			case 1:
+				return "B";
+				break;
+			case 2:
+				return "L";
+				break;
+			case 3:
+				return "R";
+				break;
+			}
+
+			return "";
+		}
+		else
+		if( name == "min" )
+		{
+			return toString( _Min );
+		}
+		else
+		if( name == "max" )
+		{
+			return toString( _Max );
+		}
+		else
+		if( name == "value" )
+		{
+			if( _IsDBLink )
+				return _DBLink.getNodePtr()->getFullName();
+			else
+				return toString( _Value );
+		}
+		else
+		if( name == "tracksize" )
+		{
+			return toString( _TrackSize );
+		}
+		else
+		if( name == "onscroll" )
+		{
+			return _AHOnScroll;
+		}
+		else
+		if( name == "params" )
+		{
+			return _AHOnScrollParams;
+		}
+		else
+		if( name == "onscrollend" )
+		{
+			return _AHOnScrollEnd;
+		}
+		else
+		if( name == "end_params" )
+		{
+			return _AHOnScrollEndParams;
+		}
+		else
+		if( name == "onscrollcancel" )
+		{
+			return _AHOnScrollCancel;
+		}
+		else
+		if( name == "cancel_params" )
+		{
+			return _AHOnScrollCancelParams;
+		}
+		else
+		if( name == "target" )
+		{
+			if( _Target != NULL )
+				return _Target->getId();
+			else
+				return "";
+		}
+		else
+		if( name == "target_stepx" )
+		{
+			return toString( _TargetStepX );
+		}
+		else
+		if( name == "target_stepy" )
+		{
+			return toString( _TargetStepY );
+		}
+		else
+		if( name == "step_value" )
+		{
+			return toString( _StepValue );
+		}
+		else
+		if( name == "cancelable" )
+		{
+			return toString( _Cancelable );
+		}
+		else
+		if( name == "frozen" )
+		{
+			return toString( _Frozen );
+		}
+		else
+			return CCtrlBase::getProperty( name );
+	}
+
 	// ------------------------------------------------------------------------------------------------
 	bool CCtrlScroll::parse(xmlNodePtr node, CInterfaceGroup * parentGroup)
 	{
@@ -706,6 +839,21 @@ namespace NLGUI
 	{
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		_TxIdT = rVR.getTextureIdFromName(txName);
+	}
+
+	std::string CCtrlScroll::getTextureBottomOrLeft() const
+	{
+		return CViewRenderer::getInstance()->getTextureNameFromId( _TxIdB );
+	}
+
+	std::string CCtrlScroll::getTextureMiddle() const
+	{
+		return CViewRenderer::getInstance()->getTextureNameFromId( _TxIdM );
+	}
+
+	std::string CCtrlScroll::getTextureTopOrRight() const
+	{
+		return CViewRenderer::getInstance()->getTextureNameFromId( _TxIdT );
 	}
 
 	// ------------------------------------------------------------------------------------------------

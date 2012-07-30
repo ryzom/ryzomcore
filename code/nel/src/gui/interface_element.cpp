@@ -288,6 +288,8 @@ namespace NLGUI
 			return toString( _AvoidResizeParent );
 		}
 
+		nlwarning( "Invalid property '%s' queried for widget '%s'", name.c_str(), _Id.c_str() );
+
 		return "";
 	}
 

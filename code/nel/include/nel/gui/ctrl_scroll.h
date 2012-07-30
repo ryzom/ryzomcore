@@ -40,6 +40,7 @@ namespace NLGUI
 		CCtrlScroll(const TCtorParam &param);
 		~CCtrlScroll();
 
+		std::string getProperty( const std::string &name ) const;
 
 		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
 
@@ -65,6 +66,9 @@ namespace NLGUI
 		void	setTextureBottomOrLeft	(const std::string &txName);
 		void	setTextureMiddle		(const std::string &txName);
 		void	setTextureTopOrRight	(const std::string &txName);
+		std::string getTextureBottomOrLeft() const;
+		std::string getTextureMiddle() const;
+		std::string getTextureTopOrRight() const;
 
 		void	setTextureBottomOrLeft	(sint32 txid) { _TxIdB = txid; }
 		void	setTextureMiddle		(sint32 txid) { _TxIdM = txid; }
