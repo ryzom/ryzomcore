@@ -298,17 +298,23 @@ public:
 
 	void handleUpdateTasks()
 	{
+		IRunnable *currentRunnable;
+		{
+			NLMISC::CSynchronized<std::deque<IRunnable *>>::CAccessor updateTasks(&m_UpdateTasks);
+			if (updateTasks.value().size() == 0)
+				return;
+			currentRunnable = updateTasks.value().front();
+		}
 		for (; ; )
 		{
-			IRunnable *currentRunnable;
+			currentRunnable->run();
 			{
 				NLMISC::CSynchronized<std::deque<IRunnable *>>::CAccessor updateTasks(&m_UpdateTasks);
+				updateTasks.value().pop_front();
 				if (updateTasks.value().size() == 0)
 					break;
 				currentRunnable = updateTasks.value().front();
-				updateTasks.value().pop_front();
 			}
-			currentRunnable->run();
 		}
 	}
 
