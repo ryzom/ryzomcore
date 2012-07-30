@@ -152,6 +152,8 @@ namespace NLGUI
 
 		CCtrlTabButton(const TCtorParam &param);
 
+		std::string getProperty( const std::string &name ) const;
+
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 		virtual void setActive(bool state);

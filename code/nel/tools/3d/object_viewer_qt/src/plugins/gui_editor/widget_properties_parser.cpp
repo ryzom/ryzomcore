@@ -243,27 +243,25 @@ namespace GUIEditor
 
 		std::vector< SPropEntry > &props = info->props;
 
-		std::map< std::string, SWidgetInfo >::iterator itr2 =
-			widgetInfo->find( info->ancestor );
-		if( itr2 == widgetInfo->end() )
-			return;
-		SWidgetInfo *info2 = &(itr2->second);
+		SWidgetInfo *info2 = info;
 
 		do
 		{
+			if( info2->ancestor.empty() )
+				break;
+			
+			std::map< std::string, SWidgetInfo >::iterator itr2 =
+				widgetInfo->find( info2->ancestor );
+			if( itr2 == widgetInfo->end() )
+				break;
+
+			info2 = &( itr2->second );
+
 			for( std::vector< SPropEntry >::iterator propItr = info2->props.begin(); propItr != info2->props.end(); ++propItr )
 				props.push_back( *propItr );
 
-			if( !info2->resolved && !info2->ancestor.empty() )
-			{
-				itr2 = widgetInfo->find( info2->ancestor );
-				if( itr2 != widgetInfo->end() )
-					info2 = &(itr2->second);
-				else
-					info2 = NULL;				
-			}
 		}
-		while( ( info2 != NULL ) && !info2->resolved && !info2->ancestor.empty() );
+		while( !info2->resolved );
 
 		info->resolved = true;
 	}
