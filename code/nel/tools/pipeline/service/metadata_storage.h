@@ -102,19 +102,19 @@ public:
 #define PIPELINE_DATABASE_DEPEND_SUFFIX ".depend"
 // .......................
 
-/// Suffix for metafiles that contain the output of the last build of a project
-#define PIPELINE_DATABASE_OUTPUT_SUFFIX ".output"
-struct CProjectOutput
+/// Suffix for metafiles that contain the result of the last build of a project
+#define PIPELINE_DATABASE_RESULT_SUFFIX ".result"
+struct CProjectResult
 {
 	std::vector<std::string> FilePaths;
-	struct CFileOutput
+	struct CFileResult
 	{
 		uint32 CRC32;
 		TFileState Level;
 
 		void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
 	};
-	std::vector<CFileOutput> FileOutputs;
+	std::vector<CFileResult> FileResults;
 	
 	void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
 };
@@ -129,16 +129,21 @@ class CMetadataStorage
 {
 public:
 
-	/// Note: Use the functions provided by CDatabaseStatus for manipulating status files.
+	// Note: Use the functions provided by CDatabaseStatus for manipulating status files.
+	/// Format like .../something.somedirectory.meta/path/file.status
 	static std::string getStatusPath(const std::string &file);
 	static bool readStatus(CFileStatus &status, const std::string &path);
 	static void writeStatus(const CFileStatus &status, const std::string &path);
 	static void eraseStatus(const std::string &path);
+	
+	/// Format like .../something.somedirectory.meta/path/file.remove
+	// static std::string getRemovePath(const std::string &file);
+	// static bool readRemove(CFileRemove &remove, const std::string & path);
+	// static void createRemove(const CFileRemove &remove, const std::string &path); // Remove cannot be modified after creation, only erased.
+	// static void eraseRemove(const std::string &path);
 
-	static std::string getRemovePath(const std::string &file);
-	static bool readRemove(CFileRemove &remove, const std::string & path);
-	static void createRemove(const CFileRemove &remove, const std::string &path); // Remove cannot be modified after creation, only erased.
-	static void eraseRemove(const std::string &path);
+	// Pathname for result metadata is like .../project.projectname.meta/pluginname.result
+	// static std::string getResultPath(const std::string &projectName, const std::string &pluginName);
 
 }; /* class CMetadataStorage */
 

@@ -50,10 +50,13 @@ class CWorkspaceStorage
 {
 public:
 	/// Get the path for a metadata file, based on a filepath it represents, and the suffix of it's contents
+	/// Format like .../root.somedirectory.meta/path/file.suffix, or .../pipeline..., or .../project.common.meta/...
 	static std::string getMetaFilePath(const std::string &path, const std::string &dotSuffix);
 
 	/// Get the directory where metadata files are stored, based on the filepath containing the files which the containing metadata represents
 	static std::string getMetaDirectoryPath(const std::string &path);
+
+	// TODO: getProjectDirectory /// Format like .../project.common/
 
 }; /* class CWorkspaceStorage */
 
