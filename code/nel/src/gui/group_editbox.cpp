@@ -100,6 +100,161 @@ namespace NLGUI
 		}
 	}
 
+	std::string CGroupEditBox::getProperty( const stlpx_std::string &name ) const
+	{
+		if( name == "onchange" )
+		{
+			return _AHOnChange;
+		}
+		else
+		if( name == "onchange_params" )
+		{
+			return _ParamsOnChange;
+		}
+		else
+		if( name == "on_focus_lost" )
+		{
+			return _AHOnFocusLost;
+		}
+		else
+		if( name == "on_focus_lost_params" )
+		{
+			return _AHOnFocusLostParams;
+		}
+		else
+		if( name == "on_focus" )
+		{
+			return _AHOnFocus;
+		}
+		else
+		if( name == "on_focus_params" )
+		{
+			return _AHOnFocusParams;
+		}
+		else
+		if( name == "max_num_chars" )
+		{
+			return toString( _MaxNumChar );
+		}
+		else
+		if( name == "max_num_return" )
+		{
+			return toString( _MaxNumReturn );
+		}
+		else
+		if( name == "max_chars_size" )
+		{
+			return toString( _MaxCharsSize );
+		}
+		else
+		if( name == "enter_loose_focus" )
+		{
+			return toString( _LooseFocusOnEnter );
+		}
+		else
+		if( name == "enter_recover_focus" )
+		{
+			return toString( _RecoverFocusOnEnter );
+		}
+		else
+		if( name == "prompt" )
+		{
+			return _Prompt.toString();
+		}
+		else
+		if( name == "enter_type" )
+		{
+			switch( _EntryType )
+			{
+			case Integer:
+				return "integer";
+				break;
+
+			case PositiveInteger:
+				return "positive_integer";
+				break;
+
+			case Float:
+				return "float";
+				break;
+
+			case PositiveFloat:
+				return "positive_float";
+				break;
+
+			case Alpha:
+				return "alpha";
+				break;
+
+			case AlphaNum:
+				return "alpha_num";
+				break;
+
+			case AlphaNumSpace:
+				return "alpha_num_space";
+				break;
+
+			case Password:
+				return "password";
+				break;
+
+			case Filename:
+				return "filename";
+				break;
+
+			case PlayerName:
+				return "playername";
+				break;
+			}
+			
+			return "text";
+		}
+		else
+		if( name == "menu_r" )
+		{
+			return _ListMenuRight;
+		}
+		else
+		if( name == "max_historic" )
+		{
+			return toString( _MaxHistoric );
+		}
+		else
+		if( name == "backup_father_container_pos" )
+		{
+			return toString( _BackupFatherContainerPos );
+		}
+		else
+		if( name == "want_return" )
+		{
+			return toString( _WantReturn );
+		}
+		else
+		if( name == "savable" )
+		{
+			return toString( _Savable );
+		}
+		else
+		if( name == "max_float_prec" )
+		{
+			return toString( _MaxFloatPrec );
+		}
+		else
+		if( name == "negative_filter" )
+		{
+			std::string s;
+			s.reserve( _NegativeFilter.size() );
+
+			std::vector< char >::const_iterator itr;
+			for( itr = _NegativeFilter.begin(); itr != _NegativeFilter.end(); ++itr )
+				s.push_back( *itr );
+			
+			return s;
+		}
+		else
+			return CInterfaceGroup::getProperty( name );
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CGroupEditBox::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
@@ -168,7 +323,8 @@ namespace NLGUI
 			else if (stricmp(prop, "password") == 0) _EntryType = Password;
 			else if (stricmp(prop, "filename") == 0) _EntryType = Filename;
 			else if (stricmp(prop, "playername") == 0) _EntryType = PlayerName;
-			else nlwarning("<CGroupEditBox::parse> Unknown entry type %s", (const char *) prop);
+			else
+				nlwarning("<CGroupEditBox::parse> Unknown entry type %s", (const char *) prop);
 		}
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r" );

@@ -71,6 +71,87 @@ namespace NLGUI
 		Group->setResizeFromChildH(true);
 	}
 
+	std::string CGroupCell::getProperty( const std::string &name ) const
+	{
+		if( name == "align" )
+		{
+			switch( Align )
+			{
+			case Right:
+				return "right";
+				break;
+
+			case Center:
+				return "center";
+				break;
+			}
+
+			return "left";
+
+		}
+		else
+		if( name == "valign" )
+		{
+			switch( VAlign )
+			{
+			case Middle:
+				return "middle";
+				break;
+
+			case Bottom:
+				return "bottom";
+				break;
+			}
+
+			return "top";
+		}
+		else
+		if( name == "left_margin" )
+		{
+			return toString( LeftMargin );
+		}
+		else
+		if( name == "nowrap" )
+		{
+			return toString( NoWrap );
+		}
+		else
+		if( name == "bgcolor" )
+		{
+			return toString( BgColor );
+		}
+		else
+		if( name == "width" )
+		{
+			if( WidthWanted != 0 )
+				return toString( WidthWanted );
+			else
+				return toString( TableRatio * 100.0f );
+		}
+		else
+		if( name == "height" )
+		{
+			return toString( Height );
+		}
+		else
+		if( name == "ignore_max_width" )
+		{
+			return toString( IgnoreMaxWidth );
+		}
+		else
+		if( name == "ignore_min_width" )
+		{
+			return toString( IgnoreMinWidth );
+		}
+		else
+		if( name == "add_child_w" )
+		{
+			return toString( AddChildW );
+		}
+		else
+			return CInterfaceGroup::getProperty( name );
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CGroupCell::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup, uint columnIndex, uint rowIndex)
 	{

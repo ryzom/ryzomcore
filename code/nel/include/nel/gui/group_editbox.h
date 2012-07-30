@@ -48,6 +48,8 @@ namespace NLGUI
 		/// Dtor
 		~CGroupEditBox();
 
+		std::string getProperty( const std::string &name ) const;
+
 		bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup);
 		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 

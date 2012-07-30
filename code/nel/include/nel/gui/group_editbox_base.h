@@ -59,8 +59,6 @@ namespace NLGUI
 
 		static CGroupEditBoxBase *_CurrSelection; // the edit box for which the selection is currently active, or NULL if there's none
 
-	private:
-
 	};
 
 }
