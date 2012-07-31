@@ -94,10 +94,11 @@ public:
 	NLMISC::CSynchronized<bool> m_StatusUpdateSlaveDone;
 
 	CPipelineProject *m_ActiveProject;
+	CPipelineProcessImpl *m_ActiveProcess; // TODO: Maybe it would be easier to go directly to CPipelineProject from the plugin and provide an interface therefore.
 	CProcessPluginInfo m_ActivePlugin;
 	
 public:
-	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(false)
+	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(NULL), m_ActiveProcess(NULL)
 	{
 		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateMasterDone).value() = false;
 		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateSlaveDone).value() = false;
@@ -119,6 +120,8 @@ public:
 		m_TaskManager = NULL;
 
 		// temp sanity
+		nlassert(m_ActiveProject == NULL);
+		nlassert(m_ActiveProcess == NULL);
 		nlassert(m_SlaveTaskState == IDLE_WAIT_MASTER);
 	}
 
@@ -259,7 +262,7 @@ public:
 		case PIPELINE::PLUGIN_REGISTERED_CLASS:
 			{
 				PIPELINE::IProcessInfo *processInfo = static_cast<PIPELINE::IProcessInfo *>(NLMISC::CClassRegistry::create(m_ActivePlugin.Info));
-				// processInfo->setPipelineProcess(pipelineProcess); // .... TODO ....
+				processInfo->setPipelineProcess(m_ActiveProcess);
 				processInfo->getDependentDirectories(result);
 				for (std::vector<std::string>::iterator it = result.begin(), end = result.end(); it != end; ++it)
 					m_Master->vectorPushString(this, PIPELINE::macroPath(*it));
@@ -283,12 +286,14 @@ public:
 	{
 		nlassert(m_Master->getModuleProxy() == sender); // sanity check
 		nlassert(m_ActiveProject == NULL);
+		nlassert(m_ActiveProcess == NULL);
 
 		// Set the task state somewhere inbetween
 		m_SlaveTaskState = SOMEWHERE_INBETWEEN;
 
 		// Set the active project and get the plugin information
 		m_ActiveProject = g_PipelineWorkspace->getProject(projectName);
+		m_ActiveProcess = new CPipelineProcessImpl(m_ActiveProject);
 		g_PipelineWorkspace->getProcessPlugin(m_ActivePlugin, pluginId);
 		
 		// TODO: ERROR HANDLING !!!
@@ -302,7 +307,8 @@ public:
 
 	virtual void abortBuildTask(NLNET::IModuleProxy *sender)
 	{
-		nlassert(m_Master->getModuleProxy() == sender); // sanity check
+		// Sender NULL is request from slave (user exit, command or master disconnect), otherwise request from master.
+		nlassert(m_Master->getModuleProxy() == sender || sender == NULL); // sanity check
 
 		// TODO
 
