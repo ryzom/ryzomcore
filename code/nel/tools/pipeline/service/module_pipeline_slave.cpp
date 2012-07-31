@@ -56,6 +56,8 @@ namespace PIPELINE {
 #define PIPELINE_INFO_STATUS_UPDATE_MASTER "S_ST_UPD_MASTER"
 #define PIPELINE_INFO_STATUS_UPDATE_SLAVE "S_ST_UPD_SLAVE"
 
+#define PIPELINE_INFO_ABORTING "S_ABORTING"
+
 enum TRequestState
 {
 	REQUEST_NONE, 
@@ -96,9 +98,11 @@ public:
 	CPipelineProject *m_ActiveProject;
 	CPipelineProcessImpl *m_ActiveProcess; // TODO: Maybe it would be easier to go directly to CPipelineProject from the plugin and provide an interface therefore.
 	CProcessPluginInfo m_ActivePlugin;
+
+	bool m_AbortRequested;
 	
 public:
-	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(NULL), m_ActiveProcess(NULL)
+	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(NULL), m_ActiveProcess(NULL), m_AbortRequested(false)
 	{
 		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateMasterDone).value() = false;
 		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateSlaveDone).value() = false;
@@ -203,10 +207,18 @@ public:
 				if (NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateMasterDone).value()
 					&& NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateSlaveDone).value())
 				{
-					nlinfo("Slave task: Status update done");
-					m_SlaveTaskState = SOMEWHERE_INBETWEEN;
-					// Done with the status updating, now do something fancey
-					// ... TODO ...
+					if (m_AbortRequested)
+					{
+						nlinfo("Aborted slave task after status update");
+						finalizeAbort();
+					}
+					else
+					{
+						nlinfo("Slave task: Status update done");
+						m_SlaveTaskState = SOMEWHERE_INBETWEEN;
+						// Done with the status updating, now do something fancey
+						// ... TODO ...
+					}
 				}
 			}
 			break;
@@ -287,6 +299,9 @@ public:
 		nlassert(m_Master->getModuleProxy() == sender); // sanity check
 		nlassert(m_ActiveProject == NULL);
 		nlassert(m_ActiveProcess == NULL);
+		
+		// TODO: ERROR HANDLING !!! (see sanity check above)
+		// master->slaveRefusedBuildTask(this);
 
 		// Set the task state somewhere inbetween
 		m_SlaveTaskState = SOMEWHERE_INBETWEEN;
@@ -296,24 +311,43 @@ public:
 		m_ActiveProcess = new CPipelineProcessImpl(m_ActiveProject);
 		g_PipelineWorkspace->getProcessPlugin(m_ActivePlugin, pluginId);
 		
-		// TODO: ERROR HANDLING !!!
-
-		//CModulePipelineMasterProxy master(sender);
-		//master.slaveRefusedBuildTask(this);
+		// TODO: ERROR HANDLING !!! (see sanity check above)
+		// master->slaveRefusedBuildTask(this);
 
 		// Begin with status update of the dependent directories and files on the master, and previous output files on the slave
 		beginTaskStatusUpdate();
 	}
 
+	void finalizeAbort()
+	{
+		m_ActiveProject = NULL;
+		m_ActiveProcess = NULL;
+		m_SlaveTaskState = IDLE_WAIT_MASTER;
+		m_Master->slaveAbortedBuildTask(this);
+		m_AbortRequested = false;
+		CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_ABORTING);
+	}
+
+	/// Master or user request to abort.
 	virtual void abortBuildTask(NLNET::IModuleProxy *sender)
 	{
-		// Sender NULL is request from slave (user exit, command or master disconnect), otherwise request from master.
-		nlassert(m_Master->getModuleProxy() == sender || sender == NULL); // sanity check
+		if (m_ActiveProject)
+		{
+			// Sender NULL is request from slave (user exit, command or master disconnect), otherwise request from master.
+			nlassert(m_Master->getModuleProxy() == sender || sender == NULL); // sanity check
 
-		// TODO
+			// ?TODO? Actually wait for the task manager etc to end before sending the aborted confirmation.
+			CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_ABORTING);
+			m_AbortRequested = true;
 
-		// KABOOM
-		// m_ActiveProject = NULL;
+			// ?TODO?
+			//m_ActiveProject = NULL;
+			//m_ActiveProcess = NULL;
+			//m_Master->slaveAbortedBuildTask(this);
+			// ?TODO?
+
+			// KABOOM
+		}
 	}
 
 	virtual void masterUpdatedDatabaseStatus(NLNET::IModuleProxy *sender)
@@ -361,7 +395,7 @@ public:
 	
 	virtual void leaveBuildReadyState(NLNET::IModuleProxy *sender)
 	{
-		nlassert(m_Master->getModuleProxy() == sender); // sanity check
+		nlassert(m_Master->getModuleProxy() == sender || sender == NULL); // sanity check
 
 		if (m_BuildReadyState)
 		{

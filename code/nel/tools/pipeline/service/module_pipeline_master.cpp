@@ -58,6 +58,7 @@ namespace PIPELINE {
 // permanent flags
 #define PIPELINE_INFO_CODE_ERROR_UNMACRO "#CODE_ERROR_UNMACRO"
 #define PIPELINE_INFO_SLAVE_REJECTED "#M_SLAVE_REJECT"
+#define PIPELINE_INFO_SLAVE_ABORTED "#M_SLAVE_ABORTED"
 #define PIPELINE_INFO_SLAVE_CRASHED "#M_SLAVE_CRASH"
 #define PIPELINE_INFO_SLAVE_NOT_READY "#M_SLAVE_NOT_R"
 #define PIPELINE_INFO_SLAVE_CB_GONE "#M_SLAVE_CB_GONE"
@@ -271,6 +272,7 @@ public:
 				// if it goes down while busy on a task it crashed (or was poorly stopped by user...)
 				CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_CRASHED);
 				// ... TODO ...
+				slaveAbortedBuildTask(moduleProxy); // see if this works
 			}
 			
 			m_Slaves.erase(slaveIt);
@@ -392,13 +394,25 @@ public:
 	///////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////
 
+	/// When the slave task finishes, with or without error
 	virtual void slaveFinishedBuildTask(NLNET::IModuleProxy *sender, uint8 errorLevel)
 	{
 		// TODO
 	}
 
+	/// When the user aborts slave-side, when slave-side exits, etc
 	virtual void slaveAbortedBuildTask(NLNET::IModuleProxy *sender)
 	{
+		// TODO
+		//m_SlavesMutex.lock();
+		CSlave *slave = m_Slaves[sender];
+		if (slave == NULL) { nlerror("Received 'slaveAbortedBuildTask' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		//m_SlavesMutex.unlock();
+		m_BuildTaskQueue.abortedTask(slave->ActiveTaskId);
+		slave->ActiveTaskId = 0;
+		// --slave->SaneBehaviour; // legal behaviour
+		// slave->TimeOutStamp = NLMISC::CTime::getSecondsSince1970() + 30; // timeout for 30 seconds on this slave
+		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_ABORTED);
 		// TODO
 	}
 	
@@ -475,6 +489,7 @@ public:
 				nlwarning("Slave disconnected before callback could be delivered");
 				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_MASTER_UPDATE_DATABASE_FOR_SLAVE);
 				CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_CB_GONE);
+				delete this;
 				return;
 			}
 
