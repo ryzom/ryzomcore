@@ -106,6 +106,13 @@ public:
 		// TODO: ABORT RUNNING BUILD PROCESS
 		abortBuildTask(NULL);
 		leaveBuildReadyState(NULL);
+
+		// TODO:
+		// wait till build task has exited if still was running
+		// wait for other things to exist in case there are...
+
+		// temp sanity
+		nlassert(m_SlaveTaskState == IDLE_WAIT_MASTER);
 	}
 
 	virtual bool initModule(const TParsedCommandLine &initInfo)
