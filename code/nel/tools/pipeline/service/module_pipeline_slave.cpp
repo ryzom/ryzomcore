@@ -53,10 +53,14 @@ namespace PIPELINE {
 #define PIPELINE_INFO_SLAVE_RELOAD_SHEETS "S_RELOAD_SHEETS"
 #define PIPELINE_ERROR_SHEETS_CRC32_FAILED "Failed sheets CRC32. Sheets were modified inbetween launching services. This causes newly loaded services to be out of sync. Not allowed. Reload the sheets from the master service, and restart this slave service"
 
+#define PIPELINE_INFO_BUILD_TASK "S_BUILD_TASK"
+
 #define PIPELINE_INFO_STATUS_UPDATE_MASTER "S_ST_UPD_MASTER"
 #define PIPELINE_INFO_STATUS_UPDATE_SLAVE "S_ST_UPD_SLAVE"
 
 #define PIPELINE_INFO_ABORTING "S_ABORTING"
+
+#define PIPELINE_INFO_MASTER_CRASH "#S_MASTER_CRASH"
 
 enum TRequestState
 {
@@ -112,6 +116,7 @@ public:
 
 	virtual ~CModulePipelineSlave()
 	{
+		nldebug("START ~CModulePipelineSlave");
 		// TODO: IF MASTER STILL CONNECTED, NOTIFY INSANITY
 		// TODO: ABORT RUNNING BUILD PROCESS
 		abortBuildTask(NULL);
@@ -127,6 +132,7 @@ public:
 		nlassert(m_ActiveProject == NULL);
 		nlassert(m_ActiveProcess == NULL);
 		nlassert(m_SlaveTaskState == IDLE_WAIT_MASTER);
+		nldebug("END ~CModulePipelineSlave");
 	}
 
 	virtual bool initModule(const TParsedCommandLine &initInfo)
@@ -166,6 +172,27 @@ public:
 
 			nlassert(m_Master->getModuleProxy() == moduleProxy);
 
+			if (m_BuildReadyState)
+			{
+				CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_MASTER_CRASH);
+			}
+
+			switch (m_SlaveTaskState)
+			{
+			case STATUS_UPDATE:
+				bool masterDone;
+				{
+					// We won't receive this anymore from the master after disconnect. Do as if from master.
+					NLMISC::CSynchronized<bool>::CAccessor statusUpdateMasterDone(&m_StatusUpdateMasterDone);
+					masterDone = statusUpdateMasterDone.value();
+				}
+				if (!masterDone)
+				{
+					masterUpdatedDatabaseStatus(NULL);
+				}
+				break;
+			}
+
 			// TODO: ABORT RUNNING BUILD PROCESS
 			abortBuildTask(NULL);
 			leaveBuildReadyState(NULL); // leave state if building
@@ -204,6 +231,7 @@ public:
 			break;
 		case STATUS_UPDATE:
 			{
+				bool bothReady = false;
 				NLMISC::CSynchronized<bool>::CAccessor statusUpdateMasterDone(&m_StatusUpdateMasterDone);
 				if (statusUpdateMasterDone.value())
 				{
@@ -212,18 +240,22 @@ public:
 					{
 						statusUpdateMasterDone.value() = false;
 						statusUpdateSlaveDone.value() = false;
-						if (m_AbortRequested)
-						{
-							nlinfo("Aborted slave task after status update");
-							finalizeAbort();
-						}
-						else
-						{
-							nlinfo("Slave task: Status update done");
-							m_SlaveTaskState = SOMEWHERE_INBETWEEN;
-							// Done with the status updating, now do something fancey
-							// ... TODO ...
-						}
+						bothReady = true;
+					}
+				}
+				if (bothReady)
+				{
+					if (m_AbortRequested)
+					{
+						nlinfo("Aborted slave task after status update");
+						finalizeAbort();
+					}
+					else
+					{
+						nlinfo("Slave task: Status update done");
+						m_SlaveTaskState = SOMEWHERE_INBETWEEN;
+						// Done with the status updating, now do something fancey
+						// ... TODO ...
 					}
 				}
 			}
@@ -310,6 +342,7 @@ public:
 		// master->slaveRefusedBuildTask(this);
 
 		// Set the task state somewhere inbetween
+		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_BUILD_TASK);
 		m_SlaveTaskState = SOMEWHERE_INBETWEEN;
 
 		// Set the active project and get the plugin information
@@ -329,9 +362,11 @@ public:
 		m_ActiveProject = NULL;
 		m_ActiveProcess = NULL;
 		m_SlaveTaskState = IDLE_WAIT_MASTER;
-		m_Master->slaveAbortedBuildTask(this);
+		if (m_Master) // else was disconnect
+			m_Master->slaveAbortedBuildTask(this);
 		m_AbortRequested = false;
 		CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_ABORTING);
+		CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_BUILD_TASK);
 	}
 
 	/// Master or user request to abort.
@@ -340,7 +375,7 @@ public:
 		if (m_ActiveProject)
 		{
 			// Sender NULL is request from slave (user exit, command or master disconnect), otherwise request from master.
-			nlassert(m_Master->getModuleProxy() == sender || sender == NULL); // sanity check
+			nlassert(sender == NULL || m_Master->getModuleProxy() == sender); // sanity check
 
 			// ?TODO? Actually wait for the task manager etc to end before sending the aborted confirmation.
 			CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_ABORTING);
@@ -358,7 +393,7 @@ public:
 
 	virtual void masterUpdatedDatabaseStatus(NLNET::IModuleProxy *sender)
 	{
-		nlassert(m_Master->getModuleProxy() == sender); // sanity check
+		nlassert(sender == NULL || m_Master->getModuleProxy() == sender); // sanity check
 
 		if (m_TestCommand)
 		{
@@ -401,7 +436,7 @@ public:
 	
 	virtual void leaveBuildReadyState(NLNET::IModuleProxy *sender)
 	{
-		nlassert(m_Master->getModuleProxy() == sender || sender == NULL); // sanity check
+		nlassert(sender == NULL || m_Master->getModuleProxy() == sender); // sanity check
 
 		if (m_BuildReadyState)
 		{

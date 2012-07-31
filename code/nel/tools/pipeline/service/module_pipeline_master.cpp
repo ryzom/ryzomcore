@@ -170,6 +170,7 @@ public:
 
 	virtual ~CModulePipelineMaster()
 	{
+		nldebug("START ~CModulePipelineMaster");
 		if (m_BuildWorking)
 			this->abort();
 
@@ -201,6 +202,7 @@ public:
 		m_Slaves.clear();
 		
 		m_SlavesMutex.unlock();
+		nldebug("END ~CModulePipelineMaster");
 	}
 
 	///////////////////////////////////////////////////////////////////
