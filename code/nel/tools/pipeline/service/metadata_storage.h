@@ -48,11 +48,11 @@ namespace PIPELINE {
 
 enum TFileState
 {
-	Unknown = 0,
-	Success = 1,
-	Warning = 2,
-	Error = 3,
-	Removal = 4,
+	STATE_UNKNOWN = 0,
+	STATE_SUCCESS = 1,
+	STATE_WARNING = 2,
+	STATE_ERROR = 3,
+	STATE_REMOVAL = 4,
 };
 
 /// Suffix for metafiles that contain the CRC32 etc

@@ -251,6 +251,7 @@ public:
 				}
 				if (bothReady)
 				{
+					m_SlaveTaskState = SOMEWHERE_INBETWEEN;
 					if (m_AbortRequested)
 					{
 						nlinfo("Aborted slave task after status update");
@@ -259,14 +260,16 @@ public:
 					else
 					{
 						nlinfo("Slave task: Status update done");
-						m_SlaveTaskState = SOMEWHERE_INBETWEEN;
 						// Done with the status updating, now do something fancey
 						// ... TODO ...
 						// not implemented, so abort.
-						abortBuildTask(NULL);
+						// abortBuildTask(NULL);
 					}
 				}
 			}
+			break;
+		default:
+			finishedTask(FINISH_ERROR, "Task got lost somewhere inbetween the code of the slave service. This is a programming error. Implementation may be incomplete.");
 			break;
 		}
 		
@@ -374,6 +377,16 @@ public:
 			m_Master->slaveAbortedBuildTask(this);
 		m_AbortRequested = false;
 		CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_ABORTING);
+		CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_BUILD_TASK);
+	}
+
+	void finishedTask(TProcessResult errorLevel, const std::string &errorMessage)
+	{
+		m_ActiveProject = NULL;
+		m_ActiveProcess = NULL;
+		m_SlaveTaskState = IDLE_WAIT_MASTER;
+		if (m_Master) // else was disconnect
+			m_Master->slaveFinishedBuildTask(this, (uint8)errorLevel, errorMessage);
 		CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_BUILD_TASK);
 	}
 

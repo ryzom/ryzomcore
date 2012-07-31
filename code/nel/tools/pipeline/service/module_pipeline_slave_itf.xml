@@ -24,6 +24,7 @@
 			</method>
 
 			<method name="reloadSheets" msg="RELOAD_SHEETS">
+				<doc line=""/>
 			</method>
 
 			<method name="enterBuildReadyState" msg="BRT_ENTER">

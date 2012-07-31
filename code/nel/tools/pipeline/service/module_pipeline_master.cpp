@@ -44,6 +44,7 @@
 #include "database_status.h"
 #include "build_task_queue.h"
 #include "pipeline_workspace.h"
+#include "../plugin_library/pipeline_process.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -425,43 +426,62 @@ public:
 	///////////////////////////////////////////////////////////////////
 
 	/// When the slave task finishes, with or without error
-	virtual void slaveFinishedBuildTask(NLNET::IModuleProxy *sender, uint8 errorLevel)
+	virtual void slaveFinishedBuildTask(NLNET::IModuleProxy *sender, uint8 errorLevel, const std::string &errorMessage)
 	{
-		// TODO
+		//m_SlavesMutex.lock();
+		TSlaveMap::iterator slaveIt = m_Slaves.find(sender);
+		if (slaveIt == m_Slaves.end()) { nlerror("Received 'slaveFinishedBuildTask' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		CSlave *slave = slaveIt->second;
+		//m_SlavesMutex.unlock();
+
+		switch ((TProcessResult)errorLevel)
+		{
+		case FINISH_WARNING:
+		case FINISH_SUCCESS:
+			m_BuildTaskQueue.successTask(slave->ActiveTaskId);
+			break;
+		case FINISH_ERROR:
+			m_BuildTaskQueue.erroredTask(slave->ActiveTaskId);
+			break;
+		default:
+			nlerror("Slave returned bad error level");
+			break;
+		}
+		
+		notifyTerminalTaskState(slave->ActiveTaskId, (TProcessResult)errorLevel, errorMessage);
+
+		slave->ActiveTaskId = 0;
 	}
 
 	/// When the user aborts slave-side, when slave-side exits, etc (assume the master requested abort or the slave crashed)
 	virtual void slaveAbortedBuildTask(NLNET::IModuleProxy *sender)
 	{
-		// TODO
 		//m_SlavesMutex.lock();
 		TSlaveMap::iterator slaveIt = m_Slaves.find(sender);
 		if (slaveIt == m_Slaves.end()) { nlerror("Received 'slaveAbortedBuildTask' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
 		CSlave *slave = slaveIt->second;
 		//m_SlavesMutex.unlock();
+
 		m_BuildTaskQueue.abortedTask(slave->ActiveTaskId);
+		notifyTerminalTaskState(slave->ActiveTaskId, FINISH_ABORT, "The task has been aborted");
 		slave->ActiveTaskId = 0;
-		// --slave->SaneBehaviour; // legal behaviour
-		// slave->TimeOutStamp = NLMISC::CTime::getSecondsSince1970() + 30; // timeout for 30 seconds on this slave // no timeout
-		// CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_ABORTED); // don't keep a count
-		// TODO
 	}
 	
 	// in fact slaves are not allowed to refuse tasks, but they may do this if the user is toying around with the slave service
 	virtual void slaveRefusedBuildTask(NLNET::IModuleProxy *sender)
 	{
-		// TODO
 		//m_SlavesMutex.lock();
 		TSlaveMap::iterator slaveIt = m_Slaves.find(sender);
 		if (slaveIt == m_Slaves.end()) { nlerror("Received 'slaveRefusedBuildTask' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
 		CSlave *slave = slaveIt->second;
 		//m_SlavesMutex.unlock();
+
 		m_BuildTaskQueue.rejectedTask(slave->ActiveTaskId);
+		notifyTerminalTaskState(slave->ActiveTaskId, FINISH_REJECT, "The slave service has rejected the task. This is a programming error");
 		slave->ActiveTaskId = 0;
 		--slave->SaneBehaviour;
 		slave->TimeOutStamp = NLMISC::CTime::getSecondsSince1970() + 3; // timeout for 3 seconds on this slave
 		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_REJECTED);
-		// TODO
 	}
 
 	virtual void slaveReloadedSheets(NLNET::IModuleProxy *sender)
@@ -506,6 +526,16 @@ public:
 		CSlave *slave = slaveIt->second;
 		//m_SlavesMutex.unlock();
 		slave->Vector.push_back(str);
+	}
+
+	///////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////
+
+	void notifyTerminalTaskState(uint32 taskId, TProcessResult errorLevel, const std::string &errorMessage)
+	{
+		nlinfo("taskId: %i, errorLevel: %i, errorMessage: %s", taskId, (uint32)errorLevel, errorMessage.c_str());
+		// TODO NOTIFY TERMINAL (send errorlevel as uint8 as usual)
 	}
 
 	///////////////////////////////////////////////////////////////////

@@ -39,6 +39,27 @@
 
 namespace PIPELINE {
 
+enum TProcessResult
+{
+	/// Invalid state.
+	FINISH_NOT = 0,
+
+	/// Successfully built.
+	FINISH_SUCCESS = 1,
+
+	/// Built successfully with warnings.
+	FINISH_WARNING = 2,
+
+	/// Build failed.
+	FINISH_ERROR = 3,
+
+	/// Task aborted by slave. For internal usage only.
+	FINISH_ABORT = 4, 
+
+	/// Task rejected by slave. For internal usage only.
+	FINISH_REJECT = 5, 
+};
+
 /**
  * \brief IPipelineProcess
  * \date 2012-03-03 09:22GMT

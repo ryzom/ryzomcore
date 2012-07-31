@@ -7,7 +7,8 @@
 			<method name="slaveFinishedBuildTask" msg="RE_BT_DONE">
 				<doc line=""/>
 
-				<param type="uint8"			name="errorLevel"	/>
+				<param type="uint8" name="errorLevel" />
+				<param type="std::string" name="errorMessage" byref="true" />
 			</method>
 
 			<method name="slaveAbortedBuildTask" msg="RE_BT_ABORTED">
@@ -33,7 +34,7 @@
 			<method name="vectorPushString" msg="VEC_PUSH_STR">
 				<doc line=""/>
 				
-				<param type="std::string"		name="str"		byref="true"/>
+				<param type="std::string" name="str" byref="true" />
 			</method>
 
 			<method name="updateDatabaseStatusByVector" msg="UPD_DB_ST">
