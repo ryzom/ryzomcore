@@ -81,16 +81,20 @@ public:
 	enum TSlaveTaskState
 	{
 		IDLE_WAIT_MASTER, 
+		SOMEWHERE_INBETWEEN, 
 		STATUS_UPDATE, 
 		// ...
 	};
-	TSlaveTaskState m_SlaveTaskState;
+	TSlaveTaskState m_SlaveTaskState; // only set and used by update!! used on other threads for sanity checks
 
 	NLMISC::CSynchronized<bool> m_StatusUpdateMasterDone;
 	NLMISC::CSynchronized<bool> m_StatusUpdateSlaveDone;
+
+	CPipelineProject *m_ActiveProject;
+	CProcessPluginInfo m_ActivePlugin;
 	
 public:
-	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone")
+	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(false)
 	{
 		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateMasterDone).value() = false;
 		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateSlaveDone).value() = false;
@@ -197,28 +201,46 @@ public:
 	/// Begin with the status update of the current task
 	void beginTaskStatusUpdate()
 	{
-		
+		// Set the task state
+		m_SlaveTaskState = STATUS_UPDATE;
+
+		// TODO: Start the client and master status update
 	}
 
 	///////////////////////////////////////////////////////////////////
 
 	virtual void startBuildTask(NLNET::IModuleProxy *sender, const std::string &projectName, const uint32 &pluginId)
 	{
-		// TODO
-		// Start the status update for master and slave.
+		nlassert(m_Master->getModuleProxy() == sender); // sanity check
+		nlassert(m_ActiveProject == NULL);
 
-		//this->queueModuleTask
-		CModulePipelineMasterProxy master(sender);
-		master.slaveRefusedBuildTask(this); // NO MORE TASK ID
+		// Set the task state somewhere inbetween
+		m_SlaveTaskState = SOMEWHERE_INBETWEEN;
+
+		// Set the active project and get the plugin information
+		m_ActiveProject = g_PipelineWorkspace->getProject(projectName);
+		g_PipelineWorkspace->getProcessPlugin(m_ActivePlugin, pluginId);
+		
+		// TODO: ERROR HANDLING !!!
+
+		//CModulePipelineMasterProxy master(sender);
+		//master.slaveRefusedBuildTask(this);
 	}
 
 	virtual void abortBuildTask(NLNET::IModuleProxy *sender)
 	{
+		nlassert(m_Master->getModuleProxy() == sender); // sanity check
+
 		// TODO
+
+		// KABOOM
+		// m_ActiveProject = NULL;
 	}
 
 	virtual void masterUpdatedDatabaseStatus(NLNET::IModuleProxy *sender)
 	{
+		nlassert(m_Master->getModuleProxy() == sender); // sanity check
+
 		if (m_TestCommand)
 		{
 			endedRunnableTask();
@@ -235,6 +257,8 @@ public:
 
 	virtual void reloadSheets(NLNET::IModuleProxy *sender)
 	{
+		nlassert(m_Master->getModuleProxy() == sender); // sanity check
+
 		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_RELOAD_SHEETS);
 		if (PIPELINE::reloadSheets()) m_ReloadSheetsState = REQUEST_WORKING;
 		else m_ReloadSheetsState = REQUEST_MADE;
@@ -242,6 +266,8 @@ public:
 	
 	virtual void enterBuildReadyState(NLNET::IModuleProxy *sender)
 	{
+		nlassert(m_Master->getModuleProxy() == sender); // sanity check
+
 		if (!m_BuildReadyState && PIPELINE::tryBuildReady())
 		{
 			m_BuildReadyState = true;
@@ -255,6 +281,8 @@ public:
 	
 	virtual void leaveBuildReadyState(NLNET::IModuleProxy *sender)
 	{
+		nlassert(m_Master->getModuleProxy() == sender); // sanity check
+
 		if (m_BuildReadyState)
 		{
 			m_BuildReadyState = false;
