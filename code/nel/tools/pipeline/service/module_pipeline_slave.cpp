@@ -125,8 +125,14 @@ public:
 		// TODO?
 		// wait till build task has exited if still was running
 		// wait for other things to exist in case there are...
+		nldebug("Wait for tasks on the slave");
+		while (m_TaskManager->getNumWaitingTasks() > 0)
+			nlSleep(10);
 		delete m_TaskManager;
 		m_TaskManager = NULL;
+
+		if (m_AbortRequested)
+			finalizeAbort(); // hopefully this is fine
 
 		// temp sanity
 		nlassert(m_ActiveProject == NULL);

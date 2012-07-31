@@ -170,6 +170,9 @@ public:
 
 		g_IsMaster = false;
 
+		nldebug("Wait for tasks on the master");
+		while (m_TaskManager->getNumWaitingTasks() > 0)
+			nlSleep(10);
 		delete m_TaskManager;
 		m_TaskManager = NULL;
 
@@ -523,6 +526,7 @@ public:
 				nlwarning("Slave disconnected before callback could be delivered");
 				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_MASTER_UPDATE_DATABASE_FOR_SLAVE);
 				CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_CB_GONE);
+				Master->m_SlavesMutex.unlock();
 				delete this;
 				return;
 			}
@@ -589,8 +593,15 @@ public:
 		
 		if (ok)
 		{
-			CUpdateDatabaseStatusByVectorTask *slaveTask = new CUpdateDatabaseStatusByVectorTask(this, sender, slave->Vector); // slave->Vector is wiped due to swap
-			m_TaskManager->addTask(slaveTask);
+			if (g_IsExiting)
+			{
+				nlwarning("Cannot add task while exiting");
+			}
+			else
+			{
+				CUpdateDatabaseStatusByVectorTask *slaveTask = new CUpdateDatabaseStatusByVectorTask(this, sender, slave->Vector); // slave->Vector is wiped due to swap
+				m_TaskManager->addTask(slaveTask);
+			}
 		}
 	}
 

@@ -414,7 +414,7 @@ void updatePathStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater, cons
 
 void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater, const std::string &dir, bool recurse)
 {
-	if (!g_IsMaster)
+	if (!g_IsExiting && !g_IsMaster)
 	{
 		nlerror("Not master, not allowed.");
 	}
