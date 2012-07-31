@@ -14,7 +14,6 @@
     </ARRAY>
     <ARRAY Name="Processes">
       <ATOM Value="Interface"/>
-      <ATOM Value="Dummy"/>
     </ARRAY>
     <STRUCT Name="Interface">
       <ARRAY Name="Atlas">
@@ -95,5 +94,6 @@ Sat Mar 03 13:34:02 2012 (Kaetemi) .Macros[1].Value = [!OutputDirectory]/interfa
 Sat Mar 03 13:34:02 2012 (Kaetemi) formName Resized = 2
 Sat Mar 03 13:34:32 2012 (Kaetemi) .Interface.AtlasDxtc[0].DstFile = [&amp;DstInterfaceAtlasDxtc]/texture_interfaces_dxtc.tga
 Fri Mar 09 19:49:23 2012 (Kaetemi) .Processes[1] = Dummy
-Fri Mar 09 19:49:23 2012 (Kaetemi) formName Resized = 2</LOG>
+Fri Mar 09 19:49:23 2012 (Kaetemi) formName Resized = 2
+Tue Jul 31 19:45:33 2012 (kaetemi) formName Resized = 1</LOG>
 </FORM>
