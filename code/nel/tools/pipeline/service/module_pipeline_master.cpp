@@ -277,6 +277,7 @@ public:
 			
 			m_Slaves.erase(slaveIt);
 			delete slave;
+			// nldebug("Now %i slaves remaining", m_Slaves.size());
 			
 			m_SlavesMutex.unlock();
 		}
@@ -329,6 +330,7 @@ public:
 		if (m_BuildWorking)
 		{
 			m_SlavesMutex.lock();
+			// nldebug("Iterating %i slaves", m_Slaves.size());
 			// iterate trough all slaves to tell them the enter build_ready state.
 			for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
 			{
@@ -405,8 +407,9 @@ public:
 	{
 		// TODO
 		//m_SlavesMutex.lock();
-		CSlave *slave = m_Slaves[sender];
-		if (slave == NULL) { nlerror("Received 'slaveAbortedBuildTask' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		TSlaveMap::iterator slaveIt = m_Slaves.find(sender);
+		if (slaveIt == m_Slaves.end()) { nlerror("Received 'slaveAbortedBuildTask' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		CSlave *slave = slaveIt->second;
 		//m_SlavesMutex.unlock();
 		m_BuildTaskQueue.abortedTask(slave->ActiveTaskId);
 		slave->ActiveTaskId = 0;
@@ -421,8 +424,9 @@ public:
 	{
 		// TODO
 		//m_SlavesMutex.lock();
-		CSlave *slave = m_Slaves[sender];
-		if (slave == NULL) { nlerror("Received 'slaveRefusedBuildTask' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		TSlaveMap::iterator slaveIt = m_Slaves.find(sender);
+		if (slaveIt == m_Slaves.end()) { nlerror("Received 'slaveRefusedBuildTask' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		CSlave *slave = slaveIt->second;
 		//m_SlavesMutex.unlock();
 		m_BuildTaskQueue.rejectedTask(slave->ActiveTaskId);
 		slave->ActiveTaskId = 0;
@@ -435,8 +439,9 @@ public:
 	virtual void slaveReloadedSheets(NLNET::IModuleProxy *sender)
 	{
 		//m_SlavesMutex.lock();
-		CSlave *slave = m_Slaves[sender];
-		if (slave == NULL) { nlerror("Received 'slaveReloadedSheets' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		TSlaveMap::iterator slaveIt = m_Slaves.find(sender);
+		if (slaveIt == m_Slaves.end()) { nlerror("Received 'slaveReloadedSheets' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		CSlave *slave = slaveIt->second;
 		//m_SlavesMutex.unlock();
 		slave->SheetsOk = true;
 		CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_MASTER_RELOAD_SHEETS);
@@ -445,8 +450,9 @@ public:
 	virtual void slaveBuildReadySuccess(NLNET::IModuleProxy *sender)
 	{
 		//m_SlavesMutex.lock();
-		CSlave *slave = m_Slaves[sender];
-		if (slave == NULL) { nlerror("Received 'slaveBuildReadySuccess' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		TSlaveMap::iterator slaveIt = m_Slaves.find(sender);
+		if (slaveIt == m_Slaves.end()) { nlerror("Received 'slaveBuildReadySuccess' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		CSlave *slave = slaveIt->second;
 		//m_SlavesMutex.unlock();
 		slave->BuildReadyState = 2;
 	}
@@ -454,8 +460,9 @@ public:
 	virtual void slaveBuildReadyFail(NLNET::IModuleProxy *sender)
 	{
 		//m_SlavesMutex.lock();
-		CSlave *slave = m_Slaves[sender];
-		if (slave == NULL) { nlerror("Received 'slaveBuildReadyFail' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		TSlaveMap::iterator slaveIt = m_Slaves.find(sender);
+		if (slaveIt == m_Slaves.end()) { nlerror("Received 'slaveBuildReadyFail' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		CSlave *slave = slaveIt->second;
 		//m_SlavesMutex.unlock();
 		slave->BuildReadyState = 0;
 		// --slave->SaneBehaviour; // allow this behaviour.
@@ -466,8 +473,9 @@ public:
 	virtual void vectorPushString(NLNET::IModuleProxy *sender, const std::string &str)
 	{
 		//m_SlavesMutex.lock();
-		CSlave *slave = m_Slaves[sender];
-		if (slave == NULL) { nlerror("Received 'vectorPushString' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		TSlaveMap::iterator slaveIt = m_Slaves.find(sender);
+		if (slaveIt == m_Slaves.end()) { nlerror("Received 'vectorPushString' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		CSlave *slave = slaveIt->second;
 		//m_SlavesMutex.unlock();
 		slave->Vector.push_back(str);
 	}
@@ -483,8 +491,9 @@ public:
 		
 		virtual void run() // this is sanely run from the update thread
 		{
-			CSlave *slave = Master->m_Slaves[m_SlaveProxy];
-			if (slave == NULL) 
+			Master->m_SlavesMutex.lock();
+			TSlaveMap::iterator slaveIt = Master->m_Slaves.find(m_SlaveProxy);
+			if (slaveIt == Master->m_Slaves.end())
 			{
 				nlwarning("Slave disconnected before callback could be delivered");
 				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_MASTER_UPDATE_DATABASE_FOR_SLAVE);
@@ -492,6 +501,8 @@ public:
 				delete this;
 				return;
 			}
+			CSlave *slave = slaveIt->second;
+			Master->m_SlavesMutex.unlock();
 
 			slave->Proxy.masterUpdatedDatabaseStatus(Master);
 			CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_MASTER_UPDATE_DATABASE_FOR_SLAVE);
@@ -529,8 +540,9 @@ public:
 		// SWAP THE VECTOR CONTAINERS
 
 		//m_SlavesMutex.lock();
-		CSlave *slave = m_Slaves[sender];
-		if (slave == NULL) { nlerror("Received 'updateDatabaseStatusByVector' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		TSlaveMap::iterator slaveIt = m_Slaves.find(sender);
+		if (slaveIt == m_Slaves.end()) { nlerror("Received 'updateDatabaseStatusByVector' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		CSlave *slave = slaveIt->second;
 		//m_SlavesMutex.unlock();
 		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_MASTER_UPDATE_DATABASE_FOR_SLAVE);
 
@@ -564,8 +576,9 @@ public:
 	void setAvailablePlugins(NLNET::IModuleProxy *sender, const std::vector<uint32> &pluginsAvailable)
 	{
 		//m_SlavesMutex.lock();
-		CSlave *slave = m_Slaves[sender];
-		if (slave == NULL) { nlerror("Received 'setAvailablePlugins' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		TSlaveMap::iterator slaveIt = m_Slaves.find(sender);
+		if (slaveIt == m_Slaves.end()) { nlerror("Received 'setAvailablePlugins' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		CSlave *slave = slaveIt->second;
 		//m_SlavesMutex.unlock();
 		slave->PluginsAvailable = pluginsAvailable;
 	}
