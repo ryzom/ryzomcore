@@ -402,7 +402,7 @@ public:
 		// TODO
 	}
 
-	/// When the user aborts slave-side, when slave-side exits, etc
+	/// When the user aborts slave-side, when slave-side exits, etc (assume the master requested abort or the slave crashed)
 	virtual void slaveAbortedBuildTask(NLNET::IModuleProxy *sender)
 	{
 		// TODO
@@ -414,8 +414,8 @@ public:
 		m_BuildTaskQueue.abortedTask(slave->ActiveTaskId);
 		slave->ActiveTaskId = 0;
 		// --slave->SaneBehaviour; // legal behaviour
-		// slave->TimeOutStamp = NLMISC::CTime::getSecondsSince1970() + 30; // timeout for 30 seconds on this slave
-		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_ABORTED);
+		// slave->TimeOutStamp = NLMISC::CTime::getSecondsSince1970() + 30; // timeout for 30 seconds on this slave // no timeout
+		// CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_ABORTED); // don't keep a count
 		// TODO
 	}
 	

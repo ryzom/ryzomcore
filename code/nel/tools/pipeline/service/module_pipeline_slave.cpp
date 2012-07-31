@@ -204,20 +204,26 @@ public:
 			break;
 		case STATUS_UPDATE:
 			{
-				if (NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateMasterDone).value()
-					&& NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateSlaveDone).value())
+				NLMISC::CSynchronized<bool>::CAccessor statusUpdateMasterDone(&m_StatusUpdateMasterDone);
+				if (statusUpdateMasterDone.value())
 				{
-					if (m_AbortRequested)
+					NLMISC::CSynchronized<bool>::CAccessor statusUpdateSlaveDone(&m_StatusUpdateSlaveDone);
+					if (statusUpdateSlaveDone.value())
 					{
-						nlinfo("Aborted slave task after status update");
-						finalizeAbort();
-					}
-					else
-					{
-						nlinfo("Slave task: Status update done");
-						m_SlaveTaskState = SOMEWHERE_INBETWEEN;
-						// Done with the status updating, now do something fancey
-						// ... TODO ...
+						statusUpdateMasterDone.value() = false;
+						statusUpdateSlaveDone.value() = false;
+						if (m_AbortRequested)
+						{
+							nlinfo("Aborted slave task after status update");
+							finalizeAbort();
+						}
+						else
+						{
+							nlinfo("Slave task: Status update done");
+							m_SlaveTaskState = SOMEWHERE_INBETWEEN;
+							// Done with the status updating, now do something fancey
+							// ... TODO ...
+						}
 					}
 				}
 			}
