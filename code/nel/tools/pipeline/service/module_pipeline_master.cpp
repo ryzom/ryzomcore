@@ -234,7 +234,7 @@ public:
 		PIPELINE::endedDirectTask();
 	}
 
-	std::vector<IModuleProxy *> m_ModuleUpDelay;
+	//std::vector<IModuleProxy *> m_ModuleUpDelay;
 
 	virtual void onModuleUp(IModuleProxy *moduleProxy)
 	{
@@ -243,13 +243,13 @@ public:
 			nlinfo("Slave UP (%s)", moduleProxy->getModuleName().c_str());
 			
 			nlassert(m_Slaves.find(moduleProxy) == m_Slaves.end());
-			
+			/*
 			if (m_AbortRequested)
 			{
 				nlinfo("Add to slave delay list");
 				m_ModuleUpDelay.push_back(moduleProxy);
 			}
-			else
+			else*/
 			{
 				m_SlavesMutex.lock();
 
@@ -269,13 +269,13 @@ public:
 		{
 			nlinfo("Slave DOWN (%s)", moduleProxy->getModuleName().c_str());
 
-			std::vector<IModuleProxy *>::iterator findDelay = std::find(m_ModuleUpDelay.begin(), m_ModuleUpDelay.end(), moduleProxy);
+			/*std::vector<IModuleProxy *>::iterator findDelay = std::find(m_ModuleUpDelay.begin(), m_ModuleUpDelay.end(), moduleProxy);
 			if (findDelay != m_ModuleUpDelay.end())
 			{
 				nlinfo("Remove from slave delay list");
 				m_ModuleUpDelay.erase(findDelay);
 			}
-			else
+			else*/
 			{			
 				nlassert(m_Slaves.find(moduleProxy) != m_Slaves.end());
 				
@@ -410,9 +410,9 @@ public:
 					m_AbortRequested = false;
 					CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_ABORTING);
 					// Go through delayed slave list
-					nldebug("Handle delayed slave list");
+					/*nldebug("Handle delayed slave list");
 					for (std::vector<IModuleProxy *>::iterator it = m_ModuleUpDelay.begin(), end = m_ModuleUpDelay.end(); it != end; ++it)
-						onModuleUp(*it);
+						onModuleUp(*it);*/
 				}
 				
 				PIPELINE::endedBuildReadyMaster();
