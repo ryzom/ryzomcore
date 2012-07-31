@@ -32,6 +32,7 @@
 
 // NeL includes
 #include <nel/misc/debug.h>
+#include <nel/misc/mutex.h>
 
 // Project includes
 #include "info_flags.h"
@@ -48,8 +49,11 @@ using namespace NLNET;
 
 namespace PIPELINE {
 
-#define PIPELINE_INFO_SLAVE_RELOAD_SHEETS "SLAVE_RELOAD_SHEETS"
+#define PIPELINE_INFO_SLAVE_RELOAD_SHEETS "S_RELOAD_SHEETS"
 #define PIPELINE_ERROR_SHEETS_CRC32_FAILED "Failed sheets CRC32. Sheets were modified inbetween launching services. This causes newly loaded services to be out of sync. Not allowed. Reload the sheets from the master service, and restart this slave service"
+
+#define PIPELINE_INFO_STATUS_UPDATE_MASTER "S_ST_UPD_MASTER"
+#define PIPELINE_INFO_STATUS_UPDATE_SLAVE "S_ST_UPD_SLAVE"
 
 enum TRequestState
 {
@@ -73,11 +77,23 @@ public:
 	bool m_TestCommand;
 	TRequestState m_ReloadSheetsState;
 	bool m_BuildReadyState;
+
+	enum TSlaveTaskState
+	{
+		IDLE_WAIT_MASTER, 
+		STATUS_UPDATE, 
+		// ...
+	};
+	TSlaveTaskState m_SlaveTaskState;
+
+	NLMISC::CSynchronized<bool> m_StatusUpdateMasterDone;
+	NLMISC::CSynchronized<bool> m_StatusUpdateSlaveDone;
 	
 public:
-	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false)
+	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone")
 	{
-		
+		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateMasterDone).value() = false;
+		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateSlaveDone).value() = false;
 	}
 
 	virtual ~CModulePipelineSlave()
@@ -155,11 +171,41 @@ public:
 				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_SLAVE_RELOAD_SHEETS);
 			}
 		}
+
+		switch (m_SlaveTaskState)
+		{
+		case IDLE_WAIT_MASTER:
+			// Keep calm and carry on
+			break;
+		case STATUS_UPDATE:
+			{
+				if (NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateMasterDone).value()
+					&& NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateSlaveDone).value())
+				{
+					// Done with the status updating, now do something fancey
+					// ... TODO ...
+				}
+			}
+			break;
+		}
+		
+		// Nothing to do here, move along
 	}
+
+	///////////////////////////////////////////////////////////////////
+
+	/// Begin with the status update of the current task
+	void beginTaskStatusUpdate()
+	{
+		
+	}
+
+	///////////////////////////////////////////////////////////////////
 
 	virtual void startBuildTask(NLNET::IModuleProxy *sender, const std::string &projectName, const uint32 &pluginId)
 	{
 		// TODO
+		// Start the status update for master and slave.
 
 		//this->queueModuleTask
 		CModulePipelineMasterProxy master(sender);
@@ -176,10 +222,14 @@ public:
 		if (m_TestCommand)
 		{
 			endedRunnableTask();
+			m_SlaveTaskState = IDLE_WAIT_MASTER;
 		}
 		else
 		{
-			nlwarning("NOT_IMPLEMENTED");
+			nlassert(m_SlaveTaskState == STATUS_UPDATE);
+			// Notify the update function that the master update has arrived.
+			NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateMasterDone).value() = true;
+			CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_STATUS_UPDATE_SLAVE);
 		}
 	}
 
