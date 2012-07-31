@@ -296,6 +296,8 @@ namespace NLGUI
 
 		TCaseMode getCaseMode() { return _CaseMode; }
 
+		std::string getProperty( const std::string &name ) const;
+
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 		virtual void draw ();
@@ -365,6 +367,8 @@ namespace NLGUI
 		TCaseMode		 _CaseMode;
 
 		CGroupSubMenu	*_RootMenu;
+
+		std::string _Extends;
 
 		// Text lookup
 		NLMISC::CRGBA			_Color;

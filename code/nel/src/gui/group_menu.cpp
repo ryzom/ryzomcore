@@ -1920,6 +1920,85 @@ namespace NLGUI
 	{
 	}
 
+	std::string CGroupMenu::getProperty( const std::string &name ) const
+	{
+		if( name == "extends" )
+		{
+			return _Extends;
+		}
+		else
+		if( name == "case_mode" )
+		{
+			uint32 cm = _CaseMode;
+			return toString( cm );
+		}
+		else
+		if( name == "color" )
+		{
+			return toString( _Color );
+		}
+		else
+		if( name == "shadow_color" )
+		{
+			return toString( _ShadowColor );
+		}
+		else
+		if( name == "color_over" )
+		{
+			return toString( _ColorOver );
+		}
+		else
+		if( name == "shadow_color_over" )
+		{
+			return toString( _ShadowColorOver );
+		}
+		else
+		if( name == "highlight_over" )
+		{
+			return toString( _HighLightOver );
+		}
+		else
+		if( name == "color_grayed" )
+		{
+			return toString( _ColorGrayed );
+		}
+		else
+		if( name == "shadow_color_grayed" )
+		{
+			return toString( _ShadowColorGrayed );
+		}
+		else
+		if( name == "space" )
+		{
+			return toString( _Space );
+		}
+		else
+		if( name == "fontsize" )
+		{
+			return toString( _FontSize );
+		}
+		else
+		if( name == "shadow" )
+		{
+			return toString( _Shadow );
+		}
+		else
+		if( name == "formatted" )
+		{
+			return toString( _Formatted );
+		}
+		else
+		if( name == "max_visible_line" )
+		{
+			if( _RootMenu == NULL )
+				return "0";
+			else
+				return toString( _RootMenu->getMaxVisibleLine() );
+		}
+		else
+			return CGroupModal::getProperty( name );
+	}
+
 	// ------------------------------------------------------------------------------------------------
 	bool CGroupMenu::parse (xmlNodePtr in,  CInterfaceGroup *parentGroup)
 	{
@@ -1937,6 +2016,8 @@ namespace NLGUI
 		CGroupSubMenu *gmExtended = NULL;
 		if (prop)
 		{
+			if( editorMode )
+				_Extends = std::string( prop );
 
 			CGroupMenu *gm = dynamic_cast<CGroupMenu *>(CWidgetManager::getInstance()->getElementFromId(prop));
 			if (!gm)
