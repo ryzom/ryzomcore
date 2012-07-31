@@ -397,6 +397,105 @@ namespace NLGUI
 		if (_RootNode != NULL) delete _RootNode;
 	}
 
+	std::string CGroupTree::getProperty( const std::string &name ) const
+	{
+		if( name == "col_over" )
+		{
+			return toString( _OverColor );
+		}
+		else
+		if( name == "col_select" )
+		{
+			return toString( _SelectedColor );
+		}
+		else
+		if( name == "col_over_back" )
+		{
+			return toString( _OverColorBack );
+		}
+		else
+		if( name == "fontsize" )
+		{
+			return toString( _FontSize );
+		}
+		else
+		if( name == "select_ancestor_on_close" )
+		{
+			return toString( _SelectAncestorOnClose );
+		}
+		else
+		if( name == "navigate_one_branch" )
+		{
+			return toString( _NavigateOneBranch );
+		}
+		else
+		if( name == "arbo_open_first" )
+		{
+			return _ArboOpenFirst;
+		}
+		else
+		if( name == "arbo_close_just_one" )
+		{
+			return _ArboCloseJustOne;
+		}
+		else
+		if( name == "arbo_son_without_son" )
+		{
+			return _ArboSonWithoutSon;
+		}
+		else
+		if( name == "arbo_son_last" )
+		{
+			return _ArboSonLast;
+		}
+		else
+		if( name == "arbo_son" )
+		{
+			return _ArboSon;
+		}
+		else
+		if( name == "arbo_x_extend" )
+		{
+			return _ArboXExtend;
+		}
+		else
+		if( name == "arbo_level" )
+		{
+			return _ArboLevel;
+		}
+		if( name == "rectangle_outline" )
+		{
+			return toString( _RectangleOutlineMode );
+		}
+		else
+		if( name == "rectangle_x" )
+		{
+			return toString( _RectangleX );
+		}
+		else
+		if( name == "rectangle_y" )
+		{
+			return toString( _RectangleY );
+		}
+		else
+		if( name == "rectangle_w" )
+		{
+			return toString( _RectangleW );
+		}
+		else
+		if( name == "rectangle_h" )
+		{
+			return toString( _RectangleH );
+		}
+		else
+		if( name == "rectangle_drl" )
+		{
+			return toString( _RectangleDeltaRL );
+		}
+		else
+			return CInterfaceGroup::getProperty( name );
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CGroupTree::parse (xmlNodePtr cur,  CInterfaceGroup * parentGroup)
 	{

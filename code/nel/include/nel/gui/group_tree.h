@@ -207,6 +207,8 @@ namespace NLGUI
 		// dtor
 		virtual ~CGroupTree();
 
+		std::string getProperty( const std::string &name ) const;
+
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
 
 		virtual void checkCoords();
