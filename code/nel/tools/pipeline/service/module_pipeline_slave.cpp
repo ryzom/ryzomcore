@@ -33,6 +33,7 @@
 // NeL includes
 #include <nel/misc/debug.h>
 #include <nel/misc/mutex.h>
+#include <nel/misc/task_manager.h>
 
 // Project includes
 #include "info_flags.h"
@@ -87,6 +88,8 @@ public:
 	};
 	TSlaveTaskState m_SlaveTaskState; // only set and used by update!! used on other threads for sanity checks
 
+	NLMISC::CTaskManager *m_TaskManager;
+
 	NLMISC::CSynchronized<bool> m_StatusUpdateMasterDone;
 	NLMISC::CSynchronized<bool> m_StatusUpdateSlaveDone;
 
@@ -94,10 +97,12 @@ public:
 	CProcessPluginInfo m_ActivePlugin;
 	
 public:
-	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(false)
+	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(false)
 	{
 		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateMasterDone).value() = false;
 		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateSlaveDone).value() = false;
+
+		m_TaskManager = new NLMISC::CTaskManager();
 	}
 
 	virtual ~CModulePipelineSlave()
@@ -107,9 +112,11 @@ public:
 		abortBuildTask(NULL);
 		leaveBuildReadyState(NULL);
 
-		// TODO:
+		// TODO?
 		// wait till build task has exited if still was running
 		// wait for other things to exist in case there are...
+		delete m_TaskManager;
+		m_TaskManager = NULL;
 
 		// temp sanity
 		nlassert(m_SlaveTaskState == IDLE_WAIT_MASTER);
@@ -193,6 +200,8 @@ public:
 				if (NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateMasterDone).value()
 					&& NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateSlaveDone).value())
 				{
+					nlinfo("Slave task: Status update done");
+					m_SlaveTaskState = SOMEWHERE_INBETWEEN;
 					// Done with the status updating, now do something fancey
 					// ... TODO ...
 				}
@@ -205,13 +214,67 @@ public:
 
 	///////////////////////////////////////////////////////////////////
 
+	class CStatusUpdateSlaveTask : public NLMISC::IRunnable
+	{
+	public:
+		CStatusUpdateSlaveTask(CModulePipelineSlave *slave) : m_Slave(slave) { }
+		virtual void run()
+		{
+			// TODO...
+
+			// Mark as done
+			{
+				NLMISC::CSynchronized<bool>::CAccessor(&m_Slave->m_StatusUpdateSlaveDone).value() = true;
+				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_STATUS_UPDATE_SLAVE);
+			}
+
+			delete this;
+		}
+	private:
+		CModulePipelineSlave *m_Slave;
+	};
+
 	/// Begin with the status update of the current task
 	void beginTaskStatusUpdate()
 	{
 		// Set the task state
 		m_SlaveTaskState = STATUS_UPDATE;
+		nlinfo("Slave task: Status update begin");
 
-		// TODO: Start the client and master status update
+		// Sanity check
+		{
+			nlassert(NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateMasterDone).value() == false);
+			nlassert(NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateSlaveDone).value() == false);
+		}
+
+		// Start the client update
+		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_STATUS_UPDATE_SLAVE);
+		m_TaskManager->addTask(new CStatusUpdateSlaveTask(this));
+
+		// Start the master update
+		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_STATUS_UPDATE_MASTER);
+		std::vector<std::string> result;
+		switch (m_ActivePlugin.InfoType)
+		{
+		case PIPELINE::PLUGIN_REGISTERED_CLASS:
+			{
+				PIPELINE::IProcessInfo *processInfo = static_cast<PIPELINE::IProcessInfo *>(NLMISC::CClassRegistry::create(m_ActivePlugin.Info));
+				// processInfo->setPipelineProcess(pipelineProcess); // .... TODO ....
+				processInfo->getDependentDirectories(result);
+				for (std::vector<std::string>::iterator it = result.begin(), end = result.end(); it != end; ++it)
+					m_Master->vectorPushString(this, PIPELINE::macroPath(*it));
+				result.clear();
+				processInfo->getDependentFiles(result);
+				for (std::vector<std::string>::iterator it = result.begin(), end = result.end(); it != end; ++it)
+					m_Master->vectorPushString(this, PIPELINE::macroPath(*it));
+				result.clear();
+			}
+			break;
+		default:
+			nlwarning("Plugin type not implemented");
+			break;
+		}
+		m_Master->updateDatabaseStatusByVector(this);
 	}
 
 	///////////////////////////////////////////////////////////////////
@@ -232,6 +295,9 @@ public:
 
 		//CModulePipelineMasterProxy master(sender);
 		//master.slaveRefusedBuildTask(this);
+
+		// Begin with status update of the dependent directories and files on the master, and previous output files on the slave
+		beginTaskStatusUpdate();
 	}
 
 	virtual void abortBuildTask(NLNET::IModuleProxy *sender)
@@ -255,10 +321,11 @@ public:
 		}
 		else
 		{
+			nldebug("Master updated database status");
 			nlassert(m_SlaveTaskState == STATUS_UPDATE);
 			// Notify the update function that the master update has arrived.
 			NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateMasterDone).value() = true;
-			CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_STATUS_UPDATE_SLAVE);
+			CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_STATUS_UPDATE_MASTER);
 		}
 	}
 
