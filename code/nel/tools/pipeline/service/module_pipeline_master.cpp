@@ -637,9 +637,14 @@ public:
 	{
 		if (m_BuildWorking)
 		{
-			m_AbortRequested = true;
-			CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_ABORTING);
+			if (!m_AbortRequested)
+			{
+				m_AbortRequested = true;
+				CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_ABORTING);
+			}
 
+			// Yes, we effectively send the abort again to the slaves, it makes for a more epic abort button hammering experience.
+			
 			m_BuildTaskQueue.abortQueue();
 
 			m_SlavesMutex.lock();
