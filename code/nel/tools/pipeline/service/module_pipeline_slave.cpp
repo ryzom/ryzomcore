@@ -256,6 +256,8 @@ public:
 						m_SlaveTaskState = SOMEWHERE_INBETWEEN;
 						// Done with the status updating, now do something fancey
 						// ... TODO ...
+						// not implemented, so abort.
+						abortBuildTask(NULL);
 					}
 				}
 			}
@@ -372,11 +374,12 @@ public:
 	/// Master or user request to abort.
 	virtual void abortBuildTask(NLNET::IModuleProxy *sender)
 	{
-		if (m_ActiveProject)
+		if (m_ActiveProject && !m_AbortRequested)
 		{
 			// Sender NULL is request from slave (user exit, command or master disconnect), otherwise request from master.
 			nlassert(sender == NULL || m_Master->getModuleProxy() == sender); // sanity check
 
+			nlwarning("Aborting");
 			// ?TODO? Actually wait for the task manager etc to end before sending the aborted confirmation.
 			CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_ABORTING);
 			m_AbortRequested = true;
