@@ -40,6 +40,8 @@ namespace NLGUI
 		/// Constructor
 		CGroupFrame(const TCtorParam &param);
 
+		std::string getProperty( const std::string &name ) const;
+
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 		virtual void draw ();
 
@@ -64,6 +66,8 @@ namespace NLGUI
 		NLMISC::CRGBA	_Color;
 
 		uint8			_DispType;
+
+		std::string _Options;
 
 		// Fields Defined in the XML => must not herit them from extends=""
 		bool			_DisplayFrameDefined : 1;

@@ -44,6 +44,26 @@ namespace NLGUI
 		_DispTypeDefined= false;
 	}
 
+	std::string CGroupFrame::getProperty( const std::string &name ) const
+	{
+		if( name == "display" )
+		{
+			return toString( _DisplayFrame );
+		}
+		else
+		if( name == "color" )
+		{
+			return toString( _Color );
+		}
+		else
+		if( name == "options" )
+		{
+			return _Options;
+		}
+		else
+			return CInterfaceGroup::getProperty( name );
+	}
+
 	// ***************************************************************************
 	bool CGroupFrame::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{
@@ -78,7 +98,10 @@ namespace NLGUI
 		CInterfaceOptions *pIO = NULL;
 
 		if (ptr)
+		{
+			_Options = std::string( ptr );
 			pIO = CWidgetManager::getInstance()->getOptions(ptr);
+		}
 
 		// The first type in display type struct is the default display type
 		if (_DispTypes.size() == 0)
