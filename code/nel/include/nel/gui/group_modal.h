@@ -53,6 +53,8 @@ namespace NLGUI
 		/// Constructor
 		CGroupModal(const TCtorParam &param);
 
+		std::string getProperty( const std::string &name ) const;
+
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 		virtual void updateCoords ();
 		void setBaseX(sint32 x) { _MouseDeltaX = x;}

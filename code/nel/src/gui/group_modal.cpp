@@ -46,6 +46,75 @@ namespace NLGUI
 	}
 
 
+	std::string CGroupModal::getProperty( const std::string &name ) const
+	{
+		if( name == "mouse_pos" )
+		{
+			return NLMISC::toString( SpawnOnMousePos );
+		}
+		else
+		if( name == "exit_click_out" )
+		{
+			return NLMISC::toString( ExitClickOut );
+		}
+		else
+		if( name == "exit_click_l" )
+		{
+			return NLMISC::toString( ExitClickL );
+		}
+		else
+		if( name == "exit_click_r" )
+		{
+			return NLMISC::toString( ExitClickR );
+		}
+		else
+		if( name == "exit_click_b" )
+		{
+			if( ExitClickL == ExitClickR )
+				return NLMISC::toString( ExitClickL );
+			else
+				return "false";
+		}
+		else
+		if( name == "force_inside_screen" )
+		{
+			return NLMISC::toString( ForceInsideScreen );
+		}
+		else
+		if( name == "category" )
+		{
+			return Category;
+		}
+		else
+		if( name == "onclick_out" )
+		{
+			return OnClickOut;
+		}
+		else
+		if( name == "onclick_out_params" )
+		{
+			return OnClickOutParams;
+		}
+		else
+		if( name == "onpostclick_out" )
+		{
+			return OnPostClickOut;
+		}
+		else
+		if( name == "onpostclick_out_params" )
+		{
+			return OnPostClickOutParams;
+		}
+		else
+		if( name == "exit_key_pushed" )
+		{
+			return NLMISC::toString( ExitKeyPushed );
+		}
+		else
+			return CGroupFrame::getProperty( name );
+	}
+
+
 	// ***************************************************************************
 	bool CGroupModal::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{
