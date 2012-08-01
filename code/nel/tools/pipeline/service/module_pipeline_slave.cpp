@@ -287,14 +287,28 @@ public:
 
 	class CStatusUpdateSlaveTask : public NLMISC::IRunnable
 	{
+		void cbFile(const std::string &filePath, const CFileStatus &fileStatus, bool success)
+		{
+			if (success)
+			{
+				m_Slave->addFileStatusToCache(NULL, filePath, fileStatus); // not macro path but works also :)
+			}
+		}
+
+		void cbDone()
+		{
+			// Not used because we wait for the updateDatabaseStatus function; it's easier.
+		}
+
 	public:
 		CStatusUpdateSlaveTask(CModulePipelineSlave *slave) : m_Slave(slave) { }
 		virtual void run()
 		{
-			// ****************************************************************************** TODO...
-			// Read the last build results
-			// Update the database status of those files
-
+			g_DatabaseStatus->updateDatabaseStatus(
+				CCallback<void>(this, &CStatusUpdateSlaveTask::cbDone), 
+				TFileStatusCallback(this, &CStatusUpdateSlaveTask::cbFile), 
+				m_Slave->m_ResultPreviousSuccess.MacroPaths, true, false);
+			
 			// Mark as done
 			{
 				NLMISC::CSynchronized<bool>::CAccessor(&m_Slave->m_StatusUpdateSlaveDone).value() = true;
