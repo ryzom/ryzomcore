@@ -58,6 +58,7 @@ namespace PIPELINE {
 
 #define PIPELINE_INFO_STATUS_UPDATE_MASTER "S_ST_UPD_MASTER"
 #define PIPELINE_INFO_STATUS_UPDATE_SLAVE "S_ST_UPD_SLAVE"
+#define PIPELINE_INFO_GET_REMOVE "S_GET_REMOVE"
 
 #define PIPELINE_INFO_ABORTING "S_ABORTING"
 
@@ -91,6 +92,7 @@ public:
 		IDLE_WAIT_MASTER, 
 		SOMEWHERE_INBETWEEN, 
 		STATUS_UPDATE, 
+		GET_REMOVE, 
 		// ...
 	};
 	TSlaveTaskState m_SlaveTaskState; // only set and used by update!! used on other threads for sanity checks
@@ -106,13 +108,25 @@ public:
 
 	bool m_AbortRequested;
 
+	std::vector<std::string> m_DependentDirectories;
+	std::vector<std::string> m_DependentFiles;
+
 	CProcessResult m_ResultPreviousSuccess;
 	CMutex m_FileStatusInitializeMutex;
 	std::map<std::string, CFileStatus> m_FileStatusCache;
+
+	/// List of dependencies (files) that were removed, or never existed (in which case remove time is 0).
+	std::map<std::string, CFileRemove> m_FileRemoveCache;
+
+	/// Result of current process
 	CProcessResult m_ResultCurrent;
 	
+	/// Result of the last subtask (usually in the taskmanager), check this after the task has completed to make sure all went fine.
+	TProcessResult m_SubTaskResult;
+	std::string m_SubTaskErrorMessage;
+	
 public:
-	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(NULL), m_ActiveProcess(NULL), m_AbortRequested(false)
+	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(NULL), m_ActiveProcess(NULL), m_AbortRequested(false), m_SubTaskResult(FINISH_NOT)
 	{
 		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateMasterDone).value() = false;
 		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateSlaveDone).value() = false;
@@ -268,11 +282,26 @@ public:
 					else
 					{
 						nlinfo("Slave task: Status update done");
-						// Done with the status updating, now do something fancey
-						// ... TODO ...
-						// not implemented, so abort.
-						// abortBuildTask(NULL);
+						beginGetRemove();
 					}
+				}
+			}
+			break;
+		case GET_REMOVE:
+			{
+				if (m_RemovedTaskDone)
+				{
+					m_SlaveTaskState = SOMEWHERE_INBETWEEN;
+					CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_GET_REMOVE);
+
+					if (m_SubTaskResult != FINISH_SUCCESS)
+					{
+						// Bye bye.
+						finishedTask(m_SubTaskResult, m_SubTaskErrorMessage);
+						break;
+					}
+
+					// TODO ***************************************************************************
 				}
 			}
 			break;
@@ -349,21 +378,23 @@ public:
 
 		// Start the master update
 		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_STATUS_UPDATE_MASTER);
-		std::vector<std::string> result;
+		//std::vector<std::string> result;
 		switch (m_ActivePlugin.InfoType)
 		{
 		case PIPELINE::PLUGIN_REGISTERED_CLASS:
 			{
 				PIPELINE::IProcessInfo *processInfo = static_cast<PIPELINE::IProcessInfo *>(NLMISC::CClassRegistry::create(m_ActivePlugin.Info));
 				processInfo->setPipelineProcess(m_ActiveProcess);
-				processInfo->getDependentDirectories(result);
-				for (std::vector<std::string>::iterator it = result.begin(), end = result.end(); it != end; ++it)
+				m_DependentDirectories.clear();
+				processInfo->getDependentDirectories(m_DependentDirectories);
+				for (std::vector<std::string>::iterator it = m_DependentDirectories.begin(), end = m_DependentDirectories.end(); it != end; ++it)
 					m_Master->vectorPushString(this, PIPELINE::macroPath(*it));
-				result.clear();
-				processInfo->getDependentFiles(result);
-				for (std::vector<std::string>::iterator it = result.begin(), end = result.end(); it != end; ++it)
+				//result.clear();
+				m_DependentFiles.clear();
+				processInfo->getDependentFiles(m_DependentFiles);
+				for (std::vector<std::string>::iterator it = m_DependentFiles.begin(), end = m_DependentFiles.end(); it != end; ++it)
 					m_Master->vectorPushString(this, PIPELINE::macroPath(*it));
-				result.clear();
+				//result.clear();
 			}
 			break;
 		default:
@@ -372,6 +403,44 @@ public:
 		}
 		m_Master->updateDatabaseStatusByVector(this);
 	}
+
+	void beginGetRemove()
+	{
+		m_SlaveTaskState = GET_REMOVE;
+		m_SubTaskResult = FINISH_NOT;
+		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_GET_REMOVE);
+		m_RemovedTaskDone = false;
+		m_TaskManager->addTask(new CGetRemovedTask(this));
+	}
+	
+	bool m_RemovedTaskDone;
+	class CGetRemovedTask : public IRunnable
+	{
+	public:
+		CGetRemovedTask(CModulePipelineSlave *slave) : m_Slave(slave) { }
+		virtual void run()
+		{
+			breakable
+			{
+				if (!g_DatabaseStatus->getRemoved(m_Slave->m_FileRemoveCache, m_Slave->m_DependentDirectories))
+				{
+					m_Slave->m_SubTaskResult = FINISH_ERROR;
+					m_Slave->m_SubTaskErrorMessage = "Metadata for removed files in directories not sane";
+					break;
+				}
+				if (!g_DatabaseStatus->getRemoved(m_Slave->m_FileRemoveCache, m_Slave->m_DependentFiles))
+				{
+					m_Slave->m_SubTaskResult = FINISH_ERROR;
+					m_Slave->m_SubTaskErrorMessage = "Metadata for removed files not sane";
+					break;
+				}
+				m_Slave->m_SubTaskResult = FINISH_SUCCESS;
+			}
+			m_Slave->m_RemovedTaskDone = true;
+		}
+	private:
+		CModulePipelineSlave *m_Slave;
+	};
 
 	///////////////////////////////////////////////////////////////////
 
@@ -407,6 +476,8 @@ public:
 		m_ResultPreviousSuccess.clear();
 		m_FileStatusCache.clear();
 		m_ResultCurrent.clear();
+		m_DependentDirectories.clear();
+		m_DependentFiles.clear();
 	}
 
 	void finalizeAbort()
