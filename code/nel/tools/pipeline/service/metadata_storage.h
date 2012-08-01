@@ -155,6 +155,7 @@ public:
 	// Pathname for result metadata is like .../project.projectname.meta/pluginname.result
 	static std::string getResultPath(const std::string &projectName, const std::string &pluginName);
 	static void readProcessResult(CProcessResult &result, const std::string &path);
+	static void writeProcessResult(const CProcessResult &result, const std::string &path);
 
 }; /* class CMetadataStorage */
 
