@@ -135,12 +135,15 @@ public:
 
 	// TODO: Make maps of the dependent files and directories after the vectors no longer needed
 	// Provide a function to check if a dependency is either in the dependent files or inside one of the directories to ensure the plugin is behaving sanely
+	// Slave should check this when it reads the depend log of a tool
 
 	// TODO: Provide a function: bool needsToBeRebuilt(inputpaths, outputfiles)
 	// It should check if anything was added, changed or removed in the input paths.
 	// It should check if the output files were changed or removed.
-	// NOT DONE FOR NOW ??? It should check if the dependencies in the metadata of the output were changed or removed / in case it uses different dependencies / in case the dependencies are not known?!
+	// NOT NECESSARY AT ALL --- It should check if the dependencies in the metadata of the output in case the dependencies are not given in the inputpaths.
 	
+	// NOT NECESSARY --- TODO: Provide a function for removing output files, it will also erase the status file and create a remove metadata file.
+
 public:
 	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(NULL), m_ActiveProcess(NULL), m_AbortRequested(false), m_SubTaskResult(FINISH_NOT)
 	{
