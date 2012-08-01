@@ -42,6 +42,25 @@ namespace NLGUI
 		_LastTabIndex = -1;
 	}
 
+	std::string CGroupTab::getProperty( const std::string &name ) const
+	{
+		if( name == "hide_out_tabs" )
+		{
+			return toString( _HideOutTabs );
+		}
+		else
+		if( name == "onchange" )
+		{
+			return _AHOnChange;
+		}
+		else
+		if( name == "onchange_params" )
+		{
+			return _ParamsOnChange;
+		}
+		else
+			return CInterfaceGroup::getProperty( name );
+	}
 
 	// ***************************************************************************
 	bool	CGroupTab::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
