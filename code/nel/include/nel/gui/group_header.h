@@ -41,6 +41,9 @@ namespace NLGUI
 		REFLECT_EXPORT_END
 
 		CGroupHeader(const TCtorParam &param);
+
+		std::string getProperty( const std::string &name ) const;
+
 		// from CInterfaceGroup
 		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
 		sint32	getHeaderMaxSize() const { return _HeaderMaxSize; }

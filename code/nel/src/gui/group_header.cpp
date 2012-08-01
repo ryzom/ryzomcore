@@ -215,6 +215,16 @@ namespace NLGUI
 		return 0;
 	}
 
+	std::string CGroupHeader::getProperty( const std::string &name ) const
+	{
+		if( name == "header_max_size" )
+		{
+			return toString( _HeaderMaxSize );
+		}
+		else
+			return CGroupList::getProperty( name );
+	}
+
 	// *****************************************************************************************************************
 	bool CGroupHeader::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
