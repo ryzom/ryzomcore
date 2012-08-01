@@ -124,6 +124,22 @@ public:
 	/// Result of the last subtask (usually in the taskmanager), check this after the task has completed to make sure all went fine.
 	TProcessResult m_SubTaskResult;
 	std::string m_SubTaskErrorMessage;
+
+
+	std::list<std::string> m_ListInputAdded;
+	std::list<std::string> m_ListInputChanged;
+	std::list<std::string> m_ListInputRemoved;
+	
+	std::list<std::string> m_ListOutputChanged;
+	std::list<std::string> m_ListOutputRemoved; // changed and removed end up being the same, it needs to be rebuilt ;)
+
+	// TODO: Make maps of the dependent files and directories after the vectors no longer needed
+	// Provide a function to check if a dependency is either in the dependent files or inside one of the directories to ensure the plugin is behaving sanely
+
+	// TODO: Provide a function: bool needsToBeRebuilt(inputpaths, outputfiles)
+	// It should check if anything was added, changed or removed in the input paths.
+	// It should check if the output files were changed or removed.
+	// NOT DONE FOR NOW ??? It should check if the dependencies in the metadata of the output were changed or removed / in case it uses different dependencies / in case the dependencies are not known?!
 	
 public:
 	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(NULL), m_ActiveProcess(NULL), m_AbortRequested(false), m_SubTaskResult(FINISH_NOT)
