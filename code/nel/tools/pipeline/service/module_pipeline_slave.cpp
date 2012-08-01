@@ -131,7 +131,9 @@ public:
 	std::set<std::string> m_ListInputRemoved;
 	
 	std::set<std::string> m_ListOutputChanged;
-	std::set<std::string> m_ListOutputRemoved; // changed and removed end up being the same, it needs to be rebuilt ;)
+	std::set<std::string> m_ListOutputChangedNG; // after .depend check, found that dependencies changed, so not good
+	std::set<std::string> m_ListOutputChangedOK; // idem but dependencies did not change, so ok
+	std::set<std::string> m_ListOutputRemoved; // changed_ng and removed end up being the same, it needs to be rebuilt ;)
 
 	// TODO: Make maps of the dependent files and directories after the vectors no longer needed
 	// Provide a function to check if a dependency is either in the dependent files or inside one of the directories to ensure the plugin is behaving sanely
@@ -146,6 +148,8 @@ public:
 
 	// PROBABLY NOT NECESSARY -- Could check the .depend of all output files from the previous build if necessary instead of having output files and use those to flag additional removals.
 	
+	// TODO: (use this one for known input to unknown output) Also, instead of the .output file, we can check outputfileremoved and outputfilechanged's depend to flag input files that have lost output files!!!
+
 public:
 	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(NULL), m_ActiveProcess(NULL), m_AbortRequested(false), m_SubTaskResult(FINISH_NOT)
 	{
@@ -581,6 +585,8 @@ public:
 		m_ListInputRemoved.clear();
 		m_ListOutputChanged.clear();
 		m_ListOutputRemoved.clear();
+		m_ListOutputChangedNG.clear();
+		m_ListOutputChangedOK.clear();
 	}
 
 	void finalizeAbort()
