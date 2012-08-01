@@ -82,9 +82,16 @@ void CProcessResult::CFileResult::serial(NLMISC::IStream &stream) throw (NLMISC:
 void CProcessResult::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 {
 	uint version = stream.serialVersion(1);
-	stream.serial(LastSuccessfulBuildStart);
+	stream.serial(BuildStart);
 	stream.serialCont(MacroPaths);
 	stream.serialCont(FileResults);
+}
+
+void CProcessResult::clear()
+{
+	BuildStart = 0;
+	MacroPaths.clear();
+	FileResults.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -147,9 +154,7 @@ std::string CMetadataStorage::getResultPath(const std::string &projectName, cons
 void CMetadataStorage::readProcessResult(CProcessResult &result, const std::string &path)
 {
 	// TODO
-	result.LastSuccessfulBuildStart = 0;
-	result.MacroPaths.clear();
-	result.FileResults.clear();
+	result.clear();
 	// TODO
 }
 

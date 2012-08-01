@@ -43,6 +43,7 @@
 #include "pipeline_workspace.h"
 #include "pipeline_process_impl.h"
 #include "database_status.h"
+#include "pipeline_project.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -105,7 +106,9 @@ public:
 
 	bool m_AbortRequested;
 
+	CProcessResult m_ResultPreviousSuccess;
 	std::map<std::string, CFileStatus> m_FileStatusCache;
+	CProcessResult m_ResultCurrent;
 	
 public:
 	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(NULL), m_ActiveProcess(NULL), m_AbortRequested(false)
@@ -114,6 +117,8 @@ public:
 		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateSlaveDone).value() = false;
 
 		m_TaskManager = new NLMISC::CTaskManager();
+		m_ResultPreviousSuccess.clear();
+		m_ResultCurrent.clear();
 	}
 
 	virtual ~CModulePipelineSlave()
@@ -314,6 +319,14 @@ public:
 			nlassert(NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateMasterDone).value() == false);
 			nlassert(NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateSlaveDone).value() == false);
 		}
+		nlassert(m_ResultCurrent.BuildStart == 0);
+		nlassert(m_ResultPreviousSuccess.BuildStart == 0);
+
+		// Set start time
+		m_ResultCurrent.BuildStart = NLMISC::CTime::getSecondsSince1970();
+
+		// Read the previous process result
+		CMetadataStorage::readProcessResult(m_ResultPreviousSuccess, CMetadataStorage::getResultPath(m_ActiveProject->getName(), m_ActivePlugin.Handler));
 
 		// Start the client update
 		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_STATUS_UPDATE_SLAVE);
@@ -372,11 +385,18 @@ public:
 		beginTaskStatusUpdate();
 	}
 
-	void finalizeAbort()
+	void clearActiveProcess()
 	{
 		m_ActiveProject = NULL;
 		m_ActiveProcess = NULL;
+		m_ResultPreviousSuccess.clear();
 		m_FileStatusCache.clear();
+		m_ResultCurrent.clear();
+	}
+
+	void finalizeAbort()
+	{
+		clearActiveProcess();
 		m_SlaveTaskState = IDLE_WAIT_MASTER;
 		if (m_Master) // else was disconnect
 			m_Master->slaveAbortedBuildTask(this);
@@ -387,9 +407,7 @@ public:
 
 	void finishedTask(TProcessResult errorLevel, const std::string &errorMessage)
 	{
-		m_ActiveProject = NULL;
-		m_ActiveProcess = NULL;
-		m_FileStatusCache.clear();
+		clearActiveProcess();
 		m_SlaveTaskState = IDLE_WAIT_MASTER;
 		if (m_Master) // else was disconnect
 			m_Master->slaveFinishedBuildTask(this, (uint8)errorLevel, errorMessage);

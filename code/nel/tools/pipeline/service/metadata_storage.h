@@ -112,7 +112,9 @@ public:
 	// In that case, the last successfulbuild start is 0, and no output files will be known.
 	// This is the same situation as if the project never built before.
 	// It must be handled sanely.
-	uint32 LastSuccessfulBuildStart;
+	// This file is only stored when the build completed successfully.
+	// If it did not, bad output files can be noticed by having a different CRC32.
+	uint32 BuildStart;
 	std::vector<std::string> MacroPaths;
 	struct CFileResult
 	{
@@ -124,6 +126,7 @@ public:
 	std::vector<CFileResult> FileResults;
 
 	void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
+	void clear();
 };
 
 /**
