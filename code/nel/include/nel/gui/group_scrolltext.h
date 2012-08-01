@@ -43,6 +43,8 @@ namespace NLGUI
 		CGroupScrollText(const TCtorParam &param);
 		~CGroupScrollText();
 
+		std::string getProperty( const std::string &name ) const;
+
 		/// CInterfaceGroup Interface
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 		virtual void updateCoords ();

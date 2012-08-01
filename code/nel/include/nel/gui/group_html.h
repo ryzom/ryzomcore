@@ -87,6 +87,8 @@ namespace NLGUI
 		CGroupHTML(const TCtorParam &param);
 		~CGroupHTML();
 
+		std::string getProperty( const std::string &name ) const;
+
 		// CInterfaceGroup Interface
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 		virtual void draw ();

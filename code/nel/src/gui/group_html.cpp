@@ -1905,6 +1905,246 @@ namespace NLGUI
 		delete _LibWWW;
 	}
 
+	std::string CGroupHTML::getProperty( const std::string &name ) const
+	{
+		if( name == "url" )
+		{
+			return _URL;
+		}
+		else
+		if( name == "title_prefix" )
+		{
+			return _TitlePrefix.toString();
+		}
+		else
+		if( name == "background_color" )
+		{
+			return toString( BgColor );
+		}
+		else
+		if( name == "error_color" )
+		{
+			return toString( ErrorColor );
+		}
+		else
+		if( name == "link_color" )
+		{
+			return toString( LinkColor );
+		}
+		else
+		if( name == "h1_color" )
+		{
+			return toString( H1Color );
+		}
+		else
+		if( name == "h2_color" )
+		{
+			return toString( H2Color );
+		}
+		else
+		if( name == "h3_color" )
+		{
+			return toString( H3Color );
+		}
+		else
+		if( name == "h4_color" )
+		{
+			return toString( H4Color );
+		}
+		else
+		if( name == "h5_color" )
+		{
+			return toString( H5Color );
+		}
+		else
+		if( name == "h6_color" )
+		{
+			return toString( H6Color );
+		}
+		else
+		if( name == "error_color_global_color" )
+		{			
+			return toString( ErrorColorGlobalColor );
+		}
+		else
+		if( name == "link_color_global_color" )
+		{			
+			return toString( LinkColorGlobalColor );
+		}
+		else
+		if( name == "text_color_global_color" )
+		{
+			return toString( TextColorGlobalColor );
+		}
+		else
+		if( name == "h1_color_global_color" )
+		{			
+			return toString( H1ColorGlobalColor );
+		}
+		else
+		if( name == "h2_color_global_color" )
+		{			
+			return toString( H2ColorGlobalColor );
+		}
+		else
+		if( name == "h3_color_global_color" )
+		{			
+			return toString( H3ColorGlobalColor );
+		}
+		else
+		if( name == "h4_color_global_color" )
+		{			
+			return toString( H4ColorGlobalColor );
+		}
+		else
+		if( name == "h5_color_global_color" )
+		{			
+			return toString( H5ColorGlobalColor );
+		}
+		else
+		if( name == "h6_color_global_color" )
+		{			
+			return toString( H6ColorGlobalColor );
+		}
+		else
+		if( name == "text_font_size" )
+		{			
+			return toString( TextFontSize );
+		}
+		else
+		if( name == "h1_font_size" )
+		{			
+			return toString( H1FontSize );
+		}
+		else
+		if( name == "h2_font_size" )
+		{			
+			return toString( H2FontSize );
+		}
+		else
+		if( name == "h3_font_size" )
+		{			
+			return toString( H3FontSize );
+		}
+		else
+		if( name == "h4_font_size" )
+		{			
+			return toString( H4FontSize );
+		}
+		else
+		if( name == "h5_font_size" )
+		{			
+			return toString( H5FontSize );
+		}
+		else
+		if( name == "h6_font_size" )
+		{			
+			return toString( H6FontSize );
+		}
+		else
+		if( name == "td_begin_space" )
+		{
+			return toString( TDBeginSpace );
+		}
+		else
+		if( name == "paragraph_begin_space" )
+		{
+			return toString( PBeginSpace );
+		}
+		else
+		if( name == "li_begin_space" )
+		{
+			return toString( LIBeginSpace );
+		}
+		else
+		if( name == "ul_begin_space" )
+		{
+			return toString( ULBeginSpace );
+		}
+		else
+		if( name == "li_indent" )
+		{
+			return toString( LIIndent );
+		}
+		else
+		if( name == "ul_indent" )
+		{
+			return toString( ULIndent );
+		}
+		else
+		if( name == "multi_line_space_factor" )
+		{
+			return toString( LineSpaceFontFactor );
+		}
+		else
+		if( name == "form_text_area_group" )
+		{
+			return DefaultFormTextGroup;
+		}
+		else
+		if( name == "form_select_group" )
+		{
+			return DefaultFormSelectGroup;
+		}
+		else
+		if( name == "checkbox_bitmap_normal" )
+		{
+			return DefaultCheckBoxBitmapNormal;
+		}
+		else
+		if( name == "checkbox_bitmap_pushed" )
+		{
+			return DefaultCheckBoxBitmapPushed;
+		}
+		else
+		if( name == "checkbox_bitmap_over" )
+		{
+			return DefaultCheckBoxBitmapOver;
+		}
+		else
+		if( name == "background_bitmap_view" )
+		{
+			return DefaultBackgroundBitmapView;
+		}
+		else
+		if( name == "home" )
+		{
+			return Home;
+		}
+		else
+		if( name == "browse_next_time" )
+		{
+			return toString( _BrowseNextTime );
+		}
+		else
+		if( name == "browse_tree" )
+		{
+			return _BrowseTree;
+		}
+		else
+		if( name == "browse_undo" )
+		{
+			return _BrowseUndoButton;
+		}
+		else
+		if( name == "browse_redo" )
+		{
+			return _BrowseRedoButton;
+		}
+		else
+		if( name == "browse_refresh" )
+		{
+			return _BrowseRefreshButton;
+		}
+		else
+		if( name == "timeout" )
+		{
+			return toString( _TimeoutValue );
+		}
+		else
+			return CGroupScrollText::getProperty( name );
+	}
+
 	// ***************************************************************************
 
 	bool CGroupHTML::parse(xmlNodePtr cur,CInterfaceGroup *parentGroup)

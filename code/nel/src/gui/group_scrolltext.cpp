@@ -49,6 +49,14 @@ namespace NLGUI
 	{
 	}
 
+	std::string CGroupScrollText::getProperty( const std::string &name ) const
+	{
+		if( name == "invert_scroll_bar" )
+			return NLMISC::toString( _InvertScrollBar );
+		else
+			return CInterfaceGroup::getProperty( name );
+	}
+
 	//========================================================================
 	bool CGroupScrollText::parse(xmlNodePtr cur,CInterfaceGroup *parentGroup)
 	{
