@@ -72,17 +72,18 @@ void CFileRemove::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 	stream.serial(Lost);
 }
 
-void CProjectResult::CFileResult::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
+void CProcessResult::CFileResult::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 {
 	uint version = stream.serialVersion(1);
 	stream.serial(CRC32);
 	stream.serial((uint8 &)Level); // test this :o)
 }
 
-void CProjectResult::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
+void CProcessResult::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 {
 	uint version = stream.serialVersion(1);
-	stream.serialCont(FilePaths);
+	stream.serial(LastSuccessfulBuildStart);
+	stream.serialCont(MacroPaths);
 	stream.serialCont(FileResults);
 }
 
@@ -127,6 +128,29 @@ void CMetadataStorage::writeStatus(const CFileStatus &status, const std::string 
 void CMetadataStorage::eraseStatus(const std::string &path)
 {
 	NLMISC::CFile::deleteFile(path);
+}
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+std::string CMetadataStorage::getResultPath(const std::string &projectName, const std::string &pluginName)
+{
+	std::string lwPluginName = NLMISC::toLower(pluginName);
+	std::string resultPath = CWorkspaceStorage::getMetaDirectoryPath(
+		CWorkspaceStorage::getProjectDirectory(projectName))
+		+ lwPluginName + PIPELINE_DATABASE_RESULT_SUFFIX;
+	nldebug("Result path: '%s'", resultPath.c_str());
+	return resultPath;
+}
+
+void CMetadataStorage::readProcessResult(CProcessResult &result, const std::string &path)
+{
+	// TODO
+	result.LastSuccessfulBuildStart = 0;
+	result.MacroPaths.clear();
+	result.FileResults.clear();
+	// TODO
 }
 
 ///////////////////////////////////////////////////////////////////////

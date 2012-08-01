@@ -41,6 +41,7 @@
 
 // Project includes
 #include "pipeline_service.h"
+#include "workspace_storage.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -206,7 +207,8 @@ std::string CPipelineProject::getName()
 
 std::string CPipelineProject::getOutputDirectory()
 {
-	return g_WorkDir + PIPELINE_DIRECTORY_PREFIX_PROJECT + getName() + "/";
+	// return g_WorkDir + PIPELINE_DIRECTORY_PREFIX_PROJECT + getName() + "/";
+	return CWorkspaceStorage::getProjectDirectory(getName());
 }
 
 std::string CPipelineProject::getTempDirectory()
@@ -222,6 +224,7 @@ std::string CPipelineProject::getTempDirectory()
 		ss << ".";
 		ss << rand();
 		ss << PIPELINE_DIRECTORY_TEMP_SUFFIX;
+		ss << "/";
 		m_TempDirectory = ss.str();
 	}
 	return m_TempDirectory;

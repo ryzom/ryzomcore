@@ -145,6 +145,12 @@ std::string CWorkspaceStorage::getMetaDirectoryPath(const std::string &path)
 	return standardizePath(CWorkspaceStorage::getMetaFilePath(path, ""), true);
 }
 
+std::string CWorkspaceStorage::getProjectDirectory(const std::string &projectName)
+{
+	std::string lwProjectName = NLMISC::toLower(projectName);
+	return g_WorkDir + PIPELINE_DIRECTORY_PREFIX_PROJECT + lwProjectName + "/";
+}
+
 } /* namespace PIPELINE */
 
 /* end of file */

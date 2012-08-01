@@ -103,12 +103,17 @@ public:
 #define PIPELINE_DATABASE_DEPEND_SUFFIX ".depend"
 // .......................
 
-/// Suffix for metafiles that contain the result of the last build of a project
+/// Suffix for metafiles that contain the result of the last build of a process
 #define PIPELINE_DATABASE_RESULT_SUFFIX ".result"
-struct CProjectResult
+struct CProcessResult
 {
 public:
-	std::vector<std::string> FilePaths;
+	// Note: this file may have been erased on build start in case something went wrong!
+	// In that case, the last successfulbuild start is 0, and no output files will be known.
+	// This is the same situation as if the project never built before.
+	// It must be handled sanely.
+	uint32 LastSuccessfulBuildStart;
+	std::vector<std::string> MacroPaths;
 	struct CFileResult
 	{
 		uint32 CRC32;
@@ -145,7 +150,8 @@ public:
 	// static void eraseRemove(const std::string &path);
 
 	// Pathname for result metadata is like .../project.projectname.meta/pluginname.result
-	// static std::string getResultPath(const std::string &projectName, const std::string &pluginName);
+	static std::string getResultPath(const std::string &projectName, const std::string &pluginName);
+	static void readProcessResult(CProcessResult &result, const std::string &path);
 
 }; /* class CMetadataStorage */
 

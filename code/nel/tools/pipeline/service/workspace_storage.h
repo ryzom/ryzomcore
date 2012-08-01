@@ -56,7 +56,8 @@ public:
 	/// Get the directory where metadata files are stored, based on the filepath containing the files which the containing metadata represents
 	static std::string getMetaDirectoryPath(const std::string &path);
 
-	// TODO: getProjectDirectory /// Format like .../project.common/
+	/// Format like .../project.someproject/
+	static std::string getProjectDirectory(const std::string &projectName);
 
 }; /* class CWorkspaceStorage */
 

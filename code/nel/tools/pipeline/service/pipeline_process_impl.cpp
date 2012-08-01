@@ -87,6 +87,7 @@ std::string CPipelineProcessImpl::getTempDirectory()
 		ss << ".";
 		ss << rand();
 		ss << PIPELINE_DIRECTORY_TEMP_SUFFIX;
+		ss << "/";
 		return ss.str();
 	}
 	else
