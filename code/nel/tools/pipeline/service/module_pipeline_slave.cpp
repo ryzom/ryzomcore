@@ -410,6 +410,7 @@ public:
 
 	void finalizeAbort()
 	{
+		nldebug("abort");
 		clearActiveProcess();
 		m_SlaveTaskState = IDLE_WAIT_MASTER;
 		if (m_Master) // else was disconnect
@@ -421,6 +422,7 @@ public:
 
 	void finishedTask(TProcessResult errorLevel, const std::string &errorMessage)
 	{
+		nlinfo("errorLevel: %i, errorMessage: %s", (uint32)errorLevel, errorMessage.c_str());
 		clearActiveProcess();
 		m_SlaveTaskState = IDLE_WAIT_MASTER;
 		if (m_Master) // else was disconnect
