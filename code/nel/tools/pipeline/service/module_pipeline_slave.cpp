@@ -107,6 +107,7 @@ public:
 	bool m_AbortRequested;
 
 	CProcessResult m_ResultPreviousSuccess;
+	CMutex m_FileStatusInitializeMutex;
 	std::map<std::string, CFileStatus> m_FileStatusCache;
 	CProcessResult m_ResultCurrent;
 	
@@ -488,8 +489,10 @@ public:
 		nldebug("Add file status: '%s' (macro path)", macroPath.c_str());
 
 		std::string filePath = unMacroPath(macroPath);
-		nlassert(m_FileStatusCache.find(filePath) == m_FileStatusCache.end());
+		m_FileStatusInitializeMutex.enter();
+		nlassert(m_FileStatusCache.find(filePath) == m_FileStatusCache.end()); // for now don't allow depending on own output within process :)
 		m_FileStatusCache[filePath] = fileStatus;
+		m_FileStatusInitializeMutex.leave();
 	}
 	
 	///////////////////////////////////////////////////////////////////
