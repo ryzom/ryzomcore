@@ -422,6 +422,8 @@ public:
 	virtual void addFileStatusToCache(NLNET::IModuleProxy *sender, const std::string &macroPath, const CFileStatus &fileStatus)
 	{
 		nlassert(sender == NULL || m_Master->getModuleProxy() == sender); // sanity check
+		
+		nldebug("Add file status: '%s' (macro path)", macroPath.c_str());
 
 		std::string filePath = unMacroPath(macroPath);
 		nlassert(m_FileStatusCache.find(filePath) == m_FileStatusCache.end());

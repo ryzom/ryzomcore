@@ -324,9 +324,13 @@ public:
 
 	std::vector<IRunnable *> RequestTasks;
 
+	TFileStatusCallback FileStatusCallback;
+
 	void fileUpdated(const std::string &filePath, const CFileStatus &fileStatus, bool success)
 	{
 		// warning: may be g_IsExiting during this callback!
+		if (!g_IsExiting)
+			FileStatusCallback(filePath, fileStatus, success);
 
 		bool done = false;
 		Mutex.enter();
@@ -408,6 +412,12 @@ void updatePathStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater, cons
 				updater.RequestTasks.push_back(runnable);
 			}
 			updater.Mutex.leave();
+		}
+		else
+		{
+			// File was not updated, but the status was read successfully
+			// This only notifies the callback set by the user
+			updater.FileStatusCallback(subPath, fileStatus, true);
 		}
 	}
 }
@@ -499,6 +509,8 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 
 } /* anonymous namespace */
 
+void dummyFileStatusCallback(const std::string &/*filePath*/, const CFileStatus &/*fileStatus*/, bool /*success*/) { }
+
 void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback)
 {
 	/*if (!g_IsMaster)
@@ -516,10 +528,10 @@ void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback)
 		std::string rootDirectoryPath = standardizePath(dir.asString(), true);
 		paths.push_back(rootDirectoryPath);
 	}
-	updateDatabaseStatus(callback, paths, false, true);
+	updateDatabaseStatus(callback, dummyFileStatusCallback, paths, false, true);
 }
 
-void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback, const std::vector<std::string> &paths, bool wait, bool recurse)
+void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback, const TFileStatusCallback &fileStatusCallback, const std::vector<std::string> &paths, bool wait, bool recurse)
 {
 	/*if (!g_IsMaster)
 	{
@@ -532,6 +544,7 @@ void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback, cons
 	updater->FilesUpdated = 0;
 	updater->Ready = false;
 	updater->CallbackCalled = false;
+	updater->FileStatusCallback = fileStatusCallback;
 	
 	nlinfo("Starting iteration through database, queueing file status updates.");
 	

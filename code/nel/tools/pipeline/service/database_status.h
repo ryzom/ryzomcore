@@ -74,7 +74,7 @@ public:
 	/// Runs an update of the complete {{DatabaseDirectory}} status asynchronously. Warning: If g_IsExiting during callback then update is incomplete. Callback is always called when done (or failed).
 	void updateDatabaseStatus(const CCallback<void> &callback);
 	/// Runs an update of the file status of given paths asynchronously. Warning: If g_IsExiting during callback then update is incomplete. Callback is always called when done (or failed). Do NOT use the wait parameter. Do NOT use recurse, please. Recurse directories beforehand. Paths may contain db and pl macros.
-	void updateDatabaseStatus(const CCallback<void> &callback, const std::vector<std::string> &paths, bool wait = false, bool recurse = false);
+	void updateDatabaseStatus(const CCallback<void> &callback, const TFileStatusCallback &fileStatusCallback, const std::vector<std::string> &paths, bool wait = false, bool recurse = false);
 	/// Gets the last file statuses of given paths in a map. Directories are scanned for files, non recursively. Returns false if one of the statuses is bad (not updated; file changed inbetween). Considered as build error.
 	bool getFileStatus(std::map<std::string, CFileStatus> &fileStatusMap, std::map<std::string, CFileRemove> &fileRemoveMap, const std::vector<std::string> &paths);
 	

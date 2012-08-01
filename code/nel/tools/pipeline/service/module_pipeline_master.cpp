@@ -222,12 +222,14 @@ public:
 		return true;
 	}
 
+	static void dummyFileStatusCallback(const std::string &/*filePath*/, const CFileStatus &/*fileStatus*/, bool /*success*/) { }
+
 	void updateSheetsDatabaseStatus(const CCallback<void> &callback)
 	{
 		std::vector<std::string> sheetPaths;
 		// sheetPaths.push_back(NLNET::IService::getInstance()->ConfigFile.getVar("WorkspaceDfnDirectory").asString()); // not really necessary to check the dfn's
 		sheetPaths.push_back(NLNET::IService::getInstance()->ConfigFile.getVar("WorkspaceSheetDirectory").asString());
-		g_DatabaseStatus->updateDatabaseStatus(callback, sheetPaths, false, true);
+		g_DatabaseStatus->updateDatabaseStatus(callback, dummyFileStatusCallback, sheetPaths, false, true);
 	}
 
 	void cbMasterInitSheets()
@@ -320,14 +322,16 @@ public:
 
 	void handleUpdateTasks()
 	{
+		uint maxRuns;
 		IRunnable *currentRunnable;
 		{
 			NLMISC::CSynchronized<std::deque<IRunnable *> >::CAccessor updateTasks(&m_UpdateTasks);
 			if (updateTasks.value().size() == 0)
 				return;
+			maxRuns = updateTasks.value().size();
 			currentRunnable = updateTasks.value().front();
 		}
-		for (; ; )
+		for (uint i = 0; i < maxRuns; ++i)
 		{
 			currentRunnable->run();
 			{
@@ -544,9 +548,48 @@ public:
 
 	class CUpdateDatabaseStatusSlaveCallback : public CDelayedCallback
 	{
+		class CSlaveFileCallback : public NLMISC::IRunnable
+		{
+		public:
+			CSlaveFileCallback(CModulePipelineMaster *master, NLNET::IModuleProxy *slaveProxy, const std::string &filePath, const CFileStatus &fileStatus)
+				: m_Master(master), m_SlaveProxy(slaveProxy), m_FilePath(filePath), m_FileStatus(fileStatus) { }
+			virtual void run()
+			{
+				m_Master->m_SlavesMutex.lock();
+				TSlaveMap::iterator slaveIt = m_Master->m_Slaves.find(m_SlaveProxy);
+				if (slaveIt == m_Master->m_Slaves.end())
+				{
+					// nlwarning("Slave disconnected before callback could be delivered");
+					m_Master->m_SlavesMutex.unlock();
+					delete this;
+					return;
+				}
+				CSlave *slave = slaveIt->second;
+				m_Master->m_SlavesMutex.unlock();
+
+				slave->Proxy.addFileStatusToCache(m_Master, macroPath(m_FilePath), m_FileStatus);
+
+				delete this;
+			}
+		private:
+			CModulePipelineMaster *m_Master;
+			NLNET::IModuleProxy *m_SlaveProxy;
+			std::string m_FilePath;
+			CFileStatus m_FileStatus;
+		};
+
 	public:
 		CUpdateDatabaseStatusSlaveCallback(CModulePipelineMaster *master, NLNET::IModuleProxy *slaveProxy) : CDelayedCallback(master), m_SlaveProxy(slaveProxy) { }
 
+		void fileCallback(const std::string &filePath, const CFileStatus &fileStatus, bool success)
+		{
+			if (success)
+			{
+				Master->addUpdateTask(new CSlaveFileCallback(Master, m_SlaveProxy, filePath, fileStatus));
+			}
+		}
+		
+		/// All status updated for this task
 		virtual void run() // this is sanely run from the update thread
 		{
 			Master->m_SlavesMutex.lock();
@@ -583,7 +626,7 @@ public:
 		virtual void run() // run from the master process task manager
 		{
 			CUpdateDatabaseStatusSlaveCallback *cb = new CUpdateDatabaseStatusSlaveCallback(m_Master, m_Sender); // deleted by update
-			g_DatabaseStatus->updateDatabaseStatus(cb->getCallback(), m_Vector, false, false);
+			g_DatabaseStatus->updateDatabaseStatus(cb->getCallback(), TFileStatusCallback(cb, &CUpdateDatabaseStatusSlaveCallback::fileCallback), m_Vector, false, false);
 
 			delete this;
 		}
