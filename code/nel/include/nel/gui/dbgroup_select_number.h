@@ -44,6 +44,8 @@ namespace NLGUI
 		CDBGroupSelectNumber(const TCtorParam &param);
 		~CDBGroupSelectNumber();
 
+		std::string getProperty( const std::string &name ) const;
+
 		/// CInterfaceGroup Interface
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 		virtual void updateCoords ();

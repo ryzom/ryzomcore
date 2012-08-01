@@ -49,6 +49,39 @@ namespace NLGUI
 	{
 	}
 
+	std::string CDBGroupSelectNumber::getProperty( const std::string &name ) const
+	{
+		if( name == "value" )
+		{
+			if( _Number.getNodePtr() != NULL )
+				return _Number.getNodePtr()->getFullName();
+			else
+				return "";
+		}
+		else
+		if( name == "loop" )
+		{
+			return toString( _LoopMode );
+		}
+		else
+		if( name == "min" )
+		{
+			return toString( _MinValue );
+		}
+		else
+		if( name == "max" )
+		{
+			return toString( _MaxValue );
+		}
+		else
+		if( name == "delta" )
+		{
+			return toString( _DeltaMultiplier );
+		}
+		else
+			return CInterfaceGroup::getProperty( name );
+	}
+
 	// ***************************************************************************
 	bool CDBGroupSelectNumber::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{
