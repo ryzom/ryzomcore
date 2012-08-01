@@ -112,11 +112,11 @@ public:
 	std::vector<std::string> m_DependentFiles;
 
 	CProcessResult m_ResultPreviousSuccess;
-	CMutex m_FileStatusInitializeMutex;
-	std::map<std::string, CFileStatus> m_FileStatusCache;
+	std::map<std::string, CFileStatus> m_FileStatusInputCache;
+	std::map<std::string, CFileStatus> m_FileStatusOutputCache;
 
 	/// List of dependencies (files) that were removed, or never existed (in which case remove time is 0).
-	std::map<std::string, CFileRemove> m_FileRemoveCache;
+	std::map<std::string, CFileRemove> m_FileRemoveInputCache;
 
 	/// Result of current process
 	CProcessResult m_ResultCurrent;
@@ -339,9 +339,7 @@ public:
 		void cbFile(const std::string &filePath, const CFileStatus &fileStatus, bool success)
 		{
 			if (success)
-			{
-				m_Slave->addFileStatusToCache(NULL, filePath, fileStatus); // not macro path but works also :)
-			}
+				m_Slave->m_FileStatusOutputCache[filePath] = fileStatus;
 		}
 
 		void cbDone()
@@ -441,13 +439,13 @@ public:
 		{
 			breakable
 			{
-				if (!g_DatabaseStatus->getRemoved(m_Slave->m_FileRemoveCache, m_Slave->m_DependentDirectories))
+				if (!g_DatabaseStatus->getRemoved(m_Slave->m_FileRemoveInputCache, m_Slave->m_DependentDirectories))
 				{
 					m_Slave->m_SubTaskResult = FINISH_ERROR;
 					m_Slave->m_SubTaskErrorMessage = "Metadata for removed files in directories not sane";
 					break;
 				}
-				if (!g_DatabaseStatus->getRemoved(m_Slave->m_FileRemoveCache, m_Slave->m_DependentFiles))
+				if (!g_DatabaseStatus->getRemoved(m_Slave->m_FileRemoveInputCache, m_Slave->m_DependentFiles))
 				{
 					m_Slave->m_SubTaskResult = FINISH_ERROR;
 					m_Slave->m_SubTaskErrorMessage = "Metadata for removed files not sane";
@@ -493,10 +491,17 @@ public:
 		m_ActiveProject = NULL;
 		m_ActiveProcess = NULL;
 		m_ResultPreviousSuccess.clear();
-		m_FileStatusCache.clear();
+		m_FileStatusInputCache.clear();
+		m_FileStatusOutputCache.clear();
+		m_FileRemoveInputCache.clear();
 		m_ResultCurrent.clear();
 		m_DependentDirectories.clear();
 		m_DependentFiles.clear();
+		m_ListInputAdded.clear();
+		m_ListInputChanged.clear();
+		m_ListInputRemoved.clear();
+		m_ListOutputChanged.clear();
+		m_ListOutputRemoved.clear();
 	}
 
 	void finalizeAbort()
@@ -549,25 +554,25 @@ public:
 
 	// If this returns false, the status is not sane, and the build must error; or the file does not exist and must error or warn.
 	// Gets the file status as it was known at the beginning of the build or when this file was first known.
-	bool getFileStatusCached(CFileStatus &fileStatus, const std::string &filePath) // not by macro path :)
+	bool getDependencyFileStatusCached(CFileStatus &fileStatus, const std::string &filePath) // not by macro path :)
 	{
-		std::map<std::string, CFileStatus>::iterator statusIt = m_FileStatusCache.find(filePath);
-		if (statusIt == m_FileStatusCache.end())
+		std::map<std::string, CFileStatus>::iterator statusIt = m_FileStatusInputCache.find(filePath);
+		if (statusIt == m_FileStatusInputCache.end())
 		{
-			nldebug("File status '%s' not requested before, ensure this is not a dependency", filePath.c_str());
+			/*nldebug("File status '%s' not requested before, ensure this is not a dependency", filePath.c_str());
 			if (g_DatabaseStatus->getFileStatus(fileStatus, filePath))
 			{
 				m_FileStatusCache[filePath] = fileStatus;
 				return true;
 			}
-			else return false;
+			else*/ return false;
 		}
 		fileStatus = statusIt->second; // copy
 		return true;
 	}
 
 	// If this returns false, the status is not sane, and the build must error; or the file does not exist and must error or warn.
-	bool getFileStatusLatest(CFileStatus &fileStatus, const std::string &filePath)
+	bool getDependencyFileStatusLatest(CFileStatus &fileStatus, const std::string &filePath)
 	{
 		return g_DatabaseStatus->getFileStatus(fileStatus, filePath);
 	}
@@ -579,10 +584,10 @@ public:
 		nldebug("Add file status: '%s' (macro path)", macroPath.c_str());
 
 		std::string filePath = unMacroPath(macroPath);
-		m_FileStatusInitializeMutex.enter();
-		nlassert(m_FileStatusCache.find(filePath) == m_FileStatusCache.end()); // for now don't allow depending on own output within process :)
-		m_FileStatusCache[filePath] = fileStatus;
-		m_FileStatusInitializeMutex.leave();
+		// m_FileStatusInitializeMutex.enter();
+		nlassert(m_FileStatusInputCache.find(filePath) == m_FileStatusInputCache.end()); // for now don't allow depending on own output within process :)
+		m_FileStatusInputCache[filePath] = fileStatus;
+		// m_FileStatusInitializeMutex.leave();
 	}
 	
 	///////////////////////////////////////////////////////////////////
