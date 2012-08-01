@@ -108,6 +108,8 @@ namespace NLGUI
 			return &_Templ;
 		}
 
+		std::string getProperty( const std::string &name ) const;
+
 		/**
 		 * parse the element and initalize it
 		 * \paral cur : pointer to the node describing this element
@@ -194,6 +196,8 @@ namespace NLGUI
 
 
 	protected:
+		std::string _HardText;
+		uint32 _TextId;
 
 		//max number of elements
 		sint32	_MaxElements;

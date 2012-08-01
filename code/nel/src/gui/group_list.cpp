@@ -50,6 +50,7 @@ namespace NLGUI
 		_OverColor = CRGBA(255,  255,  255,  32);
 		_OverElt = -1;
 		_IsGroupList = true;
+		_TextId = 0;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -188,6 +189,86 @@ namespace NLGUI
 				view->_X = (sint32)space;
 			}
 		}
+	}
+
+	std::string CGroupList::getProperty( const std::string &name ) const
+	{
+		if( name == "maxelements" )
+		{
+			return toString( _MaxElements );
+		}
+		else
+		if( name == "addelt" )
+		{
+			switch( _AddElt )
+			{
+			case Top:
+				return "T";
+				break;
+
+			case Left:
+				return "L";
+				break;
+
+			case Right:
+				return "R";
+				break;
+			}
+
+			return "B";
+		}
+		else
+		if( name == "align" )
+		{
+			switch( _Align )
+			{
+			case Top:
+				return "T";
+				break;
+
+			case Left:
+				return "L";
+				break;
+
+			case Right:
+				return "R";
+				break;
+			}
+
+			return "B";
+		}
+		else
+		if( name == "space" )
+		{
+			return toString( _Space );
+		}
+		else
+		if( name == "over" )
+		{
+			return toString( _Over );
+		}
+		else
+		if( name == "dynamic_display_size" )
+		{
+			return toString( _DynamicDisplaySize );
+		}
+		else
+		if( name == "col_over" )
+		{
+			return toString( _OverColor );
+		}
+		else
+		if( name == "hardtext" )
+		{
+			return _HardText;
+		}
+		else
+		if( name == "textid" )
+		{
+			return toString( _TextId );
+		}
+		else
+			return CInterfaceGroup::getProperty( name );
 	}
 
 	// ----------------------------------------------------------------------------
