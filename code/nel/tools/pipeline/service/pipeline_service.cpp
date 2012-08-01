@@ -6,20 +6,20 @@
  * CPipelineService
  */
 
-/* 
+/*
  * Copyright (C) 2012  by authors
- * 
+ *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
  * and/or modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, either version 2 of
  * the License, or (at your option) any later version.
- * 
+ *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with RYZOM CORE PIPELINE; see the file COPYING.  If not, see
  * <http://www.gnu.org/licenses/>.
@@ -100,7 +100,7 @@ std::string macroPath(const std::string &path)
 	std::string result = standardizePath(path, false);
 
 	strFindReplace(result, g_WorkDir, PIPELINE_MACRO_WORKSPACE_DIRECTORY "/");
-	
+
 	CConfigFile::CVar &rootDirectories = NLNET::IService::getInstance()->ConfigFile.getVar("RootDirectories");
 	for (uint i = 0; i < rootDirectories.size(); ++i)
 	{
@@ -178,14 +178,14 @@ namespace {
 /// Enum
 enum EState
 {
-	STATE_IDLE, 
-	STATE_RELOAD_SHEETS, 
-	STATE_DATABASE_STATUS, 
-	STATE_RUNNABLE_TASK, 
-	STATE_BUSY_TEST, 
-	STATE_DIRECT_CODE, 
-	STATE_BUILD_READY, 
-	STATE_BUILD_PROCESS, 
+	STATE_IDLE,
+	STATE_RELOAD_SHEETS,
+	STATE_DATABASE_STATUS,
+	STATE_RUNNABLE_TASK,
+	STATE_BUSY_TEST,
+	STATE_DIRECT_CODE,
+	STATE_BUILD_READY,
+	STATE_BUILD_PROCESS,
 };
 
 /// Data
@@ -211,7 +211,7 @@ void cbNull(CMessage & /* msgin */, const std::string & /* serviceName */, TServ
 /// Callbacks from shard
 TUnifiedCallbackItem s_ShardCallbacks[] = // pipeline_server
 {
-	{ "N", cbNull }, 
+	{ "N", cbNull },
 };
 
 bool tryStateTask(EState state, IRunnable *task)
@@ -227,9 +227,9 @@ bool tryStateTask(EState state, IRunnable *task)
 	if (!result) return false;
 
 	nlassert(s_State != STATE_IDLE);
-	
+
 	s_TaskManager->addTask(task);
-	
+
 	return true;
 }
 
@@ -256,9 +256,9 @@ bool tryRunnableTask(const std::string &stateName, IRunnable *task)
 	if (!result) return false;
 
 	nlassert(s_State == STATE_RUNNABLE_TASK);
-	
+
 	s_TaskManager->addTask(task);
-	
+
 	return true;
 }
 
@@ -294,7 +294,7 @@ bool tryDirectTask(const std::string &stateName)
 	if (!result) return false;
 
 	nlassert(s_State == STATE_DIRECT_CODE);
-	
+
 	return true;
 }
 
@@ -317,7 +317,7 @@ bool tryBuildReadyMaster()
 	if (!result) return false;
 
 	nlassert((s_State == STATE_BUILD_READY) && (s_BuildReadyRecursive > 0));
-	
+
 	return true;
 }
 
@@ -348,7 +348,7 @@ bool tryBuildReady()
 	if (!result) return false;
 
 	nlassert((s_State == STATE_BUILD_READY) && (s_BuildReadyRecursive > 0));
-	
+
 	return true;
 }
 
@@ -377,7 +377,7 @@ bool tryBuildProcess(const std::string &stateName)
 	if (!result) return false;
 
 	nlassert(s_State == STATE_BUILD_PROCESS);
-	
+
 	return true;
 }
 
@@ -400,11 +400,11 @@ void initSheets()
 	IService::getInstance()->ConfigFile.getVar("WorkspaceDfnDirectory").setAsString(dfnDirectory);
 	std::string sheetDirectory = standardizePath(IService::getInstance()->ConfigFile.getVar("WorkspaceSheetDirectory").asString(), true);
 	IService::getInstance()->ConfigFile.getVar("WorkspaceSheetDirectory").setAsString(sheetDirectory);
-	
+
 	if (!CFile::isDirectory(dfnDirectory)) nlerror("'WorkspaceDfnDirectory' does not exist! (%s)", dfnDirectory.c_str());
 	nlinfo("Adding 'WorkspaceDfnDirectory' to search path (%s)", dfnDirectory.c_str());
 	CPath::addSearchPath(dfnDirectory, true, false);
-	
+
 	if (!CFile::isDirectory(sheetDirectory)) nlerror("'WorkspaceSheetDirectory' does not exist! (%s)", sheetDirectory.c_str());
 	nlinfo("Adding 'WorkspaceSheetDirectory' to search path (%s)", sheetDirectory.c_str());
 	CPath::addSearchPath(sheetDirectory, true, false);
@@ -418,9 +418,9 @@ void initSheets()
 		if (!CFile::isDirectory(dirName)) nlerror("'%s' does not exist! (%s)", rootName.c_str(), dirName.c_str());
 		CPath::addSearchPath(dirName, true, false);
 	}
-	
+
 	g_FormLoader = UFormLoader::createLoader();
-	
+
 	g_PipelineWorkspace = new CPipelineWorkspace(g_FormLoader, IService::getInstance()->ConfigFile.getVar("WorkspaceSheet").asString());
 }
 
@@ -437,14 +437,14 @@ void releaseSheets()
 
 class CReloadSheets : public IRunnable
 {
-	virtual void getName(std::string &result) const 
+	virtual void getName(std::string &result) const
 	{ result = "CReloadSheets"; }
-	
+
 	virtual void run()
 	{
 		releaseSheets();
 		initSheets();
-		
+
 		endedRunnableTask(STATE_RELOAD_SHEETS);
 	}
 };
@@ -463,9 +463,9 @@ namespace {
 
 class CUpdateDatabaseStatus : public IRunnable
 {
-	virtual void getName(std::string &result) const 
+	virtual void getName(std::string &result) const
 	{ result = "CUpdateDatabaseStatus"; }
-	
+
 	void databaseStatusUpdated()
 	{
 		endedRunnableTask(STATE_DATABASE_STATUS);
@@ -489,7 +489,7 @@ bool updateDatabaseStatus()
 
 class CBusyTestStatus : public IRunnable
 {
-	virtual void getName(std::string &result) const 
+	virtual void getName(std::string &result) const
 	{ result = "CBusyTestStatus"; }
 
 	virtual void run()
@@ -523,15 +523,15 @@ public:
 		module_pipeline_master_forceLink();
 		module_pipeline_slave_forceLink();
 	}
-	
+
 	virtual ~CPipelineService()
 	{
-		
+
 	}
-	
+
 	/** Called before the displayer is created, no displayer or network connection are built.
 	    Use this callback to check some args and perform some command line based stuff */
-	virtual void commandStart() 
+	virtual void commandStart()
 	{
 		// setup the randomizer properly
 		{
@@ -542,7 +542,7 @@ public:
 			srand(s);
 		}
 	}
-	
+
 	/// Initializes the service (must be called before the first call to update())
 	virtual void init()
 	{
@@ -569,7 +569,7 @@ public:
 		}
 
 		s_TaskManager = new CTaskManager();
-		
+
 		initSheets();
 
 		g_DatabaseStatus = new CDatabaseStatus();
@@ -578,27 +578,38 @@ public:
 		s_PipelineProcessImpl = new CPipelineProcessImpl(NULL); // Create a singleton impl for global usage without running project for test purposes.
 
 		// Load libraries
+		s_InfoFlags->addFlag("PLUGIN");
 		const CConfigFile::CVar &usedPlugins = ConfigFile.getVar("UsedPlugins");
 		s_LoadedLibraries.reserve(usedPlugins.size());
 		for (uint i = 0; i < usedPlugins.size(); ++i)
 		{
-			CLibrary *library = new CLibrary();
-			if (library->loadLibrary(usedPlugins.asString(i), true, true, true))
+			std::string pluginName = usedPlugins.asString(i);
+			if (pluginName.size() > 0)
 			{
-				s_LoadedLibraries.push_back(library);
+				CLibrary *library = new CLibrary();
+				if (library->loadLibrary(usedPlugins.asString(i), true, true, true))
+				{
+					nlinfo("Loaded plugin '%s'", pluginName.c_str());
+					s_LoadedLibraries.push_back(library);
+				}
+				else
+				{
+					nlwarning("Failed to load plugin '%s'", pluginName.c_str());
+					delete library;
+				}
 			}
-			else delete library;
 		}
+		s_InfoFlags->removeFlag("PLUGIN");
 
 		s_InfoFlags->removeFlag("INIT");
 	}
-	
+
 	/// This function is called every "frame" (you must call init() before). It returns false if the service is stopped.
 	virtual bool update()
 	{
 		return true;
 	}
-	
+
 	/// Finalization. Release the service. For example, this function frees all allocations made in the init() function.
 	virtual void release()
 	{
@@ -611,9 +622,9 @@ public:
 			nlSleep(10);
 		}
 		NLMISC::CAsyncFileManager::terminate();
-		
+
 		NLNET::IModuleManager::releaseInstance();
-		
+
 		for (std::vector<NLMISC::CLibrary *>::iterator it = s_LoadedLibraries.begin(), end = s_LoadedLibraries.end(); it != end; ++it)
 		{
 			(*it)->freeLibrary();
@@ -642,7 +653,7 @@ public:
 		delete s_InfoFlags;
 		s_InfoFlags = NULL;
 	}
-	
+
 }; /* class CPipelineService */
 
 } /* anonymous namespace */
@@ -869,7 +880,7 @@ NLMISC_COMMAND(showDependencies, "Show dependencies.", "<projectName> <processNa
 NLMISC_COMMAND(dumpTestTaskQueueLoad, "Test task queue generation. You MUST NOT reload workspace sheets while running this.", "")
 {
 	if(args.size() != 0) return false;
-	
+
 	log.displayNL("**********************************************************************");
 
 	PIPELINE::CBuildTaskQueue taskQueue;
@@ -879,7 +890,7 @@ NLMISC_COMMAND(dumpTestTaskQueueLoad, "Test task queue generation. You MUST NOT 
 	taskQueue.listTaskQueueByMostDependents(tasks);
 
 	log.displayNL("COUNT: %i", tasks.size());
-	
+
 	for (std::vector<PIPELINE::CBuildTaskInfo *>::iterator it = tasks.begin(), end = tasks.end(); it != end; ++it)
 	{
 		PIPELINE::CBuildTaskInfo *task = *it;
@@ -889,9 +900,9 @@ NLMISC_COMMAND(dumpTestTaskQueueLoad, "Test task queue generation. You MUST NOT 
 	}
 
 	taskQueue.abortQueue();
-	
+
 	log.displayNL("**********************************************************************");
-	
+
 	return true;
 }
 

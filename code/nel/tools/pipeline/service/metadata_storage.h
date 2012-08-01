@@ -6,20 +6,20 @@
  * CMetadataStorage
  */
 
-/* 
+/*
  * Copyright (C) 2012  by authors
- * 
+ *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public
  * License as published by the Free Software Foundation, either
  * version 3 of the License, or (at your option) any later version.
- * 
+ *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public
  * License along with RYZOM CORE PIPELINE.  If not, see
  * <http://www.gnu.org/licenses/>.
@@ -32,6 +32,7 @@
 // STL includes
 
 // NeL includes
+#include <vector>
 
 // Project includes
 #include "workspace_storage.h"
@@ -106,6 +107,7 @@ public:
 #define PIPELINE_DATABASE_RESULT_SUFFIX ".result"
 struct CProjectResult
 {
+public:
 	std::vector<std::string> FilePaths;
 	struct CFileResult
 	{
@@ -115,7 +117,7 @@ struct CProjectResult
 		void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
 	};
 	std::vector<CFileResult> FileResults;
-	
+
 	void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
 };
 
@@ -135,7 +137,7 @@ public:
 	static bool readStatus(CFileStatus &status, const std::string &path);
 	static void writeStatus(const CFileStatus &status, const std::string &path);
 	static void eraseStatus(const std::string &path);
-	
+
 	/// Format like .../something.somedirectory.meta/path/file.remove
 	// static std::string getRemovePath(const std::string &file);
 	// static bool readRemove(CFileRemove &remove, const std::string & path);

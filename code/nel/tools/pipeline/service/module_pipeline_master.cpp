@@ -6,20 +6,20 @@
  * CModulePipelineMaster
  */
 
-/* 
+/*
  * Copyright (C) 2012  by authors
- * 
+ *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
  * and/or modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, either version 2 of
  * the License, or (at your option) any later version.
- * 
+ *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with RYZOM CORE PIPELINE; see the file COPYING.  If not, see
  * <http://www.gnu.org/licenses/>.
@@ -72,15 +72,15 @@ namespace PIPELINE {
  * CModulePipelineMaster
  */
 class CModulePipelineMaster :
-	public CModulePipelineMasterSkel, 
+	public CModulePipelineMasterSkel,
 	public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >
 {
 	struct CSlave
 	{
 	public:
-		CSlave(CModulePipelineMaster *master, IModuleProxy *moduleProxy) 
-			: Master(master), 
-			Proxy(moduleProxy), 
+		CSlave(CModulePipelineMaster *master, IModuleProxy *moduleProxy)
+			: Master(master),
+			Proxy(moduleProxy),
 			ActiveTaskId(0),
 			SheetsOk(true),
 			SaneBehaviour(3),
@@ -95,7 +95,7 @@ class CModulePipelineMaster :
 		sint SaneBehaviour;
 		uint BuildReadyState;
 		uint32 TimeOutStamp;
-		
+
 		~CSlave()
 		{
 			if (!SheetsOk)
@@ -109,7 +109,7 @@ class CModulePipelineMaster :
 			return SheetsOk && (ActiveTaskId == 0) && SaneBehaviour > 0 && BuildReadyState == 2 && TimeOutStamp < NLMISC::CTime::getSecondsSince1970();
 		}
 	};
-	
+
 protected:
 	typedef std::map<IModuleProxy *, CSlave *> TSlaveMap;
 	TSlaveMap m_Slaves;
@@ -120,7 +120,7 @@ protected:
 	bool m_AbortRequested;
 
 	NLMISC::CTaskManager *m_TaskManager; // Manages tasks requested by a slave.
-	NLMISC::CSynchronized<std::list<IRunnable *>> m_WaitingCallbacks;
+	NLMISC::CSynchronized<std::list<IRunnable *> > m_WaitingCallbacks;
 
 	// A runnable that's executed at next update state used as a callback.
 	// Override runnable as normal as the callback function.
@@ -128,8 +128,8 @@ protected:
 	{
 	public:
 		CDelayedCallback(CModulePipelineMaster *master) : Master(master)
-		{ 
-			NLMISC::CSynchronized<std::list<IRunnable *>>::CAccessor waitingCallbacks(&Master->m_WaitingCallbacks);
+		{
+			NLMISC::CSynchronized<std::list<IRunnable *> >::CAccessor waitingCallbacks(&Master->m_WaitingCallbacks);
 			waitingCallbacks.value().push_back(this);
 		}
 		inline CCallback<void> getCallback() { return CCallback<void>(this, &CDelayedCallback::callback); }
@@ -142,7 +142,7 @@ protected:
 				Master->addUpdateTask(this);
 			}
 			{
-				NLMISC::CSynchronized<std::list<IRunnable *>>::CAccessor waitingCallbacks(&Master->m_WaitingCallbacks);
+				NLMISC::CSynchronized<std::list<IRunnable *> >::CAccessor waitingCallbacks(&Master->m_WaitingCallbacks);
 				waitingCallbacks.value().remove(this);
 			}
 		}
@@ -150,7 +150,7 @@ protected:
 
 	// Runnable tasks that are ran on the next update cycle.
 	// The IRunnable instance is deleted by the update cycle.
-	NLMISC::CSynchronized<std::deque<IRunnable *>> m_UpdateTasks;
+	NLMISC::CSynchronized<std::deque<IRunnable *> > m_UpdateTasks;
 
 	// build command
 	bool m_BypassErrors;
@@ -181,11 +181,11 @@ public:
 		for (; ; )
 		{
 			{
-				NLMISC::CSynchronized<std::list<IRunnable *>>::CAccessor waitingCallbacks(&m_WaitingCallbacks);
+				NLMISC::CSynchronized<std::list<IRunnable *> >::CAccessor waitingCallbacks(&m_WaitingCallbacks);
 				if (waitingCallbacks.value().size() == 0)
 					break;
 			}
-			
+
 			nlwarning("Waiting for callbacks on the master to be called...");
 			nlSleep(1000);
 		}
@@ -194,11 +194,11 @@ public:
 		handleUpdateTasks();
 
 		m_SlavesMutex.lock();
-		
+
 		for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
 			delete it->second;
 		m_Slaves.clear();
-		
+
 		m_SlavesMutex.unlock();
 		nldebug("END ~CModulePipelineMaster");
 	}
@@ -242,7 +242,7 @@ public:
 		if (moduleProxy->getModuleClassName() == "ModulePipelineSlave")
 		{
 			nlinfo("Slave UP (%s)", moduleProxy->getModuleName().c_str());
-			
+
 			nlassert(m_Slaves.find(moduleProxy) == m_Slaves.end());
 			/*
 			if (m_AbortRequested)
@@ -263,7 +263,7 @@ public:
 			}
 		}
 	}
-	
+
 	virtual void onModuleDown(IModuleProxy *moduleProxy)
 	{
 		if (moduleProxy->getModuleClassName() == "ModulePipelineSlave")
@@ -277,9 +277,9 @@ public:
 				m_ModuleUpDelay.erase(findDelay);
 			}
 			else*/
-			{			
+			{
 				nlassert(m_Slaves.find(moduleProxy) != m_Slaves.end());
-				
+
 				m_SlavesMutex.lock();
 
 				TSlaveMap::iterator slaveIt = m_Slaves.find(moduleProxy);
@@ -292,11 +292,11 @@ public:
 					// ... TODO ...
 					slaveAbortedBuildTask(moduleProxy); // see if this works
 				}
-				
+
 				m_Slaves.erase(slaveIt);
 				delete slave;
 				// nldebug("Now %i slaves remaining", m_Slaves.size());
-				
+
 				m_SlavesMutex.unlock();
 			}
 		}
@@ -310,7 +310,7 @@ public:
 	// The IRunnable will be deleted
 	void addUpdateTask(IRunnable *runnable)
 	{
-		NLMISC::CSynchronized<std::deque<IRunnable *>>::CAccessor updateTasks(&m_UpdateTasks);
+		NLMISC::CSynchronized<std::deque<IRunnable *> >::CAccessor updateTasks(&m_UpdateTasks);
 		updateTasks.value().push_back(runnable);
 	}
 
@@ -322,7 +322,7 @@ public:
 	{
 		IRunnable *currentRunnable;
 		{
-			NLMISC::CSynchronized<std::deque<IRunnable *>>::CAccessor updateTasks(&m_UpdateTasks);
+			NLMISC::CSynchronized<std::deque<IRunnable *> >::CAccessor updateTasks(&m_UpdateTasks);
 			if (updateTasks.value().size() == 0)
 				return;
 			currentRunnable = updateTasks.value().front();
@@ -331,7 +331,7 @@ public:
 		{
 			currentRunnable->run();
 			{
-				NLMISC::CSynchronized<std::deque<IRunnable *>>::CAccessor updateTasks(&m_UpdateTasks);
+				NLMISC::CSynchronized<std::deque<IRunnable *> >::CAccessor updateTasks(&m_UpdateTasks);
 				updateTasks.value().pop_front();
 				if (updateTasks.value().size() == 0)
 					break;
@@ -357,7 +357,7 @@ public:
 				{
 					it->second->BuildReadyState = 1;
 					it->second->Proxy.enterBuildReadyState(this);
-				}				
+				}
 				// wait for confirmation, set BuildReadyState = 2 in that callback!
 			}
 			m_SlavesMutex.unlock();
@@ -393,9 +393,9 @@ public:
 			else if (nbWorking == 0)
 			{
 				// done (or stuck)
-				
+
 				m_BuildWorking = false;
-				
+
 				m_SlavesMutex.lock();
 				// Iterate trough all slaves to tell them to end build_ready state.
 				for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
@@ -415,7 +415,7 @@ public:
 					for (std::vector<IModuleProxy *>::iterator it = m_ModuleUpDelay.begin(), end = m_ModuleUpDelay.end(); it != end; ++it)
 						onModuleUp(*it);*/
 				}
-				
+
 				PIPELINE::endedBuildReadyMaster();
 			}
 		}
@@ -447,7 +447,7 @@ public:
 			nlerror("Slave returned bad error level");
 			break;
 		}
-		
+
 		notifyTerminalTaskState(slave->ActiveTaskId, (TProcessResult)errorLevel, errorMessage);
 
 		slave->ActiveTaskId = 0;
@@ -466,7 +466,7 @@ public:
 		notifyTerminalTaskState(slave->ActiveTaskId, FINISH_ABORT, "The task has been aborted");
 		slave->ActiveTaskId = 0;
 	}
-	
+
 	// in fact slaves are not allowed to refuse tasks, but they may do this if the user is toying around with the slave service
 	virtual void slaveRefusedBuildTask(NLNET::IModuleProxy *sender)
 	{
@@ -494,7 +494,7 @@ public:
 		slave->SheetsOk = true;
 		CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_MASTER_RELOAD_SHEETS);
 	}
-	
+
 	virtual void slaveBuildReadySuccess(NLNET::IModuleProxy *sender)
 	{
 		//m_SlavesMutex.lock();
@@ -504,7 +504,7 @@ public:
 		//m_SlavesMutex.unlock();
 		slave->BuildReadyState = 2;
 	}
-	
+
 	virtual void slaveBuildReadyFail(NLNET::IModuleProxy *sender)
 	{
 		//m_SlavesMutex.lock();
@@ -546,7 +546,7 @@ public:
 	{
 	public:
 		CUpdateDatabaseStatusSlaveCallback(CModulePipelineMaster *master, NLNET::IModuleProxy *slaveProxy) : CDelayedCallback(master), m_SlaveProxy(slaveProxy) { }
-		
+
 		virtual void run() // this is sanely run from the update thread
 		{
 			Master->m_SlavesMutex.lock();
@@ -568,7 +568,7 @@ public:
 
 			delete this;
 		}
-		
+
 	private:
 		NLNET::IModuleProxy *m_SlaveProxy;
 	};
@@ -576,8 +576,8 @@ public:
 	class CUpdateDatabaseStatusByVectorTask : public IRunnable
 	{
 	public:
-		CUpdateDatabaseStatusByVectorTask(CModulePipelineMaster *master, NLNET::IModuleProxy *sender, std::vector<std::string> &slaveVector) : m_Master(master), m_Sender(sender) 
-		{ 
+		CUpdateDatabaseStatusByVectorTask(CModulePipelineMaster *master, NLNET::IModuleProxy *sender, std::vector<std::string> &slaveVector) : m_Master(master), m_Sender(sender)
+		{
 			std::swap(slaveVector, m_Vector);
 		}
 		virtual void run() // run from the master process task manager
@@ -592,7 +592,7 @@ public:
 		NLNET::IModuleProxy *m_Sender;
 		std::vector<std::string> m_Vector;
 	};
-	
+
 	virtual void updateDatabaseStatusByVector(NLNET::IModuleProxy *sender)
 	{
 		// FIXME: THIS MUST BE DONE ON A SEPERATE THREAD, IT HANGS WHILE ITERATING
@@ -620,7 +620,7 @@ public:
 				break;
 			}
 		}
-		
+
 		if (ok)
 		{
 			if (g_IsExiting)
@@ -674,7 +674,7 @@ public:
 			}
 
 			// Yes, we effectively send the abort again to the slaves, it makes for a more epic abort button hammering experience.
-			
+
 			m_BuildTaskQueue.abortQueue();
 
 			m_SlavesMutex.lock();
@@ -693,7 +693,7 @@ public:
 			return false;
 		}
 	}
-	
+
 protected:
 	NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CModulePipelineMaster, CModuleBase)
 		NLMISC_COMMAND_HANDLER_ADD(CModulePipelineMaster, reloadSheets, "Reload sheets across all services", "")
@@ -717,11 +717,11 @@ protected:
 			return false;
 		}
 	}
-	
+
 	void cbMasterSheetReloadUpdate()
 	{
 		m_SlavesMutex.lock();
-			
+
 		for (TSlaveMap::iterator it = m_Slaves.begin(), end = m_Slaves.end(); it != end; ++it)
 		{
 			CSlave *slave = it->second;
@@ -730,7 +730,7 @@ protected:
 			slave->Proxy.reloadSheets(this);
 			CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_MASTER_RELOAD_SHEETS);
 		}
-		
+
 		m_SlavesMutex.unlock();
 
 		PIPELINE::endedDirectTask();
