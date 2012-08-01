@@ -452,6 +452,34 @@ public:
 			// KABOOM
 		}
 	}
+	
+	///////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////
+
+	// If this returns false, the status is not sane, and the build must error; or the file does not exist and must error or warn.
+	// Gets the file status as it was known at the beginning of the build or when this file was first known.
+	bool getFileStatusCached(CFileStatus &fileStatus, const std::string &filePath) // not by macro path :)
+	{
+		std::map<std::string, CFileStatus>::iterator statusIt = m_FileStatusCache.find(filePath);
+		if (statusIt == m_FileStatusCache.end())
+		{
+			nldebug("File status '%s' not requested before, ensure this is not a dependency", filePath.c_str());
+			if (g_DatabaseStatus->getFileStatus(fileStatus, filePath))
+			{
+				m_FileStatusCache[filePath] = fileStatus;
+				return true;
+			}
+			else return false;
+		}
+		fileStatus = statusIt->second; // copy
+		return true;
+	}
+
+	// If this returns false, the status is not sane, and the build must error; or the file does not exist and must error or warn.
+	bool getFileStatusLatest(CFileStatus &fileStatus, const std::string &filePath)
+	{
+		return g_DatabaseStatus->getFileStatus(fileStatus, filePath);
+	}
 
 	virtual void addFileStatusToCache(NLNET::IModuleProxy *sender, const std::string &macroPath, const CFileStatus &fileStatus)
 	{
@@ -463,6 +491,9 @@ public:
 		nlassert(m_FileStatusCache.find(filePath) == m_FileStatusCache.end());
 		m_FileStatusCache[filePath] = fileStatus;
 	}
+	
+	///////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////
 
 	virtual void masterUpdatedDatabaseStatus(NLNET::IModuleProxy *sender)
 	{
