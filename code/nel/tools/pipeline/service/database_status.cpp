@@ -77,6 +77,8 @@ bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &
 
 bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStatusMap, std::map<std::string, CFileRemove> &fileRemoveMap, const std::vector<std::string> &paths)
 {
+	nlassert(false); // not used
+
 	// ARE THE PATHS UNMACRO'D OR NOT???
 
 	// nlassert(false); // i don't think this is used? (yet?) (maybe for slave?)
@@ -190,6 +192,103 @@ bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStat
 	
 	// no issues occured apparently
 	return true;
+}
+
+void CDatabaseStatus::getRemoved(std::map<std::string, CFileRemove> &fileRemoveMap, const std::vector<std::string> &paths)
+{
+	for (std::vector<std::string>::const_iterator it = paths.begin(), end = paths.end(); it != end; ++it)
+	{
+		const std::string &macroPath = *it;
+		std::string path = unMacroPath(macroPath);
+		
+		if (CFile::isExists(path))
+		{
+			if (CFile::isDirectory(path)) // perhaps it is possible to check only on / assuming it's properly formatted!!
+			{
+				nlassert(path.find_last_of('/') == path.size() - 1); // ensure sanity
+
+				// std::string dirPath = standardizePath(path, true);
+				std::string &dirPath = path;
+				/*std::vector<std::string> dirContents;
+
+				CPath::getPathContent(dirPath, false, false, true, dirContents); // get only files, no dirs
+				
+				for (std::vector<std::string>::iterator it = dirContents.begin(), end = dirContents.end(); it != end; ++it)
+				{
+					const std::string &subPath = *it;
+					
+					CFileStatus fs;
+					if (!getFileStatus(fs, subPath))
+					{
+						// bad status, data corruption // TODO_PROCESS_ERROR
+						nlwarning("Invalid status for '%s'!", subPath.c_str());
+						return; 
+					}
+					fileStatusMap[subPath] = fs; // i'll assume macropath might be easiest
+					
+					// TODO_PROCESS_ERROR_EXIT
+					if (g_IsExiting)
+						return;
+				}*/
+
+				std::string dirPathMeta = CWorkspaceStorage::getMetaDirectoryPath(dirPath);
+				std::vector<std::string> dirContentsMeta;
+
+				CPath::getPathContent(dirPathMeta, false, false, true, dirContentsMeta);
+
+				for (std::vector<std::string>::iterator it = dirContentsMeta.begin(), end = dirContentsMeta.end(); it != end; ++it)
+				{
+					const std::string &subPath = *it;
+					
+					std::string::size_type removePos = subPath.find(PIPELINE_DATABASE_REMOVE_SUFFIX);
+
+					if (removePos != std::string::npos)
+					{
+						std::string subPathFilename = CFile::getFilename(subPath.substr(0, removePos));
+						std::string subPathOrig = dirPath + subPathFilename;
+						
+						nldebug("Found remove meta for file '%s'!", subPathOrig.c_str());
+						// Read the removed tag.
+						std::string removedTagFile = dirPathMeta + subPathFilename + PIPELINE_DATABASE_REMOVE_SUFFIX;
+						CFileRemove fr;
+						CIFile ifr(removedTagFile, false);
+						fr.serial(ifr);
+						ifr.close();
+
+						fileRemoveMap[subPathOrig] = fr;
+					}
+					
+					// TODO_PROCESS_ERROR_EXIT
+					if (g_IsExiting)
+						return;
+				}
+			}
+		}
+		else
+		{
+			// TODO_PROCESS_WARNING
+			nlwarning("Requesting information on file or directory '%s' that does not exist!", path.c_str());
+			CFileRemove fr;
+			std::string removedTagFile = CWorkspaceStorage::getMetaFilePath(path, PIPELINE_DATABASE_REMOVE_SUFFIX);
+			if (CFile::isExists(removedTagFile))
+			{
+				// file existed before
+				CIFile ifr(removedTagFile, false);
+				fr.serial(ifr);
+				ifr.close();
+			}
+			else
+			{
+				// file never existed or is directory
+				fr.Lost = 0;
+			}
+			fileRemoveMap[path] = fr;
+		}
+
+		// TODO_PROCESS_ERROR_EXIT
+		if (g_IsExiting)
+			return;
+	}
 }
 
 namespace {

@@ -77,7 +77,9 @@ public:
 	void updateDatabaseStatus(const CCallback<void> &callback, const TFileStatusCallback &fileStatusCallback, const std::vector<std::string> &paths, bool wait = false, bool recurse = false);
 	/// Gets the last file statuses of given paths in a map. Directories are scanned for files, non recursively. Returns false if one of the statuses is bad (not updated; file changed inbetween). Considered as build error.
 	bool getFileStatus(std::map<std::string, CFileStatus> &fileStatusMap, std::map<std::string, CFileRemove> &fileRemoveMap, const std::vector<std::string> &paths);
-	
+	/// Gets all removed files
+	void getRemoved(std::map<std::string, CFileRemove> &fileRemoveMap, const std::vector<std::string> &paths);
+
 	void getFileErrors(CFileErrors &fileErrors, const std::string &filePath, uint32 newerThan = 0) const;
 	void addFileError(const std::string &filePath, const CFileError &fileError);
 	
