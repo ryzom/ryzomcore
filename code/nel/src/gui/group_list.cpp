@@ -362,6 +362,7 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur,   (xmlChar*)"hardtext" );
 		if (ptr)
 		{
+			_HardText = std::string( ptr );
 			const char *propPtr = ptr;
 			ucstring Text = ucstring(propPtr);
 			if ((strlen(propPtr)>2) && (propPtr[0] == 'u') && (propPtr[1] == 'i'))
@@ -374,9 +375,8 @@ namespace NLGUI
 			ptr = (char*) xmlGetProp( cur,   (xmlChar*)"textid" );
 			if (ptr)
 			{
-				uint32 textId;
-				fromString((const char*)ptr, textId);
-				addTextChildID(textId);
+				fromString((const char*)ptr, _TextId );
+				addTextChildID( _TextId );
 			}
 		}
 

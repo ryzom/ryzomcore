@@ -55,6 +55,7 @@ namespace NLGUI
 		_Indent = 0;
 		_FirstViewIndentView = false;
 		_BrowseGroup = NULL;
+		_TextId = 0;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -186,6 +187,77 @@ namespace NLGUI
 		}
 	}*/
 
+
+	std::string CGroupParagraph::getProperty( const std::string &name ) const
+	{
+		if( name == "addelt" )
+		{
+			switch( _AddElt )
+			{
+			case Top:
+				return "T";
+				break;
+
+			case Left:
+				return "L";
+				break;
+
+			case Right:
+				return "R";
+				break;
+			}
+
+			return "B";
+		}
+		else
+		if( name == "align" )
+		{
+			switch( _Align )
+			{
+			case Top:
+				return "T";
+				break;
+
+			case Left:
+				return "L";
+				break;
+
+			case Right:
+				return "R";
+				break;
+			}
+
+			return "B";
+		}
+		else
+		if( name == "space" )
+		{
+			return toString( _Space );
+		}
+		else
+		if( name == "over" )
+		{
+			return toString( _Over );
+		}
+		else
+		if( name == "col_over" )
+		{
+			return toString( _OverColor );
+		}
+		else
+		if( name == "hardtext" )
+		{
+			return _HardText;
+		}
+		else
+		if( name == "textid" )
+		{
+			return toString( _TextId );
+		}
+		else
+		return CInterfaceGroup::getProperty( name );
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CGroupParagraph::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
@@ -263,6 +335,7 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"hardtext" );
 		if (ptr)
 		{
+			_HardText = std::string( ptr );
 			const char *propPtr = ptr;
 			ucstring Text = ucstring(propPtr);
 			if ((strlen(propPtr)>2) && (propPtr[0] == 'u') && (propPtr[1] == 'i'))
@@ -275,9 +348,8 @@ namespace NLGUI
 			ptr = (char*) xmlGetProp( cur, (xmlChar*)"textid" );
 			if (ptr)
 			{
-				uint32 textId;
-				fromString((const char*)ptr, textId);
-				addTextChildID(textId);
+				fromString((const char*)ptr, _TextId );
+				addTextChildID( _TextId );
 			}
 		}
 

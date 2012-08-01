@@ -125,6 +125,8 @@ namespace NLGUI
 			return &_Templ;
 		}
 
+		std::string getProperty( const std::string &name ) const;
+
 		/**
 		 * parse the element and initalize it
 		 * \paral cur : pointer to the node describing this element
@@ -289,6 +291,8 @@ namespace NLGUI
 		CInterfaceElement	*_BrowseGroup;
 
 	private:
+		std::string _HardText;
+		uint32 _TextId;
 
 		// void setHSGroup (CViewBase *child, EAlign addElt, EAlign align);
 		// void setHSParent(CViewBase *view, EAlign addElt, EAlign align, uint space);
