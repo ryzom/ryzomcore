@@ -194,7 +194,7 @@ bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStat
 	return true;
 }
 
-void CDatabaseStatus::getRemoved(std::map<std::string, CFileRemove> &fileRemoveMap, const std::vector<std::string> &paths)
+bool CDatabaseStatus::getRemoved(std::map<std::string, CFileRemove> &fileRemoveMap, const std::vector<std::string> &paths)
 {
 	for (std::vector<std::string>::const_iterator it = paths.begin(), end = paths.end(); it != end; ++it)
 	{
@@ -249,9 +249,15 @@ void CDatabaseStatus::getRemoved(std::map<std::string, CFileRemove> &fileRemoveM
 						
 						nldebug("Found remove meta for file '%s'!", subPathOrig.c_str());
 						// Read the removed tag.
-						std::string removedTagFile = dirPathMeta + subPathFilename + PIPELINE_DATABASE_REMOVE_SUFFIX;
+						std::string removeTagFile = dirPathMeta + subPathFilename + PIPELINE_DATABASE_REMOVE_SUFFIX;
+						std::string statusTagFile = dirPathMeta + subPathFilename + PIPELINE_DATABASE_STATUS_SUFFIX;
+						if (CFile::isExists(statusTagFile))
+						{
+							nlwarning("Removed file has status");
+							return false;
+						}
 						CFileRemove fr;
-						CIFile ifr(removedTagFile, false);
+						CIFile ifr(removeTagFile, false);
 						fr.serial(ifr);
 						ifr.close();
 
@@ -260,7 +266,7 @@ void CDatabaseStatus::getRemoved(std::map<std::string, CFileRemove> &fileRemoveM
 					
 					// TODO_PROCESS_ERROR_EXIT
 					if (g_IsExiting)
-						return;
+						return false;
 				}
 			}
 		}
@@ -269,11 +275,17 @@ void CDatabaseStatus::getRemoved(std::map<std::string, CFileRemove> &fileRemoveM
 			// TODO_PROCESS_WARNING
 			nlwarning("Requesting information on file or directory '%s' that does not exist!", path.c_str());
 			CFileRemove fr;
-			std::string removedTagFile = CWorkspaceStorage::getMetaFilePath(path, PIPELINE_DATABASE_REMOVE_SUFFIX);
-			if (CFile::isExists(removedTagFile))
+			std::string removeTagFile = CWorkspaceStorage::getMetaFilePath(path, PIPELINE_DATABASE_REMOVE_SUFFIX);
+			std::string statusTagFile = CWorkspaceStorage::getMetaFilePath(path, PIPELINE_DATABASE_RESULT_SUFFIX);
+			if (CFile::isExists(statusTagFile))
+			{
+				nlwarning("Not existing file has status");
+				return false;
+			}
+			if (CFile::isExists(removeTagFile))
 			{
 				// file existed before
-				CIFile ifr(removedTagFile, false);
+				CIFile ifr(removeTagFile, false);
 				fr.serial(ifr);
 				ifr.close();
 			}
@@ -287,8 +299,10 @@ void CDatabaseStatus::getRemoved(std::map<std::string, CFileRemove> &fileRemoveM
 
 		// TODO_PROCESS_ERROR_EXIT
 		if (g_IsExiting)
-			return;
+			return false;
 	}
+
+	return true;
 }
 
 namespace {
