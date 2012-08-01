@@ -126,12 +126,12 @@ public:
 	std::string m_SubTaskErrorMessage;
 
 
-	std::list<std::string> m_ListInputAdded;
-	std::list<std::string> m_ListInputChanged;
-	std::list<std::string> m_ListInputRemoved;
+	std::set<std::string> m_ListInputAdded;
+	std::set<std::string> m_ListInputChanged;
+	std::set<std::string> m_ListInputRemoved;
 	
-	std::list<std::string> m_ListOutputChanged;
-	std::list<std::string> m_ListOutputRemoved; // changed and removed end up being the same, it needs to be rebuilt ;)
+	std::set<std::string> m_ListOutputChanged;
+	std::set<std::string> m_ListOutputRemoved; // changed and removed end up being the same, it needs to be rebuilt ;)
 
 	// TODO: Make maps of the dependent files and directories after the vectors no longer needed
 	// Provide a function to check if a dependency is either in the dependent files or inside one of the directories to ensure the plugin is behaving sanely
@@ -144,6 +144,8 @@ public:
 	
 	// NOT NECESSARY --- TODO: Provide a function for removing output files, it will also erase the status file and create a remove metadata file.
 
+	// PROBABLY NOT NECESSARY -- Could check the .depend of all output files from the previous build if necessary instead of having output files and use those to flag additional removals.
+	
 public:
 	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(NULL), m_ActiveProcess(NULL), m_AbortRequested(false), m_SubTaskResult(FINISH_NOT)
 	{
@@ -319,8 +321,15 @@ public:
 						finishedTask(m_SubTaskResult, m_SubTaskErrorMessage);
 						break;
 					}
+					
+					// Build the lists of files added changed removed
+					buildListsOfFiles();
+					
+					// Set the actual start time of the actual build
+					m_ResultCurrent.BuildStart = NLMISC::CTime::getSecondsSince1970();
 
-					// TODO ***************************************************************************
+					// TODO *************************************************************************** *************** **** BUILD
+					beginTheBuildThing();
 				}
 			}
 			break;
@@ -383,7 +392,7 @@ public:
 		nlassert(m_ResultCurrent.BuildStart == 0);
 		nlassert(m_ResultPreviousSuccess.BuildStart == 0);
 
-		// Set start time
+		// Set start time (not necessary, it will be set again later, when the actual build starts)
 		m_ResultCurrent.BuildStart = NLMISC::CTime::getSecondsSince1970();
 
 		// Read the previous process result
@@ -459,6 +468,76 @@ public:
 		CModulePipelineSlave *m_Slave;
 	};
 
+	///////////////////////////////////////////////////////////////////
+
+	void buildListsOfFiles()
+	{
+		for (std::map<std::string, CFileStatus>::const_iterator it = m_FileStatusInputCache.begin(), end = m_FileStatusInputCache.end(); it != end; ++it)
+		{
+			if (it->second.FirstSeen > m_ResultPreviousSuccess.BuildStart)
+			{
+				m_ListInputAdded.insert(it->first);
+			}
+			else if (it->second.LastUpdate > m_ResultPreviousSuccess.BuildStart)
+			{
+				m_ListInputChanged.insert(it->first);
+			}
+		}
+		for (std::map<std::string, CFileRemove>::const_iterator it = m_FileRemoveInputCache.begin(), end = m_FileRemoveInputCache.end(); it != end; ++it)
+		{
+			if (it->second.Lost > m_ResultPreviousSuccess.BuildStart) // or >= ?
+			{
+				m_ListInputRemoved.insert(it->first);
+			}
+		}
+		for (std::map<std::string, CFileStatus>::const_iterator it = m_FileStatusOutputCache.begin(), end = m_FileStatusOutputCache.end(); it != end; ++it)
+		{
+			if (it->second.FirstSeen > m_ResultPreviousSuccess.BuildStart)
+			{
+				m_ListOutputChanged.insert(it->first);
+			}
+		}
+		//for (std::vector<std::string>::const_iterator it = m_ResultPreviousSuccess.MacroPaths.begin(), end = m_ResultPreviousSuccess.MacroPaths.end(); it != end; ++it)
+		for (uint i = 0; i < m_ResultPreviousSuccess.MacroPaths.size(); ++i)
+		{
+			std::string filePath = unMacroPath(m_ResultPreviousSuccess.MacroPaths[i]);
+			std::map<std::string, CFileStatus>::const_iterator statusIt = m_FileStatusOutputCache.find(filePath);
+			if (statusIt == m_FileStatusOutputCache.end())
+			{
+				nlwarning("Spotted remove by not being in the cache");
+				m_ListOutputRemoved.insert(filePath);
+			}
+			else if (m_ResultPreviousSuccess.FileResults[i].CRC32 == 0)
+			{
+				nlwarning("Spotted remove by dummy CRC32 value"); // not sure which of these two .. dunno if non-existant files were in the cache // keep these codes anyway
+				m_ListOutputRemoved.insert(filePath);
+			}
+			else
+			{
+				const CFileStatus &status = statusIt->second;
+				if (status.CRC32 != m_ResultPreviousSuccess.FileResults[i].CRC32)
+				{
+					nlwarning("Output file was illegally modified, probably by a previous build run that failed");
+					m_ListOutputChanged.insert(filePath);
+					// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+					// (in the needbuild(something) function)
+					// TODO: IF THE OUTPUT IS ILLEGALLY MODIFIED (always the case in m_ListOutputChanged)
+					// USE THE .DEPEND FILE TO COMPARE THE CRC32 OF THE CURRENT STATUS WITH THE .DEPEND LOGGED CRC32 (this is the one from the failed build)
+					// AND ALSO COMPARE THE CRC32 OF ALL DEPENDENCY FILES WITH THE CACHED STATUS CRC32 OF THESE INPUT FILES
+					// IF ANY IS DIFFERENT, IT NEEDS A REBUILD
+					// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				}
+			}
+		}
+	}
+
+	void beginTheBuildThing()
+	{
+		// TODO ************/////////////////########################################################################### BUILD THING
+	}
+
+	///////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////
 
 	virtual void startBuildTask(NLNET::IModuleProxy *sender, const std::string &projectName, uint32 pluginId)
@@ -579,9 +658,9 @@ public:
 
 	virtual void addFileStatusToCache(NLNET::IModuleProxy *sender, const std::string &macroPath, const CFileStatus &fileStatus)
 	{
-		nlassert(sender == NULL || m_Master->getModuleProxy() == sender); // sanity check
+		nlassert(/*sender == NULL || */m_Master->getModuleProxy() == sender); // sanity check
 		
-		nldebug("Add file status: '%s' (macro path)", macroPath.c_str());
+		// nldebug("Add file status: '%s' (macro path)", macroPath.c_str());
 
 		std::string filePath = unMacroPath(macroPath);
 		// m_FileStatusInitializeMutex.enter();
