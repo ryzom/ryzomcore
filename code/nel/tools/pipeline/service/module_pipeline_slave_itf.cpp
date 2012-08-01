@@ -34,6 +34,10 @@ namespace PIPELINE
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
 			
+			res = handlers.insert(std::make_pair(std::string("ADD_FS_CACHE"), &CModulePipelineSlaveSkel::addFileStatusToCache_skel));
+			// if this assert, you have a doubly message name in your interface definition !
+			nlassert(res.second);
+			
 			res = handlers.insert(std::make_pair(std::string("RE_UPD_DB_ST"), &CModulePipelineSlaveSkel::masterUpdatedDatabaseStatus_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
@@ -95,6 +99,16 @@ namespace PIPELINE
 		abortBuildTask(sender);
 	}
 
+	void CModulePipelineSlaveSkel::addFileStatusToCache_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
+	{
+		H_AUTO(CModulePipelineSlaveSkel_addFileStatusToCache_ADD_FS_CACHE);
+		std::string	macroPath;
+			nlRead(__message, serial, macroPath);
+		CFileStatus	fileStatus;
+			nlRead(__message, serial, fileStatus);
+		addFileStatusToCache(sender, macroPath, fileStatus);
+	}
+
 	void CModulePipelineSlaveSkel::masterUpdatedDatabaseStatus_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CModulePipelineSlaveSkel_masterUpdatedDatabaseStatus_RE_UPD_DB_ST);
@@ -137,7 +151,7 @@ namespace PIPELINE
 		}
 	}
 		// 
-	void CModulePipelineSlaveProxy::startBuildTask(NLNET::IModule *sender, const std::string &projectName, const uint32 &pluginId)
+	void CModulePipelineSlaveProxy::startBuildTask(NLNET::IModule *sender, const std::string &projectName, uint32 pluginId)
 	{
 		if (_LocalModuleSkel && _LocalModule->isImmediateDispatchingSupported())
 		{
@@ -168,6 +182,24 @@ namespace PIPELINE
 			NLNET::CMessage __message;
 
 			buildMessageFor_abortBuildTask(__message);
+
+			_ModuleProxy->sendModuleMessage(sender, __message);
+		}
+	}
+		// 
+	void CModulePipelineSlaveProxy::addFileStatusToCache(NLNET::IModule *sender, const std::string &macroPath, const CFileStatus &fileStatus)
+	{
+		if (_LocalModuleSkel && _LocalModule->isImmediateDispatchingSupported())
+		{
+			// immediate local synchronous dispatching
+			_LocalModuleSkel->addFileStatusToCache(_ModuleProxy->getModuleGateway()->getPluggedModuleProxy(sender), macroPath, fileStatus);
+		}
+		else
+		{
+			// send the message for remote dispatching and execution or local queing
+			NLNET::CMessage __message;
+
+			buildMessageFor_addFileStatusToCache(__message, macroPath, fileStatus);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
 		}
@@ -255,11 +287,11 @@ namespace PIPELINE
 	}
 
 	// Message serializer. Return the message received in reference for easier integration
-	const NLNET::CMessage &CModulePipelineSlaveProxy::buildMessageFor_startBuildTask(NLNET::CMessage &__message, const std::string &projectName, const uint32 &pluginId)
+	const NLNET::CMessage &CModulePipelineSlaveProxy::buildMessageFor_startBuildTask(NLNET::CMessage &__message, const std::string &projectName, uint32 pluginId)
 	{
 		__message.setType("GO_BT");
 			nlWrite(__message, serial, const_cast < std::string& > (projectName));
-			nlWrite(__message, serial, const_cast < uint32& > (pluginId));
+			nlWrite(__message, serial, pluginId);
 
 
 		return __message;
@@ -269,6 +301,17 @@ namespace PIPELINE
 	const NLNET::CMessage &CModulePipelineSlaveProxy::buildMessageFor_abortBuildTask(NLNET::CMessage &__message)
 	{
 		__message.setType("ABORT_BT");
+
+
+		return __message;
+	}
+
+	// Message serializer. Return the message received in reference for easier integration
+	const NLNET::CMessage &CModulePipelineSlaveProxy::buildMessageFor_addFileStatusToCache(NLNET::CMessage &__message, const std::string &macroPath, const CFileStatus &fileStatus)
+	{
+		__message.setType("ADD_FS_CACHE");
+			nlWrite(__message, serial, const_cast < std::string& > (macroPath));
+			nlWrite(__message, serial, const_cast < CFileStatus& > (fileStatus));
 
 
 		return __message;

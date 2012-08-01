@@ -104,6 +104,8 @@ public:
 	CProcessPluginInfo m_ActivePlugin;
 
 	bool m_AbortRequested;
+
+	std::map<std::string, CFileStatus> m_FileStatusCache;
 	
 public:
 	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(NULL), m_ActiveProcess(NULL), m_AbortRequested(false)
@@ -284,7 +286,9 @@ public:
 		CStatusUpdateSlaveTask(CModulePipelineSlave *slave) : m_Slave(slave) { }
 		virtual void run()
 		{
-			// TODO...
+			// ****************************************************************************** TODO...
+			// Read the last build results
+			// Update the database status of those files
 
 			// Mark as done
 			{
@@ -343,7 +347,7 @@ public:
 
 	///////////////////////////////////////////////////////////////////
 
-	virtual void startBuildTask(NLNET::IModuleProxy *sender, const std::string &projectName, const uint32 &pluginId)
+	virtual void startBuildTask(NLNET::IModuleProxy *sender, const std::string &projectName, uint32 pluginId)
 	{
 		nlassert(m_Master->getModuleProxy() == sender); // sanity check
 		nlassert(m_ActiveProject == NULL);
@@ -372,6 +376,7 @@ public:
 	{
 		m_ActiveProject = NULL;
 		m_ActiveProcess = NULL;
+		m_FileStatusCache.clear();
 		m_SlaveTaskState = IDLE_WAIT_MASTER;
 		if (m_Master) // else was disconnect
 			m_Master->slaveAbortedBuildTask(this);
@@ -384,6 +389,7 @@ public:
 	{
 		m_ActiveProject = NULL;
 		m_ActiveProcess = NULL;
+		m_FileStatusCache.clear();
 		m_SlaveTaskState = IDLE_WAIT_MASTER;
 		if (m_Master) // else was disconnect
 			m_Master->slaveFinishedBuildTask(this, (uint8)errorLevel, errorMessage);
@@ -411,6 +417,15 @@ public:
 
 			// KABOOM
 		}
+	}
+
+	virtual void addFileStatusToCache(NLNET::IModuleProxy *sender, const std::string &macroPath, const CFileStatus &fileStatus)
+	{
+		nlassert(sender == NULL || m_Master->getModuleProxy() == sender); // sanity check
+
+		std::string filePath = unMacroPath(macroPath);
+		nlassert(m_FileStatusCache.find(filePath) == m_FileStatusCache.end());
+		m_FileStatusCache[filePath] = fileStatus;
 	}
 
 	virtual void masterUpdatedDatabaseStatus(NLNET::IModuleProxy *sender)

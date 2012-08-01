@@ -17,6 +17,8 @@
 #include "nel/net/module_message.h"
 #include "nel/net/module_gateway.h"
 
+#include "metadata_storage.h"
+	
 namespace PIPELINE
 {
 	
@@ -66,6 +68,8 @@ namespace PIPELINE
 
 		void abortBuildTask_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
+		void addFileStatusToCache_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
+
 		void masterUpdatedDatabaseStatus_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void reloadSheets_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -87,9 +91,11 @@ namespace PIPELINE
 		// 
 		virtual void submitToMaster(NLNET::IModuleProxy *sender) =0;
 		// 
-		virtual void startBuildTask(NLNET::IModuleProxy *sender, const std::string &projectName, const uint32 &pluginId) =0;
+		virtual void startBuildTask(NLNET::IModuleProxy *sender, const std::string &projectName, uint32 pluginId) =0;
 		// 
 		virtual void abortBuildTask(NLNET::IModuleProxy *sender) =0;
+		// 
+		virtual void addFileStatusToCache(NLNET::IModuleProxy *sender, const std::string &macroPath, const CFileStatus &fileStatus) =0;
 		// 
 		virtual void masterUpdatedDatabaseStatus(NLNET::IModuleProxy *sender) =0;
 		// 
@@ -150,9 +156,11 @@ namespace PIPELINE
 		// 
 		void submitToMaster(NLNET::IModule *sender);
 		// 
-		void startBuildTask(NLNET::IModule *sender, const std::string &projectName, const uint32 &pluginId);
+		void startBuildTask(NLNET::IModule *sender, const std::string &projectName, uint32 pluginId);
 		// 
 		void abortBuildTask(NLNET::IModule *sender);
+		// 
+		void addFileStatusToCache(NLNET::IModule *sender, const std::string &macroPath, const CFileStatus &fileStatus);
 		// 
 		void masterUpdatedDatabaseStatus(NLNET::IModule *sender);
 		// 
@@ -166,10 +174,13 @@ namespace PIPELINE
 		static const NLNET::CMessage &buildMessageFor_submitToMaster(NLNET::CMessage &__message);
 	
 		// Message serializer. Return the message received in reference for easier integration
-		static const NLNET::CMessage &buildMessageFor_startBuildTask(NLNET::CMessage &__message, const std::string &projectName, const uint32 &pluginId);
+		static const NLNET::CMessage &buildMessageFor_startBuildTask(NLNET::CMessage &__message, const std::string &projectName, uint32 pluginId);
 	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_abortBuildTask(NLNET::CMessage &__message);
+	
+		// Message serializer. Return the message received in reference for easier integration
+		static const NLNET::CMessage &buildMessageFor_addFileStatusToCache(NLNET::CMessage &__message, const std::string &macroPath, const CFileStatus &fileStatus);
 	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_masterUpdatedDatabaseStatus(NLNET::CMessage &__message);

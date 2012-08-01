@@ -1,38 +1,47 @@
 <generator header_tag="PIPELINE_MODULE_PIPELINE_SLAVE_ITF_H">
 
+	<include file="metadata_storage.h"/>
+
 	<namespace name="PIPELINE">
 
 		<module_interface name="CModulePipelineSlave">
 
 			<method name="submitToMaster" msg="M_HELLO">
-				<doc line=""/>
+				<doc line="" />
 			</method>
 
 			<method name="startBuildTask" msg="GO_BT">
-				<doc line=""/>
+				<doc line="" />
 
-				<param type="std::string"		name="projectName"		byref="true"/>
-				<param type="uint32"		name="pluginId"		byref="true"/>
+				<param type="std::string" name="projectName" byref="true" />
+				<param type="uint32" name="pluginId" />
 			</method>
 
 			<method name="abortBuildTask" msg="ABORT_BT">
-				<doc line=""/>
+				<doc line="" />
+			</method>
+			
+			<method name="addFileStatusToCache" msg="ADD_FS_CACHE">
+				<doc line="" />
+				
+				<param type="std::string" name="macroPath" byref="true" />
+				<param type="CFileStatus" name="fileStatus" byref="true" />
 			</method>
 
 			<method name="masterUpdatedDatabaseStatus" msg="RE_UPD_DB_ST">
-				<doc line=""/>
+				<doc line="" />
 			</method>
 
 			<method name="reloadSheets" msg="RELOAD_SHEETS">
-				<doc line=""/>
+				<doc line="" />
 			</method>
 
 			<method name="enterBuildReadyState" msg="BRT_ENTER">
-				<doc line=""/>
+				<doc line="" />
 			</method>
 
 			<method name="leaveBuildReadyState" msg="BRT_LEAVE">
-				<doc line=""/>
+				<doc line="" />
 			</method>
 
 		</module_interface>
