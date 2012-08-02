@@ -33,6 +33,83 @@ REGISTER_UI_CLASS(CViewBitmap)
 namespace NLGUI
 {
 
+	std::string CViewBitmap::getProperty( const std::string &name ) const
+	{
+		if( name == "color" )
+		{
+			return toString( _Color );
+		}
+		else
+		if( name == "txtoffsetx" )
+		{
+			return toString( _TxtOffsetX );
+		}
+		else
+		if( name == "txtoffsety" )
+		{
+			return toString( _TxtOffsetY );
+		}
+		else
+		if( name == "txtwidth" )
+		{
+			return toString( _TxtWidth );
+		}
+		else
+		if( name == "txtheight" )
+		{
+			return toString( _TxtHeight );
+		}
+		else
+		if( name == "texture" )
+		{
+			return getTexture();
+		}
+		else
+		if( name == "scale" )
+		{
+			return toString( _Scale );
+		}
+		else
+		if( name == "rot" )
+		{
+			return toString( _Rot );
+		}
+		else
+		if( name == "flip" )
+		{
+			return toString( _Flip );
+		}
+		else
+		if( name == "tile" )
+		{
+			return toString( _Tile );
+		}
+		else
+		if( name == "align" )
+		{
+			std::string align;
+
+			if( ( _Align & 1 ) != 0 )
+				align += "R";
+			else
+				align += "L";
+
+			if( ( _Align & 2 ) != 0 )
+				align += "T";
+			else
+				align += "B";
+
+			return align;
+		}
+		else
+		if( name == "inherit_gc_alpha" )
+		{
+			return toString( _InheritGCAlpha );
+		}
+		else
+			return CViewBase::getProperty( name );
+	}
+
 	// ----------------------------------------------------------------------------
 
 	bool CViewBitmap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)

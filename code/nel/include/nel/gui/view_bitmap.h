@@ -58,6 +58,8 @@ namespace NLGUI
 			_TxtHeight = -1;
 		}
 
+		std::string getProperty( const std::string &name ) const;
+
 		/**
 		 * parse an xml node and initialize the base view mambers. Must call CViewBase::parse
 		 * \param cur : pointer to the xml node to be parsed
