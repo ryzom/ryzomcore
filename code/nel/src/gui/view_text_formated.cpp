@@ -25,6 +25,16 @@ namespace NLGUI
 
 	CViewTextFormated::IViewTextFormatter *CViewTextFormated::textFormatter = NULL;
 
+	std::string CViewTextFormated::getProperty( const std::string &name ) const
+	{
+		if( name == "format" )
+		{
+			return getFormatString().toString();
+		}
+		else
+			return CViewText::getProperty( name );
+	}
+
 	// ****************************************************************************
 	bool CViewTextFormated::parse(xmlNodePtr cur,CInterfaceGroup * parentGroup)
 	{
