@@ -38,6 +38,7 @@ namespace NLGUI
 		/// Constructor
 		CDBViewBar3(const TCtorParam &param);
 
+		std::string getProperty( const std::string &name ) const;
 		bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup);
 		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 		virtual void updateCoords ();
@@ -96,6 +97,7 @@ namespace NLGUI
 
 		void	parseValProp(xmlNodePtr cur, CInterfaceProperty &dbProp, sint32 &intProp, const char *name);
 		sint32	getCurrentValProp(const CInterfaceProperty &dbProp, sint32 intProp);
+		std::string getValProp( const CInterfaceProperty &prop, sint32 intProp  ) const;
 	};
 
 }

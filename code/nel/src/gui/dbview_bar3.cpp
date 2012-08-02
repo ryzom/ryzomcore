@@ -55,6 +55,80 @@ namespace NLGUI
 	}
 
 
+	std::string CDBViewBar3::getProperty( const std::string &name ) const
+	{
+		if( name == "value1" )
+		{
+			return getValProp( _Value[ 0 ], _ValueInt[ 0 ] );
+		}
+		else
+		if( name == "value2" )
+		{
+			return getValProp( _Value[ 1 ], _ValueInt[ 1 ] );
+		}
+		else
+		if( name == "value3" )
+		{
+			return getValProp( _Value[ 2 ], _ValueInt[ 2 ] );
+		}
+		else
+		if( name == "range1" )
+		{
+			return getValProp( _Range[ 0 ], _RangeInt[ 0 ] );
+		}
+		else
+		if( name == "range2" )
+		{
+			return getValProp( _Range[ 1 ], _RangeInt[ 1 ] );
+		}
+		else
+		if( name == "range3" )
+		{
+			return getValProp( _Range[ 2 ], _RangeInt[ 2 ] );
+		}
+		else
+		if( name == "color1" )
+		{
+			return toString( _Colors[ 0 ] );
+		}
+		else
+		if( name == "color2" )
+		{
+			return toString( _Colors[ 1 ] );
+		}
+		else
+		if( name == "color3" )
+		{
+			return toString( _Colors[ 2 ] );
+		}
+		else
+		if( name == "color1_negative" )
+		{
+			return toString( _ColorsNegative[ 0 ] );
+		}
+		else
+		if( name == "color2_negative" )
+		{
+			return toString( _ColorsNegative[ 1 ] );
+		}
+		else
+		if( name == "color3_negative" )
+		{
+			return toString( _ColorsNegative[ 2 ] );
+		}
+		else
+		if( name == "mini" )
+		{
+			if( _Mini )
+				return "true";
+			else
+				return "false";
+		}
+		else
+			return CViewBitmap::getProperty( name );
+	}
+
+
 	// ----------------------------------------------------------------------------
 	bool CDBViewBar3::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
@@ -152,6 +226,14 @@ namespace NLGUI
 			return dbProp.getSInt32();
 		else
 			return intProp;
+	}
+
+	std::string CDBViewBar3::getValProp( const CInterfaceProperty &prop, sint32 intProp ) const
+	{
+		if( prop.getNodePtr() != NULL )
+			return prop.getNodePtr()->getFullName();
+		else
+			return toString( intProp );
 	}
 
 
