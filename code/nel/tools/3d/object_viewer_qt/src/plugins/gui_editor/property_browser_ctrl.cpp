@@ -86,6 +86,9 @@ namespace GUIEditor
 			const SPropEntry &prop = *pItr;
 			setupProperty( prop, element );
 		}
+
+		QtVariantEditorFactory *factory = new QtVariantEditorFactory;
+		browser->setFactoryForManager( propertyMgr, factory );
 	}
 
 	void CPropBrowserCtrl::setupProperty( const SPropEntry &prop, const CInterfaceElement *element )
