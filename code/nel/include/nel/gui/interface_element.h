@@ -123,10 +123,12 @@ namespace NLGUI
 
 		static std::string stripId( const std::string &fullId );
 
+		virtual std::string getProperty( const std::string &name ) const;
+
+		virtual void setProperty( const std::string &name, const std::string &value );
+
 		/// Parse the element and initalize it
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
-
-		virtual std::string getProperty( const std::string &name ) const;
 
 		/// Debug info on memory
 		virtual uint32 getMemory () { return (uint32)(sizeof(*this)+_Id.size()); }
@@ -469,6 +471,9 @@ namespace NLGUI
 
 		void setEditorSelected( bool b ){ editorSelected = b; }
 		bool isEditorSelected() const{ return editorSelected; }
+
+		void setPosParent( const std::string &id );
+		void setSizeParent( const std::string &id );
 
 	protected:
 

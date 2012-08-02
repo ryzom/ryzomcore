@@ -82,6 +82,170 @@ namespace NLGUI
 		return id;
 	}
 
+	std::string CInterfaceElement::getProperty( const std::string &name ) const
+	{
+		if( name == "id" )
+		{
+			return stripId( getId() );
+		}
+		else
+		if( name == "active" )
+		{
+			if( getActive() )
+				return "true";
+			else
+				return "false";
+		}
+		else
+		if( name == "x" )
+		{
+			return NLMISC::toString( getX() );
+		}
+		else
+		if( name == "y" )
+		{
+			return NLMISC::toString( getY() );
+		}
+		else
+		if( name == "w" )
+		{
+			return NLMISC::toString( getW() );
+		}
+		else
+		if( name == "h" )
+		{
+			return NLMISC::toString( getH() );
+		}
+		else
+		if( name == "posref" )
+		{
+			std::string posref;
+			posref = HotSpotToString( getParentPosRef() );
+			posref += " ";
+			posref += HotSpotToString( getPosRef() );
+			return posref;
+		}
+		else
+		if( name == "sizeref" )
+		{
+			return getSizeRefAsString( _SizeRef, _SizeDivW, _SizeDivH );
+		}
+		if( name == "posparent" )
+		{
+			return CWidgetManager::getInstance()->getParser()->getParentPosAssociation( (CInterfaceElement*)this );
+		}
+		else
+		if( name == "sizeparent" )
+		{
+			return CWidgetManager::getInstance()->getParser()->getParentSizeAssociation( (CInterfaceElement*)this );
+		}
+		else
+		if( name == "global_color" )
+		{
+			return toString( _ModulateGlobalColor );
+		}
+		else
+		if( name == "render_layer" )
+		{
+			return toString( _RenderLayer );
+		}
+		else
+		if( name == "avoid_resize_parent" )
+		{
+			return toString( _AvoidResizeParent );
+		}
+		else
+		{
+			nlwarning( "Invalid property '%s' queried for widget '%s'", name.c_str(), _Id.c_str() );
+			return "";
+		}
+	}
+
+	void CInterfaceElement::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "id" )
+		{
+			setIdRecurse( stripId( value ) );
+		}
+		else
+		if( name == "active" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				setActive( b );
+		}
+		else
+		if( name == "x" )
+		{
+			sint32 x;
+			if( fromString( value, x ) )
+				setX( x );
+		}
+		else
+		if( name == "y" )
+		{
+			sint32 y;
+			if( fromString( value, y ) )
+				setY( y );
+		}
+		else
+		if( name == "w" )
+		{
+			sint32 w;
+			if( fromString( value, w ) )
+				setW( w );
+		}
+		else
+		if( name == "h" )
+		{
+			sint32 h;
+			if( fromString( value, h ) )
+				setH( h );
+		}
+		else
+		if( name == "posref" )
+		{
+			convertHotSpotCouple( value.c_str(), _ParentPosRef, _PosRef );
+		}
+		else
+		if( name == "sizeref" )
+		{
+			parseSizeRef( value.c_str() );
+		}
+		if( name == "posparent" )
+		{
+			setPosParent( value );
+		}
+		else
+		if( name == "sizeparent" )
+		{
+			setSizeParent( value );
+		}
+		else
+		if( name == "global_color" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				setModulateGlobalColor( b );
+		}
+		else
+		if( name == "render_layer" )
+		{
+			sint8 l;
+			if( fromString( value, l ) )
+				setRenderLayer( l );
+		}
+		else
+		if( name == "avoid_resize_parent" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				setAvoidResizeParent( b );
+		}
+		else
+			nlwarning( "Tried to set invalid property '%s' for widget '%s'", name.c_str(), _Id.c_str() );
+	}
+
 	// ------------------------------------------------------------------------------------------------
 	bool CInterfaceElement::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
@@ -157,35 +321,13 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"posparent" );
 		if (ptr)
 		{
-			if (strcmp(ptr,"parent")) // is ptr != "parent"
-			{
-				string idparent;
-				if (parentGroup)
-					idparent = parentGroup->getId() +":";
-				else
-					idparent = "ui:";
-				CWidgetManager::getInstance()->getParser()->addParentPositionAssociation(this, idparent +  string((const char*)ptr));
-			}
+			setPosParent( std::string( ptr ) );
 		}
 
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"sizeparent" );
 		if (ptr)
 		{
-			string idparent = ptr;
-			idparent = NLMISC::strlwr(idparent);
-			if (idparent != "parent")
-			{
-				if (parentGroup)
-					idparent = parentGroup->getId() +":" +  string((const char*)ptr);
-				else
-					idparent = "ui:" +  string((const char*)ptr);
-			}
-			else
-			{
-				if (parentGroup)
-					idparent = parentGroup->getId();
-			}
-			CWidgetManager::getInstance()->getParser()->addParentSizeAssociation( this, idparent );
+			setSizeParent( std::string( ptr ) );
 		}
 
 		ptr = (char*) xmlGetProp (cur, (xmlChar*)"sizeref");
@@ -212,85 +354,6 @@ namespace NLGUI
 		if(ptr)		_AvoidResizeParent= convertBool(ptr);
 
 		return true;
-	}
-
-
-	std::string CInterfaceElement::getProperty( const std::string &name ) const
-	{
-		if( name == "id" )
-		{
-			return stripId( getId() );
-		}
-		else
-		if( name == "active" )
-		{
-			if( getActive() )
-				return "true";
-			else
-				return "false";
-		}
-		else
-		if( name == "x" )
-		{
-			return NLMISC::toString( getX() );
-		}
-		else
-		if( name == "y" )
-		{
-			return NLMISC::toString( getY() );
-		}
-		else
-		if( name == "w" )
-		{
-			return NLMISC::toString( getW() );
-		}
-		else
-		if( name == "h" )
-		{
-			return NLMISC::toString( getH() );
-		}
-		else
-		if( name == "posref" )
-		{
-			std::string posref;
-			posref = HotSpotToString( getParentPosRef() );
-			posref += " ";
-			posref += HotSpotToString( getPosRef() );
-			return posref;
-		}
-		else
-		if( name == "sizeref" )
-		{
-			return getSizeRefAsString( _SizeRef, _SizeDivW, _SizeDivH );
-		}
-		if( name == "posparent" )
-		{
-			return CWidgetManager::getInstance()->getParser()->getParentPosAssociation( (CInterfaceElement*)this );
-		}
-		else
-		if( name == "sizeparent" )
-		{
-			return CWidgetManager::getInstance()->getParser()->getParentSizeAssociation( (CInterfaceElement*)this );
-		}
-		else
-		if( name == "global_color" )
-		{
-			return toString( _ModulateGlobalColor );
-		}
-		else
-		if( name == "render_layer" )
-		{
-			return toString( _RenderLayer );
-		}
-		else
-		if( name == "avoid_resize_parent" )
-		{
-			return toString( _AvoidResizeParent );
-		}
-
-		nlwarning( "Invalid property '%s' queried for widget '%s'", name.c_str(), _Id.c_str() );
-
-		return "";
 	}
 
 
@@ -1390,6 +1453,43 @@ namespace NLGUI
 				parent = parent->getParent();
 		}
 		return false;
+	}
+
+	void CInterfaceElement::setPosParent( const std::string &id )
+	{
+		std::string Id = stripId( id );
+
+		if( Id != "parent" )
+		{
+			std::string idParent;
+			if( _Parent != NULL )
+				idParent = _Parent->getId() + ":";
+			else
+				idParent = "ui:";
+			CWidgetManager::getInstance()->getParser()->addParentPositionAssociation( this, idParent + Id );
+		}
+	}
+
+	void CInterfaceElement::setSizeParent( const std::string &id )
+	{
+		std::string Id = stripId( id );
+		std::string idParent;
+
+		if( Id != "parent" )
+		{
+			if( _Parent != NULL )
+				idParent = _Parent->getId() + ":";
+			else
+				idParent = "ui:";
+			
+		}
+		else
+		{
+			if( _Parent != NULL )
+				idParent = _Parent->getId();
+		}
+
+		CWidgetManager::getInstance()->getParser()->addParentSizeAssociation( this, idParent + Id );
 	}
 
 	CStringMapper* CStringShared::_UIStringMapper = NULL;
