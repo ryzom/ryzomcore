@@ -1291,6 +1291,282 @@ namespace NLGUI
 		return TitleText;
 	}
 
+	std::string CGroupContainer::getProperty( const std::string &name ) const
+	{
+		if( name == "localize" )
+		{
+			return toString( _Localize );
+		}
+		else
+		if( name == "title_class" )
+		{
+			switch( _TitleClass )
+			{
+			case TitleTextFormated:
+				return "formated";
+				break;
+
+			case TitleTextId:
+				return "text_id";
+				break;
+
+			case TitleTextDynString:
+				return "text_dyn_string";
+				break;
+			}
+
+			return "text";
+		}
+		else
+		if( name == "content_y_offset" )
+		{
+			return toString( _ContentYOffset );
+		}
+		else
+		if( name == "title" )
+		{
+			if( _TitleTextOpened == _TitleTextClosed )
+				return _TitleTextOpened.toString();
+			else
+				return "";
+		}
+		else
+		if( name == "title_opened" )
+		{
+			return _TitleTextOpened.toString();
+		}
+		else
+		if( name == "title_closed" )
+		{
+			return _TitleTextClosed.toString();
+		}
+		else
+		if( name == "header_active" )
+		{
+			return toString( _HeaderActive );
+		}
+		else
+		if( name == "header_color" )
+		{
+			if( _HeaderColor.getNodePtr() != NULL )
+				return _HeaderColor.getNodePtr()->getFullName();
+			else
+				return "";
+		}
+		else
+		if( name == "right_button" )
+		{
+			return toString( _EnabledRightButton );
+		}
+		else
+		if( name == "help_button" )
+		{
+			return toString( _EnabledHelpButton );
+		}
+		else
+		if( name == "movable" )
+		{
+			return toString( _Movable );
+		}
+		else
+		if( name == "popable" )
+		{
+			return toString( _Popable );
+		}
+		else
+		if( name == "lockable" )
+		{
+			return toString( _Lockable );
+		}
+		else
+		if( name == "locked" )
+		{
+			return toString( _Locked );
+		}
+		else
+		if( name == "openable" )
+		{
+			return toString( _Openable );
+		}
+		else
+		if( name == "opened" )
+		{
+			return toString( _Opened );
+		}
+		else
+		if( name == "modal" )
+		{
+			return toString( _Modal );
+		}
+		else
+		if( name == "open_when_popup" )
+		{
+			return toString( _OpenWhenPopup );
+		}
+		else
+		if( name == "resizer" )
+		{
+			return toString( _EnabledResizer );
+		}
+		else
+		if( name == "resizer_top_size" )
+		{
+			return toString( _ResizerTopSize );
+		}
+		else
+		if( name == "on_open" )
+		{
+			return CAHManager::getInstance()->getActionHandlerName( _AHOnOpen );
+		}
+		else
+		if( name == "on_open_params" )
+		{
+			return _AHOnOpenParams.toString();
+		}
+		else
+		if( name == "on_close" )
+		{
+			return CAHManager::getInstance()->getActionHandlerName( _AHOnClose );
+		}
+		else
+		if( name == "on_close_params" )
+		{
+			return _AHOnCloseParams.toString();
+		}
+		else
+		if( name == "on_close_button" )
+		{
+			return CAHManager::getInstance()->getActionHandlerName( _AHOnCloseButton );
+		}
+		else
+		if( name == "on_close_button_params" )
+		{
+			return _AHOnCloseButtonParams.toString();
+		}
+		else
+		if( name == "on_move" )
+		{
+			return CAHManager::getInstance()->getActionHandlerName( _AHOnMove );
+		}
+		else
+		if( name == "on_move_params" )
+		{
+			return _AHOnMoveParams.toString();
+		}
+		else
+		if( name == "on_deactive_check" )
+		{
+			return CAHManager::getInstance()->getActionHandlerName( _AHOnDeactiveCheck );
+		}
+		else
+		if( name == "on_deactive_check_params" )
+		{
+			return _AHOnDeactiveCheckParams.toString();
+		}
+		else
+		if( name == "on_resize" )
+		{
+			return CAHManager::getInstance()->getActionHandlerName( _AHOnResize );
+		}
+		else
+		if( name == "on_resize_params" )
+		{
+			return _AHOnResizeParams.toString();
+		}
+		else
+		if( name == "on_alpha_settings_changed" )
+		{
+			return CAHManager::getInstance()->getActionHandlerName( _AHOnAlphaSettingsChanged );
+		}
+		else
+		if( name == "on_alpha_settings_changed_params" )
+		{
+			return _AHOnAlphaSettingsChangedParams.toString();
+		}
+		else
+		if( name == "on_begin_move" )
+		{
+			return CAHManager::getInstance()->getActionHandlerName( _AHOnBeginMove );
+		}
+		else
+		if( name == "on_begin_move_params" )
+		{
+			return _AHOnBeginMoveParams.toString();
+		}
+		else
+		if( name == "max_w" )
+		{
+			return toString( _MaxW );
+		}
+		else
+		if( name == "min_w" )
+		{
+			return toString( _MinW );
+		}
+		else
+		if( name == "pop_max_w" )
+		{
+			return toString( _PopupMaxW );
+		}
+		else
+		if( name == "pop_min_w" )
+		{
+			return toString( _PopupMinW );
+		}
+		else
+		if( name == "pop_max_h" )
+		{
+			return toString( _PopupMaxH );
+		}
+		else
+		if( name == "pop_min_h" )
+		{
+			return toString( _PopupMinH );
+		}
+		else
+		if( name == "movable_in_parent_list" )
+		{
+			return toString( _MovableInParentList );
+		}
+		else
+		if( name == "savable" )
+		{
+			return toString( _Savable );
+		}
+		else
+		if( name == "active_savable" )
+		{
+			return toString( _ActiveSavable );
+		}
+		else
+		if( name == "modal_parent" )
+		{
+			return _ModalParentNames;
+		}
+		else
+		if( name == "options" )
+		{
+			return _OptionsName;
+		}
+		else
+		if( name == "title_delta_max_w" )
+		{
+			return toString( _TitleDeltaMaxW );
+		}
+		else
+		if( name == "title_over_extend_view_text" )
+		{
+			return toString( _TitleOverExtendViewText );
+		}
+		else
+		if( name == "help_page" )
+		{
+			return _HelpPage.toString();
+		}
+		else
+			return CInterfaceGroup::getProperty( name );
+	}
+
 	// ***************************************************************************
 	bool CGroupContainer::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{

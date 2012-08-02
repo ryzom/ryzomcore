@@ -166,6 +166,8 @@ namespace NLGUI
 		CGroupContainer(const TCtorParam &param);
 		~CGroupContainer();
 
+		std::string getProperty( const std::string &name ) const;
+
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 		virtual void updateCoords ();
