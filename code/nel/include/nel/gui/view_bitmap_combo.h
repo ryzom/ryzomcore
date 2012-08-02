@@ -105,6 +105,11 @@ namespace NLGUI
 	public:
 		/// ctor
 		CViewBitmapCombo(const TCtorParam &param);
+
+
+		std::string getProperty( const std::string &name ) const;
+
+
 		/**
 		 * parse an xml node and initialize the base view members. Must call CViewBase::parse
 		 * \param cur : pointer to the xml node to be parsed
@@ -159,6 +164,8 @@ namespace NLGUI
 	private:
 		void	parseTexList(const std::string &names, TStringArray &dest);
 		void	parseColList(const std::string &names, TColorArray &dest);
+		void    getTexList( const TStringArray &arr, std::string &dest ) const;
+		void    getColList( const TColorArray  &arr, std::string &dest ) const;
 		void	setupSize();
 		void	getDimensions(uint &numRow, uint &numCol);
 		// From ICDBNode::IPropertyObserver

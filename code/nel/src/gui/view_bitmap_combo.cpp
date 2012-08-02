@@ -169,6 +169,52 @@ namespace NLGUI
 	{
 	}
 
+	std::string CViewBitmapCombo::getProperty( const std::string &name ) const
+	{
+		if( name == "tx_normal" )
+		{
+			std::string normal;
+			getTexList( _Texs, normal );
+			return normal;
+		}
+		else
+		if( name == "tx_over" )
+		{
+			std::string over;
+			getTexList( _TexsOver, over );
+			return over;
+		}
+		else
+		if( name == "tx_pushed" )
+		{
+			std::string pushed;
+			getTexList( _TexsPushed, pushed );
+			return pushed;
+		}
+		else
+		if( name == "col_normal" )
+		{
+			std::string normal;
+			getColList( _Col, normal );
+			return normal;
+		}
+		else
+		if( name == "col_over" )
+		{
+			std::string over;
+			getColList( _ColOver, over );
+			return over;
+		}
+		else
+		if( name == "col_pushed" )
+		{
+			std::string pushed;
+			getColList( _ColPushed, pushed );
+			return pushed;
+		}
+		else
+			return CViewBase::getProperty( name );
+	}
 
 	//=======================================================================================
 	bool CViewBitmapCombo::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
@@ -503,6 +549,28 @@ namespace NLGUI
 			pos = names.find_first_not_of(sep, nextPos);
 		}
 		while (pos != std::string::npos);
+	}
+
+	void CViewBitmapCombo::getTexList( const TStringArray &arr, std::string &dest ) const
+	{
+		dest.clear();
+		TStringArray::const_iterator itr;
+		for( itr = arr.begin(); itr != arr.end(); ++itr )
+		{
+			dest += *itr;
+			dest += " ";
+		}
+	}
+
+	void CViewBitmapCombo::getColList( const TColorArray &arr, std::string &dest ) const
+	{
+		dest.clear();
+		TColorArray::const_iterator itr;
+		for( itr = arr.begin(); itr != arr.end(); ++itr )
+		{
+			dest += toString( *itr );
+			dest += " ";
+		}
 	}
 
 	//=======================================================================================
