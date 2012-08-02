@@ -135,20 +135,8 @@ public:
 	std::set<std::string> m_ListOutputChangedOK; // idem but dependencies did not change, so ok
 	std::set<std::string> m_ListOutputRemoved; // changed_ng and removed end up being the same, it needs to be rebuilt ;)
 
-	// TODO: Make maps of the dependent files and directories after the vectors no longer needed
-	// Provide a function to check if a dependency is either in the dependent files or inside one of the directories to ensure the plugin is behaving sanely
-	// Slave should check this when it reads the depend log of a tool
-
-	// TODO: Provide a function: bool needsToBeRebuilt(inputpaths, outputfiles)
-	// It should check if anything was added, changed or removed in the input paths.
-	// It should check if the output files were changed or removed.
-	// NOT NECESSARY AT ALL --- It should check if the dependencies in the metadata of the output in case the dependencies are not given in the inputpaths.
-	
-	// NOT NECESSARY --- TODO: Provide a function for removing output files, it will also erase the status file and create a remove metadata file.
-
-	// PROBABLY NOT NECESSARY -- Could check the .depend of all output files from the previous build if necessary instead of having output files and use those to flag additional removals.
-	
-	// TODO: (use this one for known input to unknown output) Also, instead of the .output file, we can check outputfileremoved and outputfilechanged's depend to flag input files that have lost output files!!!
+	std::set<std::string> m_ListDependentDirectories;
+	std::set<std::string> m_ListDependentFiles;
 
 public:
 	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(NULL), m_ActiveProcess(NULL), m_AbortRequested(false), m_SubTaskResult(FINISH_NOT)
@@ -164,12 +152,12 @@ public:
 	virtual ~CModulePipelineSlave()
 	{
 		nldebug("START ~CModulePipelineSlave");
-		// TODO: IF MASTER STILL CONNECTED, NOTIFY INSANITY
-		// TODO: ABORT RUNNING BUILD PROCESS
+		// ?TODO? IF MASTER STILL CONNECTED, NOTIFY INSANITY
+		// ?TODO? ABORT RUNNING BUILD PROCESS
 		abortBuildTask(NULL);
 		leaveBuildReadyState(NULL);
 
-		// TODO?
+		// ?TODO?
 		// wait till build task has exited if still was running
 		// wait for other things to exist in case there are...
 		nldebug("Wait for tasks on the slave");
@@ -533,12 +521,174 @@ public:
 				}
 			}
 		}
+		std::copy(m_DependentDirectories.begin(), m_DependentDirectories.end(), m_ListDependentDirectories.end());
+		m_DependentDirectories.clear();
+		std::copy(m_DependentFiles.begin(), m_DependentFiles.end(), m_ListDependentFiles.end());
+		m_DependentFiles.clear();
+		m_SubTaskResult = FINISH_SUCCESS;
 	}
+
+	///////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////
 
 	void beginTheBuildThing()
 	{
 		// TODO ************/////////////////########################################################################### BUILD THING
 	}
+
+	///////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////
+
+	/// Returns false if the file does not need to be built, or if an error occured.
+	/// Must verify needsExit() afterwards.
+	/// Input paths may be files or directories.
+	/// Output paths can ONLY be files!
+	bool needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths)
+	{
+		if (m_SubTaskResult != FINISH_SUCCESS)
+			return false; // Cannot continue on previous failure.
+
+		m_SubTaskResult = FINISH_NOT;
+		for (std::vector<std::string>::const_iterator it = inputPaths.begin(), end = inputPaths.end(); it != end; ++it)
+		{
+			const std::string &path = *it;
+			if (path[path.size() - 1] == '/') // isDirectory
+			{
+				// Check if this directory is in the dependencies.
+				if (m_ListDependentDirectories.find(path) == m_ListDependentDirectories.end())
+				{
+					m_SubTaskResult = FINISH_ERROR;
+					m_SubTaskErrorMessage = std::string("Directory '") + path + "' is not part of the dependencies";
+					return false; // Error, cannot rebuild.
+				}
+				// Check if any files added/changed/removed are part of this directory (slow).
+				for (std::set<std::string>::const_iterator itr = m_ListInputAdded.begin(), endr = m_ListInputAdded.end(); itr != endr; ++itr)
+				{
+					const std::string &pathr = *it;
+					if ((pathr.size() > path.size())
+						&& (pathr.substr(0, path.size()) == path) // inside the path
+						&& (pathr.substr(path.size(), pathr.size() - path.size())).find('/') == std::string::npos) // not in a further subdirectory 
+					{
+						nldebug("Found added '%s' in dependency directory '%s', rebuild", pathr.c_str(), path.c_str());
+						m_SubTaskResult = FINISH_SUCCESS;
+						return true; // Rebuild.
+					}
+				}
+				for (std::set<std::string>::const_iterator itr = m_ListInputChanged.begin(), endr = m_ListInputChanged.end(); itr != endr; ++itr)
+				{
+					const std::string &pathr = *it;
+					if ((pathr.size() > path.size())
+						&& (pathr.substr(0, path.size()) == path) // inside the path
+						&& (pathr.substr(path.size(), pathr.size() - path.size())).find('/') == std::string::npos) // not in a further subdirectory 
+					{
+						nldebug("Found changed '%s' in dependency directory '%s', rebuild", pathr.c_str(), path.c_str());
+						m_SubTaskResult = FINISH_SUCCESS;
+						return true; // Rebuild.
+					}
+				}
+				for (std::set<std::string>::const_iterator itr = m_ListInputRemoved.begin(), endr = m_ListInputRemoved.end(); itr != endr; ++itr)
+				{
+					const std::string &pathr = *it;
+					if ((pathr.size() > path.size())
+						&& (pathr.substr(0, path.size()) == path) // inside the path
+						&& (pathr.substr(path.size(), pathr.size() - path.size())).find('/') == std::string::npos) // not in a further subdirectory 
+					{
+						nldebug("Found removed '%s' in dependency directory '%s', rebuild", pathr.c_str(), path.c_str());
+						m_SubTaskResult = FINISH_SUCCESS;
+						return true; // Rebuild.
+					}
+				}
+			}
+			else // isFile
+			{
+				// Check if this file is in the dependencies.
+				if (m_ListDependentFiles.find(path) == m_ListDependentFiles.end())
+				{
+					m_SubTaskResult = FINISH_ERROR;
+					m_SubTaskErrorMessage = std::string("File '") + path + "' is not part of the dependencies";
+					return false; // Error, cannot rebuild.
+				}
+				// Check if this file is in added/changed/removed.
+				if (m_ListInputAdded.find(path) != m_ListInputAdded.end()
+					|| m_ListInputChanged.find(path) != m_ListInputChanged.end()
+					|| m_ListInputRemoved.find(path) != m_ListInputRemoved.end())
+				{
+					nldebug("Found added/changed/removed input file '%s', rebuild", path.c_str());
+					m_SubTaskResult = FINISH_SUCCESS;
+					return true; // Rebuild.
+				}
+			}
+		}
+		for (std::vector<std::string>::const_iterator it = outputPaths.begin(), end = outputPaths.end(); it != end; ++it)
+		{
+			const std::string &path = *it;
+			if (path[path.size() - 1] == '/') // isDirectory
+			{
+				m_SubTaskResult = FINISH_ERROR;
+				m_SubTaskErrorMessage = std::string("Output file '") + path + "' cannot be a directory";
+				return false; // Error, cannot rebuild.
+			}
+			if (m_ListOutputRemoved.find(path) != m_ListOutputRemoved.end())
+			{
+				nldebug("Found removed output file '%s', rebuild", path.c_str());
+				return true;
+			}
+			if (m_ListOutputChanged.find(path) != m_ListOutputChanged.end())
+			{
+				nlwarning("Changed output files not implemented yet. Previous build was likely incomplete. Please wipe the output directory. Rebuilding anyways");
+				// For now always rebuild and don't check if the output file is up-to-date from a previous incomplete build.
+				nldebug("Found changed output file '%s', rebuild", path.c_str());
+				return true;
+				//m_SubTaskResult = FINISH_ERROR;
+				//m_SubTaskErrorMessage = std::string("Changed output files not implemented yet. Previous build was likely incomplete. Please wipe the output directory");
+				//return false; // Error, cannot rebuild.
+			}
+		}
+		m_SubTaskResult = FINISH_SUCCESS;
+		return false; // Does not need rebuild.
+	}
+
+	/*void findInputFilesNeedingRebuild()
+	{
+		// A Function that lists all known changed input files & that checks----
+		// write the .output file instead for .max style files! (by choice when parsing the depends log)
+		// need to check in the needstoberebuilt or earlier if an output file exists for all input files and inside all input directories if there are any output files & check & cache those
+	}*/
+
+	/// Set the exit message, exit the plugin immediately afterwards.
+	bool setExit(const TProcessResult exitLevel, const std::string &exitMessage)
+	{
+		m_SubTaskResult = exitLevel;
+		m_SubTaskErrorMessage = exitMessage;
+	}
+
+	/// Must verify this regularly to exit the plugin in case something went wrong.
+	bool needsExit()
+	{
+		// TODO: Bypass error feature.
+		if (m_SubTaskResult != FINISH_SUCCESS)
+			return true;
+		return false;
+	}
+
+	// TODO: Make maps of the dependent files and directories after the vectors no longer needed
+	// Provide a function to check if a dependency is either in the dependent files or inside one of the directories to ensure the plugin is behaving sanely
+	// Slave should check this when it reads the depend log of a tool
+
+	// TODO: Provide a function: bool needsToBeRebuilt(inputpaths, outputfiles)
+	// It should check if anything was added, changed or removed in the input paths.
+	// It should check if the output files were changed or removed.
+	// NOT NECESSARY AT ALL --- It should check if the dependencies in the metadata of the output in case the dependencies are not given in the inputpaths.
+	
+	// NOT NECESSARY --- TODO: Provide a function for removing output files, it will also erase the status file and create a remove metadata file.
+
+	// PROBABLY NOT NECESSARY -- Could check the .depend of all output files from the previous build if necessary instead of having output files and use those to flag additional removals.
+	
+	// TODO: (use this one for known input to unknown output) Also, instead of the .output file, we can check outputfileremoved and outputfilechanged's depend to flag input files that have lost output files!!!
+
+	// TODO: If the state of an output file that is changed & ok or not changed is error, return error!
 
 	///////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////
@@ -587,6 +737,9 @@ public:
 		m_ListOutputRemoved.clear();
 		m_ListOutputChangedNG.clear();
 		m_ListOutputChangedOK.clear();
+		m_ListDependentDirectories.clear();
+		m_ListDependentFiles.clear();
+		m_SubTaskResult = FINISH_NOT; // ! //
 	}
 
 	void finalizeAbort()
