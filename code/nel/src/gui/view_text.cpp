@@ -176,6 +176,133 @@ namespace NLGUI
 		return *this;
 	}
 
+	std::string CViewText::getProperty( const std::string &name ) const
+	{
+		if( name == "color" )
+		{
+			return toString( _Color );
+		}
+		else
+		if( name == "global_color" )
+		{
+			return toString( _ModulateGlobalColor );
+		}
+		else
+		if( name == "fontsize" )
+		{
+			return toString(
+				_FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32()
+				);
+		}
+		else
+		if( name == "shadow" )
+		{
+			return toString( _Shadow );
+		}
+		else
+		if( name == "shadow_color" )
+		{
+			return toString( _ShadowColor );
+		}
+		else
+		if( name == "multi_line" )
+		{
+			return toString( _MultiLine );
+		}
+		else
+		if( name == "justification" )
+		{
+			switch( _TextMode )
+			{
+			case ClipWord:
+				return "clip_word";
+				break;
+
+			case DontClipWord:
+				return "dont_clip_word";
+				break;
+
+			case Justified:
+				return "justified";
+				break;
+			}
+
+			return "";
+		}
+		else
+		if( name == "line_maxw" )
+		{
+			return toString( _LineMaxW );
+		}
+		else
+		if( name == "multi_line_space" )
+		{
+			return toString( _MultiLineSpace );
+		}
+		else
+		if( name == "multi_line_maxw_only" )
+		{
+			return toString( _MultiLineMaxWOnly );
+		}
+		else
+		if( name == "multi_max_line" )
+		{
+			return toString( _MultiMaxLine );
+		}
+		else
+		if( name == "underlined" )
+		{
+			return toString( _Underlined );
+		}
+		else
+		if( name == "case_mode" )
+		{
+			return toString( uint32( _CaseMode ) );
+		}
+		else
+		if( name == "over_extend_view_text" )
+		{
+			return toString( _OverExtendViewText );
+		}
+		else
+		if( name == "over_extend_parent_rect" )
+		{
+			return toString( _OverExtendViewTextUseParentRect );
+		}
+		else
+		if( name == "auto_clamp" )
+		{
+			return toString( _AutoClamp );
+		}
+		else
+		if( name == "clamp_right" )
+		{
+			return toString( _ClampRight );
+		}
+		else
+		if( name == "auto_clamp_offset" )
+		{
+			return toString( _AutoClampOffset );
+		}
+		else
+		if( name == "continuous_update" )
+		{
+			return toString( _ContinuousUpdate );
+		}
+		else
+		if( name == "hardtext" )
+		{
+			return _Text.toString();
+		}
+		else
+		if( name == "hardtext_format" )
+		{
+			return _HardtextFormat;
+		}
+		else
+			return CViewBase::getProperty( name );
+	}
+
 	// ***************************************************************************
 	void CViewText::parseTextOptions (xmlNodePtr cur)
 	{
@@ -333,6 +460,8 @@ namespace NLGUI
 		if (prop)
 		{
 			const char *propPtr = prop;
+			_HardtextFormat = propPtr;
+
 			if (_MultiLine)
 			{
 				setTextFormatTaged(CI18N::get(propPtr));

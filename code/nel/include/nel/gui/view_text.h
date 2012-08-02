@@ -54,6 +54,7 @@ namespace NLGUI
 
 		CViewText &operator=(const CViewText &vt);
 
+		std::string getProperty( const std::string &name ) const;
 		void parseTextOptions (xmlNodePtr cur);
 		bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
 		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
@@ -199,7 +200,7 @@ namespace NLGUI
 			virtual void serial(NLMISC::IStream &f);
 
 	protected:
-
+		std::string _HardtextFormat;
 		/// Text to display.
 		ucstring _Text;
 		/// index of the computed String associated to this text control
