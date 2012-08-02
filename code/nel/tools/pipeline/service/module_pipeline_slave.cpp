@@ -541,6 +541,26 @@ public:
 	///////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////
 
+	bool isFileDependency(const std::string &path)
+	{
+		if (m_ListDependentFiles.find(path) == m_ListDependentFiles.end()) // check if it's directly in the dependent files
+		{
+			// Not found!
+			std::string pathParent = path.substr(0, path.find_last_of('/') + 1);
+			if (m_ListDependentDirectories.find(pathParent) == m_ListDependentDirectories.end()) // check if it's inside one of the dependent directories
+			{
+				// Still not found!
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool isDirectoryDependency(const std::string &path)
+	{
+		return m_ListDependentDirectories.find(path) != m_ListDependentDirectories.end();
+	}
+
 	/// Returns false if the file does not need to be built, or if an error occured.
 	/// Must verify needsExit() afterwards.
 	/// Input paths may be files or directories.
@@ -557,7 +577,7 @@ public:
 			if (path[path.size() - 1] == '/') // isDirectory
 			{
 				// Check if this directory is in the dependencies.
-				if (m_ListDependentDirectories.find(path) == m_ListDependentDirectories.end())
+				if (!isDirectoryDependency(path))
 				{
 					m_SubTaskResult = FINISH_ERROR;
 					m_SubTaskErrorMessage = std::string("Directory '") + path + "' is not part of the dependencies";
@@ -604,7 +624,7 @@ public:
 			else // isFile
 			{
 				// Check if this file is in the dependencies.
-				if (m_ListDependentFiles.find(path) == m_ListDependentFiles.end())
+				if (!isFileDependency(path))
 				{
 					m_SubTaskResult = FINISH_ERROR;
 					m_SubTaskErrorMessage = std::string("File '") + path + "' is not part of the dependencies";
@@ -615,6 +635,7 @@ public:
 					|| m_ListInputChanged.find(path) != m_ListInputChanged.end()
 					|| m_ListInputRemoved.find(path) != m_ListInputRemoved.end())
 				{
+					// Found!
 					nldebug("Found added/changed/removed input file '%s', rebuild", path.c_str());
 					m_SubTaskResult = FINISH_SUCCESS;
 					return true; // Rebuild.
@@ -633,6 +654,7 @@ public:
 			if (m_ListOutputRemoved.find(path) != m_ListOutputRemoved.end())
 			{
 				nldebug("Found removed output file '%s', rebuild", path.c_str());
+				m_SubTaskResult = FINISH_SUCCESS;
 				return true;
 			}
 			if (m_ListOutputChanged.find(path) != m_ListOutputChanged.end())
@@ -640,6 +662,7 @@ public:
 				nlwarning("Changed output files not implemented yet. Previous build was likely incomplete. Please wipe the output directory. Rebuilding anyways");
 				// For now always rebuild and don't check if the output file is up-to-date from a previous incomplete build.
 				nldebug("Found changed output file '%s', rebuild", path.c_str());
+				m_SubTaskResult = FINISH_SUCCESS;
 				return true;
 				//m_SubTaskResult = FINISH_ERROR;
 				//m_SubTaskErrorMessage = std::string("Changed output files not implemented yet. Previous build was likely incomplete. Please wipe the output directory");
