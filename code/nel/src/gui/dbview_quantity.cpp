@@ -36,6 +36,31 @@ namespace NLGUI
 	}
 
 
+	std::string CDBViewQuantity::getProperty( const std::string &name ) const
+	{
+		if( name == "value" )
+		{
+			if( _Number.getNodePtr() != NULL )
+				return _Number.getNodePtr()->getFullName();
+			else
+				return "";
+		}
+		else
+		if( name == "valuemax" )
+		{
+			if( _NumberMax.getNodePtr() != NULL )
+				return _NumberMax.getNodePtr()->getFullName();
+			else
+				return "";
+		}
+		else
+		if( name == "emptytext" )
+		{
+			return _EmptyText.toString();
+		}
+		else
+			return CViewText::getProperty( name );
+	}
 
 	// ***************************************************************************
 	bool CDBViewQuantity::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
