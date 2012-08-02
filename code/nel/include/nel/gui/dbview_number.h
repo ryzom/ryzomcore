@@ -39,6 +39,7 @@ namespace NLGUI
 		/// Constructor
 		CDBViewNumber(const TCtorParam &param);
 
+		std::string getProperty( const std::string &name ) const;
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
 		virtual void checkCoords();
 		virtual void draw ();
