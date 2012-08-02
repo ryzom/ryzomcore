@@ -38,6 +38,35 @@ namespace NLGUI
 	}
 
 
+	std::string CDBViewDigit::getProperty( const std::string &name ) const
+	{
+		if( name == "value" )
+		{
+			if( _Number.getNodePtr() != NULL )
+				return _Number.getNodePtr()->getFullName();
+			else
+				return "";
+		}
+		else
+		if( name == "numdigit" )
+		{
+			return toString( _NumDigit );
+		}
+		else
+		if( name == "wspace" )
+		{
+			return toString( _WSpace );
+		}
+		else
+		if( name == "color" )
+		{
+			return toString( _Color );
+		}
+		else
+			return CViewBase::getProperty( name );
+	}
+
+
 	// ***************************************************************************
 	bool CDBViewDigit::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
