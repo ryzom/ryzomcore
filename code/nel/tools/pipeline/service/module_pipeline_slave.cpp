@@ -561,6 +561,92 @@ public:
 		return m_ListDependentDirectories.find(path) != m_ListDependentDirectories.end();
 	}
 
+	bool needsToBeRebuilt(const std::vector<std::string> &inputPaths)
+	{
+		if (m_SubTaskResult != FINISH_SUCCESS)
+			return false; // Cannot continue on previous failure.
+
+		m_SubTaskResult = FINISH_NOT;
+
+		// Sanity check
+		for (std::vector<std::string>::const_iterator it = inputPaths.begin(), end = inputPaths.end(); it != end; ++it)
+		{
+			const std::string &path = *it;
+			if (path[path.size() - 1] == '/') // isDirectory
+			{
+				m_SubTaskResult = FINISH_ERROR;
+				m_SubTaskErrorMessage = std::string("Output file '") + path + "' cannot be a directory";
+				return false; // Error, cannot rebuild.
+			}
+			if (!isFileDependency(path))
+			{
+				m_SubTaskResult = FINISH_ERROR;
+				m_SubTaskErrorMessage = std::string("File '") + path + "' is not part of the dependencies";
+				return false; // Error, cannot rebuild.
+			}
+		}
+
+		// Find out if anything happened to the input files.
+		bool inputFilesDifferent = false;
+		for (std::vector<std::string>::const_iterator it = inputPaths.begin(), end = inputPaths.end(); it != end; ++it)
+		{
+			const std::string &path = *it;
+			if (m_ListInputAdded.find(path) != m_ListInputAdded.end()
+				|| m_ListInputChanged.find(path) != m_ListInputChanged.end()
+				|| m_ListInputRemoved.find(path) != m_ListInputRemoved.end())
+			{
+				// Found!
+				nldebug("Found added/changed/removed input file '%s'", path.c_str());
+				inputFilesDifferent = true;
+				break;
+			}
+		}
+		if (!inputFilesDifferent)
+		{
+			nldebug("No added/changed/removed input files in this request");
+			if (m_ListOutputChanged.size() == 0 && m_ListOutputRemoved.size())
+			{
+				nldebug("No output files were tampered with since last successful build, rebuild not needed");
+				m_SubTaskResult = FINISH_SUCCESS;
+				return false; // No rebuild required.
+			}
+			else
+			{
+				nldebug("Output files may have changed, find out which output files are part of these input files");
+				m_SubTaskResult = FINISH_SUCCESS;
+				return needsToBeRebuildSubByOutput(inputPaths);
+			}
+		}
+		else // input files have changed
+		{
+			// TODO: FIND IF ALL INPUT FILES HAVE A .output FILE
+			bool allInputFilesHaveOutputFile = (rand()) % 2 == 0; // ###################################
+			if (!allInputFilesHaveOutputFile)
+			{
+				nldebug("Not all input files have an .output files, rebuild");
+				m_SubTaskResult = FINISH_SUCCESS;
+				return true;
+			}
+			else
+			{
+				nldebug("Output files may or may not be up to date, find out more, after the break");
+				m_SubTaskResult = FINISH_SUCCESS;
+				return needsToBeRebuildSubByOutput(inputPaths);
+			}
+		}
+	}
+
+	bool needsToBeRebuildSubByOutput(const std::vector<std::string> &inputPaths)
+	{
+		if (m_SubTaskResult != FINISH_SUCCESS)
+			return false; // Cannot continue on previous failure.
+		
+		m_SubTaskResult = FINISH_NOT;
+
+		// TODO: READ THE .output FILES AND PASS ON TO needsToBeRebuilt(2)
+		return true;
+	}
+
 	/// Returns false if the file does not need to be built, or if an error occured.
 	/// Must verify needsExit() afterwards.
 	/// Input paths may be files or directories.
@@ -672,13 +758,6 @@ public:
 		m_SubTaskResult = FINISH_SUCCESS;
 		return false; // Does not need rebuild.
 	}
-
-	/*void findInputFilesNeedingRebuild()
-	{
-		// A Function that lists all known changed input files & that checks----
-		// write the .output file instead for .max style files! (by choice when parsing the depends log)
-		// need to check in the needstoberebuilt or earlier if an output file exists for all input files and inside all input directories if there are any output files & check & cache those
-	}*/
 
 	/// Set the exit message, exit the plugin immediately afterwards.
 	bool setExit(const TProcessResult exitLevel, const std::string &exitMessage)
