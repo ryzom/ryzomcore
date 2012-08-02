@@ -614,13 +614,13 @@ public:
 			{
 				nldebug("Output files may have changed, find out which output files are part of these input files");
 				m_SubTaskResult = FINISH_SUCCESS;
-				return needsToBeRebuildSubByOutput(inputPaths);
+				return needsToBeRebuildSubByOutput(inputPaths, false);
 			}
 		}
 		else // input files have changed
 		{
 			// TODO: FIND IF ALL INPUT FILES HAVE A .output FILE
-			bool allInputFilesHaveOutputFile = (rand()) % 2 == 0; // ###################################
+			bool allInputFilesHaveOutputFile = (rand()) % 2 == 0; // ###################################fa
 			if (!allInputFilesHaveOutputFile)
 			{
 				nldebug("Not all input files have an .output files, rebuild");
@@ -631,19 +631,22 @@ public:
 			{
 				nldebug("Output files may or may not be up to date, find out more, after the break");
 				m_SubTaskResult = FINISH_SUCCESS;
-				return needsToBeRebuildSubByOutput(inputPaths);
+				return needsToBeRebuildSubByOutput(inputPaths, true);
 			}
 		}
 	}
 
-	bool needsToBeRebuildSubByOutput(const std::vector<std::string> &inputPaths)
+	bool needsToBeRebuildSubByOutput(const std::vector<std::string> &inputPaths, bool inputChanged)
 	{
 		if (m_SubTaskResult != FINISH_SUCCESS)
 			return false; // Cannot continue on previous failure.
 		
 		m_SubTaskResult = FINISH_NOT;
 
-		// TODO: READ THE .output FILES AND PASS ON TO needsToBeRebuilt(2)
+		// TODO: READ THE .output FILES (AND PASS ON TO needsToBeRebuilt(2))
+		// (if inputChanged) IF INPUT CACHED LastUpdate > .output BuildStart (project of file-based? - should not matter... prefer same as project start! (make it ProcessStart)) THEN NEED REBUILD
+		// OTHERWISE IF NO CHANGES SINCE OUTPUT BUILD, PASS TO needsToBeRebuilt(2) TO VERIFY THE OUTPUT PATHS IF ANYTHING MESSED WITH
+
 		return true;
 	}
 
@@ -653,6 +656,8 @@ public:
 	/// Output paths can ONLY be files!
 	bool needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths)
 	{
+		// TODO: REWRITE THIS
+
 		if (m_SubTaskResult != FINISH_SUCCESS)
 			return false; // Cannot continue on previous failure.
 
