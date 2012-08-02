@@ -26,6 +26,16 @@ NLMISC_REGISTER_OBJECT(CViewBase, CViewTextIDFormated, std::string, "text_id_for
 namespace NLGUI
 {
 
+	std::string CViewTextIDFormated::getProperty( const std::string &name ) const
+	{
+		if( name == "format" )
+		{
+			return getFormatString().toString();
+		}
+		else
+		return CViewTextID::getProperty( name );
+	}
+
 	// *********************************************************************************
 	bool CViewTextIDFormated::parse(xmlNodePtr cur,CInterfaceGroup * parentGroup)
 	{
