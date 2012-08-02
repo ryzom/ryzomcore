@@ -91,6 +91,7 @@ namespace NLGUI
 
 		~CViewTextID();
 
+		std::string getProperty( const std::string &name ) const;
 		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
 		virtual void checkCoords();
 

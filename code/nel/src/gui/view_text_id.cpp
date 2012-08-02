@@ -46,6 +46,29 @@ namespace NLGUI
 	{
 	}
 
+	std::string CViewTextID::getProperty( const std::string &name ) const
+	{
+		if( name == "textid" )
+		{
+			if( _DBTextId.getNodePtr() != NULL )
+				return _DBTextId.getNodePtr()->getFullName();
+			else
+				return NLMISC::toString( _TextId );
+		}
+		else
+		if( name == "dynamic_string" )
+		{
+			return NLMISC::toString( _DynamicString );
+		}
+		else
+		if( name == "format_taged" )
+		{
+			return NLMISC::toString( _IsTextFormatTaged );
+		}
+		else
+			return CViewText::getProperty( name );
+	}
+
 	// ***************************************************************************
 	bool CViewTextID::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
