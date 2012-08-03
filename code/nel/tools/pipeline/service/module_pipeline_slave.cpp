@@ -710,7 +710,8 @@ public:
 			const std::string &path = *it;
 			nlassert(!CFile::isDirectory(path)); // All input are files! Coding error otherwise, because should already be checked.
 			std::string metaOutputPath = CMetadataStorage::getOutputPath(path, m_ActiveProject->getName(), m_ActivePlugin.Handler);
-			nlassert(CFile::fileExists(metaOutputPath)); // Coding error otherwise.
+			nlassert(CFile::fileExists(metaOutputPath)); // Coding error otherwise, already must have checked beforehand that they all exist.
+
 			// Read the .output file
 			CFileOutput metaOutput;
 			CMetadataStorage::readOutput(metaOutput, metaOutputPath);
@@ -718,6 +719,7 @@ public:
 			localOutputPaths.reserve(metaOutput.MacroPaths.size());
 			for (std::vector<std::string>::const_iterator it = metaOutput.MacroPaths.begin(), end = metaOutput.MacroPaths.end(); it != end; ++it)
 				localOutputPaths.push_back(unMacroPath(*it));
+
 			// If inputChanged & hasInputFileBeenModified(path)
 			if (inputChanged && hasInputFileBeenModified(path))
 			{
@@ -729,7 +731,7 @@ public:
 					m_SubTaskResult = FINISH_SUCCESS;
 					return true; // Rebuild.
 				}
-				else // if (!needsFurtherInfo) // really only need to check this if we don't know yet if we need further info
+				else if (!needsFurtherInfo) // only need to check this if we don't know yet if we need further info // 'if ...' may be commented for debug purposes
 				{
 					CFileStatus inputStatus;
 					if (getDependencyFileStatusCached(inputStatus, path))
@@ -741,25 +743,26 @@ public:
 							needsFurtherInfo = true;
 							// Ad keep reading the rest of the .output files
 						}
-						// Else
-							// The .output is more or as recent as the input
-							// Don't need a rebuild if no other input's .output is outdated
-							// Do nothing and keep copying the output paths over
+						// Else:
+						// The .output is more or as recent as the input
+						// Don't need a rebuild if no other input's .output is outdated
+						// Do nothing and keep copying the output paths over
+						// Output may still have been tampered with, though.
 					}
 					else
 					{
-						m_SubTaskErrorMessage = "Input file '" + path + "' does not have status cache, cannot rebuild";
+						m_SubTaskErrorMessage = "Input file '" + path + "' does not have status cache, should never happen, possible data corruption, cannot rebuild";
 						m_SubTaskResult = FINISH_ERROR;
 						return false; // Error, cannot rebuild.
 					}
 				}
 			}
-			// Else (no input was changed)
 			else
 			{
-				// Input files did not change, but output may have been tampered with
+				// Input file did not change, but output may have been tampered with
 				needsFurtherInfo = true;
 			}
+			
 			// Copy the .output file into the output paths
 			for (std::vector<std::string>::const_iterator it = localOutputPaths.begin(), end = localOutputPaths.end(); it != end; ++it)
 				outputPaths.push_back(*it);
