@@ -839,11 +839,16 @@ public:
 
 		// Sanity check of all the output paths
 		// These must all be files, no directories allowed
+
+		// Check if any of the output paths are part of the removed output files
+			// If so, rebuild
+		// Check if any of the output files don't exist
+			// If so, rebuild
 		
-		// bool outputModified = Check if any of the output paths are part of the changed or removed output files
+		// bool outputChanged = Check if any of the output paths are part of the changed output files
 		
-		// Check the .depend files of all the output files
-			// If outputModified
+		// Check the .depend files of all the output files // also check that they exist :)
+			// If outputChanged
 				// Compare the output checksum with the cached output checksum
 			// If inputModified
 				// Compare the input checksums with the cached input checksums
