@@ -213,7 +213,7 @@ public:
 		CModulePipelineMasterSkel::init(this);
 		if (PIPELINE::tryDirectTask("MASTER_INIT_SHEETS"))
 		{
-			updateSheetsDatabaseStatus(CCallback<void>(this, &CModulePipelineMaster::cbMasterInitSheets));
+			updateSheetsDatabaseStatus();
 		}
 		else
 		{
@@ -222,8 +222,17 @@ public:
 		return true;
 	}
 
+	static void dummyCallback() { }
 	static void dummyFileStatusCallback(const std::string &/*filePath*/, const CFileStatus &/*fileStatus*/, bool /*success*/) { }
 
+	void updateSheetsDatabaseStatus()
+	{
+		std::vector<std::string> sheetPaths;
+		sheetPaths.push_back(NLNET::IService::getInstance()->ConfigFile.getVar("WorkspaceSheetDirectory").asString());
+		g_DatabaseStatus->updateDatabaseStatus(dummyCallback, dummyFileStatusCallback, sheetPaths, true, true); // relatively fast so no need to thread
+		PIPELINE::endedDirectTask();
+	}
+	
 	void updateSheetsDatabaseStatus(const CCallback<void> &callback)
 	{
 		std::vector<std::string> sheetPaths;
