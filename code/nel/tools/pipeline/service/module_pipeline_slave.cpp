@@ -919,10 +919,11 @@ public:
 				{
 					// Compare the output checksum with the status output checksum
 					CFileStatus metaStatus;
-					if (!CDatabaseStatus::updateFileStatus(metaStatus, path))
+					if (!g_DatabaseStatus->updateFileStatus(metaStatus, path))
 					{
+						// FIXME: Is it really necessary to recalculate the crc32 if the status file is broken for an output file? Useful though for some rare cases.
 						m_SubTaskResult = FINISH_ERROR;
-						m_SubTaskErrorMessage = std::string("Could not get status for output file ', this should never happen at all, coding error") + path + "'";
+						m_SubTaskErrorMessage = std::string("Could not get status for output file '") + path + "', this should never happen at all, coding error";
 						return false; // Error, cannot rebuild.
 					}
 					else
@@ -938,7 +939,27 @@ public:
 				if (inputModified)
 				{
 					// Compare the input checksums with the cached input checksums
-					
+					for (std::vector<CFileDepend::CDependency>::const_iterator itd = metaDepend.Dependencies.begin(), endd = metaDepend.Dependencies.end(); itd != endd; ++itd)
+					{
+						const CFileDepend::CDependency &dependency = *itd;
+						std::string dependencyFile = unMacroPath(dependency.MacroPath);
+						CFileStatus metaStatus;
+						if (!getDependencyFileStatusCached(metaStatus, dependencyFile))
+						{
+							nlwarning("Output file '%s' depends on unknown file '%s', rebuild", path.c_str(), dependencyFile.c_str());
+							m_SubTaskResult = FINISH_SUCCESS;
+							return true; // Rebuild.
+						}
+						else
+						{
+							if (metaStatus.CRC32 != metaDepend.CRC32)
+							{
+								nldebug("Status checksum for '%s' does match depend checksum, input file was modified, rebuild", path.c_str());
+								m_SubTaskResult = FINISH_SUCCESS;
+								return true; // Rebuild.
+							}
+						}
+					}
 				}
 			}
 		}
@@ -1187,11 +1208,11 @@ public:
 protected:
 	NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CModulePipelineSlave, CModuleBase)
 		NLMISC_COMMAND_HANDLER_ADD(CModulePipelineSlave, testUpdateDatabaseStatus, "Test master request for database status update on dependencies", "<projectName> <processName>")
-		NLMISC_COMMAND_HANDLER_ADD(CModulePipelineSlave, testGetFileStatus, "Test reading of file status from slave on dependencies", "<projectName> <processName>")
+		// NLMISC_COMMAND_HANDLER_ADD(CModulePipelineSlave, testGetFileStatus, "Test reading of file status from slave on dependencies", "<projectName> <processName>")
 	NLMISC_COMMAND_HANDLER_TABLE_END
 
 	NLMISC_CLASS_COMMAND_DECL(testUpdateDatabaseStatus);
-	NLMISC_CLASS_COMMAND_DECL(testGetFileStatus);
+	// NLMISC_CLASS_COMMAND_DECL(testGetFileStatus);
 
 }; /* class CModulePipelineSlave */
 
@@ -1286,7 +1307,7 @@ NLMISC_CLASS_COMMAND_IMPL(CModulePipelineSlave, testUpdateDatabaseStatus)
 }
 
 ///////////////////////////////////////////////////////////////////////
-
+/*
 namespace {
 
 class CTestGetFileStatusCommand : public NLMISC::IRunnable
@@ -1359,8 +1380,8 @@ public:
 	}
 };
 
-} /* anonymous namespace */
-
+}*/ /* anonymous namespace */
+/*
 NLMISC_CLASS_COMMAND_IMPL(CModulePipelineSlave, testGetFileStatus)
 {
 	// EXAMPLE USAGE: slave.testGetFileStatus common_interface Interface
@@ -1384,7 +1405,7 @@ NLMISC_CLASS_COMMAND_IMPL(CModulePipelineSlave, testGetFileStatus)
 	{ log.displayNL("BUSY"); delete runnableCommand; return false; }
 	return true;
 }
-
+*/
 ///////////////////////////////////////////////////////////////////////
 
 void module_pipeline_slave_forceLink() { }
