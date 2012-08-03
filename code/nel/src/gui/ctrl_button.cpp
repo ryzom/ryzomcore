@@ -28,6 +28,36 @@ NLMISC_REGISTER_OBJECT(CViewBase, CCtrlButton, std::string, "button");
 
 namespace NLGUI
 {
+
+	void CCtrlButton::setAlignFromString( const std::string &s )
+	{
+		_Align = 0;
+
+		std::string::size_type i;
+		for( i = 0; i < s.size(); i++ )
+		{
+			char c = toLower( s[ i ] );
+
+			switch( c ){
+				case 'l':
+					_Align &= ~1;
+					break;
+
+				case 'r':
+					_Align |= 1;
+					break;
+
+				case 'b':
+					_Align &= ~2;
+					break;
+
+				case 't':
+					_Align |= 2;
+					break;
+			}
+		}
+	}
+
 	std::string CCtrlButton::getProperty( const std::string &name ) const
 	{
 		if( name == "tx_normal" )
@@ -65,6 +95,55 @@ namespace NLGUI
 		}
 		else
 			return CCtrlBaseButton::getProperty( name );
+	}
+
+	void CCtrlButton::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "tx_normal" )
+		{
+			std::string s = CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdNormal );
+			if( !_TextureIdNormal.setTexture( value.c_str() ) )
+			{
+				_TextureIdNormal.setTexture( s.c_str() );
+			}
+			return;
+		}
+		else
+		if( name == "tx_pushed" )
+		{
+			std::string s = CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdPushed );
+			if( !_TextureIdPushed.setTexture( value.c_str() ) )
+			{
+				_TextureIdPushed.setTexture( s.c_str() );
+			}
+			return;
+		}
+		else
+		if( name == "tx_over" )
+		{
+			std::string s = CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdOver );
+			if( !_TextureIdOver.setTexture( value.c_str() ) )
+			{
+				_TextureIdOver.setTexture( s.c_str() );
+			}
+			return;
+		}
+		else
+		if( name == "scale" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Scale = b;
+			return;
+		}
+		else
+		if( name == "align" )
+		{
+			setAlignFromString( value );
+			return;
+		}
+		else
+			CCtrlBaseButton::setProperty( name, value );
 	}
 
 	// ----------------------------------------------------------------------------
@@ -115,22 +194,9 @@ namespace NLGUI
 
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"align");
-		_Align = 0;
 		if (prop)
 		{
-			const char *seekPtr = prop.getDatas();
-			while (*seekPtr != 0)
-			{
-				if ((*seekPtr=='l')||(*seekPtr=='L'))
-					_Align &= ~1;
-				if ((*seekPtr=='r')||(*seekPtr=='R'))
-					_Align |= 1;
-				if ((*seekPtr=='b')||(*seekPtr=='B'))
-					_Align &= ~2;
-				if ((*seekPtr=='t')||(*seekPtr=='T'))
-					_Align |= 2;
-				++seekPtr;
-			}
+			setAlignFromString( std::string( prop ) );
 		}
 
 
