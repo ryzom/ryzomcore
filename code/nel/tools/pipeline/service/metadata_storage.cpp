@@ -83,6 +83,7 @@ void CFileDepend::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 	uint version = stream.serialVersion(1);
 	stream.serial(CRC32);
 	stream.serialCont(Dependencies);
+	stream.serialCont(RuntimeDependencies);
 }
 
 void CProcessResult::CFileResult::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)

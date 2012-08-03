@@ -922,7 +922,7 @@ public:
 					if (!CDatabaseStatus::updateFileStatus(metaStatus, path))
 					{
 						m_SubTaskResult = FINISH_ERROR;
-						m_SubTaskErrorMessage = std::string("Could not get status for output file '") + path + "'";
+						m_SubTaskErrorMessage = std::string("Could not get status for output file ', this should never happen at all, coding error") + path + "'";
 						return false; // Error, cannot rebuild.
 					}
 					else
@@ -938,7 +938,7 @@ public:
 				if (inputModified)
 				{
 					// Compare the input checksums with the cached input checksums
-
+					
 				}
 			}
 		}

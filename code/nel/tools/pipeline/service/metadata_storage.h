@@ -113,6 +113,7 @@ public:
 		void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
 	};
 	std::vector<CDependency> Dependencies;
+	std::vector<CDependency> RuntimeDependencies; // informational
 
 	void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
 };
