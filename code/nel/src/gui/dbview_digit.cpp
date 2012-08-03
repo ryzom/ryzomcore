@@ -67,6 +67,42 @@ namespace NLGUI
 	}
 
 
+	void CDBViewDigit::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "value" )
+		{
+			_Number.link( value.c_str() );
+			return;
+		}
+		else
+		if( name == "numdigit" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_NumDigit = i;
+			return;
+		}
+		else
+		if( name == "wspace" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_WSpace = i;
+			return;
+		}
+		else
+		if( name == "color" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_Color = c;
+			return;
+		}
+		else
+			CViewBase::setProperty( name, value );
+	}
+
+
 	// ***************************************************************************
 	bool CDBViewDigit::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
