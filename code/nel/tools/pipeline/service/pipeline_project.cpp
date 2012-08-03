@@ -213,7 +213,8 @@ std::string CPipelineProject::getOutputDirectory()
 
 std::string CPipelineProject::getTempDirectory()
 {
-	if (m_TempDirectory.empty())
+	std::string tempDirectory;
+	do
 	{
 		std::stringstream ss;
 		ss << g_WorkDir;
@@ -225,10 +226,10 @@ std::string CPipelineProject::getTempDirectory()
 		ss << rand();
 		ss << PIPELINE_DIRECTORY_TEMP_SUFFIX;
 		ss << "/";
-		NLMISC::CFile::createDirectoryTree(ss.str());
-		m_TempDirectory = ss.str();
-	}
-	return m_TempDirectory;
+		tempDirectory = ss.str();
+	} while (NLMISC::CFile::isDirectory(tempDirectory));
+	NLMISC::CFile::createDirectoryTree(tempDirectory);
+	return tempDirectory;
 }
 
 void CPipelineProject::parseValue(std::string &result, const std::string &value)
