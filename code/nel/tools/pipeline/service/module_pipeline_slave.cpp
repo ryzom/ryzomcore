@@ -40,6 +40,7 @@
 #include "module_pipeline_master_itf.h"
 #include "pipeline_service.h"
 #include "../plugin_library/process_info.h"
+#include "../plugin_library/process_handler.h"
 #include "pipeline_workspace.h"
 #include "pipeline_process_impl.h"
 #include "database_status.h"
@@ -516,12 +517,24 @@ public:
 		CPluginBuildTask(CModulePipelineSlave *slave) : m_Slave(slave) { }
 		virtual void run()
 		{
-			// Figure out the build plugin
-			// ...
-
-				// Build
-				// ...
-				// TODO ************/////////////////########################################################################### BUILD THING
+			// Call the build plugin
+			switch (m_Slave->m_ActiveProcess->m_ActivePlugin.HandlerType)
+			{
+			case PIPELINE::PLUGIN_REGISTERED_CLASS:
+				{
+					PIPELINE::IProcessHandler *processHandler = static_cast<PIPELINE::IProcessHandler *>(NLMISC::CClassRegistry::create(m_Slave->m_ActiveProcess->m_ActivePlugin.Handler));
+					processHandler->setPipelineProcess(m_Slave->m_ActiveProcess);
+					m_Slave->m_ActiveProcess->m_SubTaskResult = FINISH_NOT;
+					processHandler->build();
+				}
+				break;
+			default:
+				nlwarning("Plugin type not implemented");
+				break;
+			}
+			
+			// Write the results file
+			// ... ****************************** TODO
 
 			// Done
 			m_Slave->m_PluginBuildDone = true;

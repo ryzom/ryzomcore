@@ -31,7 +31,7 @@
 // STL includes
 
 // NeL includes
-// #include <nel/misc/debug.h>
+#include <nel/misc/debug.h>
 
 // Project includes
 
@@ -52,7 +52,9 @@ CProcessInterface::~CProcessInterface()
 
 void CProcessInterface::build()
 {
+	nldebug("Building process interface!");
 
+	m_PipelineProcess->setExit(FINISH_ERROR, "Not yet implemented");
 }
 
 } /* namespace PIPELINE */
