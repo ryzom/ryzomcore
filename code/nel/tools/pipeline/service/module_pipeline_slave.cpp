@@ -561,6 +561,45 @@ public:
 		return m_ListDependentDirectories.find(path) != m_ListDependentDirectories.end();
 	}
 
+	bool hasInputDirectoryBeenModified(const std::string &inputDirectory)
+	{
+		// Check if any files added/changed/removed are part of this directory (slow).
+		for (std::set<std::string>::const_iterator itr = m_ListInputAdded.begin(), endr = m_ListInputAdded.end(); itr != endr; ++itr)
+		{
+			const std::string &pathr = *itr;
+			if ((pathr.size() > inputDirectory.size())
+				&& (pathr.substr(0, inputDirectory.size()) == inputDirectory) // inside the path
+				&& (pathr.substr(inputDirectory.size(), pathr.size() - inputDirectory.size())).find('/') == std::string::npos) // not in a further subdirectory 
+			{
+				nldebug("Found added '%s' in dependency directory '%s'", pathr.c_str(), inputDirectory.c_str());
+				return true;
+			}
+		}
+		for (std::set<std::string>::const_iterator itr = m_ListInputChanged.begin(), endr = m_ListInputChanged.end(); itr != endr; ++itr)
+		{
+			const std::string &pathr = *itr;
+			if ((pathr.size() > inputDirectory.size())
+				&& (pathr.substr(0, inputDirectory.size()) == inputDirectory) // inside the path
+				&& (pathr.substr(inputDirectory.size(), pathr.size() - inputDirectory.size())).find('/') == std::string::npos) // not in a further subdirectory 
+			{
+				nldebug("Found changed '%s' in dependency directory '%s'", pathr.c_str(), inputDirectory.c_str());
+				return true;
+			}
+		}
+		for (std::set<std::string>::const_iterator itr = m_ListInputRemoved.begin(), endr = m_ListInputRemoved.end(); itr != endr; ++itr)
+		{
+			const std::string &pathr = *itr;
+			if ((pathr.size() > inputDirectory.size())
+				&& (pathr.substr(0, inputDirectory.size()) == inputDirectory) // inside the path
+				&& (pathr.substr(inputDirectory.size(), pathr.size() - inputDirectory.size())).find('/') == std::string::npos) // not in a further subdirectory 
+			{
+				nldebug("Found removed '%s' in dependency directory '%s'", pathr.c_str(), inputDirectory.c_str());
+				return true;
+			}
+		}
+		return false;
+	}
+
 	bool hasInputFileBeenModified(const std::string &inputFile)
 	{
 		return m_ListInputAdded.find(inputFile) != m_ListInputAdded.end()
@@ -701,14 +740,95 @@ public:
 	{
 		if (m_SubTaskResult != FINISH_SUCCESS)
 			return false; // Cannot continue on previous failure.
+		
+		m_SubTaskResult = FINISH_NOT;
 
+		// Sanity check of all the input paths, 
+		// they must be either files that are dependency files or inside dependency directories
+		// or directories that are dependency directories.
+		for (std::vector<std::string>::const_iterator it = inputPaths.begin(), end = inputPaths.end(); it != end; ++it)
+		{
+			const std::string &path = *it;
+			if (path[path.size() - 1] == '/') // isDirectory
+			{
+				// Check if this directory is in the dependencies.
+				if (!isDirectoryDependency(path))
+				{
+					m_SubTaskResult = FINISH_ERROR;
+					m_SubTaskErrorMessage = std::string("Directory '") + path + "' is not part of the dependencies";
+					return false; // Error, cannot rebuild.
+				}
+			}
+			else // isFile
+			{
+				// Check if this file is in the dependencies.
+				if (!isFileDependency(path))
+				{
+					m_SubTaskResult = FINISH_ERROR;
+					m_SubTaskErrorMessage = std::string("File '") + path + "' is not part of the dependencies";
+					return false; // Error, cannot rebuild.
+				}
+			}
+		}
+		
+		// Check if any of the input has changed
+		bool inputFilesDifferent = false;
+		for (std::vector<std::string>::const_iterator it = inputPaths.begin(), end = inputPaths.end(); it != end; ++it)
+		{
+			const std::string &path = *it;
+			if (path[path.size() - 1] == '/') // isDirectory
+			{
+				if (hasInputDirectoryBeenModified(path))
+				{
+					nldebug("Found modified input directory '%s'", path.c_str());
+					inputFilesDifferent = true;
+					break;
+				}
+			}
+			else
+			{
+				if (hasInputFileBeenModified(path))
+				{
+					nldebug("Found modified input file '%s'", path.c_str());
+					inputFilesDifferent = true;
+					break;
+				}
+			}
+		}
 
+		if (inputFilesDifferent)
+		{
+			nldebug("Input files were modified, check if output files were already built");
+			m_SubTaskResult = FINISH_SUCCESS;
+			return needsToBeRebuiltSub(inputPaths, outputPaths, true);
+		}
+		else
+		{
+			nldebug("Input files were not modified");
+			if (m_ListOutputChanged.size() == 0 && m_ListOutputRemoved.size() == 0)
+			{
+				nldebug("No output files were tampered with since last successful build, rebuild not needed");
+				m_SubTaskResult = FINISH_SUCCESS;
+				return false; // No rebuild required.
+			}
+			else
+			{
+				nldebug("Output files may have changed, find out more");
+				m_SubTaskResult = FINISH_SUCCESS;
+				return needsToBeRebuiltSub(inputPaths, outputPaths, false);
+			}
+		}
 	}
 
 	bool needsToBeRebuiltSub(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths, bool inputChanged)
 	{
 		if (m_SubTaskResult != FINISH_SUCCESS)
 			return false; // Cannot continue on previous failure.
+		
+		m_SubTaskResult = FINISH_NOT;
+
+		// Sanity check of all the output paths
+		// These must all be files, no directories allowed
 	}
 
 	/// Returns false if the file does not need to be built, or if an error occured.
