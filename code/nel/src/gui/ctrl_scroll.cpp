@@ -218,6 +218,180 @@ namespace NLGUI
 			return CCtrlBase::getProperty( name );
 	}
 
+
+	void CCtrlScroll::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "tx_bottomleft" )
+		{
+			setTextureBottomOrLeft( value );
+			return;
+		}
+		else
+		if( name == "tx_middle" )
+		{
+			setTextureMiddle( value );
+			return;
+		}
+		else
+		if( name == "tx_topright" )
+		{
+			setTextureTopOrRight( value );
+			return;
+		}
+		else
+		if( name == "vertical" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Vertical = b;
+			return;
+		}
+		else
+		if( name == "align" )
+		{
+			if( value == "T" )
+				_Aligned = 0;
+			else
+			if( value == "B" )
+				_Aligned = 1;
+			else
+			if( value == "L" )
+				_Aligned = 2;
+			else
+			if( value == "R" )
+				_Aligned = 3;
+			
+			return;
+		}
+		else
+		if( name == "min" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_Min = i;
+			return;
+		}
+		else
+		if( name == "max" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_Max = i;
+			return;
+		}
+		else
+		if( name == "value" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+			{
+				_IsDBLink = false;
+				_Value = i;
+			}
+			else
+			{
+				_IsDBLink = true;
+				_DBLink.link( value.c_str() );
+				_DBLink.getNodePtr()->addObserver( this, ICDBNode::CTextId() );
+			}
+			return;
+		}
+		else
+		if( name == "tracksize" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_TrackSize = i;
+			return;
+		}
+		else
+		if( name == "onscroll" )
+		{
+			_AHOnScroll = value;
+			return;
+		}
+		else
+		if( name == "params" )
+		{
+			_AHOnScrollParams = value;
+			return;
+		}
+		else
+		if( name == "onscrollend" )
+		{
+			_AHOnScrollEnd = value;
+			return;
+		}
+		else
+		if( name == "end_params" )
+		{
+			_AHOnScrollEndParams = value;
+			return;
+		}
+		else
+		if( name == "onscrollcancel" )
+		{
+			_AHOnScrollCancel = value;
+			return;
+		}
+		else
+		if( name == "cancel_params" )
+		{
+			_AHOnScrollCancelParams = value;
+			return;
+		}
+		else
+		if( name == "target" )
+		{
+			_Target = dynamic_cast< CInterfaceGroup* >(
+				CWidgetManager::getInstance()->getElementFromId( value )
+				);
+			return;
+		}
+		else
+		if( name == "target_stepx" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_TargetStepX = i;
+			return;
+		}
+		else
+		if( name == "target_stepy" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_TargetStepY = i;
+			return;
+		}
+		else
+		if( name == "step_value" )
+		{
+			uint32 i;
+			if( fromString( value, i ) )
+				_StepValue = i;
+			return;
+		}
+		else
+		if( name == "cancelable" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Cancelable = b;
+			return;
+		}
+		else
+		if( name == "frozen" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Frozen = b;
+			return;
+		}
+		else
+			CCtrlBase::setProperty( name, value );
+	}
+
 	// ------------------------------------------------------------------------------------------------
 	bool CCtrlScroll::parse(xmlNodePtr node, CInterfaceGroup * parentGroup)
 	{

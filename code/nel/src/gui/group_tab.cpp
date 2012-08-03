@@ -756,6 +756,16 @@ namespace NLGUI
 			return CCtrlTextButton::getProperty( name );
 	}
 
+	void CCtrlTabButton::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "group" )
+		{
+			_AssociatedGroup = value;
+		}
+		else
+			CCtrlTextButton::setProperty( name, value );
+	}
+
 	// ***************************************************************************
 	bool CCtrlTabButton::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{
