@@ -80,6 +80,22 @@ namespace NLGUI
 		return "";
 	}
 
+	CCtrlBase::TToolTipParentType CCtrlBase::stringToToolTipParent( const std::string &str )
+	{
+		std::string s = toLower( str );
+
+		if( s == "mouse" )
+			return TTMouse;
+		else
+		if( s == "win" )
+			return TTWindow;
+		else
+		if( s == "special" )
+			return TTSpecialWindow;
+		else
+			return TTCtrl;
+	}
+
 	// ***************************************************************************
 	bool CCtrlBase::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{
@@ -129,14 +145,7 @@ namespace NLGUI
 		_ToolTipParent= TTCtrl;
 		if(prop)
 		{
-			if(stricmp((const char*)prop, "win")==0)
-				_ToolTipParent= TTWindow;
-			else if(stricmp((const char*)prop, "mouse")==0)
-				_ToolTipParent= TTMouse;
-			else if(stricmp((const char*)prop, "special")==0)
-				_ToolTipParent= TTSpecialWindow;
-			else
-				_ToolTipParent= TTCtrl;
+			_ToolTipParent = stringToToolTipParent( std::string( prop ) );
 		}
 
 		// Tooltip special parent
@@ -216,12 +225,12 @@ namespace NLGUI
 		if( name == "tooltip_posref_alt" )
 		{
 			std::string s;
-			if( ( _ToolTipParentPosRef == Hotspot_TTAuto ) && ( _ToolTipPosRef == Hotspot_TTAuto ) )
+			if( ( _ToolTipParentPosRefAlt == Hotspot_TTAuto ) && ( _ToolTipPosRefAlt == Hotspot_TTAuto ) )
 				return "auto";
 			else{
-				s = CInterfaceElement::HotSpotToString( _ToolTipParentPosRef );
+				s = CInterfaceElement::HotSpotToString( _ToolTipParentPosRefAlt );
 				s += " ";
-				s += CInterfaceElement::HotSpotToString( _ToolTipPosRef );
+				s += CInterfaceElement::HotSpotToString( _ToolTipPosRefAlt );
 				return s;
 			}
 		}
@@ -232,6 +241,76 @@ namespace NLGUI
 		}
 		else
 			return CInterfaceElement::getProperty( name );
+	}
+
+
+	void CCtrlBase::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "tooltip" )
+		{
+			_ContextHelp = value;
+			return;
+		}
+		else
+		if( name == "tooltip_i18n" )
+		{
+			_ContextHelp = value;
+			return;
+		}
+		else
+		if( name == "on_tooltip" )
+		{
+			_OnContextHelp = value;
+			return;
+		}
+		else
+		if( name == "on_tooltip_params" )
+		{
+			_OnContextHelpParams = value;
+			return;
+		}
+		else
+		if( name == "tooltip_parent" )
+		{
+			_ToolTipParent = stringToToolTipParent( value );
+			return;
+		}
+		else
+		if( name == "tooltip_special_parent" )
+		{
+			_ToolTipSpecialParent = value;
+			return;
+		}
+		else
+		if( name == "tooltip_posref" )
+		{
+			THotSpot parentHS;
+			THotSpot HS;
+			convertTooltipHotSpot( value.c_str(), parentHS, HS );
+			_ToolTipParentPosRef = parentHS;
+			_ToolTipPosRef = HS;
+			return;
+		}
+		else
+		if( name == "tooltip_posref_alt" )
+		{
+			THotSpot parentHS;
+			THotSpot HS;
+			convertTooltipHotSpot( value.c_str(), parentHS, HS );
+			_ToolTipParentPosRefAlt = parentHS;
+			_ToolTipPosRefAlt = HS;
+			return;
+		}
+		else
+		if( name == "instant_help" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_ToolTipInstant = b;
+			return;
+		}
+		else
+			CInterfaceElement::setProperty( name, value );
 	}
 
 	// ***************************************************************************

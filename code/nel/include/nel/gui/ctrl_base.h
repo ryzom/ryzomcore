@@ -57,11 +57,14 @@ namespace NLGUI
 		virtual ~CCtrlBase();
 
 		static std::string tooltipParentToString( TToolTipParentType type );
+		static TToolTipParentType stringToToolTipParent( const std::string &str );
+
+		std::string getProperty( const std::string &name ) const;
+
+		void setProperty( const std::string &name, const std::string &value );
 
 		// special parse
 		virtual bool parse(xmlNodePtr cur, CInterfaceGroup *parentGroup);
-
-		std::string getProperty( const std::string &name ) const;
 
 
 		/// Handle all events (implemented by derived classes) (return true to signal event handled)
