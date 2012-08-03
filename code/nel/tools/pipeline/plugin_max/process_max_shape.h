@@ -46,15 +46,11 @@ namespace PIPELINE {
  */
 class CProcessMaxShape : public IProcessHandler
 {
-protected:
-	// pointers
-	// ...
-	
-	// instances
-	// ...
 public:
 	CProcessMaxShape();
 	virtual ~CProcessMaxShape();
+
+	virtual void build();
 
 	NLMISC_DECLARE_CLASS(CProcessMaxShape)
 }; /* class CProcessMaxShape */

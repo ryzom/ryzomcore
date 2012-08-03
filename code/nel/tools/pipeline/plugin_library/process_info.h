@@ -55,7 +55,7 @@ protected:
 
 public:
 	IProcessInfo() : m_PipelineProcess(IPipelineProcess::getInstance()) { }
-	virtual ~IProcessInfo() { }	
+	virtual ~IProcessInfo() { }
 	
 	void setPipelineProcess(IPipelineProcess *pipelineProcess) { m_PipelineProcess = pipelineProcess; }
 	

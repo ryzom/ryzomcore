@@ -40,15 +40,7 @@ using namespace std;
 
 namespace PIPELINE {
 
-IProcessHandler::IProcessHandler()
-{
-	
-}
-
-IProcessHandler::~IProcessHandler()
-{
-	
-}
+void sdfkjsdklfjsdfodjsfop() { }
 
 } /* namespace PIPELINE */
 

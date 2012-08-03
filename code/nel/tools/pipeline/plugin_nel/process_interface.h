@@ -46,15 +46,11 @@ namespace PIPELINE {
  */
 class CProcessInterface : public IProcessHandler
 {
-protected:
-	// pointers
-	// ...
-	
-	// instances
-	// ...
 public:
 	CProcessInterface();
 	virtual ~CProcessInterface();
+
+	virtual void build();
 
 	NLMISC_DECLARE_CLASS(CProcessInterface)
 }; /* class CProcessInterface */

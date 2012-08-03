@@ -54,6 +54,11 @@ CProcessMaxShape::~CProcessMaxShape()
 	
 }
 
+void CProcessMaxShape::build()
+{
+
+}
+
 namespace {
 
 class CMaxExportShapeCommand : public NLMISC::IRunnable

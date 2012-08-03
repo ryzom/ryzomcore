@@ -35,6 +35,7 @@
 #include <nel/misc/class_registry.h>
 
 // Project includes
+#include "pipeline_process.h"
 
 namespace PIPELINE {
 
@@ -48,14 +49,17 @@ namespace PIPELINE {
 class IProcessHandler : public NLMISC::IClassable
 {
 protected:
-	// pointers
-	// ...
-	
-	// instances
-	// ...
+	IPipelineProcess *m_PipelineProcess;
+
 public:
-	IProcessHandler();
-	virtual ~IProcessHandler();
+	IProcessHandler() : m_PipelineProcess(IPipelineProcess::getInstance()) { }
+	virtual ~IProcessHandler() { }
+	
+	void setPipelineProcess(IPipelineProcess *pipelineProcess) { m_PipelineProcess = pipelineProcess; }
+
+	/// Build. Can't be any easier than that, can it?
+	virtual void build() = 0;
+
 }; /* class IProcessHandler */
 
 } /* namespace PIPELINE */

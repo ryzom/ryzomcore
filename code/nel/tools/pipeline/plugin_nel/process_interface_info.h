@@ -46,12 +46,6 @@ namespace PIPELINE {
  */
 class CProcessInterfaceInfo : public IProcessInfo
 {
-protected:
-	// pointers
-	// ...
-	
-	// instances
-	// ...
 public:
 	CProcessInterfaceInfo();
 	virtual ~CProcessInterfaceInfo();

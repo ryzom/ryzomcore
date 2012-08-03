@@ -50,6 +50,11 @@ CProcessInterface::~CProcessInterface()
 	
 }
 
+void CProcessInterface::build()
+{
+
+}
+
 } /* namespace PIPELINE */
 
 /* end of file */
