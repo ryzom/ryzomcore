@@ -232,6 +232,9 @@ public:
 					masterUpdatedDatabaseStatus(NULL);
 				}
 				break;
+			default:
+				// Nothing to do for now
+				break;
 			}
 
 			// TODO: ABORT RUNNING BUILD PROCESS
@@ -521,9 +524,11 @@ public:
 				}
 			}
 		}
-		std::copy(m_DependentDirectories.begin(), m_DependentDirectories.end(), m_ListDependentDirectories.end());
+		for (std::vector<std::string>::iterator it = m_DependentDirectories.begin(), end = m_DependentDirectories.end(); it != end; ++it)
+			m_ListDependentDirectories.insert(*it);
 		m_DependentDirectories.clear();
-		std::copy(m_DependentFiles.begin(), m_DependentFiles.end(), m_ListDependentFiles.end());
+		for (std::vector<std::string>::iterator it = m_DependentFiles.begin(), end = m_DependentFiles.end(); it != end; ++it)
+			m_ListDependentFiles.insert(*it);
 		m_DependentFiles.clear();
 		m_SubTaskResult = FINISH_SUCCESS;
 	}
@@ -970,7 +975,7 @@ public:
 	}
 
 	/// Set the exit message, exit the plugin immediately afterwards.
-	bool setExit(const TProcessResult exitLevel, const std::string &exitMessage)
+	void setExit(const TProcessResult exitLevel, const std::string &exitMessage)
 	{
 		m_SubTaskResult = exitLevel;
 		m_SubTaskErrorMessage = exitMessage;
