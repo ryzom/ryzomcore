@@ -820,7 +820,7 @@ public:
 		}
 	}
 
-	bool needsToBeRebuiltSub(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths, bool inputChanged)
+	bool needsToBeRebuiltSub(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths, bool inputModified)
 	{
 		if (m_SubTaskResult != FINISH_SUCCESS)
 			return false; // Cannot continue on previous failure.
@@ -829,6 +829,15 @@ public:
 
 		// Sanity check of all the output paths
 		// These must all be files, no directories allowed
+		
+		// bool outputModified = Check if any of the output paths are part of the changed or removed output files
+		
+		// Check the .depend files of all the output files
+			// If outputModified
+				// Compare the output checksum with the cached output checksum
+			// If inputModified
+				// Compare the input checksums with the cached input checksums
+		// (if any checksum was different, require rebuild, if no checksums were different, no rebuild is needed)
 	}
 
 	/// Returns false if the file does not need to be built, or if an error occured.
