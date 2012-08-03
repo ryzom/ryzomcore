@@ -59,6 +59,7 @@ namespace PIPELINE {
 #define PIPELINE_INFO_STATUS_UPDATE_MASTER "S_ST_UPD_MASTER"
 #define PIPELINE_INFO_STATUS_UPDATE_SLAVE "S_ST_UPD_SLAVE"
 #define PIPELINE_INFO_GET_REMOVE "S_GET_REMOVE"
+#define PIPELINE_INFO_PLUGIN_WORKING "S_PLUGIN_WORKING"
 
 #define PIPELINE_INFO_ABORTING "S_ABORTING"
 
@@ -93,7 +94,7 @@ public:
 		SOMEWHERE_INBETWEEN, 
 		STATUS_UPDATE, 
 		GET_REMOVE, 
-		// ...
+		ACTUALLY_BUILDING, 
 	};
 	TSlaveTaskState m_SlaveTaskState; // only set and used by update!! used on other threads for sanity checks
 
@@ -109,9 +110,11 @@ public:
 	
 	std::vector<std::string> m_DependentDirectories;
 	std::vector<std::string> m_DependentFiles;
+	
+	bool m_PluginBuildDone;
 
 public:
-	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(NULL), m_ActiveProcess(NULL), m_AbortRequested(false)
+	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(NULL), m_ActiveProcess(NULL), m_AbortRequested(false), m_PluginBuildDone(false)
 	{
 		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateMasterDone).value() = false;
 		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateSlaveDone).value() = false;
@@ -298,6 +301,14 @@ public:
 				}
 			}
 			break;
+		case ACTUALLY_BUILDING:
+			if (m_PluginBuildDone)
+			{
+				m_SlaveTaskState = SOMEWHERE_INBETWEEN;
+				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_PLUGIN_WORKING);
+				finishedTask(m_ActiveProcess->m_SubTaskResult, m_ActiveProcess->m_SubTaskErrorMessage);
+			}
+			break;
 		default:
 			finishedTask(FINISH_ERROR, "Task got lost somewhere inbetween the code of the slave service. This is a programming error. Implementation may be incomplete.");
 			break;
@@ -396,10 +407,10 @@ public:
 
 	void beginGetRemove()
 	{
+		m_RemovedTaskDone = false;
 		m_SlaveTaskState = GET_REMOVE;
 		m_ActiveProcess->m_SubTaskResult = FINISH_NOT;
 		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_GET_REMOVE);
-		m_RemovedTaskDone = false;
 		m_TaskManager->addTask(new CGetRemovedTask(this));
 	}
 	
@@ -499,9 +510,33 @@ public:
 	///////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////
 
+	class CPluginBuildTask : public IRunnable
+	{
+	public:
+		CPluginBuildTask(CModulePipelineSlave *slave) : m_Slave(slave) { }
+		virtual void run()
+		{
+			// Figure out the build plugin
+			// ...
+
+				// Build
+				// ...
+				// TODO ************/////////////////########################################################################### BUILD THING
+
+			// Done
+			m_Slave->m_PluginBuildDone = true;
+			delete this;
+		}
+	private:
+		CModulePipelineSlave *m_Slave;
+	};
+	
 	void beginTheBuildThing()
 	{
-		// TODO ************/////////////////########################################################################### BUILD THING
+		m_PluginBuildDone = false;
+		m_SlaveTaskState = ACTUALLY_BUILDING;
+		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_PLUGIN_WORKING);
+		m_TaskManager->addTask(new CPluginBuildTask(this));
 	}
 
 	///////////////////////////////////////////////////////////////////
