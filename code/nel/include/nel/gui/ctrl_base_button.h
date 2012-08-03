@@ -42,6 +42,7 @@ namespace NLGUI
 		CCtrlBaseButton(const TCtorParam &param);
 
 		std::string getProperty( const std::string &name ) const;
+		void setProperty( const std::string &name, const std::string &value );
 
 		virtual bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup);
 		virtual bool handleEvent (const NLGUI::CEventDescriptor& event);
@@ -51,6 +52,7 @@ namespace NLGUI
 		void	setType (EType t) { _Type = t; }
 		EType	getType() { return _Type; }
 		std::string getTypeString() const;
+		void setTypeFromString( const std::string &type );
 
 		void	setClickWhenPushed(bool click) { _ClickWhenPushed = click; }
 		bool	getClickWhenPushed() const { return _ClickWhenPushed; }

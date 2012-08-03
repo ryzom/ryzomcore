@@ -205,6 +205,190 @@ namespace NLGUI
 			return CCtrlBase::getProperty( name );
 	}
 
+	void CCtrlBaseButton::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "button_type" )
+		{
+			setTypeFromString( value );
+			return;
+		}
+		else
+		if( name == "pushed" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Pushed = b;
+			return;
+		}
+		else
+		if( name == "over_when_pushed" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_OverWhenPushed = b;
+			return;
+		}
+		else
+		if( name == "clicked_when_pushed" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_ClickWhenPushed = b;
+			return;
+		}
+		else
+		if( name == "color" )
+		{
+			setColorAsString( value );
+			return;
+		}
+		else
+		if( name == "col_pushed" )
+		{
+			setColorPushedAsString( value );
+			return;
+		}
+		else
+		if( name == "col_over" )
+		{
+			setColorOverAsString( value );
+			return;
+		}
+		else
+		if( name == "global_color_normal" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_ModulateGlobalColorNormal = b;
+			return;
+		}
+		else
+		if( name == "global_color_pushed" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_ModulateGlobalColorPushed = b;
+			return;
+			
+		}
+		else
+		if( name == "global_color_over" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_ModulateGlobalColorOver = b;
+			return;
+		}
+		else
+		if( name == "onover" )
+		{
+			_AHOnOver = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "params_over" )
+		{
+			_AHOverParams = value;
+			return;
+		}
+		else
+		if( name == "onclick_l" )
+		{
+			_AHOnLeftClick = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "params_l" )
+		{
+			_AHLeftClickParams = value;
+			return;
+		}
+		else
+		if( name == "ondblclick_l" )
+		{
+			_AHOnLeftDblClick = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "params_dblclick_l" )
+		{
+			_AHLeftDblClickParams = value;
+			return;
+		}
+		else
+		if( name == "onlongclick_l" )
+		{
+			_AHOnLeftLongClick = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "params_longclick_l" )
+		{
+			_AHLeftLongClickParams = value;
+			return;
+		}
+		else
+		if( name == "onclick_r" )
+		{
+			_AHOnRightClick = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "params_r" )
+		{
+			_AHRightClickParams = value;
+			return;
+		}
+		else
+		if( name == "onclock_tick" )
+		{
+			_AHOnClockTick = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "params_clock_tick" )
+		{
+			_AHClockTickParams = value;
+			return;
+		}
+		else
+		if( name == "menu_l" )
+		{
+			_ListMenuLeft = value;
+			return;
+		}
+		else
+		if( name == "menu_r" )
+		{
+			_ListMenuRight = value;
+			return;
+		}
+		else
+		if( name == "menu_b" )
+		{
+			_ListMenuLeft = _ListMenuRight = value;
+			return;
+		}
+		else
+		if( name == "frozen" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Frozen = b;
+			return;
+		}
+		else
+		if( name == "frozen_half_tone" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_FrozenHalfTone = b;
+			return;
+		}
+		else
+			CCtrlBase::setProperty( name, value );
+	}
+
 
 	// ***************************************************************************
 	bool CCtrlBaseButton::parse (xmlNodePtr cur,CInterfaceGroup * parentGroup)
@@ -222,26 +406,9 @@ namespace NLGUI
 		// *** try to get the NEEDED specific props
 		prop = xmlGetProp (cur, (xmlChar*)"button_type");
 		string type;
-		if (prop) type = (const char*) prop;
-		if (type.empty() || type == "toggle_button")
+		if (prop)
 		{
-			_Type = ToggleButton;
-		}
-		else if (type == "push_button")
-		{
-			_Type = PushButton;
-		}
-		else if (type == "radio_button")
-		{
-			_Type = RadioButton;
-
-			initRBRef();
-			if (_Pushed)
-				*_RBRef = this;
-		}
-		else
-		{
-			nlinfo(("cannot parse button type for button " + getId()).c_str());
+			type = (const char*) prop;
 		}
 
 		prop= (char*) xmlGetProp (cur, (xmlChar*)"pushed");
@@ -528,6 +695,37 @@ namespace NLGUI
 
 		}
 		return "";
+	}
+
+	void CCtrlBaseButton::setTypeFromString( const std::string &type )
+	{
+		if( type.empty() || type == "toggle_button" )
+		{
+			_Type = ToggleButton;
+			return;
+		}
+		else
+		if( type == "push_button" )
+		{
+			_Type = PushButton;
+			return;
+		}
+		else
+		if( type == "radio_button" )
+		{
+			_Type = RadioButton;
+
+			initRBRef();
+			if( _Pushed )
+				*_RBRef = this;
+
+			return;
+		}
+		else
+		{
+			_Type = ToggleButton;
+			nlinfo( ( "cannot parse button type for button " + getId() ).c_str() );
+		}
 	}
 
 	// ***************************************************************************
