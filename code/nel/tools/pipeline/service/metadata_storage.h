@@ -101,7 +101,21 @@ public:
 
 /// Suffix for metafiles that contain dependencies for a file
 #define PIPELINE_DATABASE_DEPEND_SUFFIX ".depend"
-// .......................
+struct CFileDepend
+{
+public:
+	uint32 CRC32; // Checksum of the current file
+	struct CDependency
+	{
+		std::string MacroPath;
+		uint32 CRC32;
+
+		void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
+	};
+	std::vector<CDependency> Dependencies;
+
+	void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
+};
 
 /// Suffix for metafiles that contain the result of the last build of a process
 #define PIPELINE_DATABASE_RESULT_SUFFIX ".result"
@@ -162,6 +176,10 @@ public:
 	// static bool readRemove(CFileRemove &remove, const std::string & path);
 	// static void createRemove(const CFileRemove &remove, const std::string &path); // Remove cannot be modified after creation, only erased.
 	// static void eraseRemove(const std::string &path);
+
+	static std::string getDependPath(const std::string &file);
+	static bool readDepend(CFileDepend &status, const std::string &metaPath);
+	static void writeDepend(const CFileDepend &status, const std::string &metaPath);
 
 	// Pathname for result metadata is like .../project.projectname.meta/pluginname.result
 	static std::string getResultPath(const std::string &projectName, const std::string &pluginName);

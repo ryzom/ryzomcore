@@ -71,6 +71,20 @@ void CFileRemove::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 	stream.serial(Lost);
 }
 
+void CFileDepend::CDependency::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
+{
+	uint version = stream.serialVersion(1);
+	stream.serial(CRC32);
+	stream.serial(MacroPath);
+}
+
+void CFileDepend::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
+{
+	uint version = stream.serialVersion(1);
+	stream.serial(CRC32);
+	stream.serialCont(Dependencies);
+}
+
 void CProcessResult::CFileResult::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 {
 	uint version = stream.serialVersion(1);
@@ -219,6 +233,41 @@ void CMetadataStorage::writeOutput(const CFileOutput &output, const std::string 
 void CMetadataStorage::eraseOutput(const std::string &metaPath)
 {
 	NLMISC::CFile::deleteFile(metaPath);
+}
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+std::string CMetadataStorage::getDependPath(const std::string &file)
+{
+	return CWorkspaceStorage::getMetaFilePath(file, PIPELINE_DATABASE_DEPEND_SUFFIX);
+}
+
+bool CMetadataStorage::readDepend(CFileDepend &depend, const std::string &metaPath)
+{
+	if (!NLMISC::CFile::fileExists(metaPath))
+	{
+		depend.CRC32 = 0;
+		depend.Dependencies.clear();
+		return false;
+	}
+
+	nlassert(!NLMISC::CFile::isDirectory(metaPath));
+
+	NLMISC::CIFile is(metaPath, false);
+	depend.serial(is);
+	is.close();
+
+	return true;
+}
+
+void CMetadataStorage::writeDepend(const CFileDepend &depend, const std::string &metaPath)
+{
+	NLMISC::COFile os(metaPath, false, false, true);
+	const_cast<CFileDepend &>(depend).serial(os);
+	os.flush();
+	os.close();
 }
 
 ///////////////////////////////////////////////////////////////////////
