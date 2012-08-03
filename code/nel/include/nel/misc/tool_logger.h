@@ -103,7 +103,7 @@ public:
 		m_DependLog = fopen(dependLog.c_str(), "wt");
 		fwrite(s_DependHeader.c_str(), 1, s_DependHeader.length(), m_DependLog);
 		fwrite("\n", 1, 1, m_DependLog);
-		fflush(m_DependLog);
+		// fflush(m_DependLog);
 	}
 
 	void writeError(TError type, const std::string &path, const std::string &error)
@@ -153,7 +153,7 @@ public:
 			fwrite("\t", 1, 1, m_DependLog);
 			fwrite(inputFile.c_str(), 1, inputFile.length(), m_DependLog);
 			fwrite("\n", 1, 1, m_DependLog);
-			fflush(m_DependLog);
+			// fflush(m_DependLog);
 		}
 	}
 
