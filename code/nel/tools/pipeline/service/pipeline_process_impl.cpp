@@ -45,13 +45,15 @@ using namespace std;
 
 namespace PIPELINE {
 
-CPipelineProcessImpl::CPipelineProcessImpl(CPipelineProject *activeProject) : m_ActiveProject(activeProject)
+CPipelineProcessImpl::CPipelineProcessImpl(CPipelineProject *activeProject) : m_ActiveProject(activeProject), m_SubTaskResult(FINISH_NOT)
 {
 	if (activeProject == NULL)
 	{
 		nlassert(getInstance() == NULL);
 		NLMISC::INelContext::getInstance().setSingletonPointer("IPipelineProcess", this);
 	}
+	m_ResultPreviousSuccess.clear();
+	m_ResultCurrent.clear();
 }
 
 CPipelineProcessImpl::~CPipelineProcessImpl()
@@ -133,31 +135,6 @@ bool CPipelineProcessImpl::getValueNb(uint &result, const std::string &name)
 	{
 		return m_ActiveProject->getValueNb(result, name);
 	}
-}
-
-bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths)
-{
-	return false;
-}
-
-bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inputPaths)
-{
-	return false;
-}
-
-void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const std::string &errorLogFile, bool writeOutputMeta)
-{
-	
-}
-
-bool CPipelineProcessImpl::needsExit()
-{
-	return true;
-}
-
-void CPipelineProcessImpl::setExit(const TProcessResult exitLevel, const std::string &exitMessage)
-{
-	
 }
 
 } /* namespace PIPELINE */

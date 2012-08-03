@@ -35,6 +35,8 @@
 
 // Project includes
 #include "../plugin_library/pipeline_process.h"
+#include "pipeline_workspace.h"
+#include "metadata_storage.h"
 
 namespace PIPELINE {
 	class CPipelineProject;
@@ -46,7 +48,9 @@ namespace PIPELINE {
  * CPipelineProcessImpl
  */
 class CPipelineProcessImpl : public IPipelineProcess
-{
+{	
+	friend class CModulePipelineSlave;
+
 private:
 	CPipelineProject *m_ActiveProject;
 
@@ -67,6 +71,45 @@ public:
 
 	virtual bool needsExit();
 	virtual void setExit(const TProcessResult exitLevel, const std::string &exitMessage);
+
+private:
+	CProcessPluginInfo m_ActivePlugin;
+
+	CProcessResult m_ResultPreviousSuccess;
+	std::map<std::string, CFileStatus> m_FileStatusInputCache;
+	std::map<std::string, CFileStatus> m_FileStatusOutputCache;
+
+	/// List of dependencies (files) that were removed, or never existed (in which case remove time is 0).
+	std::map<std::string, CFileRemove> m_FileRemoveInputCache;
+
+	/// Result of current process
+	CProcessResult m_ResultCurrent;
+	
+	/// Result of the last subtask (usually in the taskmanager), check this after the task has completed to make sure all went fine.
+	TProcessResult m_SubTaskResult;
+	std::string m_SubTaskErrorMessage;
+	
+	std::set<std::string> m_ListInputAdded;
+	std::set<std::string> m_ListInputChanged;
+	std::set<std::string> m_ListInputRemoved;
+	
+	std::set<std::string> m_ListOutputChanged;
+	std::set<std::string> m_ListOutputChangedNG; // after .depend check, found that dependencies changed, so not good
+	std::set<std::string> m_ListOutputChangedOK; // idem but dependencies did not change, so ok
+	std::set<std::string> m_ListOutputRemoved; // changed_ng and removed end up being the same, it needs to be rebuilt ;)
+
+	std::set<std::string> m_ListDependentDirectories;
+	std::set<std::string> m_ListDependentFiles;
+
+private:
+	bool getDependencyFileStatusCached(CFileStatus &fileStatus, const std::string &filePath);
+	bool getDependencyFileStatusLatest(CFileStatus &fileStatus, const std::string &filePath);
+	bool isFileDependency(const std::string &path);
+	bool isDirectoryDependency(const std::string &path);
+	bool hasInputDirectoryBeenModified(const std::string &inputDirectory);
+	bool hasInputFileBeenModified(const std::string &inputFile);
+	bool needsToBeRebuildSubByOutput(const std::vector<std::string> &inputPaths, bool inputChanged);
+	bool needsToBeRebuiltSub(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths, bool inputModified);
 
 }; /* class CPipelineProcessImpl */
 
