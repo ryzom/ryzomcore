@@ -82,10 +82,24 @@ public:
 	/// Get the temporary directory for the current process. The directory must be deleted when the process ends. May return random temporary directories if no process is running.
 	virtual std::string getTempDirectory() = 0;
 	
-	/// Get a value from the currently active project configuration
+	/// Get a value from the currently active project configuration. If false, don't use, no need to write warnings to service log, already written, set exit state and exit if necessary
 	virtual bool getValue(std::string &result, const std::string &name) = 0;
 	virtual bool getValues(std::vector<std::string> &resultAppend, const std::string &name) = 0;
 	virtual bool getValueNb(uint &result, const std::string &name) = 0;
+
+	/// Find out if the plugin needs to rebuild. Input can be files or directories, output can only be files
+	virtual bool needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths) = 0;
+	/// Find out if the plugin needs to rebuild. Input can only be files. Must request the service to write an .output metafile during depend log parsing.
+	virtual bool needsToBeRebuilt(const std::vector<std::string> &inputPaths) = 0;
+
+	/// Parse the depend and error logs. Only set writeOutputMeta true if the output is not known in advance by the plugin, see needsToBeRebuilt
+	virtual void parseToolLog(const std::string &dependLogFile, const std::string &errorLogFile, bool writeOutputMeta) = 0;
+
+	/// Check if the plugin needs to exit, exit plugin immediately if true.
+	virtual bool needsExit() = 0;
+	/// Set the exit state, must exit the plugin immediately afterwards. Use for configuration mistakes, etc
+	virtual void setExit(const TProcessResult exitLevel, const std::string &exitMessage) = 0;
+
 }; /* class IPipelineProcess */
 
 } /* namespace PIPELINE */

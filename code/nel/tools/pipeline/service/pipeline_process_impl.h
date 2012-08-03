@@ -60,6 +60,14 @@ public:
 	virtual bool getValues(std::vector<std::string> &resultAppend, const std::string &name);
 	virtual bool getValueNb(uint &result, const std::string &name);
 
+	virtual bool needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths);
+	virtual bool needsToBeRebuilt(const std::vector<std::string> &inputPaths);
+
+	virtual void parseToolLog(const std::string &dependLogFile, const std::string &errorLogFile, bool writeOutputMeta);
+
+	virtual bool needsExit();
+	virtual void setExit(const TProcessResult exitLevel, const std::string &exitMessage);
+
 }; /* class CPipelineProcessImpl */
 
 } /* namespace PIPELINE */

@@ -135,6 +135,31 @@ bool CPipelineProcessImpl::getValueNb(uint &result, const std::string &name)
 	}
 }
 
+bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths)
+{
+	return false;
+}
+
+bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inputPaths)
+{
+	return false;
+}
+
+void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const std::string &errorLogFile, bool writeOutputMeta)
+{
+	
+}
+
+bool CPipelineProcessImpl::needsExit()
+{
+	return true;
+}
+
+void CPipelineProcessImpl::setExit(const TProcessResult exitLevel, const std::string &exitMessage)
+{
+	
+}
+
 } /* namespace PIPELINE */
 
 /* end of file */
