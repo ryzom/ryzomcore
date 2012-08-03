@@ -329,6 +329,7 @@ public:
 	static CRGBA stringToRGBA( const char *ptr );
 
 	std::string toString() const;
+	bool fromString( const std::string &s );
 
 
 	/// Swap the B and R components, to simulate a CBRGA

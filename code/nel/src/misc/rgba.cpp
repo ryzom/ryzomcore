@@ -756,6 +756,12 @@ std::string CRGBA::toString() const
 	return s;
 }
 
+bool CRGBA::fromString( const std::string &s )
+{
+	*this = stringToRGBA( s.c_str() );
+	return true;
+}
+
 
 // ***************************************************************************
 // ***************************************************************************
