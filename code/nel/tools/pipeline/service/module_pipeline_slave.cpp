@@ -705,23 +705,66 @@ public:
 		bool needsFurtherInfo = false;
 
 		// For each inputPath
+		for (std::vector<std::string>::const_iterator it = inputPaths.begin(), end = inputPaths.end(); it != end; ++it)
+		{
+			const std::string &path = *it;
+			nlassert(!CFile::isDirectory(path)); // All input are files! Coding error otherwise, because should already be checked.
+			std::string metaOutputPath = CMetadataStorage::getOutputPath(path, m_ActiveProject->getName(), m_ActivePlugin.Handler);
+			nlassert(CFile::fileExists(metaOutputPath)); // Coding error otherwise.
 			// Read the .output file
+			CFileOutput metaOutput;
+			CMetadataStorage::readOutput(metaOutput, metaOutputPath);
+			std::vector<std::string> localOutputPaths;
+			localOutputPaths.reserve(metaOutput.MacroPaths.size());
+			for (std::vector<std::string>::const_iterator it = metaOutput.MacroPaths.begin(), end = metaOutput.MacroPaths.end(); it != end; ++it)
+				localOutputPaths.push_back(unMacroPath(*it));
 			// If inputChanged & hasInputFileBeenModified(path)
+			if (inputChanged && hasInputFileBeenModified(path))
+			{
 				// If .output file was empty
+				if (metaOutput.MacroPaths.empty())
+				{
 					// Require rebuild because we don't know if there's new output
-				// Else if input LastUpdate > .output BuildStart (project-based start time)
-					// The checksums may still be the same so we want more information
-					// Need to read the rest of the .output files though
-					// needsFurtherInfo = true;
-				// Else
-					// The .output is more or as recent as the input
-					// Don't need a rebuild if no other input's .output is outdated
-					// Do nothing
+					nldebug("Input file '%s' has output file with no output files, state not known, so rebuild", path.c_str());
+					m_SubTaskResult = FINISH_SUCCESS;
+					return true; // Rebuild.
+				}
+				else // if (!needsFurtherInfo) // really only need to check this if we don't know yet if we need further info
+				{
+					CFileStatus inputStatus;
+					if (getDependencyFileStatusCached(inputStatus, path))
+					{
+						// If input LastUpdate > .output BuildStart (project-based start time)
+						if (inputStatus.LastUpdate > metaOutput.BuildStart)
+						{
+							// The checksums may still be the same so we want more information
+							needsFurtherInfo = true;
+							// Ad keep reading the rest of the .output files
+						}
+						// Else
+							// The .output is more or as recent as the input
+							// Don't need a rebuild if no other input's .output is outdated
+							// Do nothing and keep copying the output paths over
+					}
+					else
+					{
+						m_SubTaskErrorMessage = "Input file '" + path + "' does not have status cache, cannot rebuild";
+						m_SubTaskResult = FINISH_ERROR;
+						return false; // Error, cannot rebuild.
+					}
+				}
+			}
 			// Else (no input was changed)
+			else
+			{
 				// Input files did not change, but output may have been tampered with
-				// needsFurtherInfo = true;
+				needsFurtherInfo = true;
+			}
 			// Copy the .output file into the output paths
-		// End
+			for (std::vector<std::string>::const_iterator it = localOutputPaths.begin(), end = localOutputPaths.end(); it != end; ++it)
+				outputPaths.push_back(*it);
+			// End
+		}
 
 		if (needsFurtherInfo)
 		{
@@ -735,7 +778,7 @@ public:
 			m_SubTaskResult = FINISH_SUCCESS;
 			return false; // No rebuild necessary.
 		}
-	}
+	} // ok ?
 
 	bool needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths)
 	{
