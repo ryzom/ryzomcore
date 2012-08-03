@@ -96,6 +96,10 @@ public:
 	virtual bool needsToBeRebuilt(const std::vector<std::string> &inputPaths) = 0;
 	bool needsToBeRebuilt(const std::string &inputPath) { std::vector<std::string> inputPaths; inputPaths.push_back(inputPath); return needsToBeRebuilt(inputPaths); }
 
+	/// Create directories for paths. Call for output paths
+	virtual void makePaths(const std::vector<std::string> &outputPaths) = 0;
+	void makePaths(const std::string &outputPath) { std::vector<std::string> outputPaths; outputPaths.push_back(outputPath); makePaths(outputPaths); }
+
 	/// Parse the depend and error logs. Only set writeOutputMeta true if the output is not known in advance by the plugin, see needsToBeRebuilt
 	virtual void parseToolLog(const std::string &dependLogFile, const std::string &errorLogFile, bool writeOutputMeta) = 0;
 

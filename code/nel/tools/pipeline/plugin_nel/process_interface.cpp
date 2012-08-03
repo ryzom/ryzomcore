@@ -54,6 +54,14 @@ CProcessInterface::~CProcessInterface()
 void CProcessInterface::buildAtlas(const std::vector<std::string> &srcDirectories, const std::string &dstFile)
 {
 	nldebug("Build atlas '%s'", dstFile.c_str());
+	std::stringstream ss;
+	ss << "build_interface " << dstFile;
+	for (std::vector<std::string>::const_iterator it = srcDirectories.begin(), end = srcDirectories.end(); it != end; ++it)
+	{
+		const std::string &path = *it;
+		ss << " " << path;
+	}
+	system(ss.str().c_str());
 }
 
 void CProcessInterface::build()
@@ -78,16 +86,13 @@ void CProcessInterface::build()
 					ss << "Interface.Atlas[" << i << "].DstFile";
 					if (!m_PipelineProcess->getValue(dstFile, ss.str())) break;
 				}
-				// GO
 				if (m_PipelineProcess->needsToBeRebuilt(srcDirectories, dstFile))
 				{
-					// TODO
-					nldebug("Need to rebuild");
+					m_PipelineProcess->makePaths(dstFile);
+					buildAtlas(srcDirectories, dstFile);
 					m_PipelineProcess->parseToolLog("", "", false);
 				}
-				else nldebug("Don't need to rebuild");
-				if (m_PipelineProcess->needsExit())
-					return;
+				if (m_PipelineProcess->needsExit()) return;
 			}
 		}
 	}

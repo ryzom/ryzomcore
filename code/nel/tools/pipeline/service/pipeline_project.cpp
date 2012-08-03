@@ -225,6 +225,7 @@ std::string CPipelineProject::getTempDirectory()
 		ss << rand();
 		ss << PIPELINE_DIRECTORY_TEMP_SUFFIX;
 		ss << "/";
+		NLMISC::CFile::createDirectoryTree(ss.str());
 		m_TempDirectory = ss.str();
 	}
 	return m_TempDirectory;

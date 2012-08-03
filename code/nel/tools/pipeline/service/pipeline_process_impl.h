@@ -67,6 +67,8 @@ public:
 	virtual bool needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths);
 	virtual bool needsToBeRebuilt(const std::vector<std::string> &inputPaths);
 
+	virtual void makePaths(const std::vector<std::string> &outputPaths);
+
 	virtual void parseToolLog(const std::string &dependLogFile, const std::string &errorLogFile, bool writeOutputMeta);
 
 	virtual bool needsExit();

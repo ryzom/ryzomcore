@@ -35,6 +35,7 @@
 #include <nel/misc/time_nl.h>
 #include <nel/misc/app_context.h>
 #include <nel/misc/debug.h>
+#include <nel/misc/path.h>
 
 // Project includes
 #include "pipeline_service.h"
@@ -90,6 +91,7 @@ std::string CPipelineProcessImpl::getTempDirectory()
 		ss << rand();
 		ss << PIPELINE_DIRECTORY_TEMP_SUFFIX;
 		ss << "/";
+		NLMISC::CFile::createDirectoryTree(ss.str());
 		return ss.str();
 	}
 	else
@@ -134,6 +136,22 @@ bool CPipelineProcessImpl::getValueNb(uint &result, const std::string &name)
 	else
 	{
 		return m_ActiveProject->getValueNb(result, name);
+	}
+}
+
+void CPipelineProcessImpl::makePaths(const std::vector<std::string> &outputPaths)
+{
+	for (std::vector<std::string>::const_iterator it = outputPaths.begin(), end = outputPaths.end(); it != end; ++it)
+	{
+		const std::string &path = *it;
+		if (path[path.size() - 1] == '/') // isDirectory
+		{
+			NLMISC::CFile::createDirectoryTree(path);
+		}
+		else
+		{
+			NLMISC::CFile::createDirectoryTree(NLMISC::CFile::getPath(path));
+		}
 	}
 }
 
