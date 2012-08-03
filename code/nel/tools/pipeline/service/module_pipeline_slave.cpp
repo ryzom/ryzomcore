@@ -524,7 +524,7 @@ public:
 				{
 					PIPELINE::IProcessHandler *processHandler = static_cast<PIPELINE::IProcessHandler *>(NLMISC::CClassRegistry::create(m_Slave->m_ActiveProcess->m_ActivePlugin.Handler));
 					processHandler->setPipelineProcess(m_Slave->m_ActiveProcess);
-					m_Slave->m_ActiveProcess->m_SubTaskResult = FINISH_NOT;
+					m_Slave->m_ActiveProcess->m_SubTaskResult = FINISH_SUCCESS;
 					processHandler->build();
 				}
 				break;

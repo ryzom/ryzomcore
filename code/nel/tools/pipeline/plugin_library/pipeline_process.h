@@ -89,8 +89,12 @@ public:
 
 	/// Find out if the plugin needs to rebuild. Input can be files or directories, output can only be files
 	virtual bool needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths) = 0;
+	bool needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::string &outputPath) { std::vector<std::string> outputPaths; outputPaths.push_back(outputPath); return needsToBeRebuilt(inputPaths, outputPaths); }
+	bool needsToBeRebuilt(const std::string &inputPath, const std::vector<std::string> &outputPaths) { std::vector<std::string> inputPaths; inputPaths.push_back(inputPath); return needsToBeRebuilt(inputPaths, outputPaths); }
+	bool needsToBeRebuilt(const std::string &inputPath, const std::string &outputPath) { std::vector<std::string> inputPaths; inputPaths.push_back(inputPath); std::vector<std::string> outputPaths; outputPaths.push_back(outputPath); return needsToBeRebuilt(inputPaths, outputPaths); }
 	/// Find out if the plugin needs to rebuild. Input can only be files. Must request the service to write an .output metafile during depend log parsing.
 	virtual bool needsToBeRebuilt(const std::vector<std::string> &inputPaths) = 0;
+	bool needsToBeRebuilt(const std::string &inputPath) { std::vector<std::string> inputPaths; inputPaths.push_back(inputPath); return needsToBeRebuilt(inputPaths); }
 
 	/// Parse the depend and error logs. Only set writeOutputMeta true if the output is not known in advance by the plugin, see needsToBeRebuilt
 	virtual void parseToolLog(const std::string &dependLogFile, const std::string &errorLogFile, bool writeOutputMeta) = 0;

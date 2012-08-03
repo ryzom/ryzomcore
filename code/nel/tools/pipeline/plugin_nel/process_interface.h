@@ -50,6 +50,8 @@ public:
 	CProcessInterface();
 	virtual ~CProcessInterface();
 
+	void buildAtlas(const std::vector<std::string> &srcDirectories, const std::string &dstFile);
+
 	virtual void build();
 
 	NLMISC_DECLARE_CLASS(CProcessInterface)

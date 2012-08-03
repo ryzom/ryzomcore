@@ -29,6 +29,7 @@
 #include "process_interface.h"
 
 // STL includes
+#include <sstream>
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -50,9 +51,46 @@ CProcessInterface::~CProcessInterface()
 	
 }
 
+void CProcessInterface::buildAtlas(const std::vector<std::string> &srcDirectories, const std::string &dstFile)
+{
+	nldebug("Build atlas '%s'", dstFile.c_str());
+}
+
 void CProcessInterface::build()
 {
 	nldebug("Building process interface!");
+
+	{
+		uint nb;
+		if (m_PipelineProcess->getValueNb(nb, "Interface.Atlas"))
+		{
+			for (uint i = 0; i < nb; ++i)
+			{
+				std::vector<std::string> srcDirectories;
+				{
+					std::stringstream ss;
+					ss << "Interface.Atlas[" << i << "].SrcDirectories";
+					if (!m_PipelineProcess->getValues(srcDirectories, ss.str())) break;
+				}
+				std::string dstFile;
+				{
+					std::stringstream ss;
+					ss << "Interface.Atlas[" << i << "].DstFile";
+					if (!m_PipelineProcess->getValue(dstFile, ss.str())) break;
+				}
+				// GO
+				if (m_PipelineProcess->needsToBeRebuilt(srcDirectories, dstFile))
+				{
+					// TODO
+					nldebug("Need to rebuild");
+					m_PipelineProcess->parseToolLog("", "", false);
+				}
+				else nldebug("Don't need to rebuild");
+				if (m_PipelineProcess->needsExit())
+					return;
+			}
+		}
+	}
 
 	m_PipelineProcess->setExit(FINISH_ERROR, "Not yet implemented");
 }

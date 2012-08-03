@@ -47,7 +47,7 @@ namespace PIPELINE {
 
 void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const std::string &errorLogFile, bool writeOutputMeta)
 {
-	
+	m_SubTaskResult = FINISH_SUCCESS;
 }
 
 } /* namespace PIPELINE */
