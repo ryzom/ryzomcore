@@ -731,36 +731,6 @@ public:
 					m_SubTaskResult = FINISH_SUCCESS;
 					return true; // Rebuild.
 				}
-				else if (!needsFurtherInfo) // only need to check this if we don't know yet if we need further info // 'if ...' may be commented for debug purposes
-				{
-					CFileStatus inputStatus;
-					if (getDependencyFileStatusCached(inputStatus, path))
-					{
-						// If input LastUpdate > .output BuildStart (project-based start time)
-						if (inputStatus.LastUpdate > metaOutput.BuildStart)
-						{
-							// The checksums may still be the same so we want more information
-							needsFurtherInfo = true;
-							// Ad keep reading the rest of the .output files
-						}
-						// Else:
-						// The .output is more or as recent as the input
-						// Don't need a rebuild if no other input's .output is outdated
-						// Do nothing and keep copying the output paths over
-						// Output may still have been tampered with, though.
-					}
-					else
-					{
-						m_SubTaskErrorMessage = "Input file '" + path + "' does not have status cache, should never happen, possible data corruption, cannot rebuild";
-						m_SubTaskResult = FINISH_ERROR;
-						return false; // Error, cannot rebuild.
-					}
-				}
-			}
-			else
-			{
-				// Input file did not change, but output may have been tampered with
-				needsFurtherInfo = true;
 			}
 			
 			// Copy the .output file into the output paths
@@ -769,19 +739,12 @@ public:
 			// End
 		}
 
-		if (needsFurtherInfo)
-		{
-			nldebug("Need further information");
-			m_SubTaskResult = FINISH_SUCCESS;
-			return needsToBeRebuiltSub(inputPaths, outputPaths, inputChanged); // to skip input changed checks because these are only input files and no input folders
-		}
-		else
-		{
-			nldebug("All .output seem more recent than the input, so no rebuild needed");
-			m_SubTaskResult = FINISH_SUCCESS;
-			return false; // No rebuild necessary.
-		}
-	} // ok ?
+		// Output files may have already been built by a failed build,
+		// or they might have been tampered with after they were built.
+		nldebug("Need further information");
+		m_SubTaskResult = FINISH_SUCCESS;
+		return needsToBeRebuiltSub(inputPaths, outputPaths, inputChanged); // to skip input changed checks because these are only input files and no input folders
+	} // ok ? ?
 
 	bool needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths)
 	{
