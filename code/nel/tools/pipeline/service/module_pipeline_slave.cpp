@@ -561,6 +561,13 @@ public:
 		return m_ListDependentDirectories.find(path) != m_ListDependentDirectories.end();
 	}
 
+	bool hasInputFileBeenModified(const std::string &inputFile)
+	{
+		return m_ListInputAdded.find(inputFile) != m_ListInputAdded.end()
+			|| m_ListInputChanged.find(inputFile) != m_ListInputChanged.end()
+			|| m_ListInputRemoved.find(inputFile) != m_ListInputRemoved.end();
+	}
+
 	bool needsToBeRebuilt(const std::vector<std::string> &inputPaths)
 	{
 		if (m_SubTaskResult != FINISH_SUCCESS)
@@ -575,7 +582,7 @@ public:
 			if (path[path.size() - 1] == '/') // isDirectory
 			{
 				m_SubTaskResult = FINISH_ERROR;
-				m_SubTaskErrorMessage = std::string("Output file '") + path + "' cannot be a directory";
+				m_SubTaskErrorMessage = std::string("Input file '") + path + "' cannot be a directory";
 				return false; // Error, cannot rebuild.
 			}
 			if (!isFileDependency(path))
@@ -591,9 +598,7 @@ public:
 		for (std::vector<std::string>::const_iterator it = inputPaths.begin(), end = inputPaths.end(); it != end; ++it)
 		{
 			const std::string &path = *it;
-			if (m_ListInputAdded.find(path) != m_ListInputAdded.end()
-				|| m_ListInputChanged.find(path) != m_ListInputChanged.end()
-				|| m_ListInputRemoved.find(path) != m_ListInputRemoved.end())
+			if (hasInputFileBeenModified(path))
 			{
 				// Found!
 				nldebug("Found added/changed/removed input file '%s'", path.c_str());
@@ -604,7 +609,7 @@ public:
 		if (!inputFilesDifferent)
 		{
 			nldebug("No added/changed/removed input files in this request");
-			if (m_ListOutputChanged.size() == 0 && m_ListOutputRemoved.size())
+			if (m_ListOutputChanged.size() == 0 && m_ListOutputRemoved.size() == 0)
 			{
 				nldebug("No output files were tampered with since last successful build, rebuild not needed");
 				m_SubTaskResult = FINISH_SUCCESS;
@@ -634,6 +639,7 @@ public:
 				return needsToBeRebuildSubByOutput(inputPaths, true);
 			}
 		}
+		// not reachable
 	}
 
 	bool needsToBeRebuildSubByOutput(const std::vector<std::string> &inputPaths, bool inputChanged)
@@ -643,18 +649,62 @@ public:
 		
 		m_SubTaskResult = FINISH_NOT;
 
-		// TODO: READ THE .output FILES (AND PASS ON TO needsToBeRebuilt(2))
-		// (if inputChanged) IF INPUT CACHED LastUpdate > .output BuildStart (project of file-based? - should not matter... prefer same as project start! (make it ProcessStart)) THEN NEED REBUILD
-		// OTHERWISE IF NO CHANGES SINCE OUTPUT BUILD, PASS TO needsToBeRebuilt(2) TO VERIFY THE OUTPUT PATHS IF ANYTHING MESSED WITH
+		std::vector<std::string> outputPaths;
 
-		return true;
+		bool needsFurtherInfo = false;
+
+		// For each inputPath
+			// Read the .output file
+			// If inputChanged & hasInputFileBeenModified(path)
+				// If .output file was empty
+					// Require rebuild because we don't know if there's new output
+				// Else if input LastUpdate > .output BuildStart (project-based start time)
+					// The checksums may still be the same so we want more information
+					// Need to read the rest of the .output files though
+					// needsFurtherInfo = true;
+				// Else
+					// The .output is more or as recent as the input
+					// Don't need a rebuild if no other input's .output is outdated
+					// Do nothing
+			// Else (no input was changed)
+				// Input files did not change, but output may have been tampered with
+				// neesFurtherInfo = true;
+			// Copy the .output file into the output paths
+		// End
+
+		if (needsFurtherInfo)
+		{
+			nldebug("Need further information");
+			m_SubTaskResult = FINISH_SUCCESS;
+			return needsToBeRebuiltSub(inputPaths, outputPaths, inputChanged); // to skip input changed checks because these are only input files and no input folders
+		}
+		else
+		{
+			nldebug("All .output seem more recent than the input, so no rebuild needed");
+			m_SubTaskResult = FINISH_SUCCESS;
+			return false; // No rebuild necessary.
+		}
+	}
+
+	bool needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths)
+	{
+		if (m_SubTaskResult != FINISH_SUCCESS)
+			return false; // Cannot continue on previous failure.
+
+
+	}
+
+	bool needsToBeRebuiltSub(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths, bool inputChanged)
+	{
+		if (m_SubTaskResult != FINISH_SUCCESS)
+			return false; // Cannot continue on previous failure.
 	}
 
 	/// Returns false if the file does not need to be built, or if an error occured.
 	/// Must verify needsExit() afterwards.
 	/// Input paths may be files or directories.
 	/// Output paths can ONLY be files!
-	bool needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths)
+	bool needsToBeRebuiltOld(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths)
 	{
 		// TODO: REWRITE THIS
 
