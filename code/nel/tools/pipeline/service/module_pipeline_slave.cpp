@@ -554,12 +554,12 @@ public:
 			}
 		}
 		return true;
-	}
+	} // ok
 
 	bool isDirectoryDependency(const std::string &path)
 	{
 		return m_ListDependentDirectories.find(path) != m_ListDependentDirectories.end();
-	}
+	} // ok
 
 	bool hasInputDirectoryBeenModified(const std::string &inputDirectory)
 	{
@@ -597,15 +597,16 @@ public:
 				return true;
 			}
 		}
+		// nldebug("Input directory '%s' not modified", inputDirectory.c_str());
 		return false;
-	}
+	} // ok
 
 	bool hasInputFileBeenModified(const std::string &inputFile)
 	{
 		return m_ListInputAdded.find(inputFile) != m_ListInputAdded.end()
 			|| m_ListInputChanged.find(inputFile) != m_ListInputChanged.end()
 			|| m_ListInputRemoved.find(inputFile) != m_ListInputRemoved.end();
-	}
+	} // ok
 
 	bool needsToBeRebuilt(const std::vector<std::string> &inputPaths)
 	{
@@ -680,7 +681,7 @@ public:
 			{
 				nldebug("Not all input files have an .output files, rebuild");
 				m_SubTaskResult = FINISH_SUCCESS;
-				return true;
+				return true; // Rebuild
 			}
 			else
 			{
@@ -690,7 +691,7 @@ public:
 			}
 		}
 		// not reachable
-	}
+	} // ok
 
 	bool needsToBeRebuildSubByOutput(const std::vector<std::string> &inputPaths, bool inputChanged)
 	{
