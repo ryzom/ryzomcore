@@ -624,8 +624,19 @@ public:
 		}
 		else // input files have changed
 		{
-			// TODO: FIND IF ALL INPUT FILES HAVE A .output FILE
-			bool allInputFilesHaveOutputFile = (rand()) % 2 == 0; // ###################################fa
+			// Find out if all the input files have a .output file
+			bool allInputFilesHaveOutputFile = true;
+			for (std::vector<std::string>::const_iterator it = inputPaths.begin(), end = inputPaths.end(); it != end; ++it)
+			{
+				const std::string &path = *it;
+				std::string outputMetaPath = CMetadataStorage::getOutputPath(path, m_ActiveProject->getName(), m_ActivePlugin.Handler);
+				if (!CFile::fileExists(outputMetaPath))
+				{
+					nldebug("Found an input file that has no .output meta file");
+					allInputFilesHaveOutputFile = false;
+					break;
+				}
+			}
 			if (!allInputFilesHaveOutputFile)
 			{
 				nldebug("Not all input files have an .output files, rebuild");
@@ -668,7 +679,7 @@ public:
 					// Do nothing
 			// Else (no input was changed)
 				// Input files did not change, but output may have been tampered with
-				// neesFurtherInfo = true;
+				// needsFurtherInfo = true;
 			// Copy the .output file into the output paths
 		// End
 

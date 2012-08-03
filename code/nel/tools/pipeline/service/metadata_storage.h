@@ -129,6 +129,17 @@ public:
 	void clear();
 };
 
+/// Suffix for metafiles that contain the list of output files of an input file when it was last built (what happens to this meta when the file fails build? - erase it for now... forces a rebuild)
+#define PIPELINE_DATABASE_OUTPUT_SUFFIX ".output"
+struct CFileOutput
+{
+public:
+	uint32 BuildStart;
+	std::vector<std::string> MacroPaths;
+
+	void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
+};
+
 /**
  * \brief CMetadataStorage
  * \date 2012-07-30 14:31GMT
@@ -142,9 +153,9 @@ public:
 	// Note: Use the functions provided by CDatabaseStatus for manipulating status files.
 	/// Format like .../something.somedirectory.meta/path/file.status
 	static std::string getStatusPath(const std::string &file);
-	static bool readStatus(CFileStatus &status, const std::string &path);
-	static void writeStatus(const CFileStatus &status, const std::string &path);
-	static void eraseStatus(const std::string &path);
+	static bool readStatus(CFileStatus &status, const std::string &metaPath);
+	static void writeStatus(const CFileStatus &status, const std::string &metaPath);
+	static void eraseStatus(const std::string &metaPath);
 
 	/// Format like .../something.somedirectory.meta/path/file.remove
 	// static std::string getRemovePath(const std::string &file);
@@ -154,8 +165,14 @@ public:
 
 	// Pathname for result metadata is like .../project.projectname.meta/pluginname.result
 	static std::string getResultPath(const std::string &projectName, const std::string &pluginName);
-	static void readProcessResult(CProcessResult &result, const std::string &path);
-	static void writeProcessResult(const CProcessResult &result, const std::string &path);
+	static void readProcessResult(CProcessResult &result, const std::string &metaPath);
+	static void writeProcessResult(const CProcessResult &result, const std::string &metaPath);
+
+	// Pathname for the output metadata file, like .../something.somedirectory.meta/path/file.projectname.pluginname.output
+	static std::string getOutputPath(const std::string &file, const std::string &projectName, const std::string &pluginName);
+	static bool readOutput(CFileOutput &output, const std::string &metaPath);
+	static void writeOutput(const CFileOutput &output, const std::string &metaPath);
+	static void eraseOutput(const std::string &metaPath);
 
 }; /* class CMetadataStorage */
 
