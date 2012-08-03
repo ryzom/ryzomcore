@@ -51,11 +51,11 @@ CProcessInterface::~CProcessInterface()
 	
 }
 
-void CProcessInterface::buildAtlas(const std::vector<std::string> &srcDirectories, const std::string &dstFile)
+void CProcessInterface::buildAtlas(const std::string &dependLog, const std::string &errorLog, const std::vector<std::string> &srcDirectories, const std::string &dstFile)
 {
 	nldebug("Build atlas '%s'", dstFile.c_str());
 	std::stringstream ss;
-	ss << "build_interface " << dstFile;
+	ss << "build_interface -d" << dependLog << " -e" << errorLog << " " << dstFile;
 	for (std::vector<std::string>::const_iterator it = srcDirectories.begin(), end = srcDirectories.end(); it != end; ++it)
 	{
 		const std::string &path = *it;
@@ -67,6 +67,10 @@ void CProcessInterface::buildAtlas(const std::vector<std::string> &srcDirectorie
 void CProcessInterface::build()
 {
 	nldebug("Building process interface!");
+
+	std::string tempDir = m_PipelineProcess->getTempDirectory();
+	std::string dependLog = tempDir + "depend.log";
+	std::string errorLog = tempDir + "error.log";
 
 	{
 		uint nb;
@@ -86,17 +90,21 @@ void CProcessInterface::build()
 					ss << "Interface.Atlas[" << i << "].DstFile";
 					if (!m_PipelineProcess->getValue(dstFile, ss.str())) break;
 				}
-				if (m_PipelineProcess->needsToBeRebuilt(srcDirectories, dstFile))
+				std::vector<std::string> dstFiles;
+				dstFiles.push_back(dstFile); // .tga
+				dstFiles.push_back(dstFile.substr(0, dstFile.size() - 3) + "txt"); // .txt
+				if (m_PipelineProcess->needsToBeRebuilt(srcDirectories, dstFiles))
 				{
-					m_PipelineProcess->makePaths(dstFile);
-					buildAtlas(srcDirectories, dstFile);
+					m_PipelineProcess->makePaths(dstFiles);
+					buildAtlas(dependLog, errorLog, srcDirectories, dstFile);
 					m_PipelineProcess->parseToolLog("", "", false);
 				}
 				if (m_PipelineProcess->needsExit()) return;
 			}
 		}
 	}
-
+	
+	m_PipelineProcess->deleteDirectoryIfEmpty(tempDir);
 	m_PipelineProcess->setExit(FINISH_ERROR, "Not yet implemented");
 }
 

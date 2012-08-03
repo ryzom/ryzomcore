@@ -474,7 +474,7 @@ int main(int nNbArg, char **ppArgs)
 			string findTGAName;
 			for (i = 0; i < mapSize; ++i)
 			{
-				// get the string whitout path
+				// get the string without path
 				findTGAName = toLower(CFile::getFilename(AllMapNames[i]));
 				if( findTGAName == sTGAname )
 					break;

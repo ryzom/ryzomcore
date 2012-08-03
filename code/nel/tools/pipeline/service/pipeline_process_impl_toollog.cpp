@@ -47,7 +47,8 @@ namespace PIPELINE {
 
 void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const std::string &errorLogFile, bool writeOutputMeta)
 {
-	m_SubTaskResult = FINISH_SUCCESS;
+	m_SubTaskErrorMessage = "Log parsing not implemented, goodbye";
+	m_SubTaskResult = FINISH_ERROR;
 }
 
 } /* namespace PIPELINE */

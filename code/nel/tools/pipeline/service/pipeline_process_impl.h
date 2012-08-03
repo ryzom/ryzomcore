@@ -60,6 +60,7 @@ public:
 	
 	virtual std::string getOutputDirectory();
 	virtual std::string getTempDirectory();
+	virtual void deleteDirectoryIfEmpty(const std::string &path);
 	virtual bool getValue(std::string &result, const std::string &name);
 	virtual bool getValues(std::vector<std::string> &resultAppend, const std::string &name);
 	virtual bool getValueNb(uint &result, const std::string &name);

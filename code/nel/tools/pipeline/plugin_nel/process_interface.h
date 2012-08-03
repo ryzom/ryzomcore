@@ -50,7 +50,7 @@ public:
 	CProcessInterface();
 	virtual ~CProcessInterface();
 
-	void buildAtlas(const std::vector<std::string> &srcDirectories, const std::string &dstFile);
+	void buildAtlas(const std::string &dependLog, const std::string &errorLog, const std::vector<std::string> &srcDirectories, const std::string &dstFile);
 
 	virtual void build();
 

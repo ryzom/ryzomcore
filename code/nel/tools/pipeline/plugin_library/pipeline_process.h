@@ -81,6 +81,9 @@ public:
 	
 	/// Get the temporary directory for the current process. The directory must be deleted when the process ends. May return random temporary directories if no process is running.
 	virtual std::string getTempDirectory() = 0;
+
+	/// Delete a directory if it's empty
+	virtual void deleteDirectoryIfEmpty(const std::string &path) = 0;
 	
 	/// Get a value from the currently active project configuration. If false, don't use, no need to write warnings to service log, already written, set exit state and exit if necessary
 	virtual bool getValue(std::string &result, const std::string &name) = 0;
