@@ -46,19 +46,21 @@ namespace {
 #ifdef ERROR
 #undef ERROR
 #endif
-enum EError
+enum TError
 {
 	ERROR, 
 	WARNING, 
 	MESSAGE, 
 };
 
-const std::string s_Error = "ERROR";
-const std::string s_Warning = "WARNING";
-const std::string s_Message = "MESSAGE";
+enum TDepend
+{
+	BUILD, 
+	RUNTIME, 
+};
 
 const std::string s_ErrorHeader = "type\tpath\ttime\terror";
-const std::string s_DependHeader = "output_file\tinput_file";
+const std::string s_DependHeader = "type\toutput_file\tinput_file";
 
 /**
  * \brief CToolLogger
@@ -104,7 +106,7 @@ public:
 		fflush(m_DependLog);
 	}
 
-	void writeError(EError type, const std::string &path, const std::string &error)
+	void writeError(TError type, const std::string &path, const std::string &error)
 	{
 		if (m_ErrorLog)
 		{
@@ -132,11 +134,21 @@ public:
 		}
 	}
 
-	/// inputFile can only be file. May be not-yet-existing file for expected input for future build runs. Directories are handled on process level. You should call this before calling writeError on inputFile, so the error is also linked from the outputFile.
-	void writeDepend(const std::string &outputFile, const std::string &inputFile)
+	/// inputFile can only be file. [? May be not-yet-existing file for expected input for future build runs. ?] Directories are handled on process level. [? You should call this before calling writeError on inputFile, so the error is also linked from the outputFile. ?]
+	void writeDepend(TDepend type, const std::string &outputFile, const std::string &inputFile)
 	{
 		if (m_DependLog)
 		{
+			switch (type)
+			{
+			case BUILD:
+				fwrite("BUILD", 1, 5, m_DependLog);
+				break;
+			case RUNTIME:
+				fwrite("RUNTIME", 1, 7, m_DependLog);
+				break;
+			}
+			fwrite("\t", 1, 1, m_DependLog);
 			fwrite(outputFile.c_str(), 1, outputFile.length(), m_DependLog);
 			fwrite("\t", 1, 1, m_DependLog);
 			fwrite(inputFile.c_str(), 1, inputFile.length(), m_DependLog);

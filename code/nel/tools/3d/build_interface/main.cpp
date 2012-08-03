@@ -270,8 +270,8 @@ int main(int nNbArg, char **ppArgs)
 	{
 		try
 		{
-			ToolLogger.writeDepend(tgaName, AllMapNames[i]); // Write depend before error can occur.
-			ToolLogger.writeDepend(uvName, AllMapNames[i]);
+			ToolLogger.writeDepend(PIPELINE::BUILD, tgaName, AllMapNames[i]); // Write depend before error can occur.
+			ToolLogger.writeDepend(PIPELINE::BUILD, uvName, AllMapNames[i]);
 
 			NLMISC::CBitmap *pBtmp = new NLMISC::CBitmap;
 			NLMISC::CIFile inFile;
@@ -436,8 +436,8 @@ int main(int nNbArg, char **ppArgs)
 		CIFile iFile;
 		string filename = CPath::lookup (existingUVfilename, false);
 
-		ToolLogger.writeDepend(tgaName, existingUVfilename); // Write depend before error can occur.
-		ToolLogger.writeDepend(uvName, existingUVfilename);
+		ToolLogger.writeDepend(PIPELINE::BUILD, tgaName, existingUVfilename); // Write depend before error can occur.
+		ToolLogger.writeDepend(PIPELINE::BUILD, uvName, existingUVfilename);
 
 		if( (filename == "") || (!iFile.open(filename)) )
 		{
