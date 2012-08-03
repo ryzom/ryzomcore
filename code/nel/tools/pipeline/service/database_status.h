@@ -69,14 +69,16 @@ public:
 	
 	/// Tries to read the last file status. Return false if the status is invalid. Call updateFileStatus if the result is false to update asynchronously.
 	bool getFileStatus(CFileStatus &fileStatus, const std::string &filePath) const;
-	/// Updates the file status asynchronously. The new file status is broadcast to clients and slaves afterwards. Warning: If g_IsExiting during callback then update likely did not happen.
+	/// Updates a file status synchronously. Returns the result in metaStatus. filepPath is NOT a macro path.
+	bool updateFileStatus(CFileStatus &metaStatus, const std::string &filePath);
+	/// Updates the file status asynchronously. Warning: If g_IsExiting during callback then update likely did not happen.
 	NLMISC::IRunnable *updateFileStatus(const TFileStatusCallback &callback, const std::string &filePath);
 	/// Runs an update of the complete {{DatabaseDirectory}} status asynchronously. Warning: If g_IsExiting during callback then update is incomplete. Callback is always called when done (or failed).
 	void updateDatabaseStatus(const CCallback<void> &callback);
 	/// Runs an update of the file status of given paths asynchronously. Warning: If g_IsExiting during callback then update is incomplete. Callback is always called when done (or failed). Do NOT use the wait parameter. Do NOT use recurse, please. Recurse directories beforehand. Paths may contain db and pl macros.
 	void updateDatabaseStatus(const CCallback<void> &callback, const TFileStatusCallback &fileStatusCallback, const std::vector<std::string> &paths, bool wait = false, bool recurse = false);
 	/// Gets the last file statuses of given paths in a map. Directories are scanned for files, non recursively. Returns false if one of the statuses is bad (not updated; file changed inbetween). Considered as build error.
-	bool getFileStatus(std::map<std::string, CFileStatus> &fileStatusMap, std::map<std::string, CFileRemove> &fileRemoveMap, const std::vector<std::string> &paths);
+	// bool getFileStatus(std::map<std::string, CFileStatus> &fileStatusMap, std::map<std::string, CFileRemove> &fileRemoveMap, const std::vector<std::string> &paths);
 	/// Gets all removed files
 	bool getRemoved(std::map<std::string, CFileRemove> &fileRemoveMap, const std::vector<std::string> &paths);
 

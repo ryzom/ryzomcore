@@ -178,8 +178,8 @@ public:
 	// static void eraseRemove(const std::string &path);
 
 	static std::string getDependPath(const std::string &file);
-	static bool readDepend(CFileDepend &status, const std::string &metaPath);
-	static void writeDepend(const CFileDepend &status, const std::string &metaPath);
+	static bool readDepend(CFileDepend &depend, const std::string &metaPath);
+	static void writeDepend(const CFileDepend &depend, const std::string &metaPath);
 
 	// Pathname for result metadata is like .../project.projectname.meta/pluginname.result
 	static std::string getResultPath(const std::string &projectName, const std::string &pluginName);

@@ -74,7 +74,7 @@ bool CDatabaseStatus::getFileStatus(CFileStatus &fileStatus, const std::string &
 	m_StatusMutex.unlock_shared();
 	return seemsValid;
 }
-
+/*
 bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStatusMap, std::map<std::string, CFileRemove> &fileRemoveMap, const std::vector<std::string> &paths)
 {
 	nlassert(false); // not used
@@ -193,7 +193,7 @@ bool CDatabaseStatus::getFileStatus(std::map<std::string, CFileStatus> &fileStat
 	// no issues occured apparently
 	return true;
 }
-
+*/
 bool CDatabaseStatus::getRemoved(std::map<std::string, CFileRemove> &fileRemoveMap, const std::vector<std::string> &paths)
 {
 	for (std::vector<std::string>::const_iterator it = paths.begin(), end = paths.end(); it != end; ++it)
@@ -402,7 +402,32 @@ public:
 	}
 };
 
+struct CRememberTheFileStatus
+{
+	CFileStatus FileStatus;
+	bool Success;
+	void cb(const std::string &/*filePath*/, const CFileStatus &fileStatus, bool success)
+	{
+		FileStatus = fileStatus;
+		Success = success;
+	}
+};
+
 } /* anonymous namespace */
+
+/// Updates a file status synchronously. Returns the result in metaStatus.
+bool CDatabaseStatus::updateFileStatus(CFileStatus &metaStatus, const std::string &filePath)
+{
+	CRememberTheFileStatus result;
+	CUpdateFileStatus *ufs = new CUpdateFileStatus();
+	ufs->StatusMutex = &m_StatusMutex;
+	ufs->FilePath = filePath;
+	ufs->Callback = TFileStatusCallback(&result, &CRememberTheFileStatus::cb);
+	ufs->run();
+	ufs = NULL; // deleted by run
+	metaStatus = result.FileStatus;
+	return result.Success;
+}
 
 IRunnable *CDatabaseStatus::updateFileStatus(const TFileStatusCallback &callback, const std::string &filePath)
 {
@@ -620,9 +645,9 @@ void updateDirectoryStatus(CDatabaseStatus* ds, CDatabaseStatusUpdater &updater,
 	// <-- END REMOVE
 }
 
-} /* anonymous namespace */
-
 void dummyFileStatusCallback(const std::string &/*filePath*/, const CFileStatus &/*fileStatus*/, bool /*success*/) { }
+
+} /* anonymous namespace */
 
 void CDatabaseStatus::updateDatabaseStatus(const CCallback<void> &callback)
 {

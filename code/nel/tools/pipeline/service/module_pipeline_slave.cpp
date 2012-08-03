@@ -713,6 +713,7 @@ public:
 		for (std::vector<std::string>::const_iterator it = inputPaths.begin(), end = inputPaths.end(); it != end; ++it)
 		{
 			const std::string &path = *it;
+			// FIXME: What if an input file does not exist? Deleted long ago? Just print a warning (& notify terminal), keep calm, and carry on.
 			nlassert(!CFile::isDirectory(path)); // All input are files! Coding error otherwise, because should already be checked.
 			std::string metaOutputPath = CMetadataStorage::getOutputPath(path, m_ActiveProject->getName(), m_ActivePlugin.Handler);
 			nlassert(CFile::fileExists(metaOutputPath)); // Coding error otherwise, already must have checked beforehand that they all exist.
@@ -844,105 +845,6 @@ public:
 
 		// Sanity check of all the output paths
 		// These must all be files, no directories allowed
-
-		// Check if any of the output paths are part of the removed output files
-			// If so, rebuild
-		// Check if any of the output files don't exist
-			// If so, rebuild
-		
-		// bool outputChanged = Check if any of the output paths are part of the changed output files
-		
-		// Check the .depend files of all the output files // also check that they exist :)
-			// If outputChanged
-				// Compare the output checksum with the cached output checksum
-			// If inputModified
-				// Compare the input checksums with the cached input checksums
-		// (if any checksum was different, require rebuild, if no checksums were different, no rebuild is needed)
-	}
-
-	/// Returns false if the file does not need to be built, or if an error occured.
-	/// Must verify needsExit() afterwards.
-	/// Input paths may be files or directories.
-	/// Output paths can ONLY be files!
-	bool needsToBeRebuiltOld(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths)
-	{
-		// TODO: REWRITE THIS
-
-		if (m_SubTaskResult != FINISH_SUCCESS)
-			return false; // Cannot continue on previous failure.
-
-		m_SubTaskResult = FINISH_NOT;
-		for (std::vector<std::string>::const_iterator it = inputPaths.begin(), end = inputPaths.end(); it != end; ++it)
-		{
-			const std::string &path = *it;
-			if (path[path.size() - 1] == '/') // isDirectory
-			{
-				// Check if this directory is in the dependencies.
-				if (!isDirectoryDependency(path))
-				{
-					m_SubTaskResult = FINISH_ERROR;
-					m_SubTaskErrorMessage = std::string("Directory '") + path + "' is not part of the dependencies";
-					return false; // Error, cannot rebuild.
-				}
-				// Check if any files added/changed/removed are part of this directory (slow).
-				for (std::set<std::string>::const_iterator itr = m_ListInputAdded.begin(), endr = m_ListInputAdded.end(); itr != endr; ++itr)
-				{
-					const std::string &pathr = *it;
-					if ((pathr.size() > path.size())
-						&& (pathr.substr(0, path.size()) == path) // inside the path
-						&& (pathr.substr(path.size(), pathr.size() - path.size())).find('/') == std::string::npos) // not in a further subdirectory 
-					{
-						nldebug("Found added '%s' in dependency directory '%s', rebuild", pathr.c_str(), path.c_str());
-						m_SubTaskResult = FINISH_SUCCESS;
-						return true; // Rebuild.
-					}
-				}
-				for (std::set<std::string>::const_iterator itr = m_ListInputChanged.begin(), endr = m_ListInputChanged.end(); itr != endr; ++itr)
-				{
-					const std::string &pathr = *it;
-					if ((pathr.size() > path.size())
-						&& (pathr.substr(0, path.size()) == path) // inside the path
-						&& (pathr.substr(path.size(), pathr.size() - path.size())).find('/') == std::string::npos) // not in a further subdirectory 
-					{
-						nldebug("Found changed '%s' in dependency directory '%s', rebuild", pathr.c_str(), path.c_str());
-						m_SubTaskResult = FINISH_SUCCESS;
-						return true; // Rebuild.
-					}
-				}
-				for (std::set<std::string>::const_iterator itr = m_ListInputRemoved.begin(), endr = m_ListInputRemoved.end(); itr != endr; ++itr)
-				{
-					const std::string &pathr = *it;
-					if ((pathr.size() > path.size())
-						&& (pathr.substr(0, path.size()) == path) // inside the path
-						&& (pathr.substr(path.size(), pathr.size() - path.size())).find('/') == std::string::npos) // not in a further subdirectory 
-					{
-						nldebug("Found removed '%s' in dependency directory '%s', rebuild", pathr.c_str(), path.c_str());
-						m_SubTaskResult = FINISH_SUCCESS;
-						return true; // Rebuild.
-					}
-				}
-			}
-			else // isFile
-			{
-				// Check if this file is in the dependencies.
-				if (!isFileDependency(path))
-				{
-					m_SubTaskResult = FINISH_ERROR;
-					m_SubTaskErrorMessage = std::string("File '") + path + "' is not part of the dependencies";
-					return false; // Error, cannot rebuild.
-				}
-				// Check if this file is in added/changed/removed.
-				if (m_ListInputAdded.find(path) != m_ListInputAdded.end()
-					|| m_ListInputChanged.find(path) != m_ListInputChanged.end()
-					|| m_ListInputRemoved.find(path) != m_ListInputRemoved.end())
-				{
-					// Found!
-					nldebug("Found added/changed/removed input file '%s', rebuild", path.c_str());
-					m_SubTaskResult = FINISH_SUCCESS;
-					return true; // Rebuild.
-				}
-			}
-		}
 		for (std::vector<std::string>::const_iterator it = outputPaths.begin(), end = outputPaths.end(); it != end; ++it)
 		{
 			const std::string &path = *it;
@@ -952,26 +854,99 @@ public:
 				m_SubTaskErrorMessage = std::string("Output file '") + path + "' cannot be a directory";
 				return false; // Error, cannot rebuild.
 			}
-			if (m_ListOutputRemoved.find(path) != m_ListOutputRemoved.end())
+		}
+
+		// Check if any of the output paths are part of the removed output files
+		for (std::vector<std::string>::const_iterator it = outputPaths.begin(), end = outputPaths.end(); it != end; ++it)
+		{
+			const std::string &path = *it;
+			if (m_ListOutputRemoved.find(*it) != m_ListOutputRemoved.end())
 			{
-				nldebug("Found removed output file '%s', rebuild", path.c_str());
+				// If so, rebuild
+				nldebug("Output file '%s' has been removed, rebuild", path.c_str());
 				m_SubTaskResult = FINISH_SUCCESS;
-				return true;
-			}
-			if (m_ListOutputChanged.find(path) != m_ListOutputChanged.end())
-			{
-				nlwarning("Changed output files not implemented yet. Previous build was likely incomplete. Please wipe the output directory. Rebuilding anyways");
-				// For now always rebuild and don't check if the output file is up-to-date from a previous incomplete build.
-				nldebug("Found changed output file '%s', rebuild", path.c_str());
-				m_SubTaskResult = FINISH_SUCCESS;
-				return true;
-				//m_SubTaskResult = FINISH_ERROR;
-				//m_SubTaskErrorMessage = std::string("Changed output files not implemented yet. Previous build was likely incomplete. Please wipe the output directory");
-				//return false; // Error, cannot rebuild.
+				return true; // Rebuild.
 			}
 		}
+
+		// Check if any of the output files don't exist
+		for (std::vector<std::string>::const_iterator it = outputPaths.begin(), end = outputPaths.end(); it != end; ++it)
+		{
+			// If so, rebuild
+			const std::string &path = *it;
+			if (!CFile::isExists(path))
+			{
+				// If so, rebuild
+				nldebug("Output file '%s' does not exist, rebuild", path.c_str());
+				m_SubTaskResult = FINISH_SUCCESS;
+				return true; // Rebuild.
+			}
+		}
+		
+		// Check if any of the output paths are part of the changed output files
+		bool outputChanged = false; 
+		for (std::vector<std::string>::const_iterator it = outputPaths.begin(), end = outputPaths.end(); it != end; ++it)
+		{
+			const std::string &path = *it;
+			if (m_ListOutputChanged.find(*it) != m_ListOutputChanged.end())
+			{
+				nldebug("Output file '%s' has been changed", path.c_str());
+				outputChanged = true;
+				break;
+			}
+		}
+
+		if (!outputChanged && !inputModified)
+		{
+			nlerror("Should never reach this, this must have been cought earlier normally");
+		}
+		
+		// Check the .depend files of all the output files // also check that they exist :)
+		for (std::vector<std::string>::const_iterator it = outputPaths.begin(), end = outputPaths.end(); it != end; ++it)
+		{
+			const std::string &path = *it;
+			std::string metaDependPath = CMetadataStorage::getDependPath(path);
+			CFileDepend metaDepend;
+			if (!CMetadataStorage::readDepend(metaDepend, metaDependPath))
+			{
+				nlwarning("Depend file for existing output '%s' does not exist, this should not happen, rebuild", path.c_str());
+				m_SubTaskResult = FINISH_SUCCESS;
+				return true; // Rebuild.
+			}
+			else
+			{
+				if (outputChanged)
+				{
+					// Compare the output checksum with the status output checksum
+					CFileStatus metaStatus;
+					if (!CDatabaseStatus::updateFileStatus(metaStatus, path))
+					{
+						m_SubTaskResult = FINISH_ERROR;
+						m_SubTaskErrorMessage = std::string("Could not get status for output file '") + path + "'";
+						return false; // Error, cannot rebuild.
+					}
+					else
+					{
+						if (metaStatus.CRC32 != metaDepend.CRC32)
+						{
+							nlwarning("Status checksum for '%s' does match depend checksum, output file was modified, this should not happen, rebuild", path.c_str());
+							m_SubTaskResult = FINISH_SUCCESS;
+							return true; // Rebuild.
+						}
+					}
+				}
+				if (inputModified)
+				{
+					// Compare the input checksums with the cached input checksums
+
+				}
+			}
+		}
+
+		// (if any checksum was different, require rebuild, if no checksums were different, no rebuild is needed)
+		nldebug("No differences found, no rebuild needed");
 		m_SubTaskResult = FINISH_SUCCESS;
-		return false; // Does not need rebuild.
+		return false; // Rebuild not necessary.
 	}
 
 	/// Set the exit message, exit the plugin immediately afterwards.
