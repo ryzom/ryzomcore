@@ -237,7 +237,33 @@ inline bool fromString(const std::string &str, uint64 &val) { bool ret = sscanf(
 inline bool fromString(const std::string &str, sint64 &val) { bool ret = sscanf(str.c_str(), "%"NL_I64"d", &val) == 1; if (!ret) val = 0; return ret; }
 inline bool fromString(const std::string &str, float &val) { bool ret = sscanf(str.c_str(), "%f", &val) == 1; if (!ret) val = 0.0f; return ret; }
 inline bool fromString(const std::string &str, double &val) { bool ret = sscanf(str.c_str(), "%lf", &val) == 1; if (!ret) val = 0.0; return ret; }
-inline bool fromString(const std::string &str, bool &val) { val = (str.length() == 1) && str[0] != '0'; return (str.length() == 1) && (str[0] == '0' || str[0] == '1'); }
+
+inline bool fromString(const std::string &str, bool &val)
+{
+	if( str.length() == 1 )
+	{
+		if( str[ 0 ] == '1' )
+			val = true;
+		else
+		if( str[ 0 ] == '0' )
+			val = false;
+		else
+			return false;
+	}
+	else
+	{
+		if( str == "true" )
+			val = true;
+		else
+		if( str == "false" )
+			val = false;
+		else
+			return false;
+	}
+
+	return true;
+}
+
 inline bool fromString(const std::string &str, std::string &val) { val = str; return true; }
 
 // stl vectors of bool use bit reference and not real bools, so define the operator for bit reference

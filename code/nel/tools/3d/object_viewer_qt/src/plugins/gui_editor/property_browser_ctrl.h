@@ -25,6 +25,7 @@
 
 class QtTreePropertyBrowser;
 class QtVariantPropertyManager;
+class QtProperty;
 
 namespace NLGUI
 {
@@ -49,6 +50,9 @@ namespace GUIEditor
 	public Q_SLOTS:
 		void onSelectionChanged( std::string &id );
 
+	private Q_SLOTS:
+		void onPropertyChanged( QtProperty *prop );
+
 	private:
 		void setupProperties( const std::string &type, const NLGUI::CInterfaceElement *element );
 		void setupProperty( const SPropEntry &prop, const NLGUI::CInterfaceElement *element );
@@ -56,6 +60,8 @@ namespace GUIEditor
 		QtTreePropertyBrowser *browser;
 		QtVariantPropertyManager *propertyMgr;
 		std::map< std::string, SWidgetInfo > widgetInfo;
+
+		std::string currentElement;
 	};
 
 }

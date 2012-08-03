@@ -58,11 +58,16 @@ namespace GUIEditor
 	{
 		if( browser == NULL )
 			return;
+		disconnect( propertyMgr, SIGNAL( propertyChanged( QtProperty* ) ),
+			this, SLOT( onPropertyChanged( QtProperty* ) ) );
+
 		browser->clear();
 
 		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( id );
 		if( e == NULL )
 			return;
+
+		currentElement = id;
 
 		std::string n;
 		n = typeid( *e ).name();
@@ -71,6 +76,27 @@ namespace GUIEditor
 			n = n.substr( i + 1, n.size() - 1 );
 
 		setupProperties( n, e );
+		connect( propertyMgr, SIGNAL( propertyChanged( QtProperty* ) ),
+			this, SLOT( onPropertyChanged( QtProperty* ) ) );
+	}
+
+	void CPropBrowserCtrl::onPropertyChanged( QtProperty *prop )
+	{
+		QString propName = prop->propertyName();
+		QString propValue = prop->valueText();
+
+		// for some reason booleans cannot be extracted from a QtProperty :(
+		if( propValue.isEmpty() )
+		{
+			QtVariantProperty *p = propertyMgr->variantProperty( prop );
+			if( p != NULL )
+				propValue = p->value().toString();
+		}
+
+		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
+		if( e == NULL )
+			return;
+		e->setProperty( propName.toStdString(), propValue.toStdString() );
 	}
 
 	void CPropBrowserCtrl::setupProperties( const std::string &type, const CInterfaceElement *element )

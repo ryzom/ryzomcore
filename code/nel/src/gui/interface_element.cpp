@@ -166,6 +166,7 @@ namespace NLGUI
 		if( name == "id" )
 		{
 			setIdRecurse( stripId( value ) );
+			return;
 		}
 		else
 		if( name == "active" )
@@ -173,6 +174,7 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				setActive( b );
+			return;
 		}
 		else
 		if( name == "x" )
@@ -180,6 +182,7 @@ namespace NLGUI
 			sint32 x;
 			if( fromString( value, x ) )
 				setX( x );
+			return;
 		}
 		else
 		if( name == "y" )
@@ -187,6 +190,7 @@ namespace NLGUI
 			sint32 y;
 			if( fromString( value, y ) )
 				setY( y );
+			return;
 		}
 		else
 		if( name == "w" )
@@ -194,6 +198,7 @@ namespace NLGUI
 			sint32 w;
 			if( fromString( value, w ) )
 				setW( w );
+			return;
 		}
 		else
 		if( name == "h" )
@@ -201,25 +206,30 @@ namespace NLGUI
 			sint32 h;
 			if( fromString( value, h ) )
 				setH( h );
+			return;
 		}
 		else
 		if( name == "posref" )
 		{
 			convertHotSpotCouple( value.c_str(), _ParentPosRef, _PosRef );
+			return;
 		}
 		else
 		if( name == "sizeref" )
 		{
 			parseSizeRef( value.c_str() );
+			return;
 		}
 		if( name == "posparent" )
 		{
 			setPosParent( value );
+			return;
 		}
 		else
 		if( name == "sizeparent" )
 		{
 			setSizeParent( value );
+			return;
 		}
 		else
 		if( name == "global_color" )
@@ -227,6 +237,7 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				setModulateGlobalColor( b );
+			return;
 		}
 		else
 		if( name == "render_layer" )
@@ -234,6 +245,7 @@ namespace NLGUI
 			sint8 l;
 			if( fromString( value, l ) )
 				setRenderLayer( l );
+			return;
 		}
 		else
 		if( name == "avoid_resize_parent" )
@@ -241,6 +253,7 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				setAvoidResizeParent( b );
+			return;
 		}
 		else
 			nlwarning( "Tried to set invalid property '%s' for widget '%s'", name.c_str(), _Id.c_str() );
