@@ -68,7 +68,7 @@ bool CPipelineProject::getValue(std::string &result, const std::string &name)
 	}
 	if (!valueElm)
 	{
-		nlwarning("Node '%s' not found in '%s', valueElm returned NULL, probably using default value", name.c_str(), m_Form->getFilename().c_str());
+		nlwarning("Node '%s' not found in '%s', valueElm NULL, probably using default value", name.c_str(), m_Form->getFilename().c_str());
 		return false;
 	}
 	std::string value;
@@ -98,6 +98,11 @@ bool CPipelineProject::getValues(std::vector<std::string> &resultAppend, const s
 	if (!m_Form->getRootNode().getNodeByName(&elm, name.c_str()))
 	{
 		nlwarning("Node '%s' not found in '%s'", name.c_str(), m_Form->getFilename().c_str());
+		return false;
+	}
+	if (!elm)
+	{
+		nlwarning("Node '%s' not found in '%s', elm NULL, probably using default value", name.c_str(), m_Form->getFilename().c_str());
 		return false;
 	}
 	uint size;

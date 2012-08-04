@@ -22,6 +22,12 @@
         <ATOM Name="Handler" Value="CProcessTextureDDS"/>
         <ATOM Name="Info" Value="CProcessTextureDDSInfo"/>
       </STRUCT>
+      <STRUCT>
+        <ATOM Name="Description" Value="Builds a big nel package"/>
+        <ATOM Name="Process" Value="PackageBNP"/>
+        <ATOM Name="Handler" Value="CProcessPackageBNP"/>
+        <ATOM Name="Info" Value="CProcessPackageBNPInfo"/>
+      </STRUCT>
     </ARRAY>
   </STRUCT>
   <STRUCT/>
@@ -50,5 +56,10 @@ Sat Aug 04 15:33:08 2012 (kaetemi) .ProcessHandlers[2].Description = Builds comp
 Sat Aug 04 15:33:08 2012 (kaetemi) .ProcessHandlers[2].Handler = CProcessTextureDDS
 Sat Aug 04 15:33:08 2012 (kaetemi) .ProcessHandlers[2].Info = CProcessTextureDDSInfo
 Sat Aug 04 15:33:08 2012 (kaetemi) .ProcessHandlers[2].Process = TextureDDS
-Sat Aug 04 15:33:08 2012 (kaetemi) formName Resized = 3</LOG>
+Sat Aug 04 15:33:08 2012 (kaetemi) formName Resized = 3
+Sat Aug 04 21:08:26 2012 (kaetemi) .ProcessHandlers[3].Description = Builds a big nel package
+Sat Aug 04 21:08:26 2012 (kaetemi) .ProcessHandlers[3].Handler = CProcessPackageBNP
+Sat Aug 04 21:08:26 2012 (kaetemi) .ProcessHandlers[3].Info = CProcessPackageBNPInfo
+Sat Aug 04 21:08:26 2012 (kaetemi) .ProcessHandlers[3].Process = PackageBNP
+Sat Aug 04 21:08:26 2012 (kaetemi) formName Resized = 4</LOG>
 </FORM>

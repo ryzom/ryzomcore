@@ -32,6 +32,7 @@
 
 // NeL includes
 #include <nel/misc/debug.h>
+#include <nel/misc/path.h>
 
 // Project includes
 #include "pipeline_workspace.h"
@@ -146,7 +147,36 @@ void CBuildTaskQueue::loadQueue(CPipelineWorkspace *workspace, bool bypassDepend
 		}
 	}
 
-	// TODO_TODO_TODO Dependencies between projects *************************************************************************
+	// Dependencies between projects
+	for (std::map<std::string, CPipelineProject *>::const_iterator pr_it = projects.begin(), pr_end = projects.end(); pr_it != pr_end; ++pr_it)
+	{
+		const std::string &projectName = pr_it->first;
+		CPipelineProject *project = pr_it->second;
+		std::map<uint32, CBuildTaskInfo *> &builtTaskByPlugin = builtTaskByProjectAndPlugin[projectName];
+		std::vector<std::string> dependentProjects;
+		project->getValues(dependentProjects, "DependentProjects");
+		for (std::vector<std::string>::iterator it2 = dependentProjects.begin(), end2 = dependentProjects.end(); it2 != end2; ++it2)
+		{
+			const std::string &dependentProject = NLMISC::CFile::getFilenameWithoutExtension(*it2);
+			std::map<std::string, std::map<uint32, CBuildTaskInfo *> >::iterator dependencyTasksIt = builtTaskByProjectAndPlugin.find(dependentProject);
+			if (dependencyTasksIt == builtTaskByProjectAndPlugin.end())
+			{
+				nlwarning("Project '%s' depends on project '%s' which does not exist in this workspace", projectName.c_str(), dependentProject.c_str());
+			}
+			else
+			{
+				for (std::map<uint32, CBuildTaskInfo *>::iterator cur_it = builtTaskByPlugin.begin(), cur_end = builtTaskByPlugin.end(); cur_it != cur_end; ++cur_it)
+				{
+					CBuildTaskInfo *currentTask = cur_it->second;
+					for (std::map<uint32, CBuildTaskInfo *>::iterator dep_it = dependencyTasksIt->second.begin(), dep_end = dependencyTasksIt->second.end(); dep_it != dep_end; ++dep_it)
+					{
+						currentTask->Dependencies.push_back(dep_it->second->Id.Sub.Task);
+					}
+				}
+			}
+		}
+	}
+	
 
 	m_Mutex.unlock();
 }
@@ -400,7 +430,7 @@ void CBuildTaskQueue::sortBuildableTaskListByMostWaitingDependents(std::vector<C
 	do
 	{
 		sc = 0;
-		for (std::vector<uint>::size_type i = 0; i < dependentsCache.size() - 1; ++i)
+		for (ptrdiff_t i = 0; i < (ptrdiff_t)dependentsCache.size() - 1; ++i)
 		{
 			if (dependentsCache[i + 1] > dependentsCache[i])
 			{
