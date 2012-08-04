@@ -1,11 +1,17 @@
 <?xml version="1.0"?>
 <FORM Revision="$Revision$" State="modified">
   <STRUCT>
+    <ARRAY Name="DependentProjects">
+      <ATOM Value="common_interface.pipeline_project"/>
+    </ARRAY>
+    <ARRAY Name="Processes">
+      <ATOM Value="PackageBNP"/>
+    </ARRAY>
     <STRUCT Name="Package">
       <STRUCT Name="BNP">
         <ARRAY Name="SrcDirectories">
           <ATOM Value="[@common_interface&amp;DstInterfaceAtlas]"/>
-		  <ATOM Value="[@common_interface:Texture.DDS[0].DstDirectory]"/>
+          <ATOM Value="[@common_interface:Texture.DDS[0].DstDirectory]"/>
           <ATOM Value="[$DatabaseDirectory]/interfaces/v3_outgame/3d"/>
           <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/htm"/>
           <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc"/>
@@ -23,5 +29,9 @@
   <LOG>Sat Aug 04 20:06:04 2012 (kaetemi) .Package.BNP.DstFile = interfaces.bnp
 Sat Aug 04 20:06:04 2012 (kaetemi) formName Resized = 1
 Sat Aug 04 20:16:14 2012 (kaetemi) .Package.BNP.SrcDirectories[5] = [@common_interface&amp;DstInterfaceAtlas]
-Sat Aug 04 20:16:14 2012 (kaetemi) formName Resized = 6</LOG>
+Sat Aug 04 20:16:14 2012 (kaetemi) formName Resized = 6
+Sat Aug 04 20:19:53 2012 (kaetemi) .DependentProjects[0] = common_interface.pipeline_project
+Sat Aug 04 20:19:53 2012 (kaetemi) formName Resized = 1
+Sat Aug 04 20:20:13 2012 (kaetemi) .Processes[0] = PackageBNP
+Sat Aug 04 20:20:13 2012 (kaetemi) formName Resized = 1</LOG>
 </FORM>
