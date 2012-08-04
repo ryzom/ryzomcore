@@ -103,6 +103,8 @@ private:
 
 	std::set<std::string> m_ListDependentDirectories;
 	std::set<std::string> m_ListDependentFiles;
+	
+	bool m_Aborting;
 
 private:
 	bool getDependencyFileStatusCached(CFileStatus &fileStatus, const std::string &filePath);

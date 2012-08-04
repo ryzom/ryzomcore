@@ -506,7 +506,7 @@ void CPipelineProcessImpl::setExit(const TProcessResult exitLevel, const std::st
 /// Must verify this regularly to exit the plugin in case something went wrong.
 bool CPipelineProcessImpl::needsExit()
 {
-	if (g_IsExiting)
+	if (g_IsExiting || m_Aborting)
 		return true;
 	
 	// TODO: Bypass error feature.

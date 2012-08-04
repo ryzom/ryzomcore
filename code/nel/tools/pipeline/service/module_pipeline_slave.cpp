@@ -290,6 +290,12 @@ public:
 						finishedTask(m_ActiveProcess->m_SubTaskResult, m_ActiveProcess->m_SubTaskErrorMessage);
 						break;
 					}
+					if (m_AbortRequested)
+					{
+						nlinfo("Aborted slave task after getting removed files");
+						finalizeAbort();
+						break;
+					}
 					
 					// Build the lists of files added changed removed
 					buildListsOfFiles();
@@ -307,7 +313,15 @@ public:
 			{
 				m_SlaveTaskState = SOMEWHERE_INBETWEEN;
 				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_PLUGIN_WORKING);
-				finishedTask(m_ActiveProcess->m_SubTaskResult, m_ActiveProcess->m_SubTaskErrorMessage);
+				if (m_AbortRequested)
+				{
+					nlinfo("Aborted slave task while plugin was working");
+					finalizeAbort();
+				}
+				else
+				{
+					finishedTask(m_ActiveProcess->m_SubTaskResult, m_ActiveProcess->m_SubTaskErrorMessage);
+				}
 			}
 			break;
 		default:
@@ -644,6 +658,9 @@ public:
 			// ?TODO? Actually wait for the task manager etc to end before sending the aborted confirmation.
 			CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_ABORTING);
 			m_AbortRequested = true;
+
+			if (m_ActiveProcess)
+				m_ActiveProcess->m_Aborting = true;
 
 			// ?TODO?
 			//m_ActiveProject = NULL;
