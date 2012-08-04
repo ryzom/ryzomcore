@@ -165,7 +165,7 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 					return;
 				}
 				std::string outputFile = standardizePath(tabbedLine[1], false);
-				std::string outputFileMacro = macroPath(outputFile);
+				// std::string outputFileMacro = macroPath(outputFile);
 				std::string inputFile = standardizePath(tabbedLine[2], false);
 				std::string inputFileMacro = macroPath(inputFile);
 				std::map<std::string, CFileDepend>::iterator metaDependIt = metaDepends.find(outputFile);
@@ -179,11 +179,13 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 					metaDependIt->second.CRC32 = status.CRC32;
 					// nldebug("Checksum %i; %i", metaDependIt->second.CRC32, status.CRC32);
 
-					m_ResultCurrent.MacroPaths.push_back(outputFileMacro);
+					/*m_ResultCurrent.MacroPaths.push_back(outputFileMacro);
 					CProcessResult::CFileResult prfr;
 					prfr.Level = STATE_SUCCESS; // dunno if still needed?
 					prfr.CRC32 = status.CRC32;
-					m_ResultCurrent.FileResults.push_back(prfr);
+					m_ResultCurrent.FileResults.push_back(prfr);*/
+
+					m_FileStatusOutputCache[outputFile] = status;
 				}
 				CFileDepend::CDependency dependency;
 				dependency.MacroPath = inputFileMacro;

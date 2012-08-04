@@ -102,9 +102,7 @@ private:
 	std::set<std::string> m_ListInputRemoved;
 	
 	std::set<std::string> m_ListOutputChanged;
-	std::set<std::string> m_ListOutputChangedNG; // after .depend check, found that dependencies changed, so not good
-	std::set<std::string> m_ListOutputChangedOK; // idem but dependencies did not change, so ok
-	std::set<std::string> m_ListOutputRemoved; // changed_ng and removed end up being the same, it needs to be rebuilt ;)
+	std::set<std::string> m_ListOutputRemoved;
 
 	std::set<std::string> m_ListDependentDirectories;
 	std::set<std::string> m_ListDependentFiles;
