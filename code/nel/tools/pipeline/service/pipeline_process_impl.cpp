@@ -36,6 +36,7 @@
 #include <nel/misc/app_context.h>
 #include <nel/misc/debug.h>
 #include <nel/misc/path.h>
+#include <nel/net/service.h>
 
 // Project includes
 #include "pipeline_service.h"
@@ -114,6 +115,11 @@ void CPipelineProcessImpl::deleteDirectoryIfEmpty(const std::string &path)
 	/*}*/
 }
 
+std::string CPipelineProcessImpl::getConfig(const std::string &name)
+{
+	return NLNET::IService::getInstance()->ConfigFile.getVar(name).asString(0);
+}
+
 bool CPipelineProcessImpl::getValue(std::string &result, const std::string &name)
 {
 	if (m_ActiveProject == NULL)
@@ -167,6 +173,16 @@ void CPipelineProcessImpl::makePaths(const std::vector<std::string> &outputPaths
 			NLMISC::CFile::createDirectoryTree(NLMISC::CFile::getPath(path));
 		}
 	}
+}
+
+void CPipelineProcessImpl::runConsoleTool(const std::string &executablePath, const std::vector<std::string> &arguments)
+{
+	// FIXME: NOT SAFE FOR ARGUMENTS WITH SPACES
+	std::stringstream ss;
+	ss << executablePath;
+	for (std::vector<std::string>::const_iterator it = arguments.begin(), end = arguments.end(); it != end; ++it)
+		ss << " " << *it;
+	system(ss.str().c_str());
 }
 
 } /* namespace PIPELINE */

@@ -84,6 +84,9 @@ public:
 
 	/// Delete a directory if it's empty
 	virtual void deleteDirectoryIfEmpty(const std::string &path) = 0;
+
+	/// Get a value from the local service configuration. Use only to get paths to tool executables and similar installed utilities
+	virtual std::string getConfig(const std::string &name) = 0;
 	
 	/// Get a value from the currently active project configuration. If false, don't use, no need to write warnings to service log, already written, set exit state and exit if necessary
 	virtual bool getValue(std::string &result, const std::string &name) = 0;
@@ -110,6 +113,9 @@ public:
 	virtual bool needsExit() = 0;
 	/// Set the exit state, must exit the plugin immediately afterwards. Use for configuration mistakes, etc
 	virtual void setExit(const TProcessResult exitLevel, const std::string &exitMessage) = 0;
+
+	/// Run a console tool. If failed, error state is set for you, call needsExit afterwards to check
+	virtual void runConsoleTool(const std::string &executablePath, const std::vector<std::string> &arguments) = 0;
 
 }; /* class IPipelineProcess */
 

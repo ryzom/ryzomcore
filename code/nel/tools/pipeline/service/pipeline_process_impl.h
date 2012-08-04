@@ -61,6 +61,9 @@ public:
 	virtual std::string getOutputDirectory();
 	virtual std::string getTempDirectory();
 	virtual void deleteDirectoryIfEmpty(const std::string &path);
+
+	virtual std::string getConfig(const std::string &name);
+
 	virtual bool getValue(std::string &result, const std::string &name);
 	virtual bool getValues(std::vector<std::string> &resultAppend, const std::string &name);
 	virtual bool getValueNb(uint &result, const std::string &name);
@@ -74,6 +77,8 @@ public:
 
 	virtual bool needsExit();
 	virtual void setExit(const TProcessResult exitLevel, const std::string &exitMessage);
+
+	virtual void runConsoleTool(const std::string &executablePath, const std::vector<std::string> &arguments);
 
 private:
 	CProcessPluginInfo m_ActivePlugin;

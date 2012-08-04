@@ -54,14 +54,13 @@ CProcessInterface::~CProcessInterface()
 void CProcessInterface::buildAtlas(const std::string &dependLog, const std::string &errorLog, const std::vector<std::string> &srcDirectories, const std::string &dstFile)
 {
 	nldebug("Build atlas '%s'", dstFile.c_str());
-	std::stringstream ss;
-	ss << "build_interface -d" << dependLog << " -e" << errorLog << " " << dstFile;
+	std::vector<std::string> arguments;
+	arguments.push_back(std::string("-d") + dependLog);
+	arguments.push_back(std::string("-e") + errorLog);
+	arguments.push_back(dstFile);
 	for (std::vector<std::string>::const_iterator it = srcDirectories.begin(), end = srcDirectories.end(); it != end; ++it)
-	{
-		const std::string &path = *it;
-		ss << " " << path;
-	}
-	system(ss.str().c_str());
+		arguments.push_back(*it);
+	m_PipelineProcess->runConsoleTool(m_PipelineProcess->getConfig("ToolBuildInterface"), arguments);
 }
 
 void CProcessInterface::build()
@@ -97,6 +96,7 @@ void CProcessInterface::build()
 				{
 					m_PipelineProcess->makePaths(dstFiles);
 					buildAtlas(dependLog, errorLog, srcDirectories, dstFile);
+					if (m_PipelineProcess->needsExit()) return;
 					m_PipelineProcess->parseToolLog(dependLog, errorLog, false);
 				}
 				if (m_PipelineProcess->needsExit()) return;

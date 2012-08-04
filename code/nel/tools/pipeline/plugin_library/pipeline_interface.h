@@ -59,6 +59,7 @@ public:
 	static IPipelineInterface *getInstance();
 
 	// ***************** PLUGIN UTILITY FUNCTIONS *****************
+	// ************* DO NOT USE FROM INSIDE A PROCESS *************
 
 	/// Get the configuration file of the pipeline service. Must only be used for configuration values that may be different on different services, such as tool paths.
 	virtual NLMISC::CConfigFile &getConfigFile() = 0;

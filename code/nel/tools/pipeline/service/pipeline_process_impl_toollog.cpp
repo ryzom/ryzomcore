@@ -90,6 +90,20 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 {
 	m_SubTaskResult = FINISH_NOT;
 
+	if (!NLMISC::CFile::fileExists(dependLogFile))
+	{
+		m_SubTaskErrorMessage = "Depend log does not exist";
+		m_SubTaskResult = FINISH_ERROR;
+		return;
+	}
+
+	if (!NLMISC::CFile::fileExists(errorLogFile))
+	{
+		m_SubTaskErrorMessage = "Error log does not exist";
+		m_SubTaskResult = FINISH_ERROR;
+		return;
+	}
+
 	// Parse error log
 	{
 		// ...
@@ -223,7 +237,7 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 			CMetadataStorage::writeDepend(depend, CMetadataStorage::getDependPath(it->first));
 		}
 	}
-
+	
 	NLMISC::CFile::deleteFile(dependLogFile);
 	
 	// m_SubTaskErrorMessage = "Log parsing not implemented, goodbye";
