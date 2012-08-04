@@ -56,6 +56,7 @@ enum TError
 enum TDepend
 {
 	BUILD, 
+	DIRECTORY, 
 	RUNTIME, 
 };
 
@@ -143,6 +144,9 @@ public:
 			{
 			case BUILD:
 				fwrite("BUILD", 1, 5, m_DependLog);
+				break;
+			case DIRECTORY:
+				fwrite("DIRECTORY", 1, 9, m_DependLog);
 				break;
 			case RUNTIME:
 				fwrite("RUNTIME", 1, 7, m_DependLog);

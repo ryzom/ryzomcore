@@ -3,7 +3,10 @@
   <ELEMENT Name="SrcDirectories" Type="Type" Filename="pipeline_path_endslash.typ" Array="true"/>
   <ELEMENT Name="DstDirectory" Type="Type" Filename="pipeline_path_endslash.typ"/>
   <ELEMENT Name="Algorithm" Type="Type" Filename="string.typ"/>
-  <ELEMENT Name="CreateMipMap" Type="Type" Filename="boolean.typ"/>
+  <ELEMENT Name="CreateMipMap" Type="Type" Filename="boolean.typ" Default="false"/>
   <ELEMENT Name="ReduceFactor" Type="Type" Filename="uint8.typ" Default="0"/>
-  <LOG>Sat Aug 04 15:22:53 2012 (kaetemi) Dfn Structure = </LOG>
+  <ELEMENT Name="CheckUserColor" Type="Type" Filename="boolean.typ" Default="false"/>
+  <LOG>Sat Aug 04 15:22:53 2012 (kaetemi) Dfn Structure = 
+Sat Aug 04 16:36:51 2012 (kaetemi) Dfn Structure = 
+Sat Aug 04 16:38:11 2012 (kaetemi) Dfn Structure = </LOG>
 </DFN>

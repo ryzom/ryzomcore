@@ -114,7 +114,8 @@ public:
 		void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
 	};
 	std::vector<CDependency> Dependencies;
-	std::vector<CDependency> RuntimeDependencies; // informational (TODO)
+	std::vector<std::string> DirectoryDependencies; // In case the file needs to be informed when files are added to a directory.
+	std::vector<std::string> RuntimeDependencies; // informational (TODO) User can use this to check if any files are missing.
 
 	void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
 };

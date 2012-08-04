@@ -153,6 +153,8 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 				TDepend type;
 				if (tabbedLine[0] == "BUILD")
 					type = BUILD;
+				else if (tabbedLine[0] == "DIRECTORY")
+					type = DIRECTORY;
 				else if (tabbedLine[0] == "RUNTIME")
 					type = RUNTIME;
 				else
@@ -166,7 +168,7 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 				}
 				std::string outputFile = standardizePath(tabbedLine[1], false);
 				// std::string outputFileMacro = macroPath(outputFile);
-				std::string inputFile = standardizePath(tabbedLine[2], false);
+				std::string inputFile = standardizePath(tabbedLine[2], type == DIRECTORY);
 				std::string inputFileMacro = macroPath(inputFile);
 				std::map<std::string, CFileDepend>::iterator metaDependIt = metaDepends.find(outputFile);
 				if (metaDependIt == metaDepends.end())
@@ -187,46 +189,58 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 
 					m_FileStatusOutputCache[outputFile] = status;
 				}
-				CFileDepend::CDependency dependency;
-				dependency.MacroPath = inputFileMacro;
-				std::map<std::string, CFileStatus>::iterator statusIt = statusCache.find(inputFile);
-				if (statusIt == statusCache.end())
+				switch (type)
 				{
-					if (!isFileDependency(inputFile))
+				case BUILD:
 					{
-						m_SubTaskErrorMessage = std::string("Invalid dependency '") + inputFile + "'";
-						m_SubTaskResult = FINISH_ERROR;
-						file.close();
-						return;
+						CFileDepend::CDependency dependency;
+						dependency.MacroPath = inputFileMacro;
+						std::map<std::string, CFileStatus>::iterator statusIt = statusCache.find(inputFile);
+						if (statusIt == statusCache.end())
+						{
+							if (!isFileDependency(inputFile))
+							{
+								m_SubTaskErrorMessage = std::string("Invalid dependency '") + inputFile + "'";
+								m_SubTaskResult = FINISH_ERROR;
+								file.close();
+								return;
+							}
+							CFileStatus statusOriginal;
+							if (!getDependencyFileStatusCached(statusOriginal, inputFile))
+							{
+								m_SubTaskErrorMessage = std::string("Cached status for '") + inputFile + "' does not exist, this may be a programming error";
+								m_SubTaskResult = FINISH_ERROR;
+								file.close();
+								return;
+							}
+							CFileStatus status;
+							if (!getDependencyFileStatusLatest(status, inputFile))
+							{
+								m_SubTaskErrorMessage = std::string("Invalid status for '") + inputFile + "', file may have changed during build";
+								m_SubTaskResult = FINISH_ERROR;
+								file.close();
+								return;
+							}
+							if (statusOriginal.CRC32 != status.CRC32)
+							{
+								m_SubTaskErrorMessage = std::string("Status checksums changed for '") + inputFile + "', file has changed during build";
+								m_SubTaskResult = FINISH_ERROR;
+								file.close();
+								return;
+							}
+							statusCache[inputFile] = status;
+							statusIt = statusCache.find(inputFile);
+						}
+						dependency.CRC32 = statusIt->second.CRC32;
+						metaDependIt->second.Dependencies.push_back(dependency);
 					}
-					CFileStatus statusOriginal;
-					if (!getDependencyFileStatusCached(statusOriginal, inputFile))
-					{
-						m_SubTaskErrorMessage = std::string("Cached status for '") + inputFile + "' does not exist, this may be a programming error";
-						m_SubTaskResult = FINISH_ERROR;
-						file.close();
-						return;
-					}
-					CFileStatus status;
-					if (!getDependencyFileStatusLatest(status, inputFile))
-					{
-						m_SubTaskErrorMessage = std::string("Invalid status for '") + inputFile + "', file may have changed during build";
-						m_SubTaskResult = FINISH_ERROR;
-						file.close();
-						return;
-					}
-					if (statusOriginal.CRC32 != status.CRC32)
-					{
-						m_SubTaskErrorMessage = std::string("Status checksums changed for '") + inputFile + "', file has changed during build";
-						m_SubTaskResult = FINISH_ERROR;
-						file.close();
-						return;
-					}
-					statusCache[inputFile] = status;
-					statusIt = statusCache.find(inputFile);
+				case DIRECTORY:
+					metaDependIt->second.DirectoryDependencies.push_back(inputFileMacro);
+					break;
+				case RUNTIME:
+					metaDependIt->second.RuntimeDependencies.push_back(inputFileMacro);
+					break;
 				}
-				dependency.CRC32 = statusIt->second.CRC32;
-				metaDependIt->second.Dependencies.push_back(dependency);
 			}
 		}
 

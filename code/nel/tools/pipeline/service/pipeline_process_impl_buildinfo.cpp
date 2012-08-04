@@ -540,6 +540,7 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 	// Find out if any files were added in dependency directories since last build start
 	if (inputModified)
 	{
+		// TODO: ONLY CHECK INPUT PATHS GIVEN BY DEPEND META FILES
 		for (std::vector<std::string>::const_iterator it = inputPaths.begin(), end = inputPaths.end(); it != end; ++it)
 		{
 			const std::string &path = *it;

@@ -256,6 +256,8 @@ int main(int nNbArg, char **ppArgs)
 			ToolLogger.release();
 			return -1;
 		}
+		ToolLogger.writeDepend(PIPELINE::DIRECTORY, tgaName, sDir);
+		ToolLogger.writeDepend(PIPELINE::DIRECTORY, uvName, sDir);
 		CPath::getPathContent(sDir, false, false, true, AllMapNames);
 	}
 

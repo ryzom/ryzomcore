@@ -80,11 +80,12 @@ void CFileDepend::CDependency::serial(NLMISC::IStream &stream) throw (NLMISC::ES
 
 void CFileDepend::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 {
-	uint version = stream.serialVersion(2);
+	uint version = stream.serialVersion(3);
 	if (version >= 2) stream.serial(BuildStart); else BuildStart = 0;
 	stream.serial(CRC32);
 	stream.serialCont(Dependencies);
-	stream.serialCont(RuntimeDependencies);
+	if (version >= 3) stream.serialCont(DirectoryDependencies); else DirectoryDependencies.clear();
+	if (version >= 3) stream.serialCont(RuntimeDependencies); else { std::vector<CDependency> dummy; stream.serialCont(dummy); }
 }
 
 void CProcessResult::CFileResult::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)

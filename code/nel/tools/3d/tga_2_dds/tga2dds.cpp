@@ -25,10 +25,13 @@
 
 #include "../s3tc_compressor_lib/s3tc_compressor.h"
 
+#include <sstream>
+#include "nel/misc/tool_logger.h"
 
 using namespace NLMISC;
 using namespace std;
 
+PIPELINE::CToolLogger ToolLogger;
 
 #define	TGA8	8
 #define	TGA16	16
@@ -204,7 +207,7 @@ void writeInstructions()
 	cout<<"extension \"_usercolor\""<<endl;
 	cout<<"ex : pic.tga, the associated user color file must be : pic_usercolor.tga"<<endl;
 	cout<<endl;
-	cout<<"syntax : tga2dds <input> [-o <output.dds>] [-a <algo>] [-m]"<<endl;
+	cout<<"syntax : tga2dds <input> [-o <output.dds>] [-a <algo>] [-m] [-d dependLog] [-e errorLog]"<<endl;
 	cout<<endl;
 	cout<<"with"<<endl;
 	cout<<"algo      : 1  for DXTC1 (no alpha)"<<endl;
@@ -246,6 +249,8 @@ string		OptOutputFileName;
 uint8		OptAlgo = NOT_DEFINED;
 bool		OptMipMap = false;
 uint		Reduce = 0;
+bool		ForceSkipCheck = false;
+bool		CheckUserColor = true;
 bool	parseOptions(int argc, char **argv)
 {
 	for(sint i=2;i<argc;i++)
@@ -309,6 +314,20 @@ bool	parseOptions(int argc, char **argv)
 			Reduce = 7;
 		else if(!strcmp(argv[i], "-r8"))
 			Reduce = 8;
+		else if(!strcmp(argv[i], "-d"))
+		{
+			++i;
+			ToolLogger.initDepend(argv[i]);
+		}
+		else if(!strcmp(argv[i], "-e"))
+		{
+			++i;
+			ToolLogger.initDepend(argv[i]);
+		}
+		else if(!strcmp(argv[i], "-f"))
+			ForceSkipCheck = true;
+		else if(!strcmp(argv[i], "-nousercolor"))
+			CheckUserColor = false;
 		// What is this option?
 		else
 		{
@@ -382,6 +401,8 @@ int main(int argc, char **argv)
 	if(!parseOptions(argc, argv))
 	{
 		writeInstructions();
+		ToolLogger.writeError(PIPELINE::ERROR, "", "Invalid settings");
+		ToolLogger.release();
 		return 0;
 	}
 
@@ -394,23 +415,33 @@ int main(int argc, char **argv)
 	std::string inputFileName(argv[1]);
 	if(inputFileName.find("_usercolor")<inputFileName.length())
 	{
+		ToolLogger.writeError(PIPELINE::ERROR, inputFileName, "User color cannot be converted directly, it is the source file for a channel of another dds file");
+		ToolLogger.release();
 		return 0;
 	}
 	NLMISC::CIFile input;
 	if(!input.open(inputFileName))
 	{
 		cerr<<"Can't open input file "<<inputFileName<<endl;
+		ToolLogger.writeError(PIPELINE::ERROR, inputFileName, "Can't open input file");
+		ToolLogger.release();
 		return 1;
 	}
 	uint8 imageDepth = picTga.load(input);
 	if(imageDepth==0)
 	{
 		cerr<<"Can't load file : "<<inputFileName<<endl;
+		ToolLogger.writeError(PIPELINE::ERROR, inputFileName, "Can't load file");
+		ToolLogger.release();
 		return 1;
 	}
 	if(imageDepth!=16 && imageDepth!=24 && imageDepth!=32 && imageDepth!=8)
 	{
-		cerr<<"Image not supported : "<<imageDepth<<endl;
+		stringstream ss;
+		ss << "Image depth not supported: " << imageDepth;
+		cerr << ss.str() << endl;
+		ToolLogger.writeError(PIPELINE::ERROR, inputFileName, ss.str());
+		ToolLogger.release();
 		return 1;
 	}
 	input.close();
@@ -444,11 +475,15 @@ int main(int argc, char **argv)
 			algo = DXT5;
 	}
 
+	ToolLogger.writeDepend(PIPELINE::BUILD, outputFileName, inputFileName);
+
 	// Data check
 	//===========
-	if(dataCheck(inputFileName,outputFileName, OptAlgo, OptMipMap))
+	if(!ForceSkipCheck && dataCheck(inputFileName,outputFileName, OptAlgo, OptMipMap))
 	{
 		cout<<outputFileName<<" : a recent dds file already exists"<<endl;
+		ToolLogger.writeError(PIPELINE::WARNING, outputFileName, "A more recent dds file already exists, this file may not have been built correctly");
+		ToolLogger.release();
 		return 0;
 	}
 
@@ -499,8 +534,10 @@ int main(int argc, char **argv)
 
 	// Reading second Tga for user color, don't complain if _usercolor is missing
 	NLMISC::CIFile input2;
-	if (CPath::exists(userColorFileName) && input2.open(userColorFileName))
+	if (CheckUserColor && CPath::exists(userColorFileName) && input2.open(userColorFileName))
 	{
+		ToolLogger.writeDepend(PIPELINE::BUILD, outputFileName, userColorFileName);
+
 		picTga2.load(input2);
 		uint32 height2 = picTga2.getHeight();
 		uint32 width2 = picTga2.getWidth();
@@ -606,6 +643,8 @@ int main(int argc, char **argv)
 		if(!output.open(outputFileName))
 		{
 			cerr<<"Can't open output file "<<outputFileName<<endl;
+			ToolLogger.writeError(PIPELINE::ERROR, outputFileName, "Can't open output file");
+			ToolLogger.release();
 			return 1;
 		}
 		try
@@ -632,6 +671,8 @@ int main(int argc, char **argv)
 		catch(const NLMISC::EWriteError &e)
 		{
 			cerr<<e.what()<<endl;
+			ToolLogger.writeError(PIPELINE::ERROR, outputFileName, std::string("Write error: ") + e.what());
+			ToolLogger.release();
 			return 1;
 		}
 
@@ -668,6 +709,8 @@ int main(int argc, char **argv)
 		if(!output.open(outputFileName))
 		{
 			cerr<<"Can't open output file "<<outputFileName<<endl;
+			ToolLogger.writeError(PIPELINE::ERROR, outputFileName, "Can't open output file");
+			ToolLogger.release();
 			return 1;
 		}
 		try
@@ -678,11 +721,14 @@ int main(int argc, char **argv)
 		catch(const NLMISC::EWriteError &e)
 		{
 			cerr<<e.what()<<endl;
+			ToolLogger.writeError(PIPELINE::ERROR, outputFileName, std::string("Write error: ") + e.what());
+			ToolLogger.release();
 			return 1;
 		}
 
 		output.close();
 	}
 
+	ToolLogger.release();
 	return 0;
 }	

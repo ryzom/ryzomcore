@@ -90,6 +90,9 @@ public:
 	
 	/// Get a value from the currently active project configuration. If false, don't use, no need to write warnings to service log, already written, set exit state and exit if necessary
 	virtual bool getValue(std::string &result, const std::string &name) = 0;
+	bool getValue(bool &result, const std::string &name);
+	bool getValue(uint &result, const std::string &name);
+	bool getValue(sint &result, const std::string &name);
 	virtual bool getValues(std::vector<std::string> &resultAppend, const std::string &name) = 0;
 	virtual bool getValueNb(uint &result, const std::string &name) = 0;
 

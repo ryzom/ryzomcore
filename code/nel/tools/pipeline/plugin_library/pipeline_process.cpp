@@ -48,6 +48,50 @@ IPipelineProcess *IPipelineProcess::getInstance()
 	return static_cast<IPipelineProcess *>(NLMISC::INelContext::getInstance().getSingletonPointer("IPipelineProcess"));
 }
 
+bool IPipelineProcess::getValue(bool &result, const std::string &name)
+{
+	// It's true.
+	std::string resultString;
+	if (!getValue(resultString, name))
+		return false;
+	if (resultString == "true")
+		result = true;
+	if (resultString == "false")
+		result = false;
+	else
+	{
+		nlwarning("Value '%s' with result '%s' is not a boolean", name.c_str(), resultString.c_str());
+		return false;
+	}
+	return true;
+}
+
+bool IPipelineProcess::getValue(uint &result, const std::string &name)
+{
+	std::string resultString;
+	if (!getValue(resultString, name))
+		return false;
+	if (!NLMISC::fromString(resultString, result))
+	{
+		nlwarning("Value '%s' with result '%s' is not an integer", name.c_str(), resultString.c_str());
+		return false;
+	}
+	return true;
+}
+
+bool IPipelineProcess::getValue(sint &result, const std::string &name)
+{
+	std::string resultString;
+	if (!getValue(resultString, name))
+		return false;
+	if (!NLMISC::fromString(resultString, result))
+	{
+		nlwarning("Value '%s' with result '%s' is not an integer", name.c_str(), resultString.c_str());
+		return false;
+	}
+	return true;
+}
+
 } /* namespace PIPELINE */
 
 /* end of file */
