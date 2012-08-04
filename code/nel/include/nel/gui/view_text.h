@@ -55,6 +55,7 @@ namespace NLGUI
 		CViewText &operator=(const CViewText &vt);
 
 		std::string getProperty( const std::string &name ) const;
+		void setProperty( const std::string &name, const std::string &value );
 		void parseTextOptions (xmlNodePtr cur);
 		bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
 		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }

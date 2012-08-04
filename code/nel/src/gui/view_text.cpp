@@ -303,6 +303,181 @@ namespace NLGUI
 			return CViewBase::getProperty( name );
 	}
 
+	void CViewText::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "color" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_Color = c;
+			return;
+		}
+		else
+		if( name == "global_color" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_ModulateGlobalColor = b;
+			return;
+		}
+		else
+		if( name == "fontsize" )
+		{
+			sint i;
+			if( fromString( value, i ) )
+				_FontSize = i + CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
+			return;
+		}
+		else
+		if( name == "shadow" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Shadow = b;
+			return;
+		}
+		else
+		if( name == "shadow_color" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_ShadowColor = c;
+			return;
+		}
+		else
+		if( name == "multi_line" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_MultiLine = b;
+			return;
+		}
+		else
+		if( name == "justification" )
+		{
+			if( value == "clip_word" )
+				_TextMode = ClipWord;
+			else
+			if( value == "dont_clip_word" )
+				_TextMode = DontClipWord;
+			else
+			if( value == "justified" )
+				_TextMode = Justified;
+
+			return;
+		}
+		else
+		if( name == "line_maxw" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_LineMaxW = i;
+			return;
+		}
+		else
+		if( name == "multi_line_space" )
+		{
+			sint i;
+			if( fromString( value, i ) )
+				_MultiLineSpace = i;
+			return;
+		}
+		else
+		if( name == "multi_line_maxw_only" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_MultiLineMaxWOnly = b;
+			return;
+		}
+		else
+		if( name == "multi_max_line" )
+		{
+			uint32 i;
+			if( fromString( value, i ) )
+				_MultiMaxLine = i;
+			return;
+		}
+		else
+		if( name == "underlined" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Underlined = b;
+			return;
+		}
+		else
+		if( name == "case_mode" )
+		{
+			uint32 i;
+			if( fromString( value, i ) )
+				_CaseMode = (TCaseMode)i;
+			return;
+		}
+		else
+		if( name == "over_extend_view_text" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_OverExtendViewText = b;
+			return;
+		}
+		else
+		if( name == "over_extend_parent_rect" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_OverExtendViewTextUseParentRect = b;
+			return;
+		}
+		else
+		if( name == "auto_clamp" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_AutoClamp = b;
+			return;
+		}
+		else
+		if( name == "clamp_right" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_ClampRight = b;
+			return;
+		}
+		else
+		if( name == "auto_clamp_offset" )
+		{
+			uint8 i;
+			if( fromString( value, i ) )
+				_AutoClampOffset = i;
+			return;
+		}
+		else
+		if( name == "continuous_update" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_ContinuousUpdate = b;
+			return;
+		}
+		else
+		if( name == "hardtext" )
+		{
+			_Text = value;
+			return;
+		}
+		else
+		if( name == "hardtext_format" )
+		{
+			_HardtextFormat = value;
+			return;
+		}
+		else
+			CViewBase::setProperty( name, value );
+	}
+
 	// ***************************************************************************
 	void CViewText::parseTextOptions (xmlNodePtr cur)
 	{
