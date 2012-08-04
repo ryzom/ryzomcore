@@ -30,6 +30,9 @@
 
 // STL includes
 #include <sstream>
+#ifndef NL_OS_WINDOWS
+#	include <sys/wait.h>
+#endif
 
 // NeL includes
 #include <nel/misc/time_nl.h>
@@ -177,12 +180,32 @@ void CPipelineProcessImpl::makePaths(const std::vector<std::string> &outputPaths
 
 void CPipelineProcessImpl::runConsoleTool(const std::string &executablePath, const std::vector<std::string> &arguments)
 {
+#ifdef NL_OS_WINDOWS
 	// FIXME: NOT SAFE FOR ARGUMENTS WITH SPACES
 	std::stringstream ss;
 	ss << executablePath;
 	for (std::vector<std::string>::const_iterator it = arguments.begin(), end = arguments.end(); it != end; ++it)
 		ss << " " << *it;
 	system(ss.str().c_str());
+#else
+	pid_t fork_id = fork();
+	if (fork_id)
+	{	
+		int exitCode;
+		while (wait(&exitCode) != fork_id) { /* ... */ }
+	}
+	else
+	{
+		std::vector<char *> argv;
+		argv.reserve(arguments.size() + 1);
+		argv.push_back(const_cast<char *>(executablePath.c_str()));
+		for (std::vector<std::string>::const_iterator it = arguments.begin(), end = arguments.end(); it != end; ++it)
+			argv.push_back(const_cast<char *>((*it).c_str()));
+		argv.push_back(NULL);
+		execv(argv[0], &argv[0]);
+		exit(1); // failure
+	}
+#endif
 }
 
 } /* namespace PIPELINE */
