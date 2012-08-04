@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision$" State="modified">
+  <STRUCT>
+    <STRUCT Name="Package">
+      <STRUCT Name="BNP">
+        <ARRAY Name="SrcDirectories">
+          <ATOM Value="[@common_interface&amp;DstInterfaceAtlas]"/>
+		  <ATOM Value="[@common_interface:Texture.DDS[0].DstDirectory]"/>
+          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_outgame/3d"/>
+          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/htm"/>
+          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc"/>
+          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_quick_help"/>
+          <ATOM Value="[$DatabaseDirectory]/interfaces/r2_3d"/>
+        </ARRAY>
+        <ATOM Name="DstFile" Value="interfaces.bnp"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Sat Aug 04 20:06:04 2012 (kaetemi) .Package.BNP.DstFile = interfaces.bnp
+Sat Aug 04 20:06:04 2012 (kaetemi) formName Resized = 1
+Sat Aug 04 20:16:14 2012 (kaetemi) .Package.BNP.SrcDirectories[5] = [@common_interface&amp;DstInterfaceAtlas]
+Sat Aug 04 20:16:14 2012 (kaetemi) formName Resized = 6</LOG>
+</FORM>

@@ -42,16 +42,6 @@
           <ATOM Name="DstFile" Value="[&amp;DstInterfaceAtlas]/texture_interfaces_dxtc.tga"/>
         </STRUCT>
       </ARRAY>
-      <STRUCT Name="3D">
-        <ARRAY Name="SrcDirectories">
-          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_outgame/3d"/>
-          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/htm"/>
-          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc"/>
-          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_quick_help"/>
-          <ATOM Value="[$DatabaseDirectory]/interfaces/r2_3d"/>
-        </ARRAY>
-        <ATOM Name="DstDirectory" Value="[!OutputDirectory]/interface_3d"/>
-      </STRUCT>
     </STRUCT>
     <STRUCT Name="Texture">
       <ARRAY Name="DDS">

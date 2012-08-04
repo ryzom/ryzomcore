@@ -278,10 +278,10 @@ void CPipelineProject::parseValue(std::string &result, const std::string &value)
 				{
 					ss << getOutputDirectory();
 				}
-				else if (tagName == "TempDirectory")
+				/*else if (tagName == "TempDirectory")
 				{
 					ss << getTempDirectory();
-				}
+				}*/
 				else
 				{
 					nlwarning("Unknown special project value '%s' in '%s'", tagName.c_str(), m_Form->getFilename().c_str());
@@ -304,6 +304,8 @@ void CPipelineProject::parseValue(std::string &result, const std::string &value)
 			}
 			break;
 		case '@': // WORKSPACE PROJECT VALUE
+			// [@common_interface&DstInterfaceAtlas] // macro
+			// [@common_interface:
 			// TODO
 			// break;
 		case '#': // LEVELDESIGN SHEET VALUE

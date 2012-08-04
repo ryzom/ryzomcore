@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <DFN Revision="$Revision$" State="modified">
-  <ELEMENT Name="Atlas" Type="Dfn" Filename="pipeline_common_id_of.dfn" Array="true"/>
+  <ELEMENT Name="BNP" Type="Dfn" Filename="pipeline_process_package_bnp.dfn"/>
   <LOG></LOG>
 </DFN>
