@@ -35,6 +35,17 @@ namespace NLGUI
 			return CViewText::getProperty( name );
 	}
 
+	void CViewTextFormated::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "format" )
+		{
+			setFormatString( value );
+			return;
+		}
+		else
+			CViewText::setProperty( name, value );
+	}
+
 	// ****************************************************************************
 	bool CViewTextFormated::parse(xmlNodePtr cur,CInterfaceGroup * parentGroup)
 	{
