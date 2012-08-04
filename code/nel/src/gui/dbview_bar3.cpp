@@ -55,6 +55,16 @@ namespace NLGUI
 	}
 
 
+	void CDBViewBar3::setValProp( const std::string &value, CInterfaceProperty &dbProp, sint32 &intProp )
+	{
+		sint32 i;
+		if( fromString( value, i ) )
+			intProp = i;
+		else
+			dbProp.link( value.c_str() );
+	}
+
+
 	std::string CDBViewBar3::getProperty( const std::string &name ) const
 	{
 		if( name == "value1" )
@@ -126,6 +136,104 @@ namespace NLGUI
 		}
 		else
 			return CViewBitmap::getProperty( name );
+	}
+
+
+	void CDBViewBar3::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "value1" )
+		{
+			setValProp( value, _Value[ 0 ], _ValueInt[ 0 ] );
+			return;
+		}
+		else
+		if( name == "value2" )
+		{
+			setValProp( value, _Value[ 1 ], _ValueInt[ 1 ] );
+			return;
+		}
+		else
+		if( name == "value3" )
+		{
+			setValProp( value, _Value[ 2 ], _ValueInt[ 2 ] );
+			return;
+		}
+		else
+		if( name == "range1" )
+		{
+			setValProp( value, _Range[ 0 ], _RangeInt[ 0 ] );
+			return;
+		}
+		else
+		if( name == "range2" )
+		{
+			setValProp( value, _Range[ 1 ], _RangeInt[ 1 ] );
+			return;
+		}
+		else
+		if( name == "range3" )
+		{
+			setValProp( value, _Range[ 2 ], _RangeInt[ 2 ] );
+			return;
+		}
+		else
+		if( name == "color1" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_Colors[ 0 ] = c;
+			return;
+		}
+		else
+		if( name == "color2" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_Colors[ 1 ] = c;
+			return;
+		}
+		else
+		if( name == "color3" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_Colors[ 2 ] = c;
+			return;
+		}
+		else
+		if( name == "color1_negative" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_ColorsNegative[ 0 ] = c;
+			return;
+		}
+		else
+		if( name == "color2_negative" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_ColorsNegative[ 1 ] = c;
+			return;
+		}
+		else
+		if( name == "color3_negative" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_ColorsNegative[ 2 ] = c;
+			return;
+		}
+		else
+		if( name == "mini" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Mini = b;
+			return;
+		}
+		else
+			CViewBitmap::setProperty( name, value );
 	}
 
 

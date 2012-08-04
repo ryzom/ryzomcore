@@ -39,6 +39,7 @@ namespace NLGUI
 		CDBViewBar3(const TCtorParam &param);
 
 		std::string getProperty( const std::string &name ) const;
+		void setProperty( const std::string &name, const std::string &value );
 		bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup);
 		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 		virtual void updateCoords ();
@@ -95,7 +96,8 @@ namespace NLGUI
 		// Height of the bitmap
 		sint32		_BarH;
 
-		void	parseValProp(xmlNodePtr cur, CInterfaceProperty &dbProp, sint32 &intProp, const char *name);
+		void parseValProp(xmlNodePtr cur, CInterfaceProperty &dbProp, sint32 &intProp, const char *name);
+		void setValProp( const std::string &value, CInterfaceProperty &dbProp, sint32 &intProp );
 		sint32	getCurrentValProp(const CInterfaceProperty &dbProp, sint32 intProp);
 		std::string getValProp( const CInterfaceProperty &prop, sint32 intProp  ) const;
 	};
