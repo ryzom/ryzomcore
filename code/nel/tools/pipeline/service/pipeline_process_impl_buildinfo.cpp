@@ -141,20 +141,18 @@ bool CPipelineProcessImpl::hasInputFileBeenModified(const std::string &inputFile
 
 bool CPipelineProcessImpl::haveFilesBeenAddedInDirectorySince(const std::string &inputDirectory, const std::set<std::string> &excludeFiles, uint32 since)
 {
-	// for (std::set<std::string>::const_iterator itr = m_ListInputAdded.begin(), endr = m_ListInputAdded.end(); itr != endr; ++itr)
-	for (std::map<std::string, CFileStatus>::const_iterator it = m_FileStatusInputCache.begin(), end = m_FileStatusInputCache.end(); it != end; ++it)
+	for (std::set<std::string>::const_iterator itr = m_ListInputAdded.begin(), endr = m_ListInputAdded.end(); itr != endr; ++itr)
 	{
-		const std::string &pathr = it->first;
+		const std::string &pathr = *itr;
 		if (excludeFiles.find(pathr) == excludeFiles.end())
 		{
 			if ((pathr.size() > inputDirectory.size())
 				&& (pathr.substr(0, inputDirectory.size()) == inputDirectory) // inside the path
 				&& (pathr.substr(inputDirectory.size(), pathr.size() - inputDirectory.size())).find('/') == std::string::npos) // not in a further subdirectory 
 			{
-				//CFileStatus status;
-				//if (!getDependencyFileStatusCached(status, pathr))
-				//	nlerror("Cannot get cached status of known file");
-				const CFileStatus &status = it->second;
+				CFileStatus status;
+				if (!getDependencyFileStatusCached(status, pathr))
+					nlerror("Cannot get cached status of known file");
 				if (status.FirstSeen >= since) // or > ?
 				{
 					nldebug("Found newly added '%s' in dependency directory '%s'", pathr.c_str(), inputDirectory.c_str());
@@ -168,17 +166,17 @@ bool CPipelineProcessImpl::haveFilesBeenAddedInDirectorySince(const std::string 
 
 bool CPipelineProcessImpl::hasFileBeenAddedSince(const std::string &inputFile, uint32 since)
 {
-	/*if (m_ListInputAdded.find(inputFile) != m_ListInputAdded.end())
-	{*/
-	CFileStatus status;
-	if (!getDependencyFileStatusCached(status, inputFile))
-		nlerror("Cannot get cached status of known file");
-	if (status.FirstSeen >= since) // or > ?
+	if (m_ListInputAdded.find(inputFile) != m_ListInputAdded.end())
 	{
-		nldebug("Found newly added '%s' in dependency files", inputFile.c_str());
-		return true;
+		CFileStatus status;
+		if (!getDependencyFileStatusCached(status, inputFile))
+			nlerror("Cannot get cached status of known file");
+		if (status.FirstSeen >= since) // or > ?
+		{
+			nldebug("Found newly added '%s' in dependency files", inputFile.c_str());
+			return true;
+		}
 	}
-	/*}*/
 	return false;
 }
 
@@ -472,7 +470,6 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 
 	std::set<std::string> inputsChecked;
 	uint32 earliestBuildStart = 0xFFFFFFFF;
-	uint32 lastBuildStart = 0;
 	
 	// Check the .depend files of all the output files // also check that they exist :)
 	for (std::vector<std::string>::const_iterator it = outputPaths.begin(), end = outputPaths.end(); it != end; ++it)
@@ -490,8 +487,6 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 		{
 			if (metaDepend.BuildStart < earliestBuildStart)
 				earliestBuildStart = metaDepend.BuildStart;
-			if (metaDepend.BuildStart > lastBuildStart)
-				lastBuildStart = metaDepend.BuildStart;
 			if (outputChanged)
 			{
 				// Compare the output checksum with the status output checksum
@@ -543,10 +538,8 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 	}
 
 	// Find out if any files were added in dependency directories since last build start
-	if (lastBuildStart != m_ResultPreviousSuccess.BuildStart || earliestBuildStart != m_ResultPreviousSuccess.BuildStart)
+	if (inputModified)
 	{
-		nldebug("Found files that were built at a different time than the last successful build, find out if any input files have been added for them");
-		
 		for (std::vector<std::string>::const_iterator it = inputPaths.begin(), end = inputPaths.end(); it != end; ++it)
 		{
 			const std::string &path = *it;
