@@ -104,6 +104,7 @@ public:
 struct CFileDepend
 {
 public:
+	uint32 BuildStart; // The process build start when this file was built
 	uint32 CRC32; // Checksum of the current file
 	struct CDependency
 	{

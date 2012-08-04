@@ -80,7 +80,8 @@ void CFileDepend::CDependency::serial(NLMISC::IStream &stream) throw (NLMISC::ES
 
 void CFileDepend::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 {
-	uint version = stream.serialVersion(1);
+	uint version = stream.serialVersion(2);
+	if (version >= 2) stream.serial(BuildStart); else BuildStart = 0;
 	stream.serial(CRC32);
 	stream.serialCont(Dependencies);
 	stream.serialCont(RuntimeDependencies);

@@ -113,6 +113,8 @@ private:
 	bool isDirectoryDependency(const std::string &path);
 	bool hasInputDirectoryBeenModified(const std::string &inputDirectory);
 	bool hasInputFileBeenModified(const std::string &inputFile);
+	bool haveFilesBeenAddedInDirectorySince(const std::string &inputDirectory, const std::set<std::string> &excludeFiles, uint32 since);
+	bool hasFileBeenAddedSince(const std::string &inputFile, uint32 since);
 	bool needsToBeRebuildSubByOutput(const std::vector<std::string> &inputPaths, bool inputChanged);
 	bool needsToBeRebuiltSub(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths, bool inputModified);
 
