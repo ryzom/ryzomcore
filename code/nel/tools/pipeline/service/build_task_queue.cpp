@@ -407,7 +407,7 @@ void CBuildTaskQueue::sortBuildableTaskListByMostDependents(std::vector<CBuildTa
 	do
 	{
 		sc = 0;
-		for (std::vector<uint>::size_type i = 0; i < dependentsCache.size() - 1; ++i)
+		for (ptrdiff_t i = 0; i < (ptrdiff_t)dependentsCache.size() - 1; ++i)
 		{
 			if (dependentsCache[i + 1] > dependentsCache[i])
 			{
