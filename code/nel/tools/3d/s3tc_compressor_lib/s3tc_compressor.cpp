@@ -63,6 +63,9 @@ static void		compressMipMap(uint8 *pixSrc, sint width, sint height, vector<uint8
 	float weight[3] = {0.3086f, 0.6094f, 0.0820f};
 	squish::CompressImage(pixSrc, width, height, &(*compdata.begin()), flags, weight);
 
+#if 0
+	// This code was for the previous compression library, if I remember correctly.
+	// It should no longer be relevant.
 	/* S3TC is a very good compressor, but make BIG mistakes in some case with  DXTC5 and DXTC3
 	*/
 	if( algo==DXT5 || algo==DXT3 )
@@ -153,6 +156,7 @@ static void		compressMipMap(uint8 *pixSrc, sint width, sint height, vector<uint8
 			nlinfo("Fix %d blocks on %d total ", numFixedBlock, numTotalBlock);
 		}
 	}
+#endif
 	
 }
 
