@@ -1,9 +1,9 @@
 /**
- * \file process_texture_dds.h
- * \brief CProcessTextureDDS
- * \date 2012-08-04 12:50GMT
+ * \file process_package_bnp.h
+ * \brief CProcessPackageBNP
+ * \date 2012-08-04 18:54GMT
  * \author Jan Boon (Kaetemi)
- * CProcessTextureDDS
+ * CProcessPackageBNP
  */
 
 /* 
@@ -25,8 +25,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIPELINE_PROCESS_TEXTURE_DDS_H
-#define PIPELINE_PROCESS_TEXTURE_DDS_H
+#ifndef PIPELINE_PROCESS_PACKAGE_BNP_H
+#define PIPELINE_PROCESS_PACKAGE_BNP_H
 #include <nel/misc/types_nl.h>
 
 // STL includes
@@ -40,44 +40,42 @@
 namespace PIPELINE {
 
 /**
- * \brief CProcessTextureDDS
- * \date 2012-08-04 12:50GMT
+ * \brief CProcessPackageBNP
+ * \date 2012-08-04 18:54GMT
  * \author Jan Boon (Kaetemi)
- * CProcessTextureDDS
+ * CProcessPackageBNP
  */
-class CProcessTextureDDS : public IProcessHandler
+class CProcessPackageBNP : public IProcessHandler
 {
 public:
-	CProcessTextureDDS() { }
-	virtual ~CProcessTextureDDS() { }
-
-	void buildDDS(const std::string &dependLog, const std::string &errorLog, const std::string &srcFile, const std::string &dstFile, const std::string &algorithm, bool createMipMap, uint reduceFactor, bool checkUserColor);
+	CProcessPackageBNP() { }
+	virtual ~CProcessPackageBNP() { }
 
 	virtual void build();
 
-	NLMISC_DECLARE_CLASS(CProcessTextureDDS)
-}; /* class CProcessTextureDDS */
+	NLMISC_DECLARE_CLASS(CProcessPackageBNP)
+}; /* class CProcessPackageBNP */
 
 /**
- * \brief CProcessTextureDDSInfo
- * \date 2012-08-04 12:50GMT
+ * \brief CProcessPackageBNPInfo
+ * \date 2012-08-04 18:54GMT
  * \author Jan Boon (Kaetemi)
- * CProcessTextureDDSInfo
+ * CProcessPackageBNPInfo
  */
-class CProcessTextureDDSInfo : public IProcessInfo
+class CProcessPackageBNPInfo : public IProcessInfo
 {
 public:
-	CProcessTextureDDSInfo() { }
-	virtual ~CProcessTextureDDSInfo() { }
+	CProcessPackageBNPInfo() { }
+	virtual ~CProcessPackageBNPInfo() { }
 
-	virtual void getDependentDirectories(std::vector<std::string> &resultAppend);	
+	virtual void getDependentDirectories(std::vector<std::string> &resultAppend);
 	virtual void getDependentFiles(std::vector<std::string> &resultAppend);
 
-	NLMISC_DECLARE_CLASS(CProcessTextureDDSInfo)
-}; /* class CProcessTextureDDSInfo */
+	NLMISC_DECLARE_CLASS(CProcessPackageBNPInfo)
+}; /* class CProcessPackageBNPInfo */
 
 } /* namespace PIPELINE */
 
-#endif /* #ifndef PIPELINE_PROCESS_TEXTURE_DDS_H */
+#endif /* #ifndef PIPELINE_PROCESS_PACKAGE_BNP_H */
 
 /* end of file */

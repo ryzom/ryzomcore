@@ -18,7 +18,7 @@
           <ATOM Value="[$DatabaseDirectory]/interfaces/v3_quick_help"/>
           <ATOM Value="[$DatabaseDirectory]/interfaces/r2_3d"/>
         </ARRAY>
-        <ATOM Name="DstFile" Value="interfaces.bnp"/>
+        <ATOM Name="DstFile" Value="[$PackageDirectory]/interfaces.bnp"/>
       </STRUCT>
     </STRUCT>
   </STRUCT>
@@ -33,5 +33,6 @@ Sat Aug 04 20:16:14 2012 (kaetemi) formName Resized = 6
 Sat Aug 04 20:19:53 2012 (kaetemi) .DependentProjects[0] = common_interface.pipeline_project
 Sat Aug 04 20:19:53 2012 (kaetemi) formName Resized = 1
 Sat Aug 04 20:20:13 2012 (kaetemi) .Processes[0] = PackageBNP
-Sat Aug 04 20:20:13 2012 (kaetemi) formName Resized = 1</LOG>
+Sat Aug 04 20:20:13 2012 (kaetemi) formName Resized = 1
+Sat Aug 04 20:34:00 2012 (kaetemi) .Package.BNP.DstFile = [$PackageDirectory]/interfaces.bnp</LOG>
 </FORM>

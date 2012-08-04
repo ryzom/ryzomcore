@@ -41,6 +41,7 @@
 #include "../plugin_library/pipeline_interface.h"
 #include "process_interface.h"
 #include "process_texture_dds.h"
+#include "process_package_bnp.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -58,6 +59,8 @@ class CPipelinePluginNeLNelLibrary : public NLMISC::INelLibrary
 		PIPELINE_REGISTER_CLASS(CProcessInterfaceInfo);
 		PIPELINE_REGISTER_CLASS(CProcessTextureDDS);
 		PIPELINE_REGISTER_CLASS(CProcessTextureDDSInfo);
+		PIPELINE_REGISTER_CLASS(CProcessPackageBNP);
+		PIPELINE_REGISTER_CLASS(CProcessPackageBNPInfo);
 	} 
 	void onLibraryUnloaded(bool /* lastTime */) 
 	{ 
