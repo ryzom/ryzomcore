@@ -71,7 +71,7 @@
             <ATOM Value="[$DatabaseDirectory]/interfaces/v3_quick_help/graph"/>
             <ATOM Value="[$DatabaseDirectory]/interfaces/r2_decals"/>
           </ARRAY>
-          <ATOM Name="DstDirectory" Value="[!OutputDirectory]/interface_3d"/>
+          <ATOM Name="DstDirectory" Value="[!OutputDirectory]/interface_fullscreen"/>
           <ATOM Name="Algorithm" Value="5"/>
         </STRUCT>
       </ARRAY>

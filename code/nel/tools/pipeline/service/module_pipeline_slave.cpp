@@ -636,7 +636,7 @@ public:
 		CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_BUILD_TASK);
 	}
 
-	void finishedTask(TProcessResult errorLevel, const std::string &errorMessage)
+	void finishedTask(TProcessResult errorLevel, std::string errorMessage)
 	{
 		nlinfo("errorLevel: %i, errorMessage: %s", (uint32)errorLevel, errorMessage.c_str());
 		clearActiveProcess();

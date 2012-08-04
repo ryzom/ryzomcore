@@ -66,6 +66,11 @@ bool CPipelineProject::getValue(std::string &result, const std::string &name)
 		nlwarning("Node '%s' not found in '%s'", name.c_str(), m_Form->getFilename().c_str());
 		return false;
 	}
+	if (!valueElm)
+	{
+		nlwarning("Node '%s' not found in '%s', valueElm returned NULL, probably using default value", name.c_str(), m_Form->getFilename().c_str());
+		return false;
+	}
 	std::string value;
 	if (!valueElm->getValue(value))
 	{

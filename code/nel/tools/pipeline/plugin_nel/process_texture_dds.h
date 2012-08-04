@@ -51,7 +51,7 @@ public:
 	CProcessTextureDDS() { }
 	virtual ~CProcessTextureDDS() { }
 
-	void buildAtlas(const std::string &dependLog, const std::string &errorLog, const std::vector<std::string> &srcDirectories, const std::string &dstFile);
+	void buildDDS(const std::string &dependLog, const std::string &errorLog, const std::string &srcFile, const std::string &dstFile, const std::string &algorithm, bool createMipMap, uint reduceFactor, bool checkUserColor);
 
 	virtual void build();
 
@@ -69,7 +69,7 @@ class CProcessTextureDDSInfo : public IProcessInfo
 public:
 	CProcessTextureDDSInfo() { }
 	virtual ~CProcessTextureDDSInfo() { }
-	
+
 	virtual void getDependentDirectories(std::vector<std::string> &resultAppend);	
 	virtual void getDependentFiles(std::vector<std::string> &resultAppend);
 
