@@ -84,6 +84,61 @@ namespace NLGUI
 			return CViewText::getProperty( name );
 	}
 
+	void CDBViewNumber::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "value" )
+		{
+			_Number.link( value.c_str() );
+			return;
+		}
+		else
+		if( name == "positive" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Positive = b;
+			return;
+		}
+		else
+		if( name == "format" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Format = b;
+			return;
+		}
+		else
+		if( name == "divisor" )
+		{
+			sint64 i;
+			if( fromString( value, i ) )
+				_Divisor = i;
+			return;
+		}
+		else
+		if( name == "modulo" )
+		{
+			sint64 i;
+			if( fromString( value, i ) )
+				_Divisor = i;
+			return;
+		}
+		else
+		if( name == "suffix" )
+		{
+			_Suffix = value;
+			return;
+		}
+		else
+		if( name == "prefix" )
+		{
+			_Prefix = value;
+			return;
+		}
+		else
+			CViewText::setProperty( name, value );
+	}
+
 	// ***************************************************************************
 	bool CDBViewNumber::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
