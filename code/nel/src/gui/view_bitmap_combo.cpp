@@ -216,6 +216,47 @@ namespace NLGUI
 			return CViewBase::getProperty( name );
 	}
 
+	void CViewBitmapCombo::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "tx_normal" )
+		{
+			parseTexList( value, _Texs );
+			return;
+		}
+		else
+		if( name == "tx_over" )
+		{
+			parseTexList( value, _TexsOver );
+			return;
+		}
+		else
+		if( name == "tx_pushed" )
+		{
+			parseTexList( value, _TexsPushed );
+			return;
+		}
+		else
+		if( name == "col_normal" )
+		{
+			parseColList( value, _Col );
+			return;
+		}
+		else
+		if( name == "col_over" )
+		{
+			parseColList( value, _ColOver );
+			return;
+		}
+		else
+		if( name == "col_pushed" )
+		{
+			parseColList( value, _ColPushed );
+			return;
+		}
+		else
+			CViewBase::setProperty( name, value );
+	}
+
 	//=======================================================================================
 	bool CViewBitmapCombo::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
