@@ -97,7 +97,7 @@ void CProcessInterface::build()
 				{
 					m_PipelineProcess->makePaths(dstFiles);
 					buildAtlas(dependLog, errorLog, srcDirectories, dstFile);
-					m_PipelineProcess->parseToolLog("", "", false);
+					m_PipelineProcess->parseToolLog(dependLog, errorLog, false);
 				}
 				if (m_PipelineProcess->needsExit()) return;
 			}

@@ -103,7 +103,7 @@ public:
 	virtual void makePaths(const std::vector<std::string> &outputPaths) = 0;
 	void makePaths(const std::string &outputPath) { std::vector<std::string> outputPaths; outputPaths.push_back(outputPath); makePaths(outputPaths); }
 
-	/// Parse the depend and error logs. Only set writeOutputMeta true if the output is not known in advance by the plugin, see needsToBeRebuilt
+	/// Parse the depend and error logs. Only set writeOutputMeta true if the output is not known in advance by the plugin, see needsToBeRebuilt. The log files are deleted for you afterwards
 	virtual void parseToolLog(const std::string &dependLogFile, const std::string &errorLogFile, bool writeOutputMeta) = 0;
 
 	/// Check if the plugin needs to exit, exit plugin immediately if true.

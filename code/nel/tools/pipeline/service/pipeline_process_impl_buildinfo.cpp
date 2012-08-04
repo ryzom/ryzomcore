@@ -456,7 +456,7 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 				{
 					if (metaStatus.CRC32 != metaDepend.CRC32)
 					{
-						nlwarning("Status checksum for '%s' does match depend checksum, output file was modified, this should not happen, rebuild", path.c_str());
+						nlwarning("Status checksum %i for output file '%s' does match depend checksum %i, output file was modified, this should not happen, rebuild", metaStatus.CRC32, path.c_str(), metaDepend.CRC32);
 						m_SubTaskResult = FINISH_SUCCESS;
 						return true; // Rebuild.
 					}
@@ -478,9 +478,9 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 					}
 					else
 					{
-						if (metaStatus.CRC32 != metaDepend.CRC32)
+						if (metaStatus.CRC32 != dependency.CRC32)
 						{
-							nldebug("Status checksum for '%s' does match depend checksum, input file was modified, rebuild", path.c_str());
+							nldebug("Status checksum %i for input file '%s' does match depend checksum %i, input file was modified, rebuild", metaStatus.CRC32, dependencyFile.c_str(), dependency.CRC32);
 							m_SubTaskResult = FINISH_SUCCESS;
 							return true; // Rebuild.
 						}
@@ -506,8 +506,11 @@ void CPipelineProcessImpl::setExit(const TProcessResult exitLevel, const std::st
 /// Must verify this regularly to exit the plugin in case something went wrong.
 bool CPipelineProcessImpl::needsExit()
 {
+	if (g_IsExiting)
+		return true;
+	
 	// TODO: Bypass error feature.
-	if (m_SubTaskResult != FINISH_SUCCESS)
+	if (m_SubTaskResult != FINISH_SUCCESS) // m_SubTaskResult can only be FINISH_SUCCESS or FINISH_ERROR (or FINISH_NOT in case of incomplete implementation)
 		return true;
 	return false;
 }

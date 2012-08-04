@@ -102,16 +102,16 @@ std::string CPipelineProcessImpl::getTempDirectory()
 
 void CPipelineProcessImpl::deleteDirectoryIfEmpty(const std::string &path)
 {
-	std::vector<std::string> dummy;
+	/*std::vector<std::string> dummy;
 	NLMISC::CPath::getPathContent(path, false, true, true, dummy);
 	if (dummy.size())
 	{
 		nlwarning("Directory '%s' not empty", path.c_str());
 	}
 	else
-	{
+	{*/
 		NLMISC::CFile::deleteDirectory(path);
-	}
+	/*}*/
 }
 
 bool CPipelineProcessImpl::getValue(std::string &result, const std::string &name)
