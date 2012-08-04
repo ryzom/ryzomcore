@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <DFN Revision="$Revision$" State="modified">
   <ELEMENT Name="Atlas" Type="Dfn" Filename="pipeline_common_id_of.dfn" Array="true"/>
-  <ELEMENT Name="Fullscreen" Type="Dfn" Filename="pipeline_common_id_od.dfn" Array="false"/>
   <ELEMENT Name="3D" Type="Dfn" Filename="pipeline_common_id_od.dfn" Array="false"/>
   <LOG></LOG>
 </DFN>

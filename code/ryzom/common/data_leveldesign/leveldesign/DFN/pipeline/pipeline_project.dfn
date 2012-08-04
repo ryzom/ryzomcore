@@ -5,10 +5,12 @@
   <ELEMENT Name="DependentProjects" Type="Type" Filename="filename.typ" FilenameExt="*.pipeline_project" Array="true"/>
   <ELEMENT Name="Processes" Type="Type" Filename="string.typ" Array="true"/>
   <ELEMENT Name="Interface" Type="Dfn" Filename="pipeline_process_interface.dfn"/>
+  <ELEMENT Name="Texture" Type="Dfn" Filename="pipeline_process_texture.dfn"/>
   <LOG>Sat Feb 18 13:35:41 2012 (Kaetemi) Dfn Structure = 
 Sat Feb 18 13:36:45 2012 (Kaetemi) Dfn Structure = 
 Sat Feb 18 13:44:45 2012 (Kaetemi) Dfn Structure = 
 Sat Feb 18 15:28:54 2012 (Kaetemi) Dfn Structure = 
 Fri Mar 02 21:21:25 2012 (Kaetemi) Dfn Structure = 
-Sat Mar 03 13:31:41 2012 (Kaetemi) Dfn Structure = </LOG>
+Sat Mar 03 13:31:41 2012 (Kaetemi) Dfn Structure = 
+Sat Aug 04 15:24:52 2012 (kaetemi) Dfn Structure = </LOG>
 </DFN>

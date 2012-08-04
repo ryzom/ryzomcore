@@ -10,6 +10,7 @@
     </ARRAY>
     <ARRAY Name="Processes">
       <ATOM Value="Interface"/>
+      <ATOM Value="TextureDDS"/>
     </ARRAY>
     <STRUCT Name="Interface">
       <ARRAY Name="Atlas">
@@ -41,24 +42,6 @@
           <ATOM Name="DstFile" Value="[&amp;DstInterfaceAtlas]/texture_interfaces_dxtc.tga"/>
         </STRUCT>
       </ARRAY>
-      <STRUCT Name="Fullscreen">
-        <ARRAY Name="SrcDirectories">
-          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_fullscreen"/>
-          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_outgame/fullscreen"/>
-          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/abilities_items"/>
-          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/buy_sell"/>
-          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/camera_character"/>
-          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/create_perso"/>
-          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/fight"/>
-          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/MatisTown"/>
-          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/spell"/>
-          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/talk_bot"/>
-          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/abilities_items"/>
-          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_quick_help/graph"/>
-          <ATOM Value="[$DatabaseDirectory]/interfaces/r2_decals"/>
-        </ARRAY>
-        <ATOM Name="DstDirectory" Value="[!OutputDirectory]/interface_fullscreen"/>
-      </STRUCT>
       <STRUCT Name="3D">
         <ARRAY Name="SrcDirectories">
           <ATOM Value="[$DatabaseDirectory]/interfaces/v3_outgame/3d"/>
@@ -69,6 +52,29 @@
         </ARRAY>
         <ATOM Name="DstDirectory" Value="[!OutputDirectory]/interface_3d"/>
       </STRUCT>
+    </STRUCT>
+    <STRUCT Name="Texture">
+      <ARRAY Name="DDS">
+        <STRUCT>
+          <ARRAY Name="SrcDirectories">
+            <ATOM Value="[$DatabaseDirectory]/interfaces/v3_fullscreen"/>
+            <ATOM Value="[$DatabaseDirectory]/interfaces/v3_outgame/fullscreen"/>
+            <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/abilities_items"/>
+            <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/buy_sell"/>
+            <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/camera_character"/>
+            <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/create_perso"/>
+            <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/fight"/>
+            <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/MatisTown"/>
+            <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/spell"/>
+            <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/talk_bot"/>
+            <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/graph/abilities_items"/>
+            <ATOM Value="[$DatabaseDirectory]/interfaces/v3_quick_help/graph"/>
+            <ATOM Value="[$DatabaseDirectory]/interfaces/r2_decals"/>
+          </ARRAY>
+          <ATOM Name="DstDirectory" Value="[!OutputDirectory]/interface_3d"/>
+          <ATOM Name="Algorithm" Value="5"/>
+        </STRUCT>
+      </ARRAY>
     </STRUCT>
   </STRUCT>
   <STRUCT/>
@@ -89,5 +95,10 @@ Sat Mar 03 13:34:02 2012 (Kaetemi) formName Resized = 2
 Sat Mar 03 13:34:32 2012 (Kaetemi) .Interface.AtlasDxtc[0].DstFile = [&amp;DstInterfaceAtlasDxtc]/texture_interfaces_dxtc.tga
 Fri Mar 09 19:49:23 2012 (Kaetemi) .Processes[1] = Dummy
 Fri Mar 09 19:49:23 2012 (Kaetemi) formName Resized = 2
-Tue Jul 31 19:45:33 2012 (kaetemi) formName Resized = 1</LOG>
+Tue Jul 31 19:45:33 2012 (kaetemi) formName Resized = 1
+Sat Aug 04 15:26:38 2012 (kaetemi) .Texture.DDS[0].Algorithm = 5
+Sat Aug 04 15:26:38 2012 (kaetemi) formName Resized = 1
+Sat Aug 04 15:26:49 2012 (kaetemi) .Texture.DDS[0].DstDirectory = [!OutputDirectory]/interface_3d
+Sat Aug 04 15:26:57 2012 (kaetemi) .Processes[1] = TextureDSS
+Sat Aug 04 15:38:06 2012 (kaetemi) formName Resized = 13</LOG>
 </FORM>

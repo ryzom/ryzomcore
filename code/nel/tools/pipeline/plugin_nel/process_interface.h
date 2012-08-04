@@ -35,6 +35,7 @@
 
 // Project includes
 #include "../plugin_library/process_handler.h"
+#include "../plugin_library/process_info.h"
 
 namespace PIPELINE {
 
@@ -47,8 +48,8 @@ namespace PIPELINE {
 class CProcessInterface : public IProcessHandler
 {
 public:
-	CProcessInterface();
-	virtual ~CProcessInterface();
+	CProcessInterface() { }
+	virtual ~CProcessInterface() { }
 
 	void buildAtlas(const std::string &dependLog, const std::string &errorLog, const std::vector<std::string> &srcDirectories, const std::string &dstFile);
 
@@ -56,6 +57,24 @@ public:
 
 	NLMISC_DECLARE_CLASS(CProcessInterface)
 }; /* class CProcessInterface */
+
+/**
+ * \brief CProcessInterfaceInfo
+ * \date 2012-03-03 10:10GMT
+ * \author Jan Boon (Kaetemi)
+ * CProcessInterfaceInfo
+ */
+class CProcessInterfaceInfo : public IProcessInfo
+{
+public:
+	CProcessInterfaceInfo() { }
+	virtual ~CProcessInterfaceInfo() { }
+	
+	virtual void getDependentDirectories(std::vector<std::string> &resultAppend);	
+	virtual void getDependentFiles(std::vector<std::string> &resultAppend);
+
+	NLMISC_DECLARE_CLASS(CProcessInterfaceInfo)
+}; /* class CProcessInterfaceInfo */
 
 } /* namespace PIPELINE */
 

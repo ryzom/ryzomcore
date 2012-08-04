@@ -40,7 +40,7 @@
 // Project includes
 #include "../plugin_library/pipeline_interface.h"
 #include "process_interface.h"
-#include "process_interface_info.h"
+#include "process_texture_dds.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -56,6 +56,8 @@ class CPipelinePluginNeLNelLibrary : public NLMISC::INelLibrary
 		nldebug("Library loaded: CPipelinePluginNeL");
 		PIPELINE_REGISTER_CLASS(CProcessInterface);
 		PIPELINE_REGISTER_CLASS(CProcessInterfaceInfo);
+		PIPELINE_REGISTER_CLASS(CProcessTextureDDS);
+		PIPELINE_REGISTER_CLASS(CProcessTextureDDSInfo);
 	} 
 	void onLibraryUnloaded(bool /* lastTime */) 
 	{ 

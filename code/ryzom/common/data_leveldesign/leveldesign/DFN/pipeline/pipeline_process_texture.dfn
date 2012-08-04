@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision$" State="modified">
+  <ELEMENT Name="DDS" Type="Dfn" Filename="pipeline_process_texture_dds.dfn" Array="true"/>
+  <LOG>Sat Aug 04 15:26:07 2012 (kaetemi) Dfn Structure = </LOG>
+</DFN>

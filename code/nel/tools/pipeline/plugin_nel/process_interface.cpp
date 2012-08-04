@@ -41,16 +41,6 @@ using namespace std;
 
 namespace PIPELINE {
 
-CProcessInterface::CProcessInterface()
-{
-	
-}
-
-CProcessInterface::~CProcessInterface()
-{
-	
-}
-
 void CProcessInterface::buildAtlas(const std::string &dependLog, const std::string &errorLog, const std::vector<std::string> &srcDirectories, const std::string &dstFile)
 {
 	nldebug("Build: Atlas '%s'", dstFile.c_str());
@@ -105,7 +95,49 @@ void CProcessInterface::build()
 	}
 	
 	m_PipelineProcess->deleteDirectoryIfEmpty(tempDir);
-	m_PipelineProcess->setExit(FINISH_ERROR, "Not yet implemented");
+}
+
+void CProcessInterfaceInfo::getDependentDirectories(std::vector<std::string> &resultAppend)
+{
+	{
+		uint nb;
+		if (m_PipelineProcess->getValueNb(nb, "Interface.Atlas"))
+		{
+			for (uint i = 0; i < nb; ++i)
+			{
+				std::stringstream ss;
+				ss << "Interface.Atlas[" << i << "].SrcDirectories";
+				m_PipelineProcess->getValues(resultAppend, ss.str());
+			}
+		}
+	}
+	/*{
+		uint nb;
+		if (m_PipelineProcess->getValueNb(nb, "Interface.AtlasDxtc"))
+		{
+			for (uint i = 0; i < nb; ++i)
+			{
+				std::stringstream ss;
+				ss << "Interface.AtlasDxtc[" << i << "].SrcDirectories";
+				m_PipelineProcess->getValues(resultAppend, ss.str());
+			}
+		}
+	}
+	{
+		std::stringstream ss;
+		ss << "Interface.Fullscreen.SrcDirectories";
+		m_PipelineProcess->getValues(resultAppend, ss.str());
+	}
+	{
+		std::stringstream ss;
+		ss << "Interface.3D.SrcDirectories";
+		m_PipelineProcess->getValues(resultAppend, ss.str());
+	}*/
+}
+
+void CProcessInterfaceInfo::getDependentFiles(std::vector<std::string> &resultAppend)
+{
+	
 }
 
 } /* namespace PIPELINE */

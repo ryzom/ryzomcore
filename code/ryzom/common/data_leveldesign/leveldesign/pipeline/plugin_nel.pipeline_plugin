@@ -12,10 +12,15 @@
       <STRUCT>
         <ATOM Name="Description" Value="Builds interface textures"/>
         <ATOM Name="Process" Value="Interface"/>
-        
         <ATOM Name="HandlerType" Value="RegisteredClass"/>
         <ATOM Name="Handler" Value="CProcessInterface"/>
         <ATOM Name="Info" Value="CProcessInterfaceInfo"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="Description" Value="Builds compressed dds textures"/>
+        <ATOM Name="Process" Value="TextureDDS"/>
+        <ATOM Name="Handler" Value="CProcessTextureDDS"/>
+        <ATOM Name="Info" Value="CProcessTextureDDSInfo"/>
       </STRUCT>
     </ARRAY>
   </STRUCT>
@@ -40,5 +45,10 @@ Fri Mar 09 19:48:26 2012 (Kaetemi) Array Insert = 0
 Fri Mar 09 19:48:26 2012 (Kaetemi) formName Deleted = 
 Fri Mar 09 19:48:26 2012 (Kaetemi) formName Resized = 2
 Fri Mar 09 19:48:39 2012 (Kaetemi) .ProcessHandlers[1].ProcessDependencies[0] = Dummy
-Fri Mar 09 19:48:39 2012 (Kaetemi) formName Resized = 1</LOG>
+Fri Mar 09 19:48:39 2012 (Kaetemi) formName Resized = 1
+Sat Aug 04 15:33:08 2012 (kaetemi) .ProcessHandlers[2].Description = Builds compressed dds textures
+Sat Aug 04 15:33:08 2012 (kaetemi) .ProcessHandlers[2].Handler = CProcessTextureDDS
+Sat Aug 04 15:33:08 2012 (kaetemi) .ProcessHandlers[2].Info = CProcessTextureDDSInfo
+Sat Aug 04 15:33:08 2012 (kaetemi) .ProcessHandlers[2].Process = TextureDDS
+Sat Aug 04 15:33:08 2012 (kaetemi) formName Resized = 3</LOG>
 </FORM>
