@@ -110,6 +110,126 @@ namespace NLGUI
 			return CViewBase::getProperty( name );
 	}
 
+	void CViewBitmap::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "color" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_Color = c;
+			return;
+		}
+		else
+		if( name == "txtoffsetx" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_TxtOffsetX = i;
+			return;
+		}
+		else
+		if( name == "txtoffsety" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_TxtOffsetY = i;
+			return;
+		}
+		else
+		if( name == "txtwidth" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_TxtWidth = i;
+			return;
+		}
+		else
+		if( name == "txtheight" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_TxtHeight = i;
+			return;
+		}
+		else
+		if( name == "texture" )
+		{
+			setTexture( value );
+			return;
+		}
+		else
+		if( name == "scale" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Scale = b;
+			return;
+		}
+		else
+		if( name == "rot" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_Rot = i;
+			return;
+		}
+		else
+		if( name == "flip" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Flip = b;
+			return;
+		}
+		else
+		if( name == "tile" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Tile = b;
+			return;
+		}
+		else
+		if( name == "align" )
+		{
+			std::string::size_type i;
+			for( i = 0; i < value.size(); i++ )
+			{
+				const char c = value[ i ];
+
+				switch( c )
+				{
+				case 'L':
+					_Align &= ~1;
+					break;
+
+				case 'R':
+					_Align |= 1;
+					break;
+
+				case 'B':
+					_Align &= ~2;
+					break;
+
+				case 'T':
+					_Align |= 2;
+					break;
+				}
+			}
+			return;
+		}
+		else
+		if( name == "inherit_gc_alpha" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_InheritGCAlpha = b;
+			return;
+		}
+		else
+			CViewBase::setProperty( name, value );
+	}
+
 	// ----------------------------------------------------------------------------
 
 	bool CViewBitmap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)

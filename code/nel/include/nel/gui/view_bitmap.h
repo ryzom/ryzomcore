@@ -59,6 +59,7 @@ namespace NLGUI
 		}
 
 		std::string getProperty( const std::string &name ) const;
+		void setProperty( const std::string &name, const std::string &value );
 
 		/**
 		 * parse an xml node and initialize the base view mambers. Must call CViewBase::parse
