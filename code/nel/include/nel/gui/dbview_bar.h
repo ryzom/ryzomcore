@@ -53,6 +53,7 @@ namespace NLGUI
 		void setType (TViewBar vb);
 
 		std::string getProperty( const std::string &name ) const;
+		void setProperty( const std::string &name, const std::string &value );
 		bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup);
 		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 		virtual void updateCoords ();

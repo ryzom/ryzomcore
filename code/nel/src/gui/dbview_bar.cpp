@@ -101,6 +101,76 @@ namespace NLGUI
 			return CViewBitmap::getProperty( name );
 	}
 
+	void CDBViewBar::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "value" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_ValueInt = i;
+			else
+				_Value.link( value.c_str() );
+			return;
+		}
+		else
+		if( name == "range" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_RangeInt = i;
+			else
+				_Range.link( value.c_str() );
+			return;
+		}
+		else
+		if( name == "reference" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_ReferenceInt = i;
+			else
+				_Reference.link( value.c_str() );
+			return;
+		}
+		else
+		if( name == "color_negative" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_ColorNegative = c;
+			return;
+		}
+		else
+		if( name == "mini" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				if( b )
+					_Type = ViewBar_Mini;
+			return;
+		}
+		else
+		if( name == "ultra_mini" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				if( b )
+					_Type = ViewBar_UltraMini;
+			return;
+		}
+		else
+		if( name == "mini_thick" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				if( b )
+					_Type = ViewBar_MiniThick;
+			return;
+		}
+		else
+			CViewBitmap::setProperty( name, value );
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CDBViewBar::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
