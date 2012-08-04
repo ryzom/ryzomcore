@@ -322,7 +322,7 @@ bool	parseOptions(int argc, char **argv)
 		else if(!strcmp(argv[i], "-e"))
 		{
 			++i;
-			ToolLogger.initDepend(argv[i]);
+			ToolLogger.initError(argv[i]);
 		}
 		else if(!strcmp(argv[i], "-f"))
 			ForceSkipCheck = true;
