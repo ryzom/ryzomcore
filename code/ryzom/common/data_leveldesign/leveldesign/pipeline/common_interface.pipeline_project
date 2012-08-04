@@ -7,10 +7,6 @@
         <ATOM Name="Name" Value="DstInterfaceAtlas"/>
         <ATOM Name="Value" Value="[!OutputDirectory]/interface_atlas/"/>
       </STRUCT>
-      <STRUCT>
-        <ATOM Name="Name" Value="DstInterfaceAtlasDxtc"/>
-        <ATOM Name="Value" Value="[!OutputDirectory]/interface_atlas_dxtc/"/>
-      </STRUCT>
     </ARRAY>
     <ARRAY Name="Processes">
       <ATOM Value="Interface"/>
@@ -36,15 +32,13 @@
           </ARRAY>
           <ATOM Name="DstFile" Value="[&amp;DstInterfaceAtlas]/texture_interfaces_v3_outgame_ui.tga"/>
         </STRUCT>
-      </ARRAY>
-      <ARRAY Name="AtlasDxtc">
         <STRUCT>
           <ARRAY Name="SrcDirectories">
             <ATOM Value="[$DatabaseDirectory]/interfaces/v3_bricks"/>
             <ATOM Value="[$DatabaseDirectory]/interfaces/v3_items"/>
             <ATOM Value="[$DatabaseDirectory]/interfaces/v3_dxtc_misc"/>
           </ARRAY>
-          <ATOM Name="DstFile" Value="[&amp;DstInterfaceAtlasDxtc]/texture_interfaces_dxtc.tga"/>
+          <ATOM Name="DstFile" Value="[&amp;DstInterfaceAtlas]/texture_interfaces_dxtc.tga"/>
         </STRUCT>
       </ARRAY>
       <STRUCT Name="Fullscreen">

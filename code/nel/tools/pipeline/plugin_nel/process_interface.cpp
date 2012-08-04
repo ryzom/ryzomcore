@@ -53,7 +53,7 @@ CProcessInterface::~CProcessInterface()
 
 void CProcessInterface::buildAtlas(const std::string &dependLog, const std::string &errorLog, const std::vector<std::string> &srcDirectories, const std::string &dstFile)
 {
-	nldebug("Build atlas '%s'", dstFile.c_str());
+	nldebug("Build: Atlas '%s'", dstFile.c_str());
 	std::vector<std::string> arguments;
 	arguments.push_back(std::string("-d") + dependLog);
 	arguments.push_back(std::string("-e") + errorLog);
@@ -65,7 +65,7 @@ void CProcessInterface::buildAtlas(const std::string &dependLog, const std::stri
 
 void CProcessInterface::build()
 {
-	nldebug("Building process interface!");
+	nldebug("Build process plugin: CProcessInterface");
 
 	std::string tempDir = m_PipelineProcess->getTempDirectory();
 	std::string dependLog = tempDir + "depend.log";
