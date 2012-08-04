@@ -234,6 +234,7 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 						dependency.CRC32 = statusIt->second.CRC32;
 						metaDependIt->second.Dependencies.push_back(dependency);
 					}
+					break;
 				case DIRECTORY:
 					metaDependIt->second.DirectoryDependencies.push_back(inputFileMacro);
 					break;
