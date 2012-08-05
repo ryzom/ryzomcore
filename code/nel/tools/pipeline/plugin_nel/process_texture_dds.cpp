@@ -112,8 +112,7 @@ void CProcessTextureDDS::build()
 					{
 						const std::string &srcFile = *itf;
 						std::string dstFile = dstDirectory + NLMISC::CFile::getFilenameWithoutExtension(NLMISC::CFile::getFilename(srcFile)) + ".dds";
-						// TODO: PARAMETER inputDepends = checkUserColor (because there can be additional inputs depending on the input & depend file of the existing output) (expected input that is waited for must be in the depend log even if it doesn't exist yet!)
-						if (m_PipelineProcess->needsToBeRebuilt(srcFile, dstFile))
+						if (m_PipelineProcess->needsToBeRebuilt(srcFile, dstFile, checkUserColor)) // may have additional inputs if usercolor exists // todo: just always pass _usercolor in the srcFile here if checkUserColor, it's the clean way, but for now this is for debugging purposes done this way
 						{
 							m_PipelineProcess->makePaths(dstFile);
 							buildDDS(dependLog, errorLog, srcFile, dstFile, algorithm, createMipMap, reduceFactor, checkUserColor);

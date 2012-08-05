@@ -82,7 +82,7 @@ void CProcessInterface::build()
 				std::vector<std::string> dstFiles;
 				dstFiles.push_back(dstFile); // .tga
 				dstFiles.push_back(dstFile.substr(0, dstFile.size() - 3) + "txt"); // .txt
-				if (m_PipelineProcess->needsToBeRebuilt(srcDirectories, dstFiles))
+				if (m_PipelineProcess->needsToBeRebuilt(srcDirectories, dstFiles, false))
 				{
 					m_PipelineProcess->makePaths(dstFiles);
 					buildAtlas(dependLog, errorLog, srcDirectories, dstFile);

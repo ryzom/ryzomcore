@@ -180,7 +180,7 @@ bool CPipelineProcessImpl::hasFileBeenAddedSince(const std::string &inputFile, u
 	return false;
 }
 
-bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inputPaths)
+bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inputPaths, bool inputDepends)
 {
 	if (m_SubTaskResult != FINISH_SUCCESS)
 		return false; // Cannot continue on previous failure.
@@ -223,15 +223,24 @@ bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inpu
 		nldebug("No added/changed/removed input files in this request");
 		if (m_ListOutputChanged.size() == 0 && m_ListOutputRemoved.size() == 0)
 		{
-			nldebug("No output files were tampered with since last successful build, rebuild not needed");
-			m_SubTaskResult = FINISH_SUCCESS;
-			return false; // No rebuild required.
+			if (inputDepends)
+			{
+				nldebug("Ouput files did not change, but not all input files are known, need further information");
+				m_SubTaskResult = FINISH_SUCCESS;
+				return needsToBeRebuildSubByOutput(inputPaths, false, inputDepends);
+			}
+			else
+			{
+				nldebug("No output files were tampered with since last successful build, rebuild not needed");
+				m_SubTaskResult = FINISH_SUCCESS;
+				return false; // No rebuild required.
+			}
 		}
 		else
 		{
 			nldebug("Output files may have changed, find out which output files are part of these input files");
 			m_SubTaskResult = FINISH_SUCCESS;
-			return needsToBeRebuildSubByOutput(inputPaths, false);
+			return needsToBeRebuildSubByOutput(inputPaths, false, inputDepends);
 		}
 	}
 	else // input files have changed
@@ -259,13 +268,13 @@ bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inpu
 		{
 			nldebug("Output files may or may not be up to date, find out more, after the break");
 			m_SubTaskResult = FINISH_SUCCESS;
-			return needsToBeRebuildSubByOutput(inputPaths, true);
+			return needsToBeRebuildSubByOutput(inputPaths, true, inputDepends);
 		}
 	}
 	// not reachable
 } // ok
 
-bool CPipelineProcessImpl::needsToBeRebuildSubByOutput(const std::vector<std::string> &inputPaths, bool inputChanged)
+bool CPipelineProcessImpl::needsToBeRebuildSubByOutput(const std::vector<std::string> &inputPaths, bool inputChanged, bool inputDepends)
 {
 	if (m_SubTaskResult != FINISH_SUCCESS)
 		return false; // Cannot continue on previous failure.
@@ -316,10 +325,10 @@ bool CPipelineProcessImpl::needsToBeRebuildSubByOutput(const std::vector<std::st
 	// or they might have been tampered with after they were built.
 	nldebug("Need further information");
 	m_SubTaskResult = FINISH_SUCCESS;
-	return needsToBeRebuiltSub(inputPaths, outputPaths, inputChanged); // to skip input changed checks because these are only input files and no input folders
+	return needsToBeRebuiltSub(inputPaths, outputPaths, inputChanged, inputDepends); // to skip input changed checks because these are only input files and no input folders
 } // ok ? ?
 
-bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths)
+bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths, bool inputDepends)
 {
 	if (m_SubTaskResult != FINISH_SUCCESS)
 		return false; // Cannot continue on previous failure.
@@ -378,17 +387,23 @@ bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inpu
 			}
 		}
 	}
-
+	
 	if (inputFilesDifferent)
 	{
 		nldebug("Input files were modified, check if output files were already built");
 		m_SubTaskResult = FINISH_SUCCESS;
-		return needsToBeRebuiltSub(inputPaths, outputPaths, true);
+		return needsToBeRebuiltSub(inputPaths, outputPaths, true, inputDepends);
 	}
 	else
 	{
 		nldebug("Input files were not modified");
-		if (m_ListOutputChanged.size() == 0 && m_ListOutputRemoved.size() == 0)
+		if (inputDepends)
+		{
+			nldebug("Not all input files are known, find out more");
+			m_SubTaskResult = FINISH_SUCCESS;
+			return needsToBeRebuiltSub(inputPaths, outputPaths, true, inputDepends);
+		}
+		else if (m_ListOutputChanged.size() == 0 && m_ListOutputRemoved.size() == 0)
 		{
 			nldebug("No output files were tampered with since last successful build, rebuild not needed");
 			m_SubTaskResult = FINISH_SUCCESS;
@@ -398,12 +413,12 @@ bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inpu
 		{
 			nldebug("Output files may have changed, find out more");
 			m_SubTaskResult = FINISH_SUCCESS;
-			return needsToBeRebuiltSub(inputPaths, outputPaths, false);
+			return needsToBeRebuiltSub(inputPaths, outputPaths, false, inputDepends);
 		}
 	}
 }
 
-bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths, bool inputModified)
+bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths, bool inputModified, bool inputDepends)
 {
 	if (m_SubTaskResult != FINISH_SUCCESS)
 		return false; // Cannot continue on previous failure.
@@ -463,7 +478,7 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 		}
 	}
 
-	if (!outputChanged && !inputModified)
+	if (!outputChanged && !inputModified && !inputDepends)
 	{
 		nlerror("Should never reach this, this must have been cought earlier normally");
 	}
@@ -471,6 +486,8 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 	std::set<std::string> inputsChecked;
 	uint32 earliestBuildStart = 0xFFFFFFFF;
 	
+	std::set<std::string> dependDirectories;
+
 	// Check the .depend files of all the output files // also check that they exist :)
 	for (std::vector<std::string>::const_iterator it = outputPaths.begin(), end = outputPaths.end(); it != end; ++it)
 	{
@@ -508,7 +525,7 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 					}
 				}
 			}
-			if (inputModified)
+			if (inputModified || inputDepends)
 			{
 				// Compare the input checksums with the cached input checksums
 				for (std::vector<CFileDepend::CDependency>::const_iterator itd = metaDepend.Dependencies.begin(), endd = metaDepend.Dependencies.end(); itd != endd; ++itd)
@@ -535,13 +552,20 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 				}
 			}
 		}
+		for (std::vector<std::string>::iterator it_dir = metaDepend.DirectoryDependencies.begin(), end_dir = metaDepend.DirectoryDependencies.end(); it_dir != end_dir; ++it_dir)
+		{
+			std::string dir = unMacroPath(*it_dir);
+			if (dependDirectories.find(dir) == dependDirectories.end())
+				dependDirectories.insert(dir);
+		}
 	}
 
 	// Find out if any files were added in dependency directories since last build start
-	if (inputModified)
+	if (inputModified || inputDepends)
 	{
-		// TODO: ONLY CHECK INPUT PATHS GIVEN BY DEPEND META FILES
-		for (std::vector<std::string>::const_iterator it = inputPaths.begin(), end = inputPaths.end(); it != end; ++it)
+		// for (std::vector<std::string>::const_iterator it = inputPaths.begin(), end = inputPaths.end(); it != end; ++it)
+		// Only check directories given by depend meta files
+		for (std::set<std::string>::const_iterator it = dependDirectories.begin(), end = dependDirectories.end(); it != end; ++it)
 		{
 			const std::string &path = *it;
 			if (path[path.size() - 1] == '/') // isDirectory

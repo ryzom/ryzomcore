@@ -68,8 +68,8 @@ public:
 	virtual bool getValues(std::vector<std::string> &resultAppend, const std::string &name);
 	virtual bool getValueNb(uint &result, const std::string &name);
 
-	virtual bool needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths);
-	virtual bool needsToBeRebuilt(const std::vector<std::string> &inputPaths);
+	virtual bool needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths, bool inputDepends);
+	virtual bool needsToBeRebuilt(const std::vector<std::string> &inputPaths, bool inputDepends);
 
 	virtual void makePaths(const std::vector<std::string> &outputPaths);
 
@@ -118,8 +118,8 @@ private:
 	bool hasInputFileBeenModified(const std::string &inputFile);
 	bool haveFilesBeenAddedInDirectorySince(const std::string &inputDirectory, const std::set<std::string> &excludeFiles, uint32 since);
 	bool hasFileBeenAddedSince(const std::string &inputFile, uint32 since);
-	bool needsToBeRebuildSubByOutput(const std::vector<std::string> &inputPaths, bool inputChanged);
-	bool needsToBeRebuiltSub(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths, bool inputModified);
+	bool needsToBeRebuildSubByOutput(const std::vector<std::string> &inputPaths, bool inputChanged, bool inputDepends);
+	bool needsToBeRebuiltSub(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths, bool inputModified, bool inputDepends);
 
 }; /* class CPipelineProcessImpl */
 
