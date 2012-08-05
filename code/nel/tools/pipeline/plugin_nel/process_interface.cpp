@@ -99,40 +99,7 @@ void CProcessInterface::build()
 
 void CProcessInterfaceInfo::getDependentDirectories(std::vector<std::string> &resultAppend)
 {
-	{
-		uint nb;
-		if (m_PipelineProcess->getValueNb(nb, "Interface.Atlas"))
-		{
-			for (uint i = 0; i < nb; ++i)
-			{
-				std::stringstream ss;
-				ss << "Interface.Atlas[" << i << "].SrcDirectories";
-				m_PipelineProcess->getValues(resultAppend, ss.str());
-			}
-		}
-	}
-	/*{
-		uint nb;
-		if (m_PipelineProcess->getValueNb(nb, "Interface.AtlasDxtc"))
-		{
-			for (uint i = 0; i < nb; ++i)
-			{
-				std::stringstream ss;
-				ss << "Interface.AtlasDxtc[" << i << "].SrcDirectories";
-				m_PipelineProcess->getValues(resultAppend, ss.str());
-			}
-		}
-	}
-	{
-		std::stringstream ss;
-		ss << "Interface.Fullscreen.SrcDirectories";
-		m_PipelineProcess->getValues(resultAppend, ss.str());
-	}
-	{
-		std::stringstream ss;
-		ss << "Interface.3D.SrcDirectories";
-		m_PipelineProcess->getValues(resultAppend, ss.str());
-	}*/
+	m_PipelineProcess->getValuesRecurse(resultAppend, "Interface.Atlas[].SrcDirectories");
 }
 
 void CProcessInterfaceInfo::getDependentFiles(std::vector<std::string> &resultAppend)

@@ -131,7 +131,9 @@ void CProcessTextureDDS::build()
 
 void CProcessTextureDDSInfo::getDependentDirectories(std::vector<std::string> &resultAppend)
 {
-	{
+	m_PipelineProcess->getValuesRecurse(resultAppend, "Texture.DDS[].SrcDirectories");
+
+	/*{
 		uint nb;
 		if (m_PipelineProcess->getValueNb(nb, "Texture.DDS"))
 		{
@@ -142,7 +144,7 @@ void CProcessTextureDDSInfo::getDependentDirectories(std::vector<std::string> &r
 				m_PipelineProcess->getValues(resultAppend, ss.str());
 			}
 		}
-	}
+	}*/
 }
 
 void CProcessTextureDDSInfo::getDependentFiles(std::vector<std::string> &resultAppend)

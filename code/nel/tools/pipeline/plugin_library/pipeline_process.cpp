@@ -30,6 +30,7 @@
 
 // STL includes
 #include <vector>
+#include <sstream>
 
 // NeL includes
 #include <nel/misc/app_context.h>
@@ -88,6 +89,27 @@ bool IPipelineProcess::getValue(sint &result, const std::string &name)
 	{
 		nlwarning("Value '%s' with result '%s' is not an integer", name.c_str(), resultString.c_str());
 		return false;
+	}
+	return true;
+}
+
+bool IPipelineProcess::getValuesRecurse(std::vector<std::string> &resultAppend, const std::string &name)
+{
+	std::string::size_type split = name.find("[]");
+	if (split == std::string::npos) return getValues(resultAppend, name);
+	else
+	{
+		std::string subname = name.substr(0, split);
+		uint nb;
+		if (!getValueNb(nb, subname)) return false;
+		std::string begname = name.substr(0, split + 1);
+		std::string endname = name.substr(split + 1);
+		for (uint i = 0; i < nb; ++i)
+		{
+			std::stringstream ss;
+			ss << begname << i << endname;
+			if (!getValuesRecurse(resultAppend, ss.str())) return false;
+		}
 	}
 	return true;
 }

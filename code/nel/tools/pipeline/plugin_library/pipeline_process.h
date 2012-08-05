@@ -95,6 +95,7 @@ public:
 	bool getValue(sint &result, const std::string &name);
 	virtual bool getValues(std::vector<std::string> &resultAppend, const std::string &name) = 0;
 	virtual bool getValueNb(uint &result, const std::string &name) = 0;
+	bool getValuesRecurse(std::vector<std::string> &resultAppend, const std::string &name);
 
 	/// Find out if the plugin needs to rebuild. Input can be files or directories, output can only be files
 	virtual bool needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths, bool inputDepends) = 0;
