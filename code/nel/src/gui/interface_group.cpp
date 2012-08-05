@@ -483,6 +483,187 @@ namespace NLGUI
 			return CCtrlBase::getProperty( name );
 	}
 
+	void CInterfaceGroup::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "overlappable" )
+		{
+			bool b;
+			if( NLMISC::fromString( value, b ) )
+				_Overlappable = b;
+			return;
+		}
+		else
+		if( name == "escapable" )
+		{
+			bool b;
+			if( NLMISC::fromString( value, b ) )
+				_Escapable = b;
+			return;
+		}
+		else
+		if( name == "child_resize_w" )
+		{
+			bool b;
+			if( NLMISC::fromString( value, b ) )
+				_ResizeFromChildW = b;
+			return;
+		}
+		else
+		if( name == "child_resize_h" )
+		{
+			bool b;
+			if( NLMISC::fromString( value, b ) )
+				_ResizeFromChildH = b;
+			return;
+		}
+		else
+		if( name == "child_resize_wmargin" )
+		{
+			bool b;
+			if( NLMISC::fromString( value, b ) )
+				_ResizeFromChildWMargin = b;
+			return;
+		}
+		else
+		if( name == "child_resize_hmargin" )
+		{
+			bool b;
+			if( NLMISC::fromString( value, b ) )
+				_ResizeFromChildHMargin = b;
+			return;
+		}
+		else
+		if( name == "on_active" )
+		{
+			_AHOnActive = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "on_active_params" )
+		{
+			_AHOnActiveParams = value;
+			return;
+		}
+		else
+		if( name == "on_deactive" )
+		{
+			_AHOnDeactive = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "on_deactive_params" )
+		{
+			_AHOnDeactiveParams = value;
+		}
+		else
+		if( name == "max_w" )
+		{
+			sint32 i;
+			if( NLMISC::fromString( value, i ) )
+				_MaxW = i;
+			return;
+		}
+		else
+		if( name == "max_h" )
+		{
+			sint32 i;
+			if( NLMISC::fromString( value, i ) )
+				_MaxH = i;
+			return;
+		}
+		else
+		if( name == "max_sizeref" )
+		{
+			parseMaxSizeRef( value.c_str() );
+			return;
+		}
+		else
+		if( name == "max_sizeparent" )
+		{
+			std::string parentId;
+
+			if( value != "parent" ){
+				if( _Parent != NULL )
+					parentId = _Parent->getId() + ":" + value;
+				else
+					parentId = _Parent->getId();
+			}
+			CWidgetManager::getInstance()->getParser()->addParentSizeMaxAssociation( this, parentId );
+			return;
+		}
+		else
+		if( name == "group_onclick_r" )
+		{
+			_AHOnRightClick = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "group_params_r" )
+		{
+			_AHOnRightClickParams = value;
+			return;
+		}
+		else
+		if( name == "group_onclick_l" )
+		{
+			_AHOnLeftClick = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "group_params_l" )
+		{
+			_AHOnLeftClickParams = value;
+			return;
+		}
+		else
+		if( name == "on_enter" )
+		{
+			_AHOnEnter = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "on_enter_params" )
+		{
+			_AHOnEnterParams = value;
+			return;
+		}
+		else
+		if( name == "win_priority" )
+		{
+			sint8 i;
+			if( NLMISC::fromString( value, i ) )
+				_Priority = i;
+			return;
+		}
+		else
+		if( name == "use_cursor" )
+		{
+			bool b;
+			if( NLMISC::fromString( value, b ) )
+				_UseCursor = b;
+			return;
+		}
+		else
+		if( name == "on_escape" )
+		{
+			_AHOnEscape = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "on_escape_params" )
+		{
+			_AHOnEscapeParams = value;
+			return;
+		}
+		else
+		if( name == "lua_class" )
+		{
+			CWidgetManager::getInstance()->getParser()->addLuaClassAssociation( this, value );
+			return;
+		}
+		else
+			CCtrlBase::setProperty( name, value );
+	}
 
 	// ------------------------------------------------------------------------------------------------
 	void CInterfaceGroup::parseMaxSizeRef(const char *ptr)
