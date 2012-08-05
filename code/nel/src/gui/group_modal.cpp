@@ -114,6 +114,99 @@ namespace NLGUI
 			return CGroupFrame::getProperty( name );
 	}
 
+	void CGroupModal::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "mouse_pos" )
+		{
+			bool b;
+			if( NLMISC::fromString( value, b ) )
+				SpawnOnMousePos = b;
+			return;
+		}
+		else
+		if( name == "exit_click_out" )
+		{
+			bool b;
+			if( NLMISC::fromString( value, b ) )
+				ExitClickOut = b;
+			return;
+		}
+		else
+		if( name == "exit_click_l" )
+		{
+			bool b;
+			if( NLMISC::fromString( value, b ) )
+				ExitClickL = b;
+			return;
+		}
+		else
+		if( name == "exit_click_r" )
+		{
+			bool b;
+			if( NLMISC::fromString( value, b ) )
+				ExitClickR = b;
+			return;
+		}
+		else
+		if( name == "exit_click_b" )
+		{
+			bool b;
+			if( NLMISC::fromString( value, b ) )
+			{
+				ExitClickL = ExitClickR = b;
+			}
+			return;
+		}
+		else
+		if( name == "force_inside_screen" )
+		{
+			bool b;
+			if( NLMISC::fromString( value, b ) )
+				ForceInsideScreen = b;
+			return;
+		}
+		else
+		if( name == "category" )
+		{
+			Category = value;
+			return;
+		}
+		else
+		if( name == "onclick_out" )
+		{
+			OnClickOut = value;
+			return;
+		}
+		else
+		if( name == "onclick_out_params" )
+		{
+			OnClickOutParams = value;
+			return;
+		}
+		else
+		if( name == "onpostclick_out" )
+		{
+			OnPostClickOut = value;
+			return;
+		}
+		else
+		if( name == "onpostclick_out_params" )
+		{
+			OnPostClickOutParams = value;
+			return;
+		}
+		else
+		if( name == "exit_key_pushed" )
+		{
+			bool b;
+			if( NLMISC::fromString( value, b ) )
+				ExitKeyPushed = b;
+			return;
+		}
+		else
+			CGroupFrame::setProperty( name, value );
+	}
+
 
 	// ***************************************************************************
 	bool CGroupModal::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
