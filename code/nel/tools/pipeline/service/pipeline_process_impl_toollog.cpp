@@ -175,19 +175,15 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 				{
 					metaDepends[outputFile] = CFileDepend();
 					metaDependIt = metaDepends.find(outputFile);
-					CFileStatus status;
-					nldebug("Update status for output file '%s', calculate checksum", outputFile.c_str());
-					g_DatabaseStatus->updateFileStatus(status, outputFile); // calculate the checksum of the output, this takes a while
-					metaDependIt->second.CRC32 = status.CRC32;
-					// nldebug("Checksum %i; %i", metaDependIt->second.CRC32, status.CRC32);
-
-					/*m_ResultCurrent.MacroPaths.push_back(outputFileMacro);
-					CProcessResult::CFileResult prfr;
-					prfr.Level = STATE_SUCCESS; // dunno if still needed?
-					prfr.CRC32 = status.CRC32;
-					m_ResultCurrent.FileResults.push_back(prfr);*/
-
-					m_FileStatusOutputCache[outputFile] = status;
+					if (outputFile != "*")
+					{
+						CFileStatus status;
+						nldebug("Update status for output file '%s', calculate checksum", outputFile.c_str());
+						g_DatabaseStatus->updateFileStatus(status, outputFile); // calculate the checksum of the output, this takes a while
+						metaDependIt->second.CRC32 = status.CRC32;
+						// nldebug("Checksum %i; %i", metaDependIt->second.CRC32, status.CRC32);
+						m_FileStatusOutputCache[outputFile] = status;
+					}
 				}
 				switch (type)
 				{
@@ -246,6 +242,21 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 		}
 
 		file.close();
+
+		// Allow wildcard in output parameter in depend log, use when input includes other files to depend all the outputs on the included files as well
+		std::map<std::string, CFileDepend>::iterator wildcard_it = metaDepends.find("*");
+		if (wildcard_it != metaDepends.end())
+		{
+			for (std::map<std::string, CFileDepend>::iterator it = metaDepends.begin(), end = metaDepends.end(); it != end; ++it)
+			{
+				for (std::vector<CFileDepend::CDependency>::iterator sub_it = wildcard_it->second.Dependencies.begin(), sub_end = wildcard_it->second.Dependencies.end(); sub_it != sub_end; ++sub_it)
+					it->second.Dependencies.push_back(*sub_it);
+				for (std::vector<std::string>::iterator sub_it = wildcard_it->second.DirectoryDependencies.begin(), sub_end = wildcard_it->second.DirectoryDependencies.end(); sub_it != sub_end; ++sub_it)
+					it->second.DirectoryDependencies.push_back(*sub_it);
+				for (std::vector<std::string>::iterator sub_it = wildcard_it->second.RuntimeDependencies.begin(), sub_end = wildcard_it->second.RuntimeDependencies.end(); sub_it != sub_end; ++sub_it)
+					it->second.RuntimeDependencies.push_back(*sub_it);
+			}
+		}
 
 		// Write depend meta files
 		for (std::map<std::string, CFileDepend>::iterator it = metaDepends.begin(), end = metaDepends.end(); it != end; ++it)
