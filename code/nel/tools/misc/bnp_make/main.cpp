@@ -32,10 +32,12 @@
 #include "nel/misc/path.h"
 #include "nel/misc/algo.h"
 #include "nel/misc/common.h"
-
+#include "nel/misc/tool_logger.h"
 
 using namespace std;
 using namespace NLMISC;
+
+PIPELINE::CToolLogger ToolLogger;
 
 // ---------------------------------------------------------------------------
 
@@ -223,6 +225,7 @@ struct BNPHeader
 
 string gDestBNPFile;
 BNPHeader gBNPHeader;
+std::vector<std::string> gDirectories;
 
 // ---------------------------------------------------------------------------
 void append(const string &filename1, const string &filename2, uint32 sizeToRead)
@@ -249,12 +252,12 @@ bool i_comp(const string &s0, const string &s1)
 	return nlstricmp (CFile::getFilename(s0).c_str(), CFile::getFilename(s1).c_str()) < 0;
 }
 
-void packSubRecurse ()
+void packSubRecurse(const std::string &cp)
 {
 	vector<string>	pathContent;
 
-	string cp = CPath::getCurrentPath();
-	printf ("Treating directory : %s\n", cp.c_str());
+	printf("Treating directory : %s\n", cp.c_str());
+	ToolLogger.writeDepend(PIPELINE::DIRECTORY, gDestBNPFile, cp);
 	CPath::getPathContent(cp, true, false, true, pathContent);
 
 	// Sort filename
@@ -268,6 +271,7 @@ void packSubRecurse ()
 			BNPFile ftmp;
 
 			// Check if we can read the source file
+			ToolLogger.writeDepend(PIPELINE::BUILD, gDestBNPFile, pathContent[i]);
 			FILE *f = fopen (pathContent[i].c_str(), "rb");
 			if (f != NULL)
 			{
@@ -283,9 +287,15 @@ void packSubRecurse ()
 			else
 			{
 				printf("error cannot open %s\n", pathContent[i].c_str());
+				ToolLogger.writeError(PIPELINE::WARNING, pathContent[i], "Cannot open file");
 			}
 		}
 	}
+}
+
+void packSubRecurse()
+{
+	packSubRecurse(CPath::getCurrentPath());
 }
 
 // ---------------------------------------------------------------------------
@@ -321,6 +331,7 @@ void usage()
 {
 	printf ("USAGE : \n");
 	printf ("   bnp_make /p <directory_name> [<destination_path>] [<destination_filename>] [option] ... [option]\n");
+	printf ("   bnp_make /pp <bnp_filepath> [-dir directory_name] [-dir ...] [option] ... [option]\n");
 	printf ("   option : \n");
 	printf ("      -if wildcard : add the file if it matches the wilcard (at least one 'if' conditions must be met for a file to be adding)\n");
 	printf ("      -ifnot wildcard : add the file if it doesn't match the wilcard (all the 'ifnot' conditions must be met for a file to be adding)\n");
@@ -357,6 +368,21 @@ uint readOptions (int nNbArg, char **ppArgs)
 			WildCards.push_back (card);
 			optionCount += 2;
 		}
+		if ((strcmp (ppArgs[i], "-dependlog") == 0) && ((i+1)<(uint)nNbArg))
+		{
+			ToolLogger.initDepend(string(ppArgs[i+1]));
+			optionCount += 2;
+		}
+		if ((strcmp (ppArgs[i], "-errorlog") == 0) && ((i+1)<(uint)nNbArg))
+		{
+			ToolLogger.initError(string(ppArgs[i+1]));
+			optionCount += 2;
+		}
+		if ((strcmp (ppArgs[i], "-dir") == 0) && ((i+1)<(uint)nNbArg))
+		{
+			gDirectories.push_back(string(ppArgs[i+1]));
+			optionCount += 2;
+		}
 	}
 	return optionCount;
 }
@@ -370,6 +396,27 @@ int main (int nNbArg, char **ppArgs)
 	{
 		usage();
 		return -1;
+	}
+
+	if (strcmp(ppArgs[1], "/pp") == 0)
+	{
+		// Pack a directory
+		uint count = readOptions(nNbArg, ppArgs);
+		nNbArg -= count;
+
+		if (nNbArg < 3 || gDirectories.size() == 0)
+		{
+			usage();
+			return -1;
+		}
+
+		gDestBNPFile = CPath::standardizePath(ppArgs[2]);
+
+		remove(gDestBNPFile.c_str());
+		gBNPHeader.OffsetFromBeginning = 0;
+		for (std::vector<std::string>::const_iterator it = gDirectories.begin(), end = gDirectories.end(); it != end; ++it)
+			packSubRecurse(*it);
+		gBNPHeader.append(gDestBNPFile);
 	}
 
 	if ((strcmp(ppArgs[1], "/p") == 0) || (strcmp(ppArgs[1], "/P") == 0) ||
