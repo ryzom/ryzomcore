@@ -5,6 +5,8 @@
     <ARRAY Name="Projects">
       <ATOM Value="common_interface.pipeline_project"/>
       <ATOM Value="interfaces.pipeline_package"/>
+      <ATOM Value="gamedev.pipeline_package"/>
+      <ATOM Value="data_common.pipeline_package"/>
     </ARRAY>
     <ARRAY Name="Plugins">
       <ATOM Value="plugin_nel.pipeline_plugin"/>

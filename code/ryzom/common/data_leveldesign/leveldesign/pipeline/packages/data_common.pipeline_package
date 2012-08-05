@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision$" State="modified">
+  <STRUCT>
+    <ARRAY Name="Processes">
+      <ATOM Value="PackageBNP"/>
+    </ARRAY>
+    <STRUCT Name="Package">
+      <STRUCT Name="BNP">
+        <ARRAY Name="SrcDirectories">
+          <ATOM Value="[$DataCommonDirectory]"/>
+          <ATOM Value="[$DataCommonDirectory]/chat"/>
+          <ATOM Value="[$DataCommonDirectory]/r2"/>
+          <ATOM Value="[$DataCommonDirectory]/r2/unit_test"/>
+        </ARRAY>
+        <ATOM Name="DstFile" Value="[$PackageDirectory]/data_common.bnp"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG></LOG>
+</FORM>

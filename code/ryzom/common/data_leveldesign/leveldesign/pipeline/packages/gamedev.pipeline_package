@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision$" State="modified">
+  <STRUCT>
+    <ARRAY Name="Processes">
+      <ATOM Value="PackageBNP"/>
+    </ARRAY>
+    <STRUCT Name="Package">
+      <STRUCT Name="BNP">
+        <ARRAY Name="SrcDirectories">
+          <ATOM Value="[$GamedevDirectory]"/>
+          <ATOM Value="[$GamedevDirectory]/default"/>
+          <ATOM Value="[$GamedevDirectory]/html"/>
+          <ATOM Value="[$GamedevDirectory]/html/context_help"/>
+          <ATOM Value="[$GamedevDirectory]/html/help"/>
+          <ATOM Value="[$GamedevDirectory]/html/quick_help"/>
+          <ATOM Value="[$GamedevDirectory]/interfaces_v3"/>
+        </ARRAY>
+        <ATOM Name="DstFile" Value="[$PackageDirectory]/gamedev.bnp"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG></LOG>
+</FORM>
