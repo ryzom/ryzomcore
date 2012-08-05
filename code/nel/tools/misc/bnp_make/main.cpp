@@ -336,7 +336,7 @@ void usage()
 {
 	printf ("USAGE : \n");
 	printf ("   bnp_make /p <directory_name> [<destination_path>] [<destination_filename>] [option] ... [option]\n");
-	printf ("   bnp_make /pp <bnp_filepath> [-dir directory_name] [-dir ...] [option] ... [option]\n");
+	printf ("   bnp_make /p <bnp_filepath> -dir directory_name [-dir ...] [option] ... [option]\n");
 	printf ("   option : \n");
 	printf ("      -if wildcard : add the file if it matches the wilcard (at least one 'if' conditions must be met for a file to be adding)\n");
 	printf ("      -ifnot wildcard : add the file if it doesn't match the wilcard (all the 'ifnot' conditions must be met for a file to be adding)\n");
@@ -403,13 +403,16 @@ int main (int nNbArg, char **ppArgs)
 		return -1;
 	}
 
-	if (strcmp(ppArgs[1], "/pp") == 0)
+	bool cmdPack = (strcmp(ppArgs[1], "/p") == 0) || (strcmp(ppArgs[1], "/P") == 0) ||
+		(strcmp(ppArgs[1], "-p") == 0) || (strcmp(ppArgs[1], "-P") == 0);
+
+	if (cmdPack && gDirectories.size() > 0)
 	{
 		// Pack a directory
 		uint count = readOptions(nNbArg, ppArgs);
 		nNbArg -= count;
 
-		if (nNbArg < 3 || gDirectories.size() == 0)
+		if (nNbArg < 3)
 		{
 			usage();
 			return -1;
@@ -423,8 +426,7 @@ int main (int nNbArg, char **ppArgs)
 		gBNPHeader.append(gDestBNPFile);
 	}
 
-	if ((strcmp(ppArgs[1], "/p") == 0) || (strcmp(ppArgs[1], "/P") == 0) ||
-		(strcmp(ppArgs[1], "-p") == 0) || (strcmp(ppArgs[1], "-P") == 0))
+	if (cmdPack && gDirectories.size() == 0)
 	{
 		// Pack a directory
 		uint count = readOptions (nNbArg, ppArgs);
