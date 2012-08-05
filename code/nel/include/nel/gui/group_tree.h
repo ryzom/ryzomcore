@@ -208,6 +208,7 @@ namespace NLGUI
 		virtual ~CGroupTree();
 
 		std::string getProperty( const std::string &name ) const;
+		void setProperty( const std::string &name, const std::string &value );
 
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
 
@@ -292,6 +293,7 @@ namespace NLGUI
 
 	private:
 
+		void setupArbo();
 		sint32	_BmpW, _BmpH, _FontSize, _YDecal;
 		sint32	_XExtend;
 

@@ -496,6 +496,150 @@ namespace NLGUI
 			return CInterfaceGroup::getProperty( name );
 	}
 
+	void CGroupTree::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "col_over" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_OverColor = c;
+			return;
+		}
+		else
+		if( name == "col_select" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_SelectedColor = c;
+			return;
+		}
+		else
+		if( name == "col_over_back" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_OverColorBack = c;
+			return;
+		}
+		else
+		if( name == "fontsize" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_FontSize = i;
+			return;
+		}
+		else
+		if( name == "select_ancestor_on_close" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_SelectAncestorOnClose = b;
+			return;
+		}
+		else
+		if( name == "navigate_one_branch" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_NavigateOneBranch = b;
+			return;
+		}
+		else
+		if( name == "arbo_open_first" )
+		{
+			_ArboOpenFirst = value;
+			setupArbo();
+			return;
+		}
+		else
+		if( name == "arbo_close_just_one" )
+		{
+			_ArboCloseJustOne = value;
+			return;
+		}
+		else
+		if( name == "arbo_son_without_son" )
+		{
+			_ArboSonWithoutSon = value;
+			return;
+		}
+		else
+		if( name == "arbo_son_last" )
+		{
+			_ArboSonLast = value;
+			return;
+		}
+		else
+		if( name == "arbo_son" )
+		{
+			_ArboSon = value;
+			return;
+		}
+		else
+		if( name == "arbo_x_extend" )
+		{
+			_ArboXExtend = value;
+			setupArbo();
+			return;
+		}
+		else
+		if( name == "arbo_level" )
+		{
+			_ArboLevel = value;
+			return;
+		}
+		if( name == "rectangle_outline" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_RectangleOutlineMode = b;
+			return;
+		}
+		else
+		if( name == "rectangle_x" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_RectangleX = i;
+			return;
+		}
+		else
+		if( name == "rectangle_y" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_RectangleY = i;
+			return;
+		}
+		else
+		if( name == "rectangle_w" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_RectangleW = i;
+			return;
+		}
+		else
+		if( name == "rectangle_h" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_RectangleH = i;
+			return;
+		}
+		else
+		if( name == "rectangle_drl" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_RectangleDeltaRL = i;
+			return;
+		}
+		else
+			CInterfaceGroup::setProperty( name, value );
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CGroupTree::parse (xmlNodePtr cur,  CInterfaceGroup * parentGroup)
 	{
@@ -574,6 +718,13 @@ namespace NLGUI
 		_RootNode->Opened = true;
 		_ResizeFromChildW = _ResizeFromChildH = true;
 
+		setupArbo();
+
+		return true;
+	}
+
+	void CGroupTree::setupArbo()
+	{
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		sint32 id = rVR.getTextureIdFromName(_ArboOpenFirst);
 		if (id != -1)
@@ -585,9 +736,6 @@ namespace NLGUI
 		else
 			// if not found,  reset,  to avoid errors
 			_ArboXExtend= "";
-
-
-		return true;
 	}
 
 	// ----------------------------------------------------------------------------
