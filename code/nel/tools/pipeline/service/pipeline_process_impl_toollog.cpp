@@ -230,6 +230,10 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 						dependency.CRC32 = statusIt->second.CRC32;
 						metaDependIt->second.Dependencies.push_back(dependency);
 					}
+					if (writeOutputMeta)
+					{
+						// TODO ## OUTPUT META ##
+					}
 					break;
 				case DIRECTORY:
 					metaDependIt->second.DirectoryDependencies.push_back(inputFileMacro);
@@ -267,6 +271,12 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 		{
 			const CFileDepend &depend = it->second;
 			CMetadataStorage::writeDepend(depend, CMetadataStorage::getDependPath(it->first));
+		}
+
+		// Write output meta files
+		if (writeOutputMeta)
+		{
+			// TODO ## OUTPUT META ##
 		}
 	}
 	
