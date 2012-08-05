@@ -64,6 +64,34 @@ namespace NLGUI
 			return CInterfaceGroup::getProperty( name );
 	}
 
+	void CGroupFrame::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "display" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_DisplayFrame = b;
+			return;
+		}
+		else
+		if( name == "color" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_Color = c;
+			return;
+		}
+		else
+		if( name == "options" )
+		{
+			_Options = value;
+			setupOptions();
+			return;
+		}
+		else
+			CInterfaceGroup::setProperty( name, value );
+	}
+
 	// ***************************************************************************
 	bool CGroupFrame::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{
@@ -95,12 +123,9 @@ namespace NLGUI
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"options" );
-		CInterfaceOptions *pIO = NULL;
-
 		if (ptr)
 		{
 			_Options = std::string( ptr );
-			pIO = CWidgetManager::getInstance()->getOptions(ptr);
 		}
 
 		// The first type in display type struct is the default display type
@@ -126,52 +151,7 @@ namespace NLGUI
 			_DispTypes.push_back(dt);
 		}
 
-		if (pIO != NULL)
-		{
-			_DispTypeDefined= true;
-
-			// Look if we find the type...
-			uint32 i;
-			for (i = 0; i < _DispTypes.size(); ++i)
-				if (_DispTypes[i].Name == string((const char*)ptr))
-					break;
-
-			if (i == _DispTypes.size())
-			{
-				SDisplayType dt;
-				dt.Name = string((const char*)ptr);
-				// get texture ids.
-				dt.BorderIds[TextTL]= rVR.getTextureIdFromName (pIO->getValStr("tx_tl"));
-				dt.BorderIds[TextTM]= rVR.getTextureIdFromName (pIO->getValStr("tx_t"));
-				dt.BorderIds[TextTR]= rVR.getTextureIdFromName (pIO->getValStr("tx_tr"));
-				// middle
-				dt.BorderIds[TextML]= rVR.getTextureIdFromName (pIO->getValStr("tx_l"));
-				dt.BorderIds[TextMM]= rVR.getTextureIdFromName (pIO->getValStr("tx_blank"));
-				dt.BorderIds[TextMR]= rVR.getTextureIdFromName (pIO->getValStr("tx_r"));
-				// bottom
-				dt.BorderIds[TextBL]= rVR.getTextureIdFromName (pIO->getValStr("tx_bl"));
-				dt.BorderIds[TextBM]= rVR.getTextureIdFromName (pIO->getValStr("tx_b"));
-				dt.BorderIds[TextBR]= rVR.getTextureIdFromName (pIO->getValStr("tx_br"));
-
-				// Tile
-				dt.TileBorder[TextTM] = (uint8)pIO->getValSInt32("tile_t");
-				dt.TileBorder[TextML] = (uint8)pIO->getValSInt32("tile_l");
-				dt.TileBorder[TextMM] = (uint8)pIO->getValSInt32("tile_blank");
-				dt.TileBorder[TextMR] = (uint8)pIO->getValSInt32("tile_r");
-				dt.TileBorder[TextBM] = (uint8)pIO->getValSInt32("tile_b");
-
-				// get size
-				rVR.getTextureSizeFromId (dt.BorderIds[TextTL], dt.LeftBorder, dt.TopBorder);
-				rVR.getTextureSizeFromId (dt.BorderIds[TextBR], dt.RightBorder, dt.BottomBorder);
-				_DispTypes.push_back(dt);
-			}
-			_DispType = (uint8)i;
-		}
-		else
-		{
-			_DispType = 0;
-		}
-
+		setupOptions();
 
 		return true;
 	}
@@ -260,6 +240,60 @@ namespace NLGUI
 			_Color = other._Color;
 		if(!_DispTypeDefined)
 			_DispType = other._DispType;
+	}
+
+	void CGroupFrame::setupOptions()
+	{
+		CViewRenderer &rVR = *(CViewRenderer::getInstance());
+
+		CInterfaceOptions *pIO = NULL;
+		pIO = CWidgetManager::getInstance()->getOptions( _Options );
+
+		if( pIO != NULL )
+		{
+			_DispTypeDefined= true;
+
+			// Look if we find the type...
+			uint32 i;
+			for (i = 0; i < _DispTypes.size(); ++i)
+				if (_DispTypes[i].Name == _Options )
+					break;
+
+			if (i == _DispTypes.size())
+			{
+				SDisplayType dt;
+				dt.Name = _Options;
+				// get texture ids.
+				dt.BorderIds[TextTL]= rVR.getTextureIdFromName (pIO->getValStr("tx_tl"));
+				dt.BorderIds[TextTM]= rVR.getTextureIdFromName (pIO->getValStr("tx_t"));
+				dt.BorderIds[TextTR]= rVR.getTextureIdFromName (pIO->getValStr("tx_tr"));
+				// middle
+				dt.BorderIds[TextML]= rVR.getTextureIdFromName (pIO->getValStr("tx_l"));
+				dt.BorderIds[TextMM]= rVR.getTextureIdFromName (pIO->getValStr("tx_blank"));
+				dt.BorderIds[TextMR]= rVR.getTextureIdFromName (pIO->getValStr("tx_r"));
+				// bottom
+				dt.BorderIds[TextBL]= rVR.getTextureIdFromName (pIO->getValStr("tx_bl"));
+				dt.BorderIds[TextBM]= rVR.getTextureIdFromName (pIO->getValStr("tx_b"));
+				dt.BorderIds[TextBR]= rVR.getTextureIdFromName (pIO->getValStr("tx_br"));
+
+				// Tile
+				dt.TileBorder[TextTM] = (uint8)pIO->getValSInt32("tile_t");
+				dt.TileBorder[TextML] = (uint8)pIO->getValSInt32("tile_l");
+				dt.TileBorder[TextMM] = (uint8)pIO->getValSInt32("tile_blank");
+				dt.TileBorder[TextMR] = (uint8)pIO->getValSInt32("tile_r");
+				dt.TileBorder[TextBM] = (uint8)pIO->getValSInt32("tile_b");
+
+				// get size
+				rVR.getTextureSizeFromId (dt.BorderIds[TextTL], dt.LeftBorder, dt.TopBorder);
+				rVR.getTextureSizeFromId (dt.BorderIds[TextBR], dt.RightBorder, dt.BottomBorder);
+				_DispTypes.push_back(dt);
+			}
+			_DispType = (uint8)i;
+		}
+		else
+		{
+			_DispType = 0;
+		}
 	}
 
 	// ***************************************************************************
