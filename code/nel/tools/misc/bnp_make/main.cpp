@@ -252,13 +252,16 @@ bool i_comp(const string &s0, const string &s1)
 	return nlstricmp (CFile::getFilename(s0).c_str(), CFile::getFilename(s1).c_str()) < 0;
 }
 
-void packSubRecurse(const std::string &cp)
+void packSubRecurse(const std::vector<std::string> &directories)
 {
 	vector<string>	pathContent;
 
-	printf("Treating directory : %s\n", cp.c_str());
-	ToolLogger.writeDepend(PIPELINE::DIRECTORY, gDestBNPFile, cp);
-	CPath::getPathContent(cp, true, false, true, pathContent);
+	for (std::vector<std::string>::const_iterator it = gDirectories.begin(), end = gDirectories.end(); it != end; ++it)
+	{
+		printf("Treating directory : %s\n", (*it).c_str());
+		ToolLogger.writeDepend(PIPELINE::DIRECTORY, gDestBNPFile, *it);
+		CPath::getPathContent(*it, true, false, true, pathContent);
+	}
 
 	// Sort filename
 	sort (pathContent.begin(), pathContent.end(), i_comp);
@@ -295,7 +298,9 @@ void packSubRecurse(const std::string &cp)
 
 void packSubRecurse()
 {
-	packSubRecurse(CPath::getCurrentPath());
+	std::vector<std::string> directories;
+	directories.push_back(CPath::getCurrentPath());
+	packSubRecurse(directories);
 }
 
 // ---------------------------------------------------------------------------
@@ -414,8 +419,7 @@ int main (int nNbArg, char **ppArgs)
 
 		remove(gDestBNPFile.c_str());
 		gBNPHeader.OffsetFromBeginning = 0;
-		for (std::vector<std::string>::const_iterator it = gDirectories.begin(), end = gDirectories.end(); it != end; ++it)
-			packSubRecurse(*it);
+		packSubRecurse(gDirectories);
 		gBNPHeader.append(gDestBNPFile);
 	}
 
