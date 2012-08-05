@@ -226,6 +226,7 @@ struct BNPHeader
 string gDestBNPFile;
 BNPHeader gBNPHeader;
 std::vector<std::string> gDirectories;
+bool gNoRecurse = false;
 
 // ---------------------------------------------------------------------------
 void append(const string &filename1, const string &filename2, uint32 sizeToRead)
@@ -260,7 +261,7 @@ void packSubRecurse(const std::vector<std::string> &directories)
 	{
 		printf("Treating directory : %s\n", (*it).c_str());
 		ToolLogger.writeDepend(PIPELINE::DIRECTORY, gDestBNPFile, *it);
-		CPath::getPathContent(*it, true, false, true, pathContent);
+		CPath::getPathContent(*it, !gNoRecurse, false, true, pathContent);
 	}
 
 	// Sort filename
@@ -388,6 +389,11 @@ uint readOptions (int nNbArg, char **ppArgs)
 			gDirectories.push_back(string(ppArgs[i+1]));
 			optionCount += 2;
 		}
+		if ((strcmp (ppArgs[i], "-norecurse") == 0))
+		{
+			gNoRecurse = true;
+			optionCount += 1;
+		}
 	}
 	return optionCount;
 }
@@ -406,34 +412,34 @@ int main (int nNbArg, char **ppArgs)
 	bool cmdPack = (strcmp(ppArgs[1], "/p") == 0) || (strcmp(ppArgs[1], "/P") == 0) ||
 		(strcmp(ppArgs[1], "-p") == 0) || (strcmp(ppArgs[1], "-P") == 0);
 
-	if (cmdPack && gDirectories.size() > 0)
+	if (cmdPack)
 	{
 		// Pack a directory
+		// Read options
 		uint count = readOptions(nNbArg, ppArgs);
 		nNbArg -= count;
+	}
 
+	if (cmdPack && gDirectories.size() > 0)
+	{
 		if (nNbArg < 3)
 		{
 			usage();
 			return -1;
 		}
 
-		gDestBNPFile = CPath::standardizePath(ppArgs[2]);
+		gDestBNPFile = ppArgs[2];
 
 		remove(gDestBNPFile.c_str());
 		gBNPHeader.OffsetFromBeginning = 0;
 		packSubRecurse(gDirectories);
 		gBNPHeader.append(gDestBNPFile);
+
+		return 0;
 	}
 
 	if (cmdPack && gDirectories.size() == 0)
 	{
-		// Pack a directory
-		uint count = readOptions (nNbArg, ppArgs);
-		nNbArg -= count;
-
-		// Read options
-
 		string sCurDir;
 
 		if (nNbArg >= 4)

@@ -16,6 +16,7 @@
           <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc/htm"/>
           <ATOM Value="[$DatabaseDirectory]/interfaces/v3_doc"/>
           <ATOM Value="[$DatabaseDirectory]/interfaces/v3_quick_help"/>
+          <ATOM Value="[$DatabaseDirectory]/interfaces/v3_quick_help/graph"/>
           <ATOM Value="[$DatabaseDirectory]/interfaces/r2_3d"/>
         </ARRAY>
         <ATOM Name="DstFile" Value="[$PackageDirectory]/interfaces.bnp"/>

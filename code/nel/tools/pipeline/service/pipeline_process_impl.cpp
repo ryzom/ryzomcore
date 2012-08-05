@@ -186,6 +186,7 @@ void CPipelineProcessImpl::runConsoleTool(const std::string &executablePath, con
 	ss << executablePath;
 	for (std::vector<std::string>::const_iterator it = arguments.begin(), end = arguments.end(); it != end; ++it)
 		ss << " " << *it;
+	nldebug("System: '%s'", ss.str().c_str());
 	system(ss.str().c_str());
 #else
 	pid_t fork_id = fork();

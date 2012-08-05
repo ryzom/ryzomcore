@@ -51,6 +51,8 @@ public:
 	CProcessPackageBNP() { }
 	virtual ~CProcessPackageBNP() { }
 
+	void buildPackageBNP(const std::string &dependLog, const std::string &errorLog, const std::vector<std::string> &srcDirectories, const std::string &dstFile);
+
 	virtual void build();
 
 	NLMISC_DECLARE_CLASS(CProcessPackageBNP)

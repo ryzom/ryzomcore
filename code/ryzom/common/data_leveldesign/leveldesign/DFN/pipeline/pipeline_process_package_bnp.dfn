@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
-<DFN Revision="$Revision$" State="checked">
+<DFN Revision="$Revision$" State="modified">
   <ELEMENT Name="SrcDirectories" Type="Type" Filename="pipeline_path_endslash.typ" Array="true"/>
-  <ELEMENT Name="Subdivisions" Type="Type" Filename="string.typ" Array="true"/>
+  <ELEMENT Name="Divisions" Type="Type" Filename="string.typ" Array="true"/>
   <ELEMENT Name="DstFile" Type="Type" Filename="pipeline_path.typ"/>
-  <COMMENTS></COMMENTS>
   <LOG>Sat Feb 18 13:50:40 2012 (Kaetemi) Dfn Parents = 
 Sat Feb 18 13:58:21 2012 (Kaetemi) Dfn Structure = 
 Sat Feb 18 14:19:17 2012 (Kaetemi) Dfn Structure = 
 Fri Mar 02 21:20:17 2012 (Kaetemi) Header Comments = dfsd
-Fri Mar 02 21:20:22 2012 (Kaetemi) Header State = 1</LOG>
+Fri Mar 02 21:20:22 2012 (Kaetemi) Header State = 1
+Sun Aug 05 21:13:38 2012 (kaetemi) Dfn Structure = </LOG>
 </DFN>
