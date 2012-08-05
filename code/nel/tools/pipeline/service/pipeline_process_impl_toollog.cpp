@@ -104,10 +104,72 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 		return;
 	}
 
+	uint nbErrors = 0;
 	// Parse error log
 	{
-		// ...
+		NLMISC::CIFile file;
+		file.open(errorLogFile, true);
+
+		std::vector<std::string> tabbedLine;
+		readTabbedLine(tabbedLine, file);
+		uint line = 0;
+
+		if (tabbedLine.size() != 4 || tabbedLine[0] != "type" || tabbedLine[1] != "path" || tabbedLine[2] != "time" ||tabbedLine[3] != "error")
+		{
+			m_SubTaskErrorMessage = "Bad error file format";
+			m_SubTaskResult = FINISH_ERROR;
+			file.close();
+			return;
+		}
+
+		for (; ; )
+		{
+			if (file.eof())
+				break;
+			tabbedLine.clear();
+			readTabbedLine(tabbedLine, file);
+			++line;
+			if (tabbedLine.size() == 0)
+				continue;
+			if (tabbedLine.size() != 4)
+			{
+				std::stringstream ss;
+				ss << "Bad line " << line << " in error log";
+				m_SubTaskErrorMessage = ss.str();
+				m_SubTaskResult = FINISH_ERROR;
+				file.close();
+				return;
+			}
+			// Read line
+			{
+				TError type;
+				if (tabbedLine[0] == "ERROR")
+					type = ERROR;
+				else if (tabbedLine[0] == "WARNING")
+					type = WARNING;
+				else if (tabbedLine[0] == "MESSAGE")
+					type = MESSAGE;
+				else
+				{
+					std::stringstream ss;
+					ss << "Invalid type at line " << line << " in error log";
+					m_SubTaskErrorMessage = ss.str();
+					m_SubTaskResult = FINISH_ERROR;
+					file.close();
+					return;
+				}
+				std::string path = standardizePath(tabbedLine[1], false);
+				nlwarning("Read error log line: %s, %s, %s, %s", tabbedLine[0].c_str(), path.c_str(), tabbedLine[2].c_str(), tabbedLine[3].c_str());
+				// TODO: Notify the master to write to the .errors meta file and update any connected terminals
+				if (type == ERROR)
+					++nbErrors;
+			}
+		}
+
+		file.close();
 	}
+
+	NLMISC::CFile::deleteFile(errorLogFile);
 
 	// Parse depend log
 	{
@@ -142,7 +204,7 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 			if (tabbedLine.size() != 3)
 			{
 				std::stringstream ss;
-				ss << "Bad line " << line << " in depend file";
+				ss << "Bad line " << line << " in depend log";
 				m_SubTaskErrorMessage = ss.str();
 				m_SubTaskResult = FINISH_ERROR;
 				file.close();
@@ -160,7 +222,7 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 				else
 				{
 					std::stringstream ss;
-					ss << "Invalid type at line " << line << " in depend file";
+					ss << "Invalid type at line " << line << " in depend log";
 					m_SubTaskErrorMessage = ss.str();
 					m_SubTaskResult = FINISH_ERROR;
 					file.close();
@@ -282,9 +344,18 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 	
 	NLMISC::CFile::deleteFile(dependLogFile);
 	
-	// m_SubTaskErrorMessage = "Log parsing not implemented, goodbye";
-	// m_SubTaskResult = FINISH_ERROR;
-	m_SubTaskResult = FINISH_SUCCESS;
+	if (nbErrors)
+	{
+		std::stringstream ss;
+		if (nbErrors == 1) ss << "One or more errors occured in this process";
+		else ss << "There were " << nbErrors << " or more errors while running this process";
+		m_SubTaskErrorMessage = ss.str();
+		m_SubTaskResult = FINISH_ERROR;
+	}
+	else
+	{
+		m_SubTaskResult = FINISH_SUCCESS;
+	}
 }
 
 } /* namespace PIPELINE */
