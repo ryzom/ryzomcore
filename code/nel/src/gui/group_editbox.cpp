@@ -255,6 +255,183 @@ namespace NLGUI
 			return CInterfaceGroup::getProperty( name );
 	}
 
+	void CGroupEditBox::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "onchange" )
+		{
+			_AHOnChange = value;
+			return;
+		}
+		else
+		if( name == "onchange_params" )
+		{
+			_ParamsOnChange = value;
+			return;
+		}
+		else
+		if( name == "on_focus_lost" )
+		{
+			_AHOnFocusLost = value;
+			return;
+		}
+		else
+		if( name == "on_focus_lost_params" )
+		{
+			_AHOnFocusLostParams = value;
+			return;
+		}
+		else
+		if( name == "on_focus" )
+		{
+			_AHOnFocus = value;
+			return;
+		}
+		else
+		if( name == "on_focus_params" )
+		{
+			_AHOnFocusParams = value;
+			return;
+		}
+		else
+		if( name == "max_num_chars" )
+		{
+			uint32 i;
+			if( fromString( value, i ) )
+				_MaxNumChar = i;
+			return;
+		}
+		else
+		if( name == "max_num_return" )
+		{
+			uint32 i;
+			if( fromString( value, i ) )
+				_MaxNumReturn = i;
+			return;
+		}
+		else
+		if( name == "max_chars_size" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_MaxCharsSize = i;
+			return;
+		}
+		else
+		if( name == "enter_loose_focus" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_LooseFocusOnEnter = b;
+			return;
+		}
+		else
+		if( name == "enter_recover_focus" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_RecoverFocusOnEnter = b;
+			return;
+		}
+		else
+		if( name == "prompt" )
+		{
+			_Prompt = value;
+			return;
+		}
+		else
+		if( name == "enter_type" )
+		{
+			if( value == "integer" )
+				_EntryType = Integer;
+			else
+			if( value == "positive_integer" )
+				_EntryType = PositiveInteger;
+			else
+			if( value == "float" )
+				_EntryType = Float;
+			else
+			if( value == "positive_float" )
+				_EntryType = PositiveFloat;
+			else
+			if( value == "alpha" )
+				_EntryType = Alpha;
+			else
+			if( value == "alpha_num" )
+				_EntryType = AlphaNum;
+			else
+			if( value == "alpha_num_space" )
+				_EntryType = AlphaNumSpace;
+			else
+			if( value == "password" )
+				_EntryType = Password;
+			else
+			if( value == "filename" )
+				_EntryType = Filename;
+			else
+			if( value == "playername" )
+				_EntryType = PlayerName;
+
+			return;
+		}
+		else
+		if( name == "menu_r" )
+		{
+			_ListMenuRight = value;
+			return;
+		}
+		else
+		if( name == "max_historic" )
+		{
+			uint32 i;
+			if( fromString( value, i ) )
+				_MaxHistoric = i;
+			return;
+		}
+		else
+		if( name == "backup_father_container_pos" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_BackupFatherContainerPos = b;
+			return;
+		}
+		else
+		if( name == "want_return" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_WantReturn = b;
+			return;
+		}
+		else
+		if( name == "savable" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Savable = b;
+			return;
+		}
+		else
+		if( name == "max_float_prec" )
+		{
+			uint32 i;
+			if( fromString( value, i ) )
+				_MaxFloatPrec = i;
+			return;
+		}
+		else
+		if( name == "negative_filter" )
+		{
+			_NegativeFilter.clear();
+
+			std::string::size_type i;
+			for( i = 0; i < value.size(); i++ )
+				_NegativeFilter.push_back( value[ i ] );
+		}
+		else
+			CInterfaceGroup::setProperty( name, value );
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CGroupEditBox::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
