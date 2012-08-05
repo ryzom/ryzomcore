@@ -43,11 +43,12 @@ namespace PIPELINE {
 void CProcessPackageBNP::build()
 {
 	nldebug("Build process plugin: CProcessPackageBNP");
+	m_PipelineProcess->setExit(FINISH_ERROR, "Not implemented");
 }
 
 void CProcessPackageBNPInfo::getDependentDirectories(std::vector<std::string> &resultAppend)
 {
-	
+	m_PipelineProcess->getValues(resultAppend, "Package.BNP.SrcDirectories");
 }
 
 void CProcessPackageBNPInfo::getDependentFiles(std::vector<std::string> &resultAppend)
