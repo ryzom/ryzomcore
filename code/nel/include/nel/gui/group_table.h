@@ -148,6 +148,7 @@ namespace NLGUI
 		bool    ContinuousUpdate;
 
 		std::string getProperties( const std::string &name ) const;
+		void setProperty( const std::string &name, const std::string &value );
 
 	protected:
 
