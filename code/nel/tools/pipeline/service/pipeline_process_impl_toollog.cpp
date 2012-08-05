@@ -249,13 +249,17 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 		{
 			for (std::map<std::string, CFileDepend>::iterator it = metaDepends.begin(), end = metaDepends.end(); it != end; ++it)
 			{
-				for (std::vector<CFileDepend::CDependency>::iterator sub_it = wildcard_it->second.Dependencies.begin(), sub_end = wildcard_it->second.Dependencies.end(); sub_it != sub_end; ++sub_it)
-					it->second.Dependencies.push_back(*sub_it);
-				for (std::vector<std::string>::iterator sub_it = wildcard_it->second.DirectoryDependencies.begin(), sub_end = wildcard_it->second.DirectoryDependencies.end(); sub_it != sub_end; ++sub_it)
-					it->second.DirectoryDependencies.push_back(*sub_it);
-				for (std::vector<std::string>::iterator sub_it = wildcard_it->second.RuntimeDependencies.begin(), sub_end = wildcard_it->second.RuntimeDependencies.end(); sub_it != sub_end; ++sub_it)
-					it->second.RuntimeDependencies.push_back(*sub_it);
+				if (it->first != "*")
+				{
+					for (std::vector<CFileDepend::CDependency>::iterator sub_it = wildcard_it->second.Dependencies.begin(), sub_end = wildcard_it->second.Dependencies.end(); sub_it != sub_end; ++sub_it)
+						it->second.Dependencies.push_back(*sub_it);
+					for (std::vector<std::string>::iterator sub_it = wildcard_it->second.DirectoryDependencies.begin(), sub_end = wildcard_it->second.DirectoryDependencies.end(); sub_it != sub_end; ++sub_it)
+						it->second.DirectoryDependencies.push_back(*sub_it);
+					for (std::vector<std::string>::iterator sub_it = wildcard_it->second.RuntimeDependencies.begin(), sub_end = wildcard_it->second.RuntimeDependencies.end(); sub_it != sub_end; ++sub_it)
+						it->second.RuntimeDependencies.push_back(*sub_it);
+				}
 			}
+			metaDepends.erase(wildcard_it);
 		}
 
 		// Write depend meta files
