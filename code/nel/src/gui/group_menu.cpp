@@ -1999,6 +1999,124 @@ namespace NLGUI
 			return CGroupModal::getProperty( name );
 	}
 
+	void CGroupMenu::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "extends" )
+		{
+			_Extends = value;
+			return;
+		}
+		else
+		if( name == "case_mode" )
+		{
+			uint32 cm;
+			if( fromString( value, cm ) )
+				_CaseMode = (TCaseMode)cm;
+			return;
+		}
+		else
+		if( name == "color" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_Color = c;
+			return;
+		}
+		else
+		if( name == "shadow_color" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_ShadowColor = c;
+			return;
+		}
+		else
+		if( name == "color_over" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_ColorOver = c;
+			return;
+		}
+		else
+		if( name == "shadow_color_over" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_ShadowColorOver = c;
+			return;
+		}
+		else
+		if( name == "highlight_over" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_HighLightOver = c;
+			return;
+		}
+		else
+		if( name == "color_grayed" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_ColorGrayed = c;
+			return;
+		}
+		else
+		if( name == "shadow_color_grayed" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_ShadowColorGrayed = c;
+			return;
+		}
+		else
+		if( name == "space" )
+		{
+			uint8 i;
+			if( fromString( value, i ) )
+				_Space = i;
+			return;
+		}
+		else
+		if( name == "fontsize" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_FontSize = i;
+			return;
+		}
+		else
+		if( name == "shadow" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Shadow = b;
+			return;
+		}
+		else
+		if( name == "formatted" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Formatted = b;
+			return;
+		}
+		else
+		if( name == "max_visible_line" )
+		{
+			if( _RootMenu != NULL )
+			{
+				sint32 i;
+				if( fromString( value, i ) )
+					_RootMenu->setMaxVisibleLine( i );
+			}
+			return;
+		}
+		else
+			CGroupModal::setProperty( name, value );
+	}
+
 	// ------------------------------------------------------------------------------------------------
 	bool CGroupMenu::parse (xmlNodePtr in,  CInterfaceGroup *parentGroup)
 	{
