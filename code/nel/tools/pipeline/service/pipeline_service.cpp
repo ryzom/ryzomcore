@@ -153,7 +153,7 @@ std::string standardizePath(const std::string &path, bool addFinalSlash)
 	newPath.resize(j);
 
 	// add terminal slash
-	if (addFinalSlash && newPath[path.size()-1] != '/')
+	if (addFinalSlash && newPath[newPath.size()-1] != '/')
 		newPath += '/';
 
 	return newPath;

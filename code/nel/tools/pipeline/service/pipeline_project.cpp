@@ -42,6 +42,7 @@
 // Project includes
 #include "pipeline_service.h"
 #include "workspace_storage.h"
+#include "pipeline_workspace.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -242,6 +243,26 @@ std::string CPipelineProject::getTempDirectory()
 	return tempDirectory;
 }
 
+namespace {
+
+std::string::const_iterator findSqClose(std::string::const_iterator begin, std::string::const_iterator end)
+{
+	sint opened = 0;
+	for (std::string::const_iterator it = begin; it != end; ++it)
+	{
+		if (*it == '[') ++opened;
+		else if (*it == ']') 
+		{
+			if (opened == 0)
+				return it;
+			--opened;
+		}
+	}
+	return end;
+}
+
+} /* anonymous namespace */
+
 void CPipelineProject::parseValue(std::string &result, const std::string &value)
 {
 	std::stringstream ss;
@@ -309,10 +330,36 @@ void CPipelineProject::parseValue(std::string &result, const std::string &value)
 			}
 			break;
 		case '@': // WORKSPACE PROJECT VALUE
-			// [@common_interface&DstInterfaceAtlas] // macro
-			// [@common_interface:
-			// TODO
-			// break;
+			{
+				++findOpen;
+				lastEndPP = findSqClose(findOpen, value.end());
+				std::string::const_iterator findSplit = find(findOpen, lastEndPP, '&');
+				bool isValue = (findSplit == lastEndPP);
+				if (isValue)
+				{
+					findSplit = find(findOpen, lastEndPP, ':');
+					if (findSplit == lastEndPP)
+					{
+						--findOpen;
+						--findOpen;
+						++lastEndPP;
+						std::string badTag = std::string(findOpen, lastEndPP);
+						ss << badTag;
+						nlwarning("Bad tag '%s'", badTag.c_str());
+						break;
+					}
+				}
+				std::string left = std::string(findOpen, findSplit);
+				++findSplit;
+				std::string right = std::string(findSplit, lastEndPP);
+				CPipelineProject *proj = g_PipelineWorkspace->getProject(left);
+				std::string res;
+				++lastEndPP;
+				if (isValue) { if (!proj->getValue(res, right)) { --findOpen; --findOpen; res = std::string(findOpen, lastEndPP); } }
+				else { if (!proj->getMacro(res, right)) { --findOpen; --findOpen; res = std::string(findOpen, lastEndPP); } }
+				ss << res;
+			}
+			break;
 		case '#': // LEVELDESIGN SHEET VALUE
 			// TODO
 			// break;
