@@ -58,6 +58,7 @@ namespace NLGUI
 		virtual sint32 getMinUsedW() const;
 
 		std::string getProperty( const std::string &name ) const;
+		void setProperty( const std::string &name, const std::string &value );
 
 		// to be called by CGroupTable
 		bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup, uint columnIndex, uint rowIndex);

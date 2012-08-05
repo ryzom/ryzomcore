@@ -152,6 +152,101 @@ namespace NLGUI
 			return CInterfaceGroup::getProperty( name );
 	}
 
+	void CGroupCell::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "align" )
+		{
+			if( value == "right" )
+				Align = Right;
+			else
+			if( value == "center" )
+				Align = Center;
+			else
+			if( value == "left" )
+				Align = Left;
+
+			return;
+		}
+		else
+		if( name == "valign" )
+		{
+			if( value == "top" )
+				VAlign = Top;
+			else
+			if( value == "middle" )
+				VAlign = Middle;
+			else
+			if( value == "bottom" )
+				VAlign = Bottom;
+
+			return;
+		}
+		else
+		if( name == "left_margin" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				LeftMargin = i;
+			return;
+		}
+		else
+		if( name == "nowrap" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				NoWrap = b;
+			return;
+		}
+		else
+		if( name == "bgcolor" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				BgColor = c;
+			return;
+		}
+		else
+		if( name == "width" )
+		{
+			convertPixelsOrRatio( value.c_str(), WidthWanted, TableRatio );
+			return;
+		}
+		else
+		if( name == "height" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				Height = i;
+			return;
+		}
+		else
+		if( name == "ignore_max_width" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				IgnoreMaxWidth = b;
+			return;
+		}
+		else
+		if( name == "ignore_min_width" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				IgnoreMinWidth = b;
+			return;
+		}
+		else
+		if( name == "add_child_w" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				AddChildW = b;
+			return;
+		}
+		else
+			CInterfaceGroup::setProperty( name, value );
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CGroupCell::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup, uint columnIndex, uint rowIndex)
 	{
