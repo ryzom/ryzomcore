@@ -15,6 +15,7 @@ IF(WITH_NEL_TOOLS)
     build_clod_bank
     build_clodtex
     build_interface
+    unbuild_interface
     build_shadow_skin
     cluster_viewer
     file_info
