@@ -2145,6 +2145,361 @@ namespace NLGUI
 			return CGroupScrollText::getProperty( name );
 	}
 
+	void CGroupHTML::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "url" )
+		{
+			_URL = value;
+			return;
+		}
+		else
+		if( name == "title_prefix" )
+		{
+			_TitlePrefix = value;
+			return;
+		}
+		else
+		if( name == "background_color" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				BgColor = c;
+			return;
+		}
+		else
+		if( name == "error_color" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				ErrorColor = c;
+			return;
+		}
+		else
+		if( name == "link_color" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				LinkColor = c;
+			return;
+		}
+		else
+		if( name == "h1_color" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				H1Color = c;
+			return;
+		}
+		else
+		if( name == "h2_color" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				H2Color = c;
+			return;
+		}
+		else
+		if( name == "h3_color" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				H3Color = c;
+			return;
+		}
+		else
+		if( name == "h4_color" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				H4Color = c;
+			return;
+		}
+		else
+		if( name == "h5_color" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				H5Color = c;
+			return;
+		}
+		else
+		if( name == "h6_color" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				H6Color = c;
+			return;
+		}
+		else
+		if( name == "error_color_global_color" )
+		{			
+			bool b;
+			if( fromString( value, b ) )
+				ErrorColorGlobalColor = b;
+			return;
+		}
+		else
+		if( name == "link_color_global_color" )
+		{			
+			bool b;
+			if( fromString( value, b ) )
+				LinkColorGlobalColor = b;
+			return;
+		}
+		else
+		if( name == "text_color_global_color" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				TextColorGlobalColor = b;
+			return;
+		}
+		else
+		if( name == "h1_color_global_color" )
+		{			
+			bool b;
+			if( fromString( value, b ) )
+				H1ColorGlobalColor = b;
+			return;
+		}
+		else
+		if( name == "h2_color_global_color" )
+		{			
+			bool b;
+			if( fromString( value, b ) )
+				H2ColorGlobalColor = b;
+			return;
+		}
+		else
+		if( name == "h3_color_global_color" )
+		{			
+			bool b;
+			if( fromString( value, b ) )
+				H3ColorGlobalColor = b;
+			return;
+		}
+		else
+		if( name == "h4_color_global_color" )
+		{			
+			bool b;
+			if( fromString( value, b ) )
+				H4ColorGlobalColor = b;
+			return;
+		}
+		else
+		if( name == "h5_color_global_color" )
+		{			
+			bool b;
+			if( fromString( value, b ) )
+				H5ColorGlobalColor = b;
+			return;
+		}
+		else
+		if( name == "h6_color_global_color" )
+		{			
+			bool b;
+			if( fromString( value, b ) )
+				H6ColorGlobalColor = b;
+			return;
+		}
+		else
+		if( name == "text_font_size" )
+		{			
+			uint i;
+			if( fromString( value, i ) )
+				TextFontSize = i;
+			return;
+		}
+		else
+		if( name == "h1_font_size" )
+		{			
+			uint i;
+			if( fromString( value, i ) )
+				H1FontSize = i;
+			return;
+		}
+		else
+		if( name == "h2_font_size" )
+		{			
+			uint i;
+			if( fromString( value, i ) )
+				H2FontSize = i;
+			return;
+		}
+		else
+		if( name == "h3_font_size" )
+		{			
+			uint i;
+			if( fromString( value, i ) )
+				H3FontSize = i;
+			return;
+		}
+		else
+		if( name == "h4_font_size" )
+		{			
+			uint i;
+			if( fromString( value, i ) )
+				H4FontSize = i;
+			return;
+		}
+		else
+		if( name == "h5_font_size" )
+		{			
+			uint i;
+			if( fromString( value, i ) )
+				H5FontSize = i;
+			return;
+		}
+		else
+		if( name == "h6_font_size" )
+		{			
+			uint i;
+			if( fromString( value, i ) )
+				H6FontSize = i;
+			return;
+		}
+		else
+		if( name == "td_begin_space" )
+		{
+			uint i;
+			if( fromString( value, i ) )
+				TDBeginSpace = i;
+			return;
+		}
+		else
+		if( name == "paragraph_begin_space" )
+		{
+			uint i;
+			if( fromString( value, i ) )
+				PBeginSpace = i;
+			return;
+		}
+		else
+		if( name == "li_begin_space" )
+		{
+			uint i;
+			if( fromString( value, i ) )
+				LIBeginSpace = i;
+			return;
+		}
+		else
+		if( name == "ul_begin_space" )
+		{
+			uint i;
+			if( fromString( value, i ) )
+				ULBeginSpace = i;
+			return;
+		}
+		else
+		if( name == "li_indent" )
+		{
+			uint i;
+			if( fromString( value, i ) )
+				LIIndent = i;
+			return;
+		}
+		else
+		if( name == "ul_indent" )
+		{
+			uint i;
+			if( fromString( value, i ) )
+				ULIndent = i;
+			return;
+		}
+		else
+		if( name == "multi_line_space_factor" )
+		{
+			float f;
+			if( fromString( value, f ) )
+				LineSpaceFontFactor = f;
+			return;
+		}
+		else
+		if( name == "form_text_area_group" )
+		{
+			DefaultFormTextGroup = value;
+			return;
+		}
+		else
+		if( name == "form_select_group" )
+		{
+			DefaultFormSelectGroup = value;
+			return;
+		}
+		else
+		if( name == "checkbox_bitmap_normal" )
+		{
+			DefaultCheckBoxBitmapNormal = value;
+			return;
+		}
+		else
+		if( name == "checkbox_bitmap_pushed" )
+		{
+			DefaultCheckBoxBitmapPushed = value;
+			return;
+		}
+		else
+		if( name == "checkbox_bitmap_over" )
+		{
+			DefaultCheckBoxBitmapOver = value;
+			return;
+		}
+		else
+		if( name == "background_bitmap_view" )
+		{
+			DefaultBackgroundBitmapView = value;
+			return;
+		}
+		else
+		if( name == "home" )
+		{
+			Home = value;
+			return;
+		}
+		else
+		if( name == "browse_next_time" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_BrowseNextTime = b;
+			return;
+		}
+		else
+		if( name == "browse_tree" )
+		{
+			_BrowseTree = value;
+			return;
+		}
+		else
+		if( name == "browse_undo" )
+		{
+			_BrowseUndoButton = value;
+			return;
+		}
+		else
+		if( name == "browse_redo" )
+		{
+			_BrowseRedoButton = value;
+			return;
+		}
+		else
+		if( name == "browse_refresh" )
+		{
+			_BrowseRefreshButton = value;
+			return;
+		}
+		else
+		if( name == "timeout" )
+		{
+			double d;
+			if( fromString( value, d ) )
+				_TimeoutValue = d;
+			return;
+		}
+		else
+			CGroupScrollText::setProperty( name, value );
+	}
+
 	// ***************************************************************************
 
 	bool CGroupHTML::parse(xmlNodePtr cur,CInterfaceGroup *parentGroup)
