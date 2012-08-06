@@ -109,6 +109,7 @@ namespace NLGUI
 		}
 
 		std::string getProperty( const std::string &name ) const;
+		void setProperty( const std::string &name, const std::string &value );
 
 		/**
 		 * parse the element and initalize it
@@ -253,6 +254,8 @@ namespace NLGUI
 
 		void setHSGroup (CViewBase *child, EAlign addElt, EAlign align);
 		void setHSParent(CViewBase *view, EAlign addElt, EAlign align, uint space);
+		void setupSizes();
+		void onTextChanged();
 
 	};
 
