@@ -74,6 +74,42 @@ namespace NLGUI
 		return width;
 	}
 
+	std::string CDBGroupComboBox::getProperty( const std::string &name ) const
+	{
+		if( name == "linked_to_db" )
+		{
+			return toString( _LinkedToDB );
+		}
+		else
+		if( name == "value" )
+		{
+			if( _Selection.getNodePtr() != NULL )
+				return _Selection.getNodePtr()->getFullName();
+			else
+				return "";
+		}
+		else
+			return CInterfaceGroup::getProperty( name );
+	}
+
+	void CDBGroupComboBox::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "linked_to_db" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_LinkedToDB = b;
+			return;
+		}
+		else
+		if( name == "value" )
+		{
+			_Selection.link( value.c_str() );
+			return;
+		}
+		else
+			CInterfaceGroup::setProperty( name, value );
+	}
 
 	// ***************************************************************************
 	bool	CDBGroupComboBox::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
