@@ -258,6 +258,90 @@ namespace NLGUI
 		return CInterfaceGroup::getProperty( name );
 	}
 
+	void CGroupParagraph::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "addelt" )
+		{
+			if( value == "T" )
+				_AddElt = Top;
+			else
+			if( value == "L" )
+				_AddElt = Left;
+			else
+			if( value == "R" )
+				_AddElt = Right;
+			else
+			if( value == "B" )
+				_AddElt = Bottom;
+
+			setupSizes();
+			return;
+		}
+		else
+		if( name == "align" )
+		{
+			if( value == "T" )
+				_Align = Top;
+			else
+			if( value == "L" )
+				_Align = Left;
+			else
+			if( value == "R" )
+				_Align = Right;
+			else
+			if( value == "B" )
+				_Align = Bottom;
+
+			return;
+		}
+		else
+		if( name == "space" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_Space = i;
+			return;
+		}
+		else
+		if( name == "over" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Over = b;
+			return;
+		}
+		else
+		if( name == "col_over" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				_OverColor = c;
+			return;
+		}
+		if( name == "hardtext" )
+		{
+			_HardText = value;
+			_TextId = 0;
+			onTextChanged();
+			return;
+		}
+		else
+		if( name == "textid" )
+		{
+			uint32 i;
+			if( fromString( value, i ) )
+			{
+				_TextId = i;
+				_HardText = "";
+			}
+			onTextChanged();
+			return;
+
+		}
+		else
+			CInterfaceGroup::setProperty( name, value );
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CGroupParagraph::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
@@ -294,28 +378,12 @@ namespace NLGUI
 				_Align = Right;
 		}
 
+		setupSizes();
+
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"space" );
 		_Space = 0;
 		if (ptr)
 			fromString((const char*)ptr, _Space);
-
-		EAlign addElt = _AddElt;
-	//	EAlign align = _Align;
-		_GroupSizeRef = _SizeRef;
-		if ((addElt == Top) || (addElt == Bottom))
-		{
-			setMaxW (_W);
-			setMaxH(_H);
-			_H = 0;
-			_SizeRef = _SizeRef&(~2);
-		}
-		else
-		{
-			setMaxW (_W);
-			setMaxH (_H);
-			_W = 0;
-			_SizeRef = _SizeRef&(~1);
-		}
 
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"over" );
 		_Over = false;
@@ -1294,6 +1362,51 @@ namespace NLGUI
 				minWidth = width;
 		}
 		return minWidth;
+	}
+
+
+	void CGroupParagraph::setupSizes()
+	{
+		EAlign addElt = _AddElt;
+		_GroupSizeRef = _SizeRef;
+		if ((addElt == Top) || (addElt == Bottom))
+		{
+			setMaxW (_W);
+			setMaxH(_H);
+			_H = 0;
+			_SizeRef = _SizeRef&(~2);
+		}
+		else
+		{
+			setMaxW (_W);
+			setMaxH (_H);
+			_W = 0;
+			_SizeRef = _SizeRef&(~1);
+		}
+	}
+
+
+	void CGroupParagraph::onTextChanged()
+	{
+		if( _Elements.size() == 0 )
+			return;
+
+		CElementInfo &e = _Elements[ 0 ];
+		
+		CViewText *t = dynamic_cast< CViewText* >( e.Element );
+		if( t != NULL )
+		{
+			t->setText( _HardText );
+			return;
+		}
+		else
+		{
+			CViewTextID *ti = dynamic_cast< CViewTextID* >( e.Element );
+			if( ti != NULL )
+			{
+				ti->setTextId( _TextId );
+			}
+		}
 	}
 
 }
