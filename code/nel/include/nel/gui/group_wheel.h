@@ -32,6 +32,7 @@ namespace NLGUI
 		CInterfaceGroupWheel(const TCtorParam &param);
 
 		std::string getProperty( const std::string &name ) const;
+		void setProperty( const std::string &name, const std::string &value );
 
 		/// Coming from CInterfaceElement
 		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);

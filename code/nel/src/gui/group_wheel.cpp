@@ -57,6 +57,35 @@ namespace NLGUI
 			return CInterfaceGroup::getProperty( name );
 	}
 
+	void CInterfaceGroupWheel::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "on_wheel_up" )
+		{
+			_AHWheelUp = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "on_wheel_up_params" )
+		{
+			_AHWheelUpParams = value;
+			return;
+		}
+		else
+		if( name == "on_wheel_down" )
+		{
+			_AHWheelDown = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "on_wheel_down_params" )
+		{
+			_AHWheelDownParams = value;
+			return;
+		}
+		else
+			CInterfaceGroup::setProperty( name, value );
+	}
+
 	// *****************************************************************************************************************
 	bool CInterfaceGroupWheel::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
