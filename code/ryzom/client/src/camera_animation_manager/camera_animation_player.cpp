@@ -20,6 +20,7 @@
 #include "camera_animation_manager/camera_animation_step_player_factory.h"
 #include "time_client.h"
 #include "view.h"
+#include "motion/user_controls.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -34,6 +35,7 @@ CCameraAnimationPlayer::CCameraAnimationPlayer()
 	_IsPlaying = false;
 	_CurrStep = NULL;
 	_ElapsedTimeForCurrStep = 0.f;
+	_HasLastViewInfo = false;
 }
 
 CCameraAnimationPlayer::~CCameraAnimationPlayer()
@@ -47,6 +49,13 @@ void CCameraAnimationPlayer::start()
 		stop();
 
 	_IsPlaying = true;
+
+	// We set the user controls in camAnimMode and we remember the current view and viewPos
+	_LastView = View.currentView();
+	_LastViewPos = View.currentViewPos();
+	_LastMode = UserControls.mode();
+	UserControls.mode(CUserControls::CamAnimMode);
+	_HasLastViewInfo = true;
 }
 
 void CCameraAnimationPlayer::stop()
@@ -54,6 +63,15 @@ void CCameraAnimationPlayer::stop()
 	_IsPlaying = false;
 
 	stopStep();
+
+	// We reset view and viewPos and the usercontrols mode
+	if (_HasLastViewInfo)
+	{
+		UserControls.mode(_LastMode);
+		View.view(_LastView);
+		View.viewPos(_LastViewPos);
+		_HasLastViewInfo = false;
+	}
 }
 
 void CCameraAnimationPlayer::stopStep()
@@ -103,13 +121,13 @@ bool CCameraAnimationPlayer::isPlaying()
 TCameraAnimationInfo CCameraAnimationPlayer::update()
 {
 	// We get the current camera information
-	NLMISC::CVector camLookAt = View.view();
-	NLMISC::CVector camPos = View.viewPos();
+	NLMISC::CVector camLookAtDir = View.currentView();
+	NLMISC::CVector camPos = View.currentViewPos();
 
 	// We update the elapsed time for this step
 	_ElapsedTimeForCurrStep += DT;
 
-	TCameraAnimationInfo currCamInfo(camPos, camLookAt, _ElapsedTimeForCurrStep);
+	TCameraAnimationInfo currCamInfo(camPos, camLookAtDir, _ElapsedTimeForCurrStep);
 
 	if (!isPlaying())
 		return currCamInfo;

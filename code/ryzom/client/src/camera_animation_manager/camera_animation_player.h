@@ -23,6 +23,7 @@
 #include "camera_animation_manager/camera_animation_step_player_factory.h"
 #include "nel/misc/vector.h"
 #include "camera_animation_manager\camera_animation_info.h"
+#include "motion\user_controls.h"
 
 
 /************************************************************************/
@@ -85,6 +86,11 @@ private:
 
 	ICameraAnimationStepPlayer* _CurrStep;
 	float _ElapsedTimeForCurrStep;
+
+	NLMISC::CVector _LastView;
+	NLMISC::CVector _LastViewPos;
+	CUserControls::TMoveMode _LastMode;
+	bool _HasLastViewInfo;
 };
 
 

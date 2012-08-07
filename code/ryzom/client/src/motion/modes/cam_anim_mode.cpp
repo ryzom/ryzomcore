@@ -28,6 +28,8 @@
 #include "../../view.h"
 #include "../../interface_v3/interface_manager.h"
 #include "../../entities.h"
+#include "camera_animation_manager/camera_animation_info.h"
+#include "camera_animation_manager/camera_animation_player.h"
 
 
 ///////////
@@ -78,4 +80,12 @@ void CUserControls::camAnimModeStop()
 void CUserControls::camAnimMode()
 {
 	// Call the camera animation update function to update the view
+	TCameraAnimationInfo newCamInfo = CCameraAnimationPlayer::getInstance()->update();
+
+	// We normalize the look at direction
+	newCamInfo.CamLookAtDir.normalize();
+
+	// We udpate the view
+	View.view(newCamInfo.CamLookAtDir);
+	View.viewPos(newCamInfo.CamPos);
 }// camAnimMode //

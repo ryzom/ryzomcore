@@ -31,18 +31,18 @@
 struct TCameraAnimationInfo
 {
 	TCameraAnimationInfo(const NLMISC::CVector& camPos, 
-						const NLMISC::CVector& camLookAt, 
+						const NLMISC::CVector& camLookAtDir, 
 						float elapsedTimeSinceStartStep)
 	{
 		CamPos = camPos;
-		CamLookAt = camLookAt;
+		CamLookAtDir = camLookAtDir;
 		ElapsedTimeSinceStartStep = elapsedTimeSinceStartStep;
 	}
 
 	TCameraAnimationInfo() {}
 
 	NLMISC::CVector CamPos;						/// Camera position
-	NLMISC::CVector CamLookAt;					/// Camera look at position
+	NLMISC::CVector CamLookAtDir;				/// Camera look at direction
 
 	float ElapsedTimeSinceStartStep;			/// Elapsed time in second since the beginning of this step
 };
