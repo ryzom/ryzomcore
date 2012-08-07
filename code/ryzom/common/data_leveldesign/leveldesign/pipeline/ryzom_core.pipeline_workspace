@@ -3,10 +3,17 @@
   <STRUCT>
     <ATOM Name="Description" Value="Ryzom Core"/>
     <ARRAY Name="Projects">
-      <ATOM Value="common_interface.pipeline_project"/>
-      <ATOM Value="interfaces.pipeline_package"/>
       <ATOM Value="gamedev.pipeline_package"/>
       <ATOM Value="data_common.pipeline_package"/>
+      <ATOM Value="common_interface.pipeline_project"/>
+      <ATOM Value="interfaces.pipeline_package"/>
+      <ATOM Value="common_objects_generique.pipeline_project"/>
+      <ATOM Value="common_objects_fyros.pipeline_project"/>
+      <ATOM Value="common_objects_tryker.pipeline_project"/>
+      <ATOM Value="common_objects_matis.pipeline_project"/>
+      <ATOM Value="common_objects_zorai.pipeline_project"/>
+      <ATOM Value="common_objects_caravan.pipeline_project"/>
+      <ATOM Value="objects.pipeline_package"/>
     </ARRAY>
     <ARRAY Name="Plugins">
       <ATOM Value="plugin_nel.pipeline_plugin"/>

@@ -685,7 +685,13 @@ public:
 
 		std::string filePath = unMacroPath(macroPath);
 		// m_FileStatusInitializeMutex.enter();
-		nlassert(m_ActiveProcess->m_FileStatusInputCache.find(filePath) == m_ActiveProcess->m_FileStatusInputCache.end()); // for now don't allow depending on own output within process :)
+		//nlassert(m_ActiveProcess->m_FileStatusInputCache.find(filePath) == m_ActiveProcess->m_FileStatusInputCache.end()); // for now don't allow depending on own output within process :)
+		if (m_ActiveProcess->m_FileStatusInputCache.find(filePath) != m_ActiveProcess->m_FileStatusInputCache.end())
+		{
+			nlwarning("*******************************");
+			nlwarning("Received twice the same file '%s'", filePath.c_str());
+			nlwarning("*******************************");
+		}
 		m_ActiveProcess->m_FileStatusInputCache[filePath] = fileStatus;
 		// m_FileStatusInitializeMutex.leave();
 	}

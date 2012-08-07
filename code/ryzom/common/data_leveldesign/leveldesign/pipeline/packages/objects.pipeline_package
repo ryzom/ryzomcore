@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision$" State="modified">
+  <STRUCT>
+    <ARRAY Name="DependentProjects">
+      <ATOM Value="common_objects_generique.pipeline_project"/>
+      <ATOM Value="common_objects_fyros.pipeline_project"/>
+      <ATOM Value="common_objects_tryker.pipeline_project"/>
+      <ATOM Value="common_objects_matis.pipeline_project"/>
+      <ATOM Value="common_objects_zorai.pipeline_project"/>
+      <ATOM Value="common_objects_caravan.pipeline_project"/>
+    </ARRAY>
+    <ARRAY Name="Processes">
+      <ATOM Value="PackageBNP"/>
+    </ARRAY>
+    <STRUCT Name="Package">
+      <STRUCT Name="BNP">
+        <ARRAY Name="SrcDirectories">
+          <ATOM Value="[@common_objects_generique:Texture.DDS[0].DstDirectory]"/>
+          <ATOM Value="[@common_objects_fyros:Texture.DDS[0].DstDirectory]"/>
+          <ATOM Value="[@common_objects_tryker:Texture.DDS[0].DstDirectory]"/>
+          <ATOM Value="[@common_objects_matis:Texture.DDS[0].DstDirectory]"/>
+          <ATOM Value="[@common_objects_zorai:Texture.DDS[0].DstDirectory]"/>
+          <ATOM Value="[@common_objects_caravan:Texture.DDS[0].DstDirectory]"/>
+        </ARRAY>
+        <ATOM Name="DstFile" Value="[$PackageDirectory]/objects.bnp"/>
+      </STRUCT>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG></LOG></FORM>

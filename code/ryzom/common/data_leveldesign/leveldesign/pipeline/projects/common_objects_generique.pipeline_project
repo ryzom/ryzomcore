@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision$" State="modified">
+  <STRUCT>
+    <ATOM Name="Description" Value="Common Objects: Generique"/>
+    <ARRAY Name="Macros">
+      <STRUCT>
+        <ATOM Name="Name" Value="Culture"/>
+        <ATOM Name="Value" Value="generique"/>
+      </STRUCT>
+    </ARRAY>
+    <ARRAY Name="Processes">
+      <ATOM Value="TextureDDS"/>
+    </ARRAY>
+    <STRUCT Name="Texture">
+      <ARRAY Name="DDS">
+        <STRUCT>
+          <ARRAY Name="SrcDirectories">
+            <ATOM Value="[$DatabaseDirectory]/stuff/[&amp;Culture]/agents/_textures/accessories"/>
+          </ARRAY>
+          <ATOM Name="DstDirectory" Value="[!OutputDirectory]/texture_dds"/>
+          <ATOM Name="CreateMipMap" Value="true"/>
+        </STRUCT>
+      </ARRAY>
+    </STRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Tue Aug 07 15:06:19 2012 (kaetemi) .Macros[0].Name = Civilisation
+Tue Aug 07 15:06:19 2012 (kaetemi) .Macros[0].Value = generique
+Tue Aug 07 15:06:19 2012 (kaetemi) formName Resized = 1</LOG>
+</FORM>
