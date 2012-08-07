@@ -1567,6 +1567,375 @@ namespace NLGUI
 			return CInterfaceGroup::getProperty( name );
 	}
 
+
+	void CGroupContainer::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "localize" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Localize = b;
+			return;
+		}
+		else
+		if( name == "title_class" )
+		{
+			if( value == "formated" )
+				_TitleClass = TitleTextFormated;
+			else
+			if( value == "text_id" )
+				_TitleClass = TitleTextId;
+			else
+			if( value == "text_dyn_string" )
+				_TitleClass = TitleTextDynString;
+			else
+				_TitleClass = TitleText;
+
+			return;
+
+		}
+		else
+		if( name == "content_y_offset" )
+		{
+			sint8 i;
+			if( fromString( value, i ) )
+				_ContentYOffset = i;
+			return;
+		}
+		else
+		if( name == "title" )
+		{
+			_TitleTextOpened = _TitleTextClosed = value;
+			return;
+		}
+		else
+		if( name == "title_opened" )
+		{
+			_TitleTextOpened = value;
+			return;
+		}
+		else
+		if( name == "title_closed" )
+		{
+			_TitleTextClosed = value;
+			return;
+		}
+		else
+		if( name == "header_active" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_HeaderActive = b;
+			return;
+		}
+		else
+		if( name == "header_color" )
+		{
+			_HeaderColor.link( value.c_str() );
+			return;
+		}
+		else
+		if( name == "right_button" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_EnabledRightButton = b;
+			return;
+		}
+		else
+		if( name == "help_button" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_EnabledHelpButton = b;
+			return;
+		}
+		else
+		if( name == "movable" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Movable = b;
+			return;
+		}
+		else
+		if( name == "popable" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Popable = b;
+			return;
+		}
+		else
+		if( name == "lockable" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Lockable = b;
+			return;
+		}
+		else
+		if( name == "locked" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Locked = b;
+			return;
+		}
+		else
+		if( name == "openable" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Openable = b;
+			return;
+		}
+		else
+		if( name == "opened" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Opened = b;
+			return;
+		}
+		else
+		if( name == "modal" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Modal = b;
+			return;
+		}
+		else
+		if( name == "open_when_popup" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_OpenWhenPopup = b;
+			return;
+		}
+		else
+		if( name == "resizer" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_EnabledResizer = b;
+			return;
+		}
+		else
+		if( name == "resizer_top_size" )
+		{
+			sint8 i;
+			if( fromString( value, i ) )
+				_ResizerTopSize = i;
+			return;
+		}
+		else
+		if( name == "on_open" )
+		{
+			_AHOnOpen = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "on_open_params" )
+		{
+			_AHOnOpenParams = value;
+			return;
+		}
+		else
+		if( name == "on_close" )
+		{
+			_AHOnClose = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "on_close_params" )
+		{
+			_AHOnCloseParams = value;
+			return;
+		}
+		else
+		if( name == "on_close_button" )
+		{
+			_AHOnCloseButton = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "on_close_button_params" )
+		{
+			_AHOnCloseButtonParams = value;
+			return;
+		}
+		else
+		if( name == "on_move" )
+		{
+			_AHOnMove = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "on_move_params" )
+		{
+			_AHOnMoveParams = value;
+			return;
+		}
+		else
+		if( name == "on_deactive_check" )
+		{
+			_AHOnDeactiveCheck  = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "on_deactive_check_params" )
+		{
+			_AHOnDeactiveCheckParams = value;
+			return;
+		}
+		else
+		if( name == "on_resize" )
+		{
+			_AHOnResize = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "on_resize_params" )
+		{
+			_AHOnResizeParams = value;
+			return;
+		}
+		else
+		if( name == "on_alpha_settings_changed" )
+		{
+			_AHOnAlphaSettingsChanged = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "on_alpha_settings_changed_params" )
+		{
+			_AHOnAlphaSettingsChangedParams = value;
+			return;
+		}
+		else
+		if( name == "on_begin_move" )
+		{
+			_AHOnBeginMove = CAHManager::getInstance()->getAH( value, std::string() );
+			return;
+		}
+		else
+		if( name == "on_begin_move_params" )
+		{
+			_AHOnBeginMoveParams = value;
+			return;
+		}
+		else
+		if( name == "max_w" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_MaxW = i;
+			return;
+		}
+		else
+		if( name == "min_w" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_MinW = i;
+			return;
+		}
+		else
+		if( name == "pop_max_w" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_PopupMaxW = i;
+			return;
+		}
+		else
+		if( name == "pop_min_w" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_PopupMinW = i;
+			return;
+		}
+		else
+		if( name == "pop_max_h" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_PopupMaxH = i;
+			return;
+		}
+		else
+		if( name == "pop_min_h" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_PopupMinH = i;
+			return;
+		}
+		else
+		if( name == "movable_in_parent_list" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_MovableInParentList = b;
+			return;
+		}
+		else
+		if( name == "savable" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_Savable = b;
+			return;
+		}
+		else
+		if( name == "active_savable" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_ActiveSavable = b;
+			return;
+		}
+		else
+		if( name == "modal_parent" )
+		{
+			_ModalParentNames = value;
+			return;
+		}
+		else
+		if( name == "options" )
+		{
+			_OptionsName = value;
+			return;
+		}
+		else
+		if( name == "title_delta_max_w" )
+		{
+			sint32 i;
+			if( fromString( value, i ) )
+				_TitleDeltaMaxW = i;
+			return;
+		}
+		else
+		if( name == "title_over_extend_view_text" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_TitleOverExtendViewText = b;
+			return;
+		}
+		else
+		if( name == "help_page" )
+		{
+			_HelpPage = value;
+			return;
+		}
+		else
+			CInterfaceGroup::setProperty( name, value );
+	}
+
 	// ***************************************************************************
 	bool CGroupContainer::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
