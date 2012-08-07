@@ -62,6 +62,32 @@ namespace NLGUI
 			return CInterfaceGroup::getProperty( name );
 	}
 
+
+	void CGroupTab::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "hide_out_tabs" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_HideOutTabs = b;
+			return;
+		}
+		else
+		if( name == "onchange" )
+		{
+			_AHOnChange = value;
+			return;
+		}
+		else
+		if( name == "onchange_params" )
+		{
+			_ParamsOnChange = value;
+			return;
+		}
+		else
+			CInterfaceGroup::setProperty( name, value );
+	}
+
 	// ***************************************************************************
 	bool	CGroupTab::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{
