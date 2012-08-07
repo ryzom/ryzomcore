@@ -45,6 +45,7 @@ namespace NLGUI
 		~CDBGroupSelectNumber();
 
 		std::string getProperty( const std::string &name ) const;
+		void setProperty( const std::string &name, const std::string &value );
 
 		/// CInterfaceGroup Interface
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
