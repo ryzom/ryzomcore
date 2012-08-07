@@ -50,8 +50,10 @@ namespace PIPELINE {
 void CFileError::serial(NLMISC::IStream &stream) throw (NLMISC::EStream)
 {
 	uint version = stream.serialVersion(1);
+	stream.serial((uint8 &)MasterTime); // does this work?
 	stream.serial(Project);
-	stream.serial(Process);
+	stream.serial(Plugin);
+	stream.serial(Time);
 	stream.serial(Message);
 }
 

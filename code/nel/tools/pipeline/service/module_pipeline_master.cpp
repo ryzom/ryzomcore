@@ -513,6 +513,16 @@ public:
 		if (slaveIt == m_Slaves.end()) { nlerror("Received 'slaveLoggedToolError' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
 		CSlave *slave = slaveIt->second;
 
+		// TODO
+		CFileError fe;
+		fe.MasterTime = CTime::getSecondsSince1970();
+		fe.Level = (TError)type;
+		fe.Message = error;
+		fe.Time = time;
+		fe.Project = "[TODO:PROJECT]";
+		fe.Plugin = "[TODO:PLUGIN]";
+		CMetadataStorage::appendError(fe, CMetadataStorage::getErrorPath(unMacroPath(macroPath)));
+
 		notifyTerminalTaskMessage(slave->ActiveTaskId, (TError)type, macroPath, time, error);
 	}
 
