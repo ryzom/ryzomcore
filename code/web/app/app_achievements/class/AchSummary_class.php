@@ -13,7 +13,7 @@
 			//read all recent perks of user
 			//make distinct achievement list
 
-			$res = $DBc->sqlQuery("SELECT DISTINCT aa_id,ach.*,(SELECT aal_name FROM ach_achievement_lang WHERE aal_lang='".$_USER->getLang()."' AND aal_achievement=ach.aa_id) as aal_name FROM ach_achievement as ach,ach_perk,ach_player_perk WHERE ap_achievement=aa_id AND app_player='".$_USER->getID()."' AND app_perk=ap_id ORDER by app_date DESC LIMIT 0,".($size-1));
+			$res = $DBc->sqlQuery("SELECT DISTINCT aa_id,ach.*,(SELECT aal_name FROM ach_achievement_lang WHERE aal_lang='".$_USER->getLang()."' AND aal_achievement=ach.aa_id) as aal_name, (SELECT aal_template FROM ach_achievement_lang WHERE aal_lang='".$_USER->getLang()."' AND aal_achievement=ach.aa_id) as aal_template FROM ach_achievement as ach,ach_perk,ach_player_perk WHERE ap_achievement=aa_id AND app_player='".$_USER->getID()."' AND app_perk=ap_id ORDER by app_date DESC LIMIT 0,".($size-1));
 
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {

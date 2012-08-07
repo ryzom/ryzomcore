@@ -132,6 +132,8 @@
 		}
 
 		private function error($error,$query = false) {
+			global $log;
+
 			$this->DBstats['error']++;
 
 			if($query != false) {
@@ -149,7 +151,7 @@
 					echo "<script language='javascript'>\n<!--\nalert(\"database error:\\n".mysql_real_escape_string($error)."\");\n// -->\n</script>";
 					break;
 				case 'LOG':
-					logf("MySQL ERROR: ".$error);
+					$log->logf("MySQL ERROR: ".$error);
 					break;
 				default:
 					flush();

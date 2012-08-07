@@ -3,20 +3,34 @@
 		private $logfile;
 		private $buffer;
 
-		function Logfile($f) {
-			$this->logfile = $f;
-			$this->buffer = "";
+		function Logfile($f = false) {
+			$this->logfile = false;
+
+			if($f != false) {
+				$this->logfile = fopen($this->logfile.'.'.$_REQUEST['file'].'.'.date("Ymd",time()).'.txt','a');;
+			}
 		}
 
-		function append($t) {
-			$this->buffer .= $t;
+		function logf($t,$nl = true) {
+			$this->write($t);
+			if($nl == true) {
+				$this->write("\n");
+			}
 		}
 
-		function write() {
-			$f = fopen($this->logfile.'.'.date("Ymd",time()).'.txt','a');
-			fwrite($f,$this->buffer);
-			fclose($f);
-			$this->buffer = "";
+		function logi($t,$nl = true) {
+			$this->write("    > ".$t);
+			if($nl == true) {
+				$this->write("\n");
+			}
+		}
+
+		function write($txt) {
+			fwrite($this->logfile,$txt);
+		}
+
+		function close() {
+			fclose($this->logfile);
 		}
 	}
 ?>

@@ -43,7 +43,7 @@ require_once($_CONF['app_achievements_path']."class/Parentum_abstract.php");
 require_once($_CONF['app_achievements_path']."class/AchList_abstract.php");
 require_once($_CONF['app_achievements_path']."class/Tieable_inter.php");
 require_once($_CONF['app_achievements_path']."class/NodeIterator_class.php");
-require_once($_CONF['app_achievements_path']."class/InDev_trait.php");
+#require_once($_CONF['app_achievements_path']."class/InDev_trait.php");
 
 require_once($_CONF['app_achievements_path']."class/AchMenu_class.php");
 require_once($_CONF['app_achievements_path']."class/AchMenuNode_class.php");
@@ -53,7 +53,7 @@ require_once($_CONF['app_achievements_path']."class/AchPerk_class.php");
 require_once($_CONF['app_achievements_path']."class/AchObjective_class.php");
 
 require_once("class/ADM_inter.php");
-require_once("class/AdmDispatcher_trait.php");
+#require_once("class/AdmDispatcher_trait.php");
 require_once("class/AdmMenu_class.php");
 require_once("class/AdmMenuNode_class.php");
 require_once("class/AdmCategory_class.php");
@@ -62,7 +62,7 @@ require_once("class/AdmPerk_class.php");
 require_once("class/AdmObjective_class.php");
 require_once("class/AdmAtom_class.php");
 
-require_once("class/CSRDispatcher_trait.php");
+#require_once("class/CSRDispatcher_trait.php");
 require_once("class/CSR_inter.php");
 #require_once("class/CSRMenu_class.php");
 require_once("class/CSRCategory_class.php");
@@ -75,11 +75,12 @@ $DBc = ryDB::getInstance("app_achievements_test");
 #$DBc = ryDB::getInstance("ahufler");
 
 function mkn($x) {
+	global $DBc;
 	if($x == null || strtolower($x) == "null") {
 		return "NULL";
 	}
 	else {
-		return "'".mysql_real_escape_string($x)."'";
+		return "'".$DBc->sqlEscape($x)."'";
 	}
 }
 
@@ -121,6 +122,7 @@ $c = "<script type='text/javascript'>
 				<li><a href='?mode=menu'>menu settings</a></li>
 				<li><a href='?mode=ach'>achievement settings</a></li>
 				<li><a href='?mode=atom'>trigger settings</a></li>
+				<li><a href='?mode=lang'>language editor</a></li>
 			</ul><p />";
 		}
 		if($_ADMIN->isCSR()) {
@@ -135,6 +137,81 @@ $c = "<script type='text/javascript'>
 		
 $c .= "</div></td>
 		<td valign='top'>";
+
+		if($_REQUEST['mode'] == "lang" && $_ADMIN->isAdmin()) {
+			$c .= "<h1>Language Editor</h1>";
+
+			$user = array();
+			$user['id'] = 0;
+			$user['lang'] = 'en';
+			$user['name'] = 'Talvela';
+			$user['race'] = "r_matis";
+			$user['civilization'] = "c_neutral";
+			$user['cult'] = "c_neutral";
+
+			$_USER = new RyzomUser($user);
+
+			//menu
+			require_once("include/adm_render_lang.php");
+			$menu = new AdmMenu($_REQUEST['cat']);
+
+			$c .= "<center><table>
+			<tr>
+				<td valign='top'><div style='width:230px;font-weight:bold;font-size:14px;'>";
+			
+
+			$c .= adm_render_menu($menu);
+				
+			$c .= "</div></td>
+					<td width='645px' valign='top'>";
+			
+			$open = $menu->getOpenCat();
+
+			if($open != 0) {
+				$cat = new AdmCategory($open,'%','%','%');
+
+				if($_REQUEST['act'] == "insert_atom") {
+					$obj = $cat->getElementByPath($_REQUEST['id']);
+					
+					if($obj != null) {
+						$atom = new AdmAtom(array(),$obj);
+						$atom->setRuleset($_REQUEST['atom_ruleset']);
+						$atom->setMandatory($_REQUEST['atom_mandatory']);
+						$atom->setObjective($obj->getID());
+
+						$obj->insertNode($atom);
+					}
+				}
+
+				if($_REQUEST['act'] == "update_atom") {
+					$atom = $cat->getElementByPath($_REQUEST['id']);
+					
+					if($atom != null) {
+						$atom->setRuleset($_REQUEST['atom_ruleset']);
+						$atom->setMandatory($_REQUEST['atom_mandatory']);
+
+						$atom->update();
+					}
+				}
+
+				if($_REQUEST['act'] == "delete") {
+					$elem = $cat->getElementByPath($_REQUEST['id']);
+					$par = $elem->getParent();
+					$par->removeNode($elem->getID());
+				}
+
+				$c .= atom_render_category($cat);
+			}
+
+			#a:p:o:a
+
+			
+
+			$c .= "</td>
+				</tr>
+			</table></center>";
+
+		}
 
 		if($_REQUEST['mode'] == "atom" && $_ADMIN->isAdmin()) {
 			$c .= "<h1>Tigger Settings</h1>";
@@ -167,6 +244,36 @@ $c .= "</div></td>
 
 			if($open != 0) {
 				$cat = new AdmCategory($open,'%','%','%');
+
+				if($_REQUEST['act'] == "insert_atom") {
+					$obj = $cat->getElementByPath($_REQUEST['id']);
+					
+					if($obj != null) {
+						$atom = new AdmAtom(array(),$obj);
+						$atom->setRuleset($_REQUEST['atom_ruleset']);
+						$atom->setMandatory($_REQUEST['atom_mandatory']);
+						$atom->setObjective($obj->getID());
+
+						$obj->insertNode($atom);
+					}
+				}
+
+				if($_REQUEST['act'] == "update_atom") {
+					$atom = $cat->getElementByPath($_REQUEST['id']);
+					
+					if($atom != null) {
+						$atom->setRuleset($_REQUEST['atom_ruleset']);
+						$atom->setMandatory($_REQUEST['atom_mandatory']);
+
+						$atom->update();
+					}
+				}
+
+				if($_REQUEST['act'] == "delete") {
+					$elem = $cat->getElementByPath($_REQUEST['id']);
+					$par = $elem->getParent();
+					$par->removeNode($elem->getID());
+				}
 
 				$c .= atom_render_category($cat);
 			}
@@ -280,7 +387,7 @@ $c .= "</div></td>
 					$perk = new AdmPerk(array(),$ach);
 					$perk->setAchievement($ach->getID());
 					$perk->setName($_REQUEST['apl_name']);
-					$perk->setTemplate($_REQUEST['apl_name']);
+					$perk->setTemplate($_REQUEST['apl_template']);
 					$perk->setValue($_REQUEST['ap_value']);
 					$perk->setCondition($_REQUEST['ap_condition']);
 					$perk->setConditionValue($_REQUEST['ap_condition_value']);

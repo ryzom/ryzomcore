@@ -53,7 +53,6 @@
 		}
 
 		function dispatchValue($key,$val) {
-			echo "dispatching: $key=>$val<br>";
 			if(is_array($this->value[$key])) {
 				foreach($this->value[$key] as $callback) {
 					$callback->call($val);

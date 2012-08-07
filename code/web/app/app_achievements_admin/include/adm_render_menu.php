@@ -44,7 +44,7 @@
 		</div>";
 
 		if($_REQUEST['ac_id'] > 0 && $_REQUEST['confirm'] == "delete") {
-			$curr = $menu->getChildDataByID($_REQUEST['ac_id']);
+			$curr = $menu->getNode($_REQUEST['ac_id']);
 			$html .= "<div style='display:block;'>
 			<fieldset>
 				<legend>Are you sure you want to delete this category?</legend>";
@@ -95,8 +95,8 @@
 					if($curr->inDev()) {
 						$html .= "</s>";
 					}
-					$html .= "</td>
-					<td style='background-color:#FFFFFF;padding:3px;'><nobr><a href='?mode=menu&act=dev&state=".$curr->getDev()."&ac_id=".$curr->getID()."'><img src='pic/";
+					$html .= "<a name='cat_".$curr->getID()."'></td>
+					<td style='background-color:#FFFFFF;padding:3px;'><nobr><a href='?mode=menu&act=dev&state=".$curr->getDev()."&ac_id=".$curr->getID()."#cat_".$curr->getID()."'><img src='pic/";
 					if($curr->inDev()) {
 						$html .= "red";
 					}
@@ -114,7 +114,7 @@
 			</table></span>";
 			if($sub == 0) {
 				$html .= "<div style='display:none;color:#000000;background-color:#FFFFFF;' id='ins_m".$curr->getID()."'>
-					<form method='post' action='?mode=menu&act=insert'>
+					<form method='post' action='?mode=menu&act=insert#cat_".$curr->getID()."'>
 						<fieldset>
 						<legend>create new sub-category</legend>
 						<input type='hidden' name='ac_parent' value='".$curr->getID()."' />
@@ -135,7 +135,7 @@
 			}
 
 			$html .= "<div style='display:none;color:#000000;background-color:#FFFFFF;' id='edit_m".$curr->getID()."'>
-					<form method='post' action='?mode=menu&act=update&ac_id=".$curr->getID()."'>
+					<form method='post' action='?mode=menu&act=update&ac_id=".$curr->getID()."#cat_".$curr->getID()."'>
 						<fieldset>
 						<legend>edit category</legend>";
 						if($sub != 0) {

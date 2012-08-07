@@ -1,5 +1,8 @@
 <?php
 	class AchPerk extends Parentum {
+		#########################
+		# PHP 5.3 compatible
+		# InDev_trait replaces this in PHP 5.4
 		protected $dev;
 
 		function inDev() {
@@ -24,6 +27,7 @@
 		function setDev($d) {
 			$this->dev = $d;
 		}
+		#########################
 
 		protected $achievement;
 		protected $value;

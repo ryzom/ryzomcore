@@ -1,13 +1,62 @@
 <?php
 	class AdmMenu extends AchMenu {
-		use AdmDispatcher;
+		/*function insertNode($n) {
+			$n->setParent($this);
+			$n->insert();
+			$this->addChild($n);
+		}*/
+
+		/*function removeNode($id) {
+			$res = $this->getChildDataByID($id);
+			if($res != null) {
+				$res->delete_me();
+				$this->removeChild($id);
+			}
+		}*/
+
+		/*function updateNode($id) { // PROBABLY USELESS!
+			$res = $this->getChildDataByID($id);
+			if($res != null) {
+				$res->update();
+			}
+		}*/
+
+		function getPathID($path = "") {
+			if($path != "") {
+				$path = ";".$path;
+			}
+			$path = $this->getID().$path;
+			if($this->parent != null) {
+				return $this->parent->getPathID($path);
+			}
+
+			return $path;
+		}
+
+		function getElementByPath($pid) {
+			$tmp = explode(";",$pid);
+			if($tmp[0] == $this->getID()) {
+				if(sizeof($tmp) > 1) {
+					$c = $this->getChildDataByID($tmp[1]);
+					if($c != null) {
+						unset($tmp[0]);
+						return $c->getElementByPath(implode(";",$tmp));
+					}
+					return null;
+				}
+				else {
+					return $this;
+				}
+			}
+			return null;
+		}
 		
 		function AdmMenu($open) {
 			parent::__construct($open);
 
 			#$this->drawTree();
 
-			#$this->removeChild(0); // unset the auto-generated "summary" node
+			$this->removeChild(0); // unset the auto-generated "summary" node
 		}
 
 		protected function makeChild($d) { // override child generator to use admin classes
@@ -18,7 +67,8 @@
 			$res = $this->getNode($id);
 			if($res != null) {
 				$res->delete_me();
-				$this->removeChild($id);
+				$tmp = $res->getParent();
+				$tmp->removeChild($id);
 			}
 		}
 

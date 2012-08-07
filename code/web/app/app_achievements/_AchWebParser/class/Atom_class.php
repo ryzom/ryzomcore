@@ -17,7 +17,7 @@
 		function register() {
 			global $DBc,$_DATA;
 
-			echo "register<br>";
+			#echo "register<br>";
 
 			try {
 				return eval($this->ruleset);
@@ -40,18 +40,29 @@
 			$_DISPATCHER->unregisterValue($name,$callback);
 		}
 
-		function grant() {
+		function registerEntity($name,$func) {
+			global $_DISPATCHER;
+			
+			$tmp = new Callback($this,$func);
+			$_DISPATCHER->registerEntity($name,$tmp);
+		}
+
+		function unregisterEntity($name,$callback) {
+			global $_DISPATCHER;
+
+			$_DISPATCHER->unregisterEntity($name,$callback);
+		}
+
+		function grant($count = 1) {
 			global $DBc;
 
-			echo "G<br>";
-
-			$DBc->sendSQL("INSERT INTO ach_player_atom (apa_atom,apa_player,apa_date,apa_expire,apa_state) VALUES ('".$this->id."','".$this->user."','".time()."',null,'GRANT')","NONE");
+			$DBc->sendSQL("INSERT INTO ach_player_atom (apa_atom,apa_player,apa_date,apa_expire,apa_state,apa_value) VALUES ('".$this->id."','".$this->user."','".time()."',null,'GRANT','".$count."')","NONE");
 		}
 
 		function deny() {
 			global $DBc;
 
-			$DBc->sendSQL("INSERT INTO ach_player_atom (apa_atom,apa_player,apa_date,apa_expire,apa_state) VALUES ('".$this->id."','".$this->user."','".time()."',null,'DENY')","NONE");
+			$DBc->sendSQL("INSERT INTO ach_player_atom (apa_atom,apa_player,apa_date,apa_expire,apa_state) VALUES ('".$this->id."','".$this->user."','".time()."',null,'DENY','1')","NONE");
 		}
 
 		function reset_() {

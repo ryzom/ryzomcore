@@ -1,6 +1,55 @@
 <?php
 	class AdmPerk extends AchPerk implements ADM {
-		use AdmDispatcher;
+		function insertNode($n) {
+			$n->setParent($this);
+			$n->insert();
+			$this->addChild($n);
+		}
+
+		function removeNode($id) {
+			$res = $this->getChildDataByID($id);
+			if($res != null) {
+				$res->delete_me();
+				$this->removeChild($id);
+			}
+		}
+
+		function updateNode($id) { // PROBABLY USELESS!
+			$res = $this->getChildDataByID($id);
+			if($res != null) {
+				$res->update();
+			}
+		}
+
+		function getPathID($path = "") {
+			if($path != "") {
+				$path = ";".$path;
+			}
+			$path = $this->getID().$path;
+			if($this->parent != null) {
+				return $this->parent->getPathID($path);
+			}
+
+			return $path;
+		}
+
+		function getElementByPath($pid) {
+			$tmp = explode(";",$pid);
+			if($tmp[0] == $this->getID()) {
+				if(sizeof($tmp) > 1) {
+					$c = $this->getChildDataByID($tmp[1]);
+					if($c != null) {
+						unset($tmp[0]);
+						return $c->getElementByPath(implode(";",$tmp));
+					}
+					return null;
+				}
+				else {
+					return $this;
+				}
+			}
+			return null;
+		}
 
 		protected $condition;
 		protected $condition_value;
@@ -35,9 +84,9 @@
 		function update() {
 			global $DBc;
 
-			$DBc->sqlQuery("UPDATE ach_perk SET ap_parent=".mkn($this->getParentID()).",ap_value='".mysql_real_escape_string($this->getValue())."',ap_condition='".mysql_real_escape_string($this->getCondition())."',ap_condition_value=".mkn($this->getConditionValue()).",ap_dev='".$this->getDev()."',ap_porder='".$this->porder."' WHERE ap_id='".$this->getID()."'");
+			$DBc->sqlQuery("UPDATE ach_perk SET ap_parent=".mkn($this->getParentID()).",ap_value='".$DBc->sqlEscape($this->getValue())."',ap_condition='".$DBc->sqlEscape($this->getCondition())."',ap_condition_value=".mkn($this->getConditionValue()).",ap_dev='".$this->getDev()."',ap_porder='".$this->porder."' WHERE ap_id='".$this->getID()."'");
 
-			$DBc->sqlQuery("INSERT INTO ach_perk_lang (apl_perk,apl_lang,apl_name,apl_template) VALUES ('".$this->getID()."','en','".mysql_real_escape_string($this->getName())."',".mkn($this->getTemplate()).") ON DUPLICATE KEY UPDATE apl_name='".mysql_real_escape_string($this->getName())."',apl_template=".mkn($this->getTemplate())."");
+			$DBc->sqlQuery("INSERT INTO ach_perk_lang (apl_perk,apl_lang,apl_name,apl_template) VALUES ('".$this->getID()."','en','".$DBc->sqlEscape($this->getName())."',".mkn($this->getTemplate()).") ON DUPLICATE KEY UPDATE apl_name='".$DBc->sqlEscape($this->getName())."',apl_template=".mkn($this->getTemplate())."");
 		}
 
 		function insert() {
@@ -45,11 +94,11 @@
 
 			$this->dev = 1;
 
-			$DBc->sqlQuery("INSERT INTO ach_perk (ap_achievement,ap_parent,ap_value,ap_condition,ap_condition_value,ap_dev,ap_porder) VALUES ('".$this->getAchievement()."',".mkn($this->getParentID()).",'".mysql_real_escape_string($this->getValue())."','".mysql_real_escape_string($this->getCondition())."',".mkn($this->getConditionValue()).",'1','".$this->porder."')");
-			$id = mysql_insert_id();
+			$DBc->sqlQuery("INSERT INTO ach_perk (ap_achievement,ap_parent,ap_value,ap_condition,ap_condition_value,ap_dev,ap_porder) VALUES ('".$this->getAchievement()."',".mkn($this->getParentID()).",'".$DBc->sqlEscape($this->getValue())."','".$DBc->sqlEscape($this->getCondition())."',".mkn($this->getConditionValue()).",'1','".$this->porder."')");
+			$id = $DBc->insertID();
 			$this->setID($id);
 
-			$DBc->sqlQuery("INSERT INTO ach_perk_lang (apl_perk,apl_lang,apl_name,apl_template) VALUES ('".$this->getID()."','en','".mysql_real_escape_string($this->getName())."',".mkn($this->getTemplate()).")");
+			$DBc->sqlQuery("INSERT INTO ach_perk_lang (apl_perk,apl_lang,apl_name,apl_template) VALUES ('".$this->getID()."','en','".$DBc->sqlEscape($this->getName())."',".mkn($this->getTemplate()).")");
 		}
 
 		function setAchievement($a) {
@@ -92,29 +141,40 @@
 			$this->porder = $p;
 		}
 
-		function setParentID($p) { #!! CUTTING KILLS NODES! HAVE TO BE REROUTED!
+		private function reOrder() {
+			//check if order is OK!
+
+			if($this->parent_id == null) {
+
+			}
+			else {
+
+			}
+		}
+
+		function setParentID($p) { #reordering must happen A) after insert B) when updating
 			if($p == null || $p == "null") {
 				//remove from ach list; insert as first!
 				$this->parent_id = null;
 
-				$this->parent->removeChild($this->id);
-				$iter = $this->parent->getIterator();
-				$this->parent->addOpen($this,$iter->getNext());
+				#$this->parent->removeChild($this->id);
+				#$iter = $this->parent->getIterator();
+				#$this->parent->addOpen($this,$iter->getNext());
 			}
 			else {
 				//remove from ach list; insert after parent
-				echo "--".$p."<br>";
+				#echo "--".$p."<br>";
 				$this->parent_id = $p;
 
-				$this->parent->removeChild($this->id);
-				$item = $this->parent->getChildByID($this->parent_id);
-				$tmp = $item->getChild();
-				if($tmp != null) {
-					$this->parent->addOpen($this,$tmp->getID());
-				}
-				else {
-					$this->parent->addOpen($this,null);
-				}
+				#$this->parent->removeChild($this->id);
+				#$item = $this->parent->getChildByID($this->parent_id);
+				#$tmp = $item->getChild();
+				#if($tmp != null) {
+				#	$this->parent->addOpen($this,$tmp->getID());
+				#}
+				#else {
+				#	$this->parent->addOpen($this,null);
+				#}
 			}
 		}
 	}

@@ -20,7 +20,9 @@
 				return true;
 			}
 			else {
-				foreach($this->nodes as $elem) {
+				$iter = $this->getIterator();
+				while($iter->hasNext()) {
+					$elem = $iter->getNext();
 					$res = $elem->hasAchievements();
 					if($res == true) {
 						return true;
@@ -79,7 +81,7 @@
 			$DBc->sqlQuery("UPDATE ach_category SET ac_parent=".mkn($this->getParentID()).",ac_order='".$this->getOrder()."',ac_image=".mkn($this->getImage()).",ac_dev='".$this->getDev()."' WHERE ac_id='".$this->getID()."'");
 
 			#MISSING: update lang entry
-			$DBc->sqlQuery("INSERT IGNORE INTO ach_category_lang (acl_category,acl_lang,acl_name) VALUES ('".$this->getID()."','".$_USER->getLang()."','".mysql_real_escape_string($this->getName())."') ON DUPLICATE KEY UPDATE acl_name='".mysql_real_escape_string($this->getName())."'");
+			$DBc->sqlQuery("INSERT IGNORE INTO ach_category_lang (acl_category,acl_lang,acl_name) VALUES ('".$this->getID()."','".$_USER->getLang()."','".$DBc->sqlEscape($this->getName())."') ON DUPLICATE KEY UPDATE acl_name='".$DBc->sqlEscape($this->getName())."'");
 		}
 
 		function insert() { // write $this to the database as a new entry
@@ -88,10 +90,10 @@
 			$this->setOrder($this->parent->getNextOrder());
 
 			$DBc->sqlQuery("INSERT INTO ach_category (ac_parent,ac_order,ac_image,ac_dev) VALUES (".mkn($this->getParentID()).",'".$this->getOrder()."',".mkn($this->getImage()).",'1')");
-			$id = mysql_insert_id();
+			$id = $DBc->insertID();
 			$this->setID($id);
 			#MISSING: insert lang entry
-			$DBc->sqlQuery("INSERT INTO ach_category_lang (acl_category,acl_lang,acl_name) VALUES ('".$this->getID()."','".$_USER->getLang()."','".mysql_real_escape_string($this->getName())."')");
+			$DBc->sqlQuery("INSERT INTO ach_category_lang (acl_category,acl_lang,acl_name) VALUES ('".$this->getID()."','".$_USER->getLang()."','".$DBc->sqlEscape($this->getName())."')");
 			
 		}
 
@@ -147,7 +149,10 @@
 			}
 
 			$val = array();
-			foreach($this->nodes as $elem) {
+			$iter = $this->getIterator();
+			while($iter->hasNext()) {
+			#foreach($this->nodes as $elem) {
+				$elem = $iter->getNext();
 				$val[] = $elem->getOrder();
 			}
 

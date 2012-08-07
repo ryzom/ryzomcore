@@ -413,12 +413,12 @@
 		<table width='".$width."px' cellspacing='0' cellpadding='0'>
 			<tr>
 				<td bgcolor='#66CC00' width='".$left."px'><font color='#000000'>";
-				if(($prog/$val) > 0.85) {
+				if(($prog/$val) > 0.5) {
 					$html .= "&nbsp;".nf($prog)." / ".nf($val)."&nbsp;";
 				}
 				$html .= "</font></td>
 				<td align='left' bgcolor='#00000066'><font color='#FFFFFF'>";
-				if(($prog/$val) <= 0.85) {
+				if(($prog/$val) <= 0.5) {
 					$html .= "&nbsp;".nf($prog)." / ".nf($val)."&nbsp;";
 				}
 				$html .= "</font></td>

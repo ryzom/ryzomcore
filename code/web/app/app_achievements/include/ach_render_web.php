@@ -4,7 +4,14 @@
 
 		$c = "<center><table>
 			<tr>
-				<td colspan='2' align='left'>".ach_render_yubopoints($user['id'])."</td>
+				<td colspan='2' align='left'>
+					<div style='display:block;border-bottom:1px solid #000000;'>
+						<div style='float:left;width:420px;'>".ach_render_yubopoints($user['id'])."</div>
+						<div style='float:right;width:420px;text-align:right;'>".ach_render_facebook()."</div>
+						<div style='clear:both;'></div>
+					</div>
+					
+				</td>
 			</tr>
 			<tr>
 				<td valign='top'><div style='width:230px;font-weight:bold;font-size:14px;'>";
@@ -120,13 +127,29 @@
 
 		$res = $DBc->sqlQuery("SELECT sum(ap_value) as anz FROM ach_perk,ach_player_perk WHERE ap_id=app_perk AND app_player='".$_USER->getID()."'");
 
-		$html = "<div style='display:block;border-bottom:1px solid #000000;'><span style='font-size:32px;'>".$_USER->getName()."&nbsp;<img src='".$_CONF['image_url']."pic/yubo_done.png'>&nbsp;".max(0,$res[0]['anz'])."</span></div>";
+		$html = "<div style='display:block;'><span style='font-size:32px;'>".$_USER->getName()."&nbsp;<img src='".$_CONF['image_url']."pic/yubo_done.png'>&nbsp;".max(0,$res[0]['anz'])."</span></div>";
 
 		return $html;
 	}
 
 	function ach_render_facebook() {
-
+		return "<div id='auth-status'>
+			<div id='auth-loggedout'>
+				<a href='#' id='auth-loginlink'><img src='pic/f-connect.png' height='30px'></a>
+			</div>
+			<div id='auth-loggedin' style='display:none'>
+				<table cellpadding='0' align='right'>
+					<tr>
+						<td rowspan='2'><img src='pic/facebook-logo.png' height='30px'></td>
+						<td style='text-align:left;font-size:10px;'>connected</td>
+					</tr>
+					<tr>
+						<td><span id='auth-displayname' style='font-size:16px;'></span></td>
+					</tr>
+				</table>
+			
+			</div>
+		</div>";
 	}
 
 	function ach_render_twitter() {
@@ -446,12 +469,12 @@
 		<table width='".$width."px' cellspacing='0' cellpadding='0' style='border:1px solid #FFFFFF;color:#000000;'>
 			<tr>
 				<td bgcolor='#66CC00' width='".$left."px' align='right'>";
-				if(($prog/$val) > 0.85) {
+				if(($prog/$val) > 0.5) {
 					$html .= "&nbsp;".nf($prog)." / ".nf($val)."&nbsp;";
 				}
 				$html .= "</td>
 				<td align='left' style='color:#FFFFFF;'>";
-				if(($prog/$val) <= 0.85) {
+				if(($prog/$val) <= 0.5) {
 					$html .= "&nbsp;".nf($prog)." / ".nf($val)."&nbsp;";
 				}
 				$html .= "</td>
