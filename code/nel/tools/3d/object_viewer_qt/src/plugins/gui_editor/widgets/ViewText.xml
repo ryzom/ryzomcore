@@ -2,7 +2,7 @@
     <header>
         <name>ViewText</name>
         <guiname>CViewText</guiname>
-        <ancestor>CtrlBase</ancestor>
+        <ancestor>InterfaceElement</ancestor>
         <description></description>
         <abstract>false</abstract>
         <icon></icon>

@@ -109,7 +109,7 @@
             <default>params</default>
         </property>
         <property>
-            <name>win_proprity</name>
+            <name>win_priority</name>
             <type>int</type>
             <default>3</default>
         </property>

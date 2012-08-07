@@ -102,6 +102,11 @@ namespace NLGUI
 			return toString( _WMin );
 		}
 		else
+		if( name == "hardtext" )
+		{
+			return _ViewText->getText().toString();
+		}
+		else
 		if( name == "text_y" )
 		{
 			return toString( _TextY );
@@ -241,6 +246,12 @@ namespace NLGUI
 			sint32 i;
 			if( fromString( value, i ) )
 				_WMin = i;
+			return;
+		}
+		else
+		if( name == "hardtext" )
+		{
+			_ViewText->setText( value );
 			return;
 		}
 		else

@@ -305,12 +305,20 @@ namespace NLGUI
 
 	void CViewText::setProperty( const std::string &name, const std::string &value )
 	{
+		if( setTextProperty( name, value ) )
+			invalidateContent();
+		else
+			CViewBase::setProperty( name, value );
+	}
+
+	bool CViewText::setTextProperty( const std::string &name, const std::string &value )
+	{
 		if( name == "color" )
 		{
 			CRGBA c;
 			if( fromString( value, c ) )
 				_Color = c;
-			return;
+			return true;
 		}
 		else
 		if( name == "global_color" )
@@ -318,7 +326,7 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				_ModulateGlobalColor = b;
-			return;
+			return true;
 		}
 		else
 		if( name == "fontsize" )
@@ -326,7 +334,7 @@ namespace NLGUI
 			sint i;
 			if( fromString( value, i ) )
 				_FontSize = i + CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
-			return;
+			return true;
 		}
 		else
 		if( name == "shadow" )
@@ -334,7 +342,7 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				_Shadow = b;
-			return;
+			return true;
 		}
 		else
 		if( name == "shadow_color" )
@@ -342,7 +350,7 @@ namespace NLGUI
 			CRGBA c;
 			if( fromString( value, c ) )
 				_ShadowColor = c;
-			return;
+			return true;
 		}
 		else
 		if( name == "multi_line" )
@@ -350,7 +358,7 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				_MultiLine = b;
-			return;
+			return true;
 		}
 		else
 		if( name == "justification" )
@@ -364,7 +372,7 @@ namespace NLGUI
 			if( value == "justified" )
 				_TextMode = Justified;
 
-			return;
+			return true;
 		}
 		else
 		if( name == "line_maxw" )
@@ -372,7 +380,7 @@ namespace NLGUI
 			sint32 i;
 			if( fromString( value, i ) )
 				_LineMaxW = i;
-			return;
+			return true;
 		}
 		else
 		if( name == "multi_line_space" )
@@ -380,7 +388,7 @@ namespace NLGUI
 			sint i;
 			if( fromString( value, i ) )
 				_MultiLineSpace = i;
-			return;
+			return true;
 		}
 		else
 		if( name == "multi_line_maxw_only" )
@@ -388,7 +396,7 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				_MultiLineMaxWOnly = b;
-			return;
+			return true;
 		}
 		else
 		if( name == "multi_max_line" )
@@ -396,7 +404,7 @@ namespace NLGUI
 			uint32 i;
 			if( fromString( value, i ) )
 				_MultiMaxLine = i;
-			return;
+			return true;
 		}
 		else
 		if( name == "underlined" )
@@ -404,7 +412,7 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				_Underlined = b;
-			return;
+			return true;
 		}
 		else
 		if( name == "case_mode" )
@@ -412,7 +420,7 @@ namespace NLGUI
 			uint32 i;
 			if( fromString( value, i ) )
 				_CaseMode = (TCaseMode)i;
-			return;
+			return true;
 		}
 		else
 		if( name == "over_extend_view_text" )
@@ -420,7 +428,7 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				_OverExtendViewText = b;
-			return;
+			return true;
 		}
 		else
 		if( name == "over_extend_parent_rect" )
@@ -428,7 +436,7 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				_OverExtendViewTextUseParentRect = b;
-			return;
+			return true;
 		}
 		else
 		if( name == "auto_clamp" )
@@ -436,7 +444,7 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				_AutoClamp = b;
-			return;
+			return true;
 		}
 		else
 		if( name == "clamp_right" )
@@ -444,7 +452,7 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				_ClampRight = b;
-			return;
+			return true;
 		}
 		else
 		if( name == "auto_clamp_offset" )
@@ -452,7 +460,7 @@ namespace NLGUI
 			uint8 i;
 			if( fromString( value, i ) )
 				_AutoClampOffset = i;
-			return;
+			return true;
 		}
 		else
 		if( name == "continuous_update" )
@@ -460,22 +468,30 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				_ContinuousUpdate = b;
-			return;
+			return true;
 		}
 		else
 		if( name == "hardtext" )
 		{
 			_Text = value;
-			return;
+			setCase( _Text, _CaseMode );
+			invalidateContent();
+			return true;
 		}
 		else
 		if( name == "hardtext_format" )
 		{
 			_HardtextFormat = value;
-			return;
+
+			if( _MultiLine )
+				setTextFormatTaged( _HardtextFormat );
+			else
+				setSingleLineTextFormatTaged( _HardtextFormat );
+
+			return true;
 		}
 		else
-			CViewBase::setProperty( name, value );
+			return false;
 	}
 
 	// ***************************************************************************
