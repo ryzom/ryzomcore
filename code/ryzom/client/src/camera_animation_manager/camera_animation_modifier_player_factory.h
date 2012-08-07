@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include "nel\misc\bit_mem_stream.h"
+#include "camera_animation_manager\camera_animation_info.h"
 
 /************************************************************************/
 /* Interface for camera animation modifiers.
@@ -32,8 +33,13 @@ public:
 	/// This function is called when it's time to init the modifier from an impulse
 	virtual bool initModifier(NLMISC::CBitMemStream& impulse) = 0;
 
-	/// Function that plays the modifier
-	virtual void playModifier() = 0;
+	/// Function that updates the modifier
+	/// currCamInfo contains information about the current camera position and look at position
+	/// The function must return the new camera information
+	virtual TCameraAnimationInfo updateModifier(const TCameraAnimationInfo& currCamInfo) = 0;
+
+	/// Function called when the modifier is stopped
+	virtual void stopModifier() = 0;
 
 protected:
 };

@@ -21,6 +21,8 @@
 #include <string>
 #include "nel\misc\bit_mem_stream.h"
 #include "camera_animation_manager/camera_animation_step_player_factory.h"
+#include "nel/misc/vector.h"
+#include "camera_animation_manager\camera_animation_info.h"
 
 
 /************************************************************************/
@@ -63,11 +65,17 @@ public:
 	/// Checks if an animation is being played
 	bool isPlaying();
 
+	/// Updates the camera by calling the update function of the current step and modifiers
+	TCameraAnimationInfo update();
+
 private:
 	/// Constructor
 	CCameraAnimationPlayer();
 	/// Destructor
 	~CCameraAnimationPlayer();
+
+	/// Stops the current step
+	void stopStep();
 
 	/// Instance of the manager
 	static CCameraAnimationPlayer* _Instance;
@@ -75,7 +83,8 @@ private:
 
 	bool _IsPlaying;
 
-	std::vector<ICameraAnimationStepPlayer*> _Steps;
+	ICameraAnimationStepPlayer* _CurrStep;
+	float _ElapsedTimeForCurrStep;
 };
 
 

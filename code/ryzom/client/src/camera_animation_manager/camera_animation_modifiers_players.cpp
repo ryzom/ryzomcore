@@ -17,6 +17,7 @@
 
 #include "camera_animation_manager/camera_animation_modifier_player_factory.h"
 #include "game_share/position_or_entity_type.h"
+#include "camera_animation_manager\camera_animation_info.h"
 
 /////////////////////////////////////////////////////////////////////////////
 /// This animation modifier shakes the camera. The parameter is
@@ -41,9 +42,13 @@ public:
 	}
 
 	/// Function that plays the modifier
-	virtual void playModifier()
+	virtual TCameraAnimationInfo updateModifier(const TCameraAnimationInfo& currCamInfo)
 	{
+		return currCamInfo;
+	}
 
+	virtual void stopModifier()
+	{
 	}
 };
 CAMERA_ANIMATION_REGISTER_MODIFIER_PLAYER(CCameraAnimationModifierPlayerShake, "camera_modifier_shake");
@@ -74,9 +79,13 @@ public:
 	}
 
 	/// Function that plays the modifier
-	virtual void playModifier()
+	virtual TCameraAnimationInfo updateModifier(const TCameraAnimationInfo& currCamInfo)
 	{
+		return currCamInfo;
+	}
 
+	virtual void stopModifier()
+	{
 	}
 };
 CAMERA_ANIMATION_REGISTER_MODIFIER_PLAYER(CCameraAnimationModifierPlayerSoundTrigger, "sound_trigger");

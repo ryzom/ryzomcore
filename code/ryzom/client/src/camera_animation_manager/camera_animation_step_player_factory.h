@@ -21,6 +21,7 @@
 #include <vector>
 #include "nel\misc\bit_mem_stream.h"
 #include "camera_animation_manager\camera_animation_modifier_player_factory.h"
+#include "camera_animation_manager\camera_animation_info.h"
 
 /************************************************************************/
 /* Interface for camera animation steps.
@@ -35,14 +36,25 @@ public:
 	/// This function is called when it's time to init the step from an impulse
 	virtual bool initStep(NLMISC::CBitMemStream& impulse) = 0;
 
-	/// Function that plays the step
-	virtual void playStep() = 0;
+	/// Function that updates the camera with the step
+	/// currCamInfo contains information about the current camera position and look at position
+	/// The function must return the new camera information
+	virtual TCameraAnimationInfo updateStep(const TCameraAnimationInfo& currCamInfo) = 0;
+
+	/// Function called when the step stops
+	virtual void stopStep() = 0;
+
+	/// Gets the duration in seconds of this step
+	virtual float getDuration() const = 0;
 
 	/// Function that adds a camera animation modifier to this step
 	void addModifier(ICameraAnimationModifierPlayer* modifier);
 
 	// Plays the step and its modifiers
-	void playStepAndModifiers();
+	TCameraAnimationInfo updateStepAndModifiers(const TCameraAnimationInfo& currCamInfo);
+
+	// Stops the step and its modifiers
+	void stopStepAndModifiers();
 
 protected:
 	// The list of modifiers

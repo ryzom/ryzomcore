@@ -17,7 +17,7 @@
 
 #include "camera_animation_manager/camera_animation_step_player_factory.h"
 #include "game_share/position_or_entity_type.h"
-
+#include "camera_animation_manager\camera_animation_info.h"
 
 
 /// Basic camera animation step that has generic values
@@ -38,6 +38,11 @@ public:
 		Duration = 0.f;
 	}
 
+	virtual float getDuration() const
+	{
+		return Duration;
+	}
+
 	/// This function is called when it's time to init the step from an impulse
 	virtual bool initStep(NLMISC::CBitMemStream& impulse)
 	{
@@ -48,10 +53,8 @@ public:
 		return true;
 	}
 
-	/// Function that plays the step
-	virtual void playStep()
+	virtual void stopStep()
 	{
-
 	}
 
 }; // This class must not be registered because it's a base class
@@ -69,9 +72,13 @@ public:
 	}
 
 	/// Function that plays the step
-	virtual void playStep()
+	virtual TCameraAnimationInfo updateStep(const TCameraAnimationInfo& currCamInfo)
 	{
+		return currCamInfo;
+	}
 
+	virtual void stopStep()
+	{
 	}
 };
 CAMERA_ANIMATION_REGISTER_STEP_PLAYER(CCameraAnimationStepPlayerStatic, "camera_animation_static");
@@ -100,9 +107,13 @@ public:
 	}
 
 	/// Function that plays the step
-	virtual void playStep()
+	virtual TCameraAnimationInfo updateStep(const TCameraAnimationInfo& currCamInfo)
 	{
+		return currCamInfo;
+	}
 
+	virtual void stopStep()
+	{
 	}
 };
 CAMERA_ANIMATION_REGISTER_STEP_PLAYER(CCameraAnimationStepPlayerGoTo, "camera_animation_go_to");
@@ -135,9 +146,13 @@ public:
 	}
 
 	/// Function that plays the step
-	virtual void playStep()
+	virtual TCameraAnimationInfo updateStep(const TCameraAnimationInfo& currCamInfo)
 	{
+		return currCamInfo;
+	}
 
+	virtual void stopStep()
+	{
 	}
 };
 CAMERA_ANIMATION_REGISTER_STEP_PLAYER(CCameraAnimationStepPlayerFollowEntity, "camera_animation_follow_entity");
@@ -174,9 +189,13 @@ public:
 	}
 
 	/// Function that plays the step
-	virtual void playStep()
+	virtual TCameraAnimationInfo updateStep(const TCameraAnimationInfo& currCamInfo)
 	{
+		return currCamInfo;
+	}
 
+	virtual void stopStep()
+	{
 	}
 };
 CAMERA_ANIMATION_REGISTER_STEP_PLAYER(CCameraAnimationStepPlayerTurnAround, "camera_animation_turn_around");
@@ -196,6 +215,11 @@ public:
 		Duration = 0.f;
 	}
 
+	virtual float getDuration() const
+	{
+		return Duration;
+	}
+
 	/// This function is called when it's time to init the step from an impulse
 	virtual bool initStep(NLMISC::CBitMemStream& impulse)
 	{
@@ -205,9 +229,13 @@ public:
 	}
 
 	/// Function that plays the step
-	virtual void playStep()
+	virtual TCameraAnimationInfo updateStep(const TCameraAnimationInfo& currCamInfo)
 	{
+		return currCamInfo;
+	}
 
+	virtual void stopStep()
+	{
 	}
 };
 CAMERA_ANIMATION_REGISTER_STEP_PLAYER(CCameraAnimationStepPlayerReturn, "camera_animation_return");

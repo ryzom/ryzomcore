@@ -18,6 +18,8 @@
 
 #include "camera_animation_manager/camera_animation_player.h"
 #include "camera_animation_manager/camera_animation_step_player_factory.h"
+#include "time_client.h"
+#include "view.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -30,6 +32,8 @@ CCameraAnimationPlayer* CCameraAnimationPlayer::_Instance = NULL;
 CCameraAnimationPlayer::CCameraAnimationPlayer()
 {
 	_IsPlaying = false;
+	_CurrStep = NULL;
+	_ElapsedTimeForCurrStep = 0.f;
 }
 
 CCameraAnimationPlayer::~CCameraAnimationPlayer()
@@ -49,13 +53,22 @@ void CCameraAnimationPlayer::stop()
 {
 	_IsPlaying = false;
 
-	// We release the steps and modifiers
-	for (std::vector<ICameraAnimationStepPlayer*>::iterator it = _Steps.begin(); it != _Steps.end(); ++it)
+	stopStep();
+}
+
+void CCameraAnimationPlayer::stopStep()
+{
+	// We release the step and modifiers
+	if (_CurrStep)
 	{
-		ICameraAnimationStepPlayer* step = *it;
-		delete step;
+		// We first tell the step we stop it
+		_CurrStep->stopStepAndModifiers();
+
+		delete _CurrStep;
+		_CurrStep = NULL;
+
+		_ElapsedTimeForCurrStep = 0.f;
 	}
-	_Steps.clear();
 }
 
 void CCameraAnimationPlayer::playStep(const std::string& stepName, NLMISC::CBitMemStream& impulse)
@@ -67,21 +80,44 @@ void CCameraAnimationPlayer::playStep(const std::string& stepName, NLMISC::CBitM
 		return;
 	}
 
+	// We stop the current step if there is one
+	stopStep();
+
 	// We initialize the step with the factory
-	ICameraAnimationStepPlayer* step = ICameraAnimationStepPlayerFactory::initStep(stepName, impulse);
-	if (step == NULL)
+	_CurrStep = ICameraAnimationStepPlayerFactory::initStep(stepName, impulse);
+	if (_CurrStep == NULL)
 	{
 		nlwarning("CameraAnimationPlayer: cannot create step player %s", stepName.c_str());
+		_IsPlaying = false;
 		return;
 	}
-	// We add the step to our list
-	_Steps.push_back(step);
 
-	// We start playing the step
-	step->playStepAndModifiers();
+	_ElapsedTimeForCurrStep = 0.f;
 }
 
 bool CCameraAnimationPlayer::isPlaying()
 {
 	return _IsPlaying;
+}
+
+TCameraAnimationInfo CCameraAnimationPlayer::update()
+{
+	// We get the current camera information
+	NLMISC::CVector camLookAt = View.view();
+	NLMISC::CVector camPos = View.viewPos();
+
+	// We update the elapsed time for this step
+	_ElapsedTimeForCurrStep += DT;
+
+	TCameraAnimationInfo currCamInfo(camPos, camLookAt, _ElapsedTimeForCurrStep);
+
+	if (!isPlaying())
+		return currCamInfo;
+	if (_CurrStep == NULL)
+		return currCamInfo;
+
+	// We update the current step
+	currCamInfo = _CurrStep->updateStepAndModifiers(currCamInfo);
+
+	return currCamInfo;
 }

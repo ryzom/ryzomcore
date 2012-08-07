@@ -92,17 +92,33 @@ void ICameraAnimationStepPlayer::addModifier(ICameraAnimationModifierPlayer* mod
 	Modifiers.push_back(modifier);
 }
 
-void ICameraAnimationStepPlayer::playStepAndModifiers()
+TCameraAnimationInfo ICameraAnimationStepPlayer::updateStepAndModifiers(const TCameraAnimationInfo& currCamInfo)
 {
-	// Play the step
-	playStep();
+	// Updates the step
+	TCameraAnimationInfo newInfo = updateStep(currCamInfo);
 
-	// Play the modifiers
+	// Updates the modifiers
 	for (std::vector<ICameraAnimationModifierPlayer*>::iterator it = Modifiers.begin(); it != Modifiers.end(); ++it)
 	{
 		ICameraAnimationModifierPlayer* modifier = *it;
 		
-		// We play the modifier
-		modifier->playModifier();
+		// We update the modifier
+		newInfo = modifier->updateModifier(newInfo);
+	}
+	return newInfo;
+}
+
+void ICameraAnimationStepPlayer::stopStepAndModifiers()
+{
+	// Stops the step
+	stopStep();
+
+	// Stops the modifiers
+	for (std::vector<ICameraAnimationModifierPlayer*>::iterator it = Modifiers.begin(); it != Modifiers.end(); ++it)
+	{
+		ICameraAnimationModifierPlayer* modifier = *it;
+
+		// We stop the modifier
+		modifier->stopModifier();
 	}
 }
