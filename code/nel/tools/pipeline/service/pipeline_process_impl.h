@@ -32,14 +32,18 @@
 // STL includes
 
 // NeL includes
+#include <nel/misc/tool_logger.h>
 
 // Project includes
 #include "../plugin_library/pipeline_process.h"
 #include "pipeline_workspace.h"
 #include "metadata_storage.h"
+#include "callback.h"
 
 namespace PIPELINE {
 	class CPipelineProject;
+
+typedef CCallback<void, TError /* type */, const std::string & /* path */, const std::string & /* time */ , const std::string & /* error */ > TErrorLogCallback;
 
 /**
  * \brief CPipelineProcessImpl
@@ -108,6 +112,7 @@ private:
 	std::set<std::string> m_ListDependentFiles;
 	
 	bool m_Aborting;
+	TErrorLogCallback m_ErrorLogCallback;
 
 private:
 	bool getDependencyFileStatusCached(CFileStatus &fileStatus, const std::string &filePath);

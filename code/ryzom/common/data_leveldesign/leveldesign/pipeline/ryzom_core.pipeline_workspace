@@ -3,17 +3,7 @@
   <STRUCT>
     <ATOM Name="Description" Value="Ryzom Core"/>
     <ARRAY Name="Projects">
-      <ATOM Value="gamedev.pipeline_package"/>
-      <ATOM Value="data_common.pipeline_package"/>
       <ATOM Value="common_interface.pipeline_project"/>
-      <ATOM Value="interfaces.pipeline_package"/>
-      <ATOM Value="common_objects_generique.pipeline_project"/>
-      <ATOM Value="common_objects_fyros.pipeline_project"/>
-      <ATOM Value="common_objects_tryker.pipeline_project"/>
-      <ATOM Value="common_objects_matis.pipeline_project"/>
-      <ATOM Value="common_objects_zorai.pipeline_project"/>
-      <ATOM Value="common_objects_caravan.pipeline_project"/>
-      <ATOM Value="objects.pipeline_package"/>
     </ARRAY>
     <ARRAY Name="Plugins">
       <ATOM Value="plugin_nel.pipeline_plugin"/>
@@ -24,17 +14,16 @@
   <STRUCT/>
   <STRUCT/>
   <STRUCT/>
-  <LOG>Sat Feb 18 13:48:48 2012 (Kaetemi) .Name = Ryzom Core
-Sat Feb 18 13:48:48 2012 (Kaetemi) formName Resized = 1
-Sat Feb 18 14:44:25 2012 (Kaetemi) .Description = Ryzom Core
-Sat Feb 18 14:44:37 2012 (Kaetemi) .Projects[0] = common_interface.pipeline_project
-Sat Feb 18 23:23:17 2012 (Kaetemi) .Description = Ryzom Core Test
-Sat Feb 18 23:23:26 2012 (Kaetemi) .Description = Ryzom Core
-Sat Mar 03 10:58:02 2012 (Kaetemi) .Plugins[0] = plugin_nel.pipeline_plugin
-Sat Mar 03 10:58:02 2012 (Kaetemi) .Plugins[1] = plugin_max.pipeline_plugin
-Sat Mar 03 10:58:02 2012 (Kaetemi) formName Resized = 2
-Sat Aug 04 21:04:25 2012 (kaetemi) .Projects[1] = interfaces.pipeline_package
-Sat Aug 04 21:04:25 2012 (kaetemi) formName Resized = 2
-Sat Aug 04 21:09:02 2012 (kaetemi) .Projects[0] = interfaces.pipeline_package
-Sat Aug 04 21:09:02 2012 (kaetemi) .Projects[1] = common_interface.pipeline_project</LOG>
+  <COMMENTS>      &lt;ATOM Value="gamedev.pipeline_package"/&gt;
+      &lt;ATOM Value="data_common.pipeline_package"/&gt;
+      &lt;ATOM Value="common_interface.pipeline_project"/&gt;
+      &lt;ATOM Value="interfaces.pipeline_package"/&gt;
+      &lt;ATOM Value="common_objects_generique.pipeline_project"/&gt;
+      &lt;ATOM Value="common_objects_fyros.pipeline_project"/&gt;
+      &lt;ATOM Value="common_objects_tryker.pipeline_project"/&gt;
+      &lt;ATOM Value="common_objects_matis.pipeline_project"/&gt;
+      &lt;ATOM Value="common_objects_zorai.pipeline_project"/&gt;
+      &lt;ATOM Value="common_objects_caravan.pipeline_project"/&gt;
+      &lt;ATOM Value="objects.pipeline_package"/&gt;</COMMENTS>
+  <LOG></LOG>
 </FORM>
