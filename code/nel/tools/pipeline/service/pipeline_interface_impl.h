@@ -61,6 +61,7 @@ public:
 	virtual void endedRunnableTask();
 	virtual bool tryDirectCode(const std::string &stateName);
 	virtual void endedDirectCode();
+	virtual bool isExiting();
 }; /* class CPipelineInterfaceImpl */
 
 } /* namespace PIPELINE */

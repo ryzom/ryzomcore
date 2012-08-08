@@ -88,6 +88,11 @@ void CPipelineInterfaceImpl::endedDirectCode()
 	PIPELINE::endedDirectTask();
 }
 
+bool CPipelineInterfaceImpl::isExiting()
+{
+	return g_IsExiting;
+}
+
 } /* namespace PIPELINE */
 
 /* end of file */

@@ -60,6 +60,7 @@ public:
 
 	// ***************** PLUGIN UTILITY FUNCTIONS *****************
 	// ************* DO NOT USE FROM INSIDE A PROCESS *************
+	// ************ USE ONLY FOR SPECIAL TOOL COMMANDS ************
 
 	/// Get the configuration file of the pipeline service. Must only be used for configuration values that may be different on different services, such as tool paths.
 	virtual NLMISC::CConfigFile &getConfigFile() = 0;
@@ -78,6 +79,9 @@ public:
 
 	/// Call when a runnable task has ended to reset to STATE_IDLE.
 	virtual void endedDirectCode() = 0;
+
+	/// Check if service is exiting
+	virtual bool isExiting() = 0;
 	
 }; /* class IPipelineInterface */
 

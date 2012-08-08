@@ -32,6 +32,8 @@
 // STL includes
 
 // NeL includes
+#include <nel/misc/command.h>
+#include <nel/misc/task_manager.h>
 
 // Project includes
 
