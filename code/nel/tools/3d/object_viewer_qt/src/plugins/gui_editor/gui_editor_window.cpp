@@ -184,7 +184,13 @@ namespace GUIEditor
 
 		CProjectFileSerializer serializer;
 		serializer.setFile( currentProjectFile.toStdString() );
-		serializer.serialize( projectFiles );
+		if( !serializer.serialize( projectFiles ) )
+		{
+			QMessageBox::critical( this,
+							tr( "Failed to save project" ),
+							tr( "There was an error while trying to save the project." ) );
+			return;
+		}
 
 		// Can't save old projects any further, since the widgets are in multiple files in them
 		// using templates, styles and whatnot. There's no way to restore the original XML structure
@@ -197,6 +203,27 @@ namespace GUIEditor
 	{
 		if( currentProject.isEmpty() )
 			return;
+
+		QString dir = 
+			QFileDialog::getExistingDirectory( this, tr( "Save project as..." ) );
+
+		if( dir.isEmpty() )
+			return;
+
+		projectFiles.guiFiles.clear();
+		projectFiles.guiFiles.push_back( "ui_" + projectFiles.projectName + ".xml"  );
+		projectFiles.version = NEW;
+
+		QString newFile = dir + "/" + projectFiles.projectName.c_str() + ".xml";
+		CProjectFileSerializer serializer;
+		serializer.setFile( newFile.toStdString() );
+		if( !serializer.serialize( projectFiles ) )
+		{
+			QMessageBox::critical( this,
+							tr( "Failed to save project" ),
+							tr( "There was an error while trying to save the project." ) );
+			return;
+		}
 
 	}
 
