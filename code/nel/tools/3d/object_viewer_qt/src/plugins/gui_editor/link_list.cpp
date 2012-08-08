@@ -50,6 +50,12 @@ namespace GUIEditor
 		delete linkEditor;
 	}
 
+	void LinkList::clear()
+	{
+		linkTree->clear();
+		linkEditor->clear();
+	}
+
 	void LinkList::onGUILoaded()
 	{
 		linkTree->clear();

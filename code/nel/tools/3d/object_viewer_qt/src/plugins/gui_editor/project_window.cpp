@@ -104,6 +104,11 @@ namespace GUIEditor
 		}
 	}
 
+	void ProjectWindow::clear()
+	{
+		fileTree->clear();
+	}
+
 	void ProjectWindow::onAddButtonClicked()
 	{
 		if( fileTree->currentItem() == NULL )

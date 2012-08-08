@@ -34,6 +34,7 @@ namespace GUIEditor
 
 		void setupFiles( SProjectFiles &projectFiles );
 		void updateFiles( SProjectFiles &projectFiles );
+		void clear();
 
 	Q_SIGNALS:
 		void projectFilesChanged();

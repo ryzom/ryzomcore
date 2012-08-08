@@ -61,6 +61,15 @@ namespace GUIEditor
 		condEdit->setText( data.cond.c_str() );
 	}
 
+	void LinkEditor::clear()
+	{
+		expressionEdit->clear();
+		targetEdit->clear();
+		ahEdit->clear();
+		ahParamEdit->clear();
+		condEdit->clear();
+	}
+
 	void LinkEditor::onOKButtonClicked()
 	{
 		IParser *parser = CWidgetManager::getInstance()->getParser();

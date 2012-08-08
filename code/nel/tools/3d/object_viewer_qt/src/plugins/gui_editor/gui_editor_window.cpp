@@ -169,6 +169,47 @@ namespace GUIEditor
 		setCursor( Qt::ArrowCursor );
 	}
 
+	void GUIEditorWindow::newDocument()
+	{
+	}
+
+	void GUIEditorWindow::save()
+	{
+		if( currentProject.isEmpty() )
+			return;
+
+	}
+
+	void GUIEditorWindow::saveAs()
+	{
+		if( currentProject.isEmpty() )
+			return;
+
+	}
+
+	void GUIEditorWindow::close()
+	{
+		if( currentProject.isEmpty() )
+			return;
+
+		QMessageBox::StandardButton reply = QMessageBox::question( this,
+											tr( "Closing project" ),
+											tr( "Are you sure you want to close this project?" ),
+											QMessageBox::Yes | QMessageBox::No );
+		if( reply != QMessageBox::Yes )
+			return;
+
+		projectFiles.clearAll();
+		projectWindow->clear();
+		hierarchyView->clearHierarchy();
+		viewPort->reset();
+		browserCtrl.clear();
+		linkList->clear();
+		procList->clear();
+
+		currentProject = "";
+	}
+
 	void GUIEditorWindow::onProjectFilesChanged()
 	{
 		setCursor( Qt::WaitCursor );
@@ -190,11 +231,17 @@ namespace GUIEditor
 		Core::MenuManager *mm = Core::ICore::instance()->menuManager();
 		//QAction *newAction = mm->action( Core::Constants::NEW );
 		QAction *saveAction = mm->action( Core::Constants::SAVE );
+		QAction *saveAsAction = mm->action( Core::Constants::SAVE_AS );
+		QAction *closeAction = mm->action( Core::Constants::CLOSE );
 
 		//if( newAction != NULL )
 		//	newAction->setEnabled( true );
 		if( saveAction != NULL )
 			saveAction->setEnabled( true );
+		if( saveAsAction != NULL )
+			saveAsAction->setEnabled( true );
+		if( closeAction != NULL )
+			closeAction->setEnabled( true );
 
 		QMenu *menu = mm->menu( Core::Constants::M_TOOLS );
 		if( menu != NULL )

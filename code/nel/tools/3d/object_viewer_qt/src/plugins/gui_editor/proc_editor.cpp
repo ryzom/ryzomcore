@@ -60,6 +60,12 @@ namespace GUIEditor
 		setWindowTitle( QString( "Procedure Editor - %1" ).arg( currentProc ) );
 	}
 
+	void ProcEditor::clear()
+	{
+		actionList->clear();
+		actionEditor->clear();
+	}
+
 	void ProcEditor::onEditButtonClicked()
 	{
 		int row = actionList->currentRow();

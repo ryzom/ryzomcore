@@ -34,6 +34,7 @@ namespace GUIEditor
 		void init();
 		bool parse( SProjectFiles &files );
 		void draw();
+		void reset();
 
 Q_SIGNALS:
 		void guiLoadComplete();

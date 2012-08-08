@@ -32,6 +32,7 @@ namespace GUIEditor
 		~ProcEditor();
 
 		void setCurrentProc( const QString &name );
+		void clear();
 
 	private Q_SLOTS:
 		void onEditButtonClicked();

@@ -31,6 +31,7 @@ namespace GUIEditor
 		~LinkEditor();
 		void setup();
 		void setLinkId( uint32 linkId );
+		void clear();
 
 	Q_SIGNALS:
 		void okClicked();

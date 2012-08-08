@@ -169,10 +169,16 @@ void MainWindow::save()
 
 void MainWindow::saveAs()
 {
+	m_contextManager->currentContext()->saveAs();
 }
 
 void MainWindow::saveAll()
 {
+}
+
+void MainWindow::close()
+{
+	m_contextManager->currentContext()->close();
 }
 
 void MainWindow::cut()
@@ -288,6 +294,12 @@ void MainWindow::createActions()
 	connect(m_saveAllAction, SIGNAL(triggered()), this, SLOT(saveAll()));
 	m_saveAllAction->setEnabled(false);
 
+	m_closeAction = new QAction(tr("Close"), this);
+	m_closeAction->setShortcut(QKeySequence::Close);
+	menuManager()->registerAction(m_closeAction, Constants::CLOSE);
+	connect(m_closeAction, SIGNAL(triggered()), this, SLOT(close()));
+	m_closeAction->setEnabled(false);
+
 	m_exitAction = new QAction(tr("E&xit"), this);
 	m_exitAction->setShortcut(QKeySequence(tr("Ctrl+Q")));
 	m_exitAction->setStatusTip(tr("Exit the application"));
@@ -383,6 +395,7 @@ void MainWindow::createMenus()
 	m_fileMenu->addAction(m_saveAction);
 	m_fileMenu->addAction(m_saveAsAction);
 	m_fileMenu->addAction(m_saveAllAction);
+	m_fileMenu->addAction(m_closeAction);
 	m_fileMenu->addSeparator();
 
 	m_recentFilesMenu = m_fileMenu->addMenu(tr("Recent &Files"));

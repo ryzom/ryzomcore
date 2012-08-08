@@ -64,7 +64,11 @@ public:
 
 	virtual void save(){}
 
+	virtual void saveAs(){}
+
 	virtual void newDocument(){}
+
+	virtual void close(){}
 };
 
 } // namespace Core

@@ -40,6 +40,14 @@ namespace GUIEditor
 		condEdit->setText( currentAction->Conditions.c_str() );
 	}
 
+	void ActionEditor::clear()
+	{
+		currentAction = NULL;
+		handlerEdit->clear();
+		paramsEdit->clear();
+		condEdit->clear();
+	}
+
 	void ActionEditor::onOkButtonClicked()
 	{
 		currentAction->Parameters = paramsEdit->text().toStdString();

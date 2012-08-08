@@ -30,6 +30,7 @@ namespace GUIEditor
 	public:
 		LinkList( QWidget *parent = NULL );
 		~LinkList();
+		void clear();
 
 	public Q_SLOTS:
 		void onGUILoaded();

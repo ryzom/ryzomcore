@@ -33,6 +33,7 @@ namespace GUIEditor
 		ActionEditor( QWidget *parent = NULL );
 		~ActionEditor();
 		void setCurrentAction( NLGUI::CProcAction *action );
+		void clear();
 
 	private Q_SLOTS:
 		void onOkButtonClicked();

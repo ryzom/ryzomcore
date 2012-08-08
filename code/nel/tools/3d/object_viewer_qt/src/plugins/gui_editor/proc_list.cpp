@@ -42,6 +42,12 @@ namespace GUIEditor
 		delete procEditor;
 	}
 
+	void ProcList::clear()
+	{
+		procList->clear();
+		procEditor->clear();
+	}
+
 	void ProcList::onGUILoaded()
 	{
 		setupProcList();

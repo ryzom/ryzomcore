@@ -30,6 +30,7 @@ namespace GUIEditor
 	public:
 		ProcList( QWidget *parent = NULL );
 		~ProcList();
+		void clear();
 
 	public Q_SLOTS:
 		void onGUILoaded();

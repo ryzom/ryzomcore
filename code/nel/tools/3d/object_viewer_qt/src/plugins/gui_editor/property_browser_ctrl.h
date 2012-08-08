@@ -46,6 +46,7 @@ namespace GUIEditor
 		~CPropBrowserCtrl();
 		void setBrowser( QtTreePropertyBrowser *b );
 		void setupWidgetInfo( const std::map< std::string, SWidgetInfo > &info );
+		void clear();
 
 	public Q_SLOTS:
 		void onSelectionChanged( std::string &id );

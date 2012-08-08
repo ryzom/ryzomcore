@@ -74,11 +74,8 @@ namespace GUIEditor
 
 	bool NelGUIWidget::parse( SProjectFiles &files )
 	{
-		guiLoaded = false;
-		CWidgetManager::getInstance()->reset();
+		reset();
 		IParser *parser = CWidgetManager::getInstance()->getParser();
-		parser->removeAll();
-		CViewRenderer::getInstance()->reset();
 
 		std::vector< std::string >::iterator itr;
 		for( itr = files.mapFiles.begin(); itr != files.mapFiles.end(); ++itr )
@@ -110,6 +107,18 @@ namespace GUIEditor
 		Q_EMIT guiLoadComplete();
 
 		return true;
+	}
+
+	void NelGUIWidget::reset()
+	{
+		guiLoaded = false;
+		if( timerID != 0 )
+			killTimer( timerID );
+		timerID = 0;
+		CWidgetManager::getInstance()->reset();
+		CWidgetManager::getInstance()->getParser()->removeAll();
+		CViewRenderer::getInstance()->reset();
+		clear();
 	}
 
 	void NelGUIWidget::draw()

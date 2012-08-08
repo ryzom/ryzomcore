@@ -39,10 +39,22 @@ namespace GUIEditor
 
 	void GUIEditorContext::newDocument()
 	{
+		m_guiEditorWindow->newDocument();
 	}
 
 	void GUIEditorContext::save()
 	{
+		m_guiEditorWindow->save();
+	}
+
+	void GUIEditorContext::saveAs()
+	{
+		m_guiEditorWindow->saveAs();
+	}
+
+	void GUIEditorContext::close()
+	{
+		m_guiEditorWindow->close();
 	}
 		
 	QWidget *GUIEditorContext::widget()

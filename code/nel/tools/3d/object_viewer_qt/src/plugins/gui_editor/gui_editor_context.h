@@ -47,6 +47,10 @@ namespace GUIEditor
 		void newDocument();
 
 		void save();
+
+		void saveAs();
+
+		void close();
 		
 		virtual QUndoStack *undoStack();
 		

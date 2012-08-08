@@ -50,6 +50,10 @@ public:
 
 public Q_SLOTS:
 		void open();
+		void newDocument();
+		void save();
+		void saveAs();
+		void close();
 
 private Q_SLOTS:
 		void onProjectFilesChanged();

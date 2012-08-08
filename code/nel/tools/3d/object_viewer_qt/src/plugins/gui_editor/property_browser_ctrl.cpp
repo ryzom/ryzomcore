@@ -54,10 +54,18 @@ namespace GUIEditor
 		}
 	}
 
+	void CPropBrowserCtrl::clear()
+	{
+		browser->clear();
+		disconnect( propertyMgr, SIGNAL( propertyChanged( QtProperty* ) ),
+			this, SLOT( onPropertyChanged( QtProperty* ) ) );
+	}
+
 	void CPropBrowserCtrl::onSelectionChanged( std::string &id )
 	{
 		if( browser == NULL )
 			return;
+
 		disconnect( propertyMgr, SIGNAL( propertyChanged( QtProperty* ) ),
 			this, SLOT( onPropertyChanged( QtProperty* ) ) );
 
