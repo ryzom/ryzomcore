@@ -78,6 +78,7 @@ private:
 
 		CPropBrowserCtrl browserCtrl;
 		QString currentProject;
+		QString currentProjectFile;
 	};
 
 }

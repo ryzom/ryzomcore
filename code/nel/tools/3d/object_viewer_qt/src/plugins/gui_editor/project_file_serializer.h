@@ -15,47 +15,31 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef PROJECT_FILES_H
-#define PROJECT_FILES_H
+#ifndef PRJ_F_SERIALIZER
+#define PRJ_F_SERIALIZER
 
-#include <vector>
-#include <string>
+#include "project_files.h"
+#include <fstream>
 
 namespace GUIEditor
 {
-	enum ProjectVersion
-	{
-		OLD = 0,
-		NEW = 1,
-		MAX_PROJECTFILE_VERSION
-	};
-
-	struct SProjectFiles
+	class CProjectFileSerializer
 	{
 	public:
-		std::string projectName;
-		unsigned long version;
-		std::string masterGroup;
-		std::string activeGroup;
-		std::vector< std::string > guiFiles;
-		std::vector< std::string > mapFiles;
+		CProjectFileSerializer(){}
+		~CProjectFileSerializer(){}
 
-		void clearFiles()
-		{
-			guiFiles.clear();
-			mapFiles.clear();
-		}
+		void setFile( const std::string &name ){ fileName = name; }
+		bool serialize( const SProjectFiles &project );
 
-		void clearAll()
-		{
-			clearFiles();
-			projectName = "";
-			masterGroup = "";
-			activeGroup = "";
-		}
+	private:
+		bool serializeHeader( const SProjectFiles &project );
+		bool serializeGUIFiles( const SProjectFiles &project );
+		bool serializeMapFiles( const SProjectFiles &project );
+
+		std::string fileName;
+		std::ofstream out;
 	};
 }
 
 #endif
-
-

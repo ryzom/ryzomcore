@@ -35,12 +35,16 @@ namespace GUIEditor
 		
 		bool parseProjectFile( std::string &name );
 		void getProjectFiles( SProjectFiles &projectFiles ) const;
+		unsigned long getProjectVersion() const;
+		void clear();
 
 	private:
 		bool parseXMLFile( QFile &f );
 		bool parseHeader( QXmlStreamReader &reader );
 		bool parseGUIFiles( QXmlStreamReader &reader );
 		bool parseMapFiles( QXmlStreamReader &reader );
+
+		bool loaded;
 
 		SProjectFiles files;
 	};

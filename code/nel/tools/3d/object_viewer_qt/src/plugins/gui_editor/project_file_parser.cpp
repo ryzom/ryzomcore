@@ -21,6 +21,7 @@ namespace GUIEditor
 {
 	CProjectFileParser::CProjectFileParser()
 	{
+		loaded = false;
 	}
 
 	CProjectFileParser::~CProjectFileParser()
@@ -46,6 +47,9 @@ namespace GUIEditor
 
 	void CProjectFileParser::getProjectFiles( SProjectFiles &projectFiles ) const
 	{
+		if( !loaded )
+			return;
+
 		projectFiles.guiFiles.resize( files.guiFiles.size() );
 		projectFiles.mapFiles.resize( files.mapFiles.size() );
 		std::copy( files.guiFiles.begin(), files.guiFiles.end(), projectFiles.guiFiles.begin() );
@@ -55,8 +59,27 @@ namespace GUIEditor
 		projectFiles.activeGroup = files.activeGroup;
 	}
 
+	unsigned long CProjectFileParser::getProjectVersion() const
+	{
+		if( !loaded )
+			return OLD;
+
+		return files.version;
+	}
+
+	void CProjectFileParser::clear()
+	{
+		files.projectName = "";
+		files.version = OLD;
+		files.activeGroup = "";
+		files.guiFiles.clear();
+		files.mapFiles.clear();
+	}
+
 	bool CProjectFileParser::parseXMLFile(QFile &f)
 	{
+		loaded = false;
+
 		QXmlStreamReader reader;
 		reader.setDevice( &f );
 
@@ -83,6 +106,7 @@ namespace GUIEditor
 		if( !parseMapFiles( reader ) )
 			return false;
 		
+		loaded = true;
 		return true;
 	}
 
@@ -98,6 +122,14 @@ namespace GUIEditor
 					if( name.isEmpty() )
 						return false;
 					files.projectName = name.toStdString();
+				}
+				else
+				if( reader.name() == "version" )
+				{
+					QString name = reader.readElementText( QXmlStreamReader::ErrorOnUnexpectedElement );
+					if( name.isEmpty() )
+						return false;
+					files.version = static_cast< unsigned long >( name.toLong() );
 				}
 				else
 				if( reader.name() == "mastergroup" )

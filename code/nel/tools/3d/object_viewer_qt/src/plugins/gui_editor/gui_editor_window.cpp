@@ -36,6 +36,7 @@
 #include "link_list.h"
 #include "proc_list.h"
 #include "project_file_parser.h"
+#include "project_file_serializer.h"
 #include "project_window.h"
 #include "nelgui_widget.h"
 
@@ -44,6 +45,7 @@ namespace GUIEditor
 	QString _lastDir;
 	std::map< std::string, SWidgetInfo > widgetInfo;
 	SProjectFiles projectFiles;
+	CProjectFileParser projectParser;
 
 	GUIEditorWindow::GUIEditorWindow(QWidget *parent) :
 	QMainWindow(parent)
@@ -142,8 +144,9 @@ namespace GUIEditor
 			return;
 		}
 
-		CProjectFileParser parser;
-		if( !parser.parseProjectFile( fileName.toStdString() ) )
+		projectParser.clear();
+
+		if( !projectParser.parseProjectFile( fileName.toStdString() ) )
 		{
 			QMessageBox::critical( this,
 				tr( "Error parsing project file" ),
@@ -152,8 +155,9 @@ namespace GUIEditor
 			return;
 		}
 		projectFiles.clearAll();
-		parser.getProjectFiles( projectFiles );
+		projectParser.getProjectFiles( projectFiles );
 		currentProject = projectFiles.projectName.c_str();
+		currentProjectFile = fileName;
 		projectWindow->setupFiles( projectFiles );
 		if( viewPort->parse( projectFiles ) )
 		{
@@ -178,6 +182,15 @@ namespace GUIEditor
 		if( currentProject.isEmpty() )
 			return;
 
+		CProjectFileSerializer serializer;
+		serializer.setFile( currentProjectFile.toStdString() );
+		serializer.serialize( projectFiles );
+
+		// Can't save old projects any further, since the widgets are in multiple files in them
+		// using templates, styles and whatnot. There's no way to restore the original XML structure
+		// after it's loaded
+		if( projectParser.getProjectVersion() == OLD )
+			return;
 	}
 
 	void GUIEditorWindow::saveAs()
@@ -206,8 +219,9 @@ namespace GUIEditor
 		browserCtrl.clear();
 		linkList->clear();
 		procList->clear();
-
 		currentProject = "";
+		currentProjectFile = "";
+		projectParser.clear();
 	}
 
 	void GUIEditorWindow::onProjectFilesChanged()
