@@ -42,7 +42,11 @@ namespace GUIEditor
 
 		virtual QIcon icon() const{ return QIcon(); }
 
-		virtual void open();
+		void open();
+
+		void newDocument();
+
+		void save();
 		
 		virtual QUndoStack *undoStack();
 		

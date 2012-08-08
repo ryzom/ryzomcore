@@ -188,6 +188,14 @@ namespace GUIEditor
 	void GUIEditorWindow::createMenus()
 	{
 		Core::MenuManager *mm = Core::ICore::instance()->menuManager();
+		//QAction *newAction = mm->action( Core::Constants::NEW );
+		QAction *saveAction = mm->action( Core::Constants::SAVE );
+
+		//if( newAction != NULL )
+		//	newAction->setEnabled( true );
+		if( saveAction != NULL )
+			saveAction->setEnabled( true );
+
 		QMenu *menu = mm->menu( Core::Constants::M_TOOLS );
 		if( menu != NULL )
 		{

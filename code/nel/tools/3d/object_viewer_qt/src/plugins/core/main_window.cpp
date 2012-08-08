@@ -159,10 +159,12 @@ void MainWindow::open()
 
 void MainWindow::newFile()
 {
+	m_contextManager->currentContext()->newDocument();
 }
 
 void MainWindow::save()
 {
+	m_contextManager->currentContext()->save();
 }
 
 void MainWindow::saveAs()

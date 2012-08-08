@@ -61,6 +61,10 @@ public:
 	virtual QUndoStack *undoStack() = 0;
 
 	virtual void open() = 0;
+
+	virtual void save(){}
+
+	virtual void newDocument(){}
 };
 
 } // namespace Core
