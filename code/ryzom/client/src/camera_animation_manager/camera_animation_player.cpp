@@ -51,8 +51,8 @@ void CCameraAnimationPlayer::start()
 	_IsPlaying = true;
 
 	// We set the user controls in camAnimMode and we remember the current view and viewPos
-	_LastView = View.currentView();
-	_LastViewPos = View.currentViewPos();
+	_LastView = View.view();
+	_LastViewPos = View.viewPos();
 	_LastMode = UserControls.mode();
 	UserControls.mode(CUserControls::CamAnimMode);
 	_HasLastViewInfo = true;
