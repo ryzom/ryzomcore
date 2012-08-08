@@ -91,6 +91,9 @@ private:
 	NLMISC::CVector _LastViewPos;
 	CUserControls::TMoveMode _LastMode;
 	bool _HasLastViewInfo;
+
+	NLMISC::CVector _StartStepCamLookAtDir;
+	NLMISC::CVector _StartStepCamPos;
 };
 
 

@@ -111,6 +111,10 @@ void CCameraAnimationPlayer::playStep(const std::string& stepName, NLMISC::CBitM
 	}
 
 	_ElapsedTimeForCurrStep = 0.f;
+
+	// We get the current camera information
+	_StartStepCamLookAtDir = View.currentView();
+	_StartStepCamPos = View.currentViewPos();
 }
 
 bool CCameraAnimationPlayer::isPlaying()
@@ -120,14 +124,10 @@ bool CCameraAnimationPlayer::isPlaying()
 
 TCameraAnimationInfo CCameraAnimationPlayer::update()
 {
-	// We get the current camera information
-	NLMISC::CVector camLookAtDir = View.currentView();
-	NLMISC::CVector camPos = View.currentViewPos();
-
 	// We update the elapsed time for this step
 	_ElapsedTimeForCurrStep += DT;
 
-	TCameraAnimationInfo currCamInfo(camPos, camLookAtDir, _ElapsedTimeForCurrStep);
+	TCameraAnimationInfo currCamInfo(_StartStepCamLookAtDir, _StartStepCamPos, _ElapsedTimeForCurrStep);
 
 	if (!isPlaying())
 		return currCamInfo;
