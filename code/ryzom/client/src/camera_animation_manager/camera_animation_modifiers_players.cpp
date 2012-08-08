@@ -18,6 +18,9 @@
 #include "camera_animation_manager/camera_animation_modifier_player_factory.h"
 #include "game_share/position_or_entity_type.h"
 #include "camera_animation_manager/camera_animation_info.h"
+#include "camera_animation_manager/position_or_entity_pos_resolver.h"
+#include "global.h"
+#include "sound_manager.h"
 
 /////////////////////////////////////////////////////////////////////////////
 /// This animation modifier shakes the camera. The parameter is
@@ -74,6 +77,10 @@ public:
 	{
 		impulse.serial(const_cast<TPositionOrEntity&>(SoundPos));
 		impulse.serial(const_cast<NLMISC::CSheetId&>(SoundId));
+
+		// We play the sound once here
+		NLMISC::CVector pos = resolvePositionOrEntityPosition(SoundPos);
+		SoundMngr->spawnSource(SoundId, pos);
 
 		return true;
 	}

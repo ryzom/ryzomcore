@@ -92,6 +92,7 @@
 #include "nel/misc/entity_id.h"
 #include "entity_cl.h"
 #include "camera_animation_manager/camera_animation_player.h"
+#include "camera_animation_manager/position_or_entity_pos_resolver.h"
 
 
 #define OLD_STRING_SYSTEM
@@ -3574,25 +3575,9 @@ void impulsePlaySoundTrigger(NLMISC::CBitMemStream& impulse)
 		nlwarning("<impulsePlaySoundTrigger> invalid SoundPosition");
 		return;
 	}
-	if (SoundPosition.isPosition())
-		SoundMngr->spawnSource(SoundId, SoundPosition.getPosition());
-	else
-	{
-		NLMISC::CVectorD pos;
-		TDataSetIndex compressedIndex = SoundPosition.getEntityId();
 
-		CEntityCL *entity = EntitiesMngr.getEntityByCompressedIndex(compressedIndex);
-		if (!entity)
-		{
-			nlwarning("<impulsePlaySoundTrigger> invalid entity with compressed id %d", compressedIndex);
-			return;
-		}
-		else
-		{
-			pos = entity->pos();
-			SoundMngr->spawnSource(SoundId, pos);
-		}
-	}
+	NLMISC::CVector pos = resolvePositionOrEntityPosition(SoundPosition);
+	SoundMngr->spawnSource(SoundId, pos);
 }
 
 void impulseCameraAnimationPlay(NLMISC::CBitMemStream& impulse)
