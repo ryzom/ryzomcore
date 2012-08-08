@@ -114,6 +114,10 @@ private:
 	bool m_Aborting;
 	TErrorLogCallback m_ErrorLogCallback;
 
+	uint32 m_StatsBuild;
+	uint32 m_StatsSkip;
+	uint32 m_StatsInvalid;
+
 private:
 	bool getDependencyFileStatusCached(CFileStatus &fileStatus, const std::string &filePath);
 	bool getDependencyFileStatusLatest(CFileStatus &fileStatus, const std::string &filePath);

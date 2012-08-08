@@ -513,18 +513,21 @@ public:
 		if (slaveIt == m_Slaves.end()) { nlerror("Received 'slaveLoggedToolError' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
 		CSlave *slave = slaveIt->second;
 		
-		CBuildTaskInfo *task = m_BuildTaskQueue.getTaskInfo(slave->ActiveTaskId);
-		CProcessPluginInfo pluginInfo;
-		g_PipelineWorkspace->getProcessPlugin(pluginInfo, task->ProcessPluginId);
-		
-		CFileError fe;
-		fe.MasterTime = CTime::getSecondsSince1970();
-		fe.Level = (TError)type;
-		fe.Message = error;
-		fe.Time = time;
-		fe.Project = task->ProjectName;;
-		fe.Plugin = pluginInfo.Handler;
-		CMetadataStorage::appendError(fe, CMetadataStorage::getErrorPath(unMacroPath(macroPath)));
+		if (!macroPath.empty())
+		{
+			CBuildTaskInfo *task = m_BuildTaskQueue.getTaskInfo(slave->ActiveTaskId);
+			CProcessPluginInfo pluginInfo;
+			g_PipelineWorkspace->getProcessPlugin(pluginInfo, task->ProcessPluginId);
+			
+			CFileError fe;
+			fe.MasterTime = CTime::getSecondsSince1970();
+			fe.Level = (TError)type;
+			fe.Message = error;
+			fe.Time = time;
+			fe.Project = task->ProjectName;;
+			fe.Plugin = pluginInfo.Handler;
+			CMetadataStorage::appendError(fe, CMetadataStorage::getErrorPath(unMacroPath(macroPath)));
+		}
 
 		notifyTerminalTaskMessage(slave->ActiveTaskId, (TError)type, macroPath, time, error);
 	}

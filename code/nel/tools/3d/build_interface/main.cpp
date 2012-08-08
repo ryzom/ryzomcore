@@ -280,6 +280,9 @@ int main(int nNbArg, char **ppArgs)
 			inFile.open( AllMapNames[i] );
 			pBtmp->load(inFile);
 			AllMaps.push_back(pBtmp);
+
+			if (pBtmp->getWidth() == 0 || pBtmp->getHeight() == 0)
+				ToolLogger.writeError(PIPELINE::WARNING, AllMapNames[i], "Bitmap of width or height 0, corrupt data");
 		}
 		catch (const NLMISC::Exception &e)
 		{

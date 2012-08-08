@@ -685,6 +685,14 @@ public:
 	void finishedTask(TProcessResult errorLevel, std::string errorMessage)
 	{
 		nlinfo("errorLevel: %i, errorMessage: %s", (uint32)errorLevel, errorMessage.c_str());
+		stringstream ss;
+		ss << "Build: " << m_ActiveProcess->m_StatsBuild << ", Skip: " << m_ActiveProcess->m_StatsSkip << ", Invalid: " << m_ActiveProcess->m_StatsInvalid << ", Total: "
+			<< (m_ActiveProcess->m_StatsBuild + m_ActiveProcess->m_StatsSkip + m_ActiveProcess->m_StatsInvalid);
+		nlinfo("%s", ss.str().c_str());
+		stringstream ss2;
+		ss2 << NLMISC::CTime::getSecondsSince1970();
+		if (m_Master) // TODO: Maybe send this as part of the finished build task message, would be cleaner ;)
+			m_Master->slaveLoggedToolError(this, (uint8)MESSAGE, "", ss2.str(), ss.str());
 		clearActiveProcess();
 		m_SlaveTaskState = IDLE_WAIT_MASTER;
 		if (m_Master) // else was disconnect

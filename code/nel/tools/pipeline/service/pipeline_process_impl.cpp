@@ -50,7 +50,7 @@ using namespace std;
 
 namespace PIPELINE {
 
-CPipelineProcessImpl::CPipelineProcessImpl(CPipelineProject *activeProject) : m_ActiveProject(activeProject), m_SubTaskResult(FINISH_NOT), m_Aborting(false)
+CPipelineProcessImpl::CPipelineProcessImpl(CPipelineProject *activeProject) : m_ActiveProject(activeProject), m_SubTaskResult(FINISH_NOT), m_Aborting(false), m_StatsBuild(0), m_StatsSkip(0), m_StatsInvalid(0)
 {
 	if (activeProject == NULL)
 	{

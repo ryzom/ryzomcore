@@ -160,7 +160,8 @@ void CPipelineProcessImpl::parseToolLog(const std::string &dependLogFile, const 
 				}
 				std::string path = standardizePath(tabbedLine[1], false);
 				nlwarning("Read error log line: %s, %s, %s, %s", tabbedLine[0].c_str(), path.c_str(), tabbedLine[2].c_str(), tabbedLine[3].c_str());
-				// TODO: Notify the master to write to the .errors meta file and update any connected terminals
+				// Notify the master through the slave to write to the .errors meta file and update any connected terminals
+				m_ErrorLogCallback(type, path, tabbedLine[2], tabbedLine[3]);
 				if (type == ERROR)
 					++nbErrors;
 			}
