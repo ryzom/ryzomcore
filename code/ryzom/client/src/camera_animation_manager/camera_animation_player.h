@@ -19,11 +19,11 @@
 
 
 #include <string>
-#include "nel\misc\bit_mem_stream.h"
+#include "nel/misc/bit_mem_stream.h"
 #include "camera_animation_manager/camera_animation_step_player_factory.h"
 #include "nel/misc/vector.h"
-#include "camera_animation_manager\camera_animation_info.h"
-#include "motion\user_controls.h"
+#include "camera_animation_manager/camera_animation_info.h"
+#include "motion/user_controls.h"
 
 
 /************************************************************************/

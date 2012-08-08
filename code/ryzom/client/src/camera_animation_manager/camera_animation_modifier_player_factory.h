@@ -19,8 +19,8 @@
 
 #include <string>
 #include <vector>
-#include "nel\misc\bit_mem_stream.h"
-#include "camera_animation_manager\camera_animation_info.h"
+#include "nel/misc/bit_mem_stream.h"
+#include "camera_animation_manager/camera_animation_info.h"
 
 /************************************************************************/
 /* Interface for camera animation modifiers.

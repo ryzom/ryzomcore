@@ -17,7 +17,7 @@
 
 #include "camera_animation_manager/camera_animation_step_player_factory.h"
 #include "game_share/position_or_entity_type.h"
-#include "camera_animation_manager\camera_animation_info.h"
+#include "camera_animation_manager/camera_animation_info.h"
 
 
 /// Basic camera animation step that has generic values
