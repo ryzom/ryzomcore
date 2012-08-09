@@ -179,6 +179,10 @@ public:
 	/// Function that plays the step
 	virtual TCameraAnimationInfo updateStep(const TCameraAnimationInfo& currCamInfo)
 	{
+		TCameraAnimationInfo camInfo;
+
+		// We compute the distance
+
 		return currCamInfo;
 	}
 

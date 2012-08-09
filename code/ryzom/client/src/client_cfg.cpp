@@ -339,6 +339,8 @@ CClientConfig::CClientConfig()
 	DmWalk				= 6.0f;						// Default Velocity for the Walk in Ring/DM or Ring/Editor.
 	DmRun				= 20.0f;						// Default Velocity for the Run in Ring/DM or Ring/Editor.
 
+	MaxCameraAnimationSpeed		= 100.0f;			// Default maximum speed for camera animation
+
 	FlyAccel			= 1000.f;					// Default Acceleration for the fly, in m.s-2
 
 	AllowDebugCommands	= false;					// Add debug commands at startup
@@ -913,6 +915,9 @@ void CClientConfig::setValues()
 	// DM Run
 	READ_FLOAT_DEV(DmRun)
 
+
+	// Maximum camera animation speed
+	READ_FLOAT_DEV(MaxCameraAnimationSpeed);
 
 
 	// Fly
