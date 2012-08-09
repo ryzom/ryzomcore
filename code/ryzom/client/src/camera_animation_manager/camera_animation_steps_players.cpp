@@ -259,7 +259,65 @@ public:
 	/// Function that plays the step
 	virtual TCameraAnimationOutputInfo updateStep(const TCameraAnimationInputInfo& currCamInfo)
 	{
-		return currCamInfo.toOutput();
+		TCameraAnimationOutputInfo camInfo;
+
+		// We compute the distance between the point to turn around and our current position
+		NLMISC::CVector pointPos = resolvePositionOrEntityPosition(PointToTurnAround);
+		NLMISC::CVector distanceVec = pointPos - currCamInfo.CamPos;
+
+		float distance = distanceVec.norm();
+
+		// We compute the difference with the expected distance
+		float difference = distance - DistanceToPoint;
+
+		// We compute the distance we can travel
+		float travellingDistance = DT * ClientCfg.MaxCameraAnimationSpeed * (difference < 0.f ? -1.f : 1.f);
+
+		// We check if we are not going to far
+		if (abs(travellingDistance) > abs(difference))
+			travellingDistance = difference;
+
+		// We normalize the vector from our position to the point
+		distanceVec.normalize();
+		// We multiply this vector with the distance to travel
+		distanceVec = distanceVec * travellingDistance;
+
+		// We add this vector to our position to know our new position
+		NLMISC::CVector newPos = currCamInfo.CamPos + distanceVec;
+
+		// Now we compute the current angle between our position and the point's position
+		NLMISC::CVector2f currTopVector(newPos.x - pointPos.x, newPos.y - pointPos.y);
+		float distance2D = currTopVector.norm();
+		currTopVector.normalize();
+
+		float angle = acosf(currTopVector.x);
+		if (currTopVector.y < 0)
+			angle *= -1.f;
+
+		// We compute an angle to travail in function of the speed
+		float angleOffset = DT * Speed;
+
+		float newAngle = angle + angleOffset;
+
+		// We compute the new position for this angle
+		NLMISC::CVector2f new2DPos(cosf(newAngle), sinf(newAngle));
+		new2DPos = new2DPos * distance2D;
+
+		// We integrate this new position in the world
+		NLMISC::CVector newDir(new2DPos.x, new2DPos.y, newPos.z - pointPos.z);
+
+		camInfo.CamPos = pointPos + newDir;
+
+		// Now we compute the new look at direction
+		float ratio = currCamInfo.ElapsedTimeSinceStartStep / getDuration();
+
+		// We compute the final look at direction
+		NLMISC::CVector finalDir = resolvePositionOrEntityPosition(LookAtPos) - camInfo.CamPos;
+
+		// We get the current look at direction
+		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, currCamInfo.StartCamLookAtDir, finalDir);
+
+		return camInfo;
 	}
 
 	virtual void stopStep()
