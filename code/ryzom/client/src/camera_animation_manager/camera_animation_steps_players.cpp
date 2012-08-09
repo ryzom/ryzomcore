@@ -20,6 +20,7 @@
 #include "camera_animation_manager/camera_animation_info.h"
 #include "camera_animation_manager/position_or_entity_pos_resolver.h"
 #include "client_cfg.h"
+#include "time_client.h"
 
 
 /// Basic camera animation step that has generic values
@@ -185,6 +186,35 @@ public:
 		// We compute the distance between the entity to follow and our current position
 		NLMISC::CVector entityPos = resolvePositionOrEntityPosition(EntityToFollow);
 		NLMISC::CVector distanceVec = entityPos - currCamInfo.CamPos;
+
+		float distance = distanceVec.norm();
+
+		// We compute the difference with the expected distance
+		float difference = distance - DistanceToEntity;
+
+		// We compute the distance we can travel
+		float travellingDistance = DT * ClientCfg.MaxCameraAnimationSpeed * (difference < 0.f ? -1.f : 1.f);
+
+		// We check if we are not going to far
+		if (abs(travellingDistance) > abs(difference))
+			travellingDistance = difference;
+
+		// We normalize the vector from our position to the entity
+		distanceVec.normalize();
+		// We multiply this vector with the distance to travel
+		distanceVec = distanceVec * travellingDistance;
+
+		// We add this vector to our position to know our new position
+		camInfo.CamPos = currCamInfo.CamPos + distanceVec;
+
+		// Now we compute the new look at direction
+		float ratio = currCamInfo.ElapsedTimeSinceStartStep / getDuration();
+
+		// We compute the final look at direction
+		NLMISC::CVector finalDir = resolvePositionOrEntityPosition(LookAtPos) - camInfo.CamPos;
+
+		// We get the current look at direction
+		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, currCamInfo.StartCamLookAtDir, finalDir);
 
 		return camInfo;
 	}
