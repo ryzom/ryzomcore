@@ -45,9 +45,9 @@ public:
 	}
 
 	/// Function that plays the modifier
-	virtual TCameraAnimationInfo updateModifier(const TCameraAnimationInfo& currCamInfo)
+	virtual TCameraAnimationOutputInfo updateModifier(const TCameraAnimationInputInfo& currCamInfo)
 	{
-		return currCamInfo;
+		return currCamInfo.toOutput();
 	}
 
 	virtual void stopModifier()
@@ -86,9 +86,9 @@ public:
 	}
 
 	/// Function that plays the modifier
-	virtual TCameraAnimationInfo updateModifier(const TCameraAnimationInfo& currCamInfo)
+	virtual TCameraAnimationOutputInfo updateModifier(const TCameraAnimationInputInfo& currCamInfo)
 	{
-		return currCamInfo;
+		return currCamInfo.toOutput();
 	}
 
 	virtual void stopModifier()

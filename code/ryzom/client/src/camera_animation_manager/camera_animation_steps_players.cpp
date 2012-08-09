@@ -19,6 +19,7 @@
 #include "game_share/position_or_entity_type.h"
 #include "camera_animation_manager/camera_animation_info.h"
 #include "camera_animation_manager/position_or_entity_pos_resolver.h"
+#include "client_cfg.h"
 
 
 /// Basic camera animation step that has generic values
@@ -73,12 +74,12 @@ public:
 	}
 
 	/// Function that plays the step
-	virtual TCameraAnimationInfo updateStep(const TCameraAnimationInfo& currCamInfo)
+	virtual TCameraAnimationOutputInfo updateStep(const TCameraAnimationInputInfo& currCamInfo)
 	{
-		TCameraAnimationInfo camInfo;
+		TCameraAnimationOutputInfo camInfo;
 
 		// We don't change the position
-		camInfo.CamPos = currCamInfo.CamPos;
+		camInfo.CamPos = currCamInfo.StartCamPos;
 
 		float ratio = currCamInfo.ElapsedTimeSinceStartStep / getDuration();
 
@@ -86,7 +87,7 @@ public:
 		NLMISC::CVector finalDir = resolvePositionOrEntityPosition(LookAtPos) - camInfo.CamPos;
 
 		// We get the current look at direction
-		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, currCamInfo.CamLookAtDir, finalDir);
+		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, currCamInfo.StartCamLookAtDir, finalDir);
 
 		return camInfo;
 	}
@@ -121,24 +122,24 @@ public:
 	}
 
 	/// Function that plays the step
-	virtual TCameraAnimationInfo updateStep(const TCameraAnimationInfo& currCamInfo)
+	virtual TCameraAnimationOutputInfo updateStep(const TCameraAnimationInputInfo& currCamInfo)
 	{
-		TCameraAnimationInfo camInfo;
+		TCameraAnimationOutputInfo camInfo;
 
 		float ratio = currCamInfo.ElapsedTimeSinceStartStep / getDuration();
 
 		// We compute the current position between the starting position and the final position
-		NLMISC::CVector movementVector = resolvePositionOrEntityPosition(EndPos) - currCamInfo.CamPos;
+		NLMISC::CVector movementVector = resolvePositionOrEntityPosition(EndPos) - currCamInfo.StartCamPos;
 
 		// We current position is computed using the ratio and the starting position
 		NLMISC::CVector offset = movementVector * ratio;
-		camInfo.CamPos = currCamInfo.CamPos + offset;
+		camInfo.CamPos = currCamInfo.StartCamPos + offset;
 
 		// Now we compute the current look at direction
 		NLMISC::CVector finalDir = resolvePositionOrEntityPosition(LookAtPos) - camInfo.CamPos;
 
 		// We get the current look at direction
-		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, currCamInfo.CamLookAtDir, finalDir);
+		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, currCamInfo.StartCamLookAtDir, finalDir);
 
 		return camInfo;
 	}
@@ -177,13 +178,15 @@ public:
 	}
 
 	/// Function that plays the step
-	virtual TCameraAnimationInfo updateStep(const TCameraAnimationInfo& currCamInfo)
+	virtual TCameraAnimationOutputInfo updateStep(const TCameraAnimationInputInfo& currCamInfo)
 	{
-		TCameraAnimationInfo camInfo;
+		TCameraAnimationOutputInfo camInfo;
 
-		// We compute the distance
+		// We compute the distance between the entity to follow and our current position
+		NLMISC::CVector entityPos = resolvePositionOrEntityPosition(EntityToFollow);
+		NLMISC::CVector distanceVec = entityPos - currCamInfo.CamPos;
 
-		return currCamInfo;
+		return camInfo;
 	}
 
 	virtual void stopStep()
@@ -224,9 +227,9 @@ public:
 	}
 
 	/// Function that plays the step
-	virtual TCameraAnimationInfo updateStep(const TCameraAnimationInfo& currCamInfo)
+	virtual TCameraAnimationOutputInfo updateStep(const TCameraAnimationInputInfo& currCamInfo)
 	{
-		return currCamInfo;
+		return currCamInfo.toOutput();
 	}
 
 	virtual void stopStep()
@@ -264,9 +267,9 @@ public:
 	}
 
 	/// Function that plays the step
-	virtual TCameraAnimationInfo updateStep(const TCameraAnimationInfo& currCamInfo)
+	virtual TCameraAnimationOutputInfo updateStep(const TCameraAnimationInputInfo& currCamInfo)
 	{
-		return currCamInfo;
+		return currCamInfo.toOutput();
 	}
 
 	virtual void stopStep()

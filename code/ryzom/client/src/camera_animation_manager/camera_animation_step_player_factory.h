@@ -40,7 +40,7 @@ public:
 	/// Function that updates the camera with the step
 	/// currCamInfo contains information about the current camera position and look at position
 	/// The function must return the new camera information
-	virtual TCameraAnimationInfo updateStep(const TCameraAnimationInfo& currCamInfo) = 0;
+	virtual TCameraAnimationOutputInfo updateStep(const TCameraAnimationInputInfo& currCamInfo) = 0;
 
 	/// Function called when the step stops
 	virtual void stopStep() = 0;
@@ -52,7 +52,7 @@ public:
 	void addModifier(ICameraAnimationModifierPlayer* modifier);
 
 	// Plays the step and its modifiers
-	TCameraAnimationInfo updateStepAndModifiers(const TCameraAnimationInfo& currCamInfo);
+	TCameraAnimationOutputInfo updateStepAndModifiers(const TCameraAnimationInputInfo& currCamInfo);
 
 	// Stops the step and its modifiers
 	void stopStepAndModifiers();

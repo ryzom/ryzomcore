@@ -80,7 +80,7 @@ void CUserControls::camAnimModeStop()
 void CUserControls::camAnimMode()
 {
 	// Call the camera animation update function to update the view
-	TCameraAnimationInfo newCamInfo = CCameraAnimationPlayer::getInstance()->update();
+	TCameraAnimationOutputInfo newCamInfo = CCameraAnimationPlayer::getInstance()->update();
 
 	// We normalize the look at direction
 	newCamInfo.CamLookAtDir.normalize();

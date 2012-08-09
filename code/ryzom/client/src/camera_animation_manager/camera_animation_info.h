@@ -20,32 +20,72 @@
 
 #include "nel/misc/vector.h"
 
-
 /************************************************************************/
-/* Class that contains information about the camera
+/* Class that contains new information about the camera
  * 
  * \author Fabien Henon
  * \date 2012
  */
 /************************************************************************/
-struct TCameraAnimationInfo
+struct TCameraAnimationOutputInfo
 {
-	TCameraAnimationInfo(const NLMISC::CVector& camPos, 
-						const NLMISC::CVector& camLookAtDir, 
-						float elapsedTimeSinceStartStep)
-	{
-		CamPos = camPos;
-		CamLookAtDir = camLookAtDir;
-		ElapsedTimeSinceStartStep = elapsedTimeSinceStartStep;
-	}
-
-	TCameraAnimationInfo() {}
+	TCameraAnimationOutputInfo() {}
 
 	NLMISC::CVector CamPos;						/// Camera position
 	NLMISC::CVector CamLookAtDir;				/// Camera look at direction
+};
+
+/************************************************************************/
+/* Class that contains current information about the camera
+ * 
+ * \author Fabien Henon
+ * \date 2012
+ */
+/************************************************************************/
+struct TCameraAnimationInputInfo
+{
+	TCameraAnimationInputInfo(const NLMISC::CVector& currCamPos, const NLMISC::CVector& currCamLookAtDir, 
+								const NLMISC::CVector& startCamPos, const NLMISC::CVector& startCamLookAtDir, 
+								float elapsedTimeSinceStartStep)
+	{
+		CamPos = currCamPos;
+		CamLookAtDir = currCamLookAtDir;
+
+		StartCamPos = startCamPos;
+		StartCamLookAtDir = startCamLookAtDir;
+
+		ElapsedTimeSinceStartStep = elapsedTimeSinceStartStep;
+	}
+
+	TCameraAnimationInputInfo(const TCameraAnimationOutputInfo& output, const TCameraAnimationInputInfo& input)
+	{
+		CamPos = output.CamPos;
+		CamLookAtDir = output.CamLookAtDir;
+
+		StartCamPos = input.StartCamPos;
+		StartCamLookAtDir = input.StartCamLookAtDir;
+
+		ElapsedTimeSinceStartStep = input.ElapsedTimeSinceStartStep;
+	}
+
+	TCameraAnimationOutputInfo toOutput() const
+	{
+		TCameraAnimationOutputInfo output;
+		output.CamPos = CamPos;
+		output.CamLookAtDir = CamLookAtDir;
+		return output;
+	}
+
+	NLMISC::CVector CamPos;						/// Current camera position
+	NLMISC::CVector CamLookAtDir;				/// Current camera look at direction
+
+	NLMISC::CVector StartCamPos;				/// Start camera position
+	NLMISC::CVector StartCamLookAtDir;			/// Start camera look at direction
 
 	float ElapsedTimeSinceStartStep;			/// Elapsed time in second since the beginning of this step
 };
+
+
 
 
 

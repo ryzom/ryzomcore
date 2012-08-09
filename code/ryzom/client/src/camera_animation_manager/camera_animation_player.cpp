@@ -122,20 +122,24 @@ bool CCameraAnimationPlayer::isPlaying()
 	return _IsPlaying;
 }
 
-TCameraAnimationInfo CCameraAnimationPlayer::update()
+TCameraAnimationOutputInfo CCameraAnimationPlayer::update()
 {
 	// We update the elapsed time for this step
 	_ElapsedTimeForCurrStep += DT;
 
-	TCameraAnimationInfo currCamInfo(_StartStepCamLookAtDir, _StartStepCamPos, _ElapsedTimeForCurrStep);
+	NLMISC::CVector currCamPos = View.currentViewPos();
+	NLMISC::CVector currLookAtDir = View.currentView();
+
+	TCameraAnimationInputInfo currCamInfo(currCamPos, currLookAtDir,
+											_StartStepCamPos, _StartStepCamLookAtDir, _ElapsedTimeForCurrStep);
 
 	if (!isPlaying())
-		return currCamInfo;
+		return currCamInfo.toOutput();
 	if (_CurrStep == NULL)
-		return currCamInfo;
+		return currCamInfo.toOutput();
 
 	// We update the current step
-	currCamInfo = _CurrStep->updateStepAndModifiers(currCamInfo);
+	TCameraAnimationOutputInfo newCamInfo = _CurrStep->updateStepAndModifiers(currCamInfo);
 
-	return currCamInfo;
+	return newCamInfo;
 }

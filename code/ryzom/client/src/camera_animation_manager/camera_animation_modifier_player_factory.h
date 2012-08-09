@@ -36,7 +36,7 @@ public:
 	/// Function that updates the modifier
 	/// currCamInfo contains information about the current camera position and look at position
 	/// The function must return the new camera information
-	virtual TCameraAnimationInfo updateModifier(const TCameraAnimationInfo& currCamInfo) = 0;
+	virtual TCameraAnimationOutputInfo updateModifier(const TCameraAnimationInputInfo& currCamInfo) = 0;
 
 	/// Function called when the modifier is stopped
 	virtual void stopModifier() = 0;

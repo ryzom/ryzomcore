@@ -92,18 +92,20 @@ void ICameraAnimationStepPlayer::addModifier(ICameraAnimationModifierPlayer* mod
 	Modifiers.push_back(modifier);
 }
 
-TCameraAnimationInfo ICameraAnimationStepPlayer::updateStepAndModifiers(const TCameraAnimationInfo& currCamInfo)
+TCameraAnimationOutputInfo ICameraAnimationStepPlayer::updateStepAndModifiers(const TCameraAnimationInputInfo& currCamInfo)
 {
 	// Updates the step
-	TCameraAnimationInfo newInfo = updateStep(currCamInfo);
+	TCameraAnimationOutputInfo newInfo = updateStep(currCamInfo);
 
 	// Updates the modifiers
 	for (std::vector<ICameraAnimationModifierPlayer*>::iterator it = Modifiers.begin(); it != Modifiers.end(); ++it)
 	{
 		ICameraAnimationModifierPlayer* modifier = *it;
 		
+		TCameraAnimationInputInfo input(newInfo, currCamInfo);
+
 		// We update the modifier
-		newInfo = modifier->updateModifier(newInfo);
+		newInfo = modifier->updateModifier(input);
 	}
 	return newInfo;
 }

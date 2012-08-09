@@ -67,7 +67,7 @@ public:
 	bool isPlaying();
 
 	/// Updates the camera by calling the update function of the current step and modifiers
-	TCameraAnimationInfo update();
+	TCameraAnimationOutputInfo update();
 
 private:
 	/// Constructor
