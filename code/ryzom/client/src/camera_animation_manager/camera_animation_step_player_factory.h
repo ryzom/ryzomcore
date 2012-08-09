@@ -22,6 +22,7 @@
 #include "nel/misc/bit_mem_stream.h"
 #include "camera_animation_manager/camera_animation_modifier_player_factory.h"
 #include "camera_animation_manager/camera_animation_info.h"
+#include "nel/misc/vector.h"
 
 /************************************************************************/
 /* Interface for camera animation steps.
@@ -57,6 +58,13 @@ public:
 	void stopStepAndModifiers();
 
 protected:
+
+	/// Compute the current look at direction depending on the current position, the starting look at direction,
+	/// the ending look at direction and the progression expressed as a ratio (value between 0 and 1 that expresses the
+	/// progression)
+	NLMISC::CVector computeCurrentLookAtDir(float ratio, const NLMISC::CVector& currPos, const NLMISC::CVector& startLookAtDir,
+										const NLMISC::CVector& endLookAtDir);
+
 	// The list of modifiers
 	std::vector<ICameraAnimationModifierPlayer*> Modifiers;
 };

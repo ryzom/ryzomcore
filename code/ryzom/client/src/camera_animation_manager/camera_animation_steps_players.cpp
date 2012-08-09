@@ -84,24 +84,12 @@ public:
 
 		// We compute the starting look at direction
 		NLMISC::CVector startDir = currCamInfo.CamLookAtDir - currCamInfo.CamPos;
-		startDir.normalize();
 
 		// We compute the final look at direction
 		NLMISC::CVector finalDir = resolvePositionOrEntityPosition(LookAtPos) - currCamInfo.CamPos;
-		finalDir.normalize();
 
-		// We compute a vector that goes from the starting look at dir to the final look at dir
-		NLMISC::CVector startToFinal = finalDir - startDir;
-
-		// We multiply this vector by the ratio so that we can have a vector that represent the current position we are looking at
-		startToFinal = startToFinal * ratio;
-
-		// We compute the position we are looking at
-		NLMISC::CVector currLookAtPos = startDir + startToFinal;
-
-		// We compute the direction
-		camInfo.CamLookAtDir = currLookAtPos - camInfo.CamPos;
-		camInfo.CamLookAtDir.normalize();
+		// We get the current look at direction
+		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, camInfo.CamPos, startDir, finalDir);
 
 		return camInfo;
 	}

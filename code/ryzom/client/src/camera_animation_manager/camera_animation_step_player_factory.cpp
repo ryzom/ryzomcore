@@ -122,3 +122,30 @@ void ICameraAnimationStepPlayer::stopStepAndModifiers()
 		modifier->stopModifier();
 	}
 }
+
+NLMISC::CVector ICameraAnimationStepPlayer::computeCurrentLookAtDir(float ratio, const NLMISC::CVector& currPos, const NLMISC::CVector& startLookAtDir,
+																	const NLMISC::CVector& endLookAtDir)
+{
+	// We normalize the start look at direction
+	NLMISC::CVector startDir = startLookAtDir;
+	startDir.normalize();
+
+	// We normalize the final look at direction
+	NLMISC::CVector finalDir = endLookAtDir;
+	finalDir.normalize();
+
+	// We compute a vector that goes from the starting look at dir to the final look at dir
+	NLMISC::CVector startToFinal = finalDir - startDir;
+
+	// We multiply this vector by the ratio so that we can have a vector that represent the current position we are looking at
+	startToFinal = startToFinal * ratio;
+
+	// We compute the position we are looking at
+	NLMISC::CVector currLookAtPos = startDir + startToFinal;
+
+	// We compute the direction
+	NLMISC::CVector currLookAtDir = currLookAtPos - currPos;
+	currLookAtDir.normalize();
+
+	return currLookAtDir;
+}
