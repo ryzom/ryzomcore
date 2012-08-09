@@ -82,14 +82,11 @@ public:
 
 		float ratio = currCamInfo.ElapsedTimeSinceStartStep / getDuration();
 
-		// We compute the starting look at direction
-		NLMISC::CVector startDir = currCamInfo.CamLookAtDir - currCamInfo.CamPos;
-
 		// We compute the final look at direction
 		NLMISC::CVector finalDir = resolvePositionOrEntityPosition(LookAtPos) - currCamInfo.CamPos;
 
 		// We get the current look at direction
-		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, camInfo.CamPos, startDir, finalDir);
+		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, camInfo.CamPos, currCamInfo.CamLookAtDir, finalDir);
 
 		return camInfo;
 	}

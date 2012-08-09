@@ -140,11 +140,8 @@ NLMISC::CVector ICameraAnimationStepPlayer::computeCurrentLookAtDir(float ratio,
 	// We multiply this vector by the ratio so that we can have a vector that represent the current position we are looking at
 	startToFinal = startToFinal * ratio;
 
-	// We compute the position we are looking at
-	NLMISC::CVector currLookAtPos = startDir + startToFinal;
-
-	// We compute the direction
-	NLMISC::CVector currLookAtDir = currLookAtPos - currPos;
+	// We compute the direction we are looking at
+	NLMISC::CVector currLookAtDir = startDir + startToFinal;
 	currLookAtDir.normalize();
 
 	return currLookAtDir;
