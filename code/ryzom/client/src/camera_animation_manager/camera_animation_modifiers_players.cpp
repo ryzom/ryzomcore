@@ -21,6 +21,8 @@
 #include "camera_animation_manager/position_or_entity_pos_resolver.h"
 #include "global.h"
 #include "sound_manager.h"
+#include "nel/misc/random.h"
+#include "nel/misc/time_nl.h"
 
 /////////////////////////////////////////////////////////////////////////////
 /// This animation modifier shakes the camera. The parameter is
@@ -47,7 +49,21 @@ public:
 	/// Function that plays the modifier
 	virtual TCameraAnimationOutputInfo updateModifier(const TCameraAnimationInputInfo& currCamInfo)
 	{
-		return currCamInfo.toOutput();
+		TCameraAnimationOutputInfo output;
+
+		NLMISC::CRandom rnd;
+		rnd.srand((sint32)NLMISC::CTime::getLocalTime());
+
+		NLMISC::CVector dirs((float)rnd.randPlusMinus(1), (float)rnd.randPlusMinus(1), (float)rnd.randPlusMinus(1));
+		dirs.normalize();
+
+		// We increase the vector by the strength
+		dirs = dirs * Strength;
+
+		output.CamLookAtDir = currCamInfo.CamLookAtDir;
+		output.CamPos = currCamInfo.CamPos + dirs;
+
+		return output;
 	}
 
 	virtual void stopModifier()
