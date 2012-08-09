@@ -83,10 +83,10 @@ public:
 		float ratio = currCamInfo.ElapsedTimeSinceStartStep / getDuration();
 
 		// We compute the final look at direction
-		NLMISC::CVector finalDir = resolvePositionOrEntityPosition(LookAtPos) - currCamInfo.CamPos;
+		NLMISC::CVector finalDir = resolvePositionOrEntityPosition(LookAtPos) - camInfo.CamPos;
 
 		// We get the current look at direction
-		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, camInfo.CamPos, currCamInfo.CamLookAtDir, finalDir);
+		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, currCamInfo.CamLookAtDir, finalDir);
 
 		return camInfo;
 	}
@@ -123,7 +123,24 @@ public:
 	/// Function that plays the step
 	virtual TCameraAnimationInfo updateStep(const TCameraAnimationInfo& currCamInfo)
 	{
-		return currCamInfo;
+		TCameraAnimationInfo camInfo;
+
+		float ratio = currCamInfo.ElapsedTimeSinceStartStep / getDuration();
+
+		// We compute the current position between the starting position and the final position
+		NLMISC::CVector movementVector = resolvePositionOrEntityPosition(EndPos) - currCamInfo.CamPos;
+
+		// We current position is computed using the ratio and the starting position
+		NLMISC::CVector offset = movementVector * ratio;
+		camInfo.CamPos = currCamInfo.CamPos + offset;
+
+		// Now we compute the current look at direction
+		NLMISC::CVector finalDir = resolvePositionOrEntityPosition(LookAtPos) - camInfo.CamPos;
+
+		// We get the current look at direction
+		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, currCamInfo.CamLookAtDir, finalDir);
+
+		return camInfo;
 	}
 
 	virtual void stopStep()

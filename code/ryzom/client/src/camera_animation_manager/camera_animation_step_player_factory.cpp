@@ -123,7 +123,7 @@ void ICameraAnimationStepPlayer::stopStepAndModifiers()
 	}
 }
 
-NLMISC::CVector ICameraAnimationStepPlayer::computeCurrentLookAtDir(float ratio, const NLMISC::CVector& currPos, const NLMISC::CVector& startLookAtDir,
+NLMISC::CVector ICameraAnimationStepPlayer::computeCurrentLookAtDir(float ratio, const NLMISC::CVector& startLookAtDir,
 																	const NLMISC::CVector& endLookAtDir)
 {
 	// We normalize the start look at direction

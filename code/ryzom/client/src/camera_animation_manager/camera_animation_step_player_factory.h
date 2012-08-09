@@ -59,10 +59,10 @@ public:
 
 protected:
 
-	/// Compute the current look at direction depending on the current position, the starting look at direction,
+	/// Compute the current look at direction depending on the starting look at direction,
 	/// the ending look at direction and the progression expressed as a ratio (value between 0 and 1 that expresses the
 	/// progression)
-	NLMISC::CVector computeCurrentLookAtDir(float ratio, const NLMISC::CVector& currPos, const NLMISC::CVector& startLookAtDir,
+	NLMISC::CVector computeCurrentLookAtDir(float ratio, const NLMISC::CVector& startLookAtDir,
 										const NLMISC::CVector& endLookAtDir);
 
 	// The list of modifiers
