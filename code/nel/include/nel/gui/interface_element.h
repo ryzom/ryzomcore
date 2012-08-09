@@ -127,6 +127,8 @@ namespace NLGUI
 
 		virtual void setProperty( const std::string &name, const std::string &value );
 
+		virtual bool serialize( xmlNodePtr parentNode, const char *type ) const;
+
 		/// Parse the element and initalize it
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
@@ -292,6 +294,7 @@ namespace NLGUI
 
 		// Parse tools
 		static  std::string     HotSpotToString( THotSpot spot );
+		static  std::string     HotSpotCoupleToString( THotSpot parentPosRef, THotSpot posRef );
 		static	THotSpot		convertHotSpot (const char *ptr);		//
 		static	void			convertHotSpotCouple (const char *ptr, THotSpot &parentPosRef, THotSpot &posRef);
 		static	NLMISC::CRGBA	convertColor (const char *ptr);

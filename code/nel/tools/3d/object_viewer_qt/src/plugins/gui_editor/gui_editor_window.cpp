@@ -33,6 +33,7 @@
 #include "widget_properties.h"
 #include "widget_properties_parser.h"
 #include "widget_hierarchy.h"
+#include "widget_serializer.h"
 #include "link_list.h"
 #include "proc_list.h"
 #include "project_file_parser.h"
@@ -214,7 +215,9 @@ namespace GUIEditor
 		projectFiles.guiFiles.push_back( "ui_" + projectFiles.projectName + ".xml"  );
 		projectFiles.version = NEW;
 
-		QString newFile = dir + "/" + projectFiles.projectName.c_str() + ".xml";
+		QString newFile =
+			dir + "/" + projectFiles.projectName.c_str() + ".xml";
+
 		CProjectFileSerializer serializer;
 		serializer.setFile( newFile.toStdString() );
 		if( !serializer.serialize( projectFiles ) )
@@ -225,6 +228,18 @@ namespace GUIEditor
 			return;
 		}
 
+		std::string guiFile =
+			dir.toStdString() + "/" + "ui_" + projectFiles.projectName + ".xml";
+
+		WidgetSerializer widgetSerializer;
+		widgetSerializer.setFile( guiFile );
+		if( !widgetSerializer.serialize( projectFiles.masterGroup ) )
+		{
+			QMessageBox::critical( this,
+							tr( "Failed to save project" ),
+							tr( "There was an error while trying to save the project." ) );
+			return;
+		}
 	}
 
 	void GUIEditorWindow::close()

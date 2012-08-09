@@ -259,6 +259,34 @@ namespace NLGUI
 			nlwarning( "Tried to set invalid property '%s' for widget '%s'", name.c_str(), _Id.c_str() );
 	}
 
+	bool CInterfaceElement::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = xmlNewNode( NULL, BAD_CAST type );
+		if( node == NULL )
+			return false;
+
+		xmlAddChild( parentNode, node );
+
+		xmlNewProp( node, BAD_CAST "id", BAD_CAST stripId( getId() ).c_str() );
+		xmlNewProp( node, BAD_CAST "active", BAD_CAST toString( _Active ).c_str() );
+		xmlNewProp( node, BAD_CAST "x", BAD_CAST toString( _X ).c_str() );
+		xmlNewProp( node, BAD_CAST "y", BAD_CAST toString( _Y ).c_str() );
+		xmlNewProp( node, BAD_CAST "w", BAD_CAST toString( _W ).c_str() );
+		xmlNewProp( node, BAD_CAST "h", BAD_CAST toString( _H ).c_str() );
+		xmlNewProp( node, BAD_CAST "posref", BAD_CAST HotSpotCoupleToString( _ParentPosRef, _PosRef ).c_str() );
+		xmlNewProp( node, BAD_CAST "posparent",
+			BAD_CAST CWidgetManager::getInstance()->getParser()->getParentPosAssociation( (CInterfaceElement*)this ).c_str() );
+		xmlNewProp( node, BAD_CAST "sizeref", BAD_CAST getSizeRefAsString().c_str() );
+		xmlNewProp( node, BAD_CAST "sizeparent",
+			BAD_CAST CWidgetManager::getInstance()->getParser()->getParentSizeAssociation( (CInterfaceElement*)this ).c_str() );
+
+		xmlNewProp( node, BAD_CAST "global_color", BAD_CAST toString( _ModulateGlobalColor ).c_str() );
+		xmlNewProp( node, BAD_CAST "render_layer", BAD_CAST toString( _RenderLayer ).c_str() );
+		xmlNewProp( node, BAD_CAST "avoid_resize_parent", BAD_CAST toString( _AvoidResizeParent ).c_str() );
+
+		return true;
+	}
+
 	// ------------------------------------------------------------------------------------------------
 	bool CInterfaceElement::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
@@ -882,6 +910,16 @@ namespace NLGUI
 		}
 
 		return "";
+	}
+
+	std::string CInterfaceElement::HotSpotCoupleToString( THotSpot parentPosRef, THotSpot posRef )
+	{
+		std::string hs;
+		hs = HotSpotToString( parentPosRef );
+		hs += " ";
+		hs += HotSpotToString( posRef );
+		
+		return hs;
 	}
 
 	// ------------------------------------------------------------------------------------------------
