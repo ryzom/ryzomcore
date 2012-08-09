@@ -357,7 +357,21 @@ public:
 	/// Function that plays the step
 	virtual TCameraAnimationOutputInfo updateStep(const TCameraAnimationInputInfo& currCamInfo)
 	{
-		return currCamInfo.toOutput();
+		TCameraAnimationOutputInfo camInfo;
+
+		float ratio = currCamInfo.ElapsedTimeSinceStartStep / getDuration();
+
+		// We compute the current position between the starting position and the final position
+		NLMISC::CVector movementVector = resolvePositionOrEntityPosition(currCamInfo.AnimStartCamPos) - currCamInfo.StartCamPos;
+
+		// We current position is computed using the ratio and the starting position
+		NLMISC::CVector offset = movementVector * ratio;
+		camInfo.CamPos = currCamInfo.StartCamPos + offset;
+
+		// We get the current look at direction
+		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, currCamInfo.StartCamLookAtDir, currCamInfo.AnimStartCamLookAtDir);
+
+		return camInfo;
 	}
 
 	virtual void stopStep()

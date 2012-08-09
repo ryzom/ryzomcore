@@ -46,6 +46,7 @@ struct TCameraAnimationInputInfo
 {
 	TCameraAnimationInputInfo(const NLMISC::CVector& currCamPos, const NLMISC::CVector& currCamLookAtDir, 
 								const NLMISC::CVector& startCamPos, const NLMISC::CVector& startCamLookAtDir, 
+								const NLMISC::CVector& animStartCamPos, const NLMISC::CVector& animStartCamLookAtDir, 
 								float elapsedTimeSinceStartStep)
 	{
 		CamPos = currCamPos;
@@ -53,6 +54,9 @@ struct TCameraAnimationInputInfo
 
 		StartCamPos = startCamPos;
 		StartCamLookAtDir = startCamLookAtDir;
+
+		AnimStartCamPos = startCamPos;
+		AnimStartCamLookAtDir = startCamLookAtDir;
 
 		ElapsedTimeSinceStartStep = elapsedTimeSinceStartStep;
 	}
@@ -64,6 +68,9 @@ struct TCameraAnimationInputInfo
 
 		StartCamPos = input.StartCamPos;
 		StartCamLookAtDir = input.StartCamLookAtDir;
+
+		AnimStartCamPos = input.AnimStartCamPos;
+		AnimStartCamLookAtDir = input.AnimStartCamLookAtDir;
 
 		ElapsedTimeSinceStartStep = input.ElapsedTimeSinceStartStep;
 	}
@@ -81,6 +88,9 @@ struct TCameraAnimationInputInfo
 
 	NLMISC::CVector StartCamPos;				/// Start camera position
 	NLMISC::CVector StartCamLookAtDir;			/// Start camera look at direction
+
+	NLMISC::CVector AnimStartCamPos;			/// Camera position at animation start
+	NLMISC::CVector AnimStartCamLookAtDir;		/// Camera look at direction an animation start
 
 	float ElapsedTimeSinceStartStep;			/// Elapsed time in second since the beginning of this step
 };

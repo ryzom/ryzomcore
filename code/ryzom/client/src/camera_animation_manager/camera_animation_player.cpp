@@ -131,7 +131,9 @@ TCameraAnimationOutputInfo CCameraAnimationPlayer::update()
 	NLMISC::CVector currLookAtDir = View.currentView();
 
 	TCameraAnimationInputInfo currCamInfo(currCamPos, currLookAtDir,
-											_StartStepCamPos, _StartStepCamLookAtDir, _ElapsedTimeForCurrStep);
+											_StartStepCamPos, _StartStepCamLookAtDir, 
+											_LastViewPos, _LastView,
+											_ElapsedTimeForCurrStep);
 
 	if (!isPlaying())
 		return currCamInfo.toOutput();
