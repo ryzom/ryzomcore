@@ -792,6 +792,17 @@ namespace NLGUI
 			CCtrlTextButton::setProperty( name, value );
 	}
 
+	xmlNodePtr CCtrlTabButton::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CCtrlTextButton::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlNewProp( node, BAD_CAST "group", BAD_CAST _AssociatedGroup.c_str() );
+
+		return node;
+	}
+
 	// ***************************************************************************
 	bool CCtrlTabButton::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{
