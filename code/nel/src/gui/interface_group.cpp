@@ -672,6 +672,7 @@ namespace NLGUI
 			return NULL;
 
 		serializeSubGroups( node );
+		serializeControls( node );
 
 		return node;
 	}
@@ -716,15 +717,29 @@ namespace NLGUI
 
 	xmlNodePtr CInterfaceGroup::serializeSubGroups( xmlNodePtr parentNode ) const
 	{
-		xmlNodePtr node = parentNode;
-
 		std::vector< CInterfaceGroup* >::const_iterator itr;
 		for( itr = _ChildrenGroups.begin(); itr != _ChildrenGroups.end(); ++itr )
 		{
-			(*itr)->serialize( node, "group" );
+			(*itr)->serialize( parentNode, "group" );
 		}
 
-		return node;
+		return parentNode;
+	}
+
+	xmlNodePtr CInterfaceGroup::serializeControls( xmlNodePtr parentNode ) const
+	{
+		std::vector< CCtrlBase* >::const_iterator itr;
+		for( itr = _Controls.begin(); itr != _Controls.end(); ++itr )
+		{
+			(*itr)->serialize( parentNode, "ctrl" );
+		}
+
+		return parentNode;
+	}
+
+	xmlNodePtr CInterfaceGroup::serializeViews( xmlNodePtr parentNode ) const
+	{
+		return parentNode;
 	}
 
 	// ------------------------------------------------------------------------------------------------

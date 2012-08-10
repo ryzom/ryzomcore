@@ -46,6 +46,8 @@ namespace NLGUI
 		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
 		xmlNodePtr serializeGroup( xmlNodePtr parentNode, const char *type ) const;
 		xmlNodePtr serializeSubGroups( xmlNodePtr parentNode ) const;
+		xmlNodePtr serializeControls( xmlNodePtr parentNode ) const;
+		xmlNodePtr serializeViews( xmlNodePtr parentNode ) const;
 
 		virtual uint32 getMemory ();
 
