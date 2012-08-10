@@ -665,6 +665,50 @@ namespace NLGUI
 			CCtrlBase::setProperty( name, value );
 	}
 
+	xmlNodePtr CInterfaceGroup::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CCtrlBase::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlNewProp( node, BAD_CAST "overlappable", BAD_CAST NLMISC::toString( _Overlappable ).c_str() );
+		xmlNewProp( node, BAD_CAST "escapable", BAD_CAST NLMISC::toString( _Escapable ).c_str() );
+		xmlNewProp( node, BAD_CAST "child_resize_w", BAD_CAST NLMISC::toString( _ResizeFromChildW ).c_str() );
+		xmlNewProp( node, BAD_CAST "child_resize_h", BAD_CAST NLMISC::toString( _ResizeFromChildH ).c_str() );
+		xmlNewProp( node, BAD_CAST "child_resize_wmargin", BAD_CAST NLMISC::toString( _ResizeFromChildWMargin ).c_str() );
+		xmlNewProp( node, BAD_CAST "child_resize_hmargin", BAD_CAST NLMISC::toString( _ResizeFromChildHMargin ).c_str() );
+		xmlNewProp( node, BAD_CAST "on_active", BAD_CAST getOnActiveHandler().c_str() );
+		xmlNewProp( node, BAD_CAST "on_active_params", BAD_CAST getOnActiveParams().c_str() );
+		xmlNewProp( node, BAD_CAST "on_deactive", BAD_CAST getOnDeactiveHandler().c_str() );
+		xmlNewProp( node, BAD_CAST "on_deactive_params", BAD_CAST getOnDeactiveParams().c_str() );
+		xmlNewProp( node, BAD_CAST "max_w", BAD_CAST NLMISC::toString( _MaxW ).c_str() );
+		xmlNewProp( node, BAD_CAST "max_h", BAD_CAST NLMISC::toString( _MaxH ).c_str() );
+		xmlNewProp( node, BAD_CAST "max_sizeref",
+			BAD_CAST getSizeRefAsString( _GroupSizeRef, _SizeDivW, _SizeDivH ).c_str() );
+		xmlNewProp( node, BAD_CAST "max_sizeparent",
+			BAD_CAST CWidgetManager::getInstance()->getParser()->getParentSizeMaxAssociation( (CInterfaceElement*)this ).c_str() );
+		xmlNewProp( node, BAD_CAST "group_onclick_r", BAD_CAST getRightClickHandler().c_str() );
+		xmlNewProp( node, BAD_CAST "group_params_r", BAD_CAST getRightClickHandlerParams().c_str() );
+		xmlNewProp( node, BAD_CAST "group_onclick_l", BAD_CAST getLeftClickHandler().c_str() );
+		xmlNewProp( node, BAD_CAST "group_params_l", BAD_CAST getLeftClickHandlerParams().c_str() );
+		xmlNewProp( node, BAD_CAST "on_enter", BAD_CAST getAHOnEnter().c_str() );
+		xmlNewProp( node, BAD_CAST "on_enter_params", BAD_CAST getAHOnEnterParams().c_str() );
+		xmlNewProp( node, BAD_CAST "win_priority", BAD_CAST NLMISC::toString( _Priority ).c_str() );
+		xmlNewProp( node, BAD_CAST "use_cursor", BAD_CAST NLMISC::toString( _UseCursor ).c_str() );
+		xmlNewProp( node, BAD_CAST "on_escape", BAD_CAST getAHOnEscape().c_str() );
+		xmlNewProp( node, BAD_CAST "on_escape_params", BAD_CAST getAHOnEscapeParams().c_str() );
+		xmlNewProp( node, BAD_CAST "lua_class",
+			BAD_CAST CWidgetManager::getInstance()->getParser()->getLuaClassAssociation( (CInterfaceGroup*)this ).c_str() );
+
+		std::vector< CInterfaceGroup* >::const_iterator itr;
+		for( itr = _ChildrenGroups.begin(); itr != _ChildrenGroups.end(); ++itr )
+		{
+			(*itr)->serialize( node, "group" );
+		}
+
+		return node;
+	}
+
 	// ------------------------------------------------------------------------------------------------
 	void CInterfaceGroup::parseMaxSizeRef(const char *ptr)
 	{
