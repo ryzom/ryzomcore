@@ -127,7 +127,7 @@ namespace NLGUI
 
 		virtual void setProperty( const std::string &name, const std::string &value );
 
-		virtual bool serialize( xmlNodePtr parentNode, const char *type ) const;
+		virtual xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
 
 		/// Parse the element and initalize it
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);

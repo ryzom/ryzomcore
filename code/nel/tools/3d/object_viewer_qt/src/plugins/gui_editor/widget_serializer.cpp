@@ -43,7 +43,7 @@ namespace GUIEditor
 			return false;
 		}
 
-		if( !mg->serialize( root, "root" ) )
+		if( mg->serialize( root, "root" ) == NULL )
 		{
 			xmlFreeNode( root );
 			out.close();
@@ -66,8 +66,12 @@ namespace GUIEditor
 		xmlAttrPtr prop = node->properties;
 		while( prop != NULL )
 		{
-			std::string name  = std::string( (const char*)prop->name );
-			std::string value = std::string( (const char*)xmlGetProp( node, BAD_CAST name.c_str() ) );
+			std::string name  =
+				std::string( reinterpret_cast< const char* >( prop->name ) );
+
+			std::string value =
+				std::string( reinterpret_cast< const char* >( xmlGetProp( node, BAD_CAST name.c_str() ) ) );
+
 			out << " " << name << "=\"" << value << "\"" << std::endl;
 
 			prop = prop->next;

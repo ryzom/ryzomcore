@@ -63,6 +63,8 @@ namespace NLGUI
 
 		void setProperty( const std::string &name, const std::string &value );
 
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+
 		// special parse
 		virtual bool parse(xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
@@ -171,6 +173,8 @@ namespace NLGUI
 		THotSpot			_ToolTipPosRefAlt       : 6;
 	protected:
 		void convertTooltipHotSpot(const char *prop, THotSpot &parentHS, THotSpot &childHS);
+		static std::string TooltipHotSpotToString( THotSpot parent, THotSpot child );
+
 		bool resizer;
 	};
 

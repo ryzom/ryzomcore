@@ -313,6 +313,33 @@ namespace NLGUI
 			CInterfaceElement::setProperty( name, value );
 	}
 
+
+	xmlNodePtr CCtrlBase::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node =
+			CInterfaceElement::serialize( parentNode, type );
+
+		if( node == NULL )
+			return NULL;
+
+		xmlNewProp( node, BAD_CAST "tooltip", BAD_CAST _ContextHelp.toString().c_str() );
+		xmlNewProp( node, BAD_CAST "tooltip_i18n", BAD_CAST _ContextHelp.toString().c_str() );
+		xmlNewProp( node, BAD_CAST "on_tooltip", BAD_CAST _OnContextHelp.toString().c_str() );
+		xmlNewProp( node, BAD_CAST "on_tooltip_params", BAD_CAST _OnContextHelpParams.toString().c_str() );
+		xmlNewProp( node, BAD_CAST "tooltip_parent", BAD_CAST tooltipParentToString( _ToolTipParent ).c_str() );
+		xmlNewProp( node, BAD_CAST "tooltip_special_parent", BAD_CAST _ToolTipSpecialParent.toString().c_str() );
+		
+		xmlNewProp( node, BAD_CAST "tooltip_posref",
+			BAD_CAST TooltipHotSpotToString( _ToolTipParentPosRef, _ToolTipPosRef ).c_str() );
+		
+		xmlNewProp( node, BAD_CAST "tooltip_posref_alt",
+			BAD_CAST TooltipHotSpotToString( _ToolTipParentPosRefAlt, _ToolTipPosRefAlt ).c_str() );
+
+		xmlNewProp( node, BAD_CAST "instant_help", BAD_CAST toString( _ToolTipInstant ).c_str() );
+
+		return node;
+	}
+
 	// ***************************************************************************
 	void CCtrlBase::convertTooltipHotSpot(const char *prop, THotSpot &parentHS, THotSpot &childHS)
 	{
@@ -338,6 +365,24 @@ namespace NLGUI
 		}
 	}
 
+
+	std::string CCtrlBase::TooltipHotSpotToString( THotSpot parent, THotSpot child )
+	{
+		std::string s;
+
+		if( ( parent == Hotspot_TTAuto ) && ( child == Hotspot_TTAuto ) )
+		{
+			s = "auto";
+		}
+		else
+		{
+			s = CInterfaceElement::HotSpotToString( parent );
+			s += " ";
+			s += CInterfaceElement::HotSpotToString( child );
+		}
+
+		return s;
+	}
 
 	// ***************************************************************************
 	bool CCtrlBase::emptyContextHelp() const

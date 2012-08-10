@@ -259,11 +259,11 @@ namespace NLGUI
 			nlwarning( "Tried to set invalid property '%s' for widget '%s'", name.c_str(), _Id.c_str() );
 	}
 
-	bool CInterfaceElement::serialize( xmlNodePtr parentNode, const char *type ) const
+	xmlNodePtr CInterfaceElement::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = xmlNewNode( NULL, BAD_CAST type );
 		if( node == NULL )
-			return false;
+			return NULL;
 
 		xmlAddChild( parentNode, node );
 
@@ -284,7 +284,7 @@ namespace NLGUI
 		xmlNewProp( node, BAD_CAST "render_layer", BAD_CAST toString( _RenderLayer ).c_str() );
 		xmlNewProp( node, BAD_CAST "avoid_resize_parent", BAD_CAST toString( _AvoidResizeParent ).c_str() );
 
-		return true;
+		return node;
 	}
 
 	// ------------------------------------------------------------------------------------------------
