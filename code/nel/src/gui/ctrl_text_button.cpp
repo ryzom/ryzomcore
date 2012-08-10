@@ -379,6 +379,72 @@ namespace NLGUI
 			CCtrlBaseButton::setProperty( name, value );
 	}
 
+
+	xmlNodePtr CCtrlTextButton::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CCtrlBaseButton::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+		
+		std::string tex;
+		tex = CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdNormal[ 0 ] );
+		std::string::size_type i = tex.rfind( "_l.tga" );
+		if( i != std::string::npos )
+			tex = tex.substr( 0, i );
+		
+		xmlNewProp( node, BAD_CAST "tx_normal", BAD_CAST tex.c_str() );
+		tex.clear();
+
+		tex = CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdPushed[ 0 ] );
+		i = tex.rfind( "_l.tga" );
+		if( i != std::string::npos )
+			tex = tex.substr( 0, i );
+		
+		xmlNewProp( node, BAD_CAST "tx_pushed", BAD_CAST tex.c_str() );
+		tex.clear();
+
+
+		tex = CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdOver[ 0 ] );
+		i = tex.rfind( "_l.tga" );
+		if( i != std::string::npos )
+			tex = tex.substr( 0, i );
+		
+		xmlNewProp( node, BAD_CAST "tx_over", BAD_CAST tex.c_str() );
+		tex.clear();
+
+		xmlNewProp( node, BAD_CAST "wmargin", BAD_CAST toString( _WMargin ).c_str() );
+		xmlNewProp( node, BAD_CAST "wmin", BAD_CAST toString( _WMin ).c_str() );
+		xmlNewProp( node, BAD_CAST "hardtext", BAD_CAST _ViewText->getText().toString().c_str() );
+		xmlNewProp( node, BAD_CAST "text_y", BAD_CAST toString( _TextY ).c_str() );
+		xmlNewProp( node, BAD_CAST "text_x", BAD_CAST toString( _TextX ).c_str() );
+		xmlNewProp( node, BAD_CAST "text_underlined", BAD_CAST toString( _ViewText->getUnderlined() ).c_str() );
+
+		tex = CInterfaceElement::HotSpotCoupleToString( _TextParentPosRef, _TextPosRef );
+		xmlNewProp( node, BAD_CAST "text_posref", BAD_CAST tex.c_str() );
+
+		xmlNewProp( node, BAD_CAST "text_color_normal", BAD_CAST toString( _TextColorNormal ).c_str() );
+		xmlNewProp( node, BAD_CAST "text_color_pushed", BAD_CAST toString( _TextColorPushed ).c_str() );
+		xmlNewProp( node, BAD_CAST "text_color_over", BAD_CAST toString( _TextColorOver ).c_str() );
+
+		xmlNewProp( node, BAD_CAST "text_shadow_color_normal", BAD_CAST toString( _TextShadowColorNormal ).c_str() );
+		xmlNewProp( node, BAD_CAST "text_shadow_color_pushed", BAD_CAST toString( _TextShadowColorPushed ).c_str() );
+		xmlNewProp( node, BAD_CAST "text_shadow_color_over", BAD_CAST toString( _TextShadowColorOver ).c_str() );
+		
+		xmlNewProp( node, BAD_CAST "text_global_color_normal",
+			BAD_CAST toString( _TextModulateGlobalColorNormal ).c_str() );
+
+		xmlNewProp( node, BAD_CAST "text_global_color_pushed",
+			BAD_CAST toString( _TextModulateGlobalColorPushed ).c_str() );
+
+		xmlNewProp( node, BAD_CAST "text_global_color_over",
+			BAD_CAST toString( _TextModulateGlobalColorOver ).c_str() );
+
+		xmlNewProp( node, BAD_CAST "force_text_over", BAD_CAST toString( _ForceTextOver ).c_str() );
+		xmlNewProp( node, BAD_CAST "text_header_color", BAD_CAST toString( _TextHeaderColor ).c_str() );
+
+		return node;
+	}
+
 	// ***************************************************************************
 	bool CCtrlTextButton::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
