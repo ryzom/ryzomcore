@@ -51,6 +51,149 @@ namespace NLGUI
 		}
 	}
 
+	std::string CCtrlColPick::getProperty( const std::string &name ) const
+	{
+		if( name == "texture" )
+		{
+			return CViewRenderer::getInstance()->getTextureNameFromId( _Texture );
+		}
+		else
+		if( name == "onchange" )
+		{
+			return _AHOnChange;
+		}
+		else
+		if( name == "onchange_params" )
+		{
+			return _AHOnChangeParams;
+		}
+		else
+		if( name == "dbcolr" )
+		{
+			if( _ColSelR.getNodePtr() != NULL )
+				return _ColSelR.getNodePtr()->getFullName();
+			else
+				return "";
+		}
+		else
+		if( name == "dbcolg" )
+		{
+			if( _ColSelG.getNodePtr() != NULL )
+				return _ColSelG.getNodePtr()->getFullName();
+			else
+				return "";
+		}
+		else
+		if( name == "dbcolb" )
+		{
+			if( _ColSelB.getNodePtr() != NULL )
+				return _ColSelB.getNodePtr()->getFullName();
+			else
+				return "";
+		}
+		else
+		if( name == "dbcola" )
+		{
+			if( _ColSelA.getNodePtr() != NULL )
+				return _ColSelA.getNodePtr()->getFullName();
+			else
+				return "";
+		}
+		else
+			return CCtrlBase::getProperty( name );
+	}
+
+	void CCtrlColPick::setProperty( const std::string &name, const std::string &value )
+	{
+		if( name == "texture" )
+		{
+			CViewRenderer::getInstance()->deleteTexture( _Texture );
+			_Texture = CViewRenderer::getInstance()->createTexture( value, 0, 0, 256, 64, false, false );
+			return;
+		}
+		else
+		if( name == "onchange" )
+		{
+			_AHOnChange = value;
+		}
+		else
+		if( name == "onchange_params" )
+		{
+			_AHOnChangeParams = value;
+			return;
+		}
+		else
+		if( name == "dbcolr" )
+		{
+			_ColSelR.link( value.c_str() );
+			return;
+		}
+		else
+		if( name == "dbcolg" )
+		{
+			_ColSelG.link( value.c_str() );
+			return;
+		}
+		else
+		if( name == "dbcolb" )
+		{
+			_ColSelB.link( value.c_str() );
+			return;
+		}
+		else
+		if( name == "dbcola" )
+		{
+			_ColSelA.link( value.c_str() );
+			return;
+		}
+		else
+			CCtrlBase::setProperty( name, value );
+	}
+
+	xmlNodePtr CCtrlColPick::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CCtrlBase::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		if( xmlGetProp( node, BAD_CAST "type" ) == NULL )
+			xmlSetProp( node, BAD_CAST "type", BAD_CAST "colpick" );
+
+		xmlSetProp( node, BAD_CAST "texture",
+			BAD_CAST CViewRenderer::getInstance()->getTextureNameFromId( _Texture ).c_str() );
+
+		xmlSetProp( node, BAD_CAST "onchange", BAD_CAST _AHOnChange.c_str() );
+		xmlSetProp( node, BAD_CAST "onchange_params", BAD_CAST _AHOnChangeParams.c_str() );
+
+		std::string s;
+		
+		if( _ColSelR.getNodePtr() != NULL )
+			s = _ColSelR.getNodePtr()->getFullName();
+		else
+			s = "";
+		xmlSetProp( node, BAD_CAST "dbcolr", BAD_CAST s.c_str() );
+
+		if( _ColSelG.getNodePtr() != NULL )
+			s = _ColSelG.getNodePtr()->getFullName();
+		else
+			s = "";
+		xmlSetProp( node, BAD_CAST "dbcolg", BAD_CAST s.c_str() );
+
+		if( _ColSelB.getNodePtr() != NULL )
+			s = _ColSelB.getNodePtr()->getFullName();
+		else
+			s = "";
+		xmlSetProp( node, BAD_CAST "dbcolb", BAD_CAST s.c_str() );
+
+		if( _ColSelA.getNodePtr() != NULL )
+			s = _ColSelA.getNodePtr()->getFullName();
+		else
+			s = "";
+		xmlSetProp( node, BAD_CAST "dbcola", BAD_CAST s.c_str() );
+
+		return node;
+	}
+
 	// ------------------------------------------------------------------------------------------------
 	bool CCtrlColPick::parse(xmlNodePtr node, CInterfaceGroup * parentGroup)
 	{
