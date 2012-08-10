@@ -390,6 +390,49 @@ namespace NLGUI
 	}
 
 
+	xmlNodePtr CCtrlBaseButton::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CCtrlBase::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlNewProp( node, BAD_CAST "button_type", BAD_CAST getTypeString().c_str() );
+		xmlNewProp( node, BAD_CAST "pushed", BAD_CAST toString( _Pushed ).c_str() );
+		xmlNewProp( node, BAD_CAST "over_when_pushed", BAD_CAST toString( _OverWhenPushed ).c_str() );
+		xmlNewProp( node, BAD_CAST "clicked_when_pushed", BAD_CAST toString( _ClickWhenPushed ).c_str() );
+		xmlNewProp( node, BAD_CAST "color", BAD_CAST getColorAsString().c_str() );
+		xmlNewProp( node, BAD_CAST "col_pushed", BAD_CAST getColorPushedAsString().c_str() );
+		xmlNewProp( node, BAD_CAST "col_over", BAD_CAST getColorOverAsString().c_str() );
+		xmlNewProp( node, BAD_CAST "global_color_normal", BAD_CAST toString( _ModulateGlobalColorNormal ).c_str() );
+		xmlNewProp( node, BAD_CAST "global_color_pushed", BAD_CAST toString( _ModulateGlobalColorPushed ).c_str() );
+		xmlNewProp( node, BAD_CAST "global_color_over", BAD_CAST toString( _ModulateGlobalColorOver ).c_str() );
+		xmlNewProp( node, BAD_CAST "onover", BAD_CAST _getActionOnOver().c_str() );
+		xmlNewProp( node, BAD_CAST "params_over", BAD_CAST _getParamsOnOver().c_str() );
+		xmlNewProp( node, BAD_CAST "onclick_l", BAD_CAST _getActionOnLeftClick().c_str() );
+		xmlNewProp( node, BAD_CAST "params_l", BAD_CAST _getParamsOnLeftClick().c_str() );
+		xmlNewProp( node, BAD_CAST "ondblclick_l", BAD_CAST _getActionOnDblLeftClick().c_str() );
+		xmlNewProp( node, BAD_CAST "params_dblclick_l", BAD_CAST _AHLeftDblClickParams.toString().c_str() );
+		xmlNewProp( node, BAD_CAST "onlongclick_l", BAD_CAST _getActionOnLeftLongClick().c_str() );
+		xmlNewProp( node, BAD_CAST "params_longclick_l", BAD_CAST _AHLeftLongClickParams.toString().c_str() );
+		xmlNewProp( node, BAD_CAST "onclick_r", BAD_CAST _getActionOnRightClick().c_str() );
+		xmlNewProp( node, BAD_CAST "params_r", BAD_CAST _AHRightClickParams.toString().c_str() );
+		xmlNewProp( node, BAD_CAST "onclock_tick", BAD_CAST _getActionOnClockTick().c_str() );
+		xmlNewProp( node, BAD_CAST "params_clock_tick", BAD_CAST _AHClockTickParams.toString().c_str() );
+		xmlNewProp( node, BAD_CAST "menu_l", BAD_CAST _ListMenuLeft.toString().c_str() );
+		xmlNewProp( node, BAD_CAST "menu_r", BAD_CAST _ListMenuRight.toString().c_str() );
+
+		if( _ListMenuLeft.toString() == _ListMenuRight.toString() )
+			xmlNewProp( node, BAD_CAST "menu_b", BAD_CAST _ListMenuLeft.toString().c_str() );
+		else
+			xmlNewProp( node, BAD_CAST "menu_b", BAD_CAST "" );
+
+		xmlNewProp( node, BAD_CAST "frozen", BAD_CAST toString( _Frozen ).c_str() );
+		xmlNewProp( node, BAD_CAST "frozen_half_tone", BAD_CAST toString( _FrozenHalfTone ).c_str() );
+
+		return node;
+	}
+
+
 	// ***************************************************************************
 	bool CCtrlBaseButton::parse (xmlNodePtr cur,CInterfaceGroup * parentGroup)
 	{
