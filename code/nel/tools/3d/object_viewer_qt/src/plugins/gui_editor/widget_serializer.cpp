@@ -43,13 +43,21 @@ namespace GUIEditor
 			return false;
 		}
 
-		if( mg->serialize( root, "root" ) == NULL )
+		if( mg->serializeGroup( root, "root" ) == NULL )
 		{
 			xmlFreeNode( root );
 			out.close();
 			return false;
 		}
 
+		if( mg->serializeSubGroups( root ) == NULL )
+		{
+			xmlFreeNode( root );
+			out.close();
+			return false;
+		}
+
+		level = -1;
 		serializeTree( root );
 
 
@@ -61,7 +69,13 @@ namespace GUIEditor
 
 	bool WidgetSerializer::serializeTree( _xmlNode *node )
 	{
-		out << "<" << node->name;
+		level++;
+
+		std::string tabs;
+		for( int i = 0; i < level; i++ )
+			tabs.push_back( '\t' );
+
+		out << tabs << "<" << node->name;
 
 		xmlAttrPtr prop = node->properties;
 		while( prop != NULL )
@@ -72,12 +86,12 @@ namespace GUIEditor
 			std::string value =
 				std::string( reinterpret_cast< const char* >( xmlGetProp( node, BAD_CAST name.c_str() ) ) );
 
-			out << " " << name << "=\"" << value << "\"" << std::endl;
+			out << " " << name << "=\"" << value << "\"" << std::endl << tabs;
 
 			prop = prop->next;
 		}
 
-		out << ">" << std::endl;
+		out << tabs << ">" << std::endl << std::endl;
 
 		xmlNodePtr child = node->children;
 		while( child != NULL )
@@ -86,7 +100,9 @@ namespace GUIEditor
 			child = child->next;
 		}
 
-		out << "</" << node->name << ">" << std::endl;
+		out << tabs << "</" << node->name << ">" << std::endl << std::endl;
+
+		level--;
 
 		return true;
 	}

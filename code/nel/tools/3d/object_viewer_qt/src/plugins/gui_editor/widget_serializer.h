@@ -29,7 +29,11 @@ namespace GUIEditor
 	class WidgetSerializer
 	{
 	public:
-		WidgetSerializer(){}
+		WidgetSerializer()
+		{
+			level = 0;
+		}
+
 		~WidgetSerializer(){}
 
 		void setFile( const std::string &name ){ fileName = name; }
@@ -40,6 +44,7 @@ namespace GUIEditor
 
 		std::string fileName;
 		std::ofstream out;
+		long level;
 	};
 
 }

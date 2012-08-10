@@ -667,6 +667,17 @@ namespace NLGUI
 
 	xmlNodePtr CInterfaceGroup::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
+		xmlNodePtr node = serializeGroup( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		serializeSubGroups( node );
+
+		return node;
+	}
+
+	xmlNodePtr CInterfaceGroup::serializeGroup( xmlNodePtr parentNode, const char *type ) const
+	{
 		xmlNodePtr node = CCtrlBase::serialize( parentNode, type );
 		if( node == NULL )
 			return NULL;
@@ -699,6 +710,13 @@ namespace NLGUI
 		xmlNewProp( node, BAD_CAST "on_escape_params", BAD_CAST getAHOnEscapeParams().c_str() );
 		xmlNewProp( node, BAD_CAST "lua_class",
 			BAD_CAST CWidgetManager::getInstance()->getParser()->getLuaClassAssociation( (CInterfaceGroup*)this ).c_str() );
+
+		return node;
+	}
+
+	xmlNodePtr CInterfaceGroup::serializeSubGroups( xmlNodePtr parentNode ) const
+	{
+		xmlNodePtr node = parentNode;
 
 		std::vector< CInterfaceGroup* >::const_iterator itr;
 		for( itr = _ChildrenGroups.begin(); itr != _ChildrenGroups.end(); ++itr )

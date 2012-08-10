@@ -240,6 +240,11 @@ namespace GUIEditor
 							tr( "There was an error while trying to save the project." ) );
 			return;
 		}
+
+		QMessageBox::information( this,
+						tr( "Save successful" ),
+						tr( "Project saved successfully!" ) );
+
 	}
 
 	void GUIEditorWindow::close()
