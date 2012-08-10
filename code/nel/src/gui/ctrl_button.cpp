@@ -146,6 +146,39 @@ namespace NLGUI
 			CCtrlBaseButton::setProperty( name, value );
 	}
 
+
+	xmlNodePtr CCtrlButton::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CCtrlBaseButton::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlNewProp( node, BAD_CAST "tx_normal",
+			BAD_CAST CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdNormal ).c_str() );
+
+		xmlNewProp( node, BAD_CAST "tx_pushed",
+			BAD_CAST CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdPushed ).c_str() );
+
+		xmlNewProp( node, BAD_CAST "tx_over",
+			BAD_CAST CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdOver ).c_str() );
+
+		xmlNewProp( node, BAD_CAST "scale", BAD_CAST toString( _Scale ).c_str() );
+
+		std::string align;
+		if( ( _Align & 1 ) != 0 )
+			align = "r";
+		else
+			align = "l";
+		if( ( _Align & 2 ) != 0 )
+			align += "t";
+		else
+			align += "b";
+		
+		xmlNewProp( node, BAD_CAST "align", BAD_CAST align.c_str() );
+
+		return node;
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CCtrlButton::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
