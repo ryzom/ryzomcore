@@ -398,6 +398,9 @@ namespace NLGUI
 		if( node == NULL )
 			return NULL;
 
+		if( xmlGetProp( node, BAD_CAST "type" ) == NULL )
+			xmlSetProp( node, BAD_CAST "type", BAD_CAST "scroll" );
+
 		xmlSetProp( node, BAD_CAST "tx_bottomleft", BAD_CAST getTextureBottomOrLeft().c_str() );
 		xmlSetProp( node, BAD_CAST "tx_middle", BAD_CAST getTextureMiddle().c_str() );
 		xmlSetProp( node, BAD_CAST "tx_topright", BAD_CAST getTextureTopOrRight().c_str() );

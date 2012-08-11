@@ -44,6 +44,19 @@ namespace NLGUI
 		return false;
 	}
 
+
+	xmlNodePtr CCtrlToolTip::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CCtrlBase::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		if( xmlGetProp( node, BAD_CAST "type" ) == NULL )
+			xmlSetProp( node, BAD_CAST "type", BAD_CAST "tooltip" );
+
+		return node;
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CCtrlToolTip::parse(xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{

@@ -41,6 +41,7 @@ namespace NLGUI
 
 		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
 		virtual void draw();
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
 		virtual bool		parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 		// Can do nothing with tooltip (but display it :) )
 		virtual	bool		isCapturable() const {return false;}
