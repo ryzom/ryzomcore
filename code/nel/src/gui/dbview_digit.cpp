@@ -103,6 +103,28 @@ namespace NLGUI
 	}
 
 
+	xmlNodePtr CDBViewDigit::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CViewBase::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		if( xmlGetProp( node, BAD_CAST "type" ) == NULL )
+			xmlSetProp( node, BAD_CAST "type", BAD_CAST "digit" );
+
+		if( _Number.getNodePtr() != NULL )
+			xmlSetProp( node, BAD_CAST "value", BAD_CAST _Number.getNodePtr()->getFullName().c_str() );
+		else
+			xmlSetProp( node, BAD_CAST "value", BAD_CAST "" );
+
+		xmlSetProp( node, BAD_CAST "numdigit", BAD_CAST toString( _NumDigit ).c_str() );
+		xmlSetProp( node, BAD_CAST "wspace", BAD_CAST toString( _WSpace ).c_str() );
+		xmlSetProp( node, BAD_CAST "color", BAD_CAST toString( _Color ).c_str() );
+
+		return node;
+	}
+
+
 	// ***************************************************************************
 	bool CDBViewDigit::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
