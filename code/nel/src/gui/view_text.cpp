@@ -494,6 +494,65 @@ namespace NLGUI
 			return false;
 	}
 
+
+	xmlNodePtr CViewText::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CViewBase::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		if( xmlGetProp( node, BAD_CAST "type" ) == NULL )
+			xmlSetProp( node, BAD_CAST "type", BAD_CAST "text" );
+
+		xmlSetProp( node, BAD_CAST "color", BAD_CAST toString( _Color ).c_str() );
+		xmlSetProp( node, BAD_CAST "global_color", BAD_CAST toString( _ModulateGlobalColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "fontsize",
+			BAD_CAST toString(
+			_FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32() 
+			).c_str() );
+
+		xmlSetProp( node, BAD_CAST "shadow", BAD_CAST toString( _Shadow ).c_str() );
+		xmlSetProp( node, BAD_CAST "shadow_color", BAD_CAST toString( _ShadowColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "multi_line", BAD_CAST toString( _MultiLine ).c_str() );
+
+		std::string just;
+
+		switch( _TextMode )
+		{
+		case ClipWord:
+			just = "clip_word";
+			break;
+
+		case DontClipWord:
+			just = "dont_clip_word";
+			break;
+
+		case Justified:
+			just = "justified";
+			break;
+		}
+		
+		xmlSetProp( node, BAD_CAST "justification", BAD_CAST just.c_str() );
+		xmlSetProp( node, BAD_CAST "line_maxw", BAD_CAST toString( _LineMaxW ).c_str() );
+		xmlSetProp( node, BAD_CAST "multi_line_space", BAD_CAST toString( _MultiLineSpace ).c_str() );
+		xmlSetProp( node, BAD_CAST "multi_line_maxw_only", BAD_CAST toString( _MultiLineMaxWOnly ).c_str() );
+		xmlSetProp( node, BAD_CAST "multi_max_line", BAD_CAST toString( _MultiMaxLine ).c_str() );
+		xmlSetProp( node, BAD_CAST "underlined", BAD_CAST toString( _Underlined ).c_str() );
+		xmlSetProp( node, BAD_CAST "case_mode", BAD_CAST toString( uint32( _CaseMode ) ).c_str() );
+		xmlSetProp( node, BAD_CAST "over_extend_view_text", BAD_CAST toString( _OverExtendViewText ).c_str() );
+		xmlSetProp( node, BAD_CAST "over_extend_parent_rect",
+			BAD_CAST toString( _OverExtendViewTextUseParentRect ).c_str() );
+		xmlSetProp( node, BAD_CAST "auto_clamp", BAD_CAST toString( _AutoClamp ).c_str() );
+		xmlSetProp( node, BAD_CAST "clamp_right", BAD_CAST toString( _ClampRight ).c_str() );
+		xmlSetProp( node, BAD_CAST "auto_clamp_offset", BAD_CAST toString( _AutoClampOffset ).c_str() );
+		xmlSetProp( node, BAD_CAST "continuous_update", BAD_CAST toString( _ContinuousUpdate ).c_str() );
+		xmlSetProp( node, BAD_CAST "hardtext", BAD_CAST _Text.toString().c_str() );
+		xmlSetProp( node, BAD_CAST "hardtext_format", BAD_CAST _HardtextFormat.c_str() );
+		xmlSetProp( node, BAD_CAST "", BAD_CAST "" );
+
+		return node;
+	}
+
 	// ***************************************************************************
 	void CViewText::parseTextOptions (xmlNodePtr cur)
 	{
