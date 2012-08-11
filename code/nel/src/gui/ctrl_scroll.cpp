@@ -392,6 +392,67 @@ namespace NLGUI
 			CCtrlBase::setProperty( name, value );
 	}
 
+	xmlNodePtr CCtrlScroll::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CCtrlBase::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "tx_bottomleft", BAD_CAST getTextureBottomOrLeft().c_str() );
+		xmlSetProp( node, BAD_CAST "tx_middle", BAD_CAST getTextureMiddle().c_str() );
+		xmlSetProp( node, BAD_CAST "tx_topright", BAD_CAST getTextureTopOrRight().c_str() );
+		xmlSetProp( node, BAD_CAST "vertical", BAD_CAST toString( _Vertical ).c_str() );
+		
+		std::string align;
+
+		switch( _Aligned )
+		{
+		case 0:
+			align = "T";
+			break;
+
+		case 1:
+			align = "B";
+			break;
+
+		case 2:
+			align = "L";
+			break;
+
+		case 3:
+			align = "R";
+			break;
+		}
+		xmlSetProp( node, BAD_CAST "align", BAD_CAST align.c_str() );
+
+		xmlSetProp( node, BAD_CAST "min", BAD_CAST toString( _Min ).c_str() );
+		xmlSetProp( node, BAD_CAST "max", BAD_CAST toString( _Max ).c_str() );
+
+		if( _IsDBLink )
+			xmlSetProp( node, BAD_CAST "value", BAD_CAST _DBLink.getNodePtr()->getFullName().c_str() );
+
+		xmlSetProp( node, BAD_CAST "tracksize", BAD_CAST toString( _TrackSize ).c_str() );
+		xmlSetProp( node, BAD_CAST "onscroll", BAD_CAST _AHOnScroll.c_str() );
+		xmlSetProp( node, BAD_CAST "params", BAD_CAST _AHOnScrollParams.c_str() );
+		xmlSetProp( node, BAD_CAST "onscrollend", BAD_CAST _AHOnScrollEnd.c_str() );
+		xmlSetProp( node, BAD_CAST "end_params", BAD_CAST _AHOnScrollEndParams.c_str() );
+		xmlSetProp( node, BAD_CAST "onscrollcancel", BAD_CAST _AHOnScrollCancel.c_str() );
+		xmlSetProp( node, BAD_CAST "cancel_params", BAD_CAST _AHOnScrollCancelParams.c_str() );
+
+		if( _Target != NULL )
+			xmlSetProp( node, BAD_CAST "target", BAD_CAST _Target->getId().c_str() );
+		else
+			xmlSetProp( node, BAD_CAST "target", BAD_CAST "" );
+
+		xmlSetProp( node, BAD_CAST "target_stepx", BAD_CAST toString( _TargetStepX ).c_str() );
+		xmlSetProp( node, BAD_CAST "target_stepy", BAD_CAST toString( _TargetStepY ).c_str() );
+		xmlSetProp( node, BAD_CAST "step_value", BAD_CAST toString( _StepValue ).c_str() );
+		xmlSetProp( node, BAD_CAST "cancelable", BAD_CAST toString( _Cancelable ).c_str() );
+		xmlSetProp( node, BAD_CAST "frozen", BAD_CAST toString( _Frozen ).c_str() );
+
+		return node;
+	}
+
 	// ------------------------------------------------------------------------------------------------
 	bool CCtrlScroll::parse(xmlNodePtr node, CInterfaceGroup * parentGroup)
 	{
