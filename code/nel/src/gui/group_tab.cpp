@@ -799,7 +799,7 @@ namespace NLGUI
 			return NULL;
 
 		if( xmlGetProp( node, BAD_CAST "type" ) == NULL )
-			xmlSetProp( node, BAD_CAST "type", BAD_CAST "tab_button" );
+			xmlSetProp( node, BAD_CAST "type", BAD_CAST "tab" );
 
 		xmlNewProp( node, BAD_CAST "group", BAD_CAST _AssociatedGroup.c_str() );
 
