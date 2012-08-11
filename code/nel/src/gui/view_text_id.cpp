@@ -106,6 +106,29 @@ namespace NLGUI
 			CViewText::setProperty( name, value );
 	}
 
+
+	xmlNodePtr CViewTextID::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CViewText::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text_id" );
+
+		if( _DBTextId.getNodePtr() != NULL )
+			xmlSetProp( node, BAD_CAST "textid", BAD_CAST _DBTextId.getNodePtr()->getFullName().c_str() );
+		else
+			xmlSetProp( node, BAD_CAST "textid", BAD_CAST "" );
+
+		xmlSetProp( node, BAD_CAST "dynamic_string",
+			BAD_CAST NLMISC::toString( _DynamicString ).c_str() );
+		
+		xmlSetProp( node, BAD_CAST "format_taged",
+			BAD_CAST NLMISC::toString( _IsTextFormatTaged ).c_str() );
+
+		return node;
+	}
+
 	// ***************************************************************************
 	bool CViewTextID::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{

@@ -386,8 +386,7 @@ namespace NLGUI
 		if( node == NULL )
 			return NULL;
 
-		if( xmlGetProp( node, BAD_CAST "type" ) == NULL )
-			xmlSetProp( node, BAD_CAST "type", BAD_CAST "text_button" );
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text_button" );
 		
 		std::string tex;
 		tex = CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdNormal[ 0 ] );

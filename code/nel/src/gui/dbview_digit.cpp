@@ -109,8 +109,7 @@ namespace NLGUI
 		if( node == NULL )
 			return NULL;
 
-		if( xmlGetProp( node, BAD_CAST "type" ) == NULL )
-			xmlSetProp( node, BAD_CAST "type", BAD_CAST "digit" );
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "digit" );
 
 		if( _Number.getNodePtr() != NULL )
 			xmlSetProp( node, BAD_CAST "value", BAD_CAST _Number.getNodePtr()->getFullName().c_str() );

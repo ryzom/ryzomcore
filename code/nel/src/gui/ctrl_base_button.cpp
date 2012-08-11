@@ -396,9 +396,7 @@ namespace NLGUI
 		if( node == NULL )
 			return NULL;
 
-		if( xmlGetProp( node, BAD_CAST "type" ) == NULL )
-			xmlSetProp( node, BAD_CAST "type", BAD_CAST "button" );
-
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "button" );
 		xmlNewProp( node, BAD_CAST "button_type", BAD_CAST getTypeString().c_str() );
 		xmlNewProp( node, BAD_CAST "pushed", BAD_CAST toString( _Pushed ).c_str() );
 		xmlNewProp( node, BAD_CAST "over_when_pushed", BAD_CAST toString( _OverWhenPushed ).c_str() );

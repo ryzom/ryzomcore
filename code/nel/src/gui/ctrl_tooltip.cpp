@@ -51,8 +51,7 @@ namespace NLGUI
 		if( node == NULL )
 			return NULL;
 
-		if( xmlGetProp( node, BAD_CAST "type" ) == NULL )
-			xmlSetProp( node, BAD_CAST "type", BAD_CAST "tooltip" );
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "tooltip" );
 
 		return node;
 	}

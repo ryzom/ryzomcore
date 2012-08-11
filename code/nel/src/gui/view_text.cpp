@@ -501,9 +501,7 @@ namespace NLGUI
 		if( node == NULL )
 			return NULL;
 
-		if( xmlGetProp( node, BAD_CAST "type" ) == NULL )
-			xmlSetProp( node, BAD_CAST "type", BAD_CAST "text" );
-
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text" );
 		xmlSetProp( node, BAD_CAST "color", BAD_CAST toString( _Color ).c_str() );
 		xmlSetProp( node, BAD_CAST "global_color", BAD_CAST toString( _ModulateGlobalColor ).c_str() );
 		xmlSetProp( node, BAD_CAST "fontsize",

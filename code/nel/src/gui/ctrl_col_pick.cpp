@@ -156,8 +156,7 @@ namespace NLGUI
 		if( node == NULL )
 			return NULL;
 
-		if( xmlGetProp( node, BAD_CAST "type" ) == NULL )
-			xmlSetProp( node, BAD_CAST "type", BAD_CAST "colpick" );
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "colpick" );
 
 		xmlSetProp( node, BAD_CAST "texture",
 			BAD_CAST CViewRenderer::getInstance()->getTextureNameFromId( _Texture ).c_str() );

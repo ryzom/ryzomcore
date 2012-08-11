@@ -153,8 +153,7 @@ namespace NLGUI
 		if( node == NULL )
 			return NULL;
 
-		if( xmlGetProp( node, BAD_CAST "type" ) == NULL )
-			xmlSetProp( node, BAD_CAST "type", BAD_CAST "button" );
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "button" );
 
 		xmlNewProp( node, BAD_CAST "tx_normal",
 			BAD_CAST CViewRenderer::getInstance()->getTextureNameFromId( _TextureIdNormal ).c_str() );

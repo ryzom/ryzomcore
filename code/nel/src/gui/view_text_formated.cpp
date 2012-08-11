@@ -46,6 +46,18 @@ namespace NLGUI
 			CViewText::setProperty( name, value );
 	}
 
+	xmlNodePtr CViewTextFormated::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CViewText::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text_formated" );
+		xmlSetProp( node, BAD_CAST "format", BAD_CAST getFormatString().c_str() );
+
+		return NULL;
+	}
+
 	// ****************************************************************************
 	bool CViewTextFormated::parse(xmlNodePtr cur,CInterfaceGroup * parentGroup)
 	{
