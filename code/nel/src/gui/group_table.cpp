@@ -1306,6 +1306,27 @@ namespace NLGUI
 			CInterfaceGroup::setProperty( name, value );
 	}
 
+
+	xmlNodePtr CGroupTable::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "table" );
+		xmlSetProp( node, BAD_CAST "border", BAD_CAST toString( Border ).c_str() );
+		xmlSetProp( node, BAD_CAST "cellpadding", BAD_CAST toString( CellPadding ).c_str() );
+		xmlSetProp( node, BAD_CAST "cellspacing", BAD_CAST toString( CellSpacing ).c_str() );
+		xmlSetProp( node, BAD_CAST "bgcolor", BAD_CAST toString( BgColor ).c_str() );
+
+		if( ForceWidthMin != 0 )
+			xmlSetProp( node, BAD_CAST "width", BAD_CAST toString( ForceWidthMin ).c_str() );
+		else
+			xmlSetProp( node, BAD_CAST "width", BAD_CAST toString( TableRatio * 100.0f ).c_str() );
+
+		return node;
+	}
+
 	// ------------------------------------------------------------------------------------------------
 	bool CGroupTable::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
