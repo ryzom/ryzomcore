@@ -247,6 +247,67 @@ namespace NLGUI
 			CInterfaceGroup::setProperty( name, value );
 	}
 
+	xmlNodePtr CGroupCell::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "cell" );
+		
+		std::string align;
+		std::string valign;
+
+		switch( Align )
+		{
+		case Right:
+			align = "right";
+			break;
+
+		case Center:
+			align = "center";
+			break;
+
+		default:
+			align = "left";
+			break;
+		}
+
+
+		switch( VAlign )
+		{
+		case Middle:
+			valign = "middle";
+			break;
+
+		case Bottom:
+			valign = "bottom";
+			break;
+
+		default:
+			valign = "top";
+			break;
+		}
+
+		xmlSetProp( node, BAD_CAST "align", BAD_CAST "" );
+		xmlSetProp( node, BAD_CAST "valign", BAD_CAST "" );
+		xmlSetProp( node, BAD_CAST "left_margin", BAD_CAST toString( LeftMargin ).c_str() );
+		xmlSetProp( node, BAD_CAST "nowrap", BAD_CAST toString( NoWrap ).c_str() );
+		xmlSetProp( node, BAD_CAST "bgcolor", BAD_CAST toString( BgColor ).c_str() );
+
+		if( WidthWanted != 0 )
+			xmlSetProp( node, BAD_CAST "width", BAD_CAST toString( WidthWanted ).c_str() );
+		else
+			xmlSetProp( node, BAD_CAST "width", BAD_CAST toString( TableRatio * 100.0f ).c_str() );
+
+		xmlSetProp( node, BAD_CAST "height", BAD_CAST toString( Height ).c_str() );
+		xmlSetProp( node, BAD_CAST "ignore_max_width", BAD_CAST toString( IgnoreMaxWidth ).c_str() );
+		xmlSetProp( node, BAD_CAST "ignore_min_width", BAD_CAST toString( IgnoreMinWidth ).c_str() );
+		xmlSetProp( node, BAD_CAST "add_child_w", BAD_CAST toString( AddChildW ).c_str() );
+
+		return node;
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CGroupCell::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup, uint columnIndex, uint rowIndex)
 	{

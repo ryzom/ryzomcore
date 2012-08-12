@@ -59,6 +59,7 @@ namespace NLGUI
 
 		std::string getProperty( const std::string &name ) const;
 		void setProperty( const std::string &name, const std::string &value );
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
 
 		// to be called by CGroupTable
 		bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup, uint columnIndex, uint rowIndex);
