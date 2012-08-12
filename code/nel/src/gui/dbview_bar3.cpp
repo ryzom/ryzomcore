@@ -237,6 +237,38 @@ namespace NLGUI
 	}
 
 
+	xmlNodePtr CDBViewBar3::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CViewBitmap::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "bar3" );
+		xmlSetProp( node, BAD_CAST "value1", BAD_CAST getValProp( _Value[ 0 ], _ValueInt[ 0 ] ).c_str() );
+		xmlSetProp( node, BAD_CAST "value2", BAD_CAST getValProp( _Value[ 1 ], _ValueInt[ 1 ] ).c_str() );
+		xmlSetProp( node, BAD_CAST "value3", BAD_CAST getValProp( _Value[ 2 ], _ValueInt[ 2 ] ).c_str() );
+
+		xmlSetProp( node, BAD_CAST "range1", BAD_CAST getValProp( _Range[ 0 ], _RangeInt[ 0 ] ).c_str() );
+		xmlSetProp( node, BAD_CAST "range2", BAD_CAST getValProp( _Range[ 1 ], _RangeInt[ 1 ] ).c_str() );
+		xmlSetProp( node, BAD_CAST "range3", BAD_CAST getValProp( _Range[ 2 ], _RangeInt[ 2 ] ).c_str() );
+
+		xmlSetProp( node, BAD_CAST "color1", BAD_CAST toString( _Colors[ 0 ] ).c_str() );
+		xmlSetProp( node, BAD_CAST "color2", BAD_CAST toString( _Colors[ 1 ] ).c_str() );
+		xmlSetProp( node, BAD_CAST "color3", BAD_CAST toString( _Colors[ 2 ] ).c_str() );
+
+		xmlSetProp( node, BAD_CAST "color1_negative", BAD_CAST toString( _ColorsNegative[ 0 ] ).c_str() );
+		xmlSetProp( node, BAD_CAST "color2_negative", BAD_CAST toString( _ColorsNegative[ 1 ] ).c_str() );
+		xmlSetProp( node, BAD_CAST "color3_negative", BAD_CAST toString( _ColorsNegative[ 2 ] ).c_str() );
+
+		if( _Mini )
+			xmlSetProp( node, BAD_CAST "mini", BAD_CAST "true" );
+		else
+			xmlSetProp( node, BAD_CAST "mini", BAD_CAST "false" );
+
+		return node;
+	}
+
+
 	// ----------------------------------------------------------------------------
 	bool CDBViewBar3::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
