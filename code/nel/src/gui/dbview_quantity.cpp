@@ -86,6 +86,30 @@ namespace NLGUI
 			CViewText::setProperty( name, value );
 	}
 
+
+	xmlNodePtr CDBViewQuantity::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CViewText::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text_quantity" );
+
+		if( _Number.getNodePtr() != NULL )
+			xmlSetProp( node, BAD_CAST "value", BAD_CAST _Number.getNodePtr()->getFullName().c_str() );
+		else
+			xmlSetProp( node, BAD_CAST "value", BAD_CAST "" );
+
+		if( _NumberMax.getNodePtr() != NULL )
+			xmlSetProp( node, BAD_CAST "valuemax", BAD_CAST _NumberMax.getNodePtr()->getFullName().c_str() );
+		else
+			xmlSetProp( node, BAD_CAST "valuemax", BAD_CAST "" );
+
+		xmlSetProp( node, BAD_CAST "emptytext", BAD_CAST _EmptyText.toString().c_str() );
+
+		return node;
+	}
+
 	// ***************************************************************************
 	bool CDBViewQuantity::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
