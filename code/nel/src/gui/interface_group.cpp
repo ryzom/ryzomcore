@@ -673,6 +673,7 @@ namespace NLGUI
 
 		serializeSubGroups( node );
 		serializeControls( node );
+		serializeViews( node );
 
 		return node;
 	}
@@ -739,6 +740,12 @@ namespace NLGUI
 
 	xmlNodePtr CInterfaceGroup::serializeViews( xmlNodePtr parentNode ) const
 	{
+		std::vector< CViewBase* >::const_iterator itr;
+		for( itr = _Views.begin(); itr != _Views.end(); ++itr )
+		{
+			(*itr)->serialize( parentNode, "view" );
+		}
+
 		return parentNode;
 	}
 

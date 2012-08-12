@@ -546,7 +546,6 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "continuous_update", BAD_CAST toString( _ContinuousUpdate ).c_str() );
 		xmlSetProp( node, BAD_CAST "hardtext", BAD_CAST _Text.toString().c_str() );
 		xmlSetProp( node, BAD_CAST "hardtext_format", BAD_CAST _HardtextFormat.c_str() );
-		xmlSetProp( node, BAD_CAST "", BAD_CAST "" );
 
 		return node;
 	}

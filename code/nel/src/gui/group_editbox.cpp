@@ -432,6 +432,92 @@ namespace NLGUI
 			CInterfaceGroup::setProperty( name, value );
 	}
 
+	xmlNodePtr CGroupEditBox::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "edit_box" );
+
+		xmlSetProp( node, BAD_CAST "onchange", BAD_CAST _AHOnChange.c_str() );
+		xmlSetProp( node, BAD_CAST "onchange_params", BAD_CAST _ParamsOnChange.c_str() );
+		xmlSetProp( node, BAD_CAST "on_focus_lost", BAD_CAST _AHOnFocusLost.c_str() );
+		xmlSetProp( node, BAD_CAST "on_focus_lost_params", BAD_CAST _AHOnFocusLostParams.c_str() );
+		xmlSetProp( node, BAD_CAST "on_focus", BAD_CAST _AHOnFocus.c_str() );
+		xmlSetProp( node, BAD_CAST "on_focus_params", BAD_CAST _AHOnFocusParams.c_str() );
+		xmlSetProp( node, BAD_CAST "max_num_chars", BAD_CAST toString( _MaxNumChar ).c_str() );
+		xmlSetProp( node, BAD_CAST "max_num_return", BAD_CAST toString( _MaxNumReturn ).c_str() );
+		xmlSetProp( node, BAD_CAST "max_chars_size", BAD_CAST toString( _MaxCharsSize ).c_str() );
+		xmlSetProp( node, BAD_CAST "enter_loose_focus", BAD_CAST toString( _LooseFocusOnEnter ).c_str() );
+		xmlSetProp( node, BAD_CAST "enter_recover_focus", BAD_CAST toString( _RecoverFocusOnEnter ).c_str() );
+		xmlSetProp( node, BAD_CAST "prompt", BAD_CAST _Prompt.toString().c_str() );
+
+		std::string e;
+		switch( _EntryType )
+		{
+		case Integer:
+			e = "integer";
+			break;
+
+		case PositiveInteger:
+			e = "positive_integer";
+			break;
+
+		case Float:
+			e = "float";
+			break;
+
+		case PositiveFloat:
+			e = "positive_float";
+			break;
+
+		case Alpha:
+			e = "alpha";
+			break;
+
+		case AlphaNum:
+			e = "alpha_num";
+			break;
+
+		case AlphaNumSpace:
+			e = "alpha_num_space";
+			break;
+
+		case Password:
+			e = "password";
+			break;
+
+		case Filename:
+			e = "filename";
+			break;
+
+		case PlayerName:
+			e = "playername";
+			break;
+		}
+
+		xmlSetProp( node, BAD_CAST "enter_type", BAD_CAST e.c_str() );
+		xmlSetProp( node, BAD_CAST "menu_r", BAD_CAST _ListMenuRight.c_str() );
+		xmlSetProp( node, BAD_CAST "max_historic", BAD_CAST toString( _MaxHistoric ).c_str() );
+		xmlSetProp( node, BAD_CAST "backup_father_container_pos",
+			BAD_CAST toString( _BackupFatherContainerPos ).c_str() );
+		xmlSetProp( node, BAD_CAST "want_return", BAD_CAST toString( _WantReturn ).c_str() );
+		xmlSetProp( node, BAD_CAST "savable", BAD_CAST toString( _Savable ).c_str() );
+		xmlSetProp( node, BAD_CAST "max_float_prec", BAD_CAST toString( _MaxFloatPrec ).c_str() );
+
+		std::string s;
+		s.reserve( _NegativeFilter.size() );
+
+		std::vector< char >::const_iterator itr;
+		for( itr = _NegativeFilter.begin(); itr != _NegativeFilter.end(); ++itr )
+			s.push_back( *itr );
+
+		xmlSetProp( node, BAD_CAST "negative_filter", BAD_CAST s.c_str() );
+
+		return node;
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CGroupEditBox::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{

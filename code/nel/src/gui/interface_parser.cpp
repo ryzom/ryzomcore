@@ -1353,7 +1353,8 @@ namespace NLGUI
 			if (parentGroup->getElement(view->getId()) != NULL)
 			{
 				// Remove old groupe and replace
-				if (reload)
+				// TODO: Don't save widgets created by complex widgets
+				if ( true /*reload*/)
 					parentGroup->delElement (view->getId());
 				else
 				{

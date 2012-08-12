@@ -1532,15 +1532,16 @@ namespace NLGUI
 				idParent = _Parent->getId() + ":";
 			else
 				idParent = "ui:";
-			
+			CWidgetManager::getInstance()->getParser()->addParentSizeAssociation( this, idParent + Id );
 		}
 		else
 		{
 			if( _Parent != NULL )
+			{
 				idParent = _Parent->getId();
+				CWidgetManager::getInstance()->getParser()->addParentSizeAssociation( this, idParent );
+			}
 		}
-
-		CWidgetManager::getInstance()->getParser()->addParentSizeAssociation( this, idParent + Id );
 	}
 
 	CStringMapper* CStringShared::_UIStringMapper = NULL;
