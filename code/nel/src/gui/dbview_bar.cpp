@@ -171,6 +171,50 @@ namespace NLGUI
 			CViewBitmap::setProperty( name, value );
 	}
 
+
+	xmlNodePtr CDBViewBar::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CViewBitmap::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "bar" );
+
+		if( _Value.getNodePtr() != NULL )
+			xmlSetProp( node, BAD_CAST "value", BAD_CAST _Value.getNodePtr()->getFullName().c_str() );
+		else
+			xmlSetProp( node, BAD_CAST "value", BAD_CAST toString( _RangeInt ).c_str() );
+
+		if( _Range.getNodePtr() != NULL )
+			xmlSetProp( node, BAD_CAST "range", BAD_CAST _Range.getNodePtr()->getFullName().c_str() );
+		else
+			xmlSetProp( node, BAD_CAST "range", BAD_CAST toString( _RangeInt ).c_str() );
+
+		if( _Reference.getNodePtr() != NULL )
+			xmlSetProp( node, BAD_CAST "reference", BAD_CAST _Reference.getNodePtr()->getFullName().c_str() );
+		else
+			xmlSetProp( node, BAD_CAST "reference", BAD_CAST toString( _ReferenceInt ).c_str() );
+
+		xmlSetProp( node, BAD_CAST "color_negative", BAD_CAST toString( _ColorNegative ).c_str() );
+		
+		if( _Type == ViewBar_Mini )
+			xmlSetProp( node, BAD_CAST "mini", BAD_CAST "true" );
+		else
+			xmlSetProp( node, BAD_CAST "mini", BAD_CAST "false" );
+
+		if( _Type == ViewBar_UltraMini )
+			xmlSetProp( node, BAD_CAST "ultra_mini", BAD_CAST "true" );
+		else
+			xmlSetProp( node, BAD_CAST "ultra_mini", BAD_CAST "false" );
+
+		if( _Type == ViewBar_MiniThick )
+			xmlSetProp( node, BAD_CAST "mini_thick", BAD_CAST "true" );
+		else
+			xmlSetProp( node, BAD_CAST "mini_thick", BAD_CAST "false" );
+
+		return node;
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CDBViewBar::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
