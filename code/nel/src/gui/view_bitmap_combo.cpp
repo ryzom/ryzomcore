@@ -257,6 +257,36 @@ namespace NLGUI
 			CViewBase::setProperty( name, value );
 	}
 
+	xmlNodePtr CViewBitmapCombo::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CViewBase::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "bitmap_combo" );
+
+		std::string normal;
+		std::string over;
+		std::string pushed;
+
+		getTexList( _Texs, normal );
+		getTexList( _TexsOver, over );
+		getTexList( _TexsPushed, pushed );
+		xmlSetProp( node, BAD_CAST "tx_normal", BAD_CAST normal.c_str() );
+		xmlSetProp( node, BAD_CAST "tx_over", BAD_CAST over.c_str() );
+		xmlSetProp( node, BAD_CAST "tx_pushed", BAD_CAST pushed.c_str() );
+
+		getColList( _Col, normal );
+		getColList( _ColOver, over );
+		getColList( _ColPushed, pushed );
+		xmlSetProp( node, BAD_CAST "col_normal", BAD_CAST normal.c_str() );
+		xmlSetProp( node, BAD_CAST "col_over", BAD_CAST over.c_str() );
+		xmlSetProp( node, BAD_CAST "col_pushed", BAD_CAST pushed.c_str() );
+
+
+		return node;
+	}
+
 	//=======================================================================================
 	bool CViewBitmapCombo::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
