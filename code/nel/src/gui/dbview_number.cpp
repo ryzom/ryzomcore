@@ -139,6 +139,29 @@ namespace NLGUI
 			CViewText::setProperty( name, value );
 	}
 
+	xmlNodePtr CDBViewNumber::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CViewText::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text_number" );
+		
+		if( _Number.getNodePtr() != NULL )
+			xmlSetProp( node, BAD_CAST "value", BAD_CAST _Number.getNodePtr()->getFullName().c_str() );
+		else
+			xmlSetProp( node, BAD_CAST "value", BAD_CAST "" );
+
+		xmlSetProp( node, BAD_CAST "positive", BAD_CAST toString( _Positive ).c_str() );
+		xmlSetProp( node, BAD_CAST "format", BAD_CAST toString( _Format ).c_str() );
+		xmlSetProp( node, BAD_CAST "divisor", BAD_CAST toString( _Divisor ).c_str() );
+		xmlSetProp( node, BAD_CAST "modulo", BAD_CAST toString( _Modulo ).c_str() );
+		xmlSetProp( node, BAD_CAST "suffix", BAD_CAST _Suffix.toString().c_str() );
+		xmlSetProp( node, BAD_CAST "prefix", BAD_CAST _Prefix.toString().c_str() );
+
+		return node;
+	}
+
 	// ***************************************************************************
 	bool CDBViewNumber::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
