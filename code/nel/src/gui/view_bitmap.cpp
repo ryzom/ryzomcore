@@ -230,6 +230,42 @@ namespace NLGUI
 			CViewBase::setProperty( name, value );
 	}
 
+
+	xmlNodePtr CViewBitmap::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CViewBase::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "bitmap" );
+		xmlSetProp( node, BAD_CAST "color", BAD_CAST toString( _Color ).c_str() );
+		xmlSetProp( node, BAD_CAST "txtoffsetx", BAD_CAST toString( _TxtOffsetX ).c_str() );
+		xmlSetProp( node, BAD_CAST "txtoffsety", BAD_CAST toString( _TxtOffsetY ).c_str() );
+		xmlSetProp( node, BAD_CAST "txtwidth", BAD_CAST toString( _TxtWidth ).c_str() );
+		xmlSetProp( node, BAD_CAST "txtheight", BAD_CAST toString( _TxtHeight ).c_str() );
+		xmlSetProp( node, BAD_CAST "texture", BAD_CAST getTexture().c_str() );
+		xmlSetProp( node, BAD_CAST "scale", BAD_CAST toString( _Scale ).c_str() );
+		xmlSetProp( node, BAD_CAST "rot", BAD_CAST toString( _Rot ).c_str() );
+		xmlSetProp( node, BAD_CAST "flip", BAD_CAST toString( _Flip ).c_str() );
+		xmlSetProp( node, BAD_CAST "tile", BAD_CAST toString( _Tile ).c_str() );
+		xmlSetProp( node, BAD_CAST "inherit_gc_alpha", BAD_CAST toString( _InheritGCAlpha ).c_str() );
+
+		std::string align;
+		if( ( _Align & 1 ) != 0 )
+			align += "R";
+		else
+			align += "L";
+
+		if( ( _Align & 2 ) != 0 )
+			align += "T";
+		else
+			align += "B";
+
+		xmlSetProp( node, BAD_CAST "txtoffsetx", BAD_CAST align.c_str() );
+
+		return node;
+	}
+
 	// ----------------------------------------------------------------------------
 
 	bool CViewBitmap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
