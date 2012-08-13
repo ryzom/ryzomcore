@@ -2117,6 +2117,37 @@ namespace NLGUI
 			CGroupModal::setProperty( name, value );
 	}
 
+
+	xmlNodePtr CGroupMenu::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CGroupModal::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "menu" );
+		xmlSetProp( node, BAD_CAST "extends", BAD_CAST _Extends.c_str() );
+		xmlSetProp( node, BAD_CAST "case_mode", BAD_CAST toString( uint32( _CaseMode ) ).c_str() );
+		xmlSetProp( node, BAD_CAST "color", BAD_CAST toString( _Color ).c_str() );
+		xmlSetProp( node, BAD_CAST "shadow_color", BAD_CAST toString( _ShadowColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "color_over", BAD_CAST toString( _ColorOver ).c_str() );
+		xmlSetProp( node, BAD_CAST "shadow_color_over", BAD_CAST toString( _ShadowColorOver ).c_str() );
+		xmlSetProp( node, BAD_CAST "highlight_over", BAD_CAST toString( _HighLightOver ).c_str() );
+		xmlSetProp( node, BAD_CAST "color_grayed", BAD_CAST toString( _ColorGrayed ).c_str() );
+		xmlSetProp( node, BAD_CAST "shadow_color_grayed", BAD_CAST toString( _ShadowColorGrayed ).c_str() );
+		xmlSetProp( node, BAD_CAST "space", BAD_CAST toString( _Space ).c_str() );
+		xmlSetProp( node, BAD_CAST "fontsize", BAD_CAST toString( _FontSize ).c_str() );
+		xmlSetProp( node, BAD_CAST "shadow", BAD_CAST toString( _Shadow ).c_str() );
+		xmlSetProp( node, BAD_CAST "formatted", BAD_CAST toString( _Formatted ).c_str() );
+		
+		if( _RootMenu == NULL )
+			xmlSetProp( node, BAD_CAST "max_visible_line", BAD_CAST "0" );
+		else
+			xmlSetProp( node, BAD_CAST "max_visible_line",
+				BAD_CAST toString( _RootMenu->getMaxVisibleLine() ).c_str() );
+
+		return NULL;
+	}
+
 	// ------------------------------------------------------------------------------------------------
 	bool CGroupMenu::parse (xmlNodePtr in,  CInterfaceGroup *parentGroup)
 	{
