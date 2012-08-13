@@ -640,6 +640,37 @@ namespace NLGUI
 			CInterfaceGroup::setProperty( name, value );
 	}
 
+	xmlNodePtr CGroupTree::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "tree" );
+		xmlSetProp( node, BAD_CAST "col_over", BAD_CAST toString( _OverColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "col_select", BAD_CAST toString( _SelectedColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "col_over_back", BAD_CAST toString( _OverColorBack ).c_str() );
+		xmlSetProp( node, BAD_CAST "", BAD_CAST "" );
+		xmlSetProp( node, BAD_CAST "fontsize", BAD_CAST toString( _FontSize ).c_str() );
+		xmlSetProp( node, BAD_CAST "select_ancestor_on_close", BAD_CAST toString( _SelectAncestorOnClose ).c_str() );
+		xmlSetProp( node, BAD_CAST "navigate_one_branch", BAD_CAST toString( _NavigateOneBranch ).c_str() );
+		xmlSetProp( node, BAD_CAST "arbo_open_first", BAD_CAST _ArboOpenFirst.c_str() );
+		xmlSetProp( node, BAD_CAST "arbo_close_just_one", BAD_CAST _ArboCloseJustOne.c_str() );
+		xmlSetProp( node, BAD_CAST "arbo_son_without_son", BAD_CAST _ArboSonWithoutSon.c_str() );
+		xmlSetProp( node, BAD_CAST "arbo_son_last", BAD_CAST _ArboSonLast.c_str() );
+		xmlSetProp( node, BAD_CAST "arbo_son", BAD_CAST _ArboSon.c_str() );
+		xmlSetProp( node, BAD_CAST "arbo_x_extend", BAD_CAST _ArboXExtend.c_str() );
+		xmlSetProp( node, BAD_CAST "arbo_level", BAD_CAST _ArboLevel.c_str() );
+		xmlSetProp( node, BAD_CAST "rectangle_outline", BAD_CAST toString( _RectangleOutlineMode ).c_str() );
+		xmlSetProp( node, BAD_CAST "rectangle_x", BAD_CAST toString( _RectangleX ).c_str() );
+		xmlSetProp( node, BAD_CAST "rectangle_y", BAD_CAST toString( _RectangleY ).c_str() );
+		xmlSetProp( node, BAD_CAST "rectangle_w", BAD_CAST toString( _RectangleW ).c_str() );
+		xmlSetProp( node, BAD_CAST "rectangle_h", BAD_CAST toString( _RectangleH ).c_str() );
+		xmlSetProp( node, BAD_CAST "rectangle_drl", BAD_CAST toString( _RectangleDeltaRL ).c_str() );
+
+		return node;
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CGroupTree::parse (xmlNodePtr cur,  CInterfaceGroup * parentGroup)
 	{
