@@ -86,6 +86,28 @@ namespace NLGUI
 			CInterfaceGroup::setProperty( name, value );
 	}
 
+
+	xmlNodePtr CInterfaceGroupWheel::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "group_wheel" );
+
+		xmlSetProp( node, BAD_CAST "on_wheel_up",
+			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHWheelUp ).c_str() );
+
+		xmlSetProp( node, BAD_CAST "on_wheel_up_params", BAD_CAST _AHWheelUpParams.toString().c_str() );
+		
+		xmlSetProp( node, BAD_CAST "on_wheel_down",
+			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHWheelDown ).c_str() );
+
+		xmlSetProp( node, BAD_CAST "on_wheel_down_params", BAD_CAST _AHWheelDownParams.toString().c_str() );
+
+		return node;
+	}
+
 	// *****************************************************************************************************************
 	bool CInterfaceGroupWheel::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
