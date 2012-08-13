@@ -92,6 +92,20 @@ namespace NLGUI
 			CInterfaceGroup::setProperty( name, value );
 	}
 
+	xmlNodePtr CGroupFrame::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "frame" );
+		xmlSetProp( node, BAD_CAST "display", BAD_CAST NLMISC::toString( _DisplayFrame ).c_str() );
+		xmlSetProp( node, BAD_CAST "color", BAD_CAST NLMISC::toString( _Color ).c_str() );
+		xmlSetProp( node, BAD_CAST "options", BAD_CAST _Options.c_str() );
+
+		return node;
+	}
+
 	// ***************************************************************************
 	bool CGroupFrame::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{
