@@ -23,6 +23,7 @@
 #include "sound_manager.h"
 #include "nel/misc/random.h"
 #include "nel/misc/time_nl.h"
+#include "time_client.h"
 
 /////////////////////////////////////////////////////////////////////////////
 /// This animation modifier shakes the camera. The parameter is
@@ -32,16 +33,29 @@ class CCameraAnimationModifierPlayerShake : public ICameraAnimationModifierPlaye
 protected:
 	float Strength;
 
+	float _Dir;
+	float _WaitTime;
+	float _CurrTime;
+	NLMISC::CVector _CurrVec;
+
 public:
 	CCameraAnimationModifierPlayerShake()
 	{
 		Strength = 0.f;
+
+		_Dir = 1.f;
+		_CurrTime = 0.f;
+		_WaitTime = 0.f;
 	}
 
 	/// This function is called when it's time to init the modifier from an impulse
 	virtual bool initModifier(NLMISC::CBitMemStream& impulse)
 	{
 		impulse.serial(const_cast<float&>(Strength));
+
+		_Dir = 1.f;
+		_CurrTime = 0.f;
+		_WaitTime = 0.f;
 
 		return true;
 	}
@@ -51,17 +65,28 @@ public:
 	{
 		TCameraAnimationOutputInfo output;
 
-		NLMISC::CRandom rnd;
-		rnd.srand((sint32)NLMISC::CTime::getLocalTime());
+		_CurrTime += DT;
 
-		NLMISC::CVector dirs((float)rnd.randPlusMinus(1), (float)rnd.randPlusMinus(1), (float)rnd.randPlusMinus(1));
-		dirs.normalize();
+		if (_CurrTime >= _WaitTime)
+		{
+			/*NLMISC::CRandom rnd;
+			rnd.srand((sint32)NLMISC::CTime::getLocalTime());*/
 
-		// We increase the vector by the strength
-		dirs = dirs * Strength;
+			// We find a normal vector to the look at dir
+			NLMISC::CVector newVec(currCamInfo.CamLookAtDir.y * -1.f, currCamInfo.CamLookAtDir.x, currCamInfo.CamLookAtDir.z);
+			newVec.normalize();
+
+			newVec = newVec * (Strength * _Dir);
+			_Dir *= -1.f;
+
+			_CurrVec = newVec;
+
+			_CurrTime = 0.f;
+			_WaitTime = 0.1f;
+		}
 
 		output.CamLookAtDir = currCamInfo.CamLookAtDir;
-		output.CamPos = currCamInfo.CamPos + dirs;
+		output.CamPos = currCamInfo.CamPos + _CurrVec;
 
 		return output;
 	}

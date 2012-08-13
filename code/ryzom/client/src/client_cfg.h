@@ -181,6 +181,7 @@ struct CClientConfig
 
 	/// Maximum speed for camera animation
 	float			MaxCameraAnimationSpeed;
+	float			CameraAnimMinEntityDistance;
 
 	/// Allow debug commands
 	bool			AllowDebugCommands;

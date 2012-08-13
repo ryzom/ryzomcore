@@ -132,6 +132,16 @@ public:
 		// We compute the current position between the starting position and the final position
 		NLMISC::CVector movementVector = resolvePositionOrEntityPosition(EndPos) - currCamInfo.StartCamPos;
 
+		// If the position is an entity, we substract a minimum distance to the entity
+		if (EndPos.isEntityId())
+		{
+			float currDist = movementVector.norm();
+			float substractRatio = (currDist - ClientCfg.CameraAnimMinEntityDistance) / currDist;
+			if ((currDist - ClientCfg.CameraAnimMinEntityDistance) < 0.f)
+				substractRatio = 0.f;
+			movementVector = movementVector * substractRatio;
+		}
+
 		// We current position is computed using the ratio and the starting position
 		NLMISC::CVector offset = movementVector * ratio;
 		camInfo.CamPos = currCamInfo.StartCamPos + offset;
@@ -207,14 +217,12 @@ public:
 		// We add this vector to our position to know our new position
 		camInfo.CamPos = currCamInfo.CamPos + distanceVec;
 
-		// Now we compute the new look at direction
-		float ratio = currCamInfo.ElapsedTimeSinceStartStep / getDuration();
-
 		// We compute the final look at direction
 		NLMISC::CVector finalDir = resolvePositionOrEntityPosition(LookAtPos) - camInfo.CamPos;
+		finalDir.normalize();
 
 		// We get the current look at direction
-		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, currCamInfo.StartCamLookAtDir, finalDir);
+		camInfo.CamLookAtDir = finalDir;
 
 		return camInfo;
 	}
@@ -308,14 +316,12 @@ public:
 
 		camInfo.CamPos = pointPos + newDir;
 
-		// Now we compute the new look at direction
-		float ratio = currCamInfo.ElapsedTimeSinceStartStep / getDuration();
-
 		// We compute the final look at direction
 		NLMISC::CVector finalDir = resolvePositionOrEntityPosition(LookAtPos) - camInfo.CamPos;
+		finalDir.normalize();
 
 		// We get the current look at direction
-		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, currCamInfo.StartCamLookAtDir, finalDir);
+		camInfo.CamLookAtDir = finalDir;
 
 		return camInfo;
 	}

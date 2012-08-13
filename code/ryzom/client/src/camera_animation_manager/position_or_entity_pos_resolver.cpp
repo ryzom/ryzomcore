@@ -38,7 +38,10 @@ NLMISC::CVector resolvePositionOrEntityPosition(const TPositionOrEntity& posOrEn
 	}
 	else
 	{
-		NLMISC::CVector pos = entity->pos();
+		NLMISC::CVector pos;
+		if (!entity->getHeadPos(pos))
+			pos = entity->pos();
+		
 		return pos;
 	}
 	return NLMISC::CVector();

@@ -55,8 +55,8 @@ struct TCameraAnimationInputInfo
 		StartCamPos = startCamPos;
 		StartCamLookAtDir = startCamLookAtDir;
 
-		AnimStartCamPos = startCamPos;
-		AnimStartCamLookAtDir = startCamLookAtDir;
+		AnimStartCamPos = animStartCamPos;
+		AnimStartCamLookAtDir = animStartCamLookAtDir;
 
 		ElapsedTimeSinceStartStep = elapsedTimeSinceStartStep;
 	}

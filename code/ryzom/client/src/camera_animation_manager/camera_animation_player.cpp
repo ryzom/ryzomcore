@@ -57,9 +57,17 @@ void CCameraAnimationPlayer::start()
 	// We set the user controls in camAnimMode and we remember the current view and viewPos
 	_LastView = View.view();
 	_LastViewPos = View.viewPos();
+
+	_AnimStartCamPos = View.currentViewPos();
+	_AnimStartCamLookAtDir = View.currentView();
+
 	_LastMode = UserControls.mode();
 	UserControls.mode(CUserControls::CamAnimMode);
 	_HasLastViewInfo = true;
+
+	// We set the animation start views so that the camera begins at the real previous position
+	View.view(_AnimStartCamLookAtDir);
+	View.viewPos(_AnimStartCamPos);
 }
 
 void CCameraAnimationPlayer::stop(bool interrupt)
@@ -140,7 +148,7 @@ TCameraAnimationOutputInfo CCameraAnimationPlayer::update()
 
 	TCameraAnimationInputInfo currCamInfo(currCamPos, currLookAtDir,
 											_StartStepCamPos, _StartStepCamLookAtDir, 
-											_LastViewPos, _LastView,
+											_AnimStartCamPos, _AnimStartCamLookAtDir,
 											_ElapsedTimeForCurrStep);
 
 	if (!isPlaying())

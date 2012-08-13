@@ -94,6 +94,9 @@ private:
 
 	NLMISC::CVector _StartStepCamLookAtDir;
 	NLMISC::CVector _StartStepCamPos;
+
+	NLMISC::CVector _AnimStartCamLookAtDir;
+	NLMISC::CVector _AnimStartCamPos;
 };
 
 
