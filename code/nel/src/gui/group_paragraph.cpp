@@ -342,6 +342,65 @@ namespace NLGUI
 			CInterfaceGroup::setProperty( name, value );
 	}
 
+
+	xmlNodePtr CGroupParagraph::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		std::string addelt;
+		std::string align;
+
+		switch( _AddElt )
+		{
+		case Top:
+			addelt = "T";
+			break;
+
+		case Left:
+			addelt = "L";
+			break;
+
+		case Right:
+			addelt = "R";
+			break;
+
+		default:
+			addelt = "B";
+			break;
+		}
+
+		switch( _Align )
+		{
+		case Top:
+			align = "T";
+			break;
+
+		case Left:
+			align = "L";
+			break;
+
+		case Right:
+			align = "R";
+			break;
+
+		default:
+			align = "B";
+			break;
+		}
+
+		xmlSetProp( node, BAD_CAST "addelt", BAD_CAST addelt.c_str() );
+		xmlSetProp( node, BAD_CAST "align", BAD_CAST align.c_str() );
+		xmlSetProp( node, BAD_CAST "space", BAD_CAST toString( _Space ).c_str() );
+		xmlSetProp( node, BAD_CAST "over", BAD_CAST toString( _Over ).c_str() );
+		xmlSetProp( node, BAD_CAST "col_over", BAD_CAST toString( _OverColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "hardtext", BAD_CAST _HardText.c_str() );
+		xmlSetProp( node, BAD_CAST "textid", BAD_CAST toString( _TextId ).c_str() );
+
+		return node;
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CGroupParagraph::parse (xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
