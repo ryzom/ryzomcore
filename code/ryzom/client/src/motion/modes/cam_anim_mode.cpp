@@ -69,7 +69,10 @@ void CUserControls::camAnimModeStart()
 //-----------------------------------------------
 void CUserControls::camAnimModeStop()
 {
-
+	// We tell the camera animation player to stop (by interruption)
+	// If the camera animation player was not playing any animation it will have no effect but this function
+	// is usefull if the mode has changed (player is dead) to interrupt the animation
+	CCameraAnimationPlayer::getInstance()->stop(true);
 }// camAnimModeStop //
 
 //-----------------------------------------------

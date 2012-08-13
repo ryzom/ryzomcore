@@ -58,7 +58,7 @@ public:
 	void start();
 
 	/// Stops an animation
-	void stop();
+	void stop(bool interrupt = false);
 
 	/// Loads and play the specified step
 	void playStep(const std::string& stepName, NLMISC::CBitMemStream& impulse);

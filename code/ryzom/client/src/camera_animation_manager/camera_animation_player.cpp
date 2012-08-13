@@ -48,6 +48,10 @@ void CCameraAnimationPlayer::start()
 	if (isPlaying())
 		stop();
 
+	// If the player is dead, we do nothing
+	if (UserControls.mode() == CUserControls::DeathMode)
+		return;
+
 	_IsPlaying = true;
 
 	// We set the user controls in camAnimMode and we remember the current view and viewPos
@@ -58,8 +62,11 @@ void CCameraAnimationPlayer::start()
 	_HasLastViewInfo = true;
 }
 
-void CCameraAnimationPlayer::stop()
+void CCameraAnimationPlayer::stop(bool interrupt)
 {
+	if (!isPlaying())
+		return;
+
 	_IsPlaying = false;
 
 	stopStep();
@@ -67,7 +74,8 @@ void CCameraAnimationPlayer::stop()
 	// We reset view and viewPos and the usercontrols mode
 	if (_HasLastViewInfo)
 	{
-		UserControls.mode(_LastMode);
+		if (!interrupt)
+			UserControls.mode(_LastMode);
 		View.view(_LastView);
 		View.viewPos(_LastViewPos);
 		_HasLastViewInfo = false;
