@@ -396,6 +396,23 @@ namespace NLGUI
 	CGroupHeaderEntry::CGroupHeaderEntry(const TCtorParam &param) : CInterfaceGroup(param)
 	{
 		_MinSize = 4;
+		_ResizerSize = 4;
+	}
+
+	xmlNodePtr CGroupHeaderEntry::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "wmin", BAD_CAST toString( _MinSize ).c_str() );
+		xmlSetProp( node, BAD_CAST "resizer_size", BAD_CAST toString( _ResizerSize ).c_str() );
+		xmlSetProp( node, BAD_CAST "target", BAD_CAST toString( _TargetColumnId ).c_str() );
+		xmlSetProp( node, BAD_CAST "on_resize", BAD_CAST _AHOnResize.c_str() );
+		xmlSetProp( node, BAD_CAST "on_resize_params", BAD_CAST _AHOnResizeParams.c_str() );
+
+
+		return node;
 	}
 
 	// *****************************************************************************************************************
@@ -405,9 +422,8 @@ namespace NLGUI
 		// left mover
 		CXMLAutoPtr prop((const char*) xmlGetProp( cur, (xmlChar*)"wmin" ));
 		if (prop) fromString((const char*)prop, _MinSize);
-		sint32 resizerSize = 4;
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"resizer_size" );
-		if (prop) fromString((const char*)prop, resizerSize);
+		if (prop) fromString((const char*)prop, _ResizerSize);
 		prop = (char*) xmlGetProp(cur, (xmlChar*) "target");
 		if (prop) _TargetColumnId = (const char *) prop;
 
@@ -418,7 +434,7 @@ namespace NLGUI
 
 		CHeaderEntryResizer *hm = new CHeaderEntryResizer(false, _MinSize);
 		addCtrl(hm);
-		hm->setW(resizerSize);
+		hm->setW(_ResizerSize);
 		hm->setSizeRef(2);
 		hm->setParent(this);
 		hm->setParentPosRef(Hotspot_TL);
@@ -426,7 +442,7 @@ namespace NLGUI
 		// right mover
 		hm = new CHeaderEntryResizer(true, _MinSize);
 		addCtrl(hm);
-		hm->setW(resizerSize);
+		hm->setW(_ResizerSize);
 		hm->setSizeRef(2);
 		hm->setParent(this);
 		hm->setParentPosRef(Hotspot_TR);

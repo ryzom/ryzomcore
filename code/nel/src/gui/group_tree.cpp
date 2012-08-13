@@ -650,7 +650,6 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "col_over", BAD_CAST toString( _OverColor ).c_str() );
 		xmlSetProp( node, BAD_CAST "col_select", BAD_CAST toString( _SelectedColor ).c_str() );
 		xmlSetProp( node, BAD_CAST "col_over_back", BAD_CAST toString( _OverColorBack ).c_str() );
-		xmlSetProp( node, BAD_CAST "", BAD_CAST "" );
 		xmlSetProp( node, BAD_CAST "fontsize", BAD_CAST toString( _FontSize ).c_str() );
 		xmlSetProp( node, BAD_CAST "select_ancestor_on_close", BAD_CAST toString( _SelectAncestorOnClose ).c_str() );
 		xmlSetProp( node, BAD_CAST "navigate_one_branch", BAD_CAST toString( _NavigateOneBranch ).c_str() );

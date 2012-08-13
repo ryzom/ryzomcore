@@ -67,6 +67,7 @@ namespace NLGUI
 	{
 	public:
 		CGroupHeaderEntry(const TCtorParam &param);
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
 		// from CInterfaceGroup
 		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
 		sint32 getMinSize() const { return _MinSize; }
@@ -78,6 +79,7 @@ namespace NLGUI
 
 	private:
 		sint32 _MinSize;
+		sint32 _ResizerSize;
 		std::string _TargetColumnId;
 		std::string _AHOnResize;
 		std::string _AHOnResizeParams;
