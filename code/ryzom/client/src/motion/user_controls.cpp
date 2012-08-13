@@ -172,9 +172,6 @@ void CUserControls::init()
 	_NeedReleaseForward = false;
 	_NextForwardCancelMoveTo = false;
 
-	_CamAnimEntityFrontVelocity = 0.f;
-	_CamAnimEntityLateralVelocity = 0.f;
-
 }// init //
 
 

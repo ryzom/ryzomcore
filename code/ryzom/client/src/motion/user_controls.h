@@ -314,9 +314,6 @@ private:
 	/// when true the next forward action will cancel any moveto
 	bool _NextForwardCancelMoveTo;
 
-	/// Variables used by the camera animation mode to remember values
-	float _CamAnimEntityFrontVelocity;
-	float _CamAnimEntityLateralVelocity;
 };
 
 /// User Controls (mouse, keyboard, interfaces, ...)

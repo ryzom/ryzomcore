@@ -69,8 +69,7 @@ void CUserControls::camAnimModeStart()
 //-----------------------------------------------
 void CUserControls::camAnimModeStop()
 {
-	UserEntity->frontVelocity(_CamAnimEntityFrontVelocity);
-	UserEntity->lateralVelocity(_CamAnimEntityLateralVelocity);
+
 }// camAnimModeStop //
 
 //-----------------------------------------------

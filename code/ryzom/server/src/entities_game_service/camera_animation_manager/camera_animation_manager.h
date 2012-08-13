@@ -108,7 +108,16 @@ private:
 			{
 				_Infos = info;
 				_Next = nextStep;
+
+				nldebug("TCameraAnimTimerEvent constructor for step %s, eidDynamicId: %d", info->Name.c_str(), 
+						(int)eid.getDynamicId());
 			}
+
+			~TCameraAnimTimerEvent()
+			{
+				nldebug("TCameraAnimTimerEvent destructor");
+			}
+
 			// Callback called when the timer finished
 			void timerCallback(CTimer* owner)
 			{
@@ -124,7 +133,7 @@ private:
 		private:
 			TCameraAnimInfo* _Infos;
 			int _Next;
-			const NLMISC::CEntityId& _Eid;
+			NLMISC::CEntityId _Eid;
 		};
 	};
 

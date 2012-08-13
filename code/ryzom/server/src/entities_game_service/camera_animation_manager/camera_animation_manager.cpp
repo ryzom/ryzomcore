@@ -147,6 +147,8 @@ void CCameraAnimationManager::sendAnimation(const NLMISC::CEntityId& eid, const 
 void CCameraAnimationManager::TCameraAnimInfo::sendAnimationSteps(const NLMISC::CEntityId& eid)
 {
 	// We first send an impulse to the client to tell him an animation will start (this way he can remember its current position)
+	nldebug("CameraAnimation sending impulse for starting anim, eidDynamicId: %d", (int)eid.getDynamicId());
+
 	PlayerManager.sendImpulseToClient(eid, "CAMERA_ANIMATION:PLAY");
 
 	// We send the first step, and then the others
@@ -173,6 +175,10 @@ bool CCameraAnimationManager::TCameraAnimInfo::sendAnimationStep(const NLMISC::C
 
 	// We add the buffer to the message
 	msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
+
+	nldebug("CameraAnimation sending impulse for step %s, buffer length: %d, eidDynamicId: %d", step->getStepName().c_str(), 
+		bms.length(), (int)eid.getDynamicId());
+
 	NLNET::CUnifiedNetwork::getInstance()->send(NLNET::TServiceId(eid.getDynamicId()), msgout);
 
 	return true;
@@ -196,6 +202,8 @@ void CCameraAnimationManager::TCameraAnimInfo::sendAnimationStepsFrom(const NLMI
 	else
 	{
 		// There was no other step, so we send an impulse to tell the client it's finished
+		nldebug("CameraAnimation sending impulse for finished anim, eidDynamicId: %d", (int)eid.getDynamicId());
+
 		PlayerManager.sendImpulseToClient(eid, "CAMERA_ANIMATION:FINISHED");
 	}
 }

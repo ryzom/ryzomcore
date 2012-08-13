@@ -111,6 +111,8 @@ public:
 	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
 	{
 		CCameraAnimationStepBasic::sendAnimationStep(bms);
+
+		nldebug("CameraAnimation - step %s . Value: Duration: %f", getStepName().c_str(), Duration);
 	}
 
 	CAMERA_ANIMATION_STEP_NAME("camera_animation_static");
@@ -163,6 +165,8 @@ public:
 		}
 
 		bms.serial(const_cast<TPositionOrEntity&>(pos));
+
+		nldebug("CameraAnimation - step %s . Value: Duration: %f", getStepName().c_str(), Duration);
 	}
 
 	CAMERA_ANIMATION_STEP_NAME("camera_animation_go_to");
@@ -231,6 +235,8 @@ public:
 
 		bms.serial(const_cast<TPositionOrEntity&>(pos));
 		bms.serial(const_cast<float&>(DistanceToEntity));
+
+		nldebug("CameraAnimation - step %s . Value: Duration: %f", getStepName().c_str(), Duration);
 	}
 
 	CAMERA_ANIMATION_STEP_NAME("camera_animation_follow_entity");
@@ -315,6 +321,8 @@ public:
 		bms.serial(const_cast<TPositionOrEntity&>(pos));
 		bms.serial(const_cast<float&>(DistanceToPoint));
 		bms.serial(const_cast<float&>(Speed));
+
+		nldebug("CameraAnimation - step %s . Value: Duration: %f", getStepName().c_str(), Duration);
 	}
 
 	CAMERA_ANIMATION_STEP_NAME("camera_animation_turn_around");
@@ -358,6 +366,8 @@ public:
 	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
 	{
 		bms.serial(const_cast<float&>(Duration));
+
+		nldebug("CameraAnimation - step %s . Value: Duration: %f", getStepName().c_str(), Duration);
 	}
 
 	virtual float getDuration() const
