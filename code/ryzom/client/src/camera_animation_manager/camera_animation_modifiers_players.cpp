@@ -82,7 +82,7 @@ public:
 			_CurrVec = newVec;
 
 			_CurrTime = 0.f;
-			_WaitTime = 0.1f;
+			_WaitTime = 0.05f;
 		}
 
 		output.CamLookAtDir = currCamInfo.CamLookAtDir;
