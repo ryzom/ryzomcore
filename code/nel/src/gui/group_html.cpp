@@ -4222,6 +4222,18 @@ namespace NLGUI
 	{
 	}
 
+	xmlNodePtr CGroupHTMLInputOffset::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "html_input_offset" );
+		xmlSetProp( node, BAD_CAST "y_offset", BAD_CAST toString( Offset ).c_str() );
+
+		return node;
+	}
+
 	// ***************************************************************************
 	bool CGroupHTMLInputOffset::parse(xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{

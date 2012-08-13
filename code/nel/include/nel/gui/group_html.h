@@ -659,6 +659,7 @@ namespace NLGUI
 	public:
 		sint32 Offset;
 		CGroupHTMLInputOffset(const TCtorParam &param);
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 	};
 
