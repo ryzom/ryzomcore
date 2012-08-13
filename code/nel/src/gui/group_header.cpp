@@ -238,6 +238,19 @@ namespace NLGUI
 			return CGroupList::setProperty( name, value );
 	}
 
+
+	xmlNodePtr CGroupHeader::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CGroupList::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "header" );
+		xmlSetProp( node, BAD_CAST "header_max_size", BAD_CAST toString( _HeaderMaxSize ).c_str() );
+
+		return node;
+	}
+
 	// *****************************************************************************************************************
 	bool CGroupHeader::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
