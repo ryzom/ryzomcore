@@ -208,6 +208,33 @@ namespace NLGUI
 	}
 
 
+
+	xmlNodePtr CGroupModal::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CGroupFrame::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "modal" );
+		xmlSetProp( node, BAD_CAST "mouse_pos", BAD_CAST NLMISC::toString( SpawnOnMousePos ).c_str() );
+		xmlSetProp( node, BAD_CAST "exit_click_out", BAD_CAST NLMISC::toString( ExitClickOut ).c_str() );
+		xmlSetProp( node, BAD_CAST "exit_click_l", BAD_CAST NLMISC::toString( ExitClickL ).c_str() );
+		xmlSetProp( node, BAD_CAST "exit_click_r", BAD_CAST NLMISC::toString( ExitClickR ).c_str() );
+		
+		if( ExitClickL == ExitClickR )
+			xmlSetProp( node, BAD_CAST "exit_click_b", BAD_CAST NLMISC::toString( ExitClickL ).c_str() );
+
+		xmlSetProp( node, BAD_CAST "force_inside_screen", BAD_CAST NLMISC::toString( ForceInsideScreen ).c_str() );
+		xmlSetProp( node, BAD_CAST "category", BAD_CAST Category.c_str() );
+		xmlSetProp( node, BAD_CAST "onclick_out", BAD_CAST OnClickOut.c_str() );
+		xmlSetProp( node, BAD_CAST "onclick_out_params", BAD_CAST OnClickOutParams.c_str() );
+		xmlSetProp( node, BAD_CAST "onpostclick_out", BAD_CAST OnPostClickOut.c_str() );
+		xmlSetProp( node, BAD_CAST "onpostclick_out_params", BAD_CAST OnPostClickOutParams.c_str() );
+		xmlSetProp( node, BAD_CAST "exit_key_pushed", BAD_CAST NLMISC::toString( ExitKeyPushed ).c_str() );
+
+		return node;
+	}
+
 	// ***************************************************************************
 	bool CGroupModal::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{
