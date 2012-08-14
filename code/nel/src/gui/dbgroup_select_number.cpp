@@ -125,6 +125,27 @@ namespace NLGUI
 			CInterfaceGroup::setProperty( name, value );
 	}
 
+	xmlNodePtr CDBGroupSelectNumber::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "select_number" );
+		
+		if( _Number.getNodePtr() != NULL )
+			xmlSetProp( node, BAD_CAST "value", BAD_CAST _Number.getNodePtr()->getFullName().c_str() );
+		else
+			xmlSetProp( node, BAD_CAST "value", BAD_CAST "" );
+
+		xmlSetProp( node, BAD_CAST "loop", BAD_CAST toString( _LoopMode ).c_str() );
+		xmlSetProp( node, BAD_CAST "min", BAD_CAST toString( _MinValue ).c_str() );
+		xmlSetProp( node, BAD_CAST "max", BAD_CAST toString( _MaxValue ).c_str() );
+		xmlSetProp( node, BAD_CAST "delta", BAD_CAST toString( _DeltaMultiplier ).c_str() );
+
+		return node;
+	}
+
 	// ***************************************************************************
 	bool CDBGroupSelectNumber::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{
