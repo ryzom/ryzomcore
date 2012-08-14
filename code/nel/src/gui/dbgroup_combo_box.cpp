@@ -111,6 +111,24 @@ namespace NLGUI
 			CInterfaceGroup::setProperty( name, value );
 	}
 
+	xmlNodePtr CDBGroupComboBox::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+		
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "combo_box" );
+		xmlSetProp( node, BAD_CAST "linked_to_db", BAD_CAST toString( _LinkedToDB ).c_str() );
+
+		if( _Selection.getNodePtr() != NULL )
+			xmlSetProp( node, BAD_CAST "value", BAD_CAST _Selection.getNodePtr()->getFullName().c_str() );
+		else
+			xmlSetProp( node, BAD_CAST "value", BAD_CAST "" );
+
+
+		return node;
+	}
+
 	// ***************************************************************************
 	bool	CDBGroupComboBox::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{
