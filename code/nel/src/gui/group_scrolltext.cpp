@@ -70,6 +70,19 @@ namespace NLGUI
 			CInterfaceGroup::setProperty( name, value );
 	}
 
+
+	xmlNodePtr CGroupScrollText::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "scroll_text" );
+		xmlSetProp( node, BAD_CAST "invert_scroll_bar", BAD_CAST NLMISC::toString( _InvertScrollBar ).c_str() );
+
+		return node;
+	}
+
 	//========================================================================
 	bool CGroupScrollText::parse(xmlNodePtr cur,CInterfaceGroup *parentGroup)
 	{
