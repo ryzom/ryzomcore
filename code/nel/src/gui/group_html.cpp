@@ -2500,6 +2500,76 @@ namespace NLGUI
 			CGroupScrollText::setProperty( name, value );
 	}
 
+	xmlNodePtr CGroupHTML::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CGroupScrollText::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "html" );
+		xmlSetProp( node, BAD_CAST "url", BAD_CAST _URL.c_str() );
+		xmlSetProp( node, BAD_CAST "title_prefix", BAD_CAST _TitlePrefix.toString().c_str() );
+		xmlSetProp( node, BAD_CAST "background_color", BAD_CAST toString( BgColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "error_color", BAD_CAST toString( ErrorColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "link_color", BAD_CAST toString( LinkColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "background_color", BAD_CAST toString( BgColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "h1_color", BAD_CAST toString( H1Color ).c_str() );
+		xmlSetProp( node, BAD_CAST "h2_color", BAD_CAST toString( H2Color ).c_str() );
+		xmlSetProp( node, BAD_CAST "h3_color", BAD_CAST toString( H3Color ).c_str() );
+		xmlSetProp( node, BAD_CAST "h4_color", BAD_CAST toString( H4Color ).c_str() );
+		xmlSetProp( node, BAD_CAST "h5_color", BAD_CAST toString( H5Color ).c_str() );
+		xmlSetProp( node, BAD_CAST "h6_color", BAD_CAST toString( H6Color ).c_str() );
+		
+		xmlSetProp( node, BAD_CAST "error_color_global_color",
+			BAD_CAST toString( ErrorColorGlobalColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "link_color_global_color",
+			BAD_CAST toString( LinkColorGlobalColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "text_color_global_color",
+			BAD_CAST toString( TextColorGlobalColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "h1_color_global_color",
+			BAD_CAST toString( H1ColorGlobalColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "h2_color_global_color",
+			BAD_CAST toString( H2ColorGlobalColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "h3_color_global_color",
+			BAD_CAST toString( H3ColorGlobalColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "h4_color_global_color",
+			BAD_CAST toString( H4ColorGlobalColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "h5_color_global_color",
+			BAD_CAST toString( H5ColorGlobalColor ).c_str() );
+		xmlSetProp( node, BAD_CAST "h6_color_global_color",
+			BAD_CAST toString( H6ColorGlobalColor ).c_str() );
+
+		xmlSetProp( node, BAD_CAST "text_font_size", BAD_CAST toString( TextFontSize ).c_str() );
+		xmlSetProp( node, BAD_CAST "h1_font_size", BAD_CAST toString( H1FontSize ).c_str() );
+		xmlSetProp( node, BAD_CAST "h2_font_size", BAD_CAST toString( H2FontSize ).c_str() );
+		xmlSetProp( node, BAD_CAST "h3_font_size", BAD_CAST toString( H3FontSize ).c_str() );
+		xmlSetProp( node, BAD_CAST "h4_font_size", BAD_CAST toString( H4FontSize ).c_str() );
+		xmlSetProp( node, BAD_CAST "h5_font_size", BAD_CAST toString( H5FontSize ).c_str() );
+		xmlSetProp( node, BAD_CAST "h6_font_size", BAD_CAST toString( H6FontSize ).c_str() );
+		xmlSetProp( node, BAD_CAST "td_begin_space", BAD_CAST toString( TDBeginSpace ).c_str() );
+		xmlSetProp( node, BAD_CAST "paragraph_begin_space", BAD_CAST toString( PBeginSpace ).c_str() );
+		xmlSetProp( node, BAD_CAST "li_begin_space", BAD_CAST toString( LIBeginSpace ).c_str() );
+		xmlSetProp( node, BAD_CAST "ul_begin_space", BAD_CAST toString( ULBeginSpace ).c_str() );
+		xmlSetProp( node, BAD_CAST "li_indent", BAD_CAST toString( LIIndent ).c_str() );
+		xmlSetProp( node, BAD_CAST "ul_indent", BAD_CAST toString( ULIndent ).c_str() );
+		xmlSetProp( node, BAD_CAST "multi_line_space_factor", BAD_CAST toString( LineSpaceFontFactor ).c_str() );
+		xmlSetProp( node, BAD_CAST "form_text_area_group", BAD_CAST DefaultFormTextGroup.c_str() );
+		xmlSetProp( node, BAD_CAST "form_select_group", BAD_CAST DefaultFormSelectGroup.c_str() );
+		xmlSetProp( node, BAD_CAST "checkbox_bitmap_normal", BAD_CAST DefaultCheckBoxBitmapNormal.c_str() );
+		xmlSetProp( node, BAD_CAST "checkbox_bitmap_pushed", BAD_CAST DefaultCheckBoxBitmapPushed.c_str() );
+		xmlSetProp( node, BAD_CAST "checkbox_bitmap_over", BAD_CAST DefaultCheckBoxBitmapOver.c_str() );
+		xmlSetProp( node, BAD_CAST "background_bitmap_view", BAD_CAST DefaultBackgroundBitmapView.c_str() );
+		xmlSetProp( node, BAD_CAST "home", BAD_CAST Home.c_str() );
+		xmlSetProp( node, BAD_CAST "browse_next_time", BAD_CAST toString( _BrowseNextTime ).c_str() );
+		xmlSetProp( node, BAD_CAST "browse_tree", BAD_CAST _BrowseTree.c_str() );
+		xmlSetProp( node, BAD_CAST "browse_undo", BAD_CAST _BrowseUndoButton.c_str() );
+		xmlSetProp( node, BAD_CAST "browse_redo", BAD_CAST _BrowseRedoButton.c_str() );
+		xmlSetProp( node, BAD_CAST "browse_refresh", BAD_CAST _BrowseRefreshButton.c_str() );
+		xmlSetProp( node, BAD_CAST "timeout", BAD_CAST toString( _TimeoutValue ).c_str() );
+
+		return node;
+	}
+
 	// ***************************************************************************
 
 	bool CGroupHTML::parse(xmlNodePtr cur,CInterfaceGroup *parentGroup)
