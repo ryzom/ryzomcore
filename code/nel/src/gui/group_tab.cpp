@@ -88,6 +88,20 @@ namespace NLGUI
 			CInterfaceGroup::setProperty( name, value );
 	}
 
+	xmlNodePtr CGroupTab::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "tab" );
+		xmlSetProp( node, BAD_CAST "hide_out_tabs", BAD_CAST toString( _HideOutTabs ).c_str() );
+		xmlSetProp( node, BAD_CAST "onchange", BAD_CAST _AHOnChange.c_str() );
+		xmlSetProp( node, BAD_CAST "onchange_params", BAD_CAST _ParamsOnChange.c_str() );
+
+		return node;
+	}
+
 	// ***************************************************************************
 	bool	CGroupTab::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{
