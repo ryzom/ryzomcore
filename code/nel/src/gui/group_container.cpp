@@ -1936,6 +1936,131 @@ namespace NLGUI
 			CInterfaceGroup::setProperty( name, value );
 	}
 
+	xmlNodePtr CGroupContainer::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "container" );
+		xmlSetProp( node, BAD_CAST "localize", BAD_CAST toString( _Localize ).c_str() );
+
+		std::string titleClass;
+		switch( _TitleClass )
+		{
+		case TitleTextFormated:
+			titleClass = "formated";
+			break;
+
+		case TitleTextId:
+			titleClass = "text_id";
+			break;
+
+		case TitleTextDynString:
+			titleClass = "text_dyn_string";
+			break;
+
+		default:
+			titleClass = "text";
+			break;
+		}
+
+		xmlSetProp( node, BAD_CAST "title_class", BAD_CAST titleClass.c_str() );
+		xmlSetProp( node, BAD_CAST "content_y_offset", BAD_CAST toString( _ContentYOffset ).c_str() );
+		
+		if( _TitleTextOpened == _TitleTextClosed )
+			xmlSetProp( node, BAD_CAST "title", BAD_CAST _TitleTextOpened.toString().c_str() );
+		else
+			xmlSetProp( node, BAD_CAST "title", BAD_CAST "" );
+
+		xmlSetProp( node, BAD_CAST "title_opened", BAD_CAST _TitleTextOpened.toString().c_str() );
+		xmlSetProp( node, BAD_CAST "title_closed", BAD_CAST _TitleTextClosed.toString().c_str() );
+		xmlSetProp( node, BAD_CAST "header_active", BAD_CAST toString( _HeaderActive ).c_str() );
+
+		if( _HeaderColor.getNodePtr() != NULL )
+			xmlSetProp( node, BAD_CAST "header_color", BAD_CAST _HeaderColor.getNodePtr()->getFullName().c_str() );
+		else
+			xmlSetProp( node, BAD_CAST "header_color", BAD_CAST "" );
+
+		xmlSetProp( node, BAD_CAST "right_button", BAD_CAST toString( _EnabledRightButton ).c_str() );
+		xmlSetProp( node, BAD_CAST "help_button", BAD_CAST toString( _EnabledHelpButton ).c_str() );
+		xmlSetProp( node, BAD_CAST "movable", BAD_CAST toString( _Movable ).c_str() );
+		xmlSetProp( node, BAD_CAST "popable", BAD_CAST toString( _Popable ).c_str() );
+		xmlSetProp( node, BAD_CAST "lockable", BAD_CAST toString( _Lockable ).c_str() );
+		xmlSetProp( node, BAD_CAST "locked", BAD_CAST toString( _Locked ).c_str() );
+		xmlSetProp( node, BAD_CAST "openable", BAD_CAST toString( _Openable ).c_str() );
+		xmlSetProp( node, BAD_CAST "opened", BAD_CAST toString( _Opened ).c_str() );
+		xmlSetProp( node, BAD_CAST "modal", BAD_CAST toString( _Modal ).c_str() );
+		xmlSetProp( node, BAD_CAST "open_when_popup", BAD_CAST toString( _OpenWhenPopup ).c_str() );
+		xmlSetProp( node, BAD_CAST "resizer", BAD_CAST toString( _EnabledResizer ).c_str() );
+		xmlSetProp( node, BAD_CAST "resizer_top_size", BAD_CAST toString( _ResizerTopSize ).c_str() );
+		
+		xmlSetProp( node, BAD_CAST "on_open",
+			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHOnOpen ).c_str()  );
+
+		xmlSetProp( node, BAD_CAST "on_open_params",
+			BAD_CAST _AHOnOpenParams.toString().c_str()  );
+
+		xmlSetProp( node, BAD_CAST "on_close",
+			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHOnClose ).c_str()  );
+
+		xmlSetProp( node, BAD_CAST "on_close_params",
+			BAD_CAST _AHOnCloseParams.toString().c_str()  );
+
+		xmlSetProp( node, BAD_CAST "on_close_button",
+			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHOnCloseButton ).c_str()  );
+
+		xmlSetProp( node, BAD_CAST "on_close_button_params",
+			BAD_CAST _AHOnCloseButtonParams.toString().c_str()  );
+
+		xmlSetProp( node, BAD_CAST "on_move",
+			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHOnMove ).c_str()  );
+
+		xmlSetProp( node, BAD_CAST "on_close_params",
+			BAD_CAST _AHOnMoveParams.toString().c_str()  );
+
+		xmlSetProp( node, BAD_CAST "on_deactive_check",
+			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHOnDeactiveCheck ).c_str()  );
+
+		xmlSetProp( node, BAD_CAST "on_deactive_check_params",
+			BAD_CAST _AHOnDeactiveCheckParams.toString().c_str()  );
+
+		xmlSetProp( node, BAD_CAST "on_resize",
+			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHOnResize ).c_str()  );
+
+		xmlSetProp( node, BAD_CAST "on_resize_params",
+			BAD_CAST _AHOnResizeParams.toString().c_str()  );
+
+		xmlSetProp( node, BAD_CAST "on_alpha_settings_changed",
+			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHOnAlphaSettingsChanged ).c_str()  );
+
+		xmlSetProp( node, BAD_CAST "on_alpha_settings_changed_params",
+			BAD_CAST _AHOnAlphaSettingsChangedParams.toString().c_str()  );
+
+		xmlSetProp( node, BAD_CAST "on_begin_move",
+			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHOnBeginMove ).c_str()  );
+
+		xmlSetProp( node, BAD_CAST "on_begin_move_params",
+			BAD_CAST _AHOnBeginMoveParams.toString().c_str()  );
+
+		xmlSetProp( node, BAD_CAST "max_w", BAD_CAST toString( _MaxW ).c_str() );
+		xmlSetProp( node, BAD_CAST "min_w", BAD_CAST toString( _MinW ).c_str() );
+		xmlSetProp( node, BAD_CAST "pop_max_w", BAD_CAST toString( _PopupMaxW ).c_str() );
+		xmlSetProp( node, BAD_CAST "pop_min_w", BAD_CAST toString( _PopupMinW ).c_str() );
+		xmlSetProp( node, BAD_CAST "pop_max_h", BAD_CAST toString( _PopupMaxH ).c_str() );
+		xmlSetProp( node, BAD_CAST "pop_min_h", BAD_CAST toString( _PopupMinH ).c_str() );
+		xmlSetProp( node, BAD_CAST "movable_in_parent_list", BAD_CAST toString( _MovableInParentList ).c_str() );
+		xmlSetProp( node, BAD_CAST "savable", BAD_CAST toString( _Savable ).c_str() );
+		xmlSetProp( node, BAD_CAST "active_savable", BAD_CAST toString( _ActiveSavable ).c_str() );
+		xmlSetProp( node, BAD_CAST "modal_parents", BAD_CAST _ModalParentNames.c_str() );
+		xmlSetProp( node, BAD_CAST "options", BAD_CAST _OptionsName.toString().c_str() );
+		xmlSetProp( node, BAD_CAST "title_delta_max_w", BAD_CAST toString( _TitleDeltaMaxW ).c_str() );
+		xmlSetProp( node, BAD_CAST "title_over_extend_view_text", BAD_CAST toString( _TitleOverExtendViewText ).c_str() );
+		xmlSetProp( node, BAD_CAST "help_page", BAD_CAST _HelpPage.toString().c_str() );
+
+		return node;
+	}
+
 	// ***************************************************************************
 	bool CGroupContainer::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
