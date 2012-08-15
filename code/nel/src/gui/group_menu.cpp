@@ -214,6 +214,7 @@ namespace NLGUI
 			_SelectionView = new CViewBitmap(CViewBase::TCtorParam());
 	//		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	//		CViewRenderer &rVR = *CViewRenderer::getInstance();
+			_SelectionView->setId( getId() + ":selection" );
 			_SelectionView->setParent (this);
 			_SelectionView->setActive (false);
 			_SelectionView->setTexture ("blank.tga");
@@ -228,6 +229,7 @@ namespace NLGUI
 		if (_GroupList == NULL)
 		{
 			_GroupList = new CGroupList(CViewBase::TCtorParam());
+			_GroupList->setId( getId() + ":list" );
 			_GroupList->setParent (this);
 			_GroupList->setParentPos (this);
 			_GroupList->setX (4);
@@ -2273,6 +2275,7 @@ namespace NLGUI
 		cur = in->children;
 		if (_RootMenu != NULL) delete _RootMenu;
 		_RootMenu = new CGroupSubMenu(CViewText::TCtorParam());
+		_RootMenu->setId( getId() + ":header" );
 		_RootMenu->setSerializable( false );
 		_RootMenu->_GroupMenu = this;
 		_RootMenu->parse (cur);
