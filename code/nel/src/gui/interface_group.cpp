@@ -721,6 +721,9 @@ namespace NLGUI
 		std::vector< CInterfaceGroup* >::const_iterator itr;
 		for( itr = _ChildrenGroups.begin(); itr != _ChildrenGroups.end(); ++itr )
 		{
+			if( !(*itr)->IsSerializable() )
+				continue;
+
 			(*itr)->serialize( parentNode, "group" );
 		}
 
@@ -732,6 +735,9 @@ namespace NLGUI
 		std::vector< CCtrlBase* >::const_iterator itr;
 		for( itr = _Controls.begin(); itr != _Controls.end(); ++itr )
 		{
+			if( !(*itr)->IsSerializable() )
+				continue;
+
 			(*itr)->serialize( parentNode, "ctrl" );
 		}
 
@@ -743,6 +749,9 @@ namespace NLGUI
 		std::vector< CViewBase* >::const_iterator itr;
 		for( itr = _Views.begin(); itr != _Views.end(); ++itr )
 		{
+			if( !(*itr)->IsSerializable() )
+				continue;
+
 			(*itr)->serialize( parentNode, "view" );
 		}
 

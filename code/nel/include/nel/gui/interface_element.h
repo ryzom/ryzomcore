@@ -107,6 +107,8 @@ namespace NLGUI
 			_AvoidResizeParent= false;
 
 			editorSelected = false;
+
+			serializable = true;
 		}
 
 		// dtor
@@ -477,6 +479,9 @@ namespace NLGUI
 
 		void setPosParent( const std::string &id );
 		void setSizeParent( const std::string &id );
+		
+		void setSerializable( bool b ){ serializable = b; }
+		bool IsSerializable() const{ return serializable; }
 
 	protected:
 
@@ -539,6 +544,7 @@ namespace NLGUI
 
 	private:
 		//void	snapSize();
+		bool serializable;
 
 		typedef NLMISC::CSmartPtr<CInterfaceLink> TLinkSmartPtr;
 		typedef std::vector<TLinkSmartPtr> TLinkVect;
