@@ -508,6 +508,7 @@ namespace NLGUI
 		else
 			_ViewText= new CViewText(CViewBase::TCtorParam());
 		_ViewText->setId(_Id+"_text");
+		_ViewText->setSerializable( false );
 		_ViewText->parseTextOptions(cur);
 		_ViewText->setAvoidResizeParent(avoidResizeParent());
 		if(_IsViewTextId)
