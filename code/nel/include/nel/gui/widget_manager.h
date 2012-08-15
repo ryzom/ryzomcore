@@ -392,6 +392,7 @@ namespace NLGUI
 		void addOptions( std::string name, CInterfaceOptions *options );
 		void removeOptions( std::string name );
 		void removeAllOptions();
+		bool serializeOptions( xmlNodePtr parentNode ) const;
 		
 		// Enable mouse Events to interface. if false, release Captures.
 		void enableMouseHandling( bool handle );

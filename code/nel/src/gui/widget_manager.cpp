@@ -2849,6 +2849,22 @@ namespace NLGUI
 	{
 		_OptionsMap.clear();
 	}
+
+
+	bool CWidgetManager::serializeOptions( xmlNodePtr parentNode ) const
+	{
+		if( parentNode == NULL )
+			return false;
+
+		std::map< std::string, NLMISC::CSmartPtr< CInterfaceOptions > >::const_iterator itr;
+		for( itr = _OptionsMap.begin(); itr != _OptionsMap.end(); ++itr )
+		{
+			if( itr->second->serialize( parentNode, itr->first ) == NULL )
+				return false;
+		}
+
+		return true;
+	}
 	
 	
 	// ***************************************************************************

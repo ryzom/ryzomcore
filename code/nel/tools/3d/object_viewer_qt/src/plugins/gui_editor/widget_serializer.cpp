@@ -43,6 +43,13 @@ namespace GUIEditor
 			return false;
 		}
 
+		if( !CWidgetManager::getInstance()->serializeOptions( root ) )
+		{
+			xmlFreeNode( root );
+			out.close();
+			return false;
+		}
+
 		if( mg->serializeGroup( root, "root" ) == NULL )
 		{
 			xmlFreeNode( root );

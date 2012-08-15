@@ -81,6 +81,7 @@ namespace NLGUI
 		virtual ~CInterfaceOptions();
 
 		virtual bool parse (xmlNodePtr cur);
+		virtual xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const;
 
 		// return NullValue if param not found
 		const CInterfaceOptionValue		&getValue(const std::string &sParamName) const;
@@ -110,6 +111,7 @@ namespace NLGUI
 	public:
 		COptionsLayer( const TCtorParam &/* param */ );
 		~COptionsLayer();
+		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const;
 		virtual bool parse (xmlNodePtr cur);
 
 		// Container optimizer
@@ -165,6 +167,7 @@ namespace NLGUI
 	{
 	public:
 		COptionsContainerInsertion( const TCtorParam &/* param */ );
+		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const;
 		virtual bool parse (xmlNodePtr cur);
 
 		sint32 TxId_R_Arrow;
@@ -179,6 +182,7 @@ namespace NLGUI
 	{
 	public:
 		COptionsContainerMove( const TCtorParam &/* param */ );
+		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const;
 		virtual bool parse (xmlNodePtr cur);
 
 		sint32 TrackW;
@@ -199,6 +203,7 @@ namespace NLGUI
 	{
 	public:
 		COptionsList( const TCtorParam &/* param */ );
+		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const;
 		virtual bool parse (xmlNodePtr cur);
 
 		uint	getNumParams() const {return _NumParams;}
