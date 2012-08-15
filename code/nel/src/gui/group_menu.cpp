@@ -161,6 +161,7 @@ namespace NLGUI
 	{
 		nlassert(sub != NULL);
 		nlassert(index < _SubMenus.size());
+		sub->setSerializable( false );
 
 		if (_SubMenus[index] != NULL)
 		{
@@ -220,6 +221,7 @@ namespace NLGUI
 			_SelectionView->setX (4);
 			_SelectionView->setSizeRef(1); // sizeref on W
 			_SelectionView->setW (-8);
+			_SelectionView->setSerializable( false );
 			addView (_SelectionView, 0);
 		}
 		// the group list
@@ -231,6 +233,7 @@ namespace NLGUI
 			_GroupList->setX (4);
 			_GroupList->setY (4);
 			_GroupList->setSpace (_GroupMenu->_Space);
+			_GroupList->setSerializable( false );
 			addGroup (_GroupList);
 		}
 	}
@@ -291,6 +294,7 @@ namespace NLGUI
 				if (strFormatted)	bFormatted = convertBool (strFormatted);
 
 				pV = addLine (ucstrName, strAh, strParams, strId, strCond, strTexture, bCheckable, bChecked, bFormatted);
+				pV->setSerializable( false );
 
 				CXMLAutoPtr strSelectable((const char*) xmlGetProp (cur,  (xmlChar*)"selectable"));
 				bool bSelectable = true;
@@ -318,6 +322,7 @@ namespace NLGUI
 					// and create the sub menu
 					CGroupSubMenu *childMenu = new CGroupSubMenu(CViewText::TCtorParam());
 					childMenu->_GroupMenu = _GroupMenu;
+					childMenu->setSerializable( false );
 					childMenu->parse (child,  this);
 
 					CXMLAutoPtr MVL((const char*) xmlGetProp(cur,  (xmlChar*)"max_visible_line"));
@@ -379,6 +384,7 @@ namespace NLGUI
 	{
 		// Put the left arrow to the line
 		CViewBitmap *pVB = new CViewBitmap(CViewBase::TCtorParam());
+		pVB->setSerializable( false );
 		pVB->setParent (this);
 		pVB->setParentPos (_GroupList);
 		pVB->setParentPosRef (Hotspot_BR);
@@ -400,6 +406,7 @@ namespace NLGUI
 	{
 		// Put the left arrow to the line
 		CViewBitmap *pVB = new CViewBitmap(CViewBase::TCtorParam());
+		pVB->setSerializable( false );
 		pVB->setParent (this);
 		pVB->setParentPos (parentPos);
 		if (!center)
@@ -567,6 +574,7 @@ namespace NLGUI
 					_ScrollBar->setTextureTopOrRight	("w_scroll_l123_t.tga");
 					_ScrollBar->setTarget(_GroupList);
 					_SelectionView->setW (-8-8-2);
+					_ScrollBar->setSerializable( false );
 					addCtrl(_ScrollBar);
 					mustUpdate = true;
 				}
@@ -1141,7 +1149,9 @@ namespace NLGUI
 			// create the real separator. It may be larger than the group list, this is why we create a separate group
 		CInterfaceGroup *separator = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_separator", "", NULL, 0);
 		if (!separator) return;
+		separator->setSerializable( false );
 		separator->setId(ID_MENU_SEPARATOR);
+		separator->setSerializable( false );
 		addGroup(separator);
 		separator->setParent(this);
 		// create place holder group
@@ -1249,6 +1259,7 @@ namespace NLGUI
 		}
 		SSubMenuEntry tmp;
 		CViewTextMenu *pV = new CViewTextMenu(CViewBase::TCtorParam());
+		pV->setSerializable( false );
 
 
 		pV->setCaseMode(_GroupMenu->getCaseMode());
@@ -1520,6 +1531,7 @@ namespace NLGUI
 	{
 		CGroupSubMenu *copyMenu = appendToMenu ? appendToMenu : new CGroupSubMenu(CViewText::TCtorParam());
 		uint startSize = (uint)copyMenu->_Lines.size();
+		copyMenu->setSerializable( false );
 		copyMenu->_GroupMenu = newFather;
 		copyMenu->initOptions(initGroup);
 		copyMenu->_Lines.reserve(_Lines.size() + startSize);
@@ -2261,6 +2273,7 @@ namespace NLGUI
 		cur = in->children;
 		if (_RootMenu != NULL) delete _RootMenu;
 		_RootMenu = new CGroupSubMenu(CViewText::TCtorParam());
+		_RootMenu->setSerializable( false );
 		_RootMenu->_GroupMenu = this;
 		_RootMenu->parse (cur);
 
@@ -2396,6 +2409,7 @@ namespace NLGUI
 		{
 			_RootMenu = new CGroupSubMenu(CViewText::TCtorParam());
 			_RootMenu->_GroupMenu = this;
+			_RootMenu->setSerializable( false );
 			addGroup (_RootMenu);
 		}
 
@@ -2413,6 +2427,7 @@ namespace NLGUI
 		{
 			_RootMenu = new CGroupSubMenu(CViewText::TCtorParam());
 			_RootMenu->_GroupMenu = this;
+			_RootMenu->setSerializable( false );
 			addGroup (_RootMenu);
 		}
 		_RootMenu->addLine (name,  ah,  params,  id,  cond,  texture,  checkable,  checked, _Formatted);
@@ -2427,6 +2442,7 @@ namespace NLGUI
 		{
 			_RootMenu = new CGroupSubMenu(CViewText::TCtorParam());
 			_RootMenu->_GroupMenu = this;
+			_RootMenu->setSerializable( false );
 			addGroup (_RootMenu);
 		}
 		_RootMenu->addLineAtIndex(index, name,  ah,  params,  id,  cond,  texture,  checkable,  checked, _Formatted);

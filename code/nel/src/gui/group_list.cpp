@@ -535,6 +535,7 @@ namespace NLGUI
 	{
 		const string elid = _Id + ":el" + toString(_IdCounter); ++_IdCounter;
 		CViewText *view= new CViewText (elid,   string(""),   _Templ.getFontSize(),   _Templ.getColor(),   _Templ.getShadow());
+		view->setSerializable( false );
 		view->_Parent = this;
 		view->setMultiLine (multiLine);
 		view->setTextMode(_Templ.getTextMode());
@@ -553,6 +554,7 @@ namespace NLGUI
 	{
 		const string elid = _Id + ":el" + toString(_IdCounter); ++_IdCounter;
 		CViewText *view= new CViewText (elid,   string(""),   _Templ.getFontSize(),   _Templ.getColor(),   _Templ.getShadow());
+		view->setSerializable( false );
 		view->_Parent = this;
 		view->setMultiLine (multiLine);
 		if (multiLine) view->setMultiLineSpace (_Space);
@@ -569,6 +571,7 @@ namespace NLGUI
 	{
 		const string elid = _Id + ":el" + toString(_IdCounter); ++_IdCounter;
 		CViewTextID *view= new CViewTextID (elid,   nID,   _Templ.getFontSize(),   _Templ.getColor(),   _Templ.getShadow());
+		view->setSerializable( false );
 		view->_Parent = this;
 		view->setMultiLine (multiLine);
 		if (multiLine) view->setMultiLineSpace (_Space);
@@ -583,6 +586,7 @@ namespace NLGUI
 	{
 		const string elid = _Id + ":el" + toString(_IdCounter); ++_IdCounter;
 		CViewTextID *view= new CViewTextID (elid,   dbPath,   _Templ.getFontSize(),   _Templ.getColor(),   _Templ.getShadow());
+		view->setSerializable( false );
 		view->_Parent = this;
 		view->setMultiLine (multiLine);
 		if (multiLine) view->setMultiLineSpace (_Space);
@@ -1099,6 +1103,7 @@ namespace NLGUI
 
 		// Add this element for drawing
 		{
+			child->setSerializable( false );
 			CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(child);
 			if (pIG != NULL)
 			{
