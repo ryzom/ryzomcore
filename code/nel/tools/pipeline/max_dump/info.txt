@@ -1,0 +1,72 @@
+
+
+
+see:
+http://area.autodesk.com/blogs/chris/reading_and_modifying_asset_file_paths_in_the_3ds_max_file
+file:///usr/share/doc/libgsf-1-dev/html/gsf/api.html
+
+
+
+(max 3.x)
+/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max:
+d          0 *root*
+f         52 VideoPostQueue
+f    2159653 Scene
+f       1228 DllDirectory
+f      18700 Config
+f       3194 ClassDirectory3
+f        176 ClassData
+f      34780 SummaryInformation
+f       3352 DocumentSummaryInformation
+
+(max 2010)
+/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max:
+d          0 *root*
+f         52 VideoPostQueue
+f     147230 Scene
+f        366 FileAssetMetaData2 <- this is new in max2010!
+f       2198 DllDirectory
+f      29605 Config
+f       3438 ClassDirectory3
+f        691 ClassData
+f      29576 SummaryInformation
+f       2320 DocumentSummaryInformation
+
+
+
+kaetemi@benzaiten ~/source/minimax/build $ gsf dump /home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max VideoPostQueue
+VideoPostQueue
+[
+	50 00 (id: 80)
+	0a 00 00 00 (size: 10 - 6 = 4)
+	[
+		01 00 00 00 (value: 1)
+	]
+]
+[
+	60 00 (id: 96)
+	2a 00 00 80 (size: 42 - 6 = 36) (note: negative bit = container)
+	[
+		10 00 (id: 16)
+		1e 00 00 00 (size: 30 - 6 = 24)
+		[
+			07 00 00 00 (value: 7)
+			01 00 00 00 (value: 1)
+			00 00 00 00
+			00 00 00 00
+			20 12 00 00 (value: 4610)
+			00 00 00 00
+		]
+		20 00 (id: 32)
+		06 00 00 00 (size: 6 - 6 = 0)
+	]
+]
+
+
+
+
+
+
+
+
+
