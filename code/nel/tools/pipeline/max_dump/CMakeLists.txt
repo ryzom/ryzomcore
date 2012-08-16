@@ -25,6 +25,7 @@ ADD_EXECUTABLE(pipeline_max_dump
 TARGET_LINK_LIBRARIES(pipeline_max_dump
 	${LIBGSF_LIBRARIES}
 	${GLIB2_LIBRARIES}
+	nelmisc
 )
 
 NL_DEFAULT_PROPS(pipeline_max_dump "NeL, Tools, Pipeline: Max Dump (Temporary Tool)")

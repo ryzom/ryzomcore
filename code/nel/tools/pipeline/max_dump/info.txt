@@ -65,6 +65,89 @@ VideoPostQueue
 
 
 
+Pipeline Max Dump (Temporary Tool)
+/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max
+DllDirectory
+CHUNK ID: 8248, SIZE: 112, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 80, CONTAINER: 0
+		UTF16: Default materials and textures (Kinetix)
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 20, CONTAINER: 0
+		UTF16: mtlgen.dlt
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 108, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 82, CONTAINER: 0
+		UTF16: Standard materials and textures (Kinetix)
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 14, CONTAINER: 0
+		UTF16: mtl.dlt
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 90, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 54, CONTAINER: 0
+		UTF16: Standard samplers (Kinetix)
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 24, CONTAINER: 0
+		UTF16: samplers.dlh
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 88, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 60, CONTAINER: 0
+		UTF16: Standard controllers (Kinetix)
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 16, CONTAINER: 0
+		UTF16: ctrl.dlc
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 128, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 92, CONTAINER: 0
+		UTF16: Physique Modifier: a skeletal deformation tool
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 24, CONTAINER: 0
+		UTF16: physique.dlm
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 94, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 60, CONTAINER: 0
+		UTF16: Editable mesh object (Kinetix)
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 22, CONTAINER: 0
+		UTF16: update1.dlo
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 84, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 54, CONTAINER: 0
+		UTF16: BIPED.DLC: Biped Controller
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 18, CONTAINER: 0
+		UTF16: biped.dlc
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 260, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 218, CONTAINER: 0
+		UTF16: Map extender plug-in --- made by 3DSMax Team - UBI Soft Romania & Daniel Raviart - Ubi Research & Development
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 30, CONTAINER: 0
+		UTF16: mapext198m3.dlm
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 106, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 74, CONTAINER: 0
+		UTF16: Standard pre-filter kernels (Kinetix)
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 20, CONTAINER: 0
+		UTF16: kernel.dlk
+	SKIPPED: 0
+SKIPPED: 0
+CHUNK ID: 8248, SIZE: 98, CONTAINER: 1
+	CHUNK ID: 8249, SIZE: 70, CONTAINER: 0
+		UTF16: Default scanline renderer (Kinetix)
+	SKIPPED: 0
+	CHUNK ID: 8247, SIZE: 16, CONTAINER: 0
+		UTF16: rend.dlr
+	SKIPPED: 0
+SKIPPED: 0
 
 
 
