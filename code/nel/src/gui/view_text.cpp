@@ -544,7 +544,10 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "clamp_right", BAD_CAST toString( _ClampRight ).c_str() );
 		xmlSetProp( node, BAD_CAST "auto_clamp_offset", BAD_CAST toString( _AutoClampOffset ).c_str() );
 		xmlSetProp( node, BAD_CAST "continuous_update", BAD_CAST toString( _ContinuousUpdate ).c_str() );
-		xmlSetProp( node, BAD_CAST "hardtext", BAD_CAST _Text.toString().c_str() );
+		
+		std::string hs = _Text.toString();
+
+		xmlSetProp( node, BAD_CAST "hardtext", BAD_CAST hs.c_str() );
 		xmlSetProp( node, BAD_CAST "hardtext_format", BAD_CAST _HardtextFormat.c_str() );
 
 		return node;
@@ -2708,6 +2711,8 @@ namespace NLGUI
 	// ***************************************************************************
 	void	CViewText::setTextFormatTaged(const ucstring &text)
 	{
+		if( text.empty() )
+			return;
 
 		// to allow cache (avoid infinite recurse in updateCoords() in some case), compute in temp
 		ucstring					tempText;
@@ -2794,6 +2799,9 @@ namespace NLGUI
 
 	void CViewText::setSingleLineTextFormatTaged(const ucstring &text)
 	{
+		if( text.empty() )
+			return;
+
 		// to allow cache (avoid infinite recurse in updateCoords() in some case), compute in temp
 		ucstring					tempText;
 		static std::vector<CFormatTag>		tempLetterColors;
