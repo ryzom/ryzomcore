@@ -1,4 +1,7 @@
 
+#include <nel/misc/types_nl.h>
+#include <nel/misc/common.h>
+
 #include <gsf/gsf-infile-msole.h>
 #include <gsf/gsf-infile.h>
 #include <gsf/gsf-input-stdio.h>
@@ -9,16 +12,227 @@
 #include <string.h>
 #include <cstdio>
 
+#include <vector>
+#include <utility>
+
 #include "storage_stream.h"
 
-static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
-//static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
-static const char *streamname = "DllDirectory";
+//static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
+static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
+static const char *streamname = "ClassData";
 
 inline uint8 cleanChar(uint8 c)
 {
 	if (c >= 32 && c <= 126) return c;
 	return 46;
+}
+
+namespace PIPELINE {
+namespace MAX {
+
+struct EStorage : public NLMISC::Exception
+{
+	EStorage() : NLMISC::Exception("PIPELINE::MAX::EStorage") { }
+	virtual ~EStorage() throw() { }
+};
+
+// IStorageObject : exposes serial(CStorageStream *stream) and dump(const std::string &pad)
+class IStorageObject
+{
+public:
+	virtual void serial(CStorageStream *stream) = 0;
+	virtual void dump(const std::string &pad) = 0;
+};
+
+// CStorageContainer : serializes a container chunk
+class CStorageContainer : public std::vector<std::pair<uint16, IStorageObject *> >, public IStorageObject
+{
+public:
+	virtual void serial(CStorageStream *stream);
+	virtual void dump(const std::string &pad);
+
+	// override in subclasses, call parent if not handled
+	virtual IStorageObject *serialChunk(CStorageStream *stream);
+};
+
+// CStorageRaw : serializes raw data, use for unknown data
+class CStorageRaw : public std::vector<uint8>, public IStorageObject
+{
+public:
+	virtual void serial(CStorageStream *stream);
+	virtual void dump(const std::string &pad);
+};
+
+// CStorageUCString : serializes an ucstring chunk
+class CStorageUCString : public ucstring, public IStorageObject
+{
+public:
+	virtual void serial(CStorageStream *stream);
+	virtual void dump(const std::string &pad);
+};
+
+// CStorageString : serializes a string chunk
+class CStorageString : public std::string, public IStorageObject
+{
+public:
+	virtual void serial(CStorageStream *stream);
+	virtual void dump(const std::string &pad);
+};
+
+template<typename T>
+class CStorageValue : public IStorageObject
+{
+public:
+	T Value;
+	virtual void serial(CStorageStream *stream);
+	virtual void dump(const std::string &pad);
+};
+
+void CStorageContainer::serial(CStorageStream *stream)
+{
+	if (stream->isReading())
+	{
+		while (stream->enterChunk())
+		{
+			uint16 id = stream->getChunkId();
+			IStorageObject *storageObject = serialChunk(stream);
+			push_back(std::pair<uint16, IStorageObject *>(id, storageObject));
+			if (stream->leaveChunk()) // bytes were skipped while reading
+				throw EStorage();
+		}
+	}
+	else
+	{
+		throw EStorage();
+	}
+}
+IStorageObject *CStorageContainer::serialChunk(CStorageStream *stream)
+{
+	IStorageObject *storageObject = NULL;
+	if (stream->isChunkContainer())
+	{
+		switch (stream->getChunkId())
+		{
+		case 0x2038: // container with dll desc and name
+		default:
+			storageObject = new CStorageContainer();
+			break;
+		}
+	}
+	else
+	{
+		switch (stream->getChunkId())
+		{
+		case 0x21C0: // unknown 4 byte in the dlldir thing, exists in 2010 but not in 3.x
+				storageObject = new CStorageValue<uint32>();
+				break;
+		case 0x2039: // dll description in the dlldir
+		case 0x2037: // dll name in the dlldir
+				storageObject = new CStorageUCString();
+				break;
+		default:
+				storageObject = new CStorageRaw();
+				break;
+		}
+	}
+	storageObject->serial(stream);
+	return storageObject;
+}
+void CStorageContainer::dump(const std::string &pad)
+{
+	printf("CStorageContainer - items: %i\n", (sint32)size());
+	for (iterator it = this->begin(), end = this->end(); it != end; ++it)
+	{
+		std::string padpad = pad + "\t";
+		printf("%s[0x%X] ", padpad.c_str(), (sint32)(it->first));
+		(it->second)->dump(padpad);
+	}
+}
+
+void CStorageRaw::serial(CStorageStream *stream)
+{
+	if (stream->isReading())
+	{
+		resize(stream->getChunkSize());
+		stream->serialBuffer(&(*this)[0], size());
+	}
+	else
+	{
+		throw EStorage();
+	}
+}
+void CStorageRaw::dump(const std::string &pad)
+{
+	std::vector<uint8> buffer;
+	buffer.resize(size() + 1);
+	for (std::vector<uint8>::size_type i = 0; i < size(); ++i)
+		buffer[i] = cleanChar((*this)[i]);
+	buffer[buffer.size() - 1] = 0;
+	printf("CStorageRaw - bytes: %i\n", (sint32)size());
+	printf("%s%s\n", pad.c_str(), &buffer[0]);
+}
+
+void CStorageUCString::serial(CStorageStream *stream)
+{
+	if (stream->isReading())
+	{
+		sint32 size = stream->getChunkSize();
+		resize(size / 2);
+		stream->serialBuffer((uint8 *)&(*this)[0], size);
+	}
+	else
+	{
+		throw EStorage();
+	}
+}
+void CStorageUCString::dump(const std::string &pad)
+{
+	std::vector<uint8> buffer;
+	buffer.resize(size() + 1);
+	for (size_type i = 0; i < size(); ++i)
+		buffer[i] = (*this)[i] > 255 ? 46 : cleanChar((*this)[i]);
+	buffer[buffer.size() - 1] = 0;
+	printf("CStorageUCString - length: %i\n", (sint32)size());
+	printf("%s%s\n", pad.c_str(), &buffer[0]);
+}
+
+void CStorageString::serial(CStorageStream *stream)
+{
+	if (stream->isReading())
+	{
+		resize(stream->getChunkSize());
+		stream->serialBuffer((uint8 *)(&(*this)[0]), size());
+	}
+	else
+	{
+		throw EStorage();
+	}
+}
+void CStorageString::dump(const std::string &pad)
+{
+	std::vector<uint8> buffer;
+	buffer.resize(size() + 1);
+	for (std::vector<uint8>::size_type i = 0; i < size(); ++i)
+		buffer[i] = cleanChar((*this)[i]);
+	buffer[buffer.size() - 1] = 0;
+	printf("CStorageString - length: %i\n", (sint32)size());
+	printf("%s%s\n", pad.c_str(), &buffer[0]);
+}
+
+template <typename T>
+void CStorageValue<T>::serial(CStorageStream *stream)
+{
+	stream->serial(Value);
+}
+template <typename T>
+void CStorageValue<T>::dump(const std::string &pad)
+{
+	printf("CStorageValue - bytes: %i\n", (sint32)(sizeof(T)));
+	std::string valstr = NLMISC::toString(Value);
+	printf("%s%s\n", pad.c_str(), valstr.c_str());
+}
+
+}
 }
 
 static void dumpData(PIPELINE::CStorageStream *in, const std::string &pad)
@@ -110,7 +324,10 @@ int main(int argc, char **argv)
 	GsfInput *input = gsf_infile_child_by_name(infile, streamname);
 	//gsf_input_dump(input, 1); // just a regular hex dump of this input stream
 	PIPELINE::CStorageStream *instream = new PIPELINE::CStorageStream(input);
-	dumpContainer(instream, "");
+	//dumpContainer(instream, "");
+	PIPELINE::MAX::CStorageContainer ctr;
+	ctr.serial(instream);
+	ctr.dump("");
 	delete instream;
 
 	g_object_unref(input);
