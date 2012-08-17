@@ -83,6 +83,7 @@ namespace NLGUI
 		virtual bool getLinkData( uint32 id, SLinkData &linkData ) = 0;
 		virtual void updateLinkData( uint32 id, const SLinkData &linkData ) = 0;
 		virtual bool serializeVariables( xmlNodePtr parentNode ) const = 0;
+		virtual bool serializeProcs( xmlNodePtr parentNode ) const = 0;
 	};
 }
 

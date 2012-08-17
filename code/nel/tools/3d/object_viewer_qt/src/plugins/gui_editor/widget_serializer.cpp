@@ -43,6 +43,14 @@ namespace GUIEditor
 			return false;
 		}
 
+		if( !CWidgetManager::getInstance()->serializeOptions( root ) )
+		{
+			xmlFreeNode( root );
+			out.close();
+			return false;
+		}
+
+
 		if( !CWidgetManager::getInstance()->getParser()->serializeVariables( root ) )
 		{
 			xmlFreeNode( root );
@@ -50,7 +58,8 @@ namespace GUIEditor
 			return false;
 		}
 
-		if( !CWidgetManager::getInstance()->serializeOptions( root ) )
+
+		if( !CWidgetManager::getInstance()->getParser()->serializeProcs( root ) )
 		{
 			xmlFreeNode( root );
 			out.close();

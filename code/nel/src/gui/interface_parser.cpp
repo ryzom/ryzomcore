@@ -2972,5 +2972,52 @@ namespace NLGUI
 
 		return true;
 	}
+
+
+	bool CInterfaceParser::serializeProcs( xmlNodePtr parentNode)  const
+	{
+		if( parentNode == NULL )
+			return false;
+
+		xmlNodePtr procNode = NULL;
+		xmlNodePtr actionNode = NULL;
+
+		TProcedureMap::const_iterator itr;
+		for( itr = _ProcedureMap.begin(); itr != _ProcedureMap.end(); ++itr )
+		{
+			procNode = xmlNewNode( NULL, BAD_CAST "proc" );
+			if( procNode == NULL )
+				return false;
+
+			xmlAddChild( parentNode, procNode );
+
+			const CProcedure &proc = itr->second;
+
+			xmlSetProp( procNode, BAD_CAST "id", BAD_CAST itr->first.c_str() );
+
+			std::vector< CProcAction >::const_iterator itr2;
+			for( itr2 = proc.Actions.begin(); itr2 != proc.Actions.end(); ++itr2 )
+			{
+				actionNode = xmlNewNode( NULL, BAD_CAST "action" );
+				if( actionNode == NULL )
+					return false;
+
+				xmlAddChild( procNode, actionNode );
+
+				const CProcAction &action = *itr2;
+
+				xmlSetProp( actionNode, BAD_CAST "handler", BAD_CAST action.Action.c_str() );
+				
+				if( !action.Parameters.empty() )
+					xmlSetProp( actionNode, BAD_CAST "params", BAD_CAST action.Parameters.c_str() );
+
+				if( !action.Conditions.empty() )
+					xmlSetProp( actionNode, BAD_CAST "cond", BAD_CAST action.Conditions.c_str() );
+			}
+			
+		}
+
+		return true;
+	}
 }
 

@@ -375,6 +375,7 @@ namespace NLGUI
 		void setEditorMode( bool b ){ editorMode = b; }
 
 		bool serializeVariables( xmlNodePtr parentNode ) const;
+		bool serializeProcs( xmlNodePtr parentNode ) const;
 	};
 
 }
