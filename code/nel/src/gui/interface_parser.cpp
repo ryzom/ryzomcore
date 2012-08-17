@@ -1956,10 +1956,10 @@ namespace NLGUI
 
 
 		// Clear all structures used only for init
-		NLMISC::contReset (_ParentPositionsMap);
-		NLMISC::contReset (_ParentSizesMap);
-		NLMISC::contReset (_ParentSizesMaxMap);
-		NLMISC::contReset (_LuaClassAssociation);
+		//NLMISC::contReset (_ParentPositionsMap);
+		//NLMISC::contReset (_ParentSizesMap);
+		//NLMISC::contReset (_ParentSizesMaxMap);
+		//NLMISC::contReset (_LuaClassAssociation);
 		return true;
 	}
 
@@ -2553,6 +2553,10 @@ namespace NLGUI
 		CWidgetManager::getInstance()->removeAllMasterGroups();
 		_StyleMap.clear();
 		_CtrlSheetSelection.deleteGroups();
+		NLMISC::contReset (_ParentPositionsMap);
+		NLMISC::contReset (_ParentSizesMap);
+		NLMISC::contReset (_ParentSizesMaxMap);
+		NLMISC::contReset (_LuaClassAssociation);
 	}
 
 
