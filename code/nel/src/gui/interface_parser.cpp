@@ -1061,7 +1061,9 @@ namespace NLGUI
 			value = entry;
 		}
 		else
+		{
 			value = string((const char*)ptr);
+		}
 
 		// Array definition
 		sint	size= 1;
@@ -1073,6 +1075,7 @@ namespace NLGUI
 		{
 			ArrayMode= true;
 			fromString((const char*)ptr, size);
+			
 			string::size_type pos= entry.find("$i");
 			if( pos==string::npos )
 			{
@@ -1116,6 +1119,24 @@ namespace NLGUI
 				/*uint textId = addText(value);
 				prop.readSInt32(toString(textId),entry);*/
 			}
+		}
+
+		if( editorMode )
+		{
+			VariableData data;
+
+			data.entry = entry;
+			data.type = type;
+
+			ptr = xmlGetProp( cur, BAD_CAST "value" );
+			if( ptr != NULL )
+				data.value = std::string( ptr );
+
+			ptr = xmlGetProp( cur, BAD_CAST "size" );
+			if( ptr != NULL )
+				fromString( std::string( ptr ), data.size );
+			
+			variableCache[ data.entry ] = data;
 		}
 
 		return true;
@@ -2557,6 +2578,7 @@ namespace NLGUI
 		NLMISC::contReset (_ParentSizesMap);
 		NLMISC::contReset (_ParentSizesMaxMap);
 		NLMISC::contReset (_LuaClassAssociation);
+		variableCache.clear();
 	}
 
 
@@ -2916,6 +2938,39 @@ namespace NLGUI
 		if( itr == links.end() )
 			return;
 		itr->second = linkData;
+	}
+
+
+	bool CInterfaceParser::serializeVariables( xmlNodePtr parentNode ) const
+	{
+		if( parentNode == NULL )
+			return false;
+
+		xmlNodePtr node = NULL;
+
+		std::map< std::string, VariableData >::const_iterator itr;
+		for( itr = variableCache.begin(); itr != variableCache.end(); ++itr )
+		{
+			const VariableData &data = itr->second;
+
+			node = xmlNewNode( NULL, BAD_CAST "variable" );
+			if( node == NULL )
+				return false;
+
+			xmlAddChild( parentNode, node );
+
+			xmlSetProp( node, BAD_CAST "entry", BAD_CAST data.entry.c_str() );
+			xmlSetProp( node, BAD_CAST "type", BAD_CAST data.type.c_str() );
+			
+			if( !data.value.empty() )
+				xmlSetProp( node, BAD_CAST "value", BAD_CAST data.value.c_str() );
+
+			if( data.size != 0 )
+				xmlSetProp( node, BAD_CAST "size", BAD_CAST toString( data.size ).c_str() );
+
+		}
+
+		return true;
 	}
 }
 

@@ -100,6 +100,20 @@ namespace NLGUI
 			virtual void setupOptions() = 0;
 		};
 
+
+		struct VariableData
+		{
+			std::string entry;
+			std::string type;
+			std::string value;
+			uint32 size;
+
+			VariableData()
+			{
+				size = 0;
+			}
+		};
+
 		CInterfaceParser();
 		virtual ~CInterfaceParser();
 
@@ -333,6 +347,7 @@ namespace NLGUI
 		std::map< uint32, SLinkData > links;
 
 		bool editorMode;
+		std::map< std::string, VariableData > variableCache;
 
 	public:
 		void initLUA();
@@ -358,6 +373,8 @@ namespace NLGUI
 		void updateLinkData( uint32 id, const SLinkData &linkData );
 
 		void setEditorMode( bool b ){ editorMode = b; }
+
+		bool serializeVariables( xmlNodePtr parentNode ) const;
 	};
 
 }
