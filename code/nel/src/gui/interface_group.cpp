@@ -674,6 +674,7 @@ namespace NLGUI
 		serializeSubGroups( node );
 		serializeControls( node );
 		serializeViews( node );
+		serializeLinks( node );
 
 		return node;
 	}
@@ -772,6 +773,53 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "node", BAD_CAST CInterfaceElement::stripId( getId() ).c_str() );
 
 		return node;
+	}
+
+
+	bool CInterfaceGroup::serializeLinks( xmlNodePtr parentNode ) const
+	{
+		if( parentNode == NULL )
+			return false;
+
+		const std::map< uint32, SLinkData > &linkMap =
+			CWidgetManager::getInstance()->getParser()->getLinkMap();
+		
+		xmlNodePtr node = NULL;
+
+		std::map< uint32, SLinkData >::const_iterator itr;
+		for( itr = linkMap.begin(); itr != linkMap.end(); ++itr )
+		{
+			if( itr->second.parent != getId() )
+				continue;
+
+			const SLinkData &data = itr->second;
+
+			node = xmlNewNode( NULL, BAD_CAST "link" );
+			if( node == NULL )
+				return false;
+
+			xmlAddChild( parentNode, node );
+
+			xmlSetProp( node, BAD_CAST "expr", BAD_CAST data.expr.c_str() );
+			
+			if( !data.target.empty() )
+				xmlSetProp( node, BAD_CAST "target", BAD_CAST data.target.c_str() );
+			
+			if( !data.action.empty() )
+			{
+				xmlSetProp( node, BAD_CAST "action", BAD_CAST data.action.c_str() );
+				
+				if( !data.params.empty() )
+					xmlSetProp( node, BAD_CAST "params", BAD_CAST data.params.c_str() );
+				
+				if( !data.cond.empty() )
+					xmlSetProp( node, BAD_CAST "cond", BAD_CAST data.cond.c_str() );
+			}
+
+		}
+
+
+		return true;
 	}
 
 	// ------------------------------------------------------------------------------------------------
