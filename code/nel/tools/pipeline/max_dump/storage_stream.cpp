@@ -122,6 +122,21 @@ bool CStorageStream::enterChunk()
 	chunk->OffsetBegin = CStorageStream::getPos();
 	serial(chunk->Id);
 	serial(chunk->Size);
+	chunk->HeaderSize = 6;
+	if (chunk->Size == 0)
+	{
+		// this is a 64bit chunk
+		uint64 size64;
+		serial(size64);
+		chunk->HeaderSize += 8;
+		bool iscont = (size64 & 0x8000000000000000) == 0x8000000000000000;
+		size64 &= 0x7FFFFFFFFFFFFFFF;
+		if (size64 >= 2147483647L)
+			throw NLMISC::EStream("64bit chunks not supported");
+		// downgrade to 32 bit chunk
+		chunk->Size = (uint32)size64;
+		if (iscont) chunk->Size |= 0x80000000;
+	}
 	chunk->Parent = m_CurrentChunk;
 	{
 		// temp memleak fix

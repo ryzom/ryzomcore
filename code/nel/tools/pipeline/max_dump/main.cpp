@@ -18,8 +18,10 @@
 #include "storage_stream.h"
 
 //static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
-static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
-static const char *streamname = "ClassDirectory3";
+//static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
+static const char *filename = "/home/kaetemi/3dsMax/scenes/test2008.max";
+//static const char *filename = "/home/kaetemi/3dsMax/scenes/teapot_test_scene.max";
+static const char *streamname = "Scene";
 
 inline uint8 cleanChar(uint8 c)
 {
@@ -382,10 +384,10 @@ int main(int argc, char **argv)
 	GsfInput *input = gsf_infile_child_by_name(infile, streamname);
 	//gsf_input_dump(input, 1); // just a regular hex dump of this input stream
 	PIPELINE::CStorageStream *instream = new PIPELINE::CStorageStream(input);
-	//dumpContainer(instream, "");
-	PIPELINE::MAX::CStorageContainer ctr;
-	ctr.serial(instream);
-	ctr.dump("");
+	dumpContainer(instream, "");
+	//PIPELINE::MAX::CStorageContainer ctr;
+	//ctr.serial(instream);
+	//ctr.dump("");
 	delete instream;
 
 	g_object_unref(input);

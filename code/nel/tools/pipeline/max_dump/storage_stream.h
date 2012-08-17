@@ -54,6 +54,8 @@ struct CChunk
 	CChunk *Parent;
 	std::map<uint16, CChunk *> Children;
 
+	// Size of the chunk header, 6 for 32 bit, 14 for 64 bit
+	uint8 HeaderSize;
 	// Where the header starts
 	sint32 OffsetBegin;
 
@@ -63,10 +65,10 @@ struct CChunk
 	uint32 Size;
 
 	inline sint32 getSizeWithHeader() { return (sint32)(Size & 0x7FFFFFFF); }
-	inline sint32 getSize() { return getSizeWithHeader() - 6; }
+	inline sint32 getSize() { return getSizeWithHeader() - (sint32)HeaderSize; }
 	inline bool isContainer() { return (Size & 0x80000000) == 0x80000000; }
 	inline sint32 endOfChunk() { return OffsetBegin + getSizeWithHeader(); }
-	inline sint32 getDataBegin() { return OffsetBegin + 6; }
+	inline sint32 getDataBegin() { return OffsetBegin + (sint32)HeaderSize; }
 };
 
 /**
