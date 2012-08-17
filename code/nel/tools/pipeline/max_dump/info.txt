@@ -22,14 +22,14 @@ f       3352 DocumentSummaryInformation
 (max 2010)
 /home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max:
 d          0 *root*
-f         52 VideoPostQueue
-f     147230 Scene
-f        366 FileAssetMetaData2 <- this is new in max2010!
-f       2198 DllDirectory
-f      29605 Config
-f       3438 ClassDirectory3
-f        691 ClassData
-f      29576 SummaryInformation
+f         52 VideoPostQueue <- not important
+f     147230 Scene <- the main scene, todo
+f        366 FileAssetMetaData2 <- this is new in max2010! (it is unfortunately in a different format ...)
+f       2198 DllDirectory <- a listing of dlls used by this file
+f      29605 Config <- contains stuff related to the paramblocks in max scripts, needed for handling nel material
+f       3438 ClassDirectory3 <- a listing of used classes, the index in this list may be relevant to chunk ids
+f        691 ClassData <- maybe contains global class data
+f      29576 SummaryInformation <- standard windows stuff, different format
 f       2320 DocumentSummaryInformation
 
 
