@@ -2,6 +2,9 @@
 **.h = native
 **.cpp = native
 
+**/database.xml = BIN
+**/msg.xml = BIN
+
 **.txt = native
 **.xml = native
 
