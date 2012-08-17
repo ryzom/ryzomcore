@@ -758,6 +758,22 @@ namespace NLGUI
 		return parentNode;
 	}
 
+	xmlNodePtr CInterfaceGroup::serializeTreeData( xmlNodePtr parentNode ) const
+	{
+		if( parentNode == NULL )
+			return NULL;
+
+		xmlNodePtr node = xmlNewNode( NULL, BAD_CAST "tree" );
+		if( node == NULL )
+			return NULL;
+
+		xmlAddChild( parentNode, node );
+
+		xmlSetProp( node, BAD_CAST "node", BAD_CAST CInterfaceElement::stripId( getId() ).c_str() );
+
+		return node;
+	}
+
 	// ------------------------------------------------------------------------------------------------
 	void CInterfaceGroup::parseMaxSizeRef(const char *ptr)
 	{

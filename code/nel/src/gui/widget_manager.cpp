@@ -2865,6 +2865,33 @@ namespace NLGUI
 
 		return true;
 	}
+
+
+	bool CWidgetManager::serializeTreeData( xmlNodePtr parentNode ) const
+	{
+		if( parentNode == NULL )
+			return NULL;
+
+		std::vector< SMasterGroup >::size_type i;
+		for( i = 0; i < _MasterGroups.size(); i++ )
+		{
+			const SMasterGroup &mg = _MasterGroups[ i ];
+
+			std::vector< CInterfaceGroup* >::size_type j;			
+			for( j = 0; j < mg.Group->getNumGroup(); j++ )
+			{
+				CInterfaceGroup *g = mg.Group->getGroup( j );
+
+				if( dynamic_cast< CGroupModal* >( g ) != NULL )
+					continue;
+
+				if( g->serializeTreeData( parentNode ) == NULL )
+					return false;
+			}
+		}
+
+		return true;
+	}
 	
 	
 	// ***************************************************************************

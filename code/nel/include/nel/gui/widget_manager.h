@@ -393,6 +393,7 @@ namespace NLGUI
 		void removeOptions( std::string name );
 		void removeAllOptions();
 		bool serializeOptions( xmlNodePtr parentNode ) const;
+		bool serializeTreeData( xmlNodePtr parentNode ) const;
 		
 		// Enable mouse Events to interface. if false, release Captures.
 		void enableMouseHandling( bool handle );

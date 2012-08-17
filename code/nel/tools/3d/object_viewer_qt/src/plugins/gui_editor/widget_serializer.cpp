@@ -64,6 +64,13 @@ namespace GUIEditor
 			return false;
 		}
 
+		if( !CWidgetManager::getInstance()->serializeTreeData( root ) )
+		{
+			xmlFreeNode( root );
+			out.close();
+			return false;
+		}
+
 		level = -1;
 		serializeTree( root );
 
@@ -98,16 +105,23 @@ namespace GUIEditor
 			prop = prop->next;
 		}
 
-		out << tabs << ">" << std::endl << std::endl;
-
-		xmlNodePtr child = node->children;
-		while( child != NULL )
+		if( node->children != NULL )
 		{
-			serializeTree( child );
-			child = child->next;
-		}
+			out << tabs << ">" << std::endl << std::endl;
 
-		out << tabs << "</" << node->name << ">" << std::endl << std::endl;
+			xmlNodePtr child = node->children;
+			while( child != NULL )
+			{
+				serializeTree( child );
+				child = child->next;
+			}
+
+			out << tabs << "</" << node->name << ">" << std::endl << std::endl;
+		}
+		else
+		{
+			out << tabs << "/>" << std::endl << std::endl;
+		}
 
 		level--;
 

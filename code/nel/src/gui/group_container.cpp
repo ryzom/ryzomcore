@@ -2061,6 +2061,30 @@ namespace NLGUI
 		return node;
 	}
 
+
+	xmlNodePtr CGroupContainer::serializeTreeData( xmlNodePtr parentNode ) const
+	{
+		xmlNodePtr node = CInterfaceGroup::serializeTreeData( parentNode );
+		if( node == NULL )
+			return NULL;
+
+		if( _List == NULL )
+			return NULL;
+
+		CInterfaceGroup *g = NULL;
+		for( sint32 i = 0; i < _List->getChildrenNb(); i++ )
+		{
+			g = dynamic_cast< CInterfaceGroup* >( _List->getChild( i ) );
+			if( g == NULL )
+				continue;
+			
+			if( g->serializeTreeData( node ) == NULL )
+				return NULL;
+		}
+
+		return node;
+	}
+
 	// ***************************************************************************
 	bool CGroupContainer::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
