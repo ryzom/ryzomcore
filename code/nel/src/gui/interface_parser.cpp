@@ -1125,7 +1125,10 @@ namespace NLGUI
 		{
 			VariableData data;
 
-			data.entry = entry;
+			ptr = xmlGetProp( cur, BAD_CAST "entry" );
+			if( ptr != NULL )
+				data.entry = std::string( ptr );
+
 			data.type = type;
 
 			ptr = xmlGetProp( cur, BAD_CAST "value" );
