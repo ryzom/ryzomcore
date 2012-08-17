@@ -19,7 +19,7 @@
 
 //static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
 static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
-static const char *streamname = "ClassData";
+static const char *streamname = "ClassDirectory3";
 
 inline uint8 cleanChar(uint8 c)
 {
@@ -43,6 +43,17 @@ public:
 	virtual void serial(CStorageStream *stream) = 0;
 	virtual void dump(const std::string &pad) = 0;
 };
+
+class IStorageStreamable : public NLMISC::IStreamable, public IStorageObject
+{
+public:
+	virtual void serial(CStorageStream *stream);
+	virtual void serial(NLMISC::IStream &stream) = 0;
+};
+void IStorageStreamable::serial(CStorageStream *stream)
+{
+	serial(*((NLMISC::IStream *)stream));
+}
 
 // CStorageContainer : serializes a container chunk
 class CStorageContainer : public std::vector<std::pair<uint16, IStorageObject *> >, public IStorageObject
@@ -88,6 +99,48 @@ public:
 	virtual void dump(const std::string &pad);
 };
 
+struct CClass_ID : public NLMISC::IStreamable
+{
+	uint32 A;
+	uint32 B;
+
+	virtual void serial(NLMISC::IStream &stream);
+	virtual std::string getClassName();
+};
+void CClass_ID::serial(NLMISC::IStream &stream)
+{
+	stream.serial(A);
+	stream.serial(B);
+}
+std::string CClass_ID::getClassName()
+{
+	return "Class_ID";
+}
+
+struct CClassDirectoryHeader : public IStorageStreamable
+{
+	uint32 DllIndex;
+	CClass_ID ClassID;
+	uint32 SuperClassID;
+	virtual void serial(NLMISC::IStream &stream);
+	virtual void dump(const std::string &pad);
+	virtual std::string getClassName();
+};
+void CClassDirectoryHeader::serial(NLMISC::IStream &stream)
+{
+	stream.serial(DllIndex);
+	stream.serial(ClassID);
+	stream.serial(SuperClassID);
+}
+void CClassDirectoryHeader::dump(const std::string &pad)
+{
+	printf("CClassDirectoryHeader - DllIndex: %u, ClassID: (A: 0x%X, B: 0x%X), SuperClassID: 0x%X\n", DllIndex, ClassID.A, ClassID.B, SuperClassID);
+}
+std::string CClassDirectoryHeader::getClassName()
+{
+	return "ClassDirectoryHeader";
+}
+
 void CStorageContainer::serial(CStorageStream *stream)
 {
 	if (stream->isReading())
@@ -113,7 +166,8 @@ IStorageObject *CStorageContainer::serialChunk(CStorageStream *stream)
 	{
 		switch (stream->getChunkId())
 		{
-		case 0x2038: // container with dll desc and name
+		case 0x2040: // ClassEntry: container with dll index, class id, superclass id and class name
+		case 0x2038: // DllEntry: container with dll desc and name
 		default:
 			storageObject = new CStorageContainer();
 			break;
@@ -123,11 +177,15 @@ IStorageObject *CStorageContainer::serialChunk(CStorageStream *stream)
 	{
 		switch (stream->getChunkId())
 		{
-		case 0x21C0: // unknown 4 byte in the dlldir thing, exists in 2010 but not in 3.x
+		case 0x2060:
+				storageObject = new CClassDirectoryHeader();
+				break;
+		case 0x21C0: // FileVersion: 4 byte in the dlldir thing, exists in 2010 but not in 3.x
 				storageObject = new CStorageValue<uint32>();
 				break;
-		case 0x2039: // dll description in the dlldir
-		case 0x2037: // dll name in the dlldir
+		case 0x2039: // DllDescription: dll description in the DllEntry
+		case 0x2037: // DllFilename: dll name in the DllEntry
+		case 0x2042: // ClassName: name of class in ClassEntry
 				storageObject = new CStorageUCString();
 				break;
 		default:
