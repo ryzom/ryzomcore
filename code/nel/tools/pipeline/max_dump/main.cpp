@@ -11,11 +11,13 @@
 #include <glib/gi18n.h>
 #include <string.h>
 #include <cstdio>
+#include <iostream>
 
 #include <vector>
 #include <utility>
 
 #include "../max/storage_stream.h"
+#include "../max/storage_object.h"
 
 //static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
 static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
@@ -32,75 +34,7 @@ inline uint8 cleanChar(uint8 c)
 namespace PIPELINE {
 namespace MAX {
 
-struct EStorage : public NLMISC::Exception
-{
-	EStorage() : NLMISC::Exception("PIPELINE::MAX::EStorage") { }
-	virtual ~EStorage() throw() { }
-};
-
-// IStorageObject : exposes serial(CStorageStream *stream) and dump(const std::string &pad)
-class IStorageObject
-{
-public:
-	virtual void serial(CStorageStream *stream) = 0;
-	virtual void dump(const std::string &pad) = 0;
-};
-
-class IStorageStreamable : public NLMISC::IStreamable, public IStorageObject
-{
-public:
-	virtual void serial(CStorageStream *stream);
-	virtual void serial(NLMISC::IStream &stream) = 0;
-};
-void IStorageStreamable::serial(CStorageStream *stream)
-{
-	serial(*((NLMISC::IStream *)stream));
-}
-
-// CStorageContainer : serializes a container chunk
-class CStorageContainer : public std::vector<std::pair<uint16, IStorageObject *> >, public IStorageObject
-{
-public:
-	virtual void serial(CStorageStream *stream);
-	virtual void dump(const std::string &pad);
-
-	// override in subclasses, call parent if not handled
-	virtual IStorageObject *serialChunk(CStorageStream *stream);
-};
-
-// CStorageRaw : serializes raw data, use for unknown data
-class CStorageRaw : public std::vector<uint8>, public IStorageObject
-{
-public:
-	virtual void serial(CStorageStream *stream);
-	virtual void dump(const std::string &pad);
-};
-
-// CStorageUCString : serializes an ucstring chunk
-class CStorageUCString : public ucstring, public IStorageObject
-{
-public:
-	virtual void serial(CStorageStream *stream);
-	virtual void dump(const std::string &pad);
-};
-
-// CStorageString : serializes a string chunk
-class CStorageString : public std::string, public IStorageObject
-{
-public:
-	virtual void serial(CStorageStream *stream);
-	virtual void dump(const std::string &pad);
-};
-
-template<typename T>
-class CStorageValue : public IStorageObject
-{
-public:
-	T Value;
-	virtual void serial(CStorageStream *stream);
-	virtual void dump(const std::string &pad);
-};
-
+/*
 struct CClass_ID : public NLMISC::IStreamable
 {
 	uint32 A;
@@ -145,21 +79,7 @@ std::string CClassDirectoryHeader::getClassName()
 
 void CStorageContainer::serial(CStorageStream *stream)
 {
-	if (stream->isReading())
-	{
-		while (stream->enterChunk())
-		{
-			uint16 id = stream->getChunkId();
-			IStorageObject *storageObject = serialChunk(stream);
-			push_back(std::pair<uint16, IStorageObject *>(id, storageObject));
-			if (stream->leaveChunk()) // bytes were skipped while reading
-				throw EStorage();
-		}
-	}
-	else
-	{
-		throw EStorage();
-	}
+
 }
 IStorageObject *CStorageContainer::serialChunk(CStorageStream *stream)
 {
@@ -291,10 +211,10 @@ void CStorageValue<T>::dump(const std::string &pad)
 	std::string valstr = NLMISC::toString(Value);
 	printf("%s%s\n", pad.c_str(), valstr.c_str());
 }
-
+*/
 }
 }
-
+/*
 static void dumpData(PIPELINE::MAX::CStorageStream *in, const std::string &pad)
 {
 	sint32 size = in->getChunkSize();
@@ -336,7 +256,7 @@ static void dumpContainer(PIPELINE::MAX::CStorageStream *in, const std::string &
 		printf("%sSKIPPED: %i\n", pad.c_str(), skipped);
 	}
 }
-
+*/
 // int __stdcall WinMain(void *, void *, void *, int)
 int main(int argc, char **argv)
 {
@@ -382,13 +302,16 @@ int main(int argc, char **argv)
 	g_print("%s\n", streamname);
 
 	GsfInput *input = gsf_infile_child_by_name(infile, streamname);
-	//gsf_input_dump(input, 1); // just a regular hex dump of this input stream
-	PIPELINE::MAX::CStorageStream *instream = new PIPELINE::MAX::CStorageStream(input);
-	dumpContainer(instream, "");
-	//PIPELINE::MAX::CStorageContainer ctr;
-	//ctr.serial(instream);
-	//ctr.dump("");
-	delete instream;
+
+	{
+		//gsf_input_dump(input, 1); // just a regular hex dump of this input stream
+		PIPELINE::MAX::CStorageStream instream(input);
+		//dumpContainer(instream, "");
+		PIPELINE::MAX::CStorageContainer ctr;
+		ctr.serial(instream);
+		ctr.toString(std::cout);
+		//ctr.dump("");
+	}
 
 	g_object_unref(input);
 	g_object_unref(infile);
