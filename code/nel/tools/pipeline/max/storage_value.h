@@ -61,7 +61,7 @@ public: // should be protected but that doesn't compile, nice c++!
 };
 
 template <typename T>
-std::string getClassName()
+std::string CStorageValue<T>::getClassName()
 {
 	return "CStorageValue";
 }
@@ -73,22 +73,19 @@ void CStorageValue<T>::serial(NLMISC::IStream &stream)
 }
 
 template <>
-void CStorageValue<std::string>::serial(NLMISC::IStream &stream)
-{
-	stream.serialBuffer(static_cast<uint8 *>(static_cast<void *>(&Value[0])), Value.size());
-}
+void CStorageValue<std::string>::serial(NLMISC::IStream &stream);
 
 template <>
-void CStorageValue<ucstring>::serial(NLMISC::IStream &stream)
-{
-	stream.serialBuffer(static_cast<uint8 *>(static_cast<void *>(&Value[0])), Value.size() * 2);
-}
+void CStorageValue<ucstring>::serial(NLMISC::IStream &stream);
 
 template <typename T>
 void CStorageValue<T>::toString(std::ostream &ostream, const std::string &pad)
 {
 	ostream << "(" << getClassName() << ") { " << Value << " } ";
 }
+
+template <>
+void CStorageValue<ucstring>::toString(std::ostream &ostream, const std::string &pad);
 
 template <typename T>
 void CStorageValue<T>::setSize(sint32 size)
@@ -99,16 +96,10 @@ void CStorageValue<T>::setSize(sint32 size)
 }
 
 template <>
-void CStorageValue<std::string>::setSize(sint32 size)
-{
-	Value.resize(size);
-}
+void CStorageValue<std::string>::setSize(sint32 size);
 
 template <>
-void CStorageValue<ucstring>::setSize(sint32 size)
-{
-	Value.resize(size / 2);
-}
+void CStorageValue<ucstring>::setSize(sint32 size);
 
 template <typename T>
 bool CStorageValue<T>::getSize(sint32 &size) const
@@ -118,16 +109,10 @@ bool CStorageValue<T>::getSize(sint32 &size) const
 }
 
 template <>
-bool CStorageValue<std::string>::getSize(sint32 &size) const
-{
-	return Value.size();
-}
+bool CStorageValue<std::string>::getSize(sint32 &size) const;
 
 template <>
-bool CStorageValue<ucstring>::getSize(sint32 &size) const
-{
-	return Value.size() * 2;
-}
+bool CStorageValue<ucstring>::getSize(sint32 &size) const;
 
 } /* namespace MAX */
 } /* namespace PIPELINE */

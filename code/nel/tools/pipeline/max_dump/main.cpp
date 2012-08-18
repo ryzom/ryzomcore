@@ -18,6 +18,7 @@
 
 #include "../max/storage_stream.h"
 #include "../max/storage_object.h"
+#include "../max/dll_directory.h"
 
 //static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
 static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
@@ -33,6 +34,9 @@ inline uint8 cleanChar(uint8 c)
 
 namespace PIPELINE {
 namespace MAX {
+
+
+
 
 /*
 struct CClass_ID : public NLMISC::IStreamable
@@ -307,7 +311,7 @@ int main(int argc, char **argv)
 		//gsf_input_dump(input, 1); // just a regular hex dump of this input stream
 		PIPELINE::MAX::CStorageStream instream(input);
 		//dumpContainer(instream, "");
-		PIPELINE::MAX::CStorageContainer ctr;
+		PIPELINE::MAX::CDllDirectory ctr;
 		ctr.serial(instream);
 		ctr.toString(std::cout);
 		std::cout << "\n";

@@ -39,9 +39,51 @@ using namespace std;
 // using namespace NLMISC;
 
 namespace PIPELINE {
+namespace MAX {
 
-void dummy_storage_value_cpp() { }
+template <>
+void CStorageValue<std::string>::serial(NLMISC::IStream &stream)
+{
+	stream.serialBuffer(static_cast<uint8 *>(static_cast<void *>(&Value[0])), Value.size());
+}
 
+template <>
+void CStorageValue<ucstring>::serial(NLMISC::IStream &stream)
+{
+	stream.serialBuffer(static_cast<uint8 *>(static_cast<void *>(&Value[0])), Value.size() * 2);
+}
+
+template <>
+void CStorageValue<ucstring>::toString(std::ostream &ostream, const std::string &pad)
+{
+	ostream << "(" << getClassName() << ") { " << Value.toUtf8() << " } ";
+}
+
+template <>
+void CStorageValue<std::string>::setSize(sint32 size)
+{
+	Value.resize(size);
+}
+
+template <>
+void CStorageValue<ucstring>::setSize(sint32 size)
+{
+	Value.resize(size / 2);
+}
+
+template <>
+bool CStorageValue<std::string>::getSize(sint32 &size) const
+{
+	return Value.size();
+}
+
+template <>
+bool CStorageValue<ucstring>::getSize(sint32 &size) const
+{
+	return Value.size() * 2;
+}
+
+} /* namespace MAX */
 } /* namespace PIPELINE */
 
 /* end of file */
