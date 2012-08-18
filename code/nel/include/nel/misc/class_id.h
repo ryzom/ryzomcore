@@ -52,6 +52,10 @@ public:
 	//CClassId& operator=(const CClassId &o) { Uid = o.Uid; return *this;}
 	operator uint64() const {return Uid;}
 
+	inline uint32 a() const { return (uint32)(Uid >> 32); }
+	inline uint32 b() const { return (uint32)(Uid & 0xFFFFFFFFL); }
+	inline void setA(uint32 a) { Uid = ((uint64)a<<32) | (Uid & 0xFFFFFFFFL); }
+	inline void setB(uint32 b) { Uid = (Uid & 0xFFFFFFFF00000000L) | b; }
 };
 
 /**
