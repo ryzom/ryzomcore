@@ -32,6 +32,7 @@
 
 // 3rd Party includes
 #include <gsf/gsf-input-stdio.h>
+#include <gsf/gsf-output-stdio.h>
 
 // NeL includes
 // #include <nel/misc/debug.h>
@@ -55,6 +56,15 @@ CStorageStream::CStorageStream(GsfInput *input) : NLMISC::IStream(true), m_Input
 	m_Chunks[0].Size = 0x80000000;
 }
 
+CStorageStream::CStorageStream(GsfOutput *output) : NLMISC::IStream(true), m_Input(NULL), m_Output(output), m_Is64Bit(false)
+{
+	m_Chunks.reserve(64);
+	m_Chunks.resize(1);
+	m_Chunks[0].OffsetBegin = -6;
+	m_Chunks[0].Id = 1; // in write mode, id flags a container
+	m_Chunks[0].Size = 0;
+}
+
 CStorageStream::~CStorageStream()
 {
 
@@ -74,6 +84,18 @@ bool CStorageStream::seek(sint32 offset, NLMISC::IStream::TSeekOrigin origin) co
 			return gsf_input_seek(m_Input, offset, G_SEEK_END);
 		}
 	}
+	else if (m_Output)
+	{
+		switch (origin)
+		{
+		case begin:
+			return gsf_output_seek(m_Output, offset, G_SEEK_SET);
+		case current:
+			return gsf_output_seek(m_Output, offset, G_SEEK_CUR);
+		case end:
+			return gsf_output_seek(m_Output, offset, G_SEEK_END);
+		}
+	}
 	return NLMISC::IStream::seek(offset, origin);
 }
 
@@ -82,6 +104,12 @@ sint32 CStorageStream::getPos() const
 	if (m_Input)
 	{
 		gsf_off_t res = gsf_input_tell(m_Input);
+		if (res < 2147483647L) // exception when larger
+			return (sint32)res;
+	}
+	else if (m_Output)
+	{
+		gsf_off_t res = gsf_output_tell(m_Output);
 		if (res < 2147483647L) // exception when larger
 			return (sint32)res;
 	}
@@ -109,7 +137,13 @@ void CStorageStream::serialBuffer(uint8 *buf, uint len)
 	}
 	else if (m_Output)
 	{
-		throw NLMISC::EStream(); // not yet implemented
+		if (!gsf_output_write(m_Output, len, buf))
+		{
+#ifdef NL_DEBUG_STORAGE_STREAM
+			nldebug("Cannot write to output, throw exception");
+#endif
+			throw NLMISC::EStream();
+		}
 	}
 	else
 	{
@@ -129,7 +163,17 @@ void CStorageStream::serialBit(bool &bit)
 
 bool CStorageStream::eof()
 {
-	return gsf_input_eof(m_Input);
+	if (m_Input)
+	{
+		return gsf_input_eof(m_Input);
+	}
+	else
+	{
+#ifdef NL_DEBUG_STORAGE_STREAM
+		nldebug("No input, this function cannot output, throw exception");
+#endif
+		throw NLMISC::EStream();
+	}
 }
 
 bool CStorageStream::enterChunk()
@@ -187,7 +231,22 @@ bool CStorageStream::enterChunk(uint16 id)
 {
 	if (m_Output)
 	{
-		throw NLMISC::EStream(); // not yet implemented
+		if (m_Is64Bit)
+			throw NLMISC::EStream("64bit chunks not supported");
+
+		// current chunk is a container
+		currentChunk()->Id = 1; // in write mode, id flags a container
+
+		// enter the new chunk
+		m_Chunks.resize(m_Chunks.size() + 1);
+		CChunk *chunk = currentChunk();
+		chunk->Id = 0; // don't know if it's a container
+		uint32 sizeDummy = 0xFFFFFFFF;
+		chunk->OffsetBegin = getPos(); // store current pos
+
+		// write header
+		serial(id); // write the id
+		serial(sizeDummy); // write 32 bit size placeholder
 	}
 	else // input or exception
 	{
@@ -219,7 +278,15 @@ sint32 CStorageStream::leaveChunk()
 	}
 	else if (m_Output)
 	{
-		throw NLMISC::EStream(); // not yet implemented
+		sint32 pos = getPos();
+		sint32 sizeWithHeader = pos - currentChunk()->OffsetBegin;
+		sint32 sizePos = currentChunk()->OffsetBegin + 2;
+		seek(sizePos, begin); // hopefully this correctly overwrites!!!
+		uint32 sizeField = (uint32)sizeWithHeader | (uint32)currentChunk()->Id << 31; // add container flag
+		serial(sizeField);
+		seek(pos, begin);
+		m_Chunks.resize(m_Chunks.size() - 1);
+		return sizeWithHeader;
 	}
 	else
 	{

@@ -34,6 +34,7 @@
 
 // 3rd Party includes
 #include <gsf/gsf-infile.h>
+#include <gsf/gsf-outfile.h>
 
 // NeL includes
 #include <nel/misc/stream.h>
@@ -73,6 +74,7 @@ private:
 
 public:
 	CStorageStream(GsfInput *input);
+	CStorageStream(GsfOutput *output);
 	virtual ~CStorageStream();
 
 	virtual bool seek(sint32 offset, TSeekOrigin origin) const;
@@ -103,7 +105,7 @@ private:
 
 private:
 	GsfInput *m_Input;
-	void *m_Output; // todo
+	GsfOutput *m_Output;
 	std::vector<CChunk> m_Chunks;
 	bool m_Is64Bit;
 
