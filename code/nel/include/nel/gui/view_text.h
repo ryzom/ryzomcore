@@ -55,6 +55,7 @@ namespace NLGUI
 		CViewText &operator=(const CViewText &vt);
 
 		std::string getProperty( const std::string &name ) const;
+		std::string getTextProperty( const std::string &name ) const;
 		void setProperty( const std::string &name, const std::string &value );
 		bool setTextProperty( const std::string &name, const std::string &value );
 		bool serializeTextOptions( xmlNodePtr node ) const;

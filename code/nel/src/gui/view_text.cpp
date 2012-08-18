@@ -178,6 +178,27 @@ namespace NLGUI
 
 	std::string CViewText::getProperty( const std::string &name ) const
 	{
+		std::string prop = getTextProperty( name );
+
+		if( !prop.empty() )
+			return prop;
+		else
+		if( name == "hardtext" )
+		{
+			return _Text.toString();
+		}
+		else
+		if( name == "hardtext_format" )
+		{
+			return _HardtextFormat;
+		}
+		else
+			return CViewBase::getProperty( name );
+	}
+
+
+	std::string CViewText::getTextProperty( const std::string &name ) const
+	{
 		if( name == "color" )
 		{
 			return toString( _Color );
@@ -290,17 +311,7 @@ namespace NLGUI
 			return toString( _ContinuousUpdate );
 		}
 		else
-		if( name == "hardtext" )
-		{
-			return _Text.toString();
-		}
-		else
-		if( name == "hardtext_format" )
-		{
-			return _HardtextFormat;
-		}
-		else
-			return CViewBase::getProperty( name );
+			return "";
 	}
 
 	void CViewText::setProperty( const std::string &name, const std::string &value )

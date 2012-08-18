@@ -62,6 +62,13 @@ namespace NLGUI
 
 	std::string CCtrlTextButton::getProperty( const std::string &name ) const
 	{
+		std::string prop;
+		if( _ViewText != NULL )
+			prop = _ViewText->getTextProperty( name );
+
+		if( !prop.empty() )
+			return prop;
+		else
 		if( name == "tx_normal" )
 		{
 			std::string tex;
@@ -191,6 +198,15 @@ namespace NLGUI
 
 	void CCtrlTextButton::setProperty( const std::string &name, const std::string &value )
 	{
+		if( _ViewText != NULL )
+		{
+			if( _ViewText->setTextProperty( name, value ) )
+			{
+				_ViewText->invalidateContent();
+				return;
+			}
+		}
+
 		if( name == "tx_normal" )
 		{
 			std::string tex;
