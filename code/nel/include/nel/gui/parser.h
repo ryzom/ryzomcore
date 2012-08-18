@@ -85,6 +85,7 @@ namespace NLGUI
 		virtual bool serializeVariables( xmlNodePtr parentNode ) const = 0;
 		virtual bool serializeProcs( xmlNodePtr parentNode ) const = 0;
 		virtual bool serializePointerSettings( xmlNodePtr parentNode ) const = 0;
+		virtual bool serializeKeySettings( xmlNodePtr parentNode ) const = 0;
 	};
 }
 

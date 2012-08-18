@@ -478,6 +478,11 @@ namespace NLGUI
 				// todo hulud interface syntax error
 				nlwarning ("could not read all styles");
 			}
+			if( !strcmp((char*)curNode->name,"key" ) )
+			{
+				if( editorMode )
+					saveKeySettings( curNode );
+			}
 			// If define and style oks, try to parse "1st pass" objets (define, options....).
 			else if ( !strcmp((char*)curNode->name,"template") )
 			{
@@ -1574,6 +1579,43 @@ namespace NLGUI
 
 			prop = prop->next;
 		}
+	}
+
+	void CInterfaceParser::saveKeySettings( xmlNodePtr node )
+	{
+		if( node == NULL )
+			return;
+
+		xmlAttrPtr prop = node->properties;
+
+		std::string name( reinterpret_cast< char* >( xmlGetProp( node, BAD_CAST "name" ) ) );
+		if( name.empty() )
+			return;
+
+		std::string key;
+		std::string value;
+		std::map< std::string, std::string > propMap;
+
+		while( prop != NULL )
+		{
+			key   = std::string( reinterpret_cast< const char* >( prop->name ) );
+			value = std::string( reinterpret_cast< char* >( prop->children->content ) );
+
+			if( key == "name" )
+			{
+				prop = prop->next;
+				continue;
+			}
+			
+			propMap[ key ] = value;
+
+			prop = prop->next;
+		}
+
+		if( propMap.empty() )
+			return;
+
+		keySettings[ name ] = propMap;
 	}
 
 	void CInterfaceParser::addModule( std::string name, IParserModule *module )
@@ -3067,6 +3109,37 @@ namespace NLGUI
 			const std::string &value = itr->second;
 
 			xmlSetProp( node, BAD_CAST key.c_str(), BAD_CAST value.c_str() );
+		}
+
+		return true;
+	}
+
+
+	bool CInterfaceParser::serializeKeySettings( xmlNodePtr parentNode ) const
+	{
+		if( parentNode == NULL )
+			return false;
+
+		std::map< std::string, std::map< std::string, std::string > >::const_iterator itr;
+		for( itr = keySettings.begin(); itr != keySettings.end(); ++itr )
+		{
+			xmlNodePtr node = xmlNewNode( NULL, BAD_CAST "key" );
+			if( node == NULL )
+				return false;
+
+			xmlAddChild( parentNode, node );
+			xmlSetProp( node, BAD_CAST "name", BAD_CAST itr->first.c_str() );
+
+			const std::map< std::string, std::string > &settings = itr->second;
+
+			std::map< std::string, std::string >::const_iterator itr2;
+			for( itr2 = settings.begin(); itr2 != settings.end(); ++itr2 )
+			{
+				const std::string &key = itr2->first;
+				const std::string &value = itr2->second;
+
+				xmlSetProp( node, BAD_CAST key.c_str(), BAD_CAST value.c_str() );
+			}
 		}
 
 		return true;

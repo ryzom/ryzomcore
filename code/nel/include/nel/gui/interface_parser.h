@@ -151,6 +151,7 @@ namespace NLGUI
 		bool setupTree (xmlNodePtr cur, CWidgetManager::SMasterGroup *parentGroup);
 		bool setupTreeNode (xmlNodePtr cur, CGroupContainer *parentGroup);
 		void savePointerSettings( xmlNodePtr node );
+		void saveKeySettings( xmlNodePtr node );
 		
 		void addModule( std::string name, IParserModule *module );
 		IParserModule* getModuleFor( std::string name ) const;
@@ -350,6 +351,7 @@ namespace NLGUI
 		bool editorMode;
 		std::map< std::string, VariableData > variableCache;
 		std::map< std::string, std::string > pointerSettings;
+		std::map< std::string, std::map< std::string, std::string > > keySettings;
 
 	public:
 		void initLUA();
@@ -379,6 +381,7 @@ namespace NLGUI
 		bool serializeVariables( xmlNodePtr parentNode ) const;
 		bool serializeProcs( xmlNodePtr parentNode ) const;
 		bool serializePointerSettings( xmlNodePtr parentNode ) const;
+		bool serializeKeySettings( xmlNodePtr parentNode ) const;
 	};
 
 }
