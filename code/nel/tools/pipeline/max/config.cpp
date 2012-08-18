@@ -72,14 +72,151 @@ IStorageObject *CConfig::createChunkById(uint16 id, bool container)
 	{
 		switch (id)
 		{
+		case 0x20a0: // unknown
+			return new CConfig20a0();
 		case 0x2180: // CConfigScript
 			return new CConfigScript();
+		}
+	}
+	else
+	{
+		switch (id)
+		{
+		case 0x2090: // unknown; known values: 1 (m3), 0 (m9, m2008, m2010)
+			return new CStorageValue<sint32>();
 		}
 	}
 	return CStorageContainer::createChunkById(id, container);
 }
 
 void CConfig::serialized(TStorageObjectContainer::iterator soit, bool container)
+{
+	CStorageContainer::serialized(soit, container);
+}
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+CConfig20a0::CConfig20a0()
+{
+
+}
+
+CConfig20a0::~CConfig20a0()
+{
+
+}
+
+std::string CConfig20a0::getClassName()
+{
+	return "Config20a0";
+}
+
+void CConfig20a0::toString(std::ostream &ostream, const std::string &pad)
+{
+	CStorageContainer::toString(ostream, pad);
+}
+
+IStorageObject *CConfig20a0::createChunkById(uint16 id, bool container)
+{
+	if (container)
+	{
+		switch (id)
+		{
+		case 0x0110: // CConfig20a0Entry
+			return new CConfig20a0Entry();
+		}
+	}
+	else
+	{
+		switch (id)
+		{
+		case 0x0100: // CConfig20a0Header: Number of entries
+			return new CStorageValue<sint32>();
+		}
+	}
+	return CStorageContainer::createChunkById(id, container);
+}
+
+void CConfig20a0::serialized(TStorageObjectContainer::iterator soit, bool container)
+{
+	CStorageContainer::serialized(soit, container);
+}
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+CConfig20a0Entry::CConfig20a0Entry()
+{
+
+}
+
+CConfig20a0Entry::~CConfig20a0Entry()
+{
+
+}
+
+std::string CConfig20a0Entry::getClassName()
+{
+	return "Config20a0Entry";
+}
+
+void CConfig20a0Entry::toString(std::ostream &ostream, const std::string &pad)
+{
+	CStorageContainer::toString(ostream, pad);
+}
+
+IStorageObject *CConfig20a0Entry::createChunkById(uint16 id, bool container)
+{
+	if (container)
+	{
+		switch (id)
+		{
+		case 0x0300: // unknown, contains 0x0100 with 4 bytes int value
+			return CStorageContainer::createChunkById(id, container);
+		}
+	}
+	else
+	{
+		switch (id)
+		{
+		case 0x0100: // unknown
+		case 0x0110: // unknown
+		case 0x0120: // unknown
+		case 0x0130: // unknown
+		case 0x0140: // unknown
+		case 0x0150: // unknown
+		case 0x0160: // unknown
+		case 0x0161: // unknown
+		case 0x0170: // unknown
+		case 0x0180: // unknown
+		case 0x0190: // unknown
+		case 0x0200: // unknown
+		case 0x0210: // unknown
+		case 0x0220: // unknown
+		case 0x0230: // unknown
+		case 0x0240: // unknown
+		case 0x0250: // unknown
+		case 0x0270: // unknown
+		case 0x0280: // unknown
+		case 0x0310: // unknown
+		case 0x0320: // unknown
+			return new CStorageValue<sint32>();
+		case 0x0260: // unknown
+			return new CStorageValue<sint64>();
+		case 0x0330: // unknown, 16 bytes
+			return CStorageContainer::createChunkById(id, container);
+		case 0x0290: // unknown
+		case 0x0390: // unknown
+			return new CStorageValue<ucstring>();
+		}
+	}
+	return CStorageContainer::createChunkById(id, container);
+}
+
+void CConfig20a0Entry::serialized(TStorageObjectContainer::iterator soit, bool container)
 {
 	CStorageContainer::serialized(soit, container);
 }

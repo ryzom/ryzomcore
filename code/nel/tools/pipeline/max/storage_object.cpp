@@ -125,7 +125,7 @@ void CStorageContainer::toString(std::ostream &ostream, const std::string &pad)
 	//      Blahblah: (Container) {
 	//          Moo: (Foo) "What" }
 	// only increase pad when multi-lining sub-items
-	ostream << "(" << getClassName() << ") { ";
+	ostream << "(" << getClassName() << ") [" << Chunks.size() << "] { ";
 	std::string padpad = pad + "\t";
 	for (TStorageObjectContainer::const_iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
 	{

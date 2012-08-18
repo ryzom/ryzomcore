@@ -64,6 +64,50 @@ protected:
 }; /* class CConfig */
 
 /**
+ * \brief CConfig20a0
+ * \date 2012-08-18 19:25GMT
+ * \author Jan Boon (Kaetemi)
+ * CConfig
+ */
+class CConfig20a0 : public CStorageContainer
+{
+public:
+	CConfig20a0();
+	virtual ~CConfig20a0();
+
+	// inherited
+	virtual std::string getClassName();
+	virtual void toString(std::ostream &ostream, const std::string &pad = "");
+
+protected:
+	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual void serialized(TStorageObjectContainer::iterator soit, bool container);
+
+}; /* class CConfig20a0 */
+
+/**
+ * \brief CConfig20a0Entry
+ * \date 2012-08-18 19:25GMT
+ * \author Jan Boon (Kaetemi)
+ * CConfig20a0Entry
+ */
+class CConfig20a0Entry : public CStorageContainer
+{
+public:
+	CConfig20a0Entry();
+	virtual ~CConfig20a0Entry();
+
+	// inherited
+	virtual std::string getClassName();
+	virtual void toString(std::ostream &ostream, const std::string &pad = "");
+
+protected:
+	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual void serialized(TStorageObjectContainer::iterator soit, bool container);
+
+}; /* class CConfig20a0Entry */
+
+/**
  * \brief CConfigScript
  * \date 2012-08-18 19:25GMT
  * \author Jan Boon (Kaetemi)
