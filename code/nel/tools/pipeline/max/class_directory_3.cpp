@@ -159,7 +159,7 @@ void CClassDirectoryHeader::toString(std::ostream &ostream, const std::string &p
 	ostream << "\n" << pad << "DllIndex: " << DllIndex;
 	ostream << "\n" << pad << "ClassID: " << NLMISC::toString(ClassID);
 	ostream << "\n" << pad << "SuperClassID: " << SuperClassID;
-	ostream << "} ";
+	ostream << " } ";
 }
 
 ////////////////////////////////////////////////////////////////////////

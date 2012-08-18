@@ -99,7 +99,7 @@ CClassDataEntry::~CClassDataEntry()
 
 std::string CClassDataEntry::getClassName()
 {
-	return "ClassData";
+	return "ClassDataEntry";
 }
 
 void CClassDataEntry::toString(std::ostream &ostream, const std::string &pad)
@@ -160,7 +160,7 @@ void CClassDataHeader::toString(std::ostream &ostream, const std::string &pad)
 	ostream << "(" << getClassName() << ") { ";
 	ostream << "\n" << pad << "ClassID: " << NLMISC::toString(ClassID);
 	ostream << "\n" << pad << "SuperClassID: " << SuperClassID;
-	ostream << "} ";
+	ostream << " } ";
 }
 
 ////////////////////////////////////////////////////////////////////////

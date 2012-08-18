@@ -745,3 +745,46 @@ max 2010
 
 
 
+
+Config
+
+nel script material id:
+0x64c75fec, 0x222b9eb9
+ec 5f c7 64 b9 9e 2b 22
+
+0x2180: (StorageContainer) {
+	0x0040: (StorageContainer) {
+		0x0050: (StorageRaw) {
+			Size: 12
+			String: ....._.d..+"
+			Hex: 00 0c 00 00 ec 5f c7 64 b9 9e 2b 22 }
+		0x0007: (StorageContainer) {
+			0x0060: (StorageRaw) {
+				Size: 4
+				String: ....
+				Hex: 09 00 00 00 }
+			0x0007: (StorageContainer) {
+				0x0060: (StorageRaw) {
+					Size: 4
+					String: ....
+					Hex: 0e 00 00 00 }
+				0x0006: (StorageRaw) {
+					Size: 9
+					String: ....nlbp.
+					Hex: 05 00 00 00 6e 6c 62 70 00 }
+				0x0003: (StorageRaw) {
+					Size: 4
+					String: .... }
+				0x0003: (StorageRaw) {
+					Size: 4
+					String: ....
+					Hex: 01 00 00 00 }
+				0x0007: (StorageContainer) {
+					0x0060: (StorageRaw) {
+						Size: 4
+						String: ....
+						Hex: 02 00 00 00 }
+
+
+
+

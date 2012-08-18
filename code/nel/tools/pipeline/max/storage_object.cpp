@@ -235,7 +235,7 @@ void CStorageRaw::toString(std::ostream &ostream, const std::string &pad)
 		}
 	}
 	ostream << " ";
-	if (!isString)
+	if (!isString || Value.size() <= 4)
 	{
 		ostream << "\n" << pad << "Hex: ";
 		for (TType::size_type i = 0; i < Value.size(); ++i)
