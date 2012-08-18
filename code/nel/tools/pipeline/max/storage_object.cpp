@@ -226,7 +226,7 @@ void CStorageRaw::toString(std::ostream &ostream, const std::string &pad)
 	for (TType::size_type i = 0; i < Value.size(); ++i)
 	{
 		char c = Value[i];
-		if (c == 0) ostream << ".";
+		if (c == 0 || c == 123 || c == 125) ostream << ".";
 		else if (c >= 32 && c <= 126) ostream << c;
 		else
 		{
