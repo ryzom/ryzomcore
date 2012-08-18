@@ -23,6 +23,7 @@
 
 namespace	NLMISC
 {
+	class IStream;
 
 // ***************************************************************************
 /**
@@ -56,6 +57,8 @@ public:
 	inline uint32 b() const { return (uint32)(Uid & 0xFFFFFFFFL); }
 	inline void setA(uint32 a) { Uid = ((uint64)a<<32) | (Uid & 0xFFFFFFFFL); }
 	inline void setB(uint32 b) { Uid = (Uid & 0xFFFFFFFF00000000L) | b; }
+
+	void serial(NLMISC::IStream &s);
 };
 
 /**

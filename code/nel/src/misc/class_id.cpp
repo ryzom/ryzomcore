@@ -18,7 +18,7 @@
 
 #include "nel/misc/class_id.h"
 
-
+#include "nel/misc/stream.h"
 
 
 namespace	NLMISC
@@ -26,6 +26,11 @@ namespace	NLMISC
 
 
 const	CClassId	CClassId::Null(0);
+
+void CClassId::serial(NLMISC::IStream &s)
+{
+	s.serial(Uid);
+}
 
 
 }
