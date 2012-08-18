@@ -51,6 +51,14 @@ namespace GUIEditor
 		}
 
 
+		if( !CWidgetManager::getInstance()->getParser()->serializePointerSettings( root ) )
+		{
+			xmlFreeNode( root );
+			out.close();
+			return false;
+		}
+
+
 		if( !CWidgetManager::getInstance()->getParser()->serializeVariables( root ) )
 		{
 			xmlFreeNode( root );

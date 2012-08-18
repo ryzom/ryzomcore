@@ -1363,6 +1363,9 @@ namespace NLGUI
 
 		if ( !strcmp(ptr,"pointer"))
 		{
+			if( editorMode )
+				savePointerSettings( cur );
+
 			CWidgetManager::getInstance()->setPointer( dynamic_cast<CViewPointer*>(view) );
 		}
 
@@ -1550,6 +1553,27 @@ namespace NLGUI
 			cur = cur->next;
 		}
 		return true;
+	}
+
+	void CInterfaceParser::savePointerSettings( xmlNodePtr node )
+	{
+		if( node == NULL )
+			return;
+
+		xmlAttrPtr prop = node->properties;
+
+		std::string key;
+		std::string value;
+
+		while( prop != NULL )
+		{
+			key   = std::string( reinterpret_cast< const char* >( prop->name ) );
+			value = std::string( reinterpret_cast< char* >( prop->children->content ) );
+			
+			pointerSettings[ key ] = value;
+
+			prop = prop->next;
+		}
 	}
 
 	void CInterfaceParser::addModule( std::string name, IParserModule *module )
@@ -2582,6 +2606,7 @@ namespace NLGUI
 		NLMISC::contReset (_ParentSizesMaxMap);
 		NLMISC::contReset (_LuaClassAssociation);
 		variableCache.clear();
+		pointerSettings.clear();
 	}
 
 
@@ -3018,6 +3043,30 @@ namespace NLGUI
 					xmlSetProp( actionNode, BAD_CAST "cond", BAD_CAST action.Conditions.c_str() );
 			}
 			
+		}
+
+		return true;
+	}
+
+
+	bool CInterfaceParser::serializePointerSettings( xmlNodePtr parentNode ) const
+	{
+		if( parentNode == NULL )
+			return false;
+
+		xmlNodePtr node = xmlNewNode( NULL, BAD_CAST "view" );
+		if( node == NULL )
+			return false;
+
+		xmlAddChild( parentNode, node );
+
+		std::map< std::string, std::string >::const_iterator itr;
+		for( itr = pointerSettings.begin(); itr != pointerSettings.end(); ++itr )
+		{
+			const std::string &key = itr->first;
+			const std::string &value = itr->second;
+
+			xmlSetProp( node, BAD_CAST key.c_str(), BAD_CAST value.c_str() );
 		}
 
 		return true;
