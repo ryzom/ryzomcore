@@ -495,13 +495,8 @@ namespace NLGUI
 	}
 
 
-	xmlNodePtr CViewText::serialize( xmlNodePtr parentNode, const char *type ) const
+	bool CViewText::serializeTextOptions( xmlNodePtr node ) const
 	{
-		xmlNodePtr node = CViewBase::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
-
-		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text" );
 		xmlSetProp( node, BAD_CAST "color", BAD_CAST toString( _Color ).c_str() );
 		xmlSetProp( node, BAD_CAST "global_color", BAD_CAST toString( _ModulateGlobalColor ).c_str() );
 		xmlSetProp( node, BAD_CAST "fontsize",
@@ -544,6 +539,20 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "clamp_right", BAD_CAST toString( _ClampRight ).c_str() );
 		xmlSetProp( node, BAD_CAST "auto_clamp_offset", BAD_CAST toString( _AutoClampOffset ).c_str() );
 		xmlSetProp( node, BAD_CAST "continuous_update", BAD_CAST toString( _ContinuousUpdate ).c_str() );
+
+		return true;
+	}
+
+
+	xmlNodePtr CViewText::serialize( xmlNodePtr parentNode, const char *type ) const
+	{
+		xmlNodePtr node = CViewBase::serialize( parentNode, type );
+		if( node == NULL )
+			return NULL;
+
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text" );
+
+		serializeTextOptions( node );
 		
 		std::string hs = _Text.toString();
 

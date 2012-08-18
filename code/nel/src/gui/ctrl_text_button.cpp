@@ -444,6 +444,9 @@ namespace NLGUI
 		xmlNewProp( node, BAD_CAST "force_text_over", BAD_CAST toString( _ForceTextOver ).c_str() );
 		xmlNewProp( node, BAD_CAST "text_header_color", BAD_CAST toString( _TextHeaderColor ).c_str() );
 
+		if( _ViewText != NULL )
+			_ViewText->serializeTextOptions( node );
+
 		return node;
 	}
 
