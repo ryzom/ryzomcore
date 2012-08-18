@@ -211,7 +211,31 @@ void CStorageRaw::toString(std::ostream &ostream, const std::string &pad)
 	//          Moo: (Foo) "What" }
 	// only increase pad when multi-lining sub-items
 	ostream << "(" << getClassName() << ") { ";
-
+	ostream << "\n" << pad << "Size: " << Value.size();
+	bool isString = true;
+	ostream << "\n" << pad << "String: ";
+	for (TType::size_type i = 0; i < Value.size(); ++i)
+	{
+		char c = Value[i];
+		if (c == 0) ostream << ".";
+		else if (c >= 32 && c <= 126) ostream << c;
+		else
+		{
+			ostream << ".";
+			isString = false;
+		}
+	}
+	ostream << " ";
+	if (!isString)
+	{
+		ostream << "\n" << pad << "Hex: ";
+		for (TType::size_type i = 0; i < Value.size(); ++i)
+		{
+			std::stringstream ss;
+			ss << std::hex << std::setfill('0') << std::setw(2) << (int)Value[i];
+			ostream << ss.str() << " ";
+		}
+	}
 	ostream << "} ";
 }
 

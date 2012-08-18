@@ -310,6 +310,7 @@ int main(int argc, char **argv)
 		PIPELINE::MAX::CStorageContainer ctr;
 		ctr.serial(instream);
 		ctr.toString(std::cout);
+		std::cout << "\n";
 		//ctr.dump("");
 	}
 
