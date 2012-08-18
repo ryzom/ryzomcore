@@ -1,4 +1,5 @@
 SUBDIRS(
+		max
 		max_dump
 		plugin_library
 		plugin_nel

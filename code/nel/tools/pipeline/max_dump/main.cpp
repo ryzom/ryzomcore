@@ -15,13 +15,13 @@
 #include <vector>
 #include <utility>
 
-#include "storage_stream.h"
+#include "../max/storage_stream.h"
 
 //static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
-//static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
-static const char *filename = "/home/kaetemi/3dsMax/scenes/test2008.max";
+static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
+//static const char *filename = "/home/kaetemi/3dsMax/scenes/test2008.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/teapot_test_scene.max";
-static const char *streamname = "Scene";
+static const char *streamname = "DllDirectory";
 
 inline uint8 cleanChar(uint8 c)
 {
@@ -295,7 +295,7 @@ void CStorageValue<T>::dump(const std::string &pad)
 }
 }
 
-static void dumpData(PIPELINE::CStorageStream *in, const std::string &pad)
+static void dumpData(PIPELINE::MAX::CStorageStream *in, const std::string &pad)
 {
 	sint32 size = in->getChunkSize();
 	std::vector<uint8> buffer;
@@ -319,7 +319,7 @@ static void dumpData(PIPELINE::CStorageStream *in, const std::string &pad)
 	}
 }
 
-static void dumpContainer(PIPELINE::CStorageStream *in, const std::string &pad)
+static void dumpContainer(PIPELINE::MAX::CStorageStream *in, const std::string &pad)
 {
 	while (in->enterChunk())
 	{
@@ -383,7 +383,7 @@ int main(int argc, char **argv)
 
 	GsfInput *input = gsf_infile_child_by_name(infile, streamname);
 	//gsf_input_dump(input, 1); // just a regular hex dump of this input stream
-	PIPELINE::CStorageStream *instream = new PIPELINE::CStorageStream(input);
+	PIPELINE::MAX::CStorageStream *instream = new PIPELINE::MAX::CStorageStream(input);
 	dumpContainer(instream, "");
 	//PIPELINE::MAX::CStorageContainer ctr;
 	//ctr.serial(instream);

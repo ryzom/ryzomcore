@@ -37,17 +37,17 @@ f       2320 DocumentSummaryInformation
 kaetemi@benzaiten ~/source/minimax/build $ gsf dump /home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max VideoPostQueue
 VideoPostQueue
 [
-	50 00 (id: 80)
+	50 00 (id: 0x0050)
 	0a 00 00 00 (size: 10 - 6 = 4)
 	[
 		01 00 00 00 (value: 1)
 	]
 ]
 [
-	60 00 (id: 96)
+	60 00 (id: 0x0060)
 	2a 00 00 80 (size: 42 - 6 = 36) (note: negative bit = container)
 	[
-		10 00 (id: 16)
+		10 00 (id: 0x0010)
 		1e 00 00 00 (size: 30 - 6 = 24)
 		[
 			07 00 00 00 (value: 7)
@@ -57,7 +57,7 @@ VideoPostQueue
 			20 12 00 00 (value: 4610)
 			00 00 00 00
 		]
-		20 00 (id: 32)
+		20 00 (id: 0x0020)
 		06 00 00 00 (size: 6 - 6 = 0)
 	]
 ]

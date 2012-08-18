@@ -42,7 +42,7 @@ using namespace std;
 // using namespace NLMISC;
 
 namespace PIPELINE {
-
+#if 0
 CStorageStream::CStorageStream(GsfInput *input) : NLMISC::IStream(true), m_Input(input)
 {
 	m_RootChunk.OffsetBegin = -6;
@@ -168,7 +168,7 @@ void CStorageStream::findChunkById(uint16 id)
 {
 
 }
-
+#endif
 } /* namespace PIPELINE */
 
 /* end of file */
