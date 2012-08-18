@@ -33,6 +33,7 @@
 
 // NeL includes
 #include <nel/misc/ucstring.h>
+#include <nel/misc/string_common.h>
 
 // Project includes
 #include "storage_object.h"
@@ -81,7 +82,8 @@ void CStorageValue<ucstring>::serial(NLMISC::IStream &stream);
 template <typename T>
 void CStorageValue<T>::toString(std::ostream &ostream, const std::string &pad)
 {
-	ostream << "(" << getClassName() << ") { " << Value << " } ";
+	std::string s = NLMISC::toString(Value);
+	ostream << "(" << getClassName() << ") { " << s << " } ";
 }
 
 template <>

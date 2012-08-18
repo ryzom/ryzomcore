@@ -59,6 +59,7 @@ public:
 	inline void setB(uint32 b) { Uid = (Uid & 0xFFFFFFFF00000000L) | b; }
 
 	void serial(NLMISC::IStream &s);
+	std::string toString() const;
 };
 
 /**

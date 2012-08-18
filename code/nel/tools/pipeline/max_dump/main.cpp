@@ -19,12 +19,13 @@
 #include "../max/storage_stream.h"
 #include "../max/storage_object.h"
 #include "../max/dll_directory.h"
+#include "../max/class_directory_3.h"
 
 //static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
 static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/test2008.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/teapot_test_scene.max";
-static const char *streamname = "DllDirectory";
+static const char *streamname = "ClassDirectory3";
 
 inline uint8 cleanChar(uint8 c)
 {
@@ -311,7 +312,7 @@ int main(int argc, char **argv)
 		//gsf_input_dump(input, 1); // just a regular hex dump of this input stream
 		PIPELINE::MAX::CStorageStream instream(input);
 		//dumpContainer(instream, "");
-		PIPELINE::MAX::CDllDirectory ctr;
+		PIPELINE::MAX::CClassDirectory3 ctr;
 		ctr.serial(instream);
 		ctr.toString(std::cout);
 		std::cout << "\n";
