@@ -71,7 +71,7 @@ class CStorageContainer : public IStorageObject
 public:
 	// public data
 	typedef std::pair<uint16, IStorageObject *> TStorageObjectWithId;
-	typedef std::vector<TStorageObjectWithId> TStorageObjectContainer;
+	typedef std::list<TStorageObjectWithId> TStorageObjectContainer;
 	TStorageObjectContainer Chunks;
 
 	// inherited
@@ -86,7 +86,10 @@ public: // should be protected but that doesn't compile, nice c++!
 protected:
 	// override in subclasses, default to parent if not handled
 	virtual void serial(CStorageChunks &chunks);
+	// Create a storage object by id, override to provide custom serialization
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	// Callback when a storage object has been serialized and put in the chunks list, override to index them
+	virtual void serialized(TStorageObjectContainer::iterator soit, bool container);
 };
 
 // CStorageRaw : serializes raw data, use for unknown data

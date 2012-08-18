@@ -157,13 +157,17 @@ void CStorageContainer::serial(CStorageChunks &chunks)
 		while (chunks.enterChunk())
 		{
 			uint16 id = chunks.getChunkId();
-			IStorageObject *storageObject = createChunkById(id, chunks.isChunkContainer());
+			bool cont = chunks.isChunkContainer();
+			IStorageObject *storageObject = createChunkById(id, cont);
 			storageObject->setSize(chunks.getChunkSize());
 			if (storageObject->isContainer()) static_cast<CStorageContainer *>(storageObject)->serial(chunks);
 			else storageObject->serial(chunks.stream());
 			Chunks.push_back(TStorageObjectWithId(id, storageObject));
 			if (chunks.leaveChunk()) // bytes were skipped while reading
 				throw EStorage();
+			TStorageObjectContainer::iterator soit = Chunks.end();
+			--soit;
+			serialized(soit, cont);
 		}
 	}
 	else
@@ -187,6 +191,11 @@ IStorageObject *CStorageContainer::createChunkById(uint16 id, bool container)
 	{
 		return new CStorageRaw();
 	}
+}
+
+void CStorageContainer::serialized(TStorageObjectContainer::iterator soit, bool container)
+{
+
 }
 
 ////////////////////////////////////////////////////////////////////////
