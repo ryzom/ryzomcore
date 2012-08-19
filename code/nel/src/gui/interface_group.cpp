@@ -344,6 +344,33 @@ namespace NLGUI
 		// they can add an action handler before the hide
 		CAHManager::getInstance()->parseAH(cur, "on_escape", "on_escape_params", _AHOnEscape, _AHOnEscapeParams);
 
+		if( editorMode )
+		{
+			ptr = (char*) xmlGetProp( cur, BAD_CAST "on_active" );
+			if( ptr != NULL )
+				mapAHString( "on_active", std::string( ptr ) );
+
+			ptr = (char*) xmlGetProp( cur, BAD_CAST "on_deactive" );
+			if( ptr != NULL )
+				mapAHString( "on_deactive", std::string( ptr ) );
+
+			ptr = (char*) xmlGetProp( cur, BAD_CAST "group_onclick_r" );
+			if( ptr != NULL )
+				mapAHString( "group_onclick_r", std::string( ptr ) );
+
+			ptr = (char*) xmlGetProp( cur, BAD_CAST "group_onclick_l" );
+			if( ptr != NULL )
+				mapAHString( "group_onclick_l", std::string( ptr ) );
+
+			ptr = (char*) xmlGetProp( cur, BAD_CAST "on_enter" );
+			if( ptr != NULL )
+				mapAHString( "on_enter", std::string( ptr ) );
+
+			ptr = (char*) xmlGetProp( cur, BAD_CAST "on_escape" );
+			if( ptr != NULL )
+				mapAHString( "on_escape", std::string( ptr ) );
+		}
+
 
 		// LuaClass script
 		ptr = xmlGetProp (cur, (xmlChar*)"lua_class");
@@ -387,7 +414,7 @@ namespace NLGUI
 		else
 		if( name == "on_active" )
 		{
-			return getOnActiveHandler();
+			return getAHString( name );
 		}
 		else
 		if( name == "on_active_params" )
@@ -397,7 +424,7 @@ namespace NLGUI
 		else
 		if( name == "on_deactive" )
 		{
-			return getOnDeactiveHandler();
+			return getAHString( name );
 		}
 		else
 		if( name == "on_deactive_params" )
@@ -427,7 +454,7 @@ namespace NLGUI
 		else
 		if( name == "group_onclick_r" )
 		{
-			return getRightClickHandler();
+			return getAHString( name );
 		}
 		else
 		if( name == "group_params_r" )
@@ -437,7 +464,7 @@ namespace NLGUI
 		else
 		if( name == "group_onclick_l" )
 		{
-			return getLeftClickHandler();
+			return getAHString( name );
 		}
 		else
 		if( name == "group_params_l" )
@@ -447,7 +474,7 @@ namespace NLGUI
 		else
 		if( name == "on_enter" )
 		{
-			return getAHOnEnter();
+			return getAHString( name );
 		}
 		else
 		if( name == "on_enter_params" )
@@ -467,7 +494,7 @@ namespace NLGUI
 		else
 		if( name == "on_escape" )
 		{
-			return getAHOnEscape();
+			return getAHString( name );
 		}
 		else
 		if( name == "on_escape_params" )
@@ -536,6 +563,7 @@ namespace NLGUI
 		if( name == "on_active" )
 		{
 			_AHOnActive = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( name, value );
 			return;
 		}
 		else
@@ -548,6 +576,7 @@ namespace NLGUI
 		if( name == "on_deactive" )
 		{
 			_AHOnDeactive = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( name, value );
 			return;
 		}
 		else
@@ -595,6 +624,7 @@ namespace NLGUI
 		if( name == "group_onclick_r" )
 		{
 			_AHOnRightClick = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( name, value );
 			return;
 		}
 		else
@@ -607,6 +637,7 @@ namespace NLGUI
 		if( name == "group_onclick_l" )
 		{
 			_AHOnLeftClick = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( name, value );
 			return;
 		}
 		else
@@ -619,6 +650,7 @@ namespace NLGUI
 		if( name == "on_enter" )
 		{
 			_AHOnEnter = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( name, value );
 			return;
 		}
 		else
@@ -647,6 +679,7 @@ namespace NLGUI
 		if( name == "on_escape" )
 		{
 			_AHOnEscape = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( name, value );
 			return;
 		}
 		else
@@ -691,25 +724,27 @@ namespace NLGUI
 		xmlNewProp( node, BAD_CAST "child_resize_h", BAD_CAST NLMISC::toString( _ResizeFromChildH ).c_str() );
 		xmlNewProp( node, BAD_CAST "child_resize_wmargin", BAD_CAST NLMISC::toString( _ResizeFromChildWMargin ).c_str() );
 		xmlNewProp( node, BAD_CAST "child_resize_hmargin", BAD_CAST NLMISC::toString( _ResizeFromChildHMargin ).c_str() );
-		xmlNewProp( node, BAD_CAST "on_active", BAD_CAST getOnActiveHandler().c_str() );
+
+		xmlNewProp( node, BAD_CAST "on_active", BAD_CAST getAHString( "on_active" ).c_str() );
 		xmlNewProp( node, BAD_CAST "on_active_params", BAD_CAST getOnActiveParams().c_str() );
-		xmlNewProp( node, BAD_CAST "on_deactive", BAD_CAST getOnDeactiveHandler().c_str() );
+		xmlNewProp( node, BAD_CAST "on_deactive", BAD_CAST getAHString( "on_deactive" ).c_str() );
 		xmlNewProp( node, BAD_CAST "on_deactive_params", BAD_CAST getOnDeactiveParams().c_str() );
+
 		xmlNewProp( node, BAD_CAST "max_w", BAD_CAST NLMISC::toString( _MaxW ).c_str() );
 		xmlNewProp( node, BAD_CAST "max_h", BAD_CAST NLMISC::toString( _MaxH ).c_str() );
 		xmlNewProp( node, BAD_CAST "max_sizeref",
 			BAD_CAST getSizeRefAsString( _GroupSizeRef, _SizeDivW, _SizeDivH ).c_str() );
 		xmlNewProp( node, BAD_CAST "max_sizeparent",
 			BAD_CAST CWidgetManager::getInstance()->getParser()->getParentSizeMaxAssociation( (CInterfaceElement*)this ).c_str() );
-		xmlNewProp( node, BAD_CAST "group_onclick_r", BAD_CAST getRightClickHandler().c_str() );
+		xmlNewProp( node, BAD_CAST "group_onclick_r", BAD_CAST getAHString( "group_onclick_r" ).c_str() );
 		xmlNewProp( node, BAD_CAST "group_params_r", BAD_CAST getRightClickHandlerParams().c_str() );
-		xmlNewProp( node, BAD_CAST "group_onclick_l", BAD_CAST getLeftClickHandler().c_str() );
+		xmlNewProp( node, BAD_CAST "group_onclick_l", BAD_CAST getAHString( "group_onclick_l" ).c_str() );
 		xmlNewProp( node, BAD_CAST "group_params_l", BAD_CAST getLeftClickHandlerParams().c_str() );
-		xmlNewProp( node, BAD_CAST "on_enter", BAD_CAST getAHOnEnter().c_str() );
+		xmlNewProp( node, BAD_CAST "on_enter", BAD_CAST getAHString( "on_enter" ).c_str() );
 		xmlNewProp( node, BAD_CAST "on_enter_params", BAD_CAST getAHOnEnterParams().c_str() );
 		xmlNewProp( node, BAD_CAST "win_priority", BAD_CAST NLMISC::toString( _Priority ).c_str() );
 		xmlNewProp( node, BAD_CAST "use_cursor", BAD_CAST NLMISC::toString( _UseCursor ).c_str() );
-		xmlNewProp( node, BAD_CAST "on_escape", BAD_CAST getAHOnEscape().c_str() );
+		xmlNewProp( node, BAD_CAST "on_escape", BAD_CAST getAHString( "on_escape" ).c_str() );
 		xmlNewProp( node, BAD_CAST "on_escape_params", BAD_CAST getAHOnEscapeParams().c_str() );
 		xmlNewProp( node, BAD_CAST "lua_class",
 			BAD_CAST CWidgetManager::getInstance()->getParser()->getLuaClassAssociation( (CInterfaceGroup*)this ).c_str() );
