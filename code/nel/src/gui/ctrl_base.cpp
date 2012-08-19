@@ -26,6 +26,7 @@ using namespace NLMISC;
 
 namespace NLGUI
 {
+	std::map< std::string, std::map< std::string, std::string > > CCtrlBase::AHCache;
 
 	// ***************************************************************************
 	CCtrlBase::~CCtrlBase()
@@ -451,6 +452,33 @@ namespace NLGUI
 		}
 		// The Resizer Ctrls take the precedence over Sons controls.
 		return depth + getDeltaDepth();
+	}
+
+
+	void CCtrlBase::mapAHString( const std::string &key, const std::string &value )
+	{
+		std::map< std::string, std::map< std::string, std::string > >::iterator itr = AHCache.find( getId() );
+		if( itr == AHCache.end() )
+		{
+			AHCache[ getId() ];
+			itr = AHCache.find( getId() );
+		}
+
+		std::map< std::string, std::string > &AHMap = itr->second;
+		AHMap[ key ] = value;
+	}
+
+	std::string CCtrlBase::getAHString( const stlpx_std::string &key ) const
+	{
+		std::map< std::string, std::map< std::string, std::string > >::const_iterator itr = AHCache.find( getId() );
+		if( itr == AHCache.end() )
+			return "";
+
+		std::map< std::string, std::string >::const_iterator itr2 = itr->second.find( key );
+		if( itr2 == itr->second.end() )
+			return "";
+		else
+			return itr2->second;
 	}
 
 }

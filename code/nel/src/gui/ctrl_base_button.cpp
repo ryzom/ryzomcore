@@ -116,7 +116,7 @@ namespace NLGUI
 		else
 		if( name == "onover" )
 		{
-			return _getActionOnOver();
+			return getAHString( "onover" );
 		}
 		else
 		if( name == "params_over" )
@@ -126,7 +126,7 @@ namespace NLGUI
 		else
 		if( name == "onclick_l" )
 		{
-			return _getActionOnLeftClick();
+			return getAHString( "onclick_l" );
 		}
 		else
 		if( name == "params_l" )
@@ -136,7 +136,7 @@ namespace NLGUI
 		else
 		if( name == "ondblclick_l" )
 		{
-			return _getActionOnDblLeftClick();
+			return getAHString( "ondblclick_l" );
 		}
 		else
 		if( name == "params_dblclick_l" )
@@ -146,7 +146,7 @@ namespace NLGUI
 		else
 		if( name == "onlongclick_l" )
 		{
-			return _getActionOnLeftLongClick();
+			return getAHString( "onlongclick_l" );
 		}
 		else
 		if( name == "params_longclick_l" )
@@ -156,7 +156,7 @@ namespace NLGUI
 		else
 		if( name == "onclick_r" )
 		{
-			return _getActionOnRightClick();
+			return getAHString( "onclick_r" );
 		}
 		else
 		if( name == "params_r" )
@@ -166,7 +166,7 @@ namespace NLGUI
 		else
 		if( name == "onclock_tick" )
 		{
-			return _getActionOnClockTick();
+			return getAHString( "onclock_tick" );
 		}
 		else
 		if( name == "params_clock_tick" )
@@ -283,6 +283,7 @@ namespace NLGUI
 		if( name == "onover" )
 		{
 			_AHOnOver = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( "onover", value );
 			return;
 		}
 		else
@@ -295,6 +296,7 @@ namespace NLGUI
 		if( name == "onclick_l" )
 		{
 			_AHOnLeftClick = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( "onclick_l", value );
 			return;
 		}
 		else
@@ -307,6 +309,7 @@ namespace NLGUI
 		if( name == "ondblclick_l" )
 		{
 			_AHOnLeftDblClick = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( "ondblclick_l", value );
 			return;
 		}
 		else
@@ -319,6 +322,7 @@ namespace NLGUI
 		if( name == "onlongclick_l" )
 		{
 			_AHOnLeftLongClick = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( "onlongclick_l", value );
 			return;
 		}
 		else
@@ -331,6 +335,7 @@ namespace NLGUI
 		if( name == "onclick_r" )
 		{
 			_AHOnRightClick = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( "onclick_r", value );
 			return;
 		}
 		else
@@ -343,6 +348,7 @@ namespace NLGUI
 		if( name == "onclock_tick" )
 		{
 			_AHOnClockTick = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( "onclock_tick", value );
 			return;
 		}
 		else
@@ -407,18 +413,21 @@ namespace NLGUI
 		xmlNewProp( node, BAD_CAST "global_color_normal", BAD_CAST toString( _ModulateGlobalColorNormal ).c_str() );
 		xmlNewProp( node, BAD_CAST "global_color_pushed", BAD_CAST toString( _ModulateGlobalColorPushed ).c_str() );
 		xmlNewProp( node, BAD_CAST "global_color_over", BAD_CAST toString( _ModulateGlobalColorOver ).c_str() );
-		xmlNewProp( node, BAD_CAST "onover", BAD_CAST _getActionOnOver().c_str() );
+
+		xmlNewProp( node, BAD_CAST "onover", BAD_CAST getAHString( "onover" ).c_str() );
 		xmlNewProp( node, BAD_CAST "params_over", BAD_CAST _getParamsOnOver().c_str() );
-		xmlNewProp( node, BAD_CAST "onclick_l", BAD_CAST _getActionOnLeftClick().c_str() );
+		xmlNewProp( node, BAD_CAST "onclick_l", BAD_CAST getAHString( "onclick_l" ).c_str() );
 		xmlNewProp( node, BAD_CAST "params_l", BAD_CAST _getParamsOnLeftClick().c_str() );
-		xmlNewProp( node, BAD_CAST "ondblclick_l", BAD_CAST _getActionOnDblLeftClick().c_str() );
+		xmlNewProp( node, BAD_CAST "ondblclick_l", BAD_CAST getAHString( "ondblclick_l" ).c_str() );
 		xmlNewProp( node, BAD_CAST "params_dblclick_l", BAD_CAST _AHLeftDblClickParams.toString().c_str() );
-		xmlNewProp( node, BAD_CAST "onlongclick_l", BAD_CAST _getActionOnLeftLongClick().c_str() );
+		xmlNewProp( node, BAD_CAST "onlongclick_l", BAD_CAST getAHString( "onlongclick_l" ).c_str() );
 		xmlNewProp( node, BAD_CAST "params_longclick_l", BAD_CAST _AHLeftLongClickParams.toString().c_str() );
-		xmlNewProp( node, BAD_CAST "onclick_r", BAD_CAST _getActionOnRightClick().c_str() );
+		xmlNewProp( node, BAD_CAST "onclick_r", BAD_CAST getAHString( "onclick_r" ).c_str() );
 		xmlNewProp( node, BAD_CAST "params_r", BAD_CAST _AHRightClickParams.toString().c_str() );
-		xmlNewProp( node, BAD_CAST "onclock_tick", BAD_CAST _getActionOnClockTick().c_str() );
+		xmlNewProp( node, BAD_CAST "onclock_tick", BAD_CAST getAHString( "onclock_tick" ).c_str() );
 		xmlNewProp( node, BAD_CAST "params_clock_tick", BAD_CAST _AHClockTickParams.toString().c_str() );
+		
+		
 		xmlNewProp( node, BAD_CAST "menu_l", BAD_CAST _ListMenuLeft.toString().c_str() );
 		xmlNewProp( node, BAD_CAST "menu_r", BAD_CAST _ListMenuRight.toString().c_str() );
 
@@ -508,6 +517,33 @@ namespace NLGUI
 		CAHManager::getInstance()->parseAH(cur, "onclick_r", "params_r", _AHOnRightClick, _AHRightClickParams);
 		CAHManager::getInstance()->parseAH(cur, "onlongclick_l", "params_longclick_l", _AHOnLeftLongClick, _AHLeftLongClickParams);
 		CAHManager::getInstance()->parseAH(cur, "onclock_tick", "params_clock_tick", _AHOnClockTick, _AHClockTickParams);
+
+		if( editorMode )
+		{
+			prop = (char*) xmlGetProp( cur, BAD_CAST "onover" );
+			if( prop != NULL )
+				mapAHString( "onover", std::string( prop ) );
+
+			prop = (char*) xmlGetProp( cur, BAD_CAST "onclick_l" );
+			if( prop != NULL )
+				mapAHString( "onclick_l", std::string( prop ) );
+
+			prop = (char*) xmlGetProp( cur, BAD_CAST "ondblclick_l" );
+			if( prop != NULL )
+				mapAHString( "ondblclick_l", std::string( prop ) );
+
+			prop = (char*) xmlGetProp( cur, BAD_CAST "onclick_r" );
+			if( prop != NULL )
+				mapAHString( "onclick_r", std::string( prop ) );
+
+			prop = (char*) xmlGetProp( cur, BAD_CAST "onlongclick_l" );
+			if( prop != NULL )
+				mapAHString( "onlongclick_l", std::string( prop ) );
+
+			prop = (char*) xmlGetProp( cur, BAD_CAST "onclock_tick" );
+			if( prop != NULL )
+				mapAHString( "onclock_tick", std::string( prop ) );
+		}
 
 		// Context menu association
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_l" );

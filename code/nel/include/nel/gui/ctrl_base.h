@@ -175,6 +175,11 @@ namespace NLGUI
 		void convertTooltipHotSpot(const char *prop, THotSpot &parentHS, THotSpot &childHS);
 		static std::string TooltipHotSpotToString( THotSpot parent, THotSpot child );
 
+		void mapAHString( const std::string &key, const std::string &value );
+		std::string getAHString( const std::string &key ) const;
+
+		static std::map< std::string, std::map< std::string, std::string > > AHCache;
+
 		bool resizer;
 	};
 
