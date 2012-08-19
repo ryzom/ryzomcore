@@ -439,7 +439,6 @@ namespace NLGUI
 			return NULL;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "edit_box" );
-
 		xmlSetProp( node, BAD_CAST "onchange", BAD_CAST _AHOnChange.c_str() );
 		xmlSetProp( node, BAD_CAST "onchange_params", BAD_CAST _ParamsOnChange.c_str() );
 		xmlSetProp( node, BAD_CAST "on_focus_lost", BAD_CAST _AHOnFocusLost.c_str() );
@@ -534,6 +533,13 @@ namespace NLGUI
 
 		// NB: use InterfaceGroup "OnEnter" data. Different script params for an historic reason
 		CAHManager::getInstance()->parseAH(cur, "onenter", "params", _AHOnEnter, _AHOnEnterParams);
+
+		if( editorMode )
+		{
+			prop = (char*) xmlGetProp( cur, BAD_CAST "onenter" );
+			if( prop != NULL )
+				mapAHString( "onenter", std::string( prop ) );
+		}
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"onchange" );
 		if (prop) _AHOnChange = (const char *) prop;
