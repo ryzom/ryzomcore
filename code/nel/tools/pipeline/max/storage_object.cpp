@@ -50,6 +50,16 @@ namespace MAX {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
+IStorageObject::IStorageObject()
+{
+
+}
+
+IStorageObject::~IStorageObject()
+{
+
+}
+
 std::string IStorageObject::toString()
 {
 	std::stringstream ss;
@@ -76,6 +86,19 @@ bool IStorageObject::isContainer() const
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
+CStorageContainer::CStorageContainer() : ChunksOwnsPointers(true)
+{
+
+}
+
+CStorageContainer::~CStorageContainer()
+{
+	if (ChunksOwnsPointers)
+	{
+
+	}
+}
+
 std::string CStorageContainer::getClassName() // why is this not const in IClassable?
 {
 	return "StorageContainer";
@@ -83,6 +106,11 @@ std::string CStorageContainer::getClassName() // why is this not const in IClass
 
 void CStorageContainer::serial(NLMISC::IStream &stream)
 {
+	if (stream.isReading())
+	{
+		nlassert(ChunksOwnsPointers);
+		nlassert(Chunks.empty());
+	}
 	if (stream.getPos() == 0)
 	{
 		CStorageStream *storageStream = dynamic_cast<CStorageStream *>(&stream);
@@ -125,6 +153,7 @@ void CStorageContainer::toString(std::ostream &ostream, const std::string &pad)
 	//      Blahblah: (Container) {
 	//          Moo: (Foo) "What" }
 	// only increase pad when multi-lining sub-items
+	nlassert(ChunksOwnsPointers);
 	ostream << "(" << getClassName() << ") [" << Chunks.size() << "] { ";
 	std::string padpad = pad + "\t";
 	sint i = 0;
@@ -171,13 +200,8 @@ void CStorageContainer::serial(CStorageChunks &chunks)
 {
 	if (chunks.stream().isReading())
 	{
-#ifdef NL_DEBUG_STORAGE
-		if (Chunks.size())
-		{
-			nldebug("Storage container not empty, clearing");
-		}
-#endif
-		Chunks.clear();
+		nlassert(ChunksOwnsPointers);
+		nlassert(Chunks.empty());
 		while (chunks.enterChunk())
 		{
 			uint16 id = chunks.getChunkId();
@@ -220,6 +244,16 @@ IStorageObject *CStorageContainer::createChunkById(uint16 id, bool container)
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
+
+CStorageRaw::CStorageRaw()
+{
+
+}
+
+CStorageRaw::~CStorageRaw()
+{
+
+}
 
 std::string CStorageRaw::getClassName()
 {

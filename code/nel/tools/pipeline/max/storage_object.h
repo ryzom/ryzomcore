@@ -44,7 +44,15 @@ namespace MAX {
 struct EStorage : public NLMISC::Exception
 {
 	EStorage() : NLMISC::Exception("PIPELINE::MAX::EStorage") { }
+	EStorage(const char *msg) : NLMISC::Exception(msg) { }
 	virtual ~EStorage() throw() { }
+};
+
+struct EStorageParse : public EStorage
+{
+	EStorageParse() : EStorage("PIPELINE::MAX::EStorageParse") { }
+	EStorageParse(const char *msg) : EStorage(msg) { }
+	virtual ~EStorageParse() throw() { }
 };
 
 enum TParseLevel
@@ -70,6 +78,9 @@ const uint16 Version2010 = 0x2012;
 class IStorageObject : public NLMISC::IStreamable
 {
 public:
+	IStorageObject();
+	virtual ~IStorageObject();
+
 	// virtual std::string getClassName() = 0; // inherited from NLMISC::IClassable through NLMISC::IStreamable
 	// virtual void serial(NLMISC::IStream &stream); // inherited from NLMISC::IStreamable
 	std::string toString();
@@ -92,6 +103,14 @@ public:
 	typedef std::pair<uint16, IStorageObject *> TStorageObjectWithId;
 	typedef std::list<TStorageObjectWithId> TStorageObjectContainer;
 	TStorageObjectContainer Chunks;
+
+protected:
+	// protected data
+	bool ChunksOwnsPointers;
+
+public:
+	CStorageContainer();
+	virtual ~CStorageContainer();
 
 	// inherited
 	virtual std::string getClassName();
@@ -122,6 +141,10 @@ public:
 	// public data
 	typedef std::vector<uint8> TType;
 	TType Value;
+
+public:
+	CStorageRaw();
+	virtual ~CStorageRaw();
 
 	// inherited
 	virtual std::string getClassName();

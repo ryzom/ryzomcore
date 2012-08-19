@@ -74,6 +74,23 @@ int main(int argc, char **argv)
 	g_free(display_name);
 	g_print("%s\n", streamname);
 
+	GsfInput *input = NULL;
+
+	PIPELINE::MAX::CDllDirectory dllDirectory;
+	input = gsf_infile_child_by_name(infile, "DllDirectory");
+	{
+		PIPELINE::MAX::CStorageStream instream(input);
+		dllDirectory.serial(instream);
+	}
+	g_object_unref(input);
+	dllDirectory.toString(std::cout);
+	std::cout << "\n";
+	dllDirectory.parse(PIPELINE::MAX::VersionUnknown, PIPELINE::MAX::PARSE_INTERNAL);
+	dllDirectory.toString(std::cout);
+	std::cout << "\n";
+
+
+/*
 	GsfInput *input = gsf_infile_child_by_name(infile, streamname);
 
 	{
@@ -88,6 +105,9 @@ int main(int argc, char **argv)
 	}
 
 	g_object_unref(input);
+	*/
+
+
 	g_object_unref(infile);
 
 	return 0;

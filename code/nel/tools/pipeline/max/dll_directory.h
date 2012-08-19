@@ -32,6 +32,7 @@
 // STL includes
 
 // NeL includes
+#include <iomanip>
 
 // Project includes
 #include "storage_object.h"
@@ -39,6 +40,8 @@
 
 namespace PIPELINE {
 namespace MAX {
+
+class CDllEntry;
 
 /**
  * \brief CDllDirectory
@@ -58,8 +61,16 @@ public:
 	virtual void parse(uint16 version, TParseLevel level);
 	virtual void build(uint16 version);
 
+	// public
+	const CDllEntry *get(std::vector<CDllEntry *>::size_type idx) const;
+
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
+private:
+	uint16 m_ParseVersion;
+	TStorageObjectContainer m_ChunkCache;
+	std::vector<CDllEntry *> m_Entries;
 
 }; /* class CDllDirectory */
 
@@ -81,8 +92,13 @@ public:
 	virtual void parse(uint16 version, TParseLevel level);
 	virtual void build(uint16 version);
 
+	const ucstring &dllDescription() { return m_DllDescription->Value; }
+	const ucstring &dllFilename() { return m_DllFilename->Value; }
+
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	CStorageValue<ucstring> *m_DllDescription;
+	CStorageValue<ucstring> *m_DllFilename;
 
 }; /* class CDllDirectory */
 
