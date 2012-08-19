@@ -478,9 +478,8 @@ namespace NLGUI
 				// todo hulud interface syntax error
 				nlwarning ("could not read all styles");
 			}
-			if( !strcmp((char*)curNode->name,"key" ) )
+			if( !strcmp((char*)curNode->name,"key" ) && editorMode )
 			{
-				if( editorMode )
 					saveKeySettings( curNode );
 			}
 			// If define and style oks, try to parse "1st pass" objets (define, options....).
