@@ -998,11 +998,14 @@ namespace NLGUI
 		std::vector<CInterfaceLink::CTargetInfo> targets;
 
 		ptr = (char*) xmlGetProp (cur, (xmlChar*)"target");
-		std::string target = ptr;
-		if( ( ptr != NULL ) && !editorMode )
+		std::string target;
+		if( ptr != NULL )
 		{
-			CInterfaceLink::splitLinkTargets(std::string((const char*)ptr), parentGroup, targets);
+			target = std::string( ptr );
+			if( !editorMode )
+				CInterfaceLink::splitLinkTargets(std::string((const char*)ptr), parentGroup, targets);
 		}
+
 		// optional action handler
 		std::string action;
 		std::string params;
