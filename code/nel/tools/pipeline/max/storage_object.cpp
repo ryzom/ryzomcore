@@ -127,13 +127,15 @@ void CStorageContainer::toString(std::ostream &ostream, const std::string &pad)
 	// only increase pad when multi-lining sub-items
 	ostream << "(" << getClassName() << ") [" << Chunks.size() << "] { ";
 	std::string padpad = pad + "\t";
+	sint i = 0;
 	for (TStorageObjectContainer::const_iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
 	{
 		std::stringstream ss;
 		ss << std::hex << std::setfill('0');
 		ss << std::setw(4) << it->first;
-		ostream << "\n" << pad << "0x" << ss.str() << ": ";
+		ostream << "\n" << pad << i << " 0x" << ss.str() << ": ";
 		it->second->toString(ostream, padpad);
+		++i;
 	}
 	ostream << "} ";
 }

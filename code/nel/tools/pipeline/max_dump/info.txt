@@ -834,3 +834,26 @@ max2010
 		Hex: 01 00 00 00 }
 
 
+
+
+
+max2010 scene, near no fx
+2f 27 02 05
+AppDataChunk *ap=node->GetAppDataChunk (MAXSCRIPT_UTILITY_CLASS_ID, UTILITY_CLASS_ID, id);
+MAXSCRIPT_UTILITY_CLASS_ID Class_ID(0x4d64858, 0x16d1751d)
+UTILITY_CLASS_ID 0x001020
+#define NEL3D_APPDATA_ENV_FX						(84682543)
+0x50C272F
+
+0x0110: (StorageContainer) [2] {
+	0x0120: (StorageRaw) {
+		Size: 20
+		String: XH...u.. .../'......
+		Hex: 58 48 d6 04 1d 75 d1 16 // MAXSCRIPT_UTILITY_CLASS_ID
+			20 10 00 00 // UTILITY_CLASS_ID
+			2f 27 0c 05 // NEL3D_APPDATA_ENV_FX
+			06 00 00 00 } // size???
+	0x0130: (StorageRaw) {
+		Size: 6
+		String: no fx. } }
+
