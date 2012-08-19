@@ -43,6 +43,13 @@ namespace GUIEditor
 			return false;
 		}
 
+		if( mg->serializeGroup( root, "root" ) == NULL )
+		{
+			xmlFreeNode( root );
+			out.close();
+			return false;
+		}
+
 		if( !CWidgetManager::getInstance()->serializeOptions( root ) )
 		{
 			xmlFreeNode( root );
@@ -81,12 +88,6 @@ namespace GUIEditor
 			return false;
 		}
 
-		if( mg->serializeGroup( root, "root" ) == NULL )
-		{
-			xmlFreeNode( root );
-			out.close();
-			return false;
-		}
 
 		if( mg->serializeSubGroups( root ) == NULL )
 		{
