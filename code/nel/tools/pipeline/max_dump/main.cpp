@@ -22,12 +22,13 @@
 #include "../max/class_directory_3.h"
 #include "../max/class_data.h"
 #include "../max/config.h"
+#include "../max/scene.h"
 
 //static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
 static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/test2008.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/teapot_test_scene.max";
-static const char *streamname = "ClassDirectory3";
+static const char *streamname = "Scene";
 
 // int __stdcall WinMain(void *, void *, void *, int)
 int main(int argc, char **argv)
@@ -79,7 +80,7 @@ int main(int argc, char **argv)
 		//gsf_input_dump(input, 1); // just a regular hex dump of this input stream
 		PIPELINE::MAX::CStorageStream instream(input);
 		//dumpContainer(instream, "");
-		PIPELINE::MAX::CClassDirectory3 ctr;
+		PIPELINE::MAX::CScene ctr;
 		ctr.serial(instream);
 		ctr.toString(std::cout);
 		std::cout << "\n";

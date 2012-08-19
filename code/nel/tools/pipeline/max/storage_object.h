@@ -47,6 +47,14 @@ struct EStorage : public NLMISC::Exception
 	virtual ~EStorage() throw() { }
 };
 
+enum TParseLevel
+{
+	PARSE_SYSTEM = 0x00000001, // Parse system related classes
+	// PARSE_BUILTIN = 0x00000002; // Parse all builtin classes - reserved
+	PARSE_NELDATA = 0x00000004, // Parse all structures related to nel specific data (nel material, node properties, etcetera)
+	PARSE_NEL3D = 0x00000008, // Parse classes to initialize their nel3d equivalent classes
+};
+
 // IStorageObject : exposes serial(CStorageStream &stream) and dump(const std::string &pad)
 class IStorageObject : public NLMISC::IStreamable
 {

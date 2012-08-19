@@ -839,6 +839,7 @@ max2010
 
 max2010 scene, near no fx
 2f 27 02 05
+std::string CExportNel::getScriptAppData (Animatable *node, uint32 id, const std::string& def)
 AppDataChunk *ap=node->GetAppDataChunk (MAXSCRIPT_UTILITY_CLASS_ID, UTILITY_CLASS_ID, id);
 MAXSCRIPT_UTILITY_CLASS_ID Class_ID(0x4d64858, 0x16d1751d)
 UTILITY_CLASS_ID 0x001020
