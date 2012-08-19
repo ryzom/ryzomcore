@@ -36,7 +36,7 @@ namespace NLGUI
 	{
 		if( name == "on_wheel_up" )
 		{
-			return CAHManager::getInstance()->getActionHandlerName( _AHWheelUp );
+			return getAHString( name );
 		}
 		else
 		if( name == "on_wheel_up_params" )
@@ -46,7 +46,7 @@ namespace NLGUI
 		else
 		if( name == "on_wheel_down" )
 		{
-			return CAHManager::getInstance()->getActionHandlerName( _AHWheelDown );
+			return getAHString( name );
 		}
 		else
 		if( name == "on_wheel_down_params" )
@@ -62,6 +62,7 @@ namespace NLGUI
 		if( name == "on_wheel_up" )
 		{
 			_AHWheelUp = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( name, value );
 			return;
 		}
 		else
@@ -74,6 +75,7 @@ namespace NLGUI
 		if( name == "on_wheel_down" )
 		{
 			_AHWheelDown = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( name, value );
 			return;
 		}
 		else
@@ -95,13 +97,11 @@ namespace NLGUI
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "group_wheel" );
 
-		xmlSetProp( node, BAD_CAST "on_wheel_up",
-			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHWheelUp ).c_str() );
+		xmlSetProp( node, BAD_CAST "on_wheel_up", BAD_CAST getAHString( "on_wheel_up" ).c_str() );
 
 		xmlSetProp( node, BAD_CAST "on_wheel_up_params", BAD_CAST _AHWheelUpParams.toString().c_str() );
 		
-		xmlSetProp( node, BAD_CAST "on_wheel_down",
-			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHWheelDown ).c_str() );
+		xmlSetProp( node, BAD_CAST "on_wheel_down", BAD_CAST getAHString( "on_wheel_down" ).c_str() );
 
 		xmlSetProp( node, BAD_CAST "on_wheel_down_params", BAD_CAST _AHWheelDownParams.toString().c_str() );
 
@@ -114,6 +114,19 @@ namespace NLGUI
 		if (!CInterfaceGroup::parse(cur, parentGroup)) return false;
 		CAHManager::getInstance()->parseAH(cur, "on_wheel_up", "on_wheel_up_params", _AHWheelUp, _AHWheelUpParams);
 		CAHManager::getInstance()->parseAH(cur, "on_wheel_down", "on_wheel_down_params", _AHWheelDown, _AHWheelDownParams);
+
+		if( editorMode )
+		{
+			CXMLAutoPtr ptr( (char*) xmlGetProp( cur, BAD_CAST "on_wheel_up" ) );
+			if( ptr != NULL )
+				mapAHString( "on_wheel_up", std::string( ptr ) );
+
+			ptr = (char*) xmlGetProp( cur, BAD_CAST "on_wheel_down" );
+			if( ptr != NULL )
+				mapAHString( "on_wheel_down", std::string( ptr ) );
+
+		}
+
 		return true;
 	}
 
