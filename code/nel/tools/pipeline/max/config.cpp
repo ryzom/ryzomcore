@@ -66,6 +66,16 @@ void CConfig::toString(std::ostream &ostream, const std::string &pad)
 	CStorageContainer::toString(ostream, pad);
 }
 
+void CConfig::parse(uint16 version, TParseLevel level)
+{
+	CStorageContainer::parse(version, level);
+}
+
+void CConfig::build(uint16 version)
+{
+	CStorageContainer::build(version);
+}
+
 IStorageObject *CConfig::createChunkById(uint16 id, bool container)
 {
 	if (container)
@@ -87,11 +97,6 @@ IStorageObject *CConfig::createChunkById(uint16 id, bool container)
 		}
 	}
 	return CStorageContainer::createChunkById(id, container);
-}
-
-void CConfig::serialized(TStorageObjectContainer::iterator soit, bool container)
-{
-	CStorageContainer::serialized(soit, container);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -118,6 +123,16 @@ void CConfig20a0::toString(std::ostream &ostream, const std::string &pad)
 	CStorageContainer::toString(ostream, pad);
 }
 
+void CConfig20a0::parse(uint16 version, TParseLevel level)
+{
+	CStorageContainer::parse(version, level);
+}
+
+void CConfig20a0::build(uint16 version)
+{
+	CStorageContainer::build(version);
+}
+
 IStorageObject *CConfig20a0::createChunkById(uint16 id, bool container)
 {
 	if (container)
@@ -137,11 +152,6 @@ IStorageObject *CConfig20a0::createChunkById(uint16 id, bool container)
 		}
 	}
 	return CStorageContainer::createChunkById(id, container);
-}
-
-void CConfig20a0::serialized(TStorageObjectContainer::iterator soit, bool container)
-{
-	CStorageContainer::serialized(soit, container);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -166,6 +176,16 @@ std::string CConfig20a0Entry::getClassName()
 void CConfig20a0Entry::toString(std::ostream &ostream, const std::string &pad)
 {
 	CStorageContainer::toString(ostream, pad);
+}
+
+void CConfig20a0Entry::parse(uint16 version, TParseLevel level)
+{
+	CStorageContainer::parse(version, level);
+}
+
+void CConfig20a0Entry::build(uint16 version)
+{
+	CStorageContainer::build(version);
 }
 
 IStorageObject *CConfig20a0Entry::createChunkById(uint16 id, bool container)
@@ -216,11 +236,6 @@ IStorageObject *CConfig20a0Entry::createChunkById(uint16 id, bool container)
 	return CStorageContainer::createChunkById(id, container);
 }
 
-void CConfig20a0Entry::serialized(TStorageObjectContainer::iterator soit, bool container)
-{
-	CStorageContainer::serialized(soit, container);
-}
-
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -245,6 +260,16 @@ void CConfigScript::toString(std::ostream &ostream, const std::string &pad)
 	CStorageContainer::toString(ostream, pad);
 }
 
+void CConfigScript::parse(uint16 version, TParseLevel level)
+{
+	CStorageContainer::parse(version, level);
+}
+
+void CConfigScript::build(uint16 version)
+{
+	CStorageContainer::build(version);
+}
+
 IStorageObject *CConfigScript::createChunkById(uint16 id, bool container)
 {
 	if (container)
@@ -256,11 +281,6 @@ IStorageObject *CConfigScript::createChunkById(uint16 id, bool container)
 		}
 	}
 	return CStorageContainer::createChunkById(id, container);
-}
-
-void CConfigScript::serialized(TStorageObjectContainer::iterator soit, bool container)
-{
-	CStorageContainer::serialized(soit, container);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -287,6 +307,16 @@ void CConfigScriptEntry::toString(std::ostream &ostream, const std::string &pad)
 	CStorageContainer::toString(ostream, pad);
 }
 
+void CConfigScriptEntry::parse(uint16 version, TParseLevel level)
+{
+	CStorageContainer::parse(version, level);
+}
+
+void CConfigScriptEntry::build(uint16 version)
+{
+	CStorageContainer::build(version);
+}
+
 IStorageObject *CConfigScriptEntry::createChunkById(uint16 id, bool container)
 {
 	if (container)
@@ -306,11 +336,6 @@ IStorageObject *CConfigScriptEntry::createChunkById(uint16 id, bool container)
 		}
 	}
 	return CStorageContainer::createChunkById(id, container);
-}
-
-void CConfigScriptEntry::serialized(TStorageObjectContainer::iterator soit, bool container)
-{
-	CStorageContainer::serialized(soit, container);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -370,6 +395,16 @@ void CConfigScriptMetaContainer::toString(std::ostream &ostream, const std::stri
 	CStorageContainer::toString(ostream, pad);
 }
 
+void CConfigScriptMetaContainer::parse(uint16 version, TParseLevel level)
+{
+	CStorageContainer::parse(version, level);
+}
+
+void CConfigScriptMetaContainer::build(uint16 version)
+{
+	CStorageContainer::build(version);
+}
+
 IStorageObject *CConfigScriptMetaContainer::createChunkById(uint16 id, bool container)
 {
 	if (container)
@@ -403,11 +438,6 @@ IStorageObject *CConfigScriptMetaContainer::createChunkById(uint16 id, bool cont
 		}
 	}
 	return CStorageContainer::createChunkById(id, container);
-}
-
-void CConfigScriptMetaContainer::serialized(TStorageObjectContainer::iterator soit, bool container)
-{
-	CStorageContainer::serialized(soit, container);
 }
 
 ////////////////////////////////////////////////////////////////////////

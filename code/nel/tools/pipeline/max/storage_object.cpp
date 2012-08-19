@@ -140,6 +140,28 @@ void CStorageContainer::toString(std::ostream &ostream, const std::string &pad)
 	ostream << "} ";
 }
 
+void CStorageContainer::parse(uint16 version, TParseLevel level)
+{
+	for (TStorageObjectContainer::const_iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
+	{
+		if (it->second->isContainer())
+		{
+			static_cast<CStorageContainer *>(it->second)->parse(version, level);
+		}
+	}
+}
+
+void CStorageContainer::build(uint16 version)
+{
+	for (TStorageObjectContainer::const_iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
+	{
+		if (it->second->isContainer())
+		{
+			static_cast<CStorageContainer *>(it->second)->build(version);
+		}
+	}
+}
+
 bool CStorageContainer::isContainer() const
 {
 	return true;
@@ -167,9 +189,9 @@ void CStorageContainer::serial(CStorageChunks &chunks)
 			Chunks.push_back(TStorageObjectWithId(id, storageObject));
 			if (chunks.leaveChunk()) // bytes were skipped while reading
 				throw EStorage();
-			TStorageObjectContainer::iterator soit = Chunks.end();
+			/*TStorageObjectContainer::iterator soit = Chunks.end();
 			--soit;
-			serialized(soit, cont);
+			serialized(soit, cont);*/
 		}
 	}
 	else
@@ -193,11 +215,6 @@ IStorageObject *CStorageContainer::createChunkById(uint16 id, bool container)
 	{
 		return new CStorageRaw();
 	}
-}
-
-void CStorageContainer::serialized(TStorageObjectContainer::iterator soit, bool container)
-{
-
 }
 
 ////////////////////////////////////////////////////////////////////////

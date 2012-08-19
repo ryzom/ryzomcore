@@ -65,6 +65,16 @@ void CClassData::toString(std::ostream &ostream, const std::string &pad)
 	CStorageContainer::toString(ostream, pad);
 }
 
+void CClassData::parse(uint16 version, TParseLevel level)
+{
+	CStorageContainer::parse(version, level);
+}
+
+void CClassData::build(uint16 version)
+{
+	CStorageContainer::build(version);
+}
+
 IStorageObject *CClassData::createChunkById(uint16 id, bool container)
 {
 	if (container)
@@ -76,11 +86,6 @@ IStorageObject *CClassData::createChunkById(uint16 id, bool container)
 		}
 	}
 	return CStorageContainer::createChunkById(id, container);
-}
-
-void CClassData::serialized(TStorageObjectContainer::iterator soit, bool container)
-{
-	CStorageContainer::serialized(soit, container);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -107,6 +112,16 @@ void CClassDataEntry::toString(std::ostream &ostream, const std::string &pad)
 	CStorageContainer::toString(ostream, pad);
 }
 
+void CClassDataEntry::parse(uint16 version, TParseLevel level)
+{
+	CStorageContainer::parse(version, level);
+}
+
+void CClassDataEntry::build(uint16 version)
+{
+	CStorageContainer::build(version);
+}
+
 IStorageObject *CClassDataEntry::createChunkById(uint16 id, bool container)
 {
 	if (!container)
@@ -123,11 +138,6 @@ IStorageObject *CClassDataEntry::createChunkById(uint16 id, bool container)
 		return CStorageContainer::createChunkById(id, container);
 	}
 	return CStorageContainer::createChunkById(id, container);
-}
-
-void CClassDataEntry::serialized(TStorageObjectContainer::iterator soit, bool container)
-{
-	CStorageContainer::serialized(soit, container);
 }
 
 ////////////////////////////////////////////////////////////////////////

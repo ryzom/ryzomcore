@@ -49,11 +49,22 @@ struct EStorage : public NLMISC::Exception
 
 enum TParseLevel
 {
-	PARSE_SYSTEM = 0x00000001, // Parse system related classes
+	PARSE_INTERNAL = 0x00000001, // Directly parse basic class formats
 	// PARSE_BUILTIN = 0x00000002; // Parse all builtin classes - reserved
-	PARSE_NELDATA = 0x00000004, // Parse all structures related to nel specific data (nel material, node properties, etcetera)
-	PARSE_NEL3D = 0x00000008, // Parse classes to initialize their nel3d equivalent classes
+	// PARSE_NELDATA = 0x00000004, // Parse all structures related to nel specific data (nel material, node properties, etcetera)
+	// PARSE_NEL3D = 0x00000008, // Parse classes to initialize their nel3d equivalent classes
 };
+
+// NOTE: This is the wrong location. Make a definitions header.
+const uint16 VersionUnknown = 0x0000;
+const uint16 Version3 = 0x2004;
+const uint16 Version4 = 0x2006;
+const uint16 Version5 = 0x2008;
+const uint16 Version6 = 0x2009;
+const uint16 Version9 = 0x200E;
+const uint16 Version2008 = 0x200F;
+const uint16 Version2010 = 0x2012;
+// END OF NOTE
 
 // IStorageObject : exposes serial(CStorageStream &stream) and dump(const std::string &pad)
 class IStorageObject : public NLMISC::IStreamable
@@ -87,6 +98,12 @@ public:
 	virtual void serial(NLMISC::IStream &stream); // only used to wrap a container inside another stream
 	virtual void toString(std::ostream &ostream, const std::string &pad = "");
 
+	// virtual
+	// Parse this class with given version and parse level filter
+	virtual void parse(uint16 version, TParseLevel level);
+	// Build the storage structure needed to store the parsed data back
+	virtual void build(uint16 version);
+
 public: // should be protected but that doesn't compile, nice c++!
 	// inherited
 	virtual bool isContainer() const;
@@ -96,8 +113,6 @@ protected:
 	virtual void serial(CStorageChunks &chunks);
 	// Create a storage object by id, override to provide custom serialization
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
-	// Callback when a storage object has been serialized and put in the chunks list, override to index them
-	virtual void serialized(TStorageObjectContainer::iterator soit, bool container);
 };
 
 // CStorageRaw : serializes raw data, use for unknown data

@@ -55,10 +55,11 @@ public:
 	// inherited
 	virtual std::string getClassName();
 	virtual void toString(std::ostream &ostream, const std::string &pad = "");
+	virtual void parse(uint16 version, TParseLevel level);
+	virtual void build(uint16 version);
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
-	virtual void serialized(TStorageObjectContainer::iterator soit, bool container);
 
 }; /* class CDllDirectory */
 
@@ -77,10 +78,11 @@ public:
 	// inherited
 	virtual std::string getClassName();
 	virtual void toString(std::ostream &ostream, const std::string &pad = "");
+	virtual void parse(uint16 version, TParseLevel level);
+	virtual void build(uint16 version);
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
-	virtual void serialized(TStorageObjectContainer::iterator soit, bool container);
 
 }; /* class CDllDirectory */
 

@@ -66,6 +66,16 @@ void CScene::toString(std::ostream &ostream, const std::string &pad)
 	CStorageContainer::toString(ostream, pad);
 }
 
+void CScene::parse(uint16 version, TParseLevel level)
+{
+	CStorageContainer::parse(version, level);
+}
+
+void CScene::build(uint16 version)
+{
+	CStorageContainer::build(version);
+}
+
 IStorageObject *CScene::createChunkById(uint16 id, bool container)
 {
 	if (container)
@@ -74,11 +84,6 @@ IStorageObject *CScene::createChunkById(uint16 id, bool container)
 		return new CSceneClassContainer();
 	}
 	return CStorageContainer::createChunkById(id, container);
-}
-
-void CScene::serialized(TStorageObjectContainer::iterator soit, bool container)
-{
-	CStorageContainer::serialized(soit, container);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -105,6 +110,16 @@ void CSceneClassContainer::toString(std::ostream &ostream, const std::string &pa
 	CStorageContainer::toString(ostream, pad);
 }
 
+void CSceneClassContainer::parse(uint16 version, TParseLevel level)
+{
+	CStorageContainer::parse(version, level);
+}
+
+void CSceneClassContainer::build(uint16 version)
+{
+	CStorageContainer::build(version);
+}
+
 IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 {
 	if (container)
@@ -114,11 +129,6 @@ IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 		return new CSceneClass();
 	}
 	return CStorageContainer::createChunkById(id, container);
-}
-
-void CSceneClassContainer::serialized(TStorageObjectContainer::iterator soit, bool container)
-{
-	CStorageContainer::serialized(soit, container);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -145,14 +155,19 @@ void CSceneClass::toString(std::ostream &ostream, const std::string &pad)
 	CStorageContainer::toString(ostream, pad);
 }
 
+void CSceneClass::parse(uint16 version, TParseLevel level)
+{
+	CStorageContainer::parse(version, level);
+}
+
+void CSceneClass::build(uint16 version)
+{
+	CStorageContainer::build(version);
+}
+
 IStorageObject *CSceneClass::createChunkById(uint16 id, bool container)
 {
 	return CStorageContainer::createChunkById(id, container);
-}
-
-void CSceneClass::serialized(TStorageObjectContainer::iterator soit, bool container)
-{
-	CStorageContainer::serialized(soit, container);
 }
 
 const ucchar *CSceneClass::DisplayName = ucstring("Unknown Scene Class").c_str();

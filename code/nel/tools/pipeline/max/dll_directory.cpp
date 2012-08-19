@@ -61,6 +61,16 @@ void CDllDirectory::toString(std::ostream &ostream, const std::string &pad)
 	CStorageContainer::toString(ostream, pad);
 }
 
+void CDllDirectory::parse(uint16 version, TParseLevel level)
+{
+	CStorageContainer::parse(version, level);
+}
+
+void CDllDirectory::build(uint16 version)
+{
+	CStorageContainer::build(version);
+}
+
 IStorageObject *CDllDirectory::createChunkById(uint16 id, bool container)
 {
 	if (container)
@@ -75,16 +85,11 @@ IStorageObject *CDllDirectory::createChunkById(uint16 id, bool container)
 	{
 		switch (id)
 		{
-		case 0x21C0: // FileVersion
+		case 0x21C0: // DllDirectoryHeader
 			return new CStorageValue<uint32>();
 		}
 	}
 	return CStorageContainer::createChunkById(id, container);
-}
-
-void CDllDirectory::serialized(TStorageObjectContainer::iterator soit, bool container)
-{
-	CStorageContainer::serialized(soit, container);
 }
 
 CDllEntry::CDllEntry()
@@ -107,6 +112,16 @@ void CDllEntry::toString(std::ostream &ostream, const std::string &pad)
 	CStorageContainer::toString(ostream, pad);
 }
 
+void CDllEntry::parse(uint16 version, TParseLevel level)
+{
+	CStorageContainer::parse(version, level);
+}
+
+void CDllEntry::build(uint16 version)
+{
+	CStorageContainer::build(version);
+}
+
 IStorageObject *CDllEntry::createChunkById(uint16 id, bool container)
 {
 	if (!container)
@@ -119,11 +134,6 @@ IStorageObject *CDllEntry::createChunkById(uint16 id, bool container)
 		}
 	}
 	return CStorageContainer::createChunkById(id, container);
-}
-
-void CDllEntry::serialized(TStorageObjectContainer::iterator soit, bool container)
-{
-	CStorageContainer::serialized(soit, container);
 }
 
 } /* namespace MAX */
