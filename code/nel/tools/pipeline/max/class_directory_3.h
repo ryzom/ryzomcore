@@ -43,6 +43,8 @@
 namespace PIPELINE {
 namespace MAX {
 
+class CDllDirectory;
+
 class CClassEntry;
 
 /**
@@ -54,7 +56,7 @@ class CClassEntry;
 class CClassDirectory3 : public CStorageContainer
 {
 public:
-	CClassDirectory3();
+	CClassDirectory3(CDllDirectory *dllDirectory);
 	virtual ~CClassDirectory3();
 
 	// inherited
@@ -80,6 +82,8 @@ private:
 	TStorageObjectContainer m_ChunkCache;
 	std::vector<CClassEntry *> m_Entries;
 	std::map<NLMISC::CClassId, uint16> m_ClassIdToIndex;
+
+	CDllDirectory *m_DllDirectory;
 
 }; /* class CClassDirectory3 */
 

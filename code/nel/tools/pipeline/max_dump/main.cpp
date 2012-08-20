@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 	std::cout << "\n";
 
 
-	PIPELINE::MAX::CClassDirectory3 classDirectory3;
+	PIPELINE::MAX::CClassDirectory3 classDirectory3(&dllDirectory);
 	input = gsf_infile_child_by_name(infile, "ClassDirectory3");
 	{
 		PIPELINE::MAX::CStorageStream instream(input);

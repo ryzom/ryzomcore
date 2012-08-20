@@ -91,6 +91,7 @@ class CDllEntry : public CStorageContainer
 {
 public:
 	CDllEntry();
+	CDllEntry(const IDllPluginDesc *dllPluginDesc);
 	virtual ~CDllEntry();
 
 	// inherited

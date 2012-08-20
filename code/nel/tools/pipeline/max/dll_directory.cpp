@@ -235,6 +235,8 @@ void CDllDirectory::disown()
 // Parallel to CClassDirectory3
 const CDllEntry *CDllDirectory::get(uint16 index) const
 {
+	nlassert(!ChunksOwnsPointers);
+	nlassert(index < m_Entries.size());
 	return m_Entries[index];
 }
 
@@ -261,12 +263,11 @@ uint16 CDllDirectory::getOrCreateIndex(const IDllPluginDesc *dllPluginDesc)
 		return it->second;
 
 	// Create new entry
-	/*CClassEntry *classEntry = new CClassEntry(sceneClassDesc);
+	CDllEntry *dllEntry = new CDllEntry(dllPluginDesc);
 	uint16 index = m_Entries.size();
-	m_ClassIdToIndex[classEntry->classId()] = index;
-	m_Entries.push_back(classEntry);
-	return index;*/
-	return 0xFFFF;
+	m_InternalNameToIndex[NLMISC::toLower(dllEntry->dllFilename())] = index;
+	m_Entries.push_back(dllEntry);
+	return index;
 }
 
 IStorageObject *CDllDirectory::createChunkById(uint16 id, bool container)
@@ -300,6 +301,14 @@ IStorageObject *CDllDirectory::createChunkById(uint16 id, bool container)
 CDllEntry::CDllEntry() : m_DllDescription(NULL), m_DllFilename(NULL)
 {
 
+}
+
+CDllEntry::CDllEntry(const IDllPluginDesc *dllPluginDesc) : m_DllDescription(new CStorageValue<ucstring>()), m_DllFilename(new CStorageValue<ucstring>())
+{
+	Chunks.push_back(TStorageObjectWithId(0x2039, m_DllDescription));
+	Chunks.push_back(TStorageObjectWithId(0x2037, m_DllFilename));
+	m_DllDescription->Value = dllPluginDesc->displayName();
+	m_DllFilename->Value = dllPluginDesc->internalName();
 }
 
 CDllEntry::~CDllEntry()
