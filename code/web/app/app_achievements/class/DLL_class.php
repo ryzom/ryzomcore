@@ -1,4 +1,9 @@
 <?php
+	/*
+	 * Doubly Linked List
+	 *
+	 * This list is linked to an avl tree for searching purpose!
+	 */
 	class DLL {
 		private $first;
 		private $last;
@@ -34,7 +39,7 @@
 			return $this->last;
 		}
 
-		function addNode($data,$before = null) {
+		function addNode($data,$before = null) { // add a node
 			if($this->findNode($data->getID()) != null) {
 				return false;	
 			}
@@ -71,13 +76,13 @@
 				$this->first = $n;
 			}
 
-			$this->avl->insert($n);
+			$this->avl->insert($n); // pass on to avl tree
 			$this->size++;
 
 			return null;
 		}
 
-		function removeNode($id) {
+		function removeNode($id) { // remove a node
 			$this->avl->inorder();
 
 			$n = $this->findNode($id);
@@ -109,7 +114,7 @@
 					}
 				}
 
-				$this->avl->remove($id);
+				$this->avl->remove($id); // pass on to avl tree
 				$this->size--;
 			}
 
@@ -120,6 +125,10 @@
 		}
 	}
 
+	/*
+	 * List nodes
+	 */
+
 	class DLLnode {
 		private $parent;
 		private $child;
@@ -128,7 +137,7 @@
 		function DLLNode($d) {
 			$this->parent = null;
 			$this->child = null;
-			$this->data = $d;
+			$this->data = $d; // actual data
 		}
 
 		final function getParent() {

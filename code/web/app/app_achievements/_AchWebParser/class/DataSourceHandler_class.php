@@ -1,4 +1,7 @@
 <?php
+	/*
+	 * This class is the wrapper for all loaded datasources. It will store them and pass the "drive" command on to them.
+	 */
 	class DataSourceHandler {
 		private $source;
 
@@ -10,7 +13,7 @@
 			$this->source[] = $src;
 		}
 
-		function drive($cid) {
+		function drive($cid) { // tell the datasources to start reading data
 			foreach($this->source as $elem) {
 				$elem->drive($cid);
 			}

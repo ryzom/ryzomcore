@@ -72,7 +72,7 @@
 			return new AdmObjective($d,$this);
 		}
 
-		function getLang($lang) {
+		function getLang($lang) { // load language
 			global $DBc;
 
 			$res = $DBc->sqlQuery("SELECT * FROM ach_task_lang WHERE atl_task='".$this->getID()."' AND atl_lang='".$lang."'");
@@ -80,7 +80,7 @@
 			return array(0=>$res[0]['atl_name'],1=>$res[0]['atl_template']);
 		}
 
-		function setLang($lang,$txt,$tpl) {
+		function setLang($lang,$txt,$tpl) { // write language
 			global $DBc,$_USER;
 
 			$DBc->sqlQuery("INSERT INTO ach_task_lang (atl_task,atl_lang,atl_name,atl_template) VALUES ('".$this->getID()."','".$DBc->sqlEscape($lang)."','".$DBc->sqlEscape($txt)."',".mkn($tpl).") ON DUPLICATE KEY UPDATE apl_name='".$DBc->sqlEscape($txt)."',apl_template=".mkn($tpl)."");

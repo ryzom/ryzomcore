@@ -35,8 +35,6 @@ if($_ADMIN->isIG()) {
 
 require_once("class/mySQL_class.php");
 
-#require_once("include/ach_render_admin.php");
-#require_once("include/ach_render_csr.php");
 require_once($_CONF['app_achievements_path']."include/ach_render_common.php");
 
 require_once($_CONF['app_achievements_path']."class/DLL_class.php");
@@ -68,7 +66,6 @@ require_once("class/AdmAtom_class.php");
 
 #require_once("class/CSRDispatcher_trait.php");
 require_once("class/CSR_inter.php");
-#require_once("class/CSRMenu_class.php");
 require_once("class/CSRCategory_class.php");
 require_once("class/CSRAchievement_class.php");
 require_once("class/CSRTask_class.php");
@@ -76,13 +73,10 @@ require_once("class/CSRObjective_class.php");
 require_once("class/CSRAtom_class.php");
 
 $DBc = ryDB::getInstance("app_achievements_test");
-#$DBc = ryDB::getInstance("ahufler");
 
 function mkn($x) {
 	global $DBc;
-	#echo "<br>".$x." =>";
 	if($x == null || strtolower($x) == "null" || $x == "") {
-		#echo "NULL";
 		return "NULL";
 	}
 	else {
@@ -138,8 +132,7 @@ $c = "<script type='text/javascript'>
 			</ul><p />";
 		}
 
-		
-#$c .= ach_render_menu();
+
 		
 $c .= "</div></td>
 		<td valign='top'>";
@@ -211,9 +204,6 @@ $c .= "</div></td>
 				$c .= atom_render_category($cat);
 			}
 
-			#a:p:o:a
-
-			
 
 			$c .= "</td>
 				</tr>
@@ -285,10 +275,6 @@ $c .= "</div></td>
 
 				$c .= atom_render_category($cat);
 			}
-
-			#a:p:o:a
-
-			
 
 			$c .= "</td>
 				</tr>
@@ -546,15 +532,10 @@ $c .= "</div></td>
 				echo "<br>rendering: ".round($stop_time - $start_time,3);
 			}
 
-			#a:p:o:a
-
-			
-
 			$c .= "</td>
 				</tr>
 			</table></center>";
 
-				//category
 		}
 
 		if($_REQUEST['mode'] == "player" && $_ADMIN->isCSR()) {
@@ -608,8 +589,7 @@ $c .= "</div></td>
 					
 				$c .= "</div></td>
 						<td width='645px' valign='top'>";
-				
-				#$open = $menu->getOpenCat();
+
 
 				if($open != 0) {
 					$c .= csr_render_category($cat);
@@ -629,8 +609,6 @@ $c .= "</div></td>
 			}
 
 		}
-
-#$c .= ach_render_content();
 
 $c .= "</td>
 	</tr>

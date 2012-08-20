@@ -72,7 +72,7 @@
 			return new AdmAtom($d,$this);
 		}
 
-		function getLang($lang) {
+		function getLang($lang) { // load language
 			global $DBc;
 
 			$res = $DBc->sqlQuery("SELECT * FROM ach_objective_lang WHERE aol_objective='".$this->getID()."' AND aol_lang='".$lang."'");
@@ -80,7 +80,7 @@
 			return $res[0]['aol_name'];
 		}
 
-		function setLang($lang,$txt) {
+		function setLang($lang,$txt) { // write language
 			global $DBc,$_USER;
 
 			$DBc->sqlQuery("INSERT INTO ach_objective_lang (aol_task,aol_lang,aol_name) VALUES ('".$this->getID()."','".$DBc->sqlEscape($lang)."','".$DBc->sqlEscape($txt)."') ON DUPLICATE KEY UPDATE aol_name='".$DBc->sqlEscape($txt)."'");

@@ -1,4 +1,9 @@
 <?php
+	/*
+	 * The Achievement class that holds one achievement. It is able to load one an the same task an treat is as both,
+	 * open and done.
+	 */
+
 	class AchAchievement extends AchList {
 		#########################
 		# PHP 5.3 compatible
@@ -44,9 +49,9 @@
 
 			parent::__construct();
 			
-			$this->setParent($parent);
+			$this->setParent($parent); // real parent node
 			$this->setID($data['aa_id']);
-			$this->parent_id = $data['aa_parent'];
+			$this->parent_id = $data['aa_parent']; // id of parent
 			$this->category = $data['aa_category'];
 			$this->tie_race = $data['aa_tie_race'];
 			$this->tie_civ = $data['aa_tie_civ'];
@@ -72,7 +77,7 @@
 			}
 		}
 
-		function parentDone() {
+		function parentDone() { // check if the parent is complete
 			if($this->parent_id == null) {
 				return true;
 			}
@@ -83,17 +88,9 @@
 			}
 		}
 
+		#@override Parentum::makeChild()
 		protected function makeChild($a) {
 			return new AchTask($a,$this);
-		}
-
-		function unlockedByParent() {
-			if($this->parent_id != null) {
-				$tmp = $this->parent->getChildByID($this->parent_id);
-				return ($tmp->hasOpen() == false);
-			}
-
-			return true;
 		}
 
 		function getParentID() {
@@ -120,7 +117,7 @@
 			return $this->name;
 		}
 
-		function getValueDone() {
+		function getValueDone() { // calculate the yubopoints that are already done
 			$val = 0;
 			$iter = $this->getDone();
 			while($iter->hasNext()) {
@@ -130,7 +127,7 @@
 			return $val;
 		}
 
-		function getValueOpen() {
+		function getValueOpen() { // get the yubopoints of the next open task
 			$iter = $this->getOpen();
 			if($iter->hasNext()) {
 				$curr = $iter->getNext();
@@ -139,7 +136,7 @@
 			return 0;
 		}
 
-		function fillTemplate($insert = array()) {
+		function fillTemplate($insert = array()) { // fill the naming template with given value
 			if($this->template == null) {
 				return implode(";",$insert);
 			}
@@ -170,7 +167,7 @@
 			return ($this->sticky == 1);
 		}
 
-		function isHeroic() {
+		function isHeroic() { // check parent category if it is heroic
 			return $this->parent->isHeroic();
 		}
 		

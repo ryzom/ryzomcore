@@ -60,7 +60,6 @@ require_once("fb/facebook.php");
 // Update user acces on Db
 $DBc = ryDB::getInstance(APP_NAME."_test");
 #$DBc = ryDB::getInstance(APP_NAME);
-#$DBc = ryDB::getInstance("ahufler");
 
 $c = "";
 if(!$_USER->isIG()) {

@@ -1,4 +1,8 @@
 <?php
+	/*
+	 * This is an example for evaluation scripts taken from the Ryzom Armory and adapted... it is a mess!
+	 */
+
 	@include_once("script/include_InPoly_class.php");
 
 	function in_region($pos,$where) {

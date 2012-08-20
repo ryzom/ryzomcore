@@ -1,4 +1,7 @@
 <?php
+	/*
+	 * Unlike normal values, entities may contain several values. This is their wrapper.
+	 */
 	abstract class Entity {
 		private $name;
 

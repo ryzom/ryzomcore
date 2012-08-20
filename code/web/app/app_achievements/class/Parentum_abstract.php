@@ -30,11 +30,11 @@
 			$this->nodes->removeNode($id);
 		}
 
-		function getChildByID($id) {
+		function getChildByID($id) { // returns a DLL node
 			return $this->nodes->findNode($id);
 		}
 
-		function getChildDataByID($id) {
+		function getChildDataByID($id) { // returns the actual content of the found DLL node
 			$tmp = $this->getChildByID($id);
 			if($tmp != null) {
 				return $tmp->data;

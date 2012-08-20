@@ -32,7 +32,6 @@
 				$this->addChild($this->makeChild($res[$i]));
 			}
 
-			#echo var_export($this->nodes->findNode(1),true);
 		}
 
 		function getOpen() { // just returns the previously set ID of the currently open MenuNode

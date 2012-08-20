@@ -1,4 +1,8 @@
 <?php
+	/*
+	 * Category class that is loading all achievements tied to it.
+	 */
+
 	class AchCategory extends AchList implements Tieable {
 		protected $ties_cult;
 		protected $ties_civ;

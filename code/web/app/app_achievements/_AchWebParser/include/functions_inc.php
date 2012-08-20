@@ -1,22 +1,4 @@
 <?php
-	function logf($txt,$nl = true) {
-		global $logfile;
-		if($logfile) {
-			if($nl) {
-				$txt .= "\n";
-			}
-			$logfile->append("[".date('H:i:s',time())."] ".$txt);
-		}
-	}
-
-	function logi($txt,$i = 1) {
-		$tmp = "";
-		for($v=0;$v<$i;$v++) {
-			$tmp .= "   ";
-		}
-		return $tmp."> ".$txt;
-	}
-
 	function dateTime_to_timestamp($dt) {
 		#2012-05-12 00:26:40
 		$tmp = explode(" ",$dt);
@@ -31,7 +13,7 @@
 		curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($c, CURLOPT_URL, $URL);
 		$contents = curl_exec($c);
-		$err  = curl_getinfo($c,CURLINFO_HTTP_CODE);
+		#$err  = curl_getinfo($c,CURLINFO_HTTP_CODE);
 		curl_close($c);
 		if ($contents) return $contents;
 		else return FALSE;

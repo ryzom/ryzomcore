@@ -1,4 +1,9 @@
 <?php
+	/*
+	 * The DataDispatcher is used to route data to atoms that requested it.
+	 * At first atoms will be registered. Later, when data comes in, it will be passed on to them.
+	 */
+
 	class DataDispatcher {
 		private $value;
 		private $entity;
@@ -9,6 +14,8 @@
 			$this->entity = array();
 			$this->event = array();
 		}
+
+		//registering atoms
 
 		function registerValue($name,$callback) {
 			if(!is_array($this->value[$name])) {
@@ -31,6 +38,8 @@
 			$this->event[$name][] = $callback;
 		}
 
+		//unregistering atoms
+
 		function unregisterValue($name,$callback) {
 			$res = array_search($callback,$this->value[$name],true);
 			if($res !== false) {
@@ -51,6 +60,8 @@
 				unset($this->event[$name][$res]);
 			}
 		}
+
+		//dispatching data
 
 		function dispatchValue($key,$val) {
 			if(is_array($this->value[$key])) {

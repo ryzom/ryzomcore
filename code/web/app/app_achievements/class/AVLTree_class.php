@@ -20,7 +20,7 @@
 			$this->AVLpreorder($this->root);
 		}
 
-		private function AVLpreorder($p) {
+		private function AVLpreorder($p) { // recursive; output preorder representation
 			if($p != null) {
 				echo $p->getID().", ";
 				$this->AVLpreorder($p->getLeft());
@@ -32,7 +32,7 @@
 			$this->AVLinorder($this->root);
 		}
 
-		private function AVLinorder($p) {
+		private function AVLinorder($p) { // recursive; output postorder representation
 			if($p != null) {
 				$this->AVLinorder($p->getLeft());
 				echo $p->getID().", ";
@@ -40,7 +40,7 @@
 			}
 		}
 
-		function insert($node) {
+		function insert($node) { // insert a new node
 			if($this->root == null) {
 				$this->root = new AVLTreeNode($node);
 			}
@@ -49,7 +49,7 @@
 			}
 		}
 
-		function remove($id) {
+		function remove($id) { // remove a node
 			$n = $this->AVLfind($id,$this->root);
 
 			if($n != null) {
@@ -59,8 +59,7 @@
 			return null;
 		}
 
-		function find($id) {
-			#echo "<br>search!";
+		function find($id) { // find a node
 			$res = $this->AVLfind($id,$this->root);
 			if($res != null) {
 				return $res->getNode();
@@ -68,10 +67,8 @@
 			return null;
 		}
 
-		private function AVLfind($id,$n) {
-			#echo "<br>".$id;
+		private function AVLfind($id,$n) { // recursive; search for a node
 			if($n != null) {
-				#echo "<br>searching for ".$id." compare to ".$n->getID();
 				if($n->getID() != $id) {
 					if($n->getID() > $id) {
 						$n = $this->AVLfind($id,$n->getLeft());
@@ -85,7 +82,7 @@
 			return $n;
 		}
 
-		private function AVLremove($r,$n) {
+		private function AVLremove($r,$n) { // remove a node from the actual tree
 			if($n->getLeft() == null || $n->getRight() == null) {
 				$s = $n;
 			}
@@ -121,7 +118,7 @@
 			return $r;
 		}
 
-		private function AVLinsert($r,$n) {
+		private function AVLinsert($r,$n) { // insert a node into the actual tree
 			if($r == null) {
 				$r = $n;
 			}
@@ -129,12 +126,12 @@
 				if($n->getID() < $r->getID()) {
 					$r->setLeft($this->AVLinsert($r->getLeft(),$n));
 					
-					$r = $this->balance($r);
+					$r = $this->balance($r); // rebalance
 				}
 				elseif($n->getID() > $r->getID()) {
 					$r->setRight($this->AVLinsert($r->getRight(),$n));
 					
-					$r = $this->balance($r);
+					$r = $this->balance($r); // rebalance
 				}
 
 				$r->setHeight(max($r->getHeightLeft(),$r->getHeightRight())+1);
@@ -143,8 +140,7 @@
 			return $r;
 		}
 
-		private function balance($r) {
-			#return $r;
+		private function balance($r) { // do a rebalancation of the tree
 			if($r->bal() == -2) {
 				$lc = $r->getLeft();
 				if($lc->getHeightLeft() >= $lc->getHeightRight()) {
@@ -168,8 +164,7 @@
 			return $r;
 		}
 
-		private function Successor($r) {
-			#echo "succ: ".$r->getID();
+		private function Successor($r) { // find the successor for a node
 			if($r->getRight() != null) {
 				return $this->Minimum($r->getRight());
 			}
@@ -184,7 +179,7 @@
 			}
 		}
 
-		private function Minimum($r) {
+		private function Minimum($r) { // find the minimum of a tree
 			if($r == null) {
 				return null;
 			}
@@ -200,6 +195,8 @@
 
 			return $p;
 		}
+
+		//rotations
 
 		private function RotateToRight($r) {
 			if($this->debug) {
@@ -238,7 +235,13 @@
 			$r->setRight($this->RotateToRight($r->getRight()));
 			return $this->RotateToLeft($r);
 		}
+
+		//end rotations
 	}
+
+	/*
+	 * AVL tree nodes
+	 */
 
 	class AVLTreeNode {
 			private $height;
@@ -249,10 +252,10 @@
 
 			function AVLTreeNode($node) {
 				$this->height = 0;
-				$this->left = null;
-				$this->right = null;
-				$this->node = $node;
-				$this->parent = null;
+				$this->left = null; // left child
+				$this->right = null; // right child
+				$this->node = $node; // actual data stored
+				$this->parent = null; // parent node
 			}
 
 			function getParent() {
@@ -289,7 +292,7 @@
 				return $this->right->getHeight();
 			}
 
-			function bal() {
+			function bal() { // calculate value to eval balancing
 				$r = -1;
 				$l = -1;
 

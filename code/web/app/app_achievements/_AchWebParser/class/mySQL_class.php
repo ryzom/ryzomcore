@@ -1,10 +1,13 @@
 <?php
+	/*
+	 * MySQL connection class
+	 */
 	class mySQL {
 		var $DBc;
 		var $DBstats;
 		var $cached;
 
-		function mre($in) {
+		function mre($in) { // shorter than "mysql_real_escape_string"
 			if(is_array($in)) {
 				foreach($in as $key=>$elem) {
 					$in[$key] = mysql_real_escape_string(stripslashes($elem));
@@ -16,20 +19,21 @@
 			return $in;
 		}
 
-		function mySQL($err=false) {
+		function mySQL($err=false) { // constructor
 			$this->DBstats = array();
 			$this->DBc = false;
+			//set error handling
 			if($err === "DIE" || $err === "PRINT" || $err === "ALERT" || $err === "HIDE" || $err === "LOG") {
 				$this->DBerror = $err;
 			}
 			else {
 				$this->DBerror = "HIDE";
 			}
-			$this->resetStats();
+			$this->resetStats(); // reset stats counter
 			$this->cached = false;
 		}
 
-		function connect($ip,$user,$pass,$db=false) {
+		function connect($ip,$user,$pass,$db=false) { // connect
 			$this->DBc = mysql_pconnect($ip,$user,$pass) or $this->error(mysql_error());
 			if($this->DBc && $db) {
 				$this->database($db);
@@ -37,7 +41,7 @@
 			$this->resetStats();
 		}
 
-		function database($db) {
+		function database($db) { // set database
 			if(!$this->DBc) {
 				return false;
 			}
@@ -49,14 +53,11 @@
 			$this->DBstats['error'] = 0;
 		}
 
-		function getStats() {
+		function getStats() { // return stats
 			return $this->DBstats;
 		}
 
 		function sendSQL($query,$handling="PLAIN",$buffer=false) { // can be INSERT, DELETE, UPDATE, ARRAY, NONE, PLAIN
-			#if($this->cached !== false)  {
-				#$this->unlinkSql($this->cached);
-			#}
 			if(!$this->DBc) {
 				return false;
 			}
@@ -67,8 +68,6 @@
 			else {
 				$res = mysql_query($query,$this->DBc) or $this->error(mysql_error(),$query);
 			}
-
-			#$this->cached = $res;
 
 			$this->DBstats['query']++;
 
@@ -95,7 +94,6 @@
 				else {
 					return $res;
 				}
-				//mysql_free_result($res);
 			}
 			else {
 				return false;
@@ -131,7 +129,7 @@
 			}
 		}
 
-		private function error($error,$query = false) {
+		private function error($error,$query = false) { // error handler
 			global $log;
 
 			$this->DBstats['error']++;

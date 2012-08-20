@@ -223,9 +223,7 @@
 		$iter = $cat->getDone();
 		while($iter->hasNext()) {
 			$curr = $iter->getNext();
-		#$sz = sizeof($tmp);
-		#for($i=0;$i<$sz;$i++) {
-			#echo "A";
+
 			if($curr->inDev() || !$curr->parentDone()) {
 				continue;
 			}
@@ -239,9 +237,7 @@
 		$iter = $cat->getOpen();
 		while($iter->hasNext()) {
 			$curr = $iter->getNext();
-		#$sz = sizeof($tmp);
-		#for($i=0;$i<$sz;$i++) {
-			#echo "B";
+
 			if($curr->inDev() || !$curr->parentDone()) {
 				continue;
 			}
@@ -367,7 +363,7 @@
 		$skip = false;
 		
 		while($obj->hasNext()) {
-		#foreach($obj as $elem) {
+
 			$elem = $obj->getNext();
 			if(($i%2) == 0) {
 				$html .= "<tr>";

@@ -1,4 +1,8 @@
 <?php
+	/*
+	 * This is the XML parser. It is set to extract most of the useful information from XML files generated from PDR
+	 */
+
 	$BASE_PATH = dirname(__FILE__);
 
 	require_once($BASE_PATH."/entity/FactionPoints_entity.php");
@@ -11,7 +15,7 @@
 	require_once($BASE_PATH."/entity/PhysCharacs_entity.php");
 	require_once($BASE_PATH."/entity/PhysScores_entity.php");
 	require_once($BASE_PATH."/entity/SkillPoints_entity.php");
-	require_once($BASE_PATH."/entity/Skills_entity.php");
+	#require_once($BASE_PATH."/entity/Skills_entity.php");
 	require_once($BASE_PATH."/entity/SpentSkillPoints_entity.php");
 	require_once($BASE_PATH."/entity/Position_entity.php");
 	require_once($BASE_PATH."/entity/Gear_entity.php");
@@ -19,7 +23,6 @@
 	require_once($BASE_PATH."/entity/MissionList_entity.php");
 
 	class PDRtoXMLdriver extends SourceDriver {
-		private $conf;
 		private $ignore;
 		private $ignore_block;
 		private $lock;
@@ -31,11 +34,6 @@
 		private $skills;
 
 		function PDRtoXMLdriver() {
-			require_once("conf.php");
-			
-			$this->conf = $_CONF;
-
-
 			$this->lock = 0;
 			$this->open = null;
 			$this->entity = null;

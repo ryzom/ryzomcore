@@ -1,4 +1,8 @@
 <?php
+	/*
+	 * Logging, logging, logging....
+	 */
+
 	class Logfile {
 		private $logfile;
 
