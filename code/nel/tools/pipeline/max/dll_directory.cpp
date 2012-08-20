@@ -42,6 +42,10 @@ using namespace std;
 namespace PIPELINE {
 namespace MAX {
 
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
 CDllDirectory::CDllDirectory()
 {
 
@@ -250,6 +254,13 @@ IStorageObject *CDllDirectory::createChunkById(uint16 id, bool container)
 	return CStorageContainer::createChunkById(id, container);
 }
 
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+// Entries[5]: (DllEntry) [2] PARSED {
+// 	DllDescription: ...
+// 	DllFilename: ... }
+
 CDllEntry::CDllEntry() : m_DllDescription(NULL), m_DllFilename(NULL)
 {
 
@@ -273,7 +284,7 @@ void CDllEntry::toString(std::ostream &ostream, const std::string &pad)
 		std::string padpad = pad + "\t";
 		ostream << "\n" << pad << "DllDescription: " << m_DllDescription->Value.toUtf8();
 		ostream << "\n" << pad << "DllFilename: " << m_DllFilename->Value.toUtf8();
-		ostream << "} ";
+		ostream << " } ";
 	}
 	else
 	{
@@ -328,6 +339,10 @@ IStorageObject *CDllEntry::createChunkById(uint16 id, bool container)
 	}
 	return CStorageContainer::createChunkById(id, container);
 }
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 
 } /* namespace MAX */
 } /* namespace PIPELINE */

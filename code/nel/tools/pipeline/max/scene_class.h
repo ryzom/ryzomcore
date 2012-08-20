@@ -118,23 +118,6 @@ public:
 
 }; /* class CSceneClassDesc */
 
-/**
- * \brief CSceneClassRegistry
- * \date 2012-08-19 19:25GMT
- * \author Jan Boon (Kaetemi)
- * CSceneClassRegistry
- */
-class CSceneClassRegistry
-{
-public:
-	void add(const NLMISC::CClassId, const ISceneClassDesc *desc);
-	void remove(const NLMISC::CClassId);
-	CSceneClass *create(const NLMISC::CClassId classid) const;
-	void destroy(CSceneClass *sceneClass) const;
-	const ISceneClassDesc *describe(const NLMISC::CClassId classid) const;
-
-}; /* class ISceneClassConstructor */
-
 } /* namespace MAX */
 } /* namespace PIPELINE */
 
