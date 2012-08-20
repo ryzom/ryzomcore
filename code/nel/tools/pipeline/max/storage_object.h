@@ -120,9 +120,11 @@ public:
 	// virtual
 	// Parse this class with given version and parse level filter
 	virtual void parse(uint16 version, TParseLevel level);
+	// Clean up built data or duplicate unparsed source data, call after serializing build and after parse
+	virtual void clean();
 	// Build the storage structure needed to store the parsed data back
 	virtual void build(uint16 version);
-	// Give ownership of the chunks back to the Chunks, must build first
+	// Give ownership of the chunks back to the Chunks, must call build first, call instead of clean, reduces the parse level back to 0
 	virtual void disown();
 
 public: // should be protected but that doesn't compile, nice c++!

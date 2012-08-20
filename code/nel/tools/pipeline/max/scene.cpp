@@ -71,6 +71,11 @@ void CScene::parse(uint16 version, TParseLevel level)
 	CStorageContainer::parse(version, level);
 }
 
+void CScene::clean()
+{
+	CStorageContainer::clean();
+}
+
 void CScene::build(uint16 version)
 {
 	CStorageContainer::build(version);
@@ -118,6 +123,11 @@ void CSceneClassContainer::toString(std::ostream &ostream, const std::string &pa
 void CSceneClassContainer::parse(uint16 version, TParseLevel level)
 {
 	CStorageContainer::parse(version, level);
+}
+
+void CSceneClassContainer::clean()
+{
+	CStorageContainer::clean();
 }
 
 void CSceneClassContainer::build(uint16 version)
@@ -168,6 +178,11 @@ void CSceneClass::toString(std::ostream &ostream, const std::string &pad)
 void CSceneClass::parse(uint16 version, TParseLevel level)
 {
 	CStorageContainer::parse(version, level);
+}
+
+void CSceneClass::clean()
+{
+	CStorageContainer::clean();
 }
 
 void CSceneClass::build(uint16 version)

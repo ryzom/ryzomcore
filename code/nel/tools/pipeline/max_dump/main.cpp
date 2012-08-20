@@ -86,6 +86,7 @@ int main(int argc, char **argv)
 	dllDirectory.toString(std::cout);
 	std::cout << "\n";
 	dllDirectory.parse(PIPELINE::MAX::VersionUnknown, PIPELINE::MAX::PARSE_INTERNAL);
+	dllDirectory.clean();
 	dllDirectory.toString(std::cout);
 	std::cout << "\n";
 	dllDirectory.build(PIPELINE::MAX::VersionUnknown);

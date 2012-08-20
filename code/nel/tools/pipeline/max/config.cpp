@@ -71,6 +71,11 @@ void CConfig::parse(uint16 version, TParseLevel level)
 	CStorageContainer::parse(version, level);
 }
 
+void CConfig::clean()
+{
+	CStorageContainer::clean();
+}
+
 void CConfig::build(uint16 version)
 {
 	CStorageContainer::build(version);
@@ -133,6 +138,11 @@ void CConfig20a0::parse(uint16 version, TParseLevel level)
 	CStorageContainer::parse(version, level);
 }
 
+void CConfig20a0::clean()
+{
+	CStorageContainer::clean();
+}
+
 void CConfig20a0::build(uint16 version)
 {
 	CStorageContainer::build(version);
@@ -191,6 +201,11 @@ void CConfig20a0Entry::toString(std::ostream &ostream, const std::string &pad)
 void CConfig20a0Entry::parse(uint16 version, TParseLevel level)
 {
 	CStorageContainer::parse(version, level);
+}
+
+void CConfig20a0Entry::clean()
+{
+	CStorageContainer::clean();
 }
 
 void CConfig20a0Entry::build(uint16 version)
@@ -280,6 +295,11 @@ void CConfigScript::parse(uint16 version, TParseLevel level)
 	CStorageContainer::parse(version, level);
 }
 
+void CConfigScript::clean()
+{
+	CStorageContainer::clean();
+}
+
 void CConfigScript::build(uint16 version)
 {
 	CStorageContainer::build(version);
@@ -330,6 +350,11 @@ void CConfigScriptEntry::toString(std::ostream &ostream, const std::string &pad)
 void CConfigScriptEntry::parse(uint16 version, TParseLevel level)
 {
 	CStorageContainer::parse(version, level);
+}
+
+void CConfigScriptEntry::clean()
+{
+	CStorageContainer::clean();
 }
 
 void CConfigScriptEntry::build(uint16 version)
@@ -423,6 +448,11 @@ void CConfigScriptMetaContainer::toString(std::ostream &ostream, const std::stri
 void CConfigScriptMetaContainer::parse(uint16 version, TParseLevel level)
 {
 	CStorageContainer::parse(version, level);
+}
+
+void CConfigScriptMetaContainer::clean()
+{
+	CStorageContainer::clean();
 }
 
 void CConfigScriptMetaContainer::build(uint16 version)

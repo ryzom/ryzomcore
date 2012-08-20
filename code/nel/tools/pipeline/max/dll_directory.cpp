@@ -48,7 +48,20 @@ CDllDirectory::CDllDirectory()
 
 CDllDirectory::~CDllDirectory()
 {
-	// TODO: Delete m_ChunkCache and m_Entries when !ChunksOwnsPointers
+	// Delete m_ChunkCache and m_Entries when !ChunksOwnsPointers
+	if (!ChunksOwnsPointers)
+	{
+		for (TStorageObjectContainer::iterator it = m_ChunkCache.begin(), end = m_ChunkCache.end(); it != end; ++it)
+		{
+			delete it->second;
+		}
+		for (std::vector<CDllEntry *>::iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
+		{
+			delete (*subit);
+		}
+	}
+	m_ChunkCache.clear();
+	m_Entries.clear();
 }
 
 std::string CDllDirectory::getClassName()
@@ -141,13 +154,35 @@ void CDllDirectory::parse(uint16 version, TParseLevel level)
 	}
 }
 
+void CDllDirectory::clean()
+{
+	// Ensure parsed
+	nlassert(!ChunksOwnsPointers);
+
+	// Clear Chunks
+	Chunks.clear();
+
+	// Clean chunks
+	for (TStorageObjectContainer::iterator it = m_ChunkCache.begin(), end = m_ChunkCache.end(); it != end; ++it)
+	{
+		if (it->second != NULL && it->second->isContainer())
+		{
+			static_cast<CStorageContainer *>(it->second)->clean();
+		}
+	}
+	for (std::vector<CDllEntry *>::iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
+	{
+		(*subit)->clean();
+	}
+}
+
 void CDllDirectory::build(uint16 version)
 {
 	// Ensure parsed
 	nlassert(!ChunksOwnsPointers);
 
 	// Initialize
-	Chunks.clear();
+	nlassert(Chunks.empty());
 
 	// Set up the Chunks list, when (CDllEntry::ID, NULL) is found write out all of the entries.
 	for (TStorageObjectContainer::iterator it = m_ChunkCache.begin(), end = m_ChunkCache.end(); it != end; ++it)
@@ -165,7 +200,7 @@ void CDllDirectory::build(uint16 version)
 		}
 	}
 
-	// Build the entries last
+	// Build the entries last (after Chunks is built)
 	CStorageContainer::build(version);
 
 	// NOTE: Ownership remains with m_ChunkCache and m_Entries
@@ -249,6 +284,12 @@ void CDllEntry::parse(uint16 version, TParseLevel level)
 	nlassert(it->first == 0x2037); // DllFilename
 	m_DllFilename = static_cast<CStorageValue<ucstring> *>(it->second);
 	// ++it;
+}
+
+void CDllEntry::clean()
+{
+	// Nothing to do here! (Chunks retains ownership)
+	// CStorageContainer::clean();
 }
 
 void CDllEntry::build(uint16 version)

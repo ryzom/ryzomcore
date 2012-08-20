@@ -70,6 +70,11 @@ void CClassDirectory3::parse(uint16 version, TParseLevel level)
 	CStorageContainer::parse(version, level);
 }
 
+void CClassDirectory3::clean()
+{
+	CStorageContainer::clean();
+}
+
 void CClassDirectory3::build(uint16 version)
 {
 	CStorageContainer::build(version);
@@ -120,6 +125,11 @@ void CClassEntry::toString(std::ostream &ostream, const std::string &pad)
 void CClassEntry::parse(uint16 version, TParseLevel level)
 {
 	CStorageContainer::parse(version, level);
+}
+
+void CClassEntry::clean()
+{
+	CStorageContainer::clean();
 }
 
 void CClassEntry::build(uint16 version)

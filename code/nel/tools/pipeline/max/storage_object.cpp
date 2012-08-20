@@ -95,8 +95,12 @@ CStorageContainer::~CStorageContainer()
 {
 	if (ChunksOwnsPointers)
 	{
-
+		for (TStorageObjectContainer::iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
+		{
+			delete it->second;
+		}
 	}
+	Chunks.clear();
 }
 
 std::string CStorageContainer::getClassName() // why is this not const in IClassable?
@@ -176,6 +180,18 @@ void CStorageContainer::parse(uint16 version, TParseLevel level)
 		if (it->second->isContainer())
 		{
 			static_cast<CStorageContainer *>(it->second)->parse(version, level);
+		}
+	}
+}
+
+void CStorageContainer::clean()
+{
+	nlassert(ChunksOwnsPointers); // Can only use the default when Chunks retains ownership.
+	for (TStorageObjectContainer::const_iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
+	{
+		if (it->second->isContainer())
+		{
+			static_cast<CStorageContainer *>(it->second)->clean();
 		}
 	}
 }

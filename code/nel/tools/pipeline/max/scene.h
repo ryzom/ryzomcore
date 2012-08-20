@@ -60,6 +60,7 @@ public:
 	virtual std::string getClassName();
 	virtual void toString(std::ostream &ostream, const std::string &pad = "");
 	virtual void parse(uint16 version, TParseLevel level);
+	virtual void clean();
 	virtual void build(uint16 version);
 	virtual void disown();
 
@@ -84,6 +85,7 @@ public:
 	virtual std::string getClassName();
 	virtual void toString(std::ostream &ostream, const std::string &pad = "");
 	virtual void parse(uint16 version, TParseLevel level);
+	virtual void clean();
 	virtual void build(uint16 version);
 	virtual void disown();
 
@@ -110,6 +112,7 @@ public:
 	virtual std::string getClassName();
 	virtual void toString(std::ostream &ostream, const std::string &pad = "");
 	virtual void parse(uint16 version, TParseLevel level);
+	virtual void clean();
 	virtual void build(uint16 version);
 	virtual void disown();
 
