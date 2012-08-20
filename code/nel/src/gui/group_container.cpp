@@ -1416,7 +1416,7 @@ namespace NLGUI
 		else
 		if( name == "on_open" )
 		{
-			return CAHManager::getInstance()->getActionHandlerName( _AHOnOpen );
+			return getAHString( name );
 		}
 		else
 		if( name == "on_open_params" )
@@ -1426,7 +1426,7 @@ namespace NLGUI
 		else
 		if( name == "on_close" )
 		{
-			return CAHManager::getInstance()->getActionHandlerName( _AHOnClose );
+			return getAHString( name );
 		}
 		else
 		if( name == "on_close_params" )
@@ -1436,7 +1436,7 @@ namespace NLGUI
 		else
 		if( name == "on_close_button" )
 		{
-			return CAHManager::getInstance()->getActionHandlerName( _AHOnCloseButton );
+			return getAHString( name );
 		}
 		else
 		if( name == "on_close_button_params" )
@@ -1446,7 +1446,7 @@ namespace NLGUI
 		else
 		if( name == "on_move" )
 		{
-			return CAHManager::getInstance()->getActionHandlerName( _AHOnMove );
+			return getAHString( name );
 		}
 		else
 		if( name == "on_move_params" )
@@ -1456,7 +1456,7 @@ namespace NLGUI
 		else
 		if( name == "on_deactive_check" )
 		{
-			return CAHManager::getInstance()->getActionHandlerName( _AHOnDeactiveCheck );
+			return getAHString( name );
 		}
 		else
 		if( name == "on_deactive_check_params" )
@@ -1466,7 +1466,7 @@ namespace NLGUI
 		else
 		if( name == "on_resize" )
 		{
-			return CAHManager::getInstance()->getActionHandlerName( _AHOnResize );
+			return getAHString( name );
 		}
 		else
 		if( name == "on_resize_params" )
@@ -1476,7 +1476,7 @@ namespace NLGUI
 		else
 		if( name == "on_alpha_settings_changed" )
 		{
-			return CAHManager::getInstance()->getActionHandlerName( _AHOnAlphaSettingsChanged );
+			return getAHString( name );
 		}
 		else
 		if( name == "on_alpha_settings_changed_params" )
@@ -1486,7 +1486,7 @@ namespace NLGUI
 		else
 		if( name == "on_begin_move" )
 		{
-			return CAHManager::getInstance()->getActionHandlerName( _AHOnBeginMove );
+			return getAHString( name );
 		}
 		else
 		if( name == "on_begin_move_params" )
@@ -1734,6 +1734,7 @@ namespace NLGUI
 		if( name == "on_open" )
 		{
 			_AHOnOpen = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( name, value );
 			return;
 		}
 		else
@@ -1746,6 +1747,7 @@ namespace NLGUI
 		if( name == "on_close" )
 		{
 			_AHOnClose = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( name, value );
 			return;
 		}
 		else
@@ -1758,6 +1760,7 @@ namespace NLGUI
 		if( name == "on_close_button" )
 		{
 			_AHOnCloseButton = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( name, value );
 			return;
 		}
 		else
@@ -1770,6 +1773,7 @@ namespace NLGUI
 		if( name == "on_move" )
 		{
 			_AHOnMove = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( name, value );
 			return;
 		}
 		else
@@ -1782,6 +1786,7 @@ namespace NLGUI
 		if( name == "on_deactive_check" )
 		{
 			_AHOnDeactiveCheck  = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( name, value );
 			return;
 		}
 		else
@@ -1794,6 +1799,7 @@ namespace NLGUI
 		if( name == "on_resize" )
 		{
 			_AHOnResize = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( name, value );
 			return;
 		}
 		else
@@ -1806,6 +1812,7 @@ namespace NLGUI
 		if( name == "on_alpha_settings_changed" )
 		{
 			_AHOnAlphaSettingsChanged = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( name, value );
 			return;
 		}
 		else
@@ -1818,6 +1825,7 @@ namespace NLGUI
 		if( name == "on_begin_move" )
 		{
 			_AHOnBeginMove = CAHManager::getInstance()->getAH( value, std::string() );
+			mapAHString( name, value );
 			return;
 		}
 		else
@@ -1996,49 +2004,49 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "resizer_top_size", BAD_CAST toString( _ResizerTopSize ).c_str() );
 		
 		xmlSetProp( node, BAD_CAST "on_open",
-			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHOnOpen ).c_str()  );
+			BAD_CAST getAHString( "on_open" ).c_str()  );
 
 		xmlSetProp( node, BAD_CAST "on_open_params",
 			BAD_CAST _AHOnOpenParams.toString().c_str()  );
 
 		xmlSetProp( node, BAD_CAST "on_close",
-			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHOnClose ).c_str()  );
+			BAD_CAST getAHString( "on_close" ).c_str()  );
 
 		xmlSetProp( node, BAD_CAST "on_close_params",
 			BAD_CAST _AHOnCloseParams.toString().c_str()  );
 
 		xmlSetProp( node, BAD_CAST "on_close_button",
-			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHOnCloseButton ).c_str()  );
+			BAD_CAST getAHString( "on_close_button" ).c_str()  );
 
 		xmlSetProp( node, BAD_CAST "on_close_button_params",
 			BAD_CAST _AHOnCloseButtonParams.toString().c_str()  );
 
 		xmlSetProp( node, BAD_CAST "on_move",
-			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHOnMove ).c_str()  );
+			BAD_CAST getAHString( "on_move" ).c_str()  );
 
 		xmlSetProp( node, BAD_CAST "on_close_params",
 			BAD_CAST _AHOnMoveParams.toString().c_str()  );
 
 		xmlSetProp( node, BAD_CAST "on_deactive_check",
-			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHOnDeactiveCheck ).c_str()  );
+			BAD_CAST getAHString( "on_deactive_check" ).c_str()  );
 
 		xmlSetProp( node, BAD_CAST "on_deactive_check_params",
 			BAD_CAST _AHOnDeactiveCheckParams.toString().c_str()  );
 
 		xmlSetProp( node, BAD_CAST "on_resize",
-			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHOnResize ).c_str()  );
+			BAD_CAST getAHString( "on_resize" ).c_str()  );
 
 		xmlSetProp( node, BAD_CAST "on_resize_params",
 			BAD_CAST _AHOnResizeParams.toString().c_str()  );
 
 		xmlSetProp( node, BAD_CAST "on_alpha_settings_changed",
-			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHOnAlphaSettingsChanged ).c_str()  );
+			BAD_CAST getAHString( "on_alpha_settings_changed" ).c_str()  );
 
 		xmlSetProp( node, BAD_CAST "on_alpha_settings_changed_params",
 			BAD_CAST _AHOnAlphaSettingsChangedParams.toString().c_str()  );
 
 		xmlSetProp( node, BAD_CAST "on_begin_move",
-			BAD_CAST CAHManager::getInstance()->getActionHandlerName( _AHOnBeginMove ).c_str()  );
+			BAD_CAST getAHString( "on_begin_move" ).c_str()  );
 
 		xmlSetProp( node, BAD_CAST "on_begin_move_params",
 			BAD_CAST _AHOnBeginMoveParams.toString().c_str()  );
@@ -2211,6 +2219,41 @@ namespace NLGUI
 		CAHManager::getInstance()->parseAH(cur, "on_alpha_settings_changed", "on_alpha_settings_changed_params", _AHOnAlphaSettingsChanged, _AHOnAlphaSettingsChangedParams);
 		CAHManager::getInstance()->parseAH(cur, "on_begin_move", "on_begin_move_params", _AHOnBeginMove, _AHOnBeginMoveParams);
 
+
+		if( editorMode )
+		{
+			ptr = xmlGetProp( cur, BAD_CAST "on_open" );
+			if( ptr != NULL )
+				mapAHString( "on_open", std::string( ptr ) );
+
+			ptr = xmlGetProp( cur, BAD_CAST "on_close" );
+			if( ptr != NULL )
+				mapAHString( "on_close", std::string( ptr ) );
+
+			ptr = xmlGetProp( cur, BAD_CAST "on_close_button" );
+			if( ptr != NULL )
+				mapAHString( "on_close_button", std::string( ptr ) );
+
+			ptr = xmlGetProp( cur, BAD_CAST "on_move" );
+			if( ptr != NULL )
+				mapAHString( "on_move", std::string( ptr ) );
+
+			ptr = xmlGetProp( cur, BAD_CAST "on_deactive_check" );
+			if( ptr != NULL )
+				mapAHString( "on_deactive_check", std::string( ptr ) );
+
+			ptr = xmlGetProp( cur, BAD_CAST "on_resize" );
+			if( ptr != NULL )
+				mapAHString( "on_resize", std::string( ptr ) );
+
+			ptr = xmlGetProp( cur, BAD_CAST "on_alpha_settings_changed" );
+			if( ptr != NULL )
+				mapAHString( "on_alpha_settings_changed", std::string( ptr ) );
+
+			ptr = xmlGetProp( cur, BAD_CAST "on_begin_move" );
+			if( ptr != NULL )
+				mapAHString( "on_begin_move", std::string( ptr ) );
+		}
 
 		ptr = xmlGetProp (cur, (xmlChar*)"max_w");
 		if (ptr)
