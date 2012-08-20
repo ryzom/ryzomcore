@@ -354,6 +354,11 @@ void CStorageRaw::toString(std::ostream &ostream, const std::string &pad)
 			ostream << ss.str() << " ";
 		}
 	}
+	if (Value.size() == 4)
+	{
+		ostream << "\n" << pad << "Int: " << (*(sint32 *)(void *)(&Value[0])) << " ";
+		ostream << "\n" << pad << "Float: " << (*(float *)(void *)(&Value[0])) << " ";
+	}
 	ostream << "} ";
 }
 
