@@ -69,6 +69,8 @@ if(!$_USER->isIG()) {
         'cookie' => true
 	));
 
+	#code taken from facebook tutorial
+
 	// Get the url to redirect for login to facebook
 	// and request permission to write on the user's wall.
 	$login_url = $facebook->getLoginUrl(

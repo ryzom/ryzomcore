@@ -74,7 +74,7 @@ require_once("class/CSRAtom_class.php");
 
 $DBc = ryDB::getInstance("app_achievements_test");
 
-function mkn($x) {
+function mkn($x) { // make NULL function for SQL
 	global $DBc;
 	if($x == null || strtolower($x) == "null" || $x == "") {
 		return "NULL";
@@ -87,7 +87,7 @@ function mkn($x) {
 
 $c = "<script type='text/javascript'>
 
-		function hs(id,mod) {
+		function hs(id,mod) { // hide / show
 			if(document.getElementById(id).style.display == 'none') {
 				document.getElementById(id).style.display=mod;
 			}
@@ -96,7 +96,7 @@ $c = "<script type='text/javascript'>
 			}
 		}
 
-		function hs_force(id,mod,show) {
+		function hs_force(id,mod,show) { // hide / show forced
 			if(show == true) {
 				document.getElementById(id).style.display=mod;
 			}
@@ -137,6 +137,9 @@ $c = "<script type='text/javascript'>
 $c .= "</div></td>
 		<td valign='top'>";
 
+		/*
+		 * translation
+		 */
 		if($_REQUEST['mode'] == "lang" && $_ADMIN->isAdmin()) {
 			$c .= "<h1>Language Editor</h1>";
 
@@ -211,6 +214,10 @@ $c .= "</div></td>
 
 		}
 
+		/*
+		 * Trigger settings
+		 */
+
 		if($_REQUEST['mode'] == "atom" && $_ADMIN->isAdmin()) {
 			$c .= "<h1>Tigger Settings</h1>";
 
@@ -282,6 +289,10 @@ $c .= "</div></td>
 
 		}
 
+		/*
+		 * Menu settings
+		 */
+
 		if($_REQUEST['mode'] == "menu" && $_ADMIN->isAdmin()) {
 			$c .= "<h1>Menu Settings</h1>";
 
@@ -325,6 +336,10 @@ $c .= "</div></td>
 
 			$c .= adm_render_menu($menu);
 		}
+
+		/*
+		 * Achievement settings
+		 */
 
 		if($_REQUEST['mode'] == "ach" && $_ADMIN->isAdmin()) {
 			$c .= "<h1>Achievement Settings</h1>";
@@ -538,6 +553,9 @@ $c .= "</div></td>
 
 		}
 
+		/*
+		 * CSR player manager
+		 */
 		if($_REQUEST['mode'] == "player" && $_ADMIN->isCSR()) {
 			$c .= "<h1>Player Administration</h1>";
 
