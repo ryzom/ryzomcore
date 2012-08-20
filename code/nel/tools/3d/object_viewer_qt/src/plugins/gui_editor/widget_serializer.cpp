@@ -32,6 +32,11 @@ namespace GUIEditor
 		if( mg == NULL )
 			return false;
 
+		CInterfaceElement *ag =
+			CWidgetManager::getInstance()->getElementFromId( activeGroup );
+		if( ag == NULL )
+			return false;
+
 		out.open( fileName.c_str() );
 		if( !out.is_open() )
 			return false;
@@ -88,8 +93,19 @@ namespace GUIEditor
 			return false;
 		}
 
+		ag->setActive( false );
 
 		if( mg->serializeSubGroups( root ) == NULL )
+		{
+			ag->setActive( true );
+			xmlFreeNode( root );
+			out.close();
+			return false;
+		}
+
+		ag->setActive( true );
+
+		if( !mg->serializeLinks( root ) )
 		{
 			xmlFreeNode( root );
 			out.close();

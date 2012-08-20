@@ -37,12 +37,14 @@ namespace GUIEditor
 		~WidgetSerializer(){}
 
 		void setFile( const std::string &name ){ fileName = name; }
+		void setActiveGroup( const std::string &name ){ activeGroup = name; }
 		bool serialize( const std::string &masterGroup );
 
 	private:
 		bool serializeTree( _xmlNode *node );
 
 		std::string fileName;
+		std::string activeGroup;
 		std::ofstream out;
 		long level;
 	};

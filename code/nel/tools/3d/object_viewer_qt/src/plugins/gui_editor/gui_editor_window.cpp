@@ -233,6 +233,7 @@ namespace GUIEditor
 
 		WidgetSerializer widgetSerializer;
 		widgetSerializer.setFile( guiFile );
+		widgetSerializer.setActiveGroup( projectFiles.activeGroup );
 		if( !widgetSerializer.serialize( projectFiles.masterGroup ) )
 		{
 			QMessageBox::critical( this,
