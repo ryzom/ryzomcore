@@ -237,9 +237,11 @@ void CClassDirectory3::disown()
 const CClassEntry *CClassDirectory3::get(uint16 index) const
 {
 	nlassert(!ChunksOwnsPointers);
+	nlassert(index < m_Entries.size());
 	return m_Entries[index];
 }
 
+// Parallel to CDllDirectory
 void CClassDirectory3::reset()
 {
 	nlassert(!ChunksOwnsPointers);
@@ -251,6 +253,7 @@ void CClassDirectory3::reset()
 	m_ClassIdToIndex.clear();
 }
 
+// Parallel to CDllDirectory
 uint16 CClassDirectory3::getOrCreateIndex(const ISceneClassDesc *sceneClassDesc)
 {
 	nlassert(!ChunksOwnsPointers);

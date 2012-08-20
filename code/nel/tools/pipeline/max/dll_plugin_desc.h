@@ -82,6 +82,8 @@ class CDllPluginDescBuiltin : public IDllPluginDescInternal
 	virtual const ucchar *internalName() const;
 }; /* class CDllPluginDescBuiltin */
 
+extern const CDllPluginDescBuiltin DllPluginDescBuiltin;
+
 /**
  * \brief CDllPluginDescScript
  * \date 2012-08-20 09:59GMT
@@ -94,6 +96,8 @@ class CDllPluginDescScript : public IDllPluginDescInternal
 	virtual const ucchar *displayName() const;
 	virtual const ucchar *internalName() const;
 }; /* class CDllPluginDescScript */
+
+extern const CDllPluginDescScript DllPluginDescScript;
 
 } /* namespace MAX */
 } /* namespace PIPELINE */

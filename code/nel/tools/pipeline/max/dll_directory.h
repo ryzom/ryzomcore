@@ -36,6 +36,7 @@
 // Project includes
 #include "storage_object.h"
 #include "storage_value.h"
+#include "dll_plugin_desc.h"
 
 namespace PIPELINE {
 namespace MAX {
@@ -63,7 +64,12 @@ public:
 	virtual void disown();
 
 	// public
+	// Get a dll entry corresponding to a chunk index, pointers become invalid after reset
 	const CDllEntry *get(uint16 index) const;
+	// Reset the dll directory, all dll entry pointers become invalid, use internal name and dll plugin registry
+	void reset();
+	// Get or create the chunk index for a dll by dll plugin description
+	uint16 getOrCreateIndex(const IDllPluginDesc *dllPluginDesc);
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
@@ -71,6 +77,7 @@ protected:
 private:
 	TStorageObjectContainer m_ChunkCache;
 	std::vector<CDllEntry *> m_Entries;
+	std::map<ucstring, uint16> m_InternalNameToIndex;
 
 }; /* class CDllDirectory */
 

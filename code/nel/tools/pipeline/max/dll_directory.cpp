@@ -140,15 +140,19 @@ void CDllDirectory::parse(uint16 version, TParseLevel level)
 			switch (id)
 			{
 			case 0x2038: // DllEntry
-				if (parsedDllEntry && (lastCached != id))
-					throw EStorageParse(); // There were chunks inbetween
-				if (!parsedDllEntry)
 				{
-					m_ChunkCache.push_back(TStorageObjectWithId(id, NULL)); // Dummy entry to know the location
-					lastCached = id;
-					parsedDllEntry = true;
+					if (parsedDllEntry && (lastCached != id))
+						throw EStorageParse(); // There were chunks inbetween
+					if (!parsedDllEntry)
+					{
+						m_ChunkCache.push_back(TStorageObjectWithId(id, NULL)); // Dummy entry to know the location
+						lastCached = id;
+						parsedDllEntry = true;
+					}
+					CDllEntry *dllEntry = static_cast<CDllEntry *>(it->second);
+					m_InternalNameToIndex[NLMISC::toLower(dllEntry->dllFilename())] = m_Entries.size();
+					m_Entries.push_back(dllEntry);
 				}
-				m_Entries.push_back(static_cast<CDllEntry *>(it->second));
 				break;
 			default:
 				m_ChunkCache.push_back(*it); // Dummy entry to know the location
@@ -222,6 +226,7 @@ void CDllDirectory::disown()
 	CStorageContainer::disown();
 	m_ChunkCache.clear();
 	m_Entries.clear();
+	m_InternalNameToIndex.clear();
 
 	// Ownership goes back to Chunks
 	ChunksOwnsPointers = true;
@@ -231,6 +236,37 @@ void CDllDirectory::disown()
 const CDllEntry *CDllDirectory::get(uint16 index) const
 {
 	return m_Entries[index];
+}
+
+// Parallel to CClassDirectory3
+void CDllDirectory::reset()
+{
+	nlassert(!ChunksOwnsPointers);
+	for (std::vector<CDllEntry *>::iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
+	{
+		delete (*subit);
+	}
+	m_Entries.clear();
+	m_InternalNameToIndex.clear();
+}
+
+// Parallel to CClassDirectory3
+uint16 CDllDirectory::getOrCreateIndex(const IDllPluginDesc *dllPluginDesc)
+{
+	nlassert(!ChunksOwnsPointers);
+	std::map<ucstring, uint16>::iterator it = m_InternalNameToIndex.find(NLMISC::toLower(ucstring(dllPluginDesc->internalName())));
+
+	// Return existing index
+	if (it != m_InternalNameToIndex.end())
+		return it->second;
+
+	// Create new entry
+	/*CClassEntry *classEntry = new CClassEntry(sceneClassDesc);
+	uint16 index = m_Entries.size();
+	m_ClassIdToIndex[classEntry->classId()] = index;
+	m_Entries.push_back(classEntry);
+	return index;*/
+	return 0xFFFF;
 }
 
 IStorageObject *CDllDirectory::createChunkById(uint16 id, bool container)
