@@ -38,6 +38,7 @@
 // Project includes
 #include "storage_object.h"
 #include "storage_value.h"
+#include "scene_class.h"
 
 namespace PIPELINE {
 namespace MAX {
@@ -65,7 +66,12 @@ public:
 	virtual void disown();
 
 	// public
-	const CClassEntry *get(std::vector<CClassEntry *>::size_type idx) const;
+	// Get a class entry corresponding to a chunk index, pointers become invalid after reset
+	const CClassEntry *get(uint16 index) const;
+	// Reset the class directory, all class entry pointers become invalid, use class id and scene class registry
+	void reset();
+	// Get or create the chunk index for a class by class description
+	uint16 getOrCreateIndex(const ISceneClassDesc *sceneClassDesc);
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
@@ -73,6 +79,7 @@ protected:
 private:
 	TStorageObjectContainer m_ChunkCache;
 	std::vector<CClassEntry *> m_Entries;
+	std::map<NLMISC::CClassId, uint16> m_ClassIdToIndex;
 
 }; /* class CClassDirectory3 */
 
@@ -90,8 +97,8 @@ public:
 
 	// public data
 	sint32 DllIndex;
-	NLMISC::CClassId ClassID;
-	uint32 SuperClassID;
+	NLMISC::CClassId ClassId;
+	uint32 SuperClassId;
 
 	// inherited
 	virtual std::string getClassName();
@@ -110,6 +117,7 @@ class CClassEntry : public CStorageContainer
 {
 public:
 	CClassEntry();
+	CClassEntry(const ISceneClassDesc *sceneClassDesc);
 	virtual ~CClassEntry();
 
 	// inherited
@@ -122,8 +130,8 @@ public:
 
 	const ucstring &displayName() const { return m_Name->Value; }
 	sint32 dllIndex() const { return m_Header->DllIndex; }
-	NLMISC::CClassId cslassId() const { return m_Header->ClassID; }
-	uint32 superClassId() const { return m_Header->SuperClassID; }
+	NLMISC::CClassId classId() const { return m_Header->ClassId; }
+	uint32 superClassId() const { return m_Header->SuperClassId; }
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);

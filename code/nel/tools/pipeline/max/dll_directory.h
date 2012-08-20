@@ -63,7 +63,7 @@ public:
 	virtual void disown();
 
 	// public
-	const CDllEntry *get(std::vector<CDllEntry *>::size_type idx) const;
+	const CDllEntry *get(uint16 index) const;
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);

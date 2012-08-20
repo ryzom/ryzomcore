@@ -224,9 +224,9 @@ void CDllDirectory::disown()
 }
 
 // Parallel to CClassDirectory3
-const CDllEntry *CDllDirectory::get(std::vector<CDllEntry *>::size_type idx) const
+const CDllEntry *CDllDirectory::get(uint16 index) const
 {
-	return m_Entries[idx];
+	return m_Entries[index];
 }
 
 IStorageObject *CDllDirectory::createChunkById(uint16 id, bool container)

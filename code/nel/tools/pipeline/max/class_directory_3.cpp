@@ -68,6 +68,7 @@ CClassDirectory3::~CClassDirectory3()
 	}
 	m_ChunkCache.clear();
 	m_Entries.clear();
+	m_ClassIdToIndex.clear();
 }
 
 std::string CClassDirectory3::getClassName()
@@ -140,16 +141,20 @@ void CClassDirectory3::parse(uint16 version, TParseLevel level)
 			switch (id)
 			{
 			case 0x2040: // ClassEntry
-				if (parsedDllEntry && (lastCached != id))
-					throw EStorageParse(); // There were chunks inbetween
-				if (!parsedDllEntry)
 				{
-					m_ChunkCache.push_back(TStorageObjectWithId(id, NULL)); // Dummy entry to know the location
-					lastCached = id;
-					parsedDllEntry = true;
+					if (parsedDllEntry && (lastCached != id))
+						throw EStorageParse(); // There were chunks inbetween
+					if (!parsedDllEntry)
+					{
+						m_ChunkCache.push_back(TStorageObjectWithId(id, NULL)); // Dummy entry to know the location
+						lastCached = id;
+						parsedDllEntry = true;
+					}
+					CClassEntry *classEntry = static_cast<CClassEntry *>(it->second);
+					m_ClassIdToIndex[classEntry->classId()] = m_Entries.size();
+					m_Entries.push_back(classEntry);
+					break;
 				}
-				m_Entries.push_back(static_cast<CClassEntry *>(it->second));
-				break;
 			default:
 				m_ChunkCache.push_back(*it); // Dummy entry to know the location
 				lastCached = id;
@@ -222,15 +227,45 @@ void CClassDirectory3::disown()
 	CStorageContainer::disown();
 	m_ChunkCache.clear();
 	m_Entries.clear();
+	m_ClassIdToIndex.clear();
 
 	// Ownership goes back to Chunks
 	ChunksOwnsPointers = true;
 }
 
 // Parallel to CDllDirectory
-const CClassEntry *CClassDirectory3::get(std::vector<CClassEntry *>::size_type idx) const
+const CClassEntry *CClassDirectory3::get(uint16 index) const
 {
-	return m_Entries[idx];
+	nlassert(!ChunksOwnsPointers);
+	return m_Entries[index];
+}
+
+void CClassDirectory3::reset()
+{
+	nlassert(!ChunksOwnsPointers);
+	for (std::vector<CClassEntry *>::iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
+	{
+		delete (*subit);
+	}
+	m_Entries.clear();
+	m_ClassIdToIndex.clear();
+}
+
+uint16 CClassDirectory3::getOrCreateIndex(const ISceneClassDesc *sceneClassDesc)
+{
+	nlassert(!ChunksOwnsPointers);
+	std::map<NLMISC::CClassId, uint16>::iterator it = m_ClassIdToIndex.find(sceneClassDesc->classId());
+
+	// Return existing index
+	if (it != m_ClassIdToIndex.end())
+		return it->second;
+
+	// Create new entry
+	CClassEntry *classEntry = new CClassEntry(sceneClassDesc);
+	uint16 index = m_Entries.size();
+	m_ClassIdToIndex[classEntry->classId()] = index;
+	m_Entries.push_back(classEntry);
+	return index;
 }
 
 IStorageObject *CClassDirectory3::createChunkById(uint16 id, bool container)
@@ -259,6 +294,16 @@ IStorageObject *CClassDirectory3::createChunkById(uint16 id, bool container)
 CClassEntry::CClassEntry() : m_Header(NULL), m_Name(NULL)
 {
 
+}
+
+CClassEntry::CClassEntry(const ISceneClassDesc *sceneClassDesc) : m_Header(new CClassEntryHeader()), m_Name(new CStorageValue<ucstring>())
+{
+	Chunks.push_back(TStorageObjectWithId(0x2060, m_Header));
+	Chunks.push_back(TStorageObjectWithId(0x2042, m_Name));
+	m_Header->DllIndex = -9; // Invalid temporary value
+	m_Header->ClassId = sceneClassDesc->classId();
+	m_Header->SuperClassId = sceneClassDesc->superClassId();
+	m_Name->Value = sceneClassDesc->displayName();
 }
 
 CClassEntry::~CClassEntry()
@@ -359,16 +404,16 @@ std::string CClassEntryHeader::getClassName()
 void CClassEntryHeader::serial(NLMISC::IStream &stream)
 {
 	stream.serial(DllIndex);
-	stream.serial(ClassID);
-	stream.serial(SuperClassID);
+	stream.serial(ClassId);
+	stream.serial(SuperClassId);
 }
 
 void CClassEntryHeader::toString(std::ostream &ostream, const std::string &pad)
 {
 	ostream << "(" << getClassName() << ") { ";
 	ostream << "\n" << pad << "DllIndex: " << DllIndex;
-	ostream << "\n" << pad << "ClassID: " << NLMISC::toString(ClassID);
-	ostream << "\n" << pad << "SuperClassID: " << SuperClassID;
+	ostream << "\n" << pad << "ClassId: " << NLMISC::toString(ClassId);
+	ostream << "\n" << pad << "SuperClassId: " << SuperClassId;
 	ostream << " } ";
 }
 

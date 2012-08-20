@@ -37,12 +37,10 @@
 // Project includes
 #include "storage_object.h"
 #include "storage_value.h"
+#include "scene_class.h"
 
 namespace PIPELINE {
 namespace MAX {
-
-// Don't really care about superclass IDs right now, but we have to.
-typedef uint32 TSClassId;
 
 /**
  * \brief CScene
@@ -93,97 +91,6 @@ protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 
 }; /* class CSceneClassContainer */
-
-class ISceneClassDesc;
-
-/**
- * \brief CSceneClass
- * \date 2012-08-19 19:25GMT
- * \author Jan Boon (Kaetemi)
- * CSceneClass
- */
-class CSceneClass : public CStorageContainer
-{
-public:
-	CSceneClass();
-	virtual ~CSceneClass();
-
-	// inherited
-	virtual std::string getClassName();
-	virtual void toString(std::ostream &ostream, const std::string &pad = "");
-	virtual void parse(uint16 version, TParseLevel level);
-	virtual void clean();
-	virtual void build(uint16 version);
-	virtual void disown();
-
-	// static const
-	static const ucchar *DisplayName;
-	static const char *InternalName;
-	static const NLMISC::CClassId ClassId;
-	static const TSClassId SuperClassId;
-
-	// virtual
-	virtual const ISceneClassDesc *getClassDesc();
-
-protected:
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
-
-}; /* class CSceneClass */
-
-/**
- * \brief ISceneClassDesc
- * \date 2012-08-19 19:25GMT
- * \author Jan Boon (Kaetemi)
- * ISceneClassDesc
- */
-class ISceneClassDesc
-{
-public:
-	virtual CSceneClass *create() const = 0;
-	virtual void destroy(CSceneClass *sc) const = 0;
-	virtual const ucchar *getDisplayName() const = 0;
-	virtual const char *getInternalName() const = 0;
-	virtual NLMISC::CClassId getClassId() const = 0;
-	virtual TSClassId getSuperClassId() const = 0;
-
-}; /* class ISceneClassDesc */
-
-/**
- * \brief CSceneClassDesc
- * \date 2012-08-19 19:25GMT
- * \author Jan Boon (Kaetemi)
- * CSceneClassDesc
- * Use in a cpp when registering the CClassId.
- */
-template <typename T>
-class CSceneClassDesc : public ISceneClassDesc
-{
-public:
-	virtual CSceneClass *create() const { return static_cast<CSceneClass *>(new T()); }
-	virtual void destroy(CSceneClass *sc) const { delete static_cast<T *>(sc); }
-	virtual const ucchar *getDisplayName() const { return T::DisplayName; }
-	virtual const char *getInternalName() const { return T::InternalName; }
-	virtual NLMISC::CClassId getClassId() const { return T::ClassId; }
-	virtual TSClassId getSuperClassId() const { return T::SuperClassId; }
-
-}; /* class CSceneClassDesc */
-
-/**
- * \brief CSceneClassRegistry
- * \date 2012-08-19 19:25GMT
- * \author Jan Boon (Kaetemi)
- * CSceneClassRegistry
- */
-class CSceneClassRegistry
-{
-public:
-	void add(const NLMISC::CClassId, const ISceneClassDesc *desc);
-	void remove(const NLMISC::CClassId);
-	CSceneClass *create(const NLMISC::CClassId classid) const;
-	void destroy(CSceneClass *sceneClass) const;
-	const ISceneClassDesc *describe(const NLMISC::CClassId classid) const;
-
-}; /* class ISceneClassConstructor */
 
 } /* namespace MAX */
 } /* namespace PIPELINE */

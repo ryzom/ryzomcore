@@ -1,9 +1,9 @@
 /**
- * \file scene.cpp
- * \brief CScene
- * \date 2012-08-18 19:25GMT
+ * \file scene_class.cpp
+ * \brief CSceneClass
+ * \date 2012-08-20 09:07GMT
  * \author Jan Boon (Kaetemi)
- * CScene
+ * CSceneClass
  */
 
 /*
@@ -26,13 +26,12 @@
  */
 
 #include <nel/misc/types_nl.h>
-#include "scene.h"
+#include "scene_class.h"
 
 // STL includes
 
 // NeL includes
 // #include <nel/misc/debug.h>
-#include <nel/misc/ucstring.h>
 
 // Project includes
 
@@ -46,109 +45,63 @@ namespace MAX {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CScene::CScene()
+CSceneClass::CSceneClass()
 {
 
 }
 
-CScene::~CScene()
+CSceneClass::~CSceneClass()
 {
 
 }
 
-std::string CScene::getClassName()
+std::string CSceneClass::getClassName()
 {
-	return "Scene";
+	return getClassDesc()->internalName();
 }
 
-void CScene::toString(std::ostream &ostream, const std::string &pad)
+void CSceneClass::toString(std::ostream &ostream, const std::string &pad)
 {
 	CStorageContainer::toString(ostream, pad);
 }
 
-void CScene::parse(uint16 version, TParseLevel level)
+void CSceneClass::parse(uint16 version, TParseLevel level)
 {
 	CStorageContainer::parse(version, level);
 }
 
-void CScene::clean()
+void CSceneClass::clean()
 {
 	CStorageContainer::clean();
 }
 
-void CScene::build(uint16 version)
+void CSceneClass::build(uint16 version)
 {
 	CStorageContainer::build(version);
 }
 
-void CScene::disown()
+void CSceneClass::disown()
 {
 	CStorageContainer::disown();
 }
 
-IStorageObject *CScene::createChunkById(uint16 id, bool container)
+IStorageObject *CSceneClass::createChunkById(uint16 id, bool container)
 {
-	if (container)
-	{
-		// Return the scene class container. There can be only one.
-		return new CSceneClassContainer();
-	}
 	return CStorageContainer::createChunkById(id, container);
 }
 
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
+const ucchar *CSceneClass::DisplayName = ucstring("Scene Class").c_str();
+const char *CSceneClass::InternalName = "SceneClass";
+const NLMISC::CClassId CSceneClass::ClassId = NLMISC::CClassId::Null;
+const TSClassId CSceneClass::SuperClassId = 0x0000;
 
-CSceneClassContainer::CSceneClassContainer()
+namespace {
+static const CSceneClassDesc<CSceneClass> SceneClassDesc;
+} /* anonymous namespace */
+
+const ISceneClassDesc *CSceneClass::getClassDesc()
 {
-
-}
-
-CSceneClassContainer::~CSceneClassContainer()
-{
-
-}
-
-std::string CSceneClassContainer::getClassName()
-{
-	return "SceneClassContainer";
-}
-
-void CSceneClassContainer::toString(std::ostream &ostream, const std::string &pad)
-{
-	CStorageContainer::toString(ostream, pad);
-}
-
-void CSceneClassContainer::parse(uint16 version, TParseLevel level)
-{
-	CStorageContainer::parse(version, level);
-}
-
-void CSceneClassContainer::clean()
-{
-	CStorageContainer::clean();
-}
-
-void CSceneClassContainer::build(uint16 version)
-{
-	CStorageContainer::build(version);
-}
-
-void CSceneClassContainer::disown()
-{
-	CStorageContainer::disown();
-}
-
-IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
-{
-	if (container)
-	{
-		// TODO: Check the class registry.
-		// Return default unknown scene class.
-		return new CSceneClass();
-	}
-	return CStorageContainer::createChunkById(id, container);
+	return static_cast<const ISceneClassDesc *>(&SceneClassDesc);
 }
 
 ////////////////////////////////////////////////////////////////////////
