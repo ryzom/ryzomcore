@@ -41,7 +41,36 @@
 namespace PIPELINE {
 namespace MAX {
 
-class CDllEntry;
+/**
+ * \brief CDllEntry
+ * \date 2012-08-18 09:01GMT
+ * \author Jan Boon (Kaetemi)
+ * CDllEntry
+ */
+class CDllEntry : public CStorageContainer
+{
+public:
+	CDllEntry();
+	CDllEntry(const IDllPluginDescInternal *dllPluginDesc);
+	virtual ~CDllEntry();
+
+	// inherited
+	virtual std::string getClassName();
+	virtual void toString(std::ostream &ostream, const std::string &pad = "");
+	virtual void parse(uint16 version, TParseLevel level);
+	virtual void clean();
+	virtual void build(uint16 version);
+	virtual void disown();
+
+	const ucstring &dllDescription() const { return m_DllDescription->Value; }
+	const ucstring &dllFilename() const { return m_DllFilename->Value; }
+
+protected:
+	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	CStorageValue<ucstring> *m_DllDescription;
+	CStorageValue<ucstring> *m_DllFilename;
+
+}; /* class CDllDirectory */
 
 /**
  * \brief CDllDirectory
@@ -72,11 +101,14 @@ public:
 
 	// public
 	// Get a dll entry corresponding to a chunk index, pointers become invalid after reset
-	const CDllEntry *get(uint16 index) const;
+	const CDllEntry *get(sint32 index) const;
 	// Reset the dll directory, all dll entry pointers become invalid, use internal name and dll plugin registry
 	void reset();
 	// Get or create the chunk index for a dll by dll plugin description
-	uint16 getOrCreateIndex(const IDllPluginDescInternal *dllPluginDesc);
+	sint32 getOrCreateIndex(const IDllPluginDescInternal *dllPluginDesc);
+
+private:
+	void addInternalIndices();
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
@@ -84,38 +116,10 @@ protected:
 private:
 	TStorageObjectContainer m_ChunkCache;
 	std::vector<CDllEntry *> m_Entries;
-	std::map<ucstring, uint16> m_InternalNameToIndex;
+	std::map<ucstring, sint32> m_InternalNameToIndex;
 
-}; /* class CDllDirectory */
-
-/**
- * \brief CDllEntry
- * \date 2012-08-18 09:01GMT
- * \author Jan Boon (Kaetemi)
- * CDllDirectory
- */
-class CDllEntry : public CStorageContainer
-{
-public:
-	CDllEntry();
-	CDllEntry(const IDllPluginDescInternal *dllPluginDesc);
-	virtual ~CDllEntry();
-
-	// inherited
-	virtual std::string getClassName();
-	virtual void toString(std::ostream &ostream, const std::string &pad = "");
-	virtual void parse(uint16 version, TParseLevel level);
-	virtual void clean();
-	virtual void build(uint16 version);
-	virtual void disown();
-
-	const ucstring &dllDescription() const { return m_DllDescription->Value; }
-	const ucstring &dllFilename() const { return m_DllFilename->Value; }
-
-protected:
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
-	CStorageValue<ucstring> *m_DllDescription;
-	CStorageValue<ucstring> *m_DllFilename;
+	const CDllEntry m_DllEntryBuiltin;
+	const CDllEntry m_DllEntryScript;
 
 }; /* class CDllDirectory */
 

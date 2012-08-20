@@ -46,7 +46,7 @@ namespace MAX {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CDllDirectory::CDllDirectory()
+CDllDirectory::CDllDirectory() : m_DllEntryBuiltin(&DllPluginDescBuiltin), m_DllEntryScript(&DllPluginDescScript)
 {
 
 }
@@ -130,6 +130,7 @@ void CDllDirectory::parse(uint16 version, TParseLevel level)
 		CStorageContainer::parse(version, level);
 
 		// Initialize
+		addInternalIndices();
 		uint16 lastCached = 0xFFFF;
 		bool parsedDllEntry = false;
 
@@ -233,11 +234,29 @@ void CDllDirectory::disown()
 }
 
 // Parallel to CClassDirectory3
-const CDllEntry *CDllDirectory::get(uint16 index) const
+const CDllEntry *CDllDirectory::get(sint32 index) const
 {
 	nlassert(!ChunksOwnsPointers);
-	nlassert(index < m_Entries.size());
-	return m_Entries[index];
+	if (index < 0)
+	{
+		// Handle internal dummy values
+		switch (index)
+		{
+		case -1:
+			return &m_DllEntryBuiltin;
+		case -2:
+			return &m_DllEntryScript;
+		default:
+			nlerror("Bad dll entry index");
+		}
+	}
+	else
+	{
+		nlassert(index < (sint32)m_Entries.size());
+		return m_Entries[index];
+	}
+	nlassert(false);
+	return NULL;
 }
 
 // Parallel to CClassDirectory3
@@ -250,13 +269,14 @@ void CDllDirectory::reset()
 	}
 	m_Entries.clear();
 	m_InternalNameToIndex.clear();
+	addInternalIndices();
 }
 
 // Parallel to CClassDirectory3
-uint16 CDllDirectory::getOrCreateIndex(const IDllPluginDescInternal *dllPluginDesc)
+sint32 CDllDirectory::getOrCreateIndex(const IDllPluginDescInternal *dllPluginDesc)
 {
 	nlassert(!ChunksOwnsPointers);
-	std::map<ucstring, uint16>::iterator it = m_InternalNameToIndex.find(NLMISC::toLower(ucstring(dllPluginDesc->internalName())));
+	std::map<ucstring, sint32>::iterator it = m_InternalNameToIndex.find(NLMISC::toLower(ucstring(dllPluginDesc->internalName())));
 
 	// Return existing index
 	if (it != m_InternalNameToIndex.end())
@@ -264,10 +284,16 @@ uint16 CDllDirectory::getOrCreateIndex(const IDllPluginDescInternal *dllPluginDe
 
 	// Create new entry
 	CDllEntry *dllEntry = new CDllEntry(dllPluginDesc);
-	uint16 index = m_Entries.size();
+	sint32 index = m_Entries.size();
 	m_InternalNameToIndex[NLMISC::toLower(dllEntry->dllFilename())] = index;
 	m_Entries.push_back(dllEntry);
 	return index;
+}
+
+void CDllDirectory::addInternalIndices()
+{
+	m_InternalNameToIndex[NLMISC::toLower(ucstring(DllPluginDescBuiltin.internalName()))] = -1;
+	m_InternalNameToIndex[NLMISC::toLower(ucstring(DllPluginDescScript.internalName()))] = -2;
 }
 
 IStorageObject *CDllDirectory::createChunkById(uint16 id, bool container)
