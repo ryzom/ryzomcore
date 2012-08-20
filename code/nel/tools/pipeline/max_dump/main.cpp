@@ -25,6 +25,7 @@
 #include "../max/class_data.h"
 #include "../max/config.h"
 #include "../max/scene.h"
+#include "../max/scene_class_registry.h"
 
 //static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
 static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
@@ -40,6 +41,10 @@ int main(int argc, char **argv)
 	char const *me = (argv[0] ? argv[0] : "pipeline_max_dump");
 	g_set_prgname(me);
 	gsf_init();
+
+
+	PIPELINE::MAX::CSceneClassRegistry sceneClassRegistry;
+
 
 	GsfInfile *infile;
 	GError *error = NULL;
@@ -125,6 +130,28 @@ int main(int argc, char **argv)
 	classDirectory3.parse(PIPELINE::MAX::VersionUnknown, PIPELINE::MAX::PARSE_INTERNAL); // parse the structure to readable data
 	classDirectory3.clean(); // cleanup unused file structure
 	classDirectory3.toString(std::cout);
+	std::cout << "\n";
+	//classDirectory3.build(PIPELINE::MAX::VersionUnknown);
+	//classDirectory3.disown();
+	//classDirectory3.toString(std::cout);
+	//std::cout << "\n";
+
+
+	std::cout << "\n";
+
+
+	PIPELINE::MAX::CScene scene(&sceneClassRegistry, &dllDirectory, &classDirectory3);
+	input = gsf_infile_child_by_name(infile, "Scene");
+	{
+		PIPELINE::MAX::CStorageStream instream(input);
+		scene.serial(instream);
+	}
+	g_object_unref(input);
+	//classDirectory3.toString(std::cout);
+	//std::cout << "\n";
+	scene.parse(PIPELINE::MAX::VersionUnknown, PIPELINE::MAX::PARSE_INTERNAL); // parse the structure to readable data
+	scene.clean(); // cleanup unused file structure
+	scene.toString(std::cout);
 	std::cout << "\n";
 	//classDirectory3.build(PIPELINE::MAX::VersionUnknown);
 	//classDirectory3.disown();

@@ -51,6 +51,17 @@ CSceneClassRegistry::~CSceneClassRegistry()
 
 }
 
+//void CSceneClassRegistry::add(const NLMISC::CClassId, const ISceneClassDesc *desc);
+//void CSceneClassRegistry::remove(const NLMISC::CClassId);
+
+CSceneClass *CSceneClassRegistry::create(const NLMISC::CClassId classid) const
+{
+	return NULL; // TODO
+}
+
+//void CSceneClassRegistry::destroy(CSceneClass *sceneClass) const;
+//const CSceneClassRegistry::ISceneClassDesc *describe(const NLMISC::CClassId classid) const;
+
 } /* namespace MAX */
 } /* namespace PIPELINE */
 

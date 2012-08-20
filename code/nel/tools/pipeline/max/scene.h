@@ -42,6 +42,14 @@
 namespace PIPELINE {
 namespace MAX {
 
+// Registry containing available scene classes
+class CSceneClassRegistry;
+
+// Storage
+class CDllDirectory;
+class CClassDirectory3;
+class CSceneClassContainer;
+
 /**
  * \brief CScene
  * \date 2012-08-19 19:25GMT
@@ -51,7 +59,7 @@ namespace MAX {
 class CScene : public CStorageContainer
 {
 public:
-	CScene();
+	CScene(const CSceneClassRegistry *sceneClassRegistry, CDllDirectory *dllDirectory, CClassDirectory3 *classDirectory3);
 	virtual ~CScene();
 
 	// inherited
@@ -62,8 +70,17 @@ public:
 	virtual void build(uint16 version);
 	virtual void disown();
 
+	// public
+	uint16 version();
+	CSceneClassContainer *container();
+
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
+private:
+	const CSceneClassRegistry *m_SceneClassRegistry;
+	CDllDirectory *m_DllDirectory;
+	CClassDirectory3 *m_ClassDirectory3;
 
 }; /* class CScene */
 
@@ -76,7 +93,7 @@ protected:
 class CSceneClassContainer : public CStorageContainer
 {
 public:
-	CSceneClassContainer();
+	CSceneClassContainer(const CSceneClassRegistry *sceneClassRegistry, CDllDirectory *dllDirectory, CClassDirectory3 *classDirectory3);
 	virtual ~CSceneClassContainer();
 
 	// inherited
@@ -89,6 +106,11 @@ public:
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
+private:
+	const CSceneClassRegistry *m_SceneClassRegistry;
+	CDllDirectory *m_DllDirectory;
+	CClassDirectory3 *m_ClassDirectory3;
 
 }; /* class CSceneClassContainer */
 

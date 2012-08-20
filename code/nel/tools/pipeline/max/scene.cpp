@@ -35,6 +35,10 @@
 #include <nel/misc/ucstring.h>
 
 // Project includes
+#include "dll_directory.h"
+#include "class_directory_3.h"
+#include "scene_class_registry.h"
+#include "scene_class_unknown.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -46,7 +50,7 @@ namespace MAX {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CScene::CScene()
+CScene::CScene(const CSceneClassRegistry *sceneClassRegistry, CDllDirectory *dllDirectory, CClassDirectory3 *classDirectory3) : m_SceneClassRegistry(sceneClassRegistry), m_DllDirectory(dllDirectory), m_ClassDirectory3(classDirectory3)
 {
 
 }
@@ -69,6 +73,7 @@ void CScene::toString(std::ostream &ostream, const std::string &pad)
 void CScene::parse(uint16 version, TParseLevel level)
 {
 	CStorageContainer::parse(version, level);
+	nlassert(Chunks.size() == 1);
 }
 
 void CScene::clean()
@@ -78,6 +83,7 @@ void CScene::clean()
 
 void CScene::build(uint16 version)
 {
+	nlassert(Chunks.size() == 1);
 	CStorageContainer::build(version);
 }
 
@@ -86,12 +92,24 @@ void CScene::disown()
 	CStorageContainer::disown();
 }
 
+uint16 CScene::version()
+{
+	nlassert(Chunks.size() == 1);
+	return Chunks.begin()->first;
+}
+
+CSceneClassContainer *CScene::container()
+{
+	nlassert(Chunks.size() == 1);
+	return static_cast<CSceneClassContainer *>(Chunks.begin()->second);
+}
+
 IStorageObject *CScene::createChunkById(uint16 id, bool container)
 {
 	if (container)
 	{
 		// Return the scene class container. There can be only one.
-		return new CSceneClassContainer();
+		return new CSceneClassContainer(m_SceneClassRegistry, m_DllDirectory, m_ClassDirectory3);
 	}
 	return CStorageContainer::createChunkById(id, container);
 }
@@ -100,7 +118,7 @@ IStorageObject *CScene::createChunkById(uint16 id, bool container)
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CSceneClassContainer::CSceneClassContainer()
+CSceneClassContainer::CSceneClassContainer(const CSceneClassRegistry *sceneClassRegistry, CDllDirectory *dllDirectory, CClassDirectory3 *classDirectory3) : m_SceneClassRegistry(sceneClassRegistry), m_DllDirectory(dllDirectory), m_ClassDirectory3(classDirectory3)
 {
 
 }
@@ -142,13 +160,20 @@ void CSceneClassContainer::disown()
 
 IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 {
-	if (container)
+	nldebug("Scene class id %x (%i)", (uint32)id, (uint32)id);
+	const CClassEntry *classEntry = m_ClassDirectory3->get(id);
+	CSceneClass *sceneClass = m_SceneClassRegistry->create(classEntry->classId());
+	if (sceneClass)
 	{
-		// TODO: Check the class registry.
-		// Return default unknown scene class.
-		return new CSceneClass();
+		return static_cast<IStorageObject *>(sceneClass);
 	}
-	return CStorageContainer::createChunkById(id, container);
+	else
+	{
+		// Create an unknown scene class
+		const CDllEntry *dllEntry = m_DllDirectory->get(classEntry->dllIndex());
+		return static_cast<IStorageObject *>(new CSceneClassUnknown(dllEntry, classEntry));
+	}
+	throw EStorage("Bad scene class id");
 }
 
 ////////////////////////////////////////////////////////////////////////
