@@ -95,7 +95,7 @@ protected:
  * \brief CClassDataHeader
  * \date 2012-08-18 18:01GMT
  * \author Jan Boon (Kaetemi)
- * CClassDirectoryHeader
+ * CClassDataHeader
  */
 class CClassDataHeader : public IStorageObject
 {

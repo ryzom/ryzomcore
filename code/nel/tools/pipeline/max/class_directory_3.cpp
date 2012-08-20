@@ -29,6 +29,7 @@
 #include "class_directory_3.h"
 
 // STL includes
+#include <iomanip>
 
 // NeL includes
 // #include <nel/misc/debug.h>
@@ -50,9 +51,23 @@ CClassDirectory3::CClassDirectory3()
 
 }
 
+// Parallel to CDllDirectory
 CClassDirectory3::~CClassDirectory3()
 {
-
+	// Delete m_ChunkCache and m_Entries when !ChunksOwnsPointers
+	if (!ChunksOwnsPointers)
+	{
+		for (TStorageObjectContainer::iterator it = m_ChunkCache.begin(), end = m_ChunkCache.end(); it != end; ++it)
+		{
+			delete it->second;
+		}
+		for (std::vector<CClassEntry *>::iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
+		{
+			delete (*subit);
+		}
+	}
+	m_ChunkCache.clear();
+	m_Entries.clear();
 }
 
 std::string CClassDirectory3::getClassName()
@@ -60,29 +75,162 @@ std::string CClassDirectory3::getClassName()
 	return "ClassDirectory3";
 }
 
+// Parallel to CDllDirectory
 void CClassDirectory3::toString(std::ostream &ostream, const std::string &pad)
 {
-	CStorageContainer::toString(ostream, pad);
+	if (ChunksOwnsPointers)
+	{
+		CStorageContainer::toString(ostream, pad);
+	}
+	else
+	{
+		ostream << "(" << getClassName() << ") [" << Chunks.size() << "] PARSED { ";
+		std::string padpad = pad + "\t";
+		sint i = 0;
+		for (TStorageObjectContainer::const_iterator it = m_ChunkCache.begin(), end = m_ChunkCache.end(); it != end; ++it)
+		{
+			uint16 id = it->first;
+			switch (id)
+			{
+			case 0x2040: // ClassEntry
+				{
+					uint subi = 0;
+					for (std::vector<CClassEntry *>::iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
+					{
+						ostream << "\n" << pad << "Entries[" << subi << "]: ";
+						(*subit)->toString(ostream, padpad);
+						++subi;
+					}
+				}
+				break;
+			default:
+				std::stringstream ss;
+				ss << std::hex << std::setfill('0');
+				ss << std::setw(4) << it->first;
+				ostream << "\n" << pad << "0x" << ss.str() << ": ";
+				it->second->toString(ostream, padpad);
+				++i;
+				break;
+			}
+		}
+		ostream << "} ";
+	}
 }
 
+// Parallel to CDllDirectory
 void CClassDirectory3::parse(uint16 version, TParseLevel level)
 {
-	CStorageContainer::parse(version, level);
+	if (level & PARSE_INTERNAL)
+	{
+		// Ensure not yet parsed
+		nlassert(m_ChunkCache.empty());
+		nlassert(m_Entries.empty());
+
+		// Parse entries first
+		CStorageContainer::parse(version, level);
+
+		// Initialize
+		uint16 lastCached = 0xFFFF;
+		bool parsedDllEntry = false;
+
+		// Parse chunks
+		for (TStorageObjectContainer::iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
+		{
+			uint16 id = it->first;
+			switch (id)
+			{
+			case 0x2040: // ClassEntry
+				if (parsedDllEntry && (lastCached != id))
+					throw EStorageParse(); // There were chunks inbetween
+				if (!parsedDllEntry)
+				{
+					m_ChunkCache.push_back(TStorageObjectWithId(id, NULL)); // Dummy entry to know the location
+					lastCached = id;
+					parsedDllEntry = true;
+				}
+				m_Entries.push_back(static_cast<CClassEntry *>(it->second));
+				break;
+			default:
+				m_ChunkCache.push_back(*it); // Dummy entry to know the location
+				lastCached = id;
+				break;
+			}
+		}
+
+		// Now ownership of the pointers lies in m_ChunkCache and m_Entries
+		ChunksOwnsPointers = false;
+	}
 }
 
+// Parallel to CDllDirectory
 void CClassDirectory3::clean()
 {
-	CStorageContainer::clean();
+	// Ensure parsed
+	nlassert(!ChunksOwnsPointers);
+
+	// Clear Chunks
+	Chunks.clear();
+
+	// Clean chunks
+	for (TStorageObjectContainer::iterator it = m_ChunkCache.begin(), end = m_ChunkCache.end(); it != end; ++it)
+	{
+		if (it->second != NULL && it->second->isContainer())
+		{
+			static_cast<CStorageContainer *>(it->second)->clean();
+		}
+	}
+	for (std::vector<CClassEntry *>::iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
+	{
+		(*subit)->clean();
+	}
 }
 
+// Parallel to CDllDirectory
 void CClassDirectory3::build(uint16 version)
 {
+	// Ensure parsed
+	nlassert(!ChunksOwnsPointers);
+
+	// Initialize
+	nlassert(Chunks.empty());
+
+	// Set up the Chunks list, when (CClassEntry::ID, NULL) is found write out all of the entries.
+	for (TStorageObjectContainer::iterator it = m_ChunkCache.begin(), end = m_ChunkCache.end(); it != end; ++it)
+	{
+		uint16 id = it->first;
+		switch (id)
+		{
+		case 0x2040: // ClassEntry
+			for (std::vector<CClassEntry *>::iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
+				Chunks.push_back(TStorageObjectWithId(id, (*subit)));
+			break;
+		default:
+			Chunks.push_back(*it);
+			break;
+		}
+	}
+
+	// Build the entries last (after Chunks is built)
 	CStorageContainer::build(version);
+
+	// NOTE: Ownership remains with m_ChunkCache and m_Entries
 }
 
+// Parallel to CDllDirectory
 void CClassDirectory3::disown()
 {
 	CStorageContainer::disown();
+	m_ChunkCache.clear();
+	m_Entries.clear();
+
+	// Ownership goes back to Chunks
+	ChunksOwnsPointers = true;
+}
+
+// Parallel to CDllDirectory
+const CClassEntry *CClassDirectory3::get(std::vector<CClassEntry *>::size_type idx) const
+{
+	return m_Entries[idx];
 }
 
 IStorageObject *CClassDirectory3::createChunkById(uint16 id, bool container)
@@ -101,8 +249,14 @@ IStorageObject *CClassDirectory3::createChunkById(uint16 id, bool container)
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
+// Entries[13]: (ClassEntry) [2] {
+//	0 0x2060: (ClassEntryHeader) {
+//		DllIndex: -2
+//		ClassID: (0x222b9eb9, 0x64c75fec)
+//		SuperClassID: 3072 }
+//	1 0x2042: (CStorageValue) { NeL Material } }
 
-CClassEntry::CClassEntry()
+CClassEntry::CClassEntry() : m_Header(NULL), m_Name(NULL)
 {
 
 }
@@ -119,27 +273,53 @@ std::string CClassEntry::getClassName()
 
 void CClassEntry::toString(std::ostream &ostream, const std::string &pad)
 {
-	CStorageContainer::toString(ostream, pad);
+	if (m_Header && m_Name)
+	{
+		ostream << "(" << getClassName() << ") [" << Chunks.size() << "] PARSED { ";
+		std::string padpad = pad + "\t";
+		ostream << "\n" << pad << "Header: ";
+		m_Header->toString(ostream, padpad);
+		ostream << "\n" << pad << "Name: " << m_Name->Value.toUtf8();
+		ostream << "} ";
+	}
+	else
+	{
+		CStorageContainer::toString(ostream, pad);
+	}
 }
 
 void CClassEntry::parse(uint16 version, TParseLevel level)
 {
-	CStorageContainer::parse(version, level);
+	// CStorageContainer::parse(version, level);
+	nlassert(ChunksOwnsPointers);
+	nlassert(Chunks.size() == 2);
+	TStorageObjectContainer::iterator it = Chunks.begin();
+	nlassert(it->first == 0x2060); // ClassEntryHeader
+	m_Header = static_cast<CClassEntryHeader *>(it->second);
+	++it;
+	nlassert(it->first == 0x2042); // ClassEntryName
+	m_Name = static_cast<CStorageValue<ucstring> *>(it->second);
+	// ++it;
 }
 
 void CClassEntry::clean()
 {
-	CStorageContainer::clean();
+	// Nothing to do here! (Chunks retains ownership)
+	// CStorageContainer::clean();
 }
 
 void CClassEntry::build(uint16 version)
 {
-	CStorageContainer::build(version);
+	// Nothing to do here!
+	// CStorageContainer::build(version);
 }
 
 void CClassEntry::disown()
 {
-	CStorageContainer::disown();
+	// CStorageContainer::disown();
+	m_Header = NULL;
+	m_Name = NULL;
+	nlassert(ChunksOwnsPointers);
 }
 
 IStorageObject *CClassEntry::createChunkById(uint16 id, bool container)
@@ -148,9 +328,9 @@ IStorageObject *CClassEntry::createChunkById(uint16 id, bool container)
 	{
 		switch (id)
 		{
-		case 0x2060: // ClassDirectoryHeader
-			return new CClassDirectoryHeader();
-		case 0x2042: // ClassName
+		case 0x2060: // ClassEntryHeader
+			return new CClassEntryHeader();
+		case 0x2042: // ClassEntryName
 			return new CStorageValue<ucstring>();
 		}
 	}
@@ -161,29 +341,29 @@ IStorageObject *CClassEntry::createChunkById(uint16 id, bool container)
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CClassDirectoryHeader::CClassDirectoryHeader()
+CClassEntryHeader::CClassEntryHeader()
 {
 
 }
 
-CClassDirectoryHeader::~CClassDirectoryHeader()
+CClassEntryHeader::~CClassEntryHeader()
 {
 
 }
 
-std::string CClassDirectoryHeader::getClassName()
+std::string CClassEntryHeader::getClassName()
 {
-	return "ClassDirectoryHeader";
+	return "ClassEntryHeader";
 }
 
-void CClassDirectoryHeader::serial(NLMISC::IStream &stream)
+void CClassEntryHeader::serial(NLMISC::IStream &stream)
 {
 	stream.serial(DllIndex);
 	stream.serial(ClassID);
 	stream.serial(SuperClassID);
 }
 
-void CClassDirectoryHeader::toString(std::ostream &ostream, const std::string &pad)
+void CClassEntryHeader::toString(std::ostream &ostream, const std::string &pad)
 {
 	ostream << "(" << getClassName() << ") { ";
 	ostream << "\n" << pad << "DllIndex: " << DllIndex;

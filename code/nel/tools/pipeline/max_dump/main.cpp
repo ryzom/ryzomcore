@@ -72,9 +72,11 @@ int main(int argc, char **argv)
 	display_name = g_filename_display_name(filename);
 	g_print("%s\n", display_name);
 	g_free(display_name);
-	g_print("%s\n", streamname);
+	// g_print("%s\n", streamname);
+	std::cout << "\n";
 
 	GsfInput *input = NULL;
+
 
 	PIPELINE::MAX::CDllDirectory dllDirectory;
 	input = gsf_infile_child_by_name(infile, "DllDirectory");
@@ -83,16 +85,39 @@ int main(int argc, char **argv)
 		dllDirectory.serial(instream);
 	}
 	g_object_unref(input);
+	//dllDirectory.toString(std::cout);
+	//std::cout << "\n";
+	dllDirectory.parse(PIPELINE::MAX::VersionUnknown, PIPELINE::MAX::PARSE_INTERNAL); // parse the structure to readable data
+	dllDirectory.clean(); // cleanup unused file structure
 	dllDirectory.toString(std::cout);
 	std::cout << "\n";
-	dllDirectory.parse(PIPELINE::MAX::VersionUnknown, PIPELINE::MAX::PARSE_INTERNAL);
-	dllDirectory.clean();
-	dllDirectory.toString(std::cout);
+	//dllDirectory.build(PIPELINE::MAX::VersionUnknown);
+	//dllDirectory.disown();
+	//dllDirectory.toString(std::cout);
+	//std::cout << "\n";
+
+
 	std::cout << "\n";
-	dllDirectory.build(PIPELINE::MAX::VersionUnknown);
-	dllDirectory.disown();
-	dllDirectory.toString(std::cout);
+
+
+	PIPELINE::MAX::CClassDirectory3 classDirectory3;
+	input = gsf_infile_child_by_name(infile, "ClassDirectory3");
+	{
+		PIPELINE::MAX::CStorageStream instream(input);
+		classDirectory3.serial(instream);
+	}
+	g_object_unref(input);
+	//classDirectory3.toString(std::cout);
+	//std::cout << "\n";
+	classDirectory3.parse(PIPELINE::MAX::VersionUnknown, PIPELINE::MAX::PARSE_INTERNAL); // parse the structure to readable data
+	classDirectory3.clean(); // cleanup unused file structure
+	classDirectory3.toString(std::cout);
 	std::cout << "\n";
+	//classDirectory3.build(PIPELINE::MAX::VersionUnknown);
+	//classDirectory3.disown();
+	//classDirectory3.toString(std::cout);
+	//std::cout << "\n";
+
 
 
 /*
@@ -114,6 +139,9 @@ int main(int argc, char **argv)
 
 
 	g_object_unref(infile);
+	g_object_unref(src);
+
+	gsf_shutdown();
 
 	return 0;
 }

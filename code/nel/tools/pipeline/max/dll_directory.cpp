@@ -29,6 +29,7 @@
 #include "dll_directory.h"
 
 // STL includes
+#include <iomanip>
 
 // NeL includes
 // #include <nel/misc/debug.h>
@@ -46,6 +47,7 @@ CDllDirectory::CDllDirectory()
 
 }
 
+// Parallel to CClassDirectory3
 CDllDirectory::~CDllDirectory()
 {
 	// Delete m_ChunkCache and m_Entries when !ChunksOwnsPointers
@@ -69,6 +71,7 @@ std::string CDllDirectory::getClassName()
 	return "DllDirectory";
 }
 
+// Parallel to CClassDirectory3
 void CDllDirectory::toString(std::ostream &ostream, const std::string &pad)
 {
 	if (ChunksOwnsPointers)
@@ -110,6 +113,7 @@ void CDllDirectory::toString(std::ostream &ostream, const std::string &pad)
 	}
 }
 
+// Parallel to CClassDirectory3
 void CDllDirectory::parse(uint16 version, TParseLevel level)
 {
 	if (level & PARSE_INTERNAL)
@@ -154,6 +158,7 @@ void CDllDirectory::parse(uint16 version, TParseLevel level)
 	}
 }
 
+// Parallel to CClassDirectory3
 void CDllDirectory::clean()
 {
 	// Ensure parsed
@@ -176,6 +181,7 @@ void CDllDirectory::clean()
 	}
 }
 
+// Parallel to CClassDirectory3
 void CDllDirectory::build(uint16 version)
 {
 	// Ensure parsed
@@ -206,6 +212,7 @@ void CDllDirectory::build(uint16 version)
 	// NOTE: Ownership remains with m_ChunkCache and m_Entries
 }
 
+// Parallel to CClassDirectory3
 void CDllDirectory::disown()
 {
 	CStorageContainer::disown();
@@ -216,6 +223,7 @@ void CDllDirectory::disown()
 	ChunksOwnsPointers = true;
 }
 
+// Parallel to CClassDirectory3
 const CDllEntry *CDllDirectory::get(std::vector<CDllEntry *>::size_type idx) const
 {
 	return m_Entries[idx];
@@ -276,6 +284,7 @@ void CDllEntry::toString(std::ostream &ostream, const std::string &pad)
 void CDllEntry::parse(uint16 version, TParseLevel level)
 {
 	// CStorageContainer::parse(version, level);
+	nlassert(ChunksOwnsPointers);
 	nlassert(Chunks.size() == 2);
 	TStorageObjectContainer::iterator it = Chunks.begin();
 	nlassert(it->first == 0x2039); // DllDescription

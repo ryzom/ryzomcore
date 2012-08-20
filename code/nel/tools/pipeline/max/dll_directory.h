@@ -32,7 +32,6 @@
 // STL includes
 
 // NeL includes
-#include <iomanip>
 
 // Project includes
 #include "storage_object.h"
@@ -95,8 +94,8 @@ public:
 	virtual void build(uint16 version);
 	virtual void disown();
 
-	const ucstring &dllDescription() { return m_DllDescription->Value; }
-	const ucstring &dllFilename() { return m_DllFilename->Value; }
+	const ucstring &dllDescription() const { return m_DllDescription->Value; }
+	const ucstring &dllFilename() const { return m_DllFilename->Value; }
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
