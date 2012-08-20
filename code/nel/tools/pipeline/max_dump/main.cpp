@@ -16,6 +16,8 @@
 #include <vector>
 #include <utility>
 
+#include <nel/misc/file.h>
+
 #include "../max/storage_stream.h"
 #include "../max/storage_object.h"
 #include "../max/dll_directory.h"
@@ -82,7 +84,18 @@ int main(int argc, char **argv)
 	input = gsf_infile_child_by_name(infile, "DllDirectory");
 	{
 		PIPELINE::MAX::CStorageStream instream(input);
-		dllDirectory.serial(instream);
+		PIPELINE::MAX::CStorageContainer ctr;
+		ctr.serial(instream);
+		{
+			NLMISC::COFile of("temp.bin");
+			ctr.serial(of); // out
+			// nldebug("Written %i bytes", of.getPos());
+		}
+		{
+			NLMISC::CIFile inf("temp.bin");
+			dllDirectory.serial(inf); // in
+		}
+		//dllDirectory.serial(instream);
 	}
 	g_object_unref(input);
 	//dllDirectory.toString(std::cout);

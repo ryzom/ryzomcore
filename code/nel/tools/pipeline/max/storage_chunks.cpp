@@ -111,6 +111,9 @@ bool CStorageChunks::enterChunk()
 			if (iscont) chunk->Size |= 0x80000000;
 			m_Is64Bit = true; // it's true
 		}
+#ifdef NL_DEBUG_STORAGE
+		nldebug("Entered reading chunk of size %i", chunk->Size);
+#endif
 		return true;
 	}
 	else
@@ -126,6 +129,10 @@ bool CStorageChunks::enterChunk(uint16 id, bool container)
 {
 	if (!m_Stream.isReading())
 	{
+#ifdef NL_DEBUG_STORAGE
+		nldebug("Writing, enter chunk");
+#endif
+
 		if (m_Is64Bit)
 			throw NLMISC::EStream("64bit chunks not supported");
 
@@ -171,6 +178,9 @@ sint32 CStorageChunks::leaveChunk()
 	}
 	else
 	{
+#ifdef NL_DEBUG_STORAGE
+		nldebug("Writing, leave chunk");
+#endif
 		sint32 pos = m_Stream.getPos();
 		sint32 sizeWithHeader = pos - currentChunk()->OffsetBegin;
 		sint32 sizePos = currentChunk()->OffsetBegin + 2;
@@ -179,6 +189,9 @@ sint32 CStorageChunks::leaveChunk()
 		m_Stream.serial(sizeField);
 		m_Stream.seek(pos, NLMISC::IStream::begin);
 		m_Chunks.resize(m_Chunks.size() - 1);
+#ifdef NL_DEBUG_STORAGE
+		nldebug("Size: %i, Field: %x", sizeWithHeader, sizeField);
+#endif
 		return sizeWithHeader;
 	}
 }

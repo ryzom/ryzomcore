@@ -41,7 +41,7 @@
 // using namespace std;
 // using namespace NLMISC;
 
-#define NL_DEBUG_STORAGE
+// #define NL_DEBUG_STORAGE
 
 namespace PIPELINE {
 namespace MAX {
@@ -120,13 +120,17 @@ void CStorageContainer::serial(NLMISC::IStream &stream)
 		CStorageStream *storageStream = dynamic_cast<CStorageStream *>(&stream);
 		if (storageStream)
 		{
-			// implicitly assume the entire stream is the container
+#ifdef NL_DEBUG_STORAGE
+			nldebug("Implicitly assume the entire stream is the container");
+#endif
 			CStorageChunks chunks(stream, stream.isReading() ? storageStream->size() : 0);
 			serial(chunks);
 			return;
 		}
 	}
-	// wrapping the container inside a stream with necessary size markers
+#ifdef NL_DEBUG_STORAGE
+	nldebug("Wrapping the container inside a stream with necessary size markers");
+#endif
 	{
 		const uint32 magic = 0xC0C01473;
 		stream.serialCheck(magic);
@@ -134,7 +138,9 @@ void CStorageContainer::serial(NLMISC::IStream &stream)
 		sint32 sizePos;
 		bool reading = stream.isReading();
 		if (!reading)
+		{
 			sizePos = stream.getPos();
+		}
 		sint64 size = 0;
 		stream.serial(size);
 		CStorageChunks chunks(stream, size);
@@ -142,10 +148,25 @@ void CStorageContainer::serial(NLMISC::IStream &stream)
 		if (!reading)
 		{
 			sint32 returnPos = stream.getPos();
+#ifdef NL_DEBUG_STORAGE
+			nldebug("current (return) pos is %i", stream.getPos());
+#endif
+			size = returnPos - sizePos - 8;
 			stream.seek(sizePos, NLMISC::IStream::begin);
+#ifdef NL_DEBUG_STORAGE
+			nldebug("current (size) pos is %i", stream.getPos());
+#endif
 			stream.serial(size);
 			stream.seek(returnPos, NLMISC::IStream::begin);
+#ifdef NL_DEBUG_STORAGE
+			nldebug("sizePos is %i", sizePos);
+			nldebug("returnPos is %i", returnPos);
+			nldebug("current (return) pos is %i", stream.getPos());
+#endif
 		}
+#ifdef NL_DEBUG_STORAGE
+		nldebug("Chunk container wrapper size is %i", size);
+#endif
 		return;
 	}
 }
@@ -227,6 +248,9 @@ void CStorageContainer::serial(CStorageChunks &chunks)
 {
 	if (chunks.stream().isReading())
 	{
+#ifdef NL_DEBUG_STORAGE
+		nldebug("Reading container chunk");
+#endif
 		nlassert(ChunksOwnsPointers);
 		nlassert(Chunks.empty());
 		while (chunks.enterChunk())
@@ -247,10 +271,15 @@ void CStorageContainer::serial(CStorageChunks &chunks)
 	}
 	else
 	{
+#ifdef NL_DEBUG_STORAGE
+		nldebug("Writing container chunk");
+#endif
 		for (TStorageObjectContainer::iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
 		{
 			chunks.enterChunk(it->first, it->second->isContainer());
-			it->second->serial(chunks.stream());
+			IStorageObject *storageObject = it->second;
+			if (storageObject->isContainer()) static_cast<CStorageContainer *>(storageObject)->serial(chunks);
+			else storageObject->serial(chunks.stream());
 			chunks.leaveChunk();
 		}
 	}
