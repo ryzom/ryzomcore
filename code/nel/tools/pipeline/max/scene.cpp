@@ -76,6 +76,11 @@ void CScene::build(uint16 version)
 	CStorageContainer::build(version);
 }
 
+void CScene::disown()
+{
+	CStorageContainer::disown();
+}
+
 IStorageObject *CScene::createChunkById(uint16 id, bool container)
 {
 	if (container)
@@ -118,6 +123,11 @@ void CSceneClassContainer::parse(uint16 version, TParseLevel level)
 void CSceneClassContainer::build(uint16 version)
 {
 	CStorageContainer::build(version);
+}
+
+void CSceneClassContainer::disown()
+{
+	CStorageContainer::disown();
 }
 
 IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
@@ -163,6 +173,11 @@ void CSceneClass::parse(uint16 version, TParseLevel level)
 void CSceneClass::build(uint16 version)
 {
 	CStorageContainer::build(version);
+}
+
+void CSceneClass::disown()
+{
+	CStorageContainer::disown();
 }
 
 IStorageObject *CSceneClass::createChunkById(uint16 id, bool container)

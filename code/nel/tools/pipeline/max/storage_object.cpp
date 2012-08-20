@@ -191,6 +191,17 @@ void CStorageContainer::build(uint16 version)
 	}
 }
 
+void CStorageContainer::disown()
+{
+	for (TStorageObjectContainer::const_iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
+	{
+		if (it->second->isContainer())
+		{
+			static_cast<CStorageContainer *>(it->second)->disown();
+		}
+	}
+}
+
 bool CStorageContainer::isContainer() const
 {
 	return true;

@@ -122,6 +122,8 @@ public:
 	virtual void parse(uint16 version, TParseLevel level);
 	// Build the storage structure needed to store the parsed data back
 	virtual void build(uint16 version);
+	// Give ownership of the chunks back to the Chunks, must build first
+	virtual void disown();
 
 public: // should be protected but that doesn't compile, nice c++!
 	// inherited

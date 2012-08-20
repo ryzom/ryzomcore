@@ -76,6 +76,11 @@ void CConfig::build(uint16 version)
 	CStorageContainer::build(version);
 }
 
+void CConfig::disown()
+{
+	CStorageContainer::disown();
+}
+
 IStorageObject *CConfig::createChunkById(uint16 id, bool container)
 {
 	if (container)
@@ -133,6 +138,11 @@ void CConfig20a0::build(uint16 version)
 	CStorageContainer::build(version);
 }
 
+void CConfig20a0::disown()
+{
+	CStorageContainer::disown();
+}
+
 IStorageObject *CConfig20a0::createChunkById(uint16 id, bool container)
 {
 	if (container)
@@ -186,6 +196,11 @@ void CConfig20a0Entry::parse(uint16 version, TParseLevel level)
 void CConfig20a0Entry::build(uint16 version)
 {
 	CStorageContainer::build(version);
+}
+
+void CConfig20a0Entry::disown()
+{
+	CStorageContainer::disown();
 }
 
 IStorageObject *CConfig20a0Entry::createChunkById(uint16 id, bool container)
@@ -270,6 +285,11 @@ void CConfigScript::build(uint16 version)
 	CStorageContainer::build(version);
 }
 
+void CConfigScript::disown()
+{
+	CStorageContainer::disown();
+}
+
 IStorageObject *CConfigScript::createChunkById(uint16 id, bool container)
 {
 	if (container)
@@ -315,6 +335,11 @@ void CConfigScriptEntry::parse(uint16 version, TParseLevel level)
 void CConfigScriptEntry::build(uint16 version)
 {
 	CStorageContainer::build(version);
+}
+
+void CConfigScriptEntry::disown()
+{
+	CStorageContainer::disown();
 }
 
 IStorageObject *CConfigScriptEntry::createChunkById(uint16 id, bool container)
@@ -403,6 +428,11 @@ void CConfigScriptMetaContainer::parse(uint16 version, TParseLevel level)
 void CConfigScriptMetaContainer::build(uint16 version)
 {
 	CStorageContainer::build(version);
+}
+
+void CConfigScriptMetaContainer::disown()
+{
+	CStorageContainer::disown();
 }
 
 IStorageObject *CConfigScriptMetaContainer::createChunkById(uint16 id, bool container)

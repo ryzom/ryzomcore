@@ -60,6 +60,7 @@ public:
 	virtual void toString(std::ostream &ostream, const std::string &pad = "");
 	virtual void parse(uint16 version, TParseLevel level);
 	virtual void build(uint16 version);
+	virtual void disown();
 
 	// public
 	const CDllEntry *get(std::vector<CDllEntry *>::size_type idx) const;
@@ -68,7 +69,6 @@ protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 
 private:
-	uint16 m_ParseVersion;
 	TStorageObjectContainer m_ChunkCache;
 	std::vector<CDllEntry *> m_Entries;
 
@@ -91,6 +91,7 @@ public:
 	virtual void toString(std::ostream &ostream, const std::string &pad = "");
 	virtual void parse(uint16 version, TParseLevel level);
 	virtual void build(uint16 version);
+	virtual void disown();
 
 	const ucstring &dllDescription() { return m_DllDescription->Value; }
 	const ucstring &dllFilename() { return m_DllFilename->Value; }

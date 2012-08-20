@@ -75,6 +75,11 @@ void CClassData::build(uint16 version)
 	CStorageContainer::build(version);
 }
 
+void CClassData::disown()
+{
+	CStorageContainer::disown();
+}
+
 IStorageObject *CClassData::createChunkById(uint16 id, bool container)
 {
 	if (container)
@@ -120,6 +125,11 @@ void CClassDataEntry::parse(uint16 version, TParseLevel level)
 void CClassDataEntry::build(uint16 version)
 {
 	CStorageContainer::build(version);
+}
+
+void CClassDataEntry::disown()
+{
+	CStorageContainer::disown();
 }
 
 IStorageObject *CClassDataEntry::createChunkById(uint16 id, bool container)

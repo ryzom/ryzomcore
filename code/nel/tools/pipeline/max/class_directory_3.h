@@ -58,6 +58,7 @@ public:
 	virtual void toString(std::ostream &ostream, const std::string &pad = "");
 	virtual void parse(uint16 version, TParseLevel level);
 	virtual void build(uint16 version);
+	virtual void disown();
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
@@ -81,6 +82,7 @@ public:
 	virtual void toString(std::ostream &ostream, const std::string &pad = "");
 	virtual void parse(uint16 version, TParseLevel level);
 	virtual void build(uint16 version);
+	virtual void disown();
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);

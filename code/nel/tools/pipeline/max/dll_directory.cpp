@@ -72,7 +72,7 @@ void CDllDirectory::toString(std::ostream &ostream, const std::string &pad)
 			uint16 id = it->first;
 			switch (id)
 			{
-			case 0x2038:
+			case 0x2038: // DllEntry
 				{
 					uint subi = 0;
 					for (std::vector<CDllEntry *>::iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
@@ -109,7 +109,6 @@ void CDllDirectory::parse(uint16 version, TParseLevel level)
 		CStorageContainer::parse(version, level);
 
 		// Initialize
-		m_ParseVersion = version;
 		uint16 lastCached = 0xFFFF;
 		bool parsedDllEntry = false;
 
@@ -144,11 +143,42 @@ void CDllDirectory::parse(uint16 version, TParseLevel level)
 
 void CDllDirectory::build(uint16 version)
 {
-	// TODO: Set up the Chunks list, when (CDllEntry::ID, NULL) is found write out all of the entries.
+	// Ensure parsed
+	nlassert(!ChunksOwnsPointers);
+
+	// Initialize
+	Chunks.clear();
+
+	// Set up the Chunks list, when (CDllEntry::ID, NULL) is found write out all of the entries.
+	for (TStorageObjectContainer::iterator it = m_ChunkCache.begin(), end = m_ChunkCache.end(); it != end; ++it)
+	{
+		uint16 id = it->first;
+		switch (id)
+		{
+		case 0x2038: // DllEntry
+			for (std::vector<CDllEntry *>::iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
+				Chunks.push_back(TStorageObjectWithId(id, (*subit)));
+			break;
+		default:
+			Chunks.push_back(*it);
+			break;
+		}
+	}
+
 	// Build the entries last
 	CStorageContainer::build(version);
 
 	// NOTE: Ownership remains with m_ChunkCache and m_Entries
+}
+
+void CDllDirectory::disown()
+{
+	CStorageContainer::disown();
+	m_ChunkCache.clear();
+	m_Entries.clear();
+
+	// Ownership goes back to Chunks
+	ChunksOwnsPointers = true;
 }
 
 const CDllEntry *CDllDirectory::get(std::vector<CDllEntry *>::size_type idx) const
@@ -225,6 +255,14 @@ void CDllEntry::build(uint16 version)
 {
 	// Nothing to do here!
 	// CStorageContainer::build(version);
+}
+
+void CDllEntry::disown()
+{
+	// CStorageContainer::disown();
+	m_DllDescription = NULL;
+	m_DllFilename = NULL;
+	nlassert(ChunksOwnsPointers);
 }
 
 IStorageObject *CDllEntry::createChunkById(uint16 id, bool container)
