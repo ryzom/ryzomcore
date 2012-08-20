@@ -13,7 +13,7 @@
 	function csr_render_yubopoints() {
 		global $DBc,$_USER,$_CONF;
 
-		$res = $DBc->sqlQuery("SELECT sum(ap_value) as anz FROM ach_perk,ach_player_perk WHERE ap_id=app_perk AND app_player='".$_USER->getID()."'");
+		$res = $DBc->sqlQuery("SELECT sum(at_value) as anz FROM ach_task,ach_player_task WHERE at_id=apt_task AND apt_player='".$_USER->getID()."'");
 
 		$html = "<div style='display:block;border-bottom:1px solid #000000;'><span style='font-size:32px;'>".$_USER->getName()."&nbsp;<img src='".$_CONF['image_url']."pic/yubo_done.png'>&nbsp;".max(0,$res[0]['anz'])."</span></div>";
 
@@ -94,6 +94,8 @@
 
 	function adm_render_mnode(&$menu,$sub) {
 		global $_CONF;
+
+		$html = "";
 		
 		$iter = $menu->getIterator();
 		while($iter->hasNext()) {
@@ -182,7 +184,7 @@
 										'.$ach->getValueDone().'<br><img src="'.$_CONF['image_url'].'pic/yubo_done.png">
 									</td>
 								</tr><tr><td align="center" valign="top">';
-							$html .= ach_render_perk_done($ach);
+							$html .= ach_render_task_done($ach);
 							$html .= '</td></tr></tbody></table></center>
 						</td>
 						<td style="background-image: url('.$_CONF['image_url'].'pic/bar_done_r.png);"></td>
@@ -217,7 +219,7 @@
 										'.$ach->getValueOpen().'<br><img src="'.$_CONF['image_url'].'pic/yubo_pending.png">
 									</td>
 								</tr><tr><td align="center" valign="top">';
-							$html .= ach_render_perk_open($ach);
+							$html .= ach_render_task_open($ach);
 							$html .= '</td></tr></tbody></table></center>
 						</td>
 						<td style="background-image: url('.$_CONF['image_url'].'pic/bar_pending_r.png);"></td>
@@ -232,52 +234,46 @@
 		return $html;
 	}
 
-	function ach_render_perk_open(&$ach) {
-		#echo var_export($perk_list,true);
+	function ach_render_task_open(&$ach) {
 		$html = "";
 
-		$perk_list = $ach->getOpen();
-		$perk = $perk_list->getNext();
+		$task_list = $ach->getOpen();
+		$task = $task_list->getNext();
 		
 
-		#$perk = $ach->getChild($perk_list[0]);
-
-		if($perk->inDev()) {
+		if($task->inDev()) {
 			return $html;
 		}
 		
 		$html .= "<span style='color:#999999;font-weight:bold;display:block;'>";
 		
-		if($perk->getName() != null) {
-			$html .= $perk->getName();
+		if($task->getName() != null) {
+			$html .= $task->getName();
 		}
 		else {
-			$tml .= "[untitled]";
+			$html .= "[untitled]";
 		}
-		$html .=  " <a href='?mode=player&pid=".$_REQUEST['pid']."&cat=".$_REQUEST['cat']."&grant=".$perk->getPath()."'><b>Perk:</b> grant</a>";
-		#if($perk->getName() != null) {
-			$html .= "</span>";
-		#}
-		if($perk->objDrawable()) {
-			$html .= ach_render_obj_list($perk->getIterator());
+		$html .=  " <a href='?mode=player&pid=".$_REQUEST['pid']."&cat=".$_REQUEST['cat']."&grant=".$task->getPath()."'><b>Task:</b> grant</a></span>";
+
+		if($task->objDrawable()) {
+			$html .= ach_render_obj_list($task->getIterator());
 		}
 
 		return $html;
 	}
 
-	function ach_render_perk_done(&$ach) {
+	function ach_render_task_done(&$ach) {
 		global $_CONF;
 		$html = "";
 
-		$perk_list = $ach->getDone();
-		while($perk_list->hasNext()) {
-			$perk = $perk_list->getNext();
-		#foreach($perk_list as $elem) {
-			#$perk = $ach->getChild($elem);
-			if($perk->inDev()) {
+		$task_list = $ach->getDone();
+		while($task_list->hasNext()) {
+			$task = $task_list->getNext();
+
+			if($task->inDev()) {
 				continue;
 			}
-			$html .= "<div style='display:block;'><span style='color:#66CC00;font-weight:bold;'>".$perk->getName()."</span> ( ".date('d.m.Y',$perk->getDone())." ) <img src='".$_CONF['image_url']."pic/yubo_done.png' width='15px' /> ".$perk->getValue()." <a href='?mode=player&pid=".$_REQUEST['pid']."&cat=".$_REQUEST['cat']."&deny=".$perk->getPath()."'>Perk: deny</a></div>";
+			$html .= "<div style='display:block;'><span style='color:#66CC00;font-weight:bold;'>".$task->getName()."</span> ( ".date('d.m.Y',$task->getDone())." ) <img src='".$_CONF['image_url']."pic/yubo_done.png' width='15px' /> ".$task->getValue()." <a href='?mode=player&pid=".$_REQUEST['pid']."&cat=".$_REQUEST['cat']."&deny=".$task->getPath()."'>Task: deny</a></div>";
 		}
 
 		return $html;
@@ -489,7 +485,7 @@
 	}
 
 	function ach_render_tiebar($cult = "c_neutral", $civ = "c_neutral",&$cat) {
-		global $_USER,$_CONF;
+		global $_USER;
 
 		$html = "<style>
 			.o {

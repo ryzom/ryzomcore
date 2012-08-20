@@ -1,6 +1,6 @@
 <?php
 	class AchObjective extends Parentum {
-		protected $perk;
+		protected $task;
 		protected $condition;
 		protected $value;
 		protected $name;
@@ -8,6 +8,7 @@
 		protected $done;
 		protected $progress;
 		protected $meta_image;
+		protected $metalink;
 
 		function AchObjective($data,$parent) {
 			global $DBc,$_USER;
@@ -16,13 +17,18 @@
 			
 			$this->setParent($parent);
 			$this->setID($data['ao_id']);
-			$this->perk = $data['ao_perk'];
+			$this->task = $data['ao_task'];
 			$this->condition = $data['ao_condition'];
 			$this->value = $data['ao_value'];
 			$this->name = $data['aol_name'];
 			$this->display = $data['ao_display'];
 			$this->done = $data['apo_date'];
 			$this->meta_image = $data['aa_image'];
+			$this->metalink = $data['ao_metalink'];
+
+			if($this->metalink != null) {
+				$this->name = $data['aal_name'];
+			}
 
 			$this->progress = $this->value;
 
@@ -41,8 +47,12 @@
 			return $this->meta_image;
 		}
 
-		function getPerk() {
-			return $this->perk;
+		function getMetalink() {
+			return $this->metalink;
+		}
+
+		function getTask() {
+			return $this->task;
 		}
 
 		function getCondition() {
@@ -62,6 +72,9 @@
 		}
 
 		function getDisplayName() {
+			if(substr($this->name,0,1) == "!") {
+				return substr($this->name,1);
+			}
 			return $this->parent->fillTemplate(explode(";",$this->name));
 		}
 

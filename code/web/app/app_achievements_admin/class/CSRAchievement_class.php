@@ -1,5 +1,9 @@
 <?php
 	class CSRAchievement extends AchAchievement implements CSR {
+		#########################
+		# PHP 5.3 compatible
+		# CSRDispatcher_trait replaces this in PHP 5.4
+
 		function grantNode($path,$player) {
 			#echo "start: ".$path." id: ".$this->getID()."<br>";
 			if(is_numeric($path)) {
@@ -63,13 +67,14 @@
 		private function hasParent() {
 			return ($this->parent != null);
 		}
+		#########################
 		
 		function CSRAchievement($data,$parent) {
 			parent::__construct($data,$parent);
 		}
 
 		protected function makeChild($d) {
-			return new CSRPerk($d,$this);
+			return new CSRTask($d,$this);
 		}
 
 		function grant($pid) {
@@ -94,11 +99,9 @@
 			$this->parent->setChildOpen($this->id);
 		}
 
-		function setPerkDone($id) {
-			echo "perk<br>";
+		function setTaskDone($id) {
 			$this->setChildDone($id);
 
-			echo "ach<br>";
 
 			$this->parent->addChildDone($this->id);
 			
@@ -107,10 +110,10 @@
 			}
 		}
 
-		function setPerkOpen($id) {
-			echo "perk<br>";
+		function setTaskOpen($id) {
+
 			$this->setChildOpen($id);
-			echo "ach<br>";
+
 
 			$this->parent->addChildOpen($this->id);
 			

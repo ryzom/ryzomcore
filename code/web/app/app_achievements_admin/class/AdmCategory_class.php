@@ -1,10 +1,9 @@
 <?php
 	class AdmCategory extends AchCategory {
-		/*function insertNode($n) {
-			$n->setParent($this);
-			$n->insert();
-			$this->addChild($n);
-		}*/
+		#########################
+		# PHP 5.3 compatible
+		# AdmDispatcher_trait replaces this in PHP 5.4
+
 
 		function removeNode($id) {
 			$res = $this->getChildDataByID($id);
@@ -50,13 +49,15 @@
 			}
 			return null;
 		}
+		#########################
 		
 		function AdmCategory($id,$race,$cult = null,$civ = null) {
 			parent::__construct($id,$race,$cult,$civ);
 		}
 
 		protected function makeChild($d) {
-			return new AdmAchievement($d,$this);
+			$a = new AdmAchievement($d,$this);
+			return $a;
 		}
 		
 		#@overrides AdmDispatcher::insertNode()

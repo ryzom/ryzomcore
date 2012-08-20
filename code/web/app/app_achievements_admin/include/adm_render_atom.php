@@ -135,7 +135,6 @@ function catchTab(item,e){
 	}
 
 	function ach_render_achievement_open(&$ach) {
-		global $_CONF,$menu;
 
 		$open = explode(";",$_REQUEST['id']);
 
@@ -146,30 +145,30 @@ function catchTab(item,e){
 
 		$html = "<div style='display: block; margin-bottom: 5px;'>
 			<div style='display:block;font-size:22px;' class='bar'><a href='javascript:hs(\"ach_".$ach->getID()."\",\"block\");'>[+]</a> ".$ach->getName()." <span style='font-size:12px;'>(ties= race: ".$ach->getTieRace()."; civ: ".$ach->getTieCiv()."; cult: ".$ach->getTieCult().")</span></div>
-			<div style='margin-left:25px;display:".$o.";' id='ach_".$ach->getID()."'>".ach_render_perk_open($ach)."</div>
+			<div style='margin-left:25px;display:".$o.";' id='ach_".$ach->getID()."'>".ach_render_task_open($ach)."</div>
 		</div>";
 
 		return $html;
 	}
 
-	function ach_render_perk_open(&$ach) {
+	function ach_render_task_open(&$ach) {
 		$html = "";
 
 		$open = explode(";",$_REQUEST['id']);
 
-		$perk_list = $ach->getOpen();
-		while($perk_list->hasNext()) {
+		$task_list = $ach->getOpen();
+		while($task_list->hasNext()) {
 
-			$perk = $perk_list->getNext();
+			$task = $task_list->getNext();
 
 			$o = "none";
-			if($open[2] == $perk->getID()) {
+			if($open[2] == $task->getID()) {
 				$o = "block";
 			}
 
 			$html .= "<div style='display: block; margin-bottom: 5px;'>
-				<div style='display:block;font-size:16px;' class='bar'><a href='javascript:hs(\"perk_".$perk->getID()."\",\"block\");'>[+]</a> ".$perk->getDisplayName()." <span style='font-size:12px;'>(condition= ".$perk->getCondition().": ".$perk->getConditionValue().")</span></div>
-				<div style='margin-left:25px;display:".$o.";' id='perk_".$perk->getID()."'>".ach_render_obj_list($perk->getIterator())."</div>
+				<div style='display:block;font-size:16px;' class='bar'><a href='javascript:hs(\"task_".$task->getID()."\",\"block\");'>[+]</a> ".$task->getDisplayName()." <span style='font-size:12px;'>(condition= ".$task->getCondition().": ".$task->getConditionValue().")</span></div>
+				<div style='margin-left:25px;display:".$o.";' id='task_".$task->getID()."'>".ach_render_obj_list($task->getIterator())."</div>
 			</div>";
 		}
 
@@ -179,15 +178,13 @@ function catchTab(item,e){
 	function ach_render_obj_list($obj) {
 		$html = "";
 
-		$open = explode(";",$_REQUEST['id']);
-		
+
 		while($obj->hasNext()) {
 			$elem = $obj->getNext();
 			
-			#$o = "none";
-			#if($open[3] == $elem->getID()) {
+
 				$o = "block";
-			#}
+
 			
 			$html .= "<div style='display: block; margin-bottom: 5px;'>
 				<div style='display:block;' class='bar'><a href='javascript:hs(\"obj_".$elem->getID()."\",\"block\");' name='obj_".$elem->getID()."'>[+]</a> ".$elem->getDisplayName()." <span style='font-size:12px;'>(condition= ".$elem->getCondition().": ".$elem->getValue().")</span></div>

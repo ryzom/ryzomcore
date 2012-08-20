@@ -10,7 +10,7 @@
 		protected $parent;
 
 		function Node() {
-
+			// dummy constructor
 		}
 
 		final function getID() {

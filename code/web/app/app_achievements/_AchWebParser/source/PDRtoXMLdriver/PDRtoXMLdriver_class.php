@@ -80,7 +80,7 @@
 		}
 
 		function drive($cid) {
-			global $CONF,$_DISPATCHER;
+			global $_DISPATCHER;
 
 			echo "kk";
 

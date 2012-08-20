@@ -1,7 +1,6 @@
 <?php
 	class Logfile {
 		private $logfile;
-		private $buffer;
 
 		function Logfile($f = false) {
 			$this->logfile = false;

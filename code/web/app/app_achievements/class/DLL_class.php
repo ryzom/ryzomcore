@@ -73,19 +73,16 @@
 
 			$this->avl->insert($n);
 			$this->size++;
-			
-			#$this->avl->inorder();
-			#echo "<br>";
+
+			return null;
 		}
 
 		function removeNode($id) {
-			echo "rid: ".$id."<br>";
 			$this->avl->inorder();
-			echo "<br>";
 
 			$n = $this->findNode($id);
 			if($n != null) {
-				echo "removed; ";
+
 				$p = $n->getParent();
 				$c = $n->getChild();
 				
@@ -116,23 +113,11 @@
 				$this->size--;
 			}
 
-			$this->avl->inorder();
-			echo "<br>";
 		}
 
 		function findNode($id) {
 			return $this->avl->find($id);
 		}
-
-		/*function storeOrder() {
-			$iter = $this->getIterator();
-			$i = 0;
-			while($iter->hasNext()) {
-				$curr = $iter->getNext();
-				$curr->StoreOrder($i);
-				$i++;
-			}
-		}*/
 	}
 
 	class DLLnode {
@@ -165,11 +150,6 @@
 		final function getIterator() {
 			return new NodeIterator($this);
 		}
-
-		#function ListStoreOrder($i) {
-		#	$this->data->setListOrder($i);
-		#	$this->data->update();
-		#}
 
 		function getID() {
 			return $this->data->getID();

@@ -14,12 +14,12 @@
 	echo '<?xml version="1.0" ?><ryzom_progress>';
 	echo "<character id='".$_REQUEST['cid']."' />";
 
-	echo "<perks>";
-	$res = $DBc->sendSQL("SELECT * FROM ach_player_perk WHERE app_player='".$DBc->mre($_REQUEST['cid'])."'","ARRAY");
+	echo "<tasks>";
+	$res = $DBc->sendSQL("SELECT * FROM ach_player_task WHERE apt_player='".$DBc->mre($_REQUEST['cid'])."'","ARRAY");
 	foreach($res as $elem) {
-		echo "<perk id='".$elem['app_perk']."' date='".$elem['app_date']."' />";
+		echo "<task id='".$elem['apt_task']."' date='".$elem['apt_date']."' />";
 	}
-	echo "</perks>";
+	echo "</tasks>";
 
 	echo "<objectives>";
 	echo "<done>";

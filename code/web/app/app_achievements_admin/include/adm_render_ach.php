@@ -22,16 +22,13 @@
 
 	function adm_render_mnode(&$menu,$sub) {
 		global $_CONF;
+
+        $html = "";
 		
 		$iter = $menu->getIterator();
 		while($iter->hasNext()) {
 			$curr = $iter->getNext();
-		#$sz = $menu->getSize();
-		#for($i=0;$i<$sz;$i++) {
-		#	$curr = $menu->getChild($i);
-			if($curr->inDev()) {
-				#continue;
-			}
+
 			$html .= "<span class='ach_mspan'><a href='?mode=ach&cat=".$curr->getID()."'><table class='ach_menu'>
 				<tr>";
 					if($sub == 0) {
@@ -53,6 +50,40 @@
 	}
 
 	function adm_render_category(&$cat) {
+		global $menu,$metalist,$DBc,$_USER;
+
+		$html = "";
+
+		$m = $menu->getIterator();
+		while($m->hasNext()) {
+			$n = $m->getNext();
+			$html .= "<option value='null' disabled='disabled'>".$n->getName()."</option>";
+
+			$m2 = $n->getIterator();
+			while($m2->hasNext()) {
+				$n2 = $m2->getNext();
+				$html .= "<option value='null' disabled='disabled'>&nbsp;&nbsp;&nbsp;".$n2->getName()."</option>";
+
+				//db
+				$res = $DBc->sqlQuery("SELECT aa_id,aal_name FROM ach_achievement LEFT JOIN (ach_achievement_lang) ON (aal_lang='".$_USER->getLang()."' AND aal_achievement=aa_id) WHERE aa_category='".$n2->getID()."' ORDER by aa_sticky DESC, aal_name ASC");
+				$sz = sizeof($res);
+				for($i=0;$i<$sz;$i++) {
+					$html .= "<option value='".$res[$i]['aa_id']."'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".$res[$i]['aal_name']."</option>";
+				}
+			}
+
+			//db
+			$res = $DBc->sqlQuery("SELECT aa_id,aal_name FROM ach_achievement LEFT JOIN (ach_achievement_lang) ON (aal_lang='".$_USER->getLang()."' AND aal_achievement=aa_id) WHERE aa_category='".$n->getID()."' ORDER by aa_sticky DESC, aal_name ASC");
+			$sz = sizeof($res);
+			for($i=0;$i<$sz;$i++) {
+				$html .= "<option value='".$res[$i]['aa_id']."'>&nbsp;&nbsp;&nbsp;".$res[$i]['aal_name']."</option>";
+			}
+		}
+
+		$metalist = $html;
+
+
+
 		$html = "<style>
 			.bw {
 				background-color:#FFFFFF;
@@ -67,7 +98,7 @@
 				<fieldset>
 				<legend>Delete</legend>
 					Are you sure you want to delete <b>".$tmp->getName()."</b><p>
-					<b>Any nested Perks/Objective/Atoms will be removed, as well as any player progress connected!</b>
+					<b>Any nested Tasks/Objective/Atoms will be removed, as well as any player progress connected!</b>
 					<p>
 					<a href='?mode=ach&cat=".$_REQUEST['cat']."&act=delete&id=".$_REQUEST['id']."'><b>delete</b></a>
 				</fieldset>
@@ -93,6 +124,19 @@
 								<tr>
 									<td class='bw'>naming template:</td>
 									<td><input type='text' name='aal_template' /></td>
+								</tr>
+								<tr>
+									<td class='bw'>parent achievement:</td>
+									<td>
+										<select name='aa_parent'>
+											<option value='null' selected='selected'>-- none --</option>";
+											$iter = $cat->getOpen();
+											while($iter->hasNext()) {
+												$item = $iter->getNext();
+												$html .= "<option value='".$item->getID()."'>".$item->getName()."</option>";
+											}
+										$html .= "</select>
+									</td>
 								</tr>
 								<tr>
 									<td class='bw'>cult:</td>
@@ -123,24 +167,28 @@
 									<td><input type='text' name='aa_image' /></td>
 								</tr>
 								<tr>
+									<td class='bw'>sticky:</td>
+									<td><input type='hidden' value='0' name='aa_sticky' /><input type='checkbox' name='aa_sticky' value='1'/></td>
+								</tr>
+								<tr>
 									<td colspan='2'><hr /></td>
 								</tr>
 								<tr>
-									<td class='bw'>perk name:</td>
-									<td><input type='text' name='apl_name' /></td>
+									<td class='bw'>task name:</td>
+									<td><input type='text' name='atl_name' /></td>
 								</tr>
 								<tr>
 									<td class='bw'>naming template:</td>
-									<td><input type='text' name='apl_template' /></td>
+									<td><input type='text' name='atl_template' /></td>
 								</tr>
 								<tr>
-									<td class='bw'>perk yubopoints:</td>
-									<td><input type='text' name='ap_value' /></td>
+									<td class='bw'>task yubopoints:</td>
+									<td><input type='text' name='at_value' /></td>
 								</tr>
 								<tr>
 									<td class='bw'>condition:</td>
 									<td>
-										<select name='ap_condition'>
+										<select name='at_condition'>
 											<option value='all' selected='selected'>all</option>
 											<option value='any'>any</option>
 											<option value='value'>by value</option>
@@ -149,7 +197,7 @@
 								</tr>
 								<tr>
 									<td class='bw'>condition value:</td>
-									<td><input type='text' name='ap_condition_value' /></td>
+									<td><input type='text' name='at_condition_value' /></td>
 								</tr>
 								<tr>
 									<td colspan='2'><input type='submit' value='create' /></td>
@@ -165,27 +213,11 @@
 			$html .= ach_render_tiebar($cat->getCurrentCult(),$cat->getCurrentCiv(),$cat);
 		}
 
-		/*$iter = $cat->getDone();
-		while($iter->hasNext()) {
-			$curr = $cat->getChildByIdx($iter->getNext());
-		#$sz = sizeof($tmp);
-		#for($i=0;$i<$sz;$i++) {
-			#echo "A";
-			if($curr->inDev()) {
-				continue;
-			}
-			$html .= ach_render_achievement_done($curr);
-		}*/
 
 		$iter = $cat->getOpen();
 		while($iter->hasNext()) {
 			$curr = $iter->getNext();
-		#$sz = sizeof($tmp);
-		#for($i=0;$i<$sz;$i++) {
-			#echo "B";
-			if($curr->inDev()) {
-				#continue;
-			}
+
 			$html .= ach_render_achievement_open($curr);
 		}
 
@@ -207,7 +239,15 @@
 							<center><table width="100%" cellspacing="0" cellpadding="0">
 								<tbody><tr>
 									<td rowspan="2" valign="top"><img src="'.$_CONF['image_url'].'pic/icon/grey/'.$ach->getImage().'"></td>
-									<td width="100%"><center><table><tr><td><span style="font-weight:bold;font-size:24px;color:#FFFFFF;"><a name="ach_'.$ach->getID().'">[ach:]</a>'.$ach->getName().'</span></td>';
+									<td width="100%"><center><table><tr><td><span style="font-weight:bold;font-size:24px;color:#FFFFFF;"><a name="ach_'.$ach->getID().'">[ach:]</a>'.$ach->getName().'</span>';
+									if($ach->getParentID() != null && $ach->getParentID() != "null") {
+										#echo $ach->getParentID();
+										$c = $ach->getParent();
+										$p = $c->getChildDataByID($ach->getParentID());
+										$html .= "<br><span style='font-size:11px;'>child of <b>".$p->getName()."</b></span>";
+									}
+
+									$html .= '</td>';
 					
 					$html .= "<td style='background-color:#FFFFFF;padding:3px;'><nobr><a href='?mode=ach&cat=".$_REQUEST['cat']."&act=dev&state=".$ach->getDev()."&id=".$ach->getPathID()."#ach_".$ach->getID()."'><img src='pic/";
 					if($ach->inDev()) {
@@ -218,7 +258,7 @@
 					}
 					$html .= ".gif' /></a>&nbsp;<a href='javascript:hs(\"edit_ach_".$ach->getID()."\",\"block\");'><img src='pic/icon_edit.gif'></a>";
 
-					$html .= "&nbsp;<a href='javascript:hs(\"new_perk_".$ach->getID()."\",\"block\");'><img src='pic/b_insrow.png'></a>";
+					$html .= "&nbsp;<a href='javascript:hs(\"new_task_".$ach->getID()."\",\"block\");'><img src='pic/b_insrow.png'></a>";
 
 					$html .= "&nbsp;<a href='javascript:hs(\"opts_ach_".$ach->getID()."\",\"block\");'><img src='pic/b_tblops.png'></a>";
 						
@@ -237,11 +277,31 @@
 										<table>
 											<tr>
 												<td class='bw'>name:</td>
-												<td><input type='text' name='aal_name' value=\"".$ach->getName()."\" /></td>
+												<td><input type='text' name='aal_name' value='".htmlspecialchars($ach->getName(),ENT_QUOTES)."' /></td>
 											</tr>
 											<tr>
 												<td class='bw'>naming template:</td>
-												<td><input type='text' name='aal_template' value=\"".$ach->getTemplate()."\" /></td>
+												<td><input type='text' name='aal_template' value='".htmlspecialchars($ach->getTemplate(),ENT_QUOTES)."' /></td>
+											</tr>
+											<tr>
+												<td class='bw'>parent achievement:</td>
+												<td>
+													<select name='aa_parent'>
+														<option value='null' selected='selected'>-- none --</option>";
+														$p = $ach->getParent();
+														$iter = $p->getOpen();
+														while($iter->hasNext()) {
+															$item = $iter->getNext();
+															if($item->getID() != $ach->getID()) {
+																$html .= "<option value='".$item->getID()."'";
+																if($item->getID() == $ach->getParentID()) {
+																	$html .= " selected='selected'";
+																}
+																$html .= ">".$item->getName()."</option>";
+															}
+														}
+														$html .= "</select>
+												</td>
 											</tr>
 											<tr>
 												<td class='bw'>cult:</td>
@@ -269,7 +329,15 @@
 											</tr>
 											<tr>
 												<td class='bw'>image:</td>
-												<td><input type='text' name='aa_image' value='".$ach->getImage()."' /></td>
+												<td><input type='text' name='aa_image' value='".htmlspecialchars($ach->getImage())."' /></td>
+											</tr>
+											<tr>
+												<td class='bw'>sticky:</td>
+												<td><input type='hidden' value='0' name='aa_sticky' /><input type='checkbox' name='aa_sticky' value='1'";
+													if($ach->isSticky()) {
+														$html .= " checked='checked'";
+													}
+													$html .= "/></td>
 											</tr>
 											<tr>
 												<td colspan='2'><input type='submit' value='save' /></td>
@@ -279,32 +347,36 @@
 								</form>
 							</div>";
 
-							$html .= "<div id='new_perk_".$ach->getID()."' style='margin-bottom:3px;margin-top:3px;display:none;color:#000000;background-color:#FFFFFF;'>
-								<form method='post' action='?mode=ach&cat=".$_REQUEST['cat']."&id=".$ach->getID()."&act=perk_insert#ach_".$ach->getID()."'>
+							$html .= "<div id='new_task_".$ach->getID()."' style='margin-bottom:3px;margin-top:3px;display:none;color:#000000;background-color:#FFFFFF;'>
+								<form method='post' action='?mode=ach&cat=".$_REQUEST['cat']."&id=".$ach->getID()."&act=task_insert#ach_".$ach->getID()."'>
 									<fieldset>
-										<legend>add new perk</legend>
+										<legend>add new task</legend>
 										<table>
 											<tr>
 												<td class='bw'>name:</td>
-												<td><input type='text' name='apl_name' /></td>
+												<td><input type='text' name='atl_name' /></td>
 											</tr>
 											<tr>
 												<td class='bw'>naming template:</td>
-												<td><input type='text' name='apl_template' /></td>
+												<td><input type='text' name='atl_template' /></td>
 											</tr>
 											<tr>
 												<td class='bw'>yubopoints:</td>
-												<td><input type='text' name='ap_value' /></td>
+												<td><input type='text' name='at_value' /></td>
 											</tr>
 											<tr>
 												<td class='bw'>parent:</td>
 												<td>
-													<select name='ap_parent'>
-														<option value='null' selected='selected'>[set as main perk]</option>";
+													<select name='at_parent'>
+														<option value='null'>[set as base task]</option>";
 														$iter = $ach->getOpen();
 														while($iter->hasNext()) {
 															$curr = $iter->getNext();
-															$html .= "<option value='".$curr->getID()."'>".$curr->getName()."</option>";
+															$html .= "<option value='".$curr->getID()."'";
+															if(!$iter->hasNext()) {
+																$html .= " selected='selected'";
+															}
+															$html .= ">".$curr->getDisplayName()."</option>";
 														}
 
 													$html .= "</select>
@@ -313,7 +385,7 @@
 											<tr>
 												<td class='bw'>condition:</td>
 												<td>
-													<select name='ap_condition'>
+													<select name='at_condition'>
 														<option value='all' selected='selected'>all</option>
 														<option value='any'>any</option>
 														<option value='value'>by value</option>
@@ -322,7 +394,7 @@
 											</tr>
 											<tr>
 												<td class='bw'>condition value:</td>
-												<td><input type='text' name='ap_condition_value' /></td>
+												<td><input type='text' name='at_condition_value' /></td>
 											</tr>
 											<tr>
 												<td colspan='2'><input type='submit' value='add' /></td>
@@ -364,7 +436,7 @@
 								</form>
 							</div>";
 
-							$html .= ach_render_perk_open($ach);
+							$html .= ach_render_task_open($ach);
 							$html .= '</td></tr></tbody></table></center>
 						</td>
 						<td style="background-image: url('.$_CONF['image_url'].'pic/bar_pending_r.png);"></td>
@@ -379,73 +451,70 @@
 		return $html;
 	}
 
-	function ach_render_perk_open(&$ach) {
-		#echo var_export($perk_list,true);
+	function ach_render_task_open(&$ach) {
+		global $metalist;
+
+
+
 		$html = "";
 
-		$perk_list = $ach->getOpen();
-		while($perk_list->hasNext()) {
+		$task_list = $ach->getOpen();
+		while($task_list->hasNext()) {
 
-			$perk = $perk_list->getNext();
+			$task = $task_list->getNext();
 
-			#$perk = $ach->getChild($perk_list[0]);
 
-			if($perk->inDev()) {
-				#return $html;
-			}
-			
-			#if($perk->getName() != null) {
-				$html .= "<table><tr><td><span style='color:#999999;font-weight:bold;display:block;'><a name='perk_".$perk->getID()."'>[perk:]</a>".$perk->getDisplayName()."</span></td>";
+				$html .= "<table><tr><td><span style='color:#999999;font-weight:bold;display:block;'><a name='task_".$task->getID()."'>[task:]</a>".$task->getDisplayName()." (".$task->getValue().")</span></td>";
 
-				$html .= "<td style='background-color:#FFFFFF;padding:3px;'><nobr><a href='?mode=ach&cat=".$_REQUEST['cat']."&act=dev&state=".$perk->getDev()."&id=".$perk->getPathID()."#perk_".$perk->getID()."'><img src='pic/";
-					if($perk->inDev()) {
+				$html .= "<td style='background-color:#FFFFFF;padding:3px;'><nobr><a href='?mode=ach&cat=".$_REQUEST['cat']."&act=dev&state=".$task->getDev()."&id=".$task->getPathID()."#task_".$task->getID()."'><img src='pic/";
+					if($task->inDev()) {
 						$html .= "red";
 					}
 					else {
 						$html .= "green";
 					}
-					$html .= ".gif' /></a>&nbsp;<a href='javascript:hs(\"edit_perk_".$perk->getID()."\",\"block\");'><img src='pic/icon_edit.gif'></a>";
+					$html .= ".gif' /></a>&nbsp;<a href='javascript:hs(\"edit_task_".$task->getID()."\",\"block\");'><img src='pic/icon_edit.gif'></a>";
 
-					$html .= "&nbsp;<a href='javascript:hs(\"new_obj_".$perk->getID()."\",\"block\");'><img src='pic/b_insrow.png'></a>";
+					$html .= "&nbsp;<a href='javascript:hs(\"new_obj_".$task->getID()."\",\"block\");'><img src='pic/b_insrow.png'></a>";
 						
-					$html .= "&nbsp;&nbsp;&nbsp;<a href='?mode=ach&cat=".$_REQUEST['cat']."&confirm=delete&id=".$perk->getPathID()."'><img src='pic/b_drop.png'></a></nobr></td>
+					$html .= "&nbsp;&nbsp;&nbsp;<a href='?mode=ach&cat=".$_REQUEST['cat']."&confirm=delete&id=".$task->getPathID()."'><img src='pic/b_drop.png'></a></nobr></td>
 									</td></tr></table>";
 
-					$html .= "<div id='edit_perk_".$perk->getID()."' style='margin-bottom:3px;margin-top:3px;display:none;color:#000000;background-color:#FFFFFF;'>
-						<form method='post' action='?mode=ach&cat=".$_REQUEST['cat']."&id=".$perk->getPathID()."&act=perk_update#perk_".$perk->getID()."'>
+					$html .= "<div id='edit_task_".$task->getID()."' style='margin-bottom:3px;margin-top:3px;display:none;color:#000000;background-color:#FFFFFF;'>
+						<form method='post' action='?mode=ach&cat=".$_REQUEST['cat']."&id=".$task->getPathID()."&act=task_update#task_".$task->getID()."'>
 							<fieldset>
-								<legend>edit perk</legend>
+								<legend>edit task</legend>
 								<table>
 									<tr>
 										<td class='bw'>name:</td>
-										<td><input type='text' name='apl_name' value='".$perk->getName()."' /></td>
+										<td><input type='text' name='atl_name' value='".htmlspecialchars($task->getName(),ENT_QUOTES)."' /></td>
 									</tr>
 									<tr>
 										<td class='bw'>naming template:</td>
-										<td><input type='text' name='apl_template' value=\"".$perk->getTemplate()."\" /></td>
+										<td><input type='text' name='atl_template' value='".htmlspecialchars($task->getTemplate(),ENT_QUOTES)."' /></td>
 									</tr>
 									<tr>
 										<td class='bw'>yubopoints:</td>
-										<td><input type='text' name='ap_value' value='".$perk->getValue()."' /></td>
+										<td><input type='text' name='at_value' value='".htmlspecialchars($task->getValue(),ENT_QUOTES)."' /></td>
 									</tr>
 									<tr>
 										<td class='bw'>parent:</td>
 										<td>
-											<select name='ap_parent'>
-												<option value='null' selected='selected'>[set as main perk]</option>";
-												$par = $perk->getParent();
+											<select name='at_parent'>
+												<option value='null' selected='selected'>[set as base task]</option>";
+												$par = $task->getParent();
 												$iter = $par->getOpen();
 												while($iter->hasNext()) {
 													$curr = $iter->getNext();
-													if($curr->getID() == $perk->getID()) {
+													if($curr->getID() == $task->getID()) {
 														continue;
 													}
 													
 													$html .= "<option value='".$curr->getID()."'";
-													if($curr->getID() == $perk->getParentID()) {
+													if($curr->getID() == $task->getParentID()) {
 														$html .= " selected='selected'";
 													}
-													$html .= ">".$curr->getName()."</option>";
+													$html .= ">".$curr->getDisplayName()."</option>";
 												}
 
 											$html .= "</select>
@@ -454,16 +523,16 @@
 									<tr>
 										<td class='bw'>condition:</td>
 										<td>
-											<select name='ap_condition'>
-												<option value='all'"; if($perk->getCondition() == "all") { $html .= " selected='selected'"; } $html .= ">all</option>
-												<option value='any'"; if($perk->getCondition() == "any") { $html .= " selected='selected'"; } $html .= ">any</option>
-												<option value='value'"; if($perk->getCondition() == "value") { $html .= " selected='selected'"; } $html .= ">by value</option>
+											<select name='at_condition'>
+												<option value='all'"; if($task->getCondition() == "all") { $html .= " selected='selected'"; } $html .= ">all</option>
+												<option value='any'"; if($task->getCondition() == "any") { $html .= " selected='selected'"; } $html .= ">any</option>
+												<option value='value'"; if($task->getCondition() == "value") { $html .= " selected='selected'"; } $html .= ">by value</option>
 											</select>
 										</td>
 									</tr>
 									<tr>
 										<td class='bw'>condition value:</td>
-										<td><input type='text' name='ap_condition_value' value='".$perk->getConditionValue()."' /></td>
+										<td><input type='text' name='ap_condition_value' value='".htmlspecialchars($task->getConditionValue(),ENT_QUOTES)."' /></td>
 									</tr>
 									<tr>
 										<td colspan='2'><input type='submit' value='save' /></td>
@@ -473,8 +542,8 @@
 						</form>
 					</div>";
 
-					$html .= "<div id='new_obj_".$perk->getID()."' style='margin-bottom:3px;margin-top:3px;display:none;color:#000000;background-color:#FFFFFF;'>
-						<form method='post' action='?mode=ach&cat=".$_REQUEST['cat']."&id=".$perk->getPathID()."&act=obj_insert#perk_".$perk->getID()."'>
+					$html .= "<div id='new_obj_".$task->getID()."' style='margin-bottom:3px;margin-top:3px;display:none;color:#000000;background-color:#FFFFFF;'>
+						<form method='post' action='?mode=ach&cat=".$_REQUEST['cat']."&id=".$task->getPathID()."&act=obj_insert#task_".$task->getID()."'>
 							<fieldset>
 								<legend>add new objective</legend>
 								<table>
@@ -509,7 +578,43 @@
 									</tr>
 									<tr>
 										<td class='bw'>metalink:</td>
-										<td></td>
+										<td>
+											<select name='ao_metalink'>
+												<option value=''> -- none --</option>";
+												/*$m = $menu->getIterator();
+												while($m->hasNext()) {
+													$n = $m->getNext();
+													$html .= "<option value='' disabled='disabled'>".$n->getName()."</option>";
+
+													$m2 = $n->getIterator();
+													while($m2->hasNext()) {
+														$n2 = $m2->getNext();
+														$html .= "<option value='' disabled='disabled'>&nbsp;&nbsp;&nbsp;".$n2->getName()."</option>";
+
+														//db
+														$res = $DBc->sqlQuery("SELECT aa_id,aal_name FROM ach_achievement LEFT JOIN (ach_achievement_lang) ON (aal_lang='".$_USER->getLang()."' AND aal_achievement=aa_id) WHERE aa_category='".$n2->getID()."' ORDER by aa_sticky DESC, aal_name ASC");
+														$sz = sizeof($res);
+														for($i=0;$i<$sz;$i++) {
+															$html .= "<option value='".$res[$i]['aa_id']."'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".$res[$i]['aal_name']."</option>";
+														}
+													}
+
+													//db
+													$res = $DBc->sqlQuery("SELECT aa_id,aal_name FROM ach_achievement LEFT JOIN (ach_achievement_lang) ON (aal_lang='".$_USER->getLang()."' AND aal_achievement=aa_id) WHERE aa_category='".$n->getID()."' ORDER by aa_sticky DESC, aal_name ASC");
+													$sz = sizeof($res);
+													for($i=0;$i<$sz;$i++) {
+														$html .= "<option value='".$res[$i]['aa_id']."'>&nbsp;&nbsp;&nbsp;".$res[$i]['aal_name']."</option>";
+													}
+												}*/
+
+											$html .= $metalist;
+
+
+
+
+
+											$html .= "</select>
+										</td>
 									</tr>
 									<tr>
 										<td colspan='2'><input type='submit' value='add' /></td>
@@ -518,16 +623,16 @@
 							</fieldset>
 						</form>
 					</div>";
-			#}
-			#if($perk->objDrawable()) {
-				$html .= ach_render_obj_list($perk->getIterator());
-			#}
+
+				$html .= ach_render_obj_list($task->getIterator());
 		}
 
 		return $html;
 	}
 
 	function ach_render_obj_list($obj) {
+		#return null;
+		global $metalist;
 		$html = "<center><table width='90%'>";
 
 		#$i = 0;
@@ -573,16 +678,16 @@
 					$html .= "&nbsp;&nbsp;&nbsp;<a href='?mode=ach&cat=".$_REQUEST['cat']."&confirm=delete&id=".$elem->getPathID()."'><img src='pic/b_drop.png'></a></nobr></td>
 									</td></tr></table>";
 
-									#$perk = $elem->getParent();
+
 
 			$html .= "<div id='edit_obj_".$elem->getID()."' style='margin-bottom:3px;margin-top:3px;display:none;color:#000000;background-color:#FFFFFF;'>
-						<form method='post' action='?mode=ach&cat=".$_REQUEST['cat']."&id=".$elem->getPathID()."&act=obj_update#perk_".$elem->getPerk()."'>
+						<form method='post' action='?mode=ach&cat=".$_REQUEST['cat']."&id=".$elem->getPathID()."&act=obj_update#task_".$elem->getTask()."'>
 							<fieldset>
 								<legend>edit objective</legend>
 								<table>
 									<tr>
 										<td class='bw'>name:</td>
-										<td><input type='text' name='aol_name' value='".$elem->getName()."' /></td>
+										<td><input type='text' name='aol_name' value='".htmlspecialchars($elem->getName(),ENT_QUOTES)."' /></td>
 									</tr>
 									<tr>
 										<td class='bw'>type:</td>
@@ -607,11 +712,51 @@
 									</tr>
 									<tr>
 										<td class='bw'>trigger value:</td>
-										<td><input type='text' name='ao_value' value='".$elem->getValue()."' /></td>
+										<td><input type='text' name='ao_value' value='".htmlspecialchars($elem->getValue(),ENT_QUOTES)."' /></td>
 									</tr>
 									<tr>
 										<td class='bw'>metalink:</td>
-										<td></td>
+										<td><select name='ao_metalink'>
+												<option value=''> -- none --</option>";
+												/*$m = $menu->getIterator();
+												while($m->hasNext()) {
+													$n = $m->getNext();
+													$html .= "<option value='' disabled='disabled'>".$n->getName()."</option>";
+
+													$m2 = $n->getIterator();
+													while($m2->hasNext()) {
+														$n2 = $m2->getNext();
+														$html .= "<option value='' disabled='disabled'>&nbsp;&nbsp;&nbsp;".$n2->getName()."</option>";
+
+														//db
+														$res = $DBc->sqlQuery("SELECT aa_id,aal_name FROM ach_achievement LEFT JOIN (ach_achievement_lang) ON (aal_lang='".$_USER->getLang()."' AND aal_achievement=aa_id) WHERE aa_category='".$n2->getID()."' ORDER by aa_sticky DESC, aal_name ASC");
+														$sz = sizeof($res);
+														for($i=0;$i<$sz;$i++) {
+															$html .= "<option value='".$res[$i]['aa_id']."'";
+															if($res[$i]['aa_id'] == $elem->getMetalink()) {
+																$html .= " selected='selected'";
+															}
+															$html .= ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".$res[$i]['aal_name']."</option>";
+														}
+													}
+
+													//db
+													$res = $DBc->sqlQuery("SELECT aa_id,aal_name FROM ach_achievement LEFT JOIN (ach_achievement_lang) ON (aal_lang='".$_USER->getLang()."' AND aal_achievement=aa_id) WHERE aa_category='".$n->getID()."' ORDER by aa_sticky DESC, aal_name ASC");
+													$sz = sizeof($res);
+													for($i=0;$i<$sz;$i++) {
+														$html .= "<option value='".$res[$i]['aa_id']."'";
+														if($res[$i]['aa_id'] == $elem->getMetalink()) {
+															$html .= " selected='selected'";
+														}
+														$html .= ">&nbsp;&nbsp;&nbsp;".$res[$i]['aal_name']."</option>";
+													}
+												}*/
+
+								$html .= str_replace("value='".$elem->getMetalink()."'","value='".$elem->getMetalink()."' selected='selected'",$metalist);
+
+
+
+								$html .= "</select></td>
 									</tr>
 									<tr>
 										<td colspan='2'><input type='submit' value='save' /></td>
@@ -658,7 +803,7 @@
 
 	function ach_render_obj_meta(&$obj) {
 		global $_CONF;
-		$html = "";
+
 		if($obj->isdone()) {
 			$col = "#71BE02";
 			$grey = "";
@@ -733,9 +878,8 @@
 		return $html;
 	}
 
-
 	function ach_render_tiebar($cult = "c_neutral", $civ = "c_neutral",&$cat) {
-		global $_USER,$_CONF;
+		global $_USER;
 
 		$html = "<style>
 			.o {
@@ -743,10 +887,10 @@
 			}
 		</style>
 
-		<div style='display:block;text-align:center;'><form method='post' action='?cat=".$cat->getID()."' id='cc_form'>
+		<div style='display:block;text-align:center;'><form method='post' action='?mode=ach&cat=".$cat->getID()."' id='cc_form'>
 			<table>
 				<tr>";
-				if($cat->isTiedCult()) {
+				if($cat->isTiedCultDev()) {
 					$html.= "<td>
 						<select name='cult' onchange='document.getElementById(\"cc_form\").submit();'>
 							<option value='c_neutral'"; if($cult == "c_neutral") { $html.= " selected='selected'"; } $html .= ">".get_translation('ach_c_neutral',$_USER->getLang())."</option>
@@ -755,7 +899,7 @@
 						</select>
 					</td>";
 				}
-				if($cat->isTiedCiv()) {
+				if($cat->isTiedCivDev()) {
 					$html.= "<td>
 						<select name='civ' onchange='document.getElementById(\"cc_form\").submit();'>
 							<option value='c_neutral'"; if($civ == "c_neutral") { $html.= " selected='selected'"; } $html .= ">".get_translation('ach_c_neutral',$_USER->getLang())."</option>

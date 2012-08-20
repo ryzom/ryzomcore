@@ -144,12 +144,12 @@
 						$html .= "<table>
 							<tr>
 								<td>name</td>
-								<td><input type='text' name='acl_name' value='".$curr->getName()."' /></td>
+								<td><input type='text' name='acl_name' value='".htmlspecialchars($curr->getName(),ENT_QUOTES)."' /></td>
 							</tr>";
 							if($sub == 0) {
 								$html .= "<tr>
 									<td>image</td>
-									<td><input type='text' name='ac_image' value='".$curr->getImage()."' /></td>
+									<td><input type='text' name='ac_image' value='".htmlspecialchars($curr->getImage(),ENT_QUOTES)."' /></td>
 								</tr>";
 							}
 							$html .= "<tr>

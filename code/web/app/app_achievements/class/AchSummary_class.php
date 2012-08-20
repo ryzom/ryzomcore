@@ -10,17 +10,15 @@
 
 			$this->menu = $menu;
 
-			//read all recent perks of user
+			//read all recent tasks of user
 			//make distinct achievement list
 
-			$res = $DBc->sqlQuery("SELECT DISTINCT aa_id,ach.*,(SELECT aal_name FROM ach_achievement_lang WHERE aal_lang='".$_USER->getLang()."' AND aal_achievement=ach.aa_id) as aal_name, (SELECT aal_template FROM ach_achievement_lang WHERE aal_lang='".$_USER->getLang()."' AND aal_achievement=ach.aa_id) as aal_template FROM ach_achievement as ach,ach_perk,ach_player_perk WHERE ap_achievement=aa_id AND app_player='".$_USER->getID()."' AND app_perk=ap_id ORDER by app_date DESC LIMIT 0,".($size-1));
+			$res = $DBc->sqlQuery("SELECT DISTINCT aa_id,ach.*,(SELECT aal_name FROM ach_achievement_lang WHERE aal_lang='".$_USER->getLang()."' AND aal_achievement=ach.aa_id) as aal_name, (SELECT aal_template FROM ach_achievement_lang WHERE aal_lang='".$_USER->getLang()."' AND aal_achievement=ach.aa_id) as aal_template FROM ach_achievement as ach,ach_task,ach_player_task WHERE at_achievement=aa_id AND apt_player='".$_USER->getID()."' AND apt_task=at_id ORDER by apt_date DESC LIMIT 0,".($size-1));
 
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
 				$this->addDone($this->makeChild($res[$i]));
 			}
-
-			#echo var_export($this->child_done,true);
 		}
 		
 		#@override: Parentum::makeChild()
@@ -30,23 +28,21 @@
 
 		function getSummary() {
 			if(!is_array($this->stats)) { // only load if needed
-				//now we have to find the # of perks for each main menu entry
+				//now we have to find the # of tasks for each main menu entry
 				//and also sum up how many have been completed
 				$this->stats = array(); // [][name,done,total]
 
 				$iter = $this->menu->getIterator();
 				while($iter->hasNext()) {
-					#echo "1";
 					$curr = $iter->getNext();
 					
 
 					if($curr->getID() == 0 || $curr->inDev()) {
 						continue; // skip summary page
 					}
-					#echo $curr->getID().",";
-					#echo var_export($curr,true);
+
 					$res = $this->sumStats($curr);
-					$this->stats[] = array($curr->getName(),$res[0],$res[1]);
+					$this->stats[] = array($curr->getName(),$res[0],$res[1],$res[2]);
 				}
 			}
 
@@ -62,14 +58,20 @@
 
 			$done = 0;
 			$total = 0;
+			$hero = false;
 
 			//read for current ID
 			//sum
-			$res = $DBc->sqlQuery("SELECT count(ap_id) as anz FROM ach_perk,ach_achievement,ach_player_perk WHERE aa_category='".$node->getID()."' AND ap_achievement=aa_id AND app_player='".$_USER->getID()."' AND app_perk=ap_id");
+			$res = $DBc->sqlQuery("SELECT count(at_id) as anz FROM ach_task,ach_achievement,ach_player_task WHERE aa_category='".$node->getID()."' AND at_achievement=aa_id AND apt_player='".$_USER->getID()."' AND apt_task=at_id");
 			$done += $res[0]["anz"];
 
-			$res = $DBc->sqlQuery("SELECT count(ap_id) as anz FROM ach_perk,ach_achievement WHERE aa_category='".$node->getID()."' AND ap_achievement=aa_id AND aa_dev='0' AND ap_dev='0'");
+			$res = $DBc->sqlQuery("SELECT count(at_id) as anz FROM ach_task,ach_achievement WHERE aa_category='".$node->getID()."' AND at_achievement=aa_id AND aa_dev='0' AND at_dev='0'");
 			$total += $res[0]["anz"];
+
+			$res = $DBc->sqlQuery("SELECT ac_heroic FROM ach_category WHERE ac_id='".$node->getID()."' AND ac_dev='0'");
+			if($res[0]["ac_heroic"] == 1) {
+				$hero = true;
+			}
 			
 			$iter = $node->getIterator();
 			while($iter->hasNext()) {
@@ -78,9 +80,10 @@
 				$res = $this->sumStats($curr);
 				$done += $res[0];
 				$total += $res[1];
+				$hero = ($hero == true || $res[2] == true);
 			}
 
-			return array($done,$total);
+			return array($done,$total,$hero);
 
 		}
 
@@ -98,6 +101,10 @@
 
 		function getCurrentCult() {
 			return "c_neutral";
+		}
+
+		function isHeroic() {
+			return false;
 		}
 	}
 ?>

@@ -1,5 +1,9 @@
 <?php
 	class CSRObjective extends AchObjective implements CSR {
+		#########################
+		# PHP 5.3 compatible
+		# CSRDispatcher_trait replaces this in PHP 5.4
+
 		function grantNode($path,$player) {
 			#echo "start: ".$path." id: ".$this->getID()."<br>";
 			if(is_numeric($path)) {
@@ -63,8 +67,7 @@
 		private function hasParent() {
 			return ($this->parent != null);
 		}
-
-		#private $nodes;
+		#########################
 		
 		function CSRObjective($data,$parent) {
 			parent::__construct($data,$parent);

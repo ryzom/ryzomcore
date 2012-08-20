@@ -7,15 +7,15 @@
 
 		protected $dev;
 
-		function inDev() {
+		final function inDev() {
 			return ($this->dev == 1);
 		}
 
-		function getDev() {
+		final function getDev() {
 			return $this->dev;
 		}
 
-		function setInDev($tf) {
+		final function setInDev($tf) {
 			if($tf == true) {
 				$this->setDev(1);
 			}
@@ -26,7 +26,7 @@
 			$this->update();
 		}
 
-		function setDev($d) {
+		final function setDev($d) {
 			$this->dev = $d;
 		}
 	}

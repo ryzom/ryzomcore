@@ -11,15 +11,15 @@
 	require_once($_CONF['app_achievements_path']."class/AchList_abstract.php");
 	require_once($_CONF['app_achievements_path']."class/Tieable_inter.php");
 	require_once($_CONF['app_achievements_path']."class/NodeIterator_class.php");
-	require_once($_CONF['app_achievements_path']."class/Node_trait.php");
-	require_once($_CONF['app_achievements_path']."class/InDev_trait.php");
+	#require_once($_CONF['app_achievements_path']."class/Node_trait.php");
+	#require_once($_CONF['app_achievements_path']."class/InDev_trait.php");
 
 	require_once($_CONF['app_achievements_path']."class/AchMenu_class.php");
 	require_once($_CONF['app_achievements_path']."class/AchMenuNode_class.php");
 	require_once($_CONF['app_achievements_path']."class/AchSummary_class.php");
 	require_once($_CONF['app_achievements_path']."class/AchCategory_class.php");
 	require_once($_CONF['app_achievements_path']."class/AchAchievement_class.php");
-	require_once($_CONF['app_achievements_path']."class/AchPerk_class.php");
+	require_once($_CONF['app_achievements_path']."class/AchTask_class.php");
 	require_once($_CONF['app_achievements_path']."class/AchObjective_class.php");
 
 	class RUser {
@@ -72,13 +72,13 @@
 			$iter4 = $curr3->getIterator();
 			while($iter4->hasNext()) {
 				$curr4 = $iter4->getNext();
-				echo "<perk id='".$curr4->getID()."' parent='".$curr4->getParentID()."' value='".$curr4->getValue()."'><name><![CDATA[".$curr4->getDisplayName()."]]></name>";
+				echo "<task id='".$curr4->getID()."' parent='".$curr4->getParentID()."' value='".$curr4->getValue()."'><name><![CDATA[".$curr4->getDisplayName()."]]></name>";
 				$iter5 = $curr4->getIterator();
 				while($iter5->hasNext()) {
 					$curr5 = $iter5->getNext();
 					echo "<objective id='".$curr5->getID()."' type='".$curr5->getDisplay()."' value='".$curr5->getValue()."' meta='".$_CONF['image_url']."pic/icon/".$curr5->getMetaImage()."'><name><![CDATA[".$curr5->getDisplayName()."]]></name></objective>";
 				}
-				echo "</perk>";
+				echo "</task>";
 			}
 			echo "</achievement>";
 		}

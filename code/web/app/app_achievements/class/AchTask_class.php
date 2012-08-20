@@ -1,5 +1,5 @@
 <?php
-	class AchPerk extends Parentum {
+	class AchTask extends Parentum {
 		#########################
 		# PHP 5.3 compatible
 		# InDev_trait replaces this in PHP 5.4
@@ -36,22 +36,22 @@
 		protected $template;
 		protected $parent_id;
 
-		function AchPerk($data,$parent) {
+		function AchTask($data,$parent) {
 			global $DBc,$_USER;
 
 			parent::__construct();
 			
 			$this->setParent($parent);
-			$this->setID($data['ap_id']);
-			$this->achievement = $data['ap_achievement'];
-			$this->value = $data['ap_value'];
-			$this->name = $data['apl_name'];
-			$this->done = $data['app_date'];
-			$this->dev = $data['ap_dev'];
-			$this->template = $data['apl_template'];
-			$this->parent_id = $data['ap_parent'];
+			$this->setID($data['at_id']);
+			$this->achievement = $data['at_achievement'];
+			$this->value = $data['at_value'];
+			$this->name = $data['atl_name'];
+			$this->done = $data['apt_date'];
+			$this->dev = $data['at_dev'];
+			$this->template = $data['atl_template'];
+			$this->parent_id = $data['at_parent'];
 
-			$res = $DBc->sqlQuery("SELECT * FROM ach_objective LEFT JOIN (ach_objective_lang) ON (aol_lang='".$_USER->getLang()."' AND aol_objective=ao_id) LEFT JOIN (ach_player_objective) ON (apo_objective=ao_id AND apo_player='".$_USER->getID()."') LEFT JOIN (ach_achievement) ON (aa_id=ao_metalink) WHERE ao_perk='".$this->id."'");
+			$res = $DBc->sqlQuery("SELECT * FROM ach_objective LEFT JOIN (ach_objective_lang) ON (aol_lang='".$_USER->getLang()."' AND aol_objective=ao_id) LEFT JOIN (ach_player_objective) ON (apo_objective=ao_id AND apo_player='".$_USER->getID()."') LEFT JOIN (ach_achievement,ach_achievement_lang) ON (aa_id=ao_metalink AND aa_id=aal_achievement AND aal_lang='".$_USER->getLang()."') WHERE ao_task='".$this->id."' ORDER by aol_name ASC,aal_name ASC");
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
 				$this->addChild($this->makeChild($res[$i]));
@@ -72,6 +72,9 @@
 		}
 
 		function getDisplayName() {
+			if(substr($this->name,0,1) == "!") {
+				return substr($this->name,1);
+			}
 			return $this->parent->fillTemplate(explode(";",$this->name));
 		}
 

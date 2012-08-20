@@ -1,5 +1,9 @@
 <?php
 	class AdmAtom extends Node implements ADM {
+		#########################
+		# PHP 5.3 compatible
+		# AdmDispatcher_trait replaces this in PHP 5.4
+
 		function insertNode($n) {
 			$n->setParent($this);
 			$n->insert();
@@ -50,6 +54,7 @@
 			}
 			return null;
 		}
+		#########################
 
 		protected $objective;
 		protected $mandatory;
@@ -73,13 +78,13 @@
 			$DBc->sqlQuery("DELETE FROM ach_player_atom WHERE apa_atom='".$this->id."'");
 		}
 
-		function update() {
+		function update() { // write updated data to database
 			global $DBc;
 			
 			$DBc->sqlQuery("UPDATE ach_atom SET atom_mandatory='".$this->getMandatory()."',atom_ruleset='".$DBc->sqlEscape($this->getRuleset())."',atom_ruleset_parsed='".$DBc->sqlEscape($this->getRulesetParsed())."' WHERE atom_id='".$this->id."'");
 		}
 
-		function insert() {
+		function insert() { // insert atoms as new row
 			global $DBc;
 
 			$DBc->sqlQuery("INSERT INTO ach_atom (atom_objective,atom_mandatory,atom_ruleset,atom_ruleset_parsed) VALUES ('".$this->getObjective()."','".$this->getMandatory()."','".$DBc->sqlEscape($this->getRuleset())."','".$DBc->sqlEscape($this->getRulesetParsed())."')");
@@ -125,7 +130,7 @@
 			return $this->ruleset_parsed;
 		}
 
-		private function parse() {
+		private function parse() { // parsing the ruleset
 			/*
 VALUE _money AS $money {
 	
@@ -219,7 +224,7 @@ function '.$func.'('.$match[2][$key].',$_P,$_CB) {
 			#GRANT;#
 			$match = array();
 			preg_match_all("#GRANT;#",$this->ruleset,$match);
-			foreach($match[0] as $key=>$elem) {
+			foreach($match[0] as $elem) {
 				$tmp = '$_P->grant();';
 
 				//replace
@@ -229,7 +234,7 @@ function '.$func.'('.$match[2][$key].',$_P,$_CB) {
 			#DENY;#
 			$match = array();
 			preg_match_all("#DENY;#",$this->ruleset,$match);
-			foreach($match[0] as $key=>$elem) {
+			foreach($match[0] as $elem) {
 				$tmp = '$_P->deny();';
 
 				//replace
@@ -239,7 +244,7 @@ function '.$func.'('.$match[2][$key].',$_P,$_CB) {
 			#UNLOCK;#
 			$match = array();
 			preg_match_all("#UNLOCK;#",$this->ruleset,$match);
-			foreach($match[0] as $key=>$elem) {
+			foreach($match[0] as $elem) {
 				$tmp = '$_P->unlock();';
 
 				//replace
@@ -249,7 +254,7 @@ function '.$func.'('.$match[2][$key].',$_P,$_CB) {
 			#RESET;#
 			$match = array();
 			preg_match_all("#RESET;#",$this->ruleset,$match);
-			foreach($match[0] as $key=>$elem) {
+			foreach($match[0] as $elem) {
 				$tmp = '$_P->reset_();';
 
 				//replace
@@ -259,7 +264,7 @@ function '.$func.'('.$match[2][$key].',$_P,$_CB) {
 			#UNLOCK_ALL;#
 			$match = array();
 			preg_match_all("#UNLOCK_ALL;#",$this->ruleset,$match);
-			foreach($match[0] as $key=>$elem) {
+			foreach($match[0] as $elem) {
 				$tmp = '$_P->unlock_all();';
 
 				//replace
@@ -269,7 +274,7 @@ function '.$func.'('.$match[2][$key].',$_P,$_CB) {
 			#RESET_ALL;#
 			$match = array();
 			preg_match_all("#RESET_ALL;#",$this->ruleset,$match);
-			foreach($match[0] as $key=>$elem) {
+			foreach($match[0] as $elem) {
 				$tmp = '$_P->reset_all();';
 
 				//replace
@@ -279,7 +284,7 @@ function '.$func.'('.$match[2][$key].',$_P,$_CB) {
 			#FINAL VALUE;#
 			$match = array();
 			preg_match_all("#FINAL VALUE;#",$this->ruleset,$match);
-			foreach($match[0] as $key=>$elem) {
+			foreach($match[0] as $elem) {
 				$tmp = '$_P->unregisterValue($_IDENT,$_CB);';
 
 				//replace
@@ -289,7 +294,7 @@ function '.$func.'('.$match[2][$key].',$_P,$_CB) {
 			#FINAL ENTITY;#
 			$match = array();
 			preg_match_all("#FINAL ENTITY;#",$this->ruleset,$match);
-			foreach($match[0] as $key=>$elem) {
+			foreach($match[0] as $elem) {
 				$tmp = '$_P->unregisterEntity($_IDENT,$_CB);';
 
 				//replace
@@ -298,7 +303,7 @@ function '.$func.'('.$match[2][$key].',$_P,$_CB) {
 			#FINAL EVENT;#
 			$match = array();
 			preg_match_all("#FINAL EVENT;#",$this->ruleset,$match);
-			foreach($match[0] as $key=>$elem) {
+			foreach($match[0] as $elem) {
 				$tmp = '$_P->unregisterEvent($_IDENT,$_CB);';
 
 				//replace

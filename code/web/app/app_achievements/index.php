@@ -52,15 +52,15 @@ require_once("class/AchMenuNode_class.php");
 require_once("class/AchSummary_class.php");
 require_once("class/AchCategory_class.php");
 require_once("class/AchAchievement_class.php");
-require_once("class/AchPerk_class.php");
+require_once("class/AchTask_class.php");
 require_once("class/AchObjective_class.php");
 
 require_once("fb/facebook.php");
 
 // Update user acces on Db
-#$DBc = ryDB::getInstance(APP_NAME."_test");
+$DBc = ryDB::getInstance(APP_NAME."_test");
 #$DBc = ryDB::getInstance(APP_NAME);
-$DBc = ryDB::getInstance("ahufler");
+#$DBc = ryDB::getInstance("ahufler");
 
 $c = "";
 if(!$_USER->isIG()) {
@@ -85,32 +85,10 @@ if(!$_USER->isIG()) {
 	</script>;';
 	}
 	else {
-	 echo var_export($facebook->getUser(),true);
-	// Do the wall post.
-	try {
-
-	/*$facebook->api("/me/feed", "post", array(
-				message => "My character Talvela just achieved \"Bejeweled\" on Ryzom!",
-				picture => "http://www.3025-game.de/special/app_achievements/pic/icon/test.png",
-				link => "http://www.ryzom.com",
-				name => "Ryzom",
-				caption => "Join and play for fee!"
-			));*/
-
-	} catch (FacebookApiException $e) {
-    echo $e;
-	$login_url = $facebook->getLoginUrl( array(
-                       'scope' => 'publish_stream'
-                       )); 
-        echo 'Please <a href="' . $login_url . '">login.</a>';
-        #error_log($e->getType());
-        #error_log($e->getMessage());
+	 $DBc->sqlQuery("INSERT INTO ach_fb_token (aft_player,aft_token,aft_date,aft_allow) VALUES ('".$_USER->getID()."','".$DBc->sqlEscape($facebook->getAccessToken())."','".time()."','1') ON DUPLICATE KEY UPDATE aft_token='".$DBc->sqlEscape($facebook->getAccessToken())."', aft_date='".time()."'");
   }
-
-
-	}
 	
-	
+
 }
 
 if(!$_USER->isIG && $_CONF['enable_webig'] == false) {

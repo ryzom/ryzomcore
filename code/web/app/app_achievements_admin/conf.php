@@ -16,4 +16,6 @@
 	$_CONF['char_mysql_user'] = "root";
 	$_CONF['char_mysql_pass'] = "";
 	$_CONF['char_mysql_database'] = "app_achievements";
+
+	$_CONF['langs'] = array('en','de','fr','es','ru');
 ?>

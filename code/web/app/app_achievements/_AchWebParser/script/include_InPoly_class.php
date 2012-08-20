@@ -58,6 +58,8 @@
 				}
 			}
 
+			return false;
+
 		}
 			
 		function pointStringToCoordinates($pointString) {

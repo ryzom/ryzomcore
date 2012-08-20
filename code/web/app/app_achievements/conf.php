@@ -11,7 +11,7 @@
 	$_CONF['enable_offgame'] = true;
 	$_CONF['image_url'] = "http://www.3025-game.de/special/app_achievements/";
 
-	$_CONF['use_fb'] = true;
+	$_CONF['use_fb'] = false;
 	$_CONF['fb_id'] = "447985781893176";
 	$_CONF['fb_secret'] = "f953772f1f7d871db022a6023e7a3f42";
 ?>

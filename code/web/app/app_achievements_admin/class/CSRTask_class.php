@@ -1,5 +1,9 @@
 <?php
-	class CSRPerk extends AchPerk implements CSR {
+	class CSRTask extends AchTask implements CSR {
+		#########################
+		# PHP 5.3 compatible
+		# CSRDispatcher_trait replaces this in PHP 5.4
+
 		function grantNode($path,$player) {
 			#echo "start: ".$path." id: ".$this->getID()."<br>";
 			if(is_numeric($path)) {
@@ -63,8 +67,9 @@
 		private function hasParent() {
 			return ($this->parent != null);
 		}
+		#########################
 		
-		function CSRPerk($data,$parent) {
+		function CSRTask($data,$parent) {
 			parent::__construct($data,$parent);
 		}
 
@@ -75,10 +80,10 @@
 		function grant($pid) {
 			global $DBc;
 
-			$DBc->sqlQuery("INSERT INTO ach_player_perk (app_perk,app_player,app_date) VALUES ('".$this->getID()."','".$pid."','".time()."')");
+			$DBc->sqlQuery("INSERT INTO ach_player_task (apt_task,apt_player,apt_date) VALUES ('".$this->getID()."','".$pid."','".time()."')");
 			$this->done = time();
 			#echo $this->idx."<br>";
-			$this->parent->setPerkDone($this->id);
+			$this->parent->setTaskDone($this->id);
 
 			$iter = $this->getIterator();
 			while($iter->hasNext()) {
@@ -90,9 +95,9 @@
 		function deny($pid) {
 			global $DBc;
 			
-			$DBc->sqlQuery("DELETE FROM ach_player_perk WHERE app_perk='".$this->getID()."' AND app_player='".$pid."'");
+			$DBc->sqlQuery("DELETE FROM ach_player_task WHERE apt_task='".$this->getID()."' AND apt_player='".$pid."'");
 			$this->done = 0;
-			$this->parent->setPerkOpen($this->id);
+			$this->parent->setTaskOpen($this->id);
 
 			$iter = $this->getIterator();
 			while($iter->hasNext()) {

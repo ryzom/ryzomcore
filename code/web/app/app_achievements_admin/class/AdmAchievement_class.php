@@ -1,10 +1,8 @@
 <?php
 	class AdmAchievement extends AchAchievement implements ADM {
-		/*function insertNode($n) {
-			$n->setParent($this);
-			$n->insert();
-			$this->addChild($n);
-		}*/
+		#########################
+		# PHP 5.3 compatible
+		# AdmDispatcher_trait replaces this in PHP 5.4
 
 		function removeNode($id) {
 			$res = $this->getChildDataByID($id);
@@ -50,13 +48,33 @@
 			}
 			return null;
 		}
+		#########################
 		
 		function AdmAchievement($data,$parent) {
 			parent::__construct($data,$parent);
 		}
 
 		protected function makeChild($d) {
-			return new AdmPerk($d,$this);
+			return new AdmTask($d,$this);
+		}
+
+		function getLang($lang) {
+			global $DBc;
+
+			$res = $DBc->sqlQuery("SELECT * FROM ach_achievement_lang WHERE aal_achievement='".$this->getID()."' AND aal_lang='".$lang."'");
+
+			return array(0=>$res[0]['aal_name'],1=>$res[0]['aal_template']);
+		}
+
+		function setLang($lang,$txt,$tpl) {
+			global $DBc,$_USER;
+
+			$DBc->sqlQuery("INSERT INTO ach_achievement_lang (aal_achievement,aal_lang,aal_name,aal_template) VALUES ('".$this->getID()."','".$DBc->sqlEscape($lang)."','".$DBc->sqlEscape($txt)."',".mkn($tpl).") ON DUPLICATE KEY UPDATE aal_name='".$DBc->sqlEscape($txt)."',aal_template=".mkn($tpl)."");
+
+			if($_USER->getLang() == $lang) {
+				$this->name = $txt;
+				$this->template = $tpl;
+			}
 		}
 		
 		#@overrides AdmDispatcher::insertNode()
@@ -69,7 +87,7 @@
 			global $DBc;
 
 			$DBc->sqlQuery("DELETE FROM ach_achievement WHERE aa_id='".$this->getID()."'");
-			$DBc->sqlQuery("DELETE FROM ach_player_achievement WHERE apa_id='".$this->getID()."'");
+			$DBc->sqlQuery("DELETE FROM ach_objective WHERE ao_metalink='".$this->getID()."'");
 			$DBc->sqlQuery("DELETE FROM ach_achievement_lang WHERE NOT EXISTS (SELECT * FROM ach_achievement WHERE aa_id=aal_achievement)");
 			
 			$iter = $this->getIterator();
@@ -83,7 +101,7 @@
 		function update() {
 			global $DBc;
 
-			$DBc->sqlQuery("UPDATE ach_achievement SET aa_category='".$this->getCategory()."',aa_parent=NULL,aa_tie_race=".mkn($this->getTieRace()).",aa_tie_cult=".mkn($this->getTieCult()).",aa_tie_civ=".mkn($this->getTieCiv()).",aa_image='".$DBc->sqlEscape($this->getImage())."',aa_dev='".$this->getDev()."' WHERE aa_id='".$this->getID()."'");
+			$DBc->sqlQuery("UPDATE ach_achievement SET aa_category='".$this->getCategory()."',aa_parent=".mkn($this->getParentID()).",aa_tie_race=".mkn($this->getTieRace()).",aa_tie_cult=".mkn($this->getTieCult()).",aa_tie_civ=".mkn($this->getTieCiv()).",aa_image='".$DBc->sqlEscape($this->getImage())."',aa_dev='".$this->getDev()."',aa_sticky='".$DBc->sqlEscape($this->getSticky())."' WHERE aa_id='".$this->getID()."'");
 
 			#MISSING: update lang entry
 			$DBc->sqlQuery("INSERT INTO ach_achievement_lang (aal_achievement,aal_lang,aal_name,aal_template) VALUES ('".$this->getID()."','en','".$DBc->sqlEscape($this->getName())."',".mkn($this->getTemplate()).") ON DUPLICATE KEY UPDATE aal_name='".$DBc->sqlEscape($this->getName())."',aal_template=".mkn($this->getTemplate())."");
@@ -94,7 +112,7 @@
 
 			$this->dev = 1;
 
-			$DBc->sqlQuery("INSERT INTO ach_achievement (aa_category,aa_parent,aa_tie_race,aa_tie_cult,aa_tie_civ,aa_image,aa_dev) VALUES ('".$this->getCategory()."',NULL,".mkn($this->getTieRace()).",".mkn($this->getTieCult()).",".mkn($this->getTieCiv()).",'".$DBc->sqlEscape($this->getImage())."','1')");
+			$DBc->sqlQuery("INSERT INTO ach_achievement (aa_category,aa_parent,aa_tie_race,aa_tie_cult,aa_tie_civ,aa_image,aa_dev,aa_sticky) VALUES ('".$this->getCategory()."',".mkn($this->getParentID()).",".mkn($this->getTieRace()).",".mkn($this->getTieCult()).",".mkn($this->getTieCiv()).",'".$DBc->sqlEscape($this->getImage())."','1','".$DBc->sqlEscape($this->getSticky())."')");
 			$id = $DBc->insertID();
 			$this->setID($id);
 
@@ -130,14 +148,38 @@
 			$this->template = $t;
 		}
 
-		function orderPerks() {
-			$iter = $this->getIterator();
+		function orderTasks() {
+
 			$i = 0;
+			$start = $this->findParentID(null);
+
+			while($start != null) {
+				$start->setTorder($i);
+				$start->update();
+				$i++;
+				#echo $i;
+				$start = $this->findParentID($start->getID());
+			}
+		}
+
+		private function findParentID($id) {
+			$iter = $this->getIterator();
 			while($iter->hasNext()) {
 				$curr = $iter->getNext();
-
-				$curr->setPorder($i);
+				if($curr->getParentID() == $id) {
+					return $curr;
+				}
 			}
+
+			return null;
+		}
+
+		function setParentID($p) {
+			$this->parent_id = $p;
+		}
+
+		function setSticky($s) {
+			$this->sticky = $s;
 		}
 	}
 ?>

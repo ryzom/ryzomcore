@@ -1,5 +1,9 @@
 <?php
 	class CSRCategory extends AchCategory implements CSR {
+		#########################
+		# PHP 5.3 compatible
+		# CSRDispatcher_trait replaces this in PHP 5.4
+
 		function grantNode($path,$player) {
 			#echo "start: ".$path." id: ".$this->getID()."<br>";
 			if(is_numeric($path)) {
@@ -63,6 +67,7 @@
 		private function hasParent() {
 			return ($this->parent != null);
 		}
+		#########################
 		
 		function CSRCategory($id,$race,$cult = null,$civ = null) {
 			parent::__construct($id,$race,$cult,$civ);
@@ -80,32 +85,5 @@
 			return false; // category can't deny!
 		}
 
-		/*function setAchOpen($idx,$state) {
-			if($state == false) {
-				$this->unsetOpen($idx);
-				if(!in_array($idx,$this->child_done)) {
-					$this->child_done[] = $idx;
-				}
-			}
-			else {
-				if(!in_array($idx,$this->child_open)) {
-					$this->child_open[] = $idx;
-				}
-			}
-		}
-
-		function setAchDone($idx,$state) {
-			if($state == false) {
-				$this->unsetDone($idx);
-				if(!in_array($idx,$this->child_open)) {
-					$this->child_open[] = $idx;
-				}
-			}
-			else {
-				if(!in_array($idx,$this->child_done)) {
-					$this->child_done[] = $idx;
-				}
-			}
-		}*/
 	}
 ?>

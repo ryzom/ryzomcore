@@ -1,6 +1,5 @@
 <?php
 	class AchCategory extends AchList implements Tieable {
-		#protected $id;
 		protected $ties_cult;
 		protected $ties_civ;
 		protected $ties_race;
@@ -9,6 +8,7 @@
 		protected $ties_civ_dev;
 		protected $cult;
 		protected $civ;
+		protected $heroic;
 
 		function AchCategory($id,$race = null,$cult = null,$civ = null) {
 			global $DBc,$_USER;
@@ -36,7 +36,7 @@
 
 			$this->id = $DBc->sqlEscape($id);
 
-			$res = $DBc->sqlQuery("SELECT * FROM ach_achievement LEFT JOIN (ach_achievement_lang) ON (aal_lang='".$_USER->getLang()."' AND aal_achievement=aa_id) WHERE aa_category='".$this->id."' AND (aa_parent IS NULL OR NOT EXISTS (SELECT * FROM ach_perk WHERE ap_achievement=aa_id AND NOT EXISTS (SELECT * FROM ach_player_perk WHERE app_player='".$_USER->getID()."' AND app_perk=ap_id))) AND (aa_tie_race IS NULL OR aa_tie_race LIKE '".$race."') AND (aa_tie_cult IS NULL OR aa_tie_cult LIKE '".$cult."') AND (aa_tie_civ IS NULL OR aa_tie_civ LIKE '".$civ."') ORDER by aal_name ASC");
+			$res = $DBc->sqlQuery("SELECT * FROM ach_achievement LEFT JOIN (ach_achievement_lang) ON (aal_lang='".$_USER->getLang()."' AND aal_achievement=aa_id) WHERE aa_category='".$this->id."' AND (aa_tie_race IS NULL OR aa_tie_race LIKE '".$race."') AND (aa_tie_cult IS NULL OR aa_tie_cult LIKE '".$cult."') AND (aa_tie_civ IS NULL OR aa_tie_civ LIKE '".$civ."') ORDER by aa_sticky DESC, aal_name ASC");
 
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
@@ -49,6 +49,9 @@
 					$this->addDone($tmp); #AchList::addDone()
 				}
 			}
+
+			$res = $DBc->sqlQuery("SELECT ac_heroic FROM ach_category WHERE ac_id='".$this->id."'");
+			$this->heroic = $res[0]['ac_heroic'];
 			
 			//load counts for tie determination
 			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_cult IS NOT NULL AND aa_category='".$this->id."' AND aa_dev='0'");
@@ -75,10 +78,6 @@
 			return new AchAchievement($a,$this);
 		}
 
-		#function getID() {
-		#	return $this->id;
-		#}
-
 		function isTiedCult() {
 			return ($this->ties_cult > 0);
 		}
@@ -101,6 +100,10 @@
 
 		function getCurrentCult() {
 			return $this->cult;
+		}
+
+		function isHeroic() {
+			return ($this->heroic == 1);
 		}
 	}
 ?>

@@ -42,6 +42,7 @@
 				return false;
 			}
 			mysql_select_db($db,$this->DBc) or $this->error(mysql_error());
+			return true;
 		}
 
 		function resetStats() {
@@ -95,7 +96,7 @@
 				else {
 					return $res;
 				}
-				mysql_free_result($res);
+				//mysql_free_result($res);
 			}
 			else {
 				return false;

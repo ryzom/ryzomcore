@@ -1,25 +1,8 @@
 <?php
 	class AdmMenu extends AchMenu {
-		/*function insertNode($n) {
-			$n->setParent($this);
-			$n->insert();
-			$this->addChild($n);
-		}*/
-
-		/*function removeNode($id) {
-			$res = $this->getChildDataByID($id);
-			if($res != null) {
-				$res->delete_me();
-				$this->removeChild($id);
-			}
-		}*/
-
-		/*function updateNode($id) { // PROBABLY USELESS!
-			$res = $this->getChildDataByID($id);
-			if($res != null) {
-				$res->update();
-			}
-		}*/
+		#########################
+		# PHP 5.3 compatible
+		# AdmDispatcher_trait replaces this in PHP 5.4
 
 		function getPathID($path = "") {
 			if($path != "") {
@@ -50,6 +33,7 @@
 			}
 			return null;
 		}
+		#########################
 		
 		function AdmMenu($open) {
 			parent::__construct($open);
@@ -113,7 +97,6 @@
 		}
 
 		function getNode($id) { // try to find the MenuNode that has the given ID. Return null on failure.
-			#echo "<br>getNode(".$id.")";
 			$res = $this->getChildDataByID($id);
 			if($res != null) {
 				return $res;
@@ -146,14 +129,5 @@
 
 			return (max($val)+1);
 		}
-
-		/*function unsetChild($id) { // remove child with given ID from nodes list; unset should destruct it.
-			foreach($this->nodes as $key=>$elem) {
-				if($elem->getID() == $id) {
-					unset($this->nodes[$key]);
-					return null;
-				}
-			}
-		}*/
 	}
 ?>

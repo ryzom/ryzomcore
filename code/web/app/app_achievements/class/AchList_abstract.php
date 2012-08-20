@@ -3,7 +3,7 @@
 		/*---------------------------
 			This class organizes nodes to distinguish between "open" and "done" nodes.
 
-			child_open and child_done refer to the index set in Parentum::nodes[]
+			child_open and child_done refer to  Parentum::nodes
 		---------------------------*/
 
 		protected $child_done;
@@ -25,12 +25,10 @@
 		}
 
 		final function hasOpen() {
-			#echo "hasOpen: ".$this->child_open->getSize()."<br>";
 			return ($this->child_open->getSize() != 0);
 		}
 
 		final function hasDone() {
-			#echo "hasDone: ".$this->child_done->getSize()."<br>";
 			return ($this->child_done->getSize() != 0);
 		}
 

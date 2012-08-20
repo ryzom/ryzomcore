@@ -29,7 +29,6 @@
 		}
 
 		function inorder() {
-			#echo "<br>inorder: ";
 			$this->AVLinorder($this->root);
 		}
 
@@ -145,6 +144,7 @@
 		}
 
 		private function balance($r) {
+			#return $r;
 			if($r->bal() == -2) {
 				$lc = $r->getLeft();
 				if($lc->getHeightLeft() >= $lc->getHeightRight()) {

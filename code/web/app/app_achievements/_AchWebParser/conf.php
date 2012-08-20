@@ -18,4 +18,8 @@
 	$CONF['char_mysql_database'] = "app_achievements";
 
 	$CONF['data_source'] = array("PDRtoXMLdriver");
+
+	$CONF['facebook'] = false;
+	$CONF['fb_id'] = "447985781893176";
+	$CONF['fb_secret'] = "f953772f1f7d871db022a6023e7a3f42";
 ?>

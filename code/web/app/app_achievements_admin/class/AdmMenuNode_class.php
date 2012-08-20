@@ -1,5 +1,5 @@
 <?php
-	class AdmMenuNode extends AchMenuNode implements ADM { #MISSING: da fehlt die komplette logik für sub-sub-menüs!!! DU VOLLHIRT!
+	class AdmMenuNode extends AchMenuNode implements ADM {
 		private $ach_count;
 	
 		function AdmMenuNode($data,$parent) {
@@ -79,6 +79,7 @@
 			global $DBc,$_USER;
 
 			$DBc->sqlQuery("UPDATE ach_category SET ac_parent=".mkn($this->getParentID()).",ac_order='".$this->getOrder()."',ac_image=".mkn($this->getImage()).",ac_dev='".$this->getDev()."' WHERE ac_id='".$this->getID()."'");
+			#echo "<br>".$this->getImage()." =>UPDATE ach_category SET ac_parent=".mkn($this->getParentID()).",ac_order='".$this->getOrder()."',ac_image=".mkn($this->getImage()).",ac_dev='".$this->getDev()."' WHERE ac_id='".$this->getID()."'";
 
 			#MISSING: update lang entry
 			$DBc->sqlQuery("INSERT IGNORE INTO ach_category_lang (acl_category,acl_lang,acl_name) VALUES ('".$this->getID()."','".$_USER->getLang()."','".$DBc->sqlEscape($this->getName())."') ON DUPLICATE KEY UPDATE acl_name='".$DBc->sqlEscape($this->getName())."'");
@@ -151,7 +152,6 @@
 			$val = array();
 			$iter = $this->getIterator();
 			while($iter->hasNext()) {
-			#foreach($this->nodes as $elem) {
 				$elem = $iter->getNext();
 				$val[] = $elem->getOrder();
 			}

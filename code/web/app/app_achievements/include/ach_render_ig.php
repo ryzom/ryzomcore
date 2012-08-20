@@ -110,7 +110,7 @@
 	function ach_render_yubopoints() {
 		global $DBc,$_USER,$_CONF;
 
-		$res = $DBc->sqlQuery("SELECT sum(ap_value) as anz FROM ach_perk,ach_player_perk WHERE ap_id=app_perk AND app_player='".$_USER->getID()."'");
+		$res = $DBc->sqlQuery("SELECT sum(at_value) as anz FROM ach_task,ach_player_task WHERE ap_id=apt_task AND apt_player='".$_USER->getID()."'");
 
 		$html = "<font size='32px'>".$_USER->getName()."&nbsp;<img src='".$_CONF['image_url']."pic/yubo_done.png'>&nbsp;".max(0,$res[0]['anz'])."</font>";
 
@@ -176,6 +176,10 @@
 		#return "";
 		$html = "";
 
+		if($cat->isHeroic() && !$cat->hasDone()) {
+			return "<center style='font-size:24px;'>You haven't earned any Heroic Deeds so far.</center>";
+		}
+
 		if($cat->isTiedCult() || $cat->isTiedCiv()) {
 			$html .= ach_render_tiebar($cat->getCurrentCult(),$cat->getCurrentCiv(),$cat);
 		}
@@ -183,22 +187,22 @@
 		$iter = $cat->getDone();
 		while($iter->hasNext()) {
 			$curr = $iter->getNext();
-		#$sz = sizeof($tmp);
-		#for($i=0;$i<$sz;$i++) {
-			#echo "A";
-			if($curr->inDev()) {
+
+			if($curr->inDev() || !$curr->parentDone()) {
 				continue;
 			}
 			$html .= ach_render_achievement_done($curr);
 		}
 
+		if($cat->isHeroic()) {
+			return $html;
+		}
+
 		$iter = $cat->getOpen();
 		while($iter->hasNext()) {
 			$curr = $iter->getNext();
-		#$sz = sizeof($tmp);
-		#for($i=0;$i<$sz;$i++) {
-			#echo "B";
-			if($curr->inDev()) {
+
+			if($curr->inDev() || !$curr->parentDone()) {
 				continue;
 			}
 			$html .= ach_render_achievement_open($curr);
@@ -218,9 +222,13 @@
 						<tr>
 							<td width='70px'><img src='".$_CONF['image_url']."pic/icon/".$ach->getImage()."'></td>
 							<td><center><font size='22px'><b>".$ach->getName()."</b></font></center>
-								<table>".ach_render_perk_done($ach)."</table>
+								<table>".ach_render_task_done($ach)."</table>
 							</td>
-							<td width='35px'><font size='24px' color='#000000'>".$ach->getValueDone()."</font><br><img src='".$_CONF['image_url']."pic/yubo_done.png'></td>
+							<td width='35px'>";
+		if(!$ach->isHeroic()) {
+			$html .= "<font size='24px' color='#000000'>".$ach->getValueDone()."</font><br><img src='".$_CONF['image_url']."pic/yubo_done.png'>";
+		}
+		$html .= "</td>
 						</tr>
 					</table>
 				</td>
@@ -242,7 +250,7 @@
 						<tr>
 							<td width='70px'><img src='".$_CONF['image_url']."pic/icon/grey/".$ach->getImage()."'></td>
 							<td><center><font size='22px'><b>".$ach->getName()."</b></font></center>
-								<table>".ach_render_perk_open($ach)."</table>
+								<table>".ach_render_task_open($ach)."</table>
 							</td>
 							<td width='35px'><font size='22px' color='#000000'>".$ach->getValueOpen()."</font><br><img src='".$_CONF['image_url']."pic/yubo_pending.png'></td>
 						</tr>
@@ -255,40 +263,38 @@
 		return $html;
 	}
 
-	function ach_render_perk_open(&$ach) {
+	function ach_render_task_open(&$ach) {
 		$html = "";
 
-		$perk_list = $ach->getOpen();
-		$perk = $perk_list->getNext();
+		$task_list = $ach->getOpen();
+		$task = $task_list->getNext();
 
-		if($perk->inDev()) {
+		if($task->inDev()) {
 			return $html;
 		}
 		
-		if($perk->getName() != null) {
-			$html .= "<tr><td><font color='#999999' size='12px'><b>".$perk->getDisplayName()."</b></font></td></tr><tr><td>&nbsp;</td></tr>";
+		if($task->getName() != null) {
+			$html .= "<tr><td><font color='#999999' size='12px'><b>".$task->getDisplayName()."</b></font></td></tr><tr><td>&nbsp;</td></tr>";
 		}
-		if($perk->objDrawable()) {
-			$html .= "<tr><td>".ach_render_obj_list($perk->getIterator())."</td></tr>";
+		if($task->objDrawable()) {
+			$html .= "<tr><td>".ach_render_obj_list($task->getIterator())."</td></tr>";
 		}
 
 		return $html;
 	}
 
-	function ach_render_perk_done(&$ach) {
+	function ach_render_task_done(&$ach) {
 		global $_CONF;
 		$html = "";
 
-		$perk_list = $ach->getDone();
-		while($perk_list->hasNext()) {
-			$perk = $perk_list->getNext();
+		$task_list = $ach->getDone();
+		while($task_list->hasNext()) {
+			$task = $task_list->getNext();
 
-		#foreach($perk_list as $elem) {
-			#$perk = $ach->getChild($elem);
-			if($perk->inDev()) {
+			if($task->inDev()) {
 				continue;
 			}
-			$html .= "<tr><td><font color='#66CC00'><b>".$perk->getDisplayName()."</b></font> ( ".date('d.m.Y',$perk->getDone())." ) <img src='".$_CONF['image_url']."pic/yubo_done_small.png' /> ".$perk->getValue()."</td></tr>";
+			$html .= "<tr><td><font color='#66CC00'><b>".$task->getDisplayName()."</b></font> ( ".date('d.m.Y',$task->getDone())." ) <img src='".$_CONF['image_url']."pic/yubo_done_small.png' /> ".$task->getValue()."</td></tr>";
 		}
 
 		return $html;
@@ -301,7 +307,6 @@
 		$skip = false;
 
 		while($obj->hasNext()) {
-		#foreach($obj as $elem) {
 			$elem = $obj->getNext();
 			if(($i%2) == 0) {
 				$html .= "<tr>";
@@ -366,7 +371,7 @@
 
 	function ach_render_obj_meta(&$obj) {
 		global $_CONF;
-		$html = "";
+
 		if($obj->isdone()) {
 			$col = "#71BE02";
 			$grey = "";
@@ -402,6 +407,11 @@
 	}
 
 	function ach_render_progressbar($prog,$val,$width) {
+		$hero = false;
+		if($val == false) {
+			$hero = true;
+			$val = $prog;
+		}
 		$val = max(1,$val);
 		$left = floor($width*(100*($prog/$val))/100);
 		$left = max(1,$left);
@@ -413,13 +423,18 @@
 		<table width='".$width."px' cellspacing='0' cellpadding='0'>
 			<tr>
 				<td bgcolor='#66CC00' width='".$left."px'><font color='#000000'>";
-				if(($prog/$val) > 0.5) {
-					$html .= "&nbsp;".nf($prog)." / ".nf($val)."&nbsp;";
+				if($hero == false) {
+					if(($prog/$val) > 0.5) {
+						$html .= "&nbsp;".nf($prog)." / ".nf($val)."&nbsp;";
+					}
+					$html .= "</font></td>
+					<td align='left' bgcolor='#00000066'><font color='#FFFFFF'>";
+					if(($prog/$val) <= 0.5) {
+						$html .= "&nbsp;".nf($prog)." / ".nf($val)."&nbsp;";
+					}
 				}
-				$html .= "</font></td>
-				<td align='left' bgcolor='#00000066'><font color='#FFFFFF'>";
-				if(($prog/$val) <= 0.5) {
-					$html .= "&nbsp;".nf($prog)." / ".nf($val)."&nbsp;";
+				else {
+					$html .= "&nbsp;".nf($prog)."&nbsp;";
 				}
 				$html .= "</font></td>
 			</tr>
@@ -451,7 +466,16 @@
 				$html .= "<tr>";
 			}
 
-			$html .= "<td width='225px'>".$elem[0]."<br>".ach_render_progressbar($elem[1],$elem[2],150)."</td>";
+			$html .= "<td width='225px'>".$elem[0]."<br>";
+			if($elem[3] == false) {
+				$html .= ach_render_progressbar($elem[1],$elem[2],150);
+			}
+			else {
+				$html .= ach_render_progressbar($elem[1],false,150);
+			}
+
+			$html .= "</td>";
+
 			$sum_done += $elem[1];
 			$sum_total += $elem[2];
 

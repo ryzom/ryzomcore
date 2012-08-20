@@ -1,5 +1,8 @@
 <?php
 
+$microstart = explode(' ',microtime());
+$start_time = $microstart[0] + $microstart[1];
+
 error_reporting(E_ALL ^ E_NOTICE);
 ini_set("display_errors","1");
 
@@ -49,8 +52,9 @@ require_once($_CONF['app_achievements_path']."class/AchMenu_class.php");
 require_once($_CONF['app_achievements_path']."class/AchMenuNode_class.php");
 require_once($_CONF['app_achievements_path']."class/AchCategory_class.php");
 require_once($_CONF['app_achievements_path']."class/AchAchievement_class.php");
-require_once($_CONF['app_achievements_path']."class/AchPerk_class.php");
+require_once($_CONF['app_achievements_path']."class/AchTask_class.php");
 require_once($_CONF['app_achievements_path']."class/AchObjective_class.php");
+require_once($_CONF['app_achievements_path']."class/AchSummary_class.php");
 
 require_once("class/ADM_inter.php");
 #require_once("class/AdmDispatcher_trait.php");
@@ -58,7 +62,7 @@ require_once("class/AdmMenu_class.php");
 require_once("class/AdmMenuNode_class.php");
 require_once("class/AdmCategory_class.php");
 require_once("class/AdmAchievement_class.php");
-require_once("class/AdmPerk_class.php");
+require_once("class/AdmTask_class.php");
 require_once("class/AdmObjective_class.php");
 require_once("class/AdmAtom_class.php");
 
@@ -67,7 +71,7 @@ require_once("class/CSR_inter.php");
 #require_once("class/CSRMenu_class.php");
 require_once("class/CSRCategory_class.php");
 require_once("class/CSRAchievement_class.php");
-require_once("class/CSRPerk_class.php");
+require_once("class/CSRTask_class.php");
 require_once("class/CSRObjective_class.php");
 require_once("class/CSRAtom_class.php");
 
@@ -76,7 +80,9 @@ $DBc = ryDB::getInstance("app_achievements_test");
 
 function mkn($x) {
 	global $DBc;
-	if($x == null || strtolower($x) == "null") {
+	#echo "<br>".$x." =>";
+	if($x == null || strtolower($x) == "null" || $x == "") {
+		#echo "NULL";
 		return "NULL";
 	}
 	else {
@@ -86,7 +92,7 @@ function mkn($x) {
 
 
 $c = "<script type='text/javascript'>
-		<!--
+
 		function hs(id,mod) {
 			if(document.getElementById(id).style.display == 'none') {
 				document.getElementById(id).style.display=mod;
@@ -170,35 +176,37 @@ $c .= "</div></td>
 			if($open != 0) {
 				$cat = new AdmCategory($open,'%','%','%');
 
-				if($_REQUEST['act'] == "insert_atom") {
+				if($_REQUEST['act'] == "ach_save") {
+					$ach = $cat->getElementByPath($_REQUEST['id']);
+
+					if(is_array($_REQUEST['a_name'])) {
+						foreach($_REQUEST['a_name'] as $key=>$elem) {
+							$ach->setLang($key,$_REQUEST['a_name'][$key],$_REQUEST['a_tpl'][$key]);
+						}
+					}
+				}
+
+				if($_REQUEST['act'] == "task_save") {
+					$task = $cat->getElementByPath($_REQUEST['id']);
+
+					if(is_array($_REQUEST['t_name'])) {
+						foreach($_REQUEST['t_name'] as $key=>$elem) {
+							$task->setLang($key,$_REQUEST['t_name'][$key],$_REQUEST['t_tpl'][$key]);
+						}
+					}
+				}
+
+				if($_REQUEST['act'] == "obj_save") {
 					$obj = $cat->getElementByPath($_REQUEST['id']);
-					
-					if($obj != null) {
-						$atom = new AdmAtom(array(),$obj);
-						$atom->setRuleset($_REQUEST['atom_ruleset']);
-						$atom->setMandatory($_REQUEST['atom_mandatory']);
-						$atom->setObjective($obj->getID());
 
-						$obj->insertNode($atom);
+					if(is_array($_REQUEST['o_name'])) {
+						foreach($_REQUEST['o_name'] as $key=>$elem) {
+							$obj->setLang($key,$_REQUEST['o_name'][$key]);
+						}
 					}
 				}
 
-				if($_REQUEST['act'] == "update_atom") {
-					$atom = $cat->getElementByPath($_REQUEST['id']);
-					
-					if($atom != null) {
-						$atom->setRuleset($_REQUEST['atom_ruleset']);
-						$atom->setMandatory($_REQUEST['atom_mandatory']);
-
-						$atom->update();
-					}
-				}
-
-				if($_REQUEST['act'] == "delete") {
-					$elem = $cat->getElementByPath($_REQUEST['id']);
-					$par = $elem->getParent();
-					$par->removeNode($elem->getID());
-				}
+				
 
 				$c .= atom_render_category($cat);
 			}
@@ -364,12 +372,30 @@ $c .= "</div></td>
 			if($open != 0) {
 				$cat = new AdmCategory($open,$_REQUEST['race'],$_REQUEST['cult'],$_REQUEST['civ']);
 
+				$microstop = explode(' ',microtime());
+				$stop_time = $microstop[0] + $microstop[1];
+
+				echo "<br>loading: ".round($stop_time - $start_time,3);
+
+				$start_time = $stop_time;
+
 				if($_REQUEST['act'] == "ach_move") {
 					$ach = $cat->getChildDataByID($_REQUEST['id']);
 					if($ach != null) {
 						$ach->setCategory($_REQUEST['new_cat']);
 						$ach->update();
 						$cat->removeChild($ach->getID());
+
+						$iter = $cat->getOpen();
+						while($iter->hasNext()) {
+							$item = $iter->getNext();
+
+							if($ach->getID() == $item->getParentID()) {
+								$item->setCategory($_REQUEST['new_cat']);
+								$item->update();
+								$cat->removeChild($item->getID());
+							}
+						}
 					}
 				}
 
@@ -381,18 +407,20 @@ $c .= "</div></td>
 					$ach->setTieCult($_REQUEST['aa_tie_cult']);
 					$ach->setTieCiv($_REQUEST['aa_tie_civ']);
 					$ach->setImage($_REQUEST['aa_image']);
+					$ach->setParentID($_REQUEST['aa_parent']);
+					$ach->setSticky($_REQUEST['aa_sticky']);
 					
 					$cat->insertNode($ach);
 
-					$perk = new AdmPerk(array(),$ach);
-					$perk->setAchievement($ach->getID());
-					$perk->setName($_REQUEST['apl_name']);
-					$perk->setTemplate($_REQUEST['apl_template']);
-					$perk->setValue($_REQUEST['ap_value']);
-					$perk->setCondition($_REQUEST['ap_condition']);
-					$perk->setConditionValue($_REQUEST['ap_condition_value']);
+					$task = new AdmTask(array(),$ach);
+					$task->setAchievement($ach->getID());
+					$task->setName($_REQUEST['atl_name']);
+					$task->setTemplate($_REQUEST['atl_template']);
+					$task->setValue($_REQUEST['at_value']);
+					$task->setCondition($_REQUEST['at_condition']);
+					$task->setConditionValue($_REQUEST['at_condition_value']);
 
-					$ach->insertNode($perk);
+					$ach->insertNode($task);
 				}
 
 				if($_REQUEST['act'] == "ach_update") {
@@ -404,61 +432,63 @@ $c .= "</div></td>
 						$ach->setTieCult($_REQUEST['aa_tie_cult']);
 						$ach->setTieCiv($_REQUEST['aa_tie_civ']);
 						$ach->setImage($_REQUEST['aa_image']);
+						$ach->setParentID($_REQUEST['aa_parent']);
+						$ach->setSticky($_REQUEST['aa_sticky']);
 
 						$ach->update();
 					}
 				}
 
-				if($_REQUEST['act'] == "perk_insert") {
+				if($_REQUEST['act'] == "task_insert") {
 					$ach = $cat->getChildDataByID($_REQUEST['id']);
 					if($ach != null) {
-						$perk = new AdmPerk(array(),$ach);
-						$perk->setAchievement($ach->getID());
-						$perk->setName($_REQUEST['apl_name']);
-						$perk->setTemplate($_REQUEST['apl_template']);
-						$perk->setValue($_REQUEST['ap_value']);
-						#MISSING: parent
-						$perk->setParentID($_REQUEST['ap_parent']);
-						$perk->setCondition($_REQUEST['ap_condition']);
-						$perk->setConditionValue($_REQUEST['ap_condition_value']);
+						$task = new AdmTask(array(),$ach);
+						$task->setAchievement($ach->getID());
+						$task->setName($_REQUEST['atl_name']);
+						$task->setTemplate($_REQUEST['atl_template']);
+						$task->setValue($_REQUEST['at_value']);
+						$task->setCondition($_REQUEST['at_condition']);
+						$task->setConditionValue($_REQUEST['at_condition_value']);
 
-						$ach->insertNode($perk);
-						$ach->orderPerks();
-						$perk->update();
+						$ach->insertNode($task);
+						$task->setParentID($_REQUEST['at_parent']);
+						$ach->orderTasks();
+						$task->update();
 					}
 				}
 
-				if($_REQUEST['act'] == "perk_update") {
-					$perk = $cat->getElementByPath($_REQUEST['id']);
+				if($_REQUEST['act'] == "task_update") {
+					$task = $cat->getElementByPath($_REQUEST['id']);
 					
-					if($perk != null) {
-						$perk->setName($_REQUEST['apl_name']);
-						$perk->setTemplate($_REQUEST['apl_template']);
-						$perk->setValue($_REQUEST['ap_value']);
-						$perk->setParentID($_REQUEST['ap_parent']);
-						$perk->setCondition($_REQUEST['ap_condition']);
-						$perk->setConditionValue($_REQUEST['ap_condition_value']);
+					if($task != null) {
+						$task->setName($_REQUEST['atl_name']);
+						$task->setTemplate($_REQUEST['atl_template']);
+						$task->setValue($_REQUEST['at_value']);
+						$task->setCondition($_REQUEST['at_condition']);
+						$task->setConditionValue($_REQUEST['at_condition_value']);
 
-						$ach = $perk->getParent();
-						$ach->orderPerks();
+						$task->setParentID($_REQUEST['at_parent']);
 
-						$perk->update();
+						$ach = $task->getParent();
+						$ach->orderTasks();
+
+						$task->update();
 					}
 				}
 
 				if($_REQUEST['act'] == "obj_insert") {
-					$perk = $cat->getElementByPath($_REQUEST['id']);
+					$task = $cat->getElementByPath($_REQUEST['id']);
 					
-					if($perk != null) {
-						$obj = new AdmObjective(array(),$perk);
+					if($task != null) {
+						$obj = new AdmObjective(array(),$task);
 						$obj->setName($_REQUEST['aol_name']);
 						$obj->setCondition($_REQUEST['ao_condition']);
 						$obj->setValue($_REQUEST['ao_value']);
 						$obj->setDisplay($_REQUEST['ao_display']);
 						$obj->setMetalink($_REQUEST['ao_metalink']);
-						$obj->setPerk($perk->getID());
+						$obj->setTask($task->getID());
 
-						$perk->insertNode($obj);
+						$task->insertNode($obj);
 					}
 				}
 
@@ -478,16 +508,42 @@ $c .= "</div></td>
 
 				if($_REQUEST['act'] == "delete") {
 					$elem = $cat->getElementByPath($_REQUEST['id']);
-					$par = $elem->getParent();
-					$par->removeNode($elem->getID());
+					if($elem != null) {
+						$par = $elem->getParent();
+						$par->removeNode($elem->getID());
+
+						if(get_class($elem) == "AdmAchievement") {
+							$iter = $cat->getOpen();
+							while($iter->hasNext()) {
+								$item = $iter->getNext();
+
+								if($elem->getID() == $item->getParentID()) {
+									$item->setParentID(null);
+									$item->update();
+								}
+							}
+						}
+					}
 				}
 
 				if($_REQUEST['act'] == "dev") {
 					$curr = $cat->getElementByPath($_REQUEST['id']);
 					$curr->setInDev(($_REQUEST['state'] != 1));
 				}
+
+				$microstop = explode(' ',microtime());
+				$stop_time = $microstop[0] + $microstop[1];
+
+				echo "<br>manipulation: ".round($stop_time - $start_time,3);
+
+				$start_time = $stop_time;
 				
 				$c .= adm_render_category($cat);
+
+				$microstop = explode(' ',microtime());
+				$stop_time = $microstop[0] + $microstop[1];
+
+				echo "<br>rendering: ".round($stop_time - $start_time,3);
 			}
 
 			#a:p:o:a
@@ -539,6 +595,7 @@ $c .= "</div></td>
 					}
 				}
 
+
 				$c .= "<center><table>
 				<tr>
 				<td colspan='2' align='left'>".csr_render_yubopoints($user['id'])."</td>
@@ -552,10 +609,18 @@ $c .= "</div></td>
 				$c .= "</div></td>
 						<td width='645px' valign='top'>";
 				
-				$open = $menu->getOpenCat();
+				#$open = $menu->getOpenCat();
 
 				if($open != 0) {
 					$c .= csr_render_category($cat);
+				}
+				else {
+					$cat = new AchSummary($menu,8);
+					$c .= ach_render_summary_header();
+				}
+
+				if($open == 0) {
+					$c .= ach_render_summary_footer($cat);
 				}
 
 				$c .= "</td>

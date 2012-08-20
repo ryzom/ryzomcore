@@ -95,7 +95,7 @@
 				else {
 					return $res;
 				}
-				mysql_free_result($res);
+				//mysql_free_result($res);
 			}
 			else {
 				return false;

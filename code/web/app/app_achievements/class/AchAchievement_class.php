@@ -37,6 +37,7 @@
 		protected $image;
 		protected $name;
 		protected $template;
+		protected $sticky;
 
 		function AchAchievement($data,$parent) {
 			global $DBc,$_USER;
@@ -54,8 +55,9 @@
 			$this->name = $data['aal_name'];
 			$this->template = $data['aal_template'];
 			$this->dev = $data['aa_dev'];
+			$this->sticky = $data['aa_sticky'];
 
-			$res = $DBc->sqlQuery("SELECT * FROM ach_perk LEFT JOIN (ach_perk_lang) ON (apl_lang='".$_USER->getLang()."' AND apl_perk=ap_id) LEFT JOIN (ach_player_perk) ON (app_perk=ap_id AND app_player='".$_USER->getID()."') WHERE ap_achievement='".$this->id."' ORDER by ap_porder ASC");
+			$res = $DBc->sqlQuery("SELECT * FROM ach_task LEFT JOIN (ach_task_lang) ON (atl_lang='".$_USER->getLang()."' AND atl_task=at_id) LEFT JOIN (ach_player_task) ON (apt_task=at_id AND apt_player='".$_USER->getID()."') WHERE at_achievement='".$this->id."' ORDER by at_torder ASC");
 			
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
@@ -70,8 +72,19 @@
 			}
 		}
 
+		function parentDone() {
+			if($this->parent_id == null) {
+				return true;
+			}
+			else {
+				$p = $this->parent->getChildDataByID($this->parent_id);
+
+				return ($p->hasOpen() == false);
+			}
+		}
+
 		protected function makeChild($a) {
-			return new AchPerk($a,$this);
+			return new AchTask($a,$this);
 		}
 
 		function unlockedByParent() {
@@ -147,6 +160,18 @@
 
 		function getCategory() {
 			return $this->category;
+		}
+
+		function getSticky() {
+			return $this->sticky;
+		}
+
+		function isSticky() {
+			return ($this->sticky == 1);
+		}
+
+		function isHeroic() {
+			return $this->parent->isHeroic();
 		}
 		
 	}

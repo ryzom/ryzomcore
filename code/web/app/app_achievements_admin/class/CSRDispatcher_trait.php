@@ -1,12 +1,10 @@
 <?php
 	trait CSRDispatcher {
 		function grantNode($path,$player) {
-			#echo "start: ".$path." id: ".$this->getID()."<br>";
 			if(is_numeric($path)) {
 				//it's me (id == numeric)
 				if($this->getID() == $path) {
 					$this->grant($player);
-					#echo "grant()<br>";
 				}
 			}
 			else {
@@ -14,14 +12,14 @@
 				$tmp = explode(";",$path);
 
 				$c = $this->getChildDataByID($tmp[1]);
-				#echo "...".$tmp[1];
+
 				if($c != null) { // check if it's really own child
 					unset($tmp[0]);
 					$c->grantNode(implode(";",$tmp),$player);
-					#echo "grantNode()<br>";
+
 				}
 			}
-			#echo "end<br>";
+
 		}
 
 		function denyNode($path,$player) {
