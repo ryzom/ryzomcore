@@ -47,7 +47,14 @@ class CDllEntry;
  * \brief CDllDirectory
  * \date 2012-08-18 09:01GMT
  * \author Jan Boon (Kaetemi)
- * CDllDirectory
+ * This class is used for parsing the local dll indices in a max file,
+ * both reading and writing is supported. It is not used at runtime,
+ * and should be reset when no longer necessary. Plugins have their own
+ * copy of the actual IDllPluginDescInternal. This class only contains
+ * CDllEntry instances, which should not be used directly. The instance
+ * of this class used to parse the max file should be kept, as there
+ * might be chunks that were not parsed, which should be rewritten to
+ * the stream.
  */
 class CDllDirectory : public CStorageContainer
 {

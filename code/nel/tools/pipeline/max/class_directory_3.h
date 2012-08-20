@@ -51,7 +51,11 @@ class CClassEntry;
  * \brief CClassDirectory3
  * \date 2012-08-18 18:01GMT
  * \author Jan Boon (Kaetemi)
- * CClassDirectory3
+ * This class is used for parsing the local class indices in a max file,
+ * both reading and writing is supported. It is not used at runtime,
+ * and should be reset when no longer necessary. Plugins have their own
+ * static copy of the actual ISceneClassDesc. This class only contains
+ * CClassEntry instances, which should not be used directly.
  */
 class CClassDirectory3 : public CStorageContainer
 {
