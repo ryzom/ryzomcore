@@ -29,13 +29,14 @@
 #include "scene_class_unknown.h"
 
 // STL includes
+#include <iomanip>
 
 // NeL includes
 // #include <nel/misc/debug.h>
 
 // Project includes
 
-using namespace std;
+// using namespace std;
 // using namespace NLMISC;
 
 namespace PIPELINE {
@@ -120,7 +121,20 @@ CSceneClassUnknown::~CSceneClassUnknown()
 
 void CSceneClassUnknown::toString(std::ostream &ostream, const std::string &pad)
 {
-	CSceneClass::toString(ostream, pad);
+	nlassert(ChunksOwnsPointers);
+	ostream << "(" << getClassName() << ": " << ucstring(getClassDesc()->displayName()).toUtf8() << ", " << getClassDesc()->classId().toString() << ", " << ucstring(getClassDesc()->dllPluginDesc()->internalName()).toUtf8() << ") [" << Chunks.size() << "] { ";
+	std::string padpad = pad + "\t";
+	sint i = 0;
+	for (TStorageObjectContainer::const_iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
+	{
+		std::stringstream ss;
+		ss << std::hex << std::setfill('0');
+		ss << std::setw(4) << it->first;
+		ostream << "\n" << pad << i << " 0x" << ss.str() << ": ";
+		it->second->toString(ostream, padpad);
+		++i;
+	}
+	ostream << "} ";
 }
 
 void CSceneClassUnknown::parse(uint16 version, TParseLevel level)
