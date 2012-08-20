@@ -121,7 +121,7 @@ class CClassEntry : public CStorageContainer
 {
 public:
 	CClassEntry();
-	CClassEntry(const ISceneClassDesc *sceneClassDesc);
+	CClassEntry(CDllDirectory *dllDirectory, const ISceneClassDesc *sceneClassDesc);
 	virtual ~CClassEntry();
 
 	// inherited

@@ -69,7 +69,7 @@ public:
 	// Reset the dll directory, all dll entry pointers become invalid, use internal name and dll plugin registry
 	void reset();
 	// Get or create the chunk index for a dll by dll plugin description
-	uint16 getOrCreateIndex(const IDllPluginDesc *dllPluginDesc);
+	uint16 getOrCreateIndex(const IDllPluginDescInternal *dllPluginDesc);
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
@@ -91,7 +91,7 @@ class CDllEntry : public CStorageContainer
 {
 public:
 	CDllEntry();
-	CDllEntry(const IDllPluginDesc *dllPluginDesc);
+	CDllEntry(const IDllPluginDescInternal *dllPluginDesc);
 	virtual ~CDllEntry();
 
 	// inherited

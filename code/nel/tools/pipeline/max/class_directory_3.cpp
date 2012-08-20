@@ -35,8 +35,9 @@
 // #include <nel/misc/debug.h>
 
 // Project includes
+#include "dll_directory.h"
 
-using namespace std;
+// using namespace std;
 // using namespace NLMISC;
 
 namespace PIPELINE {
@@ -264,7 +265,7 @@ uint16 CClassDirectory3::getOrCreateIndex(const ISceneClassDesc *sceneClassDesc)
 		return it->second;
 
 	// Create new entry
-	CClassEntry *classEntry = new CClassEntry(sceneClassDesc);
+	CClassEntry *classEntry = new CClassEntry(m_DllDirectory, sceneClassDesc);
 	uint16 index = m_Entries.size();
 	m_ClassIdToIndex[classEntry->classId()] = index;
 	m_Entries.push_back(classEntry);
@@ -299,11 +300,11 @@ CClassEntry::CClassEntry() : m_Header(NULL), m_Name(NULL)
 
 }
 
-CClassEntry::CClassEntry(const ISceneClassDesc *sceneClassDesc) : m_Header(new CClassEntryHeader()), m_Name(new CStorageValue<ucstring>())
+CClassEntry::CClassEntry(CDllDirectory *dllDirectory, const ISceneClassDesc *sceneClassDesc) : m_Header(new CClassEntryHeader()), m_Name(new CStorageValue<ucstring>())
 {
 	Chunks.push_back(TStorageObjectWithId(0x2060, m_Header));
 	Chunks.push_back(TStorageObjectWithId(0x2042, m_Name));
-	m_Header->DllIndex = -9; // Invalid temporary value
+	m_Header->DllIndex = dllDirectory->getOrCreateIndex(sceneClassDesc->dllPluginDesc());
 	m_Header->ClassId = sceneClassDesc->classId();
 	m_Header->SuperClassId = sceneClassDesc->superClassId();
 	m_Name->Value = sceneClassDesc->displayName();

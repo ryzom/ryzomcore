@@ -92,11 +92,11 @@ IStorageObject *CSceneClass::createChunkById(uint16 id, bool container)
 
 const ucchar *CSceneClass::DisplayName = ucstring("Scene Class").c_str();
 const char *CSceneClass::InternalName = "SceneClass";
-const NLMISC::CClassId CSceneClass::ClassId = NLMISC::CClassId::Null;
-const TSClassId CSceneClass::SuperClassId = 0x0000;
+const NLMISC::CClassId CSceneClass::ClassId = NLMISC::CClassId::Null; // This class is invalid
+const TSClassId CSceneClass::SuperClassId = 0x0000; // This class is invalid
 
 namespace {
-static const CSceneClassDesc<CSceneClass> SceneClassDesc;
+static const CSceneClassDesc<CSceneClass> SceneClassDesc(static_cast<const IDllPluginDescInternal *>(&DllPluginDescBuiltin));
 } /* anonymous namespace */
 
 const ISceneClassDesc *CSceneClass::getClassDesc()

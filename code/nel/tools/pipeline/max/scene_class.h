@@ -37,6 +37,7 @@
 // Project includes
 #include "storage_object.h"
 #include "storage_value.h"
+#include "dll_plugin_desc.h"
 
 namespace PIPELINE {
 namespace MAX {
@@ -95,6 +96,7 @@ public:
 	virtual const char *internalName() const = 0;
 	virtual NLMISC::CClassId classId() const = 0;
 	virtual TSClassId superClassId() const = 0;
+	virtual const IDllPluginDescInternal *dllPluginDesc() const = 0;
 
 }; /* class ISceneClassDesc */
 
@@ -109,12 +111,16 @@ template <typename T>
 class CSceneClassDesc : public ISceneClassDesc
 {
 public:
+	CSceneClassDesc(const IDllPluginDescInternal *dllPluginDesc) : m_DllPluginDesc(dllPluginDesc) { }
 	virtual CSceneClass *create() const { return static_cast<CSceneClass *>(new T()); }
 	virtual void destroy(CSceneClass *sc) const { delete static_cast<T *>(sc); }
 	virtual const ucchar *displayName() const { return T::DisplayName; }
 	virtual const char *internalName() const { return T::InternalName; }
 	virtual NLMISC::CClassId classId() const { return T::ClassId; }
 	virtual TSClassId superClassId() const { return T::SuperClassId; }
+	virtual const IDllPluginDescInternal *dllPluginDesc() const { return m_DllPluginDesc; }
+private:
+	const IDllPluginDescInternal *m_DllPluginDesc;
 
 }; /* class CSceneClassDesc */
 

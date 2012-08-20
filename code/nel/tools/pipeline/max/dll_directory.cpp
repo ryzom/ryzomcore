@@ -253,7 +253,7 @@ void CDllDirectory::reset()
 }
 
 // Parallel to CClassDirectory3
-uint16 CDllDirectory::getOrCreateIndex(const IDllPluginDesc *dllPluginDesc)
+uint16 CDllDirectory::getOrCreateIndex(const IDllPluginDescInternal *dllPluginDesc)
 {
 	nlassert(!ChunksOwnsPointers);
 	std::map<ucstring, uint16>::iterator it = m_InternalNameToIndex.find(NLMISC::toLower(ucstring(dllPluginDesc->internalName())));
@@ -303,7 +303,7 @@ CDllEntry::CDllEntry() : m_DllDescription(NULL), m_DllFilename(NULL)
 
 }
 
-CDllEntry::CDllEntry(const IDllPluginDesc *dllPluginDesc) : m_DllDescription(new CStorageValue<ucstring>()), m_DllFilename(new CStorageValue<ucstring>())
+CDllEntry::CDllEntry(const IDllPluginDescInternal *dllPluginDesc) : m_DllDescription(new CStorageValue<ucstring>()), m_DllFilename(new CStorageValue<ucstring>())
 {
 	Chunks.push_back(TStorageObjectWithId(0x2039, m_DllDescription));
 	Chunks.push_back(TStorageObjectWithId(0x2037, m_DllFilename));
