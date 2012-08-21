@@ -147,6 +147,8 @@ public:
 	// public
 	// Initializes a new entry
 	void init();
+	// Returns the key
+	CAppDataEntryKey *key();
 	// Returns the blob
 	CStorageRaw *value();
 
