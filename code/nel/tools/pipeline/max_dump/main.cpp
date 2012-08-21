@@ -27,6 +27,9 @@
 #include "../max/scene.h"
 #include "../max/scene_class_registry.h"
 
+// Testing
+#include "../max/builtin/app_data.h"
+
 //static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
 static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/test2008.max";
@@ -162,6 +165,32 @@ int main(int argc, char **argv)
 	//std::cout << "\n";
 
 
+	// TEST APP DATA
+
+#define MAXSCRIPT_UTILITY_CLASS_ID (NLMISC::CClassId(0x04d64858, 0x16d1751d))
+#define UTILITY_CLASS_ID (4128)
+#define NEL3D_APPDATA_ENV_FX (84682543)
+
+	PIPELINE::MAX::CSceneClassContainer *ssc = scene.container();
+	for (PIPELINE::MAX::CStorageContainer::TStorageObjectIterator it = ssc->Chunks.begin(), end = ssc->Chunks.end(); it != end; ++it)
+	{
+		PIPELINE::MAX::CStorageContainer *subc = static_cast<PIPELINE::MAX::CStorageContainer *>(it->second);
+		for (PIPELINE::MAX::CStorageContainer::TStorageObjectIterator subit = subc->Chunks.begin(), subend = subc->Chunks.end(); subit != subend; ++subit)
+		{
+			PIPELINE::MAX::IStorageObject *storageChunk = subit->second;
+			PIPELINE::MAX::CAppData *appData = dynamic_cast<PIPELINE::MAX::CAppData *>(storageChunk);
+			if (appData)
+			{
+				nlinfo("Found AppData");
+				uint32 size;
+				const uint8 *buffer = appData->read(MAXSCRIPT_UTILITY_CLASS_ID, UTILITY_CLASS_ID, NEL3D_APPDATA_ENV_FX, size);
+				if (buffer)
+				{
+					nlinfo("Found NEL3D_APPDATA_ENV_FX, size %i", size);
+				}
+			}
+		}
+	}
 
 /*
 	GsfInput *input = gsf_infile_child_by_name(infile, streamname);

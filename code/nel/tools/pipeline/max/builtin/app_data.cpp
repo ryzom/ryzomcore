@@ -237,7 +237,7 @@ const uint8 *CAppData::read(NLMISC::CClassId classId, TSClassId superClassId, ui
 	if (ChunksOwnsPointers) { nlwarning("Not parsed"); return NULL; }
 	TKey key(classId, superClassId, subId);
 	TMap::const_iterator it = m_Entries.find(key);
-	if (it == m_Entries.end()) { return NULL; }
+	if (it == m_Entries.end()) { nldebug("Trying to read non-existant key, this is allowed, returning NULL"); return NULL; }
 	size = it->second->value()->Value.size();
 	return &it->second->value()->Value[0];
 }
@@ -291,7 +291,7 @@ void CAppData::erase(NLMISC::CClassId classId, TSClassId superClassId, uint32 su
 	if (ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
 	TKey key(classId, superClassId, subId);
 	TMap::const_iterator it = m_Entries.find(key);
-	if (it == m_Entries.end()) { nldebug("Erasing non-existant key, this is allowed, doing nothing"); return; }
+	if (it == m_Entries.end()) { nldebug("Trying to erase non-existant key, this is allowed, doing nothing"); return; }
 	m_Entries.erase(key);
 }
 

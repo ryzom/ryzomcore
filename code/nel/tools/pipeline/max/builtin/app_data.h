@@ -54,7 +54,7 @@ class CAppDataEntry;
  */
 class CAppData : public CStorageContainer
 {
-private:
+public:
 	struct TKey
 	{
 		TKey(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId);
@@ -94,6 +94,10 @@ public:
 	void fill(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint8 *buffer, uint32 size);
 	/// Erases an appdata chunk.
 	void erase(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId);
+
+	// read access
+	/// Return the entries map, do not modify directly
+	inline const TMap &entries() const { return m_Entries; }
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);

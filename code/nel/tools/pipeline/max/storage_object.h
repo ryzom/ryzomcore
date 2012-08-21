@@ -91,6 +91,7 @@ public:
 	// public data
 	typedef std::pair<uint16, IStorageObject *> TStorageObjectWithId;
 	typedef std::list<TStorageObjectWithId> TStorageObjectContainer;
+	typedef TStorageObjectContainer::iterator TStorageObjectIterator;
 	TStorageObjectContainer Chunks;
 
 protected:
