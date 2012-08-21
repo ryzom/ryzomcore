@@ -36,7 +36,7 @@ static const char *streamname = "Scene";
 // int __stdcall WinMain(void *, void *, void *, int)
 int main(int argc, char **argv)
 {
-	printf("Pipeline Max Dump (Temporary Tool)\n");
+	//printf("Pipeline Max Dump (Temporary Tool)\n");
 
 	char const *me = (argv[0] ? argv[0] : "pipeline_max_dump");
 	g_set_prgname(me);
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
 	}
 
 	display_name = g_filename_display_name(filename);
-	g_print("%s\n", display_name);
+	//g_print("%s\n", display_name);
 	g_free(display_name);
 	// g_print("%s\n", streamname);
 	std::cout << "\n";
@@ -141,6 +141,7 @@ int main(int argc, char **argv)
 
 
 	PIPELINE::MAX::CScene scene(&sceneClassRegistry, &dllDirectory, &classDirectory3);
+	//PIPELINE::MAX::CStorageContainer scene;
 	input = gsf_infile_child_by_name(infile, "Scene");
 	{
 		PIPELINE::MAX::CStorageStream instream(input);

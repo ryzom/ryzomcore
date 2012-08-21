@@ -1,8 +1,411 @@
-Pipeline Max Dump (Temporary Tool)
-/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max
+
+(DllDirectory) [0] PARSED {
+0x21c0: (CStorageValue) { 786432216 }
+Entries[0]: (DllEntry) [2] PARSED {
+	DllDescription: Viewport Manager for DirectX (Autodesk)
+	DllFilename: ViewportManager.gup }
+Entries[1]: (DllEntry) [2] PARSED {
+	DllDescription: mental ray: Material Custom Attributes (Autodesk)
+	DllFilename: mrMaterialAttribs.gup }
+Entries[2]: (DllEntry) [2] PARSED {
+	DllDescription: Custom Attribute Container (Autodesk)
+	DllFilename: CustAttribContainer.dlo }
+Entries[3]: (DllEntry) [2] PARSED {
+	DllDescription: Standard Materials and Textures (Autodesk)
+	DllFilename: mtl.dlt }
+Entries[4]: (DllEntry) [2] PARSED {
+	DllDescription: Standard Samplers (Autodesk)
+	DllFilename: samplers.dlh }
+Entries[5]: (DllEntry) [2] PARSED {
+	DllDescription: Default Materials and Textures (Autodesk)
+	DllFilename: mtlgen.dlt }
+Entries[6]: (DllEntry) [2] PARSED {
+	DllDescription: ProSound - Multitrack Audio
+	DllFilename: ProSound.dlc }
+Entries[7]: (DllEntry) [2] PARSED {
+	DllDescription: Editable Poly Object (Autodesk)
+	DllFilename: EPoly.dlo }
+Entries[8]: (DllEntry) [2] PARSED {
+	DllDescription: Standard Pre-Filter Kernels (Autodesk)
+	DllFilename: kernel.dlk }
+Entries[9]: (DllEntry) [2] PARSED {
+	DllDescription: Default Scanline Renderer (Autodesk)
+	DllFilename: rend.dlr }
+Entries[10]: (DllEntry) [2] PARSED {
+	DllDescription: Standard Controllers (Autodesk)
+	DllFilename: ctrl.dlc }
+Entries[11]: (DllEntry) [2] PARSED {
+	DllDescription: Block Manager Utility (Autodesk)
+	DllFilename: AcadBlocks.dlu }
+Entries[12]: (DllEntry) [2] PARSED {
+	DllDescription: Propagation Manager Utility (Autodesk)
+	DllFilename: InstanceMgr.dlu }
+Entries[13]: (DllEntry) [2] PARSED {
+	DllDescription: Scene Effect Manager (Autodesk)
+	DllFilename: SceneEffectLoader.dlu }
+Entries[14]: (DllEntry) [2] PARSED {
+	DllDescription: Change Reaction Controller (Autodesk)
+	DllFilename: reactor.dlc }
+Entries[15]: (DllEntry) [2] PARSED {
+	DllDescription: ParameterEditor (Autodesk)
+	DllFilename: ParamEditor.gup }
+Entries[16]: (DllEntry) [2] PARSED {
+	DllDescription: Bitmap Proxies (Autodesk)
+	DllFilename: BitmapProxies.dlu }
+Entries[17]: (DllEntry) [2] PARSED {
+	DllDescription: Standard Bitmap Storages and Filters (Autodesk)
+	DllFilename: StorageAndFilter.bms }
+Entries[18]: (DllEntry) [2] PARSED {
+	DllDescription: Biped Controller (Autodesk)
+	DllFilename: biped.dlc } }
+
+(ClassDirectory3) [0] PARSED {
+Entries[0]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x00000082, 0x00000000)
+		SuperClassId: 130 }
+	Name: ParamBlock2}
+Entries[1]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 0
+		ClassId: (0x5a06293c, 0x30420c1e)
+		SuperClassId: 4448 }
+	Name: ViewportManager}
+Entries[2]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 1
+		ClassId: (0x218ab459, 0x25dc8980)
+		SuperClassId: 4448 }
+	Name: mental ray: material custom attribute}
+Entries[3]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 2
+		ClassId: (0x5ddb3626, 0x23b708db)
+		SuperClassId: 256 }
+	Name: CustAttribContainer}
+Entries[4]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 3
+		ClassId: (0x00001200, 0x00000000)
+		SuperClassId: 4224 }
+	Name: Texmaps}
+Entries[5]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 3
+		ClassId: (0x00000038, 0x00000000)
+		SuperClassId: 4272 }
+	Name: Blinn}
+Entries[6]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x00000008, 0x00000000)
+		SuperClassId: 8 }
+	Name: ParamBlock}
+Entries[7]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 4
+		ClassId: (0x25773211, 0x00000000)
+		SuperClassId: 4368 }
+	Name: Max 2.5 Star}
+Entries[8]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 3
+		ClassId: (0x00000002, 0x00000000)
+		SuperClassId: 3072 }
+	Name: Standard}
+Entries[9]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x00002007, 0x00000000)
+		SuperClassId: 36867 }
+	Name: Bezier Float}
+Entries[10]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 5
+		ClassId: (0x00000100, 0x00000000)
+		SuperClassId: 3104 }
+	Name: Placement}
+Entries[11]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 5
+		ClassId: (0x00000100, 0x00000000)
+		SuperClassId: 3136 }
+	Name: Output}
+Entries[12]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 3
+		ClassId: (0x00000240, 0x00000000)
+		SuperClassId: 3088 }
+	Name: Bitmap}
+Entries[13]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -2
+		ClassId: (0x64c75fec, 0x222b9eb9)
+		SuperClassId: 3072 }
+	Name: NeL Material}
+Entries[14]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x00000c80, 0x00000000)
+		SuperClassId: 256 }
+	Name: Material Editor}
+Entries[15]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x00003333, 0x00000000)
+		SuperClassId: 256 }
+	Name: MtlBaseLib}
+Entries[16]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 6
+		ClassId: (0x476fa9de, 0x5b918e4e)
+		SuperClassId: 3328 }
+	Name: WaveMaster}
+Entries[17]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 6
+		ClassId: (0x476fa9de, 0x5b918e4a)
+		SuperClassId: 3328 }
+	Name: ProSound}
+Entries[18]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x00000002, 0x00000000)
+		SuperClassId: 1 }
+	Name: RootNode}
+Entries[19]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x00002008, 0x00000000)
+		SuperClassId: 36875 }
+	Name: Bezier Position}
+Entries[20]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x00442313, 0x00000000)
+		SuperClassId: 36876 }
+	Name: TCB Rotation}
+Entries[21]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x00002010, 0x00000000)
+		SuperClassId: 36877 }
+	Name: Bezier Scale}
+Entries[22]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x00002005, 0x00000000)
+		SuperClassId: 36872 }
+	Name: Position/Rotation/Scale}
+Entries[23]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x0d9c20ff, 0x00000000)
+		SuperClassId: 36880 }
+	Name: Master Point Controller}
+Entries[24]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 7
+		ClassId: (0x1bf8338d, 0x192f6098)
+		SuperClassId: 16 }
+	Name: Editable Poly}
+Entries[25]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x7e9858fe, 0x1dba1df0)
+		SuperClassId: 4336 }
+	Name: Base Layer}
+Entries[26]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x00000001, 0x00000000)
+		SuperClassId: 1 }
+	Name: Node}
+Entries[27]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 8
+		ClassId: (0x77912301, 0x00000000)
+		SuperClassId: 4256 }
+	Name: Area}
+Entries[28]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 9
+		ClassId: (0x00000001, 0x00000000)
+		SuperClassId: 3840 }
+	Name: Default Scanline Renderer}
+Entries[29]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x46576167, 0x06546546)
+		SuperClassId: 512 }
+	Name: RenderElementMgr}
+Entries[30]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x00002011, 0x00000000)
+		SuperClassId: 36869 }
+	Name: Bezier Color}
+Entries[31]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0xee448b23, 0x00000000)
+		SuperClassId: 4112 }
+	Name: RenderEnvironment}
+Entries[32]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x00008d52, 0x00000000)
+		SuperClassId: 256 }
+	Name: NamedSelSetList}
+Entries[33]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x8d73b8aa, 0x90f2ee71)
+		SuperClassId: 512 }
+	Name: TVNode}
+Entries[34]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 10
+		ClassId: (0x4b4b1000, 0x00000000)
+		SuperClassId: 36867 }
+	Name: Float List}
+Entries[35]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 10
+		ClassId: (0x4b4b1001, 0x00000000)
+		SuperClassId: 36869 }
+	Name: Point3 List}
+Entries[36]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 10
+		ClassId: (0x4b4b1005, 0x00000000)
+		SuperClassId: 36882 }
+	Name: Point4 List}
+Entries[37]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 10
+		ClassId: (0x4b4b1002, 0x00000000)
+		SuperClassId: 36875 }
+	Name: Position List}
+Entries[38]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 10
+		ClassId: (0x4b4b1003, 0x00000000)
+		SuperClassId: 36876 }
+	Name: Rotation List}
+Entries[39]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 10
+		ClassId: (0x4b4b1004, 0x00000000)
+		SuperClassId: 36877 }
+	Name: Scale List}
+Entries[40]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 10
+		ClassId: (0x4b4b1015, 0x00000000)
+		SuperClassId: 36881 }
+	Name: Block Control}
+Entries[41]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 11
+		ClassId: (0x1f8c3646, 0x11793bed)
+		SuperClassId: 36867 }
+	Name: Block Manager Wrapper}
+Entries[42]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 12
+		ClassId: (0x5a1b661e, 0x7620792b)
+		SuperClassId: 36867 }
+	Name: Propagation Manager Wrapper}
+Entries[43]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 13
+		ClassId: (0x368d1139, 0xf4044794)
+		SuperClassId: 36867 }
+	Name: Scene Effect Loader}
+Entries[44]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 14
+		ClassId: (0x294a389c, 0x087906d7)
+		SuperClassId: 256 }
+	Name: Reaction Manager}
+Entries[45]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 15
+		ClassId: (0x28250b30, 0x265a2326)
+		SuperClassId: 4448 }
+	Name: ParameterCollectorCA}
+Entries[46]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 16
+		ClassId: (0x4a0c66e1, 0x01513165)
+		SuperClassId: 2912 }
+	Name: }
+Entries[47]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x0c6f6387, 0x2c1a0a7b)
+		SuperClassId: 36879 }
+	Name: SceneAppData Latch}
+Entries[48]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 17
+		ClassId: (0x5bf94f11, 0x68c22d6f)
+		SuperClassId: 2912 }
+	Name: BitmapPagerData}
+Entries[49]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 10
+		ClassId: (0x0f4871a5, 0x781f1430)
+		SuperClassId: 36879 }
+	Name: MasterLayerControlManager}
+Entries[50]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 18
+		ClassId: (0x57a52b8c, 0x30935afc)
+		SuperClassId: 36879 }
+	Name: Max Mixer Clip}
+Entries[51]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x00000001, 0x00000000)
+		SuperClassId: 4294966784 }
+	Name: Grid Reference}
+Entries[52]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x17356912, 0x00000000)
+		SuperClassId: 4240 }
+	Name: RenderEffects}
+Entries[53]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: 9
+		ClassId: (0x00000100, 0x00000000)
+		SuperClassId: 4304 }
+	Name: Shadow Map}
+Entries[54]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x0d7374fc, 0x51ff028e)
+		SuperClassId: 512 }
+	Name: Layer Manager}
+Entries[55]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x2cf03595, 0x00000000)
+		SuperClassId: 256 }
+	Name: TrackSetList}
+Entries[56]: (ClassEntry) [2] PARSED {
+	Header: (ClassEntryHeader) {
+		DllIndex: -1
+		ClassId: (0x00002222, 0x00000000)
+		SuperClassId: 256 }
+	Name: Scene} }
+
 (Scene) [1] {
 0 0x2012: (SceneClassContainer) [452] {
-	0 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+	0 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -27,7 +430,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	1 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	1 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -39,12 +442,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	2 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [41] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	2 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [41] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 09 00 00 00 }
+			Hex: 09 00 00 00
+			Int: 9
+			Float: 1.26117e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -205,16 +612,18 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	3 0x0002: (SceneClassUnknown: mental ray: material custom attribute, (0x25dc8980, 0x218ab459), mrMaterialAttribs.gup) [2] {
+	3 0x0002: (SceneClassUnknown: mental ray: material custom attribute, (0x218ab459, 0x25dc8980), mrMaterialAttribs.gup) [2] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
 			Hex: 2e } }
-	4 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+	4 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -226,16 +635,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0f 00 00 00 }
+			Hex: 0f 00 00 00
+			Int: 15
+			Float: 2.10195e-44 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 } }
-	5 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 } }
+	5 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -243,28 +658,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	6 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	6 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -321,11 +748,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	7 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	7 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 06 00 00 00 }
+			Hex: 06 00 00 00
+			Int: 6
+			Float: 8.40779e-45 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -333,13 +762,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	8 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	8 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -372,7 +805,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	9 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	9 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -429,7 +862,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	10 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	10 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -482,7 +915,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	11 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	11 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -511,7 +944,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	12 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	12 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -532,11 +965,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	13 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	13 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -545,34 +980,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	14 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	14 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -580,13 +1029,15 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 0
 				String:
 				Hex: } } }
-	15 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	15 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....................................
@@ -599,7 +1050,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 04 00 00 00 } }
+				Hex: 04 00 00 00
+				Int: 4
+				Float: 5.60519e-45 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -607,11 +1060,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 10 }
+				Hex: 00 02 00 10
+				Int: 268435968
+				Float: 2.52451e-29 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -619,13 +1076,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	16 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	16 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -650,7 +1111,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	17 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	17 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -662,12 +1123,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	18 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [41] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	18 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [41] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 09 00 00 00 }
+			Hex: 09 00 00 00
+			Int: 9
+			Float: 1.26117e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -828,16 +1293,18 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	19 0x0002: (SceneClassUnknown: mental ray: material custom attribute, (0x25dc8980, 0x218ab459), mrMaterialAttribs.gup) [2] {
+	19 0x0002: (SceneClassUnknown: mental ray: material custom attribute, (0x218ab459, 0x25dc8980), mrMaterialAttribs.gup) [2] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 12 00 00 00 }
+			Hex: 12 00 00 00
+			Int: 18
+			Float: 2.52234e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
 			Hex: 2e } }
-	20 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+	20 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -849,16 +1316,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 1f 00 00 00 }
+			Hex: 1f 00 00 00
+			Int: 31
+			Float: 4.34403e-44 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 } }
-	21 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 } }
+	21 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -866,28 +1339,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	22 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	22 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -944,11 +1429,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	23 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	23 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 16 00 00 00 }
+			Hex: 16 00 00 00
+			Int: 22
+			Float: 3.08286e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -956,13 +1443,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	24 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	24 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -995,7 +1486,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	25 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	25 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -1052,7 +1543,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	26 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	26 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -1105,7 +1596,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	27 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	27 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -1134,7 +1625,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	28 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	28 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -1155,11 +1646,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	29 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	29 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -1168,34 +1661,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	30 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	30 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 1d 00 00 00 }
+			Hex: 1d 00 00 00
+			Int: 29
+			Float: 4.06377e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -1203,13 +1710,15 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 0
 				String:
 				Hex: } } }
-	31 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	31 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....................................
@@ -1222,7 +1731,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 14 00 00 00 } }
+				Hex: 14 00 00 00
+				Int: 20
+				Float: 2.8026e-44 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -1230,11 +1741,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 10 }
+				Hex: 00 02 00 10
+				Int: 268435968
+				Float: 2.52451e-29 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -1242,13 +1757,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	32 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	32 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....!...
@@ -1273,7 +1792,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	33 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	33 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String:  .......
@@ -1285,12 +1804,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	34 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [41] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	34 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [41] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 09 00 00 00 }
+			Hex: 09 00 00 00
+			Int: 9
+			Float: 1.26117e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -1451,16 +1974,18 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	35 0x0002: (SceneClassUnknown: mental ray: material custom attribute, (0x25dc8980, 0x218ab459), mrMaterialAttribs.gup) [2] {
+	35 0x0002: (SceneClassUnknown: mental ray: material custom attribute, (0x218ab459, 0x25dc8980), mrMaterialAttribs.gup) [2] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: "...
-			Hex: 22 00 00 00 }
+			Hex: 22 00 00 00
+			Int: 34
+			Float: 4.76441e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
 			Hex: 2e } }
-	36 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+	36 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: !...#... }
@@ -1471,16 +1996,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: /...
-			Hex: 2f 00 00 00 }
+			Hex: 2f 00 00 00
+			Int: 47
+			Float: 6.5861e-44 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 } }
-	37 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 } }
+	37 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -1488,28 +2019,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	38 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	38 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....'...
@@ -1566,11 +2109,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	39 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	39 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: &...
-			Hex: 26 00 00 00 }
+			Hex: 26 00 00 00
+			Int: 38
+			Float: 5.32493e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -1578,13 +2123,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	40 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	40 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!..../...
@@ -1617,7 +2166,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	41 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	41 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!..../...
@@ -1674,7 +2223,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	42 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	42 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!..../...
@@ -1727,7 +2276,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	43 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	43 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!..../...
@@ -1756,7 +2305,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	44 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	44 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!..../...
@@ -1777,11 +2326,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	45 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	45 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -1790,34 +2341,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	46 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	46 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: -...
-			Hex: 2d 00 00 00 }
+			Hex: 2d 00 00 00
+			Int: 45
+			Float: 6.30584e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -1825,13 +2390,15 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 0
 				String:
 				Hex: } } }
-	47 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	47 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....%...'...(...)...*...+...,.......
@@ -1844,7 +2411,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: $...
-				Hex: 24 00 00 00 } }
+				Hex: 24 00 00 00
+				Int: 36
+				Float: 5.04467e-44 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -1852,11 +2421,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 10 }
+				Hex: 00 02 00 10
+				Int: 268435968
+				Float: 2.52451e-29 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -1864,13 +2437,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	48 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	48 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....1...
@@ -1895,7 +2472,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	49 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	49 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: 0.......
@@ -1907,12 +2484,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	50 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	50 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: 1...
-			Hex: 31 00 00 00 }
+			Hex: 31 00 00 00
+			Int: 49
+			Float: 6.86636e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -1920,16 +2501,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: =...
-			Hex: 3d 00 00 00 }
+			Hex: 3d 00 00 00
+			Int: 61
+			Float: 8.54792e-44 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	51 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	51 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -1937,28 +2524,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	52 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	52 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....5...
@@ -2015,11 +2614,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	53 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	53 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: 4...
-			Hex: 34 00 00 00 }
+			Hex: 34 00 00 00
+			Int: 52
+			Float: 7.28675e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -2027,13 +2628,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	54 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	54 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....=...
@@ -2066,7 +2671,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	55 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	55 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....=...
@@ -2123,7 +2728,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	56 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	56 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....=...
@@ -2176,7 +2781,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	57 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	57 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....=...
@@ -2205,7 +2810,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	58 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	58 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....=...
@@ -2226,11 +2831,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	59 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	59 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -2239,34 +2846,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	60 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	60 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ;...
-			Hex: 3b 00 00 00 }
+			Hex: 3b 00 00 00
+			Int: 59
+			Float: 8.26766e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -2274,12 +2895,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	61 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	61 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....3...5...6...7...8...9...:...<...
@@ -2292,7 +2915,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: 2...
-				Hex: 32 00 00 00 } }
+				Hex: 32 00 00 00
+				Int: 50
+				Float: 7.00649e-44 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -2300,11 +2925,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -2312,13 +2941,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	62 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	62 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....?...
@@ -2343,7 +2976,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	63 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	63 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: >.......
@@ -2355,12 +2988,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	64 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	64 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ?...
-			Hex: 3f 00 00 00 }
+			Hex: 3f 00 00 00
+			Int: 63
+			Float: 8.82818e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -2368,16 +3005,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: K...
-			Hex: 4b 00 00 00 }
+			Hex: 4b 00 00 00
+			Int: 75
+			Float: 1.05097e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	65 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	65 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -2385,28 +3028,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	66 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	66 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....C...
@@ -2463,11 +3118,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	67 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	67 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: B...
-			Hex: 42 00 00 00 }
+			Hex: 42 00 00 00
+			Int: 66
+			Float: 9.24857e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -2475,13 +3132,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	68 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	68 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....K...
@@ -2514,7 +3175,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	69 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	69 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....K...
@@ -2571,7 +3232,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	70 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	70 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....K...
@@ -2624,7 +3285,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	71 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	71 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....K...
@@ -2653,7 +3314,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	72 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	72 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....K...
@@ -2674,11 +3335,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	73 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	73 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -2687,34 +3350,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	74 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	74 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: I...
-			Hex: 49 00 00 00 }
+			Hex: 49 00 00 00
+			Int: 73
+			Float: 1.02295e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -2722,12 +3399,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	75 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	75 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....A...C...D...E...F...G...H...J...
@@ -2740,7 +3419,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: @...
-				Hex: 40 00 00 00 } }
+				Hex: 40 00 00 00
+				Int: 64
+				Float: 8.96831e-44 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -2748,11 +3429,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -2760,13 +3445,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	76 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	76 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....M...
@@ -2791,7 +3480,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	77 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	77 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: L.......
@@ -2803,12 +3492,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	78 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	78 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: M...
-			Hex: 4d 00 00 00 }
+			Hex: 4d 00 00 00
+			Int: 77
+			Float: 1.079e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -2816,16 +3509,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: Y...
-			Hex: 59 00 00 00 }
+			Hex: 59 00 00 00
+			Int: 89
+			Float: 1.24716e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	79 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	79 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -2833,28 +3532,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	80 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	80 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Q...
@@ -2911,11 +3622,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	81 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	81 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: P...
-			Hex: 50 00 00 00 }
+			Hex: 50 00 00 00
+			Int: 80
+			Float: 1.12104e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -2923,13 +3636,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	82 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	82 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Y...
@@ -2962,7 +3679,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	83 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	83 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Y...
@@ -3019,7 +3736,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	84 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	84 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Y...
@@ -3072,7 +3789,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	85 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	85 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Y...
@@ -3101,7 +3818,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	86 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	86 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Y...
@@ -3122,11 +3839,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	87 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	87 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -3135,34 +3854,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	88 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	88 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: W...
-			Hex: 57 00 00 00 }
+			Hex: 57 00 00 00
+			Int: 87
+			Float: 1.21913e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -3170,12 +3903,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	89 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	89 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....O...Q...R...S...T...U...V...X...
@@ -3188,7 +3923,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: N...
-				Hex: 4e 00 00 00 } }
+				Hex: 4e 00 00 00
+				Int: 78
+				Float: 1.09301e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -3196,11 +3933,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -3208,13 +3949,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	90 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	90 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....[...
@@ -3239,7 +3984,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ........&.
 			Hex: 01 00 00 00 01 00 00 00 26 03 } }
-	91 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	91 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: Z.......
@@ -3251,12 +3996,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	92 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [41] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	92 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [41] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 09 00 00 00 }
+			Hex: 09 00 00 00
+			Int: 9
+			Float: 1.26117e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -3417,16 +4166,18 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ........&.
 			Hex: 01 00 00 00 00 00 00 00 26 03 } }
-	93 0x0002: (SceneClassUnknown: mental ray: material custom attribute, (0x25dc8980, 0x218ab459), mrMaterialAttribs.gup) [2] {
+	93 0x0002: (SceneClassUnknown: mental ray: material custom attribute, (0x218ab459, 0x25dc8980), mrMaterialAttribs.gup) [2] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: \...
-			Hex: 5c 00 00 00 }
+			Hex: 5c 00 00 00
+			Int: 92
+			Float: 1.28919e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
 			Hex: 2e } }
-	94 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+	94 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: [...]... }
@@ -3437,16 +4188,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 86 00 00 00 }
+			Hex: 86 00 00 00
+			Int: 134
+			Float: 1.87774e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 } }
-	95 0x0009: (SceneClassUnknown: Bezier Float, (0x00000000, 0x00002007), Builtin) [11] {
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 } }
+	95 0x0009: (SceneClassUnknown: Bezier Float, (0x00002007, 0x00000000), Builtin) [11] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -3454,7 +4211,9 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x2501: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 80 3f }
+			Hex: 00 00 80 3f
+			Int: 1065353216
+			Float: 1 }
 		3 0x2500: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -3462,7 +4221,9 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x3002: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x3003: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -3482,25 +4243,35 @@ Pipeline Max Dump (Temporary Tool)
 		9 0x3005: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 86 01 00 00 }
+			Hex: 86 01 00 00
+			Int: 390
+			Float: 5.46506e-43 }
 		10 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	96 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [2] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	96 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [2] {
 		0 0x1030: (StorageRaw) {
 			Size: 4
 			String: g...
-			Hex: 67 00 00 00 }
+			Hex: 67 00 00 00
+			Int: 103
+			Float: 1.44334e-43 }
 		1 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	97 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [15] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	97 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [15] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -3509,7 +4280,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3517,12 +4290,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		3 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3530,12 +4307,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3543,12 +4324,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } }
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } }
 		5 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 03 00 00 00 }
+				Hex: 03 00 00 00
+				Int: 3
+				Float: 4.2039e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3556,12 +4341,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } }
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } }
 		6 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 04 00 00 00 }
+				Hex: 04 00 00 00
+				Int: 4
+				Float: 5.60519e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3569,12 +4358,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		7 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 05 00 00 00 }
+				Hex: 05 00 00 00
+				Int: 5
+				Float: 7.00649e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3582,12 +4375,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		8 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 06 00 00 00 }
+				Hex: 06 00 00 00
+				Int: 6
+				Float: 8.40779e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3595,12 +4392,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		9 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 07 00 00 00 }
+				Hex: 07 00 00 00
+				Int: 7
+				Float: 9.80909e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3608,12 +4409,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } }
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } }
 		10 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 08 00 00 00 }
+				Hex: 08 00 00 00
+				Int: 8
+				Float: 1.12104e-44 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3621,12 +4426,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } }
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } }
 		11 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 09 00 00 00 }
+				Hex: 09 00 00 00
+				Int: 9
+				Float: 1.26117e-44 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3634,12 +4443,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } }
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } }
 		12 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 0a 00 00 00 }
+				Hex: 0a 00 00 00
+				Int: 10
+				Float: 1.4013e-44 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3647,12 +4460,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0101: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } }
 		13 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 0b 00 00 00 }
+				Hex: 0b 00 00 00
+				Int: 11
+				Float: 1.54143e-44 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3660,12 +4477,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		14 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 0c 00 00 00 }
+				Hex: 0c 00 00 00
+				Int: 12
+				Float: 1.68156e-44 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3673,26 +4494,30 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	98 0x000a: (SceneClassUnknown: Placement, (0x00000000, 0x00000100), mtlgen.dlt) [9] {
-		0 0x2150: (StorageContainer) [2] {
-			0 0x0100: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: 01 00 00 00 }
-			1 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: ........ ...........
-					Hex: 00 01 00 00 00 00 00 00 20 0c 00 00 00 00 00 00 04 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	98 0x000a: (SceneClassUnknown: Placement, (0x00000100, 0x00000000), mtlgen.dlt) [9] {
+		0 0x2150: (AppData) [2] {
+			0 0x0100: (CStorageValue) { 1 }
+			1 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x00000100, 0x00000000)
+					SuperClassId: 3104
+					SubId: 0
+					Size: 4 }
 				1 0x0130: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 } } }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 } } }
 		1 0x2034: (StorageRaw) {
 			Size: 4
 			String: a...
-			Hex: 61 00 00 00 }
+			Hex: 61 00 00 00
+			Int: 97
+			Float: 1.35926e-43 }
 		2 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -3700,28 +4525,40 @@ Pipeline Max Dump (Temporary Tool)
 		3 0x9002: (StorageRaw) {
 			Size: 4
 			String: ...P
-			Hex: 03 00 00 50 }
+			Hex: 03 00 00 50
+			Int: 1342177283
+			Float: 8.58994e+09 }
 		4 0x9003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x9009: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 04 00 00 00 }
+			Hex: 04 00 00 00
+			Int: 4
+			Float: 5.60519e-45 }
 		6 0x9005: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x9006: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		8 0x900b: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	99 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [21] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	99 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [21] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....g...
@@ -3816,11 +4653,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	100 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [6] {
+	100 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [6] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 04 00 00 00 }
+			Hex: 04 00 00 00
+			Int: 4
+			Float: 5.60519e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -3829,7 +4668,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3837,12 +4678,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } }
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } }
 		3 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3850,12 +4695,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3863,12 +4712,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } }
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } }
 		5 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 03 00 00 00 }
+				Hex: 03 00 00 00
+				Int: 3
+				Float: 4.2039e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -3876,8 +4729,10 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } } }
-	101 0x000b: (SceneClassUnknown: Output, (0x00000000, 0x00000100), mtlgen.dlt) [3] {
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } } }
+	101 0x000b: (SceneClassUnknown: Output, (0x00000100, 0x00000000), mtlgen.dlt) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 12
 			String: d...........
@@ -3889,8 +4744,10 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0002: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	102 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	102 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....g...
@@ -3915,7 +4772,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	103 0x000c: (SceneClassUnknown: Bitmap, (0x00000000, 0x00000240), mtl.dlt) [4] {
+	103 0x000c: (SceneClassUnknown: Bitmap, (0x00000240, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 16
 			String: b...c...e...f... }
@@ -3927,7 +4784,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: `...
-				Hex: 60 00 00 00 } }
+				Hex: 60 00 00 00
+				Int: 96
+				Float: 1.34525e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 12
@@ -3935,20 +4794,26 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 08 02 00 00 }
+				Hex: 08 02 00 00
+				Int: 520
+				Float: 7.28675e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } } }
-	104 0x0009: (SceneClassUnknown: Bezier Float, (0x00000000, 0x00002007), Builtin) [11] {
+	104 0x0009: (SceneClassUnknown: Bezier Float, (0x00002007, 0x00000000), Builtin) [11] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -3956,7 +4821,9 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x2501: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 80 3f }
+			Hex: 00 00 80 3f
+			Int: 1065353216
+			Float: 1 }
 		3 0x2500: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -3964,7 +4831,9 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x3002: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x3003: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -3984,16 +4853,22 @@ Pipeline Max Dump (Temporary Tool)
 		9 0x3005: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 86 01 00 00 }
+			Hex: 86 01 00 00
+			Int: 390
+			Float: 5.46506e-43 }
 		10 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	105 0x0009: (SceneClassUnknown: Bezier Float, (0x00000000, 0x00002007), Builtin) [11] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	105 0x0009: (SceneClassUnknown: Bezier Float, (0x00002007, 0x00000000), Builtin) [11] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -4001,7 +4876,9 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x2501: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 80 3f }
+			Hex: 00 00 80 3f
+			Int: 1065353216
+			Float: 1 }
 		3 0x2500: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -4009,7 +4886,9 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x3002: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x3003: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -4029,25 +4908,35 @@ Pipeline Max Dump (Temporary Tool)
 		9 0x3005: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 86 01 00 00 }
+			Hex: 86 01 00 00
+			Int: 390
+			Float: 5.46506e-43 }
 		10 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	106 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [2] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	106 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [2] {
 		0 0x1030: (StorageRaw) {
 			Size: 4
 			String: q...
-			Hex: 71 00 00 00 }
+			Hex: 71 00 00 00
+			Int: 113
+			Float: 1.58347e-43 }
 		1 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	107 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [15] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	107 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [15] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -4056,7 +4945,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4064,12 +4955,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		3 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4077,12 +4972,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4090,12 +4989,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } }
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } }
 		5 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 03 00 00 00 }
+				Hex: 03 00 00 00
+				Int: 3
+				Float: 4.2039e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4103,12 +5006,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } }
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } }
 		6 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 04 00 00 00 }
+				Hex: 04 00 00 00
+				Int: 4
+				Float: 5.60519e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4116,12 +5023,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		7 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 05 00 00 00 }
+				Hex: 05 00 00 00
+				Int: 5
+				Float: 7.00649e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4129,12 +5040,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		8 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 06 00 00 00 }
+				Hex: 06 00 00 00
+				Int: 6
+				Float: 8.40779e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4142,12 +5057,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		9 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 07 00 00 00 }
+				Hex: 07 00 00 00
+				Int: 7
+				Float: 9.80909e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4155,12 +5074,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } }
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } }
 		10 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 08 00 00 00 }
+				Hex: 08 00 00 00
+				Int: 8
+				Float: 1.12104e-44 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4168,12 +5091,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } }
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } }
 		11 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 09 00 00 00 }
+				Hex: 09 00 00 00
+				Int: 9
+				Float: 1.26117e-44 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4181,12 +5108,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } }
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } }
 		12 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 0a 00 00 00 }
+				Hex: 0a 00 00 00
+				Int: 10
+				Float: 1.4013e-44 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4194,12 +5125,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0101: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } }
 		13 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 0b 00 00 00 }
+				Hex: 0b 00 00 00
+				Int: 11
+				Float: 1.54143e-44 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4207,12 +5142,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		14 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 0c 00 00 00 }
+				Hex: 0c 00 00 00
+				Int: 12
+				Float: 1.68156e-44 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4220,26 +5159,30 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	108 0x000a: (SceneClassUnknown: Placement, (0x00000000, 0x00000100), mtlgen.dlt) [9] {
-		0 0x2150: (StorageContainer) [2] {
-			0 0x0100: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: 01 00 00 00 }
-			1 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: ........ ...........
-					Hex: 00 01 00 00 00 00 00 00 20 0c 00 00 00 00 00 00 04 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	108 0x000a: (SceneClassUnknown: Placement, (0x00000100, 0x00000000), mtlgen.dlt) [9] {
+		0 0x2150: (AppData) [2] {
+			0 0x0100: (CStorageValue) { 1 }
+			1 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x00000100, 0x00000000)
+					SuperClassId: 3104
+					SubId: 0
+					Size: 4 }
 				1 0x0130: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 } } }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 } } }
 		1 0x2034: (StorageRaw) {
 			Size: 4
 			String: k...
-			Hex: 6b 00 00 00 }
+			Hex: 6b 00 00 00
+			Int: 107
+			Float: 1.49939e-43 }
 		2 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -4247,28 +5190,40 @@ Pipeline Max Dump (Temporary Tool)
 		3 0x9002: (StorageRaw) {
 			Size: 4
 			String: ...P
-			Hex: 03 00 00 50 }
+			Hex: 03 00 00 50
+			Int: 1342177283
+			Float: 8.58994e+09 }
 		4 0x9003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x9009: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 04 00 00 00 }
+			Hex: 04 00 00 00
+			Int: 4
+			Float: 5.60519e-45 }
 		6 0x9005: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x9006: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		8 0x900b: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	109 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [21] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	109 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [21] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....q...
@@ -4363,11 +5318,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	110 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [6] {
+	110 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [6] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 04 00 00 00 }
+			Hex: 04 00 00 00
+			Int: 4
+			Float: 5.60519e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -4376,7 +5333,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4384,12 +5343,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } }
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } }
 		3 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4397,12 +5360,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4410,12 +5377,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } }
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } }
 		5 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 03 00 00 00 }
+				Hex: 03 00 00 00
+				Int: 3
+				Float: 4.2039e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -4423,8 +5394,10 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } } }
-	111 0x000b: (SceneClassUnknown: Output, (0x00000000, 0x00000100), mtlgen.dlt) [3] {
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } } }
+	111 0x000b: (SceneClassUnknown: Output, (0x00000100, 0x00000000), mtlgen.dlt) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 12
 			String: n...........
@@ -4436,8 +5409,10 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0002: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	112 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	112 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....q...
@@ -4462,7 +5437,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	113 0x000c: (SceneClassUnknown: Bitmap, (0x00000000, 0x00000240), mtl.dlt) [4] {
+	113 0x000c: (SceneClassUnknown: Bitmap, (0x00000240, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 16
 			String: l...m...o...p... }
@@ -4474,7 +5449,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: j...
-				Hex: 6a 00 00 00 } }
+				Hex: 6a 00 00 00
+				Int: 106
+				Float: 1.48538e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 12
@@ -4482,16 +5459,20 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } } }
-	114 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+	114 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 52
 			String: 0......._.......g.......h.......g.......i.......q...
@@ -4503,28 +5484,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 07 00 00 00 }
+			Hex: 07 00 00 00
+			Int: 7
+			Float: 9.80909e-45 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	115 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	115 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....t...
@@ -4581,11 +5574,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	116 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	116 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: s...
-			Hex: 73 00 00 00 }
+			Hex: 73 00 00 00
+			Int: 115
+			Float: 1.61149e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -4593,13 +5588,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	117 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	117 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....|...
@@ -4632,7 +5631,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	118 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	118 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....|...
@@ -4689,7 +5688,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	119 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	119 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....|...
@@ -4742,7 +5741,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	120 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	120 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....|...
@@ -4771,7 +5770,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	121 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	121 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....|...
@@ -4792,11 +5791,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	122 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	122 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -4805,34 +5806,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	123 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	123 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: z...
-			Hex: 7a 00 00 00 }
+			Hex: 7a 00 00 00
+			Int: 122
+			Float: 1.70958e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -4840,12 +5855,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	124 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [5] {
+	124 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [5] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....r...t...u...v...w...x...y.......
@@ -4862,11 +5879,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 08 02 00 00 }
+				Hex: 08 02 00 00
+				Int: 520
+				Float: 7.28675e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -4874,13 +5895,17 @@ Pipeline Max Dump (Temporary Tool)
 		3 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		4 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	125 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	125 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0007: (StorageRaw) {
 			Size: 0
 			String:
@@ -4933,7 +5958,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	126 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [40] {
+	126 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [40] {
 		0 0x0007: (StorageRaw) {
 			Size: 0
 			String:
@@ -5094,7 +6119,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	127 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [29] {
+	127 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [29] {
 		0 0x2035: (StorageRaw) {
 			Size: 20
 			String: ........g.......q...
@@ -5211,7 +6236,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	128 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [22] {
+	128 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [22] {
 		0 0x0007: (StorageRaw) {
 			Size: 0
 			String:
@@ -5300,7 +6325,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	129 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [22] {
+	129 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [22] {
 		0 0x0007: (StorageRaw) {
 			Size: 0
 			String:
@@ -5389,7 +6414,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	130 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [22] {
+	130 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [22] {
 		0 0x0007: (StorageRaw) {
 			Size: 0
 			String:
@@ -5478,7 +6503,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	131 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [22] {
+	131 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [22] {
 		0 0x0007: (StorageRaw) {
 			Size: 0
 			String:
@@ -5567,7 +6592,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	132 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [3] {
+	132 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [3] {
 		0 0x0007: (StorageRaw) {
 			Size: 0
 			String:
@@ -5580,7 +6605,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	133 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [3] {
+	133 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [3] {
 		0 0x0007: (StorageRaw) {
 			Size: 0
 			String:
@@ -5593,7 +6618,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	134 0x000d: (SceneClassUnknown: NeL Material, (0x222b9eb9, 0x64c75fec), Script) [8] {
+	134 0x000d: (SceneClassUnknown: NeL Material, (0x64c75fec, 0x222b9eb9), Script) [8] {
 		0 0x2034: (StorageRaw) {
 			Size: 40
 			String: |.......~...............................
@@ -5606,7 +6631,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: ^...
-				Hex: 5e 00 00 00 } }
+				Hex: 5e 00 00 00
+				Int: 94
+				Float: 1.31722e-43 } }
 		3 0x0010: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -5617,16 +6644,20 @@ Pipeline Max Dump (Temporary Tool)
 		5 0x4003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0a 02 00 00 }
+			Hex: 0a 02 00 00
+			Int: 522
+			Float: 7.31478e-43 }
 		6 0x4020: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x4030: (StorageRaw) {
 			Size: 16
 			String: ...............?
 			Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-	135 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+	135 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -5651,7 +6682,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	136 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	136 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -5663,12 +6694,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	137 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [41] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	137 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [41] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 09 00 00 00 }
+			Hex: 09 00 00 00
+			Int: 9
+			Float: 1.26117e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -5829,16 +6864,18 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	138 0x0002: (SceneClassUnknown: mental ray: material custom attribute, (0x25dc8980, 0x218ab459), mrMaterialAttribs.gup) [2] {
+	138 0x0002: (SceneClassUnknown: mental ray: material custom attribute, (0x218ab459, 0x25dc8980), mrMaterialAttribs.gup) [2] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 89 00 00 00 }
+			Hex: 89 00 00 00
+			Int: 137
+			Float: 1.91978e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
 			Hex: 2e } }
-	139 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+	139 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -5850,16 +6887,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 96 00 00 00 }
+			Hex: 96 00 00 00
+			Int: 150
+			Float: 2.10195e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 } }
-	140 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 } }
+	140 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -5867,28 +6910,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	141 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	141 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -5945,11 +7000,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	142 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	142 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 8d 00 00 00 }
+			Hex: 8d 00 00 00
+			Int: 141
+			Float: 1.97583e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -5957,13 +7014,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	143 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	143 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -5996,7 +7057,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	144 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	144 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6053,7 +7114,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	145 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	145 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6106,7 +7167,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	146 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	146 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6135,7 +7196,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	147 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	147 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6156,11 +7217,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	148 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	148 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -6169,34 +7232,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	149 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	149 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 94 00 00 00 }
+			Hex: 94 00 00 00
+			Int: 148
+			Float: 2.07392e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -6204,13 +7281,15 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 0
 				String:
 				Hex: } } }
-	150 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	150 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....................................
@@ -6223,7 +7302,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 8b 00 00 00 } }
+				Hex: 8b 00 00 00
+				Int: 139
+				Float: 1.9478e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -6231,11 +7312,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 10 }
+				Hex: 00 02 00 10
+				Int: 268435968
+				Float: 2.52451e-29 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -6243,13 +7328,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	151 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	151 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -6274,7 +7363,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	152 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	152 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -6286,12 +7375,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	153 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	153 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 98 00 00 00 }
+			Hex: 98 00 00 00
+			Int: 152
+			Float: 2.12997e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -6299,16 +7392,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: a4 00 00 00 }
+			Hex: a4 00 00 00
+			Int: 164
+			Float: 2.29813e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	154 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	154 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -6316,28 +7415,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	155 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	155 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6394,11 +7505,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	156 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	156 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 9b 00 00 00 }
+			Hex: 9b 00 00 00
+			Int: 155
+			Float: 2.17201e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -6406,13 +7519,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	157 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	157 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6445,7 +7562,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	158 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	158 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6502,7 +7619,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	159 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	159 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6555,7 +7672,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	160 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	160 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6584,7 +7701,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	161 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	161 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6605,11 +7722,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	162 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	162 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -6618,34 +7737,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	163 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	163 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: a2 00 00 00 }
+			Hex: a2 00 00 00
+			Int: 162
+			Float: 2.2701e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -6653,12 +7786,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	164 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	164 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....................................
@@ -6671,7 +7806,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 99 00 00 00 } }
+				Hex: 99 00 00 00
+				Int: 153
+				Float: 2.14399e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -6679,11 +7816,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -6691,13 +7832,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	165 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	165 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -6722,7 +7867,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	166 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	166 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -6734,12 +7879,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	167 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	167 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: a6 00 00 00 }
+			Hex: a6 00 00 00
+			Int: 166
+			Float: 2.32616e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -6747,16 +7896,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: b2 00 00 00 }
+			Hex: b2 00 00 00
+			Int: 178
+			Float: 2.49431e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	168 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	168 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -6764,28 +7919,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	169 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	169 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6842,11 +8009,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	170 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	170 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: a9 00 00 00 }
+			Hex: a9 00 00 00
+			Int: 169
+			Float: 2.36819e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -6854,13 +8023,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	171 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	171 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6893,7 +8066,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	172 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	172 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6950,7 +8123,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	173 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	173 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7003,7 +8176,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	174 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	174 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7032,7 +8205,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	175 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	175 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7053,11 +8226,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	176 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	176 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -7066,34 +8241,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	177 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	177 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: b0 00 00 00 }
+			Hex: b0 00 00 00
+			Int: 176
+			Float: 2.46629e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -7101,12 +8290,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	178 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	178 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....................................
@@ -7119,7 +8310,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: a7 00 00 00 } }
+				Hex: a7 00 00 00
+				Int: 167
+				Float: 2.34017e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -7127,11 +8320,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -7139,13 +8336,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	179 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	179 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -7170,7 +8371,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	180 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	180 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -7182,12 +8383,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	181 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	181 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: b4 00 00 00 }
+			Hex: b4 00 00 00
+			Int: 180
+			Float: 2.52234e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -7195,16 +8400,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: c0 00 00 00 }
+			Hex: c0 00 00 00
+			Int: 192
+			Float: 2.69049e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	182 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	182 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -7212,28 +8423,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	183 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	183 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7290,11 +8513,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	184 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	184 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: b7 00 00 00 }
+			Hex: b7 00 00 00
+			Int: 183
+			Float: 2.56438e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -7302,13 +8527,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	185 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	185 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7341,7 +8570,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	186 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	186 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7398,7 +8627,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	187 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	187 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7451,7 +8680,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	188 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	188 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7480,7 +8709,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	189 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	189 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7501,11 +8730,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	190 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	190 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -7514,34 +8745,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	191 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	191 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: be 00 00 00 }
+			Hex: be 00 00 00
+			Int: 190
+			Float: 2.66247e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -7549,12 +8794,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	192 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	192 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....................................
@@ -7567,7 +8814,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: b5 00 00 00 } }
+				Hex: b5 00 00 00
+				Int: 181
+				Float: 2.53635e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -7575,11 +8824,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -7587,13 +8840,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	193 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	193 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -7618,7 +8875,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	194 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	194 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -7630,12 +8887,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	195 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	195 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: c2 00 00 00 }
+			Hex: c2 00 00 00
+			Int: 194
+			Float: 2.71852e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -7643,16 +8904,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: ce 00 00 00 }
+			Hex: ce 00 00 00
+			Int: 206
+			Float: 2.88667e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	196 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	196 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -7660,28 +8927,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	197 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	197 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7738,11 +9017,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	198 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	198 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: c5 00 00 00 }
+			Hex: c5 00 00 00
+			Int: 197
+			Float: 2.76056e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -7750,13 +9031,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	199 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	199 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7789,7 +9074,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	200 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	200 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7846,7 +9131,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	201 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	201 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7899,7 +9184,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	202 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	202 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7928,7 +9213,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	203 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	203 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7949,11 +9234,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	204 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	204 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -7962,34 +9249,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	205 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	205 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: cc 00 00 00 }
+			Hex: cc 00 00 00
+			Int: 204
+			Float: 2.85865e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -7997,12 +9298,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	206 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	206 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....................................
@@ -8015,7 +9318,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: c3 00 00 00 } }
+				Hex: c3 00 00 00
+				Int: 195
+				Float: 2.73253e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -8023,11 +9328,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -8035,13 +9344,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	207 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	207 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -8066,7 +9379,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	208 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	208 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -8078,12 +9391,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	209 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	209 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: d0 00 00 00 }
+			Hex: d0 00 00 00
+			Int: 208
+			Float: 2.9147e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -8091,16 +9408,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: dc 00 00 00 }
+			Hex: dc 00 00 00
+			Int: 220
+			Float: 3.08286e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	210 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	210 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -8108,28 +9431,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	211 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	211 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8186,11 +9521,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	212 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	212 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: d3 00 00 00 }
+			Hex: d3 00 00 00
+			Int: 211
+			Float: 2.95674e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -8198,13 +9535,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	213 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	213 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8237,7 +9578,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	214 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	214 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8294,7 +9635,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	215 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	215 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8347,7 +9688,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	216 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	216 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8376,7 +9717,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	217 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	217 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8397,11 +9738,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	218 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	218 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -8410,34 +9753,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	219 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	219 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: da 00 00 00 }
+			Hex: da 00 00 00
+			Int: 218
+			Float: 3.05483e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -8445,12 +9802,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	220 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	220 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....................................
@@ -8463,7 +9822,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: d1 00 00 00 } }
+				Hex: d1 00 00 00
+				Int: 209
+				Float: 2.92871e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -8471,11 +9832,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -8483,13 +9848,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	221 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	221 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -8514,7 +9883,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	222 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	222 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -8526,12 +9895,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	223 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	223 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: de 00 00 00 }
+			Hex: de 00 00 00
+			Int: 222
+			Float: 3.11088e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -8539,16 +9912,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: ea 00 00 00 }
+			Hex: ea 00 00 00
+			Int: 234
+			Float: 3.27904e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	224 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	224 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -8556,28 +9935,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	225 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	225 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8634,11 +10025,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	226 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	226 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: e1 00 00 00 }
+			Hex: e1 00 00 00
+			Int: 225
+			Float: 3.15292e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -8646,13 +10039,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	227 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	227 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8685,7 +10082,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	228 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	228 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8742,7 +10139,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	229 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	229 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8795,7 +10192,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	230 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	230 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8824,7 +10221,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	231 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	231 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8845,11 +10242,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	232 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	232 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -8858,34 +10257,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	233 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	233 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: e8 00 00 00 }
+			Hex: e8 00 00 00
+			Int: 232
+			Float: 3.25101e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -8893,12 +10306,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	234 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	234 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....................................
@@ -8911,7 +10326,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: df 00 00 00 } }
+				Hex: df 00 00 00
+				Int: 223
+				Float: 3.1249e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -8919,11 +10336,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -8931,13 +10352,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	235 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	235 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -8962,7 +10387,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	236 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	236 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -8974,12 +10399,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	237 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	237 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: ec 00 00 00 }
+			Hex: ec 00 00 00
+			Int: 236
+			Float: 3.30706e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -8987,16 +10416,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: f8 00 00 00 }
+			Hex: f8 00 00 00
+			Int: 248
+			Float: 3.47522e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	238 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	238 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -9004,28 +10439,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	239 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	239 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9082,11 +10529,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	240 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	240 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: ef 00 00 00 }
+			Hex: ef 00 00 00
+			Int: 239
+			Float: 3.3491e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -9094,13 +10543,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	241 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	241 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9133,7 +10586,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	242 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	242 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9190,7 +10643,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	243 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	243 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9243,7 +10696,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	244 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	244 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9272,7 +10725,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	245 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	245 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9293,11 +10746,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	246 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	246 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -9306,34 +10761,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	247 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	247 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: f6 00 00 00 }
+			Hex: f6 00 00 00
+			Int: 246
+			Float: 3.44719e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -9341,12 +10810,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	248 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	248 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....................................
@@ -9359,7 +10830,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: ed 00 00 00 } }
+				Hex: ed 00 00 00
+				Int: 237
+				Float: 3.32108e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -9367,11 +10840,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -9379,13 +10856,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	249 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	249 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -9410,7 +10891,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	250 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	250 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -9422,12 +10903,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	251 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	251 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: fa 00 00 00 }
+			Hex: fa 00 00 00
+			Int: 250
+			Float: 3.50325e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -9435,16 +10920,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 06 01 00 00 }
+			Hex: 06 01 00 00
+			Int: 262
+			Float: 3.6714e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	252 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	252 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -9452,28 +10943,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	253 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	253 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9530,11 +11033,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	254 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	254 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: fd 00 00 00 }
+			Hex: fd 00 00 00
+			Int: 253
+			Float: 3.54529e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -9542,13 +11047,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	255 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	255 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9581,7 +11090,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	256 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	256 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9638,7 +11147,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	257 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	257 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9691,7 +11200,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	258 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	258 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9720,7 +11229,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	259 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	259 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9741,11 +11250,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	260 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	260 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -9754,34 +11265,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	261 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	261 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 04 01 00 00 }
+			Hex: 04 01 00 00
+			Int: 260
+			Float: 3.64338e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -9789,12 +11314,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	262 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	262 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....................................
@@ -9807,7 +11334,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: fb 00 00 00 } }
+				Hex: fb 00 00 00
+				Int: 251
+				Float: 3.51726e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -9815,11 +11344,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -9827,13 +11360,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	263 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	263 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -9858,7 +11395,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	264 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	264 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -9870,12 +11407,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	265 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	265 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 08 01 00 00 }
+			Hex: 08 01 00 00
+			Int: 264
+			Float: 3.69943e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -9883,16 +11424,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 14 01 00 00 }
+			Hex: 14 01 00 00
+			Int: 276
+			Float: 3.86758e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	266 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	266 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -9900,28 +11447,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	267 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	267 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9978,11 +11537,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	268 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	268 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0b 01 00 00 }
+			Hex: 0b 01 00 00
+			Int: 267
+			Float: 3.74147e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -9990,13 +11551,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	269 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	269 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10029,7 +11594,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	270 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	270 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10086,7 +11651,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	271 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	271 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10139,7 +11704,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	272 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	272 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10168,7 +11733,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	273 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	273 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10189,11 +11754,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	274 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	274 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -10202,34 +11769,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	275 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	275 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 12 01 00 00 }
+			Hex: 12 01 00 00
+			Int: 274
+			Float: 3.83956e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -10237,12 +11818,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	276 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	276 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....................................
@@ -10255,7 +11838,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 09 01 00 00 } }
+				Hex: 09 01 00 00
+				Int: 265
+				Float: 3.71344e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -10263,11 +11848,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -10275,13 +11864,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	277 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	277 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -10306,7 +11899,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	278 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	278 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -10318,12 +11911,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	279 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	279 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 16 01 00 00 }
+			Hex: 16 01 00 00
+			Int: 278
+			Float: 3.89561e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -10331,16 +11928,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: "...
-			Hex: 22 01 00 00 }
+			Hex: 22 01 00 00
+			Int: 290
+			Float: 4.06377e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	280 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	280 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -10348,28 +11951,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	281 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	281 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10426,11 +12041,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	282 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	282 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 19 01 00 00 }
+			Hex: 19 01 00 00
+			Int: 281
+			Float: 3.93765e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -10438,13 +12055,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	283 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	283 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!...."...
@@ -10477,7 +12098,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	284 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	284 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!...."...
@@ -10534,7 +12155,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	285 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	285 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!...."...
@@ -10587,7 +12208,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	286 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	286 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!...."...
@@ -10616,7 +12237,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	287 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	287 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!...."...
@@ -10637,11 +12258,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	288 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	288 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -10650,34 +12273,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	289 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	289 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String:  ...
-			Hex: 20 01 00 00 }
+			Hex: 20 01 00 00
+			Int: 288
+			Float: 4.03574e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -10685,12 +12322,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	290 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	290 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ................................!...
@@ -10703,7 +12342,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 17 01 00 00 } }
+				Hex: 17 01 00 00
+				Int: 279
+				Float: 3.90962e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -10711,11 +12352,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -10723,13 +12368,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	291 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	291 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....$...
@@ -10754,7 +12403,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	292 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	292 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: #.......
@@ -10766,12 +12415,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	293 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	293 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: $...
-			Hex: 24 01 00 00 }
+			Hex: 24 01 00 00
+			Int: 292
+			Float: 4.09179e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -10779,16 +12432,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 01 00 00 }
+			Hex: 30 01 00 00
+			Int: 304
+			Float: 4.25995e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	294 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	294 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -10796,28 +12455,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	295 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	295 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....(...
@@ -10874,11 +12545,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	296 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	296 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: '...
-			Hex: 27 01 00 00 }
+			Hex: 27 01 00 00
+			Int: 295
+			Float: 4.13383e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -10886,13 +12559,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	297 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	297 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....0...
@@ -10925,7 +12602,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	298 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	298 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....0...
@@ -10982,7 +12659,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	299 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	299 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....0...
@@ -11035,7 +12712,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	300 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	300 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....0...
@@ -11064,7 +12741,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	301 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	301 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....0...
@@ -11085,11 +12762,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	302 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	302 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -11098,34 +12777,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	303 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	303 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 2e 01 00 00 }
+			Hex: 2e 01 00 00
+			Int: 302
+			Float: 4.23192e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -11133,12 +12826,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	304 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	304 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....&...(...)...*...+...,...-.../...
@@ -11151,7 +12846,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: %...
-				Hex: 25 01 00 00 } }
+				Hex: 25 01 00 00
+				Int: 293
+				Float: 4.1058e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -11159,11 +12856,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -11171,13 +12872,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	305 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	305 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....2...
@@ -11202,7 +12907,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	306 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	306 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: 1.......
@@ -11214,12 +12919,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	307 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	307 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: 2...
-			Hex: 32 01 00 00 }
+			Hex: 32 01 00 00
+			Int: 306
+			Float: 4.28797e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -11227,16 +12936,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: >...
-			Hex: 3e 01 00 00 }
+			Hex: 3e 01 00 00
+			Int: 318
+			Float: 4.45613e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	308 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	308 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -11244,28 +12959,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	309 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	309 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....6...
@@ -11322,11 +13049,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	310 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	310 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: 5...
-			Hex: 35 01 00 00 }
+			Hex: 35 01 00 00
+			Int: 309
+			Float: 4.33001e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -11334,13 +13063,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	311 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	311 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....>...
@@ -11373,7 +13106,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	312 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	312 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....>...
@@ -11430,7 +13163,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	313 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	313 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....>...
@@ -11483,7 +13216,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	314 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	314 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....>...
@@ -11512,7 +13245,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	315 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	315 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....>...
@@ -11533,11 +13266,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	316 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	316 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -11546,34 +13281,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	317 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	317 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: <...
-			Hex: 3c 01 00 00 }
+			Hex: 3c 01 00 00
+			Int: 316
+			Float: 4.4281e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -11581,12 +13330,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	318 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	318 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....4...6...7...8...9...:...;...=...
@@ -11599,7 +13350,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: 3...
-				Hex: 33 01 00 00 } }
+				Hex: 33 01 00 00
+				Int: 307
+				Float: 4.30199e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -11607,11 +13360,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -11619,13 +13376,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	319 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	319 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....@...
@@ -11650,7 +13411,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	320 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	320 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: ?.......
@@ -11662,12 +13423,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	321 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	321 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: @...
-			Hex: 40 01 00 00 }
+			Hex: 40 01 00 00
+			Int: 320
+			Float: 4.48416e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -11675,16 +13440,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: L...
-			Hex: 4c 01 00 00 }
+			Hex: 4c 01 00 00
+			Int: 332
+			Float: 4.65231e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	322 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	322 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -11692,28 +13463,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	323 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	323 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....D...
@@ -11770,11 +13553,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	324 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	324 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: C...
-			Hex: 43 01 00 00 }
+			Hex: 43 01 00 00
+			Int: 323
+			Float: 4.52619e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -11782,13 +13567,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	325 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	325 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....L...
@@ -11821,7 +13610,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	326 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	326 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....L...
@@ -11878,7 +13667,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	327 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	327 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....L...
@@ -11931,7 +13720,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	328 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	328 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....L...
@@ -11960,7 +13749,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	329 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	329 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....L...
@@ -11981,11 +13770,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	330 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	330 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -11994,34 +13785,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	331 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	331 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: J...
-			Hex: 4a 01 00 00 }
+			Hex: 4a 01 00 00
+			Int: 330
+			Float: 4.62428e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -12029,12 +13834,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	332 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	332 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....B...D...E...F...G...H...I...K...
@@ -12047,7 +13854,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: A...
-				Hex: 41 01 00 00 } }
+				Hex: 41 01 00 00
+				Int: 321
+				Float: 4.49817e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -12055,11 +13864,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -12067,13 +13880,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	333 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	333 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....N...
@@ -12098,7 +13915,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	334 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	334 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: M.......
@@ -12110,12 +13927,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	335 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	335 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: N...
-			Hex: 4e 01 00 00 }
+			Hex: 4e 01 00 00
+			Int: 334
+			Float: 4.68034e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -12123,16 +13944,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: Z...
-			Hex: 5a 01 00 00 }
+			Hex: 5a 01 00 00
+			Int: 346
+			Float: 4.84849e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	336 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	336 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -12140,28 +13967,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	337 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	337 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....R...
@@ -12218,11 +14057,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	338 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	338 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: Q...
-			Hex: 51 01 00 00 }
+			Hex: 51 01 00 00
+			Int: 337
+			Float: 4.72238e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -12230,13 +14071,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	339 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	339 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Z...
@@ -12269,7 +14114,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	340 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	340 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Z...
@@ -12326,7 +14171,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	341 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	341 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Z...
@@ -12379,7 +14224,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	342 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	342 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Z...
@@ -12408,7 +14253,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	343 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	343 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Z...
@@ -12429,11 +14274,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	344 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	344 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -12442,34 +14289,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	345 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	345 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: X...
-			Hex: 58 01 00 00 }
+			Hex: 58 01 00 00
+			Int: 344
+			Float: 4.82047e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -12477,12 +14338,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	346 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	346 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....P...R...S...T...U...V...W...Y...
@@ -12495,7 +14358,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: O...
-				Hex: 4f 01 00 00 } }
+				Hex: 4f 01 00 00
+				Int: 335
+				Float: 4.69435e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -12503,11 +14368,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -12515,13 +14384,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	347 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	347 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....\...
@@ -12546,7 +14419,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	348 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	348 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: [.......
@@ -12558,12 +14431,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	349 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	349 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: \...
-			Hex: 5c 01 00 00 }
+			Hex: 5c 01 00 00
+			Int: 348
+			Float: 4.87652e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -12571,16 +14448,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: h...
-			Hex: 68 01 00 00 }
+			Hex: 68 01 00 00
+			Int: 360
+			Float: 5.04467e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	350 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	350 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -12588,28 +14471,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	351 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	351 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....`...
@@ -12666,11 +14561,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	352 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	352 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: _...
-			Hex: 5f 01 00 00 }
+			Hex: 5f 01 00 00
+			Int: 351
+			Float: 4.91856e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -12678,13 +14575,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	353 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	353 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....h...
@@ -12717,7 +14618,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	354 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	354 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....h...
@@ -12774,7 +14675,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	355 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	355 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....h...
@@ -12827,7 +14728,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	356 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	356 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....h...
@@ -12856,7 +14757,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	357 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	357 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....h...
@@ -12877,11 +14778,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	358 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	358 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -12890,34 +14793,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	359 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	359 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: f...
-			Hex: 66 01 00 00 }
+			Hex: 66 01 00 00
+			Int: 358
+			Float: 5.01665e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -12925,12 +14842,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	360 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	360 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....^...`...a...b...c...d...e...g...
@@ -12943,7 +14862,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: ]...
-				Hex: 5d 01 00 00 } }
+				Hex: 5d 01 00 00
+				Int: 349
+				Float: 4.89053e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -12951,11 +14872,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -12963,13 +14888,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	361 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [6] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	361 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [6] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....j...
@@ -12994,7 +14923,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	362 0x0001: (SceneClassUnknown: ViewportManager, (0x30420c1e, 0x5a06293c), ViewportManager.gup) [3] {
+	362 0x0001: (SceneClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), ViewportManager.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 8
 			String: i.......
@@ -13006,12 +14935,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	363 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	363 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: j...
-			Hex: 6a 01 00 00 }
+			Hex: 6a 01 00 00
+			Int: 362
+			Float: 5.0727e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -13019,16 +14952,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: v...
-			Hex: 76 01 00 00 }
+			Hex: 76 01 00 00
+			Int: 374
+			Float: 5.24086e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	364 0x0004: (SceneClassUnknown: Texmaps, (0x00000000, 0x00001200), mtl.dlt) [8] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	364 0x0004: (SceneClassUnknown: Texmaps, (0x00001200, 0x00000000), mtl.dlt) [8] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: 0...
-			Hex: 30 00 00 00 }
+			Hex: 30 00 00 00
+			Int: 48
+			Float: 6.72623e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -13036,28 +14975,40 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x5108: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 9a 99 99 3e }
+			Hex: 9a 99 99 3e
+			Int: 1050253722
+			Float: 0.3 }
 		4 0x510c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x510d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x510e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x510f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	365 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	365 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....n...
@@ -13114,11 +15065,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	366 0x0005: (SceneClassUnknown: Blinn, (0x00000000, 0x00000038), mtl.dlt) [4] {
+	366 0x0005: (SceneClassUnknown: Blinn, (0x00000038, 0x00000000), mtl.dlt) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: m...
-			Hex: 6d 01 00 00 }
+			Hex: 6d 01 00 00
+			Int: 365
+			Float: 5.11474e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -13126,13 +15079,17 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x5020: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	367 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [8] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	367 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [8] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....v...
@@ -13165,7 +15122,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	368 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [14] {
+	368 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [14] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....v...
@@ -13222,7 +15179,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	369 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [13] {
+	369 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [13] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....v...
@@ -13275,7 +15232,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	370 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [7] {
+	370 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [7] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....v...
@@ -13304,7 +15261,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	371 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+	371 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....v...
@@ -13325,11 +15282,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	372 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [5] {
+	372 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [5] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 03 00 00 00 }
+			Hex: 03 00 00 00
+			Int: 3
+			Float: 4.2039e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -13338,34 +15297,48 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 00 3f } }
+				Hex: 00 00 00 3f
+				Int: 1056964608
+				Float: 0.5 } }
 		3 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	373 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x00000000, 0x25773211), samplers.dlh) [4] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	373 0x0007: (SceneClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), samplers.dlh) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: t...
-			Hex: 74 01 00 00 }
+			Hex: 74 01 00 00
+			Int: 372
+			Float: 5.21283e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -13373,12 +15346,14 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0200: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	374 0x0008: (SceneClassUnknown: Standard, (0x00000000, 0x00000002), mtl.dlt) [6] {
+	374 0x0008: (SceneClassUnknown: Standard, (0x00000002, 0x00000000), mtl.dlt) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 36
 			String: ....l...n...o...p...q...r...s...u...
@@ -13391,7 +15366,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: k...
-				Hex: 6b 01 00 00 } }
+				Hex: 6b 01 00 00
+				Int: 363
+				Float: 5.08671e-43 } }
 		3 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
@@ -13399,11 +15376,15 @@ Pipeline Max Dump (Temporary Tool)
 			1 0x4003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 }
 			2 0x4020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x4030: (StorageRaw) {
 				Size: 16
 				String: ...............?
@@ -13411,13 +15392,17 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0d 00 00 00 }
+			Hex: 0d 00 00 00
+			Int: 13
+			Float: 1.82169e-44 }
 		5 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	375 0x000e: (SceneClassUnknown: Material Editor, (0x00000000, 0x00000c80), Builtin) [7] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	375 0x000e: (SceneClassUnknown: Material Editor, (0x00000c80, 0x00000000), Builtin) [7] {
 		0 0x2034: (StorageRaw) {
 			Size: 104
 			String: ............/...=...K...Y..............................................."...0...>...L...Z...h...v.......
@@ -13437,20 +15422,28 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x09c0: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 06 00 00 00 }
+			Hex: 06 00 00 00
+			Int: 6
+			Float: 8.40779e-45 }
 		5 0x90b0: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		6 0x09d0: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	376 0x000f: (SceneClassUnknown: MtlBaseLib, (0x00000000, 0x00003333), Builtin) [3] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	376 0x000f: (SceneClassUnknown: MtlBaseLib, (0x00003333, 0x00000000), Builtin) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 86 00 00 00 }
+			Hex: 86 00 00 00
+			Int: 134
+			Float: 1.87774e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -13458,12 +15451,16 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x4110: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	377 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [3] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	377 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [3] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -13472,7 +15469,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -13480,21 +15479,27 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } } }
-	378 0x0010: (SceneClassUnknown: WaveMaster, (0x5b918e4e, 0x476fa9de), ProSound.dlc) [2] {
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } } }
+	378 0x0010: (SceneClassUnknown: WaveMaster, (0x476fa9de, 0x5b918e4e), ProSound.dlc) [2] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: y...
-			Hex: 79 01 00 00 }
+			Hex: 79 01 00 00
+			Int: 377
+			Float: 5.2829e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
 			Hex: 2e } }
-	379 0x0011: (SceneClassUnknown: ProSound, (0x5b918e4a, 0x476fa9de), ProSound.dlc) [31] {
+	379 0x0011: (SceneClassUnknown: ProSound, (0x476fa9de, 0x5b918e4a), ProSound.dlc) [31] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: z...
-			Hex: 7a 01 00 00 }
+			Hex: 7a 01 00 00
+			Int: 378
+			Float: 5.29691e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -13502,83 +15507,123 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x4990: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 8c 00 00 00 }
+			Hex: 8c 00 00 00
+			Int: 140
+			Float: 1.96182e-43 }
 		3 0x5000: (StorageRaw) {
 			Size: 4
 			String: <...
-			Hex: 3c 00 00 00 }
+			Hex: 3c 00 00 00
+			Int: 60
+			Float: 8.40779e-44 }
 		4 0x5001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 04 00 00 00 }
+			Hex: 04 00 00 00
+			Int: 4
+			Float: 5.60519e-45 }
 		5 0x5002: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		6 0x5003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		7 0x5004: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		8 0x5005: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: d0 07 00 00 }
+			Hex: d0 07 00 00
+			Int: 2000
+			Float: 2.8026e-42 }
 		9 0x5006: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: e8 03 00 00 }
+			Hex: e8 03 00 00
+			Int: 1000
+			Float: 1.4013e-42 }
 		10 0x5008: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		11 0x5009: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		12 0x500a: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		13 0x500b: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		14 0x500c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		15 0x500d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		16 0x500e: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		17 0x500f: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		18 0x5010: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		19 0x5011: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		20 0x5012: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		21 0x5013: (StorageRaw) {
 			Size: 4
 			String: d...
-			Hex: 64 00 00 00 }
+			Hex: 64 00 00 00
+			Int: 100
+			Float: 1.4013e-43 }
 		22 0x5014: (StorageRaw) {
 			Size: 0
 			String:
@@ -13586,23 +15631,33 @@ Pipeline Max Dump (Temporary Tool)
 		23 0x5015: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		24 0x5016: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 00 3f }
+			Hex: 00 00 00 3f
+			Int: 1056964608
+			Float: 0.5 }
 		25 0x5100: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		26 0x5110: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		27 0x5120: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		28 0x5130: (StorageRaw) {
 			Size: 8
 			String: .....>..
@@ -13610,16 +15665,22 @@ Pipeline Max Dump (Temporary Tool)
 		29 0x5140: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		30 0x5150: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	380 0x0012: (SceneClassUnknown: RootNode, (0x00000000, 0x00000002), Builtin) [3] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	380 0x0012: (SceneClassUnknown: RootNode, (0x00000002, 0x00000000), Builtin) [3] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 10 00 00 00 }
+			Hex: 10 00 00 00
+			Int: 16
+			Float: 2.24208e-44 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -13628,11 +15689,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 0
 			String:
 			Hex: } }
-	381 0x0013: (SceneClassUnknown: Bezier Position, (0x00000000, 0x00002008), Builtin) [11] {
+	381 0x0013: (SceneClassUnknown: Bezier Position, (0x00002008, 0x00000000), Builtin) [11] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -13647,7 +15710,9 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x3002: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x3003: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -13667,16 +15732,22 @@ Pipeline Max Dump (Temporary Tool)
 		9 0x3005: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 86 01 00 00 }
+			Hex: 86 01 00 00
+			Int: 390
+			Float: 5.46506e-43 }
 		10 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	382 0x0014: (SceneClassUnknown: TCB Rotation, (0x00000000, 0x00442313), Builtin) [11] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	382 0x0014: (SceneClassUnknown: TCB Rotation, (0x00442313, 0x00000000), Builtin) [11] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -13691,7 +15762,9 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x3002: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x3003: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -13711,16 +15784,22 @@ Pipeline Max Dump (Temporary Tool)
 		9 0x3005: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 86 01 00 00 }
+			Hex: 86 01 00 00
+			Int: 390
+			Float: 5.46506e-43 }
 		10 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	383 0x0015: (SceneClassUnknown: Bezier Scale, (0x00000000, 0x00002010), Builtin) [11] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	383 0x0015: (SceneClassUnknown: Bezier Scale, (0x00002010, 0x00000000), Builtin) [11] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -13735,7 +15814,9 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x3002: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x3003: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -13755,12 +15836,16 @@ Pipeline Max Dump (Temporary Tool)
 		9 0x3005: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 86 01 00 00 }
+			Hex: 86 01 00 00
+			Int: 390
+			Float: 5.46506e-43 }
 		10 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	384 0x0016: (SceneClassUnknown: Position/Rotation/Scale, (0x00000000, 0x00002005), Builtin) [5] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	384 0x0016: (SceneClassUnknown: Position/Rotation/Scale, (0x00002005, 0x00000000), Builtin) [5] {
 		0 0x2034: (StorageRaw) {
 			Size: 12
 			String: ....~.......
@@ -13772,20 +15857,28 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x7230: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x7231: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		4 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	385 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [123] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	385 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [123] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: ff ff ff ff }
+			Hex: ff ff ff ff
+			Int: -1
+			Float: -nan }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -14274,35 +16367,38 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 94
 			String: ..............................................................................................
 			Hex: 0f 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 } }
-	386 0x0017: (SceneClassUnknown: Master Point Controller, (0x00000000, 0x0d9c20ff), Builtin) [1] {
+	386 0x0017: (SceneClassUnknown: Master Point Controller, (0x0d9c20ff, 0x00000000), Builtin) [1] {
 		0 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	387 0x0018: (SceneClassUnknown: Editable Poly, (0x192f6098, 0x1bf8338d), EPoly.dlo) [12] {
-		0 0x2150: (StorageContainer) [3] {
-			0 0x0100: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: 02 00 00 00 }
-			1 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: .W.H...D`...........
-					Hex: d2 57 a0 48 8a 0d f7 44 60 0b 00 00 00 00 00 00 01 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	387 0x0018: (SceneClassUnknown: Editable Poly, (0x1bf8338d, 0x192f6098), EPoly.dlo) [12] {
+		0 0x2150: (AppData) [3] {
+			0 0x0100: (CStorageValue) { 2 }
+			1 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x48a057d2, 0x44f70d8a)
+					SuperClassId: 2912
+					SubId: 0
+					Size: 1 }
 				1 0x0130: (StorageRaw) {
 					Size: 1
 					String: .
 					Hex: 00 } }
-			2 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: ....oH..`...........
-					Hex: 8c 15 ef 1c 6f 48 a8 1d 60 0b 00 00 00 00 00 00 04 00 00 00 }
+			2 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x1cef158c, 0x1da8486f)
+					SuperClassId: 2912
+					SubId: 0
+					Size: 4 }
 				1 0x0130: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 } } }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 } } }
 		1 0x2034: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -14315,11 +16411,15 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0000: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0001: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		4 0x403a: (StorageRaw) {
 			Size: 0
 			String:
@@ -14327,7 +16427,9 @@ Pipeline Max Dump (Temporary Tool)
 		5 0x4038: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x0900: (StorageRaw) {
 			Size: 44
 			String: ............................................
@@ -14336,15 +16438,21 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0150: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 0f 00 00 00 }
+				Hex: 0f 00 00 00
+				Int: 15
+				Float: 2.10195e-44 }
 			1 0x0140: (StorageRaw) {
 				Size: 4
 				String: @...
-				Hex: 40 00 00 00 }
+				Hex: 40 00 00 00
+				Int: 64
+				Float: 8.96831e-44 }
 			2 0x0130: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			3 0x0100: (StorageRaw) {
 				Size: 3188
 				String: .........m...5.<.].?.........'.;.].?........? ...].?......p<? ...].?.....<.<.'.;.].?....].....0=...?......C.XMT<=..?....I....P*....?.....,.<n.&....?....5....o5=.j.......X6..._<>z......X....>...9......O..<.u+..L........6=*l[<........Jm...5.<~.I>.........'.;~.I>........N ..~.I>......p<L ..~.I>.....<.<.'.;~.I>...........;.9Q>.....m.....<.9Q>....R9J.f....9Q>......9<e....9Q>...."\.<...;.9Q>....wl.....<l..?...........;n..?....H9J.Y...n..?......9<Y...n..?.....[.<...;l..?.....=/=.$V<PZ.?......5:dG.<jM......tu....3<................a..........<.s.............<^..<........Z...L..<............'..<........$d.................<R..............<...<...........9...=N..?.....<.....<j..?.............F.?....]..<L...J..?.......=...<.S.?.........#.<r..?....Z4...I.;r..?....V....V..r..?.......<VJ..r..?.......<...;r..?....dn".bn.=Z..?.........."<...?.....b..,2..'..?....S..<.......?....lh.=./#<...?....-....'.;=w.?............iw.?....8..<.%...w.?.....5.<6..;`v.?....$5..0..<.v.?.....1....-=...?...........<.&.?.............&.?....r..<.G...&.?.....q.=.!.<.&.?........-.*=~9.?...........=...?......?.._N<...?....%;..nZ&....?.......<..#....?.....S,=..P<...?.....3.....<...?....k.<.J.J<y9.?.........).....?....;g....#..9.?....6..<c......?.......<.. .~9.?....O..=...<...?....b=*= .L<t9.?.........?.=.&.?....@@.....=@DR.....k.....(<@DR......v......@DR........<....?DR.....O~.=.*&<@DR.....=.A=1...IK........>.N.S.Gc......t.H.H............g..5..=........P..<q%.=............s\M=...?........).4<...?.......=vs6<...?....D...BD.=...?........0. =...?....|.../A.....?.....1.......6.?.......<.....[.?.........XN....?.......<.>..4 .?....?.x..l...N.?....?.x..m.<.N.?...........<(;.?............(;.?.... ......<.d.?.... ........d.?....&.-.`..<<=.?......C...B....?....M.?.W..;bn.?....`......<...?........A...x..?.....:./h..<F[.?.....:./p...D[.?.....:./..#<.[.?.....:./y....[.?.....:./".#..[.?....?.x>.m.<.N.?....?.x>.l...N.?.......>...<(;.?.......>....(;.?.... ..>...<.d.?.... ..>.....d.?....&.->`..<<=.?.....:./`..<.[.?......C>..B;...?....O.?>....bn.?.......=...;x..?....`..=B......?.....:./.......?.....:./..#<...?....".)...#.y .?.....'B...4....?....M.?.....bn.?.....'B.$.4;...?......C...B;...?...........;x..?....`...B......?....&.->...;<=.?....&.->....<=.?.....'B>&.4;...?....O.?>W..;bn.?.....'B>..4....?......C>..B....?....`..=...<...?.......=A...x..?.....:./#.#....?.....:./y..;...?....&.-.w...<=.?....&.-.....<=.?....".)>..#<y .?....&.->w...<=.?....".)>..#.y .?....".)...#<y .?....&.-....;<=.?....:%.....4.b.?....Y...F...hQ.?........".a....?........S.a<...?....Y......<hQ.?....I..=...4w..?.....`.=a@z....?....pc.=....e..?....pc.=...<e..?.....`.=.Az<...?....W..>N(.4x..?....>..>*6u..".?.....Y.>W...N..?.....Y.>...<N..?....>..>M7u<.".?.....RC>U..4.6.?......5>.......?....>. >s.@....?....>. >..@<...?......5>...<...?.....RC.U..4.6.?......5........?....>. .s.@....?....>. ...@<...?......5....<...?.........v.4da.?........E...]@.?.....Q..A.7..l.?.....Q..l.7<.l.?...........<]@.?.........H.4Ae.?....2....D..q..?..........$....?..........$<...?....2....D.<q..?.....Y.....4.O.?.....?..cz.4./.?.....c..=.w4.(.?.....Y.>...4.O.?.....?.>cz.4./.?.....c.>=.w4.(.?....(.;..xf4...?......./q.f4so.?....(.;>.xf4...?......./..w4-..?
@@ -14360,15 +16468,21 @@ Pipeline Max Dump (Temporary Tool)
 			6 0x0200: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			7 0x0120: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			8 0x0124: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			9 0x0128: (StorageRaw) {
 				Size: 3292
 				String: .......=...=c|.<...>...=.y.<.M.>...?4..=q..=...?Pj.<..M>...=...<.3K>...?.O.<...>...=...<0..>...?I..<|A#=...=.n.<~..=...?A..=..*?j..>...<..*?.H.>...<...>.H.>...<...>j..>...<..*?Rc.>m..<...>Tc.>s..<..*?...>X..<...>...>d..<..*?...>...<...>...>...<9.X?..A>..;=.bW?.D.>..<=..[?...>Y..=n.^?.<D>...=..X?g..=..8=Y.]?.!.=...=..X?.lv>.DM=(Q]?..y>...=..W?.R.<..B=..\?A..<...=c..?.#.>...=c..?M`.=...<c..?.OB>l..=...>...>...<...>..H?.......>..H?....E..>'.^?....E..>'.^?.......>".0?.......>".0?......"?...?....c..>.5.?......"?..+?....c..?.~v>...=...>...=...<c..?S3.<...=..<?^..>......8?...>.....9=?.!.>....P.E?IR.>......E?6..>....c=!=.M.<.K.<...=.M.<+M.<...>.M.<R..<.."?..+?.......>...?....f..>>..?....$..?J..>....7..?...>......M>.M.<.s.<rR.>.M.<.R.<.X.=.[u?z.3=9..>. w?y.G=...>R0z?.x.=...=..z?.?.=X.M>..v?."J=..M>..y?v..=...>8.v?a7H=...>..z?...=.#)=.Vv?.2;=.Z(=.;.?...=.."?...>......"?.4.?....c..>.5.?......"?...?.....cf?..H?......U?'.^?......U?'.^?.....cf?..H?....9\c?".0?....9\c?".0?.....=K?...?.....PK?>..?.....I9?...>.....F9?J..>....0z.>.04?y..=[6.=.04?.b.=TcL>.14?0..=VY.>.04?.k.=R0$=.04?.v.=9..>*wp?..C=.V.=%wp?..0=..M>.wp?..E=c..>%wp?..C=T.(=5wp?C.8=...>.hS?..1=...=QXS?..P=...=..B?.l.=..L>>.C?..(=#bL>,.d?..;=[..>..c?.)==..g>QXS?.9K=..$=.f8?...=..&=.hS?.O(=...>#WC?..%=.L.>.f8?O>.=.*.>.Z6?Dg.<.\.=.Y6?...<.:L>.Z6?.A.<rV.>JZ6?.*.<Z.!=(Y6?o..<_..=.in?...=...>.jn?..!=..M>+kn?.n#=H..>.jn?..!=.P'=6in?R'.=...>0Al?!+A=.T.=;Al?..-=79.=.f8?.!.=.h.>.f8?L. =.nM>?Al?..B=..L>.f8?5..=m..>;Al?K.A=..(=*Al?..5=..3?...>v..=..3?.f.=t..=..3?X'B>.R.=..3?(uv>m.!=..3?.p.<zG.=..D?.T\>G~P=..C?*..>..O=..C?..g=L.F=T.C?.p.=2jB=..C?.a&>..N=x..=.Me?..$=..<?...>....S.E?s..>......D?.i.>....h.<?L..>......8?r..>.......>:5.>...<...>.#.=...<...>..B>J..<...>..v>f].<...>.`.<n..<.K.>...>...<...>..F>.y.<...>..w>.y.<...>...<...<..*?...>...<...>...>...<J!.>...=.n.<J..>...?A..=..W?DN.>..B=..\?...>...=c..?R..>...=...>.M.<.K.<...>.Vv?.2;=p..>.;.?...=$?.>.04?.v.=...>5wp?C.8=nK.>.f8?...=O..>.hS?.O(=...>(Y6?o..<4..>6in?R'.=y..>*Al?..5=..3?+ .>zG.=...>.x.>...<.g.>...?......"?+%.?.......>J..?......"?+%.?......E?...?......E?...?.......>J..?.....g.>...?.......>w..?.......>...?.......>w..?....f..>>..?....7..?...>....$..?J..>....gTF?J..?....gTF?J..?.....IK?w..?.....=K?...?.....IK?w..?.....PK?>..?.....F9?J..>.....I9?...>......"?.4.?......"?...>.....<F?.5.?.......>J..?......E?...?.....<F?.5.?......E?...?.....g.>...?.......>J..?.....g.>...?....gTF?J..?....gTF?J..?.....n.>0..>....K.p>0..>....3.M>0..>......)>0..>.....0.>0..>.......=0..>.....n.>.o.>....K.p>.o.>....3.M>.o.>......)>.o.>.....0.>.o.>.......=.o.>.....n.>.t^>....K.p>.t^>....3.M>.t^>......)>.t^>.....0.>.t^>.......=.t^>.....n.>..&>....K.p>..&>....3.M>..&>......)>..&>.....0.>..&>.......=..&>.....n.>|C.>....I.p>|C.>....1.M>|C.>......)>vC.>.....0.>vC.>.......=vC.>.....n.>`..>....I.p>`..>....1.M>`..>......)>`..>.....0.>`..>.......=`..>.....n.>F..>....I.p>F..>....1.M>F..>......)>F..>.....0.>F..>.......=F..>.......>..F?....._.>(.J?....[ .>..`?.......>..W?....@..>&.0?.....L.>..-?....0tc?..G?....H.U?k.W?......V?U&a?......k?^.J?....2O_?.l1?....C.h?!Y+?.......>.z.?.......?Dc.?.... .!?o..?.... .!?...?....7wG?v..?....cmD?...?......!?.G&?......!?P..?.....s.>*A\?....f..>..H?.....g.>.;/?......V?`l\?......g?t\I?......c?.b.?.....D.>.o.?.... .!?z..?....M.E?.G.?......!?.**?....
@@ -14384,72 +16498,106 @@ Pipeline Max Dump (Temporary Tool)
 			12 0x0320: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 0c 00 00 00 } }
+				Hex: 0c 00 00 00
+				Int: 12
+				Float: 1.68156e-44 } }
 		8 0x0906: (StorageContainer) [16] {
 			0 0x300d: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 05 00 00 00 }
+				Hex: 05 00 00 00
+				Int: 5
+				Float: 7.00649e-45 }
 			1 0x300e: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			2 0x300f: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			3 0x3014: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			4 0x3015: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 03 00 00 00 }
+				Hex: 03 00 00 00
+				Int: 3
+				Float: 4.2039e-45 }
 			5 0x3010: (StorageRaw) {
 				Size: 4
 				String: .. A
-				Hex: 00 00 20 41 }
+				Hex: 00 00 20 41
+				Int: 1092616192
+				Float: 10 }
 			6 0x3017: (StorageRaw) {
 				Size: 4
 				String: ...A
-				Hex: 00 00 a0 41 }
+				Hex: 00 00 a0 41
+				Int: 1101004800
+				Float: 20 }
 			7 0x3012: (StorageRaw) {
 				Size: 4
 				String: ...A
-				Hex: 00 00 a0 41 }
+				Hex: 00 00 a0 41
+				Int: 1101004800
+				Float: 20 }
 			8 0x3013: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			9 0x3016: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			10 0x301c: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			11 0x3019: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			12 0x301a: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			13 0x301d: (StorageRaw) {
 				Size: 4
 				String:  N..
-				Hex: 20 4e 00 00 }
+				Hex: 20 4e 00 00
+				Int: 20000
+				Float: 2.8026e-41 }
 			14 0x301b: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			15 0x301e: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } }
 		9 0x0908: (StorageRaw) {
 			Size: 1
 			String: .
@@ -14462,11 +16610,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 1
 			String: .
 			Hex: 00 } }
-	388 0x0019: (SceneClassUnknown: Base Layer, (0x1dba1df0, 0x7e9858fe), Builtin) [9] {
+	388 0x0019: (SceneClassUnknown: Base Layer, (0x7e9858fe, 0x1dba1df0), Builtin) [9] {
 		0 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		1 0x1010: (StorageRaw) {
 			Size: 1
 			String: 0
@@ -14474,19 +16624,27 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: ..n.
-			Hex: 8a 08 6e 00 }
+			Hex: 8a 08 6e 00
+			Int: 7211146
+			Float: 1.0105e-38 }
 		3 0x1020: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		4 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x1050: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 d6 00 0b }
+			Hex: 00 d6 00 0b
+			Int: 184604160
+			Float: 2.48129e-32 }
 		6 0x1060: (StorageRaw) {
 			Size: 9
 			String: ...?...?.
@@ -14499,743 +16657,833 @@ Pipeline Max Dump (Temporary Tool)
 		8 0x1080: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	389 0x001a: (SceneClassUnknown: Node, (0x00000000, 0x00000001), Builtin) [25] {
-		0 0x2150: (StorageContainer) [84] {
-			0 0x0100: (StorageRaw) {
-				Size: 4
-				String: S...
-				Hex: 53 00 00 00 }
-			1 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 14 36 d2 54 02 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	389 0x001a: (SceneClassUnknown: Node, (0x00000001, 0x00000000), Builtin) [25] {
+		0 0x2150: (AppData) [84] {
+			0 0x0100: (CStorageValue) { 83 }
+			1 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062548
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			2 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 15 36 d2 54 02 00 00 00 }
+			2 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062549
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			3 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 16 36 d2 54 02 00 00 00 }
+			3 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062550
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			4 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 17 36 d2 54 02 00 00 00 }
+			4 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062551
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			5 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 18 36 d2 54 05 00 00 00 }
+			5 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062552
+					Size: 5 }
 				1 0x0130: (StorageRaw) {
 					Size: 5
 					String: 1000. } }
-			6 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 19 36 d2 54 02 00 00 00 }
+			6 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062553
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 5.
 					Hex: 35 00 } }
-			7 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 1a 36 d2 54 02 00 00 00 }
+			7 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062554
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			8 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 1b 36 d2 54 02 00 00 00 }
+			8 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062555
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 1.
 					Hex: 31 00 } }
-			9 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 1c 36 d2 54 03 00 00 00 }
+			9 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062556
+					Size: 3 }
 				1 0x0130: (StorageRaw) {
 					Size: 3
 					String: 11.
 					Hex: 31 31 00 } }
-			10 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 1d 36 d2 54 03 00 00 00 }
+			10 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062557
+					Size: 3 }
 				1 0x0130: (StorageRaw) {
 					Size: 3
 					String: 20.
 					Hex: 32 30 00 } }
-			11 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 1e 36 d2 54 02 00 00 00 }
+			11 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062558
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 5.
 					Hex: 35 00 } }
-			12 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 1f 36 d2 54 03 00 00 00 }
+			12 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062559
+					Size: 3 }
 				1 0x0130: (StorageRaw) {
 					Size: 3
 					String: 30.
 					Hex: 33 30 00 } }
-			13 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ... 6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 20 36 d2 54 04 00 00 00 }
+			13 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062560
+					Size: 4 }
 				1 0x0130: (StorageRaw) {
 					Size: 4
 					String: 200.
-					Hex: 32 30 30 00 } }
-			14 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...W6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 57 36 d2 54 02 00 00 00 }
+					Hex: 32 30 30 00
+					Int: 3158066
+					Float: 4.42539e-39 } }
+			14 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062615
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			15 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...!6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 21 36 d2 54 03 00 00 00 }
+			15 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062561
+					Size: 3 }
 				1 0x0130: (StorageRaw) {
 					Size: 3
 					String: 32.
 					Hex: 33 32 00 } }
-			16 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...,'......
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 2c 27 0c 05 0d 00 00 00 }
+			16 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 84682540
+					Size: 13 }
 				1 0x0130: (StorageRaw) {
 					Size: 13
 					String: no occlusion. } }
-			17 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...-'......
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 2d 27 0c 05 0d 00 00 00 }
+			17 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 84682541
+					Size: 13 }
 				1 0x0130: (StorageRaw) {
 					Size: 13
 					String: no occlusion. } }
-			18 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....'......
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 2e 27 0c 05 09 00 00 00 }
+			18 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 84682542
+					Size: 9 }
 				1 0x0130: (StorageRaw) {
 					Size: 9
 					String: no sound. } }
-			19 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. .../'......
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 2f 27 0c 05 06 00 00 00 }
+			19 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 84682543
+					Size: 6 }
 				1 0x0130: (StorageRaw) {
 					Size: 6
 					String: no fx. } }
-			20 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...........
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 b2 07 00 00 01 00 00 00 }
+			20 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1970
+					Size: 1 }
 				1 0x0130: (StorageRaw) {
 					Size: 1
 					String: .
 					Hex: 00 } }
-			21 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ..."6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 22 36 d2 54 01 00 00 00 }
+			21 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062562
+					Size: 1 }
 				1 0x0130: (StorageRaw) {
 					Size: 1
 					String: .
 					Hex: 00 } }
-			22 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...#6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 23 36 d2 54 02 00 00 00 }
+			22 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062563
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			23 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...Y6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 59 36 d2 54 02 00 00 00 }
+			23 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062617
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			24 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...$6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 24 36 d2 54 01 00 00 00 }
+			24 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062564
+					Size: 1 }
 				1 0x0130: (StorageRaw) {
 					Size: 1
 					String: .
 					Hex: 00 } }
-			25 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 ad 36 d2 54 04 00 00 00 }
+			25 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062701
+					Size: 4 }
 				1 0x0130: (StorageRaw) {
 					Size: 4
 					String: 0.1.
-					Hex: 30 2e 31 00 } }
-			26 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 ae 36 d2 54 02 00 00 00 }
+					Hex: 30 2e 31 00
+					Int: 3223088
+					Float: 4.51651e-39 } }
+			26 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062702
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			27 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...........
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 9f 99 7b 02 02 00 00 00 }
+			27 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 41654687
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			28 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...%6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 25 36 d2 54 02 00 00 00 }
+			28 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062565
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			29 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...&6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 26 36 d2 54 02 00 00 00 }
+			29 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062566
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			30 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....7.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 12 37 d2 54 02 00 00 00 }
+			30 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062802
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			31 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...;6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 3b 36 d2 54 02 00 00 00 }
+			31 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062587
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			32 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....7.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 10 37 d2 54 02 00 00 00 }
+			32 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062800
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			33 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....7.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 11 37 d2 54 02 00 00 00 }
+			33 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062801
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			34 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....~.|....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 f7 7e 87 7c 01 00 00 00 }
+			34 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 2089254647
+					Size: 1 }
 				1 0x0130: (StorageRaw) {
 					Size: 1
 					String: .
 					Hex: 00 } }
-			35 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....~.|....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 f8 7e 87 7c 01 00 00 00 }
+			35 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 2089254648
+					Size: 1 }
 				1 0x0130: (StorageRaw) {
 					Size: 1
 					String: .
 					Hex: 00 } }
-			36 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....~.|....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 f9 7e 87 7c 01 00 00 00 }
+			36 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 2089254649
+					Size: 1 }
 				1 0x0130: (StorageRaw) {
 					Size: 1
 					String: .
 					Hex: 00 } }
-			37 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....~.|....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 fa 7e 87 7c 01 00 00 00 }
+			37 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 2089254650
+					Size: 1 }
 				1 0x0130: (StorageRaw) {
 					Size: 1
 					String: .
 					Hex: 00 } }
-			38 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...'6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 27 36 d2 54 04 00 00 00 }
+			38 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062567
+					Size: 4 }
 				1 0x0130: (StorageRaw) {
 					Size: 4
 					String: 1.0.
-					Hex: 31 2e 30 00 } }
-			39 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...(6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 28 36 d2 54 04 00 00 00 }
+					Hex: 31 2e 30 00
+					Int: 3157553
+					Float: 4.42467e-39 } }
+			39 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062568
+					Size: 4 }
 				1 0x0130: (StorageRaw) {
 					Size: 4
 					String: 1.4.
-					Hex: 31 2e 34 00 } }
-			40 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...)6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 29 36 d2 54 03 00 00 00 }
+					Hex: 31 2e 34 00
+					Int: 3419697
+					Float: 4.79202e-39 } }
+			40 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062569
+					Size: 3 }
 				1 0x0130: (StorageRaw) {
 					Size: 3
 					String: 15.
 					Hex: 31 35 00 } }
-			41 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...*6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 2a 36 d2 54 02 00 00 00 }
+			41 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062570
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			42 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...46.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 34 36 d2 54 02 00 00 00 }
+			42 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062580
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			43 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...56.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 35 36 d2 54 02 00 00 00 }
+			43 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062581
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			44 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...66.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 36 36 d2 54 02 00 00 00 }
+			44 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062582
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			45 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...76.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 37 36 d2 54 02 00 00 00 }
+			45 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062583
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			46 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...86.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 38 36 d2 54 02 00 00 00 }
+			46 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062584
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			47 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...96.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 39 36 d2 54 02 00 00 00 }
+			47 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062585
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			48 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...:6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 3a 36 d2 54 02 00 00 00 }
+			48 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062586
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 1.
 					Hex: 31 00 } }
-			49 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...X6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 58 36 d2 54 02 00 00 00 }
+			49 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062616
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			50 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 09 36 d2 54 02 00 00 00 }
+			50 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062537
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			51 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...k^.K....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 6b 5e 80 4b 02 00 00 00 }
+			51 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1266703979
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			52 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...j^.K....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 6a 5e 80 4b 02 00 00 00 }
+			52 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1266703978
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			53 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...S6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 53 36 d2 54 02 00 00 00 }
+			53 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062611
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			54 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...T6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 54 36 d2 54 02 00 00 00 }
+			54 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062612
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			55 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...<6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 3c 36 d2 54 02 00 00 00 }
+			55 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062588
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 1.
 					Hex: 31 00 } }
-			56 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...>6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 3e 36 d2 54 02 00 00 00 }
+			56 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062590
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 1.
 					Hex: 31 00 } }
-			57 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...........
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 9e 99 7b 02 02 00 00 00 }
+			57 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 41654686
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			58 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...?6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 3f 36 d2 54 02 00 00 00 }
+			58 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062591
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			59 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...........
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 9d 99 7b 02 18 00 00 00 }
+			59 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 41654685
+					Size: 24 }
 				1 0x0130: (StorageRaw) {
 					Size: 24
 					String: (Use NelLight Modifier). } }
-			60 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...=6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 3d 36 d2 54 02 00 00 00 }
+			60 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062589
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			61 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...l6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 6c 36 d2 54 02 00 00 00 }
+			61 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062636
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			62 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...m6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 6d 36 d2 54 02 00 00 00 }
+			62 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062637
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			63 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...@6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 40 36 d2 54 02 00 00 00 }
+			63 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062592
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			64 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...U6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 55 36 d2 54 02 00 00 00 }
+			64 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062613
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			65 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...V6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 56 36 d2 54 02 00 00 00 }
+			65 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062614
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			66 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...Z6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 5a 36 d2 54 02 00 00 00 }
+			66 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062618
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			67 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...[6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 5b 36 d2 54 02 00 00 00 }
+			67 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062619
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			68 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...\6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 5c 36 d2 54 01 00 00 00 }
+			68 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062620
+					Size: 1 }
 				1 0x0130: (StorageRaw) {
 					Size: 1
 					String: .
 					Hex: 00 } }
-			69 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...g6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 67 36 d2 54 02 00 00 00 }
+			69 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062631
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			70 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...j6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 6a 36 d2 54 02 00 00 00 }
+			70 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062634
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 1.
 					Hex: 31 00 } }
-			71 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...h6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 68 36 d2 54 03 00 00 00 }
+			71 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062632
+					Size: 3 }
 				1 0x0130: (StorageRaw) {
 					Size: 3
 					String: 16.
 					Hex: 31 36 00 } }
-			72 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...i6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 69 36 d2 54 05 00 00 00 }
+			72 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062633
+					Size: 5 }
 				1 0x0130: (StorageRaw) {
 					Size: 5
 					String: 0.02. } }
-			73 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...k6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 6b 36 d2 54 02 00 00 00 }
+			73 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062635
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 1.
 					Hex: 31 00 } }
-			74 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...n6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 6e 36 d2 54 02 00 00 00 }
+			74 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062638
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			75 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...o6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 6f 36 d2 54 0a 00 00 00 }
+			75 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062639
+					Size: 10 }
 				1 0x0130: (StorageRaw) {
 					Size: 10
 					String: 0 0 0 255. } }
-			76 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 7f 36 d2 54 10 00 00 00 }
+			76 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062655
+					Size: 16 }
 				1 0x0130: (StorageRaw) {
 					Size: 16
 					String: 255 255 255 255. } }
-			77 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...p6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 70 36 d2 54 0a 00 00 00 }
+			77 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062640
+					Size: 10 }
 				1 0x0130: (StorageRaw) {
 					Size: 10
 					String: 0 0 0 255. } }
-			78 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 80 36 d2 54 10 00 00 00 }
+			78 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062656
+					Size: 16 }
 				1 0x0130: (StorageRaw) {
 					Size: 16
 					String: 255 255 255 255. } }
-			79 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ...q6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 71 36 d2 54 0a 00 00 00 }
+			79 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062641
+					Size: 10 }
 				1 0x0130: (StorageRaw) {
 					Size: 10
 					String: 0 0 0 255. } }
-			80 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 81 36 d2 54 10 00 00 00 }
+			80 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062657
+					Size: 16 }
 				1 0x0130: (StorageRaw) {
 					Size: 16
 					String: 255 255 255 255. } }
-			81 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 8f 36 d2 54 02 00 00 00 }
+			81 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062671
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			82 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: XH...u.. ....6.T....
-					Hex: 58 48 d6 04 1d 75 d1 16 20 10 00 00 90 36 d2 54 02 00 00 00 }
+			82 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x04d64858, 0x16d1751d)
+					SuperClassId: 4128
+					SubId: 1423062672
+					Size: 2 }
 				1 0x0130: (StorageRaw) {
 					Size: 2
 					String: 0.
 					Hex: 30 00 } }
-			83 0x0110: (StorageContainer) [2] {
-				0 0x0120: (StorageRaw) {
-					Size: 20
-					String: 48...%.;............
-					Hex: 34 38 d5 7f b5 25 85 3b 01 00 00 00 00 00 00 00 10 00 00 00 }
+			83 0x0110: (AppDataEntry) [2] {
+				0 0x0120: (AppDataEntryKey) {
+					ClassId: (0x7fd53834, 0x3b8525b5)
+					SuperClassId: 1
+					SubId: 0
+					Size: 16 }
 				1 0x0130: (StorageRaw) {
 					Size: 16
 					String: ..|r...=...>..@?
@@ -15251,7 +17499,9 @@ Pipeline Max Dump (Temporary Tool)
 		3 0x09ce: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: bc 02 00 00 }
+			Hex: bc 02 00 00
+			Int: 700
+			Float: 9.80909e-43 }
 		4 0x0960: (StorageRaw) {
 			Size: 8
 			String: |.......
@@ -15282,26 +17532,36 @@ Pipeline Max Dump (Temporary Tool)
 		11 0x0974: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: e4 d6 99 00 }
+			Hex: e4 d6 99 00
+			Int: 10082020
+			Float: 1.41279e-38 }
 		12 0x099c: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 d6 00 0b }
+			Hex: 00 d6 00 0b
+			Int: 184604160
+			Float: 2.48129e-32 }
 		13 0x0a28: (StorageRaw) {
 			Size: 8
 			String: ........ }
 		14 0x0a32: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		15 0x0abe: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		16 0x0ac3: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		17 0x0ad2: (StorageContainer) [1] {
 			0 0x0006: (StorageRaw) {
 				Size: 21
@@ -15311,7 +17571,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0101: (StorageRaw) {
 				Size: 1
 				String: .
@@ -15323,11 +17585,15 @@ Pipeline Max Dump (Temporary Tool)
 			3 0x0103: (StorageRaw) {
 				Size: 4
 				String: ...@
-				Hex: 00 00 00 40 }
+				Hex: 00 00 00 40
+				Int: 1073741824
+				Float: 2 }
 			4 0x0104: (StorageRaw) {
 				Size: 4
 				String: ...A
-				Hex: 00 00 a0 41 }
+				Hex: 00 00 a0 41
+				Int: 1101004800
+				Float: 20 }
 			5 0x0105: (StorageRaw) {
 				Size: 2
 				String: ..
@@ -15339,7 +17605,9 @@ Pipeline Max Dump (Temporary Tool)
 			7 0x0107: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			8 0x0108: (StorageRaw) {
 				Size: 1
 				String: .
@@ -15361,23 +17629,33 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0001: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0002: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			2 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 03 00 00 00 }
+				Hex: 03 00 00 00
+				Int: 3
+				Float: 4.2039e-45 }
 			3 0x0004: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			4 0x0005: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			5 0x0006: (StorageRaw) {
 				Size: 16
 				String: ..Iq..Iq..I...I.
@@ -15385,17 +17663,23 @@ Pipeline Max Dump (Temporary Tool)
 			6 0x0007: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			7 0x0008: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		21 0x0b0e: (StorageContainer) [1] {
 			0 0x0001: (StorageContainer) [24] {
 				0 0x0002: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				1 0x0003: (StorageRaw) {
 					Size: 0
 					String:
@@ -15403,51 +17687,75 @@ Pipeline Max Dump (Temporary Tool)
 				2 0x0018: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: ff ff ff ff }
+					Hex: ff ff ff ff
+					Int: -1
+					Float: -nan }
 				3 0x0005: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				4 0x0006: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				5 0x0007: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 03 00 00 00 }
+					Hex: 03 00 00 00
+					Int: 3
+					Float: 4.2039e-45 }
 				6 0x0008: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				7 0x001f: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				8 0x0009: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				9 0x000a: (StorageRaw) {
 					Size: 4
 					String: .. A
-					Hex: 00 00 20 41 }
+					Hex: 00 00 20 41
+					Int: 1092616192
+					Float: 10 }
 				10 0x000b: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				11 0x000c: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				12 0x000d: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				13 0x0012: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				14 0x0013: (StorageRaw) {
 					Size: 12
 					String: ...?........
@@ -15455,39 +17763,57 @@ Pipeline Max Dump (Temporary Tool)
 				15 0x0014: (StorageRaw) {
 					Size: 4
 					String: .. .
-					Hex: 00 00 20 c1 }
+					Hex: 00 00 20 c1
+					Int: -1054867456
+					Float: -10 }
 				16 0x0015: (StorageRaw) {
 					Size: 4
 					String: .. A
-					Hex: 00 00 20 41 }
+					Hex: 00 00 20 41
+					Int: 1092616192
+					Float: 10 }
 				17 0x0016: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				18 0x0017: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				19 0x001a: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				20 0x001b: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 04 00 00 00 }
+					Hex: 04 00 00 00
+					Int: 4
+					Float: 5.60519e-45 }
 				21 0x001c: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				22 0x001d: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				23 0x001e: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 } } }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 } } }
 		22 0x0b4a: (StorageRaw) {
 			Size: 1
 			String: .
@@ -15497,24 +17823,30 @@ Pipeline Max Dump (Temporary Tool)
 				0 0x0002: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 } } }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 } } }
 		24 0x0b5e: (StorageContainer) [1] {
 			0 0x0001: (StorageContainer) [1] {
 				0 0x0005: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 02 00 00 00 } } } }
-	390 0x001b: (SceneClassUnknown: Area, (0x00000000, 0x77912301), kernel.dlk) [1] {
+					Hex: 02 00 00 00
+					Int: 2
+					Float: 2.8026e-45 } } } }
+	390 0x001b: (SceneClassUnknown: Area, (0x77912301, 0x00000000), kernel.dlk) [1] {
 		0 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 0
 				String:
 				Hex: } } }
-	391 0x001c: (SceneClassUnknown: Default Scanline Renderer, (0x00000000, 0x00000001), rend.dlr) [20] {
+	391 0x001c: (SceneClassUnknown: Default Scanline Renderer, (0x00000001, 0x00000000), rend.dlr) [20] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 86 01 00 00 }
+			Hex: 86 01 00 00
+			Int: 390
+			Float: 5.46506e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -15534,39 +17866,57 @@ Pipeline Max Dump (Temporary Tool)
 		5 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		6 0x0007: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 80 3f }
+			Hex: 00 00 80 3f
+			Int: 1065353216
+			Float: 1 }
 		7 0x0008: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 80 3f }
+			Hex: 00 00 80 3f
+			Int: 1065353216
+			Float: 1 }
 		8 0x0009: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0a 00 00 00 }
+			Hex: 0a 00 00 00
+			Int: 10
+			Float: 1.4013e-44 }
 		9 0x000a: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0a 00 00 00 }
+			Hex: 0a 00 00 00
+			Int: 10
+			Float: 1.4013e-44 }
 		10 0x000b: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 00 3f }
+			Hex: 00 00 00 3f
+			Int: 1056964608
+			Float: 0.5 }
 		11 0x0030: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 00 3f }
+			Hex: 00 00 00 3f
+			Int: 1056964608
+			Float: 0.5 }
 		12 0x000d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		13 0x0060: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 80 3f }
+			Hex: 00 00 80 3f
+			Int: 1065353216
+			Float: 1 }
 		14 0x0077: (StorageRaw) {
 			Size: 8
 			String: .2w%....
@@ -15582,26 +17932,34 @@ Pipeline Max Dump (Temporary Tool)
 		17 0x0071: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 00 3f }
+			Hex: 00 00 00 3f
+			Int: 1056964608
+			Float: 0.5 }
 		18 0x0076: (StorageRaw) {
 			Size: 4
 			String: ...=
-			Hex: cd cc cc 3d }
+			Hex: cd cc cc 3d
+			Int: 1036831949
+			Float: 0.1 }
 		19 0x0080: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	392 0x001b: (SceneClassUnknown: Area, (0x00000000, 0x77912301), kernel.dlk) [1] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	392 0x001b: (SceneClassUnknown: Area, (0x77912301, 0x00000000), kernel.dlk) [1] {
 		0 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 0
 				String:
 				Hex: } } }
-	393 0x001c: (SceneClassUnknown: Default Scanline Renderer, (0x00000000, 0x00000001), rend.dlr) [20] {
+	393 0x001c: (SceneClassUnknown: Default Scanline Renderer, (0x00000001, 0x00000000), rend.dlr) [20] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 88 01 00 00 }
+			Hex: 88 01 00 00
+			Int: 392
+			Float: 5.49309e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -15621,39 +17979,57 @@ Pipeline Max Dump (Temporary Tool)
 		5 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		6 0x0007: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 80 3f }
+			Hex: 00 00 80 3f
+			Int: 1065353216
+			Float: 1 }
 		7 0x0008: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 80 3f }
+			Hex: 00 00 80 3f
+			Int: 1065353216
+			Float: 1 }
 		8 0x0009: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0a 00 00 00 }
+			Hex: 0a 00 00 00
+			Int: 10
+			Float: 1.4013e-44 }
 		9 0x000a: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0a 00 00 00 }
+			Hex: 0a 00 00 00
+			Int: 10
+			Float: 1.4013e-44 }
 		10 0x000b: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 00 3f }
+			Hex: 00 00 00 3f
+			Int: 1056964608
+			Float: 0.5 }
 		11 0x0030: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 00 3f }
+			Hex: 00 00 00 3f
+			Int: 1056964608
+			Float: 0.5 }
 		12 0x000d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		13 0x0060: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 c0 3f }
+			Hex: 00 00 c0 3f
+			Int: 1069547520
+			Float: 1.5 }
 		14 0x0077: (StorageRaw) {
 			Size: 8
 			String: .2w%....
@@ -15669,26 +18045,34 @@ Pipeline Max Dump (Temporary Tool)
 		17 0x0071: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 00 3f }
+			Hex: 00 00 00 3f
+			Int: 1056964608
+			Float: 0.5 }
 		18 0x0076: (StorageRaw) {
 			Size: 4
 			String: ...=
-			Hex: cd cc cc 3d }
+			Hex: cd cc cc 3d
+			Int: 1036831949
+			Float: 0.1 }
 		19 0x0080: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	394 0x001b: (SceneClassUnknown: Area, (0x00000000, 0x77912301), kernel.dlk) [1] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	394 0x001b: (SceneClassUnknown: Area, (0x77912301, 0x00000000), kernel.dlk) [1] {
 		0 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 0
 				String:
 				Hex: } } }
-	395 0x001c: (SceneClassUnknown: Default Scanline Renderer, (0x00000000, 0x00000001), rend.dlr) [20] {
+	395 0x001c: (SceneClassUnknown: Default Scanline Renderer, (0x00000001, 0x00000000), rend.dlr) [20] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 8a 01 00 00 }
+			Hex: 8a 01 00 00
+			Int: 394
+			Float: 5.52112e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -15708,39 +18092,57 @@ Pipeline Max Dump (Temporary Tool)
 		5 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		6 0x0007: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 80 3f }
+			Hex: 00 00 80 3f
+			Int: 1065353216
+			Float: 1 }
 		7 0x0008: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 80 3f }
+			Hex: 00 00 80 3f
+			Int: 1065353216
+			Float: 1 }
 		8 0x0009: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0a 00 00 00 }
+			Hex: 0a 00 00 00
+			Int: 10
+			Float: 1.4013e-44 }
 		9 0x000a: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0a 00 00 00 }
+			Hex: 0a 00 00 00
+			Int: 10
+			Float: 1.4013e-44 }
 		10 0x000b: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 00 3f }
+			Hex: 00 00 00 3f
+			Int: 1056964608
+			Float: 0.5 }
 		11 0x0030: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 00 3f }
+			Hex: 00 00 00 3f
+			Int: 1056964608
+			Float: 0.5 }
 		12 0x000d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		13 0x0060: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 c0 3f }
+			Hex: 00 00 c0 3f
+			Int: 1069547520
+			Float: 1.5 }
 		14 0x0077: (StorageRaw) {
 			Size: 8
 			String: .2w%....
@@ -15756,16 +18158,22 @@ Pipeline Max Dump (Temporary Tool)
 		17 0x0071: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 00 3f }
+			Hex: 00 00 00 3f
+			Int: 1056964608
+			Float: 0.5 }
 		18 0x0076: (StorageRaw) {
 			Size: 4
 			String: ...=
-			Hex: cd cc cc 3d }
+			Hex: cd cc cc 3d
+			Int: 1036831949
+			Float: 0.1 }
 		19 0x0080: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	396 0x001d: (SceneClassUnknown: RenderElementMgr, (0x06546546, 0x46576167), Builtin) [8] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	396 0x001d: (SceneClassUnknown: RenderElementMgr, (0x46576167, 0x06546546), Builtin) [8] {
 		0 0x1200: (StorageRaw) {
 			Size: 1
 			String: .
@@ -15773,15 +18181,21 @@ Pipeline Max Dump (Temporary Tool)
 		1 0x1210: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		2 0x1240: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x1220: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		4 0x1230: (StorageRaw) {
 			Size: 20
 			String: d...7...%...Z.......
@@ -15789,7 +18203,9 @@ Pipeline Max Dump (Temporary Tool)
 		5 0x1240: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x1250: (StorageRaw) {
 			Size: 1
 			String: .
@@ -15798,7 +18214,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 1
 			String: .
 			Hex: 00 } }
-	397 0x001d: (SceneClassUnknown: RenderElementMgr, (0x06546546, 0x46576167), Builtin) [8] {
+	397 0x001d: (SceneClassUnknown: RenderElementMgr, (0x46576167, 0x06546546), Builtin) [8] {
 		0 0x1200: (StorageRaw) {
 			Size: 1
 			String: .
@@ -15806,15 +18222,21 @@ Pipeline Max Dump (Temporary Tool)
 		1 0x1210: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		2 0x1240: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		3 0x1220: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		4 0x1230: (StorageRaw) {
 			Size: 20
 			String: d...7...%...Z.......
@@ -15822,7 +18244,9 @@ Pipeline Max Dump (Temporary Tool)
 		5 0x1240: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		6 0x1250: (StorageRaw) {
 			Size: 1
 			String: .
@@ -15831,11 +18255,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 1
 			String: .
 			Hex: 00 } }
-	398 0x001e: (SceneClassUnknown: Bezier Color, (0x00000000, 0x00002011), Builtin) [11] {
+	398 0x001e: (SceneClassUnknown: Bezier Color, (0x00002011, 0x00000000), Builtin) [11] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -15849,7 +18275,9 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x3002: (StorageRaw) {
 			Size: 4
 			String:  ...
-			Hex: 20 00 00 00 }
+			Hex: 20 00 00 00
+			Int: 32
+			Float: 4.48416e-44 }
 		5 0x3003: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -15869,16 +18297,22 @@ Pipeline Max Dump (Temporary Tool)
 		9 0x3005: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 86 01 00 00 }
+			Hex: 86 01 00 00
+			Int: 390
+			Float: 5.46506e-43 }
 		10 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	399 0x001e: (SceneClassUnknown: Bezier Color, (0x00000000, 0x00002011), Builtin) [11] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	399 0x001e: (SceneClassUnknown: Bezier Color, (0x00002011, 0x00000000), Builtin) [11] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -15892,7 +18326,9 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x3002: (StorageRaw) {
 			Size: 4
 			String:  ...
-			Hex: 20 00 00 00 }
+			Hex: 20 00 00 00
+			Int: 32
+			Float: 4.48416e-44 }
 		5 0x3003: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -15912,16 +18348,22 @@ Pipeline Max Dump (Temporary Tool)
 		9 0x3005: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 86 01 00 00 }
+			Hex: 86 01 00 00
+			Int: 390
+			Float: 5.46506e-43 }
 		10 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	400 0x001e: (SceneClassUnknown: Bezier Color, (0x00000000, 0x00002011), Builtin) [11] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	400 0x001e: (SceneClassUnknown: Bezier Color, (0x00002011, 0x00000000), Builtin) [11] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -15936,7 +18378,9 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x3002: (StorageRaw) {
 			Size: 4
 			String:  ...
-			Hex: 20 00 00 00 }
+			Hex: 20 00 00 00
+			Int: 32
+			Float: 4.48416e-44 }
 		5 0x3003: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -15956,16 +18400,22 @@ Pipeline Max Dump (Temporary Tool)
 		9 0x3005: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 86 01 00 00 }
+			Hex: 86 01 00 00
+			Int: 390
+			Float: 5.46506e-43 }
 		10 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	401 0x0009: (SceneClassUnknown: Bezier Float, (0x00000000, 0x00002007), Builtin) [11] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	401 0x0009: (SceneClassUnknown: Bezier Float, (0x00002007, 0x00000000), Builtin) [11] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -15973,14 +18423,18 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x2501: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 80 3f }
+			Hex: 00 00 80 3f
+			Int: 1065353216
+			Float: 1 }
 		3 0x2500: (StorageRaw) {
 			Size: 8
 			String: ........ }
 		4 0x3002: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x3003: (StorageRaw) {
 			Size: 8
 			String: ........
@@ -16000,22 +18454,28 @@ Pipeline Max Dump (Temporary Tool)
 		9 0x3005: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 86 01 00 00 }
+			Hex: 86 01 00 00
+			Int: 390
+			Float: 5.46506e-43 }
 		10 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	402 0x001b: (SceneClassUnknown: Area, (0x00000000, 0x77912301), kernel.dlk) [1] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	402 0x001b: (SceneClassUnknown: Area, (0x77912301, 0x00000000), kernel.dlk) [1] {
 		0 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 0
 				String:
 				Hex: } } }
-	403 0x001c: (SceneClassUnknown: Default Scanline Renderer, (0x00000000, 0x00000001), rend.dlr) [20] {
+	403 0x001c: (SceneClassUnknown: Default Scanline Renderer, (0x00000001, 0x00000000), rend.dlr) [20] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 92 01 00 00 }
+			Hex: 92 01 00 00
+			Int: 402
+			Float: 5.63322e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -16035,39 +18495,57 @@ Pipeline Max Dump (Temporary Tool)
 		5 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		6 0x0007: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 80 3f }
+			Hex: 00 00 80 3f
+			Int: 1065353216
+			Float: 1 }
 		7 0x0008: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 80 3f }
+			Hex: 00 00 80 3f
+			Int: 1065353216
+			Float: 1 }
 		8 0x0009: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0a 00 00 00 }
+			Hex: 0a 00 00 00
+			Int: 10
+			Float: 1.4013e-44 }
 		9 0x000a: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0a 00 00 00 }
+			Hex: 0a 00 00 00
+			Int: 10
+			Float: 1.4013e-44 }
 		10 0x000b: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 00 3f }
+			Hex: 00 00 00 3f
+			Int: 1056964608
+			Float: 0.5 }
 		11 0x0030: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 00 3f }
+			Hex: 00 00 00 3f
+			Int: 1056964608
+			Float: 0.5 }
 		12 0x000d: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		13 0x0060: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 c0 3f }
+			Hex: 00 00 c0 3f
+			Int: 1069547520
+			Float: 1.5 }
 		14 0x0077: (StorageRaw) {
 			Size: 8
 			String: .2w%....
@@ -16083,16 +18561,22 @@ Pipeline Max Dump (Temporary Tool)
 		17 0x0071: (StorageRaw) {
 			Size: 4
 			String: ...?
-			Hex: 00 00 00 3f }
+			Hex: 00 00 00 3f
+			Int: 1056964608
+			Float: 0.5 }
 		18 0x0076: (StorageRaw) {
 			Size: 4
 			String: ...=
-			Hex: cd cc cc 3d }
+			Hex: cd cc cc 3d
+			Int: 1036831949
+			Float: 0.1 }
 		19 0x0080: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	404 0x001f: (SceneClassUnknown: RenderEnvironment, (0x00000000, 0xee448b23), Builtin) [7] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	404 0x001f: (SceneClassUnknown: RenderEnvironment, (0xee448b23, 0x00000000), Builtin) [7] {
 		0 0x2034: (StorageRaw) {
 			Size: 64
 			String: ................................................................
@@ -16104,65 +18588,95 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0100: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x2000: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 0c 00 00 00 }
+			Hex: 0c 00 00 00
+			Int: 12
+			Float: 1.68156e-44 }
 		4 0x0120: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		5 0x0110: (StorageContainer) [5] {
 			0 0x2000: (StorageContainer) [41] {
 				0 0x0100: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 05 00 00 }
+					Hex: 01 05 00 00
+					Int: 1281
+					Float: 1.79506e-42 }
 				1 0x0110: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				2 0x0120: (StorageRaw) {
 					Size: 4
 					String: .>..
-					Hex: 80 3e 00 00 }
+					Hex: 80 3e 00 00
+					Int: 16000
+					Float: 2.24208e-41 }
 				3 0x0130: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				4 0x0135: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				5 0x0140: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				6 0x0150: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				7 0x0160: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				8 0x0170: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				9 0x0180: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 10 05 00 00 }
+					Hex: 10 05 00 00
+					Int: 1296
+					Float: 1.81608e-42 }
 				10 0x0610: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				11 0x0620: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				12 0x0680: (StorageRaw) {
 					Size: 0
 					String:
@@ -16170,11 +18684,15 @@ Pipeline Max Dump (Temporary Tool)
 				13 0x0640: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				14 0x0650: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				15 0x0690: (StorageRaw) {
 					Size: 0
 					String:
@@ -16182,75 +18700,111 @@ Pipeline Max Dump (Temporary Tool)
 				16 0x0670: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				17 0x0199: (StorageRaw) {
 					Size: 4
 					String: .(..
-					Hex: 03 28 00 00 }
+					Hex: 03 28 00 00
+					Int: 10243
+					Float: 1.43535e-41 }
 				18 0x0190: (StorageRaw) {
 					Size: 4
 					String:  ...
-					Hex: 20 03 00 00 }
+					Hex: 20 03 00 00
+					Int: 800
+					Float: 1.12104e-42 }
 				19 0x0200: (StorageRaw) {
 					Size: 4
 					String: X...
-					Hex: 58 02 00 00 }
+					Hex: 58 02 00 00
+					Int: 600
+					Float: 8.40779e-43 }
 				20 0x0210: (StorageRaw) {
 					Size: 4
 					String: ...?
-					Hex: 00 00 80 3f }
+					Hex: 00 00 80 3f
+					Int: 1065353216
+					Float: 1 }
 				21 0x0440: (StorageRaw) {
 					Size: 4
 					String: ...B
-					Hex: 00 00 10 42 }
+					Hex: 00 00 10 42
+					Int: 1108344832
+					Float: 36 }
 				22 0x0500: (StorageRaw) {
 					Size: 4
 					String:  ...
-					Hex: 20 03 00 00 }
+					Hex: 20 03 00 00
+					Int: 800
+					Float: 1.12104e-42 }
 				23 0x0510: (StorageRaw) {
 					Size: 4
 					String: X...
-					Hex: 58 02 00 00 }
+					Hex: 58 02 00 00
+					Int: 600
+					Float: 8.40779e-43 }
 				24 0x0520: (StorageRaw) {
 					Size: 4
 					String: ...?
-					Hex: 00 00 80 3f }
+					Hex: 00 00 80 3f
+					Int: 1065353216
+					Float: 1 }
 				25 0x0530: (StorageRaw) {
 					Size: 4
 					String: ...B
-					Hex: 00 00 10 42 }
+					Hex: 00 00 10 42
+					Int: 1108344832
+					Float: 36 }
 				26 0x0220: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				27 0x0240: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				28 0x0290: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				29 0x0310: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				30 0x0320: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				31 0x0330: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				32 0x0338: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				33 0x05b0: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				34 0x05d0: (StorageRaw) {
 					Size: 1
 					String: .
@@ -16288,15 +18842,21 @@ Pipeline Max Dump (Temporary Tool)
 					1 0x1210: (StorageRaw) {
 						Size: 4
 						String: ....
-						Hex: 00 00 00 00 }
+						Hex: 00 00 00 00
+						Int: 0
+						Float: 0 }
 					2 0x1240: (StorageRaw) {
 						Size: 4
 						String: ....
-						Hex: 00 00 00 00 }
+						Hex: 00 00 00 00
+						Int: 0
+						Float: 0 }
 					3 0x1220: (StorageRaw) {
 						Size: 4
 						String: ....
-						Hex: 00 00 00 00 }
+						Hex: 00 00 00 00
+						Int: 0
+						Float: 0 }
 					4 0x1230: (StorageRaw) {
 						Size: 20
 						String: d...7...%...Z.......
@@ -16304,7 +18864,9 @@ Pipeline Max Dump (Temporary Tool)
 					5 0x1240: (StorageRaw) {
 						Size: 4
 						String: ....
-						Hex: 00 00 00 00 }
+						Hex: 00 00 00 00
+						Int: 0
+						Float: 0 }
 					6 0x1250: (StorageRaw) {
 						Size: 1
 						String: .
@@ -16321,51 +18883,75 @@ Pipeline Max Dump (Temporary Tool)
 				0 0x0100: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 05 00 00 }
+					Hex: 01 05 00 00
+					Int: 1281
+					Float: 1.79506e-42 }
 				1 0x0110: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				2 0x0120: (StorageRaw) {
 					Size: 4
 					String: .>..
-					Hex: 80 3e 00 00 }
+					Hex: 80 3e 00 00
+					Int: 16000
+					Float: 2.24208e-41 }
 				3 0x0130: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				4 0x0135: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				5 0x0140: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				6 0x0150: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				7 0x0160: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				8 0x0170: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				9 0x0180: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 0f 05 00 00 }
+					Hex: 0f 05 00 00
+					Int: 1295
+					Float: 1.81468e-42 }
 				10 0x0610: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				11 0x0620: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				12 0x0680: (StorageRaw) {
 					Size: 0
 					String:
@@ -16373,11 +18959,15 @@ Pipeline Max Dump (Temporary Tool)
 				13 0x0640: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				14 0x0650: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				15 0x0690: (StorageRaw) {
 					Size: 0
 					String:
@@ -16385,75 +18975,111 @@ Pipeline Max Dump (Temporary Tool)
 				16 0x0670: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				17 0x0199: (StorageRaw) {
 					Size: 4
 					String: .(..
-					Hex: 03 28 00 00 }
+					Hex: 03 28 00 00
+					Int: 10243
+					Float: 1.43535e-41 }
 				18 0x0190: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 80 02 00 00 }
+					Hex: 80 02 00 00
+					Int: 640
+					Float: 8.96831e-43 }
 				19 0x0200: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: e0 01 00 00 }
+					Hex: e0 01 00 00
+					Int: 480
+					Float: 6.72623e-43 }
 				20 0x0210: (StorageRaw) {
 					Size: 4
 					String: ...?
-					Hex: 00 00 80 3f }
+					Hex: 00 00 80 3f
+					Int: 1065353216
+					Float: 1 }
 				21 0x0440: (StorageRaw) {
 					Size: 4
 					String: ...B
-					Hex: 00 00 10 42 }
+					Hex: 00 00 10 42
+					Int: 1108344832
+					Float: 36 }
 				22 0x0500: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 80 02 00 00 }
+					Hex: 80 02 00 00
+					Int: 640
+					Float: 8.96831e-43 }
 				23 0x0510: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: e0 01 00 00 }
+					Hex: e0 01 00 00
+					Int: 480
+					Float: 6.72623e-43 }
 				24 0x0520: (StorageRaw) {
 					Size: 4
 					String: ...?
-					Hex: 00 00 80 3f }
+					Hex: 00 00 80 3f
+					Int: 1065353216
+					Float: 1 }
 				25 0x0530: (StorageRaw) {
 					Size: 4
 					String: ...B
-					Hex: 00 00 10 42 }
+					Hex: 00 00 10 42
+					Int: 1108344832
+					Float: 36 }
 				26 0x0220: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				27 0x0240: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				28 0x0290: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				29 0x0310: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				30 0x0320: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				31 0x0330: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				32 0x0338: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				33 0x05b0: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				34 0x05d0: (StorageRaw) {
 					Size: 1
 					String: .
@@ -16491,15 +19117,21 @@ Pipeline Max Dump (Temporary Tool)
 					1 0x1210: (StorageRaw) {
 						Size: 4
 						String: ....
-						Hex: 00 00 00 00 }
+						Hex: 00 00 00 00
+						Int: 0
+						Float: 0 }
 					2 0x1240: (StorageRaw) {
 						Size: 4
 						String: ....
-						Hex: 01 00 00 00 }
+						Hex: 01 00 00 00
+						Int: 1
+						Float: 1.4013e-45 }
 					3 0x1220: (StorageRaw) {
 						Size: 4
 						String: ....
-						Hex: 00 00 00 00 }
+						Hex: 00 00 00 00
+						Int: 0
+						Float: 0 }
 					4 0x1230: (StorageRaw) {
 						Size: 20
 						String: d...7...%...Z.......
@@ -16507,7 +19139,9 @@ Pipeline Max Dump (Temporary Tool)
 					5 0x1240: (StorageRaw) {
 						Size: 4
 						String: ....
-						Hex: 01 00 00 00 }
+						Hex: 01 00 00 00
+						Int: 1
+						Float: 1.4013e-45 }
 					6 0x1250: (StorageRaw) {
 						Size: 1
 						String: .
@@ -16524,51 +19158,75 @@ Pipeline Max Dump (Temporary Tool)
 				0 0x0100: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 05 00 00 }
+					Hex: 01 05 00 00
+					Int: 1281
+					Float: 1.79506e-42 }
 				1 0x0110: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				2 0x0120: (StorageRaw) {
 					Size: 4
 					String: .>..
-					Hex: 80 3e 00 00 }
+					Hex: 80 3e 00 00
+					Int: 16000
+					Float: 2.24208e-41 }
 				3 0x0130: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				4 0x0135: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				5 0x0140: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				6 0x0150: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				7 0x0160: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				8 0x0170: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				9 0x0180: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 0f 05 00 00 }
+					Hex: 0f 05 00 00
+					Int: 1295
+					Float: 1.81468e-42 }
 				10 0x0610: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				11 0x0620: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				12 0x0680: (StorageRaw) {
 					Size: 0
 					String:
@@ -16576,11 +19234,15 @@ Pipeline Max Dump (Temporary Tool)
 				13 0x0640: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				14 0x0650: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				15 0x0690: (StorageRaw) {
 					Size: 0
 					String:
@@ -16588,75 +19250,111 @@ Pipeline Max Dump (Temporary Tool)
 				16 0x0670: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				17 0x0199: (StorageRaw) {
 					Size: 4
 					String: .(..
-					Hex: 03 28 00 00 }
+					Hex: 03 28 00 00
+					Int: 10243
+					Float: 1.43535e-41 }
 				18 0x0190: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 80 02 00 00 }
+					Hex: 80 02 00 00
+					Int: 640
+					Float: 8.96831e-43 }
 				19 0x0200: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: e0 01 00 00 }
+					Hex: e0 01 00 00
+					Int: 480
+					Float: 6.72623e-43 }
 				20 0x0210: (StorageRaw) {
 					Size: 4
 					String: ...?
-					Hex: 00 00 80 3f }
+					Hex: 00 00 80 3f
+					Int: 1065353216
+					Float: 1 }
 				21 0x0440: (StorageRaw) {
 					Size: 4
 					String: ...B
-					Hex: 00 00 10 42 }
+					Hex: 00 00 10 42
+					Int: 1108344832
+					Float: 36 }
 				22 0x0500: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 80 02 00 00 }
+					Hex: 80 02 00 00
+					Int: 640
+					Float: 8.96831e-43 }
 				23 0x0510: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: e0 01 00 00 }
+					Hex: e0 01 00 00
+					Int: 480
+					Float: 6.72623e-43 }
 				24 0x0520: (StorageRaw) {
 					Size: 4
 					String: ...?
-					Hex: 00 00 80 3f }
+					Hex: 00 00 80 3f
+					Int: 1065353216
+					Float: 1 }
 				25 0x0530: (StorageRaw) {
 					Size: 4
 					String: ...B
-					Hex: 00 00 10 42 }
+					Hex: 00 00 10 42
+					Int: 1108344832
+					Float: 36 }
 				26 0x0220: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				27 0x0240: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				28 0x0290: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				29 0x0310: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				30 0x0320: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				31 0x0330: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				32 0x0338: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 00 00 00 00 }
+					Hex: 00 00 00 00
+					Int: 0
+					Float: 0 }
 				33 0x05b0: (StorageRaw) {
 					Size: 4
 					String: ....
-					Hex: 01 00 00 00 }
+					Hex: 01 00 00 00
+					Int: 1
+					Float: 1.4013e-45 }
 				34 0x05d0: (StorageRaw) {
 					Size: 1
 					String: .
@@ -16693,7 +19391,9 @@ Pipeline Max Dump (Temporary Tool)
 			3 0x2400: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			4 0x2500: (StorageRaw) {
 				Size: 1
 				String: .
@@ -16702,13 +19402,15 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 12
 			String: .......@...@
 			Hex: 00 00 00 00 cd cc 0c 40 cd cc 0c 40 } }
-	405 0x0020: (SceneClassUnknown: NamedSelSetList, (0x00000000, 0x00008d52), Builtin) [1] {
+	405 0x0020: (SceneClassUnknown: NamedSelSetList, (0x00008d52, 0x00000000), Builtin) [1] {
 		0 0x0100: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	406 0x0021: (SceneClassUnknown: TVNode, (0x90f2ee71, 0x8d73b8aa), Builtin) [0] { }
-	407 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	406 0x0021: (SceneClassUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), Builtin) [0] { }
+	407 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [4] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: "......!........
@@ -16725,7 +19427,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	408 0x0022: (SceneClassUnknown: Float List, (0x00000000, 0x4b4b1000), ctrl.dlc) [5] {
+	408 0x0022: (SceneClassUnknown: Float List, (0x4b4b1000, 0x00000000), ctrl.dlc) [5] {
 		0 0x2034: (StorageRaw) {
 			Size: 12
 			String: ............
@@ -16737,16 +19439,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1010: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x1020: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		4 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	409 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	409 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [4] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: #......!........
@@ -16763,7 +19471,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	410 0x0023: (SceneClassUnknown: Point3 List, (0x00000000, 0x4b4b1001), ctrl.dlc) [5] {
+	410 0x0023: (SceneClassUnknown: Point3 List, (0x4b4b1001, 0x00000000), ctrl.dlc) [5] {
 		0 0x2034: (StorageRaw) {
 			Size: 12
 			String: ............
@@ -16775,16 +19483,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1010: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x1020: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		4 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	411 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	411 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [4] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: $......!........
@@ -16801,7 +19515,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	412 0x0024: (SceneClassUnknown: Point4 List, (0x00000000, 0x4b4b1005), ctrl.dlc) [5] {
+	412 0x0024: (SceneClassUnknown: Point4 List, (0x4b4b1005, 0x00000000), ctrl.dlc) [5] {
 		0 0x2034: (StorageRaw) {
 			Size: 12
 			String: ............
@@ -16813,16 +19527,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1010: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x1020: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		4 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	413 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	413 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [4] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: %......!........
@@ -16839,7 +19559,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	414 0x0025: (SceneClassUnknown: Position List, (0x00000000, 0x4b4b1002), ctrl.dlc) [5] {
+	414 0x0025: (SceneClassUnknown: Position List, (0x4b4b1002, 0x00000000), ctrl.dlc) [5] {
 		0 0x2034: (StorageRaw) {
 			Size: 12
 			String: ............
@@ -16851,16 +19571,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1010: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x1020: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		4 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	415 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	415 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [4] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: &......!........
@@ -16877,7 +19603,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	416 0x0026: (SceneClassUnknown: Rotation List, (0x00000000, 0x4b4b1003), ctrl.dlc) [5] {
+	416 0x0026: (SceneClassUnknown: Rotation List, (0x4b4b1003, 0x00000000), ctrl.dlc) [5] {
 		0 0x2034: (StorageRaw) {
 			Size: 12
 			String: ............
@@ -16889,16 +19615,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1010: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x1020: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		4 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	417 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	417 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [4] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: '......!........
@@ -16915,7 +19647,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	418 0x0027: (SceneClassUnknown: Scale List, (0x00000000, 0x4b4b1004), ctrl.dlc) [5] {
+	418 0x0027: (SceneClassUnknown: Scale List, (0x4b4b1004, 0x00000000), ctrl.dlc) [5] {
 		0 0x2034: (StorageRaw) {
 			Size: 12
 			String: ............
@@ -16927,16 +19659,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1010: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x1020: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		4 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	419 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [4] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	419 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [4] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: (......!........
@@ -16953,7 +19691,7 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	420 0x0028: (SceneClassUnknown: Block Control, (0x00000000, 0x4b4b1015), ctrl.dlc) [5] {
+	420 0x0028: (SceneClassUnknown: Block Control, (0x4b4b1015, 0x00000000), ctrl.dlc) [5] {
 		0 0x2034: (StorageRaw) {
 			Size: 12
 			String: ............
@@ -16965,16 +19703,22 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1010: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x1020: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		4 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	421 0x0021: (SceneClassUnknown: TVNode, (0x90f2ee71, 0x8d73b8aa), Builtin) [23] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	421 0x0021: (SceneClassUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), Builtin) [23] {
 		0 0x2034: (StorageRaw) {
 			Size: 28
 			String: ............................
@@ -16993,7 +19737,9 @@ Pipeline Max Dump (Temporary Tool)
 		4 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		5 0x0110: (StorageRaw) {
 			Size: 12
 			String: P.o.i.n.t.3. }
@@ -17004,7 +19750,9 @@ Pipeline Max Dump (Temporary Tool)
 		7 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		8 0x0110: (StorageRaw) {
 			Size: 12
 			String: P.o.i.n.t.4. }
@@ -17015,7 +19763,9 @@ Pipeline Max Dump (Temporary Tool)
 		10 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		11 0x0110: (StorageRaw) {
 			Size: 16
 			String: P.o.s.i.t.i.o.n. }
@@ -17026,7 +19776,9 @@ Pipeline Max Dump (Temporary Tool)
 		13 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		14 0x0110: (StorageRaw) {
 			Size: 16
 			String: R.o.t.a.t.i.o.n. }
@@ -17037,7 +19789,9 @@ Pipeline Max Dump (Temporary Tool)
 		16 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		17 0x0110: (StorageRaw) {
 			Size: 10
 			String: S.c.a.l.e. }
@@ -17048,7 +19802,9 @@ Pipeline Max Dump (Temporary Tool)
 		19 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		20 0x0110: (StorageRaw) {
 			Size: 26
 			String: B.l.o.c.k. .C.o.n.t.r.o.l. }
@@ -17059,18 +19815,24 @@ Pipeline Max Dump (Temporary Tool)
 		22 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	422 0x0029: (SceneClassUnknown: Block Manager Wrapper, (0x11793bed, 0x1f8c3646), AcadBlocks.dlu) [1] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	422 0x0029: (SceneClassUnknown: Block Manager Wrapper, (0x1f8c3646, 0x11793bed), AcadBlocks.dlu) [1] {
 		0 0x0001: (StorageContainer) [1] {
 			0 0x0010: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	423 0x0021: (SceneClassUnknown: TVNode, (0x90f2ee71, 0x8d73b8aa), Builtin) [6] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	423 0x0021: (SceneClassUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), Builtin) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: a6 01 00 00 }
+			Hex: a6 01 00 00
+			Int: 422
+			Float: 5.91348e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -17089,18 +19851,24 @@ Pipeline Max Dump (Temporary Tool)
 		5 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	424 0x002a: (SceneClassUnknown: Propagation Manager Wrapper, (0x7620792b, 0x5a1b661e), InstanceMgr.dlu) [1] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	424 0x002a: (SceneClassUnknown: Propagation Manager Wrapper, (0x5a1b661e, 0x7620792b), InstanceMgr.dlu) [1] {
 		0 0x0001: (StorageContainer) [1] {
 			0 0x0010: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 } } }
-	425 0x0021: (SceneClassUnknown: TVNode, (0x90f2ee71, 0x8d73b8aa), Builtin) [6] {
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 } } }
+	425 0x0021: (SceneClassUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), Builtin) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: a8 01 00 00 }
+			Hex: a8 01 00 00
+			Int: 424
+			Float: 5.94151e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -17119,8 +19887,10 @@ Pipeline Max Dump (Temporary Tool)
 		5 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	426 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [5] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	426 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [5] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: +......!........
@@ -17141,11 +19911,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	427 0x002b: (SceneClassUnknown: Scene Effect Loader, (0xf4044794, 0x368d1139), SceneEffectLoader.dlu) [5] {
+	427 0x002b: (SceneClassUnknown: Scene Effect Loader, (0x368d1139, 0xf4044794), SceneEffectLoader.dlu) [5] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: aa 01 00 00 }
+			Hex: aa 01 00 00
+			Int: 426
+			Float: 5.96953e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -17153,20 +19925,28 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0400: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x0410: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		4 0x0420: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	428 0x0021: (SceneClassUnknown: TVNode, (0x90f2ee71, 0x8d73b8aa), Builtin) [7] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	428 0x0021: (SceneClassUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), Builtin) [7] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: ab 01 00 00 }
+			Hex: ab 01 00 00
+			Int: 427
+			Float: 5.98354e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -17189,9 +19969,11 @@ Pipeline Max Dump (Temporary Tool)
 		6 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	429 0x002c: (SceneClassUnknown: Reaction Manager, (0x087906d7, 0x294a389c), reactor.dlc) [0] { }
-	430 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [18] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	429 0x002c: (SceneClassUnknown: Reaction Manager, (0x294a389c, 0x087906d7), reactor.dlc) [0] { }
+	430 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [18] {
 		0 0x000b: (StorageRaw) {
 			Size: 24
 			String: 0.%(&#Z&`......!........
@@ -17264,11 +20046,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	431 0x002d: (SceneClassUnknown: ParameterCollectorCA, (0x265a2326, 0x28250b30), ParamEditor.gup) [3] {
+	431 0x002d: (SceneClassUnknown: ParameterCollectorCA, (0x28250b30, 0x265a2326), ParamEditor.gup) [3] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: ae 01 00 00 }
+			Hex: ae 01 00 00
+			Int: 430
+			Float: 6.02558e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -17277,16 +20061,22 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0110: (StorageRaw) {
 				Size: 4
 				String: e...
-				Hex: 65 00 00 00 }
+				Hex: 65 00 00 00
+				Int: 101
+				Float: 1.41531e-43 }
 			1 0x0120: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	432 0x0003: (SceneClassUnknown: CustAttribContainer, (0x23b708db, 0x5ddb3626), CustAttribContainer.dlo) [4] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	432 0x0003: (SceneClassUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), CustAttribContainer.dlo) [4] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: af 01 00 00 }
+			Hex: af 01 00 00
+			Int: 431
+			Float: 6.0396e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -17294,17 +20084,23 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1030: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: b1 01 00 00 }
+			Hex: b1 01 00 00
+			Int: 433
+			Float: 6.06762e-43 }
 		3 0x1040: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	433 0x0021: (SceneClassUnknown: TVNode, (0x90f2ee71, 0x8d73b8aa), Builtin) [3] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	433 0x0021: (SceneClassUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), Builtin) [3] {
 		0 0x21b0: (StorageContainer) [1] {
 			0 0x1020: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: b0 01 00 00 } }
+				Hex: b0 01 00 00
+				Int: 432
+				Float: 6.05361e-43 } }
 		1 0x0140: (StorageRaw) {
 			Size: 0
 			String:
@@ -17313,11 +20109,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 0
 			String:
 			Hex: } }
-	434 0x002e: (SceneClassUnknown: , (0x01513165, 0x4a0c66e1), BitmapProxies.dlu) [7] {
+	434 0x002e: (SceneClassUnknown: , (0x4a0c66e1, 0x01513165), BitmapProxies.dlu) [7] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: ff ff ff ff }
+			Hex: ff ff ff ff
+			Int: -1
+			Float: -nan }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -17325,37 +20123,49 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0110: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x0120: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		4 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 02 00 00 }
+			Hex: 00 02 00 00
+			Int: 512
+			Float: 7.17465e-43 }
 		5 0x0140: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		6 0x0200: (StorageRaw) {
 			Size: 0
 			String:
 			Hex: } }
-	435 0x002f: (SceneClassUnknown: SceneAppData Latch, (0x2c1a0a7b, 0x0c6f6387), Builtin) [2] {
+	435 0x002f: (SceneClassUnknown: SceneAppData Latch, (0x0c6f6387, 0x2c1a0a7b), Builtin) [2] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: b2 01 00 00 }
+			Hex: b2 01 00 00
+			Int: 434
+			Float: 6.08164e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
 			Hex: 2e } }
-	436 0x0021: (SceneClassUnknown: TVNode, (0x90f2ee71, 0x8d73b8aa), Builtin) [7] {
+	436 0x0021: (SceneClassUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), Builtin) [7] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: b3 01 00 00 }
+			Hex: b3 01 00 00
+			Int: 435
+			Float: 6.09565e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -17379,12 +20189,16 @@ Pipeline Max Dump (Temporary Tool)
 		6 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	437 0x0030: (SceneClassUnknown: BitmapPagerData, (0x68c22d6f, 0x5bf94f11), StorageAndFilter.bms) [6] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	437 0x0030: (SceneClassUnknown: BitmapPagerData, (0x5bf94f11, 0x68c22d6f), StorageAndFilter.bms) [6] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: ff ff ff ff }
+			Hex: ff ff ff ff
+			Int: -1
+			Float: -nan }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -17392,33 +20206,45 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x0110: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		3 0x0120: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		4 0x0130: (StorageRaw) {
 			Size: 4
 			String: ...>
-			Hex: 00 00 80 3e }
+			Hex: 00 00 80 3e
+			Int: 1048576000
+			Float: 0.25 }
 		5 0x0140: (StorageRaw) {
 			Size: 4
 			String: ...=
-			Hex: cd cc cc 3d } }
-	438 0x002f: (SceneClassUnknown: SceneAppData Latch, (0x2c1a0a7b, 0x0c6f6387), Builtin) [2] {
+			Hex: cd cc cc 3d
+			Int: 1036831949
+			Float: 0.1 } }
+	438 0x002f: (SceneClassUnknown: SceneAppData Latch, (0x0c6f6387, 0x2c1a0a7b), Builtin) [2] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: b5 01 00 00 }
+			Hex: b5 01 00 00
+			Int: 437
+			Float: 6.12367e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
 			Hex: 2e } }
-	439 0x0021: (SceneClassUnknown: TVNode, (0x90f2ee71, 0x8d73b8aa), Builtin) [7] {
+	439 0x0021: (SceneClassUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), Builtin) [7] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: b6 01 00 00 }
+			Hex: b6 01 00 00
+			Int: 438
+			Float: 6.13769e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -17441,8 +20267,10 @@ Pipeline Max Dump (Temporary Tool)
 		6 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	440 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [3] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	440 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [3] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: 1......!........
@@ -17455,11 +20283,13 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	441 0x0031: (SceneClassUnknown: MasterLayerControlManager, (0x781f1430, 0x0f4871a5), ctrl.dlc) [9] {
+	441 0x0031: (SceneClassUnknown: MasterLayerControlManager, (0x0f4871a5, 0x781f1430), ctrl.dlc) [9] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: b8 01 00 00 }
+			Hex: b8 01 00 00
+			Int: 440
+			Float: 6.16571e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -17467,32 +20297,46 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		3 0x1002: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		4 0x1003: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		5 0x1004: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x1005: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		7 0x1006: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		8 0x1007: (StorageRaw) {
 			Size: 4
 			String: d...
-			Hex: 64 00 00 00 } }
-	442 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000000, 0x00000082), Builtin) [3] {
+			Hex: 64 00 00 00
+			Int: 100
+			Float: 1.4013e-43 } }
+	442 0x0000: (SceneClassUnknown: ParamBlock2, (0x00000082, 0x00000000), Builtin) [3] {
 		0 0x0009: (StorageRaw) {
 			Size: 16
 			String: 2......!........
@@ -17505,16 +20349,18 @@ Pipeline Max Dump (Temporary Tool)
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	443 0x0032: (SceneClassUnknown: Max Mixer Clip, (0x30935afc, 0x57a52b8c), biped.dlc) [2] {
+	443 0x0032: (SceneClassUnknown: Max Mixer Clip, (0x57a52b8c, 0x30935afc), biped.dlc) [2] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: ba 01 00 00 }
+			Hex: ba 01 00 00
+			Int: 442
+			Float: 6.19374e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
 			Hex: 2e } }
-	444 0x0021: (SceneClassUnknown: TVNode, (0x90f2ee71, 0x8d73b8aa), Builtin) [36] {
+	444 0x0021: (SceneClassUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), Builtin) [36] {
 		0 0x2034: (StorageRaw) {
 			Size: 44
 			String: ............................................
@@ -17537,7 +20383,9 @@ Pipeline Max Dump (Temporary Tool)
 		5 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		6 0x0110: (StorageRaw) {
 			Size: 26
 			String: G.l.o.b.a.l. .T.r.a.c.k.s. }
@@ -17548,7 +20396,9 @@ Pipeline Max Dump (Temporary Tool)
 		8 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		9 0x0110: (StorageRaw) {
 			Size: 56
 			String: B.l.o.c.k. .M.a.n.a.g.e.r. .W.r.a.p.p.e.r. .T.V.N.o.d.e. }
@@ -17559,7 +20409,9 @@ Pipeline Max Dump (Temporary Tool)
 		11 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		12 0x0110: (StorageRaw) {
 			Size: 68
 			String: P.r.o.p.a.g.a.t.i.o.n. .M.a.n.a.g.e.r. .W.r.a.p.p.e.r. .T.V.N.o.d.e. }
@@ -17570,7 +20422,9 @@ Pipeline Max Dump (Temporary Tool)
 		14 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		15 0x0110: (StorageRaw) {
 			Size: 26
 			String: S.c.e.n.e. .E.f.f.e.c.t.s. }
@@ -17581,7 +20435,9 @@ Pipeline Max Dump (Temporary Tool)
 		17 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		18 0x0110: (StorageRaw) {
 			Size: 32
 			String: R.e.a.c.t.i.o.n. .M.a.n.a.g.e.r. }
@@ -17592,7 +20448,9 @@ Pipeline Max Dump (Temporary Tool)
 		20 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		21 0x0110: (StorageRaw) {
 			Size: 38
 			String: P.a.r.a.m.e.t.e.r. .C.o.l.l.e.c.t.o.r. }
@@ -17603,7 +20461,9 @@ Pipeline Max Dump (Temporary Tool)
 		23 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		24 0x0110: (StorageRaw) {
 			Size: 0
 			String:
@@ -17615,7 +20475,9 @@ Pipeline Max Dump (Temporary Tool)
 		26 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		27 0x0110: (StorageRaw) {
 			Size: 30
 			String: B.i.t.m.a.p.P.a.g.e.r.D.a.t.a. }
@@ -17626,7 +20488,9 @@ Pipeline Max Dump (Temporary Tool)
 		29 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		30 0x0110: (StorageRaw) {
 			Size: 52
 			String: A.n.i.m. .L.a.y.e.r. .C.o.n.t.r.o.l. .M.a.n.a.g.e.r. }
@@ -17637,7 +20501,9 @@ Pipeline Max Dump (Temporary Tool)
 		32 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		33 0x0110: (StorageRaw) {
 			Size: 44
 			String: M.a.x. .M.o.t.i.o.n.C.l.i.p. .M.a.n.a.g.e.r. }
@@ -17648,30 +20514,40 @@ Pipeline Max Dump (Temporary Tool)
 		35 0x0130: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	445 0x0033: (SceneClassUnknown: Grid Reference, (0x00000000, 0x00000001), Builtin) [2] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	445 0x0033: (SceneClassUnknown: Grid Reference, (0x00000001, 0x00000000), Builtin) [2] {
 		0 0x2035: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
 			Hex: 2e } }
-	446 0x0034: (SceneClassUnknown: RenderEffects, (0x00000000, 0x17356912), Builtin) [2] {
+	446 0x0034: (SceneClassUnknown: RenderEffects, (0x17356912, 0x00000000), Builtin) [2] {
 		0 0x1100: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		1 0x1110: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 } }
-	447 0x0006: (SceneClassUnknown: ParamBlock, (0x00000000, 0x00000008), Builtin) [7] {
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 } }
+	447 0x0006: (SceneClassUnknown: ParamBlock, (0x00000008, 0x00000000), Builtin) [7] {
 		0 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 05 00 00 00 }
+			Hex: 05 00 00 00
+			Int: 5
+			Float: 7.00649e-45 }
 		1 0x0005: (StorageRaw) {
 			Size: 2
 			String: ..
@@ -17680,7 +20556,9 @@ Pipeline Max Dump (Temporary Tool)
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -17688,12 +20566,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0101: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 02 00 00 } }
+				Hex: 00 02 00 00
+				Int: 512
+				Float: 7.17465e-43 } }
 		3 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 01 00 00 00 }
+				Hex: 01 00 00 00
+				Int: 1
+				Float: 1.4013e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -17701,12 +20583,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...@
-				Hex: 00 00 80 40 } }
+				Hex: 00 00 80 40
+				Int: 1082130432
+				Float: 4 } }
 		4 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 02 00 00 00 }
+				Hex: 02 00 00 00
+				Int: 2
+				Float: 2.8026e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -17714,12 +20600,16 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0100: (StorageRaw) {
 				Size: 4
 				String: ...?
-				Hex: 00 00 80 3f } }
+				Hex: 00 00 80 3f
+				Int: 1065353216
+				Float: 1 } }
 		5 0x0002: (StorageContainer) [3] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 03 00 00 00 }
+				Hex: 03 00 00 00
+				Int: 3
+				Float: 4.2039e-45 }
 			1 0x0004: (StorageRaw) {
 				Size: 0
 				String:
@@ -17727,30 +20617,40 @@ Pipeline Max Dump (Temporary Tool)
 			2 0x0101: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } }
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } }
 		6 0x0002: (StorageContainer) [2] {
 			0 0x0003: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 04 00 00 00 }
+				Hex: 04 00 00 00
+				Int: 4
+				Float: 5.60519e-45 }
 			1 0x0104: (StorageRaw) {
 				Size: 4
 				String: ....
-				Hex: 00 00 00 00 } } }
-	448 0x0035: (SceneClassUnknown: Shadow Map, (0x00000000, 0x00000100), rend.dlr) [2] {
+				Hex: 00 00 00 00
+				Int: 0
+				Float: 0 } } }
+	448 0x0035: (SceneClassUnknown: Shadow Map, (0x00000100, 0x00000000), rend.dlr) [2] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: bf 01 00 00 }
+			Hex: bf 01 00 00
+			Int: 447
+			Float: 6.2638e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
 			Hex: 2e } }
-	449 0x0036: (SceneClassUnknown: Layer Manager, (0x51ff028e, 0x0d7374fc), Builtin) [5] {
+	449 0x0036: (SceneClassUnknown: Layer Manager, (0x0d7374fc, 0x51ff028e), Builtin) [5] {
 		0 0x2034: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 84 01 00 00 }
+			Hex: 84 01 00 00
+			Int: 388
+			Float: 5.43704e-43 }
 		1 0x204b: (StorageRaw) {
 			Size: 1
 			String: .
@@ -17758,21 +20658,27 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x1500: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 01 00 00 00 }
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
 		3 0x1600: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 }
 		4 0x1700: (StorageRaw) {
 			Size: 1
 			String: 0
 			Hex: 30 } }
-	450 0x0037: (SceneClassUnknown: TrackSetList, (0x00000000, 0x2cf03595), Builtin) [1] {
+	450 0x0037: (SceneClassUnknown: TrackSetList, (0x2cf03595, 0x00000000), Builtin) [1] {
 		0 0x0100: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } }
-	451 0x0038: (SceneClassUnknown: Scene, (0x00000000, 0x00002222), Builtin) [8] {
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	451 0x0038: (SceneClassUnknown: Scene, (0x00002222, 0x00000000), Builtin) [8] {
 		0 0x2034: (StorageRaw) {
 			Size: 48
 			String: w...x.......|...................................
@@ -17784,15 +20690,21 @@ Pipeline Max Dump (Temporary Tool)
 		2 0x8500: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		3 0x8530: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 02 00 00 00 }
+			Hex: 02 00 00 00
+			Int: 2
+			Float: 2.8026e-45 }
 		4 0x8510: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: c0 12 00 00 }
+			Hex: c0 12 00 00
+			Int: 4800
+			Float: 6.72623e-42 }
 		5 0x8520: (StorageRaw) {
 			Size: 8
 			String: .......?
@@ -17800,11 +20712,15 @@ Pipeline Max Dump (Temporary Tool)
 		6 0x9000: (StorageRaw) {
 			Size: 4
 			String: >...
-			Hex: 3e 00 00 00 }
+			Hex: 3e 00 00 00
+			Int: 62
+			Float: 8.68805e-44 }
 		7 0x9600: (StorageRaw) {
 			Size: 4
 			String: ....
-			Hex: 00 00 00 00 } } } }
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } } } }
 
 
 ------------------

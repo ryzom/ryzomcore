@@ -84,7 +84,7 @@ void CScene::clean()
 void CScene::build(uint16 version)
 {
 	nlassert(Chunks.size() == 1);
-	CStorageContainer::build(version);
+	CStorageContainer::build(this->version());
 }
 
 void CScene::disown()
@@ -160,7 +160,7 @@ void CSceneClassContainer::disown()
 
 IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 {
-	nldebug("Scene class id %x (%i)", (uint32)id, (uint32)id);
+	// nldebug("Scene class id %x (%i)", (uint32)id, (uint32)id);
 	const CClassEntry *classEntry = m_ClassDirectory3->get(id);
 	CSceneClass *sceneClass = m_SceneClassRegistry->create(classEntry->classId());
 	if (sceneClass)

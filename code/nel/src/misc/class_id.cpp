@@ -32,7 +32,14 @@ const	CClassId	CClassId::Null(0);
 
 void CClassId::serial(NLMISC::IStream &s)
 {
-	s.serial(Uid);
+	// s.serial(Uid);
+	// Backwards.
+	uint32 va = a();
+	uint32 vb = b();
+	s.serial(va);
+	s.serial(vb);
+	setA(va);
+	setB(vb);
 }
 
 std::string CClassId::toString() const

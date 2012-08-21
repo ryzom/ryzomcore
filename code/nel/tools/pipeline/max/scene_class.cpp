@@ -35,6 +35,9 @@
 
 // Project includes
 
+// Temporary project includes
+#include "builtin/app_data.h"
+
 using namespace std;
 // using namespace NLMISC;
 
@@ -87,6 +90,12 @@ void CSceneClass::disown()
 
 IStorageObject *CSceneClass::createChunkById(uint16 id, bool container)
 {
+	// Temporary
+	switch (id)
+	{
+	case NLMAXFILE_APP_DATA_CHUNK_ID:
+		return new CAppData();
+	}
 	return CStorageContainer::createChunkById(id, container);
 }
 

@@ -35,15 +35,13 @@
 #include <nel/misc/class_id.h>
 
 // Project includes
+#include "typedefs.h"
 #include "storage_object.h"
 #include "storage_value.h"
 #include "dll_plugin_desc.h"
 
 namespace PIPELINE {
 namespace MAX {
-
-// Don't really care about superclass IDs right now, but we have to.
-typedef uint32 TSClassId;
 
 class ISceneClassDesc;
 

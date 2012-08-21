@@ -63,17 +63,6 @@ enum TParseLevel
 	// PARSE_NEL3D = 0x00000008, // Parse classes to initialize their nel3d equivalent classes
 };
 
-// NOTE: This is the wrong location. Make a definitions header.
-const uint16 VersionUnknown = 0x0000;
-const uint16 Version3 = 0x2004;
-const uint16 Version4 = 0x2006;
-const uint16 Version5 = 0x2008;
-const uint16 Version6 = 0x2009;
-const uint16 Version9 = 0x200E;
-const uint16 Version2008 = 0x200F;
-const uint16 Version2010 = 0x2012;
-// END OF NOTE
-
 // IStorageObject : exposes serial(CStorageStream &stream) and dump(const std::string &pad)
 class IStorageObject : public NLMISC::IStreamable
 {
