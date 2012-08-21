@@ -196,6 +196,7 @@ void CStorageContainer::toString(std::ostream &ostream, const std::string &pad)
 
 void CStorageContainer::parse(uint16 version, TParseLevel level)
 {
+	nlassert(m_ChunksOwnsPointers); // Can only use this when m_Chunks still has ownership.
 	for (TStorageObjectContainer::const_iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
 	{
 		if (it->second->isContainer())
@@ -230,6 +231,7 @@ void CStorageContainer::build(uint16 version)
 
 void CStorageContainer::disown()
 {
+	nlassert(m_ChunksOwnsPointers); // Can only use this when m_Chunks has been given ownership.
 	for (TStorageObjectContainer::const_iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
 	{
 		if (it->second->isContainer())

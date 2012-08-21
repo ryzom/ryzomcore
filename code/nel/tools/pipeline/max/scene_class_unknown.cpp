@@ -29,7 +29,6 @@
 #include "scene_class_unknown.h"
 
 // STL includes
-#include <iomanip>
 
 // NeL includes
 // #include <nel/misc/debug.h>
@@ -121,7 +120,7 @@ CSceneClassUnknown::~CSceneClassUnknown()
 
 void CSceneClassUnknown::toString(std::ostream &ostream, const std::string &pad)
 {
-	nlassert(m_ChunksOwnsPointers);
+	/*nlassert(m_ChunksOwnsPointers);
 	ostream << "(" << getClassName() << ": " << ucstring(getClassDesc()->displayName()).toUtf8() << ", " << getClassDesc()->classId().toString() << ", " << ucstring(getClassDesc()->dllPluginDesc()->internalName()).toUtf8() << ") [" << m_Chunks.size() << "] { ";
 	std::string padpad = pad + "\t";
 	sint i = 0;
@@ -134,7 +133,8 @@ void CSceneClassUnknown::toString(std::ostream &ostream, const std::string &pad)
 		it->second->toString(ostream, padpad);
 		++i;
 	}
-	ostream << "} ";
+	ostream << "} ";*/
+	CSceneClass::toString(ostream, pad);
 }
 
 void CSceneClassUnknown::parse(uint16 version, TParseLevel level)

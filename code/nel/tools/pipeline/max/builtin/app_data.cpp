@@ -151,6 +151,9 @@ void CAppData::parse(uint16 version, TParseLevel level)
 {
 	if (level & PARSE_BUILTIN)
 	{
+		// Cannot be parsed yet
+		if (!m_ChunksOwnsPointers) { nlerror("Already parsed"); return; }
+
 		// First parse all the child nodes
 		CStorageContainer::parse(version, level);
 
@@ -183,8 +186,8 @@ void CAppData::parse(uint16 version, TParseLevel level)
 
 void CAppData::clean()
 {
-	if (m_ChunksOwnsPointers) { nldebug("Not parsed"); return; } // Must have local ownership
-	if (m_Chunks.size() == 0) { nlwarning("Bad container size"); return; } // Already cleaned
+	if (m_ChunksOwnsPointers) { nldebug("Not parsed, or disowned"); return; } // Must have local ownership
+	if (m_Chunks.size() == 0) { nlwarning("Already cleaned (or did not build due to coding error)"); return; } // Already cleaned
 	if (m_Chunks.begin()->first != NLMAXFILE_APP_DATA_HEADER_CHUNK_ID) { nlerror("Bad id %x, expected %x", (uint32)m_Chunks.begin()->first, NLMAXFILE_APP_DATA_HEADER_CHUNK_ID); return; } // Cannot happen, because we won't have local ownership if parsing failed
 	delete m_Chunks.begin()->second; // Delete the header chunk, since we own it
 	m_Chunks.clear(); // Clear the remaining chunks
@@ -194,7 +197,7 @@ void CAppData::build(uint16 version)
 {
 	// Must be clean first
 	if (!m_ChunksOwnsPointers && m_Chunks.size() != 0) { nlerror("Not cleaned"); return; }
-	if (m_Chunks.size() != 0) { nldebug("Not parsed"); return; }
+	if (m_Chunks.size() != 0) { nldebug("Not parsed, or disowned"); return; }
 
 	// Set up the header in the chunks container
 	CStorageValue<uint32> *headerSize = new CStorageValue<uint32>(); // Owned locally, not by m_Chunks
@@ -211,12 +214,15 @@ void CAppData::disown()
 	if (m_ChunksOwnsPointers) { nldebug("Not parsed"); }
 	if (!m_ChunksOwnsPointers && (m_Chunks.size() != (m_Entries.size() + 1))) { nlerror("Not built"); return; } // If chunks is not the owner, built chunks must match the parsed data
 	// NOTE: m_Chunks must be valid at this point!
-	// Disown all the child chunks
-	CStorageContainer::disown();
+
 	// Disown locally
 	m_Entries.clear();
+
 	// Give ownership back
 	m_ChunksOwnsPointers = true;
+
+	// Disown all the child chunks
+	CStorageContainer::disown();
 }
 
 void CAppData::init()

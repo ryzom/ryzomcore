@@ -90,7 +90,7 @@ public:
 	/// Return the class description of the inheriting class
 	virtual const ISceneClassDesc *getClassDesc();
 	/// Create a readable representation of this class
-	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "");
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
 	//@}
 
 public:
@@ -105,7 +105,7 @@ protected:
 	/// Use during parsing. Gets the chunk with specified id. Warnings when chunks are skipped may be elevated to errors. Remaining orphaned chunks will be appended after chunks that are written by the classes. Returns NULL when the chunk does not exist. Empty chunks are often not written by classes. You have ownership over the chunk until it is disowned. In case that the chunk cannot be parsed, call disown and abort parsing. If this function returns NULL it is also possible that the parsing has been aborted when m_ChunksOwnsPointers is true
 	IStorageObject *getChunk(uint16 id);
 	/// Use during file build. Adds a chunk to the chunks that will be written to the file. Build is called when a chunk is passed through
-	void putChunk(uint16 id, IStorageObject *storageObject)
+	void putChunk(uint16 id, IStorageObject *storageObject);
 	//@}
 
 protected:
