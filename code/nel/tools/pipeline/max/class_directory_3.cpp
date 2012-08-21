@@ -238,7 +238,7 @@ void CClassDirectory3::disown()
 const CClassEntry *CClassDirectory3::get(uint16 index) const
 {
 	nlassert(!m_ChunksOwnsPointers);
-	nlassert(index < m_Entries.size());
+	if (index >= m_Entries.size()) { nlerror("Index 0x%x is above the number of entries %i", (uint32)index, (uint32)m_Entries.size()); return NULL; }
 	return m_Entries[index];
 }
 

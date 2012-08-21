@@ -161,6 +161,12 @@ void CSceneClassContainer::disown()
 IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 {
 	// nldebug("Scene class id %x (%i)", (uint32)id, (uint32)id);
+	switch (id)
+	{
+		// Known unknown special identifiers...
+	case 0x2032:
+		return CStorageContainer::createChunkById(id, container);
+	}
 	const CClassEntry *classEntry = m_ClassDirectory3->get(id);
 	CSceneClass *sceneClass = m_SceneClassRegistry->create(classEntry->classId());
 	if (sceneClass)
@@ -173,7 +179,6 @@ IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 		const CDllEntry *dllEntry = m_DllDirectory->get(classEntry->dllIndex());
 		return static_cast<IStorageObject *>(new CSceneClassUnknown(dllEntry, classEntry));
 	}
-	throw EStorage("Bad scene class id");
 }
 
 ////////////////////////////////////////////////////////////////////////

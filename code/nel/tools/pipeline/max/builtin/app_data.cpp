@@ -204,9 +204,6 @@ void CAppData::build(uint16 version)
 	// Set up the entries
 	for (TMap::iterator it = m_Entries.begin(), end = m_Entries.end(); it != end; ++it)
 		m_Chunks.push_back(TStorageObjectWithId(NLMAXFILE_APP_DATA_ENTRY_CHUNK_ID, it->second));
-
-	// Build all the child chunks
-	CStorageContainer::build(version);
 }
 
 void CAppData::disown()
