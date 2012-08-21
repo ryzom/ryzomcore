@@ -57,25 +57,63 @@ public:
 	CSceneClass();
 	virtual ~CSceneClass();
 
-	// inherited
-	virtual std::string getClassName();
-	virtual void toString(std::ostream &ostream, const std::string &pad = "");
-	virtual void parse(uint16 version, TParseLevel level);
-	virtual void clean();
-	virtual void build(uint16 version);
-	virtual void disown();
+	//! \name Inherited functions that are implemented by wrapping around other virtual functions in this class
+	//@{
+	virtual std::string getClassName(); // do not override, implemented using getClassDesc
+	virtual void toString(std::ostream &ostream, const std::string &pad = ""); // do not override, implemented using toStringLocal
+	//@}
 
-	// static const
+	//! \name Inherited functions called through the storage loading and saving system
+	//@{
+	/// Override this to read a chunk from the chunks stream. Call the parent's parse function first. Get the necessary chunks implemented by your class using getChunk. See the getChunk function for further information. In case of failure, call disown. If m_ChunksOwnsPointers is true, the parsing has failed, warnings have already been printed, and nothing should happen
+	virtual void parse(uint16 version, TParseLevel level);
+	/// Override this if the chunks you are using are not needed after they have been parsed. You may delete any chunks you own. Call the parent's clean first. You must call clean on any chunks you own if they implement this function
+	virtual void clean();
+	/// Override this to write a chunk to the chunks stream. If you create a new chunk, the creating class owns it, and should delete it when clean is called. You no longer own any created chunks when disown has been called. Use putChunk to add the chunk. Call the parent's build first. The putChunk function calls build on added chunks
+	virtual void build(uint16 version);
+	/// Remove any references to chunks that are owned by the inheriting class (those that were acquired using getChunk during parse or created using putChunk during build). You no longer have ownership over these chunks, and should not use them anymore. This function may be called after build to disable any functionality from the loaded storage. Call the parent's disown after disowning your own chunks. Disown is called on the disowned child chunks for you
+	virtual void disown();
+	//@}
+
+	//! \name Static const variables for the class description
+	//@{
 	static const ucchar *DisplayName;
 	static const char *InternalName;
 	static const NLMISC::CClassId ClassId;
 	static const TSClassId SuperClassId;
+	//@}
 
-	// virtual
+	//! \name Virtual functionality for inheriting classes to implement
+	//@{
+	/// Initialize this class from scratch, call the parent first
+	virtual void init();
+	/// Return the class description of the inheriting class
 	virtual const ISceneClassDesc *getClassDesc();
+	/// Create a readable representation of this class
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "");
+	//@}
+
+public:
+	//! \name Read access to internal data, provided for browsing trough the file from code
+	//@{
+	inline const TStorageObjectContainer &orphanedChunks() const { return m_OrphanedChunks; }
+	//@}
+
+protected:
+	//! \name Methods used by inheriting classes to read and write to the storage safely
+	//@{
+	/// Use during parsing. Gets the chunk with specified id. Warnings when chunks are skipped may be elevated to errors. Remaining orphaned chunks will be appended after chunks that are written by the classes. Returns NULL when the chunk does not exist. Empty chunks are often not written by classes. You have ownership over the chunk until it is disowned. In case that the chunk cannot be parsed, call disown and abort parsing. If this function returns NULL it is also possible that the parsing has been aborted when m_ChunksOwnsPointers is true
+	IStorageObject *getChunk(uint16 id);
+	/// Use during file build. Adds a chunk to the chunks that will be written to the file. Build is called when a chunk is passed through
+	void putChunk(uint16 id, IStorageObject *storageObject)
+	//@}
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
+private:
+	TStorageObjectContainer m_OrphanedChunks;
+	TStorageObjectIterator m_PutChunkInsert;
 
 }; /* class CSceneClass */
 
