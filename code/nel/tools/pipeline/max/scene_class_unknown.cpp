@@ -121,11 +121,11 @@ CSceneClassUnknown::~CSceneClassUnknown()
 
 void CSceneClassUnknown::toString(std::ostream &ostream, const std::string &pad)
 {
-	nlassert(ChunksOwnsPointers);
-	ostream << "(" << getClassName() << ": " << ucstring(getClassDesc()->displayName()).toUtf8() << ", " << getClassDesc()->classId().toString() << ", " << ucstring(getClassDesc()->dllPluginDesc()->internalName()).toUtf8() << ") [" << Chunks.size() << "] { ";
+	nlassert(m_ChunksOwnsPointers);
+	ostream << "(" << getClassName() << ": " << ucstring(getClassDesc()->displayName()).toUtf8() << ", " << getClassDesc()->classId().toString() << ", " << ucstring(getClassDesc()->dllPluginDesc()->internalName()).toUtf8() << ") [" << m_Chunks.size() << "] { ";
 	std::string padpad = pad + "\t";
 	sint i = 0;
-	for (TStorageObjectContainer::const_iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
+	for (TStorageObjectContainer::const_iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
 	{
 		std::stringstream ss;
 		ss << std::hex << std::setfill('0');

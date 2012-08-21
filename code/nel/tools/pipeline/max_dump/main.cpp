@@ -172,10 +172,10 @@ int main(int argc, char **argv)
 #define NEL3D_APPDATA_ENV_FX (84682543)
 
 	PIPELINE::MAX::CSceneClassContainer *ssc = scene.container();
-	for (PIPELINE::MAX::CStorageContainer::TStorageObjectIterator it = ssc->Chunks.begin(), end = ssc->Chunks.end(); it != end; ++it)
+	for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(), end = ssc->chunks().end(); it != end; ++it)
 	{
 		PIPELINE::MAX::CStorageContainer *subc = static_cast<PIPELINE::MAX::CStorageContainer *>(it->second);
-		for (PIPELINE::MAX::CStorageContainer::TStorageObjectIterator subit = subc->Chunks.begin(), subend = subc->Chunks.end(); subit != subend; ++subit)
+		for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt subit = subc->chunks().begin(), subend = subc->chunks().end(); subit != subend; ++subit)
 		{
 			PIPELINE::MAX::IStorageObject *storageChunk = subit->second;
 			PIPELINE::MAX::CAppData *appData = dynamic_cast<PIPELINE::MAX::CAppData *>(storageChunk);

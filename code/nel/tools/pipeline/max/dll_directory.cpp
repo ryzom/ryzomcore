@@ -54,8 +54,8 @@ CDllDirectory::CDllDirectory() : m_DllEntryBuiltin(&DllPluginDescBuiltin), m_Dll
 // Parallel to CClassDirectory3
 CDllDirectory::~CDllDirectory()
 {
-	// Delete m_ChunkCache and m_Entries when !ChunksOwnsPointers
-	if (!ChunksOwnsPointers)
+	// Delete m_ChunkCache and m_Entries when !m_ChunksOwnsPointers
+	if (!m_ChunksOwnsPointers)
 	{
 		for (TStorageObjectContainer::iterator it = m_ChunkCache.begin(), end = m_ChunkCache.end(); it != end; ++it)
 		{
@@ -78,13 +78,13 @@ std::string CDllDirectory::getClassName()
 // Parallel to CClassDirectory3
 void CDllDirectory::toString(std::ostream &ostream, const std::string &pad)
 {
-	if (ChunksOwnsPointers)
+	if (m_ChunksOwnsPointers)
 	{
 		CStorageContainer::toString(ostream, pad);
 	}
 	else
 	{
-		ostream << "(" << getClassName() << ") [" << Chunks.size() << "] PARSED { ";
+		ostream << "(" << getClassName() << ") [" << m_Chunks.size() << "] PARSED { ";
 		std::string padpad = pad + "\t";
 		sint i = 0;
 		for (TStorageObjectContainer::const_iterator it = m_ChunkCache.begin(), end = m_ChunkCache.end(); it != end; ++it)
@@ -135,7 +135,7 @@ void CDllDirectory::parse(uint16 version, TParseLevel level)
 		bool parsedDllEntry = false;
 
 		// Parse chunks
-		for (TStorageObjectContainer::iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
+		for (TStorageObjectContainer::iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
 		{
 			uint16 id = it->first;
 			switch (id)
@@ -163,7 +163,7 @@ void CDllDirectory::parse(uint16 version, TParseLevel level)
 		}
 
 		// Now ownership of the pointers lies in m_ChunkCache and m_Entries
-		ChunksOwnsPointers = false;
+		m_ChunksOwnsPointers = false;
 	}
 }
 
@@ -171,10 +171,10 @@ void CDllDirectory::parse(uint16 version, TParseLevel level)
 void CDllDirectory::clean()
 {
 	// Ensure parsed
-	nlassert(!ChunksOwnsPointers);
+	nlassert(!m_ChunksOwnsPointers);
 
-	// Clear Chunks
-	Chunks.clear();
+	// Clear m_Chunks
+	m_Chunks.clear();
 
 	// Clean chunks
 	for (TStorageObjectContainer::iterator it = m_ChunkCache.begin(), end = m_ChunkCache.end(); it != end; ++it)
@@ -194,12 +194,12 @@ void CDllDirectory::clean()
 void CDllDirectory::build(uint16 version)
 {
 	// Ensure parsed
-	nlassert(!ChunksOwnsPointers);
+	nlassert(!m_ChunksOwnsPointers);
 
 	// Initialize
-	nlassert(Chunks.empty());
+	nlassert(m_Chunks.empty());
 
-	// Set up the Chunks list, when (CDllEntry::ID, NULL) is found write out all of the entries.
+	// Set up the m_Chunks list, when (CDllEntry::ID, NULL) is found write out all of the entries.
 	for (TStorageObjectContainer::iterator it = m_ChunkCache.begin(), end = m_ChunkCache.end(); it != end; ++it)
 	{
 		uint16 id = it->first;
@@ -207,15 +207,15 @@ void CDllDirectory::build(uint16 version)
 		{
 		case 0x2038: // DllEntry
 			for (std::vector<CDllEntry *>::iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
-				Chunks.push_back(TStorageObjectWithId(id, (*subit)));
+				m_Chunks.push_back(TStorageObjectWithId(id, (*subit)));
 			break;
 		default:
-			Chunks.push_back(*it);
+			m_Chunks.push_back(*it);
 			break;
 		}
 	}
 
-	// Build the entries last (after Chunks is built)
+	// Build the entries last (after m_Chunks is built)
 	CStorageContainer::build(version);
 
 	// NOTE: Ownership remains with m_ChunkCache and m_Entries
@@ -229,14 +229,14 @@ void CDllDirectory::disown()
 	m_Entries.clear();
 	m_InternalNameToIndex.clear();
 
-	// Ownership goes back to Chunks
-	ChunksOwnsPointers = true;
+	// Ownership goes back to m_Chunks
+	m_ChunksOwnsPointers = true;
 }
 
 // Parallel to CClassDirectory3
 const CDllEntry *CDllDirectory::get(sint32 index) const
 {
-	nlassert(!ChunksOwnsPointers);
+	nlassert(!m_ChunksOwnsPointers);
 	if (index < 0)
 	{
 		// Handle internal dummy values
@@ -262,7 +262,7 @@ const CDllEntry *CDllDirectory::get(sint32 index) const
 // Parallel to CClassDirectory3
 void CDllDirectory::reset()
 {
-	nlassert(!ChunksOwnsPointers);
+	nlassert(!m_ChunksOwnsPointers);
 	for (std::vector<CDllEntry *>::iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
 	{
 		delete (*subit);
@@ -275,7 +275,7 @@ void CDllDirectory::reset()
 // Parallel to CClassDirectory3
 sint32 CDllDirectory::getOrCreateIndex(const IDllPluginDescInternal *dllPluginDesc)
 {
-	nlassert(!ChunksOwnsPointers);
+	nlassert(!m_ChunksOwnsPointers);
 	std::map<ucstring, sint32>::iterator it = m_InternalNameToIndex.find(NLMISC::toLower(ucstring(dllPluginDesc->internalName())));
 
 	// Return existing index
@@ -331,8 +331,8 @@ CDllEntry::CDllEntry() : m_DllDescription(NULL), m_DllFilename(NULL)
 
 CDllEntry::CDllEntry(const IDllPluginDescInternal *dllPluginDesc) : m_DllDescription(new CStorageValue<ucstring>()), m_DllFilename(new CStorageValue<ucstring>())
 {
-	Chunks.push_back(TStorageObjectWithId(0x2039, m_DllDescription));
-	Chunks.push_back(TStorageObjectWithId(0x2037, m_DllFilename));
+	m_Chunks.push_back(TStorageObjectWithId(0x2039, m_DllDescription));
+	m_Chunks.push_back(TStorageObjectWithId(0x2037, m_DllFilename));
 	m_DllDescription->Value = dllPluginDesc->displayName();
 	m_DllFilename->Value = dllPluginDesc->internalName();
 }
@@ -351,7 +351,7 @@ void CDllEntry::toString(std::ostream &ostream, const std::string &pad)
 {
 	if (m_DllDescription && m_DllFilename)
 	{
-		ostream << "(" << getClassName() << ") [" << Chunks.size() << "] PARSED { ";
+		ostream << "(" << getClassName() << ") [" << m_Chunks.size() << "] PARSED { ";
 		std::string padpad = pad + "\t";
 		ostream << "\n" << pad << "DllDescription: " << m_DllDescription->Value.toUtf8();
 		ostream << "\n" << pad << "DllFilename: " << m_DllFilename->Value.toUtf8();
@@ -366,9 +366,9 @@ void CDllEntry::toString(std::ostream &ostream, const std::string &pad)
 void CDllEntry::parse(uint16 version, TParseLevel level)
 {
 	// CStorageContainer::parse(version, level);
-	nlassert(ChunksOwnsPointers);
-	nlassert(Chunks.size() == 2);
-	TStorageObjectContainer::iterator it = Chunks.begin();
+	nlassert(m_ChunksOwnsPointers);
+	nlassert(m_Chunks.size() == 2);
+	TStorageObjectContainer::iterator it = m_Chunks.begin();
 	nlassert(it->first == 0x2039); // DllDescription
 	m_DllDescription = static_cast<CStorageValue<ucstring> *>(it->second);
 	++it;
@@ -379,7 +379,7 @@ void CDllEntry::parse(uint16 version, TParseLevel level)
 
 void CDllEntry::clean()
 {
-	// Nothing to do here! (Chunks retains ownership)
+	// Nothing to do here! (m_Chunks retains ownership)
 	// CStorageContainer::clean();
 }
 
@@ -394,7 +394,7 @@ void CDllEntry::disown()
 	// CStorageContainer::disown();
 	m_DllDescription = NULL;
 	m_DllFilename = NULL;
-	nlassert(ChunksOwnsPointers);
+	nlassert(m_ChunksOwnsPointers);
 }
 
 IStorageObject *CDllEntry::createChunkById(uint16 id, bool container)

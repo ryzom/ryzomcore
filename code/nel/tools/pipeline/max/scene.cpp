@@ -73,7 +73,7 @@ void CScene::toString(std::ostream &ostream, const std::string &pad)
 void CScene::parse(uint16 version, TParseLevel level)
 {
 	CStorageContainer::parse(version, level);
-	nlassert(Chunks.size() == 1);
+	nlassert(m_Chunks.size() == 1);
 }
 
 void CScene::clean()
@@ -83,7 +83,7 @@ void CScene::clean()
 
 void CScene::build(uint16 version)
 {
-	nlassert(Chunks.size() == 1);
+	nlassert(m_Chunks.size() == 1);
 	CStorageContainer::build(this->version());
 }
 
@@ -94,14 +94,14 @@ void CScene::disown()
 
 uint16 CScene::version()
 {
-	nlassert(Chunks.size() == 1);
-	return Chunks.begin()->first;
+	nlassert(m_Chunks.size() == 1);
+	return m_Chunks.begin()->first;
 }
 
 CSceneClassContainer *CScene::container()
 {
-	nlassert(Chunks.size() == 1);
-	return static_cast<CSceneClassContainer *>(Chunks.begin()->second);
+	nlassert(m_Chunks.size() == 1);
+	return static_cast<CSceneClassContainer *>(m_Chunks.begin()->second);
 }
 
 IStorageObject *CScene::createChunkById(uint16 id, bool container)

@@ -86,21 +86,21 @@ bool IStorageObject::isContainer() const
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CStorageContainer::CStorageContainer() : ChunksOwnsPointers(true)
+CStorageContainer::CStorageContainer() : m_ChunksOwnsPointers(true)
 {
 
 }
 
 CStorageContainer::~CStorageContainer()
 {
-	if (ChunksOwnsPointers)
+	if (m_ChunksOwnsPointers)
 	{
-		for (TStorageObjectContainer::iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
+		for (TStorageObjectContainer::iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
 		{
 			delete it->second;
 		}
 	}
-	Chunks.clear();
+	m_Chunks.clear();
 }
 
 std::string CStorageContainer::getClassName() // why is this not const in IClassable?
@@ -112,8 +112,8 @@ void CStorageContainer::serial(NLMISC::IStream &stream)
 {
 	if (stream.isReading())
 	{
-		nlassert(ChunksOwnsPointers);
-		nlassert(Chunks.empty());
+		nlassert(m_ChunksOwnsPointers);
+		nlassert(m_Chunks.empty());
 	}
 	if (stream.getPos() == 0)
 	{
@@ -178,11 +178,11 @@ void CStorageContainer::toString(std::ostream &ostream, const std::string &pad)
 	//      Blahblah: (Container) {
 	//          Moo: (Foo) "What" }
 	// only increase pad when multi-lining sub-items
-	nlassert(ChunksOwnsPointers);
-	ostream << "(" << getClassName() << ") [" << Chunks.size() << "] { ";
+	nlassert(m_ChunksOwnsPointers);
+	ostream << "(" << getClassName() << ") [" << m_Chunks.size() << "] { ";
 	std::string padpad = pad + "\t";
 	sint i = 0;
-	for (TStorageObjectContainer::const_iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
+	for (TStorageObjectContainer::const_iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
 	{
 		std::stringstream ss;
 		ss << std::hex << std::setfill('0');
@@ -196,7 +196,7 @@ void CStorageContainer::toString(std::ostream &ostream, const std::string &pad)
 
 void CStorageContainer::parse(uint16 version, TParseLevel level)
 {
-	for (TStorageObjectContainer::const_iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
+	for (TStorageObjectContainer::const_iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
 	{
 		if (it->second->isContainer())
 		{
@@ -207,8 +207,8 @@ void CStorageContainer::parse(uint16 version, TParseLevel level)
 
 void CStorageContainer::clean()
 {
-	nlassert(ChunksOwnsPointers); // Can only use the default when Chunks retains ownership.
-	for (TStorageObjectContainer::const_iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
+	nlassert(m_ChunksOwnsPointers); // Can only use the default when m_Chunks retains ownership.
+	for (TStorageObjectContainer::const_iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
 	{
 		if (it->second->isContainer())
 		{
@@ -219,7 +219,7 @@ void CStorageContainer::clean()
 
 void CStorageContainer::build(uint16 version)
 {
-	for (TStorageObjectContainer::const_iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
+	for (TStorageObjectContainer::const_iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
 	{
 		if (it->second->isContainer())
 		{
@@ -230,7 +230,7 @@ void CStorageContainer::build(uint16 version)
 
 void CStorageContainer::disown()
 {
-	for (TStorageObjectContainer::const_iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
+	for (TStorageObjectContainer::const_iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
 	{
 		if (it->second->isContainer())
 		{
@@ -251,8 +251,8 @@ void CStorageContainer::serial(CStorageChunks &chunks)
 #ifdef NL_DEBUG_STORAGE
 		nldebug("Reading container chunk");
 #endif
-		nlassert(ChunksOwnsPointers);
-		nlassert(Chunks.empty());
+		nlassert(m_ChunksOwnsPointers);
+		nlassert(m_Chunks.empty());
 		while (chunks.enterChunk())
 		{
 			uint16 id = chunks.getChunkId();
@@ -261,10 +261,10 @@ void CStorageContainer::serial(CStorageChunks &chunks)
 			storageObject->setSize(chunks.getChunkSize());
 			if (storageObject->isContainer()) static_cast<CStorageContainer *>(storageObject)->serial(chunks);
 			else storageObject->serial(chunks.stream());
-			Chunks.push_back(TStorageObjectWithId(id, storageObject));
+			m_Chunks.push_back(TStorageObjectWithId(id, storageObject));
 			if (chunks.leaveChunk()) // bytes were skipped while reading
 				throw EStorage();
-			/*TStorageObjectContainer::iterator soit = Chunks.end();
+			/*TStorageObjectContainer::iterator soit = m_Chunks.end();
 			--soit;
 			serialized(soit, cont);*/
 		}
@@ -274,7 +274,7 @@ void CStorageContainer::serial(CStorageChunks &chunks)
 #ifdef NL_DEBUG_STORAGE
 		nldebug("Writing container chunk");
 #endif
-		for (TStorageObjectContainer::iterator it = Chunks.begin(), end = Chunks.end(); it != end; ++it)
+		for (TStorageObjectContainer::iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
 		{
 			chunks.enterChunk(it->first, it->second->isContainer());
 			IStorageObject *storageObject = it->second;

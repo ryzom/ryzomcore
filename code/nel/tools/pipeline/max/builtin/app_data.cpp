@@ -128,7 +128,7 @@ std::string CAppData::getClassName()
 
 void CAppData::toString(std::ostream &ostream, const std::string &pad)
 {
-	if (ChunksOwnsPointers)
+	if (m_ChunksOwnsPointers)
 	{
 		CStorageContainer::toString(ostream, pad);
 	}
@@ -155,16 +155,16 @@ void CAppData::parse(uint16 version, TParseLevel level)
 		CStorageContainer::parse(version, level);
 
 		// Verify
-		if (Chunks.size() < 2) { nlwarning("Bad container size %i", Chunks.size()); disown(); return; }
+		if (m_Chunks.size() < 2) { nlwarning("Bad container size %i", m_Chunks.size()); disown(); return; }
 
 		// Header
-		TStorageObjectContainer::iterator it = Chunks.begin();
+		TStorageObjectContainer::iterator it = m_Chunks.begin();
 		if (it->first != NLMAXFILE_APP_DATA_HEADER_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, NLMAXFILE_APP_DATA_HEADER_CHUNK_ID); disown();  return; }
 		uint32 headerSize = static_cast<CStorageValue<uint32> *>(it->second)->Value;
 		++it;
 
 		// Entries
-		for (TStorageObjectContainer::iterator end = Chunks.end(); it != end; ++it)
+		for (TStorageObjectContainer::iterator end = m_Chunks.end(); it != end; ++it)
 		{
 			if (it->first != NLMAXFILE_APP_DATA_ENTRY_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, NLMAXFILE_APP_DATA_ENTRY_CHUNK_ID); disown(); return; }
 			CAppDataEntry *entry = static_cast<CAppDataEntry *>(it->second);
@@ -177,33 +177,33 @@ void CAppData::parse(uint16 version, TParseLevel level)
 		if (m_Entries.size() != headerSize) { nlwarning("Entry count %i does not match header %i", m_Entries.size(), headerSize); disown(); return; }
 
 		// Take local ownership
-		ChunksOwnsPointers = false;
+		m_ChunksOwnsPointers = false;
 	}
 }
 
 void CAppData::clean()
 {
-	if (ChunksOwnsPointers) { nldebug("Not parsed"); return; } // Must have local ownership
-	if (Chunks.size() == 0) { nlwarning("Bad container size"); return; } // Already cleaned
-	if (Chunks.begin()->first != NLMAXFILE_APP_DATA_HEADER_CHUNK_ID) { nlerror("Bad id %x, expected %x", (uint32)Chunks.begin()->first, NLMAXFILE_APP_DATA_HEADER_CHUNK_ID); return; } // Cannot happen, because we won't have local ownership if parsing failed
-	delete Chunks.begin()->second; // Delete the header chunk, since we own it
-	Chunks.clear(); // Clear the remaining chunks
+	if (m_ChunksOwnsPointers) { nldebug("Not parsed"); return; } // Must have local ownership
+	if (m_Chunks.size() == 0) { nlwarning("Bad container size"); return; } // Already cleaned
+	if (m_Chunks.begin()->first != NLMAXFILE_APP_DATA_HEADER_CHUNK_ID) { nlerror("Bad id %x, expected %x", (uint32)m_Chunks.begin()->first, NLMAXFILE_APP_DATA_HEADER_CHUNK_ID); return; } // Cannot happen, because we won't have local ownership if parsing failed
+	delete m_Chunks.begin()->second; // Delete the header chunk, since we own it
+	m_Chunks.clear(); // Clear the remaining chunks
 }
 
 void CAppData::build(uint16 version)
 {
 	// Must be clean first
-	if (!ChunksOwnsPointers && Chunks.size() != 0) { nlerror("Not cleaned"); return; }
-	if (Chunks.size() != 0) { nldebug("Not parsed"); return; }
+	if (!m_ChunksOwnsPointers && m_Chunks.size() != 0) { nlerror("Not cleaned"); return; }
+	if (m_Chunks.size() != 0) { nldebug("Not parsed"); return; }
 
 	// Set up the header in the chunks container
-	CStorageValue<uint32> *headerSize = new CStorageValue<uint32>(); // Owned locally, not by Chunks
+	CStorageValue<uint32> *headerSize = new CStorageValue<uint32>(); // Owned locally, not by m_Chunks
 	headerSize->Value = m_Entries.size();
-	Chunks.push_back(TStorageObjectWithId(NLMAXFILE_APP_DATA_HEADER_CHUNK_ID, headerSize));
+	m_Chunks.push_back(TStorageObjectWithId(NLMAXFILE_APP_DATA_HEADER_CHUNK_ID, headerSize));
 
 	// Set up the entries
 	for (TMap::iterator it = m_Entries.begin(), end = m_Entries.end(); it != end; ++it)
-		Chunks.push_back(TStorageObjectWithId(NLMAXFILE_APP_DATA_ENTRY_CHUNK_ID, it->second));
+		m_Chunks.push_back(TStorageObjectWithId(NLMAXFILE_APP_DATA_ENTRY_CHUNK_ID, it->second));
 
 	// Build all the child chunks
 	CStorageContainer::build(version);
@@ -211,30 +211,30 @@ void CAppData::build(uint16 version)
 
 void CAppData::disown()
 {
-	if (ChunksOwnsPointers) { nldebug("Not parsed"); }
-	if (!ChunksOwnsPointers && (Chunks.size() != (m_Entries.size() + 1))) { nlerror("Not built"); return; } // If chunks is not the owner, built chunks must match the parsed data
-	// NOTE: Chunks must be valid at this point!
+	if (m_ChunksOwnsPointers) { nldebug("Not parsed"); }
+	if (!m_ChunksOwnsPointers && (m_Chunks.size() != (m_Entries.size() + 1))) { nlerror("Not built"); return; } // If chunks is not the owner, built chunks must match the parsed data
+	// NOTE: m_Chunks must be valid at this point!
 	// Disown all the child chunks
 	CStorageContainer::disown();
 	// Disown locally
 	m_Entries.clear();
 	// Give ownership back
-	ChunksOwnsPointers = true;
+	m_ChunksOwnsPointers = true;
 }
 
 void CAppData::init()
 {
 	// Cannot be init yet
-	if (!ChunksOwnsPointers) { nlerror("Already parsed"); return; }
-	if (Chunks.size() != 0) { nlerror("Already built or serialized"); return; }
+	if (!m_ChunksOwnsPointers) { nlerror("Already parsed"); return; }
+	if (m_Chunks.size() != 0) { nlerror("Already built or serialized"); return; }
 
 	// We own this
-	ChunksOwnsPointers = false;
+	m_ChunksOwnsPointers = false;
 }
 
 const uint8 *CAppData::read(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 &size) const
 {
-	if (ChunksOwnsPointers) { nlwarning("Not parsed"); return NULL; }
+	if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return NULL; }
 	TKey key(classId, superClassId, subId);
 	TMap::const_iterator it = m_Entries.find(key);
 	if (it == m_Entries.end()) { nldebug("Trying to read non-existant key, this is allowed, returning NULL"); return NULL; }
@@ -244,7 +244,7 @@ const uint8 *CAppData::read(NLMISC::CClassId classId, TSClassId superClassId, ui
 
 uint8 *CAppData::lock(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 capacity)
 {
-	if (ChunksOwnsPointers) { nlwarning("Not parsed"); return NULL; }
+	if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return NULL; }
 	TKey key(classId, superClassId, subId);
 	TMap::const_iterator it = m_Entries.find(key);
 	CAppDataEntry *appDataEntry;
@@ -267,7 +267,7 @@ uint8 *CAppData::lock(NLMISC::CClassId classId, TSClassId superClassId, uint32 s
 
 void CAppData::unlock(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 size)
 {
-	if (ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
+	if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
 	TKey key(classId, superClassId, subId);
 	TMap::const_iterator it = m_Entries.find(key);
 	if (it == m_Entries.end()) { nlerror("Unlocking non-existant key"); return; }
@@ -288,7 +288,7 @@ void CAppData::fill(NLMISC::CClassId classId, TSClassId superClassId, uint32 sub
 
 void CAppData::erase(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId)
 {
-	if (ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
+	if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
 	TKey key(classId, superClassId, subId);
 	TMap::const_iterator it = m_Entries.find(key);
 	if (it == m_Entries.end()) { nldebug("Trying to erase non-existant key, this is allowed, doing nothing"); return; }
@@ -371,7 +371,7 @@ void CAppDataEntry::toString(std::ostream &ostream, const std::string &pad)
 {
 	if (m_Key && m_Value)
 	{
-		ostream << "(" << getClassName() << ") [" << Chunks.size() << "] PARSED { ";
+		ostream << "(" << getClassName() << ") [" << m_Chunks.size() << "] PARSED { ";
 		std::string padpad = pad + "\t";
 		ostream << "\n" << pad << "Key: ";
 		m_Key->toString(ostream, padpad);
@@ -388,10 +388,10 @@ void CAppDataEntry::toString(std::ostream &ostream, const std::string &pad)
 void CAppDataEntry::parse(uint16 version, TParseLevel level)
 {
 	// CStorageContainer::parse(version, level);
-	// if (!ChunksOwnsPointers) { nlwarning("Already parsed"); return; }
-	if (Chunks.size() != 2) { nlwarning("Bad container size"); disown(); return; }
+	// if (!m_ChunksOwnsPointers) { nlwarning("Already parsed"); return; }
+	if (m_Chunks.size() != 2) { nlwarning("Bad container size"); disown(); return; }
 
-	TStorageObjectContainer::iterator it = Chunks.begin();
+	TStorageObjectContainer::iterator it = m_Chunks.begin();
 	if (it->first != NLMAXFILE_APP_DATA_ENTRY_KEY_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, NLMAXFILE_APP_DATA_ENTRY_KEY_CHUNK_ID); disown();  return; }
 	m_Key = static_cast<CAppDataEntryKey *>(it->second);
 
@@ -399,22 +399,22 @@ void CAppDataEntry::parse(uint16 version, TParseLevel level)
 	if (it->first != NLMAXFILE_APP_DATA_ENTRY_VALUE_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, NLMAXFILE_APP_DATA_ENTRY_VALUE_CHUNK_ID); disown(); return; }
 	m_Value = static_cast<CStorageRaw *>(it->second);
 
-	// ChunksOwnsPointers = false;
-	nlassert(ChunksOwnsPointers); // Never set false here
+	// m_ChunksOwnsPointers = false;
+	nlassert(m_ChunksOwnsPointers); // Never set false here
 }
 
 void CAppDataEntry::clean()
 {
 	nlassert(false);
 	// CStorageContainer::clean();
-	// if (ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
+	// if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
 	// Nothing to do here!
 }
 
 void CAppDataEntry::build(uint16 version)
 {
 	nlassert(false);
-	// if (ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
+	// if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
 	// Nothing to do here!
 	// CStorageContainer::build(version);
 }
@@ -422,18 +422,18 @@ void CAppDataEntry::build(uint16 version)
 void CAppDataEntry::disown()
 {
 	// CStorageContainer::disown();
-	if (Chunks.size() != 2) { nlerror("Not built"); return; } // Built chunks must match the parsed data
+	if (m_Chunks.size() != 2) { nlerror("Not built"); return; } // Built chunks must match the parsed data
 	m_Key = NULL;
 	m_Value = NULL;
 }
 
 void CAppDataEntry::init()
 {
-	nlassert(Chunks.size() == 0);
+	nlassert(m_Chunks.size() == 0);
 	m_Key = new CAppDataEntryKey();
-	Chunks.push_back(TStorageObjectWithId(NLMAXFILE_APP_DATA_ENTRY_KEY_CHUNK_ID, m_Key));
+	m_Chunks.push_back(TStorageObjectWithId(NLMAXFILE_APP_DATA_ENTRY_KEY_CHUNK_ID, m_Key));
 	m_Value = new CStorageRaw();
-	Chunks.push_back(TStorageObjectWithId(NLMAXFILE_APP_DATA_ENTRY_VALUE_CHUNK_ID, m_Value));
+	m_Chunks.push_back(TStorageObjectWithId(NLMAXFILE_APP_DATA_ENTRY_VALUE_CHUNK_ID, m_Value));
 }
 
 CAppDataEntryKey *CAppDataEntry::key()

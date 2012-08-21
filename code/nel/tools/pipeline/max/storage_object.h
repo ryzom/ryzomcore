@@ -92,11 +92,12 @@ public:
 	typedef std::pair<uint16, IStorageObject *> TStorageObjectWithId;
 	typedef std::list<TStorageObjectWithId> TStorageObjectContainer;
 	typedef TStorageObjectContainer::iterator TStorageObjectIterator;
-	TStorageObjectContainer Chunks;
+	typedef TStorageObjectContainer::const_iterator TStorageObjectConstIt;
 
 protected:
 	// protected data
-	bool ChunksOwnsPointers;
+	TStorageObjectContainer m_Chunks;
+	bool m_ChunksOwnsPointers;
 
 public:
 	CStorageContainer();
@@ -114,8 +115,12 @@ public:
 	virtual void clean();
 	// Build the storage structure needed to store the parsed data back
 	virtual void build(uint16 version);
-	// Give ownership of the chunks back to the Chunks, must call build first, call instead of clean, reduces the parse level back to 0
+	// Give ownership of the chunks back to the m_Chunks, must call build first, call instead of clean, reduces the parse level back to 0
 	virtual void disown();
+
+public:
+	// read access
+	inline const TStorageObjectContainer &chunks() const { return m_Chunks; }
 
 public: // should be protected but that doesn't compile, nice c++!
 	// inherited
@@ -126,6 +131,7 @@ protected:
 	virtual void serial(CStorageChunks &chunks);
 	// Create a storage object by id, override to provide custom serialization
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
 };
 
 // CStorageRaw : serializes raw data, use for unknown data
@@ -150,33 +156,8 @@ public: // should be protected but that doesn't compile, nice c++!
 	virtual void setSize(sint32 size);
 	// Gets the size when writing, return false if unknown
 	virtual bool getSize(sint32 &size) const;
-};
-/*
-// CStorageUCString : serializes an ucstring chunk
-class CStorageUCString : public ucstring, public IStorageObject
-{
-public:
-	virtual void serial(CStorageStream *stream);
-	virtual void dump(const std::string &pad);
-};
 
-// CStorageString : serializes a string chunk
-class CStorageString : public std::string, public IStorageObject
-{
-public:
-	virtual void serial(CStorageStream *stream);
-	virtual void dump(const std::string &pad);
 };
-
-template<typename T>
-class CStorageValue : public IStorageObject
-{
-public:
-	T Value;
-	virtual void serial(CStorageStream *stream);
-	virtual void dump(const std::string &pad);
-};
-*/
 
 } /* namespace MAX */
 } /* namespace PIPELINE */
