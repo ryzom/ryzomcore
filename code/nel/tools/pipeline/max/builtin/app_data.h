@@ -65,6 +65,7 @@ private:
 		bool operator>(const TKey &right) const;
 		bool operator==(const TKey &right) const;
 	};
+	typedef std::map<TKey, CAppDataEntry *> TMap;
 
 public:
 	CAppData();
@@ -94,7 +95,7 @@ protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 
 private:
-	std::map<TKey, CAppDataEntry *> m_Entries;
+	TMap m_Entries;
 
 }; /* class CAppData */
 
@@ -143,8 +144,18 @@ public:
 	virtual void build(uint16 version);
 	virtual void disown();
 
+	// public
+	// Initializes a new entry
+	void init();
+	// Returns the blob
+	CStorageRaw *value();
+
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
+private:
+	CAppDataEntryKey *m_Key;
+	CStorageRaw *m_Value;
 
 }; /* class CAppDataEntry */
 

@@ -58,7 +58,7 @@ struct EStorageParse : public EStorage
 enum TParseLevel
 {
 	PARSE_INTERNAL = 0x00000001, // Directly parse basic class formats
-	// PARSE_BUILTIN = 0x00000002; // Parse all builtin classes - reserved
+	PARSE_BUILTIN = 0x00000002, // Parse all builtin classes
 	// PARSE_NELDATA = 0x00000004, // Parse all structures related to nel specific data (nel material, node properties, etcetera)
 	// PARSE_NEL3D = 0x00000008, // Parse classes to initialize their nel3d equivalent classes
 };

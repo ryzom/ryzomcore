@@ -150,7 +150,9 @@ int main(int argc, char **argv)
 	g_object_unref(input);
 	//classDirectory3.toString(std::cout);
 	//std::cout << "\n";
-	scene.parse(PIPELINE::MAX::VersionUnknown, PIPELINE::MAX::PARSE_INTERNAL); // parse the structure to readable data
+	scene.parse(PIPELINE::MAX::VersionUnknown, (PIPELINE::MAX::TParseLevel)(
+		PIPELINE::MAX::PARSE_INTERNAL
+		| PIPELINE::MAX::PARSE_BUILTIN)); // parse the structure to readable data
 	scene.clean(); // cleanup unused file structure
 	scene.toString(std::cout);
 	std::cout << "\n";

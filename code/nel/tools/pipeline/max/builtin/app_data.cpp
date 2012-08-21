@@ -142,6 +142,40 @@ void CAppData::disown()
 	CStorageContainer::disown();
 }
 
+const uint8 *CAppData::read(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 &size) const
+{
+	if (ChunksOwnsPointers) { nlwarning("Not parsed"); return NULL; }
+	TKey key(classId, superClassId, subId);
+	TMap::const_iterator it = m_Entries.find(key);
+	if (it == m_Entries.end()) return NULL;
+	size = it->second->value()->Value.size();
+	return &it->second->value()->Value[0];
+}
+
+uint8 *CAppData::lock(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 capacity)
+{
+	if (ChunksOwnsPointers) { nlwarning("Not parsed"); return NULL; }
+	TKey key(classId, superClassId, subId);
+}
+
+void CAppData::unlock(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 size)
+{
+	if (ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
+	TKey key(classId, superClassId, subId);
+}
+
+void CAppData::fill(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint8 *buffer, uint32 size)
+{
+	if (ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
+	TKey key(classId, superClassId, subId);
+}
+
+void CAppData::erase(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId)
+{
+	if (ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
+	TKey key(classId, superClassId, subId);
+}
+
 IStorageObject *CAppData::createChunkById(uint16 id, bool container)
 {
 	switch (id)
@@ -199,7 +233,7 @@ void CAppDataEntryKey::toString(std::ostream &ostream, const std::string &pad)
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CAppDataEntry::CAppDataEntry()
+CAppDataEntry::CAppDataEntry() : m_Key(NULL), m_Value(NULL)
 {
 
 }
@@ -216,27 +250,76 @@ std::string CAppDataEntry::getClassName()
 
 void CAppDataEntry::toString(std::ostream &ostream, const std::string &pad)
 {
-	CStorageContainer::toString(ostream, pad);
+	if (m_Key && m_Value)
+	{
+		ostream << "(" << getClassName() << ") [" << Chunks.size() << "] PARSED { ";
+		std::string padpad = pad + "\t";
+		ostream << "\n" << pad << "Key: ";
+		m_Key->toString(ostream, padpad);
+		ostream << "\n" << pad << "Value: ";
+		m_Value->toString(ostream, padpad);
+		ostream << "} ";
+	}
+	else
+	{
+		CStorageContainer::toString(ostream, pad);
+	}
 }
 
 void CAppDataEntry::parse(uint16 version, TParseLevel level)
 {
-	CStorageContainer::parse(version, level);
+	if (level & PARSE_BUILTIN)
+	{
+		// CStorageContainer::parse(version, level);
+		// if (!ChunksOwnsPointers) { nlwarning("Already parsed"); return; }
+		if (Chunks.size() != 2) { nlwarning("Bad container size"); disown(); return; }
+
+		TStorageObjectContainer::iterator it = Chunks.begin();
+		if (it->first != NLMAXFILE_APP_DATA_ENTRY_KEY_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, NLMAXFILE_APP_DATA_ENTRY_KEY_CHUNK_ID); disown();  return; }
+		m_Key = static_cast<CAppDataEntryKey *>(it->second);
+
+		++it;
+		if (it->first != NLMAXFILE_APP_DATA_ENTRY_VALUE_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, NLMAXFILE_APP_DATA_ENTRY_VALUE_CHUNK_ID); disown(); return; }
+		m_Value = static_cast<CStorageRaw *>(it->second);
+
+		// ChunksOwnsPointers = false;
+	}
+
 }
 
 void CAppDataEntry::clean()
 {
-	CStorageContainer::clean();
+	// CStorageContainer::clean();
+	// if (ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
+	// Nothing to do here!
 }
 
 void CAppDataEntry::build(uint16 version)
 {
-	CStorageContainer::build(version);
+	// if (ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
+	// Nothing to do here!
+	// CStorageContainer::build(version);
 }
 
 void CAppDataEntry::disown()
 {
-	CStorageContainer::disown();
+	// CStorageContainer::disown();
+	m_Key = NULL;
+	m_Value = NULL;
+}
+
+void CAppDataEntry::init()
+{
+	nlassert(Chunks.size() == 0);
+	m_Key = new CAppDataEntryKey();
+	Chunks.push_back(TStorageObjectWithId(NLMAXFILE_APP_DATA_ENTRY_KEY_CHUNK_ID, m_Key));
+	m_Value = new CStorageRaw();
+	Chunks.push_back(TStorageObjectWithId(NLMAXFILE_APP_DATA_ENTRY_VALUE_CHUNK_ID, m_Value));
+}
+
+CStorageRaw *CAppDataEntry::value()
+{
+	return m_Value;
 }
 
 IStorageObject *CAppDataEntry::createChunkById(uint16 id, bool container)
