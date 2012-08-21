@@ -222,12 +222,22 @@ void CAppData::disown()
 	ChunksOwnsPointers = true;
 }
 
+void CAppData::init()
+{
+	// Cannot be init yet
+	if (!ChunksOwnsPointers) { nlerror("Already parsed"); return; }
+	if (Chunks.size() != 0) { nlerror("Already built or serialized"); return; }
+
+	// We own this
+	ChunksOwnsPointers = false;
+}
+
 const uint8 *CAppData::read(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 &size) const
 {
 	if (ChunksOwnsPointers) { nlwarning("Not parsed"); return NULL; }
 	TKey key(classId, superClassId, subId);
 	TMap::const_iterator it = m_Entries.find(key);
-	if (it == m_Entries.end()) return NULL;
+	if (it == m_Entries.end()) { return NULL; }
 	size = it->second->value()->Value.size();
 	return &it->second->value()->Value[0];
 }
@@ -236,24 +246,53 @@ uint8 *CAppData::lock(NLMISC::CClassId classId, TSClassId superClassId, uint32 s
 {
 	if (ChunksOwnsPointers) { nlwarning("Not parsed"); return NULL; }
 	TKey key(classId, superClassId, subId);
+	TMap::const_iterator it = m_Entries.find(key);
+	CAppDataEntry *appDataEntry;
+	if (it == m_Entries.end())
+	{
+		appDataEntry = new CAppDataEntry();
+		m_Entries[key] = appDataEntry;
+		appDataEntry->key()->ClassId = classId;
+		appDataEntry->key()->SuperClassId = superClassId;
+		appDataEntry->key()->SubId = subId;
+	}
+	else
+	{
+		appDataEntry = it->second;
+	}
+	appDataEntry->key()->Size = capacity;
+	appDataEntry->value()->Value.resize(capacity);
+	return &appDataEntry->value()->Value[0];
 }
 
 void CAppData::unlock(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 size)
 {
 	if (ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
 	TKey key(classId, superClassId, subId);
+	TMap::const_iterator it = m_Entries.find(key);
+	if (it == m_Entries.end()) { nlerror("Unlocking non-existant key"); return; }
+	CAppDataEntry *appDataEntry = it->second;
+	appDataEntry->key()->Size = size;
+	appDataEntry->value()->Value.resize(size);
 }
 
 void CAppData::fill(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint8 *buffer, uint32 size)
 {
-	if (ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
-	TKey key(classId, superClassId, subId);
+	uint8 *dest = lock(classId, superClassId, subId, size);
+	memcpy(dest, buffer, size);
+
+	// Internally not necessary, since we sent the correct size.
+	// Outside classes should unlock in case the implementation changes.
+	// unlock(classId, superClassId, subId, size);
 }
 
 void CAppData::erase(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId)
 {
 	if (ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
 	TKey key(classId, superClassId, subId);
+	TMap::const_iterator it = m_Entries.find(key);
+	if (it == m_Entries.end()) { nldebug("Erasing non-existant key, this is allowed, doing nothing"); return; }
+	m_Entries.erase(key);
 }
 
 IStorageObject *CAppData::createChunkById(uint16 id, bool container)

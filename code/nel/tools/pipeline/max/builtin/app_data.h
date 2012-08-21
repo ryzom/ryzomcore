@@ -79,10 +79,14 @@ public:
 	virtual void build(uint16 version);
 	virtual void disown();
 
+	// init
+	/// Initialize a new instance of this chunk
+	void init();
+
 	// public
 	/// Gets a pointer to an appdata chunk buffer. Returns NULL if it does not exist. Size is returned in the size parameter.
 	const uint8 *read(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 &size) const;
-	/// Locks a pointer to an appdata chunk buffer for writing to with specified capacity.
+	/// Locks a pointer to an appdata chunk buffer for writing to with specified capacity. May return NULL if this chunk is unparsable or no memory can be allocated.
 	uint8 *lock(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 capacity);
 	/// Unlocks a pointer to an appdata chunk buffer, setting the final written size.
 	void unlock(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 size);
