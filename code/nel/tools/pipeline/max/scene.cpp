@@ -165,7 +165,9 @@ IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 	{
 		// Known unknown special identifiers...
 	case 0x2032:
-		return CStorageContainer::createChunkById(id, container);
+	case 0x2033:
+		return new CSceneClass(); // TODO: Make dummy dllentry and classentry for these...
+		// return static_cast<IStorageObject *>(new CSceneClassUnknown<CSceneClass>(dllEntry, classEntry));
 	}
 	const CClassEntry *classEntry = m_ClassDirectory3->get(id);
 	CSceneClass *sceneClass = m_SceneClassRegistry->create(classEntry->classId());
@@ -175,9 +177,9 @@ IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 	}
 	else
 	{
-		// Create an unknown scene class
+		// Create an unknown scene class; TODO: By TSClassId, maybe the registry should have a createUnknown(TSuperClassId)
 		const CDllEntry *dllEntry = m_DllDirectory->get(classEntry->dllIndex());
-		return static_cast<IStorageObject *>(new CSceneClassUnknown(dllEntry, classEntry));
+		return static_cast<IStorageObject *>(new CSceneClassUnknown<CSceneClass>(dllEntry, classEntry));
 	}
 }
 

@@ -76,7 +76,7 @@ CSceneClass *CSceneClassUnknownDesc::create() const
 
 void CSceneClassUnknownDesc::destroy(CSceneClass *sc) const
 {
-	nlassert(false);
+	delete sc;
 }
 
 const ucchar *CSceneClassUnknownDesc::displayName() const
@@ -86,6 +86,7 @@ const ucchar *CSceneClassUnknownDesc::displayName() const
 
 const char *CSceneClassUnknownDesc::internalName() const
 {
+	// TODO: Get by SuperClassId, make like BlahUnknown
 	return "SceneClassUnknown";
 }
 
@@ -102,69 +103,6 @@ TSClassId CSceneClassUnknownDesc::superClassId() const
 const IDllPluginDescInternal *CSceneClassUnknownDesc::dllPluginDesc() const
 {
 	return &m_DllPluginDesc;
-}
-
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-
-CSceneClassUnknown::CSceneClassUnknown(const CDllEntry *dllEntry, const CClassEntry *classEntry) : m_Desc(dllEntry, classEntry)
-{
-
-}
-
-CSceneClassUnknown::~CSceneClassUnknown()
-{
-
-}
-
-void CSceneClassUnknown::toString(std::ostream &ostream, const std::string &pad)
-{
-	/*nlassert(m_ChunksOwnsPointers);
-	ostream << "(" << getClassName() << ": " << ucstring(getClassDesc()->displayName()).toUtf8() << ", " << getClassDesc()->classId().toString() << ", " << ucstring(getClassDesc()->dllPluginDesc()->internalName()).toUtf8() << ") [" << m_Chunks.size() << "] { ";
-	std::string padpad = pad + "\t";
-	sint i = 0;
-	for (TStorageObjectContainer::const_iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
-	{
-		std::stringstream ss;
-		ss << std::hex << std::setfill('0');
-		ss << std::setw(4) << it->first;
-		ostream << "\n" << pad << i << " 0x" << ss.str() << ": ";
-		it->second->toString(ostream, padpad);
-		++i;
-	}
-	ostream << "} ";*/
-	CSceneClass::toString(ostream, pad);
-}
-
-void CSceneClassUnknown::parse(uint16 version, TParseLevel level)
-{
-	CSceneClass::parse(version, level);
-}
-
-void CSceneClassUnknown::clean()
-{
-	CSceneClass::clean();
-}
-
-void CSceneClassUnknown::build(uint16 version)
-{
-	CSceneClass::build(version);
-}
-
-void CSceneClassUnknown::disown()
-{
-	CSceneClass::disown();
-}
-
-IStorageObject *CSceneClassUnknown::createChunkById(uint16 id, bool container)
-{
-	return CSceneClass::createChunkById(id, container);
-}
-
-const ISceneClassDesc *CSceneClassUnknown::getClassDesc()
-{
-	return &m_Desc;
 }
 
 ////////////////////////////////////////////////////////////////////////

@@ -80,7 +80,6 @@ public:
 
 private:
 	ucstring m_DisplayName;
-	std::string m_InternalName;
 	NLMISC::CClassId m_ClassId;
 	TSClassId m_SuperClassId;
 	CSceneClassUnknownDllPluginDesc m_DllPluginDesc;
@@ -94,24 +93,15 @@ private:
  * Utility class for parsing unknown scene classes and keeping them
  * in storage as is.
  */
-class CSceneClassUnknown : public CSceneClass
+template <typename TSuperClass>
+class CSceneClassUnknown : public TSuperClass
 {
 public:
-	CSceneClassUnknown(const CDllEntry *dllEntry, const CClassEntry *classEntry);
-	virtual ~CSceneClassUnknown();
+	CSceneClassUnknown(const CDllEntry *dllEntry, const CClassEntry *classEntry) : m_Desc(dllEntry, classEntry) { }
+	virtual ~CSceneClassUnknown() { }
 
 	// inherited
-	virtual void toString(std::ostream &ostream, const std::string &pad = "");
-	virtual void parse(uint16 version, TParseLevel level);
-	virtual void clean();
-	virtual void build(uint16 version);
-	virtual void disown();
-
-	// virtual
-	virtual const ISceneClassDesc *getClassDesc();
-
-protected:
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual const ISceneClassDesc *getClassDesc() { return &m_Desc; }
 
 private:
 	CSceneClassUnknownDesc m_Desc;
