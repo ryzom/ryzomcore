@@ -72,7 +72,7 @@ void CReferenceMaker::clean()
 
 void CReferenceMaker::build(uint16 version)
 {
-	CAnimatable:build(version);
+	CAnimatable::build(version);
 }
 
 void CReferenceMaker::disown()

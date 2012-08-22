@@ -72,7 +72,7 @@ void CReferenceTarget::clean()
 
 void CReferenceTarget::build(uint16 version)
 {
-	CReferenceMaker:build(version);
+	CReferenceMaker::build(version);
 }
 
 void CReferenceTarget::disown()

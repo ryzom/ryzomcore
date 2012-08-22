@@ -160,11 +160,15 @@ int main(int argc, char **argv)
 		| PIPELINE::MAX::PARSE_BUILTIN)); // parse the structure to readable data
 	scene.clean(); // cleanup unused file structure
 	// TEST ->
+	nldebug("BUILD");
 	scene.build(PIPELINE::MAX::VersionUnknown);
+	nldebug("DISOWN");
 	scene.disown();
+	nldebug("PARSE");
 	scene.parse(PIPELINE::MAX::VersionUnknown, (PIPELINE::MAX::TParseLevel)(
 		PIPELINE::MAX::PARSE_INTERNAL
 		| PIPELINE::MAX::PARSE_BUILTIN)); // parse the structure to readable data
+	nldebug("CLEAN");
 	scene.clean(); // cleanup unused file structure
 	// <- TEST
 	scene.toString(std::cout);

@@ -32,6 +32,7 @@
 // STL includes
 
 // NeL includes
+#include <nel/misc/smart_ptr.h>
 
 // Project includes
 #include "reference_maker.h"
@@ -44,9 +45,16 @@ namespace BUILTIN {
  * \brief CReferenceTarget
  * \date 2012-08-22 08:53GMT
  * \author Jan Boon (Kaetemi)
- * This is a dummy class
+ * This class counts the reference. It is recommended to use CRefPtr<T>
+ * to refer to any pointers to classes inherited from this class.
+ * NOTE: CRefPtr<T> does not delete the class when references go to
+ * zero. When you remove a class from the scene, the class will be
+ * deleted if the reference count is zero. Otherwise, you are
+ * responsible for deleting it (for example, if you keep the class
+ * backed up in an undo stack for undeletion). You may use CSmartPtr<T>
+ * when the class is no longer owned by the scene container.
  */
-class CReferenceTarget : public CReferenceMaker
+class CReferenceTarget : public CReferenceMaker, public NLMISC::CRefCount
 {
 public:
 	CReferenceTarget();

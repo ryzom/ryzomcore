@@ -72,7 +72,7 @@ void CAnimatable::clean()
 
 void CAnimatable::build(uint16 version)
 {
-	CSceneClass:build(version);
+	CSceneClass::build(version);
 }
 
 void CAnimatable::disown()

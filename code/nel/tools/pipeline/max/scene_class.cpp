@@ -209,7 +209,7 @@ void CSceneClass::toStringLocal(std::ostream &ostream, const std::string &pad) c
 		std::stringstream ss;
 		ss << std::hex << std::setfill('0');
 		ss << std::setw(4) << it->first;
-		ostream << "\n" << pad << i << " 0x" << ss.str() << ": ";
+		ostream << "\n" << pad << "Orphan[" << i << "] 0x" << ss.str() << ": ";
 		it->second->toString(ostream, padpad);
 		++i;
 	}
@@ -217,7 +217,31 @@ void CSceneClass::toStringLocal(std::ostream &ostream, const std::string &pad) c
 
 IStorageObject *CSceneClass::getChunk(uint16 id)
 {
+	if (m_OrphanedChunks.begin()->first == id)
+	{
+		return m_OrphanedChunks.begin()->second;
+		m_OrphanedChunks.pop_front();
+	}
+	else
+	{
+		for (TStorageObjectContainer::iterator it = m_OrphanedChunks.begin(), end = m_OrphanedChunks.end(); it != end; ++it)
+		{
+			if (it->first == id)
+			{
+				nlwarning("Try to get chunk with 0x%x id, but found 0x%x instead. Found the correct chunk at a different position. Unknown chunks, or chunks out of order", (uint32)id, (uint32)m_OrphanedChunks.begin()->first);
+				IStorageObject *result = it->second;
+				m_OrphanedChunks.erase(it);
+				return result;
+			}
+		}
+	}
+	nldebug("Chunk 0x%x not found, this is allowed, returning NULL", (uint32)id);
 	return NULL;
+}
+
+void CSceneClass::putChunk(uint16 id, IStorageObject *storageObject)
+{
+	m_OrphanedChunks.insert(m_PutChunkInsert, TStorageObjectWithId(id, storageObject));
 }
 
 ////////////////////////////////////////////////////////////////////////

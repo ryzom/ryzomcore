@@ -48,6 +48,10 @@ namespace BUILTIN {
 
 namespace {
 
+// 0x0 - invalid, default to reftarget
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000000> CNullSuperClassDesc;
+const CNullSuperClassDesc NullSuperClassDesc(&ReferenceTargetClassDesc);
+
 // 0x9003 bezier float control, subclass under control???; control is under reftarget
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009003> CControlFloatSuperClassDesc;
 const CControlFloatSuperClassDesc ControlFloatSuperClassDesc(&ReferenceTargetClassDesc);
@@ -136,6 +140,38 @@ const CObjectSuperClassDesc ObjectSuperClassDesc(&ReferenceTargetClassDesc);
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000050> CHelperObjectSuperClassDesc;
 const CHelperObjectSuperClassDesc HelperObjectSuperClassDesc(&ReferenceTargetClassDesc);
 
+// 0x10a0 filterkernel, under specialfx (example: area filter)
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x000010a0> CFilterKernelSuperClassDesc;
+const CFilterKernelSuperClassDesc FilterKernelSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0xf00 - renderer ,direct sub of reftarget
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000f00> CRendererSuperClassDesc;
+const CRendererSuperClassDesc RendererSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x9005 - control point3 (also color), under control???
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009005> CControlPoint3SuperClassDesc;
+const CControlPoint3SuperClassDesc ControlPoint3SuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x1010 - atmospheric, under special effects
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001010> CAtmosphericSuperClassDesc;
+const CAtmosphericSuperClassDesc AtmosphericSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x9011 - control master block 'block control', under control???
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009011> CControlMasterBlockSuperClassDesc;
+const CControlMasterBlockSuperClassDesc ControlMasterBlockSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0xfffffe00 - grid reference, not sure where, probably directly under reftarget
+typedef CSuperClassDescUnknown<CReferenceTarget, 0xfffffe00> CGridReferenceSuperClassDesc;
+const CGridReferenceSuperClassDesc GridReferenceSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x1090 - render effect, possibly under special fx
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001090> CRenderEffectSuperClassDesc;
+const CRenderEffectSuperClassDesc RenderEffectSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x10d0 - shadow type, directly under ref target
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x000010d0> CShadowTypeSuperClassDesc;
+const CShadowTypeSuperClassDesc ShadowTypeSuperClassDesc(&ReferenceTargetClassDesc);
+
 } /* anonymous namespace */
 
 CBuiltin::CBuiltin()
@@ -151,12 +187,16 @@ CBuiltin::~CBuiltin()
 
 void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 {
+	// available
 	registry->add(&AnimatableClassDesc);
 	registry->add(&AnimatableSuperClassDesc);
 	registry->add(&ReferenceMakerClassDesc);
 	registry->add(&ReferenceMakerSuperClassDesc);
 	registry->add(&ReferenceTargetClassDesc);
 	registry->add(&ReferenceTargetSuperClassDesc);
+
+	// invalid
+	registry->add(&NullSuperClassDesc);
 
 	// unimplemented
 	registry->add(&ControlFloatSuperClassDesc);
@@ -181,6 +221,14 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&LayerSuperClassDesc);
 	registry->add(&ObjectSuperClassDesc);
 	registry->add(&HelperObjectSuperClassDesc);
+	registry->add(&FilterKernelSuperClassDesc);
+	registry->add(&RendererSuperClassDesc);
+	registry->add(&ControlPoint3SuperClassDesc);
+	registry->add(&AtmosphericSuperClassDesc);
+	registry->add(&ControlMasterBlockSuperClassDesc);
+	registry->add(&GridReferenceSuperClassDesc);
+	registry->add(&RenderEffectSuperClassDesc);
+	registry->add(&ShadowTypeSuperClassDesc);
 }
 
 } /* namespace BUILTIN */
