@@ -75,6 +75,12 @@
 					$this->addOpen($tmp);
 				}
 			}
+
+			$iter = $this->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				$curr->loadHeritage();
+			}
 		}
 
 		function parentDone() { // check if the parent is complete

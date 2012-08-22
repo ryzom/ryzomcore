@@ -170,14 +170,14 @@
 			</div>
 				
 				</div>
-				<div style='margin-left:25px;display:".$o.";' id='task_".$task->getID()."'>".ach_render_obj_list($task->getIterator())."</div>
+				<div style='margin-left:25px;display:".$o.";' id='task_".$task->getID()."'>".ach_render_obj_list($task->getIterator(),$task)."</div>
 			</div>";
 		}
 
 		return $html;
 	}
 
-	function ach_render_obj_list($obj) {
+	function ach_render_obj_list($obj,$task) {
 		global $_CONF;
 
 		$html = "";
@@ -186,7 +186,9 @@
 		while($obj->hasNext()) {
 			$elem = $obj->getNext();
 			
-
+			if($task->isInherited($elem->getID())) {
+				continue;
+			}
 
 
 			

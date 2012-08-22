@@ -420,6 +420,7 @@ $c .= "</div></td>
 					$task->setValue($_REQUEST['at_value']);
 					$task->setCondition($_REQUEST['at_condition']);
 					$task->setConditionValue($_REQUEST['at_condition_value']);
+					$task->setHeritage(0);
 
 					$ach->insertNode($task);
 				}
@@ -450,6 +451,7 @@ $c .= "</div></td>
 						$task->setValue($_REQUEST['at_value']);
 						$task->setCondition($_REQUEST['at_condition']);
 						$task->setConditionValue($_REQUEST['at_condition_value']);
+						$task->setHeritage($_REQUEST['at_inherit']);
 
 						$ach->insertNode($task);
 						$task->setParentID($_REQUEST['at_parent']);
@@ -467,6 +469,7 @@ $c .= "</div></td>
 						$task->setValue($_REQUEST['at_value']);
 						$task->setCondition($_REQUEST['at_condition']);
 						$task->setConditionValue($_REQUEST['at_condition_value']);
+						$task->setHeritage($_REQUEST['at_inherit']);
 
 						$task->setParentID($_REQUEST['at_parent']);
 

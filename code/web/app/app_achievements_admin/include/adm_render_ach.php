@@ -200,7 +200,7 @@
 									<td><input type='text' name='at_condition_value' /></td>
 								</tr>
 								<tr>
-									<td colspan='2'><input type='submit' value='create' /></td>
+									<td colspan='2'><input type='hidden' value='0' name='at_inherit' /><input type='submit' value='create' /></td>
 								</tr>
 							</table>
 						</fieldset>
@@ -383,6 +383,10 @@
 												</td>
 											</tr>
 											<tr>
+												<td class='bw'>inherit objectives:</td>
+												<td><input type='hidden' value='0' name='at_inherit' /><input type='checkbox' name='at_inherit' value='1' /></td>
+											</tr>
+											<tr>
 												<td class='bw'>condition:</td>
 												<td>
 													<select name='at_condition'>
@@ -521,6 +525,14 @@
 										</td>
 									</tr>
 									<tr>
+										<td class='bw'>inherit objectives:</td>
+										<td><input type='hidden' value='0' name='at_inherit' /><input type='checkbox' name='at_inherit' value='1'";
+										if($task->getHeritage() == 1) {
+											$html .= " checked='checked'";
+										}
+										$html .= "/></td>
+									</tr>
+									<tr>
 										<td class='bw'>condition:</td>
 										<td>
 											<select name='at_condition'>
@@ -624,13 +636,13 @@
 						</form>
 					</div>";
 
-				$html .= ach_render_obj_list($task->getIterator());
+				$html .= ach_render_obj_list($task->getIterator(),$task);
 		}
 
 		return $html;
 	}
 
-	function ach_render_obj_list($obj) {
+	function ach_render_obj_list($obj,$task) {
 		#return null;
 		global $metalist;
 		$html = "<center><table width='90%'>";
@@ -640,24 +652,30 @@
 		
 		while($obj->hasNext()) {
 		#foreach($obj as $elem) {
+			$inh = "";
 			$elem = $obj->getNext();
+
+			if($task->isInherited($elem->getID())) {
+				$inh = "<i>inherited</i>:&nbsp;";
+			}
+
 			#if(($i%2) == 0) {
 				$html .= "<tr><td><table><tr>";
 			#}
 
 			switch($elem->getDisplay()) {
 				case "meta":
-					$html .= "<td>".ach_render_obj_meta($elem)."<td>";
+					$html .= "<td>".$inh.ach_render_obj_meta($elem)."<td>";
 					break;
 				case "value":
 					#if(($i%2) == 1) {
 					#	$html .= "</tr><tr>";
 					#}
-					$html .= "<td>".ach_render_obj_value($elem)."</td>";
+					$html .= "<td>".$inh.ach_render_obj_value($elem)."</td>";
 					#$i++;
 					break;
 				case "simple":
-					$html .= "<td>".ach_render_obj_simple($elem)."</td>";
+					$html .= "<td>".$inh.ach_render_obj_simple($elem)."</td>";
 					break;
 				case "hidden":
 				default:
@@ -666,7 +684,7 @@
 					#if(($i%2) == 1) {
 					#	$html .= "</tr><tr>";
 					#}
-					$html .= "<td>".ach_render_obj_hidden($elem)."</td>";
+					$html .= "<td>".$inh.ach_render_obj_hidden($elem)."</td>";
 					#$i++;
 					break;
 			}

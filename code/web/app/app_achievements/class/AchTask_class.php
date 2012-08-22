@@ -35,11 +35,15 @@
 		protected $done;
 		protected $template;
 		protected $parent_id;
+		protected $inherit_obj;
+		private $heritage_list;
 
 		function AchTask($data,$parent) {
 			global $DBc,$_USER;
 
 			parent::__construct();
+
+			$this->heritage_list = array();
 			
 			$this->setParent($parent);
 			$this->setID($data['at_id']);
@@ -50,17 +54,46 @@
 			$this->dev = $data['at_dev'];
 			$this->template = $data['atl_template'];
 			$this->parent_id = $data['at_parent'];
+			$this->inherit_obj = $data['at_inherit'];
 
-			$res = $DBc->sqlQuery("SELECT * FROM ach_objective LEFT JOIN (ach_objective_lang) ON (aol_lang='".$_USER->getLang()."' AND aol_objective=ao_id) LEFT JOIN (ach_player_objective) ON (apo_objective=ao_id AND apo_player='".$_USER->getID()."') LEFT JOIN (ach_achievement,ach_achievement_lang) ON (aa_id=ao_metalink AND aa_id=aal_achievement AND aal_lang='".$_USER->getLang()."') WHERE ao_task='".$this->id."' ORDER by aol_name ASC,aal_name ASC");
-			$sz = sizeof($res);
-			for($i=0;$i<$sz;$i++) {
-				$this->addChild($this->makeChild($res[$i]));
+			#if($this->inherit_obj == 0) {
+
+				$res = $DBc->sqlQuery("SELECT * FROM ach_objective LEFT JOIN (ach_objective_lang) ON (aol_lang='".$_USER->getLang()."' AND aol_objective=ao_id) LEFT JOIN (ach_player_objective) ON (apo_objective=ao_id AND apo_player='".$_USER->getID()."') LEFT JOIN (ach_achievement,ach_achievement_lang) ON (aa_id=ao_metalink AND aa_id=aal_achievement AND aal_lang='".$_USER->getLang()."') WHERE ao_task='".$this->id."' ORDER by aol_name ASC,aal_name ASC");
+
+				$sz = sizeof($res);
+				for($i=0;$i<$sz;$i++) {
+					$this->addChild($this->makeChild($res[$i]));
+				}
+			#}
+		}
+
+		function loadHeritage() {
+			if($this->inherit_obj == 0) {
+				return false;
+			}
+			$child = $this->parent->getChildDataByID($this->parent_id);
+			if($child == null) {
+				return false;
+			}
+			$iter = $child->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				$this->addChild($curr);
+				$this->heritage_list[] = $curr->getID();
 			}
 		}
 		
 		#@override Parentum::makeChild()
 		protected function makeChild($a) {
 			return new AchObjective($a,$this);
+		}
+
+		function getHeritage() {
+			return $this->inherit_obj;
+		}
+
+		function isInherited($id) {
+			return in_array($id,$this->heritage_list);
 		}
 
 		function getAchievement() {

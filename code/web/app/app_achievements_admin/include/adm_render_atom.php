@@ -168,20 +168,23 @@ function catchTab(item,e){
 
 			$html .= "<div style='display: block; margin-bottom: 5px;'>
 				<div style='display:block;font-size:16px;' class='bar'><a href='javascript:hs(\"task_".$task->getID()."\",\"block\");'>[+]</a> ".$task->getDisplayName()." <span style='font-size:12px;'>(condition= ".$task->getCondition().": ".$task->getConditionValue().")</span></div>
-				<div style='margin-left:25px;display:".$o.";' id='task_".$task->getID()."'>".ach_render_obj_list($task->getIterator())."</div>
+				<div style='margin-left:25px;display:".$o.";' id='task_".$task->getID()."'>".ach_render_obj_list($task->getIterator(),$task)."</div>
 			</div>";
 		}
 
 		return $html;
 	}
 
-	function ach_render_obj_list($obj) {
+	function ach_render_obj_list($obj,$task) {
 		$html = "";
 
 
 		while($obj->hasNext()) {
 			$elem = $obj->getNext();
-			
+
+			if($task->isInherited($elem->getID())) {
+				continue;
+			}
 
 				$o = "block";
 

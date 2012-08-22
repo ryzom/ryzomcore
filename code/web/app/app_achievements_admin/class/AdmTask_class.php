@@ -108,7 +108,7 @@
 		function update() {
 			global $DBc;
 
-			$DBc->sqlQuery("UPDATE ach_task SET at_parent=".mkn($this->getParentID()).",at_value='".$DBc->sqlEscape($this->getValue())."',at_condition='".$DBc->sqlEscape($this->getCondition())."',at_condition_value=".mkn($this->getConditionValue()).",at_dev='".$this->getDev()."',at_torder='".$this->torder."' WHERE at_id='".$this->getID()."'");
+			$DBc->sqlQuery("UPDATE ach_task SET at_parent=".mkn($this->getParentID()).",at_value='".$DBc->sqlEscape($this->getValue())."',at_condition='".$DBc->sqlEscape($this->getCondition())."',at_condition_value=".mkn($this->getConditionValue()).",at_dev='".$this->getDev()."',at_torder='".$this->torder."', at_inherit='".$this->inherit_obj."' WHERE at_id='".$this->getID()."'");
 
 			$DBc->sqlQuery("INSERT INTO ach_task_lang (atl_task,atl_lang,atl_name,atl_template) VALUES ('".$this->getID()."','en','".$DBc->sqlEscape($this->getName())."',".mkn($this->getTemplate()).") ON DUPLICATE KEY UPDATE atl_name='".$DBc->sqlEscape($this->getName())."',atl_template=".mkn($this->getTemplate())."");
 		}
@@ -118,7 +118,7 @@
 
 			$this->dev = 1;
 
-			$DBc->sqlQuery("INSERT INTO ach_task (at_achievement,at_parent,at_value,at_condition,at_condition_value,at_dev,at_torder) VALUES ('".$this->getAchievement()."',".mkn($this->getParentID()).",'".$DBc->sqlEscape($this->getValue())."','".$DBc->sqlEscape($this->getCondition())."',".mkn($this->getConditionValue()).",'1','".$this->torder."')");
+			$DBc->sqlQuery("INSERT INTO ach_task (at_achievement,at_parent,at_value,at_condition,at_condition_value,at_dev,at_torder,at_inherit) VALUES ('".$this->getAchievement()."',".mkn($this->getParentID()).",'".$DBc->sqlEscape($this->getValue())."','".$DBc->sqlEscape($this->getCondition())."',".mkn($this->getConditionValue()).",'1','".$this->torder."','".$this->inherit_obj."')");
 			$id = $DBc->insertID();
 			$this->setID($id);
 
@@ -163,6 +163,10 @@
 
 		function setTorder($t) {
 			$this->torder = $t;
+		}
+
+		function setHeritage($i) {
+			$this->inherit_obj = $i;
 		}
 
 		function setParentID($p,$order = true) { #reordering must happen A) after insert B) when updating
