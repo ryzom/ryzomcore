@@ -36,9 +36,6 @@
 
 // Project includes
 
-// Temporary project includes
-#include "builtin/storage/app_data.h"
-
 using namespace std;
 // using namespace NLMISC;
 
@@ -89,6 +86,18 @@ void CSceneClass::toString(std::ostream &ostream, const std::string &pad) const
 	{
 		ostream << "(" << className() << ": " << ucstring(classDesc()->displayName()).toUtf8() << ", " << classDesc()->classId().toString() << ", " << ucstring(classDesc()->dllPluginDesc()->internalName()).toUtf8() << ") [" << m_Chunks.size() << "] { ";
 		toStringLocal(ostream, pad);
+		// Append orphans
+		std::string padpad = pad + "\t";
+		sint i = 0;
+		for (TStorageObjectContainer::const_iterator it = m_OrphanedChunks.begin(), end = m_OrphanedChunks.end(); it != end; ++it)
+		{
+			std::stringstream ss;
+			ss << std::hex << std::setfill('0');
+			ss << std::setw(4) << it->first;
+			ostream << "\n" << pad << "Orphan[" << i << "] 0x" << ss.str() << ": ";
+			it->second->toString(ostream, padpad);
+			++i;
+		}
 		ostream << "} ";
 	}
 }
@@ -173,11 +182,11 @@ void CSceneClass::init()
 IStorageObject *CSceneClass::createChunkById(uint16 id, bool container)
 {
 	// Temporary
-	switch (id)
+	/*switch (id)
 	{
 	case NLMAXFILE_APP_DATA_CHUNK_ID:
 		return new BUILTIN::STORAGE::CAppData();
-	}
+	}*/
 	return CStorageContainer::createChunkById(id, container);
 }
 
@@ -202,25 +211,16 @@ const ISceneClassDesc *CSceneClass::classDesc() const
 
 void CSceneClass::toStringLocal(std::ostream &ostream, const std::string &pad) const
 {
-	std::string padpad = pad + "\t";
-	sint i = 0;
-	for (TStorageObjectContainer::const_iterator it = m_OrphanedChunks.begin(), end = m_OrphanedChunks.end(); it != end; ++it)
-	{
-		std::stringstream ss;
-		ss << std::hex << std::setfill('0');
-		ss << std::setw(4) << it->first;
-		ostream << "\n" << pad << "Orphan[" << i << "] 0x" << ss.str() << ": ";
-		it->second->toString(ostream, padpad);
-		++i;
-	}
+	// Nothing to do here...
 }
 
 IStorageObject *CSceneClass::getChunk(uint16 id)
 {
 	if (m_OrphanedChunks.begin()->first == id)
 	{
-		return m_OrphanedChunks.begin()->second;
+		IStorageObject *result = m_OrphanedChunks.begin()->second;
 		m_OrphanedChunks.pop_front();
+		return result;
 	}
 	else
 	{
@@ -235,12 +235,16 @@ IStorageObject *CSceneClass::getChunk(uint16 id)
 			}
 		}
 	}
-	nldebug("Chunk 0x%x not found, this is allowed, returning NULL", (uint32)id);
+	// nldebug("Chunk 0x%x not found, this is allowed, returning NULL", (uint32)id);
 	return NULL;
 }
 
 void CSceneClass::putChunk(uint16 id, IStorageObject *storageObject)
 {
+	if (storageObject->isContainer())
+	{
+		static_cast<CStorageContainer *>(storageObject)->build(VersionUnknown); // FIXME
+	}
 	m_OrphanedChunks.insert(m_PutChunkInsert, TStorageObjectWithId(id, storageObject));
 }
 

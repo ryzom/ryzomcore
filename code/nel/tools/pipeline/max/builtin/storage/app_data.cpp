@@ -151,8 +151,8 @@ void CAppData::toString(std::ostream &ostream, const std::string &pad) const
 
 void CAppData::parse(uint16 version, TParseLevel level)
 {
-	if (level & PARSE_BUILTIN)
-	{
+	/*if (level & PARSE_BUILTIN)
+	{*/
 		// Cannot be parsed yet
 		if (!m_ChunksOwnsPointers) { nlerror("Already parsed"); return; }
 
@@ -183,7 +183,7 @@ void CAppData::parse(uint16 version, TParseLevel level)
 
 		// Take local ownership
 		m_ChunksOwnsPointers = false;
-	}
+	/*}*/
 }
 
 void CAppData::clean()

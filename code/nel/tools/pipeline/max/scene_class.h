@@ -65,7 +65,7 @@ public:
 
 	//! \name Inherited functions called through the storage loading and saving system
 	//@{
-	/// Override this to read a chunk from the chunks stream. Call the parent's parse function first. Get the necessary chunks implemented by your class using getChunk. See the getChunk function for further information. In case of failure, call disown. If m_ChunksOwnsPointers is true, the parsing has failed, warnings have already been printed, and nothing should happen
+	/// Override this to read a chunk from the chunks stream. Call the parent's parse function first. Get the necessary chunks implemented by your class using getChunk. See the getChunk function for further information. In case of failure, call disown. If m_ChunksOwnsPointers is true, the parsing has failed, warnings have already been printed, and nothing should happen. Chunks are already parsed when you get them from getChunk
 	virtual void parse(uint16 version, TParseLevel level);
 	/// Override this if the chunks you are using are not needed after they have been parsed. You may delete any chunks you own. Call the parent's clean first. You must call clean on any chunks you own if they implement this function
 	virtual void clean();

@@ -88,13 +88,15 @@ template <typename T, TSClassId SuperClassId>
 class CSuperClassDescUnknown : public ISuperClassDesc
 {
 public:
-	CSuperClassDescUnknown(const ISceneClassDesc *classDesc) : m_ClassDesc(classDesc) { }
+	CSuperClassDescUnknown(const ISceneClassDesc *classDesc, const char *internalNameUnknown) : m_ClassDesc(classDesc), m_InternalNameUnknown(internalNameUnknown) { }
 	virtual CSceneClass *createUnknown(const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const { return static_cast<CSceneClass *>(new CSceneClassUnknown<T>(classId, SuperClassId, displayName,internalNameUnknown(), dllFilename, dllDescription)); }
-	virtual const char *internalNameUnknown() const { return T::InternalNameUnknown; }
+	virtual const char *internalNameUnknown() const { return m_InternalNameUnknown; }
 	virtual TSClassId superClassId() const { return SuperClassId; }
 	virtual const ISceneClassDesc *classDesc() const { return m_ClassDesc; }
 private:
 	const ISceneClassDesc *m_ClassDesc;
+	const char *m_InternalNameUnknown;
+
 }; /* class ISceneClassDesc */
 
 } /* namespace MAX */

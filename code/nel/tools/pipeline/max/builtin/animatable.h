@@ -40,6 +40,11 @@
 namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
+namespace STORAGE {
+
+class CAppData;
+
+}
 
 /**
  * \brief CAnimatable
@@ -69,6 +74,16 @@ public:
 	virtual bool inherits(const NLMISC::CClassId classId) const;
 	virtual const ISceneClassDesc *classDesc() const;
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
+
+	// public
+	inline STORAGE::CAppData *appData() const { return m_AppData; }
+
+protected:
+	// inherited
+	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
+private:
+	STORAGE::CAppData *m_AppData;
 
 }; /* class CAnimatable */
 

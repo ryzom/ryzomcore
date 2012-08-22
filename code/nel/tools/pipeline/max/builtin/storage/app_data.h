@@ -44,7 +44,7 @@ namespace MAX {
 namespace BUILTIN {
 namespace STORAGE {
 
-#define NLMAXFILE_APP_DATA_CHUNK_ID 0x2150
+#define PMBS_APP_DATA_CHUNK_ID 0x2150
 
 class CAppDataEntry;
 

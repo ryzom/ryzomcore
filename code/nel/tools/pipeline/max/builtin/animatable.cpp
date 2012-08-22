@@ -34,6 +34,7 @@
 // #include <nel/misc/debug.h>
 
 // Project includes
+#include "storage/app_data.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -42,14 +43,18 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CAnimatable::CAnimatable()
+CAnimatable::CAnimatable() : m_AppData(NULL)
 {
 
 }
 
 CAnimatable::~CAnimatable()
 {
-
+	if (!m_ChunksOwnsPointers)
+	{
+		delete m_AppData;
+		m_AppData = NULL;
+	}
 }
 
 const ucchar *CAnimatable::DisplayName = ucstring("Animatable").c_str();
@@ -63,20 +68,33 @@ const CAnimatableSuperClassDesc AnimatableSuperClassDesc(&AnimatableClassDesc);
 void CAnimatable::parse(uint16 version, TParseLevel level)
 {
 	CSceneClass::parse(version, level);
+	if (!m_ChunksOwnsPointers)
+	{
+		m_AppData = static_cast<STORAGE::CAppData *>(getChunk(PMBS_APP_DATA_CHUNK_ID));
+	}
 }
 
 void CAnimatable::clean()
 {
 	CSceneClass::clean();
+	if (m_AppData)
+	{
+		m_AppData->clean();
+	}
 }
 
 void CAnimatable::build(uint16 version)
 {
 	CSceneClass::build(version);
+	if (m_AppData)
+	{
+		putChunk(PMBS_APP_DATA_CHUNK_ID, m_AppData);
+	}
 }
 
 void CAnimatable::disown()
 {
+	m_AppData = NULL;
 	CSceneClass::disown();
 }
 
@@ -99,6 +117,21 @@ const ISceneClassDesc *CAnimatable::classDesc() const
 void CAnimatable::toStringLocal(std::ostream &ostream, const std::string &pad) const
 {
 	CSceneClass::toStringLocal(ostream, pad);
+	if (m_AppData)
+	{
+		ostream << "\n" << pad << "AppData: ";
+		m_AppData->toString(ostream, pad + "\t");
+	}
+}
+
+IStorageObject *CAnimatable::createChunkById(uint16 id, bool container)
+{
+	switch (id)
+	{
+	case PMBS_APP_DATA_CHUNK_ID:
+		return new STORAGE::CAppData;
+	}
+	return CSceneClass::createChunkById(id, container);
 }
 
 } /* namespace BUILTIN */
