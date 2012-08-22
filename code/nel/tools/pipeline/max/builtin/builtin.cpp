@@ -48,7 +48,7 @@ namespace BUILTIN {
 
 namespace {
 
-// 0x9003 bezier float control, subclass under control; control is under reftarget
+// 0x9003 bezier float control, subclass under control???; control is under reftarget
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009003> CControlFloatSuperClassDesc;
 const CControlFloatSuperClassDesc ControlFloatSuperClassDesc(&ReferenceTargetClassDesc);
 
@@ -88,6 +88,54 @@ const CSamplerSuperClassDesc SamplerSuperClassDesc(&ReferenceTargetClassDesc);
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c00> CMtlSuperClassDesc;
 const CMtlSuperClassDesc MtlSuperClassDesc(&ReferenceTargetClassDesc);
 
+// 0xd00, soundobj, under reftarget directly
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000d00> CSoundObjSuperClassDesc;
+const CSoundObjSuperClassDesc SoundObjSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x1, node; under reftarget directly; classid 1 is node, 2 is rootnode
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000001> CNodeSuperClassDesc;
+const CNodeSuperClassDesc NodeSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x900b, controlposition, under control???
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x0000900b> CControlPositionSuperClassDesc;
+const CControlPositionSuperClassDesc ControlPositionSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x900c, controlrotation, under control???
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x0000900c> CControlRotationSuperClassDesc;
+const CControlRotationSuperClassDesc ControlRotationSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x900d, control_scale, under control???
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x0000900d> CControlScaleSuperClassDesc;
+const CControlScaleSuperClassDesc ControlScaleSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x9008, pos/rot/scale; controltransform; matrix3; under control???
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009008> CControlTransformSuperClassDesc;
+const CControlTransformSuperClassDesc ControlTransformSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x810 - osmodifier, under modifier (physique etc, necessary for skinning)
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000810> COSModifierSuperClassDesc;
+const COSModifierSuperClassDesc OSModifierSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x9010 - master point controller
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009010> CMasterPointControllerSuperClassDesc;
+const CMasterPointControllerSuperClassDesc MasterPointControllerSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x10 - geom object
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000010> CGeomObjectSuperClassDesc;
+const CGeomObjectSuperClassDesc GeomObjectSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x10f0 - layer, under reftarget directly
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x000010f0> CLayerSuperClassDesc;
+const CLayerSuperClassDesc LayerSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x60 - object???, under base object
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000060> CObjectSuperClassDesc;
+const CObjectSuperClassDesc ObjectSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x50 helperobject, under object...
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000050> CHelperObjectSuperClassDesc;
+const CHelperObjectSuperClassDesc HelperObjectSuperClassDesc(&ReferenceTargetClassDesc);
+
 } /* anonymous namespace */
 
 CBuiltin::CBuiltin()
@@ -121,6 +169,18 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&ShaderSuperClassDesc);
 	registry->add(&SamplerSuperClassDesc);
 	registry->add(&MtlSuperClassDesc);
+	registry->add(&SoundObjSuperClassDesc);
+	registry->add(&NodeSuperClassDesc);
+	registry->add(&ControlPositionSuperClassDesc);
+	registry->add(&ControlRotationSuperClassDesc);
+	registry->add(&ControlScaleSuperClassDesc);
+	registry->add(&ControlTransformSuperClassDesc);
+	registry->add(&OSModifierSuperClassDesc);
+	registry->add(&MasterPointControllerSuperClassDesc);
+	registry->add(&GeomObjectSuperClassDesc);
+	registry->add(&LayerSuperClassDesc);
+	registry->add(&ObjectSuperClassDesc);
+	registry->add(&HelperObjectSuperClassDesc);
 }
 
 } /* namespace BUILTIN */
