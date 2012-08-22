@@ -56,10 +56,10 @@ namespace STORAGE {
 // #define nldebug nlerror
 
 // Chunk identifiers
-#define NLMAXFILE_APP_DATA_HEADER_CHUNK_ID 0x0100
-#define NLMAXFILE_APP_DATA_ENTRY_CHUNK_ID 0x0110
-#define NLMAXFILE_APP_DATA_ENTRY_KEY_CHUNK_ID 0x0120
-#define NLMAXFILE_APP_DATA_ENTRY_VALUE_CHUNK_ID 0x0130
+#define PMBS_APP_DATA_HEADER_CHUNK_ID 0x0100
+#define PMBS_APP_DATA_ENTRY_CHUNK_ID 0x0110
+#define PMBS_APP_DATA_ENTRY_KEY_CHUNK_ID 0x0120
+#define PMBS_APP_DATA_ENTRY_VALUE_CHUNK_ID 0x0130
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -164,14 +164,14 @@ void CAppData::parse(uint16 version, TParseLevel level)
 
 		// Header
 		TStorageObjectContainer::iterator it = m_Chunks.begin();
-		if (it->first != NLMAXFILE_APP_DATA_HEADER_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, NLMAXFILE_APP_DATA_HEADER_CHUNK_ID); disown();  return; }
+		if (it->first != PMBS_APP_DATA_HEADER_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, PMBS_APP_DATA_HEADER_CHUNK_ID); disown();  return; }
 		uint32 headerSize = static_cast<CStorageValue<uint32> *>(it->second)->Value;
 		++it;
 
 		// Entries
 		for (TStorageObjectContainer::iterator end = m_Chunks.end(); it != end; ++it)
 		{
-			if (it->first != NLMAXFILE_APP_DATA_ENTRY_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, NLMAXFILE_APP_DATA_ENTRY_CHUNK_ID); disown(); return; }
+			if (it->first != PMBS_APP_DATA_ENTRY_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, PMBS_APP_DATA_ENTRY_CHUNK_ID); disown(); return; }
 			CAppDataEntry *entry = static_cast<CAppDataEntry *>(it->second);
 			TKey key(entry->key()->ClassId, entry->key()->SuperClassId, entry->key()->SubId);
 			if (m_Entries.find(key) != m_Entries.end()) { nlwarning("Duplicate entry"); disown(); return; }
@@ -190,7 +190,7 @@ void CAppData::clean()
 {
 	if (m_ChunksOwnsPointers) { nldebug("Not parsed, or disowned"); return; } // Must have local ownership
 	if (m_Chunks.size() == 0) { nlwarning("Already cleaned (or did not build due to coding error)"); return; } // Already cleaned
-	if (m_Chunks.begin()->first != NLMAXFILE_APP_DATA_HEADER_CHUNK_ID) { nlerror("Bad id %x, expected %x", (uint32)m_Chunks.begin()->first, NLMAXFILE_APP_DATA_HEADER_CHUNK_ID); return; } // Cannot happen, because we won't have local ownership if parsing failed
+	if (m_Chunks.begin()->first != PMBS_APP_DATA_HEADER_CHUNK_ID) { nlerror("Bad id %x, expected %x", (uint32)m_Chunks.begin()->first, PMBS_APP_DATA_HEADER_CHUNK_ID); return; } // Cannot happen, because we won't have local ownership if parsing failed
 	delete m_Chunks.begin()->second; // Delete the header chunk, since we own it
 	m_Chunks.clear(); // Clear the remaining chunks
 }
@@ -204,11 +204,11 @@ void CAppData::build(uint16 version)
 	// Set up the header in the chunks container
 	CStorageValue<uint32> *headerSize = new CStorageValue<uint32>(); // Owned locally, not by m_Chunks
 	headerSize->Value = m_Entries.size();
-	m_Chunks.push_back(TStorageObjectWithId(NLMAXFILE_APP_DATA_HEADER_CHUNK_ID, headerSize));
+	m_Chunks.push_back(TStorageObjectWithId(PMBS_APP_DATA_HEADER_CHUNK_ID, headerSize));
 
 	// Set up the entries
 	for (TMap::iterator it = m_Entries.begin(), end = m_Entries.end(); it != end; ++it)
-		m_Chunks.push_back(TStorageObjectWithId(NLMAXFILE_APP_DATA_ENTRY_CHUNK_ID, it->second));
+		m_Chunks.push_back(TStorageObjectWithId(PMBS_APP_DATA_ENTRY_CHUNK_ID, it->second));
 }
 
 void CAppData::disown()
@@ -304,11 +304,11 @@ IStorageObject *CAppData::createChunkById(uint16 id, bool container)
 {
 	switch (id)
 	{
-	case NLMAXFILE_APP_DATA_HEADER_CHUNK_ID:
+	case PMBS_APP_DATA_HEADER_CHUNK_ID:
 		nlassert(!container);
 		return new CStorageValue<uint32>();
 		break;
-	case NLMAXFILE_APP_DATA_ENTRY_CHUNK_ID:
+	case PMBS_APP_DATA_ENTRY_CHUNK_ID:
 		nlassert(container);
 		return new CAppDataEntry();
 		break;
@@ -397,11 +397,11 @@ void CAppDataEntry::parse(uint16 version, TParseLevel level)
 	if (m_Chunks.size() != 2) { nlwarning("Bad container size"); disown(); return; }
 
 	TStorageObjectContainer::iterator it = m_Chunks.begin();
-	if (it->first != NLMAXFILE_APP_DATA_ENTRY_KEY_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, NLMAXFILE_APP_DATA_ENTRY_KEY_CHUNK_ID); disown();  return; }
+	if (it->first != PMBS_APP_DATA_ENTRY_KEY_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, PMBS_APP_DATA_ENTRY_KEY_CHUNK_ID); disown();  return; }
 	m_Key = static_cast<CAppDataEntryKey *>(it->second);
 
 	++it;
-	if (it->first != NLMAXFILE_APP_DATA_ENTRY_VALUE_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, NLMAXFILE_APP_DATA_ENTRY_VALUE_CHUNK_ID); disown(); return; }
+	if (it->first != PMBS_APP_DATA_ENTRY_VALUE_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, PMBS_APP_DATA_ENTRY_VALUE_CHUNK_ID); disown(); return; }
 	m_Value = static_cast<CStorageRaw *>(it->second);
 
 	// m_ChunksOwnsPointers = false;
@@ -436,9 +436,9 @@ void CAppDataEntry::init()
 {
 	nlassert(m_Chunks.size() == 0);
 	m_Key = new CAppDataEntryKey();
-	m_Chunks.push_back(TStorageObjectWithId(NLMAXFILE_APP_DATA_ENTRY_KEY_CHUNK_ID, m_Key));
+	m_Chunks.push_back(TStorageObjectWithId(PMBS_APP_DATA_ENTRY_KEY_CHUNK_ID, m_Key));
 	m_Value = new CStorageRaw();
-	m_Chunks.push_back(TStorageObjectWithId(NLMAXFILE_APP_DATA_ENTRY_VALUE_CHUNK_ID, m_Value));
+	m_Chunks.push_back(TStorageObjectWithId(PMBS_APP_DATA_ENTRY_VALUE_CHUNK_ID, m_Value));
 }
 
 CAppDataEntryKey *CAppDataEntry::key()
@@ -455,10 +455,10 @@ IStorageObject *CAppDataEntry::createChunkById(uint16 id, bool container)
 {
 	switch (id)
 	{
-	case NLMAXFILE_APP_DATA_ENTRY_KEY_CHUNK_ID:
+	case PMBS_APP_DATA_ENTRY_KEY_CHUNK_ID:
 		nlassert(!container);
 		return new CAppDataEntryKey();
-	case NLMAXFILE_APP_DATA_ENTRY_VALUE_CHUNK_ID:
+	case PMBS_APP_DATA_ENTRY_VALUE_CHUNK_ID:
 		nlassert(!container);
 		return new CStorageRaw();
 	}

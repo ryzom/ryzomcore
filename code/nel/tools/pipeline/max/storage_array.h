@@ -79,7 +79,7 @@ std::string CStorageArray<T>::className() const
 template <typename T>
 void CStorageArray<T>::serial(NLMISC::IStream &stream)
 {
-	for (typename TTypeArray::const_iterator it = Value.begin(), end = Value.end(); it != end; ++it)
+	for (typename TTypeArray::iterator it = Value.begin(), end = Value.end(); it != end; ++it)
 	{
 		stream.serial(*it);
 	}
@@ -102,8 +102,8 @@ void CStorageArray<T>::toString(std::ostream &ostream, const std::string &pad) c
 template <typename T>
 void CStorageArray<T>::setSize(sint32 size)
 {
-	if ((sizeof(TType) % size) != 0)
-		nlerror("Size does not match value type");
+	if (size % (sizeof(TType)) != 0)
+		nlerror("Size %i is not a multiple of value type size %i", size, sizeof(TType));
 	Value.resize(size / sizeof(TType));
 }
 

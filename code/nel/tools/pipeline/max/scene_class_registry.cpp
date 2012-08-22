@@ -83,7 +83,7 @@ void CSceneClassRegistry::remove(const NLMISC::CClassId classId)
 /// Add a superclass to the registry
 void CSceneClassRegistry::add(const ISuperClassDesc *desc)
 {
-	nldebug("Register superclass 0x%x", desc->superClassId());
+	// nldebug("Register superclass 0x%x", desc->superClassId());
 	if (m_SuperClassDescriptions.find(desc->superClassId()) != m_SuperClassDescriptions.end()) { nlerror("Already added this superclass to the registry"); return; }
 	m_SuperClassDescriptions[desc->superClassId()] = desc;
 }

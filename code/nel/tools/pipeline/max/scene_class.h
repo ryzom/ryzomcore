@@ -33,6 +33,7 @@
 
 // NeL includes
 #include <nel/misc/class_id.h>
+#include <nel/misc/smart_ptr.h>
 
 // Project includes
 #include "typedefs.h"
@@ -49,9 +50,18 @@ class ISceneClassDesc;
  * \brief CSceneClass
  * \date 2012-08-19 19:25GMT
  * \author Jan Boon (Kaetemi)
- * CSceneClass
+ * It is recommended to use CRefPtr<T> to refer to any pointers to
+ * classes inherited from this class.
+ * NOTE: CRefPtr<T> does not delete the class when references go to
+ * zero. When you remove a class from the scene, the class will be
+ * deleted if the reference count is zero. Otherwise, you are
+ * responsible for deleting it (for example, if you keep the class
+ * backed up in an undo stack for undeletion). You may use CSmartPtr<T>
+ * when the class is no longer owned by the scene container.
+ * CRefPtr<T> is a safe handle, which you can use to verify if the class
+ * has been deleted or not, similar to AnimHandle in max.
  */
-class CSceneClass : public CStorageContainer
+class CSceneClass : public CStorageContainer, public NLMISC::CRefCount
 {
 public:
 	CSceneClass();

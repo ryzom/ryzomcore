@@ -56,7 +56,7 @@ namespace BUILTIN {
 
 // Chunk identifiers
 #define PMB_REFERENCES_2034_CHUNK_ID 0x2034
-#define PMB_REFERENCES_2035_CHUNK_ID 0x2034
+#define PMB_REFERENCES_2035_CHUNK_ID 0x2035
 #define PMB_204B_EQUALS_2E_CHUNK_ID 0x204B
 
 ////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,15 @@ CReferenceMaker::CReferenceMaker()
 
 CReferenceMaker::~CReferenceMaker()
 {
-
+	if (!m_ChunksOwnsPointers)
+	{
+		delete m_References2034;
+		m_References2034 = NULL;
+		delete m_References2035;
+		m_References2035 = NULL;
+		delete m_204B_Equals_2E;
+		m_204B_Equals_2E = NULL;
+	}
 }
 
 const ucchar *CReferenceMaker::DisplayName = ucstring("ReferenceMaker").c_str();
@@ -84,20 +92,38 @@ const CReferenceMakerSuperClassDesc ReferenceMakerSuperClassDesc(&ReferenceMaker
 void CReferenceMaker::parse(uint16 version, TParseLevel level)
 {
 	CAnimatable::parse(version, level);
+	if (!m_ChunksOwnsPointers)
+	{
+		m_References2034 = static_cast<CStorageArray<sint32> *>(getChunk(PMB_REFERENCES_2034_CHUNK_ID));
+		m_References2035 = static_cast<CStorageArray<sint32> *>(getChunk(PMB_REFERENCES_2035_CHUNK_ID));
+		if (m_References2034) nlassert(m_References2035 == NULL); // Apparently, there can be only one.
+		if (m_References2035) nlassert(m_References2034 == NULL);
+		m_204B_Equals_2E = static_cast<CStorageValue<uint8> *>(getChunk(PMB_204B_EQUALS_2E_CHUNK_ID));
+		if (m_204B_Equals_2E) nlassert(m_204B_Equals_2E->Value == 0x2e); // Really, let me know when it has another value.
+		// TODO: Parse contents
+	}
 }
 
 void CReferenceMaker::clean()
 {
 	CAnimatable::clean();
+	// TODO: Delete unnecessary stuff
 }
 
 void CReferenceMaker::build(uint16 version)
 {
 	CAnimatable::build(version);
+	// TODO: Build contents
+	if (m_References2034) putChunk(PMB_REFERENCES_2034_CHUNK_ID, m_References2034);
+	if (m_References2035) putChunk(PMB_REFERENCES_2035_CHUNK_ID, m_References2035);
+	if (m_204B_Equals_2E) putChunk(PMB_204B_EQUALS_2E_CHUNK_ID, m_204B_Equals_2E);
 }
 
 void CReferenceMaker::disown()
 {
+	m_References2034 = NULL;
+	m_References2035 = NULL;
+	m_204B_Equals_2E = NULL;
 	CAnimatable::disown();
 }
 
@@ -120,12 +146,31 @@ const ISceneClassDesc *CReferenceMaker::classDesc() const
 void CReferenceMaker::toStringLocal(std::ostream &ostream, const std::string &pad) const
 {
 	CAnimatable::toStringLocal(ostream, pad);
+	if (m_References2034)
+	{
+		ostream << "\n" << pad << "References 0x2034: ";
+		m_References2034->toString(ostream, pad + "\t");
+	}
+	if (m_References2035)
+	{
+		ostream << "\n" << pad << "References 0x2035: ";
+		m_References2035->toString(ostream, pad + "\t");
+	}
+	if (m_204B_Equals_2E)
+	{
+		ostream << "\n" << pad << "0x204B Equals 0x2E (46): ";
+		m_204B_Equals_2E->toString(ostream, pad + "\t");
+	}
 }
 
 IStorageObject *CReferenceMaker::createChunkById(uint16 id, bool container)
 {
 	switch (id)
 	{
+	case PMB_REFERENCES_2034_CHUNK_ID:
+		return new CStorageArray<sint32>();
+	case PMB_REFERENCES_2035_CHUNK_ID:
+		return new CStorageArray<sint32>();
 	case PMB_204B_EQUALS_2E_CHUNK_ID:
 		return new CStorageValue<uint8>();
 	}

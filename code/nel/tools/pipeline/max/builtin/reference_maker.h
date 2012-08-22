@@ -34,6 +34,7 @@
 // NeL includes
 
 // Project includes
+#include "../storage_array.h"
 #include "animatable.h"
 
 namespace PIPELINE {
@@ -72,6 +73,11 @@ public:
 protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
+private:
+	CStorageArray<sint32> *m_References2034;
+	CStorageArray<sint32> *m_References2035;
+	CStorageValue<uint8> *m_204B_Equals_2E;
 
 }; /* class CReferenceMaker */
 

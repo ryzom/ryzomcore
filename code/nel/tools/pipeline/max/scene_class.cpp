@@ -181,12 +181,6 @@ void CSceneClass::init()
 
 IStorageObject *CSceneClass::createChunkById(uint16 id, bool container)
 {
-	// Temporary
-	/*switch (id)
-	{
-	case NLMAXFILE_APP_DATA_CHUNK_ID:
-		return new BUILTIN::STORAGE::CAppData();
-	}*/
 	return CStorageContainer::createChunkById(id, container);
 }
 
