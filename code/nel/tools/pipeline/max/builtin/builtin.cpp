@@ -172,6 +172,22 @@ const CRenderEffectSuperClassDesc RenderEffectSuperClassDesc(&ReferenceTargetCla
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x000010d0> CShadowTypeSuperClassDesc;
 const CShadowTypeSuperClassDesc ShadowTypeSuperClassDesc(&ReferenceTargetClassDesc);
 
+// 0x1160 - CustAttrib, directly under ref target
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001160> CCustAttribSuperClassDesc;
+const CCustAttribSuperClassDesc CustAttribSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x9012 - point4list, controlpoint4, also rgba, under controll???
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009012> CControlPoint4SuperClassDesc;
+const CControlPoint4SuperClassDesc ControlPoint4SuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0xb60 - userdatatype, deprecated, don't care
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000b60> CUserDataTypeSuperClassDesc;
+const CUserDataTypeSuperClassDesc UserDataTypeSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x900f - usertype, don't care
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x0000900f> CUserTypeSuperClassDesc;
+const CUserTypeSuperClassDesc UserTypeSuperClassDesc(&ReferenceTargetClassDesc);
+
 } /* anonymous namespace */
 
 CBuiltin::CBuiltin()
@@ -229,6 +245,10 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&GridReferenceSuperClassDesc);
 	registry->add(&RenderEffectSuperClassDesc);
 	registry->add(&ShadowTypeSuperClassDesc);
+	registry->add(&CustAttribSuperClassDesc);
+	registry->add(&ControlPoint4SuperClassDesc);
+	registry->add(&UserDataTypeSuperClassDesc);
+	registry->add(&UserTypeSuperClassDesc);
 }
 
 } /* namespace BUILTIN */
