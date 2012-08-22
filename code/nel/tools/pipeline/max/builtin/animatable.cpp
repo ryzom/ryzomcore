@@ -57,32 +57,32 @@ const char *CAnimatable::InternalName = "Animatable";
 const char *CAnimatable::InternalNameUnknown = "AnimatableUnknown";
 const NLMISC::CClassId CAnimatable::ClassId = NLMISC::CClassId(0x3101497b, 0x24af711b); /* Not official, please correct */
 const TSClassId CAnimatable::SuperClassId = 0x77a60fbd;/* Not official, please correct */
-CAnimatableClassDesc AnimatableClassDesc(&DllPluginDescBuiltin);
-CAnimatableSuperClassDesc AnimatableSuperClassDesc(&AnimatableClassDesc);
+const CAnimatableClassDesc AnimatableClassDesc(&DllPluginDescBuiltin);
+const CAnimatableSuperClassDesc AnimatableSuperClassDesc(&AnimatableClassDesc);
 
 void CAnimatable::parse(uint16 version, TParseLevel level)
 {
-
+	CSceneClass::parse(version, level);
 }
 
 void CAnimatable::clean()
 {
-
+	CSceneClass::clean();
 }
 
 void CAnimatable::build(uint16 version)
 {
-
+	CSceneClass:build(version);
 }
 
 void CAnimatable::disown()
 {
-
+	CSceneClass::disown();
 }
 
 void CAnimatable::init()
 {
-
+	CSceneClass::init();
 }
 
 // inherited
@@ -93,7 +93,7 @@ const ISceneClassDesc *CAnimatable::classDesc()
 
 void CAnimatable::toStringLocal(std::ostream &ostream, const std::string &pad) const
 {
-
+	CSceneClass::toStringLocal(ostream, pad);
 }
 
 } /* namespace BUILTIN */

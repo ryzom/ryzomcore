@@ -35,7 +35,7 @@
 
 // Project includes
 #include "../scene_class.h"
-#include "../scene_class_unknown.h"
+#include "../super_class_desc.h"
 
 namespace PIPELINE {
 namespace MAX {
@@ -72,9 +72,9 @@ public:
 }; /* class CAnimatable */
 
 typedef CSceneClassDesc<CAnimatable> CAnimatableClassDesc;
-extern CAnimatableClassDesc AnimatableClassDesc;
-typedef CSuperClassDesc<CAnimatable, CSceneClassUnknown<CAnimatable> > CAnimatableSuperClassDesc;
-extern CAnimatableSuperClassDesc AnimatableSuperClassDesc;
+extern const CAnimatableClassDesc AnimatableClassDesc;
+typedef CSuperClassDesc<CAnimatable> CAnimatableSuperClassDesc;
+extern const CAnimatableSuperClassDesc AnimatableSuperClassDesc;
 
 } /* namespace BUILTIN */
 } /* namespace MAX */

@@ -35,6 +35,7 @@
 
 // Project includes
 #include "scene_class.h"
+#include "super_class_desc.h"
 
 namespace PIPELINE {
 namespace MAX {

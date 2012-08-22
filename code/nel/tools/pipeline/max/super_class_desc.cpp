@@ -1,9 +1,9 @@
 /**
- * \file builtin.cpp
- * \brief CBuiltin
- * \date 2012-08-22 09:42GMT
+ * \file super_class_desc.cpp
+ * \brief CSuperClassDesc
+ * \date 2012-08-22 11:19GMT
  * \author Jan Boon (Kaetemi)
- * CBuiltin
+ * CSuperClassDesc
  */
 
 /*
@@ -26,7 +26,7 @@
  */
 
 #include <nel/misc/types_nl.h>
-#include "builtin.h"
+#include "super_class_desc.h"
 
 // STL includes
 
@@ -34,35 +34,15 @@
 // #include <nel/misc/debug.h>
 
 // Project includes
-#include "../scene_class_registry.h"
-#include "animatable.h"
-#include "reference_maker.h"
-#include "reference_target.h"
 
 // using namespace std;
 // using namespace NLMISC;
 
 namespace PIPELINE {
 namespace MAX {
-namespace BUILTIN {
 
-CBuiltin::CBuiltin()
-{
+void nyannyannyan() { }
 
-}
-
-CBuiltin::~CBuiltin()
-{
-
-}
-
-void CBuiltin::registerClasses(CSceneClassRegistry *registry)
-{
-	registry->add(&AnimatableClassDesc);
-	registry->add(&AnimatableSuperClassDesc);
-}
-
-} /* namespace BUILTIN */
 } /* namespace MAX */
 } /* namespace PIPELINE */
 
