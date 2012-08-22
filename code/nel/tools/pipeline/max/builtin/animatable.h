@@ -66,7 +66,8 @@ public:
 	virtual void build(uint16 version);
 	virtual void disown();
 	virtual void init();
-	virtual const ISceneClassDesc *classDesc();
+	virtual bool inherits(const NLMISC::CClassId classId) const;
+	virtual const ISceneClassDesc *classDesc() const;
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
 
 }; /* class CAnimatable */

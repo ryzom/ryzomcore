@@ -85,8 +85,13 @@ void CAnimatable::init()
 	CSceneClass::init();
 }
 
-// inherited
-const ISceneClassDesc *CAnimatable::classDesc()
+bool CAnimatable::inherits(const NLMISC::CClassId classId) const
+{
+	if (classId == classDesc()->classId()) return true;
+	return CSceneClass::inherits(classId);
+}
+
+const ISceneClassDesc *CAnimatable::classDesc() const
 {
 	return &AnimatableClassDesc;
 }

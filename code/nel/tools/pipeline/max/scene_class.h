@@ -91,8 +91,10 @@ public:
 
 	//! \name More virtual functionality for inheriting classes to implement
 	//@{
+	/// Returns whether the class inherits from a class with given class id
+	virtual bool inherits(const NLMISC::CClassId classId) const;
 	/// Return the class description of the inheriting class
-	virtual const ISceneClassDesc *classDesc();
+	virtual const ISceneClassDesc *classDesc() const;
 	/// Create a readable representation of this class
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
 	//@}
