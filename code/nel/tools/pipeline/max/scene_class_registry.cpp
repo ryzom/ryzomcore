@@ -70,14 +70,16 @@ CSceneClassRegistry::~CSceneClassRegistry()
 
 void CSceneClassRegistry::add(const ISceneClassDesc *desc)
 {
-	if (m_ClassDescriptions.find(desc->classId()) != m_ClassDescriptions.end()) { nlerror("Already added this class to the registry"); return; }
-	m_ClassDescriptions[desc->classId()] = desc;
+	TKey key(desc->superClassId(), desc->classId());
+	if (m_ClassDescriptions.find(key) != m_ClassDescriptions.end()) { nlerror("Already added this class to the registry"); return; }
+	m_ClassDescriptions[key] = desc;
 }
 
-void CSceneClassRegistry::remove(const NLMISC::CClassId classId)
+void CSceneClassRegistry::remove(const TSClassId superClassId, const NLMISC::CClassId classId)
 {
-	if (m_ClassDescriptions.find(classId) == m_ClassDescriptions.end()) { nlwarning("Try to remove class that is not found"); return; }
-	m_ClassDescriptions.erase(classId);
+	TKey key(superClassId, classId);
+	if (m_ClassDescriptions.find(key) == m_ClassDescriptions.end()) { nlwarning("Try to remove class that is not found"); return; }
+	m_ClassDescriptions.erase(key);
 }
 
 /// Add a superclass to the registry
@@ -96,10 +98,11 @@ void CSceneClassRegistry::remove(const TSClassId superClassId)
 }
 
 /// Create a class by class id
-CSceneClass *CSceneClassRegistry::create(const NLMISC::CClassId classId) const
+CSceneClass *CSceneClassRegistry::create(const TSClassId superClassId, const NLMISC::CClassId classId) const
 {
-	if (m_ClassDescriptions.find(classId) == m_ClassDescriptions.end()) { /* nldebug("Try to create class that does not exist"); */ return NULL; }
-	return m_ClassDescriptions.find(classId)->second->create();
+	TKey key(superClassId, classId);
+	if (m_ClassDescriptions.find(key) == m_ClassDescriptions.end()) { /* nldebug("Try to create class that does not exist"); */ return NULL; }
+	return m_ClassDescriptions.find(key)->second->create();
 }
 
 /// Create an unknown class by superclass id
@@ -116,10 +119,51 @@ void CSceneClassRegistry::destroy(CSceneClass *sceneClass) const
 }
 
 /// Return the description of a class by class id
-const ISceneClassDesc *CSceneClassRegistry::describe(const NLMISC::CClassId classId) const
+const ISceneClassDesc *CSceneClassRegistry::describe(const TSClassId superClassId, const NLMISC::CClassId classId) const
 {
-	if (m_ClassDescriptions.find(classId) == m_ClassDescriptions.end()) { nldebug("Try to describe class that does not exist"); return NULL; }
-	return m_ClassDescriptions.find(classId)->second;
+	TKey key(superClassId, classId);
+	if (m_ClassDescriptions.find(key) == m_ClassDescriptions.end()) { nldebug("Try to describe class that does not exist"); return NULL; }
+	return m_ClassDescriptions.find(key)->second;
+}
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+CSceneClassRegistry::TKey::TKey(TSClassId superClassId, NLMISC::CClassId classId) : SuperClassId(superClassId), ClassId(classId)
+{
+
+}
+
+bool CSceneClassRegistry::TKey::operator<(const CSceneClassRegistry::TKey &right) const
+{
+	if (SuperClassId < right.SuperClassId)
+		return true;
+	if (SuperClassId > right.SuperClassId)
+		return false;
+	if (ClassId < right.ClassId)
+		return true;
+	if (ClassId > right.ClassId)
+		return false;
+	return false;
+}
+
+bool CSceneClassRegistry::TKey::operator>(const CSceneClassRegistry::TKey &right) const
+{
+	if (SuperClassId > right.SuperClassId)
+		return true;
+	if (SuperClassId < right.SuperClassId)
+		return false;
+	if (ClassId > right.ClassId)
+		return true;
+	if (ClassId < right.ClassId)
+		return false;
+	return false;
+}
+
+bool CSceneClassRegistry::TKey::operator==(const CSceneClassRegistry::TKey &right) const
+{
+	return ClassId == right.ClassId && SuperClassId == right.SuperClassId;
 }
 
 ////////////////////////////////////////////////////////////////////////

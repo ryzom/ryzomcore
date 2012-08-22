@@ -171,7 +171,7 @@ IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 		// return static_cast<IStorageObject *>(new CSceneClassUnknown<CSceneClass>(dllEntry, classEntry));
 	}
 	const CClassEntry *classEntry = m_ClassDirectory3->get(id);
-	CSceneClass *sceneClass = m_SceneClassRegistry->create(classEntry->classId());
+	CSceneClass *sceneClass = m_SceneClassRegistry->create(classEntry->superClassId(), classEntry->classId());
 	if (sceneClass)
 	{
 		return static_cast<IStorageObject *>(sceneClass);

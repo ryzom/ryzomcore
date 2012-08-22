@@ -55,7 +55,7 @@ public:
 	/// Add a class to the registry
 	void add(const ISceneClassDesc *desc);
 	/// Remove a class from the registry
-	void remove(const NLMISC::CClassId classId);
+	void remove(TSClassId superClassId, const NLMISC::CClassId classId);
 
 	/// Add a superclass to the registry
 	void add(const ISuperClassDesc *desc);
@@ -63,7 +63,7 @@ public:
 	void remove(const TSClassId superClassId);
 
 	/// Create a class by class id
-	CSceneClass *create(const NLMISC::CClassId classId) const;
+	CSceneClass *create(TSClassId superClassId, const NLMISC::CClassId classId) const;
 
 	/// Create an unknown class by superclass id
 	CSceneClass *createUnknown(TSClassId superClassId, const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const;
@@ -72,10 +72,20 @@ public:
 	void destroy(CSceneClass *sceneClass) const;
 
 	/// Return the description of a class by class id
-	const ISceneClassDesc *describe(const NLMISC::CClassId classId) const;
+	const ISceneClassDesc *describe(TSClassId superClassId, const NLMISC::CClassId classId) const;
 
 private:
-	std::map<NLMISC::CClassId, const ISceneClassDesc *> m_ClassDescriptions;
+	struct TKey
+	{
+		TKey(TSClassId superClassId, NLMISC::CClassId classId);
+		TSClassId SuperClassId;
+		NLMISC::CClassId ClassId;
+		bool operator<(const TKey &right) const;
+		bool operator>(const TKey &right) const;
+		bool operator==(const TKey &right) const;
+	};
+
+	std::map<TKey, const ISceneClassDesc *> m_ClassDescriptions;
 	std::map<TSClassId, const ISuperClassDesc *> m_SuperClassDescriptions;
 
 }; /* class CSceneClassRegistry */
