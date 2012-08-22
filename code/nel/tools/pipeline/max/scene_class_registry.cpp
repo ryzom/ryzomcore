@@ -51,16 +51,58 @@ CSceneClassRegistry::~CSceneClassRegistry()
 
 }
 
-//void CSceneClassRegistry::add(const NLMISC::CClassId, const ISceneClassDesc *desc);
-//void CSceneClassRegistry::remove(const NLMISC::CClassId);
-
-CSceneClass *CSceneClassRegistry::create(const NLMISC::CClassId classid) const
+void CSceneClassRegistry::add(const ISceneClassDesc *desc)
 {
-	return NULL; // TODO
+	if (m_ClassDescriptions.find(desc->classId()) != m_ClassDescriptions.end()) { nlerror("Already added this class to the registry"); return; }
+	m_ClassDescriptions[desc->classId()] = desc;
 }
 
-//void CSceneClassRegistry::destroy(CSceneClass *sceneClass) const;
-//const CSceneClassRegistry::ISceneClassDesc *describe(const NLMISC::CClassId classid) const;
+void CSceneClassRegistry::remove(const NLMISC::CClassId classId)
+{
+	if (m_ClassDescriptions.find(classId) == m_ClassDescriptions.end()) { nlwarning("Try to remove class that is not found"); return; }
+	m_ClassDescriptions.erase(classId);
+}
+
+/// Add a superclass to the registry
+void CSceneClassRegistry::add(const ISuperClassDesc *desc)
+{
+	if (m_SuperClassDescriptions.find(desc->classDesc()->superClassId()) == m_SuperClassDescriptions.end()) { nlerror("Already added this superclass to the registry"); return; }
+	m_SuperClassDescriptions[desc->classDesc()->superClassId()] = desc;
+}
+
+/// Remove a superclass from the registry
+void CSceneClassRegistry::remove(const TSClassId superClassId)
+{
+	if (m_SuperClassDescriptions.find(superClassId) == m_SuperClassDescriptions.end()) { nlwarning("Try to remove superclass that is not found"); return; }
+	m_SuperClassDescriptions.erase(superClassId);
+}
+
+/// Create a class by class id
+CSceneClass *CSceneClassRegistry::create(const NLMISC::CClassId classId) const
+{
+	if (m_ClassDescriptions.find(classId) == m_ClassDescriptions.end()) { nldebug("Try to create class that does not exist"); return NULL; }
+	return m_ClassDescriptions.find(classId)->second->create();
+}
+
+/// Create an unknown class by superclass id
+CSceneClass *CSceneClassRegistry::createUnknown(const TSClassId superClassId, const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const
+{
+	if (m_ClassDescriptions.find(classId) == m_ClassDescriptions.end()) { nlwarning("Creating superclass that does not exist"); return NULL; }
+	return m_SuperClassDescriptions.find(classId)->second->createUnknown(classId, displayName, dllFilename, dllDescription);;
+}
+
+/// Destroy a class by pointer
+void CSceneClassRegistry::destroy(CSceneClass *sceneClass) const
+{
+	sceneClass->classDesc()->destroy(sceneClass);
+}
+
+/// Return the description of a class by class id
+const ISceneClassDesc *CSceneClassRegistry::describe(const NLMISC::CClassId classId) const
+{
+	if (m_ClassDescriptions.find(classId) == m_ClassDescriptions.end()) { nldebug("Try to describe class that does not exist"); return NULL; }
+	return m_ClassDescriptions.find(classId)->second;
+}
 
 } /* namespace MAX */
 } /* namespace PIPELINE */

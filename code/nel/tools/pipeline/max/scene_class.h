@@ -59,7 +59,7 @@ public:
 
 	//! \name Inherited functions that are implemented by wrapping around other virtual functions in this class
 	//@{
-	virtual std::string getClassName(); // do not override, implemented using getClassDesc
+	virtual std::string getClassName(); // do not override, implemented using classDesc
 	virtual void toString(std::ostream &ostream, const std::string &pad = ""); // do not override, implemented using toStringLocal
 	//@}
 
@@ -88,7 +88,7 @@ public:
 	/// Initialize this class from scratch, call the parent first
 	virtual void init();
 	/// Return the class description of the inheriting class
-	virtual const ISceneClassDesc *getClassDesc();
+	virtual const ISceneClassDesc *classDesc();
 	/// Create a readable representation of this class
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
 	//@}
@@ -159,6 +159,41 @@ private:
 	const IDllPluginDescInternal *m_DllPluginDesc;
 
 }; /* class CSceneClassDesc */
+
+/**
+ * \brief ISuperClassDesc
+ * \date 2012-08-22 09:42GMT
+ * \author Jan Boon (Kaetemi)
+ * ISuperClassDesc
+ */
+class ISuperClassDesc
+{
+public:
+	/// Create an unknown class that inherits from this superclass
+	virtual CSceneClass *createUnknown(const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const = 0;
+	/// Get an internal name associated with unknown classes of this superclass
+	virtual const char *internalNameUnknown() const = 0;
+	/// Return the class description that directly implements this superclass
+	virtual const ISceneClassDesc *classDesc() const = 0;
+
+}; /* class ISceneClassDesc */
+
+/**
+ * \brief CSuperClassDesc
+ * \date 2012-08-22 09:42GMT
+ * \author Jan Boon (Kaetemi)
+ * ISuperClassDesc
+ */
+template <typename T, typename TUnknown>
+class CSuperClassDesc : public ISuperClassDesc
+{
+	CSuperClassDesc(const ISceneClassDesc *classDesc) : m_ClassDesc(classDesc) { }
+	virtual CSceneClass *createUnknown(const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const { return static_cast<CSceneClass *>(new TUnknown(classId, displayName, dllFilename, dllDescription)); }
+	virtual const char *internalNameUnknown() const { return T::InternalNameUnknown; }
+	virtual const ISceneClassDesc *classDesc() const { return m_ClassDesc; }
+private:
+	const ISceneClassDesc *m_ClassDesc;
+}; /* class ISceneClassDesc */
 
 } /* namespace MAX */
 } /* namespace PIPELINE */

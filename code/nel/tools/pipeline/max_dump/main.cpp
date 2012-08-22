@@ -28,10 +28,10 @@
 #include "../max/scene_class_registry.h"
 
 // Testing
-#include "../max/builtin/app_data.h"
+#include "../max/builtin/storage/app_data.h"
 
-//static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
-static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
+static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
+//static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/test2008.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/teapot_test_scene.max";
 static const char *streamname = "Scene";
@@ -186,7 +186,7 @@ int main(int argc, char **argv)
 		for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt subit = subc->chunks().begin(), subend = subc->chunks().end(); subit != subend; ++subit)
 		{
 			PIPELINE::MAX::IStorageObject *storageChunk = subit->second;
-			PIPELINE::MAX::CAppData *appData = dynamic_cast<PIPELINE::MAX::CAppData *>(storageChunk);
+			PIPELINE::MAX::BUILTIN::STORAGE::CAppData *appData = dynamic_cast<PIPELINE::MAX::BUILTIN::STORAGE::CAppData *>(storageChunk);
 			if (appData)
 			{
 				nlinfo("Found AppData");

@@ -51,11 +51,31 @@ public:
 	CSceneClassRegistry();
 	virtual ~CSceneClassRegistry();
 
-	void add(const NLMISC::CClassId, const ISceneClassDesc *desc);
-	void remove(const NLMISC::CClassId);
-	CSceneClass *create(const NLMISC::CClassId classid) const;
+	/// Add a class to the registry
+	void add(const ISceneClassDesc *desc);
+	/// Remove a class from the registry
+	void remove(const NLMISC::CClassId classId);
+
+	/// Add a superclass to the registry
+	void add(const ISuperClassDesc *desc);
+	/// Remove a superclass from the registry
+	void remove(const TSClassId superClassId);
+
+	/// Create a class by class id
+	CSceneClass *create(const NLMISC::CClassId classId) const;
+
+	/// Create an unknown class by superclass id
+	CSceneClass *createUnknown(const TSClassId superClassId, const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const;
+
+	/// Destroy a class by pointer
 	void destroy(CSceneClass *sceneClass) const;
-	const ISceneClassDesc *describe(const NLMISC::CClassId classid) const;
+
+	/// Return the description of a class by class id
+	const ISceneClassDesc *describe(const NLMISC::CClassId classId) const;
+
+private:
+	std::map<NLMISC::CClassId, const ISceneClassDesc *> m_ClassDescriptions;
+	std::map<TSClassId, const ISuperClassDesc *> m_SuperClassDescriptions;
 
 }; /* class CSceneClassRegistry */
 

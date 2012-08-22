@@ -35,12 +35,14 @@
 #include <nel/misc/class_id.h>
 
 // Project includes
-#include "../typedefs.h"
-#include "../storage_object.h"
-#include "../storage_value.h"
+#include "../../typedefs.h"
+#include "../../storage_object.h"
+#include "../../storage_value.h"
 
 namespace PIPELINE {
 namespace MAX {
+namespace BUILTIN {
+namespace STORAGE {
 
 #define NLMAXFILE_APP_DATA_CHUNK_ID 0x2150
 
@@ -169,6 +171,8 @@ private:
 
 }; /* class CAppDataEntry */
 
+} /* namespace STORAGE */
+} /* namespace BUILTIN */
 } /* namespace MAX */
 } /* namespace PIPELINE */
 

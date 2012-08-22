@@ -37,7 +37,7 @@
 // Project includes
 
 // Temporary project includes
-#include "builtin/app_data.h"
+#include "builtin/storage/app_data.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -76,7 +76,7 @@ CSceneClass::~CSceneClass()
 
 std::string CSceneClass::getClassName()
 {
-	return getClassDesc()->internalName();
+	return classDesc()->internalName();
 }
 
 void CSceneClass::toString(std::ostream &ostream, const std::string &pad)
@@ -87,7 +87,7 @@ void CSceneClass::toString(std::ostream &ostream, const std::string &pad)
 	}
 	else
 	{
-		ostream << "(" << getClassName() << ": " << ucstring(getClassDesc()->displayName()).toUtf8() << ", " << getClassDesc()->classId().toString() << ", " << ucstring(getClassDesc()->dllPluginDesc()->internalName()).toUtf8() << ") [" << m_Chunks.size() << "] { ";
+		ostream << "(" << getClassName() << ": " << ucstring(classDesc()->displayName()).toUtf8() << ", " << classDesc()->classId().toString() << ", " << ucstring(classDesc()->dllPluginDesc()->internalName()).toUtf8() << ") [" << m_Chunks.size() << "] { ";
 		toStringLocal(ostream, pad);
 		ostream << "} ";
 	}
@@ -125,7 +125,6 @@ void CSceneClass::clean()
 	{
 		if (it->second->isContainer())
 		{
-			nldebug("Cleaning orphan child");
 			static_cast<CStorageContainer *>(it->second)->clean();
 		}
 	}
@@ -177,7 +176,7 @@ IStorageObject *CSceneClass::createChunkById(uint16 id, bool container)
 	switch (id)
 	{
 	case NLMAXFILE_APP_DATA_CHUNK_ID:
-		return new CAppData();
+		return new BUILTIN::STORAGE::CAppData();
 	}
 	return CStorageContainer::createChunkById(id, container);
 }
@@ -191,7 +190,7 @@ namespace {
 static const CSceneClassDesc<CSceneClass> SceneClassDesc(static_cast<const IDllPluginDescInternal *>(&DllPluginDescBuiltin));
 } /* anonymous namespace */
 
-const ISceneClassDesc *CSceneClass::getClassDesc()
+const ISceneClassDesc *CSceneClass::classDesc()
 {
 	return static_cast<const ISceneClassDesc *>(&SceneClassDesc);
 }

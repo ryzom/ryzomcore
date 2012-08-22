@@ -14,8 +14,8 @@ ENDIF (NOT GLIB2_FOUND)
 INCLUDE_DIRECTORIES(${GLIB2_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${LIBGSF_INCLUDE_DIR})
 
-FILE(GLOB SRCS *.cpp builtin/*.cpp)
-FILE(GLOB HDRS *.h builtin/*.h)
+FILE(GLOB SRCS *.cpp builtin/*.cpp builtin/storage/*.cpp)
+FILE(GLOB HDRS *.h builtin/*.h builtin/storage/*.h)
 
 NL_TARGET_LIB(pipeline_max
 	${SRCS}

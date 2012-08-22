@@ -101,7 +101,7 @@ public:
 	virtual ~CSceneClassUnknown() { }
 
 	// inherited
-	virtual const ISceneClassDesc *getClassDesc() { return &m_Desc; }
+	virtual const ISceneClassDesc *classDesc() { return &m_Desc; }
 
 private:
 	CSceneClassUnknownDesc m_Desc;
