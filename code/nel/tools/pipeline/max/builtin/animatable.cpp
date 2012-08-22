@@ -52,6 +52,50 @@ CAnimatable::~CAnimatable()
 
 }
 
+const ucchar *CAnimatable::DisplayName = ucstring("Animatable").c_str();
+const char *CAnimatable::InternalName = "Animatable";
+const char *CAnimatable::InternalNameUnknown = "AnimatableUnknown";
+const NLMISC::CClassId CAnimatable::ClassId = NLMISC::CClassId(0x3101497b, 0x24af711b); /* Not official, please correct */
+const TSClassId CAnimatable::SuperClassId = 0x77a60fbd;/* Not official, please correct */
+CAnimatableClassDesc AnimatableClassDesc(&DllPluginDescBuiltin);
+CAnimatableSuperClassDesc AnimatableSuperClassDesc(&AnimatableClassDesc);
+
+void CAnimatable::parse(uint16 version, TParseLevel level)
+{
+
+}
+
+void CAnimatable::clean()
+{
+
+}
+
+void CAnimatable::build(uint16 version)
+{
+
+}
+
+void CAnimatable::disown()
+{
+
+}
+
+void CAnimatable::init()
+{
+
+}
+
+// inherited
+const ISceneClassDesc *CAnimatable::classDesc()
+{
+	return &AnimatableClassDesc;
+}
+
+void CAnimatable::toStringLocal(std::ostream &ostream, const std::string &pad) const
+{
+
+}
+
 } /* namespace BUILTIN */
 } /* namespace MAX */
 } /* namespace PIPELINE */

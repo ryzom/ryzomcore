@@ -34,6 +34,10 @@
 // #include <nel/misc/debug.h>
 
 // Project includes
+#include "../scene_class_registry.h"
+#include "../animatable.h"
+#include "../reference_maker.h"
+#include "../reference_target.h"
 
 // using namespace std;
 // using namespace NLMISC;
@@ -51,6 +55,8 @@ CBuiltin::~CBuiltin()
 {
 
 }
+
+CBuiltin::registerClasses(
 
 } /* namespace BUILTIN */
 } /* namespace MAX */

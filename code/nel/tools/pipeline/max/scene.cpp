@@ -178,8 +178,9 @@ IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 	else
 	{
 		// Create an unknown scene class; TODO: By TSClassId, maybe the registry should have a createUnknown(TSuperClassId)
+		// const NLMISC::CClassId classId, const TSClassId superClassId, const ucstring &displayName, const std::strin &internalName, const ucstring &dllFilename, const ucstring &dllDescription
 		const CDllEntry *dllEntry = m_DllDirectory->get(classEntry->dllIndex());
-		return static_cast<IStorageObject *>(new CSceneClassUnknown<CSceneClass>(dllEntry, classEntry));
+		return static_cast<IStorageObject *>(new CSceneClassUnknown<CSceneClass>(classEntry->classId(), classEntry->superClassId(), classEntry->displayName(), "SceneClassUnknown", dllEntry->dllFilename(), dllEntry->dllDescription()));
 	}
 }
 

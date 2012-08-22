@@ -35,6 +35,7 @@
 
 // Project includes
 #include "../scene_class.h"
+#include "../scene_class_unknown.h"
 
 namespace PIPELINE {
 namespace MAX {
@@ -52,7 +53,28 @@ public:
 	CAnimatable();
 	virtual ~CAnimatable();
 
+	// class desc
+	static const ucchar *DisplayName;
+	static const char *InternalName;
+	static const char *InternalNameUnknown;
+	static const NLMISC::CClassId ClassId;
+	static const TSClassId SuperClassId;
+
+	// inherited
+	virtual void parse(uint16 version, TParseLevel level);
+	virtual void clean();
+	virtual void build(uint16 version);
+	virtual void disown();
+	virtual void init();
+	virtual const ISceneClassDesc *classDesc();
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
+
 }; /* class CAnimatable */
+
+typedef CSceneClassDesc<CAnimatable> CAnimatableClassDesc;
+extern CAnimatableClassDesc AnimatableClassDesc;
+typedef CSuperClassDesc<CAnimatable, CSceneClassUnknown<CAnimatable> > CAnimatableSuperClassDesc;
+extern CAnimatableSuperClassDesc AnimatableSuperClassDesc;
 
 } /* namespace BUILTIN */
 } /* namespace MAX */

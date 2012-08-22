@@ -34,10 +34,12 @@
 // NeL includes
 
 // Project includes
-#include "../scene_class_registry.h"
 
 namespace PIPELINE {
 namespace MAX {
+
+class CSceneClassRegistry;
+
 namespace BUILTIN {
 
 /**

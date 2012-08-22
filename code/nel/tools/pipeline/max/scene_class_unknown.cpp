@@ -45,7 +45,7 @@ namespace MAX {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CSceneClassUnknownDllPluginDesc::CSceneClassUnknownDllPluginDesc(const CDllEntry *dllEntry) : m_DisplayName(dllEntry->dllDescription()), m_InternalName(dllEntry->dllFilename())
+CSceneClassUnknownDllPluginDesc::CSceneClassUnknownDllPluginDesc(const ucstring &dllFilename, const ucstring &dllDescription) : m_DisplayName(dllFilename), m_InternalName(dllDescription)
 {
 
 }
@@ -64,7 +64,7 @@ const ucchar *CSceneClassUnknownDllPluginDesc::internalName() const
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CSceneClassUnknownDesc::CSceneClassUnknownDesc(const CDllEntry *dllEntry, const CClassEntry *classEntry) : m_DisplayName(classEntry->displayName()), m_ClassId(classEntry->classId()), m_SuperClassId(classEntry->superClassId()), m_DllPluginDesc(dllEntry)
+CSceneClassUnknownDesc::CSceneClassUnknownDesc(const NLMISC::CClassId classId, const TSClassId superClassId, const ucstring &displayName, const std::string &internalName, const ucstring &dllFilename, const ucstring &dllDescription) : m_DisplayName(displayName), m_InternalName(internalName), m_ClassId(classId), m_SuperClassId(superClassId), m_DllPluginDesc(dllFilename, dllDescription)
 {
 
 }
@@ -86,8 +86,7 @@ const ucchar *CSceneClassUnknownDesc::displayName() const
 
 const char *CSceneClassUnknownDesc::internalName() const
 {
-	// TODO: Get by SuperClassId, make like BlahUnknown
-	return "SceneClassUnknown";
+	return m_InternalName.c_str();
 }
 
 NLMISC::CClassId CSceneClassUnknownDesc::classId() const

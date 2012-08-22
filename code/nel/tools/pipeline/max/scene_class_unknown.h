@@ -35,8 +35,6 @@
 
 // Project includes
 #include "scene_class.h"
-#include "dll_directory.h"
-#include "class_directory_3.h"
 
 namespace PIPELINE {
 namespace MAX {
@@ -50,7 +48,7 @@ namespace MAX {
 class CSceneClassUnknownDllPluginDesc : public IDllPluginDescInternal
 {
 public:
-	CSceneClassUnknownDllPluginDesc(const CDllEntry *dllEntry);
+	CSceneClassUnknownDllPluginDesc(const ucstring &dllFilename, const ucstring &dllDescription);
 	virtual const ucchar *displayName() const;
 	virtual const ucchar *internalName() const;
 
@@ -69,7 +67,7 @@ private:
 class CSceneClassUnknownDesc : public ISceneClassDesc
 {
 public:
-	CSceneClassUnknownDesc(const CDllEntry *dllEntry, const CClassEntry *classEntry);
+	CSceneClassUnknownDesc(const NLMISC::CClassId classId, const TSClassId superClassId, const ucstring &displayName, const std::string &internalName, const ucstring &dllFilename, const ucstring &dllDescription);
 	virtual CSceneClass *create() const;
 	virtual void destroy(CSceneClass *sc) const;
 	virtual const ucchar *displayName() const;
@@ -80,6 +78,7 @@ public:
 
 private:
 	ucstring m_DisplayName;
+	std::string m_InternalName;
 	NLMISC::CClassId m_ClassId;
 	TSClassId m_SuperClassId;
 	CSceneClassUnknownDllPluginDesc m_DllPluginDesc;
@@ -97,7 +96,7 @@ template <typename TSuperClass>
 class CSceneClassUnknown : public TSuperClass
 {
 public:
-	CSceneClassUnknown(const CDllEntry *dllEntry, const CClassEntry *classEntry) : m_Desc(dllEntry, classEntry) { }
+	CSceneClassUnknown(const NLMISC::CClassId classId, const TSClassId superClassId, const ucstring &displayName, const std::string &internalName, const ucstring &dllFilename, const ucstring &dllDescription) : m_Desc(classId, superClassId, displayName, internalName, dllFilename, dllDescription) { }
 	virtual ~CSceneClassUnknown() { }
 
 	// inherited

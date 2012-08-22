@@ -75,6 +75,12 @@ public:
 	virtual void disown();
 	//@}
 
+	//! \name Virtual functionality for inheriting classes to implement
+	//@{
+	/// Initialize this class from scratch, call the parent first
+	virtual void init();
+	//@}
+
 	//! \name Static const variables for the class description
 	//@{
 	static const ucchar *DisplayName;
@@ -83,10 +89,8 @@ public:
 	static const TSClassId SuperClassId;
 	//@}
 
-	//! \name Virtual functionality for inheriting classes to implement
+	//! \name More virtual functionality for inheriting classes to implement
 	//@{
-	/// Initialize this class from scratch, call the parent first
-	virtual void init();
 	/// Return the class description of the inheriting class
 	virtual const ISceneClassDesc *classDesc();
 	/// Create a readable representation of this class
@@ -187,8 +191,9 @@ public:
 template <typename T, typename TUnknown>
 class CSuperClassDesc : public ISuperClassDesc
 {
+public:
 	CSuperClassDesc(const ISceneClassDesc *classDesc) : m_ClassDesc(classDesc) { }
-	virtual CSceneClass *createUnknown(const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const { return static_cast<CSceneClass *>(new TUnknown(classId, displayName, dllFilename, dllDescription)); }
+	virtual CSceneClass *createUnknown(const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const { return static_cast<CSceneClass *>(new TUnknown(classId, m_ClassDesc->superClassId(), displayName,internalNameUnknown(), dllFilename, dllDescription)); }
 	virtual const char *internalNameUnknown() const { return T::InternalNameUnknown; }
 	virtual const ISceneClassDesc *classDesc() const { return m_ClassDesc; }
 private:
