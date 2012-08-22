@@ -49,11 +49,11 @@ namespace BUILTIN {
 class INode : public CReferenceTarget
 {
 public:
-	INode();
+	INode(CScene *scene);
 	virtual ~INode();
 
 	// class desc
-	static const ucchar *DisplayName;
+	static const ucstring DisplayName;
 	static const char *InternalName;
 	static const char *InternalNameUnknown;
 	static const NLMISC::CClassId ClassId;

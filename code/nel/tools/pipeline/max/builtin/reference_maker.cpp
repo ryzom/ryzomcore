@@ -63,7 +63,7 @@ namespace BUILTIN {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CReferenceMaker::CReferenceMaker()
+CReferenceMaker::CReferenceMaker(CScene *scene) : CAnimatable(scene)
 {
 
 }
@@ -81,7 +81,7 @@ CReferenceMaker::~CReferenceMaker()
 	}
 }
 
-const ucchar *CReferenceMaker::DisplayName = ucstring("ReferenceMaker").c_str();
+const ucstring CReferenceMaker::DisplayName = ucstring("ReferenceMaker");
 const char *CReferenceMaker::InternalName = "ReferenceMaker";
 const char *CReferenceMaker::InternalNameUnknown = "ReferenceMakerUnknown";
 const NLMISC::CClassId CReferenceMaker::ClassId = NLMISC::CClassId(0x2ec43d15, 0x10a270ad); /* Not official, please correct */

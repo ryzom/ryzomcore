@@ -1,9 +1,9 @@
 /**
- * \file reference_maker.h
- * \brief CReferenceMaker
- * \date 2012-08-22 08:52GMT
+ * \file node_impl.h
+ * \brief CNodeImpl
+ * \date 2012-08-22 20:01GMT
  * \author Jan Boon (Kaetemi)
- * CReferenceMaker
+ * CNodeImpl
  */
 
 /*
@@ -25,8 +25,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIPELINE_REFERENCE_MAKER_H
-#define PIPELINE_REFERENCE_MAKER_H
+#ifndef PIPELINE_NODE_IMPL_H
+#define PIPELINE_NODE_IMPL_H
 #include <nel/misc/types_nl.h>
 
 // STL includes
@@ -34,29 +34,27 @@
 // NeL includes
 
 // Project includes
-#include "../storage_array.h"
-#include "animatable.h"
+#include "i_node.h"
 
 namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
 /**
- * \brief CReferenceMaker
- * \date 2012-08-22 08:52GMT
+ * \brief CNodeImpl
+ * \date 2012-08-22 20:01GMT
  * \author Jan Boon (Kaetemi)
- * This class implements references
+ * CNodeImpl
  */
-class CReferenceMaker : public CAnimatable
+class CNodeImpl : public INode
 {
 public:
-	CReferenceMaker(CScene *scene);
-	virtual ~CReferenceMaker();
+	CNodeImpl(CScene *scene);
+	virtual ~CNodeImpl();
 
 	// class desc
 	static const ucstring DisplayName;
 	static const char *InternalName;
-	static const char *InternalNameUnknown;
 	static const NLMISC::CClassId ClassId;
 	static const TSClassId SuperClassId;
 
@@ -74,22 +72,15 @@ protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 
-private:
-	CStorageArray<sint32> *m_References2034;
-	CStorageArray<sint32> *m_References2035;
-	CStorageValue<uint8> *m_204B_Equals_2E;
+}; /* class CNodeImpl */
 
-}; /* class CReferenceMaker */
-
-typedef CSceneClassDesc<CReferenceMaker> CReferenceMakerClassDesc;
-extern const CReferenceMakerClassDesc ReferenceMakerClassDesc;
-typedef CSuperClassDesc<CReferenceMaker> CReferenceMakerSuperClassDesc;
-extern const CReferenceMakerSuperClassDesc ReferenceMakerSuperClassDesc;
+typedef CSceneClassDesc<CNodeImpl> CNodeImplClassDesc;
+extern const CNodeImplClassDesc NodeImplClassDesc;
 
 } /* namespace BUILTIN */
 } /* namespace MAX */
 } /* namespace PIPELINE */
 
-#endif /* #ifndef PIPELINE_REFERENCE_MAKER_H */
+#endif /* #ifndef PIPELINE_NODE_IMPL_H */
 
 /* end of file */

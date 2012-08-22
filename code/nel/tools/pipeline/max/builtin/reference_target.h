@@ -45,15 +45,16 @@ namespace BUILTIN {
  * \date 2012-08-22 08:53GMT
  * \author Jan Boon (Kaetemi)
  * Dummy class, supposed to send or receive events or something.
+ * Nice for copy pasting the basic class layout.
  */
 class CReferenceTarget : public CReferenceMaker
 {
 public:
-	CReferenceTarget();
+	CReferenceTarget(CScene *scene);
 	virtual ~CReferenceTarget();
 
 	// class desc
-	static const ucchar *DisplayName;
+	static const ucstring DisplayName;
 	static const char *InternalName;
 	static const char *InternalNameUnknown;
 	static const NLMISC::CClassId ClassId;

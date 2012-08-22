@@ -49,7 +49,7 @@ namespace BUILTIN {
 class CPolyObject : public CObject
 {
 public:
-	CPolyObject();
+	CPolyObject(CScene *scene);
 	virtual ~CPolyObject();
 
 }; /* class CPolyObject */

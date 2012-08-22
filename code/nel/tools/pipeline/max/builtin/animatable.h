@@ -55,11 +55,11 @@ class CAppData;
 class CAnimatable : public CSceneClass
 {
 public:
-	CAnimatable();
+	CAnimatable(CScene *scene);
 	virtual ~CAnimatable();
 
 	// class desc
-	static const ucchar *DisplayName;
+	static const ucstring DisplayName;
 	static const char *InternalName;
 	static const char *InternalNameUnknown;
 	static const NLMISC::CClassId ClassId;

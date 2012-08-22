@@ -44,6 +44,7 @@
 namespace PIPELINE {
 namespace MAX {
 
+class CScene;
 class ISceneClassDesc;
 
 /**
@@ -64,7 +65,7 @@ class ISceneClassDesc;
 class CSceneClass : public CStorageContainer, public NLMISC::CRefCount
 {
 public:
-	CSceneClass();
+	CSceneClass(CScene *scene);
 	virtual ~CSceneClass();
 
 	//! \name Inherited functions that are implemented by wrapping around other virtual functions in this class
@@ -93,7 +94,7 @@ public:
 
 	//! \name Static const variables for the class description
 	//@{
-	static const ucchar *DisplayName;
+	static const ucstring DisplayName;
 	static const char *InternalName;
 	static const NLMISC::CClassId ClassId;
 	static const TSClassId SuperClassId;
@@ -131,6 +132,8 @@ private:
 	TStorageObjectContainer m_OrphanedChunks;
 	TStorageObjectIterator m_PutChunkInsert;
 
+	CScene *m_Scene;
+
 }; /* class CSceneClass */
 
 /**
@@ -142,7 +145,7 @@ private:
 class ISceneClassDesc
 {
 public:
-	virtual CSceneClass *create() const = 0;
+	virtual CSceneClass *create(CScene *scene) const = 0;
 	virtual void destroy(CSceneClass *sc) const = 0;
 	virtual const ucchar *displayName() const = 0;
 	virtual const char *internalName() const = 0;
@@ -164,9 +167,9 @@ class CSceneClassDesc : public ISceneClassDesc
 {
 public:
 	CSceneClassDesc(const IDllPluginDescInternal *dllPluginDesc) : m_DllPluginDesc(dllPluginDesc) { }
-	virtual CSceneClass *create() const { return static_cast<CSceneClass *>(new T()); }
+	virtual CSceneClass *create(CScene *scene) const { return static_cast<CSceneClass *>(new T(scene)); }
 	virtual void destroy(CSceneClass *sc) const { delete static_cast<T *>(sc); }
-	virtual const ucchar *displayName() const { return T::DisplayName; }
+	virtual const ucchar *displayName() const { return T::DisplayName.c_str(); }
 	virtual const char *internalName() const { return T::InternalName; }
 	virtual NLMISC::CClassId classId() const { return T::ClassId; }
 	virtual TSClassId superClassId() const { return T::SuperClassId; }

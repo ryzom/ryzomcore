@@ -50,7 +50,7 @@ class CTriObject : public CObject
 {
 
 public:
-	CTriObject();
+	CTriObject(CScene *scene);
 	virtual ~CTriObject();
 
 }; /* class CTriObject */

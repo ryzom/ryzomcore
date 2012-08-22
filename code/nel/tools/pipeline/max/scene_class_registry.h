@@ -63,10 +63,10 @@ public:
 	void remove(const TSClassId superClassId);
 
 	/// Create a class by class id
-	CSceneClass *create(TSClassId superClassId, const NLMISC::CClassId classId) const;
+	CSceneClass *create(CScene *scene, TSClassId superClassId, const NLMISC::CClassId classId) const;
 
 	/// Create an unknown class by superclass id
-	CSceneClass *createUnknown(TSClassId superClassId, const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const;
+	CSceneClass *createUnknown(CScene *scene, TSClassId superClassId, const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const;
 
 	/// Destroy a class by pointer
 	void destroy(CSceneClass *sceneClass) const;

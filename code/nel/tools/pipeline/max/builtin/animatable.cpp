@@ -43,7 +43,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CAnimatable::CAnimatable() : m_AppData(NULL)
+CAnimatable::CAnimatable(CScene *scene) : CSceneClass(scene), m_AppData(NULL)
 {
 
 }
@@ -57,7 +57,7 @@ CAnimatable::~CAnimatable()
 	}
 }
 
-const ucchar *CAnimatable::DisplayName = ucstring("Animatable").c_str();
+const ucstring CAnimatable::DisplayName = ucstring("Animatable");
 const char *CAnimatable::InternalName = "Animatable";
 const char *CAnimatable::InternalNameUnknown = "AnimatableUnknown";
 const NLMISC::CClassId CAnimatable::ClassId = NLMISC::CClassId(0x3101497b, 0x24af711b); /* Not official, please correct */

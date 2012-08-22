@@ -49,7 +49,7 @@ class ISuperClassDesc
 {
 public:
 	/// Create an unknown class that inherits from this superclass
-	virtual CSceneClass *createUnknown(const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const = 0;
+	virtual CSceneClass *createUnknown(CScene *scene, const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const = 0;
 	/// Get an internal name associated with unknown classes of this superclass
 	virtual const char *internalNameUnknown() const = 0;
 	/// Gets the associated super class id, may be different from classDesc()->superClassId() for non-implemented superclasses
@@ -70,7 +70,7 @@ class CSuperClassDesc : public ISuperClassDesc
 {
 public:
 	CSuperClassDesc(const ISceneClassDesc *classDesc) : m_ClassDesc(classDesc) { }
-	virtual CSceneClass *createUnknown(const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const { return static_cast<CSceneClass *>(new CSceneClassUnknown<T>(classId, m_ClassDesc->superClassId(), displayName,internalNameUnknown(), dllFilename, dllDescription)); }
+	virtual CSceneClass *createUnknown(CScene *scene, const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const { return static_cast<CSceneClass *>(new CSceneClassUnknown<T>(scene, classId, m_ClassDesc->superClassId(), displayName,internalNameUnknown(), dllFilename, dllDescription)); }
 	virtual const char *internalNameUnknown() const { return T::InternalNameUnknown; }
 	virtual TSClassId superClassId() const { return m_ClassDesc->superClassId(); }
 	virtual const ISceneClassDesc *classDesc() const { return m_ClassDesc; }
@@ -89,7 +89,7 @@ class CSuperClassDescUnknown : public ISuperClassDesc
 {
 public:
 	CSuperClassDescUnknown(const ISceneClassDesc *classDesc, const char *internalNameUnknown) : m_ClassDesc(classDesc), m_InternalNameUnknown(internalNameUnknown) { }
-	virtual CSceneClass *createUnknown(const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const { return static_cast<CSceneClass *>(new CSceneClassUnknown<T>(classId, SuperClassId, displayName,internalNameUnknown(), dllFilename, dllDescription)); }
+	virtual CSceneClass *createUnknown(CScene *scene, const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const { return static_cast<CSceneClass *>(new CSceneClassUnknown<T>(scene, classId, SuperClassId, displayName,internalNameUnknown(), dllFilename, dllDescription)); }
 	virtual const char *internalNameUnknown() const { return m_InternalNameUnknown; }
 	virtual TSClassId superClassId() const { return SuperClassId; }
 	virtual const ISceneClassDesc *classDesc() const { return m_ClassDesc; }

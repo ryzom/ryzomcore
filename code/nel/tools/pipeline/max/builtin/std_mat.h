@@ -49,7 +49,7 @@ namespace BUILTIN {
 class CStdMat : public CMtl
 {
 public:
-	CStdMat();
+	CStdMat(CScene *scene);
 	virtual ~CStdMat();
 
 }; /* class CStdMat */

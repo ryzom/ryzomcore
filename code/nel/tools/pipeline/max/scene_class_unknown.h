@@ -68,7 +68,7 @@ class CSceneClassUnknownDesc : public ISceneClassDesc
 {
 public:
 	CSceneClassUnknownDesc(const NLMISC::CClassId classId, const TSClassId superClassId, const ucstring &displayName, const std::string &internalName, const ucstring &dllFilename, const ucstring &dllDescription);
-	virtual CSceneClass *create() const;
+	virtual CSceneClass *create(CScene *scene) const;
 	virtual void destroy(CSceneClass *sc) const;
 	virtual const ucchar *displayName() const;
 	virtual const char *internalName() const;
@@ -96,7 +96,7 @@ template <typename TSuperClass>
 class CSceneClassUnknown : public TSuperClass
 {
 public:
-	CSceneClassUnknown(const NLMISC::CClassId classId, const TSClassId superClassId, const ucstring &displayName, const std::string &internalName, const ucstring &dllFilename, const ucstring &dllDescription) : m_Desc(classId, superClassId, displayName, internalName, dllFilename, dllDescription) { }
+	CSceneClassUnknown(CScene *scene, const NLMISC::CClassId classId, const TSClassId superClassId, const ucstring &displayName, const std::string &internalName, const ucstring &dllFilename, const ucstring &dllDescription) : TSuperClass(scene), m_Desc(classId, superClassId, displayName, internalName, dllFilename, dllDescription) { }
 	virtual ~CSceneClassUnknown() { }
 
 	// inherited

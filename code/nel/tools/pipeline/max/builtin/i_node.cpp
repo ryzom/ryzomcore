@@ -42,7 +42,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-INode::INode()
+INode::INode(CScene *scene) : CReferenceTarget(scene)
 {
 
 }
@@ -52,7 +52,7 @@ INode::~INode()
 
 }
 
-const ucchar *INode::DisplayName = ucstring("Node").c_str();
+const ucstring INode::DisplayName = ucstring("Node Interface");
 const char *INode::InternalName = "Node";
 const char *INode::InternalNameUnknown = "NodeUnknown";
 const NLMISC::CClassId INode::ClassId = NLMISC::CClassId(0x8f5b13, 0x624d477d); /* Not official, please correct */

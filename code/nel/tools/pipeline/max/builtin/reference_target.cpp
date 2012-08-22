@@ -42,7 +42,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CReferenceTarget::CReferenceTarget()
+CReferenceTarget::CReferenceTarget(CScene *scene) : CReferenceMaker(scene)
 {
 
 }
@@ -52,7 +52,7 @@ CReferenceTarget::~CReferenceTarget()
 
 }
 
-const ucchar *CReferenceTarget::DisplayName = ucstring("ReferenceTarget").c_str();
+const ucstring CReferenceTarget::DisplayName = ucstring("ReferenceTarget");
 const char *CReferenceTarget::InternalName = "ReferenceTarget";
 const char *CReferenceTarget::InternalNameUnknown = "ReferenceTargetUnknown";
 const NLMISC::CClassId CReferenceTarget::ClassId = NLMISC::CClassId(0x5d545dd9, 0xa422e4); /* Not official, please correct */

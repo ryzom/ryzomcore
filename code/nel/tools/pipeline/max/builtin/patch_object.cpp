@@ -42,7 +42,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CPatchObject::CPatchObject()
+CPatchObject::CPatchObject(CScene *scene) : CObject(scene)
 {
 
 }

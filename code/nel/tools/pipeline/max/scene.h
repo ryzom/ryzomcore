@@ -93,7 +93,7 @@ private:
 class CSceneClassContainer : public CStorageContainer
 {
 public:
-	CSceneClassContainer(const CSceneClassRegistry *sceneClassRegistry, CDllDirectory *dllDirectory, CClassDirectory3 *classDirectory3);
+	CSceneClassContainer(CScene *scene, const CSceneClassRegistry *sceneClassRegistry, CDllDirectory *dllDirectory, CClassDirectory3 *classDirectory3);
 	virtual ~CSceneClassContainer();
 
 	// inherited
@@ -104,13 +104,25 @@ public:
 	virtual void build(uint16 version);
 	virtual void disown();
 
+	/// Use while parsing to get an object by it's index
+	CSceneClass *getByStorageIndex(uint32 index) const;
+	/// Use while building to get an index for an object
+	uint32 getOrCreateStorageIndex(CSceneClass *storageObject);
+
+	/// TODO: Evaluate the references tree to build new indexes.
+
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 
 private:
+	CScene *m_Scene;
+
 	const CSceneClassRegistry *m_SceneClassRegistry;
 	CDllDirectory *m_DllDirectory;
 	CClassDirectory3 *m_ClassDirectory3;
+
+	std::vector<IStorageObject *> m_StorageObjectByIndex;
+	std::map<IStorageObject *, uint32> m_StorageObjectToIndex;
 
 }; /* class CSceneClassContainer */
 

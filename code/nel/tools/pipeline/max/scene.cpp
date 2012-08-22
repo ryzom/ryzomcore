@@ -110,7 +110,7 @@ IStorageObject *CScene::createChunkById(uint16 id, bool container)
 	if (container)
 	{
 		// Return the scene class container. There can be only one.
-		return new CSceneClassContainer(m_SceneClassRegistry, m_DllDirectory, m_ClassDirectory3);
+		return new CSceneClassContainer(this, m_SceneClassRegistry, m_DllDirectory, m_ClassDirectory3);
 	}
 	return CStorageContainer::createChunkById(id, container);
 }
@@ -119,7 +119,7 @@ IStorageObject *CScene::createChunkById(uint16 id, bool container)
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CSceneClassContainer::CSceneClassContainer(const CSceneClassRegistry *sceneClassRegistry, CDllDirectory *dllDirectory, CClassDirectory3 *classDirectory3) : m_SceneClassRegistry(sceneClassRegistry), m_DllDirectory(dllDirectory), m_ClassDirectory3(classDirectory3)
+CSceneClassContainer::CSceneClassContainer(CScene *scene, const CSceneClassRegistry *sceneClassRegistry, CDllDirectory *dllDirectory, CClassDirectory3 *classDirectory3) : m_Scene(scene), m_SceneClassRegistry(sceneClassRegistry), m_DllDirectory(dllDirectory), m_ClassDirectory3(classDirectory3)
 {
 
 }
@@ -167,11 +167,11 @@ IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 		// Known unknown special identifiers...
 	case 0x2032:
 	case 0x2033:
-		return new CSceneClass(); // TODO: Make dummy dllentry and classentry for these...
+		return new CSceneClass(m_Scene); // TODO: Make dummy dllentry and classentry for these...
 		// return static_cast<IStorageObject *>(new CSceneClassUnknown<CSceneClass>(dllEntry, classEntry));
 	}
 	const CClassEntry *classEntry = m_ClassDirectory3->get(id);
-	CSceneClass *sceneClass = m_SceneClassRegistry->create(classEntry->superClassId(), classEntry->classId());
+	CSceneClass *sceneClass = m_SceneClassRegistry->create(m_Scene, classEntry->superClassId(), classEntry->classId());
 	if (sceneClass)
 	{
 		return static_cast<IStorageObject *>(sceneClass);
@@ -179,7 +179,7 @@ IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 	else
 	{
 		const CDllEntry *dllEntry = m_DllDirectory->get(classEntry->dllIndex());
-		sceneClass = m_SceneClassRegistry->createUnknown(classEntry->superClassId(), classEntry->classId(), classEntry->displayName(), dllEntry->dllFilename(), dllEntry->dllDescription());
+		sceneClass = m_SceneClassRegistry->createUnknown(m_Scene, classEntry->superClassId(), classEntry->classId(), classEntry->displayName(), dllEntry->dllFilename(), dllEntry->dllDescription());
 		if (sceneClass)
 		{
 			return static_cast<IStorageObject *>(sceneClass);
@@ -187,7 +187,7 @@ IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 		else
 		{
 			// Create an invalid unknown scene class
-			return static_cast<IStorageObject *>(new CSceneClassUnknown<CSceneClass>(classEntry->classId(), classEntry->superClassId(), classEntry->displayName(), "SceneClassUnknown", dllEntry->dllFilename(), dllEntry->dllDescription()));
+			return static_cast<IStorageObject *>(new CSceneClassUnknown<CSceneClass>(m_Scene,classEntry->classId(), classEntry->superClassId(), classEntry->displayName(), "SceneClassUnknown", dllEntry->dllFilename(), dllEntry->dllDescription()));
 		}
 	}
 }

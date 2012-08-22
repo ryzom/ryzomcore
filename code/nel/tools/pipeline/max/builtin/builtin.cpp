@@ -35,10 +35,13 @@
 
 // Project includes
 #include "../scene_class_registry.h"
+
 #include "animatable.h"
 #include "reference_maker.h"
 #include "reference_target.h"
+
 #include "i_node.h"
+#include "node_impl.h"
 
 // using namespace std;
 // using namespace NLMISC;
@@ -204,6 +207,9 @@ CBuiltin::~CBuiltin()
 
 void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 {
+	// invalid
+	registry->add(&NullSuperClassDesc);
+
 	// available
 	registry->add(&AnimatableClassDesc);
 	registry->add(&AnimatableSuperClassDesc);
@@ -212,11 +218,12 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&ReferenceTargetClassDesc);
 	registry->add(&ReferenceTargetSuperClassDesc);
 
-	registry->add(&NodeClassDesc);
+	// node
 	registry->add(&NodeSuperClassDesc);
-
-	// invalid
-	registry->add(&NullSuperClassDesc);
+	{
+		registry->add(&NodeClassDesc);
+		registry->add(&NodeImplClassDesc);
+	}
 
 	// unimplemented
 	registry->add(&ControlFloatSuperClassDesc);

@@ -61,7 +61,7 @@ namespace MAX {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CSceneClass::CSceneClass()
+CSceneClass::CSceneClass(CScene *scene) : m_Scene(scene)
 {
 
 }
@@ -184,7 +184,7 @@ IStorageObject *CSceneClass::createChunkById(uint16 id, bool container)
 	return CStorageContainer::createChunkById(id, container);
 }
 
-const ucchar *CSceneClass::DisplayName = ucstring("Invalid Scene Class").c_str();
+const ucstring CSceneClass::DisplayName = ucstring("Invalid Scene Class");
 const char *CSceneClass::InternalName = "SceneClass";
 const NLMISC::CClassId CSceneClass::ClassId = NLMISC::CClassId::Null; // This class is invalid
 const TSClassId CSceneClass::SuperClassId = 0x0000; // This class is invalid

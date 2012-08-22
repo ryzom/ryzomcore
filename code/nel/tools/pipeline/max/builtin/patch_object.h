@@ -49,7 +49,7 @@ namespace BUILTIN {
 class CPatchObject : public CObject
 {
 public:
-	CPatchObject();
+	CPatchObject(CScene *scene);
 	virtual ~CPatchObject();
 
 }; /* class CPatchObject */

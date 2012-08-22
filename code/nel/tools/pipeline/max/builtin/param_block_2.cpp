@@ -42,7 +42,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CParamBlock2::CParamBlock2()
+CParamBlock2::CParamBlock2(CScene *scene) : CReferenceTarget(scene)
 {
 
 }

@@ -98,18 +98,18 @@ void CSceneClassRegistry::remove(const TSClassId superClassId)
 }
 
 /// Create a class by class id
-CSceneClass *CSceneClassRegistry::create(const TSClassId superClassId, const NLMISC::CClassId classId) const
+CSceneClass *CSceneClassRegistry::create(CScene *scene, const TSClassId superClassId, const NLMISC::CClassId classId) const
 {
 	TKey key(superClassId, classId);
 	if (m_ClassDescriptions.find(key) == m_ClassDescriptions.end()) { /* nldebug("Try to create class that does not exist"); */ return NULL; }
-	return m_ClassDescriptions.find(key)->second->create();
+	return m_ClassDescriptions.find(key)->second->create(scene);
 }
 
 /// Create an unknown class by superclass id
-CSceneClass *CSceneClassRegistry::createUnknown(TSClassId superClassId, const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const
+CSceneClass *CSceneClassRegistry::createUnknown(CScene *scene, TSClassId superClassId, const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const
 {
 	if (m_SuperClassDescriptions.find(superClassId) == m_SuperClassDescriptions.end()) { nlwarning("Creating superclass 0x%x (%s) %s that does not exist", superClassId, displayName.toUtf8().c_str(), classId.toString().c_str()); return NULL; }
-	return m_SuperClassDescriptions.find(superClassId)->second->createUnknown(classId, displayName, dllFilename, dllDescription);
+	return m_SuperClassDescriptions.find(superClassId)->second->createUnknown(scene, classId, displayName, dllFilename, dllDescription);
 }
 
 /// Destroy a class by pointer

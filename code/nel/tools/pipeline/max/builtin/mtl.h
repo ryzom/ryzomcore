@@ -49,7 +49,7 @@ namespace BUILTIN {
 class CMtl : public CMtlBase
 {
 public:
-	CMtl();
+	CMtl(CScene *scene);
 	virtual ~CMtl();
 
 }; /* class CMtl */

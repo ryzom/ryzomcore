@@ -42,7 +42,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CPolyObject::CPolyObject()
+CPolyObject::CPolyObject(CScene *scene) : CObject(scene)
 {
 
 }

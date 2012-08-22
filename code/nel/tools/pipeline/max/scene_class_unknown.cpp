@@ -69,7 +69,7 @@ CSceneClassUnknownDesc::CSceneClassUnknownDesc(const NLMISC::CClassId classId, c
 
 }
 
-CSceneClass *CSceneClassUnknownDesc::create() const
+CSceneClass *CSceneClassUnknownDesc::create(CScene *scene) const
 {
 	nlassert(false);
 }

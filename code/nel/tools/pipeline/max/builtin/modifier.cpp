@@ -42,7 +42,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CModifier::CModifier()
+CModifier::CModifier(CScene *scene) : CBaseObject(scene)
 {
 
 }

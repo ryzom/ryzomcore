@@ -49,7 +49,7 @@ namespace BUILTIN {
 class CMtlBase : public CReferenceTarget
 {
 public:
-	CMtlBase();
+	CMtlBase(CScene *scene);
 	virtual ~CMtlBase();
 
 }; /* class CMtlBase */

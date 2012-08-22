@@ -49,7 +49,7 @@ namespace BUILTIN {
 class CTexmap : public CMtlBase
 {
 public:
-	CTexmap();
+	CTexmap(CScene *scene);
 	virtual ~CTexmap();
 
 }; /* class CTexmap */

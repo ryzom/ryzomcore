@@ -42,7 +42,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CTexmap::CTexmap()
+CTexmap::CTexmap(CScene *scene) : CMtlBase(scene)
 {
 
 }
