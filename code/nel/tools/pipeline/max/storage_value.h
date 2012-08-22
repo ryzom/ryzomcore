@@ -50,9 +50,9 @@ public:
 	TType Value;
 
 	// inherited
-	virtual std::string getClassName();
+	virtual std::string className() const;
 	virtual void serial(NLMISC::IStream &stream);
-	virtual void toString(std::ostream &ostream, const std::string &pad = "");
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
 
 public: // should be protected but that doesn't compile, nice c++!
 	// Sets size when reading
@@ -62,7 +62,7 @@ public: // should be protected but that doesn't compile, nice c++!
 };
 
 template <typename T>
-std::string CStorageValue<T>::getClassName()
+std::string CStorageValue<T>::className() const
 {
 	return "CStorageValue";
 }
@@ -80,14 +80,14 @@ template <>
 void CStorageValue<ucstring>::serial(NLMISC::IStream &stream);
 
 template <typename T>
-void CStorageValue<T>::toString(std::ostream &ostream, const std::string &pad)
+void CStorageValue<T>::toString(std::ostream &ostream, const std::string &pad) const
 {
 	std::string s = NLMISC::toString(Value);
-	ostream << "(" << getClassName() << ") { " << s << " } ";
+	ostream << "(" << className() << ") { " << s << " } ";
 }
 
 template <>
-void CStorageValue<ucstring>::toString(std::ostream &ostream, const std::string &pad);
+void CStorageValue<ucstring>::toString(std::ostream &ostream, const std::string &pad) const;
 
 template <typename T>
 void CStorageValue<T>::setSize(sint32 size)

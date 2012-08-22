@@ -74,8 +74,8 @@ public:
 	virtual ~CAppData();
 
 	// inherited
-	virtual std::string getClassName();
-	virtual void toString(std::ostream &ostream, const std::string &pad = "");
+	virtual std::string className() const;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
 	virtual void parse(uint16 version, TParseLevel level);
 	virtual void clean();
 	virtual void build(uint16 version);
@@ -128,9 +128,9 @@ public:
 	uint32 Size;
 
 	// inherited
-	virtual std::string getClassName();
+	virtual std::string className() const;
 	virtual void serial(NLMISC::IStream &stream);
-	virtual void toString(std::ostream &ostream, const std::string &pad = "");
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
 
 }; /* class CAppDataEntryKey */
 
@@ -147,8 +147,8 @@ public:
 	virtual ~CAppDataEntry();
 
 	// inherited
-	virtual std::string getClassName();
-	virtual void toString(std::ostream &ostream, const std::string &pad = "");
+	virtual std::string className() const;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
 	virtual void parse(uint16 version, TParseLevel level);
 	virtual void clean();
 	virtual void build(uint16 version);

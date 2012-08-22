@@ -52,7 +52,29 @@ public:
 	CReferenceMaker();
 	virtual ~CReferenceMaker();
 
+	// class desc
+	static const ucchar *DisplayName;
+	static const char *InternalName;
+	static const char *InternalNameUnknown;
+	static const NLMISC::CClassId ClassId;
+	static const TSClassId SuperClassId;
+
+	// inherited
+	virtual void parse(uint16 version, TParseLevel level);
+	virtual void clean();
+	virtual void build(uint16 version);
+	virtual void disown();
+	virtual void init();
+	virtual bool inherits(const NLMISC::CClassId classId) const;
+	virtual const ISceneClassDesc *classDesc() const;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
+
 }; /* class CReferenceMaker */
+
+typedef CSceneClassDesc<CReferenceMaker> CReferenceMakerClassDesc;
+extern const CReferenceMakerClassDesc ReferenceMakerClassDesc;
+typedef CSuperClassDesc<CReferenceMaker> CReferenceMakerSuperClassDesc;
+extern const CReferenceMakerSuperClassDesc ReferenceMakerSuperClassDesc;
 
 } /* namespace BUILTIN */
 } /* namespace MAX */

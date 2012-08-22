@@ -75,6 +75,24 @@ private:
 	const ISceneClassDesc *m_ClassDesc;
 }; /* class ISceneClassDesc */
 
+/**
+ * \brief CSuperClassDescUnknown
+ * \date 2012-08-22 09:42GMT
+ * \author Jan Boon (Kaetemi)
+ * Template for non-implemented superclass descriptions
+ */
+template <typename T, TSClassId superClassId>
+class CSuperClassDescUnknown : public ISuperClassDesc
+{
+public:
+	CSuperClassDescUnknown(const ISceneClassDesc *classDesc) : m_ClassDesc(classDesc) { }
+	virtual CSceneClass *createUnknown(const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const { return static_cast<CSceneClass *>(new CSceneClassUnknown<T>(classId, superClassId, displayName,internalNameUnknown(), dllFilename, dllDescription)); }
+	virtual const char *internalNameUnknown() const { return T::InternalNameUnknown; }
+	virtual const ISceneClassDesc *classDesc() const { return m_ClassDesc; }
+private:
+	const ISceneClassDesc *m_ClassDesc;
+}; /* class ISceneClassDesc */
+
 } /* namespace MAX */
 } /* namespace PIPELINE */
 

@@ -29,6 +29,7 @@
 
 // Testing
 #include "../max/builtin/storage/app_data.h"
+#include "../max/builtin/builtin.h"
 
 static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
 //static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
@@ -47,6 +48,7 @@ int main(int argc, char **argv)
 
 
 	PIPELINE::MAX::CSceneClassRegistry sceneClassRegistry;
+	PIPELINE::MAX::BUILTIN::CBuiltin::registerClasses(&sceneClassRegistry);
 
 
 	GsfInfile *infile;

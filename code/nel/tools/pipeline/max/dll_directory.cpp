@@ -70,13 +70,13 @@ CDllDirectory::~CDllDirectory()
 	m_Entries.clear();
 }
 
-std::string CDllDirectory::getClassName()
+std::string CDllDirectory::className() const
 {
 	return "DllDirectory";
 }
 
 // Parallel to CClassDirectory3
-void CDllDirectory::toString(std::ostream &ostream, const std::string &pad)
+void CDllDirectory::toString(std::ostream &ostream, const std::string &pad) const
 {
 	if (m_ChunksOwnsPointers)
 	{
@@ -84,7 +84,7 @@ void CDllDirectory::toString(std::ostream &ostream, const std::string &pad)
 	}
 	else
 	{
-		ostream << "(" << getClassName() << ") [" << m_Chunks.size() << "] PARSED { ";
+		ostream << "(" << className() << ") [" << m_Chunks.size() << "] PARSED { ";
 		std::string padpad = pad + "\t";
 		sint i = 0;
 		for (TStorageObjectContainer::const_iterator it = m_ChunkCache.begin(), end = m_ChunkCache.end(); it != end; ++it)
@@ -95,7 +95,7 @@ void CDllDirectory::toString(std::ostream &ostream, const std::string &pad)
 			case 0x2038: // DllEntry
 				{
 					uint subi = 0;
-					for (std::vector<CDllEntry *>::iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
+					for (std::vector<CDllEntry *>::const_iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
 					{
 						ostream << "\n" << pad << "Entries[" << subi << "]: ";
 						(*subit)->toString(ostream, padpad);
@@ -342,16 +342,16 @@ CDllEntry::~CDllEntry()
 
 }
 
-std::string CDllEntry::getClassName()
+std::string CDllEntry::className() const
 {
 	return "DllEntry";
 }
 
-void CDllEntry::toString(std::ostream &ostream, const std::string &pad)
+void CDllEntry::toString(std::ostream &ostream, const std::string &pad) const
 {
 	if (m_DllDescription && m_DllFilename)
 	{
-		ostream << "(" << getClassName() << ") [" << m_Chunks.size() << "] PARSED { ";
+		ostream << "(" << className() << ") [" << m_Chunks.size() << "] PARSED { ";
 		std::string padpad = pad + "\t";
 		ostream << "\n" << pad << "DllDescription: " << m_DllDescription->Value.toUtf8();
 		ostream << "\n" << pad << "DllFilename: " << m_DllFilename->Value.toUtf8();

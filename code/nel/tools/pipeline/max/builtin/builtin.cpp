@@ -60,6 +60,10 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 {
 	registry->add(&AnimatableClassDesc);
 	registry->add(&AnimatableSuperClassDesc);
+	registry->add(&ReferenceMakerClassDesc);
+	registry->add(&ReferenceMakerSuperClassDesc);
+	registry->add(&ReferenceTargetClassDesc);
+	registry->add(&ReferenceTargetSuperClassDesc);
 }
 
 } /* namespace BUILTIN */

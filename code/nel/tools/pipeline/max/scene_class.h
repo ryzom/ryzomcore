@@ -59,8 +59,8 @@ public:
 
 	//! \name Inherited functions that are implemented by wrapping around other virtual functions in this class
 	//@{
-	virtual std::string getClassName(); // do not override, implemented using classDesc
-	virtual void toString(std::ostream &ostream, const std::string &pad = ""); // do not override, implemented using toStringLocal
+	virtual std::string className() const; // do not override, implemented using classDesc
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const; // do not override, implemented using toStringLocal
 	//@}
 
 	//! \name Inherited functions called through the storage loading and saving system

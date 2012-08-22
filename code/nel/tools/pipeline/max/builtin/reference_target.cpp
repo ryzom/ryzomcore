@@ -52,6 +52,55 @@ CReferenceTarget::~CReferenceTarget()
 
 }
 
+const ucchar *CReferenceTarget::DisplayName = ucstring("ReferenceTarget").c_str();
+const char *CReferenceTarget::InternalName = "ReferenceTarget";
+const char *CReferenceTarget::InternalNameUnknown = "ReferenceTargetUnknown";
+const NLMISC::CClassId CReferenceTarget::ClassId = NLMISC::CClassId(0x5d545dd9, 0xa422e4); /* Not official, please correct */
+const TSClassId CReferenceTarget::SuperClassId = 0x00000200;
+const CReferenceTargetClassDesc ReferenceTargetClassDesc(&DllPluginDescBuiltin);
+const CReferenceTargetSuperClassDesc ReferenceTargetSuperClassDesc(&ReferenceTargetClassDesc);
+
+void CReferenceTarget::parse(uint16 version, TParseLevel level)
+{
+	CReferenceMaker::parse(version, level);
+}
+
+void CReferenceTarget::clean()
+{
+	CReferenceMaker::clean();
+}
+
+void CReferenceTarget::build(uint16 version)
+{
+	CReferenceMaker:build(version);
+}
+
+void CReferenceTarget::disown()
+{
+	CReferenceMaker::disown();
+}
+
+void CReferenceTarget::init()
+{
+	CReferenceMaker::init();
+}
+
+bool CReferenceTarget::inherits(const NLMISC::CClassId classId) const
+{
+	if (classId == classDesc()->classId()) return true;
+	return CReferenceMaker::inherits(classId);
+}
+
+const ISceneClassDesc *CReferenceTarget::classDesc() const
+{
+	return &ReferenceTargetClassDesc;
+}
+
+void CReferenceTarget::toStringLocal(std::ostream &ostream, const std::string &pad) const
+{
+	CReferenceMaker::toStringLocal(ostream, pad);
+}
+
 } /* namespace BUILTIN */
 } /* namespace MAX */
 } /* namespace PIPELINE */

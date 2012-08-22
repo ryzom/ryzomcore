@@ -72,13 +72,13 @@ CClassDirectory3::~CClassDirectory3()
 	m_ClassIdToIndex.clear();
 }
 
-std::string CClassDirectory3::getClassName()
+std::string CClassDirectory3::className() const
 {
 	return "ClassDirectory3";
 }
 
 // Parallel to CDllDirectory
-void CClassDirectory3::toString(std::ostream &ostream, const std::string &pad)
+void CClassDirectory3::toString(std::ostream &ostream, const std::string &pad) const
 {
 	if (m_ChunksOwnsPointers)
 	{
@@ -86,7 +86,7 @@ void CClassDirectory3::toString(std::ostream &ostream, const std::string &pad)
 	}
 	else
 	{
-		ostream << "(" << getClassName() << ") [" << m_Chunks.size() << "] PARSED { ";
+		ostream << "(" << className() << ") [" << m_Chunks.size() << "] PARSED { ";
 		std::string padpad = pad + "\t";
 		sint i = 0;
 		for (TStorageObjectContainer::const_iterator it = m_ChunkCache.begin(), end = m_ChunkCache.end(); it != end; ++it)
@@ -97,7 +97,7 @@ void CClassDirectory3::toString(std::ostream &ostream, const std::string &pad)
 			case 0x2040: // ClassEntry
 				{
 					uint subi = 0;
-					for (std::vector<CClassEntry *>::iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
+					for (std::vector<CClassEntry *>::const_iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
 					{
 						ostream << "\n" << pad << "Entries[" << subi << "]: ";
 						(*subit)->toString(ostream, padpad);
@@ -315,16 +315,16 @@ CClassEntry::~CClassEntry()
 
 }
 
-std::string CClassEntry::getClassName()
+std::string CClassEntry::className() const
 {
 	return "ClassEntry";
 }
 
-void CClassEntry::toString(std::ostream &ostream, const std::string &pad)
+void CClassEntry::toString(std::ostream &ostream, const std::string &pad) const
 {
 	if (m_Header && m_Name)
 	{
-		ostream << "(" << getClassName() << ") [" << m_Chunks.size() << "] PARSED { ";
+		ostream << "(" << className() << ") [" << m_Chunks.size() << "] PARSED { ";
 		std::string padpad = pad + "\t";
 		ostream << "\n" << pad << "Header: ";
 		m_Header->toString(ostream, padpad);
@@ -400,7 +400,7 @@ CClassEntryHeader::~CClassEntryHeader()
 
 }
 
-std::string CClassEntryHeader::getClassName()
+std::string CClassEntryHeader::className() const
 {
 	return "ClassEntryHeader";
 }
@@ -412,9 +412,9 @@ void CClassEntryHeader::serial(NLMISC::IStream &stream)
 	stream.serial(SuperClassId);
 }
 
-void CClassEntryHeader::toString(std::ostream &ostream, const std::string &pad)
+void CClassEntryHeader::toString(std::ostream &ostream, const std::string &pad) const
 {
-	ostream << "(" << getClassName() << ") { ";
+	ostream << "(" << className() << ") { ";
 	ostream << "\n" << pad << "DllIndex: " << DllIndex;
 	ostream << "\n" << pad << "ClassId: " << NLMISC::toString(ClassId);
 	ostream << "\n" << pad << "SuperClassId: " << SuperClassId;

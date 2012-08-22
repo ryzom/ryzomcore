@@ -55,12 +55,12 @@ CClassData::~CClassData()
 
 }
 
-std::string CClassData::getClassName()
+std::string CClassData::className() const
 {
 	return "ClassData";
 }
 
-void CClassData::toString(std::ostream &ostream, const std::string &pad)
+void CClassData::toString(std::ostream &ostream, const std::string &pad) const
 {
 	CStorageContainer::toString(ostream, pad);
 }
@@ -112,12 +112,12 @@ CClassDataEntry::~CClassDataEntry()
 
 }
 
-std::string CClassDataEntry::getClassName()
+std::string CClassDataEntry::className() const
 {
 	return "ClassDataEntry";
 }
 
-void CClassDataEntry::toString(std::ostream &ostream, const std::string &pad)
+void CClassDataEntry::toString(std::ostream &ostream, const std::string &pad) const
 {
 	CStorageContainer::toString(ostream, pad);
 }
@@ -174,7 +174,7 @@ CClassDataHeader::~CClassDataHeader()
 
 }
 
-std::string CClassDataHeader::getClassName()
+std::string CClassDataHeader::className() const
 {
 	return "ClassDataHeader";
 }
@@ -185,9 +185,9 @@ void CClassDataHeader::serial(NLMISC::IStream &stream)
 	stream.serial(SuperClassID);
 }
 
-void CClassDataHeader::toString(std::ostream &ostream, const std::string &pad)
+void CClassDataHeader::toString(std::ostream &ostream, const std::string &pad) const
 {
-	ostream << "(" << getClassName() << ") { ";
+	ostream << "(" << className() << ") { ";
 	ostream << "\n" << pad << "ClassID: " << NLMISC::toString(ClassID);
 	ostream << "\n" << pad << "SuperClassID: " << SuperClassID;
 	ostream << " } ";

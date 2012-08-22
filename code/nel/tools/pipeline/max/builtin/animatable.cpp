@@ -56,7 +56,7 @@ const ucchar *CAnimatable::DisplayName = ucstring("Animatable").c_str();
 const char *CAnimatable::InternalName = "Animatable";
 const char *CAnimatable::InternalNameUnknown = "AnimatableUnknown";
 const NLMISC::CClassId CAnimatable::ClassId = NLMISC::CClassId(0x3101497b, 0x24af711b); /* Not official, please correct */
-const TSClassId CAnimatable::SuperClassId = 0x77a60fbd;/* Not official, please correct */
+const TSClassId CAnimatable::SuperClassId = 0x77a60fbd; /* Not official, please correct */
 const CAnimatableClassDesc AnimatableClassDesc(&DllPluginDescBuiltin);
 const CAnimatableSuperClassDesc AnimatableSuperClassDesc(&AnimatableClassDesc);
 

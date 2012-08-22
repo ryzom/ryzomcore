@@ -123,12 +123,12 @@ CAppData::~CAppData()
 
 }
 
-std::string CAppData::getClassName()
+std::string CAppData::className() const
 {
 	return "AppData";
 }
 
-void CAppData::toString(std::ostream &ostream, const std::string &pad)
+void CAppData::toString(std::ostream &ostream, const std::string &pad) const
 {
 	if (m_ChunksOwnsPointers)
 	{
@@ -136,10 +136,10 @@ void CAppData::toString(std::ostream &ostream, const std::string &pad)
 	}
 	else
 	{
-		ostream << "(" << getClassName() << ") [" << m_Entries.size() << "] PARSED { ";
+		ostream << "(" << className() << ") [" << m_Entries.size() << "] PARSED { ";
 		std::string padpad = pad + "\t";
 		uint subi = 0;
-		for (TMap::iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
+		for (TMap::const_iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
 		{
 			ostream << "\n" << pad << "Entries[" << subi << "]: ";
 			subit->second->toString(ostream, padpad);
@@ -330,7 +330,7 @@ CAppDataEntryKey::~CAppDataEntryKey()
 
 }
 
-std::string CAppDataEntryKey::getClassName()
+std::string CAppDataEntryKey::className() const
 {
 	return "AppDataEntryKey";
 }
@@ -343,9 +343,9 @@ void CAppDataEntryKey::serial(NLMISC::IStream &stream)
 	stream.serial(Size);
 }
 
-void CAppDataEntryKey::toString(std::ostream &ostream, const std::string &pad)
+void CAppDataEntryKey::toString(std::ostream &ostream, const std::string &pad) const
 {
-	ostream << "(" << getClassName() << ") { ";
+	ostream << "(" << className() << ") { ";
 	ostream << "\n" << pad << "ClassId: " << NLMISC::toString(ClassId);
 	ostream << "\n" << pad << "SuperClassId: " << SuperClassId;
 	ostream << "\n" << pad << "SubId: " << SubId;
@@ -367,16 +367,16 @@ CAppDataEntry::~CAppDataEntry()
 
 }
 
-std::string CAppDataEntry::getClassName()
+std::string CAppDataEntry::className() const
 {
 	return "AppDataEntry";
 }
 
-void CAppDataEntry::toString(std::ostream &ostream, const std::string &pad)
+void CAppDataEntry::toString(std::ostream &ostream, const std::string &pad) const
 {
 	if (m_Key && m_Value)
 	{
-		ostream << "(" << getClassName() << ") [" << m_Chunks.size() << "] PARSED { ";
+		ostream << "(" << className() << ") [" << m_Chunks.size() << "] PARSED { ";
 		std::string padpad = pad + "\t";
 		ostream << "\n" << pad << "Key: ";
 		m_Key->toString(ostream, padpad);

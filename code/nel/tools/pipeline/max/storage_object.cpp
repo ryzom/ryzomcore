@@ -103,7 +103,7 @@ CStorageContainer::~CStorageContainer()
 	m_Chunks.clear();
 }
 
-std::string CStorageContainer::getClassName() // why is this not const in IClassable?
+std::string CStorageContainer::className() const // why is this not const in IClassable?
 {
 	return "StorageContainer";
 }
@@ -171,7 +171,7 @@ void CStorageContainer::serial(NLMISC::IStream &stream)
 	}
 }
 
-void CStorageContainer::toString(std::ostream &ostream, const std::string &pad)
+void CStorageContainer::toString(std::ostream &ostream, const std::string &pad) const
 {
 	// note: only use pad when multi-lining
 	// like Blah: (Something) "SingleValue"
@@ -179,7 +179,7 @@ void CStorageContainer::toString(std::ostream &ostream, const std::string &pad)
 	//          Moo: (Foo) "What" }
 	// only increase pad when multi-lining sub-items
 	nlassert(m_ChunksOwnsPointers);
-	ostream << "(" << getClassName() << ") [" << m_Chunks.size() << "] { ";
+	ostream << "(" << className() << ") [" << m_Chunks.size() << "] { ";
 	std::string padpad = pad + "\t";
 	sint i = 0;
 	for (TStorageObjectContainer::const_iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
@@ -313,7 +313,7 @@ CStorageRaw::~CStorageRaw()
 
 }
 
-std::string CStorageRaw::getClassName()
+std::string CStorageRaw::className() const
 {
 	return "StorageRaw";
 }
@@ -323,14 +323,14 @@ void CStorageRaw::serial(NLMISC::IStream &stream)
 	stream.serialBuffer(&Value[0], Value.size());
 }
 
-void CStorageRaw::toString(std::ostream &ostream, const std::string &pad)
+void CStorageRaw::toString(std::ostream &ostream, const std::string &pad) const
 {
 	// note: only use pad when multi-lining
 	// like Blah: (Something) "SingleValue"
 	//      Blahblah: (Container) {
 	//          Moo: (Foo) "What" }
 	// only increase pad when multi-lining sub-items
-	ostream << "(" << getClassName() << ") { ";
+	ostream << "(" << className() << ") { ";
 	ostream << "\n" << pad << "Size: " << Value.size();
 	bool isString = true;
 	ostream << "\n" << pad << "String: ";

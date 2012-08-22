@@ -52,6 +52,55 @@ CReferenceMaker::~CReferenceMaker()
 
 }
 
+const ucchar *CReferenceMaker::DisplayName = ucstring("ReferenceMaker").c_str();
+const char *CReferenceMaker::InternalName = "ReferenceMaker";
+const char *CReferenceMaker::InternalNameUnknown = "ReferenceMakerUnknown";
+const NLMISC::CClassId CReferenceMaker::ClassId = NLMISC::CClassId(0x2ec43d15, 0x10a270ad); /* Not official, please correct */
+const TSClassId CReferenceMaker::SuperClassId = 0x00000100;
+const CReferenceMakerClassDesc ReferenceMakerClassDesc(&DllPluginDescBuiltin);
+const CReferenceMakerSuperClassDesc ReferenceMakerSuperClassDesc(&ReferenceMakerClassDesc);
+
+void CReferenceMaker::parse(uint16 version, TParseLevel level)
+{
+	CAnimatable::parse(version, level);
+}
+
+void CReferenceMaker::clean()
+{
+	CAnimatable::clean();
+}
+
+void CReferenceMaker::build(uint16 version)
+{
+	CAnimatable:build(version);
+}
+
+void CReferenceMaker::disown()
+{
+	CAnimatable::disown();
+}
+
+void CReferenceMaker::init()
+{
+	CAnimatable::init();
+}
+
+bool CReferenceMaker::inherits(const NLMISC::CClassId classId) const
+{
+	if (classId == classDesc()->classId()) return true;
+	return CAnimatable::inherits(classId);
+}
+
+const ISceneClassDesc *CReferenceMaker::classDesc() const
+{
+	return &ReferenceMakerClassDesc;
+}
+
+void CReferenceMaker::toStringLocal(std::ostream &ostream, const std::string &pad) const
+{
+	CAnimatable::toStringLocal(ostream, pad);
+}
+
 } /* namespace BUILTIN */
 } /* namespace MAX */
 } /* namespace PIPELINE */

@@ -74,12 +74,12 @@ CSceneClass::~CSceneClass()
 
 }
 
-std::string CSceneClass::getClassName()
+std::string CSceneClass::className() const
 {
 	return classDesc()->internalName();
 }
 
-void CSceneClass::toString(std::ostream &ostream, const std::string &pad)
+void CSceneClass::toString(std::ostream &ostream, const std::string &pad) const
 {
 	if (m_ChunksOwnsPointers)
 	{
@@ -87,7 +87,7 @@ void CSceneClass::toString(std::ostream &ostream, const std::string &pad)
 	}
 	else
 	{
-		ostream << "(" << getClassName() << ": " << ucstring(classDesc()->displayName()).toUtf8() << ", " << classDesc()->classId().toString() << ", " << ucstring(classDesc()->dllPluginDesc()->internalName()).toUtf8() << ") [" << m_Chunks.size() << "] { ";
+		ostream << "(" << className() << ": " << ucstring(classDesc()->displayName()).toUtf8() << ", " << classDesc()->classId().toString() << ", " << ucstring(classDesc()->dllPluginDesc()->internalName()).toUtf8() << ") [" << m_Chunks.size() << "] { ";
 		toStringLocal(ostream, pad);
 		ostream << "} ";
 	}

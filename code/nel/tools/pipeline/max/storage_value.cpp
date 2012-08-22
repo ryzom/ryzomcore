@@ -54,9 +54,9 @@ void CStorageValue<ucstring>::serial(NLMISC::IStream &stream)
 }
 
 template <>
-void CStorageValue<ucstring>::toString(std::ostream &ostream, const std::string &pad)
+void CStorageValue<ucstring>::toString(std::ostream &ostream, const std::string &pad) const
 {
-	ostream << "(" << getClassName() << ") { " << Value.toUtf8() << " } ";
+	ostream << "(" << className() << ") { " << Value.toUtf8() << " } ";
 }
 
 template <>

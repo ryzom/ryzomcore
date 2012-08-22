@@ -41,6 +41,22 @@ using namespace std;
 namespace PIPELINE {
 namespace MAX {
 
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+// Elevate warnings to errors in this file for stricter reading
+#undef nlwarning
+#define nlwarning nlerror
+
+// Elevate debug to error in this file for debugging
+// #undef nldebug
+// #define nldebug nlerror
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
 CSceneClassRegistry::CSceneClassRegistry()
 {
 
@@ -66,7 +82,7 @@ void CSceneClassRegistry::remove(const NLMISC::CClassId classId)
 /// Add a superclass to the registry
 void CSceneClassRegistry::add(const ISuperClassDesc *desc)
 {
-	if (m_SuperClassDescriptions.find(desc->classDesc()->superClassId()) == m_SuperClassDescriptions.end()) { nlerror("Already added this superclass to the registry"); return; }
+	if (m_SuperClassDescriptions.find(desc->classDesc()->superClassId()) != m_SuperClassDescriptions.end()) { nlerror("Already added this superclass to the registry"); return; }
 	m_SuperClassDescriptions[desc->classDesc()->superClassId()] = desc;
 }
 
@@ -80,14 +96,14 @@ void CSceneClassRegistry::remove(const TSClassId superClassId)
 /// Create a class by class id
 CSceneClass *CSceneClassRegistry::create(const NLMISC::CClassId classId) const
 {
-	if (m_ClassDescriptions.find(classId) == m_ClassDescriptions.end()) { nldebug("Try to create class that does not exist"); return NULL; }
+	if (m_ClassDescriptions.find(classId) == m_ClassDescriptions.end()) { /* nldebug("Try to create class that does not exist"); */ return NULL; }
 	return m_ClassDescriptions.find(classId)->second->create();
 }
 
 /// Create an unknown class by superclass id
 CSceneClass *CSceneClassRegistry::createUnknown(const TSClassId superClassId, const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const
 {
-	if (m_ClassDescriptions.find(classId) == m_ClassDescriptions.end()) { nlwarning("Creating superclass that does not exist"); return NULL; }
+	if (m_ClassDescriptions.find(classId) == m_ClassDescriptions.end()) { nlwarning("Creating superclass 0x%x (%s) that does not exist", superClassId, displayName.toUtf8().c_str()); return NULL; }
 	return m_SuperClassDescriptions.find(classId)->second->createUnknown(classId, displayName, dllFilename, dllDescription);;
 }
 
@@ -103,6 +119,10 @@ const ISceneClassDesc *CSceneClassRegistry::describe(const NLMISC::CClassId clas
 	if (m_ClassDescriptions.find(classId) == m_ClassDescriptions.end()) { nldebug("Try to describe class that does not exist"); return NULL; }
 	return m_ClassDescriptions.find(classId)->second;
 }
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 
 } /* namespace MAX */
 } /* namespace PIPELINE */

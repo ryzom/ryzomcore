@@ -29,6 +29,7 @@
 #include "scene.h"
 
 // STL includes
+#include <iostream>
 
 // NeL includes
 // #include <nel/misc/debug.h>
@@ -60,12 +61,12 @@ CScene::~CScene()
 
 }
 
-std::string CScene::getClassName()
+std::string CScene::className() const
 {
 	return "Scene";
 }
 
-void CScene::toString(std::ostream &ostream, const std::string &pad)
+void CScene::toString(std::ostream &ostream, const std::string &pad) const
 {
 	CStorageContainer::toString(ostream, pad);
 }
@@ -128,12 +129,12 @@ CSceneClassContainer::~CSceneClassContainer()
 
 }
 
-std::string CSceneClassContainer::getClassName()
+std::string CSceneClassContainer::className() const
 {
 	return "SceneClassContainer";
 }
 
-void CSceneClassContainer::toString(std::ostream &ostream, const std::string &pad)
+void CSceneClassContainer::toString(std::ostream &ostream, const std::string &pad) const
 {
 	CStorageContainer::toString(ostream, pad);
 }
@@ -177,10 +178,18 @@ IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 	}
 	else
 	{
-		// Create an unknown scene class; TODO: By TSClassId, maybe the registry should have a createUnknown(TSuperClassId)
-		// const NLMISC::CClassId classId, const TSClassId superClassId, const ucstring &displayName, const std::strin &internalName, const ucstring &dllFilename, const ucstring &dllDescription
 		const CDllEntry *dllEntry = m_DllDirectory->get(classEntry->dllIndex());
-		return static_cast<IStorageObject *>(new CSceneClassUnknown<CSceneClass>(classEntry->classId(), classEntry->superClassId(), classEntry->displayName(), "SceneClassUnknown", dllEntry->dllFilename(), dllEntry->dllDescription()));
+		classEntry->toString(std::cout, "");
+		sceneClass = m_SceneClassRegistry->createUnknown(classEntry->classId(), classEntry->superClassId(), classEntry->displayName(), dllEntry->dllFilename(), dllEntry->dllDescription());
+		if (sceneClass)
+		{
+			return static_cast<IStorageObject *>(sceneClass);
+		}
+		else
+		{
+			// Create an invalid unknown scene class
+			return static_cast<IStorageObject *>(new CSceneClassUnknown<CSceneClass>(classEntry->classId(), classEntry->superClassId(), classEntry->displayName(), "SceneClassUnknown", dllEntry->dllFilename(), dllEntry->dllDescription()));
+		}
 	}
 }
 

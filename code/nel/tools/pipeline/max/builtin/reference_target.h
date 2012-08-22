@@ -52,7 +52,29 @@ public:
 	CReferenceTarget();
 	virtual ~CReferenceTarget();
 
+	// class desc
+	static const ucchar *DisplayName;
+	static const char *InternalName;
+	static const char *InternalNameUnknown;
+	static const NLMISC::CClassId ClassId;
+	static const TSClassId SuperClassId;
+
+	// inherited
+	virtual void parse(uint16 version, TParseLevel level);
+	virtual void clean();
+	virtual void build(uint16 version);
+	virtual void disown();
+	virtual void init();
+	virtual bool inherits(const NLMISC::CClassId classId) const;
+	virtual const ISceneClassDesc *classDesc() const;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
+
 }; /* class CReferenceTarget */
+
+typedef CSceneClassDesc<CReferenceTarget> CReferenceTargetClassDesc;
+extern const CReferenceTargetClassDesc ReferenceTargetClassDesc;
+typedef CSuperClassDesc<CReferenceTarget> CReferenceTargetSuperClassDesc;
+extern const CReferenceTargetSuperClassDesc ReferenceTargetSuperClassDesc;
 
 } /* namespace BUILTIN */
 } /* namespace MAX */

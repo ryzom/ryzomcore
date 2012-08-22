@@ -70,10 +70,11 @@ public:
 	IStorageObject();
 	virtual ~IStorageObject();
 
-	// virtual std::string getClassName() = 0; // inherited from NLMISC::IClassable through NLMISC::IStreamable
+	virtual std::string getClassName() { return className(); } // inherited from NLMISC::IClassable through NLMISC::IStreamable
+	virtual std::string className() const = 0; // renamed for constness
 	// virtual void serial(NLMISC::IStream &stream); // inherited from NLMISC::IStreamable
 	std::string toString();
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") = 0;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const = 0;
 
 public: // should be protected but that doesn't compile, nice c++!
 	// Sets size when reading
@@ -104,9 +105,9 @@ public:
 	virtual ~CStorageContainer();
 
 	// inherited
-	virtual std::string getClassName();
+	virtual std::string className() const;
 	virtual void serial(NLMISC::IStream &stream); // only used to wrap a container inside another stream
-	virtual void toString(std::ostream &ostream, const std::string &pad = "");
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
 
 	// virtual
 	// Parse this class with given version and parse level filter
@@ -147,9 +148,9 @@ public:
 	virtual ~CStorageRaw();
 
 	// inherited
-	virtual std::string getClassName();
+	virtual std::string className() const;
 	virtual void serial(NLMISC::IStream &stream);
-	virtual void toString(std::ostream &ostream, const std::string &pad = "");
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
 
 public: // should be protected but that doesn't compile, nice c++!
 	// Sets size when reading

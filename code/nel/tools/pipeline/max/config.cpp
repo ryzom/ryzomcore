@@ -56,12 +56,12 @@ CConfig::~CConfig()
 
 }
 
-std::string CConfig::getClassName()
+std::string CConfig::className() const
 {
 	return "Config";
 }
 
-void CConfig::toString(std::ostream &ostream, const std::string &pad)
+void CConfig::toString(std::ostream &ostream, const std::string &pad) const
 {
 	CStorageContainer::toString(ostream, pad);
 }
@@ -123,12 +123,12 @@ CConfig20a0::~CConfig20a0()
 
 }
 
-std::string CConfig20a0::getClassName()
+std::string CConfig20a0::className() const
 {
 	return "Config20a0";
 }
 
-void CConfig20a0::toString(std::ostream &ostream, const std::string &pad)
+void CConfig20a0::toString(std::ostream &ostream, const std::string &pad) const
 {
 	CStorageContainer::toString(ostream, pad);
 }
@@ -188,12 +188,12 @@ CConfig20a0Entry::~CConfig20a0Entry()
 
 }
 
-std::string CConfig20a0Entry::getClassName()
+std::string CConfig20a0Entry::className() const
 {
 	return "Config20a0Entry";
 }
 
-void CConfig20a0Entry::toString(std::ostream &ostream, const std::string &pad)
+void CConfig20a0Entry::toString(std::ostream &ostream, const std::string &pad) const
 {
 	CStorageContainer::toString(ostream, pad);
 }
@@ -280,12 +280,12 @@ CConfigScript::~CConfigScript()
 
 }
 
-std::string CConfigScript::getClassName()
+std::string CConfigScript::className() const
 {
 	return "ConfigScript";
 }
 
-void CConfigScript::toString(std::ostream &ostream, const std::string &pad)
+void CConfigScript::toString(std::ostream &ostream, const std::string &pad) const
 {
 	CStorageContainer::toString(ostream, pad);
 }
@@ -337,12 +337,12 @@ CConfigScriptEntry::~CConfigScriptEntry()
 
 }
 
-std::string CConfigScriptEntry::getClassName()
+std::string CConfigScriptEntry::className() const
 {
 	return "ConfigScriptEntry";
 }
 
-void CConfigScriptEntry::toString(std::ostream &ostream, const std::string &pad)
+void CConfigScriptEntry::toString(std::ostream &ostream, const std::string &pad) const
 {
 	CStorageContainer::toString(ostream, pad);
 }
@@ -402,7 +402,7 @@ CConfigScriptHeader::~CConfigScriptHeader()
 
 }
 
-std::string CConfigScriptHeader::getClassName()
+std::string CConfigScriptHeader::className() const
 {
 	return "ConfigScriptHeader";
 }
@@ -413,9 +413,9 @@ void CConfigScriptHeader::serial(NLMISC::IStream &stream)
 	stream.serial(ClassID);
 }
 
-void CConfigScriptHeader::toString(std::ostream &ostream, const std::string &pad)
+void CConfigScriptHeader::toString(std::ostream &ostream, const std::string &pad) const
 {
-	ostream << "(" << getClassName() << ") { ";
+	ostream << "(" << className() << ") { ";
 	ostream << "\n" << pad << "SuperClassID: " << SuperClassID;
 	ostream << "\n" << pad << "ClassID: " << NLMISC::toString(ClassID);
 	ostream << " } ";
@@ -435,12 +435,12 @@ CConfigScriptMetaContainer::~CConfigScriptMetaContainer()
 
 }
 
-std::string CConfigScriptMetaContainer::getClassName()
+std::string CConfigScriptMetaContainer::className() const
 {
 	return "ConfigScriptMetaContainer";
 }
 
-void CConfigScriptMetaContainer::toString(std::ostream &ostream, const std::string &pad)
+void CConfigScriptMetaContainer::toString(std::ostream &ostream, const std::string &pad) const
 {
 	CStorageContainer::toString(ostream, pad);
 }
@@ -514,7 +514,7 @@ CConfigScriptMetaString::~CConfigScriptMetaString()
 
 }
 
-std::string CConfigScriptMetaString::getClassName()
+std::string CConfigScriptMetaString::className() const
 {
 	return "ConfigScriptMetaString";
 }
@@ -538,9 +538,9 @@ void CConfigScriptMetaString::serial(NLMISC::IStream &stream)
 	nlassert(endByte == 0);
 }
 
-void CConfigScriptMetaString::toString(std::ostream &ostream, const std::string &pad)
+void CConfigScriptMetaString::toString(std::ostream &ostream, const std::string &pad) const
 {
-	ostream << "(" << getClassName() << ") { " << Value << " } ";
+	ostream << "(" << className() << ") { " << Value << " } ";
 }
 
 ////////////////////////////////////////////////////////////////////////
