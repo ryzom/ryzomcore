@@ -66,7 +66,7 @@ public:
 	CSceneClass *create(const NLMISC::CClassId classId) const;
 
 	/// Create an unknown class by superclass id
-	CSceneClass *createUnknown(const TSClassId superClassId, const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const;
+	CSceneClass *createUnknown(TSClassId superClassId, const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const;
 
 	/// Destroy a class by pointer
 	void destroy(CSceneClass *sceneClass) const;

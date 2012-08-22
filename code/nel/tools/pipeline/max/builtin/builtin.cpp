@@ -46,6 +46,50 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
+namespace {
+
+// 0x9003 bezier float control, subclass under control; control is under reftarget
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009003> CControlFloatSuperClassDesc;
+const CControlFloatSuperClassDesc ControlFloatSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x8 param block, under reftarget directly
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000008> CParamBlockSuperClassDesc;
+const CParamBlockSuperClassDesc ParamBlockSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0xc20 uv gen, sub of mtlbase
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c20> CUVGenSuperClassDesc;
+const CUVGenSuperClassDesc UVGenSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x82 param block 2, under reftarget directly
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000082> CParamBlock2SuperClassDesc;
+const CParamBlock2SuperClassDesc ParamBlock2SuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0xc40 output, textureoutput???, under mtlbase
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c40> CTextureOutputSuperClassDesc;
+const CTextureOutputSuperClassDesc TextureOutputSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0xc10 texmap, under mtlbase
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c10> CTexmapSuperClassDesc;
+const CTexmapSuperClassDesc TexmapSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x1080 texmap_container, 'Texmaps' under reftarget directly
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001080> CTexmapContainerSuperClassDesc;
+const CTexmapContainerSuperClassDesc TexmapContainerSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x10b0, shader, under baseshader, under special_Fx
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x000010b0> CShaderSuperClassDesc;
+const CShaderSuperClassDesc ShaderSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0x1110, sampler, under special_fx
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001110> CSamplerSuperClassDesc;
+const CSamplerSuperClassDesc SamplerSuperClassDesc(&ReferenceTargetClassDesc);
+
+// 0xc00, mtl 'materials', under mtlbase
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c00> CMtlSuperClassDesc;
+const CMtlSuperClassDesc MtlSuperClassDesc(&ReferenceTargetClassDesc);
+
+} /* anonymous namespace */
+
 CBuiltin::CBuiltin()
 {
 
@@ -56,6 +100,7 @@ CBuiltin::~CBuiltin()
 
 }
 
+
 void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 {
 	registry->add(&AnimatableClassDesc);
@@ -64,6 +109,18 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&ReferenceMakerSuperClassDesc);
 	registry->add(&ReferenceTargetClassDesc);
 	registry->add(&ReferenceTargetSuperClassDesc);
+
+	// unimplemented
+	registry->add(&ControlFloatSuperClassDesc);
+	registry->add(&ParamBlockSuperClassDesc);
+	registry->add(&UVGenSuperClassDesc);
+	registry->add(&ParamBlock2SuperClassDesc);
+	registry->add(&TextureOutputSuperClassDesc);
+	registry->add(&TexmapSuperClassDesc);
+	registry->add(&TexmapContainerSuperClassDesc);
+	registry->add(&ShaderSuperClassDesc);
+	registry->add(&SamplerSuperClassDesc);
+	registry->add(&MtlSuperClassDesc);
 }
 
 } /* namespace BUILTIN */

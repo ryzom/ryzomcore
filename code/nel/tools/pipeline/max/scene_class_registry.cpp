@@ -29,6 +29,7 @@
 #include "scene_class_registry.h"
 
 // STL includes
+#include <iostream>
 
 // NeL includes
 // #include <nel/misc/debug.h>
@@ -82,8 +83,9 @@ void CSceneClassRegistry::remove(const NLMISC::CClassId classId)
 /// Add a superclass to the registry
 void CSceneClassRegistry::add(const ISuperClassDesc *desc)
 {
-	if (m_SuperClassDescriptions.find(desc->classDesc()->superClassId()) != m_SuperClassDescriptions.end()) { nlerror("Already added this superclass to the registry"); return; }
-	m_SuperClassDescriptions[desc->classDesc()->superClassId()] = desc;
+	nldebug("Register superclass 0x%x", desc->superClassId());
+	if (m_SuperClassDescriptions.find(desc->superClassId()) != m_SuperClassDescriptions.end()) { nlerror("Already added this superclass to the registry"); return; }
+	m_SuperClassDescriptions[desc->superClassId()] = desc;
 }
 
 /// Remove a superclass from the registry
@@ -101,10 +103,10 @@ CSceneClass *CSceneClassRegistry::create(const NLMISC::CClassId classId) const
 }
 
 /// Create an unknown class by superclass id
-CSceneClass *CSceneClassRegistry::createUnknown(const TSClassId superClassId, const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const
+CSceneClass *CSceneClassRegistry::createUnknown(TSClassId superClassId, const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const
 {
-	if (m_ClassDescriptions.find(classId) == m_ClassDescriptions.end()) { nlwarning("Creating superclass 0x%x (%s) that does not exist", superClassId, displayName.toUtf8().c_str()); return NULL; }
-	return m_SuperClassDescriptions.find(classId)->second->createUnknown(classId, displayName, dllFilename, dllDescription);;
+	if (m_SuperClassDescriptions.find(superClassId) == m_SuperClassDescriptions.end()) { nlwarning("Creating superclass 0x%x (%s) %s that does not exist", superClassId, displayName.toUtf8().c_str(), classId.toString().c_str()); return NULL; }
+	return m_SuperClassDescriptions.find(superClassId)->second->createUnknown(classId, displayName, dllFilename, dllDescription);
 }
 
 /// Destroy a class by pointer

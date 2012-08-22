@@ -179,8 +179,7 @@ IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 	else
 	{
 		const CDllEntry *dllEntry = m_DllDirectory->get(classEntry->dllIndex());
-		classEntry->toString(std::cout, "");
-		sceneClass = m_SceneClassRegistry->createUnknown(classEntry->classId(), classEntry->superClassId(), classEntry->displayName(), dllEntry->dllFilename(), dllEntry->dllDescription());
+		sceneClass = m_SceneClassRegistry->createUnknown(classEntry->superClassId(), classEntry->classId(), classEntry->displayName(), dllEntry->dllFilename(), dllEntry->dllDescription());
 		if (sceneClass)
 		{
 			return static_cast<IStorageObject *>(sceneClass);
