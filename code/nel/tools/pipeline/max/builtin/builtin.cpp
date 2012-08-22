@@ -38,6 +38,7 @@
 #include "animatable.h"
 #include "reference_maker.h"
 #include "reference_target.h"
+#include "i_node.h"
 
 // using namespace std;
 // using namespace NLMISC;
@@ -95,11 +96,11 @@ const CMtlSuperClassDesc MtlSuperClassDesc(&ReferenceTargetClassDesc, "MtlSuperC
 // 0xd00, soundobj, under reftarget directly
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000d00> CSoundObjSuperClassDesc;
 const CSoundObjSuperClassDesc SoundObjSuperClassDesc(&ReferenceTargetClassDesc, "SoundObjSuperClassUnknown");
-
+/*
 // 0x1, node; under reftarget directly; classid 1 is node, 2 is rootnode
-typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000001> CNodeSuperClassDesc;
+typedef CSuperClassDescUnknown<CReferenceTarget, > CNodeSuperClassDesc;
 const CNodeSuperClassDesc NodeSuperClassDesc(&ReferenceTargetClassDesc, "NodeSuperClassUnknown");
-
+*/
 // 0x900b, controlposition, under control???
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x0000900b> CControlPositionSuperClassDesc;
 const CControlPositionSuperClassDesc ControlPositionSuperClassDesc(&ReferenceTargetClassDesc, "ControlPositionSuperClassUnknown");
@@ -211,6 +212,9 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&ReferenceTargetClassDesc);
 	registry->add(&ReferenceTargetSuperClassDesc);
 
+	registry->add(&NodeClassDesc);
+	registry->add(&NodeSuperClassDesc);
+
 	// invalid
 	registry->add(&NullSuperClassDesc);
 
@@ -226,7 +230,7 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&SamplerSuperClassDesc);
 	registry->add(&MtlSuperClassDesc);
 	registry->add(&SoundObjSuperClassDesc);
-	registry->add(&NodeSuperClassDesc);
+	// registry->add(&NodeSuperClassDesc);
 	registry->add(&ControlPositionSuperClassDesc);
 	registry->add(&ControlRotationSuperClassDesc);
 	registry->add(&ControlScaleSuperClassDesc);
