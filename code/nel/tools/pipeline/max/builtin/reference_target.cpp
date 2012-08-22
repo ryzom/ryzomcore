@@ -101,6 +101,11 @@ void CReferenceTarget::toStringLocal(std::ostream &ostream, const std::string &p
 	CReferenceMaker::toStringLocal(ostream, pad);
 }
 
+IStorageObject *CReferenceTarget::createChunkById(uint16 id, bool container)
+{
+	return CReferenceMaker::createChunkById(id, container);
+}
+
 } /* namespace BUILTIN */
 } /* namespace MAX */
 } /* namespace PIPELINE */

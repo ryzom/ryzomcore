@@ -39,7 +39,8 @@
 
 namespace PIPELINE {
 namespace MAX {
-	class CStorageChunks;
+
+class CStorageChunks;
 
 struct EStorage : public NLMISC::Exception
 {

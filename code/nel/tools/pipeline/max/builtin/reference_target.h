@@ -77,6 +77,10 @@ public:
 	virtual const ISceneClassDesc *classDesc() const;
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
 
+protected:
+	// inherited
+	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
 }; /* class CReferenceTarget */
 
 typedef CSceneClassDesc<CReferenceTarget> CReferenceTargetClassDesc;

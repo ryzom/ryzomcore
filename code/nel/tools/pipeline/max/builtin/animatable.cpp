@@ -88,7 +88,16 @@ void CAnimatable::build(uint16 version)
 	CSceneClass::build(version);
 	if (m_AppData)
 	{
-		putChunk(PMBS_APP_DATA_CHUNK_ID, m_AppData);
+		if (m_AppData->entries().size() == 0)
+		{
+			// Discard appdata if it has no entries
+			delete m_AppData;
+			m_AppData = NULL;
+		}
+		else
+		{
+			putChunk(PMBS_APP_DATA_CHUNK_ID, m_AppData);
+		}
 	}
 }
 
@@ -117,11 +126,22 @@ const ISceneClassDesc *CAnimatable::classDesc() const
 void CAnimatable::toStringLocal(std::ostream &ostream, const std::string &pad) const
 {
 	CSceneClass::toStringLocal(ostream, pad);
-	if (m_AppData)
+	if (m_AppData && m_AppData->entries().size() != 0)
 	{
 		ostream << "\n" << pad << "AppData: ";
 		m_AppData->toString(ostream, pad + "\t");
 	}
+}
+
+STORAGE::CAppData *CAnimatable::appData()
+{
+	if (m_ChunksOwnsPointers) { nlerror("Not parsed"); return NULL; }
+	if (!m_AppData)
+	{
+		m_AppData = new STORAGE::CAppData();
+		m_AppData->init();
+	}
+	return m_AppData;
 }
 
 IStorageObject *CAnimatable::createChunkById(uint16 id, bool container)
