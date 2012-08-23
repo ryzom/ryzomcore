@@ -686,8 +686,11 @@ void prelogInit()
 #ifdef NL_OS_WINDOWS
 		_control87 (_EM_INVALID|_EM_DENORMAL/*|_EM_ZERODIVIDE|_EM_OVERFLOW*/|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
 #endif // NL_OS_WINDOWS
-
-		setCPUMask();
+		
+		CTime::CTimerInfo timerInfo;
+		NLMISC::CTime::probeTimerInfo(timerInfo);
+		if (timerInfo.RequiresSingleCore) // TODO: Also have a FV configuration value to force single core.
+			setCPUMask();
 
 		FPU_CHECKER_ONCE
 
@@ -1266,6 +1269,19 @@ void postlogInit()
 		CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
 
 		{
+			H_AUTO(InitRZShIdI)
+
+			nmsg = "Initializing sheets...";
+			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
+
+			// Initialize Sheet IDs.
+			CSheetId::init (ClientCfg.UpdatePackedSheet);
+
+			initLast = initCurrent;
+			initCurrent = ryzomGetLocalTime();
+		}
+
+		{
 			H_AUTO(InitRZSound)
 
 			// Init the sound manager
@@ -1275,12 +1291,13 @@ void postlogInit()
 			{
 				// tmp fix : it seems that, at this point, if the bg downloader window has focus and
 				// not the Ryzom one, then sound init fails
-				#ifdef NL_OS_WINDOWS
+				/*#ifdef NL_OS_WINDOWS
 					HWND hWnd = Driver->getDisplay ();
 					nlassert (hWnd);
 					ShowWindow(hWnd, SW_RESTORE);
 					SetForegroundWindow(hWnd);
-				#endif
+				#endif*/
+				// bg downloader not used anymore anyways
 				SoundMngr = new CSoundManager(&ProgressBar);
 				try
 				{
@@ -1323,13 +1340,7 @@ void postlogInit()
 		}
 
 		{
-			H_AUTO(InitRZShIdI)
-
-			nmsg = "Initializing sheets...";
-			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
-
-			// Initialize Sheet IDs.
-			CSheetId::init (ClientCfg.UpdatePackedSheet);
+			H_AUTO(InitRZSheetL)
 
 			// load packed sheets
 			nmsg = "Loading sheets...";

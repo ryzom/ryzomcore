@@ -336,16 +336,27 @@ void addId( string fileName )
 				if( firstFreeFileTypeId == -1 )
 				{
 					nlwarning("MORE THAN 256 FILE TYPES!!!!");
+					return;
 				}
 				else
 				{
 					FileTypeToId.insert( make_pair(fileType,(uint8)firstFreeFileTypeId) );
 					IdToFileType.insert( make_pair((uint8)firstFreeFileTypeId,fileType) );
-					TypeToLastId.insert( make_pair((uint8)firstFreeFileTypeId,0) );
 
+					// Reserve id 0 for unknown.newtype.
+					// User may supply a sheet called unknown.newtype
+					// that can safely be used as a fallback when a
+					// requested sheet does not exist.
+					// Only for newly added sheet types.
 					fid.FormIDInfos.Type = (uint8)firstFreeFileTypeId;
 					fid.FormIDInfos.Id = 0;
-					
+					std::string unknownNewType = std::string("unknown." + fileType);
+					FormToId.insert(make_pair(unknownNewType, fid));
+					IdToForm.insert(make_pair(fid, unknownNewType));
+
+					TypeToLastId.insert( make_pair((uint8)firstFreeFileTypeId,1) );
+					fid.FormIDInfos.Id = 1;
+
 					nlinfo("Adding file type '%s' with id %d", fileType.c_str(), firstFreeFileTypeId);
 					NbTypesAdded++;
 				}

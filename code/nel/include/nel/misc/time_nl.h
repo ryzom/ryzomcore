@@ -48,6 +48,19 @@ typedef sint64 TTicks;
 class CTime
 {
 public:
+	struct CTimerInfo
+	{
+		/// Returns if there is a high precision timer that can be used.
+		bool IsHighPrecisionAvailable;
+		/// If a CPU specific timer is used and the values are not consistent accross threads.
+		bool RequiresSingleCore;
+		/// The resolution of the high resolution timer.
+		TTicks HighPrecisionResolution;
+	};
+
+	/** Get advanced information on the used timers.
+	 */
+	static void probeTimerInfo(CTimerInfo &result);
 
 	/** Return the number of second since midnight (00:00:00), January 1, 1970,
 	 * coordinated universal time, according to the system clock.
@@ -71,9 +84,9 @@ public:
 	 * the value can jump backwards if the system time is changed by a user or a NTP time sync process.
 	 * The value is different on 2 different computers; use the CUniTime class to get a universal
 	 * time that is the same on all computers.
-	 * \warning On Win32, the value is on 32 bits only. It wraps around to 0 every about 49.71 days.
+	 * \warning On Win32, the value is on 32 bits only, and uses the low-res timer unless probeTimerInfo was called and a high resolution timer can be used. It wraps around to 0 every about 49.71 days.
 	 */
-	static TTime	getLocalTime ();
+	static TTime	getLocalTime();
 
 	/** Return the time in processor ticks. Use it for profile purpose.
 	 * If the performance time is not supported on this hardware, it returns 0.

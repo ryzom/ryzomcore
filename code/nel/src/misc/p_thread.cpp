@@ -34,16 +34,16 @@ struct CPMainThread : public CPThread
 {
 	CPMainThread() : CPThread(NULL, 0)
 	{
-		if(pthread_key_create(&threadSpecificKey, NULL) != 0) 
+		if(pthread_key_create(&threadSpecificKey, NULL) != 0)
 			throw EThread("cannot create thread specific storage key.");
 
 		if(pthread_setspecific(threadSpecificKey, this) != 0)
 			throw EThread("cannot set main thread ptr in thread specific storage.");
 	}
 
-	~CPMainThread() 
+	~CPMainThread()
 	{
-		if(pthread_key_delete(threadSpecificKey) != 0) 
+		if(pthread_key_delete(threadSpecificKey) != 0)
 			throw EThread("cannot delete thread specific storage key.");
 	}
 };
@@ -139,7 +139,7 @@ void CPThread::start()
 		/* setting the size of the stack also */
 		ret = pthread_attr_setstacksize(&tattr, _StackSize);
 	}
-	
+
 	bool detach_old_thread = false;
 	pthread_t old_thread_handle;
 	if (_State != ThreadStateNone)
@@ -221,6 +221,9 @@ void CPThread::wait ()
 bool CPThread::setCPUMask(uint64 cpuMask)
 {
 #ifdef __USE_GNU
+
+	nlwarning("This code does not work. May cause a segmentation fault...");
+
 	sint res = pthread_setaffinity_np(_ThreadHandle, sizeof(uint64), (const cpu_set_t*)&cpuMask);
 
 	if (res)
@@ -228,9 +231,14 @@ bool CPThread::setCPUMask(uint64 cpuMask)
 		nlwarning("pthread_setaffinity_np() returned %d", res);
 		return false;
 	}
-#endif // __USE_GNU
 
 	return true;
+
+#else // __USE_GNU
+
+	return false;
+
+#endif // __USE_GNU
 }
 
 /*
@@ -238,9 +246,12 @@ bool CPThread::setCPUMask(uint64 cpuMask)
  */
 uint64 CPThread::getCPUMask()
 {
-	uint64 cpuMask = 1;
-
 #ifdef __USE_GNU
+
+	nlwarning("This code does not work. May cause a segmentation fault...");
+
+	uint64 cpuMask = 0;
+
 	sint res = pthread_getaffinity_np(_ThreadHandle, sizeof(uint64), (cpu_set_t*)&cpuMask);
 
 	if (res)
@@ -248,9 +259,14 @@ uint64 CPThread::getCPUMask()
 		nlwarning("pthread_getaffinity_np() returned %d", res);
 		return 0;
 	}
-#endif // __USE_GNU
 
 	return cpuMask;
+
+#else // __USE_GNU
+
+	return 0;
+
+#endif // __USE_GNU
 }
 
 void CPThread::setPriority(TThreadPriority priority)
@@ -311,9 +327,9 @@ IProcess *IProcess::getCurrentProcess ()
  */
 uint64 CPProcess::getCPUMask()
 {
-	uint64 cpuMask = 1;
-
 #ifdef __USE_GNU
+
+	uint64 cpuMask = 0;
 	sint res = sched_getaffinity(getpid(), sizeof(uint64), (cpu_set_t*)&cpuMask);
 
 	if (res)
@@ -321,15 +337,21 @@ uint64 CPProcess::getCPUMask()
 		nlwarning("sched_getaffinity() returned %d, errno = %d: %s", res, errno, strerror(errno));
 		return 0;
 	}
-#endif // __USE_GNU
 
 	return cpuMask;
+
+#else // __USE_GNU
+
+	return 0;
+
+#endif // __USE_GNU
 }
 
 /// set the CPU mask
 bool CPProcess::setCPUMask(uint64 cpuMask)
 {
 #ifdef __USE_GNU
+
 	sint res = sched_setaffinity(getpid(), sizeof(uint64), (const cpu_set_t*)&cpuMask);
 
 	if (res)
@@ -337,9 +359,14 @@ bool CPProcess::setCPUMask(uint64 cpuMask)
 		nlwarning("sched_setaffinity() returned %d, errno = %d: %s", res, errno, strerror(errno));
 		return false;
 	}
-#endif // __USE_GNU
 
 	return true;
+
+#else // __USE_GNU
+
+	return false;
+
+#endif // __USE_GNU
 }
 
 
