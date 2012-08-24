@@ -30,9 +30,11 @@
 // Testing
 #include "../max/builtin/storage/app_data.h"
 #include "../max/builtin/builtin.h"
+#include "../max/builtin/scene_impl.h"
+#include "../max/builtin/i_node.h"
 
-//static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
-static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
+static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
+//static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/test2008.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/teapot_test_scene.max";
 static const char *streamname = "Scene";
@@ -174,6 +176,9 @@ int main(int argc, char **argv)
 	//classDirectory3.toString(std::cout);
 	//std::cout << "\n";
 
+	std::cout << "\n";
+	scene.container()->scene()->rootNode()->dumpNodes(std::cout);
+	std::cout << "\n";
 
 	// TEST APP DATA
 

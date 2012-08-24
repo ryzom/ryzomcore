@@ -36,12 +36,12 @@
 // Project includes
 #include "reference_maker.h"
 
+#include "root_node.h"
+#include "track_view_node.h"
+
 namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
-
-class CRootNode;
-class CTrackViewNode;
 
 /**
  * \brief CSceneImpl
@@ -75,6 +75,10 @@ public:
 	virtual CReferenceMaker *getReference(uint index) const;
 	virtual void setReference(uint index, CReferenceMaker *reference);
 	virtual uint nbReferences() const;
+
+	// read access
+	inline CRootNode *rootNode() const { return m_RootNode; }
+	inline CTrackViewNode *trackViewNode() const { return m_TrackViewNode; }
 
 protected:
 	// inherited

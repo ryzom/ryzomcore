@@ -75,6 +75,11 @@ public:
 	virtual void addChild(INode *node);
 	virtual void removeChild(INode *node); // does not delete
 	virtual const ucstring &userName() const;
+
+	// dump
+	void dumpNodes(std::ostream &ostream, const std::string &pad = "") const;
+
+	// read access
 	/// The children that are linked to this node by the parent tag
 	inline const std::set<NLMISC::CRefPtr<INode> > &children() const { return m_Children; }
 

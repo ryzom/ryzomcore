@@ -156,6 +156,43 @@ const ucstring &INode::userName() const
 	return v;
 }
 
+void INode::dumpNodes(std::ostream &ostream, const std::string &pad) const
+{
+	ostream << "<ptr=0x";
+	{
+		std::stringstream ss;
+		ss << std::hex << std::setfill('0');
+		ss << std::setw(16) << (uint64)(void *)this;
+		ostream << ss.str();
+	}
+	ostream << "> " << userName().toUtf8() << " [" << m_Children.size() << "] { ";
+	CReferenceMaker *object = getReference(1);
+	if (object) // TODO: Implement!
+	{
+		ostream << "\n" << pad << "Object: ";
+		ostream << "<ptr=0x";
+		{
+			std::stringstream ss;
+			ss << std::hex << std::setfill('0');
+			ss << std::setw(16) << (uint64)(void *)object;
+			ostream << ss.str();
+		}
+		ostream << "> ";
+		ostream << ucstring(object->classDesc()->displayName()).toUtf8() << " ";
+	}
+	uint i = 0 ;
+	std::string padpad = pad + "\t";
+	for (std::set<NLMISC::CRefPtr<INode> >::iterator it = m_Children.begin(), end = m_Children.end(); it != end; ++it)
+	{
+		INode *node = (*it);
+		nlassert(node);
+		ostream << "\n" << pad << i << ": ";
+		node->dumpNodes(ostream, padpad);
+		++i;
+	}
+	ostream << "} ";
+}
+
 IStorageObject *INode::createChunkById(uint16 id, bool container)
 {
 	return CReferenceTarget::createChunkById(id, container);

@@ -34,8 +34,6 @@
 // #include <nel/misc/debug.h>
 
 // Project includes
-#include "root_node.h"
-#include "track_view_node.h"
 
 using namespace std;
 // using namespace NLMISC;
