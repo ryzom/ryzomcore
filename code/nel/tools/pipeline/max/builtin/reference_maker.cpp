@@ -108,7 +108,7 @@ void CReferenceMaker::parse(uint16 version, TParseLevel level)
 				if (references2034->Value[i] > 0)
 				{
 					CReferenceMaker *referenceMaker = dynamic_cast<CReferenceMaker *>(container()->getByStorageIndex(references2034->Value[i]));
-					if (!referenceMaker) nlerror("Reference maker is %s not a reference maker", container()->getByStorageIndex(references2034->Value[i])->classDesc()->classId().toString().c_str());
+					if (!referenceMaker) nlerror("Reference maker %s %s, 0x%x is not a reference maker", ucstring(container()->getByStorageIndex(references2034->Value[i])->classDesc()->displayName()).toUtf8().c_str(), container()->getByStorageIndex(references2034->Value[i])->classDesc()->classId().toString().c_str(), container()->getByStorageIndex(references2034->Value[i])->classDesc()->superClassId());
 					setReference(i, referenceMaker);
 				}
 			}
@@ -128,7 +128,7 @@ void CReferenceMaker::parse(uint16 version, TParseLevel level)
 				sint32 referenceindex = (*it);
 				++it;
 				CReferenceMaker *referenceMaker = dynamic_cast<CReferenceMaker *>(container()->getByStorageIndex(referenceindex));
-				if (!referenceMaker) nlerror("Reference maker is %s not a reference maker", container()->getByStorageIndex(referenceindex)->classDesc()->classId().toString().c_str());
+				if (!referenceMaker) nlerror("Reference maker %s, 0x%x is not a reference maker", container()->getByStorageIndex(referenceindex)->classDesc()->classId().toString().c_str(), container()->getByStorageIndex(referenceindex)->classDesc()->superClassId());
 				setReference(index, referenceMaker);
 			}
 		}

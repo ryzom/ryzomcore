@@ -858,3 +858,71 @@ UTILITY_CLASS_ID 0x001020
 		Size: 6
 		String: no fx. } }
 
+
+
+
+
+
+Scene class references
+
+ver3
+		References 0x2034: PARSED {
+			0: <ptr=0x000000000201f1b0> (Material Editor, (0x00000c80, 0x00000000))
+			1: <ptr=0x0000000002110e30> (MtlBaseLib, (0x00003333, 0x00000000))
+			2: <ptr=0x00000000021110d0> (Default Sound, (0x00000001, 0x00000000))
+			3: <ptr=0x00000000021118c0> (RootNode, (0x00000002, 0x00000000))
+			4: <ptr=0x00000000027be740> (RenderEnvironment, (0xee448b23, 0x00000000))
+			5: <ptr=0x00000000027c1400> (NamedSelSetList, (0x00008d52, 0x00000000))
+			6: <ptr=0x00000000027c3640> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			7: <ptr=0x00000000027c3bc0> (Grid Reference, (0x00000001, 0x00000000))
+			8: <ptr=0x00000000027c3de0> (RenderEffects, (0x17356912, 0x00000000))
+			9: <ptr=0x00000000027c4a20> (Shadow Map, (0x00000100, 0x00000000))
+			10: <ptr=0x00000000027c4cf0> (Layer Manager, (0x0d7374fc, 0x51ff028e)) }
+
+ver9
+		References 0x2034: PARSED {
+			0: <ptr=0x0000000000f04bf0> (Material Editor, (0x00000c80, 0x00000000))
+			1: <ptr=0x0000000000f05430> (MtlBaseLib, (0x00003333, 0x00000000))
+			2: <ptr=0x0000000000f059d0> (Default Sound, (0x00000001, 0x00000000))
+			3: <ptr=0x0000000000f05ec0> (RootNode, (0x00000002, 0x00000000))
+			4: <ptr=0x0000000002b8bfb0> (RenderEnvironment, (0xee448b23, 0x00000000))
+			5: <ptr=0x0000000002b91a20> (NamedSelSetList, (0x00008d52, 0x00000000))
+			6: <ptr=0x0000000002ba2380> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			7: <ptr=0x0000000002ba38a0> (Grid Reference, (0x00000001, 0x00000000))
+			8: <ptr=0x0000000002ba3dc0> (RenderEffects, (0x17356912, 0x00000000))
+			9: <ptr=0x0000000002ba4b60> (Shadow Map, (0x00000100, 0x00000000))
+			10: <ptr=0x0000000002ba5130> (Layer Manager, (0x0d7374fc, 0x51ff028e))
+			11: <ptr=0x0000000002ba57d0> (TrackSetList, (0x2cf03595, 0x00000000)) }
+
+ver2008
+		References 0x2034: PARSED {
+			0: <ptr=0x0000000001d96380> (Material Editor, (0x00000c80, 0x00000000))
+			1: <ptr=0x0000000001d96910> (MtlBaseLib, (0x00003333, 0x00000000))
+			2: <ptr=0x0000000001d96b30> (Default Sound, (0x00000001, 0x00000000))
+			3: <ptr=0x0000000001d97020> (RootNode, (0x00000002, 0x00000000))
+			4: <ptr=0x0000000001da0870> (RenderEnvironment, (0xee448b23, 0x00000000))
+			5: <ptr=0x0000000001da6020> (NamedSelSetList, (0x00008d52, 0x00000000))
+			6: <ptr=0x0000000001daf540> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			7: <ptr=0x0000000001db0610> (Grid Reference, (0x00000001, 0x00000000))
+			8: <ptr=0x0000000001db0880> (RenderEffects, (0x17356912, 0x00000000))
+			9: <ptr=0x0000000001db1620> (Shadow Map, (0x00000100, 0x00000000))
+			10: <ptr=0x0000000001db1940> (Layer Manager, (0x0d7374fc, 0x51ff028e))
+			11: <ptr=0x0000000001db1d30> (TrackSetList, (0x2cf03595, 0x00000000)) }
+
+ver2010
+		References 0x2034: PARSED {
+			0: <ptr=0x0000000000de4060> (Material Editor, (0x00000c80, 0x00000000))
+			1: <ptr=0x0000000000de45f0> (MtlBaseLib, (0x00003333, 0x00000000))
+			2: <ptr=0x0000000000de5050> (ProSound, (0x476fa9de, 0x5b918e4a))
+			3: <ptr=0x0000000000de61b0> (RootNode, (0x00000002, 0x00000000))
+			4: <ptr=0x0000000000e044e0> (RenderEnvironment, (0xee448b23, 0x00000000))
+			5: <ptr=0x0000000000e09ee0> (NamedSelSetList, (0x00008d52, 0x00000000))
+			6: <ptr=0x0000000000e14790> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			7: <ptr=0x0000000000e15bb0> (Grid Reference, (0x00000001, 0x00000000))
+			8: <ptr=0x0000000000e15e20> (RenderEffects, (0x17356912, 0x00000000))
+			9: <ptr=0x0000000000e16bc0> (Shadow Map, (0x00000100, 0x00000000))
+			10: <ptr=0x0000000000e16ee0> (Layer Manager, (0x0d7374fc, 0x51ff028e))
+			11: <ptr=0x0000000000e172d0> (TrackSetList, (0x2cf03595, 0x00000000)) }
+
+
+
