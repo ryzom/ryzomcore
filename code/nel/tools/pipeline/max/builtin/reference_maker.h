@@ -90,6 +90,10 @@ private:
 	/// Unknown value
 	uint32 m_References2035Value0;
 
+	CStorageRaw *m_Unknown2045;
+	CStorageRaw *m_Unknown2047;
+	CStorageRaw *m_Unknown21B0;
+
 }; /* class CReferenceMaker */
 
 typedef CSceneClassDesc<CReferenceMaker> CReferenceMakerClassDesc;

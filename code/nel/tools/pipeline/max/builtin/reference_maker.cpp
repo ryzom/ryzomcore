@@ -59,12 +59,15 @@ namespace BUILTIN {
 #define PMB_REFERENCES_2034_CHUNK_ID 0x2034
 #define PMB_REFERENCES_2035_CHUNK_ID 0x2035
 #define PMB_204B_EQUALS_2E_CHUNK_ID 0x204B
+#define PMB_UNKNOWN2045_CHUNK_ID 0x2045
+#define PMB_UNKNOWN2047_CHUNK_ID 0x2047
+#define PMB_UNKNOWN21B0_CHUNK_ID 0x21B0
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CReferenceMaker::CReferenceMaker(CScene *scene) : CAnimatable(scene), m_ReferenceMap(false), m_References2035Value0(0)
+CReferenceMaker::CReferenceMaker(CScene *scene) : CAnimatable(scene), m_ReferenceMap(false), m_204B_Equals_2E(NULL), m_References2035Value0(0), m_Unknown2045(NULL), m_Unknown2047(NULL), m_Unknown21B0(NULL)
 {
 
 }
@@ -75,6 +78,12 @@ CReferenceMaker::~CReferenceMaker()
 	{
 		delete m_204B_Equals_2E;
 		m_204B_Equals_2E = NULL;
+		delete m_Unknown2045;
+		m_Unknown2045 = NULL;
+		delete m_Unknown2047;
+		m_Unknown2047 = NULL;
+		delete m_Unknown21B0;
+		m_Unknown21B0 = NULL;
 	}
 }
 
@@ -132,6 +141,10 @@ void CReferenceMaker::parse(uint16 version)
 				setReference(index, referenceMaker);
 			}
 		}
+
+		m_Unknown2045 = static_cast<CStorageRaw *>(getChunk(PMB_UNKNOWN2045_CHUNK_ID)); // not sure if this is part of maker or target
+		m_Unknown2047 = static_cast<CStorageRaw *>(getChunk(PMB_UNKNOWN2047_CHUNK_ID)); // not sure if this is part of maker or target
+		m_Unknown21B0 = static_cast<CStorageRaw *>(getChunk(PMB_UNKNOWN21B0_CHUNK_ID)); // not sure if this is part of maker or target
 	}
 }
 
@@ -178,6 +191,9 @@ void CReferenceMaker::build(uint16 version)
 		m_ArchivedChunks.push_back(references2035);
 	}
 	if (m_204B_Equals_2E) putChunk(PMB_204B_EQUALS_2E_CHUNK_ID, m_204B_Equals_2E);
+	if (m_Unknown2045) putChunk(PMB_UNKNOWN2045_CHUNK_ID, m_Unknown2045);
+	if (m_Unknown2047) putChunk(PMB_UNKNOWN2047_CHUNK_ID, m_Unknown2047);
+	if (m_Unknown21B0) putChunk(PMB_UNKNOWN21B0_CHUNK_ID, m_Unknown21B0);
 }
 
 void CReferenceMaker::disown()
@@ -186,6 +202,9 @@ void CReferenceMaker::disown()
 	m_ReferenceMap = false;
 	m_References2035Value0 = 0;
 	m_204B_Equals_2E = NULL;
+	m_Unknown2045 = NULL;
+	m_Unknown2047 = NULL;
+	m_Unknown21B0 = NULL;
 	CAnimatable::disown();
 }
 
@@ -240,6 +259,21 @@ void CReferenceMaker::toStringLocal(std::ostream &ostream, const std::string &pa
 		ostream << "\n" << pad << "0x204B Equals 0x2E (46): ";
 		m_204B_Equals_2E->toString(ostream, pad + "\t");
 	}
+	if (m_Unknown2045)
+	{
+		ostream << "\n" << pad << "Unknown 0x2045: ";
+		m_Unknown2045->toString(ostream, pad + "\t");
+	}
+	if (m_Unknown2047)
+	{
+		ostream << "\n" << pad << "Unknown 0x2047: ";
+		m_Unknown2047->toString(ostream, pad + "\t");
+	}
+	if (m_Unknown21B0)
+	{
+		ostream << "\n" << pad << "Unknown 0x21B0: ";
+		m_Unknown21B0->toString(ostream, pad + "\t");
+	}
 }
 
 CReferenceMaker *CReferenceMaker::getReference(uint index) const
@@ -269,6 +303,8 @@ IStorageObject *CReferenceMaker::createChunkById(uint16 id, bool container)
 		return new CStorageArray<sint32>();
 	case PMB_204B_EQUALS_2E_CHUNK_ID:
 		return new CStorageValue<uint8>();
+	case PMB_UNKNOWN21B0_CHUNK_ID:
+		return new CStorageRaw();
 	}
 	return CAnimatable::createChunkById(id, container);
 }

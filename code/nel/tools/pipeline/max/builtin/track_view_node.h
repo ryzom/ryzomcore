@@ -51,6 +51,7 @@ class CTrackViewNode : public CReferenceTarget
 public:
 	struct TChild
 	{
+		TChild() : Integer0130(0) { }
 		NLMISC::CRefPtr<CReferenceMaker> Reference;
 		ucstring DisplayName;
 		NLMISC::CClassId Identifier;
@@ -77,9 +78,9 @@ public:
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
 
 	// reference maker
-	/*virtual CReferenceMaker *getReference(uint index) const;
+	virtual CReferenceMaker *getReference(uint index) const;
 	virtual void setReference(uint index, CReferenceMaker *reference);
-	virtual uint nbReferences() const;*/
+	virtual uint nbReferences() const;
 
 	// read access
 	inline const std::vector<TChild> &children() const { return m_Children; }

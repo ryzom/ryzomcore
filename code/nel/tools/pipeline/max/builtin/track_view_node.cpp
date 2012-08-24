@@ -29,6 +29,7 @@
 #include "track_view_node.h"
 
 // STL includes
+#include <iomanip>
 
 // NeL includes
 // #include <nel/misc/debug.h>
@@ -49,7 +50,7 @@ namespace BUILTIN {
 #define PMB_TVNODE_IDENTIFIER_CHUNK_ID 0x0120
 #define PMB_TVNODE_INTEGER0130_CHUNK_ID 0x0130 /* type? */
 
-CTrackViewNode::CTrackViewNode(CScene *scene) : CReferenceTarget(scene)
+CTrackViewNode::CTrackViewNode(CScene *scene) : CReferenceTarget(scene), m_Empty0140(NULL), m_Empty0150(NULL)
 {
 
 }
@@ -68,6 +69,33 @@ const CTrackViewNodeClassDesc TrackViewNodeClassDesc(&DllPluginDescBuiltin);
 void CTrackViewNode::parse(uint16 version)
 {
 	CReferenceTarget::parse(version);
+	if (!m_ChunksOwnsPointers)
+	{
+		// Read unknown chunks
+		m_Empty0140 = static_cast<CStorageRaw *>(getChunk(PMB_TVNODE_EMPTY0140_CHUNK_ID));
+		if (m_Empty0140) nlassert(m_Empty0140->Value.empty());
+		m_Empty0150 = static_cast<CStorageRaw *>(getChunk(PMB_TVNODE_EMPTY0150_CHUNK_ID));
+		if (m_Empty0150) nlassert(m_Empty0140->Value.empty());
+
+		// Read child nodes
+		for (std::vector<TChild>::size_type i = 0; i < m_Children.size(); ++i)
+		{
+			CStorageValue<ucstring> *displayName = static_cast<CStorageValue<ucstring> *>(getChunk(PMB_TVNODE_DISPLAYNAME_CHUNK_ID));
+			nlassert(displayName);
+			m_ArchivedChunks.push_back(displayName);
+			m_Children[i].DisplayName = displayName->Value;
+
+			CStorageValue<NLMISC::CClassId> *identifier = static_cast<CStorageValue<NLMISC::CClassId> *>(getChunk(PMB_TVNODE_IDENTIFIER_CHUNK_ID));
+			nlassert(identifier);
+			m_ArchivedChunks.push_back(identifier);
+			m_Children[i].Identifier = identifier->Value;
+
+			CStorageValue<sint32> *integer0130 = static_cast<CStorageValue<sint32> *>(getChunk(PMB_TVNODE_INTEGER0130_CHUNK_ID));
+			nlassert(integer0130);
+			m_ArchivedChunks.push_back(integer0130);
+			m_Children[i].Integer0130 = integer0130->Value;
+		}
+	}
 }
 
 void CTrackViewNode::clean()
@@ -78,6 +106,29 @@ void CTrackViewNode::clean()
 void CTrackViewNode::build(uint16 version)
 {
 	CReferenceTarget::build(version);
+
+	// Write unknown chunks
+	if (m_Empty0140) putChunk(PMB_TVNODE_EMPTY0140_CHUNK_ID, m_Empty0140);
+	if (m_Empty0150) putChunk(PMB_TVNODE_EMPTY0150_CHUNK_ID, m_Empty0150);
+
+	// Write child nodes
+	for (std::vector<TChild>::size_type i = 0; i < m_Children.size(); ++i)
+	{
+		CStorageValue<ucstring> *displayName = new CStorageValue<ucstring>();
+		displayName->Value = m_Children[i].DisplayName;
+		m_ArchivedChunks.push_back(displayName);
+		putChunk(PMB_TVNODE_DISPLAYNAME_CHUNK_ID, displayName);
+
+		CStorageValue<NLMISC::CClassId> *identifier = new CStorageValue<NLMISC::CClassId>();
+		identifier->Value = m_Children[i].Identifier;
+		m_ArchivedChunks.push_back(identifier);
+		putChunk(PMB_TVNODE_IDENTIFIER_CHUNK_ID, identifier);
+
+		CStorageValue<sint32> *integer0130 = new CStorageValue<sint32>();
+		integer0130->Value = m_Children[i].Integer0130;
+		m_ArchivedChunks.push_back(integer0130);
+		putChunk(PMB_TVNODE_INTEGER0130_CHUNK_ID, integer0130);
+	}
 }
 
 void CTrackViewNode::disown()
@@ -104,25 +155,43 @@ const ISceneClassDesc *CTrackViewNode::classDesc() const
 void CTrackViewNode::toStringLocal(std::ostream &ostream, const std::string &pad) const
 {
 	CReferenceTarget::toStringLocal(ostream, pad);
+	if (m_Empty0140) ostream << "\n" << pad << "Empty 0x0140 ";
+	if (m_Empty0150) ostream << "\n" << pad << "Empty 0x0150 ";
+	// std::string padpad = pad + "\t";
+	for (std::vector<TChild>::size_type i = 0; i < m_Children.size(); ++i)
+	{
+		CReferenceMaker *referenceMaker = m_Children[i].Reference;
+		nlassert(referenceMaker);
+		ostream << "\n" << pad << i << ": <ptr=0x";
+		{
+			std::stringstream ss;
+			ss << std::hex << std::setfill('0');
+			ss << std::setw(16) << (uint64)(void *)referenceMaker;
+			ostream << ss.str();
+		}
+		ostream << "> ";
+		ostream << "(" << ucstring(referenceMaker->classDesc()->displayName()).toUtf8() << ", " << referenceMaker->classDesc()->classId().toString() << ") ";
+		ostream << "(" << m_Children[i].DisplayName.toUtf8() << ", " << m_Children[i].Identifier.toString() << ", " << m_Children[i].Integer0130 << ") ";
+	}
 }
-/*
+
 CReferenceMaker *CTrackViewNode::getReference(uint index) const
 {
-	if (m_References.size() <= index) return NULL;
-	return m_References[index];
+	if (m_Children.size() <= index) return NULL;
+	return m_Children[index].Reference;
 }
 
 void CTrackViewNode::setReference(uint index, CReferenceMaker *reference)
 {
-	if (m_References.size() <= index) m_References.resize(index + 1);
-	m_References[index] = reference;
+	if (m_Children.size() <= index) m_Children.resize(index + 1);
+	m_Children[index].Reference = reference;
 }
 
 uint CTrackViewNode::nbReferences() const
 {
-	return m_References.size();
+	return m_Children.size();
 }
-*/
+
 IStorageObject *CTrackViewNode::createChunkById(uint16 id, bool container)
 {
 	switch (id)
