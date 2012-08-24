@@ -49,7 +49,7 @@ namespace BUILTIN {
 class INode : public CReferenceTarget
 {
 public:
-	INode(CScene *scene);
+	INode(PIPELINE::MAX::CScene *scene);
 	virtual ~INode();
 
 	// class desc

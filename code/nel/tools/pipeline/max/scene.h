@@ -37,10 +37,16 @@
 // Project includes
 #include "storage_object.h"
 #include "storage_value.h"
-#include "scene_class.h"
 
 namespace PIPELINE {
 namespace MAX {
+namespace BUILTIN {
+
+class CScene;
+
+}
+
+class CSceneClass;
 
 // Registry containing available scene classes
 class CSceneClassRegistry;
@@ -114,6 +120,10 @@ public:
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 
+public:
+	/// Return the single instance of the builtin scene class
+	inline BUILTIN::CScene *scene() { return NULL; }
+
 private:
 	CScene *m_Scene;
 
@@ -121,8 +131,8 @@ private:
 	CDllDirectory *m_DllDirectory;
 	CClassDirectory3 *m_ClassDirectory3;
 
-	std::vector<IStorageObject *> m_StorageObjectByIndex;
-	std::map<IStorageObject *, uint32> m_StorageObjectToIndex;
+	std::vector<CSceneClass *> m_StorageObjectByIndex;
+	std::map<CSceneClass *, uint32> m_StorageObjectToIndex;
 
 }; /* class CSceneClassContainer */
 

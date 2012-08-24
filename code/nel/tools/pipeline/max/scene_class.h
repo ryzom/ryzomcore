@@ -40,11 +40,16 @@
 #include "storage_object.h"
 #include "storage_value.h"
 #include "dll_plugin_desc.h"
+#include "scene.h"
 
 namespace PIPELINE {
 namespace MAX {
+namespace BUILTIN {
 
 class CScene;
+
+}
+
 class ISceneClassDesc;
 
 /**
@@ -62,7 +67,7 @@ class ISceneClassDesc;
  * CRefPtr<T> is a safe handle, which you can use to verify if the class
  * has been deleted or not, similar to AnimHandle in max.
  */
-class CSceneClass : public CStorageContainer, public NLMISC::CRefCount
+class CSceneClass : public CStorageContainer, public NLMISC::CVirtualRefCount
 {
 public:
 	CSceneClass(CScene *scene);
@@ -116,6 +121,16 @@ public:
 	inline const TStorageObjectContainer &orphanedChunks() const { return m_OrphanedChunks; }
 	//@}
 
+	//! \name Scene utility access
+	//@{
+	/// Return the scene scene class
+	inline BUILTIN::CScene *scene() const { return m_Scene->container()->scene(); }
+	/// Return the scene version
+	inline uint16 version() const { return m_Scene->version(); }
+	/// Return the scene container
+	inline CSceneClassContainer *container() const { return m_Scene->container(); }
+	//@}
+
 protected:
 	//! \name Methods used by inheriting classes to read and write to the storage safely
 	//@{
@@ -127,6 +142,9 @@ protected:
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
+	/// Chunks which have been parsed, kept unmodified, and which are no longer necessary, should be placed here
+	std::vector<IStorageObject *> m_ArchivedChunks;
 
 private:
 	TStorageObjectContainer m_OrphanedChunks;

@@ -49,7 +49,7 @@ namespace BUILTIN {
 class CStdMat : public CMtl
 {
 public:
-	CStdMat(CScene *scene);
+	CStdMat(PIPELINE::MAX::CScene *scene);
 	virtual ~CStdMat();
 
 }; /* class CStdMat */

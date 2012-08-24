@@ -50,7 +50,7 @@ namespace BUILTIN {
 class CReferenceMaker : public CAnimatable
 {
 public:
-	CReferenceMaker(CScene *scene);
+	CReferenceMaker(PIPELINE::MAX::CScene *scene);
 	virtual ~CReferenceMaker();
 
 	// class desc
@@ -70,14 +70,25 @@ public:
 	virtual const ISceneClassDesc *classDesc() const;
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
 
+	// child classes should inherit, default implementation stores in a vector
+	/// Get a reference
+	virtual CReferenceMaker *getReference(uint index) const;
+	virtual void setReference(uint index, CReferenceMaker *reference);
+	virtual uint nbReferences() const;
+
 protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	/// Storage method
+	bool m_ReferenceMap;
 
 private:
-	CStorageArray<sint32> *m_References2034;
-	CStorageArray<sint32> *m_References2035;
 	CStorageValue<uint8> *m_204B_Equals_2E;
+
+	/// Default implementation, should preferably not use this, no direct read access will be provided
+	std::vector<NLMISC::CRefPtr<CReferenceMaker> > m_References;
+	/// Unknown value
+	uint32 m_References2035Value0;
 
 }; /* class CReferenceMaker */
 

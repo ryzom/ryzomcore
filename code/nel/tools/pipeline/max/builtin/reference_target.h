@@ -50,7 +50,7 @@ namespace BUILTIN {
 class CReferenceTarget : public CReferenceMaker
 {
 public:
-	CReferenceTarget(CScene *scene);
+	CReferenceTarget(PIPELINE::MAX::CScene *scene);
 	virtual ~CReferenceTarget();
 
 	// class desc

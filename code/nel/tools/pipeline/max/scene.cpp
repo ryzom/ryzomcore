@@ -141,22 +141,50 @@ void CSceneClassContainer::toString(std::ostream &ostream, const std::string &pa
 
 void CSceneClassContainer::parse(uint16 version, TParseLevel level)
 {
+	// Temporary 'readonly' implementation, not modifying m_Chunks!
+	m_StorageObjectByIndex.resize(m_Chunks.size());
+	TStorageObjectIterator it = m_Chunks.begin();
+	for (std::vector<CSceneClass *>::size_type i = 0; i < m_StorageObjectByIndex.size(); ++i)
+	{
+		m_StorageObjectByIndex[i] = static_cast<CSceneClass *>(it->second);
+		++it;
+	}
 	CStorageContainer::parse(version, level);
 }
 
 void CSceneClassContainer::clean()
 {
+	// Temporary 'readonly' implementation, not modifying m_Chunks!
 	CStorageContainer::clean();
 }
 
 void CSceneClassContainer::build(uint16 version)
 {
+	// Temporary 'readonly' implementation, not modifying m_Chunks!
+	for (std::vector<CSceneClass *>::size_type i = 0; i < m_StorageObjectByIndex.size(); ++i)
+	{
+		m_StorageObjectToIndex[m_StorageObjectByIndex[i]] = i;
+	}
 	CStorageContainer::build(version);
 }
 
 void CSceneClassContainer::disown()
 {
+	// Temporary 'readonly' implementation, not modifying m_Chunks!
 	CStorageContainer::disown();
+}
+
+CSceneClass *CSceneClassContainer::getByStorageIndex(uint32 index) const
+{
+	// Temporary 'readonly' implementation, not modifying m_Chunks!
+	if (index >= m_StorageObjectByIndex.size()) { nlerror("Index %i is outside size %i", index, m_StorageObjectByIndex.size()); return NULL; }
+	return m_StorageObjectByIndex[index];
+}
+
+uint32 CSceneClassContainer::getOrCreateStorageIndex(CSceneClass *storageObject)
+{
+	// Temporary 'readonly' implementation, not modifying m_Chunks!
+	return m_StorageObjectToIndex[storageObject];
 }
 
 IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)

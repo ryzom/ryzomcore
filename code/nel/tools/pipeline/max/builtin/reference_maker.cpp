@@ -29,6 +29,7 @@
 #include "reference_maker.h"
 
 // STL includes
+#include <iomanip>
 
 // NeL includes
 // #include <nel/misc/debug.h>
@@ -63,7 +64,7 @@ namespace BUILTIN {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CReferenceMaker::CReferenceMaker(CScene *scene) : CAnimatable(scene)
+CReferenceMaker::CReferenceMaker(PIPELINE::MAX::CScene *scene) : CAnimatable(scene), m_ReferenceMap(false), m_References2035Value0(0)
 {
 
 }
@@ -72,10 +73,6 @@ CReferenceMaker::~CReferenceMaker()
 {
 	if (!m_ChunksOwnsPointers)
 	{
-		delete m_References2034;
-		m_References2034 = NULL;
-		delete m_References2035;
-		m_References2035 = NULL;
 		delete m_204B_Equals_2E;
 		m_204B_Equals_2E = NULL;
 	}
@@ -94,35 +91,100 @@ void CReferenceMaker::parse(uint16 version, TParseLevel level)
 	CAnimatable::parse(version, level);
 	if (!m_ChunksOwnsPointers)
 	{
-		m_References2034 = static_cast<CStorageArray<sint32> *>(getChunk(PMB_REFERENCES_2034_CHUNK_ID));
-		m_References2035 = static_cast<CStorageArray<sint32> *>(getChunk(PMB_REFERENCES_2035_CHUNK_ID));
-		if (m_References2034) nlassert(m_References2035 == NULL); // Apparently, there can be only one.
-		if (m_References2035) nlassert(m_References2034 == NULL);
+		CStorageArray<sint32> *references2034 = static_cast<CStorageArray<sint32> *>(getChunk(PMB_REFERENCES_2034_CHUNK_ID));
+		CStorageArray<sint32> *references2035 = static_cast<CStorageArray<sint32> *>(getChunk(PMB_REFERENCES_2035_CHUNK_ID));
+		if (references2034) nlassert(references2035 == NULL); // Apparently, there can be only one.
+		if (references2035) nlassert(references2034 == NULL);
 		m_204B_Equals_2E = static_cast<CStorageValue<uint8> *>(getChunk(PMB_204B_EQUALS_2E_CHUNK_ID));
 		if (m_204B_Equals_2E) nlassert(m_204B_Equals_2E->Value == 0x2e); // Really, let me know when it has another value.
-		// TODO: Parse contents
+
+		// Parse contents
+		if (references2034)
+		{
+			m_ReferenceMap = false; // NOTE: Plugins may check after parse if they parsed with the correct type, to find a pattern
+			m_ArchivedChunks.push_back(references2034);
+			for (std::vector<sint32>::size_type i = 0; i < references2034->Value.size(); ++i)
+			{
+				if (references2034->Value[i] > 0)
+				{
+					CReferenceMaker *referenceMaker = dynamic_cast<CReferenceMaker *>(container()->getByStorageIndex(references2034->Value[i]));
+					if (!referenceMaker) nlerror("Reference maker is %s not a reference maker", container()->getByStorageIndex(references2034->Value[i])->classDesc()->classId().toString().c_str());
+					setReference(i, referenceMaker);
+				}
+			}
+		}
+		if (references2035)
+		{
+			m_ReferenceMap = true;
+			m_ArchivedChunks.push_back(references2035);
+			std::vector<sint32>::iterator it = references2035->Value.begin();
+			m_References2035Value0 = (*it);
+			++it;
+			std::vector<sint32>::iterator end = references2035->Value.end();
+			while (it != end)
+			{
+				sint32 index = (*it);
+				++it;
+				sint32 referenceindex = (*it);
+				++it;
+				CReferenceMaker *referenceMaker = dynamic_cast<CReferenceMaker *>(container()->getByStorageIndex(referenceindex));
+				if (!referenceMaker) nlerror("Reference maker is %s not a reference maker", container()->getByStorageIndex(referenceindex)->classDesc()->classId().toString().c_str());
+				setReference(index, referenceMaker);
+			}
+		}
 	}
 }
 
 void CReferenceMaker::clean()
 {
-	CAnimatable::clean();
-	// TODO: Delete unnecessary stuff
+	CAnimatable::clean(); // Nothing to do here, m_ArchivedChunks is cleaned (deleted) for us!
 }
 
 void CReferenceMaker::build(uint16 version)
 {
 	CAnimatable::build(version);
 	// TODO: Build contents
-	if (m_References2034) putChunk(PMB_REFERENCES_2034_CHUNK_ID, m_References2034);
-	if (m_References2035) putChunk(PMB_REFERENCES_2035_CHUNK_ID, m_References2035);
+	//if (m_References2034) putChunk(PMB_REFERENCES_2034_CHUNK_ID, m_References2034);
+	//if (m_References2035) putChunk(PMB_REFERENCES_2035_CHUNK_ID, m_References2035);
+	if (!m_ReferenceMap)
+	{
+		CStorageArray<sint32> *references2034 = new CStorageArray<sint32>();
+		uint nb = nbReferences();
+		references2034->Value.resize(nb);
+		for (uint i = 0; i < nb; ++i)
+		{
+			CReferenceMaker *referenceMaker = getReference(i);
+			if (referenceMaker) references2034->Value[i] = container()->getOrCreateStorageIndex(referenceMaker);
+			else references2034->Value[i] = -1;
+		}
+		putChunk(PMB_REFERENCES_2034_CHUNK_ID, references2034);
+		m_ArchivedChunks.push_back(references2034);
+	}
+	else
+	{
+		CStorageArray<sint32> *references2035 = new CStorageArray<sint32>();
+		uint nb = nbReferences();
+		references2035->Value.push_back(m_References2035Value0);
+		for (uint i = 0; i < nb; ++i)
+		{
+			CReferenceMaker *referenceMaker = getReference(i);
+			if (referenceMaker)
+			{
+				references2035->Value.push_back(i);
+				references2035->Value.push_back(container()->getOrCreateStorageIndex(referenceMaker));
+			}
+		}
+		putChunk(PMB_REFERENCES_2035_CHUNK_ID, references2035);
+		m_ArchivedChunks.push_back(references2035);
+	}
 	if (m_204B_Equals_2E) putChunk(PMB_204B_EQUALS_2E_CHUNK_ID, m_204B_Equals_2E);
 }
 
 void CReferenceMaker::disown()
 {
-	m_References2034 = NULL;
-	m_References2035 = NULL;
+	m_References.clear();
+	m_ReferenceMap = false;
+	m_References2035Value0 = 0;
 	m_204B_Equals_2E = NULL;
 	CAnimatable::disown();
 }
@@ -146,21 +208,55 @@ const ISceneClassDesc *CReferenceMaker::classDesc() const
 void CReferenceMaker::toStringLocal(std::ostream &ostream, const std::string &pad) const
 {
 	CAnimatable::toStringLocal(ostream, pad);
-	if (m_References2034)
+	uint nb = nbReferences();
+	if (nb)
 	{
-		ostream << "\n" << pad << "References 0x2034: ";
-		m_References2034->toString(ostream, pad + "\t");
-	}
-	if (m_References2035)
-	{
-		ostream << "\n" << pad << "References 0x2035: ";
-		m_References2035->toString(ostream, pad + "\t");
+		if (!m_ReferenceMap) ostream << "\n" << pad << "References 0x2034: ";
+		else ostream << "\n" << pad << "References 0x2035: ";
+		std::string padpad = pad + "\t";
+		ostream << "PARSED ";
+		if (!m_References.size()) ostream << "VIRTUAL ";
+		ostream << "{ ";
+		for (uint i = 0; i < nb; ++i)
+		{
+			CReferenceMaker *referenceMaker = getReference(i);
+			if (referenceMaker)
+			{
+				ostream << "\n" << padpad << i << ": <ptr=0x";
+				{
+					std::stringstream ss;
+					ss << std::hex << std::setfill('0');
+					ss << std::setw(16) << (uint64)(void *)referenceMaker;
+					ostream << ss.str();
+				}
+				ostream << "> ";
+				ostream << "(" << ucstring(referenceMaker->classDesc()->displayName()).toUtf8() << ", " << referenceMaker->classDesc()->classId().toString() << ") ";
+			}
+		}
+		ostream << "} ";
 	}
 	if (m_204B_Equals_2E)
 	{
 		ostream << "\n" << pad << "0x204B Equals 0x2E (46): ";
 		m_204B_Equals_2E->toString(ostream, pad + "\t");
 	}
+}
+
+CReferenceMaker *CReferenceMaker::getReference(uint index) const
+{
+	if (m_References.size() <= index) return NULL;
+	return m_References[index];
+}
+
+void CReferenceMaker::setReference(uint index, CReferenceMaker *reference)
+{
+	if (m_References.size() <= index) m_References.resize(index + 1);
+	m_References[index] = reference;
+}
+
+uint CReferenceMaker::nbReferences() const
+{
+	return m_References.size();
 }
 
 IStorageObject *CReferenceMaker::createChunkById(uint16 id, bool container)

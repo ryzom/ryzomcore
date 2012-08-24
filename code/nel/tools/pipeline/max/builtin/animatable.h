@@ -34,6 +34,7 @@
 // NeL includes
 
 // Project includes
+#include "../scene.h"
 #include "../scene_class.h"
 #include "../super_class_desc.h"
 
@@ -55,7 +56,7 @@ class CAppData;
 class CAnimatable : public CSceneClass
 {
 public:
-	CAnimatable(CScene *scene);
+	CAnimatable(PIPELINE::MAX::CScene *scene);
 	virtual ~CAnimatable();
 
 	// class desc

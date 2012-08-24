@@ -68,7 +68,15 @@ CSceneClass::CSceneClass(CScene *scene) : m_Scene(scene)
 
 CSceneClass::~CSceneClass()
 {
-
+	if (!m_ChunksOwnsPointers)
+	{
+		for (TStorageObjectContainer::iterator it = m_OrphanedChunks.begin(), end = m_OrphanedChunks.end(); it != end; ++it)
+			delete it->second;
+		m_OrphanedChunks.clear();
+		for (std::vector<IStorageObject *>::iterator it = m_ArchivedChunks.begin(), end = m_ArchivedChunks.end(); it != end; ++it)
+			delete (*it);
+		m_ArchivedChunks.clear();
+	}
 }
 
 std::string CSceneClass::className() const
@@ -84,7 +92,22 @@ void CSceneClass::toString(std::ostream &ostream, const std::string &pad) const
 	}
 	else
 	{
-		ostream << "(" << className() << ": " << ucstring(classDesc()->displayName()).toUtf8() << ", " << classDesc()->classId().toString() << ", " << ucstring(classDesc()->dllPluginDesc()->internalName()).toUtf8() << ") [" << m_Chunks.size() << "] { ";
+		ostream << "<ptr=0x";
+		{
+			std::stringstream ss;
+			ss << std::hex << std::setfill('0');
+			ss << std::setw(16) << (uint64)(void *)this;
+			ostream << ss.str();
+		}
+		ostream << "> ";
+		ostream << "(" << className() << ": " << ucstring(classDesc()->displayName()).toUtf8() << ", " << classDesc()->classId().toString() << ", 0x";
+		{
+			std::stringstream ss;
+			ss << std::hex << std::setfill('0');
+			ss << std::setw(8) << classDesc()->superClassId();
+			ostream << ss.str();
+		}
+		ostream << ", " << ucstring(classDesc()->dllPluginDesc()->internalName()).toUtf8() << ") [" << m_OrphanedChunks.size() << "] { ";
 		toStringLocal(ostream, pad);
 		// Append orphans
 		std::string padpad = pad + "\t";
@@ -137,6 +160,11 @@ void CSceneClass::clean()
 			static_cast<CStorageContainer *>(it->second)->clean();
 		}
 	}
+
+	// Erase archived chunks, they must have been parsed perfectly
+	for (std::vector<IStorageObject *>::iterator it = m_ArchivedChunks.begin(), end = m_ArchivedChunks.end(); it != end; ++it)
+		delete (*it);
+	m_ArchivedChunks.clear();
 }
 
 void CSceneClass::build(uint16 version)
@@ -166,6 +194,7 @@ void CSceneClass::disown()
 
 	// Clear local references
 	m_OrphanedChunks.clear();
+	m_ArchivedChunks.clear();
 
 	// Return ownership
 	m_ChunksOwnsPointers = true;

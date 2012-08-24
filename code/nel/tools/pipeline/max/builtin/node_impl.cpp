@@ -42,7 +42,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CNodeImpl::CNodeImpl(CScene *scene) : INode(scene)
+CNodeImpl::CNodeImpl(PIPELINE::MAX::CScene *scene) : INode(scene)
 {
 
 }

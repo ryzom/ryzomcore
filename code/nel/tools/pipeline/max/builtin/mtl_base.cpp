@@ -42,7 +42,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CMtlBase::CMtlBase(CScene *scene) : CReferenceTarget(scene)
+CMtlBase::CMtlBase(PIPELINE::MAX::CScene *scene) : CReferenceTarget(scene)
 {
 
 }

@@ -49,7 +49,7 @@ namespace BUILTIN {
 class CPolyObject : public CObject
 {
 public:
-	CPolyObject(CScene *scene);
+	CPolyObject(PIPELINE::MAX::CScene *scene);
 	virtual ~CPolyObject();
 
 }; /* class CPolyObject */

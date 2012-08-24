@@ -49,7 +49,7 @@ namespace BUILTIN {
 class CObject : public CBaseObject
 {
 public:
-	CObject(CScene *scene);
+	CObject(PIPELINE::MAX::CScene *scene);
 	virtual ~CObject();
 
 }; /* class CObject */

@@ -42,7 +42,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CObject::CObject(CScene *scene) : CBaseObject(scene)
+CObject::CObject(PIPELINE::MAX::CScene *scene) : CBaseObject(scene)
 {
 
 }

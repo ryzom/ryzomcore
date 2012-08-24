@@ -42,7 +42,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CStdMat::CStdMat(CScene *scene) : CMtl(scene)
+CStdMat::CStdMat(PIPELINE::MAX::CScene *scene) : CMtl(scene)
 {
 
 }

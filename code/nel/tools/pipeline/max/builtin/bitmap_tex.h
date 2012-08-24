@@ -49,7 +49,7 @@ namespace BUILTIN {
 class CBitmapTex : public CTexmap
 {
 public:
-	CBitmapTex(CScene *scene);
+	CBitmapTex(PIPELINE::MAX::CScene *scene);
 	virtual ~CBitmapTex();
 
 }; /* class CBitmapTex */

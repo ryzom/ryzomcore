@@ -49,7 +49,7 @@ namespace BUILTIN {
 class CParamBlock : public CReferenceTarget
 {
 public:
-	CParamBlock(CScene *scene);
+	CParamBlock(PIPELINE::MAX::CScene *scene);
 	virtual ~CParamBlock();
 
 }; /* class CParamBlock */

@@ -49,7 +49,7 @@ namespace BUILTIN {
 class CBaseObject : public CReferenceTarget
 {
 public:
-	CBaseObject(CScene *scene);
+	CBaseObject(PIPELINE::MAX::CScene *scene);
 	virtual ~CBaseObject();
 
 }; /* class CBaseObject */
