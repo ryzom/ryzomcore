@@ -138,6 +138,12 @@ protected:
 	IStorageObject *getChunk(uint16 id);
 	/// Use during file build. Adds a chunk to the chunks that will be written to the file. Build is called when a chunk is passed through
 	void putChunk(uint16 id, IStorageObject *storageObject);
+	/// Same as getChunk but for lazy programmers, must use together with putChunkValue
+	template <typename T>
+	const T &getChunkValue(uint16 id);
+	/// Same as putChunk but for lazy programmers, must use together with getChunkValue
+	template <typename T>
+	void putChunkValue(uint16 id, const T &value);
 	//@}
 
 protected:
@@ -153,6 +159,24 @@ private:
 	CScene *m_Scene;
 
 }; /* class CSceneClass */
+
+template <typename T>
+const T &CSceneClass::getChunkValue(uint16 id)
+{
+	CStorageValue<T> *chunk = static_cast<CStorageValue<T> *>(getChunk(id));
+	if (!chunk) { nlerror("Try to get required chunk value 0x%x but it does not exist, bad file format"); }
+	m_ArchivedChunks.push_back(chunk);
+	return chunk->Value;
+}
+
+template <typename T>
+void CSceneClass::putChunkValue(uint16 id, const T &value)
+{
+	CStorageValue<T> *chunk = new CStorageValue<T>();
+	chunk->Value = value;
+	m_ArchivedChunks.push_back(chunk);
+	putChunk(id, chunk);
+}
 
 /**
  * \brief ISceneClassDesc

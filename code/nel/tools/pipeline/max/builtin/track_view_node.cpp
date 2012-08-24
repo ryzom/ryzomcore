@@ -48,7 +48,7 @@ namespace BUILTIN {
 
 #define PMB_TVNODE_DISPLAYNAME_CHUNK_ID 0x0110
 #define PMB_TVNODE_IDENTIFIER_CHUNK_ID 0x0120
-#define PMB_TVNODE_INTEGER0130_CHUNK_ID 0x0130 /* type? */
+#define PMB_TVNODE_ISNOTNODE_CHUNK_ID 0x0130
 
 CTrackViewNode::CTrackViewNode(CScene *scene) : CReferenceTarget(scene), m_Empty0140(NULL), m_Empty0150(NULL)
 {
@@ -80,20 +80,9 @@ void CTrackViewNode::parse(uint16 version)
 		// Read child nodes
 		for (std::vector<TChild>::size_type i = 0; i < m_Children.size(); ++i)
 		{
-			CStorageValue<ucstring> *displayName = static_cast<CStorageValue<ucstring> *>(getChunk(PMB_TVNODE_DISPLAYNAME_CHUNK_ID));
-			nlassert(displayName);
-			m_ArchivedChunks.push_back(displayName);
-			m_Children[i].DisplayName = displayName->Value;
-
-			CStorageValue<NLMISC::CClassId> *identifier = static_cast<CStorageValue<NLMISC::CClassId> *>(getChunk(PMB_TVNODE_IDENTIFIER_CHUNK_ID));
-			nlassert(identifier);
-			m_ArchivedChunks.push_back(identifier);
-			m_Children[i].Identifier = identifier->Value;
-
-			CStorageValue<sint32> *integer0130 = static_cast<CStorageValue<sint32> *>(getChunk(PMB_TVNODE_INTEGER0130_CHUNK_ID));
-			nlassert(integer0130);
-			m_ArchivedChunks.push_back(integer0130);
-			m_Children[i].Integer0130 = integer0130->Value;
+			m_Children[i].DisplayName = getChunkValue<ucstring>(PMB_TVNODE_DISPLAYNAME_CHUNK_ID);
+			m_Children[i].Identifier = getChunkValue<NLMISC::CClassId>(PMB_TVNODE_IDENTIFIER_CHUNK_ID);
+			m_Children[i].IsNotAnotherNode = getChunkValue<sint32>(PMB_TVNODE_ISNOTNODE_CHUNK_ID);
 		}
 	}
 }
@@ -114,25 +103,15 @@ void CTrackViewNode::build(uint16 version)
 	// Write child nodes
 	for (std::vector<TChild>::size_type i = 0; i < m_Children.size(); ++i)
 	{
-		CStorageValue<ucstring> *displayName = new CStorageValue<ucstring>();
-		displayName->Value = m_Children[i].DisplayName;
-		m_ArchivedChunks.push_back(displayName);
-		putChunk(PMB_TVNODE_DISPLAYNAME_CHUNK_ID, displayName);
-
-		CStorageValue<NLMISC::CClassId> *identifier = new CStorageValue<NLMISC::CClassId>();
-		identifier->Value = m_Children[i].Identifier;
-		m_ArchivedChunks.push_back(identifier);
-		putChunk(PMB_TVNODE_IDENTIFIER_CHUNK_ID, identifier);
-
-		CStorageValue<sint32> *integer0130 = new CStorageValue<sint32>();
-		integer0130->Value = m_Children[i].Integer0130;
-		m_ArchivedChunks.push_back(integer0130);
-		putChunk(PMB_TVNODE_INTEGER0130_CHUNK_ID, integer0130);
+		putChunkValue(PMB_TVNODE_DISPLAYNAME_CHUNK_ID, m_Children[i].DisplayName);
+		putChunkValue(PMB_TVNODE_IDENTIFIER_CHUNK_ID, m_Children[i].Identifier);
+		putChunkValue(PMB_TVNODE_ISNOTNODE_CHUNK_ID, m_Children[i].IsNotAnotherNode);
 	}
 }
 
 void CTrackViewNode::disown()
 {
+	m_Children.clear();
 	CReferenceTarget::disown();
 }
 
@@ -171,7 +150,7 @@ void CTrackViewNode::toStringLocal(std::ostream &ostream, const std::string &pad
 		}
 		ostream << "> ";
 		ostream << "(" << ucstring(referenceMaker->classDesc()->displayName()).toUtf8() << ", " << referenceMaker->classDesc()->classId().toString() << ") ";
-		ostream << "(" << m_Children[i].DisplayName.toUtf8() << ", " << m_Children[i].Identifier.toString() << ", " << m_Children[i].Integer0130 << ") ";
+		ostream << "(" << m_Children[i].DisplayName.toUtf8() << ", " << m_Children[i].Identifier.toString() << ", " << (m_Children[i].IsNotAnotherNode ? "ENTRY" : "TVNODE") << ") ";
 	}
 }
 
@@ -200,7 +179,7 @@ IStorageObject *CTrackViewNode::createChunkById(uint16 id, bool container)
 		return new CStorageValue<ucstring>();
 	case PMB_TVNODE_IDENTIFIER_CHUNK_ID:
 		return new CStorageValue<NLMISC::CClassId>();
-	case PMB_TVNODE_INTEGER0130_CHUNK_ID:
+	case PMB_TVNODE_ISNOTNODE_CHUNK_ID:
 		return new CStorageValue<sint32>();
 	}
 	return CReferenceTarget::createChunkById(id, container);

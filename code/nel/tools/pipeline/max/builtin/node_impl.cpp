@@ -68,10 +68,7 @@ void CNodeImpl::parse(uint16 version)
 	INode::parse(version);
 	if (!m_ChunksOwnsPointers)
 	{
-		CStorageValue<uint32> *nodeVersion = static_cast<CStorageValue<uint32> *>(getChunk(PMB_NODE_VERSION_CHUNK_ID));
-		nlassert(nodeVersion);
-		m_NodeVersion = nodeVersion->Value;
-		m_ArchivedChunks.push_back(nodeVersion);
+		m_NodeVersion = getChunkValue<uint32>(PMB_NODE_VERSION_CHUNK_ID);
 
 		CStorageArray<uint32> *parent = static_cast<CStorageArray<uint32> *>(getChunk(PMB_NODE_PARENT_CHUNK_ID));
 		nlassert(parent);
@@ -81,10 +78,7 @@ void CNodeImpl::parse(uint16 version)
 		m_ParentFlags = parent->Value[1];
 		m_ArchivedChunks.push_back(parent);
 
-		CStorageValue<ucstring> *userName = static_cast<CStorageValue<ucstring> *>(getChunk(PMB_NODE_NAME_CHUNK_ID));
-		nlassert(userName);
-		m_UserName = userName->Value;
-		m_ArchivedChunks.push_back(userName);
+		m_UserName = getChunkValue<ucstring>(PMB_NODE_NAME_CHUNK_ID);
 	}
 }
 
@@ -97,10 +91,7 @@ void CNodeImpl::build(uint16 version)
 {
 	INode::build(version);
 
-	CStorageValue<uint32> *nodeVersion = new CStorageValue<uint32>();
-	nodeVersion->Value = m_NodeVersion;
-	m_ArchivedChunks.push_back(nodeVersion);
-	putChunk(PMB_NODE_VERSION_CHUNK_ID, nodeVersion);
+	putChunkValue(PMB_NODE_VERSION_CHUNK_ID, m_NodeVersion);
 
 	CStorageArray<uint32> *parent = new CStorageArray<uint32>();
 	parent->Value.resize(2);
@@ -109,10 +100,7 @@ void CNodeImpl::build(uint16 version)
 	m_ArchivedChunks.push_back(parent);
 	putChunk(PMB_NODE_PARENT_CHUNK_ID, parent);
 
-	CStorageValue<ucstring> *userName = new CStorageValue<ucstring>();
-	userName->Value = m_UserName;
-	m_ArchivedChunks.push_back(userName);
-	putChunk(PMB_NODE_NAME_CHUNK_ID, userName);
+	putChunkValue(PMB_NODE_NAME_CHUNK_ID, m_UserName);
 }
 
 void CNodeImpl::disown()

@@ -51,11 +51,11 @@ class CTrackViewNode : public CReferenceTarget
 public:
 	struct TChild
 	{
-		TChild() : Integer0130(0) { }
+		TChild() : IsNotAnotherNode(0) { }
 		NLMISC::CRefPtr<CReferenceMaker> Reference;
 		ucstring DisplayName;
 		NLMISC::CClassId Identifier;
-		sint32 Integer0130;
+		sint32 IsNotAnotherNode;
 	};
 
 	CTrackViewNode(CScene *scene);

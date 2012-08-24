@@ -199,9 +199,9 @@ IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 	{
 		// Known unknown special identifiers...
 	case 0x2032:
-		return m_SceneClassRegistry->createUnknown(m_Scene, 0x0, NLMISC::CClassId(0x29263a68, 0x405f22f5), ucstring("Unknown 0x2032"), ucstring("0x2032_0x2033_dll"), ucstring("Not part of the dll directory!"));
+		return m_SceneClassRegistry->createUnknown(m_Scene, 0x0, NLMISC::CClassId(0x29263a68, 0x405f22f5), ucstring("OSM Derived"), ucstring("Internal"), ucstring("Internal"));
 	case 0x2033:
-		return m_SceneClassRegistry->createUnknown(m_Scene, 0x0, NLMISC::CClassId(0x4ec13906, 0x5578130e), ucstring("Unknown 0x2033"), ucstring("0x2032_0x2033_dll"), ucstring("Not part of the dll directory!"));
+		return m_SceneClassRegistry->createUnknown(m_Scene, 0x0, NLMISC::CClassId(0x4ec13906, 0x5578130e), ucstring("WSM Derived"), ucstring("Internal"), ucstring("Internal"));
 		// return new CSceneClass(m_Scene); // TODO: Make dummy dllentry and classentry for these...
 		// return static_cast<IStorageObject *>(new CSceneClassUnknown<CSceneClass>(dllEntry, classEntry));
 	}
