@@ -58,9 +58,21 @@ const NLMISC::CClassId CSceneImpl::ClassId = NLMISC::CClassId(0x00002222, 0x0000
 const TSClassId CSceneImpl::SuperClassId = CReferenceMaker::SuperClassId;
 const CSceneImplClassDesc SceneImplClassDesc(&DllPluginDescBuiltin);
 
-void CSceneImpl::parse(uint16 version, TParseLevel level)
+void CSceneImpl::parse(uint16 version_, TParseLevel level)
 {
-	CReferenceMaker::parse(version, level);
+	CReferenceMaker::parse(version_, level);
+	nlassert(m_MaterialEditor);
+	nlassert(m_MtlBaseLib);
+	nlassert(m_Sound);
+	nlassert(m_RootNode);
+	nlassert(m_RenderEnvironment);
+	nlassert(m_NamedSelSetList);
+	nlassert(m_TVNode);
+	nlassert(m_GridReference);
+	nlassert(m_RenderEffects);
+	nlassert(m_ShadowMap);
+	nlassert(m_LayerManager);
+	if (version() > Version3) nlassert(m_TrackSetList);
 }
 
 void CSceneImpl::clean()
@@ -97,6 +109,85 @@ const ISceneClassDesc *CSceneImpl::classDesc() const
 void CSceneImpl::toStringLocal(std::ostream &ostream, const std::string &pad) const
 {
 	CReferenceMaker::toStringLocal(ostream, pad);
+}
+
+CReferenceMaker *CSceneImpl::getReference(uint index) const
+{
+	switch (index)
+	{
+	case 0:
+		return m_MaterialEditor;
+	case 1:
+		return m_MtlBaseLib;
+	case 2:
+		return m_Sound;
+	case 3:
+		return m_RootNode;
+	case 4:
+		return m_RenderEnvironment;
+	case 5:
+		return m_NamedSelSetList;
+	case 6:
+		return m_TVNode;
+	case 7:
+		return m_GridReference;
+	case 8:
+		return m_RenderEffects;
+	case 9:
+		return m_ShadowMap;
+	case 10:
+		return m_LayerManager;
+	case 11:
+		return m_TrackSetList;
+	}
+}
+
+void CSceneImpl::setReference(uint index, CReferenceMaker *reference)
+{
+	switch (index)
+	{
+	case 0:
+		m_MaterialEditor = reference;
+		break;
+	case 1:
+		m_MtlBaseLib = reference;
+		break;
+	case 2:
+		m_Sound = reference;
+		break;
+	case 3:
+		m_RootNode = reference;
+		break;
+	case 4:
+		m_RenderEnvironment = reference;
+		break;
+	case 5:
+		m_NamedSelSetList = reference;
+		break;
+	case 6:
+		m_TVNode = reference;
+		break;
+	case 7:
+		m_GridReference = reference;
+		break;
+	case 8:
+		m_RenderEffects = reference;
+		break;
+	case 9:
+		m_ShadowMap = reference;
+		break;
+	case 10:
+		m_LayerManager = reference;
+		break;
+	case 11:
+		m_TrackSetList = reference;
+		break;
+	}
+}
+
+uint CSceneImpl::nbReferences() const
+{
+	return m_TrackSetList ? 12 : 11;
 }
 
 IStorageObject *CSceneImpl::createChunkById(uint16 id, bool container)

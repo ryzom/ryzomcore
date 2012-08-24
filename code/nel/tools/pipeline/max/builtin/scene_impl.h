@@ -68,9 +68,28 @@ public:
 	virtual const ISceneClassDesc *classDesc() const;
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
 
+	// reference maker
+	virtual CReferenceMaker *getReference(uint index) const;
+	virtual void setReference(uint index, CReferenceMaker *reference);
+	virtual uint nbReferences() const;
+
 protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
+private:
+	NLMISC::CRefPtr<CReferenceMaker> m_MaterialEditor;
+	NLMISC::CRefPtr<CReferenceMaker> m_MtlBaseLib;
+	NLMISC::CRefPtr<CReferenceMaker> m_Sound;
+	NLMISC::CRefPtr<CReferenceMaker> m_RootNode;
+	NLMISC::CRefPtr<CReferenceMaker> m_RenderEnvironment;
+	NLMISC::CRefPtr<CReferenceMaker> m_NamedSelSetList;
+	NLMISC::CRefPtr<CReferenceMaker> m_TVNode;
+	NLMISC::CRefPtr<CReferenceMaker> m_GridReference;
+	NLMISC::CRefPtr<CReferenceMaker> m_RenderEffects;
+	NLMISC::CRefPtr<CReferenceMaker> m_ShadowMap;
+	NLMISC::CRefPtr<CReferenceMaker> m_LayerManager;
+	NLMISC::CRefPtr<CReferenceMaker> m_TrackSetList; // Does not exist in R3
 
 }; /* class CSceneImpl */
 
