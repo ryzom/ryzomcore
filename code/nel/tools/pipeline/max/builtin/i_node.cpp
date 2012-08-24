@@ -29,6 +29,7 @@
 #include "i_node.h"
 
 // STL includes
+#include <iomanip>
 
 // NeL includes
 // #include <nel/misc/debug.h>
@@ -99,7 +100,33 @@ const ISceneClassDesc *INode::classDesc() const
 void INode::toStringLocal(std::ostream &ostream, const std::string &pad) const
 {
 	CReferenceTarget::toStringLocal(ostream, pad);
-	// Children: IMPLICIT { } - print the implied connected children
+	// Print the implied connected children
+	ostream << "\n" << pad << "Children: IMPLICIT { ";
+	uint i = 0;
+	for (std::set<NLMISC::CRefPtr<INode> >::iterator it = m_Children.begin(), end = m_Children.end(); it != end; ++it)
+	{
+		INode *node = (*it);
+		nlassert(node);
+		if (node)
+		{
+			ostream << "\n" << pad << "\t" << i << ": <ptr=0x";
+			{
+				std::stringstream ss;
+				ss << std::hex << std::setfill('0');
+				ss << std::setw(16) << (uint64)(void *)node;
+				ostream << ss.str();
+			}
+			ostream << "> ";
+			ostream << "(" << ucstring(node->classDesc()->displayName()).toUtf8() << ", " << node->classDesc()->classId().toString() << ") ";
+			ostream << node->userName().toUtf8() << " ";
+		}
+		else
+		{
+			ostream << "\n" << pad << "\t" << i << ": NULL ";
+		}
+		++i;
+	}
+	ostream << "} ";
 }
 
 INode *INode::parent()
@@ -121,6 +148,12 @@ void INode::addChild(INode *node)
 void INode::removeChild(INode *node)
 {
 	m_Children.erase(node);
+}
+
+const ucstring &INode::userName() const
+{
+	static const ucstring v = ucstring("Invalid INode");
+	return v;
 }
 
 IStorageObject *INode::createChunkById(uint16 id, bool container)

@@ -68,9 +68,25 @@ public:
 	virtual const ISceneClassDesc *classDesc() const;
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
 
+	// node interface
+	virtual INode *parent();
+	virtual void setParent(INode *node);
+	// virtual void addChild(INode *node);
+	// virtual void removeChild(INode *node); // does not delete
+	virtual const ucstring &userName() const;
+
+	// read access
+	inline uint32 nodeVersion() const { return m_NodeVersion; }
+
 protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
+private:
+	uint32 m_NodeVersion;
+	NLMISC::CRefPtr<INode> m_Parent;
+	uint32 m_ParentFlags;
+	ucstring m_UserName;
 
 }; /* class CNodeImpl */
 

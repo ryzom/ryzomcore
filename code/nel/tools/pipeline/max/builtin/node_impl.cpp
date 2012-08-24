@@ -29,6 +29,7 @@
 #include "node_impl.h"
 
 // STL includes
+#include <iomanip>
 
 // NeL includes
 // #include <nel/misc/debug.h>
@@ -42,7 +43,11 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CNodeImpl::CNodeImpl(CScene *scene) : INode(scene)
+#define PMB_NODE_VERSION_CHUNK_ID 0x09ce
+#define PMB_NODE_PARENT_CHUNK_ID 0x0960
+#define PMB_NODE_NAME_CHUNK_ID 0x0962
+
+CNodeImpl::CNodeImpl(CScene *scene) : INode(scene), m_NodeVersion(0), m_ParentFlags(0), m_UserName(ucstring("Untitled Node"))
 {
 
 }
@@ -61,6 +66,26 @@ const CNodeImplClassDesc NodeImplClassDesc(&DllPluginDescBuiltin);
 void CNodeImpl::parse(uint16 version)
 {
 	INode::parse(version);
+	if (!m_ChunksOwnsPointers)
+	{
+		CStorageValue<uint32> *nodeVersion = static_cast<CStorageValue<uint32> *>(getChunk(PMB_NODE_VERSION_CHUNK_ID));
+		nlassert(nodeVersion);
+		m_NodeVersion = nodeVersion->Value;
+		m_ArchivedChunks.push_back(nodeVersion);
+
+		CStorageArray<uint32> *parent = static_cast<CStorageArray<uint32> *>(getChunk(PMB_NODE_PARENT_CHUNK_ID));
+		nlassert(parent);
+		nlassert(parent->Value.size() == 2);
+		setParent(dynamic_cast<INode *>(container()->getByStorageIndex((sint32)parent->Value[0])));
+		nlassert(m_Parent);
+		m_ParentFlags = parent->Value[1];
+		m_ArchivedChunks.push_back(parent);
+
+		CStorageValue<ucstring> *userName = static_cast<CStorageValue<ucstring> *>(getChunk(PMB_NODE_NAME_CHUNK_ID));
+		nlassert(userName);
+		m_UserName = userName->Value;
+		m_ArchivedChunks.push_back(userName);
+	}
 }
 
 void CNodeImpl::clean()
@@ -71,10 +96,32 @@ void CNodeImpl::clean()
 void CNodeImpl::build(uint16 version)
 {
 	INode::build(version);
+
+	CStorageValue<uint32> *nodeVersion = new CStorageValue<uint32>();
+	nodeVersion->Value = m_NodeVersion;
+	m_ArchivedChunks.push_back(nodeVersion);
+	putChunk(PMB_NODE_VERSION_CHUNK_ID, nodeVersion);
+
+	CStorageArray<uint32> *parent = new CStorageArray<uint32>();
+	parent->Value.resize(2);
+	parent->Value[0] = container()->getOrCreateStorageIndex(m_Parent);
+	parent->Value[1] = m_ParentFlags;
+	m_ArchivedChunks.push_back(parent);
+	putChunk(PMB_NODE_PARENT_CHUNK_ID, parent);
+
+	CStorageValue<ucstring> *userName = new CStorageValue<ucstring>();
+	userName->Value = m_UserName;
+	m_ArchivedChunks.push_back(userName);
+	putChunk(PMB_NODE_NAME_CHUNK_ID, userName);
 }
 
 void CNodeImpl::disown()
 {
+	m_NodeVersion = 0;
+	setParent(NULL);
+	m_ParentFlags = 0;
+	m_UserName = ucstring("Untitled Node");
+
 	INode::disown();
 }
 
@@ -97,10 +144,59 @@ const ISceneClassDesc *CNodeImpl::classDesc() const
 void CNodeImpl::toStringLocal(std::ostream &ostream, const std::string &pad) const
 {
 	INode::toStringLocal(ostream, pad);
+	ostream << "\n" << pad << "NodeVersion: " << m_NodeVersion;
+	ostream << "\n" << pad << "Parent: ";
+	INode *parent = m_Parent;
+	nlassert(parent);
+	if (parent)
+	{
+		ostream << "<ptr=0x";
+		{
+			std::stringstream ss;
+			ss << std::hex << std::setfill('0');
+			ss << std::setw(16) << (uint64)(void *)parent;
+			ostream << ss.str();
+		}
+		ostream << "> ";
+		ostream << "(" << ucstring(parent->classDesc()->displayName()).toUtf8() << ", " << parent->classDesc()->classId().toString() << ") ";
+		ostream << parent->userName().toUtf8();
+	}
+	else
+	{
+		ostream << "NULL";
+	}
+	ostream << "\n" << pad << "ParentFlags: " << m_ParentFlags;
+	ostream << "\n" << pad << "UserName: " << m_UserName.toUtf8() << " ";
+}
+
+INode *CNodeImpl::parent()
+{
+	return m_Parent;
+}
+
+void CNodeImpl::setParent(INode *node)
+{
+	if (m_Parent) m_Parent->removeChild(this);
+	m_Parent = node;
+	if (node) node->addChild(this);
+}
+
+const ucstring &CNodeImpl::userName() const
+{
+	return m_UserName;
 }
 
 IStorageObject *CNodeImpl::createChunkById(uint16 id, bool container)
 {
+	switch (id)
+	{
+	case PMB_NODE_VERSION_CHUNK_ID:
+		return new CStorageValue<uint32>();
+	case PMB_NODE_PARENT_CHUNK_ID:
+		return new CStorageArray<uint32>();
+	case PMB_NODE_NAME_CHUNK_ID:
+		return new CStorageValue<ucstring>();
+	}
 	return INode::createChunkById(id, container);
 }
 

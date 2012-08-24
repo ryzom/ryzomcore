@@ -326,7 +326,7 @@ void CClassEntry::toString(std::ostream &ostream, const std::string &pad) const
 		ostream << "\n" << pad << "Header: ";
 		m_Header->toString(ostream, padpad);
 		ostream << "\n" << pad << "Name: " << m_Name->Value.toUtf8();
-		ostream << "} ";
+		ostream << " } ";
 	}
 	else
 	{

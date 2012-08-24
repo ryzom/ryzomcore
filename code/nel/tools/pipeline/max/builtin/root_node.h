@@ -68,6 +68,9 @@ public:
 	virtual const ISceneClassDesc *classDesc() const;
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
 
+	// node interface
+	virtual const ucstring &userName() const;
+
 protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);

@@ -99,6 +99,12 @@ void CRootNode::toStringLocal(std::ostream &ostream, const std::string &pad) con
 	INode::toStringLocal(ostream, pad);
 }
 
+const ucstring &CRootNode::userName() const
+{
+	static const ucstring v = ucstring("Root Node");
+	return v;
+}
+
 IStorageObject *CRootNode::createChunkById(uint16 id, bool container)
 {
 	return INode::createChunkById(id, container);

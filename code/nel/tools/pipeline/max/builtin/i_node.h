@@ -74,15 +74,16 @@ public:
 	virtual void setParent(INode *node);
 	virtual void addChild(INode *node);
 	virtual void removeChild(INode *node); // does not delete
+	virtual const ucstring &userName() const;
 	/// The children that are linked to this node by the parent tag
-	inline const std::set<INode *> &children() const { return m_Children; }
+	inline const std::set<NLMISC::CRefPtr<INode> > &children() const { return m_Children; }
 
 protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 
 protected:
-	std::set<INode *> m_Children;
+	std::set<NLMISC::CRefPtr<INode> > m_Children;
 
 }; /* class INode */
 
