@@ -55,7 +55,7 @@ protected:
 	// instances
 	// ...
 public:
-	CStdMat2(PIPELINE::MAX::CScene *scene);
+	CStdMat2(CScene *scene);
 	virtual ~CStdMat2();
 }; /* class CStdMat2 */
 

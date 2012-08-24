@@ -1,9 +1,9 @@
 /**
- * \file reference_target.cpp
- * \brief CReferenceTarget
- * \date 2012-08-22 08:53GMT
+ * \file scene_impl.cpp
+ * \brief CSceneImpl
+ * \date 2012-08-24 12:33GMT
  * \author Jan Boon (Kaetemi)
- * CReferenceTarget
+ * CSceneImpl
  */
 
 /*
@@ -26,7 +26,7 @@
  */
 
 #include <nel/misc/types_nl.h>
-#include "reference_target.h"
+#include "scene_impl.h"
 
 // STL includes
 
@@ -42,66 +42,64 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CReferenceTarget::CReferenceTarget(CScene *scene) : CReferenceMaker(scene)
+CSceneImpl::CSceneImpl(CScene *scene) : CReferenceMaker(scene)
 {
 
 }
 
-CReferenceTarget::~CReferenceTarget()
+CSceneImpl::~CSceneImpl()
 {
 
 }
 
-const ucstring CReferenceTarget::DisplayName = ucstring("ReferenceTarget");
-const char *CReferenceTarget::InternalName = "ReferenceTarget";
-const char *CReferenceTarget::InternalNameUnknown = "ReferenceTargetUnknown";
-const NLMISC::CClassId CReferenceTarget::ClassId = NLMISC::CClassId(0x5d545dd9, 0xa422e4); /* Not official, please correct */
-const TSClassId CReferenceTarget::SuperClassId = 0x00000200;
-const CReferenceTargetClassDesc ReferenceTargetClassDesc(&DllPluginDescBuiltin);
-const CReferenceTargetSuperClassDesc ReferenceTargetSuperClassDesc(&ReferenceTargetClassDesc);
+const ucstring CSceneImpl::DisplayName = ucstring("Scene");
+const char *CSceneImpl::InternalName = "SceneImpl";
+const NLMISC::CClassId CSceneImpl::ClassId = NLMISC::CClassId(0x00002222, 0x00000000);
+const TSClassId CSceneImpl::SuperClassId = CReferenceMaker::SuperClassId;
+const CSceneImplClassDesc SceneImplClassDesc(&DllPluginDescBuiltin);
 
-void CReferenceTarget::parse(uint16 version, TParseLevel level)
+void CSceneImpl::parse(uint16 version, TParseLevel level)
 {
 	CReferenceMaker::parse(version, level);
 }
 
-void CReferenceTarget::clean()
+void CSceneImpl::clean()
 {
 	CReferenceMaker::clean();
 }
 
-void CReferenceTarget::build(uint16 version)
+void CSceneImpl::build(uint16 version)
 {
 	CReferenceMaker::build(version);
 }
 
-void CReferenceTarget::disown()
+void CSceneImpl::disown()
 {
 	CReferenceMaker::disown();
 }
 
-void CReferenceTarget::init()
+void CSceneImpl::init()
 {
 	CReferenceMaker::init();
 }
 
-bool CReferenceTarget::inherits(const NLMISC::CClassId classId) const
+bool CSceneImpl::inherits(const NLMISC::CClassId classId) const
 {
 	if (classId == classDesc()->classId()) return true;
 	return CReferenceMaker::inherits(classId);
 }
 
-const ISceneClassDesc *CReferenceTarget::classDesc() const
+const ISceneClassDesc *CSceneImpl::classDesc() const
 {
-	return &ReferenceTargetClassDesc;
+	return &SceneImplClassDesc;
 }
 
-void CReferenceTarget::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CSceneImpl::toStringLocal(std::ostream &ostream, const std::string &pad) const
 {
 	CReferenceMaker::toStringLocal(ostream, pad);
 }
 
-IStorageObject *CReferenceTarget::createChunkById(uint16 id, bool container)
+IStorageObject *CSceneImpl::createChunkById(uint16 id, bool container)
 {
 	return CReferenceMaker::createChunkById(id, container);
 }

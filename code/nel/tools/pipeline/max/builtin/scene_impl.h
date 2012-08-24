@@ -1,9 +1,9 @@
 /**
- * \file animatable.h
- * \brief CAnimatable
- * \date 2012-08-22 08:52GMT
+ * \file scene_impl.h
+ * \brief CSceneImpl
+ * \date 2012-08-24 12:33GMT
  * \author Jan Boon (Kaetemi)
- * CAnimatable
+ * CSceneImpl
  */
 
 /*
@@ -25,8 +25,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIPELINE_ANIMATABLE_H
-#define PIPELINE_ANIMATABLE_H
+#ifndef PIPELINE_SCENE_IMPL_H
+#define PIPELINE_SCENE_IMPL_H
 #include <nel/misc/types_nl.h>
 
 // STL includes
@@ -34,35 +34,27 @@
 // NeL includes
 
 // Project includes
-#include "../scene.h"
-#include "../scene_class.h"
-#include "../super_class_desc.h"
+#include "reference_maker.h"
 
 namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
-namespace STORAGE {
-
-class CAppData;
-
-}
 
 /**
- * \brief CAnimatable
- * \date 2012-08-22 08:52GMT
+ * \brief CSceneImpl
+ * \date 2012-08-22 08:53GMT
  * \author Jan Boon (Kaetemi)
- * This scene class owns the AppData chunk
+ * Scene implementation
  */
-class CAnimatable : public CSceneClass
+class CSceneImpl : public CReferenceMaker
 {
 public:
-	CAnimatable(CScene *scene);
-	virtual ~CAnimatable();
+	CSceneImpl(CScene *scene);
+	virtual ~CSceneImpl();
 
 	// class desc
 	static const ucstring DisplayName;
 	static const char *InternalName;
-	static const char *InternalNameUnknown;
 	static const NLMISC::CClassId ClassId;
 	static const TSClassId SuperClassId;
 
@@ -76,27 +68,19 @@ public:
 	virtual const ISceneClassDesc *classDesc() const;
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
 
-	// public
-	STORAGE::CAppData *appData();
-
 protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 
-private:
-	STORAGE::CAppData *m_AppData;
+}; /* class CSceneImpl */
 
-}; /* class CAnimatable */
-
-typedef CSceneClassDesc<CAnimatable> CAnimatableClassDesc;
-extern const CAnimatableClassDesc AnimatableClassDesc;
-typedef CSuperClassDesc<CAnimatable> CAnimatableSuperClassDesc;
-extern const CAnimatableSuperClassDesc AnimatableSuperClassDesc;
+typedef CSceneClassDesc<CSceneImpl> CSceneImplClassDesc;
+extern const CSceneImplClassDesc SceneImplClassDesc;
 
 } /* namespace BUILTIN */
 } /* namespace MAX */
 } /* namespace PIPELINE */
 
-#endif /* #ifndef PIPELINE_ANIMATABLE_H */
+#endif /* #ifndef PIPELINE_SCENE_IMPL_H */
 
 /* end of file */

@@ -49,7 +49,7 @@ namespace BUILTIN {
 class CPatchObject : public CObject
 {
 public:
-	CPatchObject(PIPELINE::MAX::CScene *scene);
+	CPatchObject(CScene *scene);
 	virtual ~CPatchObject();
 
 }; /* class CPatchObject */

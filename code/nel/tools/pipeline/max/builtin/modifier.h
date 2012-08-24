@@ -49,7 +49,7 @@ namespace BUILTIN {
 class CModifier : public CBaseObject
 {
 public:
-	CModifier(PIPELINE::MAX::CScene *scene);
+	CModifier(CScene *scene);
 	virtual ~CModifier();
 
 }; /* class CModifier */

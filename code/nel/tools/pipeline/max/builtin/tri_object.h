@@ -50,7 +50,7 @@ class CTriObject : public CObject
 {
 
 public:
-	CTriObject(PIPELINE::MAX::CScene *scene);
+	CTriObject(CScene *scene);
 	virtual ~CTriObject();
 
 }; /* class CTriObject */

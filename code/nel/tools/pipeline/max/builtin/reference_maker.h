@@ -50,7 +50,7 @@ namespace BUILTIN {
 class CReferenceMaker : public CAnimatable
 {
 public:
-	CReferenceMaker(PIPELINE::MAX::CScene *scene);
+	CReferenceMaker(CScene *scene);
 	virtual ~CReferenceMaker();
 
 	// class desc

@@ -43,7 +43,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CAnimatable::CAnimatable(PIPELINE::MAX::CScene *scene) : CSceneClass(scene), m_AppData(NULL)
+CAnimatable::CAnimatable(CScene *scene) : CSceneClass(scene), m_AppData(NULL)
 {
 
 }

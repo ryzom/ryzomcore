@@ -64,7 +64,7 @@ namespace BUILTIN {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CReferenceMaker::CReferenceMaker(PIPELINE::MAX::CScene *scene) : CAnimatable(scene), m_ReferenceMap(false), m_References2035Value0(0)
+CReferenceMaker::CReferenceMaker(CScene *scene) : CAnimatable(scene), m_ReferenceMap(false), m_References2035Value0(0)
 {
 
 }

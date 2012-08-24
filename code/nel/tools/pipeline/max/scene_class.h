@@ -46,7 +46,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-class CScene;
+class CSceneImpl;
 
 }
 
@@ -124,7 +124,7 @@ public:
 	//! \name Scene utility access
 	//@{
 	/// Return the scene scene class
-	inline BUILTIN::CScene *scene() const { return m_Scene->container()->scene(); }
+	inline BUILTIN::CSceneImpl *scene() const { return m_Scene->container()->scene(); }
 	/// Return the scene version
 	inline uint16 version() const { return m_Scene->version(); }
 	/// Return the scene container

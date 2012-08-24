@@ -42,7 +42,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-class CScene;
+class CSceneImpl;
 
 }
 
@@ -122,7 +122,7 @@ protected:
 
 public:
 	/// Return the single instance of the builtin scene class
-	inline BUILTIN::CScene *scene() { return NULL; }
+	inline BUILTIN::CSceneImpl *scene() const { return m_BuiltinScene; }
 
 private:
 	CScene *m_Scene;
@@ -133,6 +133,8 @@ private:
 
 	std::vector<CSceneClass *> m_StorageObjectByIndex;
 	std::map<CSceneClass *, uint32> m_StorageObjectToIndex;
+
+	BUILTIN::CSceneImpl *m_BuiltinScene;
 
 }; /* class CSceneClassContainer */
 

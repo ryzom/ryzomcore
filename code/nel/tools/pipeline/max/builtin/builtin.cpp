@@ -40,6 +40,8 @@
 #include "reference_maker.h"
 #include "reference_target.h"
 
+#include "scene_impl.h"
+
 #include "i_node.h"
 #include "node_impl.h"
 
@@ -218,7 +220,10 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&ReferenceTargetClassDesc);
 	registry->add(&ReferenceTargetSuperClassDesc);
 
-	// node
+	// scene (inh ReferenceMaker)
+	registry->add(&SceneImplClassDesc);
+
+	// node (inh ReferenceTarget)
 	registry->add(&NodeSuperClassDesc);
 	{
 		registry->add(&NodeClassDesc);

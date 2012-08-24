@@ -40,6 +40,7 @@
 #include "class_directory_3.h"
 #include "scene_class_registry.h"
 #include "scene_class_unknown.h"
+#include "builtin/scene_impl.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -119,7 +120,7 @@ IStorageObject *CScene::createChunkById(uint16 id, bool container)
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CSceneClassContainer::CSceneClassContainer(CScene *scene, const CSceneClassRegistry *sceneClassRegistry, CDllDirectory *dllDirectory, CClassDirectory3 *classDirectory3) : m_Scene(scene), m_SceneClassRegistry(sceneClassRegistry), m_DllDirectory(dllDirectory), m_ClassDirectory3(classDirectory3)
+CSceneClassContainer::CSceneClassContainer(CScene *scene, const CSceneClassRegistry *sceneClassRegistry, CDllDirectory *dllDirectory, CClassDirectory3 *classDirectory3) : m_Scene(scene), m_SceneClassRegistry(sceneClassRegistry), m_DllDirectory(dllDirectory), m_ClassDirectory3(classDirectory3), m_BuiltinScene(NULL)
 {
 
 }
@@ -149,6 +150,10 @@ void CSceneClassContainer::parse(uint16 version, TParseLevel level)
 		m_StorageObjectByIndex[i] = static_cast<CSceneClass *>(it->second);
 		++it;
 	}
+	CSceneClass *builtinScene = m_StorageObjectByIndex[m_StorageObjectByIndex.size() - 1];
+	nlassert(builtinScene);
+	m_BuiltinScene = dynamic_cast<BUILTIN::CSceneImpl *>(builtinScene);
+	nlassert(m_BuiltinScene);
 	CStorageContainer::parse(version, level);
 }
 

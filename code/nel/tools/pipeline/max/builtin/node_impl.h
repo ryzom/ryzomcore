@@ -49,7 +49,7 @@ namespace BUILTIN {
 class CNodeImpl : public INode
 {
 public:
-	CNodeImpl(PIPELINE::MAX::CScene *scene);
+	CNodeImpl(CScene *scene);
 	virtual ~CNodeImpl();
 
 	// class desc
