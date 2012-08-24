@@ -60,7 +60,7 @@ public:
 	static const TSClassId SuperClassId;
 
 	// inherited
-	virtual void parse(uint16 version, TParseLevel level);
+	virtual void parse(uint16 version);
 	virtual void clean();
 	virtual void build(uint16 version);
 	virtual void disown();
@@ -69,9 +69,20 @@ public:
 	virtual const ISceneClassDesc *classDesc() const;
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
 
+	// node interface
+	virtual INode *parent();
+	virtual void setParent(INode *node);
+	virtual void addChild(INode *node);
+	virtual void removeChild(INode *node); // does not delete
+	/// The children that are linked to this node by the parent tag
+	inline const std::set<INode *> &children() const { return m_Children; }
+
 protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
+protected:
+	std::set<INode *> m_Children;
 
 }; /* class INode */
 

@@ -58,9 +58,9 @@ const NLMISC::CClassId CSceneImpl::ClassId = NLMISC::CClassId(0x00002222, 0x0000
 const TSClassId CSceneImpl::SuperClassId = CReferenceMaker::SuperClassId;
 const CSceneImplClassDesc SceneImplClassDesc(&DllPluginDescBuiltin);
 
-void CSceneImpl::parse(uint16 version_, TParseLevel level)
+void CSceneImpl::parse(uint16 version)
 {
-	CReferenceMaker::parse(version_, level);
+	CReferenceMaker::parse(version);
 	nlassert(m_MaterialEditor);
 	nlassert(m_MtlBaseLib);
 	nlassert(m_Sound);
@@ -72,7 +72,7 @@ void CSceneImpl::parse(uint16 version_, TParseLevel level)
 	nlassert(m_RenderEffects);
 	nlassert(m_ShadowMap);
 	nlassert(m_LayerManager);
-	if (version() > Version3) nlassert(m_TrackSetList);
+	if (version > Version3) nlassert(m_TrackSetList);
 }
 
 void CSceneImpl::clean()
@@ -139,6 +139,10 @@ CReferenceMaker *CSceneImpl::getReference(uint index) const
 		return m_LayerManager;
 	case 11:
 		return m_TrackSetList;
+	default:
+		if (index > 0)
+			nlerror("Invalid index %i", index);
+		return NULL;
 	}
 }
 
@@ -181,6 +185,9 @@ void CSceneImpl::setReference(uint index, CReferenceMaker *reference)
 		break;
 	case 11:
 		m_TrackSetList = reference;
+		break;
+	default:
+		nlerror("Unknown reference index %i entry <ptr=0x%x> (%s, 0x%x)", index, (uint32)(uint64)(void *)reference, reference->classDesc()->classId().toString().c_str(), reference->classDesc()->superClassId());
 		break;
 	}
 }

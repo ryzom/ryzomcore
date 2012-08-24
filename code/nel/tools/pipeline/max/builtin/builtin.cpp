@@ -44,6 +44,7 @@
 
 #include "i_node.h"
 #include "node_impl.h"
+#include "root_node.h"
 
 // using namespace std;
 // using namespace NLMISC;
@@ -228,6 +229,7 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	{
 		registry->add(&NodeClassDesc);
 		registry->add(&NodeImplClassDesc);
+		registry->add(&RootNodeClassDesc);
 	}
 
 	// unimplemented

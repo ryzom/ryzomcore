@@ -60,9 +60,9 @@ const TSClassId INode::SuperClassId = 0x00000001;
 const CNodeClassDesc NodeClassDesc(&DllPluginDescBuiltin);
 const CNodeSuperClassDesc NodeSuperClassDesc(&NodeClassDesc);
 
-void INode::parse(uint16 version, TParseLevel level)
+void INode::parse(uint16 version)
 {
-	CReferenceTarget::parse(version, level);
+	CReferenceTarget::parse(version);
 }
 
 void INode::clean()
@@ -99,6 +99,28 @@ const ISceneClassDesc *INode::classDesc() const
 void INode::toStringLocal(std::ostream &ostream, const std::string &pad) const
 {
 	CReferenceTarget::toStringLocal(ostream, pad);
+	// Children: IMPLICIT { } - print the implied connected children
+}
+
+INode *INode::parent()
+{
+	nlerror("Unkown node class, cannot get parent node");
+	return NULL;
+}
+
+void INode::setParent(INode *node)
+{
+	nlerror("Unkown node class, cannot set parent node");
+}
+
+void INode::addChild(INode *node)
+{
+	m_Children.insert(node);
+}
+
+void INode::removeChild(INode *node)
+{
+	m_Children.erase(node);
 }
 
 IStorageObject *INode::createChunkById(uint16 id, bool container)

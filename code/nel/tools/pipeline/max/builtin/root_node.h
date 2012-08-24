@@ -1,9 +1,9 @@
 /**
- * \file scene_impl.h
- * \brief CSceneImpl
- * \date 2012-08-24 12:33GMT
+ * \file root_node.h
+ * \brief CRootNode
+ * \date 2012-08-22 19:45GMT
  * \author Jan Boon (Kaetemi)
- * CSceneImpl
+ * CRootNode
  */
 
 /*
@@ -25,8 +25,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIPELINE_SCENE_IMPL_H
-#define PIPELINE_SCENE_IMPL_H
+#ifndef PIPELINE_ROOT_NODE_H
+#define PIPELINE_ROOT_NODE_H
 #include <nel/misc/types_nl.h>
 
 // STL includes
@@ -34,23 +34,23 @@
 // NeL includes
 
 // Project includes
-#include "reference_maker.h"
+#include "i_node.h"
 
 namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
 /**
- * \brief CSceneImpl
- * \date 2012-08-22 08:53GMT
+ * \brief CRootNode
+ * \date 2012-08-22 20:01GMT
  * \author Jan Boon (Kaetemi)
- * Scene implementation
+ * CRootNode
  */
-class CSceneImpl : public CReferenceMaker
+class CRootNode : public INode
 {
 public:
-	CSceneImpl(CScene *scene);
-	virtual ~CSceneImpl();
+	CRootNode(CScene *scene);
+	virtual ~CRootNode();
 
 	// class desc
 	static const ucstring DisplayName;
@@ -68,38 +68,19 @@ public:
 	virtual const ISceneClassDesc *classDesc() const;
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
 
-	// reference maker
-	virtual CReferenceMaker *getReference(uint index) const;
-	virtual void setReference(uint index, CReferenceMaker *reference);
-	virtual uint nbReferences() const;
-
 protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 
-private:
-	NLMISC::CRefPtr<CReferenceMaker> m_MaterialEditor;
-	NLMISC::CRefPtr<CReferenceMaker> m_MtlBaseLib;
-	NLMISC::CRefPtr<CReferenceMaker> m_Sound;
-	NLMISC::CRefPtr<CReferenceMaker> m_RootNode;
-	NLMISC::CRefPtr<CReferenceMaker> m_RenderEnvironment;
-	NLMISC::CRefPtr<CReferenceMaker> m_NamedSelSetList;
-	NLMISC::CRefPtr<CReferenceMaker> m_TVNode;
-	NLMISC::CRefPtr<CReferenceMaker> m_GridReference;
-	NLMISC::CRefPtr<CReferenceMaker> m_RenderEffects;
-	NLMISC::CRefPtr<CReferenceMaker> m_ShadowMap;
-	NLMISC::CRefPtr<CReferenceMaker> m_LayerManager;
-	NLMISC::CRefPtr<CReferenceMaker> m_TrackSetList; // Does not exist in R3
+}; /* class CRootNode */
 
-}; /* class CSceneImpl */
-
-typedef CSceneClassDesc<CSceneImpl> CSceneImplClassDesc;
-extern const CSceneImplClassDesc SceneImplClassDesc;
+typedef CSceneClassDesc<CRootNode> CRootNodeClassDesc;
+extern const CRootNodeClassDesc RootNodeClassDesc;
 
 } /* namespace BUILTIN */
 } /* namespace MAX */
 } /* namespace PIPELINE */
 
-#endif /* #ifndef PIPELINE_SCENE_IMPL_H */
+#endif /* #ifndef PIPELINE_ROOT_NODE_H */
 
 /* end of file */

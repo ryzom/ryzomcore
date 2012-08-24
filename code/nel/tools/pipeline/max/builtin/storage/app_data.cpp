@@ -149,7 +149,7 @@ void CAppData::toString(std::ostream &ostream, const std::string &pad) const
 	}
 }
 
-void CAppData::parse(uint16 version, TParseLevel level)
+void CAppData::parse(uint16 version)
 {
 	/*if (level & PARSE_BUILTIN)
 	{*/
@@ -157,7 +157,7 @@ void CAppData::parse(uint16 version, TParseLevel level)
 		if (!m_ChunksOwnsPointers) { nlerror("Already parsed"); return; }
 
 		// First parse all the child nodes
-		CStorageContainer::parse(version, level);
+		CStorageContainer::parse(version);
 
 		// Verify
 		if (m_Chunks.size() < 2) { nlwarning("Bad container size %i", m_Chunks.size()); disown(); return; }
@@ -390,9 +390,9 @@ void CAppDataEntry::toString(std::ostream &ostream, const std::string &pad) cons
 	}
 }
 
-void CAppDataEntry::parse(uint16 version, TParseLevel level)
+void CAppDataEntry::parse(uint16 version)
 {
-	// CStorageContainer::parse(version, level);
+	// CStorageContainer::parse(version);
 	// if (!m_ChunksOwnsPointers) { nlwarning("Already parsed"); return; }
 	if (m_Chunks.size() != 2) { nlwarning("Bad container size"); disown(); return; }
 

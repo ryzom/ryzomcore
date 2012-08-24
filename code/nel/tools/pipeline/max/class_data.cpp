@@ -65,9 +65,9 @@ void CClassData::toString(std::ostream &ostream, const std::string &pad) const
 	CStorageContainer::toString(ostream, pad);
 }
 
-void CClassData::parse(uint16 version, TParseLevel level)
+void CClassData::parse(uint16 version)
 {
-	CStorageContainer::parse(version, level);
+	CStorageContainer::parse(version);
 }
 
 void CClassData::clean()
@@ -122,9 +122,9 @@ void CClassDataEntry::toString(std::ostream &ostream, const std::string &pad) co
 	CStorageContainer::toString(ostream, pad);
 }
 
-void CClassDataEntry::parse(uint16 version, TParseLevel level)
+void CClassDataEntry::parse(uint16 version)
 {
-	CStorageContainer::parse(version, level);
+	CStorageContainer::parse(version);
 }
 
 void CClassDataEntry::clean()

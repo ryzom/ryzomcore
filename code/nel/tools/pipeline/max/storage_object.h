@@ -112,7 +112,7 @@ public:
 
 	// virtual
 	// Parse this class with given version and parse level filter
-	virtual void parse(uint16 version, TParseLevel level);
+	virtual void parse(uint16 version);
 	// Clean up built data or duplicate unparsed source data, call after serializing build and after parse
 	virtual void clean();
 	// Build the storage structure needed to store the parsed data back

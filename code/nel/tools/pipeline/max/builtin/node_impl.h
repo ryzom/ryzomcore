@@ -59,7 +59,7 @@ public:
 	static const TSClassId SuperClassId;
 
 	// inherited
-	virtual void parse(uint16 version, TParseLevel level);
+	virtual void parse(uint16 version);
 	virtual void clean();
 	virtual void build(uint16 version);
 	virtual void disown();

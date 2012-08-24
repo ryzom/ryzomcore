@@ -72,9 +72,9 @@ void CScene::toString(std::ostream &ostream, const std::string &pad) const
 	CStorageContainer::toString(ostream, pad);
 }
 
-void CScene::parse(uint16 version, TParseLevel level)
+void CScene::parse(uint16 version)
 {
-	CStorageContainer::parse(version, level);
+	CStorageContainer::parse(version);
 	nlassert(m_Chunks.size() == 1);
 }
 
@@ -140,7 +140,7 @@ void CSceneClassContainer::toString(std::ostream &ostream, const std::string &pa
 	CStorageContainer::toString(ostream, pad);
 }
 
-void CSceneClassContainer::parse(uint16 version, TParseLevel level)
+void CSceneClassContainer::parse(uint16 version)
 {
 	// Temporary 'readonly' implementation, not modifying m_Chunks!
 	m_StorageObjectByIndex.resize(m_Chunks.size());
@@ -154,7 +154,7 @@ void CSceneClassContainer::parse(uint16 version, TParseLevel level)
 	nlassert(builtinScene);
 	m_BuiltinScene = dynamic_cast<BUILTIN::CSceneImpl *>(builtinScene);
 	nlassert(m_BuiltinScene);
-	CStorageContainer::parse(version, level);
+	CStorageContainer::parse(version);
 }
 
 void CSceneClassContainer::clean()

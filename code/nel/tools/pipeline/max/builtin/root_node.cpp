@@ -1,9 +1,9 @@
 /**
- * \file node_impl.cpp
- * \brief CNodeImpl
- * \date 2012-08-22 20:01GMT
+ * \file root_node.cpp
+ * \brief CRootNode
+ * \date 2012-08-22 19:45GMT
  * \author Jan Boon (Kaetemi)
- * CNodeImpl
+ * CRootNode
  */
 
 /*
@@ -26,7 +26,7 @@
  */
 
 #include <nel/misc/types_nl.h>
-#include "node_impl.h"
+#include "root_node.h"
 
 // STL includes
 
@@ -42,64 +42,64 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CNodeImpl::CNodeImpl(CScene *scene) : INode(scene)
+CRootNode::CRootNode(CScene *scene) : INode(scene)
 {
 
 }
 
-CNodeImpl::~CNodeImpl()
+CRootNode::~CRootNode()
 {
 
 }
 
-const ucstring CNodeImpl::DisplayName = ucstring("Node");
-const char *CNodeImpl::InternalName = "NodeImpl";
-const NLMISC::CClassId CNodeImpl::ClassId = NLMISC::CClassId(0x00000001, 0x00000000);
-const TSClassId CNodeImpl::SuperClassId = INode::SuperClassId;
-const CNodeImplClassDesc NodeImplClassDesc(&DllPluginDescBuiltin);
+const ucstring CRootNode::DisplayName = ucstring("RootNode");
+const char *CRootNode::InternalName = "RootNode";
+const NLMISC::CClassId CRootNode::ClassId = NLMISC::CClassId(0x00000002, 0x00000000);
+const TSClassId CRootNode::SuperClassId = INode::SuperClassId;
+const CRootNodeClassDesc RootNodeClassDesc(&DllPluginDescBuiltin);
 
-void CNodeImpl::parse(uint16 version)
+void CRootNode::parse(uint16 version)
 {
 	INode::parse(version);
 }
 
-void CNodeImpl::clean()
+void CRootNode::clean()
 {
 	INode::clean();
 }
 
-void CNodeImpl::build(uint16 version)
+void CRootNode::build(uint16 version)
 {
 	INode::build(version);
 }
 
-void CNodeImpl::disown()
+void CRootNode::disown()
 {
 	INode::disown();
 }
 
-void CNodeImpl::init()
+void CRootNode::init()
 {
 	INode::init();
 }
 
-bool CNodeImpl::inherits(const NLMISC::CClassId classId) const
+bool CRootNode::inherits(const NLMISC::CClassId classId) const
 {
 	if (classId == classDesc()->classId()) return true;
 	return INode::inherits(classId);
 }
 
-const ISceneClassDesc *CNodeImpl::classDesc() const
+const ISceneClassDesc *CRootNode::classDesc() const
 {
-	return &NodeImplClassDesc;
+	return &RootNodeClassDesc;
 }
 
-void CNodeImpl::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CRootNode::toStringLocal(std::ostream &ostream, const std::string &pad) const
 {
 	INode::toStringLocal(ostream, pad);
 }
 
-IStorageObject *CNodeImpl::createChunkById(uint16 id, bool container)
+IStorageObject *CRootNode::createChunkById(uint16 id, bool container)
 {
 	return INode::createChunkById(id, container);
 }

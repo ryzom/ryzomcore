@@ -125,13 +125,13 @@ void CSceneClass::toString(std::ostream &ostream, const std::string &pad) const
 	}
 }
 
-void CSceneClass::parse(uint16 version, TParseLevel level)
+void CSceneClass::parse(uint16 version)
 {
 	// Cannot be parsed yet
 	if (!m_ChunksOwnsPointers) { nlerror("Already parsed"); return; } // Already parsed, illegal to call twice
 
 	// Parse all child chunks
-	CStorageContainer::parse(version, level);
+	CStorageContainer::parse(version);
 
 	// Orphanize all child chunk
 	m_OrphanedChunks.insert(m_OrphanedChunks.end(), m_Chunks.begin(), m_Chunks.end());

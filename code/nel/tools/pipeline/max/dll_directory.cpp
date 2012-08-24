@@ -118,53 +118,50 @@ void CDllDirectory::toString(std::ostream &ostream, const std::string &pad) cons
 }
 
 // Parallel to CClassDirectory3
-void CDllDirectory::parse(uint16 version, TParseLevel level)
+void CDllDirectory::parse(uint16 version)
 {
-	if (level & PARSE_INTERNAL)
+	// Ensure not yet parsed
+	nlassert(m_ChunkCache.empty());
+	nlassert(m_Entries.empty());
+
+	// Parse entries first
+	CStorageContainer::parse(version);
+
+	// Initialize
+	addInternalIndices();
+	uint16 lastCached = 0xFFFF;
+	bool parsedDllEntry = false;
+
+	// Parse chunks
+	for (TStorageObjectContainer::iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
 	{
-		// Ensure not yet parsed
-		nlassert(m_ChunkCache.empty());
-		nlassert(m_Entries.empty());
-
-		// Parse entries first
-		CStorageContainer::parse(version, level);
-
-		// Initialize
-		addInternalIndices();
-		uint16 lastCached = 0xFFFF;
-		bool parsedDllEntry = false;
-
-		// Parse chunks
-		for (TStorageObjectContainer::iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
+		uint16 id = it->first;
+		switch (id)
 		{
-			uint16 id = it->first;
-			switch (id)
+		case 0x2038: // DllEntry
 			{
-			case 0x2038: // DllEntry
+				if (parsedDllEntry && (lastCached != id))
+					throw EStorageParse(); // There were chunks inbetween
+				if (!parsedDllEntry)
 				{
-					if (parsedDllEntry && (lastCached != id))
-						throw EStorageParse(); // There were chunks inbetween
-					if (!parsedDllEntry)
-					{
-						m_ChunkCache.push_back(TStorageObjectWithId(id, NULL)); // Dummy entry to know the location
-						lastCached = id;
-						parsedDllEntry = true;
-					}
-					CDllEntry *dllEntry = static_cast<CDllEntry *>(it->second);
-					m_InternalNameToIndex[NLMISC::toLower(dllEntry->dllFilename())] = m_Entries.size();
-					m_Entries.push_back(dllEntry);
+					m_ChunkCache.push_back(TStorageObjectWithId(id, NULL)); // Dummy entry to know the location
+					lastCached = id;
+					parsedDllEntry = true;
 				}
-				break;
-			default:
-				m_ChunkCache.push_back(*it); // Dummy entry to know the location
-				lastCached = id;
-				break;
+				CDllEntry *dllEntry = static_cast<CDllEntry *>(it->second);
+				m_InternalNameToIndex[NLMISC::toLower(dllEntry->dllFilename())] = m_Entries.size();
+				m_Entries.push_back(dllEntry);
 			}
+			break;
+		default:
+			m_ChunkCache.push_back(*it); // Dummy entry to know the location
+			lastCached = id;
+			break;
 		}
-
-		// Now ownership of the pointers lies in m_ChunkCache and m_Entries
-		m_ChunksOwnsPointers = false;
 	}
+
+	// Now ownership of the pointers lies in m_ChunkCache and m_Entries
+	m_ChunksOwnsPointers = false;
 }
 
 // Parallel to CClassDirectory3
@@ -363,9 +360,9 @@ void CDllEntry::toString(std::ostream &ostream, const std::string &pad) const
 	}
 }
 
-void CDllEntry::parse(uint16 version, TParseLevel level)
+void CDllEntry::parse(uint16 version)
 {
-	// CStorageContainer::parse(version, level);
+	// CStorageContainer::parse(version);
 	nlassert(m_ChunksOwnsPointers);
 	nlassert(m_Chunks.size() == 2);
 	TStorageObjectContainer::iterator it = m_Chunks.begin();

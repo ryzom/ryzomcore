@@ -86,9 +86,9 @@ const TSClassId CReferenceMaker::SuperClassId = 0x00000100;
 const CReferenceMakerClassDesc ReferenceMakerClassDesc(&DllPluginDescBuiltin);
 const CReferenceMakerSuperClassDesc ReferenceMakerSuperClassDesc(&ReferenceMakerClassDesc);
 
-void CReferenceMaker::parse(uint16 version, TParseLevel level)
+void CReferenceMaker::parse(uint16 version)
 {
-	CAnimatable::parse(version, level);
+	CAnimatable::parse(version);
 	if (!m_ChunksOwnsPointers)
 	{
 		CStorageArray<sint32> *references2034 = static_cast<CStorageArray<sint32> *>(getChunk(PMB_REFERENCES_2034_CHUNK_ID));

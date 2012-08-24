@@ -110,7 +110,7 @@ int main(int argc, char **argv)
 	g_object_unref(input);
 	//dllDirectory.toString(std::cout);
 	//std::cout << "\n";
-	dllDirectory.parse(PIPELINE::MAX::VersionUnknown, PIPELINE::MAX::PARSE_INTERNAL); // parse the structure to readable data
+	dllDirectory.parse(PIPELINE::MAX::VersionUnknown); // parse the structure to readable data
 	dllDirectory.clean(); // cleanup unused file structure
 	dllDirectory.toString(std::cout);
 	std::cout << "\n";
@@ -132,7 +132,7 @@ int main(int argc, char **argv)
 	g_object_unref(input);
 	//classDirectory3.toString(std::cout);
 	//std::cout << "\n";
-	classDirectory3.parse(PIPELINE::MAX::VersionUnknown, PIPELINE::MAX::PARSE_INTERNAL); // parse the structure to readable data
+	classDirectory3.parse(PIPELINE::MAX::VersionUnknown); // parse the structure to readable data
 	classDirectory3.clean(); // cleanup unused file structure
 	classDirectory3.toString(std::cout);
 	std::cout << "\n";
@@ -155,9 +155,7 @@ int main(int argc, char **argv)
 	g_object_unref(input);
 	//classDirectory3.toString(std::cout);
 	//std::cout << "\n";
-	scene.parse(PIPELINE::MAX::VersionUnknown, (PIPELINE::MAX::TParseLevel)(
-		PIPELINE::MAX::PARSE_INTERNAL
-		| PIPELINE::MAX::PARSE_BUILTIN)); // parse the structure to readable data
+	scene.parse(PIPELINE::MAX::VersionUnknown); // parse the structure to readable data
 	scene.clean(); // cleanup unused file structure
 	// TEST ->
 	nldebug("BUILD");
@@ -165,9 +163,7 @@ int main(int argc, char **argv)
 	nldebug("DISOWN");
 	scene.disown();
 	nldebug("PARSE");
-	scene.parse(PIPELINE::MAX::VersionUnknown, (PIPELINE::MAX::TParseLevel)(
-		PIPELINE::MAX::PARSE_INTERNAL
-		| PIPELINE::MAX::PARSE_BUILTIN)); // parse the structure to readable data
+	scene.parse(PIPELINE::MAX::VersionUnknown); // parse the structure to readable data
 	nldebug("CLEAN");
 	scene.clean(); // cleanup unused file structure
 	// <- TEST

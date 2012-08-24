@@ -194,14 +194,14 @@ void CStorageContainer::toString(std::ostream &ostream, const std::string &pad) 
 	ostream << "} ";
 }
 
-void CStorageContainer::parse(uint16 version, TParseLevel level)
+void CStorageContainer::parse(uint16 version)
 {
 	nlassert(m_ChunksOwnsPointers); // Can only use this when m_Chunks still has ownership.
 	for (TStorageObjectContainer::const_iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
 	{
 		if (it->second->isContainer())
 		{
-			static_cast<CStorageContainer *>(it->second)->parse(version, level);
+			static_cast<CStorageContainer *>(it->second)->parse(version);
 		}
 	}
 }

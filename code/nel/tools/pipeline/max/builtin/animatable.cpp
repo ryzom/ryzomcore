@@ -65,9 +65,9 @@ const TSClassId CAnimatable::SuperClassId = 0x77a60fbd; /* Not official, please 
 const CAnimatableClassDesc AnimatableClassDesc(&DllPluginDescBuiltin);
 const CAnimatableSuperClassDesc AnimatableSuperClassDesc(&AnimatableClassDesc);
 
-void CAnimatable::parse(uint16 version, TParseLevel level)
+void CAnimatable::parse(uint16 version)
 {
-	CSceneClass::parse(version, level);
+	CSceneClass::parse(version);
 	if (!m_ChunksOwnsPointers)
 	{
 		m_AppData = static_cast<STORAGE::CAppData *>(getChunk(PMBS_APP_DATA_CHUNK_ID));
