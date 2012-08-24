@@ -34,6 +34,8 @@
 // #include <nel/misc/debug.h>
 
 // Project includes
+#include "root_node.h"
+#include "track_view_node.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -67,7 +69,7 @@ void CSceneImpl::parse(uint16 version)
 	nlassert(m_RootNode);
 	nlassert(m_RenderEnvironment);
 	nlassert(m_NamedSelSetList);
-	nlassert(m_TVNode);
+	nlassert(m_TrackViewNode);
 	nlassert(m_GridReference);
 	nlassert(m_RenderEffects);
 	nlassert(m_ShadowMap);
@@ -128,7 +130,7 @@ CReferenceMaker *CSceneImpl::getReference(uint index) const
 	case 5:
 		return m_NamedSelSetList;
 	case 6:
-		return m_TVNode;
+		return m_TrackViewNode;
 	case 7:
 		return m_GridReference;
 	case 8:
@@ -160,7 +162,7 @@ void CSceneImpl::setReference(uint index, CReferenceMaker *reference)
 		m_Sound = reference;
 		break;
 	case 3:
-		m_RootNode = reference;
+		m_RootNode = dynamic_cast<CRootNode *>(reference);
 		break;
 	case 4:
 		m_RenderEnvironment = reference;
@@ -169,7 +171,7 @@ void CSceneImpl::setReference(uint index, CReferenceMaker *reference)
 		m_NamedSelSetList = reference;
 		break;
 	case 6:
-		m_TVNode = reference;
+		m_TrackViewNode = dynamic_cast<CTrackViewNode *>(reference);
 		break;
 	case 7:
 		m_GridReference = reference;

@@ -46,6 +46,8 @@
 #include "node_impl.h"
 #include "root_node.h"
 
+#include "track_view_node.h"
+
 // using namespace std;
 // using namespace NLMISC;
 
@@ -231,6 +233,9 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 		registry->add(&NodeImplClassDesc);
 		registry->add(&RootNodeClassDesc);
 	}
+
+	// tvnode (inh ReferenceTarget)
+	registry->add(&TrackViewNodeClassDesc);
 
 	// unimplemented
 	registry->add(&ControlFloatSuperClassDesc);

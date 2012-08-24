@@ -1,9 +1,9 @@
 /**
- * \file scene_impl.h
- * \brief CSceneImpl
- * \date 2012-08-24 12:33GMT
+ * \file track_view_node.h
+ * \brief CTrackViewNode
+ * \date 2012-08-24 09:44GMT
  * \author Jan Boon (Kaetemi)
- * CSceneImpl
+ * CTrackViewNode
  */
 
 /*
@@ -25,8 +25,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIPELINE_SCENE_IMPL_H
-#define PIPELINE_SCENE_IMPL_H
+#ifndef PIPELINE_TRACK_VIEW_NODE_H
+#define PIPELINE_TRACK_VIEW_NODE_H
 #include <nel/misc/types_nl.h>
 
 // STL includes
@@ -34,26 +34,31 @@
 // NeL includes
 
 // Project includes
-#include "reference_maker.h"
+#include "reference_target.h"
 
 namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-class CRootNode;
-class CTrackViewNode;
-
 /**
- * \brief CSceneImpl
- * \date 2012-08-22 08:53GMT
+ * \brief CTrackViewNode
+ * \date 2012-08-24 09:44GMT
  * \author Jan Boon (Kaetemi)
- * Scene implementation
+ * TVNode
  */
-class CSceneImpl : public CReferenceMaker
+class CTrackViewNode : public CReferenceTarget
 {
 public:
-	CSceneImpl(CScene *scene);
-	virtual ~CSceneImpl();
+	struct TChild
+	{
+		NLMISC::CRefPtr<CReferenceMaker> Reference;
+		ucstring DisplayName;
+		NLMISC::CClassId Identifier;
+		sint32 Integer0130;
+	};
+
+	CTrackViewNode(CScene *scene);
+	virtual ~CTrackViewNode();
 
 	// class desc
 	static const ucstring DisplayName;
@@ -72,37 +77,32 @@ public:
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
 
 	// reference maker
-	virtual CReferenceMaker *getReference(uint index) const;
+	/*virtual CReferenceMaker *getReference(uint index) const;
 	virtual void setReference(uint index, CReferenceMaker *reference);
-	virtual uint nbReferences() const;
+	virtual uint nbReferences() const;*/
+
+	// read access
+	inline const std::vector<TChild> &children() const { return m_Children; }
 
 protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 
 private:
-	NLMISC::CRefPtr<CReferenceMaker> m_MaterialEditor;
-	NLMISC::CRefPtr<CReferenceMaker> m_MtlBaseLib;
-	NLMISC::CRefPtr<CReferenceMaker> m_Sound;
-	NLMISC::CRefPtr<CRootNode> m_RootNode;
-	NLMISC::CRefPtr<CReferenceMaker> m_RenderEnvironment;
-	NLMISC::CRefPtr<CReferenceMaker> m_NamedSelSetList;
-	NLMISC::CRefPtr<CTrackViewNode> m_TrackViewNode;
-	NLMISC::CRefPtr<CReferenceMaker> m_GridReference;
-	NLMISC::CRefPtr<CReferenceMaker> m_RenderEffects;
-	NLMISC::CRefPtr<CReferenceMaker> m_ShadowMap;
-	NLMISC::CRefPtr<CReferenceMaker> m_LayerManager;
-	NLMISC::CRefPtr<CReferenceMaker> m_TrackSetList; // Does not exist in R3
+	CStorageRaw *m_Empty0140;
+	CStorageRaw *m_Empty0150;
 
-}; /* class CSceneImpl */
+	std::vector<TChild> m_Children;
 
-typedef CSceneClassDesc<CSceneImpl> CSceneImplClassDesc;
-extern const CSceneImplClassDesc SceneImplClassDesc;
+}; /* class CTrackViewNode */
+
+typedef CSceneClassDesc<CTrackViewNode> CTrackViewNodeClassDesc;
+extern const CTrackViewNodeClassDesc TrackViewNodeClassDesc;
 
 } /* namespace BUILTIN */
 } /* namespace MAX */
 } /* namespace PIPELINE */
 
-#endif /* #ifndef PIPELINE_SCENE_IMPL_H */
+#endif /* #ifndef PIPELINE_TRACK_VIEW_NODE_H */
 
 /* end of file */
