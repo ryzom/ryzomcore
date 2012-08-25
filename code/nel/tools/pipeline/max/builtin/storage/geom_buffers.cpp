@@ -73,19 +73,37 @@ namespace STORAGE {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
+void CGeomTriIndex::serial(NLMISC::IStream &stream)
+{
+	stream.serial(a);
+	stream.serial(b);
+	stream.serial(c);
+}
+
+std::string CGeomTriIndex::toString() const
+{
+	std::stringstream ss;
+	ss << a << " " << b << " " << c;
+	return ss.str();
+}
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
 void CGeomTriIndexInfo::serial(NLMISC::IStream &stream)
 {
 	stream.serial(a);
 	stream.serial(b);
 	stream.serial(c);
-	stream.serial(i1);
-	stream.serial(i2);
+	stream.serial(alwaysOne);
+	stream.serial(smoothingGroups);
 }
 
 std::string CGeomTriIndexInfo::toString() const
 {
 	std::stringstream ss;
-	ss << a << ", " << b << ", " << c << ", " << i1 << ", " << i2;
+	ss << a << " " << b << " " << c << ", " << alwaysOne << " " << smoothingGroups;
 	return ss.str();
 }
 
@@ -137,21 +155,23 @@ IStorageObject *CGeomBuffers::createChunkById(uint16 id, bool container)
 {
 	switch (id)
 	{
-	case PMBS_GEOM_BUFFERS_TRI_B_VERTEX_CHUNK_ID:
-	case PMBS_GEOM_BUFFERS_TRI_C_VERTEX_CHUNK_ID:
-	case PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID:
-		nlassert(!container);
-		return new CStorageArray<float>();
+	//case PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID:
+	//	nlassert(!container);
+	//	return new CStorageArray<float>();
+	//case PBMS_GEOM_BUFFERS_POLY_A_INDEX_A_CHUNK_ID:
+	//case PBMS_GEOM_BUFFERS_POLY_A_INDEX_B_CHUNK_ID:
+	//	nlassert(!container);
+	//	return new CStorageArray<uint32>();
 	case PMBS_GEOM_BUFFERS_TRI_B_INDEX_CHUNK_ID:
 	case PMBS_GEOM_BUFFERS_TRI_C_INDEX_CHUNK_ID:
-	case PBMS_GEOM_BUFFERS_POLY_A_INDEX_A_CHUNK_ID:
-	case PBMS_GEOM_BUFFERS_POLY_A_INDEX_B_CHUNK_ID:
 		nlassert(!container);
-		return new CStorageArray<uint32>();
+		return new CStorageArray<CGeomTriIndex>(); // nb: parse should check if the sizes match with tri_a size (which is the master index buffer)
 	case PMBS_GEOM_BUFFERS_TRI_A_INDEX_CHUNK_ID:
 		nlassert(!container);
 		return new CStorageArraySizePre<CGeomTriIndexInfo>();
 	case PMBS_GEOM_BUFFERS_TRI_A_VERTEX_CHUNK_ID:
+	case PMBS_GEOM_BUFFERS_TRI_B_VERTEX_CHUNK_ID:
+	case PMBS_GEOM_BUFFERS_TRI_C_VERTEX_CHUNK_ID:
 		nlassert(!container);
 		return new CStorageArraySizePre<NLMISC::CVector>();
 	}

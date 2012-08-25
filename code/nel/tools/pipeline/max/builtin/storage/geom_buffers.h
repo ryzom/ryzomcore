@@ -41,13 +41,22 @@ namespace MAX {
 namespace BUILTIN {
 namespace STORAGE {
 
+struct CGeomTriIndex
+{
+	uint32 a;
+	uint32 b;
+	uint32 c;
+	void serial(NLMISC::IStream &stream);
+	std::string toString() const;
+};
+
 struct CGeomTriIndexInfo
 {
 	uint32 a;
 	uint32 b;
 	uint32 c;
-	uint32 i1;
-	uint32 i2;
+	uint32 alwaysOne;
+	uint32 smoothingGroups;
 	void serial(NLMISC::IStream &stream);
 	std::string toString() const;
 };
