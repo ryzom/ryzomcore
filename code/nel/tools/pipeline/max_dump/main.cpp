@@ -18,6 +18,7 @@
 #include <utility>
 
 #include <nel/misc/file.h>
+#include <nel/misc/vector.h>
 
 #include "../max/storage_stream.h"
 #include "../max/storage_object.h"
@@ -30,12 +31,14 @@
 
 // Testing
 #include "../max/builtin/storage/app_data.h"
+#include "../max/builtin/storage/geom_buffers.h"
 #include "../max/builtin/builtin.h"
 #include "../max/builtin/scene_impl.h"
 #include "../max/builtin/i_node.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
+using namespace PIPELINE::MAX::BUILTIN::STORAGE;
 
 static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
 //static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
@@ -49,14 +52,14 @@ void exportObj(const std::string &fileName, const CReferenceMaker *triObject)
 	IStorageObject *bufferBlock = triObject->findStorageObject(0x08fe);
 	nlassert(bufferBlock->isContainer());
 	CStorageContainer *buffers = static_cast<CStorageContainer *>(bufferBlock);
-	CStorageArray<float> *vertexBuffer = static_cast<CStorageArray<float> *>(buffers->findStorageObject(0x0914));
-	CStorageArray<uint32> *indexBuffer = static_cast<CStorageArray<uint32> *>(buffers->findStorageObject(0x0912));
+	CStorageArraySizePre<NLMISC::CVector> *vertexBuffer = static_cast<CStorageArraySizePre<NLMISC::CVector> *>(buffers->findStorageObject(0x0914));
+	CStorageArraySizePre<CGeomTriIndexInfo> *indexBuffer = static_cast<CStorageArraySizePre<CGeomTriIndexInfo> *>(buffers->findStorageObject(0x0912));
 
 	std::ofstream ofs(fileName.c_str());
-	for (uint i = 1; i < vertexBuffer->Value.size() - 1; i += 3)
-		ofs << "v " << vertexBuffer->Value[i] << " " << vertexBuffer->Value[i + 1] << " " << vertexBuffer->Value[i + 2] << "\n";
-	for (uint i = 1; i < indexBuffer->Value.size() - 1; i += 5)
-		ofs << "f " << (indexBuffer->Value[i] + 1) << " " << (indexBuffer->Value[i + 1] + 1) << " " << (indexBuffer->Value[i + 2] + 1) << "\n";
+	for (uint i = 0; i < vertexBuffer->Value.size(); ++i)
+		ofs << "v " << vertexBuffer->Value[i].x << " " << vertexBuffer->Value[i].y << " " << vertexBuffer->Value[i].z << "\n";
+	for (uint i = 0; i < indexBuffer->Value.size(); ++i)
+		ofs << "f " << (indexBuffer->Value[i].a) << " " << (indexBuffer->Value[i].b) << " " << (indexBuffer->Value[i].c) << "\n";
 }
 
 // int __stdcall WinMain(void *, void *, void *, int)

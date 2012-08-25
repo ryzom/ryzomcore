@@ -88,16 +88,16 @@ void CStorageArray<T>::serial(NLMISC::IStream &stream)
 template <typename T>
 void CStorageArray<T>::toString(std::ostream &ostream, const std::string &pad) const
 {
-	ostream << "(" << className() << ") { "; // << s << " } ";
+	ostream << "(" << className() << ") [" << Value.size() << "] { "; // << s << " } ";
 	uint i = 0;
 	for (typename TTypeArray::const_iterator it = Value.begin(), end = Value.end(); it != end; ++it)
 	{
 		std::string s = NLMISC::toString(*it);
 		//ostream << "\n" << pad << i << ": " << s;
-		ostream << s << ", ";
+		ostream << "{ " << s << " } ";
 		++i;
 	}
-	ostream << " } ";
+	ostream << "} ";
 }
 
 template <typename T>
@@ -113,6 +113,43 @@ bool CStorageArray<T>::getSize(sint32 &size) const
 {
 	size = Value.size() * sizeof(TType);
 	return true;
+}
+
+template <typename T>
+class CStorageArraySizePre : public CStorageArray<T>
+{
+public:
+	virtual std::string className() const;
+	virtual void serial(NLMISC::IStream &stream);
+	virtual void setSize(sint32 size);
+	virtual bool getSize(sint32 &size) const;
+};
+
+template <typename T>
+std::string CStorageArraySizePre<T>::className() const
+{
+	return "StorageArraySizePre";
+}
+
+template <typename T>
+void CStorageArraySizePre<T>::serial(NLMISC::IStream &stream)
+{
+	uint32 size = this->Value.size();
+	stream.serial(size);
+	nlassert(this->Value.size() == size);
+	CStorageArray<T>::serial(stream);
+}
+
+template <typename T>
+void CStorageArraySizePre<T>::setSize(sint32 size)
+{
+	CStorageArray<T>::setSize(size - sizeof(uint32));
+}
+
+template <typename T>
+bool CStorageArraySizePre<T>::getSize(sint32 &size) const
+{
+	return CStorageArray<T>::getSize(size) + sizeof(uint32);
 }
 
 } /* namespace MAX */

@@ -29,9 +29,11 @@
 #include "geom_buffers.h"
 
 // STL includes
+#include <sstream>
 
 // NeL includes
 // #include <nel/misc/debug.h>
+#include <nel/misc/vector.h>
 
 // Project includes
 #include "../../storage_array.h"
@@ -66,6 +68,26 @@ namespace STORAGE {
 #define PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID 0x0100
 #define PBMS_GEOM_BUFFERS_POLY_A_INDEX_A_CHUNK_ID 0x010a
 #define PBMS_GEOM_BUFFERS_POLY_A_INDEX_B_CHUNK_ID 0x011a
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+void CGeomTriIndexInfo::serial(NLMISC::IStream &stream)
+{
+	stream.serial(a);
+	stream.serial(b);
+	stream.serial(c);
+	stream.serial(i1);
+	stream.serial(i2);
+}
+
+std::string CGeomTriIndexInfo::toString() const
+{
+	std::stringstream ss;
+	ss << a << ", " << b << ", " << c << ", " << i1 << ", " << i2;
+	return ss.str();
+}
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -115,19 +137,23 @@ IStorageObject *CGeomBuffers::createChunkById(uint16 id, bool container)
 {
 	switch (id)
 	{
-	case PMBS_GEOM_BUFFERS_TRI_A_VERTEX_CHUNK_ID:
 	case PMBS_GEOM_BUFFERS_TRI_B_VERTEX_CHUNK_ID:
 	case PMBS_GEOM_BUFFERS_TRI_C_VERTEX_CHUNK_ID:
 	case PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID:
 		nlassert(!container);
 		return new CStorageArray<float>();
-	case PMBS_GEOM_BUFFERS_TRI_A_INDEX_CHUNK_ID:
 	case PMBS_GEOM_BUFFERS_TRI_B_INDEX_CHUNK_ID:
 	case PMBS_GEOM_BUFFERS_TRI_C_INDEX_CHUNK_ID:
 	case PBMS_GEOM_BUFFERS_POLY_A_INDEX_A_CHUNK_ID:
 	case PBMS_GEOM_BUFFERS_POLY_A_INDEX_B_CHUNK_ID:
 		nlassert(!container);
 		return new CStorageArray<uint32>();
+	case PMBS_GEOM_BUFFERS_TRI_A_INDEX_CHUNK_ID:
+		nlassert(!container);
+		return new CStorageArraySizePre<CGeomTriIndexInfo>();
+	case PMBS_GEOM_BUFFERS_TRI_A_VERTEX_CHUNK_ID:
+		nlassert(!container);
+		return new CStorageArraySizePre<NLMISC::CVector>();
 	}
 	return CStorageContainer::createChunkById(id, container);
 }
