@@ -32,6 +32,7 @@
 // STL includes
 
 // NeL includes
+#include <nel/misc/vector.h>
 
 // Project includes
 #include "../../storage_object.h"
@@ -57,6 +58,23 @@ struct CGeomTriIndexInfo
 	uint32 c;
 	uint32 alwaysOne;
 	uint32 smoothingGroups;
+	void serial(NLMISC::IStream &stream);
+	std::string toString() const;
+};
+
+struct CGeomPolyVertexInfo
+{
+	uint32 i1;
+	NLMISC::CVector v;
+	void serial(NLMISC::IStream &stream);
+	std::string toString() const;
+};
+
+struct CGeomPolyEdgeInfo
+{
+	uint32 i1;
+	uint32 a;
+	uint32 b;
 	void serial(NLMISC::IStream &stream);
 	std::string toString() const;
 };

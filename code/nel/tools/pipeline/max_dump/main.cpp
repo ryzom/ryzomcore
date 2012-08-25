@@ -40,15 +40,15 @@ using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
 using namespace PIPELINE::MAX::BUILTIN::STORAGE;
 
-static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
+//static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
 //static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/test2008.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/teapot_test_scene.max";
+static const char *filename = "/home/kaetemi/3dsMax/scenes/testplane.max";
 static const char *streamname = "Scene";
 
 void exportObj(const std::string &fileName, const CReferenceMaker *triObject)
 {
-	triObject->toString(std::cout);
 	IStorageObject *bufferBlock = triObject->findStorageObject(0x08fe);
 	nlassert(bufferBlock->isContainer());
 	CStorageContainer *buffers = static_cast<CStorageContainer *>(bufferBlock);
@@ -190,9 +190,9 @@ int main(int argc, char **argv)
 	nldebug("PARSE");
 	scene.parse(PIPELINE::MAX::VersionUnknown); // parse the structure to readable data
 	nldebug("CLEAN");
-	// scene.clean(); // cleanup unused file structure, don't clean up if we want direct access to chunks as well
+	//## scene.clean(); // cleanup unused file structure, don't clean up if we want direct access to chunks as well
 	// <- TEST
-	// scene.toString(std::cout);
+	//## scene.toString(std::cout);
 	std::cout << "\n";
 	//classDirectory3.build(PIPELINE::MAX::VersionUnknown);
 	//classDirectory3.disown();
@@ -203,8 +203,17 @@ int main(int argc, char **argv)
 	scene.container()->scene()->rootNode()->dumpNodes(std::cout);
 	std::cout << "\n";
 
-	PIPELINE::MAX::BUILTIN::INode *node = scene.container()->scene()->rootNode()->find(ucstring("TR_HOF_civil01_gilet")); nlassert(node);
-	exportObj("tr_hof_civil01_gilet.obj", node->getReference(1)->getReference(1));
+	//PIPELINE::MAX::BUILTIN::INode *node = scene.container()->scene()->rootNode()->find(ucstring("TR_HOF_civil01_gilet")); nlassert(node);
+	//node->toString(std::cout);
+	//exportObj("tr_hof_civil01_gilet.obj", node->getReference(1)->getReference(1)); // => CDerivedObject::getBase(node->object())
+
+	//INode *node = scene.container()->scene()->rootNode()->find(ucstring("GE_Acc_MikotoBaniere")); nlassert(node);
+	INode *node = scene.container()->scene()->rootNode()->find(ucstring("testplane")); nlassert(node);
+	CReferenceMaker *object = node->getReference(1);
+	object->toString(std::cout);
+
+
+	//GE_Acc_MikotoBaniere
 
 	// TEST APP DATA
 

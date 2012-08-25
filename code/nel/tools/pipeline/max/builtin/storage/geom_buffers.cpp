@@ -32,8 +32,7 @@
 #include <sstream>
 
 // NeL includes
-// #include <nel/misc/debug.h>
-#include <nel/misc/vector.h>
+// #include <nel/misc/debug.h>s
 
 // Project includes
 #include "../../storage_array.h"
@@ -66,7 +65,7 @@ namespace STORAGE {
 #define PMBS_GEOM_BUFFERS_TRI_C_VERTEX_CHUNK_ID 0x0938
 #define PMBS_GEOM_BUFFERS_TRI_C_INDEX_CHUNK_ID 0x0942
 #define PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID 0x0100
-#define PBMS_GEOM_BUFFERS_POLY_A_INDEX_A_CHUNK_ID 0x010a
+#define PBMS_GEOM_BUFFERS_POLY_A_EDGE_CHUNK_ID 0x010a
 #define PBMS_GEOM_BUFFERS_POLY_A_INDEX_B_CHUNK_ID 0x011a
 
 ////////////////////////////////////////////////////////////////////////
@@ -104,6 +103,41 @@ std::string CGeomTriIndexInfo::toString() const
 {
 	std::stringstream ss;
 	ss << a << " " << b << " " << c << ", " << alwaysOne << " " << smoothingGroups;
+	return ss.str();
+}
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+void CGeomPolyVertexInfo::serial(NLMISC::IStream &stream)
+{
+	stream.serial(i1);
+	stream.serial(v);
+}
+
+std::string CGeomPolyVertexInfo::toString() const
+{
+	std::stringstream ss;
+	ss << "0x" << NLMISC::toString("%x", i1) << ", " << v.toString();
+	return ss.str();
+}
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+void CGeomPolyEdgeInfo::serial(NLMISC::IStream &stream)
+{
+	stream.serial(i1);
+	stream.serial(a);
+	stream.serial(b);
+}
+
+std::string CGeomPolyEdgeInfo::toString() const
+{
+	std::stringstream ss;
+	ss << "0x" << NLMISC::toString("%x", i1) << ", " << a << " " << b;
 	return ss.str();
 }
 
@@ -155,13 +189,17 @@ IStorageObject *CGeomBuffers::createChunkById(uint16 id, bool container)
 {
 	switch (id)
 	{
-	//case PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID:
 	//	nlassert(!container);
 	//	return new CStorageArray<float>();
-	//case PBMS_GEOM_BUFFERS_POLY_A_INDEX_A_CHUNK_ID:
 	//case PBMS_GEOM_BUFFERS_POLY_A_INDEX_B_CHUNK_ID:
 	//	nlassert(!container);
 	//	return new CStorageArray<uint32>();
+	case PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID:
+		nlassert(!container);
+		return new CStorageArraySizePre<CGeomPolyVertexInfo>();
+	case PBMS_GEOM_BUFFERS_POLY_A_EDGE_CHUNK_ID:
+		nlassert(!container);
+		return new CStorageArraySizePre<CGeomPolyEdgeInfo>();
 	case PMBS_GEOM_BUFFERS_TRI_B_INDEX_CHUNK_ID:
 	case PMBS_GEOM_BUFFERS_TRI_C_INDEX_CHUNK_ID:
 		nlassert(!container);
