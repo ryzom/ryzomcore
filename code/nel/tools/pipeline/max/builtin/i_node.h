@@ -75,6 +75,7 @@ public:
 	virtual void addChild(INode *node);
 	virtual void removeChild(INode *node); // does not delete
 	virtual const ucstring &userName() const;
+	INode *find(const ucstring &userName) const;
 
 	// dump
 	void dumpNodes(std::ostream &ostream, const std::string &pad = "") const;

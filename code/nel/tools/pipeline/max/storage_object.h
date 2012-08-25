@@ -123,6 +123,7 @@ public:
 public:
 	// read access
 	inline const TStorageObjectContainer &chunks() const { return m_Chunks; }
+	IStorageObject *findStorageObject(uint16 id) const;
 
 public: // should be protected but that doesn't compile, nice c++!
 	// inherited

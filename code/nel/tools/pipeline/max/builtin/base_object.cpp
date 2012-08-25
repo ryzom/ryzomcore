@@ -52,6 +52,60 @@ CBaseObject::~CBaseObject()
 
 }
 
+const ucstring CBaseObject::DisplayName = ucstring("BaseObject");
+const char *CBaseObject::InternalName = "BaseObject";
+// const char *CBaseObject::InternalNameUnknown = "BaseObjectUnknown";
+const NLMISC::CClassId CBaseObject::ClassId = NLMISC::CClassId(0x71c8167a, 0x5a9f57b2); /* Not official, please correct */
+const TSClassId CBaseObject::SuperClassId = CReferenceTarget::SuperClassId;
+const CBaseObjectClassDesc BaseObjectClassDesc(&DllPluginDescBuiltin);
+// const CBaseObjectSuperClassDesc BaseObjectSuperClassDesc(&BaseObjectClassDesc);
+
+void CBaseObject::parse(uint16 version)
+{
+	CReferenceTarget::parse(version);
+}
+
+void CBaseObject::clean()
+{
+	CReferenceTarget::clean();
+}
+
+void CBaseObject::build(uint16 version)
+{
+	CReferenceTarget::build(version);
+}
+
+void CBaseObject::disown()
+{
+	CReferenceTarget::disown();
+}
+
+void CBaseObject::init()
+{
+	CReferenceTarget::init();
+}
+
+bool CBaseObject::inherits(const NLMISC::CClassId classId) const
+{
+	if (classId == classDesc()->classId()) return true;
+	return CReferenceTarget::inherits(classId);
+}
+
+const ISceneClassDesc *CBaseObject::classDesc() const
+{
+	return &BaseObjectClassDesc;
+}
+
+void CBaseObject::toStringLocal(std::ostream &ostream, const std::string &pad) const
+{
+	CReferenceTarget::toStringLocal(ostream, pad);
+}
+
+IStorageObject *CBaseObject::createChunkById(uint16 id, bool container)
+{
+	return CReferenceTarget::createChunkById(id, container);
+}
+
 } /* namespace BUILTIN */
 } /* namespace MAX */
 } /* namespace PIPELINE */

@@ -48,6 +48,10 @@
 
 #include "track_view_node.h"
 
+#include "base_object.h"
+#include "object.h"
+#include "geom_object.h"
+
 // using namespace std;
 // using namespace NLMISC;
 
@@ -132,19 +136,19 @@ const COSModifierSuperClassDesc OSModifierSuperClassDesc(&ReferenceTargetClassDe
 // 0x9010 - master point controller
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009010> CMasterPointControllerSuperClassDesc;
 const CMasterPointControllerSuperClassDesc MasterPointControllerSuperClassDesc(&ReferenceTargetClassDesc, "MasterPointControllerSuperClassUnknown");
-
+/*
 // 0x10 - geom object
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000010> CGeomObjectSuperClassDesc;
 const CGeomObjectSuperClassDesc GeomObjectSuperClassDesc(&ReferenceTargetClassDesc, "GeomObjectSuperClassUnknown");
-
+*/
 // 0x10f0 - layer, under reftarget directly
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x000010f0> CLayerSuperClassDesc;
 const CLayerSuperClassDesc LayerSuperClassDesc(&ReferenceTargetClassDesc, "LayerSuperClassUnknown");
-
+/*
 // 0x60 - object???, under base object
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000060> CObjectSuperClassDesc;
 const CObjectSuperClassDesc ObjectSuperClassDesc(&ReferenceTargetClassDesc, "ObjectSuperClassUnknown");
-
+*/
 // 0x50 helperobject, under object...
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000050> CHelperObjectSuperClassDesc;
 const CHelperObjectSuperClassDesc HelperObjectSuperClassDesc(&ReferenceTargetClassDesc, "HelperObjectSuperClassUnknown");
@@ -228,14 +232,25 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 
 	// node (inh ReferenceTarget)
 	registry->add(&NodeSuperClassDesc);
+	registry->add(&NodeClassDesc);
 	{
-		registry->add(&NodeClassDesc);
 		registry->add(&NodeImplClassDesc);
 		registry->add(&RootNodeClassDesc);
 	}
 
 	// tvnode (inh ReferenceTarget)
 	registry->add(&TrackViewNodeClassDesc);
+
+	// object (inh ReferenceMaker)
+	registry->add(&BaseObjectClassDesc);
+	{
+		registry->add(&ObjectSuperClassDesc);
+		registry->add(&ObjectClassDesc);
+		{
+			registry->add(&GeomObjectSuperClassDesc);
+			registry->add(&GeomObjectClassDesc);
+		}
+	}
 
 	// unimplemented
 	registry->add(&ControlFloatSuperClassDesc);
@@ -256,9 +271,9 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&ControlTransformSuperClassDesc);
 	registry->add(&OSModifierSuperClassDesc);
 	registry->add(&MasterPointControllerSuperClassDesc);
-	registry->add(&GeomObjectSuperClassDesc);
+	//registry->add(&GeomObjectSuperClassDesc);
 	registry->add(&LayerSuperClassDesc);
-	registry->add(&ObjectSuperClassDesc);
+	//registry->add(&ObjectSuperClassDesc);
 	registry->add(&HelperObjectSuperClassDesc);
 	registry->add(&FilterKernelSuperClassDesc);
 	registry->add(&RendererSuperClassDesc);

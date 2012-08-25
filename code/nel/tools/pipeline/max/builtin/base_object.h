@@ -52,7 +52,33 @@ public:
 	CBaseObject(CScene *scene);
 	virtual ~CBaseObject();
 
+	// class desc
+	static const ucstring DisplayName;
+	static const char *InternalName;
+	// static const char *InternalNameUnknown;
+	static const NLMISC::CClassId ClassId;
+	static const TSClassId SuperClassId;
+
+	// inherited
+	virtual void parse(uint16 version);
+	virtual void clean();
+	virtual void build(uint16 version);
+	virtual void disown();
+	virtual void init();
+	virtual bool inherits(const NLMISC::CClassId classId) const;
+	virtual const ISceneClassDesc *classDesc() const;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
+
+protected:
+	// inherited
+	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
 }; /* class CBaseObject */
+
+typedef CSceneClassDesc<CBaseObject> CBaseObjectClassDesc;
+extern const CBaseObjectClassDesc BaseObjectClassDesc;
+// typedef CSuperClassDesc<CBaseObject> CBaseObjectSuperClassDesc;
+// extern const CBaseObjectSuperClassDesc BaseObjectSuperClassDesc;
 
 } /* namespace BUILTIN */
 } /* namespace MAX */

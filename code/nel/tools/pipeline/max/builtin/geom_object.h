@@ -1,9 +1,9 @@
 /**
  * \file geom_object.h
- * \brief CGeomObject
+ * \brief CGeomGeomObject
  * \date 2012-08-22 08:58GMT
  * \author Jan Boon (Kaetemi)
- * CGeomObject
+ * CGeomGeomObject
  */
 
 /*
@@ -34,29 +34,51 @@
 // NeL includes
 
 // Project includes
+#include "object.h"
 
 namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
 /**
- * \brief CGeomObject
+ * \brief CGeomGeomObject
  * \date 2012-08-22 08:58GMT
  * \author Jan Boon (Kaetemi)
- * CGeomObject
+ * CGeomGeomObject
  */
-class CGeomObject
+class CGeomObject : public CObject
 {
-protected:
-	// pointers
-	// ...
-
-	// instances
-	// ...
 public:
-	CGeomObject();
+	CGeomObject(CScene *scene);
 	virtual ~CGeomObject();
+
+	// class desc
+	static const ucstring DisplayName;
+	static const char *InternalName;
+	static const char *InternalNameUnknown;
+	static const NLMISC::CClassId ClassId;
+	static const TSClassId SuperClassId;
+
+	// inherited
+	virtual void parse(uint16 version);
+	virtual void clean();
+	virtual void build(uint16 version);
+	virtual void disown();
+	virtual void init();
+	virtual bool inherits(const NLMISC::CClassId classId) const;
+	virtual const ISceneClassDesc *classDesc() const;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
+
+protected:
+	// inherited
+	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
 }; /* class CGeomObject */
+
+typedef CSceneClassDesc<CGeomObject> CGeomObjectClassDesc;
+extern const CGeomObjectClassDesc GeomObjectClassDesc;
+typedef CSuperClassDesc<CGeomObject> CGeomObjectSuperClassDesc;
+extern const CGeomObjectSuperClassDesc GeomObjectSuperClassDesc;
 
 } /* namespace BUILTIN */
 } /* namespace MAX */

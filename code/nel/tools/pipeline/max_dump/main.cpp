@@ -12,6 +12,7 @@
 #include <string.h>
 #include <cstdio>
 #include <iostream>
+#include <fstream>
 
 #include <vector>
 #include <utility>
@@ -33,11 +34,30 @@
 #include "../max/builtin/scene_impl.h"
 #include "../max/builtin/i_node.h"
 
-//static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
-static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
+using namespace PIPELINE::MAX;
+using namespace PIPELINE::MAX::BUILTIN;
+
+static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
+//static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/test2008.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/teapot_test_scene.max";
 static const char *streamname = "Scene";
+
+void exportObj(const std::string &fileName, const CReferenceMaker *triObject)
+{
+	triObject->toString(std::cout);
+	IStorageObject *bufferBlock = triObject->findStorageObject(0x08fe);
+	nlassert(bufferBlock->isContainer());
+	CStorageContainer *buffers = static_cast<CStorageContainer *>(bufferBlock);
+	CStorageArray<float> *vertexBuffer = static_cast<CStorageArray<float> *>(buffers->findStorageObject(0x0914));
+	CStorageArray<uint32> *indexBuffer = static_cast<CStorageArray<uint32> *>(buffers->findStorageObject(0x0912));
+
+	std::ofstream ofs(fileName.c_str());
+	for (uint i = 1; i < vertexBuffer->Value.size() - 1; i += 3)
+		ofs << "v " << vertexBuffer->Value[i] << " " << vertexBuffer->Value[i + 1] << " " << vertexBuffer->Value[i + 2] << "\n";
+	for (uint i = 1; i < indexBuffer->Value.size() - 1; i += 5)
+		ofs << "f " << (indexBuffer->Value[i] + 1) << " " << (indexBuffer->Value[i + 1] + 1) << " " << (indexBuffer->Value[i + 2] + 1) << "\n";
+}
 
 // int __stdcall WinMain(void *, void *, void *, int)
 int main(int argc, char **argv)
@@ -167,9 +187,9 @@ int main(int argc, char **argv)
 	nldebug("PARSE");
 	scene.parse(PIPELINE::MAX::VersionUnknown); // parse the structure to readable data
 	nldebug("CLEAN");
-	scene.clean(); // cleanup unused file structure
+	// scene.clean(); // cleanup unused file structure, don't clean up if we want direct access to chunks as well
 	// <- TEST
-	scene.toString(std::cout);
+	// scene.toString(std::cout);
 	std::cout << "\n";
 	//classDirectory3.build(PIPELINE::MAX::VersionUnknown);
 	//classDirectory3.disown();
@@ -179,6 +199,9 @@ int main(int argc, char **argv)
 	std::cout << "\n";
 	scene.container()->scene()->rootNode()->dumpNodes(std::cout);
 	std::cout << "\n";
+
+	PIPELINE::MAX::BUILTIN::INode *node = scene.container()->scene()->rootNode()->find(ucstring("TR_HOF_civil01_gilet")); nlassert(node);
+	exportObj("tr_hof_civil01_gilet.obj", node->getReference(1)->getReference(1));
 
 	// TEST APP DATA
 

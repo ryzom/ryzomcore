@@ -85,7 +85,7 @@ public:
 	/// Initialize a new instance of this chunk
 	void init();
 
-	// public
+	// public // TODO: Simplify using templates and returning a specialized storage object, auto-converted to the requested type.
 	/// Gets a pointer to an appdata chunk buffer. Returns NULL if it does not exist. Size is returned in the size parameter.
 	const uint8 *read(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 &size) const;
 	/// Locks a pointer to an appdata chunk buffer for writing to with specified capacity. May return NULL if this chunk is unparsable or no memory can be allocated.

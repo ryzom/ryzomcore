@@ -93,7 +93,8 @@ void CStorageArray<T>::toString(std::ostream &ostream, const std::string &pad) c
 	for (typename TTypeArray::const_iterator it = Value.begin(), end = Value.end(); it != end; ++it)
 	{
 		std::string s = NLMISC::toString(*it);
-		ostream << "\n" << pad << i << ": " << s;
+		//ostream << "\n" << pad << i << ": " << s;
+		ostream << s << ", ";
 		++i;
 	}
 	ostream << " } ";

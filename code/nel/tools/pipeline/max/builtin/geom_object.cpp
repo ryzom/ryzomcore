@@ -1,9 +1,9 @@
 /**
  * \file geom_object.cpp
- * \brief CGeomObject
+ * \brief CGeomGeomObject
  * \date 2012-08-22 08:58GMT
  * \author Jan Boon (Kaetemi)
- * CGeomObject
+ * CGeomGeomObject
  */
 
 /*
@@ -34,15 +34,18 @@
 // #include <nel/misc/debug.h>
 
 // Project includes
+#include "storage/geom_buffers.h"
 
-using namespace std;
+// using namespace std;
 // using namespace NLMISC;
 
 namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CGeomObject::CGeomObject()
+#define PMB_GEOM_BUFFERS_CHUNK_ID 0x08fe
+
+CGeomObject::CGeomObject(CScene *scene) : CObject(scene)
 {
 
 }
@@ -50,6 +53,65 @@ CGeomObject::CGeomObject()
 CGeomObject::~CGeomObject()
 {
 
+}
+
+const ucstring CGeomObject::DisplayName = ucstring("GeomObject");
+const char *CGeomObject::InternalName = "GeomObject";
+const char *CGeomObject::InternalNameUnknown = "GeomObjectUnknown";
+const NLMISC::CClassId CGeomObject::ClassId = NLMISC::CClassId(0x37097c44, 0x38aa3f24); /* Not official, please correct */
+const TSClassId CGeomObject::SuperClassId = 0x00000010;
+const CGeomObjectClassDesc GeomObjectClassDesc(&DllPluginDescBuiltin);
+const CGeomObjectSuperClassDesc GeomObjectSuperClassDesc(&GeomObjectClassDesc);
+
+void CGeomObject::parse(uint16 version)
+{
+	CObject::parse(version);
+}
+
+void CGeomObject::clean()
+{
+	CObject::clean();
+}
+
+void CGeomObject::build(uint16 version)
+{
+	CObject::build(version);
+}
+
+void CGeomObject::disown()
+{
+	CObject::disown();
+}
+
+void CGeomObject::init()
+{
+	CObject::init();
+}
+
+bool CGeomObject::inherits(const NLMISC::CClassId classId) const
+{
+	if (classId == classDesc()->classId()) return true;
+	return CObject::inherits(classId);
+}
+
+const ISceneClassDesc *CGeomObject::classDesc() const
+{
+	return &GeomObjectClassDesc;
+}
+
+void CGeomObject::toStringLocal(std::ostream &ostream, const std::string &pad) const
+{
+	CObject::toStringLocal(ostream, pad);
+}
+
+IStorageObject *CGeomObject::createChunkById(uint16 id, bool container)
+{
+	switch (id)
+	{
+	case PMB_GEOM_BUFFERS_CHUNK_ID:
+		return new STORAGE::CGeomBuffers();
+	}
+	return CObject::createChunkById(id, container);
 }
 
 } /* namespace BUILTIN */

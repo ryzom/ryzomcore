@@ -1,9 +1,9 @@
 /**
- * \file object.h
- * \brief CObject
- * \date 2012-08-22 09:13GMT
+ * \file geom_buffers.h
+ * \brief CGeomBuffers
+ * \date 2012-08-25 07:55GMT
  * \author Jan Boon (Kaetemi)
- * CObject
+ * CGeomBuffers
  */
 
 /*
@@ -25,8 +25,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIPELINE_OBJECT_H
-#define PIPELINE_OBJECT_H
+#ifndef PIPELINE_GEOM_BUFFERS_H
+#define PIPELINE_GEOM_BUFFERS_H
 #include <nel/misc/types_nl.h>
 
 // STL includes
@@ -34,56 +34,43 @@
 // NeL includes
 
 // Project includes
-#include "base_object.h"
+#include "../../storage_object.h"
 
 namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
+namespace STORAGE {
 
 /**
- * \brief CObject
- * \date 2012-08-22 09:13GMT
+ * \brief CGeomBuffers
+ * \date 2012-08-25 07:55GMT
  * \author Jan Boon (Kaetemi)
- * CObject
+ * CGeomBuffers
  */
-class CObject : public CBaseObject
+class CGeomBuffers : public CStorageContainer
 {
 public:
-	CObject(CScene *scene);
-	virtual ~CObject();
-
-	// class desc
-	static const ucstring DisplayName;
-	static const char *InternalName;
-	static const char *InternalNameUnknown;
-	static const NLMISC::CClassId ClassId;
-	static const TSClassId SuperClassId;
+	CGeomBuffers();
+	virtual ~CGeomBuffers();
 
 	// inherited
+	virtual std::string className() const;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
 	virtual void parse(uint16 version);
 	virtual void clean();
 	virtual void build(uint16 version);
 	virtual void disown();
-	virtual void init();
-	virtual bool inherits(const NLMISC::CClassId classId) const;
-	virtual const ISceneClassDesc *classDesc() const;
-	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
 
 protected:
-	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 
-}; /* class CObject */
+}; /* class CGeomBuffers */
 
-typedef CSceneClassDesc<CObject> CObjectClassDesc;
-extern const CObjectClassDesc ObjectClassDesc;
-typedef CSuperClassDesc<CObject> CObjectSuperClassDesc;
-extern const CObjectSuperClassDesc ObjectSuperClassDesc;
-
+} /* namespace STORAGE */
 } /* namespace BUILTIN */
 } /* namespace MAX */
 } /* namespace PIPELINE */
 
-#endif /* #ifndef PIPELINE_OBJECT_H */
+#endif /* #ifndef PIPELINE_GEOM_BUFFERS_H */
 
 /* end of file */

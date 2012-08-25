@@ -156,6 +156,19 @@ const ucstring &INode::userName() const
 	return v;
 }
 
+INode *INode::find(const ucstring &userName) const
+{
+	ucstring unl = NLMISC::toLower(userName);
+	for (std::set<NLMISC::CRefPtr<INode> >::iterator it = m_Children.begin(), end = m_Children.end(); it != end; ++it)
+	{
+		INode *node = (*it);
+		nlassert(node);
+		if (NLMISC::toLower(node->userName()) == unl)
+			return node;
+	}
+	return NULL;
+}
+
 void INode::dumpNodes(std::ostream &ostream, const std::string &pad) const
 {
 	ostream << "<ptr=0x";
