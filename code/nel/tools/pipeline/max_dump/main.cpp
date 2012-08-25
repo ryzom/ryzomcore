@@ -59,7 +59,7 @@ void exportObj(const std::string &fileName, const CReferenceMaker *triObject)
 	for (uint i = 0; i < vertexBuffer->Value.size(); ++i)
 		ofs << "v " << vertexBuffer->Value[i].x << " " << vertexBuffer->Value[i].y << " " << vertexBuffer->Value[i].z << "\n";
 	for (uint i = 0; i < indexBuffer->Value.size(); ++i)
-		ofs << "f " << (indexBuffer->Value[i].a) << " " << (indexBuffer->Value[i].b) << " " << (indexBuffer->Value[i].c) << "\n";
+		ofs << "f " << (indexBuffer->Value[i].a + 1) << " " << (indexBuffer->Value[i].b + 1) << " " << (indexBuffer->Value[i].c + 1) << "\n"; // + 1 as .obj indexes at 1...
 }
 
 // int __stdcall WinMain(void *, void *, void *, int)
