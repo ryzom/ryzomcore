@@ -202,7 +202,25 @@ void CGeomPolyFaceInfo::serial(NLMISC::IStream &stream)
 std::string CGeomPolyFaceInfo::toString() const
 {
 	std::stringstream ss;
-	//ss << "0x" << NLMISC::toString("%x", i1) << ", " << a << " " << b;
+	ss << "( ";
+	for (std::vector<uint32>::size_type i = 0; i < Vertices.size(); ++i)
+	{
+		ss << Vertices[i] << " ";
+	}
+	ss << ")";
+	if (I1) ss << ", I1: " << "0x" << NLMISC::toString("%x", I1);
+	if (Material) ss << ", M: " << Material;
+	if (SmoothingGroups) ss << ", S: " << SmoothingGroups;
+	if (Triangulation.size())
+	{
+		ss << ", ( ";
+		for (std::vector<std::pair<uint32, uint32> >::size_type i = 0; i < Triangulation.size(); ++i)
+		{
+			ss << Triangulation[i].first << ":" << Triangulation[i].second << " ";
+		}
+		ss << ")";
+	}
+	ss << " ";
 	return ss.str();
 }
 
